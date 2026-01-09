@@ -39,8 +39,8 @@ const jetbrainsMono = JetBrains_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Sports Mockery | Chicago Sports News & Commentary",
-  description: "Your source for Chicago Bears, Bulls, Cubs, White Sox, and Blackhawks news, rumors, and hot takes.",
+  title: "Sports Mockery | Chicago Sports News and Rumors",
+  description: "Chicago sports news, rumors, and analysis for Bears, Bulls, Blackhawks, Cubs, and White Sox fans.",
   openGraph: {
     title: "Sports Mockery",
     description: "Chicago sports news and commentary",
