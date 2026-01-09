@@ -191,7 +191,7 @@ export default function HomePage() {
                         {featuredArticle.title}
                       </h1>
                       <div className="flex items-center gap-3 text-sm text-gray-300">
-                        <span className="font-medium">{featuredArticle.author?.name || 'Staff'}</span>
+                        <span className="font-medium">{featuredArticle.author?.display_name || 'Staff'}</span>
                         <span>•</span>
                         <span>{featuredArticle.published_at ? new Date(featuredArticle.published_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : ''}</span>
                       </div>
@@ -352,7 +352,7 @@ export default function HomePage() {
                         <p className="text-sm text-gray-600 dark:text-gray-400 line-clamp-2 mb-3">{article.excerpt}</p>
                       )}
                       <div className="flex items-center gap-2 text-xs text-gray-500 dark:text-gray-400">
-                        <span className="font-medium">{article.author?.name || 'Staff'}</span>
+                        <span className="font-medium">{article.author?.display_name || 'Staff'}</span>
                         <span>•</span>
                         <span>{new Date(article.published_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}</span>
                       </div>

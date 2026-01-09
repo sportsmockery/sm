@@ -2,20 +2,7 @@ import { supabaseAdmin } from '@/lib/supabase-server'
 import { NextRequest, NextResponse } from 'next/server'
 
 // Column names match actual sm_posts table schema
-const POST_SELECT = `
-  id,
-  title,
-  slug,
-  excerpt,
-  featured_image,
-  category_id,
-  author_id,
-  importance_score,
-  published_at,
-  views,
-  author:sm_authors!author_id (name),
-  category:sm_categories!category_id (slug, name)
-`
+const POST_SELECT = 'id,title,slug,excerpt,featured_image,category_id,author_id,importance_score,published_at,views,author:sm_authors!author_id(display_name),category:sm_categories!category_id(slug,name)'
 
 export async function POST(request: NextRequest) {
   try {
@@ -128,7 +115,7 @@ export async function POST(request: NextRequest) {
 
     for (const team of teams) {
       teamSections[team] = scoredArticles
-        .filter(a => a.category_id?.toLowerCase().includes(team))
+        .filter(a => a.category?.slug?.toLowerCase().includes(team))
         .slice(0, 4)
     }
 
@@ -184,7 +171,7 @@ export async function GET() {
 
     for (const team of teams) {
       teamSections[team] = (posts || [])
-        .filter(a => a.category_id?.toLowerCase().includes(team))
+        .filter(a => a.category?.slug?.toLowerCase().includes(team))
         .slice(0, 4)
     }
 

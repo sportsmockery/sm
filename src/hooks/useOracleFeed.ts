@@ -14,7 +14,7 @@ interface Article {
   published_at: string
   views: number
   final_score?: number
-  author?: { name: string }
+  author?: { display_name: string }
   category?: { slug: string; name: string }
 }
 
