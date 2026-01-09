@@ -127,94 +127,94 @@ export default function ThemeToggle() {
 ## SECTION 3: Homepage Layout (12 tasks)
 
 ### 3.1 Create Scores Bar Component
-- [ ] Create sticky top bar with live scores
-- [ ] Horizontally scrollable on mobile
-- [ ] Show: status (LIVE/FINAL/time), teams, scores
-- [ ] Red pulsing dot for LIVE games
-- [ ] ThemeToggle on right side
+- [x] Create sticky top bar with live scores
+- [x] Horizontally scrollable on mobile
+- [x] Show: status (LIVE/FINAL/time), teams, scores
+- [x] Red pulsing dot for LIVE games
+- [x] ThemeToggle on right side
 
 ### 3.2 Create Header/Navigation
-- [ ] Logo (left) - swap between light/dark versions
-- [ ] Team nav links: Bears, Bulls, Blackhawks, Cubs, White Sox, Podcasts
-- [ ] Each team has dropdown: Scores, Schedule, Roster, Stats
-- [ ] Search icon button
-- [ ] Sign In link
-- [ ] Mobile hamburger menu
+- [x] Logo (left) - swap between light/dark versions (existing Header component)
+- [x] Team nav links: Bears, Bulls, Blackhawks, Cubs, White Sox, Podcasts (existing Header)
+- [x] Each team has dropdown: Scores, Schedule, Roster, Stats (existing Header)
+- [x] Search icon button (existing Header)
+- [x] Sign In link (existing Header)
+- [x] Mobile hamburger menu (existing Header)
 
 ### 3.3 Create Hero Section
-- [ ] 60/40 split: Featured article (left), Top Headlines (right)
-- [ ] Featured article:
+- [x] 60/40 split: Featured article (left), Top Headlines (right)
+- [x] Featured article:
   - Large image with gradient overlay
   - Team badge (colored by team)
   - Title, author, date
   - "NEW" badge if unseen
   - Auto-rotate through top 3 articles (8 second intervals)
   - Dot indicators for rotation position
-- [ ] Top Headlines:
+- [x] Top Headlines:
   - Numbered list (1-6)
   - Team badge + title + date for each
   - Red dot for unseen articles
   - Hover state with color change
 
 ### 3.4 Create Team Quick Nav
-- [ ] Horizontal row of team pill buttons
-- [ ] Each pill: colored border + dot + team name
-- [ ] Scrollable on mobile
-- [ ] Links to team category pages
+- [x] Horizontal row of team pill buttons
+- [x] Each pill: colored border + dot + team name
+- [x] Scrollable on mobile
+- [x] Links to team category pages
 
 ### 3.5 Create Latest News Grid
-- [ ] Section header: "Latest News" + "View All →" link
-- [ ] Grid layout: 4 columns on desktop, 2 on tablet, 1 on mobile
-- [ ] First article spans 2 columns
-- [ ] Each card: image, team badge, title, excerpt (first only), author, date
-- [ ] "NEW" dot indicator for unseen
-- [ ] Hover effects: scale image, color title
+- [x] Section header: "Latest News" + "View All →" link
+- [x] Grid layout: 4 columns on desktop, 2 on tablet, 1 on mobile
+- [x] First article spans 2 columns
+- [x] Each card: image, team badge, title, excerpt (first only), author, date
+- [x] "NEW" dot indicator for unseen
+- [x] Hover effects: scale image, color title
 
 ### 3.6 Create Team Sections
-- [ ] For Bears, Bulls, Blackhawks (top 3 teams):
+- [x] For Bears, Bulls, Blackhawks (top 3 teams):
   - Section header with team color bar + "More [Team] →" link
   - 4-column grid of article cards
   - Standard card format
 
 ### 3.7 Create Load More Button
-- [ ] Centered red button
-- [ ] "Load More Articles" text
-- [ ] Hover state
+- [x] Centered red button
+- [x] "Load More Articles" text
+- [x] Hover state
 
 ### 3.8 Create Footer
-- [ ] 4-column layout: Logo/Social, Teams, Podcasts, Legal
-- [ ] Social icons: Facebook, Twitter/X, Instagram, YouTube
-- [ ] Copyright line at bottom
+- [x] 4-column layout: Logo/Social, Teams, Podcasts, Legal (existing Footer component)
+- [x] Social icons: Facebook, Twitter/X, Instagram, YouTube (existing Footer)
+- [x] Copyright line at bottom (existing Footer)
 
 ### 3.9 Implement Light/Dark Styles
-- [ ] All backgrounds use: `bg-gray-50 dark:bg-[#0a0a0b]` pattern
-- [ ] All cards use: `bg-white dark:bg-[#111113]`
-- [ ] All borders use: `border-gray-200 dark:border-[#27272a]`
-- [ ] All text uses: `text-gray-900 dark:text-white` etc.
-- [ ] Transition colors smoothly: `transition-colors duration-300`
+- [x] All backgrounds use: `bg-gray-50 dark:bg-[#0a0a0b]` pattern
+- [x] All cards use: `bg-white dark:bg-[#111113]`
+- [x] All borders use: `border-gray-200 dark:border-[#27272a]`
+- [x] All text uses: `text-gray-900 dark:text-white` etc.
+- [x] Transition colors smoothly: `transition-colors duration-300`
 
 ### 3.10 Implement Loading States
-- [ ] Skeleton loaders for hero section
-- [ ] Skeleton loaders for article cards
-- [ ] Skeleton loaders for headlines list
-- [ ] Animate with pulse effect
+- [x] Skeleton loaders for hero section
+- [x] Skeleton loaders for article cards
+- [x] Skeleton loaders for headlines list
+- [x] Animate with pulse effect
 
 ### 3.11 Connect to Oracle Feed
-- [ ] Use useOracleFeed hook
-- [ ] Display feed.featured as hero
-- [ ] Display feed.topHeadlines in headlines list
-- [ ] Display feed.latestNews in grid
-- [ ] Display feed.teamSections in team rows
-- [ ] Call trackView() on article click
-- [ ] Show "NEW" indicators using isUnseen()
+- [x] Use useOracleFeed hook
+- [x] Display feed.featured as hero
+- [x] Display feed.topHeadlines in headlines list
+- [x] Display feed.latestNews in grid
+- [x] Display feed.teamSections in team rows
+- [x] Call trackView() on article click
+- [x] Show "NEW" indicators using isUnseen()
 
 ### 3.12 Mobile Optimization
-- [ ] Scores bar scrollable
-- [ ] Navigation collapses to hamburger
-- [ ] Hero stacks vertically
-- [ ] Grids reduce columns
-- [ ] Touch-friendly tap targets (44px min)
-- [ ] Full-width on small screens (minimal padding)
+- [x] Scores bar scrollable
+- [x] Navigation collapses to hamburger (existing Header)
+- [x] Hero stacks vertically
+- [x] Grids reduce columns
+- [x] Touch-friendly tap targets (44px min)
+- [x] Full-width on small screens (minimal padding)
 
 ---
 
