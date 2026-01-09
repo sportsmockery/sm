@@ -188,11 +188,27 @@ export function useOracleFeed(options: UseOracleFeedOptions = {}) {
     return () => clearInterval(interval)
   }, [autoRefresh, refreshInterval, fetchFeed])
 
-  // Track article view
-  const trackView = useCallback((article: Article) => {
+  // Track article view - calls API to increment view count
+  const trackView = useCallback(async (article: Article) => {
+    // Save to localStorage for client-side "unseen" tracking
     saveViewedId(article.id)
     if (article.team) {
       updateTeamPreferences(article.team)
+    }
+
+    // Call API to increment server-side view count
+    try {
+      await fetch('/api/views', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          post_id: article.id,
+          // user_id would be passed if user is logged in (from auth context)
+        }),
+      })
+    } catch (e) {
+      // Silent fail - view tracking is not critical
+      console.warn('Failed to track view:', e)
     }
   }, [])
 

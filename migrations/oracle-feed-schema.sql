@@ -66,12 +66,12 @@ $$ LANGUAGE plpgsql;
 ALTER TABLE sm_user_views ENABLE ROW LEVEL SECURITY;
 ALTER TABLE sm_user_preferences ENABLE ROW LEVEL SECURITY;
 
--- Users can only see their own views
+-- Users can only READ their own views (inserts happen server-side via service role)
 CREATE POLICY "Users can view own views" ON sm_user_views
   FOR SELECT USING (auth.uid() = user_id);
 
-CREATE POLICY "Users can insert own views" ON sm_user_views
-  FOR INSERT WITH CHECK (auth.uid() = user_id);
+-- NO INSERT policy for users - views are tracked server-side only
+-- Service role bypasses RLS so API can insert views
 
 -- Users can only manage their own preferences
 CREATE POLICY "Users can view own preferences" ON sm_user_preferences
@@ -80,8 +80,7 @@ CREATE POLICY "Users can view own preferences" ON sm_user_preferences
 CREATE POLICY "Users can update own preferences" ON sm_user_preferences
   FOR ALL USING (auth.uid() = user_id);
 
--- Grant permissions
-GRANT SELECT, INSERT ON sm_user_views TO authenticated;
+-- Grant permissions (SELECT only for views - inserts via service role)
+GRANT SELECT ON sm_user_views TO authenticated;
 GRANT ALL ON sm_user_preferences TO authenticated;
-GRANT USAGE ON SEQUENCE sm_user_views_id_seq TO authenticated;
 GRANT USAGE ON SEQUENCE sm_user_preferences_id_seq TO authenticated;
