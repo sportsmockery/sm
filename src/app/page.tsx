@@ -15,13 +15,24 @@ const teams = [
   { name: 'White Sox', slug: 'chicago-white-sox', color: '#C4CED4', bgColor: '#27251F', sport: 'MLB' },
 ]
 
-// Team badge colors
+// Team badge colors - handles both short and full category slugs
 const teamColors: Record<string, { bg: string; text: string }> = {
-  bears: { bg: '#0B162A', text: '#C83200' },
-  bulls: { bg: '#CE1141', text: '#ffffff' },
-  blackhawks: { bg: '#CF0A2C', text: '#ffffff' },
-  cubs: { bg: '#0E3386', text: '#ffffff' },
-  whitesox: { bg: '#27251F', text: '#C4CED4' },
+  'bears': { bg: '#0B162A', text: '#C83200' },
+  'chicago-bears': { bg: '#0B162A', text: '#C83200' },
+  'bulls': { bg: '#CE1141', text: '#ffffff' },
+  'chicago-bulls': { bg: '#CE1141', text: '#ffffff' },
+  'blackhawks': { bg: '#CF0A2C', text: '#ffffff' },
+  'chicago-blackhawks': { bg: '#CF0A2C', text: '#ffffff' },
+  'cubs': { bg: '#0E3386', text: '#ffffff' },
+  'chicago-cubs': { bg: '#0E3386', text: '#ffffff' },
+  'whitesox': { bg: '#27251F', text: '#C4CED4' },
+  'white-sox': { bg: '#27251F', text: '#C4CED4' },
+  'chicago-white-sox': { bg: '#27251F', text: '#C4CED4' },
+}
+
+// Get team colors with fallback
+const getTeamColors = (slug: string) => {
+  return teamColors[slug] || teamColors[slug?.replace('chicago-', '')] || { bg: '#27272a', text: '#ffffff' }
 }
 
 // Mock live scores - replace with real API
@@ -32,10 +43,15 @@ const liveScores = [
   { id: 4, status: 'FINAL', home: 'Cubs', away: 'Cardinals', homeScore: 5, awayScore: 3 },
 ]
 
-// Format team name for display
-const formatTeamName = (team: string) => {
-  if (team === 'whitesox') return 'White Sox'
-  return team.charAt(0).toUpperCase() + team.slice(1)
+// Format category slug to display name
+const formatTeamName = (slug: string) => {
+  if (!slug) return 'News'
+  // Remove "chicago-" prefix if present
+  const name = slug.replace('chicago-', '').replace(/-/g, ' ')
+  // Special cases
+  if (name === 'white sox' || name === 'whitesox') return 'White Sox'
+  // Capitalize each word
+  return name.split(' ').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ')
 }
 
 // Loading skeleton for articles
@@ -140,7 +156,7 @@ export default function HomePage() {
             ) : featuredArticle ? (
               <article className="lg:col-span-3 relative group">
                 <Link
-                  href={`/${featuredArticle.team}/${featuredArticle.slug}`}
+                  href={`/${featuredArticle.category?.slug || 'news'}/${featuredArticle.slug}`}
                   onClick={() => trackView(featuredArticle)}
                   className="block"
                 >
@@ -165,19 +181,19 @@ export default function HomePage() {
                       <span
                         className="inline-block px-3 py-1 rounded text-xs font-bold uppercase tracking-wide mb-3"
                         style={{
-                          backgroundColor: teamColors[featuredArticle.team]?.bg || '#27272a',
-                          color: teamColors[featuredArticle.team]?.text || '#ffffff',
+                          backgroundColor: teamColors[featuredArticle.category?.slug || 'news']?.bg || '#27272a',
+                          color: teamColors[featuredArticle.category?.slug || 'news']?.text || '#ffffff',
                         }}
                       >
-                        {formatTeamName(featuredArticle.team)}
+                        {formatTeamName(featuredArticle.category?.slug || 'news')}
                       </span>
                       <h1 className="text-2xl lg:text-3xl xl:text-4xl font-extrabold text-white leading-tight mb-3 group-hover:text-[#bc0000] transition-colors">
                         {featuredArticle.title}
                       </h1>
                       <div className="flex items-center gap-3 text-sm text-gray-300">
-                        <span className="font-medium">{featuredArticle.sm_authors?.name || 'Staff'}</span>
+                        <span className="font-medium">{featuredArticle.author?.name || 'Staff'}</span>
                         <span>•</span>
-                        <span>{new Date(featuredArticle.publish_date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</span>
+                        <span>{featuredArticle.published_at ? new Date(featuredArticle.published_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : ''}</span>
                       </div>
                     </div>
                   </div>
@@ -230,7 +246,7 @@ export default function HomePage() {
                   feed?.topHeadlines?.map((article, index) => (
                     <Link
                       key={article.id}
-                      href={`/${article.team}/${article.slug}`}
+                      href={`/${article.category?.slug || 'news'}/${article.slug}`}
                       onClick={() => trackView(article)}
                       className="flex items-start gap-3 px-4 py-3 hover:bg-gray-50 dark:hover:bg-[#1c1c1f] transition-colors group"
                     >
@@ -242,11 +258,11 @@ export default function HomePage() {
                           <span
                             className="inline-block px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wide"
                             style={{
-                              backgroundColor: teamColors[article.team]?.bg || '#27272a',
-                              color: teamColors[article.team]?.text || '#ffffff',
+                              backgroundColor: teamColors[article.category?.slug || 'news']?.bg || '#27272a',
+                              color: teamColors[article.category?.slug || 'news']?.text || '#ffffff',
                             }}
                           >
-                            {formatTeamName(article.team)}
+                            {formatTeamName(article.category?.slug || 'news')}
                           </span>
                           {isUnseen(article.id) && (
                             <span className="w-2 h-2 bg-[#bc0000] rounded-full" title="New for you" />
@@ -256,7 +272,7 @@ export default function HomePage() {
                           {article.title}
                         </h3>
                         <span className="text-xs text-gray-500 dark:text-gray-400 mt-1 block">
-                          {new Date(article.publish_date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+                          {new Date(article.published_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
                         </span>
                       </div>
                     </Link>
@@ -306,7 +322,7 @@ export default function HomePage() {
                   className={`bg-white dark:bg-[#111113] rounded-xl border border-gray-200 dark:border-[#27272a] overflow-hidden group hover:shadow-lg transition-all duration-300 ${index === 0 ? 'md:col-span-2 lg:col-span-2' : ''
                     }`}
                 >
-                  <Link href={`/${article.team}/${article.slug}`} onClick={() => trackView(article)}>
+                  <Link href={`/${article.category?.slug || 'news'}/${article.slug}`} onClick={() => trackView(article)}>
                     <div className={`relative ${index === 0 ? 'aspect-[2/1]' : 'aspect-video'} overflow-hidden`}>
                       <Image
                         src={article.featured_image || '/placeholder.jpg'}
@@ -317,11 +333,11 @@ export default function HomePage() {
                       <span
                         className="absolute top-3 left-3 px-2 py-1 rounded text-[10px] font-bold uppercase tracking-wide"
                         style={{
-                          backgroundColor: teamColors[article.team]?.bg || '#27272a',
-                          color: teamColors[article.team]?.text || '#ffffff',
+                          backgroundColor: teamColors[article.category?.slug || 'news']?.bg || '#27272a',
+                          color: teamColors[article.category?.slug || 'news']?.text || '#ffffff',
                         }}
                       >
-                        {formatTeamName(article.team)}
+                        {formatTeamName(article.category?.slug || 'news')}
                       </span>
                       {isUnseen(article.id) && (
                         <span className="absolute top-3 right-3 w-2 h-2 bg-[#bc0000] rounded-full" />
@@ -336,9 +352,9 @@ export default function HomePage() {
                         <p className="text-sm text-gray-600 dark:text-gray-400 line-clamp-2 mb-3">{article.excerpt}</p>
                       )}
                       <div className="flex items-center gap-2 text-xs text-gray-500 dark:text-gray-400">
-                        <span className="font-medium">{article.sm_authors?.name || 'Staff'}</span>
+                        <span className="font-medium">{article.author?.name || 'Staff'}</span>
                         <span>•</span>
-                        <span>{new Date(article.publish_date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}</span>
+                        <span>{new Date(article.published_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}</span>
                       </div>
                     </div>
                   </Link>
@@ -370,7 +386,7 @@ export default function HomePage() {
                     key={article.id}
                     className="bg-white dark:bg-[#111113] rounded-xl border border-gray-200 dark:border-[#27272a] overflow-hidden group hover:shadow-lg transition-all duration-300"
                   >
-                    <Link href={`/${article.team}/${article.slug}`} onClick={() => trackView(article)}>
+                    <Link href={`/${article.category?.slug || 'news'}/${article.slug}`} onClick={() => trackView(article)}>
                       <div className="relative aspect-video overflow-hidden">
                         <Image
                           src={article.featured_image || '/placeholder.jpg'}
@@ -387,7 +403,7 @@ export default function HomePage() {
                           {article.title}
                         </h3>
                         <span className="text-xs text-gray-500 dark:text-gray-400 mt-2 block">
-                          {new Date(article.publish_date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+                          {new Date(article.published_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
                         </span>
                       </div>
                     </Link>

@@ -2,14 +2,13 @@
 -- Run this in Supabase SQL Editor
 
 -- Add importance_score to posts table if not exists
+-- Note: 'views' column already exists, 'published_at' is the date column
 ALTER TABLE sm_posts
-ADD COLUMN IF NOT EXISTS importance_score INTEGER DEFAULT 50,
-ADD COLUMN IF NOT EXISTS view_count INTEGER DEFAULT 0;
+ADD COLUMN IF NOT EXISTS importance_score INTEGER DEFAULT 50;
 
 -- Create index for feed queries
 CREATE INDEX IF NOT EXISTS idx_posts_importance ON sm_posts(importance_score DESC);
-CREATE INDEX IF NOT EXISTS idx_posts_publish_date ON sm_posts(publish_date DESC);
-CREATE INDEX IF NOT EXISTS idx_posts_team ON sm_posts(team);
+CREATE INDEX IF NOT EXISTS idx_posts_published_at ON sm_posts(published_at DESC);
 CREATE INDEX IF NOT EXISTS idx_posts_status ON sm_posts(status);
 
 -- User views tracking (for logged-in users)
@@ -38,12 +37,12 @@ CREATE TABLE IF NOT EXISTS sm_user_preferences (
 CREATE INDEX IF NOT EXISTS idx_user_prefs_user ON sm_user_preferences(user_id);
 
 -- Function to increment view count
-CREATE OR REPLACE FUNCTION increment_view_count(post_id BIGINT)
+CREATE OR REPLACE FUNCTION increment_view_count(p_post_id BIGINT)
 RETURNS VOID AS $$
 BEGIN
   UPDATE sm_posts
-  SET view_count = view_count + 1
-  WHERE id = post_id;
+  SET views = COALESCE(views, 0) + 1
+  WHERE id = p_post_id;
 END;
 $$ LANGUAGE plpgsql;
 
@@ -53,9 +52,9 @@ RETURNS VOID AS $$
 BEGIN
   -- Decay scores by 5 points per day for posts older than 24 hours
   UPDATE sm_posts
-  SET importance_score = GREATEST(importance_score - 5, 10)
-  WHERE publish_date < NOW() - INTERVAL '24 hours'
-    AND importance_score > 10;
+  SET importance_score = GREATEST(COALESCE(importance_score, 50) - 5, 10)
+  WHERE published_at < NOW() - INTERVAL '24 hours'
+    AND COALESCE(importance_score, 50) > 10;
 END;
 $$ LANGUAGE plpgsql;
 
@@ -67,6 +66,7 @@ ALTER TABLE sm_user_views ENABLE ROW LEVEL SECURITY;
 ALTER TABLE sm_user_preferences ENABLE ROW LEVEL SECURITY;
 
 -- Users can only READ their own views (inserts happen server-side via service role)
+DROP POLICY IF EXISTS "Users can view own views" ON sm_user_views;
 CREATE POLICY "Users can view own views" ON sm_user_views
   FOR SELECT USING (auth.uid() = user_id);
 
@@ -74,9 +74,11 @@ CREATE POLICY "Users can view own views" ON sm_user_views
 -- Service role bypasses RLS so API can insert views
 
 -- Users can only manage their own preferences
+DROP POLICY IF EXISTS "Users can view own preferences" ON sm_user_preferences;
 CREATE POLICY "Users can view own preferences" ON sm_user_preferences
   FOR SELECT USING (auth.uid() = user_id);
 
+DROP POLICY IF EXISTS "Users can update own preferences" ON sm_user_preferences;
 CREATE POLICY "Users can update own preferences" ON sm_user_preferences
   FOR ALL USING (auth.uid() = user_id);
 

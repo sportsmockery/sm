@@ -24,14 +24,14 @@ export async function POST(request: NextRequest) {
     if (rpcError) {
       const { data: post } = await supabaseAdmin
         .from('sm_posts')
-        .select('view_count')
+        .select('views')
         .eq('id', post_id)
         .single()
 
       if (post) {
         await supabaseAdmin
           .from('sm_posts')
-          .update({ view_count: (post.view_count || 0) + 1 })
+          .update({ views: (post.views || 0) + 1 })
           .eq('id', post_id)
       }
     }

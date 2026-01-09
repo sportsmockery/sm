@@ -1,6 +1,22 @@
 import { supabaseAdmin } from '@/lib/supabase-server'
 import { NextRequest, NextResponse } from 'next/server'
 
+// Column names match actual sm_posts table schema
+const POST_SELECT = `
+  id,
+  title,
+  slug,
+  excerpt,
+  featured_image,
+  category_id,
+  author_id,
+  importance_score,
+  published_at,
+  views,
+  author:sm_authors!author_id (name),
+  category:sm_categories!category_id (slug, name)
+`
+
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json()
@@ -15,20 +31,7 @@ export async function POST(request: NextRequest) {
     // 1. Get HIGH IMPORTANCE unseen articles (score > 70)
     let highImportanceQuery = supabaseAdmin
       .from('sm_posts')
-      .select(`
-        id,
-        title,
-        slug,
-        excerpt,
-        featured_image,
-        category_id,
-        team,
-        author_id,
-        importance_score,
-        publish_date,
-        view_count,
-        sm_authors:author_id (name)
-      `)
+      .select(POST_SELECT)
       .eq('status', 'published')
       .gt('importance_score', 70)
       .order('importance_score', { ascending: false })
@@ -44,23 +47,10 @@ export async function POST(request: NextRequest) {
     // 2. Get RECENT articles (last 7 days)
     let recentQuery = supabaseAdmin
       .from('sm_posts')
-      .select(`
-        id,
-        title,
-        slug,
-        excerpt,
-        featured_image,
-        category_id,
-        team,
-        author_id,
-        importance_score,
-        publish_date,
-        view_count,
-        sm_authors:author_id (name)
-      `)
+      .select(POST_SELECT)
       .eq('status', 'published')
-      .gte('publish_date', new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString())
-      .order('publish_date', { ascending: false })
+      .gte('published_at', new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString())
+      .order('published_at', { ascending: false })
       .limit(20)
 
     // Exclude already fetched high importance and viewed
@@ -74,23 +64,10 @@ export async function POST(request: NextRequest) {
     // 3. Get TRENDING articles (high view count in last 24h)
     const { data: trending } = await supabaseAdmin
       .from('sm_posts')
-      .select(`
-        id,
-        title,
-        slug,
-        excerpt,
-        featured_image,
-        category_id,
-        team,
-        author_id,
-        importance_score,
-        publish_date,
-        view_count,
-        sm_authors:author_id (name)
-      `)
+      .select(POST_SELECT)
       .eq('status', 'published')
-      .gte('publish_date', new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString())
-      .order('view_count', { ascending: false })
+      .gte('published_at', new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString())
+      .order('views', { ascending: false })
       .limit(10)
 
     // 4. Calculate final scores with team preference boost
@@ -98,11 +75,15 @@ export async function POST(request: NextRequest) {
       let score = post.importance_score || 50
 
       // Recency decay: -5 points per day old
-      const daysOld = (now.getTime() - new Date(post.publish_date).getTime()) / (1000 * 60 * 60 * 24)
-      score -= Math.min(daysOld * 5, 30) // Max 30 point penalty
+      if (post.published_at) {
+        const daysOld = (now.getTime() - new Date(post.published_at).getTime()) / (1000 * 60 * 60 * 24)
+        score -= Math.min(daysOld * 5, 30) // Max 30 point penalty
+      }
 
       // Team preference boost: +15 if user's favorite team
-      if (teamPreferences.includes(post.team)) {
+      // Note: team info would come from category or a team field
+      const postTeam = post.category_id // Could map category_id to team
+      if (teamPreferences.includes(postTeam)) {
         score += 15
       }
 
@@ -141,13 +122,13 @@ export async function POST(request: NextRequest) {
     const topHeadlines = scoredArticles.slice(1, 7)
     const latestNews = scoredArticles.slice(7, 20)
 
-    // Group by team for team sections
+    // Group by category for team sections
     const teamSections: Record<string, any[]> = {}
     const teams = ['bears', 'bulls', 'blackhawks', 'cubs', 'whitesox']
 
     for (const team of teams) {
       teamSections[team] = scoredArticles
-        .filter(a => a.team === team)
+        .filter(a => a.category_id?.toLowerCase().includes(team))
         .slice(0, 4)
     }
 
@@ -179,23 +160,10 @@ export async function GET() {
     // Default feed: High score + recent, no personalization
     const { data: posts, error } = await supabaseAdmin
       .from('sm_posts')
-      .select(`
-        id,
-        title,
-        slug,
-        excerpt,
-        featured_image,
-        category_id,
-        team,
-        author_id,
-        importance_score,
-        publish_date,
-        view_count,
-        sm_authors:author_id (name)
-      `)
+      .select(POST_SELECT)
       .eq('status', 'published')
       .order('importance_score', { ascending: false })
-      .order('publish_date', { ascending: false })
+      .order('published_at', { ascending: false })
       .limit(30)
 
     if (error) {
@@ -210,13 +178,13 @@ export async function GET() {
     const topHeadlines = posts?.slice(1, 7) || []
     const latestNews = posts?.slice(7, 20) || []
 
-    // Group by team
+    // Group by category for team sections
     const teamSections: Record<string, any[]> = {}
     const teams = ['bears', 'bulls', 'blackhawks', 'cubs', 'whitesox']
 
     for (const team of teams) {
       teamSections[team] = (posts || [])
-        .filter(a => a.team === team)
+        .filter(a => a.category_id?.toLowerCase().includes(team))
         .slice(0, 4)
     }
 

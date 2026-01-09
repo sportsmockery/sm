@@ -9,13 +9,13 @@ interface Article {
   excerpt: string
   featured_image: string
   category_id: string
-  team: string
   author_id: string
   importance_score: number
-  publish_date: string
-  view_count: number
+  published_at: string
+  views: number
   final_score?: number
-  sm_authors?: { name: string }
+  author?: { name: string }
+  category?: { slug: string; name: string }
 }
 
 interface FeedData {
@@ -192,8 +192,8 @@ export function useOracleFeed(options: UseOracleFeedOptions = {}) {
   const trackView = useCallback(async (article: Article) => {
     // Save to localStorage for client-side "unseen" tracking
     saveViewedId(article.id)
-    if (article.team) {
-      updateTeamPreferences(article.team)
+    if (article.category?.slug) {
+      updateTeamPreferences(article.category.slug)
     }
 
     // Call API to increment server-side view count
