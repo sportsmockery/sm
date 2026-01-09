@@ -89,8 +89,8 @@ export default function ThemeToggle() {
 ## SECTION 2: Oracle Feed API (6 tasks)
 
 ### 2.1 Create Feed API Route
-- [ ] Create directory `src/app/api/feed/`
-- [ ] Create `src/app/api/feed/route.ts` with:
+- [x] Create directory `src/app/api/feed/`
+- [x] Create `src/app/api/feed/route.ts` with:
   - POST handler for personalized feed (accepts viewed_ids, team_preferences)
   - GET handler for default feed (first-time visitors)
   - Query sm_posts with importance_score, publish_date ordering
@@ -100,7 +100,7 @@ export default function ThemeToggle() {
   - Return: featured, topHeadlines, latestNews, teamSections, trending
 
 ### 2.2 Create useOracleFeed Hook
-- [ ] Create `src/hooks/useOracleFeed.ts` with:
+- [x] Create `src/hooks/useOracleFeed.ts` with:
   - localStorage tracking for viewed article IDs (48hr expiry)
   - localStorage tracking for team preferences (inferred from reading)
   - fetchFeed() function that calls /api/feed
@@ -109,17 +109,18 @@ export default function ThemeToggle() {
   - Auto-refresh every 5 minutes (optional)
 
 ### 2.3 Database Schema
-- [ ] Add to sm_posts table (if not exists):
+- [x] Add to sm_posts table (if not exists):
   - `importance_score INTEGER DEFAULT 50`
   - `view_count INTEGER DEFAULT 0`
-- [ ] Create `sm_user_views` table for logged-in user tracking
-- [ ] Create `sm_user_preferences` table for user prefs
-- [ ] Add indexes for feed queries
+- [x] Create `sm_user_views` table for logged-in user tracking
+- [x] Create `sm_user_preferences` table for user prefs
+- [x] Add indexes for feed queries
+- Note: Run `migrations/oracle-feed-schema.sql` in Supabase SQL Editor
 
 ### 2.4 Test Feed API
-- [ ] Test GET /api/feed returns articles
-- [ ] Test POST /api/feed with viewed_ids excludes those articles
-- [ ] Test that importance_score affects ordering
+- [x] Test GET /api/feed returns articles
+- [x] Test POST /api/feed with viewed_ids excludes those articles
+- [x] Test that importance_score affects ordering
 
 ---
 
