@@ -80,7 +80,7 @@ export default function Footer() {
   return (
     <footer className="bg-white dark:bg-[#0a0a0b] border-t border-gray-200 dark:border-[#27272a]">
       {/* Main footer content */}
-      <div className="max-w-[1800px] mx-auto px-4 lg:px-8 py-12">
+      <div className="max-w-[1400px] mx-auto px-4 py-12">
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-8">
           {/* Logo and social */}
           <div className="col-span-2">
@@ -135,7 +135,7 @@ export default function Footer() {
 
       {/* Bottom bar */}
       <div className="border-t border-gray-200 dark:border-[#27272a]">
-        <div className="max-w-[1800px] mx-auto px-4 lg:px-8 py-4">
+        <div className="max-w-[1400px] mx-auto px-4 py-4">
           <div className="flex flex-col md:flex-row items-center justify-between gap-4 text-sm text-gray-500 dark:text-gray-400">
             <p>
               &copy; {new Date().getFullYear()} Sports Mockery. All rights reserved.

@@ -2,7 +2,6 @@
 
 import { useState, useRef, useEffect, ReactNode } from 'react'
 import Link from 'next/link'
-import { useTheme } from '@/contexts/ThemeContext'
 import { ThemeToggle } from '@/components/ThemeToggle'
 
 // Team navigation items with submenus
@@ -141,7 +140,6 @@ function DropdownMenu({ items, isOpen }: { items: { name: string; href: string }
 }
 
 export default function Header() {
-  const { theme } = useTheme()
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const [searchOpen, setSearchOpen] = useState(false)
   const [activeDropdown, setActiveDropdown] = useState<string | null>(null)
@@ -193,7 +191,7 @@ export default function Header() {
     <header className="bg-white dark:bg-[#0a0a0b] border-b border-gray-200 dark:border-[#27272a] sticky top-0 z-50">
       {/* Top bar with social and date */}
       <div className="border-b border-gray-100 dark:border-[#1c1c1f]">
-        <div className="max-w-[1800px] mx-auto px-4 lg:px-8">
+        <div className="max-w-[1400px] mx-auto px-4">
           <div className="flex items-center justify-between h-9">
             {/* Date */}
             <div className="text-xs text-gray-500 dark:text-gray-400">
@@ -220,7 +218,7 @@ export default function Header() {
       </div>
 
       {/* Main header */}
-      <div className="max-w-[1800px] mx-auto px-4 lg:px-8">
+      <div className="max-w-[1400px] mx-auto px-4">
         <div className="flex items-center justify-between h-16 lg:h-20">
           {/* Mobile menu button */}
           <button
