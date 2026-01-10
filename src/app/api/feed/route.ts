@@ -6,6 +6,14 @@ const POST_SELECT = 'id,title,slug,excerpt,featured_image,category_id,author_id,
 
 export async function POST(request: NextRequest) {
   try {
+    // Check if supabase client is available
+    if (!supabaseAdmin) {
+      return NextResponse.json(
+        { error: 'Database not configured' },
+        { status: 503 }
+      )
+    }
+
     const body = await request.json()
 
     // Get viewed IDs from client (anonymous tracking via localStorage)
@@ -115,7 +123,11 @@ export async function POST(request: NextRequest) {
 
     for (const team of teams) {
       teamSections[team] = scoredArticles
-        .filter(a => a.category?.slug?.toLowerCase().includes(team))
+        .filter(a => {
+          // Handle both array and object category structures
+          const category = Array.isArray(a.category) ? a.category[0] : a.category
+          return category?.slug?.toLowerCase()?.includes(team)
+        })
         .slice(0, 4)
     }
 
@@ -144,6 +156,14 @@ export async function POST(request: NextRequest) {
 // GET endpoint for simple fetches (first-time visitors)
 export async function GET() {
   try {
+    // Check if supabase client is available
+    if (!supabaseAdmin) {
+      return NextResponse.json(
+        { error: 'Database not configured' },
+        { status: 503 }
+      )
+    }
+
     // Default feed: High score + recent, no personalization
     const { data: posts, error } = await supabaseAdmin
       .from('sm_posts')
@@ -171,7 +191,11 @@ export async function GET() {
 
     for (const team of teams) {
       teamSections[team] = (posts || [])
-        .filter(a => a.category?.slug?.toLowerCase().includes(team))
+        .filter(a => {
+          // Handle both array and object category structures
+          const category = Array.isArray(a.category) ? a.category[0] : a.category
+          return category?.slug?.toLowerCase()?.includes(team)
+        })
         .slice(0, 4)
     }
 

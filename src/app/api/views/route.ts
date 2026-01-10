@@ -4,6 +4,14 @@ import { NextRequest, NextResponse } from 'next/server'
 // POST /api/views - Track a post view (server-side only via service role)
 export async function POST(request: NextRequest) {
   try {
+    // Check if supabase client is available
+    if (!supabaseAdmin) {
+      return NextResponse.json(
+        { error: 'Database not configured' },
+        { status: 503 }
+      )
+    }
+
     const body = await request.json()
     const { post_id, user_id } = body
 

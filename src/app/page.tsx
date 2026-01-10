@@ -3,7 +3,6 @@
 import Link from 'next/link'
 import Image from 'next/image'
 import { useEffect, useState } from 'react'
-import { ThemeToggle } from '@/components/ThemeToggle'
 import { useOracleFeed } from '@/hooks/useOracleFeed'
 
 // Team configuration
@@ -31,20 +30,13 @@ const teamColors: Record<string, { bg: string; text: string }> = {
 }
 
 // Get team colors with fallback
-const getTeamColors = (slug: string) => {
-  return teamColors[slug] || teamColors[slug?.replace('chicago-', '')] || { bg: '#27272a', text: '#ffffff' }
+const getTeamColors = (slug: string | undefined | null): { bg: string; text: string } => {
+  if (!slug) return { bg: '#bc0000', text: '#ffffff' }
+  return teamColors[slug] || teamColors[slug.replace('chicago-', '')] || { bg: '#bc0000', text: '#ffffff' }
 }
 
-// Mock live scores - replace with real API
-const liveScores = [
-  { id: 1, status: 'LIVE', home: 'Bears', away: 'Packers', homeScore: 24, awayScore: 17, quarter: '4th', time: '2:34' },
-  { id: 2, status: 'FINAL', home: 'Bulls', away: 'Heat', homeScore: 112, awayScore: 108 },
-  { id: 3, status: '7:30 PM', home: 'Blackhawks', away: 'Blues', homeScore: null, awayScore: null },
-  { id: 4, status: 'FINAL', home: 'Cubs', away: 'Cardinals', homeScore: 5, awayScore: 3 },
-]
-
 // Format category slug to display name
-const formatTeamName = (slug: string) => {
+const formatTeamName = (slug: string | undefined | null): string => {
   if (!slug) return 'News'
   // Remove "chicago-" prefix if present
   const name = slug.replace('chicago-', '').replace(/-/g, ' ')
@@ -54,16 +46,165 @@ const formatTeamName = (slug: string) => {
   return name.split(' ').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ')
 }
 
-// Loading skeleton for articles
-function ArticleSkeleton({ large = false }: { large?: boolean }) {
+// Format date for display
+const formatDate = (dateStr: string) => {
+  const date = new Date(dateStr)
+  const now = new Date()
+  const diffMs = now.getTime() - date.getTime()
+  const diffHours = Math.floor(diffMs / (1000 * 60 * 60))
+  const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24))
+
+  if (diffHours < 1) return 'Just now'
+  if (diffHours < 24) return `${diffHours}h ago`
+  if (diffDays < 7) return `${diffDays}d ago`
+  return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
+}
+
+// Article card component - matches SportsMockery.com style
+function ArticleCard({
+  article,
+  size = 'default',
+  onView
+}: {
+  article: any
+  size?: 'featured' | 'large' | 'default' | 'small'
+  onView: (article: any) => void
+}) {
+  const colors = getTeamColors(article.category?.slug || '')
+
+  const sizeClasses = {
+    featured: 'col-span-full lg:col-span-2 lg:row-span-2',
+    large: 'col-span-full md:col-span-2',
+    default: '',
+    small: '',
+  }
+
+  const imageAspect = {
+    featured: 'aspect-[16/9] lg:aspect-[4/3]',
+    large: 'aspect-[16/9]',
+    default: 'aspect-[16/10]',
+    small: 'aspect-[16/9]',
+  }
+
+  const titleSize = {
+    featured: 'text-xl md:text-2xl lg:text-3xl',
+    large: 'text-lg md:text-xl',
+    default: 'text-base md:text-lg',
+    small: 'text-sm md:text-base',
+  }
+
   return (
-    <div className={`bg-white dark:bg-[#111113] rounded-xl border border-gray-200 dark:border-[#27272a] overflow-hidden animate-pulse ${large ? 'md:col-span-2 lg:col-span-2' : ''}`}>
-      <div className={`bg-gray-200 dark:bg-[#27272a] ${large ? 'aspect-[2/1]' : 'aspect-video'}`} />
-      <div className="p-4 space-y-3">
-        <div className="h-4 bg-gray-200 dark:bg-[#27272a] rounded w-3/4" />
-        <div className="h-4 bg-gray-200 dark:bg-[#27272a] rounded w-1/2" />
-        <div className="h-3 bg-gray-200 dark:bg-[#27272a] rounded w-1/4" />
+    <article className={`group ${sizeClasses[size]}`}>
+      <Link
+        href={`/${article.category?.slug || 'news'}/${article.slug}`}
+        onClick={() => onView(article)}
+        className="block h-full"
+      >
+        <div className="bg-white dark:bg-[#111113] rounded-lg overflow-hidden h-full hover:shadow-xl transition-all duration-300 border border-gray-100 dark:border-[#27272a]">
+          {/* Image */}
+          <div className={`relative ${imageAspect[size]} overflow-hidden`}>
+            <Image
+              src={article.featured_image || '/placeholder.jpg'}
+              alt={article.title}
+              fill
+              className="object-cover group-hover:scale-105 transition-transform duration-500"
+              priority={size === 'featured'}
+            />
+            {/* Category badge */}
+            <span
+              className="absolute top-3 left-3 px-2 py-1 text-[10px] font-bold uppercase tracking-wider rounded"
+              style={{ backgroundColor: colors.bg, color: colors.text }}
+            >
+              {formatTeamName(article.category?.slug)}
+            </span>
+          </div>
+
+          {/* Content */}
+          <div className="p-4">
+            <h3 className={`font-bold text-gray-900 dark:text-white leading-tight group-hover:text-[#bc0000] transition-colors ${titleSize[size]}`}>
+              {article.title}
+            </h3>
+
+            {/* Excerpt for larger cards */}
+            {(size === 'featured' || size === 'large') && article.excerpt && (
+              <p className="mt-2 text-sm text-gray-600 dark:text-gray-400 line-clamp-2">
+                {article.excerpt}
+              </p>
+            )}
+
+            {/* Meta */}
+            <div className="mt-3 flex items-center gap-2 text-xs text-gray-500 dark:text-gray-400">
+              {article.author?.display_name && (
+                <>
+                  <span className="font-medium">{article.author.display_name}</span>
+                  <span>•</span>
+                </>
+              )}
+              <span>{formatDate(article.published_at)}</span>
+            </div>
+          </div>
+        </div>
+      </Link>
+    </article>
+  )
+}
+
+// Loading skeleton
+function ArticleSkeleton({ size = 'default' }: { size?: 'featured' | 'large' | 'default' | 'small' }) {
+  const sizeClasses = {
+    featured: 'col-span-full lg:col-span-2 lg:row-span-2',
+    large: 'col-span-full md:col-span-2',
+    default: '',
+    small: '',
+  }
+
+  return (
+    <div className={`animate-pulse ${sizeClasses[size]}`}>
+      <div className="bg-white dark:bg-[#111113] rounded-lg overflow-hidden border border-gray-100 dark:border-[#27272a]">
+        <div className="aspect-[16/10] bg-gray-200 dark:bg-[#27272a]" />
+        <div className="p-4 space-y-3">
+          <div className="h-4 bg-gray-200 dark:bg-[#27272a] rounded w-3/4" />
+          <div className="h-4 bg-gray-200 dark:bg-[#27272a] rounded w-1/2" />
+          <div className="h-3 bg-gray-200 dark:bg-[#27272a] rounded w-1/4" />
+        </div>
       </div>
+    </div>
+  )
+}
+
+// Section header component
+function SectionHeader({
+  title,
+  team,
+  href,
+  linkText
+}: {
+  title: string
+  team?: typeof teams[0]
+  href?: string
+  linkText?: string
+}) {
+  return (
+    <div className="flex items-center justify-between mb-6">
+      <div className="flex items-center gap-3">
+        {team && (
+          <div
+            className="w-1 h-6 rounded-full"
+            style={{ backgroundColor: team.bgColor }}
+          />
+        )}
+        <h2 className="text-xl md:text-2xl font-bold text-gray-900 dark:text-white">
+          {title}
+        </h2>
+      </div>
+      {href && (
+        <Link
+          href={href}
+          className="text-sm font-semibold text-[#bc0000] hover:underline"
+        >
+          {linkText || 'View All'} →
+        </Link>
+      )}
     </div>
   )
 }
@@ -74,349 +215,165 @@ export default function HomePage() {
     refreshInterval: 5 * 60 * 1000, // 5 minutes
   })
 
-  const [heroIndex, setHeroIndex] = useState(0)
-
-  // Rotate featured article every 8 seconds
-  useEffect(() => {
-    if (!feed?.topHeadlines?.length) return
-
-    const interval = setInterval(() => {
-      setHeroIndex(prev => (prev + 1) % Math.min(feed.topHeadlines.length, 3))
-    }, 8000)
-
-    return () => clearInterval(interval)
-  }, [feed?.topHeadlines?.length])
-
-  // Get current featured article (rotating)
-  const featuredArticle = feed?.featured || (feed?.topHeadlines?.[heroIndex])
-
-  return (
-    <div className="min-h-screen bg-gray-50 dark:bg-[#0a0a0b] transition-colors duration-300">
-
-      {/* ========== SCORES BAR ========== */}
-      <div className="bg-white dark:bg-[#111113] border-b border-gray-200 dark:border-[#27272a]">
-        <div className="max-w-[1400px] mx-auto">
-          <div className="flex items-center h-12 overflow-x-auto scrollbar-hide">
-            <div className="flex items-center gap-1 px-2">
-              {liveScores.map((game) => (
-                <div
-                  key={game.id}
-                  className="flex items-center gap-3 px-4 py-2 rounded-lg hover:bg-gray-100 dark:hover:bg-[#1c1c1f] cursor-pointer transition-colors min-w-fit"
-                >
-                  <div className="flex items-center gap-1.5">
-                    {game.status === 'LIVE' && (
-                      <>
-                        <span className="w-2 h-2 bg-red-500 rounded-full animate-pulse" />
-                        <span className="text-xs font-bold text-red-500">LIVE</span>
-                      </>
-                    )}
-                    {game.status === 'FINAL' && (
-                      <span className="text-xs font-medium text-gray-500 dark:text-gray-400">FINAL</span>
-                    )}
-                    {game.status !== 'LIVE' && game.status !== 'FINAL' && (
-                      <span className="text-xs font-medium text-gray-500 dark:text-gray-400">{game.status}</span>
-                    )}
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <span className="text-sm font-semibold text-gray-900 dark:text-white">{game.away}</span>
-                    {game.awayScore !== null && (
-                      <span className="text-sm font-bold text-gray-900 dark:text-white">{game.awayScore}</span>
-                    )}
-                    <span className="text-xs text-gray-400">@</span>
-                    <span className="text-sm font-semibold text-gray-900 dark:text-white">{game.home}</span>
-                    {game.homeScore !== null && (
-                      <span className="text-sm font-bold text-gray-900 dark:text-white">{game.homeScore}</span>
-                    )}
-                  </div>
-                  {game.quarter && (
-                    <span className="text-xs text-gray-500 dark:text-gray-400">
-                      {game.quarter} {game.time}
-                    </span>
-                  )}
-                </div>
-              ))}
-            </div>
-            <div className="ml-auto pr-4 flex items-center gap-3 border-l border-gray-200 dark:border-[#27272a] pl-4">
-              <ThemeToggle />
-            </div>
-          </div>
+  // Error state
+  if (error) {
+    return (
+      <div className="min-h-screen bg-gray-50 dark:bg-[#0a0a0b] flex items-center justify-center">
+        <div className="text-center">
+          <p className="text-gray-600 dark:text-gray-400 mb-4">Unable to load articles</p>
+          <button
+            onClick={refresh}
+            className="px-4 py-2 bg-[#bc0000] text-white rounded-lg hover:bg-[#a00000]"
+          >
+            Try Again
+          </button>
         </div>
       </div>
+    )
+  }
 
-      {/* ========== MAIN CONTENT ========== */}
-      <main className="max-w-[1400px] mx-auto px-4 py-6">
+  return (
+    <div className="min-h-screen bg-gray-50 dark:bg-[#0a0a0b]">
+      {/* Main Content - wider max-width for optimized desktop */}
+      <main className="max-w-[1800px] mx-auto px-4 lg:px-8 py-6 lg:py-8">
 
-        {/* ========== HERO SECTION ========== */}
-        <section className="mb-8">
-          <div className="grid lg:grid-cols-5 gap-4">
-
-            {/* Featured Article - Rotating */}
+        {/* ========== FEATURED / HERO SECTION ========== */}
+        <section className="mb-10">
+          <div className="grid grid-cols-1 lg:grid-cols-4 gap-4 lg:gap-6">
+            {/* Main featured article */}
             {loading ? (
-              <div className="lg:col-span-3 bg-gray-200 dark:bg-[#27272a] rounded-2xl aspect-[16/9] animate-pulse" />
-            ) : featuredArticle ? (
-              <article className="lg:col-span-3 relative group">
+              <ArticleSkeleton size="featured" />
+            ) : feed?.featured ? (
+              <article className="lg:col-span-2 lg:row-span-2 group">
                 <Link
-                  href={`/${featuredArticle.category?.slug || 'news'}/${featuredArticle.slug}`}
-                  onClick={() => trackView(featuredArticle)}
-                  className="block"
+                  href={`/${feed.featured.category?.slug || 'news'}/${feed.featured.slug}`}
+                  onClick={() => feed.featured && trackView(feed.featured)}
+                  className="block h-full"
                 >
-                  <div className="relative aspect-[16/10] lg:aspect-[16/9] rounded-2xl overflow-hidden">
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent z-10" />
+                  <div className="relative h-full min-h-[300px] lg:min-h-[500px] rounded-xl overflow-hidden">
                     <Image
-                      src={featuredArticle.featured_image || '/placeholder.jpg'}
-                      alt={featuredArticle.title}
+                      src={feed.featured.featured_image || '/placeholder.jpg'}
+                      alt={feed.featured.title}
                       fill
-                      className="object-cover group-hover:scale-105 transition-transform duration-500"
+                      className="object-cover group-hover:scale-105 transition-transform duration-700"
                       priority
                     />
+                    {/* Gradient overlay */}
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent" />
 
-                    {/* Unseen badge */}
-                    {isUnseen(featuredArticle.id) && (
-                      <span className="absolute top-4 right-4 z-20 px-2 py-1 bg-[#bc0000] text-white text-xs font-bold rounded">
-                        NEW
-                      </span>
-                    )}
-
-                    <div className="absolute bottom-0 left-0 right-0 p-6 z-20">
+                    {/* Content overlay */}
+                    <div className="absolute inset-0 flex flex-col justify-end p-6 lg:p-8">
                       <span
-                        className="inline-block px-3 py-1 rounded text-xs font-bold uppercase tracking-wide mb-3"
+                        className="inline-block w-fit px-3 py-1 text-xs font-bold uppercase tracking-wider rounded mb-4"
                         style={{
-                          backgroundColor: teamColors[featuredArticle.category?.slug || 'news']?.bg || '#27272a',
-                          color: teamColors[featuredArticle.category?.slug || 'news']?.text || '#ffffff',
+                          backgroundColor: getTeamColors(feed.featured.category?.slug).bg,
+                          color: getTeamColors(feed.featured.category?.slug).text
                         }}
                       >
-                        {formatTeamName(featuredArticle.category?.slug || 'news')}
+                        {formatTeamName(feed.featured.category?.slug)}
                       </span>
-                      <h1 className="text-2xl lg:text-3xl xl:text-4xl font-extrabold text-white leading-tight mb-3 group-hover:text-[#bc0000] transition-colors">
-                        {featuredArticle.title}
+                      <h1 className="text-2xl md:text-3xl lg:text-4xl font-black text-white leading-tight group-hover:text-[#bc0000] transition-colors mb-3">
+                        {feed.featured.title}
                       </h1>
+                      {feed.featured.excerpt && (
+                        <p className="text-sm md:text-base text-gray-200 line-clamp-2 mb-4 max-w-xl">
+                          {feed.featured.excerpt}
+                        </p>
+                      )}
                       <div className="flex items-center gap-3 text-sm text-gray-300">
-                        <span className="font-medium">{featuredArticle.author?.display_name || 'Staff'}</span>
+                        <span className="font-medium">{feed.featured.author?.display_name || 'Staff'}</span>
                         <span>•</span>
-                        <span>{featuredArticle.published_at ? new Date(featuredArticle.published_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : ''}</span>
+                        <span>{formatDate(feed.featured.published_at)}</span>
                       </div>
                     </div>
                   </div>
                 </Link>
-
-                {/* Hero rotation indicators */}
-                {feed?.topHeadlines && feed.topHeadlines.length > 1 && (
-                  <div className="absolute bottom-4 right-4 z-30 flex gap-1">
-                    {[0, 1, 2].map((i) => (
-                      <button
-                        key={i}
-                        onClick={() => setHeroIndex(i)}
-                        className={`w-2 h-2 rounded-full transition-colors ${heroIndex === i ? 'bg-white' : 'bg-white/40'
-                          }`}
-                      />
-                    ))}
-                  </div>
-                )}
               </article>
             ) : null}
 
-            {/* Top Headlines - ESPN Style */}
-            <div className="lg:col-span-2 bg-white dark:bg-[#111113] rounded-2xl border border-gray-200 dark:border-[#27272a] overflow-hidden">
-              <div className="px-4 py-3 border-b border-gray-200 dark:border-[#27272a] flex items-center justify-between">
-                <h2 className="text-sm font-bold text-gray-900 dark:text-white uppercase tracking-wide">
-                  Top Headlines
-                </h2>
-                <button
-                  onClick={refresh}
-                  className="text-xs text-gray-500 hover:text-[#bc0000] transition-colors"
-                  title="Refresh feed"
-                >
-                  ↻
-                </button>
-              </div>
-              <div className="divide-y divide-gray-100 dark:divide-[#27272a]">
-                {loading ? (
-                  Array.from({ length: 6 }).map((_, i) => (
-                    <div key={i} className="px-4 py-3 animate-pulse">
-                      <div className="flex gap-3">
-                        <div className="w-6 h-6 bg-gray-200 dark:bg-[#27272a] rounded" />
-                        <div className="flex-1 space-y-2">
-                          <div className="h-3 bg-gray-200 dark:bg-[#27272a] rounded w-full" />
-                          <div className="h-3 bg-gray-200 dark:bg-[#27272a] rounded w-2/3" />
-                        </div>
-                      </div>
-                    </div>
-                  ))
-                ) : (
-                  feed?.topHeadlines?.map((article, index) => (
-                    <Link
-                      key={article.id}
-                      href={`/${article.category?.slug || 'news'}/${article.slug}`}
-                      onClick={() => trackView(article)}
-                      className="flex items-start gap-3 px-4 py-3 hover:bg-gray-50 dark:hover:bg-[#1c1c1f] transition-colors group"
-                    >
-                      <span className="text-2xl font-black text-gray-200 dark:text-[#27272a] leading-none mt-0.5">
-                        {index + 1}
-                      </span>
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-center gap-2 mb-1">
-                          <span
-                            className="inline-block px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wide"
-                            style={{
-                              backgroundColor: teamColors[article.category?.slug || 'news']?.bg || '#27272a',
-                              color: teamColors[article.category?.slug || 'news']?.text || '#ffffff',
-                            }}
-                          >
-                            {formatTeamName(article.category?.slug || 'news')}
-                          </span>
-                          {isUnseen(article.id) && (
-                            <span className="w-2 h-2 bg-[#bc0000] rounded-full" title="New for you" />
-                          )}
-                        </div>
-                        <h3 className="text-sm font-semibold text-gray-900 dark:text-white leading-snug group-hover:text-[#bc0000] transition-colors line-clamp-2">
-                          {article.title}
-                        </h3>
-                        <span className="text-xs text-gray-500 dark:text-gray-400 mt-1 block">
-                          {new Date(article.published_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
-                        </span>
-                      </div>
-                    </Link>
-                  ))
-                )}
-              </div>
-            </div>
-          </div>
-        </section>
-
-        {/* ========== TEAM QUICK NAV ========== */}
-        <section className="mb-8">
-          <div className="flex items-center gap-2 overflow-x-auto pb-2 scrollbar-hide">
-            {teams.map((team) => (
-              <Link
-                key={team.slug}
-                href={`/teams/${team.slug}`}
-                className="flex items-center gap-2 px-4 py-2 rounded-full border-2 transition-all duration-200 hover:scale-105 whitespace-nowrap"
-                style={{ borderColor: team.bgColor }}
-              >
-                <span className="w-3 h-3 rounded-full" style={{ backgroundColor: team.bgColor }} />
-                <span className="text-sm font-semibold text-gray-700 dark:text-gray-200">{team.name}</span>
-              </Link>
-            ))}
-          </div>
-        </section>
-
-        {/* ========== LATEST NEWS GRID ========== */}
-        <section className="mb-12">
-          <div className="flex items-center justify-between mb-6">
-            <h2 className="text-xl font-bold text-gray-900 dark:text-white">Latest News</h2>
-            <Link href="/search" className="text-sm font-medium text-[#bc0000] hover:underline">View All →</Link>
-          </div>
-
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+            {/* Secondary featured articles */}
             {loading ? (
               <>
-                <ArticleSkeleton large />
+                <ArticleSkeleton />
                 <ArticleSkeleton />
                 <ArticleSkeleton />
                 <ArticleSkeleton />
               </>
             ) : (
-              feed?.latestNews?.map((article, index) => (
-                <article
+              feed?.topHeadlines?.slice(0, 4).map((article) => (
+                <ArticleCard
                   key={article.id}
-                  className={`bg-white dark:bg-[#111113] rounded-xl border border-gray-200 dark:border-[#27272a] overflow-hidden group hover:shadow-lg transition-all duration-300 ${index === 0 ? 'md:col-span-2 lg:col-span-2' : ''
-                    }`}
-                >
-                  <Link href={`/${article.category?.slug || 'news'}/${article.slug}`} onClick={() => trackView(article)}>
-                    <div className={`relative ${index === 0 ? 'aspect-[2/1]' : 'aspect-video'} overflow-hidden`}>
-                      <Image
-                        src={article.featured_image || '/placeholder.jpg'}
-                        alt={article.title}
-                        fill
-                        className="object-cover group-hover:scale-105 transition-transform duration-500"
-                      />
-                      <span
-                        className="absolute top-3 left-3 px-2 py-1 rounded text-[10px] font-bold uppercase tracking-wide"
-                        style={{
-                          backgroundColor: teamColors[article.category?.slug || 'news']?.bg || '#27272a',
-                          color: teamColors[article.category?.slug || 'news']?.text || '#ffffff',
-                        }}
-                      >
-                        {formatTeamName(article.category?.slug || 'news')}
-                      </span>
-                      {isUnseen(article.id) && (
-                        <span className="absolute top-3 right-3 w-2 h-2 bg-[#bc0000] rounded-full" />
-                      )}
-                    </div>
-                    <div className="p-4">
-                      <h3 className={`font-bold text-gray-900 dark:text-white leading-snug group-hover:text-[#bc0000] transition-colors mb-2 ${index === 0 ? 'text-xl' : 'text-base'
-                        }`}>
-                        {article.title}
-                      </h3>
-                      {index === 0 && article.excerpt && (
-                        <p className="text-sm text-gray-600 dark:text-gray-400 line-clamp-2 mb-3">{article.excerpt}</p>
-                      )}
-                      <div className="flex items-center gap-2 text-xs text-gray-500 dark:text-gray-400">
-                        <span className="font-medium">{article.author?.display_name || 'Staff'}</span>
-                        <span>•</span>
-                        <span>{new Date(article.published_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}</span>
-                      </div>
-                    </div>
-                  </Link>
-                </article>
+                  article={article}
+                  size="default"
+                  onView={trackView}
+                />
+              ))
+            )}
+          </div>
+        </section>
+
+        {/* ========== LATEST NEWS ========== */}
+        <section className="mb-12">
+          <SectionHeader
+            title="Latest News"
+            href="/search"
+            linkText="View All"
+          />
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-4 lg:gap-6">
+            {loading ? (
+              Array.from({ length: 10 }).map((_, i) => (
+                <ArticleSkeleton key={i} size={i === 0 ? 'large' : 'default'} />
+              ))
+            ) : (
+              feed?.latestNews?.slice(0, 10).map((article, index) => (
+                <ArticleCard
+                  key={article.id}
+                  article={article}
+                  size={index === 0 ? 'large' : 'default'}
+                  onView={trackView}
+                />
               ))
             )}
           </div>
         </section>
 
         {/* ========== TEAM SECTIONS ========== */}
-        {teams.slice(0, 3).map((team) => (
-          <section key={team.slug} className="mb-12">
-            <div className="flex items-center justify-between mb-6">
-              <div className="flex items-center gap-3">
-                <div className="w-1 h-6 rounded-full" style={{ backgroundColor: team.bgColor }} />
-                <h2 className="text-xl font-bold text-gray-900 dark:text-white">{team.name} News</h2>
-              </div>
-              <Link href={`/teams/${team.slug}`} className="text-sm font-medium text-[#bc0000] hover:underline">
-                More {team.name} →
-              </Link>
-            </div>
+        {teams.map((team) => {
+          const teamArticles = feed?.teamSections?.[team.name.toLowerCase()]
+          if (!teamArticles?.length && !loading) return null
 
-            <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-4">
-              {loading ? (
-                Array.from({ length: 4 }).map((_, i) => <ArticleSkeleton key={i} />)
-              ) : (
-                feed?.teamSections?.[team.name.toLowerCase()]?.map((article) => (
-                  <article
-                    key={article.id}
-                    className="bg-white dark:bg-[#111113] rounded-xl border border-gray-200 dark:border-[#27272a] overflow-hidden group hover:shadow-lg transition-all duration-300"
-                  >
-                    <Link href={`/${article.category?.slug || 'news'}/${article.slug}`} onClick={() => trackView(article)}>
-                      <div className="relative aspect-video overflow-hidden">
-                        <Image
-                          src={article.featured_image || '/placeholder.jpg'}
-                          alt={article.title}
-                          fill
-                          className="object-cover group-hover:scale-105 transition-transform duration-500"
-                        />
-                        {isUnseen(article.id) && (
-                          <span className="absolute top-2 right-2 w-2 h-2 bg-[#bc0000] rounded-full" />
-                        )}
-                      </div>
-                      <div className="p-4">
-                        <h3 className="font-semibold text-gray-900 dark:text-white leading-snug group-hover:text-[#bc0000] transition-colors line-clamp-2">
-                          {article.title}
-                        </h3>
-                        <span className="text-xs text-gray-500 dark:text-gray-400 mt-2 block">
-                          {new Date(article.published_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
-                        </span>
-                      </div>
-                    </Link>
-                  </article>
-                ))
-              )}
-            </div>
-          </section>
-        ))}
+          return (
+            <section key={team.slug} className="mb-12">
+              <SectionHeader
+                title={`${team.name} News`}
+                team={team}
+                href={`/${team.slug.replace('chicago-', '')}`}
+                linkText={`More ${team.name}`}
+              />
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-4 lg:gap-6">
+                {loading ? (
+                  Array.from({ length: 5 }).map((_, i) => (
+                    <ArticleSkeleton key={i} />
+                  ))
+                ) : (
+                  teamArticles?.slice(0, 5).map((article) => (
+                    <ArticleCard
+                      key={article.id}
+                      article={article}
+                      onView={trackView}
+                    />
+                  ))
+                )}
+              </div>
+            </section>
+          )
+        })}
 
         {/* ========== LOAD MORE ========== */}
         <div className="text-center py-8">
-          <button className="px-8 py-3 bg-[#bc0000] hover:bg-[#a00000] text-white font-semibold rounded-lg transition-colors">
+          <button className="px-8 py-3 bg-[#bc0000] hover:bg-[#a00000] text-white font-bold rounded-lg transition-colors shadow-lg hover:shadow-xl">
             Load More Articles
           </button>
         </div>
