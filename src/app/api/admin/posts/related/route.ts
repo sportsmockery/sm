@@ -7,13 +7,18 @@ import { supabaseAdmin } from '@/lib/supabase-server'
  */
 export async function GET(request: NextRequest) {
   try {
+    if (!supabaseAdmin) {
+      return NextResponse.json({ error: 'Database not configured' }, { status: 500 })
+    }
+
+    const supabase = supabaseAdmin
     const { searchParams } = new URL(request.url)
     const query = searchParams.get('q')
     const category = searchParams.get('category')
     const excludeId = searchParams.get('exclude')
     const limit = parseInt(searchParams.get('limit') || '5')
 
-    let dbQuery = supabaseAdmin
+    let dbQuery = supabase
       .from('sm_posts')
       .select(`
         id,

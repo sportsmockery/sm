@@ -36,10 +36,16 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
   const pageSize = 12
   const offset = (currentPage - 1) * pageSize
 
+  if (!supabaseAdmin) {
+    return <div className="p-6">Database not configured</div>
+  }
+
+  const supabase = supabaseAdmin
+
   // Fetch categories and authors for filters
   const [{ data: categories }, { data: authors }] = await Promise.all([
-    supabaseAdmin.from('sm_categories').select('id, name, slug'),
-    supabaseAdmin.from('sm_authors').select('id, display_name'),
+    supabase.from('sm_categories').select('id, name, slug'),
+    supabase.from('sm_authors').select('id, display_name'),
   ])
 
   const filterCategories = categories?.map((c) => ({ name: c.name, slug: c.slug })) || []

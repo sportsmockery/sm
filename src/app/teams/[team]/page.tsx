@@ -52,12 +52,14 @@ export default async function TeamOverviewPage({ params }: TeamPageProps) {
   ]);
 
   // Fetch recent articles about this team
-  const { data: articles } = await supabaseAdmin
-    .from('sm_posts')
-    .select('id, title, slug, featured_image, published_at')
-    .eq('status', 'published')
-    .order('published_at', { ascending: false })
-    .limit(5);
+  const { data: articles } = supabaseAdmin
+    ? await supabaseAdmin
+        .from('sm_posts')
+        .select('id, title, slug, featured_image, published_at')
+        .eq('status', 'published')
+        .order('published_at', { ascending: false })
+        .limit(5)
+    : { data: [] };
 
   // Get key stats based on sport
   const getKeyStats = () => {

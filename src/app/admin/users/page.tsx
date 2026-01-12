@@ -27,6 +27,10 @@ export default function UsersPage() {
   const fetchUsers = async () => {
     try {
       const supabase = createClient()
+      if (!supabase) {
+        setLoading(false)
+        return
+      }
       const { data, error } = await supabase
         .from('sm_users')
         .select('*')
@@ -44,6 +48,7 @@ export default function UsersPage() {
   const handleRoleChange = async (userId: string, role: User['role']) => {
     try {
       const supabase = createClient()
+      if (!supabase) return
       const { error } = await supabase
         .from('sm_users')
         .update({ role })
@@ -63,6 +68,7 @@ export default function UsersPage() {
 
     try {
       const supabase = createClient()
+      if (!supabase) return
       const { error } = await supabase
         .from('sm_users')
         .delete()

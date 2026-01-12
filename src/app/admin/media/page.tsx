@@ -37,6 +37,10 @@ export default function MediaPage() {
     setLoading(true)
     try {
       const supabase = createClient()
+      if (!supabase) {
+        setLoading(false)
+        return
+      }
       let query = supabase
         .from('sm_media')
         .select('*')
@@ -70,6 +74,10 @@ export default function MediaPage() {
 
     setUploading(true)
     const supabase = createClient()
+    if (!supabase) {
+      setUploading(false)
+      return
+    }
     const uploaded: MediaItem[] = []
 
     try {
@@ -175,6 +183,7 @@ export default function MediaPage() {
 
     try {
       const supabase = createClient()
+      if (!supabase) return
       const itemsToDelete = media.filter(m => ids.includes(m.id))
 
       for (const item of itemsToDelete) {

@@ -23,6 +23,8 @@ export interface AuthorWithDetails extends Author {
  * Fetch all authors with their post counts
  */
 export async function getAuthorsWithPostCounts(): Promise<Author[]> {
+  if (!supabaseAdmin) return []
+
   const { data: authors } = await supabaseAdmin
     .from('sm_authors')
     .select('id, display_name, bio, avatar_url, created_at')
@@ -61,6 +63,8 @@ export async function getAuthorsWithPostCounts(): Promise<Author[]> {
  * Fetch a single author by ID with full details
  */
 export async function getAuthorById(id: string | number): Promise<AuthorWithDetails | null> {
+  if (!supabaseAdmin) return null
+
   const { data: author, error } = await supabaseAdmin
     .from('sm_authors')
     .select('*')
@@ -109,6 +113,8 @@ export async function getTopAuthors(limit: number = 5): Promise<Author[]> {
  * Fetch authors for a specific category
  */
 export async function getAuthorsByCategory(categoryId: number, limit: number = 10): Promise<Author[]> {
+  if (!supabaseAdmin) return []
+
   // Get posts in this category
   const { data: posts } = await supabaseAdmin
     .from('sm_posts')

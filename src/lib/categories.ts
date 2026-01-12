@@ -13,6 +13,7 @@ export interface Category {
 
 export async function getCategories(): Promise<Category[]> {
   const supabase = createClient()
+  if (!supabase) return []
 
   const { data, error } = await supabase
     .from('sm_categories')
@@ -26,6 +27,7 @@ export async function getCategories(): Promise<Category[]> {
 
 export async function getCategoriesWithPostCount(): Promise<Category[]> {
   const supabase = createClient()
+  if (!supabase) return []
 
   // Get categories
   const { data: categories, error: catError } = await supabase
@@ -58,6 +60,7 @@ export async function getCategoriesWithPostCount(): Promise<Category[]> {
 
 export async function getCategory(id: string): Promise<Category | null> {
   const supabase = createClient()
+  if (!supabase) return null
 
   const { data, error } = await supabase
     .from('sm_categories')
@@ -75,6 +78,7 @@ export async function getCategory(id: string): Promise<Category | null> {
 
 export async function getCategoryBySlug(slug: string): Promise<Category | null> {
   const supabase = createClient()
+  if (!supabase) return null
 
   const { data, error } = await supabase
     .from('sm_categories')
@@ -92,6 +96,7 @@ export async function getCategoryBySlug(slug: string): Promise<Category | null> 
 
 export async function createCategory(data: Partial<Category>): Promise<Category> {
   const supabase = createClient()
+  if (!supabase) throw new Error('Database not configured')
 
   const { data: category, error } = await supabase
     .from('sm_categories')
@@ -111,6 +116,7 @@ export async function createCategory(data: Partial<Category>): Promise<Category>
 
 export async function updateCategory(id: string, data: Partial<Category>): Promise<Category> {
   const supabase = createClient()
+  if (!supabase) throw new Error('Database not configured')
 
   const updates: Record<string, unknown> = {
     updated_at: new Date().toISOString()
@@ -135,6 +141,7 @@ export async function updateCategory(id: string, data: Partial<Category>): Promi
 
 export async function deleteCategory(id: string): Promise<void> {
   const supabase = createClient()
+  if (!supabase) throw new Error('Database not configured')
 
   const { error } = await supabase
     .from('sm_categories')

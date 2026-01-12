@@ -1,9 +1,12 @@
 const { createClient } = require('@supabase/supabase-js')
 
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL,
-  process.env.SUPABASE_SERVICE_ROLE_KEY
-)
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
+const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY
+
+// Only create client if env vars are set
+const supabase = supabaseUrl && supabaseKey
+  ? createClient(supabaseUrl, supabaseKey)
+  : null
 
 /** @type {import('next-sitemap').IConfig} */
 module.exports = {
@@ -12,6 +15,12 @@ module.exports = {
   generateIndexSitemap: false,
   additionalPaths: async (config) => {
     const paths = []
+
+    // Skip database queries if supabase is not configured
+    if (!supabase) {
+      console.log('Sitemap: Supabase not configured, skipping dynamic paths')
+      return paths
+    }
 
     // Fetch all published posts
     const { data: posts } = await supabase

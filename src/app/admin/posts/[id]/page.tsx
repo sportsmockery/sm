@@ -11,7 +11,13 @@ interface PostDetailPageProps {
 export default async function AdminPostDetailPage({ params }: PostDetailPageProps) {
   const { id } = await params
 
-  const { data: post, error } = await supabaseAdmin
+  if (!supabaseAdmin) {
+    notFound()
+  }
+
+  const supabase = supabaseAdmin
+
+  const { data: post, error } = await supabase
     .from('sm_posts')
     .select('*')
     .eq('id', id)
@@ -24,10 +30,10 @@ export default async function AdminPostDetailPage({ params }: PostDetailPageProp
   // Fetch category and author
   const [categoryResult, authorResult] = await Promise.all([
     post.category_id
-      ? supabaseAdmin.from('sm_categories').select('name, slug').eq('id', post.category_id).single()
+      ? supabase.from('sm_categories').select('name, slug').eq('id', post.category_id).single()
       : Promise.resolve({ data: null }),
     post.author_id
-      ? supabaseAdmin.from('sm_authors').select('display_name').eq('id', post.author_id).single()
+      ? supabase.from('sm_authors').select('display_name').eq('id', post.author_id).single()
       : Promise.resolve({ data: null }),
   ])
 

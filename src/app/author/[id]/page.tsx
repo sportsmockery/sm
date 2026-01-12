@@ -22,6 +22,8 @@ interface AuthorPageProps {
 
 // Fetch author data
 async function getAuthor(id: string) {
+  if (!supabaseAdmin) return null
+
   const { data: author, error } = await supabaseAdmin
     .from('sm_authors')
     .select('id, display_name, bio, avatar_url, created_at')
@@ -67,24 +69,26 @@ export default async function AuthorPage({ params, searchParams }: AuthorPagePro
 
   // Fetch author
   const author = await getAuthor(id)
-  if (!author) {
+  if (!author || !supabaseAdmin) {
     notFound()
   }
 
+  const supabase = supabaseAdmin
+
   // Count total posts
-  let postsQuery = supabaseAdmin
+  let postsQuery = supabase
     .from('sm_posts')
     .select('*', { count: 'exact', head: true })
     .eq('author_id', author.id)
 
   // Get category info for filtering
-  const { data: allPosts } = await supabaseAdmin
+  const { data: allPosts } = await supabase
     .from('sm_posts')
     .select('category_id')
     .eq('author_id', author.id)
 
   const categoryIds = [...new Set(allPosts?.map(p => p.category_id) || [])]
-  const { data: categories } = await supabaseAdmin
+  const { data: categories } = await supabase
     .from('sm_categories')
     .select('id, name, slug')
     .in('id', categoryIds)
@@ -121,7 +125,7 @@ export default async function AuthorPage({ params, searchParams }: AuthorPagePro
   const offset = (currentPage - 1) * POSTS_PER_PAGE
 
   // Build articles query with category filter
-  let articlesQuery = supabaseAdmin
+  let articlesQuery = supabase
     .from('sm_posts')
     .select('id, slug, title, excerpt, featured_image, published_at, category_id, views')
     .eq('author_id', author.id)
@@ -137,7 +141,7 @@ export default async function AuthorPage({ params, searchParams }: AuthorPagePro
   const { data: posts } = await articlesQuery.range(offset, offset + POSTS_PER_PAGE - 1)
 
   // Fetch latest 3 articles for sidebar
-  const { data: latestPosts } = await supabaseAdmin
+  const { data: latestPosts } = await supabase
     .from('sm_posts')
     .select('id, slug, title, excerpt, featured_image, published_at, category_id')
     .eq('author_id', author.id)
@@ -145,7 +149,7 @@ export default async function AuthorPage({ params, searchParams }: AuthorPagePro
     .limit(3)
 
   // Fetch top 5 by views for popular section
-  const { data: popularPosts } = await supabaseAdmin
+  const { data: popularPosts } = await supabase
     .from('sm_posts')
     .select('id, slug, title, published_at, category_id, views')
     .eq('author_id', author.id)

@@ -1,9 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createServerClient } from '@/lib/supabase-server'
+import { supabaseAdmin } from '@/lib/supabase-server'
 
 export async function GET(request: NextRequest) {
   try {
-    const supabase = await createServerClient()
+    const supabase = supabaseAdmin
+    if (!supabase) {
+      return NextResponse.json({ error: 'Database not configured' }, { status: 500 })
+    }
     const { searchParams } = new URL(request.url)
 
     const page = parseInt(searchParams.get('page') || '1')
@@ -50,12 +53,9 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
   try {
-    const supabase = await createServerClient()
-
-    // Check authentication
-    const { data: { user } } = await supabase.auth.getUser()
-    if (!user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    const supabase = supabaseAdmin
+    if (!supabase) {
+      return NextResponse.json({ error: 'Database not configured' }, { status: 500 })
     }
 
     const formData = await request.formData()
@@ -109,8 +109,7 @@ export async function POST(request: NextRequest) {
         type: file.type,
         width,
         height,
-        alt_text: '',
-        uploaded_by: user.id
+        alt_text: ''
       })
       .select()
       .single()

@@ -21,14 +21,20 @@ interface AuthorsPageProps {
 export default async function AuthorsPage({ searchParams }: AuthorsPageProps) {
   const { sort } = await searchParams
 
+  if (!supabaseAdmin) {
+    return <div className="p-6">Database not configured</div>
+  }
+
+  const supabase = supabaseAdmin
+
   // Fetch all authors with post counts
-  const { data: authors } = await supabaseAdmin
+  const { data: authors } = await supabase
     .from('sm_authors')
     .select('id, display_name, bio, avatar_url')
 
   // Get post counts for each author
   const authorIds = authors?.map(a => a.id) || []
-  const { data: postCounts } = await supabaseAdmin
+  const { data: postCounts } = await supabase
     .from('sm_posts')
     .select('author_id')
     .in('author_id', authorIds)

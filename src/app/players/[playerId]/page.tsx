@@ -49,12 +49,14 @@ export default async function PlayerOverviewPage({ params }: PlayerPageProps) {
   ]);
 
   // Fetch articles that might mention this player (simplified search)
-  const { data: articles } = await supabaseAdmin
-    .from('sm_posts')
-    .select('id, title, slug, featured_image, published_at')
-    .eq('status', 'published')
-    .order('published_at', { ascending: false })
-    .limit(5);
+  const { data: articles } = supabaseAdmin
+    ? await supabaseAdmin
+        .from('sm_posts')
+        .select('id, title, slug, featured_image, published_at')
+        .eq('status', 'published')
+        .order('published_at', { ascending: false })
+        .limit(5)
+    : { data: [] };
 
   return (
     <main className="mx-auto max-w-7xl px-4 py-8">

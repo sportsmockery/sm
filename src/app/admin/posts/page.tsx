@@ -19,7 +19,13 @@ export default async function AdminPostsPage({ searchParams }: PostsPageProps) {
   const currentPage = Math.max(1, parseInt(page || '1', 10))
   const offset = (currentPage - 1) * POSTS_PER_PAGE
 
-  let query = supabaseAdmin
+  if (!supabaseAdmin) {
+    return <div className="p-6">Database not configured</div>
+  }
+
+  const supabase = supabaseAdmin
+
+  let query = supabase
     .from('sm_posts')
     .select('id, title, slug, status, published_at, created_at, category_id, author_id, featured_image, excerpt', { count: 'exact' })
 
@@ -47,29 +53,29 @@ export default async function AdminPostsPage({ searchParams }: PostsPageProps) {
 
   const [categoriesResult, authorsResult, allCategories] = await Promise.all([
     categoryIds.length > 0
-      ? supabaseAdmin.from('sm_categories').select('id, name, slug').in('id', categoryIds)
+      ? supabase.from('sm_categories').select('id, name, slug').in('id', categoryIds)
       : Promise.resolve({ data: [] }),
     authorIds.length > 0
-      ? supabaseAdmin.from('sm_authors').select('id, display_name, avatar_url').in('id', authorIds)
+      ? supabase.from('sm_authors').select('id, display_name, avatar_url').in('id', authorIds)
       : Promise.resolve({ data: [] }),
-    supabaseAdmin.from('sm_categories').select('id, name, slug').order('name'),
+    supabase.from('sm_categories').select('id, name, slug').order('name'),
   ])
 
   const categoryMap = new Map(categoriesResult.data?.map(c => [c.id, c]) || [])
   const authorMap = new Map(authorsResult.data?.map(a => [a.id, a]) || [])
 
   // Status counts
-  const { count: publishedCount } = await supabaseAdmin
+  const { count: publishedCount } = await supabase
     .from('sm_posts')
     .select('*', { count: 'exact', head: true })
     .eq('status', 'published')
 
-  const { count: draftCount } = await supabaseAdmin
+  const { count: draftCount } = await supabase
     .from('sm_posts')
     .select('*', { count: 'exact', head: true })
     .eq('status', 'draft')
 
-  const { count: scheduledCount } = await supabaseAdmin
+  const { count: scheduledCount } = await supabase
     .from('sm_posts')
     .select('*', { count: 'exact', head: true })
     .eq('status', 'scheduled')

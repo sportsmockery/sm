@@ -147,6 +147,11 @@ export async function POST(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    if (!supabaseAdmin) {
+      return NextResponse.json({ error: 'Database not configured' }, { status: 500 })
+    }
+
+    const supabase = supabaseAdmin
     const { id } = await params
     const body = await request.json()
 
@@ -172,7 +177,7 @@ export async function POST(
     }
 
     // Check if slug is unique (excluding current post)
-    const { data: existingPost } = await supabaseAdmin
+    const { data: existingPost } = await supabase
       .from('sm_posts')
       .select('id')
       .eq('slug', slug)
@@ -206,7 +211,7 @@ export async function POST(
       // Get category name for better AI context
       let categoryName: string | undefined
       if (category_id) {
-        const { data: category } = await supabaseAdmin
+        const { data: category } = await supabase
           .from('sm_categories')
           .select('name')
           .eq('id', category_id)
@@ -217,7 +222,7 @@ export async function POST(
       updateData = await autoFillSEOFields(updateData, categoryName)
 
       // Set published_at if publishing for the first time
-      const { data: currentPost } = await supabaseAdmin
+      const { data: currentPost } = await supabase
         .from('sm_posts')
         .select('status, published_at')
         .eq('id', id)
@@ -229,7 +234,7 @@ export async function POST(
     }
 
     // Update the post
-    const { data: post, error } = await supabaseAdmin
+    const { data: post, error } = await supabase
       .from('sm_posts')
       .update(updateData)
       .eq('id', id)
@@ -259,9 +264,14 @@ export async function GET(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    if (!supabaseAdmin) {
+      return NextResponse.json({ error: 'Database not configured' }, { status: 500 })
+    }
+
+    const supabase = supabaseAdmin
     const { id } = await params
 
-    const { data: post, error } = await supabaseAdmin
+    const { data: post, error } = await supabase
       .from('sm_posts')
       .select('*')
       .eq('id', id)

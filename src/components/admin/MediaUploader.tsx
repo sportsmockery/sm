@@ -29,6 +29,7 @@ export default function MediaUploader({ onUploadComplete, onClose }: MediaUpload
 
   const uploadFile = async (file: File, fileId: string) => {
     const supabase = createClient()
+    if (!supabase) throw new Error('Database not configured')
 
     try {
       // Validate file

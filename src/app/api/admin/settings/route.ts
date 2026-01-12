@@ -1,14 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createServerClient } from '@/lib/supabase-server'
+import { supabaseAdmin } from '@/lib/supabase-server'
 
 export async function GET() {
   try {
-    const supabase = await createServerClient()
-
-    // Check authentication
-    const { data: { user } } = await supabase.auth.getUser()
-    if (!user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    const supabase = supabaseAdmin
+    if (!supabase) {
+      return NextResponse.json({ error: 'Database not configured' }, { status: 500 })
     }
 
     const { data, error } = await supabase
@@ -45,23 +42,9 @@ export async function GET() {
 
 export async function PUT(request: NextRequest) {
   try {
-    const supabase = await createServerClient()
-
-    // Check authentication
-    const { data: { user } } = await supabase.auth.getUser()
-    if (!user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-    }
-
-    // Check if user is admin
-    const { data: userData } = await supabase
-      .from('sm_users')
-      .select('role')
-      .eq('id', user.id)
-      .single()
-
-    if (userData?.role !== 'admin') {
-      return NextResponse.json({ error: 'Admin access required' }, { status: 403 })
+    const supabase = supabaseAdmin
+    if (!supabase) {
+      return NextResponse.json({ error: 'Database not configured' }, { status: 500 })
     }
 
     const body = await request.json()
@@ -79,8 +62,7 @@ export async function PUT(request: NextRequest) {
         .from('sm_settings')
         .update({
           ...body,
-          updated_at: new Date().toISOString(),
-          updated_by: user.id
+          updated_at: new Date().toISOString()
         })
         .eq('id', existing.id)
         .select()
@@ -93,8 +75,7 @@ export async function PUT(request: NextRequest) {
       const { data, error } = await supabase
         .from('sm_settings')
         .insert({
-          ...body,
-          created_by: user.id
+          ...body
         })
         .select()
         .single()

@@ -52,6 +52,8 @@ export async function searchPosts(options: SearchOptions): Promise<{
   results: SearchResult[]
   total: number
 }> {
+  if (!supabaseAdmin) return { results: [], total: 0 }
+
   const { query, categorySlug, authorId, dateRange, limit = 20, offset = 0 } = options
 
   // Get category ID if slug provided
@@ -145,7 +147,7 @@ export async function searchPosts(options: SearchOptions): Promise<{
  * Get search suggestions (autocomplete)
  */
 export async function getSearchSuggestions(query: string, limit: number = 5) {
-  if (!query || query.length < 2) {
+  if (!query || query.length < 2 || !supabaseAdmin) {
     return { articles: [], categories: [], authors: [] }
   }
 

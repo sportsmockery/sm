@@ -9,16 +9,22 @@ import CategoryBreakdown from '@/components/admin/CategoryBreakdown'
 import TopPostsChart from '@/components/admin/TopPostsChart'
 
 export default async function AdminDashboard() {
+  if (!supabaseAdmin) {
+    return <div className="p-6">Database not configured</div>
+  }
+
+  const supabase = supabaseAdmin
+
   const [postsResult, categoriesResult, authorsResult, recentPostsResult, viewsResult] = await Promise.all([
-    supabaseAdmin.from('sm_posts').select('*', { count: 'exact', head: true }),
-    supabaseAdmin.from('sm_categories').select('*', { count: 'exact', head: true }),
-    supabaseAdmin.from('sm_authors').select('*', { count: 'exact', head: true }),
-    supabaseAdmin
+    supabase.from('sm_posts').select('*', { count: 'exact', head: true }),
+    supabase.from('sm_categories').select('*', { count: 'exact', head: true }),
+    supabase.from('sm_authors').select('*', { count: 'exact', head: true }),
+    supabase
       .from('sm_posts')
       .select('id, title, slug, status, published_at, category_id, created_at')
       .order('created_at', { ascending: false })
       .limit(5),
-    supabaseAdmin
+    supabase
       .from('sm_posts')
       .select('views')
       .single(),
@@ -30,12 +36,12 @@ export default async function AdminDashboard() {
   const recentPosts = recentPostsResult.data || []
 
   // Get published vs draft counts
-  const { count: publishedCount } = await supabaseAdmin
+  const { count: publishedCount } = await supabase
     .from('sm_posts')
     .select('*', { count: 'exact', head: true })
     .eq('status', 'published')
 
-  const { count: draftCount } = await supabaseAdmin
+  const { count: draftCount } = await supabase
     .from('sm_posts')
     .select('*', { count: 'exact', head: true })
     .eq('status', 'draft')

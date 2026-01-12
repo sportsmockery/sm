@@ -5,6 +5,10 @@ import { supabaseAdmin } from '@/lib/supabase-server'
 const POSTS_PER_PAGE = 12
 
 export async function loadMorePosts(offset: number) {
+  if (!supabaseAdmin) {
+    return { posts: [], hasMore: false }
+  }
+
   const { data: posts, error } = await supabaseAdmin
     .from('sm_posts')
     .select('id, title, slug, excerpt, featured_image, published_at, category_id')

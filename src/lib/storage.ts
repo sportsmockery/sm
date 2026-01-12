@@ -9,6 +9,7 @@ export interface UploadResult {
 
 export async function uploadFile(file: File): Promise<UploadResult> {
   const supabase = createClient()
+  if (!supabase) throw new Error('Database not configured')
 
   // Generate unique filename
   const ext = file.name.split('.').pop()
@@ -37,6 +38,7 @@ export async function uploadFile(file: File): Promise<UploadResult> {
 
 export async function deleteFile(path: string): Promise<void> {
   const supabase = createClient()
+  if (!supabase) throw new Error('Database not configured')
 
   const { error } = await supabase.storage
     .from('media')
@@ -47,6 +49,7 @@ export async function deleteFile(path: string): Promise<void> {
 
 export function getFileUrl(path: string): string {
   const supabase = createClient()
+  if (!supabase) return ''
 
   const { data } = supabase.storage
     .from('media')
@@ -57,6 +60,7 @@ export function getFileUrl(path: string): string {
 
 export async function listFiles(prefix?: string): Promise<string[]> {
   const supabase = createClient()
+  if (!supabase) return []
 
   const { data, error } = await supabase.storage
     .from('media')
@@ -72,6 +76,7 @@ export async function listFiles(prefix?: string): Promise<string[]> {
 
 export async function downloadFile(path: string): Promise<Blob> {
   const supabase = createClient()
+  if (!supabase) throw new Error('Database not configured')
 
   const { data, error } = await supabase.storage
     .from('media')
@@ -84,6 +89,7 @@ export async function downloadFile(path: string): Promise<Blob> {
 
 export async function getSignedUrl(path: string, expiresIn = 3600): Promise<string> {
   const supabase = createClient()
+  if (!supabase) throw new Error('Database not configured')
 
   const { data, error } = await supabase.storage
     .from('media')
@@ -96,6 +102,7 @@ export async function getSignedUrl(path: string, expiresIn = 3600): Promise<stri
 
 export async function moveFile(fromPath: string, toPath: string): Promise<void> {
   const supabase = createClient()
+  if (!supabase) throw new Error('Database not configured')
 
   const { error } = await supabase.storage
     .from('media')
@@ -106,6 +113,7 @@ export async function moveFile(fromPath: string, toPath: string): Promise<void> 
 
 export async function copyFile(fromPath: string, toPath: string): Promise<void> {
   const supabase = createClient()
+  if (!supabase) throw new Error('Database not configured')
 
   const { error } = await supabase.storage
     .from('media')

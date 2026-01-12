@@ -13,6 +13,11 @@ import { TEAM_SLUGS } from '@/lib/bot/types'
 
 export async function GET(request: NextRequest) {
   try {
+    if (!supabaseAdmin) {
+      return NextResponse.json({ error: 'Database not configured' }, { status: 500 })
+    }
+
+    const supabase = supabaseAdmin
     const { searchParams } = new URL(request.url)
     const team_slug = searchParams.get('team') as TeamSlug | null
 
@@ -27,14 +32,14 @@ export async function GET(request: NextRequest) {
     const statuses = await getBotStatus(team_slug || undefined)
 
     // Get recent logs summary
-    const { data: recentLogs } = await supabaseAdmin
+    const { data: recentLogs } = await supabase
       .from('sm_bot_logs')
       .select('id, team_slug, log_level, action, message, created_at')
       .order('created_at', { ascending: false })
       .limit(10)
 
     // Get pending response counts by team
-    const { data: pendingByTeam } = await supabaseAdmin
+    const { data: pendingByTeam } = await supabase
       .from('sm_bot_responses')
       .select('team_slug')
       .eq('status', 'pending')

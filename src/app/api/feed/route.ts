@@ -14,6 +14,7 @@ export async function POST(request: NextRequest) {
       )
     }
 
+    const supabase = supabaseAdmin
     const body = await request.json()
 
     // Get viewed IDs from client (anonymous tracking via localStorage)
@@ -24,7 +25,7 @@ export async function POST(request: NextRequest) {
     const now = new Date()
 
     // 1. Get HIGH IMPORTANCE unseen articles (score > 70)
-    let highImportanceQuery = supabaseAdmin
+    let highImportanceQuery = supabase
       .from('sm_posts')
       .select(POST_SELECT)
       .eq('status', 'published')
@@ -40,7 +41,7 @@ export async function POST(request: NextRequest) {
     const { data: highImportance } = await highImportanceQuery
 
     // 2. Get RECENT articles (last 7 days)
-    let recentQuery = supabaseAdmin
+    let recentQuery = supabase
       .from('sm_posts')
       .select(POST_SELECT)
       .eq('status', 'published')
@@ -57,7 +58,7 @@ export async function POST(request: NextRequest) {
     const { data: recent } = await recentQuery
 
     // 3. Get TRENDING articles (high view count in last 24h)
-    const { data: trending } = await supabaseAdmin
+    const { data: trending } = await supabase
       .from('sm_posts')
       .select(POST_SELECT)
       .eq('status', 'published')
@@ -164,8 +165,10 @@ export async function GET() {
       )
     }
 
+    const supabase = supabaseAdmin
+
     // Default feed: High score + recent, no personalization
-    const { data: posts, error } = await supabaseAdmin
+    const { data: posts, error } = await supabase
       .from('sm_posts')
       .select(POST_SELECT)
       .eq('status', 'published')

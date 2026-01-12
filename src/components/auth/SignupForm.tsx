@@ -52,7 +52,7 @@ export default function SignupForm() {
 
     setLoading(true)
 
-    const { error } = await signUp(email, password, { full_name: fullName })
+    const { error } = await signUp(email, password, fullName)
 
     if (error) {
       setError(error)

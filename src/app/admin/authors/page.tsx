@@ -3,7 +3,13 @@ import Link from 'next/link'
 import Image from 'next/image'
 
 export default async function AdminAuthorsPage() {
-  const { data: authors } = await supabaseAdmin
+  if (!supabaseAdmin) {
+    return <div className="p-6">Database not configured</div>
+  }
+
+  const supabase = supabaseAdmin
+
+  const { data: authors } = await supabase
     .from('sm_authors')
     .select('id, display_name, email, bio, avatar_url, social_twitter, social_linkedin')
     .order('display_name')
@@ -11,7 +17,7 @@ export default async function AdminAuthorsPage() {
   // Get post counts for each author
   const authorsWithCounts = await Promise.all(
     (authors || []).map(async (author) => {
-      const { count } = await supabaseAdmin
+      const { count } = await supabase
         .from('sm_posts')
         .select('*', { count: 'exact', head: true })
         .eq('author_id', author.id)

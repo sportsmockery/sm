@@ -39,6 +39,7 @@ const defaultSettings: SiteSettings = {
 
 export async function getSettings(): Promise<SiteSettings> {
   const supabase = createClient()
+  if (!supabase) return defaultSettings
 
   const { data, error } = await supabase
     .from('sm_settings')
@@ -55,6 +56,7 @@ export async function getSettings(): Promise<SiteSettings> {
 
 export async function updateSettings(updates: Partial<SiteSettings>): Promise<SiteSettings> {
   const supabase = createClient()
+  if (!supabase) throw new Error('Database not configured')
 
   // Check if settings exist
   const { data: existing } = await supabase

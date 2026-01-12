@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createServerClient } from '@/lib/supabase-server'
+import { supabaseAdmin } from '@/lib/supabase-server'
 
 export async function GET(
   request: NextRequest,
@@ -7,7 +7,10 @@ export async function GET(
 ) {
   try {
     const { id } = await params
-    const supabase = await createServerClient()
+    const supabase = supabaseAdmin
+    if (!supabase) {
+      return NextResponse.json({ error: 'Database not configured' }, { status: 500 })
+    }
 
     const { data, error } = await supabase
       .from('sm_categories')
@@ -34,12 +37,9 @@ export async function PUT(
 ) {
   try {
     const { id } = await params
-    const supabase = await createServerClient()
-
-    // Check authentication
-    const { data: { user } } = await supabase.auth.getUser()
-    if (!user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    const supabase = supabaseAdmin
+    if (!supabase) {
+      return NextResponse.json({ error: 'Database not configured' }, { status: 500 })
     }
 
     const body = await request.json()
@@ -90,12 +90,9 @@ export async function DELETE(
 ) {
   try {
     const { id } = await params
-    const supabase = await createServerClient()
-
-    // Check authentication
-    const { data: { user } } = await supabase.auth.getUser()
-    if (!user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    const supabase = supabaseAdmin
+    if (!supabase) {
+      return NextResponse.json({ error: 'Database not configured' }, { status: 500 })
     }
 
     // Check if category has posts

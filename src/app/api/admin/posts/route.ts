@@ -149,12 +149,17 @@ async function autoFillSEOFields(
  */
 export async function GET(request: NextRequest) {
   try {
+    if (!supabaseAdmin) {
+      return NextResponse.json({ error: 'Database not configured' }, { status: 500 })
+    }
+
+    const supabase = supabaseAdmin
     const { searchParams } = new URL(request.url)
     const status = searchParams.get('status')
     const limit = parseInt(searchParams.get('limit') || '50')
     const offset = parseInt(searchParams.get('offset') || '0')
 
-    let query = supabaseAdmin
+    let query = supabase
       .from('sm_posts')
       .select(`
         *,
@@ -199,6 +204,11 @@ export async function GET(request: NextRequest) {
  */
 export async function POST(request: NextRequest) {
   try {
+    if (!supabaseAdmin) {
+      return NextResponse.json({ error: 'Database not configured' }, { status: 500 })
+    }
+
+    const supabase = supabaseAdmin
     const body = await request.json()
 
     // Validate required fields
@@ -210,7 +220,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Check for duplicate slug
-    const { data: existing } = await supabaseAdmin
+    const { data: existing } = await supabase
       .from('sm_posts')
       .select('id')
       .eq('slug', body.slug)
@@ -243,7 +253,7 @@ export async function POST(request: NextRequest) {
       // Get category name for better AI context
       let categoryName: string | undefined
       if (body.category_id) {
-        const { data: category } = await supabaseAdmin
+        const { data: category } = await supabase
           .from('sm_categories')
           .select('name')
           .eq('id', body.category_id)
@@ -255,7 +265,7 @@ export async function POST(request: NextRequest) {
       postData.published_at = new Date().toISOString()
     }
 
-    const { data: post, error } = await supabaseAdmin
+    const { data: post, error } = await supabase
       .from('sm_posts')
       .insert(postData)
       .select()

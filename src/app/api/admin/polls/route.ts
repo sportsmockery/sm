@@ -6,6 +6,10 @@ import { supabase } from '@/lib/supabase'
  * List all polls with filtering
  */
 export async function GET(request: NextRequest) {
+  if (!supabase) {
+    return NextResponse.json({ error: 'Database not configured' }, { status: 503 })
+  }
+
   try {
     const { searchParams } = new URL(request.url)
     const status = searchParams.get('status')
@@ -60,6 +64,10 @@ export async function GET(request: NextRequest) {
  * Create a new poll
  */
 export async function POST(request: NextRequest) {
+  if (!supabase) {
+    return NextResponse.json({ error: 'Database not configured' }, { status: 503 })
+  }
+
   try {
     const body = await request.json()
 

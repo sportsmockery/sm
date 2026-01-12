@@ -7,6 +7,11 @@ import { supabaseAdmin } from '@/lib/supabase-server'
  */
 export async function GET(request: NextRequest) {
   try {
+    if (!supabaseAdmin) {
+      return NextResponse.json({ error: 'Database not configured' }, { status: 500 })
+    }
+
+    const supabase = supabaseAdmin
     const { searchParams } = new URL(request.url)
     const slug = searchParams.get('slug')
     const excludeId = searchParams.get('exclude') // Exclude current post when editing
@@ -16,7 +21,7 @@ export async function GET(request: NextRequest) {
     }
 
     // Check if exact slug exists
-    let exactQuery = supabaseAdmin
+    let exactQuery = supabase
       .from('sm_posts')
       .select('id, slug, title')
       .eq('slug', slug)
@@ -28,7 +33,7 @@ export async function GET(request: NextRequest) {
     const isAvailable = !exactMatch || (excludeId && exactMatch.id === excludeId)
 
     // Find similar slugs for suggestions
-    const { data: similarPosts } = await supabaseAdmin
+    const { data: similarPosts } = await supabase
       .from('sm_posts')
       .select('slug')
       .ilike('slug', `${slug}%`)

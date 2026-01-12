@@ -1,6 +1,6 @@
 'use client'
 
-import { useAuthContext } from '@/contexts/AuthContext'
+import { useAuth as useAuthFromContext } from '@/contexts/AuthContext'
 
 /**
  * Hook to access authentication state and methods
@@ -14,7 +14,7 @@ import { useAuthContext } from '@/contexts/AuthContext'
  * return <Dashboard user={user} />
  */
 export function useAuth() {
-  return useAuthContext()
+  return useAuthFromContext()
 }
 
 export default useAuth

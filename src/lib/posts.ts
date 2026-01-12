@@ -49,6 +49,7 @@ export interface PostsResult {
 
 export async function getPosts(filters: PostFilters = {}): Promise<PostsResult> {
   const supabase = createClient()
+  if (!supabase) return { posts: [], total: 0, page: 1, totalPages: 0 }
   const {
     search = '',
     category = '',
@@ -104,6 +105,7 @@ export async function getPosts(filters: PostFilters = {}): Promise<PostsResult> 
 
 export async function getPost(id: string): Promise<Post | null> {
   const supabase = createClient()
+  if (!supabase) return null
 
   const { data, error } = await supabase
     .from('sm_posts')
@@ -125,6 +127,7 @@ export async function getPost(id: string): Promise<Post | null> {
 
 export async function getPostBySlug(slug: string): Promise<Post | null> {
   const supabase = createClient()
+  if (!supabase) return null
 
   const { data, error } = await supabase
     .from('sm_posts')
@@ -147,6 +150,7 @@ export async function getPostBySlug(slug: string): Promise<Post | null> {
 
 export async function createPost(data: Partial<Post>): Promise<Post> {
   const supabase = createClient()
+  if (!supabase) throw new Error('Database not configured')
 
   const { data: post, error } = await supabase
     .from('sm_posts')
@@ -175,6 +179,7 @@ export async function createPost(data: Partial<Post>): Promise<Post> {
 
 export async function updatePost(id: string, data: Partial<Post>): Promise<Post> {
   const supabase = createClient()
+  if (!supabase) throw new Error('Database not configured')
 
   const updateData: Record<string, unknown> = {
     updated_at: new Date().toISOString()
@@ -207,6 +212,7 @@ export async function updatePost(id: string, data: Partial<Post>): Promise<Post>
 
 export async function deletePost(id: string): Promise<void> {
   const supabase = createClient()
+  if (!supabase) throw new Error('Database not configured')
 
   const { error } = await supabase
     .from('sm_posts')
@@ -218,12 +224,14 @@ export async function deletePost(id: string): Promise<void> {
 
 export async function incrementPostViews(id: string): Promise<void> {
   const supabase = createClient()
+  if (!supabase) return
 
   await supabase.rpc('increment_post_views', { post_id: id })
 }
 
 export async function getRelatedPosts(postId: string, categoryId: string, limit = 3): Promise<Post[]> {
   const supabase = createClient()
+  if (!supabase) return []
 
   const { data, error } = await supabase
     .from('sm_posts')

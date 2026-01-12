@@ -23,6 +23,10 @@ export default function MediaModal({ isOpen, onClose, onSelect, allowMultiple = 
     setLoading(true)
     try {
       const supabase = createClient()
+      if (!supabase) {
+        setLoading(false)
+        return
+      }
       let query = supabase
         .from('sm_media')
         .select('*')

@@ -35,6 +35,10 @@ export interface CategoryStats {
 
 // Increment view count for a post
 export async function incrementPostViews(postId: number): Promise<{ success: boolean; views?: number; error?: string }> {
+  if (!supabaseAdmin) {
+    return { success: false, error: 'Database not configured' }
+  }
+
   try {
     // First, get current view count
     const { data: post, error: fetchError } = await supabaseAdmin
@@ -68,6 +72,8 @@ export async function incrementPostViews(postId: number): Promise<{ success: boo
 
 // Get view count for a post
 export async function getPostViews(postId: number): Promise<number> {
+  if (!supabaseAdmin) return 0
+
   const { data } = await supabaseAdmin
     .from('sm_posts')
     .select('views')
@@ -79,6 +85,8 @@ export async function getPostViews(postId: number): Promise<number> {
 
 // Get top posts by views
 export async function getTopPosts(limit: number = 10): Promise<TopPost[]> {
+  if (!supabaseAdmin) return []
+
   const { data: posts } = await supabaseAdmin
     .from('sm_posts')
     .select('id, title, slug, views, category_id')
@@ -109,6 +117,8 @@ export async function getTopPosts(limit: number = 10): Promise<TopPost[]> {
 // Get trending posts (most views in last 24 hours)
 // Note: This assumes we track view timestamps separately or use a heuristic
 export async function getTrendingPosts(limit: number = 5): Promise<TopPost[]> {
+  if (!supabaseAdmin) return []
+
   // For now, get recent posts with high view counts
   // In production, you'd track view timestamps in a separate table
   const { data: posts } = await supabaseAdmin
@@ -140,6 +150,8 @@ export async function getTrendingPosts(limit: number = 5): Promise<TopPost[]> {
 
 // Get popular posts this week
 export async function getPopularThisWeek(limit: number = 5): Promise<TopPost[]> {
+  if (!supabaseAdmin) return []
+
   const weekAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString()
 
   const { data: posts } = await supabaseAdmin
@@ -190,6 +202,8 @@ export async function getViewsByDate(days: number = 30): Promise<ViewsByDate[]> 
 
 // Get category breakdown
 export async function getCategoryBreakdown(): Promise<CategoryStats[]> {
+  if (!supabaseAdmin) return []
+
   const { data: posts } = await supabaseAdmin
     .from('sm_posts')
     .select('category_id')
@@ -252,6 +266,10 @@ export async function getSiteStats(): Promise<{
   totalAuthors: number
   totalCategories: number
 }> {
+  if (!supabaseAdmin) {
+    return { totalPosts: 0, totalViews: 0, totalAuthors: 0, totalCategories: 0 }
+  }
+
   const [postsResult, authorsResult, categoriesResult] = await Promise.all([
     supabaseAdmin.from('sm_posts').select('views', { count: 'exact' }).eq('status', 'published'),
     supabaseAdmin.from('sm_authors').select('id', { count: 'exact' }),

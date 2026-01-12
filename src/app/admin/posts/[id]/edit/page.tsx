@@ -10,10 +10,16 @@ interface PostEditPageProps {
 export default async function AdminPostEditPage({ params }: PostEditPageProps) {
   const { id } = await params
 
+  if (!supabaseAdmin) {
+    notFound()
+  }
+
+  const supabase = supabaseAdmin
+
   const [postResult, categoriesResult, authorsResult] = await Promise.all([
-    supabaseAdmin.from('sm_posts').select('*').eq('id', id).single(),
-    supabaseAdmin.from('sm_categories').select('id, name').order('name'),
-    supabaseAdmin.from('sm_authors').select('id, display_name').order('display_name'),
+    supabase.from('sm_posts').select('*').eq('id', id).single(),
+    supabase.from('sm_categories').select('id, name').order('name'),
+    supabase.from('sm_authors').select('id, display_name').order('display_name'),
   ])
 
   if (postResult.error || !postResult.data) {

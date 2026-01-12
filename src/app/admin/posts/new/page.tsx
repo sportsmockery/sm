@@ -22,10 +22,16 @@ export default async function AdminNewPostPage() {
   )
   const { data: { user } } = await supabase.auth.getUser()
 
+  if (!supabaseAdmin) {
+    return <div className="p-6">Database not configured</div>
+  }
+
+  const adminDb = supabaseAdmin
+
   // Fetch categories, authors, and find current user's author ID
   const [categoriesResult, authorsResult] = await Promise.all([
-    supabaseAdmin.from('sm_categories').select('id, name').order('name'),
-    supabaseAdmin.from('sm_authors').select('id, display_name, email').order('display_name'),
+    adminDb.from('sm_categories').select('id, name').order('name'),
+    adminDb.from('sm_authors').select('id, display_name, email').order('display_name'),
   ])
 
   const categories = categoriesResult.data || []

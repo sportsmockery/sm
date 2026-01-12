@@ -21,6 +21,11 @@ export default function InviteUser({ onSuccess, onCancel }: InviteUserProps) {
 
     try {
       const supabase = createClient()
+      if (!supabase) {
+        setError('Database not configured')
+        setSending(false)
+        return
+      }
 
       // Check if user already exists
       const { data: existingUser } = await supabase

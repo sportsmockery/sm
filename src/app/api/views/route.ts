@@ -12,6 +12,7 @@ export async function POST(request: NextRequest) {
       )
     }
 
+    const supabase = supabaseAdmin
     const body = await request.json()
     const { post_id, user_id } = body
 
@@ -24,20 +25,20 @@ export async function POST(request: NextRequest) {
 
     // 1. Increment view_count on the post
     // First try the RPC function
-    const { error: rpcError } = await supabaseAdmin.rpc('increment_view_count', {
+    const { error: rpcError } = await supabase.rpc('increment_view_count', {
       post_id: parseInt(post_id)
     })
 
     // Fallback to manual increment if RPC doesn't exist
     if (rpcError) {
-      const { data: post } = await supabaseAdmin
+      const { data: post } = await supabase
         .from('sm_posts')
         .select('views')
         .eq('id', post_id)
         .single()
 
       if (post) {
-        await supabaseAdmin
+        await supabase
           .from('sm_posts')
           .update({ views: (post.views || 0) + 1 })
           .eq('id', post_id)
@@ -48,7 +49,7 @@ export async function POST(request: NextRequest) {
     // (user_id is passed from client if user is logged in)
     if (user_id) {
       try {
-        await supabaseAdmin
+        await supabase
           .from('sm_user_views')
           .upsert(
             {

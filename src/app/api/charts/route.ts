@@ -6,6 +6,10 @@ import { supabase } from '@/lib/supabase'
  * List all charts (with optional filtering)
  */
 export async function GET(request: NextRequest) {
+  if (!supabase) {
+    return NextResponse.json({ error: 'Database not configured' }, { status: 503 })
+  }
+
   try {
     const { searchParams } = new URL(request.url)
     const postId = searchParams.get('post_id')
@@ -65,6 +69,10 @@ export async function GET(request: NextRequest) {
  * Create a new chart
  */
 export async function POST(request: NextRequest) {
+  if (!supabase) {
+    return NextResponse.json({ error: 'Database not configured' }, { status: 503 })
+  }
+
   try {
     const body = await request.json()
 

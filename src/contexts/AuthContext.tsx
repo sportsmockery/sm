@@ -14,9 +14,10 @@ interface User {
 interface AuthContextType {
   user: User | null
   loading: boolean
-  signIn: (email: string, password: string) => Promise<void>
-  signUp: (email: string, password: string, name?: string) => Promise<void>
+  signIn: (email: string, password: string) => Promise<{ error: string | null }>
+  signUp: (email: string, password: string, name?: string) => Promise<{ error: string | null }>
   signOut: () => Promise<void>
+  resetPassword: (email: string) => Promise<{ error: string | null }>
   isAuthenticated: boolean
 }
 
@@ -45,7 +46,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, [])
 
   // Sign in
-  const signIn = async (email: string, password: string) => {
+  const signIn = async (email: string, password: string): Promise<{ error: string | null }> => {
     setLoading(true)
     try {
       // Placeholder implementation - replace with actual auth
@@ -56,16 +57,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }
       setUser(mockUser)
       localStorage.setItem('sm-user', JSON.stringify(mockUser))
+      return { error: null }
     } catch (error) {
       console.error('Sign in failed:', error)
-      throw error
+      return { error: 'Invalid email or password' }
     } finally {
       setLoading(false)
     }
   }
 
   // Sign up
-  const signUp = async (email: string, password: string, name?: string) => {
+  const signUp = async (email: string, password: string, name?: string): Promise<{ error: string | null }> => {
     setLoading(true)
     try {
       // Placeholder implementation - replace with actual auth
@@ -76,9 +78,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }
       setUser(mockUser)
       localStorage.setItem('sm-user', JSON.stringify(mockUser))
+      return { error: null }
     } catch (error) {
       console.error('Sign up failed:', error)
-      throw error
+      return { error: 'Failed to create account' }
     } finally {
       setLoading(false)
     }
@@ -98,6 +101,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   }
 
+  // Reset password
+  const resetPassword = async (email: string): Promise<{ error: string | null }> => {
+    try {
+      // Placeholder implementation - replace with actual password reset
+      console.log('Password reset requested for:', email)
+      return { error: null }
+    } catch (error) {
+      console.error('Password reset failed:', error)
+      return { error: 'Failed to send reset email' }
+    }
+  }
+
   return (
     <AuthContext.Provider
       value={{
@@ -106,6 +121,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         signIn,
         signUp,
         signOut,
+        resetPassword,
         isAuthenticated: !!user,
       }}
     >

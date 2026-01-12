@@ -20,6 +20,8 @@ function calculateReadingTime(content: string): number {
 }
 
 async function getPost(slug: string) {
+  if (!supabaseAdmin) return null
+
   const { data: post, error } = await supabaseAdmin
     .from('sm_posts')
     .select('id, title, content, excerpt, featured_image, published_at, updated_at, seo_title, seo_description, author_id, category_id, views')
@@ -170,7 +172,7 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
 
   // Fetch all data in parallel
   const [authorResult, relatedPostsResult, categoryResult] = await Promise.all([
-    post.author_id
+    post.author_id && supabaseAdmin
       ? supabaseAdmin
           .from('sm_authors')
           .select('id, display_name, bio, avatar_url, twitter, instagram, email, slug')
@@ -178,18 +180,22 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
           .single()
       : Promise.resolve({ data: null }),
     supabaseAdmin
-      .from('sm_posts')
-      .select('id, title, slug, excerpt, featured_image, published_at')
-      .eq('category_id', post.category_id)
-      .eq('status', 'published')
-      .neq('id', post.id)
-      .order('published_at', { ascending: false })
-      .limit(4),
+      ? supabaseAdmin
+          .from('sm_posts')
+          .select('id, title, slug, excerpt, featured_image, published_at')
+          .eq('category_id', post.category_id)
+          .eq('status', 'published')
+          .neq('id', post.id)
+          .order('published_at', { ascending: false })
+          .limit(4)
+      : Promise.resolve({ data: [] }),
     supabaseAdmin
-      .from('sm_categories')
-      .select('id, name, slug')
-      .eq('id', post.category_id)
-      .single(),
+      ? supabaseAdmin
+          .from('sm_categories')
+          .select('id, name, slug')
+          .eq('id', post.category_id)
+          .single()
+      : Promise.resolve({ data: null }),
   ])
 
   const author = authorResult.data

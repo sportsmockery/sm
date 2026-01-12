@@ -189,6 +189,10 @@ function Pagination({ currentPage, totalPages, basePath }: { currentPage: number
 export async function generateMetadata({ params }: CategoryPageProps): Promise<Metadata> {
   const { category: categorySlug } = await params
 
+  if (!supabaseAdmin) {
+    return { title: 'Category Not Found' }
+  }
+
   const { data: category } = await supabaseAdmin
     .from('sm_categories')
     .select('name, slug')
@@ -224,6 +228,10 @@ export default async function CategoryPage({ params, searchParams }: CategoryPag
   const { category: categorySlug } = await params
   const { page } = await searchParams
   const currentPage = Math.max(1, parseInt(page || '1', 10))
+
+  if (!supabaseAdmin) {
+    notFound()
+  }
 
   // Fetch category by slug
   const { data: category, error: categoryError } = await supabaseAdmin

@@ -37,6 +37,7 @@ export function useMediaLibrary(options: UseMediaLibraryOptions = {}) {
 
     try {
       const supabase = createClient()
+      if (!supabase) throw new Error('Database not configured')
       const {
         page = 1,
         limit = initialLimit,
@@ -92,6 +93,7 @@ export function useMediaLibrary(options: UseMediaLibraryOptions = {}) {
 
     try {
       const supabase = createClient()
+      if (!supabase) throw new Error('Database not configured')
 
       // Validate file
       const allowedTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp', 'video/mp4', 'application/pdf']
@@ -162,6 +164,7 @@ export function useMediaLibrary(options: UseMediaLibraryOptions = {}) {
 
     try {
       const supabase = createClient()
+      if (!supabase) throw new Error('Database not configured')
 
       // Get the media item first
       const item = media.find(m => m.id === id)
@@ -199,6 +202,7 @@ export function useMediaLibrary(options: UseMediaLibraryOptions = {}) {
 
     try {
       const supabase = createClient()
+      if (!supabase) throw new Error('Database not configured')
 
       const { data, error: updateError } = await supabase
         .from('sm_media')

@@ -31,6 +31,7 @@ import { TEAM_SLUGS, TEAM_SHORT_NAMES, TEAM_DISPLAY_NAMES } from './types'
 // =============================================================================
 
 async function log(entry: BotLogInsert): Promise<void> {
+  if (!supabaseAdmin) return
   try {
     await supabaseAdmin.from('sm_bot_logs').insert(entry)
   } catch (error) {
@@ -46,6 +47,8 @@ async function log(entry: BotLogInsert): Promise<void> {
  * Get bot configuration for a team
  */
 export async function getBotConfig(team_slug: TeamSlug): Promise<BotConfig | null> {
+  if (!supabaseAdmin) return null
+
   const { data, error } = await supabaseAdmin
     .from('sm_bot_config')
     .select('*')
@@ -69,6 +72,8 @@ export async function getBotConfig(team_slug: TeamSlug): Promise<BotConfig | nul
  * Get all bot configurations
  */
 export async function getAllBotConfigs(): Promise<BotConfig[]> {
+  if (!supabaseAdmin) return []
+
   const { data, error } = await supabaseAdmin
     .from('sm_bot_config')
     .select('*')
@@ -93,6 +98,8 @@ export async function updateBotConfig(
   team_slug: TeamSlug,
   updates: Partial<BotConfig>
 ): Promise<boolean> {
+  if (!supabaseAdmin) return false
+
   const { error } = await supabaseAdmin
     .from('sm_bot_config')
     .update({ ...updates, updated_at: new Date().toISOString() })
@@ -130,6 +137,8 @@ export async function canPerformAction(
   team_slug: TeamSlug,
   is_reply: boolean = true
 ): Promise<boolean> {
+  if (!supabaseAdmin) return false
+
   const config = await getBotConfig(team_slug)
   if (!config || !config.enabled) return false
 
@@ -157,6 +166,8 @@ export async function recordActivity(
   is_reply: boolean,
   tokens_used: number = 0
 ): Promise<void> {
+  if (!supabaseAdmin) return
+
   const today = new Date().toISOString().split('T')[0]
 
   // Upsert daily activity
@@ -204,6 +215,8 @@ export async function recordActivity(
  * Get current status for all teams or a specific team
  */
 export async function getBotStatus(team_slug?: TeamSlug): Promise<BotStatus[]> {
+  if (!supabaseAdmin) return []
+
   const configs = team_slug
     ? [await getBotConfig(team_slug)].filter(Boolean) as BotConfig[]
     : await getAllBotConfigs()
@@ -257,6 +270,17 @@ export async function getBotStatus(team_slug?: TeamSlug): Promise<BotStatus[]> {
 export async function monitorForEngagement(
   team_slug?: TeamSlug
 ): Promise<MonitorResult[]> {
+  if (!supabaseAdmin) {
+    return [{
+      team_slug: team_slug || TEAM_SLUGS[0],
+      tweets_found: 0,
+      tweets_processed: 0,
+      replies_queued: 0,
+      errors: ['Database not configured'],
+    }]
+  }
+  const supabase = supabaseAdmin
+
   const teams = team_slug ? [team_slug] : TEAM_SLUGS
   const results: MonitorResult[] = []
   const twitter = getTwitterClient()
@@ -294,7 +318,7 @@ export async function monitorForEngagement(
       }
 
       // Get keywords for this team
-      const { data: keywords } = await supabaseAdmin
+      const { data: keywords } = await supabase
         .from('sm_bot_keywords')
         .select('keyword, priority_boost, is_negative')
         .or(`team_slug.eq.${team},team_slug.is.null`)
@@ -319,7 +343,7 @@ export async function monitorForEngagement(
       result.tweets_found = searchResponse.data.length
 
       // Get blocked users
-      const { data: blockedUsers } = await supabaseAdmin
+      const { data: blockedUsers } = await supabase
         .from('sm_bot_blocked_users')
         .select('twitter_user_id')
 
@@ -331,7 +355,7 @@ export async function monitorForEngagement(
         if (blockedIds.has(tweet.author_id)) continue
 
         // Skip if already processed
-        const { data: existing } = await supabaseAdmin
+        const { data: existing } = await supabase
           .from('sm_bot_monitored_tweets')
           .select('id')
           .eq('tweet_id', tweet.id)
@@ -370,7 +394,7 @@ export async function monitorForEngagement(
           tweet_created_at: tweet.created_at,
         }
 
-        const { error: insertError } = await supabaseAdmin
+        const { error: insertError } = await supabase
           .from('sm_bot_monitored_tweets')
           .insert({
             ...tweetInsert,
@@ -406,7 +430,7 @@ export async function monitorForEngagement(
               tokens_used: response.tokens_used,
             }
 
-            await supabaseAdmin.from('sm_bot_responses').insert(responseInsert)
+            await supabase.from('sm_bot_responses').insert(responseInsert)
 
             result.replies_queued++
 
@@ -423,7 +447,7 @@ export async function monitorForEngagement(
         }
 
         // Mark as processed
-        await supabaseAdmin
+        await supabase
           .from('sm_bot_monitored_tweets')
           .update({ processed: true, processed_at: new Date().toISOString() })
           .eq('tweet_id', tweet.id)
@@ -433,7 +457,7 @@ export async function monitorForEngagement(
       }
 
       // Update daily activity
-      await supabaseAdmin
+      await supabase
         .from('sm_bot_daily_activity')
         .upsert({
           team_slug: team,
@@ -473,6 +497,11 @@ export async function monitorForEngagement(
  * Post a pending response
  */
 export async function postResponse(response_id: number): Promise<PostResult> {
+  if (!supabaseAdmin) {
+    return { success: false, error: 'Database not configured' }
+  }
+  const supabase = supabaseAdmin
+
   const twitter = getTwitterClient()
 
   if (!twitter.isConfigured()) {
@@ -480,7 +509,7 @@ export async function postResponse(response_id: number): Promise<PostResult> {
   }
 
   // Get the response
-  const { data: response, error } = await supabaseAdmin
+  const { data: response, error } = await supabase
     .from('sm_bot_responses')
     .select('*')
     .eq('id', response_id)
@@ -545,7 +574,7 @@ export async function postResponse(response_id: number): Promise<PostResult> {
     }
 
     // Update response record
-    await supabaseAdmin
+    await supabase
       .from('sm_bot_responses')
       .update({
         status: 'posted',
@@ -579,7 +608,7 @@ export async function postResponse(response_id: number): Promise<PostResult> {
     const errorMessage = error instanceof Error ? error.message : 'Unknown error'
 
     // Update response with error
-    await supabaseAdmin
+    await supabase
       .from('sm_bot_responses')
       .update({
         status: 'failed',
@@ -606,7 +635,12 @@ export async function postPendingResponses(
   team_slug?: TeamSlug,
   limit: number = 5
 ): Promise<PostResult[]> {
-  const query = supabaseAdmin
+  if (!supabaseAdmin) {
+    return []
+  }
+  const supabase = supabaseAdmin
+
+  const query = supabase
     .from('sm_bot_responses')
     .select('id, team_slug')
     .eq('status', 'pending')
@@ -648,8 +682,13 @@ export async function queueArticlePromotion(
   team_slug: TeamSlug,
   article_id: number
 ): Promise<{ success: boolean; response_id?: number; error?: string }> {
+  if (!supabaseAdmin) {
+    return { success: false, error: 'Database not configured' }
+  }
+  const supabase = supabaseAdmin
+
   // Get the article
-  const { data: article, error } = await supabaseAdmin
+  const { data: article, error } = await supabase
     .from('sm_posts')
     .select('id, title, excerpt, slug, category:sm_categories!category_id(slug)')
     .eq('id', article_id)
@@ -679,7 +718,7 @@ export async function queueArticlePromotion(
     )
 
     // Store for posting
-    const { data: inserted, error: insertError } = await supabaseAdmin
+    const { data: inserted, error: insertError } = await supabase
       .from('sm_bot_responses')
       .insert({
         team_slug,

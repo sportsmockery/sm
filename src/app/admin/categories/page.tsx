@@ -12,7 +12,13 @@ const TEAM_COLORS: Record<string, { bg: string; text: string; border: string }> 
 }
 
 export default async function AdminCategoriesPage() {
-  const { data: categories } = await supabaseAdmin
+  if (!supabaseAdmin) {
+    return <div className="p-6">Database not configured</div>
+  }
+
+  const supabase = supabaseAdmin
+
+  const { data: categories } = await supabase
     .from('sm_categories')
     .select('id, name, slug, description')
     .order('name')
@@ -20,7 +26,7 @@ export default async function AdminCategoriesPage() {
   // Get post counts for each category
   const categoriesWithCounts = await Promise.all(
     (categories || []).map(async (category) => {
-      const { count } = await supabaseAdmin
+      const { count } = await supabase
         .from('sm_posts')
         .select('*', { count: 'exact', head: true })
         .eq('category_id', category.id)

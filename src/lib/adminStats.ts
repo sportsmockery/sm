@@ -31,6 +31,7 @@ export interface ViewsData {
  * Get total post count
  */
 export async function getPostCount(): Promise<number> {
+  if (!supabase) return 0
   const { count, error } = await supabase
     .from('sm_posts')
     .select('*', { count: 'exact', head: true })
@@ -47,6 +48,7 @@ export async function getPostCount(): Promise<number> {
  * Get published post count
  */
 export async function getPublishedPostCount(): Promise<number> {
+  if (!supabase) return 0
   const { count, error } = await supabase
     .from('sm_posts')
     .select('*', { count: 'exact', head: true })
@@ -64,6 +66,7 @@ export async function getPublishedPostCount(): Promise<number> {
  * Get draft post count
  */
 export async function getDraftPostCount(): Promise<number> {
+  if (!supabase) return 0
   const { count, error } = await supabase
     .from('sm_posts')
     .select('*', { count: 'exact', head: true })
@@ -81,6 +84,7 @@ export async function getDraftPostCount(): Promise<number> {
  * Get total views across all posts
  */
 export async function getTotalViews(): Promise<number> {
+  if (!supabase) return 0
   const { data, error } = await supabase
     .from('sm_posts')
     .select('views')
@@ -97,6 +101,7 @@ export async function getTotalViews(): Promise<number> {
  * Get author count
  */
 export async function getAuthorCount(): Promise<number> {
+  if (!supabase) return 0
   const { count, error } = await supabase
     .from('sm_authors')
     .select('*', { count: 'exact', head: true })
@@ -113,6 +118,7 @@ export async function getAuthorCount(): Promise<number> {
  * Get category count
  */
 export async function getCategoryCount(): Promise<number> {
+  if (!supabase) return 0
   const { count, error } = await supabase
     .from('sm_categories')
     .select('*', { count: 'exact', head: true })
@@ -129,6 +135,7 @@ export async function getCategoryCount(): Promise<number> {
  * Get recent posts
  */
 export async function getRecentPosts(limit: number = 10): Promise<RecentPost[]> {
+  if (!supabase) return []
   const { data, error } = await supabase
     .from('sm_posts')
     .select(`
@@ -158,6 +165,7 @@ export async function getRecentPosts(limit: number = 10): Promise<RecentPost[]> 
  * Get top posts by views
  */
 export async function getTopPosts(limit: number = 5): Promise<{ id: number; title: string; views: number }[]> {
+  if (!supabase) return []
   const { data, error } = await supabase
     .from('sm_posts')
     .select('id, title, views')
@@ -176,6 +184,7 @@ export async function getTopPosts(limit: number = 5): Promise<{ id: number; titl
  * Get posts by category for pie chart
  */
 export async function getPostsByCategory(): Promise<{ name: string; count: number }[]> {
+  if (!supabase) return []
   const { data, error } = await supabase
     .from('sm_categories')
     .select(`
