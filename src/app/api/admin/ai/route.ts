@@ -4,7 +4,7 @@ import Anthropic from '@anthropic-ai/sdk'
 const anthropic = new Anthropic()
 
 interface AIRequest {
-  action: 'headlines' | 'seo' | 'ideas' | 'polish' | 'excerpt'
+  action: 'headlines' | 'seo' | 'generate_seo' | 'ideas' | 'polish' | 'excerpt'
   content?: string
   title?: string
   category?: string
@@ -25,6 +25,8 @@ export async function POST(request: NextRequest) {
         return await generateHeadlines(title || '', content || '', category, team)
       case 'seo':
         return await optimizeSEO(title || '', content || '', category)
+      case 'generate_seo':
+        return await generateSEOFields(title || '', content || '', category)
       case 'ideas':
         return await generateIdeas(category, team)
       case 'polish':
@@ -211,4 +213,63 @@ Return ONLY the excerpt text, no explanation.`
   const excerpt = message.content[0].type === 'text' ? message.content[0].text : ''
 
   return NextResponse.json({ excerpt: excerpt.trim() })
+}
+
+/**
+ * Generate SEO fields for auto-fill during post editing
+ * Called automatically when content reaches 150+ words
+ */
+async function generateSEOFields(title: string, content: string, category?: string) {
+  // Strip HTML for cleaner analysis
+  const plainContent = content.replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim()
+
+  const prompt = `You are an SEO expert for Sports Mockery, a Chicago sports news site.
+
+Generate SEO-optimized fields for this article:
+
+Title: "${title}"
+${category ? `Category: ${category}` : ''}
+Content preview: ${plainContent.slice(0, 1500)}
+
+Return a JSON object with these EXACT fields:
+{
+  "seoTitle": "SEO-optimized title (50-60 characters, include primary keyword)",
+  "metaDescription": "Compelling meta description (150-160 characters) that encourages clicks",
+  "keywords": "comma-separated keywords (5-8 relevant keywords)",
+  "excerpt": "2-3 sentence summary for article cards (max 250 characters)"
+}
+
+Important:
+- seoTitle should be engaging but include the main topic keyword
+- metaDescription should create curiosity and include a call-to-action feel
+- excerpt should summarize the key point without giving everything away
+- Make it Sports Mockery style - engaging, punchy, Chicago sports focused
+
+Return ONLY valid JSON, no explanation.`
+
+  const message = await anthropic.messages.create({
+    model: 'claude-sonnet-4-20250514',
+    max_tokens: 500,
+    messages: [{ role: 'user', content: prompt }],
+  })
+
+  const responseText = message.content[0].type === 'text' ? message.content[0].text : ''
+
+  try {
+    const seo = JSON.parse(responseText)
+    return NextResponse.json({
+      seoTitle: seo.seoTitle || title.slice(0, 60),
+      metaDescription: seo.metaDescription || plainContent.slice(0, 160),
+      keywords: seo.keywords || '',
+      excerpt: seo.excerpt || plainContent.slice(0, 250),
+    })
+  } catch {
+    // Fallback: generate basic SEO from content
+    return NextResponse.json({
+      seoTitle: title.slice(0, 60),
+      metaDescription: plainContent.slice(0, 160),
+      keywords: '',
+      excerpt: plainContent.slice(0, 250),
+    })
+  }
 }

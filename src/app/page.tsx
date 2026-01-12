@@ -11,22 +11,25 @@ const formatCategoryName = (slug: string | undefined | null): string => {
   return name.toUpperCase()
 }
 
-// Format date for display - uppercase style like SM
+// Format date for display - uppercase style like SportsMockery.com
 const formatDate = (dateStr: string) => {
   const date = new Date(dateStr)
   return date.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' }).toUpperCase()
 }
 
-// Category badge component - white bg, black border, uppercase
+// Category badge component - white bg, black border, uppercase (SportsMockery.com exact)
 function CategoryBadge({ category }: { category: string }) {
   return (
-    <span className="inline-block bg-white text-black text-[11px] uppercase tracking-wider px-1.5 py-1 border border-black font-normal">
+    <span
+      className="inline-block bg-white text-black text-[11px] uppercase tracking-wider px-1.5 py-1 border border-black font-normal"
+      style={{ fontFamily: 'ABeeZee, sans-serif' }}
+    >
       {category}
     </span>
   )
 }
 
-// Large featured article card with image and overlay text
+// Large featured article card with image and overlay text - SportsMockery.com hero style
 function HeroCard({ article, onView, size = 'large' }: { article: any; onView: (a: any) => void; size?: 'large' | 'medium' }) {
   return (
     <article className="relative group">
@@ -44,7 +47,7 @@ function HeroCard({ article, onView, size = 'large' }: { article: any; onView: (
             className="object-cover"
             priority={size === 'large'}
           />
-          {/* Dark gradient overlay */}
+          {/* Dark gradient overlay - SportsMockery.com style */}
           <div
             className="absolute inset-0"
             style={{ background: 'linear-gradient(to top, rgba(0,0,0,0.7) 0%, transparent 60%)' }}
@@ -57,7 +60,7 @@ function HeroCard({ article, onView, size = 'large' }: { article: any; onView: (
               className={`mt-2 font-semibold text-white leading-tight group-hover:underline decoration-[#bc0000] decoration-2 underline-offset-2 ${
                 size === 'large' ? 'text-xl md:text-2xl' : 'text-base md:text-lg'
               }`}
-              style={{ lineHeight: 1.1 }}
+              style={{ lineHeight: 1.1, fontFamily: 'Montserrat, sans-serif' }}
             >
               {article.title}
             </h2>
@@ -68,16 +71,16 @@ function HeroCard({ article, onView, size = 'large' }: { article: any; onView: (
   )
 }
 
-// Standard article card - image on top, content below
+// Standard article card - image on top, content below (SportsMockery.com style)
 function ArticleCard({ article, onView }: { article: any; onView: (a: any) => void }) {
   return (
-    <article className="group">
+    <article className="group article-card">
       <Link
         href={`/${article.category?.slug || 'news'}/${article.slug}`}
         onClick={() => onView(article)}
         className="block"
       >
-        {/* Image */}
+        {/* Image - 70% aspect ratio like SportsMockery.com */}
         <div className="relative w-full pb-[70%] mb-3 overflow-hidden">
           <Image
             src={article.featured_image || '/placeholder.jpg'}
@@ -91,12 +94,15 @@ function ArticleCard({ article, onView }: { article: any; onView: (a: any) => vo
         <div>
           <CategoryBadge category={formatCategoryName(article.category?.slug)} />
           <h3
-            className="mt-2 text-base font-semibold text-black dark:text-white leading-tight group-hover:underline decoration-[#bc0000] decoration-2 underline-offset-2"
-            style={{ lineHeight: 1.1 }}
+            className="mt-2 text-base font-semibold text-[#222] leading-tight article-title"
+            style={{ lineHeight: 1.1, fontFamily: 'Montserrat, sans-serif' }}
           >
             {article.title}
           </h3>
-          <p className="mt-2 text-xs uppercase tracking-wider text-gray-600 dark:text-gray-400">
+          <p
+            className="mt-2 text-xs uppercase tracking-wider text-[#999]"
+            style={{ fontFamily: 'ABeeZee, sans-serif' }}
+          >
             {article.author?.display_name || 'STAFF'} - {formatDate(article.published_at)}
           </p>
         </div>
@@ -105,19 +111,25 @@ function ArticleCard({ article, onView }: { article: any; onView: (a: any) => vo
   )
 }
 
-// Section header with link
+// Section header with red underline - SportsMockery.com exact style
 function SectionHeader({ title, href }: { title: string; href?: string }) {
   return (
-    <div className="mb-4 pb-2 border-b border-gray-200 dark:border-gray-700">
+    <div className="mb-5 pb-2 border-b-[3px] border-[#bc0000]">
       {href ? (
         <Link
           href={href}
-          className="text-lg font-bold text-black dark:text-white hover:text-[#bc0000] transition-colors"
+          className="text-lg font-bold text-[#222] hover:text-[#bc0000] transition-colors"
+          style={{ fontFamily: 'Montserrat, sans-serif' }}
         >
           {title}
         </Link>
       ) : (
-        <h2 className="text-lg font-bold text-black dark:text-white">{title}</h2>
+        <h2
+          className="text-lg font-bold text-[#222]"
+          style={{ fontFamily: 'Montserrat, sans-serif' }}
+        >
+          {title}
+        </h2>
       )}
     </div>
   )
@@ -126,10 +138,10 @@ function SectionHeader({ title, href }: { title: string; href?: string }) {
 // Loading skeleton for hero
 function HeroSkeleton() {
   return (
-    <div className="relative w-full pb-[70%] bg-gray-200 dark:bg-gray-800 animate-pulse">
+    <div className="relative w-full pb-[70%] bg-gray-200 animate-pulse">
       <div className="absolute bottom-0 left-0 right-0 p-4">
-        <div className="h-5 w-24 bg-gray-300 dark:bg-gray-700 mb-2" />
-        <div className="h-6 w-3/4 bg-gray-300 dark:bg-gray-700" />
+        <div className="h-5 w-24 bg-gray-300 mb-2" />
+        <div className="h-6 w-3/4 bg-gray-300" />
       </div>
     </div>
   )
@@ -139,11 +151,11 @@ function HeroSkeleton() {
 function CardSkeleton() {
   return (
     <div className="animate-pulse">
-      <div className="relative w-full pb-[70%] bg-gray-200 dark:bg-gray-800 mb-3" />
-      <div className="h-4 w-20 bg-gray-200 dark:bg-gray-800 mb-2" />
-      <div className="h-5 w-full bg-gray-200 dark:bg-gray-800 mb-1" />
-      <div className="h-5 w-2/3 bg-gray-200 dark:bg-gray-800 mb-2" />
-      <div className="h-3 w-1/2 bg-gray-200 dark:bg-gray-800" />
+      <div className="relative w-full pb-[70%] bg-gray-200 mb-3" />
+      <div className="h-4 w-20 bg-gray-200 mb-2" />
+      <div className="h-5 w-full bg-gray-200 mb-1" />
+      <div className="h-5 w-2/3 bg-gray-200 mb-2" />
+      <div className="h-3 w-1/2 bg-gray-200" />
     </div>
   )
 }
@@ -156,12 +168,13 @@ export default function HomePage() {
 
   if (error) {
     return (
-      <div className="min-h-screen bg-white dark:bg-[#0a0a0a] flex items-center justify-center">
+      <div className="min-h-screen bg-white flex items-center justify-center">
         <div className="text-center">
-          <p className="text-gray-600 dark:text-gray-400 mb-4">Unable to load articles</p>
+          <p className="text-[#666] mb-4" style={{ fontFamily: 'ABeeZee, sans-serif' }}>Unable to load articles</p>
           <button
             onClick={refresh}
-            className="px-6 py-2 bg-black text-white hover:bg-gray-800 transition-colors"
+            className="px-6 py-2 bg-[#bc0000] text-white hover:bg-[#8a0000] transition-colors"
+            style={{ fontFamily: 'ABeeZee, sans-serif' }}
           >
             Try Again
           </button>
@@ -176,10 +189,10 @@ export default function HomePage() {
   const teamSections = feed?.teamSections || {}
 
   return (
-    <div className="min-h-screen bg-white dark:bg-[#0a0a0a]">
+    <div className="min-h-screen bg-white">
       <main className="max-w-[1110px] mx-auto px-4 py-6">
 
-        {/* ========== HERO GRID SECTION ========== */}
+        {/* ========== HERO GRID SECTION - SportsMockery.com Style ========== */}
         <section className="mb-8">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {/* Main featured article - large */}
@@ -209,10 +222,10 @@ export default function HomePage() {
           </div>
         </section>
 
-        {/* ========== LATEST NEWS SECTION ========== */}
+        {/* ========== LATEST NEWS SECTION - 3 column grid ========== */}
         <section className="mb-10">
           <SectionHeader title="Latest News" href="/search" />
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
             {loading ? (
               Array.from({ length: 6 }).map((_, i) => <CardSkeleton key={i} />)
             ) : (
@@ -223,13 +236,13 @@ export default function HomePage() {
           </div>
         </section>
 
-        {/* ========== TEAM SECTIONS ========== */}
+        {/* ========== TEAM SECTIONS - 3 column grid ========== */}
 
         {/* Bears Section */}
         {(loading || teamSections.bears?.length > 0) && (
           <section className="mb-10">
             <SectionHeader title="Chicago Bears News & Rumors" href="/bears" />
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
               {loading ? (
                 Array.from({ length: 3 }).map((_, i) => <CardSkeleton key={i} />)
               ) : (
@@ -245,7 +258,7 @@ export default function HomePage() {
         {(loading || teamSections.bulls?.length > 0) && (
           <section className="mb-10">
             <SectionHeader title="Chicago Bulls News & Rumors" href="/bulls" />
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
               {loading ? (
                 Array.from({ length: 3 }).map((_, i) => <CardSkeleton key={i} />)
               ) : (
@@ -261,7 +274,7 @@ export default function HomePage() {
         {(loading || teamSections.blackhawks?.length > 0) && (
           <section className="mb-10">
             <SectionHeader title="Chicago Blackhawks News & Rumors" href="/blackhawks" />
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
               {loading ? (
                 Array.from({ length: 3 }).map((_, i) => <CardSkeleton key={i} />)
               ) : (
@@ -277,7 +290,7 @@ export default function HomePage() {
         {(loading || teamSections.cubs?.length > 0) && (
           <section className="mb-10">
             <SectionHeader title="Chicago Cubs News & Rumors" href="/cubs" />
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
               {loading ? (
                 Array.from({ length: 3 }).map((_, i) => <CardSkeleton key={i} />)
               ) : (
@@ -293,7 +306,7 @@ export default function HomePage() {
         {(loading || teamSections['white sox']?.length > 0) && (
           <section className="mb-10">
             <SectionHeader title="Chicago White Sox News & Rumors" href="/white-sox" />
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
               {loading ? (
                 Array.from({ length: 3 }).map((_, i) => <CardSkeleton key={i} />)
               ) : (
@@ -305,9 +318,12 @@ export default function HomePage() {
           </section>
         )}
 
-        {/* ========== LOAD MORE ========== */}
+        {/* ========== LOAD MORE - SportsMockery.com style ========== */}
         <div className="text-center py-8">
-          <button className="px-8 py-3 bg-black dark:bg-white text-white dark:text-black font-medium hover:bg-gray-800 dark:hover:bg-gray-200 transition-colors">
+          <button
+            className="px-8 py-3 bg-[#bc0000] text-white font-medium hover:bg-[#8a0000] transition-colors"
+            style={{ fontFamily: 'ABeeZee, sans-serif' }}
+          >
             Load More
           </button>
         </div>
