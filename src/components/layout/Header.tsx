@@ -1,155 +1,66 @@
 'use client'
 
-import { useState, useRef, useEffect, ReactNode } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
 import { useTheme } from '@/contexts/ThemeContext'
 
-// Team navigation items with submenus
-const teamNavItems = [
-  {
-    name: 'BEARS',
-    href: '/bears',
-    subItems: [
-      { name: 'News', href: '/bears' },
-      { name: 'Scores', href: '/bears/scores' },
-      { name: 'Schedule', href: '/bears/schedule' },
-      { name: 'Roster', href: '/bears/roster' },
-      { name: 'Stats', href: '/bears/stats' },
-    ],
-  },
-  {
-    name: 'BULLS',
-    href: '/bulls',
-    subItems: [
-      { name: 'News', href: '/bulls' },
-      { name: 'Scores', href: '/bulls/scores' },
-      { name: 'Schedule', href: '/bulls/schedule' },
-      { name: 'Roster', href: '/bulls/roster' },
-      { name: 'Stats', href: '/bulls/stats' },
-    ],
-  },
-  {
-    name: 'BLACKHAWKS',
-    href: '/blackhawks',
-    subItems: [
-      { name: 'News', href: '/blackhawks' },
-      { name: 'Scores', href: '/blackhawks/scores' },
-      { name: 'Schedule', href: '/blackhawks/schedule' },
-      { name: 'Roster', href: '/blackhawks/roster' },
-      { name: 'Stats', href: '/blackhawks/stats' },
-    ],
-  },
-  {
-    name: 'WHITE SOX',
-    href: '/white-sox',
-    subItems: [
-      { name: 'News', href: '/white-sox' },
-      { name: 'Scores', href: '/white-sox/scores' },
-      { name: 'Schedule', href: '/white-sox/schedule' },
-      { name: 'Roster', href: '/white-sox/roster' },
-      { name: 'Stats', href: '/white-sox/stats' },
-    ],
-  },
-  {
-    name: 'CUBS',
-    href: '/cubs',
-    subItems: [
-      { name: 'News', href: '/cubs' },
-      { name: 'Scores', href: '/cubs/scores' },
-      { name: 'Schedule', href: '/cubs/schedule' },
-      { name: 'Roster', href: '/cubs/roster' },
-      { name: 'Stats', href: '/cubs/stats' },
-    ],
-  },
-  {
-    name: 'PODCASTS',
-    href: '/podcasts',
-    subItems: [
-      { name: 'Bears Film Room (BFR)', href: '/podcasts/bears-film-room' },
-      { name: 'Pinwheels and Ivy', href: '/podcasts/pinwheels-and-ivy' },
-    ],
-  },
+// Navigation items per design spec
+const navItems = [
+  { name: 'HOME', href: '/' },
+  { name: 'BEARS', href: '/chicago-bears' },
+  { name: 'BULLS', href: '/chicago-bulls' },
+  { name: 'CUBS', href: '/chicago-cubs' },
+  { name: 'WHITE SOX', href: '/chicago-white-sox' },
+  { name: 'BLACKHAWKS', href: '/chicago-blackhawks' },
 ]
 
-// Social icon component
-function SocialIcon({ icon, className = '' }: { icon: string; className?: string }) {
-  const icons: Record<string, ReactNode> = {
-    facebook: (
-      <svg className={className} fill="currentColor" viewBox="0 0 320 512">
-        <path d="M279.14 288l14.22-92.66h-88.91v-60.13c0-25.35 12.42-50.06 52.24-50.06h40.42V6.26S260.43 0 225.36 0c-73.22 0-121.08 44.38-121.08 124.72v70.62H22.89V288h81.39v224h100.17V288z" />
-      </svg>
-    ),
-    twitter: (
-      <svg className={className} fill="currentColor" viewBox="0 0 512 512">
-        <path d="M389.2 48h70.6L305.6 224.2 487 464H345L233.7 318.6 106.5 464H35.8L200.7 275.5 26.8 48H172.4L272.9 180.9 389.2 48zM364.4 421.8h39.1L151.1 88h-42L364.4 421.8z" />
-      </svg>
-    ),
-  }
-  return icons[icon] || null
-}
-
-// Dropdown menu component
-function DropdownMenu({ items, isOpen }: { items: { name: string; href: string }[]; isOpen: boolean }) {
-  return (
-    <div
-      className={`absolute left-0 top-full mt-0 w-48 bg-white dark:bg-[#222] shadow-lg z-50 transition-all duration-150 ${
-        isOpen ? 'opacity-100 visible' : 'opacity-0 invisible'
-      }`}
-      style={{ boxShadow: '0 2px 8px rgba(0,0,0,0.15)' }}
-    >
-      {items.map((item) => (
-        <Link
-          key={item.href}
-          href={item.href}
-          className="block px-4 py-2.5 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-[#333] hover:text-[#bc0000] transition-colors border-b border-gray-100 dark:border-gray-700 last:border-0"
-        >
-          {item.name}
-        </Link>
-      ))}
-    </div>
-  )
-}
+const moreItems = [
+  { name: 'Podcasts', href: '/podcasts' },
+  { name: 'About', href: '/about' },
+  { name: 'Contact', href: '/contact' },
+  { name: 'Privacy', href: '/privacy' },
+]
 
 export default function Header() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
-  const [activeDropdown, setActiveDropdown] = useState<string | null>(null)
+  const [moreMenuOpen, setMoreMenuOpen] = useState(false)
   const [searchOpen, setSearchOpen] = useState(false)
   const [searchQuery, setSearchQuery] = useState('')
   const searchInputRef = useRef<HTMLInputElement>(null)
-  const dropdownTimeoutRef = useRef<NodeJS.Timeout | null>(null)
+  const moreMenuRef = useRef<HTMLDivElement>(null)
   const { theme, toggleTheme } = useTheme()
 
+  // Focus search input when opened
   useEffect(() => {
     if (searchOpen && searchInputRef.current) {
       searchInputRef.current.focus()
     }
   }, [searchOpen])
 
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (moreMenuRef.current && !moreMenuRef.current.contains(e.target as Node)) {
+        setMoreMenuOpen(false)
+      }
+    }
+    document.addEventListener('mousedown', handleClickOutside)
+    return () => document.removeEventListener('mousedown', handleClickOutside)
+  }, [])
+
+  // Close menus on escape
   useEffect(() => {
     const handleEscape = (e: KeyboardEvent) => {
       if (e.key === 'Escape') {
         setMobileMenuOpen(false)
         setSearchOpen(false)
-        setActiveDropdown(null)
+        setMoreMenuOpen(false)
       }
     }
     document.addEventListener('keydown', handleEscape)
     return () => document.removeEventListener('keydown', handleEscape)
   }, [])
-
-  const handleMouseEnter = (name: string) => {
-    if (dropdownTimeoutRef.current) {
-      clearTimeout(dropdownTimeoutRef.current)
-    }
-    setActiveDropdown(name)
-  }
-
-  const handleMouseLeave = () => {
-    dropdownTimeoutRef.current = setTimeout(() => {
-      setActiveDropdown(null)
-    }, 100)
-  }
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault()
@@ -159,30 +70,56 @@ export default function Header() {
   }
 
   return (
-    <header className="bg-white dark:bg-[#0a0a0a] sticky top-0 z-50">
-      {/* Main Header Row: Social icons | Logo | App Store buttons */}
-      <div className="border-b border-gray-200 dark:border-gray-800">
+    <header className="sticky top-0 z-[200] bg-white dark:bg-[#0a0a0b]">
+      {/* Top Header Bar - Logo and Social */}
+      <div className="border-b border-[#e0e0e0] dark:border-[#27272a]">
         <div className="max-w-[1110px] mx-auto px-4">
-          <div className="flex items-center justify-between py-4">
+          <div className="flex items-center justify-between h-[60px]">
             {/* Left: Social icons */}
-            <div className="flex items-center gap-5">
+            <div className="flex items-center gap-4">
               <a
                 href="https://facebook.com/sportsmockery"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-black dark:text-white hover:text-[#bc0000] transition-colors"
+                className="text-[#222] dark:text-white hover:text-[#bc0000] transition-colors"
                 aria-label="Facebook"
               >
-                <SocialIcon icon="facebook" className="w-4 h-4" />
+                <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 320 512">
+                  <path d="M279.14 288l14.22-92.66h-88.91v-60.13c0-25.35 12.42-50.06 52.24-50.06h40.42V6.26S260.43 0 225.36 0c-73.22 0-121.08 44.38-121.08 124.72v70.62H22.89V288h81.39v224h100.17V288z" />
+                </svg>
               </a>
               <a
                 href="https://twitter.com/sportsmockery"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-black dark:text-white hover:text-[#bc0000] transition-colors"
+                className="text-[#222] dark:text-white hover:text-[#bc0000] transition-colors"
                 aria-label="X (Twitter)"
               >
-                <SocialIcon icon="twitter" className="w-4 h-4" />
+                <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 512 512">
+                  <path d="M389.2 48h70.6L305.6 224.2 487 464H345L233.7 318.6 106.5 464H35.8L200.7 275.5 26.8 48H172.4L272.9 180.9 389.2 48zM364.4 421.8h39.1L151.1 88h-42L364.4 421.8z" />
+                </svg>
+              </a>
+              <a
+                href="https://instagram.com/sportsmockery"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-[#222] dark:text-white hover:text-[#bc0000] transition-colors"
+                aria-label="Instagram"
+              >
+                <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 448 512">
+                  <path d="M224.1 141c-63.6 0-114.9 51.3-114.9 114.9s51.3 114.9 114.9 114.9S339 319.5 339 255.9 287.7 141 224.1 141zm0 189.6c-41.1 0-74.7-33.5-74.7-74.7s33.5-74.7 74.7-74.7 74.7 33.5 74.7 74.7-33.6 74.7-74.7 74.7zm146.4-194.3c0 14.9-12 26.8-26.8 26.8-14.9 0-26.8-12-26.8-26.8s12-26.8 26.8-26.8 26.8 12 26.8 26.8zm76.1 27.2c-1.7-35.9-9.9-67.7-36.2-93.9-26.2-26.2-58-34.4-93.9-36.2-37-2.1-147.9-2.1-184.9 0-35.8 1.7-67.6 9.9-93.9 36.1s-34.4 58-36.2 93.9c-2.1 37-2.1 147.9 0 184.9 1.7 35.9 9.9 67.7 36.2 93.9s58 34.4 93.9 36.2c37 2.1 147.9 2.1 184.9 0 35.9-1.7 67.7-9.9 93.9-36.2 26.2-26.2 34.4-58 36.2-93.9 2.1-37 2.1-147.8 0-184.8zM398.8 388c-7.8 19.6-22.9 34.7-42.6 42.6-29.5 11.7-99.5 9-132.1 9s-102.7 2.6-132.1-9c-19.6-7.8-34.7-22.9-42.6-42.6-11.7-29.5-9-99.5-9-132.1s-2.6-102.7 9-132.1c7.8-19.6 22.9-34.7 42.6-42.6 29.5-11.7 99.5-9 132.1-9s102.7-2.6 132.1 9c19.6 7.8 34.7 22.9 42.6 42.6 11.7 29.5 9 99.5 9 132.1s2.7 102.7-9 132.1z" />
+                </svg>
+              </a>
+              <a
+                href="https://youtube.com/sportsmockery"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-[#222] dark:text-white hover:text-[#bc0000] transition-colors"
+                aria-label="YouTube"
+              >
+                <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 576 512">
+                  <path d="M549.655 124.083c-6.281-23.65-24.787-42.276-48.284-48.597C458.781 64 288 64 288 64S117.22 64 74.629 75.486c-23.497 6.322-42.003 24.947-48.284 48.597-11.412 42.867-11.412 132.305-11.412 132.305s0 89.438 11.412 132.305c6.281 23.65 24.787 41.5 48.284 47.821C117.22 448 288 448 288 448s170.78 0 213.371-11.486c23.497-6.321 42.003-24.171 48.284-47.821 11.412-42.867 11.412-132.305 11.412-132.305s0-89.438-11.412-132.305zm-317.51 213.508V175.185l142.739 81.205-142.739 81.201z" />
+                </svg>
               </a>
             </div>
 
@@ -190,20 +127,19 @@ export default function Header() {
             <Link href="/" className="flex-shrink-0">
               <Image
                 src="https://www.sportsmockery.com/wp-content/uploads/2020/12/272.png"
-                alt="Sports Mockery - Chicago Sports News"
+                alt="Sports Mockery"
                 width={272}
                 height={90}
-                className="h-16 md:h-20 w-auto dark:invert"
+                className="h-12 md:h-14 w-auto dark:invert"
                 priority
               />
             </Link>
 
-            {/* Right: App store buttons + Theme toggle */}
-            <div className="flex items-center gap-3">
-              {/* Theme toggle */}
+            {/* Right: Theme toggle */}
+            <div className="flex items-center gap-4">
               <button
                 onClick={toggleTheme}
-                className="p-2 text-gray-500 dark:text-gray-400 hover:text-[#bc0000] transition-colors"
+                className="p-2 text-[#666] dark:text-gray-400 hover:text-[#bc0000] transition-colors"
                 aria-label={`Switch to ${theme === 'dark' ? 'light' : 'dark'} mode`}
               >
                 {theme === 'dark' ? (
@@ -216,50 +152,22 @@ export default function Header() {
                   </svg>
                 )}
               </button>
-
-              {/* App Store buttons - hidden on small mobile */}
-              <div className="hidden sm:flex flex-col gap-1">
-                <a
-                  href="#"
-                  className="flex items-center gap-1.5 bg-black text-white text-[10px] px-2 py-1 rounded hover:bg-gray-800 transition-colors"
-                >
-                  <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
-                    <path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.81-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z"/>
-                  </svg>
-                  <div className="flex flex-col leading-none">
-                    <span className="text-[7px] opacity-70">Download on the</span>
-                    <span className="font-semibold text-[9px]">App Store</span>
-                  </div>
-                </a>
-                <a
-                  href="#"
-                  className="flex items-center gap-1.5 bg-black text-white text-[10px] px-2 py-1 rounded hover:bg-gray-800 transition-colors"
-                >
-                  <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
-                    <path d="M3.609 1.814L13.792 12 3.61 22.186a.996.996 0 01-.61-.92V2.734a1 1 0 01.609-.92zm10.89 10.893l2.302 2.302-10.937 6.333 8.635-8.635zm3.199-3.198l2.807 1.626a1 1 0 010 1.73l-2.808 1.626L15.206 12l2.492-2.491zM5.864 2.658L16.802 8.99l-2.303 2.303-8.635-8.635z"/>
-                  </svg>
-                  <div className="flex flex-col leading-none">
-                    <span className="text-[7px] opacity-70">GET IT ON</span>
-                    <span className="font-semibold text-[9px]">Google Play</span>
-                  </div>
-                </a>
-              </div>
             </div>
           </div>
         </div>
       </div>
 
-      {/* Navigation Row */}
-      <div className="border-b border-gray-200 dark:border-gray-800 bg-white dark:bg-[#0a0a0a]">
+      {/* Main Navigation Bar - with red underline */}
+      <nav className="border-b-[3px] border-[#bc0000]">
         <div className="max-w-[1110px] mx-auto px-4">
-          <div className="flex items-center justify-center h-11">
+          <div className="flex items-center justify-between h-[50px]">
             {/* Mobile menu button */}
             <button
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="lg:hidden absolute left-4 p-2 text-gray-700 dark:text-gray-200 hover:text-[#bc0000]"
+              className="lg:hidden p-2 text-[#222] dark:text-white hover:text-[#bc0000]"
               aria-label="Toggle menu"
             >
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 {mobileMenuOpen ? (
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                 ) : (
@@ -269,33 +177,51 @@ export default function Header() {
             </button>
 
             {/* Desktop Navigation */}
-            <nav className="hidden lg:flex items-center gap-0">
-              {teamNavItems.map((item, index) => (
-                <div
+            <div className="hidden lg:flex items-center gap-0">
+              {navItems.map((item) => (
+                <Link
                   key={item.name}
-                  className="relative"
-                  onMouseEnter={() => handleMouseEnter(item.name)}
-                  onMouseLeave={handleMouseLeave}
+                  href={item.href}
+                  className="px-4 py-4 text-[14px] font-bold text-[#222] dark:text-white uppercase tracking-[0.5px] hover:text-[#bc0000] transition-colors"
+                  style={{ fontFamily: "'Montserrat', sans-serif" }}
                 >
-                  <Link
-                    href={item.href}
-                    className="flex items-center gap-1 px-4 py-2.5 text-[13px] font-medium text-gray-800 dark:text-gray-200 hover:text-[#bc0000] transition-colors tracking-wide"
-                    style={{ fontFamily: 'var(--font-montserrat), Montserrat, sans-serif' }}
-                  >
-                    {item.name}
-                    <svg className="w-2.5 h-2.5 opacity-50 ml-0.5" fill="currentColor" viewBox="0 0 20 20">
-                      <path fillRule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clipRule="evenodd" />
-                    </svg>
-                  </Link>
-                  {item.subItems && (
-                    <DropdownMenu items={item.subItems} isOpen={activeDropdown === item.name} />
-                  )}
-                </div>
+                  {item.name}
+                </Link>
               ))}
-            </nav>
 
-            {/* Search icon */}
-            <div className="absolute right-4 lg:relative lg:right-auto lg:ml-2">
+              {/* MORE dropdown */}
+              <div className="relative" ref={moreMenuRef}>
+                <button
+                  onClick={() => setMoreMenuOpen(!moreMenuOpen)}
+                  className="flex items-center gap-1 px-4 py-4 text-[14px] font-bold text-[#222] dark:text-white uppercase tracking-[0.5px] hover:text-[#bc0000] transition-colors"
+                  style={{ fontFamily: "'Montserrat', sans-serif" }}
+                >
+                  MORE
+                  <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                  </svg>
+                </button>
+
+                {/* Dropdown menu */}
+                {moreMenuOpen && (
+                  <div className="absolute top-full left-0 mt-0 w-48 bg-white dark:bg-[#222] border border-[#e0e0e0] dark:border-[#333] shadow-md z-[100]">
+                    {moreItems.map((item) => (
+                      <Link
+                        key={item.name}
+                        href={item.href}
+                        onClick={() => setMoreMenuOpen(false)}
+                        className="block px-5 py-2 text-[14px] text-[#222] dark:text-white hover:bg-[#f5f5f5] dark:hover:bg-[#333] transition-colors"
+                      >
+                        {item.name}
+                      </Link>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* Search */}
+            <div className="flex items-center">
               {searchOpen ? (
                 <form onSubmit={handleSearch} className="flex items-center">
                   <input
@@ -304,7 +230,7 @@ export default function Header() {
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
                     placeholder="Search..."
-                    className="w-40 lg:w-52 px-3 py-1.5 text-sm bg-gray-50 dark:bg-[#1a1a1a] border border-gray-200 dark:border-gray-700 focus:outline-none focus:border-[#bc0000]"
+                    className="w-40 lg:w-56 px-3 py-1.5 text-sm bg-white dark:bg-[#1a1a1a] border border-[#e0e0e0] dark:border-[#333] focus:outline-none focus:border-[#bc0000]"
                   />
                   <button
                     type="button"
@@ -312,7 +238,7 @@ export default function Header() {
                       setSearchOpen(false)
                       setSearchQuery('')
                     }}
-                    className="p-1.5 text-gray-500 hover:text-[#bc0000]"
+                    className="p-2 text-[#666] hover:text-[#bc0000]"
                   >
                     <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -322,10 +248,10 @@ export default function Header() {
               ) : (
                 <button
                   onClick={() => setSearchOpen(true)}
-                  className="p-2 text-gray-600 dark:text-gray-300 hover:text-[#bc0000] transition-colors"
+                  className="p-2 text-[#222] dark:text-white hover:text-[#bc0000] transition-colors"
                   aria-label="Search"
                 >
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                   </svg>
                 </button>
@@ -333,42 +259,36 @@ export default function Header() {
             </div>
           </div>
         </div>
-      </div>
+      </nav>
 
       {/* Mobile Navigation */}
-      <div
-        className={`lg:hidden bg-white dark:bg-[#0a0a0a] border-b border-gray-200 dark:border-gray-800 overflow-hidden transition-all duration-300 ${
-          mobileMenuOpen ? 'max-h-[80vh]' : 'max-h-0'
-        }`}
-      >
-        <nav className="max-w-[1110px] mx-auto px-4 py-3 space-y-0">
-          {teamNavItems.map((item) => (
-            <div key={item.name} className="border-b border-gray-100 dark:border-gray-800 last:border-0">
+      {mobileMenuOpen && (
+        <div className="lg:hidden bg-white dark:bg-[#0a0a0b] border-b border-[#e0e0e0] dark:border-[#27272a]">
+          <div className="max-w-[1110px] mx-auto px-4 py-4">
+            {navItems.map((item) => (
               <Link
+                key={item.name}
                 href={item.href}
                 onClick={() => setMobileMenuOpen(false)}
-                className="block py-3 text-sm font-medium text-gray-800 dark:text-white hover:text-[#bc0000]"
+                className="block py-3 text-[14px] font-bold text-[#222] dark:text-white uppercase tracking-[0.5px] hover:text-[#bc0000] border-b border-[#e0e0e0] dark:border-[#27272a] last:border-0"
+                style={{ fontFamily: "'Montserrat', sans-serif" }}
               >
                 {item.name}
               </Link>
-              {item.subItems && (
-                <div className="pl-4 pb-2 space-y-0">
-                  {item.subItems.map((subItem) => (
-                    <Link
-                      key={subItem.href}
-                      href={subItem.href}
-                      onClick={() => setMobileMenuOpen(false)}
-                      className="block py-2 text-sm text-gray-500 dark:text-gray-400 hover:text-[#bc0000]"
-                    >
-                      {subItem.name}
-                    </Link>
-                  ))}
-                </div>
-              )}
-            </div>
-          ))}
-        </nav>
-      </div>
+            ))}
+            {moreItems.map((item) => (
+              <Link
+                key={item.name}
+                href={item.href}
+                onClick={() => setMobileMenuOpen(false)}
+                className="block py-3 text-[14px] text-[#666] dark:text-gray-400 hover:text-[#bc0000] border-b border-[#e0e0e0] dark:border-[#27272a] last:border-0"
+              >
+                {item.name}
+              </Link>
+            ))}
+          </div>
+        </div>
+      )}
     </header>
   )
 }

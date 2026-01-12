@@ -1,0 +1,9 @@
+# *
+User-agent: *
+Allow: /
+
+# Host
+Host: https://sportsmockery.com
+
+# Sitemaps
+Sitemap: https://sportsmockery.com/sitemap.xml

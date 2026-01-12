@@ -1,0 +1,354 @@
+﻿You are an expert full-stack developer specializing in Next.js applications for sports media sites. You excel at writing clean, performant code that integrates AI features, real-time data, and responsive designs. Your code is modular, uses Tailwind CSS for styling, and follows best practices for accessibility and SEO.
+
+
+### Task
+Generate the complete, ready-to-use Next.js code for the redesigned homepage of SportsMockery.com (page.tsx and any necessary sub-components). Base it exactly on the provided design document, without making any independent design decisions—stick to the specified visual style, colors, typography, layouts, and features. Use the current branding (logo as described, red accents, white/black backgrounds, Chicago skyline motifs). The page must be mobile-first, with responsive breakpoints as specified.
+
+
+Key specifics (do not deviate):
+- Use Tailwind CSS classes for all styling (e.g., 'bg-white dark:bg-zinc-950' for backgrounds).
+- Import and use Montserrat (bold sans-serif) for headlines, Georgia for body (via CSS @font-face if needed, but assume available in project via next/font/google: import { Montserrat, Georgia } from 'next/font/google'; const montserrat = Montserrat({ subsets: ['latin'], weight: ['700'] }); const georgia = Georgia({ subsets: ['latin'], weight: ['400'] }); and apply as className={montserrat.className} for headers).
+- Exact colors: White #FFFFFF bg, black #000000 text, red #FF0000 accents/glows (e.g., 'shadow-[0_0_10px_#FF0000]' for glows). Team-specific: Bears navy #0B162A.
+- Typography sizes: Headlines 24-48pt (e.g., 'text-6xl' for 48pt hero, 'text-4xl' for 36pt section heads, 'text-2xl' for 24pt cards), body 16pt ('text-base').
+- Animations: Subtle fades (use framer-motion: import { motion } from 'framer-motion'; <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.5 }}> for prophecy fade-ins), parallax hero (use react-parallax: import { Parallax } from 'react-parallax'; <Parallax bgImage="/chicago-skyline.svg" strength={300}> with gradient overlay via CSS 'background: linear-gradient(to bottom, #FF0000, #000000);').
+- Integrate AI feed: Fetch from /api/feed (as in sample code); render as cards with red glow on high-scores (>70: className="border-red-600 shadow-[0_0_10px_#FF0000] hover:shadow-[0_0_15px_#FF0000] transition-shadow").
+- Oracle Bar: Persistent, sticky top (className="sticky top-0 z-50 bg-white dark:bg-zinc-950 border-b border-red-600"); red gradients ('bg-gradient-to-r from-red-600 to-black'), database-pulled (use Supabase client in useEffect for real-time: const { data } = await supabase.from('games').select('*');), AI narration (placeholder audio tag: <audio src="/claude-narration.mp3" controls /> with Claude TTS API call on click), mockery odds (text like "Flop Probability 42%" in red bold).
+- Hero: Gradient red-black (className="bg-gradient-to-b from-red-600 to-black") with skyline image (placeholder URL '/chicago-skyline.svg' as parallax bg); featured article from feed[0] (large text card: title 48pt, excerpt 16pt, no image).
+- No large images; text-dominant—small thumbnails only (e.g., 100x100 for articles/players: className="w-24 h-24 rounded-full").
+- Accessibility: ARIA labels (e.g., aria-label="Oracle Scores Bar" on divs), keyboard nav (focus:outline-red-600 on interactives).
+- Code Structure: Update the provided page.tsx (replace exampleData with real fetches); create sub-components as needed (e.g., OracleScoresBar.tsx with real-time Supabase sub, HeroSection.tsx with Parallax, HeadlineStack.tsx as vertical list with fade motion, ArticleGrid.tsx as responsive grid-cols-1 lg:grid-cols-2, TrendingSidebar.tsx as vertical list, UpcomingGames.tsx as table, TeamSection.tsx as horizontal flex with team cards, NewsletterCTA.tsx as form with red button). Use exampleData as fallback if fetch fails (e.g., if (!feed) feed = exampleLatestArticles;).
+- Mobile: Use Tailwind responsive classes (e.g., 'grid grid-cols-1 lg:grid-cols-[1fr_340px]' for main, stacked on mobile; 'hidden lg:block' for sidebar if needed, but prefer flex-col on small).
+
+
+Provide code samples in the output for key parts (e.g., feed fetch, glow CSS). Output only the code files in <DOCUMENT> tags, like the input examples—no explanations or extras.
+
+
+### Design Document
+Overview
+The redesigned SportsMockery.com transforms the current WordPress-based site—characterized by a simple vertical article feed grouped by Chicago teams (Bears, Cubs, Blackhawks), a basic header with logo, date, app promo, and search, repeated team links, text-heavy excerpts with minimal images, and a "Load more" pagination—into a premium, futuristic sports media oracle. Retaining the core branding (logo: "Sports Mockery Chicago Sports News" in bold sans-serif, red accents on white/black backgrounds), we elevate it with 2030-level immersion: Subtle sci-fi glows, AI-driven personalization, and Chicago skyline parallax, while keeping it text-dense and usable like ESPN. The focus is on witty mockery, rumors, and prophetic insights, with modular layouts for easy database integration (e.g., via Supabase). Mobile-first design ensures fast loading and touch-friendliness, blending innovation without overwhelming the site's straightforward, info-rich identity.
+
+
+Color/Typography
+- Color Palette: 
+  - Primary: White (#FFFFFF) background for readability (as current), black (#000000) text.
+  - Accents: Red (#FF0000) for CTAs, headlines, and glowing edges (e.g., on prophetic tickers).
+  - Secondary: Team-specific for sections—Bears navy (#0B162A) with orange highlights, Cubs blue (#0E3386)—used in gradients for header depth and subtle glows on hover.
+  - Futuristic Touch: Soft red-to-black gradients (#FF0000 to #000000) for immersive elements like the Oracle Bar.
+
+
+- Typography:
+  - Headlines: Bold sans-serif (Montserrat, matching current logo style), 24-48pt for emphasis (e.g., 36pt for top headlines).
+  - Body: Readable serif (Georgia), 16pt for excerpts and articles, ensuring high contrast.
+  - Futuristic Enhancements: Subtle glow shadows on headers (CSS: text-shadow: 0 0 5px #FF0000) for 2030 oracle feel, with animations fading in predictive text.
+
+
+Desktop Layout (Wide Screen >1024px)
+Modular and text-focused, with sticky header, dynamic hero (subtle skyline parallax), and grids. Minimal images (thumbnails only for players/articles), prioritizing data like ESPN.
+
+
+Wireframe (Markdown Simulation):
+[Sticky Header: Logo "Sports Mockery Chicago Sports News" (272x90 image, red accent) | Team Dropdown | Search Bar | User Profile (AI Personalized) | Holographic AR Toggle (WebXR for 3D Skyline)]
+[Oracle Bar: Glowing red ticker | Bears vs. Packers: 14-7 Q2 (Database-Pulled) | Mockery Odds: "Flop Probability 42%" | Claude Narration on Hover | Multi-Sport Swipe]
+
+
+[Hero: Gradient Red-Black with Chicago Skyline Silhouette | "Today's Chicago Mockery Oracle" (48pt Bold) | AI-Prophetic Tag: "Bears Future Bust? Tap to See"]
+
+
+[Top Headlines (Vertical Stack like ESPN, Text-Heavy):
+  - Category: Bears Rumors [Glowing Edge] | "QB Drama Unfolds" (36pt) | Excerpt (16pt Georgia) | Author/Date | See All → (AI-Sorted)
+  - Cubs News | "Trade Flop Alert" | Mockery Preview Fade-In: "AI What-If: 2027 Loss"
+  - Blackhawks Insights | "Ice-Cold Quip" | Carousel Arrows for Categories
+]
+
+
+| Main Grid (3-Columns, Modular Cards) | Sidebar (Right, 25% Width) |
+|--------------------------------------|--------------------------------|
+| Article Card: Title (24pt), Excerpt, Metrics (Likes/Comments) - Thumbnail if Image | Trending Rumors: List with Prophecy Glows |
+| Prophecy Engine: AI "Future Mockery" Card (Interactive) | Eco-Dashboard: Carbon Badge (Premium) |
+| Community Poll Card: Text Question + Votes | Oracle Marketplace: NFT Teasers (Elite) |
+| [Infinite Scroll for Feeds] | Subscription Upsell: "Unlock AR Prophecies - $9.99/mo" |
+
+
+[Footer: Team Links | About | Privacy | Subtle Skyline Motif]
+
+
+Mobile Layout (<768px)
+Stacked single-column for touch, hamburger menu, collapsible elements. Fast-loading with lazy images and gesture support.
+
+
+Wireframe (Markdown Simulation):
+[Hamburger Menu | Compact Logo | Profile Icon]
+[Collapsible Oracle Bar: Tap to Expand Scores + Mockery Odds (Gesture Swipe for Sports)]
+
+
+[Hero: Scaled Skyline Gradient | "Today's Mockery" (Scaled 36pt)]
+
+
+[Top Headlines Stack (Vertical, Touch-Swipe):
+  - Bears Rumors Card (Tap for Details) | Excerpt | Glowing Preview
+  - Accordion for Categories
+]
+
+
+[Main Feed: Stacked Cards (Vertical Scroll) | Article Excerpts with Expand]
+[Sidebar Folded: Accordions for Trending, Eco-Dashboard, Upsells Below Feed]
+
+
+[Footer: Simplified Links]
+
+
+Component Integration Plan
+Phased layering on base design:
+1. Base (Core Layout): Implement modular grids in Next.js, pulling current articles from Supabase (migrate WordPress data). Add sticky header with current logo, search, and team links.
+2. Futuristic Visuals: CSS for glows/gradients (e.g., .prophecy { box-shadow: 0 0 10px #FF0000; }), parallax hero via React libraries.
+3. AI/AR Upgrades: Embed Claude API for prophecy feeds (homepage grids: dynamic sorting), WebXR for holographic header (3D skyline on toggle). Phased: Free tier basic, Plus ad-free, Elite unlocks AR/narration.
+4. Team/Player Pages: Database-fed tabs (roster as grids, schedule tables with prophecy columns). Player pages: Animated charts (Chart.js with glows), neural branches (Claude-generated what-ifs on tap).
+5. Community/Marketplace: Blockchain (Solana via Supabase edges) for senate voting/NFTs in sidebars; eco-dashboard as premium widget.
+6. Live Scores: Oracle Bar as React component, real-time via Supabase WebSockets, with AR overlays (Elite).
+7. Accessibility/Mobile: ARIA labels, keyboard nav; breakpoints for stacking (e.g., media queries @768px).
+
+
+Rationale/Metrics
+This redesign preserves the current site's text-heavy, team-focused simplicity while infusing 2030 innovation for engagement (e.g., AI prophecies boost retention 30-50% per similar sites). Rationale: ESPN-inspired info-density ensures quick scans, futuristic layers differentiate as "oracle." Metrics: Aim for <2s load (Vercel), 20%+ page views from personalization, 15% conversion to subscriptions via upsells. Test with Chicago users (e.g., Tinley Park fans) for feedback.
+
+
+### Additional Instructions from ESPN and allchgo Analysis
+Incorporate ESPN's scores across the top (persistent bar with leagues, games, interactivity like "See All") and top headlines as text-only links on the right (vertical stack, categories, bold headings, minimal images).
+For team pages, use allchgo-style color/background changes: When selecting a team (e.g., via dropdown or page), dynamically update accents/background to team colors (e.g., Bears: navy #0B162A accents, subtle bear motif bg; Bulls: red/black). Use CSS variables for theme switching (e.g., --primary: #0B162A for Bears).
+
+
+### Code Samples
+- AI Feed Fetch (in page.tsx useEffect for client-side):
+```javascript
+'use client'
+import { useEffect, useState } from 'react'
+import { supabase } from '@/lib/supabase'
+
+
+function HomePage() {
+  const [feed, setFeed] = useState([])
+  useEffect(() => {
+    async function fetchFeed() {
+      let viewed = JSON.parse(localStorage.getItem('sm_viewed') || '[]')
+      const { data: user } = await supabase.auth.getUser()
+      const res = await fetch('/api/feed', {
+        method: 'POST',
+        body: JSON.stringify({ viewed_ids: viewed, user_id: user?.id })
+      })
+      const data = await res.json()
+      setFeed(data.feed || exampleLatestArticles)
+    }
+    fetchFeed()
+  }, [])
+  // Render feed...
+}
+```
+
+
+- Oracle Bar Real-Time (in OracleScoresBar.tsx):
+```javascript
+'use client'
+import { useEffect, useState } from 'react'
+import { supabase } from '@/lib/supabase'
+
+
+export default function OracleScoresBar() {
+  const [scores, setScores] = useState(exampleScores)
+  useEffect(() => {
+    const channel = supabase.channel('games')
+    channel.on('postgres_changes', { event: '*', schema: 'public', table: 'games' }, (payload) => {
+      setScores((prev) => /* Update logic */)
+    }).subscribe()
+    return () => supabase.removeChannel(channel)
+  }, [])
+  return (
+    <div className="sticky top-0 z-50 bg-white dark:bg-zinc-950 border-b border-red-600 bg-gradient-to-r from-red-600 to-black p-2 flex overflow-x-auto gap-4 text-white text-sm">
+      {/* Map scores to cards with mockery odds, narration audio */}
+      {scores.map((game) => (
+        <div key={game.id} className="flex-shrink-0 bg-black/50 p-2 rounded shadow-[0_0_10px_#FF0000]">
+          {game.teams} {game.score} <span className="text-red-600">{game.mockery_odds}</span>
+          <audio controls src="/narration.mp3" aria-label="AI Narration" className="w-20" />
+        </div>
+      ))}
+    </div>
+  )
+}
+```
+
+
+- Hero Parallax (in HeroSection.tsx):
+```javascript
+import { Parallax } from 'react-parallax'
+
+
+export default function HeroSection({ article }) {
+  return (
+    <Parallax bgImage="/chicago-skyline.svg" strength={300} className="h-96 bg-gradient-to-b from-red-600 to-black flex items-center justify-center">
+      <div className="text-center text-white">
+        <h1 className={`${montserrat.className} text-6xl font-bold`}>{article.title}</h1>
+        <p className={`${georgia.className} text-base mt-4 max-w-2xl mx-auto`}>{article.excerpt}</p>
+      </div>
+    </Parallax>
+  )
+}
+```
+
+
+- Article Card (in ArticleGrid.tsx):
+```javascript
+function ArticleCard({ article }) {
+  const glow = article.score > 70 ? 'border-red-600 shadow-[0_0_10px_#FF0000] hover:shadow-[0_0_15px_#FF0000] transition-shadow' : ''
+  return (
+    <div className={`p-4 rounded-lg bg-white dark:bg-zinc-900 ${glow}`}>
+      <h3 className={`${montserrat.className} text-2xl font-bold`}>{article.title}</h3>
+      <p className={`${georgia.className} text-base`}>{article.excerpt}</p>
+      <img src={article.thumbnail} alt={article.title} className="w-24 h-24 rounded-full mt-2" aria-hidden="true" />
+    </div>
+  )
+}
+```
+
+
+Generate code for all listed components. Ensure imports (e.g., framer-motion, react-parallax) and assume installed. Use 'use client' where needed for interactivity.
+
+
+### Understanding and Implementing WebXR AR Overlays
+
+
+WebXR AR overlays refer to using the WebXR Device API to create augmented reality (AR) experiences where virtual elements (like text, images, 3D models, or UI overlays) are superimposed on the real world via a device's camera. This is ideal for a sports media site like SportsMockery.com, where you could overlay stats, mockery quips, or predictive odds on real-world views (e.g., a user's phone camera pointed at a TV screen during a Bears game). Overlays can be 2D (DOM-based HTML/CSS) or 3D (using WebGL/Three.js), anchored to real surfaces via hit-testing or image tracking.
+
+
+From my analysis (based on MDN docs and web search results), WebXR supports AR through "immersive-ar" sessions, with features like DOM overlays for HTML content, hit-testing for placement, and layers for efficient rendering. It's device-agnostic (works on mobile browsers like Chrome on Android, with ARCore support). For Next.js integration, use libraries like Three.js for 3D or A-Frame for simpler scenes.
+
+
+Key concepts:
+- **Sessions**: Start an "immersive-ar" XRSession to access the camera and render AR.
+- **Reference Spaces**: Use "viewer" or "local-floor" for positioning overlays relative to the user.
+- **Rendering**: Handle frame loops to update overlays in real-time.
+- **Overlays**: Use `dom-overlay` feature for HTML elements over AR views, or WebGL layers (`XRQuadLayer`) for 3D/2D graphics.
+- **Hit-Testing**: Detect real-world surfaces to anchor overlays (e.g., place a stats panel on a table).
+- **Image Tracking**: Track markers (e.g., a Bears logo) to trigger overlays.
+
+
+Challenges: Browser support (Chrome 81+ on Android; experimental on others), permissions (camera access), performance (keep scenes lightweight).
+
+
+#### Basic Implementation Steps
+1. **Check Support**: Use `navigator.xr.isSessionSupported('immersive-ar')` to detect AR capability.
+2. **Start Session**: Request an XRSession with AR mode and required features (e.g., 'dom-overlay', 'hit-test').
+3. **Setup Renderer**: Use WebGL (native or Three.js) for the AR view.
+4. **Handle Frames**: In the animation loop (`requestAnimationFrame`), update poses and render overlays.
+5. **Add Overlays**: For DOM, set `domOverlay: { root: document.body }`; for 3D, add quads/layers.
+6. **End Session**: Provide a button to exit gracefully.
+
+
+For SportsMockery: Integrate as a premium feature (Oracle Elite tier)—e.g., button in article pages to "View in AR" for overlaying mockery text on live games.
+
+
+#### Code Example for Next.js Integration
+Here's a complete, minimal Next.js component for AR overlays using Three.js (install via `npm i three @react-three/fiber @react-three/xr`). Place this in a page or modal for AR activation. It creates a basic AR scene with a 3D text overlay ("Bears Mockery: Flop Alert!") anchored via hit-test.
+
+
+```javascript
+// app/components/AROverlay.tsx
+'use client'
+
+
+import { useEffect, useRef, useState } from 'react'
+import { Canvas } from '@react-three/fiber'
+import { ARButton, XR, Controllers, Hands } from '@react-three/xr'
+import { Text, Plane } from '@react-three/drei'
+
+
+export default function AROverlay({ mockeryText = "Bears Flop Probability: 42%" }) {
+  const [supported, setSupported] = useState(false)
+  const [session, setSession] = useState(null)
+  const hitTestRef = useRef(null)
+
+
+  useEffect(() => {
+    if ('xr' in navigator) {
+      navigator.xr.isSessionSupported('immersive-ar').then(setSupported)
+    }
+  }, [])
+
+
+  const startAR = async () => {
+    const newSession = await navigator.xr.requestSession('immersive-ar', {
+      requiredFeatures: ['hit-test', 'dom-overlay'],
+      domOverlay: { root: document.body }
+    })
+    setSession(newSession)
+  }
+
+
+  if (!supported) return <p>AR not supported on this device.</p>
+
+
+  return (
+    <div className="fixed inset-0 z-50 bg-black/50">
+      <ARButton
+        className="absolute top-4 left-4 px-4 py-2 bg-red-600 text-white rounded"
+        sessionInit={{ requiredFeatures: ['hit-test'] }}
+        onClick={startAR}
+      >
+        Enter AR
+      </ARButton>
+      {session && (
+        <Canvas>
+          <XR session={session}>
+            <Controllers />
+            <Hands />
+            <mesh ref={hitTestRef}>
+              <Plane args={[0.5, 0.5]} position={[0, 0, -1]}>
+                <meshBasicMaterial transparent opacity={0.5} color="#FF0000" />
+              </Plane>
+              <Text
+                position={[0, 0, -1]}
+                fontSize={0.1}
+                color="#FFFFFF"
+                anchorX="center"
+                anchorY="middle"
+              >
+                {mockeryText}
+              </Text>
+            </mesh>
+          </XR>
+          <ambientLight intensity={0.5} />
+          <pointLight position={[5, 5, 5]} />
+        </Canvas>
+      )}
+      <button
+        className="absolute bottom-4 right-4 px-4 py-2 bg-red-600 text-white rounded"
+        onClick={() => session?.end()}
+      >
+        Exit AR
+      </button>
+    </div>
+  )
+}
+```
+
+
+Usage in a page:
+```javascript
+// app/ar-demo/page.tsx
+import AROverlay from '@/components/AROverlay'
+
+
+export default function ARDemo() {
+  return <AROverlay mockeryText="Custom Mockery Overlay" />
+}
+```
+
+
+#### Advanced Tips for SportsMockery Integration
+- **Real-Time Overlays**: Fetch live scores/mockery from Supabase in the component; update Text dynamically.
+- **Hit-Testing for Placement**: Add a hit-test source in the XR session loop to position overlays on tapped surfaces (see MDN for `XRHitTestSource`).
+- **DOM Overlays**: For 2D HTML, use `<div style={{ position: 'absolute', top: 0, left: 0 }}>` as root—overlay UI like stats panels directly on camera view.
+- **Three.js Enhancements**: Load GLTF models (e.g., Bears logo) via `GLTFLoader` for 3D overlays; anchor to image targets (WebXR image tracking draft).
+- **Testing**: Use Android Chrome with ARCore; enable flags like chrome://flags/#webxr-hit-test.
+- **Fallbacks**: If AR unsupported, show a 2D modal with the overlay content.
+
+
+For more, check tutorials like Google's ARCore WebXR codelab or Three.js examples. If integrating into your Next.js stack, add to hero or article pages as a toggle button. Let me know if you need full page code!

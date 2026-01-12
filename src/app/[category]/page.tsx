@@ -5,11 +5,8 @@ import CategoryHeader from '@/components/category/CategoryHeader'
 import CategoryFilters from '@/components/category/CategoryFilters'
 import CategoryFeatured from '@/components/category/CategoryFeatured'
 import CategoryGrid from '@/components/category/CategoryGrid'
-import CategorySidebar from '@/components/category/CategorySidebar'
 import Pagination from '@/components/category/Pagination'
 import NoResults from '@/components/category/NoResults'
-import SubcategoryNav from '@/components/category/SubcategoryNav'
-import CategoryStats from '@/components/category/CategoryStats'
 
 const POSTS_PER_PAGE = 12
 
@@ -155,15 +152,6 @@ export default async function CategoryPage({ params, searchParams }: CategoryPag
         .limit(3)
     : { data: [] }
 
-  // Fetch trending posts for sidebar
-  const { data: trendingPosts } = await supabaseAdmin
-    .from('sm_posts')
-    .select('id, slug, title, featured_image, published_at, views')
-    .eq('category_id', category.id)
-    .eq('status', 'published')
-    .order('views', { ascending: false, nullsFirst: false })
-    .limit(5)
-
   // Fetch authors
   const allPostsWithAuthors = [...(posts || []), ...(featuredPosts || [])]
   const authorIds = [...new Set(allPostsWithAuthors.map(p => p.author_id).filter(Boolean))]
@@ -175,35 +163,6 @@ export default async function CategoryPage({ params, searchParams }: CategoryPag
     : { data: [] }
 
   const authorMap = new Map(authors?.map(a => [a.id, a]) || [])
-
-  // Fetch other categories for sidebar
-  const { data: otherCategories } = await supabaseAdmin
-    .from('sm_categories')
-    .select('id, name, slug')
-    .neq('id', category.id)
-    .limit(5)
-
-  // Get articles count per category
-  const relatedCategories = await Promise.all(
-    (otherCategories || []).map(async (cat) => {
-      const { count } = await supabaseAdmin
-        .from('sm_posts')
-        .select('*', { count: 'exact', head: true })
-        .eq('category_id', cat.id)
-        .eq('status', 'published')
-      return { ...cat, post_count: count || 0 }
-    })
-  )
-
-  // Calculate this week's article count
-  const weekAgo = new Date()
-  weekAgo.setDate(weekAgo.getDate() - 7)
-  const { count: weekCount } = await supabaseAdmin
-    .from('sm_posts')
-    .select('*', { count: 'exact', head: true })
-    .eq('category_id', category.id)
-    .eq('status', 'published')
-    .gte('published_at', weekAgo.toISOString())
 
   // Format posts for components
   const formattedPosts = (posts || []).map(post => {
@@ -238,19 +197,9 @@ export default async function CategoryPage({ params, searchParams }: CategoryPag
     }
   })
 
-  const formattedTrending = (trendingPosts || []).map(post => ({
-    id: post.id,
-    title: post.title,
-    slug: post.slug,
-    featured_image: post.featured_image,
-    published_at: post.published_at,
-    views: post.views,
-    category: { name: category.name, slug: category.slug },
-  }))
-
   return (
-    <div className="min-h-screen bg-zinc-50 dark:bg-zinc-950">
-      {/* Premium Category Header */}
+    <div className="min-h-screen bg-[#f5f5f5]">
+      {/* Category Header per spec section 8.1 */}
       <CategoryHeader
         categorySlug={category.slug}
         categoryName={category.name}
@@ -258,18 +207,9 @@ export default async function CategoryPage({ params, searchParams }: CategoryPag
         description={categoryDescriptions[categorySlug]}
       />
 
-      <main className="mx-auto max-w-7xl px-4 py-8">
-        {/* Stats Bar */}
-        <CategoryStats
-          totalArticles={totalPosts}
-          articlesThisWeek={weekCount || 0}
-          className="mb-6"
-        />
-
-        {/* Subcategory Navigation */}
-        <SubcategoryNav categorySlug={category.slug} className="mb-6" />
-
-        {/* Filters */}
+      {/* Main content container - 1110px max per spec */}
+      <main className="mx-auto max-w-[1110px] px-4 py-8">
+        {/* Filters per spec section 8.2 */}
         <CategoryFilters categorySlug={category.slug} className="mb-8" />
 
         {/* Featured Section (only on first page with default filters) */}
@@ -277,35 +217,22 @@ export default async function CategoryPage({ params, searchParams }: CategoryPag
           <CategoryFeatured posts={formattedFeatured} className="mb-10" />
         )}
 
-        {/* Main Content Grid */}
-        <div className="lg:grid lg:grid-cols-12 lg:gap-8">
-          {/* Articles Grid */}
-          <div className="lg:col-span-8">
-            {formattedPosts.length > 0 ? (
-              <>
-                <CategoryGrid articles={formattedPosts} />
+        {/* Articles Grid - 3 column layout per spec section 8.3 */}
+        {formattedPosts.length > 0 ? (
+          <>
+            <CategoryGrid articles={formattedPosts} />
 
-                {/* Pagination */}
-                <Pagination
-                  currentPage={currentPage}
-                  totalPages={totalPages}
-                  basePath={`/${categorySlug}`}
-                  className="mt-12"
-                />
-              </>
-            ) : (
-              <NoResults categoryName={category.name} />
-            )}
-          </div>
-
-          {/* Sidebar */}
-          <div className="mt-10 lg:col-span-4 lg:mt-0">
-            <CategorySidebar
-              trendingPosts={formattedTrending}
-              relatedCategories={relatedCategories}
+            {/* Pagination per spec */}
+            <Pagination
+              currentPage={currentPage}
+              totalPages={totalPages}
+              basePath={`/${categorySlug}`}
+              className="mt-12"
             />
-          </div>
-        </div>
+          </>
+        ) : (
+          <NoResults categoryName={category.name} />
+        )}
       </main>
     </div>
   )

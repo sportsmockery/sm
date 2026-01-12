@@ -11,6 +11,13 @@ interface CategoryFiltersProps {
 type SortOption = 'latest' | 'popular' | 'oldest'
 type TimeFilter = 'all' | 'week' | 'month' | 'year'
 
+// Per design spec section 8.2:
+// - Background: #ffffff
+// - Border bottom: 1px solid #e0e0e0
+// - Height: 50px
+// - Contains: Sort dropdown, filter options
+// - Padding: 10px 20px
+
 export default function CategoryFilters({
   categorySlug,
   className = '',
@@ -62,23 +69,27 @@ export default function CategoryFilters({
 
   return (
     <div
-      className={`flex flex-wrap items-center justify-between gap-4 rounded-xl border border-zinc-200 bg-white p-4 dark:border-zinc-800 dark:bg-zinc-900 ${className}`}
+      className={`flex flex-wrap items-center justify-between gap-4 bg-white border-b border-[#e0e0e0] px-5 py-2 min-h-[50px] ${className}`}
     >
       {/* Sort by */}
       <div className="flex items-center gap-3">
-        <span className="text-sm font-medium text-zinc-500 dark:text-zinc-400">
-          Sort by:
+        <span
+          className="text-[13px] font-medium text-[#666666]"
+          style={{ fontFamily: "'Montserrat', sans-serif" }}
+        >
+          Sort:
         </span>
-        <div className="flex rounded-lg bg-zinc-100 p-1 dark:bg-zinc-800">
+        <div className="flex gap-1">
           {sortOptions.map((option) => (
             <button
               key={option.value}
               onClick={() => handleSortChange(option.value)}
-              className={`rounded-md px-3 py-1.5 text-sm font-medium transition-all ${
+              className={`px-3 py-1.5 text-[13px] font-medium transition-colors ${
                 sortBy === option.value
-                  ? 'bg-white text-zinc-900 shadow-sm dark:bg-zinc-700 dark:text-white'
-                  : 'text-zinc-600 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-white'
+                  ? 'bg-[#bc0000] text-white'
+                  : 'bg-[#f5f5f5] text-[#666666] hover:bg-[#e0e0e0]'
               }`}
+              style={{ fontFamily: "'Montserrat', sans-serif" }}
             >
               {option.label}
             </button>
@@ -88,64 +99,28 @@ export default function CategoryFilters({
 
       {/* Time filter */}
       <div className="flex items-center gap-3">
-        <span className="text-sm font-medium text-zinc-500 dark:text-zinc-400">
+        <span
+          className="text-[13px] font-medium text-[#666666]"
+          style={{ fontFamily: "'Montserrat', sans-serif" }}
+        >
           Time:
         </span>
-        <div className="flex rounded-lg bg-zinc-100 p-1 dark:bg-zinc-800">
+        <div className="flex gap-1">
           {timeOptions.map((option) => (
             <button
               key={option.value}
               onClick={() => handleTimeChange(option.value)}
-              className={`rounded-md px-3 py-1.5 text-sm font-medium transition-all ${
+              className={`px-3 py-1.5 text-[13px] font-medium transition-colors ${
                 timeFilter === option.value
-                  ? 'bg-white text-zinc-900 shadow-sm dark:bg-zinc-700 dark:text-white'
-                  : 'text-zinc-600 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-white'
+                  ? 'bg-[#bc0000] text-white'
+                  : 'bg-[#f5f5f5] text-[#666666] hover:bg-[#e0e0e0]'
               }`}
+              style={{ fontFamily: "'Montserrat', sans-serif" }}
             >
               {option.label}
             </button>
           ))}
         </div>
-      </div>
-
-      {/* View toggle (grid/list) - optional enhancement */}
-      <div className="hidden items-center gap-2 sm:flex">
-        <button
-          className="flex h-9 w-9 items-center justify-center rounded-lg bg-[#8B0000] text-white dark:bg-[#FF6666]"
-          title="Grid view"
-        >
-          <svg
-            className="h-4 w-4"
-            fill="none"
-            viewBox="0 0 24 24"
-            strokeWidth={2}
-            stroke="currentColor"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              d="M3.75 6A2.25 2.25 0 016 3.75h2.25A2.25 2.25 0 0110.5 6v2.25a2.25 2.25 0 01-2.25 2.25H6a2.25 2.25 0 01-2.25-2.25V6zM3.75 15.75A2.25 2.25 0 016 13.5h2.25a2.25 2.25 0 012.25 2.25V18a2.25 2.25 0 01-2.25 2.25H6A2.25 2.25 0 013.75 18v-2.25zM13.5 6a2.25 2.25 0 012.25-2.25H18A2.25 2.25 0 0120.25 6v2.25A2.25 2.25 0 0118 10.5h-2.25a2.25 2.25 0 01-2.25-2.25V6zM13.5 15.75a2.25 2.25 0 012.25-2.25H18a2.25 2.25 0 012.25 2.25V18A2.25 2.25 0 0118 20.25h-2.25A2.25 2.25 0 0113.5 18v-2.25z"
-            />
-          </svg>
-        </button>
-        <button
-          className="flex h-9 w-9 items-center justify-center rounded-lg bg-zinc-100 text-zinc-500 transition-colors hover:bg-zinc-200 hover:text-zinc-700 dark:bg-zinc-800 dark:text-zinc-400 dark:hover:bg-zinc-700 dark:hover:text-white"
-          title="List view"
-        >
-          <svg
-            className="h-4 w-4"
-            fill="none"
-            viewBox="0 0 24 24"
-            strokeWidth={2}
-            stroke="currentColor"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              d="M3.75 12h16.5m-16.5 3.75h16.5M3.75 19.5h16.5M5.625 4.5h12.75a1.875 1.875 0 010 3.75H5.625a1.875 1.875 0 010-3.75z"
-            />
-          </svg>
-        </button>
       </div>
     </div>
   )

@@ -639,3 +639,125 @@ Format:
 **Section Progress:** Sections 1-5 COMPLETE
 
 ---
+
+### 2026-01-11 - Automatic SEO Optimization System
+
+**Added:**
+
+*Server-Side AI SEO Generation:*
+- `src/app/api/admin/posts/route.ts` - Auto SEO on post creation:
+  - `generateAISEO()` function calls Claude AI to generate optimized SEO fields
+  - `autoFillSEOFields()` runs automatically when publishing
+  - AI generates: seoTitle (50-60 chars), seoDescription (150-160 chars), excerpt (250 chars)
+  - Falls back to content extraction if AI fails
+  - SAFETY: Only fills empty fields, never overwrites existing data
+
+- `src/app/api/posts/[id]/route.ts` - Auto SEO on post update:
+  - Same AI generation system for post updates
+  - Fetches category name for better AI context
+  - Triggers only when status is 'published'
+
+- `src/app/api/admin/ai/route.ts` - Added `generate_seo` action:
+  - New action type for SEO field generation
+  - Returns seoTitle, metaDescription, keywords, excerpt
+  - Used by both server-side auto-fill and client-side editor
+
+*Supabase SEO Optimizer Script:*
+- `/Users/christopherburhans/Documents/SM Traffic Analysis/sm-seo-optimizer/supabase-seo-optimizer.ts`:
+  - Batch processes all posts in Supabase
+  - Fills empty seo_title, seo_description, excerpt fields
+  - Dry-run mode for preview
+  - Progress tracking and reporting
+
+*WordPress SEO Plugin:*
+- `/Users/christopherburhans/Documents/SM Traffic Analysis/sm-seo-optimizer/` - Full WordPress plugin:
+  - Audit dashboard showing SEO issues
+  - Batch processing with progress UI
+  - Meta description, OG tags, Twitter cards generation
+  - Focus keyword extraction
+  - Schema markup assignment
+  - SAFETY: Only adds missing data, never overwrites
+  - SEO plugin detection (Yoast, RankMath, AIOSEO, SEOPress, The SEO Framework)
+
+**Results:**
+- Ran SEO optimizer on 31,096 imported posts
+- SEO titles added: 30,802
+- SEO descriptions added: 4,500
+- Excerpts added: 27,378
+- Errors: 0
+
+**User Experience:**
+- Writers just write content and click Publish
+- SEO is 100% automatic - no manual input required
+- AI generates optimized titles, descriptions, excerpts server-side
+- Fallback to content extraction if AI unavailable
+
+**Files Created:**
+- `src/app/api/admin/ai/route.ts` - generate_seo action
+- `/Documents/SM Traffic Analysis/sm-seo-optimizer/` - WordPress plugin
+- `/Documents/SM Traffic Analysis/sm-seo-optimizer/supabase-seo-optimizer.ts`
+
+**Files Modified:**
+- `src/app/api/admin/posts/route.ts` - AI SEO generation on create
+- `src/app/api/posts/[id]/route.ts` - AI SEO generation on update
+
+---
+
+### 2026-01-11 - Design Spec Implementation (SPORTSMOCKERY-DESIGN-SPEC.md)
+
+**Major Redesign:**
+Implemented comprehensive design spec to match sportsmockery.com exactly. All public-facing pages now follow the spec's typography, colors, spacing, and layout rules.
+
+**Changed:**
+
+*CSS & Theme:*
+- `src/app/globals.css` - Complete rewrite with design spec CSS variables:
+  - Primary red: #bc0000 (was #8B0000)
+  - Typography: Montserrat (headings), Fira Sans (body)
+  - Container max-width: 1110px
+  - Added article-card, category-tag, section-header, btn-primary/secondary classes
+  - Added skeleton loading, scrollbar styles, focus states
+- `src/styles/theme.ts` - Updated brand.primary to #bc0000
+- `src/styles/colors.ts` - Updated all accent colors to #bc0000
+
+*Header/Footer:*
+- `src/components/layout/Header.tsx` - Complete rewrite per spec:
+  - Sticky header with proper structure
+  - 3px red bottom border (#bc0000)
+  - Navigation: HOME, BEARS, BULLS, CUBS, WHITE SOX, BLACKHAWKS, MORE
+  - Montserrat 14px bold uppercase
+- `src/components/layout/Footer.tsx` - Complete rewrite per spec:
+  - Dark background (#222222) top section
+  - 3-column layout: About, Categories, Connect
+  - Darker bottom section (#111111) with copyright
+
+*Homepage:*
+- `src/app/page.tsx` - Complete rewrite per spec:
+  - Featured section: 16:9 aspect ratio, gradient overlay
+  - Category tags: #bc0000 bg, top-left positioning
+  - 3-column article grid with 20px gap
+  - Section headers with 3px red bottom border
+  - Article cards: 70% aspect ratio images, overlapping category tag
+
+*Category Pages:*
+- `src/app/[category]/page.tsx` - Updated per spec:
+  - Red header (#bc0000) with centered category name
+  - 1110px max-width container
+  - Simplified layout (removed sidebar)
+- `src/components/category/CategoryHeader.tsx` - Red bg, Montserrat 36-42px 900 weight
+- `src/components/category/CategoryGrid.tsx` - 3-column grid, proper card styling
+- `src/components/category/CategoryFilters.tsx` - White bg, red active buttons
+- `src/components/category/Pagination.tsx` - Square 40px buttons, #bc0000 active state
+
+*Single Article Page:*
+- `src/app/[category]/[slug]/page.tsx` - Updated per spec:
+  - Title: 36-42px Montserrat 700-900
+  - Red category tag (#bc0000)
+  - Article body: max-width 750px, Fira Sans 16px, line-height 1.7
+  - Proper author/date formatting
+
+**Note:**
+~145 other component files still use old red colors (#8B0000, #FF0000, #FF6666). These are primarily admin components and secondary UI that will be updated in a future pass. The core theme files have been updated so new components will use the correct color.
+
+**Files Modified:** 15 files
+**Build Status:** Success

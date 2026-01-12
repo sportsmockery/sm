@@ -1,0 +1,938 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SportsMockery Admin Guide - WordPress to Next.js Migration</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: #f8f9fa;
+      color: #333;
+      line-height: 1.6;
+    }
+    
+    /* Header */
+    .header {
+      background: linear-gradient(135deg, #0B162A 0%, #1a1a1a 100%);
+      color: white;
+      padding: 40px 20px;
+      text-align: center;
+    }
+    .header h1 {
+      font-size: 36px;
+      margin-bottom: 10px;
+    }
+    .header .subtitle {
+      color: #ff0000;
+      font-size: 18px;
+      font-weight: 600;
+    }
+    .header .tagline {
+      color: #888;
+      margin-top: 10px;
+    }
+    
+    /* Navigation */
+    .nav {
+      background: #1a1a1a;
+      padding: 15px 20px;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+    .nav ul {
+      list-style: none;
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 20px;
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+    .nav a {
+      color: #ccc;
+      text-decoration: none;
+      font-size: 14px;
+      padding: 8px 16px;
+      border-radius: 20px;
+      transition: all 0.2s;
+    }
+    .nav a:hover {
+      background: #ff0000;
+      color: white;
+    }
+    
+    /* Main Content */
+    .container {
+      max-width: 1000px;
+      margin: 0 auto;
+      padding: 40px 20px;
+    }
+    
+    /* Section Styles */
+    .section {
+      background: white;
+      border-radius: 12px;
+      padding: 40px;
+      margin-bottom: 30px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+    }
+    .section h2 {
+      color: #0B162A;
+      font-size: 28px;
+      margin-bottom: 20px;
+      padding-bottom: 15px;
+      border-bottom: 3px solid #ff0000;
+    }
+    .section h3 {
+      color: #333;
+      font-size: 20px;
+      margin: 30px 0 15px 0;
+    }
+    .section p {
+      margin-bottom: 15px;
+      color: #555;
+    }
+    
+    /* Comparison Tables */
+    .comparison {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 20px 0;
+    }
+    .comparison th {
+      background: #0B162A;
+      color: white;
+      padding: 15px;
+      text-align: left;
+    }
+    .comparison td {
+      padding: 15px;
+      border-bottom: 1px solid #eee;
+    }
+    .comparison tr:hover {
+      background: #f8f9fa;
+    }
+    .comparison .old {
+      color: #888;
+    }
+    .comparison .new {
+      color: #10b981;
+      font-weight: 600;
+    }
+    .comparison .arrow {
+      color: #ff0000;
+      font-weight: bold;
+    }
+    
+    /* Feature Cards */
+    .features {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 20px;
+      margin: 30px 0;
+    }
+    .feature-card {
+      background: #f8f9fa;
+      border-radius: 10px;
+      padding: 25px;
+      border-left: 4px solid #ff0000;
+    }
+    .feature-card h4 {
+      color: #0B162A;
+      margin-bottom: 10px;
+      font-size: 18px;
+    }
+    .feature-card p {
+      color: #666;
+      font-size: 14px;
+      margin: 0;
+    }
+    .feature-card .icon {
+      font-size: 30px;
+      margin-bottom: 15px;
+    }
+    
+    /* Steps */
+    .steps {
+      counter-reset: step;
+    }
+    .step {
+      position: relative;
+      padding-left: 60px;
+      margin-bottom: 30px;
+    }
+    .step::before {
+      counter-increment: step;
+      content: counter(step);
+      position: absolute;
+      left: 0;
+      top: 0;
+      width: 40px;
+      height: 40px;
+      background: #ff0000;
+      color: white;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: bold;
+    }
+    .step h4 {
+      margin-bottom: 10px;
+      color: #0B162A;
+    }
+    .step p {
+      color: #666;
+    }
+    
+    /* Screenshots placeholder */
+    .screenshot {
+      background: linear-gradient(135deg, #1a1a1a 0%, #333 100%);
+      border-radius: 10px;
+      padding: 60px 20px;
+      text-align: center;
+      color: #666;
+      margin: 20px 0;
+    }
+    .screenshot .label {
+      background: #ff0000;
+      color: white;
+      padding: 5px 15px;
+      border-radius: 20px;
+      font-size: 12px;
+      display: inline-block;
+    }
+    
+    /* Tips */
+    .tip {
+      background: #fff3cd;
+      border-left: 4px solid #ffc107;
+      padding: 15px 20px;
+      border-radius: 0 8px 8px 0;
+      margin: 20px 0;
+    }
+    .tip strong {
+      color: #856404;
+    }
+    
+    /* Warning */
+    .warning {
+      background: #f8d7da;
+      border-left: 4px solid #dc3545;
+      padding: 15px 20px;
+      border-radius: 0 8px 8px 0;
+      margin: 20px 0;
+    }
+    .warning strong {
+      color: #721c24;
+    }
+    
+    /* Success */
+    .success {
+      background: #d4edda;
+      border-left: 4px solid #28a745;
+      padding: 15px 20px;
+      border-radius: 0 8px 8px 0;
+      margin: 20px 0;
+    }
+    .success strong {
+      color: #155724;
+    }
+    
+    /* Code blocks */
+    code {
+      background: #f1f1f1;
+      padding: 2px 8px;
+      border-radius: 4px;
+      font-family: 'Monaco', 'Consolas', monospace;
+      font-size: 14px;
+    }
+    
+    /* Team colors reference */
+    .team-colors {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      gap: 15px;
+      margin: 20px 0;
+    }
+    .team-color {
+      padding: 20px;
+      border-radius: 8px;
+      text-align: center;
+      color: white;
+      font-weight: 600;
+    }
+    .team-color.bears { background: linear-gradient(135deg, #0B162A, #C83200); }
+    .team-color.bulls { background: linear-gradient(135deg, #CE1141, #000000); }
+    .team-color.cubs { background: linear-gradient(135deg, #0E3386, #CC3433); }
+    .team-color.whitesox { background: linear-gradient(135deg, #27251F, #C4CED4); color: #27251F; }
+    .team-color.blackhawks { background: linear-gradient(135deg, #CF0A2C, #000000); }
+    
+    /* FAQ Accordion */
+    .faq-item {
+      border-bottom: 1px solid #eee;
+      padding: 20px 0;
+    }
+    .faq-question {
+      font-weight: 600;
+      color: #0B162A;
+      cursor: pointer;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .faq-question::after {
+      content: '+';
+      font-size: 24px;
+      color: #ff0000;
+    }
+    .faq-answer {
+      padding-top: 15px;
+      color: #666;
+    }
+    
+    /* Footer */
+    .footer {
+      background: #0B162A;
+      color: white;
+      padding: 40px 20px;
+      text-align: center;
+    }
+    .footer a {
+      color: #ff0000;
+    }
+  </style>
+</head>
+<body>
+
+<div class="header">
+  <h1>🏈 SportsMockery Admin Guide</h1>
+  <div class="subtitle">WordPress → Next.js Migration</div>
+  <div class="tagline">Everything you need to know about your new site</div>
+</div>
+
+<nav class="nav">
+  <ul>
+    <li><a href="#overview">Overview</a></li>
+    <li><a href="#whats-new">What's New</a></li>
+    <li><a href="#writing">Writing Posts</a></li>
+    <li><a href="#admin">Admin Panel</a></li>
+    <li><a href="#features">New Features</a></li>
+    <li><a href="#team-pages">Team Pages</a></li>
+    <li><a href="#faq">FAQ</a></li>
+  </ul>
+</nav>
+
+<div class="container">
+  
+  <!-- Overview Section -->
+  <section class="section" id="overview">
+    <h2>📋 Overview: What Changed?</h2>
+    
+    <p>We've migrated SportsMockery.com from WordPress to a modern tech stack. This guide explains what's different and how to use the new system.</p>
+    
+    <table class="comparison">
+      <thead>
+        <tr>
+          <th>Feature</th>
+          <th>Old (WordPress)</th>
+          <th></th>
+          <th>New (Next.js)</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>Admin URL</strong></td>
+          <td class="old">sportsmockery.com/wp-admin</td>
+          <td class="arrow">→</td>
+          <td class="new">sportsmockery.com/admin</td>
+        </tr>
+        <tr>
+          <td><strong>Page Speed</strong></td>
+          <td class="old">3-5 seconds</td>
+          <td class="arrow">→</td>
+          <td class="new">Under 1 second</td>
+        </tr>
+        <tr>
+          <td><strong>Editor</strong></td>
+          <td class="old">Gutenberg/Classic</td>
+          <td class="arrow">→</td>
+          <td class="new">TipTap (simpler, faster)</td>
+        </tr>
+        <tr>
+          <td><strong>SEO</strong></td>
+          <td class="old">Yoast Plugin</td>
+          <td class="arrow">→</td>
+          <td class="new">Built-in SEO fields</td>
+        </tr>
+        <tr>
+          <td><strong>Images</strong></td>
+          <td class="old">Manual optimization</td>
+          <td class="arrow">→</td>
+          <td class="new">Auto-optimized</td>
+        </tr>
+        <tr>
+          <td><strong>Caching</strong></td>
+          <td class="old">WP Rocket plugin</td>
+          <td class="arrow">→</td>
+          <td class="new">Automatic (Vercel Edge)</td>
+        </tr>
+        <tr>
+          <td><strong>Security</strong></td>
+          <td class="old">Wordfence plugin</td>
+          <td class="arrow">→</td>
+          <td class="new">Built-in + Cloudflare</td>
+        </tr>
+        <tr>
+          <td><strong>Mobile</strong></td>
+          <td class="old">Responsive theme</td>
+          <td class="arrow">→</td>
+          <td class="new">Mobile-first design</td>
+        </tr>
+      </tbody>
+    </table>
+    
+    <div class="success">
+      <strong>✅ Good News:</strong> All 31,096 articles, categories, and author profiles have been migrated. Nothing was lost!
+    </div>
+  </section>
+  
+  <!-- What's New Section -->
+  <section class="section" id="whats-new">
+    <h2>✨ What's New</h2>
+    
+    <div class="features">
+      <div class="feature-card">
+        <div class="icon">⚡</div>
+        <h4>Lightning Fast</h4>
+        <p>Pages load in under 1 second. No more waiting for WordPress to think.</p>
+      </div>
+      
+      <div class="feature-card">
+        <div class="icon">🎨</div>
+        <h4>Modern Design</h4>
+        <p>Premium 2030-style design with team colors, animations, and dark mode.</p>
+      </div>
+      
+      <div class="feature-card">
+        <div class="icon">📊</div>
+        <h4>Live Scores Bar</h4>
+        <p>Real-time scores for all Chicago teams displayed at the top of every page.</p>
+      </div>
+      
+      <div class="feature-card">
+        <div class="icon">🤖</div>
+        <h4>AI Prophecies</h4>
+        <p>Claude AI generates witty predictions and mockery commentary automatically.</p>
+      </div>
+      
+      <div class="feature-card">
+        <div class="icon">🏟️</div>
+        <h4>ESPN-Style Team Pages</h4>
+        <p>Full team hubs with rosters, schedules, stats, depth charts, and standings.</p>
+      </div>
+      
+      <div class="feature-card">
+        <div class="icon">👤</div>
+        <h4>Player Profiles</h4>
+        <p>Detailed player pages with stats, career charts, and "What If" scenarios.</p>
+      </div>
+      
+      <div class="feature-card">
+        <div class="icon">🔍</div>
+        <h4>Smart Search</h4>
+        <p>Instant search with Cmd+K shortcut. Find any article in milliseconds.</p>
+      </div>
+      
+      <div class="feature-card">
+        <div class="icon">🌙</div>
+        <h4>Dark Mode</h4>
+        <p>Easy on the eyes for late-night sports reading. Toggle anytime.</p>
+      </div>
+    </div>
+  </section>
+  
+  <!-- Writing Posts Section -->
+  <section class="section" id="writing">
+    <h2>✍️ Writing & Publishing Posts</h2>
+    
+    <h3>Creating a New Post</h3>
+    
+    <div class="steps">
+      <div class="step">
+        <h4>Go to Admin Dashboard</h4>
+        <p>Navigate to <code>sportsmockery.com/admin</code> and log in with your credentials.</p>
+      </div>
+      
+      <div class="step">
+        <h4>Click "New Post"</h4>
+        <p>Find the "New Post" button on the dashboard or in the sidebar under Posts.</p>
+      </div>
+      
+      <div class="step">
+        <h4>Write Your Article</h4>
+        <p>Enter your title (slug auto-generates). Use the editor toolbar for formatting: bold, italic, links, images, headings, lists, quotes.</p>
+      </div>
+      
+      <div class="step">
+        <h4>Set Category & Featured Image</h4>
+        <p>In the right sidebar, select the team category (Bears, Cubs, etc.) and upload a featured image.</p>
+      </div>
+      
+      <div class="step">
+        <h4>Add SEO Info</h4>
+        <p>Fill in SEO title and meta description. These appear in Google search results.</p>
+      </div>
+      
+      <div class="step">
+        <h4>Publish or Save Draft</h4>
+        <p>Click "Publish" to go live immediately, or "Save Draft" to continue later.</p>
+      </div>
+    </div>
+    
+    <div class="screenshot">
+      <span class="label">POST EDITOR SCREENSHOT</span>
+      <p style="margin-top: 20px;">The new editor is cleaner than WordPress Gutenberg</p>
+    </div>
+    
+    <h3>Editor Toolbar Reference</h3>
+    
+    <table class="comparison">
+      <thead>
+        <tr>
+          <th>Button</th>
+          <th>What It Does</th>
+          <th>Keyboard Shortcut</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>B</strong></td>
+          <td>Bold text</td>
+          <td>Cmd+B</td>
+        </tr>
+        <tr>
+          <td><strong>I</strong></td>
+          <td>Italic text</td>
+          <td>Cmd+I</td>
+        </tr>
+        <tr>
+          <td><strong>🔗</strong></td>
+          <td>Insert link</td>
+          <td>Cmd+K</td>
+        </tr>
+        <tr>
+          <td><strong>H2</strong></td>
+          <td>Subheading</td>
+          <td>Cmd+Alt+2</td>
+        </tr>
+        <tr>
+          <td><strong>H3</strong></td>
+          <td>Sub-subheading</td>
+          <td>Cmd+Alt+3</td>
+        </tr>
+        <tr>
+          <td><strong>•</strong></td>
+          <td>Bullet list</td>
+          <td>Cmd+Shift+8</td>
+        </tr>
+        <tr>
+          <td><strong>1.</strong></td>
+          <td>Numbered list</td>
+          <td>Cmd+Shift+7</td>
+        </tr>
+        <tr>
+          <td><strong>"</strong></td>
+          <td>Block quote</td>
+          <td>Cmd+Shift+B</td>
+        </tr>
+        <tr>
+          <td><strong>🖼️</strong></td>
+          <td>Insert image</td>
+          <td>—</td>
+        </tr>
+      </tbody>
+    </table>
+    
+    <div class="tip">
+      <strong>💡 Pro Tip:</strong> The editor auto-saves every 30 seconds. You'll never lose work again!
+    </div>
+  </section>
+  
+  <!-- Admin Panel Section -->
+  <section class="section" id="admin">
+    <h2>🎛️ Admin Panel Guide</h2>
+    
+    <h3>Dashboard</h3>
+    <p>Your home base. See total posts, views, recent activity, and quick stats at a glance.</p>
+    
+    <h3>Sidebar Navigation</h3>
+    
+    <table class="comparison">
+      <thead>
+        <tr>
+          <th>Menu Item</th>
+          <th>What You'll Find</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>📊 Dashboard</strong></td>
+          <td>Stats overview, recent posts, activity feed, charts</td>
+        </tr>
+        <tr>
+          <td><strong>📝 Posts</strong></td>
+          <td>All articles. Search, filter by category/status, edit, delete</td>
+        </tr>
+        <tr>
+          <td><strong>📁 Categories</strong></td>
+          <td>Manage team categories and subcategories</td>
+        </tr>
+        <tr>
+          <td><strong>👥 Authors</strong></td>
+          <td>Writer profiles, bios, avatars, roles</td>
+        </tr>
+        <tr>
+          <td><strong>🖼️ Media</strong></td>
+          <td>Image library. Upload, search, manage all media files</td>
+        </tr>
+        <tr>
+          <td><strong>⚙️ Settings</strong></td>
+          <td>Site name, SEO defaults, social links (admin only)</td>
+        </tr>
+      </tbody>
+    </table>
+    
+    <h3>User Roles</h3>
+    
+    <table class="comparison">
+      <thead>
+        <tr>
+          <th>Role</th>
+          <th>Can Do</th>
+          <th>Cannot Do</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>Author</strong></td>
+          <td>Write & edit own posts, upload images</td>
+          <td>Edit others' posts, manage categories, access settings</td>
+        </tr>
+        <tr>
+          <td><strong>Editor</strong></td>
+          <td>Everything Author can + edit any post, manage categories</td>
+          <td>Manage users, site settings</td>
+        </tr>
+        <tr>
+          <td><strong>Admin</strong></td>
+          <td>Everything. Full access.</td>
+          <td>Nothing restricted</td>
+        </tr>
+      </tbody>
+    </table>
+  </section>
+  
+  <!-- New Features Section -->
+  <section class="section" id="features">
+    <h2>🚀 New Features Explained</h2>
+    
+    <h3>🏆 Oracle Scores Bar</h3>
+    <p>The live scores bar appears at the top of every page, showing current games for all Chicago teams. It includes:</p>
+    <ul style="margin: 15px 0 15px 30px;">
+      <li>Real-time scores (updated every 30 seconds)</li>
+      <li>Team logos and names</li>
+      <li>Quarter/period/inning status</li>
+      <li>TV channel info</li>
+      <li><strong>AI Prediction</strong> - Our "Oracle" predicts game outcomes with witty commentary</li>
+    </ul>
+    
+    <div class="screenshot">
+      <span class="label">SCORES BAR SCREENSHOT</span>
+      <p style="margin-top: 20px;">Bears 17 - Packers 14 | 3rd Quarter | "Bears win 72%"</p>
+    </div>
+    
+    <h3>🔮 AI Prophecy Feed</h3>
+    <p>Claude AI generates predictions and mockery commentary throughout the site:</p>
+    <ul style="margin: 15px 0 15px 30px;">
+      <li><strong>Homepage Prophecies:</strong> "Bears clinch NFC North by Week 17 (78% confidence)"</li>
+      <li><strong>Article Mockery:</strong> Witty takes appear in red boxes within articles</li>
+      <li><strong>Player What-Ifs:</strong> "What if Caleb Williams stays healthy all season?"</li>
+    </ul>
+    
+    <div class="tip">
+      <strong>💡 Note:</strong> AI content is marked with a "Powered by Claude AI" badge. It's entertainment, not journalism!
+    </div>
+    
+    <h3>📰 Prophecy Ticker</h3>
+    <p>The scrolling headline ticker below the header shows breaking news with hover-to-reveal AI mockery. Example:</p>
+    <ul style="margin: 15px 0 15px 30px;">
+      <li><strong>Headline:</strong> "LaVine Trade Rumors Heat Up"</li>
+      <li><strong>On Hover:</strong> "Please, anyone, take him—we'll add a toaster"</li>
+    </ul>
+    
+    <h3>📱 Reading Progress Bar</h3>
+    <p>On article pages, a red progress bar at the top shows how far you've scrolled through the article.</p>
+    
+    <h3>🌙 Dark Mode</h3>
+    <p>Click the sun/moon icon in the header to toggle dark mode. Your preference is saved automatically.</p>
+    
+    <h3>⌨️ Keyboard Shortcuts</h3>
+    <table class="comparison">
+      <thead>
+        <tr>
+          <th>Shortcut</th>
+          <th>Action</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><code>Cmd + K</code></td>
+          <td>Open search</td>
+        </tr>
+        <tr>
+          <td><code>Esc</code></td>
+          <td>Close modals/search</td>
+        </tr>
+        <tr>
+          <td><code>D</code></td>
+          <td>Toggle dark mode (when not in input)</td>
+        </tr>
+      </tbody>
+    </table>
+  </section>
+  
+  <!-- Team Pages Section -->
+  <section class="section" id="team-pages">
+    <h2>🏟️ Team Hub Pages</h2>
+    
+    <p>Each team now has a full ESPN-style hub page at <code>/team/[team-slug]</code>:</p>
+    
+    <div class="team-colors">
+      <div class="team-color bears">Bears<br>/team/bears</div>
+      <div class="team-color bulls">Bulls<br>/team/bulls</div>
+      <div class="team-color cubs">Cubs<br>/team/cubs</div>
+      <div class="team-color whitesox">White Sox<br>/team/white-sox</div>
+      <div class="team-color blackhawks">Blackhawks<br>/team/blackhawks</div>
+    </div>
+    
+    <h3>What's on Team Pages</h3>
+    
+    <table class="comparison">
+      <thead>
+        <tr>
+          <th>Tab</th>
+          <th>Content</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>News</strong></td>
+          <td>Latest articles for this team from sm_posts</td>
+        </tr>
+        <tr>
+          <td><strong>Schedule</strong></td>
+          <td>Full season schedule with results, upcoming games, TV info, spreads</td>
+        </tr>
+        <tr>
+          <td><strong>Roster</strong></td>
+          <td>Complete roster table - sortable by name, position, number</td>
+        </tr>
+        <tr>
+          <td><strong>Stats</strong></td>
+          <td>Team offense/defense stats with rankings and AI prophecy</td>
+        </tr>
+        <tr>
+          <td><strong>Depth Chart</strong></td>
+          <td>Visual depth chart showing starters and backups by position</td>
+        </tr>
+        <tr>
+          <td><strong>Standings</strong></td>
+          <td>Division/conference standings with current team highlighted</td>
+        </tr>
+        <tr>
+          <td><strong>Injuries</strong></td>
+          <td>Current injury report with status (Out, Questionable, etc.)</td>
+        </tr>
+      </tbody>
+    </table>
+    
+    <div class="warning">
+      <strong>⚠️ Note:</strong> Team data (rosters, schedules, stats) currently uses example data. It will connect to the Data Lab API (datalab.sportsmockery.com) for live data soon.
+    </div>
+    
+    <h3>Player Profile Pages</h3>
+    <p>Click any player name to see their full profile at <code>/player/[id]</code>:</p>
+    <ul style="margin: 15px 0 15px 30px;">
+      <li>Bio info (height, weight, college, draft)</li>
+      <li>Career & season stats</li>
+      <li>Game log (recent performances)</li>
+      <li>Career chart (animated)</li>
+      <li><strong>What-If Scenarios</strong> - AI predictions for alternate futures</li>
+      <li>Related news articles</li>
+    </ul>
+  </section>
+  
+  <!-- URL Reference Section -->
+  <section class="section">
+    <h2>🔗 URL Structure Reference</h2>
+    
+    <table class="comparison">
+      <thead>
+        <tr>
+          <th>Page</th>
+          <th>URL Pattern</th>
+          <th>Example</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Homepage</td>
+          <td><code>/</code></td>
+          <td>sportsmockery.com</td>
+        </tr>
+        <tr>
+          <td>Category</td>
+          <td><code>/[category]</code></td>
+          <td>/chicago-bears</td>
+        </tr>
+        <tr>
+          <td>Article</td>
+          <td><code>/[category]/[slug]</code></td>
+          <td>/chicago-bears/caleb-williams-questionable</td>
+        </tr>
+        <tr>
+          <td>Team Hub</td>
+          <td><code>/team/[slug]</code></td>
+          <td>/team/bears</td>
+        </tr>
+        <tr>
+          <td>Player Profile</td>
+          <td><code>/player/[id]</code></td>
+          <td>/player/18</td>
+        </tr>
+        <tr>
+          <td>Author</td>
+          <td><code>/author/[id]</code></td>
+          <td>/author/91</td>
+        </tr>
+        <tr>
+          <td>Search</td>
+          <td><code>/search?q=[query]</code></td>
+          <td>/search?q=bears+trade</td>
+        </tr>
+        <tr>
+          <td>Scores</td>
+          <td><code>/scores</code></td>
+          <td>/scores or /scores/nfl</td>
+        </tr>
+        <tr>
+          <td>Admin Dashboard</td>
+          <td><code>/admin</code></td>
+          <td>/admin</td>
+        </tr>
+        <tr>
+          <td>Edit Post</td>
+          <td><code>/admin/posts/[id]/edit</code></td>
+          <td>/admin/posts/12345/edit</td>
+        </tr>
+      </tbody>
+    </table>
+  </section>
+  
+  <!-- FAQ Section -->
+  <section class="section" id="faq">
+    <h2>❓ Frequently Asked Questions</h2>
+    
+    <div class="faq-item">
+      <div class="faq-question">Where did my old posts go?</div>
+      <div class="faq-answer">All 31,096 posts were migrated! They're at the same URLs they were before. The only change is faster loading.</div>
+    </div>
+    
+    <div class="faq-item">
+      <div class="faq-question">Why does /wp-admin not work anymore?</div>
+      <div class="faq-answer">We're no longer on WordPress. The new admin is at <code>/admin</code>. Same login credentials work.</div>
+    </div>
+    
+    <div class="faq-item">
+      <div class="faq-question">Can I still use Yoast for SEO?</div>
+      <div class="faq-answer">Yoast was a WordPress plugin. SEO is now built-in! Fill out the SEO Title and Meta Description fields in the post editor sidebar.</div>
+    </div>
+    
+    <div class="faq-item">
+      <div class="faq-question">Where are my images?</div>
+      <div class="faq-answer">All images are still hosted at the same URLs on the old server. They load through our CDN for speed. Upload new images through the Media Library in admin.</div>
+    </div>
+    
+    <div class="faq-item">
+      <div class="faq-question">How do I embed tweets/videos?</div>
+      <div class="faq-answer">Paste the Twitter or YouTube URL directly into the editor on its own line. It will auto-embed.</div>
+    </div>
+    
+    <div class="faq-item">
+      <div class="faq-question">What happened to Disqus comments?</div>
+      <div class="faq-answer">Disqus still works! All existing comments are preserved. The same Disqus thread loads on each article.</div>
+    </div>
+    
+    <div class="faq-item">
+      <div class="faq-question">Why is the site so fast now?</div>
+      <div class="faq-answer">Next.js pre-renders pages, Vercel serves from edge locations worldwide, and images are auto-optimized. No more WordPress plugin bloat!</div>
+    </div>
+    
+    <div class="faq-item">
+      <div class="faq-question">Can I schedule posts for later?</div>
+      <div class="faq-answer">Yes! In the Publish panel, change the date/time before clicking Publish. The post will go live at that time.</div>
+    </div>
+    
+    <div class="faq-item">
+      <div class="faq-question">Where does the AI mockery come from?</div>
+      <div class="faq-answer">We use Claude AI (by Anthropic) to generate witty predictions and commentary. It's integrated throughout the site for entertainment value.</div>
+    </div>
+    
+    <div class="faq-item">
+      <div class="faq-question">Who do I contact for help?</div>
+      <div class="faq-answer">Reach out to Chris (founder) for technical issues. For editorial questions, contact Erik (editor).</div>
+    </div>
+  </section>
+  
+  <!-- Quick Reference Card -->
+  <section class="section">
+    <h2>📋 Quick Reference Card</h2>
+    
+    <div class="features">
+      <div class="feature-card">
+        <h4>🔑 Login</h4>
+        <p>sportsmockery.com/login<br>Use your existing email/password</p>
+      </div>
+      
+      <div class="feature-card">
+        <h4>📝 New Post</h4>
+        <p>sportsmockery.com/admin/posts/new<br>Or click "New Post" in admin</p>
+      </div>
+      
+      <div class="feature-card">
+        <h4>🔍 Search</h4>
+        <p>Press Cmd+K anywhere<br>Or click search icon in header</p>
+      </div>
+      
+      <div class="feature-card">
+        <h4>🌙 Dark Mode</h4>
+        <p>Click sun/moon icon in header<br>Preference saves automatically</p>
+      </div>
+    </div>
+  </section>
+  
+</div>
+
+<footer class="footer">
+  <p><strong>SportsMockery.com</strong> — Chicago Sports News, Rumors & Mockery</p>
+  <p style="margin-top: 10px; color: #888;">Questions? Contact <a href="mailto:chris@sportsmockery.com">chris@sportsmockery.com</a></p>
+  <p style="margin-top: 20px; color: #666; font-size: 12px;">Admin Guide v1.0 — January 2026</p>
+</footer>
+
+</body>
+</html>

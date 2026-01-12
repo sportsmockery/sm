@@ -1,10 +1,10 @@
-// Sports Mockery Brand Palette
+// Sports Mockery Brand Palette (per SPORTSMOCKERY-DESIGN-SPEC.md)
 export const brand = {
-  primary: '#FF0000',
-  secondary: '#000000',
+  primary: '#bc0000', // SM Red per design spec
+  primaryDark: '#8a0000', // Darker red for hover
+  secondary: '#222222',
   white: '#FFFFFF',
-  darkRed: '#8B0000',
-  accent: '#FF0000',
+  accent: '#bc0000',
 }
 
 // Team Color Palettes
@@ -90,10 +90,10 @@ export const ui = {
     hoverDark: '#3f3f46',
   },
   accent: {
-    light: '#8B0000', // Dark red for light mode
-    dark: '#FF6666', // Lighter red for dark mode
-    hover: '#a00000',
-    hoverDark: '#FF8888',
+    light: '#bc0000', // SM Red for light mode per design spec
+    dark: '#bc0000', // Same red for dark mode per design spec
+    hover: '#8a0000',
+    hoverDark: '#8a0000',
   },
   card: {
     light: '#FFFFFF',
@@ -106,8 +106,8 @@ export const ui = {
     bgDark: '#27272a',
     border: '#d1d5db',
     borderDark: '#3f3f46',
-    focus: '#8B0000',
-    focusDark: '#FF6666',
+    focus: '#bc0000',
+    focusDark: '#bc0000',
   },
 }
 
@@ -137,8 +137,8 @@ export const lightModeTokens = {
 
 // Gradient presets
 export const gradients = {
-  brand: 'linear-gradient(135deg, #FF0000 0%, #8B0000 100%)',
-  dark: 'linear-gradient(135deg, #1a1a1a 0%, #000000 100%)',
+  brand: 'linear-gradient(135deg, #bc0000 0%, #8a0000 100%)',
+  dark: 'linear-gradient(135deg, #222222 0%, #000000 100%)',
   overlay: 'linear-gradient(to top, rgba(0,0,0,0.8) 0%, rgba(0,0,0,0.4) 50%, transparent 100%)',
   hero: 'linear-gradient(to bottom, transparent 0%, rgba(0,0,0,0.7) 100%)',
   glass: 'linear-gradient(135deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0.05) 100%)',

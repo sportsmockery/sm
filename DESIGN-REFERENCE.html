@@ -1,0 +1,1378 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SportsMockery Design Reference</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    
+    :root {
+      --bg-primary: #0a0a0b;
+      --bg-secondary: #111113;
+      --bg-tertiary: #18181b;
+      --bg-card: #1c1c1f;
+      --text-primary: #ffffff;
+      --text-secondary: #a1a1aa;
+      --text-muted: #71717a;
+      --border: #27272a;
+      --accent: #FF0000;
+      --accent-hover: #CC0000;
+      --bears: #0B162A;
+      --bears-alt: #C83200;
+      --bulls: #CE1141;
+      --cubs: #0E3386;
+      --whitesox: #27251F;
+      --blackhawks: #CF0A2C;
+      --success: #10b981;
+    }
+    
+    body {
+      font-family: 'Inter', -apple-system, sans-serif;
+      background: var(--bg-primary);
+      color: var(--text-primary);
+      line-height: 1.5;
+    }
+    
+    .design-nav {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 250px;
+      height: 100vh;
+      background: var(--bg-secondary);
+      border-right: 1px solid var(--border);
+      padding: 20px;
+      overflow-y: auto;
+      z-index: 1000;
+    }
+    
+    .design-nav h1 {
+      font-size: 14px;
+      font-weight: 800;
+      color: var(--accent);
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      margin-bottom: 20px;
+    }
+    
+    .design-nav a {
+      display: block;
+      color: var(--text-secondary);
+      text-decoration: none;
+      padding: 8px 12px;
+      border-radius: 6px;
+      font-size: 13px;
+      margin-bottom: 4px;
+    }
+    
+    .design-nav a:hover {
+      background: var(--bg-tertiary);
+      color: var(--text-primary);
+    }
+    
+    .design-nav h3 {
+      font-size: 10px;
+      font-weight: 700;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin: 20px 0 10px;
+    }
+    
+    .main-content {
+      margin-left: 250px;
+      padding: 40px;
+    }
+    
+    .section {
+      margin-bottom: 80px;
+      padding-top: 40px;
+    }
+    
+    .section-title {
+      font-size: 32px;
+      font-weight: 800;
+      margin-bottom: 10px;
+    }
+    
+    .section-desc {
+      color: var(--text-secondary);
+      margin-bottom: 40px;
+      max-width: 600px;
+    }
+    
+    .preview-box {
+      background: var(--bg-secondary);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      overflow: hidden;
+      margin-bottom: 40px;
+    }
+    
+    .preview-label {
+      background: var(--bg-tertiary);
+      padding: 12px 20px;
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text-secondary);
+      border-bottom: 1px solid var(--border);
+    }
+    
+    .preview-content {
+      padding: 30px;
+    }
+    
+    /* ============================================
+       COMPONENT PREVIEWS
+       ============================================ */
+    
+    /* Buttons */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 12px 24px;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 600;
+      text-decoration: none;
+      cursor: pointer;
+      border: none;
+      transition: all 0.2s;
+    }
+    
+    .btn-primary {
+      background: var(--accent);
+      color: white;
+    }
+    
+    .btn-primary:hover {
+      background: var(--accent-hover);
+      box-shadow: 0 0 20px rgba(255, 0, 0, 0.3);
+    }
+    
+    .btn-secondary {
+      background: var(--bg-tertiary);
+      color: var(--text-primary);
+      border: 1px solid var(--border);
+    }
+    
+    .btn-ghost {
+      background: transparent;
+      color: var(--text-secondary);
+    }
+    
+    .btn-sm { padding: 8px 16px; font-size: 12px; }
+    .btn-lg { padding: 16px 32px; font-size: 16px; }
+    
+    /* Cards */
+    .card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      overflow: hidden;
+    }
+    
+    .card-glass {
+      background: rgba(255, 255, 255, 0.03);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.05);
+    }
+    
+    .card-glow:hover {
+      border-color: var(--accent);
+      box-shadow: 0 0 30px rgba(255, 0, 0, 0.15);
+    }
+    
+    /* Stats Card */
+    .stat-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 20px;
+    }
+    
+    .stat-card-label {
+      font-size: 12px;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+    
+    .stat-card-value {
+      font-size: 36px;
+      font-weight: 800;
+      margin: 8px 0;
+    }
+    
+    .stat-card-trend {
+      font-size: 12px;
+      color: var(--success);
+    }
+    
+    /* Badges */
+    .badge {
+      display: inline-block;
+      padding: 4px 10px;
+      border-radius: 4px;
+      font-size: 10px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    
+    .badge-bears { background: var(--bears); color: var(--bears-alt); }
+    .badge-bulls { background: var(--bulls); color: white; }
+    .badge-cubs { background: var(--cubs); color: white; }
+    .badge-whitesox { background: var(--whitesox); color: #C4CED4; }
+    .badge-blackhawks { background: var(--blackhawks); color: white; }
+    .badge-live { background: var(--accent); color: white; }
+    .badge-final { background: var(--bg-tertiary); color: var(--text-secondary); }
+    
+    /* Inputs */
+    .input {
+      width: 100%;
+      padding: 12px 16px;
+      background: var(--bg-tertiary);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      color: var(--text-primary);
+      font-size: 14px;
+    }
+    
+    .input:focus {
+      outline: none;
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(255, 0, 0, 0.1);
+    }
+    
+    .input-label {
+      display: block;
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text-secondary);
+      margin-bottom: 8px;
+    }
+    
+    /* ============================================
+       PAGE MOCKUPS
+       ============================================ */
+    
+    .mockup {
+      background: var(--bg-primary);
+      border-radius: 12px;
+      overflow: hidden;
+      border: 1px solid var(--border);
+    }
+    
+    /* Scores Bar */
+    .scores-bar {
+      background: var(--bg-secondary);
+      padding: 10px 20px;
+      display: flex;
+      gap: 20px;
+      overflow-x: auto;
+      border-bottom: 1px solid var(--border);
+    }
+    
+    .score-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 8px 16px;
+      background: var(--bg-tertiary);
+      border-radius: 8px;
+      white-space: nowrap;
+    }
+    
+    .score-teams {
+      font-size: 12px;
+      font-weight: 600;
+    }
+    
+    .score-result {
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--success);
+    }
+    
+    .score-live {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    
+    .live-dot {
+      width: 8px;
+      height: 8px;
+      background: var(--accent);
+      border-radius: 50%;
+      animation: pulse 1.5s infinite;
+    }
+    
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.5; }
+    }
+    
+    /* Header */
+    .site-header {
+      background: var(--bg-secondary);
+      padding: 15px 30px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid var(--border);
+    }
+    
+    .logo {
+      font-size: 20px;
+      font-weight: 900;
+      letter-spacing: -1px;
+    }
+    
+    .logo span { color: var(--accent); }
+    
+    .nav-links {
+      display: flex;
+      gap: 30px;
+    }
+    
+    .nav-links a {
+      color: var(--text-secondary);
+      text-decoration: none;
+      font-size: 14px;
+      font-weight: 500;
+    }
+    
+    .nav-links a:hover { color: var(--text-primary); }
+    
+    /* Hero */
+    .hero {
+      position: relative;
+      height: 500px;
+      background: linear-gradient(135deg, var(--bears) 0%, #1a2d4a 100%);
+      display: flex;
+      align-items: flex-end;
+      padding: 40px;
+    }
+    
+    .hero-content {
+      max-width: 600px;
+    }
+    
+    .hero-category {
+      display: inline-block;
+      background: var(--bears-alt);
+      color: white;
+      padding: 6px 14px;
+      border-radius: 4px;
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      margin-bottom: 15px;
+    }
+    
+    .hero-title {
+      font-size: 36px;
+      font-weight: 800;
+      line-height: 1.15;
+      margin-bottom: 15px;
+    }
+    
+    .hero-excerpt {
+      color: var(--text-secondary);
+      font-size: 16px;
+      margin-bottom: 20px;
+    }
+    
+    .hero-meta {
+      color: var(--text-muted);
+      font-size: 13px;
+    }
+    
+    /* Content Grid */
+    .content-grid {
+      display: grid;
+      grid-template-columns: 1fr 350px;
+      gap: 40px;
+      padding: 40px;
+    }
+    
+    .section-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 20px;
+      padding-bottom: 15px;
+      border-bottom: 2px solid var(--border);
+    }
+    
+    .section-header h2 {
+      font-size: 18px;
+      font-weight: 700;
+    }
+    
+    /* Article Cards */
+    .article-list {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+    
+    .article-item {
+      display: flex;
+      gap: 16px;
+      padding: 16px;
+      background: var(--bg-card);
+      border-radius: 12px;
+      border: 1px solid var(--border);
+      transition: all 0.2s;
+    }
+    
+    .article-item:hover {
+      border-color: var(--accent);
+      transform: translateX(4px);
+    }
+    
+    .article-thumb {
+      width: 120px;
+      height: 80px;
+      background: var(--bg-tertiary);
+      border-radius: 8px;
+      flex-shrink: 0;
+    }
+    
+    .article-content h3 {
+      font-size: 15px;
+      font-weight: 600;
+      margin-bottom: 6px;
+      line-height: 1.3;
+    }
+    
+    .article-content p {
+      font-size: 13px;
+      color: var(--text-muted);
+      margin-bottom: 8px;
+    }
+    
+    .article-meta {
+      font-size: 11px;
+      color: var(--text-muted);
+    }
+    
+    /* Sidebar */
+    .sidebar-widget {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 20px;
+      margin-bottom: 20px;
+    }
+    
+    .sidebar-widget h3 {
+      font-size: 14px;
+      font-weight: 700;
+      margin-bottom: 15px;
+      padding-bottom: 10px;
+      border-bottom: 1px solid var(--border);
+    }
+    
+    .trending-item {
+      display: flex;
+      gap: 12px;
+      padding: 10px 0;
+      border-bottom: 1px solid var(--border);
+    }
+    
+    .trending-item:last-child { border: none; }
+    
+    .trending-num {
+      font-size: 18px;
+      font-weight: 800;
+      color: var(--accent);
+      width: 24px;
+    }
+    
+    .trending-title {
+      font-size: 13px;
+      font-weight: 500;
+      line-height: 1.4;
+    }
+    
+    /* Team Cards */
+    .team-grid {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 20px;
+      padding: 40px;
+      background: var(--bg-secondary);
+    }
+    
+    .team-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 24px;
+      text-align: center;
+      transition: all 0.2s;
+    }
+    
+    .team-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+    }
+    
+    .team-logo {
+      width: 60px;
+      height: 60px;
+      background: var(--bg-tertiary);
+      border-radius: 50%;
+      margin: 0 auto 15px;
+    }
+    
+    .team-name {
+      font-size: 16px;
+      font-weight: 700;
+      margin-bottom: 5px;
+    }
+    
+    .team-record {
+      font-size: 13px;
+      color: var(--text-muted);
+    }
+    
+    /* ============================================
+       ADMIN MOCKUPS
+       ============================================ */
+    
+    .admin-layout {
+      display: grid;
+      grid-template-columns: 240px 1fr;
+      min-height: 600px;
+    }
+    
+    .admin-sidebar {
+      background: var(--bg-secondary);
+      border-right: 1px solid var(--border);
+      padding: 20px;
+    }
+    
+    .admin-sidebar .logo {
+      margin-bottom: 30px;
+    }
+    
+    .admin-nav-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 10px 14px;
+      border-radius: 8px;
+      color: var(--text-secondary);
+      font-size: 14px;
+      margin-bottom: 4px;
+      cursor: pointer;
+    }
+    
+    .admin-nav-item:hover {
+      background: var(--bg-tertiary);
+      color: var(--text-primary);
+    }
+    
+    .admin-nav-item.active {
+      background: rgba(255, 0, 0, 0.1);
+      color: var(--accent);
+      border-left: 3px solid var(--accent);
+      margin-left: -3px;
+    }
+    
+    .admin-nav-section {
+      font-size: 10px;
+      font-weight: 700;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin: 25px 0 10px;
+      padding: 0 14px;
+    }
+    
+    .admin-main {
+      padding: 30px;
+      background: var(--bg-primary);
+    }
+    
+    .admin-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 30px;
+    }
+    
+    .admin-header h1 {
+      font-size: 28px;
+      font-weight: 800;
+    }
+    
+    .admin-stats {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 20px;
+      margin-bottom: 30px;
+    }
+    
+    .quick-actions {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 15px;
+      margin-bottom: 30px;
+    }
+    
+    .quick-action {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 20px;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    
+    .quick-action:hover {
+      border-color: var(--accent);
+      transform: translateY(-2px);
+    }
+    
+    .quick-action-icon {
+      font-size: 24px;
+      margin-bottom: 10px;
+    }
+    
+    .quick-action-label {
+      font-size: 13px;
+      font-weight: 600;
+    }
+    
+    /* Table */
+    .data-table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+    
+    .data-table th {
+      text-align: left;
+      padding: 12px 16px;
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      border-bottom: 1px solid var(--border);
+    }
+    
+    .data-table td {
+      padding: 16px;
+      border-bottom: 1px solid var(--border);
+      font-size: 14px;
+    }
+    
+    .data-table tr:hover td {
+      background: var(--bg-tertiary);
+    }
+    
+    /* Form */
+    .form-group {
+      margin-bottom: 20px;
+    }
+    
+    .form-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+    }
+    
+    /* Tabs */
+    .tabs {
+      display: flex;
+      gap: 0;
+      border-bottom: 1px solid var(--border);
+      margin-bottom: 30px;
+    }
+    
+    .tab {
+      padding: 12px 20px;
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--text-secondary);
+      cursor: pointer;
+      border-bottom: 2px solid transparent;
+      margin-bottom: -1px;
+    }
+    
+    .tab:hover { color: var(--text-primary); }
+    
+    .tab.active {
+      color: var(--accent);
+      border-bottom-color: var(--accent);
+    }
+    
+    /* Color swatches */
+    .color-grid {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 15px;
+    }
+    
+    .color-swatch {
+      height: 80px;
+      border-radius: 8px;
+      display: flex;
+      align-items: flex-end;
+      padding: 10px;
+    }
+    
+    .color-swatch span {
+      font-size: 10px;
+      font-weight: 600;
+      background: rgba(0,0,0,0.5);
+      padding: 4px 8px;
+      border-radius: 4px;
+    }
+    
+    /* Typography */
+    .type-sample {
+      margin-bottom: 20px;
+    }
+    
+    .type-sample .label {
+      font-size: 11px;
+      color: var(--text-muted);
+      margin-bottom: 5px;
+    }
+    
+    .text-xs { font-size: 12px; }
+    .text-sm { font-size: 14px; }
+    .text-base { font-size: 16px; }
+    .text-lg { font-size: 18px; }
+    .text-xl { font-size: 20px; }
+    .text-2xl { font-size: 24px; }
+    .text-3xl { font-size: 30px; }
+    .text-4xl { font-size: 36px; }
+    .text-5xl { font-size: 48px; }
+    
+    .font-normal { font-weight: 400; }
+    .font-medium { font-weight: 500; }
+    .font-semibold { font-weight: 600; }
+    .font-bold { font-weight: 700; }
+    .font-extrabold { font-weight: 800; }
+    
+    /* Spacing helpers */
+    .flex { display: flex; }
+    .gap-2 { gap: 8px; }
+    .gap-4 { gap: 16px; }
+    .mb-4 { margin-bottom: 16px; }
+    .mb-8 { margin-bottom: 32px; }
+    .mt-4 { margin-top: 16px; }
+    
+  </style>
+</head>
+<body>
+
+<!-- Navigation -->
+<nav class="design-nav">
+  <h1>🎨 Design Ref</h1>
+  
+  <h3>Foundations</h3>
+  <a href="#colors">Colors</a>
+  <a href="#typography">Typography</a>
+  <a href="#spacing">Spacing</a>
+  
+  <h3>Components</h3>
+  <a href="#buttons">Buttons</a>
+  <a href="#cards">Cards</a>
+  <a href="#badges">Badges</a>
+  <a href="#inputs">Form Inputs</a>
+  <a href="#tables">Tables</a>
+  
+  <h3>Page Layouts</h3>
+  <a href="#homepage">Homepage</a>
+  <a href="#admin">Admin Dashboard</a>
+  <a href="#team-page">Team Page</a>
+  <a href="#article">Article Page</a>
+  
+  <h3>Features</h3>
+  <a href="#charts">Chart Builder</a>
+  <a href="#media">Media Library</a>
+  <a href="#editor">Post Editor</a>
+</nav>
+
+<!-- Main Content -->
+<main class="main-content">
+
+  <!-- Colors -->
+  <section id="colors" class="section">
+    <h2 class="section-title">Colors</h2>
+    <p class="section-desc">The SportsMockery color palette. Dark theme primary with team color accents.</p>
+    
+    <div class="preview-box">
+      <div class="preview-label">Background Colors</div>
+      <div class="preview-content">
+        <div class="color-grid">
+          <div class="color-swatch" style="background: #0a0a0b;"><span>Primary #0a0a0b</span></div>
+          <div class="color-swatch" style="background: #111113;"><span>Secondary #111113</span></div>
+          <div class="color-swatch" style="background: #18181b;"><span>Tertiary #18181b</span></div>
+          <div class="color-swatch" style="background: #1c1c1f;"><span>Card #1c1c1f</span></div>
+          <div class="color-swatch" style="background: #27272a;"><span>Border #27272a</span></div>
+        </div>
+      </div>
+    </div>
+    
+    <div class="preview-box">
+      <div class="preview-label">Team Colors</div>
+      <div class="preview-content">
+        <div class="color-grid">
+          <div class="color-swatch" style="background: linear-gradient(135deg, #0B162A, #C83200);"><span>Bears</span></div>
+          <div class="color-swatch" style="background: linear-gradient(135deg, #CE1141, #000);"><span>Bulls</span></div>
+          <div class="color-swatch" style="background: linear-gradient(135deg, #0E3386, #CC3433);"><span>Cubs</span></div>
+          <div class="color-swatch" style="background: linear-gradient(135deg, #27251F, #C4CED4);"><span>White Sox</span></div>
+          <div class="color-swatch" style="background: linear-gradient(135deg, #CF0A2C, #000);"><span>Blackhawks</span></div>
+        </div>
+      </div>
+    </div>
+    
+    <div class="preview-box">
+      <div class="preview-label">Accent & Status</div>
+      <div class="preview-content">
+        <div class="color-grid">
+          <div class="color-swatch" style="background: #FF0000;"><span>Accent #FF0000</span></div>
+          <div class="color-swatch" style="background: #10b981;"><span>Success #10b981</span></div>
+          <div class="color-swatch" style="background: #f59e0b;"><span>Warning #f59e0b</span></div>
+          <div class="color-swatch" style="background: #ef4444;"><span>Error #ef4444</span></div>
+          <div class="color-swatch" style="background: #3b82f6;"><span>Info #3b82f6</span></div>
+        </div>
+      </div>
+    </div>
+  </section>
+  
+  <!-- Typography -->
+  <section id="typography" class="section">
+    <h2 class="section-title">Typography</h2>
+    <p class="section-desc">Inter font family with a clear hierarchy.</p>
+    
+    <div class="preview-box">
+      <div class="preview-label">Font Sizes</div>
+      <div class="preview-content">
+        <div class="type-sample"><div class="label">text-5xl / 48px</div><div class="text-5xl font-extrabold">Bears Crush Packers</div></div>
+        <div class="type-sample"><div class="label">text-4xl / 36px</div><div class="text-4xl font-bold">Bears Crush Packers</div></div>
+        <div class="type-sample"><div class="label">text-3xl / 30px</div><div class="text-3xl font-bold">Bears Crush Packers</div></div>
+        <div class="type-sample"><div class="label">text-2xl / 24px</div><div class="text-2xl font-semibold">Bears Crush Packers</div></div>
+        <div class="type-sample"><div class="label">text-xl / 20px</div><div class="text-xl font-semibold">Bears Crush Packers</div></div>
+        <div class="type-sample"><div class="label">text-lg / 18px</div><div class="text-lg font-medium">Bears Crush Packers</div></div>
+        <div class="type-sample"><div class="label">text-base / 16px</div><div class="text-base">Body text for articles and descriptions.</div></div>
+        <div class="type-sample"><div class="label">text-sm / 14px</div><div class="text-sm" style="color: var(--text-secondary);">Secondary text, metadata, captions.</div></div>
+        <div class="type-sample"><div class="label">text-xs / 12px</div><div class="text-xs" style="color: var(--text-muted);">Labels, timestamps, fine print.</div></div>
+      </div>
+    </div>
+  </section>
+  
+  <!-- Buttons -->
+  <section id="buttons" class="section">
+    <h2 class="section-title">Buttons</h2>
+    <p class="section-desc">Consistent button styles across the site.</p>
+    
+    <div class="preview-box">
+      <div class="preview-label">Button Variants</div>
+      <div class="preview-content">
+        <div class="flex gap-4 mb-8">
+          <button class="btn btn-primary">Primary</button>
+          <button class="btn btn-secondary">Secondary</button>
+          <button class="btn btn-ghost">Ghost</button>
+        </div>
+        <div class="flex gap-4">
+          <button class="btn btn-primary btn-sm">Small</button>
+          <button class="btn btn-primary">Medium</button>
+          <button class="btn btn-primary btn-lg">Large</button>
+        </div>
+      </div>
+    </div>
+  </section>
+  
+  <!-- Badges -->
+  <section id="badges" class="section">
+    <h2 class="section-title">Badges</h2>
+    <p class="section-desc">Team badges and status indicators.</p>
+    
+    <div class="preview-box">
+      <div class="preview-label">Team Badges</div>
+      <div class="preview-content">
+        <div class="flex gap-2">
+          <span class="badge badge-bears">🏈 Bears</span>
+          <span class="badge badge-bulls">🏀 Bulls</span>
+          <span class="badge badge-cubs">⚾ Cubs</span>
+          <span class="badge badge-whitesox">⚾ White Sox</span>
+          <span class="badge badge-blackhawks">🏒 Blackhawks</span>
+        </div>
+        <div class="flex gap-2 mt-4">
+          <span class="badge badge-live">● LIVE</span>
+          <span class="badge badge-final">FINAL</span>
+        </div>
+      </div>
+    </div>
+  </section>
+  
+  <!-- Cards -->
+  <section id="cards" class="section">
+    <h2 class="section-title">Cards</h2>
+    <p class="section-desc">Card components for content display.</p>
+    
+    <div class="preview-box">
+      <div class="preview-label">Stat Cards</div>
+      <div class="preview-content">
+        <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px;">
+          <div class="stat-card">
+            <div class="stat-card-label">Total Posts</div>
+            <div class="stat-card-value">31,099</div>
+            <div class="stat-card-trend">↑ 12% this week</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-card-label">Views Today</div>
+            <div class="stat-card-value">12,847</div>
+            <div class="stat-card-trend">↑ 8% vs yesterday</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-card-label">Authors</div>
+            <div class="stat-card-value">9</div>
+            <div class="stat-card-trend">Active writers</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-card-label">Subscribers</div>
+            <div class="stat-card-value">22,000</div>
+            <div class="stat-card-trend">↑ 156 this month</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+  
+  <!-- Inputs -->
+  <section id="inputs" class="section">
+    <h2 class="section-title">Form Inputs</h2>
+    <p class="section-desc">Consistent form styling.</p>
+    
+    <div class="preview-box">
+      <div class="preview-label">Input Fields</div>
+      <div class="preview-content" style="max-width: 500px;">
+        <div class="form-group">
+          <label class="input-label">Post Title</label>
+          <input type="text" class="input" placeholder="Enter post title...">
+        </div>
+        <div class="form-group">
+          <label class="input-label">Category</label>
+          <select class="input">
+            <option>Chicago Bears</option>
+            <option>Chicago Bulls</option>
+            <option>Chicago Cubs</option>
+          </select>
+        </div>
+      </div>
+    </div>
+  </section>
+  
+  <!-- Homepage -->
+  <section id="homepage" class="section">
+    <h2 class="section-title">Homepage Layout</h2>
+    <p class="section-desc">ESPN-style homepage with scores, hero, and content grid.</p>
+    
+    <div class="preview-box">
+      <div class="preview-label">Homepage Mockup</div>
+      <div class="preview-content" style="padding: 0;">
+        <div class="mockup">
+          
+          <!-- Scores Bar -->
+          <div class="scores-bar">
+            <div class="score-item">
+              <div class="score-live"><div class="live-dot"></div> LIVE</div>
+              <div class="score-teams">CHI vs GB</div>
+              <div class="score-result">24-17</div>
+            </div>
+            <div class="score-item">
+              <div class="score-teams">Bulls vs Heat</div>
+              <div style="color: var(--text-muted)">7:30 PM</div>
+            </div>
+            <div class="score-item">
+              <div class="score-teams">Hawks 7 - Blues 3</div>
+              <div class="badge badge-final">FINAL</div>
+            </div>
+          </div>
+          
+          <!-- Header -->
+          <div class="site-header">
+            <div class="logo">SPORTS<span>MOCKERY</span></div>
+            <div class="nav-links">
+              <a href="#">Bears</a>
+              <a href="#">Bulls</a>
+              <a href="#">Cubs</a>
+              <a href="#">White Sox</a>
+              <a href="#">Blackhawks</a>
+            </div>
+            <div class="flex gap-4">
+              <button class="btn btn-ghost btn-sm">Search</button>
+              <button class="btn btn-primary btn-sm">Subscribe</button>
+            </div>
+          </div>
+          
+          <!-- Hero -->
+          <div class="hero">
+            <div class="hero-content">
+              <span class="hero-category">🏈 Bears Playoffs</span>
+              <h1 class="hero-title">Playoff Revenge Tour: 3 Ways the Bears Can Finally Exorcise the Green Bay Demons</h1>
+              <p class="hero-excerpt">Saturday night. The playoffs. And staring back at us is that same puke-green and yellow monstrosity...</p>
+              <p class="hero-meta">By Ficky • 5 min read • 2 hours ago</p>
+            </div>
+          </div>
+          
+          <!-- Content Grid -->
+          <div class="content-grid">
+            <div>
+              <div class="section-header">
+                <h2>Top Stories</h2>
+                <a href="#" style="color: var(--accent); font-size: 13px; text-decoration: none;">View All →</a>
+              </div>
+              <div class="article-list">
+                <div class="article-item">
+                  <div class="article-thumb"></div>
+                  <div class="article-content">
+                    <span class="badge badge-cubs" style="margin-bottom: 8px;">Cubs</span>
+                    <h3>Bo Bichette Rumors: A New Frontrunner Emerges?</h3>
+                    <p>The heavy lifting seemingly began once the calendar flipped to January...</p>
+                    <div class="article-meta">Aldo Soto • 2 hours ago</div>
+                  </div>
+                </div>
+                <div class="article-item">
+                  <div class="article-thumb"></div>
+                  <div class="article-content">
+                    <span class="badge badge-blackhawks" style="margin-bottom: 8px;">Blackhawks</span>
+                    <h3>Blackhawks Dump Two Solid Assets To Solve Cap Problem</h3>
+                    <p>GM Kyle Davidson has to be creative just to hit the cap floor...</p>
+                    <div class="article-meta">Isaac Nielsen • 3 hours ago</div>
+                  </div>
+                </div>
+                <div class="article-item">
+                  <div class="article-thumb"></div>
+                  <div class="article-content">
+                    <span class="badge badge-whitesox" style="margin-bottom: 8px;">White Sox</span>
+                    <h3>White Sox Claim Former Top-100 Prospect</h3>
+                    <p>Drew Romo claimed off waivers, leaving Korey Lee's role in question...</p>
+                    <div class="article-meta">Mitchell Kaminski • 4 hours ago</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+            <div>
+              <div class="sidebar-widget">
+                <h3>🔥 Trending</h3>
+                <div class="trending-item">
+                  <span class="trending-num">1</span>
+                  <span class="trending-title">Caleb Williams playoff stats vs Aaron Rodgers</span>
+                </div>
+                <div class="trending-item">
+                  <span class="trending-num">2</span>
+                  <span class="trending-title">Cubs sign Justin Steele to extension</span>
+                </div>
+                <div class="trending-item">
+                  <span class="trending-num">3</span>
+                  <span class="trending-title">Blackhawks 4-0 in 2026</span>
+                </div>
+                <div class="trending-item">
+                  <span class="trending-num">4</span>
+                  <span class="trending-title">Bulls trade rumors heating up</span>
+                </div>
+                <div class="trending-item">
+                  <span class="trending-num">5</span>
+                  <span class="trending-title">White Sox rebuild continues</span>
+                </div>
+              </div>
+              
+              <div class="sidebar-widget">
+                <h3>📅 Upcoming Games</h3>
+                <div style="font-size: 13px;">
+                  <div style="padding: 10px 0; border-bottom: 1px solid var(--border);">
+                    <div style="font-weight: 600;">Bears vs Packers</div>
+                    <div style="color: var(--text-muted);">Sat, Jan 11 • 7:00 PM • FOX</div>
+                  </div>
+                  <div style="padding: 10px 0; border-bottom: 1px solid var(--border);">
+                    <div style="font-weight: 600;">Bulls @ Celtics</div>
+                    <div style="color: var(--text-muted);">Sun, Jan 12 • 6:00 PM • NBCSCH</div>
+                  </div>
+                  <div style="padding: 10px 0;">
+                    <div style="font-weight: 600;">Blackhawks vs Wild</div>
+                    <div style="color: var(--text-muted);">Mon, Jan 13 • 7:30 PM • ESPN+</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <!-- Team Cards -->
+          <div class="team-grid">
+            <div class="team-card" style="border-top: 3px solid var(--bears-alt);">
+              <div class="team-logo"></div>
+              <div class="team-name">Bears</div>
+              <div class="team-record">10-7 • NFC North</div>
+            </div>
+            <div class="team-card" style="border-top: 3px solid var(--bulls);">
+              <div class="team-logo"></div>
+              <div class="team-name">Bulls</div>
+              <div class="team-record">18-22 • Central</div>
+            </div>
+            <div class="team-card" style="border-top: 3px solid var(--cubs);">
+              <div class="team-logo"></div>
+              <div class="team-name">Cubs</div>
+              <div class="team-record">Offseason</div>
+            </div>
+            <div class="team-card" style="border-top: 3px solid #C4CED4;">
+              <div class="team-logo"></div>
+              <div class="team-name">White Sox</div>
+              <div class="team-record">Offseason</div>
+            </div>
+            <div class="team-card" style="border-top: 3px solid var(--blackhawks);">
+              <div class="team-logo"></div>
+              <div class="team-name">Blackhawks</div>
+              <div class="team-record">22-18-4 • Central</div>
+            </div>
+          </div>
+          
+        </div>
+      </div>
+    </div>
+  </section>
+  
+  <!-- Admin Dashboard -->
+  <section id="admin" class="section">
+    <h2 class="section-title">Admin Dashboard</h2>
+    <p class="section-desc">Clean admin interface with all features accessible.</p>
+    
+    <div class="preview-box">
+      <div class="preview-label">Admin Layout</div>
+      <div class="preview-content" style="padding: 0;">
+        <div class="mockup">
+          <div class="admin-layout">
+            
+            <!-- Sidebar -->
+            <div class="admin-sidebar">
+              <div class="logo">SPORTS<span>MOCKERY</span></div>
+              
+              <div class="admin-nav-item active">📊 Dashboard</div>
+              
+              <div class="admin-nav-section">Content</div>
+              <div class="admin-nav-item">📝 Posts</div>
+              <div class="admin-nav-item">📁 Categories</div>
+              <div class="admin-nav-item">👤 Authors</div>
+              <div class="admin-nav-item">🖼️ Media</div>
+              
+              <div class="admin-nav-section">Features</div>
+              <div class="admin-nav-item">📈 Charts</div>
+              <div class="admin-nav-item">🔮 AI Assistant</div>
+              <div class="admin-nav-item">📊 Analytics</div>
+              
+              <div class="admin-nav-section">Settings</div>
+              <div class="admin-nav-item">⚙️ General</div>
+              <div class="admin-nav-item">🔍 SEO</div>
+              <div class="admin-nav-item">👥 Users</div>
+            </div>
+            
+            <!-- Main -->
+            <div class="admin-main">
+              <div class="admin-header">
+                <h1>Dashboard</h1>
+                <button class="btn btn-primary">+ New Post</button>
+              </div>
+              
+              <div class="admin-stats">
+                <div class="stat-card">
+                  <div class="stat-card-label">Total Posts</div>
+                  <div class="stat-card-value">31,099</div>
+                  <div class="stat-card-trend">↑ 12%</div>
+                </div>
+                <div class="stat-card">
+                  <div class="stat-card-label">Views Today</div>
+                  <div class="stat-card-value">12,847</div>
+                  <div class="stat-card-trend">↑ 8%</div>
+                </div>
+                <div class="stat-card">
+                  <div class="stat-card-label">Authors</div>
+                  <div class="stat-card-value">9</div>
+                  <div class="stat-card-trend">Active</div>
+                </div>
+                <div class="stat-card">
+                  <div class="stat-card-label">Subscribers</div>
+                  <div class="stat-card-value">22K</div>
+                  <div class="stat-card-trend">↑ 156</div>
+                </div>
+              </div>
+              
+              <h3 style="margin-bottom: 15px; font-size: 14px; font-weight: 600;">Quick Actions</h3>
+              <div class="quick-actions">
+                <div class="quick-action">
+                  <div class="quick-action-icon">📝</div>
+                  <div class="quick-action-label">New Post</div>
+                </div>
+                <div class="quick-action">
+                  <div class="quick-action-icon">📊</div>
+                  <div class="quick-action-label">Create Chart</div>
+                </div>
+                <div class="quick-action">
+                  <div class="quick-action-icon">🖼️</div>
+                  <div class="quick-action-label">Upload Media</div>
+                </div>
+                <div class="quick-action">
+                  <div class="quick-action-icon">👤</div>
+                  <div class="quick-action-label">Add Author</div>
+                </div>
+              </div>
+              
+              <h3 style="margin: 30px 0 15px; font-size: 14px; font-weight: 600;">Recent Posts</h3>
+              <div class="card">
+                <table class="data-table">
+                  <thead>
+                    <tr>
+                      <th>Title</th>
+                      <th>Author</th>
+                      <th>Category</th>
+                      <th>Status</th>
+                      <th>Date</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td>Playoff Revenge Tour: 3 Ways...</td>
+                      <td>Ficky</td>
+                      <td><span class="badge badge-bears">Bears</span></td>
+                      <td><span style="color: var(--success)">Published</span></td>
+                      <td>Jan 8, 2026</td>
+                    </tr>
+                    <tr>
+                      <td>Bo Bichette Rumors: A New...</td>
+                      <td>Aldo Soto</td>
+                      <td><span class="badge badge-cubs">Cubs</span></td>
+                      <td><span style="color: var(--success)">Published</span></td>
+                      <td>Jan 8, 2026</td>
+                    </tr>
+                    <tr>
+                      <td>Blackhawks Dump Two Assets...</td>
+                      <td>Isaac Nielsen</td>
+                      <td><span class="badge badge-blackhawks">Hawks</span></td>
+                      <td><span style="color: var(--success)">Published</span></td>
+                      <td>Jan 8, 2026</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+  
+  <!-- Features Summary -->
+  <section id="features" class="section">
+    <h2 class="section-title">All Features Built</h2>
+    <p class="section-desc">Summary of everything that's been created and needs to be visible/accessible.</p>
+    
+    <div class="preview-box">
+      <div class="preview-label">Feature Inventory (Make All Visible)</div>
+      <div class="preview-content">
+        <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px;">
+          
+          <div class="card" style="padding: 20px;">
+            <h4 style="color: var(--accent); margin-bottom: 15px;">📝 Content Management</h4>
+            <ul style="font-size: 13px; color: var(--text-secondary); line-height: 2;">
+              <li>Rich text editor (TipTap)</li>
+              <li>AI writing assistant</li>
+              <li>Voice-to-text input</li>
+              <li>SEO fields & preview</li>
+              <li>Scheduled publishing</li>
+              <li>Categories & tags</li>
+              <li>Featured images</li>
+              <li>Related content picker</li>
+            </ul>
+          </div>
+          
+          <div class="card" style="padding: 20px;">
+            <h4 style="color: var(--accent); margin-bottom: 15px;">📊 Data Visualization</h4>
+            <ul style="font-size: 13px; color: var(--text-secondary); line-height: 2;">
+              <li>D3 Chart Builder</li>
+              <li>Bar charts</li>
+              <li>Line charts</li>
+              <li>Pie/donut charts</li>
+              <li>Player comparisons</li>
+              <li>Team stats radar</li>
+              <li>Chart shortcodes [chart:id]</li>
+              <li>Data Lab integration</li>
+            </ul>
+          </div>
+          
+          <div class="card" style="padding: 20px;">
+            <h4 style="color: var(--accent); margin-bottom: 15px;">🏟️ Sports Data</h4>
+            <ul style="font-size: 13px; color: var(--text-secondary); line-height: 2;">
+              <li>Team pages (all 5 teams)</li>
+              <li>Schedules</li>
+              <li>Rosters</li>
+              <li>Standings</li>
+              <li>Team stats</li>
+              <li>Player profiles</li>
+              <li>Player stats</li>
+              <li>Game logs</li>
+            </ul>
+          </div>
+          
+          <div class="card" style="padding: 20px;">
+            <h4 style="color: var(--accent); margin-bottom: 15px;">🖼️ Media</h4>
+            <ul style="font-size: 13px; color: var(--text-secondary); line-height: 2;">
+              <li>Media library</li>
+              <li>Drag-drop upload</li>
+              <li>Image optimization</li>
+              <li>Video embeds</li>
+              <li>Image galleries</li>
+              <li>Filtering & search</li>
+            </ul>
+          </div>
+          
+          <div class="card" style="padding: 20px;">
+            <h4 style="color: var(--accent); margin-bottom: 15px;">📈 Analytics</h4>
+            <ul style="font-size: 13px; color: var(--text-secondary); line-height: 2;">
+              <li>Views tracking</li>
+              <li>Reading time</li>
+              <li>Scroll depth</li>
+              <li>Top posts</li>
+              <li>Category breakdown</li>
+              <li>Traffic charts</li>
+            </ul>
+          </div>
+          
+          <div class="card" style="padding: 20px;">
+            <h4 style="color: var(--accent); margin-bottom: 15px;">🎨 UI Components</h4>
+            <ul style="font-size: 13px; color: var(--text-secondary); line-height: 2;">
+              <li>Animated cards</li>
+              <li>Glass cards</li>
+              <li>Glow effects</li>
+              <li>Skeleton loaders</li>
+              <li>Team color badges</li>
+              <li>Scroll animations</li>
+              <li>Reading progress bar</li>
+              <li>Table of contents</li>
+            </ul>
+          </div>
+          
+        </div>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+</body>
+</html>

@@ -32,66 +32,7 @@ function calculateReadingTime(content: string): number {
   return Math.max(1, Math.ceil(words / 200))
 }
 
-// Team color mapping based on category slug
-function getTeamColors(categorySlug: string): { bg: string; text: string; gradient: string } {
-  const teamColors: Record<string, { bg: string; text: string; gradient: string }> = {
-    bears: {
-      bg: 'bg-[#C83200]',
-      text: 'text-white',
-      gradient: 'from-[#0B162A] to-[#C83200]',
-    },
-    'chicago-bears': {
-      bg: 'bg-[#C83200]',
-      text: 'text-white',
-      gradient: 'from-[#0B162A] to-[#C83200]',
-    },
-    bulls: {
-      bg: 'bg-[#CE1141]',
-      text: 'text-white',
-      gradient: 'from-[#CE1141] to-[#000000]',
-    },
-    'chicago-bulls': {
-      bg: 'bg-[#CE1141]',
-      text: 'text-white',
-      gradient: 'from-[#CE1141] to-[#000000]',
-    },
-    cubs: {
-      bg: 'bg-[#0E3386]',
-      text: 'text-white',
-      gradient: 'from-[#0E3386] to-[#CC3433]',
-    },
-    'chicago-cubs': {
-      bg: 'bg-[#0E3386]',
-      text: 'text-white',
-      gradient: 'from-[#0E3386] to-[#CC3433]',
-    },
-    'white-sox': {
-      bg: 'bg-[#27251F]',
-      text: 'text-white',
-      gradient: 'from-[#27251F] to-[#4a4a4a]',
-    },
-    'chicago-white-sox': {
-      bg: 'bg-[#27251F]',
-      text: 'text-white',
-      gradient: 'from-[#27251F] to-[#4a4a4a]',
-    },
-    blackhawks: {
-      bg: 'bg-[#CF0A2C]',
-      text: 'text-white',
-      gradient: 'from-[#CF0A2C] to-[#000000]',
-    },
-    'chicago-blackhawks': {
-      bg: 'bg-[#CF0A2C]',
-      text: 'text-white',
-      gradient: 'from-[#CF0A2C] to-[#000000]',
-    },
-  }
-  return teamColors[categorySlug] || {
-    bg: 'bg-[#8B0000]',
-    text: 'text-white',
-    gradient: 'from-[#8B0000] to-[#FF0000]',
-  }
-}
+// Per design spec: Use primary red #bc0000 for category tags consistently
 
 async function getPost(slug: string) {
   const { data: post, error } = await supabaseAdmin
@@ -234,9 +175,6 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
 
   const categoryMap = new Map(allCategories?.map(c => [c.id, c]) || [])
 
-  // Get team colors for category
-  const teamColors = getTeamColors(categoryData?.slug || category)
-
   // Generate a witty SM commentary
   const smCommentaries = [
     "Another day, another hot take served piping hot from the Windy City. You're welcome.",
@@ -316,16 +254,20 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
                   </ol>
                 </nav>
 
-                {/* Category Badge with team color */}
+                {/* Category Badge per spec: red bg #bc0000 */}
                 <Link
                   href={`/${categoryData?.slug || category}`}
-                  className={`mb-4 inline-flex items-center rounded-full ${teamColors.bg} ${teamColors.text} px-4 py-1.5 text-xs font-bold uppercase tracking-wider transition-transform hover:scale-105`}
+                  className="mb-4 inline-block bg-[#bc0000] text-white text-[11px] font-bold uppercase tracking-[0.5px] px-[10px] py-[4px]"
+                  style={{ fontFamily: "'Montserrat', sans-serif" }}
                 >
                   {categoryData?.name || category}
                 </Link>
 
-                {/* Title */}
-                <h1 className="mb-4 font-heading text-3xl font-black leading-tight text-white sm:text-4xl lg:text-5xl">
+                {/* Title per spec: 36-42px, Montserrat 700-900, line-height 1.2 */}
+                <h1
+                  className="mb-4 text-[36px] lg:text-[42px] font-black leading-[1.2] text-white"
+                  style={{ fontFamily: "'Montserrat', sans-serif", letterSpacing: '-0.5px' }}
+                >
                   {post.title}
                 </h1>
 
@@ -343,7 +285,7 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
                           />
                         </div>
                       ) : (
-                        <div className={`flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br ${teamColors.gradient} text-sm font-bold text-white`}>
+                        <div className="flex h-10 w-10 items-center justify-center rounded-full bg-[#bc0000] text-sm font-bold text-white">
                           {author.display_name.charAt(0).toUpperCase()}
                         </div>
                       )}
@@ -372,22 +314,22 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
             </div>
           </div>
         ) : (
-          /* Fallback header without image */
-          <div className={`bg-gradient-to-br ${teamColors.gradient} py-16 lg:py-24`}>
-            <div className="mx-auto max-w-4xl px-4">
-              {/* Breadcrumb */}
+          /* Fallback header without image - per spec use white bg */
+          <div className="bg-white py-10 border-b border-[#e0e0e0]">
+            <div className="mx-auto max-w-[1110px] px-4">
+              {/* Breadcrumb per spec section 15.1 */}
               <nav className="mb-4">
-                <ol className="flex items-center gap-2 text-sm text-white/70">
+                <ol className="flex items-center gap-2 text-[12px] text-[#666666]">
                   <li>
-                    <Link href="/" className="hover:text-white transition-colors">
+                    <Link href="/" className="hover:text-[#bc0000] transition-colors">
                       Home
                     </Link>
                   </li>
-                  <li className="text-white/50">/</li>
+                  <li>/</li>
                   <li>
                     <Link
                       href={`/${categoryData?.slug || category}`}
-                      className="hover:text-white transition-colors"
+                      className="hover:text-[#bc0000] transition-colors"
                     >
                       {categoryData?.name || category}
                     </Link>
@@ -395,127 +337,101 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
                 </ol>
               </nav>
 
-              {/* Category Badge */}
+              {/* Category Badge per spec */}
               <Link
                 href={`/${categoryData?.slug || category}`}
-                className="mb-4 inline-flex items-center rounded-full bg-white/20 px-4 py-1.5 text-xs font-bold uppercase tracking-wider text-white backdrop-blur-sm transition-all hover:bg-white/30"
+                className="mb-4 inline-block bg-[#bc0000] text-white text-[11px] font-bold uppercase tracking-[0.5px] px-[10px] py-[4px]"
+                style={{ fontFamily: "'Montserrat', sans-serif" }}
               >
                 {categoryData?.name || category}
               </Link>
 
-              {/* Title */}
-              <h1 className="mb-4 font-heading text-3xl font-black leading-tight text-white sm:text-4xl lg:text-5xl">
+              {/* Title per spec: 36-42px, Montserrat 700-900 */}
+              <h1
+                className="mb-4 text-[36px] lg:text-[42px] font-black leading-[1.2] text-[#222222]"
+                style={{ fontFamily: "'Montserrat', sans-serif", letterSpacing: '-0.5px' }}
+              >
                 {post.title}
               </h1>
 
-              {/* Meta info */}
-              <div className="flex flex-wrap items-center gap-4">
+              {/* Author/Date Line per spec section 7.1: "By Author Name | Month Day, Year" */}
+              <p className="text-[14px] text-[#666666]" style={{ fontFamily: "'Montserrat', sans-serif" }}>
                 {author && (
-                  <Link href={`/author/${author.slug || author.id}`} className="flex items-center gap-3 group">
-                    {author.avatar_url ? (
-                      <div className="relative h-10 w-10 overflow-hidden rounded-full ring-2 ring-white/30 transition-all group-hover:ring-white/60">
-                        <Image
-                          src={author.avatar_url}
-                          alt={author.display_name}
-                          fill
-                          className="object-cover"
-                        />
-                      </div>
-                    ) : (
-                      <div className="flex h-10 w-10 items-center justify-center rounded-full bg-white/20 text-sm font-bold text-white">
-                        {author.display_name.charAt(0).toUpperCase()}
-                      </div>
-                    )}
-                    <span className="font-semibold text-white group-hover:text-white/80 transition-colors">
+                  <>
+                    By{' '}
+                    <Link
+                      href={`/author/${author.slug || author.id}`}
+                      className="font-medium text-[#222222] hover:text-[#bc0000] transition-colors"
+                    >
                       {author.display_name}
-                    </span>
-                  </Link>
+                    </Link>
+                    {' | '}
+                  </>
                 )}
-                <div className="flex items-center gap-3 text-sm text-white/80">
-                  <time dateTime={post.published_at} className="flex items-center gap-1.5">
-                    <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5" />
-                    </svg>
-                    {format(new Date(post.published_at), 'MMMM d, yyyy')}
-                  </time>
-                  <span className="flex items-center gap-1.5">
-                    <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" />
-                    </svg>
-                    {readingTime} min read
-                  </span>
-                  <ViewCounterCompact views={post.views || 0} className="text-white/80" />
-                </div>
-              </div>
+                {format(new Date(post.published_at), 'MMMM d, yyyy')}
+              </p>
             </div>
           </div>
         )}
       </header>
 
-      {/* Main Content Area with Sidebar */}
-      <div className="mx-auto max-w-7xl px-4 py-10 lg:py-14">
-        <div className="lg:grid lg:grid-cols-12 lg:gap-12">
-          {/* Main Article Content */}
-          <article className="lg:col-span-8">
-            {/* Updated date indicator */}
-            {post.updated_at && (
-              <UpdatedDate
-                publishedAt={post.published_at}
-                updatedAt={post.updated_at}
-                className="mb-6"
-              />
-            )}
+      {/* Main Content Area - per spec section 7.3: max-width 700-750px for article body */}
+      <div className="bg-white">
+        <div className="mx-auto max-w-[1110px] px-4 py-10">
+          {/* Featured Image per spec section 7.2 */}
+          {post.featured_image && (
+            <div className="mb-8">
+              <div className="relative w-full" style={{ maxHeight: '500px' }}>
+                <Image
+                  src={post.featured_image}
+                  alt={post.title}
+                  width={1110}
+                  height={500}
+                  className="w-full h-auto object-cover"
+                  style={{ maxHeight: '500px' }}
+                  priority
+                />
+              </div>
+            </div>
+          )}
 
-            {/* Share buttons (top) */}
-            <div className="mb-8 flex items-center justify-between border-b border-zinc-200 pb-6 dark:border-zinc-800">
+          {/* Article body per spec section 7.3: max-width 750px, Fira Sans 16-17px, line-height 1.7 */}
+          <article
+            className="article-body mx-auto"
+            style={{ maxWidth: '750px', fontFamily: "'Fira Sans', sans-serif" }}
+          >
+            {/* Share buttons (top) per spec section 7.4 */}
+            <div className="mb-8 flex items-center gap-3 border-b border-[#e0e0e0] pb-6">
               <ShareButtons url={articleUrl} title={post.title} />
             </div>
 
-            {/* SM Mockery Commentary */}
-            <MockeryCommentary commentary={randomCommentary} className="mb-8" />
-
-            {/* Article body with premium prose styling */}
+            {/* Article body content - using globals.css .article-body styles */}
             <div
-              className="prose prose-lg max-w-none
-                prose-headings:font-heading prose-headings:font-black prose-headings:text-zinc-900
-                prose-h2:mt-10 prose-h2:mb-4 prose-h2:text-2xl prose-h2:border-l-4 prose-h2:border-[#8B0000] prose-h2:pl-4
-                prose-h3:mt-8 prose-h3:mb-3 prose-h3:text-xl
-                prose-p:text-lg prose-p:leading-relaxed prose-p:text-zinc-700
-                prose-a:text-[#8B0000] prose-a:font-semibold prose-a:no-underline hover:prose-a:underline
-                prose-strong:text-zinc-900
-                prose-blockquote:border-l-4 prose-blockquote:border-[#8B0000] prose-blockquote:bg-zinc-50 prose-blockquote:py-4 prose-blockquote:px-6 prose-blockquote:rounded-r-lg prose-blockquote:text-zinc-600 prose-blockquote:not-italic prose-blockquote:font-medium
-                prose-img:rounded-xl prose-img:shadow-lg
-                prose-ul:marker:text-[#8B0000]
-                prose-ol:marker:text-[#8B0000] prose-ol:marker:font-bold
-                dark:prose-headings:text-zinc-100
-                dark:prose-p:text-zinc-300
-                dark:prose-a:text-[#FF6666]
-                dark:prose-strong:text-zinc-100
-                dark:prose-blockquote:bg-zinc-800/50 dark:prose-blockquote:text-zinc-400"
+              className="article-body"
               dangerouslySetInnerHTML={{ __html: post.content }}
             />
 
-            {/* Tags */}
+            {/* Tags per spec section 15.4 */}
             {tags.length > 0 && (
-              <div className="mt-10 border-t border-zinc-200 pt-6 dark:border-zinc-800">
+              <div className="mt-10 border-t border-[#e0e0e0] pt-6">
                 <ArticleTags tags={tags} />
               </div>
             )}
 
             {/* Share buttons (bottom) */}
-            <div className="mt-10 border-t border-zinc-200 pt-6 dark:border-zinc-800">
-              <p className="mb-3 text-sm font-semibold uppercase tracking-wider text-zinc-500 dark:text-zinc-400">
+            <div className="mt-10 border-t border-[#e0e0e0] pt-6">
+              <p
+                className="mb-3 text-[12px] font-bold uppercase tracking-wider text-[#999999]"
+                style={{ fontFamily: "'Montserrat', sans-serif" }}
+              >
                 Share this article
               </p>
               <ShareButtons url={articleUrl} title={post.title} />
             </div>
 
-            {/* Author Card */}
+            {/* Author Card per spec section 15.3 */}
             {author && (
-              <div className="mt-10 border-t border-zinc-200 pt-10 dark:border-zinc-800">
-                <h3 className="mb-4 text-sm font-semibold uppercase tracking-wider text-zinc-500 dark:text-zinc-400">
-                  About the Author
-                </h3>
+              <div className="mt-10 border-t border-[#e0e0e0] pt-10">
                 <AuthorCard
                   author={{
                     id: author.id,
@@ -529,78 +445,7 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
                 />
               </div>
             )}
-
-            {/* Comments Section */}
-            <CommentSection articleId={post.id} className="mt-10" />
           </article>
-
-          {/* Sidebar */}
-          <aside className="mt-10 lg:col-span-4 lg:mt-0">
-            <div className="sticky top-24 space-y-6">
-              {/* Table of Contents */}
-              {post.content && (
-                <TableOfContents content={post.content} />
-              )}
-
-              {/* Related Articles in Sidebar */}
-              {relatedPosts.length > 0 && categoryData && (
-                <div className="rounded-2xl border border-zinc-200 bg-white p-5 dark:border-zinc-800 dark:bg-zinc-900">
-                  <h3 className="mb-4 flex items-center gap-2 font-heading text-sm font-bold uppercase tracking-wider text-zinc-900 dark:text-white">
-                    <svg
-                      className="h-4 w-4 text-[#8B0000] dark:text-[#FF6666]"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      strokeWidth={2}
-                      stroke="currentColor"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z"
-                      />
-                    </svg>
-                    More {categoryData.name}
-                  </h3>
-                  <ul className="space-y-4">
-                    {relatedPosts.slice(0, 4).map((relatedPost) => (
-                      <li key={relatedPost.id}>
-                        <Link
-                          href={`/${categoryData.slug}/${relatedPost.slug}`}
-                          className="group flex gap-3"
-                        >
-                          {relatedPost.featured_image && (
-                            <div className="relative h-16 w-16 shrink-0 overflow-hidden rounded-lg">
-                              <Image
-                                src={relatedPost.featured_image}
-                                alt=""
-                                fill
-                                className="object-cover transition-transform group-hover:scale-105"
-                              />
-                            </div>
-                          )}
-                          <div className="min-w-0 flex-1">
-                            <h4 className="line-clamp-2 text-sm font-semibold text-zinc-900 transition-colors group-hover:text-[#8B0000] dark:text-white dark:group-hover:text-[#FF6666]">
-                              {relatedPost.title}
-                            </h4>
-                            <p className="mt-1 text-xs text-zinc-500 dark:text-zinc-400">
-                              {format(new Date(relatedPost.published_at), 'MMM d, yyyy')}
-                            </p>
-                          </div>
-                        </Link>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              )}
-
-              {/* Ad placeholder */}
-              <div className="rounded-2xl border border-dashed border-zinc-300 bg-zinc-50 p-8 text-center dark:border-zinc-700 dark:bg-zinc-800/50">
-                <p className="text-xs font-semibold uppercase tracking-wider text-zinc-400">
-                  Advertisement
-                </p>
-              </div>
-            </div>
-          </aside>
         </div>
       </div>
 

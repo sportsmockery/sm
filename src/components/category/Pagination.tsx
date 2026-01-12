@@ -1,8 +1,6 @@
 'use client'
 
-import { useState } from 'react'
 import Link from 'next/link'
-import { useRouter } from 'next/navigation'
 
 interface PaginationProps {
   currentPage: number
@@ -11,15 +9,20 @@ interface PaginationProps {
   className?: string
 }
 
+// Per design spec section 15.2:
+// - Style: Numbered buttons
+// - Current page: #bc0000 background, #ffffff text
+// - Other pages: #ffffff background, #222222 text, 1px #e0e0e0 border
+// - Hover: Light gray background (#f5f5f5)
+// - Button size: 36-40px square
+// - Spacing: 5px between
+
 export default function Pagination({
   currentPage,
   totalPages,
   basePath,
   className = '',
 }: PaginationProps) {
-  const router = useRouter()
-  const [jumpPage, setJumpPage] = useState('')
-
   if (totalPages <= 1) return null
 
   // Generate page numbers to display
@@ -64,154 +67,74 @@ export default function Pagination({
     return `${basePath}?page=${page}`
   }
 
-  const handleJumpToPage = (e: React.FormEvent) => {
-    e.preventDefault()
-    const page = parseInt(jumpPage, 10)
-    if (page >= 1 && page <= totalPages) {
-      router.push(getPageUrl(page))
-      setJumpPage('')
-    }
-  }
-
   const pages = getPageNumbers()
 
   return (
     <nav
-      className={`flex flex-wrap items-center justify-center gap-4 ${className}`}
+      className={`flex flex-wrap items-center justify-center gap-[5px] ${className}`}
       aria-label="Pagination"
     >
       {/* Previous button */}
       {currentPage > 1 ? (
         <Link
           href={getPageUrl(currentPage - 1)}
-          className="flex items-center gap-1 rounded-lg border border-zinc-200 bg-white px-4 py-2 text-sm font-medium text-zinc-700 transition-colors hover:bg-zinc-50 dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-300 dark:hover:bg-zinc-800"
+          className="flex items-center justify-center w-[40px] h-[40px] bg-white text-[#222222] border border-[#e0e0e0] text-[14px] font-medium transition-colors hover:bg-[#f5f5f5]"
+          aria-label="Previous page"
         >
-          <svg
-            className="h-4 w-4"
-            fill="none"
-            viewBox="0 0 24 24"
-            strokeWidth={2}
-            stroke="currentColor"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              d="M15.75 19.5L8.25 12l7.5-7.5"
-            />
+          <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
           </svg>
-          Previous
         </Link>
       ) : (
-        <span className="flex cursor-not-allowed items-center gap-1 rounded-lg border border-zinc-200 bg-zinc-100 px-4 py-2 text-sm font-medium text-zinc-400 dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-600">
-          <svg
-            className="h-4 w-4"
-            fill="none"
-            viewBox="0 0 24 24"
-            strokeWidth={2}
-            stroke="currentColor"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              d="M15.75 19.5L8.25 12l7.5-7.5"
-            />
+        <span className="flex items-center justify-center w-[40px] h-[40px] bg-[#f5f5f5] text-[#999999] border border-[#e0e0e0] cursor-not-allowed">
+          <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
           </svg>
-          Previous
         </span>
       )}
 
       {/* Page numbers */}
-      <div className="flex items-center gap-1">
-        {pages.map((page, index) =>
-          page === 'ellipsis' ? (
-            <span
-              key={`ellipsis-${index}`}
-              className="px-2 text-zinc-400 dark:text-zinc-600"
-            >
-              ...
-            </span>
-          ) : (
-            <Link
-              key={page}
-              href={getPageUrl(page)}
-              className={`flex h-10 w-10 items-center justify-center rounded-lg text-sm font-medium transition-colors ${
-                currentPage === page
-                  ? 'bg-[#8B0000] text-white dark:bg-[#FF6666]'
-                  : 'border border-zinc-200 bg-white text-zinc-700 hover:bg-zinc-50 dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-300 dark:hover:bg-zinc-800'
-              }`}
-            >
-              {page}
-            </Link>
-          )
-        )}
-      </div>
+      {pages.map((page, index) =>
+        page === 'ellipsis' ? (
+          <span
+            key={`ellipsis-${index}`}
+            className="flex items-center justify-center w-[40px] h-[40px] text-[#999999] text-[14px]"
+          >
+            ...
+          </span>
+        ) : (
+          <Link
+            key={page}
+            href={getPageUrl(page)}
+            className={`flex items-center justify-center w-[40px] h-[40px] text-[14px] font-medium transition-colors ${
+              currentPage === page
+                ? 'bg-[#bc0000] text-white border border-[#bc0000]'
+                : 'bg-white text-[#222222] border border-[#e0e0e0] hover:bg-[#f5f5f5]'
+            }`}
+          >
+            {page}
+          </Link>
+        )
+      )}
 
       {/* Next button */}
       {currentPage < totalPages ? (
         <Link
           href={getPageUrl(currentPage + 1)}
-          className="flex items-center gap-1 rounded-lg border border-zinc-200 bg-white px-4 py-2 text-sm font-medium text-zinc-700 transition-colors hover:bg-zinc-50 dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-300 dark:hover:bg-zinc-800"
+          className="flex items-center justify-center w-[40px] h-[40px] bg-white text-[#222222] border border-[#e0e0e0] text-[14px] font-medium transition-colors hover:bg-[#f5f5f5]"
+          aria-label="Next page"
         >
-          Next
-          <svg
-            className="h-4 w-4"
-            fill="none"
-            viewBox="0 0 24 24"
-            strokeWidth={2}
-            stroke="currentColor"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              d="M8.25 4.5l7.5 7.5-7.5 7.5"
-            />
+          <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
           </svg>
         </Link>
       ) : (
-        <span className="flex cursor-not-allowed items-center gap-1 rounded-lg border border-zinc-200 bg-zinc-100 px-4 py-2 text-sm font-medium text-zinc-400 dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-600">
-          Next
-          <svg
-            className="h-4 w-4"
-            fill="none"
-            viewBox="0 0 24 24"
-            strokeWidth={2}
-            stroke="currentColor"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              d="M8.25 4.5l7.5 7.5-7.5 7.5"
-            />
+        <span className="flex items-center justify-center w-[40px] h-[40px] bg-[#f5f5f5] text-[#999999] border border-[#e0e0e0] cursor-not-allowed">
+          <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
           </svg>
         </span>
       )}
-
-      {/* Page info and jump to page */}
-      <div className="flex items-center gap-4">
-        <span className="text-sm text-zinc-500 dark:text-zinc-400">
-          Page {currentPage} of {totalPages}
-        </span>
-
-        {totalPages > 5 && (
-          <form onSubmit={handleJumpToPage} className="flex items-center gap-2">
-            <input
-              type="number"
-              min={1}
-              max={totalPages}
-              value={jumpPage}
-              onChange={(e) => setJumpPage(e.target.value)}
-              placeholder="Go to"
-              className="w-16 rounded-lg border border-zinc-200 bg-white px-2 py-1.5 text-center text-sm text-zinc-900 placeholder-zinc-400 focus:border-[#8B0000] focus:outline-none focus:ring-1 focus:ring-[#8B0000] dark:border-zinc-700 dark:bg-zinc-800 dark:text-white dark:placeholder-zinc-500 dark:focus:border-[#FF6666] dark:focus:ring-[#FF6666]"
-            />
-            <button
-              type="submit"
-              className="rounded-lg bg-zinc-200 px-2 py-1.5 text-sm font-medium text-zinc-700 transition-colors hover:bg-zinc-300 dark:bg-zinc-700 dark:text-zinc-300 dark:hover:bg-zinc-600"
-            >
-              Go
-            </button>
-          </form>
-        )}
-      </div>
     </nav>
   )
 }

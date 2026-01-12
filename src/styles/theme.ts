@@ -1,11 +1,12 @@
-// Sports Mockery Brand Colors
+// Sports Mockery Brand Colors (per SPORTSMOCKERY-DESIGN-SPEC.md)
 export const brand = {
-  primary: '#8B0000', // Dark red
-  secondary: '#1a1a1a', // Near black
+  primary: '#bc0000', // SM Red per design spec
+  primaryDark: '#8a0000', // Darker red for hover
+  secondary: '#222222', // Near black
   white: '#ffffff',
   background: '#f5f5f5',
-  text: '#1a1a1a',
-  textMuted: '#6b7280',
+  text: '#222222',
+  textMuted: '#666666',
 }
 
 // Team Colors
