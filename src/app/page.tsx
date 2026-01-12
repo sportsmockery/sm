@@ -4,45 +4,39 @@ import Link from 'next/link'
 import Image from 'next/image'
 import { useOracleFeed } from '@/hooks/useOracleFeed'
 
-// Team configuration
-const teams = [
-  { name: 'Bears', slug: 'chicago-bears', color: '#C83200', bgColor: '#0B162A', sport: 'NFL' },
-  { name: 'Bulls', slug: 'chicago-bulls', color: '#ffffff', bgColor: '#CE1141', sport: 'NBA' },
-  { name: 'Blackhawks', slug: 'chicago-blackhawks', color: '#FFD100', bgColor: '#CF0A2C', sport: 'NHL' },
-  { name: 'Cubs', slug: 'chicago-cubs', color: '#CC3433', bgColor: '#0E3386', sport: 'MLB' },
-  { name: 'White Sox', slug: 'chicago-white-sox', color: '#C4CED4', bgColor: '#27251F', sport: 'MLB' },
-]
-
 // Format category slug to display name
-const formatTeamName = (slug: string | undefined | null): string => {
+const formatCategoryName = (slug: string | undefined | null): string => {
   if (!slug) return 'NEWS'
   const name = slug.replace('chicago-', '').replace(/-/g, ' ')
-  if (name === 'white sox' || name === 'whitesox') return 'WHITE SOX'
   return name.toUpperCase()
 }
 
-// Format date for display
+// Format date for display - uppercase style like SM
 const formatDate = (dateStr: string) => {
   const date = new Date(dateStr)
-  return date.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })
+  return date.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' }).toUpperCase()
 }
 
-// Large featured article card with overlay text
-function FeaturedCard({ article, onView, size = 'large' }: { article: any; onView: (a: any) => void; size?: 'large' | 'medium' | 'small' }) {
-  const heights = {
-    large: 'h-[400px] md:h-[500px]',
-    medium: 'h-[250px] md:h-[300px]',
-    small: 'h-[200px] md:h-[250px]',
-  }
-
+// Category badge component - white bg, black border, uppercase
+function CategoryBadge({ category }: { category: string }) {
   return (
-    <article className="relative group overflow-hidden">
+    <span className="inline-block bg-white text-black text-[11px] uppercase tracking-wider px-1.5 py-1 border border-black font-normal">
+      {category}
+    </span>
+  )
+}
+
+// Large featured article card with image and overlay text
+function HeroCard({ article, onView, size = 'large' }: { article: any; onView: (a: any) => void; size?: 'large' | 'medium' }) {
+  return (
+    <article className="relative group">
       <Link
         href={`/${article.category?.slug || 'news'}/${article.slug}`}
         onClick={() => onView(article)}
         className="block"
       >
-        <div className={`relative ${heights[size]} w-full`}>
+        {/* Image container with aspect ratio */}
+        <div className={`relative w-full overflow-hidden ${size === 'large' ? 'pb-[70%]' : 'pb-[70%]'}`}>
           <Image
             src={article.featured_image || '/placeholder.jpg'}
             alt={article.title}
@@ -50,25 +44,23 @@ function FeaturedCard({ article, onView, size = 'large' }: { article: any; onVie
             className="object-cover"
             priority={size === 'large'}
           />
-          {/* Gradient overlay */}
-          <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent" />
+          {/* Dark gradient overlay */}
+          <div
+            className="absolute inset-0"
+            style={{ background: 'linear-gradient(to top, rgba(0,0,0,0.7) 0%, transparent 60%)' }}
+          />
 
-          {/* Content overlay */}
-          <div className="absolute bottom-0 left-0 right-0 p-4 md:p-6">
-            <span className="inline-block text-[11px] font-semibold text-white uppercase tracking-wide mb-2 border-b-2 border-[#bc0000] pb-1">
-              {formatTeamName(article.category?.slug)}
-            </span>
-            <h2 className={`font-bold text-white leading-tight group-hover:underline decoration-[#bc0000] decoration-2 ${
-              size === 'large' ? 'text-xl md:text-2xl lg:text-3xl' :
-              size === 'medium' ? 'text-lg md:text-xl' : 'text-base md:text-lg'
-            }`}>
+          {/* Content overlay at bottom */}
+          <div className="absolute bottom-0 left-0 right-0 p-4">
+            <CategoryBadge category={formatCategoryName(article.category?.slug)} />
+            <h2
+              className={`mt-2 font-semibold text-white leading-tight group-hover:underline decoration-[#bc0000] decoration-2 underline-offset-2 ${
+                size === 'large' ? 'text-xl md:text-2xl' : 'text-base md:text-lg'
+              }`}
+              style={{ lineHeight: 1.1 }}
+            >
               {article.title}
             </h2>
-            <div className="flex items-center gap-2 mt-2 text-xs text-gray-300">
-              <span>{article.author?.display_name || 'Staff'}</span>
-              <span>|</span>
-              <span>{formatDate(article.published_at)}</span>
-            </div>
           </div>
         </div>
       </Link>
@@ -76,64 +68,17 @@ function FeaturedCard({ article, onView, size = 'large' }: { article: any; onVie
   )
 }
 
-// Standard article card (image above, text below)
-function ArticleCard({ article, onView, showExcerpt = false }: { article: any; onView: (a: any) => void; showExcerpt?: boolean }) {
+// Standard article card - image on top, content below
+function ArticleCard({ article, onView }: { article: any; onView: (a: any) => void }) {
   return (
-    <article className="group border-b border-gray-200 dark:border-gray-700 pb-4">
+    <article className="group">
       <Link
         href={`/${article.category?.slug || 'news'}/${article.slug}`}
         onClick={() => onView(article)}
         className="block"
       >
         {/* Image */}
-        <div className="relative aspect-[16/10] w-full mb-3 overflow-hidden">
-          <Image
-            src={article.featured_image || '/placeholder.jpg'}
-            alt={article.title}
-            fill
-            className="object-cover group-hover:scale-105 transition-transform duration-300"
-          />
-        </div>
-
-        {/* Content */}
-        <div>
-          <span className="inline-block text-[10px] font-semibold text-[#bc0000] uppercase tracking-wide mb-1">
-            {formatTeamName(article.category?.slug)}
-          </span>
-          <h3 className="font-semibold text-gray-900 dark:text-white leading-snug group-hover:text-[#bc0000] transition-colors text-base md:text-lg">
-            {article.title}
-          </h3>
-          {showExcerpt && article.excerpt && (
-            <p className="text-sm text-gray-600 dark:text-gray-400 mt-2 line-clamp-2">
-              {article.excerpt}
-            </p>
-          )}
-          <div className="flex items-center gap-2 mt-2 text-[11px] text-gray-500 dark:text-gray-400">
-            <span>{article.author?.display_name || 'Staff'}</span>
-            <span>|</span>
-            <span>{formatDate(article.published_at)}</span>
-          </div>
-        </div>
-      </Link>
-    </article>
-  )
-}
-
-// Compact article card for sidebars/lists
-function CompactCard({ article, onView, index }: { article: any; onView: (a: any) => void; index?: number }) {
-  return (
-    <article className="group flex gap-3 py-3 border-b border-gray-100 dark:border-gray-800 last:border-0">
-      <Link
-        href={`/${article.category?.slug || 'news'}/${article.slug}`}
-        onClick={() => onView(article)}
-        className="flex gap-3 w-full"
-      >
-        {index !== undefined && (
-          <span className="text-2xl font-bold text-gray-200 dark:text-gray-700 w-6 flex-shrink-0">
-            {index + 1}
-          </span>
-        )}
-        <div className="relative w-20 h-14 flex-shrink-0 overflow-hidden">
+        <div className="relative w-full pb-[70%] mb-3 overflow-hidden">
           <Image
             src={article.featured_image || '/placeholder.jpg'}
             alt={article.title}
@@ -141,71 +86,64 @@ function CompactCard({ article, onView, index }: { article: any; onView: (a: any
             className="object-cover"
           />
         </div>
-        <div className="flex-1 min-w-0">
-          <span className="text-[9px] font-semibold text-[#bc0000] uppercase tracking-wide">
-            {formatTeamName(article.category?.slug)}
-          </span>
-          <h4 className="text-sm font-medium text-gray-900 dark:text-white leading-snug group-hover:text-[#bc0000] transition-colors line-clamp-2">
+
+        {/* Content */}
+        <div>
+          <CategoryBadge category={formatCategoryName(article.category?.slug)} />
+          <h3
+            className="mt-2 text-base font-semibold text-black dark:text-white leading-tight group-hover:underline decoration-[#bc0000] decoration-2 underline-offset-2"
+            style={{ lineHeight: 1.1 }}
+          >
             {article.title}
-          </h4>
+          </h3>
+          <p className="mt-2 text-xs uppercase tracking-wider text-gray-600 dark:text-gray-400">
+            {article.author?.display_name || 'STAFF'} - {formatDate(article.published_at)}
+          </p>
         </div>
       </Link>
     </article>
   )
 }
 
-// Loading skeleton
-function ArticleSkeleton({ type = 'card' }: { type?: 'featured' | 'card' | 'compact' }) {
-  if (type === 'featured') {
-    return (
-      <div className="relative h-[400px] bg-gray-200 dark:bg-gray-800 animate-pulse">
-        <div className="absolute bottom-0 left-0 right-0 p-6 space-y-3">
-          <div className="h-3 w-20 bg-gray-300 dark:bg-gray-700 rounded" />
-          <div className="h-6 w-3/4 bg-gray-300 dark:bg-gray-700 rounded" />
-          <div className="h-3 w-1/3 bg-gray-300 dark:bg-gray-700 rounded" />
-        </div>
-      </div>
-    )
-  }
-
-  if (type === 'compact') {
-    return (
-      <div className="flex gap-3 py-3 animate-pulse">
-        <div className="w-20 h-14 bg-gray-200 dark:bg-gray-800 flex-shrink-0" />
-        <div className="flex-1 space-y-2">
-          <div className="h-2 w-12 bg-gray-200 dark:bg-gray-800 rounded" />
-          <div className="h-3 w-full bg-gray-200 dark:bg-gray-800 rounded" />
-        </div>
-      </div>
-    )
-  }
-
+// Section header with link
+function SectionHeader({ title, href }: { title: string; href?: string }) {
   return (
-    <div className="animate-pulse pb-4 border-b border-gray-200 dark:border-gray-700">
-      <div className="aspect-[16/10] bg-gray-200 dark:bg-gray-800 mb-3" />
-      <div className="space-y-2">
-        <div className="h-2 w-16 bg-gray-200 dark:bg-gray-800 rounded" />
-        <div className="h-4 w-full bg-gray-200 dark:bg-gray-800 rounded" />
-        <div className="h-4 w-2/3 bg-gray-200 dark:bg-gray-800 rounded" />
-        <div className="h-2 w-1/3 bg-gray-200 dark:bg-gray-800 rounded" />
+    <div className="mb-4 pb-2 border-b border-gray-200 dark:border-gray-700">
+      {href ? (
+        <Link
+          href={href}
+          className="text-lg font-bold text-black dark:text-white hover:text-[#bc0000] transition-colors"
+        >
+          {title}
+        </Link>
+      ) : (
+        <h2 className="text-lg font-bold text-black dark:text-white">{title}</h2>
+      )}
+    </div>
+  )
+}
+
+// Loading skeleton for hero
+function HeroSkeleton() {
+  return (
+    <div className="relative w-full pb-[70%] bg-gray-200 dark:bg-gray-800 animate-pulse">
+      <div className="absolute bottom-0 left-0 right-0 p-4">
+        <div className="h-5 w-24 bg-gray-300 dark:bg-gray-700 mb-2" />
+        <div className="h-6 w-3/4 bg-gray-300 dark:bg-gray-700" />
       </div>
     </div>
   )
 }
 
-// Section header
-function SectionHeader({ title, href, team }: { title: string; href?: string; team?: typeof teams[0] }) {
+// Loading skeleton for article card
+function CardSkeleton() {
   return (
-    <div className="flex items-center justify-between border-b-2 border-gray-900 dark:border-white pb-2 mb-4">
-      <h2 className="text-lg font-bold text-gray-900 dark:text-white uppercase tracking-wide flex items-center gap-2">
-        {team && <span className="w-3 h-3 rounded-full" style={{ backgroundColor: team.bgColor }} />}
-        {title}
-      </h2>
-      {href && (
-        <Link href={href} className="text-xs font-semibold text-[#bc0000] hover:underline uppercase">
-          View All →
-        </Link>
-      )}
+    <div className="animate-pulse">
+      <div className="relative w-full pb-[70%] bg-gray-200 dark:bg-gray-800 mb-3" />
+      <div className="h-4 w-20 bg-gray-200 dark:bg-gray-800 mb-2" />
+      <div className="h-5 w-full bg-gray-200 dark:bg-gray-800 mb-1" />
+      <div className="h-5 w-2/3 bg-gray-200 dark:bg-gray-800 mb-2" />
+      <div className="h-3 w-1/2 bg-gray-200 dark:bg-gray-800" />
     </div>
   )
 }
@@ -218,12 +156,12 @@ export default function HomePage() {
 
   if (error) {
     return (
-      <div className="min-h-screen bg-white dark:bg-[#0a0a0b] flex items-center justify-center">
+      <div className="min-h-screen bg-white dark:bg-[#0a0a0a] flex items-center justify-center">
         <div className="text-center">
           <p className="text-gray-600 dark:text-gray-400 mb-4">Unable to load articles</p>
           <button
             onClick={refresh}
-            className="px-4 py-2 bg-[#bc0000] text-white hover:bg-[#a00000]"
+            className="px-6 py-2 bg-black text-white hover:bg-gray-800 transition-colors"
           >
             Try Again
           </button>
@@ -235,141 +173,145 @@ export default function HomePage() {
   const featured = feed?.featured
   const topHeadlines = feed?.topHeadlines || []
   const latestNews = feed?.latestNews || []
+  const teamSections = feed?.teamSections || {}
 
   return (
-    <div className="min-h-screen bg-white dark:bg-[#0a0a0b]">
-      <main className="max-w-[1400px] mx-auto px-4 py-6">
+    <div className="min-h-screen bg-white dark:bg-[#0a0a0a]">
+      <main className="max-w-[1110px] mx-auto px-4 py-6">
 
-        {/* ========== HERO SECTION ========== */}
+        {/* ========== HERO GRID SECTION ========== */}
         <section className="mb-8">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-1">
-            {/* Main featured */}
-            {loading ? (
-              <ArticleSkeleton type="featured" />
-            ) : featured ? (
-              <FeaturedCard article={featured} onView={trackView} size="large" />
-            ) : null}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {/* Main featured article - large */}
+            <div className="md:col-span-1">
+              {loading ? (
+                <HeroSkeleton />
+              ) : featured ? (
+                <HeroCard article={featured} onView={trackView} size="large" />
+              ) : null}
+            </div>
 
-            {/* Secondary featured grid */}
-            <div className="grid grid-cols-2 gap-1">
+            {/* Secondary featured articles - 2x2 grid */}
+            <div className="grid grid-cols-2 gap-4">
               {loading ? (
                 <>
-                  <ArticleSkeleton type="featured" />
-                  <ArticleSkeleton type="featured" />
-                  <ArticleSkeleton type="featured" />
-                  <ArticleSkeleton type="featured" />
+                  <HeroSkeleton />
+                  <HeroSkeleton />
+                  <HeroSkeleton />
+                  <HeroSkeleton />
                 </>
               ) : (
                 topHeadlines.slice(0, 4).map((article) => (
-                  <FeaturedCard key={article.id} article={article} onView={trackView} size="small" />
+                  <HeroCard key={article.id} article={article} onView={trackView} size="medium" />
                 ))
               )}
             </div>
           </div>
         </section>
 
-        {/* ========== MAIN CONTENT AREA ========== */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        {/* ========== LATEST NEWS SECTION ========== */}
+        <section className="mb-10">
+          <SectionHeader title="Latest News" href="/search" />
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            {loading ? (
+              Array.from({ length: 6 }).map((_, i) => <CardSkeleton key={i} />)
+            ) : (
+              latestNews.slice(0, 6).map((article) => (
+                <ArticleCard key={article.id} article={article} onView={trackView} />
+              ))
+            )}
+          </div>
+        </section>
 
-          {/* Left column - Latest News */}
-          <div className="lg:col-span-2">
-            <SectionHeader title="Latest News" href="/search" />
+        {/* ========== TEAM SECTIONS ========== */}
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        {/* Bears Section */}
+        {(loading || teamSections.bears?.length > 0) && (
+          <section className="mb-10">
+            <SectionHeader title="Chicago Bears News & Rumors" href="/bears" />
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
               {loading ? (
-                Array.from({ length: 6 }).map((_, i) => (
-                  <ArticleSkeleton key={i} type="card" />
-                ))
+                Array.from({ length: 3 }).map((_, i) => <CardSkeleton key={i} />)
               ) : (
-                latestNews.slice(0, 6).map((article) => (
+                teamSections.bears?.slice(0, 3).map((article: any) => (
                   <ArticleCard key={article.id} article={article} onView={trackView} />
                 ))
               )}
             </div>
+          </section>
+        )}
 
-            {/* Team Sections */}
-            {teams.slice(0, 3).map((team) => {
-              const teamArticles = feed?.teamSections?.[team.name.toLowerCase()]
-              if (!teamArticles?.length && !loading) return null
-
-              return (
-                <section key={team.slug} className="mt-10">
-                  <SectionHeader
-                    title={`${team.name} News`}
-                    href={`/${team.slug.replace('chicago-', '')}`}
-                    team={team}
-                  />
-
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    {loading ? (
-                      Array.from({ length: 4 }).map((_, i) => (
-                        <ArticleSkeleton key={i} type="card" />
-                      ))
-                    ) : (
-                      teamArticles?.slice(0, 4).map((article) => (
-                        <ArticleCard key={article.id} article={article} onView={trackView} />
-                      ))
-                    )}
-                  </div>
-                </section>
-              )
-            })}
-          </div>
-
-          {/* Right sidebar */}
-          <aside className="lg:col-span-1">
-            {/* Trending/Popular */}
-            <div className="sticky top-24">
-              <SectionHeader title="Trending" />
-
-              <div className="bg-gray-50 dark:bg-[#111113] p-4">
-                {loading ? (
-                  Array.from({ length: 5 }).map((_, i) => (
-                    <ArticleSkeleton key={i} type="compact" />
-                  ))
-                ) : (
-                  feed?.trending?.slice(0, 5).map((article, index) => (
-                    <CompactCard key={article.id} article={article} onView={trackView} index={index} />
-                  ))
-                )}
-              </div>
-
-              {/* More team sections in sidebar */}
-              {teams.slice(3).map((team) => {
-                const teamArticles = feed?.teamSections?.[team.name.toLowerCase()]
-                if (!teamArticles?.length && !loading) return null
-
-                return (
-                  <div key={team.slug} className="mt-8">
-                    <SectionHeader
-                      title={team.name}
-                      href={`/${team.slug.replace('chicago-', '')}`}
-                      team={team}
-                    />
-                    <div className="space-y-0">
-                      {loading ? (
-                        Array.from({ length: 3 }).map((_, i) => (
-                          <ArticleSkeleton key={i} type="compact" />
-                        ))
-                      ) : (
-                        teamArticles?.slice(0, 3).map((article) => (
-                          <CompactCard key={article.id} article={article} onView={trackView} />
-                        ))
-                      )}
-                    </div>
-                  </div>
-                )
-              })}
+        {/* Bulls Section */}
+        {(loading || teamSections.bulls?.length > 0) && (
+          <section className="mb-10">
+            <SectionHeader title="Chicago Bulls News & Rumors" href="/bulls" />
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+              {loading ? (
+                Array.from({ length: 3 }).map((_, i) => <CardSkeleton key={i} />)
+              ) : (
+                teamSections.bulls?.slice(0, 3).map((article: any) => (
+                  <ArticleCard key={article.id} article={article} onView={trackView} />
+                ))
+              )}
             </div>
-          </aside>
-        </div>
+          </section>
+        )}
 
-        {/* Load More */}
-        <div className="text-center py-10 mt-8 border-t border-gray-200 dark:border-gray-800">
-          <button className="px-8 py-3 bg-[#bc0000] hover:bg-[#a00000] text-white font-semibold uppercase text-sm tracking-wide transition-colors">
-            Load More Articles
+        {/* Blackhawks Section */}
+        {(loading || teamSections.blackhawks?.length > 0) && (
+          <section className="mb-10">
+            <SectionHeader title="Chicago Blackhawks News & Rumors" href="/blackhawks" />
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+              {loading ? (
+                Array.from({ length: 3 }).map((_, i) => <CardSkeleton key={i} />)
+              ) : (
+                teamSections.blackhawks?.slice(0, 3).map((article: any) => (
+                  <ArticleCard key={article.id} article={article} onView={trackView} />
+                ))
+              )}
+            </div>
+          </section>
+        )}
+
+        {/* Cubs Section */}
+        {(loading || teamSections.cubs?.length > 0) && (
+          <section className="mb-10">
+            <SectionHeader title="Chicago Cubs News & Rumors" href="/cubs" />
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+              {loading ? (
+                Array.from({ length: 3 }).map((_, i) => <CardSkeleton key={i} />)
+              ) : (
+                teamSections.cubs?.slice(0, 3).map((article: any) => (
+                  <ArticleCard key={article.id} article={article} onView={trackView} />
+                ))
+              )}
+            </div>
+          </section>
+        )}
+
+        {/* White Sox Section */}
+        {(loading || teamSections['white sox']?.length > 0) && (
+          <section className="mb-10">
+            <SectionHeader title="Chicago White Sox News & Rumors" href="/white-sox" />
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+              {loading ? (
+                Array.from({ length: 3 }).map((_, i) => <CardSkeleton key={i} />)
+              ) : (
+                teamSections['white sox']?.slice(0, 3).map((article: any) => (
+                  <ArticleCard key={article.id} article={article} onView={trackView} />
+                ))
+              )}
+            </div>
+          </section>
+        )}
+
+        {/* ========== LOAD MORE ========== */}
+        <div className="text-center py-8">
+          <button className="px-8 py-3 bg-black dark:bg-white text-white dark:text-black font-medium hover:bg-gray-800 dark:hover:bg-gray-200 transition-colors">
+            Load More
           </button>
         </div>
+
       </main>
     </div>
   )

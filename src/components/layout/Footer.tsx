@@ -7,142 +7,84 @@ import { ReactNode } from 'react'
 function SocialIcon({ icon, className = '' }: { icon: string; className?: string }) {
   const icons: Record<string, ReactNode> = {
     facebook: (
-      <svg className={className} fill="currentColor" viewBox="0 0 24 24">
-        <path d="M18.77 7.46H14.5v-1.9c0-.9.6-1.1 1-1.1h3V.5h-4.33C10.24.5 9.5 3.44 9.5 5.32v2.15h-3v4h3v12h5v-12h3.85l.42-4z" />
-      </svg>
-    ),
-    twitter: (
-      <svg className={className} fill="currentColor" viewBox="0 0 24 24">
-        <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
+      <svg className={className} fill="currentColor" viewBox="0 0 320 512">
+        <path d="M279.14 288l14.22-92.66h-88.91v-60.13c0-25.35 12.42-50.06 52.24-50.06h40.42V6.26S260.43 0 225.36 0c-73.22 0-121.08 44.38-121.08 124.72v70.62H22.89V288h81.39v224h100.17V288z" />
       </svg>
     ),
     instagram: (
-      <svg className={className} fill="currentColor" viewBox="0 0 24 24">
-        <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 110-8 4 4 0 010 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z" />
+      <svg className={className} fill="currentColor" viewBox="0 0 448 512">
+        <path d="M224.1 141c-63.6 0-114.9 51.3-114.9 114.9s51.3 114.9 114.9 114.9S Salt 339 288.7 288.7 224.1 314.8 141 224.1 141zm0 189.6c-41.1 0-74.7-33.5-74.7-74.7s33.5-74.7 74.7-74.7 74.7 33.5 74.7 74.7-33.6 74.7-74.7 74.7zm146.4-194.3c0 14.9-12 26.8-26.8 26.8-14.9 0-26.8-12-26.8-26.8s12-26.8 26.8-26.8 26.8 12 26.8 26.8zm76.1 27.2c-1.7-35.9-9.9-67.7-36.2-93.9-26.2-26.2-58-34.4-93.9-36.2-37-2.1-147.9-2.1-184.9 0-35.8 1.7-67.6 9.9-93.9 36.1s-34.4 58-36.2 93.9c-2.1 37-2.1 147.9 0 184.9 1.7 35.9 9.9 67.7 36.2 93.9s58 34.4 93.9 36.2c37 2.1 147.9 2.1 184.9 0 35.9-1.7 67.7-9.9 93.9-36.2 26.2-26.2 34.4-58 36.2-93.9 2.1-37 2.1-147.8 0-184.8zM398.8 388c-7.8 19.6-22.9 34.7-42.6 42.6-29.5 11.7-99.5 9-132.1 9s-102.7 2.6-132.1-9c-19.6-7.8-34.7-22.9-42.6-42.6-11.7-29.5-9-99.5-9-132.1s-2.6-102.7 9-132.1c7.8-19.6 22.9-34.7 42.6-42.6 29.5-11.7 99.5-9 132.1-9s102.7-2.6 132.1 9c19.6 7.8 34.7 22.9 42.6 42.6 11.7 29.5 9 99.5 9 132.1s2.7 102.7-9 132.1z" />
+      </svg>
+    ),
+    twitter: (
+      <svg className={className} fill="currentColor" viewBox="0 0 512 512">
+        <path d="M389.2 48h70.6L305.6 224.2 487 464H345L233.7 318.6 106.5 464H35.8L200.7 275.5 26.8 48H172.4L272.9 180.9 389.2 48zM364.4 421.8h39.1L151.1 88h-42L364.4 421.8z" />
       </svg>
     ),
     youtube: (
-      <svg className={className} fill="currentColor" viewBox="0 0 24 24">
-        <path d="M23.498 6.186a3.016 3.016 0 00-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 00.502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 002.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 002.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z" />
+      <svg className={className} fill="currentColor" viewBox="0 0 576 512">
+        <path d="M549.655 124.083c-6.281-23.65-24.787-42.276-48.284-48.597C458.781 64 288 64 288 64S117.22 64 74.629 75.486c-23.497 6.322-42.003 24.947-48.284 48.597-11.412 42.867-11.412 132.305-11.412 132.305s0 89.438 11.412 132.305c6.281 23.65 24.787 41.5 48.284 47.821C117.22 448 288 448 288 448s170.78 0 213.371-11.486c23.497-6.321 42.003-24.171 48.284-47.821 11.412-42.867 11.412-132.305 11.412-132.305s0-89.438-11.412-132.305zm-317.51 213.508V175.185l142.739 81.205-142.739 81.201z" />
       </svg>
     ),
   }
   return icons[icon] || null
 }
 
-// Footer link sections
-const footerSections = [
-  {
-    title: 'Teams',
-    links: [
-      { name: 'Bears', href: '/bears' },
-      { name: 'Bulls', href: '/bulls' },
-      { name: 'Blackhawks', href: '/blackhawks' },
-      { name: 'White Sox', href: '/white-sox' },
-      { name: 'Cubs', href: '/cubs' },
-    ],
-  },
-  {
-    title: 'Podcasts',
-    links: [
-      { name: 'Bears Film Room', href: '/podcasts/bears-film-room' },
-      { name: 'Pinwheels and Ivy', href: '/podcasts/pinwheels-and-ivy' },
-    ],
-  },
-  {
-    title: 'Company',
-    links: [
-      { name: 'About Us', href: '/about' },
-      { name: 'Contact', href: '/contact' },
-      { name: 'Advertise', href: '/advertise' },
-      { name: 'Careers', href: '/careers' },
-    ],
-  },
-  {
-    title: 'Legal',
-    links: [
-      { name: 'Privacy Policy', href: '/privacy' },
-      { name: 'Terms of Service', href: '/terms' },
-      { name: 'Cookie Policy', href: '/cookies' },
-    ],
-  },
-]
-
 // Social links
 const socialLinks = [
   { name: 'Facebook', href: 'https://facebook.com/sportsmockery', icon: 'facebook' },
-  { name: 'Twitter', href: 'https://twitter.com/sportsmockery', icon: 'twitter' },
   { name: 'Instagram', href: 'https://instagram.com/sportsmockery', icon: 'instagram' },
+  { name: 'Twitter', href: 'https://twitter.com/sportsmockery', icon: 'twitter' },
   { name: 'YouTube', href: 'https://youtube.com/sportsmockery', icon: 'youtube' },
 ]
 
 export default function Footer() {
   return (
-    <footer className="bg-white dark:bg-[#0a0a0b] border-t border-gray-200 dark:border-[#27272a]">
-      {/* Main footer content */}
-      <div className="max-w-[1400px] mx-auto px-4 py-12">
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-8">
-          {/* Logo and social */}
-          <div className="col-span-2">
-            <Link href="/" className="inline-block mb-4">
-              <span className="text-xl font-black tracking-tight">
-                <span className="text-[#bc0000]">SPORTS</span>
-                <span className="text-gray-900 dark:text-white">MOCKERY</span>
-              </span>
-            </Link>
-            <p className="text-sm text-gray-600 dark:text-gray-400 mb-4 max-w-xs">
-              Chicago&apos;s premier source for sports news, rumors, and analysis covering the Bears, Bulls, Blackhawks, Cubs, and White Sox.
-            </p>
-            {/* Social links */}
-            <div className="flex items-center gap-4">
+    <footer className="bg-white dark:bg-[#0a0a0a]">
+      {/* Main footer - centered social icons */}
+      <div className="border-t border-gray-200 dark:border-gray-800">
+        <div className="max-w-[1110px] mx-auto px-4 py-8">
+          <div className="flex flex-col items-center gap-6">
+            {/* Social icons */}
+            <div className="flex items-center gap-6">
               {socialLinks.map((social) => (
                 <a
                   key={social.name}
                   href={social.href}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-gray-500 dark:text-gray-400 hover:text-[#bc0000] transition-colors"
+                  className="text-gray-500 dark:text-gray-400 hover:text-black dark:hover:text-white transition-colors"
                   aria-label={social.name}
                 >
                   <SocialIcon icon={social.icon} className="w-5 h-5" />
                 </a>
               ))}
             </div>
-          </div>
 
-          {/* Link sections */}
-          {footerSections.map((section) => (
-            <div key={section.title}>
-              <h3 className="font-semibold text-gray-900 dark:text-white mb-3 text-sm uppercase tracking-wide">
-                {section.title}
-              </h3>
-              <ul className="space-y-2">
-                {section.links.map((link) => (
-                  <li key={link.href}>
-                    <Link
-                      href={link.href}
-                      className="text-sm text-gray-600 dark:text-gray-400 hover:text-[#bc0000] transition-colors"
-                    >
-                      {link.name}
-                    </Link>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          ))}
+            {/* Copyright */}
+            <p className="text-sm text-gray-500 dark:text-gray-400 text-center">
+              &copy; Sports Mockery, Inc. {new Date().getFullYear()} | All rights reserved
+            </p>
+          </div>
         </div>
       </div>
 
-      {/* Bottom bar */}
-      <div className="border-t border-gray-200 dark:border-[#27272a]">
-        <div className="max-w-[1400px] mx-auto px-4 py-4">
-          <div className="flex flex-col md:flex-row items-center justify-between gap-4 text-sm text-gray-500 dark:text-gray-400">
-            <p>
-              &copy; {new Date().getFullYear()} Sports Mockery. All rights reserved.
-            </p>
-            <p>
-              Chicago Sports News and Rumors
-            </p>
+      {/* Sub-footer with brand color */}
+      <div className="bg-[#bc0000]">
+        <div className="max-w-[1110px] mx-auto px-4 py-4">
+          <div className="flex items-center justify-center gap-4">
+            {socialLinks.map((social) => (
+              <a
+                key={social.name}
+                href={social.href}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="w-8 h-8 flex items-center justify-center rounded-full bg-white/20 text-white hover:bg-black transition-colors"
+                aria-label={social.name}
+              >
+                <SocialIcon icon={social.icon} className="w-4 h-4" />
+              </a>
+            ))}
           </div>
         </div>
       </div>
