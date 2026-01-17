@@ -336,22 +336,22 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
             </div>
           </div>
         ) : (
-          /* Fallback header without image - per spec use white bg */
-          <div className="bg-white py-10 border-b border-[#e0e0e0]">
+          /* Fallback header without image - dark background for white text */
+          <div className="bg-[#1a1a1a] py-10 border-b border-zinc-800">
             <div className="mx-auto max-w-[1110px] px-4">
-              {/* Breadcrumb per spec section 15.1 */}
+              {/* Breadcrumb */}
               <nav className="mb-4">
-                <ol className="flex items-center gap-2 text-[12px] text-[#666666]">
+                <ol className="flex items-center gap-2 text-[12px] text-zinc-400">
                   <li>
-                    <Link href="/" className="hover:text-[#bc0000] transition-colors">
+                    <Link href="/" className="hover:text-white transition-colors">
                       Home
                     </Link>
                   </li>
-                  <li>/</li>
+                  <li className="text-zinc-500">/</li>
                   <li>
                     <Link
                       href={`/${categoryData?.slug || category}`}
-                      className="hover:text-[#bc0000] transition-colors"
+                      className="hover:text-white transition-colors"
                     >
                       {categoryData?.name || category}
                     </Link>
@@ -361,7 +361,7 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
 
               {/* Context label above title (Rumor, Film Room, Opinion) */}
               {contextLabel && (
-                <span className="mb-2 inline-block text-xs font-semibold uppercase tracking-[0.06em] px-2 py-[2px] rounded-full bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-300">
+                <span className="mb-2 inline-block text-xs font-semibold uppercase tracking-[0.06em] px-2 py-[2px] rounded-full bg-white/20 text-white/90">
                   {contextLabel.label}
                 </span>
               )}
@@ -384,13 +384,13 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
               </h1>
 
               {/* Meta line per spec: "By {author} · {Date} · {X min read} · {Category}" */}
-              <p className="text-[14px] text-[var(--text-muted)]">
+              <p className="text-[14px] text-zinc-400">
                 {author && (
                   <>
                     By{' '}
                     <Link
                       href={`/author/${author.slug || author.id}`}
-                      className="font-medium text-[#222222] hover:text-[#bc0000] transition-colors"
+                      className="font-medium text-white hover:text-[#bc0000] transition-colors"
                     >
                       {author.display_name}
                     </Link>
