@@ -3,12 +3,12 @@
 import { NextRequest, NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabase-server";
 
-// ElevenLabs voice IDs - using their high-quality built-in voices
+// ElevenLabs voice IDs - custom voices
 const VOICE_IDS: Record<string, string> = {
-  mike: "TxGEqnHWrfWFTfGW9XjX",    // Josh - young, energetic American male
-  david: "pNInz6obpgDQGcFmaJgB",   // Adam - deep, mature American male
-  sarah: "21m00Tcm4TlvDq8ikWAM",   // Rachel - expressive American female
-  jennifer: "MF3mGyEYCl7XYWbV9V6O", // Elli - warm, friendly American female
+  will: "bIHbv24MWmeRgasZH58o",     // Will - young, energetic American male
+  brian: "nPczCjzI2devNBz1zQrb",    // Brian - mature, authoritative American male
+  laura: "FGY2WhTYpPnrIDTdsKH5",    // Laura - warm, friendly American female
+  sarah: "EXAVITQu4vr4xnSDxMaL",    // Sarah - expressive American female
 };
 
 // ElevenLabs model - eleven_turbo_v2_5 is fast and high quality
@@ -48,10 +48,10 @@ export async function GET(
   { params }: { params: Promise<{ slug: string }> }
 ) {
   const { slug } = await params;
-  const voiceParam = req.nextUrl.searchParams.get("voice") || "mike";
+  const voiceParam = req.nextUrl.searchParams.get("voice") || "will";
 
   // Validate voice parameter
-  const voiceId = VOICE_IDS[voiceParam] || VOICE_IDS.mike;
+  const voiceId = VOICE_IDS[voiceParam] || VOICE_IDS.will;
 
   // Check for API key
   const apiKey = process.env.ELEVENLABS_API_KEY;

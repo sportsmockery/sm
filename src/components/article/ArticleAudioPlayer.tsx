@@ -17,7 +17,7 @@ interface PlaylistState {
 }
 
 // Voice profile configuration
-type VoiceProfileId = 'mike' | 'david' | 'sarah' | 'jennifer';
+type VoiceProfileId = 'will' | 'brian' | 'sarah' | 'laura';
 
 interface VoiceProfile {
   id: VoiceProfileId;
@@ -27,13 +27,13 @@ interface VoiceProfile {
 
 const VOICE_PROFILES: VoiceProfile[] = [
   {
-    id: 'mike',
-    name: 'Mike',
+    id: 'will',
+    name: 'Will',
     description: 'Young male, energetic',
   },
   {
-    id: 'david',
-    name: 'David',
+    id: 'brian',
+    name: 'Brian',
     description: 'Mature male, authoritative',
   },
   {
@@ -42,8 +42,8 @@ const VOICE_PROFILES: VoiceProfile[] = [
     description: 'Young female, expressive',
   },
   {
-    id: 'jennifer',
-    name: 'Jennifer',
+    id: 'laura',
+    name: 'Laura',
     description: 'Young female, warm',
   },
 ];
@@ -63,7 +63,7 @@ export function ArticleAudioPlayer({
   const [error, setError] = useState<string | null>(null);
   const [progress, setProgress] = useState(0);
   const [duration, setDuration] = useState(0);
-  const [selectedVoice, setSelectedVoice] = useState<VoiceProfileId>('mike');
+  const [selectedVoice, setSelectedVoice] = useState<VoiceProfileId>('will');
   const [showVoiceSelector, setShowVoiceSelector] = useState(false);
 
   const audioRef = useRef<HTMLAudioElement | null>(null);
