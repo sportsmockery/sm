@@ -20,6 +20,10 @@ import TableOfContents from '@/components/article/TableOfContents'
 import MockeryCommentary from '@/components/article/MockeryCommentary'
 import { ArticleTableOfContents, MoreFromTeam } from '@/components/article'
 import { categorySlugToTeam, PostSummary } from '@/lib/types'
+import { stripDuplicateFeaturedImage, calculateReadTime, getContextLabel } from '@/lib/content-utils'
+import { buildAutoLinkContextForPost, applyAutoLinksToHtml } from '@/lib/autolink'
+import { getArticleAudioInfo } from '@/lib/audioPlayer'
+import { ArticleAudioPlayer } from '@/components/article/ArticleAudioPlayer'
 
 interface ArticlePageProps {
   params: Promise<{
@@ -28,11 +32,7 @@ interface ArticlePageProps {
   }>
 }
 
-function calculateReadingTime(content: string): number {
-  const text = content.replace(/<[^>]*>/g, '')
-  const words = text.split(/\s+/).filter(Boolean).length
-  return Math.max(1, Math.ceil(words / 200))
-}
+// Reading time now uses centralized utility with 225 WPM standard
 
 // Per design spec: Use primary red #bc0000 for category tags consistently
 
@@ -103,7 +103,7 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
     notFound()
   }
 
-  const readingTime = calculateReadingTime(post.content || '')
+  const readingTime = calculateReadTime(post.content || '')
   const articleUrl = `https://sportsmockery.com/${category}/${slug}`
 
   // Fetch all data in parallel
@@ -165,6 +165,19 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
     }
     return tagData.tag?.name
   }).filter((name): name is string => typeof name === 'string') || [])
+
+  // Get context label (Rumor, Film Room, Opinion) per spec
+  const contextLabel = getContextLabel(categoryData?.name, tags)
+
+  // Build auto-link context and apply auto-linking to content
+  const autoLinkCtx = await buildAutoLinkContextForPost(
+    post.id,
+    categoryData?.slug || category
+  )
+  const autoLinkedContent = applyAutoLinksToHtml(post.content || '', autoLinkCtx)
+
+  // Fetch audio info for article audio player
+  const audioInfo = await getArticleAudioInfo(slug)
 
   // Fetch category slugs for prev/next posts
   const categoryIds = [prevPost?.category_id, nextPost?.category_id].filter(Boolean)
@@ -256,6 +269,13 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
                   </ol>
                 </nav>
 
+                {/* Context label above title (Rumor, Film Room, Opinion) */}
+                {contextLabel && (
+                  <span className="mb-2 inline-block text-xs font-semibold uppercase tracking-[0.06em] px-2 py-[2px] rounded-full bg-white/20 text-white/90">
+                    {contextLabel.label}
+                  </span>
+                )}
+
                 {/* Category Badge per spec: red bg #bc0000 */}
                 <Link
                   href={`/${categoryData?.slug || category}`}
@@ -265,7 +285,7 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
                   {categoryData?.name || category}
                 </Link>
 
-                {/* Title per spec: 36-42px, Montserrat 700-900, line-height 1.2 */}
+                {/* Title per spec: 36-42px, Montserrat 700-900, line-height 1.2 - no text-transform */}
                 <h1
                   className="mb-4 text-[36px] lg:text-[42px] font-black leading-[1.2] text-white"
                   style={{ fontFamily: "'Montserrat', sans-serif", letterSpacing: '-0.5px' }}
@@ -339,6 +359,13 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
                 </ol>
               </nav>
 
+              {/* Context label above title (Rumor, Film Room, Opinion) */}
+              {contextLabel && (
+                <span className="mb-2 inline-block text-xs font-semibold uppercase tracking-[0.06em] px-2 py-[2px] rounded-full bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-300">
+                  {contextLabel.label}
+                </span>
+              )}
+
               {/* Category Badge per spec */}
               <Link
                 href={`/${categoryData?.slug || category}`}
@@ -348,7 +375,7 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
                 {categoryData?.name || category}
               </Link>
 
-              {/* Title per spec: 36-42px, Montserrat 700-900 */}
+              {/* Title per spec: 36-42px, Montserrat 700-900 - no text-transform */}
               <h1
                 className="mb-4 text-[36px] lg:text-[42px] font-black leading-[1.2] text-[#222222]"
                 style={{ fontFamily: "'Montserrat', sans-serif", letterSpacing: '-0.5px' }}
@@ -356,8 +383,8 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
                 {post.title}
               </h1>
 
-              {/* Author/Date Line per spec section 7.1: "By Author Name | Month Day, Year" */}
-              <p className="text-[14px] text-[#666666]" style={{ fontFamily: "'Montserrat', sans-serif" }}>
+              {/* Meta line per spec: "By {author} · {Date} · {X min read} · {Category}" */}
+              <p className="text-[14px] text-[var(--text-muted)]">
                 {author && (
                   <>
                     By{' '}
@@ -367,10 +394,14 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
                     >
                       {author.display_name}
                     </Link>
-                    {' | '}
+                    {' · '}
                   </>
                 )}
                 {format(new Date(post.published_at), 'MMMM d, yyyy')}
+                {' · '}
+                {readingTime} min read
+                {' · '}
+                {categoryData?.name || category}
               </p>
             </div>
           </div>
@@ -383,21 +414,15 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
           <div className="lg:flex lg:gap-10">
             {/* Main article column */}
             <div className="lg:flex-1 lg:max-w-[750px]">
-              {/* Featured Image per spec section 7.2 */}
-              {post.featured_image && (
-                <div className="mb-8">
-                  <div className="relative w-full" style={{ maxHeight: '500px' }}>
-                    <Image
-                      src={post.featured_image}
-                      alt={post.title}
-                      width={1110}
-                      height={500}
-                      className="w-full h-auto object-cover"
-                      style={{ maxHeight: '500px' }}
-                      priority
-                    />
-                  </div>
-                </div>
+              {/* Note: Featured image is shown in hero section above, not duplicated here */}
+
+              {/* Article Audio Player - Listen to this article */}
+              {audioInfo && (
+                <ArticleAudioPlayer
+                  initialArticle={audioInfo.article}
+                  initialAudioUrl={audioInfo.audioUrl}
+                  articleContent={post.content || ''}
+                />
               )}
 
               {/* Article body per spec section 7.3: Fira Sans 16-17px, line-height 1.7 */}
@@ -405,11 +430,6 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
                 className="article-body"
                 style={{ fontFamily: "'Fira Sans', sans-serif" }}
               >
-                {/* Share buttons (top) per spec section 7.4 */}
-                <div className="mb-8 flex items-center gap-3 border-b border-[#e0e0e0] pb-6">
-                  <ShareButtons url={articleUrl} title={post.title} />
-                </div>
-
                 {/* In-article Table of Contents (for longer articles) */}
                 {readingTime >= 5 && (
                   <ArticleTableOfContents
@@ -419,10 +439,16 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
                 )}
 
                 {/* Article body content - using globals.css .article-body styles */}
+                {/* Auto-linked content with duplicate featured image stripped */}
                 <div
                   className="article-body"
-                  dangerouslySetInnerHTML={{ __html: post.content }}
+                  dangerouslySetInnerHTML={{ __html: stripDuplicateFeaturedImage(autoLinkedContent, post.featured_image) }}
                 />
+
+                {/* Share buttons placed after article body per spec */}
+                <div className="my-8 flex items-center gap-3 border-y border-[#e0e0e0] py-6">
+                  <ShareButtons url={articleUrl} title={post.title} />
+                </div>
 
                 {/* Tags per spec section 15.4 */}
                 {tags.length > 0 && (
@@ -430,17 +456,6 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
                     <ArticleTags tags={tags} />
                   </div>
                 )}
-
-                {/* Share buttons (bottom) */}
-                <div className="mt-10 border-t border-[#e0e0e0] pt-6">
-                  <p
-                    className="mb-3 text-[12px] font-bold uppercase tracking-wider text-[#999999]"
-                    style={{ fontFamily: "'Montserrat', sans-serif" }}
-                  >
-                    Share this article
-                  </p>
-                  <ShareButtons url={articleUrl} title={post.title} />
-                </div>
 
                 {/* Author Card per spec section 15.3 */}
                 {author && (
