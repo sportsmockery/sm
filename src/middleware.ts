@@ -39,6 +39,7 @@ const publicPaths = [
   '/api/bears',  // Bears data API (ticker, schedule, roster, etc.)
   '/api/feed',   // Oracle feed API
   '/api/audio',  // Audio TTS API
+  '/api/cron',   // Vercel cron jobs
 ]
 
 export async function middleware(request: NextRequest) {
