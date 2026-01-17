@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useCallback, useRef } from 'react'
 import { TEAM_INFO } from '@/lib/types'
 
 interface BearsStickyBarProps {
@@ -12,43 +12,118 @@ interface BearsStickyBarProps {
 
 interface TickerData {
   record: string
+  regularRecord?: string
+  postseasonRecord?: string
   nextGame: {
     opponent: string
+    opponentFull?: string
     date: string
     fullDate: string
     time: string
-    week: number
-    gameType: string
+    temp?: number
+    spread?: number
   } | null
   lastGame: {
     opponent: string
+    opponentFull?: string
     result: string
     score: string
     week: number
+    gameType?: string
+  } | null
+  liveGame?: {
+    opponent: string
+    bearsScore: number
+    opponentScore: number
+    quarter: number
+    clock: string
+    possession?: string
   } | null
 }
+
+// Polling intervals
+const LIVE_POLL_INTERVAL = 10000 // 10 seconds during live games
+const NORMAL_POLL_INTERVAL = 300000 // 5 minutes during non-game times
 
 /**
  * Bears-focused sticky navigation bar
  * Shows Bears record, next game, and quick links
  * Height: 48px default, 36px on article pages per spec
- * Data fetched from /api/bears/ticker (cached hourly)
+ *
+ * Polling behavior:
+ * - Every 10 seconds during live Bears games
+ * - Every 5 minutes during non-game times
  */
 export default function BearsStickyBar({ className = '', isArticlePage }: BearsStickyBarProps) {
   const pathname = usePathname()
   const bearsInfo = TEAM_INFO.bears
   const [tickerData, setTickerData] = useState<TickerData | null>(null)
+  const [isLiveGame, setIsLiveGame] = useState(false)
+  const intervalRef = useRef<NodeJS.Timeout | null>(null)
 
   // Detect if we're on an article page (has slug after category)
   const isArticle = isArticlePage ?? (pathname?.match(/^\/[^/]+\/[^/]+$/) !== null && !pathname?.startsWith('/teams/'))
 
-  // Fetch ticker data on mount
-  useEffect(() => {
-    fetch('/api/bears/ticker')
-      .then(res => res.json())
-      .then(data => setTickerData(data))
-      .catch(err => console.error('Failed to fetch Bears ticker:', err))
+  // Fetch ticker data
+  const fetchTicker = useCallback(async () => {
+    try {
+      const res = await fetch('/api/bears/ticker')
+      const data = await res.json()
+      setTickerData(data)
+
+      // Check if there's a live game
+      const hasLiveGame = !!data.liveGame
+      setIsLiveGame(hasLiveGame)
+
+      return hasLiveGame
+    } catch (err) {
+      console.error('Failed to fetch Bears ticker:', err)
+      return false
+    }
   }, [])
+
+  // Set up polling with dynamic interval
+  useEffect(() => {
+    // Initial fetch
+    fetchTicker()
+
+    // Set up polling
+    const startPolling = (isLive: boolean) => {
+      if (intervalRef.current) {
+        clearInterval(intervalRef.current)
+      }
+
+      const interval = isLive ? LIVE_POLL_INTERVAL : NORMAL_POLL_INTERVAL
+      intervalRef.current = setInterval(async () => {
+        const nowLive = await fetchTicker()
+
+        // If live status changed, update polling interval
+        if (nowLive !== isLive) {
+          startPolling(nowLive)
+        }
+      }, interval)
+    }
+
+    // Start with normal polling, will switch to live if game detected
+    startPolling(false)
+
+    // Also check immediately for live game status
+    fetch('/api/bears/sync')
+      .then(res => res.json())
+      .then(data => {
+        if (data.hasLiveGame) {
+          setIsLiveGame(true)
+          startPolling(true)
+        }
+      })
+      .catch(() => {})
+
+    return () => {
+      if (intervalRef.current) {
+        clearInterval(intervalRef.current)
+      }
+    }
+  }, [fetchTicker])
 
   // Use fetched data or fallback
   const bearsData = {
@@ -58,6 +133,7 @@ export default function BearsStickyBar({ className = '', isArticlePage }: BearsS
       date: tickerData.nextGame.date,
       time: tickerData.nextGame.time,
     } : null,
+    liveGame: tickerData?.liveGame || null,
   }
 
   const quickLinks = [
@@ -76,7 +152,7 @@ export default function BearsStickyBar({ className = '', isArticlePage }: BearsS
     >
       <div className={`max-w-[1110px] mx-auto ${isArticle ? 'px-3 md:px-4' : 'px-4'} h-full`}>
         <div className="flex items-center justify-between h-full">
-          {/* Left: Bears badge + record */}
+          {/* Left: Bears badge + record/live score */}
           <div className="flex items-center gap-3">
             {/* Bears logo/badge */}
             <Link
@@ -97,16 +173,31 @@ export default function BearsStickyBar({ className = '', isArticlePage }: BearsS
               </span>
             </Link>
 
-            {/* Record */}
-            <div className="flex items-center gap-2 border-l border-white/20 pl-3">
-              <span className="text-white/70 text-xs">Record:</span>
-              <span
-                className="text-white font-bold text-sm"
-                style={{ fontFamily: "'Montserrat', sans-serif" }}
-              >
-                {bearsData.record}
-              </span>
-            </div>
+            {/* Live Game Score OR Record */}
+            {bearsData.liveGame ? (
+              <div className="flex items-center gap-2 border-l border-white/20 pl-3">
+                <span className="text-red-400 text-xs font-bold animate-pulse">LIVE</span>
+                <span
+                  className="text-white font-bold text-sm"
+                  style={{ fontFamily: "'Montserrat', sans-serif" }}
+                >
+                  CHI {bearsData.liveGame.bearsScore} - {bearsData.liveGame.opponentScore} {bearsData.liveGame.opponent}
+                </span>
+                <span className="text-white/60 text-xs">
+                  Q{bearsData.liveGame.quarter} {bearsData.liveGame.clock}
+                </span>
+              </div>
+            ) : (
+              <div className="flex items-center gap-2 border-l border-white/20 pl-3">
+                <span className="text-white/70 text-xs">Record:</span>
+                <span
+                  className="text-white font-bold text-sm"
+                  style={{ fontFamily: "'Montserrat', sans-serif" }}
+                >
+                  {bearsData.record}
+                </span>
+              </div>
+            )}
 
             {/* Next game (hidden on mobile) */}
             {bearsData.nextGame && (

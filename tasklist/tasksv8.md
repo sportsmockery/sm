@@ -71,11 +71,11 @@ Implement ESPN + MySportsFeeds data sync for Bears tables in datalab, with hourl
 - [x] Ticker reads from bears_games_master (already done)
 
 ### 9. Test and verify
-- [ ] Test ESPN API calls
-- [ ] Test fallback to MySportsFeeds
-- [ ] Verify hourly cron runs
-- [ ] Verify live game updates work
-- [ ] Deploy and monitor
+- [x] Test ESPN API calls - Working! Inserted 1 game from ESPN
+- [x] Deploy and monitor - Deployed successfully
+- [ ] Test fallback to MySportsFeeds (requires ESPN failure)
+- [ ] Verify hourly cron runs (next run at top of hour)
+- [ ] Verify live game updates work (requires live Bears game)
 
 ---
 
@@ -109,4 +109,21 @@ Implement ESPN + MySportsFeeds data sync for Bears tables in datalab, with hourl
 - DO NOT add null values
 - DO NOT change table format
 - ESPN is PRIMARY, MySportsFeeds is BACKUP
+
+### Update: 2025-01-17 (Session 2)
+
+**Fixed queries to use correct datalab tables:**
+- Ticker now uses `bears_season_record` table for accurate record
+- Record displays as "11-6, 1-0 Playoffs" (NEVER combined as "12-5")
+- All times in Central Time (CT)
+
+**Live game polling:**
+- Client polls every 10 seconds during live games
+- Client polls every 5 minutes during non-game times
+- Ticker checks for live game in `bears_games_master`
+- Live game window: 1hr before to 4hrs after kickoff
+
+**Updated files:**
+- `src/app/api/bears/ticker/route.ts` - Uses bears_season_record, adds live game
+- `src/components/layout/BearsStickyBar.tsx` - 10-sec polling during games, shows live score
 
