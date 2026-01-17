@@ -7,14 +7,13 @@ import type { ArticleMeta, NextArticleMode } from "@/lib/audioPlayer";
 interface ArticleAudioPlayerProps {
   initialArticle: ArticleMeta;
   initialAudioUrl: string;
-  articleContent?: string; // HTML content to read
+  articleContent?: string;
 }
 
 interface PlaylistState {
   currentArticle: ArticleMeta;
   currentAudioUrl: string;
   mode: NextArticleMode;
-  content: string;
 }
 
 // Voice profile configuration
@@ -24,11 +23,6 @@ interface VoiceProfile {
   id: VoiceProfileId;
   name: string;
   description: string;
-  gender: 'male' | 'female';
-  rate: number;
-  pitch: number;
-  // Preferred voice names to search for
-  preferredVoices: string[];
 }
 
 const VOICE_PROFILES: VoiceProfile[] = [
@@ -36,255 +30,118 @@ const VOICE_PROFILES: VoiceProfile[] = [
     id: 'mike',
     name: 'Mike',
     description: 'Young male, energetic',
-    gender: 'male',
-    rate: 1.0,
-    pitch: 1.05,
-    preferredVoices: ['aaron', 'guy', 'evan', 'reed', 'tom'],
   },
   {
     id: 'david',
     name: 'David',
     description: 'Mature male, authoritative',
-    gender: 'male',
-    rate: 0.9,
-    pitch: 0.85,
-    preferredVoices: ['david', 'alex', 'daniel', 'fred', 'bruce'],
   },
   {
     id: 'sarah',
     name: 'Sarah',
     description: 'Young female, expressive',
-    gender: 'female',
-    rate: 1.0,
-    pitch: 1.1,
-    preferredVoices: ['samantha', 'karen', 'sara', 'ava', 'allison'],
   },
   {
     id: 'jennifer',
     name: 'Jennifer',
     description: 'Young female, warm',
-    gender: 'female',
-    rate: 0.95,
-    pitch: 1.0,
-    preferredVoices: ['victoria', 'kate', 'susan', 'zira', 'fiona'],
   },
 ];
-
-// Strip HTML tags and get plain text, clean up for better speech
-function stripHtml(html: string): string {
-  const doc = new DOMParser().parseFromString(html, 'text/html');
-  let text = doc.body.textContent || '';
-
-  // Clean up common issues that cause choppy speech
-  text = text
-    .replace(/\s+/g, ' ') // Normalize whitespace
-    .replace(/\.{2,}/g, '.') // Multiple periods to single
-    .replace(/([.!?])\s*([A-Z])/g, '$1 $2') // Ensure space after sentences
-    .trim();
-
-  return text;
-}
-
-// Find the best matching voice for a profile
-function findVoiceForProfile(
-  voices: SpeechSynthesisVoice[],
-  profile: VoiceProfile
-): SpeechSynthesisVoice | null {
-  // Filter to English US voices, preferring remote (higher quality) voices
-  const usVoices = voices.filter(v =>
-    v.lang === 'en-US' || v.lang.startsWith('en-US')
-  );
-
-  // Sort to prefer remote/cloud voices (usually higher quality)
-  const sortedVoices = [...usVoices].sort((a, b) => {
-    // Prefer non-local (cloud) voices
-    if (a.localService !== b.localService) {
-      return a.localService ? 1 : -1;
-    }
-    // Prefer voices with "Premium" or "Enhanced" in name
-    const aEnhanced = /premium|enhanced|neural|natural/i.test(a.name);
-    const bEnhanced = /premium|enhanced|neural|natural/i.test(b.name);
-    if (aEnhanced !== bEnhanced) {
-      return aEnhanced ? -1 : 1;
-    }
-    return 0;
-  });
-
-  // Try to find a voice matching the profile's preferred names
-  for (const prefName of profile.preferredVoices) {
-    const match = sortedVoices.find(v =>
-      v.name.toLowerCase().includes(prefName.toLowerCase())
-    );
-    if (match) return match;
-  }
-
-  // Fallback: find any voice matching gender by common names
-  const genderNames = profile.gender === 'male'
-    ? ['david', 'alex', 'daniel', 'tom', 'james', 'guy', 'aaron', 'fred', 'junior', 'ralph', 'albert', 'bruce', 'evan', 'reed']
-    : ['samantha', 'victoria', 'karen', 'sarah', 'susan', 'jennifer', 'kate', 'allison', 'ava', 'zira', 'linda', 'fiona', 'tessa', 'moira'];
-
-  for (const name of genderNames) {
-    const match = sortedVoices.find(v =>
-      v.name.toLowerCase().includes(name)
-    );
-    if (match) return match;
-  }
-
-  // Last resort: return the first high-quality US voice
-  if (sortedVoices.length > 0) {
-    return sortedVoices[0];
-  }
-
-  // Ultimate fallback: any English voice
-  const anyEnglish = voices.find(v => v.lang.startsWith('en'));
-  return anyEnglish || voices[0] || null;
-}
 
 export function ArticleAudioPlayer({
   initialArticle,
   initialAudioUrl,
-  articleContent = '',
 }: ArticleAudioPlayerProps) {
   const [playlist, setPlaylist] = useState<PlaylistState>({
     currentArticle: initialArticle,
     currentAudioUrl: initialAudioUrl,
     mode: "team",
-    content: articleContent,
   });
   const [isLoadingNext, setIsLoadingNext] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
   const [isPlaying, setIsPlaying] = useState(false);
-  const [isPaused, setIsPaused] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [progress, setProgress] = useState(0);
-  const [isSupported, setIsSupported] = useState(true);
+  const [duration, setDuration] = useState(0);
   const [selectedVoice, setSelectedVoice] = useState<VoiceProfileId>('mike');
-  const [availableVoices, setAvailableVoices] = useState<SpeechSynthesisVoice[]>([]);
   const [showVoiceSelector, setShowVoiceSelector] = useState(false);
-  const [currentVoiceName, setCurrentVoiceName] = useState<string>('');
 
-  const utteranceRef = useRef<SpeechSynthesisUtterance | null>(null);
-  const textRef = useRef<string>('');
-  const charIndexRef = useRef<number>(0);
+  const audioRef = useRef<HTMLAudioElement | null>(null);
 
-  // Check for Speech Synthesis support
-  useEffect(() => {
-    if (typeof window !== 'undefined' && !('speechSynthesis' in window)) {
-      setIsSupported(false);
-      setError('Text-to-speech is not supported in your browser.');
-    }
+  // Build audio URL with voice parameter
+  const getAudioUrl = useCallback((slug: string, voice: VoiceProfileId) => {
+    return `/api/audio/${encodeURIComponent(slug)}?voice=${voice}`;
   }, []);
 
-  // Load voices when they become available
+  // Initialize audio element
   useEffect(() => {
-    if (typeof window === 'undefined' || !('speechSynthesis' in window)) return;
+    const audio = new Audio();
+    audioRef.current = audio;
 
-    const loadVoices = () => {
-      const voices = window.speechSynthesis.getVoices();
-      if (voices.length > 0) {
-        setAvailableVoices(voices);
+    audio.addEventListener('loadstart', () => setIsLoading(true));
+    audio.addEventListener('canplay', () => setIsLoading(false));
+    audio.addEventListener('playing', () => {
+      setIsPlaying(true);
+      setIsLoading(false);
+    });
+    audio.addEventListener('pause', () => setIsPlaying(false));
+    audio.addEventListener('ended', () => {
+      setIsPlaying(false);
+      setProgress(0);
+      // Auto-advance to next article
+      loadNextArticle();
+    });
+    audio.addEventListener('error', (e) => {
+      console.error('Audio error:', e);
+      setError('Failed to load audio. Please try again.');
+      setIsLoading(false);
+      setIsPlaying(false);
+    });
+    audio.addEventListener('timeupdate', () => {
+      if (audio.duration) {
+        setProgress((audio.currentTime / audio.duration) * 100);
       }
-    };
-
-    // Load immediately if already available
-    loadVoices();
-
-    // Also listen for voices to load (some browsers load async)
-    window.speechSynthesis.onvoiceschanged = loadVoices;
+    });
+    audio.addEventListener('durationchange', () => {
+      setDuration(audio.duration);
+    });
 
     return () => {
-      window.speechSynthesis.onvoiceschanged = null;
+      audio.pause();
+      audio.src = '';
     };
-  }, []);
-
-  // Cleanup on unmount
-  useEffect(() => {
-    return () => {
-      if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
-        window.speechSynthesis.cancel();
-      }
-    };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const handleModeChange = (mode: NextArticleMode) => {
     setPlaylist((prev) => ({ ...prev, mode }));
   };
 
-  const stopSpeech = useCallback(() => {
-    if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
-      window.speechSynthesis.cancel();
-    }
-    setIsPlaying(false);
-    setIsPaused(false);
-    setProgress(0);
-    charIndexRef.current = 0;
-  }, []);
+  const handleVoiceChange = useCallback((voiceId: VoiceProfileId) => {
+    setSelectedVoice(voiceId);
+    setShowVoiceSelector(false);
 
-  const startSpeech = useCallback((content: string, title: string, voiceId?: VoiceProfileId) => {
-    if (!isSupported || typeof window === 'undefined') return;
-
-    const profileId = voiceId || selectedVoice;
-    const voiceProfile = VOICE_PROFILES.find(v => v.id === profileId) || VOICE_PROFILES[0];
-
-    // Cancel any existing speech
-    window.speechSynthesis.cancel();
-
-    // Prepare text: title + content
-    const plainText = `${title}. ${stripHtml(content)}`;
-    textRef.current = plainText;
-
-    const utterance = new SpeechSynthesisUtterance(plainText);
-    utteranceRef.current = utterance;
-
-    // Apply voice profile settings for fluent reading
-    utterance.rate = voiceProfile.rate;
-    utterance.pitch = voiceProfile.pitch;
-    utterance.volume = 1.0;
-
-    // Find and set the best matching voice
-    if (availableVoices.length > 0) {
-      const voice = findVoiceForProfile(availableVoices, voiceProfile);
-      if (voice) {
-        utterance.voice = voice;
-        setCurrentVoiceName(voice.name);
+    // If currently playing, restart with new voice
+    if (audioRef.current && (isPlaying || audioRef.current.src)) {
+      const audio = audioRef.current;
+      const wasPlaying = isPlaying;
+      audio.pause();
+      audio.src = getAudioUrl(playlist.currentArticle.slug, voiceId);
+      if (wasPlaying) {
+        setIsLoading(true);
+        audio.play().catch(err => {
+          console.error('Play error:', err);
+          setError('Failed to play audio');
+          setIsLoading(false);
+        });
       }
     }
-
-    // Event handlers
-    utterance.onstart = () => {
-      setIsPlaying(true);
-      setIsPaused(false);
-      setError(null);
-    };
-
-    utterance.onend = () => {
-      setIsPlaying(false);
-      setIsPaused(false);
-      setProgress(100);
-      // Auto-advance to next article
-      loadNextArticle();
-    };
-
-    utterance.onerror = (event) => {
-      if (event.error !== 'canceled') {
-        console.error('Speech error:', event.error);
-        setError(`Speech error: ${event.error}`);
-      }
-      setIsPlaying(false);
-      setIsPaused(false);
-    };
-
-    utterance.onboundary = (event) => {
-      charIndexRef.current = event.charIndex;
-      const progressPercent = (event.charIndex / plainText.length) * 100;
-      setProgress(progressPercent);
-    };
-
-    window.speechSynthesis.speak(utterance);
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isSupported, selectedVoice, availableVoices]);
+  }, [isPlaying, playlist.currentArticle.slug, getAudioUrl]);
 
   const loadNextArticle = useCallback(async () => {
-    stopSpeech();
+    if (audioRef.current) {
+      audioRef.current.pause();
+    }
     setIsLoadingNext(true);
     setError(null);
 
@@ -298,7 +155,6 @@ export function ArticleAudioPlayer({
       const data = (await res.json()) as {
         article: ArticleMeta;
         audioUrl: string;
-        content?: string;
       } | null;
 
       if (!data) {
@@ -307,78 +163,81 @@ export function ArticleAudioPlayer({
         return;
       }
 
-      // Fetch the article content
-      const contentRes = await fetch(`/api/posts/${data.article.id}`);
-      let content = '';
-      if (contentRes.ok) {
-        const contentData = await contentRes.json();
-        content = contentData.content || '';
-      }
-
       setPlaylist({
         currentArticle: data.article,
         currentAudioUrl: data.audioUrl,
         mode: playlist.mode,
-        content: content,
       });
 
-      // Auto-play after a short delay
+      // Auto-play next article
       setTimeout(() => {
-        startSpeech(content, data.article.title);
-      }, 500);
+        if (audioRef.current) {
+          audioRef.current.src = getAudioUrl(data.article.slug, selectedVoice);
+          setIsLoading(true);
+          audioRef.current.play().catch(err => {
+            console.error('Auto-play error:', err);
+            setIsLoading(false);
+          });
+        }
+      }, 300);
     } catch (e) {
       console.error(e);
       setError("Error loading next article.");
     } finally {
       setIsLoadingNext(false);
     }
-  }, [playlist.currentArticle.id, playlist.currentArticle.team, playlist.mode, stopSpeech, startSpeech]);
-
-  const handleVoiceChange = useCallback((voiceId: VoiceProfileId) => {
-    setSelectedVoice(voiceId);
-    setShowVoiceSelector(false);
-
-    // If currently playing, restart with new voice
-    if (isPlaying || isPaused) {
-      stopSpeech();
-      setTimeout(() => {
-        startSpeech(playlist.content, playlist.currentArticle.title, voiceId);
-      }, 100);
-    }
-  }, [isPlaying, isPaused, stopSpeech, startSpeech, playlist.content, playlist.currentArticle.title]);
+  }, [playlist.currentArticle.id, playlist.currentArticle.team, playlist.mode, selectedVoice, getAudioUrl]);
 
   const handlePlayPause = useCallback(() => {
-    if (!isSupported || typeof window === 'undefined') return;
+    if (!audioRef.current) return;
 
-    if (isPlaying && !isPaused) {
-      // Pause
-      window.speechSynthesis.pause();
-      setIsPaused(true);
-    } else if (isPaused) {
-      // Resume
-      window.speechSynthesis.resume();
-      setIsPaused(false);
+    const audio = audioRef.current;
+
+    if (isPlaying) {
+      audio.pause();
     } else {
-      // Start fresh
-      startSpeech(playlist.content, playlist.currentArticle.title);
+      // If no source or different source, load the current article
+      const expectedUrl = getAudioUrl(playlist.currentArticle.slug, selectedVoice);
+      if (!audio.src || !audio.src.includes(playlist.currentArticle.slug)) {
+        audio.src = expectedUrl;
+      }
+      setIsLoading(true);
+      setError(null);
+      audio.play().catch(err => {
+        console.error('Play error:', err);
+        setError('Failed to play audio. Please try again.');
+        setIsLoading(false);
+      });
     }
-  }, [isSupported, isPlaying, isPaused, playlist.content, playlist.currentArticle.title, startSpeech]);
+  }, [isPlaying, playlist.currentArticle.slug, selectedVoice, getAudioUrl]);
 
   const handleStop = useCallback(() => {
-    stopSpeech();
-  }, [stopSpeech]);
+    if (audioRef.current) {
+      audioRef.current.pause();
+      audioRef.current.currentTime = 0;
+    }
+    setIsPlaying(false);
+    setProgress(0);
+  }, []);
+
+  const handleSeek = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
+    if (!audioRef.current || !duration) return;
+
+    const rect = e.currentTarget.getBoundingClientRect();
+    const percent = (e.clientX - rect.left) / rect.width;
+    audioRef.current.currentTime = percent * duration;
+  }, [duration]);
+
+  // Format time as MM:SS
+  const formatTime = (seconds: number) => {
+    if (!seconds || !isFinite(seconds)) return '0:00';
+    const mins = Math.floor(seconds / 60);
+    const secs = Math.floor(seconds % 60);
+    return `${mins}:${secs.toString().padStart(2, '0')}`;
+  };
 
   const currentVoiceProfile = VOICE_PROFILES.find(v => v.id === selectedVoice) || VOICE_PROFILES[0];
-
-  if (!isSupported) {
-    return (
-      <div className="border border-zinc-200 dark:border-zinc-700 p-4 rounded-lg mt-4 bg-zinc-50 dark:bg-zinc-800/50">
-        <div className="text-sm text-zinc-500 dark:text-zinc-400">
-          Text-to-speech is not supported in your browser.
-        </div>
-      </div>
-    );
-  }
+  const currentTime = audioRef.current?.currentTime || 0;
 
   return (
     <div className="border border-zinc-200 dark:border-zinc-700 p-4 rounded-lg mt-4 bg-zinc-50 dark:bg-zinc-800/50">
@@ -394,12 +253,21 @@ export function ArticleAudioPlayer({
         </span>
       </div>
 
-      {/* Progress bar */}
-      <div className="w-full bg-zinc-200 dark:bg-zinc-700 rounded-full h-1.5 mb-3">
+      {/* Progress bar - clickable for seeking */}
+      <div
+        className="w-full bg-zinc-200 dark:bg-zinc-700 rounded-full h-1.5 mb-2 cursor-pointer"
+        onClick={handleSeek}
+      >
         <div
-          className="bg-[#bc0000] h-1.5 rounded-full transition-all duration-300"
+          className="bg-[#bc0000] h-1.5 rounded-full transition-all duration-150"
           style={{ width: `${progress}%` }}
         />
+      </div>
+
+      {/* Time display */}
+      <div className="flex justify-between text-xs text-zinc-500 dark:text-zinc-400 mb-3">
+        <span>{formatTime(currentTime)}</span>
+        <span>{formatTime(duration)}</span>
       </div>
 
       <div className="flex flex-wrap items-center justify-between gap-3 text-sm">
@@ -407,9 +275,18 @@ export function ArticleAudioPlayer({
           <button
             type="button"
             onClick={handlePlayPause}
-            className="px-3 py-1.5 rounded border border-zinc-300 dark:border-zinc-600 bg-white dark:bg-zinc-700 hover:bg-zinc-100 dark:hover:bg-zinc-600 text-zinc-900 dark:text-white transition-colors text-sm flex items-center gap-1.5"
+            disabled={isLoading}
+            className="px-3 py-1.5 rounded border border-zinc-300 dark:border-zinc-600 bg-white dark:bg-zinc-700 hover:bg-zinc-100 dark:hover:bg-zinc-600 disabled:opacity-50 text-zinc-900 dark:text-white transition-colors text-sm flex items-center gap-1.5"
           >
-            {isPlaying && !isPaused ? (
+            {isLoading ? (
+              <>
+                <svg className="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
+                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"/>
+                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"/>
+                </svg>
+                Loading...
+              </>
+            ) : isPlaying ? (
               <>
                 <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
                   <path d="M6 4h4v16H6V4zm8 0h4v16h-4V4z"/>
@@ -421,11 +298,11 @@ export function ArticleAudioPlayer({
                 <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
                   <path d="M8 5v14l11-7z"/>
                 </svg>
-                {isPaused ? 'Resume' : 'Play'}
+                Play
               </>
             )}
           </button>
-          {(isPlaying || isPaused) && (
+          {(isPlaying || progress > 0) && (
             <button
               type="button"
               onClick={handleStop}
@@ -487,11 +364,6 @@ export function ArticleAudioPlayer({
                       <div className="text-zinc-500 dark:text-zinc-400">{profile.description}</div>
                     </button>
                   ))}
-                  {currentVoiceName && (
-                    <div className="mt-2 pt-2 border-t border-zinc-200 dark:border-zinc-700 px-2 text-xs text-zinc-400">
-                      Using: {currentVoiceName}
-                    </div>
-                  )}
                 </div>
               </div>
             )}
