@@ -19,6 +19,12 @@ const publicPaths = [
   '/whitesox',
   '/blackhawks',
   '/fire',
+  '/chicago-bears',   // Team category pages
+  '/chicago-bulls',
+  '/chicago-cubs',
+  '/chicago-white-sox',
+  '/chicago-blackhawks',
+  '/chicago-fire',
   '/author',
   '/authors',
   '/search',
@@ -27,7 +33,12 @@ const publicPaths = [
   '/privacy',
   '/terms',
   '/predictions',
+  '/players',
+  '/teams',
   '/api/public',
+  '/api/bears',  // Bears data API (ticker, schedule, roster, etc.)
+  '/api/feed',   // Oracle feed API
+  '/api/audio',  // Audio TTS API
 ]
 
 export async function middleware(request: NextRequest) {
