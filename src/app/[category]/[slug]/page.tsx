@@ -18,6 +18,8 @@ import CommentSection from '@/components/article/CommentSection'
 import UpdatedDate from '@/components/article/UpdatedDate'
 import TableOfContents from '@/components/article/TableOfContents'
 import MockeryCommentary from '@/components/article/MockeryCommentary'
+import { ArticleTableOfContents, MoreFromTeam } from '@/components/article'
+import { categorySlugToTeam, PostSummary } from '@/lib/types'
 
 interface ArticlePageProps {
   params: Promise<{
@@ -378,74 +380,124 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
       {/* Main Content Area - per spec section 7.3: max-width 700-750px for article body */}
       <div className="bg-white">
         <div className="mx-auto max-w-[1110px] px-4 py-10">
-          {/* Featured Image per spec section 7.2 */}
-          {post.featured_image && (
-            <div className="mb-8">
-              <div className="relative w-full" style={{ maxHeight: '500px' }}>
-                <Image
-                  src={post.featured_image}
-                  alt={post.title}
-                  width={1110}
-                  height={500}
-                  className="w-full h-auto object-cover"
-                  style={{ maxHeight: '500px' }}
-                  priority
-                />
-              </div>
-            </div>
-          )}
+          <div className="lg:flex lg:gap-10">
+            {/* Main article column */}
+            <div className="lg:flex-1 lg:max-w-[750px]">
+              {/* Featured Image per spec section 7.2 */}
+              {post.featured_image && (
+                <div className="mb-8">
+                  <div className="relative w-full" style={{ maxHeight: '500px' }}>
+                    <Image
+                      src={post.featured_image}
+                      alt={post.title}
+                      width={1110}
+                      height={500}
+                      className="w-full h-auto object-cover"
+                      style={{ maxHeight: '500px' }}
+                      priority
+                    />
+                  </div>
+                </div>
+              )}
 
-          {/* Article body per spec section 7.3: max-width 750px, Fira Sans 16-17px, line-height 1.7 */}
-          <article
-            className="article-body mx-auto"
-            style={{ maxWidth: '750px', fontFamily: "'Fira Sans', sans-serif" }}
-          >
-            {/* Share buttons (top) per spec section 7.4 */}
-            <div className="mb-8 flex items-center gap-3 border-b border-[#e0e0e0] pb-6">
-              <ShareButtons url={articleUrl} title={post.title} />
-            </div>
-
-            {/* Article body content - using globals.css .article-body styles */}
-            <div
-              className="article-body"
-              dangerouslySetInnerHTML={{ __html: post.content }}
-            />
-
-            {/* Tags per spec section 15.4 */}
-            {tags.length > 0 && (
-              <div className="mt-10 border-t border-[#e0e0e0] pt-6">
-                <ArticleTags tags={tags} />
-              </div>
-            )}
-
-            {/* Share buttons (bottom) */}
-            <div className="mt-10 border-t border-[#e0e0e0] pt-6">
-              <p
-                className="mb-3 text-[12px] font-bold uppercase tracking-wider text-[#999999]"
-                style={{ fontFamily: "'Montserrat', sans-serif" }}
+              {/* Article body per spec section 7.3: Fira Sans 16-17px, line-height 1.7 */}
+              <article
+                className="article-body"
+                style={{ fontFamily: "'Fira Sans', sans-serif" }}
               >
-                Share this article
-              </p>
-              <ShareButtons url={articleUrl} title={post.title} />
+                {/* Share buttons (top) per spec section 7.4 */}
+                <div className="mb-8 flex items-center gap-3 border-b border-[#e0e0e0] pb-6">
+                  <ShareButtons url={articleUrl} title={post.title} />
+                </div>
+
+                {/* In-article Table of Contents (for longer articles) */}
+                {readingTime >= 5 && (
+                  <ArticleTableOfContents
+                    contentHtml={post.content || ''}
+                    className="mb-8 lg:hidden"
+                  />
+                )}
+
+                {/* Article body content - using globals.css .article-body styles */}
+                <div
+                  className="article-body"
+                  dangerouslySetInnerHTML={{ __html: post.content }}
+                />
+
+                {/* Tags per spec section 15.4 */}
+                {tags.length > 0 && (
+                  <div className="mt-10 border-t border-[#e0e0e0] pt-6">
+                    <ArticleTags tags={tags} />
+                  </div>
+                )}
+
+                {/* Share buttons (bottom) */}
+                <div className="mt-10 border-t border-[#e0e0e0] pt-6">
+                  <p
+                    className="mb-3 text-[12px] font-bold uppercase tracking-wider text-[#999999]"
+                    style={{ fontFamily: "'Montserrat', sans-serif" }}
+                  >
+                    Share this article
+                  </p>
+                  <ShareButtons url={articleUrl} title={post.title} />
+                </div>
+
+                {/* Author Card per spec section 15.3 */}
+                {author && (
+                  <div className="mt-10 border-t border-[#e0e0e0] pt-10">
+                    <AuthorCard
+                      author={{
+                        id: author.id,
+                        name: author.display_name,
+                        slug: author.slug || String(author.id),
+                        avatar_url: author.avatar_url,
+                        bio: author.bio,
+                        twitter_url: author.twitter,
+                        email: author.email,
+                      }}
+                    />
+                  </div>
+                )}
+              </article>
             </div>
 
-            {/* Author Card per spec section 15.3 */}
-            {author && (
-              <div className="mt-10 border-t border-[#e0e0e0] pt-10">
-                <AuthorCard
-                  author={{
-                    id: author.id,
-                    name: author.display_name,
-                    slug: author.slug || String(author.id),
-                    avatar_url: author.avatar_url,
-                    bio: author.bio,
-                    twitter_url: author.twitter,
-                    email: author.email,
-                  }}
-                />
+            {/* Desktop Sidebar */}
+            <aside className="hidden lg:block lg:w-[300px] lg:flex-shrink-0">
+              <div className="sticky top-24 space-y-6">
+                {/* Table of Contents for longer articles */}
+                {readingTime >= 5 && (
+                  <ArticleTableOfContents
+                    contentHtml={post.content || ''}
+                  />
+                )}
+
+                {/* More from this team */}
+                {relatedPosts.length > 0 && categoryData && (
+                  <MoreFromTeam
+                    posts={relatedPosts.map(p => ({
+                      id: p.id,
+                      slug: p.slug,
+                      title: p.title,
+                      excerpt: p.excerpt,
+                      featuredImage: p.featured_image,
+                      publishedAt: p.published_at,
+                      views: 0,
+                      author: {
+                        id: author?.id || 0,
+                        displayName: author?.display_name || 'Staff',
+                        avatarUrl: author?.avatar_url || null,
+                      },
+                      team: categorySlugToTeam(categoryData.slug),
+                      categorySlug: categoryData.slug,
+                      categoryName: categoryData.name,
+                    }))}
+                    team={categorySlugToTeam(categoryData.slug)}
+                    currentPostId={post.id}
+                  />
+                )}
               </div>
-            )}
-          </article>
+            </aside>
+          </div>
         </div>
       </div>
 

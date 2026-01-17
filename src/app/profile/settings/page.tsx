@@ -2,6 +2,8 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
+import { FavoriteTeamsSelector } from '@/components/personalization'
+import { TeamSlug } from '@/lib/types'
 
 export default function SettingsPage() {
   const [settings, setSettings] = useState({
@@ -21,8 +23,8 @@ export default function SettingsPage() {
     showActivity: false,
     allowAnalytics: true,
 
-    // Favorite team
-    favoriteTeam: 'bears',
+    // Favorite teams (multiple)
+    favoriteTeams: ['bears'] as TeamSlug[],
   })
 
   const handleToggle = (key: keyof typeof settings) => {
@@ -32,13 +34,12 @@ export default function SettingsPage() {
     }))
   }
 
-  const teams = [
-    { id: 'bears', name: 'Chicago Bears', color: '#C83200' },
-    { id: 'bulls', name: 'Chicago Bulls', color: '#CE1141' },
-    { id: 'cubs', name: 'Chicago Cubs', color: '#0E3386' },
-    { id: 'white-sox', name: 'Chicago White Sox', color: '#27251F' },
-    { id: 'blackhawks', name: 'Chicago Blackhawks', color: '#CF0A2C' },
-  ]
+  const handleFavoriteTeamsChange = (teams: TeamSlug[]) => {
+    setSettings(prev => ({
+      ...prev,
+      favoriteTeams: teams,
+    }))
+  }
 
   return (
     <div className="min-h-screen bg-zinc-950">
@@ -60,28 +61,25 @@ export default function SettingsPage() {
       </section>
 
       <div className="mx-auto max-w-2xl px-4 py-8">
-        {/* Favorite Team */}
-        <section className="mb-8">
-          <h2 className="mb-4 font-bold text-white">Favorite Team</h2>
-          <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
-            {teams.map((team) => (
-              <button
-                key={team.id}
-                onClick={() => setSettings(prev => ({ ...prev, favoriteTeam: team.id }))}
-                className={`flex items-center gap-3 rounded-xl border-2 p-4 transition-all ${
-                  settings.favoriteTeam === team.id
-                    ? 'border-white/50 bg-white/10'
-                    : 'border-zinc-800 bg-zinc-900/50 hover:border-zinc-700'
-                }`}
-              >
-                <div
-                  className="h-4 w-4 rounded-full"
-                  style={{ backgroundColor: team.color }}
-                />
-                <span className="text-sm font-medium text-white">{team.name}</span>
-              </button>
-            ))}
+        {/* Favorite Teams */}
+        <section className="mb-8 rounded-2xl border border-zinc-800 bg-zinc-900/50 p-6">
+          <div className="mb-6 flex items-center gap-3">
+            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#C83803]/20">
+              <svg className="h-5 w-5 text-[#C83803]" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M11.48 3.499a.562.562 0 011.04 0l2.125 5.111a.563.563 0 00.475.345l5.518.442c.499.04.701.663.321.988l-4.204 3.602a.563.563 0 00-.182.557l1.285 5.385a.562.562 0 01-.84.61l-4.725-2.885a.563.563 0 00-.586 0L6.982 20.54a.562.562 0 01-.84-.61l1.285-5.386a.562.562 0 00-.182-.557l-4.204-3.602a.563.563 0 01.321-.988l5.518-.442a.563.563 0 00.475-.345L11.48 3.5z" />
+              </svg>
+            </div>
+            <div>
+              <h2 className="font-bold text-white">Favorite Teams</h2>
+              <p className="text-xs text-zinc-500">Select your favorite Chicago teams for personalized content</p>
+            </div>
           </div>
+
+          <FavoriteTeamsSelector
+            initialTeams={settings.favoriteTeams}
+            onChange={handleFavoriteTeamsChange}
+            maxSelections={5}
+          />
         </section>
 
         {/* Notifications */}

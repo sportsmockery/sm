@@ -39,20 +39,67 @@ const jetbrainsMono = JetBrains_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Sports Mockery | Chicago Sports News and Rumors",
-  description: "Chicago sports news, rumors, and analysis for Bears, Bulls, Blackhawks, Cubs, and White Sox fans.",
+  title: {
+    default: "Sports Mockery | Bears News, Chicago Sports Analysis & Rumors",
+    template: "%s | Sports Mockery",
+  },
+  description: "Your #1 source for Chicago Bears news, analysis, and rumors. Plus complete coverage of Bulls, Cubs, White Sox, and Blackhawks. Bears-first Chicago sports coverage.",
+  keywords: [
+    "Chicago Bears",
+    "Bears news",
+    "Chicago sports",
+    "Bears rumors",
+    "NFL",
+    "Chicago Bulls",
+    "Chicago Cubs",
+    "Chicago White Sox",
+    "Chicago Blackhawks",
+    "Caleb Williams",
+    "Bears analysis",
+  ],
+  authors: [{ name: "Sports Mockery" }],
+  creator: "Sports Mockery",
+  publisher: "Sports Mockery",
+  metadataBase: new URL("https://sportsmockery.com"),
   openGraph: {
-    title: "Sports Mockery",
-    description: "Chicago sports news and commentary",
+    title: "Sports Mockery | Bears-First Chicago Sports Coverage",
+    description: "Your #1 source for Chicago Bears news and all Chicago sports. In-depth analysis, breaking rumors, and fan perspectives.",
     url: "https://sportsmockery.com",
     siteName: "Sports Mockery",
     type: "website",
+    locale: "en_US",
+    images: [
+      {
+        url: "/og-image.png",
+        width: 1200,
+        height: 630,
+        alt: "Sports Mockery - Chicago Sports News",
+      },
+    ],
   },
   twitter: {
     card: "summary_large_image",
-    title: "Sports Mockery",
-    description: "Chicago sports news and commentary",
+    title: "Sports Mockery | Bears-First Chicago Sports",
+    description: "Your #1 source for Chicago Bears news and all Chicago sports coverage.",
+    site: "@sportsmockery",
+    creator: "@sportsmockery",
+    images: ["/twitter-image.png"],
   },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      "max-video-preview": -1,
+      "max-image-preview": "large",
+      "max-snippet": -1,
+    },
+  },
+  alternates: {
+    canonical: "https://sportsmockery.com",
+  },
+  category: "sports",
 };
 
 export default function RootLayout({

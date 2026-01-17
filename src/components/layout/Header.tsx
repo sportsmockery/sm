@@ -4,6 +4,7 @@ import { useState, useRef, useEffect } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
 import { useTheme } from '@/contexts/ThemeContext'
+import BearsStickyBar from './BearsStickyBar'
 
 // Navigation items per design spec
 const navItems = [
@@ -289,6 +290,9 @@ export default function Header() {
           </div>
         </div>
       )}
+
+      {/* Bears Sticky Bar - Bears-first navigation */}
+      <BearsStickyBar />
     </header>
   )
 }
