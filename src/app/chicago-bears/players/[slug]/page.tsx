@@ -208,7 +208,7 @@ export default async function PlayerProfilePage({ params }: PlayerPageProps) {
                   {similarPlayers.map(p => (
                     <Link
                       key={p.playerId}
-                      href={`/players/${p.slug}`}
+                      href={`/chicago-bears/players/${p.slug}`}
                       className="flex items-center gap-3 p-3 rounded-xl hover:bg-[var(--bg-hover)] transition-colors group"
                     >
                       {p.headshotUrl ? (

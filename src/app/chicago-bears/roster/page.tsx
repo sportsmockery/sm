@@ -167,7 +167,7 @@ function PositionCard({
                   </td>
                   <td className="px-4 py-3">
                     <Link
-                      href={`/players/${player.slug}`}
+                      href={`/chicago-bears/players/${player.slug}`}
                       className="flex items-center gap-3 group"
                     >
                       {player.headshotUrl ? (
