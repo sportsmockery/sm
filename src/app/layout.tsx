@@ -108,7 +108,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className="scroll-smooth" suppressHydrationWarning>
+    <html lang="en" className="scroll-smooth light" suppressHydrationWarning>
       <head>
         <script
           dangerouslySetInnerHTML={{
@@ -117,6 +117,7 @@ export default function RootLayout({
                 try {
                   var theme = localStorage.getItem('sm-theme');
                   if (theme === 'dark') {
+                    document.documentElement.classList.remove('light');
                     document.documentElement.classList.add('dark');
                   }
                 } catch (e) {}

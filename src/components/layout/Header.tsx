@@ -73,11 +73,11 @@ export default function Header() {
   return (
     <header className="sticky top-0 z-[200] bg-white dark:bg-[#0a0a0b]">
       {/* Top Header Bar - Logo and Social */}
-      <div className="border-b border-[#e0e0e0] dark:border-[#27272a]">
+      <div className="border-b border-[#e0e0e0] dark:border-[#27272a] bg-white dark:bg-[#0a0a0b]">
         <div className="max-w-[1110px] mx-auto px-4">
           <div className="flex items-center justify-between h-[60px]">
             {/* Left: Social icons */}
-            <div className="flex items-center gap-4">
+            <div className="flex items-center gap-4 w-[100px]">
               <a
                 href="https://facebook.com/sportsmockery"
                 target="_blank"
@@ -127,31 +127,39 @@ export default function Header() {
             {/* Center: Logo */}
             <Link href="/" className="flex-shrink-0">
               <Image
-                src="https://www.sportsmockery.com/wp-content/uploads/2020/12/272.png"
+                src="/logo.png"
                 alt="Sports Mockery"
-                width={272}
-                height={90}
-                className="h-12 md:h-14 w-auto dark:invert"
+                width={220}
+                height={65}
+                className="h-8 md:h-10 w-auto object-contain"
                 priority
               />
             </Link>
 
-            {/* Right: Theme toggle */}
-            <div className="flex items-center gap-4">
+            {/* Right: Theme toggle - pill switch style */}
+            <div className="flex items-center gap-4 w-[100px] justify-end">
               <button
                 onClick={toggleTheme}
-                className="p-2 text-[#666] dark:text-gray-400 hover:text-[#bc0000] transition-colors"
+                className={`relative w-[52px] h-[26px] rounded-full border border-[#bc0000] transition-colors ${
+                  theme === 'dark' ? 'bg-[#bc0000]' : 'bg-white'
+                }`}
                 aria-label={`Switch to ${theme === 'dark' ? 'light' : 'dark'} mode`}
               >
-                {theme === 'dark' ? (
-                  <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
-                    <path fillRule="evenodd" d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4 8a4 4 0 11-8 0 4 4 0 018 0zm-.464 4.95l.707.707a1 1 0 001.414-1.414l-.707-.707a1 1 0 00-1.414 1.414zm2.12-10.607a1 1 0 010 1.414l-.706.707a1 1 0 11-1.414-1.414l.707-.707a1 1 0 011.414 0zM17 11a1 1 0 100-2h-1a1 1 0 100 2h1zm-7 4a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zM5.05 6.464A1 1 0 106.465 5.05l-.708-.707a1 1 0 00-1.414 1.414l.707.707zm1.414 8.486l-.707.707a1 1 0 01-1.414-1.414l.707-.707a1 1 0 011.414 1.414zM4 11a1 1 0 100-2H3a1 1 0 000 2h1z" clipRule="evenodd" />
+                {/* Toggle circle with star icon */}
+                <span
+                  className={`absolute top-[2px] w-[20px] h-[20px] rounded-full flex items-center justify-center transition-all duration-200 ${
+                    theme === 'dark' ? 'left-[28px] bg-white' : 'left-[2px] bg-[#bc0000]'
+                  }`}
+                >
+                  {/* Chicago 6-pointed star */}
+                  <svg
+                    className={`w-3 h-3 ${theme === 'dark' ? 'text-[#bc0000]' : 'text-white'}`}
+                    viewBox="0 0 24 24"
+                    fill="currentColor"
+                  >
+                    <polygon points="12,0 14.5,8 24,8 16.5,13 19,22 12,17 5,22 7.5,13 0,8 9.5,8" />
                   </svg>
-                ) : (
-                  <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
-                    <path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z" />
-                  </svg>
-                )}
+                </span>
               </button>
             </div>
           </div>
@@ -159,7 +167,7 @@ export default function Header() {
       </div>
 
       {/* Main Navigation Bar - with red underline */}
-      <nav className="border-b-[3px] border-[#bc0000]">
+      <nav className="border-b-[3px] border-[#bc0000] bg-white dark:bg-[#0a0a0b]">
         <div className="max-w-[1110px] mx-auto px-4">
           <div className="flex items-center justify-between h-[50px]">
             {/* Mobile menu button */}

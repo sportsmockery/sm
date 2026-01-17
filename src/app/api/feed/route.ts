@@ -23,14 +23,15 @@ export async function POST(request: NextRequest) {
     // Build the feed query
     const now = new Date()
 
-    // 1. Get HIGH IMPORTANCE unseen articles (score > 70)
+    // 1. Get HIGH IMPORTANCE unseen articles (score >= 50 for more inclusive results)
     let highImportanceQuery = supabaseAdmin
       .from('sm_posts')
       .select(POST_SELECT)
       .eq('status', 'published')
-      .gt('importance_score', 70)
+      .gte('importance_score', 50)
       .order('importance_score', { ascending: false })
-      .limit(5)
+      .order('published_at', { ascending: false })
+      .limit(10)
 
     // Exclude viewed articles if any
     if (clientViewedIds.length > 0) {
@@ -39,14 +40,13 @@ export async function POST(request: NextRequest) {
 
     const { data: highImportance } = await highImportanceQuery
 
-    // 2. Get RECENT articles (last 7 days)
+    // 2. Get RECENT articles (all time, no date filter to ensure content)
     let recentQuery = supabaseAdmin
       .from('sm_posts')
       .select(POST_SELECT)
       .eq('status', 'published')
-      .gte('published_at', new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString())
       .order('published_at', { ascending: false })
-      .limit(20)
+      .limit(30)
 
     // Exclude already fetched high importance and viewed
     const excludeIds = [...clientViewedIds, ...(highImportance?.map(p => p.id) || [])]
@@ -56,13 +56,13 @@ export async function POST(request: NextRequest) {
 
     const { data: recent } = await recentQuery
 
-    // 3. Get TRENDING articles (high view count in last 24h)
+    // 3. Get TRENDING articles (high view count, no date filter)
     const { data: trending } = await supabaseAdmin
       .from('sm_posts')
       .select(POST_SELECT)
       .eq('status', 'published')
-      .gte('published_at', new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString())
       .order('views', { ascending: false })
+      .order('published_at', { ascending: false })
       .limit(10)
 
     // 4. Calculate final scores with team preference boost
@@ -97,10 +97,21 @@ export async function POST(request: NextRequest) {
     }
 
     // Combine and score all articles
-    const allArticles = [
+    let allArticles = [
       ...(highImportance || []),
       ...(recent || []),
     ]
+
+    // FALLBACK: If no articles found, fetch without any filters
+    if (allArticles.length === 0) {
+      const { data: fallbackPosts } = await supabaseAdmin
+        .from('sm_posts')
+        .select(POST_SELECT)
+        .eq('status', 'published')
+        .order('published_at', { ascending: false })
+        .limit(30)
+      allArticles = fallbackPosts || []
+    }
 
     // Remove duplicates
     const uniqueArticles = allArticles.filter((article, index, self) =>
@@ -165,7 +176,7 @@ export async function GET() {
     }
 
     // Default feed: High score + recent, no personalization
-    const { data: posts, error } = await supabaseAdmin
+    let { data: posts, error } = await supabaseAdmin
       .from('sm_posts')
       .select(POST_SELECT)
       .eq('status', 'published')
@@ -175,10 +186,17 @@ export async function GET() {
 
     if (error) {
       console.error('Feed GET error:', error)
-      return NextResponse.json(
-        { error: 'Failed to fetch feed' },
-        { status: 500 }
-      )
+    }
+
+    // FALLBACK: If no posts found, try without importance_score ordering
+    if (!posts || posts.length === 0) {
+      const fallback = await supabaseAdmin
+        .from('sm_posts')
+        .select(POST_SELECT)
+        .eq('status', 'published')
+        .order('published_at', { ascending: false })
+        .limit(30)
+      posts = fallback.data || []
     }
 
     const featured = posts?.[0] || null
