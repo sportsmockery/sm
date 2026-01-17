@@ -3,6 +3,9 @@
 import { NextRequest, NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabase-server";
 
+// Allow longer timeout for TTS generation
+export const maxDuration = 60;
+
 // ElevenLabs voice IDs - custom voices
 const VOICE_IDS: Record<string, string> = {
   will: "bIHbv24MWmeRgasZH58o",     // Will - young, energetic American male
@@ -87,9 +90,9 @@ export async function GET(
       ? plainText.substring(0, maxChars) + "... Article continues."
       : plainText;
 
-    // Call ElevenLabs API
+    // Call ElevenLabs API (non-streaming for better compatibility)
     const response = await fetch(
-      `https://api.elevenlabs.io/v1/text-to-speech/${voiceId}/stream`,
+      `https://api.elevenlabs.io/v1/text-to-speech/${voiceId}`,
       {
         method: "POST",
         headers: {
@@ -103,8 +106,6 @@ export async function GET(
           voice_settings: {
             stability: 0.5,
             similarity_boost: 0.75,
-            style: 0.5,
-            use_speaker_boost: true,
           },
         }),
       }
@@ -119,20 +120,15 @@ export async function GET(
       );
     }
 
-    // Stream the audio response
-    const audioStream = response.body;
-    if (!audioStream) {
-      return NextResponse.json(
-        { error: "No audio stream returned" },
-        { status: 500 }
-      );
-    }
+    // Get the audio data
+    const audioBuffer = await response.arrayBuffer();
 
-    // Return the audio stream with proper headers
-    return new NextResponse(audioStream, {
+    // Return the audio with proper headers
+    return new NextResponse(audioBuffer, {
       status: 200,
       headers: {
         "Content-Type": "audio/mpeg",
+        "Content-Length": audioBuffer.byteLength.toString(),
         "Cache-Control": "public, max-age=86400", // Cache for 24 hours
         "X-Voice": voiceParam,
       },
