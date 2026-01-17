@@ -27,6 +27,8 @@ interface VoiceProfile {
   gender: 'male' | 'female';
   rate: number;
   pitch: number;
+  // Preferred voice names to search for
+  preferredVoices: string[];
 }
 
 const VOICE_PROFILES: VoiceProfile[] = [
@@ -35,16 +37,18 @@ const VOICE_PROFILES: VoiceProfile[] = [
     name: 'Mike',
     description: 'Young male, energetic',
     gender: 'male',
-    rate: 1.05,
-    pitch: 1.1,
+    rate: 1.0,
+    pitch: 1.05,
+    preferredVoices: ['aaron', 'guy', 'evan', 'reed', 'tom'],
   },
   {
     id: 'david',
     name: 'David',
     description: 'Mature male, authoritative',
     gender: 'male',
-    rate: 0.95,
-    pitch: 0.9,
+    rate: 0.9,
+    pitch: 0.85,
+    preferredVoices: ['david', 'alex', 'daniel', 'fred', 'bruce'],
   },
   {
     id: 'sarah',
@@ -52,72 +56,88 @@ const VOICE_PROFILES: VoiceProfile[] = [
     description: 'Young female, expressive',
     gender: 'female',
     rate: 1.0,
-    pitch: 1.15,
+    pitch: 1.1,
+    preferredVoices: ['samantha', 'karen', 'sara', 'ava', 'allison'],
   },
   {
     id: 'jennifer',
     name: 'Jennifer',
     description: 'Young female, warm',
     gender: 'female',
-    rate: 0.98,
-    pitch: 1.05,
+    rate: 0.95,
+    pitch: 1.0,
+    preferredVoices: ['victoria', 'kate', 'susan', 'zira', 'fiona'],
   },
 ];
 
-// Strip HTML tags and get plain text
+// Strip HTML tags and get plain text, clean up for better speech
 function stripHtml(html: string): string {
   const doc = new DOMParser().parseFromString(html, 'text/html');
-  return doc.body.textContent || '';
+  let text = doc.body.textContent || '';
+
+  // Clean up common issues that cause choppy speech
+  text = text
+    .replace(/\s+/g, ' ') // Normalize whitespace
+    .replace(/\.{2,}/g, '.') // Multiple periods to single
+    .replace(/([.!?])\s*([A-Z])/g, '$1 $2') // Ensure space after sentences
+    .trim();
+
+  return text;
 }
 
-// Find the best matching voice from available voices
-function findBestVoice(
+// Find the best matching voice for a profile
+function findVoiceForProfile(
   voices: SpeechSynthesisVoice[],
-  gender: 'male' | 'female'
+  profile: VoiceProfile
 ): SpeechSynthesisVoice | null {
-  // Prefer US English voices
+  // Filter to English US voices, preferring remote (higher quality) voices
   const usVoices = voices.filter(v =>
     v.lang === 'en-US' || v.lang.startsWith('en-US')
   );
 
-  // Voice name patterns for gender detection
-  const maleNames = ['david', 'mike', 'alex', 'tom', 'james', 'daniel', 'guy', 'aaron', 'fred', 'junior', 'ralph', 'albert'];
-  const femaleNames = ['samantha', 'victoria', 'karen', 'sarah', 'susan', 'jennifer', 'kate', 'allison', 'ava', 'zira', 'linda', 'fiona', 'tessa'];
-
-  const targetNames = gender === 'male' ? maleNames : femaleNames;
-
-  // First try: Find US English voice with matching gender by name
-  for (const voice of usVoices) {
-    const nameLower = voice.name.toLowerCase();
-    if (targetNames.some(name => nameLower.includes(name))) {
-      return voice;
+  // Sort to prefer remote/cloud voices (usually higher quality)
+  const sortedVoices = [...usVoices].sort((a, b) => {
+    // Prefer non-local (cloud) voices
+    if (a.localService !== b.localService) {
+      return a.localService ? 1 : -1;
     }
+    // Prefer voices with "Premium" or "Enhanced" in name
+    const aEnhanced = /premium|enhanced|neural|natural/i.test(a.name);
+    const bEnhanced = /premium|enhanced|neural|natural/i.test(b.name);
+    if (aEnhanced !== bEnhanced) {
+      return aEnhanced ? -1 : 1;
+    }
+    return 0;
+  });
+
+  // Try to find a voice matching the profile's preferred names
+  for (const prefName of profile.preferredVoices) {
+    const match = sortedVoices.find(v =>
+      v.name.toLowerCase().includes(prefName.toLowerCase())
+    );
+    if (match) return match;
   }
 
-  // Second try: Any English voice with matching gender by name
-  const enVoices = voices.filter(v => v.lang.startsWith('en'));
-  for (const voice of enVoices) {
-    const nameLower = voice.name.toLowerCase();
-    if (targetNames.some(name => nameLower.includes(name))) {
-      return voice;
-    }
+  // Fallback: find any voice matching gender by common names
+  const genderNames = profile.gender === 'male'
+    ? ['david', 'alex', 'daniel', 'tom', 'james', 'guy', 'aaron', 'fred', 'junior', 'ralph', 'albert', 'bruce', 'evan', 'reed']
+    : ['samantha', 'victoria', 'karen', 'sarah', 'susan', 'jennifer', 'kate', 'allison', 'ava', 'zira', 'linda', 'fiona', 'tessa', 'moira'];
+
+  for (const name of genderNames) {
+    const match = sortedVoices.find(v =>
+      v.name.toLowerCase().includes(name)
+    );
+    if (match) return match;
   }
 
-  // Third try: Google US English (high quality, generally available)
-  const googleVoice = usVoices.find(v =>
-    v.name.includes('Google') && v.name.includes('US')
-  );
-  if (googleVoice) return googleVoice;
+  // Last resort: return the first high-quality US voice
+  if (sortedVoices.length > 0) {
+    return sortedVoices[0];
+  }
 
-  // Fourth try: Any US English voice (prefer non-local for higher quality)
-  const remoteVoice = usVoices.find(v => !v.localService);
-  if (remoteVoice) return remoteVoice;
-
-  // Fifth try: Any US English voice
-  if (usVoices.length > 0) return usVoices[0];
-
-  // Fallback: Any English voice
-  return enVoices[0] || voices[0] || null;
+  // Ultimate fallback: any English voice
+  const anyEnglish = voices.find(v => v.lang.startsWith('en'));
+  return anyEnglish || voices[0] || null;
 }
 
 export function ArticleAudioPlayer({
@@ -140,6 +160,7 @@ export function ArticleAudioPlayer({
   const [selectedVoice, setSelectedVoice] = useState<VoiceProfileId>('mike');
   const [availableVoices, setAvailableVoices] = useState<SpeechSynthesisVoice[]>([]);
   const [showVoiceSelector, setShowVoiceSelector] = useState(false);
+  const [currentVoiceName, setCurrentVoiceName] = useState<string>('');
 
   const utteranceRef = useRef<SpeechSynthesisUtterance | null>(null);
   const textRef = useRef<string>('');
@@ -188,19 +209,6 @@ export function ArticleAudioPlayer({
     setPlaylist((prev) => ({ ...prev, mode }));
   };
 
-  const handleVoiceChange = (voiceId: VoiceProfileId) => {
-    setSelectedVoice(voiceId);
-    setShowVoiceSelector(false);
-
-    // If currently playing, restart with new voice
-    if (isPlaying || isPaused) {
-      stopSpeech();
-      setTimeout(() => {
-        startSpeech(playlist.content, playlist.currentArticle.title, voiceId);
-      }, 100);
-    }
-  };
-
   const stopSpeech = useCallback(() => {
     if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
       window.speechSynthesis.cancel();
@@ -210,6 +218,70 @@ export function ArticleAudioPlayer({
     setProgress(0);
     charIndexRef.current = 0;
   }, []);
+
+  const startSpeech = useCallback((content: string, title: string, voiceId?: VoiceProfileId) => {
+    if (!isSupported || typeof window === 'undefined') return;
+
+    const profileId = voiceId || selectedVoice;
+    const voiceProfile = VOICE_PROFILES.find(v => v.id === profileId) || VOICE_PROFILES[0];
+
+    // Cancel any existing speech
+    window.speechSynthesis.cancel();
+
+    // Prepare text: title + content
+    const plainText = `${title}. ${stripHtml(content)}`;
+    textRef.current = plainText;
+
+    const utterance = new SpeechSynthesisUtterance(plainText);
+    utteranceRef.current = utterance;
+
+    // Apply voice profile settings for fluent reading
+    utterance.rate = voiceProfile.rate;
+    utterance.pitch = voiceProfile.pitch;
+    utterance.volume = 1.0;
+
+    // Find and set the best matching voice
+    if (availableVoices.length > 0) {
+      const voice = findVoiceForProfile(availableVoices, voiceProfile);
+      if (voice) {
+        utterance.voice = voice;
+        setCurrentVoiceName(voice.name);
+      }
+    }
+
+    // Event handlers
+    utterance.onstart = () => {
+      setIsPlaying(true);
+      setIsPaused(false);
+      setError(null);
+    };
+
+    utterance.onend = () => {
+      setIsPlaying(false);
+      setIsPaused(false);
+      setProgress(100);
+      // Auto-advance to next article
+      loadNextArticle();
+    };
+
+    utterance.onerror = (event) => {
+      if (event.error !== 'canceled') {
+        console.error('Speech error:', event.error);
+        setError(`Speech error: ${event.error}`);
+      }
+      setIsPlaying(false);
+      setIsPaused(false);
+    };
+
+    utterance.onboundary = (event) => {
+      charIndexRef.current = event.charIndex;
+      const progressPercent = (event.charIndex / plainText.length) * 100;
+      setProgress(progressPercent);
+    };
+
+    window.speechSynthesis.speak(utterance);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isSupported, selectedVoice, availableVoices]);
 
   const loadNextArticle = useCallback(async () => {
     stopSpeech();
@@ -260,69 +332,20 @@ export function ArticleAudioPlayer({
     } finally {
       setIsLoadingNext(false);
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [playlist.currentArticle.id, playlist.currentArticle.team, playlist.mode, stopSpeech]);
+  }, [playlist.currentArticle.id, playlist.currentArticle.team, playlist.mode, stopSpeech, startSpeech]);
 
-  const startSpeech = useCallback((content: string, title: string, voiceId?: VoiceProfileId) => {
-    if (!isSupported || typeof window === 'undefined') return;
+  const handleVoiceChange = useCallback((voiceId: VoiceProfileId) => {
+    setSelectedVoice(voiceId);
+    setShowVoiceSelector(false);
 
-    const voiceProfile = VOICE_PROFILES.find(v => v.id === (voiceId || selectedVoice)) || VOICE_PROFILES[0];
-
-    // Cancel any existing speech
-    window.speechSynthesis.cancel();
-
-    // Prepare text: title + content
-    const plainText = `${title}. ${stripHtml(content)}`;
-    textRef.current = plainText;
-
-    const utterance = new SpeechSynthesisUtterance(plainText);
-    utteranceRef.current = utterance;
-
-    // Apply voice profile settings
-    utterance.rate = voiceProfile.rate;
-    utterance.pitch = voiceProfile.pitch;
-    utterance.volume = 1.0;
-
-    // Find the best matching voice for this profile
-    if (availableVoices.length > 0) {
-      const voice = findBestVoice(availableVoices, voiceProfile.gender);
-      if (voice) {
-        utterance.voice = voice;
-      }
+    // If currently playing, restart with new voice
+    if (isPlaying || isPaused) {
+      stopSpeech();
+      setTimeout(() => {
+        startSpeech(playlist.content, playlist.currentArticle.title, voiceId);
+      }, 100);
     }
-
-    // Event handlers
-    utterance.onstart = () => {
-      setIsPlaying(true);
-      setIsPaused(false);
-      setError(null);
-    };
-
-    utterance.onend = () => {
-      setIsPlaying(false);
-      setIsPaused(false);
-      setProgress(100);
-      // Auto-advance to next article
-      loadNextArticle();
-    };
-
-    utterance.onerror = (event) => {
-      if (event.error !== 'canceled') {
-        console.error('Speech error:', event.error);
-        setError(`Speech error: ${event.error}`);
-      }
-      setIsPlaying(false);
-      setIsPaused(false);
-    };
-
-    utterance.onboundary = (event) => {
-      charIndexRef.current = event.charIndex;
-      const progressPercent = (event.charIndex / plainText.length) * 100;
-      setProgress(progressPercent);
-    };
-
-    window.speechSynthesis.speak(utterance);
-  }, [isSupported, selectedVoice, availableVoices, loadNextArticle]);
+  }, [isPlaying, isPaused, stopSpeech, startSpeech, playlist.content, playlist.currentArticle.title]);
 
   const handlePlayPause = useCallback(() => {
     if (!isSupported || typeof window === 'undefined') return;
@@ -416,7 +439,7 @@ export function ArticleAudioPlayer({
           )}
           <button
             type="button"
-            onClick={loadNextArticle}
+            onClick={() => loadNextArticle()}
             disabled={isLoadingNext}
             className="px-3 py-1.5 rounded border border-zinc-300 dark:border-zinc-600 bg-white dark:bg-zinc-700 hover:bg-zinc-100 dark:hover:bg-zinc-600 disabled:opacity-50 disabled:cursor-not-allowed text-zinc-900 dark:text-white transition-colors text-sm flex items-center gap-1.5"
           >
@@ -444,7 +467,7 @@ export function ArticleAudioPlayer({
               </svg>
             </button>
             {showVoiceSelector && (
-              <div className="absolute right-0 mt-1 w-48 bg-white dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-lg shadow-lg z-10">
+              <div className="absolute right-0 mt-1 w-52 bg-white dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-lg shadow-lg z-10">
                 <div className="p-2">
                   <div className="text-xs font-medium text-zinc-500 dark:text-zinc-400 px-2 py-1 mb-1">
                     Select Voice
@@ -464,6 +487,11 @@ export function ArticleAudioPlayer({
                       <div className="text-zinc-500 dark:text-zinc-400">{profile.description}</div>
                     </button>
                   ))}
+                  {currentVoiceName && (
+                    <div className="mt-2 pt-2 border-t border-zinc-200 dark:border-zinc-700 px-2 text-xs text-zinc-400">
+                      Using: {currentVoiceName}
+                    </div>
+                  )}
                 </div>
               </div>
             )}
