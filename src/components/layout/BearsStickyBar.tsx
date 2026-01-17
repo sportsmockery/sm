@@ -1,28 +1,63 @@
 'use client'
 
 import Link from 'next/link'
+import { usePathname } from 'next/navigation'
+import { useEffect, useState } from 'react'
 import { TEAM_INFO } from '@/lib/types'
 
 interface BearsStickyBarProps {
   className?: string
+  isArticlePage?: boolean
+}
+
+interface TickerData {
+  record: string
+  nextGame: {
+    opponent: string
+    date: string
+    fullDate: string
+    time: string
+    week: number
+    gameType: string
+  } | null
+  lastGame: {
+    opponent: string
+    result: string
+    score: string
+    week: number
+  } | null
 }
 
 /**
  * Bears-focused sticky navigation bar
  * Shows Bears record, next game, and quick links
- * Height: 64px as specified in design spec
+ * Height: 48px default, 36px on article pages per spec
+ * Data fetched from /api/bears/ticker (cached hourly)
  */
-export default function BearsStickyBar({ className = '' }: BearsStickyBarProps) {
+export default function BearsStickyBar({ className = '', isArticlePage }: BearsStickyBarProps) {
+  const pathname = usePathname()
   const bearsInfo = TEAM_INFO.bears
+  const [tickerData, setTickerData] = useState<TickerData | null>(null)
 
-  // Stub data - would come from API in production
+  // Detect if we're on an article page (has slug after category)
+  const isArticle = isArticlePage ?? (pathname?.match(/^\/[^/]+\/[^/]+$/) !== null && !pathname?.startsWith('/teams/'))
+
+  // Fetch ticker data on mount
+  useEffect(() => {
+    fetch('/api/bears/ticker')
+      .then(res => res.json())
+      .then(data => setTickerData(data))
+      .catch(err => console.error('Failed to fetch Bears ticker:', err))
+  }, [])
+
+  // Use fetched data or fallback
   const bearsData = {
-    record: '4-8',
-    nextGame: {
-      opponent: 'vs GB',
-      date: 'Sun',
-      time: '12:00 PM',
-    },
+    record: tickerData?.record || '--',
+    nextGame: tickerData?.nextGame ? {
+      opponent: tickerData.nextGame.opponent,
+      date: tickerData.nextGame.date,
+      time: tickerData.nextGame.time,
+    } : null,
   }
 
   const quickLinks = [
@@ -34,12 +69,12 @@ export default function BearsStickyBar({ className = '' }: BearsStickyBarProps) 
 
   return (
     <div
-      className={`h-[48px] bg-gradient-to-r from-[${bearsInfo.primaryColor}] to-[#1a2940] ${className}`}
+      className={`${isArticle ? 'h-[36px]' : 'h-[48px]'} bg-gradient-to-r from-[${bearsInfo.primaryColor}] to-[#1a2940] ${className}`}
       style={{
         background: `linear-gradient(to right, ${bearsInfo.primaryColor}, #1a2940)`,
       }}
     >
-      <div className="max-w-[1110px] mx-auto px-4 h-full">
+      <div className={`max-w-[1110px] mx-auto ${isArticle ? 'px-3 md:px-4' : 'px-4'} h-full`}>
         <div className="flex items-center justify-between h-full">
           {/* Left: Bears badge + record */}
           <div className="flex items-center gap-3">
@@ -74,18 +109,20 @@ export default function BearsStickyBar({ className = '' }: BearsStickyBarProps) 
             </div>
 
             {/* Next game (hidden on mobile) */}
-            <div className="hidden md:flex items-center gap-2 border-l border-white/20 pl-3">
-              <span className="text-white/70 text-xs">Next:</span>
-              <span
-                className="text-white font-semibold text-sm"
-                style={{ fontFamily: "'Montserrat', sans-serif" }}
-              >
-                {bearsData.nextGame.opponent}
-              </span>
-              <span className="text-white/60 text-xs">
-                {bearsData.nextGame.date} {bearsData.nextGame.time}
-              </span>
-            </div>
+            {bearsData.nextGame && (
+              <div className="hidden md:flex items-center gap-2 border-l border-white/20 pl-3">
+                <span className="text-white/70 text-xs">Next:</span>
+                <span
+                  className="text-white font-semibold text-sm"
+                  style={{ fontFamily: "'Montserrat', sans-serif" }}
+                >
+                  {bearsData.nextGame.opponent}
+                </span>
+                <span className="text-white/60 text-xs">
+                  {bearsData.nextGame.date} {bearsData.nextGame.time}
+                </span>
+              </div>
+            )}
           </div>
 
           {/* Center: Quick links (hidden on small screens) */}
