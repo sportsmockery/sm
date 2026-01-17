@@ -225,7 +225,7 @@ function LeaderboardRow({ entry, rank }: { entry: LeaderboardEntry; rank: number
 
   return (
     <Link
-      href={`/players/${entry.player.slug}`}
+      href={`/chicago-bears/players/${entry.player.slug}`}
       className="flex items-center gap-4 px-5 py-4 hover:bg-[var(--bg-hover)] transition-colors group"
     >
       {/* Rank */}

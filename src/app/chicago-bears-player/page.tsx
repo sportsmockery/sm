@@ -168,7 +168,7 @@ export default function BearsPlayerSelectorPage() {
                         onMouseEnter={() => setSelectedPlayer(player)}
                       >
                         <Link
-                          href={`/players/${player.slug}`}
+                          href={`/chicago-bears/players/${player.slug}`}
                           className={`flex items-center gap-3 px-4 py-3 hover:bg-[var(--bg-hover)] transition-colors border-b border-[var(--border-subtle)] last:border-0 ${
                             selectedPlayer?.playerId === player.playerId ? 'bg-[var(--bg-hover)]' : ''
                           }`}
@@ -179,7 +179,7 @@ export default function BearsPlayerSelectorPage() {
 
                       {/* Mobile: Direct link */}
                       <Link
-                        href={`/players/${player.slug}`}
+                        href={`/chicago-bears/players/${player.slug}`}
                         className="lg:hidden flex items-center gap-3 px-4 py-3 hover:bg-[var(--bg-hover)] transition-colors border-b border-[var(--border-subtle)] last:border-0"
                       >
                         <PlayerRow player={player} />
@@ -397,7 +397,7 @@ function QuickViewPanel({
 
         {/* View Profile Link */}
         <Link
-          href={`/players/${player.slug}`}
+          href={`/chicago-bears/players/${player.slug}`}
           className="mt-6 flex items-center justify-center gap-2 w-full py-3 bg-[#C83200] hover:bg-[#a82900] text-white font-semibold rounded-xl transition-colors"
         >
           View Full Profile
