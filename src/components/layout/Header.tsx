@@ -195,11 +195,11 @@ export default function Header() {
   return (
     <header className="bg-white sticky top-0 z-50">
       {/* Top Bar: Date left, Social icons + Apply button right */}
-      <div className="bg-[#222] text-white">
+      <div className="bg-white border-b border-gray-200">
         <div className="max-w-[1110px] mx-auto px-4">
           <div className="flex items-center justify-between h-8">
             {/* Left: Date */}
-            <span className="text-xs text-white/90" style={{ fontFamily: 'ABeeZee, sans-serif' }}>
+            <span className="text-xs text-black" style={{ fontFamily: 'ABeeZee, sans-serif' }}>
               {formatDate()}
             </span>
 
@@ -211,7 +211,7 @@ export default function Header() {
                   href="https://facebook.com/sportsmockery"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-white hover:text-[#bc0000] transition-colors"
+                  className="text-black hover:text-[#bc0000] transition-colors"
                   aria-label="Facebook"
                 >
                   <FacebookIcon className="w-3.5 h-3.5" />
@@ -220,7 +220,7 @@ export default function Header() {
                   href="https://instagram.com/sportsmockery"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-white hover:text-[#bc0000] transition-colors"
+                  className="text-black hover:text-[#bc0000] transition-colors"
                   aria-label="Instagram"
                 >
                   <InstagramIcon className="w-3.5 h-3.5" />
@@ -229,7 +229,7 @@ export default function Header() {
                   href="https://twitter.com/sportsmockery"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-white hover:text-[#bc0000] transition-colors"
+                  className="text-black hover:text-[#bc0000] transition-colors"
                   aria-label="Twitter"
                 >
                   <TwitterIcon className="w-3.5 h-3.5" />
@@ -238,7 +238,7 @@ export default function Header() {
                   href="https://youtube.com/sportsmockery"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-white hover:text-[#bc0000] transition-colors"
+                  className="text-black hover:text-[#bc0000] transition-colors"
                   aria-label="YouTube"
                 >
                   <YouTubeIcon className="w-3.5 h-3.5" />
