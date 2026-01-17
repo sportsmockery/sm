@@ -761,3 +761,90 @@ Implemented comprehensive design spec to match sportsmockery.com exactly. All pu
 
 **Files Modified:** 15 files
 **Build Status:** Success
+
+---
+
+### 2025-01-17 - Article Audio Player, Auto-Linking & Fan Council Role
+
+**Added:**
+
+*Article Audio Player:*
+"Listen to this article" feature on all article pages using browser Speech Synthesis API.
+
+- **4 Voice Profiles (American English, fluent reading):**
+  1. **Mike** (default) - Young male (25-30), energetic - slightly faster pace with higher pitch
+  2. **David** - Mature male (45-50), authoritative - slightly slower pace with lower pitch
+  3. **Sarah** - Young female (25-30), expressive - natural pace with higher pitch
+  4. **Jennifer** - Young female (25-30), warm - natural pace with slightly elevated pitch
+
+- **Features:**
+  - Voice selector dropdown - all users can choose their preferred voice
+  - Play/Pause/Stop controls with visual feedback
+  - Progress bar showing current reading position
+  - Skip to next article button
+  - Auto-advance to next article when reading completes
+  - Playlist modes: "Team" (same category articles) or "Recent" (all articles)
+  - Dark mode support
+  - Prioritizes high-quality cloud/remote voices for smoother reading
+  - Text cleanup for better speech flow (normalizes whitespace, fixes punctuation)
+  - Shows current voice name in selector dropdown
+
+- **Files created:**
+  - `src/components/article/ArticleAudioPlayer.tsx` - Client-side audio player component
+  - `src/lib/audioPlayer.ts` - Data layer with Supabase queries for article metadata
+  - `src/app/api/audio/[slug]/route.ts` - Audio endpoint (stub for future TTS service)
+  - `src/app/api/audio/next/route.ts` - API for getting next article in playlist sequence
+
+*Auto-Linking Feature:*
+Automatic internal linking of team and player names in article content.
+
+- Team names automatically link to: `https://test.sportsmockery.com/<team-slug>`
+- Player names automatically link to: `/players/<player-id>`
+- Only the first occurrence of each name is linked
+- Existing `<a>` tags are preserved (not modified)
+- **Configuration (environment variables):**
+  - `AUTO_LINK_TEAMS=true|false` - Enable/disable team linking
+  - `AUTO_LINK_PLAYERS=true|false` - Enable/disable player linking
+  - `AUTO_LINK_CASE_SENSITIVE=true|false` - Case sensitivity for matching
+
+- **Files created:**
+  - `src/lib/autolink/entities.ts` - Entity types and URL helpers
+  - `src/lib/autolink/config.ts` - Feature flags and configuration
+  - `src/lib/autolink/context.ts` - Context builder for posts
+  - `src/lib/autolink/applyAutoLinks.ts` - HTML transformation logic
+  - `src/lib/autolink/index.ts` - Module exports
+
+*Fan Council Member Role:*
+New role added to the user roles system for community governance.
+
+- **Role Hierarchy (highest to lowest):**
+  1. `admin` - Full access to all features and settings
+  2. `editor` - Can edit and publish all posts
+  3. `author` - Can create and edit own posts
+  4. `fan_council` - Elevated fan with governance voting rights
+  5. `fan` - Basic logged-in fan with commenting access
+
+- **Permission Helpers:**
+  - `isEligibleForFanCouncil()` - Checks reputation score OR explicit flag
+  - `overridesFanCouncil()` - Admin/Editor choices override Fan Council votes
+  - `canVoteOnGovernance()` - Permission check for council voting
+
+- **Files created:**
+  - `src/lib/roles.ts` - Centralized roles module with types and helpers
+
+- **Files modified:**
+  - `src/components/admin/RoleSelector.tsx` - Updated to use centralized roles
+  - `src/components/admin/UsersTable.tsx` - Added all role colors and Fan Council badge
+  - `src/components/admin/InviteUser.tsx` - Updated to use STAFF_ROLES
+  - `src/components/admin/AuthorForm.tsx` - Updated to use StaffRole type
+  - `src/app/admin/users/page.tsx` - Updated to use Role type
+
+**Technical Notes:**
+- Audio player uses browser Speech Synthesis API - voice quality depends on user's browser/OS
+- For premium TTS quality, consider integrating ElevenLabs, OpenAI TTS, or similar service
+- Auto-linking integrated into article render pipeline at `src/app/[category]/[slug]/page.tsx`
+
+**Files Created:** 12 files
+**Files Modified:** 6 files
+**Build Status:** Success
+**Deployed:** https://test.sportsmockery.com
