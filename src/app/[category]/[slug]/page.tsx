@@ -377,7 +377,7 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
 
               {/* Title per spec: 36-42px, Montserrat 700-900 - no text-transform */}
               <h1
-                className="mb-4 text-[36px] lg:text-[42px] font-black leading-[1.2] text-[#222222]"
+                className="mb-4 text-[36px] lg:text-[42px] font-black leading-[1.2] text-white"
                 style={{ fontFamily: "'Montserrat', sans-serif", letterSpacing: '-0.5px' }}
               >
                 {post.title}
