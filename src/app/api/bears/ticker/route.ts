@@ -35,29 +35,41 @@ export async function GET() {
       })
     }
 
-    // Format record - NEVER combine regular and postseason
-    // Show as "11-6" or "11-6, 1-0 Playoffs"
-    let record = seasonRecord?.regular_season_record || '--'
-    const postseasonRecord = seasonRecord?.postseason_record
-    if (postseasonRecord && postseasonRecord !== '0-0') {
-      record = `${record}, ${postseasonRecord} Playoffs`
-    }
+    // Format record - combine regular season + playoffs into total record
+    // e.g., 11-6 regular + 1-0 playoffs = 12-6
+    const regWins = seasonRecord?.regular_season_wins || 0
+    const regLosses = seasonRecord?.regular_season_losses || 0
+    const postWins = seasonRecord?.postseason_wins || 0
+    const postLosses = seasonRecord?.postseason_losses || 0
+    const totalWins = regWins + postWins
+    const totalLosses = regLosses + postLosses
+    const record = `${totalWins}-${totalLosses}`
 
     // Format next game from bears_season_record
+    // Get current date in Central Time for "Tonight" logic
+    const nowCT = new Date().toLocaleString('en-US', { timeZone: 'America/Chicago' })
+    const todayCT = new Date(nowCT).toISOString().split('T')[0]
+
     let nextGame = null
     if (seasonRecord?.next_game_date) {
+      // Check if game is today
+      const isToday = seasonRecord.next_game_date === todayCT
+
       // Parse date and time (stored in Central Time)
       const gameDate = new Date(seasonRecord.next_game_date + 'T' + (seasonRecord.next_game_time || '12:00:00'))
-      const dayName = gameDate.toLocaleDateString('en-US', { weekday: 'short', timeZone: 'America/Chicago' })
+      const dayName = isToday ? 'Tonight' : gameDate.toLocaleDateString('en-US', { weekday: 'short', timeZone: 'America/Chicago' })
       const monthDay = gameDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric', timeZone: 'America/Chicago' })
 
-      // Format time in Central Time (CT)
-      const timeStr = seasonRecord.next_game_time
-        ? formatTimeCT(seasonRecord.next_game_time)
-        : 'TBD'
+      // Format time in Central Time (CT) - skip time display if "Tonight"
+      const timeStr = isToday
+        ? ''
+        : (seasonRecord.next_game_time ? formatTimeCT(seasonRecord.next_game_time) : 'TBD')
+
+      // Format opponent - use common abbreviations (LA instead of LAR, etc.)
+      const opponentAbbrev = formatOpponentAbbrev(seasonRecord.next_opponent || 'TBD')
 
       nextGame = {
-        opponent: `${seasonRecord.next_game_home ? 'vs' : '@'} ${seasonRecord.next_opponent || 'TBD'}`,
+        opponent: `${seasonRecord.next_game_home ? 'vs' : '@'} ${opponentAbbrev}`,
         opponentFull: seasonRecord.next_opponent_full,
         date: dayName,
         fullDate: monthDay,
@@ -68,9 +80,6 @@ export async function GET() {
     }
 
     // Check for live game - look for today's game that's within game window
-    // Games are stored in Central Time
-    const nowCT = new Date().toLocaleString('en-US', { timeZone: 'America/Chicago' })
-    const todayCT = new Date(nowCT).toISOString().split('T')[0]
 
     // Query for today's game that might be live
     const { data: todayGame } = await datalabAdmin
@@ -162,4 +171,27 @@ function formatTimeCT(timeStr: string): string {
   const period = hours >= 12 ? 'PM' : 'AM'
   const hour12 = hours % 12 || 12
   return `${hour12}:${minutes.toString().padStart(2, '0')} ${period} CT`
+}
+
+// Format opponent abbreviation to common display format
+function formatOpponentAbbrev(abbrev: string): string {
+  const abbrevMap: Record<string, string> = {
+    'LAR': 'LA',      // Los Angeles Rams -> LA
+    'LAC': 'LAC',     // Los Angeles Chargers stays LAC
+    'SFO': 'SF',      // San Francisco -> SF
+    'SF': 'SF',
+    'GNB': 'GB',      // Green Bay -> GB
+    'GB': 'GB',
+    'NWE': 'NE',      // New England -> NE
+    'NE': 'NE',
+    'TAM': 'TB',      // Tampa Bay -> TB
+    'TB': 'TB',
+    'KAN': 'KC',      // Kansas City -> KC
+    'KC': 'KC',
+    'NOR': 'NO',      // New Orleans -> NO
+    'NO': 'NO',
+    'LVR': 'LV',      // Las Vegas Raiders -> LV
+    'LV': 'LV',
+  }
+  return abbrevMap[abbrev] || abbrev
 }
