@@ -302,7 +302,7 @@ export default function Header() {
 
                         {/* Player Profiles link */}
                         <Link
-                          href="/chicago-bears-player"
+                          href="/chicago-bears/player"
                           onClick={() => setBearsMenuOpen(false)}
                           className="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-[var(--bg-hover)] transition-colors"
                         >
@@ -456,7 +456,7 @@ export default function Header() {
                         </Link>
                       ))}
                       <Link
-                        href="/chicago-bears-player"
+                        href="/chicago-bears/player"
                         onClick={() => setMobileMenuOpen(false)}
                         className="flex items-center gap-3 py-2 text-[14px] text-[var(--text-secondary)] hover:text-[#C83200]"
                       >

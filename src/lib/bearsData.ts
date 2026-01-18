@@ -470,11 +470,34 @@ export async function getBearsSchedule(season?: number): Promise<BearsGame[]> {
 async function getBearsScheduleFromDatalab(season: number): Promise<BearsGame[]> {
   if (!datalabAdmin) return []
 
-  const { data, error } = await datalabAdmin
+  // Try with season filter first
+  let { data, error } = await datalabAdmin
     .from('bears_games_master')
     .select('*')
     .eq('season', season)
     .order('game_date', { ascending: true })
+
+  // If no data, try previous season (NFL seasons span two calendar years)
+  if ((!data || data.length === 0) && !error) {
+    const result = await datalabAdmin
+      .from('bears_games_master')
+      .select('*')
+      .eq('season', season - 1)
+      .order('game_date', { ascending: true })
+    data = result.data
+    error = result.error
+  }
+
+  // If still no data, get all games without season filter
+  if ((!data || data.length === 0) && !error) {
+    const result = await datalabAdmin
+      .from('bears_games_master')
+      .select('*')
+      .order('game_date', { ascending: false })
+      .limit(20)
+    data = result.data
+    error = result.error
+  }
 
   if (error || !data) return []
 

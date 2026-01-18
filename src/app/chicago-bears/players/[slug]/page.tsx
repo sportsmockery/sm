@@ -61,7 +61,7 @@ export default async function PlayerProfilePage({ params }: PlayerPageProps) {
             <span>/</span>
             <Link href="/chicago-bears" className="hover:text-white">Chicago Bears</Link>
             <span>/</span>
-            <Link href="/chicago-bears-player" className="hover:text-white">Player Profiles</Link>
+            <Link href="/chicago-bears/player" className="hover:text-white">Player Profiles</Link>
             <span>/</span>
             <span className="text-white">{player.fullName}</span>
           </nav>
@@ -252,7 +252,7 @@ export default async function PlayerProfilePage({ params }: PlayerPageProps) {
               </h3>
               <div className="space-y-2">
                 <Link
-                  href="/chicago-bears-player"
+                  href="/chicago-bears/player"
                   className="flex items-center gap-3 p-3 rounded-xl hover:bg-[var(--bg-hover)] transition-colors text-[var(--text-secondary)] hover:text-[#C83200]"
                 >
                   <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">

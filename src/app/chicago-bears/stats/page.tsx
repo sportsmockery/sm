@@ -139,7 +139,7 @@ export default async function BearsStatsPage() {
             View Full Roster
           </Link>
           <Link
-            href="/chicago-bears-player"
+            href="/chicago-bears/player"
             className="inline-flex items-center gap-2 px-6 py-3 bg-[#C83200] hover:bg-[#a82900] text-white font-semibold rounded-xl transition-colors"
           >
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
