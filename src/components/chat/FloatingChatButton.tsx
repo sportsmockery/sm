@@ -56,9 +56,9 @@ export default function FloatingChatButton({ teamSlug, teamName }: FloatingChatB
       <style jsx>{`
         .chat-floating-btn {
           position: fixed;
-          bottom: 24px;
+          bottom: 90px;
           right: 24px;
-          z-index: 1000;
+          z-index: 999;
           display: flex;
           align-items: center;
           gap: 10px;
@@ -97,7 +97,7 @@ export default function FloatingChatButton({ teamSlug, teamName }: FloatingChatB
 
         @media (max-width: 768px) {
           .chat-floating-btn {
-            bottom: 16px;
+            bottom: 80px;
             right: 16px;
             padding: 12px 16px;
             font-size: 0.85rem;

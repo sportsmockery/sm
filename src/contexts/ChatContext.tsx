@@ -156,33 +156,38 @@ export function ChatProvider({ children, teamSlug }: ChatProviderProps) {
   // Check authentication on mount
   useEffect(() => {
     const checkAuth = async () => {
-      const { data: { session } } = await supabase.auth.getSession()
-      setIsAuthenticated(!!session)
+      try {
+        const { data: { session } } = await supabase.auth.getSession()
+        setIsAuthenticated(!!session)
 
-      if (session) {
-        // Get or create chat user
-        const { data: chatUser } = await supabase
-          .from('chat_users')
-          .select('*')
-          .eq('user_id', session.user.id)
-          .single()
-
-        if (chatUser) {
-          setCurrentUser(chatUser)
-        } else {
-          // Create chat user
-          const { data: newUser } = await supabase
+        if (session) {
+          // Get or create chat user
+          const { data: chatUser } = await supabase
             .from('chat_users')
-            .insert({
-              user_id: session.user.id,
-              display_name: session.user.email?.split('@')[0] || 'Anonymous',
-              avatar_url: session.user.user_metadata?.avatar_url,
-            })
-            .select()
+            .select('*')
+            .eq('user_id', session.user.id)
             .single()
 
-          setCurrentUser(newUser)
+          if (chatUser) {
+            setCurrentUser(chatUser)
+          } else {
+            // Create chat user
+            const { data: newUser } = await supabase
+              .from('chat_users')
+              .insert({
+                user_id: session.user.id,
+                display_name: session.user.email?.split('@')[0] || 'Anonymous',
+                avatar_url: session.user.user_metadata?.avatar_url,
+              })
+              .select()
+              .single()
+
+            setCurrentUser(newUser)
+          }
         }
+      } catch (err) {
+        console.error('Chat auth check failed:', err)
+        // Don't throw - chat is non-critical
       }
     }
 
@@ -198,12 +203,17 @@ export function ChatProvider({ children, teamSlug }: ChatProviderProps) {
   // Load rooms
   useEffect(() => {
     const loadRooms = async () => {
-      const { data } = await supabase
-        .from('chat_rooms')
-        .select('*')
-        .eq('is_active', true)
+      try {
+        const { data } = await supabase
+          .from('chat_rooms')
+          .select('*')
+          .eq('is_active', true)
 
-      if (data) setRooms(data)
+        if (data) setRooms(data)
+      } catch (err) {
+        console.error('Failed to load chat rooms:', err)
+        // Don't throw - chat is non-critical
+      }
     }
 
     loadRooms()
