@@ -58,7 +58,17 @@ export async function GET(request: NextRequest) {
     // Format schedule with additional context
     const schedule = (data || []).map((game: any) => {
       const gameDate = new Date(game.game_date)
-      const isPast = gameDate < new Date()
+
+      // Determine if game is actually completed vs scheduled
+      // A game is completed if:
+      // 1. Date is before today, OR
+      // 2. Date is today AND the game has a non-zero score
+      // A 0-0 score with today's date means the game hasn't started yet
+      const isToday = game.game_date === today
+      const hasScore = game.bears_score > 0 || game.opponent_score > 0
+      const isCompleted = (game.game_date < today) || (isToday && hasScore)
+      const isPast = isCompleted
+      const isUpcoming = !isCompleted
 
       return {
         gameId: game.game_id || game.external_id,
@@ -82,7 +92,8 @@ export async function GET(request: NextRequest) {
           roof: game.roof,
           isIndoor: ['DOME', 'CLOSED', 'RETRACTABLE'].includes(game.roof),
         },
-        result: isPast && game.bears_score !== null ? {
+        // Only show result if game is completed AND has a real score
+        result: isCompleted && hasScore ? {
           bearsScore: game.bears_score,
           opponentScore: game.opponent_score,
           outcome: game.bears_win ? 'W' : 'L',
@@ -94,7 +105,8 @@ export async function GET(request: NextRequest) {
         } : null,
         isPlayoff: game.is_playoff,
         isPast,
-        isUpcoming: !isPast,
+        isUpcoming,
+        isToday,
       }
     })
 

@@ -1,5 +1,6 @@
 import Link from 'next/link'
 import Image from 'next/image'
+import { processIconShortcodes } from '@/lib/shortcodes'
 
 interface GridArticle {
   id: number
@@ -78,9 +79,8 @@ function ArticleCard({ article }: { article: GridArticle }) {
           <h3
             className="text-[18px] font-bold text-[#222222] leading-[1.3] line-clamp-3 group-hover:text-[#bc0000] group-hover:underline decoration-1 underline-offset-2 transition-colors"
             style={{ fontFamily: "'Montserrat', sans-serif" }}
-          >
-            {article.title}
-          </h3>
+            dangerouslySetInnerHTML={{ __html: processIconShortcodes(article.title) }}
+          />
           {/* Metadata per spec: 12-13px, #999999, "Author Name • Month Day, Year" */}
           <p className="mt-2 text-[12px] text-[#999999]" style={{ fontFamily: "'Montserrat', sans-serif" }}>
             {article.author?.name || 'Staff'} • {formatDate(article.published_at)}

@@ -1,6 +1,7 @@
 import Image from 'next/image'
 import Link from 'next/link'
 import { format } from 'date-fns'
+import { processIconShortcodes } from '@/lib/shortcodes'
 
 interface FeaturedPost {
   id: number
@@ -65,14 +66,16 @@ export default function CategoryFeatured({
                 Featured
               </span>
 
-              <h2 className="mb-2 font-heading text-lg font-black leading-tight text-white transition-colors group-hover:text-[#FF6666] sm:text-xl md:text-2xl lg:text-3xl">
-                {mainPost.title}
-              </h2>
+              <h2
+                className="mb-2 font-heading text-lg font-black leading-tight text-white transition-colors group-hover:text-[#FF6666] sm:text-xl md:text-2xl lg:text-3xl"
+                dangerouslySetInnerHTML={{ __html: processIconShortcodes(mainPost.title) }}
+              />
 
               {mainPost.excerpt && (
-                <p className="mb-4 line-clamp-2 text-xs text-zinc-300 sm:text-sm md:text-base">
-                  {mainPost.excerpt}
-                </p>
+                <p
+                  className="mb-4 line-clamp-2 text-xs text-zinc-300 sm:text-sm md:text-base"
+                  dangerouslySetInnerHTML={{ __html: processIconShortcodes(mainPost.excerpt) }}
+                />
               )}
 
               <div className="flex items-center gap-3 text-sm text-zinc-400">
@@ -116,9 +119,10 @@ export default function CategoryFeatured({
 
               {/* Content */}
               <div className="flex min-w-0 flex-1 flex-col justify-center">
-                <h3 className="mb-2 line-clamp-2 font-heading text-lg font-bold text-zinc-900 transition-colors group-hover:text-[#8B0000] dark:text-white dark:group-hover:text-[#FF6666]">
-                  {post.title}
-                </h3>
+                <h3
+                  className="mb-2 line-clamp-2 font-heading text-lg font-bold text-zinc-900 transition-colors group-hover:text-[#8B0000] dark:text-white dark:group-hover:text-[#FF6666]"
+                  dangerouslySetInnerHTML={{ __html: processIconShortcodes(post.title) }}
+                />
 
                 <div className="flex items-center gap-2 text-sm text-zinc-500 dark:text-zinc-400">
                   {post.author && (
