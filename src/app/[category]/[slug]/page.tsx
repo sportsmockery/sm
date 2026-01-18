@@ -20,6 +20,7 @@ import TableOfContents from '@/components/article/TableOfContents'
 import MockeryCommentary from '@/components/article/MockeryCommentary'
 import { ArticleTableOfContents, MoreFromTeam } from '@/components/article'
 import { categorySlugToTeam, PostSummary } from '@/lib/types'
+import { TeamChatWidget } from '@/components/chat/TeamChatWidget'
 import { stripDuplicateFeaturedImage, calculateReadTime, getContextLabel } from '@/lib/content-utils'
 import { buildAutoLinkContextForPost, applyAutoLinksToHtml } from '@/lib/autolink'
 import { getArticleAudioInfo } from '@/lib/audioPlayer'
@@ -572,6 +573,13 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
         articleId={post.id}
         articleUrl={articleUrl}
         articleTitle={post.title}
+      />
+
+      {/* Team Chat Widget - Floating button and panel */}
+      <TeamChatWidget
+        categorySlug={categoryData?.slug || category}
+        categoryName={categoryData?.name}
+        articleId={post.id}
       />
     </>
   )
