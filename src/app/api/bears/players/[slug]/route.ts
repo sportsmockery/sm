@@ -107,6 +107,7 @@ export async function GET(
     }
 
     // Get player's game stats for 2025 season and aggregate
+    // Use internal ID (playerData.id) since that's what game stats reference
     const { data: gameStats } = await datalabAdmin
       .from('bears_player_game_stats')
       .select(`
@@ -127,7 +128,7 @@ export async function GET(
         def_passes_defended,
         fum_fum
       `)
-      .eq('player_id', parseInt(player.playerId))
+      .eq('player_id', playerData.id)  // Use internal ID, not ESPN ID
       .eq('season', 2025)
 
     // Aggregate stats

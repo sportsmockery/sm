@@ -19,6 +19,7 @@ export type Side = 'OFF' | 'DEF' | 'ST'
 
 export interface BearsPlayer {
   playerId: string
+  internalId: number  // Internal database ID used for game stats matching
   slug: string
   fullName: string
   firstName: string
@@ -312,6 +313,7 @@ function transformPlayers(data: any[]): BearsPlayer[] {
 
     return {
       playerId: String(p.player_id || p.espn_id || p.id),
+      internalId: p.id,  // Internal DB ID used for game stats matching
       slug: p.slug || generateSlug(p.name || p.full_name),
       fullName: p.name || p.full_name,
       firstName: p.first_name || (p.name || p.full_name)?.split(' ')[0] || '',
@@ -378,11 +380,11 @@ export async function getPlayerProfile(slug: string): Promise<PlayerProfile | nu
 
   if (!player) return null
 
-  // Get season stats
-  const seasons = await getPlayerSeasonStats(player.playerId)
+  // Get season stats using internal ID (used by game stats table)
+  const seasons = await getPlayerSeasonStats(player.internalId)
 
   // Get game log
-  const gameLog = await getPlayerGameLog(player.playerId)
+  const gameLog = await getPlayerGameLog(player.internalId)
 
   // Current season (2024 or most recent)
   const currentYear = new Date().getFullYear()
@@ -398,16 +400,17 @@ export async function getPlayerProfile(slug: string): Promise<PlayerProfile | nu
   }
 }
 
-async function getPlayerSeasonStats(playerId: string): Promise<PlayerSeasonStats[]> {
+async function getPlayerSeasonStats(internalId: number): Promise<PlayerSeasonStats[]> {
   // Always use Datalab - aggregate from game stats for accurate data
-  return await getPlayerSeasonStatsFromDatalab(playerId)
+  return await getPlayerSeasonStatsFromDatalab(internalId)
 }
 
-async function getPlayerSeasonStatsFromDatalab(playerId: string): Promise<PlayerSeasonStats[]> {
+async function getPlayerSeasonStatsFromDatalab(internalId: number): Promise<PlayerSeasonStats[]> {
   if (!datalabAdmin) return []
 
   // Aggregate from game stats for accurate data
   // Per SM_INTEGRATION_GUIDE.md: Use correct column names
+  // Use internal ID since that's what game stats reference
   const { data, error } = await datalabAdmin
     .from('bears_player_game_stats')
     .select(`
@@ -432,7 +435,7 @@ async function getPlayerSeasonStatsFromDatalab(playerId: string): Promise<Player
       fum_fum,
       fum_lost
     `)
-    .eq('player_id', parseInt(playerId))
+    .eq('player_id', internalId)
     .eq('season', 2025)
 
   if (error || !data || data.length === 0) return []
@@ -528,15 +531,16 @@ function transformSeasonStats(data: any[]): PlayerSeasonStats[] {
   }))
 }
 
-async function getPlayerGameLog(playerId: string): Promise<PlayerGameLogEntry[]> {
+async function getPlayerGameLog(internalId: number): Promise<PlayerGameLogEntry[]> {
   // Always use Datalab as source of truth
-  return await getPlayerGameLogFromDatalab(playerId)
+  return await getPlayerGameLogFromDatalab(internalId)
 }
 
-async function getPlayerGameLogFromDatalab(playerId: string): Promise<PlayerGameLogEntry[]> {
+async function getPlayerGameLogFromDatalab(internalId: number): Promise<PlayerGameLogEntry[]> {
   if (!datalabAdmin) return []
 
   // Per SM_INTEGRATION_GUIDE.md: Use correct column names
+  // Use internal ID since that's what game stats reference
   const { data, error } = await datalabAdmin
     .from('bears_player_game_stats')
     .select(`
@@ -568,7 +572,7 @@ async function getPlayerGameLogFromDatalab(playerId: string): Promise<PlayerGame
         season
       )
     `)
-    .eq('player_id', parseInt(playerId))
+    .eq('player_id', internalId)
     .eq('season', 2025)
     .order('game_date', { ascending: false })
     .limit(20)
@@ -835,7 +839,8 @@ async function getLeaderboards(season: number): Promise<BearsLeaderboard> {
   }
 
   const players = await getBearsPlayers()
-  const playersMap = new Map(players.map(p => [p.playerId, p]))
+  // Key by internalId since game stats use the internal DB ID, not ESPN ID
+  const playersMap = new Map(players.map(p => [p.internalId, p]))
 
   // Per SM_INTEGRATION_GUIDE.md: Aggregate from bears_player_game_stats
   // Use correct column names: passing_yards, rushing_yards, receiving_yards, etc.
@@ -864,11 +869,11 @@ async function getLeaderboards(season: number): Promise<BearsLeaderboard> {
     return { passing: [], rushing: [], receiving: [], defense: [] }
   }
 
-  // Aggregate stats by player
-  const playerTotals = new Map<string, any>()
+  // Aggregate stats by player (using internal ID which is a number)
+  const playerTotals = new Map<number, any>()
 
   for (const stat of gameStats) {
-    const pid = String(stat.player_id)
+    const pid = stat.player_id  // Internal ID as number
     if (!playerTotals.has(pid)) {
       playerTotals.set(pid, {
         player_id: pid,

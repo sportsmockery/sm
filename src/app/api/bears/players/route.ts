@@ -85,6 +85,7 @@ export async function GET() {
 
       return {
         playerId: String(p.player_id || p.id),
+        internalId: p.id,  // Internal DB ID for game stats matching
         slug,
         fullName: p.name,
         firstName: p.first_name || (p.name || '').split(' ')[0] || '',
