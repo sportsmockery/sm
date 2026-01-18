@@ -25,7 +25,7 @@ import { buildAutoLinkContextForPost, applyAutoLinksToHtml } from '@/lib/autolin
 import { getArticleAudioInfo } from '@/lib/audioPlayer'
 import { ArticleAudioPlayer } from '@/components/article/ArticleAudioPlayer'
 import ArticleContentWithEmbeds from '@/components/article/ArticleContentWithEmbeds'
-// import { TeamChatWidget } from '@/components/chat' // Temporarily disabled
+import { TeamChatWidget } from '@/components/chat'
 
 interface ArticlePageProps {
   params: Promise<{
@@ -580,8 +580,8 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
         articleTitle={post.title}
       />
 
-      {/* Team Chat Widget - Temporarily disabled for debugging */}
-      {/* <TeamChatWidget categorySlug={category} /> */}
+      {/* Team Chat Widget - Floating chat for team fan engagement */}
+      <TeamChatWidget categorySlug={category} />
     </>
   )
 }
