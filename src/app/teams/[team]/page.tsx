@@ -10,6 +10,7 @@ import {
   StandingsTable,
   InjuryReport,
 } from '@/components/teams';
+import ARTourButton from '@/components/ar/ARTourButton';
 
 interface TeamPageProps {
   params: Promise<{ team: string }>;
@@ -120,6 +121,9 @@ export default async function TeamOverviewPage({ params }: TeamPageProps) {
 
           {/* Injury Report */}
           {injuries.length > 0 && <InjuryReport injuries={injuries} team={team} />}
+
+          {/* AR Stadium Tour */}
+          <ARTourButton team={teamSlug} />
 
           {/* Latest News */}
           <TeamNewsWidget
