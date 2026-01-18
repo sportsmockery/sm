@@ -57,10 +57,12 @@ export default function BearsPlayerSelectorPage() {
       return
     }
 
+    const playerSlug = selectedPlayer.slug
+
     async function loadProfile() {
       setLoadingProfile(true)
       try {
-        const profile = await getPlayerProfile(selectedPlayer.slug)
+        const profile = await getPlayerProfile(playerSlug)
         setPlayerProfile(profile)
       } catch (err) {
         console.error('Failed to load profile:', err)
