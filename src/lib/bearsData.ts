@@ -242,6 +242,7 @@ async function getBearsPlayersFromDatalab(): Promise<BearsPlayer[]> {
     return []
   }
 
+  // Get all players - the bears_players table should contain current roster
   const { data, error } = await datalabAdmin
     .from('bears_players')
     .select('*')
@@ -253,6 +254,7 @@ async function getBearsPlayersFromDatalab(): Promise<BearsPlayer[]> {
     return []
   }
 
+  console.log('Bears players fetched:', data?.length, 'Sample:', data?.[0])
   return transformPlayers(data || [])
 }
 
@@ -263,6 +265,8 @@ function transformPlayers(data: any[]): BearsPlayer[] {
   const players: BearsPlayer[] = data.map((p: any) => {
     const position = p.position || 'UNKNOWN'
     const side = POSITION_TO_SIDE[position] || 'ST'
+    // Try multiple possible headshot field names
+    const headshotUrl = p.headshot_url || p.headshot || p.image_url || p.photo_url || null
 
     return {
       playerId: String(p.player_id || p.id),
@@ -279,7 +283,7 @@ function transformPlayers(data: any[]): BearsPlayer[] {
       age: p.age,
       experience: p.experience ? `${p.experience} yr${p.experience !== 1 ? 's' : ''}` : null,
       college: p.college,
-      headshotUrl: p.headshot_url,
+      headshotUrl,
       primaryRole: p.primary_role || p.status || null,
       status: p.status,
     }
