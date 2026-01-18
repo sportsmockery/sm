@@ -9,6 +9,7 @@ import Footer from "@/components/layout/Footer";
 import SkipToContent from "@/components/layout/SkipToContent";
 import ScrollToTop from "@/components/layout/ScrollToTop";
 import CookieBanner from "@/components/layout/CookieBanner";
+import BearsAIButton from "@/components/bears/BearsAIButton";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -141,6 +142,7 @@ export default function RootLayout({
             </div>
             <ScrollToTop />
             <CookieBanner />
+            <BearsAIButton />
           </AuthProvider>
         </ThemeProvider>
       </body>

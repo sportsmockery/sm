@@ -49,32 +49,33 @@ export default function PopularSearches({
         Popular Searches
       </h3>
 
-      <div className="flex flex-wrap gap-2">
-        {searches.map((query, index) => (
-          <div key={query}>
-            {onSearchClick ? (
-              <button
-                onClick={() => onSearchClick(query)}
-                className="inline-flex items-center gap-1.5 rounded-full border border-zinc-200 bg-white px-3 py-1.5 text-sm text-zinc-700 transition-all hover:border-[#8B0000]/30 hover:bg-[#8B0000]/5 hover:text-[#8B0000] dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-300 dark:hover:border-[#FF6666]/30 dark:hover:bg-[#FF6666]/5 dark:hover:text-[#FF6666]"
-              >
-                {index < 3 && (
-                  <span className="text-[#8B0000] dark:text-[#FF6666]">🔥</span>
-                )}
-                {query}
-              </button>
-            ) : (
-              <Link
-                href={`/search?q=${encodeURIComponent(query)}`}
-                className="inline-flex items-center gap-1.5 rounded-full border border-zinc-200 bg-white px-3 py-1.5 text-sm text-zinc-700 transition-all hover:border-[#8B0000]/30 hover:bg-[#8B0000]/5 hover:text-[#8B0000] dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-300 dark:hover:border-[#FF6666]/30 dark:hover:bg-[#FF6666]/5 dark:hover:text-[#FF6666]"
-              >
-                {index < 3 && (
-                  <span className="text-[#8B0000] dark:text-[#FF6666]">🔥</span>
-                )}
-                {query}
-              </Link>
-            )}
-          </div>
-        ))}
+      <div className="flex flex-wrap gap-2 relative z-10">
+        {searches.map((query, index) =>
+          onSearchClick ? (
+            <button
+              key={query}
+              type="button"
+              onClick={() => onSearchClick(query)}
+              className="inline-flex items-center gap-1.5 rounded-full border border-zinc-200 bg-white px-3 py-1.5 text-sm text-zinc-700 transition-all hover:border-[#8B0000]/30 hover:bg-[#8B0000]/5 hover:text-[#8B0000] dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-300 dark:hover:border-[#FF6666]/30 dark:hover:bg-[#FF6666]/5 dark:hover:text-[#FF6666] cursor-pointer"
+            >
+              {index < 3 && (
+                <span className="text-[#8B0000] dark:text-[#FF6666]">🔥</span>
+              )}
+              {query}
+            </button>
+          ) : (
+            <Link
+              key={query}
+              href={`/search?q=${encodeURIComponent(query)}`}
+              className="inline-flex items-center gap-1.5 rounded-full border border-zinc-200 bg-white px-3 py-1.5 text-sm text-zinc-700 transition-all hover:border-[#8B0000]/30 hover:bg-[#8B0000]/5 hover:text-[#8B0000] dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-300 dark:hover:border-[#FF6666]/30 dark:hover:bg-[#FF6666]/5 dark:hover:text-[#FF6666] cursor-pointer"
+            >
+              {index < 3 && (
+                <span className="text-[#8B0000] dark:text-[#FF6666]">🔥</span>
+              )}
+              {query}
+            </Link>
+          )
+        )}
       </div>
     </div>
   )

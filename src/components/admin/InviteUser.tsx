@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { createClient } from '@/lib/supabase'
+import { Role, STAFF_ROLES } from '@/lib/roles'
 
 interface InviteUserProps {
   onSuccess: () => void
@@ -10,7 +11,7 @@ interface InviteUserProps {
 
 export default function InviteUser({ onSuccess, onCancel }: InviteUserProps) {
   const [email, setEmail] = useState('')
-  const [role, setRole] = useState<'admin' | 'editor' | 'author'>('author')
+  const [role, setRole] = useState<Role>('author')
   const [sending, setSending] = useState(false)
   const [error, setError] = useState('')
 
@@ -96,12 +97,14 @@ export default function InviteUser({ onSuccess, onCancel }: InviteUserProps) {
           </label>
           <select
             value={role}
-            onChange={(e) => setRole(e.target.value as typeof role)}
+            onChange={(e) => setRole(e.target.value as Role)}
             className="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:border-blue-500"
           >
-            <option value="author">Author - Can create and edit own posts</option>
-            <option value="editor">Editor - Can edit all posts</option>
-            <option value="admin">Admin - Full access</option>
+            {STAFF_ROLES.map(r => (
+              <option key={r.value} value={r.value}>
+                {r.label} - {r.description}
+              </option>
+            ))}
           </select>
         </div>
 

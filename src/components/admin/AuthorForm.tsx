@@ -5,6 +5,7 @@ import Image from 'next/image'
 import RoleSelector from './RoleSelector'
 import MediaModal from './MediaModal'
 import { MediaItem } from '@/app/admin/media/page'
+import { Role, StaffRole } from '@/lib/roles'
 
 interface Author {
   id?: string
@@ -12,7 +13,7 @@ interface Author {
   email: string
   bio: string
   avatar_url: string
-  role: 'admin' | 'editor' | 'author'
+  role: StaffRole
   twitter?: string
   website?: string
 }
@@ -28,7 +29,7 @@ export default function AuthorForm({ initialData, onSave, saving }: AuthorFormPr
   const [email, setEmail] = useState(initialData?.email || '')
   const [bio, setBio] = useState(initialData?.bio || '')
   const [avatarUrl, setAvatarUrl] = useState(initialData?.avatar_url || '')
-  const [role, setRole] = useState<Author['role']>(initialData?.role || 'author')
+  const [role, setRole] = useState<StaffRole>(initialData?.role || 'author')
   const [twitter, setTwitter] = useState(initialData?.twitter || '')
   const [website, setWebsite] = useState(initialData?.website || '')
   const [showMediaModal, setShowMediaModal] = useState(false)
@@ -126,7 +127,11 @@ export default function AuthorForm({ initialData, onSave, saving }: AuthorFormPr
         <label className="block text-sm font-medium text-gray-300 mb-1">
           Role
         </label>
-        <RoleSelector value={role} onChange={setRole} />
+        <RoleSelector
+          value={role}
+          onChange={(r) => setRole(r as StaffRole)}
+          staffOnly
+        />
       </div>
 
       {/* Bio */}

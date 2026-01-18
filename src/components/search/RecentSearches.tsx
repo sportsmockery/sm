@@ -91,7 +91,7 @@ export default function RecentSearches({
         </button>
       </div>
 
-      <div className="flex flex-wrap gap-2">
+      <div className="flex flex-wrap gap-2 relative z-10">
         {searches.map((query) => (
           <div
             key={query}
@@ -99,22 +99,25 @@ export default function RecentSearches({
           >
             {onSearchClick ? (
               <button
+                type="button"
                 onClick={() => onSearchClick(query)}
-                className="text-sm text-zinc-700 hover:text-[#8B0000] dark:text-zinc-300 dark:hover:text-[#FF6666]"
+                className="text-sm text-zinc-700 hover:text-[#8B0000] dark:text-zinc-300 dark:hover:text-[#FF6666] cursor-pointer"
               >
                 {query}
               </button>
             ) : (
               <Link
                 href={`/search?q=${encodeURIComponent(query)}`}
-                className="text-sm text-zinc-700 hover:text-[#8B0000] dark:text-zinc-300 dark:hover:text-[#FF6666]"
+                className="text-sm text-zinc-700 hover:text-[#8B0000] dark:text-zinc-300 dark:hover:text-[#FF6666] cursor-pointer"
               >
                 {query}
               </Link>
             )}
             <button
+              type="button"
               onClick={() => handleRemove(query)}
-              className="ml-1 flex h-5 w-5 items-center justify-center rounded-full text-zinc-400 opacity-0 transition-all hover:bg-zinc-100 hover:text-zinc-600 group-hover:opacity-100 dark:hover:bg-zinc-700 dark:hover:text-zinc-300"
+              className="ml-1 flex h-5 w-5 items-center justify-center rounded-full text-zinc-400 opacity-0 transition-all hover:bg-zinc-100 hover:text-zinc-600 group-hover:opacity-100 dark:hover:bg-zinc-700 dark:hover:text-zinc-300 cursor-pointer"
+              aria-label={`Remove "${query}" from recent searches`}
             >
               <svg
                 className="h-3 w-3"

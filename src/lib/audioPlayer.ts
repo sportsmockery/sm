@@ -9,6 +9,7 @@ export interface ArticleMeta {
   title: string;
   team: string | null; // e.g. "bears", "bulls"
   publishedAt: string; // ISO string
+  featuredImage: string | null; // URL to featured image
 }
 
 export interface ArticleAudioInfo {
@@ -25,6 +26,7 @@ export async function getArticleMetaBySlug(slug: string): Promise<ArticleMeta | 
       slug,
       title,
       published_at,
+      featured_image,
       category:sm_categories!category_id (slug)
     `)
     .eq('slug', slug)
@@ -58,6 +60,7 @@ export async function getArticleMetaBySlug(slug: string): Promise<ArticleMeta | 
     title: post.title,
     team,
     publishedAt: post.published_at,
+    featuredImage: post.featured_image || null,
   }
 }
 
@@ -72,6 +75,7 @@ export async function getArticleMetaById(id: number): Promise<ArticleMeta | null
       slug,
       title,
       published_at,
+      featured_image,
       category:sm_categories!category_id (slug)
     `)
     .eq('id', id)
@@ -102,6 +106,7 @@ export async function getArticleMetaById(id: number): Promise<ArticleMeta | null
     title: post.title,
     team,
     publishedAt: post.published_at,
+    featuredImage: post.featured_image || null,
   }
 }
 
@@ -128,6 +133,7 @@ export async function getNextArticle(
       slug,
       title,
       published_at,
+      featured_image,
       category:sm_categories!category_id (slug)
     `)
     .eq('status', 'published')
@@ -187,6 +193,7 @@ export async function getNextArticle(
     title: post.title,
     team: postTeam,
     publishedAt: post.published_at,
+    featuredImage: post.featured_image || null,
   }
 }
 

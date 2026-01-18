@@ -1,0 +1,190 @@
+ARTICLE PAGE DOM STRUCTURE - test.sportsmockery.com
+===================================================
+URL: /chicago-bears/ben-johnson-delivers-blunt-message-to-bears-locker-room-ahead-of-packers-game
+
+link "Skip to main content" [ref_1] href="#main-content"
+banner [ref_2]
+ link "Facebook" [ref_3] href="https://facebook.com/sportsmockery"
+ link "X (Twitter)" [ref_4] href="https://twitter.com/sportsmockery"
+ link "Instagram" [ref_5] href="https://instagram.com/sportsmockery"
+ link "YouTube" [ref_6] href="https://youtube.com/sportsmockery"
+ link [ref_7] href="/"
+  image "Sports Mockery" [ref_8]
+ button "Switch to dark mode" [ref_9]
+ navigation [ref_10]
+  button "Toggle menu" [ref_11]
+  link "HOME" [ref_12] href="/"
+  link "BEARS" [ref_13] href="/chicago-bears"
+  link "BULLS" [ref_14] href="/chicago-bulls"
+  link "CUBS" [ref_15] href="/chicago-cubs"
+  link "WHITE SOX" [ref_16] href="/chicago-white-sox"
+  link "BLACKHAWKS" [ref_17] href="/chicago-blackhawks"
+  button "MORE" [ref_18]
+  button "Search" [ref_19]
+ link [ref_20] href="/chicago-bears"
+  generic "Bears" [ref_21]
+ generic "Record:" [ref_22]
+ generic "4-8" [ref_23]
+ generic "Next:" [ref_24]
+ generic "vs GB" [ref_25]
+ generic "Sun 12:00 PM" [ref_26]
+ navigation [ref_27]
+  link "News" [ref_28] href="/chicago-bears"
+  link "Data Hub" [ref_29] href="/bears/data"
+  link "Rumors" [ref_30] href="/bears/rumors"
+  link "Podcasts" [ref_31] href="/podcasts?team=bears"
+ link [ref_32] href="/bears/subscribe"
+  generic "Get Bears Alerts" [ref_33]
+  generic "Alerts" [ref_34]
+generic [ref_35]
+ banner [ref_36]
+  image "Ben Johnson Delivers Blunt Message to Bears Locker Room Ahead of Packers Game" [ref_37]
+  navigation [ref_38]
+   list [ref_39]
+    listitem [ref_40]
+     link "Home" [ref_41] href="/"
+    listitem [ref_42]
+    listitem [ref_43]
+     link "Chicago Bears News & Rumors" [ref_44] href="/chicago-bears"
+  link "Chicago Bears News & Rumors" [ref_45] href="/chicago-bears"
+  heading "Ben Johnson Delivers Blunt Message to Bears Locker Room Ahead of Packers Game" [ref_46]
+  generic "January 8, 2026" [ref_47]
+  generic "2 min read" [ref_48]
+ image "Ben Johnson Delivers Blunt Message to Bears Locker Room Ahead of Packers Game" [ref_49]
+ article [ref_50]
+  generic "Share:" [ref_51]
+  link "Share on Twitter" [ref_52] href="https://twitter.com/intent/tweet?url=https%3A%2F%2Fsportsmockery.com%2Fchicago-bears%2Fben-johnson-delivers-blunt-message-to-bears-locker-room-ahead-of-packers-game&text=Ben%20Johnson%20Delivers%20Blunt%20Message%20to%20Bears%20Locker%20Room%20Ahead%20of%20Packers%20Game"
+  link "Share on Facebook" [ref_53] href="https://www.facebook.com/sharer/sharer.php?u=https%3A%2F%2Fsportsmockery.com%2Fchicago-bears%2Fben-johnson-delivers-blunt-message-to-bears-locker-room-ahead-of-packers-game"
+  button "Copy link" [ref_54]
+  generic "Chicago Bears rookie tight end recently shared a quote from head coach Ben Johnson that perfectly c." [ref_55]
+   link "Colston Loveland Profile" [ref_56] href="https://www.sportsmockery.com/chicago-bears-player/?player_id=4723086"
+  generic ""If you're not prepared to play the next 5 weeks or if you're thinking about anything else — thinkin" [ref_57]
+  generic "https://twitter.com/davebfr/status/2009022010605887808" [ref_58]
+  generic "It's the type of statement that instantly sets a tone. There's no sugarcoating, no room for distract" [ref_59]
+  generic "That mentality is rare, especially coming from a first-year head coach. But Johnson has shown all se" [ref_60]
+  generic "Loveland sharing the quote speaks volumes on its own. When players echo their coach's message public" [ref_61]
+  generic "Now, that focus turns to Green Bay." [ref_62]
+  generic "A Bears-Packers playoff matchup on Saturday is going to be electric. The stakes couldn't be higher, " [ref_63]
+  heading "Bears vs Packers: EVERYTHING Is on the Line | Playoff Pregame Show" [ref_64]
+  generic "https://www.youtube.com/watch?v=fQZjSo1w0Ww" [ref_65]
+  generic "Share this article" [ref_66]
+  generic "Share:" [ref_67]
+  link "Share on Twitter" [ref_68] href="https://twitter.com/intent/tweet?url=https%3A%2F%2Fsportsmockery.com%2Fchicago-bears%2Fben-johnson-delivers-blunt-message-to-bears-locker-room-ahead-of-packers-game&text=Ben%20Johnson%20Delivers%20Blunt%20Message%20to%20Bears%20Locker%20Room%20Ahead%20of%20Packers%20Game"
+  link "Share on Facebook" [ref_69] href="https://www.facebook.com/sharer/sharer.php?u=https%3A%2F%2Fsportsmockery.com%2Fchicago-bears%2Fben-johnson-delivers-blunt-message-to-bears-locker-room-ahead-of-packers-game"
+  button "Copy link" [ref_70]
+ complementary [ref_71]
+  region [ref_72]
+   heading "More Bears News" [ref_73]
+   link "View All →" [ref_74] href="/chicago-bears"
+   link [ref_75] href="/chicago-bears/audio-bears-v-packers-preview-vol-v-prediction"
+    heading "Audio: Bears v. Packers Preview, Vol. V: Prediction!" [ref_76]
+    generic "Jan 9, 2026" [ref_77]
+   link [ref_78] href="/chicago-bears/playoff-revenge-tour-3-ways-the-bears-can-finally-exorcise-the-green-bay-demons-this-saturday"
+    heading "Playoff Revenge Tour: 3 Ways the Bears Can Finally Exorcise the Green Bay Demons This Saturday" [ref_79]
+    generic "Jan 8, 2026" [ref_80]
+   link [ref_81] href="/chicago-bears/audio-bears-v-packers-preview-vol-iv-you-with-the-stars-in-your-eyes"
+    heading "Audio: Bears v. Packers Preview, Vol. IV: You with the Stars in Your Eyes" [ref_82]
+    generic "Jan 8, 2026" [ref_83]
+   link [ref_84] href="/chicago-bears/audio-bears-v-packers-preview-vol-iii"
+    heading "Audio: Bears v. Packers Preview, Vol. III" [ref_85]
+    generic "Jan 7, 2026" [ref_86]
+ region [ref_87]
+  link [ref_88] href="/chicago-cubs/jed-hoyer-finally-traded-for-stud-starting-pitcher"
+   generic "Previous Article" [ref_89]
+   generic "Chicago Cubs News & Rumors" [ref_90]
+   heading "Jed Hoyer Finally Traded for Stud Starting Pitcher" [ref_91]
+  link [ref_92] href="/chicago-bears/audio-bears-v-packers-preview-vol-iv-you-with-the-stars-in-your-eyes"
+   generic "Next Article" [ref_93]
+   generic "Chicago Bears News & Rumors" [ref_94]
+   heading "Audio: Bears v. Packers Preview, Vol. IV: You with the Stars in Your Eyes" [ref_95]
+ region [ref_96]
+  region [ref_97]
+   heading "More from Chicago Bears News & Rumors" [ref_98]
+   article [ref_99]
+    link [ref_100] href="/chicago-bears/audio-bears-v-packers-preview-vol-v-prediction"
+     image "Audio: Bears v. Packers Preview, Vol. V: Prediction!" [ref_101]
+     link "Chicago Bears News & Rumors" [ref_102] href="/chicago-bears"
+    heading "Audio: Bears v. Packers Preview, Vol. V: Prediction!" [ref_103]
+     link "Audio: Bears v. Packers Preview, Vol. V: Prediction!" [ref_104] href="/chicago-bears/audio-bears-v-packers-preview-vol-v-prediction"
+    link [ref_105] href="/author/staff"
+    link "Staff" [ref_106] href="/author/staff"
+    generic "Jan 9, 2026" [ref_107]
+   article [ref_108]
+    link [ref_109] href="/chicago-bears/playoff-revenge-tour-3-ways-the-bears-can-finally-exorcise-the-green-bay-demons-this-saturday"
+     image "Playoff Revenge Tour: 3 Ways the Bears Can Finally Exorcise the Green Bay Demons This Saturday" [ref_110]
+     link "Chicago Bears News & Rumors" [ref_111] href="/chicago-bears"
+    heading "Playoff Revenge Tour: 3 Ways the Bears Can Finally Exorcise the Green Bay Demons This Saturday" [ref_112]
+     link "Playoff Revenge Tour: 3 Ways the Bears Can Finally Exorcise the Green Bay Demons This Saturday" [ref_113] href="/chicago-bears/playoff-revenge-tour-3-ways-the-bears-can-finally-exorcise-the-green-bay-demons-this-saturday"
+    generic "Alright, Bears fans. Pour yourself a drink. A stiff one. You're gonna need it. We're back here again" [ref_114]
+    link [ref_115] href="/author/staff"
+    link "Staff" [ref_116] href="/author/staff"
+    generic "Jan 8, 2026" [ref_117]
+   article [ref_118]
+    link [ref_119] href="/chicago-bears/audio-bears-v-packers-preview-vol-iv-you-with-the-stars-in-your-eyes"
+     image "Audio: Bears v. Packers Preview, Vol. IV: You with the Stars in Your Eyes" [ref_120]
+     link "Chicago Bears News & Rumors" [ref_121] href="/chicago-bears"
+    heading "Audio: Bears v. Packers Preview, Vol. IV: You with the Stars in Your Eyes" [ref_122]
+     link "Audio: Bears v. Packers Preview, Vol. IV: You with the Stars in Your Eyes" [ref_123] href="/chicago-bears/audio-bears-v-packers-preview-vol-iv-you-with-the-stars-in-your-eyes"
+    link [ref_124] href="/author/staff"
+    link "Staff" [ref_125] href="/author/staff"
+    generic "Jan 8, 2026" [ref_126]
+   article [ref_127]
+    link [ref_128] href="/chicago-bears/audio-bears-v-packers-preview-vol-iii"
+     image "Audio: Bears v. Packers Preview, Vol. III" [ref_129]
+     link "Chicago Bears News & Rumors" [ref_130] href="/chicago-bears"
+    heading "Audio: Bears v. Packers Preview, Vol. III" [ref_131]
+     link "Audio: Bears v. Packers Preview, Vol. III" [ref_132] href="/chicago-bears/audio-bears-v-packers-preview-vol-iii"
+    link [ref_133] href="/author/staff"
+    link "Staff" [ref_134] href="/author/staff"
+    generic "Jan 7, 2026" [ref_135]
+ button [ref_136]
+  generic "Tweet" [ref_137]
+ button [ref_138]
+  generic "Share" [ref_139]
+ button [ref_140]
+  generic "Link" [ref_141]
+ button [ref_142]
+  generic "Save" [ref_143]
+ button [ref_144]
+  generic "React" [ref_145]
+contentinfo [ref_146]
+ heading "ABOUT" [ref_147]
+ generic "Your source for Chicago sports news, analysis, and commentary. Covering Bears, Bulls, Cubs, White So" [ref_148]
+ link "Facebook" [ref_149] href="https://facebook.com/sportsmockery"
+ link "Twitter" [ref_150] href="https://twitter.com/sportsmockery"
+ link "Instagram" [ref_151] href="https://instagram.com/sportsmockery"
+ link "YouTube" [ref_152] href="https://youtube.com/sportsmockery"
+ heading "CATEGORIES" [ref_153]
+ list [ref_154]
+  listitem [ref_155]
+   link "Chicago Bears" [ref_156] href="/chicago-bears"
+  listitem [ref_157]
+   link "Chicago Bulls" [ref_158] href="/chicago-bulls"
+  listitem [ref_159]
+   link "Chicago Cubs" [ref_160] href="/chicago-cubs"
+  listitem [ref_161]
+   link "Chicago White Sox" [ref_162] href="/chicago-white-sox"
+  listitem [ref_163]
+   link "Chicago Blackhawks" [ref_164] href="/chicago-blackhawks"
+  listitem [ref_165]
+   link "Podcasts" [ref_166] href="/podcasts"
+ heading "CONNECT" [ref_167]
+ list [ref_168]
+  listitem [ref_169]
+   link "About Us" [ref_170] href="/about"
+  listitem [ref_171]
+   link "Contact" [ref_172] href="/contact"
+  listitem [ref_173]
+   link "Advertise" [ref_174] href="/contact"
+  listitem [ref_175]
+   link "Privacy Policy" [ref_176] href="/privacy"
+  listitem [ref_177]
+   link "Terms of Service" [ref_178] href="/privacy"
+ generic "© 2026 Sports Mockery. All Rights Reserved." [ref_179]
+button "Scroll to top" [ref_180]
+generic "We use cookies to enhance your experience. By continuing to visit this site you agree to our use of " [ref_181]
+ link "Learn more" [ref_182] href="/privacy"
+button "Decline" [ref_183]
+button "Accept" [ref_184]
+
+Viewport: 1512x775

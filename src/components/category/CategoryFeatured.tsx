@@ -65,12 +65,12 @@ export default function CategoryFeatured({
                 Featured
               </span>
 
-              <h2 className="mb-2 font-heading text-2xl font-black leading-tight text-white transition-colors group-hover:text-[#FF6666] sm:text-3xl lg:text-4xl">
+              <h2 className="mb-2 font-heading text-lg font-black leading-tight text-white transition-colors group-hover:text-[#FF6666] sm:text-xl md:text-2xl lg:text-3xl">
                 {mainPost.title}
               </h2>
 
               {mainPost.excerpt && (
-                <p className="mb-4 line-clamp-2 text-sm text-zinc-300 sm:text-base">
+                <p className="mb-4 line-clamp-2 text-xs text-zinc-300 sm:text-sm md:text-base">
                   {mainPost.excerpt}
                 </p>
               )}

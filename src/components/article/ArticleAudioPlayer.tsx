@@ -66,52 +66,69 @@ export function ArticleAudioPlayer({
   const [selectedVoice, setSelectedVoice] = useState<VoiceProfileId>('will');
   const [showVoiceSelector, setShowVoiceSelector] = useState(false);
 
-  const audioRef = useRef<HTMLAudioElement | null>(null);
+  // Use ref to DOM audio element for iOS compatibility
+  const audioRef = useRef<HTMLAudioElement>(null);
 
   // Build audio URL with voice parameter
   const getAudioUrl = useCallback((slug: string, voice: VoiceProfileId) => {
     return `/api/audio/${encodeURIComponent(slug)}?voice=${voice}`;
   }, []);
 
-  // Initialize audio element
-  useEffect(() => {
-    const audio = new Audio();
-    audioRef.current = audio;
+  // Update Media Session metadata for lock screen controls
+  const updateMediaSession = useCallback((article: ArticleMeta) => {
+    if ('mediaSession' in navigator) {
+      navigator.mediaSession.metadata = new MediaMetadata({
+        title: article.title,
+        artist: 'Sports Mockery',
+        album: article.team || 'Chicago Sports',
+        artwork: article.featuredImage ? [
+          { src: article.featuredImage, sizes: '512x512', type: 'image/jpeg' }
+        ] : []
+      });
+    }
+  }, []);
 
-    audio.addEventListener('loadstart', () => setIsLoading(true));
-    audio.addEventListener('canplay', () => setIsLoading(false));
-    audio.addEventListener('playing', () => {
-      setIsPlaying(true);
-      setIsLoading(false);
-    });
-    audio.addEventListener('pause', () => setIsPlaying(false));
-    audio.addEventListener('ended', () => {
-      setIsPlaying(false);
-      setProgress(0);
-      // Auto-advance to next article
-      loadNextArticle();
-    });
-    audio.addEventListener('error', (e) => {
-      console.error('Audio error:', e);
-      setError('Failed to load audio. Please try again.');
-      setIsLoading(false);
-      setIsPlaying(false);
-    });
-    audio.addEventListener('timeupdate', () => {
-      if (audio.duration) {
-        setProgress((audio.currentTime / audio.duration) * 100);
+  // Set up Media Session action handlers for lock screen controls
+  useEffect(() => {
+    if (!('mediaSession' in navigator)) return;
+
+    const handlePlay = () => {
+      audioRef.current?.play();
+    };
+    const handlePause = () => {
+      audioRef.current?.pause();
+    };
+    const handleSeekBackward = () => {
+      if (audioRef.current) {
+        audioRef.current.currentTime = Math.max(0, audioRef.current.currentTime - 10);
       }
-    });
-    audio.addEventListener('durationchange', () => {
-      setDuration(audio.duration);
-    });
+    };
+    const handleSeekForward = () => {
+      if (audioRef.current) {
+        audioRef.current.currentTime = Math.min(
+          audioRef.current.duration || 0,
+          audioRef.current.currentTime + 10
+        );
+      }
+    };
+
+    navigator.mediaSession.setActionHandler('play', handlePlay);
+    navigator.mediaSession.setActionHandler('pause', handlePause);
+    navigator.mediaSession.setActionHandler('seekbackward', handleSeekBackward);
+    navigator.mediaSession.setActionHandler('seekforward', handleSeekForward);
 
     return () => {
-      audio.pause();
-      audio.src = '';
+      navigator.mediaSession.setActionHandler('play', null);
+      navigator.mediaSession.setActionHandler('pause', null);
+      navigator.mediaSession.setActionHandler('seekbackward', null);
+      navigator.mediaSession.setActionHandler('seekforward', null);
     };
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  // Initialize media session with current article
+  useEffect(() => {
+    updateMediaSession(playlist.currentArticle);
+  }, [playlist.currentArticle, updateMediaSession]);
 
   const handleModeChange = (mode: NextArticleMode) => {
     setPlaylist((prev) => ({ ...prev, mode }));
@@ -239,8 +256,62 @@ export function ArticleAudioPlayer({
   const currentVoiceProfile = VOICE_PROFILES.find(v => v.id === selectedVoice) || VOICE_PROFILES[0];
   const currentTime = audioRef.current?.currentTime || 0;
 
+  // Audio event handlers for the DOM element
+  const handleLoadStart = () => setIsLoading(true);
+  const handleCanPlay = () => setIsLoading(false);
+  const handlePlaying = () => {
+    setIsPlaying(true);
+    setIsLoading(false);
+    if ('mediaSession' in navigator) {
+      navigator.mediaSession.playbackState = 'playing';
+    }
+  };
+  const handlePause = () => {
+    setIsPlaying(false);
+    if ('mediaSession' in navigator) {
+      navigator.mediaSession.playbackState = 'paused';
+    }
+  };
+  const handleEnded = () => {
+    setIsPlaying(false);
+    setProgress(0);
+    loadNextArticle();
+  };
+  const handleAudioError = () => {
+    setError('Failed to load audio. Please try again.');
+    setIsLoading(false);
+    setIsPlaying(false);
+  };
+  const handleTimeUpdate = () => {
+    const audio = audioRef.current;
+    if (audio && audio.duration) {
+      setProgress((audio.currentTime / audio.duration) * 100);
+    }
+  };
+  const handleDurationChange = () => {
+    const audio = audioRef.current;
+    if (audio) {
+      setDuration(audio.duration);
+    }
+  };
+
   return (
     <div className="border border-zinc-200 dark:border-zinc-700 p-4 rounded-lg mt-4 bg-zinc-50 dark:bg-zinc-800/50">
+      {/* Hidden audio element for iOS background playback compatibility */}
+      <audio
+        ref={audioRef}
+        preload="metadata"
+        playsInline
+        onLoadStart={handleLoadStart}
+        onCanPlay={handleCanPlay}
+        onPlaying={handlePlaying}
+        onPause={handlePause}
+        onEnded={handleEnded}
+        onError={handleAudioError}
+        onTimeUpdate={handleTimeUpdate}
+        onDurationChange={handleDurationChange}
+        className="hidden"
+      />
       <div className="flex justify-between items-center gap-3 mb-3 text-sm">
         <span className="font-medium text-zinc-900 dark:text-white flex items-center gap-2">
           <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -327,7 +398,7 @@ export function ArticleAudioPlayer({
           </button>
         </div>
 
-        <div className="flex gap-2 items-center">
+        <div className="flex gap-2 items-center flex-wrap">
           {/* Voice selector */}
           <div className="relative">
             <button
@@ -343,29 +414,50 @@ export function ArticleAudioPlayer({
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
               </svg>
             </button>
+            {/* Voice selector - mobile: bottom sheet, desktop: dropdown */}
             {showVoiceSelector && (
-              <div className="absolute right-0 mt-1 w-52 bg-white dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-lg shadow-lg z-10">
-                <div className="p-2">
-                  <div className="text-xs font-medium text-zinc-500 dark:text-zinc-400 px-2 py-1 mb-1">
-                    Select Voice
+              <>
+                {/* Mobile overlay backdrop */}
+                <div
+                  className="fixed inset-0 bg-black/50 z-40 md:hidden"
+                  onClick={() => setShowVoiceSelector(false)}
+                />
+                {/* Mobile: bottom sheet, Desktop: dropdown */}
+                <div className="fixed inset-x-0 bottom-0 z-50 md:absolute md:inset-auto md:right-0 md:bottom-auto md:mt-1 w-full md:w-52 bg-white dark:bg-zinc-800 border-t md:border border-zinc-200 dark:border-zinc-700 md:rounded-lg shadow-lg max-h-[50vh] md:max-h-none overflow-y-auto">
+                  <div className="p-3 md:p-2">
+                    <div className="flex justify-between items-center md:block mb-2 md:mb-1">
+                      <div className="text-sm md:text-xs font-medium text-zinc-700 dark:text-zinc-300 md:text-zinc-500 md:dark:text-zinc-400 px-2 py-1">
+                        Select Voice
+                      </div>
+                      {/* Close button for mobile */}
+                      <button
+                        type="button"
+                        onClick={() => setShowVoiceSelector(false)}
+                        className="md:hidden p-1 rounded-full hover:bg-zinc-100 dark:hover:bg-zinc-700"
+                      >
+                        <svg className="w-5 h-5 text-zinc-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                      </button>
+                    </div>
+                    {VOICE_PROFILES.map((profile) => (
+                      <button
+                        key={profile.id}
+                        type="button"
+                        onClick={() => handleVoiceChange(profile.id)}
+                        className={`w-full text-left px-3 md:px-2 py-3 md:py-1.5 rounded text-sm md:text-xs transition-colors ${
+                          selectedVoice === profile.id
+                            ? 'bg-red-50 dark:bg-red-900/20 text-[#bc0000] dark:text-red-400'
+                            : 'hover:bg-zinc-100 dark:hover:bg-zinc-700 text-zinc-700 dark:text-zinc-300'
+                        }`}
+                      >
+                        <div className="font-medium">{profile.name}</div>
+                        <div className="text-zinc-500 dark:text-zinc-400">{profile.description}</div>
+                      </button>
+                    ))}
                   </div>
-                  {VOICE_PROFILES.map((profile) => (
-                    <button
-                      key={profile.id}
-                      type="button"
-                      onClick={() => handleVoiceChange(profile.id)}
-                      className={`w-full text-left px-2 py-1.5 rounded text-xs transition-colors ${
-                        selectedVoice === profile.id
-                          ? 'bg-red-50 dark:bg-red-900/20 text-[#bc0000] dark:text-red-400'
-                          : 'hover:bg-zinc-100 dark:hover:bg-zinc-700 text-zinc-700 dark:text-zinc-300'
-                      }`}
-                    >
-                      <div className="font-medium">{profile.name}</div>
-                      <div className="text-zinc-500 dark:text-zinc-400">{profile.description}</div>
-                    </button>
-                  ))}
                 </div>
-              </div>
+              </>
             )}
           </div>
 

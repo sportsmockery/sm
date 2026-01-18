@@ -46,6 +46,12 @@ export async function GET(request: NextRequest) {
           `${baseUrl}/api/bears/stats?type=game&player_id=12345`,
         ],
       },
+      syncHeadshots: {
+        url: `${baseUrl}/api/bears/sync-headshots`,
+        description: 'Sync player headshot photos from ESPN',
+        method: 'POST to sync, GET to view roster',
+        source: 'sportsmockery.com roster + ESPN CDN',
+      },
     },
     tables: [
       'bears_games_master',

@@ -24,6 +24,7 @@ import { stripDuplicateFeaturedImage, calculateReadTime, getContextLabel } from 
 import { buildAutoLinkContextForPost, applyAutoLinksToHtml } from '@/lib/autolink'
 import { getArticleAudioInfo } from '@/lib/audioPlayer'
 import { ArticleAudioPlayer } from '@/components/article/ArticleAudioPlayer'
+import ArticleContentWithEmbeds from '@/components/article/ArticleContentWithEmbeds'
 
 interface ArticlePageProps {
   params: Promise<{
@@ -285,9 +286,9 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
                   {categoryData?.name || category}
                 </Link>
 
-                {/* Title per spec: 36-42px, Montserrat 700-900, line-height 1.2 - no text-transform */}
+                {/* Title per spec: 28-36px, Montserrat 700-900, line-height 1.2 - no text-transform */}
                 <h1
-                  className="mb-4 text-[36px] lg:text-[42px] font-black leading-[1.2] text-white"
+                  className="mb-4 text-[24px] sm:text-[28px] lg:text-[36px] font-black leading-[1.2] text-white max-w-4xl"
                   style={{ fontFamily: "'Montserrat', sans-serif", letterSpacing: '-0.5px' }}
                 >
                   {post.title}
@@ -375,9 +376,9 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
                 {categoryData?.name || category}
               </Link>
 
-              {/* Title per spec: 36-42px, Montserrat 700-900 - no text-transform */}
+              {/* Title per spec: 28-36px, Montserrat 700-900 - no text-transform */}
               <h1
-                className="mb-4 text-[36px] lg:text-[42px] font-black leading-[1.2] text-white"
+                className="mb-4 text-[24px] sm:text-[28px] lg:text-[36px] font-black leading-[1.2] text-white max-w-4xl"
                 style={{ fontFamily: "'Montserrat', sans-serif", letterSpacing: '-0.5px' }}
               >
                 {post.title}
@@ -439,10 +440,9 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
                 )}
 
                 {/* Article body content - using globals.css .article-body styles */}
-                {/* Auto-linked content with duplicate featured image stripped */}
-                <div
-                  className="article-body"
-                  dangerouslySetInnerHTML={{ __html: stripDuplicateFeaturedImage(autoLinkedContent, post.featured_image) }}
+                {/* Auto-linked content with duplicate featured image stripped, Twitter embeds processed */}
+                <ArticleContentWithEmbeds
+                  content={stripDuplicateFeaturedImage(autoLinkedContent, post.featured_image)}
                 />
 
                 {/* Share buttons placed after article body per spec */}

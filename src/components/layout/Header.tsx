@@ -6,59 +6,14 @@ import Image from 'next/image'
 import { useTheme } from '@/contexts/ThemeContext'
 import BearsStickyBar from './BearsStickyBar'
 
-// Bears submenu items
-const bearsSubmenu = [
-  {
-    name: 'Roster',
-    href: '/chicago-bears/roster',
-    icon: (
-      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
-      </svg>
-    ),
-    description: 'Full team roster with player profiles',
-  },
-  {
-    name: 'Scores',
-    href: '/chicago-bears/scores',
-    icon: (
-      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-      </svg>
-    ),
-    description: 'Recent game results and box scores',
-  },
-  {
-    name: 'Schedule',
-    href: '/chicago-bears/schedule',
-    icon: (
-      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-      </svg>
-    ),
-    description: '2025 season schedule and results',
-  },
-  {
-    name: 'Stats',
-    href: '/chicago-bears/stats',
-    icon: (
-      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 3.055A9.001 9.001 0 1020.945 13H11V3.055z" />
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20.488 9H15V3.512A9.025 9.025 0 0120.488 9z" />
-      </svg>
-    ),
-    description: 'Team and player statistics',
-  },
-]
-
-// Navigation items per design spec
+// Navigation items - proper casing (not all caps) per spec
 const navItems = [
-  { name: 'HOME', href: '/' },
-  { name: 'BEARS', href: '/chicago-bears', hasSubmenu: true },
-  { name: 'BULLS', href: '/chicago-bulls' },
-  { name: 'CUBS', href: '/chicago-cubs' },
-  { name: 'WHITE SOX', href: '/chicago-white-sox' },
-  { name: 'BLACKHAWKS', href: '/chicago-blackhawks' },
+  { name: 'Home', href: '/' },
+  { name: 'Bears', href: '/chicago-bears' },
+  { name: 'Bulls', href: '/chicago-bulls' },
+  { name: 'Cubs', href: '/chicago-cubs' },
+  { name: 'White Sox', href: '/chicago-white-sox' },
+  { name: 'Blackhawks', href: '/chicago-blackhawks' },
 ]
 
 const moreItems = [
@@ -71,13 +26,10 @@ const moreItems = [
 export default function Header() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const [moreMenuOpen, setMoreMenuOpen] = useState(false)
-  const [bearsMenuOpen, setBearsMenuOpen] = useState(false)
-  const [bearsExpanded, setBearsExpanded] = useState(false) // For mobile
   const [searchOpen, setSearchOpen] = useState(false)
   const [searchQuery, setSearchQuery] = useState('')
   const searchInputRef = useRef<HTMLInputElement>(null)
   const moreMenuRef = useRef<HTMLDivElement>(null)
-  const bearsMenuRef = useRef<HTMLDivElement>(null)
   const { theme, toggleTheme } = useTheme()
 
   // Focus search input when opened
@@ -93,9 +45,6 @@ export default function Header() {
       if (moreMenuRef.current && !moreMenuRef.current.contains(e.target as Node)) {
         setMoreMenuOpen(false)
       }
-      if (bearsMenuRef.current && !bearsMenuRef.current.contains(e.target as Node)) {
-        setBearsMenuOpen(false)
-      }
     }
     document.addEventListener('mousedown', handleClickOutside)
     return () => document.removeEventListener('mousedown', handleClickOutside)
@@ -108,7 +57,6 @@ export default function Header() {
         setMobileMenuOpen(false)
         setSearchOpen(false)
         setMoreMenuOpen(false)
-        setBearsMenuOpen(false)
       }
     }
     document.addEventListener('keydown', handleEscape)
@@ -127,7 +75,7 @@ export default function Header() {
       {/* Top Header Bar - Logo and Social */}
       <div className="border-b border-[#e0e0e0] dark:border-[#27272a] bg-white dark:bg-[#0a0a0b]">
         <div className="max-w-[1110px] mx-auto px-4">
-          <div className="flex items-center justify-between h-[60px]">
+          <div className="flex items-center justify-between h-[52px]">
             {/* Left: Social icons */}
             <div className="flex items-center gap-4 w-[100px]">
               <a
@@ -221,7 +169,7 @@ export default function Header() {
       {/* Main Navigation Bar - with red underline */}
       <nav className="border-b-[3px] border-[#bc0000] bg-white dark:bg-[#0a0a0b]">
         <div className="max-w-[1110px] mx-auto px-4">
-          <div className="flex items-center justify-between h-[50px]">
+          <div className="flex items-center justify-between h-[44px]">
             {/* Mobile menu button */}
             <button
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
@@ -240,105 +188,24 @@ export default function Header() {
             {/* Desktop Navigation */}
             <div className="hidden lg:flex items-center gap-0">
               {navItems.map((item) => (
-                item.hasSubmenu ? (
-                  // Bears with dropdown
-                  <div key={item.name} className="relative" ref={bearsMenuRef}>
-                    <button
-                      onMouseEnter={() => setBearsMenuOpen(true)}
-                      onFocus={() => setBearsMenuOpen(true)}
-                      onClick={() => setBearsMenuOpen(!bearsMenuOpen)}
-                      className="flex items-center gap-1 px-4 py-4 text-[14px] font-bold text-[#222] dark:text-white uppercase tracking-[0.5px] hover:text-[#C83200] transition-colors"
-                      style={{ fontFamily: "'Montserrat', sans-serif" }}
-                    >
-                      {item.name}
-                      <svg className={`w-3 h-3 transition-transform ${bearsMenuOpen ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                      </svg>
-                    </button>
-
-                    {/* Bears Dropdown Panel */}
-                    {bearsMenuOpen && (
-                      <div
-                        className="absolute top-full left-0 mt-0 w-[280px] bg-[var(--bg-elevated)] border border-[var(--border-subtle)] rounded-xl shadow-md p-3 z-[200]"
-                        onMouseLeave={() => setBearsMenuOpen(false)}
-                      >
-                        {/* Quick link to main Bears page */}
-                        <Link
-                          href="/chicago-bears"
-                          onClick={() => setBearsMenuOpen(false)}
-                          className="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-[var(--bg-hover)] transition-colors mb-1"
-                        >
-                          <span className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ background: 'linear-gradient(135deg, #0B162A 0%, #C83200 100%)' }}>
-                            <svg className="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 24 24">
-                              <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" />
-                            </svg>
-                          </span>
-                          <div>
-                            <span className="block text-[14px] font-bold text-[var(--text-primary)]">Bears Hub</span>
-                            <span className="block text-[11px] text-[var(--text-muted)]">News, analysis & more</span>
-                          </div>
-                        </Link>
-
-                        <div className="h-px bg-[var(--border-subtle)] my-2" />
-
-                        {bearsSubmenu.map((subItem) => (
-                          <Link
-                            key={subItem.name}
-                            href={subItem.href}
-                            onClick={() => setBearsMenuOpen(false)}
-                            className="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-[var(--bg-hover)] transition-colors"
-                          >
-                            <span className="w-8 h-8 rounded-lg bg-[#0B162A]/10 dark:bg-[#C83200]/10 flex items-center justify-center text-[#C83200]">
-                              {subItem.icon}
-                            </span>
-                            <div>
-                              <span className="block text-[14px] font-bold text-[var(--text-primary)]">{subItem.name}</span>
-                              <span className="block text-[11px] text-[var(--text-muted)]">{subItem.description}</span>
-                            </div>
-                          </Link>
-                        ))}
-
-                        <div className="h-px bg-[var(--border-subtle)] my-2" />
-
-                        {/* Player Profiles link */}
-                        <Link
-                          href="/chicago-bears-player"
-                          onClick={() => setBearsMenuOpen(false)}
-                          className="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-[var(--bg-hover)] transition-colors"
-                        >
-                          <span className="w-8 h-8 rounded-lg bg-[#0B162A]/10 dark:bg-[#C83200]/10 flex items-center justify-center text-[#C83200]">
-                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                            </svg>
-                          </span>
-                          <div>
-                            <span className="block text-[14px] font-bold text-[var(--text-primary)]">Player Profiles</span>
-                            <span className="block text-[11px] text-[var(--text-muted)]">Search and explore all players</span>
-                          </div>
-                        </Link>
-                      </div>
-                    )}
-                  </div>
-                ) : (
-                  <Link
-                    key={item.name}
-                    href={item.href}
-                    className="px-4 py-4 text-[14px] font-bold text-[#222] dark:text-white uppercase tracking-[0.5px] hover:text-[#bc0000] transition-colors"
-                    style={{ fontFamily: "'Montserrat', sans-serif" }}
-                  >
-                    {item.name}
-                  </Link>
-                )
+                <Link
+                  key={item.name}
+                  href={item.href}
+                  className="px-4 py-4 text-[14px] font-bold text-[#222] dark:text-white hover:text-[#bc0000] transition-colors"
+                  style={{ fontFamily: "'Montserrat', sans-serif" }}
+                >
+                  {item.name}
+                </Link>
               ))}
 
               {/* MORE dropdown */}
               <div className="relative" ref={moreMenuRef}>
                 <button
                   onClick={() => setMoreMenuOpen(!moreMenuOpen)}
-                  className="flex items-center gap-1 px-4 py-4 text-[14px] font-bold text-[#222] dark:text-white uppercase tracking-[0.5px] hover:text-[#bc0000] transition-colors"
+                  className="flex items-center gap-1 px-4 py-4 text-[14px] font-bold text-[#222] dark:text-white hover:text-[#bc0000] transition-colors"
                   style={{ fontFamily: "'Montserrat', sans-serif" }}
                 >
-                  MORE
+                  More
                   <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
                   </svg>
@@ -408,79 +275,15 @@ export default function Header() {
         <div className="lg:hidden bg-white dark:bg-[#0a0a0b] border-b border-[#e0e0e0] dark:border-[#27272a]">
           <div className="max-w-[1110px] mx-auto px-4 py-4">
             {navItems.map((item) => (
-              item.hasSubmenu ? (
-                // Bears with expandable submenu
-                <div key={item.name} className="border-b border-[#e0e0e0] dark:border-[#27272a]">
-                  <button
-                    onClick={() => setBearsExpanded(!bearsExpanded)}
-                    className="w-full flex items-center justify-between py-3 text-[14px] font-bold text-[#222] dark:text-white uppercase tracking-[0.5px] hover:text-[#C83200]"
-                    style={{ fontFamily: "'Montserrat', sans-serif" }}
-                  >
-                    {item.name}
-                    <svg
-                      className={`w-4 h-4 transition-transform ${bearsExpanded ? 'rotate-180' : ''}`}
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                    </svg>
-                  </button>
-
-                  {/* Expanded submenu */}
-                  {bearsExpanded && (
-                    <div className="pb-3 pl-4 space-y-1">
-                      <Link
-                        href="/chicago-bears"
-                        onClick={() => setMobileMenuOpen(false)}
-                        className="flex items-center gap-3 py-2 text-[14px] text-[var(--text-primary)] hover:text-[#C83200]"
-                      >
-                        <span className="w-6 h-6 rounded flex items-center justify-center" style={{ background: 'linear-gradient(135deg, #0B162A 0%, #C83200 100%)' }}>
-                          <svg className="w-3 h-3 text-white" fill="currentColor" viewBox="0 0 24 24">
-                            <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" />
-                          </svg>
-                        </span>
-                        Bears Hub
-                      </Link>
-                      {bearsSubmenu.map((subItem) => (
-                        <Link
-                          key={subItem.name}
-                          href={subItem.href}
-                          onClick={() => setMobileMenuOpen(false)}
-                          className="flex items-center gap-3 py-2 text-[14px] text-[var(--text-secondary)] hover:text-[#C83200]"
-                        >
-                          <span className="w-6 h-6 rounded bg-[#0B162A]/10 dark:bg-[#C83200]/10 flex items-center justify-center text-[#C83200]">
-                            {subItem.icon}
-                          </span>
-                          {subItem.name}
-                        </Link>
-                      ))}
-                      <Link
-                        href="/chicago-bears-player"
-                        onClick={() => setMobileMenuOpen(false)}
-                        className="flex items-center gap-3 py-2 text-[14px] text-[var(--text-secondary)] hover:text-[#C83200]"
-                      >
-                        <span className="w-6 h-6 rounded bg-[#0B162A]/10 dark:bg-[#C83200]/10 flex items-center justify-center text-[#C83200]">
-                          <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                          </svg>
-                        </span>
-                        Player Profiles
-                      </Link>
-                    </div>
-                  )}
-                </div>
-              ) : (
-                <Link
-                  key={item.name}
-                  href={item.href}
-                  onClick={() => setMobileMenuOpen(false)}
-                  className="block py-3 text-[14px] font-bold text-[#222] dark:text-white uppercase tracking-[0.5px] hover:text-[#bc0000] border-b border-[#e0e0e0] dark:border-[#27272a] last:border-0"
-                  style={{ fontFamily: "'Montserrat', sans-serif" }}
-                >
-                  {item.name}
-                </Link>
-              )
+              <Link
+                key={item.name}
+                href={item.href}
+                onClick={() => setMobileMenuOpen(false)}
+                className="block py-3 text-[14px] font-bold text-[#222] dark:text-white hover:text-[#bc0000] border-b border-[#e0e0e0] dark:border-[#27272a] last:border-0"
+                style={{ fontFamily: "'Montserrat', sans-serif" }}
+              >
+                {item.name}
+              </Link>
             ))}
             {moreItems.map((item) => (
               <Link

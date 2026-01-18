@@ -25,18 +25,19 @@ export default function ReadingProgressBar({
     return () => window.removeEventListener('scroll', updateProgress)
   }, [])
 
+  // Calculate header height: 52px (header) + 44px (nav) + 36-48px (Bears bar) = ~132-144px
+  // Using CSS variable to ensure it's positioned correctly under header
+  const headerHeight = 132 // Approximate: 52 + 44 + 36
+
   return (
     <div
-      className={`fixed left-0 top-16 z-40 h-1 w-full bg-zinc-200 dark:bg-zinc-800 ${className}`}
+      id="article-progress"
+      className={`fixed left-0 right-0 z-[180] h-[2px] bg-transparent ${className}`}
+      style={{ top: `${headerHeight}px` }}
     >
       <div
-        className="h-full bg-gradient-to-r from-[#8B0000] via-[#FF0000] to-[#FF6666] transition-all duration-150 ease-out"
+        className="h-full bg-[#bc0000] transition-all duration-100 ease-out"
         style={{ width: `${progress}%` }}
-      />
-      {/* Glow effect at the progress tip */}
-      <div
-        className="absolute top-0 h-full w-8 bg-gradient-to-r from-transparent to-[#FF6666]/50 blur-sm transition-all duration-150 ease-out"
-        style={{ left: `calc(${progress}% - 2rem)` }}
       />
     </div>
   )

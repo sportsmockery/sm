@@ -848,3 +848,213 @@ New role added to the user roles system for community governance.
 **Files Modified:** 6 files
 **Build Status:** Success
 **Deployed:** https://test.sportsmockery.com
+
+---
+
+### 2026-01-17 - Bears Data Sync System (ESPN + MySportsFeeds)
+
+**Added:**
+
+*ESPN API Integration (Primary Data Source):*
+- `src/lib/espn-api.ts` - ESPN NFL API client:
+  - `fetchESPNScoreboard()` - Fetches Bears schedule and scores
+  - `fetchESPNGameSummary()` - Detailed game stats
+  - `fetchLiveBearsGame()` - Live game detection and score updates
+  - `getCurrentNFLSeason()` - Season calculation helper
+  - Bears team ID: 3
+  - Base URL: `https://site.api.espn.com/apis/site/v2/sports/football/nfl`
+
+*MySportsFeeds API Integration (Backup Source):*
+- `src/lib/mysportsfeeds-api.ts` - Backup API client:
+  - `fetchMSFBearsSchedule()` - Schedule fetcher
+  - `fetchMSFLiveGame()` - Live game data
+  - Only used when ESPN fails
+  - Requires `MYSPORTSFEEDS_API_KEY` env var
+
+*Bears Sync Service:*
+- `src/lib/bears-sync.ts` - Sync orchestration layer:
+  - `syncBearsSchedule()` - Hourly schedule sync
+  - `syncLiveGame()` - Real-time live game updates
+  - `syncRecentGames()` - Quick sync for recent/upcoming games
+  - `hasLiveGame()` - Live game detection
+  - `getNextGame()` - Next game lookup
+  - **Rules enforced:**
+    - DO NOT delete any data from datalab tables
+    - DO NOT add null values (only update with actual data)
+    - DO NOT change table format
+    - ESPN is PRIMARY, MySportsFeeds is BACKUP
+
+*API Routes:*
+- `src/app/api/bears/sync/route.ts` - Manual sync trigger:
+  - POST - Trigger full schedule sync
+  - GET - Check sync status and live game state
+
+- `src/app/api/cron/bears-sync/route.ts` - Hourly cron job:
+  - Runs every hour at minute 0 (`0 * * * *`)
+  - Syncs Bears schedule from ESPN/MySportsFeeds to datalab
+  - Protected with CRON_SECRET verification
+
+- `src/app/api/cron/bears-live/route.ts` - Live game cron job:
+  - Runs every minute (`* * * * *`)
+  - Smart polling: Only active during game windows
+  - Game window: 1 hour before to 4 hours after kickoff
+  - Updates scores, quarter, clock, possession in real-time
+
+**Changed:**
+
+*Ticker Endpoint - Accurate Record Display:*
+- `src/app/api/bears/ticker/route.ts` - Updated to query `bears_season_record` table:
+  - Record format: "11-6, 1-0 Playoffs" (NEVER combined as "12-5")
+  - Regular season and postseason records kept separate
+  - Next game info from `bears_season_record` table
+  - Live game detection based on game window
+  - All times in Central Time (CT)
+  - `formatTimeCT()` helper for proper CT formatting
+
+*BearsStickyBar - Real-Time Polling:*
+- `src/components/layout/BearsStickyBar.tsx` - Dynamic polling intervals:
+  - **10 seconds** during live Bears games
+  - **5 minutes** during non-game times
+  - Automatic interval switching when game state changes
+  - Live score display: "CHI 17 - 14 DET Q3 5:42"
+  - Pulsing red "LIVE" indicator
+  - Quarter and clock display
+
+*Infrastructure:*
+- `vercel.json` - Added cron configuration:
+  ```json
+  {
+    "crons": [
+      {"path": "/api/cron/bears-sync", "schedule": "0 * * * *"},
+      {"path": "/api/cron/bears-live", "schedule": "* * * * *"}
+    ]
+  }
+  ```
+
+- `src/middleware.ts` - Added public paths:
+  - `/api/bears` - Bears data API
+  - `/api/cron` - Vercel cron jobs
+
+*Task Tracking:*
+- `tasklist/tasksv8.md` - Bears Data Sync System task tracking
+
+**Data Flow:**
+1. ESPN API (primary) or MySportsFeeds (backup) fetch game data
+2. `bears-sync.ts` processes and validates data
+3. Data upserted to `bears_games_master` table in datalab
+4. `/api/bears/ticker` queries `bears_season_record` and `bears_games_master`
+5. `BearsStickyBar` polls ticker endpoint (10s live / 5min normal)
+6. UI displays accurate record, next game, and live scores
+
+**Files Created:** 6 files
+- `src/lib/espn-api.ts`
+- `src/lib/mysportsfeeds-api.ts`
+- `src/lib/bears-sync.ts`
+- `src/app/api/bears/sync/route.ts`
+- `src/app/api/cron/bears-sync/route.ts`
+- `src/app/api/cron/bears-live/route.ts`
+
+**Files Modified:** 4 files
+- `src/app/api/bears/ticker/route.ts`
+- `src/components/layout/BearsStickyBar.tsx`
+- `vercel.json`
+- `src/middleware.ts`
+
+**Build Status:** Success
+**Deployed:** https://test.sportsmockery.com
+
+---
+
+### 2026-01-18 - Critical Bug Fixes & Bears AI Chat Bot
+
+**Added:**
+
+*Twitter/X Embed Support:*
+- `src/components/article/TwitterEmbed.tsx` - Individual Twitter embed component using Twitter widgets.js
+- `src/components/article/ArticleContentWithEmbeds.tsx` - Content processor for embeds and shortcodes
+- Processes Twitter URLs (twitter.com and x.com) in article content
+- Loads Twitter widgets.js dynamically for proper oEmbed rendering
+- Normalizes x.com URLs to twitter.com for widget compatibility
+
+*Bears AI Chat Bot:*
+- `src/components/bears/BearsAIChat.tsx` - Full chat interface with message history
+- `src/components/bears/BearsAIButton.tsx` - Floating AI button (shows on Bears pages and homepage)
+- `src/app/api/bears/chat/route.ts` - API endpoint using Anthropic Claude SDK
+- Suggested questions for quick interaction
+- Streaming-style UI with loading indicators
+
+*Bears Alerts Subscription Page:*
+- `src/app/bears/subscribe/page.tsx` - Email subscription form with preferences
+- Notification types: game alerts, breaking news, injury updates, weekly digest
+- Form validation and success state
+
+*Icon Shortcode Support:*
+- Added `[icon name=icon-star]` shortcode parsing to `src/lib/shortcodes.ts`
+- 25+ icon mappings including sports icons (🏈🏀⚾🏒), UI elements (★❤✓✕), and common symbols
+- `getIconHtml()` and `processIconShortcodes()` functions
+- CSS styles for `.shortcode-icon` in globals.css
+
+**Fixed:**
+
+*iPhone Audio Lock Screen (Task 2):*
+- `src/components/article/ArticleAudioPlayer.tsx` - Complete rewrite
+- Changed from detached `new Audio()` to DOM-attached `<audio>` element with `playsInline`
+- Added Media Session API for lock screen controls (play/pause/seek)
+- Audio now continues playing when iPhone screen is locked
+
+*Audio Voice Selector Mobile (Task 3):*
+- Voice selection now displays as bottom sheet on mobile devices
+- Added backdrop overlay and close button
+- Dropdown still works on desktop
+
+*Search Page Buttons (Task 4):*
+- `src/components/search/PopularSearches.tsx` - Fixed z-index and pointer events
+- `src/components/search/RecentSearches.tsx` - Fixed z-index and pointer events
+- Added `relative z-10` to button containers
+- Added explicit `type="button"` and `cursor-pointer` classes
+
+*Alerts Button (Task 5):*
+- Header alerts bell icon now links to `/bears/subscribe` instead of being non-functional
+
+*Text Size Over Images (Task 7):*
+- `src/components/category/CategoryFeatured.tsx` - Reduced headline sizes on mobile/tablet
+- `src/app/[category]/[slug]/page.tsx` - Reduced article header text sizes
+- Added `max-w-4xl` constraint for better readability
+
+*Team Banner Alignment (Task 8):*
+- `src/components/category/CategoryGrid.tsx` - Restructured card layout
+- Category badges now consistently positioned at bottom-left of images
+
+*Mobile Footer (Task 10):*
+- `src/components/layout/Footer.tsx` - Mobile-responsive redesign
+- Reduced padding, side-by-side Categories/Connect columns on mobile
+- Added `mt-auto` for proper footer positioning
+
+**Changed:**
+- Article content rendering migrated to `ArticleContentWithEmbeds` client component
+- Audio player architecture switched to DOM-attached audio element for iOS compatibility
+- Main layout now includes BearsAIButton component
+
+**Files Created:** 7 files
+- `src/components/article/TwitterEmbed.tsx`
+- `src/components/article/ArticleContentWithEmbeds.tsx`
+- `src/components/bears/BearsAIChat.tsx`
+- `src/components/bears/BearsAIButton.tsx`
+- `src/app/api/bears/chat/route.ts`
+- `src/app/bears/subscribe/page.tsx`
+- `tasklist/tasksv9.md`
+
+**Files Modified:** 11 files
+- `src/components/article/ArticleAudioPlayer.tsx`
+- `src/components/search/PopularSearches.tsx`
+- `src/components/search/RecentSearches.tsx`
+- `src/components/category/CategoryFeatured.tsx`
+- `src/components/category/CategoryGrid.tsx`
+- `src/components/layout/Footer.tsx`
+- `src/components/layout/Header.tsx`
+- `src/app/[category]/[slug]/page.tsx`
+- `src/app/layout.tsx`
+- `src/lib/shortcodes.ts`
+- `src/app/globals.css`
+
+**Build Status:** Pending deployment

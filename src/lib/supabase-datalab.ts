@@ -47,20 +47,19 @@ export interface BearsGame {
 
 export interface BearsPlayer {
   id: number
-  player_id: number
-  full_name: string
-  first_name: string
-  last_name: string
+  espn_id: string | null
+  name: string
+  first_name: string | null
+  last_name: string | null
   position: string
-  position_group: string | null
   jersey_number: number | null
-  height: string | null
-  weight: number | null
-  age: number | null
+  height_inches: number | null
+  weight_lbs: number | null
+  birth_date: string | null
   college: string | null
-  experience: number | null
-  status: string | null
+  is_active: boolean
   headshot_url: string | null
+  validation: Record<string, any> | null
   created_at: string
   updated_at: string
 }

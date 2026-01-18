@@ -75,24 +75,24 @@ function SocialIcon({ icon, className = '' }: { icon: string; className?: string
 
 export default function Footer() {
   return (
-    <footer>
+    <footer className="mt-auto">
       {/* Footer Top Section - Dark Background per spec */}
-      <div className="bg-[#222222] py-12">
+      <div className="bg-[#222222] py-8 md:py-12">
         <div className="max-w-[1110px] mx-auto px-4">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+          <div className="grid grid-cols-1 gap-8 md:grid-cols-3">
             {/* About Column */}
-            <div>
+            <div className="text-center md:text-left">
               <h3
-                className="text-white text-[14px] font-bold uppercase mb-5"
+                className="text-white text-[14px] font-bold uppercase mb-4 md:mb-5"
                 style={{ fontFamily: "'Montserrat', sans-serif" }}
               >
                 ABOUT
               </h3>
-              <p className="text-[#999] text-[14px] leading-relaxed mb-5">
+              <p className="text-[#999] text-[13px] md:text-[14px] leading-relaxed mb-4 md:mb-5">
                 Your source for Chicago sports news, analysis, and commentary. Covering Bears, Bulls, Cubs, White Sox, and Blackhawks with passion.
               </p>
               {/* Social icons */}
-              <div className="flex items-center gap-4">
+              <div className="flex items-center justify-center md:justify-start gap-4">
                 {socialLinks.map((social) => (
                   <a
                     key={social.name}
@@ -102,63 +102,66 @@ export default function Footer() {
                     className="text-[#999] hover:text-white transition-colors"
                     aria-label={social.name}
                   >
-                    <SocialIcon icon={social.icon} className="w-6 h-6" />
+                    <SocialIcon icon={social.icon} className="w-5 h-5 md:w-6 md:h-6" />
                   </a>
                 ))}
               </div>
             </div>
 
-            {/* Categories Column */}
-            <div>
-              <h3
-                className="text-white text-[14px] font-bold uppercase mb-5"
-                style={{ fontFamily: "'Montserrat', sans-serif" }}
-              >
-                CATEGORIES
-              </h3>
-              <ul className="space-y-2">
-                {footerColumns[1].links?.map((link) => (
-                  <li key={link.name}>
-                    <Link
-                      href={link.href}
-                      className="text-[#999] text-[14px] hover:text-white transition-colors"
-                    >
-                      {link.name}
-                    </Link>
-                  </li>
-                ))}
-              </ul>
-            </div>
+            {/* Categories and Connect - side by side on mobile */}
+            <div className="grid grid-cols-2 gap-6 md:contents">
+              {/* Categories Column */}
+              <div>
+                <h3
+                  className="text-white text-[13px] md:text-[14px] font-bold uppercase mb-3 md:mb-5"
+                  style={{ fontFamily: "'Montserrat', sans-serif" }}
+                >
+                  CATEGORIES
+                </h3>
+                <ul className="space-y-1.5 md:space-y-2">
+                  {footerColumns[1].links?.map((link) => (
+                    <li key={link.name}>
+                      <Link
+                        href={link.href}
+                        className="text-[#999] text-[13px] md:text-[14px] hover:text-white transition-colors"
+                      >
+                        {link.name}
+                      </Link>
+                    </li>
+                  ))}
+                </ul>
+              </div>
 
-            {/* Connect Column */}
-            <div>
-              <h3
-                className="text-white text-[14px] font-bold uppercase mb-5"
-                style={{ fontFamily: "'Montserrat', sans-serif" }}
-              >
-                CONNECT
-              </h3>
-              <ul className="space-y-2">
-                {footerColumns[2].links?.map((link) => (
-                  <li key={link.name}>
-                    <Link
-                      href={link.href}
-                      className="text-[#999] text-[14px] hover:text-white transition-colors"
-                    >
-                      {link.name}
-                    </Link>
-                  </li>
-                ))}
-              </ul>
+              {/* Connect Column */}
+              <div>
+                <h3
+                  className="text-white text-[13px] md:text-[14px] font-bold uppercase mb-3 md:mb-5"
+                  style={{ fontFamily: "'Montserrat', sans-serif" }}
+                >
+                  CONNECT
+                </h3>
+                <ul className="space-y-1.5 md:space-y-2">
+                  {footerColumns[2].links?.map((link) => (
+                    <li key={link.name}>
+                      <Link
+                        href={link.href}
+                        className="text-[#999] text-[13px] md:text-[14px] hover:text-white transition-colors"
+                      >
+                        {link.name}
+                      </Link>
+                    </li>
+                  ))}
+                </ul>
+              </div>
             </div>
           </div>
         </div>
       </div>
 
       {/* Footer Bottom Section - Darker per spec */}
-      <div className="bg-[#111111] py-5">
+      <div className="bg-[#111111] py-4 md:py-5">
         <div className="max-w-[1110px] mx-auto px-4">
-          <p className="text-[#666] text-[12px] text-center">
+          <p className="text-[#666] text-[11px] md:text-[12px] text-center">
             &copy; {new Date().getFullYear()} Sports Mockery. All Rights Reserved.
           </p>
         </div>

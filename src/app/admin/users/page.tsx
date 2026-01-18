@@ -4,15 +4,18 @@ import { useState, useEffect } from 'react'
 import { createClient } from '@/lib/supabase'
 import UsersTable from '@/components/admin/UsersTable'
 import InviteUser from '@/components/admin/InviteUser'
+import { Role } from '@/lib/roles'
 
 interface User {
   id: string
   email: string
   name: string
-  role: 'admin' | 'editor' | 'author'
+  role: Role
   avatar_url?: string
   last_sign_in_at?: string
   created_at: string
+  isFanCouncilMember?: boolean
+  reputationScore?: number
 }
 
 export default function UsersPage() {
@@ -41,7 +44,7 @@ export default function UsersPage() {
     }
   }
 
-  const handleRoleChange = async (userId: string, role: User['role']) => {
+  const handleRoleChange = async (userId: string, role: Role) => {
     try {
       const supabase = createClient()
       const { error } = await supabase

@@ -45,7 +45,7 @@ export async function GET(request: NextRequest) {
     }
 
     if (search) {
-      query = query.ilike('full_name', `%${search}%`)
+      query = query.ilike('name', `%${search}%`)
     }
 
     const { data, error } = await query
@@ -59,21 +59,20 @@ export async function GET(request: NextRequest) {
     }
 
     // Transform to cleaner response format
+    // Note: Column names in datalab differ from TypeScript interface
     const players = (data || []).map((player: any) => ({
       id: player.id,
-      playerId: player.player_id,
-      name: player.full_name,
+      espnId: player.espn_id,
+      name: player.name,
       firstName: player.first_name,
       lastName: player.last_name,
       position: player.position,
-      positionGroup: player.position_group,
       number: player.jersey_number,
-      height: player.height,
-      weight: player.weight,
-      age: player.age,
+      heightInches: player.height_inches,
+      weightLbs: player.weight_lbs,
+      birthDate: player.birth_date,
       college: player.college,
-      experience: player.experience,
-      status: player.status,
+      isActive: player.is_active,
       headshot: player.headshot_url,
     }))
 

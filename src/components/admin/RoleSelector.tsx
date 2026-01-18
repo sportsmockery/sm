@@ -1,42 +1,44 @@
 'use client'
 
-type Role = 'admin' | 'editor' | 'author'
+import { Role, ALL_ROLES, STAFF_ROLES, ROLE_DEFINITIONS } from '@/lib/roles'
 
 interface RoleSelectorProps {
   value: Role
   onChange: (role: Role) => void
+  // If true, only show staff roles (for admin invite flow)
+  staffOnly?: boolean
+  // If true, include fan roles in selection
+  includeFanRoles?: boolean
 }
 
-const roles: {
-  value: Role
-  label: string
-  description: string
-  color: string
-}[] = [
-  {
-    value: 'admin',
-    label: 'Admin',
-    description: 'Full access to all features and settings',
-    color: 'border-red-500 bg-red-500/10 text-red-400'
-  },
-  {
-    value: 'editor',
-    label: 'Editor',
-    description: 'Can edit and publish all posts',
-    color: 'border-blue-500 bg-blue-500/10 text-blue-400'
-  },
-  {
-    value: 'author',
-    label: 'Author',
-    description: 'Can create and edit own posts',
-    color: 'border-green-500 bg-green-500/10 text-green-400'
-  }
-]
+// Build role options with styling
+function getRoleOptions(staffOnly: boolean, includeFanRoles: boolean) {
+  let roles = staffOnly ? STAFF_ROLES : ALL_ROLES
 
-export default function RoleSelector({ value, onChange }: RoleSelectorProps) {
+  if (!includeFanRoles && !staffOnly) {
+    // Default: show staff roles only unless explicitly including fan roles
+    roles = STAFF_ROLES
+  }
+
+  return roles.map(role => ({
+    value: role.value,
+    label: role.label,
+    description: role.description,
+    color: `${role.borderColor} ${role.color.replace('text-', 'bg-').replace('/20', '/10')}`
+  }))
+}
+
+export default function RoleSelector({
+  value,
+  onChange,
+  staffOnly = false,
+  includeFanRoles = false
+}: RoleSelectorProps) {
+  const roleOptions = getRoleOptions(staffOnly, includeFanRoles)
+
   return (
     <div className="space-y-2">
-      {roles.map((role) => (
+      {roleOptions.map((role) => (
         <label
           key={role.value}
           className={`flex items-start gap-3 p-3 rounded-lg border cursor-pointer transition-colors ${

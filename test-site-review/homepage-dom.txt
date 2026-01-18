@@ -1,0 +1,179 @@
+HOMEPAGE DOM STRUCTURE - test.sportsmockery.com
+================================================
+
+link "Skip to main content" [ref_1] href="#main-content"
+banner [ref_2]
+ link "Facebook" [ref_3] href="https://facebook.com/sportsmockery"
+ link "X (Twitter)" [ref_4] href="https://twitter.com/sportsmockery"
+ link "Instagram" [ref_5] href="https://instagram.com/sportsmockery"
+ link "YouTube" [ref_6] href="https://youtube.com/sportsmockery"
+ link [ref_7] href="/"
+  image "Sports Mockery" [ref_8]
+ button "Switch to dark mode" [ref_9]
+ navigation [ref_10]
+  button "Toggle menu" [ref_11]
+  link "HOME" [ref_12] href="/"
+  link "BEARS" [ref_13] href="/chicago-bears"
+  link "BULLS" [ref_14] href="/chicago-bulls"
+  link "CUBS" [ref_15] href="/chicago-cubs"
+  link "WHITE SOX" [ref_16] href="/chicago-white-sox"
+  link "BLACKHAWKS" [ref_17] href="/chicago-blackhawks"
+  button "MORE" [ref_18]
+  button "Search" [ref_19]
+ link [ref_20] href="/chicago-bears"
+  generic "Bears" [ref_21]
+ generic "Record:" [ref_22]
+ generic "4-8" [ref_23]
+ generic "Next:" [ref_24]
+ generic "vs GB" [ref_25]
+ generic "Sun 12:00 PM" [ref_26]
+ navigation [ref_27]
+  link "News" [ref_28] href="/chicago-bears"
+  link "Data Hub" [ref_29] href="/bears/data"
+  link "Rumors" [ref_30] href="/bears/rumors"
+  link "Podcasts" [ref_31] href="/podcasts?team=bears"
+ link [ref_32] href="/bears/subscribe"
+  generic "Get Bears Alerts" [ref_33]
+  generic "Alerts" [ref_34]
+generic [ref_35]
+ main [ref_36]
+  region [ref_37]
+   article [ref_38]
+    link [ref_39] href="/chicago-bears/audio-bears-v-packers-preview-vol-v-prediction"
+     image "Audio: Bears v. Packers Preview, Vol. V: Prediction!" [ref_40]
+     generic "BEARS" [ref_41]
+     heading "Audio: Bears v. Packers Preview, Vol. V: Prediction!" [ref_42]
+  region [ref_43]
+   link "Latest News" [ref_44] href="/search"
+   article [ref_45]
+    link [ref_46] href="/chicago-bears/playoff-revenge-tour-3-ways-the-bears-can-finally-exorcise-the-green-bay-demons-this-saturday"
+     image "Playoff Revenge Tour: 3 Ways the Bears Can Finally Exorcise the Green Bay Demons This Saturday" [ref_47]
+     generic "BEARS" [ref_48]
+     heading "Playoff Revenge Tour: 3 Ways the Bears Can Finally Exorcise the Green Bay Demons This Saturday" [ref_49]
+     generic "Ficky • January 8, 2026" [ref_50]
+   article [ref_51]
+    link [ref_52] href="/chicago-bears/audio-bears-v-packers-preview-vol-iv-you-with-the-stars-in-your-eyes"
+     image "Audio: Bears v. Packers Preview, Vol. IV: You with the Stars in Your Eyes" [ref_53]
+     generic "BEARS" [ref_54]
+     heading "Audio: Bears v. Packers Preview, Vol. IV: You with the Stars in Your Eyes" [ref_55]
+     generic "DaBearsBlog • January 8, 2026" [ref_56]
+   article [ref_57]
+    link [ref_58] href="/chicago-bears/ben-johnson-delivers-blunt-message-to-bears-locker-room-ahead-of-packers-game"
+     image "Ben Johnson Delivers Blunt Message to Bears Locker Room Ahead of Packers Game" [ref_59]
+     generic "BEARS" [ref_60]
+     heading "Ben Johnson Delivers Blunt Message to Bears Locker Room Ahead of Packers Game" [ref_61]
+     generic "Dave • January 7, 2026" [ref_62]
+   article [ref_63]
+    link [ref_64] href="/chicago-cubs/jed-hoyer-finally-traded-for-stud-starting-pitcher"
+     image "Jed Hoyer Finally Traded for Stud Starting Pitcher" [ref_65]
+     generic "CUBS" [ref_66]
+     heading "Jed Hoyer Finally Traded for Stud Starting Pitcher" [ref_67]
+     generic "Aldo Soto • January 7, 2026" [ref_68]
+   article [ref_69]
+    link [ref_70] href="/chicago-bears/audio-bears-v-packers-preview-vol-iii"
+     image "Audio: Bears v. Packers Preview, Vol. III" [ref_71]
+     generic "BEARS" [ref_72]
+     heading "Audio: Bears v. Packers Preview, Vol. III" [ref_73]
+     generic "DaBearsBlog • January 7, 2026" [ref_74]
+   article [ref_75]
+    link [ref_76] href="/chicago-bears/nfl-insider-floats-bears-trade-cost-for-maxx-crosby-and-it-might-be-too-high"
+     image "NFL Insider Floats Bears Trade Cost For Maxx Crosby — And It Might Be Too High" [ref_77]
+     generic "BEARS" [ref_78]
+     heading "NFL Insider Floats Bears Trade Cost For Maxx Crosby — And It Might Be Too High" [ref_79]
+     generic "Erik Lambert • January 7, 2026" [ref_80]
+  region [ref_81]
+   link "Chicago Bears" [ref_82] href="/chicago-bears"
+   article [ref_83]
+    link [ref_84] href="/chicago-bears/audio-bears-v-packers-preview-vol-v-prediction"
+     image "Audio: Bears v. Packers Preview, Vol. V: Prediction!" [ref_85]
+     generic "BEARS" [ref_86]
+     heading "Audio: Bears v. Packers Preview, Vol. V: Prediction!" [ref_87]
+     generic "DaBearsBlog • January 9, 2026" [ref_88]
+   article [ref_89]
+    link [ref_90] href="/chicago-bears/playoff-revenge-tour-3-ways-the-bears-can-finally-exorcise-the-green-bay-demons-this-saturday"
+     image "Playoff Revenge Tour: 3 Ways the Bears Can Finally Exorcise the Green Bay Demons This Saturday" [ref_91]
+     generic "BEARS" [ref_92]
+     heading "Playoff Revenge Tour: 3 Ways the Bears Can Finally Exorcise the Green Bay Demons This Saturday" [ref_93]
+     generic "Ficky • January 8, 2026" [ref_94]
+   article [ref_95]
+    link [ref_96] href="/chicago-bears/audio-bears-v-packers-preview-vol-iv-you-with-the-stars-in-your-eyes"
+     image "Audio: Bears v. Packers Preview, Vol. IV: You with the Stars in Your Eyes" [ref_97]
+     generic "BEARS" [ref_98]
+     heading "Audio: Bears v. Packers Preview, Vol. IV: You with the Stars in Your Eyes" [ref_99]
+     generic "DaBearsBlog • January 8, 2026" [ref_100]
+  region [ref_101]
+   link "Chicago Cubs" [ref_102] href="/chicago-cubs"
+   article [ref_103]
+    link [ref_104] href="/chicago-cubs/bo-bichette-rumors-a-new-frontrunner-emerges"
+     image "Bo Bichette Rumors: A New Frontrunner Emerges?" [ref_105]
+     generic "CUBS" [ref_106]
+     heading "Bo Bichette Rumors: A New Frontrunner Emerges?" [ref_107]
+     generic "Aldo Soto • January 8, 2026" [ref_108]
+   article [ref_109]
+    link [ref_110] href="/chicago-cubs/justin-steele-has-a-new-deal-with-the-cubs"
+     image "Justin Steele Has a New Deal with the Cubs" [ref_111]
+     generic "CUBS" [ref_112]
+     heading "Justin Steele Has a New Deal with the Cubs" [ref_113]
+     generic "Aldo Soto • January 8, 2026" [ref_114]
+   article [ref_115]
+    link [ref_116] href="/chicago-cubs/a-cody-bellinger-reunion-with-the-cubs-is-gaining-momentum"
+     image "A Cody Bellinger Reunion with the Cubs Is Gaining Momentum" [ref_117]
+     generic "CUBS" [ref_118]
+     heading "A Cody Bellinger Reunion with the Cubs Is Gaining Momentum" [ref_119]
+     generic "Aldo Soto • January 8, 2026" [ref_120]
+  region [ref_121]
+   link "Chicago Blackhawks" [ref_122] href="/chicago-blackhawks"
+   article [ref_123]
+    link [ref_124] href="/chicago-blackhawks/blackhawks-dump-two-solid-assets-to-solve-pressing-cap-problem"
+     image "Blackhawks Dump Two Solid Assets To Solve Pressing Cap Problem" [ref_125]
+     generic "BLACKHAWKS" [ref_126]
+     heading "Blackhawks Dump Two Solid Assets To Solve Pressing Cap Problem" [ref_127]
+     generic "Isaac Nielsen • January 8, 2026" [ref_128]
+   article [ref_129]
+    link [ref_130] href="/chicago-blackhawks/the-blackhawks-potent-offense-just-made-a-goalie-hide-from-entering-the-game"
+     image "The Blackhawks' Potent Offense Just Made A Goalie HIDE From Entering The Game" [ref_131]
+     generic "BLACKHAWKS" [ref_132]
+     heading "The Blackhawks' Potent Offense Just Made A Goalie HIDE From Entering The Game" [ref_133]
+     generic "Isaac Nielsen • January 8, 2026" [ref_134]
+  button "Load More" [ref_135]
+contentinfo [ref_136]
+ heading "ABOUT" [ref_137]
+ generic "Your source for Chicago sports news, analysis, and commentary. Covering Bears, Bulls, Cubs, White So" [ref_138]
+ link "Facebook" [ref_139] href="https://facebook.com/sportsmockery"
+ link "Twitter" [ref_140] href="https://twitter.com/sportsmockery"
+ link "Instagram" [ref_141] href="https://instagram.com/sportsmockery"
+ link "YouTube" [ref_142] href="https://youtube.com/sportsmockery"
+ heading "CATEGORIES" [ref_143]
+ list [ref_144]
+  listitem [ref_145]
+   link "Chicago Bears" [ref_146] href="/chicago-bears"
+  listitem [ref_147]
+   link "Chicago Bulls" [ref_148] href="/chicago-bulls"
+  listitem [ref_149]
+   link "Chicago Cubs" [ref_150] href="/chicago-cubs"
+  listitem [ref_151]
+   link "Chicago White Sox" [ref_152] href="/chicago-white-sox"
+  listitem [ref_153]
+   link "Chicago Blackhawks" [ref_154] href="/chicago-blackhawks"
+  listitem [ref_155]
+   link "Podcasts" [ref_156] href="/podcasts"
+ heading "CONNECT" [ref_157]
+ list [ref_158]
+  listitem [ref_159]
+   link "About Us" [ref_160] href="/about"
+  listitem [ref_161]
+   link "Contact" [ref_162] href="/contact"
+  listitem [ref_163]
+   link "Advertise" [ref_164] href="/contact"
+  listitem [ref_165]
+   link "Privacy Policy" [ref_166] href="/privacy"
+  listitem [ref_167]
+   link "Terms of Service" [ref_168] href="/privacy"
+ generic "© 2026 Sports Mockery. All Rights Reserved." [ref_169]
+button "Scroll to top" [ref_170]
+generic "We use cookies to enhance your experience. By continuing to visit this site you agree to our use of " [ref_171]
+ link "Learn more" [ref_172] href="/privacy"
+button "Decline" [ref_173]
+button "Accept" [ref_174]
+
+Viewport: 1512x775

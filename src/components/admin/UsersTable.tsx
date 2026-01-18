@@ -1,30 +1,35 @@
 'use client'
 
 import Image from 'next/image'
+import { Role, ROLE_COLORS, ALL_ROLES, ROLE_DEFINITIONS } from '@/lib/roles'
 
 interface User {
   id: string
   email: string
   name: string
-  role: 'admin' | 'editor' | 'author'
+  role: Role
   avatar_url?: string
   last_sign_in_at?: string
   created_at: string
+  // Fan Council specific fields
+  isFanCouncilMember?: boolean
+  reputationScore?: number
 }
 
 interface UsersTableProps {
   users: User[]
-  onRoleChange: (userId: string, role: User['role']) => void
+  onRoleChange: (userId: string, role: Role) => void
   onDelete: (userId: string) => void
+  // If true, show all roles including fan roles
+  showAllRoles?: boolean
 }
 
-const roleColors = {
-  admin: 'bg-red-500/20 text-red-400 border-red-500/30',
-  editor: 'bg-blue-500/20 text-blue-400 border-blue-500/30',
-  author: 'bg-green-500/20 text-green-400 border-green-500/30'
-}
-
-export default function UsersTable({ users, onRoleChange, onDelete }: UsersTableProps) {
+export default function UsersTable({
+  users,
+  onRoleChange,
+  onDelete,
+  showAllRoles = true
+}: UsersTableProps) {
   const formatDate = (dateString?: string) => {
     if (!dateString) return 'Never'
     return new Date(dateString).toLocaleDateString('en-US', {
@@ -88,13 +93,25 @@ export default function UsersTable({ users, onRoleChange, onDelete }: UsersTable
               <td className="px-6 py-4 whitespace-nowrap">
                 <select
                   value={user.role}
-                  onChange={(e) => onRoleChange(user.id, e.target.value as User['role'])}
-                  className={`px-3 py-1 rounded-full text-sm font-medium border bg-transparent focus:outline-none cursor-pointer ${roleColors[user.role]}`}
+                  onChange={(e) => onRoleChange(user.id, e.target.value as Role)}
+                  className={`px-3 py-1 rounded-full text-sm font-medium border bg-transparent focus:outline-none cursor-pointer ${ROLE_COLORS[user.role]}`}
                 >
-                  <option value="admin" className="bg-gray-800 text-white">Admin</option>
-                  <option value="editor" className="bg-gray-800 text-white">Editor</option>
-                  <option value="author" className="bg-gray-800 text-white">Author</option>
+                  {ALL_ROLES.map(role => (
+                    <option
+                      key={role.value}
+                      value={role.value}
+                      className="bg-gray-800 text-white"
+                    >
+                      {role.label}
+                    </option>
+                  ))}
                 </select>
+                {/* Show Fan Council badge if applicable */}
+                {user.isFanCouncilMember && user.role === 'fan' && (
+                  <span className="ml-2 px-2 py-0.5 text-xs rounded-full bg-purple-500/20 text-purple-400 border border-purple-500/30">
+                    Council Eligible
+                  </span>
+                )}
               </td>
               <td className="px-6 py-4 whitespace-nowrap">
                 <span className="text-gray-400 text-sm">{formatDate(user.last_sign_in_at)}</span>
