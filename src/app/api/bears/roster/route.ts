@@ -25,12 +25,20 @@ export async function GET(request: NextRequest) {
     const search = searchParams.get('search')
     const limit = Math.min(parseInt(searchParams.get('limit') || '100'), 200)
 
+    // Default to active players only (from ESPN roster)
+    const includeInactive = searchParams.get('include_inactive') === 'true'
+
     let query = datalabAdmin
       .from('bears_players')
       .select('*')
       .order('position', { ascending: true })
       .order('jersey_number', { ascending: true })
       .limit(limit)
+
+    // Only show active players by default
+    if (!includeInactive) {
+      query = query.eq('is_active', true)
+    }
 
     if (position) {
       query = query.eq('position', position.toUpperCase())
