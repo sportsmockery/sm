@@ -1,6 +1,10 @@
 import { Metadata } from 'next'
 import Link from 'next/link'
+import Image from 'next/image'
 import { getBearsSchedule, getAvailableSeasons, type BearsGame } from '@/lib/bearsData'
+
+// Bears logo URL
+const BEARS_LOGO = 'https://a.espncdn.com/i/teamlogos/nfl/500/chi.png'
 
 export const metadata: Metadata = {
   title: 'Chicago Bears Schedule 2025 | Game Dates & Results | SportsMockery',
@@ -140,15 +144,41 @@ function GameRow({ game }: { game: BearsGame }) {
           </div>
         </div>
 
-        {/* Opponent */}
+        {/* Matchup with Logos */}
         <div className="flex-1">
-          <div className="flex items-center gap-2">
-            <span className="text-sm text-[var(--text-muted)]">
+          <div className="flex items-center gap-3">
+            {/* Bears Logo */}
+            <div className="w-8 h-8 flex-shrink-0">
+              <Image
+                src={BEARS_LOGO}
+                alt="Chicago Bears"
+                width={32}
+                height={32}
+                className="w-full h-full object-contain"
+              />
+            </div>
+
+            <span className="text-sm text-[var(--text-muted)] font-medium">
               {game.homeAway === 'home' ? 'vs' : '@'}
             </span>
+
+            {/* Opponent Logo */}
+            {game.opponentLogo && (
+              <div className="w-8 h-8 flex-shrink-0">
+                <Image
+                  src={game.opponentLogo}
+                  alt={game.opponentFullName || game.opponent}
+                  width={32}
+                  height={32}
+                  className="w-full h-full object-contain"
+                />
+              </div>
+            )}
+
             <span className="text-lg font-semibold text-[var(--text-primary)]">
-              {game.opponent}
+              {game.opponentFullName || game.opponent}
             </span>
+
             {game.isPlayoff && (
               <span className="px-2 py-0.5 bg-[#C83200]/10 text-[#C83200] text-xs rounded-full font-medium">
                 Playoff
@@ -156,7 +186,7 @@ function GameRow({ game }: { game: BearsGame }) {
             )}
           </div>
           {game.venue && (
-            <div className="text-sm text-[var(--text-muted)] mt-1">
+            <div className="text-sm text-[var(--text-muted)] mt-1 ml-11">
               {game.venue}
             </div>
           )}

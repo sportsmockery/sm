@@ -115,6 +115,8 @@ export interface BearsGame {
   time: string | null
   dayOfWeek: string
   opponent: string
+  opponentFullName: string | null
+  opponentLogo: string | null
   homeAway: 'home' | 'away'
   status: 'scheduled' | 'in_progress' | 'final'
   bearsScore: number | null
@@ -128,6 +130,23 @@ export interface BearsGame {
     tempF: number | null
     windMph: number | null
   } | null
+}
+
+// NFL team abbreviation to ESPN team ID mapping for logos
+const NFL_TEAM_IDS: Record<string, string> = {
+  ARI: '22', ATL: '1', BAL: '33', BUF: '2', CAR: '29', CHI: '3',
+  CIN: '4', CLE: '5', DAL: '6', DEN: '7', DET: '8', GB: '9', GNB: '9',
+  HOU: '34', IND: '11', JAC: '30', JAX: '30', KC: '12', KAN: '12',
+  LAC: '24', LAR: '14', LV: '13', LVR: '13', MIA: '15', MIN: '16',
+  NE: '17', NWE: '17', NO: '18', NOR: '18', NYG: '19', NYJ: '20',
+  PHI: '21', PIT: '23', SEA: '26', SF: '25', SFO: '25', TB: '27', TAM: '27',
+  TEN: '10', WAS: '28', WSH: '28',
+}
+
+function getTeamLogo(abbrev: string): string {
+  const teamId = NFL_TEAM_IDS[abbrev] || NFL_TEAM_IDS[abbrev.toUpperCase()]
+  if (!teamId) return ''
+  return `https://a.espncdn.com/i/teamlogos/nfl/500/${abbrev.toLowerCase()}.png`
 }
 
 export interface BearsTeamStats {
@@ -630,11 +649,21 @@ async function getBearsScheduleFromDatalab(season: number): Promise<BearsGame[]>
       weather_summary
     `)
     .eq('season', season)
-    .order('game_date', { ascending: true })
+    .order('game_date', { ascending: false })
 
   if (error || !data) return []
 
   return data.map((g: any) => transformGame(g, null))
+}
+
+// Format time from 24-hour (17:30:00) to 12-hour (5:30 PM CT)
+function formatGameTime(timeStr: string | null): string | null {
+  if (!timeStr) return null
+  const [hours, minutes] = timeStr.split(':').map(Number)
+  const hour12 = hours % 12 || 12
+  const ampm = hours >= 12 ? 'PM' : 'AM'
+  const minStr = minutes.toString().padStart(2, '0')
+  return `${hour12}:${minStr} ${ampm} CT`
 }
 
 function transformGame(game: any, context?: any): BearsGame {
@@ -653,9 +682,11 @@ function transformGame(game: any, context?: any): BearsGame {
     season: 2025, // Always 2025 for current season
     week: game.week,
     date: game.game_date,
-    time: game.game_time,
+    time: formatGameTime(game.game_time),
     dayOfWeek: gameDate.toLocaleDateString('en-US', { weekday: 'long' }),
     opponent: game.opponent,
+    opponentFullName: game.opponent_full_name || null,
+    opponentLogo: getTeamLogo(game.opponent),
     homeAway: game.is_bears_home ? 'home' : 'away',
     status: isPlayed ? 'final' : (game.status === 'in_progress' ? 'in_progress' : 'scheduled'),
     bearsScore: game.bears_score,
