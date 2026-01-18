@@ -25,7 +25,7 @@ import { buildAutoLinkContextForPost, applyAutoLinksToHtml } from '@/lib/autolin
 import { getArticleAudioInfo } from '@/lib/audioPlayer'
 import { ArticleAudioPlayer } from '@/components/article/ArticleAudioPlayer'
 import ArticleContentWithEmbeds from '@/components/article/ArticleContentWithEmbeds'
-import { TeamChatWidget } from '@/components/chat'
+// import { TeamChatWidget } from '@/components/chat' // Temporarily disabled
 
 interface ArticlePageProps {
   params: Promise<{
@@ -136,16 +136,14 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
       .eq('status', 'published')
       .lt('published_at', post.published_at)
       .order('published_at', { ascending: false })
-      .limit(1)
-      .single(),
+      .limit(1),
     supabaseAdmin
       .from('sm_posts')
       .select('title, slug, category_id, featured_image')
       .eq('status', 'published')
       .gt('published_at', post.published_at)
       .order('published_at', { ascending: true })
-      .limit(1)
-      .single(),
+      .limit(1),
     // Try to fetch tags if the junction table exists
     Promise.resolve(
       supabaseAdmin
@@ -158,8 +156,8 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
   const author = authorResult.data
   const relatedPosts = relatedPostsResult.data || []
   const categoryData = categoryResult.data
-  const prevPost = prevPostResult.data
-  const nextPost = nextPostResult.data
+  const prevPost = prevPostResult.data?.[0] || null
+  const nextPost = nextPostResult.data?.[0] || null
   const tags: string[] = (tagsResult?.data?.map((t: unknown) => {
     const tagData = t as { tag?: { name?: string } | Array<{ name?: string }> }
     if (Array.isArray(tagData.tag)) {
@@ -582,8 +580,8 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
         articleTitle={post.title}
       />
 
-      {/* Team Chat Widget - Floating chat for team fan engagement */}
-      <TeamChatWidget categorySlug={category} />
+      {/* Team Chat Widget - Temporarily disabled for debugging */}
+      {/* <TeamChatWidget categorySlug={category} /> */}
     </>
   )
 }
