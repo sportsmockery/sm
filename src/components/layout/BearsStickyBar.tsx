@@ -143,9 +143,9 @@ export default function BearsStickyBar({ className = '', isArticlePage }: BearsS
 
   const quickLinks = [
     { name: 'News', href: '/chicago-bears' },
-    { name: 'Data Hub', href: '/bears/data' },
-    { name: 'Rumors', href: '/bears/rumors' },
-    { name: 'Podcasts', href: '/podcasts?team=bears' },
+    { name: 'Stats', href: '/chicago-bears/stats' },
+    { name: 'Roster', href: '/chicago-bears/roster' },
+    { name: 'Scores', href: '/chicago-bears/scores' },
   ]
 
   return (

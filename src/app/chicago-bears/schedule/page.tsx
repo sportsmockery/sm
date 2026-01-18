@@ -1,7 +1,7 @@
 import { Metadata } from 'next'
 import Link from 'next/link'
 import Image from 'next/image'
-import { getBearsSchedule, getAvailableSeasons, type BearsGame } from '@/lib/bearsData'
+import { getBearsSchedule, getAvailableSeasons, getPlayoffRoundName, type BearsGame } from '@/lib/bearsData'
 
 // Bears logo URL
 const BEARS_LOGO = 'https://a.espncdn.com/i/teamlogos/nfl/500/chi.png'
@@ -127,6 +127,7 @@ function GameRow({ game }: { game: BearsGame }) {
   const gameDate = new Date(game.date)
   const isPast = game.status === 'final'
   const isInProgress = game.status === 'in_progress'
+  const playoffRound = game.isPlayoff ? getPlayoffRoundName(game.week) : null
 
   return (
     <div className={`p-4 hover:bg-[var(--bg-hover)] transition-colors ${isPast ? '' : 'bg-[var(--bg-tertiary)]/30'}`}>
@@ -134,7 +135,7 @@ function GameRow({ game }: { game: BearsGame }) {
         {/* Week & Date */}
         <div className="sm:w-32 flex-shrink-0">
           <div className="text-xs text-[var(--text-muted)] uppercase tracking-wider">
-            Week {game.week}
+            {playoffRound || `Week ${game.week}`}
           </div>
           <div className="font-medium text-[var(--text-primary)]">
             {gameDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}

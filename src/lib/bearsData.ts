@@ -213,6 +213,18 @@ export interface LiveBoxScore {
   }[]
 }
 
+// Playoff round names
+const PLAYOFF_ROUND_NAMES: Record<number, string> = {
+  19: 'Wild Card',
+  20: 'Divisional Round',
+  21: 'Conference Championship',
+  22: 'Super Bowl',
+}
+
+export function getPlayoffRoundName(week: number): string | null {
+  return PLAYOFF_ROUND_NAMES[week] || null
+}
+
 // Position group mapping
 export type PositionGroup = 'QB' | 'RB' | 'WR' | 'TE' | 'OL' | 'DL' | 'LB' | 'CB' | 'S' | 'ST'
 

@@ -1,7 +1,6 @@
 import { notFound } from 'next/navigation'
 import { Metadata } from 'next'
 import { supabaseAdmin } from '@/lib/supabase-server'
-import CategoryHeader from '@/components/category/CategoryHeader'
 import CategoryFilters from '@/components/category/CategoryFilters'
 import CategoryFeatured from '@/components/category/CategoryFeatured'
 import CategoryGrid from '@/components/category/CategoryGrid'
@@ -199,18 +198,15 @@ export default async function CategoryPage({ params, searchParams }: CategoryPag
 
   return (
     <div className="min-h-screen" style={{ backgroundColor: 'var(--bg-surface)' }}>
-      {/* Category Header per spec section 8.1 */}
-      <CategoryHeader
+      {/* Sort bar directly below navigation */}
+      <CategoryFilters
         categorySlug={category.slug}
         categoryName={category.name}
         postCount={totalPosts}
-        description={categoryDescriptions[categorySlug]}
       />
 
       {/* Main content container - 1110px max per spec */}
       <main className="mx-auto max-w-[1110px] px-4 py-8">
-        {/* Filters per spec section 8.2 */}
-        <CategoryFilters categorySlug={category.slug} className="mb-8" />
 
         {/* Featured Section (only on first page with default filters) */}
         {currentPage === 1 && sortBy === 'latest' && timeFilter === 'all' && formattedFeatured.length > 0 && (

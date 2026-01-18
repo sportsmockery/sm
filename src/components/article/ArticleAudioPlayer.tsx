@@ -296,7 +296,7 @@ export function ArticleAudioPlayer({
   };
 
   return (
-    <div className="border border-zinc-200 dark:border-zinc-700 p-4 rounded-lg mt-4 bg-zinc-50 dark:bg-zinc-800/50">
+    <div className="border border-zinc-200 dark:border-white/30 p-4 rounded-lg mt-4 bg-zinc-50 dark:bg-zinc-900">
       {/* Hidden audio element for iOS background playback compatibility */}
       <audio
         ref={audioRef}
@@ -347,7 +347,7 @@ export function ArticleAudioPlayer({
             type="button"
             onClick={handlePlayPause}
             disabled={isLoading}
-            className="px-3 py-1.5 rounded border border-zinc-300 dark:border-zinc-600 bg-white dark:bg-zinc-700 hover:bg-zinc-100 dark:hover:bg-zinc-600 disabled:opacity-50 text-zinc-900 dark:text-white transition-colors text-sm flex items-center gap-1.5"
+            className="px-3 py-1.5 rounded border border-zinc-300 dark:border-white/50 bg-white dark:bg-transparent hover:bg-zinc-100 dark:hover:bg-white/10 disabled:opacity-50 text-zinc-900 dark:text-white transition-colors text-sm flex items-center gap-1.5"
           >
             {isLoading ? (
               <>
@@ -377,7 +377,7 @@ export function ArticleAudioPlayer({
             <button
               type="button"
               onClick={handleStop}
-              className="px-3 py-1.5 rounded border border-zinc-300 dark:border-zinc-600 bg-white dark:bg-zinc-700 hover:bg-zinc-100 dark:hover:bg-zinc-600 text-zinc-900 dark:text-white transition-colors text-sm flex items-center gap-1.5"
+              className="px-3 py-1.5 rounded border border-zinc-300 dark:border-white/50 bg-white dark:bg-transparent hover:bg-zinc-100 dark:hover:bg-white/10 text-zinc-900 dark:text-white transition-colors text-sm flex items-center gap-1.5"
             >
               <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
                 <path d="M6 6h12v12H6z"/>
@@ -389,7 +389,7 @@ export function ArticleAudioPlayer({
             type="button"
             onClick={() => loadNextArticle()}
             disabled={isLoadingNext}
-            className="px-3 py-1.5 rounded border border-zinc-300 dark:border-zinc-600 bg-white dark:bg-zinc-700 hover:bg-zinc-100 dark:hover:bg-zinc-600 disabled:opacity-50 disabled:cursor-not-allowed text-zinc-900 dark:text-white transition-colors text-sm flex items-center gap-1.5"
+            className="px-3 py-1.5 rounded border border-zinc-300 dark:border-white/50 bg-white dark:bg-transparent hover:bg-zinc-100 dark:hover:bg-white/10 disabled:opacity-50 disabled:cursor-not-allowed text-zinc-900 dark:text-white transition-colors text-sm flex items-center gap-1.5"
           >
             <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
               <path d="M6 18l8.5-6L6 6v12zM16 6v12h2V6h-2z"/>
@@ -404,7 +404,7 @@ export function ArticleAudioPlayer({
             <button
               type="button"
               onClick={() => setShowVoiceSelector(!showVoiceSelector)}
-              className="px-2.5 py-1 rounded-full text-xs transition-colors border border-zinc-300 dark:border-zinc-600 bg-white dark:bg-zinc-700 text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-600 flex items-center gap-1"
+              className="px-2.5 py-1 rounded-full text-xs transition-colors border border-zinc-300 dark:border-white/50 bg-white dark:bg-transparent text-zinc-700 dark:text-white hover:bg-zinc-100 dark:hover:bg-white/10 flex items-center gap-1"
             >
               <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
@@ -461,14 +461,14 @@ export function ArticleAudioPlayer({
             )}
           </div>
 
-          <span className="text-zinc-500 dark:text-zinc-400 text-xs">Next by:</span>
+          <span className="text-zinc-500 dark:text-white/60 text-xs">Next by:</span>
           <button
             type="button"
             onClick={() => handleModeChange("team")}
             className={`px-2.5 py-1 rounded-full text-xs transition-colors ${
               playlist.mode === "team"
-                ? "border border-[#bc0000] bg-red-50 dark:bg-red-900/20 text-[#bc0000] dark:text-red-400"
-                : "border border-zinc-300 dark:border-zinc-600 bg-white dark:bg-zinc-700 text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-600"
+                ? "border border-[#bc0000] bg-red-50 dark:bg-red-900/30 text-[#bc0000] dark:text-red-400"
+                : "border border-zinc-300 dark:border-white/50 bg-white dark:bg-transparent text-zinc-700 dark:text-white hover:bg-zinc-100 dark:hover:bg-white/10"
             }`}
           >
             Team
@@ -478,8 +478,8 @@ export function ArticleAudioPlayer({
             onClick={() => handleModeChange("recent")}
             className={`px-2.5 py-1 rounded-full text-xs transition-colors ${
               playlist.mode === "recent"
-                ? "border border-[#bc0000] bg-red-50 dark:bg-red-900/20 text-[#bc0000] dark:text-red-400"
-                : "border border-zinc-300 dark:border-zinc-600 bg-white dark:bg-zinc-700 text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-600"
+                ? "border border-[#bc0000] bg-red-50 dark:bg-red-900/30 text-[#bc0000] dark:text-red-400"
+                : "border border-zinc-300 dark:border-white/50 bg-white dark:bg-transparent text-zinc-700 dark:text-white hover:bg-zinc-100 dark:hover:bg-white/10"
             }`}
           >
             Recent
