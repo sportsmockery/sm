@@ -31,6 +31,22 @@ export default function RichTextEditor({
   const [showChartBuilder, setShowChartBuilder] = useState(false)
   const [showPollBuilder, setShowPollBuilder] = useState(false)
 
+  // Check if content already has a chart (limit: 1 per article)
+  const hasChart = content.includes('[chart:')
+
+  // Listen for open-chart-builder event from parent
+  useEffect(() => {
+    const handleOpenChartBuilder = () => {
+      if (hasChart) {
+        alert('This article already has a chart. Only one chart is allowed per article.')
+        return
+      }
+      setShowChartBuilder(true)
+    }
+    window.addEventListener('open-chart-builder', handleOpenChartBuilder)
+    return () => window.removeEventListener('open-chart-builder', handleOpenChartBuilder)
+  }, [hasChart])
+
   const editor = useEditor({
     immediatelyRender: false,
     extensions: [
@@ -354,10 +370,16 @@ export default function RichTextEditor({
 
         {/* Charts & Polls */}
         <ToolbarButton
-          onClick={() => setShowChartBuilder(true)}
-          title="Insert Chart"
+          onClick={() => {
+            if (hasChart) {
+              alert('This article already has a chart. Only one chart is allowed per article.')
+              return
+            }
+            setShowChartBuilder(true)
+          }}
+          title={hasChart ? 'Chart limit reached (1 per article)' : 'Insert Chart'}
         >
-          <svg className="w-4 h-4" viewBox="0 0 24 24" fill="currentColor">
+          <svg className={`w-4 h-4 ${hasChart ? 'opacity-50' : ''}`} viewBox="0 0 24 24" fill="currentColor">
             <path d="M3.5 18.49l6-6.01 4 4L22 6.92l-1.41-1.41-7.09 7.97-4-4L2 16.99z"/>
           </svg>
         </ToolbarButton>

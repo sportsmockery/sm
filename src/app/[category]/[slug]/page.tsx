@@ -14,7 +14,7 @@ import { ViewCounterCompact } from '@/components/ViewCounter'
 import ReadingProgressBar from '@/components/article/ReadingProgressBar'
 import ArticleActions from '@/components/article/ArticleActions'
 import ArticleSchema from '@/components/article/ArticleSchema'
-import CommentSection from '@/components/article/CommentSection'
+import { DisqusComments } from '@/components/comments'
 import UpdatedDate from '@/components/article/UpdatedDate'
 import TableOfContents from '@/components/article/TableOfContents'
 import MockeryCommentary from '@/components/article/MockeryCommentary'
@@ -473,6 +473,13 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
                     />
                   </div>
                 )}
+
+                {/* Disqus Comments */}
+                <DisqusComments
+                  identifier={slug}
+                  url={articleUrl}
+                  title={post.title}
+                />
               </article>
             </div>
 

@@ -1,9 +1,9 @@
 import Link from 'next/link'
 import Image from 'next/image'
 import { format } from 'date-fns'
-import CategoryBadge from './CategoryBadge'
 import AuthorByline from './AuthorByline'
 import ReadingTime from './ReadingTime'
+import DisqusCommentCount from '@/components/comments/DisqusCommentCount'
 
 interface ArticleCardProps {
   title: string
@@ -65,11 +65,6 @@ export default function ArticleCard({
 
           {/* Gradient overlay */}
           <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
-
-          {/* Category Badge */}
-          <div className="absolute left-3 top-3">
-            <CategoryBadge slug={category.slug} name={category.name} />
-          </div>
         </Link>
 
         {/* Content */}
@@ -108,6 +103,12 @@ export default function ArticleCard({
                 <ReadingTime content={content} />
               </>
             )}
+
+            <span className="text-zinc-300 dark:text-zinc-700">•</span>
+            <DisqusCommentCount
+              identifier={slug}
+              url={`https://sportsmockery.com/${category.slug}/${slug}`}
+            />
           </div>
         </div>
       </div>

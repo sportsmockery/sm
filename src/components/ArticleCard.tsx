@@ -1,6 +1,7 @@
 import Image from 'next/image'
 import Link from 'next/link'
 import { getTeamColor } from '@/styles/theme'
+import DisqusCommentCount from '@/components/comments/DisqusCommentCount'
 
 interface ArticleCardProps {
   title: string
@@ -48,16 +49,6 @@ export default function ArticleCard({
             {/* Multi-layer gradient overlay */}
             <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent opacity-0 transition-opacity duration-500 group-hover:opacity-100" />
 
-            {/* Category badge floating on image */}
-            <div className="absolute bottom-3 left-3 transform translate-y-2 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-500">
-              <span
-                className="px-3 py-1.5 text-xs font-bold uppercase tracking-wider text-white rounded-full shadow-lg"
-                style={{ backgroundColor: badgeColor }}
-              >
-                {category.name}
-              </span>
-            </div>
-
             {/* Read indicator */}
             <div className="absolute bottom-3 right-3 transform translate-y-2 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-500 delay-100">
               <div className="w-10 h-10 rounded-full bg-white/90 flex items-center justify-center shadow-lg">
@@ -71,17 +62,6 @@ export default function ArticleCard({
       )}
 
       <div className="p-5">
-        {/* Category badge (visible when no image or always on mobile) */}
-        {!featuredImage && (
-          <Link
-            href={`/${category.slug}`}
-            className="inline-block px-3 py-1.5 text-xs font-bold uppercase tracking-wider text-white rounded-full transition-transform hover:scale-105 shadow-sm"
-            style={{ backgroundColor: badgeColor }}
-          >
-            {category.name}
-          </Link>
-        )}
-
         <Link href={`/${category.slug}/${slug}`}>
           <h2 className="mt-3 text-lg font-bold text-zinc-900 line-clamp-2 transition-colors duration-300 group-hover:text-[#8B0000] dark:text-zinc-100 dark:group-hover:text-[#ff6b6b] font-[var(--font-montserrat)]">
             {title}
@@ -107,15 +87,21 @@ export default function ArticleCard({
               </>
             )}
           </div>
-          <time dateTime={publishedAt} className="flex items-center gap-1">
-            <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-            </svg>
-            {new Date(publishedAt).toLocaleDateString('en-US', {
-              month: 'short',
-              day: 'numeric',
-            })}
-          </time>
+          <div className="flex items-center gap-3">
+            <time dateTime={publishedAt} className="flex items-center gap-1">
+              <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+              </svg>
+              {new Date(publishedAt).toLocaleDateString('en-US', {
+                month: 'short',
+                day: 'numeric',
+              })}
+            </time>
+            <DisqusCommentCount
+              identifier={slug}
+              url={`https://sportsmockery.com/${category.slug}/${slug}`}
+            />
+          </div>
         </div>
       </div>
 

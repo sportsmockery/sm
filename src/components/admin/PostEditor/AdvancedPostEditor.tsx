@@ -74,6 +74,12 @@ export default function AdvancedPostEditor({
   const [seoExpanded, setSeoExpanded] = useState(true)
   const [seoGenerated, setSeoGenerated] = useState(false)
   const [generatingSEO, setGeneratingSEO] = useState(false)
+  const [showPublishModal, setShowPublishModal] = useState(false)
+  const [publishHeadlines, setPublishHeadlines] = useState<string[]>([])
+  const [selectedHeadline, setSelectedHeadline] = useState<string | null>(null)
+  const [generatingPublishHeadlines, setGeneratingPublishHeadlines] = useState(false)
+  const [showChartSuggestion, setShowChartSuggestion] = useState(false)
+  const [chartSuggestionDismissed, setChartSuggestionDismissed] = useState(false)
 
   // Refs for auto-AI tracking
   const lastAutoSeoWordCount = useRef(0)
@@ -318,24 +324,66 @@ export default function AdvancedPostEditor({
     }
   }
 
-  // Submit form
+  // Generate headlines for publish modal
+  const generatePublishHeadlines = async () => {
+    setGeneratingPublishHeadlines(true)
+    try {
+      const response = await fetch('/api/admin/ai', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'headlines',
+          title: formData.title,
+          content: formData.content,
+          category: categories.find(c => c.id === formData.category_id)?.name,
+        }),
+      })
+      if (response.ok) {
+        const data = await response.json()
+        if (data.headlines) {
+          setPublishHeadlines(data.headlines)
+        }
+      }
+    } catch (err) {
+      console.error('Headline generation error:', err)
+    }
+    setGeneratingPublishHeadlines(false)
+  }
+
+  // Submit form - shows publish modal for headline selection when publishing
   const handleSubmit = async () => {
     if (!formData.title.trim()) {
       setError('Title is required')
       return
     }
 
+    // If publishing (not draft) and we haven't shown the headline modal yet, show it
+    if (formData.status === 'published' && !isEditing && publishHeadlines.length === 0 && wordCount >= 100) {
+      setShowPublishModal(true)
+      generatePublishHeadlines()
+      return
+    }
+
+    await savePost()
+  }
+
+  // Actual save function
+  const savePost = async () => {
     setSaving(true)
     setError('')
 
     try {
       const endpoint = isEditing ? `/api/posts/${post.id}` : '/api/admin/posts'
 
+      // Use selected headline if one was chosen
+      const finalTitle = selectedHeadline || formData.title
+
       const response = await fetch(endpoint, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           ...formData,
+          title: finalTitle,
           category_id: formData.category_id || null,
           author_id: formData.author_id || null,
         }),
@@ -347,6 +395,7 @@ export default function AdvancedPostEditor({
       }
 
       const data = await response.json()
+      setShowPublishModal(false)
       router.push(`/admin/posts/${data.id}`)
       router.refresh()
     } catch (err) {
@@ -355,6 +404,18 @@ export default function AdvancedPostEditor({
       setSaving(false)
     }
   }
+
+  // Check if article would benefit from a chart (300+ words, no chart yet)
+  useEffect(() => {
+    const hasChart = formData.content.includes('[chart:')
+    const shouldSuggestChart = wordCount >= 300 && !hasChart && !chartSuggestionDismissed && !isEditing
+
+    if (shouldSuggestChart && !showChartSuggestion) {
+      // Delay showing the suggestion
+      const timer = setTimeout(() => setShowChartSuggestion(true), 1000)
+      return () => clearTimeout(timer)
+    }
+  }, [wordCount, formData.content, chartSuggestionDismissed, isEditing, showChartSuggestion])
 
   // Use idea from modal
   const useSelectedIdea = () => {
@@ -973,6 +1034,141 @@ export default function AdvancedPostEditor({
                 className="rounded-lg bg-purple-600 px-4 py-2 text-sm font-medium text-white hover:bg-purple-700 disabled:cursor-not-allowed disabled:opacity-50"
               >
                 Use Selected
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Publish Modal with AI Headline Suggestions */}
+      {showPublishModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
+          <div className="mx-4 w-full max-w-lg overflow-hidden rounded-xl bg-white shadow-2xl dark:bg-[#1c1c1f]">
+            <div className="flex items-center justify-between border-b border-gray-200 px-6 py-4 dark:border-gray-700">
+              <h3 className="text-lg font-bold text-gray-900 dark:text-white">
+                ✨ Publish Article
+              </h3>
+              <button
+                type="button"
+                onClick={() => setShowPublishModal(false)}
+                className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200"
+              >
+                <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+
+            <div className="p-6">
+              <p className="mb-4 text-sm text-gray-600 dark:text-gray-400">
+                AI has generated alternative headlines for your article. Select one or keep your original:
+              </p>
+
+              <div className="space-y-2 max-h-60 overflow-y-auto">
+                {/* Original headline */}
+                <button
+                  type="button"
+                  onClick={() => setSelectedHeadline(null)}
+                  className={`w-full rounded-lg border-2 p-3 text-left transition-all ${
+                    selectedHeadline === null
+                      ? 'border-[var(--accent-red)] bg-red-50 dark:bg-red-500/10'
+                      : 'border-gray-200 hover:border-gray-300 dark:border-gray-700'
+                  }`}
+                >
+                  <p className="text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">Original</p>
+                  <p className="font-medium text-gray-900 dark:text-white">{formData.title}</p>
+                </button>
+
+                {generatingPublishHeadlines ? (
+                  <div className="py-4 text-center">
+                    <div className="mx-auto h-5 w-5 animate-spin rounded-full border-2 border-purple-500 border-t-transparent" />
+                    <p className="mt-2 text-xs text-gray-500">Generating alternatives...</p>
+                  </div>
+                ) : (
+                  publishHeadlines.map((headline, i) => (
+                    <button
+                      key={i}
+                      type="button"
+                      onClick={() => setSelectedHeadline(headline)}
+                      className={`w-full rounded-lg border-2 p-3 text-left transition-all ${
+                        selectedHeadline === headline
+                          ? 'border-purple-500 bg-purple-50 dark:bg-purple-500/10'
+                          : 'border-gray-200 hover:border-purple-300 dark:border-gray-700'
+                      }`}
+                    >
+                      <p className="font-medium text-gray-900 dark:text-white">{headline}</p>
+                    </button>
+                  ))
+                )}
+              </div>
+            </div>
+
+            <div className="flex items-center justify-end gap-3 border-t border-gray-200 bg-gray-50 px-6 py-4 dark:border-gray-700 dark:bg-gray-800/50">
+              <button
+                type="button"
+                onClick={() => setShowPublishModal(false)}
+                className="px-4 py-2 text-sm text-gray-600 hover:text-gray-900 dark:text-gray-300 dark:hover:text-white"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={savePost}
+                disabled={saving}
+                className="rounded-lg bg-[var(--accent-red)] px-6 py-2 text-sm font-medium text-white hover:bg-[var(--accent-red-hover)] disabled:opacity-50"
+              >
+                {saving ? 'Publishing...' : 'Publish Now'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Chart Suggestion Banner */}
+      {showChartSuggestion && (
+        <div className="fixed bottom-20 left-4 right-4 z-40 mx-auto max-w-lg animate-in slide-in-from-bottom duration-300">
+          <div className="rounded-xl border border-purple-200 bg-gradient-to-r from-purple-50 to-pink-50 p-4 shadow-lg dark:border-purple-800 dark:from-purple-900/20 dark:to-pink-900/20">
+            <div className="flex items-start gap-3">
+              <span className="text-2xl">📊</span>
+              <div className="flex-1">
+                <p className="font-medium text-gray-900 dark:text-white">
+                  Add a data visualization?
+                </p>
+                <p className="mt-1 text-sm text-gray-600 dark:text-gray-400">
+                  Charts help readers understand stats and comparisons. Add one to make your article more engaging!
+                </p>
+                <p className="mt-2 text-xs text-amber-600 dark:text-amber-400">
+                  Note: Maximum one chart per article
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={() => setChartSuggestionDismissed(true)}
+                className="text-gray-400 hover:text-gray-600"
+              >
+                <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+            <div className="mt-3 flex gap-2">
+              <button
+                type="button"
+                onClick={() => {
+                  setChartSuggestionDismissed(true)
+                  // Trigger chart builder in RichTextEditor - emit custom event
+                  window.dispatchEvent(new CustomEvent('open-chart-builder'))
+                }}
+                className="flex-1 rounded-lg bg-purple-600 px-4 py-2 text-sm font-medium text-white hover:bg-purple-700"
+              >
+                Add Chart
+              </button>
+              <button
+                type="button"
+                onClick={() => setChartSuggestionDismissed(true)}
+                className="rounded-lg border border-gray-300 px-4 py-2 text-sm text-gray-600 hover:bg-gray-100 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-800"
+              >
+                Not Now
               </button>
             </div>
           </div>

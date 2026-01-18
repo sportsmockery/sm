@@ -1,9 +1,9 @@
 import Link from 'next/link'
 import Image from 'next/image'
 import { format } from 'date-fns'
-import CategoryBadge from './CategoryBadge'
 import AuthorByline from './AuthorByline'
 import ReadingTime from './ReadingTime'
+import DisqusCommentCount from '@/components/comments/DisqusCommentCount'
 
 interface ArticleCardLargeProps {
   title: string
@@ -69,11 +69,6 @@ export default function ArticleCardLarge({
 
         {/* Content - Right side */}
         <div className="flex flex-col justify-center p-6 md:w-1/2">
-          {/* Category Badge */}
-          <div className="mb-3">
-            <CategoryBadge slug={category.slug} name={category.name} />
-          </div>
-
           {/* Title */}
           <h3 className="mb-3 font-heading text-xl font-bold leading-tight text-zinc-900 transition-colors group-hover:text-[#8B0000] dark:text-white dark:group-hover:text-[#FF6666] md:text-2xl lg:text-3xl">
             <Link href={`/${category.slug}/${slug}`}>{title}</Link>
@@ -108,6 +103,12 @@ export default function ArticleCardLarge({
                 <ReadingTime content={content} />
               </>
             )}
+
+            <span className="text-zinc-300 dark:text-zinc-700">•</span>
+            <DisqusCommentCount
+              identifier={slug}
+              url={`https://sportsmockery.com/${category.slug}/${slug}`}
+            />
           </div>
         </div>
       </div>
