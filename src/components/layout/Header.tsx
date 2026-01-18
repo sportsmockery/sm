@@ -26,21 +26,19 @@ const navItems = [
   { name: 'Blackhawks', href: '/chicago-blackhawks' },
 ]
 
-const moreItems = [
-  { name: 'Podcasts', href: '/podcasts' },
-  { name: 'About', href: '/about' },
-  { name: 'Contact', href: '/contact' },
-  { name: 'Privacy', href: '/privacy' },
+const podcastLinks = [
+  { name: 'Bears Film Room', href: 'https://podcasts.apple.com/us/podcast/bears-film-room-a-chicago-bears-show/id1690627823', icon: '/logos/bfr_logo.png' },
+  { name: 'Pinwheels and Ivy', href: 'https://podcasts.apple.com/us/podcast/pinwheels-and-ivy-podcast/id1385696768', icon: '/logos/PI_logo.png' },
 ]
 
 export default function Header() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
-  const [moreMenuOpen, setMoreMenuOpen] = useState(false)
+  const [podcastMenuOpen, setPodcastMenuOpen] = useState(false)
   const [bearsMenuOpen, setBearsMenuOpen] = useState(false)
   const [searchOpen, setSearchOpen] = useState(false)
   const [searchQuery, setSearchQuery] = useState('')
   const searchInputRef = useRef<HTMLInputElement>(null)
-  const moreMenuRef = useRef<HTMLDivElement>(null)
+  const podcastMenuRef = useRef<HTMLDivElement>(null)
   const bearsMenuRef = useRef<HTMLDivElement>(null)
   const { theme, toggleTheme } = useTheme()
 
@@ -54,8 +52,8 @@ export default function Header() {
   // Close dropdown when clicking outside
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
-      if (moreMenuRef.current && !moreMenuRef.current.contains(e.target as Node)) {
-        setMoreMenuOpen(false)
+      if (podcastMenuRef.current && !podcastMenuRef.current.contains(e.target as Node)) {
+        setPodcastMenuOpen(false)
       }
       if (bearsMenuRef.current && !bearsMenuRef.current.contains(e.target as Node)) {
         setBearsMenuOpen(false)
@@ -71,7 +69,7 @@ export default function Header() {
       if (e.key === 'Escape') {
         setMobileMenuOpen(false)
         setSearchOpen(false)
-        setMoreMenuOpen(false)
+        setPodcastMenuOpen(false)
         setBearsMenuOpen(false)
       }
     }
@@ -263,35 +261,46 @@ export default function Header() {
                 )
               ))}
 
-              {/* MORE dropdown */}
-              <div className="relative" ref={moreMenuRef}>
+              {/* Podcasts dropdown */}
+              <div className="relative" ref={podcastMenuRef}>
                 <button
-                  onClick={() => setMoreMenuOpen(!moreMenuOpen)}
+                  onClick={() => setPodcastMenuOpen(!podcastMenuOpen)}
                   className="flex items-center gap-1 px-4 py-4 text-[14px] font-bold hover:text-[var(--link-color)] transition-colors"
                   style={{ fontFamily: "'Montserrat', sans-serif", color: 'var(--text-primary)' }}
                 >
-                  More
+                  Podcasts
                   <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
                   </svg>
                 </button>
 
-                {/* Dropdown menu */}
-                {moreMenuOpen && (
+                {podcastMenuOpen && (
                   <div
-                    className="absolute top-full left-0 mt-0 w-48 shadow-md z-[100]"
+                    className="absolute top-full left-0 mt-0 w-56 shadow-md z-[100]"
                     style={{ backgroundColor: 'var(--bg-surface)', border: '1px solid var(--border-color)' }}
                   >
-                    {moreItems.map((item) => (
-                      <Link
-                        key={item.name}
-                        href={item.href}
-                        onClick={() => setMoreMenuOpen(false)}
-                        className="block px-5 py-2 text-[14px] hover:bg-[var(--card-hover-bg)] transition-colors"
+                    {podcastLinks.map((podcast) => (
+                      <a
+                        key={podcast.name}
+                        href={podcast.href}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        onClick={() => setPodcastMenuOpen(false)}
+                        className="flex items-center gap-3 px-4 py-3 text-[14px] hover:bg-[var(--card-hover-bg)] transition-colors"
                         style={{ color: 'var(--text-primary)' }}
                       >
-                        {item.name}
-                      </Link>
+                        <Image
+                          src={podcast.icon}
+                          alt={podcast.name}
+                          width={28}
+                          height={28}
+                          className="rounded-md flex-shrink-0"
+                        />
+                        <span className="flex-1">{podcast.name}</span>
+                        <svg className="w-3 h-3 opacity-50 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                        </svg>
+                      </a>
                     ))}
                   </div>
                 )}
@@ -387,17 +396,40 @@ export default function Header() {
                 </Link>
               )
             ))}
-            {moreItems.map((item) => (
-              <Link
-                key={item.name}
-                href={item.href}
-                onClick={() => setMobileMenuOpen(false)}
-                className="block py-3 text-[14px] hover:text-[var(--link-color)] last:border-0"
-                style={{ color: 'var(--text-muted)', borderBottom: '1px solid var(--border-color)' }}
+            {/* Podcasts section */}
+            <div>
+              <div
+                className="py-3 text-[14px] font-bold"
+                style={{ fontFamily: "'Montserrat', sans-serif", color: 'var(--text-primary)', borderBottom: '1px solid var(--border-color)' }}
               >
-                {item.name}
-              </Link>
-            ))}
+                Podcasts
+              </div>
+              <div className="pl-4 border-l-2 border-[#C83200] ml-2">
+                {podcastLinks.map((podcast) => (
+                  <a
+                    key={podcast.name}
+                    href={podcast.href}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    onClick={() => setMobileMenuOpen(false)}
+                    className="flex items-center gap-3 py-3 text-[13px] hover:text-[var(--link-color)]"
+                    style={{ color: 'var(--text-muted)', borderBottom: '1px solid var(--border-color)' }}
+                  >
+                    <Image
+                      src={podcast.icon}
+                      alt={podcast.name}
+                      width={24}
+                      height={24}
+                      className="rounded-md flex-shrink-0"
+                    />
+                    <span className="flex-1">{podcast.name}</span>
+                    <svg className="w-3 h-3 opacity-50 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                    </svg>
+                  </a>
+                ))}
+              </div>
+            </div>
           </div>
         </div>
       )}

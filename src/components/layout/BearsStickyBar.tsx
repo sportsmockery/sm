@@ -1,5 +1,6 @@
 'use client'
 
+import Image from 'next/image'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { useEffect, useState, useCallback, useRef } from 'react'
@@ -16,6 +17,7 @@ interface TickerData {
   postseasonRecord?: string
   nextGame: {
     opponent: string
+    opponentAbbrev?: string
     opponentFull?: string
     date: string
     fullDate: string
@@ -24,6 +26,8 @@ interface TickerData {
     wind?: number
     weather?: string
     spread?: number
+    stadium?: string
+    isHome?: boolean
     isToday?: boolean
   } | null
   lastGame: {
@@ -128,14 +132,34 @@ export default function BearsStickyBar({ className = '', isArticlePage }: BearsS
     }
   }, [fetchTicker])
 
+  // Map team abbreviations to ESPN logo codes
+  const getTeamLogoCode = (abbrev: string): string => {
+    const logoMap: Record<string, string> = {
+      'LA': 'lar', 'LAR': 'lar', 'LAC': 'lac',
+      'SF': 'sf', 'SFO': 'sf', 'GB': 'gb', 'GNB': 'gb',
+      'NE': 'ne', 'NWE': 'ne', 'TB': 'tb', 'TAM': 'tb',
+      'KC': 'kc', 'KAN': 'kc', 'NO': 'no', 'NOR': 'no',
+      'LV': 'lv', 'LVR': 'lv', 'MIN': 'min', 'DET': 'det',
+      'PHI': 'phi', 'DAL': 'dal', 'NYG': 'nyg', 'WAS': 'was',
+      'ATL': 'atl', 'CAR': 'car', 'SEA': 'sea', 'ARI': 'ari',
+      'DEN': 'den', 'PIT': 'pit', 'BAL': 'bal', 'CLE': 'cle',
+      'CIN': 'cin', 'BUF': 'buf', 'MIA': 'mia', 'NYJ': 'nyj',
+      'IND': 'ind', 'TEN': 'ten', 'JAX': 'jax', 'HOU': 'hou',
+    }
+    return logoMap[abbrev.toUpperCase()] || abbrev.toLowerCase()
+  }
+
   // Use fetched data or fallback
   const bearsData = {
     record: tickerData?.record || '--',
     nextGame: tickerData?.nextGame ? {
       opponent: tickerData.nextGame.opponent,
+      opponentAbbrev: tickerData.nextGame.opponentAbbrev,
       date: tickerData.nextGame.date,
       time: tickerData.nextGame.time,
       weather: tickerData.nextGame.weather,
+      stadium: tickerData.nextGame.stadium,
+      isHome: tickerData.nextGame.isHome,
       isToday: tickerData.nextGame.isToday,
     } : null,
     liveGame: tickerData?.liveGame || null,
@@ -159,17 +183,19 @@ export default function BearsStickyBar({ className = '', isArticlePage }: BearsS
         <div className="flex items-center justify-between h-full">
           {/* Left: Bears badge + record/live score */}
           <div className="flex items-center gap-3">
-            {/* Bears logo/badge */}
+            {/* Bears logo */}
             <Link
               href="/chicago-bears"
               className="flex items-center gap-2 group"
             >
-              <div
-                className="w-8 h-8 rounded-full flex items-center justify-center text-white font-black text-sm"
-                style={{ backgroundColor: bearsInfo.secondaryColor }}
-              >
-                <span className="font-montserrat">B</span>
-              </div>
+              <Image
+                src="https://a.espncdn.com/i/teamlogos/nfl/500/chi.png"
+                alt="Chicago Bears"
+                width={32}
+                height={32}
+                className="w-8 h-8 object-contain"
+                unoptimized
+              />
               <span
                 className="hidden sm:inline text-white font-bold text-sm uppercase tracking-wide group-hover:text-orange-300 transition-colors"
                 style={{ fontFamily: "'Montserrat', sans-serif" }}
@@ -208,14 +234,20 @@ export default function BearsStickyBar({ className = '', isArticlePage }: BearsS
             {bearsData.nextGame && (
               <div className="hidden md:flex items-center gap-2 border-l border-white/20 pl-3">
                 <span className="text-white/70 text-xs">Next:</span>
-                <span
-                  className="text-white font-semibold text-sm"
-                  style={{ fontFamily: "'Montserrat', sans-serif" }}
-                >
-                  {bearsData.nextGame.opponent}
-                </span>
+                <span className="text-white/70 text-xs">{bearsData.nextGame.isHome ? 'vs' : '@'}</span>
+                {bearsData.nextGame.opponentAbbrev && (
+                  <Image
+                    src={`https://a.espncdn.com/i/teamlogos/nfl/500/${getTeamLogoCode(bearsData.nextGame.opponentAbbrev)}.png`}
+                    alt={bearsData.nextGame.opponentAbbrev}
+                    width={24}
+                    height={24}
+                    className="w-6 h-6 object-contain"
+                    unoptimized
+                  />
+                )}
                 <span className="text-white/60 text-xs">
                   {bearsData.nextGame.date} {bearsData.nextGame.time}
+                  {bearsData.nextGame.stadium && ` • ${bearsData.nextGame.stadium}`}
                   {bearsData.nextGame.weather && ` • ${bearsData.nextGame.weather}`}
                 </span>
               </div>

@@ -1,0 +1,816 @@
+/*
+  HomepageV3 CSS - Chicago Tonight Layout
+  Dark and light mode via CSS variables
+  Text-first, compact, dashboard-like layout
+*/
+
+/* THEME VARIABLES */
+:root {
+  --font-sans: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+
+  /* team colors */
+  --color-bears-primary: #0b162a;
+  --color-bears-accent: #dc4405;
+  --color-bulls-primary: #ce1141;
+  --color-cubs-primary: #0e3386;
+  --color-whitesox-primary: #27251f;
+  --color-blackhawks-primary: #cf0a2c;
+  --color-citywide: #f5a623;
+}
+
+/* LIGHT MODE */
+body.theme-light .sm-main,
+:root:not(.dark) .sm-main {
+  --bg-page: #f5f5f7;
+  --bg-section: #ffffff;
+  --bg-card: #ffffff;
+  --bg-card-subtle: #f1f3f5;
+  --border-subtle: rgba(0, 0, 0, 0.08);
+  --text-main: #111111;
+  --text-subtle: #555555;
+  --headline-link: #111111;
+  --headline-link-hover: #2222ff;
+  --chip-bg: #f1f3f5;
+  --chip-border: rgba(0, 0, 0, 0.12);
+}
+
+/* DARK MODE (default) */
+body.theme-dark .sm-main,
+.dark .sm-main,
+.sm-main {
+  --bg-page: #050608;
+  --bg-section: #101219;
+  --bg-card: #151823;
+  --bg-card-subtle: #111320;
+  --border-subtle: rgba(255, 255, 255, 0.09);
+  --text-main: #f5f5f5;
+  --text-subtle: #a5a8b5;
+  --headline-link: #ffffff;
+  --headline-link-hover: #7aa0ff;
+  --chip-bg: #202437;
+  --chip-border: rgba(255, 255, 255, 0.12);
+}
+
+/* GLOBAL */
+.sm-main {
+  font-family: var(--font-sans);
+  background-color: var(--bg-page);
+  color: var(--text-main);
+  min-height: 100vh;
+}
+
+.sm-section {
+  padding: 32px 0;
+}
+
+.sm-container {
+  max-width: 1320px;
+  margin: 0 auto;
+  padding: 0 16px;
+}
+
+.sm-section-title {
+  font-size: 1.4rem;
+  font-weight: 700;
+  margin: 0 0 4px;
+  color: var(--text-main);
+}
+
+.sm-section-subtitle {
+  margin: 0;
+  font-size: 0.9rem;
+  color: var(--text-subtle);
+}
+
+.sm-section-header {
+  margin-bottom: 16px;
+}
+
+.sm-section-header--compact {
+  margin-bottom: 8px;
+}
+
+/* LOADING SPINNER */
+.sm-loading-spinner {
+  width: 40px;
+  height: 40px;
+  border: 3px solid var(--border-subtle);
+  border-top-color: var(--color-bears-accent);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin: 0 auto;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* INFO DECK LAYOUT */
+.sm-container--deck .sm-section-header {
+  margin-bottom: 16px;
+}
+
+.sm-info-deck {
+  display: grid;
+  grid-template-columns: minmax(0, 4fr) minmax(0, 3.25fr) minmax(0, 3fr);
+  gap: 16px;
+}
+
+/* Two-column layout: Primary (left, larger) | Headlines (right) */
+.sm-info-deck.sm-info-deck--two-col {
+  grid-template-columns: minmax(0, 2fr) minmax(0, 1fr);
+  gap: 24px;
+}
+
+/* PRIMARY COLUMN */
+.sm-deck-col--primary {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.sm-primary-card {
+  background-color: var(--bg-card);
+  border-radius: 10px;
+  border: 1px solid var(--border-subtle);
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.sm-primary-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.sm-tag {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-size: 0.7rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+/* TEAM TAG COLORS */
+.sm-tag--bears {
+  background: rgba(11, 22, 42, 0.9);
+  color: #ffffff;
+  border: 1px solid var(--color-bears-accent);
+}
+.sm-tag--bulls {
+  background: rgba(206, 17, 65, 0.12);
+  color: var(--color-bulls-primary);
+  border: 1px solid rgba(206, 17, 65, 0.5);
+}
+.sm-tag--cubs {
+  background: rgba(14, 51, 134, 0.12);
+  color: var(--color-cubs-primary);
+  border: 1px solid rgba(14, 51, 134, 0.5);
+}
+.sm-tag--whitesox {
+  background: rgba(39, 37, 31, 0.12);
+  color: var(--color-whitesox-primary);
+  border: 1px solid rgba(39, 37, 31, 0.5);
+}
+.sm-tag--blackhawks {
+  background: rgba(207, 10, 44, 0.12);
+  color: var(--color-blackhawks-primary);
+  border: 1px solid rgba(207, 10, 44, 0.5);
+}
+.sm-tag--citywide {
+  background: rgba(245, 166, 35, 0.12);
+  color: var(--color-citywide);
+  border: 1px solid rgba(245, 166, 35, 0.5);
+}
+
+/* Light mode tag adjustments */
+body.theme-light .sm-tag--bulls,
+:root:not(.dark) .sm-tag--bulls {
+  background: rgba(206, 17, 65, 0.1);
+}
+body.theme-light .sm-tag--cubs,
+:root:not(.dark) .sm-tag--cubs {
+  background: rgba(14, 51, 134, 0.1);
+}
+
+.sm-primary-meta {
+  font-size: 0.75rem;
+  color: var(--text-subtle);
+}
+
+.sm-primary-headline {
+  font-size: 1.4rem;
+  font-weight: 700;
+  margin: 4px 0;
+  line-height: 1.3;
+  color: var(--text-main);
+}
+
+.sm-primary-headline:hover {
+  color: var(--headline-link-hover);
+}
+
+.sm-primary-dek {
+  margin: 0;
+  font-size: 0.95rem;
+  color: var(--text-subtle);
+  line-height: 1.5;
+}
+
+.sm-primary-footer {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  font-size: 0.8rem;
+  color: var(--text-subtle);
+}
+
+.sm-primary-media {
+  margin-top: 6px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.sm-primary-thumb {
+  position: relative;
+  width: 120px;
+  height: 68px;
+  border-radius: 6px;
+  overflow: hidden;
+  flex-shrink: 0;
+  background: linear-gradient(135deg, rgba(220, 68, 5, 0.25), rgba(11, 22, 42, 0.7));
+}
+
+.sm-primary-thumb-img {
+  object-fit: cover;
+}
+
+/* SUPPORT CARDS */
+.sm-support-row {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.sm-support-card {
+  background-color: var(--bg-card-subtle);
+  border-radius: 8px;
+  border: 1px solid var(--border-subtle);
+  padding: 10px 12px;
+}
+
+.sm-support-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px;
+}
+
+.sm-support-meta {
+  font-size: 0.7rem;
+  color: var(--text-subtle);
+}
+
+.sm-support-title {
+  font-size: 0.9rem;
+  font-weight: 600;
+  margin: 6px 0 0;
+  line-height: 1.4;
+  color: var(--text-main);
+}
+
+.sm-support-title:hover {
+  color: var(--headline-link-hover);
+}
+
+/* HEADLINES COLUMN */
+.sm-deck-col--headlines {
+  display: flex;
+  flex-direction: column;
+}
+
+.sm-headlines-box {
+  background-color: var(--bg-card);
+  border-radius: 10px;
+  border: 1px solid var(--border-subtle);
+  padding: 10px 12px;
+  flex: 1;
+}
+
+.sm-headlines-list {
+  list-style: decimal;
+  padding-left: 18px;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.sm-headline-row {
+  font-size: 0.85rem;
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+  line-height: 1.4;
+}
+
+.sm-headline-tag {
+  font-size: 0.6rem;
+  font-weight: 600;
+  padding: 1px 6px;
+  border-radius: 999px;
+  text-transform: uppercase;
+  flex-shrink: 0;
+}
+
+.sm-headline-tag-BEARS {
+  background-color: rgba(11, 22, 42, 0.9);
+  color: #ffffff;
+}
+.sm-headline-tag-BULLS {
+  background-color: var(--color-bulls-primary);
+  color: #ffffff;
+}
+.sm-headline-tag-BLACKHAWKS {
+  background-color: var(--color-blackhawks-primary);
+  color: #ffffff;
+}
+.sm-headline-tag-CUBS {
+  background-color: var(--color-cubs-primary);
+  color: #ffffff;
+}
+.sm-headline-tag-WHITE-SOX {
+  background-color: var(--color-whitesox-primary);
+  color: #ffffff;
+}
+.sm-headline-tag-CITYWIDE {
+  background-color: var(--color-citywide);
+  color: #111111;
+}
+
+.sm-headline-link {
+  color: var(--headline-link);
+  text-decoration: none;
+  transition: color 0.15s;
+}
+.sm-headline-link:hover {
+  text-decoration: underline;
+  color: var(--headline-link-hover);
+}
+
+/* TONIGHT COLUMN */
+.sm-deck-col--tonight {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.sm-tonight-list {
+  list-style: none;
+  margin: 0 0 10px;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.sm-tonight-item {
+  background-color: var(--bg-card);
+  border-radius: 10px;
+  border: 1px solid var(--border-subtle);
+  padding: 10px 12px;
+  font-size: 0.82rem;
+}
+
+.sm-tonight-main {
+  display: flex;
+  align-items: baseline;
+  gap: 4px;
+}
+
+.sm-tonight-team {
+  font-weight: 700;
+  color: var(--text-main);
+}
+
+.sm-tonight-vs {
+  font-size: 0.75rem;
+  color: var(--text-subtle);
+}
+
+.sm-tonight-status {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 4px;
+  font-size: 0.75rem;
+}
+
+.sm-status-pill {
+  padding: 2px 8px;
+  border-radius: 999px;
+  border: 1px solid var(--border-subtle);
+  font-size: 0.68rem;
+  color: var(--text-subtle);
+}
+.sm-status-pill--live {
+  border-color: var(--color-bears-accent);
+  color: var(--color-bears-accent);
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.7; }
+}
+
+.sm-tonight-score {
+  font-weight: 600;
+  color: var(--text-main);
+}
+
+.sm-tonight-score--placeholder {
+  color: var(--text-subtle);
+}
+
+.sm-tonight-take {
+  margin: 6px 0 0;
+  font-size: 0.75rem;
+  color: var(--text-subtle);
+  font-style: italic;
+}
+
+.sm-tonight-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.sm-today-count {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.75rem;
+  color: var(--text-subtle);
+}
+
+.sm-dot-indicator {
+  width: 6px;
+  height: 6px;
+  border-radius: 999px;
+  background-color: var(--color-bears-accent);
+}
+
+/* CHIPS */
+.sm-chip {
+  border-radius: 999px;
+  border: 1px solid var(--chip-border);
+  background-color: var(--chip-bg);
+  font-size: 0.75rem;
+  padding: 4px 12px;
+  cursor: pointer;
+  color: var(--text-subtle);
+  text-decoration: none;
+  transition: all 0.15s;
+}
+.sm-chip:hover {
+  border-color: var(--color-bears-accent);
+  color: var(--text-main);
+}
+.sm-chip--ghost {
+  background-color: transparent;
+}
+
+/* FEATURED SHELL */
+.sm-featured-shell {
+  background-color: var(--bg-section);
+  border-top: 1px solid var(--border-subtle);
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+.sm-featured-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+}
+
+.sm-featured-slot {
+  min-height: 200px;
+}
+
+.sm-featured-card {
+  display: flex;
+  flex-direction: column;
+  background-color: var(--bg-card);
+  border-radius: 10px;
+  border: 1px solid var(--border-subtle);
+  overflow: hidden;
+  text-decoration: none;
+  transition: transform 0.15s, box-shadow 0.15s;
+  height: 100%;
+}
+
+.sm-featured-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+}
+
+.sm-featured-image {
+  position: relative;
+  height: 140px;
+  background: linear-gradient(135deg, var(--bg-card-subtle), var(--bg-card));
+}
+
+.sm-featured-img {
+  object-fit: cover;
+}
+
+.sm-featured-content {
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  flex: 1;
+}
+
+.sm-featured-title {
+  font-size: 0.95rem;
+  font-weight: 600;
+  line-height: 1.4;
+  color: var(--text-main);
+  margin: 0;
+}
+
+.sm-featured-meta {
+  font-size: 0.75rem;
+  color: var(--text-subtle);
+  margin-top: auto;
+}
+
+/* LATEST STREAM */
+.sm-latest-stream {
+  background-color: var(--bg-page);
+}
+
+.sm-latest-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.sm-latest-card {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 16px;
+  padding: 12px;
+  background-color: var(--bg-card);
+  border-radius: 10px;
+  border: 1px solid var(--border-subtle);
+}
+
+.sm-latest-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.sm-latest-title {
+  font-size: 0.95rem;
+  font-weight: 600;
+  line-height: 1.4;
+  color: var(--text-main);
+  margin: 0;
+}
+
+.sm-latest-title:hover {
+  color: var(--headline-link-hover);
+}
+
+.sm-latest-meta {
+  font-size: 0.75rem;
+  color: var(--text-subtle);
+}
+
+.sm-latest-thumb {
+  position: relative;
+  width: 80px;
+  height: 60px;
+  border-radius: 6px;
+  overflow: hidden;
+  flex-shrink: 0;
+  background: var(--bg-card-subtle);
+}
+
+.sm-latest-img {
+  object-fit: cover;
+}
+
+/* SEASONAL FOCUS */
+.sm-seasonal-focus {
+  background-color: var(--bg-section);
+  border-top: 1px solid var(--border-subtle);
+}
+
+.sm-seasonal-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+}
+
+.sm-seasonal-team {
+  background-color: var(--bg-card);
+  border-radius: 10px;
+  border: 1px solid var(--border-subtle);
+  padding: 16px;
+}
+
+.sm-seasonal-team-name {
+  font-size: 1rem;
+  font-weight: 700;
+  margin: 0 0 12px;
+  color: var(--text-main);
+}
+
+.sm-seasonal-posts {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.sm-seasonal-link {
+  font-size: 0.85rem;
+  color: var(--headline-link);
+  text-decoration: none;
+  line-height: 1.4;
+}
+
+.sm-seasonal-link:hover {
+  color: var(--headline-link-hover);
+  text-decoration: underline;
+}
+
+.sm-seasonal-link--main {
+  font-weight: 600;
+  font-size: 0.95rem;
+}
+
+/* EVERGREEN */
+.sm-evergreen {
+  background-color: var(--bg-page);
+  border-top: 1px solid var(--border-subtle);
+}
+
+.sm-evergreen-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+}
+
+.sm-evergreen-card {
+  background-color: var(--bg-card);
+  border-radius: 10px;
+  border: 1px solid var(--border-subtle);
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  text-decoration: none;
+  transition: transform 0.15s;
+}
+
+.sm-evergreen-card:hover {
+  transform: translateY(-2px);
+}
+
+.sm-evergreen-title {
+  font-size: 0.95rem;
+  font-weight: 600;
+  line-height: 1.4;
+  color: var(--text-main);
+  margin: 0;
+}
+
+.sm-evergreen-excerpt {
+  font-size: 0.8rem;
+  color: var(--text-subtle);
+  margin: 0;
+  line-height: 1.5;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+/* RESPONSIVE BREAKPOINTS */
+@media (max-width: 1024px) {
+  .sm-info-deck {
+    grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr);
+    grid-template-areas:
+      "primary primary"
+      "headlines tonight";
+  }
+  .sm-deck-col--primary {
+    grid-area: primary;
+  }
+  .sm-deck-col--headlines {
+    grid-area: headlines;
+  }
+  .sm-deck-col--tonight {
+    grid-area: tonight;
+  }
+
+  /* Two-column layout responsive */
+  .sm-info-deck.sm-info-deck--two-col {
+    grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr);
+    gap: 16px;
+  }
+
+  .sm-featured-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .sm-seasonal-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .sm-evergreen-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 768px) {
+  .sm-section {
+    padding: 24px 0;
+  }
+
+  .sm-info-deck,
+  .sm-info-deck.sm-info-deck--two-col {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 12px;
+  }
+
+  .sm-support-row {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .sm-primary-headline {
+    font-size: 1.2rem;
+  }
+
+  .sm-featured-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .sm-seasonal-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .sm-evergreen-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .sm-headlines-list {
+    padding-left: 16px;
+  }
+
+  .sm-headline-row {
+    font-size: 0.8rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .sm-container {
+    padding: 0 12px;
+  }
+
+  .sm-section-title {
+    font-size: 1.2rem;
+  }
+
+  .sm-primary-card,
+  .sm-support-card,
+  .sm-headlines-box,
+  .sm-tonight-item {
+    padding: 12px;
+  }
+
+  .sm-primary-media {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .sm-primary-thumb {
+    width: 100%;
+    height: 120px;
+  }
+}

@@ -50,6 +50,17 @@ export async function GET() {
     const nowCT = new Date().toLocaleString('en-US', { timeZone: 'America/Chicago' })
     const todayCT = new Date(nowCT).toISOString().split('T')[0]
 
+    // Get stadium from bears_games_master for next game
+    let nextGameStadium = null
+    if (seasonRecord?.next_game_date) {
+      const { data: nextGameData } = await datalabAdmin
+        .from('bears_games_master')
+        .select('stadium')
+        .eq('game_date', seasonRecord.next_game_date)
+        .single()
+      nextGameStadium = nextGameData?.stadium || null
+    }
+
     let nextGame = null
     if (seasonRecord?.next_game_date) {
       // Check if game is today
@@ -74,6 +85,7 @@ export async function GET() {
 
       nextGame = {
         opponent: `${seasonRecord.next_game_home ? 'vs' : '@'} ${opponentAbbrev}`,
+        opponentAbbrev: opponentAbbrev, // Raw abbreviation for logo lookup
         opponentFull: seasonRecord.next_opponent_full,
         date: dayName,
         fullDate: monthDay,
@@ -82,6 +94,8 @@ export async function GET() {
         wind: seasonRecord.next_game_wind,
         weather: weatherDisplay,
         spread: seasonRecord.next_game_spread,
+        stadium: nextGameStadium,
+        isHome: seasonRecord.next_game_home,
         isToday,
       }
     }

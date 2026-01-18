@@ -25,6 +25,7 @@ import { buildAutoLinkContextForPost, applyAutoLinksToHtml } from '@/lib/autolin
 import { getArticleAudioInfo } from '@/lib/audioPlayer'
 import { ArticleAudioPlayer } from '@/components/article/ArticleAudioPlayer'
 import ArticleContentWithEmbeds from '@/components/article/ArticleContentWithEmbeds'
+import { TeamChatWidget } from '@/components/chat'
 
 interface ArticlePageProps {
   params: Promise<{
@@ -474,6 +475,13 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
                     />
                   </div>
                 )}
+
+                {/* Disqus Comments Section */}
+                <CommentSection
+                  articleId={post.id}
+                  articleUrl={articleUrl}
+                  articleTitle={post.title}
+                />
               </article>
             </div>
 
@@ -573,6 +581,9 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
         articleUrl={articleUrl}
         articleTitle={post.title}
       />
+
+      {/* Team Chat Widget - Floating chat for team fan engagement */}
+      <TeamChatWidget categorySlug={category} />
     </>
   )
 }

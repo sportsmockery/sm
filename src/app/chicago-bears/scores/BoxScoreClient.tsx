@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
+import GameHighlights from '@/components/scores/GameHighlights'
 
 const BEARS_LOGO = 'https://a.espncdn.com/i/teamlogos/nfl/500/chi.png'
 
@@ -281,6 +282,16 @@ export default function BoxScoreClient({ games, initialGameId }: Props) {
               )}
             </div>
           </div>
+
+          {/* Game Highlights */}
+          <GameHighlights
+            gameId={boxScore.gameId}
+            homeTeam={boxScore.bears.isHome ? 'CHI' : boxScore.opponent.abbrev}
+            awayTeam={boxScore.bears.isHome ? boxScore.opponent.abbrev : 'CHI'}
+            gameDate={boxScore.date}
+            week={boxScore.week}
+            className="mt-6"
+          />
         </div>
       )}
     </div>
