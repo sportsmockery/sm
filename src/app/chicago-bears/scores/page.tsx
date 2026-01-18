@@ -14,7 +14,7 @@ export default async function BearsScoresPage() {
 
   // Calculate win streak
   let streak = 0
-  let streakType: 'W' | 'L' | null = null
+  let streakType: 'W' | 'L' | 'T' | null = null
   for (const game of recentScores) {
     if (!streakType) {
       streakType = game.result
