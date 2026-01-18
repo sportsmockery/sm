@@ -3,7 +3,60 @@
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
-import { getBearsPlayers, searchPlayers, filterPlayersBySide, getPlayerProfile, type BearsPlayer, type Side, type PlayerProfile } from '@/lib/bearsData'
+
+// Types for player data
+type Side = 'OFF' | 'DEF' | 'ST'
+
+interface BearsPlayer {
+  playerId: string
+  slug: string
+  fullName: string
+  firstName: string
+  lastName: string
+  jerseyNumber: number | null
+  position: string
+  positionGroup: string | null
+  side: Side
+  height: string | null
+  weight: number | null
+  age: number | null
+  experience: string | null
+  college: string | null
+  headshotUrl: string | null
+  primaryRole: string | null
+  status: string | null
+}
+
+interface PlayerSeasonStats {
+  gamesPlayed: number
+  passYards: number | null
+  passTD: number | null
+  passINT: number | null
+  completionPct: number | null
+  rushYards: number | null
+  rushTD: number | null
+  yardsPerCarry: number | null
+  receptions: number | null
+  recYards: number | null
+  recTD: number | null
+  tackles: number | null
+  sacks: number | null
+  interceptions: number | null
+  passesDefended: number | null
+  forcedFumbles: number | null
+  snaps: number | null
+}
+
+interface PlayerProfile {
+  player: BearsPlayer
+  currentSeason: PlayerSeasonStats | null
+}
+
+// Filter players by side
+function filterPlayersBySide(players: BearsPlayer[], side: Side | 'ALL'): BearsPlayer[] {
+  if (side === 'ALL') return players
+  return players.filter(p => p.side === side)
+}
 
 export default function BearsPlayerSelectorPage() {
   const [players, setPlayers] = useState<BearsPlayer[]>([])
@@ -15,13 +68,14 @@ export default function BearsPlayerSelectorPage() {
   const [playerProfile, setPlayerProfile] = useState<PlayerProfile | null>(null)
   const [loadingProfile, setLoadingProfile] = useState(false)
 
-  // Load players on mount
+  // Load players on mount via API
   useEffect(() => {
     async function loadPlayers() {
       try {
-        const data = await getBearsPlayers()
-        setPlayers(data)
-        setFilteredPlayers(data)
+        const res = await fetch('/api/bears/players')
+        const data = await res.json()
+        setPlayers(data.players || [])
+        setFilteredPlayers(data.players || [])
       } catch (err) {
         console.error('Failed to load players:', err)
       } finally {
@@ -50,7 +104,7 @@ export default function BearsPlayerSelectorPage() {
     setFilteredPlayers(result)
   }, [players, searchQuery, sideFilter])
 
-  // Load player profile when selected (desktop only)
+  // Load player profile when selected (desktop only) via API
   useEffect(() => {
     if (!selectedPlayer) {
       setPlayerProfile(null)
@@ -61,8 +115,14 @@ export default function BearsPlayerSelectorPage() {
     async function loadProfile() {
       setLoadingProfile(true)
       try {
-        const profile = await getPlayerProfile(playerSlug)
-        setPlayerProfile(profile)
+        const res = await fetch(`/api/bears/players/${playerSlug}`)
+        const data = await res.json()
+        if (data.player) {
+          setPlayerProfile({
+            player: data.player,
+            currentSeason: data.currentSeason,
+          })
+        }
       } catch (err) {
         console.error('Failed to load profile:', err)
       } finally {

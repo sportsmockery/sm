@@ -22,6 +22,10 @@ const nextConfig: NextConfig = {
         protocol: 'https',
         hostname: 'i.ytimg.com',
       },
+      {
+        protocol: 'https',
+        hostname: 'a.espncdn.com',
+      },
     ],
     // Enable modern image formats
     formats: ['image/avif', 'image/webp'],

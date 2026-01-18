@@ -101,7 +101,8 @@ export default function CategoryFeatured({
             <Link
               key={post.id}
               href={`/${post.category.slug}/${post.slug}`}
-              className="group flex gap-4 rounded-xl border border-zinc-200 bg-white p-4 transition-all hover:border-[#8B0000]/30 hover:shadow-lg dark:border-zinc-800 dark:bg-zinc-900 dark:hover:border-[#FF6666]/30"
+              className="group flex gap-4 rounded-xl p-4 transition-all hover:shadow-lg"
+              style={{ backgroundColor: 'var(--card-bg)', border: '1px solid var(--card-border)' }}
             >
               {/* Thumbnail */}
               <div className="relative h-24 w-24 shrink-0 overflow-hidden rounded-lg sm:h-32 sm:w-32">
@@ -113,18 +114,19 @@ export default function CategoryFeatured({
                     className="object-cover transition-transform duration-300 group-hover:scale-105"
                   />
                 ) : (
-                  <div className="h-full w-full bg-gradient-to-br from-zinc-200 to-zinc-300 dark:from-zinc-700 dark:to-zinc-800" />
+                  <div className="h-full w-full" style={{ background: 'linear-gradient(to bottom right, var(--bg-surface), var(--border-color))' }} />
                 )}
               </div>
 
               {/* Content */}
               <div className="flex min-w-0 flex-1 flex-col justify-center">
                 <h3
-                  className="mb-2 line-clamp-2 font-heading text-lg font-bold text-zinc-900 transition-colors group-hover:text-[#8B0000] dark:text-white dark:group-hover:text-[#FF6666]"
+                  className="mb-2 line-clamp-2 font-heading text-lg font-bold transition-colors group-hover:text-[var(--link-color)]"
+                  style={{ color: 'var(--text-primary)' }}
                   dangerouslySetInnerHTML={{ __html: processIconShortcodes(post.title) }}
                 />
 
-                <div className="flex items-center gap-2 text-sm text-zinc-500 dark:text-zinc-400">
+                <div className="flex items-center gap-2 text-sm" style={{ color: 'var(--text-muted)' }}>
                   {post.author && (
                     <>
                       <span>{post.author.name}</span>

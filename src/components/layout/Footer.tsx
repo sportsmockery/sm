@@ -77,18 +77,21 @@ export default function Footer() {
   return (
     <footer className="mt-auto">
       {/* Footer Top Section - Dark Background per spec */}
-      <div className="bg-[#222222] py-8 md:py-12">
+      <div className="py-8 md:py-12" style={{ backgroundColor: 'var(--bg-footer)' }}>
         <div className="max-w-[1110px] mx-auto px-4">
           <div className="grid grid-cols-1 gap-8 md:grid-cols-3">
             {/* About Column */}
             <div className="text-center md:text-left">
               <h3
-                className="text-white text-[14px] font-bold uppercase mb-4 md:mb-5"
-                style={{ fontFamily: "'Montserrat', sans-serif" }}
+                className="text-[14px] font-bold uppercase mb-4 md:mb-5"
+                style={{ fontFamily: "'Montserrat', sans-serif", color: 'var(--text-inverse)' }}
               >
                 ABOUT
               </h3>
-              <p className="text-[#999] text-[13px] md:text-[14px] leading-relaxed mb-4 md:mb-5">
+              <p
+                className="text-[13px] md:text-[14px] leading-relaxed mb-4 md:mb-5"
+                style={{ color: 'var(--footer-text-muted, #999)' }}
+              >
                 Your source for Chicago sports news, analysis, and commentary. Covering Bears, Bulls, Cubs, White Sox, and Blackhawks with passion.
               </p>
               {/* Social icons */}
@@ -99,7 +102,8 @@ export default function Footer() {
                     href={social.href}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="text-[#999] hover:text-white transition-colors"
+                    className="transition-colors hover:opacity-100"
+                    style={{ color: 'var(--footer-text-muted, #999)' }}
                     aria-label={social.name}
                   >
                     <SocialIcon icon={social.icon} className="w-5 h-5 md:w-6 md:h-6" />
@@ -113,8 +117,8 @@ export default function Footer() {
               {/* Categories Column */}
               <div>
                 <h3
-                  className="text-white text-[13px] md:text-[14px] font-bold uppercase mb-3 md:mb-5"
-                  style={{ fontFamily: "'Montserrat', sans-serif" }}
+                  className="text-[13px] md:text-[14px] font-bold uppercase mb-3 md:mb-5"
+                  style={{ fontFamily: "'Montserrat', sans-serif", color: 'var(--text-inverse)' }}
                 >
                   CATEGORIES
                 </h3>
@@ -123,7 +127,8 @@ export default function Footer() {
                     <li key={link.name}>
                       <Link
                         href={link.href}
-                        className="text-[#999] text-[13px] md:text-[14px] hover:text-white transition-colors"
+                        className="text-[13px] md:text-[14px] transition-colors hover:opacity-100"
+                        style={{ color: 'var(--footer-text-muted, #999)' }}
                       >
                         {link.name}
                       </Link>
@@ -135,8 +140,8 @@ export default function Footer() {
               {/* Connect Column */}
               <div>
                 <h3
-                  className="text-white text-[13px] md:text-[14px] font-bold uppercase mb-3 md:mb-5"
-                  style={{ fontFamily: "'Montserrat', sans-serif" }}
+                  className="text-[13px] md:text-[14px] font-bold uppercase mb-3 md:mb-5"
+                  style={{ fontFamily: "'Montserrat', sans-serif", color: 'var(--text-inverse)' }}
                 >
                   CONNECT
                 </h3>
@@ -145,7 +150,8 @@ export default function Footer() {
                     <li key={link.name}>
                       <Link
                         href={link.href}
-                        className="text-[#999] text-[13px] md:text-[14px] hover:text-white transition-colors"
+                        className="text-[13px] md:text-[14px] transition-colors hover:opacity-100"
+                        style={{ color: 'var(--footer-text-muted, #999)' }}
                       >
                         {link.name}
                       </Link>
@@ -159,9 +165,12 @@ export default function Footer() {
       </div>
 
       {/* Footer Bottom Section - Darker per spec */}
-      <div className="bg-[#111111] py-4 md:py-5">
+      <div className="py-4 md:py-5" style={{ backgroundColor: 'var(--footer-bottom-bg, #111111)' }}>
         <div className="max-w-[1110px] mx-auto px-4">
-          <p className="text-[#666] text-[11px] md:text-[12px] text-center">
+          <p
+            className="text-[11px] md:text-[12px] text-center"
+            style={{ color: 'var(--footer-text-muted, #666)' }}
+          >
             &copy; {new Date().getFullYear()} Sports Mockery. All Rights Reserved.
           </p>
         </div>

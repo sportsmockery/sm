@@ -71,9 +71,9 @@ export default function Header() {
   }
 
   return (
-    <header className="sticky top-0 z-[200] bg-white dark:bg-[#0a0a0b]">
+    <header className="sticky top-0 z-[200]" style={{ backgroundColor: 'var(--bg-header)' }}>
       {/* Top Header Bar - Logo and Social */}
-      <div className="border-b border-[#e0e0e0] dark:border-[#27272a] bg-white dark:bg-[#0a0a0b]">
+      <div className="border-b" style={{ borderColor: 'var(--border-color)', backgroundColor: 'var(--bg-header)' }}>
         <div className="max-w-[1110px] mx-auto px-4">
           <div className="flex items-center justify-between h-[52px]">
             {/* Left: Social icons */}
@@ -82,7 +82,8 @@ export default function Header() {
                 href="https://facebook.com/sportsmockery"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-[#222] dark:text-white hover:text-[#bc0000] transition-colors"
+                className="hover:text-[var(--link-color)] transition-colors"
+                style={{ color: 'var(--text-primary)' }}
                 aria-label="Facebook"
               >
                 <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 320 512">
@@ -93,7 +94,8 @@ export default function Header() {
                 href="https://twitter.com/sportsmockery"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-[#222] dark:text-white hover:text-[#bc0000] transition-colors"
+                className="hover:text-[var(--link-color)] transition-colors"
+                style={{ color: 'var(--text-primary)' }}
                 aria-label="X (Twitter)"
               >
                 <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 512 512">
@@ -104,7 +106,8 @@ export default function Header() {
                 href="https://instagram.com/sportsmockery"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-[#222] dark:text-white hover:text-[#bc0000] transition-colors"
+                className="hover:text-[var(--link-color)] transition-colors"
+                style={{ color: 'var(--text-primary)' }}
                 aria-label="Instagram"
               >
                 <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 448 512">
@@ -115,7 +118,8 @@ export default function Header() {
                 href="https://youtube.com/sportsmockery"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-[#222] dark:text-white hover:text-[#bc0000] transition-colors"
+                className="hover:text-[var(--link-color)] transition-colors"
+                style={{ color: 'var(--text-primary)' }}
                 aria-label="YouTube"
               >
                 <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 576 512">
@@ -124,10 +128,10 @@ export default function Header() {
               </a>
             </div>
 
-            {/* Center: Logo */}
+            {/* Center: Logo - swaps based on theme */}
             <Link href="/" className="flex-shrink-0">
               <Image
-                src="/logo.png"
+                src={theme === 'dark' ? '/logo-white.png' : '/logo.png'}
                 alt="Sports Mockery"
                 width={220}
                 height={65}
@@ -167,13 +171,14 @@ export default function Header() {
       </div>
 
       {/* Main Navigation Bar - with red underline */}
-      <nav className="border-b-[3px] border-[#bc0000] bg-white dark:bg-[#0a0a0b]">
+      <nav className="border-b-[3px] border-[#bc0000]" style={{ backgroundColor: 'var(--bg-header)' }}>
         <div className="max-w-[1110px] mx-auto px-4">
           <div className="flex items-center justify-between h-[44px]">
             {/* Mobile menu button */}
             <button
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="lg:hidden p-2 text-[#222] dark:text-white hover:text-[#bc0000]"
+              className="lg:hidden p-2 hover:text-[var(--link-color)]"
+              style={{ color: 'var(--text-primary)' }}
               aria-label="Toggle menu"
             >
               <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -191,8 +196,8 @@ export default function Header() {
                 <Link
                   key={item.name}
                   href={item.href}
-                  className="px-4 py-4 text-[14px] font-bold text-[#222] dark:text-white hover:text-[#bc0000] transition-colors"
-                  style={{ fontFamily: "'Montserrat', sans-serif" }}
+                  className="px-4 py-4 text-[14px] font-bold hover:text-[var(--link-color)] transition-colors"
+                  style={{ fontFamily: "'Montserrat', sans-serif", color: 'var(--text-primary)' }}
                 >
                   {item.name}
                 </Link>
@@ -202,8 +207,8 @@ export default function Header() {
               <div className="relative" ref={moreMenuRef}>
                 <button
                   onClick={() => setMoreMenuOpen(!moreMenuOpen)}
-                  className="flex items-center gap-1 px-4 py-4 text-[14px] font-bold text-[#222] dark:text-white hover:text-[#bc0000] transition-colors"
-                  style={{ fontFamily: "'Montserrat', sans-serif" }}
+                  className="flex items-center gap-1 px-4 py-4 text-[14px] font-bold hover:text-[var(--link-color)] transition-colors"
+                  style={{ fontFamily: "'Montserrat', sans-serif", color: 'var(--text-primary)' }}
                 >
                   More
                   <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -213,13 +218,17 @@ export default function Header() {
 
                 {/* Dropdown menu */}
                 {moreMenuOpen && (
-                  <div className="absolute top-full left-0 mt-0 w-48 bg-white dark:bg-[#222] border border-[#e0e0e0] dark:border-[#333] shadow-md z-[100]">
+                  <div
+                    className="absolute top-full left-0 mt-0 w-48 shadow-md z-[100]"
+                    style={{ backgroundColor: 'var(--bg-surface)', border: '1px solid var(--border-color)' }}
+                  >
                     {moreItems.map((item) => (
                       <Link
                         key={item.name}
                         href={item.href}
                         onClick={() => setMoreMenuOpen(false)}
-                        className="block px-5 py-2 text-[14px] text-[#222] dark:text-white hover:bg-[#f5f5f5] dark:hover:bg-[#333] transition-colors"
+                        className="block px-5 py-2 text-[14px] hover:bg-[var(--card-hover-bg)] transition-colors"
+                        style={{ color: 'var(--text-primary)' }}
                       >
                         {item.name}
                       </Link>
@@ -239,7 +248,12 @@ export default function Header() {
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
                     placeholder="Search..."
-                    className="w-40 lg:w-56 px-3 py-1.5 text-sm bg-white dark:bg-[#1a1a1a] border border-[#e0e0e0] dark:border-[#333] focus:outline-none focus:border-[#bc0000]"
+                    className="w-40 lg:w-56 px-3 py-1.5 text-sm focus:outline-none focus:border-[#bc0000]"
+                    style={{
+                      backgroundColor: 'var(--input-bg)',
+                      border: '1px solid var(--input-border)',
+                      color: 'var(--input-text)'
+                    }}
                   />
                   <button
                     type="button"
@@ -247,7 +261,8 @@ export default function Header() {
                       setSearchOpen(false)
                       setSearchQuery('')
                     }}
-                    className="p-2 text-[#666] hover:text-[#bc0000]"
+                    className="p-2 hover:text-[var(--link-color)]"
+                    style={{ color: 'var(--text-muted)' }}
                   >
                     <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -257,7 +272,8 @@ export default function Header() {
               ) : (
                 <button
                   onClick={() => setSearchOpen(true)}
-                  className="p-2 text-[#222] dark:text-white hover:text-[#bc0000] transition-colors"
+                  className="p-2 hover:text-[var(--link-color)] transition-colors"
+                  style={{ color: 'var(--text-primary)' }}
                   aria-label="Search"
                 >
                   <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -272,15 +288,15 @@ export default function Header() {
 
       {/* Mobile Navigation */}
       {mobileMenuOpen && (
-        <div className="lg:hidden bg-white dark:bg-[#0a0a0b] border-b border-[#e0e0e0] dark:border-[#27272a]">
+        <div className="lg:hidden" style={{ backgroundColor: 'var(--bg-header)', borderBottom: '1px solid var(--border-color)' }}>
           <div className="max-w-[1110px] mx-auto px-4 py-4">
             {navItems.map((item) => (
               <Link
                 key={item.name}
                 href={item.href}
                 onClick={() => setMobileMenuOpen(false)}
-                className="block py-3 text-[14px] font-bold text-[#222] dark:text-white hover:text-[#bc0000] border-b border-[#e0e0e0] dark:border-[#27272a] last:border-0"
-                style={{ fontFamily: "'Montserrat', sans-serif" }}
+                className="block py-3 text-[14px] font-bold hover:text-[var(--link-color)] last:border-0"
+                style={{ fontFamily: "'Montserrat', sans-serif", color: 'var(--text-primary)', borderBottom: '1px solid var(--border-color)' }}
               >
                 {item.name}
               </Link>
@@ -290,7 +306,8 @@ export default function Header() {
                 key={item.name}
                 href={item.href}
                 onClick={() => setMobileMenuOpen(false)}
-                className="block py-3 text-[14px] text-[#666] dark:text-gray-400 hover:text-[#bc0000] border-b border-[#e0e0e0] dark:border-[#27272a] last:border-0"
+                className="block py-3 text-[14px] hover:text-[var(--link-color)] last:border-0"
+                style={{ color: 'var(--text-muted)', borderBottom: '1px solid var(--border-color)' }}
               >
                 {item.name}
               </Link>

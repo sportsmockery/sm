@@ -198,7 +198,7 @@ export default async function CategoryPage({ params, searchParams }: CategoryPag
   })
 
   return (
-    <div className="min-h-screen bg-[#f5f5f5]">
+    <div className="min-h-screen" style={{ backgroundColor: 'var(--bg-surface)' }}>
       {/* Category Header per spec section 8.1 */}
       <CategoryHeader
         categorySlug={category.slug}

@@ -55,18 +55,22 @@ export async function GET() {
       // Check if game is today
       const isToday = seasonRecord.next_game_date === todayCT
 
-      // Parse date and time (stored in Central Time)
-      const gameDate = new Date(seasonRecord.next_game_date + 'T' + (seasonRecord.next_game_time || '12:00:00'))
-      const dayName = isToday ? 'Tonight' : gameDate.toLocaleDateString('en-US', { weekday: 'short', timeZone: 'America/Chicago' })
+      // Parse date for day name - use UTC date directly since we want the game date
+      const gameDate = new Date(seasonRecord.next_game_date + 'T12:00:00Z')
+      const dayName = isToday ? 'Today' : gameDate.toLocaleDateString('en-US', { weekday: 'short', timeZone: 'America/Chicago' })
       const monthDay = gameDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric', timeZone: 'America/Chicago' })
 
-      // Format time in Central Time (CT) - skip time display if "Tonight"
-      const timeStr = isToday
-        ? ''
-        : (seasonRecord.next_game_time ? formatTimeCT(seasonRecord.next_game_time) : 'TBD')
+      // Show kickoff time in Central Time
+      // Per SM_INTEGRATION_GUIDE: Database stores times in Central Time already
+      const timeStr = seasonRecord.next_game_time ? formatTimeCT(seasonRecord.next_game_time) : 'TBD'
 
       // Format opponent - use common abbreviations (LA instead of LAR, etc.)
       const opponentAbbrev = formatOpponentAbbrev(seasonRecord.next_opponent || 'TBD')
+
+      // Format weather display (temp + wind if available)
+      const weatherDisplay = seasonRecord.next_game_temp !== null
+        ? `${Math.round(seasonRecord.next_game_temp)}°F`
+        : null
 
       nextGame = {
         opponent: `${seasonRecord.next_game_home ? 'vs' : '@'} ${opponentAbbrev}`,
@@ -75,7 +79,10 @@ export async function GET() {
         fullDate: monthDay,
         time: timeStr,
         temp: seasonRecord.next_game_temp,
+        wind: seasonRecord.next_game_wind,
+        weather: weatherDisplay,
         spread: seasonRecord.next_game_spread,
+        isToday,
       }
     }
 
@@ -165,12 +172,15 @@ export async function GET() {
   }
 }
 
-// Format time from HH:MM:SS to readable CT format
+// Format time for display (already in Central Time per SM_INTEGRATION_GUIDE)
+// Input: "17:30:00" (HH:MM:SS in CT)
+// Output: "5:30 PM CT"
 function formatTimeCT(timeStr: string): string {
   const [hours, minutes] = timeStr.split(':').map(Number)
-  const period = hours >= 12 ? 'PM' : 'AM'
   const hour12 = hours % 12 || 12
-  return `${hour12}:${minutes.toString().padStart(2, '0')} ${period} CT`
+  const ampm = hours >= 12 ? 'PM' : 'AM'
+  const minStr = minutes.toString().padStart(2, '0')
+  return `${hour12}:${minStr} ${ampm} CT`
 }
 
 // Format opponent abbreviation to common display format

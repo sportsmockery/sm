@@ -68,11 +68,11 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
   const totalPages = Math.ceil(total / pageSize)
 
   return (
-    <div className="min-h-screen bg-zinc-50 dark:bg-zinc-950">
+    <div className="min-h-screen" style={{ backgroundColor: 'var(--bg-surface)' }}>
       {/* Hero Section */}
-      <header className="bg-gradient-to-b from-zinc-900 to-zinc-800 py-16">
+      <header className="py-16" style={{ background: 'linear-gradient(to bottom, var(--bg-footer), var(--bg-elevated))' }}>
         <div className="mx-auto max-w-4xl px-4">
-          <h1 className="mb-6 text-center font-heading text-4xl font-black text-white">
+          <h1 className="mb-6 text-center font-heading text-4xl font-black" style={{ color: 'var(--text-inverse)' }}>
             Search SportsMockery
           </h1>
 
@@ -120,20 +120,22 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
                       {currentPage > 1 && (
                         <a
                           href={`/search?q=${encodeURIComponent(query)}${category ? `&category=${category}` : ''}${author ? `&author=${author}` : ''}${dateRange ? `&dateRange=${dateRange}` : ''}&page=${currentPage - 1}`}
-                          className="rounded-lg border border-zinc-200 bg-white px-4 py-2 font-medium text-zinc-700 transition-colors hover:bg-zinc-50 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-300 dark:hover:bg-zinc-700"
+                          className="rounded-lg border px-4 py-2 font-medium transition-colors"
+                          style={{ borderColor: 'var(--border-color)', backgroundColor: 'var(--card-bg)', color: 'var(--text-primary)' }}
                         >
                           Previous
                         </a>
                       )}
 
-                      <span className="px-4 text-sm text-zinc-600 dark:text-zinc-400">
+                      <span className="px-4 text-sm" style={{ color: 'var(--text-muted)' }}>
                         Page {currentPage} of {totalPages}
                       </span>
 
                       {currentPage < totalPages && (
                         <a
                           href={`/search?q=${encodeURIComponent(query)}${category ? `&category=${category}` : ''}${author ? `&author=${author}` : ''}${dateRange ? `&dateRange=${dateRange}` : ''}&page=${currentPage + 1}`}
-                          className="rounded-lg border border-zinc-200 bg-white px-4 py-2 font-medium text-zinc-700 transition-colors hover:bg-zinc-50 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-300 dark:hover:bg-zinc-700"
+                          className="rounded-lg border px-4 py-2 font-medium transition-colors"
+                          style={{ borderColor: 'var(--border-color)', backgroundColor: 'var(--card-bg)', color: 'var(--text-primary)' }}
                         >
                           Next
                         </a>
@@ -154,8 +156,8 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
             </div>
 
             {/* Browse by team */}
-            <div className="rounded-2xl border border-zinc-200 bg-white p-6 dark:border-zinc-800 dark:bg-zinc-900">
-              <h2 className="mb-4 font-heading text-xl font-bold text-zinc-900 dark:text-white">
+            <div className="rounded-2xl border p-6" style={{ borderColor: 'var(--border-color)', backgroundColor: 'var(--card-bg)' }}>
+              <h2 className="mb-4 font-heading text-xl font-bold" style={{ color: 'var(--text-primary)' }}>
                 Browse by Team
               </h2>
               <div className="grid grid-cols-2 gap-3 sm:grid-cols-5">
@@ -180,12 +182,13 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
 
             {/* Latest articles teaser */}
             <div className="mt-8 text-center">
-              <p className="mb-4 text-zinc-600 dark:text-zinc-400">
+              <p className="mb-4" style={{ color: 'var(--text-muted)' }}>
                 Or check out the latest news
               </p>
               <a
                 href="/"
-                className="inline-flex items-center gap-2 rounded-xl bg-[#8B0000] px-6 py-3 font-semibold text-white transition-colors hover:bg-[#a00000] dark:bg-[#FF6666] dark:hover:bg-[#FF8888]"
+                className="inline-flex items-center gap-2 rounded-xl px-6 py-3 font-semibold transition-colors"
+                style={{ backgroundColor: 'var(--badge-bg)', color: 'var(--badge-text)' }}
               >
                 Browse All Articles
                 <svg

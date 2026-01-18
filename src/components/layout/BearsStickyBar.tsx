@@ -21,7 +21,10 @@ interface TickerData {
     fullDate: string
     time: string
     temp?: number
+    wind?: number
+    weather?: string
     spread?: number
+    isToday?: boolean
   } | null
   lastGame: {
     opponent: string
@@ -132,6 +135,8 @@ export default function BearsStickyBar({ className = '', isArticlePage }: BearsS
       opponent: tickerData.nextGame.opponent,
       date: tickerData.nextGame.date,
       time: tickerData.nextGame.time,
+      weather: tickerData.nextGame.weather,
+      isToday: tickerData.nextGame.isToday,
     } : null,
     liveGame: tickerData?.liveGame || null,
   }
@@ -211,6 +216,7 @@ export default function BearsStickyBar({ className = '', isArticlePage }: BearsS
                 </span>
                 <span className="text-white/60 text-xs">
                   {bearsData.nextGame.date} {bearsData.nextGame.time}
+                  {bearsData.nextGame.weather && ` • ${bearsData.nextGame.weather}`}
                 </span>
               </div>
             )}

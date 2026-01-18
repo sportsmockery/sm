@@ -280,8 +280,8 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
                 {/* Category Badge per spec: red bg #bc0000 */}
                 <Link
                   href={`/${categoryData?.slug || category}`}
-                  className="mb-4 inline-block bg-[#bc0000] text-white text-[11px] font-bold uppercase tracking-[0.5px] px-[10px] py-[4px]"
-                  style={{ fontFamily: "'Montserrat', sans-serif" }}
+                  className="mb-4 inline-block text-[11px] font-bold uppercase tracking-[0.5px] px-[10px] py-[4px]"
+                  style={{ fontFamily: "'Montserrat', sans-serif", backgroundColor: 'var(--badge-bg)', color: 'var(--badge-text)' }}
                 >
                   {categoryData?.name || category}
                 </Link>
@@ -308,7 +308,7 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
                           />
                         </div>
                       ) : (
-                        <div className="flex h-10 w-10 items-center justify-center rounded-full bg-[#bc0000] text-sm font-bold text-white">
+                        <div className="flex h-10 w-10 items-center justify-center rounded-full text-sm font-bold" style={{ backgroundColor: 'var(--badge-bg)', color: 'var(--badge-text)' }}>
                           {author.display_name.charAt(0).toUpperCase()}
                         </div>
                       )}
@@ -338,7 +338,7 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
           </div>
         ) : (
           /* Fallback header without image - dark background for white text */
-          <div className="bg-[#1a1a1a] py-10 border-b border-zinc-800">
+          <div className="py-10 border-b" style={{ backgroundColor: 'var(--bg-elevated)', borderColor: 'var(--border-color)' }}>
             <div className="mx-auto max-w-[1110px] px-4">
               {/* Breadcrumb */}
               <nav className="mb-4">
@@ -370,8 +370,8 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
               {/* Category Badge per spec */}
               <Link
                 href={`/${categoryData?.slug || category}`}
-                className="mb-4 inline-block bg-[#bc0000] text-white text-[11px] font-bold uppercase tracking-[0.5px] px-[10px] py-[4px]"
-                style={{ fontFamily: "'Montserrat', sans-serif" }}
+                className="mb-4 inline-block text-[11px] font-bold uppercase tracking-[0.5px] px-[10px] py-[4px]"
+                style={{ fontFamily: "'Montserrat', sans-serif", backgroundColor: 'var(--badge-bg)', color: 'var(--badge-text)' }}
               >
                 {categoryData?.name || category}
               </Link>
@@ -385,13 +385,14 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
               </h1>
 
               {/* Meta line per spec: "By {author} · {Date} · {X min read} · {Category}" */}
-              <p className="text-[14px] text-zinc-400">
+              <p className="text-[14px]" style={{ color: 'var(--text-muted)' }}>
                 {author && (
                   <>
                     By{' '}
                     <Link
                       href={`/author/${author.slug || author.id}`}
-                      className="font-medium text-white hover:text-[#bc0000] transition-colors"
+                      className="font-medium transition-colors"
+                      style={{ color: 'var(--text-primary)' }}
                     >
                       {author.display_name}
                     </Link>
@@ -410,7 +411,7 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
       </header>
 
       {/* Main Content Area - per spec section 7.3: max-width 700-750px for article body */}
-      <div className="bg-white">
+      <div style={{ backgroundColor: 'var(--bg-page)' }}>
         <div className="mx-auto max-w-[1110px] px-4 py-10">
           <div className="lg:flex lg:gap-10">
             {/* Main article column */}
@@ -446,20 +447,20 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
                 />
 
                 {/* Share buttons placed after article body per spec */}
-                <div className="my-8 flex items-center gap-3 border-y border-[#e0e0e0] py-6">
+                <div className="my-8 flex items-center gap-3 border-y py-6" style={{ borderColor: 'var(--border-color)' }}>
                   <ShareButtons url={articleUrl} title={post.title} />
                 </div>
 
                 {/* Tags per spec section 15.4 */}
                 {tags.length > 0 && (
-                  <div className="mt-10 border-t border-[#e0e0e0] pt-6">
+                  <div className="mt-10 border-t pt-6" style={{ borderColor: 'var(--border-color)' }}>
                     <ArticleTags tags={tags} />
                   </div>
                 )}
 
                 {/* Author Card per spec section 15.3 */}
                 {author && (
-                  <div className="mt-10 border-t border-[#e0e0e0] pt-10">
+                  <div className="mt-10 border-t pt-10" style={{ borderColor: 'var(--border-color)' }}>
                     <AuthorCard
                       author={{
                         id: author.id,
@@ -540,7 +541,7 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
 
       {/* Full-width Related Articles Section */}
       {relatedPosts.length > 0 && categoryData && (
-        <section className="border-t border-zinc-200 bg-zinc-50 py-12 dark:border-zinc-800 dark:bg-zinc-900/50">
+        <section className="border-t py-12" style={{ borderColor: 'var(--border-color)', backgroundColor: 'var(--bg-surface)' }}>
           <div className="mx-auto max-w-7xl px-4">
             <RelatedArticles
               articles={relatedPosts.map(p => ({

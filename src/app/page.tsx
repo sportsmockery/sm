@@ -17,12 +17,12 @@ const formatDate = (dateStr: string) => {
   return date.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })
 }
 
-// Category tag component - RED bg, white text per spec (section 6.3)
+// Category tag component - Badge colors from theme variables per spec (section 6.3)
 function CategoryTag({ category, className = '' }: { category: string; className?: string }) {
   return (
     <span
-      className={`inline-block bg-[#bc0000] text-white text-[10px] font-bold uppercase tracking-[0.5px] px-[10px] py-[4px] ${className}`}
-      style={{ fontFamily: "'Montserrat', sans-serif" }}
+      className={`inline-block text-[10px] font-bold uppercase tracking-[0.5px] px-[10px] py-[4px] ${className}`}
+      style={{ fontFamily: "'Montserrat', sans-serif", backgroundColor: 'var(--badge-bg)', color: 'var(--badge-text)' }}
     >
       {category}
     </span>
@@ -75,7 +75,7 @@ function FeaturedArticle({ article, onView }: { article: any; onView: (a: any) =
 // Image (70% aspect), category tag bottom-left overlapping, headline below, metadata below
 function ArticleCard({ article, onView }: { article: any; onView: (a: any) => void }) {
   return (
-    <article className="article-card group bg-white">
+    <article className="article-card group" style={{ backgroundColor: 'var(--card-bg)' }}>
       <Link
         href={`/${article.category?.slug || 'news'}/${article.slug}`}
         onClick={() => onView(article)}
@@ -97,15 +97,15 @@ function ArticleCard({ article, onView }: { article: any; onView: (a: any) => vo
 
         {/* Content area - padding per spec: 0 15px 15px 15px */}
         <div className="pt-5 px-0 pb-4">
-          {/* Headline per spec: Montserrat 700, 18-20px, #222, hover: #bc0000 + underline */}
+          {/* Headline per spec: Montserrat 700, 18-20px, hover: link-color + underline */}
           <h3
-            className="text-[18px] font-bold text-[#222222] leading-[1.3] line-clamp-3 group-hover:text-[#bc0000] group-hover:underline decoration-1 underline-offset-2 transition-colors"
-            style={{ fontFamily: "'Montserrat', sans-serif" }}
+            className="text-[18px] font-bold leading-[1.3] line-clamp-3 group-hover:text-[var(--link-color)] group-hover:underline decoration-1 underline-offset-2 transition-colors"
+            style={{ fontFamily: "'Montserrat', sans-serif", color: 'var(--text-primary)' }}
           >
             {article.title}
           </h3>
-          {/* Metadata per spec: 12-13px, #999999, "Author Name • Month Day, Year" */}
-          <p className="mt-2 text-[12px] text-[#999999]" style={{ fontFamily: "'Montserrat', sans-serif" }}>
+          {/* Metadata per spec: 12-13px, "Author Name • Month Day, Year" */}
+          <p className="mt-2 text-[12px]" style={{ fontFamily: "'Montserrat', sans-serif", color: 'var(--text-muted)' }}>
             {article.author?.display_name || 'Staff'} • {formatDate(article.published_at)}
           </p>
         </div>
@@ -115,22 +115,22 @@ function ArticleCard({ article, onView }: { article: any; onView: (a: any) => vo
 }
 
 // Section header per spec section 5.2:
-// Montserrat 700, 18-20px, #222, uppercase, 3px red bottom border, padding-bottom 10px, margin-bottom 20px
+// Montserrat 700, 18-20px, uppercase, 3px red bottom border, padding-bottom 10px, margin-bottom 20px
 function SectionHeader({ title, href }: { title: string; href?: string }) {
   return (
     <div className="border-b-[3px] border-[#bc0000] pb-[10px] mb-5">
       {href ? (
         <Link
           href={href}
-          className="text-[18px] font-bold text-[#222222] uppercase hover:text-[#bc0000] transition-colors"
-          style={{ fontFamily: "'Montserrat', sans-serif" }}
+          className="text-[18px] font-bold uppercase hover:text-[var(--link-color)] transition-colors"
+          style={{ fontFamily: "'Montserrat', sans-serif", color: 'var(--text-primary)' }}
         >
           {title}
         </Link>
       ) : (
         <h2
-          className="text-[18px] font-bold text-[#222222] uppercase"
-          style={{ fontFamily: "'Montserrat', sans-serif" }}
+          className="text-[18px] font-bold uppercase"
+          style={{ fontFamily: "'Montserrat', sans-serif", color: 'var(--text-primary)' }}
         >
           {title}
         </h2>
@@ -154,12 +154,12 @@ function FeaturedSkeleton() {
 // Loading skeleton for article card
 function CardSkeleton() {
   return (
-    <div className="bg-white">
+    <div style={{ backgroundColor: 'var(--card-bg)' }}>
       <div className="relative w-full pb-[70%] skeleton" />
       <div className="pt-5 px-0 pb-4">
-        <div className="h-5 w-full bg-gray-200 mb-2" />
-        <div className="h-5 w-2/3 bg-gray-200 mb-3" />
-        <div className="h-3 w-1/2 bg-gray-200" />
+        <div className="h-5 w-full skeleton mb-2" />
+        <div className="h-5 w-2/3 skeleton mb-3" />
+        <div className="h-3 w-1/2 skeleton" />
       </div>
     </div>
   )
@@ -173,9 +173,9 @@ export default function HomePage() {
 
   if (error) {
     return (
-      <div className="min-h-screen bg-[#f5f5f5] flex items-center justify-center">
+      <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: 'var(--bg-surface)' }}>
         <div className="text-center">
-          <p className="text-[#666666] mb-4">Unable to load articles</p>
+          <p className="mb-4" style={{ color: 'var(--text-muted)' }}>Unable to load articles</p>
           <button onClick={refresh} className="btn-primary">
             Try Again
           </button>
@@ -190,7 +190,7 @@ export default function HomePage() {
   const teamSections = feed?.teamSections || {}
 
   return (
-    <div className="min-h-screen bg-[#f5f5f5]">
+    <div className="min-h-screen" style={{ backgroundColor: 'var(--bg-surface)' }}>
       {/* Main content container - 1110px max per spec */}
       <main className="max-w-[1110px] mx-auto px-4 py-6">
 

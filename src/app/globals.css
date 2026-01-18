@@ -4,15 +4,53 @@
 @import "tailwindcss";
 
 /* ========== CSS VARIABLES (from Design Spec) ========== */
-:root {
-  /* Primary Colors */
+/*
+ * GLOBAL THEME SYSTEM
+ * - Light mode (default): data-theme="light" or .light class
+ * - Dark mode: data-theme="dark" or .dark class
+ * - All colors must use these variables - never hardcode colors in components
+ */
+
+:root,
+:root[data-theme="light"],
+.light {
+  /* ===== CORE THEME VARIABLES ===== */
+  /* These are the primary theme variables that MUST be used across all components */
+  --bg-page: #ffffff;
+  --bg-surface: #f7f7f7;
+  --bg-header: #ffffff;
+  --bg-footer: #222222;
+  --bg-elevated: #ffffff;
+
+  --text-primary: #222222;
+  --text-muted: #666666;
+  --text-inverse: #ffffff;
+
+  --border-color: #e0e0e0;
+  --border-subtle: #f0f0f0;
+
+  --link-color: #bc0000;
+  --link-hover: #8a0000;
+
+  --badge-bg: #bc0000;
+  --badge-text: #ffffff;
+
+  /* ===== EXTENDED THEME VARIABLES ===== */
+  /* Primary brand colors */
   --color-primary: #bc0000;
   --color-primary-dark: #8a0000;
+  --color-primary-light: #ff3333;
+
+  /* Text hierarchy */
   --color-text-primary: #222222;
   --color-text-secondary: #666666;
   --color-text-muted: #999999;
+
+  /* Backgrounds */
   --color-background: #ffffff;
   --color-background-alt: #f5f5f5;
+
+  /* Borders */
   --color-border: #e0e0e0;
   --color-black: #000000;
   --color-white: #ffffff;
@@ -44,13 +82,25 @@
   --bg-primary: #ffffff;
   --bg-secondary: #f5f5f5;
   --bg-tertiary: #e0e0e0;
-  --text-primary: #222222;
-  --text-secondary: #666666;
-  --text-tertiary: #999999;
   --sm-red: #bc0000;
   --sm-red-hover: #8a0000;
   --border-primary: #e0e0e0;
   --border-secondary: #f5f5f5;
+
+  /* Card colors */
+  --card-bg: #ffffff;
+  --card-border: #e0e0e0;
+  --card-hover-bg: #fafafa;
+
+  /* Footer colors - footer is always dark */
+  --footer-text-muted: #999999;
+  --footer-bottom-bg: #111111;
+
+  /* Input colors */
+  --input-bg: #ffffff;
+  --input-border: #e0e0e0;
+  --input-text: #222222;
+  --input-placeholder: #999999;
 
   /* Typography */
   --font-heading: 'Montserrat', sans-serif;
@@ -75,10 +125,10 @@
   --transition-normal: 0.2s ease-in-out;
   --transition-slow: 0.3s ease;
 
-  /* Shadows */
-  --shadow-sm: 0 2px 4px rgba(0,0,0,0.1);
+  /* Shadows - Light mode */
+  --shadow-sm: 0 2px 4px rgba(0,0,0,0.08);
   --shadow-md: 0 4px 8px rgba(0,0,0,0.1);
-  --shadow-lg: 0 8px 16px rgba(0,0,0,0.1);
+  --shadow-lg: 0 8px 16px rgba(0,0,0,0.12);
 
   /* Border Radius */
   --radius-none: 0;
@@ -92,25 +142,79 @@
   --z-overlay: 400;
 }
 
-/* Dark mode colors */
+/* ===== DARK MODE THEME ===== */
+:root[data-theme="dark"],
 .dark {
-  --color-background: #0a0a0b;
-  --color-background-alt: #111113;
-  --color-text-primary: #ffffff;
-  --color-text-secondary: #a1a1aa;
-  --color-text-muted: #71717a;
-  --color-border: #27272a;
+  /* ===== CORE THEME VARIABLES ===== */
+  --bg-page: #000000;
+  --bg-surface: #0a0a0b;
+  --bg-header: #000000;
+  --bg-footer: #000000;
+  --bg-elevated: #111113;
 
-  --background: #0a0a0b;
-  --bg-primary: #0a0a0b;
-  --bg-secondary: #111113;
-  --bg-tertiary: #1c1c1f;
-  --foreground: #ffffff;
   --text-primary: #ffffff;
-  --text-secondary: #a1a1aa;
-  --text-tertiary: #71717a;
-  --border-primary: #27272a;
+  --text-muted: #a1a1aa;
+  --text-inverse: #ffffff; /* Still white - footer bg is always dark */
+
+  --border-color: #27272a;
+  --border-subtle: #1c1c1f;
+
+  --link-color: #ff4444;
+  --link-hover: #ff6666;
+
+  --badge-bg: #bc0000;
+  --badge-text: #ffffff;
+
+  /* ===== EXTENDED THEME VARIABLES ===== */
+  /* Primary brand colors - brighter for dark mode */
+  --color-primary: #ff4444;
+  --color-primary-dark: #cc0000;
+  --color-primary-light: #ff6666;
+
+  /* Text hierarchy */
+  --color-text-primary: #ffffff;
+  --color-text-secondary: #bbbbbb;
+  --color-text-muted: #888888;
+
+  /* Backgrounds */
+  --color-background: #000000;
+  --color-background-alt: #0a0a0b;
+
+  /* Borders */
+  --color-border: #333333;
+  --color-black: #000000;
+  --color-white: #ffffff;
+
+  /* Legacy variable names for compatibility */
+  --background: #000000;
+  --foreground: #ffffff;
+  --bg-primary: #000000;
+  --bg-secondary: #0a0a0b;
+  --bg-tertiary: #111113;
+  --sm-red: #ff4444;
+  --sm-red-hover: #ff6666;
+  --border-primary: #333333;
   --border-secondary: #1c1c1f;
+
+  /* Card colors */
+  --card-bg: #111113;
+  --card-border: #27272a;
+  --card-hover-bg: #1a1a1c;
+
+  /* Footer colors - still muted on dark bg */
+  --footer-text-muted: #888888;
+  --footer-bottom-bg: #000000;
+
+  /* Input colors */
+  --input-bg: #111113;
+  --input-border: #333333;
+  --input-text: #ffffff;
+  --input-placeholder: #666666;
+
+  /* Shadows - Dark mode (more subtle) */
+  --shadow-sm: 0 2px 4px rgba(0,0,0,0.4);
+  --shadow-md: 0 4px 8px rgba(0,0,0,0.5);
+  --shadow-lg: 0 8px 16px rgba(0,0,0,0.6);
 }
 
 @theme inline {
@@ -132,12 +236,13 @@ html, body, button, input, textarea {
 }
 
 body {
-  background: var(--color-background-alt);
-  color: var(--color-text-primary);
+  background-color: var(--bg-page);
+  color: var(--text-primary);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   font-size: 16px;
   line-height: 1.5;
+  transition: background-color 0.2s ease, color 0.2s ease;
 }
 
 /* Montserrat only for specific brand elements */

@@ -11,7 +11,8 @@ export const metadata: Metadata = {
 export const revalidate = 3600
 
 export default async function BearsStatsPage() {
-  const currentSeason = new Date().getFullYear()
+  // 2025-26 NFL season is stored as season = 2025
+  const currentSeason = 2025
   const stats = await getBearsStats(currentSeason)
 
   return (
