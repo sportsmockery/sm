@@ -145,8 +145,8 @@ function PositionCard({
               <th className="px-4 py-2 w-12">#</th>
               <th className="px-4 py-2">Player</th>
               <th className="px-4 py-2 hidden sm:table-cell">Size</th>
-              <th className="px-4 py-2 hidden md:table-cell">Exp</th>
-              <th className="px-4 py-2 hidden lg:table-cell">Role</th>
+              <th className="px-4 py-2 hidden md:table-cell">College</th>
+              <th className="px-4 py-2 hidden lg:table-cell">Exp</th>
             </tr>
           </thead>
           <tbody>
@@ -203,20 +203,10 @@ function PositionCard({
                       : '—'}
                   </td>
                   <td className="px-4 py-3 text-sm text-[var(--text-secondary)] hidden md:table-cell">
-                    {player.experience || 'R'}
+                    {player.college || '—'}
                   </td>
-                  <td className="px-4 py-3 hidden lg:table-cell">
-                    {player.primaryRole && (
-                      <span
-                        className={`inline-block px-2 py-0.5 text-xs rounded-full ${
-                          isStarter
-                            ? 'bg-[#C83200]/10 text-[#C83200]'
-                            : 'bg-[var(--bg-tertiary)] text-[var(--text-muted)]'
-                        }`}
-                      >
-                        {player.primaryRole}
-                      </span>
-                    )}
+                  <td className="px-4 py-3 text-sm text-[var(--text-secondary)] hidden lg:table-cell">
+                    {player.experience || 'R'}
                   </td>
                 </tr>
               )
