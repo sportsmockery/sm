@@ -113,11 +113,13 @@ export async function GET() {
     }
 
     // Get last completed game from bears_games_master
+    // A completed game must have: non-null score, non-null result, and NOT a 0-0 score
     const { data: lastGameData } = await datalabAdmin
       .from('bears_games_master')
-      .select('opponent, opponent_full_name, bears_score, opponent_score, bears_win, week, game_type')
+      .select('opponent, opponent_full_name, bears_score, opponent_score, bears_win, week, game_type, game_date')
       .not('bears_score', 'is', null)
       .not('bears_win', 'is', null) // Only completed games
+      .lt('game_date', todayCT) // Must be before today (not today's game)
       .order('game_date', { ascending: false })
       .limit(1)
       .single()
