@@ -225,34 +225,12 @@ const SIDE_ORDER: Record<Side, number> = { OFF: 1, DEF: 2, ST: 3 }
 // =============================================================================
 
 /**
- * Get all Bears players from the mirrored table
+ * Get all Bears players from Datalab
  * Sorted by side (OFF, DEF, ST), then position, then jersey number
  */
 export async function getBearsPlayers(): Promise<BearsPlayer[]> {
-  try {
-    // First try the mirrored table in SportsMockery DB
-    const { data, error } = await supabase
-      .from('bears_players')
-      .select('*')
-      .order('position', { ascending: true })
-      .order('jersey_number', { ascending: true })
-
-    if (error) {
-      console.error('Error fetching from mirrored table, falling back to Datalab:', error)
-      // Fallback to Datalab if mirrored table doesn't exist yet
-      return await getBearsPlayersFromDatalab()
-    }
-
-    if (!data || data.length === 0) {
-      // Mirrored table empty, fallback to Datalab
-      return await getBearsPlayersFromDatalab()
-    }
-
-    return transformPlayers(data)
-  } catch (err) {
-    console.error('getBearsPlayers error:', err)
-    return await getBearsPlayersFromDatalab()
-  }
+  // Query Datalab directly (primary source of truth)
+  return await getBearsPlayersFromDatalab()
 }
 
 /**
@@ -373,23 +351,7 @@ export async function getPlayerProfile(slug: string): Promise<PlayerProfile | nu
 }
 
 async function getPlayerSeasonStats(playerId: string): Promise<PlayerSeasonStats[]> {
-  try {
-    // Try mirrored table first
-    const { data, error } = await supabase
-      .from('bears_player_season_stats')
-      .select('*')
-      .eq('player_id', parseInt(playerId))
-      .order('season', { ascending: false })
-
-    if (error || !data || data.length === 0) {
-      // Fallback to Datalab
-      return await getPlayerSeasonStatsFromDatalab(playerId)
-    }
-
-    return transformSeasonStats(data)
-  } catch {
-    return await getPlayerSeasonStatsFromDatalab(playerId)
-  }
+  return await getPlayerSeasonStatsFromDatalab(playerId)
 }
 
 async function getPlayerSeasonStatsFromDatalab(playerId: string): Promise<PlayerSeasonStats[]> {
@@ -437,35 +399,7 @@ function transformSeasonStats(data: any[]): PlayerSeasonStats[] {
 }
 
 async function getPlayerGameLog(playerId: string): Promise<PlayerGameLogEntry[]> {
-  try {
-    // Try mirrored table
-    const { data: gameStats, error: statsError } = await supabase
-      .from('bears_player_game_stats')
-      .select('*')
-      .eq('player_id', parseInt(playerId))
-      .order('game_id', { ascending: false })
-      .limit(20)
-
-    if (statsError || !gameStats || gameStats.length === 0) {
-      return await getPlayerGameLogFromDatalab(playerId)
-    }
-
-    // Get game info
-    const gameIds = gameStats.map((g: any) => g.game_id)
-    const { data: games } = await supabase
-      .from('bears_games_master')
-      .select('*')
-      .in('game_id', gameIds)
-
-    const gamesMap = new Map((games || []).map((g: any) => [g.game_id, g]))
-
-    return gameStats.map((s: any) => {
-      const game = gamesMap.get(s.game_id) || {}
-      return transformGameLogEntry(s, game)
-    })
-  } catch {
-    return await getPlayerGameLogFromDatalab(playerId)
-  }
+  return await getPlayerGameLogFromDatalab(playerId)
 }
 
 async function getPlayerGameLogFromDatalab(playerId: string): Promise<PlayerGameLogEntry[]> {
@@ -526,31 +460,7 @@ function transformGameLogEntry(stats: any, game: any): PlayerGameLogEntry {
  */
 export async function getBearsSchedule(season?: number): Promise<BearsGame[]> {
   const targetSeason = season || getCurrentSeason()
-
-  try {
-    const { data, error } = await supabase
-      .from('bears_games_master')
-      .select('*')
-      .eq('season', targetSeason)
-      .order('game_date', { ascending: true })
-
-    if (error || !data || data.length === 0) {
-      return await getBearsScheduleFromDatalab(targetSeason)
-    }
-
-    // Get game context
-    const gameIds = data.map((g: any) => g.game_id)
-    const { data: context } = await supabase
-      .from('bears_game_context')
-      .select('*')
-      .in('game_id', gameIds)
-
-    const contextMap = new Map((context || []).map((c: any) => [c.game_id, c]))
-
-    return data.map((g: any) => transformGame(g, contextMap.get(g.game_id)))
-  } catch {
-    return await getBearsScheduleFromDatalab(targetSeason)
-  }
+  return await getBearsScheduleFromDatalab(targetSeason)
 }
 
 async function getBearsScheduleFromDatalab(season: number): Promise<BearsGame[]> {
@@ -641,21 +551,7 @@ export async function getBearsStats(
 }
 
 async function getTeamStats(season: number): Promise<BearsTeamStats> {
-  try {
-    const { data, error } = await supabase
-      .from('bears_team_season_stats')
-      .select('*')
-      .eq('season', season)
-      .single()
-
-    if (error || !data) {
-      return await getTeamStatsFromDatalab(season)
-    }
-
-    return transformTeamStats(data)
-  } catch {
-    return await getTeamStatsFromDatalab(season)
-  }
+  return await getTeamStatsFromDatalab(season)
 }
 
 async function getTeamStatsFromDatalab(season: number): Promise<BearsTeamStats> {
@@ -714,27 +610,15 @@ function getDefaultTeamStats(season: number): BearsTeamStats {
 async function getLeaderboards(season: number): Promise<BearsLeaderboard> {
   const players = await getBearsPlayers()
 
-  // Get all season stats for this season
+  // Get all season stats for this season from Datalab
   let seasonStats: any[] = []
 
-  try {
-    const { data, error } = await supabase
+  if (datalabAdmin) {
+    const { data } = await datalabAdmin
       .from('bears_player_season_stats')
       .select('*')
       .eq('season', season)
-
-    if (!error && data) {
-      seasonStats = data
-    }
-  } catch {
-    // Fallback to Datalab
-    if (datalabAdmin) {
-      const { data } = await datalabAdmin
-        .from('bears_player_season_stats')
-        .select('*')
-        .eq('season', season)
-      seasonStats = data || []
-    }
+    seasonStats = data || []
   }
 
   const statsMap = new Map(seasonStats.map((s: any) => [String(s.player_id), s]))
