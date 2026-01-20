@@ -5,7 +5,7 @@ import Link from 'next/link'
 import Image from 'next/image'
 import { motion } from 'framer-motion'
 import { useTheme } from '@/contexts/ThemeContext'
-import BearsStickyBar from './BearsStickyBar'
+import TeamStickyBarRouter from './TeamStickyBarRouter'
 
 // Navigation items - proper casing (not all caps) per spec
 const navItems = [
@@ -620,8 +620,8 @@ export default function Header() {
         </div>
       )}
 
-      {/* Bears Sticky Bar - Bears-first navigation */}
-      <BearsStickyBar />
+      {/* Team Sticky Bar - Shows appropriate team bar based on current page */}
+      <TeamStickyBarRouter />
     </header>
   )
 }
