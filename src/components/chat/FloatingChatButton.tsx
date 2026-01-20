@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { usePathname } from 'next/navigation'
 import Link from 'next/link'
 
 interface FloatingChatButtonProps {
@@ -10,6 +11,12 @@ interface FloatingChatButtonProps {
 
 export default function FloatingChatButton({ teamSlug, teamName }: FloatingChatButtonProps) {
   const [isHovered, setIsHovered] = useState(false)
+  const pathname = usePathname()
+
+  // Hide on /fan-chat page since user is already there
+  if (pathname === '/fan-chat') {
+    return null
+  }
 
   return (
     <Link
