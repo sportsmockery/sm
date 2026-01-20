@@ -151,6 +151,12 @@ export function useAIChatPersonality({
 
   /**
    * Check conditions and potentially trigger an AI response
+   *
+   * STRICT RULES:
+   * - ONLY respond if user is completely alone (no other users online)
+   * - ONLY respond if directly mentioned/tagged
+   * - NEVER respond if multiple users are chatting
+   * - NEVER spam or interrupt conversations
    */
   const checkAndTriggerAI = useCallback(async (
     messages: ChatMessage[],
@@ -163,7 +169,20 @@ export function useAIChatPersonality({
     // Don't respond to AI messages
     if (lastMessage.isAI) return
 
-    // Check if AI was mentioned
+    // STRICT: If multiple users are online, ONLY respond if directly mentioned
+    if (authenticatedUsersOnline > 1) {
+      // Check if AI was directly mentioned/tagged
+      if (personality) {
+        const mentionPattern = new RegExp(`@${personality.username}`, 'i')
+        if (mentionPattern.test(lastMessage.content)) {
+          await requestAIResponse(messages, 'direct_mention')
+        }
+      }
+      // Otherwise, do NOT respond - don't interrupt conversations
+      return
+    }
+
+    // Check if AI was mentioned (works even when alone)
     if (personality) {
       const mentionPattern = new RegExp(`@?${personality.username}`, 'i')
       if (mentionPattern.test(lastMessage.content)) {
@@ -172,32 +191,13 @@ export function useAIChatPersonality({
       }
     }
 
-    // Check if it's a question
-    const isQuestion = lastMessage.content.includes('?') ||
-      /^(what|who|when|where|why|how|is|are|do|does|can|could|would|should)/i.test(lastMessage.content.trim())
-
-    // If user is alone, respond to questions or engage periodically
+    // User is COMPLETELY alone - respond to keep them engaged
     if (authenticatedUsersOnline <= 1) {
-      if (isQuestion) {
-        await requestAIResponse(messages, 'direct_question')
-      } else {
-        // Respond to keep conversation going when user is alone
-        await requestAIResponse(messages, 'no_users_online')
-      }
+      await requestAIResponse(messages, 'no_users_online')
       return
     }
 
-    // Set up quiet room timer
-    // Clear any existing timer
-    if (quietRoomTimerRef.current) {
-      clearTimeout(quietRoomTimerRef.current)
-    }
-
-    // Set timer to respond if room goes quiet
-    quietRoomTimerRef.current = setTimeout(async () => {
-      // Check if conditions still apply (no new messages)
-      await requestAIResponse(messages, 'quiet_room')
-    }, AI_RATE_LIMITS.quietRoomThresholdMs)
+    // Default: Do NOT respond
 
   }, [channelId, enabled, personality, requestAIResponse])
 

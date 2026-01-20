@@ -134,6 +134,7 @@ export async function POST(request: NextRequest) {
       )
     }
 
+    // Use Perplexity's online model for real-time search and accuracy
     const perplexityResponse = await fetch('https://api.perplexity.ai/chat/completions', {
       method: 'POST',
       headers: {
@@ -141,20 +142,38 @@ export async function POST(request: NextRequest) {
         'Content-Type': 'application/json'
       },
       body: JSON.stringify({
-        model: 'llama-3.1-sonar-small-128k-online', // or your preferred model
+        // Use sonar-pro for best accuracy with online search
+        model: 'sonar-pro',
         messages: [
           {
             role: 'system',
-            content: `${personality.systemPrompt}\n\nCONTEXT FOR THIS RESPONSE:\n${contextPrompt}\n\nIMPORTANT: Keep responses conversational and under 280 characters when possible. Sound like a real fan texting, not writing an essay.`
+            content: `${personality.systemPrompt}
+
+CONTEXT FOR THIS RESPONSE:
+${contextPrompt}
+
+CRITICAL ACCURACY REQUIREMENTS:
+- You MUST use your search capability to verify any stats, standings, scores, or roster information before responding
+- Search the team's official sources and ESPN/league sites for current, accurate data
+- If you cannot verify a fact, DO NOT include it in your response
+- Every stat you mention must be current and accurate
+- Reference your sources mentally but don't cite them in chat (fans don't cite sources in casual chat)
+
+RESPONSE FORMAT:
+- Keep responses conversational and under 280 characters when possible
+- Sound like a real fan texting, not writing an essay
+- Be specific with verified stats but natural in delivery`
           },
           {
             role: 'user',
-            content: `Here is the recent chat conversation:\n\n${conversationContext}\n\nRespond as ${personality.username}. Remember: you are a real Chicago ${personality.teamFullName} fan, NOT an AI.`
+            content: `Here is the recent chat conversation:\n\n${conversationContext}\n\nRespond as ${personality.username}. Remember: you are a real Chicago ${personality.teamFullName} fan, NOT an AI. Use search to verify any facts before responding.`
           }
         ],
-        max_tokens: 300,
-        temperature: 0.8, // Slightly creative but not too random
-        top_p: 0.9
+        max_tokens: 400,
+        temperature: 0.7, // Lower temperature for more accuracy
+        top_p: 0.9,
+        // Enable search for real-time data
+        search_recency_filter: 'week' // Prefer recent data
       })
     })
 
