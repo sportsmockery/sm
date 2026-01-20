@@ -15,6 +15,7 @@ import {
   BearsTrendingTopics,
   AskBearsAI,
 } from '@/components/bears'
+import ARTourButton from '@/components/ar/ARTourButton'
 
 export const metadata: Metadata = {
   title: 'Chicago Bears Hub | News, Stats & Analysis',
@@ -185,6 +186,9 @@ export default async function BearsHubPage() {
           <div className="space-y-8">
             {/* Key players */}
             <BearsRosterHighlights players={keyPlayers} />
+
+            {/* AR Stadium Tour */}
+            <ARTourButton team="chicago-bears" />
 
             {/* Trending topics */}
             <BearsTrendingTopics trends={trends} />

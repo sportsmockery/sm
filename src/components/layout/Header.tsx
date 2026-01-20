@@ -3,12 +3,12 @@
 import { useState, useRef, useEffect } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
+import { motion } from 'framer-motion'
 import { useTheme } from '@/contexts/ThemeContext'
 import BearsStickyBar from './BearsStickyBar'
 
 // Navigation items - proper casing (not all caps) per spec
 const navItems = [
-  { name: 'Home', href: '/' },
   {
     name: 'Bears',
     href: '/chicago-bears',
@@ -31,16 +31,34 @@ const podcastLinks = [
   { name: 'Pinwheels and Ivy', href: 'https://podcasts.apple.com/us/podcast/pinwheels-and-ivy-podcast/id1385696768', icon: '/logos/PI_logo.png' },
 ]
 
+const appLinks = [
+  { name: 'Apple', href: 'https://apps.apple.com/us/app/sports-mockery/id680797716', icon: 'apple' },
+  { name: 'Google Play', href: 'https://play.google.com/store/search?q=sports%20mockery&c=apps&hl=en_US', icon: 'google-play' },
+]
+
 export default function Header() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const [podcastMenuOpen, setPodcastMenuOpen] = useState(false)
+  const [appMenuOpen, setAppMenuOpen] = useState(false)
   const [bearsMenuOpen, setBearsMenuOpen] = useState(false)
   const [searchOpen, setSearchOpen] = useState(false)
   const [searchQuery, setSearchQuery] = useState('')
+  const [isScrolled, setIsScrolled] = useState(false)
   const searchInputRef = useRef<HTMLInputElement>(null)
   const podcastMenuRef = useRef<HTMLDivElement>(null)
+  const appMenuRef = useRef<HTMLDivElement>(null)
   const bearsMenuRef = useRef<HTMLDivElement>(null)
   const { theme, toggleTheme } = useTheme()
+
+  // Track scroll position for glass effect
+  useEffect(() => {
+    const handleScroll = () => {
+      setIsScrolled(window.scrollY > 10)
+    }
+
+    window.addEventListener('scroll', handleScroll, { passive: true })
+    return () => window.removeEventListener('scroll', handleScroll)
+  }, [])
 
   // Focus search input when opened
   useEffect(() => {
@@ -54,6 +72,9 @@ export default function Header() {
     const handleClickOutside = (e: MouseEvent) => {
       if (podcastMenuRef.current && !podcastMenuRef.current.contains(e.target as Node)) {
         setPodcastMenuOpen(false)
+      }
+      if (appMenuRef.current && !appMenuRef.current.contains(e.target as Node)) {
+        setAppMenuOpen(false)
       }
       if (bearsMenuRef.current && !bearsMenuRef.current.contains(e.target as Node)) {
         setBearsMenuOpen(false)
@@ -70,6 +91,7 @@ export default function Header() {
         setMobileMenuOpen(false)
         setSearchOpen(false)
         setPodcastMenuOpen(false)
+        setAppMenuOpen(false)
         setBearsMenuOpen(false)
       }
     }
@@ -85,9 +107,28 @@ export default function Header() {
   }
 
   return (
-    <header className="sticky top-0 z-[200]" style={{ backgroundColor: 'var(--bg-header)' }}>
+    <header
+      className={`sticky top-0 z-[200] transition-all duration-300 ${
+        isScrolled
+          ? 'shadow-md backdrop-blur-md'
+          : ''
+      }`}
+      style={{
+        backgroundColor: isScrolled
+          ? theme === 'dark'
+            ? 'rgba(0, 0, 0, 0.85)'
+            : 'rgba(255, 255, 255, 0.9)'
+          : 'var(--bg-header)',
+      }}
+    >
       {/* Top Header Bar - Logo and Social */}
-      <div className="border-b" style={{ borderColor: 'var(--border-color)', backgroundColor: 'var(--bg-header)' }}>
+      <div
+        className="border-b transition-colors duration-300"
+        style={{
+          borderColor: 'var(--border-color)',
+          backgroundColor: isScrolled ? 'transparent' : 'var(--bg-header)',
+        }}
+      >
         <div className="max-w-[1110px] mx-auto px-4">
           <div className="flex items-center justify-between h-[52px]">
             {/* Left: Social icons */}
@@ -142,16 +183,22 @@ export default function Header() {
               </a>
             </div>
 
-            {/* Center: Logo - swaps based on theme */}
+            {/* Center: Logo - swaps based on theme with hover animation */}
             <Link href="/" className="flex-shrink-0">
-              <Image
-                src={theme === 'dark' ? '/logo-white.png' : '/logo.png'}
-                alt="Sports Mockery"
-                width={220}
-                height={65}
-                className="h-8 md:h-10 w-auto object-contain"
-                priority
-              />
+              <motion.div
+                whileHover={{ scale: 1.03 }}
+                whileTap={{ scale: 0.98 }}
+                transition={{ type: 'spring', stiffness: 400, damping: 17 }}
+              >
+                <Image
+                  src={theme === 'dark' ? '/logo-white.png' : '/logo.png'}
+                  alt="Sports Mockery"
+                  width={220}
+                  height={65}
+                  className="h-8 md:h-10 w-auto object-contain"
+                  priority
+                />
+              </motion.div>
             </Link>
 
             {/* Right: Theme toggle and Login */}
@@ -195,7 +242,10 @@ export default function Header() {
       </div>
 
       {/* Main Navigation Bar - with red underline */}
-      <nav className="border-b-[3px] border-[#bc0000]" style={{ backgroundColor: 'var(--bg-header)' }}>
+      <nav
+        className="border-b-[3px] border-[#bc0000] transition-colors duration-300"
+        style={{ backgroundColor: isScrolled ? 'transparent' : 'var(--bg-header)' }}
+      >
         <div className="max-w-[1110px] mx-auto px-4">
           <div className="flex items-center justify-between h-[44px]">
             {/* Mobile menu button */}
@@ -214,8 +264,8 @@ export default function Header() {
               </svg>
             </button>
 
-            {/* Desktop Navigation */}
-            <div className="hidden lg:flex items-center gap-0">
+            {/* Desktop Navigation - Centered */}
+            <div className="hidden lg:flex items-center justify-center flex-1 gap-0">
               {navItems.map((item) => (
                 item.submenu ? (
                   <div key={item.name} className="relative" ref={item.name === 'Bears' ? bearsMenuRef : undefined}>
@@ -305,10 +355,58 @@ export default function Header() {
                   </div>
                 )}
               </div>
+
+              {/* App dropdown */}
+              <div className="relative" ref={appMenuRef}>
+                <button
+                  onClick={() => setAppMenuOpen(!appMenuOpen)}
+                  className="flex items-center gap-1 px-4 py-4 text-[14px] font-bold hover:text-[var(--link-color)] transition-colors"
+                  style={{ fontFamily: "'Montserrat', sans-serif", color: 'var(--text-primary)' }}
+                >
+                  App
+                  <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                  </svg>
+                </button>
+
+                {appMenuOpen && (
+                  <div
+                    className="absolute top-full left-0 mt-0 w-48 shadow-md z-[100]"
+                    style={{ backgroundColor: 'var(--bg-surface)', border: '1px solid var(--border-color)' }}
+                  >
+                    {appLinks.map((app) => (
+                      <a
+                        key={app.name}
+                        href={app.href}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        onClick={() => setAppMenuOpen(false)}
+                        className="flex items-center gap-3 px-4 py-3 text-[14px] hover:bg-[var(--card-hover-bg)] transition-colors"
+                        style={{ color: 'var(--text-primary)' }}
+                      >
+                        {app.icon === 'apple' ? (
+                          <svg className="w-5 h-5 flex-shrink-0" fill="currentColor" viewBox="0 0 384 512">
+                            <path d="M318.7 268.7c-.2-36.7 16.4-64.4 50-84.8-18.8-26.9-47.2-41.7-84.7-44.6-35.5-2.8-74.3 20.7-88.5 20.7-15 0-49.4-19.7-76.4-19.7C63.3 141.2 4 184.8 4 273.5q0 39.3 14.4 81.2c12.8 36.7 59 126.7 107.2 125.2 25.2-.6 43-17.9 75.8-17.9 31.8 0 48.3 17.9 76.4 17.9 48.6-.7 90.4-82.5 102.6-119.3-65.2-30.7-61.7-90-61.7-91.9zm-56.6-164.2c27.3-32.4 24.8-61.9 24-72.5-24.1 1.4-52 16.4-67.9 34.9-17.5 19.8-27.8 44.3-25.6 71.9 26.1 2 49.9-11.4 69.5-34.3z"/>
+                          </svg>
+                        ) : (
+                          <svg className="w-5 h-5 flex-shrink-0" fill="currentColor" viewBox="0 0 512 512">
+                            <path d="M325.3 234.3L104.6 13l280.8 161.2-60.1 60.1zM47 0C34 6.8 25.3 19.2 25.3 35.3v441.3c0 16.1 8.7 28.5 21.7 35.3l256.6-256L47 0zm425.2 225.6l-58.9-34.1-65.7 64.5 65.7 64.5 60.1-34.1c18-14.3 18-46.5-1.2-60.8zM104.6 499l280.8-161.2-60.1-60.1L104.6 499z"/>
+                          </svg>
+                        )}
+                        <span className="flex-1">{app.name}</span>
+                        <svg className="w-3 h-3 opacity-50 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                        </svg>
+                      </a>
+                    ))}
+                  </div>
+                )}
+              </div>
             </div>
 
-            {/* Search */}
-            <div className="flex items-center">
+            {/* Right Side: Search + CTAs */}
+            <div className="flex items-center gap-2">
+              {/* Search */}
               {searchOpen ? (
                 <form onSubmit={handleSearch} className="flex items-center">
                   <input
@@ -350,6 +448,30 @@ export default function Header() {
                   </svg>
                 </button>
               )}
+
+              {/* Fan Chat CTA - Primary */}
+              <Link
+                href="/fan-chat"
+                className="hidden md:flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded bg-[#C83803] text-white hover:bg-[#a52d02] transition-colors"
+                style={{ fontFamily: "'Montserrat', sans-serif" }}
+              >
+                <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+                </svg>
+                Fan Chat
+              </Link>
+
+              {/* Ask AI CTA - Secondary */}
+              <Link
+                href="/ask-ai"
+                className="hidden md:flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded border border-[#bc0000] text-[#bc0000] hover:bg-[#bc0000] hover:text-white transition-colors"
+                style={{ fontFamily: "'Montserrat', sans-serif" }}
+              >
+                <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
+                </svg>
+                Ask AI
+              </Link>
             </div>
           </div>
         </div>
@@ -359,6 +481,32 @@ export default function Header() {
       {mobileMenuOpen && (
         <div className="lg:hidden" style={{ backgroundColor: 'var(--bg-header)', borderBottom: '1px solid var(--border-color)' }}>
           <div className="max-w-[1110px] mx-auto px-4 py-4">
+            {/* Mobile CTAs at top */}
+            <div className="flex gap-3 mb-4 pb-4" style={{ borderBottom: '1px solid var(--border-color)' }}>
+              <Link
+                href="/fan-chat"
+                onClick={() => setMobileMenuOpen(false)}
+                className="flex-1 flex items-center justify-center gap-2 px-4 py-3 text-sm font-semibold rounded-lg bg-[#C83803] text-white"
+                style={{ fontFamily: "'Montserrat', sans-serif" }}
+              >
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+                </svg>
+                Fan Chat
+              </Link>
+              <Link
+                href="/ask-ai"
+                onClick={() => setMobileMenuOpen(false)}
+                className="flex-1 flex items-center justify-center gap-2 px-4 py-3 text-sm font-semibold rounded-lg border-2 border-[#bc0000] text-[#bc0000]"
+                style={{ fontFamily: "'Montserrat', sans-serif" }}
+              >
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
+                </svg>
+                Ask AI
+              </Link>
+            </div>
+
             {navItems.map((item) => (
               item.submenu ? (
                 <div key={item.name}>
@@ -423,6 +571,42 @@ export default function Header() {
                       className="rounded-md flex-shrink-0"
                     />
                     <span className="flex-1">{podcast.name}</span>
+                    <svg className="w-3 h-3 opacity-50 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                    </svg>
+                  </a>
+                ))}
+              </div>
+            </div>
+            {/* App section */}
+            <div>
+              <div
+                className="py-3 text-[14px] font-bold"
+                style={{ fontFamily: "'Montserrat', sans-serif", color: 'var(--text-primary)', borderBottom: '1px solid var(--border-color)' }}
+              >
+                App
+              </div>
+              <div className="pl-4 border-l-2 border-[#C83200] ml-2">
+                {appLinks.map((app) => (
+                  <a
+                    key={app.name}
+                    href={app.href}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    onClick={() => setMobileMenuOpen(false)}
+                    className="flex items-center gap-3 py-3 text-[13px] hover:text-[var(--link-color)]"
+                    style={{ color: 'var(--text-muted)', borderBottom: '1px solid var(--border-color)' }}
+                  >
+                    {app.icon === 'apple' ? (
+                      <svg className="w-5 h-5 flex-shrink-0" fill="currentColor" viewBox="0 0 384 512">
+                        <path d="M318.7 268.7c-.2-36.7 16.4-64.4 50-84.8-18.8-26.9-47.2-41.7-84.7-44.6-35.5-2.8-74.3 20.7-88.5 20.7-15 0-49.4-19.7-76.4-19.7C63.3 141.2 4 184.8 4 273.5q0 39.3 14.4 81.2c12.8 36.7 59 126.7 107.2 125.2 25.2-.6 43-17.9 75.8-17.9 31.8 0 48.3 17.9 76.4 17.9 48.6-.7 90.4-82.5 102.6-119.3-65.2-30.7-61.7-90-61.7-91.9zm-56.6-164.2c27.3-32.4 24.8-61.9 24-72.5-24.1 1.4-52 16.4-67.9 34.9-17.5 19.8-27.8 44.3-25.6 71.9 26.1 2 49.9-11.4 69.5-34.3z"/>
+                      </svg>
+                    ) : (
+                      <svg className="w-5 h-5 flex-shrink-0" fill="currentColor" viewBox="0 0 512 512">
+                        <path d="M325.3 234.3L104.6 13l280.8 161.2-60.1 60.1zM47 0C34 6.8 25.3 19.2 25.3 35.3v441.3c0 16.1 8.7 28.5 21.7 35.3l256.6-256L47 0zm425.2 225.6l-58.9-34.1-65.7 64.5 65.7 64.5 60.1-34.1c18-14.3 18-46.5-1.2-60.8zM104.6 499l280.8-161.2-60.1-60.1L104.6 499z"/>
+                      </svg>
+                    )}
+                    <span className="flex-1">{app.name}</span>
                     <svg className="w-3 h-3 opacity-50 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
                     </svg>

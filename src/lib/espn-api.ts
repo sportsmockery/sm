@@ -31,7 +31,7 @@ const STATUS_MAP: Record<string, string> = {
 export interface ESPNGame {
   eventId: string
   date: string // ISO date string
-  time: string // HH:MM:SS format
+  time: string // HH:MM:SS format (Central Time)
   season: number
   week: number
   gameType: 'preseason' | 'regular' | 'postseason'
@@ -47,6 +47,7 @@ export interface ESPNGame {
   quarter: number | null
   clock: string | null
   possession: string | null // Team abbreviation with possession
+  broadcast: string | null // TV network (FOX, CBS, NBC, ESPN, etc.)
 }
 
 export interface ESPNScoreboardResponse {
@@ -134,10 +135,15 @@ export async function fetchESPNScoreboard(options?: {
         }
       }
 
-      // Parse date and time
+      // Parse date and time - convert UTC to Central Time
       const gameDate = new Date(event.date)
+      // Convert to Central Time for display
+      const centralTime = new Date(gameDate.toLocaleString('en-US', { timeZone: 'America/Chicago' }))
       const dateStr = gameDate.toISOString().split('T')[0]
-      const timeStr = gameDate.toTimeString().split(' ')[0]
+      // Format time as HH:MM:SS in Central Time
+      const hours = centralTime.getHours().toString().padStart(2, '0')
+      const minutes = centralTime.getMinutes().toString().padStart(2, '0')
+      const timeStr = `${hours}:${minutes}:00`
 
       // Get season info
       const seasonInfo = event.season || data.season || {}
@@ -152,6 +158,26 @@ export async function fetchESPNScoreboard(options?: {
 
       // Get live game info
       const situation = competition.situation
+
+      // Extract TV broadcast network
+      let broadcast: string | null = null
+      if (competition.broadcasts && competition.broadcasts.length > 0) {
+        // Get first broadcast (typically the main network)
+        const mainBroadcast = competition.broadcasts[0]
+        if (mainBroadcast.names && mainBroadcast.names.length > 0) {
+          broadcast = mainBroadcast.names[0]
+        } else if (mainBroadcast.market === 'national') {
+          // Extract from media if available
+          broadcast = mainBroadcast.type?.abbreviation || null
+        }
+      }
+      // Also check geoBroadcasts array (alternative location for broadcast info)
+      if (!broadcast && event.geoBroadcasts) {
+        const nationalBroadcast = event.geoBroadcasts.find((b: any) => b.type?.type === 'TV')
+        if (nationalBroadcast?.media?.shortName) {
+          broadcast = nationalBroadcast.media.shortName
+        }
+      }
 
       bearsGames.push({
         eventId: event.id,
@@ -173,6 +199,7 @@ export async function fetchESPNScoreboard(options?: {
         clock: situation?.clock ? formatClock(situation.clock) : null,
         possession: situation?.possession ?
           (situation.possession === BEARS_TEAM_ID ? 'CHI' : opponentTeam.team?.abbreviation) : null,
+        broadcast,
       })
     }
 
@@ -251,8 +278,12 @@ export async function fetchESPNGameSummary(eventId: string): Promise<{
       }
     }
 
-    // Parse date
+    // Parse date and convert to Central Time
     const gameDate = new Date(header?.gameDate || Date.now())
+    const centralTime = new Date(gameDate.toLocaleString('en-US', { timeZone: 'America/Chicago' }))
+    const hours = centralTime.getHours().toString().padStart(2, '0')
+    const minutes = centralTime.getMinutes().toString().padStart(2, '0')
+    const timeStr = `${hours}:${minutes}:00`
 
     // Get situation for live games
     const situation = data.situation
@@ -260,7 +291,7 @@ export async function fetchESPNGameSummary(eventId: string): Promise<{
     const game: ESPNGame = {
       eventId,
       date: gameDate.toISOString().split('T')[0],
-      time: gameDate.toTimeString().split(' ')[0],
+      time: timeStr,
       season: header?.season?.year || new Date().getFullYear(),
       week: header?.week?.number || 1,
       gameType: header?.season?.type === 3 ? 'postseason' :
@@ -278,6 +309,7 @@ export async function fetchESPNGameSummary(eventId: string): Promise<{
       clock: situation?.clock ? formatClock(situation.clock) : null,
       possession: situation?.possession ?
         (situation.possession === BEARS_TEAM_ID ? 'CHI' : opponentTeam.team?.abbreviation) : null,
+      broadcast: null, // Game summary doesn't include broadcast info
     }
 
     return {

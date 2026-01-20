@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
 import GameHighlights from '@/components/scores/GameHighlights'
@@ -90,6 +90,34 @@ export default function BoxScoreClient({ games, initialGameId }: Props) {
   const [boxScore, setBoxScore] = useState<BoxScore | null>(null)
   const [loading, setLoading] = useState(true)
   const [activeTab, setActiveTab] = useState<'passing' | 'rushing' | 'receiving' | 'defense'>('passing')
+  const scrollContainerRef = useRef<HTMLDivElement>(null)
+  const [canScrollLeft, setCanScrollLeft] = useState(false)
+  const [canScrollRight, setCanScrollRight] = useState(true)
+
+  // Check scroll position
+  useEffect(() => {
+    const checkScroll = () => {
+      const el = scrollContainerRef.current
+      if (el) {
+        setCanScrollLeft(el.scrollLeft > 0)
+        setCanScrollRight(el.scrollLeft < el.scrollWidth - el.clientWidth - 10)
+      }
+    }
+    checkScroll()
+    scrollContainerRef.current?.addEventListener('scroll', checkScroll)
+    return () => scrollContainerRef.current?.removeEventListener('scroll', checkScroll)
+  }, [games])
+
+  const scrollGames = (direction: 'left' | 'right') => {
+    const el = scrollContainerRef.current
+    if (el) {
+      const scrollAmount = 300
+      el.scrollBy({
+        left: direction === 'left' ? -scrollAmount : scrollAmount,
+        behavior: 'smooth'
+      })
+    }
+  }
 
   useEffect(() => {
     if (!selectedGameId) {
@@ -118,12 +146,46 @@ export default function BoxScoreClient({ games, initialGameId }: Props) {
 
   return (
     <div className="max-w-7xl mx-auto px-4 py-8">
-      {/* Game Selector - Horizontal Scroll */}
+      {/* Game Selector - Horizontal Scroll with Navigation */}
       <div className="mb-8">
-        <h2 className="text-sm font-semibold text-[var(--text-muted)] uppercase tracking-wider mb-3">
-          Select Game
-        </h2>
-        <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-hide">
+        <div className="flex items-center justify-between mb-3">
+          <h2 className="text-sm font-semibold text-[var(--text-muted)] uppercase tracking-wider">
+            Select Game
+          </h2>
+          <div className="flex gap-2">
+            <button
+              onClick={() => scrollGames('left')}
+              disabled={!canScrollLeft}
+              className={`p-2 rounded-lg border transition-all ${
+                canScrollLeft
+                  ? 'bg-[var(--bg-elevated)] border-[var(--border-subtle)] hover:bg-[var(--bg-hover)] text-[var(--text-primary)]'
+                  : 'bg-[var(--bg-tertiary)] border-transparent text-[var(--text-muted)] cursor-not-allowed opacity-40'
+              }`}
+            >
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+              </svg>
+            </button>
+            <button
+              onClick={() => scrollGames('right')}
+              disabled={!canScrollRight}
+              className={`p-2 rounded-lg border transition-all ${
+                canScrollRight
+                  ? 'bg-[var(--bg-elevated)] border-[var(--border-subtle)] hover:bg-[var(--bg-hover)] text-[var(--text-primary)]'
+                  : 'bg-[var(--bg-tertiary)] border-transparent text-[var(--text-muted)] cursor-not-allowed opacity-40'
+              }`}
+            >
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+              </svg>
+            </button>
+          </div>
+        </div>
+        <div
+          ref={scrollContainerRef}
+          className="flex gap-3 overflow-x-auto pb-2 scrollbar-hide scroll-smooth"
+          style={{ scrollBehavior: 'smooth' }}
+        >
           {games.map((game) => {
             const gameDate = new Date(game.date)
             const isSelected = game.gameId === selectedGameId
@@ -135,8 +197,8 @@ export default function BoxScoreClient({ games, initialGameId }: Props) {
                 onClick={() => setSelectedGameId(game.gameId)}
                 className={`flex-shrink-0 flex items-center gap-3 px-4 py-3 rounded-xl border transition-all ${
                   isSelected
-                    ? 'bg-[#0B162A] border-[#C83200] text-white'
-                    : 'bg-[var(--bg-elevated)] border-[var(--border-subtle)] hover:border-[var(--border-strong)]'
+                    ? 'bg-[#0B162A] border-[#C83200] text-white ring-2 ring-[#C83200]/30'
+                    : 'bg-[var(--bg-elevated)] border-[var(--border-subtle)] hover:border-[var(--border-strong)] hover:shadow-md'
                 }`}
               >
                 {/* Opponent Logo */}
@@ -144,27 +206,27 @@ export default function BoxScoreClient({ games, initialGameId }: Props) {
                   <Image
                     src={game.opponentLogo}
                     alt={game.opponent}
-                    width={32}
-                    height={32}
-                    className="w-8 h-8"
+                    width={36}
+                    height={36}
+                    className="w-9 h-9"
                   />
                 )}
                 <div className="text-left">
                   <div className={`text-xs ${isSelected ? 'text-white/60' : 'text-[var(--text-muted)]'}`}>
-                    {game.playoffRound || `Week ${game.week}`}
+                    {game.playoffRound || `Week ${game.week}`} • {gameDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
                   </div>
                   <div className="flex items-center gap-2">
                     <span className={`font-semibold ${isSelected ? 'text-white' : 'text-[var(--text-primary)]'}`}>
                       {game.homeAway === 'home' ? 'vs' : '@'} {game.opponent}
                     </span>
-                    <span className={`text-sm font-bold ${
-                      isWin ? 'text-green-500' : 'text-red-500'
-                    }`}>
+                  </div>
+                  <div className="flex items-center gap-2 mt-1">
+                    <span className={`text-sm font-bold ${isWin ? 'text-green-500' : 'text-red-500'}`}>
                       {game.result}
                     </span>
-                  </div>
-                  <div className={`text-xs ${isSelected ? 'text-white/60' : 'text-[var(--text-muted)]'}`}>
-                    {game.bearsScore}-{game.oppScore}
+                    <span className={`text-sm font-semibold ${isSelected ? 'text-white' : 'text-[var(--text-primary)]'}`}>
+                      {game.bearsScore}-{game.oppScore}
+                    </span>
                   </div>
                 </div>
               </button>

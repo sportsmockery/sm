@@ -709,7 +709,7 @@ function transformGame(game: any, context?: any): BearsGame {
     oppScore: game.opponent_score,
     result: isPlayed ? (game.bears_win ? 'W' : 'L') : null,
     venue: game.stadium,
-    tv: game.broadcast_window === 'primetime' ? 'Prime' : (game.nationally_televised ? 'National' : null),
+    tv: game.tv_network || (game.broadcast_window === 'primetime' ? 'Prime' : (game.nationally_televised ? 'National' : null)),
     isPlayoff: game.game_type === 'postseason' || game.game_type === 'POST',
     articleSlug: null,
     weather: game.temp_f !== null ? {

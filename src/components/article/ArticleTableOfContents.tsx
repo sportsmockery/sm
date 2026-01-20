@@ -14,7 +14,8 @@ interface ArticleTableOfContentsProps {
 }
 
 /**
- * In-article table of contents
+ * In-article table of contents - Athletic-style
+ * Left sidebar placement with minimal design
  * Extracts h2 and h3 headings from article content
  * Highlights current section based on scroll position
  */
@@ -93,19 +94,81 @@ export default function ArticleTableOfContents({
     }
   }
 
+  // Detect if we're in sidebar mode (left side, no border/bg)
+  const isSidebarMode = className.includes('bg-transparent')
+
+  if (isSidebarMode) {
+    // Athletic-style left sidebar TOC - minimal, elegant
+    return (
+      <nav className={className} aria-label="Table of contents">
+        <div className="mb-4">
+          <span
+            className="text-[11px] font-semibold tracking-[0.1em] uppercase"
+            style={{ color: 'var(--text-muted)', fontFamily: "'Montserrat', sans-serif" }}
+          >
+            Contents
+          </span>
+        </div>
+        <ul className="space-y-0">
+          {items.map((item, index) => (
+            <li key={item.id} className="relative">
+              <button
+                onClick={() => scrollToHeading(item.id)}
+                className={`group w-full text-left py-2 text-[13px] leading-snug transition-all duration-200 ${
+                  item.level === 3 ? 'pl-3' : ''
+                }`}
+                style={{
+                  color: activeId === item.id ? '#bc0000' : 'var(--text-muted)',
+                  fontWeight: activeId === item.id ? 600 : 400,
+                }}
+              >
+                {/* Active indicator line */}
+                {activeId === item.id && (
+                  <span
+                    className="absolute left-0 top-1/2 -translate-y-1/2 w-[2px] h-4 rounded-full"
+                    style={{ backgroundColor: '#bc0000' }}
+                  />
+                )}
+                <span className="line-clamp-2 group-hover:text-[var(--text-primary)] transition-colors pl-3">
+                  {item.text}
+                </span>
+              </button>
+            </li>
+          ))}
+        </ul>
+        {/* Progress indicator */}
+        <div className="mt-6 pt-4 border-t" style={{ borderColor: 'var(--border-color)' }}>
+          <div className="flex items-center gap-2 text-[11px]" style={{ color: 'var(--text-muted)' }}>
+            <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            <span>{items.findIndex(i => i.id === activeId) + 1} of {items.length}</span>
+          </div>
+        </div>
+      </nav>
+    )
+  }
+
+  // Mobile/tablet collapsible TOC
   return (
     <nav
-      className={`bg-white dark:bg-[#111] rounded-xl overflow-hidden border border-gray-100 dark:border-gray-800 ${className}`}
+      className={`rounded-lg overflow-hidden ${className}`}
+      style={{
+        backgroundColor: 'var(--bg-elevated)',
+        border: '1px solid var(--border-color)'
+      }}
       aria-label="Table of contents"
     >
       {/* Header */}
       <button
         onClick={() => setIsExpanded(!isExpanded)}
-        className="w-full flex items-center justify-between px-5 py-4 border-b border-gray-100 dark:border-gray-800 hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors"
+        className="w-full flex items-center justify-between px-4 py-3 transition-colors"
+        style={{ borderBottom: isExpanded ? '1px solid var(--border-color)' : 'none' }}
       >
         <div className="flex items-center gap-2">
           <svg
-            className="w-4 h-4 text-[#bc0000]"
+            className="w-4 h-4"
+            style={{ color: '#bc0000' }}
             fill="none"
             stroke="currentColor"
             viewBox="0 0 24 24"
@@ -118,16 +181,21 @@ export default function ArticleTableOfContents({
             />
           </svg>
           <span
-            className="text-[14px] font-bold text-[#222] dark:text-white uppercase"
-            style={{ fontFamily: "'Montserrat', sans-serif" }}
+            className="text-[13px] font-semibold uppercase tracking-wide"
+            style={{ color: 'var(--text-primary)', fontFamily: "'Montserrat', sans-serif" }}
           >
             In This Article
           </span>
+          <span
+            className="text-[11px] px-1.5 py-0.5 rounded"
+            style={{ backgroundColor: 'var(--bg-surface)', color: 'var(--text-muted)' }}
+          >
+            {items.length}
+          </span>
         </div>
         <svg
-          className={`w-4 h-4 text-gray-400 transition-transform ${
-            isExpanded ? 'rotate-180' : ''
-          }`}
+          className={`w-4 h-4 transition-transform duration-200 ${isExpanded ? 'rotate-180' : ''}`}
+          style={{ color: 'var(--text-muted)' }}
           fill="none"
           stroke="currentColor"
           viewBox="0 0 24 24"
@@ -138,18 +206,20 @@ export default function ArticleTableOfContents({
 
       {/* TOC items */}
       {isExpanded && (
-        <ul className="py-2">
+        <ul className="py-1">
           {items.map((item) => (
             <li key={item.id}>
               <button
                 onClick={() => scrollToHeading(item.id)}
-                className={`w-full text-left px-5 py-2 text-sm transition-colors ${
-                  item.level === 3 ? 'pl-8' : ''
-                } ${
-                  activeId === item.id
-                    ? 'text-[#bc0000] bg-red-50 dark:bg-red-900/20 border-l-2 border-[#bc0000]'
-                    : 'text-gray-600 dark:text-gray-400 hover:text-[#222] dark:hover:text-white hover:bg-gray-50 dark:hover:bg-gray-800/50'
+                className={`w-full text-left px-4 py-2 text-[13px] transition-all duration-150 ${
+                  item.level === 3 ? 'pl-7' : ''
                 }`}
+                style={{
+                  color: activeId === item.id ? '#bc0000' : 'var(--text-secondary)',
+                  backgroundColor: activeId === item.id ? 'rgba(188, 0, 0, 0.05)' : 'transparent',
+                  borderLeft: activeId === item.id ? '2px solid #bc0000' : '2px solid transparent',
+                  fontWeight: activeId === item.id ? 500 : 400,
+                }}
               >
                 <span className="line-clamp-1">{item.text}</span>
               </button>

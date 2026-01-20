@@ -4,12 +4,17 @@ import { Montserrat } from "next/font/google";
 import "./globals.css";
 import { ThemeProvider } from "@/contexts/ThemeContext";
 import { AuthProvider } from "@/contexts/AuthContext";
+import { ChatProvider } from "@/contexts/ChatContext";
 import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
 import SkipToContent from "@/components/layout/SkipToContent";
 import ScrollToTop from "@/components/layout/ScrollToTop";
 import CookieBanner from "@/components/layout/CookieBanner";
 import BearsAIButton from "@/components/bears/BearsAIButton";
+import FloatingChatButton from "@/components/chat/FloatingChatButton";
+import TeamChatPanel from "@/components/chat/TeamChatPanel";
+import FloatingARButton from "@/components/ar/FloatingARButton";
+import MotionProvider from "@/components/motion/MotionProvider";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -132,17 +137,24 @@ export default function RootLayout({
       >
         <ThemeProvider>
           <AuthProvider>
-            <SkipToContent />
-            <div className="flex min-h-screen flex-col">
-              <Header />
-              <div id="main-content" className="flex-1" tabIndex={-1}>
-                {children}
+            <ChatProvider teamSlug="bears">
+              <SkipToContent />
+              <div className="flex min-h-screen flex-col">
+                <Header />
+                <div id="main-content" className="flex-1" tabIndex={-1}>
+                  <MotionProvider>
+                    {children}
+                  </MotionProvider>
+                </div>
+                <Footer />
               </div>
-              <Footer />
-            </div>
-            <ScrollToTop />
-            <CookieBanner />
-            <BearsAIButton />
+              <ScrollToTop />
+              <CookieBanner />
+              <FloatingChatButton teamSlug="bears" teamName="Bears" />
+              <TeamChatPanel teamSlug="bears" teamName="Bears" />
+              <FloatingARButton />
+              <BearsAIButton />
+            </ChatProvider>
           </AuthProvider>
         </ThemeProvider>
       </body>

@@ -273,6 +273,11 @@ async function upsertGame(
     updateData.game_type = typeMap[game.gameType] || 'REG'
   }
 
+  // Sync broadcast network if available (ESPN games have this field)
+  if ('broadcast' in game && game.broadcast) {
+    updateData.tv_network = game.broadcast
+  }
+
   // Only update scores if they have actual values (NOT null)
   if (game.bearsScore !== null && game.bearsScore !== undefined) {
     updateData.bears_score = game.bearsScore

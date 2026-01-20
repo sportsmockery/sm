@@ -2,6 +2,8 @@ import { Metadata } from 'next'
 import Link from 'next/link'
 import Image from 'next/image'
 import { getBearsRosterGrouped, type BearsPlayer, type PositionGroup } from '@/lib/bearsData'
+import { TeamHubLayout } from '@/components/team'
+import { CHICAGO_TEAMS, fetchTeamRecord, fetchNextGame } from '@/lib/team-config'
 
 export const metadata: Metadata = {
   title: 'Chicago Bears Roster 2025 | SportsMockery',
@@ -27,7 +29,14 @@ const POSITION_GROUP_NAMES: Record<PositionGroup, string> = {
 const POSITION_ORDER: PositionGroup[] = ['QB', 'RB', 'WR', 'TE', 'OL', 'DL', 'LB', 'CB', 'S', 'ST']
 
 export default async function BearsRosterPage() {
-  const roster = await getBearsRosterGrouped()
+  const team = CHICAGO_TEAMS.bears
+
+  // Fetch all data in parallel
+  const [roster, record, nextGame] = await Promise.all([
+    getBearsRosterGrouped(),
+    fetchTeamRecord('bears'),
+    fetchNextGame('bears'),
+  ])
 
   // Count by side
   const allPlayers = Object.values(roster).flat()
@@ -36,69 +45,63 @@ export default async function BearsRosterPage() {
   const stCount = allPlayers.filter(p => p.positionGroup === 'ST').length
 
   return (
-    <main className="min-h-screen bg-[var(--bg-primary)]">
-      {/* Header */}
-      <div className="bg-gradient-to-r from-[#0B162A] to-[#0B162A]/90 border-b border-[var(--border-subtle)]">
-        <div className="max-w-7xl mx-auto px-4 py-8">
-          <nav className="flex items-center gap-2 text-sm text-white/60 mb-4">
-            <Link href="/" className="hover:text-white">Home</Link>
-            <span>/</span>
-            <Link href="/chicago-bears" className="hover:text-white">Chicago Bears</Link>
-            <span>/</span>
-            <span className="text-white">Roster</span>
-          </nav>
-          <h1 className="text-3xl md:text-4xl font-bold text-white" style={{ fontFamily: "'Montserrat', sans-serif" }}>
-            Chicago Bears Roster
-          </h1>
-          <p className="text-white/70 mt-2">
-            2025 roster with positions, measurables, and profile links.
-          </p>
-
-          {/* Position Count Chips */}
-          <div className="flex flex-wrap gap-2 mt-4">
-            {POSITION_ORDER.map(group => {
-              const count = roster[group]?.length || 0
-              if (count === 0) return null
-              return (
-                <span
-                  key={group}
-                  className="px-3 py-1 bg-white/10 rounded-full text-sm text-white/80"
-                >
-                  {count} {group}
-                  {count !== 1 && group !== 'OL' && group !== 'DL' && group !== 'ST' ? 's' : ''}
-                </span>
-              )
-            })}
+    <TeamHubLayout
+      team={team}
+      record={record}
+      nextGame={nextGame}
+      activeTab="roster"
+    >
+      {/* Summary Bar */}
+      <div
+        className="rounded-xl p-4 mb-6"
+        style={{
+          backgroundColor: 'var(--bg-surface)',
+          border: '1px solid var(--border-color)',
+        }}
+      >
+        <div className="flex flex-wrap gap-6 text-sm">
+          <div>
+            <span style={{ color: 'var(--text-muted)' }}>Total: </span>
+            <span className="font-semibold" style={{ color: 'var(--text-primary)' }}>{allPlayers.length} players</span>
+          </div>
+          <div>
+            <span style={{ color: 'var(--text-muted)' }}>Offense: </span>
+            <span className="font-semibold" style={{ color: 'var(--text-primary)' }}>{offenseCount}</span>
+          </div>
+          <div>
+            <span style={{ color: 'var(--text-muted)' }}>Defense: </span>
+            <span className="font-semibold" style={{ color: 'var(--text-primary)' }}>{defenseCount}</span>
+          </div>
+          <div>
+            <span style={{ color: 'var(--text-muted)' }}>Special Teams: </span>
+            <span className="font-semibold" style={{ color: 'var(--text-primary)' }}>{stCount}</span>
           </div>
         </div>
-      </div>
 
-      {/* Summary Bar */}
-      <div className="bg-[var(--bg-secondary)] border-b border-[var(--border-subtle)]">
-        <div className="max-w-7xl mx-auto px-4 py-4">
-          <div className="flex flex-wrap gap-6 text-sm">
-            <div>
-              <span className="text-[var(--text-muted)]">Total: </span>
-              <span className="font-semibold text-[var(--text-primary)]">{allPlayers.length} players</span>
-            </div>
-            <div>
-              <span className="text-[var(--text-muted)]">Offense: </span>
-              <span className="font-semibold text-[var(--text-primary)]">{offenseCount}</span>
-            </div>
-            <div>
-              <span className="text-[var(--text-muted)]">Defense: </span>
-              <span className="font-semibold text-[var(--text-primary)]">{defenseCount}</span>
-            </div>
-            <div>
-              <span className="text-[var(--text-muted)]">Special Teams: </span>
-              <span className="font-semibold text-[var(--text-primary)]">{stCount}</span>
-            </div>
-          </div>
+        {/* Position Count Chips */}
+        <div className="flex flex-wrap gap-2 mt-4">
+          {POSITION_ORDER.map(group => {
+            const count = roster[group]?.length || 0
+            if (count === 0) return null
+            return (
+              <span
+                key={group}
+                className="px-3 py-1 rounded-full text-sm"
+                style={{
+                  backgroundColor: 'var(--bg-tertiary)',
+                  color: 'var(--text-secondary)',
+                }}
+              >
+                {count} {group}
+                {count !== 1 && group !== 'OL' && group !== 'DL' && group !== 'ST' ? 's' : ''}
+              </span>
+            )
+          })}
         </div>
       </div>
 
       {/* Roster Grid */}
-      <div className="max-w-7xl mx-auto px-4 py-8">
+      <div>
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           {POSITION_ORDER.map(group => {
             const players = roster[group]
@@ -114,7 +117,7 @@ export default async function BearsRosterPage() {
           })}
         </div>
       </div>
-    </main>
+    </TeamHubLayout>
   )
 }
 

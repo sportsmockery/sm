@@ -1,6 +1,16 @@
 'use client'
 
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react'
+import { createBrowserClient } from '@supabase/ssr'
+import type { User as SupabaseUser, Session } from '@supabase/supabase-js'
+
+// Create Supabase client for browser
+function createSupabaseClient() {
+  return createBrowserClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+  )
+}
 
 // User type
 interface User {
@@ -23,7 +33,19 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined)
 
+// Convert Supabase user to our User type
+function mapSupabaseUser(supabaseUser: SupabaseUser | null): User | null {
+  if (!supabaseUser) return null
+  return {
+    id: supabaseUser.id,
+    email: supabaseUser.email || '',
+    name: supabaseUser.user_metadata?.full_name || supabaseUser.email?.split('@')[0],
+    avatar: supabaseUser.user_metadata?.avatar_url,
+  }
+}
+
 export function AuthProvider({ children }: { children: ReactNode }) {
+  const [supabase] = useState(() => createSupabaseClient())
   const [user, setUser] = useState<User | null>(null)
   const [loading, setLoading] = useState(true)
 
@@ -31,59 +53,106 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     const checkAuth = async () => {
       try {
-        // Check localStorage for existing session (placeholder)
-        const savedUser = localStorage.getItem('sm-user')
-        if (savedUser) {
-          setUser(JSON.parse(savedUser))
+        const { data: { session }, error } = await supabase.auth.getSession()
+
+        if (error) {
+          console.error('Auth session check failed:', error.message)
+          setUser(null)
+        } else if (session?.user) {
+          setUser(mapSupabaseUser(session.user))
+        } else {
+          setUser(null)
         }
       } catch (error) {
         console.error('Auth check failed:', error)
+        setUser(null)
       } finally {
         setLoading(false)
       }
     }
-    checkAuth()
-  }, [])
 
-  // Sign in
+    checkAuth()
+
+    // Listen for auth state changes
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      async (event, session) => {
+        if (session?.user) {
+          setUser(mapSupabaseUser(session.user))
+        } else {
+          setUser(null)
+        }
+        setLoading(false)
+      }
+    )
+
+    return () => subscription.unsubscribe()
+  }, [supabase])
+
+  // Sign in with email and password
   const signIn = async (email: string, password: string): Promise<{ error?: string }> => {
     setLoading(true)
     try {
-      // Placeholder implementation - replace with actual auth
-      const mockUser: User = {
-        id: '1',
+      const { data, error } = await supabase.auth.signInWithPassword({
         email,
-        name: email.split('@')[0],
+        password,
+      })
+
+      if (error) {
+        console.error('Sign in failed:', error.message)
+        return { error: error.message }
       }
-      setUser(mockUser)
-      localStorage.setItem('sm-user', JSON.stringify(mockUser))
+
+      if (data.user) {
+        setUser(mapSupabaseUser(data.user))
+      }
+
       return {}
     } catch (error) {
       console.error('Sign in failed:', error)
-      return { error: 'Sign in failed' }
+      return { error: 'Sign in failed. Please try again.' }
     } finally {
       setLoading(false)
     }
   }
 
-  // Sign up
-  const signUp = async (email: string, password: string, options?: string | { full_name?: string }): Promise<{ error?: string }> => {
+  // Sign up with email and password
+  const signUp = async (
+    email: string,
+    password: string,
+    options?: string | { full_name?: string }
+  ): Promise<{ error?: string }> => {
     setLoading(true)
     try {
-      // Handle both string name or options object
-      const name = typeof options === 'string' ? options : options?.full_name
-      // Placeholder implementation - replace with actual auth
-      const mockUser: User = {
-        id: '1',
+      const fullName = typeof options === 'string' ? options : options?.full_name
+
+      const { data, error } = await supabase.auth.signUp({
         email,
-        name: name || email.split('@')[0],
+        password,
+        options: {
+          data: {
+            full_name: fullName || email.split('@')[0],
+          },
+        },
+      })
+
+      if (error) {
+        console.error('Sign up failed:', error.message)
+        return { error: error.message }
       }
-      setUser(mockUser)
-      localStorage.setItem('sm-user', JSON.stringify(mockUser))
+
+      // Check if email confirmation is required
+      if (data.user && !data.session) {
+        return { error: 'Please check your email to confirm your account.' }
+      }
+
+      if (data.user) {
+        setUser(mapSupabaseUser(data.user))
+      }
+
       return {}
     } catch (error) {
       console.error('Sign up failed:', error)
-      return { error: 'Sign up failed' }
+      return { error: 'Sign up failed. Please try again.' }
     } finally {
       setLoading(false)
     }
@@ -93,8 +162,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const signOut = async () => {
     setLoading(true)
     try {
+      const { error } = await supabase.auth.signOut()
+      if (error) {
+        console.error('Sign out failed:', error.message)
+        throw error
+      }
       setUser(null)
-      localStorage.removeItem('sm-user')
     } catch (error) {
       console.error('Sign out failed:', error)
       throw error
@@ -107,12 +180,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const resetPassword = async (email: string): Promise<{ error?: string }> => {
     setLoading(true)
     try {
-      // Placeholder implementation - replace with actual password reset
-      console.log('Password reset email sent to:', email)
+      const { error } = await supabase.auth.resetPasswordForEmail(email, {
+        redirectTo: `${window.location.origin}/reset-password`,
+      })
+
+      if (error) {
+        console.error('Password reset failed:', error.message)
+        return { error: error.message }
+      }
+
       return {}
     } catch (error) {
       console.error('Password reset failed:', error)
-      return { error: 'Failed to send reset email' }
+      return { error: 'Failed to send reset email. Please try again.' }
     } finally {
       setLoading(false)
     }

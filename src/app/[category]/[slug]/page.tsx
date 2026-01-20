@@ -43,9 +43,16 @@ async function getPost(slug: string) {
     .from('sm_posts')
     .select('id, title, content, excerpt, featured_image, published_at, updated_at, seo_title, seo_description, author_id, category_id, views')
     .eq('slug', slug)
+    .eq('status', 'published')
     .single()
 
   if (error || !post) {
+    return null
+  }
+
+  // Ensure published_at exists (required for date formatting)
+  if (!post.published_at) {
+    console.error('Post missing published_at:', slug)
     return null
   }
 
@@ -409,12 +416,24 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
         )}
       </header>
 
-      {/* Main Content Area - per spec section 7.3: max-width 700-750px for article body */}
+      {/* Main Content Area - Athletic-style layout with TOC on LEFT */}
       <div style={{ backgroundColor: 'var(--bg-page)' }}>
-        <div className="mx-auto max-w-[1110px] px-4 py-10">
-          <div className="lg:flex lg:gap-10">
-            {/* Main article column */}
-            <div className="lg:flex-1 lg:max-w-[750px]">
+        <div className="mx-auto max-w-[1400px] px-4 py-10">
+          <div className="flex justify-center gap-0">
+            {/* Left Sidebar - TOC (Desktop only) */}
+            {readingTime >= 5 && (
+              <aside className="hidden xl:block w-[220px] flex-shrink-0">
+                <div className="sticky top-24 pr-6">
+                  <ArticleTableOfContents
+                    contentHtml={post.content || ''}
+                    className="border-0 bg-transparent"
+                  />
+                </div>
+              </aside>
+            )}
+
+            {/* Main article column - centered */}
+            <div className={`w-full max-w-[720px] ${readingTime >= 5 ? 'xl:border-l xl:border-r xl:px-12' : ''}`} style={{ borderColor: 'var(--border-color)' }}>
               {/* Note: Featured image is shown in hero section above, not duplicated here */}
 
               {/* Article Audio Player - Listen to this article */}
@@ -431,11 +450,11 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
                 className="article-body"
                 style={{ fontFamily: "'Fira Sans', sans-serif" }}
               >
-                {/* In-article Table of Contents (for longer articles) */}
+                {/* Mobile TOC - shown at top on smaller screens */}
                 {readingTime >= 5 && (
                   <ArticleTableOfContents
                     contentHtml={post.content || ''}
-                    className="mb-8 lg:hidden"
+                    className="mb-8 xl:hidden"
                   />
                 )}
 
@@ -483,16 +502,9 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
               </article>
             </div>
 
-            {/* Desktop Sidebar */}
-            <aside className="hidden lg:block lg:w-[300px] lg:flex-shrink-0">
-              <div className="sticky top-24 space-y-6">
-                {/* Table of Contents for longer articles */}
-                {readingTime >= 5 && (
-                  <ArticleTableOfContents
-                    contentHtml={post.content || ''}
-                  />
-                )}
-
+            {/* Right Sidebar - More from team (Desktop only) */}
+            <aside className="hidden xl:block w-[280px] flex-shrink-0">
+              <div className="sticky top-24 pl-6">
                 {/* More from this team */}
                 {relatedPosts.length > 0 && categoryData && (
                   <MoreFromTeam

@@ -2,6 +2,8 @@ import { Metadata } from 'next'
 import Link from 'next/link'
 import Image from 'next/image'
 import { getBearsSchedule, getAvailableSeasons, getPlayoffRoundName, type BearsGame } from '@/lib/bearsData'
+import { TeamHubLayout } from '@/components/team'
+import { CHICAGO_TEAMS, fetchTeamRecord, fetchNextGame } from '@/lib/team-config'
 
 // Bears logo URL
 const BEARS_LOGO = 'https://a.espncdn.com/i/teamlogos/nfl/500/chi.png'
@@ -16,85 +18,62 @@ export const revalidate = 3600
 export default async function BearsSchedulePage() {
   // 2025-26 NFL season is stored as season = 2025
   const currentSeason = 2025
-  const schedule = await getBearsSchedule(currentSeason)
-  const seasons = await getAvailableSeasons()
+  const team = CHICAGO_TEAMS.bears
+
+  // Fetch all data in parallel
+  const [schedule, seasons, record, nextGame] = await Promise.all([
+    getBearsSchedule(currentSeason),
+    getAvailableSeasons(),
+    fetchTeamRecord('bears'),
+    fetchNextGame('bears'),
+  ])
 
   // Calculate record
   const completedGames = schedule.filter(g => g.status === 'final')
   const wins = completedGames.filter(g => g.result === 'W').length
   const losses = completedGames.filter(g => g.result === 'L').length
 
-  // Find next game
-  const nextGame = schedule.find(g => g.status === 'scheduled')
+  // Find next scheduled game
+  const nextScheduledGame = schedule.find(g => g.status === 'scheduled')
 
   return (
-    <main className="min-h-screen bg-[var(--bg-primary)]">
-      {/* Header */}
-      <div className="bg-gradient-to-r from-[#0B162A] to-[#0B162A]/90 border-b border-[var(--border-subtle)]">
-        <div className="max-w-7xl mx-auto px-4 py-8">
-          <nav className="flex items-center gap-2 text-sm text-white/60 mb-4">
-            <Link href="/" className="hover:text-white">Home</Link>
-            <span>/</span>
-            <Link href="/chicago-bears" className="hover:text-white">Chicago Bears</Link>
-            <span>/</span>
-            <span className="text-white">Schedule</span>
-          </nav>
-          <h1 className="text-3xl md:text-4xl font-bold text-white" style={{ fontFamily: "'Montserrat', sans-serif" }}>
-            Chicago Bears Schedule {currentSeason}
-          </h1>
-          <p className="text-white/70 mt-2">
-            Full season schedule with game times, opponents, and results.
-          </p>
-
-          {/* Record Summary */}
-          <div className="flex flex-wrap gap-4 mt-4">
-            <div className="px-4 py-2 bg-white/10 rounded-lg">
-              <span className="text-white/60 text-sm">Record: </span>
-              <span className="text-white font-bold">{wins}-{losses}</span>
-            </div>
-            <div className="px-4 py-2 bg-white/10 rounded-lg">
-              <span className="text-white/60 text-sm">Games Played: </span>
-              <span className="text-white font-bold">{completedGames.length}</span>
-            </div>
-            <div className="px-4 py-2 bg-white/10 rounded-lg">
-              <span className="text-white/60 text-sm">Remaining: </span>
-              <span className="text-white font-bold">{schedule.length - completedGames.length}</span>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Main Content */}
-      <div className="max-w-7xl mx-auto px-4 py-8">
-        {/* Next Game Highlight */}
-        {nextGame && (
-          <div className="mb-8">
-            <h2 className="text-lg font-bold text-[var(--text-primary)] mb-4" style={{ fontFamily: "'Montserrat', sans-serif" }}>
-              Next Game
-            </h2>
-            <div className="bg-gradient-to-r from-[#0B162A] to-[#0B162A]/90 rounded-2xl p-6 text-white">
-              <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-                <div>
-                  <div className="text-white/60 text-sm mb-1">
-                    Week {nextGame.week} • {nextGame.dayOfWeek}
-                  </div>
-                  <div className="text-2xl font-bold">
-                    {nextGame.homeAway === 'home' ? 'vs' : '@'} {nextGame.opponent}
-                  </div>
-                  <div className="text-white/70 mt-1">
-                    {new Date(nextGame.date).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}
-                    {nextGame.time && ` • ${nextGame.time}`}
-                  </div>
+    <TeamHubLayout
+      team={team}
+      record={record}
+      nextGame={nextGame}
+      activeTab="schedule"
+    >
+      {/* Schedule Content */}
+      <div>
+        {/* Next Game Highlight - Compact */}
+        {nextScheduledGame && (
+          <div className="mb-6 p-4 rounded-xl bg-[var(--bg-elevated)] border border-[var(--border-subtle)]">
+            <div className="flex items-center justify-between gap-4">
+              <div className="flex items-center gap-3">
+                <div className="px-2 py-1 bg-[#C83200]/10 text-[#C83200] text-xs font-semibold rounded">
+                  UP NEXT
                 </div>
-                <div className="text-right">
-                  {nextGame.venue && (
-                    <div className="text-white/60 text-sm">{nextGame.venue}</div>
+                <div className="flex items-center gap-2">
+                  {nextScheduledGame.opponentLogo && (
+                    <Image
+                      src={nextScheduledGame.opponentLogo}
+                      alt={nextScheduledGame.opponent}
+                      width={28}
+                      height={28}
+                      className="w-7 h-7"
+                    />
                   )}
-                  {nextGame.tv && (
-                    <div className="mt-1 px-3 py-1 bg-white/10 rounded inline-block text-sm">
-                      {nextGame.tv}
-                    </div>
-                  )}
+                  <span className="font-semibold text-[var(--text-primary)]">
+                    {nextScheduledGame.homeAway === 'home' ? 'vs' : '@'} {nextScheduledGame.opponentFullName || nextScheduledGame.opponent}
+                  </span>
+                </div>
+              </div>
+              <div className="text-right text-sm">
+                <div className="text-[var(--text-primary)] font-medium">
+                  {new Date(nextScheduledGame.date).toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })}
+                </div>
+                <div className="text-[var(--text-muted)]">
+                  {nextScheduledGame.time || 'TBD'} {nextScheduledGame.tv && `• ${nextScheduledGame.tv}`}
                 </div>
               </div>
             </div>
@@ -119,7 +98,7 @@ export default async function BearsSchedulePage() {
           </div>
         </div>
       </div>
-    </main>
+    </TeamHubLayout>
   )
 }
 
@@ -131,115 +110,114 @@ function GameRow({ game }: { game: BearsGame }) {
 
   return (
     <div className={`p-4 hover:bg-[var(--bg-hover)] transition-colors ${isPast ? '' : 'bg-[var(--bg-tertiary)]/30'}`}>
-      <div className="flex flex-col sm:flex-row sm:items-center gap-4">
+      <div className="grid grid-cols-[auto_1fr_auto] sm:grid-cols-[100px_1fr_140px] gap-4 items-center">
         {/* Week & Date */}
-        <div className="sm:w-32 flex-shrink-0">
-          <div className="text-xs text-[var(--text-muted)] uppercase tracking-wider">
-            {playoffRound || `Week ${game.week}`}
-          </div>
+        <div className="flex-shrink-0">
+          {game.isPlayoff ? (
+            <div className="px-2 py-1 bg-[#C83200]/10 text-[#C83200] text-xs rounded font-semibold inline-block mb-1">
+              {playoffRound || 'Playoff'}
+            </div>
+          ) : (
+            <div className="text-xs text-[var(--text-muted)] uppercase tracking-wider">
+              Week {game.week}
+            </div>
+          )}
           <div className="font-medium text-[var(--text-primary)]">
             {gameDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
           </div>
-          <div className="text-sm text-[var(--text-muted)]">
+          <div className="text-xs text-[var(--text-muted)]">
             {game.dayOfWeek}
           </div>
         </div>
 
-        {/* Matchup with Logos */}
-        <div className="flex-1">
-          <div className="flex items-center gap-3">
-            {/* Bears Logo */}
-            <div className="w-8 h-8 flex-shrink-0">
+        {/* Matchup - Compact Design */}
+        <div className="flex items-center gap-2 min-w-0">
+          {/* Bears Logo */}
+          <div className="w-7 h-7 flex-shrink-0">
+            <Image
+              src={BEARS_LOGO}
+              alt="Chicago Bears"
+              width={28}
+              height={28}
+              className="w-full h-full object-contain"
+            />
+          </div>
+
+          <span className="text-xs text-[var(--text-muted)] font-medium flex-shrink-0">
+            {game.homeAway === 'home' ? 'vs' : '@'}
+          </span>
+
+          {/* Opponent Logo */}
+          {game.opponentLogo && (
+            <div className="w-7 h-7 flex-shrink-0">
               <Image
-                src={BEARS_LOGO}
-                alt="Chicago Bears"
-                width={32}
-                height={32}
+                src={game.opponentLogo}
+                alt={game.opponentFullName || game.opponent}
+                width={28}
+                height={28}
                 className="w-full h-full object-contain"
               />
             </div>
+          )}
 
-            <span className="text-sm text-[var(--text-muted)] font-medium">
-              {game.homeAway === 'home' ? 'vs' : '@'}
-            </span>
-
-            {/* Opponent Logo */}
-            {game.opponentLogo && (
-              <div className="w-8 h-8 flex-shrink-0">
-                <Image
-                  src={game.opponentLogo}
-                  alt={game.opponentFullName || game.opponent}
-                  width={32}
-                  height={32}
-                  className="w-full h-full object-contain"
-                />
-              </div>
-            )}
-
-            <span className="text-lg font-semibold text-[var(--text-primary)]">
+          <div className="min-w-0 flex-1">
+            <span className="text-sm sm:text-base font-semibold text-[var(--text-primary)] truncate block">
               {game.opponentFullName || game.opponent}
             </span>
-
-            {game.isPlayoff && (
-              <span className="px-2 py-0.5 bg-[#C83200]/10 text-[#C83200] text-xs rounded-full font-medium">
-                Playoff
-              </span>
+            {game.venue && (
+              <div className="text-xs text-[var(--text-muted)] truncate hidden sm:block">
+                {game.venue}
+              </div>
             )}
           </div>
-          {game.venue && (
-            <div className="text-sm text-[var(--text-muted)] mt-1 ml-11">
-              {game.venue}
-            </div>
-          )}
         </div>
 
-        {/* Result / Time */}
-        <div className="sm:w-40 sm:text-right flex-shrink-0">
+        {/* Result / Time - Right aligned */}
+        <div className="text-right flex-shrink-0">
           {isPast ? (
-            <div className="flex items-center gap-2 sm:justify-end">
-              <span className={`px-3 py-1 rounded-lg text-sm font-bold ${
+            <div className="flex items-center gap-2 justify-end">
+              <span className={`px-2 py-0.5 rounded text-xs font-bold ${
                 game.result === 'W'
                   ? 'bg-green-500/10 text-green-500'
                   : 'bg-red-500/10 text-red-500'
               }`}>
                 {game.result}
               </span>
-              <span className="font-semibold text-[var(--text-primary)]">
+              <span className="font-semibold text-[var(--text-primary)] text-sm">
                 {game.bearsScore}-{game.oppScore}
               </span>
             </div>
           ) : isInProgress ? (
-            <div className="flex items-center gap-2 sm:justify-end">
-              <span className="px-3 py-1 bg-[#C83200]/10 text-[#C83200] rounded-lg text-sm font-medium animate-pulse">
+            <div className="flex items-center gap-2 justify-end">
+              <span className="px-2 py-0.5 bg-[#C83200]/10 text-[#C83200] rounded text-xs font-medium animate-pulse">
                 LIVE
               </span>
-              <span className="font-semibold text-[var(--text-primary)]">
+              <span className="font-semibold text-[var(--text-primary)] text-sm">
                 {game.bearsScore}-{game.oppScore}
               </span>
             </div>
           ) : (
             <div>
-              <div className="font-medium text-[var(--text-primary)]">
+              <div className="font-medium text-[var(--text-primary)] text-sm">
                 {game.time || 'TBD'}
               </div>
               {game.tv && (
-                <div className="text-sm text-[var(--text-muted)]">
+                <div className="text-xs text-[var(--text-muted)]">
                   {game.tv}
                 </div>
               )}
             </div>
           )}
+          {/* Recap Link inline */}
+          {game.articleSlug && (
+            <Link
+              href={`/bears/${game.articleSlug}`}
+              className="text-xs text-[#C83200] hover:underline mt-1 inline-block"
+            >
+              Recap →
+            </Link>
+          )}
         </div>
-
-        {/* Recap Link */}
-        {game.articleSlug && (
-          <Link
-            href={`/bears/${game.articleSlug}`}
-            className="sm:w-24 text-center px-3 py-1 bg-[var(--bg-tertiary)] hover:bg-[var(--bg-hover)] text-sm text-[#C83200] rounded-lg transition-colors"
-          >
-            Recap
-          </Link>
-        )}
       </div>
     </div>
   )

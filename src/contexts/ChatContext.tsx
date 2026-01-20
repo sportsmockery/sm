@@ -157,22 +157,34 @@ export function ChatProvider({ children, teamSlug }: ChatProviderProps) {
   useEffect(() => {
     const checkAuth = async () => {
       try {
-        const { data: { session } } = await supabase.auth.getSession()
+        const { data: { session }, error: sessionError } = await supabase.auth.getSession()
+
+        if (sessionError) {
+          console.warn('Chat auth session check failed:', sessionError.message)
+          return
+        }
+
         setIsAuthenticated(!!session)
 
         if (session) {
           // Get or create chat user
-          const { data: chatUser } = await supabase
+          const { data: chatUser, error: userError } = await supabase
             .from('chat_users')
             .select('*')
             .eq('user_id', session.user.id)
             .single()
 
+          if (userError && userError.code !== 'PGRST116') {
+            // PGRST116 = not found, which is okay
+            console.warn('Chat user lookup failed:', userError.message)
+            return
+          }
+
           if (chatUser) {
             setCurrentUser(chatUser)
           } else {
-            // Create chat user
-            const { data: newUser } = await supabase
+            // Create chat user - but don't fail if table doesn't exist
+            const { data: newUser, error: createError } = await supabase
               .from('chat_users')
               .insert({
                 user_id: session.user.id,
@@ -182,11 +194,16 @@ export function ChatProvider({ children, teamSlug }: ChatProviderProps) {
               .select()
               .single()
 
+            if (createError) {
+              console.warn('Chat user creation failed:', createError.message)
+              return
+            }
+
             setCurrentUser(newUser)
           }
         }
       } catch (err) {
-        console.error('Chat auth check failed:', err)
+        console.warn('Chat auth check failed:', err)
         // Don't throw - chat is non-critical
       }
     }
@@ -204,14 +221,20 @@ export function ChatProvider({ children, teamSlug }: ChatProviderProps) {
   useEffect(() => {
     const loadRooms = async () => {
       try {
-        const { data } = await supabase
+        const { data, error } = await supabase
           .from('chat_rooms')
           .select('*')
           .eq('is_active', true)
 
+        if (error) {
+          // Table might not exist - that's okay, chat is optional
+          console.warn('Chat rooms not available:', error.message)
+          return
+        }
+
         if (data) setRooms(data)
       } catch (err) {
-        console.error('Failed to load chat rooms:', err)
+        console.warn('Failed to load chat rooms:', err)
         // Don't throw - chat is non-critical
       }
     }

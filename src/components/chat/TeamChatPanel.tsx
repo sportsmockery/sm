@@ -109,11 +109,16 @@ export default function TeamChatPanel({ teamName, teamSlug }: TeamChatPanelProps
                   <span>Loading messages...</span>
                 </div>
               ) : error ? (
-                <div className="chat-panel__error">{error}</div>
+                <div className="chat-panel__error">
+                  <p>{error}</p>
+                  <p className="chat-panel__error-sub">Chat is currently unavailable. Please try again later.</p>
+                </div>
               ) : messages.length === 0 ? (
                 <div className="chat-panel__empty">
-                  <p>No messages yet</p>
-                  <p className="chat-panel__empty-sub">Be the first to start the conversation!</p>
+                  <p>Welcome to {teamName} Fan Chat!</p>
+                  <p className="chat-panel__empty-sub">
+                    {currentUser ? 'Be the first to start the conversation!' : 'Sign in to join the conversation.'}
+                  </p>
                 </div>
               ) : (
                 <>
@@ -297,7 +302,8 @@ export default function TeamChatPanel({ teamName, teamSlug }: TeamChatPanelProps
         }
 
         .chat-panel__empty-sub,
-        .chat-panel__placeholder-sub {
+        .chat-panel__placeholder-sub,
+        .chat-panel__error-sub {
           font-size: 0.8rem;
           opacity: 0.7;
         }

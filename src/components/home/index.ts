@@ -1,12 +1,19 @@
 /**
  * Homepage components export
  *
+ * V10 Design System Components:
+ * - ChicagoLive, FanControlCenter
+ *
  * SSR Components (guaranteed rendering):
  * - InfoDeck, FeaturedShell, LatestStream, SeasonalFocus, EvergreenClassics
  *
  * Legacy Components:
  * - HeroCarousel, TeamSpotlight, HomepageTimeline, PersonalizedFeed
  */
+
+// V10 Design System Components
+export { default as ChicagoLive } from './ChicagoLive'
+export { default as FanControlCenter } from './FanControlCenter'
 
 // SSR Homepage Components - guaranteed to render with fallback data
 export { InfoDeck } from './InfoDeck'

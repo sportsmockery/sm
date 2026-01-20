@@ -3,6 +3,7 @@ import { notFound } from 'next/navigation'
 import Link from 'next/link'
 import Image from 'next/image'
 import { getPlayerProfile, getSimilarPlayers, getBearsPlayers, type PlayerProfile, type BearsPlayer, type PlayerGameLogEntry } from '@/lib/bearsData'
+import ScrollToTop from './ScrollToTop'
 
 interface PlayerPageProps {
   params: Promise<{ slug: string }>
@@ -49,6 +50,9 @@ export default async function PlayerProfilePage({ params }: PlayerPageProps) {
 
   return (
     <main className="min-h-screen bg-[var(--bg-primary)]">
+      {/* Scroll to top on page load */}
+      <ScrollToTop />
+
       {/* Hero Section */}
       <div
         className="relative overflow-hidden"

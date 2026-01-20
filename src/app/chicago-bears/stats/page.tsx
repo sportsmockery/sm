@@ -2,6 +2,8 @@ import { Metadata } from 'next'
 import Link from 'next/link'
 import Image from 'next/image'
 import { getBearsStats, type BearsStats, type LeaderboardEntry, type BearsPlayer } from '@/lib/bearsData'
+import { TeamHubLayout } from '@/components/team'
+import { CHICAGO_TEAMS, fetchTeamRecord, fetchNextGame } from '@/lib/team-config'
 
 export const metadata: Metadata = {
   title: 'Chicago Bears Stats 2025 | Team & Player Statistics | SportsMockery',
@@ -13,31 +15,24 @@ export const revalidate = 3600
 export default async function BearsStatsPage() {
   // 2025-26 NFL season is stored as season = 2025
   const currentSeason = 2025
-  const stats = await getBearsStats(currentSeason)
+  const team = CHICAGO_TEAMS.bears
+
+  // Fetch all data in parallel
+  const [stats, record, nextGame] = await Promise.all([
+    getBearsStats(currentSeason),
+    fetchTeamRecord('bears'),
+    fetchNextGame('bears'),
+  ])
 
   return (
-    <main className="min-h-screen bg-[var(--bg-primary)]">
-      {/* Header */}
-      <div className="bg-gradient-to-r from-[#0B162A] to-[#0B162A]/90 border-b border-[var(--border-subtle)]">
-        <div className="max-w-7xl mx-auto px-4 py-8">
-          <nav className="flex items-center gap-2 text-sm text-white/60 mb-4">
-            <Link href="/" className="hover:text-white">Home</Link>
-            <span>/</span>
-            <Link href="/chicago-bears" className="hover:text-white">Chicago Bears</Link>
-            <span>/</span>
-            <span className="text-white">Stats</span>
-          </nav>
-          <h1 className="text-3xl md:text-4xl font-bold text-white" style={{ fontFamily: "'Montserrat', sans-serif" }}>
-            Chicago Bears Stats {currentSeason}
-          </h1>
-          <p className="text-white/70 mt-2">
-            Team and player statistics for the {currentSeason} season.
-          </p>
-        </div>
-      </div>
-
-      {/* Main Content */}
-      <div className="max-w-7xl mx-auto px-4 py-8">
+    <TeamHubLayout
+      team={team}
+      record={record}
+      nextGame={nextGame}
+      activeTab="stats"
+    >
+      {/* Stats Content */}
+      <div>
         {/* Team Overview Cards */}
         <section className="mb-10">
           <h2 className="text-xl font-bold text-[var(--text-primary)] mb-6" style={{ fontFamily: "'Montserrat', sans-serif" }}>
@@ -150,7 +145,7 @@ export default async function BearsStatsPage() {
           </Link>
         </div>
       </div>
-    </main>
+    </TeamHubLayout>
   )
 }
 

@@ -1,5 +1,8 @@
+'use client'
+
 import Image from 'next/image'
 import Link from 'next/link'
+import { motion, useReducedMotion } from 'framer-motion'
 import { getTeamColor } from '@/styles/theme'
 
 interface ArticleCardProps {
@@ -13,6 +16,8 @@ interface ArticleCardProps {
   }
   author?: string
   publishedAt: string
+  /** Index for staggered animations in grids */
+  index?: number
 }
 
 export default function ArticleCard({
@@ -23,13 +28,29 @@ export default function ArticleCard({
   category,
   author,
   publishedAt,
+  index = 0,
 }: ArticleCardProps) {
   const teamColor = getTeamColor(category.slug)
   const badgeColor = teamColor?.primary || '#8B0000'
   const accentColor = teamColor?.primary || '#FF0000'
+  const prefersReducedMotion = useReducedMotion()
 
   return (
-    <article className="group relative overflow-hidden rounded-2xl border border-zinc-200 bg-white shadow-sm transition-all duration-500 hover:shadow-2xl hover:-translate-y-2 dark:border-zinc-800 dark:bg-zinc-900">
+    <motion.article
+      initial={prefersReducedMotion ? false : { opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{
+        duration: 0.4,
+        delay: index * 0.08,
+        ease: [0.25, 0.46, 0.45, 0.94],
+      }}
+      whileHover={prefersReducedMotion ? {} : { y: -4, transition: { duration: 0.2 } }}
+      className="group relative overflow-hidden rounded-xl border bg-white shadow-sm dark:border-zinc-800 dark:bg-zinc-900"
+      style={{
+        borderColor: 'var(--border-color)',
+        boxShadow: 'var(--shadow-sm)',
+      }}
+    >
       {/* Colored accent line on hover */}
       <div
         className="absolute top-0 left-0 right-0 h-1 transform scale-x-0 group-hover:scale-x-100 transition-transform duration-500 origin-left"
@@ -121,9 +142,16 @@ export default function ArticleCard({
 
       {/* Hover glow effect */}
       <div
-        className="absolute inset-0 opacity-0 group-hover:opacity-5 transition-opacity duration-500 pointer-events-none rounded-2xl"
+        className="absolute inset-0 opacity-0 group-hover:opacity-5 transition-opacity duration-500 pointer-events-none rounded-xl"
         style={{ background: `radial-gradient(circle at center, ${accentColor} 0%, transparent 70%)` }}
       />
-    </article>
+
+      {/* Enhanced shadow on hover via CSS custom properties */}
+      <style jsx>{`
+        .group:hover {
+          box-shadow: var(--shadow-lg);
+        }
+      `}</style>
+    </motion.article>
   )
 }

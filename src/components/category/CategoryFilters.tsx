@@ -58,79 +58,68 @@ export default function CategoryFilters({
   ]
 
   const timeOptions: { value: TimeFilter; label: string }[] = [
-    { value: 'all', label: 'All Time' },
-    { value: 'week', label: 'This Week' },
-    { value: 'month', label: 'This Month' },
-    { value: 'year', label: 'This Year' },
+    { value: 'all', label: 'All' },
+    { value: 'week', label: 'Week' },
+    { value: 'month', label: 'Month' },
+    { value: 'year', label: 'Year' },
   ]
 
   return (
-    <div
-      className={`border-b bg-white dark:bg-zinc-900 border-[#e0e0e0] dark:border-white/20 ${className}`}
-    >
-      <div className="mx-auto max-w-[1110px] px-4">
-        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3 py-3">
-          {/* Category name and count */}
-          {categoryName && (
-            <div className="flex items-center gap-3">
-              <h1
-                className="text-lg md:text-xl font-bold text-[var(--text-primary)]"
-                style={{ fontFamily: "'Montserrat', sans-serif" }}
-              >
-                {categoryName}
-              </h1>
-              {postCount !== undefined && (
-                <span className="text-sm text-[var(--text-muted)]">
-                  {postCount.toLocaleString()} articles
-                </span>
-              )}
-            </div>
-          )}
-
-          {/* Filters row */}
-          <div className="flex flex-wrap items-center gap-4">
-            {/* Sort by */}
-            <div className="flex items-center gap-2">
-              <span className="text-xs font-medium text-[var(--text-muted)]">
-                Sort:
+    <div className={`bg-[var(--bg-surface)] border-b border-[var(--border-color)] ${className}`}>
+      <div className="max-w-[1600px] mx-auto px-4 lg:px-6">
+        <div className="flex items-center justify-between h-14">
+          {/* Category Title */}
+          <div className="flex items-baseline gap-3">
+            <h1
+              className="text-xl font-bold text-[var(--text-primary)]"
+              style={{ fontFamily: "'Montserrat', sans-serif" }}
+            >
+              {categoryName}
+            </h1>
+            {postCount !== undefined && (
+              <span className="text-sm text-[var(--text-muted)]">
+                {postCount.toLocaleString()} articles
               </span>
-              <div className="flex gap-1">
-                {sortOptions.map((option) => (
-                  <button
-                    key={option.value}
-                    onClick={() => handleSortChange(option.value)}
-                    className={`px-2 py-1 text-xs font-medium rounded transition-colors ${
-                      sortBy === option.value
-                        ? 'bg-[#bc0000] text-white'
-                        : 'bg-zinc-100 dark:bg-zinc-800 text-[var(--text-secondary)] hover:bg-zinc-200 dark:hover:bg-zinc-700'
-                    }`}
-                  >
-                    {option.label}
-                  </button>
-                ))}
-              </div>
+            )}
+          </div>
+
+          {/* Filters */}
+          <div className="flex items-center gap-4">
+            {/* Sort */}
+            <div className="flex items-center gap-1.5">
+              {sortOptions.map((option) => (
+                <button
+                  key={option.value}
+                  onClick={() => handleSortChange(option.value)}
+                  className={`px-3 py-1.5 text-xs font-medium rounded-md transition-colors ${
+                    sortBy === option.value
+                      ? 'bg-[var(--text-primary)] text-[var(--bg-surface)]'
+                      : 'text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-elevated)]'
+                  }`}
+                >
+                  {option.label}
+                </button>
+              ))}
             </div>
 
-            {/* Time filter */}
-            <div className="flex items-center gap-2">
-              <span className="text-xs font-medium text-[var(--text-muted)]">
-                Time:
-              </span>
-              <div className="flex gap-1">
-                {timeOptions.map((option) => (
-                  <button
-                    key={option.value}
-                    onClick={() => handleTimeChange(option.value)}
-                    className={`px-2 py-1 text-xs font-medium rounded transition-colors ${
-                      timeFilter === option.value
-                        ? 'bg-[#bc0000] text-white'
-                        : 'bg-zinc-100 dark:bg-zinc-800 text-[var(--text-secondary)] hover:bg-zinc-200 dark:hover:bg-zinc-700'
-                    }`}
-                  >
-                    {option.label}
-                  </button>
-                ))}
-              </div>
+            {/* Divider */}
+            <div className="w-px h-5 bg-[var(--border-color)]" />
+
+            {/* Time */}
+            <div className="flex items-center gap-1.5">
+              {timeOptions.map((option) => (
+                <button
+                  key={option.value}
+                  onClick={() => handleTimeChange(option.value)}
+                  className={`px-3 py-1.5 text-xs font-medium rounded-md transition-colors ${
+                    timeFilter === option.value
+                      ? 'bg-[var(--text-primary)] text-[var(--bg-surface)]'
+                      : 'text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-elevated)]'
+                  }`}
+                >
+                  {option.label}
+                </button>
+              ))}
             </div>
           </div>
         </div>

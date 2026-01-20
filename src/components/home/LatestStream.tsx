@@ -1,6 +1,10 @@
+'use client'
+
 import Link from 'next/link'
 import { formatDistanceToNow } from 'date-fns'
+import { motion, useReducedMotion } from 'framer-motion'
 import type { Post } from '@/lib/homepage-data'
+import { FadeInView } from '@/components/motion'
 
 interface LatestStreamProps {
   posts: Post[]
@@ -10,22 +14,54 @@ interface LatestStreamProps {
  * LatestStream - Latest from Chicago section
  *
  * GUARANTEE: Always renders content.
- * Displays up to 15 latest posts in a clean list.
+ * Displays up to 15 latest posts in a clean list with staggered entrance animations.
  */
 export function LatestStream({ posts }: LatestStreamProps) {
   const displayPosts = posts.slice(0, 15)
+  const prefersReducedMotion = useReducedMotion()
+
+  const containerVariants = {
+    hidden: {},
+    visible: {
+      transition: {
+        staggerChildren: 0.06,
+      },
+    },
+  }
+
+  const itemVariants = {
+    hidden: { opacity: 0, x: -10 },
+    visible: {
+      opacity: 1,
+      x: 0,
+      transition: {
+        duration: 0.3,
+        ease: [0.25, 0.46, 0.45, 0.94] as const,
+      },
+    },
+  }
 
   return (
-    <section className="sm-section sm-latest-section">
+    <FadeInView as="section" className="sm-section sm-latest-section" threshold={0.1}>
       <div className="sm-container">
         <header className="sm-section-header">
           <h2 className="sm-section-title">Latest from Chicago</h2>
           <p className="sm-section-subtitle">Fresh takes, breaking news, and everything in between.</p>
         </header>
 
-        <div className="sm-latest-grid">
+        <motion.div
+          className="sm-latest-grid"
+          variants={prefersReducedMotion ? {} : containerVariants}
+          initial="hidden"
+          whileInView="visible"
+          viewport={{ once: true, amount: 0.1 }}
+        >
           {displayPosts.map((post) => (
-            <article key={post.id} className="sm-latest-item">
+            <motion.article
+              key={post.id}
+              className="sm-latest-item"
+              variants={prefersReducedMotion ? {} : itemVariants}
+            >
               <div className="sm-latest-marker">
                 <span className={`sm-team-dot sm-team-dot--${getTeamClass(post.category.name)}`} />
               </div>
@@ -45,9 +81,9 @@ export function LatestStream({ posts }: LatestStreamProps) {
                   <p className="sm-latest-excerpt">{truncateExcerpt(post.excerpt, 120)}</p>
                 )}
               </div>
-            </article>
+            </motion.article>
           ))}
-        </div>
+        </motion.div>
 
         <div className="sm-latest-footer">
           <Link href="/latest" className="sm-chip sm-chip--primary">
@@ -55,7 +91,7 @@ export function LatestStream({ posts }: LatestStreamProps) {
           </Link>
         </div>
       </div>
-    </section>
+    </FadeInView>
   )
 }
 
