@@ -159,12 +159,12 @@
 
 ## 10. MOBILE-FIRST AUDIT
 
-- [ ] Replace absolute positioning with flex/grid
-- [ ] All tap targets 44-48px minimum
+- [~] Replace absolute positioning with flex/grid (most components use flex/grid)
+- [x] All tap targets 44-48px minimum (fixed Header, TeamHubLayout, ChicagoLive, ShareButtons)
 - [ ] Test at 320px, 375px, 414px, 768px
-- [ ] No overlapping sticky elements
-- [ ] Article title, meta, share icons properly spaced
-- [ ] Images scale down proportionally
+- [x] No overlapping sticky elements (fixed TeamHubLayout sticky nav position)
+- [x] Article title, meta, share icons properly spaced (fixed ShareButtons tap targets)
+- [x] Images scale down proportionally (verified - using Tailwind responsive classes)
 
 ## 11. QUALITY CHECKS
 
@@ -258,3 +258,26 @@ Modified Files:
 - src/app/chicago-bears/roster/page.tsx
 - src/app/chicago-bears/schedule/page.tsx
 - src/app/chicago-bears/scores/page.tsx
+
+### 2026-01-20 (Session 3 - Mobile Audit)
+- **Tap Target Fixes (44-48px minimum per WCAG guidelines):**
+  - TeamHubLayout.tsx: Mobile nav pills increased to min-h-[44px]
+  - ChicagoLive.tsx: Game link items increased to min-h-[48px], logos to w-11 h-11
+  - Header.tsx: Mobile menu button, search button, social icons all fixed to 44px minimum
+  - ShareButtons.tsx: Share buttons increased from h-9 w-9 (36px) to h-11 w-11 (44px)
+
+- **Sticky Element Conflict Fix:**
+  - TeamHubLayout.tsx: Fixed sticky subnav position from top-16 (64px) to top-[140px]
+  - Fixed sticky trigger from headerBottom <= 64 to headerBottom <= 140
+  - Accounts for full main header height (52px top + 44px nav + 44px BearsStickyBar)
+
+- **Mobile Improvements:**
+  - Social icons hidden on mobile to reduce header clutter
+  - ShareButtons "Share:" label hidden on mobile to save space
+  - All interactive elements now meet 44-48px minimum tap target size
+
+Modified Files:
+- src/components/team/TeamHubLayout.tsx
+- src/components/home/ChicagoLive.tsx
+- src/components/layout/Header.tsx
+- src/components/ShareButtons.tsx

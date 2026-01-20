@@ -106,11 +106,14 @@ export default function TeamHubLayout({
   })?.id || 'overview'
 
   // Handle sticky nav
+  // Main site header is ~140px (52px top bar + 44px nav + 44px BearsStickyBar)
+  const MAIN_HEADER_HEIGHT = 140
+
   useEffect(() => {
     const handleScroll = () => {
       if (headerRef.current) {
         const headerBottom = headerRef.current.getBoundingClientRect().bottom
-        setIsSticky(headerBottom <= 64) // Account for main header height
+        setIsSticky(headerBottom <= MAIN_HEADER_HEIGHT)
       }
     }
 
@@ -242,11 +245,11 @@ export default function TeamHubLayout({
         </div>
       </div>
 
-      {/* Sticky Team Subnav */}
+      {/* Sticky Team Subnav - positioned below main site header (140px) */}
       <div
         ref={navRef}
         className={`bg-[var(--bg-surface)] border-b transition-shadow z-40 ${
-          isSticky ? 'sticky top-16 shadow-md' : ''
+          isSticky ? 'sticky top-[140px] shadow-md' : ''
         }`}
         style={{ borderColor: 'var(--border-color)' }}
       >
@@ -279,8 +282,8 @@ export default function TeamHubLayout({
             })}
           </nav>
 
-          {/* Mobile: Horizontally scrollable pill row */}
-          <nav className="flex md:hidden items-center gap-2 py-3 overflow-x-auto scrollbar-hide">
+          {/* Mobile: Horizontally scrollable pill row - 44px min tap target */}
+          <nav className="flex md:hidden items-center gap-2 py-2 overflow-x-auto scrollbar-hide">
             {tabs.map((tab) => {
               const isActive = tab.id === currentTab
               const href = basePath + tab.path
@@ -289,7 +292,7 @@ export default function TeamHubLayout({
                 <Link
                   key={tab.id}
                   href={href}
-                  className={`px-4 py-2 text-sm font-medium whitespace-nowrap rounded-full transition-colors ${
+                  className={`px-4 py-2.5 text-sm font-medium whitespace-nowrap rounded-full transition-colors min-h-[44px] flex items-center ${
                     isActive
                       ? 'text-white'
                       : 'bg-[var(--bg-tertiary)] text-[var(--text-secondary)]'

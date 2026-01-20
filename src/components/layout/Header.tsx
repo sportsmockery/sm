@@ -131,13 +131,13 @@ export default function Header() {
       >
         <div className="max-w-[1110px] mx-auto px-4">
           <div className="flex items-center justify-between h-[52px]">
-            {/* Left: Social icons */}
-            <div className="flex items-center gap-4 w-[100px]">
+            {/* Left: Social icons - hidden on mobile, show on tablet+ */}
+            <div className="hidden sm:flex items-center gap-1 w-[140px]">
               <a
                 href="https://facebook.com/sportsmockery"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="hover:text-[var(--link-color)] transition-colors"
+                className="hover:text-[var(--link-color)] transition-colors p-2 min-w-[36px] min-h-[36px] flex items-center justify-center"
                 style={{ color: 'var(--text-primary)' }}
                 aria-label="Facebook"
               >
@@ -149,7 +149,7 @@ export default function Header() {
                 href="https://twitter.com/sportsmockery"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="hover:text-[var(--link-color)] transition-colors"
+                className="hover:text-[var(--link-color)] transition-colors p-2 min-w-[36px] min-h-[36px] flex items-center justify-center"
                 style={{ color: 'var(--text-primary)' }}
                 aria-label="X (Twitter)"
               >
@@ -161,7 +161,7 @@ export default function Header() {
                 href="https://www.youtube.com/@bearsfilmroom"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="hover:text-[var(--link-color)] transition-colors"
+                className="hover:text-[var(--link-color)] transition-colors p-2 min-w-[36px] min-h-[36px] flex items-center justify-center"
                 style={{ color: 'var(--text-primary)' }}
                 aria-label="Bears Film Room YouTube"
               >
@@ -173,7 +173,7 @@ export default function Header() {
                 href="https://www.tiktok.com/@sportsmockerychi"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="hover:text-[var(--link-color)] transition-colors"
+                className="hover:text-[var(--link-color)] transition-colors p-2 min-w-[36px] min-h-[36px] flex items-center justify-center"
                 style={{ color: 'var(--text-primary)' }}
                 aria-label="TikTok"
               >
@@ -182,6 +182,8 @@ export default function Header() {
                 </svg>
               </a>
             </div>
+            {/* Mobile: Empty spacer for centering */}
+            <div className="sm:hidden w-[44px]" />
 
             {/* Center: Logo - swaps based on theme with hover animation */}
             <Link href="/" className="flex-shrink-0">
@@ -248,10 +250,10 @@ export default function Header() {
       >
         <div className="max-w-[1110px] mx-auto px-4">
           <div className="flex items-center justify-between h-[44px]">
-            {/* Mobile menu button */}
+            {/* Mobile menu button - 44px min tap target */}
             <button
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="lg:hidden p-2 hover:text-[var(--link-color)]"
+              className="lg:hidden p-2 hover:text-[var(--link-color)] min-w-[44px] min-h-[44px] flex items-center justify-center"
               style={{ color: 'var(--text-primary)' }}
               aria-label="Toggle menu"
             >
@@ -439,7 +441,7 @@ export default function Header() {
               ) : (
                 <button
                   onClick={() => setSearchOpen(true)}
-                  className="p-2 hover:text-[var(--link-color)] transition-colors"
+                  className="p-2 hover:text-[var(--link-color)] transition-colors min-w-[44px] min-h-[44px] flex items-center justify-center"
                   style={{ color: 'var(--text-primary)' }}
                   aria-label="Search"
                 >

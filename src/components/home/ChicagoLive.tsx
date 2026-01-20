@@ -142,16 +142,16 @@ export default function ChicagoLive({ heroStory, upcomingGames }: ChicagoLivePro
                     <Link
                       key={`${game.team}-${index}`}
                       href={`/${game.teamSlug}`}
-                      className="flex items-center gap-3 p-3 rounded-lg transition-colors hover:bg-[var(--card-hover-bg)]"
+                      className="flex items-center gap-3 p-3 rounded-lg transition-colors hover:bg-[var(--card-hover-bg)] min-h-[48px]"
                       style={{ borderBottom: index < upcomingGames.length - 1 ? '1px solid var(--border-subtle)' : 'none' }}
                     >
-                      {/* Team Logo */}
-                      <div className="w-10 h-10 rounded-full overflow-hidden flex-shrink-0 bg-white flex items-center justify-center">
+                      {/* Team Logo - 44px minimum tap target */}
+                      <div className="w-11 h-11 rounded-full overflow-hidden flex-shrink-0 bg-white flex items-center justify-center">
                         <Image
                           src={game.teamLogo}
                           alt={game.team}
-                          width={32}
-                          height={32}
+                          width={36}
+                          height={36}
                           className="object-contain"
                           unoptimized
                         />
