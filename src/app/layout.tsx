@@ -10,11 +10,13 @@ import Footer from "@/components/layout/Footer";
 import SkipToContent from "@/components/layout/SkipToContent";
 import ScrollToTop from "@/components/layout/ScrollToTop";
 import CookieBanner from "@/components/layout/CookieBanner";
-import BearsAIButton from "@/components/bears/BearsAIButton";
-import FloatingChatButton from "@/components/chat/FloatingChatButton";
 import TeamChatPanel from "@/components/chat/TeamChatPanel";
-import FloatingARButton from "@/components/ar/FloatingARButton";
 import MotionProvider from "@/components/motion/MotionProvider";
+
+// Floating buttons disabled - users access AI and Fan Chat via header buttons
+// import BearsAIButton from "@/components/bears/BearsAIButton";
+// import FloatingChatButton from "@/components/chat/FloatingChatButton";
+// import FloatingARButton from "@/components/ar/FloatingARButton";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -150,10 +152,9 @@ export default function RootLayout({
               </div>
               <ScrollToTop />
               <CookieBanner />
-              <FloatingChatButton teamSlug="bears" teamName="Bears" />
               <TeamChatPanel teamSlug="bears" teamName="Bears" />
-              <FloatingARButton />
-              <BearsAIButton />
+              {/* Floating buttons disabled - users access AI and Fan Chat via header buttons */}
+              {/* AR Tour available in article sidebars */}
             </ChatProvider>
           </AuthProvider>
         </ThemeProvider>

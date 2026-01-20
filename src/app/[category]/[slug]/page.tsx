@@ -26,6 +26,7 @@ import { getArticleAudioInfo } from '@/lib/audioPlayer'
 import { ArticleAudioPlayer } from '@/components/article/ArticleAudioPlayer'
 import ArticleContentWithEmbeds from '@/components/article/ArticleContentWithEmbeds'
 import { TeamChatWidget } from '@/components/chat'
+import ARTourButton from '@/components/ar/ARTourButton'
 
 interface ArticlePageProps {
   params: Promise<{
@@ -504,7 +505,7 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
 
             {/* Right Sidebar - More from team (Desktop only) */}
             <aside className="hidden xl:block w-[280px] flex-shrink-0">
-              <div className="sticky top-24 pl-6">
+              <div className="sticky top-24 pl-6 space-y-6">
                 {/* More from this team */}
                 {relatedPosts.length > 0 && categoryData && (
                   <MoreFromTeam
@@ -529,6 +530,9 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
                     currentPostId={post.id}
                   />
                 )}
+
+                {/* AR Stadium Tour */}
+                <ARTourButton team={categoryData?.slug || category} />
               </div>
             </aside>
           </div>
