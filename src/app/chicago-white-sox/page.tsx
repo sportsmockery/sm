@@ -2,6 +2,7 @@ import { Metadata } from 'next'
 import Image from 'next/image'
 import Link from 'next/link'
 import { TeamHubLayout } from '@/components/team'
+import ARTourButton from '@/components/ar/ARTourButton'
 import { CHICAGO_TEAMS, fetchTeamRecord, fetchNextGame } from '@/lib/team-config'
 import { supabaseAdmin } from '@/lib/supabase-server'
 
@@ -93,6 +94,7 @@ export default async function WhiteSoxHubPage() {
         <div className="space-y-6">
           <SeasonSnapshotCard team={team} record={record} />
           <QuickLinksCard team={team} />
+          <ARTourButton team="chicago-white-sox" />
           <AskAIWidget team={team} />
           <FanChatWidget team={team} />
         </div>

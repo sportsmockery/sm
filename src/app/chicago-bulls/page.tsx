@@ -2,6 +2,7 @@ import { Metadata } from 'next'
 import Image from 'next/image'
 import Link from 'next/link'
 import { TeamHubLayout } from '@/components/team'
+import ARTourButton from '@/components/ar/ARTourButton'
 import { CHICAGO_TEAMS, fetchTeamRecord, fetchNextGame } from '@/lib/team-config'
 import { supabaseAdmin } from '@/lib/supabase-server'
 
@@ -148,6 +149,9 @@ export default async function BullsHubPage() {
 
           {/* Quick Links */}
           <QuickLinksCard team={team} />
+
+          {/* AR Stadium Tour */}
+          <ARTourButton team="chicago-bulls" />
 
           {/* Ask AI Widget */}
           <AskAIWidget team={team} />
@@ -325,7 +329,7 @@ function SeasonSnapshotCard({
             >
               Season Snapshot
             </h3>
-            <p className="text-xs text-white/70">2024-25 Season</p>
+            <p className="text-xs text-white/70">2025-26 Season</p>
           </div>
         </div>
       </div>

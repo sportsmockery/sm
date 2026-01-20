@@ -2,6 +2,7 @@ import { Metadata } from 'next'
 import Image from 'next/image'
 import Link from 'next/link'
 import { TeamHubLayout } from '@/components/team'
+import ARTourButton from '@/components/ar/ARTourButton'
 import { CHICAGO_TEAMS, fetchTeamRecord, fetchNextGame } from '@/lib/team-config'
 import { supabaseAdmin } from '@/lib/supabase-server'
 
@@ -93,6 +94,7 @@ export default async function BlackhawksHubPage() {
         <div className="space-y-6">
           <SeasonSnapshotCard team={team} record={record} />
           <QuickLinksCard team={team} />
+          <ARTourButton team="chicago-blackhawks" />
           <AskAIWidget team={team} />
           <FanChatWidget team={team} />
         </div>
@@ -162,7 +164,7 @@ function SeasonSnapshotCard({ team, record }: { team: typeof CHICAGO_TEAMS.black
           <Image src={team.logo} alt={team.name} width={40} height={40} className="w-10 h-10 object-contain" unoptimized />
           <div>
             <h3 className="font-bold text-white" style={{ fontFamily: "'Montserrat', sans-serif" }}>Season Snapshot</h3>
-            <p className="text-xs text-white/70">2024-25 Season</p>
+            <p className="text-xs text-white/70">2025-26 Season</p>
           </div>
         </div>
       </div>

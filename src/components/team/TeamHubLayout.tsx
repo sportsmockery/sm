@@ -59,6 +59,7 @@ interface TeamHubLayoutProps {
 }
 
 // Standard tabs for all team hubs
+// Note: Fan Chat uses external path format with channel query param
 const TEAM_TABS = [
   { id: 'overview', label: 'Overview', path: '' },
   { id: 'schedule', label: 'Schedule', path: '/schedule' },
@@ -67,7 +68,7 @@ const TEAM_TABS = [
   { id: 'roster', label: 'Roster', path: '/roster' },
   { id: 'players', label: 'Players', path: '/players' },
   { id: 'news', label: 'News', path: '/news' },
-  { id: 'fan-chat', label: 'Fan Chat', path: '/chat' },
+  { id: 'fan-chat', label: 'Fan Chat', path: '', external: '/fan-chat' },
 ]
 
 // NFL tabs (includes scores for box scores)
@@ -78,7 +79,7 @@ const NFL_TABS = [
   { id: 'stats', label: 'Stats', path: '/stats' },
   { id: 'roster', label: 'Roster', path: '/roster' },
   { id: 'players', label: 'Players', path: '/players' },
-  { id: 'fan-chat', label: 'Fan Chat', path: '/chat' },
+  { id: 'fan-chat', label: 'Fan Chat', path: '', external: '/fan-chat' },
 ]
 
 export default function TeamHubLayout({
@@ -256,9 +257,12 @@ export default function TeamHubLayout({
         <div className="max-w-[1320px] mx-auto px-4 md:px-6 lg:px-8">
           {/* Desktop: Horizontal bar */}
           <nav className="hidden md:flex items-center gap-1 py-1 overflow-x-auto">
-            {tabs.map((tab) => {
+            {tabs.map((tab: any) => {
               const isActive = tab.id === currentTab
-              const href = basePath + tab.path
+              // Handle external links (like Fan Chat) with channel parameter
+              const href = tab.external
+                ? `${tab.external}?channel=${team.slug.replace('chicago-', '')}`
+                : basePath + tab.path
 
               return (
                 <Link
@@ -284,9 +288,12 @@ export default function TeamHubLayout({
 
           {/* Mobile: Horizontally scrollable pill row - 44px min tap target */}
           <nav className="flex md:hidden items-center gap-2 py-2 overflow-x-auto scrollbar-hide">
-            {tabs.map((tab) => {
+            {tabs.map((tab: any) => {
               const isActive = tab.id === currentTab
-              const href = basePath + tab.path
+              // Handle external links (like Fan Chat) with channel parameter
+              const href = tab.external
+                ? `${tab.external}?channel=${team.slug.replace('chicago-', '')}`
+                : basePath + tab.path
 
               return (
                 <Link
