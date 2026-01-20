@@ -1,10 +1,24 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect, useRef, useCallback } from 'react'
+import { useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import Image from 'next/image'
+import { useAIChatPersonality } from '@/hooks/useAIChatPersonality'
+import { AI_PERSONALITIES } from '@/lib/ai-personalities'
 
-// Team channels
+// Message type
+interface ChatMessage {
+  id: string
+  user: string
+  content: string
+  time: string
+  isOwn: boolean
+  isAI?: boolean
+  personality?: string
+}
+
+// Team channels with AI personality info
 const channels = [
   {
     id: 'global',
@@ -13,6 +27,7 @@ const channels = [
     icon: '🏙️',
     color: '#bc0000',
     unread: 5,
+    aiPersonality: 'BearDownBenny', // Default to Bears in global
   },
   {
     id: 'bears',
@@ -23,6 +38,7 @@ const channels = [
     color: '#0B162A',
     unread: 12,
     isLive: true,
+    aiPersonality: 'BearDownBenny',
   },
   {
     id: 'bulls',
@@ -32,6 +48,7 @@ const channels = [
     logo: 'https://a.espncdn.com/i/teamlogos/nba/500/chi.png',
     color: '#CE1141',
     unread: 3,
+    aiPersonality: 'WindyCityHoops',
   },
   {
     id: 'cubs',
@@ -41,6 +58,7 @@ const channels = [
     logo: 'https://a.espncdn.com/i/teamlogos/mlb/500/chc.png',
     color: '#0E3386',
     unread: 0,
+    aiPersonality: 'WrigleyWill',
   },
   {
     id: 'whitesox',
@@ -50,6 +68,7 @@ const channels = [
     logo: 'https://a.espncdn.com/i/teamlogos/mlb/500/chw.png',
     color: '#27251F',
     unread: 2,
+    aiPersonality: 'SouthSideSoxSarah',
   },
   {
     id: 'blackhawks',
@@ -59,22 +78,154 @@ const channels = [
     logo: 'https://a.espncdn.com/i/teamlogos/nhl/500/chi.png',
     color: '#CF0A2C',
     unread: 0,
+    aiPersonality: 'MadhouseMike',
   },
 ]
 
-// Mock messages
-const mockMessages = [
-  { id: '1', user: 'BearDown85', avatar: null, content: "Can't wait for the game Sunday!", time: '2 min ago', isOwn: false },
-  { id: '2', user: 'ChiSportsKing', avatar: null, content: 'Williams is going to ball out, mark my words', time: '1 min ago', isOwn: false },
-  { id: '3', user: 'You', avatar: null, content: 'The defense looks solid this year', time: 'Just now', isOwn: true },
-]
+// Get initial welcome messages for a channel
+function getWelcomeMessages(channelId: string): ChatMessage[] {
+  const personality = AI_PERSONALITIES[channelId] || AI_PERSONALITIES.bears
+
+  const welcomeMessages: Record<string, ChatMessage[]> = {
+    bears: [
+      {
+        id: 'welcome-1',
+        user: 'BearDownBenny',
+        content: "What's up Bears fans! Ready to talk some football? What did youse think of the last game?",
+        time: '5 min ago',
+        isOwn: false,
+        isAI: true,
+        personality: 'bears-benny'
+      }
+    ],
+    bulls: [
+      {
+        id: 'welcome-1',
+        user: 'WindyCityHoops',
+        content: "Bulls Nation! Good to see you. Who's your pick for most improved player this season?",
+        time: '5 min ago',
+        isOwn: false,
+        isAI: true,
+        personality: 'bulls-hoops'
+      }
+    ],
+    cubs: [
+      {
+        id: 'welcome-1',
+        user: 'WrigleyWill',
+        content: "Hey Cubbies fans! Beautiful day for baseball talk. What's your favorite Wrigley memory?",
+        time: '5 min ago',
+        isOwn: false,
+        isAI: true,
+        personality: 'cubs-will'
+      }
+    ],
+    whitesox: [
+      {
+        id: 'welcome-1',
+        user: 'SouthSideSoxSarah',
+        content: "South Side represent! Who do you think is the most underrated player on the Sox right now?",
+        time: '5 min ago',
+        isOwn: false,
+        isAI: true,
+        personality: 'sox-sarah'
+      }
+    ],
+    blackhawks: [
+      {
+        id: 'welcome-1',
+        user: 'MadhouseMike',
+        content: "Hawks fans! Ready to talk some hockey? Who's looking sharp in the rebuild so far?",
+        time: '5 min ago',
+        isOwn: false,
+        isAI: true,
+        personality: 'hawks-mike'
+      }
+    ],
+    global: [
+      {
+        id: 'welcome-1',
+        user: 'BearDownBenny',
+        content: "Welcome to the Chicago Lounge! All Chicago sports talk welcome. What's on your mind?",
+        time: '5 min ago',
+        isOwn: false,
+        isAI: true,
+        personality: 'bears-benny'
+      }
+    ]
+  }
+
+  return welcomeMessages[channelId] || welcomeMessages.bears
+}
 
 export default function FanChatPage() {
-  const [activeChannel, setActiveChannel] = useState('bears')
+  const searchParams = useSearchParams()
+  const initialChannel = searchParams.get('channel') || 'bears'
+
+  const [activeChannel, setActiveChannel] = useState(initialChannel)
   const [message, setMessage] = useState('')
   const [showChannels, setShowChannels] = useState(false)
+  const [messages, setMessages] = useState<ChatMessage[]>(() => getWelcomeMessages(initialChannel))
+  const [isTyping, setIsTyping] = useState(false)
 
-  const currentChannel = channels.find(c => c.id === activeChannel) || channels[0]
+  const messagesEndRef = useRef<HTMLDivElement>(null)
+  const currentChannel = channels.find(c => c.id === activeChannel) || channels[1]
+
+  // AI Personality hook
+  const {
+    personality,
+    isLoading: aiLoading,
+    requestAIResponse
+  } = useAIChatPersonality({
+    channelId: activeChannel,
+    enabled: true,
+    onAIMessage: (aiMessage) => {
+      setMessages(prev => [...prev, aiMessage])
+      setIsTyping(false)
+    }
+  })
+
+  // Scroll to bottom when messages change
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
+  }, [messages])
+
+  // Reset messages when channel changes
+  useEffect(() => {
+    setMessages(getWelcomeMessages(activeChannel))
+  }, [activeChannel])
+
+  // Handle sending a message
+  const handleSendMessage = useCallback(async () => {
+    if (!message.trim()) return
+
+    const newMessage: ChatMessage = {
+      id: `user-${Date.now()}`,
+      user: 'You',
+      content: message.trim(),
+      time: 'Just now',
+      isOwn: true,
+      isAI: false
+    }
+
+    setMessages(prev => [...prev, newMessage])
+    setMessage('')
+
+    // Trigger AI response after a small delay (simulates typing)
+    setIsTyping(true)
+    setTimeout(async () => {
+      const updatedMessages = [...messages, newMessage]
+      await requestAIResponse(updatedMessages, 'no_users_online')
+    }, 1500 + Math.random() * 2000) // 1.5-3.5 second delay
+  }, [message, messages, requestAIResponse])
+
+  // Handle Enter key
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault()
+      handleSendMessage()
+    }
+  }
 
   return (
     <div className="min-h-screen" style={{ backgroundColor: 'var(--bg-page)' }}>
@@ -153,24 +304,20 @@ export default function FanChatPage() {
                         )}
                       </div>
                       <p className="text-xs truncate" style={{ color: 'var(--text-muted)' }}>
-                        {channel.description}
+                        {channel.aiPersonality} is here
                       </p>
                     </div>
 
-                    {/* Unread Badge */}
-                    {channel.unread > 0 && (
-                      <span className="w-5 h-5 rounded-full bg-[#bc0000] text-white text-[10px] font-bold flex items-center justify-center flex-shrink-0">
-                        {channel.unread}
-                      </span>
-                    )}
+                    {/* Online indicator for AI */}
+                    <span className="w-2 h-2 bg-green-500 rounded-full flex-shrink-0" title={`${channel.aiPersonality} is online`} />
                   </button>
                 ))}
               </div>
 
-              {/* Join More Link */}
+              {/* AI Info */}
               <div className="px-5 py-4" style={{ borderTop: '1px solid var(--border-color)' }}>
                 <p className="text-xs" style={{ color: 'var(--text-muted)' }}>
-                  Game-specific chats open during live games
+                  Our superfans are always online and ready to chat about Chicago sports
                 </p>
               </div>
             </div>
@@ -195,7 +342,7 @@ export default function FanChatPage() {
                   {/* Mobile channel toggle */}
                   <button
                     onClick={() => setShowChannels(!showChannels)}
-                    className="lg:hidden p-2 -ml-2 text-white/80 hover:text-white"
+                    className="lg:hidden p-2 -ml-2 text-white/80 hover:text-white min-w-[44px] min-h-[44px] flex items-center justify-center"
                   >
                     <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
@@ -222,7 +369,7 @@ export default function FanChatPage() {
                       {currentChannel.name}
                     </h2>
                     <p className="text-xs text-white/70">
-                      {currentChannel.description}
+                      {currentChannel.aiPersonality} is online
                     </p>
                   </div>
                 </div>
@@ -234,8 +381,9 @@ export default function FanChatPage() {
                       Live
                     </span>
                   )}
-                  <span className="text-white/70 text-sm">
-                    247 online
+                  <span className="flex items-center gap-1.5 text-white/70 text-sm">
+                    <span className="w-2 h-2 bg-green-500 rounded-full" />
+                    {personality?.username || currentChannel.aiPersonality} online
                   </span>
                 </div>
               </div>
@@ -266,31 +414,46 @@ export default function FanChatPage() {
                   >
                     Welcome to {currentChannel.name}
                   </h3>
-                  <p className="text-sm" style={{ color: 'var(--text-muted)' }}>
-                    This is the beginning of the {currentChannel.name} chat. Be respectful and have fun!
+                  <p className="text-sm mb-2" style={{ color: 'var(--text-muted)' }}>
+                    Chat with {currentChannel.aiPersonality} and other fans. Be respectful and have fun!
                   </p>
+                  {personality && (
+                    <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-xs" style={{ backgroundColor: 'var(--bg-page)' }}>
+                      <span className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
+                      <span style={{ color: 'var(--text-muted)' }}>
+                        {personality.username} is here to talk {personality.teamFullName}
+                      </span>
+                    </div>
+                  )}
                 </div>
 
                 {/* Messages */}
                 <div className="space-y-4">
-                  {mockMessages.map((msg) => (
+                  {messages.map((msg) => (
                     <div
                       key={msg.id}
                       className={`flex gap-3 ${msg.isOwn ? 'flex-row-reverse' : ''}`}
                     >
                       {/* Avatar */}
                       <div
-                        className="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 text-white text-sm font-bold"
+                        className="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 text-white text-sm font-bold relative"
                         style={{ backgroundColor: msg.isOwn ? '#bc0000' : currentChannel.color }}
                       >
                         {msg.user.charAt(0)}
+                        {/* Online indicator for AI personalities */}
+                        {msg.isAI && (
+                          <span className="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 bg-green-500 rounded-full border-2 border-[var(--bg-surface)]" />
+                        )}
                       </div>
 
                       {/* Message */}
                       <div className={`max-w-[75%] ${msg.isOwn ? 'text-right' : ''}`}>
-                        <div className="flex items-center gap-2 mb-1">
+                        <div className={`flex items-center gap-2 mb-1 ${msg.isOwn ? 'justify-end' : ''}`}>
                           {!msg.isOwn && (
-                            <span className="text-sm font-semibold" style={{ color: 'var(--text-primary)' }}>
+                            <span
+                              className="text-sm font-semibold"
+                              style={{ color: msg.isAI ? currentChannel.color : 'var(--text-primary)' }}
+                            >
                               {msg.user}
                             </span>
                           )}
@@ -311,6 +474,36 @@ export default function FanChatPage() {
                       </div>
                     </div>
                   ))}
+
+                  {/* Typing indicator */}
+                  {isTyping && (
+                    <div className="flex gap-3">
+                      <div
+                        className="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 text-white text-sm font-bold relative"
+                        style={{ backgroundColor: currentChannel.color }}
+                      >
+                        {currentChannel.aiPersonality?.charAt(0) || 'A'}
+                        <span className="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 bg-green-500 rounded-full border-2 border-[var(--bg-surface)]" />
+                      </div>
+                      <div className="max-w-[75%]">
+                        <div className="flex items-center gap-2 mb-1">
+                          <span className="text-sm font-semibold" style={{ color: currentChannel.color }}>
+                            {currentChannel.aiPersonality}
+                          </span>
+                        </div>
+                        <div
+                          className="inline-flex items-center gap-1 px-4 py-3 rounded-2xl rounded-tl-sm"
+                          style={{ backgroundColor: 'var(--bg-page)' }}
+                        >
+                          <span className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
+                          <span className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
+                          <span className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
+                  <div ref={messagesEndRef} />
                 </div>
               </div>
 
@@ -319,7 +512,7 @@ export default function FanChatPage() {
                 <div className="flex items-center gap-3">
                   {/* Emoji Button */}
                   <button
-                    className="p-2 rounded-lg transition-colors hover:bg-[var(--card-hover-bg)]"
+                    className="p-2 rounded-lg transition-colors hover:bg-[var(--card-hover-bg)] min-w-[44px] min-h-[44px] flex items-center justify-center"
                     style={{ color: 'var(--text-muted)' }}
                   >
                     <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -329,7 +522,7 @@ export default function FanChatPage() {
 
                   {/* GIF Button */}
                   <button
-                    className="p-2 rounded-lg transition-colors hover:bg-[var(--card-hover-bg)]"
+                    className="p-2 rounded-lg transition-colors hover:bg-[var(--card-hover-bg)] min-w-[44px] min-h-[44px] flex items-center justify-center"
                     style={{ color: 'var(--text-muted)' }}
                   >
                     <span className="text-xs font-bold">GIF</span>
@@ -340,7 +533,8 @@ export default function FanChatPage() {
                     type="text"
                     value={message}
                     onChange={(e) => setMessage(e.target.value)}
-                    placeholder="Type a message..."
+                    onKeyDown={handleKeyDown}
+                    placeholder={`Message ${currentChannel.aiPersonality}...`}
                     className="flex-1 px-4 py-3 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[#bc0000]"
                     style={{
                       backgroundColor: 'var(--bg-page)',
@@ -351,8 +545,9 @@ export default function FanChatPage() {
 
                   {/* Send Button */}
                   <button
-                    disabled={!message.trim()}
-                    className="px-5 py-3 bg-[#bc0000] text-white font-semibold rounded-xl hover:bg-[#a00000] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                    onClick={handleSendMessage}
+                    disabled={!message.trim() || aiLoading}
+                    className="px-5 py-3 bg-[#bc0000] text-white font-semibold rounded-xl hover:bg-[#a00000] transition-colors disabled:opacity-50 disabled:cursor-not-allowed min-h-[44px]"
                   >
                     Send
                   </button>
@@ -361,7 +556,7 @@ export default function FanChatPage() {
                 {/* Sign in prompt for non-logged-in users */}
                 <div className="mt-3 text-center">
                   <p className="text-xs" style={{ color: 'var(--text-muted)' }}>
-                    <Link href="/login" className="text-[#bc0000] hover:underline">Sign in</Link> to join the conversation
+                    <Link href="/login" className="text-[#bc0000] hover:underline">Sign in</Link> to save your chat history
                   </p>
                 </div>
               </div>

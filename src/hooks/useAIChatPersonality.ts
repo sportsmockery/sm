@@ -1,0 +1,213 @@
+'use client'
+
+import { useState, useCallback, useRef, useEffect } from 'react'
+import { AI_RATE_LIMITS, type TriggerReason } from '@/lib/ai-personalities'
+
+interface ChatMessage {
+  id: string
+  user: string
+  content: string
+  time: string
+  isOwn: boolean
+  isAI?: boolean
+  personality?: string
+}
+
+interface AIPersonalityInfo {
+  id: string
+  username: string
+  team: string
+  teamFullName: string
+  traits: string[]
+  catchphrases: string[]
+}
+
+interface UseAIChatPersonalityOptions {
+  channelId: string
+  enabled?: boolean
+  onAIMessage?: (message: ChatMessage) => void
+}
+
+interface UseAIChatPersonalityReturn {
+  personality: AIPersonalityInfo | null
+  isLoading: boolean
+  error: string | null
+  requestAIResponse: (
+    messages: ChatMessage[],
+    triggerReason?: TriggerReason
+  ) => Promise<ChatMessage | null>
+  checkAndTriggerAI: (
+    messages: ChatMessage[],
+    authenticatedUsersOnline: number
+  ) => Promise<void>
+}
+
+/**
+ * Hook for managing AI chat personality interactions
+ */
+export function useAIChatPersonality({
+  channelId,
+  enabled = true,
+  onAIMessage
+}: UseAIChatPersonalityOptions): UseAIChatPersonalityReturn {
+  const [personality, setPersonality] = useState<AIPersonalityInfo | null>(null)
+  const [isLoading, setIsLoading] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+
+  const lastAIResponseTime = useRef<number>(0)
+  const quietRoomTimerRef = useRef<NodeJS.Timeout | null>(null)
+
+  // Fetch personality info on mount
+  useEffect(() => {
+    if (!enabled || !channelId) return
+
+    const fetchPersonality = async () => {
+      try {
+        const response = await fetch(`/api/fan-chat/ai-response?channel=${channelId}`)
+        if (response.ok) {
+          const data = await response.json()
+          setPersonality(data)
+        }
+      } catch (err) {
+        console.error('Failed to fetch AI personality:', err)
+      }
+    }
+
+    fetchPersonality()
+  }, [channelId, enabled])
+
+  // Cleanup timer on unmount
+  useEffect(() => {
+    return () => {
+      if (quietRoomTimerRef.current) {
+        clearTimeout(quietRoomTimerRef.current)
+      }
+    }
+  }, [])
+
+  /**
+   * Request an AI response for the current conversation
+   */
+  const requestAIResponse = useCallback(async (
+    messages: ChatMessage[],
+    triggerReason?: TriggerReason
+  ): Promise<ChatMessage | null> => {
+    if (!enabled || !channelId) return null
+
+    // Check local rate limiting
+    const now = Date.now()
+    const timeSinceLastResponse = now - lastAIResponseTime.current
+    const minDelay = AI_RATE_LIMITS.minSecondsBetweenMessages * 1000
+
+    if (timeSinceLastResponse < minDelay) {
+      console.log('AI response rate limited locally')
+      return null
+    }
+
+    setIsLoading(true)
+    setError(null)
+
+    try {
+      const response = await fetch('/api/fan-chat/ai-response', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          channelId,
+          messages,
+          currentUser: null, // In production, get from auth context
+          authenticatedUsersOnline: 1, // In production, get from presence
+          triggerReason
+        })
+      })
+
+      const data = await response.json()
+
+      if (!response.ok) {
+        if (response.status === 429) {
+          // Rate limited, not an error to display
+          return null
+        }
+        throw new Error(data.error || 'Failed to get AI response')
+      }
+
+      if (data.shouldRespond && data.message) {
+        lastAIResponseTime.current = now
+        onAIMessage?.(data.message)
+        return data.message
+      }
+
+      return null
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : 'Unknown error'
+      setError(errorMessage)
+      console.error('AI response error:', err)
+      return null
+    } finally {
+      setIsLoading(false)
+    }
+  }, [channelId, enabled, onAIMessage])
+
+  /**
+   * Check conditions and potentially trigger an AI response
+   */
+  const checkAndTriggerAI = useCallback(async (
+    messages: ChatMessage[],
+    authenticatedUsersOnline: number
+  ): Promise<void> => {
+    if (!enabled || !channelId || messages.length === 0) return
+
+    const lastMessage = messages[messages.length - 1]
+
+    // Don't respond to AI messages
+    if (lastMessage.isAI) return
+
+    // Check if AI was mentioned
+    if (personality) {
+      const mentionPattern = new RegExp(`@?${personality.username}`, 'i')
+      if (mentionPattern.test(lastMessage.content)) {
+        await requestAIResponse(messages, 'direct_mention')
+        return
+      }
+    }
+
+    // Check if it's a question
+    const isQuestion = lastMessage.content.includes('?') ||
+      /^(what|who|when|where|why|how|is|are|do|does|can|could|would|should)/i.test(lastMessage.content.trim())
+
+    // If user is alone, respond to questions or engage periodically
+    if (authenticatedUsersOnline <= 1) {
+      if (isQuestion) {
+        await requestAIResponse(messages, 'direct_question')
+      } else {
+        // Respond to keep conversation going when user is alone
+        await requestAIResponse(messages, 'no_users_online')
+      }
+      return
+    }
+
+    // Set up quiet room timer
+    // Clear any existing timer
+    if (quietRoomTimerRef.current) {
+      clearTimeout(quietRoomTimerRef.current)
+    }
+
+    // Set timer to respond if room goes quiet
+    quietRoomTimerRef.current = setTimeout(async () => {
+      // Check if conditions still apply (no new messages)
+      await requestAIResponse(messages, 'quiet_room')
+    }, AI_RATE_LIMITS.quietRoomThresholdMs)
+
+  }, [channelId, enabled, personality, requestAIResponse])
+
+  return {
+    personality,
+    isLoading,
+    error,
+    requestAIResponse,
+    checkAndTriggerAI
+  }
+}
+
+export default useAIChatPersonality

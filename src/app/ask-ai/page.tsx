@@ -2,13 +2,15 @@
 
 import { useState, useRef, useEffect } from 'react'
 import Link from 'next/link'
-import Image from 'next/image'
+import ReactMarkdown from 'react-markdown'
 
 interface Message {
   id: string
   role: 'user' | 'assistant'
   content: string
   timestamp: Date
+  source?: string
+  team?: string
 }
 
 const suggestedPrompts = [
@@ -24,6 +26,7 @@ export default function AskAIPage() {
   const [messages, setMessages] = useState<Message[]>([])
   const [input, setInput] = useState('')
   const [isLoading, setIsLoading] = useState(false)
+  const [error, setError] = useState<string | null>(null)
   const messagesEndRef = useRef<HTMLDivElement>(null)
 
   const scrollToBottom = () => {
@@ -48,22 +51,67 @@ export default function AskAIPage() {
     setMessages((prev) => [...prev, userMessage])
     setInput('')
     setIsLoading(true)
+    setError(null)
 
-    // Simulate AI response (replace with actual API call)
-    setTimeout(() => {
+    try {
+      const response = await fetch('/api/ask-ai', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ query: userMessage.content }),
+      })
+
+      const data = await response.json()
+
       const aiMessage: Message = {
         id: (Date.now() + 1).toString(),
         role: 'assistant',
-        content: `Thanks for your question about "${userMessage.content}". I'm Mockery AI, your Chicago sports expert. This feature is coming soon - I'll be able to answer questions about the Bears, Bulls, Cubs, White Sox, and Blackhawks with real-time stats, historical data, and expert analysis. Stay tuned!`,
+        content: data.response || "I couldn't find an answer to that question.",
         timestamp: new Date(),
+        source: data.source,
+        team: data.teamDisplayName,
       }
+
       setMessages((prev) => [...prev, aiMessage])
+
+    } catch (err) {
+      console.error('Ask AI error:', err)
+      setError('Failed to get a response. Please try again.')
+
+      const errorMessage: Message = {
+        id: (Date.now() + 1).toString(),
+        role: 'assistant',
+        content: "I'm sorry, I had trouble processing your question. Please try again in a moment.",
+        timestamp: new Date(),
+        source: 'error',
+      }
+      setMessages((prev) => [...prev, errorMessage])
+    } finally {
       setIsLoading(false)
-    }, 1500)
+    }
   }
 
   const handlePromptClick = (prompt: string) => {
     setInput(prompt)
+  }
+
+  const getSourceBadge = (source?: string) => {
+    if (!source) return null
+
+    const badges: Record<string, { label: string; color: string }> = {
+      ai: { label: 'From Database', color: 'bg-green-500' },
+      web_fallback: { label: 'From Web Sources', color: 'bg-blue-500' },
+      error: { label: 'Error', color: 'bg-red-500' },
+      empty: { label: 'No Data', color: 'bg-yellow-500' },
+    }
+
+    const badge = badges[source]
+    if (!badge) return null
+
+    return (
+      <span className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium text-white ${badge.color}`}>
+        {badge.label}
+      </span>
+    )
   }
 
   return (
@@ -91,7 +139,7 @@ export default function AskAIPage() {
               </h1>
 
               <p className="text-sm mb-6" style={{ color: 'var(--text-muted)' }}>
-                Your intelligent Chicago sports assistant. Get instant answers about all five Chicago teams.
+                Your intelligent Chicago sports assistant powered by SM Data Lab. Get instant answers with verified stats and sources.
               </p>
 
               {/* What you can ask */}
@@ -121,6 +169,29 @@ export default function AskAIPage() {
                     </li>
                   ))}
                 </ul>
+              </div>
+
+              {/* Data Source */}
+              <div className="mt-6 pt-6" style={{ borderTop: '1px solid var(--border-color)' }}>
+                <h3
+                  className="text-xs font-bold uppercase tracking-wider mb-3"
+                  style={{ color: 'var(--text-muted)' }}
+                >
+                  Powered By
+                </h3>
+                <Link
+                  href="https://datalab.sportsmockery.com"
+                  target="_blank"
+                  className="flex items-center gap-2 text-sm text-[#bc0000] hover:underline"
+                >
+                  <span>SM Data Lab</span>
+                  <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                  </svg>
+                </Link>
+                <p className="text-xs mt-2" style={{ color: 'var(--text-muted)' }}>
+                  Verified data from our Chicago sports database
+                </p>
               </div>
 
               {/* Teams */}
@@ -247,7 +318,42 @@ export default function AskAIPage() {
                               : {}
                           }
                         >
-                          <p className="text-sm leading-relaxed">{message.content}</p>
+                          {message.role === 'assistant' && (
+                            <div className="flex items-center gap-2 mb-2">
+                              {message.team && (
+                                <span className="text-xs font-medium" style={{ color: 'var(--text-muted)' }}>
+                                  {message.team}
+                                </span>
+                              )}
+                              {getSourceBadge(message.source)}
+                            </div>
+                          )}
+                          <div className="text-sm leading-relaxed prose prose-sm max-w-none">
+                            {message.role === 'assistant' ? (
+                              <ReactMarkdown
+                                components={{
+                                  table: ({ children }) => (
+                                    <div className="overflow-x-auto my-2">
+                                      <table className="min-w-full text-sm">{children}</table>
+                                    </div>
+                                  ),
+                                  th: ({ children }) => (
+                                    <th className="px-2 py-1 text-left font-semibold border-b" style={{ borderColor: 'var(--border-color)' }}>{children}</th>
+                                  ),
+                                  td: ({ children }) => (
+                                    <td className="px-2 py-1 border-b" style={{ borderColor: 'var(--border-color)' }}>{children}</td>
+                                  ),
+                                  strong: ({ children }) => (
+                                    <strong className="font-semibold">{children}</strong>
+                                  ),
+                                }}
+                              >
+                                {message.content}
+                              </ReactMarkdown>
+                            ) : (
+                              <p>{message.content}</p>
+                            )}
+                          </div>
                         </div>
                       </div>
                     ))}
