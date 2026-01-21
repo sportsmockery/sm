@@ -8,19 +8,16 @@ import {
 /**
  * Ask AI API Route
  *
- * This route handles AI queries with the following flow:
- * 1. ALWAYS query Datalab first - this is the PRIMARY data source with all main tables
- * 2. If Datalab returns data from its tables (source: 'ai'), return it directly
- * 3. If Datalab uses external sources (web_fallback):
- *    a. Check if we have this cached in AI tables (supplementary cache)
- *    b. If cached, return cached data
- *    c. If not cached, log query, validate with 2+ sources, import to AI tables
- * 4. AI tables in /sm are SUPPLEMENTARY - they store externally-sourced data
- *    and join to Datalab tables via related_player_id, related_game_id, etc.
+ * FLOW:
+ * 1. Query Datalab first - PRIMARY data source with all main tables
+ * 2. Check AI tables (joins with Datalab data for cached external info)
+ * 3. If not found in either, use external sources to answer user
+ * 4. After answering, store new external data in team's AI table
  *
  * Architecture:
  * - Datalab = Primary data (bears_players, bears_games, bears_player_stats, etc.)
- * - AI tables = Cache for external data that can join to Datalab tables
+ * - AI tables in /sm = Store externally-sourced data, joinable to Datalab
+ * - AI tables use related_player_id, related_game_id to link to Datalab records
  */
 
 const DATALAB_API_URL = process.env.DATALAB_API_URL || 'https://datalab.sportsmockery.com'
