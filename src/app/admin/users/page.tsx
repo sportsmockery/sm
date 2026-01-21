@@ -32,10 +32,42 @@ export default function UsersPage() {
   const [newPassword, setNewPassword] = useState('')
   const [passwordLoading, setPasswordLoading] = useState(false)
   const [passwordMessage, setPasswordMessage] = useState('')
+  const [syncing, setSyncing] = useState(false)
+  const [syncMessage, setSyncMessage] = useState('')
 
   useEffect(() => {
     fetchUsers()
   }, [])
+
+  const handleSyncUsers = async () => {
+    setSyncing(true)
+    setSyncMessage('')
+
+    try {
+      const response = await fetch('/api/admin/users/sync', {
+        method: 'POST'
+      })
+
+      const data = await response.json()
+
+      if (data.error) {
+        setSyncMessage(`Error: ${data.error}`)
+      } else {
+        setSyncMessage(data.message)
+        if (data.synced > 0) {
+          fetchUsers() // Refresh the list
+        }
+      }
+
+      // Clear message after 3 seconds
+      setTimeout(() => setSyncMessage(''), 3000)
+    } catch (error) {
+      console.error('Error syncing users:', error)
+      setSyncMessage('Failed to sync users')
+    } finally {
+      setSyncing(false)
+    }
+  }
 
   const fetchUsers = async () => {
     try {
@@ -176,16 +208,36 @@ export default function UsersPage() {
   return (
     <div className="p-6">
       <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold text-white">Users</h1>
-        <button
-          onClick={() => setShowInvite(true)}
-          className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center gap-2"
-        >
-          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
-          </svg>
-          Invite User
-        </button>
+        <div>
+          <h1 className="text-2xl font-bold text-white">Users</h1>
+          {syncMessage && (
+            <p className={`text-sm mt-1 ${syncMessage.includes('Error') ? 'text-red-400' : 'text-green-400'}`}>
+              {syncMessage}
+            </p>
+          )}
+        </div>
+        <div className="flex items-center gap-2">
+          <button
+            onClick={handleSyncUsers}
+            disabled={syncing}
+            className="px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-500 disabled:opacity-50 transition-colors flex items-center gap-2"
+            title="Sync users from Supabase Auth"
+          >
+            <svg className={`w-5 h-5 ${syncing ? 'animate-spin' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+            </svg>
+            {syncing ? 'Syncing...' : 'Sync Auth Users'}
+          </button>
+          <button
+            onClick={() => setShowInvite(true)}
+            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center gap-2"
+          >
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+            </svg>
+            Add User
+          </button>
+        </div>
       </div>
 
       {showInvite && (
