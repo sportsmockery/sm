@@ -40,24 +40,35 @@ interface ArticlePageProps {
 // Per design spec: Use primary red #bc0000 for category tags consistently
 
 async function getPost(slug: string) {
-  const { data: post, error } = await supabaseAdmin
-    .from('sm_posts')
-    .select('id, title, content, excerpt, featured_image, published_at, updated_at, seo_title, seo_description, author_id, category_id, views')
-    .eq('slug', slug)
-    .eq('status', 'published')
-    .single()
+  try {
+    const { data: post, error } = await supabaseAdmin
+      .from('sm_posts')
+      .select('id, title, content, excerpt, featured_image, published_at, updated_at, seo_title, seo_description, author_id, category_id, views')
+      .eq('slug', slug)
+      .eq('status', 'published')
+      .single()
 
-  if (error || !post) {
+    if (error) {
+      console.error('Supabase error fetching post:', error.message, 'slug:', slug)
+      return null
+    }
+
+    if (!post) {
+      console.log('Post not found:', slug)
+      return null
+    }
+
+    // Ensure published_at exists (required for date formatting)
+    if (!post.published_at) {
+      console.error('Post missing published_at:', slug)
+      return null
+    }
+
+    return post
+  } catch (err) {
+    console.error('Exception fetching post:', err, 'slug:', slug)
     return null
   }
-
-  // Ensure published_at exists (required for date formatting)
-  if (!post.published_at) {
-    console.error('Post missing published_at:', slug)
-    return null
-  }
-
-  return post
 }
 
 export async function generateMetadata({ params }: ArticlePageProps): Promise<Metadata> {
@@ -116,85 +127,116 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
   const readingTime = calculateReadTime(post.content || '')
   const articleUrl = `https://sportsmockery.com/${category}/${slug}`
 
-  // Fetch all data in parallel
-  const [authorResult, relatedPostsResult, categoryResult, prevPostResult, nextPostResult, tagsResult] = await Promise.all([
-    post.author_id
-      ? supabaseAdmin
-          .from('sm_authors')
-          .select('id, display_name, bio, avatar_url, twitter, instagram, email, slug')
-          .eq('id', post.author_id)
-          .single()
-      : Promise.resolve({ data: null }),
-    supabaseAdmin
-      .from('sm_posts')
-      .select('id, title, slug, excerpt, featured_image, published_at')
-      .eq('category_id', post.category_id)
-      .eq('status', 'published')
-      .neq('id', post.id)
-      .order('published_at', { ascending: false })
-      .limit(4),
-    supabaseAdmin
-      .from('sm_categories')
-      .select('id, name, slug')
-      .eq('id', post.category_id)
-      .single(),
-    supabaseAdmin
-      .from('sm_posts')
-      .select('title, slug, category_id, featured_image')
-      .eq('status', 'published')
-      .lt('published_at', post.published_at)
-      .order('published_at', { ascending: false })
-      .limit(1),
-    supabaseAdmin
-      .from('sm_posts')
-      .select('title, slug, category_id, featured_image')
-      .eq('status', 'published')
-      .gt('published_at', post.published_at)
-      .order('published_at', { ascending: true })
-      .limit(1),
-    // Try to fetch tags if the junction table exists
-    Promise.resolve(
-      supabaseAdmin
-        .from('sm_post_tags')
-        .select('tag:sm_tags(id, name, slug)')
-        .eq('post_id', post.id)
-    ).catch(() => ({ data: null, error: null })),
-  ])
+  // Fetch all data in parallel - wrapped in try-catch to handle cold start issues
+  let author = null
+  let relatedPosts: Array<{ id: number; title: string; slug: string; excerpt: string | null; featured_image: string | null; published_at: string }> = []
+  let categoryData: { id: number; name: string; slug: string } | null = null
+  let prevPost: { title: string; slug: string; category_id: number; featured_image: string | null | undefined } | null = null
+  let nextPost: { title: string; slug: string; category_id: number; featured_image: string | null | undefined } | null = null
+  let tags: string[] = []
 
-  const author = authorResult.data
-  const relatedPosts = relatedPostsResult.data || []
-  const categoryData = categoryResult.data
-  const prevPost = prevPostResult.data?.[0] || null
-  const nextPost = nextPostResult.data?.[0] || null
-  const tags: string[] = (tagsResult?.data?.map((t: unknown) => {
-    const tagData = t as { tag?: { name?: string } | Array<{ name?: string }> }
-    if (Array.isArray(tagData.tag)) {
-      return tagData.tag[0]?.name
-    }
-    return tagData.tag?.name
-  }).filter((name): name is string => typeof name === 'string') || [])
+  try {
+    const [authorResult, relatedPostsResult, categoryResult, prevPostResult, nextPostResult, tagsResult] = await Promise.all([
+      post.author_id
+        ? supabaseAdmin
+            .from('sm_authors')
+            .select('id, display_name, bio, avatar_url, twitter, instagram, email, slug')
+            .eq('id', post.author_id)
+            .single()
+        : Promise.resolve({ data: null, error: null }),
+      supabaseAdmin
+        .from('sm_posts')
+        .select('id, title, slug, excerpt, featured_image, published_at')
+        .eq('category_id', post.category_id)
+        .eq('status', 'published')
+        .neq('id', post.id)
+        .order('published_at', { ascending: false })
+        .limit(4),
+      supabaseAdmin
+        .from('sm_categories')
+        .select('id, name, slug')
+        .eq('id', post.category_id)
+        .single(),
+      supabaseAdmin
+        .from('sm_posts')
+        .select('title, slug, category_id, featured_image')
+        .eq('status', 'published')
+        .lt('published_at', post.published_at)
+        .order('published_at', { ascending: false })
+        .limit(1),
+      supabaseAdmin
+        .from('sm_posts')
+        .select('title, slug, category_id, featured_image')
+        .eq('status', 'published')
+        .gt('published_at', post.published_at)
+        .order('published_at', { ascending: true })
+        .limit(1),
+      // Try to fetch tags if the junction table exists
+      Promise.resolve(
+        supabaseAdmin
+          .from('sm_post_tags')
+          .select('tag:sm_tags(id, name, slug)')
+          .eq('post_id', post.id)
+      ).catch(() => ({ data: null, error: null })),
+    ])
+
+    author = authorResult.data
+    relatedPosts = relatedPostsResult.data || []
+    categoryData = categoryResult.data
+    prevPost = prevPostResult.data?.[0] || null
+    nextPost = nextPostResult.data?.[0] || null
+    tags = (tagsResult?.data?.map((t: unknown) => {
+      const tagData = t as { tag?: { name?: string } | Array<{ name?: string }> }
+      if (Array.isArray(tagData.tag)) {
+        return tagData.tag[0]?.name
+      }
+      return tagData.tag?.name
+    }).filter((name): name is string => typeof name === 'string') || [])
+  } catch (err) {
+    console.error('Error fetching article supplementary data:', err)
+    // Continue with defaults - page will still render with just the post content
+  }
 
   // Get context label (Rumor, Film Room, Opinion) per spec
   const contextLabel = getContextLabel(categoryData?.name, tags)
 
   // Build auto-link context and apply auto-linking to content
-  const autoLinkCtx = await buildAutoLinkContextForPost(
-    post.id,
-    categoryData?.slug || category
-  )
-  const autoLinkedContent = applyAutoLinksToHtml(post.content || '', autoLinkCtx)
+  let autoLinkedContent = post.content || ''
+  try {
+    const autoLinkCtx = await buildAutoLinkContextForPost(
+      post.id,
+      categoryData?.slug || category
+    )
+    autoLinkedContent = applyAutoLinksToHtml(post.content || '', autoLinkCtx)
+  } catch (err) {
+    console.error('Error applying auto-links:', err)
+    // Continue with original content if auto-linking fails
+  }
 
   // Fetch audio info for article audio player
-  const audioInfo = await getArticleAudioInfo(slug)
+  let audioInfo = null
+  try {
+    audioInfo = await getArticleAudioInfo(slug)
+  } catch (err) {
+    console.error('Error fetching audio info:', err)
+    // Continue without audio if it fails
+  }
 
   // Fetch category slugs for prev/next posts
-  const categoryIds = [prevPost?.category_id, nextPost?.category_id].filter(Boolean)
-  const { data: allCategories } = categoryIds.length > 0
-    ? await supabaseAdmin
+  let allCategories: Array<{ id: number; name: string; slug: string }> = []
+  try {
+    const categoryIds = [prevPost?.category_id, nextPost?.category_id].filter(Boolean)
+    if (categoryIds.length > 0) {
+      const { data } = await supabaseAdmin
         .from('sm_categories')
         .select('id, name, slug')
         .in('id', [...new Set(categoryIds)])
-    : { data: [] }
+      allCategories = data || []
+    }
+  } catch (err) {
+    console.error('Error fetching category slugs for prev/next:', err)
+    // Continue without category slugs
+  }
 
   const categoryMap = new Map(allCategories?.map(c => [c.id, c]) || [])
 
@@ -544,7 +586,7 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
         prevArticle={prevPost ? {
           title: prevPost.title,
           slug: prevPost.slug,
-          featured_image: prevPost.featured_image,
+          featured_image: prevPost.featured_image ?? undefined,
           category: {
             name: categoryMap.get(prevPost.category_id)?.name || 'Article',
             slug: categoryMap.get(prevPost.category_id)?.slug || 'article',
@@ -553,7 +595,7 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
         nextArticle={nextPost ? {
           title: nextPost.title,
           slug: nextPost.slug,
-          featured_image: nextPost.featured_image,
+          featured_image: nextPost.featured_image ?? undefined,
           category: {
             name: categoryMap.get(nextPost.category_id)?.name || 'Article',
             slug: categoryMap.get(nextPost.category_id)?.slug || 'article',
@@ -570,8 +612,8 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
                 id: p.id,
                 title: p.title,
                 slug: p.slug,
-                excerpt: p.excerpt,
-                featured_image: p.featured_image,
+                excerpt: p.excerpt ?? undefined,
+                featured_image: p.featured_image ?? undefined,
                 published_at: p.published_at,
                 category: {
                   name: categoryData.name,
@@ -580,7 +622,7 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
                 author: author ? {
                   name: author.display_name,
                   slug: author.slug || String(author.id),
-                  avatar_url: author.avatar_url,
+                  avatar_url: author.avatar_url ?? undefined,
                 } : { name: 'Staff', slug: 'staff' },
               }))}
               categoryName={categoryData.name}

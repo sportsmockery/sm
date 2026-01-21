@@ -48,8 +48,9 @@ export default function AskBearsAI({ className = '' }: AskBearsAIProps) {
 
       const data = await response.json()
 
-      if (data.error) {
-        setError(data.error)
+      // Check for explicit error field OR error source from API
+      if (data.error || data.source === 'error') {
+        setError(data.error || data.response || 'Failed to get a response. Please try again.')
       } else {
         setAiResponse({
           response: data.response,
@@ -72,9 +73,21 @@ export default function AskBearsAI({ className = '' }: AskBearsAIProps) {
 
   const handleCustomSubmit = (e: React.FormEvent) => {
     e.preventDefault()
+    e.stopPropagation()
     if (customQuestion.trim()) {
       askQuestion(customQuestion.trim())
       setCustomQuestion('')
+    }
+  }
+
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter') {
+      e.preventDefault()
+      e.stopPropagation()
+      if (customQuestion.trim() && !isLoading) {
+        askQuestion(customQuestion.trim())
+        setCustomQuestion('')
+      }
     }
   }
 
@@ -255,6 +268,7 @@ export default function AskBearsAI({ className = '' }: AskBearsAIProps) {
             type="text"
             value={customQuestion}
             onChange={(e) => setCustomQuestion(e.target.value)}
+            onKeyDown={handleKeyDown}
             placeholder="Ask your own question..."
             disabled={isLoading}
             className="w-full px-4 py-3 pr-12 bg-white/10 border border-white/20 rounded-lg text-white placeholder-white/50 text-sm focus:outline-none focus:border-white/40 transition-colors disabled:opacity-50"
