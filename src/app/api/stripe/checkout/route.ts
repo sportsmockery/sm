@@ -33,7 +33,8 @@ export async function POST(request: NextRequest) {
     const { tier } = body as { tier: PriceTier }
 
     if (!tier || !PRICE_IDS[tier]) {
-      return NextResponse.json({ error: 'Invalid tier' }, { status: 400 })
+      console.error('Invalid tier or missing price ID:', { tier, priceId: PRICE_IDS[tier] })
+      return NextResponse.json({ error: `Invalid tier: ${tier}. Price ID not configured.` }, { status: 400 })
     }
 
     // Check for existing Stripe customer
@@ -89,8 +90,9 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ sessionId: session.id, url: session.url })
   } catch (error) {
     console.error('Checkout error:', error)
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error'
     return NextResponse.json(
-      { error: 'Failed to create checkout session' },
+      { error: `Failed to create checkout session: ${errorMessage}` },
       { status: 500 }
     )
   }

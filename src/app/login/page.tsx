@@ -7,7 +7,13 @@ export const metadata: Metadata = {
   description: 'Sign in to your Sports Mockery account',
 }
 
-export default function LoginPage() {
+interface LoginPageProps {
+  searchParams: Promise<{ next?: string }>
+}
+
+export default async function LoginPage({ searchParams }: LoginPageProps) {
+  const params = await searchParams
+  const redirectTo = params.next || '/admin'
   return (
     <div className="flex min-h-screen">
       {/* Left side - Form */}
@@ -31,7 +37,7 @@ export default function LoginPage() {
             </p>
           </div>
 
-          <LoginForm />
+          <LoginForm redirectTo={redirectTo} />
         </div>
       </div>
 

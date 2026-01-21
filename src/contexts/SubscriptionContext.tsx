@@ -120,7 +120,7 @@ export function SubscriptionProvider({ children }: { children: ReactNode }) {
     async (tier: 'sm_plus_monthly' | 'sm_plus_annual') => {
       if (!isAuthenticated) {
         // Redirect to login with return URL
-        window.location.href = `/login?next=/pricing&tier=${tier}`
+        window.location.href = `/login?next=/pricing`
         return
       }
 
@@ -134,16 +134,25 @@ export function SubscriptionProvider({ children }: { children: ReactNode }) {
         const data = await response.json()
 
         if (!response.ok) {
-          throw new Error(data.error || 'Failed to create checkout')
+          const errorMsg = data.error || 'Failed to create checkout'
+          setError(errorMsg)
+          alert(`Checkout error: ${errorMsg}`)
+          return
         }
 
         // Redirect to Stripe Checkout
         if (data.url) {
           window.location.href = data.url
+        } else {
+          const errorMsg = 'No checkout URL returned from Stripe'
+          setError(errorMsg)
+          alert(`Checkout error: ${errorMsg}`)
         }
       } catch (err) {
         console.error('Checkout error:', err)
-        setError(err instanceof Error ? err.message : 'Checkout failed')
+        const errorMsg = err instanceof Error ? err.message : 'Checkout failed'
+        setError(errorMsg)
+        alert(`Checkout error: ${errorMsg}`)
       }
     },
     [isAuthenticated]
