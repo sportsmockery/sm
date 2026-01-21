@@ -123,32 +123,27 @@ export async function GET(
     }
 
     // Get player stats for this game
+    // Column names match datalab schema: pass_*, rush_*, rec_*, etc.
     const { data: playerStats, error: statsError } = await datalabAdmin
       .from('bears_player_game_stats')
       .select(`
         player_id,
-        passing_cmp,
-        passing_att,
-        passing_yds,
-        passing_td,
-        passing_int,
-        rushing_car,
-        rushing_yds,
-        rushing_td,
-        rushing_lng,
-        receiving_rec,
-        receiving_tgts,
-        receiving_yds,
-        receiving_td,
-        receiving_lng,
-        def_tackles_total,
-        def_tackles_solo,
-        def_sacks,
-        def_tfl,
-        def_passes_defended,
-        def_int,
-        fum_fum,
-        fum_lost,
+        pass_cmp,
+        pass_att,
+        pass_yds,
+        pass_td,
+        pass_int,
+        sacks,
+        rush_att,
+        rush_yds,
+        rush_td,
+        rec_tgt,
+        rec,
+        rec_yds,
+        rec_td,
+        fumbles,
+        tackles,
+        interceptions,
         bears_players!inner(
           id,
           name,
@@ -156,60 +151,61 @@ export async function GET(
           headshot_url
         )
       `)
-      .eq('bears_game_id', gameId)
+      .eq('game_id', gameId)
 
     if (statsError) {
       console.error('Stats fetch error:', statsError)
     }
 
     // Transform player stats into categorized arrays
+    // Maps datalab column names (pass_*, rush_*, rec_*) to API response format
     const transformPlayerStats = (stat: any): PlayerBoxStats => ({
       playerId: stat.player_id,
       name: stat.bears_players?.name || 'Unknown',
       position: stat.bears_players?.position || '',
       headshotUrl: stat.bears_players?.headshot_url || null,
-      passingCmp: stat.passing_cmp,
-      passingAtt: stat.passing_att,
-      passingYds: stat.passing_yds,
-      passingTd: stat.passing_td,
-      passingInt: stat.passing_int,
+      passingCmp: stat.pass_cmp,
+      passingAtt: stat.pass_att,
+      passingYds: stat.pass_yds,
+      passingTd: stat.pass_td,
+      passingInt: stat.pass_int,
       passingRating: null, // Calculate if needed
-      rushingCar: stat.rushing_car,
-      rushingYds: stat.rushing_yds,
-      rushingTd: stat.rushing_td,
-      rushingLng: stat.rushing_lng,
-      receivingRec: stat.receiving_rec,
-      receivingTgts: stat.receiving_tgts,
-      receivingYds: stat.receiving_yds,
-      receivingTd: stat.receiving_td,
-      receivingLng: stat.receiving_lng,
-      defTacklesTotal: stat.def_tackles_total,
-      defTacklesSolo: stat.def_tackles_solo,
-      defSacks: parseFloat(stat.def_sacks) || null,
-      defTfl: stat.def_tfl,
-      defPassesDefended: stat.def_passes_defended,
-      defInt: stat.def_int,
-      fumFum: stat.fum_fum,
-      fumLost: stat.fum_lost,
+      rushingCar: stat.rush_att,
+      rushingYds: stat.rush_yds,
+      rushingTd: stat.rush_td,
+      rushingLng: null, // Not in datalab schema
+      receivingRec: stat.rec,
+      receivingTgts: stat.rec_tgt,
+      receivingYds: stat.rec_yds,
+      receivingTd: stat.rec_td,
+      receivingLng: null, // Not in datalab schema
+      defTacklesTotal: stat.tackles,
+      defTacklesSolo: null, // Not in datalab schema
+      defSacks: parseFloat(stat.sacks) || null,
+      defTfl: null, // Not in datalab schema
+      defPassesDefended: null, // Not in datalab schema
+      defInt: stat.interceptions,
+      fumFum: stat.fumbles,
+      fumLost: null, // Not in datalab schema
     })
 
     const allStats = (playerStats || []).map(transformPlayerStats)
 
     // Categorize players by stats they have
     const passing = allStats
-      .filter(s => s.passingAtt && s.passingAtt > 0)
+      .filter(s => s.passingAtt !== null && s.passingAtt > 0)
       .sort((a, b) => (b.passingYds || 0) - (a.passingYds || 0))
 
     const rushing = allStats
-      .filter(s => s.rushingCar && s.rushingCar > 0)
+      .filter(s => s.rushingCar !== null && s.rushingCar > 0)
       .sort((a, b) => (b.rushingYds || 0) - (a.rushingYds || 0))
 
     const receiving = allStats
-      .filter(s => s.receivingRec && s.receivingRec > 0)
+      .filter(s => s.receivingRec !== null && s.receivingRec > 0)
       .sort((a, b) => (b.receivingYds || 0) - (a.receivingYds || 0))
 
     const defense = allStats
-      .filter(s => s.defTacklesTotal && s.defTacklesTotal > 0)
+      .filter(s => s.defTacklesTotal !== null && s.defTacklesTotal > 0)
       .sort((a, b) => (b.defTacklesTotal || 0) - (a.defTacklesTotal || 0))
 
     const isPlayoff = gameData.game_type === 'postseason' || gameData.game_type === 'POST'

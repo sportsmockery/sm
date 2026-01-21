@@ -108,25 +108,26 @@ export async function GET(
 
     // Get player's game stats for 2025 season and aggregate
     // Use internal ID (playerData.id) since that's what game stats reference
+    // Column names match datalab schema: pass_*, rush_*, rec_*, etc.
     const { data: gameStats } = await datalabAdmin
       .from('bears_player_game_stats')
       .select(`
-        passing_cmp,
-        passing_att,
-        passing_yds,
-        passing_td,
-        passing_int,
-        rushing_car,
-        rushing_yds,
-        rushing_td,
-        receiving_rec,
-        receiving_tgts,
-        receiving_yds,
-        receiving_td,
-        def_tackles_total,
-        def_sacks,
-        def_passes_defended,
-        fum_fum
+        pass_cmp,
+        pass_att,
+        pass_yds,
+        pass_td,
+        pass_int,
+        sacks,
+        rush_att,
+        rush_yds,
+        rush_td,
+        rec_tgt,
+        rec,
+        rec_yds,
+        rec_td,
+        fumbles,
+        tackles,
+        interceptions
       `)
       .eq('player_id', playerData.id)  // Use internal ID, not ESPN ID
       .eq('season', 2025)
@@ -136,21 +137,21 @@ export async function GET(
     if (gameStats && gameStats.length > 0) {
       const totals = gameStats.reduce((acc: any, game: any) => {
         acc.gamesPlayed = (acc.gamesPlayed || 0) + 1
-        acc.passAttempts = (acc.passAttempts || 0) + (game.passing_att || 0)
-        acc.passCompletions = (acc.passCompletions || 0) + (game.passing_cmp || 0)
-        acc.passYards = (acc.passYards || 0) + (game.passing_yds || 0)
-        acc.passTD = (acc.passTD || 0) + (game.passing_td || 0)
-        acc.passINT = (acc.passINT || 0) + (game.passing_int || 0)
-        acc.rushAttempts = (acc.rushAttempts || 0) + (game.rushing_car || 0)
-        acc.rushYards = (acc.rushYards || 0) + (game.rushing_yds || 0)
-        acc.rushTD = (acc.rushTD || 0) + (game.rushing_td || 0)
-        acc.receptions = (acc.receptions || 0) + (game.receiving_rec || 0)
-        acc.recYards = (acc.recYards || 0) + (game.receiving_yds || 0)
-        acc.recTD = (acc.recTD || 0) + (game.receiving_td || 0)
-        acc.tackles = (acc.tackles || 0) + (game.def_tackles_total || 0)
-        acc.sacks = (acc.sacks || 0) + (parseFloat(game.def_sacks) || 0)
-        acc.passesDefended = (acc.passesDefended || 0) + (game.def_passes_defended || 0)
-        acc.fumbles = (acc.fumbles || 0) + (game.fum_fum || 0)
+        acc.passAttempts = (acc.passAttempts || 0) + (game.pass_att || 0)
+        acc.passCompletions = (acc.passCompletions || 0) + (game.pass_cmp || 0)
+        acc.passYards = (acc.passYards || 0) + (game.pass_yds || 0)
+        acc.passTD = (acc.passTD || 0) + (game.pass_td || 0)
+        acc.passINT = (acc.passINT || 0) + (game.pass_int || 0)
+        acc.rushAttempts = (acc.rushAttempts || 0) + (game.rush_att || 0)
+        acc.rushYards = (acc.rushYards || 0) + (game.rush_yds || 0)
+        acc.rushTD = (acc.rushTD || 0) + (game.rush_td || 0)
+        acc.receptions = (acc.receptions || 0) + (game.rec || 0)
+        acc.recYards = (acc.recYards || 0) + (game.rec_yds || 0)
+        acc.recTD = (acc.recTD || 0) + (game.rec_td || 0)
+        acc.tackles = (acc.tackles || 0) + (game.tackles || 0)
+        acc.sacks = (acc.sacks || 0) + (parseFloat(game.sacks) || 0)
+        acc.passesDefended = (acc.passesDefended || 0) + 0 // Not in datalab schema
+        acc.fumbles = (acc.fumbles || 0) + (game.fumbles || 0)
         return acc
       }, {})
 

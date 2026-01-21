@@ -421,31 +421,28 @@ async function getPlayerSeasonStatsFromDatalab(internalId: number): Promise<Play
   if (!datalabAdmin) return []
 
   // Aggregate from game stats for accurate data
-  // Per SM_INTEGRATION_GUIDE.md: Use correct column names
+  // Per SM_INTEGRATION_GUIDE.md: Use correct column names from datalab schema
   // Use internal ID since that's what game stats reference
   const { data, error } = await datalabAdmin
     .from('bears_player_game_stats')
     .select(`
       season,
-      passing_cmp,
-      passing_att,
-      passing_yds,
-      passing_td,
-      passing_int,
-      rushing_car,
-      rushing_yds,
-      rushing_td,
-      receiving_rec,
-      receiving_tgts,
-      receiving_yds,
-      receiving_td,
-      def_tackles_total,
-      def_tackles_solo,
-      def_sacks,
-      def_tfl,
-      def_passes_defended,
-      fum_fum,
-      fum_lost
+      pass_cmp,
+      pass_att,
+      pass_yds,
+      pass_td,
+      pass_int,
+      sacks,
+      rush_att,
+      rush_yds,
+      rush_td,
+      rec_tgt,
+      rec,
+      rec_yds,
+      rec_td,
+      fumbles,
+      tackles,
+      interceptions
     `)
     .eq('player_id', internalId)
     .eq('season', 2025)
@@ -455,22 +452,22 @@ async function getPlayerSeasonStatsFromDatalab(internalId: number): Promise<Play
   // Aggregate all game stats into season totals
   const totals = data.reduce((acc: any, game: any) => {
     acc.gamesPlayed = (acc.gamesPlayed || 0) + 1
-    acc.passAttempts = (acc.passAttempts || 0) + (game.passing_att || 0)
-    acc.passCompletions = (acc.passCompletions || 0) + (game.passing_cmp || 0)
-    acc.passYards = (acc.passYards || 0) + (game.passing_yds || 0)
-    acc.passTD = (acc.passTD || 0) + (game.passing_td || 0)
-    acc.passINT = (acc.passINT || 0) + (game.passing_int || 0)
-    acc.rushAttempts = (acc.rushAttempts || 0) + (game.rushing_car || 0)
-    acc.rushYards = (acc.rushYards || 0) + (game.rushing_yds || 0)
-    acc.rushTD = (acc.rushTD || 0) + (game.rushing_td || 0)
-    acc.receptions = (acc.receptions || 0) + (game.receiving_rec || 0)
-    acc.recYards = (acc.recYards || 0) + (game.receiving_yds || 0)
-    acc.recTD = (acc.recTD || 0) + (game.receiving_td || 0)
-    acc.targets = (acc.targets || 0) + (game.receiving_tgts || 0)
-    acc.tackles = (acc.tackles || 0) + (game.def_tackles_total || 0)
-    acc.sacks = (acc.sacks || 0) + (parseFloat(game.def_sacks) || 0)
-    acc.passesDefended = (acc.passesDefended || 0) + (game.def_passes_defended || 0)
-    acc.fumbles = (acc.fumbles || 0) + (game.fum_fum || 0)
+    acc.passAttempts = (acc.passAttempts || 0) + (game.pass_att || 0)
+    acc.passCompletions = (acc.passCompletions || 0) + (game.pass_cmp || 0)
+    acc.passYards = (acc.passYards || 0) + (game.pass_yds || 0)
+    acc.passTD = (acc.passTD || 0) + (game.pass_td || 0)
+    acc.passINT = (acc.passINT || 0) + (game.pass_int || 0)
+    acc.rushAttempts = (acc.rushAttempts || 0) + (game.rush_att || 0)
+    acc.rushYards = (acc.rushYards || 0) + (game.rush_yds || 0)
+    acc.rushTD = (acc.rushTD || 0) + (game.rush_td || 0)
+    acc.receptions = (acc.receptions || 0) + (game.rec || 0)
+    acc.recYards = (acc.recYards || 0) + (game.rec_yds || 0)
+    acc.recTD = (acc.recTD || 0) + (game.rec_td || 0)
+    acc.targets = (acc.targets || 0) + (game.rec_tgt || 0)
+    acc.tackles = (acc.tackles || 0) + (game.tackles || 0)
+    acc.sacks = (acc.sacks || 0) + (parseFloat(game.sacks) || 0)
+    acc.passesDefended = (acc.passesDefended || 0) + 0 // Not in datalab schema
+    acc.fumbles = (acc.fumbles || 0) + (game.fumbles || 0)
     return acc
   }, {})
 
@@ -551,27 +548,29 @@ async function getPlayerGameLog(internalId: number): Promise<PlayerGameLogEntry[
 async function getPlayerGameLogFromDatalab(internalId: number): Promise<PlayerGameLogEntry[]> {
   if (!datalabAdmin) return []
 
-  // Per SM_INTEGRATION_GUIDE.md: Use correct column names
+  // Per SM_INTEGRATION_GUIDE.md: Use correct column names from datalab schema
   // Use internal ID since that's what game stats reference
   const { data, error } = await datalabAdmin
     .from('bears_player_game_stats')
     .select(`
       player_id,
-      passing_cmp,
-      passing_att,
-      passing_yds,
-      passing_td,
-      passing_int,
-      rushing_car,
-      rushing_yds,
-      rushing_td,
-      receiving_rec,
-      receiving_tgts,
-      receiving_yds,
-      receiving_td,
-      def_tackles_total,
-      def_sacks,
-      fum_fum,
+      game_id,
+      pass_cmp,
+      pass_att,
+      pass_yds,
+      pass_td,
+      pass_int,
+      sacks,
+      rush_att,
+      rush_yds,
+      rush_td,
+      rec_tgt,
+      rec,
+      rec_yds,
+      rec_td,
+      fumbles,
+      tackles,
+      interceptions,
       bears_games_master!inner(
         game_date,
         opponent,
@@ -595,11 +594,11 @@ async function getPlayerGameLogFromDatalab(internalId: number): Promise<PlayerGa
 }
 
 function transformGameLogEntry(stats: any, game: any): PlayerGameLogEntry {
-  // Per SM_INTEGRATION_GUIDE.md: Use correct column names
+  // Per SM_INTEGRATION_GUIDE.md: Use correct column names from datalab schema
   const isPlayed = (game.bears_score > 0) || (game.opponent_score > 0)
 
   return {
-    gameId: stats.game_id || stats.bears_game_id,
+    gameId: stats.game_id,
     date: game.game_date || '',
     week: game.week || 0,
     season: game.season || 2025,
@@ -608,23 +607,23 @@ function transformGameLogEntry(stats: any, game: any): PlayerGameLogEntry {
     result: isPlayed ? (game.bears_win ? 'W' : 'L') : null,
     bearsScore: game.bears_score,
     oppScore: game.opponent_score,
-    // Use correct column names per SM_INTEGRATION_GUIDE.md
-    passAttempts: stats.passing_att,
-    passCompletions: stats.passing_cmp,
-    passYards: stats.passing_yds,
-    passTD: stats.passing_td,
-    passINT: stats.passing_int,
-    rushAttempts: stats.rushing_car,
-    rushYards: stats.rushing_yds,
-    rushTD: stats.rushing_td,
-    targets: stats.receiving_tgts,
-    receptions: stats.receiving_rec,
-    recYards: stats.receiving_yds,
-    recTD: stats.receiving_td,
-    tackles: stats.def_tackles_total,
-    sacks: stats.def_sacks,
-    interceptions: 0, // Not in standard columns
-    fumbles: stats.fum_fum,
+    // Use correct column names from datalab schema
+    passAttempts: stats.pass_att,
+    passCompletions: stats.pass_cmp,
+    passYards: stats.pass_yds,
+    passTD: stats.pass_td,
+    passINT: stats.pass_int,
+    rushAttempts: stats.rush_att,
+    rushYards: stats.rush_yds,
+    rushTD: stats.rush_td,
+    targets: stats.rec_tgt,
+    receptions: stats.rec,
+    recYards: stats.rec_yds,
+    recTD: stats.rec_td,
+    tackles: stats.tackles,
+    sacks: stats.sacks,
+    interceptions: stats.interceptions || 0,
+    fumbles: stats.fumbles,
   }
 }
 
@@ -855,25 +854,24 @@ async function getLeaderboards(season: number): Promise<BearsLeaderboard> {
   const playersMap = new Map(players.map(p => [p.internalId, p]))
 
   // Per SM_INTEGRATION_GUIDE.md: Aggregate from bears_player_game_stats
-  // Use correct column names: passing_yards, rushing_yards, receiving_yards, etc.
+  // Use correct column names from datalab schema: pass_yds, rush_yds, rec_yds, etc.
 
   // Get all game stats for season and aggregate by player
-  // Per SM_INTEGRATION_GUIDE.md: Use correct column names
   const { data: gameStats } = await datalabAdmin
     .from('bears_player_game_stats')
     .select(`
       player_id,
-      passing_yds,
-      passing_td,
-      passing_int,
-      rushing_yds,
-      rushing_td,
-      rushing_car,
-      receiving_yds,
-      receiving_td,
-      receiving_rec,
-      def_tackles_total,
-      def_sacks
+      pass_yds,
+      pass_td,
+      pass_int,
+      rush_yds,
+      rush_td,
+      rush_att,
+      rec_yds,
+      rec_td,
+      rec,
+      tackles,
+      sacks
     `)
     .eq('season', season)
 
@@ -889,31 +887,31 @@ async function getLeaderboards(season: number): Promise<BearsLeaderboard> {
     if (!playerTotals.has(pid)) {
       playerTotals.set(pid, {
         player_id: pid,
-        passing_yds: 0,
-        passing_td: 0,
-        passing_int: 0,
-        rushing_yds: 0,
-        rushing_td: 0,
-        rushing_car: 0,
-        receiving_yds: 0,
-        receiving_td: 0,
-        receiving_rec: 0,
-        def_tackles_total: 0,
-        def_sacks: 0,
+        pass_yds: 0,
+        pass_td: 0,
+        pass_int: 0,
+        rush_yds: 0,
+        rush_td: 0,
+        rush_att: 0,
+        rec_yds: 0,
+        rec_td: 0,
+        rec: 0,
+        tackles: 0,
+        sacks: 0,
       })
     }
     const totals = playerTotals.get(pid)!
-    totals.passing_yds += stat.passing_yds || 0
-    totals.passing_td += stat.passing_td || 0
-    totals.passing_int += stat.passing_int || 0
-    totals.rushing_yds += stat.rushing_yds || 0
-    totals.rushing_td += stat.rushing_td || 0
-    totals.rushing_car += stat.rushing_car || 0
-    totals.receiving_yds += stat.receiving_yds || 0
-    totals.receiving_td += stat.receiving_td || 0
-    totals.receiving_rec += stat.receiving_rec || 0
-    totals.def_tackles_total += stat.def_tackles_total || 0
-    totals.def_sacks += parseFloat(stat.def_sacks) || 0
+    totals.pass_yds += stat.pass_yds || 0
+    totals.pass_td += stat.pass_td || 0
+    totals.pass_int += stat.pass_int || 0
+    totals.rush_yds += stat.rush_yds || 0
+    totals.rush_td += stat.rush_td || 0
+    totals.rush_att += stat.rush_att || 0
+    totals.rec_yds += stat.rec_yds || 0
+    totals.rec_td += stat.rec_td || 0
+    totals.rec += stat.rec || 0
+    totals.tackles += stat.tackles || 0
+    totals.sacks += parseFloat(stat.sacks) || 0
   }
 
   const aggregatedStats = Array.from(playerTotals.values())
@@ -921,56 +919,56 @@ async function getLeaderboards(season: number): Promise<BearsLeaderboard> {
   // Build leaderboards from aggregated stats
   // Only include players we have in playersMap (active roster)
   const passing = aggregatedStats
-    .filter(s => s.passing_yds > 0 && playersMap.has(s.player_id))
-    .sort((a, b) => b.passing_yds - a.passing_yds)
+    .filter(s => s.pass_yds > 0 && playersMap.has(s.player_id))
+    .sort((a, b) => b.pass_yds - a.pass_yds)
     .slice(0, 5)
     .map(s => ({
       player: playersMap.get(s.player_id)!,
-      primaryStat: s.passing_yds,
+      primaryStat: s.pass_yds,
       primaryLabel: 'YDS',
-      secondaryStat: s.passing_td,
+      secondaryStat: s.pass_td,
       secondaryLabel: 'TD',
-      tertiaryStat: s.passing_int,
+      tertiaryStat: s.pass_int,
       tertiaryLabel: 'INT',
     }))
 
   const rushing = aggregatedStats
-    .filter(s => s.rushing_yds > 0 && playersMap.has(s.player_id))
-    .sort((a, b) => b.rushing_yds - a.rushing_yds)
+    .filter(s => s.rush_yds > 0 && playersMap.has(s.player_id))
+    .sort((a, b) => b.rush_yds - a.rush_yds)
     .slice(0, 5)
     .map(s => ({
       player: playersMap.get(s.player_id)!,
-      primaryStat: s.rushing_yds,
+      primaryStat: s.rush_yds,
       primaryLabel: 'YDS',
-      secondaryStat: s.rushing_td,
+      secondaryStat: s.rush_td,
       secondaryLabel: 'TD',
-      tertiaryStat: s.rushing_car,
+      tertiaryStat: s.rush_att,
       tertiaryLabel: 'ATT',
     }))
 
   const receiving = aggregatedStats
-    .filter(s => s.receiving_yds > 0 && playersMap.has(s.player_id))
-    .sort((a, b) => b.receiving_yds - a.receiving_yds)
+    .filter(s => s.rec_yds > 0 && playersMap.has(s.player_id))
+    .sort((a, b) => b.rec_yds - a.rec_yds)
     .slice(0, 5)
     .map(s => ({
       player: playersMap.get(s.player_id)!,
-      primaryStat: s.receiving_yds,
+      primaryStat: s.rec_yds,
       primaryLabel: 'YDS',
-      secondaryStat: s.receiving_td,
+      secondaryStat: s.rec_td,
       secondaryLabel: 'TD',
-      tertiaryStat: s.receiving_rec,
+      tertiaryStat: s.rec,
       tertiaryLabel: 'REC',
     }))
 
   const defense = aggregatedStats
-    .filter(s => s.def_tackles_total > 0 && playersMap.has(s.player_id))
-    .sort((a, b) => b.def_tackles_total - a.def_tackles_total)
+    .filter(s => s.tackles > 0 && playersMap.has(s.player_id))
+    .sort((a, b) => b.tackles - a.tackles)
     .slice(0, 5)
     .map(s => ({
       player: playersMap.get(s.player_id)!,
-      primaryStat: s.def_tackles_total,
+      primaryStat: s.tackles,
       primaryLabel: 'TKL',
-      secondaryStat: s.def_sacks,
+      secondaryStat: s.sacks,
       secondaryLabel: 'SACK',
       tertiaryStat: 0,
       tertiaryLabel: 'INT',
