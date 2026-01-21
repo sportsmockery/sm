@@ -18,10 +18,20 @@ interface User {
   reputationScore?: number
 }
 
+interface PasswordModalState {
+  isOpen: boolean
+  userId: string
+  email: string
+}
+
 export default function UsersPage() {
   const [users, setUsers] = useState<User[]>([])
   const [loading, setLoading] = useState(true)
   const [showInvite, setShowInvite] = useState(false)
+  const [passwordModal, setPasswordModal] = useState<PasswordModalState>({ isOpen: false, userId: '', email: '' })
+  const [newPassword, setNewPassword] = useState('')
+  const [passwordLoading, setPasswordLoading] = useState(false)
+  const [passwordMessage, setPasswordMessage] = useState('')
 
   useEffect(() => {
     fetchUsers()
@@ -85,6 +95,84 @@ export default function UsersPage() {
     fetchUsers()
   }
 
+  const handleResetPassword = (userId: string, email: string) => {
+    setPasswordModal({ isOpen: true, userId, email })
+    setNewPassword('')
+    setPasswordMessage('')
+  }
+
+  const handleSetPassword = async () => {
+    if (!newPassword || newPassword.length < 6) {
+      setPasswordMessage('Password must be at least 6 characters')
+      return
+    }
+
+    setPasswordLoading(true)
+    setPasswordMessage('')
+
+    try {
+      const response = await fetch('/api/admin/users/password', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          userId: passwordModal.userId,
+          email: passwordModal.email,
+          password: newPassword,
+          action: 'set_password'
+        })
+      })
+
+      const data = await response.json()
+
+      if (data.error) {
+        setPasswordMessage(`Error: ${data.error}`)
+      } else {
+        setPasswordMessage('Password updated successfully!')
+        setTimeout(() => {
+          setPasswordModal({ isOpen: false, userId: '', email: '' })
+        }, 1500)
+      }
+    } catch (error) {
+      console.error('Error setting password:', error)
+      setPasswordMessage('Failed to update password')
+    } finally {
+      setPasswordLoading(false)
+    }
+  }
+
+  const handleSendResetEmail = async () => {
+    setPasswordLoading(true)
+    setPasswordMessage('')
+
+    try {
+      const response = await fetch('/api/admin/users/password', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          userId: passwordModal.userId,
+          email: passwordModal.email,
+          action: 'send_reset'
+        })
+      })
+
+      const data = await response.json()
+
+      if (data.error) {
+        setPasswordMessage(`Error: ${data.error}`)
+      } else {
+        setPasswordMessage('Password reset email sent!')
+        setTimeout(() => {
+          setPasswordModal({ isOpen: false, userId: '', email: '' })
+        }, 1500)
+      }
+    } catch (error) {
+      console.error('Error sending reset email:', error)
+      setPasswordMessage('Failed to send reset email')
+    } finally {
+      setPasswordLoading(false)
+    }
+  }
+
   return (
     <div className="p-6">
       <div className="flex justify-between items-center mb-6">
@@ -131,7 +219,73 @@ export default function UsersPage() {
           users={users}
           onRoleChange={handleRoleChange}
           onDelete={handleDelete}
+          onResetPassword={handleResetPassword}
         />
+      )}
+
+      {/* Password Reset Modal */}
+      {passwordModal.isOpen && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+          <div className="bg-gray-800 rounded-lg p-6 w-full max-w-md mx-4">
+            <h3 className="text-lg font-semibold text-white mb-4">
+              Manage Password
+            </h3>
+            <p className="text-gray-400 text-sm mb-4">
+              User: {passwordModal.email}
+            </p>
+
+            {passwordMessage && (
+              <div className={`p-3 rounded-lg mb-4 text-sm ${
+                passwordMessage.includes('Error') || passwordMessage.includes('Failed')
+                  ? 'bg-red-500/20 border border-red-500/30 text-red-400'
+                  : 'bg-green-500/20 border border-green-500/30 text-green-400'
+              }`}>
+                {passwordMessage}
+              </div>
+            )}
+
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-300 mb-1">
+                  Set New Password
+                </label>
+                <input
+                  type="password"
+                  value={newPassword}
+                  onChange={(e) => setNewPassword(e.target.value)}
+                  placeholder="Enter new password (min 6 chars)"
+                  className="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:border-blue-500"
+                />
+              </div>
+
+              <div className="flex gap-2">
+                <button
+                  onClick={handleSetPassword}
+                  disabled={passwordLoading || !newPassword}
+                  className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 transition-colors"
+                >
+                  {passwordLoading ? 'Setting...' : 'Set Password'}
+                </button>
+                <button
+                  onClick={handleSendResetEmail}
+                  disabled={passwordLoading}
+                  className="flex-1 px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-500 disabled:opacity-50 transition-colors"
+                >
+                  {passwordLoading ? 'Sending...' : 'Send Reset Email'}
+                </button>
+              </div>
+            </div>
+
+            <div className="mt-4 pt-4 border-t border-gray-700">
+              <button
+                onClick={() => setPasswordModal({ isOpen: false, userId: '', email: '' })}
+                className="w-full px-4 py-2 text-gray-400 hover:text-white transition-colors"
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        </div>
       )}
     </div>
   )
