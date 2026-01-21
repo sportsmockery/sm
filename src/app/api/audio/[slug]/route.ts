@@ -69,7 +69,7 @@ export async function GET(
     // Fetch article content from database
     const { data: post, error } = await supabaseAdmin
       .from("sm_posts")
-      .select("title, content")
+      .select("title, content, published_at")
       .eq("slug", slug)
       .eq("status", "published")
       .single();
@@ -81,8 +81,18 @@ export async function GET(
       );
     }
 
-    // Prepare text for TTS: title + content
-    const plainText = `${post.title}. ${stripHtmlForTTS(post.content || '')}`;
+    // Format the publish date
+    const publishDate = post.published_at
+      ? new Date(post.published_at).toLocaleDateString('en-US', {
+          month: 'long',
+          day: 'numeric',
+          year: 'numeric',
+        })
+      : 'recently';
+
+    // Prepare text for TTS: introduction + title + date + content
+    const introduction = `Article Headline: ${post.title}. Written ${publishDate}.`;
+    const plainText = `${introduction} ${stripHtmlForTTS(post.content || '')}`;
 
     // Limit text length (ElevenLabs has limits)
     const maxChars = 5000; // Adjust based on your plan

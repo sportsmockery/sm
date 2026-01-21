@@ -76,7 +76,7 @@ export async function POST(request: NextRequest) {
           quantity: 1,
         },
       ],
-      success_url: `${process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3005'}/subscription/success?session_id={CHECKOUT_SESSION_ID}`,
+      success_url: `${process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3005'}/?subscribed=true`,
       cancel_url: `${process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3005'}/pricing?canceled=true`,
       subscription_data: {
         metadata: {

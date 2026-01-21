@@ -1,0 +1,7 @@
+** BUILD FAILED **
+
+
+The following build commands failed:
+	CompileC /Users/christopherburhans/Library/Developer/Xcode/DerivedData/SportsMockery-eevktqyzakldgwdzsenzfxfsifnb/Build/Intermediates.noindex/Pods.build/Debug-iphonesimulator/RNReanimated.build/Objects-normal/arm64/ShadowTreeCloner.o /Users/christopherburhans/Documents/projects/sm/mobile/node_modules/react-native-reanimated/Common/cpp/Fabric/ShadowTreeCloner.cpp normal arm64 c++ com.apple.compilers.llvm.clang.1_0.compiler (in target 'RNReanimated' from project 'Pods')
+	Building workspace SportsMockery with scheme SportsMockery and configuration Debug
+(2 failures)

@@ -11,103 +11,188 @@ import {
   PostSummary,
   categorySlugToTeam
 } from './types'
+import { fetchTeamRecord, fetchNextGame } from './team-config'
+import { getBearsSchedule } from './bearsData'
 
 /**
  * Get Bears season overview data
  * Returns current record, standings, next/last game info
+ * Now fetches LIVE data from ESPN API and Datalab
  */
 export async function getBearsSeasonOverview(): Promise<BearsSeasonOverview> {
-  // In production, this would fetch from a sports API
-  // For now, return stub data
-  return {
-    season: 2024,
-    record: {
-      wins: 4,
-      losses: 8,
-      ties: 0,
-    },
-    standing: '4th in NFC North',
-    nextGame: {
-      opponent: 'Green Bay Packers',
-      date: '2024-12-22',
-      time: '12:00 PM CT',
-      isHome: true,
-    },
-    lastGame: {
-      opponent: 'Minnesota Vikings',
-      result: 'L',
-      score: '17-30',
-    },
+  try {
+    // Fetch live data from ESPN API and Datalab in parallel
+    const [espnRecord, espnNextGame, schedule] = await Promise.all([
+      fetchTeamRecord('bears'),
+      fetchNextGame('bears'),
+      getBearsSchedule(2025),
+    ])
+
+    // Get the most recent completed game for "last game" info
+    const completedGames = schedule
+      .filter(g => g.status === 'final')
+      .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
+
+    const lastGame = completedGames[0]
+
+    // Use ESPN data if available, otherwise fall back to calculated data from schedule
+    const wins = espnRecord?.wins ?? completedGames.filter(g => g.result === 'W').length
+    const losses = espnRecord?.losses ?? completedGames.filter(g => g.result === 'L').length
+    const ties = espnRecord?.ties ?? 0
+
+    // Calculate standing (simplified - could be enhanced with division standings API)
+    const standing = `${wins}-${losses} in NFC North`
+
+    return {
+      season: 2025,
+      record: {
+        wins,
+        losses,
+        ties,
+      },
+      standing,
+      nextGame: espnNextGame ? {
+        opponent: espnNextGame.opponent,
+        date: espnNextGame.date,
+        time: espnNextGame.time,
+        isHome: espnNextGame.isHome,
+      } : null,
+      lastGame: lastGame ? {
+        opponent: lastGame.opponent,
+        result: lastGame.result as 'W' | 'L' | 'T',
+        score: `${lastGame.bearsScore}-${lastGame.oppScore}`,
+      } : null,
+    }
+  } catch (error) {
+    console.error('Error fetching Bears season overview:', error)
+    // Return minimal data on error
+    return {
+      season: 2025,
+      record: { wins: 0, losses: 0, ties: 0 },
+      standing: 'NFC North',
+      nextGame: null,
+      lastGame: null,
+    }
   }
 }
 
 /**
  * Get Bears key players for roster highlights
+ * Now fetches LIVE data from Datalab
  */
 export async function getBearsKeyPlayers(): Promise<BearsPlayer[]> {
-  // In production, this would fetch from a sports API
+  try {
+    // Import dynamically to avoid circular dependency
+    const { getBearsStats, getBearsPlayers } = await import('./bearsData')
+
+    // Get players and stats from Datalab
+    const [players, stats] = await Promise.all([
+      getBearsPlayers(),
+      getBearsStats(2025),
+    ])
+
+    const { leaderboards } = stats
+
+    // Build key players from leaderboard data (top performers)
+    const keyPlayers: BearsPlayer[] = []
+
+    // Add top passer
+    if (leaderboards.passing[0]) {
+      const p = leaderboards.passing[0]
+      keyPlayers.push({
+        id: parseInt(p.player.playerId) || 1,
+        name: p.player.fullName,
+        position: p.player.position,
+        number: p.player.jerseyNumber || 0,
+        imageUrl: p.player.headshotUrl || undefined,
+        stats: {
+          passingYards: p.primaryStat,
+          touchdowns: p.secondaryStat || 0,
+          interceptions: p.tertiaryStat || 0,
+        },
+      })
+    }
+
+    // Add top rusher
+    if (leaderboards.rushing[0]) {
+      const p = leaderboards.rushing[0]
+      keyPlayers.push({
+        id: parseInt(p.player.playerId) || 2,
+        name: p.player.fullName,
+        position: p.player.position,
+        number: p.player.jerseyNumber || 0,
+        imageUrl: p.player.headshotUrl || undefined,
+        stats: {
+          rushingYards: p.primaryStat,
+          touchdowns: p.secondaryStat || 0,
+          attempts: p.tertiaryStat || 0,
+        },
+      })
+    }
+
+    // Add top receivers (2)
+    leaderboards.receiving.slice(0, 2).forEach((p, idx) => {
+      keyPlayers.push({
+        id: parseInt(p.player.playerId) || (3 + idx),
+        name: p.player.fullName,
+        position: p.player.position,
+        number: p.player.jerseyNumber || 0,
+        imageUrl: p.player.headshotUrl || undefined,
+        stats: {
+          receivingYards: p.primaryStat,
+          touchdowns: p.secondaryStat || 0,
+          receptions: p.tertiaryStat || 0,
+        },
+      })
+    })
+
+    // Add top defender
+    if (leaderboards.defense[0]) {
+      const p = leaderboards.defense[0]
+      keyPlayers.push({
+        id: parseInt(p.player.playerId) || 5,
+        name: p.player.fullName,
+        position: p.player.position,
+        number: p.player.jerseyNumber || 0,
+        imageUrl: p.player.headshotUrl || undefined,
+        stats: {
+          tackles: p.primaryStat,
+          sacks: p.secondaryStat || 0,
+        },
+      })
+    }
+
+    // If we got live data, return it
+    if (keyPlayers.length > 0) {
+      return keyPlayers
+    }
+
+    // Fall back to basic player list if no stats available
+    const fallbackPlayers = players.slice(0, 5).map((p, idx) => ({
+      id: parseInt(p.playerId) || idx + 1,
+      name: p.fullName,
+      position: p.position,
+      number: p.jerseyNumber || 0,
+      imageUrl: p.headshotUrl || undefined,
+    }))
+
+    return fallbackPlayers.length > 0 ? fallbackPlayers : getStaticKeyPlayers()
+  } catch (error) {
+    console.error('Error fetching key players:', error)
+    return getStaticKeyPlayers()
+  }
+}
+
+/**
+ * Static fallback key players (used when live data unavailable)
+ */
+function getStaticKeyPlayers(): BearsPlayer[] {
   return [
-    {
-      id: 1,
-      name: 'Caleb Williams',
-      position: 'QB',
-      number: 18,
-      imageUrl: '/images/players/williams.jpg',
-      stats: {
-        passingYards: 2654,
-        touchdowns: 15,
-        interceptions: 5,
-        rating: 89.2,
-      },
-    },
-    {
-      id: 2,
-      name: "D'Andre Swift",
-      position: 'RB',
-      number: 4,
-      imageUrl: '/images/players/swift.jpg',
-      stats: {
-        rushingYards: 687,
-        touchdowns: 4,
-        yardsPerCarry: 4.1,
-      },
-    },
-    {
-      id: 3,
-      name: 'DJ Moore',
-      position: 'WR',
-      number: 2,
-      imageUrl: '/images/players/moore.jpg',
-      stats: {
-        receptions: 58,
-        receivingYards: 712,
-        touchdowns: 4,
-      },
-    },
-    {
-      id: 4,
-      name: 'Rome Odunze',
-      position: 'WR',
-      number: 15,
-      imageUrl: '/images/players/odunze.jpg',
-      stats: {
-        receptions: 42,
-        receivingYards: 478,
-        touchdowns: 2,
-      },
-    },
-    {
-      id: 5,
-      name: 'Montez Sweat',
-      position: 'DE',
-      number: 98,
-      imageUrl: '/images/players/sweat.jpg',
-      stats: {
-        sacks: 6.5,
-        tackles: 38,
-        forcedFumbles: 2,
-      },
-    },
+    { id: 1, name: 'Caleb Williams', position: 'QB', number: 18 },
+    { id: 2, name: "D'Andre Swift", position: 'RB', number: 4 },
+    { id: 3, name: 'DJ Moore', position: 'WR', number: 2 },
+    { id: 4, name: 'Rome Odunze', position: 'WR', number: 15 },
+    { id: 5, name: 'Montez Sweat', position: 'DE', number: 98 },
   ]
 }
 
