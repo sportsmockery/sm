@@ -108,7 +108,7 @@ function GameRow({ game }: { game: BearsGame }) {
   const isInProgress = game.status === 'in_progress'
   const playoffRound = game.isPlayoff ? getPlayoffRoundName(game.week) : null
 
-  return (
+  const content = (
     <div className={`p-4 hover:bg-[var(--bg-hover)] transition-colors ${isPast ? '' : 'bg-[var(--bg-tertiary)]/30'}`}>
       <div className="grid grid-cols-[auto_1fr_auto] sm:grid-cols-[100px_1fr_140px] gap-4 items-center">
         {/* Week & Date */}
@@ -186,6 +186,10 @@ function GameRow({ game }: { game: BearsGame }) {
               <span className="font-semibold text-[var(--text-primary)] text-sm">
                 {game.bearsScore}-{game.oppScore}
               </span>
+              {/* View Box Score link for completed games */}
+              <svg className="w-4 h-4 text-[var(--text-muted)] group-hover:text-[#C83200] transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+              </svg>
             </div>
           ) : isInProgress ? (
             <div className="flex items-center gap-2 justify-end">
@@ -213,6 +217,7 @@ function GameRow({ game }: { game: BearsGame }) {
             <Link
               href={`/bears/${game.articleSlug}`}
               className="text-xs text-[#C83200] hover:underline mt-1 inline-block"
+              onClick={(e) => e.stopPropagation()}
             >
               Recap →
             </Link>
@@ -221,4 +226,15 @@ function GameRow({ game }: { game: BearsGame }) {
       </div>
     </div>
   )
+
+  // Wrap completed games in a link to box score page
+  if (isPast) {
+    return (
+      <Link href={`/chicago-bears/scores?game=${game.gameId}`} className="block group">
+        {content}
+      </Link>
+    )
+  }
+
+  return content
 }

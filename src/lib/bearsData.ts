@@ -423,10 +423,10 @@ async function getPlayerSeasonStatsFromDatalab(internalId: number): Promise<Play
   // Aggregate from game stats for accurate data
   // Per SM_INTEGRATION_GUIDE.md: Use correct column names from datalab schema
   // Use internal ID since that's what game stats reference
+  // NOTE: Season is in bears_games_master, not bears_player_game_stats, so we join
   const { data, error } = await datalabAdmin
     .from('bears_player_game_stats')
     .select(`
-      season,
       pass_cmp,
       pass_att,
       pass_yds,
@@ -442,10 +442,11 @@ async function getPlayerSeasonStatsFromDatalab(internalId: number): Promise<Play
       rec_td,
       fumbles,
       tackles,
-      interceptions
+      interceptions,
+      bears_games_master!inner(season)
     `)
     .eq('player_id', internalId)
-    .eq('season', 2025)
+    .eq('bears_games_master.season', 2025)
 
   if (error || !data || data.length === 0) return []
 
@@ -550,6 +551,7 @@ async function getPlayerGameLogFromDatalab(internalId: number): Promise<PlayerGa
 
   // Per SM_INTEGRATION_GUIDE.md: Use correct column names from datalab schema
   // Use internal ID since that's what game stats reference
+  // NOTE: Season is in bears_games_master, so we filter by the joined table
   const { data, error } = await datalabAdmin
     .from('bears_player_game_stats')
     .select(`
@@ -584,8 +586,8 @@ async function getPlayerGameLogFromDatalab(internalId: number): Promise<PlayerGa
       )
     `)
     .eq('player_id', internalId)
-    .eq('season', 2025)
-    .order('game_date', { ascending: false })
+    .eq('bears_games_master.season', 2025)
+    .order('bears_games_master(game_date)', { ascending: false })
     .limit(20)
 
   if (error || !data) return []
@@ -855,6 +857,7 @@ async function getLeaderboards(season: number): Promise<BearsLeaderboard> {
 
   // Per SM_INTEGRATION_GUIDE.md: Aggregate from bears_player_game_stats
   // Use correct column names from datalab schema: pass_yds, rush_yds, rec_yds, etc.
+  // NOTE: Season is in bears_games_master, not bears_player_game_stats, so we join
 
   // Get all game stats for season and aggregate by player
   const { data: gameStats } = await datalabAdmin
@@ -871,9 +874,10 @@ async function getLeaderboards(season: number): Promise<BearsLeaderboard> {
       rec_td,
       rec,
       tackles,
-      sacks
+      sacks,
+      bears_games_master!inner(season)
     `)
-    .eq('season', season)
+    .eq('bears_games_master.season', season)
 
   if (!gameStats || gameStats.length === 0) {
     return { passing: [], rushing: [], receiving: [], defense: [] }

@@ -162,8 +162,9 @@ async function fetchYouTubeHighlights(
   const apiKey = process.env.YOUTUBE_API_KEY
 
   if (!apiKey) {
-    console.warn('YouTube API key not configured, using fallback')
-    return getFallbackHighlights(homeTeam, awayTeam)
+    console.warn('YouTube API key not configured')
+    // Return empty array - don't show random old videos
+    return []
   }
 
   try {
@@ -171,11 +172,15 @@ async function fetchYouTubeHighlights(
     const homeTerms = TEAM_SEARCH_TERMS[homeTeam] || [homeTeam]
     const awayTerms = TEAM_SEARCH_TERMS[awayTeam] || [awayTeam]
 
-    // Search for: "Bears vs Packers highlights" or "Week 1 Bears highlights"
+    // Get the year from game date for more specific searches
+    const year = gameDate ? new Date(gameDate).getFullYear() : new Date().getFullYear()
+
+    // Search for more specific queries including week and year
+    // NFL official channel typically uses format like "Team vs Team | NFL Week X Highlights"
     const searchQueries = [
-      `${homeTerms[0]} vs ${awayTerms[0]} highlights`,
-      `${homeTerms[0]} ${awayTerms[0]} game highlights`,
-      week ? `Week ${week} ${homeTerms[0]} highlights` : null,
+      week ? `${homeTerms[0]} vs ${awayTerms[0]} Week ${week} ${year} highlights` : null,
+      week ? `${homeTerms[0]} ${awayTerms[0]} NFL Week ${week} highlights` : null,
+      `${homeTerms[0]} vs ${awayTerms[0]} ${year} highlights`,
     ].filter(Boolean)
 
     const allVideos: YouTubeSearchResult[] = []
@@ -186,15 +191,16 @@ async function fetchYouTubeHighlights(
       searchUrl.searchParams.set('q', query!)
       searchUrl.searchParams.set('type', 'video')
       searchUrl.searchParams.set('maxResults', '5')
-      searchUrl.searchParams.set('order', 'relevance')
+      searchUrl.searchParams.set('order', 'date') // Most recent first for game-specific content
       searchUrl.searchParams.set('channelId', NFL_CHANNEL_IDS[0]) // Official NFL
       searchUrl.searchParams.set('key', apiKey)
 
-      // If we have a game date, search within a reasonable time window
+      // If we have a game date, search within a tighter time window
+      // Highlights are typically posted within 1-2 days after the game
       if (gameDate) {
         const date = new Date(gameDate)
-        const publishedAfter = new Date(date.getTime() - 7 * 24 * 60 * 60 * 1000).toISOString()
-        const publishedBefore = new Date(date.getTime() + 7 * 24 * 60 * 60 * 1000).toISOString()
+        const publishedAfter = new Date(date.getTime() - 1 * 24 * 60 * 60 * 1000).toISOString() // 1 day before
+        const publishedBefore = new Date(date.getTime() + 4 * 24 * 60 * 60 * 1000).toISOString() // 4 days after
         searchUrl.searchParams.set('publishedAfter', publishedAfter)
         searchUrl.searchParams.set('publishedBefore', publishedBefore)
       }
@@ -213,14 +219,26 @@ async function fetchYouTubeHighlights(
           // Avoid duplicates
           if (allVideos.some(v => v.videoId === item.id.videoId)) continue
 
-          allVideos.push({
-            videoId: item.id.videoId,
-            title: item.snippet.title,
-            description: item.snippet.description,
-            thumbnail: item.snippet.thumbnails.high?.url || item.snippet.thumbnails.default?.url,
-            publishedAt: item.snippet.publishedAt,
-            channelTitle: item.snippet.channelTitle,
-          })
+          // Filter to ensure video is relevant to this specific game
+          const title = item.snippet.title.toLowerCase()
+          const homeTeamName = homeTerms[0].toLowerCase()
+          const awayTeamName = awayTerms[0].toLowerCase()
+
+          // Only include if title contains both team names
+          const hasHomeTeam = title.includes(homeTeamName)
+          const hasAwayTeam = title.includes(awayTeamName)
+          const hasHighlights = title.includes('highlight')
+
+          if (hasHomeTeam && hasAwayTeam && hasHighlights) {
+            allVideos.push({
+              videoId: item.id.videoId,
+              title: item.snippet.title,
+              description: item.snippet.description,
+              thumbnail: item.snippet.thumbnails.high?.url || item.snippet.thumbnails.default?.url,
+              publishedAt: item.snippet.publishedAt,
+              channelTitle: item.snippet.channelTitle,
+            })
+          }
         }
       }
 
@@ -232,41 +250,10 @@ async function fetchYouTubeHighlights(
     return allVideos.slice(0, 3)
   } catch (error) {
     console.error('YouTube fetch error:', error)
-    return getFallbackHighlights(homeTeam, awayTeam)
+    return []
   }
 }
 
-/**
- * Fallback highlights when API unavailable
- * Uses known official NFL YouTube video IDs
- */
-function getFallbackHighlights(homeTeam: string, awayTeam: string): YouTubeSearchResult[] {
-  // These are real NFL official channel video IDs for Bears games
-  // Updated periodically
-  const BEARS_HIGHLIGHT_IDS: Record<string, { videoId: string; title: string }[]> = {
-    'default': [
-      { videoId: 'NqGQyMF5a_0', title: 'Bears Game Highlights' },
-    ],
-    'GB': [
-      { videoId: 'aIkwk9p2GX8', title: 'Bears vs. Packers Highlights' },
-    ],
-    'MIN': [
-      { videoId: 'YLWuH5x7LWE', title: 'Bears vs. Vikings Highlights' },
-    ],
-    'DET': [
-      { videoId: '6GmUfb8ARYY', title: 'Bears vs. Lions Highlights' },
-    ],
-  }
-
-  const opponent = homeTeam === 'CHI' ? awayTeam : homeTeam
-  const videos = BEARS_HIGHLIGHT_IDS[opponent] || BEARS_HIGHLIGHT_IDS['default']
-
-  return videos.map(v => ({
-    videoId: v.videoId,
-    title: v.title,
-    description: 'Official NFL Game Highlights',
-    thumbnail: `https://i.ytimg.com/vi/${v.videoId}/hqdefault.jpg`,
-    publishedAt: new Date().toISOString(),
-    channelTitle: 'NFL',
-  }))
-}
+// Note: We no longer use hardcoded fallback video IDs since they become outdated quickly
+// and showing wrong game highlights is worse than showing none at all.
+// Configure YOUTUBE_API_KEY environment variable to enable game highlights.

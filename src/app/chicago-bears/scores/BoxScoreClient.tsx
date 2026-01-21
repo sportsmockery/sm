@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect, useRef } from 'react'
+import { useSearchParams, useRouter } from 'next/navigation'
 import Image from 'next/image'
 import Link from 'next/link'
 import GameHighlights from '@/components/scores/GameHighlights'
@@ -86,13 +87,31 @@ interface Props {
 }
 
 export default function BoxScoreClient({ games, initialGameId }: Props) {
-  const [selectedGameId, setSelectedGameId] = useState<string | null>(initialGameId)
+  const searchParams = useSearchParams()
+  const router = useRouter()
+
+  // Get game from URL param, fallback to initialGameId
+  const gameFromUrl = searchParams.get('game')
+  const [selectedGameId, setSelectedGameId] = useState<string | null>(gameFromUrl || initialGameId)
   const [boxScore, setBoxScore] = useState<BoxScore | null>(null)
   const [loading, setLoading] = useState(true)
   const [activeTab, setActiveTab] = useState<'passing' | 'rushing' | 'receiving' | 'defense'>('passing')
   const scrollContainerRef = useRef<HTMLDivElement>(null)
   const [canScrollLeft, setCanScrollLeft] = useState(false)
   const [canScrollRight, setCanScrollRight] = useState(true)
+
+  // Update state when URL param changes
+  useEffect(() => {
+    if (gameFromUrl && gameFromUrl !== selectedGameId) {
+      setSelectedGameId(gameFromUrl)
+    }
+  }, [gameFromUrl])
+
+  // Update URL when game is selected
+  const handleSelectGame = (gameId: string) => {
+    setSelectedGameId(gameId)
+    router.replace(`/chicago-bears/scores?game=${gameId}`, { scroll: false })
+  }
 
   // Check scroll position
   useEffect(() => {
@@ -194,7 +213,7 @@ export default function BoxScoreClient({ games, initialGameId }: Props) {
             return (
               <button
                 key={game.gameId}
-                onClick={() => setSelectedGameId(game.gameId)}
+                onClick={() => handleSelectGame(game.gameId)}
                 className={`flex-shrink-0 flex items-center gap-3 px-4 py-3 rounded-xl border transition-all ${
                   isSelected
                     ? 'bg-[#0B162A] border-[#C83200] text-white ring-2 ring-[#C83200]/30'
