@@ -123,11 +123,17 @@ export async function GET(
     }
 
     // Get player stats for this game
-    // Column names match datalab schema: pass_*, rush_*, rec_*, etc.
-    const { data: playerStats, error: statsError } = await datalabAdmin
+    // The game_id in bears_player_game_stats references bears_games_master.id
+    // Try querying with the game ID directly
+    let playerStats: any[] | null = null
+    let statsError: any = null
+
+    // First try matching by game_id (the internal ID)
+    const { data: stats1, error: err1 } = await datalabAdmin
       .from('bears_player_game_stats')
       .select(`
         player_id,
+        game_id,
         pass_cmp,
         pass_att,
         pass_yds,
@@ -144,17 +150,56 @@ export async function GET(
         fumbles,
         tackles,
         interceptions,
-        bears_players!inner(
+        bears_players(
           id,
           name,
           position,
           headshot_url
         )
       `)
-      .eq('game_id', gameId)
+      .eq('game_id', parseInt(gameId, 10) || gameId)
 
-    if (statsError) {
-      console.error('Stats fetch error:', statsError)
+    if (!err1 && stats1 && stats1.length > 0) {
+      playerStats = stats1
+    } else {
+      // Fallback: try to find stats by matching game date and season
+      const { data: stats2, error: err2 } = await datalabAdmin
+        .from('bears_player_game_stats')
+        .select(`
+          player_id,
+          game_id,
+          pass_cmp,
+          pass_att,
+          pass_yds,
+          pass_td,
+          pass_int,
+          sacks,
+          rush_att,
+          rush_yds,
+          rush_td,
+          rec_tgt,
+          rec,
+          rec_yds,
+          rec_td,
+          fumbles,
+          tackles,
+          interceptions,
+          bears_players(
+            id,
+            name,
+            position,
+            headshot_url
+          )
+        `)
+        .eq('season', 2025)
+        .eq('game_date', gameData.game_date)
+
+      if (!err2 && stats2 && stats2.length > 0) {
+        playerStats = stats2
+      } else {
+        statsError = err1 || err2
+        console.error('Stats fetch error:', statsError)
+      }
     }
 
     // Transform player stats into categorized arrays
@@ -189,23 +234,26 @@ export async function GET(
       fumLost: null, // Not in datalab schema
     })
 
-    const allStats = (playerStats || []).map(transformPlayerStats)
+    const allStats = (playerStats || [])
+      .filter(s => s.bears_players) // Only include stats with valid player data
+      .map(transformPlayerStats)
 
     // Categorize players by stats they have
+    // Use >= 0 to include players with 0 attempts/carries if they have other stats
     const passing = allStats
-      .filter(s => s.passingAtt !== null && s.passingAtt > 0)
+      .filter(s => (s.passingAtt ?? 0) > 0 || (s.passingYds ?? 0) > 0)
       .sort((a, b) => (b.passingYds || 0) - (a.passingYds || 0))
 
     const rushing = allStats
-      .filter(s => s.rushingCar !== null && s.rushingCar > 0)
+      .filter(s => (s.rushingCar ?? 0) > 0 || (s.rushingYds ?? 0) > 0)
       .sort((a, b) => (b.rushingYds || 0) - (a.rushingYds || 0))
 
     const receiving = allStats
-      .filter(s => s.receivingRec !== null && s.receivingRec > 0)
+      .filter(s => (s.receivingRec ?? 0) > 0 || (s.receivingYds ?? 0) > 0)
       .sort((a, b) => (b.receivingYds || 0) - (a.receivingYds || 0))
 
     const defense = allStats
-      .filter(s => s.defTacklesTotal !== null && s.defTacklesTotal > 0)
+      .filter(s => (s.defTacklesTotal ?? 0) > 0 || (s.defSacks ?? 0) > 0 || (s.defInt ?? 0) > 0)
       .sort((a, b) => (b.defTacklesTotal || 0) - (a.defTacklesTotal || 0))
 
     const isPlayoff = gameData.game_type === 'postseason' || gameData.game_type === 'POST'

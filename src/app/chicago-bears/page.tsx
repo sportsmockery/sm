@@ -77,9 +77,9 @@ export default async function BearsHubPage() {
       activeTab="overview"
     >
       {/* Main two-column layout */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-8">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-8 items-start">
         {/* Left Column: Main Content - 2/3 width */}
-        <div className="lg:col-span-2 space-y-8">
+        <div className="lg:col-span-2 space-y-8 min-h-[800px]">
           {/* Season Snapshot - Mobile Only */}
           <div className="lg:hidden">
             <BearsSeasonCard season={seasonOverview} />
@@ -142,7 +142,7 @@ export default async function BearsHubPage() {
         </div>
 
         {/* Right Column: Sidebar - 1/3 width */}
-        <div className="space-y-6">
+        <div className="space-y-6 lg:sticky lg:top-36">
           {/* Season Card - Desktop Only */}
           <div className="hidden lg:block">
             <BearsSeasonCard season={seasonOverview} />

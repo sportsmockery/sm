@@ -45,36 +45,72 @@ export default async function BearsSchedulePage() {
     >
       {/* Schedule Content */}
       <div>
-        {/* Next Game Highlight - Compact */}
+        {/* Next Game Highlight - Full Width */}
         {nextScheduledGame && (
-          <div className="mb-6 p-4 rounded-xl bg-[var(--bg-elevated)] border border-[var(--border-subtle)]">
-            <div className="flex items-center justify-between gap-4">
-              <div className="flex items-center gap-3">
-                <div className="px-2 py-1 bg-[#C83200]/10 text-[#C83200] text-xs font-semibold rounded">
-                  UP NEXT
+          <div className="mb-6 p-5 rounded-xl bg-gradient-to-r from-[#0B162A] to-[#0B162A]/90 border border-[var(--border-subtle)]">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+              {/* Left: Badge + Matchup */}
+              <div className="flex items-center gap-4">
+                <div className="px-3 py-1.5 bg-[#C83200] text-white text-xs font-bold rounded uppercase tracking-wide">
+                  Up Next
                 </div>
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-3">
+                  <Image
+                    src="https://a.espncdn.com/i/teamlogos/nfl/500/chi.png"
+                    alt="Chicago Bears"
+                    width={40}
+                    height={40}
+                    className="w-10 h-10"
+                  />
+                  <span className="text-white/60 text-sm font-medium">
+                    {nextScheduledGame.homeAway === 'home' ? 'vs' : '@'}
+                  </span>
                   {nextScheduledGame.opponentLogo && (
                     <Image
                       src={nextScheduledGame.opponentLogo}
                       alt={nextScheduledGame.opponent}
-                      width={28}
-                      height={28}
-                      className="w-7 h-7"
+                      width={40}
+                      height={40}
+                      className="w-10 h-10"
                     />
                   )}
-                  <span className="font-semibold text-[var(--text-primary)]">
-                    {nextScheduledGame.homeAway === 'home' ? 'vs' : '@'} {nextScheduledGame.opponentFullName || nextScheduledGame.opponent}
+                  <span className="font-bold text-white text-lg">
+                    {nextScheduledGame.opponentFullName || nextScheduledGame.opponent}
                   </span>
                 </div>
               </div>
+
+              {/* Center: Date & Time */}
+              <div className="flex items-center gap-6 text-center sm:text-left">
+                <div>
+                  <div className="text-white font-semibold">
+                    {new Date(nextScheduledGame.date).toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })}
+                  </div>
+                  <div className="text-white/60 text-sm">
+                    {nextScheduledGame.time || 'Time TBD'}
+                  </div>
+                </div>
+                {nextScheduledGame.tv && (
+                  <div className="px-3 py-1 bg-white/10 rounded text-white/80 text-sm font-medium">
+                    {nextScheduledGame.tv}
+                  </div>
+                )}
+              </div>
+
+              {/* Right: Venue & Weather */}
               <div className="text-right text-sm">
-                <div className="text-[var(--text-primary)] font-medium">
-                  {new Date(nextScheduledGame.date).toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })}
-                </div>
-                <div className="text-[var(--text-muted)]">
-                  {nextScheduledGame.time || 'TBD'} {nextScheduledGame.tv && `• ${nextScheduledGame.tv}`}
-                </div>
+                {nextScheduledGame.venue && (
+                  <div className="text-white/70">{nextScheduledGame.venue}</div>
+                )}
+                {nextScheduledGame.weather?.tempF && (
+                  <div className="text-white/50 flex items-center gap-1 justify-end mt-1">
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 15a4 4 0 004 4h9a5 5 0 10-.1-9.999 5.002 5.002 0 10-9.78 2.096A4.001 4.001 0 003 15z" />
+                    </svg>
+                    {nextScheduledGame.weather.tempF}°F
+                    {nextScheduledGame.weather.windMph && ` • ${nextScheduledGame.weather.windMph}mph wind`}
+                  </div>
+                )}
               </div>
             </div>
           </div>

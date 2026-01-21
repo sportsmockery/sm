@@ -232,6 +232,16 @@ export default function BearsStickyBar({ className = '', isArticlePage }: BearsS
                   <span className="text-white/70 text-xs">
                     {bearsData.nextGame.date} {bearsData.nextGame.time}
                   </span>
+                  {/* Weather info */}
+                  {tickerData?.nextGame?.temp && (
+                    <span className="text-white/50 text-xs flex items-center gap-1">
+                      <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 15a4 4 0 004 4h9a5 5 0 10-.1-9.999 5.002 5.002 0 10-9.78 2.096A4.001 4.001 0 003 15z" />
+                      </svg>
+                      {tickerData.nextGame.temp}°F
+                      {tickerData.nextGame.wind && ` • ${tickerData.nextGame.wind}mph`}
+                    </span>
+                  )}
                 </div>
               </>
             )}
