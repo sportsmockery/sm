@@ -67,7 +67,7 @@ const SubscriptionContext = createContext<SubscriptionContextType | undefined>(
 )
 
 export function SubscriptionProvider({ children }: { children: ReactNode }) {
-  const { user, isAuthenticated } = useAuth()
+  const { user, isAuthenticated, loading: authLoading } = useAuth()
   const [state, setState] = useState<SubscriptionState>(defaultState)
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -118,6 +118,13 @@ export function SubscriptionProvider({ children }: { children: ReactNode }) {
 
   const openCheckout = useCallback(
     async (tier: 'sm_plus_monthly' | 'sm_plus_annual') => {
+      // Wait for auth to finish loading before checking
+      if (authLoading) {
+        // Auth still loading, wait a moment and retry
+        setTimeout(() => openCheckout(tier), 100)
+        return
+      }
+
       if (!isAuthenticated) {
         // Redirect to login with return URL
         window.location.href = `/login?next=/pricing`
@@ -155,7 +162,7 @@ export function SubscriptionProvider({ children }: { children: ReactNode }) {
         alert(`Checkout error: ${errorMsg}`)
       }
     },
-    [isAuthenticated]
+    [isAuthenticated, authLoading]
   )
 
   const openPortal = useCallback(async () => {
