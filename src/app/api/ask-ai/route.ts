@@ -17,16 +17,6 @@ const DATALAB_API_URL = process.env.DATALAB_API_URL || 'https://datalab.sportsmo
 
 export async function POST(request: NextRequest) {
   try {
-    // Block on test site to avoid Perplexity API charges
-    const host = request.headers.get('host') || ''
-    if (host.includes('test.sportsmockery.com')) {
-      return NextResponse.json({
-        response: "Ask AI is disabled on the test site to avoid API charges. This feature works on the live site.",
-        source: 'disabled',
-        showSuggestions: false,
-      })
-    }
-
     const body = await request.json()
     const { query } = body
 
