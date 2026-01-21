@@ -28,17 +28,25 @@ export default function AskAIPage() {
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const messagesEndRef = useRef<HTMLDivElement>(null)
+  const messagesContainerRef = useRef<HTMLDivElement>(null)
 
   const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
+    // Scroll within the container, not the whole page
+    if (messagesContainerRef.current) {
+      messagesContainerRef.current.scrollTop = messagesContainerRef.current.scrollHeight
+    }
   }
 
   useEffect(() => {
-    scrollToBottom()
+    // Only scroll if there are messages
+    if (messages.length > 0) {
+      scrollToBottom()
+    }
   }, [messages])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+    e.stopPropagation()
     if (!input.trim() || isLoading) return
 
     const userMessage: Message = {
@@ -61,6 +69,19 @@ export default function AskAIPage() {
       })
 
       const data = await response.json()
+
+      // Check for error responses from the API
+      if (data.error || data.source === 'error') {
+        const errorMessage: Message = {
+          id: (Date.now() + 1).toString(),
+          role: 'assistant',
+          content: data.error || data.response || "I'm having trouble connecting to the data service. Please try again in a moment.",
+          timestamp: new Date(),
+          source: 'error',
+        }
+        setMessages((prev) => [...prev, errorMessage])
+        return
+      }
 
       const aiMessage: Message = {
         id: (Date.now() + 1).toString(),
@@ -258,7 +279,7 @@ export default function AskAIPage() {
               </div>
 
               {/* Messages Area */}
-              <div className="flex-1 overflow-y-auto p-6">
+              <div ref={messagesContainerRef} className="flex-1 overflow-y-auto p-6">
                 {messages.length === 0 ? (
                   <div className="h-full flex flex-col items-center justify-center text-center">
                     <div className="w-20 h-20 rounded-full bg-gradient-to-br from-[#bc0000]/20 to-[#ff4444]/20 flex items-center justify-center mb-6">

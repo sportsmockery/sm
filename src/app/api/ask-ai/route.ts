@@ -74,17 +74,29 @@ export async function POST(request: NextRequest) {
     })
 
   } catch (error) {
-    console.error('Ask AI error:', error)
+    const errorMessage = error instanceof Error ? error.message : String(error)
+    console.error('Ask AI error:', errorMessage, 'URL:', `${DATALAB_API_URL}/api/query`)
+
+    // Provide more specific error feedback
+    let userMessage = "I apologize, but I'm unable to process your question right now. Please try again later."
+
+    if (errorMessage.includes('fetch failed') || errorMessage.includes('ECONNREFUSED') || errorMessage.includes('ENOTFOUND')) {
+      userMessage = "I'm having trouble connecting to the data service. The service may be temporarily unavailable."
+    } else if (errorMessage.includes('timeout') || errorMessage.includes('ETIMEDOUT')) {
+      userMessage = "The request took too long to complete. Please try a simpler question or try again later."
+    }
 
     return NextResponse.json({
-      response: "I apologize, but I'm unable to process your question right now. Please try again later.",
+      response: userMessage,
       source: 'error',
       showSuggestions: true,
       suggestions: [
         "What's the Bears' record this season?",
         "Who leads the Bulls in scoring?",
         "Cubs playoff chances this year?"
-      ]
+      ],
+      // Include debug info in development
+      debug: process.env.NODE_ENV === 'development' ? { error: errorMessage } : undefined
     })
   }
 }
