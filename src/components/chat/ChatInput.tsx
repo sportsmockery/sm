@@ -1,22 +1,29 @@
 'use client'
 
-import { useState, useRef, useEffect } from 'react'
+import { useState, useRef, useEffect, useCallback } from 'react'
 import { useChatContext } from '@/contexts/ChatContext'
 import EmojiPicker from './EmojiPicker'
 import GifPicker from './GifPicker'
+import MentionTypeahead, { MentionUser } from './MentionTypeahead'
 
 interface ChatInputProps {
   onSend?: () => void
 }
 
 export default function ChatInput({ onSend }: ChatInputProps) {
-  const { sendMessage, isAuthenticated, error, currentRoom } = useChatContext()
+  const { sendMessage, isAuthenticated, error, currentRoom, roomParticipants } = useChatContext()
   const [content, setContent] = useState('')
   const [showEmoji, setShowEmoji] = useState(false)
   const [showGif, setShowGif] = useState(false)
   const [isSending, setIsSending] = useState(false)
   const [localError, setLocalError] = useState<string | null>(null)
   const textareaRef = useRef<HTMLTextAreaElement>(null)
+
+  // Mention state
+  const [showMentions, setShowMentions] = useState(false)
+  const [mentionSearch, setMentionSearch] = useState('')
+  const [mentionIndex, setMentionIndex] = useState(0)
+  const [mentionStartPos, setMentionStartPos] = useState<number | null>(null)
 
   const maxLength = 1000
   const showCharCount = content.length > 800
@@ -29,9 +36,80 @@ export default function ChatInput({ onSend }: ChatInputProps) {
     }
   }, [content])
 
+  // Filter participants for mention suggestions
+  const mentionUsers: MentionUser[] = (roomParticipants || [])
+    .filter(p => p.display_name.toLowerCase().includes(mentionSearch.toLowerCase()))
+    .slice(0, 8)
+
+  // Reset mention index when search changes
+  useEffect(() => {
+    setMentionIndex(0)
+  }, [mentionSearch])
+
+  // Detect @ mentions while typing
+  const handleInputChange = useCallback((e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    const newValue = e.target.value.slice(0, maxLength)
+    setContent(newValue)
+
+    const cursorPos = e.target.selectionStart || 0
+    const textBeforeCursor = newValue.slice(0, cursorPos)
+
+    // Find the last @ symbol that could be a mention trigger
+    const lastAtIndex = textBeforeCursor.lastIndexOf('@')
+
+    if (lastAtIndex !== -1) {
+      // Check if this @ is at start or after a space (valid mention trigger)
+      const charBefore = lastAtIndex > 0 ? textBeforeCursor[lastAtIndex - 1] : ' '
+
+      if (charBefore === ' ' || charBefore === '\n' || lastAtIndex === 0) {
+        const searchText = textBeforeCursor.slice(lastAtIndex + 1)
+
+        // Only show if no space after @ (still typing username)
+        if (!searchText.includes(' ')) {
+          setShowMentions(true)
+          setMentionSearch(searchText)
+          setMentionStartPos(lastAtIndex)
+          return
+        }
+      }
+    }
+
+    // Hide mention typeahead if no valid @ trigger
+    setShowMentions(false)
+    setMentionSearch('')
+    setMentionStartPos(null)
+  }, [])
+
+  // Handle mention selection
+  const handleMentionSelect = useCallback((user: MentionUser) => {
+    if (mentionStartPos === null) return
+
+    // Replace @search with @username
+    const before = content.slice(0, mentionStartPos)
+    const after = content.slice(mentionStartPos + 1 + mentionSearch.length)
+    const newContent = `${before}@${user.display_name} ${after}`
+
+    setContent(newContent)
+    setShowMentions(false)
+    setMentionSearch('')
+    setMentionStartPos(null)
+
+    // Focus and move cursor after the mention
+    setTimeout(() => {
+      if (textareaRef.current) {
+        textareaRef.current.focus()
+        const newPos = mentionStartPos + user.display_name.length + 2 // +2 for @ and space
+        textareaRef.current.setSelectionRange(newPos, newPos)
+      }
+    }, 0)
+  }, [content, mentionStartPos, mentionSearch])
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     if (!content.trim() || isSending) return
+
+    // Close mentions if open
+    setShowMentions(false)
 
     setIsSending(true)
     setLocalError(null)
@@ -51,6 +129,31 @@ export default function ChatInput({ onSend }: ChatInputProps) {
   }
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
+    // Handle mention navigation
+    if (showMentions && mentionUsers.length > 0) {
+      if (e.key === 'ArrowDown') {
+        e.preventDefault()
+        setMentionIndex(prev => (prev + 1) % mentionUsers.length)
+        return
+      }
+      if (e.key === 'ArrowUp') {
+        e.preventDefault()
+        setMentionIndex(prev => (prev - 1 + mentionUsers.length) % mentionUsers.length)
+        return
+      }
+      if (e.key === 'Enter' || e.key === 'Tab') {
+        e.preventDefault()
+        handleMentionSelect(mentionUsers[mentionIndex])
+        return
+      }
+      if (e.key === 'Escape') {
+        e.preventDefault()
+        setShowMentions(false)
+        return
+      }
+    }
+
+    // Regular submit on Enter
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault()
       handleSubmit(e)
@@ -150,9 +253,9 @@ export default function ChatInput({ onSend }: ChatInputProps) {
           <textarea
             ref={textareaRef}
             value={content}
-            onChange={(e) => setContent(e.target.value.slice(0, maxLength))}
+            onChange={handleInputChange}
             onKeyDown={handleKeyDown}
-            placeholder="Type a message..."
+            placeholder="Type a message... Use @ to tag fans"
             className="chat-input__field"
             rows={1}
             disabled={isSending}
@@ -161,6 +264,17 @@ export default function ChatInput({ onSend }: ChatInputProps) {
             <span className={`chat-input__char-count ${content.length >= maxLength ? 'chat-input__char-count--limit' : ''}`}>
               {content.length}/{maxLength}
             </span>
+          )}
+
+          {/* Mention Typeahead */}
+          {showMentions && mentionUsers.length > 0 && (
+            <MentionTypeahead
+              users={mentionUsers}
+              searchTerm={mentionSearch}
+              selectedIndex={mentionIndex}
+              onSelect={handleMentionSelect}
+              position={{ top: 0, left: 0 }}
+            />
           )}
         </div>
 

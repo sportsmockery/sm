@@ -62,6 +62,14 @@ export interface DMConversation {
   unread_count: number
 }
 
+export interface RoomParticipant {
+  user_id: string
+  display_name: string
+  avatar_url?: string
+  badge?: string
+  last_message_at: string
+}
+
 export interface ChatContextType {
   // Connection state
   isConnected: boolean
@@ -74,6 +82,7 @@ export interface ChatContextType {
   messages: ChatMessage[]
   onlineUsers: ChatUser[]
   staffOnline: boolean
+  roomParticipants: RoomParticipant[]
 
   // DM state
   dmConversations: DMConversation[]
@@ -85,6 +94,10 @@ export interface ChatContextType {
   activeTab: 'room' | 'dms' | 'history'
   isLoading: boolean
   error: string | null
+  highlightedMessageId: string | null
+
+  // Notification count
+  unreadNotifications: number
 
   // Actions
   connect: () => Promise<void>
@@ -109,6 +122,9 @@ export interface ChatContextType {
   // UI Actions
   setIsOpen: (open: boolean) => void
   setActiveTab: (tab: 'room' | 'dms' | 'history') => void
+  scrollToMessage: (messageId: string) => void
+  clearHighlight: () => void
+  fetchUnreadNotifications: () => Promise<void>
 }
 
 const ChatContext = createContext<ChatContextType | null>(null)
@@ -141,6 +157,7 @@ export function ChatProvider({ children, teamSlug }: ChatProviderProps) {
   const [messages, setMessages] = useState<ChatMessage[]>([])
   const [onlineUsers, setOnlineUsers] = useState<ChatUser[]>([])
   const [staffOnline, setStaffOnline] = useState(false)
+  const [roomParticipants, setRoomParticipants] = useState<RoomParticipant[]>([])
 
   // DM state
   const [dmConversations, setDmConversations] = useState<DMConversation[]>([])
@@ -152,6 +169,8 @@ export function ChatProvider({ children, teamSlug }: ChatProviderProps) {
   const [activeTab, setActiveTab] = useState<'room' | 'dms' | 'history'>('room')
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [highlightedMessageId, setHighlightedMessageId] = useState<string | null>(null)
+  const [unreadNotifications, setUnreadNotifications] = useState(0)
 
   // Check authentication on mount
   useEffect(() => {
@@ -278,6 +297,33 @@ export function ChatProvider({ children, teamSlug }: ChatProviderProps) {
       }
 
       setCurrentRoom(room)
+
+      // Load room participants (users who have chatted in this room)
+      const { data: participants } = await supabase
+        .from('chat_room_participants')
+        .select(`
+          user_id,
+          display_name,
+          last_message_at,
+          chat_users:user_id (
+            avatar_url,
+            badge
+          )
+        `)
+        .eq('room_id', room.id)
+        .order('last_message_at', { ascending: false })
+        .limit(100)
+
+      if (participants) {
+        const formattedParticipants: RoomParticipant[] = participants.map((p: any) => ({
+          user_id: p.user_id,
+          display_name: p.display_name || 'Anonymous',
+          avatar_url: p.chat_users?.avatar_url,
+          badge: p.chat_users?.badge,
+          last_message_at: p.last_message_at,
+        }))
+        setRoomParticipants(formattedParticipants)
+      }
 
       // Load recent messages
       const { data: recentMessages, error: msgError } = await supabase
@@ -525,6 +571,39 @@ export function ChatProvider({ children, teamSlug }: ChatProviderProps) {
     if (err) setError(err.message)
   }, [supabase, currentUser])
 
+  // Scroll to and highlight a specific message
+  const scrollToMessage = useCallback((messageId: string) => {
+    setHighlightedMessageId(messageId)
+    // The highlighting will be cleared after 5 seconds
+    setTimeout(() => setHighlightedMessageId(null), 5000)
+  }, [])
+
+  const clearHighlight = useCallback(() => {
+    setHighlightedMessageId(null)
+  }, [])
+
+  // Fetch unread notifications count
+  const fetchUnreadNotifications = useCallback(async () => {
+    if (!isAuthenticated) return
+
+    try {
+      const response = await fetch('/api/chat/notifications?unread=true&limit=1')
+      const data = await response.json()
+      if (data.unreadCount !== undefined) {
+        setUnreadNotifications(data.unreadCount)
+      }
+    } catch (err) {
+      console.warn('Failed to fetch notification count:', err)
+    }
+  }, [isAuthenticated])
+
+  // Fetch notifications on auth change
+  useEffect(() => {
+    if (isAuthenticated) {
+      fetchUnreadNotifications()
+    }
+  }, [isAuthenticated, fetchUnreadNotifications])
+
   const value: ChatContextType = {
     isConnected,
     isAuthenticated,
@@ -534,6 +613,7 @@ export function ChatProvider({ children, teamSlug }: ChatProviderProps) {
     messages,
     onlineUsers,
     staffOnline,
+    roomParticipants,
     dmConversations,
     activeDM,
     dmMessages,
@@ -541,6 +621,8 @@ export function ChatProvider({ children, teamSlug }: ChatProviderProps) {
     activeTab,
     isLoading,
     error,
+    highlightedMessageId,
+    unreadNotifications,
     connect,
     disconnect,
     joinRoom,
@@ -557,6 +639,9 @@ export function ChatProvider({ children, teamSlug }: ChatProviderProps) {
     blockUser,
     setIsOpen,
     setActiveTab,
+    scrollToMessage,
+    clearHighlight,
+    fetchUnreadNotifications,
   }
 
   return (

@@ -31,9 +31,12 @@ export default function TeamChatPanel({ teamName, teamSlug }: TeamChatPanelProps
     onlineUsers,
     isLoading,
     error,
+    highlightedMessageId,
   } = useChatContext()
 
   const messagesEndRef = useRef<HTMLDivElement>(null)
+  const messagesContainerRef = useRef<HTMLDivElement>(null)
+  const messageRefs = useRef<Map<string, HTMLDivElement>>(new Map())
   const [autoScroll, setAutoScroll] = useState(true)
 
   const colors = TEAM_COLORS[teamSlug] || TEAM_COLORS.bears
@@ -44,6 +47,17 @@ export default function TeamChatPanel({ teamName, teamSlug }: TeamChatPanelProps
       messagesEndRef.current.scrollIntoView({ behavior: 'smooth' })
     }
   }, [messages, autoScroll])
+
+  // Scroll to highlighted message when set
+  useEffect(() => {
+    if (highlightedMessageId) {
+      const messageElement = messageRefs.current.get(highlightedMessageId)
+      if (messageElement) {
+        setAutoScroll(false)
+        messageElement.scrollIntoView({ behavior: 'smooth', block: 'center' })
+      }
+    }
+  }, [highlightedMessageId])
 
   const handleScroll = (e: React.UIEvent<HTMLDivElement>) => {
     const target = e.currentTarget
@@ -126,14 +140,23 @@ export default function TeamChatPanel({ teamName, teamSlug }: TeamChatPanelProps
                     const isOwn = message.user_id === currentUser?.user_id
                     const prevMessage = messages[index - 1]
                     const showAvatar = !prevMessage || prevMessage.user_id !== message.user_id
+                    const isHighlighted = message.id === highlightedMessageId
 
                     return (
-                      <ChatMessage
+                      <div
                         key={message.id}
-                        message={message}
-                        isOwn={isOwn}
-                        showAvatar={showAvatar}
-                      />
+                        ref={(el) => {
+                          if (el) messageRefs.current.set(message.id, el)
+                          else messageRefs.current.delete(message.id)
+                        }}
+                      >
+                        <ChatMessage
+                          message={message}
+                          isOwn={isOwn}
+                          showAvatar={showAvatar}
+                          isHighlighted={isHighlighted}
+                        />
+                      </div>
                     )
                   })}
                   <div ref={messagesEndRef} />

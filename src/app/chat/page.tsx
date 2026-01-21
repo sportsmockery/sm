@@ -1,16 +1,44 @@
 'use client'
 
-import { useEffect } from 'react'
+import { useEffect, Suspense } from 'react'
+import { useSearchParams } from 'next/navigation'
 import Image from 'next/image'
 import Link from 'next/link'
-import { ChatProvider } from '@/contexts/ChatContext'
-import TeamChatPanel from '@/components/chat/TeamChatPanel'
+import { ChatProvider, useChatContext } from '@/contexts/ChatContext'
+import ChatMessage from '@/components/chat/ChatMessage'
+import ChatInput from '@/components/chat/ChatInput'
 
-function ChatPageContent() {
-  // Auto-open the chat when page loads
+function ChatContent() {
+  const searchParams = useSearchParams()
+  const highlightId = searchParams.get('highlight')
+
+  const {
+    messages,
+    currentUser,
+    isAuthenticated,
+    isLoading,
+    error,
+    currentRoom,
+    joinRoom,
+    scrollToMessage,
+    highlightedMessageId,
+    unreadNotifications,
+  } = useChatContext()
+
+  // Join the Bears room on mount
   useEffect(() => {
-    // The ChatProvider will handle connecting to the Bears room
-  }, [])
+    joinRoom('bears')
+  }, [joinRoom])
+
+  // Handle highlight parameter from URL
+  useEffect(() => {
+    if (highlightId && messages.length > 0) {
+      // Small delay to ensure messages are rendered
+      setTimeout(() => {
+        scrollToMessage(highlightId)
+      }, 500)
+    }
+  }, [highlightId, messages.length, scrollToMessage])
 
   return (
     <div className="min-h-screen bg-[#0B162A]">
@@ -26,16 +54,33 @@ function ChatPageContent() {
               className="h-8 w-auto"
             />
           </Link>
-          <div className="flex items-center gap-3">
-            <Image
-              src="https://a.espncdn.com/i/teamlogos/nfl/500/chi.png"
-              alt="Chicago Bears"
-              width={32}
-              height={32}
-              className="w-8 h-8"
-              unoptimized
-            />
-            <span className="text-white font-semibold">Bears Fan Chat</span>
+          <div className="flex items-center gap-4">
+            {/* Notifications link */}
+            <Link
+              href="/notifications"
+              className="relative p-2 text-white/70 hover:text-white transition-colors"
+              title="Notifications"
+            >
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
+              </svg>
+              {unreadNotifications > 0 && (
+                <span className="absolute -top-1 -right-1 w-5 h-5 bg-red-500 text-white text-xs font-bold rounded-full flex items-center justify-center">
+                  {unreadNotifications > 9 ? '9+' : unreadNotifications}
+                </span>
+              )}
+            </Link>
+            <div className="flex items-center gap-3">
+              <Image
+                src="https://a.espncdn.com/i/teamlogos/nfl/500/chi.png"
+                alt="Chicago Bears"
+                width={32}
+                height={32}
+                className="w-8 h-8"
+                unoptimized
+              />
+              <span className="text-white font-semibold">Bears Fan Chat</span>
+            </div>
           </div>
         </div>
       </header>
@@ -61,55 +106,110 @@ function ChatPageContent() {
 
           {/* Chat Content Area */}
           <div className="flex flex-col h-[calc(100%-72px)]">
-            {/* Messages Area */}
-            <div className="flex-1 overflow-y-auto p-6">
-              <div className="flex flex-col items-center justify-center h-full text-center">
-                <div className="w-20 h-20 rounded-full bg-[#C83803]/20 flex items-center justify-center mb-4">
-                  <svg className="w-10 h-10 text-[#C83803]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
-                  </svg>
+            {!isAuthenticated ? (
+              /* Not logged in - show welcome message */
+              <>
+                <div className="flex-1 overflow-y-auto p-6">
+                  <div className="flex flex-col items-center justify-center h-full text-center">
+                    <div className="w-20 h-20 rounded-full bg-[#C83803]/20 flex items-center justify-center mb-4">
+                      <svg className="w-10 h-10 text-[#C83803]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+                      </svg>
+                    </div>
+                    <h2 className="text-xl font-bold text-white mb-2">Welcome to Bears Fan Chat!</h2>
+                    <p className="text-white/60 max-w-md mb-6">
+                      Join the conversation with fellow Chicago Bears fans. Discuss games, trades, rumors, and everything Bears football.
+                    </p>
+                    <div className="flex flex-col gap-3 w-full max-w-sm">
+                      <Link
+                        href="/login"
+                        className="w-full py-3 px-6 bg-[#C83803] text-white font-semibold rounded-xl hover:bg-[#a52d02] transition-colors text-center"
+                      >
+                        Sign In to Chat
+                      </Link>
+                      <Link
+                        href="/signup"
+                        className="w-full py-3 px-6 bg-white/10 text-white font-semibold rounded-xl hover:bg-white/20 transition-colors text-center"
+                      >
+                        Create Account
+                      </Link>
+                    </div>
+                    <p className="text-white/40 text-sm mt-6">
+                      Chat is moderated. Be respectful and follow our community guidelines.
+                    </p>
+                  </div>
                 </div>
-                <h2 className="text-xl font-bold text-white mb-2">Welcome to Bears Fan Chat!</h2>
-                <p className="text-white/60 max-w-md mb-6">
-                  Join the conversation with fellow Chicago Bears fans. Discuss games, trades, rumors, and everything Bears football.
-                </p>
-                <div className="flex flex-col gap-3 w-full max-w-sm">
-                  <Link
-                    href="/login"
-                    className="w-full py-3 px-6 bg-[#C83803] text-white font-semibold rounded-xl hover:bg-[#a52d02] transition-colors text-center"
-                  >
-                    Sign In to Chat
-                  </Link>
-                  <Link
-                    href="/signup"
-                    className="w-full py-3 px-6 bg-white/10 text-white font-semibold rounded-xl hover:bg-white/20 transition-colors text-center"
-                  >
-                    Create Account
-                  </Link>
-                </div>
-                <p className="text-white/40 text-sm mt-6">
-                  Chat is moderated. Be respectful and follow our community guidelines.
-                </p>
-              </div>
-            </div>
 
-            {/* Input Area (disabled for non-logged-in users) */}
-            <div className="border-t border-white/10 p-4">
-              <div className="flex items-center gap-3">
-                <input
-                  type="text"
-                  placeholder="Sign in to send messages..."
-                  disabled
-                  className="flex-1 px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white placeholder-white/40 cursor-not-allowed"
-                />
-                <button
-                  disabled
-                  className="px-6 py-3 bg-[#C83803]/50 text-white/50 font-semibold rounded-xl cursor-not-allowed"
-                >
-                  Send
-                </button>
-              </div>
-            </div>
+                <div className="border-t border-white/10 p-4">
+                  <div className="flex items-center gap-3">
+                    <input
+                      type="text"
+                      placeholder="Sign in to send messages..."
+                      disabled
+                      className="flex-1 px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white placeholder-white/40 cursor-not-allowed"
+                    />
+                    <button
+                      disabled
+                      className="px-6 py-3 bg-[#C83803]/50 text-white/50 font-semibold rounded-xl cursor-not-allowed"
+                    >
+                      Send
+                    </button>
+                  </div>
+                </div>
+              </>
+            ) : (
+              /* Logged in - show real chat */
+              <>
+                <div className="flex-1 overflow-y-auto" id="chat-messages-container">
+                  {isLoading ? (
+                    <div className="flex items-center justify-center h-full">
+                      <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-[#C83803]" />
+                    </div>
+                  ) : error ? (
+                    <div className="flex flex-col items-center justify-center h-full text-center p-6">
+                      <p className="text-red-400 mb-4">{error}</p>
+                      <button
+                        onClick={() => joinRoom('bears')}
+                        className="px-4 py-2 bg-[#C83803] text-white rounded-lg hover:bg-[#a52d02]"
+                      >
+                        Try Again
+                      </button>
+                    </div>
+                  ) : messages.length === 0 ? (
+                    <div className="flex flex-col items-center justify-center h-full text-center p-6">
+                      <div className="w-16 h-16 rounded-full bg-[#C83803]/20 flex items-center justify-center mb-4">
+                        <svg className="w-8 h-8 text-[#C83803]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+                        </svg>
+                      </div>
+                      <p className="text-white font-semibold mb-1">No messages yet</p>
+                      <p className="text-white/60 text-sm">Be the first to start the conversation!</p>
+                    </div>
+                  ) : (
+                    <div className="p-4">
+                      {messages.map((message, index) => {
+                        const isOwn = message.user_id === currentUser?.user_id
+                        const prevMessage = messages[index - 1]
+                        const showAvatar = !prevMessage || prevMessage.user_id !== message.user_id
+                        const isHighlighted = message.id === highlightedMessageId
+
+                        return (
+                          <ChatMessage
+                            key={message.id}
+                            message={message}
+                            isOwn={isOwn}
+                            showAvatar={showAvatar}
+                            isHighlighted={isHighlighted}
+                          />
+                        )
+                      })}
+                    </div>
+                  )}
+                </div>
+
+                <ChatInput />
+              </>
+            )}
           </div>
         </div>
 
@@ -138,15 +238,25 @@ function ChatPageContent() {
           <div className="bg-white/5 rounded-xl p-4 border border-white/10">
             <div className="w-10 h-10 rounded-lg bg-[#C83803]/20 flex items-center justify-center mb-3">
               <svg className="w-5 h-5 text-[#C83803]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14.828 14.828a4 4 0 01-5.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
               </svg>
             </div>
-            <h3 className="text-white font-semibold mb-1">GIFs & Reactions</h3>
-            <p className="text-white/60 text-sm">Express yourself with GIFs and emoji reactions</p>
+            <h3 className="text-white font-semibold mb-1">@Mentions</h3>
+            <p className="text-white/60 text-sm">Tag other fans with @ and get notified when mentioned</p>
           </div>
         </div>
       </div>
     </div>
+  )
+}
+
+function ChatPageContent() {
+  return (
+    <Suspense fallback={<div className="min-h-screen bg-[#0B162A] flex items-center justify-center">
+      <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-[#C83803]" />
+    </div>}>
+      <ChatContent />
+    </Suspense>
   )
 }
 

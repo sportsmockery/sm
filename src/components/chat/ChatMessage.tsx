@@ -9,6 +9,7 @@ interface ChatMessageProps {
   message: ChatMessageType
   isOwn: boolean
   showAvatar?: boolean
+  isHighlighted?: boolean
 }
 
 const BADGE_LABELS: Record<string, { label: string; color: string }> = {
@@ -22,7 +23,7 @@ const BADGE_LABELS: Record<string, { label: string; color: string }> = {
 
 const QUICK_REACTIONS = ['', '', '', '', '', '']
 
-export default function ChatMessage({ message, isOwn, showAvatar = true }: ChatMessageProps) {
+export default function ChatMessage({ message, isOwn, showAvatar = true, isHighlighted = false }: ChatMessageProps) {
   const { addReaction, removeReaction, deleteMessage, reportMessage, blockUser, currentUser } = useChatContext()
   const [showActions, setShowActions] = useState(false)
   const [showReactions, setShowReactions] = useState(false)
@@ -58,7 +59,7 @@ export default function ChatMessage({ message, isOwn, showAvatar = true }: ChatM
 
   return (
     <div
-      className={`chat-message ${isOwn ? 'chat-message--own' : ''}`}
+      className={`chat-message ${isOwn ? 'chat-message--own' : ''} ${isHighlighted ? 'chat-message--highlighted' : ''}`}
       onMouseEnter={() => setShowActions(true)}
       onMouseLeave={() => { setShowActions(false); setShowReactions(false) }}
     >
@@ -182,6 +183,23 @@ export default function ChatMessage({ message, isOwn, showAvatar = true }: ChatM
 
         .chat-message:hover {
           background: var(--bg-hover, rgba(255, 255, 255, 0.03));
+        }
+
+        .chat-message--highlighted {
+          background: rgba(59, 130, 246, 0.15);
+          animation: highlight-pulse 2s ease-in-out;
+        }
+
+        @keyframes highlight-pulse {
+          0% {
+            background: rgba(59, 130, 246, 0.3);
+          }
+          50% {
+            background: rgba(59, 130, 246, 0.15);
+          }
+          100% {
+            background: rgba(59, 130, 246, 0.15);
+          }
         }
 
         .chat-message--own {

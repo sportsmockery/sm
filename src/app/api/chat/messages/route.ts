@@ -111,6 +111,25 @@ export async function POST(request: NextRequest) {
       }, { status: 429 })
     }
 
+    // Extract @mentions from content
+    const mentionRegex = /@(\w+(?:\s\w+)*?)(?=\s|$|[.,!?])/g
+    const mentionMatches = content.match(mentionRegex) || []
+    const mentionedNames = mentionMatches.map((m: string) => m.slice(1).trim()) // Remove @ prefix
+
+    // Look up user IDs for mentioned display names
+    let mentionedUserIds: string[] = []
+    if (mentionedNames.length > 0) {
+      const { data: mentionedUsers } = await supabase
+        .from('chat_room_participants')
+        .select('user_id, display_name')
+        .eq('room_id', roomId)
+        .in('display_name', mentionedNames)
+
+      if (mentionedUsers) {
+        mentionedUserIds = mentionedUsers.map(u => u.user_id)
+      }
+    }
+
     // Content moderation
     const moderationResult = moderateMessage(content)
 
@@ -173,6 +192,7 @@ export async function POST(request: NextRequest) {
         moderation_status: moderationResult.action === 'warn' ? 'pending' : 'approved',
         moderation_score: moderationResult.score,
         moderation_flags: moderationResult.flags,
+        mentions: mentionedUserIds.length > 0 ? mentionedUserIds : null,
       })
       .select(`
         *,
