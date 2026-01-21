@@ -4,11 +4,22 @@
  * Handles logging, validation, and importing of data from external sources
  * when the Ask AI function cannot find answers in the Datalab database.
  *
+ * ARCHITECTURE:
+ * - Datalab = PRIMARY data source (bears_players, bears_games, bears_player_stats, etc.)
+ * - AI tables in /sm = SUPPLEMENTARY cache for externally-sourced data only
+ * - AI tables join to Datalab via: related_player_id, related_game_id, season, week
+ *
  * Key Features:
  * - Logs all queries requiring external sources
  * - Validates data with at least 2 sources before importing
  * - Imports verified data into team-specific AI tables
- * - Checks AI tables before making external requests
+ * - AI tables store data that can be joined to Datalab's main tables
+ *
+ * Flow:
+ * 1. Datalab queried first (always)
+ * 2. If Datalab uses web_fallback, check AI cache
+ * 3. If not cached, validate and import to AI tables
+ * 4. AI tables can be joined to Datalab for enriched queries
  */
 
 import { supabaseAdmin } from './db'

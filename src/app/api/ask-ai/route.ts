@@ -9,15 +9,18 @@ import {
  * Ask AI API Route
  *
  * This route handles AI queries with the following flow:
- * 1. Check local AI cache tables for previously imported data
- * 2. If not found, proxy to SM Data Lab query endpoint
- * 3. When Data Lab uses external sources (web_fallback), log and validate the data
- * 4. Import validated data to team-specific AI tables for future queries
+ * 1. ALWAYS query Datalab first - this is the PRIMARY data source with all main tables
+ * 2. If Datalab returns data from its tables (source: 'ai'), return it directly
+ * 3. If Datalab uses external sources (web_fallback):
+ *    a. Check if we have this cached in AI tables (supplementary cache)
+ *    b. If cached, return cached data
+ *    c. If not cached, log query, validate with 2+ sources, import to AI tables
+ * 4. AI tables in /sm are SUPPLEMENTARY - they store externally-sourced data
+ *    and join to Datalab tables via related_player_id, related_game_id, etc.
  *
- * By caching validated external data:
- * - Faster responses for repeated questions
- * - Reduced external API calls
- * - Consistent answers across sessions
+ * Architecture:
+ * - Datalab = Primary data (bears_players, bears_games, bears_player_stats, etc.)
+ * - AI tables = Cache for external data that can join to Datalab tables
  */
 
 const DATALAB_API_URL = process.env.DATALAB_API_URL || 'https://datalab.sportsmockery.com'
@@ -139,26 +142,7 @@ export async function POST(request: NextRequest) {
     // Detect team from query
     const { team, displayName } = detectTeamFromQuery(trimmedQuery)
 
-    // Step 1: Check local AI cache first
-    if (team) {
-      const cacheResult = await checkAICache(team, trimmedQuery)
-
-      if (cacheResult.found && cacheResult.data) {
-        console.log('AI cache hit for team:', team)
-
-        // Return cached response
-        return NextResponse.json({
-          response: cacheResult.data.raw_response || JSON.stringify(cacheResult.data),
-          source: 'ai', // Treat cached data as verified AI response
-          team,
-          teamDisplayName: displayName,
-          cachedResponse: true,
-          cacheSource: cacheResult.source,
-        })
-      }
-    }
-
-    // Step 2: Forward request to Data Lab
+    // Step 1: ALWAYS query Datalab first - it has all the primary data
     const response = await fetch(`${DATALAB_API_URL}/api/query`, {
       method: 'POST',
       headers: {
@@ -185,17 +169,37 @@ export async function POST(request: NextRequest) {
 
     const data = await response.json()
 
-    // Step 3: If response came from external sources, log and attempt to validate/import
+    // Step 2: If Datalab used external sources, check our AI cache first
+    // AI tables store previously validated external data that joins to Datalab tables
     if (data.source === 'web_fallback') {
-      console.log('External source used, logging query for team:', team || data.team)
+      const effectiveTeam = team || data.team
+      const effectiveDisplayName = displayName || data.teamDisplayName
+
+      // Check if we already have this external data cached in AI tables
+      if (effectiveTeam) {
+        const cacheResult = await checkAICache(effectiveTeam, trimmedQuery)
+
+        if (cacheResult.found && cacheResult.data) {
+          console.log('AI cache hit for external query, team:', effectiveTeam)
+
+          // Return cached external data (already validated)
+          return NextResponse.json({
+            response: cacheResult.data.raw_response || JSON.stringify(cacheResult.data),
+            source: 'ai', // Cached external data is validated
+            team: effectiveTeam,
+            teamDisplayName: effectiveDisplayName,
+            cachedResponse: true,
+            cacheSource: cacheResult.source,
+          })
+        }
+      }
+
+      // Not in cache - log, validate, and import for future queries
+      console.log('External source used, logging query for team:', effectiveTeam)
 
       // Parse data from response for validation
       const parsedData = tryParseDataFromResponse(data.response)
       const dataType = determineDataType(trimmedQuery)
-
-      // Use team from response if not detected from query
-      const effectiveTeam = team || data.team
-      const effectiveDisplayName = displayName || data.teamDisplayName
 
       // Process in background (don't await to avoid slowing response)
       processExternalQueryResponse(
