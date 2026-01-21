@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { usePathname } from 'next/navigation'
 import Link from 'next/link'
+import { useCanAccess, useSubscription } from '@/contexts/SubscriptionContext'
 
 interface FloatingChatButtonProps {
   teamSlug: string
@@ -12,10 +13,50 @@ interface FloatingChatButtonProps {
 export default function FloatingChatButton({ teamSlug, teamName }: FloatingChatButtonProps) {
   const [isHovered, setIsHovered] = useState(false)
   const pathname = usePathname()
+  const canAccessChat = useCanAccess('fan_chat')
+  const { isLoading } = useSubscription()
 
   // Hide on /fan-chat page since user is already there
   if (pathname === '/fan-chat') {
     return null
+  }
+
+  // Don't show while loading subscription status
+  if (isLoading) return null
+
+  // If user doesn't have access, show upgrade prompt
+  if (!canAccessChat) {
+    return (
+      <Link
+        href="/pricing"
+        className="fixed z-[1000] flex items-center gap-3 border-none cursor-pointer no-underline"
+        style={{
+          bottom: '100px',
+          right: '24px',
+          padding: '14px 20px',
+          borderRadius: '50px',
+          background: '#C83803',
+          color: 'white',
+          fontSize: '0.95rem',
+          fontWeight: 600,
+          fontFamily: "'Montserrat', sans-serif",
+          boxShadow: '0 4px 20px rgba(200, 56, 3, 0.4)',
+          transition: 'transform 0.2s, box-shadow 0.2s',
+        }}
+        aria-label="Unlock Fan Chat with SM+"
+      >
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+          <path strokeLinecap="round" strokeLinejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+        </svg>
+        <span className="hidden sm:inline whitespace-nowrap">Fan Chat</span>
+        <span
+          className="absolute -top-1 -right-1 px-1.5 py-0.5 text-[10px] font-bold rounded-full"
+          style={{ background: '#F59E0B', color: 'white' }}
+        >
+          SM+
+        </span>
+      </Link>
+    )
   }
 
   return (

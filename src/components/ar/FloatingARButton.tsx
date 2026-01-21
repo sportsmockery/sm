@@ -3,16 +3,20 @@
 import { useState } from 'react'
 import { usePathname } from 'next/navigation'
 import ARTourButton from './ARTourButton'
+import { useCanAccess, useSubscription } from '@/contexts/SubscriptionContext'
+import Link from 'next/link'
 
 /**
  * FloatingARButton
  *
  * A clearly visible floating button to trigger AR/3D stadium tours.
- * Shows on team pages only.
+ * Shows on team pages only. Requires SM+ subscription.
  */
 export default function FloatingARButton() {
   const [isOpen, setIsOpen] = useState(false)
   const pathname = usePathname()
+  const canAccessAR = useCanAccess('ar_tours')
+  const { isLoading } = useSubscription()
 
   // Determine which team page we're on
   const getTeamFromPath = (): string | null => {
@@ -29,6 +33,44 @@ export default function FloatingARButton() {
 
   // Only show on team pages
   if (!team) return null
+
+  // Don't show while loading subscription status
+  if (isLoading) return null
+
+  // If user doesn't have access, show upgrade prompt button
+  if (!canAccessAR) {
+    return (
+      <Link
+        href="/pricing"
+        className="fixed z-[1000] flex items-center gap-3 border-none cursor-pointer no-underline"
+        style={{
+          bottom: '170px',
+          right: '24px',
+          padding: '14px 20px',
+          borderRadius: '50px',
+          background: 'linear-gradient(135deg, #8B5CF6 0%, #6366F1 100%)',
+          color: 'white',
+          fontSize: '0.95rem',
+          fontWeight: 600,
+          fontFamily: "'Montserrat', sans-serif",
+          boxShadow: '0 4px 20px rgba(139, 92, 246, 0.4)',
+          transition: 'transform 0.2s, box-shadow 0.2s',
+        }}
+        aria-label="Unlock AR Stadium Tour with SM+"
+      >
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+          <path strokeLinecap="round" strokeLinejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+        </svg>
+        <span className="hidden sm:inline whitespace-nowrap">AR Tour</span>
+        <span
+          className="absolute -top-1 -right-1 px-1.5 py-0.5 text-[10px] font-bold rounded-full"
+          style={{ background: '#F59E0B', color: 'white' }}
+        >
+          SM+
+        </span>
+      </Link>
+    )
+  }
 
   return (
     <>

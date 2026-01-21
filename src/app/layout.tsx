@@ -5,6 +5,7 @@ import "./globals.css";
 import { ThemeProvider } from "@/contexts/ThemeContext";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { ChatProvider } from "@/contexts/ChatContext";
+import { SubscriptionProvider } from "@/contexts/SubscriptionContext";
 import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
 import SkipToContent from "@/components/layout/SkipToContent";
@@ -139,7 +140,8 @@ export default function RootLayout({
       >
         <ThemeProvider>
           <AuthProvider>
-            <ChatProvider teamSlug="bears">
+            <SubscriptionProvider>
+              <ChatProvider teamSlug="bears">
               <SkipToContent />
               <div className="flex min-h-screen flex-col">
                 <Header />
@@ -156,6 +158,7 @@ export default function RootLayout({
               {/* Floating buttons disabled - users access AI and Fan Chat via header buttons */}
               {/* AR Tour available in article sidebars */}
             </ChatProvider>
+            </SubscriptionProvider>
           </AuthProvider>
         </ThemeProvider>
       </body>

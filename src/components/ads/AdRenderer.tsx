@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
+import { useIsPro } from '@/contexts/SubscriptionContext'
 
 interface AdPlacement {
   id: number
@@ -35,8 +36,11 @@ interface AdRendererProps {
 export default function AdRenderer({ placement, className = '' }: AdRendererProps) {
   const [ads, setAds] = useState<AdPlacement[]>([])
   const [isMobile, setIsMobile] = useState(false)
+  const isPro = useIsPro()
 
   useEffect(() => {
+    // Don't fetch ads for pro users
+    if (isPro) return
     // Detect mobile
     const checkMobile = () => {
       setIsMobile(window.innerWidth < 768)
@@ -86,6 +90,9 @@ export default function AdRenderer({ placement, className = '' }: AdRendererProp
       console.error('Failed to fetch ads:', error)
     }
   }
+
+  // Don't show ads for pro users (ad-free experience)
+  if (isPro) return null
 
   // Filter ads based on device
   const visibleAds = ads.filter(ad => {
