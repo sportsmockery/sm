@@ -205,7 +205,7 @@ export async function POST(request: NextRequest) {
         effectiveDisplayName,
         data.externalSource || 'web_fallback',
         data.response,
-        parsedData,
+        parsedData ?? undefined,
         dataType
       ).then(result => {
         console.log('External query processed:', {
