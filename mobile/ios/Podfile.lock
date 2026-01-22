@@ -1499,9 +1499,6 @@ PODS:
     - ReactCommon/turbomodule/core
     - ReactNativeDependencies
     - Yoga
-  - react-native-track-player (4.1.2):
-    - React-Core
-    - SwiftAudioEx (= 1.1.0)
   - react-native-webview (13.15.0):
     - hermes-engine
     - RCTRequired
@@ -1942,7 +1939,7 @@ PODS:
     - ReactCommon/turbomodule/core
     - ReactNativeDependencies
     - Yoga
-  - RNReanimated (3.10.1):
+  - RNReanimated (4.1.6):
     - hermes-engine
     - RCTRequired
     - RCTTypeSafety
@@ -1952,6 +1949,7 @@ PODS:
     - React-Fabric
     - React-featureflags
     - React-graphics
+    - React-hermes
     - React-ImageManager
     - React-jsi
     - React-NativeModulesApple
@@ -1963,6 +1961,57 @@ PODS:
     - ReactCommon/turbomodule/bridging
     - ReactCommon/turbomodule/core
     - ReactNativeDependencies
+    - RNReanimated/reanimated (= 4.1.6)
+    - RNWorklets
+    - Yoga
+  - RNReanimated/reanimated (4.1.6):
+    - hermes-engine
+    - RCTRequired
+    - RCTTypeSafety
+    - React-Core
+    - React-Core-prebuilt
+    - React-debug
+    - React-Fabric
+    - React-featureflags
+    - React-graphics
+    - React-hermes
+    - React-ImageManager
+    - React-jsi
+    - React-NativeModulesApple
+    - React-RCTFabric
+    - React-renderercss
+    - React-rendererdebug
+    - React-utils
+    - ReactCodegen
+    - ReactCommon/turbomodule/bridging
+    - ReactCommon/turbomodule/core
+    - ReactNativeDependencies
+    - RNReanimated/reanimated/apple (= 4.1.6)
+    - RNWorklets
+    - Yoga
+  - RNReanimated/reanimated/apple (4.1.6):
+    - hermes-engine
+    - RCTRequired
+    - RCTTypeSafety
+    - React-Core
+    - React-Core-prebuilt
+    - React-debug
+    - React-Fabric
+    - React-featureflags
+    - React-graphics
+    - React-hermes
+    - React-ImageManager
+    - React-jsi
+    - React-NativeModulesApple
+    - React-RCTFabric
+    - React-renderercss
+    - React-rendererdebug
+    - React-utils
+    - ReactCodegen
+    - ReactCommon/turbomodule/bridging
+    - ReactCommon/turbomodule/core
+    - ReactNativeDependencies
+    - RNWorklets
     - Yoga
   - RNScreens (4.16.0):
     - hermes-engine
@@ -2011,6 +2060,77 @@ PODS:
     - ReactCommon/turbomodule/core
     - ReactNativeDependencies
     - Yoga
+  - RNWorklets (0.7.2):
+    - hermes-engine
+    - RCTRequired
+    - RCTTypeSafety
+    - React-Core
+    - React-Core-prebuilt
+    - React-debug
+    - React-Fabric
+    - React-featureflags
+    - React-graphics
+    - React-hermes
+    - React-ImageManager
+    - React-jsi
+    - React-NativeModulesApple
+    - React-RCTFabric
+    - React-renderercss
+    - React-rendererdebug
+    - React-utils
+    - ReactCodegen
+    - ReactCommon/turbomodule/bridging
+    - ReactCommon/turbomodule/core
+    - ReactNativeDependencies
+    - RNWorklets/worklets (= 0.7.2)
+    - Yoga
+  - RNWorklets/worklets (0.7.2):
+    - hermes-engine
+    - RCTRequired
+    - RCTTypeSafety
+    - React-Core
+    - React-Core-prebuilt
+    - React-debug
+    - React-Fabric
+    - React-featureflags
+    - React-graphics
+    - React-hermes
+    - React-ImageManager
+    - React-jsi
+    - React-NativeModulesApple
+    - React-RCTFabric
+    - React-renderercss
+    - React-rendererdebug
+    - React-utils
+    - ReactCodegen
+    - ReactCommon/turbomodule/bridging
+    - ReactCommon/turbomodule/core
+    - ReactNativeDependencies
+    - RNWorklets/worklets/apple (= 0.7.2)
+    - Yoga
+  - RNWorklets/worklets/apple (0.7.2):
+    - hermes-engine
+    - RCTRequired
+    - RCTTypeSafety
+    - React-Core
+    - React-Core-prebuilt
+    - React-debug
+    - React-Fabric
+    - React-featureflags
+    - React-graphics
+    - React-hermes
+    - React-ImageManager
+    - React-jsi
+    - React-NativeModulesApple
+    - React-RCTFabric
+    - React-renderercss
+    - React-rendererdebug
+    - React-utils
+    - ReactCodegen
+    - ReactCommon/turbomodule/bridging
+    - ReactCommon/turbomodule/core
+    - ReactNativeDependencies
+    - Yoga
   - SDWebImage (5.21.5):
     - SDWebImage/Core (= 5.21.5)
   - SDWebImage/Core (5.21.5)
@@ -2022,7 +2142,6 @@ PODS:
   - SDWebImageWebPCoder (0.14.6):
     - libwebp (~> 1.0)
     - SDWebImage/Core (~> 5.17)
-  - SwiftAudioEx (1.1.0)
   - Yoga (0.0.0)
 
 DEPENDENCIES:
@@ -2079,7 +2198,6 @@ DEPENDENCIES:
   - React-microtasksnativemodule (from `../node_modules/react-native/ReactCommon/react/nativemodule/microtasks`)
   - react-native-onesignal (from `../node_modules/react-native-onesignal`)
   - react-native-safe-area-context (from `../node_modules/react-native-safe-area-context`)
-  - react-native-track-player (from `../node_modules/react-native-track-player`)
   - react-native-webview (from `../node_modules/react-native-webview`)
   - React-NativeModulesApple (from `../node_modules/react-native/ReactCommon/react/nativemodule/core/platform/ios`)
   - React-oscompat (from `../node_modules/react-native/ReactCommon/oscompat`)
@@ -2117,6 +2235,7 @@ DEPENDENCIES:
   - RNGoogleMobileAds (from `../node_modules/react-native-google-mobile-ads`)
   - RNReanimated (from `../node_modules/react-native-reanimated`)
   - RNScreens (from `../node_modules/react-native-screens`)
+  - RNWorklets (from `../node_modules/react-native-worklets`)
   - Yoga (from `../node_modules/react-native/ReactCommon/yoga`)
 
 SPEC REPOS:
@@ -2131,7 +2250,6 @@ SPEC REPOS:
     - SDWebImageAVIFCoder
     - SDWebImageSVGCoder
     - SDWebImageWebPCoder
-    - SwiftAudioEx
 
 EXTERNAL SOURCES:
   EXAV:
@@ -2237,8 +2355,6 @@ EXTERNAL SOURCES:
     :path: "../node_modules/react-native-onesignal"
   react-native-safe-area-context:
     :path: "../node_modules/react-native-safe-area-context"
-  react-native-track-player:
-    :path: "../node_modules/react-native-track-player"
   react-native-webview:
     :path: "../node_modules/react-native-webview"
   React-NativeModulesApple:
@@ -2313,6 +2429,8 @@ EXTERNAL SOURCES:
     :path: "../node_modules/react-native-reanimated"
   RNScreens:
     :path: "../node_modules/react-native-screens"
+  RNWorklets:
+    :path: "../node_modules/react-native-worklets"
   Yoga:
     :path: "../node_modules/react-native/ReactCommon/yoga"
 
@@ -2374,7 +2492,6 @@ SPEC CHECKSUMS:
   React-microtasksnativemodule: f775db9e991c6f3b8ccbc02bfcde22770f96e23b
   react-native-onesignal: 1634e96223d6a666b76f38f4a20fec6c87bbb0c4
   react-native-safe-area-context: 37e680fc4cace3c0030ee46e8987d24f5d3bdab2
-  react-native-track-player: dd56f9948e03756a217c75e0a61aa04aab65b5a1
   react-native-webview: b29007f4723bca10872028067b07abacfa1cb35a
   React-NativeModulesApple: 8969913947d5b576de4ed371a939455a8daf28aa
   React-oscompat: ce47230ed20185e91de62d8c6d139ae61763d09c
@@ -2410,13 +2527,13 @@ SPEC CHECKSUMS:
   RNCAsyncStorage: 3a4f5e2777dae1688b781a487923a08569e27fe4
   RNGestureHandler: 2914750df066d89bf9d8f48a10ad5f0051108ac3
   RNGoogleMobileAds: 99720d30d7c7378946a69ca7784433ccf8da52a4
-  RNReanimated: 0d3f1a7e499369a9de13106484505825f1618c37
+  RNReanimated: e5c702a3e24cc1c68b2de67671713f35461678f4
   RNScreens: d8d6f1792f6e7ac12b0190d33d8d390efc0c1845
+  RNWorklets: 2fb11aebe21ea76d0c5456e92d2f23e0cad91a68
   SDWebImage: e9c98383c7572d713c1a0d7dd2783b10599b9838
   SDWebImageAVIFCoder: afe194a084e851f70228e4be35ef651df0fc5c57
   SDWebImageSVGCoder: 15a300a97ec1c8ac958f009c02220ac0402e936c
   SDWebImageWebPCoder: e38c0a70396191361d60c092933e22c20d5b1380
-  SwiftAudioEx: f6aa653770f3a0d3851edaf8d834a30aee4a7646
   Yoga: 5934998fbeaef7845dbf698f698518695ab4cd1a
 
 PODFILE CHECKSUM: 2a121d096d897873c0e55f41f37618279e27f407

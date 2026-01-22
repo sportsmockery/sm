@@ -1,13 +1,5 @@
-import { createContext, useContext, useState, useCallback, useEffect, ReactNode } from 'react'
-import TrackPlayer, {
-  State,
-  usePlaybackState,
-  useProgress,
-  useTrackPlayerEvents,
-  Event,
-  Capability,
-  AppKilledPlaybackBehavior,
-} from 'react-native-track-player'
+import { createContext, useContext, useState, useCallback, useEffect, useRef, ReactNode } from 'react'
+import { Audio, AVPlaybackStatus } from 'expo-av'
 import { api } from '@/lib/api'
 
 interface Article {
@@ -18,7 +10,6 @@ interface Article {
 }
 
 interface AudioPlayerContextType {
-  // Current state
   currentArticle: Article | null
   isPlaying: boolean
   isLoading: boolean
@@ -26,8 +17,6 @@ interface AudioPlayerContextType {
   duration: number
   selectedVoice: string
   error: string | null
-
-  // Actions
   playArticle: (article: Article, voice?: string) => Promise<void>
   togglePlayPause: () => Promise<void>
   stop: () => Promise<void>
@@ -38,70 +27,58 @@ interface AudioPlayerContextType {
 
 const AudioPlayerContext = createContext<AudioPlayerContextType | null>(null)
 
-let isPlayerSetup = false
-
-async function setupPlayer() {
-  if (isPlayerSetup) return
-
-  try {
-    await TrackPlayer.setupPlayer({
-      autoHandleInterruptions: true,
-    })
-
-    await TrackPlayer.updateOptions({
-      capabilities: [
-        Capability.Play,
-        Capability.Pause,
-        Capability.Stop,
-        Capability.SeekTo,
-        Capability.SkipToNext,
-      ],
-      compactCapabilities: [Capability.Play, Capability.Pause, Capability.Stop],
-      notificationCapabilities: [Capability.Play, Capability.Pause, Capability.Stop],
-      android: {
-        appKilledPlaybackBehavior: AppKilledPlaybackBehavior.ContinuePlayback,
-      },
-    })
-
-    isPlayerSetup = true
-  } catch (error) {
-    console.error('Error setting up player:', error)
-  }
-}
-
 export function AudioPlayerProvider({ children }: { children: ReactNode }) {
   const [currentArticle, setCurrentArticle] = useState<Article | null>(null)
+  const [isPlaying, setIsPlaying] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
+  const [progress, setProgress] = useState(0)
+  const [duration, setDuration] = useState(0)
   const [selectedVoice, setSelectedVoice] = useState('will')
   const [error, setError] = useState<string | null>(null)
 
-  const playbackState = usePlaybackState()
-  const { position, duration } = useProgress()
+  const soundRef = useRef<Audio.Sound | null>(null)
 
-  // Determine if playing from playback state
-  const isPlaying = playbackState.state === State.Playing
-
-  // Initialize player on mount
   useEffect(() => {
-    setupPlayer()
+    const configureAudio = async () => {
+      try {
+        await Audio.setAudioModeAsync({
+          playsInSilentModeIOS: true,
+          staysActiveInBackground: true,
+          shouldDuckAndroid: true,
+        })
+      } catch (err) {
+        console.error('Error configuring audio:', err)
+      }
+    }
+    configureAudio()
 
     return () => {
-      // Don't destroy player on unmount to allow background playback
+      if (soundRef.current) {
+        soundRef.current.unloadAsync()
+      }
     }
   }, [])
 
-  // Listen for track player events
-  useTrackPlayerEvents([Event.PlaybackQueueEnded, Event.PlaybackError], async (event) => {
-    if (event.type === Event.PlaybackQueueEnded) {
-      setCurrentArticle(null)
+  const onPlaybackStatusUpdate = useCallback((status: AVPlaybackStatus) => {
+    if (!status.isLoaded) {
+      if (status.error) {
+        console.error('Playback error:', status.error)
+        setError('Failed to play audio')
+      }
+      return
     }
-    if (event.type === Event.PlaybackError) {
-      console.error('Playback error:', event)
-      setError('Failed to play audio')
-    }
-  })
 
-  // Play an article
+    setIsPlaying(status.isPlaying)
+    setProgress(status.positionMillis)
+    setDuration(status.durationMillis || 0)
+
+    if (status.didJustFinish) {
+      setCurrentArticle(null)
+      setIsPlaying(false)
+      setProgress(0)
+    }
+  }, [])
+
   const playArticle = useCallback(async (article: Article, voice?: string) => {
     setIsLoading(true)
     setError(null)
@@ -110,22 +87,20 @@ export function AudioPlayerProvider({ children }: { children: ReactNode }) {
     const voiceToUse = voice || selectedVoice
 
     try {
-      await setupPlayer()
-
-      // Clear current queue and add new track
-      await TrackPlayer.reset()
+      if (soundRef.current) {
+        await soundRef.current.unloadAsync()
+        soundRef.current = null
+      }
 
       const audioUrl = api.getAudioUrl(article.slug, voiceToUse)
 
-      await TrackPlayer.add({
-        id: article.id.toString(),
-        url: audioUrl,
-        title: article.title,
-        artist: 'Sports Mockery',
-        artwork: 'https://sportsmockery.com/logo.png', // You can customize this
-      })
+      const { sound } = await Audio.Sound.createAsync(
+        { uri: audioUrl },
+        { shouldPlay: true },
+        onPlaybackStatusUpdate
+      )
 
-      await TrackPlayer.play()
+      soundRef.current = sound
     } catch (err) {
       console.error('Failed to load audio:', err)
       setError('Failed to load audio. Please try again.')
@@ -133,53 +108,56 @@ export function AudioPlayerProvider({ children }: { children: ReactNode }) {
     } finally {
       setIsLoading(false)
     }
-  }, [selectedVoice])
+  }, [selectedVoice, onPlaybackStatusUpdate])
 
-  // Toggle play/pause
   const togglePlayPause = useCallback(async () => {
+    if (!soundRef.current) return
+
     try {
       if (isPlaying) {
-        await TrackPlayer.pause()
+        await soundRef.current.pauseAsync()
       } else {
-        await TrackPlayer.play()
+        await soundRef.current.playAsync()
       }
     } catch (err) {
       console.error('Error toggling playback:', err)
     }
   }, [isPlaying])
 
-  // Stop playback
   const stop = useCallback(async () => {
     try {
-      await TrackPlayer.stop()
-      await TrackPlayer.reset()
+      if (soundRef.current) {
+        await soundRef.current.stopAsync()
+        await soundRef.current.unloadAsync()
+        soundRef.current = null
+      }
     } catch (err) {
       console.warn('Error stopping audio:', err)
     }
-    // Always clear state regardless of errors
     setCurrentArticle(null)
+    setIsPlaying(false)
+    setProgress(0)
+    setDuration(0)
     setError(null)
   }, [])
 
-  // Seek to position (in seconds for track player)
   const seek = useCallback(async (positionMs: number) => {
+    if (!soundRef.current) return
+
     try {
-      await TrackPlayer.seekTo(positionMs / 1000)
+      await soundRef.current.setPositionAsync(positionMs)
     } catch (err) {
       console.error('Error seeking:', err)
     }
   }, [])
 
-  // Set voice
   const setVoice = useCallback((voice: string) => {
     setSelectedVoice(voice)
-    // If currently playing, reload with new voice
     if (currentArticle && isPlaying) {
       playArticle(currentArticle, voice)
     }
   }, [currentArticle, isPlaying, playArticle])
 
-  // Play next article
   const playNext = useCallback(async (mode: 'team' | 'recent', team?: string) => {
     if (!currentArticle) return
 
@@ -210,8 +188,8 @@ export function AudioPlayerProvider({ children }: { children: ReactNode }) {
         currentArticle,
         isPlaying,
         isLoading,
-        progress: position * 1000, // Convert to milliseconds for consistency
-        duration: duration * 1000, // Convert to milliseconds for consistency
+        progress,
+        duration,
         selectedVoice,
         error,
         playArticle,
