@@ -2,12 +2,16 @@
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "crons": [
     {
-      "path": "/api/cron/bears-sync",
+      "path": "/api/cron/sync-teams",
       "schedule": "0 * * * *"
     },
     {
-      "path": "/api/cron/bears-live",
+      "path": "/api/cron/live-games",
       "schedule": "* * * * *"
+    },
+    {
+      "path": "/api/cron/send-chicago-daily",
+      "schedule": "0 12 * * *"
     }
   ],
   "headers": [

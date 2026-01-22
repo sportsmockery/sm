@@ -11,6 +11,7 @@
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.71.2",
+    "@react-email/components": "^1.0.6",
     "@react-three/drei": "^10.7.7",
     "@react-three/fiber": "^9.5.0",
     "@react-three/xr": "^6.6.29",
@@ -41,6 +42,7 @@
     "react-markdown": "^10.1.0",
     "react-select": "^5.10.2",
     "resend": "^6.7.0",
+    "server-only": "^0.0.1",
     "slugify": "^1.6.6",
     "stripe": "^20.2.0",
     "three": "^0.182.0",
