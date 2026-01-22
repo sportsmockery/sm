@@ -36,8 +36,8 @@ const TEAM_CONFIG = {
     logo: 'https://a.espncdn.com/i/teamlogos/nfl/500/chi.png',
     color: '#0B162A',
     scoresPath: '/chicago-bears/scores',
-    // NFL: September through early February
-    seasonMonths: [9, 10, 11, 12, 1, 2],
+    // NFL: September through December (add 1, 2 back for playoff teams)
+    seasonMonths: [9, 10, 11, 12],
   },
   bulls: {
     name: 'Bulls',
