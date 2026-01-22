@@ -1,124 +1,69 @@
 import { NextRequest, NextResponse } from 'next/server'
-import {
-  checkAICache,
-  processExternalQueryResponse,
-  generateDataKey,
-} from '@/lib/ai-external-service'
 
 /**
  * Ask AI API Route
  *
- * This route handles AI queries with the following flow:
- * 1. Check local AI cache tables for previously imported data
- * 2. If not found, proxy to SM Data Lab query endpoint
- * 3. When Data Lab uses external sources (web_fallback), log and validate the data
- * 4. Import validated data to team-specific AI tables for future queries
+ * This route proxies requests to the SM Data Lab query endpoint.
+ * The Data Lab handles all AI processing, SQL generation, and web fallbacks.
  *
- * By caching validated external data:
- * - Faster responses for repeated questions
- * - Reduced external API calls
- * - Consistent answers across sessions
+ * By calling the Data Lab API directly:
+ * 1. Both sites use the exact same AI model and training
+ * 2. Updates to Data Lab's prompts automatically apply here
+ * 3. Data gaps logged in Data Lab include queries from this site
+ * 4. Consistent behavior across both platforms
  */
 
 const DATALAB_API_URL = process.env.DATALAB_API_URL || 'https://datalab.sportsmockery.com'
 
-// Team detection patterns
-const TEAM_PATTERNS: Record<string, { team: string; displayName: string }> = {
-  bears: { team: 'bears', displayName: 'Chicago Bears' },
-  bulls: { team: 'bulls', displayName: 'Chicago Bulls' },
-  cubs: { team: 'cubs', displayName: 'Chicago Cubs' },
-  'white sox': { team: 'whitesox', displayName: 'Chicago White Sox' },
-  whitesox: { team: 'whitesox', displayName: 'Chicago White Sox' },
-  blackhawks: { team: 'blackhawks', displayName: 'Chicago Blackhawks' },
-  hawks: { team: 'blackhawks', displayName: 'Chicago Blackhawks' },
-}
-
 /**
- * Detect team from query string
+ * Transform DataLab chart data format to the format expected by DataVisualization component.
+ *
+ * DataLab format: { type, title, columns, rows (array of objects), summary }
+ * Component format: { type, title, labels, datasets (array with label and data array) }
  */
-function detectTeamFromQuery(query: string): { team: string | null; displayName: string | null } {
-  const normalizedQuery = query.toLowerCase()
-
-  for (const [pattern, info] of Object.entries(TEAM_PATTERNS)) {
-    if (normalizedQuery.includes(pattern)) {
-      return info
-    }
+function transformChartData(dataLabChart: {
+  type: string
+  title?: string
+  columns?: string[]
+  rows?: Record<string, unknown>[]
+  labels?: string[]
+  datasets?: unknown[]
+}) {
+  // If already in the expected format, return as-is
+  if (dataLabChart.labels && dataLabChart.datasets) {
+    return dataLabChart
   }
 
-  return { team: null, displayName: null }
-}
-
-/**
- * Try to parse structured data from AI response
- */
-function tryParseDataFromResponse(response: string): Record<string, any> | null {
-  try {
-    // Try to detect if response contains structured data
-    // Look for patterns like "X had Y yards" or stat-like information
-    const data: Record<string, any> = {
-      raw_response: response,
-      extracted_at: new Date().toISOString(),
-    }
-
-    // Extract numbers and stats if present
-    const numberPatterns = /(\d+(?:,\d{3})*(?:\.\d+)?)\s*(yards?|points?|touchdowns?|goals?|assists?|wins?|losses?|games?)/gi
-    const matches = response.matchAll(numberPatterns)
-    const stats: Record<string, number> = {}
-
-    for (const match of matches) {
-      const value = parseFloat(match[1].replace(/,/g, ''))
-      const statType = match[2].toLowerCase().replace(/s$/, '') // Remove plural
-      stats[statType] = value
-    }
-
-    if (Object.keys(stats).length > 0) {
-      data.stats = stats
-    }
-
-    // Extract player names if mentioned
-    const playerPattern = /(?:^|[^a-zA-Z])([A-Z][a-z]+ [A-Z][a-z]+)(?:[^a-zA-Z]|$)/g
-    const playerMatches = response.matchAll(playerPattern)
-    const players: string[] = []
-
-    for (const match of playerMatches) {
-      if (!players.includes(match[1])) {
-        players.push(match[1])
-      }
-    }
-
-    if (players.length > 0) {
-      data.mentioned_players = players
-    }
-
-    return Object.keys(data).length > 2 ? data : null
-  } catch {
+  // Transform from DataLab format (columns/rows) to component format (labels/datasets)
+  if (!dataLabChart.columns || !dataLabChart.rows || dataLabChart.rows.length === 0) {
     return null
   }
-}
 
-/**
- * Determine data type from query content
- */
-function determineDataType(query: string): 'player_stat' | 'game_info' | 'roster' | 'news' | 'historical' | 'general' {
-  const normalizedQuery = query.toLowerCase()
+  const columns = dataLabChart.columns
+  const rows = dataLabChart.rows
 
-  if (/stats?|yards?|points?|touchdowns?|goals?|assists?|average|per game/i.test(normalizedQuery)) {
-    return 'player_stat'
-  }
-  if (/game|score|won|lost|vs\.?|versus|played/i.test(normalizedQuery)) {
-    return 'game_info'
-  }
-  if (/roster|lineup|starting|position|players?/i.test(normalizedQuery)) {
-    return 'roster'
-  }
-  if (/news|rumor|trade|sign|contract|injury/i.test(normalizedQuery)) {
-    return 'news'
-  }
-  if (/history|historical|all[- ]time|record|season \d{4}|\d{4} season/i.test(normalizedQuery)) {
-    return 'historical'
-  }
+  // First column is typically the label column (e.g., "Type", "Player", etc.)
+  const labelColumn = columns[0]
+  const dataColumns = columns.slice(1)
 
-  return 'general'
+  // Extract labels from the first column of each row
+  const labels = rows.map(row => String(row[labelColumn] || ''))
+
+  // Create datasets for each data column
+  const datasets = dataColumns.map(colName => ({
+    label: colName,
+    data: rows.map(row => {
+      const val = row[colName]
+      return typeof val === 'number' ? val : parseFloat(String(val)) || 0
+    }),
+  }))
+
+  return {
+    type: dataLabChart.type,
+    title: dataLabChart.title,
+    labels,
+    datasets,
+  }
 }
 
 export async function POST(request: NextRequest) {
@@ -133,44 +78,23 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    const trimmedQuery = query.trim()
-    console.log('Ask AI request:', trimmedQuery.slice(0, 100))
+    console.log('Ask AI request:', query.slice(0, 100))
 
-    // Detect team from query
-    const { team, displayName } = detectTeamFromQuery(trimmedQuery)
-
-    // Step 1: Check local AI cache first
-    if (team) {
-      const cacheResult = await checkAICache(team, trimmedQuery)
-
-      if (cacheResult.found && cacheResult.data) {
-        console.log('AI cache hit for team:', team)
-
-        // Return cached response
-        return NextResponse.json({
-          response: cacheResult.data.raw_response || JSON.stringify(cacheResult.data),
-          source: 'ai', // Treat cached data as verified AI response
-          team,
-          teamDisplayName: displayName,
-          cachedResponse: true,
-          cacheSource: cacheResult.source,
-        })
-      }
-    }
-
-    // Step 2: Forward request to Data Lab
+    // Forward the request to Data Lab's query API
     const response = await fetch(`${DATALAB_API_URL}/api/query`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
+        // Pass along any auth if needed in the future
         'X-Source': 'sportsmockery.com',
       },
-      body: JSON.stringify({ query: trimmedQuery }),
+      body: JSON.stringify({ query: query.trim() }),
     })
 
     if (!response.ok) {
       console.error('Data Lab API error:', response.status, response.statusText)
 
+      // Return a friendly error message
       return NextResponse.json({
         response: "I'm having trouble connecting to the data service right now. Please try again in a moment.",
         source: 'error',
@@ -185,57 +109,33 @@ export async function POST(request: NextRequest) {
 
     const data = await response.json()
 
-    // Step 3: If response came from external sources, log and attempt to validate/import
-    if (data.source === 'web_fallback') {
-      console.log('External source used, logging query for team:', team || data.team)
-
-      // Parse data from response for validation
-      const parsedData = tryParseDataFromResponse(data.response)
-      const dataType = determineDataType(trimmedQuery)
-
-      // Use team from response if not detected from query
-      const effectiveTeam = team || data.team
-      const effectiveDisplayName = displayName || data.teamDisplayName
-
-      // Process in background (don't await to avoid slowing response)
-      processExternalQueryResponse(
-        trimmedQuery,
-        effectiveTeam,
-        effectiveDisplayName,
-        data.externalSource || 'web_fallback',
-        data.response,
-        parsedData,
-        dataType
-      ).then(result => {
-        console.log('External query processed:', {
-          logged: result.logged,
-          validated: result.validated,
-          imported: result.imported,
-        })
-      }).catch(err => {
-        console.error('Error processing external query:', err)
-      })
-    }
+    // Transform chart data to the format expected by the frontend component
+    const transformedChartData = data.chartData ? transformChartData(data.chartData) : null
 
     // Return the Data Lab response
     return NextResponse.json({
       response: data.response,
       rowCount: data.rowCount,
       source: data.source,
-      team: data.team || team,
-      teamDisplayName: data.teamDisplayName || displayName,
+      team: data.team,
+      teamDisplayName: data.teamDisplayName,
       sport: data.sport,
       dataGapLogged: data.dataGapLogged,
       showSuggestions: data.showSuggestions,
       suggestions: data.suggestions,
       relatedArticles: data.relatedArticles,
       newsSummary: data.newsSummary,
+      // Structured chart data for visualization (transformed to component format)
+      chartData: transformedChartData,
+      bonusInsight: data.bonusInsight,
+      rawData: data.rawData,
     })
 
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : String(error)
     console.error('Ask AI error:', errorMessage, 'URL:', `${DATALAB_API_URL}/api/query`)
 
+    // Provide more specific error feedback
     let userMessage = "I apologize, but I'm unable to process your question right now. Please try again later."
 
     if (errorMessage.includes('fetch failed') || errorMessage.includes('ECONNREFUSED') || errorMessage.includes('ENOTFOUND')) {
@@ -253,6 +153,7 @@ export async function POST(request: NextRequest) {
         "Who leads the Bulls in scoring?",
         "Cubs playoff chances this year?"
       ],
+      // Include debug info in development
       debug: process.env.NODE_ENV === 'development' ? { error: errorMessage } : undefined
     })
   }
