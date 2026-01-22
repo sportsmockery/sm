@@ -3,6 +3,7 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
+import Script from 'next/script';
 import type { TikTokEmbed } from '@/lib/tiktokTypes';
 import { truncateCaption } from '@/lib/tiktokFormatters';
 
@@ -10,10 +11,6 @@ type Props = {
   latestEmbed: TikTokEmbed | null;
   previousEmbeds: TikTokEmbed[];
 };
-
-// White Sox team colors
-const WHITESOX_PRIMARY = '#27251F';
-const WHITESOX_SECONDARY = '#C4CED4';
 
 export function SouthsideBehaviorClient({ latestEmbed, previousEmbeds }: Props) {
   const [activeEmbed, setActiveEmbed] = useState(latestEmbed);
@@ -23,21 +20,21 @@ export function SouthsideBehaviorClient({ latestEmbed, previousEmbeds }: Props) 
     window.scrollTo(0, 0);
   }, []);
 
+  // Reload TikTok embeds when active embed changes
+  useEffect(() => {
+    if (typeof window !== 'undefined' && (window as any).tiktokEmbed) {
+      (window as any).tiktokEmbed.lib.render();
+    }
+  }, [activeEmbed]);
+
   if (!latestEmbed) {
     return (
-      <main className="sm-show-page">
+      <main className="sm-show-page sm-southside-behavior">
         {/* White Sox Team Bar */}
-        <div
-          className="w-full py-2 px-4"
-          style={{ backgroundColor: WHITESOX_PRIMARY }}
-        >
+        <div className="w-full py-3 px-4" style={{ backgroundColor: '#27251F' }}>
           <div className="sm-container flex items-center justify-between">
             <Link href="/chicago-white-sox" className="flex items-center gap-3 hover:opacity-80 transition-opacity">
-              <img
-                src="/logos/whitesox.svg"
-                alt="White Sox"
-                className="w-8 h-8 object-contain"
-              />
+              <img src="/logos/whitesox.svg" alt="White Sox" className="w-8 h-8 object-contain" />
               <span className="text-white font-semibold text-sm">Chicago White Sox</span>
             </Link>
             <nav className="hidden sm:flex items-center gap-4 text-sm">
@@ -64,19 +61,15 @@ export function SouthsideBehaviorClient({ latestEmbed, previousEmbeds }: Props) 
   }
 
   return (
-    <main className="sm-show-page">
+    <main className="sm-show-page sm-southside-behavior">
+      {/* TikTok Embed Script */}
+      <Script src="https://www.tiktok.com/embed.js" strategy="lazyOnload" />
+
       {/* White Sox Team Bar */}
-      <div
-        className="w-full py-2 px-4"
-        style={{ backgroundColor: WHITESOX_PRIMARY }}
-      >
+      <div className="w-full py-3 px-4" style={{ backgroundColor: '#27251F' }}>
         <div className="sm-container flex items-center justify-between">
           <Link href="/chicago-white-sox" className="flex items-center gap-3 hover:opacity-80 transition-opacity">
-            <img
-              src="/logos/whitesox.svg"
-              alt="White Sox"
-              className="w-8 h-8 object-contain"
-            />
+            <img src="/logos/whitesox.svg" alt="White Sox" className="w-8 h-8 object-contain" />
             <span className="text-white font-semibold text-sm">Chicago White Sox</span>
           </Link>
           <nav className="hidden sm:flex items-center gap-4 text-sm">
@@ -87,61 +80,64 @@ export function SouthsideBehaviorClient({ latestEmbed, previousEmbeds }: Props) 
         </div>
       </div>
 
-      {/* Hero Section - Bears Film Room Style */}
+      {/* Hero Section - Matching Bears Film Room */}
       <section className="sm-show-hero">
         <div className="sm-container sm-hero-inner">
           <div className="sm-hero-text">
-            <span className="sm-show-label" style={{ color: WHITESOX_SECONDARY }}>Southside Behavior</span>
-            <h1 className="sm-hero-title">{truncateCaption(activeEmbed?.title || latestEmbed.title, 100)}</h1>
+            <span className="sm-show-label">Southside Behavior</span>
+            <h1 className="sm-hero-title">
+              {truncateCaption(activeEmbed?.title || latestEmbed.title, 120)}
+            </h1>
             <p className="sm-hero-meta">
-              Latest TikTok from @southsidebehavior
+              Latest TikTok · @southsidebehavior
             </p>
             <p className="sm-hero-description">
-              Quick-hit TikToks from the South Side fan perspective. Catch the latest clips, reactions, and behind-the-scenes moments.
+              Quick-hit TikToks from the South Side fan perspective. Catch the latest clips, reactions, and behind-the-scenes moments from White Sox fandom.
             </p>
           </div>
 
           <div className="sm-hero-video">
-            <div className="sm-video-wrapper" style={{ aspectRatio: '9/16', maxWidth: '400px', margin: '0 auto' }}>
-              <div
-                className="w-full h-full"
-                dangerouslySetInnerHTML={{ __html: activeEmbed?.html || latestEmbed.html }}
-              />
-            </div>
+            <div
+              className="sm-video-wrapper"
+              key={activeEmbed?.url || latestEmbed.url}
+              dangerouslySetInnerHTML={{ __html: activeEmbed?.html || latestEmbed.html }}
+            />
           </div>
         </div>
       </section>
 
       {/* Previous Videos Section */}
-      <section className="sm-show-previous">
-        <div className="sm-container">
-          <h2 className="sm-section-title">Recent TikToks</h2>
-          <div className="sm-video-grid">
-            {previousEmbeds.map((embed) => (
-              <article key={embed.url} className="sm-video-card">
-                <button
-                  type="button"
-                  className="sm-video-thumb-button"
-                  onClick={() => setActiveEmbed(embed)}
-                >
-                  <div className="sm-video-thumb" style={{ aspectRatio: '9/16' }}>
-                    <img
-                      src={embed.thumbnailUrl}
-                      alt={embed.title}
-                      loading="lazy"
-                    />
-                    <span className="sm-video-play-icon">▶</span>
+      {previousEmbeds.length > 0 && (
+        <section className="sm-show-previous">
+          <div className="sm-container">
+            <h2 className="sm-section-title">Recent TikToks</h2>
+            <div className="sm-video-grid">
+              {previousEmbeds.map((embed) => (
+                <article key={embed.url} className="sm-video-card">
+                  <button
+                    type="button"
+                    className="sm-video-thumb-button"
+                    onClick={() => setActiveEmbed(embed)}
+                  >
+                    <div className="sm-video-thumb">
+                      <img
+                        src={embed.thumbnailUrl}
+                        alt={embed.title}
+                        loading="lazy"
+                      />
+                      <span className="sm-video-play-icon">▶</span>
+                    </div>
+                  </button>
+                  <div className="sm-video-info">
+                    <h3 className="sm-video-title">{truncateCaption(embed.title, 80)}</h3>
+                    <p className="sm-video-meta">@southsidebehavior</p>
                   </div>
-                </button>
-                <div className="sm-video-info">
-                  <h3 className="sm-video-title">{truncateCaption(embed.title, 80)}</h3>
-                  <p className="sm-video-meta">@southsidebehavior</p>
-                </div>
-              </article>
-            ))}
+                </article>
+              ))}
+            </div>
           </div>
-        </div>
-      </section>
+        </section>
+      )}
 
       {/* CTA Section */}
       <section className="sm-show-cta">
@@ -154,7 +150,6 @@ export function SouthsideBehaviorClient({ latestEmbed, previousEmbeds }: Props) 
             target="_blank"
             rel="noopener noreferrer"
             className="sm-cta-button"
-            style={{ backgroundColor: WHITESOX_PRIMARY }}
           >
             Follow on TikTok
           </a>
