@@ -174,7 +174,7 @@ export default function HomepageTeamBar() {
   return (
     <div className="w-full bg-zinc-900 border-b border-zinc-800">
       <div className="max-w-7xl mx-auto px-4">
-        <div className="flex items-stretch divide-x divide-zinc-700/50 overflow-x-auto scrollbar-hide">
+        <div className="flex items-stretch justify-center divide-x divide-zinc-700/50 overflow-x-auto scrollbar-hide">
           {teamsData.map((team) => (
             <TeamSection key={team.teamKey} team={team} />
           ))}
