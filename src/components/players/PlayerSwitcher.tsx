@@ -6,7 +6,7 @@ import { useState } from 'react'
 interface Player {
   slug: string
   fullName: string
-  jerseyNumber: string
+  jerseyNumber: string | number | null
   position: string
   headshotUrl: string | null
 }
@@ -23,8 +23,8 @@ export default function PlayerSwitcher({ players, currentSlug, teamPath }: Playe
 
   // Sort players by jersey number
   const sortedPlayers = [...players].sort((a, b) => {
-    const numA = parseInt(a.jerseyNumber) || 999
-    const numB = parseInt(b.jerseyNumber) || 999
+    const numA = typeof a.jerseyNumber === 'number' ? a.jerseyNumber : parseInt(String(a.jerseyNumber)) || 999
+    const numB = typeof b.jerseyNumber === 'number' ? b.jerseyNumber : parseInt(String(b.jerseyNumber)) || 999
     return numA - numB
   })
 
@@ -82,13 +82,13 @@ export default function PlayerSwitcher({ players, currentSlug, teamPath }: Playe
                     />
                   ) : (
                     <div className="w-8 h-8 rounded-full bg-zinc-800 flex items-center justify-center text-xs text-zinc-500">
-                      {player.jerseyNumber}
+                      {player.jerseyNumber ?? '?'}
                     </div>
                   )}
                   <div className="flex-1 min-w-0">
                     <div className="font-medium truncate">{player.fullName}</div>
                     <div className="text-xs text-zinc-500">
-                      #{player.jerseyNumber} · {player.position}
+                      #{player.jerseyNumber ?? '?'} · {player.position}
                     </div>
                   </div>
                   {player.slug === currentSlug && (
