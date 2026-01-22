@@ -1,7 +1,7 @@
 // app/bears-film-room/BearsFilmRoomClient.tsx
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import type { ShowVideo } from '@/lib/youtubeTypes';
 import { formatDate, truncate } from '@/lib/formatters';
 
@@ -35,6 +35,11 @@ export function BearsFilmRoomClient({ latestVideo, previousVideos }: Props) {
   }
 
   const [activeVideoId, setActiveVideoId] = useState(latestVideo.videoId);
+
+  // Scroll to top on mount (prevents iframe from stealing scroll position)
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
 
   return (
     <main className="sm-show-page sm-bears-film-room">
