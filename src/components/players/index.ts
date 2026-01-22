@@ -1,2 +1,8 @@
 export { default as PlayerSwitcher } from './PlayerSwitcher'
 export { default as SimilarPlayers } from './SimilarPlayers'
+export { default as PlayerBio } from './PlayerBio'
+export { default as PlayerGameLog } from './PlayerGameLog'
+export { default as PlayerHeader } from './PlayerHeader'
+export { default as PlayerNav } from './PlayerNav'
+export { default as PlayerNews } from './PlayerNews'
+export { default as PlayerStatsTable } from './PlayerStatsTable'
