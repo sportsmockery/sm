@@ -25,8 +25,8 @@ export default async function PlayersIndexPage() {
 
   // Sort players by jersey number and get the first one
   const sortedPlayers = [...players].sort((a, b) => {
-    const numA = parseInt(a.jerseyNumber) || 999
-    const numB = parseInt(b.jerseyNumber) || 999
+    const numA = typeof a.jerseyNumber === 'number' ? a.jerseyNumber : parseInt(String(a.jerseyNumber)) || 999
+    const numB = typeof b.jerseyNumber === 'number' ? b.jerseyNumber : parseInt(String(b.jerseyNumber)) || 999
     return numA - numB
   })
 
