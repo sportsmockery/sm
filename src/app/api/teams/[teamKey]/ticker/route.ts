@@ -112,7 +112,23 @@ async function getTeamTickerFromDatalab(teamKey: TeamKey) {
 
     const config = TEAM_CONFIG[teamKey]
     const today = new Date().toISOString().split('T')[0]
-    const currentSeason = new Date().getMonth() >= 9 ? new Date().getFullYear() + 1 : new Date().getFullYear()
+
+    // Calculate current season based on league
+    // NFL: Season year is the year it starts (2025 season = Sept 2025 - Feb 2026)
+    // NBA/NHL: Season year is the year it starts (2025-26 season stored as 2025)
+    // MLB: Season year is the calendar year (2025 season = Mar-Oct 2025)
+    const currentYear = new Date().getFullYear()
+    const currentMonth = new Date().getMonth() + 1 // 1-12
+
+    let currentSeason: number
+    if (config.league === 'mlb') {
+      // MLB: current year, or previous year if before March
+      currentSeason = currentMonth < 3 ? currentYear - 1 : currentYear
+    } else {
+      // NBA, NHL, NFL: Season starts in fall, stored by start year
+      // If we're in Jan-June, we're in the season that started last year
+      currentSeason = currentMonth <= 6 ? currentYear - 1 : currentYear
+    }
 
     // Get current season record by counting wins/losses
     const { data: seasonGames, error: recordError } = await datalabAdmin
