@@ -2,7 +2,8 @@ import { Metadata } from 'next'
 import { notFound } from 'next/navigation'
 import Link from 'next/link'
 import Image from 'next/image'
-import { getPlayerProfile, type PlayerProfile, type PlayerGameLogEntry } from '@/lib/whitesoxData'
+import { getPlayerProfile, getWhiteSoxPlayers, type PlayerProfile, type PlayerGameLogEntry } from '@/lib/whitesoxData'
+import { PlayerSwitcher } from '@/components/players'
 
 interface PlayerPageProps {
   params: Promise<{ slug: string }>
@@ -31,13 +32,25 @@ export const revalidate = 3600
 
 export default async function WhiteSoxPlayerPage({ params }: PlayerPageProps) {
   const { slug } = await params
-  const profile = await getPlayerProfile(slug)
+  const [profile, allPlayers] = await Promise.all([
+    getPlayerProfile(slug),
+    getWhiteSoxPlayers(),
+  ])
 
   if (!profile) {
     notFound()
   }
 
   const isPitcher = profile.player.positionGroup === 'pitchers'
+
+  // Prepare players for switcher
+  const switcherPlayers = allPlayers.map(p => ({
+    slug: p.slug,
+    fullName: p.fullName,
+    jerseyNumber: p.jerseyNumber,
+    position: p.position,
+    headshotUrl: p.headshotUrl,
+  }))
 
   return (
     <main className="min-h-screen bg-[var(--bg-primary)]">
@@ -47,16 +60,23 @@ export default async function WhiteSoxPlayerPage({ params }: PlayerPageProps) {
         style={{ background: 'linear-gradient(135deg, #27251F 0%, #27251F 70%, #C4CED4 100%)' }}
       >
         <div className="max-w-7xl mx-auto px-4 py-8">
-          {/* Breadcrumb */}
-          <nav className="flex items-center gap-2 text-sm text-white/60 mb-6">
-            <Link href="/" className="hover:text-white">Home</Link>
-            <span>/</span>
-            <Link href="/chicago-white-sox" className="hover:text-white">Chicago White Sox</Link>
-            <span>/</span>
-            <Link href="/chicago-white-sox/roster" className="hover:text-white">Roster</Link>
-            <span>/</span>
-            <span className="text-white">{profile.player.fullName}</span>
-          </nav>
+          {/* Breadcrumb & Player Switcher */}
+          <div className="flex flex-wrap items-center justify-between gap-4 mb-6">
+            <nav className="flex items-center gap-2 text-sm text-white/60">
+              <Link href="/" className="hover:text-white">Home</Link>
+              <span>/</span>
+              <Link href="/chicago-white-sox" className="hover:text-white">Chicago White Sox</Link>
+              <span>/</span>
+              <Link href="/chicago-white-sox/players" className="hover:text-white">Players</Link>
+              <span>/</span>
+              <span className="text-white">{profile.player.fullName}</span>
+            </nav>
+            <PlayerSwitcher
+              players={switcherPlayers}
+              currentSlug={slug}
+              teamPath="/chicago-white-sox/players"
+            />
+          </div>
 
           <div className="flex flex-col md:flex-row gap-8 items-start">
             {/* Headshot */}

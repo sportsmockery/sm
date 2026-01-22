@@ -4,6 +4,7 @@ import Link from 'next/link'
 import Image from 'next/image'
 import { getPlayerProfile, getSimilarPlayers, getBearsPlayers, type PlayerProfile, type BearsPlayer, type PlayerGameLogEntry } from '@/lib/bearsData'
 import ScrollToTop from './ScrollToTop'
+import { PlayerSwitcher } from '@/components/players'
 
 interface PlayerPageProps {
   params: Promise<{ slug: string }>
@@ -39,7 +40,10 @@ export const revalidate = 3600 // Revalidate every hour
 
 export default async function PlayerProfilePage({ params }: PlayerPageProps) {
   const { slug } = await params
-  const profile = await getPlayerProfile(slug)
+  const [profile, allPlayers] = await Promise.all([
+    getPlayerProfile(slug),
+    getBearsPlayers(),
+  ])
 
   if (!profile) {
     notFound()
@@ -47,6 +51,15 @@ export default async function PlayerProfilePage({ params }: PlayerPageProps) {
 
   const { player, currentSeason, gameLog } = profile
   const similarPlayers = await getSimilarPlayers(player, 3)
+
+  // Prepare players for switcher
+  const switcherPlayers = allPlayers.map(p => ({
+    slug: p.slug,
+    fullName: p.fullName,
+    jerseyNumber: p.jerseyNumber,
+    position: p.position,
+    headshotUrl: p.headshotUrl,
+  }))
 
   return (
     <main className="min-h-screen bg-[var(--bg-primary)]">
@@ -59,16 +72,23 @@ export default async function PlayerProfilePage({ params }: PlayerPageProps) {
         style={{ background: 'linear-gradient(135deg, #0B162A 0%, #0B162A 70%, #C83200 100%)' }}
       >
         <div className="max-w-7xl mx-auto px-4 py-8">
-          {/* Breadcrumb */}
-          <nav className="flex items-center gap-2 text-sm text-white/60 mb-6">
-            <Link href="/" className="hover:text-white">Home</Link>
-            <span>/</span>
-            <Link href="/chicago-bears" className="hover:text-white">Chicago Bears</Link>
-            <span>/</span>
-            <Link href="/chicago-bears-player" className="hover:text-white">Player Profiles</Link>
-            <span>/</span>
-            <span className="text-white">{player.fullName}</span>
-          </nav>
+          {/* Breadcrumb & Player Switcher */}
+          <div className="flex flex-wrap items-center justify-between gap-4 mb-6">
+            <nav className="flex items-center gap-2 text-sm text-white/60">
+              <Link href="/" className="hover:text-white">Home</Link>
+              <span>/</span>
+              <Link href="/chicago-bears" className="hover:text-white">Chicago Bears</Link>
+              <span>/</span>
+              <Link href="/chicago-bears/players" className="hover:text-white">Players</Link>
+              <span>/</span>
+              <span className="text-white">{player.fullName}</span>
+            </nav>
+            <PlayerSwitcher
+              players={switcherPlayers}
+              currentSlug={slug}
+              teamPath="/chicago-bears/players"
+            />
+          </div>
 
           <div className="flex flex-col md:flex-row gap-8 items-start">
             {/* Left: Headshot */}

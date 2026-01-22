@@ -7,7 +7,7 @@
  * All page-level components should use these helpers, never query databases directly.
  */
 
-import { datalabClient } from './supabase-datalab'
+import { datalabAdmin } from './supabase-datalab'
 
 // =============================================================================
 // TYPE DEFINITIONS
@@ -201,12 +201,12 @@ function generateSlug(name: string): string {
  * Filters by is_active = true
  */
 export async function getWhiteSoxPlayers(): Promise<WhiteSoxPlayer[]> {
-  if (!datalabClient) {
+  if (!datalabAdmin) {
     console.error('DataLab not configured')
     return []
   }
 
-  const { data, error } = await datalabClient
+  const { data, error } = await datalabAdmin
     .from('whitesox_players')
     .select('*')
     .eq('is_active', true)
@@ -315,9 +315,9 @@ export async function getPlayerProfile(slug: string): Promise<PlayerProfile | nu
 }
 
 async function getPlayerSeasonStats(internalId: number, isPitcher: boolean): Promise<PlayerSeasonStats[]> {
-  if (!datalabClient) return []
+  if (!datalabAdmin) return []
 
-  const { data, error } = await datalabClient
+  const { data, error } = await datalabAdmin
     .from('whitesox_player_game_stats')
     .select(`
       season,
@@ -417,9 +417,9 @@ async function getPlayerSeasonStats(internalId: number, isPitcher: boolean): Pro
 }
 
 async function getPlayerGameLog(internalId: number): Promise<PlayerGameLogEntry[]> {
-  if (!datalabClient) return []
+  if (!datalabAdmin) return []
 
-  const { data, error } = await datalabClient
+  const { data, error } = await datalabAdmin
     .from('whitesox_player_game_stats')
     .select(`
       player_id,
@@ -498,9 +498,9 @@ async function getPlayerGameLog(internalId: number): Promise<PlayerGameLogEntry[
 export async function getWhiteSoxSchedule(season?: number): Promise<WhiteSoxGame[]> {
   const targetSeason = season || getCurrentSeason()
 
-  if (!datalabClient) return []
+  if (!datalabAdmin) return []
 
-  const { data, error } = await datalabClient
+  const { data, error } = await datalabAdmin
     .from('whitesox_games_master')
     .select(`
       id,
@@ -585,19 +585,19 @@ export async function getWhiteSoxStats(season?: number): Promise<WhiteSoxStats> 
 }
 
 async function getTeamStats(season: number): Promise<WhiteSoxTeamStats> {
-  if (!datalabClient) {
+  if (!datalabAdmin) {
     return getDefaultTeamStats(season)
   }
 
   // Get team season stats
-  const { data: teamData } = await datalabClient
+  const { data: teamData } = await datalabAdmin
     .from('whitesox_team_season_stats')
     .select('*')
     .eq('season', season)
     .single()
 
   // Get season record from games
-  const { data: gamesData } = await datalabClient
+  const { data: gamesData } = await datalabAdmin
     .from('whitesox_games_master')
     .select('whitesox_score, opponent_score, whitesox_win')
     .eq('season', season)
@@ -641,7 +641,7 @@ function getDefaultTeamStats(season: number): WhiteSoxTeamStats {
 }
 
 async function getLeaderboards(season: number): Promise<WhiteSoxLeaderboard> {
-  if (!datalabClient) {
+  if (!datalabAdmin) {
     return { batting: [], homeRuns: [], pitching: [], saves: [] }
   }
 
@@ -649,7 +649,7 @@ async function getLeaderboards(season: number): Promise<WhiteSoxLeaderboard> {
   const playersMap = new Map(players.map(p => [p.internalId, p]))
 
   // Get all game stats for season and aggregate by player
-  const { data: gameStats } = await datalabClient
+  const { data: gameStats } = await datalabAdmin
     .from('whitesox_player_game_stats')
     .select(`
       player_id,
@@ -777,13 +777,13 @@ async function getLeaderboards(season: number): Promise<WhiteSoxLeaderboard> {
  * Get available seasons
  */
 export async function getAvailableSeasons(): Promise<number[]> {
-  if (!datalabClient) {
+  if (!datalabAdmin) {
     const current = getCurrentSeason()
     return [current, current - 1, current - 2]
   }
 
   try {
-    const { data } = await datalabClient
+    const { data } = await datalabAdmin
       .from('whitesox_games_master')
       .select('season')
       .order('season', { ascending: false })

@@ -7,7 +7,7 @@
  * All page-level components should use these helpers, never query databases directly.
  */
 
-import { datalabClient } from './supabase-datalab'
+import { datalabAdmin } from './supabase-datalab'
 
 // =============================================================================
 // TYPE DEFINITIONS
@@ -203,12 +203,12 @@ function generateSlug(name: string): string {
  * Filters by is_active = true
  */
 export async function getBullsPlayers(): Promise<BullsPlayer[]> {
-  if (!datalabClient) {
+  if (!datalabAdmin) {
     console.error('DataLab not configured')
     return []
   }
 
-  const { data, error } = await datalabClient
+  const { data, error } = await datalabAdmin
     .from('bulls_players')
     .select('*')
     .eq('is_active', true)
@@ -315,9 +315,9 @@ export async function getPlayerProfile(slug: string): Promise<PlayerProfile | nu
 }
 
 async function getPlayerSeasonStats(internalId: number): Promise<PlayerSeasonStats[]> {
-  if (!datalabClient) return []
+  if (!datalabAdmin) return []
 
-  const { data, error } = await datalabClient
+  const { data, error } = await datalabAdmin
     .from('bulls_player_game_stats')
     .select(`
       season,
@@ -389,9 +389,9 @@ async function getPlayerSeasonStats(internalId: number): Promise<PlayerSeasonSta
 }
 
 async function getPlayerGameLog(internalId: number): Promise<PlayerGameLogEntry[]> {
-  if (!datalabClient) return []
+  if (!datalabAdmin) return []
 
-  const { data, error } = await datalabClient
+  const { data, error } = await datalabAdmin
     .from('bulls_player_game_stats')
     .select(`
       player_id,
@@ -463,9 +463,9 @@ async function getPlayerGameLog(internalId: number): Promise<PlayerGameLogEntry[
 export async function getBullsSchedule(season?: number): Promise<BullsGame[]> {
   const targetSeason = season || getCurrentSeason()
 
-  if (!datalabClient) return []
+  if (!datalabAdmin) return []
 
-  const { data, error } = await datalabClient
+  const { data, error } = await datalabAdmin
     .from('bulls_games_master')
     .select(`
       id,
@@ -554,19 +554,19 @@ export async function getBullsStats(season?: number): Promise<BullsStats> {
 }
 
 async function getTeamStats(season: number): Promise<BullsTeamStats> {
-  if (!datalabClient) {
+  if (!datalabAdmin) {
     return getDefaultTeamStats(season)
   }
 
   // Get team season stats
-  const { data: teamData } = await datalabClient
+  const { data: teamData } = await datalabAdmin
     .from('bulls_team_season_stats')
     .select('*')
     .eq('season', season)
     .single()
 
   // Get season record from games
-  const { data: gamesData } = await datalabClient
+  const { data: gamesData } = await datalabAdmin
     .from('bulls_games_master')
     .select('bulls_score, opponent_score, bulls_win')
     .eq('season', season)
@@ -614,7 +614,7 @@ function getDefaultTeamStats(season: number): BullsTeamStats {
 }
 
 async function getLeaderboards(season: number): Promise<BullsLeaderboard> {
-  if (!datalabClient) {
+  if (!datalabAdmin) {
     return { scoring: [], rebounding: [], assists: [], defense: [] }
   }
 
@@ -622,7 +622,7 @@ async function getLeaderboards(season: number): Promise<BullsLeaderboard> {
   const playersMap = new Map(players.map(p => [p.internalId, p]))
 
   // Get all game stats for season and aggregate by player
-  const { data: gameStats } = await datalabClient
+  const { data: gameStats } = await datalabAdmin
     .from('bulls_player_game_stats')
     .select(`
       player_id,
@@ -728,13 +728,13 @@ async function getLeaderboards(season: number): Promise<BullsLeaderboard> {
  * Get available seasons
  */
 export async function getAvailableSeasons(): Promise<number[]> {
-  if (!datalabClient) {
+  if (!datalabAdmin) {
     const current = getCurrentSeason()
     return [current, current - 1, current - 2]
   }
 
   try {
-    const { data } = await datalabClient
+    const { data } = await datalabAdmin
       .from('bulls_games_master')
       .select('season')
       .order('season', { ascending: false })

@@ -7,7 +7,7 @@
  * All page-level components should use these helpers, never query databases directly.
  */
 
-import { datalabClient } from './supabase-datalab'
+import { datalabAdmin } from './supabase-datalab'
 
 // =============================================================================
 // TYPE DEFINITIONS
@@ -191,12 +191,12 @@ function generateSlug(name: string): string {
  * Filters by is_active = true
  */
 export async function getBlackhawksPlayers(): Promise<BlackhawksPlayer[]> {
-  if (!datalabClient) {
+  if (!datalabAdmin) {
     console.error('DataLab not configured')
     return []
   }
 
-  const { data, error } = await datalabClient
+  const { data, error } = await datalabAdmin
     .from('blackhawks_players')
     .select('*')
     .eq('is_active', true)
@@ -303,9 +303,9 @@ export async function getPlayerProfile(slug: string): Promise<PlayerProfile | nu
 }
 
 async function getPlayerSeasonStats(internalId: number, isGoalie: boolean): Promise<PlayerSeasonStats[]> {
-  if (!datalabClient) return []
+  if (!datalabAdmin) return []
 
-  const { data, error } = await datalabClient
+  const { data, error } = await datalabAdmin
     .from('blackhawks_player_game_stats')
     .select(`
       season,
@@ -371,9 +371,9 @@ async function getPlayerSeasonStats(internalId: number, isGoalie: boolean): Prom
 }
 
 async function getPlayerGameLog(internalId: number): Promise<PlayerGameLogEntry[]> {
-  if (!datalabClient) return []
+  if (!datalabAdmin) return []
 
-  const { data, error } = await datalabClient
+  const { data, error } = await datalabAdmin
     .from('blackhawks_player_game_stats')
     .select(`
       player_id,
@@ -450,9 +450,9 @@ async function getPlayerGameLog(internalId: number): Promise<PlayerGameLogEntry[
 export async function getBlackhawksSchedule(season?: number): Promise<BlackhawksGame[]> {
   const targetSeason = season || getCurrentSeason()
 
-  if (!datalabClient) return []
+  if (!datalabAdmin) return []
 
-  const { data, error } = await datalabClient
+  const { data, error } = await datalabAdmin
     .from('blackhawks_games_master')
     .select(`
       id,
@@ -550,19 +550,19 @@ export async function getBlackhawksStats(season?: number): Promise<BlackhawksSta
 }
 
 async function getTeamStats(season: number): Promise<BlackhawksTeamStats> {
-  if (!datalabClient) {
+  if (!datalabAdmin) {
     return getDefaultTeamStats(season)
   }
 
   // Get team season stats
-  const { data: teamData } = await datalabClient
+  const { data: teamData } = await datalabAdmin
     .from('blackhawks_team_season_stats')
     .select('*')
     .eq('season', season)
     .single()
 
   // Get season record from games
-  const { data: gamesData } = await datalabClient
+  const { data: gamesData } = await datalabAdmin
     .from('blackhawks_games_master')
     .select('blackhawks_score, opponent_score, blackhawks_win, overtime, shootout')
     .eq('season', season)
@@ -610,7 +610,7 @@ function getDefaultTeamStats(season: number): BlackhawksTeamStats {
 }
 
 async function getLeaderboards(season: number): Promise<BlackhawksLeaderboard> {
-  if (!datalabClient) {
+  if (!datalabAdmin) {
     return { goals: [], assists: [], points: [], goaltending: [] }
   }
 
@@ -618,7 +618,7 @@ async function getLeaderboards(season: number): Promise<BlackhawksLeaderboard> {
   const playersMap = new Map(players.map(p => [p.internalId, p]))
 
   // Get all game stats for season and aggregate by player
-  const { data: gameStats } = await datalabClient
+  const { data: gameStats } = await datalabAdmin
     .from('blackhawks_player_game_stats')
     .select(`
       player_id,
@@ -735,13 +735,13 @@ async function getLeaderboards(season: number): Promise<BlackhawksLeaderboard> {
  * Get available seasons
  */
 export async function getAvailableSeasons(): Promise<number[]> {
-  if (!datalabClient) {
+  if (!datalabAdmin) {
     const current = getCurrentSeason()
     return [current, current - 1, current - 2]
   }
 
   try {
-    const { data } = await datalabClient
+    const { data } = await datalabAdmin
       .from('blackhawks_games_master')
       .select('season')
       .order('season', { ascending: false })
