@@ -5,6 +5,7 @@ import Link from 'next/link'
 import Image from 'next/image'
 import { motion } from 'framer-motion'
 import { useTheme } from '@/contexts/ThemeContext'
+import { useAuth } from '@/contexts/AuthContext'
 import TeamStickyBarRouter from './TeamStickyBarRouter'
 
 // Navigation items - proper casing (not all caps) per spec
@@ -20,10 +21,50 @@ const navItems = [
       { name: 'Roster', href: '/chicago-bears/roster' },
     ]
   },
-  { name: 'Bulls', href: '/chicago-bulls' },
-  { name: 'Cubs', href: '/chicago-cubs' },
-  { name: 'White Sox', href: '/chicago-white-sox' },
-  { name: 'Blackhawks', href: '/chicago-blackhawks' },
+  {
+    name: 'Bulls',
+    href: '/chicago-bulls',
+    submenu: [
+      { name: 'News', href: '/chicago-bulls' },
+      { name: 'Schedule', href: '/chicago-bulls/schedule' },
+      { name: 'Scores', href: '/chicago-bulls/scores' },
+      { name: 'Stats', href: '/chicago-bulls/stats' },
+      { name: 'Roster', href: '/chicago-bulls/roster' },
+    ]
+  },
+  {
+    name: 'Cubs',
+    href: '/chicago-cubs',
+    submenu: [
+      { name: 'News', href: '/chicago-cubs' },
+      { name: 'Schedule', href: '/chicago-cubs/schedule' },
+      { name: 'Scores', href: '/chicago-cubs/scores' },
+      { name: 'Stats', href: '/chicago-cubs/stats' },
+      { name: 'Roster', href: '/chicago-cubs/roster' },
+    ]
+  },
+  {
+    name: 'White Sox',
+    href: '/chicago-white-sox',
+    submenu: [
+      { name: 'News', href: '/chicago-white-sox' },
+      { name: 'Schedule', href: '/chicago-white-sox/schedule' },
+      { name: 'Scores', href: '/chicago-white-sox/scores' },
+      { name: 'Stats', href: '/chicago-white-sox/stats' },
+      { name: 'Roster', href: '/chicago-white-sox/roster' },
+    ]
+  },
+  {
+    name: 'Blackhawks',
+    href: '/chicago-blackhawks',
+    submenu: [
+      { name: 'News', href: '/chicago-blackhawks' },
+      { name: 'Schedule', href: '/chicago-blackhawks/schedule' },
+      { name: 'Scores', href: '/chicago-blackhawks/scores' },
+      { name: 'Stats', href: '/chicago-blackhawks/stats' },
+      { name: 'Roster', href: '/chicago-blackhawks/roster' },
+    ]
+  },
 ]
 
 const podcastLinks = [
@@ -40,15 +81,18 @@ export default function Header() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const [podcastMenuOpen, setPodcastMenuOpen] = useState(false)
   const [appMenuOpen, setAppMenuOpen] = useState(false)
-  const [bearsMenuOpen, setBearsMenuOpen] = useState(false)
+  const [activeTeamMenu, setActiveTeamMenu] = useState<string | null>(null)
+  const [userMenuOpen, setUserMenuOpen] = useState(false)
   const [searchOpen, setSearchOpen] = useState(false)
   const [searchQuery, setSearchQuery] = useState('')
   const [isScrolled, setIsScrolled] = useState(false)
   const searchInputRef = useRef<HTMLInputElement>(null)
   const podcastMenuRef = useRef<HTMLDivElement>(null)
   const appMenuRef = useRef<HTMLDivElement>(null)
-  const bearsMenuRef = useRef<HTMLDivElement>(null)
+  const teamMenuRefs = useRef<{ [key: string]: HTMLDivElement | null }>({})
+  const userMenuRef = useRef<HTMLDivElement>(null)
   const { theme, toggleTheme } = useTheme()
+  const { user, isAuthenticated, signOut } = useAuth()
 
   // Track scroll position for glass effect
   useEffect(() => {
@@ -76,13 +120,20 @@ export default function Header() {
       if (appMenuRef.current && !appMenuRef.current.contains(e.target as Node)) {
         setAppMenuOpen(false)
       }
-      if (bearsMenuRef.current && !bearsMenuRef.current.contains(e.target as Node)) {
-        setBearsMenuOpen(false)
+      // Check all team menu refs
+      if (activeTeamMenu) {
+        const activeRef = teamMenuRefs.current[activeTeamMenu]
+        if (activeRef && !activeRef.contains(e.target as Node)) {
+          setActiveTeamMenu(null)
+        }
+      }
+      if (userMenuRef.current && !userMenuRef.current.contains(e.target as Node)) {
+        setUserMenuOpen(false)
       }
     }
     document.addEventListener('mousedown', handleClickOutside)
     return () => document.removeEventListener('mousedown', handleClickOutside)
-  }, [])
+  }, [activeTeamMenu])
 
   // Close menus on escape
   useEffect(() => {
@@ -92,7 +143,8 @@ export default function Header() {
         setSearchOpen(false)
         setPodcastMenuOpen(false)
         setAppMenuOpen(false)
-        setBearsMenuOpen(false)
+        setActiveTeamMenu(null)
+        setUserMenuOpen(false)
       }
     }
     document.addEventListener('keydown', handleEscape)
@@ -228,16 +280,86 @@ export default function Header() {
                   </svg>
                 </span>
               </button>
-              <Link
-                href="/login"
-                className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded border border-[#bc0000] text-[#bc0000] hover:bg-[#bc0000] hover:text-white transition-colors"
-                style={{ fontFamily: "'Montserrat', sans-serif" }}
-              >
-                <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                </svg>
-                Login
-              </Link>
+              {/* User Profile / Login */}
+              {isAuthenticated && user ? (
+                <div className="relative hidden sm:block" ref={userMenuRef}>
+                  <button
+                    onClick={() => setUserMenuOpen(!userMenuOpen)}
+                    className="flex items-center gap-2 px-2 py-1.5 rounded-full hover:bg-[var(--bg-surface)] transition-colors"
+                  >
+                    {/* User Avatar - show image if available, otherwise initials */}
+                    {user.avatar ? (
+                      <Image
+                        src={user.avatar}
+                        alt={user.name || 'User'}
+                        width={32}
+                        height={32}
+                        className="w-8 h-8 rounded-full object-cover"
+                        unoptimized
+                      />
+                    ) : (
+                      <div className="w-8 h-8 rounded-full bg-[#bc0000] flex items-center justify-center text-white text-sm font-bold">
+                        {(user.name || user.email)?.charAt(0).toUpperCase() || 'U'}
+                      </div>
+                    )}
+                    <span
+                      className="text-xs font-medium max-w-[100px] truncate"
+                      style={{ color: 'var(--text-primary)' }}
+                    >
+                      {user.name || user.email?.split('@')[0] || 'User'}
+                    </span>
+                    <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" style={{ color: 'var(--text-muted)' }}>
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                    </svg>
+                  </button>
+
+                  {/* User Dropdown Menu */}
+                  {userMenuOpen && (
+                    <div
+                      className="absolute top-full right-0 mt-1 w-48 rounded-lg shadow-lg z-[100]"
+                      style={{ backgroundColor: 'var(--bg-surface)', border: '1px solid var(--border-color)' }}
+                    >
+                      <div className="py-1">
+                        <Link
+                          href="/profile"
+                          onClick={() => setUserMenuOpen(false)}
+                          className="flex items-center gap-2 px-4 py-2 text-sm hover:bg-[var(--card-hover-bg)] transition-colors"
+                          style={{ color: 'var(--text-primary)' }}
+                        >
+                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                          </svg>
+                          My Profile
+                        </Link>
+                        <div className="my-1" style={{ borderTop: '1px solid var(--border-color)' }} />
+                        <button
+                          onClick={() => {
+                            setUserMenuOpen(false)
+                            signOut()
+                          }}
+                          className="flex items-center gap-2 px-4 py-2 text-sm w-full text-left hover:bg-[var(--card-hover-bg)] transition-colors text-red-500"
+                        >
+                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                          </svg>
+                          Sign Out
+                        </button>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              ) : (
+                <Link
+                  href="/login"
+                  className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded border border-[#bc0000] text-[#bc0000] hover:bg-[#bc0000] hover:text-white transition-colors"
+                  style={{ fontFamily: "'Montserrat', sans-serif" }}
+                >
+                  <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1" />
+                  </svg>
+                  Login
+                </Link>
+              )}
             </div>
           </div>
         </div>
@@ -270,9 +392,13 @@ export default function Header() {
             <div className="hidden lg:flex items-center justify-center flex-1 gap-0">
               {navItems.map((item) => (
                 item.submenu ? (
-                  <div key={item.name} className="relative" ref={item.name === 'Bears' ? bearsMenuRef : undefined}>
+                  <div
+                    key={item.name}
+                    className="relative"
+                    ref={(el) => { teamMenuRefs.current[item.name] = el }}
+                  >
                     <button
-                      onClick={() => setBearsMenuOpen(!bearsMenuOpen)}
+                      onClick={() => setActiveTeamMenu(activeTeamMenu === item.name ? null : item.name)}
                       className="flex items-center gap-1 px-4 py-4 text-[14px] font-bold hover:text-[var(--link-color)] transition-colors"
                       style={{ fontFamily: "'Montserrat', sans-serif", color: 'var(--text-primary)' }}
                     >
@@ -282,7 +408,7 @@ export default function Header() {
                       </svg>
                     </button>
 
-                    {bearsMenuOpen && (
+                    {activeTeamMenu === item.name && (
                       <div
                         className="absolute top-full left-0 mt-0 w-48 shadow-md z-[100]"
                         style={{ backgroundColor: 'var(--bg-surface)', border: '1px solid var(--border-color)' }}
@@ -291,7 +417,7 @@ export default function Header() {
                           <Link
                             key={subItem.name}
                             href={subItem.href}
-                            onClick={() => setBearsMenuOpen(false)}
+                            onClick={() => setActiveTeamMenu(null)}
                             className="block px-5 py-2 text-[14px] hover:bg-[var(--card-hover-bg)] transition-colors"
                             style={{ color: 'var(--text-primary)' }}
                           >
@@ -451,10 +577,10 @@ export default function Header() {
                 </button>
               )}
 
-              {/* Fan Chat CTA - Primary */}
+              {/* Fan Chat CTA - Red bg, white text; hover: white bg, red text */}
               <Link
                 href="/fan-chat"
-                className="hidden md:flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded bg-[#C83803] text-white hover:bg-[#a52d02] transition-colors"
+                className="hidden md:flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded border border-black bg-[#bc0000] text-white hover:bg-white hover:text-[#bc0000] transition-colors"
                 style={{ fontFamily: "'Montserrat', sans-serif" }}
               >
                 <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -463,10 +589,10 @@ export default function Header() {
                 Fan Chat
               </Link>
 
-              {/* Ask AI CTA - Secondary */}
+              {/* Ask AI CTA - White bg, red text; hover: red bg, white text */}
               <Link
                 href="/ask-ai"
-                className="hidden md:flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded border border-[#bc0000] text-[#bc0000] hover:bg-[#bc0000] hover:text-white transition-colors"
+                className="hidden md:flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded border border-black bg-white text-[#bc0000] hover:bg-[#bc0000] hover:text-white transition-colors"
                 style={{ fontFamily: "'Montserrat', sans-serif" }}
               >
                 <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -488,7 +614,7 @@ export default function Header() {
               <Link
                 href="/fan-chat"
                 onClick={() => setMobileMenuOpen(false)}
-                className="flex-1 flex items-center justify-center gap-2 px-4 py-3 text-sm font-semibold rounded-lg bg-[#C83803] text-white"
+                className="flex-1 flex items-center justify-center gap-2 px-4 py-3 text-sm font-semibold rounded-lg border border-black bg-[#bc0000] text-white"
                 style={{ fontFamily: "'Montserrat', sans-serif" }}
               >
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -499,7 +625,7 @@ export default function Header() {
               <Link
                 href="/ask-ai"
                 onClick={() => setMobileMenuOpen(false)}
-                className="flex-1 flex items-center justify-center gap-2 px-4 py-3 text-sm font-semibold rounded-lg border-2 border-[#bc0000] text-[#bc0000]"
+                className="flex-1 flex items-center justify-center gap-2 px-4 py-3 text-sm font-semibold rounded-lg border border-black bg-white text-[#bc0000]"
                 style={{ fontFamily: "'Montserrat', sans-serif" }}
               >
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -615,6 +741,73 @@ export default function Header() {
                   </a>
                 ))}
               </div>
+            </div>
+
+            {/* Mobile Account Section */}
+            <div className="mt-4 pt-4" style={{ borderTop: '1px solid var(--border-color)' }}>
+              {isAuthenticated && user ? (
+                <>
+                  <div className="flex items-center gap-3 py-3" style={{ borderBottom: '1px solid var(--border-color)' }}>
+                    {user.avatar ? (
+                      <Image
+                        src={user.avatar}
+                        alt={user.name || 'User'}
+                        width={40}
+                        height={40}
+                        className="w-10 h-10 rounded-full object-cover"
+                        unoptimized
+                      />
+                    ) : (
+                      <div className="w-10 h-10 rounded-full bg-[#bc0000] flex items-center justify-center text-white font-bold">
+                        {(user.name || user.email)?.charAt(0).toUpperCase() || 'U'}
+                      </div>
+                    )}
+                    <div>
+                      <div className="font-semibold" style={{ color: 'var(--text-primary)' }}>
+                        {user.name || user.email?.split('@')[0] || 'User'}
+                      </div>
+                      <div className="text-xs" style={{ color: 'var(--text-muted)' }}>
+                        {user.email}
+                      </div>
+                    </div>
+                  </div>
+                  <Link
+                    href="/profile"
+                    onClick={() => setMobileMenuOpen(false)}
+                    className="flex items-center gap-3 py-3 text-[14px] hover:text-[var(--link-color)]"
+                    style={{ color: 'var(--text-primary)', borderBottom: '1px solid var(--border-color)' }}
+                  >
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                    </svg>
+                    My Profile
+                  </Link>
+                  <button
+                    onClick={() => {
+                      setMobileMenuOpen(false)
+                      signOut()
+                    }}
+                    className="flex items-center gap-3 py-3 text-[14px] w-full text-left text-red-500"
+                  >
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                    </svg>
+                    Sign Out
+                  </button>
+                </>
+              ) : (
+                <Link
+                  href="/login"
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="flex items-center justify-center gap-2 py-3 text-[14px] font-semibold rounded-lg bg-[#bc0000] text-white"
+                  style={{ fontFamily: "'Montserrat', sans-serif" }}
+                >
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1" />
+                  </svg>
+                  Login / Sign Up
+                </Link>
+              )}
             </div>
           </div>
         </div>

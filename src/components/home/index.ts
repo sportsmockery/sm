@@ -14,6 +14,7 @@
 // V10 Design System Components
 export { default as ChicagoLive } from './ChicagoLive'
 export { default as FanControlCenter } from './FanControlCenter'
+export { default as HomepageTeamBar } from './HomepageTeamBar'
 
 // SSR Homepage Components - guaranteed to render with fallback data
 export { InfoDeck } from './InfoDeck'

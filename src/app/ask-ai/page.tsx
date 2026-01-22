@@ -2,7 +2,17 @@
 
 import { useState, useRef, useEffect } from 'react'
 import Link from 'next/link'
+import dynamic from 'next/dynamic'
 import ReactMarkdown from 'react-markdown'
+import { useAuth } from '@/contexts/AuthContext'
+import { useSubscription } from '@/contexts/SubscriptionContext'
+import type { ChartData } from '@/components/ask-ai/DataVisualization'
+
+// Dynamically import DataVisualization to avoid SSR issues with Chart.js
+const DataVisualization = dynamic(
+  () => import('@/components/ask-ai/DataVisualization'),
+  { ssr: false }
+)
 
 interface Message {
   id: string
@@ -11,6 +21,8 @@ interface Message {
   timestamp: Date
   source?: string
   team?: string
+  chartData?: ChartData
+  bonusInsight?: string
 }
 
 const suggestedPrompts = [
@@ -29,6 +41,13 @@ export default function AskAIPage() {
   const [error, setError] = useState<string | null>(null)
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const messagesContainerRef = useRef<HTMLDivElement>(null)
+
+  const { isAuthenticated, loading: authLoading } = useAuth()
+  const { canAccess, isLoading: subLoading, features, openCheckout } = useSubscription()
+
+  // Check if user can access Ask AI (logged in + has feature access)
+  const hasAccess = canAccess('ask_ai')
+  const isPageLoading = authLoading || subLoading
 
   const scrollToBottom = () => {
     // Scroll within the container, not the whole page
@@ -90,6 +109,8 @@ export default function AskAIPage() {
         timestamp: new Date(),
         source: data.source,
         team: data.teamDisplayName,
+        chartData: data.chartData,
+        bonusInsight: data.bonusInsight,
       }
 
       setMessages((prev) => [...prev, aiMessage])
@@ -132,6 +153,109 @@ export default function AskAIPage() {
       <span className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium text-white ${badge.color}`}>
         {badge.label}
       </span>
+    )
+  }
+
+  // Loading state
+  if (isPageLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: 'var(--bg-page)' }}>
+        <div className="text-center">
+          <div className="w-12 h-12 border-4 border-[#bc0000] border-t-transparent rounded-full animate-spin mx-auto mb-4" />
+          <p style={{ color: 'var(--text-muted)' }}>Loading...</p>
+        </div>
+      </div>
+    )
+  }
+
+  // Not logged in - show login prompt
+  if (!isAuthenticated) {
+    return (
+      <div className="min-h-screen" style={{ backgroundColor: 'var(--bg-page)' }}>
+        <div className="max-w-lg mx-auto px-4 py-16">
+          <div
+            className="rounded-2xl p-8 text-center"
+            style={{ backgroundColor: 'var(--bg-surface)', border: '1px solid var(--border-color)' }}
+          >
+            <div className="w-20 h-20 rounded-full bg-gradient-to-br from-[#bc0000] to-[#ff4444] flex items-center justify-center mx-auto mb-6">
+              <svg className="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
+              </svg>
+            </div>
+            <h1
+              className="text-2xl font-bold mb-3"
+              style={{ fontFamily: "'Montserrat', sans-serif", color: 'var(--text-primary)' }}
+            >
+              Sign in to Ask Mockery AI
+            </h1>
+            <p className="text-sm mb-6" style={{ color: 'var(--text-muted)' }}>
+              Get instant answers about the Bears, Bulls, Cubs, White Sox, and Blackhawks with our AI-powered sports assistant.
+            </p>
+            <Link
+              href="/login?next=/ask-ai"
+              className="inline-flex items-center gap-2 px-6 py-3 bg-[#bc0000] text-white font-semibold rounded-xl hover:bg-[#a00000] transition-colors"
+            >
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+              </svg>
+              Sign In
+            </Link>
+            <p className="text-xs mt-4" style={{ color: 'var(--text-muted)' }}>
+              Don&apos;t have an account?{' '}
+              <Link href="/login?next=/ask-ai" className="text-[#bc0000] hover:underline">
+                Sign up free
+              </Link>
+            </p>
+          </div>
+        </div>
+      </div>
+    )
+  }
+
+  // Logged in but doesn't have access (free tier with limit reached or no access)
+  if (!hasAccess) {
+    return (
+      <div className="min-h-screen" style={{ backgroundColor: 'var(--bg-page)' }}>
+        <div className="max-w-lg mx-auto px-4 py-16">
+          <div
+            className="rounded-2xl p-8 text-center"
+            style={{ backgroundColor: 'var(--bg-surface)', border: '1px solid var(--border-color)' }}
+          >
+            <div className="w-20 h-20 rounded-full bg-gradient-to-br from-amber-500 to-orange-500 flex items-center justify-center mx-auto mb-6">
+              <svg className="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+              </svg>
+            </div>
+            <h1
+              className="text-2xl font-bold mb-3"
+              style={{ fontFamily: "'Montserrat', sans-serif", color: 'var(--text-primary)' }}
+            >
+              Upgrade to SM+ for Unlimited Access
+            </h1>
+            <p className="text-sm mb-6" style={{ color: 'var(--text-muted)' }}>
+              Free accounts get {features.ask_ai.limit} AI questions per day. Upgrade to SM+ for unlimited access to Ask Mockery AI, plus Fan Chat and ad-free browsing.
+            </p>
+            <button
+              onClick={() => openCheckout('sm_plus_monthly')}
+              className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-amber-500 to-orange-500 text-white font-semibold rounded-xl hover:from-amber-600 hover:to-orange-600 transition-colors"
+            >
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
+              </svg>
+              Upgrade to SM+ ($4.99/mo)
+            </button>
+            <p className="text-xs mt-4" style={{ color: 'var(--text-muted)' }}>
+              Or{' '}
+              <button
+                onClick={() => openCheckout('sm_plus_annual')}
+                className="text-[#bc0000] hover:underline"
+              >
+                save 33% with annual ($39.99/yr)
+              </button>
+            </p>
+          </div>
+        </div>
+      </div>
     )
   }
 
@@ -351,26 +475,34 @@ export default function AskAIPage() {
                           )}
                           <div className="text-sm leading-relaxed prose prose-sm max-w-none">
                             {message.role === 'assistant' ? (
-                              <ReactMarkdown
-                                components={{
-                                  table: ({ children }) => (
-                                    <div className="overflow-x-auto my-2">
-                                      <table className="min-w-full text-sm">{children}</table>
-                                    </div>
-                                  ),
-                                  th: ({ children }) => (
-                                    <th className="px-2 py-1 text-left font-semibold border-b" style={{ borderColor: 'var(--border-color)' }}>{children}</th>
-                                  ),
-                                  td: ({ children }) => (
-                                    <td className="px-2 py-1 border-b" style={{ borderColor: 'var(--border-color)' }}>{children}</td>
-                                  ),
-                                  strong: ({ children }) => (
-                                    <strong className="font-semibold">{children}</strong>
-                                  ),
-                                }}
-                              >
-                                {message.content}
-                              </ReactMarkdown>
+                              <>
+                                <ReactMarkdown
+                                  components={{
+                                    table: ({ children }) => (
+                                      <div className="overflow-x-auto my-2">
+                                        <table className="min-w-full text-sm">{children}</table>
+                                      </div>
+                                    ),
+                                    th: ({ children }) => (
+                                      <th className="px-2 py-1 text-left font-semibold border-b" style={{ borderColor: 'var(--border-color)' }}>{children}</th>
+                                    ),
+                                    td: ({ children }) => (
+                                      <td className="px-2 py-1 border-b" style={{ borderColor: 'var(--border-color)' }}>{children}</td>
+                                    ),
+                                    strong: ({ children }) => (
+                                      <strong className="font-semibold">{children}</strong>
+                                    ),
+                                  }}
+                                >
+                                  {message.content}
+                                </ReactMarkdown>
+                                {message.chartData && (
+                                  <DataVisualization
+                                    chartData={message.chartData}
+                                    bonusInsight={message.bonusInsight}
+                                  />
+                                )}
+                              </>
                             ) : (
                               <p>{message.content}</p>
                             )}

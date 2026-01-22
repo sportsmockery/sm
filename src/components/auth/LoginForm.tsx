@@ -23,7 +23,7 @@ export default function LoginForm({ redirectTo = '/admin' }: LoginFormProps) {
     setError('')
     setLoading(true)
 
-    const { error } = await signIn(email, password)
+    const { error } = await signIn(email, password, rememberMe)
 
     if (error) {
       setError(error)

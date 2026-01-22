@@ -1,5 +1,4 @@
 import { NextResponse } from 'next/server'
-import { CHICAGO_TEAMS, ESPN_TEAM_IDS, fetchTeamRecord, fetchNextGame } from '@/lib/team-config'
 import { datalabAdmin } from '@/lib/supabase-datalab'
 
 // Revalidate every 5 minutes during non-game times
@@ -17,8 +16,65 @@ const ROUTE_TO_TEAM: Record<string, TeamKey> = {
   'blackhawks': 'blackhawks',
 }
 
+// Team configuration for DataLab queries
+const TEAM_CONFIG: Record<TeamKey, {
+  gamesTable: string
+  scoreCol: string
+  oppScoreCol: string
+  isHomeCol: string
+  winCol: string
+  league: 'nfl' | 'nba' | 'nhl' | 'mlb'
+  logoBaseUrl: string
+}> = {
+  bears: {
+    gamesTable: 'bears_games_master',
+    scoreCol: 'bears_score',
+    oppScoreCol: 'opponent_score',
+    isHomeCol: 'is_bears_home',
+    winCol: 'bears_win',
+    league: 'nfl',
+    logoBaseUrl: 'https://a.espncdn.com/i/teamlogos/nfl/500/',
+  },
+  bulls: {
+    gamesTable: 'bulls_games_master',
+    scoreCol: 'bulls_score',
+    oppScoreCol: 'opponent_score',
+    isHomeCol: 'is_bulls_home',
+    winCol: 'bulls_win',
+    league: 'nba',
+    logoBaseUrl: 'https://a.espncdn.com/i/teamlogos/nba/500/',
+  },
+  blackhawks: {
+    gamesTable: 'blackhawks_games_master',
+    scoreCol: 'blackhawks_score',
+    oppScoreCol: 'opponent_score',
+    isHomeCol: 'is_blackhawks_home',
+    winCol: 'blackhawks_win',
+    league: 'nhl',
+    logoBaseUrl: 'https://a.espncdn.com/i/teamlogos/nhl/500/',
+  },
+  cubs: {
+    gamesTable: 'cubs_games_master',
+    scoreCol: 'cubs_score',
+    oppScoreCol: 'opponent_score',
+    isHomeCol: 'is_cubs_home',
+    winCol: 'cubs_win',
+    league: 'mlb',
+    logoBaseUrl: 'https://a.espncdn.com/i/teamlogos/mlb/500/',
+  },
+  whitesox: {
+    gamesTable: 'whitesox_games_master',
+    scoreCol: 'whitesox_score',
+    oppScoreCol: 'opponent_score',
+    isHomeCol: 'is_whitesox_home',
+    winCol: 'whitesox_win',
+    league: 'mlb',
+    logoBaseUrl: 'https://a.espncdn.com/i/teamlogos/mlb/500/',
+  },
+}
+
 // GET /api/teams/[teamKey]/ticker - Lightweight endpoint for team sticky bars
-// Returns: record, next game, last game result
+// Returns: record, next game, last game result (all from DataLab)
 export async function GET(
   request: Request,
   { params }: { params: Promise<{ teamKey: string }> }
@@ -33,16 +89,205 @@ export async function GET(
     )
   }
 
-  // For Bears, use the dedicated datalab tables for accurate data
+  // For Bears, use the dedicated bears_season_record table (more detailed)
   if (teamKey === 'bears') {
     return getBearsTickerFromDatalab()
   }
 
-  // For other teams, use ESPN API directly
-  return getTeamTickerFromESPN(teamKey)
+  // For all other teams, use generic DataLab ticker
+  return getTeamTickerFromDatalab(teamKey)
 }
 
-// Get Bears ticker from datalab (existing implementation)
+// Generic DataLab ticker for Bulls, Blackhawks, Cubs, White Sox
+async function getTeamTickerFromDatalab(teamKey: TeamKey) {
+  try {
+    if (!datalabAdmin) {
+      return NextResponse.json({
+        record: '--',
+        nextGame: null,
+        lastGame: null,
+        error: 'Datalab not configured',
+      })
+    }
+
+    const config = TEAM_CONFIG[teamKey]
+    const today = new Date().toISOString().split('T')[0]
+    const currentSeason = new Date().getMonth() >= 9 ? new Date().getFullYear() + 1 : new Date().getFullYear()
+
+    // Get current season record by counting wins/losses
+    const { data: seasonGames, error: recordError } = await datalabAdmin
+      .from(config.gamesTable)
+      .select('*')
+      .eq('season', currentSeason)
+      .not(config.winCol, 'is', null)
+
+    if (recordError) {
+      console.error(`${teamKey} season record fetch error:`, recordError)
+    }
+
+    // Calculate record
+    let wins = 0
+    let losses = 0
+    let otLosses = 0 // For NHL
+    if (seasonGames && seasonGames.length > 0) {
+      seasonGames.forEach((game: Record<string, unknown>) => {
+        if (game[config.winCol] === true) {
+          wins++
+        } else if (game[config.winCol] === false) {
+          // Check for OT loss in NHL
+          if (config.league === 'nhl' && (game.is_overtime || game.is_shootout)) {
+            otLosses++
+          } else {
+            losses++
+          }
+        }
+      })
+    }
+
+    // Format record based on league
+    let record: string
+    if (config.league === 'nhl' && otLosses > 0) {
+      record = `${wins}-${losses}-${otLosses}`
+    } else {
+      record = `${wins}-${losses}`
+    }
+
+    // Get next game (first game on or after today without score)
+    const { data: nextGameData, error: nextError } = await datalabAdmin
+      .from(config.gamesTable)
+      .select('*')
+      .gte('game_date', today)
+      .is(config.scoreCol, null)
+      .order('game_date', { ascending: true })
+      .limit(1)
+      .single()
+
+    if (nextError && nextError.code !== 'PGRST116') {
+      console.error(`${teamKey} next game fetch error:`, nextError)
+    }
+
+    let nextGame = null
+    if (nextGameData) {
+      const gameDate = new Date(nextGameData.game_date + 'T12:00:00Z')
+      const isToday = nextGameData.game_date === today
+      const dayName = isToday ? 'Today' : gameDate.toLocaleDateString('en-US', { weekday: 'short', timeZone: 'America/Chicago' })
+      const timeStr = nextGameData.game_time ? formatTime(nextGameData.game_time) : 'TBD'
+      const opponentAbbrev = nextGameData.opponent || 'TBD'
+      const opponentLogo = getOpponentLogo(opponentAbbrev, config.league, config.logoBaseUrl)
+
+      nextGame = {
+        opponent: opponentAbbrev,
+        opponentAbbrev: opponentAbbrev,
+        opponentFull: nextGameData.opponent_full_name || opponentAbbrev,
+        opponentLogo,
+        date: dayName,
+        time: timeStr,
+        isHome: nextGameData[config.isHomeCol] ?? true,
+        isToday,
+        stadium: nextGameData.arena || nextGameData.stadium,
+      }
+    }
+
+    // Get last completed game
+    const { data: lastGameData, error: lastError } = await datalabAdmin
+      .from(config.gamesTable)
+      .select('*')
+      .lt('game_date', today)
+      .not(config.winCol, 'is', null)
+      .order('game_date', { ascending: false })
+      .limit(1)
+      .single()
+
+    if (lastError && lastError.code !== 'PGRST116') {
+      console.error(`${teamKey} last game fetch error:`, lastError)
+    }
+
+    let lastGame = null
+    if (lastGameData) {
+      const teamScore = Number(lastGameData[config.scoreCol]) || 0
+      const oppScore = Number(lastGameData[config.oppScoreCol]) || 0
+      const didWin = lastGameData[config.winCol] === true
+      const opponentAbbrev = lastGameData.opponent || 'OPP'
+      const opponentLogo = getOpponentLogo(opponentAbbrev, config.league, config.logoBaseUrl)
+
+      // Determine result (W, L, or OTL for NHL)
+      let result = didWin ? 'W' : 'L'
+      if (config.league === 'nhl' && !didWin && (lastGameData.is_overtime || lastGameData.is_shootout)) {
+        result = 'OTL'
+      }
+
+      lastGame = {
+        opponent: opponentAbbrev,
+        opponentFull: lastGameData.opponent_full_name || opponentAbbrev,
+        opponentLogo,
+        result,
+        score: `${teamScore}-${oppScore}`,
+        date: new Date(lastGameData.game_date).toLocaleDateString('en-US', {
+          month: 'short',
+          day: 'numeric',
+        }),
+      }
+    }
+
+    return NextResponse.json({
+      record,
+      nextGame,
+      lastGame,
+      liveGame: null, // TODO: Add live game detection
+      updatedAt: new Date().toISOString(),
+    })
+  } catch (error) {
+    console.error(`${teamKey} ticker API error:`, error)
+    return NextResponse.json({
+      record: '--',
+      nextGame: null,
+      lastGame: null,
+      error: 'Internal server error',
+    })
+  }
+}
+
+// Get opponent logo URL from abbreviation
+function getOpponentLogo(abbrev: string, league: string, baseUrl: string): string {
+  // Normalize abbreviation for logo URLs
+  const logoAbbrevMap: Record<string, Record<string, string>> = {
+    nfl: {
+      'LA': 'lar', 'LAR': 'lar', 'LAC': 'lac', 'SF': 'sf', 'SFO': 'sf',
+      'GB': 'gb', 'GNB': 'gb', 'NE': 'ne', 'NWE': 'ne', 'TB': 'tb',
+      'TAM': 'tb', 'KC': 'kc', 'KAN': 'kc', 'NO': 'no', 'NOR': 'no',
+      'LV': 'lv', 'LVR': 'lv',
+    },
+    nhl: {
+      'LA': 'la', 'LAK': 'la', 'SJ': 'sj', 'SJS': 'sj', 'TB': 'tb',
+      'TBL': 'tb', 'NJ': 'njd', 'NJD': 'njd', 'NY': 'nyr', 'NYR': 'nyr',
+      'NYI': 'nyi', 'VGK': 'vgk', 'VAN': 'van', 'WPG': 'wpg',
+    },
+    nba: {
+      'LA': 'lal', 'LAL': 'lal', 'LAC': 'lac', 'GS': 'gs', 'GSW': 'gs',
+      'NY': 'ny', 'NYK': 'ny', 'SA': 'sas', 'SAS': 'sas', 'NO': 'no',
+      'NOP': 'no', 'OKC': 'okc',
+    },
+    mlb: {
+      'LA': 'lad', 'LAD': 'lad', 'LAA': 'laa', 'SF': 'sf', 'SFG': 'sf',
+      'SD': 'sd', 'SDP': 'sd', 'TB': 'tb', 'TBR': 'tb', 'KC': 'kc',
+      'KCR': 'kc', 'STL': 'stl', 'CWS': 'chw', 'CHW': 'chw',
+    },
+  }
+
+  const leagueMap = logoAbbrevMap[league] || {}
+  const logoCode = leagueMap[abbrev.toUpperCase()] || abbrev.toLowerCase()
+  return `${baseUrl}${logoCode}.png`
+}
+
+// Format time from 24h to 12h format
+function formatTime(timeStr: string): string {
+  const [hours, minutes] = timeStr.split(':').map(Number)
+  const hour12 = hours % 12 || 12
+  const ampm = hours >= 12 ? 'PM' : 'AM'
+  return `${hour12}:${minutes.toString().padStart(2, '0')} ${ampm}`
+}
+
+// Get Bears ticker from datalab (uses bears_season_record for detailed info)
 async function getBearsTickerFromDatalab() {
   try {
     if (!datalabAdmin) {
@@ -160,9 +405,11 @@ async function getBearsTickerFromDatalab() {
 
     let lastGame = null
     if (lastGameData) {
+      const opponentAbbrev = formatOpponentAbbrev(lastGameData.opponent || 'OPP')
       lastGame = {
-        opponent: lastGameData.opponent,
+        opponent: opponentAbbrev,
         opponentFull: lastGameData.opponent_full_name,
+        opponentLogo: `https://a.espncdn.com/i/teamlogos/nfl/500/${getLogoCode(opponentAbbrev)}.png`,
         result: lastGameData.bears_win ? 'W' : 'L',
         score: `${lastGameData.bears_score}-${lastGameData.opponent_score}`,
       }
@@ -184,187 +431,6 @@ async function getBearsTickerFromDatalab() {
       error: 'Internal server error',
     })
   }
-}
-
-// Get team ticker from ESPN API (for non-Bears teams)
-async function getTeamTickerFromESPN(teamKey: TeamKey) {
-  try {
-    const teamInfo = CHICAGO_TEAMS[teamKey]
-    const espnConfig = ESPN_TEAM_IDS[teamKey as keyof typeof ESPN_TEAM_IDS]
-
-    if (!teamInfo || !espnConfig) {
-      return NextResponse.json({
-        record: '--',
-        nextGame: null,
-        lastGame: null,
-        error: 'Team not found',
-      })
-    }
-
-    // Fetch team data from ESPN
-    const [record, nextGameInfo] = await Promise.all([
-      fetchTeamRecord(teamKey),
-      fetchNextGame(teamKey),
-    ])
-
-    // Format record based on league
-    let recordStr = '--'
-    if (record) {
-      if (espnConfig.league === 'nhl' && record.otLosses) {
-        recordStr = `${record.wins}-${record.losses}-${record.otLosses}`
-      } else if (record.ties !== undefined && record.ties > 0) {
-        recordStr = `${record.wins}-${record.losses}-${record.ties}`
-      } else {
-        recordStr = `${record.wins}-${record.losses}`
-      }
-    }
-
-    // Format next game
-    let nextGame = null
-    if (nextGameInfo) {
-      // Extract opponent abbreviation from the opponent name
-      const opponentAbbrev = getOpponentAbbrevFromName(nextGameInfo.opponent, espnConfig.league)
-
-      nextGame = {
-        opponent: nextGameInfo.opponent,
-        opponentAbbrev,
-        opponentFull: nextGameInfo.opponent,
-        opponentLogo: nextGameInfo.opponentLogo,
-        date: nextGameInfo.date.split(',')[0], // e.g., "Wed"
-        time: nextGameInfo.time,
-        isHome: nextGameInfo.isHome,
-        stadium: nextGameInfo.venue,
-      }
-    }
-
-    // Fetch last game from ESPN scoreboard
-    const lastGame = await fetchLastGame(teamKey, espnConfig)
-
-    return NextResponse.json({
-      record: recordStr,
-      nextGame,
-      lastGame,
-      liveGame: null, // TODO: Add live game detection
-      updatedAt: new Date().toISOString(),
-    })
-  } catch (error) {
-    console.error(`${teamKey} ticker API error:`, error)
-    return NextResponse.json({
-      record: '--',
-      nextGame: null,
-      lastGame: null,
-      error: 'Internal server error',
-    })
-  }
-}
-
-// Fetch last completed game from ESPN
-async function fetchLastGame(teamKey: TeamKey, espnConfig: { sport: string; league: string; teamId: string }) {
-  try {
-    // Get the team's schedule
-    const url = `https://site.api.espn.com/apis/site/v2/sports/${espnConfig.sport}/${espnConfig.league}/teams/${espnConfig.teamId}/schedule`
-    const response = await fetch(url, { cache: 'force-cache' })
-
-    if (!response.ok) return null
-
-    const data = await response.json()
-    const events = data.events || []
-    const now = new Date()
-
-    // Find the most recent completed game
-    const completedGames = events
-      .filter((event: any) => {
-        const eventDate = new Date(event.date)
-        return eventDate < now && event.competitions?.[0]?.status?.type?.completed
-      })
-      .sort((a: any, b: any) => new Date(b.date).getTime() - new Date(a.date).getTime())
-
-    if (completedGames.length === 0) return null
-
-    const lastGameEvent = completedGames[0]
-    const competition = lastGameEvent.competitions?.[0]
-
-    if (!competition) return null
-
-    // Find our team and opponent
-    const teamCompetitor = competition.competitors?.find(
-      (c: any) => c.team?.id === espnConfig.teamId
-    )
-    const opponentCompetitor = competition.competitors?.find(
-      (c: any) => c.team?.id !== espnConfig.teamId
-    )
-
-    if (!teamCompetitor || !opponentCompetitor) return null
-
-    const teamScore = parseInt(teamCompetitor.score) || 0
-    const opponentScore = parseInt(opponentCompetitor.score) || 0
-    const didWin = teamScore > opponentScore
-
-    return {
-      opponent: opponentCompetitor.team?.abbreviation || opponentCompetitor.team?.shortDisplayName || 'OPP',
-      opponentFull: opponentCompetitor.team?.displayName,
-      opponentLogo: opponentCompetitor.team?.logo,
-      result: didWin ? 'W' : 'L',
-      score: `${teamScore}-${opponentScore}`,
-      date: new Date(lastGameEvent.date).toLocaleDateString('en-US', {
-        month: 'short',
-        day: 'numeric',
-      }),
-    }
-  } catch (error) {
-    console.error(`Error fetching last game for ${teamKey}:`, error)
-    return null
-  }
-}
-
-// Get opponent abbreviation from full name
-function getOpponentAbbrevFromName(name: string, league: string): string {
-  // Common team name to abbreviation mappings by league
-  const mappings: Record<string, Record<string, string>> = {
-    nba: {
-      'Hawks': 'ATL', 'Celtics': 'BOS', 'Nets': 'BKN', 'Hornets': 'CHA',
-      'Bulls': 'CHI', 'Cavaliers': 'CLE', 'Mavericks': 'DAL', 'Nuggets': 'DEN',
-      'Pistons': 'DET', 'Warriors': 'GSW', 'Rockets': 'HOU', 'Pacers': 'IND',
-      'Clippers': 'LAC', 'Lakers': 'LAL', 'Grizzlies': 'MEM', 'Heat': 'MIA',
-      'Bucks': 'MIL', 'Timberwolves': 'MIN', 'Pelicans': 'NOP', 'Knicks': 'NYK',
-      'Thunder': 'OKC', 'Magic': 'ORL', '76ers': 'PHI', 'Suns': 'PHX',
-      'Trail Blazers': 'POR', 'Blazers': 'POR', 'Kings': 'SAC', 'Spurs': 'SAS',
-      'Raptors': 'TOR', 'Jazz': 'UTA', 'Wizards': 'WAS',
-    },
-    mlb: {
-      'Diamondbacks': 'ARI', 'Braves': 'ATL', 'Orioles': 'BAL', 'Red Sox': 'BOS',
-      'Cubs': 'CHC', 'White Sox': 'CWS', 'Reds': 'CIN', 'Guardians': 'CLE',
-      'Rockies': 'COL', 'Tigers': 'DET', 'Astros': 'HOU', 'Royals': 'KC',
-      'Angels': 'LAA', 'Dodgers': 'LAD', 'Marlins': 'MIA', 'Brewers': 'MIL',
-      'Twins': 'MIN', 'Mets': 'NYM', 'Yankees': 'NYY', 'Athletics': 'OAK',
-      'Phillies': 'PHI', 'Pirates': 'PIT', 'Padres': 'SD', 'Giants': 'SF',
-      'Mariners': 'SEA', 'Cardinals': 'STL', 'Rays': 'TB', 'Rangers': 'TEX',
-      'Blue Jays': 'TOR', 'Nationals': 'WSH',
-    },
-    nhl: {
-      'Ducks': 'ANA', 'Coyotes': 'ARI', 'Bruins': 'BOS', 'Sabres': 'BUF',
-      'Flames': 'CGY', 'Hurricanes': 'CAR', 'Blackhawks': 'CHI', 'Avalanche': 'COL',
-      'Blue Jackets': 'CBJ', 'Stars': 'DAL', 'Red Wings': 'DET', 'Oilers': 'EDM',
-      'Panthers': 'FLA', 'Kings': 'LA', 'Wild': 'MIN', 'Canadiens': 'MTL',
-      'Predators': 'NSH', 'Devils': 'NJ', 'Islanders': 'NYI', 'Rangers': 'NYR',
-      'Senators': 'OTT', 'Flyers': 'PHI', 'Penguins': 'PIT', 'Sharks': 'SJ',
-      'Kraken': 'SEA', 'Blues': 'STL', 'Lightning': 'TB', 'Maple Leafs': 'TOR',
-      'Canucks': 'VAN', 'Golden Knights': 'VGK', 'Capitals': 'WAS', 'Jets': 'WPG',
-      'Utah Hockey Club': 'UTA',
-    },
-  }
-
-  const leagueMappings = mappings[league] || {}
-
-  // Try to find matching team name
-  for (const [teamName, abbrev] of Object.entries(leagueMappings)) {
-    if (name.toLowerCase().includes(teamName.toLowerCase())) {
-      return abbrev
-    }
-  }
-
-  // Return first 3 letters as fallback
-  return name.substring(0, 3).toUpperCase()
 }
 
 // Helper functions

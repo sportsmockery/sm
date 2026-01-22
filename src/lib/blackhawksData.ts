@@ -1,0 +1,779 @@
+/**
+ * Blackhawks Data Layer
+ *
+ * This module provides helper functions for Blackhawks data access.
+ * Data is pulled from DataLab Supabase ({blackhawks}_* tables).
+ *
+ * All page-level components should use these helpers, never query databases directly.
+ */
+
+import { datalabClient } from './supabase-datalab'
+
+// =============================================================================
+// TYPE DEFINITIONS
+// =============================================================================
+
+export type PositionGroup = 'forwards' | 'defensemen' | 'goalies'
+
+export interface BlackhawksPlayer {
+  playerId: string
+  internalId: number
+  slug: string
+  fullName: string
+  firstName: string
+  lastName: string
+  jerseyNumber: number | null
+  position: string
+  positionGroup: PositionGroup
+  height: string | null
+  weight: number | null
+  age: number | null
+  experience: string | null
+  college: string | null
+  birthCountry: string | null
+  headshotUrl: string | null
+  status: string | null
+}
+
+export interface PlayerSeasonStats {
+  season: number
+  gamesPlayed: number
+  // Skater stats
+  goals: number | null
+  assists: number | null
+  points: number | null
+  plusMinus: number | null
+  pim: number | null
+  shots: number | null
+  shotPct: number | null
+  hits: number | null
+  blockedShots: number | null
+  toi: string | null
+  // Goalie stats
+  wins: number | null
+  losses: number | null
+  otLosses: number | null
+  saves: number | null
+  goalsAgainst: number | null
+  savePct: number | null
+  gaa: number | null
+  shutouts: number | null
+}
+
+export interface PlayerGameLogEntry {
+  gameId: string
+  date: string
+  season: number
+  opponent: string
+  isHome: boolean
+  result: 'W' | 'L' | 'OTL' | null
+  blackhawksScore: number | null
+  oppScore: number | null
+  goals: number | null
+  assists: number | null
+  points: number | null
+  plusMinus: number | null
+  pim: number | null
+  shots: number | null
+  toi: string | null
+  // Goalie stats
+  saves: number | null
+  goalsAgainst: number | null
+}
+
+export interface PlayerProfile {
+  player: BlackhawksPlayer
+  seasons: PlayerSeasonStats[]
+  currentSeason: PlayerSeasonStats | null
+  gameLog: PlayerGameLogEntry[]
+}
+
+export interface BlackhawksGame {
+  gameId: string
+  season: number
+  date: string
+  time: string | null
+  dayOfWeek: string
+  opponent: string
+  opponentFullName: string | null
+  opponentLogo: string | null
+  homeAway: 'home' | 'away'
+  status: 'scheduled' | 'in_progress' | 'final'
+  blackhawksScore: number | null
+  oppScore: number | null
+  result: 'W' | 'L' | 'OTL' | null
+  arena: string | null
+  tv: string | null
+  overtime: boolean
+  shootout: boolean
+}
+
+export interface BlackhawksTeamStats {
+  season: number
+  record: string
+  wins: number
+  losses: number
+  otLosses: number
+  points: number
+  goalsFor: number
+  goalsAgainst: number
+  gfpg: number
+  gapg: number
+  ppPct: number | null
+  pkPct: number | null
+}
+
+export interface BlackhawksLeaderboard {
+  goals: LeaderboardEntry[]
+  assists: LeaderboardEntry[]
+  points: LeaderboardEntry[]
+  goaltending: LeaderboardEntry[]
+}
+
+export interface LeaderboardEntry {
+  player: BlackhawksPlayer
+  primaryStat: number
+  primaryLabel: string
+  secondaryStat: number | null
+  secondaryLabel: string | null
+  tertiaryStat: number | null
+  tertiaryLabel: string | null
+}
+
+export interface BlackhawksStats {
+  team: BlackhawksTeamStats
+  leaderboards: BlackhawksLeaderboard
+}
+
+// NHL team abbreviation to logo mapping
+const NHL_TEAM_ABBREVS: Record<string, string> = {
+  ANA: 'ana', ARI: 'ari', BOS: 'bos', BUF: 'buf', CGY: 'cgy',
+  CAR: 'car', CHI: 'chi', COL: 'col', CBJ: 'cbj', DAL: 'dal',
+  DET: 'det', EDM: 'edm', FLA: 'fla', LAK: 'la', MIN: 'min',
+  MTL: 'mtl', NSH: 'nsh', NJD: 'njd', NYI: 'nyi', NYR: 'nyr',
+  OTT: 'ott', PHI: 'phi', PIT: 'pit', SJS: 'sj', SEA: 'sea',
+  STL: 'stl', TBL: 'tb', TOR: 'tor', UTA: 'utah', VAN: 'van',
+  VGK: 'vgk', WSH: 'wsh', WPG: 'wpg',
+}
+
+function getTeamLogo(abbrev: string): string {
+  const code = NHL_TEAM_ABBREVS[abbrev] || abbrev.toLowerCase()
+  return `https://a.espncdn.com/i/teamlogos/nhl/500/${code}.png`
+}
+
+// Position group mapping for NHL
+function getPositionGroup(position: string): PositionGroup {
+  const pos = position.toUpperCase()
+  if (pos === 'G') return 'goalies'
+  if (pos === 'D') return 'defensemen'
+  return 'forwards' // C, LW, RW, F
+}
+
+const POSITION_GROUP_NAMES: Record<PositionGroup, string> = {
+  forwards: 'Forwards',
+  defensemen: 'Defensemen',
+  goalies: 'Goaltenders',
+}
+
+export { POSITION_GROUP_NAMES }
+
+function generateSlug(name: string): string {
+  if (!name) return ''
+  return name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '')
+}
+
+// =============================================================================
+// HELPER FUNCTIONS - READ FROM DATALAB
+// =============================================================================
+
+/**
+ * Get all Blackhawks players from DataLab
+ * Filters by is_active = true
+ */
+export async function getBlackhawksPlayers(): Promise<BlackhawksPlayer[]> {
+  if (!datalabClient) {
+    console.error('DataLab not configured')
+    return []
+  }
+
+  const { data, error } = await datalabClient
+    .from('blackhawks_players')
+    .select('*')
+    .eq('is_active', true)
+    .order('position')
+    .order('name')
+
+  if (error) {
+    console.error('DataLab fetch error:', error)
+    return []
+  }
+
+  return transformPlayers(data || [])
+}
+
+function transformPlayers(data: any[]): BlackhawksPlayer[] {
+  return data.map((p: any) => {
+    const position = p.position || 'F'
+    const positionGroup = getPositionGroup(position)
+
+    // Handle various height column formats
+    let heightDisplay: string | null = null
+    if (typeof p.height === 'string' && p.height) {
+      heightDisplay = p.height
+    } else if (p.height_inches) {
+      heightDisplay = `${Math.floor(p.height_inches / 12)}'${p.height_inches % 12}"`
+    }
+
+    // Handle various experience column names
+    const yearsExp = p.years_pro ?? p.years_exp ?? p.experience
+
+    return {
+      playerId: String(p.player_id || p.espn_id || p.id),
+      internalId: p.id,
+      slug: p.slug || generateSlug(p.name || p.full_name),
+      fullName: p.name || p.full_name,
+      firstName: p.first_name || (p.name || p.full_name)?.split(' ')[0] || '',
+      lastName: p.last_name || (p.name || p.full_name)?.split(' ').slice(1).join(' ') || '',
+      jerseyNumber: p.jersey_number,
+      position,
+      positionGroup,
+      height: heightDisplay,
+      weight: p.weight_lbs || p.weight,
+      age: p.age,
+      experience: yearsExp !== null && yearsExp !== undefined
+        ? (yearsExp === 0 ? 'R' : `${yearsExp} yr${yearsExp !== 1 ? 's' : ''}`)
+        : null,
+      college: p.college || null,
+      birthCountry: p.birth_country,
+      headshotUrl: p.headshot_url,
+      status: p.status,
+    }
+  }).sort((a, b) => parseInt(a.jerseyNumber?.toString() || '99') - parseInt(b.jerseyNumber?.toString() || '99'))
+}
+
+/**
+ * Get Blackhawks roster grouped by position
+ */
+export async function getBlackhawksRosterGrouped(): Promise<Record<PositionGroup, BlackhawksPlayer[]>> {
+  const players = await getBlackhawksPlayers()
+
+  const grouped: Record<PositionGroup, BlackhawksPlayer[]> = {
+    forwards: [],
+    defensemen: [],
+    goalies: [],
+  }
+
+  players.forEach(player => {
+    grouped[player.positionGroup].push(player)
+  })
+
+  // Sort each group by jersey number
+  Object.keys(grouped).forEach(key => {
+    grouped[key as PositionGroup].sort((a, b) =>
+      parseInt(a.jerseyNumber?.toString() || '99') - parseInt(b.jerseyNumber?.toString() || '99')
+    )
+  })
+
+  return grouped
+}
+
+/**
+ * Get a single player profile with stats and game log
+ */
+export async function getPlayerProfile(slug: string): Promise<PlayerProfile | null> {
+  const players = await getBlackhawksPlayers()
+  const player = players.find(p => p.slug === slug)
+
+  if (!player) return null
+
+  const seasons = await getPlayerSeasonStats(player.internalId, player.positionGroup === 'goalies')
+  const gameLog = await getPlayerGameLog(player.internalId)
+
+  const currentYear = getCurrentSeason()
+  const currentSeason = seasons.find(s => s.season === currentYear) ||
+                        seasons.find(s => s.season === currentYear - 1) ||
+                        seasons[0] || null
+
+  return {
+    player,
+    seasons,
+    currentSeason,
+    gameLog,
+  }
+}
+
+async function getPlayerSeasonStats(internalId: number, isGoalie: boolean): Promise<PlayerSeasonStats[]> {
+  if (!datalabClient) return []
+
+  const { data, error } = await datalabClient
+    .from('blackhawks_player_game_stats')
+    .select(`
+      season,
+      goals,
+      assists,
+      points,
+      plus_minus,
+      pim,
+      shots,
+      hits,
+      blocked_shots,
+      toi,
+      saves,
+      goals_against,
+      shots_against
+    `)
+    .eq('player_id', internalId)
+    .eq('season', getCurrentSeason())
+
+  if (error || !data || data.length === 0) return []
+
+  // Aggregate all game stats into season totals
+  const totals = data.reduce((acc: any, game: any) => {
+    acc.gamesPlayed = (acc.gamesPlayed || 0) + 1
+    acc.goals = (acc.goals || 0) + (game.goals || 0)
+    acc.assists = (acc.assists || 0) + (game.assists || 0)
+    acc.points = (acc.points || 0) + (game.points || 0)
+    acc.plusMinus = (acc.plusMinus || 0) + (game.plus_minus || 0)
+    acc.pim = (acc.pim || 0) + (game.pim || 0)
+    acc.shots = (acc.shots || 0) + (game.shots || 0)
+    acc.hits = (acc.hits || 0) + (game.hits || 0)
+    acc.blockedShots = (acc.blockedShots || 0) + (game.blocked_shots || 0)
+    // Goalie stats
+    acc.saves = (acc.saves || 0) + (game.saves || 0)
+    acc.goalsAgainst = (acc.goalsAgainst || 0) + (game.goals_against || 0)
+    acc.shotsAgainst = (acc.shotsAgainst || 0) + (game.shots_against || 0)
+    return acc
+  }, {})
+
+  return [{
+    season: getCurrentSeason(),
+    gamesPlayed: totals.gamesPlayed || 0,
+    goals: totals.goals || null,
+    assists: totals.assists || null,
+    points: totals.points || null,
+    plusMinus: totals.plusMinus || null,
+    pim: totals.pim || null,
+    shots: totals.shots || null,
+    shotPct: totals.shots > 0 ? Math.round((totals.goals / totals.shots) * 1000) / 10 : null,
+    hits: totals.hits || null,
+    blockedShots: totals.blockedShots || null,
+    toi: null,
+    // Goalie stats
+    wins: null, // Calculate from game results if needed
+    losses: null,
+    otLosses: null,
+    saves: totals.saves || null,
+    goalsAgainst: totals.goalsAgainst || null,
+    savePct: totals.shotsAgainst > 0 ? Math.round((totals.saves / totals.shotsAgainst) * 1000) / 1000 : null,
+    gaa: totals.gamesPlayed > 0 && totals.goalsAgainst ? Math.round((totals.goalsAgainst / totals.gamesPlayed) * 100) / 100 : null,
+    shutouts: null,
+  }]
+}
+
+async function getPlayerGameLog(internalId: number): Promise<PlayerGameLogEntry[]> {
+  if (!datalabClient) return []
+
+  const { data, error } = await datalabClient
+    .from('blackhawks_player_game_stats')
+    .select(`
+      player_id,
+      game_id,
+      goals,
+      assists,
+      points,
+      plus_minus,
+      pim,
+      shots,
+      toi,
+      saves,
+      goals_against,
+      blackhawks_games_master!inner(
+        game_date,
+        opponent,
+        opponent_full_name,
+        is_blackhawks_home,
+        blackhawks_score,
+        opponent_score,
+        blackhawks_win,
+        overtime,
+        shootout,
+        season
+      )
+    `)
+    .eq('player_id', internalId)
+    .eq('season', getCurrentSeason())
+    .order('game_date', { ascending: false })
+    .limit(20)
+
+  if (error || !data) return []
+
+  return data.map((s: any) => {
+    const game = s.blackhawks_games_master || {}
+    const isPlayed = (game.blackhawks_score > 0) || (game.opponent_score > 0)
+
+    let result: 'W' | 'L' | 'OTL' | null = null
+    if (isPlayed) {
+      if (game.blackhawks_win) {
+        result = 'W'
+      } else if (game.overtime || game.shootout) {
+        result = 'OTL'
+      } else {
+        result = 'L'
+      }
+    }
+
+    return {
+      gameId: s.game_id,
+      date: game.game_date || '',
+      season: game.season || getCurrentSeason(),
+      opponent: game.opponent || '',
+      isHome: game.is_blackhawks_home ?? true,
+      result,
+      blackhawksScore: game.blackhawks_score,
+      oppScore: game.opponent_score,
+      goals: s.goals,
+      assists: s.assists,
+      points: s.points,
+      plusMinus: s.plus_minus,
+      pim: s.pim,
+      shots: s.shots,
+      toi: s.toi,
+      saves: s.saves,
+      goalsAgainst: s.goals_against,
+    }
+  })
+}
+
+/**
+ * Get Blackhawks schedule for a season
+ */
+export async function getBlackhawksSchedule(season?: number): Promise<BlackhawksGame[]> {
+  const targetSeason = season || getCurrentSeason()
+
+  if (!datalabClient) return []
+
+  const { data, error } = await datalabClient
+    .from('blackhawks_games_master')
+    .select(`
+      id,
+      game_date,
+      game_time,
+      opponent,
+      opponent_full_name,
+      is_blackhawks_home,
+      arena,
+      blackhawks_score,
+      opponent_score,
+      blackhawks_win,
+      broadcast,
+      game_type,
+      overtime,
+      shootout
+    `)
+    .eq('season', targetSeason)
+    .order('game_date', { ascending: false })
+
+  if (error || !data) return []
+
+  return data.map((g: any) => transformGame(g))
+}
+
+function formatGameTime(timeStr: string | null): string | null {
+  if (!timeStr) return null
+  const [hours, minutes] = timeStr.split(':').map(Number)
+  const hour12 = hours % 12 || 12
+  const ampm = hours >= 12 ? 'PM' : 'AM'
+  const minStr = minutes.toString().padStart(2, '0')
+  return `${hour12}:${minStr} ${ampm} CT`
+}
+
+function transformGame(game: any): BlackhawksGame {
+  const gameDate = new Date(game.game_date)
+  const isPlayed = (game.blackhawks_score > 0) || (game.opponent_score > 0)
+
+  let result: 'W' | 'L' | 'OTL' | null = null
+  if (isPlayed) {
+    if (game.blackhawks_win) {
+      result = 'W'
+    } else if (game.overtime || game.shootout) {
+      result = 'OTL'
+    } else {
+      result = 'L'
+    }
+  }
+
+  return {
+    gameId: game.id?.toString() || game.game_id,
+    season: getCurrentSeason(),
+    date: game.game_date,
+    time: formatGameTime(game.game_time),
+    dayOfWeek: gameDate.toLocaleDateString('en-US', { weekday: 'long' }),
+    opponent: game.opponent,
+    opponentFullName: game.opponent_full_name || null,
+    opponentLogo: getTeamLogo(game.opponent),
+    homeAway: game.is_blackhawks_home ? 'home' : 'away',
+    status: isPlayed ? 'final' : (game.status === 'in_progress' ? 'in_progress' : 'scheduled'),
+    blackhawksScore: game.blackhawks_score,
+    oppScore: game.opponent_score,
+    result,
+    arena: game.arena,
+    tv: game.broadcast,
+    overtime: game.overtime || false,
+    shootout: game.shootout || false,
+  }
+}
+
+/**
+ * Get recent Blackhawks scores (completed games)
+ */
+export async function getBlackhawksRecentScores(limit: number = 10): Promise<BlackhawksGame[]> {
+  const schedule = await getBlackhawksSchedule()
+  return schedule
+    .filter(g => g.status === 'final')
+    .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
+    .slice(0, limit)
+}
+
+/**
+ * Get Blackhawks stats for a season
+ */
+export async function getBlackhawksStats(season?: number): Promise<BlackhawksStats> {
+  const targetSeason = season || getCurrentSeason()
+
+  const teamStats = await getTeamStats(targetSeason)
+  const leaderboards = await getLeaderboards(targetSeason)
+
+  return {
+    team: teamStats,
+    leaderboards,
+  }
+}
+
+async function getTeamStats(season: number): Promise<BlackhawksTeamStats> {
+  if (!datalabClient) {
+    return getDefaultTeamStats(season)
+  }
+
+  // Get team season stats
+  const { data: teamData } = await datalabClient
+    .from('blackhawks_team_season_stats')
+    .select('*')
+    .eq('season', season)
+    .single()
+
+  // Get season record from games
+  const { data: gamesData } = await datalabClient
+    .from('blackhawks_games_master')
+    .select('blackhawks_score, opponent_score, blackhawks_win, overtime, shootout')
+    .eq('season', season)
+    .or('blackhawks_score.gt.0,opponent_score.gt.0')
+
+  const wins = gamesData?.filter((g: any) => g.blackhawks_win).length || 0
+  const losses = gamesData?.filter((g: any) => !g.blackhawks_win && !g.overtime && !g.shootout).length || 0
+  const otLosses = gamesData?.filter((g: any) => !g.blackhawks_win && (g.overtime || g.shootout)).length || 0
+  const gamesPlayed = gamesData?.length || 0
+  const totalGoals = gamesData?.reduce((sum: number, g: any) => sum + (g.blackhawks_score || 0), 0) || 0
+  const totalOppGoals = gamesData?.reduce((sum: number, g: any) => sum + (g.opponent_score || 0), 0) || 0
+  const pts = wins * 2 + otLosses
+
+  return {
+    season,
+    record: `${wins}-${losses}-${otLosses}`,
+    wins,
+    losses,
+    otLosses,
+    points: pts,
+    goalsFor: totalGoals,
+    goalsAgainst: totalOppGoals,
+    gfpg: gamesPlayed > 0 ? Math.round(totalGoals / gamesPlayed * 100) / 100 : 0,
+    gapg: gamesPlayed > 0 ? Math.round(totalOppGoals / gamesPlayed * 100) / 100 : 0,
+    ppPct: teamData?.pp_pct || null,
+    pkPct: teamData?.pk_pct || null,
+  }
+}
+
+function getDefaultTeamStats(season: number): BlackhawksTeamStats {
+  return {
+    season,
+    record: '0-0-0',
+    wins: 0,
+    losses: 0,
+    otLosses: 0,
+    points: 0,
+    goalsFor: 0,
+    goalsAgainst: 0,
+    gfpg: 0,
+    gapg: 0,
+    ppPct: null,
+    pkPct: null,
+  }
+}
+
+async function getLeaderboards(season: number): Promise<BlackhawksLeaderboard> {
+  if (!datalabClient) {
+    return { goals: [], assists: [], points: [], goaltending: [] }
+  }
+
+  const players = await getBlackhawksPlayers()
+  const playersMap = new Map(players.map(p => [p.internalId, p]))
+
+  // Get all game stats for season and aggregate by player
+  const { data: gameStats } = await datalabClient
+    .from('blackhawks_player_game_stats')
+    .select(`
+      player_id,
+      goals,
+      assists,
+      points,
+      saves,
+      goals_against,
+      shots_against
+    `)
+    .eq('season', season)
+
+  if (!gameStats || gameStats.length === 0) {
+    return { goals: [], assists: [], points: [], goaltending: [] }
+  }
+
+  // Aggregate stats by player
+  const playerTotals = new Map<number, any>()
+
+  for (const stat of gameStats) {
+    const pid = stat.player_id
+    if (!playerTotals.has(pid)) {
+      playerTotals.set(pid, {
+        player_id: pid,
+        goals: 0,
+        assists: 0,
+        points: 0,
+        saves: 0,
+        goalsAgainst: 0,
+        shotsAgainst: 0,
+        games: 0,
+      })
+    }
+    const totals = playerTotals.get(pid)!
+    totals.goals += stat.goals || 0
+    totals.assists += stat.assists || 0
+    totals.points += stat.points || 0
+    totals.saves += stat.saves || 0
+    totals.goalsAgainst += stat.goals_against || 0
+    totals.shotsAgainst += stat.shots_against || 0
+    totals.games += 1
+  }
+
+  const aggregatedStats = Array.from(playerTotals.values())
+
+  const goals = aggregatedStats
+    .filter(s => s.goals > 0 && playersMap.has(s.player_id))
+    .sort((a, b) => b.goals - a.goals)
+    .slice(0, 5)
+    .map(s => ({
+      player: playersMap.get(s.player_id)!,
+      primaryStat: s.goals,
+      primaryLabel: 'G',
+      secondaryStat: s.assists,
+      secondaryLabel: 'A',
+      tertiaryStat: s.games,
+      tertiaryLabel: 'GP',
+    }))
+
+  const assists = aggregatedStats
+    .filter(s => s.assists > 0 && playersMap.has(s.player_id))
+    .sort((a, b) => b.assists - a.assists)
+    .slice(0, 5)
+    .map(s => ({
+      player: playersMap.get(s.player_id)!,
+      primaryStat: s.assists,
+      primaryLabel: 'A',
+      secondaryStat: s.goals,
+      secondaryLabel: 'G',
+      tertiaryStat: s.games,
+      tertiaryLabel: 'GP',
+    }))
+
+  const points = aggregatedStats
+    .filter(s => s.points > 0 && playersMap.has(s.player_id))
+    .sort((a, b) => b.points - a.points)
+    .slice(0, 5)
+    .map(s => ({
+      player: playersMap.get(s.player_id)!,
+      primaryStat: s.points,
+      primaryLabel: 'PTS',
+      secondaryStat: s.goals,
+      secondaryLabel: 'G',
+      tertiaryStat: s.assists,
+      tertiaryLabel: 'A',
+    }))
+
+  const goaltending = aggregatedStats
+    .filter(s => s.saves > 0 && playersMap.has(s.player_id))
+    .sort((a, b) => {
+      const aSvPct = a.shotsAgainst > 0 ? a.saves / a.shotsAgainst : 0
+      const bSvPct = b.shotsAgainst > 0 ? b.saves / b.shotsAgainst : 0
+      return bSvPct - aSvPct
+    })
+    .slice(0, 3)
+    .map(s => {
+      const svPct = s.shotsAgainst > 0 ? Math.round((s.saves / s.shotsAgainst) * 1000) / 1000 : 0
+      const gaa = s.games > 0 ? Math.round((s.goalsAgainst / s.games) * 100) / 100 : 0
+      return {
+        player: playersMap.get(s.player_id)!,
+        primaryStat: svPct,
+        primaryLabel: 'SV%',
+        secondaryStat: gaa,
+        secondaryLabel: 'GAA',
+        tertiaryStat: s.games,
+        tertiaryLabel: 'GP',
+      }
+    })
+
+  return { goals, assists, points, goaltending }
+}
+
+/**
+ * Get available seasons
+ */
+export async function getAvailableSeasons(): Promise<number[]> {
+  if (!datalabClient) {
+    const current = getCurrentSeason()
+    return [current, current - 1, current - 2]
+  }
+
+  try {
+    const { data } = await datalabClient
+      .from('blackhawks_games_master')
+      .select('season')
+      .order('season', { ascending: false })
+
+    if (data && data.length > 0) {
+      return [...new Set(data.map((d: any) => d.season))]
+    }
+  } catch {
+    // Fallback
+  }
+
+  const current = getCurrentSeason()
+  return [current, current - 1, current - 2]
+}
+
+function getCurrentSeason(): number {
+  // NHL 2024-25 season is stored as 2025
+  return 2025
+}
+
+/**
+ * Search players by name or number
+ */
+export async function searchPlayers(query: string): Promise<BlackhawksPlayer[]> {
+  const players = await getBlackhawksPlayers()
+  const q = query.toLowerCase().trim()
+
+  if (!q) return players
+
+  return players.filter(p => {
+    const matchesName = p.fullName.toLowerCase().includes(q)
+    const matchesNumber = p.jerseyNumber?.toString() === q
+    return matchesName || matchesNumber
+  })
+}

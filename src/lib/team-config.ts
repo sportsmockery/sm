@@ -13,6 +13,7 @@
  */
 
 import type { TeamInfo, NextGameInfo, TeamRecord } from '@/components/team/TeamHubLayout'
+import { datalabClient } from './supabase-datalab'
 
 export const CHICAGO_TEAMS: Record<string, TeamInfo> = {
   bears: {
@@ -87,36 +88,63 @@ export function getTeamKey(slug: string): string | null {
   return null
 }
 
+// DataLab table configuration for each team
+const DATALAB_CONFIG: Record<string, { gamesTable: string; scoreCol: string; oppScoreCol: string; isHomeCol: string }> = {
+  bears: { gamesTable: 'bears_games_master', scoreCol: 'bears_score', oppScoreCol: 'opponent_score', isHomeCol: 'is_bears_home' },
+  bulls: { gamesTable: 'bulls_games_master', scoreCol: 'bulls_score', oppScoreCol: 'opponent_score', isHomeCol: 'is_bulls_home' },
+  blackhawks: { gamesTable: 'blackhawks_games_master', scoreCol: 'blackhawks_score', oppScoreCol: 'opponent_score', isHomeCol: 'is_blackhawks_home' },
+  cubs: { gamesTable: 'cubs_games_master', scoreCol: 'cubs_score', oppScoreCol: 'opponent_score', isHomeCol: 'is_cubs_home' },
+  whitesox: { gamesTable: 'whitesox_games_master', scoreCol: 'whitesox_score', oppScoreCol: 'opponent_score', isHomeCol: 'is_whitesox_home' },
+}
+
 /**
- * Fetch team record from ESPN API
+ * Fetch team record from DataLab Supabase
  */
 export async function fetchTeamRecord(teamKey: string): Promise<TeamRecord | null> {
-  const config = ESPN_TEAM_IDS[teamKey as keyof typeof ESPN_TEAM_IDS]
-  if (!config) return null
+  const config = DATALAB_CONFIG[teamKey]
+  if (!config || !datalabClient) return null
 
   try {
-    const url = `https://site.api.espn.com/apis/site/v2/sports/${config.sport}/${config.league}/teams/${config.teamId}`
-    const response = await fetch(url, { next: { revalidate: 3600 } })
+    // Get completed games for the current season
+    const { data: games, error } = await datalabClient
+      .from(config.gamesTable)
+      .select('*')
+      .not(config.scoreCol, 'is', null)
+      .not(config.oppScoreCol, 'is', null)
 
-    if (!response.ok) return null
+    if (error || !games) {
+      console.error(`Error fetching ${teamKey} record from DataLab:`, error)
+      return null
+    }
 
-    const data = await response.json()
-    const team = data.team
-    const record = team?.record?.items?.[0]?.stats
+    let wins = 0
+    let losses = 0
+    let ties = 0
+    let otLosses = 0
 
-    if (!record) return null
+    games.forEach((game: any) => {
+      const teamScore = Number(game[config.scoreCol]) || 0
+      const oppScore = Number(game[config.oppScoreCol]) || 0
 
-    // Parse record based on league
-    const wins = record.find((s: any) => s.name === 'wins')?.value || 0
-    const losses = record.find((s: any) => s.name === 'losses')?.value || 0
-    const ties = record.find((s: any) => s.name === 'ties')?.value
-    const otLosses = record.find((s: any) => s.name === 'OTLosses')?.value
+      if (teamScore > oppScore) {
+        wins++
+      } else if (teamScore < oppScore) {
+        // Check for OT/SO loss (NHL) or tie (NFL)
+        if (game.result === 'OTL' || game.result === 'SOL') {
+          otLosses++
+        } else {
+          losses++
+        }
+      } else {
+        ties++
+      }
+    })
 
     return {
       wins,
       losses,
-      ties: ties || undefined,
-      otLosses: otLosses || undefined,
+      ties: ties > 0 ? ties : undefined,
+      otLosses: otLosses > 0 ? otLosses : undefined,
     }
   } catch (error) {
     console.error(`Error fetching ${teamKey} record:`, error)
@@ -125,60 +153,78 @@ export async function fetchTeamRecord(teamKey: string): Promise<TeamRecord | nul
 }
 
 /**
- * Fetch next game from ESPN API
+ * Fetch next game from DataLab Supabase
  */
 export async function fetchNextGame(teamKey: string): Promise<NextGameInfo | null> {
-  const config = ESPN_TEAM_IDS[teamKey as keyof typeof ESPN_TEAM_IDS]
+  const config = DATALAB_CONFIG[teamKey]
   const teamInfo = CHICAGO_TEAMS[teamKey]
-  if (!config || !teamInfo) return null
+  if (!config || !teamInfo || !datalabClient) return null
 
   try {
-    const url = `https://site.api.espn.com/apis/site/v2/sports/${config.sport}/${config.league}/teams/${config.teamId}/schedule`
-    const response = await fetch(url, { next: { revalidate: 3600 } })
+    const today = new Date().toISOString().split('T')[0]
 
-    if (!response.ok) return null
+    // Get next upcoming game (game_date >= today with no score yet)
+    const { data: games, error } = await datalabClient
+      .from(config.gamesTable)
+      .select('*')
+      .gte('game_date', today)
+      .is(config.scoreCol, null)
+      .order('game_date', { ascending: true })
+      .limit(1)
 
-    const data = await response.json()
-    const events = data.events || []
-    const now = new Date()
+    if (error || !games || games.length === 0) {
+      // Fallback: try to get any future game
+      const { data: futureGames } = await datalabClient
+        .from(config.gamesTable)
+        .select('*')
+        .gte('game_date', today)
+        .order('game_date', { ascending: true })
+        .limit(1)
 
-    // Find next upcoming game
-    const nextGame = events.find((event: any) => new Date(event.date) >= now)
-    if (!nextGame) return null
+      if (!futureGames || futureGames.length === 0) return null
 
-    const gameDate = new Date(nextGame.date)
-    const competitions = nextGame.competitions?.[0]
-
-    // Determine if home or away
-    const isHome = competitions?.competitors?.find(
-      (c: any) => c.homeAway === 'home'
-    )?.team?.id === config.teamId
-
-    // Find opponent
-    const opponent = competitions?.competitors?.find(
-      (c: any) => c.team?.id !== config.teamId
-    )?.team
-
-    const opponentLogo = opponent?.logo || null
-    const opponentName = opponent?.shortDisplayName || opponent?.displayName || 'TBD'
-
-    return {
-      opponent: opponentName,
-      opponentLogo,
-      date: gameDate.toLocaleDateString('en-US', {
-        weekday: 'short',
-        month: 'short',
-        day: 'numeric',
-      }),
-      time: gameDate.toLocaleTimeString('en-US', {
-        hour: 'numeric',
-        minute: '2-digit',
-      }),
-      isHome,
-      venue: competitions?.venue?.fullName,
+      const game = futureGames[0]
+      return formatNextGame(game, config)
     }
+
+    const game = games[0]
+    return formatNextGame(game, config)
   } catch (error) {
     console.error(`Error fetching ${teamKey} next game:`, error)
     return null
+  }
+}
+
+function formatNextGame(game: any, config: { isHomeCol: string }): NextGameInfo {
+  const isHome = game[config.isHomeCol] || game.home_away === 'home' || game.homeAway === 'home'
+
+  // Parse date and time
+  let gameDate: Date
+  if (game.game_date) {
+    gameDate = new Date(game.game_date)
+    if (game.game_time) {
+      const [hours, minutes] = game.game_time.split(':').map(Number)
+      gameDate.setHours(hours, minutes, 0, 0)
+    }
+  } else {
+    gameDate = new Date()
+  }
+
+  return {
+    opponent: game.opponent_full_name || game.opponent || 'TBD',
+    opponentLogo: game.opponent_logo || null,
+    date: gameDate.toLocaleDateString('en-US', {
+      weekday: 'short',
+      month: 'short',
+      day: 'numeric',
+    }),
+    time: game.game_time
+      ? new Date(`2000-01-01T${game.game_time}`).toLocaleTimeString('en-US', {
+          hour: 'numeric',
+          minute: '2-digit',
+        })
+      : 'TBD',
+    isHome,
+    venue: game.venue || undefined,
   }
 }

@@ -4,6 +4,10 @@ import { createContext, useContext, useState, useEffect, ReactNode } from 'react
 import { createBrowserClient } from '@supabase/ssr'
 import type { User as SupabaseUser, Session } from '@supabase/supabase-js'
 
+// Session persistence constants
+const SESSION_KEY = 'sm-session-expiry'
+const SESSION_DURATION = 24 * 60 * 60 * 1000 // 24 hours in milliseconds
+
 // Create Supabase client for browser
 function createSupabaseClient() {
   return createBrowserClient(
@@ -18,16 +22,18 @@ interface User {
   email: string
   name?: string
   avatar?: string
+  createdAt?: string
 }
 
 // Auth context type
 interface AuthContextType {
   user: User | null
   loading: boolean
-  signIn: (email: string, password: string) => Promise<{ error?: string }>
+  signIn: (email: string, password: string, rememberMe?: boolean) => Promise<{ error?: string }>
   signUp: (email: string, password: string, options?: string | { full_name?: string }) => Promise<{ error?: string }>
   signOut: () => Promise<void>
   resetPassword: (email: string) => Promise<{ error?: string }>
+  refreshUser: () => Promise<void>
   isAuthenticated: boolean
 }
 
@@ -41,6 +47,7 @@ function mapSupabaseUser(supabaseUser: SupabaseUser | null): User | null {
     email: supabaseUser.email || '',
     name: supabaseUser.user_metadata?.full_name || supabaseUser.email?.split('@')[0],
     avatar: supabaseUser.user_metadata?.avatar_url,
+    createdAt: supabaseUser.created_at,
   }
 }
 
@@ -49,10 +56,29 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null)
   const [loading, setLoading] = useState(true)
 
-  // Check for existing session on mount
+  // Check for existing session on mount and handle session persistence
   useEffect(() => {
     const checkAuth = async () => {
       try {
+        // Check if we have a valid "remember me" session
+        const sessionExpiry = localStorage.getItem(SESSION_KEY)
+        const now = Date.now()
+
+        if (sessionExpiry) {
+          const expiryTime = parseInt(sessionExpiry, 10)
+          if (now > expiryTime) {
+            // Session expired, sign out
+            localStorage.removeItem(SESSION_KEY)
+            await supabase.auth.signOut()
+            setUser(null)
+            setLoading(false)
+            return
+          } else {
+            // Session still valid, reset the 24-hour timer on each visit
+            localStorage.setItem(SESSION_KEY, (now + SESSION_DURATION).toString())
+          }
+        }
+
         const { data: { session }, error } = await supabase.auth.getSession()
 
         if (error) {
@@ -62,6 +88,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           setUser(mapSupabaseUser(session.user))
         } else {
           setUser(null)
+          // Clean up any stale session expiry
+          localStorage.removeItem(SESSION_KEY)
         }
       } catch (error) {
         console.error('Auth check failed:', error)
@@ -80,6 +108,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           setUser(mapSupabaseUser(session.user))
         } else {
           setUser(null)
+          // Clean up session expiry on sign out
+          localStorage.removeItem(SESSION_KEY)
         }
         setLoading(false)
       }
@@ -89,7 +119,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, [supabase])
 
   // Sign in with email and password
-  const signIn = async (email: string, password: string): Promise<{ error?: string }> => {
+  const signIn = async (email: string, password: string, rememberMe: boolean = false): Promise<{ error?: string }> => {
     setLoading(true)
     try {
       const { data, error } = await supabase.auth.signInWithPassword({
@@ -104,6 +134,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
       if (data.user) {
         setUser(mapSupabaseUser(data.user))
+
+        // If "Remember me" is checked, store session expiry time (24 hours from now)
+        if (rememberMe) {
+          const expiryTime = Date.now() + SESSION_DURATION
+          localStorage.setItem(SESSION_KEY, expiryTime.toString())
+        } else {
+          // Remove any existing session expiry (session-only login)
+          localStorage.removeItem(SESSION_KEY)
+        }
       }
 
       return {}
@@ -198,6 +237,22 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   }
 
+  // Refresh user data (e.g., after avatar update)
+  const refreshUser = async () => {
+    try {
+      const { data: { user: freshUser }, error } = await supabase.auth.getUser()
+      if (error) {
+        console.error('Failed to refresh user:', error.message)
+        return
+      }
+      if (freshUser) {
+        setUser(mapSupabaseUser(freshUser))
+      }
+    } catch (error) {
+      console.error('Failed to refresh user:', error)
+    }
+  }
+
   return (
     <AuthContext.Provider
       value={{
@@ -207,6 +262,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         signUp,
         signOut,
         resetPassword,
+        refreshUser,
         isAuthenticated: !!user,
       }}
     >

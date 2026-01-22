@@ -1,7 +1,17 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import Image from 'next/image'
 import { TeamSlug, TEAM_INFO } from '@/lib/types'
+
+// ESPN CDN logos for teams
+const TEAM_LOGOS: Record<TeamSlug, string> = {
+  bears: 'https://a.espncdn.com/i/teamlogos/nfl/500/chi.png',
+  cubs: 'https://a.espncdn.com/i/teamlogos/mlb/500/chc.png',
+  'white-sox': 'https://a.espncdn.com/i/teamlogos/mlb/500/chw.png',
+  bulls: 'https://a.espncdn.com/i/teamlogos/nba/500/chi.png',
+  blackhawks: 'https://a.espncdn.com/i/teamlogos/nhl/500/chi.png',
+}
 
 interface FavoriteTeamsSelectorProps {
   initialTeams?: TeamSlug[]
@@ -137,12 +147,16 @@ export default function FavoriteTeamsSelector({
                 backgroundColor: isSelected ? `${teamInfo.primaryColor}15` : undefined,
               }}
             >
-              {/* Team color dot */}
-              <div
-                className="w-10 h-10 rounded-full flex items-center justify-center text-white font-bold text-lg flex-shrink-0"
-                style={{ backgroundColor: teamInfo.primaryColor }}
-              >
-                {teamInfo.shortName.charAt(0)}
+              {/* Team logo */}
+              <div className="w-10 h-10 flex-shrink-0">
+                <Image
+                  src={TEAM_LOGOS[team]}
+                  alt={teamInfo.name}
+                  width={40}
+                  height={40}
+                  className="w-10 h-10 object-contain"
+                  unoptimized
+                />
               </div>
 
               {/* Team name */}

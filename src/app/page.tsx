@@ -3,6 +3,7 @@ import { getMockUpcomingGames } from '@/lib/upcoming-games'
 import {
   ChicagoLive,
   FanControlCenter,
+  HomepageTeamBar,
   InfoDeck,
   FeaturedShell,
   LatestStream,
@@ -18,13 +19,14 @@ import '@/components/homepage/homepagev3.css'
  * Uses fetchHomepageData which never throws and always returns data.
  *
  * V10 Layout:
- * 1. Chicago Live (hero story + upcoming games)
- * 2. Chicago Fan Control Center (Fan Chat + Ask AI)
- * 3. Trending Right Now / Info Deck
- * 4. Chicago Front Page (6 featured slots)
- * 5. Latest Stream (15 items, reverse chronological)
- * 6. Seasonal Focus (up to 3 in-season teams)
- * 7. Chicago Classics (4 evergreen pieces)
+ * 1. Homepage Team Bar (in-season teams: last game, next game)
+ * 2. Trending Right Now / Info Deck
+ * 3. Chicago Front Page (6 featured slots)
+ * 4. Latest Stream (15 items, reverse chronological)
+ * 5. Chicago Live (hero story + upcoming games)
+ * 6. Chicago Fan Control Center (Fan Chat + Ask AI)
+ * 7. Seasonal Focus (up to 3 in-season teams)
+ * 8. Chicago Classics (4 evergreen pieces)
  */
 export default async function HomePage() {
   // SSR data fetch - guaranteed to return valid data with fallbacks
@@ -46,14 +48,8 @@ export default async function HomePage() {
 
   return (
     <main className="sm-homepage">
-      {/* V10: Chicago Live - Hero + Upcoming Games */}
-      <ChicagoLive
-        heroStory={heroStory}
-        upcomingGames={upcomingGames}
-      />
-
-      {/* V10: Fan Control Center - Chat + AI */}
-      <FanControlCenter />
+      {/* In-Season Teams Bar - Shows Bulls, Blackhawks now; adds other teams when their seasons start */}
+      <HomepageTeamBar />
 
       {/* Trending / Headlines */}
       <InfoDeck
@@ -67,6 +63,15 @@ export default async function HomePage() {
 
       {/* Latest from Chicago */}
       <LatestStream posts={data.latestPosts} />
+
+      {/* Chicago Live - Hero + Upcoming Games (moved lower) */}
+      <ChicagoLive
+        heroStory={heroStory}
+        upcomingGames={upcomingGames}
+      />
+
+      {/* Fan Control Center - Chat + AI (moved lower) */}
+      <FanControlCenter />
 
       {/* In Season Right Now */}
       <SeasonalFocus teams={data.seasonalTeams} />
