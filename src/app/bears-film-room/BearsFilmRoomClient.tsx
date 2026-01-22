@@ -17,12 +17,12 @@ export function BearsFilmRoomClient({ latestVideo, previousVideos }: Props) {
         <section className="sm-show-hero">
           <div className="sm-container sm-hero-inner">
             <div className="sm-hero-text">
-              <div className="flex items-start gap-4 mb-3">
+              <div className="flex items-start gap-6 mb-3">
                 <img
                   src="/youtubelogos/bfr.png"
                   alt="Bears Film Room"
                   className="sm-show-logo"
-                  style={{ marginBottom: 0, height: '80px', width: 'auto' }}
+                  style={{ marginBottom: 0 }}
                 />
                 <div className="flex flex-col gap-1.5">
                   {/* YouTube Subscribe */}
@@ -42,7 +42,7 @@ export function BearsFilmRoomClient({ latestVideo, previousVideos }: Props) {
                     href="https://podcasts.apple.com/us/podcast/bears-film-room-a-chicago-bears-show/id1690627823"
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="inline-flex items-center justify-between w-28 px-2 py-1 bg-gradient-to-r from-purple-600 to-pink-500 hover:from-purple-700 hover:to-pink-600 text-white text-[10px] font-semibold rounded transition-colors"
+                    className="inline-flex items-center justify-between w-28 px-2 py-1 bg-white hover:bg-gray-100 text-black text-[10px] font-semibold rounded transition-colors"
                   >
                     <span>Apple</span>
                     <img src="https://logos-world.net/wp-content/uploads/2021/10/Podcast-Emblem.png" alt="Apple Podcasts" className="h-3 w-auto" />
@@ -97,12 +97,12 @@ export function BearsFilmRoomClient({ latestVideo, previousVideos }: Props) {
       <section className="sm-show-hero">
         <div className="sm-container sm-hero-inner">
           <div className="sm-hero-text">
-            <div className="flex items-start gap-4 mb-3">
+            <div className="flex items-start gap-6 mb-3">
               <img
                 src="/youtubelogos/bfr.png"
                 alt="Bears Film Room"
                 className="sm-show-logo"
-                style={{ marginBottom: 0, height: '80px', width: 'auto' }}
+                style={{ marginBottom: 0 }}
               />
               <div className="flex flex-col gap-1.5">
                 {/* YouTube Subscribe */}
@@ -122,7 +122,7 @@ export function BearsFilmRoomClient({ latestVideo, previousVideos }: Props) {
                   href="https://podcasts.apple.com/us/podcast/bears-film-room-a-chicago-bears-show/id1690627823"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="inline-flex items-center justify-between w-28 px-2 py-1 bg-gradient-to-r from-purple-600 to-pink-500 hover:from-purple-700 hover:to-pink-600 text-white text-[10px] font-semibold rounded transition-colors"
+                  className="inline-flex items-center justify-between w-28 px-2 py-1 bg-white hover:bg-gray-100 text-black text-[10px] font-semibold rounded transition-colors"
                 >
                   <span>Apple</span>
                   <img src="https://logos-world.net/wp-content/uploads/2021/10/Podcast-Emblem.png" alt="Apple Podcasts" className="h-3 w-auto" />
