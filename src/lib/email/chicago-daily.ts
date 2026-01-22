@@ -12,7 +12,7 @@ import {
 const resend = new Resend(process.env.RESEND_API_KEY);
 
 const CONFIG = {
-  fromEmail: 'Chicago Sports Daily <daily@sportsmockery.com>',
+  fromEmail: 'Sports Mockery <info@sportsmockery.com>',
   replyTo: 'info@sportsmockery.com',
   apiBaseUrl:
     process.env.NEXT_PUBLIC_SITE_URL
@@ -21,6 +21,12 @@ const CONFIG = {
   defaultUnsubscribeUrl: 'https://sportsmockery.com/unsubscribe',
   defaultManagePrefsUrl: 'https://sportsmockery.com/preferences',
 };
+
+// =============================================================================
+// TEST MODE: Hard-coded recipient (bypasses database)
+// =============================================================================
+
+const TEST_RECIPIENTS = ['cbur22@gmail.com'];
 
 // =============================================================================
 // Types
@@ -145,6 +151,22 @@ function getYesterday(): Date {
   return d;
 }
 
+/**
+ * Returns yesterday's date as a label for the email subject.
+ * Format: "Jan 22, 2026"
+ */
+function getYesterdayLabel(): string {
+  const now = new Date();
+  const yesterday = new Date(now);
+  yesterday.setDate(now.getDate() - 1);
+
+  return yesterday.toLocaleDateString('en-US', {
+    month: 'short',  // "Jan"
+    day: '2-digit',  // "22"
+    year: 'numeric', // "2026"
+  });
+}
+
 // =============================================================================
 // API Functions
 // =============================================================================
@@ -231,7 +253,7 @@ export async function fetchDailyStories(date: Date): Promise<Story[]> {
 
 export type SendOptions = {
   date?: Date;
-  recipients: string[];
+  recipients?: string[];  // Optional - defaults to TEST_RECIPIENTS
   variant?: ABVariant;
   showAppPromo?: boolean;
   tags?: string[];
@@ -240,15 +262,16 @@ export type SendOptions = {
 };
 
 export async function sendChicagoDailyEmail(
-  options: SendOptions
+  options: SendOptions = {}
 ): Promise<SendResult> {
+  // Use hard-coded test recipients if none provided
+  const recipients = options.recipients || TEST_RECIPIENTS;
+
   const {
     date = getYesterday(),
-    recipients,
     variant = AB_VARIANTS[0],
     showAppPromo = false,
     tags = ['chicago-daily'],
-    metadata = {},
     testMode = false,
   } = options;
 
@@ -262,12 +285,10 @@ export async function sendChicagoDailyEmail(
 
     // 3. Build subject and preheader
     const formattedDate = formatDate(date);
-    const shortDate = date.toLocaleDateString('en-US', {
-      month: 'short',
-      day: 'numeric',
-    });
+    const dateLabel = getYesterdayLabel();
 
-    const subject = variant.subjectPattern(heroStory, shortDate);
+    // Fixed subject format: "Chicago Sports News for Jan 22, 2026"
+    const subject = `Chicago Sports News for ${dateLabel}`;
     const preheader = variant.preheaderPattern(heroStory, sortedStories.length);
 
     // 4. Build email props
@@ -303,7 +324,7 @@ export async function sendChicagoDailyEmail(
 
     // 6. Send via Resend
     const { data, error } = await resend.emails.send({
-      from: CONFIG.fromEmail,
+      from: 'Sports Mockery <info@sportsmockery.com>',
       to: recipients,
       replyTo: CONFIG.replyTo,
       subject,
@@ -409,7 +430,7 @@ export async function sendABTest(
 export async function sendBatch(
   options: SendOptions & { batchSize?: number }
 ): Promise<SendResult[]> {
-  const { recipients, batchSize = 100, ...rest } = options;
+  const { recipients = TEST_RECIPIENTS, batchSize = 100, ...rest } = options;
   const results: SendResult[] = [];
 
   for (let i = 0; i < recipients.length; i += batchSize) {
