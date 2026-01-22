@@ -220,8 +220,11 @@ async function getTeamTickerFromDatalab(teamKey: TeamKey) {
 
     let lastGame = null
     if (lastGameData) {
-      const teamScore = Number(lastGameData[config.scoreCol]) || 0
-      const oppScore = Number(lastGameData[config.oppScoreCol]) || 0
+      // Get scores - check for null explicitly (0 is a valid score)
+      const rawTeamScore = lastGameData[config.scoreCol]
+      const rawOppScore = lastGameData[config.oppScoreCol]
+      const teamScore = rawTeamScore !== null && rawTeamScore !== undefined ? Number(rawTeamScore) : null
+      const oppScore = rawOppScore !== null && rawOppScore !== undefined ? Number(rawOppScore) : null
       const didWin = lastGameData[config.winCol] === true
       const opponentAbbrev = lastGameData.opponent || 'OPP'
       const opponentLogo = getOpponentLogo(opponentAbbrev, config.league, config.logoBaseUrl)
@@ -232,16 +235,21 @@ async function getTeamTickerFromDatalab(teamKey: TeamKey) {
         result = 'OTL'
       }
 
-      lastGame = {
-        opponent: opponentAbbrev,
-        opponentFull: lastGameData.opponent_full_name || opponentAbbrev,
-        opponentLogo,
-        result,
-        score: `${teamScore}-${oppScore}`,
-        date: new Date(lastGameData.game_date).toLocaleDateString('en-US', {
-          month: 'short',
-          day: 'numeric',
-        }),
+      // Only include lastGame if we have actual scores
+      if (teamScore !== null && oppScore !== null) {
+        lastGame = {
+          opponent: opponentAbbrev,
+          opponentFull: lastGameData.opponent_full_name || opponentAbbrev,
+          opponentLogo,
+          result,
+          score: `${teamScore}-${oppScore}`,
+          date: new Date(lastGameData.game_date).toLocaleDateString('en-US', {
+            month: 'short',
+            day: 'numeric',
+          }),
+        }
+      } else {
+        console.warn(`${teamKey} lastGame has null scores:`, { teamScore: rawTeamScore, oppScore: rawOppScore, game: lastGameData.game_date })
       }
     }
 
