@@ -98,17 +98,40 @@ const DATALAB_CONFIG: Record<string, { gamesTable: string; scoreCol: string; opp
 }
 
 /**
+ * Get current season based on team's league
+ */
+function getCurrentSeason(league: string): number {
+  const now = new Date()
+  const year = now.getFullYear()
+  const month = now.getMonth() + 1 // 1-12
+
+  // NFL/NHL: Season starts in fall, use starting year (e.g., 2025-26 season = 2025)
+  // NBA: Season starts in October, use starting year
+  // MLB: Season is within a calendar year
+  if (league === 'NFL' || league === 'NHL' || league === 'NBA') {
+    // If before September, we're in the previous year's season
+    return month < 9 ? year - 1 : year
+  }
+  // MLB: just use current year
+  return year
+}
+
+/**
  * Fetch team record from DataLab Supabase
  */
 export async function fetchTeamRecord(teamKey: string): Promise<TeamRecord | null> {
   const config = DATALAB_CONFIG[teamKey]
-  if (!config || !datalabClient) return null
+  const teamInfo = CHICAGO_TEAMS[teamKey]
+  if (!config || !teamInfo || !datalabClient) return null
+
+  const currentSeason = getCurrentSeason(teamInfo.league)
 
   try {
     // Get completed games for the current season
     const { data: games, error } = await datalabClient
       .from(config.gamesTable)
       .select('*')
+      .eq('season', currentSeason)
       .not(config.scoreCol, 'is', null)
       .not(config.oppScoreCol, 'is', null)
 
@@ -117,34 +140,50 @@ export async function fetchTeamRecord(teamKey: string): Promise<TeamRecord | nul
       return null
     }
 
-    let wins = 0
-    let losses = 0
-    let ties = 0
-    let otLosses = 0
+    // Separate regular season and postseason games
+    let regWins = 0
+    let regLosses = 0
+    let regTies = 0
+    let regOtLosses = 0
+    let postWins = 0
+    let postLosses = 0
 
     games.forEach((game: any) => {
       const teamScore = Number(game[config.scoreCol]) || 0
       const oppScore = Number(game[config.oppScoreCol]) || 0
+      const isPlayoff = game.game_type === 'postseason' || game.is_playoff === true
 
       if (teamScore > oppScore) {
-        wins++
-      } else if (teamScore < oppScore) {
-        // Check for OT/SO loss (NHL) or tie (NFL)
-        if (game.result === 'OTL' || game.result === 'SOL') {
-          otLosses++
+        if (isPlayoff) {
+          postWins++
         } else {
-          losses++
+          regWins++
+        }
+      } else if (teamScore < oppScore) {
+        if (isPlayoff) {
+          postLosses++
+        } else {
+          // Check for OT/SO loss (NHL) or tie (NFL)
+          if (game.result === 'OTL' || game.result === 'SOL') {
+            regOtLosses++
+          } else {
+            regLosses++
+          }
         }
       } else {
-        ties++
+        // Ties only count in regular season
+        if (!isPlayoff) {
+          regTies++
+        }
       }
     })
 
     return {
-      wins,
-      losses,
-      ties: ties > 0 ? ties : undefined,
-      otLosses: otLosses > 0 ? otLosses : undefined,
+      wins: regWins,
+      losses: regLosses,
+      ties: regTies > 0 ? regTies : undefined,
+      otLosses: regOtLosses > 0 ? regOtLosses : undefined,
+      postseason: (postWins > 0 || postLosses > 0) ? { wins: postWins, losses: postLosses } : undefined,
     }
   } catch (error) {
     console.error(`Error fetching ${teamKey} record:`, error)

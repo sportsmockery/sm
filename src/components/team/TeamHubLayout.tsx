@@ -48,6 +48,10 @@ export interface TeamRecord {
   otLosses?: number
   pct?: string
   divisionRank?: string
+  postseason?: {
+    wins: number
+    losses: number
+  }
 }
 
 interface TeamHubLayoutProps {
@@ -126,15 +130,23 @@ export default function TeamHubLayout({
   const formatRecord = () => {
     if (!record) return null
 
+    let regularSeason = ''
     if (team.league === 'NFL') {
       const tie = record.ties && record.ties > 0 ? `-${record.ties}` : ''
-      return `${record.wins}-${record.losses}${tie}`
-    }
-    if (team.league === 'NHL') {
+      regularSeason = `${record.wins}-${record.losses}${tie}`
+    } else if (team.league === 'NHL') {
       const ot = record.otLosses && record.otLosses > 0 ? `-${record.otLosses}` : ''
-      return `${record.wins}-${record.losses}${ot}`
+      regularSeason = `${record.wins}-${record.losses}${ot}`
+    } else {
+      regularSeason = `${record.wins}-${record.losses}`
     }
-    return `${record.wins}-${record.losses}`
+
+    // Add postseason if available
+    if (record.postseason && (record.postseason.wins > 0 || record.postseason.losses > 0)) {
+      return `${regularSeason} • Playoffs: ${record.postseason.wins}-${record.postseason.losses}`
+    }
+
+    return regularSeason
   }
 
   return (
