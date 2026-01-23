@@ -209,12 +209,12 @@ export function PinwheelsAndIvyClient({ latestVideo, previousVideos }: Props) {
             Want more Pinwheels & Ivy episodes?
           </p>
           <a
-            href="https://www.youtube.com/@PinwheelsandIvyPodcast/videos"
+            href="https://www.youtube.com/@PinwheelsandIvyPodcast/streams"
             target="_blank"
             rel="noopener noreferrer"
-            className="sm-cta-button"
+            className="sm-cta-button-pi"
           >
-            View full video archive
+            View Full Video Archive
           </a>
         </div>
       </section>

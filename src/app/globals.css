@@ -1356,6 +1356,19 @@ a:hover {
   color: #000000;
 }
 
+/* Pinwheels & Ivy CTA Button */
+.sm-cta-button-pi {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 10px 18px;
+  border-radius: 999px;
+  background-color: #e31e26;
+  color: #ffffff;
+  font-weight: 600;
+  text-decoration: none;
+}
+
 /* ========== PINWHEELS & IVY SHOW PAGE ========== */
 
 .sm-pinwheels-ivy .sm-show-hero {
