@@ -200,7 +200,8 @@ function generateSlug(name: string): string {
 
 /**
  * Get all Bulls players from DataLab
- * Filters by is_active = true
+ * Filters to only show players from current season (or most recent season for off-season)
+ * Only includes players with headshots
  */
 export async function getBullsPlayers(): Promise<BullsPlayer[]> {
   if (!datalabAdmin) {
@@ -208,10 +209,39 @@ export async function getBullsPlayers(): Promise<BullsPlayer[]> {
     return []
   }
 
+  const targetSeason = getCurrentSeason()
+
+  // Get players who have game stats in the current season
+  let playerIds = await getSeasonPlayerIds(targetSeason)
+
+  // If no players in current season, fall back to previous season (off-season)
+  if (playerIds.length === 0) {
+    playerIds = await getSeasonPlayerIds(targetSeason - 1)
+  }
+
+  // If still no players, get all players with headshots as fallback
+  if (playerIds.length === 0) {
+    const { data, error } = await datalabAdmin
+      .from('bulls_players')
+      .select('*')
+      .not('headshot_url', 'is', null)
+      .order('position')
+      .order('name')
+      .limit(25)
+
+    if (error) {
+      console.error('DataLab fetch error:', error)
+      return []
+    }
+    return transformPlayers(data || [])
+  }
+
+  // Get player details for players with game stats this season
   const { data, error } = await datalabAdmin
     .from('bulls_players')
     .select('*')
-    .eq('is_active', true)
+    .in('id', playerIds)
+    .not('headshot_url', 'is', null)
     .order('position')
     .order('name')
 
@@ -221,6 +251,23 @@ export async function getBullsPlayers(): Promise<BullsPlayer[]> {
   }
 
   return transformPlayers(data || [])
+}
+
+/**
+ * Get player IDs who have game stats in a specific season
+ */
+async function getSeasonPlayerIds(season: number): Promise<number[]> {
+  if (!datalabAdmin) return []
+
+  const { data, error } = await datalabAdmin
+    .from('bulls_player_game_stats')
+    .select('player_id')
+    .eq('season', season)
+
+  if (error || !data) return []
+
+  // Return unique player IDs
+  return [...new Set(data.map((d: any) => d.player_id))]
 }
 
 function transformPlayers(data: any[]): BullsPlayer[] {
@@ -459,6 +506,7 @@ async function getPlayerGameLog(internalId: number): Promise<PlayerGameLogEntry[
 
 /**
  * Get Bulls schedule for a season
+ * Falls back to previous season if current season has no games
  */
 export async function getBullsSchedule(season?: number): Promise<BullsGame[]> {
   const targetSeason = season || getCurrentSeason()
@@ -471,6 +519,7 @@ export async function getBullsSchedule(season?: number): Promise<BullsGame[]> {
       id,
       game_date,
       game_time,
+      season,
       opponent,
       opponent_full_name,
       is_bulls_home,
@@ -484,7 +533,33 @@ export async function getBullsSchedule(season?: number): Promise<BullsGame[]> {
     .eq('season', targetSeason)
     .order('game_date', { ascending: false })
 
-  if (error || !data) return []
+  if (error) return []
+
+  // If no games in current season, fall back to previous season
+  if (!data || data.length === 0) {
+    const { data: prevData, error: prevError } = await datalabAdmin
+      .from('bulls_games_master')
+      .select(`
+        id,
+        game_date,
+        game_time,
+        season,
+        opponent,
+        opponent_full_name,
+        is_bulls_home,
+        arena,
+        bulls_score,
+        opponent_score,
+        bulls_win,
+        broadcast,
+        game_type
+      `)
+      .eq('season', targetSeason - 1)
+      .order('game_date', { ascending: false })
+
+    if (prevError || !prevData) return []
+    return prevData.map((g: any) => transformGame(g))
+  }
 
   return data.map((g: any) => transformGame(g))
 }
@@ -622,7 +697,7 @@ async function getLeaderboards(season: number): Promise<BullsLeaderboard> {
   const playersMap = new Map(players.map(p => [p.internalId, p]))
 
   // Get all game stats for season and aggregate by player
-  const { data: gameStats } = await datalabAdmin
+  let { data: gameStats } = await datalabAdmin
     .from('bulls_player_game_stats')
     .select(`
       player_id,
@@ -633,6 +708,22 @@ async function getLeaderboards(season: number): Promise<BullsLeaderboard> {
       blocks
     `)
     .eq('season', season)
+
+  // Fallback to previous season if no stats
+  if (!gameStats || gameStats.length === 0) {
+    const { data: prevStats } = await datalabAdmin
+      .from('bulls_player_game_stats')
+      .select(`
+        player_id,
+        points,
+        rebounds,
+        assists,
+        steals,
+        blocks
+      `)
+      .eq('season', season - 1)
+    gameStats = prevStats
+  }
 
   if (!gameStats || gameStats.length === 0) {
     return { scoring: [], rebounding: [], assists: [], defense: [] }
@@ -751,8 +842,17 @@ export async function getAvailableSeasons(): Promise<number[]> {
 }
 
 function getCurrentSeason(): number {
-  // NBA 2024-25 season is stored as 2025
-  return 2025
+  // NBA season runs Oct-June, stored as the ending year
+  // e.g., 2024-25 season = 2025, 2025-26 season = 2026
+  const now = new Date()
+  const year = now.getFullYear()
+  const month = now.getMonth() + 1
+  // If before October, use current year (still in previous season)
+  // If October or later, use next year (new season started)
+  if (month < 10) {
+    return year
+  }
+  return year + 1
 }
 
 /**

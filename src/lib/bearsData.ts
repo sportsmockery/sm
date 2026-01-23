@@ -258,7 +258,7 @@ const SIDE_ORDER: Record<Side, number> = { OFF: 1, DEF: 2, ST: 3 }
 
 /**
  * Get all Bears players from Datalab
- * Filters by is_active = true per SM_INTEGRATION_GUIDE.md
+ * Filters to only show players from current season (or most recent season for off-season)
  * Sorted by side (OFF, DEF, ST), then position, then jersey number
  */
 export async function getBearsPlayers(): Promise<BearsPlayer[]> {
@@ -267,8 +267,26 @@ export async function getBearsPlayers(): Promise<BearsPlayer[]> {
 }
 
 /**
+ * Get player IDs who have game stats in a specific season
+ */
+async function getSeasonPlayerIds(season: number): Promise<number[]> {
+  if (!datalabAdmin) return []
+
+  const { data, error } = await datalabAdmin
+    .from('bears_player_game_stats')
+    .select('player_id')
+    .eq('season', season)
+
+  if (error || !data) return []
+
+  // Return unique player IDs
+  return [...new Set(data.map((d: any) => d.player_id))]
+}
+
+/**
  * Get players directly from Datalab
- * Per SM_INTEGRATION_GUIDE.md: Filter by is_active = true
+ * Filters to only show players from current season (or most recent season for off-season)
+ * Only includes players with headshots
  */
 async function getBearsPlayersFromDatalab(): Promise<BearsPlayer[]> {
   if (!datalabAdmin) {
@@ -276,7 +294,51 @@ async function getBearsPlayersFromDatalab(): Promise<BearsPlayer[]> {
     return []
   }
 
-  // Per SM_INTEGRATION_GUIDE.md: Only get active players
+  const targetSeason = getCurrentSeason()
+
+  // Get players who have game stats in the current season
+  let playerIds = await getSeasonPlayerIds(targetSeason)
+
+  // If no players in current season, fall back to previous season (off-season)
+  if (playerIds.length === 0) {
+    playerIds = await getSeasonPlayerIds(targetSeason - 1)
+  }
+
+  // If still no players, get all players with headshots as fallback
+  if (playerIds.length === 0) {
+    const { data, error } = await datalabAdmin
+      .from('bears_players')
+      .select(`
+        id,
+        player_id,
+        name,
+        first_name,
+        last_name,
+        position,
+        position_group,
+        jersey_number,
+        height_inches,
+        weight_lbs,
+        age,
+        college,
+        years_exp,
+        status,
+        is_active,
+        headshot_url
+      `)
+      .not('headshot_url', 'is', null)
+      .order('position_group')
+      .order('name')
+      .limit(60)
+
+    if (error) {
+      console.error('Datalab fetch error:', error)
+      return []
+    }
+    return transformPlayers(data || [])
+  }
+
+  // Get player details for players with game stats this season
   const { data, error } = await datalabAdmin
     .from('bears_players')
     .select(`
@@ -297,7 +359,8 @@ async function getBearsPlayersFromDatalab(): Promise<BearsPlayer[]> {
       is_active,
       headshot_url
     `)
-    .eq('is_active', true)
+    .in('id', playerIds)
+    .not('headshot_url', 'is', null)
     .order('position_group')
     .order('name')
 
@@ -648,6 +711,7 @@ async function getBearsScheduleFromDatalab(season: number): Promise<BearsGame[]>
       game_date,
       game_time,
       game_type,
+      season,
       opponent,
       opponent_full_name,
       is_bears_home,
@@ -666,7 +730,40 @@ async function getBearsScheduleFromDatalab(season: number): Promise<BearsGame[]>
     .eq('season', season)
     .order('game_date', { ascending: false })
 
-  if (error || !data) return []
+  if (error) return []
+
+  // If no games in current season, fall back to previous season (off-season)
+  if (!data || data.length === 0) {
+    const { data: prevData, error: prevError } = await datalabAdmin
+      .from('bears_games_master')
+      .select(`
+        id,
+        week,
+        game_date,
+        game_time,
+        game_type,
+        season,
+        opponent,
+        opponent_full_name,
+        is_bears_home,
+        stadium,
+        bears_score,
+        opponent_score,
+        bears_win,
+        spread_line,
+        total_line,
+        broadcast_window,
+        nationally_televised,
+        temp_f,
+        wind_mph,
+        weather_summary
+      `)
+      .eq('season', season - 1)
+      .order('game_date', { ascending: false })
+
+    if (prevError || !prevData) return []
+    return prevData.map((g: any) => transformGame(g, null))
+  }
 
   return data.map((g: any) => transformGame(g, null))
 }
@@ -857,7 +954,7 @@ async function getLeaderboards(season: number): Promise<BearsLeaderboard> {
   // Use correct column names from datalab schema: pass_yds, rush_yds, rec_yds, etc.
 
   // Get all game stats for season and aggregate by player
-  const { data: gameStats } = await datalabAdmin
+  let { data: gameStats } = await datalabAdmin
     .from('bears_player_game_stats')
     .select(`
       player_id,
@@ -874,6 +971,28 @@ async function getLeaderboards(season: number): Promise<BearsLeaderboard> {
       sacks
     `)
     .eq('season', season)
+
+  // Fallback to previous season if no stats
+  if (!gameStats || gameStats.length === 0) {
+    const { data: prevStats } = await datalabAdmin
+      .from('bears_player_game_stats')
+      .select(`
+        player_id,
+        pass_yds,
+        pass_td,
+        pass_int,
+        rush_yds,
+        rush_td,
+        rush_att,
+        rec_yds,
+        rec_td,
+        rec,
+        tackles,
+        sacks
+      `)
+      .eq('season', season - 1)
+    gameStats = prevStats
+  }
 
   if (!gameStats || gameStats.length === 0) {
     return { passing: [], rushing: [], receiving: [], defense: [] }
@@ -1000,10 +1119,17 @@ export async function getAvailableSeasons(): Promise<number[]> {
 }
 
 function getCurrentSeason(): number {
-  // The 2025-26 NFL season is stored as season = 2025
-  // This season runs from September 2025 through February 2026
-  // ALWAYS return 2025 for the current NFL season
-  return 2025
+  // NFL season runs Sep-Feb, stored as the starting year
+  // e.g., 2025-26 season = 2025
+  const now = new Date()
+  const year = now.getFullYear()
+  const month = now.getMonth() + 1
+  // If before September, use previous year (still in that season)
+  // If September or later, use current year (new season started)
+  if (month < 9) {
+    return year - 1
+  }
+  return year
 }
 
 // =============================================================================

@@ -198,7 +198,8 @@ function generateSlug(name: string): string {
 
 /**
  * Get all Cubs players from DataLab
- * Filters by is_active = true
+ * Filters to only show players from current season (or most recent season for off-season)
+ * Only includes players with headshots
  */
 export async function getCubsPlayers(): Promise<CubsPlayer[]> {
   if (!datalabAdmin) {
@@ -206,10 +207,39 @@ export async function getCubsPlayers(): Promise<CubsPlayer[]> {
     return []
   }
 
+  const targetSeason = getCurrentSeason()
+
+  // Get players who have game stats in the current season
+  let playerIds = await getSeasonPlayerIds(targetSeason)
+
+  // If no players in current season, fall back to previous season (off-season)
+  if (playerIds.length === 0) {
+    playerIds = await getSeasonPlayerIds(targetSeason - 1)
+  }
+
+  // If still no players, get all players with headshots as fallback
+  if (playerIds.length === 0) {
+    const { data, error } = await datalabAdmin
+      .from('cubs_players')
+      .select('*')
+      .not('headshot_url', 'is', null)
+      .order('position')
+      .order('name')
+      .limit(50)
+
+    if (error) {
+      console.error('DataLab fetch error:', error)
+      return []
+    }
+    return transformPlayers(data || [])
+  }
+
+  // Get player details for players with game stats this season
   const { data, error } = await datalabAdmin
     .from('cubs_players')
     .select('*')
-    .eq('is_active', true)
+    .in('id', playerIds)
+    .not('headshot_url', 'is', null)
     .order('position')
     .order('name')
 
@@ -219,6 +249,23 @@ export async function getCubsPlayers(): Promise<CubsPlayer[]> {
   }
 
   return transformPlayers(data || [])
+}
+
+/**
+ * Get player IDs who have game stats in a specific season
+ */
+async function getSeasonPlayerIds(season: number): Promise<number[]> {
+  if (!datalabAdmin) return []
+
+  const { data, error } = await datalabAdmin
+    .from('cubs_player_game_stats')
+    .select('player_id')
+    .eq('season', season)
+
+  if (error || !data) return []
+
+  // Return unique player IDs
+  return [...new Set(data.map((d: any) => d.player_id))]
 }
 
 function transformPlayers(data: any[]): CubsPlayer[] {
@@ -494,6 +541,7 @@ async function getPlayerGameLog(internalId: number): Promise<PlayerGameLogEntry[
 
 /**
  * Get Cubs schedule for a season
+ * Falls back to previous season if current season has no games
  */
 export async function getCubsSchedule(season?: number): Promise<CubsGame[]> {
   const targetSeason = season || getCurrentSeason()
@@ -506,6 +554,7 @@ export async function getCubsSchedule(season?: number): Promise<CubsGame[]> {
       id,
       game_date,
       game_time,
+      season,
       opponent,
       opponent_full_name,
       is_cubs_home,
@@ -520,7 +569,34 @@ export async function getCubsSchedule(season?: number): Promise<CubsGame[]> {
     .eq('season', targetSeason)
     .order('game_date', { ascending: false })
 
-  if (error || !data) return []
+  if (error) return []
+
+  // If no games in current season, fall back to previous season
+  if (!data || data.length === 0) {
+    const { data: prevData, error: prevError } = await datalabAdmin
+      .from('cubs_games_master')
+      .select(`
+        id,
+        game_date,
+        game_time,
+        season,
+        opponent,
+        opponent_full_name,
+        is_cubs_home,
+        stadium,
+        cubs_score,
+        opponent_score,
+        cubs_win,
+        broadcast,
+        game_type,
+        innings
+      `)
+      .eq('season', targetSeason - 1)
+      .order('game_date', { ascending: false })
+
+    if (prevError || !prevData) return []
+    return prevData.map((g: any) => transformGame(g))
+  }
 
   return data.map((g: any) => transformGame(g))
 }
@@ -540,7 +616,7 @@ function transformGame(game: any): CubsGame {
 
   return {
     gameId: game.id?.toString() || game.game_id,
-    season: getCurrentSeason(),
+    season: game.season || getCurrentSeason(),
     date: game.game_date,
     time: formatGameTime(game.game_time),
     dayOfWeek: gameDate.toLocaleDateString('en-US', { weekday: 'long' }),
@@ -649,7 +725,7 @@ async function getLeaderboards(season: number): Promise<CubsLeaderboard> {
   const playersMap = new Map(players.map(p => [p.internalId, p]))
 
   // Get all game stats for season and aggregate by player
-  const { data: gameStats } = await datalabAdmin
+  let { data: gameStats } = await datalabAdmin
     .from('cubs_player_game_stats')
     .select(`
       player_id,
@@ -665,6 +741,27 @@ async function getLeaderboards(season: number): Promise<CubsLeaderboard> {
       save
     `)
     .eq('season', season)
+
+  // Fallback to previous season if no stats (off-season)
+  if (!gameStats || gameStats.length === 0) {
+    const { data: prevStats } = await datalabAdmin
+      .from('cubs_player_game_stats')
+      .select(`
+        player_id,
+        at_bats,
+        hits,
+        home_runs,
+        rbi,
+        innings_pitched,
+        earned_runs,
+        strikeouts_pitched,
+        win,
+        loss,
+        save
+      `)
+      .eq('season', season - 1)
+    gameStats = prevStats
+  }
 
   if (!gameStats || gameStats.length === 0) {
     return { batting: [], homeRuns: [], pitching: [], saves: [] }
@@ -800,8 +897,16 @@ export async function getAvailableSeasons(): Promise<number[]> {
 }
 
 function getCurrentSeason(): number {
-  // MLB 2025 season
-  return 2025
+  // MLB season year - use 2024 until 2025 season has games
+  const now = new Date()
+  const year = now.getFullYear()
+  const month = now.getMonth() + 1
+  // MLB season typically starts in late March/April
+  // If before April, use previous year
+  if (month < 4) {
+    return year - 1
+  }
+  return year
 }
 
 /**
