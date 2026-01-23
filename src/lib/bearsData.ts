@@ -703,6 +703,7 @@ async function getBearsScheduleFromDatalab(season: number): Promise<BearsGame[]>
   if (!datalabAdmin) return []
 
   // Per SM_INTEGRATION_GUIDE.md: Use exact column names from bears_games_master
+  // Only include regular season and postseason games
   const { data, error } = await datalabAdmin
     .from('bears_games_master')
     .select(`
@@ -728,6 +729,7 @@ async function getBearsScheduleFromDatalab(season: number): Promise<BearsGame[]>
       weather_summary
     `)
     .eq('season', season)
+    .in('game_type', ['regular', 'postseason'])
     .order('game_date', { ascending: false })
 
   if (error) return []
@@ -759,6 +761,7 @@ async function getBearsScheduleFromDatalab(season: number): Promise<BearsGame[]>
         weather_summary
       `)
       .eq('season', season - 1)
+      .in('game_type', ['regular', 'postseason'])
       .order('game_date', { ascending: false })
 
     if (prevError || !prevData) return []

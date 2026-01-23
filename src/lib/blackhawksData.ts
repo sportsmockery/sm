@@ -494,6 +494,7 @@ async function getPlayerGameLog(internalId: number): Promise<PlayerGameLogEntry[
 /**
  * Get Blackhawks schedule for a season
  * Falls back to previous season if current season has no games
+ * Only includes regular season and postseason games
  */
 export async function getBlackhawksSchedule(season?: number): Promise<BlackhawksGame[]> {
   const targetSeason = season || getCurrentSeason()
@@ -520,6 +521,7 @@ export async function getBlackhawksSchedule(season?: number): Promise<Blackhawks
       shootout
     `)
     .eq('season', targetSeason)
+    .in('game_type', ['regular', 'postseason'])
     .order('game_date', { ascending: false })
 
   if (error) return []
@@ -546,6 +548,7 @@ export async function getBlackhawksSchedule(season?: number): Promise<Blackhawks
         shootout
       `)
       .eq('season', targetSeason - 1)
+      .in('game_type', ['regular', 'postseason'])
       .order('game_date', { ascending: false })
 
     if (prevError || !prevData) return []

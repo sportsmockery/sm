@@ -507,6 +507,7 @@ async function getPlayerGameLog(internalId: number): Promise<PlayerGameLogEntry[
 /**
  * Get Bulls schedule for a season
  * Falls back to previous season if current season has no games
+ * Only includes regular season and postseason games
  */
 export async function getBullsSchedule(season?: number): Promise<BullsGame[]> {
   const targetSeason = season || getCurrentSeason()
@@ -531,6 +532,7 @@ export async function getBullsSchedule(season?: number): Promise<BullsGame[]> {
       game_type
     `)
     .eq('season', targetSeason)
+    .in('game_type', ['regular', 'postseason'])
     .order('game_date', { ascending: false })
 
   if (error) return []
@@ -555,6 +557,7 @@ export async function getBullsSchedule(season?: number): Promise<BullsGame[]> {
         game_type
       `)
       .eq('season', targetSeason - 1)
+      .in('game_type', ['regular', 'postseason'])
       .order('game_date', { ascending: false })
 
     if (prevError || !prevData) return []

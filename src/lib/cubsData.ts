@@ -542,11 +542,16 @@ async function getPlayerGameLog(internalId: number): Promise<PlayerGameLogEntry[
 /**
  * Get Cubs schedule for a season
  * Falls back to previous season if current season has no games
+ * Filters to only regular season (from ~March 18) and postseason games
  */
 export async function getCubsSchedule(season?: number): Promise<CubsGame[]> {
   const targetSeason = season || getCurrentSeason()
 
   if (!datalabAdmin) return []
+
+  // MLB regular season starts late March (earliest is Tokyo series ~March 18)
+  // Filter out spring training games
+  const seasonStartDate = `${targetSeason}-03-18`
 
   const { data, error } = await datalabAdmin
     .from('cubs_games_master')
@@ -567,12 +572,14 @@ export async function getCubsSchedule(season?: number): Promise<CubsGame[]> {
       innings
     `)
     .eq('season', targetSeason)
+    .gte('game_date', seasonStartDate)
     .order('game_date', { ascending: false })
 
   if (error) return []
 
   // If no games in current season, fall back to previous season
   if (!data || data.length === 0) {
+    const prevSeasonStartDate = `${targetSeason - 1}-03-18`
     const { data: prevData, error: prevError } = await datalabAdmin
       .from('cubs_games_master')
       .select(`
@@ -592,6 +599,7 @@ export async function getCubsSchedule(season?: number): Promise<CubsGame[]> {
         innings
       `)
       .eq('season', targetSeason - 1)
+      .gte('game_date', prevSeasonStartDate)
       .order('game_date', { ascending: false })
 
     if (prevError || !prevData) return []
