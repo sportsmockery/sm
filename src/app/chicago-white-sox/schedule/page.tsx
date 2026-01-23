@@ -1,8 +1,8 @@
 import { Metadata } from 'next'
 import Image from 'next/image'
 import { TeamHubLayout } from '@/components/team'
-import { CHICAGO_TEAMS, fetchTeamRecord, fetchNextGame } from '@/lib/team-config'
-import { getWhiteSoxSchedule, type WhiteSoxGame } from '@/lib/whitesoxData'
+import { CHICAGO_TEAMS, fetchNextGame } from '@/lib/team-config'
+import { getWhiteSoxSchedule, getWhiteSoxRecord, type WhiteSoxGame } from '@/lib/whitesoxData'
 
 const WHITE_SOX_LOGO = 'https://a.espncdn.com/i/teamlogos/mlb/500/chw.png'
 
@@ -16,11 +16,16 @@ export const revalidate = 3600
 export default async function WhiteSoxSchedulePage() {
   const team = CHICAGO_TEAMS.whitesox
 
-  const [schedule, record, nextGame] = await Promise.all([
+  const [schedule, soxRecord, nextGame] = await Promise.all([
     getWhiteSoxSchedule(),
-    fetchTeamRecord('whitesox'),
+    getWhiteSoxRecord(),
     fetchNextGame('whitesox'),
   ])
+
+  const record = {
+    wins: soxRecord.wins,
+    losses: soxRecord.losses,
+  }
 
   const nextScheduledGame = schedule.find(g => g.status === 'scheduled')
 

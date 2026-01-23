@@ -2,8 +2,8 @@ import { Metadata } from 'next'
 import Link from 'next/link'
 import Image from 'next/image'
 import { TeamHubLayout } from '@/components/team'
-import { CHICAGO_TEAMS, fetchTeamRecord, fetchNextGame } from '@/lib/team-config'
-import { getCubsRecentScores, type CubsGame } from '@/lib/cubsData'
+import { CHICAGO_TEAMS, fetchNextGame } from '@/lib/team-config'
+import { getCubsRecentScores, getCubsRecord, type CubsGame } from '@/lib/cubsData'
 
 const CUBS_LOGO = 'https://a.espncdn.com/i/teamlogos/mlb/500/chc.png'
 
@@ -17,11 +17,16 @@ export const revalidate = 1800
 export default async function CubsScoresPage() {
   const team = CHICAGO_TEAMS.cubs
 
-  const [scores, record, nextGame] = await Promise.all([
+  const [scores, cubsRecord, nextGame] = await Promise.all([
     getCubsRecentScores(20),
-    fetchTeamRecord('cubs'),
+    getCubsRecord(),
     fetchNextGame('cubs'),
   ])
+
+  const record = {
+    wins: cubsRecord.wins,
+    losses: cubsRecord.losses,
+  }
 
   return (
     <TeamHubLayout

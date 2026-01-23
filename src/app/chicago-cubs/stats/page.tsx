@@ -2,8 +2,8 @@ import { Metadata } from 'next'
 import Link from 'next/link'
 import Image from 'next/image'
 import { TeamHubLayout } from '@/components/team'
-import { CHICAGO_TEAMS, fetchTeamRecord, fetchNextGame } from '@/lib/team-config'
-import { getCubsStats, type CubsStats, type LeaderboardEntry, type CubsPlayer } from '@/lib/cubsData'
+import { CHICAGO_TEAMS, fetchNextGame } from '@/lib/team-config'
+import { getCubsStats, getCubsRecord, type CubsStats, type LeaderboardEntry, type CubsPlayer } from '@/lib/cubsData'
 
 export const metadata: Metadata = {
   title: 'Chicago Cubs Stats 2025 | Team & Player Statistics | SportsMockery',
@@ -15,11 +15,16 @@ export const revalidate = 3600
 export default async function CubsStatsPage() {
   const team = CHICAGO_TEAMS.cubs
 
-  const [stats, record, nextGame] = await Promise.all([
+  const [stats, cubsRecord, nextGame] = await Promise.all([
     getCubsStats(),
-    fetchTeamRecord('cubs'),
+    getCubsRecord(),
     fetchNextGame('cubs'),
   ])
+
+  const record = {
+    wins: cubsRecord.wins,
+    losses: cubsRecord.losses,
+  }
 
   return (
     <TeamHubLayout

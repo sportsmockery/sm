@@ -2,8 +2,8 @@ import { Metadata } from 'next'
 import Link from 'next/link'
 import Image from 'next/image'
 import { TeamHubLayout } from '@/components/team'
-import { CHICAGO_TEAMS, fetchTeamRecord, fetchNextGame } from '@/lib/team-config'
-import { getWhiteSoxStats, type WhiteSoxStats, type LeaderboardEntry, type WhiteSoxPlayer } from '@/lib/whitesoxData'
+import { CHICAGO_TEAMS, fetchNextGame } from '@/lib/team-config'
+import { getWhiteSoxStats, getWhiteSoxRecord, type WhiteSoxStats, type LeaderboardEntry, type WhiteSoxPlayer } from '@/lib/whitesoxData'
 
 export const metadata: Metadata = {
   title: 'Chicago White Sox Stats 2025 | Team & Player Statistics | SportsMockery',
@@ -15,11 +15,16 @@ export const revalidate = 3600
 export default async function WhiteSoxStatsPage() {
   const team = CHICAGO_TEAMS.whitesox
 
-  const [stats, record, nextGame] = await Promise.all([
+  const [stats, soxRecord, nextGame] = await Promise.all([
     getWhiteSoxStats(),
-    fetchTeamRecord('whitesox'),
+    getWhiteSoxRecord(),
     fetchNextGame('whitesox'),
   ])
+
+  const record = {
+    wins: soxRecord.wins,
+    losses: soxRecord.losses,
+  }
 
   return (
     <TeamHubLayout

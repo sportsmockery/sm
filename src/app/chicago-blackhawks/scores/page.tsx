@@ -2,8 +2,8 @@ import { Metadata } from 'next'
 import Link from 'next/link'
 import Image from 'next/image'
 import { TeamHubLayout } from '@/components/team'
-import { CHICAGO_TEAMS, fetchTeamRecord, fetchNextGame } from '@/lib/team-config'
-import { getBlackhawksRecentScores, type BlackhawksGame } from '@/lib/blackhawksData'
+import { CHICAGO_TEAMS, fetchNextGame } from '@/lib/team-config'
+import { getBlackhawksRecentScores, getBlackhawksRecord, type BlackhawksGame } from '@/lib/blackhawksData'
 
 const BLACKHAWKS_LOGO = 'https://a.espncdn.com/i/teamlogos/nhl/500/chi.png'
 
@@ -17,11 +17,17 @@ export const revalidate = 1800
 export default async function BlackhawksScoresPage() {
   const team = CHICAGO_TEAMS.blackhawks
 
-  const [scores, record, nextGame] = await Promise.all([
+  const [scores, hawksRecord, nextGame] = await Promise.all([
     getBlackhawksRecentScores(20),
-    fetchTeamRecord('blackhawks'),
+    getBlackhawksRecord(),
     fetchNextGame('blackhawks'),
   ])
+
+  const record = {
+    wins: hawksRecord.wins,
+    losses: hawksRecord.losses,
+    otLosses: hawksRecord.otLosses,
+  }
 
   return (
     <TeamHubLayout

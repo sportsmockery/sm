@@ -2,8 +2,8 @@ import { Metadata } from 'next'
 import Link from 'next/link'
 import Image from 'next/image'
 import { TeamHubLayout } from '@/components/team'
-import { CHICAGO_TEAMS, fetchTeamRecord, fetchNextGame } from '@/lib/team-config'
-import { getWhiteSoxRecentScores, type WhiteSoxGame } from '@/lib/whitesoxData'
+import { CHICAGO_TEAMS, fetchNextGame } from '@/lib/team-config'
+import { getWhiteSoxRecentScores, getWhiteSoxRecord, type WhiteSoxGame } from '@/lib/whitesoxData'
 
 const WHITE_SOX_LOGO = 'https://a.espncdn.com/i/teamlogos/mlb/500/chw.png'
 
@@ -17,11 +17,16 @@ export const revalidate = 1800
 export default async function WhiteSoxScoresPage() {
   const team = CHICAGO_TEAMS.whitesox
 
-  const [scores, record, nextGame] = await Promise.all([
+  const [scores, soxRecord, nextGame] = await Promise.all([
     getWhiteSoxRecentScores(20),
-    fetchTeamRecord('whitesox'),
+    getWhiteSoxRecord(),
     fetchNextGame('whitesox'),
   ])
+
+  const record = {
+    wins: soxRecord.wins,
+    losses: soxRecord.losses,
+  }
 
   return (
     <TeamHubLayout

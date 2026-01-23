@@ -1,8 +1,8 @@
 import { Metadata } from 'next'
 import Image from 'next/image'
 import { TeamHubLayout } from '@/components/team'
-import { CHICAGO_TEAMS, fetchTeamRecord, fetchNextGame } from '@/lib/team-config'
-import { getBlackhawksSchedule, type BlackhawksGame } from '@/lib/blackhawksData'
+import { CHICAGO_TEAMS, fetchNextGame } from '@/lib/team-config'
+import { getBlackhawksSchedule, getBlackhawksRecord, type BlackhawksGame } from '@/lib/blackhawksData'
 
 const BLACKHAWKS_LOGO = 'https://a.espncdn.com/i/teamlogos/nhl/500/chi.png'
 
@@ -16,11 +16,17 @@ export const revalidate = 3600
 export default async function BlackhawksSchedulePage() {
   const team = CHICAGO_TEAMS.blackhawks
 
-  const [schedule, record, nextGame] = await Promise.all([
+  const [schedule, hawksRecord, nextGame] = await Promise.all([
     getBlackhawksSchedule(),
-    fetchTeamRecord('blackhawks'),
+    getBlackhawksRecord(),
     fetchNextGame('blackhawks'),
   ])
+
+  const record = {
+    wins: hawksRecord.wins,
+    losses: hawksRecord.losses,
+    otLosses: hawksRecord.otLosses,
+  }
 
   const nextScheduledGame = schedule.find(g => g.status === 'scheduled')
 

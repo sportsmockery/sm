@@ -2,8 +2,8 @@ import { Metadata } from 'next'
 import Link from 'next/link'
 import Image from 'next/image'
 import { TeamHubLayout } from '@/components/team'
-import { CHICAGO_TEAMS, fetchTeamRecord, fetchNextGame } from '@/lib/team-config'
-import { getCubsRosterGrouped, POSITION_GROUP_NAMES, type CubsPlayer, type PositionGroup } from '@/lib/cubsData'
+import { CHICAGO_TEAMS, fetchNextGame } from '@/lib/team-config'
+import { getCubsRosterGrouped, getCubsRecord, POSITION_GROUP_NAMES, type CubsPlayer, type PositionGroup } from '@/lib/cubsData'
 
 export const metadata: Metadata = {
   title: 'Chicago Cubs Roster 2025 | SportsMockery',
@@ -17,11 +17,16 @@ const POSITION_ORDER: PositionGroup[] = ['pitchers', 'catchers', 'infielders', '
 export default async function CubsRosterPage() {
   const team = CHICAGO_TEAMS.cubs
 
-  const [roster, record, nextGame] = await Promise.all([
+  const [roster, cubsRecord, nextGame] = await Promise.all([
     getCubsRosterGrouped(),
-    fetchTeamRecord('cubs'),
+    getCubsRecord(),
     fetchNextGame('cubs'),
   ])
+
+  const record = {
+    wins: cubsRecord.wins,
+    losses: cubsRecord.losses,
+  }
 
   const allPlayers = Object.values(roster).flat()
 

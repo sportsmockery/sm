@@ -2,8 +2,8 @@ import { Metadata } from 'next'
 import Link from 'next/link'
 import Image from 'next/image'
 import { TeamHubLayout } from '@/components/team'
-import { CHICAGO_TEAMS, fetchTeamRecord, fetchNextGame } from '@/lib/team-config'
-import { getBlackhawksStats, type BlackhawksStats, type LeaderboardEntry, type BlackhawksPlayer } from '@/lib/blackhawksData'
+import { CHICAGO_TEAMS, fetchNextGame } from '@/lib/team-config'
+import { getBlackhawksStats, getBlackhawksRecord, type BlackhawksStats, type LeaderboardEntry, type BlackhawksPlayer } from '@/lib/blackhawksData'
 
 export const metadata: Metadata = {
   title: 'Chicago Blackhawks Stats 2024-25 | Team & Player Statistics | SportsMockery',
@@ -15,11 +15,17 @@ export const revalidate = 3600
 export default async function BlackhawksStatsPage() {
   const team = CHICAGO_TEAMS.blackhawks
 
-  const [stats, record, nextGame] = await Promise.all([
+  const [stats, hawksRecord, nextGame] = await Promise.all([
     getBlackhawksStats(),
-    fetchTeamRecord('blackhawks'),
+    getBlackhawksRecord(),
     fetchNextGame('blackhawks'),
   ])
+
+  const record = {
+    wins: hawksRecord.wins,
+    losses: hawksRecord.losses,
+    otLosses: hawksRecord.otLosses,
+  }
 
   return (
     <TeamHubLayout
