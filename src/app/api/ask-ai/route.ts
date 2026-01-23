@@ -69,7 +69,7 @@ function transformChartData(dataLabChart: {
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json()
-    const { query } = body
+    const { query, sessionId } = body
 
     if (!query || typeof query !== 'string' || query.trim().length < 3) {
       return NextResponse.json(
@@ -78,7 +78,7 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    console.log('Ask AI request:', query.slice(0, 100))
+    console.log('Ask AI request:', query.slice(0, 100), sessionId ? `[session: ${sessionId}]` : '[new session]')
 
     // Forward the request to Data Lab's query API
     const response = await fetch(`${DATALAB_API_URL}/api/query`, {
@@ -88,7 +88,10 @@ export async function POST(request: NextRequest) {
         // Pass along any auth if needed in the future
         'X-Source': 'sportsmockery.com',
       },
-      body: JSON.stringify({ query: query.trim() }),
+      body: JSON.stringify({
+        query: query.trim(),
+        sessionId: sessionId || undefined,
+      }),
     })
 
     if (!response.ok) {
@@ -129,6 +132,9 @@ export async function POST(request: NextRequest) {
       chartData: transformedChartData,
       bonusInsight: data.bonusInsight,
       rawData: data.rawData,
+      // Session data for follow-up context (pronoun resolution)
+      sessionId: data.sessionId,
+      sessionContext: data.sessionContext,
     })
 
   } catch (error) {
