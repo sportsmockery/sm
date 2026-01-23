@@ -20,7 +20,7 @@ export function BearsFilmRoomClient({ latestVideo, previousVideos }: Props) {
               <img
                 src="/youtubelogos/bfr-wide.png"
                 alt="Bears Film Room"
-                style={{ marginBottom: '0.5rem', maxWidth: '100%', height: 'auto' }}
+                style={{ marginBottom: '0.5rem', maxWidth: '320px', height: 'auto' }}
               />
               <span className="sm-show-label">Bears Film Room</span>
               <h1 className="sm-hero-title">Videos temporarily unavailable</h1>
@@ -97,7 +97,7 @@ export function BearsFilmRoomClient({ latestVideo, previousVideos }: Props) {
             <img
               src="/youtubelogos/bfr-wide.png"
               alt="Bears Film Room"
-              style={{ marginBottom: '0.5rem', maxWidth: '100%', height: 'auto' }}
+              style={{ marginBottom: '0.5rem', maxWidth: '320px', height: 'auto' }}
             />
             <span className="sm-show-label">Bears Film Room</span>
             <h1 className="sm-hero-title">{latestVideo.title}</h1>
@@ -157,7 +157,7 @@ export function BearsFilmRoomClient({ latestVideo, previousVideos }: Props) {
             </div>
           </div>
 
-          <div className="sm-hero-video">
+          <div className="sm-hero-video self-center">
             <div className="sm-video-wrapper">
               <iframe
                 src={`https://www.youtube.com/embed/${activeVideoId}`}
