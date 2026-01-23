@@ -93,11 +93,8 @@ export default async function AdminPostsPage({ searchParams }: PostsPageProps) {
         </div>
         <Link
           href="/admin/posts/new"
-          className="inline-flex items-center gap-2 rounded-lg bg-[var(--accent-red)] px-4 py-2.5 text-sm font-medium text-white hover:bg-[var(--accent-red-hover)] transition-colors"
+          className="inline-flex items-center rounded-lg px-4 py-2.5 text-sm font-medium transition-colors bg-[#bc0000] text-white dark:bg-white dark:text-[#bc0000]"
         >
-          <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
-          </svg>
           New Post
         </Link>
       </div>
