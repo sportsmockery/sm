@@ -6,7 +6,6 @@ import Image from 'next/image'
 import Link from 'next/link'
 import RichTextEditor from './RichTextEditor'
 import { CategorySelect, AuthorSelect } from './SearchableSelect'
-import VoiceToText from './VoiceToText'
 
 interface Category {
   id: string
@@ -61,7 +60,6 @@ export default function AdvancedPostEditor({
   const isEditing = !!post?.id
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState('')
-  const [showVoice, setShowVoice] = useState(false)
   const [aiLoading, setAiLoading] = useState<string | null>(null)
   const [uploadingImage, setUploadingImage] = useState(false)
   const [headlines, setHeadlines] = useState<string[]>([])
@@ -69,17 +67,25 @@ export default function AdvancedPostEditor({
   const [showIdeasModal, setShowIdeasModal] = useState(false)
   const [selectedIdea, setSelectedIdea] = useState<ArticleIdea | null>(null)
   const [loadingIdeas, setLoadingIdeas] = useState(false)
-  const [showSidebar, setShowSidebar] = useState(true)
-  const [settingsExpanded, setSettingsExpanded] = useState(true)
-  const [seoExpanded, setSeoExpanded] = useState(true)
+
+  // Sidebar states
+  const [leftSidebarCollapsed, setLeftSidebarCollapsed] = useState(true)
+  const [rightSidebarCollapsed, setRightSidebarCollapsed] = useState(false)
+
+  // SEO states
+  const [seoExpanded, setSeoExpanded] = useState(false)
   const [seoGenerated, setSeoGenerated] = useState(false)
   const [generatingSEO, setGeneratingSEO] = useState(false)
 
+  // Push notification states
+  const [sendPushNotification, setSendPushNotification] = useState(false)
+  const [pushTitle, setPushTitle] = useState('')
+  const [pushMessage, setPushMessage] = useState('')
+
   // Refs for auto-AI tracking
-  const lastAutoSeoWordCount = useRef(0)
   const autoAiTimerRef = useRef<NodeJS.Timeout | null>(null)
 
-  // Form state - default author to current user
+  // Form state
   const [formData, setFormData] = useState({
     title: post?.title || '',
     slug: post?.slug || '',
@@ -115,7 +121,7 @@ export default function AdvancedPostEditor({
     const parser = new DOMParser()
     const doc = parser.parseFromString(html, 'text/html')
     const paragraphs = doc.querySelectorAll('p')
-    return Array.from(paragraphs).map((p, i) => {
+    return Array.from(paragraphs).map((p) => {
       const text = p.textContent || ''
       return text.length > 60 ? text.slice(0, 60) + '...' : text
     }).filter(t => t.trim().length > 0)
@@ -132,6 +138,13 @@ export default function AdvancedPostEditor({
     }
   }, [formData.title, formData.slug, isEditing])
 
+  // Auto-populate push title when checkbox is enabled and title changes
+  useEffect(() => {
+    if (sendPushNotification && formData.title && !pushTitle) {
+      setPushTitle(formData.title.slice(0, 65))
+    }
+  }, [sendPushNotification, formData.title, pushTitle])
+
   // Word count calculation
   const wordCount = formData.content.replace(/<[^>]*>/g, ' ').split(/\s+/).filter(w => w).length
 
@@ -141,7 +154,6 @@ export default function AdvancedPostEditor({
       clearTimeout(autoAiTimerRef.current)
     }
 
-    // Only auto-generate if content is substantial and SEO hasn't been generated yet
     const shouldAutoGenerate = wordCount >= 150 &&
       !seoGenerated &&
       !formData.seo_title &&
@@ -177,7 +189,7 @@ export default function AdvancedPostEditor({
           console.error('Auto-SEO generation error:', err)
         }
         setGeneratingSEO(false)
-      }, 2000) // 2 second debounce
+      }, 2000)
     }
 
     return () => {
@@ -305,7 +317,7 @@ export default function AdvancedPostEditor({
     setGeneratingSEO(false)
   }
 
-  // Open PostIQ Chart Modal and analyze content
+  // Open PostIQ Chart Modal
   const openChartModal = async () => {
     if (formData.content.length < 200) {
       alert('Please add more content before generating a chart (minimum 200 characters)')
@@ -316,7 +328,6 @@ export default function AdvancedPostEditor({
     setChartLoading(true)
     setChartSuggestion(null)
 
-    // Extract paragraphs for the dropdown
     const paragraphs = extractParagraphs(formData.content)
     setParagraphOptions(paragraphs)
 
@@ -339,8 +350,6 @@ export default function AdvancedPostEditor({
           setSelectedChartType(data.chartType || 'bar')
           setSelectedParagraph(data.paragraphIndex || 1)
           setCustomChartTitle(data.chartTitle || '')
-        } else {
-          setChartSuggestion(null)
         }
       }
     } catch (err) {
@@ -387,7 +396,6 @@ export default function AdvancedPostEditor({
 
     setChartLoading(true)
     try {
-      // Determine team from category
       const teamMap: Record<string, string> = {
         'Chicago Bears': 'bears', 'Bears': 'bears',
         'Chicago Bulls': 'bulls', 'Bulls': 'bulls',
@@ -398,7 +406,6 @@ export default function AdvancedPostEditor({
       const categoryName = categories.find(c => c.id === formData.category_id)?.name || ''
       const team = teamMap[categoryName] || 'bears'
 
-      // Create chart via API
       const chartResponse = await fetch('/api/charts', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -415,14 +422,7 @@ export default function AdvancedPostEditor({
       if (chartResponse.ok) {
         const chartData = await chartResponse.json()
         const shortcode = `[chart:${chartData.id}]`
-
-        // Insert shortcode after selected paragraph
-        const updatedContent = insertShortcodeAfterParagraph(
-          formData.content,
-          shortcode,
-          selectedParagraph
-        )
-
+        const updatedContent = insertShortcodeAfterParagraph(formData.content, shortcode, selectedParagraph)
         setFormData(prev => ({ ...prev, content: updatedContent }))
         setShowChartModal(false)
         setChartSuggestion(null)
@@ -457,14 +457,6 @@ export default function AdvancedPostEditor({
 
     return html + `\n<div class="chart-embed my-6">${shortcode}</div>`
   }
-
-  // Handle voice transcript
-  const handleVoiceTranscript = useCallback((text: string) => {
-    setFormData((prev) => ({
-      ...prev,
-      content: prev.content + (prev.content ? '\n\n' : '') + `<p>${text}</p>`,
-    }))
-  }, [])
 
   // Handle image upload
   const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -501,6 +493,7 @@ export default function AdvancedPostEditor({
   const handleSubmit = async () => {
     if (!formData.title.trim()) {
       setError('Title is required')
+      setTimeout(() => setError(''), 3000)
       return
     }
 
@@ -508,7 +501,7 @@ export default function AdvancedPostEditor({
     setError('')
 
     try {
-      const endpoint = isEditing ? `/api/posts/${post.id}` : '/api/admin/posts'
+      const endpoint = isEditing ? `/api/posts/${post?.id}` : '/api/admin/posts'
 
       const response = await fetch(endpoint, {
         method: 'POST',
@@ -526,6 +519,27 @@ export default function AdvancedPostEditor({
       }
 
       const data = await response.json()
+
+      // Send push notification if checkbox is checked and post is published
+      if (sendPushNotification && formData.status === 'published' && pushTitle.trim() && pushMessage.trim()) {
+        try {
+          const categorySlug = categories.find(c => c.id === formData.category_id)?.slug || null
+          await fetch('/api/admin/notifications/send', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              title: pushTitle.trim(),
+              body: pushMessage.trim(),
+              articleId: data.id,
+              articleSlug: formData.slug,
+              categorySlug,
+            }),
+          })
+        } catch (pushErr) {
+          console.error('Failed to send push notification:', pushErr)
+        }
+      }
+
       router.push(`/admin/posts/${data.id}`)
       router.refresh()
     } catch (err) {
@@ -544,7 +558,7 @@ export default function AdvancedPostEditor({
     }
   }
 
-  // Open ideas modal and generate ideas
+  // Open ideas modal
   const openIdeasModal = () => {
     setShowIdeasModal(true)
     if (ideas.length === 0) {
@@ -565,186 +579,196 @@ export default function AdvancedPostEditor({
   }, [formData])
 
   return (
-    <div className="bg-[var(--bg-primary)]">
-      {/* Fixed Header - reduced height */}
-      <header className="sticky left-0 right-0 top-0 z-40 border-b border-[var(--border-default)] bg-[var(--bg-secondary)]/95 backdrop-blur-sm">
-        <div className="flex h-14 items-center justify-between px-4 lg:px-6">
-          {/* Left: Back & Title */}
-          <div className="flex items-center gap-4">
-            <Link
-              href="/admin/posts"
-              className="flex h-9 w-9 items-center justify-center rounded-lg text-[var(--text-muted)] hover:bg-[var(--bg-hover)] hover:text-[var(--text-primary)] transition-colors"
-            >
-              <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18" />
-              </svg>
-            </Link>
-            <div className="hidden sm:block">
-              <h1 className="text-sm font-semibold text-[var(--text-primary)]">
-                {isEditing ? 'Edit Post' : 'New Post'}
-              </h1>
-              <p className="text-xs text-[var(--text-muted)]">
-                {wordCount} words · {Math.ceil(wordCount / 200)} min read
-              </p>
-            </div>
-          </div>
+    <div className="fixed inset-0 z-50 flex flex-col bg-[var(--bg-primary)]">
+      {/* Top Header Bar - minimal, below the red line */}
+      <header className="flex-shrink-0 flex h-12 items-center justify-between border-b border-[var(--border-default)] bg-[var(--bg-secondary)] px-4">
+        {/* Left: Toggle sidebar + Breadcrumb */}
+        <div className="flex items-center gap-3">
+          <button
+            type="button"
+            onClick={() => setLeftSidebarCollapsed(!leftSidebarCollapsed)}
+            className="flex h-8 w-8 items-center justify-center rounded-lg text-[var(--text-muted)] hover:bg-[var(--bg-hover)] hover:text-[var(--text-primary)] transition-colors"
+            title={leftSidebarCollapsed ? 'Show sidebar' : 'Hide sidebar'}
+          >
+            <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
+            </svg>
+          </button>
+          <nav className="flex items-center gap-1.5 text-sm">
+            <Link href="/admin" className="text-[var(--text-muted)] hover:text-[var(--text-primary)]">Dashboard</Link>
+            <span className="text-[var(--text-muted)]">/</span>
+            <Link href="/admin/posts" className="text-[var(--text-muted)] hover:text-[var(--text-primary)]">Posts</Link>
+            <span className="text-[var(--text-muted)]">/</span>
+            <span className="text-[var(--text-primary)] font-medium">{isEditing ? 'Edit' : 'New'}</span>
+          </nav>
+        </div>
 
-          {/* Center: AI Tools Bar */}
-          <div className="hidden items-center gap-1 rounded-lg bg-[var(--bg-tertiary)] p-1 md:flex">
-            <button
-              type="button"
-              onClick={() => runAI('grammar')}
-              disabled={aiLoading === 'grammar' || !formData.content}
-              className="flex items-center gap-1.5 rounded-md px-3 py-1.5 text-xs font-medium text-[var(--text-secondary)] hover:bg-[var(--bg-hover)] hover:text-[var(--text-primary)] disabled:opacity-50 transition-colors"
-              title="Grammar Check"
-            >
-              <svg className="h-4 w-4 text-purple-500" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-              </svg>
-              {aiLoading === 'grammar' ? 'Checking...' : 'Grammar Check'}
-            </button>
-            <div className="h-4 w-px bg-[var(--border-default)]" />
-            <button
-              type="button"
-              onClick={() => runAI('headlines')}
-              disabled={aiLoading === 'headlines' || !formData.title}
-              className="flex items-center gap-1.5 rounded-md px-3 py-1.5 text-xs font-medium text-[var(--text-secondary)] hover:bg-[var(--bg-hover)] hover:text-[var(--text-primary)] disabled:opacity-50 transition-colors"
-              title="Generate Headlines"
-            >
-              <svg className="h-4 w-4 text-purple-500" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25H12" />
-              </svg>
-              {aiLoading === 'headlines' ? 'Generating...' : 'Headlines'}
-            </button>
-            <div className="h-4 w-px bg-[var(--border-default)]" />
-            <button
-              type="button"
-              onClick={() => setShowVoice(!showVoice)}
-              className={`flex items-center gap-1.5 rounded-md px-3 py-1.5 text-xs font-medium transition-colors ${
-                showVoice
-                  ? 'bg-purple-500/10 text-purple-500'
-                  : 'text-[var(--text-secondary)] hover:bg-[var(--bg-hover)] hover:text-[var(--text-primary)]'
-              }`}
-              title="Voice Input"
-            >
-              <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M12 18.75a6 6 0 006-6v-1.5m-6 7.5a6 6 0 01-6-6v-1.5m6 7.5v3.75m-3.75 0h7.5M12 15.75a3 3 0 01-3-3V4.5a3 3 0 116 0v8.25a3 3 0 01-3 3z" />
-              </svg>
-              Voice
-            </button>
-          </div>
+        {/* Right: Word count + Status + Save */}
+        <div className="flex items-center gap-3">
+          <span className="hidden sm:inline text-xs text-[var(--text-muted)]">{wordCount} words</span>
 
-          {/* Right: Actions */}
-          <div className="flex items-center gap-2">
-            <button
-              type="button"
-              onClick={() => setShowSidebar(!showSidebar)}
-              className="flex h-9 w-9 items-center justify-center rounded-lg text-[var(--text-muted)] hover:bg-[var(--bg-hover)] hover:text-[var(--text-primary)] transition-colors lg:hidden"
-            >
-              <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M10.5 6h9.75M10.5 6a1.5 1.5 0 11-3 0m3 0a1.5 1.5 0 10-3 0M3.75 6H7.5m3 12h9.75m-9.75 0a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m-3.75 0H7.5m9-6h3.75m-3.75 0a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m-9.75 0h9.75" />
-              </svg>
-            </button>
+          <select
+            value={formData.status}
+            onChange={(e) => updateField('status', e.target.value)}
+            className="h-8 rounded-lg border border-[var(--border-default)] bg-[var(--bg-tertiary)] px-2 text-sm text-[var(--text-primary)] focus:border-[var(--accent-red)] focus:outline-none"
+          >
+            <option value="draft">Draft</option>
+            <option value="published">Published</option>
+            <option value="scheduled">Scheduled</option>
+          </select>
 
-            <select
-              value={formData.status}
-              onChange={(e) => updateField('status', e.target.value)}
-              className="hidden h-9 rounded-lg border border-[var(--border-default)] bg-[var(--bg-tertiary)] px-3 text-sm text-[var(--text-primary)] focus:border-[var(--accent-red)] focus:outline-none sm:block"
-            >
-              <option value="draft">Draft</option>
-              <option value="published">Published</option>
-              <option value="scheduled">Scheduled</option>
-            </select>
+          <button
+            type="button"
+            onClick={() => setRightSidebarCollapsed(!rightSidebarCollapsed)}
+            className="flex h-8 w-8 items-center justify-center rounded-lg text-[var(--text-muted)] hover:bg-[var(--bg-hover)] hover:text-[var(--text-primary)] transition-colors lg:hidden"
+            title="Toggle settings"
+          >
+            <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M10.5 6h9.75M10.5 6a1.5 1.5 0 11-3 0m3 0a1.5 1.5 0 10-3 0M3.75 6H7.5m3 12h9.75m-9.75 0a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m-3.75 0H7.5m9-6h3.75m-3.75 0a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m-9.75 0h9.75" />
+            </svg>
+          </button>
 
-            <button
-              type="button"
-              onClick={handleSubmit}
-              disabled={saving}
-              className="inline-flex h-9 items-center gap-2 rounded-lg bg-[var(--accent-red)] px-4 text-sm font-medium text-white hover:bg-[var(--accent-red-hover)] disabled:opacity-50 transition-colors"
-            >
-              {saving ? (
-                <>
-                  <svg className="h-4 w-4 animate-spin" fill="none" viewBox="0 0 24 24">
-                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
-                  </svg>
-                  Saving...
-                </>
-              ) : (
-                <>
-                  <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" />
-                  </svg>
-                  {isEditing ? 'Update' : 'Publish'}
-                </>
-              )}
-            </button>
-          </div>
+          <button
+            type="button"
+            onClick={handleSubmit}
+            disabled={saving}
+            className="inline-flex h-8 items-center gap-2 rounded-lg px-4 text-sm font-medium transition-colors disabled:opacity-50"
+            style={{
+              backgroundColor: '#bc0000',
+              color: '#ffffff',
+            }}
+          >
+            {saving ? 'Saving...' : isEditing ? 'Update' : 'Publish'}
+          </button>
         </div>
       </header>
 
-      {/* Main Content Area - no extra top padding */}
-      <div className="flex">
-        {/* Editor Column */}
-        <div className={`flex-1 overflow-auto transition-all ${showSidebar ? 'lg:mr-72' : ''}`}>
-          {error && (
-            <div className="mx-4 mt-4 flex items-center gap-3 rounded-lg border border-[var(--error)] bg-[var(--error-muted)] p-4 lg:mx-auto lg:max-w-4xl">
-              <svg className="h-5 w-5 flex-shrink-0 text-[var(--error)]" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z" />
-              </svg>
-              <p className="text-sm text-[var(--error)]">{error}</p>
-              <button onClick={() => setError('')} className="ml-auto text-[var(--error)] hover:opacity-70">
-                <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+      {/* Main Content Area */}
+      <div className="flex-1 flex overflow-hidden">
+        {/* Left Sidebar - Collapsible Navigation */}
+        <aside
+          className={`flex-shrink-0 border-r border-[var(--border-default)] bg-[var(--bg-secondary)] transition-all duration-300 overflow-hidden ${
+            leftSidebarCollapsed ? 'w-0' : 'w-60'
+          }`}
+        >
+          <div className="h-full overflow-y-auto p-4">
+            <nav className="space-y-1">
+              <Link
+                href="/admin"
+                className="flex items-center gap-3 rounded-lg px-3 py-2 text-sm text-[var(--text-secondary)] hover:bg-[var(--bg-hover)] hover:text-[var(--text-primary)]"
+              >
+                <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 12l8.954-8.955c.44-.439 1.152-.439 1.591 0L21.75 12M4.5 9.75v10.125c0 .621.504 1.125 1.125 1.125H9.75v-4.875c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21h4.125c.621 0 1.125-.504 1.125-1.125V9.75M8.25 21h8.25" />
                 </svg>
-              </button>
-            </div>
-          )}
+                Dashboard
+              </Link>
+              <Link
+                href="/admin/posts"
+                className="flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium text-[var(--accent-red)] bg-[var(--accent-red-muted)]"
+              >
+                <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" />
+                </svg>
+                Posts
+              </Link>
+              <Link
+                href="/admin/media"
+                className="flex items-center gap-3 rounded-lg px-3 py-2 text-sm text-[var(--text-secondary)] hover:bg-[var(--bg-hover)] hover:text-[var(--text-primary)]"
+              >
+                <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909m-18 3.75h16.5a1.5 1.5 0 001.5-1.5V6a1.5 1.5 0 00-1.5-1.5H3.75A1.5 1.5 0 002.25 6v12a1.5 1.5 0 001.5 1.5zm10.5-11.25h.008v.008h-.008V8.25zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z" />
+                </svg>
+                Media
+              </Link>
+            </nav>
 
-          <div className="mx-auto w-full max-w-4xl px-4 py-4 lg:px-6">
-            {/* Title Input */}
+            {/* AI Tools in Sidebar */}
+            <div className="mt-6 pt-6 border-t border-[var(--border-default)]">
+              <p className="px-3 mb-2 text-xs font-semibold uppercase tracking-wide text-[var(--text-muted)]">PostIQ Tools</p>
+              <div className="space-y-1">
+                <button
+                  type="button"
+                  onClick={() => runAI('grammar')}
+                  disabled={aiLoading === 'grammar' || !formData.content}
+                  className="w-full flex items-center gap-3 rounded-lg px-3 py-2 text-sm text-[var(--text-secondary)] hover:bg-[var(--bg-hover)] hover:text-[var(--text-primary)] disabled:opacity-50"
+                >
+                  <svg className="h-5 w-5 text-purple-500" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                  {aiLoading === 'grammar' ? 'Checking...' : 'Grammar Check'}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => runAI('headlines')}
+                  disabled={aiLoading === 'headlines' || !formData.title}
+                  className="w-full flex items-center gap-3 rounded-lg px-3 py-2 text-sm text-[var(--text-secondary)] hover:bg-[var(--bg-hover)] hover:text-[var(--text-primary)] disabled:opacity-50"
+                >
+                  <svg className="h-5 w-5 text-purple-500" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25H12" />
+                  </svg>
+                  {aiLoading === 'headlines' ? 'Generating...' : 'Headlines'}
+                </button>
+                <button
+                  type="button"
+                  onClick={openIdeasModal}
+                  className="w-full flex items-center gap-3 rounded-lg px-3 py-2 text-sm text-[var(--text-secondary)] hover:bg-[var(--bg-hover)] hover:text-[var(--text-primary)]"
+                >
+                  <span className="text-lg">💡</span>
+                  Generate Ideas
+                </button>
+                <button
+                  type="button"
+                  onClick={openChartModal}
+                  disabled={formData.content.length < 200}
+                  className="w-full flex items-center gap-3 rounded-lg px-3 py-2 text-sm text-[var(--text-secondary)] hover:bg-[var(--bg-hover)] hover:text-[var(--text-primary)] disabled:opacity-50"
+                >
+                  <svg className="h-5 w-5 text-purple-500" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 013 19.875v-6.75zM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V8.625zM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V4.125z" />
+                  </svg>
+                  Add Chart
+                </button>
+              </div>
+            </div>
+          </div>
+        </aside>
+
+        {/* Main Editor Column */}
+        <main className="flex-1 overflow-y-auto">
+          <div className="max-w-4xl mx-auto px-6 py-6">
+            {/* Error - inline, dismisses automatically */}
+            {error && (
+              <div className="mb-4 rounded-lg border border-red-500/30 bg-red-500/10 px-4 py-2 text-sm text-red-500">
+                {error}
+              </div>
+            )}
+
+            {/* Title Input - large and prominent */}
             <input
               type="text"
               value={formData.title}
               onChange={(e) => updateField('title', e.target.value)}
               placeholder="Article title..."
-              className="mb-3 w-full border-0 bg-transparent p-0 text-3xl font-bold text-[var(--text-primary)] placeholder-[var(--text-muted)] focus:outline-none focus:ring-0 lg:text-4xl"
+              className="mb-2 w-full border-0 bg-transparent p-0 text-3xl font-bold text-[var(--text-primary)] placeholder-[var(--text-muted)] focus:outline-none focus:ring-0"
             />
 
-            {/* Slug row with Generate Ideas button */}
-            <div className="mb-6 flex items-center gap-4">
-              <div className="flex flex-1 items-center gap-1 text-sm text-[var(--text-muted)]">
-                <span>sportsmockery.com/</span>
-                <input
-                  type="text"
-                  value={formData.slug}
-                  onChange={(e) => updateField('slug', e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, '-'))}
-                  placeholder="article-slug"
-                  className="flex-1 border-0 bg-transparent p-0 text-[var(--text-secondary)] focus:outline-none focus:ring-0"
-                />
-              </div>
-
-              {/* Generate Ideas - styled like other AI options */}
-              <button
-                type="button"
-                onClick={openIdeasModal}
-                className="flex items-center gap-2 text-purple-500 hover:text-purple-400 transition-colors"
-              >
-                <span>💡</span>
-                <span className="text-sm font-medium">Generate Ideas</span>
-              </button>
+            {/* Slug */}
+            <div className="mb-6 flex items-center gap-1 text-sm text-[var(--text-muted)]">
+              <span>sportsmockery.com/</span>
+              <input
+                type="text"
+                value={formData.slug}
+                onChange={(e) => updateField('slug', e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, '-'))}
+                placeholder="article-slug"
+                className="flex-1 border-0 bg-transparent p-0 text-[var(--text-secondary)] focus:outline-none focus:ring-0"
+              />
             </div>
 
-            {/* Alternative Headlines (shown when generated) */}
+            {/* Alternative Headlines */}
             {headlines.length > 0 && (
               <div className="mb-6 rounded-lg border border-purple-500/30 bg-purple-500/5 p-4">
                 <div className="mb-3 flex items-center justify-between">
                   <p className="text-xs font-semibold uppercase tracking-wide text-purple-500">Alternative Headlines</p>
-                  <button
-                    type="button"
-                    onClick={() => setHeadlines([])}
-                    className="text-[var(--text-muted)] hover:text-[var(--text-primary)]"
-                  >
+                  <button type="button" onClick={() => setHeadlines([])} className="text-[var(--text-muted)] hover:text-[var(--text-primary)]">
                     <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
                       <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
                     </svg>
@@ -765,212 +789,32 @@ export default function AdvancedPostEditor({
               </div>
             )}
 
-            {/* Voice Recording Panel */}
-            {showVoice && (
-              <div className="mb-6 rounded-xl border border-purple-500/30 bg-purple-500/5 p-6">
-                <div className="mb-4 flex items-center justify-between">
-                  <h3 className="flex items-center gap-2 text-sm font-semibold text-purple-500">
-                    <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M12 18.75a6 6 0 006-6v-1.5m-6 7.5a6 6 0 01-6-6v-1.5m6 7.5v3.75m-3.75 0h7.5M12 15.75a3 3 0 01-3-3V4.5a3 3 0 116 0v8.25a3 3 0 01-3 3z" />
-                    </svg>
-                    Voice to Text
-                  </h3>
-                  <button
-                    type="button"
-                    onClick={() => setShowVoice(false)}
-                    className="text-[var(--text-muted)] hover:text-[var(--text-primary)]"
-                  >
-                    <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
-                    </svg>
-                  </button>
-                </div>
-                <VoiceToText
-                  onTranscript={handleVoiceTranscript}
-                  onPolishedTranscript={(t) => updateField('content', t)}
-                />
-              </div>
-            )}
-
-            {/* Content Editor - light background, full width */}
-            <div className="mb-6 overflow-hidden rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900">
+            {/* Content Editor - extends to fill space */}
+            <div className="mb-6 overflow-hidden rounded-lg border border-[var(--border-default)] bg-white dark:bg-gray-900">
               <RichTextEditor
                 content={formData.content}
                 onChange={(content) => updateField('content', content)}
                 placeholder="Start writing your article..."
               />
             </div>
-          </div>
-        </div>
 
-        {/* Right Sidebar - Stacked Panels (NO TABS) */}
-        <aside className={`fixed bottom-0 right-0 top-14 w-72 transform border-l border-[var(--border-default)] bg-[var(--bg-secondary)] transition-transform ${showSidebar ? 'translate-x-0' : 'translate-x-full'}`}>
-          <div className="h-full overflow-y-auto pb-16">
-            {/* SETTINGS PANEL */}
-            <div className="border-b border-[var(--border-default)]">
-              <button
-                type="button"
-                onClick={() => setSettingsExpanded(!settingsExpanded)}
-                className="flex w-full items-center justify-between px-4 py-3 text-left"
-              >
-                <span className="text-xs font-semibold uppercase tracking-wide text-[var(--text-primary)]">Settings</span>
-                <svg className={`h-4 w-4 text-[var(--text-muted)] transition-transform ${settingsExpanded ? 'rotate-180' : ''}`} fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
-                </svg>
-              </button>
-
-              {settingsExpanded && (
-                <div className="space-y-4 px-4 pb-4">
-                  {/* Status */}
-                  <div>
-                    <label className="mb-1.5 block text-xs font-medium text-[var(--text-muted)]">Status</label>
-                    <div className="grid grid-cols-3 gap-2">
-                      {[
-                        { value: 'draft', label: 'Draft' },
-                        { value: 'published', label: 'Published' },
-                        { value: 'scheduled', label: 'Scheduled' },
-                      ].map(({ value, label }) => (
-                        <button
-                          key={value}
-                          type="button"
-                          onClick={() => updateField('status', value)}
-                          className={`rounded-lg border px-2 py-1.5 text-xs font-medium transition-all ${
-                            formData.status === value
-                              ? 'border-[var(--accent-red)] bg-[var(--accent-red-muted)] text-[var(--accent-red)]'
-                              : 'border-[var(--border-default)] text-[var(--text-secondary)] hover:border-[var(--text-muted)]'
-                          }`}
-                        >
-                          {label}
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-
-                  {/* Schedule */}
-                  {formData.status === 'scheduled' && (
-                    <div>
-                      <label className="mb-1.5 block text-xs font-medium text-[var(--text-muted)]">Schedule Date</label>
-                      <input
-                        type="datetime-local"
-                        value={formData.scheduled_at || ''}
-                        onChange={(e) => setFormData(prev => ({ ...prev, scheduled_at: e.target.value || null }))}
-                        className="w-full rounded-lg border border-[var(--border-default)] bg-gray-50 dark:bg-gray-800 px-3 py-2 text-sm text-[var(--text-primary)] focus:border-[var(--accent-red)] focus:outline-none"
-                      />
-                    </div>
-                  )}
-
-                  {/* Author - defaults to logged in user */}
-                  <div>
-                    <label className="mb-1.5 block text-xs font-medium text-[var(--text-muted)]">Author</label>
-                    <AuthorSelect
-                      options={authorOptions}
-                      value={formData.author_id}
-                      onChange={(value) => updateField('author_id', value)}
-                      placeholder="Select author..."
-                    />
-                  </div>
-
-                  {/* Category */}
-                  <div>
-                    <label className="mb-1.5 block text-xs font-medium text-[var(--text-muted)]">Category</label>
-                    <CategorySelect
-                      options={categoryOptions}
-                      value={formData.category_id}
-                      onChange={(value) => updateField('category_id', value)}
-                      placeholder="Select category..."
-                    />
-                  </div>
-
-                  {/* Featured Image - MOVED HERE */}
-                  <div>
-                    <label className="mb-1.5 block text-xs font-medium text-[var(--text-muted)]">Featured Image</label>
-                    {formData.featured_image ? (
-                      <div className="group relative aspect-video overflow-hidden rounded-lg bg-[var(--bg-tertiary)]">
-                        <Image
-                          src={formData.featured_image}
-                          alt="Featured"
-                          fill
-                          className="object-cover"
-                        />
-                        <div className="absolute inset-0 bg-black/50 opacity-0 transition-opacity group-hover:opacity-100">
-                          <div className="flex h-full items-center justify-center gap-2">
-                            <label className="cursor-pointer rounded bg-white px-2 py-1 text-xs font-medium text-zinc-900 hover:bg-zinc-100">
-                              Change
-                              <input type="file" accept="image/*" onChange={handleImageUpload} className="hidden" />
-                            </label>
-                            <button
-                              type="button"
-                              onClick={() => updateField('featured_image', '')}
-                              className="rounded bg-red-500 px-2 py-1 text-xs font-medium text-white hover:bg-red-600"
-                            >
-                              Remove
-                            </button>
-                          </div>
-                        </div>
-                      </div>
-                    ) : (
-                      <label className="flex cursor-pointer flex-col items-center justify-center rounded-lg border-2 border-dashed border-[var(--border-default)] bg-gray-50 dark:bg-gray-800 py-6 hover:border-[var(--accent-red)] transition-colors">
-                        {uploadingImage ? (
-                          <svg className="h-6 w-6 animate-spin text-[var(--text-muted)]" fill="none" viewBox="0 0 24 24">
-                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
-                          </svg>
-                        ) : (
-                          <>
-                            <svg className="mb-2 h-6 w-6 text-[var(--text-muted)]" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
-                              <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909m-18 3.75h16.5a1.5 1.5 0 001.5-1.5V6a1.5 1.5 0 00-1.5-1.5H3.75A1.5 1.5 0 002.25 6v12a1.5 1.5 0 001.5 1.5zm10.5-11.25h.008v.008h-.008V8.25zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z" />
-                            </svg>
-                            <p className="text-xs font-medium text-[var(--text-secondary)]">Add image</p>
-                          </>
-                        )}
-                        <input type="file" accept="image/*" onChange={handleImageUpload} className="hidden" />
-                      </label>
-                    )}
-                  </div>
-
-                  {/* PostIQ: Add Chart To Post */}
-                  <div className="rounded-lg border border-purple-500/30 bg-purple-500/5 p-3">
-                    <button
-                      type="button"
-                      onClick={openChartModal}
-                      disabled={formData.content.length < 200}
-                      className="w-full flex items-center gap-2 text-left disabled:opacity-50"
-                    >
-                      <svg className="h-5 w-5 text-purple-500" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 013 19.875v-6.75zM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V8.625zM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V4.125z" />
-                      </svg>
-                      <div className="flex-1">
-                        <span className="text-sm font-medium text-purple-600 dark:text-purple-400">PostIQ: Add Chart To Post</span>
-                        <p className="mt-0.5 text-xs text-[var(--text-muted)]">
-                          AI will analyze content and suggest a chart to insert.
-                        </p>
-                      </div>
-                      <svg className="h-4 w-4 text-purple-400" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
-                      </svg>
-                    </button>
-                  </div>
-                </div>
-              )}
-            </div>
-
-            {/* SEO PANEL */}
-            <div className="border-b border-[var(--border-default)]">
+            {/* SEO Section - Below Content */}
+            <div className="rounded-lg border border-[var(--border-default)] bg-[var(--bg-card)]">
               <button
                 type="button"
                 onClick={() => setSeoExpanded(!seoExpanded)}
                 className="flex w-full items-center justify-between px-4 py-3 text-left"
               >
                 <div className="flex items-center gap-2">
-                  <span className="text-xs font-semibold uppercase tracking-wide text-[var(--text-primary)]">SEO</span>
+                  <span className="text-sm font-medium text-[var(--text-primary)]">SEO Settings</span>
                   {generatingSEO && (
-                    <svg className="h-3 w-3 animate-spin text-purple-500" fill="none" viewBox="0 0 24 24">
+                    <svg className="h-4 w-4 animate-spin text-purple-500" fill="none" viewBox="0 0 24 24">
                       <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
                       <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
                     </svg>
                   )}
                   {seoGenerated && !generatingSEO && (
-                    <span className="rounded bg-emerald-500/10 px-1.5 py-0.5 text-[10px] font-medium text-emerald-500">Auto</span>
+                    <span className="rounded bg-emerald-500/10 px-1.5 py-0.5 text-[10px] font-medium text-emerald-500">Auto-generated</span>
                   )}
                 </div>
                 <div className="flex items-center gap-2">
@@ -983,79 +827,79 @@ export default function AdvancedPostEditor({
                       ↻ Regenerate
                     </button>
                   )}
-                  <svg className={`h-4 w-4 text-[var(--text-muted)] transition-transform ${seoExpanded ? 'rotate-180' : ''}`} fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
+                  <svg
+                    className={`h-4 w-4 text-[var(--text-muted)] transition-transform ${seoExpanded ? 'rotate-180' : ''}`}
+                    fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor"
+                  >
                     <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
                   </svg>
                 </div>
               </button>
 
               {seoExpanded && (
-                <div className="space-y-4 px-4 pb-4">
-                  {/* Auto-generate indicator */}
+                <div className="border-t border-[var(--border-default)] p-4 space-y-4">
                   {wordCount < 150 && !seoGenerated && (
                     <p className="rounded-lg bg-amber-500/10 px-3 py-2 text-xs text-amber-600 dark:text-amber-400">
                       SEO fields will auto-generate when content reaches 150+ words ({wordCount}/150)
                     </p>
                   )}
 
-                  {/* SEO Title */}
-                  <div>
-                    <label className="mb-1.5 block text-xs font-medium text-[var(--text-muted)]">SEO Title</label>
-                    <input
-                      type="text"
-                      value={formData.seo_title}
-                      onChange={(e) => updateField('seo_title', e.target.value)}
-                      placeholder={formData.title || 'SEO title...'}
-                      className="w-full rounded-lg border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 px-3 py-2 text-sm text-[var(--text-primary)] placeholder-[var(--text-muted)] focus:border-[var(--accent-red)] focus:outline-none"
-                    />
-                    <p className={`mt-1 text-xs ${(formData.seo_title || formData.title).length > 60 ? 'text-amber-500' : 'text-[var(--text-muted)]'}`}>
-                      {(formData.seo_title || formData.title).length}/60
-                    </p>
+                  <div className="grid gap-4 md:grid-cols-2">
+                    <div>
+                      <label className="mb-1.5 block text-xs font-medium text-[var(--text-muted)]">SEO Title</label>
+                      <input
+                        type="text"
+                        value={formData.seo_title}
+                        onChange={(e) => updateField('seo_title', e.target.value)}
+                        placeholder={formData.title || 'SEO title...'}
+                        className="w-full rounded-lg border border-[var(--border-default)] bg-[var(--bg-tertiary)] px-3 py-2 text-sm text-[var(--text-primary)] placeholder-[var(--text-muted)] focus:border-[var(--accent-red)] focus:outline-none"
+                      />
+                      <p className={`mt-1 text-xs ${(formData.seo_title || formData.title).length > 60 ? 'text-amber-500' : 'text-[var(--text-muted)]'}`}>
+                        {(formData.seo_title || formData.title).length}/60
+                      </p>
+                    </div>
+
+                    <div>
+                      <label className="mb-1.5 block text-xs font-medium text-[var(--text-muted)]">Keywords</label>
+                      <input
+                        type="text"
+                        value={formData.seo_keywords}
+                        onChange={(e) => updateField('seo_keywords', e.target.value)}
+                        placeholder="keyword1, keyword2..."
+                        className="w-full rounded-lg border border-[var(--border-default)] bg-[var(--bg-tertiary)] px-3 py-2 text-sm text-[var(--text-primary)] placeholder-[var(--text-muted)] focus:border-[var(--accent-red)] focus:outline-none"
+                      />
+                    </div>
                   </div>
 
-                  {/* Meta Description */}
                   <div>
                     <label className="mb-1.5 block text-xs font-medium text-[var(--text-muted)]">Meta Description</label>
                     <textarea
                       value={formData.seo_description}
                       onChange={(e) => updateField('seo_description', e.target.value)}
-                      rows={3}
+                      rows={2}
                       placeholder="Description for search results..."
-                      className="w-full resize-none rounded-lg border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 px-3 py-2 text-sm text-[var(--text-primary)] placeholder-[var(--text-muted)] focus:border-[var(--accent-red)] focus:outline-none"
+                      className="w-full resize-none rounded-lg border border-[var(--border-default)] bg-[var(--bg-tertiary)] px-3 py-2 text-sm text-[var(--text-primary)] placeholder-[var(--text-muted)] focus:border-[var(--accent-red)] focus:outline-none"
                     />
                     <p className={`mt-1 text-xs ${(formData.seo_description || '').length > 160 ? 'text-amber-500' : 'text-[var(--text-muted)]'}`}>
                       {(formData.seo_description || '').length}/160
                     </p>
                   </div>
 
-                  {/* Keywords */}
-                  <div>
-                    <label className="mb-1.5 block text-xs font-medium text-[var(--text-muted)]">Keywords</label>
-                    <input
-                      type="text"
-                      value={formData.seo_keywords}
-                      onChange={(e) => updateField('seo_keywords', e.target.value)}
-                      placeholder="keyword1, keyword2, keyword3..."
-                      className="w-full rounded-lg border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 px-3 py-2 text-sm text-[var(--text-primary)] placeholder-[var(--text-muted)] focus:border-[var(--accent-red)] focus:outline-none"
-                    />
-                  </div>
-
-                  {/* Excerpt - MOVED HERE */}
                   <div>
                     <label className="mb-1.5 block text-xs font-medium text-[var(--text-muted)]">Excerpt</label>
                     <textarea
                       value={formData.excerpt}
                       onChange={(e) => updateField('excerpt', e.target.value)}
-                      rows={3}
+                      rows={2}
                       placeholder="Brief summary for article cards..."
-                      className="w-full resize-none rounded-lg border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 px-3 py-2 text-sm text-[var(--text-primary)] placeholder-[var(--text-muted)] focus:border-[var(--accent-red)] focus:outline-none"
+                      className="w-full resize-none rounded-lg border border-[var(--border-default)] bg-[var(--bg-tertiary)] px-3 py-2 text-sm text-[var(--text-primary)] placeholder-[var(--text-muted)] focus:border-[var(--accent-red)] focus:outline-none"
                     />
                   </div>
 
                   {/* Google Preview */}
                   <div>
                     <label className="mb-1.5 block text-xs font-medium text-[var(--text-muted)]">Search Preview</label>
-                    <div className="rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 p-3">
+                    <div className="rounded-lg border border-[var(--border-default)] bg-white dark:bg-gray-900 p-3">
                       <p className="truncate text-sm text-blue-600 hover:underline">
                         {formData.seo_title || formData.title || 'Page Title'}
                       </p>
@@ -1070,9 +914,204 @@ export default function AdvancedPostEditor({
                 </div>
               )}
             </div>
+          </div>
+        </main>
 
-            {/* Analytics Quick Stats */}
-            <div className="px-4 py-4">
+        {/* Right Sidebar - Settings Only */}
+        <aside
+          className={`flex-shrink-0 border-l border-[var(--border-default)] bg-[var(--bg-secondary)] transition-all duration-300 overflow-hidden ${
+            rightSidebarCollapsed ? 'w-0 lg:w-0' : 'w-72'
+          } hidden lg:block`}
+        >
+          <div className="h-full overflow-y-auto p-4">
+            <h3 className="mb-4 text-xs font-semibold uppercase tracking-wide text-[var(--text-muted)]">Settings</h3>
+
+            <div className="space-y-4">
+              {/* Status */}
+              <div>
+                <label className="mb-1.5 block text-xs font-medium text-[var(--text-muted)]">Status</label>
+                <div className="grid grid-cols-3 gap-1">
+                  {['draft', 'published', 'scheduled'].map((s) => (
+                    <button
+                      key={s}
+                      type="button"
+                      onClick={() => updateField('status', s)}
+                      className={`rounded-lg border px-2 py-1.5 text-xs font-medium transition-all ${
+                        formData.status === s
+                          ? 'border-[var(--accent-red)] bg-[var(--accent-red-muted)] text-[var(--accent-red)]'
+                          : 'border-[var(--border-default)] text-[var(--text-secondary)] hover:border-[var(--text-muted)]'
+                      }`}
+                    >
+                      {s.charAt(0).toUpperCase() + s.slice(1)}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Schedule */}
+              {formData.status === 'scheduled' && (
+                <div>
+                  <label className="mb-1.5 block text-xs font-medium text-[var(--text-muted)]">Schedule Date</label>
+                  <input
+                    type="datetime-local"
+                    value={formData.scheduled_at || ''}
+                    onChange={(e) => setFormData(prev => ({ ...prev, scheduled_at: e.target.value || null }))}
+                    className="w-full rounded-lg border border-[var(--border-default)] bg-[var(--bg-tertiary)] px-3 py-2 text-sm text-[var(--text-primary)] focus:border-[var(--accent-red)] focus:outline-none"
+                  />
+                </div>
+              )}
+
+              {/* Push Notification */}
+              <div className="border-t border-[var(--border-default)] pt-4">
+                <label className="flex items-center gap-2 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={sendPushNotification}
+                    onChange={(e) => {
+                      setSendPushNotification(e.target.checked)
+                      if (e.target.checked && formData.title && !pushTitle) {
+                        setPushTitle(formData.title.slice(0, 65))
+                      }
+                    }}
+                    className="h-4 w-4 rounded border-[var(--border-default)] text-[var(--accent-red)] focus:ring-[var(--accent-red)]"
+                  />
+                  <span className="text-sm font-medium text-[var(--text-primary)]">Send Push Notification</span>
+                </label>
+                <p className="mt-1 text-xs text-[var(--text-muted)] ml-6">SM App push notification will be sent upon publishing</p>
+
+                {sendPushNotification && (
+                  <div className="mt-4 space-y-4">
+                    {/* Push Title */}
+                    <div>
+                      <label className="mb-1.5 block text-xs font-medium text-[var(--text-muted)]">Push Title</label>
+                      <input
+                        type="text"
+                        value={pushTitle}
+                        onChange={(e) => setPushTitle(e.target.value.slice(0, 65))}
+                        placeholder="Breaking News: ..."
+                        maxLength={65}
+                        className="w-full rounded-lg border border-[var(--border-default)] bg-[var(--bg-tertiary)] px-3 py-2 text-sm text-[var(--text-primary)] placeholder-[var(--text-muted)] focus:border-[var(--accent-red)] focus:outline-none"
+                      />
+                      <p className={`mt-1 text-xs text-right ${pushTitle.length >= 60 ? 'text-amber-500' : 'text-[var(--text-muted)]'}`}>
+                        {pushTitle.length}/65
+                      </p>
+                    </div>
+
+                    {/* Push Message */}
+                    <div>
+                      <label className="mb-1.5 block text-xs font-medium text-[var(--text-muted)]">Push Message</label>
+                      <textarea
+                        value={pushMessage}
+                        onChange={(e) => setPushMessage(e.target.value.slice(0, 240))}
+                        placeholder="Tap to read the full story..."
+                        maxLength={240}
+                        rows={3}
+                        className="w-full resize-none rounded-lg border border-[var(--border-default)] bg-[var(--bg-tertiary)] px-3 py-2 text-sm text-[var(--text-primary)] placeholder-[var(--text-muted)] focus:border-[var(--accent-red)] focus:outline-none"
+                      />
+                      <p className={`mt-1 text-xs text-right ${pushMessage.length >= 220 ? 'text-amber-500' : 'text-[var(--text-muted)]'}`}>
+                        {pushMessage.length}/240
+                      </p>
+                    </div>
+
+                    {/* Push Preview */}
+                    <div>
+                      <label className="mb-1.5 block text-xs font-medium text-[var(--text-muted)]">Preview</label>
+                      <div className="rounded-xl bg-white p-3 shadow-lg dark:bg-gray-800">
+                        <div className="flex items-start gap-3">
+                          <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-lg bg-[#bc0000]">
+                            <span className="text-xs font-bold text-white">SM</span>
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center justify-between">
+                              <span className="text-[10px] font-semibold uppercase tracking-wide text-gray-500">Sports Mockery</span>
+                              <span className="text-[10px] text-gray-400">now</span>
+                            </div>
+                            <p className="mt-0.5 truncate text-sm font-semibold text-gray-900 dark:text-white">
+                              {pushTitle || 'Notification Title'}
+                            </p>
+                            <p className="line-clamp-2 text-xs text-gray-600 dark:text-gray-300">
+                              {pushMessage || 'Your notification message will appear here...'}
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* Author */}
+              <div>
+                <label className="mb-1.5 block text-xs font-medium text-[var(--text-muted)]">Author</label>
+                <AuthorSelect
+                  options={authorOptions}
+                  value={formData.author_id}
+                  onChange={(value) => updateField('author_id', value)}
+                  placeholder="Select author..."
+                />
+              </div>
+
+              {/* Category */}
+              <div>
+                <label className="mb-1.5 block text-xs font-medium text-[var(--text-muted)]">Category</label>
+                <CategorySelect
+                  options={categoryOptions}
+                  value={formData.category_id}
+                  onChange={(value) => updateField('category_id', value)}
+                  placeholder="Select category..."
+                />
+              </div>
+
+              {/* Featured Image */}
+              <div>
+                <label className="mb-1.5 block text-xs font-medium text-[var(--text-muted)]">Featured Image</label>
+                {formData.featured_image ? (
+                  <div className="group relative aspect-video overflow-hidden rounded-lg bg-[var(--bg-tertiary)]">
+                    <Image
+                      src={formData.featured_image}
+                      alt="Featured"
+                      fill
+                      className="object-cover"
+                    />
+                    <div className="absolute inset-0 bg-black/50 opacity-0 transition-opacity group-hover:opacity-100">
+                      <div className="flex h-full items-center justify-center gap-2">
+                        <label className="cursor-pointer rounded bg-white px-2 py-1 text-xs font-medium text-zinc-900 hover:bg-zinc-100">
+                          Change
+                          <input type="file" accept="image/*" onChange={handleImageUpload} className="hidden" />
+                        </label>
+                        <button
+                          type="button"
+                          onClick={() => updateField('featured_image', '')}
+                          className="rounded bg-red-500 px-2 py-1 text-xs font-medium text-white hover:bg-red-600"
+                        >
+                          Remove
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                ) : (
+                  <label className="flex cursor-pointer flex-col items-center justify-center rounded-lg border-2 border-dashed border-[var(--border-default)] bg-[var(--bg-tertiary)] py-4 hover:border-[var(--accent-red)] transition-colors">
+                    {uploadingImage ? (
+                      <svg className="h-5 w-5 animate-spin text-[var(--text-muted)]" fill="none" viewBox="0 0 24 24">
+                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                      </svg>
+                    ) : (
+                      <>
+                        <svg className="h-5 w-5 text-[var(--text-muted)]" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909m-18 3.75h16.5a1.5 1.5 0 001.5-1.5V6a1.5 1.5 0 00-1.5-1.5H3.75A1.5 1.5 0 002.25 6v12a1.5 1.5 0 001.5 1.5zm10.5-11.25h.008v.008h-.008V8.25zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z" />
+                        </svg>
+                        <p className="mt-1 text-xs text-[var(--text-muted)]">Add image</p>
+                      </>
+                    )}
+                    <input type="file" accept="image/*" onChange={handleImageUpload} className="hidden" />
+                  </label>
+                )}
+              </div>
+            </div>
+
+            {/* Stats */}
+            <div className="mt-6 pt-6 border-t border-[var(--border-default)]">
               <div className="grid grid-cols-3 gap-2">
                 <div className="rounded-lg bg-[var(--bg-tertiary)] p-2 text-center">
                   <p className="text-lg font-bold text-[var(--text-primary)]">{wordCount}</p>
@@ -1088,38 +1127,29 @@ export default function AdvancedPostEditor({
                 </div>
               </div>
             </div>
-          </div>
 
-          {/* Keyboard Shortcut Hint */}
-          <div className="absolute bottom-0 left-0 right-0 border-t border-[var(--border-default)] bg-[var(--bg-tertiary)] px-4 py-2">
-            <p className="text-center text-xs text-[var(--text-muted)]">
-              <kbd className="rounded bg-[var(--bg-primary)] px-1.5 py-0.5 font-mono text-[var(--text-secondary)]">⌘S</kbd> to save
-            </p>
+            {/* Keyboard Shortcut */}
+            <div className="mt-4 text-center">
+              <p className="text-xs text-[var(--text-muted)]">
+                <kbd className="rounded bg-[var(--bg-primary)] px-1.5 py-0.5 font-mono text-[var(--text-secondary)]">⌘S</kbd> to save
+              </p>
+            </div>
           </div>
         </aside>
       </div>
 
-      {/* Ideas Popup Modal */}
+      {/* Ideas Modal */}
       {showIdeasModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
+        <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/60 backdrop-blur-sm">
           <div className="mx-4 w-full max-w-lg overflow-hidden rounded-xl bg-white shadow-2xl dark:bg-[#1c1c1f]">
-            {/* Header */}
             <div className="flex items-center justify-between border-b border-gray-200 px-6 py-4 dark:border-gray-700">
-              <h3 className="text-lg font-bold text-gray-900 dark:text-white">
-                💡 Article Ideas
-              </h3>
-              <button
-                type="button"
-                onClick={() => setShowIdeasModal(false)}
-                className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200"
-              >
+              <h3 className="text-lg font-bold text-gray-900 dark:text-white">💡 Article Ideas</h3>
+              <button type="button" onClick={() => setShowIdeasModal(false)} className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200">
                 <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
                 </svg>
               </button>
             </div>
-
-            {/* Ideas List */}
             <div className="max-h-80 space-y-3 overflow-y-auto p-6">
               {loadingIdeas ? (
                 <div className="py-8 text-center">
@@ -1149,23 +1179,12 @@ export default function AdvancedPostEditor({
                 <p className="py-8 text-center text-gray-500">Click "Generate More" to get article ideas</p>
               )}
             </div>
-
-            {/* Footer */}
             <div className="flex items-center gap-3 border-t border-gray-200 bg-gray-50 px-6 py-4 dark:border-gray-700 dark:bg-gray-800/50">
-              <button
-                type="button"
-                onClick={generateIdeas}
-                disabled={loadingIdeas}
-                className="text-sm font-medium text-purple-500 hover:text-purple-400 disabled:opacity-50"
-              >
+              <button type="button" onClick={generateIdeas} disabled={loadingIdeas} className="text-sm font-medium text-purple-500 hover:text-purple-400 disabled:opacity-50">
                 ↻ Generate More
               </button>
               <div className="flex-1" />
-              <button
-                type="button"
-                onClick={() => setShowIdeasModal(false)}
-                className="px-4 py-2 text-sm text-gray-600 hover:text-gray-900 dark:text-gray-300 dark:hover:text-white"
-              >
+              <button type="button" onClick={() => setShowIdeasModal(false)} className="px-4 py-2 text-sm text-gray-600 hover:text-gray-900 dark:text-gray-300 dark:hover:text-white">
                 Cancel
               </button>
               <button
@@ -1181,11 +1200,10 @@ export default function AdvancedPostEditor({
         </div>
       )}
 
-      {/* PostIQ Chart Modal */}
+      {/* Chart Modal */}
       {showChartModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
+        <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/60 backdrop-blur-sm">
           <div className="mx-4 w-full max-w-2xl overflow-hidden rounded-xl bg-white shadow-2xl dark:bg-[#1c1c1f]">
-            {/* Header */}
             <div className="flex items-center justify-between border-b border-gray-200 px-6 py-4 dark:border-gray-700">
               <div className="flex items-center gap-3">
                 <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-purple-500/10">
@@ -1198,18 +1216,12 @@ export default function AdvancedPostEditor({
                   <p className="text-sm text-gray-500 dark:text-gray-400">AI-suggested chart based on your content</p>
                 </div>
               </div>
-              <button
-                type="button"
-                onClick={() => setShowChartModal(false)}
-                className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200"
-              >
+              <button type="button" onClick={() => setShowChartModal(false)} className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200">
                 <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
                 </svg>
               </button>
             </div>
-
-            {/* Content */}
             <div className="max-h-[60vh] overflow-y-auto p-6">
               {chartLoading ? (
                 <div className="py-12 text-center">
@@ -1218,14 +1230,11 @@ export default function AdvancedPostEditor({
                 </div>
               ) : chartSuggestion ? (
                 <div className="space-y-6">
-                  {/* AI Reasoning */}
                   <div className="rounded-lg bg-purple-50 p-4 dark:bg-purple-900/20">
                     <p className="text-sm text-purple-700 dark:text-purple-300">
                       <span className="font-semibold">AI Analysis:</span> {chartSuggestion.reasoning}
                     </p>
                   </div>
-
-                  {/* Chart Title */}
                   <div>
                     <label className="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-300">Chart Title</label>
                     <input
@@ -1236,8 +1245,6 @@ export default function AdvancedPostEditor({
                       className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 focus:border-purple-500 focus:outline-none dark:border-gray-600 dark:bg-gray-800 dark:text-white"
                     />
                   </div>
-
-                  {/* Chart Type Selector */}
                   <div>
                     <label className="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-300">Chart Type</label>
                     <div className="grid grid-cols-5 gap-2">
@@ -1266,8 +1273,6 @@ export default function AdvancedPostEditor({
                       ))}
                     </div>
                   </div>
-
-                  {/* Data Preview */}
                   <div>
                     <label className="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-300">Chart Data</label>
                     <div className="rounded-lg border border-gray-200 dark:border-gray-700 overflow-hidden">
@@ -1289,8 +1294,6 @@ export default function AdvancedPostEditor({
                       </table>
                     </div>
                   </div>
-
-                  {/* Paragraph Selector */}
                   <div>
                     <label className="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-300">Insert After Paragraph</label>
                     <select
@@ -1299,9 +1302,7 @@ export default function AdvancedPostEditor({
                       className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 focus:border-purple-500 focus:outline-none dark:border-gray-600 dark:bg-gray-800 dark:text-white"
                     >
                       {paragraphOptions.map((text, i) => (
-                        <option key={i} value={i + 1}>
-                          Paragraph {i + 1}: {text}
-                        </option>
+                        <option key={i} value={i + 1}>Paragraph {i + 1}: {text}</option>
                       ))}
                     </select>
                   </div>
@@ -1316,25 +1317,14 @@ export default function AdvancedPostEditor({
                 </div>
               )}
             </div>
-
-            {/* Footer */}
             <div className="flex items-center gap-3 border-t border-gray-200 bg-gray-50 px-6 py-4 dark:border-gray-700 dark:bg-gray-800/50">
               {chartSuggestion && (
-                <button
-                  type="button"
-                  onClick={regenerateChartSuggestion}
-                  disabled={chartLoading}
-                  className="text-sm font-medium text-purple-500 hover:text-purple-400 disabled:opacity-50"
-                >
+                <button type="button" onClick={regenerateChartSuggestion} disabled={chartLoading} className="text-sm font-medium text-purple-500 hover:text-purple-400 disabled:opacity-50">
                   ↻ Regenerate
                 </button>
               )}
               <div className="flex-1" />
-              <button
-                type="button"
-                onClick={() => setShowChartModal(false)}
-                className="px-4 py-2 text-sm text-gray-600 hover:text-gray-900 dark:text-gray-300 dark:hover:text-white"
-              >
+              <button type="button" onClick={() => setShowChartModal(false)} className="px-4 py-2 text-sm text-gray-600 hover:text-gray-900 dark:text-gray-300 dark:hover:text-white">
                 Cancel
               </button>
               <button

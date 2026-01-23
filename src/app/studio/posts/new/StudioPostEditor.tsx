@@ -53,6 +53,11 @@ export default function StudioPostEditor({
   const [seoExpanded, setSeoExpanded] = useState(false)
   const [uploadingImage, setUploadingImage] = useState(false)
 
+  // Push notification states
+  const [sendPushNotification, setSendPushNotification] = useState(false)
+  const [pushTitle, setPushTitle] = useState('')
+  const [pushMessage, setPushMessage] = useState('')
+
   // PostIQ Chart Modal State
   const [showChartModal, setShowChartModal] = useState(false)
   const [chartLoading, setChartLoading] = useState(false)
@@ -93,6 +98,13 @@ export default function StudioPostEditor({
       setFormData(prev => ({ ...prev, slug }))
     }
   }, [formData.title, formData.slug, isEditing])
+
+  // Auto-populate push title when checkbox is enabled and title changes
+  useEffect(() => {
+    if (sendPushNotification && formData.title && !pushTitle) {
+      setPushTitle(formData.title.slice(0, 65))
+    }
+  }, [sendPushNotification, formData.title, pushTitle])
 
   const wordCount = formData.content.replace(/<[^>]*>/g, ' ').split(/\s+/).filter(w => w).length
 
@@ -163,6 +175,27 @@ export default function StudioPostEditor({
       }
 
       const data = await response.json()
+
+      // Send push notification if checkbox is checked and post is published
+      if (sendPushNotification && formData.status === 'published' && pushTitle.trim() && pushMessage.trim()) {
+        try {
+          const categorySlug = categories.find(c => c.id === formData.category_id)?.name?.toLowerCase().replace(/\s+/g, '-') || null
+          await fetch('/api/admin/notifications/send', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              title: pushTitle.trim(),
+              body: pushMessage.trim(),
+              articleId: data.id,
+              articleSlug: formData.slug,
+              categorySlug,
+            }),
+          })
+        } catch (pushErr) {
+          console.error('Failed to send push notification:', pushErr)
+        }
+      }
+
       router.push(`/studio/posts`)
       router.refresh()
     } catch (err) {
@@ -625,6 +658,85 @@ export default function StudioPostEditor({
                   />
                 </div>
               )}
+
+              {/* Push Notification */}
+              <div className="border-t border-[var(--border-default)] pt-4">
+                <label className="flex items-center gap-2 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={sendPushNotification}
+                    onChange={(e) => {
+                      setSendPushNotification(e.target.checked)
+                      if (e.target.checked && formData.title && !pushTitle) {
+                        setPushTitle(formData.title.slice(0, 65))
+                      }
+                    }}
+                    className="h-4 w-4 rounded border-[var(--border-default)] text-[var(--accent-red)] focus:ring-[var(--accent-red)]"
+                  />
+                  <span className="text-sm font-medium text-[var(--text-primary)]">Send Push Notification</span>
+                </label>
+                <p className="mt-1 text-xs text-[var(--text-muted)] ml-6">SM App push notification will be sent upon publishing</p>
+
+                {sendPushNotification && (
+                  <div className="mt-4 space-y-4">
+                    {/* Push Title */}
+                    <div>
+                      <label className="mb-1.5 block text-xs font-medium text-[var(--text-muted)]">Push Title</label>
+                      <input
+                        type="text"
+                        value={pushTitle}
+                        onChange={(e) => setPushTitle(e.target.value.slice(0, 65))}
+                        placeholder="Breaking News: ..."
+                        maxLength={65}
+                        className="w-full rounded-lg border border-[var(--border-default)] bg-[var(--bg-tertiary)] px-3 py-2 text-sm text-[var(--text-primary)] placeholder-[var(--text-muted)] focus:border-[var(--accent-red)] focus:outline-none"
+                      />
+                      <p className={`mt-1 text-xs text-right ${pushTitle.length >= 60 ? 'text-amber-500' : 'text-[var(--text-muted)]'}`}>
+                        {pushTitle.length}/65
+                      </p>
+                    </div>
+
+                    {/* Push Message */}
+                    <div>
+                      <label className="mb-1.5 block text-xs font-medium text-[var(--text-muted)]">Push Message</label>
+                      <textarea
+                        value={pushMessage}
+                        onChange={(e) => setPushMessage(e.target.value.slice(0, 240))}
+                        placeholder="Tap to read the full story..."
+                        maxLength={240}
+                        rows={3}
+                        className="w-full resize-none rounded-lg border border-[var(--border-default)] bg-[var(--bg-tertiary)] px-3 py-2 text-sm text-[var(--text-primary)] placeholder-[var(--text-muted)] focus:border-[var(--accent-red)] focus:outline-none"
+                      />
+                      <p className={`mt-1 text-xs text-right ${pushMessage.length >= 220 ? 'text-amber-500' : 'text-[var(--text-muted)]'}`}>
+                        {pushMessage.length}/240
+                      </p>
+                    </div>
+
+                    {/* Push Preview */}
+                    <div>
+                      <label className="mb-1.5 block text-xs font-medium text-[var(--text-muted)]">Preview</label>
+                      <div className="rounded-xl bg-white p-3 shadow-lg dark:bg-gray-800">
+                        <div className="flex items-start gap-3">
+                          <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-lg bg-[#bc0000]">
+                            <span className="text-xs font-bold text-white">SM</span>
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center justify-between">
+                              <span className="text-[10px] font-semibold uppercase tracking-wide text-gray-500">Sports Mockery</span>
+                              <span className="text-[10px] text-gray-400">now</span>
+                            </div>
+                            <p className="mt-0.5 truncate text-sm font-semibold text-gray-900 dark:text-white">
+                              {pushTitle || 'Notification Title'}
+                            </p>
+                            <p className="line-clamp-2 text-xs text-gray-600 dark:text-gray-300">
+                              {pushMessage || 'Your notification message will appear here...'}
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
 
               {/* Author */}
               <div>

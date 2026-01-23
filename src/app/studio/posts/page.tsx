@@ -100,12 +100,6 @@ export default async function StudioPostsPage({ searchParams }: PostsPageProps) 
             {isEditor ? 'Manage all articles' : 'Manage your articles'}
           </p>
         </div>
-        <Link
-          href="/studio/posts/new"
-          className="inline-flex items-center rounded-lg px-4 py-2.5 text-sm font-medium transition-colors bg-[#bc0000] text-white dark:bg-white dark:text-[#bc0000]"
-        >
-          New Post
-        </Link>
       </div>
 
       {/* Filters */}
