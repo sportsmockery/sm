@@ -18,6 +18,44 @@
 - **Auth:** Supabase Auth
 - **Styling:** Tailwind CSS
 
+---
+
+## Styling Rules (IMPORTANT)
+
+### Always Use Inline Styles for Button Colors
+Tailwind classes for colors/borders on buttons often get overridden by other CSS. **Always use inline `style={{}}` for:**
+- `backgroundColor`
+- `color`
+- `border`
+- `outline`
+- SVG `stroke` color
+
+**Example - Correct:**
+```jsx
+<Link
+  href="/fan-chat"
+  className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded"
+  style={{
+    backgroundColor: theme === 'dark' ? '#ffffff' : '#bc0000',
+    color: theme === 'dark' ? '#bc0000' : '#ffffff',
+    border: 'none',
+    outline: 'none',
+  }}
+>
+  <svg stroke={theme === 'dark' ? '#bc0000' : '#ffffff'} ...>
+```
+
+**Example - Wrong (will get overridden):**
+```jsx
+<Link
+  className={`... ${theme === 'dark' ? 'bg-white text-[#bc0000]' : 'bg-[#bc0000] text-white'}`}
+>
+```
+
+### Brand Colors
+- **Primary Red:** `#bc0000`
+- Use this for CTA buttons, accents, and highlights
+
 ### Teams Covered
 - Chicago Bears (NFL)
 - Chicago Bulls (NBA)
