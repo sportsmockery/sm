@@ -4,4 +4,5 @@ export type TikTokEmbed = {
   html: string;       // TikTok oEmbed HTML
   thumbnailUrl: string;
   title: string;
+  publishedAt: string; // ISO date string
 };

@@ -1,11 +1,10 @@
 // app/southside-behavior/SouthsideBehaviorClient.tsx
 'use client';
 
-import { useState, useEffect } from 'react';
-import Link from 'next/link';
+import { useEffect } from 'react';
 import Script from 'next/script';
 import type { TikTokEmbed } from '@/lib/tiktokTypes';
-import { truncateCaption } from '@/lib/tiktokFormatters';
+import { formatDate, truncate } from '@/lib/formatters';
 
 type Props = {
   latestEmbed: TikTokEmbed | null;
@@ -13,46 +12,60 @@ type Props = {
 };
 
 export function SouthsideBehaviorClient({ latestEmbed, previousEmbeds }: Props) {
-  const [activeEmbed, setActiveEmbed] = useState(latestEmbed);
-
   // Scroll to top on mount
   useEffect(() => {
     window.scrollTo(0, 0);
   }, []);
 
-  // Reload TikTok embeds when active embed changes
+  // Reload TikTok embeds after component mounts
   useEffect(() => {
-    if (typeof window !== 'undefined' && (window as any).tiktokEmbed) {
-      (window as any).tiktokEmbed.lib.render();
-    }
-  }, [activeEmbed]);
+    const timer = setTimeout(() => {
+      if (typeof window !== 'undefined' && (window as any).tiktokEmbed) {
+        (window as any).tiktokEmbed.lib.render();
+      }
+    }, 100);
+    return () => clearTimeout(timer);
+  }, []);
 
   if (!latestEmbed) {
     return (
       <main className="sm-show-page sm-southside-behavior">
-        {/* White Sox Team Bar */}
-        <div className="w-full py-3 px-4" style={{ backgroundColor: '#27251F' }}>
-          <div className="sm-container flex items-center justify-between">
-            <Link href="/chicago-white-sox" className="flex items-center gap-3 hover:opacity-80 transition-opacity">
-              <img src="/logos/whitesox.svg" alt="White Sox" className="w-8 h-8 object-contain" />
-              <span className="text-white font-semibold text-sm">Chicago White Sox</span>
-            </Link>
-            <nav className="hidden sm:flex items-center gap-4 text-sm">
-              <Link href="/chicago-white-sox/schedule" className="text-white/70 hover:text-white transition-colors">Schedule</Link>
-              <Link href="/chicago-white-sox/roster" className="text-white/70 hover:text-white transition-colors">Roster</Link>
-              <Link href="/chicago-white-sox/stats" className="text-white/70 hover:text-white transition-colors">Stats</Link>
-            </nav>
-          </div>
-        </div>
-
-        <section className="sm-show-hero">
-          <div className="sm-container sm-hero-inner">
-            <div className="sm-hero-text">
-              <span className="sm-show-label">Southside Behavior</span>
-              <h1 className="sm-hero-title">Videos temporarily unavailable</h1>
-              <p className="sm-hero-description">
-                Please check back soon. We&apos;re having trouble loading the latest TikToks.
-              </p>
+        <section className="sm-show-hero sm-tiktok-hero">
+          <div className="sm-container">
+            <div className="sm-tiktok-hero-inner">
+              <div className="sm-hero-text">
+                <span className="sm-show-label">Southside Behavior</span>
+                <h1 className="sm-hero-title">Videos temporarily unavailable</h1>
+                <p className="sm-hero-description">
+                  Please check back soon. We&apos;re having trouble loading the latest TikToks.
+                </p>
+                <div className="flex items-center justify-center gap-5 mt-4">
+                  {/* TikTok */}
+                  <a
+                    href="https://www.tiktok.com/@southsidebehavior"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-white hover:text-white/70 transition-colors"
+                    title="Follow on TikTok"
+                  >
+                    <svg className="w-8 h-8" viewBox="0 0 24 24" fill="currentColor">
+                      <path d="M19.59 6.69a4.83 4.83 0 01-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 01-5.2 1.74 2.89 2.89 0 012.31-4.64 2.93 2.93 0 01.88.13V9.4a6.84 6.84 0 00-1-.05A6.33 6.33 0 005 20.1a6.34 6.34 0 0010.86-4.43v-7a8.16 8.16 0 004.77 1.52v-3.4a4.85 4.85 0 01-1-.1z"/>
+                    </svg>
+                  </a>
+                  {/* Twitter/X */}
+                  <a
+                    href="https://x.com/SouthsideBhvr"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-white hover:text-white/70 transition-colors"
+                    title="Follow on X"
+                  >
+                    <svg className="w-8 h-8" viewBox="0 0 24 24" fill="currentColor">
+                      <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
+                    </svg>
+                  </a>
+                </div>
+              </div>
             </div>
           </div>
         </section>
@@ -65,72 +78,87 @@ export function SouthsideBehaviorClient({ latestEmbed, previousEmbeds }: Props) 
       {/* TikTok Embed Script */}
       <Script src="https://www.tiktok.com/embed.js" strategy="lazyOnload" />
 
-      {/* White Sox Team Bar */}
-      <div className="w-full py-3 px-4" style={{ backgroundColor: '#27251F' }}>
-        <div className="sm-container flex items-center justify-between">
-          <Link href="/chicago-white-sox" className="flex items-center gap-3 hover:opacity-80 transition-opacity">
-            <img src="/logos/whitesox.svg" alt="White Sox" className="w-8 h-8 object-contain" />
-            <span className="text-white font-semibold text-sm">Chicago White Sox</span>
-          </Link>
-          <nav className="hidden sm:flex items-center gap-4 text-sm">
-            <Link href="/chicago-white-sox/schedule" className="text-white/70 hover:text-white transition-colors">Schedule</Link>
-            <Link href="/chicago-white-sox/roster" className="text-white/70 hover:text-white transition-colors">Roster</Link>
-            <Link href="/chicago-white-sox/stats" className="text-white/70 hover:text-white transition-colors">Stats</Link>
-          </nav>
-        </div>
-      </div>
+      {/* Hero Section - Featured TikTok */}
+      <section className="sm-show-hero sm-tiktok-hero">
+        <div className="sm-container">
+          <div className="sm-tiktok-hero-inner">
+            <div className="sm-hero-text">
+              <span className="sm-show-label">Southside Behavior</span>
+              <h1 className="sm-hero-title">
+                {truncate(latestEmbed.title, 120)}
+              </h1>
+              <p className="sm-hero-meta">
+                {formatDate(latestEmbed.publishedAt)} · Latest TikTok
+              </p>
+              <p className="sm-hero-description">
+                Quick-hit TikToks from the South Side fan perspective. Catch the latest clips, reactions, and behind-the-scenes moments from White Sox fandom.
+              </p>
+              <div className="flex items-center justify-center gap-5 mt-4">
+                {/* TikTok */}
+                <a
+                  href="https://www.tiktok.com/@southsidebehavior"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-white hover:text-white/70 transition-colors"
+                  title="Follow on TikTok"
+                >
+                  <svg className="w-8 h-8" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M19.59 6.69a4.83 4.83 0 01-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 01-5.2 1.74 2.89 2.89 0 012.31-4.64 2.93 2.93 0 01.88.13V9.4a6.84 6.84 0 00-1-.05A6.33 6.33 0 005 20.1a6.34 6.34 0 0010.86-4.43v-7a8.16 8.16 0 004.77 1.52v-3.4a4.85 4.85 0 01-1-.1z"/>
+                  </svg>
+                </a>
+                {/* Twitter/X */}
+                <a
+                  href="https://x.com/SouthsideBhvr"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-white hover:text-white/70 transition-colors"
+                  title="Follow on X"
+                >
+                  <svg className="w-8 h-8" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
+                  </svg>
+                </a>
+              </div>
+            </div>
 
-      {/* Hero Section - Matching Bears Film Room */}
-      <section className="sm-show-hero">
-        <div className="sm-container sm-hero-inner">
-          <div className="sm-hero-text">
-            <span className="sm-show-label">Southside Behavior</span>
-            <h1 className="sm-hero-title">
-              {truncateCaption(activeEmbed?.title || latestEmbed.title, 120)}
-            </h1>
-            <p className="sm-hero-meta">
-              Latest TikTok · @southsidebehavior
-            </p>
-            <p className="sm-hero-description">
-              Quick-hit TikToks from the South Side fan perspective. Catch the latest clips, reactions, and behind-the-scenes moments from White Sox fandom.
-            </p>
-          </div>
-
-          <div className="sm-hero-video">
-            <div
-              className="sm-video-wrapper"
-              key={activeEmbed?.url || latestEmbed.url}
-              dangerouslySetInnerHTML={{ __html: activeEmbed?.html || latestEmbed.html }}
-            />
+            <div className="sm-tiktok-featured">
+              <div
+                className="sm-tiktok-embed-wrapper"
+                dangerouslySetInnerHTML={{ __html: latestEmbed.html }}
+              />
+            </div>
           </div>
         </div>
       </section>
 
-      {/* Previous Videos Section */}
+      {/* Recent Videos Section */}
       {previousEmbeds.length > 0 && (
         <section className="sm-show-previous">
           <div className="sm-container">
-            <h2 className="sm-section-title">Recent TikToks</h2>
-            <div className="sm-video-grid">
+            <h2 className="sm-section-title">Recent videos</h2>
+            <div className="sm-tiktok-grid">
               {previousEmbeds.map((embed) => (
-                <article key={embed.url} className="sm-video-card">
-                  <button
-                    type="button"
-                    className="sm-video-thumb-button"
-                    onClick={() => setActiveEmbed(embed)}
+                <article key={embed.url} className="sm-tiktok-card">
+                  <a
+                    href={embed.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="sm-tiktok-card-link"
                   >
-                    <div className="sm-video-thumb">
+                    <div className="sm-tiktok-thumb">
                       <img
                         src={embed.thumbnailUrl}
                         alt={embed.title}
                         loading="lazy"
                       />
-                      <span className="sm-video-play-icon">▶</span>
+                      <span className="sm-tiktok-play-icon">▶</span>
                     </div>
-                  </button>
+                  </a>
                   <div className="sm-video-info">
-                    <h3 className="sm-video-title">{truncateCaption(embed.title, 80)}</h3>
-                    <p className="sm-video-meta">@southsidebehavior</p>
+                    <h3 className="sm-video-title">{truncate(embed.title, 60)}</h3>
+                    <p className="sm-video-meta">
+                      {formatDate(embed.publishedAt)}
+                    </p>
                   </div>
                 </article>
               ))}
@@ -149,7 +177,7 @@ export function SouthsideBehaviorClient({ latestEmbed, previousEmbeds }: Props) 
             href="https://www.tiktok.com/@southsidebehavior"
             target="_blank"
             rel="noopener noreferrer"
-            className="sm-cta-button"
+            className="sm-cta-button-ssb"
           >
             Follow on TikTok
           </a>
