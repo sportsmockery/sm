@@ -32,14 +32,14 @@ export function SouthsideBehaviorClient({ latestEmbed, previousEmbeds }: Props) 
       <main className="sm-show-page sm-southside-behavior">
         <section className="sm-show-hero sm-tiktok-hero">
           <div className="sm-container">
-            <div className="sm-tiktok-hero-inner">
-              <div className="sm-hero-text" style={{ maxWidth: '400px' }}>
+            <div className="sm-tiktok-hero-inner" style={{ justifyContent: 'center' }}>
+              <div className="sm-hero-text" style={{ maxWidth: '400px', textAlign: 'center' }}>
                 <img
                   src="/youtubelogos/ssb-logo.png"
                   alt="Southside Behavior"
                   style={{ marginBottom: '0.5rem', maxWidth: '320px', height: 'auto', display: 'block', marginLeft: 'auto', marginRight: 'auto' }}
                 />
-                <span className="sm-show-label">Southside Behavior</span>
+                <span className="sm-show-label" style={{ display: 'block', textAlign: 'center' }}>Southside Behavior</span>
                 <h1 className="sm-hero-title">Videos temporarily unavailable</h1>
                 <p className="sm-hero-description">
                   Please check back soon. We&apos;re having trouble loading the latest TikToks.
@@ -86,14 +86,14 @@ export function SouthsideBehaviorClient({ latestEmbed, previousEmbeds }: Props) 
       {/* Hero Section - Featured TikTok */}
       <section className="sm-show-hero sm-tiktok-hero">
         <div className="sm-container">
-          <div className="sm-tiktok-hero-inner">
-            <div className="sm-hero-text" style={{ maxWidth: '400px' }}>
+          <div className="sm-tiktok-hero-inner" style={{ justifyContent: 'center' }}>
+            <div className="sm-hero-text" style={{ maxWidth: '400px', textAlign: 'center' }}>
               <img
                 src="/youtubelogos/ssb-logo.png"
                 alt="Southside Behavior"
                 style={{ marginBottom: '0.5rem', maxWidth: '320px', height: 'auto', display: 'block', marginLeft: 'auto', marginRight: 'auto' }}
               />
-              <span className="sm-show-label">Southside Behavior</span>
+              <span className="sm-show-label" style={{ display: 'block', textAlign: 'center' }}>Southside Behavior</span>
               <h1 className="sm-hero-title">
                 {truncate(latestEmbed.title, 120)}
               </h1>
