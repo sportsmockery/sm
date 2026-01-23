@@ -1336,3 +1336,78 @@ a:hover {
   font-weight: 600;
   text-decoration: none;
 }
+
+/* ========== PINWHEELS & IVY SHOW PAGE ========== */
+
+.sm-pinwheels-ivy .sm-show-hero {
+  background-color: #0E3386;
+}
+
+.sm-pinwheels-ivy .sm-show-previous {
+  background-color: #ffffff;
+}
+
+.sm-pinwheels-ivy .sm-section-title {
+  color: #222222;
+}
+
+.sm-pinwheels-ivy .sm-video-card {
+  background-color: #f7f7f7;
+}
+
+.sm-pinwheels-ivy .sm-video-title {
+  color: #222222;
+}
+
+.sm-pinwheels-ivy .sm-video-meta {
+  color: #666666;
+}
+
+.sm-pinwheels-ivy .sm-show-cta {
+  background-color: #ffffff;
+}
+
+.sm-pinwheels-ivy .sm-cta-text {
+  color: #222222;
+}
+
+/* Pinwheels & Ivy Dark Mode */
+:root[data-theme="dark"] .sm-pinwheels-ivy .sm-show-hero,
+.dark .sm-pinwheels-ivy .sm-show-hero {
+  background-color: #000000;
+}
+
+:root[data-theme="dark"] .sm-pinwheels-ivy .sm-show-previous,
+.dark .sm-pinwheels-ivy .sm-show-previous {
+  background-color: #000000;
+}
+
+:root[data-theme="dark"] .sm-pinwheels-ivy .sm-section-title,
+.dark .sm-pinwheels-ivy .sm-section-title {
+  color: #ffffff;
+}
+
+:root[data-theme="dark"] .sm-pinwheels-ivy .sm-video-card,
+.dark .sm-pinwheels-ivy .sm-video-card {
+  background-color: #1a1a1a;
+}
+
+:root[data-theme="dark"] .sm-pinwheels-ivy .sm-video-title,
+.dark .sm-pinwheels-ivy .sm-video-title {
+  color: #ffffff;
+}
+
+:root[data-theme="dark"] .sm-pinwheels-ivy .sm-video-meta,
+.dark .sm-pinwheels-ivy .sm-video-meta {
+  color: #999999;
+}
+
+:root[data-theme="dark"] .sm-pinwheels-ivy .sm-show-cta,
+.dark .sm-pinwheels-ivy .sm-show-cta {
+  background-color: #000000;
+}
+
+:root[data-theme="dark"] .sm-pinwheels-ivy .sm-cta-text,
+.dark .sm-pinwheels-ivy .sm-cta-text {
+  color: #ffffff;
+}
