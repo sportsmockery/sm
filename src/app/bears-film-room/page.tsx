@@ -4,7 +4,9 @@ import { getBearsFilmRoomVideos } from '@/lib/getBearsFilmRoomVideos';
 import { BearsFilmRoomClient } from './BearsFilmRoomClient';
 
 export const metadata: Metadata = {
-  title: 'Sports Mockery | BFR',
+  title: {
+    absolute: 'Sports Mockery | BFR',
+  },
 };
 
 export const revalidate = 900; // 15 minutes
