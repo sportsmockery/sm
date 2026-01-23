@@ -38,7 +38,7 @@ export async function POST(request: NextRequest) {
     // - message: text above the card (NO URL included)
     // - link: article URL -> Facebook builds card from OG tags
     const fbRes = await fetch(
-      `https://graph.facebook.com/v20.0/${pageId}/feed`,
+      `https://graph.facebook.com/v24.0/${pageId}/feed`,
       {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
