@@ -7,6 +7,7 @@ import { motion } from 'framer-motion'
 import { useTheme } from '@/contexts/ThemeContext'
 import { useAuth } from '@/contexts/AuthContext'
 import TeamStickyBarRouter from './TeamStickyBarRouter'
+import type { Role } from '@/lib/roles'
 
 // Navigation items - proper casing (not all caps) per spec
 const navItems = [
@@ -86,6 +87,7 @@ export default function Header() {
   const [searchOpen, setSearchOpen] = useState(false)
   const [searchQuery, setSearchQuery] = useState('')
   const [isScrolled, setIsScrolled] = useState(false)
+  const [userRole, setUserRole] = useState<Role | null>(null)
   const searchInputRef = useRef<HTMLInputElement>(null)
   const videoMenuRef = useRef<HTMLDivElement>(null)
   const appMenuRef = useRef<HTMLDivElement>(null)
@@ -93,6 +95,20 @@ export default function Header() {
   const userMenuRef = useRef<HTMLDivElement>(null)
   const { theme, toggleTheme } = useTheme()
   const { user, isAuthenticated, signOut } = useAuth()
+
+  // Fetch user role when authenticated
+  useEffect(() => {
+    if (isAuthenticated && user?.email) {
+      fetch(`/api/user/role?email=${encodeURIComponent(user.email)}`)
+        .then(res => res.ok ? res.json() : null)
+        .then(data => {
+          if (data?.role) setUserRole(data.role)
+        })
+        .catch(() => {})
+    } else {
+      setUserRole(null)
+    }
+  }, [isAuthenticated, user?.email])
 
   // Track scroll position for glass effect
   useEffect(() => {
@@ -320,6 +336,20 @@ export default function Header() {
                       style={{ backgroundColor: 'var(--bg-surface)', border: '1px solid var(--border-color)' }}
                     >
                       <div className="py-1">
+                        {/* Creator Studio link for editors and authors - above My Profile */}
+                        {(userRole === 'editor' || userRole === 'author') && (
+                          <Link
+                            href="/studio"
+                            onClick={() => setUserMenuOpen(false)}
+                            className="flex items-center gap-2 px-4 py-2 text-sm hover:bg-[var(--card-hover-bg)] transition-colors"
+                            style={{ color: 'var(--text-primary)' }}
+                          >
+                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+                            </svg>
+                            Creator Studio
+                          </Link>
+                        )}
                         <Link
                           href="/profile"
                           onClick={() => setUserMenuOpen(false)}
@@ -331,6 +361,21 @@ export default function Header() {
                           </svg>
                           My Profile
                         </Link>
+                        {/* Admin Dash link for admins - below My Profile */}
+                        {userRole === 'admin' && (
+                          <Link
+                            href="/admin"
+                            onClick={() => setUserMenuOpen(false)}
+                            className="flex items-center gap-2 px-4 py-2 text-sm hover:bg-[var(--card-hover-bg)] transition-colors"
+                            style={{ color: 'var(--text-primary)' }}
+                          >
+                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                            </svg>
+                            Admin Dash
+                          </Link>
+                        )}
                         <div className="my-1" style={{ borderTop: '1px solid var(--border-color)' }} />
                         <button
                           onClick={() => {
@@ -809,6 +854,20 @@ export default function Header() {
                       </div>
                     </div>
                   </div>
+                  {/* Creator Studio link for editors/authors */}
+                  {(userRole === 'editor' || userRole === 'author') && (
+                    <Link
+                      href="/studio"
+                      onClick={() => setMobileMenuOpen(false)}
+                      className="flex items-center gap-3 py-3 text-[14px] hover:text-[var(--link-color)]"
+                      style={{ color: 'var(--text-primary)', borderBottom: '1px solid var(--border-color)' }}
+                    >
+                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                      </svg>
+                      Creator Studio
+                    </Link>
+                  )}
                   <Link
                     href="/profile"
                     onClick={() => setMobileMenuOpen(false)}
@@ -820,6 +879,21 @@ export default function Header() {
                     </svg>
                     My Profile
                   </Link>
+                  {/* Admin Dash link for admins */}
+                  {userRole === 'admin' && (
+                    <Link
+                      href="/admin"
+                      onClick={() => setMobileMenuOpen(false)}
+                      className="flex items-center gap-3 py-3 text-[14px] hover:text-[var(--link-color)]"
+                      style={{ color: 'var(--text-primary)', borderBottom: '1px solid var(--border-color)' }}
+                    >
+                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                      </svg>
+                      Admin Dash
+                    </Link>
+                  )}
                   <button
                     onClick={() => {
                       setMobileMenuOpen(false)
