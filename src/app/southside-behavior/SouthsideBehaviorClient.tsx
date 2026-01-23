@@ -34,6 +34,11 @@ export function SouthsideBehaviorClient({ latestEmbed, previousEmbeds }: Props) 
           <div className="sm-container">
             <div className="sm-tiktok-hero-inner">
               <div className="sm-hero-text">
+                <img
+                  src="/youtubelogos/ssb-logo.png"
+                  alt="Southside Behavior"
+                  style={{ marginBottom: '0.5rem', maxWidth: '320px', height: 'auto', display: 'block', marginLeft: 'auto', marginRight: 'auto' }}
+                />
                 <span className="sm-show-label">Southside Behavior</span>
                 <h1 className="sm-hero-title">Videos temporarily unavailable</h1>
                 <p className="sm-hero-description">
@@ -83,6 +88,11 @@ export function SouthsideBehaviorClient({ latestEmbed, previousEmbeds }: Props) 
         <div className="sm-container">
           <div className="sm-tiktok-hero-inner">
             <div className="sm-hero-text">
+              <img
+                src="/youtubelogos/ssb-logo.png"
+                alt="Southside Behavior"
+                style={{ marginBottom: '0.5rem', maxWidth: '320px', height: 'auto', display: 'block', marginLeft: 'auto', marginRight: 'auto' }}
+              />
               <span className="sm-show-label">Southside Behavior</span>
               <h1 className="sm-hero-title">
                 {truncate(latestEmbed.title, 120)}
