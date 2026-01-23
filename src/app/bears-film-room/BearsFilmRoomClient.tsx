@@ -209,12 +209,12 @@ export function BearsFilmRoomClient({ latestVideo, previousVideos }: Props) {
             Want more Bears Film Room breakdowns?
           </p>
           <a
-            href="https://www.youtube.com/@bearsfilmroom/videos"
+            href="https://www.youtube.com/@bearsfilmroom/streams"
             target="_blank"
             rel="noopener noreferrer"
-            className="sm-cta-button"
+            className="sm-cta-button-bfr"
           >
-            View full video archive
+            View Full Video Archive
           </a>
         </div>
       </section>

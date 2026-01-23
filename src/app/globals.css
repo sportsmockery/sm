@@ -1337,6 +1337,25 @@ a:hover {
   text-decoration: none;
 }
 
+/* Bears Film Room CTA Button */
+.sm-cta-button-bfr {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 10px 18px;
+  border-radius: 999px;
+  background-color: #000000;
+  color: #ffffff;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+:root[data-theme="dark"] .sm-cta-button-bfr,
+.dark .sm-cta-button-bfr {
+  background-color: #ffffff;
+  color: #000000;
+}
+
 /* ========== PINWHEELS & IVY SHOW PAGE ========== */
 
 .sm-pinwheels-ivy .sm-show-hero {
