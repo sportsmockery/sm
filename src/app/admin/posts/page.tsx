@@ -2,6 +2,7 @@ import { supabaseAdmin } from '@/lib/supabase-server'
 import Link from 'next/link'
 import PostsListClient from './PostsListClient'
 import CategoryFilter from './CategoryFilter'
+import NewPostButton from './NewPostButton'
 
 interface PostsPageProps {
   searchParams: Promise<{
@@ -91,12 +92,7 @@ export default async function AdminPostsPage({ searchParams }: PostsPageProps) {
             Manage all your articles and content
           </p>
         </div>
-        <Link
-          href="/admin/posts/new"
-          className="inline-flex items-center rounded-lg px-4 py-2.5 text-sm font-medium transition-colors bg-[#bc0000] text-white dark:bg-white dark:text-[#bc0000]"
-        >
-          New Post
-        </Link>
+        <NewPostButton />
       </div>
 
       {/* Stats Bar */}
