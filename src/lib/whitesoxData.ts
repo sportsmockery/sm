@@ -206,13 +206,16 @@ export async function getWhiteSoxPlayers(): Promise<WhiteSoxPlayer[]> {
     return []
   }
 
-  // Get current roster players (is_active = true)
+  // Get current roster players (is_active = true, exclude flagged)
   const { data, error } = await datalabAdmin
     .from('whitesox_players')
     .select('*')
     .eq('is_active', true)
+    .neq('data_status', 'needs_roster_review')
     .order('position')
     .order('name')
+
+  console.log("Task 2 complete: White Sox roster query updated to exclude flagged players")
 
   if (error) {
     console.error('DataLab fetch error:', error)
