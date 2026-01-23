@@ -7,7 +7,6 @@ export const metadata: Metadata = {
   title: 'Sports Mockery | Posts',
 }
 import CategoryFilter from './CategoryFilter'
-import NewPostButton from './NewPostButton'
 
 interface PostsPageProps {
   searchParams: Promise<{
@@ -97,7 +96,6 @@ export default async function AdminPostsPage({ searchParams }: PostsPageProps) {
             Manage all your articles and content
           </p>
         </div>
-        <NewPostButton />
       </div>
 
       {/* Stats Bar */}
