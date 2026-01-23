@@ -641,21 +641,23 @@ export default function AdvancedPostEditor({
   }, [formData])
 
   return (
-    <div className="fixed top-[92px] left-0 right-0 bottom-0 z-[35] flex flex-col bg-[var(--bg-primary)]">
+    <div className="fixed top-[92px] left-0 right-0 bottom-0 z-[35] flex flex-col bg-[var(--bg-primary)] mt-2">
       {/* Top Header Bar - minimal, below the red line */}
       <header className="flex-shrink-0 flex h-12 items-center justify-between border-b border-[var(--border-default)] bg-[var(--bg-secondary)] px-4">
-        {/* Left: Toggle sidebar + Breadcrumb */}
+        {/* Left: Expand arrow (when collapsed) + Breadcrumb */}
         <div className="flex items-center gap-3">
-          <button
-            type="button"
-            onClick={() => setLeftSidebarCollapsed(!leftSidebarCollapsed)}
-            className="flex h-8 w-8 items-center justify-center rounded-lg text-[var(--text-muted)] hover:bg-[var(--bg-hover)] hover:text-[var(--text-primary)] transition-colors"
-            title={leftSidebarCollapsed ? 'Show sidebar' : 'Hide sidebar'}
-          >
-            <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
-            </svg>
-          </button>
+          {leftSidebarCollapsed && (
+            <button
+              type="button"
+              onClick={() => setLeftSidebarCollapsed(false)}
+              className="flex h-8 w-8 items-center justify-center rounded-lg text-[var(--text-muted)] hover:bg-[var(--bg-hover)] hover:text-[var(--text-primary)] transition-colors"
+              title="Show sidebar"
+            >
+              <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
+              </svg>
+            </button>
+          )}
           <nav className="flex items-center gap-1.5 text-sm">
             <Link href="/admin" className="text-[var(--text-muted)] hover:text-[var(--text-primary)]">Dashboard</Link>
             <span className="text-[var(--text-muted)]">/</span>
@@ -708,13 +710,24 @@ export default function AdvancedPostEditor({
       {/* Main Content Area */}
       <div className="flex-1 flex overflow-hidden">
         {/* Left Sidebar - Collapsible Navigation */}
-        <aside
-          className={`flex-shrink-0 border-r border-[var(--border-default)] bg-[var(--bg-secondary)] transition-all duration-300 overflow-hidden ${
-            leftSidebarCollapsed ? 'w-0' : 'w-60'
-          }`}
-        >
-          <div className="h-full overflow-y-auto p-4">
-            <nav className="space-y-1">
+        {!leftSidebarCollapsed && (
+          <aside className="flex-shrink-0 w-60 border-r border-[var(--border-default)] bg-[var(--bg-secondary)] flex flex-col">
+            {/* Sidebar Header with Collapse Button */}
+            <div className="flex h-12 items-center justify-between border-b border-[var(--border-default)] px-4">
+              <span className="text-sm font-semibold text-[var(--text-primary)]">Navigation</span>
+              <button
+                type="button"
+                onClick={() => setLeftSidebarCollapsed(true)}
+                className="flex h-8 w-8 items-center justify-center rounded-lg text-[var(--text-muted)] hover:bg-[var(--bg-hover)] hover:text-[var(--text-primary)] transition-colors"
+                title="Collapse sidebar"
+              >
+                <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
+                </svg>
+              </button>
+            </div>
+            <div className="flex-1 overflow-y-auto p-4">
+              <nav className="space-y-1">
               <Link
                 href="/admin"
                 className="flex items-center gap-3 rounded-lg px-3 py-2 text-sm text-[var(--text-secondary)] hover:bg-[var(--bg-hover)] hover:text-[var(--text-primary)]"
@@ -791,12 +804,13 @@ export default function AdvancedPostEditor({
                 </button>
               </div>
             </div>
-          </div>
-        </aside>
+            </div>
+          </aside>
+        )}
 
-        {/* Main Editor Column */}
+        {/* Main Editor Column - responsive width */}
         <main className="flex-1 overflow-y-auto">
-          <div className="max-w-4xl mx-auto px-6 py-6">
+          <div className={`mx-auto px-6 py-6 ${leftSidebarCollapsed ? 'max-w-5xl' : 'max-w-4xl'}`}>
             {/* Error - inline, dismisses automatically */}
             {error && (
               <div className="mb-4 rounded-lg border border-red-500/30 bg-red-500/10 px-4 py-2 text-sm text-red-500">
