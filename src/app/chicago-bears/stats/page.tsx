@@ -1,9 +1,9 @@
 import { Metadata } from 'next'
 import Link from 'next/link'
 import Image from 'next/image'
-import { getBearsStats, type BearsStats, type LeaderboardEntry, type BearsPlayer } from '@/lib/bearsData'
+import { getBearsStats, getBearsSeparatedRecord, type BearsStats, type LeaderboardEntry, type BearsPlayer } from '@/lib/bearsData'
 import { TeamHubLayout } from '@/components/team'
-import { CHICAGO_TEAMS, fetchTeamRecord, fetchNextGame } from '@/lib/team-config'
+import { CHICAGO_TEAMS, fetchNextGame } from '@/lib/team-config'
 
 export const metadata: Metadata = {
   title: 'Chicago Bears Stats 2025 | Team & Player Statistics | SportsMockery',
@@ -18,11 +18,25 @@ export default async function BearsStatsPage() {
   const team = CHICAGO_TEAMS.bears
 
   // Fetch all data in parallel
-  const [stats, record, nextGame] = await Promise.all([
+  const [stats, separatedRecord, nextGame] = await Promise.all([
     getBearsStats(currentSeason),
-    fetchTeamRecord('bears'),
+    getBearsSeparatedRecord(currentSeason),
     fetchNextGame('bears'),
   ])
+
+  // Build record object for TeamHubLayout (regular season only in main display)
+  const record = {
+    wins: separatedRecord.regularSeason.wins,
+    losses: separatedRecord.regularSeason.losses,
+    ties: separatedRecord.regularSeason.ties > 0 ? separatedRecord.regularSeason.ties : undefined,
+    postseason: (separatedRecord.postseason.wins > 0 || separatedRecord.postseason.losses > 0)
+      ? separatedRecord.postseason
+      : undefined,
+    divisionRank: separatedRecord.divisionRank || undefined,
+  }
+
+  // Format record string for display (regular season only)
+  const recordString = `${separatedRecord.regularSeason.wins}-${separatedRecord.regularSeason.losses}${separatedRecord.regularSeason.ties > 0 ? `-${separatedRecord.regularSeason.ties}` : ''}`
 
   return (
     <TeamHubLayout
@@ -36,13 +50,13 @@ export default async function BearsStatsPage() {
         {/* Team Overview Cards */}
         <section className="mb-10">
           <h2 className="text-xl font-bold text-[var(--text-primary)] mb-6" style={{ fontFamily: "'Montserrat', sans-serif" }}>
-            Team Overview
+            Team Overview — Regular Season
           </h2>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             <TeamStatCard
               label="Record"
-              value={stats.team.record}
-              sublabel={`${stats.team.wins}W - ${stats.team.losses}L`}
+              value={recordString}
+              sublabel={separatedRecord.divisionRank || 'Regular Season'}
             />
             <TeamStatCard
               label="Points/Game"
@@ -123,8 +137,25 @@ export default async function BearsStatsPage() {
           </div>
         </section>
 
+        {/* Postseason Section (if applicable) */}
+        {(separatedRecord.postseason.wins > 0 || separatedRecord.postseason.losses > 0) && (
+          <section className="mt-10 p-6 rounded-2xl bg-[#C83200]/5 border border-[#C83200]/20">
+            <h2 className="text-xl font-bold text-[#C83200] mb-4" style={{ fontFamily: "'Montserrat', sans-serif" }}>
+              🏈 Postseason
+            </h2>
+            <div className="flex flex-wrap gap-6">
+              <div>
+                <div className="text-2xl font-bold text-[var(--text-primary)]">
+                  {separatedRecord.postseason.wins}-{separatedRecord.postseason.losses}
+                </div>
+                <div className="text-sm text-[var(--text-muted)]">Playoff Record</div>
+              </div>
+            </div>
+          </section>
+        )}
+
         {/* Links */}
-        <div className="mt-10 flex flex-wrap gap-4 justify-center">
+        <div className="mt-10 pb-12 flex flex-wrap gap-4 justify-center">
           <Link
             href="/chicago-bears/roster"
             className="inline-flex items-center gap-2 px-6 py-3 bg-[var(--bg-elevated)] border border-[var(--border-subtle)] hover:border-[#C83200] text-[var(--text-primary)] font-medium rounded-xl transition-colors"
@@ -135,7 +166,7 @@ export default async function BearsStatsPage() {
             View Full Roster
           </Link>
           <Link
-            href="/chicago-bears-player"
+            href="/chicago-bears/players"
             className="inline-flex items-center gap-2 px-6 py-3 bg-[#C83200] hover:bg-[#a82900] text-white font-semibold rounded-xl transition-colors"
           >
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">

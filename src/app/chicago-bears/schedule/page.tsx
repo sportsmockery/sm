@@ -1,12 +1,15 @@
 import { Metadata } from 'next'
 import Link from 'next/link'
 import Image from 'next/image'
-import { getBearsSchedule, getAvailableSeasons, getPlayoffRoundName, type BearsGame } from '@/lib/bearsData'
+import { getBearsSchedule, getAvailableSeasons, getPlayoffRoundName, getBearsSeparatedRecord, type BearsGame } from '@/lib/bearsData'
 import { TeamHubLayout } from '@/components/team'
-import { CHICAGO_TEAMS, fetchTeamRecord, fetchNextGame } from '@/lib/team-config'
+import { CHICAGO_TEAMS, fetchNextGame } from '@/lib/team-config'
 
 // Bears logo URL
 const BEARS_LOGO = 'https://a.espncdn.com/i/teamlogos/nfl/500/chi.png'
+
+// Bye week for 2025 season
+const BYE_WEEK = 5
 
 export const metadata: Metadata = {
   title: 'Chicago Bears Schedule 2025 | Game Dates & Results | SportsMockery',
@@ -15,25 +18,55 @@ export const metadata: Metadata = {
 
 export const revalidate = 3600
 
+// Helper to calculate progressive record
+function calculateProgressiveRecord(games: BearsGame[]): (BearsGame & { progressiveRecord: string })[] {
+  let wins = 0
+  let losses = 0
+  let ties = 0
+  return games.map(g => {
+    if (g.status === 'final') {
+      if (g.result === 'W') wins++
+      else if (g.result === 'L') losses++
+      else if (g.result === 'T') ties++
+    }
+    const tieStr = ties > 0 ? `-${ties}` : ''
+    return { ...g, progressiveRecord: `${wins}-${losses}${tieStr}` }
+  })
+}
+
 export default async function BearsSchedulePage() {
   // 2025-26 NFL season is stored as season = 2025
   const currentSeason = 2025
   const team = CHICAGO_TEAMS.bears
 
   // Fetch all data in parallel
-  const [schedule, seasons, record, nextGame] = await Promise.all([
+  const [schedule, seasons, separatedRecord, nextGame] = await Promise.all([
     getBearsSchedule(currentSeason),
     getAvailableSeasons(),
-    fetchTeamRecord('bears'),
+    getBearsSeparatedRecord(currentSeason),
     fetchNextGame('bears'),
   ])
 
-  // Calculate record
-  const completedGames = schedule.filter(g => g.status === 'final')
-  const wins = completedGames.filter(g => g.result === 'W').length
-  const losses = completedGames.filter(g => g.result === 'L').length
+  // Separate games by type
+  const preseasonGames = schedule.filter(g => g.gameType === 'preseason')
+  const regularGames = schedule.filter(g => g.gameType === 'regular')
+  const postseasonGames = schedule.filter(g => g.gameType === 'postseason')
 
-  // Find next scheduled game
+  // Calculate progressive record for regular season
+  const regularWithRecord = calculateProgressiveRecord(regularGames)
+
+  // Build record object for TeamHubLayout (regular season only in main display)
+  const record = {
+    wins: separatedRecord.regularSeason.wins,
+    losses: separatedRecord.regularSeason.losses,
+    ties: separatedRecord.regularSeason.ties > 0 ? separatedRecord.regularSeason.ties : undefined,
+    postseason: (separatedRecord.postseason.wins > 0 || separatedRecord.postseason.losses > 0)
+      ? separatedRecord.postseason
+      : undefined,
+    divisionRank: separatedRecord.divisionRank || undefined,
+  }
+
+  // Find next scheduled game (any type)
   const nextScheduledGame = schedule.find(g => g.status === 'scheduled')
 
   return (
@@ -44,7 +77,7 @@ export default async function BearsSchedulePage() {
       activeTab="schedule"
     >
       {/* Schedule Content */}
-      <div>
+      <div className="pb-12">
         {/* Next Game Highlight - Compact */}
         {nextScheduledGame && (
           <div className="mb-6 p-4 rounded-xl bg-[var(--bg-elevated)] border border-[var(--border-subtle)]">
@@ -80,29 +113,111 @@ export default async function BearsSchedulePage() {
           </div>
         )}
 
-        {/* Full Schedule */}
-        <div className="bg-[var(--bg-elevated)] border border-[var(--border-subtle)] rounded-2xl overflow-hidden">
-          <div className="p-4 border-b border-[var(--border-subtle)] flex items-center justify-between">
-            <h2 className="font-bold text-[var(--text-primary)]" style={{ fontFamily: "'Montserrat', sans-serif" }}>
-              Full Schedule
-            </h2>
-            <span className="text-sm text-[var(--text-muted)]">
-              {schedule.length} games
-            </span>
-          </div>
-
-          <div className="divide-y divide-[var(--border-subtle)]">
-            {schedule.map((game) => (
-              <GameRow key={game.gameId} game={game} />
-            ))}
+        {/* Record Summary */}
+        <div className="mb-6 p-4 rounded-xl bg-[var(--bg-elevated)] border border-[var(--border-subtle)]">
+          <div className="flex flex-wrap gap-6 justify-center text-center">
+            <div>
+              <div className="text-xs text-[var(--text-muted)] uppercase tracking-wider mb-1">Regular Season</div>
+              <div className="text-xl font-bold text-[var(--text-primary)]">
+                {separatedRecord.regularSeason.wins}-{separatedRecord.regularSeason.losses}
+                {separatedRecord.regularSeason.ties > 0 && `-${separatedRecord.regularSeason.ties}`}
+              </div>
+              {separatedRecord.divisionRank && (
+                <div className="text-xs text-[var(--text-muted)]">{separatedRecord.divisionRank}</div>
+              )}
+            </div>
+            {(separatedRecord.postseason.wins > 0 || separatedRecord.postseason.losses > 0) && (
+              <div>
+                <div className="text-xs text-[var(--text-muted)] uppercase tracking-wider mb-1">Postseason</div>
+                <div className="text-xl font-bold text-[#C83200]">
+                  {separatedRecord.postseason.wins}-{separatedRecord.postseason.losses}
+                </div>
+              </div>
+            )}
           </div>
         </div>
+
+        {/* Postseason Section */}
+        {postseasonGames.length > 0 && (
+          <div className="mb-6">
+            <div className="bg-[var(--bg-elevated)] border border-[var(--border-subtle)] rounded-2xl overflow-hidden">
+              <div className="p-4 border-b border-[var(--border-subtle)] bg-[#C83200]/5">
+                <h2 className="font-bold text-[#C83200]" style={{ fontFamily: "'Montserrat', sans-serif" }}>
+                  🏈 Postseason
+                </h2>
+              </div>
+              <div className="divide-y divide-[var(--border-subtle)]">
+                {postseasonGames.map((game) => (
+                  <GameRow key={game.gameId} game={game} />
+                ))}
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Regular Season Section */}
+        <div className="mb-6">
+          <div className="bg-[var(--bg-elevated)] border border-[var(--border-subtle)] rounded-2xl overflow-hidden">
+            <div className="p-4 border-b border-[var(--border-subtle)] flex items-center justify-between">
+              <h2 className="font-bold text-[var(--text-primary)]" style={{ fontFamily: "'Montserrat', sans-serif" }}>
+                Regular Season
+              </h2>
+              <span className="text-sm text-[var(--text-muted)]">
+                {regularGames.length} games
+              </span>
+            </div>
+            <div className="divide-y divide-[var(--border-subtle)]">
+              {regularWithRecord.map((game, index) => {
+                // Check if bye week comes after this game
+                const showByeAfter = game.week === BYE_WEEK - 1 && regularWithRecord[index + 1]?.week === BYE_WEEK + 1
+                return (
+                  <div key={game.gameId}>
+                    <GameRow game={game} progressiveRecord={game.progressiveRecord} />
+                    {showByeAfter && (
+                      <div className="p-4 bg-[var(--bg-tertiary)]/50 text-center">
+                        <span className="text-sm text-[var(--text-muted)] italic">
+                          Week {BYE_WEEK} — BYE WEEK
+                        </span>
+                      </div>
+                    )}
+                  </div>
+                )
+              })}
+            </div>
+          </div>
+        </div>
+
+        {/* Preseason Section */}
+        {preseasonGames.length > 0 && (
+          <div className="mb-6">
+            <div className="bg-[var(--bg-elevated)] border border-[var(--border-subtle)] rounded-2xl overflow-hidden">
+              <div className="p-4 border-b border-[var(--border-subtle)] bg-[var(--bg-tertiary)]/30">
+                <h2 className="font-bold text-[var(--text-secondary)]" style={{ fontFamily: "'Montserrat', sans-serif" }}>
+                  Preseason
+                </h2>
+              </div>
+              <div className="divide-y divide-[var(--border-subtle)]">
+                {preseasonGames.map((game) => (
+                  <GameRow key={game.gameId} game={game} isPreseason />
+                ))}
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </TeamHubLayout>
   )
 }
 
-function GameRow({ game }: { game: BearsGame }) {
+function GameRow({
+  game,
+  progressiveRecord,
+  isPreseason
+}: {
+  game: BearsGame
+  progressiveRecord?: string
+  isPreseason?: boolean
+}) {
   const gameDate = new Date(game.date)
   const isPast = game.status === 'final'
   const isInProgress = game.status === 'in_progress'
@@ -110,12 +225,16 @@ function GameRow({ game }: { game: BearsGame }) {
 
   return (
     <div className={`p-4 hover:bg-[var(--bg-hover)] transition-colors ${isPast ? '' : 'bg-[var(--bg-tertiary)]/30'}`}>
-      <div className="grid grid-cols-[auto_1fr_auto] sm:grid-cols-[100px_1fr_140px] gap-4 items-center">
+      <div className="grid grid-cols-[auto_1fr_auto] sm:grid-cols-[100px_1fr_160px] gap-4 items-center">
         {/* Week & Date */}
         <div className="flex-shrink-0">
           {game.isPlayoff ? (
             <div className="px-2 py-1 bg-[#C83200]/10 text-[#C83200] text-xs rounded font-semibold inline-block mb-1">
               {playoffRound || 'Playoff'}
+            </div>
+          ) : isPreseason ? (
+            <div className="text-xs text-[var(--text-muted)] uppercase tracking-wider">
+              Pre {game.week}
             </div>
           ) : (
             <div className="text-xs text-[var(--text-muted)] uppercase tracking-wider">
@@ -179,7 +298,9 @@ function GameRow({ game }: { game: BearsGame }) {
               <span className={`px-2 py-0.5 rounded text-xs font-bold ${
                 game.result === 'W'
                   ? 'bg-green-500/10 text-green-500'
-                  : 'bg-red-500/10 text-red-500'
+                  : game.result === 'T'
+                    ? 'bg-yellow-500/10 text-yellow-500'
+                    : 'bg-red-500/10 text-red-500'
               }`}>
                 {game.result}
               </span>
@@ -206,6 +327,12 @@ function GameRow({ game }: { game: BearsGame }) {
                   {game.tv}
                 </div>
               )}
+            </div>
+          )}
+          {/* Progressive Record (regular season only) */}
+          {progressiveRecord && isPast && !isPreseason && (
+            <div className="text-xs text-[var(--text-muted)] mt-1">
+              ({progressiveRecord})
             </div>
           )}
           {/* Recap Link inline */}

@@ -1,14 +1,14 @@
 import { Metadata } from 'next'
 import Image from 'next/image'
 import { TeamHubLayout } from '@/components/team'
-import { CHICAGO_TEAMS, fetchTeamRecord, fetchNextGame } from '@/lib/team-config'
-import { getBullsSchedule, type BullsGame } from '@/lib/bullsData'
+import { CHICAGO_TEAMS, fetchNextGame } from '@/lib/team-config'
+import { getBullsSchedule, getBullsRecord, type BullsGame } from '@/lib/bullsData'
 
 const BULLS_LOGO = 'https://a.espncdn.com/i/teamlogos/nba/500/chi.png'
 
 export const metadata: Metadata = {
-  title: 'Chicago Bulls Schedule 2024-25 | Game Dates & Results | SportsMockery',
-  description: 'Complete Chicago Bulls 2024-25 schedule with game dates, times, opponents, scores, and results. View upcoming games and past results.',
+  title: 'Chicago Bulls Schedule 2025-26 | Game Dates & Results | SportsMockery',
+  description: 'Complete Chicago Bulls 2025-26 schedule with game dates, times, opponents, scores, and results. View upcoming games and past results.',
 }
 
 export const revalidate = 3600
@@ -16,13 +16,27 @@ export const revalidate = 3600
 export default async function BullsSchedulePage() {
   const team = CHICAGO_TEAMS.bulls
 
-  const [schedule, record, nextGame] = await Promise.all([
+  const [schedule, bullsRecord, nextGame] = await Promise.all([
     getBullsSchedule(),
-    fetchTeamRecord('bulls'),
+    getBullsRecord(),
     fetchNextGame('bulls'),
   ])
 
-  const nextScheduledGame = schedule.find(g => g.status === 'scheduled')
+  // Build record for TeamHubLayout
+  const record = {
+    wins: bullsRecord.wins,
+    losses: bullsRecord.losses,
+  }
+
+  // Sort schedule: upcoming games first (ascending by date), then completed (descending by date)
+  const upcomingGames = schedule.filter(g => g.status !== 'final').sort((a, b) =>
+    new Date(a.date).getTime() - new Date(b.date).getTime()
+  )
+  const completedGames = schedule.filter(g => g.status === 'final').sort((a, b) =>
+    new Date(b.date).getTime() - new Date(a.date).getTime()
+  )
+
+  const nextScheduledGame = upcomingGames[0]
 
   return (
     <TeamHubLayout
@@ -31,7 +45,34 @@ export default async function BullsSchedulePage() {
       nextGame={nextGame}
       activeTab="schedule"
     >
-      <div>
+      <div className="pb-12">
+        {/* Record Summary */}
+        <div className="mb-6 p-4 rounded-xl bg-[var(--bg-elevated)] border border-[var(--border-subtle)]">
+          <div className="flex flex-wrap gap-6 justify-center text-center">
+            <div>
+              <div className="text-xs text-[var(--text-muted)] uppercase tracking-wider mb-1">2025-26 Season</div>
+              <div className="text-xl font-bold text-[var(--text-primary)]">
+                {bullsRecord.wins}-{bullsRecord.losses}
+              </div>
+            </div>
+            {bullsRecord.streak && (
+              <div>
+                <div className="text-xs text-[var(--text-muted)] uppercase tracking-wider mb-1">Streak</div>
+                <div className={`text-xl font-bold ${bullsRecord.streak.startsWith('W') ? 'text-green-500' : 'text-red-500'}`}>
+                  {bullsRecord.streak}
+                </div>
+              </div>
+            )}
+            <div>
+              <div className="text-xs text-[var(--text-muted)] uppercase tracking-wider mb-1">Games Played</div>
+              <div className="text-xl font-bold text-[var(--text-primary)]">
+                {completedGames.length}
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Next Game */}
         {nextScheduledGame && (
           <div className="mb-6 p-4 rounded-xl bg-[var(--bg-elevated)] border border-[var(--border-subtle)]">
             <div className="flex items-center justify-between gap-4">
@@ -67,22 +108,50 @@ export default async function BullsSchedulePage() {
           </div>
         )}
 
-        <div className="bg-[var(--bg-elevated)] border border-[var(--border-subtle)] rounded-2xl overflow-hidden">
-          <div className="p-4 border-b border-[var(--border-subtle)] flex items-center justify-between">
-            <h2 className="font-bold text-[var(--text-primary)]" style={{ fontFamily: "'Montserrat', sans-serif" }}>
-              Full Schedule
-            </h2>
-            <span className="text-sm text-[var(--text-muted)]">
-              {schedule.length} games
-            </span>
+        {/* Upcoming Games */}
+        {upcomingGames.length > 0 && (
+          <div className="mb-6 bg-[var(--bg-elevated)] border border-[var(--border-subtle)] rounded-2xl overflow-hidden">
+            <div className="p-4 border-b border-[var(--border-subtle)] flex items-center justify-between bg-[var(--bg-tertiary)]/30">
+              <h2 className="font-bold text-[var(--text-primary)]" style={{ fontFamily: "'Montserrat', sans-serif" }}>
+                Upcoming Games
+              </h2>
+              <span className="text-sm text-[var(--text-muted)]">
+                {upcomingGames.length} games
+              </span>
+            </div>
+            <div className="divide-y divide-[var(--border-subtle)]">
+              {upcomingGames.slice(0, 10).map((game) => (
+                <GameRow key={game.gameId} game={game} />
+              ))}
+            </div>
           </div>
+        )}
 
-          <div className="divide-y divide-[var(--border-subtle)]">
-            {schedule.map((game) => (
-              <GameRow key={game.gameId} game={game} />
-            ))}
+        {/* Completed Games */}
+        {completedGames.length > 0 && (
+          <div className="bg-[var(--bg-elevated)] border border-[var(--border-subtle)] rounded-2xl overflow-hidden">
+            <div className="p-4 border-b border-[var(--border-subtle)] flex items-center justify-between">
+              <h2 className="font-bold text-[var(--text-primary)]" style={{ fontFamily: "'Montserrat', sans-serif" }}>
+                Recent Results
+              </h2>
+              <span className="text-sm text-[var(--text-muted)]">
+                {completedGames.length} games
+              </span>
+            </div>
+            <div className="divide-y divide-[var(--border-subtle)]">
+              {completedGames.map((game) => (
+                <GameRow key={game.gameId} game={game} />
+              ))}
+            </div>
           </div>
-        </div>
+        )}
+
+        {/* Empty state */}
+        {schedule.length === 0 && (
+          <div className="bg-[var(--bg-elevated)] border border-[var(--border-subtle)] rounded-2xl p-12 text-center">
+            <p className="text-[var(--text-muted)]">No schedule data available</p>
+          </div>
+        )}
       </div>
     </TeamHubLayout>
   )

@@ -200,8 +200,7 @@ function generateSlug(name: string): string {
 
 /**
  * Get all Bulls players from DataLab
- * Filters to only show players from current season (or most recent season for off-season)
- * Only includes players with headshots
+ * Filters to current roster using is_current_bulls = true
  */
 export async function getBullsPlayers(): Promise<BullsPlayer[]> {
   if (!datalabAdmin) {
@@ -209,39 +208,11 @@ export async function getBullsPlayers(): Promise<BullsPlayer[]> {
     return []
   }
 
-  const targetSeason = getCurrentSeason()
-
-  // Get players who have game stats in the current season
-  let playerIds = await getSeasonPlayerIds(targetSeason)
-
-  // If no players in current season, fall back to previous season (off-season)
-  if (playerIds.length === 0) {
-    playerIds = await getSeasonPlayerIds(targetSeason - 1)
-  }
-
-  // If still no players, get all players with headshots as fallback
-  if (playerIds.length === 0) {
-    const { data, error } = await datalabAdmin
-      .from('bulls_players')
-      .select('*')
-      .not('headshot_url', 'is', null)
-      .order('position')
-      .order('name')
-      .limit(25)
-
-    if (error) {
-      console.error('DataLab fetch error:', error)
-      return []
-    }
-    return transformPlayers(data || [])
-  }
-
-  // Get player details for players with game stats this season
+  // Get current roster players (is_current_bulls = true)
   const { data, error } = await datalabAdmin
     .from('bulls_players')
     .select('*')
-    .in('id', playerIds)
-    .not('headshot_url', 'is', null)
+    .eq('is_current_bulls', true)
     .order('position')
     .order('name')
 
@@ -364,23 +335,24 @@ export async function getPlayerProfile(slug: string): Promise<PlayerProfile | nu
 async function getPlayerSeasonStats(internalId: number): Promise<PlayerSeasonStats[]> {
   if (!datalabAdmin) return []
 
+  // Use actual column names from database
   const { data, error } = await datalabAdmin
     .from('bulls_player_game_stats')
     .select(`
       season,
-      minutes,
+      minutes_played,
       points,
-      rebounds,
+      total_rebounds,
       assists,
       steals,
       blocks,
       turnovers,
-      fg_made,
-      fg_attempted,
-      three_made,
-      three_attempted,
-      ft_made,
-      ft_attempted
+      field_goals_made,
+      field_goals_attempted,
+      three_pointers_made,
+      three_pointers_attempted,
+      free_throws_made,
+      free_throws_attempted
     `)
     .eq('player_id', internalId)
     .eq('season', getCurrentSeason())
@@ -390,19 +362,19 @@ async function getPlayerSeasonStats(internalId: number): Promise<PlayerSeasonSta
   // Aggregate all game stats into season totals
   const totals = data.reduce((acc: any, game: any) => {
     acc.gamesPlayed = (acc.gamesPlayed || 0) + 1
-    acc.minutes = (acc.minutes || 0) + (game.minutes || 0)
+    acc.minutes = (acc.minutes || 0) + (game.minutes_played || 0)
     acc.points = (acc.points || 0) + (game.points || 0)
-    acc.rebounds = (acc.rebounds || 0) + (game.rebounds || 0)
+    acc.rebounds = (acc.rebounds || 0) + (game.total_rebounds || 0)
     acc.assists = (acc.assists || 0) + (game.assists || 0)
     acc.steals = (acc.steals || 0) + (game.steals || 0)
     acc.blocks = (acc.blocks || 0) + (game.blocks || 0)
     acc.turnovers = (acc.turnovers || 0) + (game.turnovers || 0)
-    acc.fgMade = (acc.fgMade || 0) + (game.fg_made || 0)
-    acc.fgAttempted = (acc.fgAttempted || 0) + (game.fg_attempted || 0)
-    acc.threeMade = (acc.threeMade || 0) + (game.three_made || 0)
-    acc.threeAttempted = (acc.threeAttempted || 0) + (game.three_attempted || 0)
-    acc.ftMade = (acc.ftMade || 0) + (game.ft_made || 0)
-    acc.ftAttempted = (acc.ftAttempted || 0) + (game.ft_attempted || 0)
+    acc.fgMade = (acc.fgMade || 0) + (game.field_goals_made || 0)
+    acc.fgAttempted = (acc.fgAttempted || 0) + (game.field_goals_attempted || 0)
+    acc.threeMade = (acc.threeMade || 0) + (game.three_pointers_made || 0)
+    acc.threeAttempted = (acc.threeAttempted || 0) + (game.three_pointers_attempted || 0)
+    acc.ftMade = (acc.ftMade || 0) + (game.free_throws_made || 0)
+    acc.ftAttempted = (acc.ftAttempted || 0) + (game.free_throws_attempted || 0)
     return acc
   }, {})
 
@@ -438,34 +410,28 @@ async function getPlayerSeasonStats(internalId: number): Promise<PlayerSeasonSta
 async function getPlayerGameLog(internalId: number): Promise<PlayerGameLogEntry[]> {
   if (!datalabAdmin) return []
 
+  // Use actual column names from database
   const { data, error } = await datalabAdmin
     .from('bulls_player_game_stats')
     .select(`
       player_id,
       game_id,
-      minutes,
+      game_date,
+      opponent,
+      is_home,
+      minutes_played,
       points,
-      rebounds,
+      total_rebounds,
       assists,
       steals,
       blocks,
       turnovers,
-      fg_made,
-      fg_attempted,
-      three_made,
-      three_attempted,
-      ft_made,
-      ft_attempted,
-      bulls_games_master!inner(
-        game_date,
-        opponent,
-        opponent_full_name,
-        is_bulls_home,
-        bulls_score,
-        opponent_score,
-        bulls_win,
-        season
-      )
+      field_goals_made,
+      field_goals_attempted,
+      three_pointers_made,
+      three_pointers_attempted,
+      free_throws_made,
+      free_throws_attempted
     `)
     .eq('player_id', internalId)
     .eq('season', getCurrentSeason())
@@ -474,32 +440,41 @@ async function getPlayerGameLog(internalId: number): Promise<PlayerGameLogEntry[
 
   if (error || !data) return []
 
+  // Get game results from bulls_games_master
+  const { data: gamesData } = await datalabAdmin
+    .from('bulls_games_master')
+    .select('id, game_date, opponent, is_bulls_home, bulls_score, opponent_score, bulls_win, season')
+    .eq('season', getCurrentSeason())
+
+  const gamesMap = new Map(gamesData?.map((g: any) => [g.game_date + '-' + g.opponent, g]) || [])
+
   return data.map((s: any) => {
-    const game = s.bulls_games_master || {}
+    const gameKey = s.game_date + '-' + s.opponent
+    const game = gamesMap.get(gameKey) || {}
     const isPlayed = (game.bulls_score > 0) || (game.opponent_score > 0)
 
     return {
       gameId: s.game_id,
-      date: game.game_date || '',
+      date: s.game_date || '',
       season: game.season || getCurrentSeason(),
-      opponent: game.opponent || '',
-      isHome: game.is_bulls_home ?? true,
+      opponent: s.opponent || '',
+      isHome: s.is_home ?? true,
       result: isPlayed ? (game.bulls_win ? 'W' : 'L') : null,
       bullsScore: game.bulls_score,
       oppScore: game.opponent_score,
-      minutes: s.minutes,
+      minutes: s.minutes_played,
       points: s.points,
-      rebounds: s.rebounds,
+      rebounds: s.total_rebounds,
       assists: s.assists,
       steals: s.steals,
       blocks: s.blocks,
       turnovers: s.turnovers,
-      fgMade: s.fg_made,
-      fgAttempted: s.fg_attempted,
-      threeMade: s.three_made,
-      threeAttempted: s.three_attempted,
-      ftMade: s.ft_made,
-      ftAttempted: s.ft_attempted,
+      fgMade: s.field_goals_made,
+      fgAttempted: s.field_goals_attempted,
+      threeMade: s.three_pointers_made,
+      threeAttempted: s.three_pointers_attempted,
+      ftMade: s.free_throws_made,
+      ftAttempted: s.free_throws_attempted,
     }
   })
 }
@@ -819,6 +794,49 @@ async function getLeaderboards(season: number): Promise<BullsLeaderboard> {
 }
 
 /**
+ * Get Bulls record (NBA doesn't have separate postseason record display typically)
+ */
+export interface BullsRecord {
+  wins: number
+  losses: number
+  streak: string | null
+  divisionRank: string | null
+}
+
+export async function getBullsRecord(season?: number): Promise<BullsRecord> {
+  const schedule = await getBullsSchedule(season)
+
+  const completedGames = schedule.filter(g => g.status === 'final')
+  const wins = completedGames.filter(g => g.result === 'W').length
+  const losses = completedGames.filter(g => g.result === 'L').length
+
+  // Calculate streak from most recent games
+  let streak: string | null = null
+  if (completedGames.length > 0) {
+    const sortedGames = [...completedGames].sort((a, b) =>
+      new Date(b.date).getTime() - new Date(a.date).getTime()
+    )
+    let streakCount = 1
+    const streakType = sortedGames[0].result
+    for (let i = 1; i < sortedGames.length && i < 10; i++) {
+      if (sortedGames[i].result === streakType) {
+        streakCount++
+      } else {
+        break
+      }
+    }
+    streak = `${streakType}${streakCount}`
+  }
+
+  return {
+    wins,
+    losses,
+    streak,
+    divisionRank: null, // Would need standings data
+  }
+}
+
+/**
  * Get available seasons
  */
 export async function getAvailableSeasons(): Promise<number[]> {
@@ -845,17 +863,17 @@ export async function getAvailableSeasons(): Promise<number[]> {
 }
 
 function getCurrentSeason(): number {
-  // NBA season runs Oct-June, stored as the ending year
-  // e.g., 2024-25 season = 2025, 2025-26 season = 2026
+  // NBA season runs Oct-June, stored as starting year
+  // e.g., 2024-25 season = 2024, 2025-26 season = 2025
   const now = new Date()
   const year = now.getFullYear()
   const month = now.getMonth() + 1
-  // If before October, use current year (still in previous season)
-  // If October or later, use next year (new season started)
+  // If before October, use previous year (still in that season)
+  // If October or later, use current year (new season started)
   if (month < 10) {
-    return year
+    return year - 1
   }
-  return year + 1
+  return year
 }
 
 /**

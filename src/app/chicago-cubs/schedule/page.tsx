@@ -1,8 +1,8 @@
 import { Metadata } from 'next'
 import Image from 'next/image'
 import { TeamHubLayout } from '@/components/team'
-import { CHICAGO_TEAMS, fetchTeamRecord, fetchNextGame } from '@/lib/team-config'
-import { getCubsSchedule, type CubsGame } from '@/lib/cubsData'
+import { CHICAGO_TEAMS, fetchNextGame } from '@/lib/team-config'
+import { getCubsSchedule, getCubsRecord, type CubsGame } from '@/lib/cubsData'
 
 const CUBS_LOGO = 'https://a.espncdn.com/i/teamlogos/mlb/500/chc.png'
 
@@ -16,13 +16,26 @@ export const revalidate = 3600
 export default async function CubsSchedulePage() {
   const team = CHICAGO_TEAMS.cubs
 
-  const [schedule, record, nextGame] = await Promise.all([
+  const [schedule, cubsRecord, nextGame] = await Promise.all([
     getCubsSchedule(),
-    fetchTeamRecord('cubs'),
+    getCubsRecord(),
     fetchNextGame('cubs'),
   ])
 
-  const nextScheduledGame = schedule.find(g => g.status === 'scheduled')
+  const record = {
+    wins: cubsRecord.wins,
+    losses: cubsRecord.losses,
+  }
+
+  // Sort: upcoming first, then completed (most recent first)
+  const upcomingGames = schedule.filter(g => g.status !== 'final').sort((a, b) =>
+    new Date(a.date).getTime() - new Date(b.date).getTime()
+  )
+  const completedGames = schedule.filter(g => g.status === 'final').sort((a, b) =>
+    new Date(b.date).getTime() - new Date(a.date).getTime()
+  )
+
+  const nextScheduledGame = upcomingGames[0]
 
   return (
     <TeamHubLayout

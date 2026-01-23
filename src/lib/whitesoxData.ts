@@ -198,8 +198,7 @@ function generateSlug(name: string): string {
 
 /**
  * Get all White Sox players from DataLab
- * Filters to only show players from current season (or most recent season for off-season)
- * Only includes players with headshots
+ * Filters to current roster using is_active = true
  */
 export async function getWhiteSoxPlayers(): Promise<WhiteSoxPlayer[]> {
   if (!datalabAdmin) {
@@ -207,39 +206,11 @@ export async function getWhiteSoxPlayers(): Promise<WhiteSoxPlayer[]> {
     return []
   }
 
-  const targetSeason = getCurrentSeason()
-
-  // Get players who have game stats in the current season
-  let playerIds = await getSeasonPlayerIds(targetSeason)
-
-  // If no players in current season, fall back to previous season (off-season)
-  if (playerIds.length === 0) {
-    playerIds = await getSeasonPlayerIds(targetSeason - 1)
-  }
-
-  // If still no players, get all players with headshots as fallback
-  if (playerIds.length === 0) {
-    const { data, error } = await datalabAdmin
-      .from('whitesox_players')
-      .select('*')
-      .not('headshot_url', 'is', null)
-      .order('position')
-      .order('name')
-      .limit(50)
-
-    if (error) {
-      console.error('DataLab fetch error:', error)
-      return []
-    }
-    return transformPlayers(data || [])
-  }
-
-  // Get player details for players with game stats this season
+  // Get current roster players (is_active = true)
   const { data, error } = await datalabAdmin
     .from('whitesox_players')
     .select('*')
-    .in('id', playerIds)
-    .not('headshot_url', 'is', null)
+    .eq('is_active', true)
     .order('position')
     .order('name')
 
@@ -876,6 +847,24 @@ async function getLeaderboards(season: number): Promise<WhiteSoxLeaderboard> {
     }))
 
   return { batting, homeRuns, pitching, saves }
+}
+
+/**
+ * Get White Sox record (regular season only, no playoffs for 2025)
+ */
+export interface WhiteSoxRecord {
+  wins: number
+  losses: number
+}
+
+export async function getWhiteSoxRecord(season?: number): Promise<WhiteSoxRecord> {
+  const schedule = await getWhiteSoxSchedule(season)
+
+  const completedGames = schedule.filter(g => g.status === 'final')
+  const wins = completedGames.filter(g => g.result === 'W').length
+  const losses = completedGames.filter(g => g.result === 'L').length
+
+  return { wins, losses }
 }
 
 /**

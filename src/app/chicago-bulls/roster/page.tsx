@@ -2,12 +2,12 @@ import { Metadata } from 'next'
 import Link from 'next/link'
 import Image from 'next/image'
 import { TeamHubLayout } from '@/components/team'
-import { CHICAGO_TEAMS, fetchTeamRecord, fetchNextGame } from '@/lib/team-config'
-import { getBullsRosterGrouped, POSITION_GROUP_NAMES, type BullsPlayer, type PositionGroup } from '@/lib/bullsData'
+import { CHICAGO_TEAMS, fetchNextGame } from '@/lib/team-config'
+import { getBullsRosterGrouped, getBullsRecord, POSITION_GROUP_NAMES, type BullsPlayer, type PositionGroup } from '@/lib/bullsData'
 
 export const metadata: Metadata = {
-  title: 'Chicago Bulls Roster 2024-25 | SportsMockery',
-  description: 'Complete 2024-25 Chicago Bulls roster with player profiles, positions, measurements, and stats.',
+  title: 'Chicago Bulls Roster 2025-26 | SportsMockery',
+  description: 'Complete 2025-26 Chicago Bulls roster with player profiles, positions, measurements, and stats.',
 }
 
 export const revalidate = 3600
@@ -17,11 +17,16 @@ const POSITION_ORDER: PositionGroup[] = ['guards', 'forwards', 'centers']
 export default async function BullsRosterPage() {
   const team = CHICAGO_TEAMS.bulls
 
-  const [roster, record, nextGame] = await Promise.all([
+  const [roster, bullsRecord, nextGame] = await Promise.all([
     getBullsRosterGrouped(),
-    fetchTeamRecord('bulls'),
+    getBullsRecord(),
     fetchNextGame('bulls'),
   ])
+
+  const record = {
+    wins: bullsRecord.wins,
+    losses: bullsRecord.losses,
+  }
 
   const allPlayers = Object.values(roster).flat()
 
@@ -59,7 +64,7 @@ export default async function BullsRosterPage() {
       </div>
 
       {/* Roster Grid */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 pb-12">
         {POSITION_ORDER.map(group => {
           const players = roster[group]
           if (!players || players.length === 0) return null

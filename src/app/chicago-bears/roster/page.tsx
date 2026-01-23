@@ -1,13 +1,13 @@
 import { Metadata } from 'next'
 import Link from 'next/link'
 import Image from 'next/image'
-import { getBearsRosterGrouped, type BearsPlayer, type PositionGroup } from '@/lib/bearsData'
+import { getBearsRosterGrouped, getBearsSeparatedRecord, type BearsPlayer, type PositionGroup } from '@/lib/bearsData'
 import { TeamHubLayout } from '@/components/team'
-import { CHICAGO_TEAMS, fetchTeamRecord, fetchNextGame } from '@/lib/team-config'
+import { CHICAGO_TEAMS, fetchNextGame } from '@/lib/team-config'
 
 export const metadata: Metadata = {
-  title: 'Chicago Bears Roster 2025 | SportsMockery',
-  description: 'Complete 2025 Chicago Bears roster with player profiles, positions, measurements, and stats. View all players by position group.',
+  title: 'Chicago Bears Roster 2026 | SportsMockery',
+  description: 'Complete 2026 Chicago Bears roster with player profiles, positions, measurements, and stats. View all players by position group.',
 }
 
 // Revalidate every hour
@@ -32,11 +32,22 @@ export default async function BearsRosterPage() {
   const team = CHICAGO_TEAMS.bears
 
   // Fetch all data in parallel
-  const [roster, record, nextGame] = await Promise.all([
+  const [roster, separatedRecord, nextGame] = await Promise.all([
     getBearsRosterGrouped(),
-    fetchTeamRecord('bears'),
+    getBearsSeparatedRecord(2025), // 2025 season record for reference
     fetchNextGame('bears'),
   ])
+
+  // Build record object for TeamHubLayout
+  const record = {
+    wins: separatedRecord.regularSeason.wins,
+    losses: separatedRecord.regularSeason.losses,
+    ties: separatedRecord.regularSeason.ties > 0 ? separatedRecord.regularSeason.ties : undefined,
+    postseason: (separatedRecord.postseason.wins > 0 || separatedRecord.postseason.losses > 0)
+      ? separatedRecord.postseason
+      : undefined,
+    divisionRank: separatedRecord.divisionRank || undefined,
+  }
 
   // Count by side
   const allPlayers = Object.values(roster).flat()
@@ -101,7 +112,7 @@ export default async function BearsRosterPage() {
       </div>
 
       {/* Roster Grid */}
-      <div>
+      <div className="pb-12">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           {POSITION_ORDER.map(group => {
             const players = roster[group]

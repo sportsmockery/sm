@@ -126,6 +126,8 @@ export interface BearsGame {
   venue: string | null
   tv: string | null
   isPlayoff: boolean
+  isPreseason: boolean
+  gameType: 'preseason' | 'regular' | 'postseason'
   articleSlug: string | null
   weather: {
     tempF: number | null
@@ -294,51 +296,8 @@ async function getBearsPlayersFromDatalab(): Promise<BearsPlayer[]> {
     return []
   }
 
-  const targetSeason = getCurrentSeason()
-
-  // Get players who have game stats in the current season
-  let playerIds = await getSeasonPlayerIds(targetSeason)
-
-  // If no players in current season, fall back to previous season (off-season)
-  if (playerIds.length === 0) {
-    playerIds = await getSeasonPlayerIds(targetSeason - 1)
-  }
-
-  // If still no players, get all players with headshots as fallback
-  if (playerIds.length === 0) {
-    const { data, error } = await datalabAdmin
-      .from('bears_players')
-      .select(`
-        id,
-        player_id,
-        name,
-        first_name,
-        last_name,
-        position,
-        position_group,
-        jersey_number,
-        height_inches,
-        weight_lbs,
-        age,
-        college,
-        years_exp,
-        status,
-        is_active,
-        headshot_url
-      `)
-      .not('headshot_url', 'is', null)
-      .order('position_group')
-      .order('name')
-      .limit(60)
-
-    if (error) {
-      console.error('Datalab fetch error:', error)
-      return []
-    }
-    return transformPlayers(data || [])
-  }
-
-  // Get player details for players with game stats this season
+  // Get all active roster players (is_active = true)
+  // This gives us the full current roster (53+ players)
   const { data, error } = await datalabAdmin
     .from('bears_players')
     .select(`
@@ -359,8 +318,7 @@ async function getBearsPlayersFromDatalab(): Promise<BearsPlayer[]> {
       is_active,
       headshot_url
     `)
-    .in('id', playerIds)
-    .not('headshot_url', 'is', null)
+    .eq('is_active', true)
     .order('position_group')
     .order('name')
 
@@ -486,25 +444,26 @@ async function getPlayerSeasonStatsFromDatalab(internalId: number): Promise<Play
   // Aggregate from game stats for accurate data
   // Per SM_INTEGRATION_GUIDE.md: Use correct column names from datalab schema
   // Use internal ID since that's what game stats reference
+  // Use actual column names from database schema
   const { data, error } = await datalabAdmin
     .from('bears_player_game_stats')
     .select(`
       season,
-      pass_cmp,
-      pass_att,
-      pass_yds,
-      pass_td,
-      pass_int,
-      sacks,
-      rush_att,
-      rush_yds,
-      rush_td,
-      rec_tgt,
-      rec,
-      rec_yds,
-      rec_td,
-      fumbles,
-      tackles,
+      passing_cmp,
+      passing_att,
+      passing_yds,
+      passing_td,
+      passing_int,
+      def_sacks,
+      rushing_car,
+      rushing_yds,
+      rushing_td,
+      receiving_tgts,
+      receiving_rec,
+      receiving_yds,
+      receiving_td,
+      fum_fum,
+      def_tackles_total,
       interceptions
     `)
     .eq('player_id', internalId)
@@ -515,22 +474,22 @@ async function getPlayerSeasonStatsFromDatalab(internalId: number): Promise<Play
   // Aggregate all game stats into season totals
   const totals = data.reduce((acc: any, game: any) => {
     acc.gamesPlayed = (acc.gamesPlayed || 0) + 1
-    acc.passAttempts = (acc.passAttempts || 0) + (game.pass_att || 0)
-    acc.passCompletions = (acc.passCompletions || 0) + (game.pass_cmp || 0)
-    acc.passYards = (acc.passYards || 0) + (game.pass_yds || 0)
-    acc.passTD = (acc.passTD || 0) + (game.pass_td || 0)
-    acc.passINT = (acc.passINT || 0) + (game.pass_int || 0)
-    acc.rushAttempts = (acc.rushAttempts || 0) + (game.rush_att || 0)
-    acc.rushYards = (acc.rushYards || 0) + (game.rush_yds || 0)
-    acc.rushTD = (acc.rushTD || 0) + (game.rush_td || 0)
-    acc.receptions = (acc.receptions || 0) + (game.rec || 0)
-    acc.recYards = (acc.recYards || 0) + (game.rec_yds || 0)
-    acc.recTD = (acc.recTD || 0) + (game.rec_td || 0)
-    acc.targets = (acc.targets || 0) + (game.rec_tgt || 0)
-    acc.tackles = (acc.tackles || 0) + (game.tackles || 0)
-    acc.sacks = (acc.sacks || 0) + (parseFloat(game.sacks) || 0)
-    acc.passesDefended = (acc.passesDefended || 0) + 0 // Not in datalab schema
-    acc.fumbles = (acc.fumbles || 0) + (game.fumbles || 0)
+    acc.passAttempts = (acc.passAttempts || 0) + (game.passing_att || 0)
+    acc.passCompletions = (acc.passCompletions || 0) + (game.passing_cmp || 0)
+    acc.passYards = (acc.passYards || 0) + (game.passing_yds || 0)
+    acc.passTD = (acc.passTD || 0) + (game.passing_td || 0)
+    acc.passINT = (acc.passINT || 0) + (game.passing_int || 0)
+    acc.rushAttempts = (acc.rushAttempts || 0) + (game.rushing_car || 0)
+    acc.rushYards = (acc.rushYards || 0) + (game.rushing_yds || 0)
+    acc.rushTD = (acc.rushTD || 0) + (game.rushing_td || 0)
+    acc.receptions = (acc.receptions || 0) + (game.receiving_rec || 0)
+    acc.recYards = (acc.recYards || 0) + (game.receiving_yds || 0)
+    acc.recTD = (acc.recTD || 0) + (game.receiving_td || 0)
+    acc.targets = (acc.targets || 0) + (game.receiving_tgts || 0)
+    acc.tackles = (acc.tackles || 0) + (game.def_tackles_total || 0)
+    acc.sacks = (acc.sacks || 0) + (parseFloat(game.def_sacks) || 0)
+    acc.passesDefended = (acc.passesDefended || 0) + (game.def_passes_defended || 0)
+    acc.fumbles = (acc.fumbles || 0) + (game.fum_fum || 0)
     return acc
   }, {})
 
@@ -611,40 +570,31 @@ async function getPlayerGameLog(internalId: number): Promise<PlayerGameLogEntry[
 async function getPlayerGameLogFromDatalab(internalId: number): Promise<PlayerGameLogEntry[]> {
   if (!datalabAdmin) return []
 
-  // Per SM_INTEGRATION_GUIDE.md: Use correct column names from datalab schema
-  // Use internal ID since that's what game stats reference
+  // Use actual column names from database schema
   const { data, error } = await datalabAdmin
     .from('bears_player_game_stats')
     .select(`
       player_id,
-      game_id,
-      pass_cmp,
-      pass_att,
-      pass_yds,
-      pass_td,
-      pass_int,
-      sacks,
-      rush_att,
-      rush_yds,
-      rush_td,
-      rec_tgt,
-      rec,
-      rec_yds,
-      rec_td,
-      fumbles,
-      tackles,
+      bears_game_id,
+      passing_cmp,
+      passing_att,
+      passing_yds,
+      passing_td,
+      passing_int,
+      def_sacks,
+      rushing_car,
+      rushing_yds,
+      rushing_td,
+      receiving_tgts,
+      receiving_rec,
+      receiving_yds,
+      receiving_td,
+      fum_fum,
+      def_tackles_total,
       interceptions,
-      bears_games_master!inner(
-        game_date,
-        opponent,
-        opponent_full_name,
-        is_bears_home,
-        bears_score,
-        opponent_score,
-        bears_win,
-        week,
-        season
-      )
+      game_date,
+      opponent,
+      is_home
     `)
     .eq('player_id', internalId)
     .eq('season', 2025)
@@ -653,40 +603,50 @@ async function getPlayerGameLogFromDatalab(internalId: number): Promise<PlayerGa
 
   if (error || !data) return []
 
-  return data.map((s: any) => transformGameLogEntry(s, s.bears_games_master || {}))
+  // Get game results from bears_games_master to match scores
+  const { data: gamesData } = await datalabAdmin
+    .from('bears_games_master')
+    .select('id, game_date, opponent, is_bears_home, bears_score, opponent_score, bears_win, week, season')
+    .eq('season', 2025)
+
+  const gamesMap = new Map(gamesData?.map((g: any) => [g.id, g]) || [])
+
+  return data.map((s: any) => {
+    const game = gamesMap.get(s.bears_game_id) || {}
+    return transformGameLogEntry(s, game)
+  })
 }
 
 function transformGameLogEntry(stats: any, game: any): PlayerGameLogEntry {
-  // Per SM_INTEGRATION_GUIDE.md: Use correct column names from datalab schema
   const isPlayed = (game.bears_score > 0) || (game.opponent_score > 0)
 
   return {
-    gameId: stats.game_id,
-    date: game.game_date || '',
+    gameId: stats.bears_game_id,
+    date: stats.game_date || game.game_date || '',
     week: game.week || 0,
     season: game.season || 2025,
-    opponent: game.opponent || '',
-    isHome: game.is_bears_home ?? true,
+    opponent: stats.opponent || game.opponent || '',
+    isHome: stats.is_home ?? game.is_bears_home ?? true,
     result: isPlayed ? (game.bears_win ? 'W' : 'L') : null,
     bearsScore: game.bears_score,
     oppScore: game.opponent_score,
-    // Use correct column names from datalab schema
-    passAttempts: stats.pass_att,
-    passCompletions: stats.pass_cmp,
-    passYards: stats.pass_yds,
-    passTD: stats.pass_td,
-    passINT: stats.pass_int,
-    rushAttempts: stats.rush_att,
-    rushYards: stats.rush_yds,
-    rushTD: stats.rush_td,
-    targets: stats.rec_tgt,
-    receptions: stats.rec,
-    recYards: stats.rec_yds,
-    recTD: stats.rec_td,
-    tackles: stats.tackles,
-    sacks: stats.sacks,
+    // Use actual column names from database
+    passAttempts: stats.passing_att,
+    passCompletions: stats.passing_cmp,
+    passYards: stats.passing_yds,
+    passTD: stats.passing_td,
+    passINT: stats.passing_int,
+    rushAttempts: stats.rushing_car,
+    rushYards: stats.rushing_yds,
+    rushTD: stats.rushing_td,
+    targets: stats.receiving_tgts,
+    receptions: stats.receiving_rec,
+    recYards: stats.receiving_yds,
+    recTD: stats.receiving_td,
+    tackles: stats.def_tackles_total,
+    sacks: stats.def_sacks,
     interceptions: stats.interceptions || 0,
-    fumbles: stats.fumbles,
+    fumbles: stats.fum_fum,
   }
 }
 
@@ -703,7 +663,7 @@ async function getBearsScheduleFromDatalab(season: number): Promise<BearsGame[]>
   if (!datalabAdmin) return []
 
   // Per SM_INTEGRATION_GUIDE.md: Use exact column names from bears_games_master
-  // Only include regular season and postseason games
+  // Include preseason, regular season, and postseason games
   const { data, error } = await datalabAdmin
     .from('bears_games_master')
     .select(`
@@ -726,13 +686,19 @@ async function getBearsScheduleFromDatalab(season: number): Promise<BearsGame[]>
       nationally_televised,
       temp_f,
       wind_mph,
-      weather_summary
+      weather_summary,
+      tv_network
     `)
     .eq('season', season)
-    .in('game_type', ['regular', 'postseason'])
-    .order('game_date', { ascending: false })
+    .in('game_type', ['preseason', 'regular', 'postseason'])
+    .order('game_date', { ascending: true })
 
   if (error) return []
+
+  if (error) {
+    console.error('Bears schedule fetch error:', error)
+    return []
+  }
 
   // If no games in current season, fall back to previous season (off-season)
   if (!data || data.length === 0) {
@@ -758,11 +724,12 @@ async function getBearsScheduleFromDatalab(season: number): Promise<BearsGame[]>
         nationally_televised,
         temp_f,
         wind_mph,
-        weather_summary
+        weather_summary,
+        tv_network
       `)
       .eq('season', season - 1)
-      .in('game_type', ['regular', 'postseason'])
-      .order('game_date', { ascending: false })
+      .in('game_type', ['preseason', 'regular', 'postseason'])
+      .order('game_date', { ascending: true })
 
     if (prevError || !prevData) return []
     return prevData.map((g: any) => transformGame(g, null))
@@ -788,28 +755,57 @@ function transformGame(game: any, context?: any): BearsGame {
   const gameDateOnly = new Date(game.game_date)
   gameDateOnly.setHours(0, 0, 0, 0)
 
-  // Per SM_INTEGRATION_GUIDE.md: Game is played if bears_score > 0 OR opponent_score > 0
-  const isPlayed = (game.bears_score > 0) || (game.opponent_score > 0)
+  // Game is played if scores are not null (handles 0-0 scores)
+  // Check if bears_score and opponent_score exist (not null/undefined)
+  const hasScores = game.bears_score !== null && game.bears_score !== undefined &&
+                    game.opponent_score !== null && game.opponent_score !== undefined
+  const isPlayed = hasScores && (game.bears_score >= 0 || game.opponent_score >= 0)
   const isPast = gameDateOnly < today
+
+  // Determine result including ties
+  let result: 'W' | 'L' | 'T' | null = null
+  if (isPlayed) {
+    if (game.bears_win === true) {
+      result = 'W'
+    } else if (game.bears_win === false) {
+      result = 'L'
+    } else if (game.bears_score === game.opponent_score) {
+      result = 'T'
+    } else {
+      result = game.bears_score > game.opponent_score ? 'W' : 'L'
+    }
+  }
+
+  // Determine game type for isPlayoff and isPreseason
+  const gameType = (game.game_type || '').toLowerCase()
+  const isPlayoff = gameType === 'postseason' || gameType === 'post' || gameType === 'playoff'
+  const isPreseason = gameType === 'preseason' || gameType === 'pre'
+
+  // Determine gameType enum
+  let gameTypeEnum: 'preseason' | 'regular' | 'postseason' = 'regular'
+  if (isPreseason) gameTypeEnum = 'preseason'
+  else if (isPlayoff) gameTypeEnum = 'postseason'
 
   return {
     gameId: game.id?.toString() || game.game_id || game.external_id,
-    season: 2025, // Always 2025 for current season
+    season: game.season || 2025,
     week: game.week,
     date: game.game_date,
     time: formatGameTime(game.game_time),
     dayOfWeek: gameDate.toLocaleDateString('en-US', { weekday: 'long' }),
-    opponent: game.opponent,
-    opponentFullName: game.opponent_full_name || null,
-    opponentLogo: getTeamLogo(game.opponent),
+    opponent: (game.opponent || '').trim(), // Trim whitespace from opponent
+    opponentFullName: game.opponent_full_name ? game.opponent_full_name.trim() : null,
+    opponentLogo: getTeamLogo((game.opponent || '').trim()),
     homeAway: game.is_bears_home ? 'home' : 'away',
     status: isPlayed ? 'final' : (game.status === 'in_progress' ? 'in_progress' : 'scheduled'),
     bearsScore: game.bears_score,
     oppScore: game.opponent_score,
-    result: isPlayed ? (game.bears_win ? 'W' : 'L') : null,
+    result,
     venue: game.stadium,
     tv: game.tv_network || (game.broadcast_window === 'primetime' ? 'Prime' : (game.nationally_televised ? 'National' : null)),
-    isPlayoff: game.game_type === 'postseason' || game.game_type === 'POST',
+    isPlayoff,
+    isPreseason,
+    gameType: gameTypeEnum,
     articleSlug: null,
     weather: game.temp_f !== null ? {
       tempF: game.temp_f,
@@ -953,25 +949,26 @@ async function getLeaderboards(season: number): Promise<BearsLeaderboard> {
   // Key by internalId since game stats use the internal DB ID, not ESPN ID
   const playersMap = new Map(players.map(p => [p.internalId, p]))
 
-  // Per SM_INTEGRATION_GUIDE.md: Aggregate from bears_player_game_stats
-  // Use correct column names from datalab schema: pass_yds, rush_yds, rec_yds, etc.
+  // Aggregate from bears_player_game_stats using actual column names from database
+  // Columns: passing_yds, passing_td, passing_int, rushing_yds, rushing_td, rushing_car,
+  //          receiving_yds, receiving_td, receiving_rec, def_tackles_total, def_sacks
 
   // Get all game stats for season and aggregate by player
   let { data: gameStats } = await datalabAdmin
     .from('bears_player_game_stats')
     .select(`
       player_id,
-      pass_yds,
-      pass_td,
-      pass_int,
-      rush_yds,
-      rush_td,
-      rush_att,
-      rec_yds,
-      rec_td,
-      rec,
-      tackles,
-      sacks
+      passing_yds,
+      passing_td,
+      passing_int,
+      rushing_yds,
+      rushing_td,
+      rushing_car,
+      receiving_yds,
+      receiving_td,
+      receiving_rec,
+      def_tackles_total,
+      def_sacks
     `)
     .eq('season', season)
 
@@ -981,17 +978,17 @@ async function getLeaderboards(season: number): Promise<BearsLeaderboard> {
       .from('bears_player_game_stats')
       .select(`
         player_id,
-        pass_yds,
-        pass_td,
-        pass_int,
-        rush_yds,
-        rush_td,
-        rush_att,
-        rec_yds,
-        rec_td,
-        rec,
-        tackles,
-        sacks
+        passing_yds,
+        passing_td,
+        passing_int,
+        rushing_yds,
+        rushing_td,
+        rushing_car,
+        receiving_yds,
+        receiving_td,
+        receiving_rec,
+        def_tackles_total,
+        def_sacks
       `)
       .eq('season', season - 1)
     gameStats = prevStats
@@ -1023,17 +1020,17 @@ async function getLeaderboards(season: number): Promise<BearsLeaderboard> {
       })
     }
     const totals = playerTotals.get(pid)!
-    totals.pass_yds += stat.pass_yds || 0
-    totals.pass_td += stat.pass_td || 0
-    totals.pass_int += stat.pass_int || 0
-    totals.rush_yds += stat.rush_yds || 0
-    totals.rush_td += stat.rush_td || 0
-    totals.rush_att += stat.rush_att || 0
-    totals.rec_yds += stat.rec_yds || 0
-    totals.rec_td += stat.rec_td || 0
-    totals.rec += stat.rec || 0
-    totals.tackles += stat.tackles || 0
-    totals.sacks += parseFloat(stat.sacks) || 0
+    totals.pass_yds += stat.passing_yds || 0
+    totals.pass_td += stat.passing_td || 0
+    totals.pass_int += stat.passing_int || 0
+    totals.rush_yds += stat.rushing_yds || 0
+    totals.rush_td += stat.rushing_td || 0
+    totals.rush_att += stat.rushing_car || 0
+    totals.rec_yds += stat.receiving_yds || 0
+    totals.rec_td += stat.receiving_td || 0
+    totals.rec += stat.receiving_rec || 0
+    totals.tackles += stat.def_tackles_total || 0
+    totals.sacks += parseFloat(stat.def_sacks) || 0
   }
 
   const aggregatedStats = Array.from(playerTotals.values())
@@ -1097,6 +1094,46 @@ async function getLeaderboards(season: number): Promise<BearsLeaderboard> {
     }))
 
   return { passing, rushing, receiving, defense }
+}
+
+/**
+ * Get Bears record separated by regular season and postseason
+ */
+export interface BearsSeparatedRecord {
+  regularSeason: { wins: number; losses: number; ties: number }
+  postseason: { wins: number; losses: number }
+  divisionRank: string | null
+}
+
+export async function getBearsSeparatedRecord(season?: number): Promise<BearsSeparatedRecord> {
+  const schedule = await getBearsSchedule(season)
+
+  // Calculate regular season record
+  const regularGames = schedule.filter(g => g.status === 'final' && g.gameType === 'regular')
+  const regWins = regularGames.filter(g => g.result === 'W').length
+  const regLosses = regularGames.filter(g => g.result === 'L').length
+  const regTies = regularGames.filter(g => g.result === 'T').length
+
+  // Calculate postseason record
+  const postGames = schedule.filter(g => g.status === 'final' && g.gameType === 'postseason')
+  const postWins = postGames.filter(g => g.result === 'W').length
+  const postLosses = postGames.filter(g => g.result === 'L').length
+
+  // Get division rank from Datalab if available
+  let divisionRank: string | null = null
+  if (datalabAdmin) {
+    const { data } = await datalabAdmin
+      .from('bears_season_record')
+      .select('division_rank')
+      .single()
+    divisionRank = data?.division_rank || null
+  }
+
+  return {
+    regularSeason: { wins: regWins, losses: regLosses, ties: regTies },
+    postseason: { wins: postWins, losses: postLosses },
+    divisionRank,
+  }
 }
 
 /**

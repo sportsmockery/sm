@@ -18,6 +18,8 @@ interface Game {
   oppScore: number | null
   result: 'W' | 'L' | 'T' | null
   isPlayoff: boolean
+  isPreseason?: boolean
+  gameType?: 'preseason' | 'regular' | 'postseason'
   playoffRound: string | null
   homeAway: 'home' | 'away'
 }

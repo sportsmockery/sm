@@ -2,13 +2,13 @@ import { Metadata } from 'next'
 import Link from 'next/link'
 import Image from 'next/image'
 import { TeamHubLayout } from '@/components/team'
-import { CHICAGO_TEAMS, fetchTeamRecord, fetchNextGame } from '@/lib/team-config'
-import { getBullsRecentScores, type BullsGame } from '@/lib/bullsData'
+import { CHICAGO_TEAMS, fetchNextGame } from '@/lib/team-config'
+import { getBullsRecentScores, getBullsRecord, type BullsGame } from '@/lib/bullsData'
 
 const BULLS_LOGO = 'https://a.espncdn.com/i/teamlogos/nba/500/chi.png'
 
 export const metadata: Metadata = {
-  title: 'Chicago Bulls Scores 2024-25 | Game Results & Box Scores | SportsMockery',
+  title: 'Chicago Bulls Scores 2025-26 | Game Results & Box Scores | SportsMockery',
   description: 'Chicago Bulls game scores and results. View recent games, final scores, and game summaries.',
 }
 
@@ -17,11 +17,16 @@ export const revalidate = 1800
 export default async function BullsScoresPage() {
   const team = CHICAGO_TEAMS.bulls
 
-  const [scores, record, nextGame] = await Promise.all([
+  const [scores, bullsRecord, nextGame] = await Promise.all([
     getBullsRecentScores(20),
-    fetchTeamRecord('bulls'),
+    getBullsRecord(),
     fetchNextGame('bulls'),
   ])
+
+  const record = {
+    wins: bullsRecord.wins,
+    losses: bullsRecord.losses,
+  }
 
   return (
     <TeamHubLayout
@@ -30,7 +35,27 @@ export default async function BullsScoresPage() {
       nextGame={nextGame}
       activeTab="scores"
     >
-      <div>
+      <div className="pb-12">
+        {/* Record Summary */}
+        <div className="mb-6 p-4 rounded-xl bg-[var(--bg-elevated)] border border-[var(--border-subtle)]">
+          <div className="flex flex-wrap gap-6 justify-center text-center">
+            <div>
+              <div className="text-xs text-[var(--text-muted)] uppercase tracking-wider mb-1">2025-26 Season</div>
+              <div className="text-xl font-bold text-[var(--text-primary)]">
+                {bullsRecord.wins}-{bullsRecord.losses}
+              </div>
+            </div>
+            {bullsRecord.streak && (
+              <div>
+                <div className="text-xs text-[var(--text-muted)] uppercase tracking-wider mb-1">Streak</div>
+                <div className={`text-xl font-bold ${bullsRecord.streak.startsWith('W') ? 'text-green-500' : 'text-red-500'}`}>
+                  {bullsRecord.streak}
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+
         <div className="bg-[var(--bg-elevated)] border border-[var(--border-subtle)] rounded-2xl overflow-hidden">
           <div className="p-4 border-b border-[var(--border-subtle)] flex items-center justify-between">
             <h2 className="font-bold text-[var(--text-primary)]" style={{ fontFamily: "'Montserrat', sans-serif" }}>
