@@ -1,5 +1,10 @@
+import type { Metadata } from 'next'
 import { supabaseAdmin } from '@/lib/supabase-server'
 import Link from 'next/link'
+
+export const metadata: Metadata = {
+  title: 'Sports Mockery | Categories',
+}
 
 // Team colors for category badges
 const TEAM_COLORS: Record<string, { bg: string; text: string; border: string }> = {

@@ -1,7 +1,12 @@
+import type { Metadata } from 'next'
 import { supabaseAdmin } from '@/lib/supabase-server'
 import { createServerClient } from '@supabase/ssr'
 import { cookies } from 'next/headers'
 import NewPostForm from './NewPostForm'
+
+export const metadata: Metadata = {
+  title: 'Sports Mockery | New Post',
+}
 
 export default async function AdminNewPostPage() {
   // Get current user

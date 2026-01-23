@@ -1,8 +1,13 @@
+import type { Metadata } from 'next'
 import { supabaseAdmin } from '@/lib/supabase-server'
 import { createServerClient } from '@supabase/ssr'
 import { cookies } from 'next/headers'
 import { notFound } from 'next/navigation'
 import StudioPostEditor from '../../new/StudioPostEditor'
+
+export const metadata: Metadata = {
+  title: 'Sports Mockery | Edit Post',
+}
 
 interface EditPostPageProps {
   params: Promise<{ id: string }>

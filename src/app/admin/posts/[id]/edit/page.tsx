@@ -1,7 +1,12 @@
+import type { Metadata } from 'next'
 import { supabaseAdmin } from '@/lib/supabase-server'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import PostEditForm from './PostEditForm'
+
+export const metadata: Metadata = {
+  title: 'Sports Mockery | Edit Post',
+}
 
 interface PostEditPageProps {
   params: Promise<{ id: string }>

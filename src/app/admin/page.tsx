@@ -1,5 +1,10 @@
+import type { Metadata } from 'next'
 import { supabaseAdmin } from '@/lib/supabase-server'
 import Link from 'next/link'
+
+export const metadata: Metadata = {
+  title: 'Sports Mockery | Dashboard',
+}
 import StatsCard from '@/components/admin/StatsCard'
 import QuickActions from '@/components/admin/QuickActions'
 import RecentPosts from '@/components/admin/RecentPosts'

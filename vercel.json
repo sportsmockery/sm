@@ -6,6 +6,10 @@
       "schedule": "0 * * * *"
     },
     {
+      "path": "/api/cron/sync-bears-data",
+      "schedule": "30 * * * *"
+    },
+    {
       "path": "/api/cron/live-games",
       "schedule": "* * * * *"
     },

@@ -1,7 +1,12 @@
+import type { Metadata } from 'next'
 import { supabaseAdmin } from '@/lib/supabase-server'
 import { createServerClient } from '@supabase/ssr'
 import { cookies } from 'next/headers'
 import StudioPostEditor from './StudioPostEditor'
+
+export const metadata: Metadata = {
+  title: 'Sports Mockery | New Post',
+}
 
 export default async function StudioNewPostPage() {
   const cookieStore = await cookies()

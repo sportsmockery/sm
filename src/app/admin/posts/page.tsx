@@ -1,6 +1,11 @@
+import type { Metadata } from 'next'
 import { supabaseAdmin } from '@/lib/supabase-server'
 import Link from 'next/link'
 import PostsListClient from './PostsListClient'
+
+export const metadata: Metadata = {
+  title: 'Sports Mockery | Posts',
+}
 import CategoryFilter from './CategoryFilter'
 import NewPostButton from './NewPostButton'
 

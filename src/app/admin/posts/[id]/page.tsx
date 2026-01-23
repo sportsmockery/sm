@@ -1,8 +1,13 @@
+import type { Metadata } from 'next'
 import { supabaseAdmin } from '@/lib/supabase-server'
 import Link from 'next/link'
 import Image from 'next/image'
 import { notFound } from 'next/navigation'
 import { format } from 'date-fns'
+
+export const metadata: Metadata = {
+  title: 'Sports Mockery | View Post',
+}
 
 interface PostDetailPageProps {
   params: Promise<{ id: string }>

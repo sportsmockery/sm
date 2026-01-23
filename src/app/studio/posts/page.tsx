@@ -1,8 +1,13 @@
+import type { Metadata } from 'next'
 import { supabaseAdmin } from '@/lib/supabase-server'
 import { createServerClient } from '@supabase/ssr'
 import { cookies } from 'next/headers'
 import Link from 'next/link'
 import StudioPostsClient from './StudioPostsClient'
+
+export const metadata: Metadata = {
+  title: 'Sports Mockery | Posts',
+}
 
 interface PostsPageProps {
   searchParams: Promise<{

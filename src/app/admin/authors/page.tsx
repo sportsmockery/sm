@@ -1,6 +1,11 @@
+import type { Metadata } from 'next'
 import { supabaseAdmin } from '@/lib/supabase-server'
 import Link from 'next/link'
 import Image from 'next/image'
+
+export const metadata: Metadata = {
+  title: 'Sports Mockery | Authors',
+}
 
 export default async function AdminAuthorsPage() {
   const { data: authors } = await supabaseAdmin
