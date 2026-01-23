@@ -495,7 +495,7 @@ export default function StudioPostEditor({
   }, [formData])
 
   return (
-    <div className="fixed top-14 left-0 right-0 bottom-0 z-40 flex flex-col bg-[var(--bg-primary)]">
+    <div className="fixed top-[120px] left-0 right-0 bottom-0 z-[45] flex flex-col bg-[var(--bg-primary)]">
       {/* Top Header Bar - minimal, below the red line */}
       <header className="flex-shrink-0 flex h-12 items-center justify-between border-b border-[var(--border-default)] bg-[var(--bg-secondary)] px-4">
         {/* Left: Toggle sidebar + Breadcrumb */}
@@ -929,9 +929,7 @@ export default function StudioPostEditor({
                       <div className="rounded-xl border border-[var(--border-default)] bg-white dark:bg-black overflow-hidden">
                         <div className="p-3">
                           <div className="flex gap-3">
-                            <div className="flex-shrink-0 h-10 w-10 rounded-full bg-[#bc0000] flex items-center justify-center">
-                              <span className="text-xs font-bold text-white">SM</span>
-                            </div>
+                            <Image src="/sm-logo-preview.png" alt="Sports Mockery" width={40} height={40} className="flex-shrink-0 h-10 w-10 rounded-full bg-white p-1" />
                             <div className="flex-1 min-w-0">
                               <div className="flex items-center gap-1">
                                 <span className="font-bold text-sm text-gray-900 dark:text-white">Sports Mockery</span>
@@ -976,9 +974,7 @@ export default function StudioPostEditor({
                       <div className="rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-[#242526] overflow-hidden">
                         <div className="p-3">
                           <div className="flex gap-2">
-                            <div className="flex-shrink-0 h-10 w-10 rounded-full bg-[#bc0000] flex items-center justify-center">
-                              <span className="text-xs font-bold text-white">SM</span>
-                            </div>
+                            <Image src="/sm-logo-preview.png" alt="Sports Mockery" width={40} height={40} className="flex-shrink-0 h-10 w-10 rounded-full bg-white p-1" />
                             <div>
                               <p className="font-semibold text-sm text-gray-900 dark:text-white">Sports Mockery</p>
                               <p className="text-xs text-gray-500">Just now · Public</p>

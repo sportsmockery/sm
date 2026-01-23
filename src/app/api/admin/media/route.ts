@@ -1,9 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createServerClient } from '@/lib/supabase-server'
+import { supabaseAdmin } from '@/lib/supabase-server'
+import { createServerClient } from '@supabase/ssr'
+import { cookies } from 'next/headers'
 
 export async function GET(request: NextRequest) {
   try {
-    const supabase = await createServerClient()
+    const supabase = supabaseAdmin
     const { searchParams } = new URL(request.url)
 
     const page = parseInt(searchParams.get('page') || '1')
@@ -50,10 +52,23 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
   try {
-    const supabase = await createServerClient()
+    // Create auth client with cookies to verify user
+    const cookieStore = await cookies()
+    const authClient = createServerClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+      {
+        cookies: {
+          getAll() {
+            return cookieStore.getAll()
+          },
+          setAll() {},
+        },
+      }
+    )
 
     // Check authentication
-    const { data: { user } } = await supabase.auth.getUser()
+    const { data: { user } } = await authClient.auth.getUser()
     if (!user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
@@ -80,18 +95,21 @@ export async function POST(request: NextRequest) {
     const ext = file.name.split('.').pop()
     const filename = `${Date.now()}-${Math.random().toString(36).substring(7)}.${ext}`
 
-    // Upload to storage
-    const { error: uploadError } = await supabase.storage
+    // Upload to storage using admin client
+    const { error: uploadError } = await supabaseAdmin.storage
       .from('media')
       .upload(filename, file, {
         cacheControl: '3600',
         upsert: false
       })
 
-    if (uploadError) throw uploadError
+    if (uploadError) {
+      console.error('Storage upload error:', uploadError)
+      throw uploadError
+    }
 
     // Get public URL
-    const { data: urlData } = supabase.storage
+    const { data: urlData } = supabaseAdmin.storage
       .from('media')
       .getPublicUrl(filename)
 
@@ -99,8 +117,8 @@ export async function POST(request: NextRequest) {
     let width: number | undefined
     let height: number | undefined
 
-    // Save to database
-    const { data, error: dbError } = await supabase
+    // Save to database using admin client
+    const { data, error: dbError } = await supabaseAdmin
       .from('sm_media')
       .insert({
         name: file.name,
@@ -115,7 +133,10 @@ export async function POST(request: NextRequest) {
       .select()
       .single()
 
-    if (dbError) throw dbError
+    if (dbError) {
+      console.error('Database insert error:', dbError)
+      throw dbError
+    }
 
     return NextResponse.json(data)
   } catch (error) {
