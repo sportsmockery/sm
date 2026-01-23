@@ -17,6 +17,12 @@ interface Author {
   display_name: string
 }
 
+interface ArticleIdea {
+  headline: string
+  angle: string
+  type: string
+}
+
 interface StudioPostEditorProps {
   post?: {
     id?: string
@@ -57,6 +63,17 @@ export default function StudioPostEditor({
   const [sendPushNotification, setSendPushNotification] = useState(false)
   const [pushTitle, setPushTitle] = useState('')
   const [pushMessage, setPushMessage] = useState('')
+
+  // PostIQ AI states
+  const [aiLoading, setAiLoading] = useState<string | null>(null)
+  const [headlines, setHeadlines] = useState<string[]>([])
+  const [ideas, setIdeas] = useState<ArticleIdea[]>([])
+  const [showIdeasModal, setShowIdeasModal] = useState(false)
+  const [selectedIdea, setSelectedIdea] = useState<ArticleIdea | null>(null)
+  const [loadingIdeas, setLoadingIdeas] = useState(false)
+  const [seoGenerated, setSeoGenerated] = useState(false)
+  const [generatingSEO, setGeneratingSEO] = useState(false)
+  const autoAiTimerRef = useRef<NodeJS.Timeout | null>(null)
 
   // PostIQ Chart Modal State
   const [showChartModal, setShowChartModal] = useState(false)
@@ -108,6 +125,31 @@ export default function StudioPostEditor({
 
   const wordCount = formData.content.replace(/<[^>]*>/g, ' ').split(/\s+/).filter(w => w).length
 
+  // Auto-generate SEO when content reaches 150+ words
+  useEffect(() => {
+    if (autoAiTimerRef.current) clearTimeout(autoAiTimerRef.current)
+    const shouldAutoGenerate = wordCount >= 150 && !seoGenerated && !formData.seo_title && !formData.seo_description && !formData.excerpt
+    if (shouldAutoGenerate) {
+      autoAiTimerRef.current = setTimeout(async () => {
+        setGeneratingSEO(true)
+        try {
+          const response = await fetch('/api/admin/ai', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ action: 'generate_seo', title: formData.title, content: formData.content, category: categories.find(c => c.id === formData.category_id)?.name }),
+          })
+          if (response.ok) {
+            const data = await response.json()
+            setFormData(prev => ({ ...prev, seo_title: prev.seo_title || data.seoTitle || '', seo_description: prev.seo_description || data.metaDescription || '', seo_keywords: prev.seo_keywords || data.keywords || '', excerpt: prev.excerpt || data.excerpt || '' }))
+            setSeoGenerated(true)
+          }
+        } catch (err) { console.error('Auto-SEO error:', err) }
+        setGeneratingSEO(false)
+      }, 2000)
+    }
+    return () => { if (autoAiTimerRef.current) clearTimeout(autoAiTimerRef.current) }
+  }, [wordCount, formData.content, formData.title, formData.category_id, formData.seo_title, formData.seo_description, formData.excerpt, seoGenerated, categories])
+
   const categoryOptions = categories.map((cat) => ({
     value: cat.id,
     label: cat.name,
@@ -121,6 +163,44 @@ export default function StudioPostEditor({
   const updateField = useCallback((field: string, value: string | null) => {
     setFormData((prev) => ({ ...prev, [field]: value }))
   }, [])
+
+  // PostIQ AI Actions
+  const runAI = async (action: string) => {
+    setAiLoading(action)
+    try {
+      const response = await fetch('/api/admin/ai', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ action, title: formData.title, content: formData.content, category: categories.find(c => c.id === formData.category_id)?.name }) })
+      if (response.ok) {
+        const data = await response.json()
+        if ((action === 'seo' || action === 'generate_seo') && data.seoTitle) { setFormData(prev => ({ ...prev, seo_title: data.seoTitle, seo_description: data.metaDescription || '', seo_keywords: data.keywords || '', excerpt: data.excerpt || prev.excerpt })); setSeoGenerated(true) }
+        else if (action === 'excerpt' && data.excerpt) { updateField('excerpt', data.excerpt) }
+        else if (action === 'grammar' && data.correctedContent) { updateField('content', data.correctedContent) }
+        else if (action === 'headlines' && data.headlines) { setHeadlines(data.headlines) }
+        else if (action === 'ideas' && data.ideas) { setIdeas(data.ideas) }
+      }
+    } catch (err) { console.error('AI error:', err) }
+    finally { setAiLoading(null) }
+  }
+
+  const generateIdeas = async () => {
+    setLoadingIdeas(true); setSelectedIdea(null)
+    try {
+      const response = await fetch('/api/admin/ai', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ action: 'ideas', category: categories.find(c => c.id === formData.category_id)?.name || 'Chicago Sports' }) })
+      if (response.ok) { const data = await response.json(); if (data.ideas) setIdeas(data.ideas) }
+    } catch (err) { console.error('Ideas error:', err) }
+    finally { setLoadingIdeas(false) }
+  }
+
+  const regenerateSEO = async () => {
+    setSeoGenerated(false); setGeneratingSEO(true)
+    try {
+      const response = await fetch('/api/admin/ai', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ action: 'generate_seo', title: formData.title, content: formData.content, category: categories.find(c => c.id === formData.category_id)?.name }) })
+      if (response.ok) { const data = await response.json(); setFormData(prev => ({ ...prev, seo_title: data.seoTitle || '', seo_description: data.metaDescription || '', seo_keywords: data.keywords || '', excerpt: data.excerpt || '' })); setSeoGenerated(true) }
+    } catch (err) { console.error('SEO error:', err) }
+    setGeneratingSEO(false)
+  }
+
+  const useSelectedIdea = () => { if (selectedIdea) { setFormData(prev => ({ ...prev, title: selectedIdea.headline })); setShowIdeasModal(false); setSelectedIdea(null) } }
+  const openIdeasModal = () => { setShowIdeasModal(true); if (ideas.length === 0) generateIdeas() }
 
   const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
@@ -468,15 +548,20 @@ export default function StudioPostEditor({
             <div className="mt-6 pt-6 border-t border-[var(--border-default)]">
               <p className="px-3 mb-2 text-xs font-semibold uppercase tracking-wide text-[var(--text-muted)]">PostIQ Tools</p>
               <div className="space-y-1">
-                <button
-                  type="button"
-                  onClick={openChartModal}
-                  disabled={formData.content.length < 200}
-                  className="w-full flex items-center gap-3 rounded-lg px-3 py-2 text-sm text-[var(--text-secondary)] hover:bg-[var(--bg-hover)] hover:text-[var(--text-primary)] disabled:opacity-50"
-                >
-                  <svg className="h-5 w-5 text-purple-500" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 013 19.875v-6.75zM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V8.625zM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V4.125z" />
-                  </svg>
+                <button type="button" onClick={() => runAI('grammar')} disabled={aiLoading === 'grammar' || !formData.content} className="w-full flex items-center gap-3 rounded-lg px-3 py-2 text-sm text-[var(--text-secondary)] hover:bg-[var(--bg-hover)] hover:text-[var(--text-primary)] disabled:opacity-50">
+                  <svg className="h-5 w-5 text-purple-500" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                  {aiLoading === 'grammar' ? 'Checking...' : 'Grammar Check'}
+                </button>
+                <button type="button" onClick={() => runAI('headlines')} disabled={aiLoading === 'headlines' || !formData.title} className="w-full flex items-center gap-3 rounded-lg px-3 py-2 text-sm text-[var(--text-secondary)] hover:bg-[var(--bg-hover)] hover:text-[var(--text-primary)] disabled:opacity-50">
+                  <svg className="h-5 w-5 text-purple-500" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25H12" /></svg>
+                  {aiLoading === 'headlines' ? 'Generating...' : 'Headlines'}
+                </button>
+                <button type="button" onClick={openIdeasModal} className="w-full flex items-center gap-3 rounded-lg px-3 py-2 text-sm text-[var(--text-secondary)] hover:bg-[var(--bg-hover)] hover:text-[var(--text-primary)]">
+                  <span className="text-lg">💡</span>
+                  Generate Ideas
+                </button>
+                <button type="button" onClick={openChartModal} disabled={formData.content.length < 200} className="w-full flex items-center gap-3 rounded-lg px-3 py-2 text-sm text-[var(--text-secondary)] hover:bg-[var(--bg-hover)] hover:text-[var(--text-primary)] disabled:opacity-50">
+                  <svg className="h-5 w-5 text-purple-500" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 013 19.875v-6.75zM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V8.625zM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V4.125z" /></svg>
                   Add Chart
                 </button>
               </div>
@@ -515,6 +600,19 @@ export default function StudioPostEditor({
               />
             </div>
 
+            {/* Alternative Headlines */}
+            {headlines.length > 0 && (
+              <div className="mb-6 rounded-lg border border-purple-500/30 bg-purple-500/5 p-4">
+                <div className="mb-3 flex items-center justify-between">
+                  <p className="text-xs font-semibold uppercase tracking-wide text-purple-500">Alternative Headlines</p>
+                  <button type="button" onClick={() => setHeadlines([])} className="text-[var(--text-muted)] hover:text-[var(--text-primary)]"><svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" /></svg></button>
+                </div>
+                <div className="space-y-2">
+                  {headlines.map((h, i) => (<button key={i} type="button" onClick={() => { updateField('title', h); setHeadlines([]) }} className="w-full rounded-lg bg-white/50 dark:bg-gray-800/50 px-3 py-2 text-left text-sm text-[var(--text-secondary)] hover:bg-purple-500/10 hover:text-purple-500 transition-colors">{h}</button>))}
+                </div>
+              </div>
+            )}
+
             {/* Content Editor - extends to fill space */}
             <div className="mb-6 overflow-hidden rounded-lg border border-[var(--border-default)] bg-white dark:bg-gray-900">
               <RichTextEditor
@@ -526,22 +624,21 @@ export default function StudioPostEditor({
 
             {/* SEO Section - Below Content */}
             <div className="rounded-lg border border-[var(--border-default)] bg-[var(--bg-card)]">
-              <button
-                type="button"
-                onClick={() => setSeoExpanded(!seoExpanded)}
-                className="flex w-full items-center justify-between px-4 py-3 text-left"
-              >
-                <span className="text-sm font-medium text-[var(--text-primary)]">SEO Settings</span>
-                <svg
-                  className={`h-4 w-4 text-[var(--text-muted)] transition-transform ${seoExpanded ? 'rotate-180' : ''}`}
-                  fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor"
-                >
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
-                </svg>
+              <button type="button" onClick={() => setSeoExpanded(!seoExpanded)} className="flex w-full items-center justify-between px-4 py-3 text-left">
+                <div className="flex items-center gap-2">
+                  <span className="text-sm font-medium text-[var(--text-primary)]">SEO Settings</span>
+                  {generatingSEO && <svg className="h-4 w-4 animate-spin text-purple-500" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" /><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" /></svg>}
+                  {seoGenerated && !generatingSEO && <span className="rounded bg-emerald-500/10 px-1.5 py-0.5 text-[10px] font-medium text-emerald-500">Auto-generated</span>}
+                </div>
+                <div className="flex items-center gap-2">
+                  {seoGenerated && <button type="button" onClick={(e) => { e.stopPropagation(); regenerateSEO() }} className="text-xs text-purple-500 hover:text-purple-400">↻ Regenerate</button>}
+                  <svg className={`h-4 w-4 text-[var(--text-muted)] transition-transform ${seoExpanded ? 'rotate-180' : ''}`} fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" /></svg>
+                </div>
               </button>
 
               {seoExpanded && (
                 <div className="border-t border-[var(--border-default)] p-4 space-y-4">
+                  {wordCount < 150 && !seoGenerated && <p className="rounded-lg bg-amber-500/10 px-3 py-2 text-xs text-amber-600 dark:text-amber-400">SEO fields will auto-generate when content reaches 150+ words ({wordCount}/150)</p>}
                   <div className="grid gap-4 md:grid-cols-2">
                     <div>
                       <label className="mb-1.5 block text-xs font-medium text-[var(--text-muted)]">SEO Title</label>
@@ -835,6 +932,27 @@ export default function StudioPostEditor({
           </div>
         </aside>
       </div>
+
+      {/* Ideas Modal */}
+      {showIdeasModal && (
+        <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/60 backdrop-blur-sm">
+          <div className="mx-4 w-full max-w-lg overflow-hidden rounded-xl bg-white shadow-2xl dark:bg-[#1c1c1f]">
+            <div className="flex items-center justify-between border-b border-gray-200 px-6 py-4 dark:border-gray-700">
+              <h3 className="text-lg font-bold text-gray-900 dark:text-white">💡 Article Ideas</h3>
+              <button type="button" onClick={() => setShowIdeasModal(false)} className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200"><svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" /></svg></button>
+            </div>
+            <div className="max-h-80 space-y-3 overflow-y-auto p-6">
+              {loadingIdeas ? (<div className="py-8 text-center"><div className="mx-auto h-6 w-6 animate-spin rounded-full border-2 border-purple-500 border-t-transparent" /><p className="mt-3 text-gray-500 dark:text-gray-400">Generating ideas...</p></div>) : ideas.length > 0 ? (ideas.map((idea, i) => (<button key={i} type="button" onClick={() => setSelectedIdea(idea)} className={`w-full rounded-lg border-2 p-4 text-left transition-all ${selectedIdea === idea ? 'border-purple-500 bg-purple-50 dark:bg-purple-500/10' : 'border-gray-200 hover:border-purple-300 dark:border-gray-700'}`}><p className="font-medium text-gray-900 dark:text-white">{idea.headline}</p><p className="mt-1 text-sm text-gray-500 dark:text-gray-400">{idea.angle}</p><span className="mt-2 inline-block rounded bg-gray-100 px-2 py-0.5 text-xs text-gray-600 dark:bg-gray-800 dark:text-gray-400">{idea.type}</span></button>))) : (<p className="py-8 text-center text-gray-500">Click "Generate More" to get article ideas</p>)}
+            </div>
+            <div className="flex items-center gap-3 border-t border-gray-200 bg-gray-50 px-6 py-4 dark:border-gray-700 dark:bg-gray-800/50">
+              <button type="button" onClick={generateIdeas} disabled={loadingIdeas} className="text-sm font-medium text-purple-500 hover:text-purple-400 disabled:opacity-50">↻ Generate More</button>
+              <div className="flex-1" />
+              <button type="button" onClick={() => setShowIdeasModal(false)} className="px-4 py-2 text-sm text-gray-600 hover:text-gray-900 dark:text-gray-300 dark:hover:text-white">Cancel</button>
+              <button type="button" onClick={useSelectedIdea} disabled={!selectedIdea} className="rounded-lg bg-purple-600 px-4 py-2 text-sm font-medium text-white hover:bg-purple-700 disabled:cursor-not-allowed disabled:opacity-50">Use Selected</button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* PostIQ Chart Modal */}
       {showChartModal && (
