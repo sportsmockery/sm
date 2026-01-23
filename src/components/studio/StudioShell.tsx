@@ -5,8 +5,8 @@ import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 
 const navItems = [
-  { href: '/studio/posts', label: 'All Posts', icon: 'document' },
   { href: '/studio/posts/new', label: 'New Post', icon: 'plus' },
+  { href: '/studio/posts', label: 'All Posts', icon: 'document' },
   { href: '/studio/polls', label: 'Polls', icon: 'chart' },
   { href: '/studio/charts', label: 'Charts', icon: 'presentation' },
   { href: '/studio/media', label: 'Media', icon: 'photo' },

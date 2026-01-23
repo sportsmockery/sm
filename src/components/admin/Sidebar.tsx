@@ -119,8 +119,8 @@ const navSections: NavSection[] = [
   {
     title: 'CONTENT',
     items: [
-      { name: 'All Posts', href: '/admin/posts', icon: 'posts' },
       { name: 'New Post', href: '/admin/posts/new', icon: 'posts' },
+      { name: 'All Posts', href: '/admin/posts', icon: 'posts' },
       { name: 'Categories', href: '/admin/categories', icon: 'categories' },
       { name: 'Authors', href: '/admin/authors', icon: 'authors' },
       { name: 'Media Library', href: '/admin/media', icon: 'media' },
