@@ -52,6 +52,20 @@ export default function StudioPostEditor({
   const [seoExpanded, setSeoExpanded] = useState(false)
   const [uploadingImage, setUploadingImage] = useState(false)
 
+  // PostIQ Chart Modal State
+  const [showChartModal, setShowChartModal] = useState(false)
+  const [chartLoading, setChartLoading] = useState(false)
+  const [chartSuggestion, setChartSuggestion] = useState<{
+    chartType: string
+    chartTitle: string
+    data: { label: string; value: number }[]
+    paragraphIndex: number
+    reasoning: string
+  } | null>(null)
+  const [selectedChartType, setSelectedChartType] = useState<string>('bar')
+  const [selectedParagraph, setSelectedParagraph] = useState<number>(1)
+  const [editableChartTitle, setEditableChartTitle] = useState<string>('')
+
   const [formData, setFormData] = useState({
     title: post?.title || '',
     slug: post?.slug || '',
