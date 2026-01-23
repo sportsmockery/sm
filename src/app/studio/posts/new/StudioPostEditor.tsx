@@ -4,7 +4,7 @@ import { useState, useCallback, useEffect, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 import Image from 'next/image'
 import Link from 'next/link'
-import RichTextEditor from '@/components/admin/PostEditor/RichTextEditor'
+import RichTextEditor, { RichTextEditorRef } from '@/components/admin/PostEditor/RichTextEditor'
 import { CategorySelect, AuthorSelect } from '@/components/admin/PostEditor/SearchableSelect'
 
 interface Category {
@@ -60,6 +60,8 @@ export default function StudioPostEditor({
   const [rightSidebarCollapsed, setRightSidebarCollapsed] = useState(false)
   const [seoExpanded, setSeoExpanded] = useState(false)
   const [uploadingImage, setUploadingImage] = useState(false)
+  const [slugEditable, setSlugEditable] = useState(false)
+  const contentEditorRef = useRef<RichTextEditorRef>(null)
 
   // Push notification states
   const [sendPushNotification, setSendPushNotification] = useState(false)
@@ -112,16 +114,49 @@ export default function StudioPostEditor({
     scheduled_at: post?.scheduled_at || null,
   })
 
-  // Auto-generate slug from title
-  useEffect(() => {
-    if (!isEditing && formData.title && !formData.slug) {
-      const slug = formData.title
-        .toLowerCase()
-        .replace(/[^a-z0-9]+/g, '-')
-        .replace(/^-+|-+$/g, '')
-      setFormData(prev => ({ ...prev, slug }))
+  // Category name to URL prefix mapping
+  const categorySlugMap: Record<string, string> = {
+    'Chicago Bears News & Rumors': 'chicago-bears',
+    'Chicago Bulls News & Rumors': 'chicago-bulls',
+    'Chicago Cubs News & Rumors': 'chicago-cubs',
+    'Chicago White Sox News & Rumors': 'chicago-white-sox',
+    'Chicago Blackhawks News & Rumors': 'chicago-blackhawks',
+  }
+
+  // Get category prefix for slug
+  const getCategoryPrefix = (categoryId: string): string => {
+    const category = categories.find(c => c.id === categoryId)
+    if (category) {
+      return categorySlugMap[category.name] || ''
     }
-  }, [formData.title, formData.slug, isEditing])
+    return ''
+  }
+
+  // Generate slug from title with category prefix
+  const generateSlug = useCallback((title: string, categoryId: string): string => {
+    const titleSlug = title
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, '-')
+      .replace(/^-+|-+$/g, '')
+    const prefix = getCategoryPrefix(categoryId)
+    return prefix ? `${prefix}/${titleSlug}` : titleSlug
+  }, [categories])
+
+  // Auto-generate slug from title and category
+  useEffect(() => {
+    if (!isEditing && formData.title && !slugEditable) {
+      const newSlug = generateSlug(formData.title, formData.category_id)
+      setFormData(prev => ({ ...prev, slug: newSlug }))
+    }
+  }, [formData.title, formData.category_id, isEditing, slugEditable, generateSlug])
+
+  // Update slug when category changes (if not manually edited)
+  useEffect(() => {
+    if (!isEditing && formData.title && formData.category_id && !slugEditable) {
+      const newSlug = generateSlug(formData.title, formData.category_id)
+      setFormData(prev => ({ ...prev, slug: newSlug }))
+    }
+  }, [formData.category_id])
 
   // Auto-populate push title when checkbox is enabled and title changes
   useEffect(() => {
@@ -213,6 +248,19 @@ export default function StudioPostEditor({
     const file = e.target.files?.[0]
     if (!file) return
 
+    if (!file.type.startsWith('image/')) {
+      setError('Please select an image file')
+      setTimeout(() => setError(''), 3000)
+      return
+    }
+
+    // Check file size (max 10MB)
+    if (file.size > 10 * 1024 * 1024) {
+      setError('Image too large (max 10MB)')
+      setTimeout(() => setError(''), 3000)
+      return
+    }
+
     setUploadingImage(true)
     try {
       const formDataUpload = new FormData()
@@ -226,8 +274,15 @@ export default function StudioPostEditor({
       if (response.ok) {
         const data = await response.json()
         updateField('featured_image', data.url)
+      } else {
+        const errorData = await response.json()
+        setError(errorData.error || 'Failed to upload image')
+        setTimeout(() => setError(''), 3000)
+        console.error('Upload failed:', errorData)
       }
     } catch (err) {
+      setError('Failed to upload image. Please try again.')
+      setTimeout(() => setError(''), 3000)
       console.error('Upload error:', err)
     } finally {
       setUploadingImage(false)
@@ -643,20 +698,41 @@ export default function StudioPostEditor({
               type="text"
               value={formData.title}
               onChange={(e) => updateField('title', e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === 'Tab' && !e.shiftKey) {
+                  e.preventDefault()
+                  contentEditorRef.current?.focus()
+                }
+              }}
               placeholder="Article title..."
+              tabIndex={1}
               className="mb-2 w-full border-0 bg-transparent p-0 text-3xl font-bold text-[var(--text-primary)] placeholder-[var(--text-muted)] focus:outline-none focus:ring-0"
             />
 
-            {/* Slug */}
-            <div className="mb-6 flex items-center gap-1 text-sm text-[var(--text-muted)]">
-              <span>sportsmockery.com/</span>
-              <input
-                type="text"
-                value={formData.slug}
-                onChange={(e) => updateField('slug', e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, '-'))}
-                placeholder="article-slug"
-                className="flex-1 border-0 bg-transparent p-0 text-[var(--text-secondary)] focus:outline-none focus:ring-0"
-              />
+            {/* Slug/URL */}
+            <div className="mb-6 flex items-center gap-2 text-sm text-[var(--text-muted)]">
+              <span className="flex-shrink-0">sportsmockery.com/</span>
+              {slugEditable ? (
+                <input
+                  type="text"
+                  value={formData.slug}
+                  onChange={(e) => updateField('slug', e.target.value.toLowerCase().replace(/[^a-z0-9-/]/g, '-'))}
+                  placeholder="category/article-slug"
+                  className="flex-1 border-0 bg-transparent p-0 text-[var(--text-secondary)] focus:outline-none focus:ring-0"
+                  autoFocus
+                />
+              ) : (
+                <span className="flex-1 text-[var(--text-secondary)] truncate">
+                  {formData.slug || 'category/article-slug'}
+                </span>
+              )}
+              <button
+                type="button"
+                onClick={() => setSlugEditable(!slugEditable)}
+                className="flex-shrink-0 px-2 py-1 text-xs font-medium rounded border border-[var(--border-default)] text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:border-[var(--text-muted)] transition-colors"
+              >
+                {slugEditable ? 'Done' : 'Edit'}
+              </button>
             </div>
 
             {/* Alternative Headlines */}
@@ -675,6 +751,7 @@ export default function StudioPostEditor({
             {/* Content Editor - extends to fill space */}
             <div className="mb-6 overflow-hidden rounded-lg border border-[var(--border-default)] bg-white dark:bg-gray-900">
               <RichTextEditor
+                ref={contentEditorRef}
                 content={formData.content}
                 onChange={(content) => updateField('content', content)}
                 placeholder="Start writing your article..."

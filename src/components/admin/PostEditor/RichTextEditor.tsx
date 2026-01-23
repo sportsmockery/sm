@@ -7,7 +7,7 @@ import Image from '@tiptap/extension-image'
 import Youtube from '@tiptap/extension-youtube'
 import Placeholder from '@tiptap/extension-placeholder'
 import CharacterCount from '@tiptap/extension-character-count'
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useState, forwardRef, useImperativeHandle } from 'react'
 import ChartBuilderModal, { ChartConfig } from '@/components/admin/ChartBuilder/ChartBuilderModal'
 import PollBuilder, { PollConfig } from '@/components/admin/PollBuilder/PollBuilder'
 
@@ -18,12 +18,16 @@ interface RichTextEditorProps {
   onWordCountChange?: (count: number) => void
 }
 
-export default function RichTextEditor({
+export interface RichTextEditorRef {
+  focus: () => void
+}
+
+const RichTextEditor = forwardRef<RichTextEditorRef, RichTextEditorProps>(function RichTextEditor({
   content,
   onChange,
   placeholder = 'Write your article...',
   onWordCountChange,
-}: RichTextEditorProps) {
+}, ref) {
   const [showLinkInput, setShowLinkInput] = useState(false)
   const [linkUrl, setLinkUrl] = useState('')
   const [showEmbedModal, setShowEmbedModal] = useState<'youtube' | 'twitter' | 'image' | null>(null)
@@ -73,6 +77,13 @@ export default function RichTextEditor({
       },
     },
   })
+
+  // Expose focus method to parent
+  useImperativeHandle(ref, () => ({
+    focus: () => {
+      editor?.commands.focus()
+    }
+  }), [editor])
 
   useEffect(() => {
     if (editor && content !== editor.getHTML()) {
@@ -462,4 +473,6 @@ export default function RichTextEditor({
       />
     </div>
   )
-}
+})
+
+export default RichTextEditor

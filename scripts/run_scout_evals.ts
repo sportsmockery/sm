@@ -65,6 +65,9 @@ function parseQuestions(content: string): Map<number, string> {
   const questions = new Map<number, string>();
   const lines = content.split('\n');
 
+  // Track whether we're inside a code block
+  let inCodeBlock = false;
+
   // Regex patterns for different question formats
   // Format 1: "1. How many passing touchdowns..."
   // Format 2: "101. Using only last season's data..."
@@ -72,14 +75,27 @@ function parseQuestions(content: string): Map<number, string> {
 
   for (const line of lines) {
     const trimmedLine = line.trim();
+
+    // Toggle code block state
+    if (trimmedLine.startsWith('```')) {
+      inCodeBlock = !inCodeBlock;
+      continue;
+    }
+
+    // Skip content inside code blocks
+    if (inCodeBlock) {
+      continue;
+    }
+
     const match = trimmedLine.match(questionPattern);
 
     if (match) {
       const num = parseInt(match[1], 10);
       const question = match[2].trim();
 
-      // Only include questions 1-200
-      if (num >= 1 && num <= 200) {
+      // Only include questions 1-200 that look like real questions
+      // (at least 10 chars, not just "..." or placeholders)
+      if (num >= 1 && num <= 200 && question.length >= 10 && !question.startsWith('"...')) {
         questions.set(num, question);
       }
     }
