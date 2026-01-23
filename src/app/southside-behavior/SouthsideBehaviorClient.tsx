@@ -33,7 +33,7 @@ export function SouthsideBehaviorClient({ latestEmbed, previousEmbeds }: Props) 
         <section className="sm-show-hero sm-tiktok-hero">
           <div className="sm-container">
             <div className="sm-tiktok-hero-inner">
-              <div className="sm-hero-text">
+              <div className="sm-hero-text" style={{ maxWidth: '400px' }}>
                 <img
                   src="/youtubelogos/ssb-logo.png"
                   alt="Southside Behavior"
@@ -87,7 +87,7 @@ export function SouthsideBehaviorClient({ latestEmbed, previousEmbeds }: Props) 
       <section className="sm-show-hero sm-tiktok-hero">
         <div className="sm-container">
           <div className="sm-tiktok-hero-inner">
-            <div className="sm-hero-text">
+            <div className="sm-hero-text" style={{ maxWidth: '400px' }}>
               <img
                 src="/youtubelogos/ssb-logo.png"
                 alt="Southside Behavior"
