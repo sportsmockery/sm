@@ -1,4 +1,4 @@
-// app/pinwheelsandivy/page.tsx
+// app/pinwheels-and-ivy/page.tsx
 import { Metadata } from 'next';
 import { getPinwheelsAndIvyVideos } from '@/lib/getPinwheelsAndIvyVideos';
 import { PinwheelsAndIvyClient } from './PinwheelsAndIvyClient';

@@ -1,4 +1,4 @@
-// app/pinwheelsandivy/PinwheelsAndIvyClient.tsx
+// app/pinwheels-and-ivy/PinwheelsAndIvyClient.tsx
 'use client';
 
 import { useState, useEffect } from 'react';
