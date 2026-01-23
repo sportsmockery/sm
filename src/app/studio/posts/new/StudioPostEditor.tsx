@@ -495,7 +495,7 @@ export default function StudioPostEditor({
   }, [formData])
 
   return (
-    <div className="fixed top-14 left-0 right-0 bottom-0 z-[35] flex flex-col bg-[var(--bg-primary)]">
+    <div className="fixed top-[92px] left-0 right-0 bottom-0 z-[35] flex flex-col bg-[var(--bg-primary)]">
       {/* Top Header Bar - minimal, below the red line */}
       <header className="flex-shrink-0 flex h-12 items-center justify-between border-b border-[var(--border-default)] bg-[var(--bg-secondary)] px-4">
         {/* Left: Toggle sidebar + Breadcrumb */}

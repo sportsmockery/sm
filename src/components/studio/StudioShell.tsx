@@ -46,60 +46,31 @@ export default function StudioShell({ children }: { children: React.ReactNode })
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false)
 
   return (
-    <div className="min-h-screen bg-[var(--bg-primary)]">
-      {/* Top Header Bar */}
-      <header className="sticky top-0 z-50 border-b-2 border-[#bc0000] bg-[var(--bg-secondary)]">
-        <div className="flex h-14 items-center justify-between px-4">
-          <div className="flex items-center gap-4">
+    <div className="min-h-screen bg-[var(--bg-primary)] pt-[92px]">
+      <div className="flex">
+        {/* Sidebar - positioned below global header */}
+        <aside
+          className={`fixed left-0 top-[92px] bottom-0 z-40 border-r border-[var(--border-default)] bg-[var(--bg-secondary)] transition-all duration-300 ${
+            sidebarCollapsed ? 'w-0 -translate-x-full' : 'w-60'
+          }`}
+        >
+          {/* Sidebar Header with collapse toggle */}
+          <div className="flex h-14 items-center justify-between border-b border-[var(--border-default)] px-4">
+            <Link href="/studio/posts" className="flex items-center gap-2">
+              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-[var(--accent-red)] text-white font-bold text-sm">
+                SM
+              </div>
+              <span className="text-base font-bold text-[var(--text-primary)]">Studio</span>
+            </Link>
             <button
               onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
-              className="flex h-9 w-9 items-center justify-center rounded-lg text-[var(--text-muted)] hover:bg-[var(--bg-hover)] hover:text-[var(--text-primary)] transition-colors"
+              className="flex h-8 w-8 items-center justify-center rounded-lg text-[var(--text-muted)] hover:bg-[var(--bg-hover)] hover:text-[var(--text-primary)] transition-colors"
             >
               <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
               </svg>
             </button>
-            <Link href="/studio/posts" className="flex items-center gap-2">
-              <span className="text-lg font-bold text-[var(--text-primary)]">Studio</span>
-            </Link>
           </div>
-
-          <nav className="hidden md:flex items-center gap-1">
-            {navItems.map((item) => (
-              <Link
-                key={item.href}
-                href={item.href}
-                className={`flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium transition-colors ${
-                  pathname.startsWith(item.href)
-                    ? 'bg-[var(--accent-red-muted)] text-[var(--accent-red)]'
-                    : 'text-[var(--text-secondary)] hover:bg-[var(--bg-hover)] hover:text-[var(--text-primary)]'
-                }`}
-              >
-                {icons[item.icon]}
-                {item.label}
-              </Link>
-            ))}
-          </nav>
-
-          <Link
-            href="/"
-            className="flex items-center gap-2 text-sm text-[var(--text-muted)] hover:text-[var(--text-primary)]"
-          >
-            <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 12l8.954-8.955c.44-.439 1.152-.439 1.591 0L21.75 12M4.5 9.75v10.125c0 .621.504 1.125 1.125 1.125H9.75v-4.875c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21h4.125c.621 0 1.125-.504 1.125-1.125V9.75M8.25 21h8.25" />
-            </svg>
-            Back to Site
-          </Link>
-        </div>
-      </header>
-
-      <div className="flex">
-        {/* Sidebar */}
-        <aside
-          className={`fixed left-0 top-14 bottom-0 z-40 border-r border-[var(--border-default)] bg-[var(--bg-secondary)] transition-all duration-300 ${
-            sidebarCollapsed ? 'w-0 -translate-x-full' : 'w-60'
-          }`}
-        >
           <nav className="p-4 space-y-1">
             {navItems.map((item) => (
               <Link
@@ -120,7 +91,7 @@ export default function StudioShell({ children }: { children: React.ReactNode })
 
         {/* Main Content */}
         <main
-          className={`flex-1 min-h-[calc(100vh-56px)] transition-all duration-300 ${
+          className={`flex-1 min-h-[calc(100vh-92px)] transition-all duration-300 ${
             sidebarCollapsed ? 'ml-0' : 'ml-60'
           }`}
         >

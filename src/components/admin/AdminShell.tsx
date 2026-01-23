@@ -2,7 +2,6 @@
 
 import { useState } from 'react'
 import Sidebar, { MobileSidebar } from '@/components/admin/Sidebar'
-import AdminTopBar from '@/components/admin/AdminTopBar'
 
 export default function AdminShell({
   children,
@@ -12,8 +11,8 @@ export default function AdminShell({
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false)
 
   return (
-    <div className="min-h-screen bg-[var(--bg-primary)]">
-      {/* Desktop Sidebar - hidden on mobile */}
+    <div className="min-h-screen bg-[var(--bg-primary)] pt-[92px]">
+      {/* Desktop Sidebar - hidden on mobile, positioned below global header */}
       <div className="hidden lg:block">
         <Sidebar />
       </div>
@@ -26,9 +25,6 @@ export default function AdminShell({
 
       {/* Main Content Area */}
       <div className="lg:ml-60 transition-all duration-300">
-        {/* Top Bar */}
-        <AdminTopBar onMenuClick={() => setIsMobileSidebarOpen(true)} />
-
         {/* Page Content */}
         <main className="p-4 md:p-6 lg:p-8">
           {children}
