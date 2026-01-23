@@ -2,26 +2,28 @@
 import 'server-only';
 import { TikTokEmbed } from './tiktokTypes';
 
-// Curated list of original TikTok posts from @southsidebehavior (NOT replies, duets, or stitches)
-// Each entry includes the URL and publish date (newest first)
+/**
+ * MANUAL CURATION REQUIRED
+ *
+ * TikTok does not provide a public API to fetch user videos automatically.
+ * To update this list:
+ * 1. Go to https://www.tiktok.com/@southsidebehavior
+ * 2. Click on videos you want to feature (only original posts, NOT replies/duets/stitches)
+ * 3. Copy the URL from browser address bar
+ * 4. Add to this list with the publish date
+ *
+ * Format: { url: 'https://www.tiktok.com/@southsidebehavior/video/VIDEO_ID', publishedAt: 'YYYY-MM-DD' }
+ *
+ * Keep list sorted by date (newest first). Add new videos at the top.
+ */
 const SOUTHSIDE_TIKTOKS: { url: string; publishedAt: string }[] = [
-  // Add TikTok URLs here in order of newest to oldest
-  // Only include original posts, not replies/duets/stitches
-  { url: 'https://www.tiktok.com/@southsidebehavior/video/7461227606248296750', publishedAt: '2025-01-19' },
-  { url: 'https://www.tiktok.com/@southsidebehavior/video/7460863033246653742', publishedAt: '2025-01-18' },
-  { url: 'https://www.tiktok.com/@southsidebehavior/video/7460138422355661099', publishedAt: '2025-01-16' },
-  { url: 'https://www.tiktok.com/@southsidebehavior/video/7459413988485523755', publishedAt: '2025-01-14' },
-  { url: 'https://www.tiktok.com/@southsidebehavior/video/7458689413338488107', publishedAt: '2025-01-12' },
-  { url: 'https://www.tiktok.com/@southsidebehavior/video/7457964838787150123', publishedAt: '2025-01-10' },
-  { url: 'https://www.tiktok.com/@southsidebehavior/video/7457240263568940330', publishedAt: '2025-01-08' },
-  { url: 'https://www.tiktok.com/@southsidebehavior/video/7456515688346214698', publishedAt: '2025-01-06' },
-  { url: 'https://www.tiktok.com/@southsidebehavior/video/7455791113178144042', publishedAt: '2025-01-04' },
-  { url: 'https://www.tiktok.com/@southsidebehavior/video/7455066538030993706', publishedAt: '2025-01-02' },
-  { url: 'https://www.tiktok.com/@southsidebehavior/video/7454341963571580203', publishedAt: '2024-12-31' },
-  { url: 'https://www.tiktok.com/@southsidebehavior/video/7453617388440923435', publishedAt: '2024-12-29' },
+  // Original posts from @southsidebehavior (NOT replies, duets, or stitches)
+  // Update this list periodically by visiting the TikTok profile
+  { url: 'https://www.tiktok.com/@southsidebehavior/video/7127779450061704490', publishedAt: '2022-08-05' },
+  { url: 'https://www.tiktok.com/@southsidebehavior/video/7122292861890055466', publishedAt: '2022-07-21' },
 ];
 
-const DISPLAY_COUNT = 12; // 1 featured + 11 in grid
+const DISPLAY_COUNT = 12; // 1 featured + up to 11 in grid
 
 async function fetchOEmbed(
   url: string,
