@@ -1209,7 +1209,7 @@ a:hover {
 /* Previous videos */
 
 .sm-show-previous {
-  background-color: #f6f6f6;
+  background-color: var(--bg-surface);
   padding: 32px 0;
 }
 
@@ -1217,6 +1217,7 @@ a:hover {
   font-size: 1.2rem;
   font-weight: 600;
   margin: 0 0 16px;
+  color: var(--text-primary);
 }
 
 .sm-video-grid {
@@ -1232,7 +1233,7 @@ a:hover {
 }
 
 .sm-video-card {
-  background-color: #ffffff;
+  background-color: var(--bg-elevated);
   border-radius: 10px;
   overflow: hidden;
   box-shadow: 0 6px 14px rgba(0, 0, 0, 0.08);
@@ -1289,18 +1290,19 @@ a:hover {
   font-size: 0.95rem;
   font-weight: 600;
   margin: 0 0 4px;
+  color: var(--text-primary);
 }
 
 .sm-video-meta {
   font-size: 0.8rem;
-  opacity: 0.75;
+  color: var(--text-muted);
 }
 
 /* CTA */
 
 .sm-show-cta {
   padding: 24px 0 40px;
-  background-color: #f6f6f6;
+  background-color: var(--bg-surface);
 }
 
 .sm-cta-inner {
@@ -1320,6 +1322,7 @@ a:hover {
 .sm-cta-text {
   font-size: 0.95rem;
   margin: 0;
+  color: var(--text-primary);
 }
 
 .sm-cta-button {
