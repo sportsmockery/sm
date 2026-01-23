@@ -10,7 +10,19 @@ interface AIAssistantProps {
   onHeadlineSelect: (headline: string) => void
   onSEOUpdate: (seo: { seoTitle: string; metaDescription: string }) => void
   onExcerptGenerate: (excerpt: string) => void
-  onContentPolish: (content: string) => void
+  onGrammarFix: (content: string) => void
+}
+
+interface GrammarIssue {
+  original: string
+  corrected: string
+  explanation: string
+}
+
+interface GrammarResult {
+  correctedContent: string
+  issues: GrammarIssue[]
+  issueCount: number
 }
 
 interface MockeryScore {
@@ -41,13 +53,14 @@ export default function AIAssistant({
   onHeadlineSelect,
   onSEOUpdate,
   onExcerptGenerate,
-  onContentPolish,
+  onGrammarFix,
 }: AIAssistantProps) {
-  const [activeTab, setActiveTab] = useState<'headlines' | 'seo' | 'ideas' | 'polish'>('headlines')
+  const [activeTab, setActiveTab] = useState<'headlines' | 'seo' | 'ideas' | 'grammar'>('headlines')
   const [loading, setLoading] = useState(false)
   const [headlines, setHeadlines] = useState<string[]>([])
   const [seoResult, setSeoResult] = useState<SEOResult | null>(null)
   const [ideas, setIdeas] = useState<ArticleIdea[]>([])
+  const [grammarResult, setGrammarResult] = useState<GrammarResult | null>(null)
   const [error, setError] = useState('')
 
   const callAI = async (action: string) => {
@@ -95,10 +108,16 @@ export default function AIAssistant({
     }
   }
 
-  const polishContent = async () => {
-    const result = await callAI('polish')
-    if (result?.content) {
-      onContentPolish(result.content)
+  const checkGrammar = async () => {
+    const result = await callAI('grammar')
+    if (result) {
+      setGrammarResult(result)
+    }
+  }
+
+  const applyGrammarFix = () => {
+    if (grammarResult?.correctedContent) {
+      onGrammarFix(grammarResult.correctedContent)
     }
   }
 
@@ -132,7 +151,7 @@ export default function AIAssistant({
             { key: 'headlines', label: 'Headlines' },
             { key: 'seo', label: 'SEO' },
             { key: 'ideas', label: 'Ideas' },
-            { key: 'polish', label: 'Polish' },
+            { key: 'grammar', label: 'Grammar' },
           ].map((tab) => (
             <button
               key={tab.key}
@@ -324,21 +343,57 @@ export default function AIAssistant({
           </div>
         )}
 
-        {activeTab === 'polish' && (
+        {activeTab === 'grammar' && (
           <div className="space-y-4">
             <p className="text-sm text-zinc-600 dark:text-zinc-400">
-              Give your content the Sports Mockery touch - add wit, personality, and edge.
+              Check your content for grammar, spelling, and punctuation errors.
             </p>
             <button
-              onClick={polishContent}
+              onClick={checkGrammar}
               disabled={loading || !content}
-              className="w-full rounded-lg bg-gradient-to-r from-purple-600 to-pink-600 px-4 py-2 text-sm font-medium text-white hover:from-purple-700 hover:to-pink-700 disabled:opacity-50"
+              className="w-full rounded-lg bg-purple-600 px-4 py-2 text-sm font-medium text-white hover:bg-purple-700 disabled:opacity-50"
             >
-              {loading ? 'Polishing...' : '✨ Mockery Polish'}
+              {loading ? 'Checking...' : 'Check Grammar'}
             </button>
-            <p className="text-xs text-zinc-500 dark:text-zinc-500">
-              This will update your content with improved style and tone while keeping the core message intact.
-            </p>
+
+            {grammarResult && (
+              <div className="space-y-4">
+                <div className={`rounded-lg p-4 ${grammarResult.issueCount === 0 ? 'bg-green-50 dark:bg-green-900/30' : 'bg-yellow-50 dark:bg-yellow-900/30'}`}>
+                  <div className="flex items-center justify-between">
+                    <span className={`font-semibold ${grammarResult.issueCount === 0 ? 'text-green-700 dark:text-green-300' : 'text-yellow-700 dark:text-yellow-300'}`}>
+                      {grammarResult.issueCount === 0 ? 'No issues found!' : `${grammarResult.issueCount} issue${grammarResult.issueCount > 1 ? 's' : ''} found`}
+                    </span>
+                  </div>
+                </div>
+
+                {grammarResult.issues.length > 0 && (
+                  <div className="space-y-2">
+                    <label className="text-xs font-medium uppercase text-zinc-500 dark:text-zinc-400">
+                      Issues Found
+                    </label>
+                    {grammarResult.issues.map((issue, i) => (
+                      <div key={i} className="rounded border border-zinc-200 p-3 dark:border-zinc-700">
+                        <div className="flex items-start gap-2">
+                          <span className="text-red-500 line-through text-sm">{issue.original}</span>
+                          <span className="text-zinc-400">→</span>
+                          <span className="text-green-600 dark:text-green-400 text-sm">{issue.corrected}</span>
+                        </div>
+                        <p className="mt-1 text-xs text-zinc-500 dark:text-zinc-400">{issue.explanation}</p>
+                      </div>
+                    ))}
+                  </div>
+                )}
+
+                {grammarResult.issueCount > 0 && (
+                  <button
+                    onClick={applyGrammarFix}
+                    className="w-full rounded-lg bg-green-600 px-4 py-2 text-sm font-medium text-white hover:bg-green-700"
+                  >
+                    Apply All Corrections
+                  </button>
+                )}
+              </div>
+            )}
           </div>
         )}
       </div>

@@ -3,8 +3,29 @@ import Anthropic from '@anthropic-ai/sdk'
 
 const anthropic = new Anthropic()
 
+/**
+ * Extract JSON from a response that might be wrapped in markdown code blocks
+ */
+function extractJSON(text: string): string {
+  // Remove markdown code blocks if present
+  const jsonMatch = text.match(/```(?:json)?\s*([\s\S]*?)```/)
+  if (jsonMatch) {
+    return jsonMatch[1].trim()
+  }
+  // Try to find JSON array or object
+  const arrayMatch = text.match(/\[[\s\S]*\]/)
+  if (arrayMatch) {
+    return arrayMatch[0]
+  }
+  const objectMatch = text.match(/\{[\s\S]*\}/)
+  if (objectMatch) {
+    return objectMatch[0]
+  }
+  return text.trim()
+}
+
 interface AIRequest {
-  action: 'headlines' | 'seo' | 'ideas' | 'polish' | 'excerpt'
+  action: 'headlines' | 'seo' | 'ideas' | 'grammar' | 'excerpt'
   content?: string
   title?: string
   category?: string
@@ -27,8 +48,8 @@ export async function POST(request: NextRequest) {
         return await optimizeSEO(title || '', content || '', category)
       case 'ideas':
         return await generateIdeas(category, team)
-      case 'polish':
-        return await polishContent(content || '')
+      case 'grammar':
+        return await checkGrammar(content || '')
       case 'excerpt':
         return await generateExcerpt(title || '', content || '')
       default:
@@ -66,18 +87,21 @@ Return ONLY a JSON array of 5 headline strings, no explanation.`
   })
 
   const responseText = message.content[0].type === 'text' ? message.content[0].text : ''
+  console.log('Headlines raw response:', responseText.slice(0, 500))
 
   try {
-    // Try to parse as JSON
-    const headlines = JSON.parse(responseText)
-    return NextResponse.json({ headlines })
-  } catch {
+    // Extract and parse JSON
+    const jsonText = extractJSON(responseText)
+    const headlines = JSON.parse(jsonText)
+    return NextResponse.json({ headlines: Array.isArray(headlines) ? headlines : [] })
+  } catch (e) {
+    console.error('Headlines JSON parse error:', e)
     // If not valid JSON, extract lines
     const headlines = responseText
       .split('\n')
       .filter(line => line.trim())
       .map(line => line.replace(/^[\d\-\.\*]+\s*/, '').replace(/^["']|["']$/g, '').trim())
-      .filter(line => line.length > 0)
+      .filter(line => line.length > 0 && !line.startsWith('```'))
       .slice(0, 5)
     return NextResponse.json({ headlines })
   }
@@ -116,9 +140,11 @@ Return ONLY the JSON object, no explanation.`
   const responseText = message.content[0].type === 'text' ? message.content[0].text : ''
 
   try {
-    const seo = JSON.parse(responseText)
+    const jsonText = extractJSON(responseText)
+    const seo = JSON.parse(jsonText)
     return NextResponse.json(seo)
-  } catch {
+  } catch (e) {
+    console.error('SEO JSON parse error:', e)
     return NextResponse.json({
       seoTitle: title.slice(0, 60),
       metaDescription: content.slice(0, 160),
@@ -159,29 +185,39 @@ Return ONLY the JSON array, no explanation.`
   })
 
   const responseText = message.content[0].type === 'text' ? message.content[0].text : ''
+  console.log('Ideas raw response:', responseText.slice(0, 500))
 
   try {
-    const ideas = JSON.parse(responseText)
-    return NextResponse.json({ ideas })
-  } catch {
-    return NextResponse.json({ ideas: [] })
+    const jsonText = extractJSON(responseText)
+    const ideas = JSON.parse(jsonText)
+    return NextResponse.json({ ideas: Array.isArray(ideas) ? ideas : [] })
+  } catch (e) {
+    console.error('Ideas JSON parse error:', e)
+    return NextResponse.json({ ideas: [], error: 'Failed to parse ideas' })
   }
 }
 
-async function polishContent(content: string) {
-  const prompt = `You are an editor at Sports Mockery, a Chicago sports news site known for edgy, satirical takes.
+async function checkGrammar(content: string) {
+  const prompt = `You are a professional editor. Check this content for grammar, spelling, punctuation, and clarity issues.
 
-Polish this content to match the Sports Mockery voice:
-- Add wit and personality
-- Make it more engaging and punchy
-- Fix any grammar or clarity issues
-- Keep the core message intact
-- Add some satirical edge where appropriate
-
-Original content:
+Content to check:
 ${content}
 
-Return ONLY the polished content, no explanation or commentary.`
+Return a JSON object with:
+{
+  "correctedContent": "the full content with all corrections applied",
+  "issues": [
+    {
+      "original": "the problematic text",
+      "corrected": "the corrected text",
+      "explanation": "brief explanation of the issue"
+    }
+  ],
+  "issueCount": number of issues found
+}
+
+If no issues are found, return the original content with an empty issues array and issueCount of 0.
+Return ONLY the JSON object, no explanation.`
 
   const message = await anthropic.messages.create({
     model: 'claude-sonnet-4-20250514',
@@ -189,9 +225,21 @@ Return ONLY the polished content, no explanation or commentary.`
     messages: [{ role: 'user', content: prompt }],
   })
 
-  const polishedContent = message.content[0].type === 'text' ? message.content[0].text : content
+  const responseText = message.content[0].type === 'text' ? message.content[0].text : ''
 
-  return NextResponse.json({ content: polishedContent })
+  try {
+    const jsonText = extractJSON(responseText)
+    const result = JSON.parse(jsonText)
+    return NextResponse.json(result)
+  } catch (e) {
+    console.error('Grammar JSON parse error:', e)
+    return NextResponse.json({
+      correctedContent: content,
+      issues: [],
+      issueCount: 0,
+      error: 'Unable to parse grammar check results'
+    })
+  }
 }
 
 async function generateExcerpt(title: string, content: string) {

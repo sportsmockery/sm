@@ -104,6 +104,48 @@ See `/AskAI_Wrong.md` for documented failures:
 
 ---
 
+## PostIQ - Admin Content Assistant
+
+**PostIQ** is the AI-powered content assistant for admin post creation. When the user mentions "PostIQ", "admin AI", or "content assistant", they are referring to this system.
+
+**Note:** PostIQ is separate from Scout. Scout answers user sports questions; PostIQ helps admins write posts.
+
+### Where PostIQ Lives
+| Location | Description |
+|----------|-------------|
+| API Route | `/src/app/api/admin/ai/route.ts` |
+| Frontend | `/src/components/admin/PostEditor/AIAssistant.tsx` |
+| UI Location | AI Assistant panel in `/admin/posts/new` |
+
+### How PostIQ Works
+- Uses Claude Sonnet 4 (`claude-sonnet-4-20250514`) via `@anthropic-ai/sdk`
+- Direct API calls to Anthropic (no Data Lab involved)
+- Returns JSON responses parsed by the frontend
+
+### Features
+| Feature | Description |
+|---------|-------------|
+| **Headlines** | Generates 5 alternative headlines for articles |
+| **SEO** | Analyzes content, returns optimized title, meta description, keywords, and Mockery Score (1-100) |
+| **Ideas** | Generates 5 article ideas based on category/team |
+| **Grammar** | Checks grammar, spelling, and punctuation; shows issues with corrections |
+| **Excerpt** | Auto-generates 2-3 sentence article summary |
+
+### API Usage
+```typescript
+POST /api/admin/ai
+{ action: 'headlines' | 'seo' | 'ideas' | 'grammar' | 'excerpt', title, content, category, team }
+```
+
+### Key Files
+| File | Purpose |
+|------|---------|
+| `/src/app/api/admin/ai/route.ts` | Backend route handling all PostIQ requests |
+| `/src/components/admin/PostEditor/AIAssistant.tsx` | Frontend UI component |
+| `/docs/PostIQ_Guide.md` | Full documentation |
+
+---
+
 ## Key Features
 
 ### Profile / Favorite Teams
