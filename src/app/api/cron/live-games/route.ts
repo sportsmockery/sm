@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { datalabClient } from '@/lib/supabase-datalab'
+import { refreshLiveGamesCache, liveGamesCache } from '@/lib/live-games-cache'
 import { revalidatePath } from 'next/cache'
 
 // Allow sufficient timeout for live sync
@@ -8,106 +8,103 @@ export const maxDuration = 30
 // Vercel cron requires GET method
 export const dynamic = 'force-dynamic'
 
-interface LiveGameCheck {
-  team: string
-  tableName: string
-  teamScoreCol: string
-  oppScoreCol: string
-  isHomeCol: string
-  pathPrefix: string
-}
-
-const TEAM_CONFIGS: LiveGameCheck[] = [
-  {
-    team: 'bears',
-    tableName: 'bears_games_master',
-    teamScoreCol: 'bears_score',
-    oppScoreCol: 'opponent_score',
-    isHomeCol: 'is_bears_home',
-    pathPrefix: '/chicago-bears',
-  },
-  {
-    team: 'bulls',
-    tableName: 'bulls_games_master',
-    teamScoreCol: 'bulls_score',
-    oppScoreCol: 'opponent_score',
-    isHomeCol: 'is_bulls_home',
-    pathPrefix: '/chicago-bulls',
-  },
-  {
-    team: 'blackhawks',
-    tableName: 'blackhawks_games_master',
-    teamScoreCol: 'blackhawks_score',
-    oppScoreCol: 'opponent_score',
-    isHomeCol: 'is_blackhawks_home',
-    pathPrefix: '/chicago-blackhawks',
-  },
-  {
-    team: 'cubs',
-    tableName: 'cubs_games_master',
-    teamScoreCol: 'cubs_score',
-    oppScoreCol: 'opponent_score',
-    isHomeCol: 'is_cubs_home',
-    pathPrefix: '/chicago-cubs',
-  },
-  {
-    team: 'whitesox',
-    tableName: 'whitesox_games_master',
-    teamScoreCol: 'whitesox_score',
-    oppScoreCol: 'opponent_score',
-    isHomeCol: 'is_whitesox_home',
-    pathPrefix: '/chicago-white-sox',
-  },
-]
-
 /**
- * GET /api/cron/live-games - Check all Chicago teams for live games
+ * GET /api/cron/live-games
  *
- * Vercel Cron: runs every minute
- * Schedule: "* * * * *"
+ * Cron job that runs every 10 seconds to fetch live game data from Datalab.
+ * This is the ONLY place that talks to Datalab's /live/games endpoint.
+ * All UI components consume /api/live-games which reads from the cache.
  *
- * This endpoint checks if any Chicago team has a live game.
- * When a live game is found, it triggers revalidation of the
- * relevant team pages so users see updated scores.
+ * Vercel Cron Schedule: Every 10 seconds is not supported by Vercel cron.
+ * For production, you would use:
+ *   - A Vercel Edge Function with setInterval
+ *   - An external scheduler (e.g., Upstash QStash, AWS EventBridge)
+ *   - Vercel cron at "* * * * *" (every minute) with multiple internal fetches
+ *
+ * For development/testing, this can be called manually or via external trigger.
  */
 export async function GET(request: NextRequest) {
-  // Verify this is a Vercel cron request (optional)
+  // Verify this is a Vercel cron request or has proper auth
   const authHeader = request.headers.get('authorization')
   const cronSecret = process.env.CRON_SECRET
 
-  if (cronSecret && authHeader !== `Bearer ${cronSecret}`) {
+  // Allow requests from localhost/internal or with valid auth
+  const isInternal = request.headers.get('x-internal-request') === 'true'
+
+  if (cronSecret && !isInternal && authHeader !== `Bearer ${cronSecret}`) {
     console.log('[Live Games Cron] Unauthorized request')
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
 
   const startTime = Date.now()
-  const results: { team: string; hasLiveGame: boolean; revalidated: boolean }[] = []
 
   try {
-    const today = new Date().toISOString().split('T')[0]
+    // Fetch from Datalab and update cache
+    const result = await refreshLiveGamesCache()
 
-    for (const config of TEAM_CONFIGS) {
-      const liveCheck = await checkForLiveGame(config, today)
-      results.push({
-        team: config.team,
-        hasLiveGame: liveCheck.isLive,
-        revalidated: liveCheck.revalidated,
-      })
+    if (!result.success) {
+      console.error('[Live Games Cron] Failed to refresh cache:', result.error)
+      return NextResponse.json(
+        {
+          success: false,
+          error: result.error,
+          duration: `${Date.now() - startTime}ms`,
+          timestamp: new Date().toISOString(),
+        },
+        { status: 500 }
+      )
     }
 
-    const liveGames = results.filter(r => r.hasLiveGame)
+    // Get the current live games for logging
+    const liveGames = liveGamesCache.getChicagoGames()
+    const inProgressCount = liveGames.length
+
+    // Revalidate pages if there are live games
+    if (inProgressCount > 0) {
+      const teams = new Set(liveGames.map(g =>
+        g.home_team_id.includes('bear') || g.away_team_id.includes('bear') ? 'bears' :
+        g.home_team_id.includes('bull') || g.away_team_id.includes('bull') ? 'bulls' :
+        g.home_team_id.includes('cub') || g.away_team_id.includes('cub') ? 'cubs' :
+        g.home_team_id.includes('sox') || g.away_team_id.includes('sox') ? 'whitesox' :
+        g.home_team_id.includes('hawk') || g.away_team_id.includes('hawk') ? 'blackhawks' :
+        null
+      ).filter(Boolean))
+
+      // Revalidate relevant team pages
+      for (const team of teams) {
+        try {
+          const prefix = team === 'whitesox' ? '/chicago-white-sox' : `/chicago-${team}`
+          revalidatePath(prefix)
+          revalidatePath(`${prefix}/scores`)
+        } catch (e) {
+          // Revalidation might fail in some environments
+          console.log(`[Live Games Cron] Revalidation for ${team} skipped`)
+        }
+      }
+    }
+
     const duration = Date.now() - startTime
 
-    console.log(`[Live Games Cron] Checked all teams in ${duration}ms:`, {
-      liveGamesFound: liveGames.length,
-      teams: liveGames.map(g => g.team),
+    console.log(`[Live Games Cron] Updated cache in ${duration}ms:`, {
+      totalGames: result.gamesCount,
+      inProgressChicago: inProgressCount,
+      teams: liveGames.map(g => `${g.home_team_abbr} vs ${g.away_team_abbr}`),
     })
 
     return NextResponse.json({
       success: true,
-      type: 'live-games',
-      liveGamesFound: liveGames.length,
-      results,
+      type: 'live-games-datalab',
+      total_games: result.gamesCount,
+      chicago_games: inProgressCount,
+      games: liveGames.map(g => ({
+        game_id: g.game_id,
+        sport: g.sport,
+        matchup: `${g.home_team_abbr} ${g.home_score} - ${g.away_score} ${g.away_team_abbr}`,
+        status: g.status,
+        period_label: g.period_label,
+        clock: g.clock,
+      })),
+      cache_age_seconds: liveGamesCache.getCacheAge(),
       duration: `${duration}ms`,
       timestamp: new Date().toISOString(),
     })
@@ -118,7 +115,7 @@ export async function GET(request: NextRequest) {
     return NextResponse.json(
       {
         success: false,
-        type: 'live-games',
+        type: 'live-games-datalab',
         error: error instanceof Error ? error.message : 'Unknown error',
         duration: `${duration}ms`,
         timestamp: new Date().toISOString(),
@@ -128,87 +125,21 @@ export async function GET(request: NextRequest) {
   }
 }
 
-async function checkForLiveGame(
-  config: LiveGameCheck,
-  today: string
-): Promise<{ isLive: boolean; revalidated: boolean }> {
-  if (!datalabClient) {
-    return { isLive: false, revalidated: false }
-  }
+/**
+ * POST /api/cron/live-games
+ *
+ * Manual trigger for the cron job (useful for testing).
+ */
+export async function POST(request: NextRequest) {
+  // Add internal request header and forward to GET
+  const url = new URL(request.url)
+  const internalRequest = new Request(url, {
+    method: 'GET',
+    headers: {
+      ...Object.fromEntries(request.headers),
+      'x-internal-request': 'true',
+    },
+  })
 
-  try {
-    // Check for games today
-    const { data: todayGames } = await datalabClient
-      .from(config.tableName)
-      .select('*')
-      .eq('game_date', today)
-      .limit(1)
-
-    if (!todayGames || todayGames.length === 0) {
-      return { isLive: false, revalidated: false }
-    }
-
-    const game = todayGames[0]
-
-    // Check if game is in progress (has scores but might not be final)
-    const teamScore = Number(game[config.teamScoreCol]) || 0
-    const oppScore = Number(game[config.oppScoreCol]) || 0
-    const hasScores = teamScore > 0 || oppScore > 0
-
-    // For a live game, check if we're within the game window
-    if (!hasScores) {
-      const isInWindow = await isWithinGameWindow(config, today)
-      if (isInWindow) {
-        // Game might be about to start or just started
-        return { isLive: true, revalidated: false }
-      }
-      return { isLive: false, revalidated: false }
-    }
-
-    // Game has scores - assume it's live or recently finished
-    // Trigger revalidation of team pages
-    try {
-      revalidatePath(config.pathPrefix)
-      revalidatePath(`${config.pathPrefix}/schedule`)
-      revalidatePath(`${config.pathPrefix}/scores`)
-    } catch (e) {
-      // Revalidation might fail in some environments
-      console.log(`[Live Games] Revalidation for ${config.team} skipped`)
-    }
-
-    return { isLive: true, revalidated: true }
-  } catch (error) {
-    console.error(`[Live Games] Error checking ${config.team}:`, error)
-    return { isLive: false, revalidated: false }
-  }
-}
-
-async function isWithinGameWindow(config: LiveGameCheck, today: string): Promise<boolean> {
-  if (!datalabClient) return false
-
-  try {
-    const { data: games } = await datalabClient
-      .from(config.tableName)
-      .select('game_time')
-      .eq('game_date', today)
-      .limit(1)
-
-    if (!games || games.length === 0 || !games[0].game_time) {
-      // No time specified, assume we should check on game day
-      return true
-    }
-
-    const now = new Date()
-    const [hours, minutes] = games[0].game_time.split(':').map(Number)
-    const gameStart = new Date(today)
-    gameStart.setHours(hours, minutes, 0, 0)
-
-    // Check if we're within 1 hour before to 4 hours after kickoff
-    const windowStart = new Date(gameStart.getTime() - 60 * 60 * 1000)
-    const windowEnd = new Date(gameStart.getTime() + 4 * 60 * 60 * 1000)
-
-    return now >= windowStart && now <= windowEnd
-  } catch {
-    return true // On error, be safe and check
-  }
+  return GET(internalRequest as NextRequest)
 }

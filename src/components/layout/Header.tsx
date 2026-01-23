@@ -7,6 +7,7 @@ import { motion } from 'framer-motion'
 import { useTheme } from '@/contexts/ThemeContext'
 import { useAuth } from '@/contexts/AuthContext'
 import TeamStickyBarRouter from './TeamStickyBarRouter'
+import LiveGamesTopBar from './LiveGamesTopBar'
 import type { Role } from '@/lib/roles'
 
 // Navigation items - proper casing (not all caps) per spec
@@ -189,6 +190,9 @@ export default function Header() {
           : 'var(--bg-header)',
       }}
     >
+      {/* Live Games Top Bar - Shows when Chicago teams are playing */}
+      <LiveGamesTopBar isHomepage />
+
       {/* Top Header Bar - Logo and Social */}
       <div
         className="border-b transition-colors duration-300"
