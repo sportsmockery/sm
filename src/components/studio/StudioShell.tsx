@@ -4,6 +4,22 @@ import { useState } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 
+// Full-screen editor routes that should NOT show the StudioShell sidebar
+const fullScreenEditorRoutes = [
+  '/studio/posts/new',
+  '/studio/posts/*/edit', // matches /studio/posts/[id]/edit
+]
+
+function isFullScreenRoute(pathname: string): boolean {
+  return fullScreenEditorRoutes.some(route => {
+    if (route.includes('*')) {
+      const regex = new RegExp('^' + route.replace('*', '[^/]+') + '$')
+      return regex.test(pathname)
+    }
+    return pathname === route
+  })
+}
+
 const navItems = [
   { href: '/studio/posts/new', label: 'New Post', icon: 'plus' },
   { href: '/studio/posts', label: 'All Posts', icon: 'document' },
@@ -44,6 +60,13 @@ const icons: Record<string, React.ReactNode> = {
 export default function StudioShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname()
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false)
+
+  // Full-screen editor pages render without StudioShell chrome
+  const isFullScreen = isFullScreenRoute(pathname)
+
+  if (isFullScreen) {
+    return <>{children}</>
+  }
 
   return (
     <div className="min-h-screen bg-[var(--bg-primary)] pt-[92px]">

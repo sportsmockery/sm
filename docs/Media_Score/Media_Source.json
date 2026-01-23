@@ -1,0 +1,585 @@
+
+{
+  "meta": {
+    "description": "Comprehensive Chicago sports media sources for Media Sentiment on test.sportsmockery.com. Claude should use this as a starting point, add slugs/platform_ids/follower counts, and expand further via provided reference URLs and public research.",
+    "last_updated": "2026-01-23",
+    "teams": ["bears", "bulls", "hawks", "cubs", "sox"],
+    "notes": [
+      "Only include outlets/accounts with ~5k+ followers/subs when seeding.",
+      "Claude should verify all URLs and handles before finalizing.",
+      "Official team channels (Cubs, Bears, Bulls, Blackhawks, White Sox) are included where available.",
+      "Regional sports networks (CHSN replacing NBC Sports Chicago for some teams).",
+      "Includes national outlets with heavy Chicago focus."
+    ]
+  },
+
+  "rss_feeds": {
+    "major_outlets": [
+      {
+        "name": "Chicago Tribune - Sports",
+        "url": "https://www.chicagotribune.com/arcio/rss-feeds/sports/",
+        "teams": ["bears", "bulls", "hawks", "cubs", "sox"],
+        "notes": "Main Tribune sports RSS; Claude should parse and extract team-specific feeds.",
+        "followers": "36K Twitter, 25.9K Facebook (sports page)"
+      },
+      {
+        "name": "Chicago Tribune - Breaking News",
+        "url": "https://www.chicagotribune.com/news/local/",
+        "teams": ["bears", "bulls", "hawks", "cubs", "sox"],
+        "notes": "For broader Chicago news that impacts sports teams and personalities.",
+        "followers": "1.1M Twitter, 721.3K Facebook"
+      },
+      {
+        "name": "Chicago Sun-Times - Sports",
+        "url": "https://www.suntimes.com/sports/",
+        "teams": ["bears", "bulls", "hawks", "cubs", "sox"],
+        "notes": "Local alternative to Tribune; strong sports coverage."
+      },
+      {
+        "name": "ChicagoSportsHQ - RSS Hub",
+        "url": "https://www.chicagosportshq.com/rss.do",
+        "teams": ["bears", "bulls", "hawks", "cubs", "sox"],
+        "notes": "Aggregator with team-specific feeds; Claude should extract individual team RSS URLs."
+      },
+      {
+        "name": "ChicagoBullsHQ - Bulls News & Rumors",
+        "url": "https://www.chicagobullshq.com/rss.do",
+        "teams": ["bulls"],
+        "notes": "Dedicated Bulls site with feature/news/rumor RSS feeds."
+      },
+      {
+        "name": "Sports Talk Chicago",
+        "url": "https://sportstalkchicago.com/feed/",
+        "teams": ["bears", "bulls", "hawks", "cubs", "sox"],
+        "notes": "Chicago sports podcast/show with RSS feed; heavy on Bears."
+      },
+      {
+        "name": "Bleacher Nation - Cubs",
+        "url": "https://www.bleachernation.com/cubs/feed/",
+        "teams": ["cubs"],
+        "notes": "SB Nation Cubs blog; dedicated Cubs coverage."
+      },
+      {
+        "name": "Blackhawk Up",
+        "url": "https://blackhawkup.com/",
+        "teams": ["hawks"],
+        "notes": "FanSided Blackhawks blog; high-signal Blackhawks coverage. Founded by Greg Boysen."
+      },
+      {
+        "name": "Chicago Bears Official Site",
+        "url": "https://www.chicagobears.com/rss/",
+        "teams": ["bears"],
+        "notes": "Official Bears RSS; splits into After Further Review, Chalk Talk, Game Recap feeds."
+      },
+      {
+        "name": "Marquee Sports Network / Cubs",
+        "url": "https://www.marqueeallaccess.com/",
+        "teams": ["cubs"],
+        "notes": "Regional network co-owned by Cubs; check for RSS or live update feeds."
+      }
+    ],
+    "regional_and_national": [
+      {
+        "name": "ESPN.com - Chicago",
+        "url": "https://www.espn.com/chicago/",
+        "teams": ["bears", "bulls", "hawks", "cubs", "sox"],
+        "notes": "National network with Chicago-focused content; check for RSS."
+      },
+      {
+        "name": "MLB.com - Chicago Cubs",
+        "url": "https://www.mlb.com/cubs/",
+        "teams": ["cubs"],
+        "notes": "Official MLB page for Cubs; includes beat reporter feeds."
+      },
+      {
+        "name": "MLB.com - Chicago White Sox",
+        "url": "https://www.mlb.com/whitesox/",
+        "teams": ["sox"],
+        "notes": "Official MLB page for White Sox."
+      },
+      {
+        "name": "NBA.com - Chicago Bulls",
+        "url": "https://www.nba.com/bulls/",
+        "teams": ["bulls"],
+        "notes": "Official NBA page for Bulls."
+      },
+      {
+        "name": "NHL.com - Chicago Blackhawks",
+        "url": "https://www.nhl.com/blackhawks/",
+        "teams": ["hawks"],
+        "notes": "Official NHL page for Blackhawks."
+      },
+      {
+        "name": "NFL.com - Chicago Bears",
+        "url": "https://www.nfl.com/teams/chicago-bears/",
+        "teams": ["bears"],
+        "notes": "Official NFL page for Bears."
+      }
+    ]
+  },
+
+  "twitter_accounts": {
+    "major_outlets": [
+      {
+        "name": "CHGO Sports",
+        "handle": "@CHGO_Sports",
+        "url": "https://x.com/CHGO_Sports",
+        "teams": ["bears", "bulls", "hawks", "cubs", "sox"],
+        "followers": "200K+ (estimated)",
+        "notes": "AllCity hub for all Chicago teams; primary source for Chicago sports talk."
+      },
+      {
+        "name": "ESPN Chicago",
+        "handle": "@ESPN1000",
+        "url": "https://x.com/ESPN1000",
+        "teams": ["bears", "sox"],
+        "followers": "100K+",
+        "notes": "ESPN 1000 radio; primary home of Bears and White Sox; national ESPN presence."
+      },
+      {
+        "name": "670 The Score",
+        "handle": "@670TheScore",
+        "url": "https://x.com/670thescore",
+        "teams": ["bears", "bulls", "hawks", "cubs", "sox"],
+        "followers": "122.3K",
+        "notes": "Major Chicago sports radio; moving to FM band; covers all 5 teams daily."
+      },
+      {
+        "name": "Chicago Tribune Sports",
+        "handle": "@ChicagoTribuneSports (or similar)",
+        "url": "https://x.com/ChicagoTribSports",
+        "teams": ["bears", "bulls", "hawks", "cubs", "sox"],
+        "followers": "50K+",
+        "notes": "Tribune's official sports account; beat reporter updates."
+      },
+      {
+        "name": "Chicago Sun-Times Sports",
+        "handle": "@SunTimesSports",
+        "url": "https://x.com/SunTimesSports",
+        "teams": ["bears", "bulls", "hawks", "cubs", "sox"],
+        "followers": "50K+",
+        "notes": "Sun-Times sports account."
+      },
+      {
+        "name": "NBC Sports Chicago / CHSN",
+        "handle": "@NBCSChicago or @CHSNsports",
+        "url": "https://x.com/NBCSChicago",
+        "teams": ["bulls", "hawks", "sox"],
+        "followers": "50K+",
+        "notes": "NBC regional sports network; transitioning to CHSN for some teams."
+      },
+      {
+        "name": "CBS Chicago Sports",
+        "handle": "@CBSChicago",
+        "url": "https://x.com/CBSChicago",
+        "teams": ["bears", "bulls", "hawks", "cubs", "sox"],
+        "followers": "50K+",
+        "notes": "Local CBS affiliate sports coverage."
+      }
+    ],
+    "beat_reporters_and_analysts": [
+      {
+        "name": "Dan Wiederer (Bears)",
+        "handle": "@danwiederer",
+        "url": "https://x.com/danwiederer",
+        "teams": ["bears"],
+        "followers": "50K+ (estimated)",
+        "organization": "Chicago Tribune",
+        "notes": "Senior Bears beat writer for Tribune; long-tenured, highly respected."
+      },
+      {
+        "name": "Sean Hammond (Bears)",
+        "handle": "@bears_reporter",
+        "url": "https://x.com/bears_reporter",
+        "teams": ["bears"],
+        "followers": "15K+",
+        "organization": "Chicago Tribune",
+        "notes": "Bears beat writer; 5+ years covering Bears."
+      },
+      {
+        "name": "KC Johnson (Bulls)",
+        "handle": "@kcjhoop",
+        "url": "https://x.com/kcjhoop",
+        "teams": ["bulls"],
+        "followers": "50K+",
+        "organization": "Chicago Tribune / Athletic",
+        "notes": "Longest-tenured and most respected Bulls beat reporter."
+      },
+      {
+        "name": "Jamal Collier (Bulls)",
+        "handle": "@JamalCollierNBA",
+        "url": "https://x.com/JamalCollierNBA",
+        "teams": ["bulls"],
+        "followers": "30K+",
+        "organization": "ESPN",
+        "notes": "ESPN NBA reporter with Midwest focus; based in Chicago; covers Bulls and wider Midwest."
+      },
+      {
+        "name": "Joe Cowley (Bulls)",
+        "handle": "@jcowley",
+        "url": "https://x.com/jcowley",
+        "teams": ["bulls"],
+        "followers": "20K+",
+        "organization": "Chicago Sun-Times",
+        "notes": "Bulls beat reporter; also does radio work."
+      },
+      {
+        "name": "Greg Boysen (Blackhawks)",
+        "handle": "@gregboysen",
+        "url": "https://x.com/gregboysen",
+        "teams": ["hawks"],
+        "followers": "10K+",
+        "organization": "Blackhawk Up / SB Nation",
+        "notes": "Blackhawks expert; covering since 2011; formerly CHGO, SB Nation."
+      },
+      {
+        "name": "Caley Chelios (Blackhawks)",
+        "handle": "@CaleyChelios",
+        "url": "https://x.com/CaleyChelios",
+        "teams": ["hawks"],
+        "followers": "18.2K",
+        "organization": "Chicago Blackhawks broadcast",
+        "notes": "Blackhawks reporter/analyst on broadcast; daughter of NHL legend Chris Chelios."
+      },
+      {
+        "name": "Kacy Standohar (Bears/Multi)",
+        "handle": "@KacyStandohar",
+        "url": "https://x.com/KacyStandohar",
+        "teams": ["bears"],
+        "followers": "10K+",
+        "organization": "NBC Chicago",
+        "notes": "NBC sports reporter; covers Bears and other Chicago teams."
+      },
+      {
+        "name": "Alyssa Bergamini (Bulls/Multi)",
+        "handle": "@alyssa_bergamini",
+        "url": "https://x.com/alyssa_bergamini",
+        "teams": ["bulls"],
+        "followers": "5K+",
+        "organization": "NBC Chicago / 670 The Score",
+        "notes": "Bulls reporter/radio personality; only female covering Bulls."
+      }
+    ],
+    "podcasts_and_shows": [
+      {
+        "name": "Locked On Bears",
+        "handle": "@LockedOnBears",
+        "url": "https://x.com/lockedonbears",
+        "teams": ["bears"],
+        "followers": "20K+",
+        "notes": "Daily Bears podcast; hosted by Lorin Cox (PFF analyst)."
+      },
+      {
+        "name": "Locked On Sports Chicago",
+        "handle": "@LockedOnSports_Chi",
+        "url": "https://x.com/LockedOnSports_Chi",
+        "teams": ["bears", "bulls", "hawks", "cubs", "sox"],
+        "followers": "10K+",
+        "notes": "Multi-team podcast covering all Chicago teams."
+      },
+      {
+        "name": "The Stretch (Barstool)",
+        "handle": "@BarstoolChicago (or @TheStretchShow)",
+        "url": "https://x.com/barstoolchicago",
+        "teams": ["bears", "bulls", "hawks", "cubs", "sox"],
+        "followers": "50K+",
+        "notes": "Barstool Sports Chicago; Eddie, Chief, White Sox Dave; comedic sports talk."
+      },
+      {
+        "name": "Hoge & Jahns (Bears podcast)",
+        "handle": "@hogeandjahns",
+        "url": "https://x.com/hogeandjahns",
+        "teams": ["bears"],
+        "followers": "20K+",
+        "notes": "Bears-focused independent podcast."
+      }
+    ]
+  },
+
+  "facebook_pages": {
+    "major_outlets": [
+      {
+        "name": "FOX 32 Chicago",
+        "url": "https://www.facebook.com/Fox32Chicago/",
+        "teams": ["bears", "bulls", "hawks", "cubs", "sox"],
+        "followers": "500K+",
+        "notes": "Local TV affiliate; sports segments and highlight shares."
+      },
+      {
+        "name": "Chicago Tribune",
+        "url": "https://www.facebook.com/ChicagoTribune/",
+        "teams": ["bears", "bulls", "hawks", "cubs", "sox"],
+        "followers": "721.3K",
+        "notes": "Main Tribune page; shares sports content and articles."
+      },
+      {
+        "name": "Chicago Tribune Sports",
+        "url": "https://www.facebook.com/ChicagoTribuneSports/",
+        "teams": ["bears", "bulls", "hawks", "cubs", "sox"],
+        "followers": "25.7K",
+        "notes": "Dedicated Tribune sports page."
+      },
+      {
+        "name": "NBC Chicago",
+        "url": "https://www.facebook.com/nbcchicago/",
+        "teams": ["bears", "bulls", "hawks", "cubs", "sox"],
+        "followers": "200K+",
+        "notes": "Local NBC affiliate; sports news and highlights."
+      },
+      {
+        "name": "ABC 7 Chicago",
+        "url": "https://www.facebook.com/abc7chicago/",
+        "teams": ["bears", "bulls", "hawks", "cubs", "sox"],
+        "followers": "200K+",
+        "notes": "Local ABC affiliate; sports coverage."
+      },
+      {
+        "name": "CBS Chicago",
+        "url": "https://www.facebook.com/CBS2Chicago/",
+        "teams": ["bears", "bulls", "hawks", "cubs", "sox"],
+        "followers": "150K+",
+        "notes": "Local CBS affiliate; sports and news."
+      }
+    ],
+    "teams_and_networks": [
+      {
+        "name": "Chicago Bears",
+        "url": "https://www.facebook.com/chicagobears/",
+        "teams": ["bears"],
+        "followers": "500K+",
+        "notes": "Official Bears team page."
+      },
+      {
+        "name": "Chicago Bulls",
+        "url": "https://www.facebook.com/ChicagoBulls/",
+        "teams": ["bulls"],
+        "followers": "400K+",
+        "notes": "Official Bulls team page."
+      },
+      {
+        "name": "Chicago Blackhawks",
+        "url": "https://www.facebook.com/nhlblackhawks/",
+        "teams": ["hawks"],
+        "followers": "300K+",
+        "notes": "Official Blackhawks team page."
+      },
+      {
+        "name": "Chicago Cubs",
+        "url": "https://www.facebook.com/chicagocubs/",
+        "teams": ["cubs"],
+        "followers": "500K+",
+        "notes": "Official Cubs team page."
+      },
+      {
+        "name": "Chicago White Sox",
+        "url": "https://www.facebook.com/whitesox/",
+        "teams": ["sox"],
+        "followers": "300K+",
+        "notes": "Official White Sox team page."
+      },
+      {
+        "name": "Marquee Sports Network (Cubs)",
+        "url": "https://www.facebook.com/marqueeallaccess/",
+        "teams": ["cubs"],
+        "followers": "100K+",
+        "notes": "Cubs regional sports network."
+      }
+    ]
+  },
+
+  "youtube_channels": {
+    "local_outlets": [
+      {
+        "name": "Chicago Tribune",
+        "url": "https://www.youtube.com/user/ChicagoTribune",
+        "teams": ["bears", "bulls", "hawks", "cubs", "sox"],
+        "followers": "100K+",
+        "notes": "Tribune's YouTube channel; sports, news, entertainment."
+      },
+      {
+        "name": "FOX 32 Chicago",
+        "url": "https://www.youtube.com/c/Fox32Chicago",
+        "teams": ["bears", "bulls", "hawks", "cubs", "sox"],
+        "followers": "200K+",
+        "notes": "Local TV affiliate; sports clips and daily coverage."
+      },
+      {
+        "name": "NBC Chicago",
+        "url": "https://www.youtube.com/c/NBCChicago",
+        "teams": ["bears", "bulls", "hawks", "cubs", "sox"],
+        "followers": "100K+",
+        "notes": "Local NBC affiliate YouTube."
+      },
+      {
+        "name": "ABC 7 Chicago",
+        "url": "https://www.youtube.com/c/ABC7Chicago",
+        "teams": ["bears", "bulls", "hawks", "cubs", "sox"],
+        "followers": "100K+",
+        "notes": "Local ABC affiliate YouTube."
+      },
+      {
+        "name": "CBS Chicago",
+        "url": "https://www.youtube.com/c/CBS2Chicago",
+        "teams": ["bears", "bulls", "hawks", "cubs", "sox"],
+        "followers": "50K+",
+        "notes": "Local CBS affiliate YouTube."
+      }
+    ],
+    "sports_media": [
+      {
+        "name": "CHGO Sports",
+        "url": "https://www.youtube.com/@CHGOSports",
+        "teams": ["bears", "bulls", "hawks", "cubs", "sox"],
+        "followers": "200K+",
+        "notes": "Fastest-growing Chicago sports digital outlet; daily shows, podcasts."
+      },
+      {
+        "name": "Locked On Sports Chicago",
+        "url": "https://www.youtube.com/@LockedOnSportsChicago",
+        "teams": ["bears", "bulls", "hawks", "cubs", "sox"],
+        "followers": "30K+",
+        "notes": "Daily podcast with postcast shows after every Bears game."
+      },
+      {
+        "name": "Bleacher Nation",
+        "url": "https://www.youtube.com/c/BleacherNationCubs",
+        "teams": ["cubs"],
+        "followers": "20K+",
+        "notes": "SB Nation Cubs blog; Cubs coverage."
+      },
+      {
+        "name": "Sports Talk Chicago",
+        "url": "https://www.youtube.com/c/SportsTalkChicago",
+        "teams": ["bears", "bulls", "hawks", "cubs", "sox"],
+        "followers": "30K+",
+        "notes": "Chicago sports podcast and show."
+      }
+    ],
+    "teams": [
+      {
+        "name": "Chicago Bears",
+        "url": "https://www.youtube.com/chicagobears",
+        "teams": ["bears"],
+        "followers": "300K+",
+        "notes": "Official Bears YouTube channel."
+      },
+      {
+        "name": "Chicago Bulls",
+        "url": "https://www.youtube.com/nba/chicagobulls",
+        "teams": ["bulls"],
+        "followers": "250K+",
+        "notes": "Official Bulls YouTube channel."
+      },
+      {
+        "name": "Chicago Blackhawks",
+        "url": "https://www.youtube.com/nhlblackhawks",
+        "teams": ["hawks"],
+        "followers": "200K+",
+        "notes": "Official Blackhawks YouTube channel."
+      },
+      {
+        "name": "Chicago Cubs",
+        "url": "https://www.youtube.com/mlbcubs",
+        "teams": ["cubs"],
+        "followers": "300K+",
+        "notes": "Official Cubs YouTube channel."
+      },
+      {
+        "name": "Chicago White Sox",
+        "url": "https://www.youtube.com/mlbwhitesox",
+        "teams": ["sox"],
+        "followers": "200K+",
+        "notes": "Official White Sox YouTube channel."
+      },
+      {
+        "name": "Marquee Sports Network",
+        "url": "https://www.youtube.com/marqueeallaccess",
+        "teams": ["cubs"],
+        "followers": "100K+",
+        "notes": "Cubs regional network YouTube."
+      }
+    ]
+  },
+
+  "additional_sources": {
+    "radio_and_podcasts": [
+      {
+        "name": "670 The Score",
+        "url": "https://www.audacy.com/670thescore",
+        "teams": ["bears", "bulls", "hawks", "cubs", "sox"],
+        "followers": "122K+ on X",
+        "notes": "Major Chicago sports radio; moving to 104.3 FM; covers all 5 teams daily."
+      },
+      {
+        "name": "ESPN 1000",
+        "url": "https://www.espnchicago.com/",
+        "teams": ["bears", "sox"],
+        "notes": "ESPN Chicago radio; home of Bears and White Sox coverage."
+      },
+      {
+        "name": "Barstool Sports Chicago",
+        "url": "https://barstool.link/redlineradio",
+        "teams": ["bears", "bulls", "hawks", "cubs", "sox"],
+        "notes": "Barstool Chicago office; The Stretch show; comedy-sports mix."
+      },
+      {
+        "name": "The Rekap Podcast",
+        "handle": "@TheKAPman",
+        "teams": ["bears", "bulls", "hawks", "cubs", "sox"],
+        "notes": "Chicago sports recap podcast; daily takes."
+      }
+    ],
+    "blogs_and_independent_sites": [
+      {
+        "name": "Hoge & Jahns",
+        "url": "https://www.hogeandjahns.com/",
+        "teams": ["bears"],
+        "notes": "Independent Bears podcast/blog."
+      },
+      {
+        "name": "Bleacher Report (Chicago teams)",
+        "url": "https://bleacherreport.com/",
+        "teams": ["bears", "bulls", "hawks", "cubs", "sox"],
+        "notes": "National with Chicago sections; BR app heavily used."
+      },
+      {
+        "name": "Barstool Sports (national with Chicago desk)",
+        "url": "https://barstoolsports.com/",
+        "teams": ["bears", "bulls", "hawks", "cubs", "sox"],
+        "notes": "National outlet; Chicago office; Carl Nassib, WSD, etc."
+      }
+    ],
+    "reference_urls_for_claude_expansion": [
+      {
+        "name": "Best Chicago Bears Twitter Follows (Yahoo/2023)",
+        "url": "https://sports.yahoo.com/best-chicago-bears-twitter-follows-142047266.html",
+        "purpose": "Mine for additional high-quality Bears beat writers and accounts > 5k followers."
+      },
+      {
+        "name": "Reddit: Favorite Bulls Journalists",
+        "url": "https://www.reddit.com/r/chicagobulls/comments/1do8yyp/favorite_bulls_blogsjournalistsreporters/",
+        "purpose": "Community recommendations for Bulls media sources; KC Johnson, CHGO, etc."
+      },
+      {
+        "name": "Blackhawk Up About Page",
+        "url": "https://blackhawkup.com/about/",
+        "purpose": "Identify Blackhawks expert Greg Boysen and other Hawks writers."
+      },
+      {
+        "name": "Reddit: Bears YouTube/Podcast Recommendations",
+        "url": "https://www.reddit.com/r/CHIBears/comments/1o5sr6t/bears_youtube_channelspodcast_recommendations/",
+        "purpose": "Find independent Bears media creators."
+      },
+      {
+        "name": "Chicago Tribune RSS Feeds",
+        "url": "https://rss.feedspot.com/chicago_tribune_rss_feeds/",
+        "purpose": "Extract exact Tribune sports RSS feed URLs and metadata."
+      },
+      {
+        "name": "Locked On Podcast Network",
+        "url": "https://podcasts.apple.com/us/podcast/locked-on-bears-daily-podcast-on-the-chicago-bears/id1141591437",
+        "purpose": "Identify Locked On Bears and other Locked On Chicago team daily podcasts."
+      }
+    ]
+  }
+}
