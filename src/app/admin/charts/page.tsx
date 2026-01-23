@@ -1,16 +1,14 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import Link from 'next/link'
 
-// Mock data for charts
-const mockCharts = [
-  { id: '1', title: 'Bears Win-Loss Record 2024', type: 'bar', createdAt: '2024-01-15', thumbnail: null },
-  { id: '2', title: 'Scoring Trends Q4', type: 'line', createdAt: '2024-01-14', thumbnail: null },
-  { id: '3', title: 'Division Breakdown', type: 'pie', createdAt: '2024-01-13', thumbnail: null },
-  { id: '4', title: 'Fields vs Williams Stats', type: 'player', createdAt: '2024-01-12', thumbnail: null },
-  { id: '5', title: 'Team Performance Metrics', type: 'team', createdAt: '2024-01-11', thumbnail: null },
-]
+interface ChartItem {
+  id: string
+  title: string
+  type: string
+  createdAt: string
+}
 
 const chartTypeIcons: Record<string, React.ReactNode> = {
   bar: (
@@ -29,12 +27,12 @@ const chartTypeIcons: Record<string, React.ReactNode> = {
       <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 10.5H21A7.5 7.5 0 0013.5 3v7.5z" />
     </svg>
   ),
-  player: (
+  'player-comparison': (
     <svg className="h-8 w-8" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
       <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z" />
     </svg>
   ),
-  team: (
+  'team-stats': (
     <svg className="h-8 w-8" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
       <path strokeLinecap="round" strokeLinejoin="round" d="M18 18.72a9.094 9.094 0 003.741-.479 3 3 0 00-4.682-2.72m.94 3.198l.001.031c0 .225-.012.447-.037.666A11.944 11.944 0 0112 21c-2.17 0-4.207-.576-5.963-1.584A6.062 6.062 0 016 18.719m12 0a5.971 5.971 0 00-.941-3.197m0 0A5.995 5.995 0 0012 12.75a5.995 5.995 0 00-5.058 2.772m0 0a3 3 0 00-4.681 2.72 8.986 8.986 0 003.74.477m.94-3.197a5.971 5.971 0 00-.94 3.197M15 6.75a3 3 0 11-6 0 3 3 0 016 0zm6 3a2.25 2.25 0 11-4.5 0 2.25 2.25 0 014.5 0zm-13.5 0a2.25 2.25 0 11-4.5 0 2.25 2.25 0 014.5 0z" />
     </svg>
@@ -45,15 +43,57 @@ const chartTypeLabels: Record<string, string> = {
   bar: 'Bar Chart',
   line: 'Line Chart',
   pie: 'Pie Chart',
-  player: 'Player Comparison',
-  team: 'Team Stats',
+  'player-comparison': 'Player Comparison',
+  'team-stats': 'Team Stats',
 }
 
 export default function ChartsPage() {
   const [filter, setFilter] = useState<string>('all')
   const [searchQuery, setSearchQuery] = useState('')
+  const [charts, setCharts] = useState<ChartItem[]>([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
+  const [deletingId, setDeletingId] = useState<string | null>(null)
 
-  const filteredCharts = mockCharts.filter(chart => {
+  const fetchCharts = useCallback(async () => {
+    try {
+      setLoading(true)
+      setError(null)
+      const response = await fetch('/api/charts')
+      if (!response.ok) {
+        throw new Error('Failed to fetch charts')
+      }
+      const data = await response.json()
+      setCharts(data.charts || [])
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to load charts')
+    } finally {
+      setLoading(false)
+    }
+  }, [])
+
+  useEffect(() => {
+    fetchCharts()
+  }, [fetchCharts])
+
+  const handleDelete = async (id: string) => {
+    if (!confirm('Are you sure you want to delete this chart?')) return
+
+    try {
+      setDeletingId(id)
+      const response = await fetch(`/api/charts/${id}`, { method: 'DELETE' })
+      if (!response.ok) {
+        throw new Error('Failed to delete chart')
+      }
+      setCharts(prev => prev.filter(c => c.id !== id))
+    } catch (err) {
+      alert(err instanceof Error ? err.message : 'Failed to delete chart')
+    } finally {
+      setDeletingId(null)
+    }
+  }
+
+  const filteredCharts = charts.filter(chart => {
     const matchesFilter = filter === 'all' || chart.type === filter
     const matchesSearch = chart.title.toLowerCase().includes(searchQuery.toLowerCase())
     return matchesFilter && matchesSearch
@@ -130,8 +170,28 @@ export default function ChartsPage() {
         </div>
       </div>
 
+      {/* Loading State */}
+      {loading && (
+        <div className="flex items-center justify-center py-16">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[var(--accent-red)]"></div>
+        </div>
+      )}
+
+      {/* Error State */}
+      {error && !loading && (
+        <div className="rounded-xl border border-red-500/20 bg-red-500/10 p-6 text-center">
+          <p className="text-red-400">{error}</p>
+          <button
+            onClick={fetchCharts}
+            className="mt-4 inline-flex items-center gap-2 rounded-lg bg-[var(--accent-red)] px-4 py-2 text-sm font-medium text-white hover:bg-[var(--accent-red-hover)] transition-colors"
+          >
+            Try Again
+          </button>
+        </div>
+      )}
+
       {/* Charts Grid */}
-      {filteredCharts.length === 0 ? (
+      {!loading && !error && filteredCharts.length === 0 ? (
         <div className="flex flex-col items-center justify-center py-16 px-6 rounded-xl border border-[var(--border-default)] bg-[var(--bg-card)]">
           <svg className="h-16 w-16 text-[var(--text-muted)] mb-4" fill="none" viewBox="0 0 24 24" strokeWidth={1} stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 013 19.875v-6.75zM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V8.625zM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V4.125z" />
@@ -149,7 +209,7 @@ export default function ChartsPage() {
             Create your first chart
           </Link>
         </div>
-      ) : (
+      ) : !loading && !error ? (
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {filteredCharts.map((chart) => (
             <div
@@ -181,12 +241,21 @@ export default function ChartsPage() {
                     </svg>
                   </button>
                   <button
-                    className="flex h-10 w-10 items-center justify-center rounded-lg bg-red-500/80 text-white hover:bg-red-500 transition-colors"
+                    onClick={(e) => {
+                      e.preventDefault()
+                      handleDelete(chart.id)
+                    }}
+                    disabled={deletingId === chart.id}
+                    className="flex h-10 w-10 items-center justify-center rounded-lg bg-red-500/80 text-white hover:bg-red-500 transition-colors disabled:opacity-50"
                     title="Delete"
                   >
-                    <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0" />
-                    </svg>
+                    {deletingId === chart.id ? (
+                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                    ) : (
+                      <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0" />
+                      </svg>
+                    )}
                   </button>
                 </div>
               </div>
@@ -211,7 +280,7 @@ export default function ChartsPage() {
             </div>
           ))}
         </div>
-      )}
+      ) : null}
     </div>
   )
 }

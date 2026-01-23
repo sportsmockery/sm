@@ -7,13 +7,28 @@ import { ChartBuilderModal, type ChartConfig } from '@/components/admin/ChartBui
 
 export default function NewChartPage() {
   const [showModal, setShowModal] = useState(true)
+  const [saving, setSaving] = useState(false)
   const router = useRouter()
 
-  const handleInsert = (config: ChartConfig) => {
-    // Save chart to database
-    console.log('Saving chart:', config)
-    // For now, just redirect to charts list
-    router.push('/admin/charts')
+  const handleInsert = async (config: ChartConfig) => {
+    try {
+      setSaving(true)
+      const response = await fetch('/api/charts', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(config),
+      })
+
+      if (!response.ok) {
+        const error = await response.json()
+        throw new Error(error.error || 'Failed to create chart')
+      }
+
+      router.push('/admin/charts')
+    } catch (err) {
+      alert(err instanceof Error ? err.message : 'Failed to create chart')
+      setSaving(false)
+    }
   }
 
   return (
