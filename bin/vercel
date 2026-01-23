@@ -1,0 +1,111 @@
+#!/bin/bash
+# Vercel wrapper - automatically syncs with remote before production deploys
+# Prevents overwriting changes from other Claude Code sessions
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+PROJECT_ROOT="$(dirname "$SCRIPT_DIR")"
+
+# Check if this is a production deploy
+IS_PROD_DEPLOY=false
+for arg in "$@"; do
+    if [[ "$arg" == "--prod" || "$arg" == "--production" ]]; then
+        IS_PROD_DEPLOY=true
+        break
+    fi
+done
+
+if [ "$IS_PROD_DEPLOY" = true ]; then
+    echo "🛡️  Production deploy detected - syncing with remote first..."
+    echo ""
+
+    cd "$PROJECT_ROOT"
+
+    BRANCH=$(git rev-parse --abbrev-ref HEAD)
+    REMOTE="origin"
+
+    # Fetch latest from remote
+    git fetch $REMOTE $BRANCH --quiet 2>/dev/null || true
+
+    LOCAL=$(git rev-parse HEAD)
+    REMOTE_HEAD=$(git rev-parse $REMOTE/$BRANCH 2>/dev/null || echo "")
+
+    if [ -n "$REMOTE_HEAD" ]; then
+        BASE=$(git merge-base HEAD $REMOTE/$BRANCH 2>/dev/null || echo "")
+
+        if [ "$LOCAL" = "$REMOTE_HEAD" ]; then
+            echo "✅ Already up to date with remote"
+
+        elif [ "$LOCAL" = "$BASE" ]; then
+            # Local is behind - pull
+            BEHIND_COUNT=$(git rev-list --count HEAD..$REMOTE/$BRANCH)
+            echo "📥 Pulling $BEHIND_COUNT commit(s) from other sessions..."
+            git pull --rebase $REMOTE $BRANCH
+            echo "✅ Synced with remote"
+
+        elif [ "$REMOTE_HEAD" = "$BASE" ]; then
+            # Local is ahead - push first
+            AHEAD_COUNT=$(git rev-list --count $REMOTE/$BRANCH..HEAD)
+            echo "✅ Local is $AHEAD_COUNT commit(s) ahead"
+            echo "📤 Pushing to $REMOTE/$BRANCH..."
+            git push $REMOTE $BRANCH || {
+                echo "❌ Push failed. Please resolve and try again."
+                exit 1
+            }
+
+        else
+            # Diverged - attempt auto-rebase
+            AHEAD_COUNT=$(git rev-list --count $REMOTE/$BRANCH..HEAD)
+            BEHIND_COUNT=$(git rev-list --count HEAD..$REMOTE/$BRANCH)
+            echo "⚠️  Branch diverged: $AHEAD_COUNT ahead, $BEHIND_COUNT behind"
+            echo "📥 Attempting automatic rebase..."
+
+            if git rebase $REMOTE/$BRANCH; then
+                echo "✅ Successfully rebased"
+                echo "📤 Pushing rebased commits..."
+                git push $REMOTE $BRANCH || {
+                    echo "❌ Push failed after rebase."
+                    exit 1
+                }
+            else
+                echo ""
+                echo "❌ DEPLOYMENT BLOCKED - Merge conflicts"
+                echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+                git rebase --abort 2>/dev/null || true
+                echo "Run: git pull --rebase origin $BRANCH"
+                echo "Resolve conflicts, then: npm run deploy"
+                echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+                exit 1
+            fi
+        fi
+    fi
+
+    # Check for uncommitted changes
+    if ! git diff-index --quiet HEAD -- 2>/dev/null; then
+        echo ""
+        echo "❌ DEPLOYMENT BLOCKED - Uncommitted changes"
+        echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+        git status --short
+        echo ""
+        echo "Commit first, then: npm run deploy"
+        echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+        exit 1
+    fi
+
+    echo ""
+fi
+
+# Find the real vercel binary (skip this wrapper)
+REAL_VERCEL=""
+IFS=':' read -ra PATH_DIRS <<< "$PATH"
+for dir in "${PATH_DIRS[@]}"; do
+    if [[ "$dir" != "$SCRIPT_DIR" && -x "$dir/vercel" ]]; then
+        REAL_VERCEL="$dir/vercel"
+        break
+    fi
+done
+
+if [ -z "$REAL_VERCEL" ]; then
+    REAL_VERCEL="npx vercel"
+fi
+
+exec $REAL_VERCEL "$@"

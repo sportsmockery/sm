@@ -1,0 +1,30 @@
+#!/bin/bash
+# Pre-push hook to prevent pushing when behind remote
+# This ensures all sessions stay synchronized
+
+BRANCH=$(git rev-parse --abbrev-ref HEAD)
+REMOTE="origin"
+
+# Fetch latest (quietly)
+git fetch $REMOTE $BRANCH --quiet 2>/dev/null || exit 0
+
+REMOTE_HEAD=$(git rev-parse $REMOTE/$BRANCH 2>/dev/null || echo "")
+[ -z "$REMOTE_HEAD" ] && exit 0
+
+LOCAL=$(git rev-parse HEAD)
+BASE=$(git merge-base HEAD $REMOTE/$BRANCH 2>/dev/null || echo "")
+
+# Check if branches have diverged
+if [ "$LOCAL" != "$REMOTE_HEAD" ] && [ "$LOCAL" != "$BASE" ] && [ "$REMOTE_HEAD" != "$BASE" ]; then
+    BEHIND_COUNT=$(git rev-list --count HEAD..$REMOTE/$BRANCH)
+    echo ""
+    echo "❌ PUSH BLOCKED - Branch has diverged"
+    echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+    echo "Another session pushed changes. You are $BEHIND_COUNT commit(s) behind."
+    echo ""
+    echo "Run: git pull --rebase origin $BRANCH"
+    echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+    exit 1
+fi
+
+exit 0
