@@ -12,7 +12,7 @@ interface AIGeneration {
 
 const promptTemplates = [
   {
-    id: 'headline',
+    id: 'headlines',
     title: 'Generate Headlines',
     description: 'Create catchy headlines for your article',
     icon: (
@@ -34,15 +34,15 @@ const promptTemplates = [
     placeholder: 'Paste your article content here...',
   },
   {
-    id: 'mockery',
-    title: 'Mockery Polish',
-    description: 'Add Sports Mockery wit and humor to your content',
+    id: 'grammar',
+    title: 'Grammar Check',
+    description: 'Check grammar, spelling, and punctuation',
     icon: (
       <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
-        <path strokeLinecap="round" strokeLinejoin="round" d="M15.182 15.182a4.5 4.5 0 01-6.364 0M21 12a9 9 0 11-18 0 9 9 0 0118 0zM9.75 9.75c0 .414-.168.75-.375.75S9 10.164 9 9.75 9.168 9 9.375 9s.375.336.375.75zm-.375 0h.008v.015h-.008V9.75zm5.625 0c0 .414-.168.75-.375.75s-.375-.336-.375-.75.168-.75.375-.75.375.336.375.75zm-.375 0h.008v.015h-.008V9.75z" />
+        <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
       </svg>
     ),
-    placeholder: 'Enter the content you want to make more entertaining...',
+    placeholder: 'Paste content to check for grammar and spelling issues...',
   },
   {
     id: 'ideas',
@@ -68,68 +68,103 @@ const promptTemplates = [
   },
 ]
 
-// Mock history
-const mockHistory: AIGeneration[] = [
-  {
-    id: '1',
-    type: 'headline',
-    prompt: 'Bears trade rumors for 2024 draft',
-    result: '5 generated headlines',
-    createdAt: '2024-01-15T10:30:00Z',
-  },
-  {
-    id: '2',
-    type: 'mockery',
-    prompt: 'Article about Cubs losing streak',
-    result: 'Content polished with humor',
-    createdAt: '2024-01-14T14:20:00Z',
-  },
-]
-
-export default function AIAssistantPage() {
+export default function PostIQPage() {
   const [selectedTemplate, setSelectedTemplate] = useState(promptTemplates[0])
   const [inputText, setInputText] = useState('')
   const [isGenerating, setIsGenerating] = useState(false)
   const [result, setResult] = useState<string | null>(null)
-  const [tone, setTone] = useState('witty')
   const [team, setTeam] = useState('bears')
+  const [history, setHistory] = useState<AIGeneration[]>([])
 
   const handleGenerate = async () => {
-    if (!inputText.trim()) return
+    // Ideas can work without input text
+    if (!inputText.trim() && selectedTemplate.id !== 'ideas') return
 
     setIsGenerating(true)
     setResult(null)
 
-    // Simulate API call
-    await new Promise(resolve => setTimeout(resolve, 2000))
+    try {
+      const response = await fetch('/api/admin/ai', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: selectedTemplate.id,
+          content: inputText,
+          title: inputText.slice(0, 100),
+          team,
+        }),
+      })
 
-    // Mock result
-    if (selectedTemplate.id === 'headline') {
-      setResult(`Generated Headlines:
-1. "Bears Trade Drama: What Chicago Fans Need to Know"
-2. "Breaking Down the Bears' Bold 2024 Draft Strategy"
-3. "Chicago's Front Office Makes Waves with Trade Talks"
-4. "Will the Bears Finally Get It Right? Trade Analysis"
-5. "Hot Takes: Bears' Latest Move Could Change Everything"`)
-    } else if (selectedTemplate.id === 'seo') {
-      setResult(`SEO Analysis:
-• Meta Title: "Bears Trade Rumors 2024: Everything You Need to Know | Sports Mockery"
-• Meta Description: "Get the inside scoop on the Chicago Bears' latest trade rumors. Our experts break down what these moves mean for the 2024 season."
-• Keywords: Bears trade, Chicago Bears 2024, NFL trade rumors, Bears draft picks`)
-    } else {
-      setResult(`Here's your ${selectedTemplate.title} result based on your input. This is a mock response demonstrating the AI assistant functionality.`)
+      if (!response.ok) {
+        throw new Error('AI service temporarily unavailable')
+      }
+
+      const data = await response.json()
+
+      // Format result based on action type
+      if (selectedTemplate.id === 'headlines' && data.headlines) {
+        setResult(data.headlines.map((h: string, i: number) => `${i + 1}. ${h}`).join('\n'))
+      } else if (selectedTemplate.id === 'seo') {
+        setResult(`SEO Title: ${data.seoTitle || 'N/A'}
+
+Meta Description: ${data.metaDescription || 'N/A'}
+
+Focus Keyword: ${data.focusKeyword || 'N/A'}
+
+Secondary Keywords: ${data.secondaryKeywords?.join(', ') || 'N/A'}
+
+Mockery Score: ${data.mockeryScore?.score || 'N/A'}/100
+${data.mockeryScore?.feedback || ''}
+
+Improvements:
+${data.improvements?.map((i: string) => `• ${i}`).join('\n') || 'None'}`)
+      } else if (selectedTemplate.id === 'ideas' && data.ideas) {
+        setResult(data.ideas.map((idea: { headline: string; angle: string; type: string }, i: number) =>
+          `${i + 1}. ${idea.headline}\n   Angle: ${idea.angle}\n   Type: ${idea.type}`
+        ).join('\n\n'))
+      } else if (selectedTemplate.id === 'grammar') {
+        if (data.issueCount === 0) {
+          setResult('No grammar or spelling issues found!')
+        } else {
+          setResult(`Found ${data.issueCount} issue(s):
+
+${data.issues?.map((issue: { original: string; corrected: string; explanation: string }) =>
+  `• "${issue.original}" → "${issue.corrected}"\n  ${issue.explanation}`
+).join('\n\n') || ''}
+
+Corrected Content:
+${data.correctedContent || inputText}`)
+        }
+      } else if (selectedTemplate.id === 'excerpt' && data.excerpt) {
+        setResult(data.excerpt)
+      } else if (data.error) {
+        setResult(`Error: ${data.error}`)
+      } else {
+        setResult(JSON.stringify(data, null, 2))
+      }
+
+      // Add to history
+      setHistory(prev => [{
+        id: Date.now().toString(),
+        type: selectedTemplate.id,
+        prompt: inputText.slice(0, 50) + (inputText.length > 50 ? '...' : '') || `${team} content`,
+        result: selectedTemplate.title + ' generated',
+        createdAt: new Date().toISOString(),
+      }, ...prev.slice(0, 9)])
+    } catch (err) {
+      setResult(`Error: ${err instanceof Error ? err.message : 'An error occurred'}`)
+    } finally {
+      setIsGenerating(false)
     }
-
-    setIsGenerating(false)
   }
 
   return (
     <div className="space-y-6">
       {/* Header */}
       <div>
-        <h1 className="text-2xl font-bold text-[var(--text-primary)]">AI Assistant</h1>
+        <h1 className="text-2xl font-bold text-[var(--text-primary)]">PostIQ</h1>
         <p className="mt-1 text-[var(--text-muted)]">
-          Use AI to generate content, headlines, and more
+          AI-powered content tools for headlines, SEO, ideas, and more
         </p>
       </div>
 
@@ -166,29 +201,17 @@ export default function AIAssistantPage() {
           <div className="rounded-xl border border-[var(--border-default)] bg-[var(--bg-card)] p-6 space-y-4">
             <div className="flex items-center justify-between">
               <h2 className="font-semibold text-[var(--text-primary)]">{selectedTemplate.title}</h2>
-              <div className="flex gap-2">
-                <select
-                  value={team}
-                  onChange={(e) => setTeam(e.target.value)}
-                  className="rounded-lg border border-[var(--border-default)] bg-[var(--bg-tertiary)] px-3 py-1.5 text-sm text-[var(--text-primary)]"
-                >
-                  <option value="bears">Bears</option>
-                  <option value="bulls">Bulls</option>
-                  <option value="cubs">Cubs</option>
-                  <option value="whitesox">White Sox</option>
-                  <option value="blackhawks">Blackhawks</option>
-                </select>
-                <select
-                  value={tone}
-                  onChange={(e) => setTone(e.target.value)}
-                  className="rounded-lg border border-[var(--border-default)] bg-[var(--bg-tertiary)] px-3 py-1.5 text-sm text-[var(--text-primary)]"
-                >
-                  <option value="witty">Witty</option>
-                  <option value="serious">Serious</option>
-                  <option value="satirical">Satirical</option>
-                  <option value="analytical">Analytical</option>
-                </select>
-              </div>
+              <select
+                value={team}
+                onChange={(e) => setTeam(e.target.value)}
+                className="rounded-lg border border-[var(--border-default)] bg-[var(--bg-tertiary)] px-3 py-1.5 text-sm text-[var(--text-primary)]"
+              >
+                <option value="bears">Bears</option>
+                <option value="bulls">Bulls</option>
+                <option value="cubs">Cubs</option>
+                <option value="whitesox">White Sox</option>
+                <option value="blackhawks">Blackhawks</option>
+              </select>
             </div>
 
             <textarea
@@ -205,7 +228,7 @@ export default function AIAssistantPage() {
               </p>
               <button
                 onClick={handleGenerate}
-                disabled={!inputText.trim() || isGenerating}
+                disabled={(!inputText.trim() && selectedTemplate.id !== 'ideas') || isGenerating}
                 className="inline-flex items-center gap-2 rounded-lg bg-[var(--accent-red)] px-5 py-2.5 text-sm font-medium text-white hover:bg-[var(--accent-red-hover)] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {isGenerating ? (
@@ -256,22 +279,28 @@ export default function AIAssistantPage() {
             <div className="border-b border-[var(--border-default)] px-6 py-4">
               <h2 className="font-semibold text-[var(--text-primary)]">Recent Generations</h2>
             </div>
-            <div className="divide-y divide-[var(--border-subtle)]">
-              {mockHistory.map((item) => (
-                <div key={item.id} className="px-6 py-4">
-                  <div className="flex items-center gap-2 mb-1">
-                    <span className="text-xs font-medium text-[var(--accent-red)] uppercase">
-                      {item.type}
-                    </span>
-                    <span className="text-xs text-[var(--text-muted)]">
-                      {new Date(item.createdAt).toLocaleDateString()}
-                    </span>
+            {history.length === 0 ? (
+              <div className="px-6 py-8 text-center text-sm text-[var(--text-muted)]">
+                No generations yet. Try one of the tools above!
+              </div>
+            ) : (
+              <div className="divide-y divide-[var(--border-subtle)]">
+                {history.map((item) => (
+                  <div key={item.id} className="px-6 py-4">
+                    <div className="flex items-center gap-2 mb-1">
+                      <span className="text-xs font-medium text-[var(--accent-red)] uppercase">
+                        {item.type}
+                      </span>
+                      <span className="text-xs text-[var(--text-muted)]">
+                        {new Date(item.createdAt).toLocaleTimeString()}
+                      </span>
+                    </div>
+                    <p className="text-sm text-[var(--text-primary)] truncate">{item.prompt}</p>
+                    <p className="text-xs text-[var(--text-muted)] mt-1">{item.result}</p>
                   </div>
-                  <p className="text-sm text-[var(--text-primary)] truncate">{item.prompt}</p>
-                  <p className="text-xs text-[var(--text-muted)] mt-1">{item.result}</p>
-                </div>
-              ))}
-            </div>
+                ))}
+              </div>
+            )}
           </div>
 
           {/* Tips */}

@@ -130,7 +130,7 @@ const navSections: NavSection[] = [
     items: [
       { name: 'Charts', href: '/admin/charts', icon: 'charts' },
       { name: 'Polls', href: '/admin/polls', icon: 'polls' },
-      { name: 'PostIQ', href: '/admin/ai', icon: 'ai' },
+      { name: 'PostIQ', href: '/admin/postiq', icon: 'ai' },
       { name: 'Scout AI Imports', href: '/admin/ai-logging', icon: 'aiLogging' },
       { name: 'Analytics', href: '/admin/analytics', icon: 'analytics' },
       { name: 'Feed Scoring', href: '/admin/feed-scoring', icon: 'feedScoring' },
