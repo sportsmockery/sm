@@ -1139,40 +1139,92 @@ export default function AdvancedPostEditor({
                       </p>
                     </div>
 
-                    {/* Social Preview */}
+                    {/* X (Twitter) Preview */}
                     <div>
-                      <label className="mb-1.5 block text-xs font-medium text-[var(--text-muted)]">Preview</label>
-                      <div className="rounded-lg border border-[var(--border-default)] bg-white dark:bg-gray-900 overflow-hidden">
-                        {/* Caption */}
+                      <label className="mb-1.5 flex items-center gap-1.5 text-xs font-medium text-[var(--text-muted)]">
+                        <svg className="h-3.5 w-3.5" viewBox="0 0 24 24" fill="currentColor">
+                          <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
+                        </svg>
+                        X Preview
+                      </label>
+                      <div className="rounded-xl border border-[var(--border-default)] bg-white dark:bg-black overflow-hidden">
                         <div className="p-3">
-                          <p className="text-sm text-gray-900 dark:text-white">
-                            {socialCaption || 'Your social post text will appear here...'}
+                          <div className="flex gap-3">
+                            <div className="flex-shrink-0 h-10 w-10 rounded-full bg-[#bc0000] flex items-center justify-center">
+                              <span className="text-xs font-bold text-white">SM</span>
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              <div className="flex items-center gap-1">
+                                <span className="font-bold text-sm text-gray-900 dark:text-white">Sports Mockery</span>
+                                <svg className="h-4 w-4 text-[#1d9bf0]" viewBox="0 0 24 24" fill="currentColor">
+                                  <path d="M22.5 12.5c0-1.58-.875-2.95-2.148-3.6.154-.435.238-.905.238-1.4 0-2.21-1.71-3.998-3.818-3.998-.47 0-.92.084-1.336.25C14.818 2.415 13.51 1.5 12 1.5s-2.816.917-3.437 2.25c-.415-.165-.866-.25-1.336-.25-2.11 0-3.818 1.79-3.818 4 0 .494.083.964.237 1.4-1.272.65-2.147 2.018-2.147 3.6 0 1.495.782 2.798 1.942 3.486-.02.17-.032.34-.032.514 0 2.21 1.708 4 3.818 4 .47 0 .92-.086 1.335-.25.62 1.334 1.926 2.25 3.437 2.25 1.512 0 2.818-.916 3.437-2.25.415.163.865.248 1.336.248 2.11 0 3.818-1.79 3.818-4 0-.174-.012-.344-.033-.513 1.158-.687 1.943-1.99 1.943-3.484zm-6.616-3.334l-4.334 6.5c-.145.217-.382.334-.625.334-.143 0-.288-.04-.416-.126l-.115-.094-2.415-2.415c-.293-.293-.293-.768 0-1.06s.768-.294 1.06 0l1.77 1.767 3.825-5.74c.23-.345.696-.436 1.04-.207.346.23.44.696.21 1.04z" />
+                                </svg>
+                                <span className="text-sm text-gray-500">@SportsMockery · now</span>
+                              </div>
+                              <p className="mt-1 text-sm text-gray-900 dark:text-white whitespace-pre-wrap">
+                                {socialCaption || 'Your post text will appear here...'}
+                              </p>
+                              {/* X Link Card */}
+                              <div className="mt-3 rounded-xl border border-gray-200 dark:border-gray-700 overflow-hidden">
+                                {formData.featured_image ? (
+                                  <div className="relative aspect-[1.91/1] bg-gray-100 dark:bg-gray-800">
+                                    <Image src={formData.featured_image} alt="Article preview" fill className="object-cover" />
+                                  </div>
+                                ) : (
+                                  <div className="aspect-[1.91/1] bg-gray-100 dark:bg-gray-800 flex items-center justify-center">
+                                    <span className="text-xs text-gray-400">Featured image</span>
+                                  </div>
+                                )}
+                                <div className="p-3 bg-white dark:bg-gray-900">
+                                  <p className="text-xs text-gray-500">sportsmockery.com</p>
+                                  <p className="font-medium text-sm text-gray-900 dark:text-white truncate">{formData.title || 'Article Title'}</p>
+                                  <p className="text-xs text-gray-500 line-clamp-2">{formData.excerpt || formData.seo_description || 'Article description...'}</p>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Facebook Preview */}
+                    <div>
+                      <label className="mb-1.5 flex items-center gap-1.5 text-xs font-medium text-[var(--text-muted)]">
+                        <svg className="h-3.5 w-3.5 text-[#1877f2]" viewBox="0 0 24 24" fill="currentColor">
+                          <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z" />
+                        </svg>
+                        Facebook Preview
+                      </label>
+                      <div className="rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-[#242526] overflow-hidden">
+                        <div className="p-3">
+                          <div className="flex gap-2">
+                            <div className="flex-shrink-0 h-10 w-10 rounded-full bg-[#bc0000] flex items-center justify-center">
+                              <span className="text-xs font-bold text-white">SM</span>
+                            </div>
+                            <div>
+                              <p className="font-semibold text-sm text-gray-900 dark:text-white">Sports Mockery</p>
+                              <p className="text-xs text-gray-500">Just now · <svg className="inline h-3 w-3" fill="currentColor" viewBox="0 0 16 16"><path d="M0 8a8 8 0 1 1 16 0A8 8 0 0 1 0 8zm7.5-6.923c-.67.204-1.335.82-1.887 1.855A7.97 7.97 0 0 0 5.145 4H7.5V1.077zM4.09 4a9.267 9.267 0 0 1 .64-1.539 6.7 6.7 0 0 1 .597-.933A7.025 7.025 0 0 0 2.255 4H4.09zm-.582 3.5c.03-.877.138-1.718.312-2.5H1.674a6.958 6.958 0 0 0-.656 2.5h2.49zM4.847 5a12.5 12.5 0 0 0-.338 2.5H7.5V5H4.847zM8.5 5v2.5h2.99a12.495 12.495 0 0 0-.337-2.5H8.5zM4.51 8.5a12.5 12.5 0 0 0 .337 2.5H7.5V8.5H4.51zm3.99 0V11h2.653c.187-.765.306-1.608.338-2.5H8.5zM5.145 12c.138.386.295.744.468 1.068.552 1.035 1.218 1.65 1.887 1.855V12H5.145zm.182 2.472a6.696 6.696 0 0 1-.597-.933A9.268 9.268 0 0 1 4.09 12H2.255a7.024 7.024 0 0 0 3.072 2.472zM3.82 11a13.652 13.652 0 0 1-.312-2.5h-2.49c.062.89.291 1.733.656 2.5H3.82zm6.853 3.472A7.024 7.024 0 0 0 13.745 12H11.91a9.27 9.27 0 0 1-.64 1.539 6.688 6.688 0 0 1-.597.933zM8.5 12v2.923c.67-.204 1.335-.82 1.887-1.855.173-.324.33-.682.468-1.068H8.5zm3.68-1h2.146c.365-.767.594-1.61.656-2.5h-2.49a13.65 13.65 0 0 1-.312 2.5zm2.802-3.5a6.959 6.959 0 0 0-.656-2.5H12.18c.174.782.282 1.623.312 2.5h2.49zM11.27 2.461c.247.464.462.98.64 1.539h1.835a7.024 7.024 0 0 0-3.072-2.472c.218.284.418.598.597.933zM10.855 4a7.966 7.966 0 0 0-.468-1.068C9.835 1.897 9.17 1.282 8.5 1.077V4h2.355z"/></svg></p>
+                            </div>
+                          </div>
+                          <p className="mt-3 text-sm text-gray-900 dark:text-[#e4e6eb]">
+                            {socialCaption || 'Your post text will appear here...'}
                           </p>
                         </div>
-                        {/* Link Card Preview */}
-                        <div className="border-t border-[var(--border-default)]">
+                        {/* Facebook Link Card */}
+                        <div className="border-t border-gray-200 dark:border-gray-700">
                           {formData.featured_image ? (
                             <div className="relative aspect-[1.91/1] bg-gray-100 dark:bg-gray-800">
-                              <Image
-                                src={formData.featured_image}
-                                alt="Article preview"
-                                fill
-                                className="object-cover"
-                              />
+                              <Image src={formData.featured_image} alt="Article preview" fill className="object-cover" />
                             </div>
                           ) : (
-                            <div className="aspect-[1.91/1] bg-gray-100 dark:bg-gray-800 flex items-center justify-center">
-                              <span className="text-xs text-gray-400">Featured image will appear here</span>
+                            <div className="aspect-[1.91/1] bg-gray-100 dark:bg-[#3a3b3c] flex items-center justify-center">
+                              <span className="text-xs text-gray-400">Featured image</span>
                             </div>
                           )}
-                          <div className="p-3 bg-gray-50 dark:bg-gray-800">
-                            <p className="text-[10px] uppercase text-gray-500">sportsmockery.com</p>
-                            <p className="font-semibold text-sm text-gray-900 dark:text-white truncate">
-                              {formData.title || 'Article Title'}
-                            </p>
-                            <p className="text-xs text-gray-500 line-clamp-2">
-                              {formData.excerpt || formData.seo_description || 'Article description...'}
-                            </p>
+                          <div className="p-3 bg-[#f0f2f5] dark:bg-[#3a3b3c]">
+                            <p className="text-xs uppercase text-gray-500 dark:text-gray-400">sportsmockery.com</p>
+                            <p className="font-semibold text-sm text-gray-900 dark:text-[#e4e6eb] truncate">{formData.title || 'Article Title'}</p>
+                            <p className="text-xs text-gray-500 dark:text-gray-400 line-clamp-1">{formData.excerpt || formData.seo_description || 'Article description...'}</p>
                           </div>
                         </div>
                       </div>
