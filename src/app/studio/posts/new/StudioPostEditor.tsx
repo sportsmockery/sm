@@ -337,29 +337,33 @@ export default function StudioPostEditor({
   }, [formData])
 
   return (
-    <div className="fixed inset-0 flex flex-col bg-[var(--bg-primary)]">
-      {/* Header - below red line from layout */}
+    <div className="fixed inset-0 z-50 flex flex-col bg-[var(--bg-primary)]">
+      {/* Top Header Bar - minimal, below the red line */}
       <header className="flex-shrink-0 flex h-12 items-center justify-between border-b border-[var(--border-default)] bg-[var(--bg-secondary)] px-4">
+        {/* Left: Toggle sidebar + Breadcrumb */}
         <div className="flex items-center gap-3">
-          <Link
-            href="/studio/posts"
+          <button
+            type="button"
+            onClick={() => setLeftSidebarCollapsed(!leftSidebarCollapsed)}
             className="flex h-8 w-8 items-center justify-center rounded-lg text-[var(--text-muted)] hover:bg-[var(--bg-hover)] hover:text-[var(--text-primary)] transition-colors"
+            title={leftSidebarCollapsed ? 'Show sidebar' : 'Hide sidebar'}
           >
             <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18" />
+              <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
             </svg>
-          </Link>
-          <nav className="flex items-center gap-1 text-sm text-[var(--text-muted)]">
-            <span>Studio</span>
-            <span>/</span>
-            <span>Posts</span>
-            <span>/</span>
-            <span className="text-[var(--text-primary)]">{isEditing ? 'Edit' : 'New'}</span>
+          </button>
+          <nav className="flex items-center gap-1.5 text-sm">
+            <Link href="/studio" className="text-[var(--text-muted)] hover:text-[var(--text-primary)]">Studio</Link>
+            <span className="text-[var(--text-muted)]">/</span>
+            <Link href="/studio/posts" className="text-[var(--text-muted)] hover:text-[var(--text-primary)]">Posts</Link>
+            <span className="text-[var(--text-muted)]">/</span>
+            <span className="text-[var(--text-primary)] font-medium">{isEditing ? 'Edit' : 'New'}</span>
           </nav>
         </div>
 
+        {/* Right: Word count + Status + Save */}
         <div className="flex items-center gap-3">
-          <span className="text-xs text-[var(--text-muted)]">{wordCount} words</span>
+          <span className="hidden sm:inline text-xs text-[var(--text-muted)]">{wordCount} words</span>
 
           <select
             value={formData.status}
@@ -373,25 +377,221 @@ export default function StudioPostEditor({
 
           <button
             type="button"
+            onClick={() => setRightSidebarCollapsed(!rightSidebarCollapsed)}
+            className="flex h-8 w-8 items-center justify-center rounded-lg text-[var(--text-muted)] hover:bg-[var(--bg-hover)] hover:text-[var(--text-primary)] transition-colors lg:hidden"
+            title="Toggle settings"
+          >
+            <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M10.5 6h9.75M10.5 6a1.5 1.5 0 11-3 0m3 0a1.5 1.5 0 10-3 0M3.75 6H7.5m3 12h9.75m-9.75 0a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m-3.75 0H7.5m9-6h3.75m-3.75 0a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m-9.75 0h9.75" />
+            </svg>
+          </button>
+
+          <button
+            type="button"
             onClick={handleSubmit}
             disabled={saving}
-            className="inline-flex h-8 items-center gap-2 rounded-lg px-4 text-sm font-medium transition-colors bg-[#bc0000] text-white dark:bg-white dark:text-[#bc0000] disabled:opacity-50"
+            className="inline-flex h-8 items-center gap-2 rounded-lg px-4 text-sm font-medium transition-colors disabled:opacity-50"
+            style={{
+              backgroundColor: '#bc0000',
+              color: '#ffffff',
+            }}
           >
             {saving ? 'Saving...' : isEditing ? 'Update' : 'Publish'}
           </button>
         </div>
       </header>
 
-      {/* Main Content Area - fills remaining space */}
+      {/* Main Content Area */}
       <div className="flex-1 flex overflow-hidden">
-        {/* Left Sidebar - collapsible */}
+        {/* Left Sidebar - Collapsible Navigation + PostIQ */}
         <aside
-          className={`flex-shrink-0 border-r border-[var(--border-default)] bg-[var(--bg-secondary)] transition-all duration-300 overflow-y-auto ${
-            leftSidebarCollapsed ? 'w-0' : 'w-64'
+          className={`flex-shrink-0 border-r border-[var(--border-default)] bg-[var(--bg-secondary)] transition-all duration-300 overflow-hidden ${
+            leftSidebarCollapsed ? 'w-0' : 'w-60'
           }`}
         >
-          {!leftSidebarCollapsed && (
-            <div className="p-4 space-y-4">
+          <div className="h-full overflow-y-auto p-4">
+            <nav className="space-y-1">
+              <Link
+                href="/studio"
+                className="flex items-center gap-3 rounded-lg px-3 py-2 text-sm text-[var(--text-secondary)] hover:bg-[var(--bg-hover)] hover:text-[var(--text-primary)]"
+              >
+                <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 12l8.954-8.955c.44-.439 1.152-.439 1.591 0L21.75 12M4.5 9.75v10.125c0 .621.504 1.125 1.125 1.125H9.75v-4.875c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21h4.125c.621 0 1.125-.504 1.125-1.125V9.75M8.25 21h8.25" />
+                </svg>
+                Studio Home
+              </Link>
+              <Link
+                href="/studio/posts"
+                className="flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium text-[var(--accent-red)] bg-[var(--accent-red-muted)]"
+              >
+                <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" />
+                </svg>
+                Posts
+              </Link>
+            </nav>
+
+            {/* PostIQ Tools in Sidebar */}
+            <div className="mt-6 pt-6 border-t border-[var(--border-default)]">
+              <p className="px-3 mb-2 text-xs font-semibold uppercase tracking-wide text-[var(--text-muted)]">PostIQ Tools</p>
+              <div className="space-y-1">
+                <button
+                  type="button"
+                  onClick={openChartModal}
+                  disabled={formData.content.length < 200}
+                  className="w-full flex items-center gap-3 rounded-lg px-3 py-2 text-sm text-[var(--text-secondary)] hover:bg-[var(--bg-hover)] hover:text-[var(--text-primary)] disabled:opacity-50"
+                >
+                  <svg className="h-5 w-5 text-purple-500" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 013 19.875v-6.75zM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V8.625zM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V4.125z" />
+                  </svg>
+                  Add Chart
+                </button>
+              </div>
+            </div>
+          </div>
+        </aside>
+
+        {/* Main Editor Column */}
+        <main className="flex-1 overflow-y-auto">
+          <div className="max-w-4xl mx-auto px-6 py-6">
+            {/* Error - inline, dismisses automatically */}
+            {error && (
+              <div className="mb-4 rounded-lg border border-red-500/30 bg-red-500/10 px-4 py-2 text-sm text-red-500">
+                {error}
+              </div>
+            )}
+
+            {/* Title Input - large and prominent */}
+            <input
+              type="text"
+              value={formData.title}
+              onChange={(e) => updateField('title', e.target.value)}
+              placeholder="Article title..."
+              className="mb-2 w-full border-0 bg-transparent p-0 text-3xl font-bold text-[var(--text-primary)] placeholder-[var(--text-muted)] focus:outline-none focus:ring-0"
+            />
+
+            {/* Slug */}
+            <div className="mb-6 flex items-center gap-1 text-sm text-[var(--text-muted)]">
+              <span>sportsmockery.com/</span>
+              <input
+                type="text"
+                value={formData.slug}
+                onChange={(e) => updateField('slug', e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, '-'))}
+                placeholder="article-slug"
+                className="flex-1 border-0 bg-transparent p-0 text-[var(--text-secondary)] focus:outline-none focus:ring-0"
+              />
+            </div>
+
+            {/* Content Editor - extends to fill space */}
+            <div className="mb-6 overflow-hidden rounded-lg border border-[var(--border-default)] bg-white dark:bg-gray-900">
+              <RichTextEditor
+                content={formData.content}
+                onChange={(content) => updateField('content', content)}
+                placeholder="Start writing your article..."
+              />
+            </div>
+
+            {/* SEO Section - Below Content */}
+            <div className="rounded-lg border border-[var(--border-default)] bg-[var(--bg-card)]">
+              <button
+                type="button"
+                onClick={() => setSeoExpanded(!seoExpanded)}
+                className="flex w-full items-center justify-between px-4 py-3 text-left"
+              >
+                <span className="text-sm font-medium text-[var(--text-primary)]">SEO Settings</span>
+                <svg
+                  className={`h-4 w-4 text-[var(--text-muted)] transition-transform ${seoExpanded ? 'rotate-180' : ''}`}
+                  fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor"
+                >
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
+                </svg>
+              </button>
+
+              {seoExpanded && (
+                <div className="border-t border-[var(--border-default)] p-4 space-y-4">
+                  <div className="grid gap-4 md:grid-cols-2">
+                    <div>
+                      <label className="mb-1.5 block text-xs font-medium text-[var(--text-muted)]">SEO Title</label>
+                      <input
+                        type="text"
+                        value={formData.seo_title}
+                        onChange={(e) => updateField('seo_title', e.target.value)}
+                        placeholder={formData.title || 'SEO title...'}
+                        className="w-full rounded-lg border border-[var(--border-default)] bg-[var(--bg-tertiary)] px-3 py-2 text-sm text-[var(--text-primary)] placeholder-[var(--text-muted)] focus:border-[var(--accent-red)] focus:outline-none"
+                      />
+                      <p className={`mt-1 text-xs ${(formData.seo_title || formData.title).length > 60 ? 'text-amber-500' : 'text-[var(--text-muted)]'}`}>
+                        {(formData.seo_title || formData.title).length}/60
+                      </p>
+                    </div>
+
+                    <div>
+                      <label className="mb-1.5 block text-xs font-medium text-[var(--text-muted)]">Keywords</label>
+                      <input
+                        type="text"
+                        value={formData.seo_keywords}
+                        onChange={(e) => updateField('seo_keywords', e.target.value)}
+                        placeholder="keyword1, keyword2..."
+                        className="w-full rounded-lg border border-[var(--border-default)] bg-[var(--bg-tertiary)] px-3 py-2 text-sm text-[var(--text-primary)] placeholder-[var(--text-muted)] focus:border-[var(--accent-red)] focus:outline-none"
+                      />
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="mb-1.5 block text-xs font-medium text-[var(--text-muted)]">Meta Description</label>
+                    <textarea
+                      value={formData.seo_description}
+                      onChange={(e) => updateField('seo_description', e.target.value)}
+                      rows={2}
+                      placeholder="Description for search results..."
+                      className="w-full resize-none rounded-lg border border-[var(--border-default)] bg-[var(--bg-tertiary)] px-3 py-2 text-sm text-[var(--text-primary)] placeholder-[var(--text-muted)] focus:border-[var(--accent-red)] focus:outline-none"
+                    />
+                    <p className={`mt-1 text-xs ${(formData.seo_description || '').length > 160 ? 'text-amber-500' : 'text-[var(--text-muted)]'}`}>
+                      {(formData.seo_description || '').length}/160
+                    </p>
+                  </div>
+
+                  <div>
+                    <label className="mb-1.5 block text-xs font-medium text-[var(--text-muted)]">Excerpt</label>
+                    <textarea
+                      value={formData.excerpt}
+                      onChange={(e) => updateField('excerpt', e.target.value)}
+                      rows={2}
+                      placeholder="Brief summary for article cards..."
+                      className="w-full resize-none rounded-lg border border-[var(--border-default)] bg-[var(--bg-tertiary)] px-3 py-2 text-sm text-[var(--text-primary)] placeholder-[var(--text-muted)] focus:border-[var(--accent-red)] focus:outline-none"
+                    />
+                  </div>
+
+                  {/* Google Preview */}
+                  <div>
+                    <label className="mb-1.5 block text-xs font-medium text-[var(--text-muted)]">Search Preview</label>
+                    <div className="rounded-lg border border-[var(--border-default)] bg-white dark:bg-gray-900 p-3">
+                      <p className="truncate text-sm text-blue-600 hover:underline">
+                        {formData.seo_title || formData.title || 'Page Title'}
+                      </p>
+                      <p className="truncate text-xs text-emerald-700 dark:text-emerald-500">
+                        sportsmockery.com/{formData.slug || 'article-slug'}
+                      </p>
+                      <p className="mt-1 line-clamp-2 text-xs text-gray-600 dark:text-gray-400">
+                        {formData.seo_description || formData.excerpt || 'Meta description will appear here...'}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+        </main>
+
+        {/* Right Sidebar - Settings Only */}
+        <aside
+          className={`flex-shrink-0 border-l border-[var(--border-default)] bg-[var(--bg-secondary)] transition-all duration-300 overflow-hidden ${
+            rightSidebarCollapsed ? 'w-0 lg:w-0' : 'w-72'
+          } hidden lg:block`}
+        >
+          <div className="h-full overflow-y-auto p-4">
+            <h3 className="mb-4 text-xs font-semibold uppercase tracking-wide text-[var(--text-muted)]">Settings</h3>
+
+            <div className="space-y-4">
               {/* Status */}
               <div>
                 <label className="mb-1.5 block text-xs font-medium text-[var(--text-muted)]">Status</label>
@@ -494,191 +694,34 @@ export default function StudioPostEditor({
                   </label>
                 )}
               </div>
-
-              {/* PostIQ: Add Chart To Post */}
-              <div className="rounded-lg border border-purple-500/30 bg-purple-500/5 p-3">
-                <button
-                  type="button"
-                  onClick={openChartModal}
-                  disabled={formData.content.length < 200}
-                  className="w-full flex items-center gap-2 text-left disabled:opacity-50"
-                >
-                  <svg className="h-5 w-5 text-purple-500" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 013 19.875v-6.75zM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V8.625zM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V4.125z" />
-                  </svg>
-                  <div className="flex-1">
-                    <span className="text-sm font-medium text-purple-600 dark:text-purple-400">PostIQ: Add Chart</span>
-                    <p className="mt-0.5 text-xs text-[var(--text-muted)]">
-                      AI-powered chart generation
-                    </p>
-                  </div>
-                  <svg className="h-4 w-4 text-purple-400" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
-                  </svg>
-                </button>
-              </div>
-
-              {/* Excerpt */}
-              <div>
-                <label className="mb-1.5 block text-xs font-medium text-[var(--text-muted)]">Excerpt</label>
-                <textarea
-                  value={formData.excerpt}
-                  onChange={(e) => updateField('excerpt', e.target.value)}
-                  rows={3}
-                  placeholder="Brief summary..."
-                  className="w-full resize-none rounded-lg border border-[var(--border-default)] bg-[var(--bg-tertiary)] px-3 py-2 text-sm text-[var(--text-primary)] placeholder-[var(--text-muted)] focus:border-[var(--accent-red)] focus:outline-none"
-                />
-              </div>
-            </div>
-          )}
-        </aside>
-
-        {/* Sidebar Toggle */}
-        <button
-          onClick={() => setLeftSidebarCollapsed(!leftSidebarCollapsed)}
-          className="flex-shrink-0 w-6 flex items-center justify-center border-r border-[var(--border-default)] bg-[var(--bg-tertiary)] hover:bg-[var(--bg-hover)] transition-colors"
-        >
-          <svg
-            className={`h-4 w-4 text-[var(--text-muted)] transition-transform ${leftSidebarCollapsed ? '' : 'rotate-180'}`}
-            fill="none"
-            viewBox="0 0 24 24"
-            strokeWidth={1.5}
-            stroke="currentColor"
-          >
-            <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
-          </svg>
-        </button>
-
-        {/* Main Editor Column */}
-        <main className="flex-1 overflow-y-auto">
-          <div className="max-w-4xl mx-auto px-6 py-6">
-            {/* Error Display */}
-            {error && (
-              <div className="mb-4 flex items-center gap-3 rounded-lg border border-red-500/30 bg-red-500/10 p-3">
-                <svg className="h-5 w-5 flex-shrink-0 text-red-500" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z" />
-                </svg>
-                <p className="text-sm text-red-500">{error}</p>
-                <button onClick={() => setError('')} className="ml-auto text-red-500 hover:opacity-70">
-                  <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
-                  </svg>
-                </button>
-              </div>
-            )}
-
-            {/* Title Input */}
-            <input
-              type="text"
-              value={formData.title}
-              onChange={(e) => updateField('title', e.target.value)}
-              placeholder="Article title..."
-              className="mb-2 w-full border-0 bg-transparent p-0 text-3xl font-bold text-[var(--text-primary)] placeholder-[var(--text-muted)] focus:outline-none focus:ring-0"
-            />
-
-            {/* Slug */}
-            <div className="mb-6 flex items-center gap-1 text-sm text-[var(--text-muted)]">
-              <span>sportsmockery.com/</span>
-              <input
-                type="text"
-                value={formData.slug}
-                onChange={(e) => updateField('slug', e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, '-'))}
-                placeholder="article-slug"
-                className="flex-1 border-0 bg-transparent p-0 text-[var(--text-secondary)] focus:outline-none focus:ring-0"
-              />
             </div>
 
-            {/* Content Editor */}
-            <div className="rounded-lg border border-[var(--border-default)] bg-white dark:bg-gray-900 overflow-hidden">
-              <RichTextEditor
-                content={formData.content}
-                onChange={(content) => updateField('content', content)}
-                placeholder="Start writing your article..."
-              />
-            </div>
-
-            {/* SEO Section - Below Content */}
-            <div className="mt-6 rounded-lg border border-[var(--border-default)] bg-[var(--bg-card)]">
-              <button
-                type="button"
-                onClick={() => setSeoExpanded(!seoExpanded)}
-                className="flex w-full items-center justify-between px-4 py-3 text-left"
-              >
-                <span className="text-sm font-medium text-[var(--text-primary)]">SEO Settings</span>
-                <svg
-                  className={`h-4 w-4 text-[var(--text-muted)] transition-transform ${seoExpanded ? 'rotate-180' : ''}`}
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  strokeWidth={2}
-                  stroke="currentColor"
-                >
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
-                </svg>
-              </button>
-
-              {seoExpanded && (
-                <div className="border-t border-[var(--border-default)] p-4 space-y-4">
-                  <div className="grid gap-4 md:grid-cols-2">
-                    <div>
-                      <label className="mb-1.5 block text-xs font-medium text-[var(--text-muted)]">SEO Title</label>
-                      <input
-                        type="text"
-                        value={formData.seo_title}
-                        onChange={(e) => updateField('seo_title', e.target.value)}
-                        placeholder={formData.title || 'SEO title...'}
-                        className="w-full rounded-lg border border-[var(--border-default)] bg-[var(--bg-tertiary)] px-3 py-2 text-sm text-[var(--text-primary)] placeholder-[var(--text-muted)] focus:border-[var(--accent-red)] focus:outline-none"
-                      />
-                      <p className={`mt-1 text-xs ${(formData.seo_title || formData.title).length > 60 ? 'text-amber-500' : 'text-[var(--text-muted)]'}`}>
-                        {(formData.seo_title || formData.title).length}/60
-                      </p>
-                    </div>
-
-                    <div>
-                      <label className="mb-1.5 block text-xs font-medium text-[var(--text-muted)]">Keywords</label>
-                      <input
-                        type="text"
-                        value={formData.seo_keywords}
-                        onChange={(e) => updateField('seo_keywords', e.target.value)}
-                        placeholder="keyword1, keyword2..."
-                        className="w-full rounded-lg border border-[var(--border-default)] bg-[var(--bg-tertiary)] px-3 py-2 text-sm text-[var(--text-primary)] placeholder-[var(--text-muted)] focus:border-[var(--accent-red)] focus:outline-none"
-                      />
-                    </div>
-                  </div>
-
-                  <div>
-                    <label className="mb-1.5 block text-xs font-medium text-[var(--text-muted)]">Meta Description</label>
-                    <textarea
-                      value={formData.seo_description}
-                      onChange={(e) => updateField('seo_description', e.target.value)}
-                      rows={2}
-                      placeholder="Description for search results..."
-                      className="w-full resize-none rounded-lg border border-[var(--border-default)] bg-[var(--bg-tertiary)] px-3 py-2 text-sm text-[var(--text-primary)] placeholder-[var(--text-muted)] focus:border-[var(--accent-red)] focus:outline-none"
-                    />
-                    <p className={`mt-1 text-xs ${(formData.seo_description || '').length > 160 ? 'text-amber-500' : 'text-[var(--text-muted)]'}`}>
-                      {(formData.seo_description || '').length}/160
-                    </p>
-                  </div>
-
-                  {/* Google Preview */}
-                  <div>
-                    <label className="mb-1.5 block text-xs font-medium text-[var(--text-muted)]">Search Preview</label>
-                    <div className="rounded-lg border border-[var(--border-default)] bg-white dark:bg-gray-900 p-3">
-                      <p className="truncate text-sm text-blue-600 hover:underline">
-                        {formData.seo_title || formData.title || 'Page Title'}
-                      </p>
-                      <p className="truncate text-xs text-emerald-700 dark:text-emerald-500">
-                        sportsmockery.com/{formData.slug || 'article-slug'}
-                      </p>
-                      <p className="mt-1 line-clamp-2 text-xs text-gray-600 dark:text-gray-400">
-                        {formData.seo_description || formData.excerpt || 'Meta description will appear here...'}
-                      </p>
-                    </div>
-                  </div>
+            {/* Stats */}
+            <div className="mt-6 pt-6 border-t border-[var(--border-default)]">
+              <div className="grid grid-cols-3 gap-2">
+                <div className="rounded-lg bg-[var(--bg-tertiary)] p-2 text-center">
+                  <p className="text-lg font-bold text-[var(--text-primary)]">{wordCount}</p>
+                  <p className="text-[10px] text-[var(--text-muted)]">Words</p>
                 </div>
-              )}
+                <div className="rounded-lg bg-[var(--bg-tertiary)] p-2 text-center">
+                  <p className="text-lg font-bold text-[var(--text-primary)]">{Math.ceil(wordCount / 200)}</p>
+                  <p className="text-[10px] text-[var(--text-muted)]">Min Read</p>
+                </div>
+                <div className="rounded-lg bg-[var(--bg-tertiary)] p-2 text-center">
+                  <p className="text-lg font-bold text-[var(--text-primary)]">{formData.content.split(/<\/p>/i).length - 1 || 0}</p>
+                  <p className="text-[10px] text-[var(--text-muted)]">Paragraphs</p>
+                </div>
+              </div>
+            </div>
+
+            {/* Keyboard Shortcut */}
+            <div className="mt-4 text-center">
+              <p className="text-xs text-[var(--text-muted)]">
+                <kbd className="rounded bg-[var(--bg-primary)] px-1.5 py-0.5 font-mono text-[var(--text-secondary)]">⌘S</kbd> to save
+              </p>
             </div>
           </div>
-        </main>
+        </aside>
       </div>
 
       {/* PostIQ Chart Modal */}
