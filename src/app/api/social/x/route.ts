@@ -3,20 +3,19 @@ import { NextRequest, NextResponse } from 'next/server'
 /**
  * POST /api/social/x
  *
- * Posts to X (Twitter) using the X API v2.
+ * Posts to X (Twitter) using the X API v2 with a bearer token.
  * The tweet text includes the caption followed by the URL.
- * X will render a link card using the OG tags from the article page.
+ * X will render a link card using the OG/Twitter tags from the article page.
  *
- * Required env vars:
- * - X_API_KEY: X API Key (Consumer Key)
- * - X_API_SECRET: X API Secret (Consumer Secret)
- * - X_ACCESS_TOKEN: X Access Token
- * - X_ACCESS_TOKEN_SECRET: X Access Token Secret
- * - X_BEARER_TOKEN: X Bearer Token (for v2 API)
+ * Required env var:
+ * - X_BEARER_TOKEN: X Bearer Token (app-only OAuth2)
  */
 export async function POST(request: NextRequest) {
   try {
-    const { url, caption } = await request.json()
+    const { url, caption } = (await request.json()) as {
+      url?: string
+      caption?: string
+    }
 
     if (!url || !caption) {
       return NextResponse.json(
@@ -26,69 +25,47 @@ export async function POST(request: NextRequest) {
     }
 
     const bearerToken = process.env.X_BEARER_TOKEN
-    const apiKey = process.env.X_API_KEY
-    const apiSecret = process.env.X_API_SECRET
-    const accessToken = process.env.X_ACCESS_TOKEN
-    const accessTokenSecret = process.env.X_ACCESS_TOKEN_SECRET
 
-    // Check for OAuth 1.0a credentials (required for posting)
-    if (!apiKey || !apiSecret || !accessToken || !accessTokenSecret) {
-      console.error('[X/Twitter] Missing API credentials')
+    if (!bearerToken) {
+      console.error('[X] Missing bearer token')
       return NextResponse.json(
         { error: 'X/Twitter not configured' },
         { status: 500 }
       )
     }
 
-    // X API v2 requires OAuth 1.0a for posting tweets
-    // We need to use oauth-1.0a library for signing requests
-    // For simplicity, we'll use the v2 API with OAuth 2.0 App-Only if available,
-    // but tweet creation requires user context (OAuth 1.0a)
+    // Tweet text: caption + URL.
+    // X will shorten the URL and generate a link card from the page metadata.
+    const text = `${caption}\n\n${url}`
 
-    // Import oauth-1.0a for signing (if available)
-    // For now, return a not-implemented response if OAuth 1.0a signing isn't set up
-    // You can integrate a library like 'oauth-1.0a' or 'twitter-api-v2' for full support
+    const xRes = await fetch('https://api.x.com/2/tweets', {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${bearerToken}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ text }),
+    })
 
-    // Using twitter-api-v2 client approach (simplified)
-    // In production, install: npm install twitter-api-v2
+    const data = await xRes.json()
 
-    try {
-      // Dynamic import to handle cases where the library isn't installed
-      const { TwitterApi } = await import('twitter-api-v2')
-
-      const client = new TwitterApi({
-        appKey: apiKey,
-        appSecret: apiSecret,
-        accessToken: accessToken,
-        accessSecret: accessTokenSecret,
-      })
-
-      // Post tweet with caption + URL
-      // X will automatically generate a card from the URL's OG tags
-      const tweetText = `${caption}\n\n${url}`
-
-      const { data } = await client.v2.tweet(tweetText)
-
-      console.log('[X/Twitter] Posted successfully:', data)
-      return NextResponse.json({ success: true, data })
-    } catch (twitterError) {
-      // If twitter-api-v2 isn't installed, try basic fetch approach
-      console.error('[X/Twitter] Twitter client error:', twitterError)
-
-      // Fallback: Log that X posting requires the twitter-api-v2 package
+    if (!xRes.ok) {
+      console.error('[X] Post error:', data)
       return NextResponse.json(
-        {
-          error: 'X posting requires twitter-api-v2 package',
-          message: 'Install with: npm install twitter-api-v2',
-          details: twitterError instanceof Error ? twitterError.message : 'Unknown error'
-        },
-        { status: 501 }
+        { error: 'X post failed', details: data },
+        { status: 500 }
       )
     }
-  } catch (error) {
-    console.error('[X/Twitter] Error:', error)
+
+    console.log('[X] Posted successfully:', data)
+    return NextResponse.json({ success: true, data })
+  } catch (error: any) {
+    console.error('[X] Error:', error)
     return NextResponse.json(
-      { error: 'Failed to post to X', message: error instanceof Error ? error.message : 'Unknown error' },
+      {
+        error: 'Failed to post to X',
+        message: error instanceof Error ? error.message : 'Unknown error',
+      },
       { status: 500 }
     )
   }
