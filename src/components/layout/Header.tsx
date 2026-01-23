@@ -67,9 +67,9 @@ const navItems = [
   },
 ]
 
-const podcastLinks = [
-  { name: 'Bears Film Room', href: 'https://podcasts.apple.com/us/podcast/bears-film-room-a-chicago-bears-show/id1690627823', icon: '/logos/bfr_logo.png' },
-  { name: 'Pinwheels and Ivy', href: 'https://podcasts.apple.com/us/podcast/pinwheels-and-ivy-podcast/id1385696768', icon: '/logos/PI_logo.png' },
+const videoLinks = [
+  { name: 'Bears Film Room', href: '/bears-film-room', icon: '/logos/bfr_logo.png', darkIcon: '/downloads/bfr.png' },
+  { name: 'Pinwheels & Ivy', href: '/pinwheels-and-ivy', icon: '/logos/PI_logo.png', darkIcon: '/downloads/PI_white.png' },
 ]
 
 const appLinks = [
@@ -79,7 +79,7 @@ const appLinks = [
 
 export default function Header() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
-  const [podcastMenuOpen, setPodcastMenuOpen] = useState(false)
+  const [videoMenuOpen, setVideoMenuOpen] = useState(false)
   const [appMenuOpen, setAppMenuOpen] = useState(false)
   const [activeTeamMenu, setActiveTeamMenu] = useState<string | null>(null)
   const [userMenuOpen, setUserMenuOpen] = useState(false)
@@ -87,7 +87,7 @@ export default function Header() {
   const [searchQuery, setSearchQuery] = useState('')
   const [isScrolled, setIsScrolled] = useState(false)
   const searchInputRef = useRef<HTMLInputElement>(null)
-  const podcastMenuRef = useRef<HTMLDivElement>(null)
+  const videoMenuRef = useRef<HTMLDivElement>(null)
   const appMenuRef = useRef<HTMLDivElement>(null)
   const teamMenuRefs = useRef<{ [key: string]: HTMLDivElement | null }>({})
   const userMenuRef = useRef<HTMLDivElement>(null)
@@ -114,8 +114,8 @@ export default function Header() {
   // Close dropdown when clicking outside
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
-      if (podcastMenuRef.current && !podcastMenuRef.current.contains(e.target as Node)) {
-        setPodcastMenuOpen(false)
+      if (videoMenuRef.current && !videoMenuRef.current.contains(e.target as Node)) {
+        setVideoMenuOpen(false)
       }
       if (appMenuRef.current && !appMenuRef.current.contains(e.target as Node)) {
         setAppMenuOpen(false)
@@ -141,7 +141,7 @@ export default function Header() {
       if (e.key === 'Escape') {
         setMobileMenuOpen(false)
         setSearchOpen(false)
-        setPodcastMenuOpen(false)
+        setVideoMenuOpen(false)
         setAppMenuOpen(false)
         setActiveTeamMenu(null)
         setUserMenuOpen(false)
@@ -439,46 +439,41 @@ export default function Header() {
                 )
               ))}
 
-              {/* Podcasts dropdown */}
-              <div className="relative" ref={podcastMenuRef}>
+              {/* Video dropdown */}
+              <div className="relative" ref={videoMenuRef}>
                 <button
-                  onClick={() => setPodcastMenuOpen(!podcastMenuOpen)}
+                  onClick={() => setVideoMenuOpen(!videoMenuOpen)}
                   className="flex items-center gap-1 px-4 py-4 text-[14px] font-bold hover:text-[var(--link-color)] transition-colors"
                   style={{ fontFamily: "'Montserrat', sans-serif", color: 'var(--text-primary)' }}
                 >
-                  Podcasts
+                  Video
                   <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
                   </svg>
                 </button>
 
-                {podcastMenuOpen && (
+                {videoMenuOpen && (
                   <div
                     className="absolute top-full left-0 mt-0 w-56 shadow-md z-[100]"
                     style={{ backgroundColor: 'var(--bg-surface)', border: '1px solid var(--border-color)' }}
                   >
-                    {podcastLinks.map((podcast) => (
-                      <a
-                        key={podcast.name}
-                        href={podcast.href}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        onClick={() => setPodcastMenuOpen(false)}
+                    {videoLinks.map((video) => (
+                      <Link
+                        key={video.name}
+                        href={video.href}
+                        onClick={() => setVideoMenuOpen(false)}
                         className="flex items-center gap-3 px-4 py-3 text-[14px] hover:bg-[var(--card-hover-bg)] transition-colors"
                         style={{ color: 'var(--text-primary)' }}
                       >
                         <Image
-                          src={podcast.icon}
-                          alt={podcast.name}
+                          src={theme === 'dark' ? video.darkIcon : video.icon}
+                          alt={video.name}
                           width={28}
                           height={28}
                           className="rounded-md flex-shrink-0"
                         />
-                        <span className="flex-1">{podcast.name}</span>
-                        <svg className="w-3 h-3 opacity-50 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
-                        </svg>
-                      </a>
+                        <span className="flex-1">{video.name}</span>
+                      </Link>
                     ))}
                   </div>
                 )}
@@ -577,26 +572,34 @@ export default function Header() {
                 </button>
               )}
 
-              {/* Fan Chat CTA - Red bg, white text; hover: white bg, red text */}
+              {/* Fan Chat CTA - Red bg, white text in light mode; White bg, red text in dark mode */}
               <Link
                 href="/fan-chat"
-                className="hidden md:flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded border border-black bg-[#bc0000] text-white hover:bg-white hover:text-[#bc0000] transition-colors"
-                style={{ fontFamily: "'Montserrat', sans-serif" }}
+                className={`hidden md:flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded border-0 outline-none cursor-pointer ${
+                  theme === 'dark'
+                    ? 'bg-white text-[#bc0000]'
+                    : 'bg-[#bc0000] text-white'
+                }`}
+                style={{ fontFamily: "'Montserrat', sans-serif", border: 'none' }}
               >
-                <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+                <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
                 </svg>
                 Fan Chat
               </Link>
 
-              {/* Ask AI CTA - White bg, red text; hover: red bg, white text */}
+              {/* Ask AI CTA - Red bg, white text in light mode; White bg, red text in dark mode */}
               <Link
                 href="/ask-ai"
-                className="hidden md:flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded border border-black bg-white text-[#bc0000] hover:bg-[#bc0000] hover:text-white transition-colors"
-                style={{ fontFamily: "'Montserrat', sans-serif" }}
+                className={`hidden md:flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded border-0 outline-none cursor-pointer ${
+                  theme === 'dark'
+                    ? 'bg-white text-[#bc0000]'
+                    : 'bg-[#bc0000] text-white'
+                }`}
+                style={{ fontFamily: "'Montserrat', sans-serif", border: 'none' }}
               >
-                <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
+                <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
                 </svg>
                 Ask AI
               </Link>
@@ -614,22 +617,30 @@ export default function Header() {
               <Link
                 href="/fan-chat"
                 onClick={() => setMobileMenuOpen(false)}
-                className="flex-1 flex items-center justify-center gap-2 px-4 py-3 text-sm font-semibold rounded-lg border border-black bg-[#bc0000] text-white"
-                style={{ fontFamily: "'Montserrat', sans-serif" }}
+                className={`flex-1 flex items-center justify-center gap-2 px-4 py-3 text-sm font-semibold rounded-lg border-0 outline-none cursor-pointer ${
+                  theme === 'dark'
+                    ? 'bg-white text-[#bc0000]'
+                    : 'bg-[#bc0000] text-white'
+                }`}
+                style={{ fontFamily: "'Montserrat', sans-serif", border: 'none' }}
               >
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
                 </svg>
                 Fan Chat
               </Link>
               <Link
                 href="/ask-ai"
                 onClick={() => setMobileMenuOpen(false)}
-                className="flex-1 flex items-center justify-center gap-2 px-4 py-3 text-sm font-semibold rounded-lg border border-black bg-white text-[#bc0000]"
-                style={{ fontFamily: "'Montserrat', sans-serif" }}
+                className={`flex-1 flex items-center justify-center gap-2 px-4 py-3 text-sm font-semibold rounded-lg border-0 outline-none cursor-pointer ${
+                  theme === 'dark'
+                    ? 'bg-white text-[#bc0000]'
+                    : 'bg-[#bc0000] text-white'
+                }`}
+                style={{ fontFamily: "'Montserrat', sans-serif", border: 'none' }}
               >
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
                 </svg>
                 Ask AI
               </Link>
@@ -672,37 +683,32 @@ export default function Header() {
                 </Link>
               )
             ))}
-            {/* Podcasts section */}
+            {/* Video section */}
             <div>
               <div
                 className="py-3 text-[14px] font-bold"
                 style={{ fontFamily: "'Montserrat', sans-serif", color: 'var(--text-primary)', borderBottom: '1px solid var(--border-color)' }}
               >
-                Podcasts
+                Video
               </div>
               <div className="pl-4 border-l-2 border-[#C83200] ml-2">
-                {podcastLinks.map((podcast) => (
-                  <a
-                    key={podcast.name}
-                    href={podcast.href}
-                    target="_blank"
-                    rel="noopener noreferrer"
+                {videoLinks.map((video) => (
+                  <Link
+                    key={video.name}
+                    href={video.href}
                     onClick={() => setMobileMenuOpen(false)}
                     className="flex items-center gap-3 py-3 text-[13px] hover:text-[var(--link-color)]"
                     style={{ color: 'var(--text-muted)', borderBottom: '1px solid var(--border-color)' }}
                   >
                     <Image
-                      src={podcast.icon}
-                      alt={podcast.name}
+                      src={theme === 'dark' ? video.darkIcon : video.icon}
+                      alt={video.name}
                       width={24}
                       height={24}
                       className="rounded-md flex-shrink-0"
                     />
-                    <span className="flex-1">{podcast.name}</span>
-                    <svg className="w-3 h-3 opacity-50 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
-                    </svg>
-                  </a>
+                    <span className="flex-1">{video.name}</span>
+                  </Link>
                 ))}
               </div>
             </div>
