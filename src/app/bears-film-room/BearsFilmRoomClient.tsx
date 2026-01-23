@@ -20,9 +20,9 @@ export function BearsFilmRoomClient({ latestVideo, previousVideos }: Props) {
               <img
                 src="/youtubelogos/bfr-wide.png"
                 alt="Bears Film Room"
-                style={{ marginBottom: '0.5rem', maxWidth: '320px', height: 'auto' }}
+                style={{ marginBottom: '0.5rem', maxWidth: '320px', height: 'auto', display: 'block', marginLeft: 'auto', marginRight: 'auto' }}
               />
-              <span className="sm-show-label">Bears Film Room</span>
+              <span className="sm-show-label" style={{ display: 'block', textAlign: 'center' }}>Bears Film Room</span>
               <h1 className="sm-hero-title">Videos temporarily unavailable</h1>
               <p className="sm-hero-description">
                 Please check back soon. We&apos;re having trouble loading the latest episodes.
@@ -97,9 +97,9 @@ export function BearsFilmRoomClient({ latestVideo, previousVideos }: Props) {
             <img
               src="/youtubelogos/bfr-wide.png"
               alt="Bears Film Room"
-              style={{ marginBottom: '0.5rem', maxWidth: '320px', height: 'auto' }}
+              style={{ marginBottom: '0.5rem', maxWidth: '320px', height: 'auto', display: 'block', marginLeft: 'auto', marginRight: 'auto' }}
             />
-            <span className="sm-show-label">Bears Film Room</span>
+            <span className="sm-show-label" style={{ display: 'block', textAlign: 'center' }}>Bears Film Room</span>
             <h1 className="sm-hero-title">{latestVideo.title}</h1>
             <p className="sm-hero-meta">
               {formatDate(latestVideo.publishedAt)} · Latest episode
