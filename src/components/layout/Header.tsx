@@ -575,14 +575,22 @@ export default function Header() {
               {/* Fan Chat CTA - Red bg, white text in light mode; White bg, red text in dark mode */}
               <Link
                 href="/fan-chat"
-                className={`hidden md:flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded border-0 outline-none cursor-pointer ${
-                  theme === 'dark'
-                    ? 'bg-white text-[#bc0000]'
-                    : 'bg-[#bc0000] text-white'
-                }`}
-                style={{ fontFamily: "'Montserrat', sans-serif", border: 'none' }}
+                className="hidden md:flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded"
+                style={{
+                  fontFamily: "'Montserrat', sans-serif",
+                  backgroundColor: theme === 'dark' ? '#ffffff' : '#bc0000',
+                  color: theme === 'dark' ? '#bc0000' : '#ffffff',
+                  border: 'none',
+                  outline: 'none',
+                }}
               >
-                <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
+                <svg
+                  className="w-3.5 h-3.5"
+                  fill="none"
+                  stroke={theme === 'dark' ? '#bc0000' : '#ffffff'}
+                  strokeWidth={2}
+                  viewBox="0 0 24 24"
+                >
                   <path strokeLinecap="round" strokeLinejoin="round" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
                 </svg>
                 Fan Chat
@@ -591,14 +599,22 @@ export default function Header() {
               {/* Ask AI CTA - Red bg, white text in light mode; White bg, red text in dark mode */}
               <Link
                 href="/ask-ai"
-                className={`hidden md:flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded border-0 outline-none cursor-pointer ${
-                  theme === 'dark'
-                    ? 'bg-white text-[#bc0000]'
-                    : 'bg-[#bc0000] text-white'
-                }`}
-                style={{ fontFamily: "'Montserrat', sans-serif", border: 'none' }}
+                className="hidden md:flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded"
+                style={{
+                  fontFamily: "'Montserrat', sans-serif",
+                  backgroundColor: theme === 'dark' ? '#ffffff' : '#bc0000',
+                  color: theme === 'dark' ? '#bc0000' : '#ffffff',
+                  border: 'none',
+                  outline: 'none',
+                }}
               >
-                <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
+                <svg
+                  className="w-3.5 h-3.5"
+                  fill="none"
+                  stroke={theme === 'dark' ? '#bc0000' : '#ffffff'}
+                  strokeWidth={2}
+                  viewBox="0 0 24 24"
+                >
                   <path strokeLinecap="round" strokeLinejoin="round" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
                 </svg>
                 Ask AI
@@ -617,14 +633,22 @@ export default function Header() {
               <Link
                 href="/fan-chat"
                 onClick={() => setMobileMenuOpen(false)}
-                className={`flex-1 flex items-center justify-center gap-2 px-4 py-3 text-sm font-semibold rounded-lg border-0 outline-none cursor-pointer ${
-                  theme === 'dark'
-                    ? 'bg-white text-[#bc0000]'
-                    : 'bg-[#bc0000] text-white'
-                }`}
-                style={{ fontFamily: "'Montserrat', sans-serif", border: 'none' }}
+                className="flex-1 flex items-center justify-center gap-2 px-4 py-3 text-sm font-semibold rounded-lg"
+                style={{
+                  fontFamily: "'Montserrat', sans-serif",
+                  backgroundColor: theme === 'dark' ? '#ffffff' : '#bc0000',
+                  color: theme === 'dark' ? '#bc0000' : '#ffffff',
+                  border: 'none',
+                  outline: 'none',
+                }}
               >
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
+                <svg
+                  className="w-4 h-4"
+                  fill="none"
+                  stroke={theme === 'dark' ? '#bc0000' : '#ffffff'}
+                  strokeWidth={2}
+                  viewBox="0 0 24 24"
+                >
                   <path strokeLinecap="round" strokeLinejoin="round" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
                 </svg>
                 Fan Chat
@@ -632,14 +656,22 @@ export default function Header() {
               <Link
                 href="/ask-ai"
                 onClick={() => setMobileMenuOpen(false)}
-                className={`flex-1 flex items-center justify-center gap-2 px-4 py-3 text-sm font-semibold rounded-lg border-0 outline-none cursor-pointer ${
-                  theme === 'dark'
-                    ? 'bg-white text-[#bc0000]'
-                    : 'bg-[#bc0000] text-white'
-                }`}
-                style={{ fontFamily: "'Montserrat', sans-serif", border: 'none' }}
+                className="flex-1 flex items-center justify-center gap-2 px-4 py-3 text-sm font-semibold rounded-lg"
+                style={{
+                  fontFamily: "'Montserrat', sans-serif",
+                  backgroundColor: theme === 'dark' ? '#ffffff' : '#bc0000',
+                  color: theme === 'dark' ? '#bc0000' : '#ffffff',
+                  border: 'none',
+                  outline: 'none',
+                }}
               >
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
+                <svg
+                  className="w-4 h-4"
+                  fill="none"
+                  stroke={theme === 'dark' ? '#bc0000' : '#ffffff'}
+                  strokeWidth={2}
+                  viewBox="0 0 24 24"
+                >
                   <path strokeLinecap="round" strokeLinejoin="round" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
                 </svg>
                 Ask AI
