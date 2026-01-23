@@ -93,6 +93,7 @@ export async function POST(request: NextRequest) {
       author_id: body.author_id || null,
       seo_title: body.seo_title || null,
       seo_description: body.seo_description || null,
+      social_caption: body.social_caption || null,
       created_at: new Date().toISOString(),
     }
 

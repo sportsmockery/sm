@@ -35,6 +35,8 @@ interface Post {
   seo_keywords?: string | null
   published_at?: string | null
   scheduled_at?: string | null
+  social_caption?: string | null
+  social_posted_at?: string | null
 }
 
 interface ArticleIdea {
@@ -81,6 +83,11 @@ export default function AdvancedPostEditor({
   const [sendPushNotification, setSendPushNotification] = useState(false)
   const [pushTitle, setPushTitle] = useState('')
   const [pushMessage, setPushMessage] = useState('')
+
+  // Social media posting states (transient - not persisted directly)
+  const [postToSocial, setPostToSocial] = useState(false)
+  const [socialCaption, setSocialCaption] = useState(post?.social_caption || '')
+  const socialAlreadyPosted = !!post?.social_posted_at
 
   // Refs for auto-AI tracking
   const autoAiTimerRef = useRef<NodeJS.Timeout | null>(null)
@@ -503,14 +510,19 @@ export default function AdvancedPostEditor({
     try {
       const endpoint = isEditing ? `/api/posts/${post?.id}` : '/api/admin/posts'
 
+      // Include social_caption in the payload if postToSocial is checked
+      const payload = {
+        ...formData,
+        category_id: formData.category_id || null,
+        author_id: formData.author_id || null,
+        social_caption: postToSocial ? socialCaption : (post?.social_caption || null),
+        post_to_social: postToSocial && !socialAlreadyPosted && socialCaption.trim(),
+      }
+
       const response = await fetch(endpoint, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          ...formData,
-          category_id: formData.category_id || null,
-          author_id: formData.author_id || null,
-        }),
+        body: JSON.stringify(payload),
       })
 
       if (!response.ok) {
@@ -519,6 +531,7 @@ export default function AdvancedPostEditor({
       }
 
       const data = await response.json()
+      const savedPost = data.post || data
 
       // Send push notification if checkbox is checked and post is published
       if (sendPushNotification && formData.status === 'published' && pushTitle.trim() && pushMessage.trim()) {
@@ -530,7 +543,7 @@ export default function AdvancedPostEditor({
             body: JSON.stringify({
               title: pushTitle.trim(),
               body: pushMessage.trim(),
-              articleId: data.id,
+              articleId: savedPost.id,
               articleSlug: formData.slug,
               categorySlug,
             }),
@@ -540,7 +553,56 @@ export default function AdvancedPostEditor({
         }
       }
 
-      router.push(`/admin/posts/${data.id}`)
+      // Post to social media if conditions are met
+      // Conditions: checkbox checked, not already posted, caption provided, status is published
+      const shouldPostToSocial =
+        postToSocial &&
+        !socialAlreadyPosted &&
+        socialCaption.trim() &&
+        formData.status === 'published'
+
+      if (shouldPostToSocial) {
+        const articleUrl = `https://test.sportsmockery.com/${formData.slug}`
+        const caption = socialCaption.trim()
+
+        // Post to Facebook
+        try {
+          await fetch('/api/social/facebook', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ url: articleUrl, caption }),
+          })
+        } catch (fbErr) {
+          console.error('Failed to post to Facebook:', fbErr)
+        }
+
+        // Post to X (Twitter)
+        try {
+          await fetch('/api/social/x', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ url: articleUrl, caption }),
+          })
+        } catch (xErr) {
+          console.error('Failed to post to X:', xErr)
+        }
+
+        // Mark as social posted (update the post)
+        try {
+          await fetch(`/api/posts/${savedPost.id}`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              ...formData,
+              social_posted_at: new Date().toISOString(),
+            }),
+          })
+        } catch (updateErr) {
+          console.error('Failed to update social_posted_at:', updateErr)
+        }
+      }
+
+      router.push(`/admin/posts/${savedPost.id}`)
       router.refresh()
     } catch (err) {
       setError(err instanceof Error ? err.message : 'An error occurred')
@@ -1035,6 +1097,94 @@ export default function AdvancedPostEditor({
                           </div>
                         </div>
                       </div>
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* Social Media Posting */}
+              <div className="border-t border-[var(--border-default)] pt-4">
+                <label className={`flex items-center gap-2 ${socialAlreadyPosted ? 'cursor-not-allowed opacity-60' : 'cursor-pointer'}`}>
+                  <input
+                    type="checkbox"
+                    checked={postToSocial}
+                    onChange={(e) => setPostToSocial(e.target.checked)}
+                    disabled={socialAlreadyPosted}
+                    className="h-4 w-4 rounded border-[var(--border-default)] text-[var(--accent-red)] focus:ring-[var(--accent-red)] disabled:opacity-50"
+                  />
+                  <span className="text-sm font-medium text-[var(--text-primary)]">Post to Social Media</span>
+                </label>
+                {socialAlreadyPosted ? (
+                  <p className="mt-1 text-xs text-amber-600 dark:text-amber-400 ml-6">
+                    Already posted to social media. Auto-posting disabled to avoid duplicates.
+                  </p>
+                ) : (
+                  <p className="mt-1 text-xs text-[var(--text-muted)] ml-6">Post to Facebook and X when publishing</p>
+                )}
+
+                {postToSocial && !socialAlreadyPosted && (
+                  <div className="mt-4 space-y-4">
+                    {/* Social Caption */}
+                    <div>
+                      <label className="mb-1.5 block text-xs font-medium text-[var(--text-muted)]">Social Post Text</label>
+                      <textarea
+                        value={socialCaption}
+                        onChange={(e) => setSocialCaption(e.target.value)}
+                        placeholder="Example: Caleb Williams just changed the entire Bears-Packers rivalry. Here's how."
+                        rows={3}
+                        className="w-full resize-none rounded-lg border border-[var(--border-default)] bg-[var(--bg-tertiary)] px-3 py-2 text-sm text-[var(--text-primary)] placeholder-[var(--text-muted)] focus:border-[var(--accent-red)] focus:outline-none"
+                      />
+                      <p className="mt-1 text-xs text-[var(--text-muted)]">
+                        This text appears above the article card on Facebook and X. The link card with image and headline is generated automatically.
+                      </p>
+                    </div>
+
+                    {/* Social Preview */}
+                    <div>
+                      <label className="mb-1.5 block text-xs font-medium text-[var(--text-muted)]">Preview</label>
+                      <div className="rounded-lg border border-[var(--border-default)] bg-white dark:bg-gray-900 overflow-hidden">
+                        {/* Caption */}
+                        <div className="p-3">
+                          <p className="text-sm text-gray-900 dark:text-white">
+                            {socialCaption || 'Your social post text will appear here...'}
+                          </p>
+                        </div>
+                        {/* Link Card Preview */}
+                        <div className="border-t border-[var(--border-default)]">
+                          {formData.featured_image ? (
+                            <div className="relative aspect-[1.91/1] bg-gray-100 dark:bg-gray-800">
+                              <Image
+                                src={formData.featured_image}
+                                alt="Article preview"
+                                fill
+                                className="object-cover"
+                              />
+                            </div>
+                          ) : (
+                            <div className="aspect-[1.91/1] bg-gray-100 dark:bg-gray-800 flex items-center justify-center">
+                              <span className="text-xs text-gray-400">Featured image will appear here</span>
+                            </div>
+                          )}
+                          <div className="p-3 bg-gray-50 dark:bg-gray-800">
+                            <p className="text-[10px] uppercase text-gray-500">sportsmockery.com</p>
+                            <p className="font-semibold text-sm text-gray-900 dark:text-white truncate">
+                              {formData.title || 'Article Title'}
+                            </p>
+                            <p className="text-xs text-gray-500 line-clamp-2">
+                              {formData.excerpt || formData.seo_description || 'Article description...'}
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {socialAlreadyPosted && post?.social_caption && (
+                  <div className="mt-4">
+                    <label className="mb-1.5 block text-xs font-medium text-[var(--text-muted)]">Posted Caption</label>
+                    <div className="rounded-lg border border-[var(--border-default)] bg-[var(--bg-tertiary)] px-3 py-2 text-sm text-[var(--text-muted)]">
+                      {post.social_caption}
                     </div>
                   </div>
                 )}

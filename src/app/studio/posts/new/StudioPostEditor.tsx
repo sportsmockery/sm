@@ -38,6 +38,8 @@ interface StudioPostEditorProps {
     seo_description: string | null
     seo_keywords?: string | null
     scheduled_at?: string | null
+    social_caption?: string | null
+    social_posted_at?: string | null
   }
   categories: Category[]
   authors: Author[]
@@ -63,6 +65,11 @@ export default function StudioPostEditor({
   const [sendPushNotification, setSendPushNotification] = useState(false)
   const [pushTitle, setPushTitle] = useState('')
   const [pushMessage, setPushMessage] = useState('')
+
+  // Social media posting states
+  const [postToSocial, setPostToSocial] = useState(false)
+  const [socialCaption, setSocialCaption] = useState(post?.social_caption || '')
+  const socialAlreadyPosted = !!post?.social_posted_at
 
   // PostIQ AI states
   const [aiLoading, setAiLoading] = useState<string | null>(null)
@@ -246,6 +253,7 @@ export default function StudioPostEditor({
           ...formData,
           category_id: formData.category_id || null,
           author_id: formData.author_id || null,
+          social_caption: socialCaption || null,
         }),
       })
 
@@ -255,6 +263,7 @@ export default function StudioPostEditor({
       }
 
       const data = await response.json()
+      const savedPost = data.post || data
 
       // Send push notification if checkbox is checked and post is published
       if (sendPushNotification && formData.status === 'published' && pushTitle.trim() && pushMessage.trim()) {
@@ -266,13 +275,49 @@ export default function StudioPostEditor({
             body: JSON.stringify({
               title: pushTitle.trim(),
               body: pushMessage.trim(),
-              articleId: data.id,
+              articleId: savedPost.id,
               articleSlug: formData.slug,
               categorySlug,
             }),
           })
         } catch (pushErr) {
           console.error('Failed to send push notification:', pushErr)
+        }
+      }
+
+      // Post to social media if checkbox is checked, post is published, and not already posted
+      if (postToSocial && formData.status === 'published' && !socialAlreadyPosted && socialCaption.trim()) {
+        const articleUrl = `https://sportsmockery.com/${formData.slug}`
+
+        // Post to Facebook and X in parallel
+        const socialPromises = [
+          fetch('/api/social/facebook', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ url: articleUrl, caption: socialCaption.trim() }),
+          }).catch(err => console.error('Facebook post failed:', err)),
+          fetch('/api/social/x', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ url: articleUrl, caption: socialCaption.trim() }),
+          }).catch(err => console.error('X post failed:', err)),
+        ]
+
+        await Promise.allSettled(socialPromises)
+
+        // Mark as posted by updating the post
+        try {
+          await fetch(`/api/posts/${savedPost.id}`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              ...formData,
+              social_caption: socialCaption.trim(),
+              social_posted_at: new Date().toISOString(),
+            }),
+          })
+        } catch (markErr) {
+          console.error('Failed to mark social as posted:', markErr)
         }
       }
 
@@ -826,6 +871,75 @@ export default function StudioPostEditor({
                             </p>
                             <p className="line-clamp-2 text-xs text-gray-600 dark:text-gray-300">
                               {pushMessage || 'Your notification message will appear here...'}
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* Social Media Posting */}
+              <div className="border-t border-[var(--border-default)] pt-4">
+                <label className={`flex items-center gap-2 ${socialAlreadyPosted ? 'cursor-not-allowed opacity-60' : 'cursor-pointer'}`}>
+                  <input
+                    type="checkbox"
+                    checked={postToSocial}
+                    onChange={(e) => setPostToSocial(e.target.checked)}
+                    disabled={socialAlreadyPosted}
+                    className="h-4 w-4 rounded border-[var(--border-default)] text-[var(--accent-red)] focus:ring-[var(--accent-red)] disabled:opacity-50"
+                  />
+                  <span className="text-sm font-medium text-[var(--text-primary)]">
+                    {socialAlreadyPosted ? 'Posted to Social Media ✓' : 'Post to Social Media'}
+                  </span>
+                </label>
+                <p className="mt-1 text-xs text-[var(--text-muted)] ml-6">
+                  {socialAlreadyPosted
+                    ? 'This article was already shared on social media'
+                    : 'Share to Facebook & X when publishing'}
+                </p>
+
+                {postToSocial && !socialAlreadyPosted && (
+                  <div className="mt-4 space-y-4">
+                    {/* Social Caption */}
+                    <div>
+                      <label className="mb-1.5 block text-xs font-medium text-[var(--text-muted)]">Social Caption</label>
+                      <textarea
+                        value={socialCaption}
+                        onChange={(e) => setSocialCaption(e.target.value.slice(0, 280))}
+                        placeholder="Write a caption for social media..."
+                        maxLength={280}
+                        rows={3}
+                        className="w-full resize-none rounded-lg border border-[var(--border-default)] bg-[var(--bg-tertiary)] px-3 py-2 text-sm text-[var(--text-primary)] placeholder-[var(--text-muted)] focus:border-[var(--accent-red)] focus:outline-none"
+                      />
+                      <p className={`mt-1 text-xs text-right ${socialCaption.length >= 260 ? 'text-amber-500' : 'text-[var(--text-muted)]'}`}>
+                        {socialCaption.length}/280
+                      </p>
+                    </div>
+
+                    {/* Social Preview */}
+                    <div>
+                      <label className="mb-1.5 block text-xs font-medium text-[var(--text-muted)]">Preview</label>
+                      <div className="rounded-lg border border-[var(--border-default)] bg-white p-3 dark:bg-gray-900">
+                        <p className="text-sm text-gray-900 dark:text-white mb-2">
+                          {socialCaption || 'Your caption will appear here...'}
+                        </p>
+                        <div className="rounded-lg border border-gray-200 dark:border-gray-700 overflow-hidden">
+                          {formData.featured_image && (
+                            <div className="relative aspect-[1.91/1] bg-gray-100 dark:bg-gray-800">
+                              <Image
+                                src={formData.featured_image}
+                                alt="Preview"
+                                fill
+                                className="object-cover"
+                              />
+                            </div>
+                          )}
+                          <div className="p-2 bg-gray-50 dark:bg-gray-800">
+                            <p className="text-xs text-gray-500 uppercase">sportsmockery.com</p>
+                            <p className="text-sm font-medium text-gray-900 dark:text-white truncate">
+                              {formData.title || 'Article Title'}
                             </p>
                           </div>
                         </div>

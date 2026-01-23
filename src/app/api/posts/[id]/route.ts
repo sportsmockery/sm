@@ -20,6 +20,8 @@ export async function POST(
       author_id,
       seo_title,
       seo_description,
+      social_caption,
+      social_posted_at,
     } = body
 
     // Validate required fields
@@ -58,6 +60,16 @@ export async function POST(
       seo_title: seo_title || null,
       seo_description: seo_description || null,
       updated_at: new Date().toISOString(),
+    }
+
+    // Only update social_caption if provided
+    if (social_caption !== undefined) {
+      updateData.social_caption = social_caption || null
+    }
+
+    // Only update social_posted_at if explicitly provided (to mark as posted)
+    if (social_posted_at) {
+      updateData.social_posted_at = social_posted_at
     }
 
     // Set published_at if publishing for the first time
