@@ -24,7 +24,7 @@ export function BearsFilmRoomClient({ latestVideo, previousVideos }: Props) {
                   className="sm-show-logo"
                   style={{ marginBottom: 0 }}
                 />
-                <div className="flex flex-col gap-1.5">
+                <div className="flex flex-col gap-2">
                   {/* YouTube Subscribe */}
                   <a
                     href="https://www.youtube.com/@bearsfilmroom?sub_confirmation=1"
@@ -45,7 +45,7 @@ export function BearsFilmRoomClient({ latestVideo, previousVideos }: Props) {
                     className="inline-flex items-center justify-between w-28 px-2 py-1 bg-white hover:bg-gray-100 text-purple-600 text-[10px] font-semibold rounded transition-colors"
                   >
                     <span>Apple</span>
-                    <img src="https://logos-world.net/wp-content/uploads/2021/10/Podcast-Emblem.png" alt="Apple Podcasts" className="h-3 w-auto" />
+                    <img src="https://logos-world.net/wp-content/uploads/2021/10/Podcast-Emblem.png" alt="Apple Podcasts" className="w-3 h-3 object-contain" />
                   </a>
                   {/* Spotify */}
                   <a
@@ -104,7 +104,7 @@ export function BearsFilmRoomClient({ latestVideo, previousVideos }: Props) {
                 className="sm-show-logo"
                 style={{ marginBottom: 0 }}
               />
-              <div className="flex flex-col gap-1.5">
+              <div className="flex flex-col gap-2">
                 {/* YouTube Subscribe */}
                 <a
                   href="https://www.youtube.com/@bearsfilmroom?sub_confirmation=1"
@@ -125,7 +125,7 @@ export function BearsFilmRoomClient({ latestVideo, previousVideos }: Props) {
                   className="inline-flex items-center justify-between w-28 px-2 py-1 bg-white hover:bg-gray-100 text-purple-600 text-[10px] font-semibold rounded transition-colors"
                 >
                   <span>Apple</span>
-                  <img src="https://logos-world.net/wp-content/uploads/2021/10/Podcast-Emblem.png" alt="Apple Podcasts" className="h-3 w-auto" />
+                  <img src="https://logos-world.net/wp-content/uploads/2021/10/Podcast-Emblem.png" alt="Apple Podcasts" className="w-3 h-3 object-contain" />
                 </a>
                 {/* Spotify */}
                 <a
