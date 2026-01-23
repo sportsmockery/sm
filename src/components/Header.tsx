@@ -1,7 +1,7 @@
 'use client'
 
 import Link from 'next/link'
-import { useRouter } from 'next/navigation'
+import { useRouter, usePathname } from 'next/navigation'
 import { useState, useEffect, useRef } from 'react'
 
 const navLinks = [
@@ -22,11 +22,17 @@ const trendingHeadlines = [
 
 export default function Header() {
   const router = useRouter()
+  const pathname = usePathname()
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const [searchQuery, setSearchQuery] = useState('')
   const [isScrolled, setIsScrolled] = useState(false)
   const [teamsDropdownOpen, setTeamsDropdownOpen] = useState(false)
   const dropdownRef = useRef<HTMLDivElement>(null)
+
+  // Don't render main header on admin and studio pages (they have their own headers)
+  if (pathname?.startsWith('/admin') || pathname?.startsWith('/studio')) {
+    return null
+  }
 
   useEffect(() => {
     const handleScroll = () => {

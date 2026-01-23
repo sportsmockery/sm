@@ -1,6 +1,7 @@
 'use client'
 
 import Link from 'next/link'
+import { usePathname } from 'next/navigation'
 
 // Footer links organized by column per design spec
 const footerColumns = [
@@ -74,6 +75,13 @@ function SocialIcon({ icon, className = '' }: { icon: string; className?: string
 }
 
 export default function Footer() {
+  const pathname = usePathname()
+
+  // Don't render footer on admin and studio pages
+  if (pathname?.startsWith('/admin') || pathname?.startsWith('/studio')) {
+    return null
+  }
+
   return (
     <footer className="mt-auto">
       {/* Footer Top Section - Dark Background per spec */}
