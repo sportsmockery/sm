@@ -64,7 +64,8 @@ export default function StudioPostEditor({
   } | null>(null)
   const [selectedChartType, setSelectedChartType] = useState<string>('bar')
   const [selectedParagraph, setSelectedParagraph] = useState<number>(1)
-  const [editableChartTitle, setEditableChartTitle] = useState<string>('')
+  const [customChartTitle, setCustomChartTitle] = useState<string>('')
+  const [paragraphOptions, setParagraphOptions] = useState<string[]>([])
 
   const [formData, setFormData] = useState({
     title: post?.title || '',
