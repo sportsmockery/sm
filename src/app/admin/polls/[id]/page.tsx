@@ -193,7 +193,12 @@ export default function PollDetailsPage({ params }: { params: Promise<{ id: stri
 
           {/* Results */}
           <PollResults
-            options={poll.options.sort((a, b) => a.display_order - b.display_order)}
+            options={poll.options.sort((a, b) => a.display_order - b.display_order).map(opt => ({
+              ...opt,
+              id: String(opt.id),
+              poll_id: String(poll.id),
+              created_at: poll.created_at,
+            }))}
             totalVotes={poll.total_votes}
             showWinner={true}
           />

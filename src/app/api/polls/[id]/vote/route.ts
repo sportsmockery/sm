@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { supabase } from '@/lib/supabase'
-import { createClient } from '@supabase/supabase-js'
+import { supabaseAdmin } from '@/lib/supabase-server'
+import type { VoteInput, Poll, PollResults, PollOptionResult } from '@/types/polls'
+import { getRandomMicrocopy } from '@/types/polls'
+import crypto from 'crypto'
 
 /**
  * POST /api/polls/[id]/vote
@@ -12,28 +14,31 @@ export async function POST(
 ) {
   try {
     const { id } = await params
-    const body = await request.json()
-    const { optionId, optionIds, anonymousId, userId } = body
+    const body: VoteInput = await request.json()
+    const { option_ids, user_id, anonymous_id } = body
 
     // Validate input
-    if (!optionId && (!optionIds || optionIds.length === 0)) {
+    if (!option_ids || option_ids.length === 0) {
       return NextResponse.json(
-        { error: 'Option ID is required' },
+        { error: 'At least one option ID is required' },
         { status: 400 }
       )
     }
 
-    if (!anonymousId && !userId) {
+    if (!anonymous_id && !user_id) {
       return NextResponse.json(
         { error: 'Anonymous ID or User ID is required' },
         { status: 400 }
       )
     }
 
-    // Fetch poll to check status
-    const { data: poll, error: pollError } = await supabase
+    // Fetch poll to check status and settings
+    const { data: poll, error: pollError } = await supabaseAdmin
       .from('sm_polls')
-      .select('*')
+      .select(`
+        *,
+        options:sm_poll_options(*)
+      `)
       .eq('id', id)
       .single()
 
@@ -52,6 +57,14 @@ export async function POST(
       )
     }
 
+    // Check if poll has started
+    if (poll.starts_at && new Date(poll.starts_at) > new Date()) {
+      return NextResponse.json(
+        { error: 'Poll has not started yet' },
+        { status: 400 }
+      )
+    }
+
     // Check if poll has ended
     if (poll.ends_at && new Date(poll.ends_at) < new Date()) {
       return NextResponse.json(
@@ -60,19 +73,24 @@ export async function POST(
       )
     }
 
-    // Check for existing vote
-    const voteQuery = supabase
-      .from('sm_poll_votes')
+    // Generate IP hash for duplicate detection
+    const forwarded = request.headers.get('x-forwarded-for')
+    const ip = forwarded ? forwarded.split(',')[0] : request.headers.get('x-real-ip') || 'unknown'
+    const ipHash = crypto.createHash('sha256').update(ip + id).digest('hex')
+
+    // Check for existing vote (by user_id, anonymous_id, or ip_hash)
+    let existingVoteQuery = supabaseAdmin
+      .from('sm_poll_responses')
       .select('id')
       .eq('poll_id', id)
 
-    if (userId) {
-      voteQuery.eq('user_id', userId)
-    } else {
-      voteQuery.eq('anonymous_id', anonymousId)
+    if (user_id) {
+      existingVoteQuery = existingVoteQuery.eq('user_id', user_id)
+    } else if (anonymous_id) {
+      existingVoteQuery = existingVoteQuery.or(`anonymous_id.eq.${anonymous_id},ip_hash.eq.${ipHash}`)
     }
 
-    const { data: existingVote } = await voteQuery.single()
+    const { data: existingVote } = await existingVoteQuery.maybeSingle()
 
     if (existingVote) {
       return NextResponse.json(
@@ -81,24 +99,34 @@ export async function POST(
       )
     }
 
-    // Handle single or multiple choice
-    const selectedOptions = optionIds || [optionId]
+    // Validate option IDs belong to this poll
+    const validOptionIds = poll.options.map((opt: any) => opt.id)
+    const invalidOptions = option_ids.filter(optId => !validOptionIds.includes(optId))
+    if (invalidOptions.length > 0) {
+      return NextResponse.json(
+        { error: 'Invalid option ID(s)' },
+        { status: 400 }
+      )
+    }
 
-    // For single choice, only take first option
-    const finalOptions = poll.poll_type === 'single'
-      ? [selectedOptions[0]]
-      : selectedOptions
+    // Handle single vs multiple choice
+    let finalOptionIds = option_ids
+    if (!poll.is_multi_select && option_ids.length > 1) {
+      // For single choice, only take first option
+      finalOptionIds = [option_ids[0]]
+    }
 
     // Create vote records
-    const voteRecords = finalOptions.map((optId: number) => ({
-      poll_id: parseInt(id),
+    const voteRecords = finalOptionIds.map(optId => ({
+      poll_id: id,
       option_id: optId,
-      user_id: userId || null,
-      anonymous_id: userId ? null : anonymousId,
+      user_id: user_id || null,
+      anonymous_id: user_id ? null : anonymous_id,
+      ip_hash: ipHash,
     }))
 
-    const { error: voteError } = await supabase
-      .from('sm_poll_votes')
+    const { error: voteError } = await supabaseAdmin
+      .from('sm_poll_responses')
       .insert(voteRecords)
 
     if (voteError) {
@@ -109,54 +137,34 @@ export async function POST(
       )
     }
 
-    // Update vote counts
-    for (const optId of finalOptions) {
-      // Try RPC first, fallback to direct update
-      const { error: rpcError } = await supabase.rpc('increment_poll_vote', {
-        option_id_param: optId
-      })
+    // Update vote counts on options
+    for (const optId of finalOptionIds) {
+      const { data: currentOption } = await supabaseAdmin
+        .from('sm_poll_options')
+        .select('vote_count')
+        .eq('id', optId)
+        .single()
 
-      if (rpcError) {
-        // Fallback: Direct update if RPC doesn't exist
-        const { data: currentOption } = await supabase
+      if (currentOption) {
+        await supabaseAdmin
           .from('sm_poll_options')
-          .select('vote_count')
+          .update({ vote_count: (currentOption.vote_count || 0) + 1 })
           .eq('id', optId)
-          .single()
-
-        if (currentOption) {
-          await supabase
-            .from('sm_poll_options')
-            .update({ vote_count: (currentOption.vote_count || 0) + 1 })
-            .eq('id', optId)
-        }
       }
     }
 
-    // Update total votes on poll
-    await supabase
+    // Update total votes on poll (count unique voters, not total options selected)
+    await supabaseAdmin
       .from('sm_polls')
-      .update({ total_votes: poll.total_votes + 1 })
+      .update({ total_votes: (poll.total_votes || 0) + 1 })
       .eq('id', id)
 
-    // Fetch updated poll
-    const { data: updatedPoll } = await supabase
+    // Fetch updated poll with results
+    const { data: updatedPoll } = await supabaseAdmin
       .from('sm_polls')
       .select(`
-        id,
-        question,
-        poll_type,
-        status,
-        show_results,
-        total_votes,
-        ends_at,
-        options:sm_poll_options(
-          id,
-          option_text,
-          vote_count,
-          display_order,
-          color
-        )
+        *,
+        options:sm_poll_options(*)
       `)
       .eq('id', id)
       .single()
@@ -166,9 +174,85 @@ export async function POST(
       updatedPoll.options.sort((a: any, b: any) => a.display_order - b.display_order)
     }
 
-    return NextResponse.json(updatedPoll)
+    // Calculate percentages
+    const totalVotes = updatedPoll?.total_votes || 0
+    const optionResults: PollOptionResult[] = (updatedPoll?.options || []).map((opt: any) => ({
+      id: opt.id,
+      option_text: opt.option_text,
+      option_image: opt.option_image,
+      team_tag: opt.team_tag,
+      emoji: opt.emoji,
+      vote_count: opt.vote_count || 0,
+      percentage: totalVotes > 0 ? Math.round((opt.vote_count / totalVotes) * 100) : 0,
+    }))
+
+    const results: PollResults = {
+      poll: updatedPoll as Poll,
+      total_votes: totalVotes,
+      options: optionResults,
+      user_voted: true,
+      user_votes: finalOptionIds,
+    }
+
+    return NextResponse.json({
+      success: true,
+      message: getRandomMicrocopy('voted'),
+      results,
+    })
   } catch (error) {
     console.error('Error voting:', error)
+    return NextResponse.json(
+      { error: 'Internal server error' },
+      { status: 500 }
+    )
+  }
+}
+
+/**
+ * GET /api/polls/[id]/vote
+ * Check if user has voted on this poll
+ */
+export async function GET(
+  request: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  try {
+    const { id } = await params
+    const { searchParams } = new URL(request.url)
+    const userId = searchParams.get('user_id')
+    const anonymousId = searchParams.get('anonymous_id')
+
+    if (!userId && !anonymousId) {
+      return NextResponse.json(
+        { error: 'User ID or Anonymous ID is required' },
+        { status: 400 }
+      )
+    }
+
+    // Generate IP hash
+    const forwarded = request.headers.get('x-forwarded-for')
+    const ip = forwarded ? forwarded.split(',')[0] : request.headers.get('x-real-ip') || 'unknown'
+    const ipHash = crypto.createHash('sha256').update(ip + id).digest('hex')
+
+    let query = supabaseAdmin
+      .from('sm_poll_responses')
+      .select('option_id')
+      .eq('poll_id', id)
+
+    if (userId) {
+      query = query.eq('user_id', userId)
+    } else {
+      query = query.or(`anonymous_id.eq.${anonymousId},ip_hash.eq.${ipHash}`)
+    }
+
+    const { data: votes } = await query
+
+    return NextResponse.json({
+      has_voted: votes && votes.length > 0,
+      voted_options: votes?.map(v => v.option_id) || [],
+    })
+  } catch (error) {
+    console.error('Error checking vote:', error)
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }
