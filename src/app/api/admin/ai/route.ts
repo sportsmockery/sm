@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import Anthropic from '@anthropic-ai/sdk'
+import { getPostIQSystemPrompt, getTeamKnowledge, VOICE_GUIDELINES, HEADLINE_GUIDELINES, SOCIAL_STRATEGY, JOURNALISM_STANDARDS } from '@/lib/postiq-knowledge'
 
 const anthropic = new Anthropic()
 
@@ -70,24 +71,33 @@ export async function POST(request: NextRequest) {
 }
 
 async function generateHeadlines(title: string, content: string, category?: string, team?: string) {
-  const prompt = `You are a sports journalist headline writer for Sports Mockery, a Chicago sports news site known for edgy, satirical takes.
+  const teamContext = team ? getTeamKnowledge(team) : ''
+  const systemPrompt = getPostIQSystemPrompt(team)
 
-Generate 5 alternative headlines for this article. The headlines should be:
-- Attention-grabbing and click-worthy (but not clickbait)
-- Witty or satirical when appropriate
-- SEO-friendly (include relevant keywords)
-- Varied in style (some punchy, some descriptive, some with wordplay)
+  const prompt = `${HEADLINE_GUIDELINES}
+
+${teamContext}
+
+Generate 5 alternative headlines for this article following Sports Mockery voice guidelines.
+
+REQUIREMENTS:
+- Generate 4 platform variants for each: SEO (50-60 chars), X/Twitter, Facebook, Push notification
+- Score each on: Rage (0-100), LOL (0-100), Hope (0-100)
+- Use fan-first language ("we" not neutral)
+- Include team-specific references when relevant
+- Make them click-worthy but credible
 
 Current title: "${title}"
 ${category ? `Category: ${category}` : ''}
-${team ? `Team: ${team}` : ''}
+${team ? `Team: ${team.charAt(0).toUpperCase() + team.slice(1)}` : ''}
 ${content ? `Article content preview: ${content.slice(0, 500)}...` : ''}
 
-Return ONLY a JSON array of 5 headline strings, no explanation.`
+Return ONLY a JSON array of 5 headline strings (use the best/main headline for each), no explanation.`
 
   const message = await anthropic.messages.create({
     model: 'claude-sonnet-4-20250514',
     max_tokens: 500,
+    system: systemPrompt,
     messages: [{ role: 'user', content: prompt }],
   })
 
@@ -113,9 +123,13 @@ Return ONLY a JSON array of 5 headline strings, no explanation.`
 }
 
 async function optimizeSEO(title: string, content: string, category?: string) {
-  const prompt = `You are an SEO expert for a sports news website called Sports Mockery.
+  const systemPrompt = getPostIQSystemPrompt()
 
-Analyze this article and provide SEO optimization:
+  const prompt = `You are PostIQ's SEO Autopilot function for Sports Mockery.
+
+${VOICE_GUIDELINES}
+
+Analyze this article and provide comprehensive SEO optimization:
 
 Title: "${title}"
 ${category ? `Category: ${category}` : ''}
@@ -123,15 +137,23 @@ Content: ${content.slice(0, 2000)}
 
 Return a JSON object with:
 {
-  "seoTitle": "optimized title for search (50-60 chars)",
-  "metaDescription": "compelling meta description (150-160 chars)",
+  "seoTitle": "optimized title for search (50-60 chars) - keywords first",
+  "metaDescription": "compelling meta description (150-160 chars) - fan-first voice",
   "focusKeyword": "primary keyword to target",
   "secondaryKeywords": ["array", "of", "secondary", "keywords"],
+  "suggestedSlug": "url-friendly-slug",
   "mockeryScore": {
     "score": number from 1-100,
-    "feedback": "brief feedback on the article's entertainment value and Sports Mockery style"
+    "feedback": "feedback on authenticity (fan voice), credibility (sourcing), virality (engagement potential)"
   },
-  "improvements": ["array of specific SEO improvement suggestions"]
+  "emotionTags": {
+    "rage": 0-100,
+    "hope": 0-100,
+    "lol": 0-100,
+    "nostalgia": 0-100
+  },
+  "improvements": ["array of specific improvements for SM voice and engagement"],
+  "internalLinkSuggestions": ["suggested topics to link to"]
 }
 
 Return ONLY the JSON object, no explanation.`
@@ -139,6 +161,7 @@ Return ONLY the JSON object, no explanation.`
   const message = await anthropic.messages.create({
     model: 'claude-sonnet-4-20250514',
     max_tokens: 800,
+    system: systemPrompt,
     messages: [{ role: 'user', content: prompt }],
   })
 
@@ -162,23 +185,36 @@ Return ONLY the JSON object, no explanation.`
 }
 
 async function generateIdeas(category?: string, team?: string) {
-  const prompt = `You are a creative sports content producer for Sports Mockery, a Chicago sports news site known for edgy, satirical takes on Chicago sports (Bears, Bulls, Cubs, White Sox, Blackhawks).
+  const teamContext = team ? getTeamKnowledge(team) : ''
+  const systemPrompt = getPostIQSystemPrompt(team)
 
-Generate 5 article ideas that would be timely and engaging. Consider:
-- Current sports season and what's happening
-- Hot takes and controversial opinions
-- Player comparisons and debates
-- Satirical pieces on team management
-- Fan culture and memes
+  const prompt = `You are PostIQ's Angle Finder function for Sports Mockery.
+
+${teamContext}
+
+Generate 5 article ideas using the ANGLE FINDER approach. Each idea should:
+- Be tagged with primary emotion (rage/hope/LOL/nostalgia/panic/analysis)
+- Use team-specific context and current events
+- Balance authenticity (fan voice), credibility (factual basis), virality (shareability)
 
 ${category ? `Focus on category: ${category}` : ''}
-${team ? `Focus on team: ${team}` : ''}
+${team ? `Focus on team: ${team.charAt(0).toUpperCase() + team.slice(1)}` : ''}
+
+Consider:
+- Current team context and recent events
+- Rivalry angles (Packers for Bears, Cardinals for Cubs, etc.)
+- Historical comparisons and nostalgia hooks
+- Fan frustrations and hopes
+- Satirical/meme-worthy situations
 
 Return a JSON array of objects with:
 {
-  "headline": "catchy headline",
-  "angle": "brief description of the angle/approach",
-  "type": "news|opinion|satire|analysis|listicle"
+  "headline": "catchy SM-voice headline",
+  "angle": "brief description of the approach",
+  "type": "news|opinion|satire|analysis|listicle|hot-take",
+  "emotion": "rage|hope|LOL|nostalgia|panic|analysis",
+  "emotionScore": 0-100,
+  "viralPotential": "low|medium|high"
 }
 
 Return ONLY the JSON array, no explanation.`
@@ -186,6 +222,7 @@ Return ONLY the JSON array, no explanation.`
   const message = await anthropic.messages.create({
     model: 'claude-sonnet-4-20250514',
     max_tokens: 800,
+    system: systemPrompt,
     messages: [{ role: 'user', content: prompt }],
   })
 
@@ -203,30 +240,51 @@ Return ONLY the JSON array, no explanation.`
 }
 
 async function checkGrammar(content: string) {
-  const prompt = `You are a professional editor. Check this content for grammar, spelling, punctuation, and clarity issues.
+  const systemPrompt = `You are PostIQ's Ethics Checker and Copy Tightener for Sports Mockery.
+
+${JOURNALISM_STANDARDS}
+
+${VOICE_GUIDELINES}`
+
+  const prompt = `Check this content for:
+
+1. GRAMMAR/SPELLING/PUNCTUATION issues
+2. JOURNALISM ETHICS issues:
+   - Unsourced claims that need attribution
+   - Potential defamation risks
+   - Opinion presented as fact
+   - Missing context
+3. VOICE issues:
+   - Weak/passive verbs
+   - Corporate speak that should be fan voice
+   - Missed opportunities for SM personality
 
 Content to check:
 ${content}
 
 Return a JSON object with:
 {
-  "correctedContent": "the full content with all corrections applied",
+  "correctedContent": "the full content with grammar corrections applied",
   "issues": [
     {
       "original": "the problematic text",
       "corrected": "the corrected text",
-      "explanation": "brief explanation of the issue"
+      "explanation": "brief explanation",
+      "type": "grammar|spelling|punctuation|attribution|voice|defamation-risk"
     }
   ],
-  "issueCount": number of issues found
+  "issueCount": number of issues found,
+  "ethicsFlags": ["any serious journalism concerns"],
+  "voiceSuggestions": ["ways to make copy more SM-voice"]
 }
 
-If no issues are found, return the original content with an empty issues array and issueCount of 0.
+If no issues are found, return the original content with empty arrays and issueCount of 0.
 Return ONLY the JSON object, no explanation.`
 
   const message = await anthropic.messages.create({
     model: 'claude-sonnet-4-20250514',
     max_tokens: 2000,
+    system: systemPrompt,
     messages: [{ role: 'user', content: prompt }],
   })
 
@@ -248,7 +306,18 @@ Return ONLY the JSON object, no explanation.`
 }
 
 async function generateExcerpt(title: string, content: string) {
-  const prompt = `Generate a compelling excerpt/summary (2-3 sentences, max 200 characters) for this sports article that will make readers want to click through.
+  const systemPrompt = getPostIQSystemPrompt()
+
+  const prompt = `Generate a compelling excerpt for this Sports Mockery article.
+
+${VOICE_GUIDELINES}
+
+Requirements:
+- 2-3 sentences, max 200 characters
+- Fan-first voice (use "we" when appropriate)
+- Tease tension, don't resolve it
+- Create urgency to click through
+- Match the emotional tone of the article
 
 Title: "${title}"
 Content: ${content.slice(0, 1500)}
@@ -258,6 +327,7 @@ Return ONLY the excerpt text, no explanation.`
   const message = await anthropic.messages.create({
     model: 'claude-sonnet-4-20250514',
     max_tokens: 200,
+    system: systemPrompt,
     messages: [{ role: 'user', content: prompt }],
   })
 

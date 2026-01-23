@@ -48,7 +48,8 @@ export default function StudioPostEditor({
   const isEditing = !!post?.id
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState('')
-  const [sidebarCollapsed, setSidebarCollapsed] = useState(true)
+  const [leftSidebarCollapsed, setLeftSidebarCollapsed] = useState(true)
+  const [rightSidebarCollapsed, setRightSidebarCollapsed] = useState(false)
   const [seoExpanded, setSeoExpanded] = useState(false)
   const [uploadingImage, setUploadingImage] = useState(false)
 
@@ -386,10 +387,10 @@ export default function StudioPostEditor({
         {/* Left Sidebar - collapsible */}
         <aside
           className={`flex-shrink-0 border-r border-[var(--border-default)] bg-[var(--bg-secondary)] transition-all duration-300 overflow-y-auto ${
-            sidebarCollapsed ? 'w-0' : 'w-64'
+            leftSidebarCollapsed ? 'w-0' : 'w-64'
           }`}
         >
-          {!sidebarCollapsed && (
+          {!leftSidebarCollapsed && (
             <div className="p-4 space-y-4">
               {/* Status */}
               <div>
@@ -534,11 +535,11 @@ export default function StudioPostEditor({
 
         {/* Sidebar Toggle */}
         <button
-          onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
+          onClick={() => setLeftSidebarCollapsed(!leftSidebarCollapsed)}
           className="flex-shrink-0 w-6 flex items-center justify-center border-r border-[var(--border-default)] bg-[var(--bg-tertiary)] hover:bg-[var(--bg-hover)] transition-colors"
         >
           <svg
-            className={`h-4 w-4 text-[var(--text-muted)] transition-transform ${sidebarCollapsed ? '' : 'rotate-180'}`}
+            className={`h-4 w-4 text-[var(--text-muted)] transition-transform ${leftSidebarCollapsed ? '' : 'rotate-180'}`}
             fill="none"
             viewBox="0 0 24 24"
             strokeWidth={1.5}
