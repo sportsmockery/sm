@@ -130,11 +130,12 @@ See `/AskAI_Wrong.md` for documented failures:
 | **Ideas** | Generates 5 article ideas based on category/team |
 | **Grammar** | Checks grammar, spelling, and punctuation; shows issues with corrections |
 | **Excerpt** | Auto-generates 2-3 sentence article summary |
+| **Auto-Chart** | Analyzes article, creates chart from data, inserts into content (checkbox in sidebar) |
 
 ### API Usage
 ```typescript
 POST /api/admin/ai
-{ action: 'headlines' | 'seo' | 'ideas' | 'grammar' | 'excerpt', title, content, category, team }
+{ action: 'headlines' | 'seo' | 'ideas' | 'grammar' | 'excerpt' | 'generate_chart', title, content, category, team }
 ```
 
 ### Key Files

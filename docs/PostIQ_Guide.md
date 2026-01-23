@@ -167,11 +167,85 @@ POST /api/admin/ai
 
 ---
 
+### 6. Add Chart To Post (Interactive Modal)
+
+Opens an interactive modal that analyzes article content and lets users customize and insert a chart.
+
+**How it works:**
+1. User clicks "PostIQ: Add Chart To Post" button in sidebar (under Featured Image)
+2. Modal opens and PostIQ analyzes the article for chartable data
+3. User sees:
+   - AI reasoning for the chart suggestion
+   - Editable chart title
+   - Chart type selector (bar, line, pie, player-comparison, team-stats)
+   - Data preview table
+   - Paragraph selector for insertion point
+4. User can click "Regenerate" to get a new suggestion
+5. User clicks "Insert Chart" to create and insert the chart
+
+**Modal Features:**
+- **Chart Title**: Editable field with AI-suggested title
+- **Chart Type**: Visual selector with 5 options (bar, line, pie, player-comparison, team-stats)
+- **Data Preview**: Table showing labels and values that will be charted
+- **Paragraph Selector**: Dropdown to choose where chart appears in article
+- **Regenerate Button**: Get a new AI suggestion
+
+**API Calls:**
+
+*Analyze (get suggestion):*
+```typescript
+POST /api/admin/ai
+{ action: 'analyze_chart', title, content, category }
+```
+
+*Response:*
+```json
+{
+  "shouldCreateChart": true,
+  "chartType": "bar",
+  "chartTitle": "Bears Rushing Yards Comparison",
+  "data": [
+    { "label": "D'Andre Swift", "value": 1049 },
+    { "label": "Khalil Herbert", "value": 611 }
+  ],
+  "paragraphIndex": 3,
+  "reasoning": "Article contains player rushing statistics that work well as a bar chart comparison."
+}
+```
+
+*Create chart (after user approval):*
+```typescript
+POST /api/charts
+{ type, title, size, colors, data, dataSource }
+```
+
+**What PostIQ looks for:**
+- Player statistics and comparisons
+- Team performance data
+- Season/game trends over time
+- Rankings and standings
+- Percentage distributions (snap counts, play types)
+
+**Chart types available:**
+| Type | Icon | Use Case |
+|------|------|----------|
+| Bar | Bars | Comparing values (player stats, rankings) |
+| Line | Line graph | Trends over time (season progress) |
+| Pie | Pie slice | Percentages/distributions |
+| Player Comparison | Person | Head-to-head player stats |
+| Team Stats | Group | Team performance metrics |
+
+---
+
 ## UI Location
 
-PostIQ appears as the **"AI Assistant"** panel in the post editor at `/admin/posts/new`.
+PostIQ appears in the post editor at `/admin/posts/new` in two places:
 
-**Tabs:**
+### Right Sidebar - Settings Panel
+- **PostIQ: Add Chart To Post** button (under Featured Image)
+- Opens interactive modal to analyze content and insert a chart
+
+### AI Assistant Panel (Tabs)
 1. **Headlines** - Generate alternative headlines
 2. **SEO** - Analyze SEO + Auto Excerpt button
 3. **Ideas** - Generate article ideas
@@ -205,4 +279,4 @@ PostIQ appears as the **"AI Assistant"** panel in the post editor at `/admin/pos
 | **Users** | Admin writers only | Public users |
 | **Model** | Claude Sonnet 4 | Perplexity sonar-pro |
 | **Backend** | Direct Anthropic API | SM Data Lab |
-| **Features** | Headlines, SEO, ideas, grammar | Q&A, charts, follow-ups |
+| **Features** | Headlines, SEO, ideas, grammar, auto-chart | Q&A, charts, follow-ups |

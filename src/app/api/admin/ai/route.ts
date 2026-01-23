@@ -25,7 +25,7 @@ function extractJSON(text: string): string {
 }
 
 interface AIRequest {
-  action: 'headlines' | 'seo' | 'ideas' | 'grammar' | 'excerpt'
+  action: 'headlines' | 'seo' | 'ideas' | 'grammar' | 'excerpt' | 'generate_chart' | 'generate_seo' | 'analyze_chart'
   content?: string
   title?: string
   category?: string
@@ -45,6 +45,7 @@ export async function POST(request: NextRequest) {
       case 'headlines':
         return await generateHeadlines(title || '', content || '', category, team)
       case 'seo':
+      case 'generate_seo':
         return await optimizeSEO(title || '', content || '', category)
       case 'ideas':
         return await generateIdeas(category, team)
@@ -52,6 +53,10 @@ export async function POST(request: NextRequest) {
         return await checkGrammar(content || '')
       case 'excerpt':
         return await generateExcerpt(title || '', content || '')
+      case 'analyze_chart':
+        return await analyzeChartData(title || '', content || '', category)
+      case 'generate_chart':
+        return await generateChartForPost(title || '', content || '', category)
       default:
         return NextResponse.json({ error: 'Invalid action' }, { status: 400 })
     }
@@ -259,4 +264,235 @@ Return ONLY the excerpt text, no explanation.`
   const excerpt = message.content[0].type === 'text' ? message.content[0].text : ''
 
   return NextResponse.json({ excerpt: excerpt.trim() })
+}
+
+/**
+ * Analyze article content for chartable data (returns analysis only, doesn't create chart)
+ * Used by the interactive chart modal
+ */
+async function analyzeChartData(title: string, content: string, category?: string) {
+  // Strip HTML tags for analysis
+  const plainText = content.replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim()
+
+  const prompt = `You are a sports data analyst for Sports Mockery. Analyze this article and identify data that would make a compelling chart visualization.
+
+Article Title: "${title}"
+Article Content:
+${plainText.slice(0, 3000)}
+
+Your task:
+1. Find statistical data, comparisons, rankings, or trends mentioned in the article that could be visualized
+2. Choose the best chart type:
+   - "bar" for comparing values (player stats, rankings, comparisons)
+   - "line" for trends over time (season progress, performance over weeks/games)
+   - "pie" for percentages or distributions (play types, snap counts)
+   - "player-comparison" for comparing two players head-to-head
+   - "team-stats" for team performance metrics
+3. Extract the data points with labels and values
+4. Identify which paragraph contains the data (count from 1)
+
+Return a JSON object with:
+{
+  "shouldCreateChart": true or false (false if no good data found),
+  "chartType": "bar" | "line" | "pie" | "player-comparison" | "team-stats",
+  "chartTitle": "descriptive title for the chart",
+  "data": [
+    { "label": "Category/Time", "value": number }
+  ],
+  "paragraphIndex": number (1-based index of paragraph where chart should appear after),
+  "reasoning": "brief explanation of why this data makes a good chart"
+}
+
+If the article doesn't contain good chartable data (no statistics, comparisons, or trends), set shouldCreateChart to false.
+Return ONLY the JSON object, no explanation.`
+
+  const message = await anthropic.messages.create({
+    model: 'claude-sonnet-4-20250514',
+    max_tokens: 1000,
+    messages: [{ role: 'user', content: prompt }],
+  })
+
+  const responseText = message.content[0].type === 'text' ? message.content[0].text : ''
+  console.log('Chart analysis response:', responseText.slice(0, 500))
+
+  try {
+    const jsonText = extractJSON(responseText)
+    const analysis = JSON.parse(jsonText)
+    return NextResponse.json(analysis)
+  } catch (e) {
+    console.error('Chart analysis parse error:', e)
+    return NextResponse.json({
+      shouldCreateChart: false,
+      reason: 'Failed to analyze content for chart data',
+    })
+  }
+}
+
+/**
+ * Generate a chart for a post based on its content
+ * Analyzes the article to find chartable data, creates a chart, and inserts it
+ */
+async function generateChartForPost(title: string, content: string, category?: string) {
+  // Strip HTML tags for analysis
+  const plainText = content.replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim()
+
+  // Determine team from category
+  const teamMap: Record<string, string> = {
+    'Chicago Bears': 'bears',
+    'Bears': 'bears',
+    'Chicago Bulls': 'bulls',
+    'Bulls': 'bulls',
+    'Chicago Cubs': 'cubs',
+    'Cubs': 'cubs',
+    'Chicago White Sox': 'whitesox',
+    'White Sox': 'whitesox',
+    'Chicago Blackhawks': 'blackhawks',
+    'Blackhawks': 'blackhawks',
+  }
+  const team = category ? (teamMap[category] || 'bears') : 'bears'
+
+  const prompt = `You are a sports data analyst for Sports Mockery. Analyze this article and identify data that would make a compelling chart visualization.
+
+Article Title: "${title}"
+Article Content:
+${plainText.slice(0, 3000)}
+
+Your task:
+1. Find statistical data, comparisons, rankings, or trends mentioned in the article that could be visualized
+2. Choose the best chart type:
+   - "bar" for comparing values (player stats, rankings, comparisons)
+   - "line" for trends over time (season progress, performance over weeks/games)
+   - "pie" for percentages or distributions (play types, snap counts)
+3. Extract the data points with labels and values
+4. Identify which paragraph contains the data (count from 1)
+
+Return a JSON object with:
+{
+  "shouldCreateChart": true or false (false if no good data found),
+  "chartType": "bar" | "line" | "pie",
+  "chartTitle": "descriptive title for the chart",
+  "data": [
+    { "label": "Category/Time", "value": number }
+  ],
+  "paragraphIndex": number (1-based index of paragraph where chart should appear after),
+  "reasoning": "brief explanation of why this data makes a good chart"
+}
+
+If the article doesn't contain good chartable data (no statistics, comparisons, or trends), set shouldCreateChart to false.
+Return ONLY the JSON object, no explanation.`
+
+  const message = await anthropic.messages.create({
+    model: 'claude-sonnet-4-20250514',
+    max_tokens: 1000,
+    messages: [{ role: 'user', content: prompt }],
+  })
+
+  const responseText = message.content[0].type === 'text' ? message.content[0].text : ''
+  console.log('Chart analysis response:', responseText.slice(0, 500))
+
+  try {
+    const jsonText = extractJSON(responseText)
+    const analysis = JSON.parse(jsonText)
+
+    if (!analysis.shouldCreateChart || !analysis.data || analysis.data.length < 2) {
+      return NextResponse.json({
+        success: false,
+        reason: 'No suitable chart data found in article',
+        updatedContent: null,
+      })
+    }
+
+    // Create the chart via internal API call
+    const chartPayload = {
+      type: analysis.chartType || 'bar',
+      title: analysis.chartTitle || `${title} - Data`,
+      size: 'medium',
+      colors: { scheme: 'team', team },
+      data: analysis.data,
+      dataSource: 'manual',
+    }
+
+    // Make internal request to create chart
+    const baseUrl = process.env.NEXT_PUBLIC_APP_URL || process.env.VERCEL_URL
+      ? `https://${process.env.VERCEL_URL}`
+      : 'http://localhost:3000'
+
+    const chartResponse = await fetch(`${baseUrl}/api/charts`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(chartPayload),
+    })
+
+    if (!chartResponse.ok) {
+      console.error('Failed to create chart:', await chartResponse.text())
+      return NextResponse.json({
+        success: false,
+        reason: 'Failed to create chart',
+        updatedContent: null,
+      })
+    }
+
+    const chartResult = await chartResponse.json()
+    const shortcode = `[chart:${chartResult.id}]`
+
+    // Insert shortcode after the specified paragraph
+    const updatedContent = insertShortcodeAfterParagraph(
+      content,
+      shortcode,
+      analysis.paragraphIndex || 1
+    )
+
+    return NextResponse.json({
+      success: true,
+      chartId: chartResult.id,
+      shortcode,
+      chartType: analysis.chartType,
+      chartTitle: analysis.chartTitle,
+      updatedContent,
+    })
+  } catch (e) {
+    console.error('Chart generation error:', e)
+    return NextResponse.json({
+      success: false,
+      reason: 'Failed to analyze content for chart',
+      updatedContent: null,
+    })
+  }
+}
+
+/**
+ * Insert a shortcode after a specific paragraph in HTML content
+ */
+function insertShortcodeAfterParagraph(
+  htmlContent: string,
+  shortcode: string,
+  paragraphIndex: number
+): string {
+  // Find all closing </p> tags
+  const closingTagRegex = /<\/p>/gi
+  let match
+  let count = 0
+  let insertPosition = -1
+
+  while ((match = closingTagRegex.exec(htmlContent)) !== null) {
+    count++
+    if (count === paragraphIndex) {
+      insertPosition = match.index + match[0].length
+      break
+    }
+  }
+
+  // If we found the position, insert the shortcode wrapped in a div
+  if (insertPosition > 0) {
+    const chartBlock = `\n<div class="chart-embed my-6">${shortcode}</div>\n`
+    return (
+      htmlContent.slice(0, insertPosition) +
+      chartBlock +
+      htmlContent.slice(insertPosition)
+    )
+  }
+
+  // If paragraph not found, insert at the end of content
+  const chartBlock = `\n<div class="chart-embed my-6">${shortcode}</div>`
+  return htmlContent + chartBlock
 }
