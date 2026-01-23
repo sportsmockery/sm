@@ -12,24 +12,30 @@ export const dynamic = 'force-dynamic'
  * Query params:
  * - team: Filter by specific team ID (e.g., 'bears', 'bulls')
  * - all: If 'true', return all games (not just in-progress)
+ * - include_upcoming: If 'true', include games starting within 5 minutes
  */
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url)
     const team = searchParams.get('team')
     const all = searchParams.get('all') === 'true'
+    const includeUpcoming = searchParams.get('include_upcoming') === 'true'
 
     let games
 
     if (team) {
       // Filter by specific team
-      games = liveGamesCache.getTeamGames(team)
+      games = includeUpcoming
+        ? liveGamesCache.getTeamGamesWithUpcoming(team, 5)
+        : liveGamesCache.getTeamGames(team)
     } else if (all) {
       // Return all games
       games = liveGamesCache.getAllGames()
     } else {
-      // Default: return all Chicago teams' in-progress games
-      games = liveGamesCache.getChicagoGames()
+      // Default: return all Chicago teams' in-progress games (include upcoming by default for UI sync)
+      games = includeUpcoming
+        ? liveGamesCache.getChicagoGamesWithUpcoming(5)
+        : liveGamesCache.getChicagoGames()
     }
 
     // Transform to a lighter payload for the UI
@@ -37,6 +43,7 @@ export async function GET(request: NextRequest) {
       game_id: game.game_id,
       sport: game.sport,
       status: game.status,
+      game_start_time: game.game_start_time,
       home_team_id: game.home_team_id,
       away_team_id: game.away_team_id,
       home_team_name: game.home_team_name,

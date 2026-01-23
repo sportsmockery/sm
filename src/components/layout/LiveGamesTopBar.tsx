@@ -21,6 +21,7 @@ interface LiveGameData {
   game_id: string
   sport: 'nfl' | 'nba' | 'nhl' | 'mlb'
   status: string
+  game_start_time?: string
   home_team_id: string
   away_team_id: string
   home_team_name: string
@@ -71,9 +72,11 @@ export default function LiveGamesTopBar({ teamFilter, isHomepage = false }: Live
   // Fetch live games from /api/live-games
   const fetchLiveGames = useCallback(async () => {
     try {
-      const url = detectedTeam && !isHomepage
+      const baseUrl = detectedTeam && !isHomepage
         ? `/api/live-games?team=${detectedTeam}`
         : '/api/live-games'
+      // Include upcoming games to show "Starting Soon" indicators
+      const url = `${baseUrl}${baseUrl.includes('?') ? '&' : '?'}include_upcoming=true`
 
       const res = await fetch(url, { cache: 'no-store' })
 
@@ -83,9 +86,23 @@ export default function LiveGamesTopBar({ teamFilter, isHomepage = false }: Live
 
       const data: LiveGamesResponse = await res.json()
 
-      // Filter to only in-progress games
-      const inProgress = data.games.filter(g => g.status === 'in_progress')
-      setLiveGames(inProgress)
+      // Filter to in-progress games OR upcoming games that should have started
+      const now = Date.now()
+      const relevantGames = data.games.filter(g => {
+        // Always show in_progress games
+        if (g.status === 'in_progress') return true
+
+        // Show upcoming games that are starting within 5 minutes or have passed their start time
+        if (g.status === 'upcoming' && g.game_start_time) {
+          const startTime = new Date(g.game_start_time).getTime()
+          const fiveMinutesFromNow = now + 5 * 60 * 1000
+          // Show if starting within 5 minutes OR if start time has passed (game should be live)
+          return startTime <= fiveMinutesFromNow
+        }
+
+        return false
+      })
+      setLiveGames(relevantGames)
       setError(null)
     } catch (err) {
       console.error('[LiveGamesTopBar] Error fetching live games:', err)
@@ -109,8 +126,42 @@ export default function LiveGamesTopBar({ teamFilter, isHomepage = false }: Live
     return null
   }
 
+  // Check if game is live or starting soon
+  const isGameLive = (game: LiveGameData): boolean => {
+    return game.status === 'in_progress'
+  }
+
+  // Check if game is starting soon (upcoming but within window)
+  const isStartingSoon = (game: LiveGameData): boolean => {
+    if (game.status !== 'upcoming') return false
+    if (!game.game_start_time) return false
+
+    const now = Date.now()
+    const startTime = new Date(game.game_start_time).getTime()
+    // Starting soon if within 5 minutes of start time
+    return startTime <= now + 5 * 60 * 1000
+  }
+
   // Get the period/status display text
   const getStatusText = (game: LiveGameData): string => {
+    // For upcoming games, show countdown or "Starting Soon"
+    if (game.status === 'upcoming' && game.game_start_time) {
+      const now = Date.now()
+      const startTime = new Date(game.game_start_time).getTime()
+      const diffMs = startTime - now
+
+      if (diffMs <= 0) {
+        return 'Starting...'
+      }
+
+      const diffMins = Math.ceil(diffMs / 60000)
+      if (diffMins <= 1) {
+        return 'Starting Soon'
+      }
+      return `${diffMins}m`
+    }
+
+    // For live games, show period and clock
     if (game.period_label && game.clock) {
       return `${game.period_label} ${game.clock}`
     }
@@ -169,15 +220,29 @@ export default function LiveGamesTopBar({ teamFilter, isHomepage = false }: Live
                 href={getLivePageUrl(game)}
                 className="flex items-center gap-2 sm:gap-3 px-3 sm:px-4 py-2 hover:bg-white/10 transition-colors min-w-fit border-r border-red-700/50 last:border-r-0"
               >
-                {/* Live Badge */}
+                {/* Live/Starting Badge */}
                 <div className="flex items-center gap-1.5 flex-shrink-0">
-                  <span className="relative flex h-2 w-2">
-                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
-                    <span className="relative inline-flex rounded-full h-full w-full bg-red-500"></span>
-                  </span>
-                  <span className="text-[10px] sm:text-xs font-bold uppercase tracking-wide text-red-300">
-                    LIVE
-                  </span>
+                  {isGameLive(game) ? (
+                    <>
+                      <span className="relative flex h-2 w-2">
+                        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
+                        <span className="relative inline-flex rounded-full h-full w-full bg-red-500"></span>
+                      </span>
+                      <span className="text-[10px] sm:text-xs font-bold uppercase tracking-wide text-red-300">
+                        LIVE
+                      </span>
+                    </>
+                  ) : isStartingSoon(game) ? (
+                    <>
+                      <span className="relative flex h-2 w-2">
+                        <span className="animate-pulse absolute inline-flex h-full w-full rounded-full bg-yellow-400 opacity-75"></span>
+                        <span className="relative inline-flex rounded-full h-full w-full bg-yellow-500"></span>
+                      </span>
+                      <span className="text-[10px] sm:text-xs font-bold uppercase tracking-wide text-yellow-300">
+                        SOON
+                      </span>
+                    </>
+                  ) : null}
                 </div>
 
                 {/* Team Logos */}

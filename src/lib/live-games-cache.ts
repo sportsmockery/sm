@@ -6,6 +6,7 @@ export interface LiveGame {
   sport: 'nfl' | 'nba' | 'nhl' | 'mlb'
   season: number
   game_date: string
+  game_start_time?: string // ISO timestamp of scheduled start time
   status: 'upcoming' | 'in_progress' | 'final' | 'suspended'
   home_team_id: string
   away_team_id: string
@@ -186,11 +187,65 @@ class LiveGamesCache {
     )
   }
 
+  // Get upcoming Chicago games starting within the next N minutes
+  getUpcomingChicagoGames(withinMinutes: number = 5): LiveGame[] {
+    const now = Date.now()
+    const cutoff = now + withinMinutes * 60 * 1000
+
+    return this.getAllGames().filter(g => {
+      if (g.status !== 'upcoming') return false
+      if (!CHICAGO_TEAM_IDS.includes(g.home_team_id) && !CHICAGO_TEAM_IDS.includes(g.away_team_id)) return false
+
+      // Check if game starts within the window
+      if (g.game_start_time) {
+        const startTime = new Date(g.game_start_time).getTime()
+        return startTime <= cutoff && startTime >= now - 60000 // Include games that just started (within last minute)
+      }
+
+      return false
+    })
+  }
+
+  // Get Chicago games including those starting soon (for UI indicators)
+  getChicagoGamesWithUpcoming(withinMinutes: number = 5): LiveGame[] {
+    const inProgress = this.getChicagoGames()
+    const upcoming = this.getUpcomingChicagoGames(withinMinutes)
+
+    // Combine and deduplicate
+    const gameMap = new Map<string, LiveGame>()
+    for (const game of [...inProgress, ...upcoming]) {
+      gameMap.set(game.game_id, game)
+    }
+
+    return Array.from(gameMap.values())
+  }
+
   // Get games for a specific team
   getTeamGames(teamId: string): LiveGame[] {
     return this.getInProgressGames().filter(g =>
       g.home_team_id === teamId || g.away_team_id === teamId
     )
+  }
+
+  // Get team games including upcoming (starting within N minutes)
+  getTeamGamesWithUpcoming(teamId: string, withinMinutes: number = 5): LiveGame[] {
+    const now = Date.now()
+    const cutoff = now + withinMinutes * 60 * 1000
+
+    return this.getAllGames().filter(g => {
+      if (g.home_team_id !== teamId && g.away_team_id !== teamId) return false
+
+      // Include in-progress games
+      if (g.status === 'in_progress') return true
+
+      // Include upcoming games starting soon
+      if (g.status === 'upcoming' && g.game_start_time) {
+        const startTime = new Date(g.game_start_time).getTime()
+        return startTime <= cutoff && startTime >= now - 60000
+      }
+
+      return false
+    })
   }
 
   // Get a single game by ID
