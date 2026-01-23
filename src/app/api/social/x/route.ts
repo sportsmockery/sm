@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { TwitterApi } from 'twitter-api-v2'
+import { TwitterApi, ApiResponseError } from 'twitter-api-v2'
 
 /**
  * POST /api/social/x
@@ -30,9 +30,25 @@ export async function POST(request: NextRequest) {
     const accessToken = process.env.X_ACCESS_TOKEN
     const accessTokenSecret = process.env.X_ACCESS_TOKEN_SECRET
 
+    // Log which credentials are present (not values)
+    console.log('[X] Credentials check:', {
+      X_API_KEY: !!apiKey,
+      X_API_SECRET: !!apiSecret,
+      X_ACCESS_TOKEN: !!accessToken,
+      X_ACCESS_TOKEN_SECRET: !!accessTokenSecret,
+    })
+
     if (!apiKey || !apiSecret || !accessToken || !accessTokenSecret) {
-      console.error('[X] Missing OAuth 1.0a credentials')
-      return NextResponse.json({ error: 'X/Twitter not configured' }, { status: 500 })
+      const missing = []
+      if (!apiKey) missing.push('X_API_KEY')
+      if (!apiSecret) missing.push('X_API_SECRET')
+      if (!accessToken) missing.push('X_ACCESS_TOKEN')
+      if (!accessTokenSecret) missing.push('X_ACCESS_TOKEN_SECRET')
+      console.error('[X] Missing OAuth 1.0a credentials:', missing)
+      return NextResponse.json(
+        { error: 'X/Twitter not configured', missing },
+        { status: 500 }
+      )
     }
 
     // Tweet text: caption + URL.
@@ -52,6 +68,20 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ success: true, data })
   } catch (error: unknown) {
     console.error('[X] Error:', error)
+
+    // Extract detailed error info from twitter-api-v2
+    if (error instanceof ApiResponseError) {
+      const details = {
+        code: error.code,
+        message: error.message,
+        data: error.data,
+        errors: error.errors,
+        rateLimit: error.rateLimit,
+      }
+      console.error('[X] API Response Error details:', JSON.stringify(details, null, 2))
+      return NextResponse.json({ error: 'X post failed', details }, { status: 500 })
+    }
+
     return NextResponse.json(
       {
         error: 'X post failed',
