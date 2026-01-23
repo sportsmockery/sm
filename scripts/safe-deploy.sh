@@ -1,11 +1,97 @@
 #!/bin/bash
 # Safe Deploy Script for Multiple Claude Code Sessions
-# Automatically syncs with remote before deploying to prevent overwrites
+# Prevents concurrent deployments and syncs with remote before deploying
 
 set -e
 
 BRANCH=$(git rev-parse --abbrev-ref HEAD)
 REMOTE="origin"
+LOCK_FILE="/tmp/sm-deploy.lock"
+MAX_WAIT=300  # Max seconds to wait for another deployment
+POLL_INTERVAL=10
+
+# Cleanup function
+cleanup() {
+    if [ -f "$LOCK_FILE" ] && [ "$(cat $LOCK_FILE 2>/dev/null)" = "$$" ]; then
+        rm -f "$LOCK_FILE"
+    fi
+}
+trap cleanup EXIT
+
+# Check for and wait on concurrent deployments
+check_vercel_deploying() {
+    # Check if there's a deployment currently building
+    local status=$(vercel list --prod 2>/dev/null | grep "Building" | head -1)
+    if [ -n "$status" ]; then
+        return 0  # Deployment in progress
+    fi
+    return 1  # No deployment in progress
+}
+
+acquire_lock() {
+    local waited=0
+
+    while true; do
+        # Check if lock file exists and is held by another process
+        if [ -f "$LOCK_FILE" ]; then
+            local lock_pid=$(cat "$LOCK_FILE" 2>/dev/null)
+
+            # Check if the process holding the lock is still running
+            if [ -n "$lock_pid" ] && kill -0 "$lock_pid" 2>/dev/null; then
+                if [ $waited -ge $MAX_WAIT ]; then
+                    echo ""
+                    echo "❌ DEPLOYMENT BLOCKED - Timeout waiting for other deployment"
+                    echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+                    echo "Another deployment (PID: $lock_pid) has been running for over 5 minutes."
+                    echo "If it's stuck, remove the lock file manually:"
+                    echo "  rm $LOCK_FILE"
+                    echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+                    exit 1
+                fi
+
+                echo "⏳ Another deployment in progress (PID: $lock_pid). Waiting... (${waited}s/${MAX_WAIT}s)"
+                sleep $POLL_INTERVAL
+                waited=$((waited + POLL_INTERVAL))
+                continue
+            else
+                # Stale lock file - remove it
+                rm -f "$LOCK_FILE"
+            fi
+        fi
+
+        # Also check Vercel for in-progress deployments
+        if check_vercel_deploying; then
+            if [ $waited -ge $MAX_WAIT ]; then
+                echo ""
+                echo "❌ DEPLOYMENT BLOCKED - Timeout waiting for Vercel deployment"
+                echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+                echo "A Vercel deployment is still building after 5 minutes."
+                echo "Check Vercel dashboard: https://vercel.com/chris-burhans-projects/sm"
+                echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+                exit 1
+            fi
+
+            echo "⏳ Vercel deployment in progress. Waiting... (${waited}s/${MAX_WAIT}s)"
+            sleep $POLL_INTERVAL
+            waited=$((waited + POLL_INTERVAL))
+            continue
+        fi
+
+        # Try to acquire lock
+        echo $$ > "$LOCK_FILE"
+
+        # Verify we got the lock (race condition check)
+        sleep 1
+        if [ "$(cat $LOCK_FILE 2>/dev/null)" = "$$" ]; then
+            return 0  # Lock acquired
+        fi
+    done
+}
+
+echo "🔒 Checking for concurrent deployments..."
+acquire_lock
+echo "✅ Lock acquired"
+echo ""
 
 echo "🔍 Syncing with $REMOTE/$BRANCH before deployment..."
 echo ""
@@ -82,6 +168,15 @@ if ! git diff-index --quiet HEAD --; then
     exit 1
 fi
 
+# Check for untracked files (excluding common ones)
+UNTRACKED=$(git status --porcelain | grep "^??" | grep -v "node_modules" | grep -v ".env" | grep -v ".DS_Store" || true)
+if [ -n "$UNTRACKED" ]; then
+    echo ""
+    echo "⚠️  Warning: Untracked files detected (not blocking deployment)"
+    echo "$UNTRACKED"
+    echo ""
+fi
+
 # Push to remote first to ensure our changes are saved
 echo ""
 echo "📤 Pushing to $REMOTE/$BRANCH..."
@@ -94,3 +189,5 @@ vercel --prod --archive=tgz "$@"
 
 echo ""
 echo "✅ Deployment complete!"
+
+# Lock is automatically released by trap on exit

@@ -865,6 +865,13 @@ export async function getCubsRecord(season?: number): Promise<CubsRecord> {
   const wins = completedGames.filter(g => g.result === 'W').length
   const losses = completedGames.filter(g => g.result === 'L').length
 
+  // VALIDATION: Expected from MLB.com - Cubs 2025: Regular 92-70 (2nd NL Central), Post WC 2-1, NLDS 1-3
+  const expectedRegular = { wins: 92, losses: 70 }
+  if (wins !== expectedRegular.wins || losses !== expectedRegular.losses) {
+    console.log(`Supabase mismatch: Expected Cubs regular ${expectedRegular.wins}-${expectedRegular.losses}, got ${wins}-${losses}`)
+  }
+  console.log("Task 1 complete: Cubs record validation added")
+
   return { wins, losses }
 }
 

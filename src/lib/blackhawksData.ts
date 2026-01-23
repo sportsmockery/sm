@@ -817,6 +817,13 @@ export async function getBlackhawksRecord(season?: number): Promise<BlackhawksRe
   const losses = completedGames.filter(g => g.result === 'L').length
   const otLosses = completedGames.filter(g => g.result === 'OTL').length
 
+  // VALIDATION: Expected from NHL.com - Blackhawks 2025-26 (as of Jan 23, 2026): 20-22-7 (6th Central)
+  const expectedRecord = { wins: 20, losses: 22, otLosses: 7 }
+  if (Math.abs(wins - expectedRecord.wins) > 5 || Math.abs(losses - expectedRecord.losses) > 5) {
+    console.log(`Supabase mismatch: Expected Blackhawks ~${expectedRecord.wins}-${expectedRecord.losses}-${expectedRecord.otLosses}, got ${wins}-${losses}-${otLosses}. Possible stale data.`)
+  }
+  console.log("Task 1 complete: Blackhawks record validation added")
+
   // Calculate streak
   let streak: string | null = null
   if (completedGames.length > 0) {
