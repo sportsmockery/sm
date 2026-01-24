@@ -472,6 +472,7 @@ export async function getBlackhawksSchedule(season?: number): Promise<Blackhawks
 
   if (!datalabAdmin) return []
 
+  // Try with 'REG'/'POST' format first (standard format)
   const { data, error } = await datalabAdmin
     .from('blackhawks_games_master')
     .select(`
@@ -492,10 +493,13 @@ export async function getBlackhawksSchedule(season?: number): Promise<Blackhawks
       shootout
     `)
     .eq('season', targetSeason)
-    .in('game_type', ['regular', 'postseason'])
-    .order('game_date', { ascending: false })
+    .in('game_type', ['REG', 'POST', 'regular', 'postseason'])
+    .order('game_date', { ascending: true })
 
-  if (error) return []
+  if (error) {
+    console.error('Blackhawks schedule error:', error)
+    return []
+  }
 
   // If no games in current season, fall back to previous season
   if (!data || data.length === 0) {
@@ -519,8 +523,8 @@ export async function getBlackhawksSchedule(season?: number): Promise<Blackhawks
         shootout
       `)
       .eq('season', targetSeason - 1)
-      .in('game_type', ['regular', 'postseason'])
-      .order('game_date', { ascending: false })
+      .in('game_type', ['REG', 'POST', 'regular', 'postseason'])
+      .order('game_date', { ascending: true })
 
     if (prevError || !prevData) return []
     return prevData.map((g: any) => transformGame(g))
