@@ -32,8 +32,9 @@ export default async function StudioNewPostPage() {
   const categories = categoriesResult.data || []
   const authors = authorsResult.data || []
 
+  // Find author matching current user's email (case-insensitive)
   const currentUserAuthor = user?.email
-    ? authors.find((a: { email?: string }) => a.email === user.email)
+    ? authors.find((a: { email?: string }) => a.email?.toLowerCase() === user.email?.toLowerCase())
     : null
 
   return (

@@ -36,9 +36,9 @@ export default async function AdminNewPostPage() {
   const categories = categoriesResult.data || []
   const authors = authorsResult.data || []
 
-  // Find author matching current user's email
+  // Find author matching current user's email (case-insensitive)
   const currentUserAuthor = user?.email
-    ? authors.find((a: { email?: string }) => a.email === user.email)
+    ? authors.find((a: { email?: string }) => a.email?.toLowerCase() === user.email?.toLowerCase())
     : null
 
   return (
