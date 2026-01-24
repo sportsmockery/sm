@@ -16,6 +16,126 @@ import { NextRequest, NextResponse } from 'next/server'
 const DATALAB_API_URL = process.env.DATALAB_API_URL || 'https://datalab.sportsmockery.com'
 
 /**
+ * Team detection patterns and their sport mappings
+ */
+const TEAM_PATTERNS: { pattern: RegExp; team: string; sport: string }[] = [
+  { pattern: /\b(bears|chicago bears|da bears)\b/i, team: 'bears', sport: 'nfl' },
+  { pattern: /\b(bulls|chicago bulls)\b/i, team: 'bulls', sport: 'nba' },
+  { pattern: /\b(blackhawks|hawks|chicago blackhawks)\b/i, team: 'blackhawks', sport: 'nhl' },
+  { pattern: /\b(cubs|chicago cubs|cubbies)\b/i, team: 'cubs', sport: 'mlb' },
+  { pattern: /\b(white sox|whitesox|sox|chicago white sox)\b/i, team: 'whitesox', sport: 'mlb' },
+]
+
+/**
+ * Player to team mappings for common players
+ */
+const PLAYER_TEAM_MAP: { pattern: RegExp; team: string; sport: string }[] = [
+  // Bears
+  { pattern: /\b(caleb williams|williams)\b/i, team: 'bears', sport: 'nfl' },
+  { pattern: /\b(dj moore|moore)\b/i, team: 'bears', sport: 'nfl' },
+  { pattern: /\b(rome odunze|odunze)\b/i, team: 'bears', sport: 'nfl' },
+  { pattern: /\b(montez sweat|sweat)\b/i, team: 'bears', sport: 'nfl' },
+  // Bulls
+  { pattern: /\b(demar derozan|derozan)\b/i, team: 'bulls', sport: 'nba' },
+  { pattern: /\b(zach lavine|lavine)\b/i, team: 'bulls', sport: 'nba' },
+  { pattern: /\b(coby white)\b/i, team: 'bulls', sport: 'nba' },
+  // Blackhawks
+  { pattern: /\b(connor bedard|bedard)\b/i, team: 'blackhawks', sport: 'nhl' },
+  // Cubs
+  { pattern: /\b(dansby swanson|swanson)\b/i, team: 'cubs', sport: 'mlb' },
+  { pattern: /\b(cody bellinger|bellinger)\b/i, team: 'cubs', sport: 'mlb' },
+  // White Sox
+  { pattern: /\b(luis robert|robert)\b/i, team: 'whitesox', sport: 'mlb' },
+]
+
+/**
+ * Detect team and sport from query text
+ */
+function detectTeamAndSport(query: string): { team: string | null; sport: string | null } {
+  // First check explicit team mentions
+  for (const { pattern, team, sport } of TEAM_PATTERNS) {
+    if (pattern.test(query)) {
+      return { team, sport }
+    }
+  }
+  // Then check player names
+  for (const { pattern, team, sport } of PLAYER_TEAM_MAP) {
+    if (pattern.test(query)) {
+      return { team, sport }
+    }
+  }
+  return { team: null, sport: null }
+}
+
+/**
+ * Extract year from query (e.g., "2025 season", "last year", "this year")
+ */
+function extractYear(query: string): number | null {
+  // Look for explicit year mention (2020-2030 range)
+  const yearMatch = query.match(/\b(202[0-9])\b/)
+  if (yearMatch) {
+    return parseInt(yearMatch[1], 10)
+  }
+
+  // Handle relative time references
+  const currentYear = new Date().getFullYear()
+  const lowerQuery = query.toLowerCase()
+
+  if (lowerQuery.includes('this year') || lowerQuery.includes('this season') || lowerQuery.includes('current season')) {
+    return currentYear
+  }
+  if (lowerQuery.includes('last year') || lowerQuery.includes('last season') || lowerQuery.includes('previous season')) {
+    return currentYear - 1
+  }
+
+  // Default to current year if no year specified
+  return currentYear
+}
+
+/**
+ * Normalize season start year based on sport
+ * - NFL/MLB: season_start_year = requestedYear directly
+ * - NBA/NHL: 2025 and 2026 both map to 2025 for 2025-26 season
+ */
+function normalizeSeasonYear(requestedYear: number, sport: string | null): number {
+  if (sport === 'nba' || sport === 'nhl') {
+    // NBA/NHL seasons span two calendar years (e.g., 2025-26 season)
+    // Both 2025 and 2026 should map to season_start_year = 2025
+    const currentYear = new Date().getFullYear()
+    const currentMonth = new Date().getMonth() // 0-11
+
+    // If we're in the first half of the year (Jan-Jun), the "current" season started previous year
+    // If we're in the second half (Jul-Dec), the "current" season starts this year
+    const currentSeasonStart = currentMonth < 6 ? currentYear - 1 : currentYear
+
+    // If requestedYear is the current or next year, map to current season start
+    if (requestedYear === currentYear || requestedYear === currentYear + 1) {
+      return currentSeasonStart
+    }
+    // For past years, take the lower year (e.g., asking about 2024 means 2023-24 season)
+    return requestedYear
+  }
+
+  // NFL and MLB: season year is straightforward
+  return requestedYear
+}
+
+/**
+ * Detect if query is about schedules, records, or streaks (needs game type separation)
+ */
+function needsGameTypeContext(query: string): boolean {
+  const patterns = [
+    /\b(schedule|schedules)\b/i,
+    /\b(record|records)\b/i,
+    /\b(streak|streaks|win streak|losing streak)\b/i,
+    /\b(standings|division|playoff)\b/i,
+    /\b(game by game|week by week)\b/i,
+    /\b(preseason|regular season|postseason|playoffs)\b/i,
+  ]
+  return patterns.some(p => p.test(query))
+}
+
+/**
  * Transform DataLab chart data format to the format expected by DataVisualization component.
  *
  * DataLab format: { type, title, columns, rows (array of objects), summary }
@@ -80,6 +200,28 @@ export async function POST(request: NextRequest) {
 
     console.log('Ask AI request:', query.slice(0, 100), sessionId ? `[session: ${sessionId}]` : '[new session]')
 
+    // Build seasonContext for Data Lab
+    const { team, sport } = detectTeamAndSport(query)
+    const requestedYear = extractYear(query)
+    const normalizedSeasonStartYear = requestedYear ? normalizeSeasonYear(requestedYear, sport) : null
+
+    const seasonContext = (team && sport && requestedYear) ? {
+      requestedYear,
+      normalizedSeasonStartYear,
+      team,
+      sport,
+    } : undefined
+
+    // Build gameTypeContext if query involves schedules/records/streaks
+    const gameTypeContext = needsGameTypeContext(query) ? {
+      includePreseason: true,
+      includeRegular: true,
+      includePostseason: true,
+      separatePhases: true,
+    } : undefined
+
+    console.log('Context:', { seasonContext, gameTypeContext })
+
     // Forward the request to Data Lab's query API
     const response = await fetch(`${DATALAB_API_URL}/api/query`, {
       method: 'POST',
@@ -91,6 +233,8 @@ export async function POST(request: NextRequest) {
       body: JSON.stringify({
         query: query.trim(),
         sessionId: sessionId || undefined,
+        seasonContext,
+        gameTypeContext,
       }),
     })
 

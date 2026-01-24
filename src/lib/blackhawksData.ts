@@ -468,6 +468,7 @@ async function getPlayerGameLog(internalId: number): Promise<PlayerGameLogEntry[
  * Only includes regular season and postseason games
  */
 export async function getBlackhawksSchedule(season?: number): Promise<BlackhawksGame[]> {
+  // For NHL, season_start_year is the year the season begins (e.g., 2025 for 2025-26 season)
   const targetSeason = season || getCurrentSeason()
 
   if (!datalabAdmin) {
@@ -475,56 +476,82 @@ export async function getBlackhawksSchedule(season?: number): Promise<Blackhawks
     return []
   }
 
-  // First, check what seasons exist in the database
-  const { data: seasonCheck } = await datalabAdmin
-    .from('blackhawks_games_master')
-    .select('season')
-    .limit(10)
+  // Try using the canonical view first (blackhawks_schedule_all)
+  let data: any[] | null = null
+  let error: any = null
 
-  const distinctSeasons = [...new Set(seasonCheck?.map((g: any) => g.season))]
-  console.log(`Blackhawks seasons in DB: ${JSON.stringify(distinctSeasons)}, looking for: ${targetSeason}`)
+  // First attempt: try blackhawks_schedule_all view with season_start_year
+  const viewResult = await datalabAdmin
+    .from('blackhawks_schedule_all')
+    .select('*')
+    .eq('season_start_year', targetSeason)
+    .order('game_date', { ascending: true })
 
-  // Check if target season exists, if not use the latest season in DB
-  let querySeasonRaw = targetSeason
-  if (distinctSeasons.length > 0 && !distinctSeasons.includes(targetSeason)) {
-    // Try as string
-    const targetSeasonStr = String(targetSeason)
-    if (distinctSeasons.includes(targetSeasonStr)) {
-      querySeasonRaw = targetSeasonStr as any
+  if (!viewResult.error && viewResult.data && viewResult.data.length > 0) {
+    console.log(`Found ${viewResult.data.length} games from blackhawks_schedule_all for season_start_year=${targetSeason}`)
+    data = viewResult.data
+  } else {
+    // Fallback: try blackhawks_games_master with season_start_year
+    const masterResult = await datalabAdmin
+      .from('blackhawks_games_master')
+      .select('*')
+      .eq('season_start_year', targetSeason)
+      .order('game_date', { ascending: true })
+
+    if (!masterResult.error && masterResult.data && masterResult.data.length > 0) {
+      console.log(`Found ${masterResult.data.length} games from blackhawks_games_master with season_start_year=${targetSeason}`)
+      data = masterResult.data
     } else {
-      // Use latest season
-      const latestSeason = distinctSeasons.sort().reverse()[0]
-      console.log(`Season ${targetSeason} not found, using latest: ${latestSeason}`)
-      querySeasonRaw = latestSeason
+      // Final fallback: try with 'season' column
+      const seasonResult = await datalabAdmin
+        .from('blackhawks_games_master')
+        .select('*')
+        .eq('season', targetSeason)
+        .order('game_date', { ascending: true })
+
+      if (!seasonResult.error && seasonResult.data && seasonResult.data.length > 0) {
+        console.log(`Found ${seasonResult.data.length} games from blackhawks_games_master with season=${targetSeason}`)
+        data = seasonResult.data
+      } else {
+        // Debug: check what columns and season values exist
+        const { data: sample } = await datalabAdmin
+          .from('blackhawks_games_master')
+          .select('*')
+          .limit(5)
+
+        if (sample && sample.length > 0) {
+          const columns = Object.keys(sample[0])
+          const seasonValues = sample.map((g: any) => ({
+            season: g.season,
+            season_start_year: g.season_start_year,
+            game_date: g.game_date
+          }))
+          console.log(`Blackhawks table columns: ${columns.join(', ')}`)
+          console.log(`Sample season values: ${JSON.stringify(seasonValues)}`)
+        }
+
+        error = seasonResult.error || masterResult.error || viewResult.error
+      }
     }
   }
-
-  console.log(`Fetching Blackhawks schedule for season: ${querySeasonRaw}`)
-
-  // Query for the season
-  const { data, error } = await datalabAdmin
-    .from('blackhawks_games_master')
-    .select('*')
-    .eq('season', querySeasonRaw)
-    .order('game_date', { ascending: true })
 
   if (error) {
     console.error('Blackhawks schedule error:', error)
     return []
   }
 
-  console.log(`Found ${data?.length || 0} games for season ${querySeasonRaw}`)
-
   if (!data || data.length === 0) {
+    console.log(`No Blackhawks games found for season ${targetSeason}`)
     return []
   }
 
-  // Filter to regular season and postseason only (exclude preseason)
-  const filtered = data.filter((g: any) =>
-    !g.game_type || g.game_type === 'REG' || g.game_type === 'POST' ||
-    g.game_type === 'regular' || g.game_type === 'postseason'
-  )
+  // Filter to regular season and postseason only (exclude preseason PRE)
+  const filtered = data.filter((g: any) => {
+    const gameType = g.game_type?.toUpperCase() || ''
+    return gameType !== 'PRE' && gameType !== 'PRESEASON'
+  })
 
+  console.log(`Returning ${filtered.length} regular/postseason games`)
   return filtered.map((g: any) => transformGame(g))
 }
 
