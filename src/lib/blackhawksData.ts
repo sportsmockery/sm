@@ -475,13 +475,37 @@ export async function getBlackhawksSchedule(season?: number): Promise<Blackhawks
     return []
   }
 
-  console.log(`Fetching Blackhawks schedule for season: ${targetSeason}`)
+  // First, check what seasons exist in the database
+  const { data: seasonCheck } = await datalabAdmin
+    .from('blackhawks_games_master')
+    .select('season')
+    .limit(10)
 
-  // Query without game_type filter first to see all data
+  const distinctSeasons = [...new Set(seasonCheck?.map((g: any) => g.season))]
+  console.log(`Blackhawks seasons in DB: ${JSON.stringify(distinctSeasons)}, looking for: ${targetSeason}`)
+
+  // Check if target season exists, if not use the latest season in DB
+  let querySeasonRaw = targetSeason
+  if (distinctSeasons.length > 0 && !distinctSeasons.includes(targetSeason)) {
+    // Try as string
+    const targetSeasonStr = String(targetSeason)
+    if (distinctSeasons.includes(targetSeasonStr)) {
+      querySeasonRaw = targetSeasonStr as any
+    } else {
+      // Use latest season
+      const latestSeason = distinctSeasons.sort().reverse()[0]
+      console.log(`Season ${targetSeason} not found, using latest: ${latestSeason}`)
+      querySeasonRaw = latestSeason
+    }
+  }
+
+  console.log(`Fetching Blackhawks schedule for season: ${querySeasonRaw}`)
+
+  // Query for the season
   const { data, error } = await datalabAdmin
     .from('blackhawks_games_master')
     .select('*')
-    .eq('season', targetSeason)
+    .eq('season', querySeasonRaw)
     .order('game_date', { ascending: true })
 
   if (error) {
@@ -489,38 +513,18 @@ export async function getBlackhawksSchedule(season?: number): Promise<Blackhawks
     return []
   }
 
-  console.log(`Found ${data?.length || 0} games for season ${targetSeason}`)
+  console.log(`Found ${data?.length || 0} games for season ${querySeasonRaw}`)
 
-  // If no games in target season, try previous season
   if (!data || data.length === 0) {
-    console.log(`No games for ${targetSeason}, trying ${targetSeason - 1}`)
-    const { data: prevData, error: prevError } = await datalabAdmin
-      .from('blackhawks_games_master')
-      .select('*')
-      .eq('season', targetSeason - 1)
-      .order('game_date', { ascending: true })
-
-    if (prevError) {
-      console.error('Blackhawks prev season error:', prevError)
-      return []
-    }
-
-    console.log(`Found ${prevData?.length || 0} games for season ${targetSeason - 1}`)
-    if (!prevData || prevData.length === 0) return []
-
-    // Filter to regular season and postseason only
-    const filtered = prevData.filter((g: any) =>
-      !g.game_type || g.game_type === 'REG' || g.game_type === 'POST' ||
-      g.game_type === 'regular' || g.game_type === 'postseason'
-    )
-    return filtered.map((g: any) => transformGame(g))
+    return []
   }
 
-  // Filter to regular season and postseason only
+  // Filter to regular season and postseason only (exclude preseason)
   const filtered = data.filter((g: any) =>
     !g.game_type || g.game_type === 'REG' || g.game_type === 'POST' ||
     g.game_type === 'regular' || g.game_type === 'postseason'
   )
+
   return filtered.map((g: any) => transformGame(g))
 }
 
