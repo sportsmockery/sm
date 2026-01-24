@@ -876,17 +876,17 @@ export async function getAvailableSeasons(): Promise<number[]> {
 }
 
 function getCurrentSeason(): number {
-  // NHL season runs Oct-June, stored as the ending year
-  // e.g., 2024-25 season = 2025, 2025-26 season = 2026
+  // NHL season runs Oct-June, stored as the STARTING year in DataLab
+  // e.g., 2024-25 season = 2024, 2025-26 season = 2025
   const now = new Date()
   const year = now.getFullYear()
   const month = now.getMonth() + 1
-  // If before October, use current year (still in previous season)
-  // If October or later, use next year (new season started)
+  // If before October, we're still in the season that started last year
+  // If October or later, the new season has started (use current year)
   if (month < 10) {
-    return year
+    return year - 1
   }
-  return year + 1
+  return year
 }
 
 /**
