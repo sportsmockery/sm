@@ -93,6 +93,11 @@ export default function AdvancedPostEditor({
   const [socialCaption, setSocialCaption] = useState(post?.social_caption || '')
   const socialAlreadyPosted = !!post?.social_posted_at
 
+  // Auto-insert content states (PostIQ features)
+  const [autoInsertChart, setAutoInsertChart] = useState(false)
+  const [autoAddPoll, setAutoAddPoll] = useState(false)
+  const [autoInsertingContent, setAutoInsertingContent] = useState<string | null>(null)
+
   // Refs for auto-AI tracking
   const autoAiTimerRef = useRef<NodeJS.Timeout | null>(null)
 
@@ -559,12 +564,70 @@ export default function AdvancedPostEditor({
     setSaving(true)
     setError('')
 
+    // Track the content that may be modified by auto-insert features
+    let contentToSave = formData.content
+
     try {
+      // Auto-insert chart if enabled and publishing
+      if (autoInsertChart && formData.status === 'published' && formData.content.length >= 200) {
+        setAutoInsertingContent('chart')
+        try {
+          const chartResponse = await fetch('/api/admin/ai', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              action: 'generate_chart',
+              title: formData.title,
+              content: contentToSave,
+              category: categories.find(c => c.id === formData.category_id)?.name,
+            }),
+          })
+          if (chartResponse.ok) {
+            const chartData = await chartResponse.json()
+            if (chartData.success && chartData.updatedContent) {
+              contentToSave = chartData.updatedContent
+              console.log('Auto-inserted chart:', chartData.chartId)
+            }
+          }
+        } catch (chartErr) {
+          console.error('Auto-insert chart error:', chartErr)
+        }
+      }
+
+      // Auto-add poll if enabled and publishing
+      if (autoAddPoll && formData.status === 'published' && formData.content.length >= 200) {
+        setAutoInsertingContent('poll')
+        try {
+          const pollResponse = await fetch('/api/admin/ai', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              action: 'generate_poll',
+              title: formData.title,
+              content: contentToSave,
+              category: categories.find(c => c.id === formData.category_id)?.name,
+            }),
+          })
+          if (pollResponse.ok) {
+            const pollData = await pollResponse.json()
+            if (pollData.success && pollData.updatedContent) {
+              contentToSave = pollData.updatedContent
+              console.log('Auto-added poll:', pollData.pollId)
+            }
+          }
+        } catch (pollErr) {
+          console.error('Auto-add poll error:', pollErr)
+        }
+      }
+
+      setAutoInsertingContent(null)
+
       const endpoint = isEditing ? `/api/posts/${post?.id}` : '/api/admin/posts'
 
       // Include social_caption in the payload if postToSocial is checked
       const payload = {
         ...formData,
+        content: contentToSave, // Use potentially modified content
         category_id: formData.category_id || null,
         author_id: formData.author_id || null,
         social_caption: postToSocial ? socialCaption : (post?.social_caption || null),
@@ -1322,6 +1385,55 @@ export default function AdvancedPostEditor({
                     <div className="rounded-lg border border-[var(--border-default)] bg-[var(--bg-tertiary)] px-3 py-2 text-sm text-[var(--text-muted)]">
                       {post.social_caption}
                     </div>
+                  </div>
+                )}
+              </div>
+
+              {/* PostIQ Auto-Insert Features */}
+              <div className="border-t border-[var(--border-default)] pt-4">
+                <div className="flex items-center gap-2 mb-3">
+                  <svg className="w-4 h-4 text-[var(--accent-red)]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+                  </svg>
+                  <span className="text-xs font-semibold uppercase tracking-wide text-[var(--text-muted)]">PostIQ Auto-Insert</span>
+                </div>
+
+                {/* Auto-Insert Chart */}
+                <label className="flex items-start gap-2 cursor-pointer mb-3">
+                  <input
+                    type="checkbox"
+                    checked={autoInsertChart}
+                    onChange={(e) => setAutoInsertChart(e.target.checked)}
+                    className="h-4 w-4 mt-0.5 rounded border-[var(--border-default)] text-[var(--accent-red)] focus:ring-[var(--accent-red)]"
+                  />
+                  <div>
+                    <span className="text-sm font-medium text-[var(--text-primary)]">Insert Chart</span>
+                    <p className="text-xs text-[var(--text-muted)]">
+                      PostIQ will analyze content and add a relevant chart when publishing
+                    </p>
+                  </div>
+                </label>
+
+                {/* Auto-Add Poll */}
+                <label className="flex items-start gap-2 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={autoAddPoll}
+                    onChange={(e) => setAutoAddPoll(e.target.checked)}
+                    className="h-4 w-4 mt-0.5 rounded border-[var(--border-default)] text-[var(--accent-red)] focus:ring-[var(--accent-red)]"
+                  />
+                  <div>
+                    <span className="text-sm font-medium text-[var(--text-primary)]">Add Poll</span>
+                    <p className="text-xs text-[var(--text-muted)]">
+                      PostIQ will create a fan engagement poll based on article content
+                    </p>
+                  </div>
+                </label>
+
+                {autoInsertingContent && (
+                  <div className="mt-3 flex items-center gap-2 text-xs text-[var(--accent-red)]">
+                    <div className="h-3 w-3 border-2 border-[var(--accent-red)] border-t-transparent rounded-full animate-spin" />
+                    <span>PostIQ is generating {autoInsertingContent}...</span>
                   </div>
                 )}
               </div>

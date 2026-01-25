@@ -26,7 +26,7 @@ function extractJSON(text: string): string {
 }
 
 interface AIRequest {
-  action: 'headlines' | 'seo' | 'ideas' | 'grammar' | 'excerpt' | 'generate_chart' | 'generate_seo' | 'analyze_chart'
+  action: 'headlines' | 'seo' | 'ideas' | 'grammar' | 'excerpt' | 'generate_chart' | 'generate_seo' | 'analyze_chart' | 'generate_poll'
   content?: string
   title?: string
   category?: string
@@ -58,6 +58,8 @@ export async function POST(request: NextRequest) {
         return await analyzeChartData(title || '', content || '', category)
       case 'generate_chart':
         return await generateChartForPost(title || '', content || '', category)
+      case 'generate_poll':
+        return await generatePollForPost(title || '', content || '', category)
       default:
         return NextResponse.json({ error: 'Invalid action' }, { status: 400 })
     }
@@ -565,4 +567,165 @@ function insertShortcodeAfterParagraph(
   // If paragraph not found, insert at the end of content
   const chartBlock = `\n<div class="chart-embed my-6">${shortcode}</div>`
   return htmlContent + chartBlock
+}
+
+/**
+ * Generate a poll for a post based on its content
+ * Analyzes the article to find a compelling question for readers to vote on
+ */
+async function generatePollForPost(title: string, content: string, category?: string) {
+  // Strip HTML tags for analysis
+  const plainText = content.replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim()
+
+  const prompt = `You are a sports engagement analyst for Sports Mockery, a Chicago sports fan site. Analyze this article and create an engaging poll question for readers to vote on.
+
+Article Title: "${title}"
+${category ? `Category: ${category}` : ''}
+Article Content:
+${plainText.slice(0, 3000)}
+
+Your task:
+1. Identify a debatable topic, prediction, or opinion from the article that fans would want to vote on
+2. Create a compelling poll question that encourages engagement
+3. Generate 2-4 answer options (not too many, keep it focused)
+4. Determine where in the article the poll should appear (after which paragraph)
+
+Poll types that work well for sports:
+- Predictions ("Will the Bears make the playoffs?")
+- Opinions ("Who should start at QB?")
+- Debates ("Best Bears QB of all time?")
+- Fan sentiment ("How do you feel about this trade?")
+- Comparisons ("Which player has more potential?")
+
+Return a JSON object with:
+{
+  "shouldCreatePoll": true or false (false if no good poll topic found),
+  "question": "The poll question to ask fans",
+  "options": ["Option 1", "Option 2", "Option 3"],
+  "paragraphIndex": number (1-based index of paragraph where poll should appear after),
+  "reasoning": "brief explanation of why this poll engages fans"
+}
+
+IMPORTANT:
+- Questions should be fan-centric ("we" perspective where appropriate)
+- Options should be clear and mutually exclusive
+- Maximum 4 options, minimum 2
+- Poll should relate directly to the article content
+- If the article doesn't lend itself to a poll, set shouldCreatePoll to false
+
+Return ONLY the JSON object, no explanation.`
+
+  const message = await anthropic.messages.create({
+    model: 'claude-sonnet-4-20250514',
+    max_tokens: 1000,
+    messages: [{ role: 'user', content: prompt }],
+  })
+
+  const responseText = message.content[0].type === 'text' ? message.content[0].text : ''
+  console.log('Poll generation response:', responseText.slice(0, 500))
+
+  try {
+    const jsonText = extractJSON(responseText)
+    const analysis = JSON.parse(jsonText)
+
+    if (!analysis.shouldCreatePoll || !analysis.options || analysis.options.length < 2) {
+      return NextResponse.json({
+        success: false,
+        reason: 'No suitable poll topic found in article',
+        updatedContent: null,
+      })
+    }
+
+    // Create the poll via internal API call
+    const pollPayload = {
+      question: analysis.question,
+      options: analysis.options.map((text: string) => ({ text })),
+      pollType: 'single',
+      status: 'active',
+      showResults: true,
+    }
+
+    // Make internal request to create poll
+    const baseUrl = process.env.NEXT_PUBLIC_APP_URL || process.env.VERCEL_URL
+      ? `https://${process.env.VERCEL_URL}`
+      : 'http://localhost:3000'
+
+    const pollResponse = await fetch(`${baseUrl}/api/admin/polls`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(pollPayload),
+    })
+
+    if (!pollResponse.ok) {
+      console.error('Failed to create poll:', await pollResponse.text())
+      return NextResponse.json({
+        success: false,
+        reason: 'Failed to create poll',
+        updatedContent: null,
+      })
+    }
+
+    const pollResult = await pollResponse.json()
+    const shortcode = `[poll:${pollResult.poll.id}]`
+
+    // Insert shortcode after the specified paragraph
+    const updatedContent = insertPollShortcodeAfterParagraph(
+      content,
+      shortcode,
+      analysis.paragraphIndex || 2 // Default to after 2nd paragraph
+    )
+
+    return NextResponse.json({
+      success: true,
+      pollId: pollResult.poll.id,
+      shortcode,
+      question: analysis.question,
+      options: analysis.options,
+      updatedContent,
+    })
+  } catch (e) {
+    console.error('Poll generation error:', e)
+    return NextResponse.json({
+      success: false,
+      reason: 'Failed to analyze content for poll',
+      updatedContent: null,
+    })
+  }
+}
+
+/**
+ * Insert a poll shortcode after a specific paragraph in HTML content
+ */
+function insertPollShortcodeAfterParagraph(
+  htmlContent: string,
+  shortcode: string,
+  paragraphIndex: number
+): string {
+  // Find all closing </p> tags
+  const closingTagRegex = /<\/p>/gi
+  let match
+  let count = 0
+  let insertPosition = -1
+
+  while ((match = closingTagRegex.exec(htmlContent)) !== null) {
+    count++
+    if (count === paragraphIndex) {
+      insertPosition = match.index + match[0].length
+      break
+    }
+  }
+
+  // If we found the position, insert the shortcode wrapped in a div
+  if (insertPosition > 0) {
+    const pollBlock = `\n<div class="poll-embed my-6">${shortcode}</div>\n`
+    return (
+      htmlContent.slice(0, insertPosition) +
+      pollBlock +
+      htmlContent.slice(insertPosition)
+    )
+  }
+
+  // If paragraph not found, insert at the end of content
+  const pollBlock = `\n<div class="poll-embed my-6">${shortcode}</div>`
+  return htmlContent + pollBlock
 }
