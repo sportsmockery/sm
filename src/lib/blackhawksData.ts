@@ -639,7 +639,7 @@ async function getTeamStats(season: number): Promise<BlackhawksTeamStats> {
   // This avoids issues with calculating record from games_master
   const { data: seasonRecord } = await datalabAdmin
     .from('blackhawks_seasons')
-    .select('wins, losses, ot_losses')
+    .select('wins, losses, otl')
     .eq('season', season)
     .single()
 
@@ -652,7 +652,7 @@ async function getTeamStats(season: number): Promise<BlackhawksTeamStats> {
 
   const wins = seasonRecord?.wins || 0
   const losses = seasonRecord?.losses || 0
-  const otLosses = seasonRecord?.ot_losses || 0
+  const otLosses = seasonRecord?.otl || 0
   const gamesPlayed = (gamesData?.length || 0) || (wins + losses + otLosses)
   const totalGoals = gamesData?.reduce((sum: number, g: any) => sum + (g.blackhawks_score || 0), 0) || 0
   const totalOppGoals = gamesData?.reduce((sum: number, g: any) => sum + (g.opponent_score || 0), 0) || 0
@@ -847,7 +847,7 @@ export async function getBlackhawksRecord(season?: number): Promise<BlackhawksRe
   if (datalabAdmin) {
     const { data: seasonRecord } = await datalabAdmin
       .from('blackhawks_seasons')
-      .select('wins, losses, ot_losses')
+      .select('wins, losses, otl')
       .eq('season', targetSeason)
       .single()
 
@@ -876,7 +876,7 @@ export async function getBlackhawksRecord(season?: number): Promise<BlackhawksRe
       return {
         wins: seasonRecord.wins || 0,
         losses: seasonRecord.losses || 0,
-        otLosses: seasonRecord.ot_losses || 0,
+        otLosses: seasonRecord.otl || 0,
         streak,
       }
     }
