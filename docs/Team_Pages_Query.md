@@ -7,19 +7,6 @@
 
 ---
 
-## CRITICAL: Differences from Datalab Integration Guide
-
-These items were identified by comparing this doc with the Datalab guide:
-
-| Item | SM Code Assumption | Datalab Reality | Action |
-|------|-------------------|-----------------|--------|
-| NHL Season | `season_start_year` (2025) | `season` = ending year (2026) | SM queries must use ending year |
-| Bears roster | 53+ players | 81 players (includes PS, IR) | Adjust expected count |
-| Blackhawks OT | Separate `is_overtime` and `is_shootout` | `is_overtime = true` covers BOTH | Simplify OT loss logic |
-| Season tables | Various names | `{team}_seasons` for all | Use consistent table names |
-
----
-
 ## Overview
 
 SportsMockery displays team hub pages for 5 Chicago teams, each pulling data from Datalab Supabase tables. This document specifies exactly what data is needed, how it's queried, and protocols to prevent data mismatches.
