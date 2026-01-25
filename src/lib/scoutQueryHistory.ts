@@ -8,7 +8,7 @@
  * Includes automatic cleanup for database entries older than 30 days.
  */
 
-import { createClient } from '@supabase/supabase-js'
+import { createBrowserClient } from '@supabase/ssr'
 
 const STORAGE_KEY = 'scout_query_history'
 const MAX_DAYS = 30
@@ -85,15 +85,17 @@ export function clearLocalHistory(): void {
 // =============================================================================
 
 /**
- * Get Supabase client for query history
+ * Get Supabase client for query history (browser client with user session)
  */
 function getSupabaseClient() {
+  if (typeof window === 'undefined') return null
+
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL
   const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
 
   if (!url || !key) return null
 
-  return createClient(url, key)
+  return createBrowserClient(url, key)
 }
 
 /**
