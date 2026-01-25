@@ -2,6 +2,7 @@
 
 import { useState, useRef, useEffect } from 'react'
 import Link from 'next/link'
+import Image from 'next/image'
 import dynamic from 'next/dynamic'
 import ReactMarkdown from 'react-markdown'
 import { useAuth } from '@/contexts/AuthContext'
@@ -178,15 +179,19 @@ export default function AskAIPage() {
             style={{ backgroundColor: 'var(--bg-surface)', border: '1px solid var(--border-color)' }}
           >
             <div className="w-20 h-20 rounded-full bg-gradient-to-br from-[#bc0000] to-[#ff4444] flex items-center justify-center mx-auto mb-6">
-              <svg className="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
-              </svg>
+              <Image
+                src="/downloads/scout-v2.png"
+                alt="Scout AI"
+                width={40}
+                height={40}
+                className="w-10 h-10"
+              />
             </div>
             <h1
               className="text-2xl font-bold mb-3"
               style={{ fontFamily: "'Montserrat', sans-serif", color: 'var(--text-primary)' }}
             >
-              Sign in to Ask Mockery AI
+              Sign in to Scout AI
             </h1>
             <p className="text-sm mb-6" style={{ color: 'var(--text-muted)' }}>
               Get instant answers about the Bears, Bulls, Cubs, White Sox, and Blackhawks with our AI-powered sports assistant.
@@ -233,7 +238,7 @@ export default function AskAIPage() {
               Upgrade to SM+ for Unlimited Access
             </h1>
             <p className="text-sm mb-6" style={{ color: 'var(--text-muted)' }}>
-              Free accounts get {features.ask_ai.limit} AI questions per day. Upgrade to SM+ for unlimited access to Ask Mockery AI, plus Fan Chat and ad-free browsing.
+              Free accounts get {features.ask_ai.limit} AI questions per day. Upgrade to SM+ for unlimited access to Scout AI, plus Fan Chat and ad-free browsing.
             </p>
             <button
               onClick={() => openCheckout('sm_plus_monthly')}
@@ -271,16 +276,20 @@ export default function AskAIPage() {
             >
               {/* Logo/Icon */}
               <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-[#bc0000] to-[#ff4444] flex items-center justify-center mb-6">
-                <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
-                </svg>
+                <Image
+                  src="/downloads/scout-v2.png"
+                  alt="Scout AI"
+                  width={32}
+                  height={32}
+                  className="w-8 h-8"
+                />
               </div>
 
               <h1
                 className="text-2xl font-bold mb-3"
                 style={{ fontFamily: "'Montserrat', sans-serif", color: 'var(--text-primary)' }}
               >
-                Ask Mockery AI
+                Scout AI
               </h1>
 
               <p className="text-sm mb-6" style={{ color: 'var(--text-muted)' }}>
@@ -380,16 +389,20 @@ export default function AskAIPage() {
               >
                 <div className="flex items-center gap-3">
                   <div className="w-10 h-10 rounded-full bg-gradient-to-br from-[#bc0000] to-[#ff4444] flex items-center justify-center">
-                    <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
-                    </svg>
+                    <Image
+                      src="/downloads/scout-v2.png"
+                      alt="Scout AI"
+                      width={20}
+                      height={20}
+                      className="w-5 h-5"
+                    />
                   </div>
                   <div>
                     <h2
                       className="font-bold"
                       style={{ fontFamily: "'Montserrat', sans-serif", color: 'var(--text-primary)' }}
                     >
-                      Mockery AI
+                      Scout AI
                     </h2>
                     <p className="text-xs" style={{ color: 'var(--text-muted)' }}>
                       Chicago Sports Expert

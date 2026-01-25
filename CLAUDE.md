@@ -237,16 +237,19 @@ const STANDARD_POLL_INTERVAL = 60_000 // No live games
 
 ---
 
-## Scout - The Ask AI Model
+## Scout AI - Chicago Sports AI Assistant
 
-**Scout** is the AI-powered "Ask AI" feature for Chicago sports questions. When the user mentions "Scout", "the AI model", "Ask AI", or "query AI", they are referring to this system.
+**Scout AI** is the AI-powered sports assistant for Chicago sports questions. When the user mentions "Scout", "Scout AI", "the AI model", or "query AI", they are referring to this system.
 
-### Where Scout Lives
+**Branding:** Always display as "Scout AI" with the Scout icon at `/downloads/scout-v2.png`.
+
+### Where Scout AI Lives
 | Location | Description |
 |----------|-------------|
 | Backend | https://datalab.sportsmockery.com/api/query |
 | Frontend | /ask-ai page on test.sportsmockery.com |
 | API Route | /src/app/api/ask-ai/route.ts (proxies to Data Lab) |
+| Icon | `/downloads/scout-v2.png` (use Image component) |
 
 ### How Scout Works
 1. User submits question on /ask-ai page
@@ -265,7 +268,8 @@ Scout maintains conversation context for follow-ups:
 | File | Purpose |
 |------|---------|
 | `/src/app/api/ask-ai/route.ts` | Proxies requests to Data Lab API |
-| `/src/app/ask-ai/page.tsx` | Ask AI chat interface |
+| `/src/app/ask-ai/page.tsx` | Scout AI chat interface |
+| `/downloads/scout-v2.png` | Scout AI icon (use with Image component) |
 | `/AskAI_Wrong.md` | QA test failure log |
 
 ### Known Issues (from QA testing)
