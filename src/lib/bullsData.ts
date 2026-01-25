@@ -618,15 +618,23 @@ async function getTeamStats(season: number): Promise<BullsTeamStats> {
     .eq('season', season)
     .single()
 
-  // Get season record from games
+  // CRITICAL: Get authoritative record from bulls_seasons table (recommended by Datalab)
+  // This avoids issues with future games having bulls_win=false with 0-0 scores
+  const { data: seasonRecord } = await datalabAdmin
+    .from('bulls_seasons')
+    .select('wins, losses')
+    .eq('season', season)
+    .single()
+
+  // Get completed games for PPG/OPPG calculation
   const { data: gamesData } = await datalabAdmin
     .from('bulls_games_master')
-    .select('bulls_score, opponent_score, bulls_win')
+    .select('bulls_score, opponent_score')
     .eq('season', season)
     .or('bulls_score.gt.0,opponent_score.gt.0')
 
-  const wins = gamesData?.filter((g: any) => g.bulls_win).length || 0
-  const losses = gamesData?.filter((g: any) => g.bulls_win === false).length || 0
+  const wins = seasonRecord?.wins || 0
+  const losses = seasonRecord?.losses || 0
   const gamesPlayed = gamesData?.length || 0
   const totalPoints = gamesData?.reduce((sum: number, g: any) => sum + (g.bulls_score || 0), 0) || 0
   const totalOppPoints = gamesData?.reduce((sum: number, g: any) => sum + (g.opponent_score || 0), 0) || 0

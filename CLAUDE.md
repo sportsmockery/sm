@@ -162,15 +162,42 @@ walks_allowed, strikeouts_pitched
 
 ---
 
-### Current Data Status (Jan 2026)
+### CRITICAL: Record Query Best Practice
 
-| Team | Record | Roster Count | Season Query | Notes |
-|------|--------|--------------|--------------|-------|
-| Bears | 11-6 (reg) + 1-1 (playoffs) | 81 | `season = 2025` | Complete (includes PS, IR) |
-| Bulls | **22-22** (in progress) | 18 | `season = 2026` | Ending year! |
-| Blackhawks | 21-22-8 (50 pts) | 20 | `season = 2026` | Ending year! |
-| Cubs | 98-74 | 35 | `season = 2025` | Offseason |
-| White Sox | 61-106 | 35 | `season = 2025` | Offseason |
+**ALWAYS use `{team}_seasons` table for authoritative win/loss records.**
+
+Calculating records from `{team}_games_master` can be inaccurate because:
+- Future games may have `{team}_win = false` with 0-0 scores
+- Filtering by `score > 0` may still have edge cases
+
+```typescript
+// WRONG - calculating from games_master
+const { data } = await supabase
+  .from('bulls_games_master')
+  .select('bulls_win')
+  .eq('season', 2026)
+const losses = data.filter(g => g.bulls_win === false).length // Includes future games!
+
+// CORRECT - use seasons table (recommended by Datalab)
+const { data } = await supabase
+  .from('bulls_seasons')
+  .select('wins, losses')
+  .eq('season', 2026)
+  .single()
+// Returns: { wins: 23, losses: 22 }
+```
+
+---
+
+### Verified Records (Jan 25, 2026)
+
+| Team | Table | Season | Record | Notes |
+|------|-------|--------|--------|-------|
+| Bears | `bears_season_record` | 2025 | 11-6 | Complete |
+| Bulls | `bulls_seasons` | 2026 | **23-22** | In progress |
+| Blackhawks | `blackhawks_seasons` | 2026 | 21-22-8 | In progress |
+| Cubs | `cubs_seasons` | 2025 | **98-76** | Offseason |
+| White Sox | `whitesox_seasons` | 2025 | 61-106 | Offseason |
 
 **Bears roster of 81 (CONFIRMED BY DATALAB):** 53 active + 16 practice squad + ~12 IR/other. Display all - there's no column to filter further.
 

@@ -653,15 +653,23 @@ async function getTeamStats(season: number): Promise<CubsTeamStats> {
     .eq('season', season)
     .single()
 
-  // Get season record from games
+  // CRITICAL: Get authoritative record from cubs_seasons table (recommended by Datalab)
+  // This avoids issues with calculating record from games_master
+  const { data: seasonRecord } = await datalabAdmin
+    .from('cubs_seasons')
+    .select('wins, losses')
+    .eq('season', season)
+    .single()
+
+  // Get completed games for runs calculation
   const { data: gamesData } = await datalabAdmin
     .from('cubs_games_master')
-    .select('cubs_score, opponent_score, cubs_win')
+    .select('cubs_score, opponent_score')
     .eq('season', season)
     .or('cubs_score.gt.0,opponent_score.gt.0')
 
-  const wins = gamesData?.filter((g: any) => g.cubs_win).length || 0
-  const losses = gamesData?.filter((g: any) => g.cubs_win === false).length || 0
+  const wins = seasonRecord?.wins || 0
+  const losses = seasonRecord?.losses || 0
   const gamesPlayed = gamesData?.length || 0
   const runsScored = gamesData?.reduce((sum: number, g: any) => sum + (g.cubs_score || 0), 0) || 0
   const runsAllowed = gamesData?.reduce((sum: number, g: any) => sum + (g.opponent_score || 0), 0) || 0
