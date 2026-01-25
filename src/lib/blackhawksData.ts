@@ -573,22 +573,15 @@ export async function getBlackhawksSchedule(season?: number): Promise<Blackhawks
     return gameType !== 'PRE' && gameType !== 'PRESEASON'
   })
 
-  // Debug: show raw database columns for first few games
+  // Debug: show raw database columns for first few games, particularly OT/SO indicators
   if (filtered.length > 0) {
-    const sample = filtered.slice(0, 3)
-    console.log(`Sample raw games from DB:`, sample.map((g: any) => ({
-      game_date: g.game_date,
-      blackhawks_score: g.blackhawks_score,
-      opponent_score: g.opponent_score,
-      blackhawks_win: g.blackhawks_win,
-      overtime: g.overtime,
-      shootout: g.shootout,
-      is_overtime: g.is_overtime,
-      is_shootout: g.is_shootout,
-      home_score: g.home_score,
-      away_score: g.away_score,
-      columns: Object.keys(g).filter(k => g[k] !== null && g[k] !== undefined)
-    })))
+    const sample = filtered.slice(0, 5)
+    console.log(`Sample raw games from DB (${sample.length} of ${filtered.length}):`)
+    for (const g of sample) {
+      const hasOtScores = g.ot_blackhawks !== null || g.ot_opponent !== null
+      const hasSoScores = g.so_blackhawks !== null || g.so_opponent !== null
+      console.log(`  ${g.game_date}: ${g.blackhawks_score}-${g.opponent_score}, win=${g.blackhawks_win}, isOT=${g.is_overtime}, isSO=${g.is_shootout}, ot_scores=${hasOtScores ? `${g.ot_blackhawks}-${g.ot_opponent}` : 'null'}, so_scores=${hasSoScores ? `${g.so_blackhawks}-${g.so_opponent}` : 'null'}`)
+    }
   }
 
   console.log(`Returning ${filtered.length} regular/postseason games`)
@@ -613,13 +606,22 @@ function transformGame(game: any): BlackhawksGame {
 
   let result: 'W' | 'L' | 'OTL' | null = null
   if (isPlayed) {
+    // Determine if game went to OT or SO by checking:
+    // 1. is_overtime / is_shootout boolean columns
+    // 2. ot_blackhawks / ot_opponent / so_blackhawks / so_opponent period scores (if non-null, game went to OT/SO)
+    const hasOtScores = (game.ot_blackhawks !== null && game.ot_blackhawks !== undefined) ||
+                        (game.ot_opponent !== null && game.ot_opponent !== undefined)
+    const hasSoScores = (game.so_blackhawks !== null && game.so_blackhawks !== undefined) ||
+                        (game.so_opponent !== null && game.so_opponent !== undefined)
+    const isOT = game.is_overtime || game.overtime || hasOtScores
+    const isSO = game.is_shootout || game.shootout || hasSoScores
+
     // Determine win/loss based on available columns
     const didWin = game.blackhawks_win ?? (hawksScore > oppScore)
-    const isOT = game.overtime || game.shootout || game.is_overtime || game.is_shootout
 
     if (didWin) {
       result = 'W'
-    } else if (isOT) {
+    } else if (isOT || isSO) {
       result = 'OTL'
     } else {
       result = 'L'
