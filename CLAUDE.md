@@ -470,6 +470,24 @@ Scout maintains conversation context for follow-ups:
 - **sessionContext**: `{ player, team, season, sport }` for pronoun resolution
 - Pronouns like "he", "his", "that player" resolve to last mentioned entity
 
+### Query History (30-Day Retention)
+
+User queries are stored for 30 days:
+- **Logged-in users**: Stored in `scout_query_history` Supabase table
+- **Guests**: Stored in localStorage (max 100 queries)
+
+**Automatic Cleanup:**
+- Daily cron job at 3am UTC: `/api/cron/cleanup-scout-history`
+- Deletes entries older than 30 days
+- Alerts if table exceeds 100,000 rows
+
+**Key Files:**
+| File | Purpose |
+|------|---------|
+| `src/lib/scoutQueryHistory.ts` | History storage utility |
+| `src/app/api/cron/cleanup-scout-history/route.ts` | Daily cleanup cron |
+| `supabase/migrations/20260125_scout_query_history.sql` | Table schema |
+
 ### Key Files
 | File | Purpose |
 |------|---------|

@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useRef, useEffect } from 'react'
+import { useState, useRef, useEffect, useCallback } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
 import dynamic from 'next/dynamic'
@@ -8,6 +8,15 @@ import ReactMarkdown from 'react-markdown'
 import { useAuth } from '@/contexts/AuthContext'
 import { useSubscription } from '@/contexts/SubscriptionContext'
 import type { ChartData } from '@/components/ask-ai/DataVisualization'
+import {
+  getLocalHistory,
+  saveToLocalHistory,
+  getSupabaseHistory,
+  saveToSupabaseHistory,
+  clearLocalHistory,
+  clearSupabaseHistory,
+  type QueryHistoryEntry,
+} from '@/lib/scoutQueryHistory'
 
 // Dynamically import DataVisualization to avoid SSR issues with Chart.js
 const DataVisualization = dynamic(
@@ -41,10 +50,13 @@ export default function AskAIPage() {
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [sessionId, setSessionId] = useState<string | undefined>(undefined)
+  const [showHistory, setShowHistory] = useState(false)
+  const [queryHistory, setQueryHistory] = useState<QueryHistoryEntry[]>([])
+  const [historyLoading, setHistoryLoading] = useState(false)
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const messagesContainerRef = useRef<HTMLDivElement>(null)
 
-  const { isAuthenticated, loading: authLoading } = useAuth()
+  const { isAuthenticated, user, loading: authLoading } = useAuth()
   const { canAccess, isLoading: subLoading, features, openCheckout } = useSubscription()
 
   // Check if user can access Ask AI (logged in + has feature access)
@@ -76,6 +88,63 @@ export default function AskAIPage() {
       scrollToBottom()
     }
   }, [messages])
+
+  // Load query history
+  const loadHistory = useCallback(async () => {
+    setHistoryLoading(true)
+    try {
+      if (isAuthenticated && user?.id) {
+        // Load from Supabase for logged-in users
+        const history = await getSupabaseHistory(user.id)
+        setQueryHistory(history)
+      } else {
+        // Load from localStorage for guests
+        const history = getLocalHistory()
+        setQueryHistory(history)
+      }
+    } catch (e) {
+      console.error('[Scout] Failed to load history:', e)
+    } finally {
+      setHistoryLoading(false)
+    }
+  }, [isAuthenticated, user?.id])
+
+  // Load history when auth state changes
+  useEffect(() => {
+    if (!authLoading) {
+      loadHistory()
+    }
+  }, [authLoading, loadHistory])
+
+  // Save query to history
+  const saveToHistory = useCallback(async (query: string, response: string, team?: string, source?: string) => {
+    const entry = { query, response, team, source }
+
+    if (isAuthenticated && user?.id) {
+      await saveToSupabaseHistory(user.id, entry)
+    } else {
+      saveToLocalHistory({ ...entry, timestamp: new Date().toISOString() })
+    }
+
+    // Refresh history
+    loadHistory()
+  }, [isAuthenticated, user?.id, loadHistory])
+
+  // Clear history
+  const handleClearHistory = useCallback(async () => {
+    if (isAuthenticated && user?.id) {
+      await clearSupabaseHistory(user.id)
+    } else {
+      clearLocalHistory()
+    }
+    setQueryHistory([])
+  }, [isAuthenticated, user?.id])
+
+  // Load a previous query
+  const loadFromHistory = useCallback((entry: QueryHistoryEntry) => {
+    setInput(entry.query)
+    setShowHistory(false)
+  }, [])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -138,6 +207,9 @@ export default function AskAIPage() {
       }
 
       setMessages((prev) => [...prev, aiMessage])
+
+      // Save to query history (30-day retention)
+      saveToHistory(userMessage.content, aiMessage.content, data.teamDisplayName, data.source)
 
     } catch (err) {
       console.error('Ask AI error:', err)
@@ -358,6 +430,59 @@ export default function AskAIPage() {
                     </li>
                   ))}
                 </ul>
+              </div>
+
+              {/* Query History Section */}
+              <div className="mt-6 pt-6" style={{ borderTop: '1px solid var(--border-color)' }}>
+                <button
+                  onClick={() => setShowHistory(!showHistory)}
+                  className="w-full flex items-center justify-between text-sm font-medium px-3 py-2 rounded-lg transition-colors hover:bg-[#bc0000]/10"
+                  style={{ color: 'var(--text-primary)' }}
+                >
+                  <span className="flex items-center gap-2">
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    Query History
+                  </span>
+                  <span className="text-xs px-2 py-0.5 rounded-full bg-[#bc0000]/20 text-[#bc0000]">
+                    {queryHistory.length}
+                  </span>
+                </button>
+
+                {showHistory && (
+                  <div className="mt-3 space-y-2 max-h-60 overflow-y-auto">
+                    {historyLoading ? (
+                      <p className="text-xs text-center py-4" style={{ color: 'var(--text-muted)' }}>Loading...</p>
+                    ) : queryHistory.length === 0 ? (
+                      <p className="text-xs text-center py-4" style={{ color: 'var(--text-muted)' }}>No recent queries</p>
+                    ) : (
+                      <>
+                        {queryHistory.slice(0, 10).map((entry) => (
+                          <button
+                            key={entry.id}
+                            onClick={() => loadFromHistory(entry)}
+                            className="w-full text-left p-2 rounded-lg text-xs transition-colors hover:bg-[#bc0000]/10"
+                            style={{ color: 'var(--text-primary)' }}
+                          >
+                            <p className="font-medium truncate">{entry.query}</p>
+                            <p className="text-[10px] mt-0.5" style={{ color: 'var(--text-muted)' }}>
+                              {new Date(entry.timestamp).toLocaleDateString()}
+                            </p>
+                          </button>
+                        ))}
+                        {queryHistory.length > 0 && (
+                          <button
+                            onClick={handleClearHistory}
+                            className="w-full text-center text-xs py-2 text-red-500 hover:text-red-600"
+                          >
+                            Clear History
+                          </button>
+                        )}
+                      </>
+                    )}
+                  </div>
+                )}
               </div>
 
             </div>
