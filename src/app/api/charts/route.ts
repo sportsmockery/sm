@@ -76,7 +76,7 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    const { data: chart, error } = await supabase
+    const { data: chart, error } = await supabaseAdmin
       .from('sm_charts')
       .insert({
         post_id: body.postId || null,
