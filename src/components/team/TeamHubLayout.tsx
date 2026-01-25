@@ -168,12 +168,12 @@ export default function TeamHubLayout({
           }}
         />
 
-        <div className="relative max-w-[1320px] mx-auto px-4 md:px-6 lg:px-8 py-6 md:py-8">
+        <div className="relative max-w-[1320px] mx-auto px-3 sm:px-4 md:px-6 lg:px-8 py-4 sm:py-6 md:py-8">
           <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 md:gap-8">
             {/* Left: Team Identity */}
             <div className="flex items-center gap-4">
               {/* Team Logo */}
-              <div className="w-16 h-16 md:w-20 md:h-20 rounded-full bg-white/10 flex items-center justify-center p-2 shadow-lg">
+              <div className="w-12 h-12 sm:w-16 sm:h-16 md:w-20 md:h-20 rounded-full bg-white/10 flex items-center justify-center p-1.5 sm:p-2 shadow-lg">
                 <Image
                   src={team.logo}
                   alt={team.name}
@@ -187,7 +187,7 @@ export default function TeamHubLayout({
               {/* Team Name & Tag */}
               <div>
                 <h1
-                  className="text-2xl md:text-3xl font-bold text-white"
+                  className="text-xl sm:text-2xl md:text-3xl font-bold text-white"
                   style={{ fontFamily: "'Montserrat', sans-serif" }}
                 >
                   {team.name}
@@ -266,7 +266,7 @@ export default function TeamHubLayout({
         }`}
         style={{ borderColor: 'var(--border-color)' }}
       >
-        <div className="max-w-[1320px] mx-auto px-4 md:px-6 lg:px-8">
+        <div className="max-w-[1320px] mx-auto px-3 sm:px-4 md:px-6 lg:px-8">
           {/* Desktop: Horizontal bar */}
           <nav className="hidden md:flex items-center gap-1 py-1 overflow-x-auto">
             {tabs.map((tab: any) => {
@@ -299,7 +299,7 @@ export default function TeamHubLayout({
           </nav>
 
           {/* Mobile: Horizontally scrollable pill row - 44px min tap target */}
-          <nav className="flex md:hidden items-center gap-2 py-2 overflow-x-auto scrollbar-hide">
+          <nav className="flex md:hidden items-center gap-1.5 sm:gap-2 py-2 overflow-x-auto scrollbar-hide">
             {tabs.map((tab: any) => {
               const isActive = tab.id === currentTab
               // Handle external links (like Fan Chat) with channel parameter
@@ -311,7 +311,7 @@ export default function TeamHubLayout({
                 <Link
                   key={tab.id}
                   href={href}
-                  className={`px-4 py-2.5 text-sm font-medium whitespace-nowrap rounded-full transition-colors min-h-[44px] flex items-center ${
+                  className={`px-3 sm:px-4 py-2 sm:py-2.5 text-xs sm:text-sm font-medium whitespace-nowrap rounded-full transition-colors min-h-[40px] sm:min-h-[44px] flex items-center ${
                     isActive
                       ? 'text-white'
                       : 'bg-[var(--bg-tertiary)] text-[var(--text-secondary)]'
@@ -327,7 +327,7 @@ export default function TeamHubLayout({
       </div>
 
       {/* Main Content */}
-      <div className="max-w-[1320px] mx-auto px-4 md:px-6 lg:px-8 py-6 md:py-8">
+      <div className="max-w-[1320px] mx-auto px-3 sm:px-4 md:px-6 lg:px-8 py-4 sm:py-6 md:py-8">
         {children}
       </div>
     </div>

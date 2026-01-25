@@ -71,17 +71,17 @@ export default async function PlayerProfilePage({ params }: PlayerPageProps) {
         className="relative overflow-hidden"
         style={{ background: 'linear-gradient(135deg, #0B162A 0%, #0B162A 70%, #C83200 100%)' }}
       >
-        <div className="max-w-7xl mx-auto px-4 py-8">
+        <div className="max-w-7xl mx-auto px-3 sm:px-4 py-4 sm:py-8">
           {/* Breadcrumb & Player Switcher */}
-          <div className="flex flex-wrap items-center justify-between gap-4 mb-6">
-            <nav className="flex items-center gap-2 text-sm text-white/60">
-              <Link href="/" className="hover:text-white">Home</Link>
+          <div className="flex flex-wrap items-center justify-between gap-3 sm:gap-4 mb-4 sm:mb-6">
+            <nav className="flex flex-wrap items-center gap-1.5 sm:gap-2 text-xs sm:text-sm text-white/60">
+              <Link href="/" className="hover:text-white py-1">Home</Link>
               <span>/</span>
-              <Link href="/chicago-bears" className="hover:text-white">Chicago Bears</Link>
+              <Link href="/chicago-bears" className="hover:text-white py-1">Bears</Link>
               <span>/</span>
-              <Link href="/chicago-bears/players" className="hover:text-white">Players</Link>
+              <Link href="/chicago-bears/players" className="hover:text-white py-1">Players</Link>
               <span>/</span>
-              <span className="text-white">{player.fullName}</span>
+              <span className="text-white py-1">{player.fullName}</span>
             </nav>
             <PlayerSwitcher
               players={switcherPlayers}
@@ -90,23 +90,24 @@ export default async function PlayerProfilePage({ params }: PlayerPageProps) {
             />
           </div>
 
-          <div className="flex flex-col md:flex-row gap-8 items-start">
+          <div className="flex flex-col md:flex-row gap-4 sm:gap-8 items-start">
             {/* Left: Headshot */}
             <div className="flex-shrink-0">
               {player.headshotUrl ? (
-                <div className="w-40 h-40 md:w-48 md:h-48 rounded-2xl overflow-hidden border-4 border-[#C83200]/30 shadow-2xl">
+                <div className="w-28 h-28 sm:w-40 sm:h-40 md:w-48 md:h-48 rounded-2xl overflow-hidden border-4 border-[#C83200]/30 shadow-2xl">
                   <Image
                     src={player.headshotUrl}
                     alt={player.fullName}
                     width={192}
                     height={192}
                     className="w-full h-full object-cover"
+                    style={{ maxWidth: '100%' }}
                     priority
                   />
                 </div>
               ) : (
-                <div className="w-40 h-40 md:w-48 md:h-48 rounded-2xl bg-white/10 flex items-center justify-center">
-                  <svg className="w-20 h-20 text-white/30" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <div className="w-28 h-28 sm:w-40 sm:h-40 md:w-48 md:h-48 rounded-2xl bg-white/10 flex items-center justify-center">
+                  <svg className="w-14 h-14 sm:w-20 sm:h-20 text-white/30" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                   </svg>
                 </div>
@@ -115,25 +116,25 @@ export default async function PlayerProfilePage({ params }: PlayerPageProps) {
 
             {/* Center: Player Info */}
             <div className="flex-1 text-white">
-              <div className="flex items-center gap-3 mb-2">
-                <span className="px-3 py-1 bg-white/20 rounded-lg text-lg font-bold">
+              <div className="flex items-center gap-2 sm:gap-3 mb-2">
+                <span className="px-2 sm:px-3 py-1 bg-white/20 rounded-lg text-base sm:text-lg font-bold">
                   #{player.jerseyNumber}
                 </span>
-                <span className="px-3 py-1 bg-[#C83200] rounded-lg text-sm font-semibold">
+                <span className="px-2 sm:px-3 py-1 bg-[#C83200] rounded-lg text-xs sm:text-sm font-semibold">
                   {player.position}
                 </span>
               </div>
 
-              <h1 className="text-4xl md:text-5xl font-bold mb-2" style={{ fontFamily: "'Montserrat', sans-serif" }}>
+              <h1 className="text-2xl sm:text-4xl md:text-5xl font-bold mb-2" style={{ fontFamily: "'Montserrat', sans-serif" }}>
                 {player.fullName}
               </h1>
 
-              <p className="text-white/70 text-lg mb-4">
+              <p className="text-white/70 text-sm sm:text-lg mb-3 sm:mb-4">
                 Chicago Bears • {player.side === 'OFF' ? 'Offense' : player.side === 'DEF' ? 'Defense' : 'Special Teams'}
               </p>
 
               {/* Bio Line */}
-              <div className="flex flex-wrap gap-x-6 gap-y-2 text-white/80">
+              <div className="flex flex-wrap gap-x-3 sm:gap-x-6 gap-y-1 sm:gap-y-2 text-white/80 text-sm sm:text-base">
                 {player.age && (
                   <div>
                     <span className="text-white/50 text-sm">Age: </span>
@@ -183,14 +184,14 @@ export default async function PlayerProfilePage({ params }: PlayerPageProps) {
       </div>
 
       {/* Main Content */}
-      <div className="max-w-7xl mx-auto px-4 py-8">
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+      <div className="max-w-7xl mx-auto px-3 sm:px-4 py-4 sm:py-8">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-8">
           {/* Left Column: Stats & Game Log */}
-          <div className="lg:col-span-2 space-y-8">
+          <div className="lg:col-span-2 space-y-4 sm:space-y-8">
             {/* Season Overview */}
             {currentSeason && (
-              <section className="bg-[var(--bg-elevated)] border border-[var(--border-subtle)] rounded-2xl p-6">
-                <h2 className="text-xl font-bold text-[var(--text-primary)] mb-6" style={{ fontFamily: "'Montserrat', sans-serif" }}>
+              <section className="bg-[var(--bg-elevated)] border border-[var(--border-subtle)] rounded-2xl p-4 sm:p-6">
+                <h2 className="text-lg sm:text-xl font-bold text-[var(--text-primary)] mb-4 sm:mb-6" style={{ fontFamily: "'Montserrat', sans-serif" }}>
                   2025 Season Overview
                 </h2>
                 <SeasonOverviewCards player={player} stats={currentSeason} />
@@ -199,8 +200,8 @@ export default async function PlayerProfilePage({ params }: PlayerPageProps) {
 
             {/* Strength Profile */}
             {currentSeason && (
-              <section className="bg-[var(--bg-elevated)] border border-[var(--border-subtle)] rounded-2xl p-6">
-                <h2 className="text-xl font-bold text-[var(--text-primary)] mb-6" style={{ fontFamily: "'Montserrat', sans-serif" }}>
+              <section className="bg-[var(--bg-elevated)] border border-[var(--border-subtle)] rounded-2xl p-4 sm:p-6">
+                <h2 className="text-lg sm:text-xl font-bold text-[var(--text-primary)] mb-4 sm:mb-6" style={{ fontFamily: "'Montserrat', sans-serif" }}>
                   Strength Profile
                 </h2>
                 <StrengthProfileBars player={player} stats={currentSeason} />
@@ -210,8 +211,8 @@ export default async function PlayerProfilePage({ params }: PlayerPageProps) {
             {/* Game Log */}
             {gameLog.length > 0 && (
               <section className="bg-[var(--bg-elevated)] border border-[var(--border-subtle)] rounded-2xl overflow-hidden">
-                <div className="p-6 border-b border-[var(--border-subtle)]">
-                  <h2 className="text-xl font-bold text-[var(--text-primary)]" style={{ fontFamily: "'Montserrat', sans-serif" }}>
+                <div className="p-4 sm:p-6 border-b border-[var(--border-subtle)]">
+                  <h2 className="text-lg sm:text-xl font-bold text-[var(--text-primary)]" style={{ fontFamily: "'Montserrat', sans-serif" }}>
                     Game Log 2025
                   </h2>
                 </div>
@@ -221,42 +222,43 @@ export default async function PlayerProfilePage({ params }: PlayerPageProps) {
           </div>
 
           {/* Right Column: Similar Players & Links */}
-          <div className="space-y-6">
+          <div className="space-y-4 sm:space-y-6">
             {/* Similar Bears */}
             {similarPlayers.length > 0 && (
-              <section className="bg-[var(--bg-elevated)] border border-[var(--border-subtle)] rounded-2xl p-6">
-                <h3 className="text-lg font-bold text-[var(--text-primary)] mb-4" style={{ fontFamily: "'Montserrat', sans-serif" }}>
+              <section className="bg-[var(--bg-elevated)] border border-[var(--border-subtle)] rounded-2xl p-4 sm:p-6">
+                <h3 className="text-base sm:text-lg font-bold text-[var(--text-primary)] mb-3 sm:mb-4" style={{ fontFamily: "'Montserrat', sans-serif" }}>
                   Similar Bears
                 </h3>
-                <div className="space-y-3">
+                <div className="space-y-2 sm:space-y-3">
                   {similarPlayers.map(p => (
                     <Link
                       key={p.playerId}
                       href={`/chicago-bears/players/${p.slug}`}
-                      className="flex items-center gap-3 p-3 rounded-xl hover:bg-[var(--bg-hover)] transition-colors group"
+                      className="flex items-center gap-2 sm:gap-3 p-2 sm:p-3 rounded-xl hover:bg-[var(--bg-hover)] transition-colors group min-h-[44px]"
                     >
                       {p.headshotUrl ? (
-                        <div className="w-12 h-12 rounded-full overflow-hidden flex-shrink-0">
+                        <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-full overflow-hidden flex-shrink-0">
                           <Image
                             src={p.headshotUrl}
                             alt={p.fullName}
                             width={48}
                             height={48}
                             className="w-full h-full object-cover"
+                            style={{ maxWidth: '100%' }}
                           />
                         </div>
                       ) : (
-                        <div className="w-12 h-12 rounded-full bg-[var(--bg-tertiary)] flex items-center justify-center flex-shrink-0">
-                          <span className="text-lg font-bold text-[var(--text-muted)]">
+                        <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-[var(--bg-tertiary)] flex items-center justify-center flex-shrink-0">
+                          <span className="text-base sm:text-lg font-bold text-[var(--text-muted)]">
                             {p.jerseyNumber}
                           </span>
                         </div>
                       )}
                       <div className="flex-1 min-w-0">
-                        <div className="font-medium text-[var(--text-primary)] group-hover:text-[#C83200] transition-colors truncate">
+                        <div className="font-medium text-sm sm:text-base text-[var(--text-primary)] group-hover:text-[#C83200] transition-colors truncate">
                           {p.fullName}
                         </div>
-                        <div className="text-sm text-[var(--text-muted)]">
+                        <div className="text-xs sm:text-sm text-[var(--text-muted)]">
                           {p.position} #{p.jerseyNumber}
                         </div>
                       </div>
@@ -270,34 +272,34 @@ export default async function PlayerProfilePage({ params }: PlayerPageProps) {
             )}
 
             {/* Quick Links */}
-            <section className="bg-[var(--bg-elevated)] border border-[var(--border-subtle)] rounded-2xl p-6">
-              <h3 className="text-lg font-bold text-[var(--text-primary)] mb-4" style={{ fontFamily: "'Montserrat', sans-serif" }}>
+            <section className="bg-[var(--bg-elevated)] border border-[var(--border-subtle)] rounded-2xl p-4 sm:p-6">
+              <h3 className="text-base sm:text-lg font-bold text-[var(--text-primary)] mb-3 sm:mb-4" style={{ fontFamily: "'Montserrat', sans-serif" }}>
                 Quick Links
               </h3>
-              <div className="space-y-2">
+              <div className="space-y-1 sm:space-y-2">
                 <Link
                   href="/chicago-bears/players"
-                  className="flex items-center gap-3 p-3 rounded-xl hover:bg-[var(--bg-hover)] transition-colors text-[var(--text-secondary)] hover:text-[#C83200]"
+                  className="flex items-center gap-2 sm:gap-3 p-2 sm:p-3 rounded-xl hover:bg-[var(--bg-hover)] transition-colors text-[var(--text-secondary)] hover:text-[#C83200] min-h-[44px] text-sm sm:text-base"
                 >
-                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg className="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                   </svg>
                   All Player Profiles
                 </Link>
                 <Link
                   href="/chicago-bears/roster"
-                  className="flex items-center gap-3 p-3 rounded-xl hover:bg-[var(--bg-hover)] transition-colors text-[var(--text-secondary)] hover:text-[#C83200]"
+                  className="flex items-center gap-2 sm:gap-3 p-2 sm:p-3 rounded-xl hover:bg-[var(--bg-hover)] transition-colors text-[var(--text-secondary)] hover:text-[#C83200] min-h-[44px] text-sm sm:text-base"
                 >
-                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg className="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z" />
                   </svg>
                   Full Bears Roster
                 </Link>
                 <Link
                   href="/chicago-bears/stats"
-                  className="flex items-center gap-3 p-3 rounded-xl hover:bg-[var(--bg-hover)] transition-colors text-[var(--text-secondary)] hover:text-[#C83200]"
+                  className="flex items-center gap-2 sm:gap-3 p-2 sm:p-3 rounded-xl hover:bg-[var(--bg-hover)] transition-colors text-[var(--text-secondary)] hover:text-[#C83200] min-h-[44px] text-sm sm:text-base"
                 >
-                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg className="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 3.055A9.001 9.001 0 1020.945 13H11V3.055z" />
                   </svg>
                   Team Stats

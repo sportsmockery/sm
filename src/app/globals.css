@@ -1620,3 +1620,436 @@ a:hover {
 .dark .sm-southside-behavior .sm-show-cta {
   background-color: var(--bg-surface);
 }
+
+/* ========== MOBILE FIXES FOR SCREENS ≤375px ========== */
+/*
+ * Comprehensive mobile optimizations for very small screens (iPhone SE, etc.)
+ * Targets: max-width 375px
+ * Focus: Touch targets (44px min), font sizes (16px min), overflow prevention
+ */
+
+@media (max-width: 375px) {
+  /* ----- GLOBAL MOBILE FIXES ----- */
+  /* Ensure base font size is readable */
+  body {
+    font-size: 16px;
+  }
+
+  /* Prevent horizontal overflow on all containers */
+  .max-w-\[1110px\],
+  .max-w-\[1320px\],
+  .max-w-7xl {
+    overflow-x: hidden;
+  }
+
+  /* Reduce container padding slightly */
+  .px-4 {
+    padding-left: 12px;
+    padding-right: 12px;
+  }
+
+  /* ----- HEADER MOBILE FIXES ----- */
+  /* Top header bar - reduce height for very small screens */
+  header .h-\[52px\] {
+    height: 48px;
+  }
+
+  /* Logo scaling */
+  header .h-8 {
+    height: 28px;
+    max-width: 100%;
+  }
+
+  /* Social icons - show vertically with better spacing on mobile menu */
+  .sm-mobile-social-vertical {
+    flex-direction: column;
+    gap: 10px;
+    padding: 10px 0;
+  }
+
+  /* Login button - larger touch target */
+  header a[href="/login"] {
+    font-size: 16px !important;
+    min-height: 44px;
+    padding: 10px 16px !important;
+  }
+
+  /* Theme toggle - ensure adequate touch target */
+  header button[aria-label*="Switch to"] {
+    min-width: 44px;
+    min-height: 44px;
+  }
+
+  /* ----- NAVIGATION MOBILE FIXES ----- */
+  /* Main nav bar */
+  nav.border-b-\[3px\] {
+    overflow-x: hidden;
+  }
+
+  /* Mobile menu container */
+  .lg\:hidden .py-4 {
+    padding-top: 12px;
+    padding-bottom: 12px;
+  }
+
+  /* Mobile menu items - larger font and touch targets */
+  .lg\:hidden a.block,
+  .lg\:hidden a.flex {
+    font-size: 16px !important;
+    min-height: 44px;
+    padding-top: 12px !important;
+    padding-bottom: 12px !important;
+  }
+
+  /* Mobile menu sub-items */
+  .lg\:hidden .pl-4 a {
+    font-size: 15px !important;
+    padding: 10px 0 !important;
+  }
+
+  /* Mobile CTA buttons */
+  .lg\:hidden .flex.gap-3 a {
+    font-size: 14px !important;
+    padding: 12px 16px !important;
+    min-height: 44px;
+  }
+
+  /* ----- FOOTER MOBILE FIXES ----- */
+  footer {
+    overflow-x: hidden;
+  }
+
+  /* Footer links - larger font and spacing */
+  footer a {
+    font-size: 16px !important;
+    padding: 8px 0;
+    display: inline-block;
+  }
+
+  footer ul.space-y-1\.5 li,
+  footer ul.space-y-2 li {
+    padding: 4px 0;
+  }
+
+  /* Footer section titles */
+  footer h3 {
+    font-size: 14px !important;
+    margin-bottom: 12px;
+  }
+
+  /* Footer description text */
+  footer p {
+    font-size: 14px !important;
+  }
+
+  /* Social icons in footer - larger touch targets */
+  footer .gap-4 a {
+    min-width: 44px;
+    min-height: 44px;
+    padding: 8px;
+  }
+
+  footer .gap-4 svg {
+    width: 24px !important;
+    height: 24px !important;
+  }
+
+  /* ----- COOKIE BANNER MOBILE FIXES ----- */
+  .fixed.bottom-0 {
+    padding: 16px 12px !important;
+  }
+
+  .fixed.bottom-0 p {
+    font-size: 14px !important;
+    text-align: center;
+    margin-bottom: 12px;
+  }
+
+  /* Cookie buttons - larger touch targets */
+  .fixed.bottom-0 button {
+    min-width: 100px !important;
+    min-height: 44px !important;
+    padding: 10px 16px !important;
+    font-size: 14px !important;
+    margin: 5px;
+  }
+
+  .fixed.bottom-0 .gap-3 {
+    gap: 10px;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+
+  /* ----- TEAM HUB LAYOUT MOBILE FIXES ----- */
+  /* Team header band - reduce padding */
+  .py-6 {
+    padding-top: 16px;
+    padding-bottom: 16px;
+  }
+
+  /* Team logo - smaller on very small screens */
+  .w-16.h-16 {
+    width: 48px;
+    height: 48px;
+  }
+
+  /* Team name - responsive sizing */
+  h1.text-2xl {
+    font-size: 20px !important;
+  }
+
+  /* Next game card - stack vertically */
+  .p-4.bg-white\/10 {
+    padding: 12px;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+
+  /* Team subnav pills - ensure horizontal scroll works */
+  nav.overflow-x-auto {
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+  }
+
+  nav.overflow-x-auto::-webkit-scrollbar {
+    display: none;
+  }
+
+  /* Subnav tabs - larger touch targets */
+  nav.overflow-x-auto a {
+    font-size: 14px !important;
+    min-height: 44px;
+    padding: 10px 12px !important;
+  }
+
+  /* ----- SCHEDULE PAGE MOBILE FIXES ----- */
+  /* Schedule sections - reduce spacing */
+  section {
+    margin-top: 15px !important;
+    margin-bottom: 15px !important;
+  }
+
+  /* Section headers */
+  section h2 {
+    font-size: 18px !important;
+    margin-bottom: 12px;
+  }
+
+  /* Section content text */
+  section p,
+  section span {
+    font-size: 16px !important;
+  }
+
+  /* Schedule table - enable horizontal scroll */
+  .overflow-x-auto {
+    -webkit-overflow-scrolling: touch;
+  }
+
+  /* Table cells - more compact */
+  table th,
+  table td {
+    padding: 8px 6px !important;
+    font-size: 14px !important;
+  }
+
+  /* ----- PLAYER PAGE MOBILE FIXES ----- */
+  /* Breadcrumbs - wrap vertically */
+  nav.flex.items-center.gap-2 {
+    flex-wrap: wrap;
+    gap: 4px 8px;
+  }
+
+  nav.flex.items-center.gap-2 a,
+  nav.flex.items-center.gap-2 span {
+    font-size: 14px !important;
+    padding: 2px 0;
+  }
+
+  /* Player switcher - larger touch target */
+  .sm-player-switcher,
+  [class*="PlayerSwitcher"] button {
+    font-size: 16px !important;
+    min-height: 44px;
+    padding: 8px 12px !important;
+  }
+
+  /* Player headshot - prevent overflow */
+  .w-40.h-40,
+  .w-48.h-48 {
+    max-width: 100% !important;
+    width: 120px !important;
+    height: 120px !important;
+  }
+
+  /* Player name - responsive */
+  h1.text-4xl {
+    font-size: 24px !important;
+  }
+
+  h1.text-5xl {
+    font-size: 28px !important;
+  }
+
+  /* Player bio line - wrap and space */
+  .flex.flex-wrap.gap-x-6 {
+    gap: 8px 16px;
+  }
+
+  .flex.flex-wrap.gap-x-6 > div {
+    font-size: 14px !important;
+    padding: 2px 0;
+  }
+
+  /* Season snapshot stats */
+  .grid.grid-cols-3.gap-3 {
+    gap: 8px;
+  }
+
+  .grid.grid-cols-3.gap-3 > div {
+    padding: 4px;
+  }
+
+  .grid.grid-cols-3.gap-3 .text-2xl {
+    font-size: 20px !important;
+  }
+
+  /* Stat sections - reduce margins */
+  .space-y-8 > section {
+    margin-bottom: 16px !important;
+  }
+
+  /* Section padding */
+  section.p-6 {
+    padding: 16px !important;
+  }
+
+  /* Game log section - enable vertical reflow on mobile cards */
+  .md\:hidden.p-4.space-y-3 > div {
+    margin-bottom: 12px;
+  }
+
+  /* Game log card stats */
+  .grid.grid-cols-3.gap-2 {
+    gap: 4px;
+  }
+
+  .grid.grid-cols-3.gap-2 .text-lg {
+    font-size: 16px !important;
+  }
+
+  /* ----- SIMILAR PLAYERS & QUICK LINKS MOBILE FIXES ----- */
+  /* Similar players images */
+  .w-12.h-12 {
+    width: 40px !important;
+    height: 40px !important;
+  }
+
+  /* Similar player links - larger touch targets */
+  a.flex.items-center.gap-3.p-3 {
+    padding: 10px !important;
+    min-height: 44px;
+  }
+
+  /* Quick links - wrap vertically with spacing */
+  .space-y-2 > a {
+    padding: 10px !important;
+    font-size: 16px !important;
+  }
+
+  /* ----- STATIC PAGES MOBILE FIXES ----- */
+  /* About page */
+  .max-w-4xl {
+    padding: 0 12px;
+  }
+
+  .max-w-4xl h1 {
+    font-size: 28px !important;
+  }
+
+  .max-w-4xl p {
+    font-size: 16px !important;
+  }
+
+  /* Login page */
+  .max-w-sm {
+    padding: 16px !important;
+    max-width: 100% !important;
+  }
+
+  .max-w-sm input {
+    font-size: 16px !important;
+    min-height: 44px;
+    padding: 12px !important;
+  }
+
+  .max-w-sm button[type="submit"] {
+    font-size: 16px !important;
+    min-height: 44px;
+  }
+
+  /* ----- FORMS MOBILE FIXES ----- */
+  /* Ensure all form inputs are 16px+ to prevent iOS zoom */
+  input,
+  textarea,
+  select {
+    font-size: 16px !important;
+  }
+
+  /* ----- CARDS & BUTTONS MOBILE FIXES ----- */
+  /* All buttons - minimum touch target */
+  button,
+  a.rounded,
+  a.rounded-lg,
+  a.rounded-xl,
+  a.rounded-full {
+    min-height: 44px;
+  }
+
+  /* Card content - readable text */
+  .article-card-headline {
+    font-size: 16px !important;
+  }
+
+  .article-card-meta {
+    font-size: 13px !important;
+  }
+
+  /* ----- SPACING UTILITY OVERRIDES ----- */
+  /* Reduce excessive vertical spacing */
+  .py-8 {
+    padding-top: 20px !important;
+    padding-bottom: 20px !important;
+  }
+
+  .py-16 {
+    padding-top: 24px !important;
+    padding-bottom: 24px !important;
+  }
+
+  .gap-8 {
+    gap: 16px !important;
+  }
+
+  .space-y-6 > * + * {
+    margin-top: 16px !important;
+  }
+
+  .space-y-8 > * + * {
+    margin-top: 20px !important;
+  }
+
+  /* ----- IMAGES MOBILE FIXES ----- */
+  /* Prevent any image from overflowing */
+  img {
+    max-width: 100% !important;
+    height: auto;
+  }
+
+  /* ----- HORIZONTAL RULE REMOVAL FOR SPACE ----- */
+  /* Remove hrs in tight spaces */
+  hr {
+    margin: 10px 0 !important;
+  }
+}

@@ -103,18 +103,18 @@ export default function Footer() {
                 Your source for Chicago sports news, analysis, and commentary. Covering Bears, Bulls, Cubs, White Sox, and Blackhawks with passion.
               </p>
               {/* Social icons */}
-              <div className="flex items-center justify-center md:justify-start gap-4">
+              <div className="flex items-center justify-center md:justify-start gap-3 sm:gap-4">
                 {socialLinks.map((social) => (
                   <a
                     key={social.name}
                     href={social.href}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="transition-colors hover:opacity-100"
+                    className="transition-colors hover:opacity-100 min-w-[44px] min-h-[44px] flex items-center justify-center"
                     style={{ color: 'var(--footer-text-muted, #999)' }}
                     aria-label={social.name}
                   >
-                    <SocialIcon icon={social.icon} className="w-5 h-5 md:w-6 md:h-6" />
+                    <SocialIcon icon={social.icon} className="w-5 h-5 sm:w-5 sm:h-5 md:w-6 md:h-6" />
                   </a>
                 ))}
               </div>
@@ -130,12 +130,12 @@ export default function Footer() {
                 >
                   CATEGORIES
                 </h3>
-                <ul className="space-y-1.5 md:space-y-2">
+                <ul className="space-y-2 sm:space-y-1.5 md:space-y-2">
                   {footerColumns[1].links?.map((link) => (
-                    <li key={link.name}>
+                    <li key={link.name} className="py-1 sm:py-0">
                       <Link
                         href={link.href}
-                        className="text-[13px] md:text-[14px] transition-colors hover:opacity-100"
+                        className="text-[14px] sm:text-[13px] md:text-[14px] transition-colors hover:opacity-100 inline-block py-1"
                         style={{ color: 'var(--footer-text-muted, #999)' }}
                       >
                         {link.name}
@@ -153,12 +153,12 @@ export default function Footer() {
                 >
                   CONNECT
                 </h3>
-                <ul className="space-y-1.5 md:space-y-2">
+                <ul className="space-y-2 sm:space-y-1.5 md:space-y-2">
                   {footerColumns[2].links?.map((link) => (
-                    <li key={link.name}>
+                    <li key={link.name} className="py-1 sm:py-0">
                       <Link
                         href={link.href}
-                        className="text-[13px] md:text-[14px] transition-colors hover:opacity-100"
+                        className="text-[14px] sm:text-[13px] md:text-[14px] transition-colors hover:opacity-100 inline-block py-1"
                         style={{ color: 'var(--footer-text-muted, #999)' }}
                       >
                         {link.name}
