@@ -1,186 +1,171 @@
 import { Metadata } from 'next';
+import Image from 'next/image';
 
 export const metadata: Metadata = {
-  title: 'Untold Chicago Stories | Sports Mockery',
+  title: 'Untold Chicago Stories',
   description: 'Untold Chicago is a long-form podcast and video series giving former Chicago athletes the space to tell their story the way it was actually lived.',
   openGraph: {
     title: 'Untold Chicago Stories',
-    description: 'The stories behind the legends. Coming soon.',
-    images: ['/untld-logo.svg'],
+    description: 'The stories behind Chicago\'s legends. Coming soon.',
+    images: ['/images/untold/untld-logo.svg'],
   },
 };
 
 export default function UntoldChicagoStoriesPage() {
   return (
-    <main className="sm-show-page sm-untold-chicago">
+    <main className="bg-[#050608] text-white min-h-screen">
       {/* Hero Section with Logo */}
-      <section className="sm-show-hero" style={{ backgroundColor: '#000000', padding: '3rem 0' }}>
-        <div className="sm-container" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-          <img
-            src="/untld-logo.svg"
-            alt="UNTLD Chicago Confidential Unreleased"
-            style={{
-              width: '100%',
-              maxHeight: '400px',
-              objectFit: 'contain',
-            }}
+      <section className="w-full bg-black py-10 md:py-16">
+        <div className="relative w-full max-w-[90vw] sm:max-w-md md:max-w-lg lg:max-w-2xl mx-auto aspect-[3/1]">
+          <Image
+            src="/images/untold/untld-logo.svg"
+            alt="Untold Chicago Stories"
+            fill
+            priority
+            className="object-contain"
           />
         </div>
       </section>
 
-      {/* Title Section */}
-      <section style={{ backgroundColor: '#0a0a0a', padding: '3rem 0' }}>
-        <div className="sm-container" style={{ textAlign: 'center' }}>
-          <h1
-            style={{
-              fontSize: 'clamp(2.5rem, 8vw, 5rem)',
-              fontWeight: 800,
-              color: '#ffffff',
-              marginBottom: '1rem',
-              letterSpacing: '-0.02em',
-            }}
-          >
+      {/* Title and Tagline Section */}
+      <section className="py-8 sm:py-10">
+        <div className="max-w-3xl mx-auto px-4 sm:px-6 text-center">
+          <h1 className="text-3xl sm:text-4xl md:text-5xl font-extrabold tracking-tight">
             UNTOLD CHICAGO
           </h1>
-          <h2
-            style={{
-              fontSize: 'clamp(1.25rem, 4vw, 2rem)',
-              fontWeight: 700,
-              color: '#bc0000',
-              marginBottom: '2rem',
-            }}
-          >
-            The stories behind the legends.
-          </h2>
+          <p className="mt-3 text-lg sm:text-xl font-semibold text-[#bc0000]">
+            The stories behind Chicago&apos;s legends.
+          </p>
         </div>
       </section>
 
-      {/* Description Section */}
-      <section style={{ backgroundColor: '#111111', padding: '3rem 0' }}>
-        <div className="sm-container">
-          <p style={{ fontSize: '1.25rem', color: '#e0e0e0', marginBottom: '1.5rem', lineHeight: 1.7 }}>
-            Untold Chicago is a long-form podcast and video series created to give former Chicago athletes the space to tell their story the way it was actually lived — without pressure, without spin, and without being reduced to headlines.
+      {/* Intro Copy Section */}
+      <section className="py-8 sm:py-10 bg-[#0a0a0a]">
+        <div className="max-w-3xl mx-auto px-4 sm:px-6 text-base sm:text-lg leading-relaxed space-y-4">
+          <p>
+            Untold Chicago is a long-form podcast and video series built to let former Chicago athletes tell their story the way it was actually lived — without pressure, without spin, and without being reduced to headlines.
           </p>
-          <p style={{ fontSize: '1.25rem', color: '#e0e0e0', lineHeight: 1.7 }}>
-            This isn&apos;t an interview meant to put you on the spot. It&apos;s a conversation designed to allow you to reflect, explain, and be heard.
+          <p>
+            This isn&apos;t an interview designed to put you on the spot. It&apos;s a conversation that gives you room to reflect, explain, and be heard.
           </p>
         </div>
       </section>
 
       {/* What the Conversation Feels Like */}
-      <section style={{ backgroundColor: '#0a0a0a', padding: '3rem 0' }}>
-        <div className="sm-container">
-          <h2 style={{ fontSize: '1.75rem', fontWeight: 700, color: '#ffffff', textAlign: 'center', marginBottom: '1.5rem' }}>
-            WHAT THE CONVERSATION FEELS LIKE
+      <section className="py-8 sm:py-12 md:py-16">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6">
+          <h2 className="text-xl sm:text-2xl md:text-3xl font-bold text-center mb-4">
+            What the Conversation Feels Like
           </h2>
-          <p style={{ fontSize: '1.1rem', color: '#b0b0b0', textAlign: 'center', marginBottom: '2rem' }}>
-            We talk through the moments that mattered — naturally, at your pace:
+          <p className="text-center text-base sm:text-lg text-gray-300 mb-6">
+            We walk through the moments that actually mattered — at your pace, in your words.
           </p>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '1rem' }}>
+          <ul className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
             {[
-              'When you first believed you could make it, and when you doubted it',
-              'Who showed up for you early, before the world did',
-              'What Chicago meant to you — the pressure, the pride, when it felt like home',
+              'When you first believed you could make it — and when you doubted it',
+              'Who showed up early, before the rest of the world noticed',
+              'What Chicago meant to you — the pressure, the pride, and when it finally felt like home',
               'The people who carried you forward — coaches, teammates, family',
               'How life changed once the game slowed down',
-              'What you\'re most proud of now, and how you want your story remembered',
+              'What you\'re proudest of now, and how you want your story remembered',
             ].map((item, idx) => (
-              <div key={idx} style={{ padding: '1rem', backgroundColor: '#1a1a1a', borderRadius: '8px' }}>
-                <p style={{ fontSize: '1rem', color: '#d0d0d0', margin: 0 }}>{item}</p>
-              </div>
+              <li key={idx} className="text-base sm:text-lg text-gray-200 bg-[#111] rounded-lg p-4">
+                {item}
+              </li>
             ))}
-          </div>
-          <p style={{ fontSize: '1.1rem', color: '#b0b0b0', textAlign: 'center', marginTop: '2rem' }}>
-            There&apos;s direction, but no script.
+          </ul>
+          <p className="text-center text-base sm:text-lg text-gray-300 mt-6">
+            There&apos;s direction, but there&apos;s no script.
           </p>
         </div>
       </section>
 
       {/* Why Athletes Say Yes */}
-      <section style={{ backgroundColor: '#111111', padding: '3rem 0' }}>
-        <div className="sm-container">
-          <h2 style={{ fontSize: '1.75rem', fontWeight: 700, color: '#ffffff', textAlign: 'center', marginBottom: '1.5rem' }}>
-            WHY ATHLETES SAY YES
+      <section className="py-8 sm:py-12 md:py-16 bg-[#0a0a0a]">
+        <div className="max-w-3xl mx-auto px-4 sm:px-6">
+          <h2 className="text-xl sm:text-2xl md:text-3xl font-bold text-center mb-4">
+            Why Athletes Say Yes
           </h2>
-          <p style={{ fontSize: '1.1rem', color: '#b0b0b0', textAlign: 'center', marginBottom: '2rem' }}>
+          <p className="text-center text-base sm:text-lg text-gray-300 mb-6">
             Athletes choose Untold Chicago because it feels different.
           </p>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '1rem' }}>
+          <ul className="space-y-3">
             {[
               'You\'re guided, not interrogated',
               'No hot takes, no rapid-fire questions',
               'It feels like sitting down with someone who understands the journey',
               'You decide what you want to share — and what you don\'t',
             ].map((item, idx) => (
-              <div key={idx} style={{ padding: '1rem', backgroundColor: '#1a1a1a', borderRadius: '8px' }}>
-                <p style={{ fontSize: '1rem', color: '#d0d0d0', margin: 0 }}>{item}</p>
-              </div>
+              <li key={idx} className="text-base sm:text-lg text-gray-200 bg-[#111] rounded-lg p-4">
+                {item}
+              </li>
             ))}
-          </div>
-          <p style={{ fontSize: '1.25rem', fontWeight: 700, color: '#bc0000', textAlign: 'center', marginTop: '2rem' }}>
+          </ul>
+          <p className="mt-6 text-center text-lg sm:text-xl font-semibold text-[#bc0000]">
             This is your story, told on your terms.
           </p>
         </div>
       </section>
 
       {/* The Environment */}
-      <section style={{ backgroundColor: '#0a0a0a', padding: '3rem 0' }}>
-        <div className="sm-container">
-          <h2 style={{ fontSize: '1.75rem', fontWeight: 700, color: '#ffffff', textAlign: 'center', marginBottom: '1.5rem' }}>
-            THE ENVIRONMENT
+      <section className="py-8 sm:py-12 md:py-16">
+        <div className="max-w-3xl mx-auto px-4 sm:px-6">
+          <h2 className="text-xl sm:text-2xl md:text-3xl font-bold text-center mb-6">
+            The Environment
           </h2>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '1rem' }}>
+          <ul className="space-y-3">
             {[
               'Private, professional studio',
               'No audience, no distractions',
               'Everyone on set signs NDAs',
               'Nothing is released without your approval',
             ].map((item, idx) => (
-              <div key={idx} style={{ padding: '1rem', backgroundColor: '#1a1a1a', borderRadius: '8px' }}>
-                <p style={{ fontSize: '1rem', color: '#d0d0d0', margin: 0 }}>{item}</p>
-              </div>
+              <li key={idx} className="text-base sm:text-lg text-gray-200 bg-[#111] rounded-lg p-4">
+                {item}
+              </li>
             ))}
-          </div>
-          <p style={{ fontSize: '1.1rem', color: '#b0b0b0', textAlign: 'center', marginTop: '2rem' }}>
-            If there&apos;s something you decide shouldn&apos;t be public, it won&apos;t be.
+          </ul>
+          <p className="text-center text-base sm:text-lg text-gray-300 mt-6">
+            If there&apos;s anything you decide shouldn&apos;t be public, it won&apos;t be.
           </p>
         </div>
       </section>
 
-      {/* Why This Matters */}
-      <section style={{ backgroundColor: '#111111', padding: '3rem 0' }}>
-        <div className="sm-container">
-          <h2 style={{ fontSize: '1.75rem', fontWeight: 700, color: '#ffffff', textAlign: 'center', marginBottom: '1.5rem' }}>
-            WHY THIS MATTERS
+      {/* Why This Matters + Coming Soon */}
+      <section className="py-8 sm:py-12 md:py-16 bg-[#0a0a0a]">
+        <div className="max-w-3xl mx-auto px-4 sm:px-6">
+          <h2 className="text-xl sm:text-2xl md:text-3xl font-bold text-center mb-6">
+            Why This Matters
           </h2>
-          <p style={{ fontSize: '1.1rem', color: '#b0b0b0', textAlign: 'center', marginBottom: '1.5rem' }}>
-            Chicago fans don&apos;t just remember stats — they remember moments, people, and how you made them feel.
-          </p>
-          <p style={{ fontSize: '1.25rem', color: '#e0e0e0', textAlign: 'center', marginBottom: '2rem' }}>
-            Untold Chicago gives you the chance to:
-          </p>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '1rem' }}>
-            {[
-              'Add depth and context to how your career is remembered',
-              'Address moments that were misunderstood',
-              'Share lessons with the next generation',
-              'Leave something meaningful behind',
-            ].map((item, idx) => (
-              <div key={idx} style={{ padding: '1rem', backgroundColor: '#1a1a1a', borderRadius: '8px' }}>
-                <p style={{ fontSize: '1rem', color: '#d0d0d0', margin: 0 }}>{item}</p>
-              </div>
-            ))}
+          <div className="space-y-4 text-base sm:text-lg leading-relaxed text-gray-200">
+            <p>
+              Chicago fans don&apos;t just remember stats — they remember moments, people, and how you made them feel.
+            </p>
+            <p>
+              Untold Chicago gives you space to add depth to how your career is remembered, clear up what was misunderstood, share what you&apos;ve learned, and leave something that still matters years from now.
+            </p>
           </div>
-          <div style={{ textAlign: 'center', marginTop: '2.5rem' }}>
-            <p style={{ fontSize: '1.25rem', fontWeight: 700, color: '#bc0000', marginBottom: '0.5rem' }}>
-              Years from now, this episode should still matter.
-            </p>
-            <p style={{ fontSize: '2rem', fontWeight: 800, color: '#ffffff', letterSpacing: '0.1em' }}>
-              COMING SOON
-            </p>
+          <p className="mt-8 text-center text-lg sm:text-xl font-semibold text-[#bc0000]">
+            Episodes coming soon to Untold Chicago Stories.
+          </p>
+        </div>
+      </section>
+
+      {/* Future Video Grid Placeholder - Hidden until episodes exist */}
+      {/*
+      <section className="py-8 sm:py-12 md:py-16" aria-hidden="true" hidden>
+        <div className="max-w-5xl mx-auto px-4 sm:px-6">
+          <h2 className="text-xl sm:text-2xl md:text-3xl font-bold text-center mb-6">
+            Episodes
+          </h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {episodes.map((episode) => (
+              <VideoCard key={episode.id} episode={episode} />
+            ))}
           </div>
         </div>
       </section>
+      */}
     </main>
   );
 }
