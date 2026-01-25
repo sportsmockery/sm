@@ -264,9 +264,21 @@ export default function AskAIPage() {
   }
 
   return (
-    <div className="min-h-screen" style={{ backgroundColor: 'var(--bg-page)' }}>
-      <div className="max-w-[1320px] mx-auto px-4 md:px-6 lg:px-8 py-8">
-        <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
+    <>
+      <style jsx global>{`
+        @keyframes thinking {
+          0%, 100% { transform: translateY(0) rotate(0deg); }
+          25% { transform: translateY(-8px) rotate(-5deg); }
+          50% { transform: translateY(-4px) rotate(0deg); }
+          75% { transform: translateY(-8px) rotate(5deg); }
+        }
+        .animate-thinking {
+          animation: thinking 1.5s ease-in-out infinite;
+        }
+      `}</style>
+      <div className="min-h-screen" style={{ backgroundColor: 'var(--bg-page)' }}>
+        <div className="max-w-[1320px] mx-auto px-4 md:px-6 lg:px-8 py-8">
+          <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
           {/* Left Sidebar - Explanation */}
           <div className="lg:col-span-1">
             <div
@@ -343,10 +355,14 @@ export default function AskAIPage() {
               <div ref={messagesContainerRef} className="flex-1 overflow-y-auto p-6">
                 {messages.length === 0 ? (
                   <div className="h-full flex flex-col items-center justify-center text-center">
-                    <div className="w-20 h-20 rounded-full bg-gradient-to-br from-[#bc0000]/20 to-[#ff4444]/20 flex items-center justify-center mb-6">
-                      <svg className="w-10 h-10 text-[#bc0000]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" />
-                      </svg>
+                    <div className={`w-24 h-24 mb-6 ${isLoading ? 'animate-thinking' : ''}`}>
+                      <Image
+                        src="/downloads/scout-v2.png"
+                        alt="Scout AI"
+                        width={96}
+                        height={96}
+                        className="w-full h-full object-contain"
+                      />
                     </div>
                     <h3
                       className="text-xl font-bold mb-2"
@@ -495,8 +511,9 @@ export default function AskAIPage() {
               </div>
             </div>
           </div>
+          </div>
         </div>
       </div>
-    </div>
+    </>
   )
 }
