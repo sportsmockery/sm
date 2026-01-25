@@ -662,8 +662,29 @@ export async function getBearsSchedule(season?: number): Promise<BearsGame[]> {
 async function getBearsScheduleFromDatalab(season: number): Promise<BearsGame[]> {
   if (!datalabAdmin) return []
 
-  // Per SM_INTEGRATION_GUIDE.md: Use exact column names from bears_games_master
-  // Include preseason, regular season, and postseason games
+  // First, check what game_type values exist in the database
+  const { data: sampleData } = await datalabAdmin
+    .from('bears_games_master')
+    .select('game_type, season')
+    .eq('season', season)
+    .limit(10)
+
+  if (sampleData && sampleData.length > 0) {
+    const gameTypes = [...new Set(sampleData.map((g: any) => g.game_type))]
+    console.log(`Bears game_type values in DB for season ${season}: ${JSON.stringify(gameTypes)}`)
+  } else {
+    console.log(`No Bears games found for season ${season}, checking what seasons exist...`)
+    const { data: seasonSample } = await datalabAdmin
+      .from('bears_games_master')
+      .select('season, game_type')
+      .limit(10)
+    if (seasonSample) {
+      const seasons = [...new Set(seasonSample.map((g: any) => g.season))]
+      console.log(`Bears available seasons: ${JSON.stringify(seasons)}`)
+    }
+  }
+
+  // Query for all games in the season (don't filter by game_type to avoid mismatch)
   const { data, error } = await datalabAdmin
     .from('bears_games_master')
     .select(`
@@ -690,10 +711,7 @@ async function getBearsScheduleFromDatalab(season: number): Promise<BearsGame[]>
       tv_network
     `)
     .eq('season', season)
-    .in('game_type', ['preseason', 'regular', 'postseason'])
     .order('game_date', { ascending: true })
-
-  if (error) return []
 
   if (error) {
     console.error('Bears schedule fetch error:', error)
@@ -702,6 +720,7 @@ async function getBearsScheduleFromDatalab(season: number): Promise<BearsGame[]>
 
   // If no games in current season, fall back to previous season (off-season)
   if (!data || data.length === 0) {
+    console.log(`No Bears games found for season ${season}, trying ${season - 1}`)
     const { data: prevData, error: prevError } = await datalabAdmin
       .from('bears_games_master')
       .select(`
@@ -728,13 +747,17 @@ async function getBearsScheduleFromDatalab(season: number): Promise<BearsGame[]>
         tv_network
       `)
       .eq('season', season - 1)
-      .in('game_type', ['preseason', 'regular', 'postseason'])
       .order('game_date', { ascending: true })
 
-    if (prevError || !prevData) return []
+    if (prevError || !prevData) {
+      console.log(`No Bears games found for season ${season - 1} either`)
+      return []
+    }
+    console.log(`Found ${prevData.length} Bears games for season ${season - 1}`)
     return prevData.map((g: any) => transformGame(g, null))
   }
 
+  console.log(`Found ${data.length} Bears games for season ${season}`)
   return data.map((g: any) => transformGame(g, null))
 }
 
