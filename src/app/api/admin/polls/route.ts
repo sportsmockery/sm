@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { supabase } from '@/lib/supabase'
+import { supabaseAdmin } from '@/lib/supabase-server'
 
 /**
  * GET /api/admin/polls
@@ -13,7 +13,7 @@ export async function GET(request: NextRequest) {
     const limit = parseInt(searchParams.get('limit') || '50')
     const offset = parseInt(searchParams.get('offset') || '0')
 
-    let query = supabase
+    let query = supabaseAdmin
       .from('sm_polls')
       .select(`
         *,
@@ -72,7 +72,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Create poll
-    const { data: poll, error: pollError } = await supabase
+    const { data: poll, error: pollError } = await supabaseAdmin
       .from('sm_polls')
       .insert({
         post_id: body.postId || null,
@@ -103,13 +103,13 @@ export async function POST(request: NextRequest) {
       color: opt.color || null,
     }))
 
-    const { error: optionsError } = await supabase
+    const { error: optionsError } = await supabaseAdmin
       .from('sm_poll_options')
       .insert(options)
 
     if (optionsError) {
       // Rollback poll creation
-      await supabase.from('sm_polls').delete().eq('id', poll.id)
+      await supabaseAdmin.from('sm_polls').delete().eq('id', poll.id)
       console.error('Error creating poll options:', optionsError)
       return NextResponse.json(
         { error: 'Failed to create poll options' },
@@ -118,7 +118,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Fetch complete poll with options
-    const { data: completePoll } = await supabase
+    const { data: completePoll } = await supabaseAdmin
       .from('sm_polls')
       .select(`
         *,
