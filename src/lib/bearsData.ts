@@ -708,7 +708,7 @@ async function getBearsScheduleFromDatalab(season: number): Promise<BearsGame[]>
       temp_f,
       wind_mph,
       weather_summary,
-      tv_network
+      broadcast
     `)
     .eq('season', season)
     .order('game_date', { ascending: true })
@@ -744,7 +744,7 @@ async function getBearsScheduleFromDatalab(season: number): Promise<BearsGame[]>
         temp_f,
         wind_mph,
         weather_summary,
-        tv_network
+        broadcast
       `)
       .eq('season', season - 1)
       .order('game_date', { ascending: true })
@@ -825,7 +825,7 @@ function transformGame(game: any, context?: any): BearsGame {
     oppScore: game.opponent_score,
     result,
     venue: game.stadium,
-    tv: game.tv_network || (game.broadcast_window === 'primetime' ? 'Prime' : (game.nationally_televised ? 'National' : null)),
+    tv: game.broadcast || (game.broadcast_window === 'primetime' ? 'Prime' : (game.nationally_televised ? 'National' : null)),
     isPlayoff,
     isPreseason,
     gameType: gameTypeEnum,
