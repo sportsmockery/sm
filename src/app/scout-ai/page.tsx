@@ -7,11 +7,11 @@ import dynamic from 'next/dynamic'
 import ReactMarkdown from 'react-markdown'
 import { useAuth } from '@/contexts/AuthContext'
 import { useSubscription } from '@/contexts/SubscriptionContext'
-import type { ChartData } from '@/components/scout-ai/DataVisualization'
+import type { ChartData } from '@/components/ask-ai/DataVisualization'
 
 // Dynamically import DataVisualization to avoid SSR issues with Chart.js
 const DataVisualization = dynamic(
-  () => import('@/components/scout-ai/DataVisualization'),
+  () => import('@/components/ask-ai/DataVisualization'),
   { ssr: false }
 )
 
@@ -293,7 +293,7 @@ export default function AskAIPage() {
               </h1>
 
               <p className="text-sm mb-6" style={{ color: 'var(--text-muted)' }}>
-                Your intelligent Chicago sports assistant powered by SM Data Lab. Get instant answers with verified stats and sources.
+                Scout AI is a high-IQ sports engine that's locked in to answer all your Chicago sports questions.
               </p>
 
               {/* What you can ask */}
