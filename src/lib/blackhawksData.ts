@@ -605,17 +605,11 @@ function transformGame(game: any): BlackhawksGame {
   const isPlayed = hawksScore !== null && hawksScore !== undefined
 
   let result: 'W' | 'L' | 'OTL' | null = null
-  if (isPlayed) {
-    // Determine if game went to OT or SO by checking:
-    // 1. is_overtime / is_shootout boolean columns
-    // 2. ot_blackhawks / ot_opponent / so_blackhawks / so_opponent period scores (if non-null, game went to OT/SO)
-    const hasOtScores = (game.ot_blackhawks !== null && game.ot_blackhawks !== undefined) ||
-                        (game.ot_opponent !== null && game.ot_opponent !== undefined)
-    const hasSoScores = (game.so_blackhawks !== null && game.so_blackhawks !== undefined) ||
-                        (game.so_opponent !== null && game.so_opponent !== undefined)
-    const isOT = game.is_overtime || game.overtime || hasOtScores
-    const isSO = game.is_shootout || game.shootout || hasSoScores
+  // Determine OT/SO from is_overtime/is_shootout boolean columns
+  const isOT = game.is_overtime === true
+  const isSO = game.is_shootout === true
 
+  if (isPlayed) {
     // Determine win/loss based on available columns
     const didWin = game.blackhawks_win ?? (hawksScore > oppScore)
 
@@ -644,8 +638,8 @@ function transformGame(game: any): BlackhawksGame {
     result,
     arena: game.arena,
     tv: game.broadcast,
-    overtime: game.overtime || false,
-    shootout: game.shootout || false,
+    overtime: isOT,
+    shootout: isSO,
   }
 }
 
