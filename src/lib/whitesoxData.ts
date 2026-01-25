@@ -215,7 +215,6 @@ export async function getWhiteSoxPlayers(): Promise<WhiteSoxPlayer[]> {
     .order('position')
     .order('name')
 
-  console.log("Task 2 complete: White Sox roster query updated to exclude flagged players")
 
   if (error) {
     console.error('DataLab fetch error:', error)
@@ -867,12 +866,6 @@ export async function getWhiteSoxRecord(season?: number): Promise<WhiteSoxRecord
   const wins = completedGames.filter(g => g.result === 'W').length
   const losses = completedGames.filter(g => g.result === 'L').length
 
-  // VALIDATION: Expected from MLB.com - White Sox 2025: Regular 60-102 (5th AL Central), No postseason
-  const expectedRegular = { wins: 60, losses: 102 }
-  if (wins !== expectedRegular.wins || losses !== expectedRegular.losses) {
-    console.log(`Supabase mismatch: Expected White Sox regular ${expectedRegular.wins}-${expectedRegular.losses}, got ${wins}-${losses}`)
-  }
-  console.log("Task 1 complete: White Sox record validation added")
 
   return { wins, losses }
 }

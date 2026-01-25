@@ -810,14 +810,6 @@ export async function getBullsRecord(season?: number): Promise<BullsRecord> {
   const wins = completedGames.filter(g => g.result === 'W').length
   const losses = completedGames.filter(g => g.result === 'L').length
 
-  // VALIDATION: Expected from ESPN/NBA.com - Bulls 2025-26 (as of Jan 23, 2026): 22-22, 3rd Central, 9th East
-  // Note: This is a snapshot in time, ongoing season record will change
-  const expectedWins = 22
-  const expectedLosses = 22
-  if (Math.abs(wins - expectedWins) > 5 || Math.abs(losses - expectedLosses) > 5) {
-    console.log(`Supabase mismatch: Expected Bulls ~${expectedWins}-${expectedLosses}, got ${wins}-${losses}. Possible stale data.`)
-  }
-  console.log("Task 1 complete: Bulls record validation added")
 
   // Calculate streak from most recent games
   let streak: string | null = null
