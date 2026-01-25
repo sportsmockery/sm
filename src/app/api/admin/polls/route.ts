@@ -57,7 +57,7 @@ export async function GET(request: NextRequest) {
 
 /**
  * POST /api/admin/polls
- * Create a new poll
+ * Create a new poll (used by PostIQ)
  */
 export async function POST(request: NextRequest) {
   try {
@@ -71,16 +71,21 @@ export async function POST(request: NextRequest) {
       )
     }
 
+    // Use question as title if not provided (for PostIQ auto-generation)
+    const title = body.title || body.question.slice(0, 255)
+
     // Create poll
     const { data: poll, error: pollError } = await supabaseAdmin
       .from('sm_polls')
       .insert({
-        post_id: body.postId || null,
-        author_id: body.authorId || null,
+        title,
         question: body.question,
         poll_type: body.pollType || 'single',
         status: body.status || 'active',
+        team_theme: body.teamTheme || null,
         show_results: body.showResults !== false,
+        show_live_results: body.showLiveResults !== false,
+        total_votes: 0,
         starts_at: body.startsAt || new Date().toISOString(),
         ends_at: body.endsAt || null,
       })
@@ -90,17 +95,18 @@ export async function POST(request: NextRequest) {
     if (pollError) {
       console.error('Error creating poll:', pollError)
       return NextResponse.json(
-        { error: 'Failed to create poll' },
+        { error: 'Failed to create poll', details: pollError.message },
         { status: 500 }
       )
     }
 
     // Create poll options
-    const options = body.options.map((opt: { text: string; color?: string }, index: number) => ({
+    const options = body.options.map((opt: { text: string; team_tag?: string }, index: number) => ({
       poll_id: poll.id,
       option_text: opt.text,
       display_order: index,
-      color: opt.color || null,
+      team_tag: opt.team_tag || null,
+      vote_count: 0,
     }))
 
     const { error: optionsError } = await supabaseAdmin
@@ -112,7 +118,7 @@ export async function POST(request: NextRequest) {
       await supabaseAdmin.from('sm_polls').delete().eq('id', poll.id)
       console.error('Error creating poll options:', optionsError)
       return NextResponse.json(
-        { error: 'Failed to create poll options' },
+        { error: 'Failed to create poll options', details: optionsError.message },
         { status: 500 }
       )
     }

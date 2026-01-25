@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { supabase } from '@/lib/supabase'
+import { supabaseAdmin } from '@/lib/supabase-server'
 
 /**
  * GET /api/charts/[id]
@@ -12,7 +12,7 @@ export async function GET(
   try {
     const { id } = await params
 
-    const { data: chart, error } = await supabase
+    const { data: chart, error } = await supabaseAdmin
       .from('sm_charts')
       .select('*')
       .eq('id', id)
@@ -58,7 +58,7 @@ export async function PUT(
     const { id } = await params
     const body = await request.json()
 
-    const { data: chart, error } = await supabase
+    const { data: chart, error } = await supabaseAdmin
       .from('sm_charts')
       .update({
         chart_type: body.type,
@@ -104,7 +104,7 @@ export async function DELETE(
   try {
     const { id } = await params
 
-    const { error } = await supabase
+    const { error } = await supabaseAdmin
       .from('sm_charts')
       .delete()
       .eq('id', id)
