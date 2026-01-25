@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useCallback } from 'react'
+import { useState, useCallback, useEffect } from 'react'
 import ChartTypeSelector, { ChartType } from './ChartTypeSelector'
 import ChartColorPicker, { ColorConfig } from './ChartColorPicker'
 import DataEntryForm, { ChartDataEntry } from './DataEntryForm'
@@ -24,6 +24,7 @@ interface ChartBuilderModalProps {
   isOpen: boolean
   onClose: () => void
   onInsert: (config: ChartConfig) => void
+  initialConfig?: Partial<ChartConfig>
 }
 
 const defaultConfig: ChartConfig = {
@@ -38,9 +39,23 @@ const defaultConfig: ChartConfig = {
   dataSource: 'manual',
 }
 
-export default function ChartBuilderModal({ isOpen, onClose, onInsert }: ChartBuilderModalProps) {
+export default function ChartBuilderModal({ isOpen, onClose, onInsert, initialConfig }: ChartBuilderModalProps) {
   const [config, setConfig] = useState<ChartConfig>(defaultConfig)
   const [activeTab, setActiveTab] = useState<'design' | 'data'>('design')
+
+  // Apply initial config when provided (e.g., from AI analysis)
+  useEffect(() => {
+    if (initialConfig && isOpen) {
+      setConfig({
+        ...defaultConfig,
+        ...initialConfig,
+      })
+      // Switch to data tab if we have AI-suggested data
+      if (initialConfig.data && initialConfig.data.length > 0) {
+        setActiveTab('data')
+      }
+    }
+  }, [initialConfig, isOpen])
 
   const updateConfig = useCallback((updates: Partial<ChartConfig>) => {
     setConfig((prev) => ({ ...prev, ...updates }))
