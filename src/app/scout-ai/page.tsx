@@ -48,6 +48,7 @@ export default function AskAIPage() {
   const [messages, setMessages] = useState<Message[]>([])
   const [input, setInput] = useState('')
   const [isLoading, setIsLoading] = useState(false)
+  const [isAnimating, setIsAnimating] = useState(false) // Tracks animation (min 3 seconds)
   const [error, setError] = useState<string | null>(null)
   const [sessionId, setSessionId] = useState<string | undefined>(undefined)
   const [showHistory, setShowHistory] = useState(false)
@@ -55,6 +56,7 @@ export default function AskAIPage() {
   const [historyLoading, setHistoryLoading] = useState(false)
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const messagesContainerRef = useRef<HTMLDivElement>(null)
+  const animationTimeoutRef = useRef<NodeJS.Timeout | null>(null)
 
   const { isAuthenticated, user, loading: authLoading } = useAuth()
   const { canAccess, isLoading: subLoading, features, openCheckout } = useSubscription()
@@ -80,6 +82,15 @@ export default function AskAIPage() {
     }
     // Scroll to top on mount
     window.scrollTo(0, 0)
+  }, [])
+
+  // Cleanup animation timeout on unmount
+  useEffect(() => {
+    return () => {
+      if (animationTimeoutRef.current) {
+        clearTimeout(animationTimeoutRef.current)
+      }
+    }
   }, [])
 
   useEffect(() => {
@@ -166,7 +177,14 @@ export default function AskAIPage() {
     setMessages((prev) => [...prev, userMessage])
     setInput('')
     setIsLoading(true)
+    setIsAnimating(true) // Start animation
     setError(null)
+
+    // Ensure animation runs for at least 3 seconds
+    const animationStartTime = Date.now()
+    if (animationTimeoutRef.current) {
+      clearTimeout(animationTimeoutRef.current)
+    }
 
     try {
       const response = await fetch('/api/ask-ai', {
@@ -225,6 +243,18 @@ export default function AskAIPage() {
       setMessages((prev) => [...prev, errorMessage])
     } finally {
       setIsLoading(false)
+
+      // Ensure animation runs for at least 3 seconds total
+      const elapsed = Date.now() - animationStartTime
+      const remainingTime = Math.max(0, 3000 - elapsed)
+
+      if (remainingTime > 0) {
+        animationTimeoutRef.current = setTimeout(() => {
+          setIsAnimating(false)
+        }, remainingTime)
+      } else {
+        setIsAnimating(false)
+      }
     }
   }
 
@@ -503,7 +533,7 @@ export default function AskAIPage() {
               <div ref={messagesContainerRef} className="flex-1 overflow-y-auto p-6">
                 {messages.length === 0 ? (
                   <div className="h-full flex flex-col items-center justify-center text-center">
-                    <div className={`w-24 h-24 mb-6 ${isLoading ? 'animate-thinking' : ''}`}>
+                    <div className={`w-24 h-24 mb-6 ${isAnimating ? 'animate-thinking' : ''}`}>
                       <Image
                         src="/downloads/scout-v2.png"
                         alt="Scout AI"
@@ -614,20 +644,16 @@ export default function AskAIPage() {
                     {isLoading && (
                       <div className="flex justify-start">
                         <div
-                          className="rounded-2xl px-4 py-3 flex items-center gap-3"
+                          className="rounded-2xl px-4 py-3 flex items-center gap-2"
                           style={{ backgroundColor: 'var(--bg-page)' }}
                         >
-                          <div className="w-10 h-10 animate-thinking">
-                            <Image
-                              src="/downloads/scout-v2.png"
-                              alt="Scout AI thinking"
-                              width={40}
-                              height={40}
-                              className="w-full h-full object-contain"
-                            />
-                          </div>
                           <span className="text-sm" style={{ color: 'var(--text-muted)' }}>
-                            Thinking...
+                            Scout is thinking
+                          </span>
+                          <span className="flex gap-1">
+                            <span className="w-2 h-2 rounded-full bg-[#bc0000] animate-bounce" style={{ animationDelay: '0ms' }}></span>
+                            <span className="w-2 h-2 rounded-full bg-[#bc0000] animate-bounce" style={{ animationDelay: '150ms' }}></span>
+                            <span className="w-2 h-2 rounded-full bg-[#bc0000] animate-bounce" style={{ animationDelay: '300ms' }}></span>
                           </span>
                         </div>
                       </div>
@@ -640,6 +666,16 @@ export default function AskAIPage() {
               {/* Input Area */}
               <div className="p-4" style={{ borderTop: '1px solid var(--border-color)' }}>
                 <form onSubmit={handleSubmit} className="flex items-center gap-3">
+                  {/* Scout Icon - Always visible, animates on question */}
+                  <div className={`w-12 h-12 flex-shrink-0 ${isAnimating ? 'animate-thinking' : ''}`}>
+                    <Image
+                      src="/downloads/scout-v2.png"
+                      alt="Scout AI"
+                      width={48}
+                      height={48}
+                      className="w-full h-full object-contain"
+                    />
+                  </div>
                   <input
                     type="text"
                     value={input}
@@ -656,11 +692,9 @@ export default function AskAIPage() {
                   <button
                     type="submit"
                     disabled={!input.trim() || isLoading}
-                    className="px-6 py-3 bg-[#bc0000] text-white font-semibold rounded-xl hover:bg-[#a00000] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="px-5 py-3 bg-[#bc0000] text-white font-semibold rounded-xl hover:bg-[#a00000] transition-colors disabled:opacity-50 disabled:cursor-not-allowed text-sm whitespace-nowrap"
                   >
-                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
-                    </svg>
+                    Ask Scout
                   </button>
                 </form>
               </div>
