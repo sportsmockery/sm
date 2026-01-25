@@ -916,9 +916,9 @@ export async function getBlackhawksRecord(season?: number): Promise<BlackhawksRe
   }))
   console.log(`Sample completed games:`, JSON.stringify(sampleGames, null, 2))
 
-  // Check how many games have scores but no result
-  const gamesWithScores = schedule.filter(g => g.blackhawksScore !== null || g.oppScore !== null)
-  const gamesWithNoResult = gamesWithScores.filter(g => g.result === null)
+  // Check how many games have scores but no result (should be 0 now)
+  const allGamesWithScores = schedule.filter(g => g.blackhawksScore !== null || g.oppScore !== null)
+  const gamesWithNoResult = allGamesWithScores.filter(g => g.result === null)
   if (gamesWithNoResult.length > 0) {
     console.log(`WARNING: ${gamesWithNoResult.length} games have scores but no result calculated`)
   }
