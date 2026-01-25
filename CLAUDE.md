@@ -247,12 +247,12 @@ const STANDARD_POLL_INTERVAL = 60_000 // No live games
 | Location | Description |
 |----------|-------------|
 | Backend | https://datalab.sportsmockery.com/api/query |
-| Frontend | /ask-ai page on test.sportsmockery.com |
+| Frontend | /scout-ai page on test.sportsmockery.com |
 | API Route | /src/app/api/ask-ai/route.ts (proxies to Data Lab) |
 | Icon | `/downloads/scout-v2.png` (use Image component) |
 
 ### How Scout Works
-1. User submits question on /ask-ai page
+1. User submits question on /scout-ai page
 2. Frontend sends POST to /api/ask-ai with `{ query, sessionId }`
 3. API route proxies to Data Lab: https://datalab.sportsmockery.com/api/query
 4. Data Lab uses Perplexity sonar-pro model to generate response

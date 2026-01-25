@@ -28,7 +28,7 @@ const TEAM_ROUTES: { pattern: RegExp; teamKey: TeamKey }[] = [
 const EXCLUDED_ROUTES = [
   /^\/$/,                    // Homepage
   /^\/fan-chat(\/.*)?$/,     // Fan chat
-  /^\/ask-ai(\/.*)?$/,       // Ask AI
+  /^\/scout-ai(\/.*)?$/,     // Scout AI
   /^\/login(\/.*)?$/,        // Login
   /^\/register(\/.*)?$/,     // Register
   /^\/search(\/.*)?$/,       // Search

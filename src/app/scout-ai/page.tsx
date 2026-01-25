@@ -7,11 +7,11 @@ import dynamic from 'next/dynamic'
 import ReactMarkdown from 'react-markdown'
 import { useAuth } from '@/contexts/AuthContext'
 import { useSubscription } from '@/contexts/SubscriptionContext'
-import type { ChartData } from '@/components/ask-ai/DataVisualization'
+import type { ChartData } from '@/components/scout-ai/DataVisualization'
 
 // Dynamically import DataVisualization to avoid SSR issues with Chart.js
 const DataVisualization = dynamic(
-  () => import('@/components/ask-ai/DataVisualization'),
+  () => import('@/components/scout-ai/DataVisualization'),
   { ssr: false }
 )
 
@@ -82,7 +82,7 @@ export default function AskAIPage() {
     setError(null)
 
     try {
-      const response = await fetch('/api/ask-ai', {
+      const response = await fetch('/api/scout-ai', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ query: userMessage.content }),
@@ -197,7 +197,7 @@ export default function AskAIPage() {
               Get instant answers about the Bears, Bulls, Cubs, White Sox, and Blackhawks with our AI-powered sports assistant.
             </p>
             <Link
-              href="/login?next=/ask-ai"
+              href="/login?next=/scout-ai"
               className="inline-flex items-center gap-2 px-6 py-3 bg-[#bc0000] text-white font-semibold rounded-xl hover:bg-[#a00000] transition-colors"
             >
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -207,7 +207,7 @@ export default function AskAIPage() {
             </Link>
             <p className="text-xs mt-4" style={{ color: 'var(--text-muted)' }}>
               Don&apos;t have an account?{' '}
-              <Link href="/login?next=/ask-ai" className="text-[#bc0000] hover:underline">
+              <Link href="/login?next=/scout-ai" className="text-[#bc0000] hover:underline">
                 Sign up free
               </Link>
             </p>

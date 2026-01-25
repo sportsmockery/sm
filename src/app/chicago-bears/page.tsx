@@ -347,7 +347,7 @@ function AskAIWidget({ team }: { team: typeof CHICAGO_TEAMS.bears }) {
 
       <div className="space-y-2 mb-4">
         <Link
-          href="/ask-ai?team=chicago-bears&q=What%20is%20the%20Bears%20record%20this%20season"
+          href="/scout-ai?team=chicago-bears&q=What%20is%20the%20Bears%20record%20this%20season"
           className="block px-3 py-2 rounded-lg text-sm transition-colors"
           style={{
             backgroundColor: 'var(--bg-tertiary)',
@@ -357,7 +357,7 @@ function AskAIWidget({ team }: { team: typeof CHICAGO_TEAMS.bears }) {
           &quot;What&apos;s the Bears record?&quot;
         </Link>
         <Link
-          href="/ask-ai?team=chicago-bears&q=Who%20is%20the%20Bears%20quarterback"
+          href="/scout-ai?team=chicago-bears&q=Who%20is%20the%20Bears%20quarterback"
           className="block px-3 py-2 rounded-lg text-sm transition-colors"
           style={{
             backgroundColor: 'var(--bg-tertiary)',
@@ -369,7 +369,7 @@ function AskAIWidget({ team }: { team: typeof CHICAGO_TEAMS.bears }) {
       </div>
 
       <Link
-        href="/ask-ai?team=chicago-bears"
+        href="/scout-ai?team=chicago-bears"
         className="block w-full text-center py-2.5 rounded-lg font-semibold text-sm transition-colors text-white"
         style={{ backgroundColor: team.secondaryColor }}
       >

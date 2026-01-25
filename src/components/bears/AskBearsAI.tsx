@@ -40,7 +40,7 @@ export default function AskBearsAI({ className = '' }: AskBearsAIProps) {
     setAiResponse(null)
 
     try {
-      const response = await fetch('/api/ask-ai', {
+      const response = await fetch('/api/scout-ai', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ query: question }),
@@ -247,7 +247,7 @@ export default function AskBearsAI({ className = '' }: AskBearsAIProps) {
             </div>
             <div className="mt-3 pt-3 border-t border-white/10">
               <a
-                href="/ask-ai"
+                href="/scout-ai"
                 className="inline-flex items-center gap-1.5 text-sm font-medium transition-colors hover:underline"
                 style={{ color: bearsInfo.secondaryColor }}
               >

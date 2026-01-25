@@ -250,7 +250,7 @@ function AskAIWidget({ team }: { team: typeof CHICAGO_TEAMS.cubs }) {
           <p className="text-xs" style={{ color: 'var(--text-muted)' }}>Get instant answers</p>
         </div>
       </div>
-      <Link href={`/ask-ai?team=${team.slug}`} className="block w-full text-center py-2.5 rounded-lg font-semibold text-sm transition-colors text-white" style={{ backgroundColor: team.primaryColor }}>Ask a Question</Link>
+      <Link href={`/scout-ai?team=${team.slug}`} className="block w-full text-center py-2.5 rounded-lg font-semibold text-sm transition-colors text-white" style={{ backgroundColor: team.primaryColor }}>Ask a Question</Link>
     </div>
   )
 }

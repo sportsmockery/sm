@@ -453,7 +453,7 @@ function AskAIWidget({ team }: { team: typeof CHICAGO_TEAMS.bulls }) {
       </div>
 
       <Link
-        href={`/ask-ai?team=${team.slug}`}
+        href={`/scout-ai?team=${team.slug}`}
         className="block w-full text-center py-2.5 rounded-lg font-semibold text-sm transition-colors text-white"
         style={{ backgroundColor: team.primaryColor }}
       >

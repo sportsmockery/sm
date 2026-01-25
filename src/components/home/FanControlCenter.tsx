@@ -127,7 +127,7 @@ export default function FanControlCenter() {
 
               {/* CTA */}
               <Link
-                href="/ask-ai"
+                href="/scout-ai"
                 className="inline-flex items-center gap-2 px-6 py-3 bg-white/10 text-white font-semibold rounded-xl hover:bg-white/20 transition-colors border border-white/20"
                 style={{ fontFamily: "'Montserrat', sans-serif" }}
               >

@@ -647,7 +647,7 @@ export default function Header() {
 
               {/* Scout AI CTA - Red bg, white text in light mode; White bg, red text in dark mode */}
               <Link
-                href="/ask-ai"
+                href="/scout-ai"
                 className="hidden md:flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded"
                 style={{
                   fontFamily: "'Montserrat', sans-serif",
@@ -701,7 +701,7 @@ export default function Header() {
                 Fan Chat
               </Link>
               <Link
-                href="/ask-ai"
+                href="/scout-ai"
                 onClick={() => setMobileMenuOpen(false)}
                 className="flex-1 flex items-center justify-center gap-2 px-4 py-3 text-sm font-semibold rounded-lg"
                 style={{
