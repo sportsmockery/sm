@@ -684,32 +684,10 @@ async function getBearsScheduleFromDatalab(season: number): Promise<BearsGame[]>
     }
   }
 
-  // Query for all games in the season (don't filter by game_type to avoid mismatch)
+  // Query for all games in the season - use select('*') to avoid column mismatch issues
   const { data, error } = await datalabAdmin
     .from('bears_games_master')
-    .select(`
-      id,
-      week,
-      game_date,
-      game_time,
-      game_type,
-      season,
-      opponent,
-      opponent_full_name,
-      is_bears_home,
-      stadium,
-      bears_score,
-      opponent_score,
-      bears_win,
-      spread_line,
-      total_line,
-      broadcast_window,
-      nationally_televised,
-      temp_f,
-      wind_mph,
-      weather_summary,
-      broadcast
-    `)
+    .select('*')
     .eq('season', season)
     .order('game_date', { ascending: true })
 
@@ -723,29 +701,7 @@ async function getBearsScheduleFromDatalab(season: number): Promise<BearsGame[]>
     console.log(`No Bears games found for season ${season}, trying ${season - 1}`)
     const { data: prevData, error: prevError } = await datalabAdmin
       .from('bears_games_master')
-      .select(`
-        id,
-        week,
-        game_date,
-        game_time,
-        game_type,
-        season,
-        opponent,
-        opponent_full_name,
-        is_bears_home,
-        stadium,
-        bears_score,
-        opponent_score,
-        bears_win,
-        spread_line,
-        total_line,
-        broadcast_window,
-        nationally_televised,
-        temp_f,
-        wind_mph,
-        weather_summary,
-        broadcast
-      `)
+      .select('*')
       .eq('season', season - 1)
       .order('game_date', { ascending: true })
 
