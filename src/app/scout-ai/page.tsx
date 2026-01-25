@@ -273,23 +273,24 @@ export default function AskAIPage() {
               className="sticky top-24 rounded-2xl p-6"
               style={{ backgroundColor: 'var(--bg-surface)', border: '1px solid var(--border-color)' }}
             >
-              {/* Logo/Icon */}
-              <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-[#bc0000] to-[#ff4444] flex items-center justify-center mb-6">
-                <Image
-                  src="/downloads/scout-v2.png"
-                  alt="Scout AI"
-                  width={32}
-                  height={32}
-                  className="w-8 h-8"
-                />
+              {/* Logo/Icon and Title */}
+              <div className="flex items-center gap-4 mb-4">
+                <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-[#bc0000] to-[#ff4444] flex items-center justify-center flex-shrink-0">
+                  <Image
+                    src="/downloads/scout-v2.png"
+                    alt="Scout AI"
+                    width={28}
+                    height={28}
+                    className="w-7 h-7"
+                  />
+                </div>
+                <h1
+                  className="text-2xl font-bold"
+                  style={{ fontFamily: "'Montserrat', sans-serif", color: 'var(--text-primary)' }}
+                >
+                  Scout AI
+                </h1>
               </div>
-
-              <h1
-                className="text-2xl font-bold mb-3"
-                style={{ fontFamily: "'Montserrat', sans-serif", color: 'var(--text-primary)' }}
-              >
-                Scout AI
-              </h1>
 
               <p className="text-sm mb-6" style={{ color: 'var(--text-muted)' }}>
                 Scout AI is a high-IQ sports engine that's locked in to answer all your Chicago sports questions.
@@ -338,39 +339,6 @@ export default function AskAIPage() {
                 maxHeight: 'calc(100vh - 200px)',
               }}
             >
-              {/* Chat Header */}
-              <div
-                className="px-6 py-4 flex items-center justify-between"
-                style={{ borderBottom: '1px solid var(--border-color)' }}
-              >
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-full bg-gradient-to-br from-[#bc0000] to-[#ff4444] flex items-center justify-center">
-                    <Image
-                      src="/downloads/scout-v2.png"
-                      alt="Scout AI"
-                      width={20}
-                      height={20}
-                      className="w-5 h-5"
-                    />
-                  </div>
-                  <div>
-                    <h2
-                      className="font-bold"
-                      style={{ fontFamily: "'Montserrat', sans-serif", color: 'var(--text-primary)' }}
-                    >
-                      Scout AI
-                    </h2>
-                    <p className="text-xs" style={{ color: 'var(--text-muted)' }}>
-                      Chicago Sports Expert
-                    </p>
-                  </div>
-                </div>
-                <span className="flex items-center gap-2 px-3 py-1 bg-green-500/10 rounded-full text-green-600 text-xs font-medium">
-                  <span className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
-                  Online
-                </span>
-              </div>
-
               {/* Messages Area */}
               <div ref={messagesContainerRef} className="flex-1 overflow-y-auto p-6">
                 {messages.length === 0 ? (
