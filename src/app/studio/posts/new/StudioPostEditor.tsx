@@ -211,11 +211,26 @@ export default function StudioPostEditor({
     setFormData((prev) => ({ ...prev, [field]: value }))
   }, [])
 
+  // Extract team key from category name
+  const getTeamFromCategory = (categoryName?: string): string | undefined => {
+    if (!categoryName) return undefined
+    const teamMap: Record<string, string> = {
+      'Chicago Bears': 'bears', 'Bears': 'bears',
+      'Chicago Bulls': 'bulls', 'Bulls': 'bulls',
+      'Chicago Cubs': 'cubs', 'Cubs': 'cubs',
+      'Chicago White Sox': 'whitesox', 'White Sox': 'whitesox',
+      'Chicago Blackhawks': 'blackhawks', 'Blackhawks': 'blackhawks',
+    }
+    return teamMap[categoryName]
+  }
+
   // PostIQ AI Actions
   const runAI = async (action: string) => {
     setAiLoading(action)
+    const categoryName = categories.find(c => c.id === formData.category_id)?.name
+    const team = getTeamFromCategory(categoryName)
     try {
-      const response = await fetch('/api/admin/ai', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ action, title: formData.title, content: formData.content, category: categories.find(c => c.id === formData.category_id)?.name }) })
+      const response = await fetch('/api/admin/ai', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ action, title: formData.title, content: formData.content, category: categoryName, team }) })
       if (response.ok) {
         const data = await response.json()
         if ((action === 'seo' || action === 'generate_seo') && data.seoTitle) { setFormData(prev => ({ ...prev, seo_title: data.seoTitle, seo_description: data.metaDescription || '', seo_keywords: data.keywords || '', excerpt: data.excerpt || prev.excerpt })); setSeoGenerated(true) }
@@ -230,8 +245,10 @@ export default function StudioPostEditor({
 
   const generateIdeas = async () => {
     setLoadingIdeas(true); setSelectedIdea(null)
+    const categoryName = categories.find(c => c.id === formData.category_id)?.name || 'Chicago Sports'
+    const team = getTeamFromCategory(categoryName)
     try {
-      const response = await fetch('/api/admin/ai', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ action: 'ideas', category: categories.find(c => c.id === formData.category_id)?.name || 'Chicago Sports' }) })
+      const response = await fetch('/api/admin/ai', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ action: 'ideas', category: categoryName, team }) })
       if (response.ok) { const data = await response.json(); if (data.ideas) setIdeas(data.ideas) }
     } catch (err) { console.error('Ideas error:', err) }
     finally { setLoadingIdeas(false) }
@@ -310,6 +327,8 @@ export default function StudioPostEditor({
       // Auto-insert chart if enabled and publishing
       if (autoInsertChart && formData.status === 'published' && formData.content.length >= 200) {
         setAutoInsertingContent('chart')
+        const chartCategoryName = categories.find(c => c.id === formData.category_id)?.name
+        const chartTeam = getTeamFromCategory(chartCategoryName)
         try {
           const chartResponse = await fetch('/api/admin/ai', {
             method: 'POST',
@@ -318,7 +337,8 @@ export default function StudioPostEditor({
               action: 'generate_chart',
               title: formData.title,
               content: contentToSave,
-              category: categories.find(c => c.id === formData.category_id)?.name,
+              category: chartCategoryName,
+              team: chartTeam,
             }),
           })
           if (chartResponse.ok) {
@@ -336,6 +356,8 @@ export default function StudioPostEditor({
       // Auto-add poll if enabled and publishing
       if (autoAddPoll && formData.status === 'published' && formData.content.length >= 200) {
         setAutoInsertingContent('poll')
+        const pollCategoryName = categories.find(c => c.id === formData.category_id)?.name
+        const pollTeam = getTeamFromCategory(pollCategoryName)
         try {
           const pollResponse = await fetch('/api/admin/ai', {
             method: 'POST',
@@ -344,7 +366,8 @@ export default function StudioPostEditor({
               action: 'generate_poll',
               title: formData.title,
               content: contentToSave,
-              category: categories.find(c => c.id === formData.category_id)?.name,
+              category: pollCategoryName,
+              team: pollTeam,
             }),
           })
           if (pollResponse.ok) {
@@ -473,6 +496,8 @@ export default function StudioPostEditor({
     const paragraphs = extractParagraphs(formData.content)
     setParagraphOptions(paragraphs)
 
+    const chartCategoryName = categories.find(c => c.id === formData.category_id)?.name
+    const chartTeam = getTeamFromCategory(chartCategoryName)
     try {
       const response = await fetch('/api/admin/ai', {
         method: 'POST',
@@ -481,7 +506,8 @@ export default function StudioPostEditor({
           action: 'analyze_chart',
           title: formData.title,
           content: formData.content,
-          category: categories.find(c => c.id === formData.category_id)?.name,
+          category: chartCategoryName,
+          team: chartTeam,
         }),
       })
 
@@ -504,6 +530,8 @@ export default function StudioPostEditor({
   // Regenerate chart suggestion
   const regenerateChartSuggestion = async () => {
     setChartLoading(true)
+    const regenCategoryName = categories.find(c => c.id === formData.category_id)?.name
+    const regenTeam = getTeamFromCategory(regenCategoryName)
     try {
       const response = await fetch('/api/admin/ai', {
         method: 'POST',
@@ -512,7 +540,8 @@ export default function StudioPostEditor({
           action: 'analyze_chart',
           title: formData.title,
           content: formData.content,
-          category: categories.find(c => c.id === formData.category_id)?.name,
+          category: regenCategoryName,
+          team: regenTeam,
         }),
       })
 

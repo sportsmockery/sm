@@ -267,9 +267,29 @@ export default function AdvancedPostEditor({
   }, [])
 
   // AI Actions
+  // Extract team key from category name
+  const getTeamFromCategory = (categoryName?: string): string | undefined => {
+    if (!categoryName) return undefined
+    const teamMap: Record<string, string> = {
+      'Chicago Bears': 'bears',
+      'Bears': 'bears',
+      'Chicago Bulls': 'bulls',
+      'Bulls': 'bulls',
+      'Chicago Cubs': 'cubs',
+      'Cubs': 'cubs',
+      'Chicago White Sox': 'whitesox',
+      'White Sox': 'whitesox',
+      'Chicago Blackhawks': 'blackhawks',
+      'Blackhawks': 'blackhawks',
+    }
+    return teamMap[categoryName]
+  }
+
   const runAI = async (action: string) => {
     setAiLoading(action)
     try {
+      const categoryName = categories.find(c => c.id === formData.category_id)?.name
+      const team = getTeamFromCategory(categoryName)
       const response = await fetch('/api/admin/ai', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -277,7 +297,8 @@ export default function AdvancedPostEditor({
           action,
           title: formData.title,
           content: formData.content,
-          category: categories.find(c => c.id === formData.category_id)?.name,
+          category: categoryName,
+          team,
         }),
       })
       if (response.ok) {
@@ -312,13 +333,16 @@ export default function AdvancedPostEditor({
   const generateIdeas = async () => {
     setLoadingIdeas(true)
     setSelectedIdea(null)
+    const categoryName = categories.find(c => c.id === formData.category_id)?.name || 'Chicago Sports'
+    const team = getTeamFromCategory(categoryName)
     try {
       const response = await fetch('/api/admin/ai', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           action: 'ideas',
-          category: categories.find(c => c.id === formData.category_id)?.name || 'Chicago Sports',
+          category: categoryName,
+          team,
         }),
       })
       if (response.ok) {
@@ -380,6 +404,8 @@ export default function AdvancedPostEditor({
     const paragraphs = extractParagraphs(formData.content)
     setParagraphOptions(paragraphs)
 
+    const categoryName = categories.find(c => c.id === formData.category_id)?.name
+    const team = getTeamFromCategory(categoryName)
     try {
       const response = await fetch('/api/admin/ai', {
         method: 'POST',
@@ -388,7 +414,8 @@ export default function AdvancedPostEditor({
           action: 'analyze_chart',
           title: formData.title,
           content: formData.content,
-          category: categories.find(c => c.id === formData.category_id)?.name,
+          category: categoryName,
+          team,
         }),
       })
 
@@ -411,6 +438,8 @@ export default function AdvancedPostEditor({
   // Regenerate chart suggestion
   const regenerateChartSuggestion = async () => {
     setChartLoading(true)
+    const categoryName = categories.find(c => c.id === formData.category_id)?.name
+    const team = getTeamFromCategory(categoryName)
     try {
       const response = await fetch('/api/admin/ai', {
         method: 'POST',
@@ -419,7 +448,8 @@ export default function AdvancedPostEditor({
           action: 'analyze_chart',
           title: formData.title,
           content: formData.content,
-          category: categories.find(c => c.id === formData.category_id)?.name,
+          category: categoryName,
+          team,
         }),
       })
 
@@ -571,6 +601,8 @@ export default function AdvancedPostEditor({
       // Auto-insert chart if enabled and publishing
       if (autoInsertChart && formData.status === 'published' && formData.content.length >= 200) {
         setAutoInsertingContent('chart')
+        const categoryName = categories.find(c => c.id === formData.category_id)?.name
+        const team = getTeamFromCategory(categoryName)
         try {
           const chartResponse = await fetch('/api/admin/ai', {
             method: 'POST',
@@ -579,7 +611,8 @@ export default function AdvancedPostEditor({
               action: 'generate_chart',
               title: formData.title,
               content: contentToSave,
-              category: categories.find(c => c.id === formData.category_id)?.name,
+              category: categoryName,
+              team,
             }),
           })
           if (chartResponse.ok) {
@@ -597,6 +630,8 @@ export default function AdvancedPostEditor({
       // Auto-add poll if enabled and publishing
       if (autoAddPoll && formData.status === 'published' && formData.content.length >= 200) {
         setAutoInsertingContent('poll')
+        const pollCategoryName = categories.find(c => c.id === formData.category_id)?.name
+        const pollTeam = getTeamFromCategory(pollCategoryName)
         try {
           const pollResponse = await fetch('/api/admin/ai', {
             method: 'POST',
@@ -605,7 +640,8 @@ export default function AdvancedPostEditor({
               action: 'generate_poll',
               title: formData.title,
               content: contentToSave,
-              category: categories.find(c => c.id === formData.category_id)?.name,
+              category: pollCategoryName,
+              team: pollTeam,
             }),
           })
           if (pollResponse.ok) {
