@@ -264,6 +264,95 @@ const STANDARD_POLL_INTERVAL = 60_000 // No live games
 
 ---
 
+## Team Pages Audit Protocol (RUN EVERY SESSION)
+
+**CRITICAL:** At the start of every session involving team pages, run a quick health check.
+
+### Audit Documents
+
+| Document | Location | Purpose |
+|----------|----------|---------|
+| **Frontend Audit** | `/docs/TeamPages_Audit.md` | Comprehensive frontend checklist |
+| **Data Lab Audit** | `/docs/TeamPages_Audit_Datalab.md` | Database verification guide |
+
+### Quick Health Check (Run First)
+
+Before making any team page changes, verify data is displaying:
+
+```bash
+# Check all team pages return 200
+for team in "chicago-bears" "chicago-bulls" "chicago-blackhawks" "chicago-cubs" "chicago-white-sox"; do
+  for page in "schedule" "scores" "stats" "roster" "players"; do
+    curl -s -o /dev/null -w "${team}/${page}: %{http_code}\n" "https://test.sportsmockery.com/${team}/${page}"
+  done
+done
+```
+
+### Inter-Claude Communication Protocol
+
+When encountering data issues, communicate with Data Lab using this format:
+
+```markdown
+## Data Lab Request
+
+**From:** Claude Code (SM Frontend)
+**Date:** [Current Date]
+**Priority:** [Critical/High/Medium/Low]
+
+### Issue Summary
+[1-2 sentence description]
+
+### Affected Tables
+- Table: `[table_name]`
+- Expected: [what data should return]
+- Actual: [what data is returning]
+
+### Verification
+- Checked official source: [ESPN/MLB/NHL/NBA/NFL.com URL]
+- Correct value: [value]
+
+### Requested Action
+[Specific fix needed]
+```
+
+### Correct Table Names (MEMORIZE THESE)
+
+| Data | Correct Table | WRONG Table |
+|------|---------------|-------------|
+| Bears record | `bears_season_record` | ~~bears_seasons~~ |
+| Blackhawks OTL | Column is `otl` | ~~ot_losses~~ |
+| Bulls active roster | `is_current_bulls` | ~~is_active~~ |
+| All games filters | Include `score > 0` filter | Raw count |
+
+### Season Values (MEMORIZE THESE)
+
+| League | Current Season | Convention |
+|--------|---------------|------------|
+| NFL | `2025` | Starting year |
+| NBA | `2026` | ENDING year |
+| NHL | `2026` | ENDING year |
+| MLB | `2025` | Calendar year |
+
+### Automatic Verification Steps
+
+1. **Check records match official sources** (ESPN, league sites)
+2. **Check roster counts are reasonable:**
+   - NFL: 53-81 (roster + practice squad)
+   - NBA: 15-18
+   - NHL: 20-23
+   - MLB: 32-40 (NOT 200+!)
+3. **Check all pages load without errors**
+4. **Check stats are populated (not "—" or 0.0)**
+
+### If Issues Found
+
+1. First check if it's a frontend query issue (wrong table/column/season)
+2. If frontend is correct, send Data Lab Request
+3. Wait for Data Lab Response before making further changes
+4. After Data Lab fixes, clear Vercel cache: `vercel --prod --force`
+
+---
+
 ## Scout AI - Chicago Sports AI Assistant
 
 **Scout AI** is the AI-powered sports assistant for Chicago sports questions. When the user mentions "Scout", "Scout AI", "the AI model", or "query AI", they are referring to this system.
