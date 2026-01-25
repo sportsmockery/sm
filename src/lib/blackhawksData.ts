@@ -488,7 +488,6 @@ export async function getBlackhawksSchedule(season?: number): Promise<Blackhawks
     .order('game_date', { ascending: true })
 
   if (!viewResult.error && viewResult.data && viewResult.data.length > 0) {
-    console.log(`Found ${viewResult.data.length} games from blackhawks_schedule_all for season_start_year=${targetSeason}`)
     data = viewResult.data
   } else {
     // Fallback: try blackhawks_games_master with season_start_year
@@ -499,7 +498,6 @@ export async function getBlackhawksSchedule(season?: number): Promise<Blackhawks
       .order('game_date', { ascending: true })
 
     if (!masterResult.error && masterResult.data && masterResult.data.length > 0) {
-      console.log(`Found ${masterResult.data.length} games from blackhawks_games_master with season_start_year=${targetSeason}`)
       data = masterResult.data
     } else {
       // Final fallback: try with 'season' column
@@ -510,26 +508,8 @@ export async function getBlackhawksSchedule(season?: number): Promise<Blackhawks
         .order('game_date', { ascending: true })
 
       if (!seasonResult.error && seasonResult.data && seasonResult.data.length > 0) {
-        console.log(`Found ${seasonResult.data.length} games from blackhawks_games_master with season=${targetSeason}`)
         data = seasonResult.data
       } else {
-        // Debug: check what columns and season values exist
-        const { data: sample } = await datalabAdmin
-          .from('blackhawks_games_master')
-          .select('*')
-          .limit(5)
-
-        if (sample && sample.length > 0) {
-          const columns = Object.keys(sample[0])
-          const seasonValues = sample.map((g: any) => ({
-            season: g.season,
-            season_start_year: g.season_start_year,
-            game_date: g.game_date
-          }))
-          console.log(`Blackhawks table columns: ${columns.join(', ')}`)
-          console.log(`Sample season values: ${JSON.stringify(seasonValues)}`)
-        }
-
         error = seasonResult.error || masterResult.error || viewResult.error
       }
     }
@@ -541,50 +521,24 @@ export async function getBlackhawksSchedule(season?: number): Promise<Blackhawks
   }
 
   if (!data || data.length === 0) {
-    console.log(`No Blackhawks games found for season ${targetSeason}`)
     return []
   }
 
-  // Debug: check the date range and game_type distribution of the returned data
-  const dates = data.map((g: any) => g.game_date).sort()
-  const gameTypes = [...new Set(data.map((g: any) => g.game_type))]
-  const seasons = [...new Set(data.map((g: any) => g.season))]
-  const seasonStartYears = [...new Set(data.map((g: any) => g.season_start_year))]
-  console.log(`Date range: ${dates[0]} to ${dates[dates.length - 1]}`)
-  console.log(`Game types: ${JSON.stringify(gameTypes)}`)
-  console.log(`Seasons in result: ${JSON.stringify(seasons)}`)
-  console.log(`Season start years in result: ${JSON.stringify(seasonStartYears)}`)
-
-  // Filter to 2025-26 season dates only (Oct 2025 - June 2026)
-  // This handles the case where season column has incorrect values
-  const seasonStartDate = `${targetSeason}-10-01` // Oct 1 of the season start year
-  const seasonEndDate = `${targetSeason + 1}-06-30` // June 30 of the following year
+  // Filter to current season dates only (Oct to June)
+  const seasonStartDate = `${targetSeason}-10-01`
+  const seasonEndDate = `${targetSeason + 1}-06-30`
 
   const dateFiltered = data.filter((g: any) => {
     const gameDate = g.game_date
     return gameDate >= seasonStartDate && gameDate <= seasonEndDate
   })
 
-  console.log(`After date filter (${seasonStartDate} to ${seasonEndDate}): ${dateFiltered.length} games`)
-
-  // Filter to regular season and postseason only (exclude preseason PRE)
+  // Filter to regular season and postseason only (exclude preseason)
   const filtered = dateFiltered.filter((g: any) => {
     const gameType = g.game_type?.toUpperCase() || ''
     return gameType !== 'PRE' && gameType !== 'PRESEASON'
   })
 
-  // Debug: show raw database columns for first few games, particularly OT/SO indicators
-  if (filtered.length > 0) {
-    const sample = filtered.slice(0, 5)
-    console.log(`Sample raw games from DB (${sample.length} of ${filtered.length}):`)
-    for (const g of sample) {
-      const hasOtScores = g.ot_blackhawks !== null || g.ot_opponent !== null
-      const hasSoScores = g.so_blackhawks !== null || g.so_opponent !== null
-      console.log(`  ${g.game_date}: ${g.blackhawks_score}-${g.opponent_score}, win=${g.blackhawks_win}, isOT=${g.is_overtime}, isSO=${g.is_shootout}, ot_scores=${hasOtScores ? `${g.ot_blackhawks}-${g.ot_opponent}` : 'null'}, so_scores=${hasSoScores ? `${g.so_blackhawks}-${g.so_opponent}` : 'null'}`)
-    }
-  }
-
-  console.log(`Returning ${filtered.length} regular/postseason games`)
   return filtered.map((g: any) => transformGame(g))
 }
 
@@ -886,42 +840,8 @@ export async function getBlackhawksRecord(season?: number): Promise<BlackhawksRe
   const losses = completedGames.filter(g => g.result === 'L').length
   const otLosses = completedGames.filter(g => g.result === 'OTL').length
 
-  // Debug: check for games with scores but wrong status
-  const gamesWithScores = schedule.filter(g => g.blackhawksScore !== null && g.blackhawksScore !== undefined)
-  const scheduledWithScores = gamesWithScores.filter(g => g.status === 'scheduled')
-  if (scheduledWithScores.length > 0) {
-    console.log(`WARNING: ${scheduledWithScores.length} games have scores but status='scheduled'`)
-    console.log(`Sample:`, scheduledWithScores.slice(0, 3).map(g => ({ date: g.date, score: `${g.blackhawksScore}-${g.oppScore}`, status: g.status })))
-  }
-
-  // Check for games before today with no scores
-  const today = new Date().toISOString().split('T')[0]
-  const pastGamesNoScore = schedule.filter(g => g.date < today && g.status === 'scheduled')
-  if (pastGamesNoScore.length > 0) {
-    console.log(`WARNING: ${pastGamesNoScore.length} past games have no scores (expected ~${51 - completedGames.length} based on ESPN)`)
-  }
-
-  // Debug: log completed game details to understand record calculation
-  console.log(`Record calculation: ${completedGames.length} completed games out of ${schedule.length} total (${gamesWithScores.length} have scores)`)
-  console.log(`Results breakdown: W=${wins}, L=${losses}, OTL=${otLosses}`)
-
-  // Sample some completed games to see their data
-  const sampleGames = completedGames.slice(0, 5).map(g => ({
-    date: g.date,
-    opponent: g.opponent,
-    score: `${g.blackhawksScore}-${g.oppScore}`,
-    result: g.result,
-    overtime: g.overtime,
-    shootout: g.shootout
-  }))
-  console.log(`Sample completed games:`, JSON.stringify(sampleGames, null, 2))
-
-  // Check how many games have scores but no result (should be 0 now)
-  const allGamesWithScores = schedule.filter(g => g.blackhawksScore !== null || g.oppScore !== null)
-  const gamesWithNoResult = allGamesWithScores.filter(g => g.result === null)
-  if (gamesWithNoResult.length > 0) {
-    console.log(`WARNING: ${gamesWithNoResult.length} games have scores but no result calculated`)
-  }
+  // Log record calculation for debugging
+  console.log(`Blackhawks record: ${wins}-${losses}-${otLosses} (${completedGames.length} games of ${schedule.length} total)`)
 
   // Calculate streak
   let streak: string | null = null
