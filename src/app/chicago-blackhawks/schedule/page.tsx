@@ -28,7 +28,16 @@ export default async function BlackhawksSchedulePage() {
     otLosses: hawksRecord.otLosses,
   }
 
-  const nextScheduledGame = schedule.find(g => g.status === 'scheduled')
+  // For in-season teams: show only the next upcoming game, hide the rest
+  // Show completed games in reverse chronological order (most recent first)
+  const upcomingGames = schedule.filter(g => g.status !== 'final').sort((a, b) =>
+    new Date(a.date).getTime() - new Date(b.date).getTime()
+  )
+  const completedGames = schedule.filter(g => g.status === 'final').sort((a, b) =>
+    new Date(b.date).getTime() - new Date(a.date).getTime()
+  )
+
+  const nextScheduledGame = upcomingGames[0]
 
   return (
     <TeamHubLayout
@@ -38,6 +47,7 @@ export default async function BlackhawksSchedulePage() {
       activeTab="schedule"
     >
       <div>
+        {/* Show only the next upcoming game */}
         {nextScheduledGame && (
           <div className="mb-6 p-4 rounded-xl bg-[var(--bg-elevated)] border border-[var(--border-subtle)]">
             <div className="flex items-center justify-between gap-4">
@@ -73,22 +83,32 @@ export default async function BlackhawksSchedulePage() {
           </div>
         )}
 
-        <div className="bg-[var(--bg-elevated)] border border-[var(--border-subtle)] rounded-2xl overflow-hidden">
-          <div className="p-4 border-b border-[var(--border-subtle)] flex items-center justify-between">
-            <h2 className="font-bold text-[var(--text-primary)]" style={{ fontFamily: "'Montserrat', sans-serif" }}>
-              Full Schedule
-            </h2>
-            <span className="text-sm text-[var(--text-muted)]">
-              {schedule.length} games
-            </span>
-          </div>
+        {/* Completed games - most recent first */}
+        {completedGames.length > 0 && (
+          <div className="bg-[var(--bg-elevated)] border border-[var(--border-subtle)] rounded-2xl overflow-hidden">
+            <div className="p-4 border-b border-[var(--border-subtle)] flex items-center justify-between">
+              <h2 className="font-bold text-[var(--text-primary)]" style={{ fontFamily: "'Montserrat', sans-serif" }}>
+                Game Results
+              </h2>
+              <span className="text-sm text-[var(--text-muted)]">
+                {completedGames.length} games played
+              </span>
+            </div>
 
-          <div className="divide-y divide-[var(--border-subtle)]">
-            {schedule.map((game) => (
-              <GameRow key={game.gameId} game={game} />
-            ))}
+            <div className="divide-y divide-[var(--border-subtle)]">
+              {completedGames.map((game) => (
+                <GameRow key={game.gameId} game={game} />
+              ))}
+            </div>
           </div>
-        </div>
+        )}
+
+        {/* Empty state */}
+        {completedGames.length === 0 && !nextScheduledGame && (
+          <div className="bg-[var(--bg-elevated)] border border-[var(--border-subtle)] rounded-2xl p-12 text-center">
+            <p className="text-[var(--text-muted)]">No schedule data available</p>
+          </div>
+        )}
       </div>
     </TeamHubLayout>
   )

@@ -72,7 +72,7 @@ export default async function BullsSchedulePage() {
           </div>
         </div>
 
-        {/* Next Game */}
+        {/* Show only the next upcoming game */}
         {nextScheduledGame && (
           <div className="mb-6 p-4 rounded-xl bg-[var(--bg-elevated)] border border-[var(--border-subtle)]">
             <div className="flex items-center justify-between gap-4">
@@ -108,34 +108,15 @@ export default async function BullsSchedulePage() {
           </div>
         )}
 
-        {/* Upcoming Games */}
-        {upcomingGames.length > 0 && (
-          <div className="mb-6 bg-[var(--bg-elevated)] border border-[var(--border-subtle)] rounded-2xl overflow-hidden">
-            <div className="p-4 border-b border-[var(--border-subtle)] flex items-center justify-between bg-[var(--bg-tertiary)]/30">
-              <h2 className="font-bold text-[var(--text-primary)]" style={{ fontFamily: "'Montserrat', sans-serif" }}>
-                Upcoming Games
-              </h2>
-              <span className="text-sm text-[var(--text-muted)]">
-                {upcomingGames.length} games
-              </span>
-            </div>
-            <div className="divide-y divide-[var(--border-subtle)]">
-              {upcomingGames.slice(0, 10).map((game) => (
-                <GameRow key={game.gameId} game={game} />
-              ))}
-            </div>
-          </div>
-        )}
-
-        {/* Completed Games */}
+        {/* Completed Games - most recent first */}
         {completedGames.length > 0 && (
           <div className="bg-[var(--bg-elevated)] border border-[var(--border-subtle)] rounded-2xl overflow-hidden">
             <div className="p-4 border-b border-[var(--border-subtle)] flex items-center justify-between">
               <h2 className="font-bold text-[var(--text-primary)]" style={{ fontFamily: "'Montserrat', sans-serif" }}>
-                Recent Results
+                Game Results
               </h2>
               <span className="text-sm text-[var(--text-muted)]">
-                {completedGames.length} games
+                {completedGames.length} games played
               </span>
             </div>
             <div className="divide-y divide-[var(--border-subtle)]">

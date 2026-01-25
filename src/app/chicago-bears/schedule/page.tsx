@@ -47,12 +47,17 @@ export default async function BearsSchedulePage() {
     fetchNextGame('bears'),
   ])
 
-  // Separate games by type
+  // For out-of-season teams: order all games by most recent first
+  const sortedSchedule = [...schedule].sort((a, b) =>
+    new Date(b.date).getTime() - new Date(a.date).getTime()
+  )
+
+  // Separate games by type for display purposes
   const preseasonGames = schedule.filter(g => g.gameType === 'preseason')
   const regularGames = schedule.filter(g => g.gameType === 'regular')
   const postseasonGames = schedule.filter(g => g.gameType === 'postseason')
 
-  // Calculate progressive record for regular season
+  // Calculate progressive record for regular season (needed for record display)
   const regularWithRecord = calculateProgressiveRecord(regularGames)
 
   // Build record object for TeamHubLayout (regular season only in main display)
@@ -137,73 +142,28 @@ export default async function BearsSchedulePage() {
           </div>
         </div>
 
-        {/* Postseason Section */}
-        {postseasonGames.length > 0 && (
-          <div className="mb-6">
-            <div className="bg-[var(--bg-elevated)] border border-[var(--border-subtle)] rounded-2xl overflow-hidden">
-              <div className="p-4 border-b border-[var(--border-subtle)] bg-[#C83200]/5">
-                <h2 className="font-bold text-[#C83200]" style={{ fontFamily: "'Montserrat', sans-serif" }}>
-                  🏈 Postseason
-                </h2>
-              </div>
-              <div className="divide-y divide-[var(--border-subtle)]">
-                {postseasonGames.map((game) => (
-                  <GameRow key={game.gameId} game={game} />
-                ))}
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* Regular Season Section */}
+        {/* All Games - most recent first (for out-of-season display) */}
         <div className="mb-6">
           <div className="bg-[var(--bg-elevated)] border border-[var(--border-subtle)] rounded-2xl overflow-hidden">
             <div className="p-4 border-b border-[var(--border-subtle)] flex items-center justify-between">
               <h2 className="font-bold text-[var(--text-primary)]" style={{ fontFamily: "'Montserrat', sans-serif" }}>
-                Regular Season
+                {separatedRecord.postseason.wins > 0 || separatedRecord.postseason.losses > 0 ? '2025 Season' : 'Regular Season'}
               </h2>
               <span className="text-sm text-[var(--text-muted)]">
-                {regularGames.length} games
+                {schedule.length} games
               </span>
             </div>
             <div className="divide-y divide-[var(--border-subtle)]">
-              {regularWithRecord.map((game, index) => {
-                // Check if bye week comes after this game
-                const showByeAfter = game.week === BYE_WEEK - 1 && regularWithRecord[index + 1]?.week === BYE_WEEK + 1
-                return (
-                  <div key={game.gameId}>
-                    <GameRow game={game} progressiveRecord={game.progressiveRecord} />
-                    {showByeAfter && (
-                      <div className="p-4 bg-[var(--bg-tertiary)]/50 text-center">
-                        <span className="text-sm text-[var(--text-muted)] italic">
-                          Week {BYE_WEEK} — BYE WEEK
-                        </span>
-                      </div>
-                    )}
-                  </div>
-                )
-              })}
+              {sortedSchedule.map((game) => (
+                <GameRow
+                  key={game.gameId}
+                  game={game}
+                  isPreseason={game.gameType === 'preseason'}
+                />
+              ))}
             </div>
           </div>
         </div>
-
-        {/* Preseason Section */}
-        {preseasonGames.length > 0 && (
-          <div className="mb-6">
-            <div className="bg-[var(--bg-elevated)] border border-[var(--border-subtle)] rounded-2xl overflow-hidden">
-              <div className="p-4 border-b border-[var(--border-subtle)] bg-[var(--bg-tertiary)]/30">
-                <h2 className="font-bold text-[var(--text-secondary)]" style={{ fontFamily: "'Montserrat', sans-serif" }}>
-                  Preseason
-                </h2>
-              </div>
-              <div className="divide-y divide-[var(--border-subtle)]">
-                {preseasonGames.map((game) => (
-                  <GameRow key={game.gameId} game={game} isPreseason />
-                ))}
-              </div>
-            </div>
-          </div>
-        )}
       </div>
     </TeamHubLayout>
   )

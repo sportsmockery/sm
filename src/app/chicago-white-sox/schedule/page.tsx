@@ -27,7 +27,10 @@ export default async function WhiteSoxSchedulePage() {
     losses: soxRecord.losses,
   }
 
-  const nextScheduledGame = schedule.find(g => g.status === 'scheduled')
+  // For out-of-season teams: order all games by most recent first
+  const sortedSchedule = [...schedule].sort((a, b) =>
+    new Date(b.date).getTime() - new Date(a.date).getTime()
+  )
 
   return (
     <TeamHubLayout
@@ -37,45 +40,11 @@ export default async function WhiteSoxSchedulePage() {
       activeTab="schedule"
     >
       <div>
-        {nextScheduledGame && (
-          <div className="mb-6 p-4 rounded-xl bg-[var(--bg-elevated)] border border-[var(--border-subtle)]">
-            <div className="flex items-center justify-between gap-4">
-              <div className="flex items-center gap-3">
-                <div className="px-2 py-1 bg-[#27251F]/10 text-[#27251F] dark:bg-[#C4CED4]/10 dark:text-[#C4CED4] text-xs font-semibold rounded">
-                  UP NEXT
-                </div>
-                <div className="flex items-center gap-2">
-                  {nextScheduledGame.opponentLogo && (
-                    <Image
-                      src={nextScheduledGame.opponentLogo}
-                      alt={nextScheduledGame.opponent}
-                      width={28}
-                      height={28}
-                      className="w-7 h-7"
-                      unoptimized
-                    />
-                  )}
-                  <span className="font-semibold text-[var(--text-primary)]">
-                    {nextScheduledGame.homeAway === 'home' ? 'vs' : '@'} {nextScheduledGame.opponentFullName || nextScheduledGame.opponent}
-                  </span>
-                </div>
-              </div>
-              <div className="text-right text-sm">
-                <div className="text-[var(--text-primary)] font-medium">
-                  {new Date(nextScheduledGame.date).toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })}
-                </div>
-                <div className="text-[var(--text-muted)]">
-                  {nextScheduledGame.time || 'TBD'} {nextScheduledGame.tv && `• ${nextScheduledGame.tv}`}
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
-
+        {/* All Games - most recent first (out-of-season display) */}
         <div className="bg-[var(--bg-elevated)] border border-[var(--border-subtle)] rounded-2xl overflow-hidden">
           <div className="p-4 border-b border-[var(--border-subtle)] flex items-center justify-between">
             <h2 className="font-bold text-[var(--text-primary)]" style={{ fontFamily: "'Montserrat', sans-serif" }}>
-              Full Schedule
+              2025 Season
             </h2>
             <span className="text-sm text-[var(--text-muted)]">
               {schedule.length} games
@@ -83,7 +52,7 @@ export default async function WhiteSoxSchedulePage() {
           </div>
 
           <div className="divide-y divide-[var(--border-subtle)]">
-            {schedule.map((game) => (
+            {sortedSchedule.map((game) => (
               <GameRow key={game.gameId} game={game} />
             ))}
           </div>
