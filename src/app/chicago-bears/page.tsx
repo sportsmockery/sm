@@ -1,5 +1,4 @@
 import { Metadata } from 'next'
-import Image from 'next/image'
 import { TeamHubLayout, TeamHubOverview } from '@/components/team'
 import {
   BearsSeasonCard,
