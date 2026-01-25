@@ -15,7 +15,8 @@ export const metadata: Metadata = {
   },
 };
 
-export const revalidate = 900; // 15 minutes
+// Force dynamic to avoid build-time TikTok oEmbed failures
+export const dynamic = 'force-dynamic'
 
 export default async function SouthsideBehaviorPage() {
   const { latestEmbed, previousEmbeds } = await getSouthsideBehaviorEmbeds();

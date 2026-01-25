@@ -65,6 +65,75 @@ Tailwind classes for colors/borders on buttons often get overridden by other CSS
 
 ---
 
+## Team Pages Data Verification (CRITICAL)
+
+**NEVER mark team pages as complete without verifying ALL data is displaying correctly.**
+
+### Data Layer Architecture
+
+```
+Team Pages → Data Layer (src/lib/{team}Data.ts) → Datalab Supabase
+```
+
+All team pages pull from Datalab. If stats are missing, the issue is either:
+1. **Wrong column names** in the query (most common)
+2. **Missing data** in Datalab tables
+3. **Wrong join column** (e.g., `game_id` vs `bears_game_id`)
+
+### Datalab Column Naming Convention
+
+**CRITICAL: Datalab uses full prefixes, NOT abbreviations:**
+
+| Wrong (will return null) | Correct |
+|--------------------------|---------|
+| `pass_cmp`, `pass_att` | `passing_cmp`, `passing_att` |
+| `rush_att`, `rush_yds` | `rushing_car`, `rushing_yds` |
+| `rec`, `rec_yds` | `receiving_rec`, `receiving_yds` |
+| `tackles`, `sacks` | `def_tackles_total`, `def_sacks` |
+| `fumbles` | `fum_fum` |
+| `game_id` | `bears_game_id` (for Bears player stats) |
+
+### Verification Checklist Before Marking Complete
+
+When working on team pages, verify EACH of these displays data:
+
+#### Scores Page (`/chicago-{team}/scores`)
+- [ ] Game selector shows all completed games
+- [ ] Passing stats table has data (CMP/ATT, YDS, TD, INT)
+- [ ] Rushing stats table has data (CAR, YDS, TD)
+- [ ] Receiving stats table has data (REC, TGTS, YDS, TD)
+- [ ] Defense stats table has data (TKL, SACK, INT)
+
+#### Players Page (`/chicago-{team}/players`)
+- [ ] Player list loads (not empty)
+- [ ] Player profile displays bio info
+- [ ] Season stats display (not "No stats recorded")
+
+#### Stats Page (`/chicago-{team}/stats`)
+- [ ] Team record is correct (matches official)
+- [ ] Leaderboards have players with stats
+
+#### Schedule Page (`/chicago-{team}/schedule`)
+- [ ] Games display (not "0 games")
+- [ ] Completed games show scores
+
+### How to Debug Missing Stats
+
+1. **Check the API response**: Open browser DevTools → Network → find the API call
+2. **Check column names**: Compare query columns in `{team}Data.ts` with Datalab schema
+3. **Check join columns**: Ensure foreign keys match (e.g., `player_id` → internal ID)
+4. **Test in Datalab**: Run the SQL query directly in Supabase to verify data exists
+
+### Reference Documentation
+
+See `/docs/Team_Pages_Query.md` for:
+- Complete table schemas for all 5 teams
+- Required columns and data types
+- Season determination logic
+- Error prevention protocols
+
+---
+
 ## Scout - The Ask AI Model
 
 **Scout** is the AI-powered "Ask AI" feature for Chicago sports questions. When the user mentions "Scout", "the AI model", "Ask AI", or "query AI", they are referring to this system.
