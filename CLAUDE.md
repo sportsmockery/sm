@@ -91,11 +91,13 @@ SM's reference doc is at: `/docs/Team_Pages_Query.md`
 | Sport | Stored As | Jan 2026 Season Value | Example |
 |-------|-----------|----------------------|---------|
 | **NFL** | Starting year | `2025` | 2025-26 season = 2025 |
-| **NBA** | Starting year | `2025` | 2025-26 season = 2025 |
+| **NBA** | **ENDING year** | `2026` | 2025-26 season = **2026** |
 | **NHL** | **ENDING year** | `2026` | 2025-26 season = **2026** |
 | **MLB** | Calendar year | `2025` (offseason) | 2025 season = 2025 |
 
-**NHL IS DIFFERENT!** Query Blackhawks with `season = 2026` for the 2025-26 season.
+**NBA AND NHL USE ENDING YEAR!** Query Bulls and Blackhawks with `season = 2026` for the 2025-26 season.
+
+There is NO `season_start_year` column in Blackhawks tables - use `season` only.
 
 ---
 
@@ -140,7 +142,11 @@ goals, assists, points, plus_minus
 shots_on_goal, hits, blocked_shots
 saves, goals_against (goalie)
 ```
-**OT Loss Logic:** `is_overtime = true` covers BOTH OT and shootout losses
+**OT Loss Logic:** Use ONLY `is_overtime = true` (covers both OT and shootout losses):
+```sql
+-- OT Losses (includes shootout)
+WHERE blackhawks_win = false AND is_overtime = true
+```
 
 #### MLB (Cubs/White Sox)
 ```
@@ -156,13 +162,15 @@ walks_allowed, strikeouts_pitched
 
 ### Current Data Status (Jan 2026)
 
-| Team | Record | Roster Count | Notes |
-|------|--------|--------------|-------|
-| Bears | 11-6 (reg) + 1-1 (playoffs) | 81 | Season complete |
-| Bulls | 39-43+ (in progress) | 18 | 2025-26 season |
-| Blackhawks | 21-22-8 (51 pts) | 20 | 2025-26 season (query season=2026) |
-| Cubs | 98-74 | 35 | 2025 complete (offseason) |
-| White Sox | 61-106 | 35 | 2025 complete (offseason) |
+| Team | Record | Roster Count | Season Query | Notes |
+|------|--------|--------------|--------------|-------|
+| Bears | 11-6 (reg) + 1-1 (playoffs) | 81 | `season = 2025` | Complete (includes PS, IR) |
+| Bulls | **22-22** (in progress) | 18 | `season = 2026` | Ending year! |
+| Blackhawks | 21-22-8 (50 pts) | 20 | `season = 2026` | Ending year! |
+| Cubs | 98-74 | 35 | `season = 2025` | Offseason |
+| White Sox | 61-106 | 35 | `season = 2025` | Offseason |
+
+**Bears roster of 81** includes: 53 active + 16 practice squad + ~12 IR/other. Display all.
 
 ---
 

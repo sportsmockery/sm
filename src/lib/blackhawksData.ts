@@ -468,7 +468,7 @@ async function getPlayerGameLog(internalId: number): Promise<PlayerGameLogEntry[
  * Only includes regular season and postseason games
  */
 export async function getBlackhawksSchedule(season?: number): Promise<BlackhawksGame[]> {
-  // For NHL, season_start_year is the year the season begins (e.g., 2025 for 2025-26 season)
+  // For NHL, season is the ENDING year (e.g., 2026 for 2025-26 season)
   const targetSeason = season || getCurrentSeason()
 
   if (!datalabAdmin) {
@@ -480,21 +480,21 @@ export async function getBlackhawksSchedule(season?: number): Promise<Blackhawks
   let data: any[] | null = null
   let error: any = null
 
-  // First attempt: try blackhawks_schedule_all view with season_start_year
+  // First attempt: try blackhawks_schedule_all view with season
   const viewResult = await datalabAdmin
     .from('blackhawks_schedule_all')
     .select('*')
-    .eq('season_start_year', targetSeason)
+    .eq('season', targetSeason)
     .order('game_date', { ascending: true })
 
   if (!viewResult.error && viewResult.data && viewResult.data.length > 0) {
     data = viewResult.data
   } else {
-    // Fallback: try blackhawks_games_master with season_start_year
+    // Fallback: try blackhawks_games_master with season
     const masterResult = await datalabAdmin
       .from('blackhawks_games_master')
       .select('*')
-      .eq('season_start_year', targetSeason)
+      .eq('season', targetSeason)
       .order('game_date', { ascending: true })
 
     if (!masterResult.error && masterResult.data && masterResult.data.length > 0) {
@@ -891,17 +891,18 @@ export async function getAvailableSeasons(): Promise<number[]> {
 }
 
 function getCurrentSeason(): number {
-  // NHL season runs Oct-June, stored as the STARTING year in DataLab
-  // e.g., 2024-25 season = 2024, 2025-26 season = 2025
+  // NHL season runs Oct-June, stored as ENDING year in Datalab
+  // e.g., 2024-25 season = 2025, 2025-26 season = 2026
+  // There is NO season column - use 'season' only
   const now = new Date()
   const year = now.getFullYear()
   const month = now.getMonth() + 1
-  // If before October, we're still in the season that started last year
-  // If October or later, the new season has started (use current year)
+  // If before October (Jan-Sep): We're in a season ending this year
+  // If October or later (Oct-Dec): New season started, ends next year
   if (month < 10) {
-    return year - 1
+    return year  // Season ends this year
   }
-  return year
+  return year + 1  // Season ends next year
 }
 
 /**
