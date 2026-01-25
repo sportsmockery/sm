@@ -635,17 +635,25 @@ async function getTeamStats(season: number): Promise<BlackhawksTeamStats> {
     .eq('season', season)
     .single()
 
-  // Get season record from games
+  // CRITICAL: Get authoritative record from blackhawks_seasons table (recommended by Datalab)
+  // This avoids issues with calculating record from games_master
+  const { data: seasonRecord } = await datalabAdmin
+    .from('blackhawks_seasons')
+    .select('wins, losses, ot_losses')
+    .eq('season', season)
+    .single()
+
+  // Get completed games for goals calculation
   const { data: gamesData } = await datalabAdmin
     .from('blackhawks_games_master')
-    .select('blackhawks_score, opponent_score, blackhawks_win, overtime, shootout')
+    .select('blackhawks_score, opponent_score')
     .eq('season', season)
     .or('blackhawks_score.gt.0,opponent_score.gt.0')
 
-  const wins = gamesData?.filter((g: any) => g.blackhawks_win).length || 0
-  const losses = gamesData?.filter((g: any) => !g.blackhawks_win && !g.overtime && !g.shootout).length || 0
-  const otLosses = gamesData?.filter((g: any) => !g.blackhawks_win && (g.overtime || g.shootout)).length || 0
-  const gamesPlayed = gamesData?.length || 0
+  const wins = seasonRecord?.wins || 0
+  const losses = seasonRecord?.losses || 0
+  const otLosses = seasonRecord?.ot_losses || 0
+  const gamesPlayed = (gamesData?.length || 0) || (wins + losses + otLosses)
   const totalGoals = gamesData?.reduce((sum: number, g: any) => sum + (g.blackhawks_score || 0), 0) || 0
   const totalOppGoals = gamesData?.reduce((sum: number, g: any) => sum + (g.opponent_score || 0), 0) || 0
   const pts = wins * 2 + otLosses
@@ -833,15 +841,53 @@ export interface BlackhawksRecord {
 }
 
 export async function getBlackhawksRecord(season?: number): Promise<BlackhawksRecord> {
-  const schedule = await getBlackhawksSchedule(season)
+  const targetSeason = season || getCurrentSeason()
 
+  // CRITICAL: Get authoritative record from blackhawks_seasons table (recommended by Datalab)
+  if (datalabAdmin) {
+    const { data: seasonRecord } = await datalabAdmin
+      .from('blackhawks_seasons')
+      .select('wins, losses, ot_losses')
+      .eq('season', targetSeason)
+      .single()
+
+    if (seasonRecord) {
+      // Get streak from schedule
+      const schedule = await getBlackhawksSchedule(targetSeason)
+      const completedGames = schedule.filter(g => g.status === 'final')
+
+      let streak: string | null = null
+      if (completedGames.length > 0) {
+        const sortedGames = [...completedGames].sort((a, b) =>
+          new Date(b.date).getTime() - new Date(a.date).getTime()
+        )
+        let streakCount = 1
+        const streakType = sortedGames[0].result
+        for (let i = 1; i < sortedGames.length && i < 10; i++) {
+          if (sortedGames[i].result === streakType) {
+            streakCount++
+          } else {
+            break
+          }
+        }
+        streak = `${streakType}${streakCount}`
+      }
+
+      return {
+        wins: seasonRecord.wins || 0,
+        losses: seasonRecord.losses || 0,
+        otLosses: seasonRecord.ot_losses || 0,
+        streak,
+      }
+    }
+  }
+
+  // Fallback: Calculate from schedule if seasons table unavailable
+  const schedule = await getBlackhawksSchedule(targetSeason)
   const completedGames = schedule.filter(g => g.status === 'final')
   const wins = completedGames.filter(g => g.result === 'W').length
   const losses = completedGames.filter(g => g.result === 'L').length
   const otLosses = completedGames.filter(g => g.result === 'OTL').length
-
-  // Log record calculation for debugging
-  console.log(`Blackhawks record: ${wins}-${losses}-${otLosses} (${completedGames.length} games of ${schedule.length} total)`)
 
   // Calculate streak
   let streak: string | null = null

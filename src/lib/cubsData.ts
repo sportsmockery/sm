@@ -868,13 +868,29 @@ export interface CubsRecord {
 }
 
 export async function getCubsRecord(season?: number): Promise<CubsRecord> {
-  const schedule = await getCubsSchedule(season)
+  const targetSeason = season || getCurrentSeason()
 
-  // Calculate record from completed games
+  // CRITICAL: Get authoritative record from cubs_seasons table (recommended by Datalab)
+  if (datalabAdmin) {
+    const { data: seasonRecord } = await datalabAdmin
+      .from('cubs_seasons')
+      .select('wins, losses')
+      .eq('season', targetSeason)
+      .single()
+
+    if (seasonRecord) {
+      return {
+        wins: seasonRecord.wins || 0,
+        losses: seasonRecord.losses || 0,
+      }
+    }
+  }
+
+  // Fallback: Calculate from schedule if seasons table unavailable
+  const schedule = await getCubsSchedule(targetSeason)
   const completedGames = schedule.filter(g => g.status === 'final')
   const wins = completedGames.filter(g => g.result === 'W').length
   const losses = completedGames.filter(g => g.result === 'L').length
-
 
   return { wins, losses }
 }

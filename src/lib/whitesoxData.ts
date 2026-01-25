@@ -653,16 +653,24 @@ async function getTeamStats(season: number): Promise<WhiteSoxTeamStats> {
     .eq('season', season)
     .single()
 
-  // Get season record from games
+  // CRITICAL: Get authoritative record from whitesox_seasons table (recommended by Datalab)
+  // This avoids issues with calculating record from games_master
+  const { data: seasonRecord } = await datalabAdmin
+    .from('whitesox_seasons')
+    .select('wins, losses')
+    .eq('season', season)
+    .single()
+
+  // Get completed games for runs calculation
   const { data: gamesData } = await datalabAdmin
     .from('whitesox_games_master')
-    .select('whitesox_score, opponent_score, whitesox_win')
+    .select('whitesox_score, opponent_score')
     .eq('season', season)
     .or('whitesox_score.gt.0,opponent_score.gt.0')
 
-  const wins = gamesData?.filter((g: any) => g.whitesox_win).length || 0
-  const losses = gamesData?.filter((g: any) => g.whitesox_win === false).length || 0
-  const gamesPlayed = gamesData?.length || 0
+  const wins = seasonRecord?.wins || 0
+  const losses = seasonRecord?.losses || 0
+  const gamesPlayed = (gamesData?.length || 0) || (wins + losses)
   const runsScored = gamesData?.reduce((sum: number, g: any) => sum + (g.whitesox_score || 0), 0) || 0
   const runsAllowed = gamesData?.reduce((sum: number, g: any) => sum + (g.opponent_score || 0), 0) || 0
 
@@ -860,12 +868,29 @@ export interface WhiteSoxRecord {
 }
 
 export async function getWhiteSoxRecord(season?: number): Promise<WhiteSoxRecord> {
-  const schedule = await getWhiteSoxSchedule(season)
+  const targetSeason = season || getCurrentSeason()
 
+  // CRITICAL: Get authoritative record from whitesox_seasons table (recommended by Datalab)
+  if (datalabAdmin) {
+    const { data: seasonRecord } = await datalabAdmin
+      .from('whitesox_seasons')
+      .select('wins, losses')
+      .eq('season', targetSeason)
+      .single()
+
+    if (seasonRecord) {
+      return {
+        wins: seasonRecord.wins || 0,
+        losses: seasonRecord.losses || 0,
+      }
+    }
+  }
+
+  // Fallback: Calculate from schedule if seasons table unavailable
+  const schedule = await getWhiteSoxSchedule(targetSeason)
   const completedGames = schedule.filter(g => g.status === 'final')
   const wins = completedGames.filter(g => g.result === 'W').length
   const losses = completedGames.filter(g => g.result === 'L').length
-
 
   return { wins, losses }
 }

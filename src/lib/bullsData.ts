@@ -683,12 +683,13 @@ async function getLeaderboards(season: number): Promise<BullsLeaderboard> {
   const playersMap = new Map(players.map(p => [p.internalId, p]))
 
   // Get all game stats for season and aggregate by player
+  // Note: Column is 'total_rebounds' in the database, not 'rebounds'
   let { data: gameStats } = await datalabAdmin
     .from('bulls_player_game_stats')
     .select(`
       player_id,
       points,
-      rebounds,
+      total_rebounds,
       assists,
       steals,
       blocks
@@ -702,7 +703,7 @@ async function getLeaderboards(season: number): Promise<BullsLeaderboard> {
       .select(`
         player_id,
         points,
-        rebounds,
+        total_rebounds,
         assists,
         steals,
         blocks
@@ -733,7 +734,7 @@ async function getLeaderboards(season: number): Promise<BullsLeaderboard> {
     }
     const totals = playerTotals.get(pid)!
     totals.points += stat.points || 0
-    totals.rebounds += stat.rebounds || 0
+    totals.rebounds += stat.total_rebounds || 0
     totals.assists += stat.assists || 0
     totals.steals += stat.steals || 0
     totals.blocks += stat.blocks || 0
@@ -812,12 +813,33 @@ export interface BullsRecord {
 }
 
 export async function getBullsRecord(season?: number): Promise<BullsRecord> {
-  const schedule = await getBullsSchedule(season)
+  const targetSeason = season || getCurrentSeason()
 
+  // CRITICAL: Get authoritative record from bulls_seasons table (recommended by Datalab)
+  let wins = 0
+  let losses = 0
+  if (datalabAdmin) {
+    const { data: seasonRecord } = await datalabAdmin
+      .from('bulls_seasons')
+      .select('wins, losses')
+      .eq('season', targetSeason)
+      .single()
+
+    if (seasonRecord) {
+      wins = seasonRecord.wins || 0
+      losses = seasonRecord.losses || 0
+    }
+  }
+
+  // Get streak from schedule (need to look at game results)
+  const schedule = await getBullsSchedule(targetSeason)
   const completedGames = schedule.filter(g => g.status === 'final')
-  const wins = completedGames.filter(g => g.result === 'W').length
-  const losses = completedGames.filter(g => g.result === 'L').length
 
+  // Fallback to calculated record if seasons table didn't have data
+  if (wins === 0 && losses === 0) {
+    wins = completedGames.filter(g => g.result === 'W').length
+    losses = completedGames.filter(g => g.result === 'L').length
+  }
 
   // Calculate streak from most recent games
   let streak: string | null = null
