@@ -141,7 +141,6 @@ export default function AskAIPage() {
     if (!source) return null
 
     const badges: Record<string, { label: string; color: string }> = {
-      ai: { label: 'From Database', color: 'bg-green-500' },
       web_fallback: { label: 'From Web Sources', color: 'bg-blue-500' },
       error: { label: 'Error', color: 'bg-red-500' },
       empty: { label: 'No Data', color: 'bg-yellow-500' },
@@ -325,49 +324,6 @@ export default function AskAIPage() {
                 </ul>
               </div>
 
-              {/* Data Source */}
-              <div className="mt-6 pt-6" style={{ borderTop: '1px solid var(--border-color)' }}>
-                <h3
-                  className="text-xs font-bold uppercase tracking-wider mb-3"
-                  style={{ color: 'var(--text-muted)' }}
-                >
-                  Powered By
-                </h3>
-                <Link
-                  href="https://datalab.sportsmockery.com"
-                  target="_blank"
-                  className="flex items-center gap-2 text-sm text-[#bc0000] hover:underline"
-                >
-                  <span>SM Data Lab</span>
-                  <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
-                  </svg>
-                </Link>
-                <p className="text-xs mt-2" style={{ color: 'var(--text-muted)' }}>
-                  Verified data from our Chicago sports database
-                </p>
-              </div>
-
-              {/* Teams */}
-              <div className="mt-6 pt-6" style={{ borderTop: '1px solid var(--border-color)' }}>
-                <h3
-                  className="text-xs font-bold uppercase tracking-wider mb-3"
-                  style={{ color: 'var(--text-muted)' }}
-                >
-                  Supported Teams
-                </h3>
-                <div className="flex flex-wrap gap-2">
-                  {['Bears', 'Bulls', 'Cubs', 'White Sox', 'Blackhawks'].map((team) => (
-                    <span
-                      key={team}
-                      className="px-3 py-1 rounded-full text-xs font-medium"
-                      style={{ backgroundColor: 'var(--bg-page)', color: 'var(--text-primary)' }}
-                    >
-                      {team}
-                    </span>
-                  ))}
-                </div>
-              </div>
             </div>
           </div>
 
