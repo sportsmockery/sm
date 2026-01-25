@@ -115,34 +115,33 @@ SM's reference doc is at: `/docs/Team_Pages_Query.md`
 
 ---
 
-### CRITICAL: ESPN ID Mapping (FIXED Jan 25, 2026)
+### CRITICAL: Stats Join Patterns DIFFER BY TEAM (Jan 25, 2026)
 
-**ALL stats tables use ESPN ID in `player_id` column, NOT internal database ID!**
+**Join patterns are NOT the same for all teams!** Data Lab confirmed:
 
-```
-Player Tables:    {team}_players.espn_id (or .player_id) = ESPN ID string
-Stats Tables:     {team}_player_game_stats.player_id = ESPN ID string
-Internal ID:      {team}_players.id = auto-increment integer (NEVER use for stats join)
-```
+| Team | Join Pattern | Code Usage |
+|------|--------------|------------|
+| **Bears** | `bp.id = bpgs.player_id` | Use `player.internalId` (number) |
+| **Bulls** | `bp.player_id = bpgs.player_id` | Use `player.playerId` (string) |
+| **Blackhawks** | `bp.espn_id = bpgs.player_id` | Use `player.playerId` (string) |
+| **Cubs** | `cp.espn_id = cpgs.player_id` | Use `player.playerId` (string) |
+| **White Sox** | `wp.espn_id = wpgs.player_id` | Use `player.playerId` (string) |
 
-**CORRECT JOIN PATTERN:**
+**Bears uses internal ID, all others use ESPN ID!**
+
 ```typescript
-// In data layer files (src/lib/{team}Data.ts):
-const espnId = player.playerId  // This is the ESPN ID from player.espn_id
-const stats = await query.from('stats_table').eq('player_id', espnId)
-```
+// BEARS - use internal database ID
+const stats = await query.from('bears_player_game_stats').eq('player_id', player.internalId)
 
-**WRONG JOIN PATTERN (FIXED):**
-```typescript
-// This was BROKEN - internalId is the database auto-increment ID
-const stats = await query.from('stats_table').eq('player_id', player.internalId)
+// ALL OTHER TEAMS - use ESPN ID (playerId)
+const stats = await query.from('bulls_player_game_stats').eq('player_id', player.playerId)
 ```
 
 **Player Interface Structure:**
 ```typescript
 interface Player {
-  playerId: string    // ESPN ID (use for stats queries)
-  internalId: number  // Database ID (NEVER use for stats queries)
+  playerId: string    // ESPN ID (use for Bulls, Blackhawks, Cubs, White Sox)
+  internalId: number  // Database ID (use ONLY for Bears)
   // ... other fields
 }
 ```
