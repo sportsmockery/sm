@@ -545,8 +545,30 @@ export async function getBlackhawksSchedule(season?: number): Promise<Blackhawks
     return []
   }
 
+  // Debug: check the date range and game_type distribution of the returned data
+  const dates = data.map((g: any) => g.game_date).sort()
+  const gameTypes = [...new Set(data.map((g: any) => g.game_type))]
+  const seasons = [...new Set(data.map((g: any) => g.season))]
+  const seasonStartYears = [...new Set(data.map((g: any) => g.season_start_year))]
+  console.log(`Date range: ${dates[0]} to ${dates[dates.length - 1]}`)
+  console.log(`Game types: ${JSON.stringify(gameTypes)}`)
+  console.log(`Seasons in result: ${JSON.stringify(seasons)}`)
+  console.log(`Season start years in result: ${JSON.stringify(seasonStartYears)}`)
+
+  // Filter to 2025-26 season dates only (Oct 2025 - June 2026)
+  // This handles the case where season column has incorrect values
+  const seasonStartDate = `${targetSeason}-10-01` // Oct 1 of the season start year
+  const seasonEndDate = `${targetSeason + 1}-06-30` // June 30 of the following year
+
+  const dateFiltered = data.filter((g: any) => {
+    const gameDate = g.game_date
+    return gameDate >= seasonStartDate && gameDate <= seasonEndDate
+  })
+
+  console.log(`After date filter (${seasonStartDate} to ${seasonEndDate}): ${dateFiltered.length} games`)
+
   // Filter to regular season and postseason only (exclude preseason PRE)
-  const filtered = data.filter((g: any) => {
+  const filtered = dateFiltered.filter((g: any) => {
     const gameType = g.game_type?.toUpperCase() || ''
     return gameType !== 'PRE' && gameType !== 'PRESEASON'
   })
