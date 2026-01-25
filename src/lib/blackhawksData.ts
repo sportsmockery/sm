@@ -573,6 +573,24 @@ export async function getBlackhawksSchedule(season?: number): Promise<Blackhawks
     return gameType !== 'PRE' && gameType !== 'PRESEASON'
   })
 
+  // Debug: show raw database columns for first few games
+  if (filtered.length > 0) {
+    const sample = filtered.slice(0, 3)
+    console.log(`Sample raw games from DB:`, sample.map((g: any) => ({
+      game_date: g.game_date,
+      blackhawks_score: g.blackhawks_score,
+      opponent_score: g.opponent_score,
+      blackhawks_win: g.blackhawks_win,
+      overtime: g.overtime,
+      shootout: g.shootout,
+      is_overtime: g.is_overtime,
+      is_shootout: g.is_shootout,
+      home_score: g.home_score,
+      away_score: g.away_score,
+      columns: Object.keys(g).filter(k => g[k] !== null && g[k] !== undefined)
+    })))
+  }
+
   console.log(`Returning ${filtered.length} regular/postseason games`)
   return filtered.map((g: any) => transformGame(g))
 }
@@ -588,13 +606,20 @@ function formatGameTime(timeStr: string | null): string | null {
 
 function transformGame(game: any): BlackhawksGame {
   const gameDate = new Date(game.game_date)
-  const isPlayed = (game.blackhawks_score > 0) || (game.opponent_score > 0)
+  // Check if game has been played - handle null/undefined scores properly
+  const hawksScore = game.blackhawks_score ?? game.home_score ?? game.away_score
+  const oppScore = game.opponent_score ?? game.away_score ?? game.home_score
+  const isPlayed = hawksScore !== null && hawksScore !== undefined
 
   let result: 'W' | 'L' | 'OTL' | null = null
   if (isPlayed) {
-    if (game.blackhawks_win) {
+    // Determine win/loss based on available columns
+    const didWin = game.blackhawks_win ?? (hawksScore > oppScore)
+    const isOT = game.overtime || game.shootout || game.is_overtime || game.is_shootout
+
+    if (didWin) {
       result = 'W'
-    } else if (game.overtime || game.shootout) {
+    } else if (isOT) {
       result = 'OTL'
     } else {
       result = 'L'
@@ -865,12 +890,27 @@ export async function getBlackhawksRecord(season?: number): Promise<BlackhawksRe
   const losses = completedGames.filter(g => g.result === 'L').length
   const otLosses = completedGames.filter(g => g.result === 'OTL').length
 
-  // VALIDATION: Expected from NHL.com - Blackhawks 2025-26 (as of Jan 23, 2026): 20-22-7 (6th Central)
-  const expectedRecord = { wins: 20, losses: 22, otLosses: 7 }
-  if (Math.abs(wins - expectedRecord.wins) > 5 || Math.abs(losses - expectedRecord.losses) > 5) {
-    console.log(`Supabase mismatch: Expected Blackhawks ~${expectedRecord.wins}-${expectedRecord.losses}-${expectedRecord.otLosses}, got ${wins}-${losses}-${otLosses}. Possible stale data.`)
+  // Debug: log completed game details to understand record calculation
+  console.log(`Record calculation: ${completedGames.length} completed games out of ${schedule.length} total`)
+  console.log(`Results breakdown: W=${wins}, L=${losses}, OTL=${otLosses}`)
+
+  // Sample some completed games to see their data
+  const sampleGames = completedGames.slice(0, 5).map(g => ({
+    date: g.date,
+    opponent: g.opponent,
+    score: `${g.blackhawksScore}-${g.oppScore}`,
+    result: g.result,
+    overtime: g.overtime,
+    shootout: g.shootout
+  }))
+  console.log(`Sample completed games:`, JSON.stringify(sampleGames, null, 2))
+
+  // Check how many games have scores but no result
+  const gamesWithScores = schedule.filter(g => g.blackhawksScore !== null || g.oppScore !== null)
+  const gamesWithNoResult = gamesWithScores.filter(g => g.result === null)
+  if (gamesWithNoResult.length > 0) {
+    console.log(`WARNING: ${gamesWithNoResult.length} games have scores but no result calculated`)
   }
-  console.log("Task 1 complete: Blackhawks record validation added")
 
   // Calculate streak
   let streak: string | null = null
