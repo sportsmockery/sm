@@ -51,14 +51,26 @@ export default function AskAIPage() {
   const isPageLoading = authLoading || subLoading
 
   const scrollToBottom = () => {
-    // Scroll within the container, not the whole page
+    // Scroll within the container only, not the whole page
     if (messagesContainerRef.current) {
-      messagesContainerRef.current.scrollTop = messagesContainerRef.current.scrollHeight
+      messagesContainerRef.current.scrollTo({
+        top: messagesContainerRef.current.scrollHeight,
+        behavior: 'smooth'
+      })
     }
   }
 
+  // Prevent browser scroll restoration on page load
   useEffect(() => {
-    // Only scroll if there are messages
+    if ('scrollRestoration' in history) {
+      history.scrollRestoration = 'manual'
+    }
+    // Scroll to top on mount
+    window.scrollTo(0, 0)
+  }, [])
+
+  useEffect(() => {
+    // Only scroll the messages container if there are messages
     if (messages.length > 0) {
       scrollToBottom()
     }
@@ -67,6 +79,11 @@ export default function AskAIPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     e.stopPropagation()
+
+    // Prevent any page scrolling
+    const scrollY = window.scrollY
+    setTimeout(() => window.scrollTo(0, scrollY), 0)
+
     if (!input.trim() || isLoading) return
 
     const userMessage: Message = {
@@ -466,14 +483,21 @@ export default function AskAIPage() {
                     {isLoading && (
                       <div className="flex justify-start">
                         <div
-                          className="rounded-2xl px-4 py-3"
+                          className="rounded-2xl px-4 py-3 flex items-center gap-3"
                           style={{ backgroundColor: 'var(--bg-page)' }}
                         >
-                          <div className="flex items-center gap-2">
-                            <div className="w-2 h-2 bg-[#bc0000] rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
-                            <div className="w-2 h-2 bg-[#bc0000] rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
-                            <div className="w-2 h-2 bg-[#bc0000] rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
+                          <div className="w-10 h-10 animate-thinking">
+                            <Image
+                              src="/downloads/scout-v2.png"
+                              alt="Scout AI thinking"
+                              width={40}
+                              height={40}
+                              className="w-full h-full object-contain"
+                            />
                           </div>
+                          <span className="text-sm" style={{ color: 'var(--text-muted)' }}>
+                            Thinking...
+                          </span>
                         </div>
                       </div>
                     )}
