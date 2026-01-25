@@ -40,6 +40,176 @@
 
 ---
 
+## Instructions to Claude for Running Comprehensive Audit on test.sportsmockery.com
+
+You are to run a comprehensive audit on the test.sportsmockery.com Next.js site for the Chicago Bears, Bulls, Cubs, White Sox, and Blackhawks pages (schedule, scores, stats, roster, players, individual player pages like caleb-williams, zach-lavine, dansby-swanson, luis-robert-jr, connor-bedard). Use your knowledge from previous interactions to check for inaccuracies, incompleteness, missing data, wrong data, duplicates, and other issues. To ensure future applicability when team stats change, always fetch the latest data from reputable sources using tools like web_search and browse_page before comparing. Verify accuracy by cross-referencing at least two sources (e.g., ESPN and official league sites like NFL.com, NBA.com, MLB.com, NHL.com; plus StatMuse or Pro-Football-Reference for historical). Data is pulled from datalab.sportsmockery.com Supabase tables—query those tables via code_execution tool to verify backend data if needed (e.g., check for duplicates in tables like bears_games_master). Do not delete any data or rename tables. Break the audit into sections per team and page, listing "What is Wrong" (specific issues like inaccurate record, missing fields, duplicates in data) and "What It Should Say" (correct data from fetched reputable sources). After auditing all pages, output an "Audit Summary" section summarizing key issues. Then, generate a "Response to Datalabs" section as a message to send to datalab.sportsmockery.com admins, detailing backend issues (e.g., missing rows, inaccurate entries, duplicates in tables) and suggested SQL updates/inserts (without deletions) to fix them based on fetched data. Proceed team by team, output "Audit for [team] complete" after each team.
+
+### Audit Methodology
+
+For each team, start with:
+1. Use web_search and browse_page to fetch latest/current or last season data (e.g., for Bears: search "Chicago Bears 2025 record ESPN" and browse espn.com/nfl/team/_/name/chi/chicago-bears; cross-reference nfl.com/teams/chicago-bears/).
+2. Verify key stats (record, player leaders, roster size) from 2+ sources for 100% accuracy.
+3. Use fetched data as "right" for all comparisons below.
+
+### Chicago Bears Audit Steps
+
+1. Web search: "Chicago Bears most recent season record and stats ESPN"; browse top result (espn.com) and nfl.com/teams/chicago-bears/ for cross-verification (record, player stats like Williams passing yds, roster size ~53).
+   - Task 1 complete.
+2. Verify: Compare sources for accuracy (e.g., if ESPN says 12-7 overall, confirm with NFL.com).
+   - Task 2 complete.
+
+#### Schedule Page Steps
+1. Browse https://test.sportsmockery.com/chicago-bears/schedule; check for wrong record (e.g., mismatched overall/regular), 0 games, missing preseason/postseason, no dates/times/locations/TV/highlights.
+   - Task 1 complete.
+2. Use code_execution to query `SELECT COUNT(DISTINCT game_id) FROM bears_games_master WHERE season=(most recent season from fetch)`; check for <expected games (e.g., 19 for reg+post), duplicates (`GROUP BY game_id HAVING COUNT>1`).
+   - Task 2 complete.
+3. List issues and corrections based on fetched data.
+   - Task 3 complete.
+
+#### Scores Page Steps
+1. Browse https://test.sportsmockery.com/chicago-bears/scores; check inconsistent record, 0 games, no box scores/quarters/videos.
+   - Task 1 complete.
+2. Query bears_teamgame for `SUM(points_for) WHERE game_id LIKE '[recent season]%'`; verify vs. fetched total pts, check duplicates.
+   - Task 2 complete.
+3. List issues and corrections based on fetched data.
+   - Task 3 complete.
+
+#### Stats Page Steps
+1. Browse https://test.sportsmockery.com/chicago-bears/stats; check wrong player stats (e.g., mismatched yds/TDs), missing totals/rankings/charts, non-recent players.
+   - Task 1 complete.
+2. Query bears_playergame for `SUM(pass_yds) GROUP BY player_id`; verify leaders vs. fetched, duplicates.
+   - Task 2 complete.
+3. List issues and corrections based on fetched data.
+   - Task 3 complete.
+
+#### Roster Page Steps
+1. Browse https://test.sportsmockery.com/chicago-bears/roster; check wrong player count (e.g., >53), missing ages/statuses/bios/depth, outdated players.
+   - Task 1 complete.
+2. Query `SELECT COUNT(DISTINCT player_id) FROM bears_playergame WHERE game_id LIKE '[recent season]%'`; check vs. fetched ~53, duplicates.
+   - Task 2 complete.
+3. List issues and corrections based on fetched data.
+   - Task 3 complete.
+
+#### Players Page Steps
+1. Browse https://test.sportsmockery.com/chicago-bears/players; check only one player shown, inaccurate stats, no visible selector despite "Switch Player".
+   - Task 1 complete.
+2. Query for unique players; verify display logic vs. fetched roster.
+   - Task 2 complete.
+3. List issues and corrections based on fetched data.
+   - Task 3 complete.
+
+#### Individual Player Page Steps (caleb-williams)
+1. Browse https://test.sportsmockery.com/chicago-bears/players/caleb-williams; check wrong stats (e.g., mismatched yds/TDs), missing logs/news/videos.
+   - Task 1 complete.
+2. Query bears_playergame `WHERE player_id=[Williams ID]`; sum stats vs. fetched, check duplicates.
+   - Task 2 complete.
+3. List issues and corrections based on fetched data.
+   - Task 3 complete.
+
+**Audit for Chicago Bears complete.**
+
+### Chicago Bulls Audit Steps
+
+1. Web search: "Chicago Bulls current record and stats NBA.com"; browse top result (nba.com) and espn.com/nba/team/_/name/chi/chicago-bulls for cross-verification (record, player leaders like Giddey PPG, roster ~18, recent games).
+   - Task 1 complete.
+2. Verify: Compare sources for accuracy (e.g., current W-L, next game).
+   - Task 2 complete.
+
+#### Schedule Page Steps
+1. Browse https://test.sportsmockery.com/chicago-bulls/schedule; check wrong record, 0 games, no next at top/recent first, missing times/TV/streaks.
+   - Task 1 complete.
+2. Query `SELECT COUNT(*) FROM bulls_games_master WHERE season=(current season)`; check vs. fetched games played, duplicates.
+   - Task 2 complete.
+3. List issues and corrections based on fetched data.
+   - Task 3 complete.
+
+(Repeat similar structure for Scores, Stats, Roster, Players, Individual Player Page (zach-lavine), using bulls_games_master fields for verification.)
+
+**Audit for Chicago Bulls complete.**
+
+### Chicago Cubs Audit Steps
+
+1. Web search: "Chicago Cubs most recent season record and stats MLB.com"; browse mlb.com/cubs and espn.com/mlb/team/_/name/chc/chicago-cubs for cross-verification (last season record, leaders like Busch AVG/HR, roster ~40).
+   - Task 1 complete.
+2. Verify: Compare sources for accuracy.
+   - Task 2 complete.
+
+#### Schedule Page Steps
+1. Browse https://test.sportsmockery.com/chicago-cubs/schedule; check wrong record, 0 games, missing playoffs.
+   - Task 1 complete.
+2. Query `SELECT COUNT(*) FROM cubs_games_master WHERE season=(last season)`; check vs. fetched ~162+playoffs, duplicates.
+   - Task 2 complete.
+3. List issues and corrections based on fetched data.
+   - Task 3 complete.
+
+(Repeat for other Cubs pages using cubs_games_master.)
+
+**Audit for Chicago Cubs complete.**
+
+### Chicago White Sox Audit Steps
+
+1. Web search: "Chicago White Sox most recent season record and stats MLB.com"; browse mlb.com/whitesox and espn.com/mlb/team/_/name/chw/chicago-white-sox for cross-verification.
+   - Task 1 complete.
+2. Verify: Compare sources.
+   - Task 2 complete.
+
+(Repeat structure for White Sox pages using whitesox_games_master.)
+
+**Audit for Chicago White Sox complete.**
+
+### Chicago Blackhawks Audit Steps
+
+1. Web search: "Chicago Blackhawks current record and stats NHL.com"; browse nhl.com/blackhawks and espn.com/nhl/team/_/name/chi/chicago-blackhawks for cross-verification (current record, Bedard points, roster ~20, recent games).
+   - Task 1 complete.
+2. Verify: Compare sources (e.g., W-L-OT, next game).
+   - Task 2 complete.
+
+#### Schedule Page Steps
+1. Browse https://test.sportsmockery.com/chicago-blackhawks/schedule; check wrong record, 0 games, no next at top/recent first.
+   - Task 1 complete.
+2. Query `SELECT COUNT(*) FROM blackhawks_games_master WHERE season=(current season)`; check vs. fetched games played, duplicates.
+   - Task 2 complete.
+3. List issues and corrections based on fetched data.
+   - Task 3 complete.
+
+(Repeat for other Blackhawks pages using blackhawks_games_master.)
+
+**Audit for Chicago Blackhawks complete.**
+
+### Final Output Requirements
+
+After all teams, output:
+
+1. **Audit Summary** with overall issues across all teams
+2. **Response to Datalabs** formatted as:
+
+```
+Dear Datalabs Admins,
+
+Audit (using sources [list e.g., ESPN, NFL.com, NBA.com, NHL.com, MLB.com]) found:
+
+[list backend issues like missing rows in bears_games_master for 2025, duplicates in cubs_games_master, inaccurate sums in playergame tables]
+
+Suggested fixes:
+- UPDATE bears_games_master SET bears_score=24 WHERE game_id='2025-week1';
+- INSERT INTO bulls_games_master (game_id, ...) VALUES (...);
+- UPDATE cubs_seasons SET wins=92, losses=70 WHERE season=2025;
+- etc.
+
+No deletions proposed.
+
+Verification sources:
+- [URL 1]
+- [URL 2]
+
+Please confirm receipt and provide ETA for fixes.
+
+Regards,
+Claude Code (SM Frontend)
+```
+
+---
+
 ## Audit Checklist
 
 ### Pre-Audit Setup
@@ -523,4 +693,5 @@ After receiving Data Lab response:
 
 | Date | Changes | Author |
 |------|---------|--------|
-| 2025-01-25 | Initial creation | Claude Code |
+| 2026-01-25 | Added comprehensive Claude audit instructions with step-by-step methodology | Claude Code |
+| 2026-01-25 | Initial creation | Claude Code |
