@@ -492,13 +492,13 @@ export default function AskAIPage() {
                           <button
                             key={entry.id}
                             onClick={() => loadFromHistory(entry)}
-                            className="w-full text-left p-2 rounded-lg text-xs transition-colors hover:bg-[#bc0000]/10"
+                            className="w-full flex items-center justify-between gap-2 p-2 rounded-lg text-xs transition-colors hover:bg-[#bc0000]/10"
                             style={{ color: 'var(--text-primary)' }}
                           >
-                            <p className="font-medium truncate">{entry.query}</p>
-                            <p className="text-[10px] mt-0.5" style={{ color: 'var(--text-muted)' }}>
+                            <span className="font-medium truncate flex-1 text-left">{entry.query}</span>
+                            <span className="text-[10px] flex-shrink-0" style={{ color: 'var(--text-muted)' }}>
                               {new Date(entry.timestamp).toLocaleDateString()}
-                            </p>
+                            </span>
                           </button>
                         ))}
                         {queryHistory.length > 0 && (
