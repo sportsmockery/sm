@@ -886,8 +886,23 @@ export async function getBlackhawksRecord(season?: number): Promise<BlackhawksRe
   const losses = completedGames.filter(g => g.result === 'L').length
   const otLosses = completedGames.filter(g => g.result === 'OTL').length
 
+  // Debug: check for games with scores but wrong status
+  const gamesWithScores = schedule.filter(g => g.blackhawksScore !== null && g.blackhawksScore !== undefined)
+  const scheduledWithScores = gamesWithScores.filter(g => g.status === 'scheduled')
+  if (scheduledWithScores.length > 0) {
+    console.log(`WARNING: ${scheduledWithScores.length} games have scores but status='scheduled'`)
+    console.log(`Sample:`, scheduledWithScores.slice(0, 3).map(g => ({ date: g.date, score: `${g.blackhawksScore}-${g.oppScore}`, status: g.status })))
+  }
+
+  // Check for games before today with no scores
+  const today = new Date().toISOString().split('T')[0]
+  const pastGamesNoScore = schedule.filter(g => g.date < today && g.status === 'scheduled')
+  if (pastGamesNoScore.length > 0) {
+    console.log(`WARNING: ${pastGamesNoScore.length} past games have no scores (expected ~${51 - completedGames.length} based on ESPN)`)
+  }
+
   // Debug: log completed game details to understand record calculation
-  console.log(`Record calculation: ${completedGames.length} completed games out of ${schedule.length} total`)
+  console.log(`Record calculation: ${completedGames.length} completed games out of ${schedule.length} total (${gamesWithScores.length} have scores)`)
   console.log(`Results breakdown: W=${wins}, L=${losses}, OTL=${otLosses}`)
 
   // Sample some completed games to see their data
