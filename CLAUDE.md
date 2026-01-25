@@ -1,6 +1,6 @@
 # SportsMockery - Claude Project Knowledge Base
 
-> **Last Updated:** January 23, 2026
+> **Last Updated:** January 25, 2026
 > **Purpose:** This file contains everything Claude needs to know to work on this project.
 
 ---
@@ -65,72 +65,165 @@ Tailwind classes for colors/borders on buttons often get overridden by other CSS
 
 ---
 
-## Team Pages Data Verification (CRITICAL)
+## Team Pages (CRITICAL REFERENCE)
+
+When the user says "Team Pages", they mean the team hub pages at `/chicago-{team}/` with sub-pages for players, roster, schedule, scores, and stats for all 5 Chicago teams (Bears, Bulls, Blackhawks, Cubs, White Sox).
 
 **NEVER mark team pages as complete without verifying ALL data is displaying correctly.**
 
-### Data Layer Architecture
+### Data Flow Architecture
 
 ```
 Team Pages → Data Layer (src/lib/{team}Data.ts) → Datalab Supabase
 ```
 
-All team pages pull from Datalab. If stats are missing, the issue is either:
-1. **Wrong column names** in the query (most common)
-2. **Missing data** in Datalab tables
-3. **Wrong join column** (e.g., `game_id` vs `bears_game_id`)
+### Datalab Reference Document
 
-### Datalab Column Naming Convention
+The **authoritative** Datalab integration guide is at:
+`/Users/christopherburhans/Documents/projects/sm-data-lab/docs/SportsMockery_Integration_Guide.md`
 
-**CRITICAL: Datalab uses full prefixes, NOT abbreviations:**
+SM's reference doc is at: `/docs/Team_Pages_Query.md`
 
-| Wrong (will return null) | Correct |
-|--------------------------|---------|
-| `pass_cmp`, `pass_att` | `passing_cmp`, `passing_att` |
-| `rush_att`, `rush_yds` | `rushing_car`, `rushing_yds` |
-| `rec`, `rec_yds` | `receiving_rec`, `receiving_yds` |
-| `tackles`, `sacks` | `def_tackles_total`, `def_sacks` |
-| `fumbles` | `fum_fum` |
-| `game_id` | `bears_game_id` (for Bears player stats) |
+---
+
+### CRITICAL: Season Year Storage (Differs by Sport!)
+
+| Sport | Stored As | Jan 2026 Season Value | Example |
+|-------|-----------|----------------------|---------|
+| **NFL** | Starting year | `2025` | 2025-26 season = 2025 |
+| **NBA** | Starting year | `2025` | 2025-26 season = 2025 |
+| **NHL** | **ENDING year** | `2026` | 2025-26 season = **2026** |
+| **MLB** | Calendar year | `2025` (offseason) | 2025 season = 2025 |
+
+**NHL IS DIFFERENT!** Query Blackhawks with `season = 2026` for the 2025-26 season.
+
+---
+
+### CRITICAL: Active Roster Column Names
+
+| Team | Column Name | Note |
+|------|-------------|------|
+| Bears | `is_active` | |
+| Bulls | **`is_current_bulls`** | Different from others! |
+| Blackhawks | `is_active` | |
+| Cubs | `is_active` | Also check `data_status != 'needs_roster_review'` |
+| White Sox | `is_active` | Also check `data_status != 'needs_roster_review'` |
+
+---
+
+### CRITICAL: Player Stats Column Names by Sport
+
+#### NFL (Bears)
+```
+passing_cmp, passing_att, passing_yds, passing_td, passing_int
+rushing_car, rushing_yds, rushing_td
+receiving_rec, receiving_tgts, receiving_yds, receiving_td
+def_tackles_total, def_sacks, def_int
+fum_fum
+```
+**Foreign key:** `player_id` → `bears_players.id` (internal ID, NOT ESPN ID)
+**Game key:** `bears_game_id` (NOT `game_id`)
+
+#### NBA (Bulls)
+```
+points, total_rebounds, offensive_rebounds, defensive_rebounds
+assists, steals, blocks, turnovers, personal_fouls
+field_goals_made, field_goals_attempted
+three_pointers_made, three_pointers_attempted
+free_throws_made, free_throws_attempted
+minutes_played, plus_minus
+```
+
+#### NHL (Blackhawks)
+```
+goals, assists, points, plus_minus
+shots_on_goal, hits, blocked_shots
+saves, goals_against (goalie)
+```
+**OT Loss Logic:** `is_overtime = true` covers BOTH OT and shootout losses
+
+#### MLB (Cubs/White Sox)
+```
+-- Batting
+at_bats, hits, runs, rbi, home_runs, walks, strikeouts
+
+-- Pitching
+innings_pitched, hits_allowed, runs_allowed, earned_runs
+walks_allowed, strikeouts_pitched
+```
+
+---
+
+### Current Data Status (Jan 2026)
+
+| Team | Record | Roster Count | Notes |
+|------|--------|--------------|-------|
+| Bears | 11-6 (reg) + 1-1 (playoffs) | 81 | Season complete |
+| Bulls | 39-43+ (in progress) | 18 | 2025-26 season |
+| Blackhawks | 21-22-8 (51 pts) | 20 | 2025-26 season (query season=2026) |
+| Cubs | 98-74 | 35 | 2025 complete (offseason) |
+| White Sox | 61-106 | 35 | 2025 complete (offseason) |
+
+---
 
 ### Verification Checklist Before Marking Complete
 
-When working on team pages, verify EACH of these displays data:
-
 #### Scores Page (`/chicago-{team}/scores`)
 - [ ] Game selector shows all completed games
-- [ ] Passing stats table has data (CMP/ATT, YDS, TD, INT)
-- [ ] Rushing stats table has data (CAR, YDS, TD)
-- [ ] Receiving stats table has data (REC, TGTS, YDS, TD)
-- [ ] Defense stats table has data (TKL, SACK, INT)
+- [ ] Stats tables have data (not "No stats available")
+- [ ] Player names and photos display
 
 #### Players Page (`/chicago-{team}/players`)
-- [ ] Player list loads (not empty)
+- [ ] Player selector works
 - [ ] Player profile displays bio info
 - [ ] Season stats display (not "No stats recorded")
 
 #### Stats Page (`/chicago-{team}/stats`)
-- [ ] Team record is correct (matches official)
+- [ ] Team record matches official (check against espn.com)
 - [ ] Leaderboards have players with stats
 
 #### Schedule Page (`/chicago-{team}/schedule`)
 - [ ] Games display (not "0 games")
 - [ ] Completed games show scores
 
+---
+
 ### How to Debug Missing Stats
 
-1. **Check the API response**: Open browser DevTools → Network → find the API call
-2. **Check column names**: Compare query columns in `{team}Data.ts` with Datalab schema
-3. **Check join columns**: Ensure foreign keys match (e.g., `player_id` → internal ID)
-4. **Test in Datalab**: Run the SQL query directly in Supabase to verify data exists
+1. **Check the API response**: Browser DevTools → Network → find the API call
+2. **Check column names**: Compare with list above
+3. **Check join columns**: `player_id` must match `{team}_players.id` (internal ID)
+4. **Check season value**: Use correct year per sport (NHL = ending year!)
+5. **Test in Datalab**: Run SQL directly in Supabase dashboard
 
-### Reference Documentation
+---
 
-See `/docs/Team_Pages_Query.md` for:
-- Complete table schemas for all 5 teams
-- Required columns and data types
-- Season determination logic
-- Error prevention protocols
+### Live Games (10-Second Polling)
+
+During live games, Datalab updates every 10 seconds. SM must poll at the same rate.
+
+| Table | Purpose |
+|-------|---------|
+| `live_games_registry` | Active games across all sports |
+| `{team}_games_live` | Live scores, quarter/period, time |
+| `{team}_player_stats_live` | Live player stats |
+
+```javascript
+const LIVE_POLL_INTERVAL = 10_000    // During live games
+const STANDARD_POLL_INTERVAL = 60_000 // No live games
+```
+
+---
+
+### Tables Reference
+
+| Team | Games | Players | Stats | Seasons |
+|------|-------|---------|-------|---------|
+| Bears | `bears_games_master` | `bears_players` | `bears_player_game_stats` | `bears_season_record` |
+| Bulls | `bulls_games_master` | `bulls_players` | `bulls_player_game_stats` | `bulls_seasons` |
+| Blackhawks | `blackhawks_games_master` | `blackhawks_players` | `blackhawks_player_game_stats` | `blackhawks_seasons` |
+| Cubs | `cubs_games_master` | `cubs_players` | `cubs_player_game_stats` | `cubs_seasons` |
+| White Sox | `whitesox_games_master` | `whitesox_players` | `whitesox_player_game_stats` | `whitesox_seasons` |
 
 ---
 
