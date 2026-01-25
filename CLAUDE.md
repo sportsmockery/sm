@@ -88,6 +88,8 @@ SM's reference doc is at: `/docs/Team_Pages_Query.md`
 
 ### CRITICAL: Season Year Storage (Differs by Sport!)
 
+**CONFIRMED BY DATALAB (Jan 25, 2026)**
+
 | Sport | Stored As | Jan 2026 Season Value | Example |
 |-------|-----------|----------------------|---------|
 | **NFL** | Starting year | `2025` | 2025-26 season = 2025 |
@@ -97,7 +99,7 @@ SM's reference doc is at: `/docs/Team_Pages_Query.md`
 
 **NBA AND NHL USE ENDING YEAR!** Query Bulls and Blackhawks with `season = 2026` for the 2025-26 season.
 
-There is NO `season_start_year` column in Blackhawks tables - use `season` only.
+**CONFIRMED:** There is NO `season_start_year` column in any tables - use `season` only.
 
 ---
 
@@ -142,9 +144,9 @@ goals, assists, points, plus_minus
 shots_on_goal, hits, blocked_shots
 saves, goals_against (goalie)
 ```
-**OT Loss Logic:** Use ONLY `is_overtime = true` (covers both OT and shootout losses):
+**OT Loss Logic (CONFIRMED BY DATALAB):** Use ONLY `is_overtime = true` (covers both OT and shootout losses):
 ```sql
--- OT Losses (includes shootout)
+-- OT Losses (includes shootout) - returns the 8 OTL in 21-22-8 record
 WHERE blackhawks_win = false AND is_overtime = true
 ```
 
@@ -170,7 +172,7 @@ walks_allowed, strikeouts_pitched
 | Cubs | 98-74 | 35 | `season = 2025` | Offseason |
 | White Sox | 61-106 | 35 | `season = 2025` | Offseason |
 
-**Bears roster of 81** includes: 53 active + 16 practice squad + ~12 IR/other. Display all.
+**Bears roster of 81 (CONFIRMED BY DATALAB):** 53 active + 16 practice squad + ~12 IR/other. Display all - there's no column to filter further.
 
 ---
 
