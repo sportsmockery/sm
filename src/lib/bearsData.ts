@@ -662,28 +662,6 @@ export async function getBearsSchedule(season?: number): Promise<BearsGame[]> {
 async function getBearsScheduleFromDatalab(season: number): Promise<BearsGame[]> {
   if (!datalabAdmin) return []
 
-  // First, check what game_type values exist in the database
-  const { data: sampleData } = await datalabAdmin
-    .from('bears_games_master')
-    .select('game_type, season')
-    .eq('season', season)
-    .limit(10)
-
-  if (sampleData && sampleData.length > 0) {
-    const gameTypes = [...new Set(sampleData.map((g: any) => g.game_type))]
-    console.log(`Bears game_type values in DB for season ${season}: ${JSON.stringify(gameTypes)}`)
-  } else {
-    console.log(`No Bears games found for season ${season}, checking what seasons exist...`)
-    const { data: seasonSample } = await datalabAdmin
-      .from('bears_games_master')
-      .select('season, game_type')
-      .limit(10)
-    if (seasonSample) {
-      const seasons = [...new Set(seasonSample.map((g: any) => g.season))]
-      console.log(`Bears available seasons: ${JSON.stringify(seasons)}`)
-    }
-  }
-
   // Query for all games in the season - use select('*') to avoid column mismatch issues
   const { data, error } = await datalabAdmin
     .from('bears_games_master')
@@ -698,22 +676,15 @@ async function getBearsScheduleFromDatalab(season: number): Promise<BearsGame[]>
 
   // If no games in current season, fall back to previous season (off-season)
   if (!data || data.length === 0) {
-    console.log(`No Bears games found for season ${season}, trying ${season - 1}`)
     const { data: prevData, error: prevError } = await datalabAdmin
       .from('bears_games_master')
       .select('*')
       .eq('season', season - 1)
       .order('game_date', { ascending: true })
 
-    if (prevError || !prevData) {
-      console.log(`No Bears games found for season ${season - 1} either`)
-      return []
-    }
-    console.log(`Found ${prevData.length} Bears games for season ${season - 1}`)
+    if (prevError || !prevData) return []
     return prevData.map((g: any) => transformGame(g, null))
   }
-
-  console.log(`Found ${data.length} Bears games for season ${season}`)
   return data.map((g: any) => transformGame(g, null))
 }
 
@@ -1099,16 +1070,6 @@ export async function getBearsSeparatedRecord(season?: number): Promise<BearsSep
   const postLosses = postGames.filter(g => g.result === 'L').length
 
   // VALIDATION: Expected from ESPN - Bears 2025: Regular 11-6 (1st NFC North), Post 1-1
-  const expectedRegular = { wins: 11, losses: 6 }
-  const expectedPost = { wins: 1, losses: 1 }
-  if (regWins !== expectedRegular.wins || regLosses !== expectedRegular.losses) {
-    console.log(`Supabase mismatch: Expected Bears regular ${expectedRegular.wins}-${expectedRegular.losses}, got ${regWins}-${regLosses}`)
-  }
-  if (postWins !== expectedPost.wins || postLosses !== expectedPost.losses) {
-    console.log(`Supabase mismatch: Expected Bears postseason ${expectedPost.wins}-${expectedPost.losses}, got ${postWins}-${postLosses}`)
-  }
-  console.log("Task 1 complete: Bears record validation added")
-
   // Get division rank from Datalab if available
   let divisionRank: string | null = null
   if (datalabAdmin) {
