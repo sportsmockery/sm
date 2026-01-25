@@ -318,8 +318,10 @@ export async function getPlayerProfile(slug: string): Promise<PlayerProfile | nu
 
   if (!player) return null
 
-  const seasons = await getPlayerSeasonStats(player.internalId, player.positionGroup === 'pitchers')
-  const gameLog = await getPlayerGameLog(player.internalId)
+  // Use playerId (ESPN ID) since stats tables use ESPN IDs in player_id column
+  const espnId = player.playerId
+  const seasons = await getPlayerSeasonStats(espnId, player.positionGroup === 'pitchers')
+  const gameLog = await getPlayerGameLog(espnId)
 
   const currentYear = getCurrentSeason()
   const currentSeason = seasons.find(s => s.season === currentYear) ||
@@ -334,7 +336,7 @@ export async function getPlayerProfile(slug: string): Promise<PlayerProfile | nu
   }
 }
 
-async function getPlayerSeasonStats(internalId: number, isPitcher: boolean): Promise<PlayerSeasonStats[]> {
+async function getPlayerSeasonStats(espnId: string, isPitcher: boolean): Promise<PlayerSeasonStats[]> {
   if (!datalabAdmin) return []
 
   const { data, error } = await datalabAdmin
@@ -361,7 +363,7 @@ async function getPlayerSeasonStats(internalId: number, isPitcher: boolean): Pro
       loss,
       save
     `)
-    .eq('player_id', internalId)
+    .eq('player_id', espnId)
     .eq('season', getCurrentSeason())
 
   if (error || !data || data.length === 0) return []
@@ -436,7 +438,7 @@ async function getPlayerSeasonStats(internalId: number, isPitcher: boolean): Pro
   }]
 }
 
-async function getPlayerGameLog(internalId: number): Promise<PlayerGameLogEntry[]> {
+async function getPlayerGameLog(espnId: string): Promise<PlayerGameLogEntry[]> {
   if (!datalabAdmin) return []
 
   const { data, error } = await datalabAdmin
@@ -470,7 +472,7 @@ async function getPlayerGameLog(internalId: number): Promise<PlayerGameLogEntry[
         season
       )
     `)
-    .eq('player_id', internalId)
+    .eq('player_id', espnId)
     .eq('season', getCurrentSeason())
     .order('game_date', { ascending: false })
     .limit(20)
@@ -711,7 +713,8 @@ async function getLeaderboards(season: number): Promise<WhiteSoxLeaderboard> {
   }
 
   const players = await getWhiteSoxPlayers()
-  const playersMap = new Map(players.map(p => [p.internalId, p]))
+  // Use playerId (ESPN ID) as key since stats tables use ESPN IDs
+  const playersMap = new Map(players.map(p => [p.playerId, p]))
 
   // Get all game stats for season and aggregate by player
   let { data: gameStats } = await datalabAdmin
@@ -756,8 +759,8 @@ async function getLeaderboards(season: number): Promise<WhiteSoxLeaderboard> {
     return { batting: [], homeRuns: [], pitching: [], saves: [] }
   }
 
-  // Aggregate stats by player
-  const playerTotals = new Map<number, any>()
+  // Aggregate stats by player (keyed by ESPN ID which is a string)
+  const playerTotals = new Map<string, any>()
 
   for (const stat of gameStats) {
     const pid = stat.player_id

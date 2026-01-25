@@ -21,13 +21,18 @@ const TEAM_PAGES = [
 
 const SUBPAGES = ['', '/schedule', '/scores', '/stats', '/roster', '/players']
 
-// Correct table/column names from TeamPages_Audit.md
+// Correct table/column names and ESPN ID mapping documentation
+// CRITICAL: Stats tables use ESPN ID in player_id column
+// Players tables have ESPN ID in espn_id column (or player_id for some teams)
+// JOIN PATTERN: players.espn_id = stats.player_id (NOT players.id = stats.player_id)
 const AUDIT_CONFIG = {
   bears: {
     recordTable: 'bears_season_record', // NOT bears_seasons
     gamesTable: 'bears_games_master',
     rosterTable: 'bears_players',
+    statsTable: 'bears_player_game_stats',
     rosterActiveColumn: 'is_active',
+    espnIdColumn: 'espn_id', // Column in players table that maps to stats.player_id
     season: 2025, // NFL uses starting year
     expectedRosterRange: [53, 90], // roster + practice squad
   },
@@ -35,7 +40,9 @@ const AUDIT_CONFIG = {
     recordTable: 'bulls_seasons',
     gamesTable: 'bulls_games_master',
     rosterTable: 'bulls_players',
+    statsTable: 'bulls_player_game_stats',
     rosterActiveColumn: 'is_current_bulls', // NOT is_active
+    espnIdColumn: 'espn_id',
     season: 2026, // NBA uses ending year
     expectedRosterRange: [15, 20],
   },
@@ -43,8 +50,10 @@ const AUDIT_CONFIG = {
     recordTable: 'blackhawks_seasons',
     gamesTable: 'blackhawks_games_master',
     rosterTable: 'blackhawks_players',
+    statsTable: 'blackhawks_player_game_stats',
     rosterActiveColumn: 'is_active',
     otlColumn: 'otl', // NOT ot_losses
+    espnIdColumn: 'espn_id',
     season: 2026, // NHL uses ending year
     expectedRosterRange: [20, 25],
   },
@@ -52,7 +61,9 @@ const AUDIT_CONFIG = {
     recordTable: 'cubs_seasons',
     gamesTable: 'cubs_games_master',
     rosterTable: 'cubs_players',
+    statsTable: 'cubs_player_game_stats',
     rosterActiveColumn: 'is_active',
+    espnIdColumn: 'espn_id',
     season: 2025, // MLB uses calendar year
     expectedRosterRange: [26, 45],
   },
@@ -60,7 +71,9 @@ const AUDIT_CONFIG = {
     recordTable: 'whitesox_seasons',
     gamesTable: 'whitesox_games_master',
     rosterTable: 'whitesox_players',
+    statsTable: 'whitesox_player_game_stats',
     rosterActiveColumn: 'is_active',
+    espnIdColumn: 'espn_id',
     season: 2025, // MLB uses calendar year
     expectedRosterRange: [26, 45],
   },
@@ -75,6 +88,9 @@ interface HealthCheckResult {
     gamesCount: number
     rosterCount: number
     rosterInRange: boolean
+    statsCount: number
+    playersWithStats: number
+    espnIdMappingOk: boolean
     issues: string[]
   }
   overallStatus: 'healthy' | 'warning' | 'error'
@@ -208,6 +224,9 @@ async function runTeamHealthCheck(team: string, key: string): Promise<HealthChec
   let recordTableExists = false
   let gamesCount = 0
   let rosterCount = 0
+  let statsCount = 0
+  let playersWithStats = 0
+  let espnIdMappingOk = false
 
   // Check record table exists
   try {
@@ -262,6 +281,56 @@ async function runTeamHealthCheck(team: string, key: string): Promise<HealthChec
     issues.push(`Roster count ${rosterCount} outside expected range [${minRoster}-${maxRoster}]`)
   }
 
+  // Check stats count and ESPN ID mapping
+  // CRITICAL: Stats tables use ESPN ID in player_id column
+  // This verifies the join between players and stats tables works correctly
+  try {
+    // Get stats count for season
+    const { count: rawStatsCount, error: statsError } = await datalabClient
+      .from(config.statsTable)
+      .select('*', { count: 'exact', head: true })
+      .eq('season', config.season)
+
+    statsCount = rawStatsCount || 0
+    if (statsError) {
+      issues.push(`Stats table error: ${statsError.message}`)
+    }
+
+    // Verify ESPN ID mapping: count how many players have matching stats
+    // This is the critical check that validates our join pattern works
+    if (statsCount > 0) {
+      // Get unique player_ids from stats table
+      const { data: statsPlayerIds } = await datalabClient
+        .from(config.statsTable)
+        .select('player_id')
+        .eq('season', config.season)
+        .limit(1000)
+
+      // Get ESPN IDs from players table
+      const { data: playerEspnIds } = await datalabClient
+        .from(config.rosterTable)
+        .select(`${config.espnIdColumn}`)
+        .eq(config.rosterActiveColumn, true)
+
+      if (statsPlayerIds && playerEspnIds) {
+        const statsIds = new Set(statsPlayerIds.map((s: any) => String(s.player_id)))
+        const espnIds = new Set(playerEspnIds.map((p: any) => String(p[config.espnIdColumn])))
+
+        // Count how many ESPN IDs from players table exist in stats table
+        playersWithStats = [...espnIds].filter(id => statsIds.has(id)).length
+
+        // ESPN ID mapping is OK if at least 50% of active players have stats
+        espnIdMappingOk = rosterCount > 0 && (playersWithStats / rosterCount) >= 0.5
+
+        if (!espnIdMappingOk && rosterCount > 0) {
+          issues.push(`ESPN ID mapping issue: only ${playersWithStats}/${rosterCount} active players have matching stats`)
+        }
+      }
+    }
+  } catch (e) {
+    issues.push(`Stats/ESPN ID check failed: ${e instanceof Error ? e.message : 'Unknown'}`)
+  }
+
   // Determine overall status
   let overallStatus: 'healthy' | 'warning' | 'error' = 'healthy'
   if (issues.length > 0) {
@@ -281,6 +350,9 @@ async function runTeamHealthCheck(team: string, key: string): Promise<HealthChec
       gamesCount,
       rosterCount,
       rosterInRange,
+      statsCount,
+      playersWithStats,
+      espnIdMappingOk,
       issues,
     },
     overallStatus,

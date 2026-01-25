@@ -1,6 +1,6 @@
 # SportsMockery - Claude Project Knowledge Base
 
-> **Last Updated:** January 25, 2026
+> **Last Updated:** January 25, 2026 (ESPN ID fix applied)
 > **Purpose:** This file contains everything Claude needs to know to work on this project.
 
 ---
@@ -115,6 +115,40 @@ SM's reference doc is at: `/docs/Team_Pages_Query.md`
 
 ---
 
+### CRITICAL: ESPN ID Mapping (FIXED Jan 25, 2026)
+
+**ALL stats tables use ESPN ID in `player_id` column, NOT internal database ID!**
+
+```
+Player Tables:    {team}_players.espn_id (or .player_id) = ESPN ID string
+Stats Tables:     {team}_player_game_stats.player_id = ESPN ID string
+Internal ID:      {team}_players.id = auto-increment integer (NEVER use for stats join)
+```
+
+**CORRECT JOIN PATTERN:**
+```typescript
+// In data layer files (src/lib/{team}Data.ts):
+const espnId = player.playerId  // This is the ESPN ID from player.espn_id
+const stats = await query.from('stats_table').eq('player_id', espnId)
+```
+
+**WRONG JOIN PATTERN (FIXED):**
+```typescript
+// This was BROKEN - internalId is the database auto-increment ID
+const stats = await query.from('stats_table').eq('player_id', player.internalId)
+```
+
+**Player Interface Structure:**
+```typescript
+interface Player {
+  playerId: string    // ESPN ID (use for stats queries)
+  internalId: number  // Database ID (NEVER use for stats queries)
+  // ... other fields
+}
+```
+
+---
+
 ### CRITICAL: Player Stats Column Names by Sport
 
 #### NFL (Bears)
@@ -125,7 +159,7 @@ receiving_rec, receiving_tgts, receiving_yds, receiving_td
 def_tackles_total, def_sacks, def_int
 fum_fum
 ```
-**Foreign key:** `player_id` → `bears_players.id` (internal ID, NOT ESPN ID)
+**Foreign key:** `player_id` → ESPN ID (NOT `bears_players.id`)
 **Game key:** `bears_game_id` (NOT `game_id`)
 
 #### NBA (Bulls)
@@ -353,6 +387,63 @@ When encountering data issues, communicate with Data Lab using this format:
 
 ---
 
+## Team Pages Health Check Cron Job
+
+**Endpoint:** `/api/cron/team-pages-health`
+**Schedule:** Every hour at minute 15 (`15 * * * *`)
+**Admin Dashboard:** `/admin/team-pages-sync`
+
+### What It Checks
+
+1. **HTTP Status**: All team page URLs return 200
+2. **Record Table**: Season record exists for current season
+3. **Games Count**: Games exist for current season
+4. **Roster Count**: Active players within expected range
+5. **Stats Count**: Player stats exist for current season
+6. **ESPN ID Mapping**: Verifies player-to-stats join works correctly
+
+### ESPN ID Mapping Check
+
+The cron job validates that ESPN IDs from the players table can be found in the stats table:
+
+```typescript
+// If < 50% of active players have matching stats, it reports an error:
+"ESPN ID mapping issue: only X/Y active players have matching stats"
+```
+
+### Expected Roster Ranges
+
+| Team | Min | Max | Notes |
+|------|-----|-----|-------|
+| Bears | 53 | 90 | Roster + practice squad |
+| Bulls | 15 | 20 | NBA roster |
+| Blackhawks | 20 | 25 | NHL roster |
+| Cubs | 26 | 45 | 40-man roster |
+| White Sox | 26 | 45 | 40-man roster |
+
+### Key Files
+
+| File | Purpose |
+|------|---------|
+| `/src/app/api/cron/team-pages-health/route.ts` | Cron endpoint |
+| `/src/app/admin/team-pages-sync/page.tsx` | Admin dashboard |
+| `/vercel.json` | Cron schedule configuration |
+
+### Adding to vercel.json
+
+```json
+{
+  "crons": [
+    {
+      "path": "/api/cron/team-pages-health",
+      "schedule": "15 * * * *"
+    }
+  ]
+}
+```
+
+---
+
 ## Scout AI - Chicago Sports AI Assistant
 
 **Scout AI** is the AI-powered sports assistant for Chicago sports questions. When the user mentions "Scout", "Scout AI", "the AI model", or "query AI", they are referring to this system.
@@ -393,6 +484,183 @@ See `/AskAI_Wrong.md` for documented failures:
 1. Citation markers [1][2][3] appearing in responses
 2. Player name typo handling needs improvement
 3. Database errors sometimes leak to user responses
+
+---
+
+## Frontend Error Logging System (CRITICAL)
+
+**USE THIS FOR ALL FRONTEND ERRORS** - Scout AI, API calls, data fetching, etc.
+
+A shared `scout_errors` table exists in Supabase for logging frontend errors. This enables debugging between frontend and Data Lab teams.
+
+### Error Logging Utility
+
+**Location:** `src/lib/scoutErrorLogger.ts`
+
+```typescript
+import { createClient } from '@supabase/supabase-js'
+
+export type FrontendErrorType = 'timeout' | 'cors' | 'parse' | 'network' | 'api' | 'unknown'
+
+interface LogErrorParams {
+  errorType: FrontendErrorType
+  errorMessage: string
+  userQuery?: string
+  sessionId?: string
+  responseTimeMs?: number
+  requestPayload?: Record<string, unknown>
+  responsePayload?: Record<string, unknown>
+  metadata?: Record<string, unknown>
+}
+
+export async function logFrontendError(params: LogErrorParams): Promise<void> {
+  try {
+    const supabase = createClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+    )
+
+    await supabase.from('scout_errors').insert({
+      source: 'frontend',
+      error_type: params.errorType,
+      error_message: params.errorMessage,
+      user_query: params.userQuery,
+      session_id: params.sessionId,
+      response_time_ms: params.responseTimeMs,
+      request_payload: params.requestPayload,
+      response_payload: params.responsePayload,
+      user_agent: typeof navigator !== 'undefined' ? navigator.userAgent : null,
+      metadata: params.metadata,
+    })
+  } catch (e) {
+    console.error('[Error Logger] Failed:', e)
+  }
+}
+
+export function getErrorType(error: unknown): FrontendErrorType {
+  if (error instanceof Error) {
+    const msg = error.message.toLowerCase()
+    if (msg.includes('timeout') || msg.includes('aborted')) return 'timeout'
+    if (msg.includes('cors')) return 'cors'
+    if (msg.includes('json') || msg.includes('parse')) return 'parse'
+    if (msg.includes('network') || msg.includes('fetch')) return 'network'
+  }
+  return 'unknown'
+}
+```
+
+### Error Types (Use Consistently)
+
+| Type | When to Use |
+|------|-------------|
+| `timeout` | Request exceeded time limit |
+| `cors` | CORS policy blocked request |
+| `parse` | Failed to parse JSON response |
+| `network` | Network connection failed |
+| `api` | API returned error response (4xx/5xx) |
+| `unknown` | Any other error |
+
+### Usage Pattern
+
+**Wrap ALL API calls with error logging:**
+
+```typescript
+import { logFrontendError, getErrorType } from '@/lib/scoutErrorLogger'
+
+async function fetchData(query: string) {
+  const startTime = Date.now()
+
+  try {
+    const response = await fetch('/api/endpoint', {
+      method: 'POST',
+      body: JSON.stringify({ query }),
+    })
+
+    if (!response.ok) {
+      await logFrontendError({
+        errorType: 'api',
+        errorMessage: `HTTP ${response.status}`,
+        userQuery: query,
+        responseTimeMs: Date.now() - startTime,
+      })
+      throw new Error(`API error: ${response.status}`)
+    }
+
+    return await response.json()
+
+  } catch (error) {
+    await logFrontendError({
+      errorType: getErrorType(error),
+      errorMessage: error instanceof Error ? error.message : String(error),
+      userQuery: query,
+      responseTimeMs: Date.now() - startTime,
+    })
+    throw error
+  }
+}
+```
+
+### Viewing Errors
+
+```sql
+-- Recent frontend errors
+SELECT created_at, error_type, error_message, user_query, response_time_ms
+FROM scout_errors
+WHERE source = 'frontend'
+ORDER BY created_at DESC
+LIMIT 20;
+
+-- Error counts by type (last 24h)
+SELECT error_type, COUNT(*) as count
+FROM scout_errors
+WHERE source = 'frontend' AND created_at > NOW() - INTERVAL '24 hours'
+GROUP BY error_type;
+
+-- Slow requests (over 10s)
+SELECT * FROM scout_errors
+WHERE response_time_ms > 10000
+ORDER BY created_at DESC;
+```
+
+### Table Schema
+
+```sql
+CREATE TABLE scout_errors (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  created_at TIMESTAMPTZ DEFAULT now(),
+  source TEXT NOT NULL,           -- 'frontend' or 'backend'
+  error_type TEXT NOT NULL,       -- timeout, cors, parse, network, api, unknown
+  error_message TEXT,
+  user_query TEXT,
+  session_id TEXT,
+  response_time_ms INTEGER,
+  request_payload JSONB,
+  response_payload JSONB,
+  user_agent TEXT,
+  metadata JSONB
+);
+```
+
+### Key Files
+
+| File | Purpose |
+|------|---------|
+| `src/lib/scoutErrorLogger.ts` | Error logging utility |
+| `/docs/Scout_Log/` | Debug session logs |
+| `/docs/Scout_Log/INTEGRATION_INSTRUCTIONS_TESTSM.md` | Full integration guide |
+
+### When to Log Errors
+
+**ALWAYS log errors for:**
+- Scout AI queries
+- Team pages data fetching
+- Any API route failures
+- External service calls (Data Lab, etc.)
+
+**DON'T log:**
+- User validation errors (empty form fields, etc.)
+- Expected "no results" responses
+- Client-side navigation errors
 
 ---
 

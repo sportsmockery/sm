@@ -40,6 +40,7 @@ export default function AskAIPage() {
   const [input, setInput] = useState('')
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [sessionId, setSessionId] = useState<string | undefined>(undefined)
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const messagesContainerRef = useRef<HTMLDivElement>(null)
 
@@ -99,10 +100,10 @@ export default function AskAIPage() {
     setError(null)
 
     try {
-      const response = await fetch('/api/scout-ai', {
+      const response = await fetch('/api/ask-ai', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ query: userMessage.content }),
+        body: JSON.stringify({ query: userMessage.content, sessionId }),
       })
 
       const data = await response.json()
@@ -118,6 +119,11 @@ export default function AskAIPage() {
         }
         setMessages((prev) => [...prev, errorMessage])
         return
+      }
+
+      // Save session ID for follow-up context (pronoun resolution)
+      if (data.sessionId) {
+        setSessionId(data.sessionId)
       }
 
       const aiMessage: Message = {

@@ -315,8 +315,10 @@ export async function getPlayerProfile(slug: string): Promise<PlayerProfile | nu
 
   if (!player) return null
 
-  const seasons = await getPlayerSeasonStats(player.internalId)
-  const gameLog = await getPlayerGameLog(player.internalId)
+  // Use playerId (ESPN ID) since stats tables use ESPN IDs in player_id column
+  const espnId = player.playerId
+  const seasons = await getPlayerSeasonStats(espnId)
+  const gameLog = await getPlayerGameLog(espnId)
 
   // Current season (2024-25 season stored as 2025)
   const currentYear = getCurrentSeason()
@@ -332,7 +334,7 @@ export async function getPlayerProfile(slug: string): Promise<PlayerProfile | nu
   }
 }
 
-async function getPlayerSeasonStats(internalId: number): Promise<PlayerSeasonStats[]> {
+async function getPlayerSeasonStats(espnId: string): Promise<PlayerSeasonStats[]> {
   if (!datalabAdmin) return []
 
   // Use actual column names from database
@@ -354,7 +356,7 @@ async function getPlayerSeasonStats(internalId: number): Promise<PlayerSeasonSta
       free_throws_made,
       free_throws_attempted
     `)
-    .eq('player_id', internalId)
+    .eq('player_id', espnId)
     .eq('season', getCurrentSeason())
 
   if (error || !data || data.length === 0) return []
@@ -407,7 +409,7 @@ async function getPlayerSeasonStats(internalId: number): Promise<PlayerSeasonSta
   }]
 }
 
-async function getPlayerGameLog(internalId: number): Promise<PlayerGameLogEntry[]> {
+async function getPlayerGameLog(espnId: string): Promise<PlayerGameLogEntry[]> {
   if (!datalabAdmin) return []
 
   // Use actual column names from database
@@ -433,7 +435,7 @@ async function getPlayerGameLog(internalId: number): Promise<PlayerGameLogEntry[
       free_throws_made,
       free_throws_attempted
     `)
-    .eq('player_id', internalId)
+    .eq('player_id', espnId)
     .eq('season', getCurrentSeason())
     .order('game_date', { ascending: false })
     .limit(20)
@@ -680,7 +682,8 @@ async function getLeaderboards(season: number): Promise<BullsLeaderboard> {
   }
 
   const players = await getBullsPlayers()
-  const playersMap = new Map(players.map(p => [p.internalId, p]))
+  // Use playerId (ESPN ID) as key since stats tables use ESPN IDs
+  const playersMap = new Map(players.map(p => [p.playerId, p]))
 
   // Get all game stats for season and aggregate by player
   // Note: Column is 'total_rebounds' in the database, not 'rebounds'
@@ -716,8 +719,8 @@ async function getLeaderboards(season: number): Promise<BullsLeaderboard> {
     return { scoring: [], rebounding: [], assists: [], defense: [] }
   }
 
-  // Aggregate stats by player
-  const playerTotals = new Map<number, any>()
+  // Aggregate stats by player (keyed by ESPN ID which is a string)
+  const playerTotals = new Map<string, any>()
 
   for (const stat of gameStats) {
     const pid = stat.player_id

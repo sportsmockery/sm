@@ -413,11 +413,12 @@ export async function getPlayerProfile(slug: string): Promise<PlayerProfile | nu
 
   if (!player) return null
 
-  // Get season stats using internal ID (used by game stats table)
-  const seasons = await getPlayerSeasonStats(player.internalId)
+  // Use playerId (ESPN ID) since stats tables use ESPN IDs in player_id column
+  const espnId = player.playerId
+  const seasons = await getPlayerSeasonStats(espnId)
 
   // Get game log
-  const gameLog = await getPlayerGameLog(player.internalId)
+  const gameLog = await getPlayerGameLog(espnId)
 
   // Current season (2024 or most recent)
   const currentYear = new Date().getFullYear()
@@ -433,17 +434,17 @@ export async function getPlayerProfile(slug: string): Promise<PlayerProfile | nu
   }
 }
 
-async function getPlayerSeasonStats(internalId: number): Promise<PlayerSeasonStats[]> {
+async function getPlayerSeasonStats(espnId: string): Promise<PlayerSeasonStats[]> {
   // Always use Datalab - aggregate from game stats for accurate data
-  return await getPlayerSeasonStatsFromDatalab(internalId)
+  return await getPlayerSeasonStatsFromDatalab(espnId)
 }
 
-async function getPlayerSeasonStatsFromDatalab(internalId: number): Promise<PlayerSeasonStats[]> {
+async function getPlayerSeasonStatsFromDatalab(espnId: string): Promise<PlayerSeasonStats[]> {
   if (!datalabAdmin) return []
 
   // Aggregate from game stats for accurate data
   // Per SM_INTEGRATION_GUIDE.md: Use correct column names from datalab schema
-  // Use internal ID since that's what game stats reference
+  // Stats tables use ESPN ID in player_id column
   // Use actual column names from database schema
   const { data, error } = await datalabAdmin
     .from('bears_player_game_stats')
@@ -466,7 +467,7 @@ async function getPlayerSeasonStatsFromDatalab(internalId: number): Promise<Play
       def_tackles_total,
       interceptions
     `)
-    .eq('player_id', internalId)
+    .eq('player_id', espnId)
     .eq('season', 2025)
 
   if (error || !data || data.length === 0) return []
@@ -562,12 +563,12 @@ function transformSeasonStats(data: any[]): PlayerSeasonStats[] {
   }))
 }
 
-async function getPlayerGameLog(internalId: number): Promise<PlayerGameLogEntry[]> {
+async function getPlayerGameLog(espnId: string): Promise<PlayerGameLogEntry[]> {
   // Always use Datalab as source of truth
-  return await getPlayerGameLogFromDatalab(internalId)
+  return await getPlayerGameLogFromDatalab(espnId)
 }
 
-async function getPlayerGameLogFromDatalab(internalId: number): Promise<PlayerGameLogEntry[]> {
+async function getPlayerGameLogFromDatalab(espnId: string): Promise<PlayerGameLogEntry[]> {
   if (!datalabAdmin) return []
 
   // Use actual column names from database schema
@@ -596,7 +597,7 @@ async function getPlayerGameLogFromDatalab(internalId: number): Promise<PlayerGa
       opponent,
       is_home
     `)
-    .eq('player_id', internalId)
+    .eq('player_id', espnId)
     .eq('season', 2025)
     .order('game_date', { ascending: false })
     .limit(20)
@@ -896,8 +897,8 @@ async function getLeaderboards(season: number): Promise<BearsLeaderboard> {
   }
 
   const players = await getBearsPlayers()
-  // Key by internalId since game stats use the internal DB ID, not ESPN ID
-  const playersMap = new Map(players.map(p => [p.internalId, p]))
+  // Use playerId (ESPN ID) as key since stats tables use ESPN IDs
+  const playersMap = new Map(players.map(p => [p.playerId, p]))
 
   // Aggregate from bears_player_game_stats using actual column names from database
   // Columns: passing_yds, passing_td, passing_int, rushing_yds, rushing_td, rushing_car,
@@ -948,11 +949,11 @@ async function getLeaderboards(season: number): Promise<BearsLeaderboard> {
     return { passing: [], rushing: [], receiving: [], defense: [] }
   }
 
-  // Aggregate stats by player (using internal ID which is a number)
-  const playerTotals = new Map<number, any>()
+  // Aggregate stats by player (keyed by ESPN ID which is a string)
+  const playerTotals = new Map<string, any>()
 
   for (const stat of gameStats) {
-    const pid = stat.player_id  // Internal ID as number
+    const pid = stat.player_id  // ESPN ID as string
     if (!playerTotals.has(pid)) {
       playerTotals.set(pid, {
         player_id: pid,
