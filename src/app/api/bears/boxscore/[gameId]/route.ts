@@ -123,26 +123,26 @@ export async function GET(
     }
 
     // Get player stats for this game
-    // Column names match datalab schema: pass_*, rush_*, rec_*, etc.
+    // Column names match actual datalab schema: passing_*, rushing_*, receiving_*, def_*
     const { data: playerStats, error: statsError } = await datalabAdmin
       .from('bears_player_game_stats')
       .select(`
         player_id,
-        pass_cmp,
-        pass_att,
-        pass_yds,
-        pass_td,
-        pass_int,
-        sacks,
-        rush_att,
-        rush_yds,
-        rush_td,
-        rec_tgt,
-        rec,
-        rec_yds,
-        rec_td,
-        fumbles,
-        tackles,
+        passing_cmp,
+        passing_att,
+        passing_yds,
+        passing_td,
+        passing_int,
+        def_sacks,
+        rushing_car,
+        rushing_yds,
+        rushing_td,
+        receiving_tgts,
+        receiving_rec,
+        receiving_yds,
+        receiving_td,
+        fum_fum,
+        def_tackles_total,
         interceptions,
         bears_players!inner(
           id,
@@ -151,41 +151,41 @@ export async function GET(
           headshot_url
         )
       `)
-      .eq('game_id', gameId)
+      .eq('bears_game_id', gameId)
 
     if (statsError) {
       console.error('Stats fetch error:', statsError)
     }
 
     // Transform player stats into categorized arrays
-    // Maps datalab column names (pass_*, rush_*, rec_*) to API response format
+    // Maps datalab column names (passing_*, rushing_*, receiving_*, def_*) to API response format
     const transformPlayerStats = (stat: any): PlayerBoxStats => ({
       playerId: stat.player_id,
       name: stat.bears_players?.name || 'Unknown',
       position: stat.bears_players?.position || '',
       headshotUrl: stat.bears_players?.headshot_url || null,
-      passingCmp: stat.pass_cmp,
-      passingAtt: stat.pass_att,
-      passingYds: stat.pass_yds,
-      passingTd: stat.pass_td,
-      passingInt: stat.pass_int,
+      passingCmp: stat.passing_cmp,
+      passingAtt: stat.passing_att,
+      passingYds: stat.passing_yds,
+      passingTd: stat.passing_td,
+      passingInt: stat.passing_int,
       passingRating: null, // Calculate if needed
-      rushingCar: stat.rush_att,
-      rushingYds: stat.rush_yds,
-      rushingTd: stat.rush_td,
+      rushingCar: stat.rushing_car,
+      rushingYds: stat.rushing_yds,
+      rushingTd: stat.rushing_td,
       rushingLng: null, // Not in datalab schema
-      receivingRec: stat.rec,
-      receivingTgts: stat.rec_tgt,
-      receivingYds: stat.rec_yds,
-      receivingTd: stat.rec_td,
+      receivingRec: stat.receiving_rec,
+      receivingTgts: stat.receiving_tgts,
+      receivingYds: stat.receiving_yds,
+      receivingTd: stat.receiving_td,
       receivingLng: null, // Not in datalab schema
-      defTacklesTotal: stat.tackles,
+      defTacklesTotal: stat.def_tackles_total,
       defTacklesSolo: null, // Not in datalab schema
-      defSacks: parseFloat(stat.sacks) || null,
+      defSacks: parseFloat(stat.def_sacks) || null,
       defTfl: null, // Not in datalab schema
       defPassesDefended: null, // Not in datalab schema
       defInt: stat.interceptions,
-      fumFum: stat.fumbles,
+      fumFum: stat.fum_fum,
       fumLost: null, // Not in datalab schema
     })
 
