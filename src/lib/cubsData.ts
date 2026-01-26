@@ -542,13 +542,12 @@ export async function getCubsSchedule(season?: number): Promise<CubsGame[]> {
       opponent,
       opponent_full_name,
       is_cubs_home,
-      stadium,
+      venue,
       cubs_score,
       opponent_score,
       cubs_win,
       broadcast,
-      game_type,
-      innings
+      game_type
     `)
     .eq('season', targetSeason)
     .gte('game_date', seasonStartDate)
@@ -569,13 +568,12 @@ export async function getCubsSchedule(season?: number): Promise<CubsGame[]> {
         opponent,
         opponent_full_name,
         is_cubs_home,
-        stadium,
+        venue,
         cubs_score,
         opponent_score,
         cubs_win,
         broadcast,
-        game_type,
-        innings
+        game_type
       `)
       .eq('season', targetSeason - 1)
       .gte('game_date', prevSeasonStartDate)
@@ -615,9 +613,9 @@ function transformGame(game: any): CubsGame {
     cubsScore: game.cubs_score,
     oppScore: game.opponent_score,
     result: isPlayed ? (game.cubs_win ? 'W' : 'L') : null,
-    stadium: game.stadium,
+    stadium: game.venue,
     tv: game.broadcast,
-    innings: game.innings,
+    innings: null,
   }
 }
 

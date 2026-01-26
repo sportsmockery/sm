@@ -539,13 +539,12 @@ export async function getWhiteSoxSchedule(season?: number): Promise<WhiteSoxGame
       opponent,
       opponent_full_name,
       is_whitesox_home,
-      stadium,
+      venue,
       whitesox_score,
       opponent_score,
       whitesox_win,
       broadcast,
-      game_type,
-      innings
+      game_type
     `)
     .eq('season', targetSeason)
     .gte('game_date', seasonStartDate)
@@ -566,13 +565,12 @@ export async function getWhiteSoxSchedule(season?: number): Promise<WhiteSoxGame
         opponent,
         opponent_full_name,
         is_whitesox_home,
-        stadium,
+        venue,
         whitesox_score,
         opponent_score,
         whitesox_win,
         broadcast,
-        game_type,
-        innings
+        game_type
       `)
       .eq('season', targetSeason - 1)
       .gte('game_date', prevSeasonStartDate)
@@ -612,9 +610,9 @@ function transformGame(game: any): WhiteSoxGame {
     whitesoxScore: game.whitesox_score,
     oppScore: game.opponent_score,
     result: isPlayed ? (game.whitesox_win ? 'W' : 'L') : null,
-    stadium: game.stadium,
+    stadium: game.venue,
     tv: game.broadcast,
-    innings: game.innings,
+    innings: null,
   }
 }
 
