@@ -231,13 +231,14 @@ export async function getCubsPlayers(): Promise<CubsPlayer[]> {
     return transformPlayers(allPlayers || [])
   }
 
-  const uniquePlayerIds = [...new Set(statsData.map((d: any) => d.player_id))]
+  // IMPORTANT: stats table player_id = players table espn_id (NOT id)
+  const uniqueEspnIds = [...new Set(statsData.map((d: any) => String(d.player_id)))]
 
-  // Get player details for those with game stats
+  // Get player details for those with game stats (join on espn_id)
   const { data, error } = await datalabAdmin
     .from('cubs_players')
     .select('*')
-    .in('id', uniquePlayerIds)
+    .in('espn_id', uniqueEspnIds)
     .order('position')
     .order('name')
 
