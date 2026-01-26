@@ -489,7 +489,12 @@ async function getPlayerGameLog(espnId: string): Promise<PlayerGameLogEntry[]> {
 export async function getBullsSchedule(season?: number): Promise<BullsGame[]> {
   const targetSeason = season || getCurrentSeason()
 
-  if (!datalabAdmin) return []
+  if (!datalabAdmin) {
+    console.error('[Bulls Schedule] DataLab admin client not configured')
+    return []
+  }
+
+  console.log(`[Bulls Schedule] Fetching for season ${targetSeason}`)
 
   // Note: Removed game_type filter - may not exist in database
   // Datalab integration guide shows no game_type filter for schedules
@@ -512,10 +517,16 @@ export async function getBullsSchedule(season?: number): Promise<BullsGame[]> {
     .eq('season', targetSeason)
     .order('game_date', { ascending: false })
 
-  if (error) return []
+  if (error) {
+    console.error('[Bulls Schedule] Query error:', error.message, error.details)
+    return []
+  }
+
+  console.log(`[Bulls Schedule] Found ${data?.length || 0} games for season ${targetSeason}`)
 
   // If no games in current season, fall back to previous season
   if (!data || data.length === 0) {
+    console.log(`[Bulls Schedule] No games for season ${targetSeason}, falling back to ${targetSeason - 1}`)
     const { data: prevData, error: prevError } = await datalabAdmin
       .from('bulls_games_master')
       .select(`
