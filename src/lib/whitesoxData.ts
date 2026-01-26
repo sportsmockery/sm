@@ -257,7 +257,9 @@ function transformPlayers(data: any[]): WhiteSoxPlayer[] {
     const yearsExp = p.years_pro ?? p.years_exp ?? p.experience
 
     return {
-      playerId: String(p.player_id || p.espn_id || p.id),
+      // CRITICAL: Use espn_id for playerId since whitesox_player_game_stats uses ESPN IDs
+      // The player_id column contains MLB IDs which don't match the stats table
+      playerId: String(p.espn_id || p.player_id || p.id),
       internalId: p.id,
       slug: p.slug || generateSlug(p.name || p.full_name),
       fullName: p.name || p.full_name,
