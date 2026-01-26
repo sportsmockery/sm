@@ -25,7 +25,7 @@ export async function GET() {
     results.getCubsScheduleResult = { error: String(e) }
   }
 
-  // Test raw query
+  // Test raw query (basic columns)
   try {
     const now = new Date()
     const year = now.getFullYear()
@@ -54,6 +54,55 @@ export async function GET() {
     }
   } catch (e) {
     results.rawQueryResult = { error: String(e) }
+  }
+
+  // Test full column query (same as getCubsSchedule)
+  try {
+    const now = new Date()
+    const year = now.getFullYear()
+    const month = now.getMonth() + 1
+    const targetSeason = month < 4 ? year - 1 : year
+    const seasonStartDate = `${targetSeason}-03-18`
+
+    const { data, error } = await datalabAdmin
+      .from('cubs_games_master')
+      .select(`
+        id,
+        game_date,
+        game_time,
+        season,
+        opponent,
+        opponent_full_name,
+        is_cubs_home,
+        stadium,
+        cubs_score,
+        opponent_score,
+        cubs_win,
+        broadcast,
+        game_type,
+        innings
+      `)
+      .eq('season', targetSeason)
+      .gte('game_date', seasonStartDate)
+      .order('game_date', { ascending: false })
+      .limit(5)
+
+    if (error) {
+      results.fullColumnQueryResult = {
+        error: error.message,
+        details: error.details,
+        hint: error.hint,
+        code: error.code,
+        note: 'This tests same columns as getCubsSchedule - if error here, that is why schedule is empty'
+      }
+    } else {
+      results.fullColumnQueryResult = {
+        count: data?.length || 0,
+        sample: data?.slice(0, 2)
+      }
+    }
+  } catch (e) {
+    results.fullColumnQueryResult = { error: String(e) }
   }
 
   try {
