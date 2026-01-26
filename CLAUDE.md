@@ -1,6 +1,6 @@
 # SportsMockery - Claude Project Knowledge Base
 
-> **Last Updated:** January 25, 2026 (ESPN ID fix applied)
+> **Last Updated:** January 26, 2026 (Team Pages 100% Complete)
 > **Purpose:** This file contains everything Claude needs to know to work on this project.
 
 ---
@@ -222,15 +222,17 @@ const { data } = await supabase
 
 ---
 
-### Verified Records (Jan 25, 2026)
+### Verified Records (Jan 26, 2026) ✅ ALL COMPLETE
 
-| Team | Table | Season | Record | Notes |
-|------|-------|--------|--------|-------|
-| Bears | `bears_season_record` | 2025 | 11-6 | Complete |
-| Bulls | `bulls_seasons` | 2026 | **23-22** | In progress |
-| Blackhawks | `blackhawks_seasons` | 2026 | 21-22-8 | In progress |
-| Cubs | `cubs_seasons` | 2025 | **98-76** | Offseason |
-| White Sox | `whitesox_seasons` | 2025 | 61-106 | Offseason |
+| Team | Table | Season | Record | Team Stats Table |
+|------|-------|--------|--------|------------------|
+| Bears | `bears_season_record` | 2025 | 11-6 | `bears_team_season_stats` ✅ |
+| Bulls | `bulls_seasons` | 2026 | 23-22 | `bulls_team_season_stats` ✅ |
+| Blackhawks | `blackhawks_seasons` | 2026 | 21-22-8 | `blackhawks_team_season_stats` ✅ |
+| Cubs | `cubs_seasons` | 2025 | 92-70 | `cubs_team_season_stats` ✅ |
+| White Sox | `whitesox_seasons` | 2025 | 60-102 | `whitesox_team_season_stats` ✅ |
+
+**All team_season_stats tables now exist and are populated.**
 
 **Bears roster of 81 (CONFIRMED BY DATALAB):** 53 active + 16 practice squad + ~12 IR/other. Display all - there's no column to filter further.
 
@@ -287,13 +289,15 @@ const STANDARD_POLL_INTERVAL = 60_000 // No live games
 
 ### Tables Reference
 
-| Team | Games | Players | Stats | Seasons |
-|------|-------|---------|-------|---------|
-| Bears | `bears_games_master` | `bears_players` | `bears_player_game_stats` | `bears_season_record` |
-| Bulls | `bulls_games_master` | `bulls_players` | `bulls_player_game_stats` | `bulls_seasons` |
-| Blackhawks | `blackhawks_games_master` | `blackhawks_players` | `blackhawks_player_game_stats` | `blackhawks_seasons` |
-| Cubs | `cubs_games_master` | `cubs_players` | `cubs_player_game_stats` | `cubs_seasons` |
-| White Sox | `whitesox_games_master` | `whitesox_players` | `whitesox_player_game_stats` | `whitesox_seasons` |
+| Team | Games | Players | Player Stats | Seasons | Team Stats |
+|------|-------|---------|--------------|---------|------------|
+| Bears | `bears_games_master` | `bears_players` | `bears_player_game_stats` | `bears_season_record` | `bears_team_season_stats` |
+| Bulls | `bulls_games_master` | `bulls_players` | `bulls_player_game_stats` | `bulls_seasons` | `bulls_team_season_stats` |
+| Blackhawks | `blackhawks_games_master` | `blackhawks_players` | `blackhawks_player_game_stats` | `blackhawks_seasons` | `blackhawks_team_season_stats` |
+| Cubs | `cubs_games_master` | `cubs_players` | `cubs_player_game_stats` | `cubs_seasons` | `cubs_team_season_stats` |
+| White Sox | `whitesox_games_master` | `whitesox_players` | `whitesox_player_game_stats` | `whitesox_seasons` | `whitesox_team_season_stats` |
+
+**Note:** All `*_team_season_stats` tables now exist and are populated (Jan 26, 2026).
 
 ---
 
@@ -383,6 +387,156 @@ When encountering data issues, communicate with Data Lab using this format:
 2. If frontend is correct, send Data Lab Request
 3. Wait for Data Lab Response before making further changes
 4. After Data Lab fixes, clear Vercel cache: `vercel --prod --force`
+
+---
+
+## Team Pages Troubleshooting Guide (CRITICAL)
+
+**Run this test script to verify all pages are working:**
+
+```bash
+node scripts/test-all-team-pages.mjs
+```
+
+This tests all 30 team pages (5 teams × 6 pages each) and shows a summary table.
+
+### Common Issues & Fixes
+
+#### Issue 1: Wrong Record Displayed
+**Symptom:** Bulls shows 39-43 instead of 23-22
+
+**Cause:** Calculating from `games_master` instead of `*_seasons` table, or wrong season value
+
+**Fix:** Always use `*_seasons` table for records:
+```typescript
+// In src/lib/{team}Data.ts - use seasons table
+const { data } = await datalabAdmin
+  .from('bulls_seasons')  // NOT games_master
+  .select('wins, losses')
+  .eq('season', getCurrentSeason())  // Make sure season is correct!
+  .single()
+```
+
+**Season calculation in team-config.ts:**
+```typescript
+function getCurrentSeason(league: string): number {
+  const now = new Date()
+  const year = now.getFullYear()
+  const month = now.getMonth() + 1
+
+  if (league === 'NFL') return month < 9 ? year - 1 : year
+  if (league === 'NBA' || league === 'NHL') return month < 10 ? year : year + 1  // ENDING year!
+  return month < 4 ? year - 1 : year  // MLB
+}
+```
+
+---
+
+#### Issue 2: 0 Players Displayed
+**Symptom:** Cubs or White Sox roster shows 0 players
+
+**Cause:** Stats table uses `espn_id` as `player_id`, but query joins on `id`
+
+**Fix:** Use `espn_id` for join:
+```typescript
+// WRONG
+const { data } = await supabase.from('cubs_players').select('*').in('id', playerIds)
+
+// CORRECT - use espn_id column
+const { data } = await supabase.from('cubs_players').select('*').in('espn_id', espnIds)
+```
+
+---
+
+#### Issue 3: No Stats for Players
+**Symptom:** Player profile shows "No stats recorded"
+
+**Cause:** Different teams use different ID columns for stats joins
+
+**Fix:** Check team-specific join pattern:
+| Team | Stats Join | Code |
+|------|------------|------|
+| Bears | `bp.id = stats.player_id` | Use `player.internalId` |
+| Bulls | `bp.player_id = stats.player_id` | Use `player.playerId` |
+| Others | `bp.espn_id = stats.player_id` | Use `player.playerId` |
+
+---
+
+#### Issue 4: Schedule Shows 0 Games
+**Symptom:** Schedule page empty for Cubs/White Sox
+
+**Cause:** Wrong season year or filtering out all games
+
+**Fix:** Check season and remove restrictive filters:
+```typescript
+// Ensure correct season
+const season = month < 4 ? year - 1 : year  // MLB calendar year
+
+// Don't filter by game_type if column doesn't exist
+const { data } = await supabase
+  .from('cubs_games_master')
+  .select('*')
+  .eq('season', season)
+  .order('game_date')
+```
+
+---
+
+### Key Data Layer Files
+
+| Team | File | Notes |
+|------|------|-------|
+| Bears | `src/lib/bearsData.ts` | Uses `is_active`, internal ID for stats |
+| Bulls | `src/lib/bullsData.ts` | Uses `is_current_bulls`, playerId for stats |
+| Blackhawks | `src/lib/blackhawksData.ts` | Uses `is_active`, espn_id for stats |
+| Cubs | `src/lib/cubsData.ts` | Uses espn_id join for stats |
+| White Sox | `src/lib/whitesoxData.ts` | Uses espn_id join for stats |
+| Shared | `src/lib/team-config.ts` | `fetchTeamRecord()`, `getCurrentSeason()` |
+
+---
+
+### Cron Jobs for Team Data
+
+| Endpoint | Schedule | Purpose |
+|----------|----------|---------|
+| `/api/cron/sync-teams` | Every hour (:00) | Revalidates all team pages, verifies data |
+| `/api/cron/team-pages-health` | Every hour (:15) | Full health check with ESPN ID mapping verification |
+
+---
+
+### DataLab Request Template (for missing data)
+
+When you need DataLab to create/fix tables:
+
+```markdown
+## DataLab Request: [Table Name]
+
+**Priority:** HIGH
+**Date:** [Today]
+
+### Current State
+- Table `{team}_team_season_stats` is MISSING / has wrong data
+
+### What's Needed
+```sql
+CREATE TABLE {team}_team_season_stats (
+  id SERIAL PRIMARY KEY,
+  season INTEGER NOT NULL,
+  games_played INTEGER,
+  wins INTEGER,
+  losses INTEGER,
+  -- sport-specific columns...
+);
+```
+
+### Data Source
+- ESPN: https://www.espn.com/{league}/team/stats/_/name/{abbrev}/season/{year}
+
+### Requested Action
+1. Create table with schema above
+2. Populate with current season data
+3. Set up auto-updates (if possible)
+```
 
 ---
 

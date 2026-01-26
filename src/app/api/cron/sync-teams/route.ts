@@ -18,13 +18,35 @@ const TEAM_PATHS = [
 
 const SUBPATHS = ['', '/schedule', '/scores', '/stats', '/roster', '/players']
 
+// Season calculation by league
+// NFL: Starting year (2025-26 season = 2025), stored as year season starts
+// NBA/NHL: Ending year (2025-26 season = 2026), stored as year season ends
+// MLB: Calendar year (2025 season = 2025)
+function getCurrentSeasonForLeague(league: string): number {
+  const now = new Date()
+  const year = now.getFullYear()
+  const month = now.getMonth() + 1
+
+  switch (league) {
+    case 'NFL':
+      return month < 9 ? year - 1 : year
+    case 'NBA':
+    case 'NHL':
+      return month < 10 ? year : year + 1
+    case 'MLB':
+      return month < 4 ? year - 1 : year
+    default:
+      return year
+  }
+}
+
 // Team configuration for data verification
-const TEAM_CONFIG: Record<string, { table: string; league: string; season: number; scoreCol: string; winCol: string }> = {
-  bears: { table: 'bears_games_master', league: 'NFL', season: 2025, scoreCol: 'bears_score', winCol: 'bears_win' },
-  bulls: { table: 'bulls_games_master', league: 'NBA', season: 2025, scoreCol: 'bulls_score', winCol: 'bulls_win' },
-  blackhawks: { table: 'blackhawks_games_master', league: 'NHL', season: 2025, scoreCol: 'blackhawks_score', winCol: 'blackhawks_win' },
-  cubs: { table: 'cubs_games_master', league: 'MLB', season: 2025, scoreCol: 'cubs_score', winCol: 'cubs_win' },
-  whitesox: { table: 'whitesox_games_master', league: 'MLB', season: 2025, scoreCol: 'whitesox_score', winCol: 'whitesox_win' },
+const TEAM_CONFIG: Record<string, { table: string; league: string; scoreCol: string; winCol: string }> = {
+  bears: { table: 'bears_games_master', league: 'NFL', scoreCol: 'bears_score', winCol: 'bears_win' },
+  bulls: { table: 'bulls_games_master', league: 'NBA', scoreCol: 'bulls_score', winCol: 'bulls_win' },
+  blackhawks: { table: 'blackhawks_games_master', league: 'NHL', scoreCol: 'blackhawks_score', winCol: 'blackhawks_win' },
+  cubs: { table: 'cubs_games_master', league: 'MLB', scoreCol: 'cubs_score', winCol: 'cubs_win' },
+  whitesox: { table: 'whitesox_games_master', league: 'MLB', scoreCol: 'whitesox_score', winCol: 'whitesox_win' },
 }
 
 interface TeamDataVerification {
@@ -76,7 +98,8 @@ export async function GET(request: NextRequest) {
 
     // Verify data for each team
     for (const [teamKey, config] of Object.entries(TEAM_CONFIG)) {
-      const verification = await verifyTeamData(teamKey, config)
+      const season = getCurrentSeasonForLeague(config.league)
+      const verification = await verifyTeamData(teamKey, { ...config, season })
       verificationResults.push(verification)
 
       if (verification.dataQuality === 'error') {
