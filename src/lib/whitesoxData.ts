@@ -198,7 +198,7 @@ function generateSlug(name: string): string {
 
 /**
  * Get all White Sox players from DataLab
- * Gets players who have game stats in the current season (since is_active column is unreliable)
+ * Filters to current roster using is_active = true (confirmed by Datalab Jan 26, 2026)
  */
 export async function getWhiteSoxPlayers(): Promise<WhiteSoxPlayer[]> {
   if (!datalabAdmin) {
@@ -206,39 +206,12 @@ export async function getWhiteSoxPlayers(): Promise<WhiteSoxPlayer[]> {
     return []
   }
 
-  const targetSeason = getCurrentSeason()
-
-  // First, get player IDs who have game stats in current season
-  const { data: statsData } = await datalabAdmin
-    .from('whitesox_player_game_stats')
-    .select('player_id')
-    .eq('season', targetSeason)
-
-  if (!statsData || statsData.length === 0) {
-    // Fallback: get all players (is_active may be unreliable)
-    const { data: allPlayers, error } = await datalabAdmin
-      .from('whitesox_players')
-      .select('*')
-      .neq('data_status', 'needs_roster_review')
-      .order('position')
-      .order('name')
-      .limit(50)
-
-    if (error) {
-      console.error('DataLab fetch error:', error)
-      return []
-    }
-    return transformPlayers(allPlayers || [])
-  }
-
-  // IMPORTANT: stats table player_id = players table espn_id (NOT id)
-  const uniqueEspnIds = [...new Set(statsData.map((d: any) => String(d.player_id)))]
-
-  // Get player details for those with game stats (join on espn_id)
+  // Get current roster players (is_active = true, exclude flagged)
   const { data, error } = await datalabAdmin
     .from('whitesox_players')
     .select('*')
-    .in('espn_id', uniqueEspnIds)
+    .eq('is_active', true)
+    .neq('data_status', 'needs_roster_review')
     .order('position')
     .order('name')
 
