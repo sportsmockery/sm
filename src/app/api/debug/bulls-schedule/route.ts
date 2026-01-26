@@ -25,6 +25,46 @@ export async function GET() {
     results.getBullsScheduleResult = { error: String(e) }
   }
 
+  // Test raw query that getBullsSchedule uses
+  try {
+    const now = new Date()
+    const year = now.getFullYear()
+    const month = now.getMonth() + 1
+    const targetSeason = month < 10 ? year : year + 1
+    results.computedSeason = { year, month, targetSeason }
+
+    const { data, error } = await datalabAdmin
+      .from('bulls_games_master')
+      .select(`
+        id,
+        game_date,
+        game_time,
+        season,
+        opponent,
+        opponent_full_name,
+        is_bulls_home,
+        arena,
+        bulls_score,
+        opponent_score,
+        bulls_win,
+        broadcast
+      `)
+      .eq('season', targetSeason)
+      .order('game_date', { ascending: false })
+      .limit(5)
+
+    if (error) {
+      results.rawQueryResult = { error: error.message, details: error.details, hint: error.hint, code: error.code }
+    } else {
+      results.rawQueryResult = {
+        count: data?.length || 0,
+        sample: data?.slice(0, 2)
+      }
+    }
+  } catch (e) {
+    results.rawQueryResult = { error: String(e) }
+  }
+
   try {
     const record = await getBullsRecord()
     results.getBullsRecordResult = record
