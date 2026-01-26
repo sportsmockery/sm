@@ -491,6 +491,8 @@ export async function getBullsSchedule(season?: number): Promise<BullsGame[]> {
 
   if (!datalabAdmin) return []
 
+  // Note: Removed game_type filter - may not exist in database
+  // Datalab integration guide shows no game_type filter for schedules
   const { data, error } = await datalabAdmin
     .from('bulls_games_master')
     .select(`
@@ -505,11 +507,9 @@ export async function getBullsSchedule(season?: number): Promise<BullsGame[]> {
       bulls_score,
       opponent_score,
       bulls_win,
-      broadcast,
-      game_type
+      broadcast
     `)
     .eq('season', targetSeason)
-    .in('game_type', ['regular', 'postseason'])
     .order('game_date', { ascending: false })
 
   if (error) return []
@@ -530,11 +530,9 @@ export async function getBullsSchedule(season?: number): Promise<BullsGame[]> {
         bulls_score,
         opponent_score,
         bulls_win,
-        broadcast,
-        game_type
+        broadcast
       `)
       .eq('season', targetSeason - 1)
-      .in('game_type', ['regular', 'postseason'])
       .order('game_date', { ascending: false })
 
     if (prevError || !prevData) return []

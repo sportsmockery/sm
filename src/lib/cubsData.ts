@@ -206,12 +206,12 @@ export async function getCubsPlayers(): Promise<CubsPlayer[]> {
     return []
   }
 
-  // Get current roster players (is_active = true, exclude flagged)
+  // Get current roster players (is_active = true)
+  // Note: Removed data_status filter - Datalab confirmed is_active is sufficient
   const { data, error } = await datalabAdmin
     .from('cubs_players')
     .select('*')
     .eq('is_active', true)
-    .neq('data_status', 'needs_roster_review')
     .order('position')
     .order('name')
 
