@@ -2,7 +2,7 @@ import { Metadata } from 'next'
 import Image from 'next/image'
 import { TeamHubLayout } from '@/components/team'
 import { CHICAGO_TEAMS, fetchNextGame } from '@/lib/team-config'
-import { getCubsSchedule, getCubsRecord, type CubsGame } from '@/lib/cubsData'
+import { getCubsSchedule, getCubsSeparatedRecord, type CubsGame } from '@/lib/cubsData'
 
 const CUBS_LOGO = 'https://a.espncdn.com/i/teamlogos/mlb/500/chc.png'
 
@@ -16,21 +16,31 @@ export const revalidate = 3600
 export default async function CubsSchedulePage() {
   const team = CHICAGO_TEAMS.cubs
 
-  const [schedule, cubsRecord, nextGame] = await Promise.all([
+  const [schedule, separatedRecord, nextGame] = await Promise.all([
     getCubsSchedule(),
-    getCubsRecord(),
+    getCubsSeparatedRecord(),
     fetchNextGame('cubs'),
   ])
 
+  // Build record object for TeamHubLayout (regular season only in main display)
   const record = {
-    wins: cubsRecord.wins,
-    losses: cubsRecord.losses,
+    wins: separatedRecord.regularSeason.wins,
+    losses: separatedRecord.regularSeason.losses,
+    postseason: (separatedRecord.postseason.wins > 0 || separatedRecord.postseason.losses > 0)
+      ? separatedRecord.postseason
+      : undefined,
+    divisionRank: separatedRecord.divisionRank || undefined,
   }
 
   // For out-of-season teams: order all games by most recent first
   const sortedSchedule = [...schedule].sort((a, b) =>
     new Date(b.date).getTime() - new Date(a.date).getTime()
   )
+
+  // Count games by type
+  const regularGames = schedule.filter(g => g.gameType === 'regular')
+  const postseasonGames = schedule.filter(g => g.gameType === 'postseason')
+  const hasPostseason = postseasonGames.length > 0
 
   return (
     <TeamHubLayout
@@ -39,15 +49,38 @@ export default async function CubsSchedulePage() {
       nextGame={nextGame}
       activeTab="schedule"
     >
-      <div>
-        {/* All Games - most recent first (out-of-season display) */}
+      <div className="pb-12">
+        {/* Record Summary */}
+        <div className="mb-6 p-4 rounded-xl bg-[var(--bg-elevated)] border border-[var(--border-subtle)]">
+          <div className="flex flex-wrap gap-6 justify-center text-center">
+            <div>
+              <div className="text-xs text-[var(--text-muted)] uppercase tracking-wider mb-1">Regular Season</div>
+              <div className="text-xl font-bold text-[var(--text-primary)]">
+                {separatedRecord.regularSeason.wins}-{separatedRecord.regularSeason.losses}
+              </div>
+              {separatedRecord.divisionRank && (
+                <div className="text-xs text-[var(--text-muted)]">{separatedRecord.divisionRank}</div>
+              )}
+            </div>
+            {hasPostseason && (
+              <div>
+                <div className="text-xs text-[var(--text-muted)] uppercase tracking-wider mb-1">Postseason</div>
+                <div className="text-xl font-bold text-[#0E3386]">
+                  {separatedRecord.postseason.wins}-{separatedRecord.postseason.losses}
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* All Games - most recent first */}
         <div className="bg-[var(--bg-elevated)] border border-[var(--border-subtle)] rounded-2xl overflow-hidden">
           <div className="p-4 border-b border-[var(--border-subtle)] flex items-center justify-between">
             <h2 className="font-bold text-[var(--text-primary)]" style={{ fontFamily: "'Montserrat', sans-serif" }}>
-              2025 Season
+              {hasPostseason ? '2025 Season' : 'Regular Season'}
             </h2>
             <span className="text-sm text-[var(--text-muted)]">
-              {schedule.length} games
+              {regularGames.length} regular{hasPostseason ? ` + ${postseasonGames.length} playoff` : ''} games
             </span>
           </div>
 
@@ -66,11 +99,17 @@ function GameRow({ game }: { game: CubsGame }) {
   const gameDate = new Date(game.date)
   const isPast = game.status === 'final'
   const isInProgress = game.status === 'in_progress'
+  const isPostseason = game.gameType === 'postseason'
 
   return (
     <div className={`p-4 hover:bg-[var(--bg-hover)] transition-colors ${isPast ? '' : 'bg-[var(--bg-tertiary)]/30'}`}>
       <div className="grid grid-cols-[auto_1fr_auto] sm:grid-cols-[100px_1fr_140px] gap-4 items-center">
         <div className="flex-shrink-0">
+          {isPostseason && (
+            <div className="px-2 py-1 bg-[#0E3386]/10 text-[#0E3386] text-xs rounded font-semibold inline-block mb-1">
+              Playoff
+            </div>
+          )}
           <div className="font-medium text-[var(--text-primary)]">
             {gameDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
           </div>

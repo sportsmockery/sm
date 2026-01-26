@@ -116,6 +116,13 @@ export interface CubsGame {
   stadium: string | null
   tv: string | null
   innings: number | null
+  gameType: 'regular' | 'postseason' | 'preseason'
+}
+
+export interface CubsSeparatedRecord {
+  regularSeason: { wins: number; losses: number }
+  postseason: { wins: number; losses: number }
+  divisionRank: string | null
 }
 
 export interface CubsTeamStats {
@@ -677,6 +684,7 @@ function transformGame(game: any): CubsGame {
     stadium: game.venue,
     tv: game.broadcast,
     innings: null,
+    gameType: game.game_type || 'regular',
   }
 }
 
@@ -959,6 +967,42 @@ export async function getCubsRecord(season?: number): Promise<CubsRecord> {
   const losses = completedGames.filter(g => g.result === 'L').length
 
   return { wins, losses }
+}
+
+/**
+ * Get Cubs separated record (regular season vs postseason)
+ * Shows regular season record and postseason record separately
+ */
+export async function getCubsSeparatedRecord(season?: number): Promise<CubsSeparatedRecord> {
+  const schedule = await getCubsSchedule(season)
+
+  // Calculate regular season record (max 162 games)
+  const regularGames = schedule.filter(g => g.status === 'final' && g.gameType === 'regular')
+  const regWins = regularGames.filter(g => g.result === 'W').length
+  const regLosses = regularGames.filter(g => g.result === 'L').length
+
+  // Calculate postseason record
+  const postGames = schedule.filter(g => g.status === 'final' && g.gameType === 'postseason')
+  const postWins = postGames.filter(g => g.result === 'W').length
+  const postLosses = postGames.filter(g => g.result === 'L').length
+
+  // Get division rank from seasons table if available
+  let divisionRank: string | null = null
+  if (datalabAdmin) {
+    const targetSeason = season || getCurrentSeason()
+    const { data } = await datalabAdmin
+      .from('cubs_seasons')
+      .select('division_rank')
+      .eq('season', targetSeason)
+      .single()
+    divisionRank = data?.division_rank || null
+  }
+
+  return {
+    regularSeason: { wins: regWins, losses: regLosses },
+    postseason: { wins: postWins, losses: postLosses },
+    divisionRank,
+  }
 }
 
 /**
