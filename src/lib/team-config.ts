@@ -99,90 +99,107 @@ const DATALAB_CONFIG: Record<string, { gamesTable: string; scoreCol: string; opp
 
 /**
  * Get current season based on team's league
+ * IMPORTANT: Different sports store seasons differently:
+ * - NFL: Starting year (2025 for 2025 season)
+ * - NBA/NHL: Ending year (2026 for 2025-26 season)
+ * - MLB: Calendar year (2025 for 2025 season)
  */
 function getCurrentSeason(league: string): number {
   const now = new Date()
   const year = now.getFullYear()
   const month = now.getMonth() + 1 // 1-12
 
-  // NFL/NHL: Season starts in fall, use starting year (e.g., 2025-26 season = 2025)
-  // NBA: Season starts in October, use starting year
-  // MLB: Season is within a calendar year
-  if (league === 'NFL' || league === 'NHL' || league === 'NBA') {
-    // If before September, we're in the previous year's season
+  if (league === 'NFL') {
+    // NFL: Season starts in September, stored as starting year
+    // Before September = previous year's season
     return month < 9 ? year - 1 : year
   }
-  // MLB: just use current year
-  return year
+
+  if (league === 'NBA' || league === 'NHL') {
+    // NBA/NHL: Season runs Oct-June, stored as ENDING year
+    // Before October = season ends this year
+    // Oct-Dec = season ends next year
+    return month < 10 ? year : year + 1
+  }
+
+  // MLB: Calendar year season (Apr-Oct)
+  // Before April = still showing previous year's completed season
+  return month < 4 ? year - 1 : year
+}
+
+// Map team keys to their _seasons table name and column mapping
+const SEASONS_TABLE_CONFIG: Record<string, { table: string; winsCol: string; lossesCol: string; otlCol?: string; tiesCol?: string; postWinsCol?: string; postLossesCol?: string }> = {
+  bears: { table: 'bears_season_record', winsCol: 'regular_season_wins', lossesCol: 'regular_season_losses', postWinsCol: 'postseason_wins', postLossesCol: 'postseason_losses' },
+  bulls: { table: 'bulls_seasons', winsCol: 'wins', lossesCol: 'losses' },
+  blackhawks: { table: 'blackhawks_seasons', winsCol: 'wins', lossesCol: 'losses', otlCol: 'otl' },
+  cubs: { table: 'cubs_seasons', winsCol: 'wins', lossesCol: 'losses' },
+  whitesox: { table: 'whitesox_seasons', winsCol: 'wins', lossesCol: 'losses' },
 }
 
 /**
  * Fetch team record from DataLab Supabase
+ * Uses the authoritative _seasons tables instead of calculating from games
  */
 export async function fetchTeamRecord(teamKey: string): Promise<TeamRecord | null> {
-  const config = DATALAB_CONFIG[teamKey]
   const teamInfo = CHICAGO_TEAMS[teamKey]
-  if (!config || !teamInfo || !datalabClient) return null
+  const seasonsConfig = SEASONS_TABLE_CONFIG[teamKey]
+  if (!teamInfo || !seasonsConfig || !datalabClient) return null
 
   const currentSeason = getCurrentSeason(teamInfo.league)
 
   try {
-    // Get completed games for the current season
-    const { data: games, error } = await datalabClient
-      .from(config.gamesTable)
+    // CRITICAL: Use the authoritative _seasons table for record
+    // This avoids issues with future games having scores of 0-0 or incorrect win flags
+    const { data: seasonData, error } = await datalabClient
+      .from(seasonsConfig.table)
       .select('*')
       .eq('season', currentSeason)
-      .not(config.scoreCol, 'is', null)
-      .not(config.oppScoreCol, 'is', null)
+      .single()
 
-    if (error || !games) {
-      console.error(`Error fetching ${teamKey} record from DataLab:`, error)
+    if (error || !seasonData) {
+      console.error(`Error fetching ${teamKey} season record from ${seasonsConfig.table}:`, error)
       return null
     }
 
-    // Separate regular season and postseason games
-    let regWins = 0
-    let regLosses = 0
-    let regTies = 0
-    let regOtLosses = 0
+    const wins = Number(seasonData[seasonsConfig.winsCol]) || 0
+    const losses = Number(seasonData[seasonsConfig.lossesCol]) || 0
+    const ties = seasonsConfig.tiesCol ? Number(seasonData[seasonsConfig.tiesCol]) || 0 : 0
+    const otLosses = seasonsConfig.otlCol ? Number(seasonData[seasonsConfig.otlCol]) || 0 : 0
+
+    // For postseason, use the season table columns if available (Bears has them)
     let postWins = 0
     let postLosses = 0
 
-    games.forEach((game: any) => {
-      const teamScore = Number(game[config.scoreCol]) || 0
-      const oppScore = Number(game[config.oppScoreCol]) || 0
-      const isPlayoff = game.game_type === 'postseason' || game.is_playoff === true
+    if (seasonsConfig.postWinsCol && seasonsConfig.postLossesCol) {
+      postWins = Number(seasonData[seasonsConfig.postWinsCol]) || 0
+      postLosses = Number(seasonData[seasonsConfig.postLossesCol]) || 0
+    } else {
+      // For teams without postseason columns, calculate from games
+      const gamesConfig = DATALAB_CONFIG[teamKey]
+      if (gamesConfig) {
+        const { data: games } = await datalabClient
+          .from(gamesConfig.gamesTable)
+          .select('*')
+          .eq('season', currentSeason)
+          .or('game_type.eq.postseason,game_type.eq.playoff,is_playoff.eq.true')
+          .gt(gamesConfig.scoreCol, 0)
 
-      if (teamScore > oppScore) {
-        if (isPlayoff) {
-          postWins++
-        } else {
-          regWins++
-        }
-      } else if (teamScore < oppScore) {
-        if (isPlayoff) {
-          postLosses++
-        } else {
-          // Check for OT/SO loss (NHL) or tie (NFL)
-          if (game.result === 'OTL' || game.result === 'SOL') {
-            regOtLosses++
-          } else {
-            regLosses++
-          }
-        }
-      } else {
-        // Ties only count in regular season
-        if (!isPlayoff) {
-          regTies++
+        if (games && games.length > 0) {
+          games.forEach((game: any) => {
+            const teamScore = Number(game[gamesConfig.scoreCol]) || 0
+            const oppScore = Number(game[gamesConfig.oppScoreCol]) || 0
+            if (teamScore > oppScore) postWins++
+            else if (oppScore > teamScore) postLosses++
+          })
         }
       }
-    })
+    }
 
     return {
-      wins: regWins,
-      losses: regLosses,
-      ties: regTies > 0 ? regTies : undefined,
-      otLosses: regOtLosses > 0 ? regOtLosses : undefined,
+      wins,
+      losses,
+      ties: ties > 0 ? ties : undefined,
+      otLosses: otLosses > 0 ? otLosses : undefined,
       postseason: (postWins > 0 || postLosses > 0) ? { wins: postWins, losses: postLosses } : undefined,
     }
   } catch (error) {

@@ -198,7 +198,7 @@ function generateSlug(name: string): string {
 
 /**
  * Get all Cubs players from DataLab
- * Filters to current roster using is_active = true
+ * Gets players who have game stats in the current season (since is_active column is unreliable)
  */
 export async function getCubsPlayers(): Promise<CubsPlayer[]> {
   if (!datalabAdmin) {
@@ -206,15 +206,40 @@ export async function getCubsPlayers(): Promise<CubsPlayer[]> {
     return []
   }
 
-  // Get current roster players (is_active = true, exclude flagged)
+  const targetSeason = getCurrentSeason()
+
+  // First, get player IDs who have game stats in current season
+  const { data: statsData } = await datalabAdmin
+    .from('cubs_player_game_stats')
+    .select('player_id')
+    .eq('season', targetSeason)
+
+  if (!statsData || statsData.length === 0) {
+    // Fallback: get all players (is_active may be unreliable)
+    const { data: allPlayers, error } = await datalabAdmin
+      .from('cubs_players')
+      .select('*')
+      .neq('data_status', 'needs_roster_review')
+      .order('position')
+      .order('name')
+      .limit(50)
+
+    if (error) {
+      console.error('DataLab fetch error:', error)
+      return []
+    }
+    return transformPlayers(allPlayers || [])
+  }
+
+  const uniquePlayerIds = [...new Set(statsData.map((d: any) => d.player_id))]
+
+  // Get player details for those with game stats
   const { data, error } = await datalabAdmin
     .from('cubs_players')
     .select('*')
-    .eq('is_active', true)
-    .neq('data_status', 'needs_roster_review')
+    .in('id', uniquePlayerIds)
     .order('position')
     .order('name')
-
 
   if (error) {
     console.error('DataLab fetch error:', error)
