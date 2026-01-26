@@ -527,8 +527,10 @@ export async function getBlackhawksSchedule(season?: number): Promise<Blackhawks
   }
 
   // Filter to current season dates only (Oct to June)
-  const seasonStartDate = `${targetSeason}-10-01`
-  const seasonEndDate = `${targetSeason + 1}-06-30`
+  // Season is stored as ENDING year (e.g., 2026 for 2025-26 season)
+  // So dates should be Oct of (targetSeason-1) to June of targetSeason
+  const seasonStartDate = `${targetSeason - 1}-10-01`
+  const seasonEndDate = `${targetSeason}-06-30`
 
   const dateFiltered = data.filter((g: any) => {
     const gameDate = g.game_date
