@@ -1,10 +1,35 @@
 import { NextResponse } from 'next/server'
 import { datalabAdmin } from '@/lib/supabase-datalab'
+import { getBullsSchedule, getBullsRecord } from '@/lib/bullsData'
 
 export async function GET() {
   const results: Record<string, any> = {
     timestamp: new Date().toISOString(),
     datalabConfigured: !!datalabAdmin,
+  }
+
+  // Test the actual function used by the page
+  try {
+    const schedule = await getBullsSchedule()
+    results.getBullsScheduleResult = {
+      count: schedule.length,
+      sample: schedule.slice(0, 3).map(g => ({
+        gameId: g.gameId,
+        date: g.date,
+        opponent: g.opponent,
+        status: g.status,
+        bullsScore: g.bullsScore,
+      }))
+    }
+  } catch (e) {
+    results.getBullsScheduleResult = { error: String(e) }
+  }
+
+  try {
+    const record = await getBullsRecord()
+    results.getBullsRecordResult = record
+  } catch (e) {
+    results.getBullsRecordResult = { error: String(e) }
   }
 
   if (!datalabAdmin) {
