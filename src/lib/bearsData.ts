@@ -1088,6 +1088,40 @@ export async function getBearsSeparatedRecord(season?: number): Promise<BearsSep
 }
 
 /**
+ * Find the most recent game ID that has actual player stats populated.
+ * Used by the scores page to default to a game with data.
+ */
+export async function getLatestGameWithStats(season?: number): Promise<string | null> {
+  const targetSeason = season || getCurrentSeason()
+  if (!datalabAdmin) return null
+
+  const { data: games } = await datalabAdmin
+    .from('bears_games_master')
+    .select('id')
+    .eq('season', targetSeason)
+    .order('game_date', { ascending: false })
+
+  if (!games || games.length === 0) return null
+
+  // Check each game (most recent first) for non-null stats
+  for (const game of games) {
+    const { data: stats } = await datalabAdmin
+      .from('bears_player_game_stats')
+      .select('passing_yds')
+      .eq('bears_game_id', game.id)
+      .not('passing_yds', 'is', null)
+      .limit(1)
+
+    if (stats && stats.length > 0) {
+      return String(game.id)
+    }
+  }
+
+  // Fallback to most recent game even without stats
+  return String(games[0].id)
+}
+
+/**
  * Get available seasons
  */
 export async function getAvailableSeasons(): Promise<number[]> {
