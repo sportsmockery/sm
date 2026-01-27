@@ -121,8 +121,9 @@ export default function LiveGamesTopBar({ teamFilter, isHomepage = false }: Live
     return () => clearInterval(interval)
   }, [fetchLiveGames])
 
+  // Don't render on live game pages (they have their own GameSwitcher)
   // Don't render anything if no live games
-  if (isLoading || liveGames.length === 0) {
+  if (isLoading || liveGames.length === 0 || pathname?.startsWith('/live/')) {
     return null
   }
 

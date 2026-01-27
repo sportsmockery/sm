@@ -43,6 +43,7 @@ export interface LiveGame {
   players?: LivePlayerStats[]
   play_by_play?: LivePlay[]
   team_stats?: LiveTeamStats
+  linescore?: Record<string, { home: number; away: number }>
   updated_at: string
 }
 

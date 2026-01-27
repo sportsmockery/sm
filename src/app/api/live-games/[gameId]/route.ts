@@ -120,6 +120,9 @@ export async function GET(
       // Team stats comparison
       team_stats: game.team_stats || null,
 
+      // Linescore (period-by-period breakdown)
+      linescore: game.linescore || null,
+
       // Metadata
       last_event_id: game.last_event_id,
       cache_age_seconds: liveGamesCache.getCacheAge(),
