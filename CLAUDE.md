@@ -234,6 +234,21 @@ const { data } = await supabase
 
 **All team_season_stats tables now exist and are populated.**
 
+### CRITICAL: Team Season Stats Column Names (Confirmed Jan 27, 2026)
+
+| Your Code Reference | Actual DB Column | Team(s) |
+|---------------------|-----------------|---------|
+| `field_goal_pct` | `field_goal_pct` | Bulls |
+| `three_point_pct` | `three_point_pct` | Bulls |
+| `free_throw_pct` | `free_throw_pct` | Bulls |
+| `batting_average` | `batting_average` | Cubs, White Sox |
+| `era` | `era` | Cubs, White Sox |
+| `ops` | `ops` | Cubs, White Sox |
+| `power_play_pct` | `power_play_pct` | Blackhawks |
+| `penalty_kill_pct` | `penalty_kill_pct` | Blackhawks |
+
+**DO NOT USE:** `fg_pct`, `three_pct`, `ft_pct`, `team_avg`, `team_era`, `team_ops`, `pp_pct`, `pk_pct` — these column names DO NOT EXIST.
+
 **Bears roster of 81 (CONFIRMED BY DATALAB):** 53 active + 16 practice squad + ~12 IR/other. Display all - there's no column to filter further.
 
 ---

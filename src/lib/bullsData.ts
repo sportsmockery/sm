@@ -661,9 +661,9 @@ async function getTeamStats(season: number): Promise<BullsTeamStats> {
     apg: teamData?.assists_per_game || 0,
     spg: teamData?.steals_per_game || 0,
     bpg: teamData?.blocks_per_game || 0,
-    fgPct: teamData?.fg_pct || null,
-    threePct: teamData?.three_pct || null,
-    ftPct: teamData?.ft_pct || null,
+    fgPct: teamData?.field_goal_pct || null,
+    threePct: teamData?.three_point_pct || null,
+    ftPct: teamData?.free_throw_pct || null,
   }
 }
 

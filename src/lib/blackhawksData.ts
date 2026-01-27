@@ -675,8 +675,8 @@ async function getTeamStats(season: number): Promise<BlackhawksTeamStats> {
     goalsAgainst: totalOppGoals,
     gfpg: gamesPlayed > 0 ? Math.round(totalGoals / gamesPlayed * 100) / 100 : 0,
     gapg: gamesPlayed > 0 ? Math.round(totalOppGoals / gamesPlayed * 100) / 100 : 0,
-    ppPct: teamData?.pp_pct || null,
-    pkPct: teamData?.pk_pct || null,
+    ppPct: teamData?.power_play_pct || null,
+    pkPct: teamData?.penalty_kill_pct || null,
   }
 }
 

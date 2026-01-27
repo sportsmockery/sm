@@ -745,9 +745,9 @@ async function getTeamStats(season: number): Promise<WhiteSoxTeamStats> {
     runsScored,
     runsAllowed,
     runDiff: runsScored - runsAllowed,
-    teamAvg: teamData?.team_avg || null,
-    teamEra: teamData?.team_era || null,
-    teamOps: teamData?.team_ops || null,
+    teamAvg: teamData?.batting_average || null,
+    teamEra: teamData?.era || null,
+    teamOps: teamData?.ops || null,
   }
 }
 
