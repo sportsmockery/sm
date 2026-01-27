@@ -542,8 +542,10 @@ export async function getCubsSchedule(season?: number): Promise<CubsGame[]> {
   // Filter out spring training games
   const seasonStartDate = `${targetSeason}-03-18`
 
-  // Get regular season games (max 162)
-  const { data: regularData, error: regularError } = await datalabAdmin
+  // Get all games for the season (regular + postseason)
+  // Date filter excludes spring training; no game_type filter so we catch
+  // postseason regardless of how it's labeled in the database
+  const { data, error } = await datalabAdmin
     .from('cubs_games_master')
     .select(`
       id,
@@ -561,44 +563,16 @@ export async function getCubsSchedule(season?: number): Promise<CubsGame[]> {
       game_type
     `)
     .eq('season', targetSeason)
-    .eq('game_type', 'regular')
     .gte('game_date', seasonStartDate)
-    .order('game_date', { ascending: true })
-    .limit(MLB_REGULAR_SEASON_GAMES)
+    .order('game_date', { ascending: false })
 
-  // Get postseason games (no limit)
-  const { data: postseasonData } = await datalabAdmin
-    .from('cubs_games_master')
-    .select(`
-      id,
-      game_date,
-      game_time,
-      season,
-      opponent,
-      opponent_full_name,
-      is_cubs_home,
-      venue,
-      cubs_score,
-      opponent_score,
-      cubs_win,
-      broadcast,
-      game_type
-    `)
-    .eq('season', targetSeason)
-    .eq('game_type', 'postseason')
-    .order('game_date', { ascending: true })
-
-  const data = [...(regularData || []), ...(postseasonData || [])]
-    .sort((a, b) => new Date(b.game_date).getTime() - new Date(a.game_date).getTime())
-
-  if (regularError) return []
+  if (error) return []
 
   // If no games in current season, fall back to previous season
   if (!data || data.length === 0) {
     const prevSeasonStartDate = `${targetSeason - 1}-03-18`
 
-    // Get previous season regular games (max 162)
-    const { data: prevRegular, error: prevError } = await datalabAdmin
+    const { data: prevData, error: prevError } = await datalabAdmin
       .from('cubs_games_master')
       .select(`
         id,
@@ -616,39 +590,12 @@ export async function getCubsSchedule(season?: number): Promise<CubsGame[]> {
         game_type
       `)
       .eq('season', targetSeason - 1)
-      .eq('game_type', 'regular')
       .gte('game_date', prevSeasonStartDate)
-      .order('game_date', { ascending: true })
-      .limit(MLB_REGULAR_SEASON_GAMES)
-
-    // Get previous season postseason games
-    const { data: prevPostseason } = await datalabAdmin
-      .from('cubs_games_master')
-      .select(`
-        id,
-        game_date,
-        game_time,
-        season,
-        opponent,
-        opponent_full_name,
-        is_cubs_home,
-        venue,
-        cubs_score,
-        opponent_score,
-        cubs_win,
-        broadcast,
-        game_type
-      `)
-      .eq('season', targetSeason - 1)
-      .eq('game_type', 'postseason')
-      .order('game_date', { ascending: true })
+      .order('game_date', { ascending: false })
 
     if (prevError) return []
 
-    const prevData = [...(prevRegular || []), ...(prevPostseason || [])]
-      .sort((a, b) => new Date(b.game_date).getTime() - new Date(a.game_date).getTime())
-
-    return prevData.map((g: any) => transformGame(g))
+    return (prevData || []).map((g: any) => transformGame(g))
   }
 
   return data.map((g: any) => transformGame(g))
@@ -684,7 +631,7 @@ function transformGame(game: any): CubsGame {
     stadium: game.venue,
     tv: game.broadcast,
     innings: null,
-    gameType: game.game_type || 'regular',
+    gameType: (!game.game_type || game.game_type === 'regular') ? 'regular' : 'postseason',
   }
 }
 

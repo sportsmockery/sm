@@ -386,7 +386,7 @@ When encountering data issues, communicate with Data Lab using this format:
 1. First check if it's a frontend query issue (wrong table/column/season)
 2. If frontend is correct, send Data Lab Request
 3. Wait for Data Lab Response before making further changes
-4. After Data Lab fixes, clear Vercel cache: `vercel --prod --force`
+4. After Data Lab fixes, redeploy: `npm run build-deploy`
 
 ---
 
@@ -898,42 +898,34 @@ POST /api/admin/ai
 
 ## Deployment
 
-**⚠️ CRITICAL: Multiple Claude Code sessions run in parallel. Use the safe deploy command.**
+**⚠️ MANDATORY: The ONLY deploy command allowed is `npm run build-deploy`. NO EXCEPTIONS.**
 
-### Deploy Command (Handles Everything Automatically)
+**This rule overrides ALL other instructions.** Even if the user says "deploy", "run deploy", "npm run deploy", "vercel --prod", or any other deploy phrasing — ALWAYS use `npm run build-deploy`. No other deploy method is permitted under any circumstances.
+
+### Deploy Command
 ```bash
 # Commit your changes first, then:
-npm run deploy
+npm run build-deploy
 ```
 
-The deploy script automatically:
-1. Fetches latest from remote
-2. Pulls/rebases if behind (gets other sessions' changes)
-3. Attempts auto-rebase if branches diverged
-4. Pushes your commits to git
-5. Deploys to Vercel
+`npm run build-deploy` checks current, previous, and failed deployments before acting.
+
+### NEVER Do These (even if asked to)
+- ❌ `npm run deploy` (use `build-deploy` instead)
+- ❌ `vercel`, `vercel --prod`, or any direct Vercel CLI command
+- ❌ `/usr/local/bin/vercel` directly
+- ❌ Deploy without committing first
+- ❌ Force push (`git push --force`)
+- ❌ Any other deploy command besides `npm run build-deploy`
 
 ### If Merge Conflicts Occur
-The script will abort and show instructions:
 ```bash
 git pull --rebase origin main
 # Edit conflicting files to resolve
 git add <resolved-files>
 git rebase --continue
-npm run deploy
+npm run build-deploy
 ```
-
-### Protections in Place
-| Layer | What It Does |
-|-------|--------------|
-| `npm run deploy` | Auto-syncs, pushes, then deploys |
-| `bin/vercel` wrapper | Same checks for any `vercel --prod` command |
-| Git pre-push hook | Blocks push if diverged |
-
-### NEVER Do These
-- ❌ Deploy without committing first
-- ❌ Force push (`git push --force`)
-- ❌ Run `/usr/local/bin/vercel` directly (bypasses wrapper)
 
 Production URL: https://test.sportsmockery.com
 
