@@ -1,7 +1,7 @@
 import { Metadata } from 'next'
 import Link from 'next/link'
 import Image from 'next/image'
-import { getBearsSchedule, getPlayoffRoundName, getBearsSeparatedRecord, getLatestGameWithStats, type BearsGame } from '@/lib/bearsData'
+import { getBearsSchedule, getPlayoffRoundName, getBearsSeparatedRecord, type BearsGame } from '@/lib/bearsData'
 import BoxScoreClient from './BoxScoreClient'
 import { TeamHubLayout } from '@/components/team'
 import { CHICAGO_TEAMS, fetchNextGame } from '@/lib/team-config'
@@ -21,11 +21,10 @@ export default async function BearsScoresPage() {
   const currentSeason = 2025
 
   // Fetch all data in parallel
-  const [schedule, separatedRecord, nextGame, latestGameWithStats] = await Promise.all([
+  const [schedule, separatedRecord, nextGame] = await Promise.all([
     getBearsSchedule(currentSeason),
     getBearsSeparatedRecord(currentSeason),
     fetchNextGame('bears'),
-    getLatestGameWithStats(currentSeason),
   ])
 
   // Get completed games only (final status), separate by type
@@ -48,7 +47,7 @@ export default async function BearsScoresPage() {
   const allGamesSorted = completedGames
     .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
   const latestGame = allGamesSorted[0]
-  const initialGameId = latestGameWithStats || latestGame?.gameId || null
+  const initialGameId = latestGame?.gameId || null
 
   // Transform games for client component - most recent first
   const games = allGamesSorted.map(game => ({

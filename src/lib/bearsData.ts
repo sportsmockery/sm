@@ -215,8 +215,16 @@ export interface LiveBoxScore {
   }[]
 }
 
-// Playoff round names
+// Playoff round names - DataLab uses week 1-4 for postseason, ESPN uses 19-22
+// Also handle edge cases where DataLab may use week 18 for Wild Card
 const PLAYOFF_ROUND_NAMES: Record<number, string> = {
+  // DataLab postseason week numbering (1-4)
+  1: 'Wild Card',
+  2: 'Divisional Round',
+  3: 'Conference Championship',
+  4: 'Super Bowl',
+  // ESPN week numbering (19-22)
+  18: 'Wild Card',
   19: 'Wild Card',
   20: 'Divisional Round',
   21: 'Conference Championship',

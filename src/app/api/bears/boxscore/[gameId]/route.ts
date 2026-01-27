@@ -77,8 +77,13 @@ interface BoxScoreData {
   }
 }
 
-// Playoff round names
+// Playoff round names - DataLab uses week 1-4 for postseason, ESPN uses 19-22
 const PLAYOFF_ROUNDS: Record<number, string> = {
+  1: 'Wild Card',
+  2: 'Divisional Round',
+  3: 'Conference Championship',
+  4: 'Super Bowl',
+  18: 'Wild Card',
   19: 'Wild Card',
   20: 'Divisional Round',
   21: 'Conference Championship',
