@@ -10,6 +10,7 @@
     "lint": "eslint",
     "scout:evals": "npx ts-node scripts/run_scout_evals.ts",
     "deploy": "./scripts/safe-deploy.sh",
+    "build-deploy": "./scripts/build-deploy.sh",
     "prepare": "git config core.hooksPath .githooks || true"
   },
   "dependencies": {

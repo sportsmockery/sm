@@ -13,7 +13,7 @@
  */
 
 import type { TeamInfo, NextGameInfo, TeamRecord } from '@/components/team/TeamHubLayout'
-import { datalabClient } from './supabase-datalab'
+import { datalabAdmin as datalabClient } from './supabase-datalab'
 
 export const CHICAGO_TEAMS: Record<string, TeamInfo> = {
   bears: {
