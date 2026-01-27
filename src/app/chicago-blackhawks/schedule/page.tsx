@@ -7,8 +7,8 @@ import { getBlackhawksSchedule, getBlackhawksRecord, type BlackhawksGame } from 
 const BLACKHAWKS_LOGO = 'https://a.espncdn.com/i/teamlogos/nhl/500/chi.png'
 
 export const metadata: Metadata = {
-  title: 'Chicago Blackhawks Schedule 2024-25 | Game Dates & Results | SportsMockery',
-  description: 'Complete Chicago Blackhawks 2024-25 schedule with game dates, times, opponents, scores, and results. View upcoming games and past results.',
+  title: 'Chicago Blackhawks Schedule 2025-26 | Game Dates & Results | SportsMockery',
+  description: 'Complete Chicago Blackhawks 2025-26 schedule with game dates, times, opponents, scores, and results. View upcoming games and past results.',
 }
 
 export const revalidate = 3600
@@ -83,20 +83,20 @@ export default async function BlackhawksSchedulePage() {
           </div>
         )}
 
-        {/* Completed games - most recent first */}
-        {completedGames.length > 0 && (
+        {/* Full Schedule - upcoming first, then completed */}
+        {schedule.length > 0 && (
           <div className="bg-[var(--bg-elevated)] border border-[var(--border-subtle)] rounded-2xl overflow-hidden">
             <div className="p-4 border-b border-[var(--border-subtle)] flex items-center justify-between">
               <h2 className="font-bold text-[var(--text-primary)]" style={{ fontFamily: "'Montserrat', sans-serif" }}>
-                Game Results
+                Chicago Blackhawks 2025-26 Schedule
               </h2>
               <span className="text-sm text-[var(--text-muted)]">
-                {completedGames.length} games played
+                {schedule.length} games
               </span>
             </div>
 
             <div className="divide-y divide-[var(--border-subtle)]">
-              {completedGames.map((game) => (
+              {[...upcomingGames, ...completedGames].map((game) => (
                 <GameRow key={game.gameId} game={game} />
               ))}
             </div>
@@ -104,7 +104,7 @@ export default async function BlackhawksSchedulePage() {
         )}
 
         {/* Empty state */}
-        {completedGames.length === 0 && !nextScheduledGame && (
+        {schedule.length === 0 && (
           <div className="bg-[var(--bg-elevated)] border border-[var(--border-subtle)] rounded-2xl p-12 text-center">
             <p className="text-[var(--text-muted)]">No schedule data available</p>
           </div>

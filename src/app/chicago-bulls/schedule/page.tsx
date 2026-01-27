@@ -108,19 +108,19 @@ export default async function BullsSchedulePage() {
           </div>
         )}
 
-        {/* Completed Games - most recent first */}
-        {completedGames.length > 0 && (
+        {/* Full Schedule - upcoming first, then completed */}
+        {schedule.length > 0 && (
           <div className="bg-[var(--bg-elevated)] border border-[var(--border-subtle)] rounded-2xl overflow-hidden">
             <div className="p-4 border-b border-[var(--border-subtle)] flex items-center justify-between">
               <h2 className="font-bold text-[var(--text-primary)]" style={{ fontFamily: "'Montserrat', sans-serif" }}>
-                Game Results
+                Chicago Bulls 2025-26 Schedule
               </h2>
               <span className="text-sm text-[var(--text-muted)]">
-                {completedGames.length} games played
+                {schedule.length} games
               </span>
             </div>
             <div className="divide-y divide-[var(--border-subtle)]">
-              {completedGames.map((game) => (
+              {[...upcomingGames, ...completedGames].map((game) => (
                 <GameRow key={game.gameId} game={game} />
               ))}
             </div>

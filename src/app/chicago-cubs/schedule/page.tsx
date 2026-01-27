@@ -77,7 +77,7 @@ export default async function CubsSchedulePage() {
         <div className="bg-[var(--bg-elevated)] border border-[var(--border-subtle)] rounded-2xl overflow-hidden">
           <div className="p-4 border-b border-[var(--border-subtle)] flex items-center justify-between">
             <h2 className="font-bold text-[var(--text-primary)]" style={{ fontFamily: "'Montserrat', sans-serif" }}>
-              {hasPostseason ? '2025 Season' : 'Regular Season'}
+              Chicago Cubs 2025 Schedule
             </h2>
             <span className="text-sm text-[var(--text-muted)]">
               {regularGames.length} regular{hasPostseason ? ` + ${postseasonGames.length} playoff` : ''} games
