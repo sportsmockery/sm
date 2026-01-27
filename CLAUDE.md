@@ -910,6 +910,10 @@ npm run build-deploy
 
 `npm run build-deploy` checks current, previous, and failed deployments before acting.
 
+### ALWAYS Deploy After Completing Tasks
+
+**After every completed set of tasks, ALWAYS commit and run `npm run build-deploy`.** Do not wait to be asked. If code changes were made and the work is done, deploy immediately.
+
 ### NEVER Do These (even if asked to)
 - ❌ `npm run deploy` (use `build-deploy` instead)
 - ❌ `vercel`, `vercel --prod`, or any direct Vercel CLI command
