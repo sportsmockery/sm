@@ -37,20 +37,24 @@ interface PlayerStats {
   rushingCar: number | null
   rushingYds: number | null
   rushingTd: number | null
-  rushingLng: number | null
   receivingRec: number | null
   receivingTgts: number | null
   receivingYds: number | null
   receivingTd: number | null
-  receivingLng: number | null
   defTacklesTotal: number | null
-  defTacklesSolo: number | null
   defSacks: number | null
-  defTfl: number | null
-  defPassesDefended: number | null
   defInt: number | null
   fumFum: number | null
-  fumLost: number | null
+}
+
+interface TeamBoxStats {
+  score: number
+  result: 'W' | 'L' | null
+  isHome: boolean
+  passing: PlayerStats[]
+  rushing: PlayerStats[]
+  receiving: PlayerStats[]
+  defense: PlayerStats[]
 }
 
 interface BoxScore {
@@ -65,19 +69,10 @@ interface BoxScore {
     windMph: number | null
     summary: string | null
   } | null
-  bears: {
-    score: number
-    result: 'W' | 'L' | null
-    isHome: boolean
-    passing: PlayerStats[]
-    rushing: PlayerStats[]
-    receiving: PlayerStats[]
-    defense: PlayerStats[]
-  }
-  opponent: {
+  bears: TeamBoxStats
+  opponent: TeamBoxStats & {
     abbrev: string
     fullName: string
-    score: number
     logo: string
   }
 }
@@ -92,11 +87,11 @@ export default function BoxScoreClient({ games, initialGameId }: Props) {
   const [boxScore, setBoxScore] = useState<BoxScore | null>(null)
   const [loading, setLoading] = useState(true)
   const [activeTab, setActiveTab] = useState<'passing' | 'rushing' | 'receiving' | 'defense'>('passing')
+  const [activeTeam, setActiveTeam] = useState<'bears' | 'opponent'>('bears')
   const scrollContainerRef = useRef<HTMLDivElement>(null)
   const [canScrollLeft, setCanScrollLeft] = useState(false)
   const [canScrollRight, setCanScrollRight] = useState(true)
 
-  // Check scroll position
   useEffect(() => {
     const checkScroll = () => {
       const el = scrollContainerRef.current
@@ -113,11 +108,7 @@ export default function BoxScoreClient({ games, initialGameId }: Props) {
   const scrollGames = (direction: 'left' | 'right') => {
     const el = scrollContainerRef.current
     if (el) {
-      const scrollAmount = 300
-      el.scrollBy({
-        left: direction === 'left' ? -scrollAmount : scrollAmount,
-        behavior: 'smooth'
-      })
+      el.scrollBy({ left: direction === 'left' ? -300 : 300, behavior: 'smooth' })
     }
   }
 
@@ -126,96 +117,49 @@ export default function BoxScoreClient({ games, initialGameId }: Props) {
       setLoading(false)
       return
     }
-
     setLoading(true)
+    setActiveTeam('bears')
     fetch(`/api/bears/boxscore/${selectedGameId}`)
       .then(res => res.json())
       .then(data => {
-        if (data.error) {
-          setBoxScore(null)
-        } else {
-          setBoxScore(data)
-        }
+        setBoxScore(data.error ? null : data)
         setLoading(false)
       })
-      .catch(() => {
-        setBoxScore(null)
-        setLoading(false)
-      })
+      .catch(() => { setBoxScore(null); setLoading(false) })
   }, [selectedGameId])
 
   const selectedGame = games.find(g => g.gameId === selectedGameId)
+  const currentStats = boxScore ? (activeTeam === 'bears' ? boxScore.bears : boxScore.opponent) : null
 
   return (
     <div className="max-w-7xl mx-auto px-4 py-8">
-      {/* Game Selector - Horizontal Scroll with Navigation */}
+      {/* Game Selector */}
       <div className="mb-8">
         <div className="flex items-center justify-between mb-3">
-          <h2 className="text-sm font-semibold text-[var(--text-muted)] uppercase tracking-wider">
-            Select Game
-          </h2>
+          <h2 className="text-sm font-semibold text-[var(--text-muted)] uppercase tracking-wider">Select Game</h2>
           <div className="flex gap-2">
-            <button
-              onClick={() => scrollGames('left')}
-              disabled={!canScrollLeft}
-              className={`p-2 rounded-lg border transition-all ${
-                canScrollLeft
-                  ? 'bg-[var(--bg-elevated)] border-[var(--border-subtle)] hover:bg-[var(--bg-hover)] text-[var(--text-primary)]'
-                  : 'bg-[var(--bg-tertiary)] border-transparent text-[var(--text-muted)] cursor-not-allowed opacity-40'
-              }`}
-            >
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-              </svg>
+            <button onClick={() => scrollGames('left')} disabled={!canScrollLeft}
+              className={`p-2 rounded-lg border transition-all ${canScrollLeft ? 'bg-[var(--bg-elevated)] border-[var(--border-subtle)] hover:bg-[var(--bg-hover)] text-[var(--text-primary)]' : 'bg-[var(--bg-tertiary)] border-transparent text-[var(--text-muted)] cursor-not-allowed opacity-40'}`}>
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" /></svg>
             </button>
-            <button
-              onClick={() => scrollGames('right')}
-              disabled={!canScrollRight}
-              className={`p-2 rounded-lg border transition-all ${
-                canScrollRight
-                  ? 'bg-[var(--bg-elevated)] border-[var(--border-subtle)] hover:bg-[var(--bg-hover)] text-[var(--text-primary)]'
-                  : 'bg-[var(--bg-tertiary)] border-transparent text-[var(--text-muted)] cursor-not-allowed opacity-40'
-              }`}
-            >
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-              </svg>
+            <button onClick={() => scrollGames('right')} disabled={!canScrollRight}
+              className={`p-2 rounded-lg border transition-all ${canScrollRight ? 'bg-[var(--bg-elevated)] border-[var(--border-subtle)] hover:bg-[var(--bg-hover)] text-[var(--text-primary)]' : 'bg-[var(--bg-tertiary)] border-transparent text-[var(--text-muted)] cursor-not-allowed opacity-40'}`}>
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" /></svg>
             </button>
           </div>
         </div>
-        <div
-          ref={scrollContainerRef}
-          className="flex gap-3 overflow-x-auto pb-2 scrollbar-hide scroll-smooth"
-          style={{ scrollBehavior: 'smooth' }}
-        >
+        <div ref={scrollContainerRef} className="flex gap-3 overflow-x-auto pb-2 scrollbar-hide scroll-smooth">
           {games.map((game) => {
             const gameDate = new Date(game.date)
             const isSelected = game.gameId === selectedGameId
             const isWin = game.result === 'W'
-
             return (
-              <button
-                key={game.gameId}
-                onClick={() => setSelectedGameId(game.gameId)}
-                className={`flex-shrink-0 flex items-center gap-3 px-4 py-3 rounded-xl border transition-all ${
-                  isSelected
-                    ? 'bg-[#0B162A] border-[#C83200] text-white ring-2 ring-[#C83200]/30'
-                    : 'bg-[var(--bg-elevated)] border-[var(--border-subtle)] hover:border-[var(--border-strong)] hover:shadow-md'
-                }`}
-              >
-                {/* Opponent Logo */}
-                {game.opponentLogo && (
-                  <Image
-                    src={game.opponentLogo}
-                    alt={game.opponent}
-                    width={36}
-                    height={36}
-                    className="w-9 h-9"
-                  />
-                )}
+              <button key={game.gameId} onClick={() => setSelectedGameId(game.gameId)}
+                className={`flex-shrink-0 flex items-center gap-3 px-4 py-3 rounded-xl border transition-all ${isSelected ? 'bg-[#0B162A] border-[#C83200] text-white ring-2 ring-[#C83200]/30' : 'bg-[var(--bg-elevated)] border-[var(--border-subtle)] hover:border-[var(--border-strong)] hover:shadow-md'}`}>
+                {game.opponentLogo && <Image src={game.opponentLogo} alt={game.opponent} width={36} height={36} className="w-9 h-9" unoptimized />}
                 <div className="text-left">
                   <div className={`text-xs ${isSelected ? 'text-white/60' : 'text-[var(--text-muted)]'}`}>
-                    {game.playoffRound || `Week ${game.week}`} • {gameDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+                    {game.playoffRound || `Week ${game.week}`} &bull; {gameDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
                   </div>
                   <div className="flex items-center gap-2">
                     <span className={`font-semibold ${isSelected ? 'text-white' : 'text-[var(--text-primary)]'}`}>
@@ -223,12 +167,8 @@ export default function BoxScoreClient({ games, initialGameId }: Props) {
                     </span>
                   </div>
                   <div className="flex items-center gap-2 mt-1">
-                    <span className={`text-sm font-bold ${isWin ? 'text-green-500' : 'text-red-500'}`}>
-                      {game.result}
-                    </span>
-                    <span className={`text-sm font-semibold ${isSelected ? 'text-white' : 'text-[var(--text-primary)]'}`}>
-                      {game.bearsScore}-{game.oppScore}
-                    </span>
+                    <span className={`text-sm font-bold ${isWin ? 'text-green-500' : 'text-red-500'}`}>{game.result}</span>
+                    <span className={`text-sm font-semibold ${isSelected ? 'text-white' : 'text-[var(--text-primary)]'}`}>{game.bearsScore}-{game.oppScore}</span>
                   </div>
                 </div>
               </button>
@@ -254,96 +194,68 @@ export default function BoxScoreClient({ games, initialGameId }: Props) {
           {/* Game Header */}
           <div className="bg-gradient-to-r from-[#0B162A] to-[#0B162A]/90 rounded-2xl p-6 text-white">
             <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-6">
-              {/* Matchup */}
               <div className="flex items-center gap-6">
-                {/* Bears */}
                 <div className="flex items-center gap-3">
-                  <Image
-                    src={BEARS_LOGO}
-                    alt="Chicago Bears"
-                    width={64}
-                    height={64}
-                    className="w-16 h-16"
-                  />
+                  <Image src={BEARS_LOGO} alt="Chicago Bears" width={64} height={64} className="w-16 h-16" unoptimized />
                   <div>
                     <div className="text-sm text-white/60">Chicago</div>
                     <div className="text-3xl font-bold">{boxScore.bears.score}</div>
                   </div>
                 </div>
-
-                {/* Result */}
-                <div className={`px-4 py-2 rounded-lg font-bold text-lg ${
-                  boxScore.bears.result === 'W' ? 'bg-green-500/20 text-green-400' : 'bg-red-500/20 text-red-400'
-                }`}>
+                <div className={`px-4 py-2 rounded-lg font-bold text-lg ${boxScore.bears.result === 'W' ? 'bg-green-500/20 text-green-400' : 'bg-red-500/20 text-red-400'}`}>
                   {boxScore.bears.result === 'W' ? 'WIN' : 'LOSS'}
                 </div>
-
-                {/* Opponent */}
                 <div className="flex items-center gap-3">
                   <div className="text-right">
                     <div className="text-sm text-white/60">{boxScore.opponent.fullName}</div>
                     <div className="text-3xl font-bold">{boxScore.opponent.score}</div>
                   </div>
-                  <Image
-                    src={boxScore.opponent.logo}
-                    alt={boxScore.opponent.fullName}
-                    width={64}
-                    height={64}
-                    className="w-16 h-16"
-                  />
+                  <Image src={boxScore.opponent.logo} alt={boxScore.opponent.fullName} width={64} height={64} className="w-16 h-16" unoptimized />
                 </div>
               </div>
-
-              {/* Game Info */}
               <div className="text-right text-sm">
                 <div className="text-white/60">
-                  {boxScore.playoffRound || `Week ${boxScore.week}`} • {new Date(boxScore.date).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}
+                  {boxScore.playoffRound || `Week ${boxScore.week}`} &bull; {new Date(boxScore.date).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}
                 </div>
-                {boxScore.venue && (
-                  <div className="text-white/60 mt-1">{boxScore.venue}</div>
-                )}
-                {boxScore.weather && boxScore.weather.tempF && (
+                {boxScore.venue && <div className="text-white/60 mt-1">{boxScore.venue}</div>}
+                {boxScore.weather?.tempF && (
                   <div className="text-white/60 mt-1">
-                    {boxScore.weather.tempF}°F
-                    {boxScore.weather.windMph && ` • ${boxScore.weather.windMph} mph wind`}
+                    {boxScore.weather.tempF}&deg;F{boxScore.weather.windMph ? ` \u2022 ${boxScore.weather.windMph} mph wind` : ''}
                   </div>
                 )}
               </div>
             </div>
           </div>
 
+          {/* Team Toggle */}
+          <div className="flex rounded-xl overflow-hidden border border-[var(--border-subtle)]">
+            <button onClick={() => setActiveTeam('bears')}
+              className={`flex-1 flex items-center justify-center gap-2 px-4 py-3 font-semibold transition-colors ${activeTeam === 'bears' ? 'bg-[#0B162A] text-white' : 'bg-[var(--bg-elevated)] text-[var(--text-muted)] hover:bg-[var(--bg-hover)]'}`}>
+              <Image src={BEARS_LOGO} alt="Bears" width={24} height={24} className="w-6 h-6" unoptimized />
+              Bears
+            </button>
+            <button onClick={() => setActiveTeam('opponent')}
+              className={`flex-1 flex items-center justify-center gap-2 px-4 py-3 font-semibold transition-colors ${activeTeam === 'opponent' ? 'bg-[#0B162A] text-white' : 'bg-[var(--bg-elevated)] text-[var(--text-muted)] hover:bg-[var(--bg-hover)]'}`}>
+              <Image src={boxScore.opponent.logo} alt={boxScore.opponent.abbrev} width={24} height={24} className="w-6 h-6" unoptimized />
+              {boxScore.opponent.fullName}
+            </button>
+          </div>
+
           {/* Stats Tabs */}
           <div className="bg-[var(--bg-elevated)] border border-[var(--border-subtle)] rounded-2xl overflow-hidden">
             <div className="flex border-b border-[var(--border-subtle)]">
               {(['passing', 'rushing', 'receiving', 'defense'] as const).map((tab) => (
-                <button
-                  key={tab}
-                  onClick={() => setActiveTab(tab)}
-                  className={`flex-1 px-6 py-4 text-sm font-semibold uppercase tracking-wider transition-colors ${
-                    activeTab === tab
-                      ? 'bg-[#C83200] text-white'
-                      : 'text-[var(--text-muted)] hover:bg-[var(--bg-hover)]'
-                  }`}
-                >
+                <button key={tab} onClick={() => setActiveTab(tab)}
+                  className={`flex-1 px-6 py-4 text-sm font-semibold uppercase tracking-wider transition-colors ${activeTab === tab ? 'bg-[#C83200] text-white' : 'text-[var(--text-muted)] hover:bg-[var(--bg-hover)]'}`}>
                   {tab}
                 </button>
               ))}
             </div>
-
-            {/* Stats Table */}
             <div className="p-4">
-              {activeTab === 'passing' && (
-                <PassingTable players={boxScore.bears.passing} />
-              )}
-              {activeTab === 'rushing' && (
-                <RushingTable players={boxScore.bears.rushing} />
-              )}
-              {activeTab === 'receiving' && (
-                <ReceivingTable players={boxScore.bears.receiving} />
-              )}
-              {activeTab === 'defense' && (
-                <DefenseTable players={boxScore.bears.defense} />
-              )}
+              {activeTab === 'passing' && <PassingTable players={currentStats?.passing || []} />}
+              {activeTab === 'rushing' && <RushingTable players={currentStats?.rushing || []} />}
+              {activeTab === 'receiving' && <ReceivingTable players={currentStats?.receiving || []} />}
+              {activeTab === 'defense' && <DefenseTable players={currentStats?.defense || []} />}
             </div>
           </div>
 
@@ -363,10 +275,7 @@ export default function BoxScoreClient({ games, initialGameId }: Props) {
 }
 
 function PassingTable({ players }: { players: PlayerStats[] }) {
-  if (players.length === 0) {
-    return <EmptyStats message="No passing stats available" />
-  }
-
+  if (players.length === 0) return <EmptyStats message="No passing stats available" />
   return (
     <div className="overflow-x-auto">
       <table className="w-full">
@@ -383,12 +292,8 @@ function PassingTable({ players }: { players: PlayerStats[] }) {
         <tbody>
           {players.map((player) => (
             <tr key={player.playerId} className="border-b border-[var(--border-subtle)] last:border-0 hover:bg-[var(--bg-hover)]">
-              <td className="px-4 py-3">
-                <PlayerCell player={player} />
-              </td>
-              <td className="px-4 py-3 text-center font-mono">
-                {player.passingCmp}/{player.passingAtt}
-              </td>
+              <td className="px-4 py-3"><PlayerCell player={player} /></td>
+              <td className="px-4 py-3 text-center font-mono">{player.passingCmp}/{player.passingAtt}</td>
               <td className="px-4 py-3 text-center font-bold">{player.passingYds}</td>
               <td className="px-4 py-3 text-center font-mono text-[var(--text-secondary)]">
                 {player.passingAtt ? (player.passingYds! / player.passingAtt).toFixed(1) : '-'}
@@ -404,10 +309,7 @@ function PassingTable({ players }: { players: PlayerStats[] }) {
 }
 
 function RushingTable({ players }: { players: PlayerStats[] }) {
-  if (players.length === 0) {
-    return <EmptyStats message="No rushing stats available" />
-  }
-
+  if (players.length === 0) return <EmptyStats message="No rushing stats available" />
   return (
     <div className="overflow-x-auto">
       <table className="w-full">
@@ -418,22 +320,18 @@ function RushingTable({ players }: { players: PlayerStats[] }) {
             <th className="px-4 py-3 text-center">YDS</th>
             <th className="px-4 py-3 text-center">AVG</th>
             <th className="px-4 py-3 text-center">TD</th>
-            <th className="px-4 py-3 text-center">LNG</th>
           </tr>
         </thead>
         <tbody>
           {players.map((player) => (
             <tr key={player.playerId} className="border-b border-[var(--border-subtle)] last:border-0 hover:bg-[var(--bg-hover)]">
-              <td className="px-4 py-3">
-                <PlayerCell player={player} />
-              </td>
+              <td className="px-4 py-3"><PlayerCell player={player} /></td>
               <td className="px-4 py-3 text-center font-mono">{player.rushingCar}</td>
               <td className="px-4 py-3 text-center font-bold">{player.rushingYds}</td>
               <td className="px-4 py-3 text-center font-mono text-[var(--text-secondary)]">
                 {player.rushingCar ? (player.rushingYds! / player.rushingCar).toFixed(1) : '-'}
               </td>
               <td className="px-4 py-3 text-center font-bold text-green-500">{player.rushingTd}</td>
-              <td className="px-4 py-3 text-center">{player.rushingLng || '-'}</td>
             </tr>
           ))}
         </tbody>
@@ -443,10 +341,7 @@ function RushingTable({ players }: { players: PlayerStats[] }) {
 }
 
 function ReceivingTable({ players }: { players: PlayerStats[] }) {
-  if (players.length === 0) {
-    return <EmptyStats message="No receiving stats available" />
-  }
-
+  if (players.length === 0) return <EmptyStats message="No receiving stats available" />
   return (
     <div className="overflow-x-auto">
       <table className="w-full">
@@ -458,15 +353,12 @@ function ReceivingTable({ players }: { players: PlayerStats[] }) {
             <th className="px-4 py-3 text-center">YDS</th>
             <th className="px-4 py-3 text-center">AVG</th>
             <th className="px-4 py-3 text-center">TD</th>
-            <th className="px-4 py-3 text-center">LNG</th>
           </tr>
         </thead>
         <tbody>
           {players.map((player) => (
             <tr key={player.playerId} className="border-b border-[var(--border-subtle)] last:border-0 hover:bg-[var(--bg-hover)]">
-              <td className="px-4 py-3">
-                <PlayerCell player={player} />
-              </td>
+              <td className="px-4 py-3"><PlayerCell player={player} /></td>
               <td className="px-4 py-3 text-center font-mono">{player.receivingRec}</td>
               <td className="px-4 py-3 text-center font-mono text-[var(--text-secondary)]">{player.receivingTgts}</td>
               <td className="px-4 py-3 text-center font-bold">{player.receivingYds}</td>
@@ -474,7 +366,6 @@ function ReceivingTable({ players }: { players: PlayerStats[] }) {
                 {player.receivingRec ? (player.receivingYds! / player.receivingRec).toFixed(1) : '-'}
               </td>
               <td className="px-4 py-3 text-center font-bold text-green-500">{player.receivingTd}</td>
-              <td className="px-4 py-3 text-center">{player.receivingLng || '-'}</td>
             </tr>
           ))}
         </tbody>
@@ -484,10 +375,7 @@ function ReceivingTable({ players }: { players: PlayerStats[] }) {
 }
 
 function DefenseTable({ players }: { players: PlayerStats[] }) {
-  if (players.length === 0) {
-    return <EmptyStats message="No defensive stats available" />
-  }
-
+  if (players.length === 0) return <EmptyStats message="No defensive stats available" />
   return (
     <div className="overflow-x-auto">
       <table className="w-full">
@@ -495,25 +383,19 @@ function DefenseTable({ players }: { players: PlayerStats[] }) {
           <tr className="text-left text-xs text-[var(--text-muted)] uppercase tracking-wider border-b border-[var(--border-subtle)]">
             <th className="px-4 py-3">Player</th>
             <th className="px-4 py-3 text-center">TOT</th>
-            <th className="px-4 py-3 text-center">SOLO</th>
             <th className="px-4 py-3 text-center">SACK</th>
-            <th className="px-4 py-3 text-center">TFL</th>
-            <th className="px-4 py-3 text-center">PD</th>
             <th className="px-4 py-3 text-center">INT</th>
+            <th className="px-4 py-3 text-center">FF</th>
           </tr>
         </thead>
         <tbody>
           {players.map((player) => (
             <tr key={player.playerId} className="border-b border-[var(--border-subtle)] last:border-0 hover:bg-[var(--bg-hover)]">
-              <td className="px-4 py-3">
-                <PlayerCell player={player} />
-              </td>
+              <td className="px-4 py-3"><PlayerCell player={player} /></td>
               <td className="px-4 py-3 text-center font-bold">{player.defTacklesTotal}</td>
-              <td className="px-4 py-3 text-center font-mono">{player.defTacklesSolo || '-'}</td>
               <td className="px-4 py-3 text-center font-bold text-[#C83200]">{player.defSacks || '-'}</td>
-              <td className="px-4 py-3 text-center">{player.defTfl || '-'}</td>
-              <td className="px-4 py-3 text-center">{player.defPassesDefended || '-'}</td>
               <td className="px-4 py-3 text-center font-bold text-green-500">{player.defInt || '-'}</td>
+              <td className="px-4 py-3 text-center">{player.fumFum || '-'}</td>
             </tr>
           ))}
         </tbody>
@@ -524,18 +406,10 @@ function DefenseTable({ players }: { players: PlayerStats[] }) {
 
 function PlayerCell({ player }: { player: PlayerStats }) {
   return (
-    <Link
-      href={`/chicago-bears/players/${player.name.toLowerCase().replace(/[^a-z0-9]+/g, '-')}`}
-      className="flex items-center gap-3 group"
-    >
+    <div className="flex items-center gap-3">
       {player.headshotUrl ? (
-        <Image
-          src={player.headshotUrl}
-          alt={player.name}
-          width={36}
-          height={36}
-          className="w-9 h-9 rounded-full object-cover border border-[var(--border-subtle)]"
-        />
+        <Image src={player.headshotUrl} alt={player.name} width={36} height={36}
+          className="w-9 h-9 rounded-full object-cover border border-[var(--border-subtle)]" unoptimized />
       ) : (
         <div className="w-9 h-9 rounded-full bg-[var(--bg-tertiary)] flex items-center justify-center">
           <span className="text-xs font-bold text-[var(--text-muted)]">
@@ -544,19 +418,13 @@ function PlayerCell({ player }: { player: PlayerStats }) {
         </div>
       )}
       <div>
-        <div className="font-medium text-[var(--text-primary)] group-hover:text-[#C83200] transition-colors">
-          {player.name}
-        </div>
+        <div className="font-medium text-[var(--text-primary)]">{player.name}</div>
         <div className="text-xs text-[var(--text-muted)]">{player.position}</div>
       </div>
-    </Link>
+    </div>
   )
 }
 
 function EmptyStats({ message }: { message: string }) {
-  return (
-    <div className="py-12 text-center text-[var(--text-muted)]">
-      {message}
-    </div>
-  )
+  return <div className="py-12 text-center text-[var(--text-muted)]">{message}</div>
 }

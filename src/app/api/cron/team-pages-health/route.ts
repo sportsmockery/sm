@@ -79,6 +79,15 @@ const AUDIT_CONFIG = {
   },
 }
 
+// Box score API config per team
+const BOXSCORE_CONFIG: Record<string, { apiPath: string; gamesTable: string; season: number; scoreCol: string; teamKey: string }> = {
+  bears: { apiPath: '/api/bears/boxscore', gamesTable: 'bears_games_master', season: 2025, scoreCol: 'bears_score', teamKey: 'bears' },
+  bulls: { apiPath: '/api/bulls/boxscore', gamesTable: 'bulls_games_master', season: 2026, scoreCol: 'bulls_score', teamKey: 'bulls' },
+  blackhawks: { apiPath: '/api/blackhawks/boxscore', gamesTable: 'blackhawks_games_master', season: 2026, scoreCol: 'blackhawks_score', teamKey: 'blackhawks' },
+  cubs: { apiPath: '/api/cubs/boxscore', gamesTable: 'cubs_games_master', season: 2025, scoreCol: 'cubs_score', teamKey: 'cubs' },
+  whitesox: { apiPath: '/api/whitesox/boxscore', gamesTable: 'whitesox_games_master', season: 2025, scoreCol: 'whitesox_score', teamKey: 'whitesox' },
+}
+
 interface HealthCheckResult {
   team: string
   timestamp: string
@@ -91,6 +100,8 @@ interface HealthCheckResult {
     statsCount: number
     playersWithStats: number
     espnIdMappingOk: boolean
+    boxscoreApiOk: boolean
+    gamesWithNullStats: number
     issues: string[]
   }
   overallStatus: 'healthy' | 'warning' | 'error'
@@ -331,6 +342,72 @@ async function runTeamHealthCheck(team: string, key: string): Promise<HealthChec
     issues.push(`Stats/ESPN ID check failed: ${e instanceof Error ? e.message : 'Unknown'}`)
   }
 
+  // 3. Box score API check - verify recent game returns player stats
+  let boxscoreApiOk = false
+  let gamesWithNullStats = 0
+  const bsConfig = BOXSCORE_CONFIG[key]
+  if (bsConfig) {
+    try {
+      // Get most recent completed game
+      const { data: recentGame } = await datalabClient
+        .from(bsConfig.gamesTable)
+        .select('id')
+        .eq('season', bsConfig.season)
+        .not(bsConfig.scoreCol, 'is', null)
+        .order('game_date', { ascending: false })
+        .limit(1)
+        .single()
+
+      if (recentGame) {
+        const bsUrl = `${BASE_URL}${bsConfig.apiPath}/${recentGame.id}`
+        try {
+          const bsResp = await fetch(bsUrl, { cache: 'no-store' })
+          if (bsResp.ok) {
+            const bsData = await bsResp.json()
+            // Check that the response has player stats
+            const teamData = bsData[bsConfig.teamKey] || bsData.bears || bsData.bulls || bsData.blackhawks || bsData.cubs || bsData.whitesox
+            if (teamData && ((teamData.batters?.length > 0) || (teamData.pitchers?.length > 0) || (teamData.passing?.length > 0) || (teamData.stats?.length > 0) || (teamData.skaters?.length > 0))) {
+              boxscoreApiOk = true
+            } else {
+              issues.push(`Box score API returned no player stats for game ${recentGame.id}`)
+            }
+          } else {
+            issues.push(`Box score API returned ${bsResp.status} for game ${recentGame.id}`)
+          }
+        } catch {
+          issues.push(`Box score API fetch failed for game ${recentGame.id}`)
+        }
+      }
+
+      // Check for games with all-NULL stats (like the Bears game 432 issue)
+      const { data: recentGames } = await datalabClient
+        .from(bsConfig.gamesTable)
+        .select('id')
+        .eq('season', bsConfig.season)
+        .not(bsConfig.scoreCol, 'is', null)
+        .order('game_date', { ascending: false })
+        .limit(5)
+
+      if (recentGames) {
+        for (const g of recentGames) {
+          const { count } = await datalabClient
+            .from(config.statsTable)
+            .select('*', { count: 'exact', head: true })
+            .eq(key === 'bears' ? 'bears_game_id' : 'game_id', g.id)
+
+          if (!count || count === 0) {
+            gamesWithNullStats++
+          }
+        }
+        if (gamesWithNullStats > 0) {
+          issues.push(`${gamesWithNullStats} recent completed games have no player stats`)
+        }
+      }
+    } catch (e) {
+      issues.push(`Box score check failed: ${e instanceof Error ? e.message : 'Unknown'}`)
+    }
+  }
+
   // Determine overall status
   let overallStatus: 'healthy' | 'warning' | 'error' = 'healthy'
   if (issues.length > 0) {
@@ -353,6 +430,8 @@ async function runTeamHealthCheck(team: string, key: string): Promise<HealthChec
       statsCount,
       playersWithStats,
       espnIdMappingOk,
+      boxscoreApiOk,
+      gamesWithNullStats,
       issues,
     },
     overallStatus,

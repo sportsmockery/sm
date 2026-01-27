@@ -125,6 +125,21 @@ export async function GET(request: NextRequest) {
       }
     }
 
+    // Revalidate boxscore API routes for in-season teams (Bulls, Blackhawks)
+    const IN_SEASON_BOXSCORE_PATHS = [
+      '/api/bulls/boxscore',
+      '/api/blackhawks/boxscore',
+    ]
+    for (const apiPath of IN_SEASON_BOXSCORE_PATHS) {
+      try {
+        revalidatePath(apiPath, 'layout')
+        revalidated.push(apiPath)
+      } catch (e) {
+        console.error(`[Sync Teams Cron] Failed to revalidate ${apiPath}:`, e)
+        errors.push(apiPath)
+      }
+    }
+
     const duration = Date.now() - startTime
 
     console.log(`[Sync Teams Cron] Hourly sync complete in ${duration}ms:`, {
