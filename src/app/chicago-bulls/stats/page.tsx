@@ -51,8 +51,8 @@ export default async function BullsStatsPage() {
               positive={(stats.team.ppg - stats.team.oppg) > 0}
               negative={(stats.team.ppg - stats.team.oppg) < 0}
             />
-            <StatCard label="FG%" value={stats.team.fgPct ? `${(stats.team.fgPct * 100).toFixed(1)}%` : '—'} />
-            <StatCard label="3P%" value={stats.team.threePct ? `${(stats.team.threePct * 100).toFixed(1)}%` : '—'} />
+            <StatCard label="FG%" value={stats.team.fgPct ? `${stats.team.fgPct.toFixed(1)}%` : '—'} />
+            <StatCard label="3P%" value={stats.team.threePct ? `${stats.team.threePct.toFixed(1)}%` : '—'} />
           </div>
         </section>
 
