@@ -109,6 +109,7 @@ await testPage('bears', 'Stats (/chicago-bears/stats)', async () => {
     status: teamStats ? '✅' : '⚠️',
     data: {
       teamStats: teamStats ? `PPG: ${teamStats.points_per_game}` : 'MISSING',
+      nullColumns: teamStats ? ['points_per_game', 'total_points'].filter(c => teamStats[c] == null).join(', ') || 'none' : 'N/A',
       playerStatEntries: count || 0,
       playersWithStats: uniquePlayers.length
     }
@@ -197,13 +198,15 @@ await testPage('bulls', 'Stats (/chicago-bulls/stats)', async () => {
   const { data: playerStats, count } = await supabase.from('bulls_player_game_stats').select('player_id', { count: 'exact' }).eq('season', SEASONS.bulls)
   const uniquePlayers = [...new Set(playerStats?.map(s => s.player_id) || [])]
 
-  // Check if team stats table exists
-  const { error: teamStatsErr } = await supabase.from('bulls_team_season_stats').select('*').limit(1)
+  // Check team stats with correct column names: field_goal_pct, three_point_pct, free_throw_pct
+  const { data: teamStats, error: teamStatsErr } = await supabase.from('bulls_team_season_stats').select('*').eq('season', SEASONS.bulls).single()
+  const bullsNullCols = teamStats ? ['field_goal_pct', 'three_point_pct', 'free_throw_pct', 'rebounds_per_game', 'assists_per_game'].filter(c => teamStats[c] == null) : []
 
   return {
     status: count > 0 ? '✅' : '❌',
     data: {
       teamStats: teamStatsErr ? '❌ TABLE MISSING' : '✅',
+      nullColumns: bullsNullCols.length > 0 ? bullsNullCols.join(', ') : 'none',
       playerStatEntries: count || 0,
       playersWithStats: uniquePlayers.length
     }
@@ -285,12 +288,15 @@ await testPage('cubs', 'Stats (/chicago-cubs/stats)', async () => {
   const { data: playerStats, count } = await supabase.from('cubs_player_game_stats').select('player_id', { count: 'exact' }).eq('season', SEASONS.cubs)
   const uniquePlayers = [...new Set(playerStats?.map(s => s.player_id) || [])]
 
-  const { error: teamStatsErr } = await supabase.from('cubs_team_season_stats').select('*').limit(1)
+  // Check team stats with correct column names: batting_average, era, ops
+  const { data: cubsTeamStats, error: teamStatsErr } = await supabase.from('cubs_team_season_stats').select('*').eq('season', SEASONS.cubs).single()
+  const cubsNullCols = cubsTeamStats ? ['batting_average', 'era', 'ops'].filter(c => cubsTeamStats[c] == null) : []
 
   return {
     status: count > 0 ? '✅' : '❌',
     data: {
       teamStats: teamStatsErr ? '❌ TABLE MISSING' : '✅',
+      nullColumns: cubsNullCols.length > 0 ? cubsNullCols.join(', ') : 'none',
       playerStatEntries: count || 0,
       playersWithStats: uniquePlayers.length
     }
@@ -375,12 +381,15 @@ await testPage('whitesox', 'Stats (/chicago-white-sox/stats)', async () => {
   const { data: playerStats, count } = await supabase.from('whitesox_player_game_stats').select('player_id', { count: 'exact' }).eq('season', SEASONS.whitesox)
   const uniquePlayers = [...new Set(playerStats?.map(s => s.player_id) || [])]
 
-  const { error: teamStatsErr } = await supabase.from('whitesox_team_season_stats').select('*').limit(1)
+  // Check team stats with correct column names: batting_average, era, ops
+  const { data: wsTeamStats, error: teamStatsErr } = await supabase.from('whitesox_team_season_stats').select('*').eq('season', SEASONS.whitesox).single()
+  const wsNullCols = wsTeamStats ? ['batting_average', 'era', 'ops'].filter(c => wsTeamStats[c] == null) : []
 
   return {
     status: count > 0 ? '✅' : '❌',
     data: {
       teamStats: teamStatsErr ? '❌ TABLE MISSING' : '✅',
+      nullColumns: wsNullCols.length > 0 ? wsNullCols.join(', ') : 'none',
       playerStatEntries: count || 0,
       playersWithStats: uniquePlayers.length
     }
@@ -471,12 +480,15 @@ await testPage('blackhawks', 'Stats (/chicago-blackhawks/stats)', async () => {
   const { data: playerStats, count } = await supabase.from('blackhawks_player_game_stats').select('player_id', { count: 'exact' }).eq('season', SEASONS.blackhawks)
   const uniquePlayers = [...new Set(playerStats?.map(s => s.player_id) || [])]
 
-  const { error: teamStatsErr } = await supabase.from('blackhawks_team_season_stats').select('*').limit(1)
+  // Check team stats with correct column names: power_play_pct, penalty_kill_pct, goals_per_game
+  const { data: bhTeamStats, error: teamStatsErr } = await supabase.from('blackhawks_team_season_stats').select('*').eq('season', SEASONS.blackhawks).single()
+  const bhNullCols = bhTeamStats ? ['power_play_pct', 'penalty_kill_pct', 'goals_per_game'].filter(c => bhTeamStats[c] == null) : []
 
   return {
     status: count > 0 ? '✅' : '❌',
     data: {
       teamStats: teamStatsErr ? '❌ TABLE MISSING' : '✅',
+      nullColumns: bhNullCols.length > 0 ? bhNullCols.join(', ') : 'none',
       playerStatEntries: count || 0,
       playersWithStats: uniquePlayers.length
     }

@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { revalidatePath } from 'next/cache'
-import { datalabClient } from '@/lib/supabase-datalab'
+import { datalabAdmin as datalabClient } from '@/lib/supabase-datalab'
 
 // Allow longer timeout for sync operations
 export const maxDuration = 60
@@ -41,12 +41,12 @@ function getCurrentSeasonForLeague(league: string): number {
 }
 
 // Team configuration for data verification
-const TEAM_CONFIG: Record<string, { table: string; league: string; scoreCol: string; winCol: string }> = {
-  bears: { table: 'bears_games_master', league: 'NFL', scoreCol: 'bears_score', winCol: 'bears_win' },
-  bulls: { table: 'bulls_games_master', league: 'NBA', scoreCol: 'bulls_score', winCol: 'bulls_win' },
-  blackhawks: { table: 'blackhawks_games_master', league: 'NHL', scoreCol: 'blackhawks_score', winCol: 'blackhawks_win' },
-  cubs: { table: 'cubs_games_master', league: 'MLB', scoreCol: 'cubs_score', winCol: 'cubs_win' },
-  whitesox: { table: 'whitesox_games_master', league: 'MLB', scoreCol: 'whitesox_score', winCol: 'whitesox_win' },
+const TEAM_CONFIG: Record<string, { table: string; league: string; scoreCol: string; winCol: string; teamStatsTable: string; teamStatsColumns: string[] }> = {
+  bears: { table: 'bears_games_master', league: 'NFL', scoreCol: 'bears_score', winCol: 'bears_win', teamStatsTable: 'bears_team_season_stats', teamStatsColumns: ['points_per_game', 'total_points'] },
+  bulls: { table: 'bulls_games_master', league: 'NBA', scoreCol: 'bulls_score', winCol: 'bulls_win', teamStatsTable: 'bulls_team_season_stats', teamStatsColumns: ['field_goal_pct', 'three_point_pct', 'free_throw_pct', 'rebounds_per_game', 'assists_per_game'] },
+  blackhawks: { table: 'blackhawks_games_master', league: 'NHL', scoreCol: 'blackhawks_score', winCol: 'blackhawks_win', teamStatsTable: 'blackhawks_team_season_stats', teamStatsColumns: ['power_play_pct', 'penalty_kill_pct', 'goals_per_game'] },
+  cubs: { table: 'cubs_games_master', league: 'MLB', scoreCol: 'cubs_score', winCol: 'cubs_win', teamStatsTable: 'cubs_team_season_stats', teamStatsColumns: ['batting_average', 'era', 'ops'] },
+  whitesox: { table: 'whitesox_games_master', league: 'MLB', scoreCol: 'whitesox_score', winCol: 'whitesox_win', teamStatsTable: 'whitesox_team_season_stats', teamStatsColumns: ['batting_average', 'era', 'ops'] },
 }
 
 interface TeamDataVerification {
@@ -58,6 +58,8 @@ interface TeamDataVerification {
   losses: number
   otLosses?: number
   lastGameDate: string | null
+  teamStatsPopulated: boolean
+  teamStatsNullColumns: string[]
   dataQuality: 'good' | 'warning' | 'error'
   issues: string[]
 }
@@ -179,7 +181,7 @@ export async function GET(request: NextRequest) {
  */
 async function verifyTeamData(
   teamKey: string,
-  config: { table: string; league: string; season: number; scoreCol: string; winCol: string }
+  config: { table: string; league: string; season: number; scoreCol: string; winCol: string; teamStatsTable: string; teamStatsColumns: string[] }
 ): Promise<TeamDataVerification> {
   const issues: string[] = []
 
@@ -201,6 +203,8 @@ async function verifyTeamData(
         wins: 0,
         losses: 0,
         lastGameDate: null,
+        teamStatsPopulated: false,
+        teamStatsNullColumns: [],
         dataQuality: 'error',
         issues: [`Failed to fetch data: ${error.message}`],
       }
@@ -215,6 +219,8 @@ async function verifyTeamData(
         wins: 0,
         losses: 0,
         lastGameDate: null,
+        teamStatsPopulated: false,
+        teamStatsNullColumns: [],
         dataQuality: 'warning',
         issues: ['No games found for current season'],
       }
@@ -260,6 +266,37 @@ async function verifyTeamData(
     // Get last game date
     const lastGameDate = completedGames.length > 0 ? completedGames[0].game_date as string : null
 
+    // Check team stats table
+    let teamStatsPopulated = false
+    let teamStatsNullColumns: string[] = []
+    try {
+      const { data: teamStats, error: tsError } = await datalabClient!
+        .from(config.teamStatsTable)
+        .select('*')
+        .eq('season', config.season)
+        .limit(1)
+        .single()
+
+      if (tsError) {
+        issues.push(`Team stats table error: ${tsError.message}`)
+      } else if (teamStats) {
+        teamStatsPopulated = true
+        // Check each expected column for null values
+        for (const col of config.teamStatsColumns) {
+          if (teamStats[col] === null || teamStats[col] === undefined) {
+            teamStatsNullColumns.push(col)
+          }
+        }
+        if (teamStatsNullColumns.length > 0) {
+          issues.push(`Team stats null columns: ${teamStatsNullColumns.join(', ')}`)
+        }
+      } else {
+        issues.push('No team stats row for current season')
+      }
+    } catch {
+      issues.push(`Team stats table ${config.teamStatsTable} not accessible`)
+    }
+
     return {
       team: teamKey,
       league: config.league,
@@ -269,6 +306,8 @@ async function verifyTeamData(
       losses,
       otLosses: config.league === 'NHL' ? otLosses : undefined,
       lastGameDate,
+      teamStatsPopulated,
+      teamStatsNullColumns,
       dataQuality: issues.length > 0 ? 'warning' : 'good',
       issues,
     }
@@ -281,6 +320,8 @@ async function verifyTeamData(
       wins: 0,
       losses: 0,
       lastGameDate: null,
+      teamStatsPopulated: false,
+      teamStatsNullColumns: [],
       dataQuality: 'error',
       issues: [`Exception: ${error instanceof Error ? error.message : 'Unknown error'}`],
     }

@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { datalabClient, datalabAdmin } from '@/lib/supabase-datalab'
+import { datalabAdmin } from '@/lib/supabase-datalab'
 
 // Allow longer timeout for health checks
 export const maxDuration = 60
@@ -35,6 +35,8 @@ const AUDIT_CONFIG = {
     espnIdColumn: 'espn_id', // Column in players table that maps to stats.player_id
     season: 2025, // NFL uses starting year
     expectedRosterRange: [53, 90], // roster + practice squad
+    teamStatsTable: 'bears_team_season_stats',
+    teamStatsColumns: ['points_per_game', 'total_points'],
   },
   bulls: {
     recordTable: 'bulls_seasons',
@@ -45,6 +47,8 @@ const AUDIT_CONFIG = {
     espnIdColumn: 'espn_id',
     season: 2026, // NBA uses ending year
     expectedRosterRange: [15, 20],
+    teamStatsTable: 'bulls_team_season_stats',
+    teamStatsColumns: ['field_goal_pct', 'three_point_pct', 'free_throw_pct', 'rebounds_per_game', 'assists_per_game'],
   },
   blackhawks: {
     recordTable: 'blackhawks_seasons',
@@ -56,6 +60,8 @@ const AUDIT_CONFIG = {
     espnIdColumn: 'espn_id',
     season: 2026, // NHL uses ending year
     expectedRosterRange: [20, 25],
+    teamStatsTable: 'blackhawks_team_season_stats',
+    teamStatsColumns: ['power_play_pct', 'penalty_kill_pct', 'goals_per_game'],
   },
   cubs: {
     recordTable: 'cubs_seasons',
@@ -66,6 +72,8 @@ const AUDIT_CONFIG = {
     espnIdColumn: 'espn_id',
     season: 2025, // MLB uses calendar year
     expectedRosterRange: [26, 45],
+    teamStatsTable: 'cubs_team_season_stats',
+    teamStatsColumns: ['batting_average', 'era', 'ops'],
   },
   whitesox: {
     recordTable: 'whitesox_seasons',
@@ -76,6 +84,8 @@ const AUDIT_CONFIG = {
     espnIdColumn: 'espn_id',
     season: 2025, // MLB uses calendar year
     expectedRosterRange: [26, 45],
+    teamStatsTable: 'whitesox_team_season_stats',
+    teamStatsColumns: ['batting_average', 'era', 'ops'],
   },
 }
 
@@ -100,6 +110,8 @@ interface HealthCheckResult {
     statsCount: number
     playersWithStats: number
     espnIdMappingOk: boolean
+    teamStatsPopulated: boolean
+    teamStatsNullColumns: string[]
     boxscoreApiOk: boolean
     gamesWithNullStats: number
     issues: string[]
@@ -241,7 +253,7 @@ async function runTeamHealthCheck(team: string, key: string): Promise<HealthChec
 
   // Check record table exists
   try {
-    const { data, error } = await datalabClient
+    const { data, error } = await datalabAdmin
       .from(config.recordTable)
       .select('*')
       .eq('season', config.season)
@@ -257,7 +269,7 @@ async function runTeamHealthCheck(team: string, key: string): Promise<HealthChec
 
   // Check games count
   try {
-    const { count, error } = await datalabClient
+    const { count, error } = await datalabAdmin
       .from(config.gamesTable)
       .select('*', { count: 'exact', head: true })
       .eq('season', config.season)
@@ -272,7 +284,7 @@ async function runTeamHealthCheck(team: string, key: string): Promise<HealthChec
 
   // Check roster count with correct column
   try {
-    const { count, error } = await datalabClient
+    const { count, error } = await datalabAdmin
       .from(config.rosterTable)
       .select('*', { count: 'exact', head: true })
       .eq(config.rosterActiveColumn, true)
@@ -297,7 +309,7 @@ async function runTeamHealthCheck(team: string, key: string): Promise<HealthChec
   // This verifies the join between players and stats tables works correctly
   try {
     // Get stats count for season
-    const { count: rawStatsCount, error: statsError } = await datalabClient
+    const { count: rawStatsCount, error: statsError } = await datalabAdmin
       .from(config.statsTable)
       .select('*', { count: 'exact', head: true })
       .eq('season', config.season)
@@ -311,14 +323,14 @@ async function runTeamHealthCheck(team: string, key: string): Promise<HealthChec
     // This is the critical check that validates our join pattern works
     if (statsCount > 0) {
       // Get unique player_ids from stats table
-      const { data: statsPlayerIds } = await datalabClient
+      const { data: statsPlayerIds } = await datalabAdmin
         .from(config.statsTable)
         .select('player_id')
         .eq('season', config.season)
         .limit(1000)
 
       // Get ESPN IDs from players table
-      const { data: playerEspnIds } = await datalabClient
+      const { data: playerEspnIds } = await datalabAdmin
         .from(config.rosterTable)
         .select(`${config.espnIdColumn}`)
         .eq(config.rosterActiveColumn, true)
@@ -342,14 +354,44 @@ async function runTeamHealthCheck(team: string, key: string): Promise<HealthChec
     issues.push(`Stats/ESPN ID check failed: ${e instanceof Error ? e.message : 'Unknown'}`)
   }
 
-  // 3. Box score API check - verify recent game returns player stats
+  // 3. Team stats table check
+  let teamStatsPopulated = false
+  let teamStatsNullColumns: string[] = []
+  try {
+    const { data: teamStats, error: tsError } = await datalabAdmin
+      .from(config.teamStatsTable)
+      .select('*')
+      .eq('season', config.season)
+      .limit(1)
+      .single()
+
+    if (tsError) {
+      issues.push(`Team stats table error: ${tsError.message}`)
+    } else if (teamStats) {
+      teamStatsPopulated = true
+      for (const col of config.teamStatsColumns) {
+        if (teamStats[col] === null || teamStats[col] === undefined) {
+          teamStatsNullColumns.push(col)
+        }
+      }
+      if (teamStatsNullColumns.length > 0) {
+        issues.push(`Team stats null columns: ${teamStatsNullColumns.join(', ')}`)
+      }
+    } else {
+      issues.push('No team stats row for current season')
+    }
+  } catch {
+    issues.push(`Team stats table ${config.teamStatsTable} not accessible`)
+  }
+
+  // 4. Box score API check - verify recent game returns player stats
   let boxscoreApiOk = false
   let gamesWithNullStats = 0
   const bsConfig = BOXSCORE_CONFIG[key]
   if (bsConfig) {
     try {
       // Get most recent completed game
-      const { data: recentGame } = await datalabClient
+      const { data: recentGame } = await datalabAdmin
         .from(bsConfig.gamesTable)
         .select('id')
         .eq('season', bsConfig.season)
@@ -380,7 +422,7 @@ async function runTeamHealthCheck(team: string, key: string): Promise<HealthChec
       }
 
       // Check for games with all-NULL stats (like the Bears game 432 issue)
-      const { data: recentGames } = await datalabClient
+      const { data: recentGames } = await datalabAdmin
         .from(bsConfig.gamesTable)
         .select('id')
         .eq('season', bsConfig.season)
@@ -390,7 +432,7 @@ async function runTeamHealthCheck(team: string, key: string): Promise<HealthChec
 
       if (recentGames) {
         for (const g of recentGames) {
-          const { count } = await datalabClient
+          const { count } = await datalabAdmin
             .from(config.statsTable)
             .select('*', { count: 'exact', head: true })
             .eq(key === 'bears' ? 'bears_game_id' : 'game_id', g.id)
@@ -430,6 +472,8 @@ async function runTeamHealthCheck(team: string, key: string): Promise<HealthChec
       statsCount,
       playersWithStats,
       espnIdMappingOk,
+      teamStatsPopulated,
+      teamStatsNullColumns,
       boxscoreApiOk,
       gamesWithNullStats,
       issues,
