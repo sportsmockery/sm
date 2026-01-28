@@ -13,6 +13,7 @@ import { ThemeProvider } from '@/hooks/useTheme'
 import { SubscriptionProvider } from '@/hooks/useSubscription'
 import { AdsProvider } from '@/hooks/useAds'
 import { AudioPlayerProvider } from '@/hooks/useAudioPlayer'
+import { GMProvider } from '@/lib/gm-context'
 
 // Prevent splash screen from auto-hiding
 SplashScreen.preventAutoHideAsync()
@@ -65,6 +66,7 @@ export default function RootLayout() {
               <SubscriptionProvider>
               <AdsProvider>
                 <AudioPlayerProvider>
+                <GMProvider>
                 <Stack
                   screenOptions={{
                     headerShown: false,
@@ -121,8 +123,72 @@ export default function RootLayout() {
                       animation: 'slide_from_right',
                     }}
                   />
+                  <Stack.Screen
+                    name="gm/index"
+                    options={{
+                      presentation: 'card',
+                      animation: 'slide_from_right',
+                    }}
+                  />
+                  <Stack.Screen
+                    name="gm/roster"
+                    options={{
+                      presentation: 'card',
+                      animation: 'slide_from_right',
+                    }}
+                  />
+                  <Stack.Screen
+                    name="gm/opponent"
+                    options={{
+                      presentation: 'card',
+                      animation: 'slide_from_right',
+                    }}
+                  />
+                  <Stack.Screen
+                    name="gm/opponent-roster"
+                    options={{
+                      presentation: 'card',
+                      animation: 'slide_from_right',
+                    }}
+                  />
+                  <Stack.Screen
+                    name="gm/draft-picks"
+                    options={{
+                      presentation: 'card',
+                      animation: 'slide_from_right',
+                    }}
+                  />
+                  <Stack.Screen
+                    name="gm/review"
+                    options={{
+                      presentation: 'card',
+                      animation: 'slide_from_right',
+                    }}
+                  />
+                  <Stack.Screen
+                    name="gm/result"
+                    options={{
+                      presentation: 'card',
+                      animation: 'slide_from_bottom',
+                    }}
+                  />
+                  <Stack.Screen
+                    name="gm/history"
+                    options={{
+                      presentation: 'card',
+                      animation: 'slide_from_right',
+                    }}
+                  />
+                  <Stack.Screen
+                    name="gm/leaderboard"
+                    options={{
+                      presentation: 'card',
+                      animation: 'slide_from_right',
+                    }}
+                  />
                 </Stack>
                 <StatusBar style="auto" />
+                </GMProvider>
                 </AudioPlayerProvider>
               </AdsProvider>
               </SubscriptionProvider>

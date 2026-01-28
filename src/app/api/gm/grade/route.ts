@@ -1,29 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server'
 import Anthropic from '@anthropic-ai/sdk'
-import { createServerClient } from '@supabase/ssr'
-import { cookies } from 'next/headers'
+import { getGMAuthUser } from '@/lib/gm-auth'
 import { datalabAdmin } from '@/lib/supabase-datalab'
 import { randomBytes } from 'crypto'
 
 export const dynamic = 'force-dynamic'
 
-async function getAuthUser() {
-  const cookieStore = await cookies()
-  const supabase = createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-    {
-      cookies: {
-        getAll() { return cookieStore.getAll() },
-        setAll(cookiesToSet) {
-          try { cookiesToSet.forEach(({ name, value, options }) => { cookieStore.set(name, value, options) }) } catch {}
-        },
-      },
-    }
-  )
-  const { data: { user } } = await supabase.auth.getUser()
-  return user
-}
 
 function getAnthropic() {
   return new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY! })
@@ -129,7 +111,7 @@ export async function POST(request: NextRequest) {
   const startTime = Date.now()
 
   try {
-    const user = await getAuthUser()
+    const user = await getGMAuthUser(request)
     if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
     // Rate limiting: max 10 trades per minute
@@ -561,7 +543,7 @@ Grade this trade from the perspective of the ${teamDisplayNames[chicago_team]}.`
     console.error('GM grade error:', error)
 
     try {
-      const user = await getAuthUser()
+      const user = await getGMAuthUser(request)
       await datalabAdmin.from('gm_errors').insert({
         user_id: user?.id,
         error_type: 'ai',

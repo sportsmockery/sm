@@ -1,7 +1,11 @@
 import { Tabs } from 'expo-router'
+import { Image, View } from 'react-native'
 import { Ionicons } from '@expo/vector-icons'
 import { useTheme } from '@/hooks/useTheme'
 import { COLORS } from '@/lib/config'
+
+const starIcon = require('@/assets/images/star.png')
+const scoutMobileIcon = require('@/assets/images/scout-mobile.png')
 
 export default function TabsLayout() {
   const { isDark } = useTheme()
@@ -42,8 +46,14 @@ export default function TabsLayout() {
       <Tabs.Screen
         name="index"
         options={{
-          title: 'Home',
-          tabBarIcon: getTabBarIcon('home', false),
+          title: 'Feed',
+          tabBarIcon: ({ color, size }) => (
+            <Image
+              source={starIcon}
+              style={{ width: size, height: size, tintColor: color }}
+              resizeMode="contain"
+            />
+          ),
         }}
       />
       <Tabs.Screen
@@ -63,8 +73,18 @@ export default function TabsLayout() {
       <Tabs.Screen
         name="ask-ai"
         options={{
-          title: 'Ask AI',
-          tabBarIcon: getTabBarIcon('sparkles', false),
+          title: 'Scout AI',
+          tabBarIcon: ({ size, focused }) => (
+            <Image
+              source={scoutMobileIcon}
+              style={{
+                width: size,
+                height: size,
+                tintColor: focused ? COLORS.primary : undefined,
+              }}
+              resizeMode="contain"
+            />
+          ),
         }}
       />
       <Tabs.Screen

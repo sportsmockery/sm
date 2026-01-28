@@ -145,6 +145,10 @@ class ApiClient {
     this.authToken = token
   }
 
+  getAuthToken(): string | null {
+    return this.authToken
+  }
+
   private async fetch<T>(
     endpoint: string,
     options: RequestInit = {}
@@ -185,6 +189,7 @@ class ApiClient {
   async getFeed(options?: {
     viewedIds?: number[]
     teamPreferences?: string[]
+    onlySelectedTeams?: boolean
   }): Promise<FeedResponse> {
     if (options?.viewedIds || options?.teamPreferences) {
       return this.fetch<FeedResponse>('/api/feed', {
@@ -192,6 +197,7 @@ class ApiClient {
         body: JSON.stringify({
           viewed_ids: options.viewedIds || [],
           team_preferences: options.teamPreferences || [],
+          only_selected_teams: options.onlySelectedTeams || false,
         }),
       })
     }
@@ -416,11 +422,26 @@ class ApiClient {
   ): Promise<{ id: number; title: string; slug: string; team?: string } | null> {
     try {
       if (mode === 'team' && team) {
-        // Get first article from team
-        const response = await this.getTeamArticles(team, { limit: 1 })
-        if (response.posts && response.posts.length > 0) {
-          const post = response.posts[0]
-          return { id: post.id, title: post.title, slug: post.slug, team }
+        // Support comma-separated teams — fetch from all and pick most recent by publish date
+        const teams = team.split(',').filter(Boolean)
+        const results = await Promise.all(
+          teams.map(async (t) => {
+            const response = await this.getTeamArticles(t.trim(), { limit: 3 })
+            return (response.posts || []).map((post: Post) => ({
+              id: post.id,
+              title: post.title,
+              slug: post.slug,
+              team: t.trim(),
+              published_at: post.published_at,
+            }))
+          })
+        )
+        const allPosts = results.flat().sort(
+          (a, b) => new Date(b.published_at).getTime() - new Date(a.published_at).getTime()
+        )
+        if (allPosts.length > 0) {
+          const { id, title, slug, team: postTeam } = allPosts[0]
+          return { id, title, slug, team: postTeam }
         }
       } else {
         // Get first recent article

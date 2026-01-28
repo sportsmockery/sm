@@ -4,13 +4,18 @@ import { Link, useRouter } from 'expo-router'
 import { SafeAreaView } from 'react-native-safe-area-context'
 
 import { useTheme } from '@/hooks/useTheme'
+import { useFeed } from '@/hooks/useFeed'
 import { TEAMS, COLORS } from '@/lib/config'
 
 export default function TeamsScreen() {
   const router = useRouter()
   const { colors } = useTheme()
+  const { teamPreferences, onlySelectedTeams } = useFeed()
 
-  const teamList = Object.values(TEAMS)
+  const allTeams = Object.values(TEAMS)
+  const teamList = onlySelectedTeams
+    ? allTeams.filter(t => teamPreferences.includes(t.id))
+    : allTeams
 
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]} edges={['top']}>
@@ -27,6 +32,24 @@ export default function TeamsScreen() {
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
       >
+        {/* GM Trade Simulator Banner */}
+        <TouchableOpacity
+          style={styles.gmBanner}
+          activeOpacity={0.85}
+          onPress={() => router.push('/gm')}
+        >
+          <View style={styles.gmBannerContent}>
+            <View style={styles.gmBannerLeft}>
+              <Text style={styles.gmBannerBadge}>NEW</Text>
+              <Text style={styles.gmBannerTitle}>GM Trade Simulator</Text>
+              <Text style={styles.gmBannerDesc}>Build trades and get AI grades</Text>
+            </View>
+            <View style={styles.gmBannerArrow}>
+              <Text style={styles.gmBannerArrowText}>{'>'}</Text>
+            </View>
+          </View>
+        </TouchableOpacity>
+
         {/* Team Cards */}
         {teamList.map((team) => (
           <Link key={team.id} href={`/team/${team.id}`} asChild>
@@ -217,5 +240,64 @@ const styles = StyleSheet.create({
     fontSize: 13,
     fontFamily: 'Montserrat-Regular',
     marginTop: 2,
+  },
+  gmBanner: {
+    borderRadius: 16,
+    marginBottom: 16,
+    overflow: 'hidden',
+    backgroundColor: '#bc0000',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.2,
+    shadowRadius: 6,
+    elevation: 4,
+  },
+  gmBannerContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: 20,
+    paddingVertical: 16,
+  },
+  gmBannerLeft: {
+    flex: 1,
+  },
+  gmBannerBadge: {
+    color: '#bc0000',
+    backgroundColor: '#fff',
+    alignSelf: 'flex-start',
+    fontSize: 10,
+    fontFamily: 'Montserrat-Bold',
+    paddingHorizontal: 8,
+    paddingVertical: 2,
+    borderRadius: 4,
+    overflow: 'hidden',
+    marginBottom: 6,
+    letterSpacing: 1,
+  },
+  gmBannerTitle: {
+    color: '#fff',
+    fontSize: 18,
+    fontFamily: 'Montserrat-Bold',
+    marginBottom: 2,
+  },
+  gmBannerDesc: {
+    color: 'rgba(255,255,255,0.85)',
+    fontSize: 13,
+    fontFamily: 'Montserrat-Regular',
+  },
+  gmBannerArrow: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    backgroundColor: 'rgba(255,255,255,0.2)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginLeft: 12,
+  },
+  gmBannerArrowText: {
+    color: '#fff',
+    fontSize: 18,
+    fontFamily: 'Montserrat-Bold',
   },
 })
