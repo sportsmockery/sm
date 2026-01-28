@@ -9,7 +9,7 @@ export const dynamic = 'force-dynamic'
 export async function GET(request: NextRequest) {
   try {
     const user = await getGMAuthUser(request)
-    if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    if (!user) return NextResponse.json({ error: 'Sign in to view error logs', code: 'AUTH_REQUIRED' }, { status: 401 })
 
     const errorType = request.nextUrl.searchParams.get('error_type')
     const source = request.nextUrl.searchParams.get('source')

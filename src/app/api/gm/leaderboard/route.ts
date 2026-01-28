@@ -8,7 +8,7 @@ export const dynamic = 'force-dynamic'
 export async function GET(request: NextRequest) {
   try {
     const user = await getGMAuthUser(request)
-    if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    if (!user) return NextResponse.json({ error: 'Sign in to view the GM leaderboard and compete with other fans', code: 'AUTH_REQUIRED' }, { status: 401 })
 
     const team = request.nextUrl.searchParams.get('team')
 

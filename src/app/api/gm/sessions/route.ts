@@ -12,7 +12,7 @@ const TEAM_SPORT_MAP: Record<string, string> = {
 export async function GET(request: NextRequest) {
   try {
     const user = await getGMAuthUser(request)
-    if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    if (!user) return NextResponse.json({ error: 'Sign in to save your trade sessions and track your GM career', code: 'AUTH_REQUIRED' }, { status: 401 })
 
     const { data: sessions, error } = await datalabAdmin
       .from('gm_sessions')
