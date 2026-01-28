@@ -17,8 +17,10 @@ export interface PlayerData {
   stat_line: string
   stats: Record<string, any>
   status?: string
+  base_salary?: number | null
   cap_hit?: number | null
   contract_years?: number | null
+  contract_signed_year?: number | null
   is_rookie_deal?: boolean | null
 }
 

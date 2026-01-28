@@ -142,12 +142,13 @@ export default function GMResultScreen() {
                     {player.full_name}
                   </Text>
                   <Text style={[styles.playerMeta, { color: colors.textMuted }]}>
-                    {player.position} {player.age ? `· ${player.age}y` : ''}
+                    {player.position} {player.age ? `· Age: ${player.age}` : ''}
                   </Text>
-                  {(player.cap_hit || player.contract_years) && (
+                  {(player.cap_hit || player.contract_years || player.contract_signed_year) && (
                     <Text style={[styles.playerContract, { color: colors.textMuted }]}>
                       {formatMoney(player.cap_hit)}
                       {player.contract_years ? ` · ${player.contract_years}yr` : ''}
+                      {player.contract_signed_year ? ` · Signed ${player.contract_signed_year}` : ''}
                       {player.is_rookie_deal ? ' (Rookie)' : ''}
                     </Text>
                   )}
@@ -196,12 +197,13 @@ export default function GMResultScreen() {
                     {player.full_name}
                   </Text>
                   <Text style={[styles.playerMeta, { color: colors.textMuted }]}>
-                    {player.position} {player.age ? `· ${player.age}y` : ''}
+                    {player.position} {player.age ? `· Age: ${player.age}` : ''}
                   </Text>
-                  {(player.cap_hit || player.contract_years) && (
+                  {(player.cap_hit || player.contract_years || player.contract_signed_year) && (
                     <Text style={[styles.playerContract, { color: colors.textMuted }]}>
                       {formatMoney(player.cap_hit)}
                       {player.contract_years ? ` · ${player.contract_years}yr` : ''}
+                      {player.contract_signed_year ? ` · Signed ${player.contract_signed_year}` : ''}
                       {player.is_rookie_deal ? ' (Rookie)' : ''}
                     </Text>
                   )}

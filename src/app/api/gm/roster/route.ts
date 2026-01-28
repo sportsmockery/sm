@@ -130,12 +130,12 @@ export async function GET(request: NextRequest) {
     const config = TEAM_CONFIG[team]
 
     const selectCols = team === 'bulls'
-      ? 'player_id, display_name, position, jersey_number, headshot_url, age, weight_lbs, college, years_pro, draft_year, draft_round, draft_pick, espn_player_id, base_salary, contract_years_remaining, contract_signed_year, is_rookie_deal'
+      ? 'player_id, display_name, position, jersey_number, headshot_url, age, weight_lbs, college, years_pro, draft_year, draft_round, draft_pick, espn_player_id, base_salary, cap_hit, contract_years_remaining, contract_signed_year, is_rookie_deal'
       : team === 'bears'
-        ? 'player_id, name, position, jersey_number, headshot_url, age, weight_lbs, college, years_exp, draft_year, draft_round, draft_pick, espn_id, base_salary, contract_years_remaining, contract_signed_year, is_rookie_deal'
+        ? 'player_id, name, position, jersey_number, headshot_url, age, weight_lbs, college, years_exp, draft_year, draft_round, draft_pick, espn_id, base_salary, cap_hit, contract_years_remaining, contract_signed_year, is_rookie_deal'
         : team === 'blackhawks'
-          ? 'player_id, name, position, jersey_number, headshot_url, age, weight_lbs, college, years_experience, draft_year, draft_round, draft_pick, espn_id, base_salary, contract_years_remaining, contract_signed_year, is_rookie_deal'
-          : 'player_id, name, position, jersey_number, headshot_url, age, weight_lbs, college, espn_id, base_salary, contract_years_remaining, contract_signed_year, is_rookie_deal'
+          ? 'player_id, name, position, jersey_number, headshot_url, age, weight_lbs, college, years_experience, draft_year, draft_round, draft_pick, espn_id, base_salary, cap_hit, contract_years_remaining, contract_signed_year, is_rookie_deal'
+          : 'player_id, name, position, jersey_number, headshot_url, age, weight_lbs, college, espn_id, base_salary, cap_hit, contract_years_remaining, contract_signed_year, is_rookie_deal'
 
     let query = datalabAdmin
       .from(config.table)
@@ -175,6 +175,7 @@ export async function GET(request: NextRequest) {
         stat_line: statLine,
         stats: playerStats,
         base_salary: p.base_salary,
+        cap_hit: p.cap_hit || p.base_salary, // Use cap_hit if available, fallback to base_salary
         contract_years: p.contract_years_remaining,
         contract_signed_year: p.contract_signed_year,
         is_rookie_deal: p.is_rookie_deal,

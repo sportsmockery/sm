@@ -306,12 +306,13 @@ export function GradeReveal({ result, show, onClose, onNewTrade, tradeDetails }:
                         {player.full_name}
                       </div>
                       <div style={{ fontSize: '10px', color: subText }}>
-                        {player.position} {player.age ? `· ${player.age}y` : ''}
+                        {player.position} {player.age ? `· Age: ${player.age}` : ''}
                       </div>
-                      {(player.cap_hit || player.contract_years) && (
+                      {(player.cap_hit || player.contract_years || player.contract_signed_year) && (
                         <div style={{ fontSize: '9px', color: subText }}>
                           {formatMoney(player.cap_hit)}
                           {player.contract_years ? ` · ${player.contract_years}yr` : ''}
+                          {player.contract_signed_year ? ` · Signed ${player.contract_signed_year}` : ''}
                           {player.is_rookie_deal ? ' (Rookie)' : ''}
                         </div>
                       )}
@@ -384,12 +385,13 @@ export function GradeReveal({ result, show, onClose, onNewTrade, tradeDetails }:
                           {isFullPlayer ? playerData.full_name : player.name}
                         </div>
                         <div style={{ fontSize: '10px', color: subText }}>
-                          {player.position} {isFullPlayer && playerData.age ? `· ${playerData.age}y` : ''}
+                          {player.position} {isFullPlayer && playerData.age ? `· Age: ${playerData.age}` : ''}
                         </div>
-                        {isFullPlayer && (playerData.cap_hit || playerData.contract_years) && (
+                        {isFullPlayer && (playerData.cap_hit || playerData.contract_years || playerData.contract_signed_year) && (
                           <div style={{ fontSize: '9px', color: subText }}>
                             {formatMoney(playerData.cap_hit)}
                             {playerData.contract_years ? ` · ${playerData.contract_years}yr` : ''}
+                            {playerData.contract_signed_year ? ` · Signed ${playerData.contract_signed_year}` : ''}
                             {playerData.is_rookie_deal ? ' (Rookie)' : ''}
                           </div>
                         )}
