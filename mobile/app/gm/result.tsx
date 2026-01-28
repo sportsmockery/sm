@@ -8,6 +8,7 @@ import {
   Animated,
   Share,
 } from 'react-native'
+import { Image } from 'expo-image'
 import { useRouter } from 'expo-router'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { Ionicons } from '@expo/vector-icons'
@@ -15,6 +16,12 @@ import { Ionicons } from '@expo/vector-icons'
 import { useTheme } from '@/hooks/useTheme'
 import { COLORS, TEAMS, API_BASE_URL } from '@/lib/config'
 import { useGM } from '@/lib/gm-context'
+import type { PlayerData, DraftPick } from '@/lib/gm-types'
+
+function formatMoney(value: number | null | undefined): string {
+  if (!value) return '—'
+  return `$${(value / 1_000_000).toFixed(1)}M`
+}
 
 function getGradeColor(grade: number) {
   if (grade >= 85) return '#22c55e'
@@ -104,6 +111,112 @@ export default function GMResultScreen() {
             <Text style={styles.dangerText}>Dangerous Trade</Text>
           </View>
         )}
+
+        {/* Trade Details */}
+        <View style={[styles.tradeDetailsCard, { backgroundColor: colors.surface }]}>
+          {/* Players Sent */}
+          <View style={styles.tradeSide}>
+            <View style={[styles.tradeSideHeader, { borderBottomColor: colors.border }]}>
+              <View style={[styles.tradeSideBadge, { backgroundColor: teamConfig?.color || COLORS.primary }]}>
+                {teamConfig?.logo && (
+                  <Image source={{ uri: teamConfig.logo }} style={{ width: 20, height: 20 }} contentFit="contain" />
+                )}
+              </View>
+              <Text style={[styles.tradeSideTitle, { color: colors.text }]}>
+                {teamConfig?.shortName || 'Chicago'} Sends
+              </Text>
+            </View>
+            {state.selectedPlayers.map((player, idx) => (
+              <View key={`sent-${player.player_id}-${idx}`} style={styles.playerRow}>
+                {player.headshot_url ? (
+                  <Image source={{ uri: player.headshot_url }} style={styles.playerThumb} contentFit="cover" />
+                ) : (
+                  <View style={[styles.playerThumb, styles.playerThumbPlaceholder, { backgroundColor: teamConfig?.color || '#666' }]}>
+                    <Text style={styles.playerThumbInitial}>{player.full_name.charAt(0)}</Text>
+                  </View>
+                )}
+                <View style={styles.playerInfo}>
+                  <Text style={[styles.playerName, { color: colors.text }]} numberOfLines={1}>
+                    {player.full_name}
+                  </Text>
+                  <Text style={[styles.playerMeta, { color: colors.textMuted }]}>
+                    {player.position} {player.age ? `· ${player.age}y` : ''}
+                  </Text>
+                  {(player.cap_hit || player.contract_years) && (
+                    <Text style={[styles.playerContract, { color: colors.textMuted }]}>
+                      {formatMoney(player.cap_hit)}
+                      {player.contract_years ? ` · ${player.contract_years}yr` : ''}
+                      {player.is_rookie_deal ? ' (Rookie)' : ''}
+                    </Text>
+                  )}
+                </View>
+              </View>
+            ))}
+            {state.draftPicksSent.map((pick, idx) => (
+              <View key={`pick-sent-${idx}`} style={styles.draftPickRow}>
+                <Ionicons name="document-text-outline" size={16} color={colors.textMuted} />
+                <Text style={[styles.draftPickText, { color: colors.text }]}>
+                  {pick.year} Round {pick.round} Pick
+                  {pick.condition ? ` (${pick.condition})` : ''}
+                </Text>
+              </View>
+            ))}
+          </View>
+
+          {/* Arrow Separator */}
+          <View style={styles.tradeArrow}>
+            <Ionicons name="swap-horizontal" size={24} color={colors.textMuted} />
+          </View>
+
+          {/* Players Received */}
+          <View style={styles.tradeSide}>
+            <View style={[styles.tradeSideHeader, { borderBottomColor: colors.border }]}>
+              <View style={[styles.tradeSideBadge, { backgroundColor: state.opponent?.primary_color || '#666' }]}>
+                {state.opponent?.logo_url && (
+                  <Image source={{ uri: state.opponent.logo_url }} style={{ width: 20, height: 20 }} contentFit="contain" />
+                )}
+              </View>
+              <Text style={[styles.tradeSideTitle, { color: colors.text }]}>
+                {state.opponent?.abbreviation || 'Opponent'} Sends
+              </Text>
+            </View>
+            {state.selectedOpponentPlayers.map((player, idx) => (
+              <View key={`recv-${player.player_id}-${idx}`} style={styles.playerRow}>
+                {player.headshot_url ? (
+                  <Image source={{ uri: player.headshot_url }} style={styles.playerThumb} contentFit="cover" />
+                ) : (
+                  <View style={[styles.playerThumb, styles.playerThumbPlaceholder, { backgroundColor: state.opponent?.primary_color || '#666' }]}>
+                    <Text style={styles.playerThumbInitial}>{player.full_name.charAt(0)}</Text>
+                  </View>
+                )}
+                <View style={styles.playerInfo}>
+                  <Text style={[styles.playerName, { color: colors.text }]} numberOfLines={1}>
+                    {player.full_name}
+                  </Text>
+                  <Text style={[styles.playerMeta, { color: colors.textMuted }]}>
+                    {player.position} {player.age ? `· ${player.age}y` : ''}
+                  </Text>
+                  {(player.cap_hit || player.contract_years) && (
+                    <Text style={[styles.playerContract, { color: colors.textMuted }]}>
+                      {formatMoney(player.cap_hit)}
+                      {player.contract_years ? ` · ${player.contract_years}yr` : ''}
+                      {player.is_rookie_deal ? ' (Rookie)' : ''}
+                    </Text>
+                  )}
+                </View>
+              </View>
+            ))}
+            {state.draftPicksReceived.map((pick, idx) => (
+              <View key={`pick-recv-${idx}`} style={styles.draftPickRow}>
+                <Ionicons name="document-text-outline" size={16} color={colors.textMuted} />
+                <Text style={[styles.draftPickText, { color: colors.text }]}>
+                  {pick.year} Round {pick.round} Pick
+                  {pick.condition ? ` (${pick.condition})` : ''}
+                </Text>
+              </View>
+            ))}
+          </View>
+        </View>
 
         {/* Breakdown */}
         {result.breakdown && (
@@ -229,4 +342,84 @@ const styles = StyleSheet.create({
   },
   linkBtn: { marginTop: 16 },
   linkBtnText: { fontSize: 14, fontFamily: 'Montserrat-SemiBold' },
+  // Trade details styles
+  tradeDetailsCard: {
+    width: '100%',
+    borderRadius: 14,
+    padding: 16,
+    marginBottom: 12,
+  },
+  tradeSide: {
+    marginBottom: 8,
+  },
+  tradeSideHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingBottom: 10,
+    marginBottom: 10,
+    borderBottomWidth: 1,
+  },
+  tradeSideBadge: {
+    width: 28,
+    height: 28,
+    borderRadius: 14,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: 10,
+  },
+  tradeSideTitle: {
+    fontSize: 14,
+    fontFamily: 'Montserrat-Bold',
+  },
+  playerRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: 8,
+  },
+  playerThumb: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+  },
+  playerThumbPlaceholder: {
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  playerThumbInitial: {
+    color: '#fff',
+    fontSize: 16,
+    fontFamily: 'Montserrat-Bold',
+  },
+  playerInfo: {
+    flex: 1,
+    marginLeft: 12,
+  },
+  playerName: {
+    fontSize: 14,
+    fontFamily: 'Montserrat-SemiBold',
+  },
+  playerMeta: {
+    fontSize: 11,
+    fontFamily: 'Montserrat-Regular',
+    marginTop: 1,
+  },
+  playerContract: {
+    fontSize: 10,
+    fontFamily: 'Montserrat-Medium',
+    marginTop: 2,
+  },
+  draftPickRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: 8,
+    gap: 8,
+  },
+  draftPickText: {
+    fontSize: 13,
+    fontFamily: 'Montserrat-Medium',
+  },
+  tradeArrow: {
+    alignItems: 'center',
+    paddingVertical: 8,
+  },
 })

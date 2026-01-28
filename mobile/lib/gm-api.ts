@@ -70,10 +70,11 @@ export const gmApi = {
     return gmFetch<{ players: PlayerData[]; sport: string }>(`/api/gm/roster?${params}`)
   },
 
-  async getTeams(sport?: string, search?: string) {
+  async getTeams(sport?: string, search?: string, excludeTeam?: string) {
     const params = new URLSearchParams()
     if (sport) params.set('sport', sport)
     if (search) params.set('search', search)
+    if (excludeTeam) params.set('exclude', excludeTeam)
     return gmFetch<{ teams: OpponentTeam[] }>(`/api/gm/teams?${params}`)
   },
 

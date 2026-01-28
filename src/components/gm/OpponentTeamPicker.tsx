@@ -1,5 +1,5 @@
 'use client'
-import { useState, useEffect, useMemo } from 'react'
+import { useState, useEffect, useMemo, useCallback } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useTheme } from '@/contexts/ThemeContext'
 
@@ -38,6 +38,11 @@ export function OpponentTeamPicker({ open, onClose, onSelect, sport, chicagoTeam
   const [teams, setTeams] = useState<LeagueTeam[]>([])
   const [search, setSearch] = useState('')
   const [loading, setLoading] = useState(false)
+  const [failedLogos, setFailedLogos] = useState<Set<string>>(new Set())
+
+  const handleLogoError = useCallback((teamKey: string) => {
+    setFailedLogos(prev => new Set(prev).add(teamKey))
+  }, [])
 
   useEffect(() => {
     if (!open || !sport) return
@@ -171,12 +176,23 @@ export function OpponentTeamPicker({ open, onClose, onSelect, sport, chicagoTeam
                               textAlign: 'left',
                             }}
                           >
-                            <img
-                              src={t.logo_url}
-                              alt={t.team_name}
-                              style={{ width: 32, height: 32, objectFit: 'contain' }}
-                              onError={(e) => { (e.target as HTMLImageElement).style.display = 'none' }}
-                            />
+                            {(t.logo_url && !failedLogos.has(t.team_key)) ? (
+                              <img
+                                src={t.logo_url}
+                                alt={t.team_name}
+                                style={{ width: 32, height: 32, objectFit: 'contain' }}
+                                onError={() => handleLogoError(t.team_key)}
+                              />
+                            ) : (
+                              <div style={{
+                                width: 32, height: 32, borderRadius: 16,
+                                backgroundColor: t.primary_color || '#666',
+                                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                fontSize: '11px', fontWeight: 700, color: '#fff',
+                              }}>
+                                {t.abbreviation}
+                              </div>
+                            )}
                             <div style={{ flex: 1 }}>
                               <div style={{ fontSize: '14px', fontWeight: 600, color: textColor }}>{t.team_name}</div>
                               <div style={{ fontSize: '11px', color: subText }}>{t.abbreviation}</div>

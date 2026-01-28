@@ -9,15 +9,23 @@ export async function GET(request: NextRequest) {
     const sport = request.nextUrl.searchParams.get('sport')
     const search = request.nextUrl.searchParams.get('search')?.toLowerCase()
 
+    const excludeTeam = request.nextUrl.searchParams.get('exclude')
+
     let query = datalabAdmin
       .from('gm_league_teams')
       .select('team_key, team_name, abbreviation, city, logo_url, primary_color, secondary_color, conference, division, sport')
       .order('conference')
       .order('division')
       .order('team_name')
+      .limit(150) // Ensure we get all teams (max ~32 per sport)
 
     if (sport) {
       query = query.eq('sport', sport)
+    }
+
+    // Exclude the Chicago team from opponent list
+    if (excludeTeam) {
+      query = query.neq('team_key', excludeTeam)
     }
 
     const { data: teams, error } = await query

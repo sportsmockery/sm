@@ -32,7 +32,8 @@ export default function GMOpponentScreen() {
     async function load() {
       try {
         const sport = state.sport || undefined
-        const res = await gmApi.getTeams(sport)
+        // Exclude the selected Chicago team from opponent list
+        const res = await gmApi.getTeams(sport, undefined, state.chicagoTeam || undefined)
         setTeams(res.teams)
       } catch (err) {
         console.error('Failed to load teams:', err)
@@ -41,7 +42,7 @@ export default function GMOpponentScreen() {
       }
     }
     load()
-  }, [state.sport])
+  }, [state.sport, state.chicagoTeam])
 
   const filtered = useMemo(() => {
     if (!search) return teams
@@ -67,33 +68,45 @@ export default function GMOpponentScreen() {
     }
   }
 
-  const renderTeam = ({ item }: { item: OpponentTeam }) => (
-    <TouchableOpacity
-      style={[styles.teamCard, { backgroundColor: colors.surface }]}
-      activeOpacity={0.85}
-      onPress={() => handleSelectOpponent(item)}
-      disabled={loadingRoster}
-    >
-      <View style={styles.teamRow}>
-        {item.logo_url ? (
-          <Image source={{ uri: item.logo_url }} style={styles.teamLogo} contentFit="contain" />
-        ) : (
-          <View style={[styles.teamLogo, { backgroundColor: item.primary_color, borderRadius: 22, justifyContent: 'center', alignItems: 'center' }]}>
-            <Text style={{ color: '#fff', fontFamily: 'Montserrat-Bold', fontSize: 14 }}>
-              {item.abbreviation}
+  const [failedLogos, setFailedLogos] = useState<Set<string>>(new Set())
+
+  const renderTeam = ({ item }: { item: OpponentTeam }) => {
+    const logoFailed = failedLogos.has(item.team_key)
+    const showFallback = !item.logo_url || logoFailed
+
+    return (
+      <TouchableOpacity
+        style={[styles.teamCard, { backgroundColor: colors.surface }]}
+        activeOpacity={0.85}
+        onPress={() => handleSelectOpponent(item)}
+        disabled={loadingRoster}
+      >
+        <View style={styles.teamRow}>
+          {showFallback ? (
+            <View style={[styles.teamLogo, { backgroundColor: item.primary_color || '#666', borderRadius: 22, justifyContent: 'center', alignItems: 'center' }]}>
+              <Text style={{ color: '#fff', fontFamily: 'Montserrat-Bold', fontSize: 14 }}>
+                {item.abbreviation}
+              </Text>
+            </View>
+          ) : (
+            <Image
+              source={{ uri: item.logo_url }}
+              style={styles.teamLogo}
+              contentFit="contain"
+              onError={() => setFailedLogos(prev => new Set(prev).add(item.team_key))}
+            />
+          )}
+          <View style={styles.teamInfo}>
+            <Text style={[styles.teamName, { color: colors.text }]}>{item.team_name}</Text>
+            <Text style={[styles.teamMeta, { color: colors.textMuted }]}>
+              {item.conference} · {item.division}
             </Text>
           </View>
-        )}
-        <View style={styles.teamInfo}>
-          <Text style={[styles.teamName, { color: colors.text }]}>{item.team_name}</Text>
-          <Text style={[styles.teamMeta, { color: colors.textMuted }]}>
-            {item.conference} · {item.division}
-          </Text>
+          <Ionicons name="chevron-forward" size={18} color={colors.textMuted} />
         </View>
-        <Ionicons name="chevron-forward" size={18} color={colors.textMuted} />
-      </View>
-    </TouchableOpacity>
-  )
+      </TouchableOpacity>
+    )
+  }
 
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]} edges={['top']}>
