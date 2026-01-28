@@ -55,18 +55,84 @@ interface PlayerData {
   stats: Record<string, number | string | null>
 }
 
+const SPORT_ROSTER_TABLE: Record<string, string> = {
+  nfl: 'gm_nfl_rosters',
+  nba: 'gm_nba_rosters',
+  nhl: 'gm_nhl_rosters',
+  mlb: 'gm_mlb_rosters',
+}
+
+async function fetchOpponentRoster(teamKey: string, sport: string, search?: string, posFilter?: string) {
+  const table = SPORT_ROSTER_TABLE[sport]
+  if (!table) throw new Error('Invalid sport')
+
+  const { data: rawPlayers, error } = await datalabAdmin
+    .from(table)
+    .select('espn_player_id, full_name, position, jersey_number, headshot_url, age, weight_lbs, college, years_exp, draft_year, draft_round, draft_pick, base_salary, cap_hit, contract_years_remaining, is_rookie_deal, status')
+    .eq('team_key', teamKey)
+    .eq('is_active', true)
+    .order('position')
+    .order('full_name')
+
+  if (error) throw error
+
+  let players: PlayerData[] = (rawPlayers || []).map((p: any) => {
+    const draftInfo = p.draft_year && p.draft_round
+      ? `${p.draft_year} R${p.draft_round}${p.draft_pick ? ` P${p.draft_pick}` : ''}`
+      : null
+
+    return {
+      player_id: p.espn_player_id?.toString() || p.full_name,
+      full_name: p.full_name || 'Unknown',
+      position: p.position || 'Unknown',
+      jersey_number: p.jersey_number,
+      headshot_url: p.headshot_url,
+      age: p.age,
+      weight_lbs: p.weight_lbs,
+      college: p.college,
+      years_exp: p.years_exp,
+      draft_info: draftInfo,
+      espn_id: p.espn_player_id?.toString() || null,
+      stat_line: '',
+      stats: {},
+      status: p.status || 'Active',
+      cap_hit: p.cap_hit,
+      contract_years: p.contract_years_remaining,
+      is_rookie_deal: p.is_rookie_deal,
+    }
+  })
+
+  if (search) {
+    players = players.filter(p => p.full_name.toLowerCase().includes(search))
+  }
+  if (posFilter && posFilter !== 'ALL') {
+    players = players.filter(p => p.position === posFilter)
+  }
+
+  return players
+}
+
 export async function GET(request: NextRequest) {
   try {
     const user = await getAuthUser()
     if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
+    const search = request.nextUrl.searchParams.get('search')?.toLowerCase()
+    const posFilter = request.nextUrl.searchParams.get('position')
+
+    // Opponent roster path: team_key + sport params
+    const teamKey = request.nextUrl.searchParams.get('team_key')
+    const sportParam = request.nextUrl.searchParams.get('sport')
+    if (teamKey && sportParam) {
+      const players = await fetchOpponentRoster(teamKey, sportParam, search || undefined, posFilter || undefined)
+      return NextResponse.json({ players, sport: sportParam })
+    }
+
+    // Chicago roster path: team param
     const team = request.nextUrl.searchParams.get('team')
     if (!team || !TEAM_CONFIG[team]) {
       return NextResponse.json({ error: 'Invalid team' }, { status: 400 })
     }
-
-    const search = request.nextUrl.searchParams.get('search')?.toLowerCase()
-    const posFilter = request.nextUrl.searchParams.get('position')
 
     const config = TEAM_CONFIG[team]
 

@@ -9,6 +9,12 @@ interface DraftPick {
   condition?: string
 }
 
+type ReceivedPlayer = PlayerData | { name: string; position: string }
+
+function isPlayerData(p: ReceivedPlayer): p is PlayerData {
+  return 'player_id' in p
+}
+
 interface TradeBoardProps {
   chicagoTeam: string
   chicagoLogo: string
@@ -17,7 +23,7 @@ interface TradeBoardProps {
   opponentLogo: string | null
   opponentColor: string
   playersSent: PlayerData[]
-  playersReceived: { name: string; position: string }[]
+  playersReceived: ReceivedPlayer[]
   draftPicksSent: DraftPick[]
   draftPicksReceived: DraftPick[]
   onRemoveSent: (playerId: string) => void
@@ -146,22 +152,35 @@ export function TradeBoard({
             <AnimatePresence>
               {playersReceived.map((p, i) => (
                 <motion.div
-                  key={`r-${i}`}
+                  key={isPlayerData(p) ? p.player_id : `r-${i}`}
                   initial={{ opacity: 0, x: 20 }}
                   animate={{ opacity: 1, x: 0 }}
                   exit={{ opacity: 0, x: 20 }}
-                  style={{
-                    display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-                    padding: '8px 10px', borderRadius: 8,
-                    backgroundColor: isDark ? '#374151' : '#f3f4f6',
-                    border: `1px solid ${borderColor}`,
-                  }}
+                  style={{ position: 'relative' }}
                 >
-                  <div>
-                    <span style={{ fontWeight: 600, fontSize: '13px', color: textColor }}>{p.name}</span>
-                    <span style={{ fontSize: '11px', color: subText, marginLeft: 6 }}>{p.position}</span>
-                  </div>
-                  <button onClick={() => onRemoveReceived(i)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#ef4444', fontWeight: 700 }}>&#x2715;</button>
+                  {isPlayerData(p) ? (
+                    <PlayerCard player={p} compact teamColor={opponentColor} />
+                  ) : (
+                    <div style={{
+                      display: 'flex', alignItems: 'center',
+                      padding: '8px 10px', borderRadius: 8,
+                      backgroundColor: isDark ? '#374151' : '#f3f4f6',
+                      border: `1px solid ${borderColor}`,
+                    }}>
+                      <span style={{ fontWeight: 600, fontSize: '13px', color: textColor }}>{p.name}</span>
+                      <span style={{ fontSize: '11px', color: subText, marginLeft: 6 }}>{p.position}</span>
+                    </div>
+                  )}
+                  <button
+                    onClick={() => onRemoveReceived(i)}
+                    style={{
+                      position: 'absolute', top: 4, right: 4,
+                      background: 'none', border: 'none', cursor: 'pointer',
+                      color: '#ef4444', fontSize: '14px', fontWeight: 700,
+                    }}
+                  >
+                    &#x2715;
+                  </button>
                 </motion.div>
               ))}
             </AnimatePresence>

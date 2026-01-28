@@ -17,6 +17,7 @@ interface GradeResult {
     team_fit: number
     future_assets: number
   }
+  cap_analysis?: string
 }
 
 interface GradeRevealProps {
@@ -239,6 +240,30 @@ export function GradeReveal({ result, show, onClose, onNewTrade }: GradeRevealPr
                   </div>
                 </div>
               ))}
+            </motion.div>
+          )}
+
+          {/* Cap Analysis */}
+          {phase >= 3 && result.cap_analysis && (
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              style={{
+                marginTop: 16, padding: 12, borderRadius: 10,
+                backgroundColor: isDark ? '#1e293b' : '#f0fdf4',
+                border: `1px solid ${isDark ? '#334155' : '#bbf7d0'}`,
+                display: 'flex', alignItems: 'flex-start', gap: 10,
+              }}
+            >
+              <span style={{ fontSize: '18px', flexShrink: 0 }}>$</span>
+              <div>
+                <div style={{ fontSize: '11px', fontWeight: 700, color: isDark ? '#94a3b8' : '#64748b', marginBottom: 4, textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+                  Cap Impact
+                </div>
+                <div style={{ fontSize: '13px', lineHeight: 1.5, color: isDark ? '#e2e8f0' : '#334155' }}>
+                  {result.cap_analysis}
+                </div>
+              </div>
             </motion.div>
           )}
 

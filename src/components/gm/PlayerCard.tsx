@@ -16,6 +16,10 @@ export interface PlayerData {
   espn_id: string | null
   stat_line: string
   stats: Record<string, any>
+  status?: string
+  cap_hit?: number | null
+  contract_years?: number | null
+  is_rookie_deal?: boolean | null
 }
 
 interface PlayerCardProps {
@@ -112,11 +116,25 @@ export function PlayerCard({ player, selected = false, compact = false, teamColo
       {/* Position badge */}
       <div style={{
         position: 'absolute', top: 8, right: 8,
-        backgroundColor: isDark ? '#374151' : '#f3f4f6',
-        color: subTextColor, fontSize: '10px', fontWeight: 600,
-        padding: '2px 8px', borderRadius: '10px',
+        display: 'flex', gap: 4, alignItems: 'center',
       }}>
-        {player.position}
+        {player.status && player.status !== 'Active' && (
+          <span style={{
+            fontSize: '9px', fontWeight: 700,
+            padding: '2px 6px', borderRadius: '10px',
+            backgroundColor: player.status === 'IR' ? '#ef444430' : '#6b728030',
+            color: player.status === 'IR' ? '#ef4444' : '#6b7280',
+          }}>
+            {player.status === 'Practice Squad' ? 'PS' : player.status}
+          </span>
+        )}
+        <span style={{
+          backgroundColor: isDark ? '#374151' : '#f3f4f6',
+          color: subTextColor, fontSize: '10px', fontWeight: 600,
+          padding: '2px 8px', borderRadius: '10px',
+        }}>
+          {player.position}
+        </span>
       </div>
 
       {/* Headshot */}
@@ -165,7 +183,11 @@ export function PlayerCard({ player, selected = false, compact = false, teamColo
 
       {/* Details */}
       <div style={{ textAlign: 'center', fontSize: '10px', color: subTextColor }}>
-        {[player.age ? `Age ${player.age}` : null, player.college].filter(Boolean).join(' | ')}
+        {[
+          player.age ? `Age ${player.age}` : null,
+          player.cap_hit ? `$${(player.cap_hit / 1_000_000).toFixed(1)}M` : null,
+          player.college,
+        ].filter(Boolean).join(' | ')}
       </div>
 
       {/* Selected checkmark */}

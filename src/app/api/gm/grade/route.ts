@@ -38,12 +38,14 @@ const MODEL_NAME = 'claude-sonnet-4-20250514'
 const GM_SYSTEM_PROMPT = `You are "GM", a brutally honest sports trade evaluator and general manager for SM Data Lab, a Chicago sports analytics platform. You grade proposed trades on a scale of 0-100.
 
 ## Grading Criteria (weighted)
-1. **Realism (25%)**: Would the other GM actually accept? One-sided trades score LOW even if they favor Chicago — real GMs don't get fleeced.
+1. **Realism (20%)**: Would the other GM actually accept? One-sided trades score LOW even if they favor Chicago — real GMs don't get fleeced.
 2. **Value Balance (25%)**: Comparable talent, production, and contract value on both sides.
 3. **Team Needs (20%)**: Does this fill a real gap for the Chicago team? Trading from depth = good. Acquiring at a stacked position = bad.
 4. **Player Caliber (15%)**: Stats, awards, trajectory, usage, advanced metrics.
-5. **Contract/Cap (10%)**: Salary cap implications. NFL ~$255M, NBA ~$141M (luxury tax ~$171M), NHL ~$88M, MLB has no cap but CBT at ~$241M.
+5. **Contract/Cap (15%)**: Salary cap implications. NFL ~$255M, NBA ~$141M (luxury tax ~$171M), NHL ~$88M, MLB has no cap but CBT at ~$241M. Include specific dollar amounts in cap_analysis.
 6. **Age/Future (5%)**: Under 27 = ascending value. Over 32 = declining. Rookie deals = premium.
+
+Note: Contract/Cap weight increased to 15% (reduced from Realism 25% to 20% to compensate).
 
 ## Grading Scale
 - 90-100: Elite, franchise-altering (extremely rare)
@@ -105,7 +107,8 @@ You MUST respond with valid JSON only, no other text:
     "contract_value": <0.0-1.0>,
     "team_fit": <0.0-1.0>,
     "future_assets": <0.0-1.0>
-  }
+  },
+  "cap_analysis": "<1-2 sentences about salary cap impact with specific dollar amounts when available>"
 }
 
 Reasoning should: name specific players, mention team phase (rebuild/contend), note cap/salary if relevant, reference comparable real trades when possible, and always frame from Chicago's perspective. Be a seasoned GM, not a robot.
@@ -152,15 +155,50 @@ export async function POST(request: NextRequest) {
       cubs: 'Chicago Cubs', whitesox: 'Chicago White Sox',
     }
 
+    // Fetch salary cap data for both teams
+    const capTable = `gm_${sport}_salary_cap`
+    let chicagoCapData: any = null
+    let partnerCapData: any = null
+    try {
+      const { data: cc } = await datalabAdmin
+        .from(capTable)
+        .select('total_cap, cap_used, cap_available, dead_money')
+        .eq('team_key', chicago_team)
+        .order('season', { ascending: false })
+        .limit(1)
+        .single()
+      chicagoCapData = cc
+    } catch {}
+    if (partner_team_key) {
+      try {
+        const { data: pc } = await datalabAdmin
+          .from(capTable)
+          .select('total_cap, cap_used, cap_available, dead_money')
+          .eq('team_key', partner_team_key)
+          .order('season', { ascending: false })
+          .limit(1)
+          .single()
+        partnerCapData = pc
+      } catch {}
+    }
+
+    const formatMoney = (v: number) => `$${(v / 1_000_000).toFixed(1)}M`
+
     const sentDesc = players_sent.map((p: any) => {
       let desc = `${p.name} (${p.position})`
       if (p.stat_line) desc += ` [${p.stat_line}]`
       if (p.age) desc += ` Age ${p.age}`
+      if (p.cap_hit) desc += `, ${formatMoney(p.cap_hit)} cap hit`
+      if (p.contract_years) desc += `, ${p.contract_years}yr remaining`
       return desc
     }).join(', ')
 
     const recvDesc = players_received.map((p: any) => {
-      let desc = `${p.name} (${p.position})`
+      let desc = `${p.name || p.full_name} (${p.position})`
+      if (p.stat_line) desc += ` [${p.stat_line}]`
+      if (p.age) desc += ` Age ${p.age}`
+      if (p.cap_hit) desc += `, ${formatMoney(p.cap_hit)} cap hit`
+      if (p.contract_years) desc += `, ${p.contract_years}yr remaining`
       return desc
     }).join(', ')
 
@@ -173,10 +211,20 @@ export async function POST(request: NextRequest) {
       picksRecvDesc = `\nDraft picks received: ${draft_picks_received.map((p: any) => `${p.year} Round ${p.round}${p.condition ? ` (${p.condition})` : ''}`).join(', ')}`
     }
 
+    let capContext = ''
+    if (chicagoCapData) {
+      capContext += `\nSalary Cap Context:\n${teamDisplayNames[chicago_team]}: ${formatMoney(chicagoCapData.cap_used)} used / ${formatMoney(chicagoCapData.cap_available)} available of ${formatMoney(chicagoCapData.total_cap)} ceiling`
+      if (chicagoCapData.dead_money) capContext += ` (${formatMoney(chicagoCapData.dead_money)} dead money)`
+    }
+    if (partnerCapData) {
+      capContext += `\n${trade_partner}: ${formatMoney(partnerCapData.cap_used)} used / ${formatMoney(partnerCapData.cap_available)} available of ${formatMoney(partnerCapData.total_cap)} ceiling`
+      if (partnerCapData.dead_money) capContext += ` (${formatMoney(partnerCapData.dead_money)} dead money)`
+    }
+
     const tradeDescription = `
 Sport: ${sport.toUpperCase()}
 ${teamDisplayNames[chicago_team]} send: ${sentDesc}${picksSentDesc}
-${trade_partner} send: ${recvDesc}${picksRecvDesc}
+${trade_partner} send: ${recvDesc}${picksRecvDesc}${capContext}
 
 Grade this trade from the perspective of the ${teamDisplayNames[chicago_team]}.`
 
@@ -198,6 +246,7 @@ Grade this trade from the perspective of the ${teamDisplayNames[chicago_team]}.`
     let tradeSummary = ''
     let improvementScore = 0
     let breakdown = { talent_balance: 0.5, contract_value: 0.5, team_fit: 0.5, future_assets: 0.5 }
+    let capAnalysis = ''
 
     try {
       const parsed = JSON.parse(rawText)
@@ -205,6 +254,7 @@ Grade this trade from the perspective of the ${teamDisplayNames[chicago_team]}.`
       reasoning = parsed.reasoning || 'No reasoning provided.'
       tradeSummary = parsed.trade_summary || ''
       improvementScore = typeof parsed.improvement_score === 'number' ? Math.max(-10, Math.min(10, parsed.improvement_score)) : 0
+      capAnalysis = parsed.cap_analysis || ''
       if (parsed.breakdown) {
         breakdown = {
           talent_balance: Math.max(0, Math.min(1, parsed.breakdown.talent_balance ?? 0.5)),
@@ -331,7 +381,7 @@ Grade this trade from the perspective of the ${teamDisplayNames[chicago_team]}.`
       user_id: user.id,
       trade_id: trade.id,
       request_payload: requestPayload,
-      response_payload: { rawText, grade, reasoning, tradeSummary, improvementScore, breakdown },
+      response_payload: { rawText, grade, reasoning, tradeSummary, improvementScore, breakdown, capAnalysis },
       model_name: MODEL_NAME,
       response_time_ms: responseTimeMs,
     })
@@ -414,6 +464,7 @@ Grade this trade from the perspective of the ${teamDisplayNames[chicago_team]}.`
       trade_summary: tradeSummary,
       improvement_score: improvementScore,
       breakdown,
+      cap_analysis: capAnalysis,
     })
 
   } catch (error) {

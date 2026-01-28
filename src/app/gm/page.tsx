@@ -8,6 +8,7 @@ import { AnimatePresence } from 'framer-motion'
 import { TeamSelector, TEAMS } from '@/components/gm/TeamSelector'
 import { RosterPanel } from '@/components/gm/RosterPanel'
 import { TradeBoard } from '@/components/gm/TradeBoard'
+import { OpponentRosterPanel } from '@/components/gm/OpponentRosterPanel'
 import { OpponentTeamPicker } from '@/components/gm/OpponentTeamPicker'
 import { DraftPickSelector } from '@/components/gm/DraftPickSelector'
 import { GradeReveal } from '@/components/gm/GradeReveal'
@@ -21,7 +22,11 @@ import type { PlayerData } from '@/components/gm/PlayerCard'
 interface DraftPick { year: number; round: number; condition?: string }
 interface OpponentTeam { team_key: string; team_name: string; abbreviation: string; logo_url: string; primary_color: string; sport: string }
 interface Session { id: string; session_name: string; chicago_team: string; is_active: boolean; num_trades: number; num_approved: number; num_dangerous: number; num_failed: number; total_improvement: number; created_at: string }
-interface GradeResult { grade: number; reasoning: string; status: string; is_dangerous: boolean; trade_summary?: string; improvement_score?: number; shared_code?: string; breakdown?: { talent_balance: number; contract_value: number; team_fit: number; future_assets: number } }
+interface GradeResult { grade: number; reasoning: string; status: string; is_dangerous: boolean; trade_summary?: string; improvement_score?: number; shared_code?: string; breakdown?: { talent_balance: number; contract_value: number; team_fit: number; future_assets: number }; cap_analysis?: string }
+
+interface CapData { total_cap: number; cap_used: number; cap_available: number; dead_money: number }
+
+type ReceivedPlayer = PlayerData | { name: string; position: string }
 
 export default function GMPage() {
   const [user, setUser] = useState<any>(null)
@@ -39,9 +44,14 @@ export default function GMPage() {
   // Opponent
   const [opponentTeam, setOpponentTeam] = useState<OpponentTeam | null>(null)
   const [showOpponentPicker, setShowOpponentPicker] = useState(false)
-  const [receivedPlayers, setReceivedPlayers] = useState<{ name: string; position: string }[]>([])
-  const [newPlayerName, setNewPlayerName] = useState('')
-  const [newPlayerPosition, setNewPlayerPosition] = useState('')
+  const [receivedPlayers, setReceivedPlayers] = useState<ReceivedPlayer[]>([])
+  const [opponentRoster, setOpponentRoster] = useState<PlayerData[]>([])
+  const [opponentRosterLoading, setOpponentRosterLoading] = useState(false)
+  const [selectedOpponentIds, setSelectedOpponentIds] = useState<Set<string>>(new Set())
+
+  // Cap data
+  const [chicagoCap, setChicagoCap] = useState<CapData | null>(null)
+  const [opponentCap, setOpponentCap] = useState<CapData | null>(null)
 
   // Draft picks
   const [draftPicksSent, setDraftPicksSent] = useState<DraftPick[]>([])
@@ -143,11 +153,21 @@ export default function GMPage() {
     loadRoster(teamKey)
     setOpponentTeam(null)
     setReceivedPlayers([])
+    setSelectedOpponentIds(new Set())
+    setOpponentRoster([])
     setDraftPicksSent([])
     setDraftPicksReceived([])
     setGradeResult(null)
     setGradeError(null)
+    setChicagoCap(null)
+    setOpponentCap(null)
     createSession(teamKey)
+    // Fetch Chicago cap data
+    const teamSport = TEAMS.find(t => t.key === teamKey)?.sport || 'nfl'
+    fetch(`/api/gm/cap?team_key=${teamKey}&sport=${teamSport}`)
+      .then(r => r.ok ? r.json() : null)
+      .then(d => d?.cap && setChicagoCap(d.cap))
+      .catch(() => {})
   }
 
   async function createSession(teamKey: string) {
@@ -176,11 +196,35 @@ export default function GMPage() {
     })
   }
 
-  function addReceivedPlayer() {
-    if (!newPlayerName.trim()) return
-    setReceivedPlayers(prev => [...prev, { name: newPlayerName.trim(), position: newPlayerPosition.trim() || 'Unknown' }])
-    setNewPlayerName('')
-    setNewPlayerPosition('')
+  function toggleOpponentPlayer(playerId: string) {
+    setSelectedOpponentIds(prev => {
+      const next = new Set(prev)
+      if (next.has(playerId)) {
+        next.delete(playerId)
+        setReceivedPlayers(rp => rp.filter(p => !('player_id' in p) || p.player_id !== playerId))
+      } else {
+        next.add(playerId)
+        const player = opponentRoster.find(p => p.player_id === playerId)
+        if (player) setReceivedPlayers(rp => [...rp, player])
+      }
+      return next
+    })
+  }
+
+  function addCustomReceivedPlayer(name: string, position: string) {
+    setReceivedPlayers(prev => [...prev, { name, position }])
+  }
+
+  function handleOpponentSelect(team: OpponentTeam) {
+    setOpponentTeam(team)
+    setReceivedPlayers([])
+    setSelectedOpponentIds(new Set())
+    setOpponentCap(null)
+    // Fetch opponent cap data
+    fetch(`/api/gm/cap?team_key=${team.team_key}&sport=${team.sport}`)
+      .then(r => r.ok ? r.json() : null)
+      .then(d => d?.cap && setOpponentCap(d.cap))
+      .catch(() => {})
   }
 
   const selectedPlayers = roster.filter(p => selectedPlayerIds.has(p.player_id))
@@ -214,8 +258,21 @@ export default function GMPage() {
             draft_info: p.draft_info,
             espn_id: p.espn_id,
             stats: p.stats,
+            cap_hit: p.cap_hit,
+            contract_years: p.contract_years,
           })),
-          players_received: receivedPlayers,
+          players_received: receivedPlayers.map(p => {
+            if ('player_id' in p) {
+              return {
+                name: p.full_name, position: p.position, stat_line: p.stat_line,
+                age: p.age, jersey_number: p.jersey_number, headshot_url: p.headshot_url,
+                college: p.college, weight_lbs: p.weight_lbs, years_exp: p.years_exp,
+                draft_info: p.draft_info, espn_id: p.espn_id, stats: p.stats,
+                cap_hit: p.cap_hit, contract_years: p.contract_years,
+              }
+            }
+            return p
+          }),
           draft_picks_sent: draftPicksSent,
           draft_picks_received: draftPicksReceived,
           session_id: activeSession?.id,
@@ -244,6 +301,7 @@ export default function GMPage() {
   function resetTrade() {
     setSelectedPlayerIds(new Set())
     setReceivedPlayers([])
+    setSelectedOpponentIds(new Set())
     setDraftPicksSent([])
     setDraftPicksReceived([])
     setGradeResult(null)
@@ -366,54 +424,87 @@ export default function GMPage() {
                   </button>
                 </div>
                 {opponentTeam && (
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 12 }}>
                     <img src={opponentTeam.logo_url} alt={opponentTeam.team_name} style={{ width: 32, height: 32, objectFit: 'contain' }}
                       onError={(e) => { (e.target as HTMLImageElement).style.display = 'none' }} />
                     <span style={{ fontWeight: 700, color: isDark ? '#fff' : '#1a1a1a' }}>{opponentTeam.team_name}</span>
                   </div>
                 )}
 
-                {/* Add players to receive */}
-                {opponentTeam && (
-                  <div style={{ marginTop: 12 }}>
-                    <div style={{ fontSize: '12px', fontWeight: 600, color: subText, marginBottom: 6 }}>Players to Receive</div>
-                    <div style={{ display: 'flex', gap: 6, marginBottom: 8 }}>
-                      <input
-                        type="text"
-                        value={newPlayerName}
-                        onChange={e => setNewPlayerName(e.target.value)}
-                        placeholder="Player name"
-                        onKeyDown={e => e.key === 'Enter' && addReceivedPlayer()}
-                        style={{
-                          flex: 1, padding: '6px 10px', borderRadius: 6,
-                          border: `1px solid ${inputBorder}`, backgroundColor: inputBg,
-                          color: isDark ? '#fff' : '#000', fontSize: '13px', outline: 'none',
-                        }}
-                      />
-                      <input
-                        type="text"
-                        value={newPlayerPosition}
-                        onChange={e => setNewPlayerPosition(e.target.value)}
-                        placeholder="Pos"
-                        onKeyDown={e => e.key === 'Enter' && addReceivedPlayer()}
-                        style={{
-                          width: 60, padding: '6px 8px', borderRadius: 6,
-                          border: `1px solid ${inputBorder}`, backgroundColor: inputBg,
-                          color: isDark ? '#fff' : '#000', fontSize: '13px', outline: 'none',
-                        }}
-                      />
-                      <button
-                        onClick={addReceivedPlayer}
-                        style={{
-                          padding: '6px 14px', borderRadius: 6, border: 'none',
-                          backgroundColor: '#bc0000', color: '#fff',
-                          fontWeight: 600, fontSize: '13px', cursor: 'pointer',
-                        }}
-                      >
-                        Add
-                      </button>
-                    </div>
+                {/* Cap status cards */}
+                {(chicagoCap || opponentCap) && opponentTeam && (
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8, marginBottom: 12 }}>
+                    {chicagoCap && (
+                      <div style={{
+                        padding: '8px 10px', borderRadius: 8,
+                        backgroundColor: isDark ? '#1e293b' : '#f8fafc',
+                        border: `1px solid ${isDark ? '#334155' : '#e2e8f0'}`,
+                      }}>
+                        <div style={{ fontSize: '10px', fontWeight: 700, color: teamColor, marginBottom: 4, textTransform: 'uppercase' }}>
+                          {selectedTeam} Cap
+                        </div>
+                        <div style={{ fontSize: '12px', fontWeight: 600, color: isDark ? '#e2e8f0' : '#334155' }}>
+                          ${(chicagoCap.cap_used / 1_000_000).toFixed(1)}M / ${(chicagoCap.total_cap / 1_000_000).toFixed(1)}M
+                        </div>
+                        <div style={{
+                          height: 4, borderRadius: 2, marginTop: 4,
+                          backgroundColor: isDark ? '#374151' : '#e5e7eb', overflow: 'hidden',
+                        }}>
+                          <div style={{
+                            height: '100%', borderRadius: 2,
+                            width: `${Math.min(100, (chicagoCap.cap_used / chicagoCap.total_cap) * 100)}%`,
+                            backgroundColor: chicagoCap.cap_used / chicagoCap.total_cap > 0.9 ? '#ef4444' : teamColor,
+                          }} />
+                        </div>
+                        <div style={{ fontSize: '10px', color: subText, marginTop: 2 }}>
+                          ${(chicagoCap.cap_available / 1_000_000).toFixed(1)}M avail
+                        </div>
+                      </div>
+                    )}
+                    {opponentCap && (
+                      <div style={{
+                        padding: '8px 10px', borderRadius: 8,
+                        backgroundColor: isDark ? '#1e293b' : '#f8fafc',
+                        border: `1px solid ${isDark ? '#334155' : '#e2e8f0'}`,
+                      }}>
+                        <div style={{ fontSize: '10px', fontWeight: 700, color: opponentTeam.primary_color, marginBottom: 4, textTransform: 'uppercase' }}>
+                          {opponentTeam.abbreviation} Cap
+                        </div>
+                        <div style={{ fontSize: '12px', fontWeight: 600, color: isDark ? '#e2e8f0' : '#334155' }}>
+                          ${(opponentCap.cap_used / 1_000_000).toFixed(1)}M / ${(opponentCap.total_cap / 1_000_000).toFixed(1)}M
+                        </div>
+                        <div style={{
+                          height: 4, borderRadius: 2, marginTop: 4,
+                          backgroundColor: isDark ? '#374151' : '#e5e7eb', overflow: 'hidden',
+                        }}>
+                          <div style={{
+                            height: '100%', borderRadius: 2,
+                            width: `${Math.min(100, (opponentCap.cap_used / opponentCap.total_cap) * 100)}%`,
+                            backgroundColor: opponentCap.cap_used / opponentCap.total_cap > 0.9 ? '#ef4444' : opponentTeam.primary_color,
+                          }} />
+                        </div>
+                        <div style={{ fontSize: '10px', color: subText, marginTop: 2 }}>
+                          ${(opponentCap.cap_available / 1_000_000).toFixed(1)}M avail
+                        </div>
+                      </div>
+                    )}
                   </div>
+                )}
+
+                {/* Opponent roster browser */}
+                {opponentTeam && (
+                  <OpponentRosterPanel
+                    teamKey={opponentTeam.team_key}
+                    sport={opponentTeam.sport}
+                    teamColor={opponentTeam.primary_color || '#666'}
+                    selectedIds={selectedOpponentIds}
+                    onToggle={toggleOpponentPlayer}
+                    roster={opponentRoster}
+                    setRoster={setOpponentRoster}
+                    loading={opponentRosterLoading}
+                    setLoading={setOpponentRosterLoading}
+                    onAddCustomPlayer={addCustomReceivedPlayer}
+                  />
                 )}
               </div>
 
@@ -431,7 +522,13 @@ export default function GMPage() {
                   draftPicksSent={draftPicksSent}
                   draftPicksReceived={draftPicksReceived}
                   onRemoveSent={id => togglePlayer(id)}
-                  onRemoveReceived={i => setReceivedPlayers(prev => prev.filter((_, idx) => idx !== i))}
+                  onRemoveReceived={i => {
+                    const removed = receivedPlayers[i]
+                    if ('player_id' in removed) {
+                      setSelectedOpponentIds(prev => { const next = new Set(prev); next.delete(removed.player_id); return next })
+                    }
+                    setReceivedPlayers(prev => prev.filter((_, idx) => idx !== i))
+                  }}
                   onRemoveDraftSent={i => setDraftPicksSent(prev => prev.filter((_, idx) => idx !== i))}
                   onRemoveDraftReceived={i => setDraftPicksReceived(prev => prev.filter((_, idx) => idx !== i))}
                   canGrade={canGrade}
@@ -521,7 +618,7 @@ export default function GMPage() {
       <OpponentTeamPicker
         open={showOpponentPicker}
         onClose={() => setShowOpponentPicker(false)}
-        onSelect={team => setOpponentTeam(team)}
+        onSelect={handleOpponentSelect}
         sport={sport}
         chicagoTeam={selectedTeam}
       />

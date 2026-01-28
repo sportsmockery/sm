@@ -79,6 +79,58 @@ export async function GET(request: NextRequest) {
     }
   }
 
+  // Check league roster tables
+  const LEAGUE_TABLES = [
+    { table: 'gm_nfl_rosters', sport: 'nfl' },
+    { table: 'gm_nba_rosters', sport: 'nba' },
+    { table: 'gm_nhl_rosters', sport: 'nhl' },
+    { table: 'gm_mlb_rosters', sport: 'mlb' },
+  ]
+  for (const lt of LEAGUE_TABLES) {
+    try {
+      const { count, error } = await datalabAdmin
+        .from(lt.table)
+        .select('*', { count: 'exact', head: true })
+      if (error) {
+        issues.push(`${lt.table}: query failed — ${error.message}`)
+        results[lt.table] = { status: 'error', error: error.message }
+      } else {
+        const ok = (count || 0) > 0
+        if (!ok) issues.push(`${lt.table}: 0 rows`)
+        results[lt.table] = { status: ok ? 'ok' : 'warning', rowCount: count || 0 }
+      }
+    } catch (e) {
+      issues.push(`${lt.table}: ${e instanceof Error ? e.message : String(e)}`)
+      results[lt.table] = { status: 'error', error: String(e) }
+    }
+  }
+
+  // Check salary cap tables
+  const CAP_TABLES = [
+    { table: 'gm_nfl_salary_cap', sport: 'nfl' },
+    { table: 'gm_nba_salary_cap', sport: 'nba' },
+    { table: 'gm_nhl_salary_cap', sport: 'nhl' },
+    { table: 'gm_mlb_salary_cap', sport: 'mlb' },
+  ]
+  for (const ct of CAP_TABLES) {
+    try {
+      const { count, error } = await datalabAdmin
+        .from(ct.table)
+        .select('*', { count: 'exact', head: true })
+      if (error) {
+        issues.push(`${ct.table}: query failed — ${error.message}`)
+        results[ct.table] = { status: 'error', error: error.message }
+      } else {
+        const ok = (count || 0) > 0
+        if (!ok) issues.push(`${ct.table}: 0 rows`)
+        results[ct.table] = { status: ok ? 'ok' : 'warning', rowCount: count || 0 }
+      }
+    } catch (e) {
+      issues.push(`${ct.table}: ${e instanceof Error ? e.message : String(e)}`)
+      results[ct.table] = { status: 'error', error: String(e) }
+    }
+  }
+
   const duration = Date.now() - startTime
   const hasErrors = issues.length > 0
 
