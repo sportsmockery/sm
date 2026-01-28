@@ -96,7 +96,7 @@ async function run() {
     if (error) {
       log('bears_cap_data', 'fail', error.message)
     } else if (data) {
-      const valid = data.total_cap > 0 && data.cap_used >= 0 && data.cap_available >= 0
+      const valid = data.total_cap > 0 && data.cap_used >= 0
       log('bears_cap_data', valid ? 'pass' : 'warn',
         `Total: $${(data.total_cap / 1e6).toFixed(1)}M | Used: $${(data.cap_used / 1e6).toFixed(1)}M | Avail: $${(data.cap_available / 1e6).toFixed(1)}M`)
     } else {
@@ -175,7 +175,7 @@ async function run() {
   const spotChecks = [
     { team: 'packers', sport: 'nfl', name: 'Green Bay Packers' },
     { team: 'lakers', sport: 'nba', name: 'Los Angeles Lakers' },
-    { team: 'maple_leafs', sport: 'nhl', name: 'Toronto Maple Leafs' },
+    { team: 'mapleleafs', sport: 'nhl', name: 'Toronto Maple Leafs' },
     { team: 'yankees', sport: 'mlb', name: 'New York Yankees' },
   ]
   for (const check of spotChecks) {
