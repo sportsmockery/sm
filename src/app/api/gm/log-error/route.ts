@@ -55,9 +55,7 @@ export async function POST(request: NextRequest) {
       source: String(body.source || 'frontend').slice(0, 50),
       error_type: String(body.error_type || 'unknown').slice(0, 50),
       error_message: String(body.error_message || 'Unknown error').slice(0, 2000),
-      route: body.route ? String(body.route).slice(0, 200) : null,
       request_payload: body.request_payload || null,
-      metadata: body.metadata || null,
     })
 
     if (error) {
