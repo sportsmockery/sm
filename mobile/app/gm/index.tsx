@@ -14,7 +14,6 @@ import { SafeAreaView } from 'react-native-safe-area-context'
 import { Ionicons } from '@expo/vector-icons'
 
 import { useTheme } from '@/hooks/useTheme'
-import { useAuth } from '@/hooks/useAuth'
 import { COLORS, TEAMS } from '@/lib/config'
 import { useGM } from '@/lib/gm-context'
 import { gmApi } from '@/lib/gm-api'
@@ -30,38 +29,8 @@ const CHICAGO_TEAMS = [
 export default function GMIndexScreen() {
   const router = useRouter()
   const { colors, isDark } = useTheme()
-  const { isAuthenticated, isLoading: authLoading } = useAuth()
   const { state, dispatch } = useGM()
   const [loading, setLoading] = useState(false)
-
-  // Show login prompt if not authenticated
-  if (!authLoading && !isAuthenticated) {
-    return (
-      <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]} edges={['top']}>
-        <View style={[styles.header, { backgroundColor: colors.surface, borderBottomColor: colors.border }]}>
-          <TouchableOpacity onPress={() => router.back()} style={styles.backBtn}>
-            <Ionicons name="arrow-back" size={24} color={colors.text} />
-          </TouchableOpacity>
-          <View style={styles.headerCenter}>
-            <Text style={[styles.headerTitle, { color: colors.text }]}>GM Trade Simulator</Text>
-          </View>
-        </View>
-        <View style={styles.loginPrompt}>
-          <Ionicons name="lock-closed-outline" size={48} color={colors.textMuted} />
-          <Text style={[styles.loginTitle, { color: colors.text }]}>Sign In Required</Text>
-          <Text style={[styles.loginDesc, { color: colors.textMuted }]}>
-            Create an account or sign in to build trades and get AI grades.
-          </Text>
-          <TouchableOpacity
-            style={styles.loginBtn}
-            onPress={() => router.push('/auth')}
-          >
-            <Text style={styles.loginBtnText}>Sign In or Create Account</Text>
-          </TouchableOpacity>
-        </View>
-      </SafeAreaView>
-    )
-  }
 
   const handleSelectTeam = async (teamKey: string) => {
     dispatch({ type: 'SET_TEAM', team: teamKey as any })
@@ -204,20 +173,4 @@ const styles = StyleSheet.create({
   teamInfo: { flex: 1, marginLeft: 14 },
   teamName: { fontSize: 16, fontFamily: 'Montserrat-Bold' },
   teamSport: { fontSize: 12, fontFamily: 'Montserrat-Medium', marginTop: 2, letterSpacing: 0.5 },
-  loginPrompt: {
-    flex: 1, justifyContent: 'center', alignItems: 'center', padding: 32,
-  },
-  loginTitle: {
-    fontSize: 20, fontFamily: 'Montserrat-Bold', marginTop: 16, marginBottom: 8,
-  },
-  loginDesc: {
-    fontSize: 14, fontFamily: 'Montserrat-Regular', textAlign: 'center', lineHeight: 22, marginBottom: 24,
-  },
-  loginBtn: {
-    backgroundColor: COLORS.primary,
-    paddingHorizontal: 32, paddingVertical: 14, borderRadius: 12,
-  },
-  loginBtnText: {
-    color: '#fff', fontSize: 16, fontFamily: 'Montserrat-Bold',
-  },
 })

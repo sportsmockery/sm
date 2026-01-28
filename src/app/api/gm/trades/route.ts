@@ -8,7 +8,8 @@ export const dynamic = 'force-dynamic'
 export async function GET(request: NextRequest) {
   try {
     const user = await getGMAuthUser(request)
-    if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    // Return empty for guests
+    if (!user) return NextResponse.json({ trades: [], total: 0, page: 1, limit: 50, total_pages: 0 })
 
     const page = parseInt(request.nextUrl.searchParams.get('page') || '1')
     const limit = Math.min(parseInt(request.nextUrl.searchParams.get('limit') || '50'), 100)
@@ -46,7 +47,8 @@ export async function GET(request: NextRequest) {
 export async function DELETE(request: NextRequest) {
   try {
     const user = await getGMAuthUser(request)
-    if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    // Guests can't delete trades (they don't have any)
+    if (!user) return NextResponse.json({ error: 'Sign in to manage trades' }, { status: 401 })
 
     await datalabAdmin
       .from('gm_sessions')

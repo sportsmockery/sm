@@ -12,7 +12,8 @@ const TEAM_SPORT_MAP: Record<string, string> = {
 export async function GET(request: NextRequest) {
   try {
     const user = await getGMAuthUser(request)
-    if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    // Return empty for guests
+    if (!user) return NextResponse.json({ sessions: [] })
 
     const { data: sessions, error } = await datalabAdmin
       .from('gm_sessions')
@@ -33,13 +34,32 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   try {
     const user = await getGMAuthUser(request)
-    if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
     const body = await request.json()
     const { chicago_team, session_name } = body
 
     if (!chicago_team || !TEAM_SPORT_MAP[chicago_team]) {
       return NextResponse.json({ error: 'Invalid chicago_team' }, { status: 400 })
+    }
+
+    // Return fake session for guests
+    if (!user) {
+      return NextResponse.json({
+        session: {
+          id: 'guest-session',
+          session_name: session_name || `${chicago_team.charAt(0).toUpperCase() + chicago_team.slice(1)} Trade Session`,
+          chicago_team,
+          sport: TEAM_SPORT_MAP[chicago_team],
+          is_active: true,
+          num_trades: 0,
+          num_approved: 0,
+          num_dangerous: 0,
+          num_failed: 0,
+          total_improvement: 0,
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
+        }
+      })
     }
 
     await datalabAdmin

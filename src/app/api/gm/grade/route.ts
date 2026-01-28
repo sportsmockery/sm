@@ -111,18 +111,22 @@ export async function POST(request: NextRequest) {
   const startTime = Date.now()
 
   try {
+    // Auth is optional - guests can grade trades but won't have history saved
     const user = await getGMAuthUser(request)
-    if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    const userId = user?.id || 'guest'
+    const isGuest = !user
 
-    // Rate limiting: max 10 trades per minute
-    const oneMinAgo = new Date(Date.now() - 60000).toISOString()
-    const { count: recentCount } = await datalabAdmin
-      .from('gm_trades')
-      .select('*', { count: 'exact', head: true })
-      .eq('user_id', user.id)
-      .gte('created_at', oneMinAgo)
-    if ((recentCount || 0) >= 10) {
-      return NextResponse.json({ error: 'Rate limited. Max 10 trades per minute.' }, { status: 429 })
+    // Rate limiting: max 10 trades per minute (only for logged-in users)
+    if (!isGuest) {
+      const oneMinAgo = new Date(Date.now() - 60000).toISOString()
+      const { count: recentCount } = await datalabAdmin
+        .from('gm_trades')
+        .select('*', { count: 'exact', head: true })
+        .eq('user_id', userId)
+        .gte('created_at', oneMinAgo)
+      if ((recentCount || 0) >= 10) {
+        return NextResponse.json({ error: 'Rate limited. Max 10 trades per minute.' }, { status: 429 })
+      }
     }
 
     const body = await request.json()
@@ -344,7 +348,7 @@ Grade this trade from the perspective of the ${teamDisplayNames[chicago_team]}.`
 
     const status = grade >= 75 ? 'accepted' : 'rejected'
     const is_dangerous = grade >= 75 && grade <= 90
-    const userEmail = user.email || 'unknown'
+    const userEmail = user?.email || 'guest'
     const sharedCode = randomBytes(6).toString('hex')
 
     let partnerTeamLogo: string | null = null
@@ -367,7 +371,7 @@ Grade this trade from the perspective of the ${teamDisplayNames[chicago_team]}.`
     chicagoTeamLogo = ct?.logo_url || null
 
     const { data: trade, error: tradeError } = await datalabAdmin.from('gm_trades').insert({
-      user_id: user.id,
+      user_id: userId,
       user_email: userEmail,
       chicago_team,
       sport,
@@ -451,7 +455,7 @@ Grade this trade from the perspective of the ${teamDisplayNames[chicago_team]}.`
     }
 
     await datalabAdmin.from('gm_audit_logs').insert({
-      user_id: user.id,
+      user_id: userId,
       trade_id: trade.id,
       request_payload: requestPayload,
       response_payload: { rawText, grade, reasoning, tradeSummary, improvementScore, breakdown, capAnalysis },
@@ -459,7 +463,9 @@ Grade this trade from the perspective of the ${teamDisplayNames[chicago_team]}.`
       response_time_ms: responseTimeMs,
     })
 
-    const { data: existing } = await datalabAdmin.from('gm_leaderboard').select('*').eq('user_id', user.id).single()
+    // Only update leaderboard for logged-in users
+    if (!isGuest) {
+    const { data: existing } = await datalabAdmin.from('gm_leaderboard').select('*').eq('user_id', userId).single()
 
     if (existing) {
       const newAccepted = (existing.accepted_count || 0) + (status === 'accepted' ? 1 : 0)
@@ -491,10 +497,10 @@ Grade this trade from the perspective of the ${teamDisplayNames[chicago_team]}.`
         streak,
         active_session_id: session_id || existing.active_session_id,
         updated_at: new Date().toISOString(),
-      }).eq('user_id', user.id)
+      }).eq('user_id', userId)
     } else {
       await datalabAdmin.from('gm_leaderboard').insert({
-        user_id: user.id,
+        user_id: userId,
         user_email: userEmail,
         total_score: status === 'accepted' ? grade : 0,
         trades_count: status === 'accepted' ? 1 : 0,
@@ -512,6 +518,7 @@ Grade this trade from the perspective of the ${teamDisplayNames[chicago_team]}.`
         updated_at: new Date().toISOString(),
       })
     }
+    } // end if (!isGuest) for leaderboard
 
     if (session_id) {
       const { data: sess } = await datalabAdmin.from('gm_sessions').select('*').eq('id', session_id).single()
