@@ -64,6 +64,7 @@ export default function AdvancedPostEditor({
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState('')
   const [aiLoading, setAiLoading] = useState<string | null>(null)
+  const [headlineTeam, setHeadlineTeam] = useState<string>('')
   const [uploadingImage, setUploadingImage] = useState(false)
   const [headlines, setHeadlines] = useState<string[]>([])
   const [ideas, setIdeas] = useState<ArticleIdea[]>([])
@@ -282,7 +283,7 @@ export default function AdvancedPostEditor({
     setAiLoading(action)
     try {
       const categoryName = categories.find(c => c.id === formData.category_id)?.name
-      const team = getTeamFromCategory(categoryName)
+      const team = (action === 'headlines' && headlineTeam) ? headlineTeam : getTeamFromCategory(categoryName)
       const response = await fetch('/api/admin/ai', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -897,6 +898,18 @@ export default function AdvancedPostEditor({
                   </svg>
                   {aiLoading === 'headlines' ? 'Generating...' : 'Headlines'}
                 </button>
+                <select
+                  value={headlineTeam}
+                  onChange={(e) => setHeadlineTeam(e.target.value)}
+                  className="w-full rounded-lg px-3 py-1.5 text-xs text-[var(--text-secondary)] bg-[var(--bg-secondary)] border border-[var(--border-default)]"
+                >
+                  <option value="">Auto (from category)</option>
+                  <option value="Bears">Bears</option>
+                  <option value="Bulls">Bulls</option>
+                  <option value="Blackhawks">Blackhawks</option>
+                  <option value="Cubs">Cubs</option>
+                  <option value="White Sox">White Sox</option>
+                </select>
                 <button
                   type="button"
                   onClick={openIdeasModal}

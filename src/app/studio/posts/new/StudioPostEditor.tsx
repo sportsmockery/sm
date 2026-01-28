@@ -80,6 +80,7 @@ export default function StudioPostEditor({
 
   // PostIQ AI states
   const [aiLoading, setAiLoading] = useState<string | null>(null)
+  const [headlineTeam, setHeadlineTeam] = useState<string>('')
   const [headlines, setHeadlines] = useState<string[]>([])
   const [ideas, setIdeas] = useState<ArticleIdea[]>([])
   const [showIdeasModal, setShowIdeasModal] = useState(false)
@@ -228,7 +229,7 @@ export default function StudioPostEditor({
   const runAI = async (action: string) => {
     setAiLoading(action)
     const categoryName = categories.find(c => c.id === formData.category_id)?.name
-    const team = getTeamFromCategory(categoryName)
+    const team = (action === 'headlines' && headlineTeam) ? headlineTeam : getTeamFromCategory(categoryName)
     try {
       const response = await fetch('/api/admin/ai', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ action, title: formData.title, content: formData.content, category: categoryName, team }) })
       if (response.ok) {
@@ -761,6 +762,14 @@ export default function StudioPostEditor({
                   <svg className="h-5 w-5 text-purple-500" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25H12" /></svg>
                   {aiLoading === 'headlines' ? 'Generating...' : 'Headlines'}
                 </button>
+                <select value={headlineTeam} onChange={(e) => setHeadlineTeam(e.target.value)} className="w-full rounded-lg px-3 py-1.5 text-xs text-[var(--text-secondary)] bg-[var(--bg-secondary)] border border-[var(--border-default)]">
+                  <option value="">Auto (from category)</option>
+                  <option value="Bears">Bears</option>
+                  <option value="Bulls">Bulls</option>
+                  <option value="Blackhawks">Blackhawks</option>
+                  <option value="Cubs">Cubs</option>
+                  <option value="White Sox">White Sox</option>
+                </select>
                 <button type="button" onClick={openIdeasModal} className="w-full flex items-center gap-3 rounded-lg px-3 py-2 text-sm text-[var(--text-secondary)] hover:bg-[var(--bg-hover)] hover:text-[var(--text-primary)]">
                   <span className="text-lg">💡</span>
                   Generate Ideas
