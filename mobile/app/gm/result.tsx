@@ -114,6 +114,8 @@ export default function GMResultScreen() {
 
         {/* Trade Details */}
         <View style={[styles.tradeDetailsCard, { backgroundColor: colors.surface }]}>
+          <Text style={[styles.tradeDetailsTitle, { color: colors.text }]}>Trade Details</Text>
+
           {/* Players Sent */}
           <View style={styles.tradeSide}>
             <View style={[styles.tradeSideHeader, { borderBottomColor: colors.border }]}>
@@ -348,6 +350,12 @@ const styles = StyleSheet.create({
     borderRadius: 14,
     padding: 16,
     marginBottom: 12,
+  },
+  tradeDetailsTitle: {
+    fontSize: 16,
+    fontFamily: 'Montserrat-Bold',
+    marginBottom: 12,
+    textAlign: 'center',
   },
   tradeSide: {
     marginBottom: 8,
