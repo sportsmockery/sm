@@ -194,12 +194,53 @@ export async function POST(request: NextRequest) {
 
     const formatMoney = (v: number) => `$${(v / 1_000_000).toFixed(1)}M`
 
+    // Look up player value tiers for both sides
+    const allPlayerNames = [
+      ...players_sent.map((p: any) => p.name || p.full_name),
+      ...players_received.map((p: any) => p.name || p.full_name),
+    ].filter(Boolean)
+
+    let tierMap: Record<string, { tier: number, tier_label: string, trade_value_score: number, is_untouchable: boolean }> = {}
+    try {
+      const { data: tiers } = await datalabAdmin
+        .from('gm_player_value_tiers')
+        .select('player_name, tier, tier_label, trade_value_score, is_untouchable')
+        .in('player_name', allPlayerNames)
+        .eq('league', sport)
+      if (tiers) {
+        for (const t of tiers) {
+          tierMap[t.player_name] = { tier: t.tier, tier_label: t.tier_label, trade_value_score: t.trade_value_score, is_untouchable: t.is_untouchable }
+        }
+      }
+    } catch {
+      // Table may not exist yet — continue without tiers
+    }
+
+    // Look up few-shot grading examples
+    let examplesBlock = ''
+    try {
+      const { data: examples } = await datalabAdmin
+        .from('gm_grading_examples')
+        .select('trade_description, correct_grade, reasoning, category')
+        .eq('sport', sport)
+        .limit(5)
+      if (examples && examples.length > 0) {
+        examplesBlock = `\n\nReference Grades (use as calibration):\n${examples.map(
+          (ex: any) => `- ${ex.category}: "${ex.trade_description}" → Grade ${ex.correct_grade} (${ex.reasoning})`
+        ).join('\n')}`
+      }
+    } catch {
+      // Table may not exist yet — continue without examples
+    }
+
     const sentDesc = players_sent.map((p: any) => {
       let desc = `${p.name} (${p.position})`
       if (p.stat_line) desc += ` [${p.stat_line}]`
       if (p.age) desc += ` Age ${p.age}`
       if (p.cap_hit) desc += `, ${formatMoney(p.cap_hit)} cap hit`
       if (p.contract_years) desc += `, ${p.contract_years}yr remaining`
+      const tier = tierMap[p.name]
+      if (tier) desc += ` [Tier ${tier.tier}: ${tier.tier_label}, value ${tier.trade_value_score}${tier.is_untouchable ? ', UNTOUCHABLE' : ''}]`
       return desc
     }).join(', ')
 
@@ -209,6 +250,8 @@ export async function POST(request: NextRequest) {
       if (p.age) desc += ` Age ${p.age}`
       if (p.cap_hit) desc += `, ${formatMoney(p.cap_hit)} cap hit`
       if (p.contract_years) desc += `, ${p.contract_years}yr remaining`
+      const tier = tierMap[p.name || p.full_name]
+      if (tier) desc += ` [Tier ${tier.tier}: ${tier.tier_label}, value ${tier.trade_value_score}${tier.is_untouchable ? ', UNTOUCHABLE' : ''}]`
       return desc
     }).join(', ')
 
@@ -231,10 +274,47 @@ export async function POST(request: NextRequest) {
       if (partnerCapData.dead_money) capContext += ` (${formatMoney(partnerCapData.dead_money)} dead money)`
     }
 
+    // Calculate value gap if tiers are available
+    let valueContext = ''
+    const hasTiers = Object.keys(tierMap).length > 0
+    if (hasTiers) {
+      const sentValue = players_sent.reduce((sum: number, p: any) => {
+        const tier = tierMap[p.name]
+        return sum + (tier?.trade_value_score || 0)
+      }, 0)
+      // Rough draft pick values
+      const pickValue = (picks: any[]) => (picks || []).reduce((sum: number, p: any) => {
+        if (p.round === 1) return sum + 35
+        if (p.round === 2) return sum + 18
+        if (p.round === 3) return sum + 10
+        return sum + 5
+      }, 0)
+      const sentTotal = sentValue + pickValue(draft_picks_sent)
+
+      const recvValue = players_received.reduce((sum: number, p: any) => {
+        const tier = tierMap[p.name || p.full_name]
+        return sum + (tier?.trade_value_score || 0)
+      }, 0)
+      const recvTotal = recvValue + pickValue(draft_picks_received)
+
+      const gap = recvTotal - sentTotal
+      valueContext = `\n\nPlayer Value Analysis (objective tier data):
+SENDING total value: ~${sentTotal}
+RECEIVING total value: ~${recvTotal}
+VALUE GAP: ${gap > 0 ? `Chicago receiving ${gap} points MORE (other team unlikely to accept if gap > 20)` : gap < 0 ? `Chicago sending ${Math.abs(gap)} points MORE (overpay)` : 'Even trade'}`
+
+      // Add realism warning for large gaps
+      if (gap > 30) {
+        valueContext += `\n⚠ REALISM WARNING: The value gap is ${gap} points. The other team would almost certainly reject this trade. Grade should reflect this — cap at 20-25 max.`
+      } else if (gap > 15) {
+        valueContext += `\n⚠ CAUTION: Notable value gap of ${gap} points favoring Chicago. Other team would likely decline without sweeteners. Cap grade at 40-50.`
+      }
+    }
+
     const tradeDescription = `
 Sport: ${sport.toUpperCase()}
 ${teamDisplayNames[chicago_team]} send: ${sentDesc}${picksSentDesc}
-${trade_partner} send: ${recvDesc}${picksRecvDesc}${capContext}
+${trade_partner} send: ${recvDesc}${picksRecvDesc}${capContext}${valueContext}${examplesBlock}
 
 Grade this trade from the perspective of the ${teamDisplayNames[chicago_team]}.`
 

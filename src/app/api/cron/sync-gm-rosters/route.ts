@@ -105,6 +105,53 @@ export async function GET(request: NextRequest) {
     }
   }
 
+  // Check player value tiers table
+  try {
+    const { count, error } = await datalabAdmin
+      .from('gm_player_value_tiers')
+      .select('*', { count: 'exact', head: true })
+    if (error) {
+      issues.push(`gm_player_value_tiers: query failed — ${error.message}`)
+      results['gm_player_value_tiers'] = { status: 'warn', error: error.message }
+    } else {
+      const c = count || 0
+      if (c === 0) issues.push('gm_player_value_tiers: 0 rows — DataLab needs to populate')
+      results['gm_player_value_tiers'] = { status: c > 0 ? 'ok' : 'warning', rowCount: c }
+    }
+
+    // Check freshness
+    if (!error) {
+      const { data: latest } = await datalabAdmin
+        .from('gm_player_value_tiers')
+        .select('updated_at')
+        .order('updated_at', { ascending: false })
+        .limit(1)
+        .single()
+      if (latest) {
+        const ageDays = Math.round((Date.now() - new Date(latest.updated_at).getTime()) / (1000 * 60 * 60 * 24))
+        if (ageDays > 7) issues.push(`gm_player_value_tiers: stale — last updated ${ageDays} days ago`)
+        results['gm_player_value_tiers_freshness'] = { status: ageDays <= 7 ? 'ok' : 'warning', ageDays }
+      }
+    }
+  } catch (e) {
+    // Table may not exist yet — not a hard error
+    results['gm_player_value_tiers'] = { status: 'warning', note: 'Table not available yet' }
+  }
+
+  // Check grading examples table
+  try {
+    const { count, error } = await datalabAdmin
+      .from('gm_grading_examples')
+      .select('*', { count: 'exact', head: true })
+    if (error) {
+      results['gm_grading_examples'] = { status: 'warn', error: error.message }
+    } else {
+      results['gm_grading_examples'] = { status: (count || 0) > 0 ? 'ok' : 'warning', rowCount: count || 0 }
+    }
+  } catch {
+    results['gm_grading_examples'] = { status: 'warning', note: 'Table not available yet' }
+  }
+
   // Check salary cap tables
   const CAP_TABLES = [
     { table: 'gm_nfl_salary_cap', sport: 'nfl' },

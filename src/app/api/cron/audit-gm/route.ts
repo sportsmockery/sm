@@ -158,7 +158,82 @@ export async function GET(request: NextRequest) {
     checks.push({ name: 'opponent_roster_api', status: 'fail', detail: String(e), duration_ms: Date.now() - t6 })
   }
 
-  // 7. Recent trades — verify grading pipeline is functional
+  // 7. Player value tiers — verify gm_player_value_tiers is populated
+  for (const sport of SPORTS) {
+    const t = Date.now()
+    try {
+      const { count, error } = await datalabAdmin
+        .from('gm_player_value_tiers')
+        .select('*', { count: 'exact', head: true })
+        .eq('league', sport)
+
+      if (error) {
+        // Table may not exist yet — warn, don't fail
+        checks.push({ name: `${sport}_value_tiers`, status: 'warn', detail: `Table query failed: ${error.message}`, duration_ms: Date.now() - t })
+      } else {
+        const c = count || 0
+        const minExpected = sport === 'nfl' ? 200 : sport === 'nba' ? 100 : sport === 'nhl' ? 100 : 150
+        checks.push({
+          name: `${sport}_value_tiers`,
+          status: c >= minExpected ? 'pass' : c > 0 ? 'warn' : 'warn',
+          detail: `${c} players with tiers (target ${minExpected}+)`,
+          duration_ms: Date.now() - t,
+        })
+      }
+    } catch (e) {
+      checks.push({ name: `${sport}_value_tiers`, status: 'warn', detail: `Not available: ${String(e)}`, duration_ms: Date.now() - t })
+    }
+  }
+
+  // 7b. Value tiers freshness — check if tiers have been updated recently
+  const tFresh = Date.now()
+  try {
+    const { data: latest, error } = await datalabAdmin
+      .from('gm_player_value_tiers')
+      .select('updated_at')
+      .order('updated_at', { ascending: false })
+      .limit(1)
+      .single()
+
+    if (error) {
+      checks.push({ name: 'value_tiers_freshness', status: 'warn', detail: `Query failed: ${error.message}`, duration_ms: Date.now() - tFresh })
+    } else if (latest) {
+      const ageMs = Date.now() - new Date(latest.updated_at).getTime()
+      const ageDays = Math.round(ageMs / (1000 * 60 * 60 * 24))
+      checks.push({
+        name: 'value_tiers_freshness',
+        status: ageDays <= 7 ? 'pass' : ageDays <= 14 ? 'warn' : 'fail',
+        detail: `Last updated ${ageDays} day(s) ago${ageDays > 7 ? ' — needs refresh' : ''}`,
+        duration_ms: Date.now() - tFresh,
+      })
+    }
+  } catch (e) {
+    checks.push({ name: 'value_tiers_freshness', status: 'warn', detail: `Not available: ${String(e)}`, duration_ms: Date.now() - tFresh })
+  }
+
+  // 7c. Grading examples — verify gm_grading_examples has data
+  const tEx = Date.now()
+  try {
+    const { count, error } = await datalabAdmin
+      .from('gm_grading_examples')
+      .select('*', { count: 'exact', head: true })
+
+    if (error) {
+      checks.push({ name: 'grading_examples', status: 'warn', detail: `Table query failed: ${error.message}`, duration_ms: Date.now() - tEx })
+    } else {
+      const c = count || 0
+      checks.push({
+        name: 'grading_examples',
+        status: c >= 10 ? 'pass' : c > 0 ? 'warn' : 'warn',
+        detail: `${c} examples (target 20+)`,
+        duration_ms: Date.now() - tEx,
+      })
+    }
+  } catch (e) {
+    checks.push({ name: 'grading_examples', status: 'warn', detail: `Not available: ${String(e)}`, duration_ms: Date.now() - tEx })
+  }
+
+  // 8. Recent trades — verify grading pipeline is functional
   const t7 = Date.now()
   try {
     const { count, error } = await datalabAdmin
