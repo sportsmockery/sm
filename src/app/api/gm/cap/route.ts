@@ -14,7 +14,9 @@ const SPORT_CAP_TABLE: Record<string, string> = {
 
 export async function GET(request: NextRequest) {
   try {
-    // Auth is optional for browsing cap data
+    const user = await getGMAuthUser(request)
+    if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+
     const teamKey = request.nextUrl.searchParams.get('team_key')
     const sport = request.nextUrl.searchParams.get('sport')
 

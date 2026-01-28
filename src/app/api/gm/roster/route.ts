@@ -96,8 +96,8 @@ async function fetchOpponentRoster(teamKey: string, sport: string, search?: stri
 
 export async function GET(request: NextRequest) {
   try {
-    // Auth is optional for browsing rosters
-    // const user = await getGMAuthUser(request)
+    const user = await getGMAuthUser(request)
+    if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
     const search = request.nextUrl.searchParams.get('search')?.toLowerCase()
     const posFilter = request.nextUrl.searchParams.get('position')
