@@ -20,37 +20,31 @@
 | Chart CRUD + Customization | 10/10 | 0 | Create, fetch, line, pie, 5 team themes, delete |
 | Poll CRUD + Voting | 5/5 | 0 | Create, fetch results, vote, verify count, delete |
 | Consistency Runs (6 actions x 5) | 30/30 | 0 | |
-| **Full Publish Workflow** | **0/5** | **5** | **BUG: POST /api/admin/posts returns 500** |
-| **TOTAL** | **91/96** | **5** | |
+| Full Publish Workflow | 5/5 | 0 | All 5 teams - chart+poll+publish cycle |
+| **TOTAL** | **96/96** | **0** | ✅ **ALL PASSING** |
 
-## Bugs Found
+## Bugs Found & Fixed
 
-### BUG 1: POST /api/admin/posts returns 500 (CRITICAL)
+### BUG 1: POST /api/admin/posts returns 500 ✅ FIXED
 
 **Endpoint:** `POST /api/admin/posts`
-**Severity:** Critical — blocks programmatic post creation
+**Severity:** Critical — blocked programmatic post creation
 
-The post creation API always returns HTTP 500 when called directly via fetch, regardless of payload. The Supabase insert fails but the error is swallowed — the response only says `{"error":"Failed to create post"}`.
+**Root cause:** The route was including columns that didn't exist in the `sm_posts` schema cache (e.g., `social_caption`).
 
-**Steps to reproduce:**
-```bash
-curl -s -X POST https://test.sportsmockery.com/api/admin/posts \
-  -H 'Content-Type: application/json' \
-  -d '{"title":"Test","slug":"test-slug-123","content":"<p>Hello</p>"}'
-# Returns: {"error":"Failed to create post"} with HTTP 500
-```
+**Fix:** Modified the route to only include core columns that definitely exist, and conditionally add optional columns only if they have values.
 
-**Impact:** Cannot create posts via API. The admin UI works because it goes through the editor component which may add additional fields or use a different code path.
+**Commit:** `f3cc5a19` - "Fix post creation: only include columns that exist in schema"
 
-**Likely cause:** Missing required database column(s) in the insert payload, or a database trigger/constraint failure. The route uses `supabaseAdmin` so RLS is not the issue.
+### BUG 2: GET /api/charts/[id] does not include `id` in response ✅ FIXED
 
-### BUG 2: GET /api/charts/[id] does not include `id` in response
+**Fix:** Added `id`, `postId`, `createdAt`, and `updatedAt` fields to the chart GET response.
 
-Not a breaking bug, but the chart GET endpoint doesn't return the chart's ID in the response body. This makes it harder for consumers to correlate responses.
+### BUG 3: analyze_chart returns raw array ✅ FIXED
 
-### BUG 3: analyze_chart returns raw array, not documented object
+**Root cause:** The AI sometimes returns a raw array of `{label, value}` objects instead of the documented object shape.
 
-The `analyze_chart` action returns a raw array of `{label, value}` objects instead of the documented `{shouldCreateChart, chartType, data, ...}` object. The generic `analyze_chart` test (with Bears-specific content containing numbers) returns data, but the per-team response shape varies.
+**Fix:** Modified the route to wrap array responses in the expected object format with `shouldCreateChart`, `chartType`, etc.
 
 ## Test Validation Details
 
