@@ -1,83 +1,150 @@
-import { fetchHomepageData } from '@/lib/homepage-data'
-import { getMockUpcomingGames } from '@/lib/upcoming-games'
-import {
-  ChicagoLive,
-  FanControlCenter,
-  HomepageTeamBar,
-  InfoDeck,
-  FeaturedShell,
-  LatestStream,
-  SeasonalFocus,
-  EvergreenClassics,
-} from '@/components/home'
-import '@/components/homepage/homepagev3.css'
+import { createServerClient } from '@supabase/ssr'
+import { cookies } from 'next/headers'
+import { HomepageFeed } from '@/components/homepage/HomepageFeed'
+import { TeamPickerPrompt } from '@/components/homepage/TeamPickerPrompt'
+import { DEFAULT_ENGAGEMENT_PROFILE, sortPostsByScore, type ScoringContext } from '@/lib/scoring-v2'
+import '@/styles/homepage.css'
 
-/**
- * SportsMockery Homepage - V10 Design System
- *
- * GUARANTEE: This page always renders full content on the server.
- * Uses fetchHomepageData which never throws and always returns data.
- *
- * V10 Layout:
- * 1. Homepage Team Bar (in-season teams: last game, next game)
- * 2. Trending Right Now / Info Deck
- * 3. Chicago Front Page (6 featured slots)
- * 4. Latest Stream (15 items, reverse chronological)
- * 5. Chicago Live (hero story + upcoming games)
- * 6. Chicago Fan Control Center (Fan Chat + Ask AI)
- * 7. Seasonal Focus (up to 3 in-season teams)
- * 8. Chicago Classics (4 evergreen pieces)
- */
+export const revalidate = 60 // Revalidate every 60 seconds
+
+async function getHomepageData() {
+  const cookieStore = await cookies()
+  const supabase = createServerClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    {
+      cookies: {
+        getAll() { return cookieStore.getAll() },
+        setAll(cookiesToSet) {
+          try { cookiesToSet.forEach(({ name, value, options }) => { cookieStore.set(name, value, options) }) } catch {}
+        },
+      },
+    }
+  )
+
+  // Get current user
+  const { data: { user } } = await supabase.auth.getUser()
+  const userId = user?.id || null
+
+  // Fetch editor picks (pinned_slot 1-6)
+  const { data: editorPicks } = await supabase
+    .from('sm_posts')
+    .select('id, title, slug, featured_image, team_slug, pinned_slot')
+    .eq('editor_pick', true)
+    .gte('pinned_slot', 1)
+    .lte('pinned_slot', 6)
+    .order('pinned_slot', { ascending: true })
+    .limit(6)
+
+  // Fetch trending posts (top 5 by views in last 7 days)
+  const sevenDaysAgo = new Date()
+  sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7)
+
+  const { data: trendingPosts } = await supabase
+    .from('sm_posts')
+    .select('id, title, slug, team_slug, views, published_at, importance_score, content_type, primary_topic, author_id, is_evergreen')
+    .gte('published_at', sevenDaysAgo.toISOString())
+    .order('views', { ascending: false })
+    .limit(5)
+
+  // Mark trending posts
+  const trendingIds = new Set(trendingPosts?.map(p => p.id) || [])
+
+  // Fetch all recent posts for feed
+  const { data: allPosts } = await supabase
+    .from('sm_posts')
+    .select(`
+      id, title, slug, excerpt, featured_image, team_slug,
+      published_at, importance_score, content_type, primary_topic,
+      author_id, is_evergreen, views,
+      author:sm_authors!author_id(display_name)
+    `)
+    .eq('status', 'published')
+    .order('published_at', { ascending: false })
+    .limit(100)
+
+  // Add is_trending flag and author_name to posts
+  const postsWithFlags = (allPosts || []).map((post: any) => ({
+    ...post,
+    is_trending: trendingIds.has(post.id),
+    author_name: Array.isArray(post.author) ? post.author[0]?.display_name : post.author?.display_name || null
+  }))
+
+  // Fetch user engagement profile if logged in
+  let userProfile = null
+  let userTeamPreference: string | null = null
+
+  if (userId) {
+    const { data: profileData } = await supabase
+      .from('user_engagement_profile')
+      .select('*')
+      .eq('user_id', userId)
+      .single()
+
+    userProfile = profileData || DEFAULT_ENGAGEMENT_PROFILE
+
+    // Determine preferred team (highest score)
+    if (userProfile?.team_scores) {
+      const teams = Object.entries(userProfile.team_scores)
+      teams.sort((a, b) => (b[1] as number) - (a[1] as number))
+      if (teams.length > 0 && (teams[0][1] as number) > 50) {
+        userTeamPreference = teams[0][0]
+      }
+    }
+  }
+
+  // Fetch viewed post IDs for logged in user
+  const viewedPostIds = new Set<string>()
+  if (userId) {
+    const { data: viewedData } = await supabase
+      .from('user_interactions')
+      .select('post_id')
+      .eq('user_id', userId)
+      .eq('clicked', true)
+
+    viewedData?.forEach((v: any) => viewedPostIds.add(v.post_id))
+  }
+
+  // Create scoring context
+  const scoringContext: ScoringContext = {
+    user: userProfile,
+    viewedPostIds,
+    isLoggedIn: !!userId
+  }
+
+  // Sort posts by score
+  const rankedPosts = sortPostsByScore(postsWithFlags as any, scoringContext)
+
+  return {
+    editorPicks: editorPicks || [],
+    trendingPosts: trendingPosts?.map(p => ({ ...p, is_trending: true })) || [],
+    rankedPosts,
+    userTeamPreference,
+    isLoggedIn: !!userId
+  }
+}
+
 export default async function HomePage() {
-  // SSR data fetch - guaranteed to return valid data with fallbacks
-  const data = await fetchHomepageData()
-
-  // Get upcoming games (use mock data for now)
-  const upcomingGames = getMockUpcomingGames()
-
-  // Transform primary story for ChicagoLive component
-  const heroStory = data.primaryStory ? {
-    id: typeof data.primaryStory.id === 'string' ? parseInt(data.primaryStory.id) : data.primaryStory.id,
-    title: data.primaryStory.title,
-    slug: data.primaryStory.slug,
-    excerpt: data.primaryStory.excerpt,
-    featured_image: data.primaryStory.featured_image,
-    published_at: data.primaryStory.published_at,
-    category: data.primaryStory.category,
-  } : null
+  const {
+    editorPicks,
+    trendingPosts,
+    rankedPosts,
+    userTeamPreference,
+    isLoggedIn
+  } = await getHomepageData()
 
   return (
-    <main className="sm-homepage">
-      {/* In-Season Teams Bar - Shows Bulls, Blackhawks now; adds other teams when their seasons start */}
-      <HomepageTeamBar />
-
-      {/* Trending / Headlines */}
-      <InfoDeck
-        primaryStory={data.primaryStory}
-        supportStories={data.supportStories}
-        headlines={data.headlines}
+    <>
+      <HomepageFeed
+        initialPosts={rankedPosts}
+        editorPicks={editorPicks}
+        trendingPosts={trendingPosts}
+        userTeamPreference={userTeamPreference}
+        isLoggedIn={isLoggedIn}
       />
 
-      {/* Chicago Front Page: 6 Featured */}
-      <FeaturedShell posts={data.featureSlots} />
-
-      {/* Latest from Chicago */}
-      <LatestStream posts={data.latestPosts} />
-
-      {/* Chicago Live - Hero + Upcoming Games (moved lower) */}
-      <ChicagoLive
-        heroStory={heroStory}
-        upcomingGames={upcomingGames}
-      />
-
-      {/* Fan Control Center - Chat + AI (moved lower) */}
-      <FanControlCenter />
-
-      {/* In Season Right Now */}
-      <SeasonalFocus teams={data.seasonalTeams} />
-
-      {/* Chicago Classics */}
-      <EvergreenClassics posts={data.evergreenPosts} />
-    </main>
+      {/* Team Picker for anonymous users */}
+      {!isLoggedIn && <TeamPickerPrompt />}
+    </>
   )
 }

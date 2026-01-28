@@ -1,5 +1,13 @@
 import { supabaseAdmin } from '@/lib/supabase-server'
 import { NextRequest, NextResponse } from 'next/server'
+import {
+  calculatePostScore,
+  calculateAnonymousScore,
+  sortPostsByScore,
+  DEFAULT_ENGAGEMENT_PROFILE,
+  type ScoringContext,
+  type UserEngagementProfile
+} from '@/lib/scoring-v2'
 
 // Column names match actual sm_posts table schema
 const POST_SELECT = 'id,title,slug,excerpt,featured_image,category_id,author_id,importance_score,published_at,views,author:sm_authors!author_id(display_name),category:sm_categories!category_id(slug,name)'
