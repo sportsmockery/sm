@@ -8,8 +8,7 @@ export const dynamic = 'force-dynamic'
 export async function GET(request: NextRequest) {
   try {
     const user = await getGMAuthUser(request)
-    // Return empty for guests
-    if (!user) return NextResponse.json({ trades: [], total: 0, page: 1, limit: 50, total_pages: 0 })
+    if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
     const page = parseInt(request.nextUrl.searchParams.get('page') || '1')
     const limit = Math.min(parseInt(request.nextUrl.searchParams.get('limit') || '50'), 100)

@@ -173,13 +173,16 @@ test.describe('Excerpt', () => {
 // ======== ANALYZE CHART ========
 
 test.describe('Analyze Chart', () => {
-  test('returns chart data array', async () => {
+  test('returns chart analysis object', async () => {
     const { status, data } = await apiCall('analyze_chart')
     expect(status).toBe(200)
-    // analyze_chart returns an array of {label, value} directly
-    expect(Array.isArray(data)).toBe(true)
-    if (data.length > 0) {
-      for (const d of data) {
+    // analyze_chart returns object with shouldCreateChart boolean
+    expect(typeof data.shouldCreateChart).toBe('boolean')
+    if (data.shouldCreateChart && data.data) {
+      expect(Array.isArray(data.data)).toBe(true)
+      expect(data.chartType).toBeDefined()
+      expect(data.chartTitle).toBeDefined()
+      for (const d of data.data) {
         expect(d.label).toBeDefined()
         expect(typeof d.value).toBe('number')
       }

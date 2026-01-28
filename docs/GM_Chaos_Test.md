@@ -1,6 +1,6 @@
 # GM Trade Simulator — Chaos Test Results
 
-> **Generated:** 2026-01-28T10:28:34.803Z
+> **Generated:** 2026-01-28T19:58:00.655Z
 > **Environment:** test.sportsmockery.com
 > **Purpose:** Try to break everything a Chicago fan could do
 
@@ -11,11 +11,11 @@
 | Metric | Value |
 |--------|-------|
 | **Total Tests** | 109 |
-| **Pass** | 49 |
-| **Warn** | 29 |
-| **Fail** | 31 |
-| **Pass Rate** | 45.0% |
-| **Fail Rate** | 28.4% |
+| **Pass** | 52 |
+| **Warn** | 32 |
+| **Fail** | 25 |
+| **Pass Rate** | 47.7% |
+| **Fail Rate** | 22.9% |
 
 ---
 
@@ -25,22 +25,22 @@
 
 | Test | Status | Detail |
 |------|--------|--------|
-| A1: Empty body | PASS | HTTP 401 |
-| A2: Missing chicago_team | PASS | HTTP 401 |
-| A3: Invalid chicago_team (packers) | PASS | HTTP 401 |
-| A4: Empty players_sent array | PASS | HTTP 401 |
-| A5: Empty players_received array | PASS | HTTP 401 |
-| A6: Non-array players_sent (string) | PASS | HTTP 401 |
-| A7: Null JSON body | PASS | HTTP 401 |
-| A8: Malformed JSON body | PASS | HTTP 401 |
-| A9: 50 players each side | PASS | HTTP 401 |
-| A10: Player with empty name | PASS | HTTP 401 |
-| A11: Player object missing name field | PASS | HTTP 401 |
+| A1: Empty body | PASS | HTTP 400 |
+| A2: Missing chicago_team | PASS | HTTP 400 |
+| A3: Invalid chicago_team (packers) | PASS | HTTP 400 |
+| A4: Empty players_sent array | PASS | HTTP 400 |
+| A5: Empty players_received array | PASS | HTTP 400 |
+| A6: Non-array players_sent (string) | PASS | HTTP 400 |
+| A7: Null JSON body | PASS | HTTP 500 |
+| A8: Malformed JSON body | PASS | HTTP 500 |
+| A9: 50 players each side | PASS | HTTP 500 |
+| A10: Player with empty name | PASS | HTTP 500 |
+| A11: Player object missing name field | PASS | HTTP 500 |
 | A12: GET to grade endpoint | PASS | HTTP 405 |
-| A13: 1000-char partner name | PASS | HTTP 401 |
+| A13: 1000-char partner name | PASS | HTTP 500 |
 | A14: XSS in player name | PASS | Sanitized or handled safely |
-| A15: SQL injection in chicago_team | PASS | HTTP 401 |
-| A16: Non-string player name/position types | PASS | HTTP 401 |
+| A15: SQL injection in chicago_team | PASS | HTTP 400 |
+| A16: Non-string player name/position types | PASS | HTTP 500 |
 
 ---
 
@@ -50,9 +50,9 @@
 
 | Test | Status | Detail |
 |------|--------|--------|
-| B1: Trade with yourself (Bears to Bears) | PASS | HTTP 401, grade: N/A |
+| B1: Trade with yourself (Bears to Bears) | PASS | HTTP 500, grade: N/A |
 | B2: Same player both sides (DJ Moore for DJ Moore) | WARN | Grade: N/A |
-| B3: Draft-picks-only trade (1st for two 2nds) | PASS | HTTP 401, grade: N/A |
+| B3: Draft-picks-only trade (1st for two 2nds) | PASS | HTTP 400, grade: N/A |
 | B4: 1-for-15 player trade | **FAIL** | Grade: N/A |
 | B5: Entire starting 5 for one player (Bulls for LeBron) | **FAIL** | Grade: N/A |
 | B6: Trade for retired player (Michael Jordan) | **FAIL** | Grade: N/A — AI should recognize retirement |
@@ -61,29 +61,29 @@
 | B9: Trade a head coach for a player | **FAIL** | Grade: N/A |
 | B10: Both untouchables (Caleb Williams for Connor Bedard) | WARN | Grade: N/A — must be 0 |
 | B11: Duplicate player in sent array | **FAIL** | Grade: N/A |
-| B12: 10 first-round picks for one player | PASS | HTTP 401, grade: N/A |
+| B12: 10 first-round picks for one player | PASS | HTTP 400, grade: N/A |
 
 ---
 
 ## Section C: Rate Limiting & Concurrency
 
-**1 pass / 0 warn / 0 fail**
+**0 pass / 1 warn / 0 fail**
 
 | Test | Status | Detail |
 |------|--------|--------|
-| C1: 3 simultaneous grade requests | PASS | Statuses: [401,401,401], 166ms |
+| C1: 3 simultaneous grade requests | WARN | Statuses: [500,500,500], 7266ms |
 
 ---
 
 ## Section D: Session & History Edge Cases
 
-**4 pass / 2 warn / 0 fail**
+**2 pass / 4 warn / 0 fail**
 
 | Test | Status | Detail |
 |------|--------|--------|
-| D1: GET sessions unauthenticated | PASS | HTTP 401 |
-| D2: Create session with invalid team | PASS | HTTP 401 |
-| D3: GET trades unauthenticated | PASS | HTTP 401 |
+| D1: GET sessions unauthenticated | WARN | HTTP 200 |
+| D2: Create session with invalid team | PASS | HTTP 400 |
+| D3: GET trades unauthenticated | WARN | HTTP 200 |
 | D4: DELETE trades unauthenticated | PASS | HTTP 401 |
 | D5: GET leaderboard (public) | WARN | HTTP 401, entries: 0 |
 | D6: Leaderboard filtered by team | WARN | HTTP 401, entries: 0 |
@@ -92,7 +92,7 @@
 
 ## Section E: Roster & Team Endpoint Edge Cases
 
-**2 pass / 5 warn / 12 fail**
+**8 pass / 5 warn / 6 fail**
 
 | Test | Status | Detail |
 |------|--------|--------|
@@ -108,12 +108,12 @@
 | E6: Roster search (bears, "moore") | WARN | HTTP 401, 0 results |
 | E7: Roster search with zero matches | WARN | HTTP 401, 0 results |
 | E8: Roster position filter (QB) | WARN | HTTP 401, 0 results |
-| E9: All teams endpoint | **FAIL** | HTTP 401, 0 teams |
-| E10: Teams by sport (nfl) | **FAIL** | 0 teams |
-| E10: Teams by sport (nba) | **FAIL** | 0 teams |
-| E10: Teams by sport (nhl) | **FAIL** | 0 teams |
-| E10: Teams by sport (mlb) | **FAIL** | 0 teams |
-| E11: Team search (lakers) | **FAIL** | 0 results |
+| E9: All teams endpoint | PASS | HTTP 200, 124 teams |
+| E10: Teams by sport (nfl) | PASS | 32 teams |
+| E10: Teams by sport (nba) | PASS | 30 teams |
+| E10: Teams by sport (nhl) | PASS | 32 teams |
+| E10: Teams by sport (mlb) | PASS | 30 teams |
+| E11: Team search (lakers) | PASS | 1 results |
 | E12: XSS in search parameter | PASS | HTTP 401 |
 
 ---
@@ -161,7 +161,7 @@
 | H3: Prompt injection in player name | **FAIL** | Grade: N/A — should NOT be 100 |
 | H4: Prompt injection in trade_partner | **FAIL** | Grade: N/A — should NOT be 99 |
 | H5: Excessive notes field in player object | **FAIL** | Grade: N/A |
-| H6: Whitespace-only player name | PASS | HTTP 401 |
+| H6: Whitespace-only player name | PASS | HTTP 500 |
 | H7: Newlines/tabs in player name | **FAIL** | Grade: N/A |
 
 ---
@@ -203,11 +203,11 @@
 
 | Test | Status | Detail |
 |------|--------|--------|
-| K1: Draft pick from year 2099 | PASS | HTTP 401, grade: N/A |
-| K2: Draft pick round 0 | PASS | HTTP 401 |
-| K3: Negative draft pick year | PASS | HTTP 401 |
+| K1: Draft pick from year 2099 | PASS | HTTP 400, grade: N/A |
+| K2: Draft pick round 0 | PASS | HTTP 400 |
+| K3: Negative draft pick year | PASS | HTTP 400 |
 | K4: Protected draft pick with condition | PASS | Grade: N/A |
-| K5: 20 draft picks (all rounds for MLB) | PASS | HTTP 401, grade: N/A |
+| K5: 20 draft picks (all rounds for MLB) | PASS | HTTP 400, grade: N/A |
 
 ---
 
@@ -238,7 +238,7 @@
 | M2: gm_nba_rosters | PASS | 510 active players |
 | M2: gm_nhl_rosters | PASS | 840 active players |
 | M2: gm_mlb_rosters | PASS | 1095 active players |
-| M3: gm_leaderboard accessible | PASS | 1 entries |
+| M3: gm_leaderboard accessible | PASS | 2 entries |
 | M4: gm_league_teams count | PASS | 124 (expect 124) |
 | M5: Orphaned trade items check | WARN | exec_sql not available — skipped |
 | M6: Bears headshot coverage | WARN | 0/10 have headshots |
@@ -259,12 +259,6 @@
 - **E1: cubs roster**: HTTP 401, 0 players
 - **E1: whitesox roster**: HTTP 401, 0 players
 - **E4: Opponent roster (Packers)**: HTTP 401, 0 players
-- **E9: All teams endpoint**: HTTP 401, 0 teams
-- **E10: Teams by sport (nfl)**: 0 teams
-- **E10: Teams by sport (nba)**: 0 teams
-- **E10: Teams by sport (nhl)**: 0 teams
-- **E10: Teams by sport (mlb)**: 0 teams
-- **E11: Team search (lakers)**: 0 results
 - **G1: Cap data bears (nfl)**: HTTP 401, cap: null
 - **G1: Cap data bulls (nba)**: HTTP 401, cap: null
 - **G1: Cap data blackhawks (nhl)**: HTTP 401, cap: null
@@ -286,6 +280,9 @@
 - B2: Same player both sides (DJ Moore for DJ Moore): Grade: N/A
 - B8: Cross-sport trade (NFL player for NBA player): Grade: N/A — should be near 0
 - B10: Both untouchables (Caleb Williams for Connor Bedard): Grade: N/A — must be 0
+- C1: 3 simultaneous grade requests: Statuses: [500,500,500], 7266ms
+- D1: GET sessions unauthenticated: HTTP 200
+- D3: GET trades unauthenticated: HTTP 200
 - D5: GET leaderboard (public): HTTP 401, entries: 0
 - D6: Leaderboard filtered by team: HTTP 401, entries: 0
 - E2: Invalid Chicago team (yankees): HTTP 401
