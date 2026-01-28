@@ -1,4 +1,4 @@
-import { useState, useRef, useCallback } from 'react'
+import { useState, useRef, useCallback, useEffect } from 'react'
 import {
   View,
   Text,
@@ -10,12 +10,18 @@ import {
   Platform,
   ActivityIndicator,
 } from 'react-native'
+import { Image } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { Ionicons } from '@expo/vector-icons'
+import AsyncStorage from '@react-native-async-storage/async-storage'
 
 import { useTheme } from '@/hooks/useTheme'
+import { useAuth } from '@/hooks/useAuth'
+import { supabase } from '@/lib/supabase'
 import { api, AskAIResponse } from '@/lib/api'
 import { COLORS } from '@/lib/config'
+
+const scoutIcon = require('@/assets/images/scout-ai.png')
 
 interface Message {
   id: string
@@ -33,12 +39,88 @@ const EXAMPLE_QUESTIONS = [
   "White Sox trade rumors",
 ]
 
+interface QueryHistoryItem {
+  query: string
+  response: string
+  timestamp: string
+}
+
+const HISTORY_STORAGE_KEY = 'scout_query_history'
+const MAX_LOCAL_HISTORY = 100
+
+async function saveQueryToHistory(
+  userId: string | null,
+  query: string,
+  response: string
+) {
+  const item: QueryHistoryItem = { query, response, timestamp: new Date().toISOString() }
+
+  if (userId) {
+    try {
+      await supabase.from('scout_query_history').insert({
+        user_id: userId,
+        query,
+        response,
+      })
+    } catch (err) {
+      console.error('Failed to save query to Supabase:', err)
+    }
+  } else {
+    try {
+      const stored = await AsyncStorage.getItem(HISTORY_STORAGE_KEY)
+      const history: QueryHistoryItem[] = stored ? JSON.parse(stored) : []
+      history.unshift(item)
+      await AsyncStorage.setItem(
+        HISTORY_STORAGE_KEY,
+        JSON.stringify(history.slice(0, MAX_LOCAL_HISTORY))
+      )
+    } catch (err) {
+      console.error('Failed to save query locally:', err)
+    }
+  }
+}
+
+async function loadQueryHistory(userId: string | null): Promise<QueryHistoryItem[]> {
+  if (userId) {
+    try {
+      const { data } = await supabase
+        .from('scout_query_history')
+        .select('query, response, created_at')
+        .eq('user_id', userId)
+        .order('created_at', { ascending: false })
+        .limit(20)
+      return (data || []).map((d: any) => ({
+        query: d.query,
+        response: d.response,
+        timestamp: d.created_at,
+      }))
+    } catch {
+      return []
+    }
+  } else {
+    try {
+      const stored = await AsyncStorage.getItem(HISTORY_STORAGE_KEY)
+      return stored ? JSON.parse(stored).slice(0, 20) : []
+    } catch {
+      return []
+    }
+  }
+}
+
 export default function AskAIScreen() {
   const { colors } = useTheme()
+  const { user } = useAuth()
   const [messages, setMessages] = useState<Message[]>([])
   const [input, setInput] = useState('')
   const [isLoading, setIsLoading] = useState(false)
+  const [history, setHistory] = useState<QueryHistoryItem[]>([])
+  const [showHistory, setShowHistory] = useState(false)
   const scrollViewRef = useRef<ScrollView>(null)
+
+  // Load history on mount
+  useEffect(() => {
+    loadQueryHistory(user?.id || null).then(setHistory)
+  }, [user?.id])
 
   const sendMessage = useCallback(async (text: string) => {
     if (!text.trim() || isLoading) return
@@ -71,6 +153,13 @@ export default function AskAIScreen() {
       }
 
       setMessages((prev) => [...prev, assistantMessage])
+
+      // Save to history
+      await saveQueryToHistory(user?.id || null, text, response.response)
+      setHistory((prev) => [
+        { query: text, response: response.response, timestamp: new Date().toISOString() },
+        ...prev,
+      ].slice(0, MAX_LOCAL_HISTORY))
     } catch (error) {
       const errorMessage: Message = {
         id: `assistant-${Date.now()}`,
@@ -96,17 +185,49 @@ export default function AskAIScreen() {
       {/* Header */}
       <View style={[styles.header, { backgroundColor: colors.surface, borderBottomColor: colors.border }]}>
         <View style={styles.headerContent}>
-          <View style={[styles.aiIcon, { backgroundColor: COLORS.primary }]}>
-            <Ionicons name="sparkles" size={24} color="#fff" />
-          </View>
-          <View>
-            <Text style={[styles.headerTitle, { color: colors.text }]}>Ask Mockery AI</Text>
+          <Image source={scoutIcon} style={styles.scoutIcon} resizeMode="contain" />
+          <View style={{ flex: 1 }}>
+            <Text style={[styles.headerTitle, { color: colors.text }]}>Scout AI</Text>
             <Text style={[styles.headerSubtitle, { color: colors.textMuted }]}>
               Your Chicago sports expert
             </Text>
           </View>
+          {history.length > 0 && (
+            <TouchableOpacity
+              style={[styles.historyButton, { backgroundColor: showHistory ? COLORS.primary : colors.background }]}
+              onPress={() => setShowHistory(!showHistory)}
+            >
+              <Ionicons name="time-outline" size={18} color={showHistory ? '#fff' : colors.textMuted} />
+            </TouchableOpacity>
+          )}
         </View>
       </View>
+
+      {/* History Panel */}
+      {showHistory && (
+        <View style={[styles.historyPanel, { backgroundColor: colors.surface, borderBottomColor: colors.border }]}>
+          <Text style={[styles.historyTitle, { color: colors.text }]}>Recent Queries</Text>
+          <ScrollView style={styles.historyScroll} showsVerticalScrollIndicator={false}>
+            {history.map((item, index) => (
+              <TouchableOpacity
+                key={index}
+                style={[styles.historyItem, { borderBottomColor: colors.border }]}
+                onPress={() => {
+                  setShowHistory(false)
+                  sendMessage(item.query)
+                }}
+              >
+                <Text style={[styles.historyQuery, { color: colors.text }]} numberOfLines={1}>
+                  {item.query}
+                </Text>
+                <Text style={[styles.historyTime, { color: colors.textMuted }]}>
+                  {new Date(item.timestamp).toLocaleDateString()}
+                </Text>
+              </TouchableOpacity>
+            ))}
+          </ScrollView>
+        </View>
+      )}
 
       <KeyboardAvoidingView
         style={styles.keyboardAvoid}
@@ -126,15 +247,12 @@ export default function AskAIScreen() {
           {/* Welcome Message */}
           {messages.length === 0 && (
             <View style={styles.welcomeContainer}>
-              <View style={[styles.welcomeIcon, { backgroundColor: `${COLORS.primary}20` }]}>
-                <Ionicons name="sparkles" size={48} color={COLORS.primary} />
-              </View>
+              <Image source={scoutIcon} style={styles.welcomeScoutIcon} resizeMode="contain" />
               <Text style={[styles.welcomeTitle, { color: colors.text }]}>
-                Ask me anything about Chicago sports
+                Scout AI
               </Text>
               <Text style={[styles.welcomeText, { color: colors.textMuted }]}>
-                I can help with stats, schedules, player info, trade rumors, and more for all
-                Chicago teams.
+                Get instant answers about the Bears, Bulls, Cubs, White Sox, and Blackhawks with our AI-powered sports assistant.
               </Text>
 
               {/* Example Questions */}
@@ -165,9 +283,7 @@ export default function AskAIScreen() {
               ]}
             >
               {message.role === 'assistant' && (
-                <View style={[styles.messageIcon, { backgroundColor: COLORS.primary }]}>
-                  <Ionicons name="sparkles" size={16} color="#fff" />
-                </View>
+                <Image source={scoutIcon} style={styles.messageScoutIcon} resizeMode="contain" />
               )}
               <View
                 style={[
@@ -209,12 +325,10 @@ export default function AskAIScreen() {
           {/* Loading Indicator */}
           {isLoading && (
             <View style={styles.loadingContainer}>
-              <View style={[styles.messageIcon, { backgroundColor: COLORS.primary }]}>
-                <Ionicons name="sparkles" size={16} color="#fff" />
-              </View>
+              <Image source={scoutIcon} style={styles.messageScoutIcon} resizeMode="contain" />
               <View style={[styles.loadingBubble, { backgroundColor: colors.surface }]}>
                 <ActivityIndicator size="small" color={COLORS.primary} />
-                <Text style={[styles.loadingText, { color: colors.textMuted }]}>Thinking...</Text>
+                <Text style={[styles.loadingText, { color: colors.textMuted }]}>Scout is thinking...</Text>
               </View>
             </View>
           )}
@@ -259,12 +373,10 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
   },
-  aiIcon: {
+  scoutIcon: {
     width: 44,
     height: 44,
     borderRadius: 22,
-    justifyContent: 'center',
-    alignItems: 'center',
     marginRight: 12,
   },
   headerTitle: {
@@ -292,12 +404,10 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingVertical: 16,
   },
-  welcomeIcon: {
+  welcomeScoutIcon: {
     width: 88,
     height: 88,
     borderRadius: 44,
-    justifyContent: 'center',
-    alignItems: 'center',
     marginBottom: 16,
   },
   welcomeTitle: {
@@ -343,12 +453,10 @@ const styles = StyleSheet.create({
   assistantMessage: {
     alignItems: 'flex-start',
   },
-  messageIcon: {
+  messageScoutIcon: {
     width: 28,
     height: 28,
     borderRadius: 14,
-    justifyContent: 'center',
-    alignItems: 'center',
     marginBottom: 4,
   },
   messageBubble: {
@@ -417,5 +525,45 @@ const styles = StyleSheet.create({
     borderRadius: 22,
     justifyContent: 'center',
     alignItems: 'center',
+  },
+  historyButton: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  historyPanel: {
+    maxHeight: 250,
+    borderBottomWidth: 1,
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+  },
+  historyTitle: {
+    fontSize: 12,
+    fontFamily: 'Montserrat-Bold',
+    textTransform: 'uppercase',
+    letterSpacing: 0.5,
+    marginBottom: 8,
+  },
+  historyScroll: {
+    flex: 1,
+  },
+  historyItem: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingVertical: 10,
+    borderBottomWidth: 1,
+  },
+  historyQuery: {
+    flex: 1,
+    fontSize: 14,
+    fontFamily: 'Montserrat-Medium',
+    marginRight: 12,
+  },
+  historyTime: {
+    fontSize: 11,
+    fontFamily: 'Montserrat-Regular',
   },
 })

@@ -53,7 +53,7 @@ export default function AudioPlayer({
 
   // Local state for playlist mode and team selection
   const [playlistMode, setPlaylistMode] = useState<'team' | 'recent'>('recent')
-  const [selectedTeam, setSelectedTeam] = useState<string | undefined>(undefined)
+  const [selectedTeams, setSelectedTeams] = useState<string[]>([])
 
   // Format time
   const formatTime = (ms: number) => {
@@ -63,19 +63,49 @@ export default function AudioPlayer({
     return `${mins}:${secs.toString().padStart(2, '0')}`
   }
 
-  // Start playing from team or recent
-  const startPlayback = useCallback(async (playMode: 'team' | 'recent', teamId?: string) => {
-    setPlaylistMode(playMode)
-    setSelectedTeam(teamId)
+  // Toggle a team in the multi-select list and start playback
+  const toggleTeamSelection = useCallback(async (teamId: string) => {
+    const isSelected = selectedTeams.includes(teamId)
+    const newTeams = isSelected
+      ? selectedTeams.filter(t => t !== teamId)
+      : [...selectedTeams, teamId]
+
+    setSelectedTeams(newTeams)
+
+    if (newTeams.length > 0) {
+      setPlaylistMode('team')
+      try {
+        // Fetch most recent article across all selected teams
+        const article = await api.getFirstAudioArticle('team', newTeams.join(','))
+        if (article) {
+          await playArticle({
+            id: article.id,
+            title: article.title,
+            slug: article.slug,
+            team: article.team,
+          })
+        }
+      } catch (err) {
+        console.error('Failed to start playback:', err)
+      }
+    } else {
+      // No teams selected, stop team mode
+      setPlaylistMode('recent')
+    }
+  }, [selectedTeams, playArticle])
+
+  // Start playing recent articles
+  const startRecentPlayback = useCallback(async () => {
+    setPlaylistMode('recent')
+    setSelectedTeams([])
 
     try {
-      const article = await api.getFirstAudioArticle(playMode, teamId)
+      const article = await api.getFirstAudioArticle('recent')
       if (article) {
         await playArticle({
           id: article.id,
           title: article.title,
           slug: article.slug,
-          team: teamId,
         })
       }
     } catch (err) {
@@ -83,10 +113,14 @@ export default function AudioPlayer({
     }
   }, [playArticle])
 
-  // Handle next article
+  // Handle next article — pass all selected teams so playNext can pull from any of them by publish date
   const handleNext = useCallback(async () => {
-    await playNext(playlistMode, selectedTeam)
-  }, [playNext, playlistMode, selectedTeam])
+    if (playlistMode === 'team' && selectedTeams.length > 0) {
+      await playNext('team', selectedTeams.join(','))
+    } else {
+      await playNext('recent', undefined)
+    }
+  }, [playNext, playlistMode, selectedTeams])
 
   // Handle voice change
   const handleVoiceChange = useCallback((voice: string) => {
@@ -194,7 +228,7 @@ export default function AudioPlayer({
             styles.modeButton,
             { backgroundColor: playlistMode === 'recent' ? `${COLORS.primary}15` : colors.background, borderColor: playlistMode === 'recent' ? COLORS.primary : colors.border },
           ]}
-          onPress={() => startPlayback('recent')}
+          onPress={startRecentPlayback}
         >
           <Ionicons name="time" size={24} color={playlistMode === 'recent' ? COLORS.primary : colors.textMuted} />
           <View style={styles.modeButtonText}>
@@ -207,23 +241,34 @@ export default function AudioPlayer({
       {/* Team Selection */}
       <View style={[styles.teamSection, { backgroundColor: colors.surface }]}>
         <Text style={[styles.sectionTitle, { color: colors.text }]}>Or Choose a Team</Text>
+        <Text style={[styles.teamSectionDesc, { color: colors.textMuted }]}>
+          Audio playback continues with the next article from the selected team(s), not the most recently published.
+        </Text>
         <View style={styles.teamsGrid}>
-          {Object.values(TEAMS).map((t) => (
-            <TouchableOpacity
-              key={t.id}
-              style={[
-                styles.teamButton,
-                {
-                  backgroundColor: selectedTeam === t.id && playlistMode === 'team' ? `${t.color}15` : colors.background,
-                  borderColor: selectedTeam === t.id && playlistMode === 'team' ? t.color : colors.border,
-                },
-              ]}
-              onPress={() => startPlayback('team', t.id)}
-            >
-              <Image source={{ uri: t.logo }} style={styles.teamLogo} contentFit="contain" />
-              <Text style={[styles.teamName, { color: colors.text }]}>{t.shortName}</Text>
-            </TouchableOpacity>
-          ))}
+          {Object.values(TEAMS).map((t) => {
+            const isTeamSelected = selectedTeams.includes(t.id)
+            return (
+              <TouchableOpacity
+                key={t.id}
+                style={[
+                  styles.teamButton,
+                  {
+                    backgroundColor: isTeamSelected ? `${t.color}15` : colors.background,
+                    borderColor: isTeamSelected ? t.color : colors.border,
+                  },
+                ]}
+                onPress={() => toggleTeamSelection(t.id)}
+              >
+                <Image source={{ uri: t.logo }} style={styles.teamLogo} contentFit="contain" />
+                <Text style={[styles.teamName, { color: colors.text }]}>{t.shortName}</Text>
+                {isTeamSelected && (
+                  <View style={[styles.teamCheck, { backgroundColor: t.color }]}>
+                    <Ionicons name="checkmark" size={10} color="#fff" />
+                  </View>
+                )}
+              </TouchableOpacity>
+            )
+          })}
         </View>
       </View>
 
@@ -377,6 +422,11 @@ const styles = StyleSheet.create({
     padding: 16,
     borderRadius: 12,
   },
+  teamSectionDesc: {
+    fontSize: 13,
+    fontFamily: 'Montserrat-Regular',
+    marginBottom: 12,
+  },
   teamsGrid: {
     flexDirection: 'row',
     flexWrap: 'wrap',
@@ -397,6 +447,16 @@ const styles = StyleSheet.create({
   teamName: {
     fontSize: 12,
     fontFamily: 'Montserrat-Medium',
+  },
+  teamCheck: {
+    position: 'absolute',
+    top: 6,
+    right: 6,
+    width: 16,
+    height: 16,
+    borderRadius: 8,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   voiceSection: {
     margin: 16,

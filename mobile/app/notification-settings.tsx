@@ -276,12 +276,17 @@ export default function NotificationSettingsScreen() {
               </Text>
 
               <View style={[styles.toggleRow, { borderBottomColor: colors.border }]}>
-                <Text style={[styles.toggleLabel, { color: colors.text }]}>Only selected teams</Text>
+                <View style={styles.toggleInfo}>
+                  <Text style={[styles.toggleLabel, { color: colors.text }]}>All Chicago Teams</Text>
+                  <Text style={[styles.toggleDesc, { color: colors.textMuted }]}>
+                    {preferences.only_favorite_teams ? 'Off — only selected teams below' : 'On — alerts for all Chicago teams'}
+                  </Text>
+                </View>
                 <Switch
-                  value={preferences.only_favorite_teams}
-                  onValueChange={(v) => update('only_favorite_teams', v)}
+                  value={!preferences.only_favorite_teams}
+                  onValueChange={(v) => update('only_favorite_teams', !v)}
                   trackColor={{ false: colors.border, true: `${COLORS.success}80` }}
-                  thumbColor={preferences.only_favorite_teams ? COLORS.success : '#f4f3f4'}
+                  thumbColor={!preferences.only_favorite_teams ? COLORS.success : '#f4f3f4'}
                 />
               </View>
 

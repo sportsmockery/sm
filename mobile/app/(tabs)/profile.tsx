@@ -14,7 +14,7 @@ export default function ProfileScreen() {
   const router = useRouter()
   const { colors, mode, setMode, isDark } = useTheme()
   const { user, isAuthenticated, signOut, isAdmin, isEditor } = useAuth()
-  const { teamPreferences, updateTeamPreferences } = useFeed()
+  const { teamPreferences, updateTeamPreferences, onlySelectedTeams, updateOnlySelectedTeams } = useFeed()
 
   const toggleTeam = useCallback((teamId: string) => {
     const isSelected = teamPreferences.includes(teamId)
@@ -92,6 +92,26 @@ export default function ProfileScreen() {
           <Text style={[styles.sectionSubtitle, { color: colors.textMuted }]}>
             Select teams to customize your feed
           </Text>
+
+          <View style={[styles.settingRow, { borderBottomColor: colors.border }]}>
+            <View style={[styles.settingInfo, { marginRight: 16 }]}>
+              <Ionicons name="filter-outline" size={22} color={colors.text} />
+              <View style={{ flex: 1 }}>
+                <Text style={[styles.settingLabel, { color: colors.text, fontSize: 13 }]} numberOfLines={1}>
+                  Show Only Selected Teams on Feed
+                </Text>
+                <Text style={[styles.settingDesc, { color: colors.textMuted }]}>
+                  {onlySelectedTeams ? 'Only showing selected teams' : 'All teams shown, selected prioritized'}
+                </Text>
+              </View>
+            </View>
+            <Switch
+              value={onlySelectedTeams}
+              onValueChange={(v) => updateOnlySelectedTeams(v)}
+              trackColor={{ false: colors.border, true: `${COLORS.primary}80` }}
+              thumbColor={onlySelectedTeams ? COLORS.primary : '#f4f3f4'}
+            />
+          </View>
 
           <View style={styles.teamsGrid}>
             {Object.values(TEAMS).map((team) => {

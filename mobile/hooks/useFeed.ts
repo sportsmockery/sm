@@ -7,6 +7,7 @@ import { STALE_TIMES } from '@/lib/config'
 
 const VIEWED_IDS_KEY = 'viewed_article_ids'
 const TEAM_PREFS_KEY = 'team_preferences'
+const ONLY_SELECTED_KEY = 'only_selected_teams_feed'
 
 /**
  * Hook for fetching the news feed from the website
@@ -18,14 +19,16 @@ export function useFeed() {
   const queryClient = useQueryClient()
   const [viewedIds, setViewedIds] = useState<number[]>([])
   const [teamPreferences, setTeamPreferences] = useState<string[]>(['bears'])
+  const [onlySelectedTeams, setOnlySelectedTeams] = useState(false)
 
   // Load viewed IDs and team preferences from storage
   useEffect(() => {
     async function loadPreferences() {
       try {
-        const [storedViewedIds, storedTeamPrefs] = await Promise.all([
+        const [storedViewedIds, storedTeamPrefs, storedOnlySelected] = await Promise.all([
           AsyncStorage.getItem(VIEWED_IDS_KEY),
           AsyncStorage.getItem(TEAM_PREFS_KEY),
+          AsyncStorage.getItem(ONLY_SELECTED_KEY),
         ])
 
         if (storedViewedIds) {
@@ -33,6 +36,9 @@ export function useFeed() {
         }
         if (storedTeamPrefs) {
           setTeamPreferences(JSON.parse(storedTeamPrefs))
+        }
+        if (storedOnlySelected) {
+          setOnlySelectedTeams(JSON.parse(storedOnlySelected))
         }
       } catch (error) {
         console.warn('Failed to load feed preferences:', error)
@@ -55,6 +61,7 @@ export function useFeed() {
       api.getFeed({
         viewedIds,
         teamPreferences,
+        onlySelectedTeams,
       }),
     staleTime: STALE_TIMES.feed,
     // Refetch when app comes back to foreground
@@ -82,7 +89,13 @@ export function useFeed() {
   const updateTeamPreferences = useCallback(async (teams: string[]) => {
     setTeamPreferences(teams)
     await AsyncStorage.setItem(TEAM_PREFS_KEY, JSON.stringify(teams))
-    // Invalidate feed to refetch with new preferences
+    queryClient.invalidateQueries({ queryKey: ['feed'] })
+  }, [queryClient])
+
+  // Toggle showing only selected teams on feed
+  const updateOnlySelectedTeams = useCallback(async (value: boolean) => {
+    setOnlySelectedTeams(value)
+    await AsyncStorage.setItem(ONLY_SELECTED_KEY, JSON.stringify(value))
     queryClient.invalidateQueries({ queryKey: ['feed'] })
   }, [queryClient])
 
@@ -114,6 +127,8 @@ export function useFeed() {
     // Preferences
     viewedIds,
     teamPreferences,
+    onlySelectedTeams,
+    updateOnlySelectedTeams,
   }
 }
 

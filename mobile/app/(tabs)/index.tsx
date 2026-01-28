@@ -98,8 +98,8 @@ export default function HomeScreen() {
           activeOpacity={0.8}
         >
           <Ionicons name="play" size={18} color="#fff" />
-          <Text style={styles.listenBannerText}>
-            🔊 Listen Now: Hands-free Chicago sports coverage
+          <Text style={styles.listenBannerText} numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.7}>
+            Listen Now: Hands-free Chicago sports coverage
           </Text>
           <Ionicons name="chevron-forward" size={18} color="#fff" />
         </TouchableOpacity>
@@ -302,8 +302,8 @@ const styles = StyleSheet.create({
   listenBannerText: {
     flex: 1,
     color: '#fff',
-    fontSize: 12,
-    fontFamily: 'Montserrat-Medium',
+    fontSize: 15,
+    fontFamily: 'Montserrat-SemiBold',
   },
   scrollView: {
     flex: 1,
