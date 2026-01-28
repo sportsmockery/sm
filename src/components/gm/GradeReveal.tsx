@@ -2,6 +2,7 @@
 import { useEffect, useState, useRef } from 'react'
 import { motion, AnimatePresence, useSpring, useTransform } from 'framer-motion'
 import { useTheme } from '@/contexts/ThemeContext'
+import type { PlayerData } from '@/components/gm/PlayerCard'
 
 interface GradeResult {
   grade: number
@@ -20,11 +21,36 @@ interface GradeResult {
   cap_analysis?: string
 }
 
+interface DraftPick {
+  year: number
+  round: number
+  condition?: string
+}
+
+interface TradeDetails {
+  chicagoTeam: string
+  chicagoLogo?: string
+  chicagoColor?: string
+  opponentName: string
+  opponentLogo?: string | null
+  opponentColor?: string
+  playersSent: PlayerData[]
+  playersReceived: Array<PlayerData | { name: string; position: string }>
+  draftPicksSent: DraftPick[]
+  draftPicksReceived: DraftPick[]
+}
+
 interface GradeRevealProps {
   result: GradeResult | null
   show: boolean
   onClose: () => void
   onNewTrade: () => void
+  tradeDetails?: TradeDetails
+}
+
+function formatMoney(value: number | null | undefined): string {
+  if (!value) return ''
+  return `$${(value / 1_000_000).toFixed(1)}M`
 }
 
 function ConfettiParticle({ delay }: { delay: number }) {
@@ -47,7 +73,7 @@ function ConfettiParticle({ delay }: { delay: number }) {
   )
 }
 
-export function GradeReveal({ result, show, onClose, onNewTrade }: GradeRevealProps) {
+export function GradeReveal({ result, show, onClose, onNewTrade, tradeDetails }: GradeRevealProps) {
   const { theme } = useTheme()
   const isDark = theme === 'dark'
   const [phase, setPhase] = useState(0) // 0=loading, 1=number, 2=status, 3=breakdown, 4=reasoning
@@ -214,6 +240,169 @@ export function GradeReveal({ result, show, onClose, onNewTrade }: GradeRevealPr
               }}
             >
               Team Improvement: {result.improvement_score > 0 ? '+' : ''}{result.improvement_score}
+            </motion.div>
+          )}
+
+          {/* Trade Details */}
+          {phase >= 3 && tradeDetails && (
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              style={{
+                marginTop: 16,
+                display: 'grid',
+                gridTemplateColumns: '1fr auto 1fr',
+                gap: 12,
+                textAlign: 'left',
+              }}
+            >
+              {/* Players Sent */}
+              <div style={{
+                padding: 12,
+                borderRadius: 10,
+                backgroundColor: isDark ? '#1f2937' : '#f9fafb',
+                border: `1px solid ${isDark ? '#374151' : '#e5e7eb'}`,
+              }}>
+                <div style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 8,
+                  marginBottom: 10,
+                  paddingBottom: 8,
+                  borderBottom: `1px solid ${isDark ? '#374151' : '#e5e7eb'}`,
+                }}>
+                  {tradeDetails.chicagoLogo && (
+                    <img
+                      src={tradeDetails.chicagoLogo}
+                      alt=""
+                      style={{ width: 20, height: 20, objectFit: 'contain' }}
+                    />
+                  )}
+                  <span style={{ fontSize: '12px', fontWeight: 700, color: tradeDetails.chicagoColor || textColor, textTransform: 'uppercase' }}>
+                    {tradeDetails.chicagoTeam} Sends
+                  </span>
+                </div>
+                {tradeDetails.playersSent.map((player, idx) => (
+                  <div key={`sent-${idx}`} style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
+                    {player.headshot_url ? (
+                      <img
+                        src={player.headshot_url}
+                        alt=""
+                        style={{ width: 32, height: 32, borderRadius: 16, objectFit: 'cover' }}
+                        onError={(e) => { (e.target as HTMLImageElement).style.display = 'none' }}
+                      />
+                    ) : (
+                      <div style={{
+                        width: 32, height: 32, borderRadius: 16,
+                        backgroundColor: tradeDetails.chicagoColor || '#666',
+                        display: 'flex', alignItems: 'center', justifyContent: 'center',
+                        fontSize: '12px', fontWeight: 700, color: '#fff',
+                      }}>
+                        {player.full_name.charAt(0)}
+                      </div>
+                    )}
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      <div style={{ fontSize: '12px', fontWeight: 600, color: textColor, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                        {player.full_name}
+                      </div>
+                      <div style={{ fontSize: '10px', color: subText }}>
+                        {player.position} {player.age ? `· ${player.age}y` : ''}
+                      </div>
+                      {(player.cap_hit || player.contract_years) && (
+                        <div style={{ fontSize: '9px', color: subText }}>
+                          {formatMoney(player.cap_hit)}
+                          {player.contract_years ? ` · ${player.contract_years}yr` : ''}
+                          {player.is_rookie_deal ? ' (Rookie)' : ''}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                ))}
+                {tradeDetails.draftPicksSent.map((pick, idx) => (
+                  <div key={`pick-sent-${idx}`} style={{ fontSize: '11px', color: subText, marginBottom: 4, paddingLeft: 4 }}>
+                    📄 {pick.year} Round {pick.round}{pick.condition ? ` (${pick.condition})` : ''}
+                  </div>
+                ))}
+              </div>
+
+              {/* Swap Icon */}
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <span style={{ fontSize: '20px', color: subText }}>⇄</span>
+              </div>
+
+              {/* Players Received */}
+              <div style={{
+                padding: 12,
+                borderRadius: 10,
+                backgroundColor: isDark ? '#1f2937' : '#f9fafb',
+                border: `1px solid ${isDark ? '#374151' : '#e5e7eb'}`,
+              }}>
+                <div style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 8,
+                  marginBottom: 10,
+                  paddingBottom: 8,
+                  borderBottom: `1px solid ${isDark ? '#374151' : '#e5e7eb'}`,
+                }}>
+                  {tradeDetails.opponentLogo && (
+                    <img
+                      src={tradeDetails.opponentLogo}
+                      alt=""
+                      style={{ width: 20, height: 20, objectFit: 'contain' }}
+                      onError={(e) => { (e.target as HTMLImageElement).style.display = 'none' }}
+                    />
+                  )}
+                  <span style={{ fontSize: '12px', fontWeight: 700, color: tradeDetails.opponentColor || textColor, textTransform: 'uppercase' }}>
+                    {tradeDetails.opponentName} Sends
+                  </span>
+                </div>
+                {tradeDetails.playersReceived.map((player, idx) => {
+                  const isFullPlayer = 'player_id' in player
+                  const playerData = player as PlayerData
+                  return (
+                    <div key={`recv-${idx}`} style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
+                      {isFullPlayer && playerData.headshot_url ? (
+                        <img
+                          src={playerData.headshot_url}
+                          alt=""
+                          style={{ width: 32, height: 32, borderRadius: 16, objectFit: 'cover' }}
+                          onError={(e) => { (e.target as HTMLImageElement).style.display = 'none' }}
+                        />
+                      ) : (
+                        <div style={{
+                          width: 32, height: 32, borderRadius: 16,
+                          backgroundColor: tradeDetails.opponentColor || '#666',
+                          display: 'flex', alignItems: 'center', justifyContent: 'center',
+                          fontSize: '12px', fontWeight: 700, color: '#fff',
+                        }}>
+                          {(isFullPlayer ? playerData.full_name : player.name).charAt(0)}
+                        </div>
+                      )}
+                      <div style={{ flex: 1, minWidth: 0 }}>
+                        <div style={{ fontSize: '12px', fontWeight: 600, color: textColor, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                          {isFullPlayer ? playerData.full_name : player.name}
+                        </div>
+                        <div style={{ fontSize: '10px', color: subText }}>
+                          {player.position} {isFullPlayer && playerData.age ? `· ${playerData.age}y` : ''}
+                        </div>
+                        {isFullPlayer && (playerData.cap_hit || playerData.contract_years) && (
+                          <div style={{ fontSize: '9px', color: subText }}>
+                            {formatMoney(playerData.cap_hit)}
+                            {playerData.contract_years ? ` · ${playerData.contract_years}yr` : ''}
+                            {playerData.is_rookie_deal ? ' (Rookie)' : ''}
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  )
+                })}
+                {tradeDetails.draftPicksReceived.map((pick, idx) => (
+                  <div key={`pick-recv-${idx}`} style={{ fontSize: '11px', color: subText, marginBottom: 4, paddingLeft: 4 }}>
+                    📄 {pick.year} Round {pick.round}{pick.condition ? ` (${pick.condition})` : ''}
+                  </div>
+                ))}
+              </div>
             </motion.div>
           )}
 

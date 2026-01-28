@@ -629,6 +629,18 @@ export default function GMPage() {
         show={showGradeReveal}
         onClose={() => setShowGradeReveal(false)}
         onNewTrade={resetTrade}
+        tradeDetails={{
+          chicagoTeam: currentTeamConfig?.shortName || selectedTeam,
+          chicagoLogo: currentTeamConfig?.logo,
+          chicagoColor: teamColor,
+          opponentName: opponentTeam?.team_name || '',
+          opponentLogo: opponentTeam?.logo_url,
+          opponentColor: opponentTeam?.primary_color,
+          playersSent: selectedPlayers,
+          playersReceived: receivedPlayers,
+          draftPicksSent,
+          draftPicksReceived,
+        }}
       />
     </div>
   )
