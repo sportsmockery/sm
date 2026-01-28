@@ -37,11 +37,16 @@ export async function GET(request: NextRequest) {
 // POST: Log a new error (from frontend or backend)
 export async function POST(request: NextRequest) {
   try {
-    const user = await getGMAuthUser(request)
+    let userId: string | null = null
+    try {
+      const user = await getGMAuthUser(request)
+      userId = user?.id || null
+    } catch {}
+
     const body = await request.json()
 
     const { error } = await datalabAdmin.from('gm_errors').insert({
-      user_id: user?.id || null,
+      user_id: userId,
       source: body.source || 'frontend',
       error_type: body.error_type || 'unknown',
       error_message: body.error_message || 'Unknown error',

@@ -1,5 +1,4 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { getGMAuthUser } from '@/lib/gm-auth'
 import { datalabAdmin } from '@/lib/supabase-datalab'
 
 export const dynamic = 'force-dynamic'
@@ -7,9 +6,6 @@ export const dynamic = 'force-dynamic'
 
 export async function GET(request: NextRequest) {
   try {
-    const user = await getGMAuthUser(request)
-    if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-
     const team = request.nextUrl.searchParams.get('team')
 
     let query = datalabAdmin
