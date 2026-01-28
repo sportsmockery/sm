@@ -216,12 +216,13 @@ export async function POST(request: NextRequest) {
     }
 
     const sentDesc = players_sent.map((p: any) => {
-      let desc = `${p.name} (${p.position})`
+      const playerName = p.name || p.full_name || 'Unknown'
+      let desc = `${playerName} (${p.position})`
       if (p.stat_line) desc += ` [${p.stat_line}]`
       if (p.age) desc += ` Age ${p.age}`
       if (p.cap_hit) desc += `, ${formatMoney(p.cap_hit)} cap hit`
       if (p.contract_years) desc += `, ${p.contract_years}yr remaining`
-      const tier = tierMap[p.name]
+      const tier = tierMap[playerName]
       if (tier) desc += ` [Tier ${tier.tier}: ${tier.tier_label}, value ${tier.trade_value_score}${tier.is_untouchable ? ', UNTOUCHABLE' : ''}]`
       return desc
     }).join(', ')
@@ -261,7 +262,7 @@ export async function POST(request: NextRequest) {
     const hasTiers = Object.keys(tierMap).length > 0
     if (hasTiers) {
       const sentValue = players_sent.reduce((sum: number, p: any) => {
-        const tier = tierMap[p.name]
+        const tier = tierMap[p.name || p.full_name]
         return sum + (tier?.trade_value_score || 0)
       }, 0)
       // Rough draft pick values

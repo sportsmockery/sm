@@ -139,7 +139,7 @@ export default function GMOpponentRosterScreen() {
 
       <FlatList
         data={filtered}
-        keyExtractor={(item) => item.player_id}
+        keyExtractor={(item, index) => `${item.player_id}-${index}`}
         renderItem={renderPlayer}
         contentContainerStyle={styles.listContent}
         ListEmptyComponent={
