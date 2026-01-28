@@ -1,6 +1,6 @@
 # SportsMockery - Claude Project Knowledge Base
 
-> **Last Updated:** January 26, 2026 (Team Pages 100% Complete)
+> **Last Updated:** January 27, 2026 (GM Trade Simulator added)
 > **Purpose:** This file contains everything Claude needs to know to work on this project.
 
 ---
@@ -847,6 +847,58 @@ CREATE TABLE scout_errors (
 - User validation errors (empty form fields, etc.)
 - Expected "no results" responses
 - Client-side navigation errors
+
+---
+
+## GM Trade Simulator
+
+**When the user says "GM"**, they mean the AI trade grading model (Claude Sonnet 4, `claude-sonnet-4-20250514`) that evaluates proposed trades. The AI runs via the Anthropic SDK in the `/api/gm/grade` route. Its system prompt makes it act as a brutally honest sports GM who grades trades 0-100.
+
+**When the user says "Trade Simulator"**, they mean the full trade simulator UI and functionality on the `/gm` page — team selection, roster browsing, opponent picking, trade building, draft pick selection, grading, trade history, leaderboard, and sessions.
+
+### Where It Lives
+
+| Location | Description |
+|----------|-------------|
+| Page | `/gm` on test.sportsmockery.com |
+| Components | `src/components/gm/` (12 files) |
+| API Routes | `src/app/api/gm/` (7 routes: roster, teams, sessions, grade, trades, leaderboard, share/[code]) |
+| Database | Same Supabase as sm-data-lab (`siwoqfzzcxmngnseyzpv`) — accessed via `datalabAdmin` from `@/lib/supabase-datalab` |
+| AI Model | Claude Sonnet 4 via `@anthropic-ai/sdk` (direct, not proxied through datalab) |
+
+### Access
+
+All logged-in users can access `/gm`. No admin check — auth uses `@supabase/ssr` cookie-based client against the main sm Supabase for identity, then queries the datalab Supabase for GM data.
+
+### Database Tables (in datalab Supabase)
+
+| Table | Purpose |
+|-------|---------|
+| `gm_trades` | All trades with grades, breakdowns, shared codes |
+| `gm_trade_items` | Structured assets per trade |
+| `gm_leaderboard` | Per-user aggregate scores |
+| `gm_sessions` | Trade scenario sessions |
+| `gm_league_teams` | 124 NFL/NBA/NHL/MLB teams with logos |
+| `gm_audit_logs` | AI request/response logging |
+| `gm_errors` | Error log |
+
+### Key Files
+
+| File | Purpose |
+|------|---------|
+| `src/app/gm/page.tsx` | Main trade simulator page |
+| `src/app/api/gm/grade/route.ts` | AI grading route (Anthropic SDK) |
+| `src/app/api/gm/roster/route.ts` | Player roster + season stats |
+| `src/components/gm/PlayerCard.tsx` | Player card component + `PlayerData` interface |
+| `src/components/gm/GradeReveal.tsx` | Animated grade reveal overlay |
+| `src/components/gm/TradeBoard.tsx` | Two-panel trade visualization |
+
+### Grading Logic
+
+- Grade 75+ = **accepted**, 50-74 = **rejected**
+- Grade 75-90 = flagged **dangerous** (risky upside)
+- Untouchable players: Caleb Williams (Bears), Connor Bedard (Blackhawks) → grade 0 if traded
+- Rate limit: 10 trades per minute per user
 
 ---
 
