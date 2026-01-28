@@ -35,6 +35,14 @@ interface PlayerData {
   espn_id: string | null
   stat_line: string
   stats: Record<string, number | string | null>
+  // Contract fields
+  base_salary?: number | null
+  cap_hit?: number | null
+  contract_years?: number | null
+  contract_expires_year?: number | null
+  contract_signed_year?: number | null
+  is_rookie_deal?: boolean | null
+  status?: string
 }
 
 const SPORT_ROSTER_TABLE: Record<string, string> = {
@@ -50,7 +58,7 @@ async function fetchOpponentRoster(teamKey: string, sport: string, search?: stri
 
   const { data: rawPlayers, error } = await datalabAdmin
     .from(table)
-    .select('espn_player_id, full_name, position, jersey_number, headshot_url, age, weight_lbs, college, years_exp, draft_year, draft_round, draft_pick, base_salary, cap_hit, contract_years_remaining, is_rookie_deal, status')
+    .select('espn_player_id, full_name, position, jersey_number, headshot_url, age, weight_lbs, college, years_exp, draft_year, draft_round, draft_pick, base_salary, cap_hit, contract_years_remaining, contract_expires_year, contract_signed_year, is_rookie_deal, status')
     .eq('team_key', teamKey)
     .eq('is_active', true)
     .order('position')
@@ -78,8 +86,11 @@ async function fetchOpponentRoster(teamKey: string, sport: string, search?: stri
       stat_line: '',
       stats: {},
       status: p.status || 'Active',
+      base_salary: p.base_salary,
       cap_hit: p.cap_hit,
       contract_years: p.contract_years_remaining,
+      contract_expires_year: p.contract_expires_year,
+      contract_signed_year: p.contract_signed_year,
       is_rookie_deal: p.is_rookie_deal,
     }
   })
@@ -119,12 +130,12 @@ export async function GET(request: NextRequest) {
     const config = TEAM_CONFIG[team]
 
     const selectCols = team === 'bulls'
-      ? 'player_id, display_name, position, jersey_number, headshot_url, age, weight_lbs, college, years_pro, draft_year, draft_round, draft_pick, espn_player_id'
+      ? 'player_id, display_name, position, jersey_number, headshot_url, age, weight_lbs, college, years_pro, draft_year, draft_round, draft_pick, espn_player_id, base_salary, contract_years_remaining, contract_signed_year, is_rookie_deal'
       : team === 'bears'
-        ? 'player_id, name, position, jersey_number, headshot_url, age, weight_lbs, college, years_exp, draft_year, draft_round, draft_pick, espn_id'
+        ? 'player_id, name, position, jersey_number, headshot_url, age, weight_lbs, college, years_exp, draft_year, draft_round, draft_pick, espn_id, base_salary, contract_years_remaining, contract_signed_year, is_rookie_deal'
         : team === 'blackhawks'
-          ? 'player_id, name, position, jersey_number, headshot_url, age, weight_lbs, college, years_experience, draft_year, draft_round, draft_pick, espn_id'
-          : 'player_id, name, position, jersey_number, headshot_url, age, weight_lbs, college, espn_id'
+          ? 'player_id, name, position, jersey_number, headshot_url, age, weight_lbs, college, years_experience, draft_year, draft_round, draft_pick, espn_id, base_salary, contract_years_remaining, contract_signed_year, is_rookie_deal'
+          : 'player_id, name, position, jersey_number, headshot_url, age, weight_lbs, college, espn_id, base_salary, contract_years_remaining, contract_signed_year, is_rookie_deal'
 
     let query = datalabAdmin
       .from(config.table)
@@ -163,6 +174,10 @@ export async function GET(request: NextRequest) {
         espn_id: espnId,
         stat_line: statLine,
         stats: playerStats,
+        base_salary: p.base_salary,
+        contract_years: p.contract_years_remaining,
+        contract_signed_year: p.contract_signed_year,
+        is_rookie_deal: p.is_rookie_deal,
       }
     })
 

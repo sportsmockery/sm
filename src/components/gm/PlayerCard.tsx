@@ -17,8 +17,11 @@ export interface PlayerData {
   stat_line: string
   stats: Record<string, any>
   status?: string
+  base_salary?: number | null
   cap_hit?: number | null
   contract_years?: number | null
+  contract_expires_year?: number | null
+  contract_signed_year?: number | null
   is_rookie_deal?: boolean | null
 }
 
@@ -185,10 +188,50 @@ export function PlayerCard({ player, selected = false, compact = false, teamColo
       <div style={{ textAlign: 'center', fontSize: '10px', color: subTextColor }}>
         {[
           player.age ? `Age ${player.age}` : null,
-          player.cap_hit ? `$${(player.cap_hit / 1_000_000).toFixed(1)}M` : null,
+          player.years_exp !== null && player.years_exp !== undefined ? `Yr ${player.years_exp + 1}` : null,
           player.college,
         ].filter(Boolean).join(' | ')}
       </div>
+
+      {/* Contract Details */}
+      {(player.base_salary || player.cap_hit || player.contract_years) && (
+        <div style={{
+          marginTop: 6,
+          padding: '6px 8px',
+          borderRadius: '6px',
+          backgroundColor: isDark ? '#374151' : '#f3f4f6',
+          fontSize: '10px',
+        }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 4 }}>
+            <span style={{ color: subTextColor }}>
+              {player.base_salary || player.cap_hit ? (
+                <span style={{ fontWeight: 600, color: textColor }}>
+                  ${((player.cap_hit || player.base_salary || 0) / 1_000_000).toFixed(1)}M
+                </span>
+              ) : null}
+              {player.contract_years ? ` / ${player.contract_years}yr` : ''}
+            </span>
+            {player.is_rookie_deal && (
+              <span style={{
+                fontSize: '8px',
+                fontWeight: 700,
+                padding: '1px 4px',
+                borderRadius: '4px',
+                backgroundColor: '#10b98120',
+                color: '#10b981',
+              }}>
+                ROOKIE
+              </span>
+            )}
+          </div>
+          {player.contract_signed_year && (
+            <div style={{ fontSize: '9px', color: subTextColor, marginTop: 2 }}>
+              Signed {player.contract_signed_year}
+              {player.contract_expires_year ? ` → ${player.contract_expires_year}` : ''}
+            </div>
+          )}
+        </div>
+      )}
 
       {/* Selected checkmark */}
       {selected && (
