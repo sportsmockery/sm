@@ -81,7 +81,7 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Prepare post data with all potentially required columns
+    // Prepare post data - only include columns that definitely exist in the schema
     const now = new Date().toISOString()
     const postData: Record<string, unknown> = {
       title: body.title,
@@ -94,12 +94,14 @@ export async function POST(request: NextRequest) {
       author_id: body.author_id || null,
       seo_title: body.seo_title || null,
       seo_description: body.seo_description || null,
-      social_caption: body.social_caption || null,
       created_at: now,
-      updated_at: now,
-      views: 0,
-      importance_score: 0,
     }
+
+    // Only add optional columns if they have values (avoids schema cache errors)
+    if (body.social_caption) postData.social_caption = body.social_caption
+    if (body.updated_at !== undefined) postData.updated_at = body.updated_at || now
+    if (body.views !== undefined) postData.views = body.views
+    if (body.importance_score !== undefined) postData.importance_score = body.importance_score
 
     // Set published_at if status is published
     if (body.status === 'published') {
