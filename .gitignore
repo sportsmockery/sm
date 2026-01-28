@@ -1,5 +1,10 @@
 # See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
 
+# Playwright
+e2e/.auth/
+/test-results/
+/playwright-report/
+
 # dependencies
 /node_modules
 /.pnp
