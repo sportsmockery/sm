@@ -19,10 +19,11 @@ const SOURCE_COLORS: Record<string, string> = {
   backend: '#ef4444',
   cron: '#8b5cf6',
   ai: '#eab308',
+  audit: '#06b6d4',
 }
 
-const ERROR_TYPES = ['all', 'api', 'ai', 'network', 'timeout', 'parse', 'sync_result', 'sync_error', 'unknown']
-const SOURCES = ['all', 'frontend', 'backend', 'cron', 'ai']
+const ERROR_TYPES = ['all', 'api', 'ai', 'network', 'timeout', 'parse', 'sync_result', 'sync_error', 'audit_result', 'audit_error', 'unknown']
+const SOURCES = ['all', 'frontend', 'backend', 'cron', 'ai', 'audit']
 
 export default function GmErrorsPage() {
   const [errors, setErrors] = useState<GmError[]>([])
@@ -60,9 +61,12 @@ export default function GmErrorsPage() {
   }, [fetchErrors])
 
   const cronResults = errors.filter(e => e.source === 'cron')
+  const auditResults = errors.filter(e => e.source === 'audit')
   const recentErrors = errors.filter(e => e.source !== 'cron' || e.error_type === 'sync_error')
-  const errorCount = errors.filter(e => e.error_type !== 'sync_result').length
+  const errorCount = errors.filter(e => !['sync_result', 'audit_result'].includes(e.error_type)).length
   const cronCount = cronResults.length
+  const auditCount = auditResults.length
+  const auditErrors = auditResults.filter(e => e.error_type === 'audit_error').length
 
   return (
     <div style={{ padding: '24px', maxWidth: 1200 }}>
@@ -70,7 +74,7 @@ export default function GmErrorsPage() {
         <div>
           <h1 style={{ fontSize: '24px', fontWeight: 800, margin: 0 }}>GM Trade Simulator — Errors & Logs</h1>
           <p style={{ fontSize: '13px', color: '#6b7280', margin: '4px 0 0' }}>
-            Trade simulator errors, AI grading failures, and cron sync results
+            Trade simulator errors, AI grading, cron syncs, league rosters, salary cap, and audit results
           </p>
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
@@ -95,7 +99,7 @@ export default function GmErrorsPage() {
       </div>
 
       {/* Summary cards */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 12, marginBottom: 24 }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 12, marginBottom: 12 }}>
         <SummaryCard label="Total Logs" value={errors.length} color="#6b7280" />
         <SummaryCard label="Errors" value={errorCount} color="#ef4444" />
         <SummaryCard label="Cron Runs" value={cronCount} color="#8b5cf6" />
@@ -103,6 +107,22 @@ export default function GmErrorsPage() {
           label="Last Cron"
           value={cronResults.length > 0 ? new Date(cronResults[0].created_at).toLocaleTimeString() : '—'}
           color="#22c55e"
+          isText
+        />
+      </div>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 12, marginBottom: 24 }}>
+        <SummaryCard label="Audit Runs" value={auditCount} color="#06b6d4" />
+        <SummaryCard label="Audit Failures" value={auditErrors} color={auditErrors > 0 ? '#ef4444' : '#22c55e'} />
+        <SummaryCard
+          label="Last Audit"
+          value={auditResults.length > 0 ? new Date(auditResults[0].created_at).toLocaleTimeString() : '—'}
+          color="#06b6d4"
+          isText
+        />
+        <SummaryCard
+          label="Data Sources"
+          value="Rosters + Cap"
+          color="#8b5cf6"
           isText
         />
       </div>

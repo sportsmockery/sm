@@ -28,6 +28,10 @@
     {
       "path": "/api/cron/sync-gm-rosters",
       "schedule": "45 * * * *"
+    },
+    {
+      "path": "/api/cron/audit-gm",
+      "schedule": "50 * * * *"
     }
   ],
   "headers": [

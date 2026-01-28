@@ -113,6 +113,45 @@ export async function GET(request: NextRequest) {
       }
     }
 
+    // Verify GM league roster & salary cap tables
+    const gmDataResults: Record<string, any> = {}
+    const GM_SPORTS = ['nfl', 'nba', 'nhl', 'mlb']
+    for (const sport of GM_SPORTS) {
+      // League roster table
+      try {
+        const { count, error } = await datalabClient!
+          .from(`gm_${sport}_rosters`)
+          .select('*', { count: 'exact', head: true })
+        if (error) {
+          errors.push(`gm_${sport}_rosters: ${error.message}`)
+          gmDataResults[`gm_${sport}_rosters`] = { status: 'error', error: error.message }
+        } else {
+          const ok = (count || 0) > 0
+          if (!ok) errors.push(`gm_${sport}_rosters: 0 rows`)
+          gmDataResults[`gm_${sport}_rosters`] = { status: ok ? 'ok' : 'warning', rowCount: count || 0 }
+        }
+      } catch (e) {
+        gmDataResults[`gm_${sport}_rosters`] = { status: 'error', error: String(e) }
+      }
+
+      // Salary cap table
+      try {
+        const { count, error } = await datalabClient!
+          .from(`gm_${sport}_salary_cap`)
+          .select('*', { count: 'exact', head: true })
+        if (error) {
+          errors.push(`gm_${sport}_salary_cap: ${error.message}`)
+          gmDataResults[`gm_${sport}_salary_cap`] = { status: 'error', error: error.message }
+        } else {
+          const ok = (count || 0) > 0
+          if (!ok) errors.push(`gm_${sport}_salary_cap: 0 rows`)
+          gmDataResults[`gm_${sport}_salary_cap`] = { status: ok ? 'ok' : 'warning', rowCount: count || 0 }
+        }
+      } catch (e) {
+        gmDataResults[`gm_${sport}_salary_cap`] = { status: 'error', error: String(e) }
+      }
+    }
+
     // Revalidate all team pages
     for (const teamPath of TEAM_PATHS) {
       for (const subpath of SUBPATHS) {
@@ -156,6 +195,7 @@ export async function GET(request: NextRequest) {
       revalidatedPaths: revalidated.length,
       errors: errors.length > 0 ? errors : undefined,
       teamData: verificationResults,
+      gmData: gmDataResults,
       duration: `${duration}ms`,
       timestamp: new Date().toISOString(),
     })
