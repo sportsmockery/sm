@@ -70,6 +70,23 @@ export function ForYouFeed({
   const visiblePosts = posts.slice(0, displayCount);
   const sectionHeader = isLoggedIn ? 'For You' : 'Trending in Chicago Sports';
 
+  // Handle empty state
+  if (!posts || posts.length === 0) {
+    return (
+      <section className="for-you-feed" aria-label={sectionHeader}>
+        <h2 className="feed-section-header">{sectionHeader}</h2>
+        <div className="feed-empty-state">
+          <p className="feed-empty-message">
+            Welcome to SportsMockery! Fresh Chicago sports content is on the way.
+          </p>
+          <p className="feed-empty-submessage">
+            Check back soon for Bears, Bulls, Blackhawks, Cubs, and White Sox coverage.
+          </p>
+        </div>
+      </section>
+    );
+  }
+
   return (
     <section className="for-you-feed" aria-label={sectionHeader}>
       <h2 className="feed-section-header">{sectionHeader}</h2>

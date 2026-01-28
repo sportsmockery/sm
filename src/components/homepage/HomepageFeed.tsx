@@ -16,11 +16,11 @@ interface HomepageFeedProps {
 }
 
 export function HomepageFeed({
-  initialPosts,
-  editorPicks,
-  trendingPosts,
-  userTeamPreference,
-  isLoggedIn
+  initialPosts = [],
+  editorPicks = [],
+  trendingPosts = [],
+  userTeamPreference = null,
+  isLoggedIn = false
 }: HomepageFeedProps) {
   const [activeTeam, setActiveTeam] = useState<string>('all');
   const [isMobile, setIsMobile] = useState<boolean>(false);
@@ -38,15 +38,20 @@ export function HomepageFeed({
     }
   }, [userTeamPreference]);
 
+  // Ensure arrays are safe
+  const safePosts = Array.isArray(initialPosts) ? initialPosts : [];
+  const safeEditorPicks = Array.isArray(editorPicks) ? editorPicks : [];
+  const safeTrendingPosts = Array.isArray(trendingPosts) ? trendingPosts : [];
+
   const filteredPosts = activeTeam === 'all'
-    ? initialPosts
-    : initialPosts.filter(post => post.team_slug === activeTeam);
+    ? safePosts
+    : safePosts.filter(post => post.team_slug === activeTeam);
 
   return (
     <div className="homepage-feed">
       {/* Editor Picks Hero - Always visible */}
       <EditorPicksHero
-        picks={editorPicks}
+        picks={safeEditorPicks}
         isMobile={isMobile}
       />
 
@@ -66,14 +71,14 @@ export function HomepageFeed({
             isLoggedIn={isLoggedIn}
             isMobile={isMobile}
             showTrendingInline={isMobile}
-            trendingPosts={trendingPosts}
+            trendingPosts={safeTrendingPosts}
           />
         </main>
 
         {/* Trending Sidebar - Desktop Only */}
-        {!isMobile && (
+        {!isMobile && safeTrendingPosts.length > 0 && (
           <aside className="trending-sidebar">
-            <TrendingSection posts={trendingPosts} />
+            <TrendingSection posts={safeTrendingPosts} />
           </aside>
         )}
       </div>

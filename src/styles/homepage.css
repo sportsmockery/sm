@@ -779,3 +779,25 @@
     width: 350px;
   }
 }
+
+/* ========== Empty State ========== */
+.feed-empty-state {
+  text-align: center;
+  padding: var(--spacing-xl) var(--spacing-md);
+  background: var(--color-surface);
+  border-radius: var(--border-radius);
+  margin: var(--spacing-lg) 0;
+}
+
+.feed-empty-message {
+  font-size: var(--font-size-lg);
+  font-weight: 600;
+  color: var(--color-text-primary);
+  margin: 0 0 var(--spacing-sm) 0;
+}
+
+.feed-empty-submessage {
+  font-size: var(--font-size-base);
+  color: var(--color-text-secondary);
+  margin: 0;
+}

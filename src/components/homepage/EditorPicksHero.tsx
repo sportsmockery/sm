@@ -18,13 +18,20 @@ interface EditorPicksHeroProps {
   isMobile: boolean;
 }
 
-export function EditorPicksHero({ picks, isMobile }: EditorPicksHeroProps) {
+export function EditorPicksHero({ picks = [], isMobile }: EditorPicksHeroProps) {
+  const safePicks = Array.isArray(picks) ? picks : [];
+
+  // Return null if no picks
+  if (safePicks.length === 0) {
+    return null;
+  }
+
   // Slots 1-3: Visual cards with images
-  const visualPicks = picks.filter(p => p.pinned_slot >= 1 && p.pinned_slot <= 3)
+  const visualPicks = safePicks.filter(p => p.pinned_slot >= 1 && p.pinned_slot <= 3)
     .sort((a, b) => a.pinned_slot - b.pinned_slot);
 
   // Slots 4-6: Text-only list
-  const textPicks = picks.filter(p => p.pinned_slot >= 4 && p.pinned_slot <= 6)
+  const textPicks = safePicks.filter(p => p.pinned_slot >= 4 && p.pinned_slot <= 6)
     .sort((a, b) => a.pinned_slot - b.pinned_slot);
 
   return (
