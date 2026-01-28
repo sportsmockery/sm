@@ -390,6 +390,25 @@ Return ONLY the JSON object, no explanation.`
   try {
     const jsonText = extractJSON(responseText)
     const analysis = JSON.parse(jsonText)
+
+    // Ensure response has the correct shape - AI sometimes returns just the data array
+    if (Array.isArray(analysis)) {
+      // If AI returned just an array, wrap it in the expected format
+      return NextResponse.json({
+        shouldCreateChart: analysis.length >= 2,
+        chartType: 'bar',
+        chartTitle: 'Data from Article',
+        data: analysis,
+        paragraphIndex: 1,
+        reasoning: 'Data extracted from article',
+      })
+    }
+
+    // Ensure shouldCreateChart is a boolean
+    if (typeof analysis.shouldCreateChart !== 'boolean') {
+      analysis.shouldCreateChart = !!(analysis.data && analysis.data.length >= 2)
+    }
+
     return NextResponse.json(analysis)
   } catch (e) {
     console.error('Chart analysis parse error:', e)

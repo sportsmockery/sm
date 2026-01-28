@@ -48,7 +48,7 @@ export async function DELETE(request: NextRequest) {
   try {
     const user = await getGMAuthUser(request)
     // Guests can't delete trades (they don't have any)
-    if (!user) return NextResponse.json({ error: 'Sign in to manage trades' }, { status: 401 })
+    if (!user) return NextResponse.json({ error: 'Please sign in to manage your trades', code: 'AUTH_REQUIRED' }, { status: 401 })
 
     await datalabAdmin
       .from('gm_sessions')

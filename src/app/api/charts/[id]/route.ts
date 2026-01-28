@@ -27,6 +27,8 @@ export async function GET(
 
     // Transform database record to ChartConfig format
     const config = {
+      id: chart.id,
+      postId: chart.post_id,
       type: chart.chart_type,
       title: chart.title,
       size: chart.config?.size || 'medium',
@@ -34,6 +36,8 @@ export async function GET(
       data: chart.data || [],
       dataSource: chart.config?.source?.type || 'manual',
       dataLabQuery: chart.config?.source?.query,
+      createdAt: chart.created_at,
+      updatedAt: chart.updated_at,
     }
 
     return NextResponse.json(config)

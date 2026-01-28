@@ -18,6 +18,14 @@ import type {
 
 const BASE = API_BASE_URL
 
+// Custom error class for auth required
+export class AuthRequiredError extends Error {
+  constructor(message: string) {
+    super(message)
+    this.name = 'AuthRequiredError'
+  }
+}
+
 async function gmFetch<T>(endpoint: string, options?: RequestInit): Promise<T> {
   // Get auth token from the shared api client (set by AuthProvider)
   const token = api.getAuthToken()
@@ -39,6 +47,10 @@ async function gmFetch<T>(endpoint: string, options?: RequestInit): Promise<T> {
   })
   if (!res.ok) {
     const err = await res.json().catch(() => ({ error: `HTTP ${res.status}` }))
+    // Check for auth required error
+    if (res.status === 401 || err.code === 'AUTH_REQUIRED') {
+      throw new AuthRequiredError(err.error || 'Please sign in to use the GM Trade Simulator')
+    }
     throw new Error(err.error || `API error: ${res.status}`)
   }
   return res.json()

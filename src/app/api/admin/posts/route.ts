@@ -81,7 +81,8 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Prepare post data
+    // Prepare post data with all potentially required columns
+    const now = new Date().toISOString()
     const postData: Record<string, unknown> = {
       title: body.title,
       slug: body.slug,
@@ -93,13 +94,17 @@ export async function POST(request: NextRequest) {
       author_id: body.author_id || null,
       seo_title: body.seo_title || null,
       seo_description: body.seo_description || null,
+      seo_keywords: body.seo_keywords || null,
       social_caption: body.social_caption || null,
-      created_at: new Date().toISOString(),
+      created_at: now,
+      updated_at: now,
+      views: 0,
+      importance_score: 0,
     }
 
     // Set published_at if status is published
     if (body.status === 'published') {
-      postData.published_at = new Date().toISOString()
+      postData.published_at = now
     }
 
     const { data: post, error } = await supabaseAdmin
@@ -111,7 +116,7 @@ export async function POST(request: NextRequest) {
     if (error) {
       console.error('Error creating post:', error)
       return NextResponse.json(
-        { error: 'Failed to create post' },
+        { error: 'Failed to create post', details: error.message, code: error.code },
         { status: 500 }
       )
     }
