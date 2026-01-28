@@ -129,6 +129,7 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ players: filtered, sport: config.sport })
   } catch (error) {
     console.error('GM roster error:', error)
+    try { await datalabAdmin.from('gm_errors').insert({ source: 'backend', error_type: 'api', error_message: String(error), route: '/api/gm/roster' }) } catch {}
     return NextResponse.json({ error: 'Failed to fetch roster' }, { status: 500 })
   }
 }

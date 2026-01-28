@@ -56,6 +56,7 @@ export async function GET(request: NextRequest) {
     })
   } catch (error) {
     console.error('GM trades error:', error)
+    try { await datalabAdmin.from('gm_errors').insert({ source: 'backend', error_type: 'api', error_message: String(error), route: '/api/gm/trades GET' }) } catch {}
     return NextResponse.json({ error: 'Failed to fetch trades' }, { status: 500 })
   }
 }
@@ -76,6 +77,7 @@ export async function DELETE(request: NextRequest) {
     return NextResponse.json({ success: true })
   } catch (error) {
     console.error('GM trades delete error:', error)
+    try { await datalabAdmin.from('gm_errors').insert({ source: 'backend', error_type: 'api', error_message: String(error), route: '/api/gm/trades DELETE' }) } catch {}
     return NextResponse.json({ error: 'Failed to clear trades' }, { status: 500 })
   }
 }

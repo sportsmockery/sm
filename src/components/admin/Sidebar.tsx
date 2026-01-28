@@ -142,6 +142,7 @@ const navSections: NavSection[] = [
       { name: 'Analytics', href: '/admin/analytics', icon: 'analytics' },
       { name: 'Feed Scoring', href: '/admin/feed-scoring', icon: 'feedScoring' },
       { name: 'Notifications', href: '/admin/notifications', icon: 'notifications' },
+      { name: 'GM Errors', href: '/admin/gm-errors', icon: 'aiLogging' },
     ],
   },
   {

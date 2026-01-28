@@ -43,6 +43,7 @@ export async function GET() {
     return NextResponse.json({ sessions })
   } catch (error) {
     console.error('GM sessions error:', error)
+    try { await datalabAdmin.from('gm_errors').insert({ source: 'backend', error_type: 'api', error_message: String(error), route: '/api/gm/sessions GET' }) } catch {}
     return NextResponse.json({ error: 'Failed to fetch sessions' }, { status: 500 })
   }
 }
@@ -89,6 +90,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ session })
   } catch (error) {
     console.error('GM session create error:', error)
+    try { await datalabAdmin.from('gm_errors').insert({ source: 'backend', error_type: 'api', error_message: String(error), route: '/api/gm/sessions POST' }) } catch {}
     return NextResponse.json({ error: 'Failed to create session' }, { status: 500 })
   }
 }

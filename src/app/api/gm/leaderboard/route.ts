@@ -46,6 +46,7 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ leaderboard })
   } catch (error) {
     console.error('GM leaderboard error:', error)
+    try { await datalabAdmin.from('gm_errors').insert({ source: 'backend', error_type: 'api', error_message: String(error), route: '/api/gm/leaderboard' }) } catch {}
     return NextResponse.json({ error: 'Failed to fetch leaderboard' }, { status: 500 })
   }
 }

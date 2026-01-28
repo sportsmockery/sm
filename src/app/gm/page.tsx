@@ -75,7 +75,7 @@ export default function GMPage() {
   useEffect(() => {
     async function init() {
       const { data: { user } } = await supabase.auth.getUser()
-      if (!user) { router.push('/login'); return }
+      if (!user) { router.push('/login?next=/gm'); return }
       setUser(user)
       setLoading(false)
       fetchTrades()
@@ -96,14 +96,18 @@ export default function GMPage() {
         const accepted = (data.trades || []).filter((t: any) => t.status === 'accepted')
         setGmScore(accepted.reduce((sum: number, t: any) => sum + t.grade, 0))
       }
-    } catch {}
+    } catch (e) {
+      fetch('/api/gm/log-error', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ source: 'frontend', error_type: 'api', error_message: e instanceof Error ? e.message : String(e), route: '/api/gm/trades' }) }).catch(() => {})
+    }
   }, [])
 
   const fetchLeaderboard = useCallback(async () => {
     try {
       const res = await fetch('/api/gm/leaderboard')
       if (res.ok) { const data = await res.json(); setLeaderboard(data.leaderboard || []) }
-    } catch {}
+    } catch (e) {
+      fetch('/api/gm/log-error', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ source: 'frontend', error_type: 'api', error_message: e instanceof Error ? e.message : String(e), route: '/api/gm/leaderboard' }) }).catch(() => {})
+    }
   }, [])
 
   const fetchSessions = useCallback(async () => {
@@ -115,7 +119,9 @@ export default function GMPage() {
         const active = (data.sessions || []).find((s: Session) => s.is_active)
         if (active) setActiveSession(active)
       }
-    } catch {}
+    } catch (e) {
+      fetch('/api/gm/log-error', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ source: 'frontend', error_type: 'api', error_message: e instanceof Error ? e.message : String(e), route: '/api/gm/sessions' }) }).catch(() => {})
+    }
   }, [])
 
   async function loadRoster(team: string) {
@@ -125,7 +131,10 @@ export default function GMPage() {
       const res = await fetch(`/api/gm/roster?team=${team}`)
       if (res.ok) { const data = await res.json(); setRoster(data.players || []) }
       else setRoster([])
-    } catch { setRoster([]) }
+    } catch (e) {
+      fetch('/api/gm/log-error', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ source: 'frontend', error_type: 'api', error_message: e instanceof Error ? e.message : String(e), route: '/api/gm/roster' }) }).catch(() => {})
+      setRoster([])
+    }
     setRosterLoading(false)
   }
 
@@ -153,7 +162,9 @@ export default function GMPage() {
         setActiveSession(data.session)
         fetchSessions()
       }
-    } catch {}
+    } catch (e) {
+      fetch('/api/gm/log-error', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ source: 'frontend', error_type: 'api', error_message: e instanceof Error ? e.message : String(e), route: '/api/gm/sessions POST' }) }).catch(() => {})
+    }
   }
 
   function togglePlayer(playerId: string) {
@@ -225,6 +236,7 @@ export default function GMPage() {
     } catch (e) {
       setGradeError('Network error. Please try again.')
       setShowGradeReveal(false)
+      fetch('/api/gm/log-error', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ source: 'frontend', error_type: 'api', error_message: e instanceof Error ? e.message : String(e), route: '/api/gm/grade' }) }).catch(() => {})
     }
     setGrading(false)
   }

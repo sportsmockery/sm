@@ -57,6 +57,7 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ teams: filtered })
   } catch (error) {
     console.error('GM teams error:', error)
+    try { await datalabAdmin.from('gm_errors').insert({ source: 'backend', error_type: 'api', error_message: String(error), route: '/api/gm/teams' }) } catch {}
     return NextResponse.json({ error: 'Failed to fetch teams' }, { status: 500 })
   }
 }
