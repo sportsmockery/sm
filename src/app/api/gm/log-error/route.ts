@@ -43,22 +43,30 @@ export async function POST(request: NextRequest) {
       userId = user?.id || null
     } catch {}
 
-    const body = await request.json()
+    let body: Record<string, unknown> = {}
+    try {
+      body = await request.json()
+    } catch {
+      body = { error_message: 'Invalid JSON body' }
+    }
 
     const { error } = await datalabAdmin.from('gm_errors').insert({
       user_id: userId,
-      source: body.source || 'frontend',
-      error_type: body.error_type || 'unknown',
-      error_message: body.error_message || 'Unknown error',
-      route: body.route || null,
+      source: String(body.source || 'frontend').slice(0, 50),
+      error_type: String(body.error_type || 'unknown').slice(0, 50),
+      error_message: String(body.error_message || 'Unknown error').slice(0, 2000),
+      route: body.route ? String(body.route).slice(0, 200) : null,
       request_payload: body.request_payload || null,
       metadata: body.metadata || null,
     })
 
-    if (error) throw error
+    if (error) {
+      console.error('GM log-error insert failed:', error.message, error.code)
+      return NextResponse.json({ error: error.message, code: error.code }, { status: 500 })
+    }
     return NextResponse.json({ success: true })
   } catch (error) {
     console.error('GM log-error POST error:', error)
-    return NextResponse.json({ error: 'Failed to log error' }, { status: 500 })
+    return NextResponse.json({ error: String(error) }, { status: 500 })
   }
 }
