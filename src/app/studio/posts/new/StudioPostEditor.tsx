@@ -80,7 +80,6 @@ export default function StudioPostEditor({
 
   // PostIQ AI states
   const [aiLoading, setAiLoading] = useState<string | null>(null)
-  const [headlineTeam, setHeadlineTeam] = useState<string>('')
   const [showTeamPicker, setShowTeamPicker] = useState(false)
   const [headlines, setHeadlines] = useState<string[]>([])
   const [ideas, setIdeas] = useState<ArticleIdea[]>([])
@@ -232,7 +231,7 @@ export default function StudioPostEditor({
   const runAI = async (action: string) => {
     setAiLoading(action)
     const categoryName = categories.find(c => c.id === formData.category_id)?.name
-    const team = (action === 'headlines' && headlineTeam) ? headlineTeam : getTeamFromCategory(categoryName)
+    const team = getTeamFromCategory(categoryName)
     try {
       const response = await fetch('/api/admin/ai', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ action, title: formData.title, content: formData.content, category: categoryName, team }) })
       if (response.ok) {
@@ -247,10 +246,10 @@ export default function StudioPostEditor({
     finally { setAiLoading(null) }
   }
 
-  const generateIdeas = async () => {
+  const generateIdeas = async (teamOverride?: string) => {
     setLoadingIdeas(true); setSelectedIdea(null)
     const categoryName = categories.find(c => c.id === formData.category_id)?.name || 'Chicago Sports'
-    const team = getTeamFromCategory(categoryName)
+    const team = teamOverride || getTeamFromCategory(categoryName)
     try {
       const response = await fetch('/api/admin/ai', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ action: 'ideas', category: categoryName, team }) })
       if (response.ok) { const data = await response.json(); if (data.ideas) setIdeas(data.ideas) }

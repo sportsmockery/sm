@@ -64,7 +64,6 @@ export default function AdvancedPostEditor({
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState('')
   const [aiLoading, setAiLoading] = useState<string | null>(null)
-  const [headlineTeam, setHeadlineTeam] = useState<string>('')
   const [showTeamPicker, setShowTeamPicker] = useState(false)
   const [uploadingImage, setUploadingImage] = useState(false)
   const [headlines, setHeadlines] = useState<string[]>([])
@@ -290,7 +289,7 @@ export default function AdvancedPostEditor({
     setAiLoading(action)
     try {
       const categoryName = categories.find(c => c.id === formData.category_id)?.name
-      const team = (action === 'headlines' && headlineTeam) ? headlineTeam : getTeamFromCategory(categoryName)
+      const team = getTeamFromCategory(categoryName)
       const response = await fetch('/api/admin/ai', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -331,11 +330,11 @@ export default function AdvancedPostEditor({
   }
 
   // Generate article ideas
-  const generateIdeas = async () => {
+  const generateIdeas = async (teamOverride?: string) => {
     setLoadingIdeas(true)
     setSelectedIdea(null)
     const categoryName = categories.find(c => c.id === formData.category_id)?.name || 'Chicago Sports'
-    const team = getTeamFromCategory(categoryName)
+    const team = teamOverride || getTeamFromCategory(categoryName)
     try {
       const response = await fetch('/api/admin/ai', {
         method: 'POST',
@@ -830,6 +829,19 @@ export default function AdvancedPostEditor({
         <div className="flex items-center gap-3">
           <span className="hidden sm:inline text-xs text-[var(--text-muted)]">{wordCount} words</span>
 
+          <button
+            type="button"
+            onClick={() => setShowPreview(true)}
+            disabled={!formData.title || !formData.content}
+            className="h-8 rounded-lg border border-[var(--border-default)] bg-[var(--bg-tertiary)] px-3 text-sm text-[var(--text-primary)] hover:bg-[var(--bg-hover)] transition-colors disabled:opacity-50 flex items-center gap-1.5"
+          >
+            <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.64 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.64 0-8.573-3.007-9.963-7.178z" />
+              <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+            </svg>
+            Preview
+          </button>
+
           <select
             value={formData.status}
             onChange={(e) => updateField('status', e.target.value)}
@@ -933,8 +945,8 @@ export default function AdvancedPostEditor({
                 </button>
                 <button
                   type="button"
-                  onClick={() => setShowTeamPicker(true)}
-                  disabled={aiLoading === 'headlines' || !formData.title}
+                  onClick={() => runAI('headlines')}
+                  disabled={aiLoading === 'headlines' || !formData.title || !formData.content}
                   className="w-full flex items-center gap-3 rounded-lg px-3 py-2 text-sm text-[var(--text-secondary)] hover:bg-[var(--bg-hover)] hover:text-[var(--text-primary)] disabled:opacity-50"
                 >
                   <svg className="h-5 w-5 text-purple-500" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
@@ -944,7 +956,7 @@ export default function AdvancedPostEditor({
                 </button>
                 <button
                   type="button"
-                  onClick={openIdeasModal}
+                  onClick={() => setShowTeamPicker(true)}
                   className="w-full flex items-center gap-3 rounded-lg px-3 py-2 text-sm text-[var(--text-secondary)] hover:bg-[var(--bg-hover)] hover:text-[var(--text-primary)]"
                 >
                   <span className="text-lg">💡</span>
@@ -1575,6 +1587,54 @@ export default function AdvancedPostEditor({
               </div>
             </div>
 
+            {/* PostIQ Tools */}
+            <div className="mt-6 pt-6 border-t border-[var(--border-default)]">
+              <p className="mb-3 text-xs font-semibold uppercase tracking-wide text-purple-500">PostIQ Tools</p>
+              <div className="grid grid-cols-2 gap-2">
+                <button
+                  type="button"
+                  onClick={() => runAI('headlines')}
+                  disabled={aiLoading === 'headlines' || !formData.title || !formData.content}
+                  className="flex flex-col items-center justify-center gap-1 rounded-lg border border-[var(--border-default)] bg-[var(--bg-tertiary)] p-3 text-[var(--text-secondary)] hover:border-purple-500 hover:bg-purple-500/5 transition-colors disabled:opacity-50"
+                >
+                  <svg className="h-5 w-5 text-purple-500" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25H12" />
+                  </svg>
+                  <span className="text-xs font-medium">{aiLoading === 'headlines' ? 'Loading...' : 'Headlines'}</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => runAI('grammar')}
+                  disabled={aiLoading === 'grammar' || !formData.content}
+                  className="flex flex-col items-center justify-center gap-1 rounded-lg border border-[var(--border-default)] bg-[var(--bg-tertiary)] p-3 text-[var(--text-secondary)] hover:border-purple-500 hover:bg-purple-500/5 transition-colors disabled:opacity-50"
+                >
+                  <svg className="h-5 w-5 text-purple-500" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                  <span className="text-xs font-medium">{aiLoading === 'grammar' ? 'Checking...' : 'Grammar'}</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setShowTeamPicker(true)}
+                  className="flex flex-col items-center justify-center gap-1 rounded-lg border border-[var(--border-default)] bg-[var(--bg-tertiary)] p-3 text-[var(--text-secondary)] hover:border-purple-500 hover:bg-purple-500/5 transition-colors"
+                >
+                  <span className="text-lg">💡</span>
+                  <span className="text-xs font-medium">Ideas</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => openChartModal()}
+                  disabled={formData.content.length < 200}
+                  className="flex flex-col items-center justify-center gap-1 rounded-lg border border-[var(--border-default)] bg-[var(--bg-tertiary)] p-3 text-[var(--text-secondary)] hover:border-purple-500 hover:bg-purple-500/5 transition-colors disabled:opacity-50"
+                >
+                  <svg className="h-5 w-5 text-purple-500" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 013 19.875v-6.75zM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V8.625zM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V4.125z" />
+                  </svg>
+                  <span className="text-xs font-medium">Add Chart</span>
+                </button>
+              </div>
+            </div>
+
             {/* Stats */}
             <div className="mt-6 pt-6 border-t border-[var(--border-default)]">
               <div className="grid grid-cols-3 gap-2">
@@ -1665,12 +1725,12 @@ export default function AdvancedPostEditor({
         </div>
       )}
 
-      {/* Team Picker Modal for Headlines */}
+      {/* Team Picker Modal for Ideas */}
       {showTeamPicker && (
         <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/60 backdrop-blur-sm">
           <div className="mx-4 w-full max-w-sm overflow-hidden rounded-xl bg-white shadow-2xl dark:bg-[#1c1c1f]">
             <div className="flex items-center justify-between border-b border-gray-200 px-6 py-4 dark:border-gray-700">
-              <h3 className="text-lg font-bold text-gray-900 dark:text-white">Which team?</h3>
+              <h3 className="text-lg font-bold text-gray-900 dark:text-white">Generate Ideas</h3>
               <button type="button" onClick={() => setShowTeamPicker(false)} className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200">
                 <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
@@ -1678,7 +1738,7 @@ export default function AdvancedPostEditor({
               </button>
             </div>
             <div className="p-4 space-y-2">
-              <p className="text-sm text-gray-500 dark:text-gray-400 mb-4">Select a team to generate headlines for:</p>
+              <p className="text-sm text-gray-500 dark:text-gray-400 mb-4">Select a team to generate article ideas for:</p>
               {[
                 { value: '', label: 'Auto-detect from category', icon: '🎯' },
                 { value: 'Bears', label: 'Chicago Bears', icon: '🐻' },
@@ -1691,9 +1751,8 @@ export default function AdvancedPostEditor({
                   key={team.value || 'auto'}
                   type="button"
                   onClick={() => {
-                    setHeadlineTeam(team.value)
                     setShowTeamPicker(false)
-                    runAI('headlines')
+                    generateIdeas(team.value || undefined)
                   }}
                   className="w-full flex items-center gap-3 rounded-lg border-2 border-gray-200 px-4 py-3 text-left transition-all hover:border-purple-400 hover:bg-purple-50 dark:border-gray-700 dark:hover:border-purple-500 dark:hover:bg-purple-500/10"
                 >
@@ -1750,6 +1809,80 @@ export default function AdvancedPostEditor({
           isLoading={chartLoading}
           team={getTeamFromCategory(categories.find(c => c.id === formData.category_id)?.name) || 'bears'}
         />
+      )}
+
+      {/* Preview Modal */}
+      {showPreview && (
+        <div className="fixed inset-0 z-[70] flex items-center justify-center bg-black/80 backdrop-blur-sm">
+          <div className="relative w-full max-w-4xl max-h-[90vh] overflow-hidden rounded-2xl bg-white shadow-2xl dark:bg-zinc-900">
+            {/* Header */}
+            <div className="flex items-center justify-between border-b border-gray-200 px-6 py-4 dark:border-zinc-700">
+              <div className="flex items-center gap-3">
+                <svg className="h-5 w-5 text-purple-500" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.64 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.64 0-8.573-3.007-9.963-7.178z" />
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                </svg>
+                <h3 className="text-lg font-bold text-gray-900 dark:text-white">Article Preview</h3>
+              </div>
+              <button
+                type="button"
+                onClick={() => setShowPreview(false)}
+                className="rounded-lg p-2 text-gray-400 hover:bg-gray-100 hover:text-gray-600 dark:hover:bg-zinc-800 dark:hover:text-gray-200"
+              >
+                <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+
+            {/* Preview Content */}
+            <div className="overflow-y-auto max-h-[calc(90vh-80px)] p-8">
+              {/* Category Badge */}
+              {formData.category_id && (
+                <span className="inline-block rounded-full bg-[#bc0000] px-3 py-1 text-xs font-medium text-white mb-4">
+                  {categories.find(c => c.id === formData.category_id)?.name || 'Uncategorized'}
+                </span>
+              )}
+
+              {/* Featured Image */}
+              {formData.featured_image && (
+                <div className="relative aspect-video w-full overflow-hidden rounded-xl mb-6">
+                  <Image
+                    src={formData.featured_image}
+                    alt={formData.title}
+                    fill
+                    className="object-cover"
+                  />
+                </div>
+              )}
+
+              {/* Title */}
+              <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-4">
+                {formData.title || 'Untitled Article'}
+              </h1>
+
+              {/* Meta */}
+              <div className="flex items-center gap-4 text-sm text-gray-500 dark:text-gray-400 mb-6 pb-6 border-b border-gray-200 dark:border-zinc-700">
+                <span>{new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}</span>
+                <span>•</span>
+                <span>{Math.ceil(wordCount / 200)} min read</span>
+              </div>
+
+              {/* Excerpt */}
+              {formData.excerpt && (
+                <p className="text-lg text-gray-600 dark:text-gray-300 italic mb-6">
+                  {formData.excerpt}
+                </p>
+              )}
+
+              {/* Content */}
+              <div
+                className="prose prose-lg max-w-none dark:prose-invert prose-headings:font-bold prose-p:text-gray-700 dark:prose-p:text-gray-300"
+                dangerouslySetInnerHTML={{ __html: formData.content || '<p class="text-gray-400">No content yet...</p>' }}
+              />
+            </div>
+          </div>
+        </div>
       )}
     </div>
   )
