@@ -8,6 +8,18 @@ import { supabaseAdmin } from '@/lib/supabase-server'
 
 export const revalidate = 60
 
+// Helper to extract team_slug from category
+function getTeamSlug(category: any): string | null {
+  const cat = Array.isArray(category) ? category[0] : category
+  const slug = cat?.slug?.toLowerCase() || ''
+  if (slug.includes('bears')) return 'bears'
+  if (slug.includes('bulls')) return 'bulls'
+  if (slug.includes('blackhawks')) return 'blackhawks'
+  if (slug.includes('cubs')) return 'cubs'
+  if (slug.includes('whitesox') || slug.includes('white-sox')) return 'whitesox'
+  return null
+}
+
 async function getFeedData() {
   const cookieStore = await cookies()
 
@@ -34,43 +46,56 @@ async function getFeedData() {
   const supabase = supabaseAdmin
 
   // 2) Editor picks (same as homepage)
-  const { data: editorPicks = [] } = await supabase
+  // Use category_id join instead of team_slug (which doesn't exist)
+  const { data: editorPicksRaw = [] } = await supabase
     .from('sm_posts')
-    .select('id, title, slug, featured_image, team_slug, pinned_slot')
+    .select('id, title, slug, featured_image, pinned_slot, category:sm_categories!category_id(slug)')
     .eq('editor_pick', true)
     .eq('status', 'published')
     .gte('pinned_slot', 1)
     .lte('pinned_slot', 6)
     .order('pinned_slot', { ascending: true })
 
+  const editorPicks = (editorPicksRaw || []).map((post: any) => ({
+    ...post,
+    team_slug: getTeamSlug(post.category)
+  }))
+
   // 3) Trending posts (same view-based logic as homepage)
   const sevenDaysAgo = new Date()
   sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7)
 
-  const { data: trendingPosts = [] } = await supabase
+  const { data: trendingPostsRaw = [] } = await supabase
     .from('sm_posts')
-    .select('id, title, slug, team_slug, views, published_at, importance_score, content_type, primary_topic, author_id, is_evergreen')
+    .select('id, title, slug, views, published_at, importance_score, content_type, primary_topic, author_id, is_evergreen, category:sm_categories!category_id(slug)')
     .eq('status', 'published')
     .gte('published_at', sevenDaysAgo.toISOString())
     .order('views', { ascending: false })
     .limit(20)
 
-  const trendingIds = new Set((trendingPosts || []).map(p => p.id))
+  const trendingPosts = (trendingPostsRaw || []).map((post: any) => ({
+    ...post,
+    team_slug: getTeamSlug(post.category)
+  }))
+
+  const trendingIds = new Set(trendingPosts.map(p => p.id))
 
   // 4) Main feed posts: full set, same as homepage
-  const { data: allPosts = [] } = await supabase
+  const { data: allPostsRaw = [] } = await supabase
     .from('sm_posts')
     .select(`
-      id, title, slug, excerpt, featured_image, team_slug,
+      id, title, slug, excerpt, featured_image,
       published_at, importance_score, content_type, primary_topic,
-      author_id, is_evergreen, views
+      author_id, is_evergreen, views,
+      category:sm_categories!category_id(slug)
     `)
     .eq('status', 'published')
     .order('published_at', { ascending: false })
     .limit(200)
 
-  const postsWithFlags = (allPosts || []).map(post => ({
+  const postsWithFlags = (allPostsRaw || []).map((post: any) => ({
     ...post,
+    team_slug: getTeamSlug(post.category),
     is_trending: trendingIds.has(post.id),
     author_name: null
   }))
