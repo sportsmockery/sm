@@ -7,7 +7,8 @@ import { getHomepageDataWithFallbacks, FALLBACK_POSTS, FALLBACK_EDITOR_PICKS } f
 import { supabaseAdmin } from '@/lib/supabase-server'
 import '@/styles/homepage.css'
 
-export const revalidate = 60 // Revalidate every 60 seconds
+// Force dynamic rendering - this page uses cookies for auth
+export const dynamic = 'force-dynamic'
 
 async function getHomepageData() {
   const cookieStore = await cookies()
