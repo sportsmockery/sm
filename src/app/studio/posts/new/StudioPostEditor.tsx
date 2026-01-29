@@ -6,6 +6,7 @@ import Image from 'next/image'
 import Link from 'next/link'
 import RichTextEditor, { RichTextEditorRef } from '@/components/admin/PostEditor/RichTextEditor'
 import { CategorySelect, AuthorSelect } from '@/components/admin/PostEditor/SearchableSelect'
+import { ChartBuilderModal, ChartConfig, AISuggestion, ChartType } from '@/components/admin/ChartBuilder'
 
 interface Category {
   id: string
@@ -93,16 +94,9 @@ export default function StudioPostEditor({
   // PostIQ Chart Modal State
   const [showChartModal, setShowChartModal] = useState(false)
   const [chartLoading, setChartLoading] = useState(false)
-  const [chartSuggestion, setChartSuggestion] = useState<{
-    chartType: string
-    chartTitle: string
-    data: { label: string; value: number }[]
-    paragraphIndex: number
-    reasoning: string
-  } | null>(null)
-  const [selectedChartType, setSelectedChartType] = useState<string>('bar')
+  const [initialChartConfig, setInitialChartConfig] = useState<Partial<ChartConfig> | null>(null)
+  const [chartAiSuggestion, setChartAiSuggestion] = useState<AISuggestion | null>(null)
   const [selectedParagraph, setSelectedParagraph] = useState<number>(1)
-  const [customChartTitle, setCustomChartTitle] = useState<string>('')
   const [paragraphOptions, setParagraphOptions] = useState<string[]>([])
   const [highlightMode, setHighlightMode] = useState(false)
   const [highlightedText, setHighlightedText] = useState('')
@@ -485,24 +479,29 @@ export default function StudioPostEditor({
     }).filter(t => t.trim().length > 0)
   }, [])
 
-  // Open PostIQ Chart Modal
+  // Open PostIQ Chart Modal with AI analysis
   const openChartModal = async (contentOverride?: string) => {
     const contentToAnalyze = contentOverride || formData.content
 
-    if (contentToAnalyze.length < 200 && !contentOverride) {
+    if (contentToAnalyze.length < 200) {
       alert('Please add more content before generating a chart (minimum 200 characters)')
       return
     }
 
-    setShowChartModal(true)
-    setChartLoading(true)
-    setChartSuggestion(null)
-
     const paragraphs = extractParagraphs(formData.content)
     setParagraphOptions(paragraphs)
+    setSelectedParagraph(1)
 
-    const chartCategoryName = categories.find(c => c.id === formData.category_id)?.name
-    const chartTeam = getTeamFromCategory(chartCategoryName)
+    const categoryName = categories.find(c => c.id === formData.category_id)?.name
+    const team = getTeamFromCategory(categoryName) || 'bears'
+
+    // Reset states
+    setChartAiSuggestion(null)
+    setInitialChartConfig(null)
+    setShowChartModal(true)
+    setChartLoading(true)
+
+    // Fetch AI suggestion to pre-populate
     try {
       const response = await fetch('/api/admin/ai', {
         method: 'POST',
@@ -511,18 +510,32 @@ export default function StudioPostEditor({
           action: 'analyze_chart',
           title: formData.title,
           content: contentToAnalyze,
-          category: chartCategoryName,
-          team: chartTeam,
+          category: categoryName,
+          team,
         }),
       })
 
       if (response.ok) {
         const data = await response.json()
         if (data.shouldCreateChart && data.data?.length >= 2) {
-          setChartSuggestion(data)
-          setSelectedChartType(data.chartType || 'bar')
+          // Store AI suggestion for display in modal
+          setChartAiSuggestion({
+            reasoning: data.reasoning || 'Found chartable data in your article',
+            chartTitle: data.chartTitle || '',
+            chartType: (data.chartType || 'bar') as ChartType,
+            data: data.data,
+            paragraphIndex: data.paragraphIndex || 1,
+          })
+          // Set initial config for the chart
+          setInitialChartConfig({
+            type: (data.chartType || 'bar') as 'bar' | 'line' | 'pie' | 'player-comparison' | 'team-stats',
+            title: data.chartTitle || '',
+            size: 'medium',
+            colors: { scheme: 'team', team: team as 'bears' | 'bulls' | 'cubs' | 'whitesox' | 'blackhawks' },
+            data: data.data,
+            dataSource: 'manual',
+          })
           setSelectedParagraph(data.paragraphIndex || 1)
-          setCustomChartTitle(data.chartTitle || '')
         }
       }
     } catch (err) {
@@ -534,7 +547,6 @@ export default function StudioPostEditor({
 
   // Handle highlight mode for chart data selection
   const handleHighlightData = () => {
-    setShowChartModal(false)
     setHighlightMode(true)
     setHighlightedText('')
   }
@@ -564,106 +576,60 @@ export default function StudioPostEditor({
     }
   }
 
-  // Regenerate chart suggestion
-  const regenerateChartSuggestion = async () => {
-    setChartLoading(true)
-    const regenCategoryName = categories.find(c => c.id === formData.category_id)?.name
-    const regenTeam = getTeamFromCategory(regenCategoryName)
+  // Handle chart insertion from ChartBuilderModal
+  const handleChartInsert = async (config: ChartConfig) => {
     try {
-      const response = await fetch('/api/admin/ai', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          action: 'analyze_chart',
-          title: formData.title,
-          content: formData.content,
-          category: regenCategoryName,
-          team: regenTeam,
-        }),
-      })
-
-      if (response.ok) {
-        const data = await response.json()
-        if (data.shouldCreateChart && data.data?.length >= 2) {
-          setChartSuggestion(data)
-          setSelectedChartType(data.chartType || 'bar')
-          setSelectedParagraph(data.paragraphIndex || 1)
-          setCustomChartTitle(data.chartTitle || '')
-        }
-      }
-    } catch (err) {
-      console.error('Chart regeneration error:', err)
-    } finally {
-      setChartLoading(false)
-    }
-  }
-
-  // Insert chart into content
-  const insertChart = async () => {
-    if (!chartSuggestion) return
-
-    setChartLoading(true)
-    try {
-      const teamMap: Record<string, string> = {
-        'Chicago Bears': 'bears', 'Bears': 'bears',
-        'Chicago Bulls': 'bulls', 'Bulls': 'bulls',
-        'Chicago Cubs': 'cubs', 'Cubs': 'cubs',
-        'Chicago White Sox': 'whitesox', 'White Sox': 'whitesox',
-        'Chicago Blackhawks': 'blackhawks', 'Blackhawks': 'blackhawks',
-      }
-      const categoryName = categories.find(c => c.id === formData.category_id)?.name || ''
-      const team = teamMap[categoryName] || 'bears'
-
       const chartResponse = await fetch('/api/charts', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          type: selectedChartType,
-          title: customChartTitle || chartSuggestion.chartTitle,
-          size: 'medium',
-          colors: { scheme: 'team', team },
-          data: chartSuggestion.data,
-          dataSource: 'manual',
+          type: config.type,
+          title: config.title,
+          size: config.size,
+          colors: config.colors,
+          data: config.data,
+          dataSource: config.dataSource,
+          dataLabQuery: config.dataLabQuery,
         }),
       })
 
       if (chartResponse.ok) {
         const chartData = await chartResponse.json()
         const shortcode = `[chart:${chartData.id}]`
-
-        // Insert shortcode after selected paragraph
-        const closingTagRegex = /<\/p>/gi
-        let match
-        let count = 0
-        let insertPosition = -1
-        const content = formData.content
-
-        while ((match = closingTagRegex.exec(content)) !== null) {
-          count++
-          if (count === selectedParagraph) {
-            insertPosition = match.index + match[0].length
-            break
-          }
-        }
-
-        let updatedContent
-        if (insertPosition > 0) {
-          const chartBlock = `\n<div class="chart-embed my-6">${shortcode}</div>\n`
-          updatedContent = content.slice(0, insertPosition) + chartBlock + content.slice(insertPosition)
-        } else {
-          updatedContent = content + `\n<div class="chart-embed my-6">${shortcode}</div>`
-        }
-
+        const updatedContent = insertShortcodeAfterParagraph(formData.content, shortcode, selectedParagraph)
         setFormData(prev => ({ ...prev, content: updatedContent }))
         setShowChartModal(false)
-        setChartSuggestion(null)
+        setInitialChartConfig(null)
+      } else {
+        alert('Failed to create chart. Please try again.')
       }
     } catch (err) {
       console.error('Chart insertion error:', err)
       alert('Failed to create chart. Please try again.')
-    } finally {
-      setChartLoading(false)
     }
+  }
+
+  // Helper to insert shortcode after paragraph
+  const insertShortcodeAfterParagraph = (html: string, shortcode: string, paragraphIndex: number): string => {
+    const closingTagRegex = /<\/p>/gi
+    let match
+    let count = 0
+    let insertPosition = -1
+
+    while ((match = closingTagRegex.exec(html)) !== null) {
+      count++
+      if (count === paragraphIndex) {
+        insertPosition = match.index + match[0].length
+        break
+      }
+    }
+
+    if (insertPosition > 0) {
+      const chartBlock = `\n<div class="chart-embed my-6">${shortcode}</div>\n`
+      return html.slice(0, insertPosition) + chartBlock + html.slice(insertPosition)
+    }
+
+    return html + `\n<div class="chart-embed my-6">${shortcode}</div>`
   }
 
   // Keyboard shortcut for save
@@ -1340,22 +1306,30 @@ export default function StudioPostEditor({
                     </div>
                   </div>
                 ) : (
-                  <label className="flex cursor-pointer flex-col items-center justify-center rounded-lg border-2 border-dashed border-[var(--border-default)] bg-[var(--bg-tertiary)] py-4 hover:border-[var(--accent-red)] transition-colors">
-                    {uploadingImage ? (
-                      <svg className="h-5 w-5 animate-spin text-[var(--text-muted)]" fill="none" viewBox="0 0 24 24">
-                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
-                      </svg>
-                    ) : (
-                      <>
-                        <svg className="h-5 w-5 text-[var(--text-muted)]" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
-                          <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909m-18 3.75h16.5a1.5 1.5 0 001.5-1.5V6a1.5 1.5 0 00-1.5-1.5H3.75A1.5 1.5 0 002.25 6v12a1.5 1.5 0 001.5 1.5zm10.5-11.25h.008v.008h-.008V8.25zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z" />
+                  <div className="relative">
+                    <input
+                      type="file"
+                      id="featured-image-upload"
+                      accept="image/*"
+                      onChange={handleImageUpload}
+                      className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
+                    />
+                    <div className="flex cursor-pointer flex-col items-center justify-center rounded-lg border-2 border-dashed border-[var(--border-default)] bg-[var(--bg-tertiary)] py-4 hover:border-[var(--accent-red)] transition-colors">
+                      {uploadingImage ? (
+                        <svg className="h-5 w-5 animate-spin text-[var(--text-muted)]" fill="none" viewBox="0 0 24 24">
+                          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
                         </svg>
-                        <p className="mt-1 text-xs text-[var(--text-muted)]">Add image</p>
-                      </>
-                    )}
-                    <input type="file" accept="image/*" onChange={handleImageUpload} className="hidden" />
-                  </label>
+                      ) : (
+                        <>
+                          <svg className="h-5 w-5 text-[var(--text-muted)]" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909m-18 3.75h16.5a1.5 1.5 0 001.5-1.5V6a1.5 1.5 0 00-1.5-1.5H3.75A1.5 1.5 0 002.25 6v12a1.5 1.5 0 001.5 1.5zm10.5-11.25h.008v.008h-.008V8.25zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z" />
+                          </svg>
+                          <p className="mt-1 text-xs text-[var(--text-muted)]">Add image</p>
+                        </>
+                      )}
+                    </div>
+                  </div>
                 )}
               </div>
             </div>
@@ -1477,197 +1451,22 @@ export default function StudioPostEditor({
         </div>
       )}
 
-      {/* PostIQ Chart Modal */}
+      {/* Chart Builder Modal with Live Preview */}
       {showChartModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
-          <div className="mx-4 w-full max-w-2xl overflow-hidden rounded-xl bg-white shadow-2xl dark:bg-[#1c1c1f]">
-            {/* Header */}
-            <div className="flex items-center justify-between border-b border-gray-200 px-6 py-4 dark:border-gray-700">
-              <div className="flex items-center gap-3">
-                <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-purple-500/10">
-                  <svg className="h-5 w-5 text-purple-500" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 013 19.875v-6.75zM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V8.625zM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V4.125z" />
-                  </svg>
-                </div>
-                <div>
-                  <h3 className="text-lg font-bold text-gray-900 dark:text-white">PostIQ: Add Chart</h3>
-                  <p className="text-sm text-gray-500 dark:text-gray-400">AI-suggested chart based on your content</p>
-                </div>
-              </div>
-              <button
-                type="button"
-                onClick={() => setShowChartModal(false)}
-                className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200"
-              >
-                <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
-                </svg>
-              </button>
-            </div>
-
-            {/* Content */}
-            <div className="max-h-[60vh] overflow-y-auto p-6">
-              {chartLoading ? (
-                <div className="py-12 text-center">
-                  <div className="mx-auto h-8 w-8 animate-spin rounded-full border-2 border-purple-500 border-t-transparent" />
-                  <p className="mt-4 text-gray-500 dark:text-gray-400">Analyzing your article for chart data...</p>
-                </div>
-              ) : chartSuggestion ? (
-                <div className="space-y-6">
-                  {/* AI Reasoning */}
-                  <div className="rounded-lg bg-purple-50 p-4 dark:bg-purple-900/20">
-                    <p className="text-sm text-purple-700 dark:text-purple-300">
-                      <span className="font-semibold">AI Analysis:</span> {chartSuggestion.reasoning}
-                    </p>
-                  </div>
-
-                  {/* Chart Title */}
-                  <div>
-                    <label className="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-300">Chart Title</label>
-                    <input
-                      type="text"
-                      value={customChartTitle}
-                      onChange={(e) => setCustomChartTitle(e.target.value)}
-                      placeholder={chartSuggestion.chartTitle}
-                      className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 focus:border-purple-500 focus:outline-none dark:border-gray-600 dark:bg-gray-800 dark:text-white"
-                    />
-                  </div>
-
-                  {/* Chart Type Selector */}
-                  <div>
-                    <label className="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-300">Chart Type</label>
-                    <div className="grid grid-cols-5 gap-2">
-                      {[
-                        { type: 'bar', label: 'Bar', icon: 'M3 13h4v8H3zM9 9h4v12H9zM15 5h4v16h-4z' },
-                        { type: 'line', label: 'Line', icon: 'M3 17l6-6 4 4 8-8' },
-                        { type: 'pie', label: 'Pie', icon: 'M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8v8l8 0c0 4.41-3.59 8-8 8z' },
-                        { type: 'player-comparison', label: 'Players', icon: 'M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z' },
-                        { type: 'team-stats', label: 'Team', icon: 'M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z' },
-                      ].map(({ type, label, icon }) => (
-                        <button
-                          key={type}
-                          type="button"
-                          onClick={() => setSelectedChartType(type)}
-                          className={`flex flex-col items-center gap-1 rounded-lg border-2 p-3 transition-all ${
-                            selectedChartType === type
-                              ? 'border-purple-500 bg-purple-50 dark:bg-purple-900/20'
-                              : 'border-gray-200 hover:border-purple-300 dark:border-gray-700'
-                          }`}
-                        >
-                          <svg className={`h-6 w-6 ${selectedChartType === type ? 'text-purple-500' : 'text-gray-400'}`} fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
-                            <path strokeLinecap="round" strokeLinejoin="round" d={icon} />
-                          </svg>
-                          <span className={`text-xs font-medium ${selectedChartType === type ? 'text-purple-600 dark:text-purple-400' : 'text-gray-500'}`}>{label}</span>
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-
-                  {/* Data Preview */}
-                  <div>
-                    <label className="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-300">Chart Data</label>
-                    <div className="rounded-lg border border-gray-200 dark:border-gray-700 overflow-hidden">
-                      <table className="w-full text-sm">
-                        <thead className="bg-gray-50 dark:bg-gray-800">
-                          <tr>
-                            <th className="px-4 py-2 text-left font-medium text-gray-600 dark:text-gray-400">Label</th>
-                            <th className="px-4 py-2 text-right font-medium text-gray-600 dark:text-gray-400">Value</th>
-                          </tr>
-                        </thead>
-                        <tbody>
-                          {chartSuggestion.data.map((item, i) => (
-                            <tr key={i} className="border-t border-gray-100 dark:border-gray-700">
-                              <td className="px-4 py-2 text-gray-900 dark:text-white">{item.label}</td>
-                              <td className="px-4 py-2 text-right font-mono text-gray-600 dark:text-gray-400">{item.value}</td>
-                            </tr>
-                          ))}
-                        </tbody>
-                      </table>
-                    </div>
-                  </div>
-
-                  {/* Paragraph Selector */}
-                  <div>
-                    <label className="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-300">Insert After Paragraph</label>
-                    <select
-                      value={selectedParagraph}
-                      onChange={(e) => setSelectedParagraph(parseInt(e.target.value))}
-                      className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 focus:border-purple-500 focus:outline-none dark:border-gray-600 dark:bg-gray-800 dark:text-white"
-                    >
-                      {paragraphOptions.map((text, i) => (
-                        <option key={i} value={i + 1}>
-                          Paragraph {i + 1}: {text}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-                </div>
-              ) : (
-                <div className="py-8 text-center">
-                  <svg className="mx-auto h-12 w-12 text-gray-300" fill="none" viewBox="0 0 24 24" strokeWidth={1} stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 013 19.875v-6.75zM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V8.625zM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V4.125z" />
-                  </svg>
-                  <p className="mt-4 text-gray-500 dark:text-gray-400">No chartable data found in this article.</p>
-                  <p className="mt-1 text-sm text-gray-400">Try adding statistics, comparisons, or rankings to your content.</p>
-                  <div className="mt-6 space-y-2">
-                    <button
-                      type="button"
-                      onClick={handleHighlightData}
-                      className="w-full rounded-lg bg-purple-600 px-4 py-2.5 text-sm font-medium text-white hover:bg-purple-700 transition-colors flex items-center justify-center gap-2"
-                    >
-                      <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
-                      </svg>
-                      Highlight data in article
-                    </button>
-                  </div>
-                </div>
-              )}
-            </div>
-
-            {/* Footer */}
-            <div className="flex items-center gap-3 border-t border-gray-200 bg-gray-50 px-6 py-4 dark:border-gray-700 dark:bg-gray-800/50">
-              {chartSuggestion && (
-                <>
-                  <button
-                    type="button"
-                    onClick={regenerateChartSuggestion}
-                    disabled={chartLoading}
-                    className="text-sm font-medium text-purple-500 hover:text-purple-400 disabled:opacity-50"
-                  >
-                    ↻ Regenerate
-                  </button>
-                  <button
-                    type="button"
-                    onClick={handleHighlightData}
-                    className="text-sm text-gray-500 hover:text-purple-500 flex items-center gap-1"
-                  >
-                    <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
-                    </svg>
-                    Wrong data?
-                  </button>
-                </>
-              )}
-              <div className="flex-1" />
-              <button
-                type="button"
-                onClick={() => setShowChartModal(false)}
-                className="px-4 py-2 text-sm text-gray-600 hover:text-gray-900 dark:text-gray-300 dark:hover:text-white"
-              >
-                Cancel
-              </button>
-              <button
-                type="button"
-                onClick={insertChart}
-                disabled={!chartSuggestion || chartLoading}
-                className="rounded-lg bg-purple-600 px-4 py-2 text-sm font-medium text-white hover:bg-purple-700 disabled:cursor-not-allowed disabled:opacity-50"
-              >
-                {chartLoading ? 'Creating...' : 'Insert Chart'}
-              </button>
-            </div>
-          </div>
-        </div>
+        <ChartBuilderModal
+          isOpen={showChartModal}
+          onClose={() => {
+            setShowChartModal(false)
+            setInitialChartConfig(null)
+            setChartAiSuggestion(null)
+          }}
+          onInsert={handleChartInsert}
+          onHighlightData={handleHighlightData}
+          initialConfig={initialChartConfig || undefined}
+          aiSuggestion={chartAiSuggestion}
+          isLoading={chartLoading}
+          team={getTeamFromCategory(categories.find(c => c.id === formData.category_id)?.name) || 'bears'}
+        />
       )}
     </div>
   )
