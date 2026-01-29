@@ -397,7 +397,7 @@ export default function GMPage() {
           <div className="grid lg:grid-cols-4 gap-6">
             {/* Roster Panel - Left column */}
             <div className={`lg:col-span-1 ${activeTab !== 'build' ? 'hidden lg:block' : ''}`}>
-              <div className={`rounded-xl border p-4 ${cardBg}`} style={{ maxHeight: 'calc(100vh - 300px)', display: 'flex', flexDirection: 'column' }}>
+              <div className={`rounded-xl border p-4 ${cardBg}`} style={{ height: 'calc(100vh - 280px)', minHeight: '400px', overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
                 <RosterPanel
                   players={roster}
                   loading={rosterLoading}
@@ -411,7 +411,56 @@ export default function GMPage() {
 
             {/* Trade Board - Center */}
             <div className={`lg:col-span-2 space-y-4 ${activeTab !== 'build' ? 'hidden lg:block' : ''}`}>
-              {/* Opponent selector */}
+              {/* Trade Board Visualization - FIRST */}
+              <div className={`rounded-xl border p-4 ${cardBg}`}>
+                <TradeBoard
+                  chicagoTeam={selectedTeam}
+                  chicagoLogo={currentTeamConfig?.logo || ''}
+                  chicagoColor={teamColor}
+                  opponentName={opponentTeam?.team_name || ''}
+                  opponentLogo={opponentTeam?.logo_url || null}
+                  opponentColor={opponentTeam?.primary_color || '#666'}
+                  playersSent={selectedPlayers}
+                  playersReceived={receivedPlayers}
+                  draftPicksSent={draftPicksSent}
+                  draftPicksReceived={draftPicksReceived}
+                  onRemoveSent={id => togglePlayer(id)}
+                  onRemoveReceived={i => {
+                    const removed = receivedPlayers[i]
+                    if ('player_id' in removed) {
+                      setSelectedOpponentIds(prev => { const next = new Set(prev); next.delete(removed.player_id); return next })
+                    }
+                    setReceivedPlayers(prev => prev.filter((_, idx) => idx !== i))
+                  }}
+                  onRemoveDraftSent={i => setDraftPicksSent(prev => prev.filter((_, idx) => idx !== i))}
+                  onRemoveDraftReceived={i => setDraftPicksReceived(prev => prev.filter((_, idx) => idx !== i))}
+                  canGrade={canGrade}
+                  grading={grading}
+                  onGrade={gradeTrade}
+                />
+              </div>
+
+              {/* Draft picks */}
+              <div className={`rounded-xl border p-4 ${cardBg}`}>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+                  <DraftPickSelector
+                    sport={sport}
+                    picks={draftPicksSent}
+                    onAdd={pk => setDraftPicksSent(prev => [...prev, pk])}
+                    onRemove={i => setDraftPicksSent(prev => prev.filter((_, idx) => idx !== i))}
+                    label="Draft Picks to Send"
+                  />
+                  <DraftPickSelector
+                    sport={sport}
+                    picks={draftPicksReceived}
+                    onAdd={pk => setDraftPicksReceived(prev => [...prev, pk])}
+                    onRemove={i => setDraftPicksReceived(prev => prev.filter((_, idx) => idx !== i))}
+                    label="Draft Picks to Receive"
+                  />
+                </div>
+              </div>
+
+              {/* Trade Partner selector */}
               <div className={`rounded-xl border p-4 ${cardBg}`}>
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
                   <span style={{ fontWeight: 700, fontSize: '14px', color: isDark ? '#fff' : '#1a1a1a' }}>Trade Partner</span>
@@ -427,7 +476,7 @@ export default function GMPage() {
                   </button>
                 </div>
                 {opponentTeam && (
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 12 }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
                     <img src={opponentTeam.logo_url} alt={opponentTeam.team_name} style={{ width: 32, height: 32, objectFit: 'contain' }}
                       onError={(e) => { (e.target as HTMLImageElement).style.display = 'none' }} />
                     <span style={{ fontWeight: 700, color: isDark ? '#fff' : '#1a1a1a' }}>{opponentTeam.team_name}</span>
@@ -436,7 +485,7 @@ export default function GMPage() {
 
                 {/* Cap status cards */}
                 {(chicagoCap || opponentCap) && opponentTeam && (
-                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8, marginBottom: 12 }}>
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8, marginTop: 12 }}>
                     {chicagoCap && (
                       <div style={{
                         padding: '8px 10px', borderRadius: 8,
@@ -493,71 +542,6 @@ export default function GMPage() {
                     )}
                   </div>
                 )}
-
-                {/* Opponent roster browser */}
-                {opponentTeam && (
-                  <OpponentRosterPanel
-                    teamKey={opponentTeam.team_key}
-                    sport={opponentTeam.sport}
-                    teamColor={opponentTeam.primary_color || '#666'}
-                    selectedIds={selectedOpponentIds}
-                    onToggle={toggleOpponentPlayer}
-                    roster={opponentRoster}
-                    setRoster={setOpponentRoster}
-                    loading={opponentRosterLoading}
-                    setLoading={setOpponentRosterLoading}
-                    onAddCustomPlayer={addCustomReceivedPlayer}
-                  />
-                )}
-              </div>
-
-              {/* Trade Board Visualization */}
-              <div className={`rounded-xl border p-4 ${cardBg}`}>
-                <TradeBoard
-                  chicagoTeam={selectedTeam}
-                  chicagoLogo={currentTeamConfig?.logo || ''}
-                  chicagoColor={teamColor}
-                  opponentName={opponentTeam?.team_name || ''}
-                  opponentLogo={opponentTeam?.logo_url || null}
-                  opponentColor={opponentTeam?.primary_color || '#666'}
-                  playersSent={selectedPlayers}
-                  playersReceived={receivedPlayers}
-                  draftPicksSent={draftPicksSent}
-                  draftPicksReceived={draftPicksReceived}
-                  onRemoveSent={id => togglePlayer(id)}
-                  onRemoveReceived={i => {
-                    const removed = receivedPlayers[i]
-                    if ('player_id' in removed) {
-                      setSelectedOpponentIds(prev => { const next = new Set(prev); next.delete(removed.player_id); return next })
-                    }
-                    setReceivedPlayers(prev => prev.filter((_, idx) => idx !== i))
-                  }}
-                  onRemoveDraftSent={i => setDraftPicksSent(prev => prev.filter((_, idx) => idx !== i))}
-                  onRemoveDraftReceived={i => setDraftPicksReceived(prev => prev.filter((_, idx) => idx !== i))}
-                  canGrade={canGrade}
-                  grading={grading}
-                  onGrade={gradeTrade}
-                />
-              </div>
-
-              {/* Draft picks */}
-              <div className={`rounded-xl border p-4 ${cardBg}`}>
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
-                  <DraftPickSelector
-                    sport={sport}
-                    picks={draftPicksSent}
-                    onAdd={pk => setDraftPicksSent(prev => [...prev, pk])}
-                    onRemove={i => setDraftPicksSent(prev => prev.filter((_, idx) => idx !== i))}
-                    label="Draft Picks to Send"
-                  />
-                  <DraftPickSelector
-                    sport={sport}
-                    picks={draftPicksReceived}
-                    onAdd={pk => setDraftPicksReceived(prev => [...prev, pk])}
-                    onRemove={i => setDraftPicksReceived(prev => prev.filter((_, idx) => idx !== i))}
-                    label="Draft Picks to Receive"
-                  />
-                </div>
               </div>
 
               {/* Stat comparison */}
@@ -594,10 +578,29 @@ export default function GMPage() {
               </div>
             </div>
 
-            {/* Leaderboard - Right column */}
-            <div className={`lg:col-span-1 ${activeTab !== 'leaderboard' ? 'hidden lg:block' : ''}`}>
-              <div className={`rounded-xl border p-4 ${cardBg} lg:sticky lg:top-24`}>
-                <LeaderboardPanel entries={leaderboard} currentUserEmail={user?.email} />
+            {/* Opponent Roster - Right column */}
+            <div className={`lg:col-span-1 ${activeTab !== 'build' ? 'hidden lg:block' : ''}`}>
+              <div className={`rounded-xl border p-4 ${cardBg}`} style={{ height: 'calc(100vh - 280px)', minHeight: '400px', overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
+                {opponentTeam ? (
+                  <OpponentRosterPanel
+                    teamKey={opponentTeam.team_key}
+                    sport={opponentTeam.sport}
+                    teamColor={opponentTeam.primary_color || '#666'}
+                    selectedIds={selectedOpponentIds}
+                    onToggle={toggleOpponentPlayer}
+                    roster={opponentRoster}
+                    setRoster={setOpponentRoster}
+                    loading={opponentRosterLoading}
+                    setLoading={setOpponentRosterLoading}
+                    onAddCustomPlayer={addCustomReceivedPlayer}
+                  />
+                ) : (
+                  <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', color: subText, textAlign: 'center', padding: 20 }}>
+                    <div style={{ fontSize: '32px', marginBottom: 12 }}>🤝</div>
+                    <div style={{ fontWeight: 600, fontSize: '14px', marginBottom: 4 }}>Opponent Roster</div>
+                    <div style={{ fontSize: '12px' }}>Select a trade partner to browse their players</div>
+                  </div>
+                )}
               </div>
             </div>
           </div>
