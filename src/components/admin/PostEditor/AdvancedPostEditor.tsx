@@ -65,6 +65,7 @@ export default function AdvancedPostEditor({
   const [error, setError] = useState('')
   const [aiLoading, setAiLoading] = useState<string | null>(null)
   const [headlineTeam, setHeadlineTeam] = useState<string>('')
+  const [showTeamPicker, setShowTeamPicker] = useState(false)
   const [uploadingImage, setUploadingImage] = useState(false)
   const [headlines, setHeadlines] = useState<string[]>([])
   const [ideas, setIdeas] = useState<ArticleIdea[]>([])
@@ -889,7 +890,7 @@ export default function AdvancedPostEditor({
                 </button>
                 <button
                   type="button"
-                  onClick={() => runAI('headlines')}
+                  onClick={() => setShowTeamPicker(true)}
                   disabled={aiLoading === 'headlines' || !formData.title}
                   className="w-full flex items-center gap-3 rounded-lg px-3 py-2 text-sm text-[var(--text-secondary)] hover:bg-[var(--bg-hover)] hover:text-[var(--text-primary)] disabled:opacity-50"
                 >
@@ -898,18 +899,6 @@ export default function AdvancedPostEditor({
                   </svg>
                   {aiLoading === 'headlines' ? 'Generating...' : 'Headlines'}
                 </button>
-                <select
-                  value={headlineTeam}
-                  onChange={(e) => setHeadlineTeam(e.target.value)}
-                  className="w-full rounded-lg px-3 py-1.5 text-xs text-[var(--text-secondary)] bg-[var(--bg-secondary)] border border-[var(--border-default)]"
-                >
-                  <option value="">Auto (from category)</option>
-                  <option value="Bears">Bears</option>
-                  <option value="Bulls">Bulls</option>
-                  <option value="Blackhawks">Blackhawks</option>
-                  <option value="Cubs">Cubs</option>
-                  <option value="White Sox">White Sox</option>
-                </select>
                 <button
                   type="button"
                   onClick={openIdeasModal}
@@ -1605,6 +1594,47 @@ export default function AdvancedPostEditor({
               >
                 Use Selected
               </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Team Picker Modal for Headlines */}
+      {showTeamPicker && (
+        <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/60 backdrop-blur-sm">
+          <div className="mx-4 w-full max-w-sm overflow-hidden rounded-xl bg-white shadow-2xl dark:bg-[#1c1c1f]">
+            <div className="flex items-center justify-between border-b border-gray-200 px-6 py-4 dark:border-gray-700">
+              <h3 className="text-lg font-bold text-gray-900 dark:text-white">Which team?</h3>
+              <button type="button" onClick={() => setShowTeamPicker(false)} className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200">
+                <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+            <div className="p-4 space-y-2">
+              <p className="text-sm text-gray-500 dark:text-gray-400 mb-4">Select a team to generate headlines for:</p>
+              {[
+                { value: '', label: 'Auto-detect from category', icon: '🎯' },
+                { value: 'Bears', label: 'Chicago Bears', icon: '🐻' },
+                { value: 'Bulls', label: 'Chicago Bulls', icon: '🐂' },
+                { value: 'Blackhawks', label: 'Chicago Blackhawks', icon: '🏒' },
+                { value: 'Cubs', label: 'Chicago Cubs', icon: '🐻' },
+                { value: 'White Sox', label: 'Chicago White Sox', icon: '⚾' },
+              ].map((team) => (
+                <button
+                  key={team.value || 'auto'}
+                  type="button"
+                  onClick={() => {
+                    setHeadlineTeam(team.value)
+                    setShowTeamPicker(false)
+                    runAI('headlines')
+                  }}
+                  className="w-full flex items-center gap-3 rounded-lg border-2 border-gray-200 px-4 py-3 text-left transition-all hover:border-purple-400 hover:bg-purple-50 dark:border-gray-700 dark:hover:border-purple-500 dark:hover:bg-purple-500/10"
+                >
+                  <span className="text-xl">{team.icon}</span>
+                  <span className="font-medium text-gray-900 dark:text-white">{team.label}</span>
+                </button>
+              ))}
             </div>
           </div>
         </div>
