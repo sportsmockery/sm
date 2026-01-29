@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useRef } from 'react'
 import {
   View,
   Text,
@@ -8,6 +8,9 @@ import {
   ActivityIndicator,
   KeyboardAvoidingView,
   Platform,
+  Keyboard,
+  TouchableWithoutFeedback,
+  InputAccessoryView,
 } from 'react-native'
 import { Image } from 'expo-image'
 import { useRouter, Stack } from 'expo-router'
@@ -30,6 +33,9 @@ export default function AuthScreen() {
   const [error, setError] = useState('')
 
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const inputAccessoryViewID = 'authKeyboardDone'
+
+  const dismissKeyboard = () => Keyboard.dismiss()
 
   const handleSubmit = async () => {
     setError('')
@@ -74,10 +80,11 @@ export default function AuthScreen() {
     <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]}>
       <Stack.Screen options={{ headerShown: false }} />
 
-      <KeyboardAvoidingView
-        style={styles.content}
-        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-      >
+      <TouchableWithoutFeedback onPress={dismissKeyboard} accessible={false}>
+        <KeyboardAvoidingView
+          style={styles.content}
+          behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+        >
         {/* Close Button */}
         <TouchableOpacity
           style={styles.closeButton}
@@ -115,6 +122,7 @@ export default function AuthScreen() {
               value={username}
               onChangeText={setUsername}
               autoCapitalize="none"
+              inputAccessoryViewID={inputAccessoryViewID}
             />
           )}
 
@@ -126,6 +134,7 @@ export default function AuthScreen() {
             onChangeText={setEmail}
             keyboardType="email-address"
             autoCapitalize="none"
+            inputAccessoryViewID={inputAccessoryViewID}
           />
 
           <TextInput
@@ -135,6 +144,7 @@ export default function AuthScreen() {
             value={password}
             onChangeText={setPassword}
             secureTextEntry
+            inputAccessoryViewID={inputAccessoryViewID}
           />
 
           {error ? (
@@ -181,7 +191,20 @@ export default function AuthScreen() {
             Continue as Guest
           </Text>
         </TouchableOpacity>
-      </KeyboardAvoidingView>
+        </KeyboardAvoidingView>
+      </TouchableWithoutFeedback>
+
+      {/* Keyboard Done Button (iOS) */}
+      {Platform.OS === 'ios' && (
+        <InputAccessoryView nativeID={inputAccessoryViewID}>
+          <View style={[styles.keyboardAccessory, { backgroundColor: colors.surface, borderTopColor: colors.border }]}>
+            <TouchableOpacity onPress={dismissKeyboard} style={styles.doneButton}>
+              <Ionicons name="chevron-down" size={20} color={COLORS.primary} />
+              <Text style={[styles.doneButtonText, { color: COLORS.primary }]}>Done</Text>
+            </TouchableOpacity>
+          </View>
+        </InputAccessoryView>
+      )}
     </SafeAreaView>
   )
 }
@@ -263,5 +286,24 @@ const styles = StyleSheet.create({
   guestText: {
     fontSize: 14,
     fontFamily: 'Montserrat-Regular',
+  },
+  keyboardAccessory: {
+    flexDirection: 'row',
+    justifyContent: 'flex-end',
+    alignItems: 'center',
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    borderTopWidth: 1,
+  },
+  doneButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    paddingVertical: 4,
+    paddingHorizontal: 8,
+  },
+  doneButtonText: {
+    fontSize: 16,
+    fontFamily: 'Montserrat-SemiBold',
   },
 })

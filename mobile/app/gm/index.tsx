@@ -15,6 +15,7 @@ import { SafeAreaView } from 'react-native-safe-area-context'
 import { Ionicons } from '@expo/vector-icons'
 
 import { useTheme } from '@/hooks/useTheme'
+import { useAuth } from '@/hooks/useAuth'
 import { COLORS, TEAMS } from '@/lib/config'
 import { useGM } from '@/lib/gm-context'
 import { gmApi, AuthRequiredError } from '@/lib/gm-api'
@@ -30,11 +31,18 @@ const CHICAGO_TEAMS = [
 export default function GMIndexScreen() {
   const router = useRouter()
   const { colors, isDark } = useTheme()
+  const { user, isLoading: authLoading } = useAuth()
   const { state, dispatch } = useGM()
   const [loading, setLoading] = useState(false)
   const [showAuthPrompt, setShowAuthPrompt] = useState(false)
 
   const handleSelectTeam = async (teamKey: string) => {
+    // Check auth before making API calls
+    if (!user) {
+      setShowAuthPrompt(true)
+      return
+    }
+
     dispatch({ type: 'SET_TEAM', team: teamKey as any })
     setLoading(true)
     try {
@@ -97,10 +105,12 @@ export default function GMIndexScreen() {
         </View>
       </View>
 
-      {loading && (
+      {(loading || authLoading) && (
         <View style={styles.loadingOverlay}>
           <ActivityIndicator size="large" color={COLORS.primary} />
-          <Text style={[styles.loadingText, { color: colors.textMuted }]}>Loading roster...</Text>
+          <Text style={[styles.loadingText, { color: colors.textMuted }]}>
+            {authLoading ? 'Checking authentication...' : 'Loading roster...'}
+          </Text>
         </View>
       )}
 
@@ -120,7 +130,7 @@ export default function GMIndexScreen() {
             style={[styles.teamCard, { backgroundColor: colors.surface }]}
             activeOpacity={0.85}
             onPress={() => handleSelectTeam(team.key)}
-            disabled={loading}
+            disabled={loading || authLoading}
           >
             <View style={[styles.teamColorBar, { backgroundColor: team.color }]} />
             <View style={styles.teamRow}>
