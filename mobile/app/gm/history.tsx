@@ -6,6 +6,8 @@ import {
   TouchableOpacity,
   StyleSheet,
   ActivityIndicator,
+  Alert,
+  Share,
 } from 'react-native'
 import { useRouter } from 'expo-router'
 import { SafeAreaView } from 'react-native-safe-area-context'
@@ -28,6 +30,7 @@ export default function GMHistoryScreen() {
   const { colors } = useTheme()
   const [trades, setTrades] = useState<Trade[]>([])
   const [loading, setLoading] = useState(true)
+  const [exporting, setExporting] = useState(false)
 
   useEffect(() => {
     async function load() {
@@ -42,6 +45,27 @@ export default function GMHistoryScreen() {
     }
     load()
   }, [])
+
+  const handleExportAll = async () => {
+    if (trades.length === 0) {
+      Alert.alert('No Trades', 'You have no trades to export.')
+      return
+    }
+    setExporting(true)
+    try {
+      const result = await gmApi.exportTrade({ format: 'json', all: true })
+      if (result.data) {
+        await Share.share({
+          message: JSON.stringify(result.data, null, 2),
+          title: 'Trade History Export',
+        })
+      }
+    } catch (err: any) {
+      Alert.alert('Export Failed', err.message || 'Failed to export trades')
+    } finally {
+      setExporting(false)
+    }
+  }
 
   const renderTrade = ({ item }: { item: Trade }) => {
     const gradeColor = getGradeColor(item.grade)
@@ -86,6 +110,16 @@ export default function GMHistoryScreen() {
           <Ionicons name="arrow-back" size={24} color={colors.text} />
         </TouchableOpacity>
         <Text style={[styles.headerTitle, { color: colors.text }]}>Trade History</Text>
+        <View style={{ flex: 1 }} />
+        {trades.length > 0 && (
+          <TouchableOpacity onPress={handleExportAll} disabled={exporting} style={styles.exportBtn}>
+            {exporting ? (
+              <ActivityIndicator size="small" color={COLORS.primary} />
+            ) : (
+              <Ionicons name="download-outline" size={22} color={COLORS.primary} />
+            )}
+          </TouchableOpacity>
+        )}
       </View>
 
       {loading ? (
@@ -119,6 +153,7 @@ const styles = StyleSheet.create({
   },
   backBtn: { marginRight: 12 },
   headerTitle: { fontSize: 18, fontFamily: 'Montserrat-Bold' },
+  exportBtn: { padding: 4 },
   listContent: { padding: 16 },
   tradeCard: {
     borderRadius: 14, padding: 14, marginBottom: 10,

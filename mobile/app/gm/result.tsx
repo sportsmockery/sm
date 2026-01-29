@@ -16,6 +16,7 @@ import { Ionicons } from '@expo/vector-icons'
 import { useTheme } from '@/hooks/useTheme'
 import { COLORS, TEAMS, API_BASE_URL } from '@/lib/config'
 import { useGM } from '@/lib/gm-context'
+import { gmApi } from '@/lib/gm-api'
 import type { PlayerData, DraftPick } from '@/lib/gm-types'
 
 function formatMoney(value: number | null | undefined): string {
@@ -268,6 +269,36 @@ export default function GMResultScreen() {
           </TouchableOpacity>
         </View>
 
+        {/* V2 Actions */}
+        <View style={styles.v2Actions}>
+          <TouchableOpacity
+            style={[styles.v2Btn, { backgroundColor: colors.surface }]}
+            onPress={() => router.push({
+              pathname: '/gm/what-if',
+              params: { trade_id: result.trade_id },
+            })}
+          >
+            <Ionicons name="git-branch-outline" size={18} color={COLORS.primary} />
+            <Text style={[styles.v2BtnText, { color: colors.text }]}>What If?</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={[styles.v2Btn, { backgroundColor: colors.surface }]}
+            onPress={async () => {
+              try {
+                const exportData = await gmApi.exportTrade({ trade_id: result.trade_id, format: 'json' })
+                if (exportData.data) {
+                  await Share.share({
+                    message: JSON.stringify(exportData.data, null, 2),
+                  })
+                }
+              } catch {}
+            }}
+          >
+            <Ionicons name="download-outline" size={18} color={COLORS.primary} />
+            <Text style={[styles.v2BtnText, { color: colors.text }]}>Export</Text>
+          </TouchableOpacity>
+        </View>
+
         <View style={styles.navLinks}>
           <TouchableOpacity onPress={() => router.push('/gm/history')}>
             <Text style={[styles.linkBtnText, { color: COLORS.primary }]}>View History</Text>
@@ -341,6 +372,15 @@ const styles = StyleSheet.create({
     paddingVertical: 14, borderRadius: 12, gap: 8,
   },
   secondaryBtnText: { fontSize: 15, fontFamily: 'Montserrat-Bold' },
+  v2Actions: {
+    flexDirection: 'row', gap: 12, marginTop: 12, width: '100%',
+  },
+  v2Btn: {
+    flex: 1,
+    flexDirection: 'row', justifyContent: 'center', alignItems: 'center',
+    paddingVertical: 12, borderRadius: 10, gap: 6,
+  },
+  v2BtnText: { fontSize: 14, fontFamily: 'Montserrat-SemiBold' },
   navLinks: {
     flexDirection: 'row', gap: 24, marginTop: 20,
   },

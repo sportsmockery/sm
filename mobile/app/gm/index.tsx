@@ -60,12 +60,12 @@ export default function GMIndexScreen() {
 
   const handleSignIn = () => {
     setShowAuthPrompt(false)
-    router.push('/login')
+    router.push('/auth')
   }
 
   const handleCreateAccount = () => {
     setShowAuthPrompt(false)
-    router.push('/signup')
+    router.push('/auth')
   }
 
   return (
@@ -82,6 +82,12 @@ export default function GMIndexScreen() {
           </Text>
         </View>
         <View style={styles.headerRight}>
+          <TouchableOpacity onPress={() => router.push('/gm/analytics')} style={styles.iconBtn}>
+            <Ionicons name="bar-chart-outline" size={22} color={colors.text} />
+          </TouchableOpacity>
+          <TouchableOpacity onPress={() => router.push('/gm/preferences')} style={styles.iconBtn}>
+            <Ionicons name="settings-outline" size={22} color={colors.text} />
+          </TouchableOpacity>
           <TouchableOpacity onPress={() => router.push('/gm/history')} style={styles.iconBtn}>
             <Ionicons name="time-outline" size={22} color={colors.text} />
           </TouchableOpacity>

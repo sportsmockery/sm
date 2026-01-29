@@ -10,6 +10,8 @@ import type {
   GradeResult,
   ChicagoTeam,
   Sport,
+  ValidationResult,
+  UserPreferences,
 } from './gm-types'
 import { CHICAGO_TEAM_SPORT } from './gm-types'
 
@@ -28,6 +30,10 @@ interface GMState {
   grading: boolean
   gradeResult: GradeResult | null
   sessionId: string | null
+  // V2 State
+  validation: ValidationResult | null
+  validating: boolean
+  preferences: UserPreferences | null
 }
 
 type GMAction =
@@ -47,6 +53,10 @@ type GMAction =
   | { type: 'SET_GRADE_RESULT'; result: GradeResult | null }
   | { type: 'SET_SESSION_ID'; id: string }
   | { type: 'RESET' }
+  // V2 Actions
+  | { type: 'SET_VALIDATION'; validation: ValidationResult | null }
+  | { type: 'SET_VALIDATING'; validating: boolean }
+  | { type: 'SET_PREFERENCES'; preferences: UserPreferences | null }
 
 const initialState: GMState = {
   chicagoTeam: null,
@@ -63,6 +73,10 @@ const initialState: GMState = {
   grading: false,
   gradeResult: null,
   sessionId: null,
+  // V2 State
+  validation: null,
+  validating: false,
+  preferences: null,
 }
 
 function gmReducer(state: GMState, action: GMAction): GMState {
@@ -117,6 +131,13 @@ function gmReducer(state: GMState, action: GMAction): GMState {
       return { ...state, sessionId: action.id }
     case 'RESET':
       return initialState
+    // V2 Actions
+    case 'SET_VALIDATION':
+      return { ...state, validation: action.validation, validating: false }
+    case 'SET_VALIDATING':
+      return { ...state, validating: action.validating }
+    case 'SET_PREFERENCES':
+      return { ...state, preferences: action.preferences }
     default:
       return state
   }

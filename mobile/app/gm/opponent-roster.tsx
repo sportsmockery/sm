@@ -13,7 +13,7 @@ import { SafeAreaView } from 'react-native-safe-area-context'
 import { Ionicons } from '@expo/vector-icons'
 
 import { useTheme } from '@/hooks/useTheme'
-import { COLORS } from '@/lib/config'
+import { COLORS, TEAMS } from '@/lib/config'
 import { useGM } from '@/lib/gm-context'
 import type { PlayerData } from '@/lib/gm-types'
 
@@ -41,6 +41,24 @@ export default function GMOpponentRosterScreen() {
 
   const isSelected = (p: PlayerData) =>
     state.selectedOpponentPlayers.some(s => s.player_id === p.player_id)
+
+  const teamConfig = state.chicagoTeam ? TEAMS[state.chicagoTeam] : null
+
+  const handleViewFit = (player: PlayerData) => {
+    if (!state.chicagoTeam || !teamConfig) return
+    router.push({
+      pathname: '/gm/team-fit',
+      params: {
+        player_name: player.full_name,
+        player_espn_id: player.espn_id || '',
+        target_team: state.chicagoTeam,
+        team_name: teamConfig.name,
+        team_color: teamConfig.color,
+        sport: state.sport || '',
+        headshot_url: player.headshot_url || '',
+      },
+    })
+  }
 
   const renderPlayer = ({ item }: { item: PlayerData }) => {
     const selected = isSelected(item)
@@ -74,6 +92,12 @@ export default function GMOpponentRosterScreen() {
               </Text>
             ) : null}
           </View>
+          <TouchableOpacity
+            style={[styles.fitBtn, { backgroundColor: `${teamConfig?.color || COLORS.primary}20` }]}
+            onPress={() => handleViewFit(item)}
+          >
+            <Ionicons name="analytics-outline" size={16} color={teamConfig?.color || COLORS.primary} />
+          </TouchableOpacity>
           {selected && (
             <View style={[styles.checkBadge, { backgroundColor: COLORS.primary }]}>
               <Ionicons name="checkmark" size={16} color="#fff" />
@@ -203,6 +227,11 @@ const styles = StyleSheet.create({
   playerName: { fontSize: 15, fontFamily: 'Montserrat-SemiBold' },
   playerMeta: { fontSize: 12, fontFamily: 'Montserrat-Regular', marginTop: 2 },
   statLine: { fontSize: 11, fontFamily: 'Montserrat-Regular', marginTop: 2 },
+  fitBtn: {
+    width: 32, height: 32, borderRadius: 8,
+    justifyContent: 'center', alignItems: 'center',
+    marginRight: 8,
+  },
   checkBadge: {
     width: 28, height: 28, borderRadius: 14,
     justifyContent: 'center', alignItems: 'center',

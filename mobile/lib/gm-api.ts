@@ -14,6 +14,13 @@ import type {
   CapData,
   DraftPick,
   ChicagoTeam,
+  ValidationResult,
+  TeamFitResult,
+  UserPreferences,
+  ScenarioType,
+  ScenarioResult,
+  SimulationResult,
+  AnalyticsResult,
 } from './gm-types'
 
 const BASE = API_BASE_URL
@@ -122,5 +129,91 @@ export const gmApi = {
   async getCap(teamKey: string, sport: string) {
     const params = new URLSearchParams({ team_key: teamKey, sport })
     return gmFetch<{ cap: CapData | null }>(`/api/gm/cap?${params}`)
+  },
+
+  // GM V2 Endpoints
+
+  async validateTrade(payload: {
+    chicago_team: ChicagoTeam
+    trade_partner: string
+    partner_team_key: string
+    players_sent: PlayerData[]
+    players_received: PlayerData[]
+    draft_picks_sent?: DraftPick[]
+    draft_picks_received?: DraftPick[]
+  }) {
+    return gmFetch<ValidationResult>('/api/gm/validate', {
+      method: 'POST',
+      body: JSON.stringify(payload),
+    })
+  },
+
+  async getTeamFit(params: {
+    player_name: string
+    player_espn_id?: string
+    target_team: string
+    sport: string
+  }) {
+    const queryParams = new URLSearchParams({
+      player_name: params.player_name,
+      target_team: params.target_team,
+      sport: params.sport,
+    })
+    if (params.player_espn_id) {
+      queryParams.set('player_espn_id', params.player_espn_id)
+    }
+    return gmFetch<TeamFitResult>(`/api/gm/fit?${queryParams}`)
+  },
+
+  async getPreferences() {
+    return gmFetch<{ preferences: UserPreferences }>('/api/gm/preferences')
+  },
+
+  async updatePreferences(preferences: Partial<UserPreferences>) {
+    return gmFetch<{ preferences: UserPreferences }>('/api/gm/preferences', {
+      method: 'POST',
+      body: JSON.stringify(preferences),
+    })
+  },
+
+  async runScenario(payload: {
+    trade_id: string
+    scenario_type: ScenarioType
+    parameters: Record<string, any>
+  }) {
+    return gmFetch<ScenarioResult>('/api/gm/scenarios', {
+      method: 'POST',
+      body: JSON.stringify(payload),
+    })
+  },
+
+  async runSimulation(payload: {
+    trade_id: string
+    simulations?: number
+    factors?: {
+      player_variance?: number
+      market_volatility?: number
+      injury_risk?: number
+    }
+  }) {
+    return gmFetch<SimulationResult>('/api/gm/simulate', {
+      method: 'POST',
+      body: JSON.stringify(payload),
+    })
+  },
+
+  async getAnalytics() {
+    return gmFetch<AnalyticsResult>('/api/gm/analytics')
+  },
+
+  async exportTrade(params: {
+    trade_id?: string
+    format: 'json' | 'csv' | 'pdf'
+    all?: boolean
+  }) {
+    const queryParams = new URLSearchParams({ format: params.format })
+    if (params.trade_id) queryParams.set('trade_id', params.trade_id)
+    if (params.all) queryParams.set('all', 'true')
+    return gmFetch<{ url?: string; data?: any }>(`/api/gm/export?${queryParams}`)
   },
 }
