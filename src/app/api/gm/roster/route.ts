@@ -13,12 +13,13 @@ const TEAM_CONFIG: Record<string, {
   statsTable: string
   statsJoinCol: string
   seasonValue: number
+  gmRosterTeamKey: string // Team key in gm_*_rosters tables
 }> = {
-  bears: { table: 'bears_players', activeCol: 'is_active', sport: 'nfl', nameCol: 'name', statsTable: 'bears_player_game_stats', statsJoinCol: 'player_id', seasonValue: 2025 },
-  bulls: { table: 'bulls_players', activeCol: 'is_current_bulls', sport: 'nba', nameCol: 'display_name', statsTable: 'bulls_player_game_stats', statsJoinCol: 'player_id', seasonValue: 2026 },
-  blackhawks: { table: 'blackhawks_players', activeCol: 'is_active', sport: 'nhl', nameCol: 'name', statsTable: 'blackhawks_player_game_stats', statsJoinCol: 'player_id', seasonValue: 2026 },
-  cubs: { table: 'cubs_players', activeCol: 'is_active', sport: 'mlb', nameCol: 'name', statsTable: 'cubs_player_game_stats', statsJoinCol: 'player_id', seasonValue: 2025 },
-  whitesox: { table: 'whitesox_players', activeCol: 'is_active', sport: 'mlb', nameCol: 'name', statsTable: 'whitesox_player_game_stats', statsJoinCol: 'player_id', seasonValue: 2025 },
+  bears: { table: 'bears_players', activeCol: 'is_active', sport: 'nfl', nameCol: 'name', statsTable: 'bears_player_game_stats', statsJoinCol: 'player_id', seasonValue: 2025, gmRosterTeamKey: 'chi' },
+  bulls: { table: 'bulls_players', activeCol: 'is_current_bulls', sport: 'nba', nameCol: 'display_name', statsTable: 'bulls_player_game_stats', statsJoinCol: 'player_id', seasonValue: 2026, gmRosterTeamKey: 'chi' },
+  blackhawks: { table: 'blackhawks_players', activeCol: 'is_active', sport: 'nhl', nameCol: 'name', statsTable: 'blackhawks_player_game_stats', statsJoinCol: 'player_id', seasonValue: 2026, gmRosterTeamKey: 'chi' },
+  cubs: { table: 'cubs_players', activeCol: 'is_active', sport: 'mlb', nameCol: 'name', statsTable: 'cubs_player_game_stats', statsJoinCol: 'player_id', seasonValue: 2025, gmRosterTeamKey: 'chc' },
+  whitesox: { table: 'whitesox_players', activeCol: 'is_active', sport: 'mlb', nameCol: 'name', statsTable: 'whitesox_player_game_stats', statsJoinCol: 'player_id', seasonValue: 2025, gmRosterTeamKey: 'chw' },
 }
 
 type TrendDirection = 'hot' | 'rising' | 'stable' | 'declining' | 'cold'
@@ -132,6 +133,7 @@ export async function GET(request: NextRequest) {
     }
 
     // Chicago roster path: team param
+    // Use GM roster tables for consistent data (including age, contract info)
     const team = request.nextUrl.searchParams.get('team')
     if (!team || !TEAM_CONFIG[team]) {
       return NextResponse.json({ error: 'Invalid team' }, { status: 400 })
@@ -139,72 +141,27 @@ export async function GET(request: NextRequest) {
 
     const config = TEAM_CONFIG[team]
 
-    const selectCols = team === 'bulls'
-      ? 'player_id, display_name, position, jersey_number, headshot_url, age, weight_lbs, college, years_pro, draft_year, draft_round, draft_pick, espn_player_id, base_salary, cap_hit, contract_years_remaining, contract_signed_year, is_rookie_deal'
-      : team === 'bears'
-        ? 'player_id, name, position, jersey_number, headshot_url, age, weight_lbs, college, years_exp, draft_year, draft_round, draft_pick, espn_id, base_salary, cap_hit, contract_years_remaining, contract_signed_year, is_rookie_deal'
-        : team === 'blackhawks'
-          ? 'player_id, name, position, jersey_number, headshot_url, age, weight_lbs, college, years_experience, draft_year, draft_round, draft_pick, espn_id, base_salary, cap_hit, contract_years_remaining, contract_signed_year, is_rookie_deal'
-          : 'player_id, name, position, jersey_number, headshot_url, age, weight_lbs, college, espn_id, base_salary, cap_hit, contract_years_remaining, contract_signed_year, is_rookie_deal'
+    // Use GM roster tables for Chicago teams - they have complete data including age
+    const players = await fetchOpponentRoster(
+      config.gmRosterTeamKey,
+      config.sport,
+      search || undefined,
+      posFilter || undefined
+    )
 
-    let query = datalabAdmin
-      .from(config.table)
-      .select(selectCols)
-      .eq(config.activeCol, true)
-      .order('position')
-      .order(config.nameCol)
-
-    const { data: rawPlayers, error } = await query
-    if (error) throw error
-
+    // Fetch stats and build stat lines for Chicago players
     const statsMap = await fetchSeasonStats(team, config)
-
-    const players: PlayerData[] = (rawPlayers || []).map((p: any) => {
-      const fullName = p.display_name || p.name || 'Unknown'
-      const espnId = p.espn_player_id || p.espn_id || null
-      const yearsExp = p.years_exp ?? p.years_pro ?? p.years_experience ?? null
-      const draftInfo = p.draft_year && p.draft_round
-        ? `${p.draft_year} R${p.draft_round}${p.draft_pick ? ` P${p.draft_pick}` : ''}`
-        : null
-
-      const playerStats = statsMap.get(espnId || p.player_id) || {}
+    const playersWithStats = players.map(p => {
+      const playerStats = statsMap.get(p.espn_id || p.player_id) || {}
       const statLine = buildStatLine(config.sport, playerStats, p.position)
-
       return {
-        player_id: p.player_id?.toString() || p.espn_player_id || p.espn_id || '',
-        full_name: fullName,
-        position: p.position || 'Unknown',
-        jersey_number: p.jersey_number,
-        headshot_url: p.headshot_url,
-        age: p.age,
-        weight_lbs: p.weight_lbs,
-        college: p.college,
-        years_exp: yearsExp,
-        draft_info: draftInfo,
-        espn_id: espnId,
-        stat_line: statLine,
-        stats: playerStats,
-        base_salary: p.base_salary,
-        cap_hit: p.cap_hit || p.base_salary, // Use cap_hit if available, fallback to base_salary
-        contract_years: p.contract_years_remaining,
-        contract_signed_year: p.contract_signed_year,
-        is_rookie_deal: p.is_rookie_deal,
-        // V2 fields - populated from Data Lab when available
-        trend: (p as any).trend || null,
-        performance_vs_projection: (p as any).performance_vs_projection || null,
-        market_sentiment: (p as any).market_sentiment || null,
+        ...p,
+        stat_line: statLine || p.stat_line,
+        stats: { ...p.stats, ...playerStats },
       }
     })
 
-    let filtered = players
-    if (search) {
-      filtered = filtered.filter(p => p.full_name.toLowerCase().includes(search))
-    }
-    if (posFilter && posFilter !== 'ALL') {
-      filtered = filtered.filter(p => p.position === posFilter)
-    }
-
-    return NextResponse.json({ players: filtered, sport: config.sport })
+    return NextResponse.json({ players: playersWithStats, sport: config.sport })
   } catch (error) {
     console.error('GM roster error:', error)
     try { await datalabAdmin.from('gm_errors').insert({ source: 'backend', error_type: 'api', error_message: String(error), route: '/api/gm/roster' }) } catch {}
