@@ -1,8 +1,8 @@
 'use client'
 import { useEffect, useState, useCallback } from 'react'
-import { createClient } from '@/lib/supabase'
 import { useRouter } from 'next/navigation'
 import { useTheme } from '@/contexts/ThemeContext'
+import { useAuth } from '@/contexts/AuthContext'
 import { AnimatePresence } from 'framer-motion'
 
 import { TeamSelector, TEAMS } from '@/components/gm/TeamSelector'
@@ -29,10 +29,9 @@ interface CapData { total_cap: number; cap_used: number; cap_available: number; 
 type ReceivedPlayer = PlayerData | { name: string; position: string }
 
 export default function GMPage() {
-  const [user, setUser] = useState<any>(null)
-  const [loading, setLoading] = useState(true)
+  const { user, loading: authLoading, isAuthenticated } = useAuth()
+  const [pageLoading, setPageLoading] = useState(true)
   const router = useRouter()
-  const supabase = createClient()
   const { theme } = useTheme()
 
   // Team & roster
@@ -82,18 +81,21 @@ export default function GMPage() {
   const teamColor = currentTeamConfig?.color || '#bc0000'
   const sport = currentTeamConfig?.sport || 'nfl'
 
+  // Handle auth redirect and initial data loading
   useEffect(() => {
-    async function init() {
-      const { data: { user } } = await supabase.auth.getUser()
-      if (!user) { router.push('/login?next=/gm'); return }
-      setUser(user)
-      setLoading(false)
-      fetchTrades()
-      fetchLeaderboard()
-      fetchSessions()
+    if (authLoading) return // Wait for auth to complete
+
+    if (!isAuthenticated) {
+      router.push('/login?next=/gm')
+      return
     }
-    init()
-  }, [])
+
+    // User is authenticated, load data
+    setPageLoading(false)
+    fetchTrades()
+    fetchLeaderboard()
+    fetchSessions()
+  }, [authLoading, isAuthenticated, router])
 
   const fetchTrades = useCallback(async (page = 1) => {
     try {
@@ -319,7 +321,8 @@ export default function GMPage() {
     fetchSessions()
   }
 
-  if (loading) {
+  // Show loading while auth is checking or page is initializing
+  if (authLoading || pageLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: 'var(--bg-page)' }}>
         <div className="w-8 h-8 border-2 border-[#bc0000] border-t-transparent rounded-full animate-spin" />
