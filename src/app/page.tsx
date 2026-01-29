@@ -7,6 +7,12 @@ import '@/styles/homepage.css'
 export const dynamic = 'force-dynamic'
 
 async function getHomepageData() {
+  console.log('[Homepage] Starting getHomepageData')
+  console.log('[Homepage] Env check:', {
+    hasUrl: !!process.env.NEXT_PUBLIC_SUPABASE_URL,
+    hasKey: !!process.env.SUPABASE_SERVICE_ROLE_KEY
+  })
+
   // Create admin client inline to ensure env vars are available at runtime
   const supabase = createClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -14,7 +20,8 @@ async function getHomepageData() {
   )
 
   // 1) Editor picks (pinned_slot 1–6)
-  const { data: editorPicks = [] } = await supabase
+  console.log('[Homepage] Fetching editor picks...')
+  const { data: editorPicks = [], error: edError } = await supabase
     .from('sm_posts')
     .select('id, title, slug, featured_image, team_slug, pinned_slot')
     .eq('editor_pick', true)
@@ -22,6 +29,7 @@ async function getHomepageData() {
     .gte('pinned_slot', 1)
     .lte('pinned_slot', 6)
     .order('pinned_slot', { ascending: true })
+  console.log('[Homepage] Editor picks:', { count: editorPicks?.length, error: edError?.message })
 
   // 2) Trending posts (based strictly on views in last 7 days)
   const sevenDaysAgo = new Date()
@@ -38,7 +46,8 @@ async function getHomepageData() {
   const trendingIds = new Set((trendingPosts || []).map(p => p.id))
 
   // 3) Main feed: ALL recent published posts, recency only
-  const { data: allPosts = [] } = await supabase
+  console.log('[Homepage] Fetching all posts...')
+  const { data: allPosts = [], error: postsError } = await supabase
     .from('sm_posts')
     .select(`
       id, title, slug, excerpt, featured_image, team_slug,
@@ -48,6 +57,7 @@ async function getHomepageData() {
     .eq('status', 'published')
     .order('published_at', { ascending: false })
     .limit(200) // All recent posts for homepage
+  console.log('[Homepage] All posts:', { count: allPosts?.length, error: postsError?.message })
 
   // 4) Add flags for UI (no scoring)
   const postsWithFlags = (allPosts || []).map(post => ({
@@ -92,8 +102,12 @@ export default async function HomePage() {
         isLoggedIn={isLoggedIn}
       />
     )
-  } catch (error) {
-    console.error('Homepage error:', error)
+  } catch (error: any) {
+    console.error('[Homepage] CAUGHT ERROR:', {
+      name: error?.name,
+      message: error?.message,
+      stack: error?.stack?.split('\n').slice(0, 5).join('\n')
+    })
     return (
       <HomepageFeed
         initialPosts={FALLBACK_POSTS}
