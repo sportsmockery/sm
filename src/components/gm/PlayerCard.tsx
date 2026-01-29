@@ -1,6 +1,7 @@
 'use client'
 import { motion } from 'framer-motion'
 import { useTheme } from '@/contexts/ThemeContext'
+import { PlayerTrendBadge, TrendDirection } from './PlayerTrendBadge'
 
 export interface PlayerData {
   player_id: string
@@ -23,6 +24,10 @@ export interface PlayerData {
   contract_expires_year?: number | null
   contract_signed_year?: number | null
   is_rookie_deal?: boolean | null
+  // V2 Enhanced fields
+  trend?: TrendDirection | null
+  performance_vs_projection?: number | null
+  market_sentiment?: 'buy' | 'hold' | 'sell' | null
 }
 
 interface PlayerCardProps {
@@ -31,9 +36,10 @@ interface PlayerCardProps {
   compact?: boolean
   teamColor?: string
   onClick?: () => void
+  onViewFit?: (player: PlayerData) => void
 }
 
-export function PlayerCard({ player, selected = false, compact = false, teamColor = '#bc0000', onClick }: PlayerCardProps) {
+export function PlayerCard({ player, selected = false, compact = false, teamColor = '#bc0000', onClick, onViewFit }: PlayerCardProps) {
   const { theme } = useTheme()
   const isDark = theme === 'dark'
 
@@ -76,8 +82,11 @@ export function PlayerCard({ player, selected = false, compact = false, teamColo
           </div>
         )}
         <div style={{ flex: 1, minWidth: 0 }}>
-          <div style={{ fontSize: '13px', fontWeight: 600, color: textColor, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-            {player.full_name}
+          <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+            <span style={{ fontSize: '13px', fontWeight: 600, color: textColor, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+              {player.full_name}
+            </span>
+            {player.trend && <PlayerTrendBadge trend={player.trend} compact />}
           </div>
           <div style={{ fontSize: '11px', color: subTextColor }}>{player.position}</div>
         </div>
@@ -174,6 +183,17 @@ export function PlayerCard({ player, selected = false, compact = false, teamColo
         {player.full_name}
       </div>
 
+      {/* Trend badge */}
+      {player.trend && (
+        <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 4 }}>
+          <PlayerTrendBadge
+            trend={player.trend}
+            performanceVsProjection={player.performance_vs_projection}
+            marketSentiment={player.market_sentiment}
+          />
+        </div>
+      )}
+
       {/* Stat line */}
       {player.stat_line && (
         <div style={{
@@ -249,6 +269,36 @@ export function PlayerCard({ player, selected = false, compact = false, teamColo
             <polyline points="20 6 9 17 4 12" />
           </svg>
         </motion.div>
+      )}
+
+      {/* View Fit button - shows on hover */}
+      {onViewFit && (
+        <motion.button
+          initial={{ opacity: 0 }}
+          whileHover={{ opacity: 1 }}
+          onClick={(e) => {
+            e.stopPropagation()
+            onViewFit(player)
+          }}
+          style={{
+            position: 'absolute',
+            bottom: 6,
+            left: 6,
+            padding: '4px 8px',
+            borderRadius: 6,
+            border: 'none',
+            backgroundColor: isDark ? '#374151' : '#e5e7eb',
+            color: teamColor,
+            fontSize: '9px',
+            fontWeight: 700,
+            cursor: 'pointer',
+            opacity: 0,
+            transition: 'opacity 0.2s',
+          }}
+          className="view-fit-btn"
+        >
+          View Fit
+        </motion.button>
       )}
     </motion.div>
   )

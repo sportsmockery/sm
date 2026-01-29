@@ -39,11 +39,12 @@ interface OpponentRosterPanelProps {
   loading: boolean
   setLoading: (v: boolean) => void
   onAddCustomPlayer: (name: string, position: string) => void
+  onViewFit?: (player: PlayerData) => void
 }
 
 export function OpponentRosterPanel({
   teamKey, sport, teamColor, selectedIds, onToggle,
-  roster, setRoster, loading, setLoading, onAddCustomPlayer,
+  roster, setRoster, loading, setLoading, onAddCustomPlayer, onViewFit,
 }: OpponentRosterPanelProps) {
   const { theme } = useTheme()
   const isDark = theme === 'dark'
@@ -218,6 +219,7 @@ export function OpponentRosterPanel({
                   selected={selectedIds.has(player.player_id)}
                   teamColor={teamColor}
                   onClick={() => onToggle(player.player_id)}
+                  onViewFit={onViewFit}
                 />
               </motion.div>
             ))}

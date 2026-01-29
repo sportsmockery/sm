@@ -21,6 +21,8 @@ const TEAM_CONFIG: Record<string, {
   whitesox: { table: 'whitesox_players', activeCol: 'is_active', sport: 'mlb', nameCol: 'name', statsTable: 'whitesox_player_game_stats', statsJoinCol: 'player_id', seasonValue: 2025 },
 }
 
+type TrendDirection = 'hot' | 'rising' | 'stable' | 'declining' | 'cold'
+
 interface PlayerData {
   player_id: string
   full_name: string
@@ -43,6 +45,10 @@ interface PlayerData {
   contract_signed_year?: number | null
   is_rookie_deal?: boolean | null
   status?: string
+  // V2 Enhanced fields
+  trend?: TrendDirection | null
+  performance_vs_projection?: number | null
+  market_sentiment?: 'buy' | 'hold' | 'sell' | null
 }
 
 const SPORT_ROSTER_TABLE: Record<string, string> = {
@@ -92,6 +98,10 @@ async function fetchOpponentRoster(teamKey: string, sport: string, search?: stri
       contract_expires_year: p.contract_expires_year,
       contract_signed_year: p.contract_signed_year,
       is_rookie_deal: p.is_rookie_deal,
+      // V2 fields - populated from Data Lab when available
+      trend: (p as any).trend || null,
+      performance_vs_projection: (p as any).performance_vs_projection || null,
+      market_sentiment: (p as any).market_sentiment || null,
     }
   })
 
@@ -179,6 +189,10 @@ export async function GET(request: NextRequest) {
         contract_years: p.contract_years_remaining,
         contract_signed_year: p.contract_signed_year,
         is_rookie_deal: p.is_rookie_deal,
+        // V2 fields - populated from Data Lab when available
+        trend: (p as any).trend || null,
+        performance_vs_projection: (p as any).performance_vs_projection || null,
+        market_sentiment: (p as any).market_sentiment || null,
       }
     })
 

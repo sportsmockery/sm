@@ -1,5 +1,5 @@
 'use client'
-import { useEffect, useState, useCallback } from 'react'
+import { useEffect, useState, useCallback, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 import { useTheme } from '@/contexts/ThemeContext'
 import { useAuth } from '@/contexts/AuthContext'
@@ -17,7 +17,19 @@ import { LeaderboardPanel } from '@/components/gm/LeaderboardPanel'
 import { WarRoomHeader } from '@/components/gm/WarRoomHeader'
 import { StatComparison } from '@/components/gm/StatComparison'
 import { SessionManager } from '@/components/gm/SessionManager'
+import { TeamFitOverlay } from '@/components/gm/TeamFitOverlay'
+import { PreferencesModal, GMPreferences } from '@/components/gm/PreferencesModal'
 import type { PlayerData } from '@/components/gm/PlayerCard'
+import type { ValidationState } from '@/components/gm/ValidationIndicator'
+
+const DEFAULT_PREFERENCES: GMPreferences = {
+  risk_tolerance: 'moderate',
+  favorite_team: null,
+  team_phase: 'auto',
+  preferred_trade_style: 'balanced',
+  cap_flexibility_priority: 'medium',
+  age_preference: 'any',
+}
 
 interface DraftPick { year: number; round: number; condition?: string }
 interface OpponentTeam { team_key: string; team_name: string; abbreviation: string; logo_url: string; primary_color: string; sport: string }
@@ -62,6 +74,10 @@ export default function GMPage() {
   const [showGradeReveal, setShowGradeReveal] = useState(false)
   const [gradeError, setGradeError] = useState<string | null>(null)
 
+  // Validation
+  const [validation, setValidation] = useState<ValidationState>({ status: 'idle', issues: [] })
+  const validationTimeoutRef = useRef<NodeJS.Timeout | null>(null)
+
   // History & leaderboard
   const [trades, setTrades] = useState<any[]>([])
   const [tradesPage, setTradesPage] = useState(1)
@@ -75,6 +91,28 @@ export default function GMPage() {
 
   // Mobile
   const [activeTab, setActiveTab] = useState<'build' | 'history' | 'leaderboard'>('build')
+
+  // Team Fit Overlay
+  const [fitPlayer, setFitPlayer] = useState<PlayerData | null>(null)
+  const [showFitOverlay, setShowFitOverlay] = useState(false)
+
+  const handleViewFit = useCallback((player: PlayerData) => {
+    setFitPlayer(player)
+    setShowFitOverlay(true)
+  }, [])
+
+  // Preferences
+  const [preferences, setPreferences] = useState<GMPreferences>(DEFAULT_PREFERENCES)
+  const [showPreferencesModal, setShowPreferencesModal] = useState(false)
+
+  // Load preferences on mount
+  useEffect(() => {
+    if (!user) return
+    fetch('/api/gm/preferences')
+      .then(r => r.ok ? r.json() : null)
+      .then(d => d?.preferences && setPreferences(d.preferences))
+      .catch(() => {})
+  }, [user])
 
   const isDark = theme === 'dark'
   const currentTeamConfig = TEAMS.find(t => t.key === selectedTeam)
@@ -232,6 +270,77 @@ export default function GMPage() {
   const selectedPlayers = roster.filter(p => selectedPlayerIds.has(p.player_id))
   const canGrade = selectedPlayerIds.size > 0 && opponentTeam !== null && receivedPlayers.length > 0
 
+  // Validate trade when it changes
+  const validateTrade = useCallback(async () => {
+    if (!selectedTeam || !opponentTeam) {
+      setValidation({ status: 'idle', issues: [] })
+      return
+    }
+    if (selectedPlayerIds.size === 0 && draftPicksSent.length === 0) {
+      setValidation({ status: 'idle', issues: [] })
+      return
+    }
+    if (receivedPlayers.length === 0 && draftPicksReceived.length === 0) {
+      setValidation({ status: 'idle', issues: [] })
+      return
+    }
+
+    setValidation(prev => ({ ...prev, status: 'validating' }))
+
+    try {
+      const res = await fetch('/api/gm/validate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          chicago_team: selectedTeam,
+          partner_team_key: opponentTeam.team_key,
+          players_sent: selectedPlayers.map(p => ({
+            name: p.full_name,
+            position: p.position,
+            espn_id: p.espn_id,
+            cap_hit: p.cap_hit,
+            age: p.age,
+          })),
+          players_received: receivedPlayers.map(p => {
+            if ('player_id' in p) {
+              return { name: p.full_name, position: p.position, espn_id: p.espn_id, cap_hit: p.cap_hit, age: p.age }
+            }
+            return { name: p.name, position: p.position }
+          }),
+          draft_picks_sent: draftPicksSent,
+          draft_picks_received: draftPicksReceived,
+        }),
+      })
+
+      if (res.ok) {
+        const data = await res.json()
+        setValidation({
+          status: data.status || 'valid',
+          issues: data.issues || [],
+        })
+      } else {
+        setValidation({ status: 'valid', issues: [] })
+      }
+    } catch {
+      setValidation({ status: 'valid', issues: [] })
+    }
+  }, [selectedTeam, opponentTeam, selectedPlayers, receivedPlayers, draftPicksSent, draftPicksReceived, selectedPlayerIds.size])
+
+  // Debounced validation trigger
+  useEffect(() => {
+    if (validationTimeoutRef.current) {
+      clearTimeout(validationTimeoutRef.current)
+    }
+    validationTimeoutRef.current = setTimeout(() => {
+      validateTrade()
+    }, 500)
+    return () => {
+      if (validationTimeoutRef.current) {
+        clearTimeout(validationTimeoutRef.current)
+      }
+    }
+  }, [validateTrade])
+
   async function gradeTrade() {
     if (!canGrade) return
     setGrading(true)
@@ -309,6 +418,7 @@ export default function GMPage() {
     setGradeResult(null)
     setGradeError(null)
     setShowGradeReveal(false)
+    setValidation({ status: 'idle', issues: [] })
   }
 
   async function clearAllTrades() {
@@ -345,6 +455,7 @@ export default function GMPage() {
           numApproved={activeSession?.num_approved}
           numDangerous={activeSession?.num_dangerous}
           numFailed={activeSession?.num_failed}
+          onOpenPreferences={() => setShowPreferencesModal(true)}
         />
 
         {/* Session manager */}
@@ -405,6 +516,7 @@ export default function GMPage() {
                   onToggle={togglePlayer}
                   sport={sport}
                   teamColor={teamColor}
+                  onViewFit={handleViewFit}
                 />
               </div>
             </div>
@@ -437,6 +549,7 @@ export default function GMPage() {
                   canGrade={canGrade}
                   grading={grading}
                   onGrade={gradeTrade}
+                  validation={validation}
                 />
               </div>
 
@@ -593,6 +706,7 @@ export default function GMPage() {
                     loading={opponentRosterLoading}
                     setLoading={setOpponentRosterLoading}
                     onAddCustomPlayer={addCustomReceivedPlayer}
+                    onViewFit={handleViewFit}
                   />
                 ) : (
                   <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', color: subText, textAlign: 'center', padding: 20 }}>
@@ -635,6 +749,7 @@ export default function GMPage() {
         show={showGradeReveal}
         onClose={() => setShowGradeReveal(false)}
         onNewTrade={resetTrade}
+        sport={sport}
         tradeDetails={{
           chicagoTeam: currentTeamConfig?.label || selectedTeam,
           chicagoLogo: currentTeamConfig?.logo,
@@ -647,6 +762,28 @@ export default function GMPage() {
           draftPicksSent,
           draftPicksReceived,
         }}
+      />
+
+      {/* Team Fit Overlay */}
+      <TeamFitOverlay
+        player={fitPlayer}
+        targetTeam={selectedTeam}
+        targetTeamName={currentTeamConfig?.label || selectedTeam}
+        targetTeamColor={teamColor}
+        sport={sport}
+        show={showFitOverlay}
+        onClose={() => {
+          setShowFitOverlay(false)
+          setFitPlayer(null)
+        }}
+      />
+
+      {/* Preferences Modal */}
+      <PreferencesModal
+        show={showPreferencesModal}
+        onClose={() => setShowPreferencesModal(false)}
+        preferences={preferences}
+        onSave={setPreferences}
       />
     </div>
   )

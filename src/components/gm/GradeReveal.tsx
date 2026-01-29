@@ -2,6 +2,8 @@
 import { useEffect, useState, useRef } from 'react'
 import { motion, AnimatePresence, useSpring, useTransform } from 'framer-motion'
 import { useTheme } from '@/contexts/ThemeContext'
+import { WhatIfPanel } from './WhatIfPanel'
+import { ExportModal } from './ExportModal'
 import type { PlayerData } from '@/components/gm/PlayerCard'
 
 interface GradeResult {
@@ -46,6 +48,7 @@ interface GradeRevealProps {
   onClose: () => void
   onNewTrade: () => void
   tradeDetails?: TradeDetails
+  sport?: string
 }
 
 function formatMoney(value: number | null | undefined): string {
@@ -73,12 +76,14 @@ function ConfettiParticle({ delay }: { delay: number }) {
   )
 }
 
-export function GradeReveal({ result, show, onClose, onNewTrade, tradeDetails }: GradeRevealProps) {
+export function GradeReveal({ result, show, onClose, onNewTrade, tradeDetails, sport = 'nfl' }: GradeRevealProps) {
   const { theme } = useTheme()
   const isDark = theme === 'dark'
   const [phase, setPhase] = useState(0) // 0=loading, 1=number, 2=status, 3=breakdown, 4=reasoning
   const [displayGrade, setDisplayGrade] = useState(0)
   const [showConfetti, setShowConfetti] = useState(false)
+  const [showWhatIf, setShowWhatIf] = useState(false)
+  const [showExport, setShowExport] = useState(false)
 
   useEffect(() => {
     if (!show || !result) {
@@ -479,7 +484,7 @@ export function GradeReveal({ result, show, onClose, onNewTrade, tradeDetails }:
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
-              style={{ marginTop: 20, display: 'flex', gap: 10, justifyContent: 'center' }}
+              style={{ marginTop: 20, display: 'flex', gap: 10, justifyContent: 'center', flexWrap: 'wrap' }}
             >
               <button
                 onClick={onNewTrade}
@@ -490,6 +495,29 @@ export function GradeReveal({ result, show, onClose, onNewTrade, tradeDetails }:
                 }}
               >
                 New Trade
+              </button>
+              <button
+                onClick={() => setShowWhatIf(!showWhatIf)}
+                style={{
+                  padding: '10px 24px', borderRadius: 10,
+                  border: `2px solid ${showWhatIf ? '#3b82f6' : (isDark ? '#374151' : '#d1d5db')}`,
+                  backgroundColor: showWhatIf ? '#3b82f615' : 'transparent',
+                  color: showWhatIf ? '#3b82f6' : textColor,
+                  fontWeight: 600, fontSize: '14px', cursor: 'pointer',
+                }}
+              >
+                {showWhatIf ? 'Hide What-If' : 'What If?'}
+              </button>
+              <button
+                onClick={() => setShowExport(true)}
+                style={{
+                  padding: '10px 24px', borderRadius: 10,
+                  border: `2px solid ${isDark ? '#374151' : '#d1d5db'}`,
+                  backgroundColor: 'transparent', color: textColor,
+                  fontWeight: 600, fontSize: '14px', cursor: 'pointer',
+                }}
+              >
+                Export
               </button>
               {result.shared_code && (
                 <button
@@ -519,7 +547,28 @@ export function GradeReveal({ result, show, onClose, onNewTrade, tradeDetails }:
               </button>
             </motion.div>
           )}
+
+          {/* What-If Panel */}
+          {phase >= 4 && tradeDetails && (
+            <WhatIfPanel
+              tradeId={result.shared_code || 'temp-trade'}
+              originalGrade={result.grade}
+              playersSent={tradeDetails.playersSent.map(p => ({ name: p.full_name, position: p.position }))}
+              playersReceived={tradeDetails.playersReceived.map(p => ('full_name' in p ? { name: p.full_name, position: p.position } : { name: p.name, position: p.position }))}
+              sport={sport}
+              show={showWhatIf}
+              onClose={() => setShowWhatIf(false)}
+            />
+          )}
         </motion.div>
+
+        {/* Export Modal */}
+        <ExportModal
+          show={showExport}
+          onClose={() => setShowExport(false)}
+          tradeIds={result.shared_code ? [result.shared_code] : []}
+          singleTrade
+        />
       </motion.div>
     </AnimatePresence>
   )

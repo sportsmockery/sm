@@ -2,6 +2,7 @@
 import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useTheme } from '@/contexts/ThemeContext'
+import { ExportModal } from './ExportModal'
 
 interface Trade {
   id: string
@@ -36,6 +37,7 @@ export function TradeHistory({ trades, page, totalPages, onPageChange }: TradeHi
   const { theme } = useTheme()
   const isDark = theme === 'dark'
   const [expandedId, setExpandedId] = useState<string | null>(null)
+  const [showExportModal, setShowExportModal] = useState(false)
 
   const textColor = isDark ? '#fff' : '#1a1a1a'
   const subText = isDark ? '#9ca3af' : '#6b7280'
@@ -46,7 +48,28 @@ export function TradeHistory({ trades, page, totalPages, onPageChange }: TradeHi
 
   return (
     <div>
-      <h2 style={{ fontSize: '18px', fontWeight: 700, color: textColor, marginBottom: 16 }}>Trade History</h2>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
+        <h2 style={{ fontSize: '18px', fontWeight: 700, color: textColor, margin: 0 }}>Trade History</h2>
+        <button
+          onClick={() => setShowExportModal(true)}
+          style={{
+            padding: '6px 14px',
+            borderRadius: 8,
+            border: `1px solid ${borderColor}`,
+            backgroundColor: 'transparent',
+            color: subText,
+            fontSize: '12px',
+            fontWeight: 600,
+            cursor: 'pointer',
+            display: 'flex',
+            alignItems: 'center',
+            gap: 6,
+          }}
+        >
+          <span>📤</span>
+          Export All
+        </button>
+      </div>
       <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
         <AnimatePresence>
           {trades.map(t => {
@@ -211,6 +234,13 @@ export function TradeHistory({ trades, page, totalPages, onPageChange }: TradeHi
           </button>
         </div>
       )}
+
+      {/* Export Modal */}
+      <ExportModal
+        show={showExportModal}
+        onClose={() => setShowExportModal(false)}
+        tradeIds={trades.map(t => t.id)}
+      />
     </div>
   )
 }

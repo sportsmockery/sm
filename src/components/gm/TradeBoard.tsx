@@ -1,6 +1,7 @@
 'use client'
 import { motion, AnimatePresence } from 'framer-motion'
 import { PlayerCard, PlayerData } from './PlayerCard'
+import { ValidationIndicator, ValidationState } from './ValidationIndicator'
 import { useTheme } from '@/contexts/ThemeContext'
 
 interface DraftPick {
@@ -33,6 +34,7 @@ interface TradeBoardProps {
   canGrade: boolean
   grading: boolean
   onGrade: () => void
+  validation?: ValidationState
 }
 
 export function TradeBoard({
@@ -43,6 +45,7 @@ export function TradeBoard({
   onRemoveSent, onRemoveReceived,
   onRemoveDraftSent, onRemoveDraftReceived,
   canGrade, grading, onGrade,
+  validation,
 }: TradeBoardProps) {
   const { theme } = useTheme()
   const isDark = theme === 'dark'
@@ -204,29 +207,40 @@ export function TradeBoard({
         </div>
       </div>
 
+      {/* Validation indicator */}
+      {validation && validation.status !== 'idle' && (
+        <ValidationIndicator validation={validation} />
+      )}
+
       {/* Grade button */}
-      <motion.button
-        whileHover={canGrade && !grading ? { scale: 1.02 } : {}}
-        whileTap={canGrade && !grading ? { scale: 0.98 } : {}}
-        animate={canGrade && !grading ? { scale: [1, 1.03, 1] } : {}}
-        transition={canGrade && !grading ? { repeat: Infinity, duration: 2 } : {}}
-        onClick={onGrade}
-        disabled={!canGrade || grading}
-        style={{
-          width: '100%',
-          padding: '14px 32px',
-          borderRadius: '12px',
-          border: 'none',
-          backgroundColor: canGrade && !grading ? '#bc0000' : (isDark ? '#374151' : '#d1d5db'),
-          color: canGrade && !grading ? '#fff' : subText,
-          fontWeight: 800,
-          fontSize: '16px',
-          cursor: canGrade && !grading ? 'pointer' : 'not-allowed',
-          letterSpacing: '0.5px',
-        }}
-      >
-        {grading ? 'ANALYZING TRADE...' : 'GRADE TRADE'}
-      </motion.button>
+      {(() => {
+        const isBlocked = validation?.status === 'invalid'
+        const canClick = canGrade && !grading && !isBlocked
+        return (
+          <motion.button
+            whileHover={canClick ? { scale: 1.02 } : {}}
+            whileTap={canClick ? { scale: 0.98 } : {}}
+            animate={canClick ? { scale: [1, 1.03, 1] } : {}}
+            transition={canClick ? { repeat: Infinity, duration: 2 } : {}}
+            onClick={onGrade}
+            disabled={!canClick}
+            style={{
+              width: '100%',
+              padding: '14px 32px',
+              borderRadius: '12px',
+              border: 'none',
+              backgroundColor: canClick ? '#bc0000' : (isDark ? '#374151' : '#d1d5db'),
+              color: canClick ? '#fff' : subText,
+              fontWeight: 800,
+              fontSize: '16px',
+              cursor: canClick ? 'pointer' : 'not-allowed',
+              letterSpacing: '0.5px',
+            }}
+          >
+            {grading ? 'ANALYZING TRADE...' : isBlocked ? 'FIX ISSUES TO GRADE' : 'GRADE TRADE'}
+          </motion.button>
+        )
+      })()}
     </div>
   )
 }

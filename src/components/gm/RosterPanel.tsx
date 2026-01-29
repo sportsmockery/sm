@@ -36,9 +36,10 @@ interface RosterPanelProps {
   onToggle: (playerId: string) => void
   sport: string
   teamColor: string
+  onViewFit?: (player: PlayerData) => void
 }
 
-export function RosterPanel({ players, loading, selectedIds, onToggle, sport, teamColor }: RosterPanelProps) {
+export function RosterPanel({ players, loading, selectedIds, onToggle, sport, teamColor, onViewFit }: RosterPanelProps) {
   const { theme } = useTheme()
   const isDark = theme === 'dark'
   const [search, setSearch] = useState('')
@@ -153,6 +154,7 @@ export function RosterPanel({ players, loading, selectedIds, onToggle, sport, te
                   selected={selectedIds.has(player.player_id)}
                   teamColor={teamColor}
                   onClick={() => onToggle(player.player_id)}
+                  onViewFit={onViewFit}
                 />
               </motion.div>
             ))}
