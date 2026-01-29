@@ -25,30 +25,29 @@ async function getHomepageData() {
     process.env.SUPABASE_SERVICE_ROLE_KEY!
   )
 
-  // 1) Editor picks (pinned_slot 1–6)
-  // Use category_id join instead of team_slug (which doesn't exist)
-  const { data: editorPicksRaw = [], error: editorPicksError } = await supabase
+  // 1) Editor picks - use top posts by importance_score as a proxy
+  // (sm_posts doesn't have editor_pick or pinned_slot columns)
+  const { data: editorPicksRaw = [] } = await supabase
     .from('sm_posts')
-    .select('id, title, slug, featured_image, pinned_slot, category:sm_categories!category_id(slug)')
-    .eq('editor_pick', true)
+    .select('id, title, slug, featured_image, category:sm_categories!category_id(slug)')
     .eq('status', 'published')
-    .gte('pinned_slot', 1)
-    .lte('pinned_slot', 6)
-    .order('pinned_slot', { ascending: true })
+    .order('importance_score', { ascending: false })
+    .limit(6)
 
   // Map to include team_slug derived from category
-  const editorPicks = (editorPicksRaw || []).map((post: any) => ({
+  const editorPicks = (editorPicksRaw || []).map((post: any, index: number) => ({
     ...post,
-    team_slug: getTeamSlug(post.category)
+    team_slug: getTeamSlug(post.category),
+    pinned_slot: index + 1 // Simulate pinned_slot for UI
   }))
 
   // 2) Trending posts (based strictly on views in last 7 days)
   const sevenDaysAgo = new Date()
   sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7)
 
-  const { data: trendingPostsRaw = [], error: trendingError } = await supabase
+  const { data: trendingPostsRaw = [] } = await supabase
     .from('sm_posts')
-    .select('id, title, slug, views, published_at, importance_score, content_type, primary_topic, author_id, is_evergreen, category:sm_categories!category_id(slug)')
+    .select('id, title, slug, views, published_at, importance_score, content_type, primary_topic, author_id, category:sm_categories!category_id(slug)')
     .eq('status', 'published')
     .gte('published_at', sevenDaysAgo.toISOString())
     .order('views', { ascending: false })
@@ -56,43 +55,31 @@ async function getHomepageData() {
 
   const trendingPosts = (trendingPostsRaw || []).map((post: any) => ({
     ...post,
-    team_slug: getTeamSlug(post.category)
+    team_slug: getTeamSlug(post.category),
+    is_evergreen: false // Default since column doesn't exist
   }))
 
   const trendingIds = new Set(trendingPosts.map(p => p.id))
 
   // 3) Main feed: ALL recent published posts, recency only
-  const { data: allPostsRaw = [], error: postsError } = await supabase
+  const { data: allPostsRaw = [] } = await supabase
     .from('sm_posts')
     .select(`
       id, title, slug, excerpt, featured_image,
       published_at, importance_score, content_type, primary_topic,
-      author_id, is_evergreen, views,
+      author_id, views,
       category:sm_categories!category_id(slug)
     `)
     .eq('status', 'published')
     .order('published_at', { ascending: false })
     .limit(200)
 
-  // Log any query errors
-  if (editorPicksError || trendingError || postsError) {
-    console.log('[Homepage] Query errors:', {
-      editorPicks: editorPicksError?.message,
-      trending: trendingError?.message,
-      posts: postsError?.message
-    })
-  }
-  console.log('[Homepage] Query results:', {
-    editorPicks: editorPicksRaw?.length || 0,
-    trending: trendingPostsRaw?.length || 0,
-    posts: allPostsRaw?.length || 0
-  })
-
   // 4) Add team_slug and flags for UI (no scoring)
   const postsWithFlags = (allPostsRaw || []).map((post: any) => ({
     ...post,
     team_slug: getTeamSlug(post.category),
     is_trending: trendingIds.has(post.id),
+    is_evergreen: false, // Default since column doesn't exist
     author_name: null
   }))
 

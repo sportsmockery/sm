@@ -45,20 +45,19 @@ async function getFeedData() {
   // Use supabaseAdmin to bypass RLS for public post queries
   const supabase = supabaseAdmin
 
-  // 2) Editor picks (same as homepage)
-  // Use category_id join instead of team_slug (which doesn't exist)
+  // 2) Editor picks - use top posts by importance_score as a proxy
+  // (sm_posts doesn't have editor_pick or pinned_slot columns)
   const { data: editorPicksRaw = [] } = await supabase
     .from('sm_posts')
-    .select('id, title, slug, featured_image, pinned_slot, category:sm_categories!category_id(slug)')
-    .eq('editor_pick', true)
+    .select('id, title, slug, featured_image, category:sm_categories!category_id(slug)')
     .eq('status', 'published')
-    .gte('pinned_slot', 1)
-    .lte('pinned_slot', 6)
-    .order('pinned_slot', { ascending: true })
+    .order('importance_score', { ascending: false })
+    .limit(6)
 
-  const editorPicks = (editorPicksRaw || []).map((post: any) => ({
+  const editorPicks = (editorPicksRaw || []).map((post: any, index: number) => ({
     ...post,
-    team_slug: getTeamSlug(post.category)
+    team_slug: getTeamSlug(post.category),
+    pinned_slot: index + 1
   }))
 
   // 3) Trending posts (same view-based logic as homepage)
@@ -67,7 +66,7 @@ async function getFeedData() {
 
   const { data: trendingPostsRaw = [] } = await supabase
     .from('sm_posts')
-    .select('id, title, slug, views, published_at, importance_score, content_type, primary_topic, author_id, is_evergreen, category:sm_categories!category_id(slug)')
+    .select('id, title, slug, views, published_at, importance_score, content_type, primary_topic, author_id, category:sm_categories!category_id(slug)')
     .eq('status', 'published')
     .gte('published_at', sevenDaysAgo.toISOString())
     .order('views', { ascending: false })
@@ -75,7 +74,8 @@ async function getFeedData() {
 
   const trendingPosts = (trendingPostsRaw || []).map((post: any) => ({
     ...post,
-    team_slug: getTeamSlug(post.category)
+    team_slug: getTeamSlug(post.category),
+    is_evergreen: false
   }))
 
   const trendingIds = new Set(trendingPosts.map(p => p.id))
@@ -86,7 +86,7 @@ async function getFeedData() {
     .select(`
       id, title, slug, excerpt, featured_image,
       published_at, importance_score, content_type, primary_topic,
-      author_id, is_evergreen, views,
+      author_id, views,
       category:sm_categories!category_id(slug)
     `)
     .eq('status', 'published')
@@ -97,6 +97,7 @@ async function getFeedData() {
     ...post,
     team_slug: getTeamSlug(post.category),
     is_trending: trendingIds.has(post.id),
+    is_evergreen: false,
     author_name: null
   }))
 
