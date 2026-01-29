@@ -10,13 +10,6 @@ import '@/styles/homepage.css'
 export const revalidate = 60 // Revalidate every 60 seconds
 
 async function getHomepageData() {
-  // Debug: log environment state
-  console.log('Homepage getHomepageData starting...', {
-    hasSupabaseUrl: !!process.env.NEXT_PUBLIC_SUPABASE_URL,
-    hasServiceKey: !!process.env.SUPABASE_SERVICE_ROLE_KEY,
-    supabaseAdminExists: !!supabaseAdmin
-  })
-
   const cookieStore = await cookies()
 
   // Auth client for user detection (uses anon key with cookies)
@@ -176,15 +169,16 @@ export default async function HomePage() {
         {!isLoggedIn && <TeamPickerPrompt />}
       </>
     )
-  } catch (error) {
-    console.error('Homepage data fetch error:', error)
-    console.error('Error details:', {
-      name: error instanceof Error ? error.name : 'unknown',
-      message: error instanceof Error ? error.message : String(error),
-      stack: error instanceof Error ? error.stack?.split('\n').slice(0, 5).join('\n') : undefined
-    })
+  } catch (error: any) {
+    // Re-throw Next.js dynamic errors - these should not be caught
+    // They signal to Next.js that the page should be rendered dynamically
+    if (error?.digest === 'DYNAMIC_SERVER_USAGE') {
+      throw error
+    }
 
-    // Return fallback content on any error
+    console.error('Homepage data fetch error:', error)
+
+    // Return fallback content only for actual data fetch errors
     return (
       <HomepageFeed
         initialPosts={FALLBACK_POSTS}
