@@ -794,11 +794,11 @@ export default function StudioPostEditor({
                   <svg className="h-5 w-5 text-purple-500" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
                   {aiLoading === 'grammar' ? 'Checking...' : 'Grammar Check'}
                 </button>
-                <button type="button" onClick={() => setShowTeamPicker(true)} disabled={aiLoading === 'headlines' || !formData.title} className="w-full flex items-center gap-3 rounded-lg px-3 py-2 text-sm text-[var(--text-secondary)] hover:bg-[var(--bg-hover)] hover:text-[var(--text-primary)] disabled:opacity-50">
+                <button type="button" onClick={() => runAI('headlines')} disabled={aiLoading === 'headlines' || !formData.title || !formData.content} className="w-full flex items-center gap-3 rounded-lg px-3 py-2 text-sm text-[var(--text-secondary)] hover:bg-[var(--bg-hover)] hover:text-[var(--text-primary)] disabled:opacity-50">
                   <svg className="h-5 w-5 text-purple-500" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25H12" /></svg>
                   {aiLoading === 'headlines' ? 'Generating...' : 'Headlines'}
                 </button>
-                <button type="button" onClick={openIdeasModal} className="w-full flex items-center gap-3 rounded-lg px-3 py-2 text-sm text-[var(--text-secondary)] hover:bg-[var(--bg-hover)] hover:text-[var(--text-primary)]">
+                <button type="button" onClick={() => setShowTeamPicker(true)} className="w-full flex items-center gap-3 rounded-lg px-3 py-2 text-sm text-[var(--text-secondary)] hover:bg-[var(--bg-hover)] hover:text-[var(--text-primary)]">
                   <span className="text-lg">💡</span>
                   Generate Ideas
                 </button>
@@ -1400,7 +1400,7 @@ export default function StudioPostEditor({
               {loadingIdeas ? (<div className="py-8 text-center"><div className="mx-auto h-6 w-6 animate-spin rounded-full border-2 border-purple-500 border-t-transparent" /><p className="mt-3 text-gray-500 dark:text-gray-400">Generating ideas...</p></div>) : ideas.length > 0 ? (ideas.map((idea, i) => (<button key={i} type="button" onClick={() => setSelectedIdea(idea)} className={`w-full rounded-lg border-2 p-4 text-left transition-all ${selectedIdea === idea ? 'border-purple-500 bg-purple-50 dark:bg-purple-500/10' : 'border-gray-200 hover:border-purple-300 dark:border-gray-700'}`}><p className="font-medium text-gray-900 dark:text-white">{idea.headline}</p><p className="mt-1 text-sm text-gray-500 dark:text-gray-400">{idea.angle}</p><span className="mt-2 inline-block rounded bg-gray-100 px-2 py-0.5 text-xs text-gray-600 dark:bg-gray-800 dark:text-gray-400">{idea.type}</span></button>))) : (<p className="py-8 text-center text-gray-500">Click "Generate More" to get article ideas</p>)}
             </div>
             <div className="flex items-center gap-3 border-t border-gray-200 bg-gray-50 px-6 py-4 dark:border-gray-700 dark:bg-gray-800/50">
-              <button type="button" onClick={generateIdeas} disabled={loadingIdeas} className="text-sm font-medium text-purple-500 hover:text-purple-400 disabled:opacity-50">↻ Generate More</button>
+              <button type="button" onClick={() => generateIdeas()} disabled={loadingIdeas} className="text-sm font-medium text-purple-500 hover:text-purple-400 disabled:opacity-50">↻ Generate More</button>
               <div className="flex-1" />
               <button type="button" onClick={() => setShowIdeasModal(false)} className="px-4 py-2 text-sm text-gray-600 hover:text-gray-900 dark:text-gray-300 dark:hover:text-white">Cancel</button>
               <button type="button" onClick={useSelectedIdea} disabled={!selectedIdea} className="rounded-lg bg-purple-600 px-4 py-2 text-sm font-medium text-white hover:bg-purple-700 disabled:cursor-not-allowed disabled:opacity-50">Use Selected</button>
@@ -1409,12 +1409,12 @@ export default function StudioPostEditor({
         </div>
       )}
 
-      {/* Team Picker Modal for Headlines */}
+      {/* Team Picker Modal for Ideas */}
       {showTeamPicker && (
         <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/60 backdrop-blur-sm">
           <div className="mx-4 w-full max-w-sm overflow-hidden rounded-xl bg-white shadow-2xl dark:bg-[#1c1c1f]">
             <div className="flex items-center justify-between border-b border-gray-200 px-6 py-4 dark:border-gray-700">
-              <h3 className="text-lg font-bold text-gray-900 dark:text-white">Which team?</h3>
+              <h3 className="text-lg font-bold text-gray-900 dark:text-white">Generate Ideas</h3>
               <button type="button" onClick={() => setShowTeamPicker(false)} className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200">
                 <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
@@ -1422,7 +1422,7 @@ export default function StudioPostEditor({
               </button>
             </div>
             <div className="p-4 space-y-2">
-              <p className="text-sm text-gray-500 dark:text-gray-400 mb-4">Select a team to generate headlines for:</p>
+              <p className="text-sm text-gray-500 dark:text-gray-400 mb-4">Select a team to generate article ideas for:</p>
               {[
                 { value: '', label: 'Auto-detect from category', icon: '🎯' },
                 { value: 'Bears', label: 'Chicago Bears', icon: '🐻' },
@@ -1435,9 +1435,8 @@ export default function StudioPostEditor({
                   key={team.value || 'auto'}
                   type="button"
                   onClick={() => {
-                    setHeadlineTeam(team.value)
                     setShowTeamPicker(false)
-                    runAI('headlines')
+                    generateIdeas(team.value || undefined)
                   }}
                   className="w-full flex items-center gap-3 rounded-lg border-2 border-gray-200 px-4 py-3 text-left transition-all hover:border-purple-400 hover:bg-purple-50 dark:border-gray-700 dark:hover:border-purple-500 dark:hover:bg-purple-500/10"
                 >

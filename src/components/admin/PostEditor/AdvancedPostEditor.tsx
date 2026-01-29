@@ -1705,7 +1705,7 @@ export default function AdvancedPostEditor({
               )}
             </div>
             <div className="flex items-center gap-3 border-t border-gray-200 bg-gray-50 px-6 py-4 dark:border-gray-700 dark:bg-gray-800/50">
-              <button type="button" onClick={generateIdeas} disabled={loadingIdeas} className="text-sm font-medium text-purple-500 hover:text-purple-400 disabled:opacity-50">
+              <button type="button" onClick={() => generateIdeas()} disabled={loadingIdeas} className="text-sm font-medium text-purple-500 hover:text-purple-400 disabled:opacity-50">
                 ↻ Generate More
               </button>
               <div className="flex-1" />
