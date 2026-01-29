@@ -11,7 +11,6 @@ function getAnthropic() {
   return new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY! })
 }
 
-// AI system prompt for simulating draft picks
 const DRAFT_AI_SYSTEM = `You are an AI simulating NFL/NBA/NHL/MLB draft picks for teams. Given the current draft state and available prospects, select the most realistic pick for the team on the clock.
 
 Consider:
@@ -42,12 +41,10 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'mock_id is required' }, { status: 400 })
     }
 
-    // Get the mock draft
-    const { data: mockDraft, error: mockError } = await datalabAdmin
-      .from('gm_mock_drafts')
-      .select('*')
-      .eq('id', mock_id)
-      .single()
+    // Get the mock draft using RPC
+    const { data: mockDraft, error: mockError } = await datalabAdmin.rpc('get_mock_draft', {
+      p_mock_id: mock_id,
+    })
 
     if (mockError || !mockDraft) {
       return NextResponse.json({ error: 'Mock draft not found' }, { status: 404 })
@@ -58,19 +55,10 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 403 })
     }
 
-    // Get all picks
-    const { data: allPicks } = await datalabAdmin
-      .from('gm_mock_draft_picks')
-      .select('*')
-      .eq('mock_draft_id', mock_id)
-      .order('pick_number')
-
-    if (!allPicks) {
-      return NextResponse.json({ error: 'No picks found' }, { status: 404 })
-    }
-
-    // Find current pick and next user pick
+    const allPicks = mockDraft.picks || []
     let currentPick = mockDraft.current_pick
+
+    // Find next user pick
     const userPickNumbers = allPicks.filter((p: any) => p.is_user_pick).map((p: any) => p.pick_number)
     const nextUserPick = userPickNumbers.find((pn: number) => pn >= currentPick) || mockDraft.total_picks + 1
 
@@ -79,7 +67,7 @@ export async function POST(request: NextRequest) {
       .filter((p: any) => p.prospect_id)
       .map((p: any) => p.prospect_id)
 
-    let prospectsQuery = datalabAdmin
+    const { data: availableProspects } = await datalabAdmin
       .from('gm_draft_prospects')
       .select('*')
       .eq('sport', mockDraft.sport)
@@ -87,18 +75,16 @@ export async function POST(request: NextRequest) {
       .order('rank', { ascending: true })
       .limit(100)
 
-    if (pickedProspectIds.length > 0) {
-      prospectsQuery = prospectsQuery.not('prospect_id', 'in', `(${pickedProspectIds.join(',')})`)
-    }
+    const filteredProspects = (availableProspects || []).filter(
+      (p: any) => !pickedProspectIds.includes(p.prospect_id)
+    )
 
-    const { data: availableProspects } = await prospectsQuery
-
-    if (!availableProspects || availableProspects.length === 0) {
+    if (filteredProspects.length === 0) {
       return NextResponse.json({ error: 'No prospects available' }, { status: 400 })
     }
 
     // Simulate picks until we reach the user's pick or end of draft
-    const maxIterations = Math.min(nextUserPick - currentPick, 50) // Safety limit
+    const maxIterations = Math.min(nextUserPick - currentPick, 50)
     let iterations = 0
 
     while (currentPick < nextUserPick && currentPick <= mockDraft.total_picks && iterations < maxIterations) {
@@ -108,14 +94,13 @@ export async function POST(request: NextRequest) {
         break
       }
 
-      // Get top available prospects for AI consideration
-      const topProspects = availableProspects
+      // Get top available prospects
+      const topProspects = filteredProspects
         .filter((p: any) => !pickedProspectIds.includes(p.prospect_id))
         .slice(0, 10)
 
       if (topProspects.length === 0) break
 
-      // Use AI to select a pick (or just pick BPA for speed)
       let selectedProspect = topProspects[0] // Default to BPA
 
       // For first round, use AI for more realistic simulation
@@ -127,9 +112,9 @@ Pick #${currentPick} (Round ${currentPickData.round})
 Team: ${currentPickData.team_name}
 
 Available prospects (top 10):
-${topProspects.map((p: any, i: number) => `${i + 1}. ${p.name} (${p.position}) - ${p.school} - Grade: ${p.grade || 'N/A'} - Rank: ${p.rank}`).join('\n')}
+${topProspects.map((p: any, i: number) => `${i + 1}. ID: ${p.prospect_id} - ${p.name} (${p.position}) - ${p.school} - Grade: ${p.grade || 'N/A'} - Rank: ${p.rank}`).join('\n')}
 
-Select the most realistic pick for ${currentPickData.team_name}.`
+Select the most realistic pick for ${currentPickData.team_name}. Return the prospect_id.`
 
           const response = await getAnthropic().messages.create({
             model: MODEL_NAME,
@@ -144,8 +129,7 @@ Select the most realistic pick for ${currentPickData.team_name}.`
           try {
             const parsed = JSON.parse(rawText)
             const aiSelectedProspect = topProspects.find((p: any) =>
-              p.prospect_id === parsed.prospect_id ||
-              p.name.toLowerCase().includes(parsed.prospect_id?.toLowerCase())
+              p.prospect_id === parsed.prospect_id
             )
             if (aiSelectedProspect) {
               selectedProspect = aiSelectedProspect
@@ -155,49 +139,39 @@ Select the most realistic pick for ${currentPickData.team_name}.`
           }
         } catch (e) {
           console.error('AI pick error:', e)
-          // Continue with BPA
         }
       }
 
-      // Update the pick
-      await datalabAdmin
-        .from('gm_mock_draft_picks')
-        .update({
-          prospect_id: selectedProspect.prospect_id,
-          prospect_name: selectedProspect.name,
-          prospect_position: selectedProspect.position,
-        })
-        .eq('mock_draft_id', mock_id)
-        .eq('pick_number', currentPick)
+      // Update the pick using RPC
+      await datalabAdmin.rpc('update_mock_draft_pick', {
+        p_mock_id: mock_id,
+        p_pick_number: currentPick,
+        p_prospect_id: selectedProspect.prospect_id,
+        p_prospect_name: selectedProspect.name,
+        p_position: selectedProspect.position,
+      })
 
       // Track picked prospect
       pickedProspectIds.push(selectedProspect.prospect_id)
+
+      // Advance pick
+      await datalabAdmin.rpc('advance_mock_draft_pick', {
+        p_mock_id: mock_id,
+      })
 
       currentPick++
       iterations++
     }
 
-    // Update mock draft current pick
-    const isComplete = currentPick > mockDraft.total_picks
+    // Get updated draft state
+    const { data: updatedDraft } = await datalabAdmin.rpc('get_mock_draft', {
+      p_mock_id: mock_id,
+    })
 
-    await datalabAdmin
-      .from('gm_mock_drafts')
-      .update({
-        current_pick: isComplete ? mockDraft.total_picks : currentPick,
-        status: isComplete ? 'completed' : 'in_progress',
-        updated_at: new Date().toISOString(),
-      })
-      .eq('id', mock_id)
-
-    // Get updated picks
-    const { data: updatedPicks } = await datalabAdmin
-      .from('gm_mock_draft_picks')
-      .select('*')
-      .eq('mock_draft_id', mock_id)
-      .order('pick_number')
+    const isComplete = updatedDraft?.current_pick > updatedDraft?.total_picks || updatedDraft?.status === 'completed'
 
     // Build response
-    const picksWithDetails = (updatedPicks || []).map((p: any) => ({
+    const picks = (updatedDraft?.picks || []).map((p: any) => ({
       pick_number: p.pick_number,
       round: p.round,
       team_key: p.team_key,
@@ -205,24 +179,24 @@ Select the most realistic pick for ${currentPickData.team_name}.`
       team_logo: p.team_logo,
       team_color: p.team_color,
       is_user_pick: p.is_user_pick,
-      is_current: p.pick_number === (isComplete ? mockDraft.total_picks : currentPick),
+      is_current: p.pick_number === updatedDraft?.current_pick,
       selected_prospect: p.prospect_id ? {
         id: p.prospect_id,
         name: p.prospect_name,
-        position: p.prospect_position,
+        position: p.position,
       } : null,
     }))
 
     return NextResponse.json({
       draft: {
         id: mock_id,
-        chicago_team: mockDraft.chicago_team,
-        sport: mockDraft.sport,
-        draft_year: mockDraft.draft_year,
+        chicago_team: updatedDraft?.chicago_team,
+        sport: updatedDraft?.sport,
+        draft_year: updatedDraft?.draft_year,
         status: isComplete ? 'completed' : 'in_progress',
-        current_pick: isComplete ? mockDraft.total_picks : currentPick,
-        total_picks: mockDraft.total_picks,
-        picks: picksWithDetails,
+        current_pick: updatedDraft?.current_pick,
+        total_picks: updatedDraft?.total_picks,
+        picks,
         user_picks: userPickNumbers,
       },
     })

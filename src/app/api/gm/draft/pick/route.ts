@@ -12,18 +12,16 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json()
-    const { mock_id, prospect_id, pick_number } = body
+    const { mock_id, prospect_id, pick_number, prospect_name, position, pick_grade } = body
 
     if (!mock_id || !prospect_id) {
       return NextResponse.json({ error: 'mock_id and prospect_id are required' }, { status: 400 })
     }
 
-    // Get the mock draft
-    const { data: mockDraft, error: mockError } = await datalabAdmin
-      .from('gm_mock_drafts')
-      .select('*')
-      .eq('id', mock_id)
-      .single()
+    // Get the mock draft to verify ownership and get current state
+    const { data: mockDraft, error: mockError } = await datalabAdmin.rpc('get_mock_draft', {
+      p_mock_id: mock_id,
+    })
 
     if (mockError || !mockDraft) {
       return NextResponse.json({ error: 'Mock draft not found' }, { status: 404 })
@@ -34,89 +32,59 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 403 })
     }
 
-    // Get the prospect details
-    const { data: prospect, error: prospectError } = await datalabAdmin
-      .from('gm_draft_prospects')
-      .select('*')
-      .eq('prospect_id', prospect_id)
-      .single()
-
-    if (prospectError || !prospect) {
-      // Try by id if prospect_id doesn't work
-      const { data: prospectById } = await datalabAdmin
-        .from('gm_draft_prospects')
-        .select('*')
-        .eq('id', prospect_id)
-        .single()
-
-      if (!prospectById) {
-        return NextResponse.json({ error: 'Prospect not found' }, { status: 404 })
-      }
-      Object.assign(prospect || {}, prospectById)
-    }
-
     const actualPickNumber = pick_number || mockDraft.current_pick
 
-    // Update the pick with selected prospect
-    const { error: updateError } = await datalabAdmin
-      .from('gm_mock_draft_picks')
-      .update({
-        prospect_id,
-        prospect_name: prospect?.name,
-        prospect_position: prospect?.position,
-      })
-      .eq('mock_draft_id', mock_id)
-      .eq('pick_number', actualPickNumber)
+    // Get prospect details if not provided
+    let prospectName = prospect_name
+    let prospectPosition = position
 
-    if (updateError) {
-      console.error('Pick update error:', updateError)
-      throw new Error('Failed to update pick')
-    }
-
-    // Find the next pick number
-    const nextPick = actualPickNumber + 1
-
-    // Check if draft is complete
-    const isComplete = nextPick > mockDraft.total_picks
-
-    // Update mock draft status and current pick
-    await datalabAdmin
-      .from('gm_mock_drafts')
-      .update({
-        current_pick: isComplete ? mockDraft.total_picks : nextPick,
-        status: isComplete ? 'completed' : 'in_progress',
-        updated_at: new Date().toISOString(),
-      })
-      .eq('id', mock_id)
-
-    // Get updated picks
-    const { data: picks } = await datalabAdmin
-      .from('gm_mock_draft_picks')
-      .select('*')
-      .eq('mock_draft_id', mock_id)
-      .order('pick_number')
-
-    // Get prospect details for picked players
-    const pickedProspectIds = (picks || [])
-      .filter((p: any) => p.prospect_id)
-      .map((p: any) => p.prospect_id)
-
-    let prospectsMap: Record<string, any> = {}
-    if (pickedProspectIds.length > 0) {
-      const { data: pickedProspects } = await datalabAdmin
+    if (!prospectName || !prospectPosition) {
+      const { data: prospect } = await datalabAdmin
         .from('gm_draft_prospects')
-        .select('*')
-        .in('prospect_id', pickedProspectIds)
+        .select('name, position')
+        .eq('prospect_id', prospect_id)
+        .single()
 
-      if (pickedProspects) {
-        for (const p of pickedProspects) {
-          prospectsMap[p.prospect_id] = p
-        }
+      if (prospect) {
+        prospectName = prospectName || prospect.name
+        prospectPosition = prospectPosition || prospect.position
       }
     }
 
+    // Update the pick using RPC
+    const { error: updateError } = await datalabAdmin.rpc('update_mock_draft_pick', {
+      p_mock_id: mock_id,
+      p_pick_number: actualPickNumber,
+      p_prospect_id: prospect_id,
+      p_prospect_name: prospectName || 'Unknown',
+      p_position: prospectPosition || 'Unknown',
+      p_pick_grade: pick_grade || null,
+    })
+
+    if (updateError) {
+      console.error('Update pick RPC error:', updateError)
+      throw new Error(`Failed to update pick: ${updateError.message}`)
+    }
+
+    // Advance to next pick
+    const { data: newPick, error: advanceError } = await datalabAdmin.rpc('advance_mock_draft_pick', {
+      p_mock_id: mock_id,
+    })
+
+    if (advanceError) {
+      console.error('Advance pick RPC error:', advanceError)
+      // Non-fatal - pick was saved, just couldn't advance
+    }
+
+    // Get updated draft state
+    const { data: updatedDraft } = await datalabAdmin.rpc('get_mock_draft', {
+      p_mock_id: mock_id,
+    })
+
+    const isComplete = updatedDraft?.current_pick > updatedDraft?.total_picks || updatedDraft?.status === 'completed'
+
     // Build response
-    const picksWithDetails = (picks || []).map((p: any) => ({
+    const picks = (updatedDraft?.picks || []).map((p: any) => ({
       pick_number: p.pick_number,
       round: p.round,
       team_key: p.team_key,
@@ -124,26 +92,25 @@ export async function POST(request: NextRequest) {
       team_logo: p.team_logo,
       team_color: p.team_color,
       is_user_pick: p.is_user_pick,
-      is_current: p.pick_number === (isComplete ? mockDraft.total_picks : nextPick),
+      is_current: p.pick_number === updatedDraft?.current_pick,
       selected_prospect: p.prospect_id ? {
         id: p.prospect_id,
-        name: p.prospect_name || prospectsMap[p.prospect_id]?.name,
-        position: p.prospect_position || prospectsMap[p.prospect_id]?.position,
-        school: prospectsMap[p.prospect_id]?.school,
+        name: p.prospect_name,
+        position: p.position,
       } : null,
     }))
 
     return NextResponse.json({
       draft: {
         id: mock_id,
-        chicago_team: mockDraft.chicago_team,
-        sport: mockDraft.sport,
-        draft_year: mockDraft.draft_year,
+        chicago_team: updatedDraft?.chicago_team,
+        sport: updatedDraft?.sport,
+        draft_year: updatedDraft?.draft_year,
         status: isComplete ? 'completed' : 'in_progress',
-        current_pick: isComplete ? mockDraft.total_picks : nextPick,
-        total_picks: mockDraft.total_picks,
-        picks: picksWithDetails,
-        user_picks: picksWithDetails.filter((p: any) => p.is_user_pick).map((p: any) => p.pick_number),
+        current_pick: updatedDraft?.current_pick || actualPickNumber + 1,
+        total_picks: updatedDraft?.total_picks,
+        picks,
+        user_picks: picks.filter((p: any) => p.is_user_pick).map((p: any) => p.pick_number),
       },
     })
 

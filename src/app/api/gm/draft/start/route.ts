@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getGMAuthUser } from '@/lib/gm-auth'
 import { datalabAdmin } from '@/lib/supabase-datalab'
-import { randomUUID } from 'crypto'
 
 export const dynamic = 'force-dynamic'
 
@@ -84,85 +83,32 @@ export async function POST(request: NextRequest) {
       }, { status: 400 })
     }
 
-    // Try using RPC function first, fall back to direct insert
-    let mockDraft: any = null
-    let mockDraftId: string | null = null
-
-    // Try RPC function (if Datalab has created it)
-    const { data: rpcResult, error: rpcError } = await datalabAdmin.rpc('create_mock_draft', {
+    // 1. Create mock draft session using RPC
+    const { data: mockId, error: mockError } = await datalabAdmin.rpc('create_mock_draft', {
       p_user_id: user.id,
       p_user_email: user.email,
       p_chicago_team: chicago_team,
       p_sport: teamInfo.sport,
       p_draft_year: year,
       p_total_picks: draftOrder.length,
+      p_mode: 'user_only',
     })
 
-    if (!rpcError && rpcResult) {
-      mockDraftId = rpcResult
-    } else {
-      // RPC not available, try direct insert to view (may work if view is updatable)
-      console.log('RPC not available, trying direct view insert. RPC error:', rpcError?.message)
-
-      // Try inserting to the view directly
-      const { data: viewInsert, error: viewError } = await datalabAdmin
-        .from('gm_mock_drafts')
-        .insert({
-          user_id: user.id,
-          user_email: user.email,
-          chicago_team,
-          sport: teamInfo.sport,
-          draft_year: year,
-          status: 'in_progress',
-          current_pick: 1,
-          total_picks: draftOrder.length,
-        })
-        .select()
-        .single()
-
-      if (viewError) {
-        console.error('View insert error:', viewError)
-        // Log detailed error for debugging
-        try {
-          await datalabAdmin.from('gm_errors').insert({
-            source: 'backend',
-            error_type: 'schema',
-            error_message: `Mock draft insert failed: ${viewError.message}`,
-            route: '/api/gm/draft/start',
-            metadata: {
-              attempted_table: 'gm_mock_drafts',
-              error_code: viewError.code,
-              error_details: viewError.details,
-              error_hint: viewError.hint,
-            }
-          })
-        } catch {}
-
-        throw new Error(`Failed to create mock draft. The database schema may need RPC functions. Error: ${viewError.message}`)
-      }
-
-      mockDraft = viewInsert
-      mockDraftId = viewInsert?.id
+    if (mockError) {
+      console.error('Create mock draft RPC error:', mockError)
+      throw new Error(`Failed to create mock draft: ${mockError.message}`)
     }
 
-    if (!mockDraftId) {
+    if (!mockId) {
       throw new Error('Failed to create mock draft: No ID returned')
     }
 
-    // Fetch the created mock draft if we only have the ID
-    if (!mockDraft) {
-      const { data: fetchedDraft } = await datalabAdmin
-        .from('gm_mock_drafts')
-        .select('*')
-        .eq('id', mockDraftId)
-        .single()
-      mockDraft = fetchedDraft
-    }
-
-    // Create all picks
+    // 2. Create all picks using RPC
     const chicagoTeamKey = teamInfo.key
     const picks = draftOrder.map((p: any) => ({
-      mock_draft_id: mockDraftId,
+      mock_draft_id: mockId,
+      sport: teamInfo.sport,
+      draft_year: year,
       pick_number: p.pick_number,
       round: p.round,
       team_key: p.team_key,
@@ -170,42 +116,16 @@ export async function POST(request: NextRequest) {
       team_logo: p.team_logo,
       team_color: p.team_color || null,
       is_user_pick: p.team_key === chicagoTeamKey,
+      is_chicago_team: p.team_key === chicagoTeamKey,
     }))
 
-    // Try RPC for picks first
-    const { error: picksRpcError } = await datalabAdmin.rpc('create_mock_draft_picks', {
+    const { error: picksError } = await datalabAdmin.rpc('create_mock_draft_picks', {
       p_picks: picks,
     })
 
-    if (picksRpcError) {
-      // Try direct insert to view
-      const { error: picksError } = await datalabAdmin
-        .from('gm_mock_draft_picks')
-        .insert(picks)
-
-      if (picksError) {
-        console.error('Picks insert error:', picksError)
-        // Clean up the mock draft
-        try {
-          await datalabAdmin.from('gm_mock_drafts').delete().eq('id', mockDraftId)
-        } catch {}
-
-        try {
-          await datalabAdmin.from('gm_errors').insert({
-            source: 'backend',
-            error_type: 'schema',
-            error_message: `Draft picks insert failed: ${picksError.message}`,
-            route: '/api/gm/draft/start',
-            metadata: {
-              attempted_table: 'gm_mock_draft_picks',
-              error_code: picksError.code,
-              mock_draft_id: mockDraftId,
-            }
-          })
-        } catch {}
-
-        throw new Error(`Failed to create draft picks: ${picksError.message}`)
-      }
+    if (picksError) {
+      console.error('Create picks RPC error:', picksError)
+      throw new Error(`Failed to create draft picks: ${picksError.message}`)
     }
 
     // Get the user's pick numbers
@@ -215,14 +135,20 @@ export async function POST(request: NextRequest) {
 
     // Build response with picks
     const picksWithCurrent = picks.map((p: any, index: number) => ({
-      ...p,
+      pick_number: p.pick_number,
+      round: p.round,
+      team_key: p.team_key,
+      team_name: p.team_name,
+      team_logo: p.team_logo,
+      team_color: p.team_color,
+      is_user_pick: p.is_user_pick,
       is_current: index === 0,
       selected_prospect: null,
     }))
 
     return NextResponse.json({
       draft: {
-        id: mockDraftId,
+        id: mockId,
         chicago_team,
         sport: teamInfo.sport,
         draft_year: year,
@@ -231,7 +157,7 @@ export async function POST(request: NextRequest) {
         total_picks: draftOrder.length,
         picks: picksWithCurrent,
         user_picks: userPicks,
-        created_at: mockDraft?.created_at || new Date().toISOString(),
+        created_at: new Date().toISOString(),
       },
     })
 
