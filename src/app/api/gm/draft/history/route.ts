@@ -17,7 +17,7 @@ export async function GET(request: NextRequest) {
 
     // Get user's draft history from Supabase
     const { data: drafts, error, count } = await datalabAdmin
-      .from('gm_mock_drafts')
+      .from('draft_mocks')
       .select('*', { count: 'exact' })
       .eq('user_id', user.id)
       .order('created_at', { ascending: false })
@@ -34,7 +34,7 @@ export async function GET(request: NextRequest) {
 
     if (draftIds.length > 0) {
       const { data: pickCounts } = await datalabAdmin
-        .from('gm_mock_draft_picks')
+        .from('draft_picks')
         .select('mock_draft_id')
         .in('mock_draft_id', draftIds)
         .not('prospect_id', 'is', null)

@@ -83,9 +83,9 @@ export async function POST(request: NextRequest) {
       }, { status: 400 })
     }
 
-    // Create mock draft session
+    // Create mock draft session (write to underlying table: draft_mocks)
     const { data: mockDraft, error: mockError } = await datalabAdmin
-      .from('gm_mock_drafts')
+      .from('draft_mocks')
       .insert({
         user_id: user.id,
         user_email: user.email,
@@ -101,10 +101,10 @@ export async function POST(request: NextRequest) {
 
     if (mockError) {
       console.error('Mock draft insert error:', mockError)
-      throw new Error('Failed to create mock draft')
+      throw new Error(`Failed to create mock draft: ${mockError.message}`)
     }
 
-    // Create all picks (initially empty)
+    // Create all picks (write to underlying table: draft_picks)
     const chicagoTeamKey = teamInfo.key
     const picks = draftOrder.map((p: any) => ({
       mock_draft_id: mockDraft.id,
@@ -118,14 +118,14 @@ export async function POST(request: NextRequest) {
     }))
 
     const { error: picksError } = await datalabAdmin
-      .from('gm_mock_draft_picks')
+      .from('draft_picks')
       .insert(picks)
 
     if (picksError) {
       console.error('Picks insert error:', picksError)
       // Clean up the mock draft
-      await datalabAdmin.from('gm_mock_drafts').delete().eq('id', mockDraft.id)
-      throw new Error('Failed to create draft picks')
+      await datalabAdmin.from('draft_mocks').delete().eq('id', mockDraft.id)
+      throw new Error(`Failed to create draft picks: ${picksError.message}`)
     }
 
     // Get the user's pick numbers

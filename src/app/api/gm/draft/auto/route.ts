@@ -44,7 +44,7 @@ export async function POST(request: NextRequest) {
 
     // Get the mock draft
     const { data: mockDraft, error: mockError } = await datalabAdmin
-      .from('gm_mock_drafts')
+      .from('draft_mocks')
       .select('*')
       .eq('id', mock_id)
       .single()
@@ -60,7 +60,7 @@ export async function POST(request: NextRequest) {
 
     // Get all picks
     const { data: allPicks } = await datalabAdmin
-      .from('gm_mock_draft_picks')
+      .from('draft_picks')
       .select('*')
       .eq('mock_draft_id', mock_id)
       .order('pick_number')
@@ -161,7 +161,7 @@ Select the most realistic pick for ${currentPickData.team_name}.`
 
       // Update the pick
       await datalabAdmin
-        .from('gm_mock_draft_picks')
+        .from('draft_picks')
         .update({
           prospect_id: selectedProspect.prospect_id,
           prospect_name: selectedProspect.name,
@@ -181,7 +181,7 @@ Select the most realistic pick for ${currentPickData.team_name}.`
     const isComplete = currentPick > mockDraft.total_picks
 
     await datalabAdmin
-      .from('gm_mock_drafts')
+      .from('draft_mocks')
       .update({
         current_pick: isComplete ? mockDraft.total_picks : currentPick,
         status: isComplete ? 'completed' : 'in_progress',
@@ -191,7 +191,7 @@ Select the most realistic pick for ${currentPickData.team_name}.`
 
     // Get updated picks
     const { data: updatedPicks } = await datalabAdmin
-      .from('gm_mock_draft_picks')
+      .from('draft_picks')
       .select('*')
       .eq('mock_draft_id', mock_id)
       .order('pick_number')
