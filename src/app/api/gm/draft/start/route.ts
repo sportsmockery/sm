@@ -66,6 +66,8 @@ export async function POST(request: NextRequest) {
     }
 
     // Call datalab API to start the draft
+    // Datalab expects chicago_team as lowercase full name (e.g., 'chicago bears')
+    const datalabChicagoTeam = teamInfo.name.toLowerCase()
     const datalabRes = await fetch(`${process.env.DATALAB_API_URL || 'https://datalab.sportsmockery.com'}/api/gm/draft/start`, {
       method: 'POST',
       headers: {
@@ -75,7 +77,7 @@ export async function POST(request: NextRequest) {
       body: JSON.stringify({
         user_id: user.id,
         user_email: user.email,
-        chicago_team: chicago_team,
+        chicago_team: datalabChicagoTeam,
         team_key: teamInfo.key,
         sport: teamInfo.sport,
         draft_year: draft_year || new Date().getFullYear(),

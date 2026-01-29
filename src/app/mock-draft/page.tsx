@@ -76,11 +76,11 @@ interface DraftHistoryItem {
 
 // Chicago teams with offseason info
 const CHICAGO_TEAMS = [
-  { key: 'bears', name: 'Chicago Bears', sport: 'nfl', logo: '/images/teams/bears.png', color: '#0B162A' },
-  { key: 'bulls', name: 'Chicago Bulls', sport: 'nba', logo: '/images/teams/bulls.png', color: '#CE1141' },
-  { key: 'blackhawks', name: 'Chicago Blackhawks', sport: 'nhl', logo: '/images/teams/blackhawks.png', color: '#CF0A2C' },
-  { key: 'cubs', name: 'Chicago Cubs', sport: 'mlb', logo: '/images/teams/cubs.png', color: '#0E3386' },
-  { key: 'whitesox', name: 'Chicago White Sox', sport: 'mlb', logo: '/images/teams/whitesox.png', color: '#27251F' },
+  { key: 'bears', name: 'Chicago Bears', sport: 'nfl', logo: 'https://a.espncdn.com/i/teamlogos/nfl/500/chi.png', color: '#0B162A' },
+  { key: 'bulls', name: 'Chicago Bulls', sport: 'nba', logo: 'https://a.espncdn.com/i/teamlogos/nba/500/chi.png', color: '#CE1141' },
+  { key: 'blackhawks', name: 'Chicago Blackhawks', sport: 'nhl', logo: 'https://a.espncdn.com/i/teamlogos/nhl/500/chi.png', color: '#CF0A2C' },
+  { key: 'cubs', name: 'Chicago Cubs', sport: 'mlb', logo: 'https://a.espncdn.com/i/teamlogos/mlb/500/chc.png', color: '#0E3386' },
+  { key: 'whitesox', name: 'Chicago White Sox', sport: 'mlb', logo: 'https://a.espncdn.com/i/teamlogos/mlb/500/chw.png', color: '#27251F' },
 ]
 
 // Check if team is in offseason (client-side check)
