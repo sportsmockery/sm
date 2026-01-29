@@ -54,6 +54,7 @@ export default function AskAIPage() {
   const [showHistory, setShowHistory] = useState(false)
   const [queryHistory, setQueryHistory] = useState<QueryHistoryEntry[]>([])
   const [historyLoading, setHistoryLoading] = useState(false)
+  const [hasUserInteracted, setHasUserInteracted] = useState(false)
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const messagesContainerRef = useRef<HTMLDivElement>(null)
   const animationTimeoutRef = useRef<NodeJS.Timeout | null>(null)
@@ -94,11 +95,12 @@ export default function AskAIPage() {
   }, [])
 
   useEffect(() => {
-    // Only scroll the messages container if there are messages
-    if (messages.length > 0) {
+    // Only scroll after user has interacted (sent a message)
+    // This prevents unwanted scrolling on page load or auth state changes
+    if (messages.length > 0 && hasUserInteracted) {
       scrollToBottom()
     }
-  }, [messages])
+  }, [messages, hasUserInteracted])
 
   // Load query history
   const loadHistory = useCallback(async () => {
@@ -179,6 +181,7 @@ export default function AskAIPage() {
     setIsLoading(true)
     setIsAnimating(true) // Start animation
     setError(null)
+    setHasUserInteracted(true) // Enable scrolling after first user interaction
 
     // Ensure animation runs for at least 3 seconds
     const animationStartTime = Date.now()
