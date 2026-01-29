@@ -11,7 +11,7 @@ interface Post {
   slug: string;
   excerpt: string | null;
   featured_image: string | null;
-  team_slug: string;
+  team_slug: string | null;
   author_name: string | null;
   published_at: string;
   content_type: string;
@@ -74,9 +74,11 @@ export function PostCard({ post, isMobile, showImage, priority = false }: PostCa
           </div>
           <div className="post-card-content">
             <div className="post-card-meta-top">
-              <span className={`team-pill team-pill--${post.team_slug}`}>
-                {post.team_slug.replace('-', ' ')}
-              </span>
+              {post.team_slug && (
+                <span className={`team-pill team-pill--${post.team_slug}`}>
+                  {post.team_slug.replace('-', ' ')}
+                </span>
+              )}
               <span className="evergreen-badge">GUIDE</span>
             </div>
             <h3 className="post-card-title">{post.title}</h3>
@@ -92,9 +94,11 @@ export function PostCard({ post, isMobile, showImage, priority = false }: PostCa
       <Link href={`/${post.slug}`} className="post-card-link">
         <div className="post-card-content">
           <div className="post-card-meta-top">
-            <span className={`team-pill team-pill--${post.team_slug}`}>
-              {post.team_slug.replace('-', ' ')}
-            </span>
+            {post.team_slug && (
+              <span className={`team-pill team-pill--${post.team_slug}`}>
+                {post.team_slug.replace('-', ' ')}
+              </span>
+            )}
             {post.is_trending && (
               <span className="trending-badge">TRENDING</span>
             )}
