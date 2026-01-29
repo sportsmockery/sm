@@ -23,8 +23,8 @@ async function getHomepageData() {
     }
   )
 
-  // Get current user - wrapped in try/catch for anonymous users
-  let userId = null
+  // 1) Get user (if any)
+  let userId: string | null = null
   try {
     const { data: { user } } = await supabase.auth.getUser()
     userId = user?.id || null
@@ -32,8 +32,8 @@ async function getHomepageData() {
     userId = null
   }
 
-  // Fetch editor picks (pinned_slot 1-6)
-  const { data: editorPicks, error: editorError } = await supabase
+  // 2) Editor picks (no limit on anonymous vs logged-in)
+  const { data: editorPicks = [] } = await supabase
     .from('sm_posts')
     .select('id, title, slug, featured_image, team_slug, pinned_slot')
     .eq('editor_pick', true)
@@ -41,52 +41,43 @@ async function getHomepageData() {
     .gte('pinned_slot', 1)
     .lte('pinned_slot', 6)
     .order('pinned_slot', { ascending: true })
-    .limit(6)
 
-  if (editorError) console.error('Editor picks error:', editorError)
-
-  // Fetch trending posts (top 5 by views in last 7 days)
+  // 3) Trending posts (for badges + sidebar)
   const sevenDaysAgo = new Date()
   sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7)
 
-  const { data: trendingPosts, error: trendingError } = await supabase
+  const { data: trendingPosts = [] } = await supabase
     .from('sm_posts')
     .select('id, title, slug, team_slug, views, published_at, importance_score, content_type, primary_topic, author_id, is_evergreen')
     .eq('status', 'published')
     .gte('published_at', sevenDaysAgo.toISOString())
     .order('views', { ascending: false })
-    .limit(5)
+    .limit(20) // we only show top 5 but keep extra for future use
 
-  if (trendingError) console.error('Trending error:', trendingError)
+  const trendingIds = new Set((trendingPosts || []).map(p => p.id))
 
-  // Mark trending posts
-  const trendingIds = new Set(trendingPosts?.map(p => p.id) || [])
-
-  // Fetch all recent posts for feed
-  const { data: allPosts, error: postsError } = await supabase
+  // 4) MAIN FEED: always fetch a large set of published posts
+  // IMPORTANT: this MUST NOT depend on login state
+  const { data: allPosts = [] } = await supabase
     .from('sm_posts')
     .select(`
       id, title, slug, excerpt, featured_image, team_slug,
       published_at, importance_score, content_type, primary_topic,
-      author_id, is_evergreen, views,
-      author:sm_authors!author_id(display_name)
+      author_id, is_evergreen, views
     `)
     .eq('status', 'published')
     .order('published_at', { ascending: false })
-    .limit(100)
+    .limit(200) // adjust if needed, but must be "all recent public posts"
 
-  if (postsError) console.error('Posts error:', postsError)
-
-  // Add is_trending flag and author_name to posts
   const postsWithFlags = (allPosts || []).map((post: any) => ({
     ...post,
     is_trending: trendingIds.has(post.id),
-    author_name: Array.isArray(post.author) ? post.author[0]?.display_name : post.author?.display_name || null
+    author_name: null
   }))
 
-  // Fetch user engagement profile if logged in
-  let userProfile = null
-  let userTeamPreference: string | null = null
+  // 5) Personalization data for logged-in users (optional, never filters)
+  let userProfile: any = null
+  const viewedPostIds = new Set<string>()
 
   if (userId) {
     const { data: profileData } = await supabase
@@ -95,55 +86,53 @@ async function getHomepageData() {
       .eq('user_id', userId)
       .single()
 
-    userProfile = profileData || DEFAULT_ENGAGEMENT_PROFILE
+    userProfile = profileData || null
 
-    // Determine preferred team (highest score)
-    if (userProfile?.team_scores) {
-      const teams = Object.entries(userProfile.team_scores)
-      teams.sort((a, b) => (b[1] as number) - (a[1] as number))
-      if (teams.length > 0 && (teams[0][1] as number) > 50) {
-        userTeamPreference = teams[0][0]
-      }
-    }
-  }
-
-  // Fetch viewed post IDs for logged in user
-  const viewedPostIds = new Set<string>()
-  if (userId) {
     const { data: viewedData } = await supabase
       .from('user_interactions')
       .select('post_id')
       .eq('user_id', userId)
       .eq('clicked', true)
 
-    viewedData?.forEach((v: any) => viewedPostIds.add(v.post_id))
+    if (viewedData) {
+      viewedData.forEach((v: any) => viewedPostIds.add(v.post_id))
+    }
   }
 
-  // Create scoring context
+  // 6) Scoring: NEVER drop posts, only sort for logged-in users
   const scoringContext: ScoringContext = {
     user: userProfile,
     viewedPostIds,
     isLoggedIn: !!userId
   }
 
-  // Sort posts by score
-  const rankedPosts = sortPostsByScore(postsWithFlags as any, scoringContext)
+  // Anonymous users: show posts in pure recency order (no scoring)
+  // Logged-in users: sort by score
+  const rankedPosts = userId
+    ? sortPostsByScore(postsWithFlags as any, scoringContext)
+    : postsWithFlags // already ordered by published_at DESC
 
-  // Apply fallbacks if any data is empty
-  const {
-    editorPicks: finalEditorPicks,
-    rankedPosts: finalRankedPosts,
-    trendingPosts: finalTrendingPosts
-  } = getHomepageDataWithFallbacks(
+  // 7) Apply fallbacks ONLY if absolutely no posts
+  const finalData = getHomepageDataWithFallbacks(
     editorPicks || [],
     rankedPosts,
-    trendingPosts?.map(p => ({ ...p, is_trending: true })) || []
+    (trendingPosts || []).map(p => ({ ...p, is_trending: true }))
   )
 
+  // 8) Optional: preferred team for UI only (does NOT filter content)
+  let userTeamPreference: string | null = null
+  if (userProfile?.team_scores) {
+    const teams = Object.entries(userProfile.team_scores)
+    teams.sort((a, b) => (b[1] as number) - (a[1] as number))
+    if (teams.length > 0 && (teams[0][1] as number) > 50) {
+      userTeamPreference = teams[0][0]
+    }
+  }
+
   return {
-    editorPicks: finalEditorPicks,
-    trendingPosts: finalTrendingPosts,
-    rankedPosts: finalRankedPosts,
+    editorPicks: finalData.editorPicks,
+    trendingPosts: finalData.trendingPosts,
+    rankedPosts: finalData.rankedPosts,
     userTeamPreference,
     isLoggedIn: !!userId
   }

@@ -49,12 +49,13 @@ export async function POST(request: NextRequest) {
     const { data: highImportance } = await highImportanceQuery
 
     // 2. Get RECENT articles (all time, no date filter to ensure content)
+    // IMPORTANT: Always fetch full content set regardless of login state
     let recentQuery = supabaseAdmin
       .from('sm_posts')
       .select(POST_SELECT)
       .eq('status', 'published')
       .order('published_at', { ascending: false })
-      .limit(30)
+      .limit(200)
 
     // Exclude already fetched high importance and viewed
     const excludeIds = [...clientViewedIds, ...(highImportance?.map(p => p.id) || [])]
@@ -117,7 +118,7 @@ export async function POST(request: NextRequest) {
         .select(POST_SELECT)
         .eq('status', 'published')
         .order('published_at', { ascending: false })
-        .limit(30)
+        .limit(200)
       allArticles = fallbackPosts || []
     }
 
@@ -183,27 +184,27 @@ export async function GET() {
       )
     }
 
-    // Default feed: High score + recent, no personalization
+    // Default feed: All recent published posts, no personalization
+    // IMPORTANT: Always fetch full content set for anonymous users
     let { data: posts, error } = await supabaseAdmin
       .from('sm_posts')
       .select(POST_SELECT)
       .eq('status', 'published')
-      .order('importance_score', { ascending: false })
       .order('published_at', { ascending: false })
-      .limit(30)
+      .limit(200)
 
     if (error) {
       console.error('Feed GET error:', error)
     }
 
-    // FALLBACK: If no posts found, try without importance_score ordering
+    // FALLBACK: Only if truly no posts found
     if (!posts || posts.length === 0) {
       const fallback = await supabaseAdmin
         .from('sm_posts')
         .select(POST_SELECT)
         .eq('status', 'published')
         .order('published_at', { ascending: false })
-        .limit(30)
+        .limit(200)
       posts = fallback.data || []
     }
 
