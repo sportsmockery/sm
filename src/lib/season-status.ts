@@ -96,11 +96,12 @@ export function getCurrentSeason(sport: string): number {
 export function isInOffseason(sport: string): boolean {
   const now = new Date()
   const month = now.getMonth() + 1
+  const day = now.getDate()
 
   switch (sport.toLowerCase()) {
     case 'nfl':
-      // NFL offseason: Feb - Aug
-      return month >= 2 && month <= 8
+      // NFL offseason: Mid-Jan through Aug (most teams eliminated by wild card weekend)
+      return (month === 1 && day >= 15) || (month >= 2 && month <= 8)
     case 'nba':
       // NBA offseason: Jun - Oct
       return month >= 6 && month <= 10

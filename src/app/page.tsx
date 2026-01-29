@@ -11,7 +11,10 @@ import '@/styles/homepage.css'
 export const dynamic = 'force-dynamic'
 
 async function getHomepageData() {
+  console.log('[Homepage] Starting data fetch...')
+
   const cookieStore = await cookies()
+  console.log('[Homepage] Got cookies')
 
   // Auth client for user detection (uses anon key with cookies)
   const authClient = createServerClient(
@@ -40,7 +43,8 @@ async function getHomepageData() {
   }
 
   // 2) Editor picks (no limit on anonymous vs logged-in)
-  const { data: editorPicks = [] } = await supabase
+  console.log('[Homepage] Fetching editor picks...')
+  const { data: editorPicks = [], error: editorPicksError } = await supabase
     .from('sm_posts')
     .select('id, title, slug, featured_image, team_slug, pinned_slot')
     .eq('editor_pick', true)
@@ -48,6 +52,7 @@ async function getHomepageData() {
     .gte('pinned_slot', 1)
     .lte('pinned_slot', 6)
     .order('pinned_slot', { ascending: true })
+  console.log('[Homepage] Editor picks result:', { count: editorPicks?.length, error: editorPicksError?.message })
 
   // 3) Trending posts (for badges + sidebar)
   const sevenDaysAgo = new Date()
@@ -65,7 +70,8 @@ async function getHomepageData() {
 
   // 4) MAIN FEED: always fetch a large set of published posts
   // IMPORTANT: this MUST NOT depend on login state
-  const { data: allPosts = [] } = await supabase
+  console.log('[Homepage] Fetching all posts...')
+  const { data: allPosts = [], error: allPostsError } = await supabase
     .from('sm_posts')
     .select(`
       id, title, slug, excerpt, featured_image, team_slug,
@@ -75,6 +81,7 @@ async function getHomepageData() {
     .eq('status', 'published')
     .order('published_at', { ascending: false })
     .limit(200) // adjust if needed, but must be "all recent public posts"
+  console.log('[Homepage] All posts result:', { count: allPosts?.length, error: allPostsError?.message })
 
   const postsWithFlags = (allPosts || []).map((post: any) => ({
     ...post,
@@ -137,6 +144,11 @@ async function getHomepageData() {
     }
   }
 
+  console.log('[Homepage] Returning data:', {
+    editorPicksCount: finalData.editorPicks?.length,
+    rankedPostsCount: finalData.rankedPosts?.length,
+    trendingPostsCount: finalData.trendingPosts?.length
+  })
   return {
     editorPicks: finalData.editorPicks,
     trendingPosts: finalData.trendingPosts,

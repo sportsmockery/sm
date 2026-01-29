@@ -87,9 +87,12 @@ const CHICAGO_TEAMS = [
 function isInOffseason(sport: string): boolean {
   const now = new Date()
   const month = now.getMonth() + 1
+  const day = now.getDate()
 
   switch (sport) {
-    case 'nfl': return month >= 2 && month <= 8
+    case 'nfl':
+      // NFL offseason: Mid-Jan through August (most teams eliminated by wild card weekend)
+      return (month === 1 && day >= 15) || (month >= 2 && month <= 8)
     case 'nba': return month >= 6 && month <= 10
     case 'nhl': return month >= 6 && month <= 9
     case 'mlb': return month >= 10 || month <= 3
@@ -99,7 +102,7 @@ function isInOffseason(sport: string): boolean {
 
 function getOffseasonText(sport: string): string {
   switch (sport) {
-    case 'nfl': return 'Available Feb - Aug'
+    case 'nfl': return 'Available mid-Jan - Aug'
     case 'nba': return 'Available Jun - Oct'
     case 'nhl': return 'Available Jun - Sep'
     case 'mlb': return 'Available Oct - Mar'

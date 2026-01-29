@@ -14,14 +14,18 @@ const CHICAGO_TEAMS: Record<string, { key: string; name: string; sport: string }
 }
 
 // Offseason windows (approximate)
+// These determine when Mock Draft is available for each sport
 function isInOffseason(sport: string): boolean {
   const now = new Date()
   const month = now.getMonth() + 1 // 1-12
+  const day = now.getDate()
 
   switch (sport) {
     case 'nfl':
-      // NFL Draft: April. Offseason: Feb-August
-      return month >= 2 && month <= 8
+      // NFL Draft: Late April. Offseason: Mid-Jan through August
+      // Most teams eliminated by wild card weekend (mid-Jan)
+      // Super Bowl is early Feb, but draft prep starts when team is eliminated
+      return (month === 1 && day >= 15) || (month >= 2 && month <= 8)
     case 'nba':
       // NBA Draft: June. Offseason: June-October
       return month >= 6 && month <= 10
