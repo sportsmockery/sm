@@ -186,10 +186,16 @@ export default async function HomePage() {
     // Re-throw Next.js dynamic errors - these should not be caught
     // They signal to Next.js that the page should be rendered dynamically
     if (error?.digest === 'DYNAMIC_SERVER_USAGE') {
+      console.log('[Homepage] Re-throwing DYNAMIC_SERVER_USAGE error')
       throw error
     }
 
-    console.error('Homepage data fetch error:', error)
+    console.error('[Homepage] CAUGHT ERROR:', {
+      name: error?.name,
+      message: error?.message,
+      digest: error?.digest,
+      stack: error?.stack?.split('\n').slice(0, 3).join('\n')
+    })
 
     // Return fallback content only for actual data fetch errors
     return (
