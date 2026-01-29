@@ -9,7 +9,7 @@ interface EditorPick {
   title: string;
   slug: string;
   featured_image: string | null;
-  team_slug: string;
+  team_slug: string | null;
   pinned_slot: number;
 }
 
@@ -57,9 +57,11 @@ export function EditorPicksHero({ picks = [], isMobile }: EditorPicksHeroProps) 
               ) : (
                 <div className="editor-pick-placeholder" />
               )}
-              <span className={`team-badge team-badge--${pick.team_slug}`}>
-                {pick.team_slug.toUpperCase()}
-              </span>
+              {pick.team_slug && (
+                <span className={`team-badge team-badge--${pick.team_slug}`}>
+                  {pick.team_slug.toUpperCase()}
+                </span>
+              )}
             </div>
             <h2 className="editor-pick-title">{pick.title}</h2>
           </Link>
@@ -74,7 +76,9 @@ export function EditorPicksHero({ picks = [], isMobile }: EditorPicksHeroProps) 
             {textPicks.map((pick) => (
               <li key={pick.id}>
                 <Link href={`/${pick.slug}`} className="editor-pick-text-link">
-                  <span className={`team-indicator team-indicator--${pick.team_slug}`} />
+                  {pick.team_slug && (
+                    <span className={`team-indicator team-indicator--${pick.team_slug}`} />
+                  )}
                   {pick.title}
                 </Link>
               </li>
