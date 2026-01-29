@@ -27,7 +27,7 @@ async function getHomepageData() {
 
   // 1) Editor picks (pinned_slot 1–6)
   // Use category_id join instead of team_slug (which doesn't exist)
-  const { data: editorPicksRaw = [] } = await supabase
+  const { data: editorPicksRaw = [], error: editorPicksError } = await supabase
     .from('sm_posts')
     .select('id, title, slug, featured_image, pinned_slot, category:sm_categories!category_id(slug)')
     .eq('editor_pick', true)
@@ -46,7 +46,7 @@ async function getHomepageData() {
   const sevenDaysAgo = new Date()
   sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7)
 
-  const { data: trendingPostsRaw = [] } = await supabase
+  const { data: trendingPostsRaw = [], error: trendingError } = await supabase
     .from('sm_posts')
     .select('id, title, slug, views, published_at, importance_score, content_type, primary_topic, author_id, is_evergreen, category:sm_categories!category_id(slug)')
     .eq('status', 'published')
@@ -62,7 +62,7 @@ async function getHomepageData() {
   const trendingIds = new Set(trendingPosts.map(p => p.id))
 
   // 3) Main feed: ALL recent published posts, recency only
-  const { data: allPostsRaw = [] } = await supabase
+  const { data: allPostsRaw = [], error: postsError } = await supabase
     .from('sm_posts')
     .select(`
       id, title, slug, excerpt, featured_image,
