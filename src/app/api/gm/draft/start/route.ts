@@ -13,30 +13,6 @@ const CHICAGO_TEAMS: Record<string, { key: string; name: string; sport: string }
   whitesox: { key: 'chw', name: 'Chicago White Sox', sport: 'mlb' },
 }
 
-// Offseason windows (approximate)
-function isInOffseason(sport: string): boolean {
-  const now = new Date()
-  const month = now.getMonth() + 1 // 1-12
-  const day = now.getDate()
-
-  switch (sport) {
-    case 'nfl':
-      // NFL Draft: Late April. Offseason: Mid-Jan through August
-      return (month === 1 && day >= 15) || (month >= 2 && month <= 8)
-    case 'nba':
-      // NBA Draft: June. Offseason: June-October
-      return month >= 6 && month <= 10
-    case 'nhl':
-      // NHL Draft: July. Offseason: June-September
-      return month >= 6 && month <= 9
-    case 'mlb':
-      // MLB Draft: July. Offseason: October-March
-      return month >= 10 || month <= 3
-    default:
-      return false
-  }
-}
-
 export async function POST(request: NextRequest) {
   try {
     const user = await getGMAuthUser(request)
@@ -52,16 +28,7 @@ export async function POST(request: NextRequest) {
     }
 
     const teamInfo = CHICAGO_TEAMS[chicago_team]
-    const year = draft_year || 2025
-
-    // Check if team is in offseason
-    if (!isInOffseason(teamInfo.sport)) {
-      return NextResponse.json({
-        error: `Mock Draft is only available during the ${teamInfo.sport.toUpperCase()} offseason`,
-        code: 'NOT_OFFSEASON',
-        sport: teamInfo.sport,
-      }, { status: 400 })
-    }
+    const year = draft_year || 2026
 
     // Get draft order from Supabase view
     const { data: draftOrder, error: orderError } = await datalabAdmin
@@ -96,7 +63,15 @@ export async function POST(request: NextRequest) {
 
     if (mockError) {
       console.error('Create mock draft RPC error:', mockError)
-      throw new Error(`Failed to create mock draft: ${mockError.message}`)
+      // Check if it's an eligibility error from Datalab
+      const errorMsg = mockError.message || String(mockError)
+      if (errorMsg.includes('Mock draft not available') || errorMsg.includes('Season in progress') || errorMsg.includes('not eligible')) {
+        return NextResponse.json({
+          error: errorMsg,
+          code: 'NOT_ELIGIBLE',
+        }, { status: 400 })
+      }
+      throw new Error(`Failed to create mock draft: ${errorMsg}`)
     }
 
     if (!mockId) {
