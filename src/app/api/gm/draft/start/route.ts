@@ -14,7 +14,6 @@ const CHICAGO_TEAMS: Record<string, { key: string; name: string; sport: string }
 }
 
 // Offseason windows (approximate)
-// These determine when Mock Draft is available for each sport
 function isInOffseason(sport: string): boolean {
   const now = new Date()
   const month = now.getMonth() + 1 // 1-12
@@ -23,8 +22,6 @@ function isInOffseason(sport: string): boolean {
   switch (sport) {
     case 'nfl':
       // NFL Draft: Late April. Offseason: Mid-Jan through August
-      // Most teams eliminated by wild card weekend (mid-Jan)
-      // Super Bowl is early Feb, but draft prep starts when team is eliminated
       return (month === 1 && day >= 15) || (month >= 2 && month <= 8)
     case 'nba':
       // NBA Draft: June. Offseason: June-October
@@ -55,6 +52,7 @@ export async function POST(request: NextRequest) {
     }
 
     const teamInfo = CHICAGO_TEAMS[chicago_team]
+    const year = draft_year || 2025
 
     // Check if team is in offseason
     if (!isInOffseason(teamInfo.sport)) {
@@ -65,66 +63,97 @@ export async function POST(request: NextRequest) {
       }, { status: 400 })
     }
 
-    // Call datalab API to start the draft
-    // Datalab expects chicago_team as lowercase full name (e.g., 'chicago bears')
-    const datalabChicagoTeam = teamInfo.name.toLowerCase()
-    const datalabRes = await fetch(`${process.env.DATALAB_API_URL || 'https://datalab.sportsmockery.com'}/api/gm/draft/start`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${process.env.DATALAB_API_KEY || ''}`,
-      },
-      body: JSON.stringify({
-        user_id: user.id,
-        user_email: user.email,
-        chicago_team: datalabChicagoTeam,
-        team_key: teamInfo.key,
-        sport: teamInfo.sport,
-        draft_year: draft_year || new Date().getFullYear(),
-      }),
-    })
+    // Get draft order from Supabase view
+    const { data: draftOrder, error: orderError } = await datalabAdmin
+      .from('gm_draft_order')
+      .select('*')
+      .eq('sport', teamInfo.sport)
+      .eq('draft_year', year)
+      .order('pick_number')
 
-    if (!datalabRes.ok) {
-      const errData = await datalabRes.json().catch(() => ({}))
-      const errorMsg = errData.error || errData.message || `Datalab API error: ${datalabRes.status}`
-      console.error('Draft start datalab error:', {
-        status: datalabRes.status,
-        errorMsg,
-        errData,
-        sentPayload: {
-          chicago_team: datalabChicagoTeam,
-          team_key: teamInfo.key,
-          sport: teamInfo.sport,
-          draft_year: draft_year || new Date().getFullYear(),
-        }
-      })
-      try {
-        await datalabAdmin.from('gm_errors').insert({
-          source: 'backend',
-          error_type: 'api',
-          error_message: errorMsg,
-          route: '/api/gm/draft/start',
-          metadata: {
-            chicago_team: datalabChicagoTeam,
-            original_team: chicago_team,
-            sport: teamInfo.sport,
-            status: datalabRes.status,
-            errData,
-            draft_year: draft_year || new Date().getFullYear(),
-          }
-        })
-      } catch {}
-      // Include more detail in the response
-      const details = errData.details || errData.validation_errors || null
-      return NextResponse.json({
-        error: errorMsg,
-        code: errData.code,
-        details,
-      }, { status: datalabRes.status })
+    if (orderError) {
+      console.error('Draft order error:', orderError)
+      throw new Error('Failed to fetch draft order')
     }
 
-    const data = await datalabRes.json()
-    return NextResponse.json(data)
+    if (!draftOrder || draftOrder.length === 0) {
+      return NextResponse.json({
+        error: `No draft order available for ${teamInfo.sport.toUpperCase()} ${year}`,
+        code: 'NO_DRAFT_ORDER',
+      }, { status: 400 })
+    }
+
+    // Create mock draft session
+    const { data: mockDraft, error: mockError } = await datalabAdmin
+      .from('gm_mock_drafts')
+      .insert({
+        user_id: user.id,
+        user_email: user.email,
+        chicago_team,
+        sport: teamInfo.sport,
+        draft_year: year,
+        status: 'in_progress',
+        current_pick: 1,
+        total_picks: draftOrder.length,
+      })
+      .select()
+      .single()
+
+    if (mockError) {
+      console.error('Mock draft insert error:', mockError)
+      throw new Error('Failed to create mock draft')
+    }
+
+    // Create all picks (initially empty)
+    const chicagoTeamKey = teamInfo.key
+    const picks = draftOrder.map((p: any) => ({
+      mock_draft_id: mockDraft.id,
+      pick_number: p.pick_number,
+      round: p.round,
+      team_key: p.team_key,
+      team_name: p.team_name,
+      team_logo: p.team_logo,
+      team_color: p.team_color || null,
+      is_user_pick: p.team_key === chicagoTeamKey,
+    }))
+
+    const { error: picksError } = await datalabAdmin
+      .from('gm_mock_draft_picks')
+      .insert(picks)
+
+    if (picksError) {
+      console.error('Picks insert error:', picksError)
+      // Clean up the mock draft
+      await datalabAdmin.from('gm_mock_drafts').delete().eq('id', mockDraft.id)
+      throw new Error('Failed to create draft picks')
+    }
+
+    // Get the user's pick numbers
+    const userPicks = picks
+      .filter((p: any) => p.is_user_pick)
+      .map((p: any) => p.pick_number)
+
+    // Build response with picks
+    const picksWithCurrent = picks.map((p: any, index: number) => ({
+      ...p,
+      is_current: index === 0,
+      selected_prospect: null,
+    }))
+
+    return NextResponse.json({
+      draft: {
+        id: mockDraft.id,
+        chicago_team,
+        sport: teamInfo.sport,
+        draft_year: year,
+        status: 'in_progress',
+        current_pick: 1,
+        total_picks: draftOrder.length,
+        picks: picksWithCurrent,
+        user_picks: userPicks,
+        created_at: mockDraft.created_at,
+      },
+    })
 
   } catch (error) {
     console.error('Draft start error:', error)
