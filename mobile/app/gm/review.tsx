@@ -189,16 +189,16 @@ export default function GMReviewScreen() {
             styles.validationBar,
             {
               backgroundColor:
-                validation.status === 'green' ? '#22c55e15' :
-                validation.status === 'yellow' ? '#eab30815' : '#ef444415',
+                validation.status === 'valid' ? '#22c55e15' :
+                validation.status === 'warning' ? '#eab30815' : '#ef444415',
             },
           ]}>
             <View style={[
               styles.validationDot,
               {
                 backgroundColor:
-                  validation.status === 'green' ? '#22c55e' :
-                  validation.status === 'yellow' ? '#eab308' : '#ef4444',
+                  validation.status === 'valid' ? '#22c55e' :
+                  validation.status === 'warning' ? '#eab308' : '#ef4444',
               },
             ]} />
             <View style={styles.validationContent}>
@@ -206,12 +206,12 @@ export default function GMReviewScreen() {
                 styles.validationStatus,
                 {
                   color:
-                    validation.status === 'green' ? '#22c55e' :
-                    validation.status === 'yellow' ? '#eab308' : '#ef4444',
+                    validation.status === 'valid' ? '#22c55e' :
+                    validation.status === 'warning' ? '#eab308' : '#ef4444',
                 },
               ]}>
-                {validation.status === 'green' ? 'Ready to Grade' :
-                 validation.status === 'yellow' ? 'Warnings' : 'Issues Found'}
+                {validation.status === 'valid' ? 'Ready to Grade' :
+                 validation.status === 'warning' ? 'Warnings' : 'Issues Found'}
               </Text>
               {validation.issues.length > 0 && (
                 <Text style={[styles.validationIssue, { color: colors.textMuted }]} numberOfLines={1}>
@@ -230,10 +230,10 @@ export default function GMReviewScreen() {
         <TouchableOpacity
           style={[
             styles.gradeBtn,
-            (grading || (validation && !validation.can_proceed)) && { opacity: 0.6 },
+            (grading || (validation && validation.status === 'invalid')) && { opacity: 0.6 },
           ]}
           onPress={handleGrade}
-          disabled={grading || (validation ? !validation.can_proceed : false)}
+          disabled={grading || (validation ? validation.status === 'invalid' : false)}
         >
           {grading ? (
             <ActivityIndicator color="#fff" />

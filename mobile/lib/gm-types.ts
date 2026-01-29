@@ -140,14 +140,27 @@ export const CHICAGO_TEAM_SPORT: Record<ChicagoTeam, Sport> = {
 
 export type PlayerTrend = 'hot' | 'rising' | 'stable' | 'declining' | 'cold'
 
+export interface ValidationIssue {
+  severity: 'error' | 'warning' | 'info'
+  code: string
+  message: string
+  player_name?: string
+}
+
 export interface ValidationResult {
-  valid: boolean
-  status: 'green' | 'yellow' | 'red'
-  issues: Array<{
-    type: 'error' | 'warning' | 'info'
-    message: string
-  }>
-  can_proceed: boolean
+  status: 'valid' | 'warning' | 'invalid'
+  issues: ValidationIssue[]
+  cap_impact?: {
+    chicago_delta: number
+    partner_delta: number
+    chicago_over_cap: boolean
+    partner_over_cap: boolean
+  }
+  roster_impact?: {
+    chicago_roster_size_after: number
+    partner_roster_size_after: number
+    position_conflicts: string[]
+  }
 }
 
 export interface TeamFitResult {
@@ -195,43 +208,52 @@ export type ScenarioType =
   | 'age_progression'
 
 export interface ScenarioResult {
-  original_grade: number
-  modified_grade: number
-  grade_delta: number
   scenario_type: ScenarioType
   description: string
-  modified_reasoning: string
-  impact_breakdown: {
+  original_grade: number
+  adjusted_grade: number
+  grade_delta: number
+  reasoning: string
+  breakdown_changes?: {
     talent_balance_delta: number
     contract_value_delta: number
     team_fit_delta: number
     future_assets_delta: number
   }
+  probability?: number
 }
 
 export interface SimulationResult {
-  simulations_run: number
-  mean_outcome: number
-  median_outcome: number
+  num_simulations: number
+  original_grade: number
+  mean_grade: number
+  median_grade: number
   std_deviation: number
   percentiles: {
+    p5: number
     p10: number
     p25: number
     p50: number
     p75: number
     p90: number
+    p95: number
   }
   distribution: Array<{
-    bucket: string
+    grade_bucket: number
     count: number
     percentage: number
   }>
   risk_analysis: {
     downside_risk: number
     upside_potential: number
-    bust_probability: number
-    success_probability: number
+    variance_band: [number, number]
   }
+  key_factors: Array<{
+    factor: string
+    impact: 'positive' | 'negative' | 'neutral'
+    magnitude: number
+    description: string
+  }>
 }
 
 export interface AnalyticsResult {

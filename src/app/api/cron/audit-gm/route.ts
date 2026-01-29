@@ -1,5 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { datalabAdmin } from '@/lib/supabase-datalab'
+import {
+  getAllTeamSeasonStatus,
+  getSeasonStatusSummary,
+  type SeasonStatus,
+} from '@/lib/season-status'
 
 export const maxDuration = 60
 export const dynamic = 'force-dynamic'
@@ -269,6 +274,111 @@ export async function GET(request: NextRequest) {
     checks.push({ name: 'gm_page', status: 'fail', detail: String(e), duration_ms: Date.now() - t8 })
   }
 
+  // 9. Season status for all Chicago teams
+  const seasonStatuses = getAllTeamSeasonStatus()
+  const seasonSummary = getSeasonStatusSummary()
+  for (const status of seasonStatuses) {
+    checks.push({
+      name: `season_${status.team}`,
+      status: 'pass',
+      detail: `${status.seasonPhase} | Season ${status.currentSeason} | Draft: ${status.draftAvailable ? 'available' : 'unavailable'}`,
+    })
+  }
+
+  // 10. Mock Draft page HTTP check
+  const t10 = Date.now()
+  try {
+    const res = await fetch(`${BASE_URL}/mock-draft`)
+    checks.push({
+      name: 'mock_draft_page',
+      status: res.status === 200 ? 'pass' : 'fail',
+      detail: `HTTP ${res.status}`,
+      duration_ms: Date.now() - t10,
+    })
+  } catch (e) {
+    checks.push({ name: 'mock_draft_page', status: 'fail', detail: String(e), duration_ms: Date.now() - t10 })
+  }
+
+  // 11. Mock Draft API — verify endpoints respond
+  const draftEndpoints = ['prospects', 'history']
+  for (const endpoint of draftEndpoints) {
+    const t = Date.now()
+    try {
+      const res = await fetch(`${BASE_URL}/api/gm/draft/${endpoint}?sport=nfl`, {
+        headers: { Cookie: '' },
+      })
+      checks.push({
+        name: `draft_api_${endpoint}`,
+        status: res.status === 401 || res.status === 200 ? 'pass' : 'fail',
+        detail: `HTTP ${res.status}`,
+        duration_ms: Date.now() - t,
+      })
+    } catch (e) {
+      checks.push({ name: `draft_api_${endpoint}`, status: 'fail', detail: String(e), duration_ms: Date.now() - t })
+    }
+  }
+
+  // 12. Draft prospects table — verify data exists for offseason sports
+  for (const team of CHICAGO_TEAMS) {
+    const status = seasonStatuses.find(s => s.team === team.key)
+    if (status?.draftAvailable) {
+      const t = Date.now()
+      try {
+        const { count, error } = await datalabAdmin
+          .from('gm_draft_prospects')
+          .select('*', { count: 'exact', head: true })
+          .eq('sport', team.sport)
+
+        if (error) {
+          checks.push({ name: `draft_prospects_${team.sport}`, status: 'warn', detail: `Query failed: ${error.message}`, duration_ms: Date.now() - t })
+        } else {
+          const c = count || 0
+          const minExpected = team.sport === 'nfl' ? 100 : team.sport === 'mlb' ? 50 : 30
+          checks.push({
+            name: `draft_prospects_${team.sport}`,
+            status: c >= minExpected ? 'pass' : c > 0 ? 'warn' : 'warn',
+            detail: `${c} prospects (target ${minExpected}+)`,
+            duration_ms: Date.now() - t,
+          })
+        }
+      } catch (e) {
+        checks.push({ name: `draft_prospects_${team.sport}`, status: 'warn', detail: `Not available: ${String(e)}`, duration_ms: Date.now() - t })
+      }
+    }
+  }
+
+  // 13. Draft order table — verify data exists for offseason sports
+  const checkedSports = new Set<string>()
+  for (const team of CHICAGO_TEAMS) {
+    const status = seasonStatuses.find(s => s.team === team.key)
+    if (status?.draftAvailable && !checkedSports.has(team.sport)) {
+      checkedSports.add(team.sport)
+      const t = Date.now()
+      try {
+        const { count, error } = await datalabAdmin
+          .from('gm_draft_order')
+          .select('*', { count: 'exact', head: true })
+          .eq('sport', team.sport)
+          .eq('draft_year', new Date().getFullYear())
+
+        if (error) {
+          checks.push({ name: `draft_order_${team.sport}`, status: 'warn', detail: `Query failed: ${error.message}`, duration_ms: Date.now() - t })
+        } else {
+          const c = count || 0
+          const minExpected = team.sport === 'nfl' ? 200 : team.sport === 'mlb' ? 500 : 60
+          checks.push({
+            name: `draft_order_${team.sport}`,
+            status: c >= minExpected ? 'pass' : c > 0 ? 'warn' : 'warn',
+            detail: `${c} picks (target ${minExpected}+)`,
+            duration_ms: Date.now() - t,
+          })
+        }
+      } catch (e) {
+        checks.push({ name: `draft_order_${team.sport}`, status: 'warn', detail: `Not available: ${String(e)}`, duration_ms: Date.now() - t })
+      }
+    }
+  }
+
   const duration = Date.now() - startTime
   const failCount = checks.filter(c => c.status === 'fail').length
   const warnCount = checks.filter(c => c.status === 'warn').length
@@ -296,6 +406,11 @@ export async function GET(request: NextRequest) {
     success: !hasErrors,
     duration: `${duration}ms`,
     summary: { pass: passCount, warn: warnCount, fail: failCount },
+    seasonStatus: {
+      inSeason: seasonSummary.inSeason,
+      offseason: seasonSummary.offseason,
+      draftAvailable: seasonSummary.draftAvailable,
+    },
     checks,
     timestamp: new Date().toISOString(),
   })

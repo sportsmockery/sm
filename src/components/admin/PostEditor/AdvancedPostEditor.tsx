@@ -6,7 +6,7 @@ import Image from 'next/image'
 import Link from 'next/link'
 import RichTextEditor, { RichTextEditorRef } from './RichTextEditor'
 import { CategorySelect, AuthorSelect } from './SearchableSelect'
-import { ChartBuilderModal, ChartConfig } from '@/components/admin/ChartBuilder'
+import { ChartBuilderModal, ChartConfig, AISuggestion, ChartType } from '@/components/admin/ChartBuilder'
 
 interface Category {
   id: string
@@ -124,8 +124,11 @@ export default function AdvancedPostEditor({
   const [showChartModal, setShowChartModal] = useState(false)
   const [chartLoading, setChartLoading] = useState(false)
   const [initialChartConfig, setInitialChartConfig] = useState<Partial<ChartConfig> | null>(null)
+  const [chartAiSuggestion, setChartAiSuggestion] = useState<AISuggestion | null>(null)
   const [selectedParagraph, setSelectedParagraph] = useState(1)
   const [paragraphOptions, setParagraphOptions] = useState<string[]>([])
+  const [highlightMode, setHighlightMode] = useState(false)
+  const [highlightedText, setHighlightedText] = useState('')
 
   // Extract paragraphs from content for the dropdown
   const extractParagraphs = useCallback((html: string) => {
@@ -386,8 +389,10 @@ export default function AdvancedPostEditor({
   }
 
   // Open PostIQ Chart Modal with AI analysis
-  const openChartModal = async () => {
-    if (formData.content.length < 200) {
+  const openChartModal = async (contentOverride?: string) => {
+    const contentToAnalyze = contentOverride || formData.content
+
+    if (contentToAnalyze.length < 200) {
       alert('Please add more content before generating a chart (minimum 200 characters)')
       return
     }
@@ -399,15 +404,9 @@ export default function AdvancedPostEditor({
     const categoryName = categories.find(c => c.id === formData.category_id)?.name
     const team = getTeamFromCategory(categoryName) || 'bears'
 
-    // Set default initial config
-    setInitialChartConfig({
-      type: 'bar',
-      title: '',
-      size: 'medium',
-      colors: { scheme: 'team', team: team as 'bears' | 'bulls' | 'cubs' | 'whitesox' | 'blackhawks' },
-      data: [{ label: '', value: 0 }, { label: '', value: 0 }],
-      dataSource: 'manual',
-    })
+    // Reset states
+    setChartAiSuggestion(null)
+    setInitialChartConfig(null)
     setShowChartModal(true)
     setChartLoading(true)
 
@@ -419,7 +418,7 @@ export default function AdvancedPostEditor({
         body: JSON.stringify({
           action: 'analyze_chart',
           title: formData.title,
-          content: formData.content,
+          content: contentToAnalyze,
           category: categoryName,
           team,
         }),
@@ -428,6 +427,15 @@ export default function AdvancedPostEditor({
       if (response.ok) {
         const data = await response.json()
         if (data.shouldCreateChart && data.data?.length >= 2) {
+          // Store AI suggestion for display in modal
+          setChartAiSuggestion({
+            reasoning: data.reasoning || 'Found chartable data in your article',
+            chartTitle: data.chartTitle || '',
+            chartType: (data.chartType || 'bar') as ChartType,
+            data: data.data,
+            paragraphIndex: data.paragraphIndex || 1,
+          })
+          // Set initial config for the chart
           setInitialChartConfig({
             type: (data.chartType || 'bar') as 'bar' | 'line' | 'pie' | 'player-comparison' | 'team-stats',
             title: data.chartTitle || '',
@@ -443,6 +451,38 @@ export default function AdvancedPostEditor({
       console.error('Chart analysis error:', err)
     } finally {
       setChartLoading(false)
+    }
+  }
+
+  // Handle highlight mode for chart data selection
+  const handleHighlightData = () => {
+    setHighlightMode(true)
+    setHighlightedText('')
+  }
+
+  // Process highlighted text and regenerate chart
+  const handleUseHighlightedData = async () => {
+    if (!highlightedText.trim()) {
+      alert('Please select some text in your article first')
+      return
+    }
+    setHighlightMode(false)
+    // Analyze just the highlighted text
+    await openChartModal(highlightedText)
+  }
+
+  // Cancel highlight mode
+  const cancelHighlightMode = () => {
+    setHighlightMode(false)
+    setHighlightedText('')
+  }
+
+  // Handle text selection in content editor during highlight mode
+  const handleContentSelection = () => {
+    if (!highlightMode) return
+    const selection = window.getSelection()
+    if (selection && selection.toString().trim()) {
+      setHighlightedText(selection.toString())
     }
   }
 
@@ -909,7 +949,7 @@ export default function AdvancedPostEditor({
                 </button>
                 <button
                   type="button"
-                  onClick={openChartModal}
+                  onClick={() => openChartModal()}
                   disabled={formData.content.length < 200}
                   className="w-full flex items-center gap-3 rounded-lg px-3 py-2 text-sm text-[var(--text-secondary)] hover:bg-[var(--bg-hover)] hover:text-[var(--text-primary)] disabled:opacity-50"
                 >
@@ -1003,7 +1043,22 @@ export default function AdvancedPostEditor({
             )}
 
             {/* Content Editor - extends to fill space */}
-            <div className="mb-6 overflow-hidden rounded-lg border border-[var(--border-default)] bg-white dark:bg-gray-900">
+            <div
+              className={`mb-6 overflow-hidden rounded-lg border bg-white dark:bg-gray-900 ${
+                highlightMode
+                  ? 'border-purple-500 ring-2 ring-purple-500/20'
+                  : 'border-[var(--border-default)]'
+              }`}
+              onMouseUp={handleContentSelection}
+            >
+              {highlightMode && (
+                <div className="bg-purple-500/10 border-b border-purple-500/30 px-4 py-2 text-sm text-purple-600 dark:text-purple-400 flex items-center gap-2">
+                  <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                  Select the text containing data you want to chart
+                </div>
+              )}
               <RichTextEditor
                 ref={contentEditorRef}
                 content={formData.content}
@@ -1640,29 +1695,50 @@ export default function AdvancedPostEditor({
         </div>
       )}
 
+      {/* Highlight Mode Floating Toolbar */}
+      {highlightMode && (
+        <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-[70] flex items-center gap-3 rounded-full bg-purple-600 px-6 py-3 shadow-2xl">
+          <svg className="h-5 w-5 text-white animate-pulse" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+          </svg>
+          <span className="text-white font-medium">
+            {highlightedText ? `Selected: "${highlightedText.slice(0, 30)}${highlightedText.length > 30 ? '...' : ''}"` : 'Select data in your article...'}
+          </span>
+          {highlightedText && (
+            <button
+              onClick={handleUseHighlightedData}
+              className="ml-2 rounded-full bg-white px-4 py-1.5 text-sm font-semibold text-purple-600 hover:bg-purple-50 transition-colors"
+            >
+              Use This Data
+            </button>
+          )}
+          <button
+            onClick={cancelHighlightMode}
+            className="ml-2 rounded-full p-1.5 text-white/70 hover:text-white hover:bg-white/10 transition-colors"
+          >
+            <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+        </div>
+      )}
+
       {/* Chart Builder Modal with Live Preview */}
       {showChartModal && (
-        chartLoading ? (
-          <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/60 backdrop-blur-sm">
-            <div className="mx-4 w-full max-w-md overflow-hidden rounded-xl bg-zinc-900 shadow-2xl p-8">
-              <div className="text-center">
-                <div className="mx-auto h-12 w-12 animate-spin rounded-full border-4 border-[#8B0000] border-t-transparent" />
-                <p className="mt-6 text-lg font-medium text-white">Analyzing your article...</p>
-                <p className="mt-2 text-sm text-zinc-400">PostIQ is finding chartable data in your content</p>
-              </div>
-            </div>
-          </div>
-        ) : (
-          <ChartBuilderModal
-            isOpen={showChartModal}
-            onClose={() => {
-              setShowChartModal(false)
-              setInitialChartConfig(null)
-            }}
-            onInsert={handleChartInsert}
-            initialConfig={initialChartConfig || undefined}
-          />
-        )
+        <ChartBuilderModal
+          isOpen={showChartModal}
+          onClose={() => {
+            setShowChartModal(false)
+            setInitialChartConfig(null)
+            setChartAiSuggestion(null)
+          }}
+          onInsert={handleChartInsert}
+          onHighlightData={handleHighlightData}
+          initialConfig={initialChartConfig || undefined}
+          aiSuggestion={chartAiSuggestion}
+          isLoading={chartLoading}
+          team={getTeamFromCategory(categories.find(c => c.id === formData.category_id)?.name) || 'bears'}
+        />
       )}
     </div>
   )

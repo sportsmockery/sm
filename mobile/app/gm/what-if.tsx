@@ -192,8 +192,8 @@ export default function WhatIfScreen() {
                   </View>
                   <Ionicons name="arrow-forward" size={24} color={colors.textMuted} />
                   <View style={styles.gradeBox}>
-                    <Text style={[styles.gradeLabel, { color: colors.textMuted }]}>Modified</Text>
-                    <Text style={[styles.gradeValue, { color: colors.text }]}>{scenarioResult.modified_grade}</Text>
+                    <Text style={[styles.gradeLabel, { color: colors.textMuted }]}>Adjusted</Text>
+                    <Text style={[styles.gradeValue, { color: colors.text }]}>{scenarioResult.adjusted_grade}</Text>
                   </View>
                   <View style={[styles.deltaBox, { backgroundColor: `${getDeltaColor(scenarioResult.grade_delta)}20` }]}>
                     <Text style={[styles.deltaValue, { color: getDeltaColor(scenarioResult.grade_delta) }]}>
@@ -203,7 +203,7 @@ export default function WhatIfScreen() {
                 </View>
 
                 <Text style={[styles.resultReasoning, { color: colors.textMuted }]}>
-                  {scenarioResult.modified_reasoning}
+                  {scenarioResult.reasoning}
                 </Text>
               </View>
             )}
@@ -240,17 +240,17 @@ export default function WhatIfScreen() {
               <View style={[styles.resultCard, { backgroundColor: colors.surface }]}>
                 <Text style={[styles.resultTitle, { color: colors.text }]}>Simulation Results</Text>
                 <Text style={[styles.simSubtitle, { color: colors.textMuted }]}>
-                  Based on {simulationResult.simulations_run.toLocaleString()} simulations
+                  Based on {simulationResult.num_simulations.toLocaleString()} simulations
                 </Text>
 
                 <View style={styles.statsRow}>
                   <View style={styles.statBox}>
                     <Text style={[styles.statLabel, { color: colors.textMuted }]}>Mean</Text>
-                    <Text style={[styles.statValue, { color: colors.text }]}>{simulationResult.mean_outcome.toFixed(1)}</Text>
+                    <Text style={[styles.statValue, { color: colors.text }]}>{simulationResult.mean_grade.toFixed(1)}</Text>
                   </View>
                   <View style={styles.statBox}>
                     <Text style={[styles.statLabel, { color: colors.textMuted }]}>Median</Text>
-                    <Text style={[styles.statValue, { color: colors.text }]}>{simulationResult.median_outcome.toFixed(1)}</Text>
+                    <Text style={[styles.statValue, { color: colors.text }]}>{simulationResult.median_grade}</Text>
                   </View>
                   <View style={styles.statBox}>
                     <Text style={[styles.statLabel, { color: colors.textMuted }]}>Std Dev</Text>
@@ -272,15 +272,15 @@ export default function WhatIfScreen() {
 
                 <View style={styles.riskRow}>
                   <View style={[styles.riskBox, { backgroundColor: '#ef444420' }]}>
-                    <Text style={[styles.riskLabel, { color: '#ef4444' }]}>Bust Risk</Text>
+                    <Text style={[styles.riskLabel, { color: '#ef4444' }]}>Downside Risk</Text>
                     <Text style={[styles.riskValue, { color: '#ef4444' }]}>
-                      {(simulationResult.risk_analysis.bust_probability * 100).toFixed(0)}%
+                      {simulationResult.risk_analysis.downside_risk}%
                     </Text>
                   </View>
                   <View style={[styles.riskBox, { backgroundColor: '#22c55e20' }]}>
-                    <Text style={[styles.riskLabel, { color: '#22c55e' }]}>Success Prob</Text>
+                    <Text style={[styles.riskLabel, { color: '#22c55e' }]}>Upside Potential</Text>
                     <Text style={[styles.riskValue, { color: '#22c55e' }]}>
-                      {(simulationResult.risk_analysis.success_probability * 100).toFixed(0)}%
+                      {simulationResult.risk_analysis.upside_potential}%
                     </Text>
                   </View>
                 </View>

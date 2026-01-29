@@ -1,6 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { revalidatePath } from 'next/cache'
 import { datalabAdmin as datalabClient } from '@/lib/supabase-datalab'
+import {
+  getCurrentSeason,
+  getAllTeamSeasonStatus,
+  getSeasonStatusSummary,
+  getInSeasonTeams,
+} from '@/lib/season-status'
 
 // Allow longer timeout for sync operations
 export const maxDuration = 60
@@ -18,26 +24,9 @@ const TEAM_PATHS = [
 
 const SUBPATHS = ['', '/schedule', '/scores', '/stats', '/roster', '/players']
 
-// Season calculation by league
-// NFL: Starting year (2025-26 season = 2025), stored as year season starts
-// NBA/NHL: Ending year (2025-26 season = 2026), stored as year season ends
-// MLB: Calendar year (2025 season = 2025)
+// Use shared utility for season calculation
 function getCurrentSeasonForLeague(league: string): number {
-  const now = new Date()
-  const year = now.getFullYear()
-  const month = now.getMonth() + 1
-
-  switch (league) {
-    case 'NFL':
-      return month < 9 ? year - 1 : year
-    case 'NBA':
-    case 'NHL':
-      return month < 10 ? year : year + 1
-    case 'MLB':
-      return month < 4 ? year - 1 : year
-    default:
-      return year
-  }
+  return getCurrentSeason(league)
 }
 
 // Team configuration for data verification
@@ -166,12 +155,10 @@ export async function GET(request: NextRequest) {
       }
     }
 
-    // Revalidate boxscore API routes for in-season teams (Bulls, Blackhawks)
-    const IN_SEASON_BOXSCORE_PATHS = [
-      '/api/bulls/boxscore',
-      '/api/blackhawks/boxscore',
-    ]
-    for (const apiPath of IN_SEASON_BOXSCORE_PATHS) {
+    // Revalidate boxscore API routes for in-season teams (dynamically determined)
+    const inSeasonTeams = getInSeasonTeams()
+    const inSeasonBoxscorePaths = inSeasonTeams.map(t => `/api/${t.key}/boxscore`)
+    for (const apiPath of inSeasonBoxscorePaths) {
       try {
         revalidatePath(apiPath, 'layout')
         revalidated.push(apiPath)
@@ -182,11 +169,15 @@ export async function GET(request: NextRequest) {
     }
 
     const duration = Date.now() - startTime
+    const seasonSummary = getSeasonStatusSummary()
+    const allSeasonStatuses = getAllTeamSeasonStatus()
 
     console.log(`[Sync Teams Cron] Hourly sync complete in ${duration}ms:`, {
       revalidatedCount: revalidated.length,
       errorsCount: errors.length,
       teamsVerified: verificationResults.length,
+      inSeason: seasonSummary.inSeason,
+      offseason: seasonSummary.offseason,
     })
 
     return NextResponse.json({
@@ -196,6 +187,17 @@ export async function GET(request: NextRequest) {
       errors: errors.length > 0 ? errors : undefined,
       teamData: verificationResults,
       gmData: gmDataResults,
+      seasonStatus: {
+        inSeason: seasonSummary.inSeason,
+        offseason: seasonSummary.offseason,
+        draftAvailable: seasonSummary.draftAvailable,
+        details: allSeasonStatuses.map(s => ({
+          team: s.team,
+          phase: s.seasonPhase,
+          season: s.currentSeason,
+          draft: s.draftAvailable,
+        })),
+      },
       duration: `${duration}ms`,
       timestamp: new Date().toISOString(),
     })

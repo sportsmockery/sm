@@ -80,7 +80,18 @@ export async function POST(request: NextRequest) {
 
     if (!datalabRes.ok) {
       const errData = await datalabRes.json().catch(() => ({}))
-      throw new Error(errData.error || `Datalab API error: ${datalabRes.status}`)
+      const errorMsg = errData.error || `Datalab API error: ${datalabRes.status}`
+      console.error('Draft start datalab error:', errorMsg, errData)
+      try {
+        await datalabAdmin.from('gm_errors').insert({
+          source: 'backend',
+          error_type: 'api',
+          error_message: errorMsg,
+          route: '/api/gm/draft/start',
+          metadata: { chicago_team, sport: teamInfo.sport, status: datalabRes.status, errData }
+        })
+      } catch {}
+      return NextResponse.json({ error: errorMsg, code: errData.code }, { status: datalabRes.status })
     }
 
     const data = await datalabRes.json()
@@ -96,6 +107,6 @@ export async function POST(request: NextRequest) {
         route: '/api/gm/draft/start'
       })
     } catch {}
-    return NextResponse.json({ error: 'Failed to start draft' }, { status: 500 })
+    return NextResponse.json({ error: String(error) || 'Failed to start draft' }, { status: 500 })
   }
 }

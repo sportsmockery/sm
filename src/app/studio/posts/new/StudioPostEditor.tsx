@@ -105,6 +105,8 @@ export default function StudioPostEditor({
   const [selectedParagraph, setSelectedParagraph] = useState<number>(1)
   const [customChartTitle, setCustomChartTitle] = useState<string>('')
   const [paragraphOptions, setParagraphOptions] = useState<string[]>([])
+  const [highlightMode, setHighlightMode] = useState(false)
+  const [highlightedText, setHighlightedText] = useState('')
 
   const [formData, setFormData] = useState({
     title: post?.title || '',
@@ -485,8 +487,10 @@ export default function StudioPostEditor({
   }, [])
 
   // Open PostIQ Chart Modal
-  const openChartModal = async () => {
-    if (formData.content.length < 200) {
+  const openChartModal = async (contentOverride?: string) => {
+    const contentToAnalyze = contentOverride || formData.content
+
+    if (contentToAnalyze.length < 200 && !contentOverride) {
       alert('Please add more content before generating a chart (minimum 200 characters)')
       return
     }
@@ -507,7 +511,7 @@ export default function StudioPostEditor({
         body: JSON.stringify({
           action: 'analyze_chart',
           title: formData.title,
-          content: formData.content,
+          content: contentToAnalyze,
           category: chartCategoryName,
           team: chartTeam,
         }),
@@ -526,6 +530,38 @@ export default function StudioPostEditor({
       console.error('Chart analysis error:', err)
     } finally {
       setChartLoading(false)
+    }
+  }
+
+  // Handle highlight mode for chart data selection
+  const handleHighlightData = () => {
+    setShowChartModal(false)
+    setHighlightMode(true)
+    setHighlightedText('')
+  }
+
+  // Process highlighted text and regenerate chart
+  const handleUseHighlightedData = async () => {
+    if (!highlightedText.trim()) {
+      alert('Please select some text in your article first')
+      return
+    }
+    setHighlightMode(false)
+    await openChartModal(highlightedText)
+  }
+
+  // Cancel highlight mode
+  const cancelHighlightMode = () => {
+    setHighlightMode(false)
+    setHighlightedText('')
+  }
+
+  // Handle text selection in content editor during highlight mode
+  const handleContentSelection = () => {
+    if (!highlightMode) return
+    const selection = window.getSelection()
+    if (selection && selection.toString().trim()) {
+      setHighlightedText(selection.toString())
     }
   }
 
@@ -767,7 +803,7 @@ export default function StudioPostEditor({
                   <span className="text-lg">💡</span>
                   Generate Ideas
                 </button>
-                <button type="button" onClick={openChartModal} disabled={formData.content.length < 200} className="w-full flex items-center gap-3 rounded-lg px-3 py-2 text-sm text-[var(--text-secondary)] hover:bg-[var(--bg-hover)] hover:text-[var(--text-primary)] disabled:opacity-50">
+                <button type="button" onClick={() => openChartModal()} disabled={formData.content.length < 200} className="w-full flex items-center gap-3 rounded-lg px-3 py-2 text-sm text-[var(--text-secondary)] hover:bg-[var(--bg-hover)] hover:text-[var(--text-primary)] disabled:opacity-50">
                   <svg className="h-5 w-5 text-purple-500" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 013 19.875v-6.75zM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V8.625zM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V4.125z" /></svg>
                   Add Chart
                 </button>
@@ -843,7 +879,22 @@ export default function StudioPostEditor({
             )}
 
             {/* Content Editor - extends to fill space */}
-            <div className="mb-6 overflow-hidden rounded-lg border border-[var(--border-default)] bg-white dark:bg-gray-900">
+            <div
+              className={`mb-6 overflow-hidden rounded-lg border bg-white dark:bg-gray-900 ${
+                highlightMode
+                  ? 'border-purple-500 ring-2 ring-purple-500/20'
+                  : 'border-[var(--border-default)]'
+              }`}
+              onMouseUp={handleContentSelection}
+            >
+              {highlightMode && (
+                <div className="bg-purple-500/10 border-b border-purple-500/30 px-4 py-2 text-sm text-purple-600 dark:text-purple-400 flex items-center gap-2">
+                  <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                  Select the text containing data you want to chart
+                </div>
+              )}
               <RichTextEditor
                 ref={contentEditorRef}
                 content={formData.content}
@@ -1400,6 +1451,34 @@ export default function StudioPostEditor({
         </div>
       )}
 
+      {/* Highlight Mode Floating Toolbar */}
+      {highlightMode && (
+        <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-[70] flex items-center gap-3 rounded-full bg-purple-600 px-6 py-3 shadow-2xl">
+          <svg className="h-5 w-5 text-white animate-pulse" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+          </svg>
+          <span className="text-white font-medium">
+            {highlightedText ? `Selected: "${highlightedText.slice(0, 30)}${highlightedText.length > 30 ? '...' : ''}"` : 'Select data in your article...'}
+          </span>
+          {highlightedText && (
+            <button
+              onClick={handleUseHighlightedData}
+              className="ml-2 rounded-full bg-white px-4 py-1.5 text-sm font-semibold text-purple-600 hover:bg-purple-50 transition-colors"
+            >
+              Use This Data
+            </button>
+          )}
+          <button
+            onClick={cancelHighlightMode}
+            className="ml-2 rounded-full p-1.5 text-white/70 hover:text-white hover:bg-white/10 transition-colors"
+          >
+            <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+        </div>
+      )}
+
       {/* PostIQ Chart Modal */}
       {showChartModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
@@ -1526,12 +1605,24 @@ export default function StudioPostEditor({
                   </div>
                 </div>
               ) : (
-                <div className="py-12 text-center">
+                <div className="py-8 text-center">
                   <svg className="mx-auto h-12 w-12 text-gray-300" fill="none" viewBox="0 0 24 24" strokeWidth={1} stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 013 19.875v-6.75zM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V8.625zM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V4.125z" />
                   </svg>
                   <p className="mt-4 text-gray-500 dark:text-gray-400">No chartable data found in this article.</p>
                   <p className="mt-1 text-sm text-gray-400">Try adding statistics, comparisons, or rankings to your content.</p>
+                  <div className="mt-6 space-y-2">
+                    <button
+                      type="button"
+                      onClick={handleHighlightData}
+                      className="w-full rounded-lg bg-purple-600 px-4 py-2.5 text-sm font-medium text-white hover:bg-purple-700 transition-colors flex items-center justify-center gap-2"
+                    >
+                      <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+                      </svg>
+                      Highlight data in article
+                    </button>
+                  </div>
                 </div>
               )}
             </div>
@@ -1539,14 +1630,26 @@ export default function StudioPostEditor({
             {/* Footer */}
             <div className="flex items-center gap-3 border-t border-gray-200 bg-gray-50 px-6 py-4 dark:border-gray-700 dark:bg-gray-800/50">
               {chartSuggestion && (
-                <button
-                  type="button"
-                  onClick={regenerateChartSuggestion}
-                  disabled={chartLoading}
-                  className="text-sm font-medium text-purple-500 hover:text-purple-400 disabled:opacity-50"
-                >
-                  ↻ Regenerate
-                </button>
+                <>
+                  <button
+                    type="button"
+                    onClick={regenerateChartSuggestion}
+                    disabled={chartLoading}
+                    className="text-sm font-medium text-purple-500 hover:text-purple-400 disabled:opacity-50"
+                  >
+                    ↻ Regenerate
+                  </button>
+                  <button
+                    type="button"
+                    onClick={handleHighlightData}
+                    className="text-sm text-gray-500 hover:text-purple-500 flex items-center gap-1"
+                  >
+                    <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+                    </svg>
+                    Wrong data?
+                  </button>
+                </>
               )}
               <div className="flex-1" />
               <button

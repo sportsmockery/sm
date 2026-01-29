@@ -15,6 +15,6 @@ export { default as TeamStats } from './charts/TeamStats'
 // Types
 export type { ChartType } from './ChartTypeSelector'
 export type { ColorConfig, TeamColorScheme } from './ChartColorPicker'
-export type { ChartConfig, ChartSize, DataSource } from './ChartBuilderModal'
+export type { ChartConfig, ChartSize, DataSource, AISuggestion } from './ChartBuilderModal'
 export type { ChartDataEntry } from './DataEntryForm'
 export type { DataLabQuery } from './DataLabPicker'
