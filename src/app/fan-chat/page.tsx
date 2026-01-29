@@ -167,8 +167,10 @@ export default function FanChatPage() {
   const [showChannels, setShowChannels] = useState(false)
   const [messages, setMessages] = useState<ChatMessage[]>(() => getWelcomeMessages(initialChannel))
   const [isTyping, setIsTyping] = useState(false)
+  const [hasUserInteracted, setHasUserInteracted] = useState(false)
 
   const messagesEndRef = useRef<HTMLDivElement>(null)
+  const messagesContainerRef = useRef<HTMLDivElement>(null)
   const currentChannel = channels.find(c => c.id === activeChannel) || channels[1]
 
   // AI Personality hook
@@ -185,10 +187,31 @@ export default function FanChatPage() {
     }
   })
 
-  // Scroll to bottom when messages change
+  // Scroll to bottom within container only (not the whole page)
+  const scrollToBottom = useCallback(() => {
+    if (messagesContainerRef.current) {
+      messagesContainerRef.current.scrollTo({
+        top: messagesContainerRef.current.scrollHeight,
+        behavior: 'smooth'
+      })
+    }
+  }, [])
+
+  // Prevent browser scroll restoration on page load
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
-  }, [messages])
+    if ('scrollRestoration' in history) {
+      history.scrollRestoration = 'manual'
+    }
+    // Scroll to top on mount
+    window.scrollTo(0, 0)
+  }, [])
+
+  // Scroll to bottom when messages change (only after user has interacted)
+  useEffect(() => {
+    if (messages.length > 0 && hasUserInteracted) {
+      scrollToBottom()
+    }
+  }, [messages, hasUserInteracted, scrollToBottom])
 
   // Reset messages when channel changes
   useEffect(() => {
@@ -210,6 +233,7 @@ export default function FanChatPage() {
 
     setMessages(prev => [...prev, newMessage])
     setMessage('')
+    setHasUserInteracted(true) // Enable scrolling after first user interaction
 
     // Trigger AI response after a small delay (simulates typing)
     setIsTyping(true)
@@ -389,7 +413,7 @@ export default function FanChatPage() {
               </div>
 
               {/* Messages Area */}
-              <div className="flex-1 overflow-y-auto p-5">
+              <div ref={messagesContainerRef} className="flex-1 overflow-y-auto p-5">
                 {/* Welcome Message */}
                 <div className="text-center py-8 mb-6" style={{ borderBottom: '1px solid var(--border-color)' }}>
                   <div
