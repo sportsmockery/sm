@@ -11,7 +11,6 @@ import {
 import { useRouter } from 'expo-router'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { Ionicons } from '@expo/vector-icons'
-import Slider from '@react-native-community/slider'
 
 import { useTheme } from '@/hooks/useTheme'
 import { useAuth } from '@/hooks/useAuth'
@@ -28,14 +27,29 @@ const RISK_OPTIONS = [
 
 const PHASE_OPTIONS = [
   { value: 'rebuilding', label: 'Rebuilding', desc: 'Focus on young talent and picks' },
-  { value: 'competing', label: 'Competing', desc: 'Mix of now and future' },
-  { value: 'contending', label: 'Contending', desc: 'Win now at all costs' },
+  { value: 'contending', label: 'Contending', desc: 'Competitive with room to grow' },
+  { value: 'win_now', label: 'Win Now', desc: 'All-in for a championship' },
+  { value: 'auto', label: 'Auto', desc: 'Let AI determine based on roster' },
 ]
 
 const STYLE_OPTIONS = [
   { value: 'balanced', label: 'Balanced', desc: 'Equal weight to all factors' },
-  { value: 'win_now', label: 'Win Now', desc: 'Prioritize immediate impact' },
-  { value: 'future_focused', label: 'Future Focused', desc: 'Prioritize long-term value' },
+  { value: 'star_hunting', label: 'Star Hunting', desc: 'Target elite talent' },
+  { value: 'depth_building', label: 'Depth Building', desc: 'Build a deep roster' },
+  { value: 'draft_focused', label: 'Draft Focused', desc: 'Prioritize draft capital' },
+]
+
+const CAP_OPTIONS = [
+  { value: 'low', label: 'Low', desc: 'Less concerned about cap space' },
+  { value: 'medium', label: 'Medium', desc: 'Balance value and cap impact' },
+  { value: 'high', label: 'High', desc: 'Prioritize cap flexibility' },
+]
+
+const AGE_OPTIONS = [
+  { value: 'young', label: 'Young', desc: 'Prefer players under 26' },
+  { value: 'prime', label: 'Prime', desc: 'Prefer players 26-30' },
+  { value: 'veteran', label: 'Veteran', desc: 'Open to experienced players' },
+  { value: 'any', label: 'Any', desc: 'No age preference' },
 ]
 
 export default function GMPreferencesScreen() {
@@ -47,12 +61,11 @@ export default function GMPreferencesScreen() {
   const [saving, setSaving] = useState(false)
   const [preferences, setPreferences] = useState<UserPreferences>({
     risk_tolerance: 'moderate',
-    team_phase: 'competing',
-    trade_style: 'balanced',
-    favorite_positions: [],
-    avoid_positions: [],
-    max_age_preference: null,
-    min_contract_years: null,
+    favorite_team: null,
+    team_phase: 'auto',
+    preferred_trade_style: 'balanced',
+    cap_flexibility_priority: 'medium',
+    age_preference: 'any',
   })
 
   useEffect(() => {
@@ -175,67 +188,23 @@ export default function GMPreferencesScreen() {
           <RadioGroup
             title="Trade Style"
             options={STYLE_OPTIONS}
-            value={preferences.trade_style}
-            onChange={(v) => setPreferences({ ...preferences, trade_style: v as any })}
+            value={preferences.preferred_trade_style}
+            onChange={(v) => setPreferences({ ...preferences, preferred_trade_style: v as any })}
           />
 
-          {/* Max Age Slider */}
-          <View style={styles.sliderSection}>
-            <Text style={[styles.radioTitle, { color: colors.text }]}>Max Player Age</Text>
-            <View style={[styles.sliderCard, { backgroundColor: colors.surface }]}>
-              <View style={styles.sliderHeader}>
-                <Text style={[styles.sliderLabel, { color: colors.textMuted }]}>
-                  {preferences.max_age_preference ? `${preferences.max_age_preference} years` : 'No preference'}
-                </Text>
-              </View>
-              <Slider
-                style={styles.slider}
-                minimumValue={20}
-                maximumValue={40}
-                step={1}
-                value={preferences.max_age_preference || 35}
-                onValueChange={(v: number) => setPreferences({ ...preferences, max_age_preference: Math.round(v) })}
-                minimumTrackTintColor={COLORS.primary}
-                maximumTrackTintColor={colors.border}
-                thumbTintColor={COLORS.primary}
-              />
-              <TouchableOpacity
-                onPress={() => setPreferences({ ...preferences, max_age_preference: null })}
-                style={styles.clearBtn}
-              >
-                <Text style={[styles.clearBtnText, { color: colors.textMuted }]}>Clear preference</Text>
-              </TouchableOpacity>
-            </View>
-          </View>
+          <RadioGroup
+            title="Cap Flexibility Priority"
+            options={CAP_OPTIONS}
+            value={preferences.cap_flexibility_priority}
+            onChange={(v) => setPreferences({ ...preferences, cap_flexibility_priority: v as any })}
+          />
 
-          {/* Min Contract Years Slider */}
-          <View style={styles.sliderSection}>
-            <Text style={[styles.radioTitle, { color: colors.text }]}>Min Contract Years</Text>
-            <View style={[styles.sliderCard, { backgroundColor: colors.surface }]}>
-              <View style={styles.sliderHeader}>
-                <Text style={[styles.sliderLabel, { color: colors.textMuted }]}>
-                  {preferences.min_contract_years ? `${preferences.min_contract_years} years` : 'No preference'}
-                </Text>
-              </View>
-              <Slider
-                style={styles.slider}
-                minimumValue={1}
-                maximumValue={6}
-                step={1}
-                value={preferences.min_contract_years || 2}
-                onValueChange={(v: number) => setPreferences({ ...preferences, min_contract_years: Math.round(v) })}
-                minimumTrackTintColor={COLORS.primary}
-                maximumTrackTintColor={colors.border}
-                thumbTintColor={COLORS.primary}
-              />
-              <TouchableOpacity
-                onPress={() => setPreferences({ ...preferences, min_contract_years: null })}
-                style={styles.clearBtn}
-              >
-                <Text style={[styles.clearBtnText, { color: colors.textMuted }]}>Clear preference</Text>
-              </TouchableOpacity>
-            </View>
-          </View>
+          <RadioGroup
+            title="Age Preference"
+            options={AGE_OPTIONS}
+            value={preferences.age_preference}
+            onChange={(v) => setPreferences({ ...preferences, age_preference: v as any })}
+          />
 
           <View style={{ height: 40 }} />
         </ScrollView>
@@ -282,11 +251,4 @@ const styles = StyleSheet.create({
   radioText: { flex: 1, marginLeft: 12 },
   radioLabel: { fontSize: 15, fontFamily: 'Montserrat-SemiBold' },
   radioDesc: { fontSize: 12, fontFamily: 'Montserrat-Regular', marginTop: 2 },
-  sliderSection: { marginBottom: 24 },
-  sliderCard: { borderRadius: 12, padding: 16 },
-  sliderHeader: { marginBottom: 8 },
-  sliderLabel: { fontSize: 14, fontFamily: 'Montserrat-Medium' },
-  slider: { width: '100%', height: 40 },
-  clearBtn: { marginTop: 8, alignSelf: 'flex-end' },
-  clearBtnText: { fontSize: 12, fontFamily: 'Montserrat-Medium' },
 })

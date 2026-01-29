@@ -191,12 +191,11 @@ export interface TeamFitResult {
 
 export interface UserPreferences {
   risk_tolerance: 'conservative' | 'moderate' | 'aggressive'
-  team_phase: 'rebuilding' | 'competing' | 'contending'
-  trade_style: 'balanced' | 'win_now' | 'future_focused'
-  favorite_positions: string[]
-  avoid_positions: string[]
-  max_age_preference: number | null
-  min_contract_years: number | null
+  favorite_team: string | null
+  team_phase: 'rebuilding' | 'contending' | 'win_now' | 'auto'
+  preferred_trade_style: 'balanced' | 'star_hunting' | 'depth_building' | 'draft_focused'
+  cap_flexibility_priority: 'low' | 'medium' | 'high'
+  age_preference: 'young' | 'prime' | 'veteran' | 'any'
 }
 
 export type ScenarioType =
