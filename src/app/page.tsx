@@ -4,13 +4,16 @@ import { HomepageFeed } from '@/components/homepage/HomepageFeed'
 import { TeamPickerPrompt } from '@/components/homepage/TeamPickerPrompt'
 import { DEFAULT_ENGAGEMENT_PROFILE, sortPostsByScore, type ScoringContext } from '@/lib/scoring-v2'
 import { getHomepageDataWithFallbacks, FALLBACK_POSTS, FALLBACK_EDITOR_PICKS } from '@/lib/homepage-fallbacks'
+import { supabaseAdmin } from '@/lib/supabase-server'
 import '@/styles/homepage.css'
 
 export const revalidate = 60 // Revalidate every 60 seconds
 
 async function getHomepageData() {
   const cookieStore = await cookies()
-  const supabase = createServerClient(
+
+  // Auth client for user detection (uses anon key with cookies)
+  const authClient = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
     {
@@ -23,10 +26,13 @@ async function getHomepageData() {
     }
   )
 
+  // Use supabaseAdmin for data queries (bypasses RLS for public content)
+  const supabase = supabaseAdmin
+
   // 1) Get user (if any)
   let userId: string | null = null
   try {
-    const { data: { user } } = await supabase.auth.getUser()
+    const { data: { user } } = await authClient.auth.getUser()
     userId = user?.id || null
   } catch {
     userId = null
@@ -76,11 +82,12 @@ async function getHomepageData() {
   }))
 
   // 5) Personalization data for logged-in users (optional, never filters)
+  // Use authClient for user-specific data (respects RLS)
   let userProfile: any = null
   const viewedPostIds = new Set<string>()
 
   if (userId) {
-    const { data: profileData } = await supabase
+    const { data: profileData } = await authClient
       .from('user_engagement_profile')
       .select('*')
       .eq('user_id', userId)
@@ -88,7 +95,7 @@ async function getHomepageData() {
 
     userProfile = profileData || null
 
-    const { data: viewedData } = await supabase
+    const { data: viewedData } = await authClient
       .from('user_interactions')
       .select('post_id')
       .eq('user_id', userId)
