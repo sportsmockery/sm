@@ -74,41 +74,27 @@ interface DraftHistoryItem {
   picks_made: number
 }
 
-// Chicago teams with offseason info
+interface TeamEligibility {
+  sport: string
+  draft_year: number
+  team_key: string
+  team_name: string
+  season_status: 'in_season' | 'eliminated' | 'champion' | 'offseason'
+  eligible: boolean
+  reason: string
+  mock_draft_window_status: 'open' | 'closed' | 'completed' | 'not_yet_open'
+  days_until_draft: number | null
+  draft_date: string | null
+}
+
+// Chicago teams config
 const CHICAGO_TEAMS = [
-  { key: 'bears', name: 'Chicago Bears', sport: 'nfl', logo: 'https://a.espncdn.com/i/teamlogos/nfl/500/chi.png', color: '#0B162A' },
-  { key: 'bulls', name: 'Chicago Bulls', sport: 'nba', logo: 'https://a.espncdn.com/i/teamlogos/nba/500/chi.png', color: '#CE1141' },
-  { key: 'blackhawks', name: 'Chicago Blackhawks', sport: 'nhl', logo: 'https://a.espncdn.com/i/teamlogos/nhl/500/chi.png', color: '#CF0A2C' },
-  { key: 'cubs', name: 'Chicago Cubs', sport: 'mlb', logo: 'https://a.espncdn.com/i/teamlogos/mlb/500/chc.png', color: '#0E3386' },
-  { key: 'whitesox', name: 'Chicago White Sox', sport: 'mlb', logo: 'https://a.espncdn.com/i/teamlogos/mlb/500/chw.png', color: '#27251F' },
+  { key: 'bears', name: 'Chicago Bears', sport: 'nfl', logo: 'https://a.espncdn.com/i/teamlogos/nfl/500/chi.png', color: '#0B162A', teamId: 'chi' },
+  { key: 'bulls', name: 'Chicago Bulls', sport: 'nba', logo: 'https://a.espncdn.com/i/teamlogos/nba/500/chi.png', color: '#CE1141', teamId: 'chi' },
+  { key: 'blackhawks', name: 'Chicago Blackhawks', sport: 'nhl', logo: 'https://a.espncdn.com/i/teamlogos/nhl/500/chi.png', color: '#CF0A2C', teamId: 'chi' },
+  { key: 'cubs', name: 'Chicago Cubs', sport: 'mlb', logo: 'https://a.espncdn.com/i/teamlogos/mlb/500/chc.png', color: '#0E3386', teamId: 'chc' },
+  { key: 'whitesox', name: 'Chicago White Sox', sport: 'mlb', logo: 'https://a.espncdn.com/i/teamlogos/mlb/500/chw.png', color: '#27251F', teamId: 'chw' },
 ]
-
-// Check if team is in offseason (client-side check)
-function isInOffseason(sport: string): boolean {
-  const now = new Date()
-  const month = now.getMonth() + 1
-  const day = now.getDate()
-
-  switch (sport) {
-    case 'nfl':
-      // NFL offseason: Mid-Jan through August (most teams eliminated by wild card weekend)
-      return (month === 1 && day >= 15) || (month >= 2 && month <= 8)
-    case 'nba': return month >= 6 && month <= 10
-    case 'nhl': return month >= 6 && month <= 9
-    case 'mlb': return month >= 10 || month <= 3
-    default: return false
-  }
-}
-
-function getOffseasonText(sport: string): string {
-  switch (sport) {
-    case 'nfl': return 'Available mid-Jan - Aug'
-    case 'nba': return 'Available Jun - Oct'
-    case 'nhl': return 'Available Jun - Sep'
-    case 'mlb': return 'Available Oct - Mar'
-    default: return ''
-  }
-}
 
 export default function MockDraftPage() {
   const { user, loading: authLoading, isAuthenticated } = useAuth()
@@ -132,6 +118,8 @@ export default function MockDraftPage() {
   const [autoAdvancing, setAutoAdvancing] = useState(false)
   const [grading, setGrading] = useState(false)
   const [showGradeModal, setShowGradeModal] = useState(false)
+  const [eligibility, setEligibility] = useState<Record<string, TeamEligibility>>({})
+  const [eligibilityLoading, setEligibilityLoading] = useState(true)
 
   // Computed
   const currentTeamConfig = CHICAGO_TEAMS.find(t => t.key === selectedTeam)
@@ -155,6 +143,31 @@ export default function MockDraftPage() {
   // Get unique positions for filter
   const positions = [...new Set(prospects.map(p => p.position))].sort()
 
+  // Fetch team eligibility status from Datalab
+  const fetchEligibility = useCallback(async () => {
+    setEligibilityLoading(true)
+    try {
+      const res = await fetch('/api/gm/draft/eligibility')
+      if (res.ok) {
+        const data = await res.json()
+        // Map by team key for easy lookup
+        const eligMap: Record<string, TeamEligibility> = {}
+        for (const team of data.teams || []) {
+          // Map team_key to our local keys
+          if (team.sport === 'nfl') eligMap['bears'] = team
+          else if (team.sport === 'nba') eligMap['bulls'] = team
+          else if (team.sport === 'nhl') eligMap['blackhawks'] = team
+          else if (team.sport === 'mlb' && team.team_key === 'chc') eligMap['cubs'] = team
+          else if (team.sport === 'mlb' && team.team_key === 'chw') eligMap['whitesox'] = team
+        }
+        setEligibility(eligMap)
+      }
+    } catch (e) {
+      console.error('Failed to fetch eligibility:', e)
+    }
+    setEligibilityLoading(false)
+  }, [])
+
   // Auth check
   useEffect(() => {
     if (authLoading) return
@@ -164,7 +177,8 @@ export default function MockDraftPage() {
     }
     setPageLoading(false)
     fetchHistory()
-  }, [authLoading, isAuthenticated, router])
+    fetchEligibility()
+  }, [authLoading, isAuthenticated, router, fetchHistory, fetchEligibility])
 
   // Fetch draft history
   const fetchHistory = useCallback(async () => {
@@ -204,8 +218,10 @@ export default function MockDraftPage() {
     const team = CHICAGO_TEAMS.find(t => t.key === teamKey)
     if (!team) return
 
-    if (!isInOffseason(team.sport)) {
-      setError(`Mock Draft is only available during the ${team.sport.toUpperCase()} offseason`)
+    // Check eligibility from Datalab
+    const teamElig = eligibility[teamKey]
+    if (teamElig && !teamElig.eligible) {
+      setError(teamElig.reason || `Mock Draft is not available for ${team.name}`)
       return
     }
 
@@ -219,7 +235,7 @@ export default function MockDraftPage() {
       const data = await res.json()
 
       if (!res.ok) {
-        if (data.code === 'NOT_OFFSEASON') {
+        if (data.code === 'NOT_ELIGIBLE') {
           setError(data.error)
         } else if (data.code === 'AUTH_REQUIRED') {
           router.push('/login?next=/mock-draft')
@@ -416,48 +432,75 @@ export default function MockDraftPage() {
               <h2 style={{ fontSize: '18px', fontWeight: 700, marginBottom: 16, color: isDark ? '#fff' : '#1a1a1a' }}>
                 Select Your Team
               </h2>
-              <div style={{ display: 'grid', gap: 12 }}>
-                {CHICAGO_TEAMS.map(team => {
-                  const inOffseason = isInOffseason(team.sport)
-                  return (
-                    <button
-                      key={team.key}
-                      onClick={() => inOffseason && startDraft(team.key)}
-                      disabled={!inOffseason}
-                      style={{
-                        display: 'flex', alignItems: 'center', gap: 12,
-                        padding: '16px', borderRadius: 12,
-                        border: `2px solid ${inOffseason ? team.color : (isDark ? '#4b5563' : '#d1d5db')}`,
-                        backgroundColor: isDark ? '#1f2937' : '#fff',
-                        opacity: inOffseason ? 1 : 0.5,
-                        cursor: inOffseason ? 'pointer' : 'not-allowed',
-                        transition: 'all 0.2s',
-                      }}
-                    >
-                      <div style={{
-                        width: 48, height: 48, borderRadius: 8,
-                        backgroundColor: team.color + '20',
-                        display: 'flex', alignItems: 'center', justifyContent: 'center',
-                      }}>
-                        <Image src={team.logo} alt={team.name} width={36} height={36} style={{ objectFit: 'contain' }} />
-                      </div>
-                      <div style={{ flex: 1, textAlign: 'left' }}>
-                        <div style={{ fontWeight: 700, color: isDark ? '#fff' : '#1a1a1a', fontSize: '15px' }}>
-                          {team.name}
+              {eligibilityLoading ? (
+                <div style={{ textAlign: 'center', padding: 40 }}>
+                  <div className="w-6 h-6 border-2 border-[#bc0000] border-t-transparent rounded-full animate-spin mx-auto" />
+                  <div style={{ marginTop: 12, fontSize: '13px', color: subText }}>Loading team status...</div>
+                </div>
+              ) : (
+                <div style={{ display: 'grid', gap: 12 }}>
+                  {CHICAGO_TEAMS.map(team => {
+                    const teamElig = eligibility[team.key]
+                    const isEligible = teamElig?.eligible ?? false
+                    const daysUntilDraft = teamElig?.days_until_draft
+
+                    // Determine status text
+                    let statusText = ''
+                    let statusColor = subText
+                    if (teamElig) {
+                      if (isEligible) {
+                        statusText = teamElig.reason || '✓ Ready to draft'
+                        statusColor = '#10b981'
+                      } else {
+                        statusText = teamElig.reason || 'Not available'
+                      }
+                    }
+
+                    return (
+                      <button
+                        key={team.key}
+                        onClick={() => isEligible && startDraft(team.key)}
+                        disabled={!isEligible}
+                        style={{
+                          display: 'flex', alignItems: 'center', gap: 12,
+                          padding: '16px', borderRadius: 12,
+                          border: `2px solid ${isEligible ? team.color : (isDark ? '#4b5563' : '#d1d5db')}`,
+                          backgroundColor: isDark ? '#1f2937' : '#fff',
+                          opacity: isEligible ? 1 : 0.5,
+                          cursor: isEligible ? 'pointer' : 'not-allowed',
+                          transition: 'all 0.2s',
+                        }}
+                      >
+                        <div style={{
+                          width: 48, height: 48, borderRadius: 8,
+                          backgroundColor: team.color + '20',
+                          display: 'flex', alignItems: 'center', justifyContent: 'center',
+                        }}>
+                          <Image src={team.logo} alt={team.name} width={36} height={36} style={{ objectFit: 'contain' }} />
                         </div>
-                        <div style={{ fontSize: '12px', color: inOffseason ? '#10b981' : subText }}>
-                          {inOffseason ? '✓ In Offseason' : getOffseasonText(team.sport)}
+                        <div style={{ flex: 1, textAlign: 'left' }}>
+                          <div style={{ fontWeight: 700, color: isDark ? '#fff' : '#1a1a1a', fontSize: '15px' }}>
+                            {team.name}
+                          </div>
+                          <div style={{ fontSize: '12px', color: statusColor }}>
+                            {statusText}
+                          </div>
+                          {isEligible && daysUntilDraft && daysUntilDraft > 0 && (
+                            <div style={{ fontSize: '11px', color: subText, marginTop: 2 }}>
+                              {daysUntilDraft} days until draft
+                            </div>
+                          )}
                         </div>
-                      </div>
-                      {inOffseason && (
-                        <div style={{ color: team.color, fontWeight: 600, fontSize: '13px' }}>
-                          Start →
-                        </div>
-                      )}
-                    </button>
-                  )
-                })}
-              </div>
+                        {isEligible && (
+                          <div style={{ color: team.color, fontWeight: 600, fontSize: '13px' }}>
+                            Start →
+                          </div>
+                        )}
+                      </button>
+                    )
+                  })}
+                </div>
+              )}
             </div>
 
             {/* History */}
