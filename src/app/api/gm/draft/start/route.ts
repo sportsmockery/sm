@@ -123,18 +123,20 @@ export async function POST(request: NextRequest) {
       if (viewError) {
         console.error('View insert error:', viewError)
         // Log detailed error for debugging
-        await datalabAdmin.from('gm_errors').insert({
-          source: 'backend',
-          error_type: 'schema',
-          error_message: `Mock draft insert failed: ${viewError.message}`,
-          route: '/api/gm/draft/start',
-          metadata: {
-            attempted_table: 'gm_mock_drafts',
-            error_code: viewError.code,
-            error_details: viewError.details,
-            error_hint: viewError.hint,
-          }
-        }).catch(() => {})
+        try {
+          await datalabAdmin.from('gm_errors').insert({
+            source: 'backend',
+            error_type: 'schema',
+            error_message: `Mock draft insert failed: ${viewError.message}`,
+            route: '/api/gm/draft/start',
+            metadata: {
+              attempted_table: 'gm_mock_drafts',
+              error_code: viewError.code,
+              error_details: viewError.details,
+              error_hint: viewError.hint,
+            }
+          })
+        } catch {}
 
         throw new Error(`Failed to create mock draft. The database schema may need RPC functions. Error: ${viewError.message}`)
       }
@@ -184,19 +186,23 @@ export async function POST(request: NextRequest) {
       if (picksError) {
         console.error('Picks insert error:', picksError)
         // Clean up the mock draft
-        await datalabAdmin.from('gm_mock_drafts').delete().eq('id', mockDraftId).catch(() => {})
+        try {
+          await datalabAdmin.from('gm_mock_drafts').delete().eq('id', mockDraftId)
+        } catch {}
 
-        await datalabAdmin.from('gm_errors').insert({
-          source: 'backend',
-          error_type: 'schema',
-          error_message: `Draft picks insert failed: ${picksError.message}`,
-          route: '/api/gm/draft/start',
-          metadata: {
-            attempted_table: 'gm_mock_draft_picks',
-            error_code: picksError.code,
-            mock_draft_id: mockDraftId,
-          }
-        }).catch(() => {})
+        try {
+          await datalabAdmin.from('gm_errors').insert({
+            source: 'backend',
+            error_type: 'schema',
+            error_message: `Draft picks insert failed: ${picksError.message}`,
+            route: '/api/gm/draft/start',
+            metadata: {
+              attempted_table: 'gm_mock_draft_picks',
+              error_code: picksError.code,
+              mock_draft_id: mockDraftId,
+            }
+          })
+        } catch {}
 
         throw new Error(`Failed to create draft picks: ${picksError.message}`)
       }
