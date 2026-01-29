@@ -1,14 +1,17 @@
+import { createClient } from '@supabase/supabase-js'
 import { HomepageFeed } from '@/components/homepage/HomepageFeed'
 import { getHomepageDataWithFallbacks, FALLBACK_POSTS, FALLBACK_EDITOR_PICKS } from '@/lib/homepage-fallbacks'
-import { supabaseAdmin } from '@/lib/supabase-server'
 import '@/styles/homepage.css'
 
 // Force dynamic rendering
 export const dynamic = 'force-dynamic'
 
 async function getHomepageData() {
-  // Use supabaseAdmin to bypass RLS for public post queries
-  const supabase = supabaseAdmin
+  // Create admin client inline to ensure env vars are available at runtime
+  const supabase = createClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.SUPABASE_SERVICE_ROLE_KEY!
+  )
 
   // 1) Editor picks (pinned_slot 1–6)
   const { data: editorPicks = [] } = await supabase
