@@ -61,7 +61,7 @@ export async function POST(request: NextRequest) {
 
     // Get the mock draft
     const { data: mockDraft, error: mockError } = await datalabAdmin
-      .from('gm_mock_drafts')
+      .from('draft_mocks')
       .select('*')
       .eq('id', mock_id)
       .single()
@@ -77,7 +77,7 @@ export async function POST(request: NextRequest) {
 
     // Get user's picks
     const { data: userPicks } = await datalabAdmin
-      .from('gm_mock_draft_picks')
+      .from('draft_picks')
       .select('*')
       .eq('mock_draft_id', mock_id)
       .eq('is_user_pick', true)
@@ -156,7 +156,7 @@ Grade this mock draft performance.`
 
     // Update mock draft with grade
     await datalabAdmin
-      .from('gm_mock_drafts')
+      .from('draft_mocks')
       .update({
         status: 'graded',
         overall_grade: gradeResult.overall_grade,
@@ -172,7 +172,7 @@ Grade this mock draft performance.`
     if (gradeResult.pick_grades && Array.isArray(gradeResult.pick_grades)) {
       for (const pg of gradeResult.pick_grades) {
         await datalabAdmin
-          .from('gm_mock_draft_picks')
+          .from('draft_picks')
           .update({
             pick_grade: pg.grade,
             pick_analysis: pg.analysis,

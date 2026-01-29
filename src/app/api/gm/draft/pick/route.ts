@@ -20,7 +20,7 @@ export async function POST(request: NextRequest) {
 
     // Get the mock draft
     const { data: mockDraft, error: mockError } = await datalabAdmin
-      .from('gm_mock_drafts')
+      .from('draft_mocks')
       .select('*')
       .eq('id', mock_id)
       .single()
@@ -59,7 +59,7 @@ export async function POST(request: NextRequest) {
 
     // Update the pick with selected prospect
     const { error: updateError } = await datalabAdmin
-      .from('gm_mock_draft_picks')
+      .from('draft_picks')
       .update({
         prospect_id,
         prospect_name: prospect?.name,
@@ -81,7 +81,7 @@ export async function POST(request: NextRequest) {
 
     // Update mock draft status and current pick
     await datalabAdmin
-      .from('gm_mock_drafts')
+      .from('draft_mocks')
       .update({
         current_pick: isComplete ? mockDraft.total_picks : nextPick,
         status: isComplete ? 'completed' : 'in_progress',
@@ -91,7 +91,7 @@ export async function POST(request: NextRequest) {
 
     // Get updated picks
     const { data: picks } = await datalabAdmin
-      .from('gm_mock_draft_picks')
+      .from('draft_picks')
       .select('*')
       .eq('mock_draft_id', mock_id)
       .order('pick_number')
