@@ -59,12 +59,10 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'mock_id is required' }, { status: 400 })
     }
 
-    // Get the mock draft
-    const { data: mockDraft, error: mockError } = await datalabAdmin
-      .from('gm_mock_drafts')
-      .select('*')
-      .eq('id', mock_id)
-      .single()
+    // Get the mock draft using RPC
+    const { data: mockDraft, error: mockError } = await datalabAdmin.rpc('get_mock_draft', {
+      p_mock_id: mock_id,
+    })
 
     if (mockError || !mockDraft) {
       return NextResponse.json({ error: 'Mock draft not found' }, { status: 404 })
@@ -76,38 +74,15 @@ export async function POST(request: NextRequest) {
     }
 
     // Get user's picks
-    const { data: userPicks } = await datalabAdmin
-      .from('gm_mock_draft_picks')
-      .select('*')
-      .eq('mock_draft_id', mock_id)
-      .eq('is_user_pick', true)
-      .order('pick_number')
+    const userPicks = (mockDraft.picks || []).filter((p: any) => p.is_user_pick && p.prospect_id)
 
-    if (!userPicks || userPicks.length === 0) {
+    if (userPicks.length === 0) {
       return NextResponse.json({ error: 'No picks to grade' }, { status: 400 })
-    }
-
-    // Get prospect details for grading context
-    const prospectIds = userPicks.map((p: any) => p.prospect_id).filter(Boolean)
-    let prospectsMap: Record<string, any> = {}
-
-    if (prospectIds.length > 0) {
-      const { data: prospects } = await datalabAdmin
-        .from('gm_draft_prospects')
-        .select('*')
-        .in('prospect_id', prospectIds)
-
-      if (prospects) {
-        for (const p of prospects) {
-          prospectsMap[p.prospect_id] = p
-        }
-      }
     }
 
     // Build grading prompt
     const picksDescription = userPicks.map((p: any) => {
-      const prospect = prospectsMap[p.prospect_id] || {}
-      return `Pick #${p.pick_number} (Round ${p.round}): ${p.prospect_name} (${p.prospect_position}) - ${prospect.school || 'Unknown'} - Rank: ${prospect.rank || 'N/A'} - Grade: ${prospect.grade || 'N/A'}`
+      return `Pick #${p.pick_number} (Round ${p.round}): ${p.prospect_name} (${p.position})`
     }).join('\n')
 
     const teamDisplayNames: Record<string, string> = {
@@ -146,7 +121,6 @@ Grade this mock draft performance.`
     try {
       gradeResult = JSON.parse(rawText)
     } catch {
-      // Try to extract grade from text
       const gradeMatch = rawText.match(/(\d{1,3})/)
       if (gradeMatch) {
         gradeResult.overall_grade = Math.min(100, parseInt(gradeMatch[1]))
@@ -154,31 +128,33 @@ Grade this mock draft performance.`
       gradeResult.analysis = rawText.slice(0, 500)
     }
 
-    // Update mock draft with grade
-    await datalabAdmin
-      .from('gm_mock_drafts')
-      .update({
-        status: 'graded',
-        overall_grade: gradeResult.overall_grade,
-        letter_grade: gradeResult.letter_grade,
-        analysis: gradeResult.analysis,
-        strengths: gradeResult.strengths,
-        weaknesses: gradeResult.weaknesses,
-        updated_at: new Date().toISOString(),
-      })
-      .eq('id', mock_id)
+    // Complete the mock draft using RPC
+    const { error: completeError } = await datalabAdmin.rpc('complete_mock_draft', {
+      p_mock_id: mock_id,
+      p_overall_grade: gradeResult.overall_grade,
+      p_chicago_grade: gradeResult.overall_grade, // Use same grade for chicago grade
+      p_realism_score: null,
+    })
 
-    // Update individual pick grades
+    if (completeError) {
+      console.error('Complete mock draft RPC error:', completeError)
+      // Non-fatal - grade was calculated, just couldn't save status
+    }
+
+    // Update individual pick grades using RPC (if we have them)
     if (gradeResult.pick_grades && Array.isArray(gradeResult.pick_grades)) {
       for (const pg of gradeResult.pick_grades) {
-        await datalabAdmin
-          .from('gm_mock_draft_picks')
-          .update({
-            pick_grade: pg.grade,
-            pick_analysis: pg.analysis,
+        try {
+          await datalabAdmin.rpc('update_mock_draft_pick', {
+            p_mock_id: mock_id,
+            p_pick_number: pg.pick_number,
+            p_prospect_id: null, // Don't update prospect
+            p_prospect_name: null,
+            p_position: null,
+            p_pick_grade: pg.grade,
+            p_commentary: pg.analysis,
           })
-          .eq('mock_draft_id', mock_id)
-          .eq('pick_number', pg.pick_number)
+        } catch {}
       }
     }
 
