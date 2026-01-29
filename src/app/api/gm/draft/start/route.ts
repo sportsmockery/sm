@@ -86,18 +86,41 @@ export async function POST(request: NextRequest) {
 
     if (!datalabRes.ok) {
       const errData = await datalabRes.json().catch(() => ({}))
-      const errorMsg = errData.error || `Datalab API error: ${datalabRes.status}`
-      console.error('Draft start datalab error:', errorMsg, errData)
+      const errorMsg = errData.error || errData.message || `Datalab API error: ${datalabRes.status}`
+      console.error('Draft start datalab error:', {
+        status: datalabRes.status,
+        errorMsg,
+        errData,
+        sentPayload: {
+          chicago_team: datalabChicagoTeam,
+          team_key: teamInfo.key,
+          sport: teamInfo.sport,
+          draft_year: draft_year || new Date().getFullYear(),
+        }
+      })
       try {
         await datalabAdmin.from('gm_errors').insert({
           source: 'backend',
           error_type: 'api',
           error_message: errorMsg,
           route: '/api/gm/draft/start',
-          metadata: { chicago_team, sport: teamInfo.sport, status: datalabRes.status, errData }
+          metadata: {
+            chicago_team: datalabChicagoTeam,
+            original_team: chicago_team,
+            sport: teamInfo.sport,
+            status: datalabRes.status,
+            errData,
+            draft_year: draft_year || new Date().getFullYear(),
+          }
         })
       } catch {}
-      return NextResponse.json({ error: errorMsg, code: errData.code }, { status: datalabRes.status })
+      // Include more detail in the response
+      const details = errData.details || errData.validation_errors || null
+      return NextResponse.json({
+        error: errorMsg,
+        code: errData.code,
+        details,
+      }, { status: datalabRes.status })
     }
 
     const data = await datalabRes.json()

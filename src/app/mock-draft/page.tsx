@@ -224,7 +224,12 @@ export default function MockDraftPage() {
         } else if (data.code === 'AUTH_REQUIRED') {
           router.push('/login?next=/mock-draft')
         } else {
-          setError(data.error || 'Failed to start draft')
+          // Show detailed error if available
+          let errorMsg = data.error || 'Failed to start draft'
+          if (data.details) {
+            errorMsg += `: ${JSON.stringify(data.details)}`
+          }
+          setError(errorMsg)
         }
         return
       }
