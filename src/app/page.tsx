@@ -1,50 +1,17 @@
-import { createServerClient } from '@supabase/ssr'
-import { cookies } from 'next/headers'
 import { HomepageFeed } from '@/components/homepage/HomepageFeed'
-import { TeamPickerPrompt } from '@/components/homepage/TeamPickerPrompt'
-import { DEFAULT_ENGAGEMENT_PROFILE, sortPostsByScore, type ScoringContext } from '@/lib/scoring-v2'
 import { getHomepageDataWithFallbacks, FALLBACK_POSTS, FALLBACK_EDITOR_PICKS } from '@/lib/homepage-fallbacks'
 import { supabaseAdmin } from '@/lib/supabase-server'
 import '@/styles/homepage.css'
 
-// Force dynamic rendering - this page uses cookies for auth
+// Force dynamic rendering
 export const dynamic = 'force-dynamic'
 
 async function getHomepageData() {
-  console.log('[Homepage] Starting data fetch...')
-
-  const cookieStore = await cookies()
-  console.log('[Homepage] Got cookies')
-
-  // Auth client for user detection (uses anon key with cookies)
-  const authClient = createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-    {
-      cookies: {
-        getAll() { return cookieStore.getAll() },
-        setAll(cookiesToSet) {
-          try { cookiesToSet.forEach(({ name, value, options }) => { cookieStore.set(name, value, options) }) } catch {}
-        },
-      },
-    }
-  )
-
-  // Use supabaseAdmin for data queries (bypasses RLS for public content)
+  // Use supabaseAdmin to bypass RLS for public post queries
   const supabase = supabaseAdmin
 
-  // 1) Get user (if any)
-  let userId: string | null = null
-  try {
-    const { data: { user } } = await authClient.auth.getUser()
-    userId = user?.id || null
-  } catch {
-    userId = null
-  }
-
-  // 2) Editor picks (no limit on anonymous vs logged-in)
-  console.log('[Homepage] Fetching editor picks...')
-  const { data: editorPicks = [], error: editorPicksError } = await supabase
+  // 1) Editor picks (pinned_slot 1–6)
+  const { data: editorPicks = [] } = await supabase
     .from('sm_posts')
     .select('id, title, slug, featured_image, team_slug, pinned_slot')
     .eq('editor_pick', true)
@@ -52,9 +19,8 @@ async function getHomepageData() {
     .gte('pinned_slot', 1)
     .lte('pinned_slot', 6)
     .order('pinned_slot', { ascending: true })
-  console.log('[Homepage] Editor picks result:', { count: editorPicks?.length, error: editorPicksError?.message })
 
-  // 3) Trending posts (for badges + sidebar)
+  // 2) Trending posts (based strictly on views in last 7 days)
   const sevenDaysAgo = new Date()
   sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7)
 
@@ -64,14 +30,12 @@ async function getHomepageData() {
     .eq('status', 'published')
     .gte('published_at', sevenDaysAgo.toISOString())
     .order('views', { ascending: false })
-    .limit(20) // we only show top 5 but keep extra for future use
+    .limit(20) // top 20 for flexibility; UI will show top 5
 
   const trendingIds = new Set((trendingPosts || []).map(p => p.id))
 
-  // 4) MAIN FEED: always fetch a large set of published posts
-  // IMPORTANT: this MUST NOT depend on login state
-  console.log('[Homepage] Fetching all posts...')
-  const { data: allPosts = [], error: allPostsError } = await supabase
+  // 3) Main feed: ALL recent published posts, recency only
+  const { data: allPosts = [] } = await supabase
     .from('sm_posts')
     .select(`
       id, title, slug, excerpt, featured_image, team_slug,
@@ -80,81 +44,29 @@ async function getHomepageData() {
     `)
     .eq('status', 'published')
     .order('published_at', { ascending: false })
-    .limit(200) // adjust if needed, but must be "all recent public posts"
-  console.log('[Homepage] All posts result:', { count: allPosts?.length, error: allPostsError?.message })
+    .limit(200) // All recent posts for homepage
 
-  const postsWithFlags = (allPosts || []).map((post: any) => ({
+  // 4) Add flags for UI (no scoring)
+  const postsWithFlags = (allPosts || []).map(post => ({
     ...post,
     is_trending: trendingIds.has(post.id),
     author_name: null
   }))
 
-  // 5) Personalization data for logged-in users (optional, never filters)
-  // Use authClient for user-specific data (respects RLS)
-  let userProfile: any = null
-  const viewedPostIds = new Set<string>()
-
-  if (userId) {
-    const { data: profileData } = await authClient
-      .from('user_engagement_profile')
-      .select('*')
-      .eq('user_id', userId)
-      .single()
-
-    userProfile = profileData || null
-
-    const { data: viewedData } = await authClient
-      .from('user_interactions')
-      .select('post_id')
-      .eq('user_id', userId)
-      .eq('clicked', true)
-
-    if (viewedData) {
-      viewedData.forEach((v: any) => viewedPostIds.add(v.post_id))
-    }
-  }
-
-  // 6) Scoring: NEVER drop posts, only sort for logged-in users
-  const scoringContext: ScoringContext = {
-    user: userProfile,
-    viewedPostIds,
-    isLoggedIn: !!userId
-  }
-
-  // Anonymous users: show posts in pure recency order (no scoring)
-  // Logged-in users: sort by score
-  const rankedPosts = userId
-    ? sortPostsByScore(postsWithFlags as any, scoringContext)
-    : postsWithFlags // already ordered by published_at DESC
-
-  // 7) Apply fallbacks ONLY if absolutely no posts
+  // 5) Apply fallbacks only if there is truly no data
   const finalData = getHomepageDataWithFallbacks(
     editorPicks || [],
-    rankedPosts,
-    (trendingPosts || []).map(p => ({ ...p, is_trending: true }))
+    postsWithFlags,
+    trendingPosts || []
   )
 
-  // 8) Optional: preferred team for UI only (does NOT filter content)
-  let userTeamPreference: string | null = null
-  if (userProfile?.team_scores) {
-    const teams = Object.entries(userProfile.team_scores)
-    teams.sort((a, b) => (b[1] as number) - (a[1] as number))
-    if (teams.length > 0 && (teams[0][1] as number) > 50) {
-      userTeamPreference = teams[0][0]
-    }
-  }
-
-  console.log('[Homepage] Returning data:', {
-    editorPicksCount: finalData.editorPicks?.length,
-    rankedPostsCount: finalData.rankedPosts?.length,
-    trendingPostsCount: finalData.trendingPosts?.length
-  })
   return {
     editorPicks: finalData.editorPicks,
     trendingPosts: finalData.trendingPosts,
+    // IMPORTANT: homepage uses recency, not scoring
     rankedPosts: finalData.rankedPosts,
-    userTeamPreference,
-    isLoggedIn: !!userId
+    isLoggedIn: false,
+    userTeamPreference: null
   }
 }
 
@@ -164,40 +76,21 @@ export default async function HomePage() {
       editorPicks,
       trendingPosts,
       rankedPosts,
-      userTeamPreference,
-      isLoggedIn
+      isLoggedIn,
+      userTeamPreference
     } = await getHomepageData()
 
     return (
-      <>
-        <HomepageFeed
-          initialPosts={rankedPosts}
-          editorPicks={editorPicks}
-          trendingPosts={trendingPosts}
-          userTeamPreference={userTeamPreference}
-          isLoggedIn={isLoggedIn}
-        />
-
-        {/* Team Picker for anonymous users */}
-        {!isLoggedIn && <TeamPickerPrompt />}
-      </>
+      <HomepageFeed
+        initialPosts={rankedPosts}
+        editorPicks={editorPicks}
+        trendingPosts={trendingPosts}
+        userTeamPreference={userTeamPreference}
+        isLoggedIn={isLoggedIn}
+      />
     )
-  } catch (error: any) {
-    // Re-throw Next.js dynamic errors - these should not be caught
-    // They signal to Next.js that the page should be rendered dynamically
-    if (error?.digest === 'DYNAMIC_SERVER_USAGE') {
-      console.log('[Homepage] Re-throwing DYNAMIC_SERVER_USAGE error')
-      throw error
-    }
-
-    console.error('[Homepage] CAUGHT ERROR:', {
-      name: error?.name,
-      message: error?.message,
-      digest: error?.digest,
-      stack: error?.stack?.split('\n').slice(0, 3).join('\n')
-    })
-
-    // Return fallback content only for actual data fetch errors
+  } catch (error) {
+    console.error('Homepage error:', error)
     return (
       <HomepageFeed
         initialPosts={FALLBACK_POSTS}
