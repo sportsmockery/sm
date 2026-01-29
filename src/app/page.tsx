@@ -74,6 +74,20 @@ async function getHomepageData() {
     .order('published_at', { ascending: false })
     .limit(200)
 
+  // Log any query errors
+  if (editorPicksError || trendingError || postsError) {
+    console.log('[Homepage] Query errors:', {
+      editorPicks: editorPicksError?.message,
+      trending: trendingError?.message,
+      posts: postsError?.message
+    })
+  }
+  console.log('[Homepage] Query results:', {
+    editorPicks: editorPicksRaw?.length || 0,
+    trending: trendingPostsRaw?.length || 0,
+    posts: allPostsRaw?.length || 0
+  })
+
   // 4) Add team_slug and flags for UI (no scoring)
   const postsWithFlags = (allPostsRaw || []).map((post: any) => ({
     ...post,
