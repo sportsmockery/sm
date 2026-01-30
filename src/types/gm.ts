@@ -14,20 +14,38 @@ export interface DraftPick {
   originalTeam?: string   // "Own" or team abbreviation
 }
 
-// MLB farm system prospect
+// MLB farm system prospect (matches Datalab gm_mlb_prospects table)
 export interface MLBProspect {
   prospect_id: string
   name: string
   position: string
-  level: 'R' | 'A' | 'A+' | 'AA' | 'AAA'
-  age: number
-  rank: number            // Organization rank
-  isTop100?: boolean      // MLB Top 100 prospect
-  eta?: string            // Expected arrival year, e.g., "2026"
-  headshot_url?: string
-  team_key?: string       // Team abbreviation
+  team_key: string
   team_name?: string
-  stats?: Record<string, number | string | null>
+  team_rank: number           // Organization rank (1-30)
+  mlb_top_100_rank?: number   // MLB Top 100 rank (null if not in top 100)
+  prospect_grade: string      // A+, A, A-, B+, B, B-, C+, C, C-, D
+  prospect_grade_display?: string  // "Grade: A-"
+  trade_value: number         // 25-95 based on grade
+  age: number
+  current_level: string       // 'R' | 'A' | 'A+' | 'AA' | 'AAA'
+  eta?: string                // "Late 2025", "2026", etc.
+  scouting_summary?: string
+  is_prospect: boolean
+  player_type: 'prospect'
+  headshot_url?: string       // Future: player headshots
+
+  // New valuation fields (Jan 2026)
+  prospect_fv_bucket?: number          // Future Value: 40-80
+  prospect_tier?: 'elite' | 'plus' | 'average' | 'organizational'
+  risk_level?: 'low' | 'medium' | 'high'
+  position_group?: 'pitcher' | 'catcher' | 'up_the_middle' | 'corner'
+  prospect_surplus_value_millions?: number  // Trade value in $M (1.0-80.0)
+  proximity_level?: 'MLB' | 'AAA' | 'AA' | 'A' | 'Rookie'
+
+  // Computed helpers for backwards compatibility
+  rank?: number               // Alias for team_rank
+  level?: string              // Alias for current_level
+  isTop100?: boolean          // true if mlb_top_100_rank exists
 }
 
 // Player data (mirrors PlayerData from PlayerCard.tsx)
@@ -116,8 +134,10 @@ export function formatSalary(amount: number | null | undefined): string {
 
 // Format prospect for display
 export function formatProspect(prospect: MLBProspect): { primary: string; secondary: string } {
-  const rankPrefix = prospect.rank ? `#${prospect.rank} ` : ''
+  const rank = prospect.team_rank || prospect.rank
+  const rankPrefix = rank ? `#${rank} ` : ''
   const primary = `${rankPrefix}${prospect.name}`
-  const secondary = `${prospect.level} - ${prospect.position} - Age ${prospect.age}`
+  const level = prospect.current_level || prospect.level || ''
+  const secondary = `${level} - ${prospect.position} - Age ${prospect.age}`
   return { primary, secondary }
 }

@@ -313,14 +313,39 @@ export default function MockDraftPage() {
 
       const data = await res.json()
 
+      // Log for debugging
+      console.log('[AutoAdvance] Response:', {
+        ok: res.ok,
+        status: res.status,
+        picksAdvanced: data.picksAdvanced,
+        currentPick: data.draft?.current_pick,
+        debug: data.debug?.slice(-5), // Last 5 debug messages
+      })
+
       if (!res.ok) {
-        setError(data.error || 'Failed to advance draft')
+        // Show detailed error with debug info if available
+        let errorMsg = data.error || 'Failed to advance draft'
+        if (data.debug && data.debug.length > 0) {
+          console.error('[AutoAdvance] Debug log:', data.debug)
+          errorMsg += ` (Check console for details)`
+        }
+        setError(errorMsg)
         setAutoAdvancing(false)
         return
       }
 
-      setActiveDraft(data.draft)
+      // Check if any picks were actually advanced
+      if (data.picksAdvanced === 0) {
+        console.log('[AutoAdvance] No picks advanced - may already be at user pick')
+      }
+
+      if (data.draft) {
+        setActiveDraft(data.draft)
+      } else {
+        setError('No draft data returned from server')
+      }
     } catch (e) {
+      console.error('[AutoAdvance] Exception:', e)
       setError('Network error. Please try again.')
     }
     setAutoAdvancing(false)

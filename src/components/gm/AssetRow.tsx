@@ -35,8 +35,10 @@ interface AssetRowProps {
   prospect?: MLBProspect
   teamColor: string
   teamAbbrev?: string
-  onRemove: () => void
+  onRemove?: () => void
   showTooltip?: boolean
+  compact?: boolean    // Smaller row for 3-team view
+  showOnly?: boolean   // Hide remove button, display only
 }
 
 export function AssetRow({
@@ -48,6 +50,8 @@ export function AssetRow({
   teamAbbrev,
   onRemove,
   showTooltip = true,
+  compact = false,
+  showOnly = false,
 }: AssetRowProps) {
   const { theme } = useTheme()
   const isDark = theme === 'dark'
@@ -56,6 +60,13 @@ export function AssetRow({
   const textColor = isDark ? '#fff' : '#1a1a1a'
   const subText = isDark ? '#9ca3af' : '#6b7280'
   const borderColor = isDark ? '#374151' : '#e5e7eb'
+
+  // Compact sizing
+  const padding = compact ? '6px 8px' : '10px 12px'
+  const iconSize = compact ? 24 : 32
+  const primaryFontSize = compact ? 11 : 13
+  const secondaryFontSize = compact ? 10 : 11
+  const minHeight = compact ? 36 : 48
 
   // Determine accent color
   const accentColor = type === 'PLAYER'
@@ -89,10 +100,13 @@ export function AssetRow({
     rightBadge = 'Pick'
     tooltipText = 'Draft pick value varies by position'
   } else if (type === 'PROSPECT' && prospect) {
-    const rankPrefix = prospect.rank ? `#${prospect.rank} ` : ''
+    const rank = prospect.team_rank || prospect.rank || 0
+    const level = prospect.current_level || prospect.level || ''
+    const isTop100 = prospect.mlb_top_100_rank != null || prospect.isTop100 === true
+    const rankPrefix = rank ? `#${rank} ` : ''
     primaryText = `${rankPrefix}${prospect.name}`
-    secondaryText = `${prospect.level} - ${prospect.position} - Age ${prospect.age}`
-    rightBadge = prospect.isTop100 ? 'Top 100' : 'Prospect'
+    secondaryText = `${level} - ${prospect.position} - Age ${prospect.age}`
+    rightBadge = prospect.prospect_grade || (isTop100 ? 'Top 100' : 'Prospect')
     if (prospect.eta) {
       rightText = `ETA ${prospect.eta}`
     }
@@ -111,20 +125,20 @@ export function AssetRow({
         position: 'relative',
         display: 'flex',
         alignItems: 'center',
-        gap: 10,
-        padding: '10px 12px',
-        borderRadius: 10,
+        gap: compact ? 6 : 10,
+        padding,
+        borderRadius: compact ? 6 : 10,
         backgroundColor: isDark ? '#1f2937' : '#f9fafb',
         border: `1px solid ${borderColor}`,
         borderLeft: `3px solid ${accentColor}`,
-        minHeight: 48,
+        minHeight,
       }}
     >
       {/* Left: Icon or Avatar */}
       <div style={{
-        width: 32,
-        height: 32,
-        borderRadius: type === 'PLAYER' ? '50%' : 6,
+        width: iconSize,
+        height: iconSize,
+        borderRadius: type === 'PLAYER' ? '50%' : compact ? 4 : 6,
         backgroundColor: avatarUrl ? 'transparent' : `${accentColor}15`,
         display: 'flex',
         alignItems: 'center',
@@ -159,7 +173,7 @@ export function AssetRow({
       {/* Middle: Labels */}
       <div style={{ flex: 1, minWidth: 0 }}>
         <div style={{
-          fontSize: 13,
+          fontSize: primaryFontSize,
           fontWeight: 600,
           color: textColor,
           whiteSpace: 'nowrap',
@@ -168,9 +182,9 @@ export function AssetRow({
         }}>
           {primaryText}
         </div>
-        {secondaryText && (
+        {secondaryText && !compact && (
           <div style={{
-            fontSize: 11,
+            fontSize: secondaryFontSize,
             color: subText,
             whiteSpace: 'nowrap',
             overflow: 'hidden',
@@ -182,13 +196,13 @@ export function AssetRow({
       </div>
 
       {/* Right: Stat/Badge + Remove */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexShrink: 0 }}>
-        {rightText && (
+      <div style={{ display: 'flex', alignItems: 'center', gap: compact ? 4 : 8, flexShrink: 0 }}>
+        {rightText && !compact && (
           <span style={{ fontSize: 11, color: subText, fontWeight: 500 }}>
             {rightText}
           </span>
         )}
-        {rightBadge && (
+        {rightBadge && !compact && (
           <span style={{
             fontSize: 10,
             fontWeight: 600,
@@ -200,27 +214,29 @@ export function AssetRow({
             {rightBadge}
           </span>
         )}
-        <button
-          onClick={(e) => {
-            e.stopPropagation()
-            onRemove()
-          }}
-          style={{
-            background: 'none',
-            border: 'none',
-            cursor: 'pointer',
-            color: '#ef4444',
-            fontSize: 16,
-            fontWeight: 700,
-            padding: 4,
-            lineHeight: 1,
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-          }}
-        >
-          &times;
-        </button>
+        {!showOnly && onRemove && (
+          <button
+            onClick={(e) => {
+              e.stopPropagation()
+              onRemove()
+            }}
+            style={{
+              background: 'none',
+              border: 'none',
+              cursor: 'pointer',
+              color: '#ef4444',
+              fontSize: compact ? 14 : 16,
+              fontWeight: 700,
+              padding: compact ? 2 : 4,
+              lineHeight: 1,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+            }}
+          >
+            &times;
+          </button>
+        )}
       </div>
 
       {/* Tooltip */}
