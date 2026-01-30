@@ -11,6 +11,14 @@ function getAnthropic() {
   return new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY! })
 }
 
+// Map sport to league format for Datalab
+const SPORT_TO_LEAGUE: Record<string, string> = {
+  nfl: 'NFL',
+  nba: 'NBA',
+  nhl: 'NHL',
+  mlb: 'MLB',
+}
+
 const DRAFT_AI_SYSTEM = `You are an AI simulating NFL/NBA/NHL/MLB draft picks for teams. Given the current draft state and available prospects, select the most realistic pick for the team on the clock.
 
 Consider:
@@ -77,17 +85,31 @@ export async function POST(request: NextRequest) {
       .filter((p: any) => p.prospect_id)
       .map((p: any) => p.prospect_id)
 
-    const { data: availableProspects } = await datalabAdmin
-      .from('gm_draft_prospects')
+    // Use draft_prospects table with league column (uppercase: NFL, NBA, etc.)
+    const league = SPORT_TO_LEAGUE[mockDraft.sport?.toLowerCase()] || mockDraft.sport?.toUpperCase()
+
+    const { data: availableProspects, error: prospectError } = await datalabAdmin
+      .from('draft_prospects')
       .select('*')
-      .eq('sport', mockDraft.sport)
+      .eq('league', league)
       .eq('draft_year', mockDraft.draft_year)
-      .order('rank', { ascending: true })
+      .order('big_board_rank', { ascending: true })
       .limit(100)
 
-    const filteredProspects = (availableProspects || []).filter(
-      (p: any) => !pickedProspectIds.includes(p.prospect_id)
-    )
+    if (prospectError) {
+      console.error('Prospects fetch error:', prospectError)
+    }
+
+    // Map to consistent format and filter out picked prospects
+    const filteredProspects = (availableProspects || [])
+      .map((p: any) => ({
+        ...p,
+        prospect_id: p.id?.toString() || p.name, // Use id as prospect_id
+        school: p.school_team,
+        grade: p.projected_value,
+        rank: p.big_board_rank,
+      }))
+      .filter((p: any) => !pickedProspectIds.includes(p.prospect_id))
 
     if (filteredProspects.length === 0) {
       return NextResponse.json({ error: 'No prospects available' }, { status: 400 })
