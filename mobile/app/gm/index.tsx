@@ -59,6 +59,8 @@ export default function GMTradeHub() {
   const [loading, setLoading] = useState(false)
   const [teams, setTeams] = useState<OpponentTeam[]>([])
   const [teamsLoading, setTeamsLoading] = useState(false)
+  const [capWarnings, setCapWarnings] = useState<string[]>([])
+  const [showCapWarnings, setShowCapWarnings] = useState(false)
 
   // Derived state
   const teamConfig = state.chicagoTeam ? TEAMS[state.chicagoTeam] : null
@@ -192,12 +194,48 @@ export default function GMTradeHub() {
     dispatch({ type: 'SET_ACTIVE_SHEET', sheet: 'none' })
   }, [dispatch])
 
-  // Handle grade
-  const handleGrade = async () => {
+  // Validate cap before grading
+  const validateCapBeforeGrade = async () => {
+    if (!canGrade || !state.chicagoTeam || !state.opponent) return
+
+    try {
+      const capResult = await gmApi.validateCap({
+        chicago_team: state.chicagoTeam,
+        trade_partner: state.opponent.team_name,
+        partner_team_key: state.opponent.team_key,
+        players_sent: state.selectedPlayers.map(p => ({
+          name: p.full_name,
+          espn_id: p.espn_id || undefined,
+          cap_hit: p.cap_hit || undefined,
+        })),
+        players_received: state.selectedOpponentPlayers.map(p => ({
+          name: p.full_name,
+          salary_millions: p.cap_hit ? p.cap_hit / 1_000_000 : undefined,
+        })),
+      })
+
+      if (capResult.warnings && capResult.warnings.length > 0) {
+        setCapWarnings(capResult.warnings)
+        setShowCapWarnings(true)
+        return // Don't proceed, wait for user to confirm
+      }
+
+      // No warnings, proceed directly
+      submitGrade()
+    } catch (err) {
+      console.warn('Cap validation failed, proceeding anyway:', err)
+      submitGrade()
+    }
+  }
+
+  // Handle grade (after cap validation)
+  const submitGrade = async () => {
     if (!canGrade || state.grading || !state.chicagoTeam || !state.opponent) return
 
     triggerHaptic('impact_medium')
     dispatch({ type: 'SET_GRADING', grading: true })
+    setShowCapWarnings(false)
+    setCapWarnings([])
 
     try {
       const result = await gmApi.gradeTrade({
@@ -220,6 +258,11 @@ export default function GMTradeHub() {
       Alert.alert('Error', err.message || 'Failed to grade trade. Please try again.')
       dispatch({ type: 'SET_GRADING', grading: false })
     }
+  }
+
+  // Handler that triggers cap validation first
+  const handleGrade = () => {
+    validateCapBeforeGrade()
   }
 
   // Handle remove assets
@@ -530,6 +573,53 @@ export default function GMTradeHub() {
               <TouchableOpacity
                 style={styles.modalCancel}
                 onPress={() => setShowAuthPrompt(false)}
+              >
+                <Text style={[styles.modalCancelText, { color: colors.textMuted }]}>Cancel</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </Modal>
+
+        {/* Cap Warnings Modal */}
+        <Modal
+          visible={showCapWarnings}
+          transparent
+          animationType="fade"
+          onRequestClose={() => setShowCapWarnings(false)}
+        >
+          <View style={styles.modalOverlay}>
+            <View style={[styles.modalContent, { backgroundColor: colors.surface }]}>
+              <View style={[styles.modalIcon, { backgroundColor: '#fef3c720' }]}>
+                <Ionicons name="warning" size={40} color="#eab308" />
+              </View>
+              <Text style={[styles.modalTitle, { color: colors.text }]}>Cap Space Warnings</Text>
+              <ScrollView style={{ maxHeight: 200, marginVertical: 12 }}>
+                {capWarnings.map((warning, index) => (
+                  <Text
+                    key={index}
+                    style={{
+                      color: colors.textMuted,
+                      fontSize: 14,
+                      marginBottom: 8,
+                      lineHeight: 20,
+                    }}
+                  >
+                    {warning}
+                  </Text>
+                ))}
+              </ScrollView>
+              <Text style={[styles.modalMessage, { color: colors.textMuted, marginBottom: 16 }]}>
+                You can still submit this trade despite the cap issues.
+              </Text>
+              <TouchableOpacity
+                style={[styles.modalBtn, { backgroundColor: COLORS.primary }]}
+                onPress={submitGrade}
+              >
+                <Text style={styles.modalBtnText}>Submit Anyway</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={styles.modalCancel}
+                onPress={() => setShowCapWarnings(false)}
               >
                 <Text style={[styles.modalCancelText, { color: colors.textMuted }]}>Cancel</Text>
               </TouchableOpacity>

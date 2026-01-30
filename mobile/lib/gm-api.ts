@@ -24,6 +24,7 @@ import type {
   MLBProspect,
   SeasonSimulationResult,
   UserScoreResponse,
+  CapValidationResult,
 } from './gm-types'
 
 const BASE = API_BASE_URL
@@ -255,5 +256,25 @@ export const gmApi = {
       method: 'POST',
       body: JSON.stringify({ mock_id: mockId }),
     })
+  },
+
+  // Cap Validation (pre-submission warnings)
+  async validateCap(payload: {
+    chicago_team: ChicagoTeam
+    trade_partner: string
+    partner_team_key: string
+    players_sent: Array<{ name: string; espn_id?: string; cap_hit?: number }>
+    players_received: Array<{ name: string; salary_millions?: number }>
+  }) {
+    // Call Datalab directly for cap validation
+    const res = await fetch('https://datalab.sportsmockery.com/api/gm/validate-cap', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
+    })
+    if (!res.ok) {
+      throw new Error('Failed to validate cap')
+    }
+    return res.json() as Promise<CapValidationResult>
   },
 }

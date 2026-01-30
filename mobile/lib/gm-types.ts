@@ -514,3 +514,29 @@ export interface UserScoreResponse {
   mock_drafts: MockDraftSummary[]
   trade_stats: TradeStats
 }
+
+// Cap Validation Types
+export interface CapSummary {
+  chicago_before: {
+    cap_space: number
+    cap_space_formatted: string
+    is_over_cap: boolean
+  }
+  chicago_after: {
+    cap_space: number
+    cap_space_formatted: string
+    is_over_cap: boolean
+  }
+  salary_in: number
+  salary_in_formatted: string
+  salary_out: number
+  salary_out_formatted: string
+  net_change: number
+  net_change_formatted: string
+}
+
+export interface CapValidationResult {
+  valid: boolean
+  warnings: string[]
+  cap_summary: CapSummary
+}

@@ -807,6 +807,9 @@ export default function MockDraftPage() {
                 <MockDraftGradePanel
                   grade={gradeResult}
                   teamColor={teamColor}
+                  teamName={currentTeamConfig?.name}
+                  draftYear={activeDraft?.draft_year}
+                  mockId={activeDraft?.id}
                   onViewDetails={() => setShowGradeModal(true)}
                 />
               )}
