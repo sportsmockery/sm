@@ -18,7 +18,6 @@ import { Image } from 'expo-image'
 import { useRouter } from 'expo-router'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { Ionicons } from '@expo/vector-icons'
-import { GestureHandlerRootView } from 'react-native-gesture-handler'
 import BottomSheet from '@gorhom/bottom-sheet'
 
 import { useTheme } from '@/hooks/useTheme'
@@ -264,7 +263,6 @@ export default function GMTradeHub() {
   }
 
   return (
-    <GestureHandlerRootView style={{ flex: 1 }}>
       <SafeAreaView
         style={[styles.container, { backgroundColor: colors.background }]}
         edges={['top']}
@@ -536,7 +534,6 @@ export default function GMTradeHub() {
           </View>
         </Modal>
       </SafeAreaView>
-    </GestureHandlerRootView>
   )
 }
 
