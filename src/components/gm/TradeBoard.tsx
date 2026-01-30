@@ -571,23 +571,289 @@ export function TradeBoard({
               </button>
               {gradeResult.shared_code && (
                 <button
-                  onClick={() => {
-                    navigator.clipboard.writeText(`${window.location.origin}/gm/share/${gradeResult.shared_code}`)
-                  }}
+                  onClick={handleCopyLink}
                   style={{
                     padding: '12px 28px',
                     borderRadius: 10,
-                    border: `2px solid ${borderColor}`,
-                    backgroundColor: 'transparent',
-                    color: textColor,
+                    border: `2px solid ${copied ? '#22c55e' : borderColor}`,
+                    backgroundColor: copied ? '#22c55e10' : 'transparent',
+                    color: copied ? '#22c55e' : textColor,
                     fontWeight: 600,
                     fontSize: 14,
                     cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 6,
+                    transition: 'all 0.2s',
                   }}
                 >
-                  Copy Link
+                  {copied ? (
+                    <>
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#22c55e" strokeWidth="2.5">
+                        <path d="M20 6L9 17l-5-5" strokeLinecap="round" strokeLinejoin="round" />
+                      </svg>
+                      Copied!
+                    </>
+                  ) : (
+                    <>
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                        <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" strokeLinecap="round" strokeLinejoin="round" />
+                        <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" strokeLinecap="round" strokeLinejoin="round" />
+                      </svg>
+                      Copy Link
+                    </>
+                  )}
                 </button>
               )}
+              <button
+                onClick={handleCreateImage}
+                disabled={generatingImage}
+                style={{
+                  padding: '12px 28px',
+                  borderRadius: 10,
+                  border: `2px solid ${borderColor}`,
+                  backgroundColor: 'transparent',
+                  color: textColor,
+                  fontWeight: 600,
+                  fontSize: 14,
+                  cursor: generatingImage ? 'wait' : 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 6,
+                }}
+              >
+                {generatingImage ? (
+                  <>
+                    <div style={{
+                      width: 16, height: 16,
+                      border: '2px solid transparent',
+                      borderTopColor: textColor,
+                      borderRadius: '50%',
+                      animation: 'spin 0.8s linear infinite',
+                    }} />
+                    Generating...
+                  </>
+                ) : (
+                  <>
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                      <rect x="3" y="3" width="18" height="18" rx="2" strokeLinecap="round" strokeLinejoin="round" />
+                      <circle cx="8.5" cy="8.5" r="1.5" fill="currentColor" />
+                      <path d="M21 15l-5-5L5 21" strokeLinecap="round" strokeLinejoin="round" />
+                    </svg>
+                    Create Image
+                  </>
+                )}
+              </button>
+            </div>
+
+            {/* Share Options Panel */}
+            <AnimatePresence>
+              {showShareOptions && (
+                <motion.div
+                  initial={{ opacity: 0, height: 0 }}
+                  animate={{ opacity: 1, height: 'auto' }}
+                  exit={{ opacity: 0, height: 0 }}
+                  style={{
+                    marginTop: 16,
+                    padding: 20,
+                    borderRadius: 12,
+                    backgroundColor: isDark ? '#111827' : '#f3f4f6',
+                    border: `1px solid ${borderColor}`,
+                    overflow: 'hidden',
+                  }}
+                >
+                  {/* Generated Image Preview */}
+                  {generatedImageUrl && (
+                    <div style={{ marginBottom: 16, textAlign: 'center' }}>
+                      <img
+                        src={generatedImageUrl}
+                        alt="Trade grade"
+                        style={{
+                          maxWidth: '100%',
+                          maxHeight: 300,
+                          borderRadius: 12,
+                          border: `1px solid ${borderColor}`,
+                          marginBottom: 12,
+                        }}
+                      />
+                      <button
+                        onClick={handleDownloadImage}
+                        style={{
+                          padding: '10px 20px',
+                          borderRadius: 8,
+                          border: 'none',
+                          backgroundColor: '#22c55e',
+                          color: '#fff',
+                          fontWeight: 600,
+                          fontSize: 13,
+                          cursor: 'pointer',
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          gap: 6,
+                        }}
+                      >
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" strokeLinecap="round" strokeLinejoin="round" />
+                          <polyline points="7 10 12 15 17 10" strokeLinecap="round" strokeLinejoin="round" />
+                          <line x1="12" y1="15" x2="12" y2="3" strokeLinecap="round" strokeLinejoin="round" />
+                        </svg>
+                        Download Image
+                      </button>
+                    </div>
+                  )}
+
+                  <div style={{ textAlign: 'center', marginBottom: 12 }}>
+                    <div style={{ fontSize: 13, fontWeight: 600, color: textColor, marginBottom: 4 }}>
+                      Share your trade
+                    </div>
+                    <div style={{ fontSize: 11, color: subText }}>
+                      Show off your GM skills on social media
+                    </div>
+                  </div>
+
+                  {/* Social Icons */}
+                  <div style={{ display: 'flex', justifyContent: 'center', gap: 12 }}>
+                    {/* Twitter/X */}
+                    <a
+                      href={socialShareLinks.twitter}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      style={{
+                        width: 48, height: 48,
+                        borderRadius: 12,
+                        backgroundColor: '#000000',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        textDecoration: 'none',
+                        transition: 'transform 0.2s',
+                      }}
+                      onMouseOver={(e) => (e.currentTarget.style.transform = 'scale(1.1)')}
+                      onMouseOut={(e) => (e.currentTarget.style.transform = 'scale(1)')}
+                    >
+                      <svg width="20" height="20" viewBox="0 0 24 24" fill="#fff">
+                        <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
+                      </svg>
+                    </a>
+
+                    {/* Facebook */}
+                    <a
+                      href={socialShareLinks.facebook}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      style={{
+                        width: 48, height: 48,
+                        borderRadius: 12,
+                        backgroundColor: '#1877F2',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        textDecoration: 'none',
+                        transition: 'transform 0.2s',
+                      }}
+                      onMouseOver={(e) => (e.currentTarget.style.transform = 'scale(1.1)')}
+                      onMouseOut={(e) => (e.currentTarget.style.transform = 'scale(1)')}
+                    >
+                      <svg width="20" height="20" viewBox="0 0 24 24" fill="#fff">
+                        <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z" />
+                      </svg>
+                    </a>
+
+                    {/* Reddit */}
+                    <a
+                      href={socialShareLinks.reddit}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      style={{
+                        width: 48, height: 48,
+                        borderRadius: 12,
+                        backgroundColor: '#FF4500',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        textDecoration: 'none',
+                        transition: 'transform 0.2s',
+                      }}
+                      onMouseOver={(e) => (e.currentTarget.style.transform = 'scale(1.1)')}
+                      onMouseOut={(e) => (e.currentTarget.style.transform = 'scale(1)')}
+                    >
+                      <svg width="20" height="20" viewBox="0 0 24 24" fill="#fff">
+                        <path d="M12 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0zm5.01 4.744c.688 0 1.25.561 1.25 1.249a1.25 1.25 0 0 1-2.498.056l-2.597-.547-.8 3.747c1.824.07 3.48.632 4.674 1.488.308-.309.73-.491 1.207-.491.968 0 1.754.786 1.754 1.754 0 .716-.435 1.333-1.01 1.614a3.111 3.111 0 0 1 .042.52c0 2.694-3.13 4.87-7.004 4.87-3.874 0-7.004-2.176-7.004-4.87 0-.183.015-.366.043-.534A1.748 1.748 0 0 1 4.028 12c0-.968.786-1.754 1.754-1.754.463 0 .898.196 1.207.49 1.207-.883 2.878-1.43 4.744-1.487l.885-4.182a.342.342 0 0 1 .14-.197.35.35 0 0 1 .238-.042l2.906.617a1.214 1.214 0 0 1 1.108-.701zM9.25 12C8.561 12 8 12.562 8 13.25c0 .687.561 1.248 1.25 1.248.687 0 1.248-.561 1.248-1.249 0-.688-.561-1.249-1.249-1.249zm5.5 0c-.687 0-1.248.561-1.248 1.25 0 .687.561 1.248 1.249 1.248.688 0 1.249-.561 1.249-1.249 0-.687-.562-1.249-1.25-1.249zm-5.466 3.99a.327.327 0 0 0-.231.094.33.33 0 0 0 0 .463c.842.842 2.484.913 2.961.913.477 0 2.105-.056 2.961-.913a.361.361 0 0 0 .029-.463.33.33 0 0 0-.464 0c-.547.533-1.684.73-2.512.73-.828 0-1.979-.196-2.512-.73a.326.326 0 0 0-.232-.095z" />
+                      </svg>
+                    </a>
+
+                    {/* Copy Link */}
+                    <button
+                      onClick={handleCopyLink}
+                      style={{
+                        width: 48, height: 48,
+                        borderRadius: 12,
+                        backgroundColor: isDark ? '#374151' : '#e5e7eb',
+                        border: 'none',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        cursor: 'pointer',
+                        transition: 'transform 0.2s',
+                      }}
+                      onMouseOver={(e) => (e.currentTarget.style.transform = 'scale(1.1)')}
+                      onMouseOut={(e) => (e.currentTarget.style.transform = 'scale(1)')}
+                    >
+                      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke={textColor} strokeWidth="2">
+                        <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" strokeLinecap="round" strokeLinejoin="round" />
+                        <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" strokeLinecap="round" strokeLinejoin="round" />
+                      </svg>
+                    </button>
+                  </div>
+
+                  {/* Promo text */}
+                  <div style={{
+                    marginTop: 16,
+                    padding: '12px 16px',
+                    borderRadius: 8,
+                    backgroundColor: '#bc000010',
+                    border: '1px solid #bc000030',
+                    textAlign: 'center',
+                  }}>
+                    <div style={{ fontSize: 12, color: '#bc0000', fontWeight: 600 }}>
+                      Build your own trades at SportsMockery.com/gm
+                    </div>
+                  </div>
+
+                  {/* Close button */}
+                  <button
+                    onClick={() => {
+                      setShowShareOptions(false)
+                      setGeneratedImageUrl(null)
+                    }}
+                    style={{
+                      display: 'block',
+                      margin: '12px auto 0',
+                      padding: '8px 16px',
+                      borderRadius: 6,
+                      border: 'none',
+                      backgroundColor: 'transparent',
+                      color: subText,
+                      fontWeight: 500,
+                      fontSize: 12,
+                      cursor: 'pointer',
+                    }}
+                  >
+                    Close
+                  </button>
+                </motion.div>
+              )}
+            </AnimatePresence>
+
+            {/* Watermark for image generation */}
+            <div style={{
+              marginTop: 12,
+              textAlign: 'center',
+              fontSize: 11,
+              color: subText,
+              opacity: 0.7,
+            }}>
+              Built with SportsMockery Trade Simulator
             </div>
           </div>
         )}
