@@ -34,11 +34,13 @@ export async function GET(request: NextRequest) {
 
   try {
     // Query directly from Datalab Supabase (gm_mlb_prospects table)
+    // Fields: name, position, team_key, team_name, org_rank, age,
+    //         prospect_grade, prospect_grade_numeric, trade_value, source
     let query = datalabAdmin
       .from('gm_mlb_prospects')
       .select('*')
       .eq('team_key', datalabKey)
-      .order('team_rank', { ascending: true })
+      .order('org_rank', { ascending: true })
       .limit(limit)
 
     if (minGrade) {

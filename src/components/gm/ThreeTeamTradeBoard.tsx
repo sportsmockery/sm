@@ -150,13 +150,13 @@ export function ThreeTeamTradeBoard({
                   compact
                 />
               ))}
-              {sends.prospects.map(p => (
+              {sends.prospects.map((p, i) => (
                 <AssetRow
-                  key={p.prospect_id}
+                  key={p.id || p.prospect_id || `prospect-${i}`}
                   type="PROSPECT"
                   prospect={p}
                   teamColor={team.color}
-                  onRemove={() => onRemoveProspect(p.prospect_id)}
+                  onRemove={() => onRemoveProspect(p.id || p.prospect_id || '')}
                   compact
                 />
               ))}
@@ -192,8 +192,8 @@ export function ThreeTeamTradeBoard({
                 {receivesFrom1.players.map(p => (
                   <AssetRow key={p.player_id} type="PLAYER" player={p} teamColor={team.color} compact showOnly />
                 ))}
-                {receivesFrom1.prospects.map(p => (
-                  <AssetRow key={p.prospect_id} type="PROSPECT" prospect={p} teamColor={team.color} compact showOnly />
+                {receivesFrom1.prospects.map((p, i) => (
+                  <AssetRow key={p.id || p.prospect_id || `r1-prospect-${i}`} type="PROSPECT" prospect={p} teamColor={team.color} compact showOnly />
                 ))}
                 {receivesFrom1.draftPicks.map((pk, i) => (
                   <AssetRow key={`pk1-${i}`} type="DRAFT_PICK" pick={pk} teamColor={team.color} compact showOnly />
@@ -207,8 +207,8 @@ export function ThreeTeamTradeBoard({
                 {receivesFrom2.players.map(p => (
                   <AssetRow key={p.player_id} type="PLAYER" player={p} teamColor={team.color} compact showOnly />
                 ))}
-                {receivesFrom2.prospects.map(p => (
-                  <AssetRow key={p.prospect_id} type="PROSPECT" prospect={p} teamColor={team.color} compact showOnly />
+                {receivesFrom2.prospects.map((p, i) => (
+                  <AssetRow key={p.id || p.prospect_id || `r2-prospect-${i}`} type="PROSPECT" prospect={p} teamColor={team.color} compact showOnly />
                 ))}
                 {receivesFrom2.draftPicks.map((pk, i) => (
                   <AssetRow key={`pk2-${i}`} type="DRAFT_PICK" pick={pk} teamColor={team.color} compact showOnly />

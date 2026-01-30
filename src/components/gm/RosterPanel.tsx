@@ -406,16 +406,16 @@ export function RosterPanel({
               <AnimatePresence>
                 {filteredProspects.map((prospect, i) => (
                   <motion.div
-                    key={prospect.prospect_id}
+                    key={prospect.id || prospect.prospect_id || `prospect-${i}`}
                     initial={{ opacity: 0, y: 10 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: Math.min(i * 0.03, 0.3) }}
                   >
                     <ProspectCard
                       prospect={prospect}
-                      selected={selectedProspectIds?.has(prospect.prospect_id) || false}
+                      selected={selectedProspectIds?.has(prospect.id || prospect.prospect_id || '') || false}
                       teamColor={teamColor}
-                      onClick={() => onToggleProspect?.(prospect.prospect_id)}
+                      onClick={() => onToggleProspect?.(prospect.id || prospect.prospect_id || '')}
                     />
                   </motion.div>
                 ))}
