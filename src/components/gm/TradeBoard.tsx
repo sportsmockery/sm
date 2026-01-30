@@ -1,5 +1,5 @@
 'use client'
-import { useState, useRef, useCallback } from 'react'
+import { useState, useCallback, useRef } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
 import { PlayerData } from './PlayerCard'
 import { AssetRow } from './AssetRow'
@@ -54,6 +54,7 @@ interface TradeBoardProps {
   mobile?: boolean
   gradeResult?: GradeResult | null
   onNewTrade?: () => void
+  onEditTrade?: () => void
 }
 
 export function TradeBoard({
@@ -68,6 +69,7 @@ export function TradeBoard({
   mobile = false,
   gradeResult,
   onNewTrade,
+  onEditTrade,
 }: TradeBoardProps) {
   const { theme } = useTheme()
   const isDark = theme === 'dark'
@@ -106,17 +108,11 @@ export function TradeBoard({
     setGeneratingImage(true)
 
     try {
-      // Dynamically import html-to-image
       const { toPng } = await import('html-to-image')
-
       const dataUrl = await toPng(gradeCardRef.current, {
         quality: 0.95,
         backgroundColor: isDark ? '#1f2937' : '#ffffff',
-        style: {
-          borderRadius: '16px',
-        },
       })
-
       setGeneratedImageUrl(dataUrl)
       setShowShareOptions(true)
     } catch (e) {
@@ -569,6 +565,30 @@ export function TradeBoard({
               >
                 New Trade
               </button>
+              {onEditTrade && (
+                <button
+                  onClick={onEditTrade}
+                  style={{
+                    padding: '12px 28px',
+                    borderRadius: 10,
+                    border: `2px solid ${borderColor}`,
+                    backgroundColor: 'transparent',
+                    color: textColor,
+                    fontWeight: 600,
+                    fontSize: 14,
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 6,
+                  }}
+                >
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" strokeLinecap="round" strokeLinejoin="round" />
+                    <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" strokeLinecap="round" strokeLinejoin="round" />
+                  </svg>
+                  Edit Trade
+                </button>
+              )}
               {gradeResult.shared_code && (
                 <button
                   onClick={handleCopyLink}
@@ -605,45 +625,6 @@ export function TradeBoard({
                   )}
                 </button>
               )}
-              <button
-                onClick={handleCreateImage}
-                disabled={generatingImage}
-                style={{
-                  padding: '12px 28px',
-                  borderRadius: 10,
-                  border: `2px solid ${borderColor}`,
-                  backgroundColor: 'transparent',
-                  color: textColor,
-                  fontWeight: 600,
-                  fontSize: 14,
-                  cursor: generatingImage ? 'wait' : 'pointer',
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: 6,
-                }}
-              >
-                {generatingImage ? (
-                  <>
-                    <div style={{
-                      width: 16, height: 16,
-                      border: '2px solid transparent',
-                      borderTopColor: textColor,
-                      borderRadius: '50%',
-                      animation: 'spin 0.8s linear infinite',
-                    }} />
-                    Generating...
-                  </>
-                ) : (
-                  <>
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                      <rect x="3" y="3" width="18" height="18" rx="2" strokeLinecap="round" strokeLinejoin="round" />
-                      <circle cx="8.5" cy="8.5" r="1.5" fill="currentColor" />
-                      <path d="M21 15l-5-5L5 21" strokeLinecap="round" strokeLinejoin="round" />
-                    </svg>
-                    Create Image
-                  </>
-                )}
-              </button>
             </div>
 
             {/* Share Options Panel */}
@@ -662,46 +643,6 @@ export function TradeBoard({
                     overflow: 'hidden',
                   }}
                 >
-                  {/* Generated Image Preview */}
-                  {generatedImageUrl && (
-                    <div style={{ marginBottom: 16, textAlign: 'center' }}>
-                      <img
-                        src={generatedImageUrl}
-                        alt="Trade grade"
-                        style={{
-                          maxWidth: '100%',
-                          maxHeight: 300,
-                          borderRadius: 12,
-                          border: `1px solid ${borderColor}`,
-                          marginBottom: 12,
-                        }}
-                      />
-                      <button
-                        onClick={handleDownloadImage}
-                        style={{
-                          padding: '10px 20px',
-                          borderRadius: 8,
-                          border: 'none',
-                          backgroundColor: '#22c55e',
-                          color: '#fff',
-                          fontWeight: 600,
-                          fontSize: 13,
-                          cursor: 'pointer',
-                          display: 'inline-flex',
-                          alignItems: 'center',
-                          gap: 6,
-                        }}
-                      >
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" strokeLinecap="round" strokeLinejoin="round" />
-                          <polyline points="7 10 12 15 17 10" strokeLinecap="round" strokeLinejoin="round" />
-                          <line x1="12" y1="15" x2="12" y2="3" strokeLinecap="round" strokeLinejoin="round" />
-                        </svg>
-                        Download Image
-                      </button>
-                    </div>
-                  )}
-
                   <div style={{ textAlign: 'center', marginBottom: 12 }}>
                     <div style={{ fontSize: 13, fontWeight: 600, color: textColor, marginBottom: 4 }}>
                       Share your trade
@@ -822,10 +763,7 @@ export function TradeBoard({
 
                   {/* Close button */}
                   <button
-                    onClick={() => {
-                      setShowShareOptions(false)
-                      setGeneratedImageUrl(null)
-                    }}
+                    onClick={() => setShowShareOptions(false)}
                     style={{
                       display: 'block',
                       margin: '12px auto 0',
