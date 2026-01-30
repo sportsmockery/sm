@@ -12,6 +12,7 @@ import type {
   Sport,
   ValidationResult,
   UserPreferences,
+  MLBProspect,
 } from './gm-types'
 import { CHICAGO_TEAM_SPORT } from './gm-types'
 
@@ -33,6 +34,13 @@ interface GMState {
   grading: boolean
   gradeResult: GradeResult | null
   sessionId: string | null
+  // MLB Prospects State
+  prospects: MLBProspect[]
+  prospectsLoading: boolean
+  selectedProspects: MLBProspect[]
+  opponentProspects: MLBProspect[]
+  opponentProspectsLoading: boolean
+  selectedOpponentProspects: MLBProspect[]
   // V2 State
   validation: ValidationResult | null
   validating: boolean
@@ -59,6 +67,15 @@ type GMAction =
   | { type: 'SET_GRADE_RESULT'; result: GradeResult | null }
   | { type: 'SET_SESSION_ID'; id: string }
   | { type: 'RESET' }
+  // MLB Prospects Actions
+  | { type: 'SET_PROSPECTS'; prospects: MLBProspect[] }
+  | { type: 'SET_PROSPECTS_LOADING'; loading: boolean }
+  | { type: 'TOGGLE_PROSPECT'; prospect: MLBProspect }
+  | { type: 'SET_OPPONENT_PROSPECTS'; prospects: MLBProspect[] }
+  | { type: 'SET_OPPONENT_PROSPECTS_LOADING'; loading: boolean }
+  | { type: 'TOGGLE_OPPONENT_PROSPECT'; prospect: MLBProspect }
+  | { type: 'REMOVE_PROSPECT'; prospectId: string }
+  | { type: 'REMOVE_OPPONENT_PROSPECT'; prospectId: string }
   // V2 Actions
   | { type: 'SET_VALIDATION'; validation: ValidationResult | null }
   | { type: 'SET_VALIDATING'; validating: boolean }
@@ -84,6 +101,13 @@ const initialState: GMState = {
   grading: false,
   gradeResult: null,
   sessionId: null,
+  // MLB Prospects State
+  prospects: [],
+  prospectsLoading: false,
+  selectedProspects: [],
+  opponentProspects: [],
+  opponentProspectsLoading: false,
+  selectedOpponentProspects: [],
   // V2 State
   validation: null,
   validating: false,
@@ -115,7 +139,14 @@ function gmReducer(state: GMState, action: GMAction): GMState {
       }
     }
     case 'SET_OPPONENT':
-      return { ...state, opponent: action.opponent, selectedOpponentPlayers: [], opponentRoster: [] }
+      return {
+        ...state,
+        opponent: action.opponent,
+        selectedOpponentPlayers: [],
+        opponentRoster: [],
+        opponentProspects: [],
+        selectedOpponentProspects: [],
+      }
     case 'SET_OPPONENT_ROSTER':
       return { ...state, opponentRoster: action.players, opponentRosterLoading: false }
     case 'SET_OPPONENT_ROSTER_LOADING':
@@ -145,6 +176,53 @@ function gmReducer(state: GMState, action: GMAction): GMState {
       return { ...state, sessionId: action.id }
     case 'RESET':
       return initialState
+    // MLB Prospects Actions
+    case 'SET_PROSPECTS':
+      return { ...state, prospects: action.prospects, prospectsLoading: false }
+    case 'SET_PROSPECTS_LOADING':
+      return { ...state, prospectsLoading: action.loading }
+    case 'TOGGLE_PROSPECT': {
+      const prospectId = action.prospect.id || action.prospect.prospect_id || action.prospect.name
+      const exists = state.selectedProspects.find(
+        p => (p.id || p.prospect_id || p.name) === prospectId
+      )
+      return {
+        ...state,
+        selectedProspects: exists
+          ? state.selectedProspects.filter(p => (p.id || p.prospect_id || p.name) !== prospectId)
+          : [...state.selectedProspects, action.prospect],
+      }
+    }
+    case 'SET_OPPONENT_PROSPECTS':
+      return { ...state, opponentProspects: action.prospects, opponentProspectsLoading: false }
+    case 'SET_OPPONENT_PROSPECTS_LOADING':
+      return { ...state, opponentProspectsLoading: action.loading }
+    case 'TOGGLE_OPPONENT_PROSPECT': {
+      const prospectId = action.prospect.id || action.prospect.prospect_id || action.prospect.name
+      const exists = state.selectedOpponentProspects.find(
+        p => (p.id || p.prospect_id || p.name) === prospectId
+      )
+      return {
+        ...state,
+        selectedOpponentProspects: exists
+          ? state.selectedOpponentProspects.filter(p => (p.id || p.prospect_id || p.name) !== prospectId)
+          : [...state.selectedOpponentProspects, action.prospect],
+      }
+    }
+    case 'REMOVE_PROSPECT':
+      return {
+        ...state,
+        selectedProspects: state.selectedProspects.filter(
+          p => (p.id || p.prospect_id || p.name) !== action.prospectId
+        ),
+      }
+    case 'REMOVE_OPPONENT_PROSPECT':
+      return {
+        ...state,
+        selectedOpponentProspects: state.selectedOpponentProspects.filter(
+          p => (p.id || p.prospect_id || p.name) !== action.prospectId
+        ),
+      }
     // V2 Actions
     case 'SET_VALIDATION':
       return { ...state, validation: action.validation, validating: false }

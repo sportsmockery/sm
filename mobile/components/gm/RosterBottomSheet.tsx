@@ -1,6 +1,6 @@
 /**
  * RosterBottomSheet - Reusable bottom sheet for roster browsing
- * Features: search, position filters, player selection
+ * Features: search, position filters, player selection, MLB prospects toggle
  */
 
 import React, { memo, useCallback, useMemo, useState, forwardRef } from 'react'
@@ -21,9 +21,12 @@ import type { BottomSheetBackdropProps } from '@gorhom/bottom-sheet'
 import { useTheme } from '@/hooks/useTheme'
 import { triggerHaptic } from '@/hooks/useHaptics'
 import { COLORS } from '@/lib/config'
-import type { PlayerData, Sport } from '@/lib/gm-types'
+import type { PlayerData, Sport, MLBProspect } from '@/lib/gm-types'
 
 import PlayerCardCompact from './PlayerCardCompact'
+import ProspectCard from './ProspectCard'
+
+type ViewMode = 'roster' | 'prospects'
 
 interface RosterBottomSheetProps {
   visible: boolean
@@ -37,6 +40,12 @@ interface RosterBottomSheetProps {
   title?: string
   showDraftPicksButton?: boolean
   onOpenDraftPicks?: () => void
+  // MLB Prospects props
+  prospects?: MLBProspect[]
+  selectedProspectIds?: Set<string>
+  onToggleProspect?: (prospect: MLBProspect) => void
+  prospectsLoading?: boolean
+  onLoadProspects?: () => void
 }
 
 const SNAP_POINTS = ['35%', '70%', '92%']
@@ -55,20 +64,34 @@ export const RosterBottomSheet = forwardRef<BottomSheet, RosterBottomSheetProps>
       title,
       showDraftPicksButton = false,
       onOpenDraftPicks,
+      // MLB Prospects
+      prospects = [],
+      selectedProspectIds = new Set(),
+      onToggleProspect,
+      prospectsLoading = false,
+      onLoadProspects,
     },
     ref
   ) {
     const { colors, isDark } = useTheme()
     const [search, setSearch] = useState('')
     const [posFilter, setPosFilter] = useState<string | null>(null)
+    const [viewMode, setViewMode] = useState<ViewMode>('roster')
 
-    // Extract unique positions
+    const isMLB = sport === 'mlb'
+    const showProspectsToggle = isMLB && onToggleProspect
+
+    // Extract unique positions based on view mode
     const positions = useMemo(() => {
+      if (viewMode === 'prospects') {
+        const pos = new Set(prospects.map((p) => p.position))
+        return Array.from(pos).sort()
+      }
       const pos = new Set(players.map((p) => p.position))
       return Array.from(pos).sort()
-    }, [players])
+    }, [players, prospects, viewMode])
 
-    // Filter players
+    // Filter players/prospects
     const filteredPlayers = useMemo(() => {
       let list = players
       if (search) {
@@ -81,12 +104,48 @@ export const RosterBottomSheet = forwardRef<BottomSheet, RosterBottomSheetProps>
       return list
     }, [players, search, posFilter])
 
+    const filteredProspects = useMemo(() => {
+      let list = prospects
+      if (search) {
+        const q = search.toLowerCase()
+        list = list.filter((p) => p.name.toLowerCase().includes(q))
+      }
+      if (posFilter) {
+        list = list.filter((p) => p.position === posFilter)
+      }
+      return list
+    }, [prospects, search, posFilter])
+
     const handleTogglePlayer = useCallback(
       (player: PlayerData) => {
         onTogglePlayer(player)
         setSearch('') // Clear search after selecting a player
       },
       [onTogglePlayer]
+    )
+
+    const handleToggleProspect = useCallback(
+      (prospect: MLBProspect) => {
+        if (onToggleProspect) {
+          onToggleProspect(prospect)
+          setSearch('') // Clear search after selecting a prospect
+        }
+      },
+      [onToggleProspect]
+    )
+
+    const handleViewModeChange = useCallback(
+      (mode: ViewMode) => {
+        triggerHaptic('selection')
+        setViewMode(mode)
+        setPosFilter(null)
+        setSearch('')
+        // Load prospects when switching to prospects view
+        if (mode === 'prospects' && prospects.length === 0 && onLoadProspects) {
+          onLoadProspects()
+        }
+      },
+      [prospects.length, onLoadProspects]
     )
 
     const renderBackdrop = useCallback(
@@ -113,12 +172,36 @@ export const RosterBottomSheet = forwardRef<BottomSheet, RosterBottomSheetProps>
       [selectedPlayerIds, team.color, handleTogglePlayer]
     )
 
+    const renderProspect = useCallback(
+      ({ item }: { item: MLBProspect }) => {
+        const prospectId = item.id || item.prospect_id || item.name
+        return (
+          <ProspectCard
+            prospect={item}
+            selected={selectedProspectIds.has(prospectId)}
+            teamColor={team.color}
+            onPress={() => handleToggleProspect(item)}
+          />
+        )
+      },
+      [selectedProspectIds, team.color, handleToggleProspect]
+    )
+
     const keyExtractor = useCallback(
       (item: PlayerData, index: number) => `${item.player_id}-${index}`,
       []
     )
 
+    const prospectKeyExtractor = useCallback(
+      (item: MLBProspect, index: number) => `${item.id || item.prospect_id || item.name}-${index}`,
+      []
+    )
+
     if (!visible) return null
+
+    const isLoading = viewMode === 'roster' ? loading : prospectsLoading
+    const currentCount = viewMode === 'roster' ? players.length : prospects.length
+    const currentSelectedCount = viewMode === 'roster' ? selectedPlayerIds.size : selectedProspectIds.size
 
     return (
       <BottomSheet
@@ -146,7 +229,7 @@ export const RosterBottomSheet = forwardRef<BottomSheet, RosterBottomSheetProps>
                 {title || team.name}
               </Text>
               <Text style={[styles.headerSubtitle, { color: colors.textMuted }]}>
-                {selectedPlayerIds.size} selected · {players.length} players
+                {currentSelectedCount} selected · {currentCount} {viewMode === 'roster' ? 'players' : 'prospects'}
               </Text>
             </View>
             <TouchableOpacity onPress={onClose} style={styles.closeBtn}>
@@ -154,13 +237,59 @@ export const RosterBottomSheet = forwardRef<BottomSheet, RosterBottomSheetProps>
             </TouchableOpacity>
           </View>
 
+          {/* Roster/Prospects Toggle (MLB only) */}
+          {showProspectsToggle && (
+            <View style={styles.toggleContainer}>
+              <TouchableOpacity
+                style={[
+                  styles.toggleBtn,
+                  viewMode === 'roster' && styles.toggleBtnActive,
+                  { backgroundColor: viewMode === 'roster' ? COLORS.primary : colors.background },
+                ]}
+                onPress={() => handleViewModeChange('roster')}
+              >
+                <Ionicons
+                  name="people"
+                  size={16}
+                  color={viewMode === 'roster' ? '#fff' : colors.text}
+                />
+                <Text style={[
+                  styles.toggleBtnText,
+                  { color: viewMode === 'roster' ? '#fff' : colors.text },
+                ]}>
+                  Roster
+                </Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={[
+                  styles.toggleBtn,
+                  viewMode === 'prospects' && styles.toggleBtnActive,
+                  { backgroundColor: viewMode === 'prospects' ? '#22c55e' : colors.background },
+                ]}
+                onPress={() => handleViewModeChange('prospects')}
+              >
+                <Ionicons
+                  name="star"
+                  size={16}
+                  color={viewMode === 'prospects' ? '#fff' : colors.text}
+                />
+                <Text style={[
+                  styles.toggleBtnText,
+                  { color: viewMode === 'prospects' ? '#fff' : colors.text },
+                ]}>
+                  Prospects
+                </Text>
+              </TouchableOpacity>
+            </View>
+          )}
+
           {/* Search */}
           <View style={styles.searchContainer}>
             <View style={[styles.searchBox, { backgroundColor: colors.background }]}>
               <Ionicons name="search" size={16} color={colors.textMuted} />
               <TextInput
                 style={[styles.searchInput, { color: colors.text }]}
-                placeholder="Search players..."
+                placeholder={viewMode === 'roster' ? 'Search players...' : 'Search prospects...'}
                 placeholderTextColor={colors.textMuted}
                 value={search}
                 onChangeText={setSearch}
@@ -221,15 +350,15 @@ export const RosterBottomSheet = forwardRef<BottomSheet, RosterBottomSheetProps>
             )}
           </View>
 
-          {/* Player List */}
-          {loading ? (
+          {/* List Content */}
+          {isLoading ? (
             <View style={styles.loadingContainer}>
               <ActivityIndicator size="large" color={COLORS.primary} />
               <Text style={[styles.loadingText, { color: colors.textMuted }]}>
-                Loading roster...
+                Loading {viewMode === 'roster' ? 'roster' : 'prospects'}...
               </Text>
             </View>
-          ) : (
+          ) : viewMode === 'roster' ? (
             <FlatList
               data={filteredPlayers}
               keyExtractor={keyExtractor}
@@ -241,6 +370,22 @@ export const RosterBottomSheet = forwardRef<BottomSheet, RosterBottomSheetProps>
                   <Ionicons name="search-outline" size={40} color={colors.textMuted} />
                   <Text style={[styles.emptyText, { color: colors.textMuted }]}>
                     No players found
+                  </Text>
+                </View>
+              }
+            />
+          ) : (
+            <FlatList
+              data={filteredProspects}
+              keyExtractor={prospectKeyExtractor}
+              renderItem={renderProspect}
+              contentContainerStyle={styles.listContent}
+              showsVerticalScrollIndicator={false}
+              ListEmptyComponent={
+                <View style={styles.emptyContainer}>
+                  <Ionicons name="star-outline" size={40} color={colors.textMuted} />
+                  <Text style={[styles.emptyText, { color: colors.textMuted }]}>
+                    No prospects found
                   </Text>
                 </View>
               }
@@ -289,6 +434,26 @@ const styles = StyleSheet.create({
   },
   closeBtn: {
     padding: 4,
+  },
+  toggleContainer: {
+    flexDirection: 'row',
+    paddingHorizontal: 16,
+    paddingTop: 12,
+    gap: 8,
+  },
+  toggleBtn: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 10,
+    borderRadius: 10,
+    gap: 6,
+  },
+  toggleBtnActive: {},
+  toggleBtnText: {
+    fontSize: 13,
+    fontFamily: 'Montserrat-SemiBold',
   },
   searchContainer: {
     paddingHorizontal: 16,

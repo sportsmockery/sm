@@ -60,7 +60,7 @@ export default function TeamsScreen() {
             <View style={styles.gmBannerLeft}>
               <Text style={styles.gmBannerBadge}>NEW</Text>
               <Text style={styles.gmBannerTitle}>GM Trade Simulator</Text>
-              <Text style={styles.gmBannerDesc}>Build trades and get AI grades</Text>
+              <Text style={styles.gmBannerDesc}>Build trades & get AI grades</Text>
             </View>
             <View style={styles.gmBannerArrow}>
               <Text style={styles.gmBannerArrowText}>{'>'}</Text>
