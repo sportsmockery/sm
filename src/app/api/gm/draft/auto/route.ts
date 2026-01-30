@@ -42,16 +42,26 @@ export async function POST(request: NextRequest) {
     }
 
     // Get the mock draft using RPC
-    const { data: mockDraft, error: mockError } = await datalabAdmin.rpc('get_mock_draft', {
+    const { data: mockDraftData, error: mockError } = await datalabAdmin.rpc('get_mock_draft', {
       p_mock_id: mock_id,
     })
 
-    if (mockError || !mockDraft) {
+    if (mockError) {
+      console.error('get_mock_draft RPC error:', mockError)
+      return NextResponse.json({ error: 'Mock draft not found' }, { status: 404 })
+    }
+
+    // RPC can return array or single object depending on function definition
+    const mockDraft = Array.isArray(mockDraftData) ? mockDraftData[0] : mockDraftData
+
+    if (!mockDraft) {
+      console.error('Mock draft not found for id:', mock_id)
       return NextResponse.json({ error: 'Mock draft not found' }, { status: 404 })
     }
 
     // Verify ownership
     if (mockDraft.user_id !== user.id) {
+      console.error('Ownership mismatch:', { stored: mockDraft.user_id, current: user.id })
       return NextResponse.json({ error: 'Unauthorized' }, { status: 403 })
     }
 
