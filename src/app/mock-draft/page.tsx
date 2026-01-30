@@ -273,6 +273,9 @@ export default function MockDraftPage() {
           mock_id: activeDraft.id,
           prospect_id: prospect.id,
           pick_number: currentPick.pick_number,
+          // Pass prospect info directly - no need for API to join to draft_prospects table
+          prospect_name: prospect.name,
+          position: prospect.position,
         }),
       })
 

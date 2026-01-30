@@ -44,22 +44,10 @@ export async function POST(request: NextRequest) {
 
     const actualPickNumber = pick_number || mockDraft.current_pick
 
-    // Get prospect details if not provided
-    let prospectName = prospect_name
-    let prospectPosition = position
-
-    if (!prospectName || !prospectPosition) {
-      const { data: prospect } = await datalabAdmin
-        .from('gm_draft_prospects')
-        .select('name, position')
-        .eq('prospect_id', prospect_id)
-        .single()
-
-      if (prospect) {
-        prospectName = prospectName || prospect.name
-        prospectPosition = prospectPosition || prospect.position
-      }
-    }
+    // Use prospect details directly from request - no need to join to draft_prospects table
+    // The draft_picks table has denormalized data: prospect_name, position, prospect_id
+    const prospectName = prospect_name || 'Unknown'
+    const prospectPosition = position || 'Unknown'
 
     // Update the pick using RPC
     const { error: updateError } = await datalabAdmin.rpc('update_mock_draft_pick', {
