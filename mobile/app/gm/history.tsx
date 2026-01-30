@@ -20,7 +20,7 @@ import type { Trade } from '@/lib/gm-types'
 
 function getGradeColor(grade: number) {
   if (grade >= 85) return '#22c55e'
-  if (grade >= 75) return '#f59e0b'
+  if (grade >= 70) return '#f59e0b'
   if (grade >= 50) return '#f97316'
   return '#ef4444'
 }

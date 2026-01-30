@@ -26,7 +26,7 @@ function formatMoney(value: number | null | undefined): string {
 
 function getGradeColor(grade: number) {
   if (grade >= 85) return '#22c55e'
-  if (grade >= 75) return '#f59e0b'
+  if (grade >= 70) return '#f59e0b'
   if (grade >= 50) return '#f97316'
   return '#ef4444'
 }
@@ -110,6 +110,24 @@ export default function GMResultScreen() {
           <View style={styles.dangerBadge}>
             <Ionicons name="warning" size={16} color="#f59e0b" />
             <Text style={styles.dangerText}>Dangerous Trade</Text>
+          </View>
+        )}
+
+        {/* Rejection Reason Box */}
+        {result.status === 'rejected' && (
+          <View style={[styles.rejectionCard, { backgroundColor: 'rgba(239,68,68,0.1)' }]}>
+            <Text style={styles.rejectionTitle}>Why This Trade Was Rejected</Text>
+            <Text style={[styles.rejectionText, { color: colors.text }]}>
+              {result.rejection_reason || `Trade score of ${result.grade} is below the 70-point acceptance threshold. The AI GM determined this trade does not provide enough value to your team.`}
+            </Text>
+            <View style={styles.rejectionScoreRow}>
+              <Text style={[styles.rejectionScoreLabel, { color: colors.textMuted }]}>
+                Current score: <Text style={{ color: '#ef4444', fontFamily: 'Montserrat-Bold' }}>{result.grade}</Text>
+              </Text>
+              <Text style={[styles.rejectionScoreLabel, { color: colors.textMuted }]}>
+                Needed: <Text style={{ color: '#22c55e', fontFamily: 'Montserrat-Bold' }}>70+</Text>
+              </Text>
+            </View>
           </View>
         )}
 
@@ -471,5 +489,37 @@ const styles = StyleSheet.create({
   tradeArrow: {
     alignItems: 'center',
     paddingVertical: 8,
+  },
+  // Rejection reason styles
+  rejectionCard: {
+    width: '100%',
+    borderRadius: 14,
+    padding: 16,
+    marginBottom: 12,
+    borderWidth: 1,
+    borderColor: '#ef4444',
+  },
+  rejectionTitle: {
+    fontSize: 15,
+    fontFamily: 'Montserrat-Bold',
+    color: '#ef4444',
+    marginBottom: 10,
+  },
+  rejectionText: {
+    fontSize: 14,
+    fontFamily: 'Montserrat-Regular',
+    lineHeight: 22,
+    marginBottom: 12,
+  },
+  rejectionScoreRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    paddingTop: 10,
+    borderTopWidth: 1,
+    borderTopColor: 'rgba(239,68,68,0.3)',
+  },
+  rejectionScoreLabel: {
+    fontSize: 13,
+    fontFamily: 'Montserrat-Medium',
   },
 })
