@@ -3,8 +3,23 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>SportsMockery - New Features Tour Preview</title>
+  <title>SportsMockery - New Features Tour</title>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;800;900&display=swap" rel="stylesheet">
   <style>
+    :root {
+      --sm-primary: #bc0000;
+      --sm-primary-dark: #8a0000;
+      --sm-primary-light: #ff4444;
+      --sm-bg-dark: #0a0a0a;
+      --sm-bg-surface: #1a1a1a;
+      --sm-bg-card: #242424;
+      --sm-text: #ffffff;
+      --sm-text-muted: #9ca3af;
+      --sm-border: #333333;
+      --sm-success: #22c55e;
+      --sm-warning: #f59e0b;
+    }
+
     * {
       margin: 0;
       padding: 0;
@@ -12,19 +27,19 @@
     }
 
     body {
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-      background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+      font-family: 'Montserrat', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: var(--sm-bg-dark);
       min-height: 100vh;
       display: flex;
       align-items: center;
       justify-content: center;
-      padding: 20px;
+      padding: 16px;
     }
 
     .tour-overlay {
       position: fixed;
       inset: 0;
-      background: rgba(0, 0, 0, 0.85);
+      background: rgba(0, 0, 0, 0.9);
       display: flex;
       align-items: center;
       justify-content: center;
@@ -33,153 +48,126 @@
     }
 
     .tour-container {
-      background: #ffffff;
-      border-radius: 20px;
-      max-width: 640px;
+      background: var(--sm-bg-surface);
+      border-radius: 24px;
+      max-width: 480px;
       width: 100%;
       max-height: 90vh;
       overflow: hidden;
-      box-shadow: 0 25px 50px rgba(0, 0, 0, 0.5);
+      box-shadow: 0 25px 80px rgba(188, 0, 0, 0.2), 0 0 0 1px rgba(255, 255, 255, 0.05);
       display: flex;
       flex-direction: column;
     }
 
+    /* Header */
     .tour-header {
-      background: linear-gradient(135deg, #bc0000 0%, #8a0000 100%);
-      padding: 20px 24px;
+      padding: 20px 24px 16px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid var(--sm-border);
+    }
+
+    .header-left {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .sm-logo {
+      height: 36px;
+      width: auto;
+    }
+
+    .header-badge {
+      background: linear-gradient(135deg, var(--sm-primary), var(--sm-primary-dark));
       color: white;
-      position: relative;
+      font-size: 10px;
+      font-weight: 700;
+      padding: 4px 10px;
+      border-radius: 20px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
     }
 
-    .tour-header h1 {
-      font-size: 22px;
-      font-weight: 800;
-      margin-bottom: 4px;
-    }
-
-    .tour-header p {
-      font-size: 14px;
-      opacity: 0.9;
-    }
-
-    .close-tour {
-      position: absolute;
-      top: 16px;
-      right: 16px;
-      background: rgba(255, 255, 255, 0.2);
+    .close-btn {
+      background: rgba(255, 255, 255, 0.1);
       border: none;
-      color: white;
-      width: 32px;
-      height: 32px;
+      color: var(--sm-text-muted);
+      width: 36px;
+      height: 36px;
       border-radius: 50%;
       cursor: pointer;
-      font-size: 18px;
+      font-size: 20px;
       display: flex;
       align-items: center;
       justify-content: center;
-      transition: background 0.2s;
-    }
-
-    .close-tour:hover {
-      background: rgba(255, 255, 255, 0.3);
-    }
-
-    .progress-container {
-      padding: 16px 24px;
-      background: #f8f9fa;
-      border-bottom: 1px solid #e9ecef;
-    }
-
-    .progress-bar {
-      height: 8px;
-      background: #e9ecef;
-      border-radius: 4px;
-      overflow: hidden;
-    }
-
-    .progress-fill {
-      height: 100%;
-      background: linear-gradient(90deg, #bc0000, #ff4444);
-      border-radius: 4px;
-      transition: width 0.3s ease;
-    }
-
-    .progress-text {
-      display: flex;
-      justify-content: space-between;
-      margin-top: 8px;
-      font-size: 12px;
-      color: #666;
-    }
-
-    .toc-container {
-      padding: 12px 24px;
-      background: #f0f4f8;
-      border-bottom: 1px solid #e0e4e8;
-    }
-
-    .toc-label {
-      font-size: 11px;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-      color: #666;
-      margin-bottom: 8px;
-      font-weight: 600;
-    }
-
-    .toc-buttons {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 6px;
-    }
-
-    .toc-btn {
-      padding: 6px 12px;
-      border-radius: 20px;
-      border: 1px solid #ddd;
-      background: white;
-      color: #333;
-      font-size: 11px;
-      font-weight: 600;
-      cursor: pointer;
       transition: all 0.2s;
     }
 
-    .toc-btn:hover {
-      border-color: #bc0000;
-      color: #bc0000;
-    }
-
-    .toc-btn.active {
-      background: #bc0000;
-      border-color: #bc0000;
+    .close-btn:hover {
+      background: rgba(255, 255, 255, 0.15);
       color: white;
     }
 
+    /* Progress Dots */
+    .progress-section {
+      padding: 16px 24px;
+      display: flex;
+      justify-content: center;
+      gap: 6px;
+    }
+
+    .progress-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--sm-border);
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+
+    .progress-dot.active {
+      background: var(--sm-primary);
+      width: 24px;
+      border-radius: 4px;
+    }
+
+    .progress-dot.completed {
+      background: var(--sm-primary-light);
+    }
+
+    /* Content Area */
     .tour-content {
       flex: 1;
       overflow-y: auto;
-      padding: 24px;
+      padding: 0 24px 24px;
     }
 
     .slide {
       display: none;
-      animation: fadeIn 0.3s ease;
+      animation: slideIn 0.4s ease;
     }
 
     .slide.active {
       display: block;
     }
 
-    @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(10px); }
-      to { opacity: 1; transform: translateY(0); }
+    @keyframes slideIn {
+      from { opacity: 0; transform: translateX(20px); }
+      to { opacity: 1; transform: translateX(0); }
+    }
+
+    /* Slide Header */
+    .slide-header {
+      text-align: center;
+      margin-bottom: 24px;
     }
 
     .slide-icon {
       width: 80px;
       height: 80px;
-      margin: 0 auto 20px;
+      margin: 0 auto 16px;
       border-radius: 20px;
       display: flex;
       align-items: center;
@@ -188,130 +176,437 @@
     }
 
     .slide-icon img {
-      width: 60px;
-      height: 60px;
+      width: 56px;
+      height: 56px;
       object-fit: contain;
     }
 
     .slide-title {
-      font-size: 24px;
+      font-size: 28px;
       font-weight: 800;
-      text-align: center;
+      color: var(--sm-text);
       margin-bottom: 8px;
-      color: #1a1a1a;
+      line-height: 1.2;
     }
 
     .slide-subtitle {
-      font-size: 14px;
-      text-align: center;
-      color: #666;
-      margin-bottom: 24px;
+      font-size: 15px;
+      color: var(--sm-text-muted);
+      line-height: 1.5;
     }
 
-    .slide-content {
-      background: #f8f9fa;
+    /* Feature Highlight Box */
+    .highlight-box {
+      background: linear-gradient(135deg, var(--sm-primary), var(--sm-primary-dark));
+      border-radius: 16px;
+      padding: 16px 20px;
+      margin-bottom: 20px;
+      text-align: center;
+    }
+
+    .highlight-box .label {
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+      color: rgba(255, 255, 255, 0.8);
+      margin-bottom: 4px;
+    }
+
+    .highlight-box .text {
+      font-size: 14px;
+      font-weight: 700;
+      color: white;
+      line-height: 1.4;
+    }
+
+    /* Team Logos Row */
+    .team-logos {
+      display: flex;
+      justify-content: center;
+      gap: 12px;
+      margin: 20px 0;
+    }
+
+    .team-logo {
+      width: 52px;
+      height: 52px;
+      border-radius: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 8px;
+      transition: transform 0.2s;
+    }
+
+    .team-logo:hover {
+      transform: scale(1.1);
+    }
+
+    .team-logo img {
+      width: 36px;
+      height: 36px;
+      object-fit: contain;
+    }
+
+    /* Feature List Card */
+    .feature-card {
+      background: var(--sm-bg-card);
       border-radius: 16px;
       padding: 20px;
       margin-bottom: 16px;
     }
 
-    .slide-content h3 {
-      font-size: 16px;
+    .feature-card-title {
+      font-size: 14px;
       font-weight: 700;
-      color: #1a1a1a;
-      margin-bottom: 12px;
+      color: var(--sm-text);
+      margin-bottom: 16px;
       display: flex;
       align-items: center;
       gap: 8px;
     }
 
-    .slide-content p {
-      font-size: 14px;
-      line-height: 1.6;
-      color: #444;
-      margin-bottom: 12px;
+    .feature-list {
+      list-style: none;
     }
 
-    .slide-content p:last-child {
-      margin-bottom: 0;
+    .feature-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      padding: 12px 0;
+      border-bottom: 1px solid var(--sm-border);
+    }
+
+    .feature-item:last-child {
+      border-bottom: none;
+      padding-bottom: 0;
+    }
+
+    .feature-item:first-child {
+      padding-top: 0;
+    }
+
+    .feature-icon {
+      width: 36px;
+      height: 36px;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .feature-icon img {
+      width: 24px;
+      height: 24px;
+      object-fit: contain;
+    }
+
+    .feature-icon svg {
+      width: 20px;
+      height: 20px;
+    }
+
+    .feature-text {
+      flex: 1;
+    }
+
+    .feature-text strong {
+      display: block;
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--sm-text);
+      margin-bottom: 2px;
+    }
+
+    .feature-text span {
+      font-size: 12px;
+      color: var(--sm-text-muted);
+      line-height: 1.4;
     }
 
     /* Preview Box */
     .preview-box {
-      background: #1a1a1a;
-      border-radius: 12px;
+      background: var(--sm-bg-dark);
+      border-radius: 16px;
       padding: 16px;
       margin: 16px 0;
+      border: 1px solid var(--sm-border);
       position: relative;
       overflow: hidden;
-    }
-
-    .preview-box.light {
-      background: #f5f5f5;
     }
 
     .preview-header {
       display: flex;
       align-items: center;
-      gap: 8px;
+      gap: 10px;
       margin-bottom: 12px;
-      padding-bottom: 8px;
-      border-bottom: 1px solid #333;
-    }
-
-    .preview-box.light .preview-header {
-      border-bottom-color: #ddd;
+      padding-bottom: 10px;
+      border-bottom: 1px solid var(--sm-border);
     }
 
     .preview-header img {
-      width: 24px;
-      height: 24px;
-      border-radius: 6px;
+      width: 28px;
+      height: 28px;
+      border-radius: 8px;
     }
 
     .preview-header span {
-      font-size: 13px;
+      font-size: 14px;
       font-weight: 600;
-      color: #fff;
+      color: var(--sm-text);
     }
 
-    .preview-box.light .preview-header span {
-      color: #333;
+    /* Chat Bubble */
+    .chat-bubble {
+      border-radius: 12px;
+      padding: 12px 14px;
+      margin-bottom: 8px;
     }
 
-    /* Mouse cursor animation */
-    .cursor-demo {
-      position: absolute;
-      width: 20px;
-      height: 20px;
-      pointer-events: none;
-      z-index: 10;
+    .chat-bubble.user {
+      background: var(--sm-bg-card);
     }
 
-    .cursor-demo svg {
-      width: 20px;
-      height: 20px;
-      filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3));
+    .chat-bubble.ai {
+      background: rgba(34, 197, 94, 0.15);
+      border: 1px solid rgba(34, 197, 94, 0.3);
     }
 
-    @keyframes moveCursor {
-      0% { transform: translate(20px, 20px); }
-      30% { transform: translate(120px, 60px); }
-      50% { transform: translate(120px, 60px) scale(0.9); }
-      55% { transform: translate(120px, 60px) scale(1); }
-      100% { transform: translate(200px, 100px); }
+    .chat-bubble .label {
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 4px;
     }
 
-    .cursor-animate {
-      animation: moveCursor 3s ease-in-out infinite;
+    .chat-bubble.user .label {
+      color: var(--sm-text-muted);
     }
 
-    /* Animated Chart Bars (D3-style) */
+    .chat-bubble.ai .label {
+      color: var(--sm-success);
+    }
+
+    .chat-bubble .message {
+      font-size: 13px;
+      color: var(--sm-text);
+      line-height: 1.5;
+    }
+
+    /* Trade Preview */
+    .trade-preview {
+      display: grid;
+      grid-template-columns: 1fr auto 1fr;
+      gap: 10px;
+      align-items: center;
+    }
+
+    .trade-team {
+      background: var(--sm-bg-card);
+      border-radius: 12px;
+      padding: 14px;
+      text-align: center;
+    }
+
+    .trade-team img {
+      width: 40px;
+      height: 40px;
+      margin-bottom: 8px;
+    }
+
+    .trade-team .team-name {
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--sm-text);
+      margin-bottom: 2px;
+    }
+
+    .trade-team .player-name {
+      font-size: 10px;
+      color: var(--sm-text-muted);
+    }
+
+    .trade-arrow {
+      font-size: 24px;
+      color: var(--sm-text-muted);
+    }
+
+    .trade-grade {
+      text-align: center;
+      margin-top: 14px;
+    }
+
+    .trade-grade .badge {
+      display: inline-block;
+      padding: 8px 20px;
+      border-radius: 24px;
+      font-size: 13px;
+      font-weight: 700;
+    }
+
+    .trade-grade .badge.accepted {
+      background: var(--sm-success);
+      color: white;
+    }
+
+    /* Grade Scale */
+    .grade-scale {
+      display: flex;
+      gap: 8px;
+      margin: 16px 0;
+    }
+
+    .grade-item {
+      flex: 1;
+      padding: 14px 10px;
+      border-radius: 12px;
+      text-align: center;
+    }
+
+    .grade-item.green {
+      background: rgba(34, 197, 94, 0.15);
+      border: 1px solid rgba(34, 197, 94, 0.3);
+    }
+
+    .grade-item.yellow {
+      background: rgba(245, 158, 11, 0.15);
+      border: 1px solid rgba(245, 158, 11, 0.3);
+    }
+
+    .grade-item.red {
+      background: rgba(239, 68, 68, 0.15);
+      border: 1px solid rgba(239, 68, 68, 0.3);
+    }
+
+    .grade-item .score {
+      font-size: 18px;
+      font-weight: 800;
+    }
+
+    .grade-item.green .score { color: var(--sm-success); }
+    .grade-item.yellow .score { color: var(--sm-warning); }
+    .grade-item.red .score { color: #ef4444; }
+
+    .grade-item .label {
+      font-size: 9px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-top: 4px;
+    }
+
+    .grade-item.green .label { color: var(--sm-success); }
+    .grade-item.yellow .label { color: var(--sm-warning); }
+    .grade-item.red .label { color: #ef4444; }
+
+    /* AI Personality Cards */
+    .ai-cards {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 10px;
+    }
+
+    .ai-card {
+      background: var(--sm-bg-card);
+      border-radius: 12px;
+      padding: 14px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      border: 1px solid var(--sm-border);
+      transition: all 0.2s;
+    }
+
+    .ai-card:hover {
+      border-color: var(--sm-primary);
+    }
+
+    .ai-card img {
+      width: 36px;
+      height: 36px;
+      border-radius: 10px;
+    }
+
+    .ai-card .name {
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--sm-text);
+    }
+
+    .ai-card .team {
+      font-size: 10px;
+      color: var(--sm-text-muted);
+    }
+
+    /* Stats Grid */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 10px;
+      margin: 16px 0;
+    }
+
+    .stat-item {
+      background: var(--sm-bg-card);
+      border-radius: 12px;
+      padding: 16px;
+      text-align: center;
+    }
+
+    .stat-item .icon {
+      width: 40px;
+      height: 40px;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 10px;
+    }
+
+    .stat-item .label {
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--sm-text);
+      margin-bottom: 2px;
+    }
+
+    .stat-item .desc {
+      font-size: 10px;
+      color: var(--sm-text-muted);
+    }
+
+    /* Animated Bar Chart */
     @keyframes growBar {
       from { height: 0; }
     }
 
+    .chart-container {
+      background: var(--sm-bg-dark);
+      border-radius: 12px;
+      padding: 16px;
+      margin: 16px 0;
+    }
+
+    .chart-bars {
+      display: flex;
+      align-items: flex-end;
+      gap: 10px;
+      height: 100px;
+      justify-content: center;
+    }
+
+    .chart-bar {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
+    }
+
     .bar-fill {
+      width: 28px;
+      background: linear-gradient(to top, var(--sm-primary), var(--sm-primary-light));
+      border-radius: 4px 4px 0 0;
       animation: growBar 1s ease-out forwards;
     }
 
@@ -322,240 +617,47 @@
     .bar-5 { height: 63px; animation-delay: 0.4s; }
     .bar-6 { height: 78px; animation-delay: 0.5s; }
 
-    .animated-chart:hover .bar-fill {
-      filter: brightness(1.2);
-      transition: filter 0.2s;
+    .chart-label {
+      font-size: 9px;
+      color: var(--sm-text-muted);
     }
 
-    /* Feature List */
-    .feature-list {
-      list-style: none;
-      padding: 0;
-    }
-
-    .feature-list li {
-      padding: 10px 0;
-      border-bottom: 1px solid #e9ecef;
-      font-size: 14px;
-      color: #333;
-      display: flex;
-      align-items: flex-start;
-      gap: 10px;
-    }
-
-    .feature-list li:last-child {
-      border-bottom: none;
-    }
-
-    .feature-list .icon-box {
-      flex-shrink: 0;
-      width: 28px;
-      height: 28px;
-      border-radius: 6px;
+    /* Video Cards */
+    .video-card {
       display: flex;
       align-items: center;
-      justify-content: center;
-    }
-
-    .feature-list .icon-box img {
-      width: 20px;
-      height: 20px;
-      object-fit: contain;
-    }
-
-    /* Rules Box */
-    .rules-box {
-      background: #fff8e6;
-      border: 1px solid #f0c36d;
-      border-radius: 12px;
-      padding: 16px;
-      margin-top: 16px;
-    }
-
-    .rules-box h4 {
-      font-size: 13px;
-      font-weight: 700;
-      color: #8a6d3b;
-      margin-bottom: 8px;
-    }
-
-    .rules-box ul {
-      margin: 0;
-      padding-left: 18px;
-    }
-
-    .rules-box li {
-      font-size: 13px;
-      color: #8a6d3b;
-      margin-bottom: 4px;
-    }
-
-    /* Tips Box */
-    .tips-box {
-      background: #e8f5e9;
-      border: 1px solid #81c784;
-      border-radius: 12px;
-      padding: 16px;
-      margin-top: 16px;
-    }
-
-    .tips-box h4 {
-      font-size: 13px;
-      font-weight: 700;
-      color: #2e7d32;
-      margin-bottom: 8px;
-    }
-
-    .tips-box p, .tips-box a {
-      font-size: 13px;
-      color: #2e7d32;
-      margin: 0;
-    }
-
-    .tips-box a {
-      text-decoration: underline;
-      font-weight: 600;
-    }
-
-    /* Team Logos Row */
-    .team-logos {
-      display: flex;
-      justify-content: center;
-      gap: 16px;
-      margin: 20px 0;
-      flex-wrap: wrap;
-    }
-
-    .team-logo-item {
-      width: 56px;
-      height: 56px;
+      gap: 14px;
+      background: var(--sm-bg-card);
       border-radius: 14px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      padding: 8px;
+      padding: 14px;
+      margin-bottom: 10px;
+      border: 1px solid var(--sm-border);
+      text-decoration: none;
+      transition: all 0.2s;
     }
 
-    .team-logo-item img {
-      width: 40px;
-      height: 40px;
-      object-fit: contain;
+    .video-card:hover {
+      border-color: var(--sm-primary);
+      transform: translateX(4px);
     }
 
-    /* AI Personality Cards */
-    .ai-cards {
-      display: grid;
-      grid-template-columns: repeat(2, 1fr);
-      gap: 10px;
-      margin-top: 16px;
-    }
-
-    .ai-card {
-      background: white;
-      border-radius: 10px;
-      padding: 12px;
-      text-align: center;
-      border: 1px solid #e9ecef;
-      display: flex;
-      align-items: center;
-      gap: 10px;
-    }
-
-    .ai-card img {
-      width: 36px;
-      height: 36px;
-      border-radius: 8px;
-    }
-
-    .ai-card-info {
-      text-align: left;
-    }
-
-    .ai-card .name {
-      font-size: 12px;
-      font-weight: 700;
-      color: #1a1a1a;
-    }
-
-    .ai-card .team {
-      font-size: 11px;
-      color: #666;
-    }
-
-    /* Grade Scale */
-    .grade-scale {
-      display: flex;
-      gap: 8px;
-      margin-top: 12px;
-    }
-
-    .grade-item {
-      flex: 1;
-      padding: 12px 8px;
-      border-radius: 10px;
-      text-align: center;
-    }
-
-    .grade-item.green { background: #d4edda; color: #155724; }
-    .grade-item.yellow { background: #fff3cd; color: #856404; }
-    .grade-item.red { background: #f8d7da; color: #721c24; }
-
-    .grade-item .score {
-      font-size: 16px;
-      font-weight: 800;
-    }
-
-    .grade-item .label {
-      font-size: 10px;
-      margin-top: 2px;
-    }
-
-    /* Theme Toggle Demo */
-    .theme-toggle-demo {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 16px;
-      margin: 16px 0;
-    }
-
-    .toggle-track {
+    .video-card img {
       width: 48px;
-      height: 28px;
-      border-radius: 14px;
-      background: #e5e7eb;
-      position: relative;
-      cursor: pointer;
+      height: 48px;
+      border-radius: 10px;
+      object-fit: contain;
     }
 
-    .toggle-track.dark {
-      background: #27272a;
+    .video-card .show-name {
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--sm-text);
+      margin-bottom: 2px;
     }
 
-    .toggle-knob {
-      width: 20px;
-      height: 20px;
-      border-radius: 50%;
-      background: white;
-      position: absolute;
-      top: 4px;
-      left: 4px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      transition: transform 0.3s;
-      box-shadow: 0 2px 4px rgba(0,0,0,0.2);
-    }
-
-    .toggle-track.dark .toggle-knob {
-      transform: translateX(20px);
-      background: #0a0a0b;
-    }
-
-    .toggle-knob .star {
-      color: #bc0000;
-      font-size: 12px;
-      font-weight: 800;
+    .video-card .show-desc {
+      font-size: 11px;
+      color: var(--sm-text-muted);
     }
 
     /* Pricing Cards */
@@ -567,18 +669,17 @@
     }
 
     .pricing-card {
-      background: white;
-      border: 2px solid #e9ecef;
-      border-radius: 12px;
-      padding: 14px;
+      background: var(--sm-bg-card);
+      border-radius: 14px;
+      padding: 16px 12px;
       text-align: center;
+      border: 2px solid var(--sm-border);
       position: relative;
     }
 
     .pricing-card.popular {
-      border-color: #bc0000;
-      background: linear-gradient(135deg, #bc0000, #8a0000);
-      color: white;
+      border-color: var(--sm-primary);
+      background: linear-gradient(135deg, var(--sm-primary), var(--sm-primary-dark));
     }
 
     .pricing-card .badge {
@@ -586,181 +687,259 @@
       top: -10px;
       left: 50%;
       transform: translateX(-50%);
-      background: #28a745;
+      background: var(--sm-success);
       color: white;
-      font-size: 9px;
+      font-size: 8px;
       font-weight: 700;
       padding: 3px 8px;
       border-radius: 10px;
       white-space: nowrap;
+      text-transform: uppercase;
     }
 
     .pricing-card .plan-name {
-      font-size: 13px;
+      font-size: 12px;
       font-weight: 700;
-      margin-bottom: 4px;
+      color: var(--sm-text);
+      margin-bottom: 6px;
+    }
+
+    .pricing-card.popular .plan-name {
+      color: white;
     }
 
     .pricing-card .price {
-      font-size: 20px;
+      font-size: 22px;
       font-weight: 800;
+      color: var(--sm-text);
+    }
+
+    .pricing-card.popular .price {
+      color: white;
     }
 
     .pricing-card .period {
-      font-size: 11px;
-      opacity: 0.7;
+      font-size: 10px;
+      color: var(--sm-text-muted);
     }
 
-    /* Video Show Cards */
-    .video-cards {
-      display: grid;
-      gap: 10px;
-      margin-top: 12px;
+    .pricing-card.popular .period {
+      color: rgba(255, 255, 255, 0.7);
     }
 
-    .video-card {
+    /* Theme Toggle Demo */
+    .toggle-demo {
       display: flex;
       align-items: center;
-      gap: 12px;
+      justify-content: center;
+      gap: 14px;
+      margin: 20px 0;
+    }
+
+    .toggle-label {
+      font-size: 13px;
+      color: var(--sm-text-muted);
+    }
+
+    .toggle-track {
+      width: 52px;
+      height: 30px;
+      border-radius: 15px;
+      background: #e5e7eb;
+      position: relative;
+      cursor: pointer;
+      transition: background 0.3s;
+    }
+
+    .toggle-track.dark {
+      background: var(--sm-bg-card);
+    }
+
+    .toggle-knob {
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
       background: white;
-      border: 1px solid #e9ecef;
-      border-radius: 10px;
-      padding: 12px;
-      text-decoration: none;
-      color: inherit;
-      transition: all 0.2s;
+      position: absolute;
+      top: 4px;
+      left: 4px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.3s;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
     }
 
-    .video-card:hover {
-      border-color: #bc0000;
-      transform: translateY(-2px);
+    .toggle-track.dark .toggle-knob {
+      transform: translateX(22px);
+      background: var(--sm-bg-dark);
     }
 
-    .video-card img {
-      width: 40px;
-      height: 40px;
-      border-radius: 8px;
-      object-fit: contain;
+    .toggle-knob .star {
+      color: var(--sm-primary);
+      font-size: 13px;
+      font-weight: 800;
     }
 
-    .video-card-info {
-      flex: 1;
+    /* Info Box */
+    .info-box {
+      border-radius: 14px;
+      padding: 14px 16px;
+      margin: 16px 0;
     }
 
-    .video-card .show-name {
-      font-size: 14px;
-      font-weight: 700;
-      color: #1a1a1a;
+    .info-box.tip {
+      background: rgba(34, 197, 94, 0.1);
+      border: 1px solid rgba(34, 197, 94, 0.2);
     }
 
-    .video-card .show-desc {
+    .info-box.rule {
+      background: rgba(245, 158, 11, 0.1);
+      border: 1px solid rgba(245, 158, 11, 0.2);
+    }
+
+    .info-box .title {
       font-size: 12px;
-      color: #666;
+      font-weight: 700;
+      margin-bottom: 6px;
+    }
+
+    .info-box.tip .title { color: var(--sm-success); }
+    .info-box.rule .title { color: var(--sm-warning); }
+
+    .info-box p, .info-box li {
+      font-size: 12px;
+      line-height: 1.5;
+    }
+
+    .info-box.tip p, .info-box.tip li { color: rgba(34, 197, 94, 0.9); }
+    .info-box.rule p, .info-box.rule li { color: rgba(245, 158, 11, 0.9); }
+
+    .info-box ul {
+      margin: 0;
+      padding-left: 16px;
     }
 
     /* Link Button */
     .link-btn {
       display: inline-flex;
       align-items: center;
-      gap: 6px;
-      padding: 8px 16px;
-      background: #bc0000;
+      gap: 8px;
+      padding: 12px 20px;
+      background: linear-gradient(135deg, var(--sm-primary), var(--sm-primary-dark));
       color: white;
-      border-radius: 8px;
+      border-radius: 12px;
       text-decoration: none;
-      font-size: 13px;
-      font-weight: 600;
-      margin-top: 12px;
+      font-size: 14px;
+      font-weight: 700;
       transition: all 0.2s;
+      border: none;
+      cursor: pointer;
     }
 
     .link-btn:hover {
-      background: #8a0000;
       transform: translateY(-2px);
+      box-shadow: 0 8px 24px rgba(188, 0, 0, 0.3);
     }
 
-    /* Footer Navigation */
+    .link-btn svg {
+      width: 16px;
+      height: 16px;
+    }
+
+    /* Footer */
     .tour-footer {
       padding: 16px 24px;
-      background: #f8f9fa;
-      border-top: 1px solid #e9ecef;
+      background: var(--sm-bg-card);
+      border-top: 1px solid var(--sm-border);
       display: flex;
       justify-content: space-between;
       align-items: center;
-      gap: 12px;
     }
 
-    .tour-btn {
+    .skip-btn {
+      background: none;
+      border: none;
+      color: var(--sm-text-muted);
+      font-size: 13px;
+      cursor: pointer;
+      padding: 8px 12px;
+      border-radius: 8px;
+      transition: all 0.2s;
+    }
+
+    .skip-btn:hover {
+      color: var(--sm-text);
+      background: rgba(255, 255, 255, 0.05);
+    }
+
+    .nav-buttons {
+      display: flex;
+      gap: 10px;
+    }
+
+    .nav-btn {
       padding: 12px 24px;
-      border-radius: 10px;
+      border-radius: 12px;
       font-size: 14px;
-      font-weight: 600;
+      font-weight: 700;
       cursor: pointer;
       transition: all 0.2s;
       border: none;
     }
 
-    .tour-btn.secondary {
-      background: white;
-      border: 2px solid #ddd;
-      color: #666;
+    .nav-btn.secondary {
+      background: var(--sm-bg-surface);
+      color: var(--sm-text);
+      border: 1px solid var(--sm-border);
     }
 
-    .tour-btn.secondary:hover {
-      border-color: #bc0000;
-      color: #bc0000;
+    .nav-btn.secondary:hover {
+      border-color: var(--sm-primary);
+      color: var(--sm-primary);
     }
 
-    .tour-btn.primary {
-      background: linear-gradient(135deg, #bc0000 0%, #8a0000 100%);
+    .nav-btn.primary {
+      background: linear-gradient(135deg, var(--sm-primary), var(--sm-primary-dark));
       color: white;
-      flex: 1;
-      max-width: 200px;
     }
 
-    .tour-btn.primary:hover {
+    .nav-btn.primary:hover {
       transform: translateY(-2px);
-      box-shadow: 0 4px 12px rgba(188, 0, 0, 0.3);
+      box-shadow: 0 8px 24px rgba(188, 0, 0, 0.3);
     }
 
-    .skip-link {
-      font-size: 13px;
-      color: #999;
-      text-decoration: underline;
-      cursor: pointer;
-      background: none;
-      border: none;
-    }
-
-    .skip-link:hover {
-      color: #666;
-    }
-
+    /* Mobile */
     @media (max-width: 480px) {
-      .tour-header h1 {
-        font-size: 18px;
+      .tour-container {
+        border-radius: 20px;
       }
 
       .slide-title {
-        font-size: 20px;
+        font-size: 24px;
       }
 
-      .ai-cards {
+      .ai-cards, .pricing-cards {
         grid-template-columns: 1fr;
       }
 
-      .pricing-cards {
+      .stats-grid {
         grid-template-columns: 1fr;
       }
 
-      .toc-buttons {
-        max-height: 60px;
-        overflow-x: auto;
-        flex-wrap: nowrap;
+      .trade-preview {
+        grid-template-columns: 1fr;
+        gap: 8px;
       }
 
-      .toc-btn {
-        white-space: nowrap;
+      .trade-arrow {
+        transform: rotate(90deg);
+        margin: 0 auto;
+      }
+
+      .nav-btn {
+        padding: 12px 18px;
+        font-size: 13px;
       }
     }
   </style>
@@ -771,194 +950,154 @@
   <div class="tour-container">
     <!-- Header -->
     <div class="tour-header">
-      <h1>Welcome to the NEW SportsMockery!</h1>
-      <p>Let's show you all the cool new features</p>
-      <button class="close-tour" onclick="closeTour()" title="Skip Tour">&times;</button>
+      <div class="header-left">
+        <img src="https://test.sportsmockery.com/logos/sm-logo-dark.png" alt="SportsMockery" class="sm-logo" onerror="this.src='/logos/sm-logo-dark.png'">
+        <span class="header-badge">New Features</span>
+      </div>
+      <button class="close-btn" onclick="closeTour()" title="Skip Tour">&times;</button>
     </div>
 
-    <!-- Progress Bar -->
-    <div class="progress-container">
-      <div class="progress-bar">
-        <div class="progress-fill" id="progressFill" style="width: 10%"></div>
-      </div>
-      <div class="progress-text">
-        <span id="slideNumber">1 of 10</span>
-        <span id="slideName">Welcome</span>
-      </div>
-    </div>
-
-    <!-- Jump Menu -->
-    <div class="toc-container">
-      <div class="toc-label">Jump to feature:</div>
-      <div class="toc-buttons" id="tocButtons">
-        <button class="toc-btn active" onclick="goToSlide(0)">Welcome</button>
-        <button class="toc-btn" onclick="goToSlide(1)">Scout AI</button>
-        <button class="toc-btn" onclick="goToSlide(2)">GM Trades</button>
-        <button class="toc-btn" onclick="goToSlide(3)">Mock Draft</button>
-        <button class="toc-btn" onclick="goToSlide(4)">Fan Chat</button>
-        <button class="toc-btn" onclick="goToSlide(5)">Team Pages</button>
-        <button class="toc-btn" onclick="goToSlide(6)">Polls</button>
-        <button class="toc-btn" onclick="goToSlide(7)">Charts</button>
-        <button class="toc-btn" onclick="goToSlide(8)">Your Profile</button>
-        <button class="toc-btn" onclick="goToSlide(9)">Videos</button>
-        <button class="toc-btn" onclick="goToSlide(10)">SM+ Premium</button>
-      </div>
+    <!-- Progress Dots -->
+    <div class="progress-section" id="progressDots">
+      <!-- Generated by JS -->
     </div>
 
     <!-- Content -->
     <div class="tour-content">
 
       <!-- SLIDE 0: Welcome -->
-      <div class="slide active" data-slide="0" data-name="Welcome">
-        <!-- SportsMockery Logo -->
-        <div style="text-align: center; margin-bottom: 16px;">
-          <img src="https://test.sportsmockery.com/logos/sm-logo-dark.png" alt="SportsMockery" style="height: 60px; width: auto;" onerror="this.src='/logos/sm-logo-dark.png'">
+      <div class="slide active" data-slide="0">
+        <div class="slide-header">
+          <div class="slide-icon" style="background: linear-gradient(135deg, var(--sm-primary), var(--sm-primary-dark));">
+            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2">
+              <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+            </svg>
+          </div>
+          <h2 class="slide-title">Welcome to the Future of Chicago Sports!</h2>
+          <p class="slide-subtitle">We've built something special. Let's show you around!</p>
         </div>
-        <div class="slide-title">Welcome to the Future of Chicago Sports!</div>
-        <div class="slide-subtitle">We've completely reimagined what a sports site can be. Get ready!</div>
 
-        <!-- First-ever callout -->
-        <div style="background: linear-gradient(135deg, #bc0000, #8a0000); color: white; border-radius: 12px; padding: 12px 16px; margin-bottom: 16px; text-align: center;">
-          <div style="font-size: 11px; text-transform: uppercase; letter-spacing: 1px; opacity: 0.9; margin-bottom: 4px;">A Chicago first</div>
-          <div style="font-size: 15px; font-weight: 700;">The only site with Mock Draft & Trade Simulator for ALL Chicago teams across NFL, NBA, MLB, and NHL</div>
+        <div class="highlight-box">
+          <div class="label">A Chicago First</div>
+          <div class="text">The only site with Mock Draft & Trade Simulator for ALL Chicago teams across NFL, NBA, MLB, and NHL</div>
         </div>
 
         <div class="team-logos">
-          <div class="team-logo-item" style="background: #0B162A;">
+          <div class="team-logo" style="background: #0B162A;">
             <img src="https://a.espncdn.com/i/teamlogos/nfl/500/chi.png" alt="Bears">
           </div>
-          <div class="team-logo-item" style="background: #CE1141;">
+          <div class="team-logo" style="background: #CE1141;">
             <img src="https://a.espncdn.com/i/teamlogos/nba/500/chi.png" alt="Bulls">
           </div>
-          <div class="team-logo-item" style="background: #0E3386;">
+          <div class="team-logo" style="background: #0E3386;">
             <img src="https://a.espncdn.com/i/teamlogos/mlb/500/chc.png" alt="Cubs">
           </div>
-          <div class="team-logo-item" style="background: #27251F;">
+          <div class="team-logo" style="background: #27251F;">
             <img src="https://a.espncdn.com/i/teamlogos/mlb/500/chw.png" alt="White Sox">
           </div>
-          <div class="team-logo-item" style="background: #CF0A2C;">
+          <div class="team-logo" style="background: #CF0A2C;">
             <img src="https://a.espncdn.com/i/teamlogos/nhl/500/chi.png" alt="Blackhawks">
           </div>
         </div>
 
-        <div class="slide-content">
-          <h3>What We've Built For You</h3>
+        <div class="feature-card">
+          <div class="feature-card-title">What We've Built For You</div>
           <ul class="feature-list">
-            <li>
-              <div class="icon-box" style="background: #667eea20;">
-                <img src="/downloads/scout-mascot.png" alt="Scout" onerror="this.parentElement.innerHTML='AI'">
+            <li class="feature-item">
+              <div class="feature-icon" style="background: rgba(102, 126, 234, 0.2);">
+                <img src="/downloads/scout-mascot.png" alt="Scout" onerror="this.innerHTML='AI'">
               </div>
-              <div><strong>Scout AI</strong> - Your personal Chicago sports expert that answers any question instantly</div>
+              <div class="feature-text">
+                <strong>Scout AI</strong>
+                <span>Your personal Chicago sports expert</span>
+              </div>
             </li>
-            <li>
-              <div class="icon-box" style="background: #11998e20;">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#11998e" stroke-width="2"><path d="M16 3h5v5M8 21H3v-5M21 3l-7 7M3 21l7-7"/></svg>
+            <li class="feature-item">
+              <div class="feature-icon" style="background: rgba(17, 153, 142, 0.2);">
+                <svg viewBox="0 0 24 24" fill="none" stroke="#11998e" stroke-width="2"><path d="M16 3h5v5M8 21H3v-5M21 3l-7 7M3 21l7-7"/></svg>
               </div>
-              <div><strong>GM Trade Simulator</strong> - Build trades for any Chicago team and our AI grades if they'd actually happen</div>
+              <div class="feature-text">
+                <strong>GM Trade Simulator</strong>
+                <span>Build trades and get AI grades</span>
+              </div>
             </li>
-            <li>
-              <div class="icon-box" style="background: #f5576c20;">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#f5576c" stroke-width="2"><circle cx="12" cy="8" r="5"/><path d="M3 21v-2a4 4 0 0 1 4-4h10a4 4 0 0 1 4 4v2"/></svg>
+            <li class="feature-item">
+              <div class="feature-icon" style="background: rgba(245, 87, 108, 0.2);">
+                <svg viewBox="0 0 24 24" fill="none" stroke="#f5576c" stroke-width="2"><circle cx="12" cy="8" r="5"/><path d="M3 21v-2a4 4 0 0 1 4-4h10a4 4 0 0 1 4 4v2"/></svg>
               </div>
-              <div><strong>Mock Draft Simulator</strong> - Take control of draft day for Bears, Bulls, Cubs, Sox, or Hawks</div>
+              <div class="feature-text">
+                <strong>Mock Draft Simulator</strong>
+                <span>Pick your team's future stars</span>
+              </div>
             </li>
-            <li>
-              <div class="icon-box" style="background: #bc000020;">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#bc0000" stroke-width="2"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg>
+            <li class="feature-item">
+              <div class="feature-icon" style="background: rgba(188, 0, 0, 0.2);">
+                <svg viewBox="0 0 24 24" fill="none" stroke="var(--sm-primary)" stroke-width="2"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg>
               </div>
-              <div><strong>Fan Chat</strong> - Talk sports with AI personalities who love your team as much as you do</div>
-            </li>
-            <li>
-              <div class="icon-box" style="background: #4facfe20;">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#4facfe" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+              <div class="feature-text">
+                <strong>Fan Chat</strong>
+                <span>AI personalities who love your team</span>
               </div>
-              <div><strong>Schedules & Scores</strong> - Full season schedules and live box scores for every game</div>
-            </li>
-            <li>
-              <div class="icon-box" style="background: #f59e0b20;">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 20v-1a4 4 0 0 1 4-4h8a4 4 0 0 1 4 4v1"/></svg>
-              </div>
-              <div><strong>Rosters & Player Pages</strong> - Complete rosters with individual player stats and profiles</div>
-            </li>
-            <li>
-              <div class="icon-box" style="background: #667eea20;">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#667eea" stroke-width="2"><path d="M3 3v18h18"/><path d="M18 17V9"/><path d="M13 17V5"/><path d="M8 17v-3"/></svg>
-              </div>
-              <div><strong>Interactive Charts</strong> - Beautiful animated stats that bring data to life</div>
-            </li>
-            <li>
-              <div class="icon-box" style="background: #e5272720;">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#e52727" stroke-width="2"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2"/></svg>
-              </div>
-              <div><strong>Video Shows</strong> - Bears Film Room, Pinwheels & Ivy, and more original content</div>
-            </li>
-            <li>
-              <div class="icon-box" style="background: #34d39920;">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#34d399" stroke-width="2"><rect x="5" y="2" width="14" height="20" rx="2"/><line x1="12" y1="18" x2="12" y2="18"/></svg>
-              </div>
-              <div><strong>Mobile App</strong> - Lightning-fast native app with push notifications and offline reading</div>
             </li>
           </ul>
         </div>
 
-        <div class="tips-box" style="background: #e8f4fd; border-color: #4facfe;">
-          <h4 style="color: #1e6bb8;">Ready to explore?</h4>
-          <p style="color: #1e6bb8;">Use the buttons above to jump to any feature, or click Next to see everything. This is going to be fun!</p>
+        <div class="info-box tip">
+          <div class="title">Ready to explore?</div>
+          <p>Click Next to see each feature, or use the dots above to jump around!</p>
         </div>
       </div>
 
       <!-- SLIDE 1: Scout AI -->
-      <div class="slide" data-slide="1" data-name="Scout AI">
-        <div class="slide-icon" style="background: linear-gradient(135deg, #667eea, #764ba2);">
-          <img src="/downloads/scout-mascot.png" alt="Scout AI" style="width: 50px; height: 50px;">
+      <div class="slide" data-slide="1">
+        <div class="slide-header">
+          <div class="slide-icon" style="background: linear-gradient(135deg, #667eea, #764ba2);">
+            <img src="/downloads/scout-mascot.png" alt="Scout AI" style="width: 50px; height: 50px;">
+          </div>
+          <h2 class="slide-title">Meet Scout AI</h2>
+          <p class="slide-subtitle">Your personal Chicago sports expert!</p>
         </div>
-        <div class="slide-title">Meet Scout AI</div>
-        <div class="slide-subtitle">Your personal Chicago sports expert!</div>
 
-        <div class="slide-content">
-          <h3>What is Scout?</h3>
-          <p>Scout is like having a super-smart friend who knows EVERYTHING about Chicago sports. Just ask a question, and Scout will give you the answer!</p>
+        <div class="feature-card">
+          <div class="feature-card-title">What is Scout?</div>
+          <p style="font-size: 14px; color: var(--sm-text-muted); line-height: 1.6;">Scout is like having a super-smart friend who knows EVERYTHING about Chicago sports. Just ask a question!</p>
 
-          <!-- Preview of Scout interface -->
-          <div class="preview-box">
+          <div class="preview-box" style="margin-top: 16px;">
             <div class="preview-header">
               <img src="/downloads/scout-mascot.png" alt="Scout" onerror="this.style.display='none'">
-              <span style="color: #fff;">Scout AI</span>
+              <span>Scout AI</span>
             </div>
-            <div style="background: #2a2a2a; border-radius: 8px; padding: 12px; margin-bottom: 8px;">
-              <div style="color: #888; font-size: 12px; margin-bottom: 4px;">You asked:</div>
-              <div style="color: #fff; font-size: 13px;">"How many touchdowns did Caleb Williams throw?"</div>
+            <div class="chat-bubble user">
+              <div class="label">You asked:</div>
+              <div class="message">"How many touchdowns did Caleb Williams throw?"</div>
             </div>
-            <div style="background: #1f4a1f; border-radius: 8px; padding: 12px;">
-              <div style="color: #6ee76e; font-size: 12px; margin-bottom: 4px;">Scout says:</div>
-              <div style="color: #fff; font-size: 13px;">Caleb Williams threw 27 passing touchdowns in the 2025 regular season...</div>
-            </div>
-            <div class="cursor-demo cursor-animate" style="top: 30px; left: 10px;">
-              <svg viewBox="0 0 24 24" fill="white" stroke="black" stroke-width="1"><path d="M4 4l16 12-7 1-3 7-6-20z"/></svg>
+            <div class="chat-bubble ai">
+              <div class="label">Scout says:</div>
+              <div class="message">Caleb Williams threw 27 passing touchdowns in the 2025 regular season...</div>
             </div>
           </div>
         </div>
 
-        <div class="slide-content">
-          <h3>Try asking things like:</h3>
+        <div class="feature-card">
+          <div class="feature-card-title">Try asking things like:</div>
           <ul class="feature-list">
-            <li>
-              <div class="icon-box" style="background: #0B162A;"><img src="https://a.espncdn.com/i/teamlogos/nfl/500/chi.png" alt="Bears"></div>
-              "How many touchdowns did Caleb Williams throw?"
+            <li class="feature-item">
+              <div class="feature-icon" style="background: #0B162A;"><img src="https://a.espncdn.com/i/teamlogos/nfl/500/chi.png" alt="Bears"></div>
+              <div class="feature-text"><span>"How many touchdowns did Caleb Williams throw?"</span></div>
             </li>
-            <li>
-              <div class="icon-box" style="background: #CE1141;"><img src="https://a.espncdn.com/i/teamlogos/nba/500/chi.png" alt="Bulls"></div>
-              "Who leads the Bulls in scoring?"
+            <li class="feature-item">
+              <div class="feature-icon" style="background: #CE1141;"><img src="https://a.espncdn.com/i/teamlogos/nba/500/chi.png" alt="Bulls"></div>
+              <div class="feature-text"><span>"Who leads the Bulls in scoring?"</span></div>
             </li>
-            <li>
-              <div class="icon-box" style="background: #0E3386;"><img src="https://a.espncdn.com/i/teamlogos/mlb/500/chc.png" alt="Cubs"></div>
-              "What's the Cubs record this year?"
+            <li class="feature-item">
+              <div class="feature-icon" style="background: #0E3386;"><img src="https://a.espncdn.com/i/teamlogos/mlb/500/chc.png" alt="Cubs"></div>
+              <div class="feature-text"><span>"What's the Cubs record this year?"</span></div>
             </li>
           </ul>
         </div>
 
-        <div class="rules-box">
-          <h4>Important Rules</h4>
+        <div class="info-box rule">
+          <div class="title">Important Rules</div>
           <ul>
             <li><strong>Free users:</strong> 5 questions per day</li>
             <li><strong>SM+ members:</strong> Unlimited questions!</li>
@@ -966,201 +1105,199 @@
           </ul>
         </div>
 
-        <a href="/scout-ai" class="link-btn">Try Scout AI</a>
+        <a href="/scout-ai" class="link-btn">
+          Try Scout AI
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+        </a>
       </div>
 
       <!-- SLIDE 2: GM Trade Simulator -->
-      <div class="slide" data-slide="2" data-name="GM Trades">
-        <div class="slide-icon" style="background: linear-gradient(135deg, #11998e, #38ef7d);">
-          <svg width="50" height="50" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2">
-            <path d="M16 3h5v5M8 21H3v-5M21 3l-7 7M3 21l7-7"/>
-          </svg>
+      <div class="slide" data-slide="2">
+        <div class="slide-header">
+          <div class="slide-icon" style="background: linear-gradient(135deg, #11998e, #38ef7d);">
+            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2">
+              <path d="M16 3h5v5M8 21H3v-5M21 3l-7 7M3 21l7-7"/>
+            </svg>
+          </div>
+          <h2 class="slide-title">GM Trade Simulator</h2>
+          <p class="slide-subtitle">Think you can do better than your team's GM?</p>
         </div>
-        <div class="slide-title">GM Trade Simulator</div>
-        <div class="slide-subtitle">Think you can do better than your team's GM?</div>
 
-        <div class="slide-content">
-          <h3>How It Works</h3>
-          <p>Pick your Chicago team, then build a trade with any other team in their league. Our AI will grade your trade and tell you if it would actually happen!</p>
+        <div class="feature-card">
+          <div class="feature-card-title">How It Works</div>
+          <p style="font-size: 14px; color: var(--sm-text-muted); line-height: 1.6;">Pick your Chicago team, build a trade with any other team, and our AI will grade if it would actually happen!</p>
 
-          <!-- Preview of trade interface -->
-          <div class="preview-box light">
-            <div style="display: grid; grid-template-columns: 1fr auto 1fr; gap: 8px; align-items: center;">
-              <div style="background: #0B162A; border-radius: 8px; padding: 10px; text-align: center;">
-                <img src="https://a.espncdn.com/i/teamlogos/nfl/500/chi.png" alt="Bears" style="width: 32px; height: 32px;">
-                <div style="color: #fff; font-size: 11px; margin-top: 4px;">Bears Send</div>
-                <div style="color: #aaa; font-size: 10px;">DJ Moore, WR</div>
+          <div class="preview-box" style="margin-top: 16px;">
+            <div class="trade-preview">
+              <div class="trade-team" style="background: #0B162A;">
+                <img src="https://a.espncdn.com/i/teamlogos/nfl/500/chi.png" alt="Bears">
+                <div class="team-name">Bears Send</div>
+                <div class="player-name">DJ Moore, WR</div>
               </div>
-              <div style="font-size: 20px;">&#8596;</div>
-              <div style="background: #003594; border-radius: 8px; padding: 10px; text-align: center;">
-                <img src="https://a.espncdn.com/i/teamlogos/nfl/500/dal.png" alt="Cowboys" style="width: 32px; height: 32px;">
-                <div style="color: #fff; font-size: 11px; margin-top: 4px;">Cowboys Send</div>
-                <div style="color: #aaa; font-size: 10px;">CeeDee Lamb, WR</div>
+              <div class="trade-arrow">&#8596;</div>
+              <div class="trade-team" style="background: #003594;">
+                <img src="https://a.espncdn.com/i/teamlogos/nfl/500/dal.png" alt="Cowboys">
+                <div class="team-name">Cowboys Send</div>
+                <div class="player-name">CeeDee Lamb, WR</div>
               </div>
             </div>
-            <div style="text-align: center; margin-top: 12px;">
-              <div style="background: #28a745; color: white; display: inline-block; padding: 6px 16px; border-radius: 20px; font-weight: 700;">Grade: 78 - ACCEPTED</div>
-            </div>
-            <div class="cursor-demo cursor-animate" style="top: 20px; left: 40px;">
-              <svg viewBox="0 0 24 24" fill="white" stroke="black" stroke-width="1"><path d="M4 4l16 12-7 1-3 7-6-20z"/></svg>
+            <div class="trade-grade">
+              <span class="badge accepted">Grade: 78 - ACCEPTED</span>
             </div>
           </div>
         </div>
 
-        <div class="slide-content">
-          <h3>Grade Scale</h3>
+        <div class="feature-card">
+          <div class="feature-card-title">Grade Scale</div>
           <div class="grade-scale">
             <div class="grade-item green">
               <div class="score">70-100</div>
-              <div class="label">ACCEPTED!</div>
+              <div class="label">Accepted!</div>
             </div>
             <div class="grade-item yellow">
               <div class="score">50-69</div>
-              <div class="label">REJECTED</div>
+              <div class="label">Rejected</div>
             </div>
             <div class="grade-item red">
               <div class="score">0-49</div>
-              <div class="label">NO WAY!</div>
+              <div class="label">No Way!</div>
             </div>
           </div>
         </div>
 
-        <div class="rules-box">
-          <h4>How to Play</h4>
+        <div class="info-box rule">
+          <div class="title">How to Play</div>
           <ul>
             <li>Pick your Chicago team (Bears, Bulls, Cubs, Sox, or Hawks)</li>
             <li>Select players to trade away</li>
-            <li>Pick the other team and select players to get back</li>
+            <li>Pick the other team and players to get back</li>
             <li>Add draft picks if you want</li>
             <li>Submit and get your AI grade!</li>
           </ul>
         </div>
 
-        <a href="/gm" class="link-btn">Try GM Simulator</a>
+        <a href="/gm" class="link-btn">
+          Try GM Simulator
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+        </a>
       </div>
 
       <!-- SLIDE 3: Mock Draft -->
-      <div class="slide" data-slide="3" data-name="Mock Draft">
-        <div class="slide-icon" style="background: linear-gradient(135deg, #f093fb, #f5576c);">
-          <svg width="50" height="50" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2">
-            <circle cx="12" cy="8" r="5"/>
-            <path d="M3 21v-2a4 4 0 0 1 4-4h10a4 4 0 0 1 4 4v2"/>
-          </svg>
+      <div class="slide" data-slide="3">
+        <div class="slide-header">
+          <div class="slide-icon" style="background: linear-gradient(135deg, #f093fb, #f5576c);">
+            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2">
+              <circle cx="12" cy="8" r="5"/>
+              <path d="M3 21v-2a4 4 0 0 1 4-4h10a4 4 0 0 1 4 4v2"/>
+            </svg>
+          </div>
+          <h2 class="slide-title">Mock Draft Simulator</h2>
+          <p class="slide-subtitle">Pick your team's future stars!</p>
         </div>
-        <div class="slide-title">Mock Draft Simulator</div>
-        <div class="slide-subtitle">Pick your team's future stars!</div>
 
-        <div class="slide-content">
-          <h3>What Is It?</h3>
-          <p>It's draft day and YOU'RE in charge! Pick prospects for your Chicago team and see how the AI grades your draft class.</p>
+        <div class="feature-card">
+          <div class="feature-card-title">What Is It?</div>
+          <p style="font-size: 14px; color: var(--sm-text-muted); line-height: 1.6;">It's draft day and YOU'RE in charge! Pick prospects for your Chicago team and see how the AI grades your draft class.</p>
 
-          <!-- Preview of draft interface -->
-          <div class="preview-box">
-            <div style="display: flex; align-items: center; gap: 8px; background: #2a2a2a; border-radius: 8px; padding: 10px; margin-bottom: 8px;">
-              <div style="background: #0B162A; color: white; padding: 4px 10px; border-radius: 6px; font-weight: 700; font-size: 12px;">#10</div>
-              <img src="https://a.espncdn.com/i/teamlogos/nfl/500/chi.png" alt="Bears" style="width: 28px; height: 28px;">
+          <div class="preview-box" style="margin-top: 16px;">
+            <div style="display: flex; align-items: center; gap: 10px; background: var(--sm-bg-card); border-radius: 10px; padding: 12px; margin-bottom: 12px;">
+              <div style="background: #0B162A; color: white; padding: 6px 12px; border-radius: 8px; font-weight: 700; font-size: 14px;">#10</div>
+              <img src="https://a.espncdn.com/i/teamlogos/nfl/500/chi.png" alt="Bears" style="width: 32px; height: 32px;">
               <div style="flex: 1;">
-                <div style="color: #fff; font-size: 13px; font-weight: 600;">Chicago Bears</div>
-                <div style="color: #10b981; font-size: 11px;">YOUR PICK</div>
+                <div style="color: var(--sm-text); font-size: 14px; font-weight: 600;">Chicago Bears</div>
+                <div style="color: var(--sm-success); font-size: 12px; font-weight: 600;">YOUR PICK</div>
               </div>
             </div>
-            <div style="color: #aaa; font-size: 12px; margin-bottom: 8px;">Available Prospects:</div>
-            <div style="display: grid; gap: 6px;">
-              <div style="background: #333; border-radius: 6px; padding: 8px; display: flex; align-items: center; gap: 8px;">
-                <div style="width: 32px; height: 32px; background: #444; border-radius: 6px; display: flex; align-items: center; justify-content: center; color: #888; font-size: 12px;">TR</div>
-                <div style="flex: 1;">
-                  <div style="color: #fff; font-size: 12px; font-weight: 600;">Travis Hunter</div>
-                  <div style="color: #888; font-size: 10px;">CB/WR - Colorado</div>
-                </div>
-                <div style="background: #bc0000; color: white; padding: 4px 10px; border-radius: 6px; font-size: 11px; font-weight: 600;">Draft</div>
+            <div style="color: var(--sm-text-muted); font-size: 12px; margin-bottom: 8px;">Available Prospects:</div>
+            <div style="background: var(--sm-bg-card); border-radius: 10px; padding: 12px; display: flex; align-items: center; gap: 10px;">
+              <div style="width: 40px; height: 40px; background: var(--sm-border); border-radius: 10px; display: flex; align-items: center; justify-content: center; color: var(--sm-text-muted); font-size: 14px; font-weight: 600;">TR</div>
+              <div style="flex: 1;">
+                <div style="color: var(--sm-text); font-size: 14px; font-weight: 600;">Travis Hunter</div>
+                <div style="color: var(--sm-text-muted); font-size: 11px;">CB/WR - Colorado</div>
               </div>
-            </div>
-            <div class="cursor-demo cursor-animate" style="top: 80px; left: 200px;">
-              <svg viewBox="0 0 24 24" fill="white" stroke="black" stroke-width="1"><path d="M4 4l16 12-7 1-3 7-6-20z"/></svg>
+              <button style="background: var(--sm-primary); color: white; padding: 8px 14px; border-radius: 8px; font-size: 12px; font-weight: 700; border: none;">Draft</button>
             </div>
           </div>
         </div>
 
-        <div class="slide-content">
-          <h3>How to Play</h3>
+        <div class="feature-card">
+          <div class="feature-card-title">How to Play</div>
           <ul class="feature-list">
-            <li>
-              <div class="icon-box" style="background: #10b98120; color: #10b981; font-weight: 700; font-size: 12px;">1</div>
-              Pick your team (if their draft window is open)
+            <li class="feature-item">
+              <div class="feature-icon" style="background: rgba(16, 185, 129, 0.2); color: #10b981; font-weight: 700;">1</div>
+              <div class="feature-text"><span>Pick your team (if their draft window is open)</span></div>
             </li>
-            <li>
-              <div class="icon-box" style="background: #10b98120; color: #10b981; font-weight: 700; font-size: 12px;">2</div>
-              When it's your pick, choose a prospect
+            <li class="feature-item">
+              <div class="feature-icon" style="background: rgba(16, 185, 129, 0.2); color: #10b981; font-weight: 700;">2</div>
+              <div class="feature-text"><span>When it's your pick, choose a prospect</span></div>
             </li>
-            <li>
-              <div class="icon-box" style="background: #10b98120; color: #10b981; font-weight: 700; font-size: 12px;">3</div>
-              Hit "Auto-Advance" to skip other teams' picks
+            <li class="feature-item">
+              <div class="feature-icon" style="background: rgba(16, 185, 129, 0.2); color: #10b981; font-weight: 700;">3</div>
+              <div class="feature-text"><span>Hit "Auto-Advance" to skip other teams' picks</span></div>
             </li>
-            <li>
-              <div class="icon-box" style="background: #10b98120; color: #10b981; font-weight: 700; font-size: 12px;">4</div>
-              Get your final draft grade from AI!
+            <li class="feature-item">
+              <div class="feature-icon" style="background: rgba(16, 185, 129, 0.2); color: #10b981; font-weight: 700;">4</div>
+              <div class="feature-text"><span>Get your final draft grade from AI!</span></div>
             </li>
           </ul>
         </div>
 
-        <a href="/mock-draft" class="link-btn">Try Mock Draft</a>
+        <a href="/mock-draft" class="link-btn">
+          Try Mock Draft
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+        </a>
       </div>
 
       <!-- SLIDE 4: Fan Chat -->
-      <div class="slide" data-slide="4" data-name="Fan Chat">
-        <div class="slide-icon" style="background: linear-gradient(135deg, #bc0000, #ff4444);">
-          <svg width="50" height="50" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2">
-            <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/>
-          </svg>
+      <div class="slide" data-slide="4">
+        <div class="slide-header">
+          <div class="slide-icon" style="background: linear-gradient(135deg, var(--sm-primary), var(--sm-primary-light));">
+            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2">
+              <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/>
+            </svg>
+          </div>
+          <h2 class="slide-title">Fan Chat</h2>
+          <p class="slide-subtitle">Talk sports with AI personalities!</p>
         </div>
-        <div class="slide-title">Fan Chat</div>
-        <div class="slide-subtitle">Talk sports with AI personalities!</div>
 
-        <div class="slide-content">
-          <h3>Meet Our AI Fans</h3>
-          <p>Each team has their own AI personality who LOVES their team. They'll chat with you about games, players, and history!</p>
+        <div class="feature-card">
+          <div class="feature-card-title">Meet Our AI Fans</div>
+          <p style="font-size: 14px; color: var(--sm-text-muted); line-height: 1.6; margin-bottom: 16px;">Each team has their own AI personality who LOVES their team. They'll chat with you about games, players, and history!</p>
 
           <div class="ai-cards">
             <div class="ai-card">
               <img src="https://a.espncdn.com/i/teamlogos/nfl/500/chi.png" alt="Bears" style="background: #0B162A;">
-              <div class="ai-card-info">
+              <div>
                 <div class="name">BearDownBenny</div>
                 <div class="team">Bears Fan</div>
               </div>
             </div>
             <div class="ai-card">
               <img src="https://a.espncdn.com/i/teamlogos/nba/500/chi.png" alt="Bulls" style="background: #CE1141;">
-              <div class="ai-card-info">
+              <div>
                 <div class="name">WindyCityHoops</div>
                 <div class="team">Bulls Fan</div>
               </div>
             </div>
             <div class="ai-card">
               <img src="https://a.espncdn.com/i/teamlogos/mlb/500/chc.png" alt="Cubs" style="background: #0E3386;">
-              <div class="ai-card-info">
+              <div>
                 <div class="name">WrigleyWill</div>
                 <div class="team">Cubs Fan</div>
               </div>
             </div>
             <div class="ai-card">
               <img src="https://a.espncdn.com/i/teamlogos/mlb/500/chw.png" alt="White Sox" style="background: #27251F;">
-              <div class="ai-card-info">
-                <div class="name">SouthSideSoxSarah</div>
+              <div>
+                <div class="name">SouthSideSarah</div>
                 <div class="team">White Sox Fan</div>
-              </div>
-            </div>
-            <div class="ai-card" style="grid-column: span 2;">
-              <img src="https://a.espncdn.com/i/teamlogos/nhl/500/chi.png" alt="Blackhawks" style="background: #CF0A2C;">
-              <div class="ai-card-info">
-                <div class="name">MadhouseMike</div>
-                <div class="team">Blackhawks Fan</div>
               </div>
             </div>
           </div>
         </div>
 
-        <div class="rules-box">
-          <h4>Chat Rules</h4>
+        <div class="info-box rule">
+          <div class="title">Chat Rules</div>
           <ul>
             <li>AI responds when you're alone OR if you tag them (@BearDownBenny)</li>
             <li>Be respectful to other fans</li>
@@ -1168,328 +1305,364 @@
           </ul>
         </div>
 
-        <a href="/fan-chat" class="link-btn">Join Fan Chat</a>
+        <a href="/fan-chat" class="link-btn">
+          Join Fan Chat
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+        </a>
       </div>
 
       <!-- SLIDE 5: Team Pages -->
-      <div class="slide" data-slide="5" data-name="Team Pages">
-        <div class="slide-icon" style="background: linear-gradient(135deg, #4facfe, #00f2fe);">
-          <svg width="50" height="50" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2">
-            <path d="M3 3v18h18"/>
-            <path d="M18 17V9"/>
-            <path d="M13 17V5"/>
-            <path d="M8 17v-3"/>
-          </svg>
+      <div class="slide" data-slide="5">
+        <div class="slide-header">
+          <div class="slide-icon" style="background: linear-gradient(135deg, #4facfe, #00f2fe);">
+            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2">
+              <path d="M3 3v18h18"/>
+              <path d="M18 17V9"/>
+              <path d="M13 17V5"/>
+              <path d="M8 17v-3"/>
+            </svg>
+          </div>
+          <h2 class="slide-title">Team Pages</h2>
+          <p class="slide-subtitle">Everything about your team in one place!</p>
         </div>
-        <div class="slide-title">Team Pages</div>
-        <div class="slide-subtitle">Everything about your team in one place!</div>
 
         <div class="team-logos">
-          <div class="team-logo-item" style="background: #0B162A;">
+          <div class="team-logo" style="background: #0B162A;">
             <img src="https://a.espncdn.com/i/teamlogos/nfl/500/chi.png" alt="Bears">
           </div>
-          <div class="team-logo-item" style="background: #CE1141;">
+          <div class="team-logo" style="background: #CE1141;">
             <img src="https://a.espncdn.com/i/teamlogos/nba/500/chi.png" alt="Bulls">
           </div>
-          <div class="team-logo-item" style="background: #0E3386;">
+          <div class="team-logo" style="background: #0E3386;">
             <img src="https://a.espncdn.com/i/teamlogos/mlb/500/chc.png" alt="Cubs">
           </div>
-          <div class="team-logo-item" style="background: #27251F;">
+          <div class="team-logo" style="background: #27251F;">
             <img src="https://a.espncdn.com/i/teamlogos/mlb/500/chw.png" alt="White Sox">
           </div>
-          <div class="team-logo-item" style="background: #CF0A2C;">
+          <div class="team-logo" style="background: #CF0A2C;">
             <img src="https://a.espncdn.com/i/teamlogos/nhl/500/chi.png" alt="Blackhawks">
           </div>
         </div>
 
-        <div class="slide-content">
-          <h3>What's On Each Page?</h3>
-          <ul class="feature-list">
-            <li>
-              <div class="icon-box" style="background: #4facfe20;">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#4facfe" stroke-width="2"><path d="M3 3v18h18"/><path d="M18 17V9"/><path d="M13 17V5"/><path d="M8 17v-3"/></svg>
-              </div>
-              <strong>Stats</strong> - Team stats and player leaders
-            </li>
-            <li>
-              <div class="icon-box" style="background: #4facfe20;">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#4facfe" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 20v-1a4 4 0 0 1 4-4h8a4 4 0 0 1 4 4v1"/></svg>
-              </div>
-              <strong>Roster</strong> - All players with photos and info
-            </li>
-            <li>
-              <div class="icon-box" style="background: #4facfe20;">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#4facfe" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
-              </div>
-              <strong>Schedule</strong> - Upcoming and past games
-            </li>
-            <li>
-              <div class="icon-box" style="background: #4facfe20;">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#4facfe" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-              </div>
-              <strong>Scores</strong> - Game results with box scores
-            </li>
-          </ul>
+        <div class="stats-grid">
+          <div class="stat-item">
+            <div class="icon" style="background: rgba(79, 172, 254, 0.2);">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#4facfe" stroke-width="2"><path d="M3 3v18h18"/><path d="M18 17V9"/><path d="M13 17V5"/><path d="M8 17v-3"/></svg>
+            </div>
+            <div class="label">Stats</div>
+            <div class="desc">Team & player leaders</div>
+          </div>
+          <div class="stat-item">
+            <div class="icon" style="background: rgba(79, 172, 254, 0.2);">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#4facfe" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 20v-1a4 4 0 0 1 4-4h8a4 4 0 0 1 4 4v1"/></svg>
+            </div>
+            <div class="label">Roster</div>
+            <div class="desc">All players & photos</div>
+          </div>
+          <div class="stat-item">
+            <div class="icon" style="background: rgba(79, 172, 254, 0.2);">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#4facfe" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+            </div>
+            <div class="label">Schedule</div>
+            <div class="desc">Full season calendar</div>
+          </div>
+          <div class="stat-item">
+            <div class="icon" style="background: rgba(79, 172, 254, 0.2);">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#4facfe" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+            </div>
+            <div class="label">Scores</div>
+            <div class="desc">Live & final box scores</div>
+          </div>
         </div>
 
-        <div class="tips-box">
-          <h4>Finding Team Pages</h4>
+        <div class="info-box tip">
+          <div class="title">Finding Team Pages</div>
           <p>Click any team name in the top menu, then use the submenu for Stats, Roster, Schedule, etc.</p>
         </div>
 
-        <a href="/chicago-bears" class="link-btn">View Bears Page</a>
+        <a href="/chicago-bears" class="link-btn">
+          View Bears Page
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+        </a>
       </div>
 
       <!-- SLIDE 6: Polls -->
-      <div class="slide" data-slide="6" data-name="Polls">
-        <div class="slide-icon" style="background: linear-gradient(135deg, #a8edea, #fed6e3);">
-          <svg width="50" height="50" viewBox="0 0 24 24" fill="none" stroke="#333" stroke-width="2">
-            <path d="M9 11l3 3L22 4"/>
-            <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/>
-          </svg>
+      <div class="slide" data-slide="6">
+        <div class="slide-header">
+          <div class="slide-icon" style="background: linear-gradient(135deg, #a8edea, #fed6e3);">
+            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#333" stroke-width="2">
+              <path d="M9 11l3 3L22 4"/>
+              <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/>
+            </svg>
+          </div>
+          <h2 class="slide-title">Polls & Voting</h2>
+          <p class="slide-subtitle">Share your opinion with Chicago!</p>
         </div>
-        <div class="slide-title">Polls & Voting</div>
-        <div class="slide-subtitle">Share your opinion with Chicago!</div>
 
-        <div class="slide-content">
-          <h3>How Polls Work</h3>
-          <p>Vote on hot takes, predictions, and debates! See what other Chicago fans think.</p>
+        <div class="feature-card">
+          <div class="feature-card-title">How Polls Work</div>
+          <p style="font-size: 14px; color: var(--sm-text-muted); line-height: 1.6;">Vote on hot takes, predictions, and debates! See what other Chicago fans think.</p>
 
-          <!-- Preview of poll -->
-          <div class="preview-box light">
-            <div style="font-weight: 700; color: #333; margin-bottom: 12px;">Who should be the Bears' starting QB?</div>
-            <div style="margin-bottom: 8px;">
-              <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 6px;">
-                <div style="width: 100%; background: #e9ecef; border-radius: 4px; height: 24px; overflow: hidden;">
-                  <div style="width: 67%; background: #0B162A; height: 100%; display: flex; align-items: center; padding-left: 8px; color: white; font-size: 11px;">Caleb Williams - 67%</div>
-                </div>
+          <div class="preview-box" style="margin-top: 16px; background: var(--sm-bg-card);">
+            <div style="font-weight: 700; color: var(--sm-text); margin-bottom: 14px; font-size: 15px;">Who should be the Bears' starting QB?</div>
+            <div style="margin-bottom: 10px;">
+              <div style="width: 100%; background: var(--sm-border); border-radius: 6px; height: 28px; overflow: hidden; margin-bottom: 8px;">
+                <div style="width: 67%; background: #0B162A; height: 100%; display: flex; align-items: center; padding-left: 10px; color: white; font-size: 12px; font-weight: 600;">Caleb Williams - 67%</div>
               </div>
-              <div style="display: flex; align-items: center; gap: 8px;">
-                <div style="width: 100%; background: #e9ecef; border-radius: 4px; height: 24px; overflow: hidden;">
-                  <div style="width: 33%; background: #C83803; height: 100%; display: flex; align-items: center; padding-left: 8px; color: white; font-size: 11px;">Other - 33%</div>
-                </div>
+              <div style="width: 100%; background: var(--sm-border); border-radius: 6px; height: 28px; overflow: hidden;">
+                <div style="width: 33%; background: #C83803; height: 100%; display: flex; align-items: center; padding-left: 10px; color: white; font-size: 12px; font-weight: 600;">Other - 33%</div>
               </div>
             </div>
-            <div style="text-align: center; font-size: 11px; color: #666;">1,247 votes</div>
+            <div style="text-align: center; font-size: 11px; color: var(--sm-text-muted);">1,247 votes</div>
           </div>
         </div>
 
-        <div class="slide-content">
-          <h3>Poll Types</h3>
+        <div class="feature-card">
+          <div class="feature-card-title">Poll Types</div>
           <ul class="feature-list">
-            <li>
-              <div class="icon-box" style="background: #bc000020; color: #bc0000; font-size: 14px;">&#9898;</div>
-              <strong>Single Choice</strong> - Pick your one answer
+            <li class="feature-item">
+              <div class="feature-icon" style="background: rgba(188, 0, 0, 0.2); color: var(--sm-primary); font-size: 16px;">&#9898;</div>
+              <div class="feature-text">
+                <strong>Single Choice</strong>
+                <span>Pick your one answer</span>
+              </div>
             </li>
-            <li>
-              <div class="icon-box" style="background: #bc000020; color: #bc0000; font-size: 14px;">&#9745;</div>
-              <strong>Multiple Choice</strong> - Pick several answers
+            <li class="feature-item">
+              <div class="feature-icon" style="background: rgba(188, 0, 0, 0.2); color: var(--sm-primary); font-size: 16px;">&#9745;</div>
+              <div class="feature-text">
+                <strong>Multiple Choice</strong>
+                <span>Pick several answers</span>
+              </div>
             </li>
-            <li>
-              <div class="icon-box" style="background: #bc000020; color: #bc0000; font-size: 14px;">&#9733;</div>
-              <strong>Scale (1-10)</strong> - Rate something
+            <li class="feature-item">
+              <div class="feature-icon" style="background: rgba(188, 0, 0, 0.2); color: var(--sm-primary); font-size: 16px;">&#9733;</div>
+              <div class="feature-text">
+                <strong>Scale (1-10)</strong>
+                <span>Rate something</span>
+              </div>
             </li>
           </ul>
         </div>
 
-        <a href="/polls" class="link-btn">View Polls</a>
+        <a href="/polls" class="link-btn">
+          View Polls
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+        </a>
       </div>
 
       <!-- SLIDE 7: Interactive Charts -->
-      <div class="slide" data-slide="7" data-name="Charts">
-        <div class="slide-icon" style="background: linear-gradient(135deg, #667eea, #764ba2);">
-          <svg width="50" height="50" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2">
-            <path d="M3 3v18h18"/>
-            <path d="M18 17V9"/>
-            <path d="M13 17V5"/>
-            <path d="M8 17v-3"/>
-          </svg>
+      <div class="slide" data-slide="7">
+        <div class="slide-header">
+          <div class="slide-icon" style="background: linear-gradient(135deg, #667eea, #764ba2);">
+            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2">
+              <path d="M3 3v18h18"/>
+              <path d="M18 17V9"/>
+              <path d="M13 17V5"/>
+              <path d="M8 17v-3"/>
+            </svg>
+          </div>
+          <h2 class="slide-title">Interactive Charts</h2>
+          <p class="slide-subtitle">Stats come alive in our articles!</p>
         </div>
-        <div class="slide-title">Interactive Charts</div>
-        <div class="slide-subtitle">Stats come alive in our articles!</div>
 
-        <div class="slide-content">
-          <h3>What Are They?</h3>
-          <p>Our articles have animated charts that show you stats in a fun, visual way. The bars grow, lines move, and you can hover to see exact numbers!</p>
+        <div class="feature-card">
+          <div class="feature-card-title">What Are They?</div>
+          <p style="font-size: 14px; color: var(--sm-text-muted); line-height: 1.6;">Our articles have animated charts that show you stats in a fun, visual way. The bars grow, lines move, and you can hover to see exact numbers!</p>
 
-          <!-- Animated Chart Preview -->
-          <div class="preview-box" style="padding: 16px;">
-            <div style="color: #888; font-size: 11px; margin-bottom: 12px;">Example: Bears Rushing Yards by Game</div>
-            <div style="background: #1a1a1a; border-radius: 8px; padding: 16px;">
-              <div class="animated-chart" style="display: flex; align-items: flex-end; gap: 8px; height: 100px; justify-content: center;">
-                <div class="chart-bar" style="display: flex; flex-direction: column; align-items: center; gap: 4px;">
-                  <div class="bar-fill bar-1" style="width: 24px; background: linear-gradient(to top, #0B162A, #1a3a5c); border-radius: 3px 3px 0 0;"></div>
-                  <span style="color: #666; font-size: 8px;">W1</span>
-                </div>
-                <div class="chart-bar" style="display: flex; flex-direction: column; align-items: center; gap: 4px;">
-                  <div class="bar-fill bar-2" style="width: 24px; background: linear-gradient(to top, #0B162A, #1a3a5c); border-radius: 3px 3px 0 0;"></div>
-                  <span style="color: #666; font-size: 8px;">W2</span>
-                </div>
-                <div class="chart-bar" style="display: flex; flex-direction: column; align-items: center; gap: 4px;">
-                  <div class="bar-fill bar-3" style="width: 24px; background: linear-gradient(to top, #0B162A, #1a3a5c); border-radius: 3px 3px 0 0;"></div>
-                  <span style="color: #666; font-size: 8px;">W3</span>
-                </div>
-                <div class="chart-bar" style="display: flex; flex-direction: column; align-items: center; gap: 4px;">
-                  <div class="bar-fill bar-4" style="width: 24px; background: linear-gradient(to top, #0B162A, #1a3a5c); border-radius: 3px 3px 0 0;"></div>
-                  <span style="color: #666; font-size: 8px;">W4</span>
-                </div>
-                <div class="chart-bar" style="display: flex; flex-direction: column; align-items: center; gap: 4px;">
-                  <div class="bar-fill bar-5" style="width: 24px; background: linear-gradient(to top, #0B162A, #1a3a5c); border-radius: 3px 3px 0 0;"></div>
-                  <span style="color: #666; font-size: 8px;">W5</span>
-                </div>
-                <div class="chart-bar" style="display: flex; flex-direction: column; align-items: center; gap: 4px;">
-                  <div class="bar-fill bar-6" style="width: 24px; background: linear-gradient(to top, #0B162A, #1a3a5c); border-radius: 3px 3px 0 0;"></div>
-                  <span style="color: #666; font-size: 8px;">W6</span>
-                </div>
+          <div class="chart-container">
+            <div style="color: var(--sm-text-muted); font-size: 11px; margin-bottom: 12px; text-align: center;">Bears Rushing Yards by Game</div>
+            <div class="chart-bars">
+              <div class="chart-bar">
+                <div class="bar-fill bar-1"></div>
+                <span class="chart-label">W1</span>
               </div>
-              <div style="text-align: center; color: #888; font-size: 10px; margin-top: 8px;">Rushing Yards</div>
+              <div class="chart-bar">
+                <div class="bar-fill bar-2"></div>
+                <span class="chart-label">W2</span>
+              </div>
+              <div class="chart-bar">
+                <div class="bar-fill bar-3"></div>
+                <span class="chart-label">W3</span>
+              </div>
+              <div class="chart-bar">
+                <div class="bar-fill bar-4"></div>
+                <span class="chart-label">W4</span>
+              </div>
+              <div class="chart-bar">
+                <div class="bar-fill bar-5"></div>
+                <span class="chart-label">W5</span>
+              </div>
+              <div class="chart-bar">
+                <div class="bar-fill bar-6"></div>
+                <span class="chart-label">W6</span>
+              </div>
             </div>
           </div>
         </div>
 
-        <div class="slide-content">
-          <h3>Chart Types</h3>
+        <div class="feature-card">
+          <div class="feature-card-title">Chart Types</div>
           <ul class="feature-list">
-            <li>
-              <div class="icon-box" style="background: #667eea20;">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#667eea" stroke-width="2"><path d="M3 3v18h18"/><path d="M18 17V9"/><path d="M13 17V5"/><path d="M8 17v-3"/></svg>
+            <li class="feature-item">
+              <div class="feature-icon" style="background: rgba(102, 126, 234, 0.2);">
+                <svg viewBox="0 0 24 24" fill="none" stroke="#667eea" stroke-width="2"><path d="M3 3v18h18"/><path d="M18 17V9"/><path d="M13 17V5"/><path d="M8 17v-3"/></svg>
               </div>
-              <strong>Bar Charts</strong> - Compare stats side by side
+              <div class="feature-text">
+                <strong>Bar Charts</strong>
+                <span>Compare stats side by side</span>
+              </div>
             </li>
-            <li>
-              <div class="icon-box" style="background: #667eea20;">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#667eea" stroke-width="2"><path d="M3 3v18h18"/><polyline points="7 14 12 9 16 13 21 8"/></svg>
+            <li class="feature-item">
+              <div class="feature-icon" style="background: rgba(102, 126, 234, 0.2);">
+                <svg viewBox="0 0 24 24" fill="none" stroke="#667eea" stroke-width="2"><path d="M3 3v18h18"/><polyline points="7 14 12 9 16 13 21 8"/></svg>
               </div>
-              <strong>Line Charts</strong> - See trends over time
+              <div class="feature-text">
+                <strong>Line Charts</strong>
+                <span>See trends over time</span>
+              </div>
             </li>
-            <li>
-              <div class="icon-box" style="background: #667eea20;">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#667eea" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 2a10 10 0 0 1 10 10"/><path d="M12 12L12 2"/><path d="M12 12L20 8"/></svg>
+            <li class="feature-item">
+              <div class="feature-icon" style="background: rgba(102, 126, 234, 0.2);">
+                <svg viewBox="0 0 24 24" fill="none" stroke="#667eea" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 2a10 10 0 0 1 10 10"/><path d="M12 12L12 2"/><path d="M12 12L20 8"/></svg>
               </div>
-              <strong>Pie Charts</strong> - See how things break down
+              <div class="feature-text">
+                <strong>Pie Charts</strong>
+                <span>See how things break down</span>
+              </div>
             </li>
           </ul>
         </div>
 
-        <div class="tips-box">
-          <h4>Where to Find Charts</h4>
+        <div class="info-box tip">
+          <div class="title">Where to Find Charts</div>
           <p>Look for charts inside our articles! They animate when you scroll to them.</p>
         </div>
       </div>
 
-      <!-- SLIDE 8: Profile & Personalization -->
-      <div class="slide" data-slide="8" data-name="Your Profile">
-        <div class="slide-icon" style="background: linear-gradient(135deg, #ffecd2, #fcb69f);">
-          <svg width="50" height="50" viewBox="0 0 24 24" fill="none" stroke="#333" stroke-width="2">
-            <circle cx="12" cy="8" r="5"/>
-            <path d="M3 21v-2a4 4 0 0 1 4-4h10a4 4 0 0 1 4 4v2"/>
-          </svg>
+      <!-- SLIDE 8: Profile -->
+      <div class="slide" data-slide="8">
+        <div class="slide-header">
+          <div class="slide-icon" style="background: linear-gradient(135deg, #ffecd2, #fcb69f);">
+            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#333" stroke-width="2">
+              <circle cx="12" cy="8" r="5"/>
+              <path d="M3 21v-2a4 4 0 0 1 4-4h10a4 4 0 0 1 4 4v2"/>
+            </svg>
+          </div>
+          <h2 class="slide-title">Your Profile</h2>
+          <p class="slide-subtitle">Make SportsMockery yours!</p>
         </div>
-        <div class="slide-title">Your Profile</div>
-        <div class="slide-subtitle">Make SportsMockery yours!</div>
 
-        <div class="slide-content">
-          <h3>Pick Your Favorite Teams</h3>
-          <p>Tell us which Chicago teams you love! Your favorite teams show up first in the feed.</p>
+        <div class="feature-card">
+          <div class="feature-card-title">Pick Your Favorite Teams</div>
+          <p style="font-size: 14px; color: var(--sm-text-muted); line-height: 1.6;">Tell us which Chicago teams you love! Your favorite teams show up first in the feed.</p>
 
           <div class="team-logos" style="margin: 16px 0;">
-            <div class="team-logo-item" style="background: #0B162A; border: 3px solid gold;">
+            <div class="team-logo" style="background: #0B162A; border: 3px solid gold;">
               <img src="https://a.espncdn.com/i/teamlogos/nfl/500/chi.png" alt="Bears">
             </div>
-            <div class="team-logo-item" style="background: #CE1141; opacity: 0.7;">
+            <div class="team-logo" style="background: #CE1141; opacity: 0.6;">
               <img src="https://a.espncdn.com/i/teamlogos/nba/500/chi.png" alt="Bulls">
             </div>
-            <div class="team-logo-item" style="background: #0E3386; opacity: 0.7;">
+            <div class="team-logo" style="background: #0E3386; opacity: 0.6;">
               <img src="https://a.espncdn.com/i/teamlogos/mlb/500/chc.png" alt="Cubs">
             </div>
           </div>
-          <p style="text-align: center; font-size: 12px; color: #666;">Example: Bears as #1, then Bulls and Cubs</p>
+          <p style="text-align: center; font-size: 11px; color: var(--sm-text-muted);">Example: Bears as #1, then Bulls and Cubs</p>
         </div>
 
-        <div class="slide-content">
-          <h3>Dark Mode Toggle</h3>
-          <p>Like reading at night? Switch to dark mode! Use the toggle in the menu.</p>
+        <div class="feature-card">
+          <div class="feature-card-title">Dark Mode Toggle</div>
+          <p style="font-size: 14px; color: var(--sm-text-muted); line-height: 1.6;">Like reading at night? Switch to dark mode! Use the toggle in the menu.</p>
 
-          <div class="theme-toggle-demo">
-            <span style="font-size: 13px; color: #666;">Light</span>
+          <div class="toggle-demo">
+            <span class="toggle-label">Light</span>
             <div class="toggle-track" id="demoToggle" onclick="toggleDemoTheme()">
               <div class="toggle-knob">
                 <span class="star">&#10038;</span>
               </div>
             </div>
-            <span style="font-size: 13px; color: #666;">Dark</span>
+            <span class="toggle-label">Dark</span>
           </div>
-          <p style="text-align: center; font-size: 11px; color: #888; margin-top: 8px;">The Chicago star slides between modes!</p>
+          <p style="text-align: center; font-size: 11px; color: var(--sm-text-muted);">The Chicago star slides between modes!</p>
         </div>
 
-        <div class="tips-box">
-          <h4>Turn On Notifications</h4>
+        <div class="info-box tip">
+          <div class="title">Turn On Notifications</div>
           <p>Get alerts for breaking news, game starts, and when your team makes news!</p>
         </div>
 
-        <a href="/profile" class="link-btn">Edit Your Profile</a>
+        <a href="/profile" class="link-btn">
+          Edit Your Profile
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+        </a>
       </div>
 
       <!-- SLIDE 9: Video Shows -->
-      <div class="slide" data-slide="9" data-name="Videos">
-        <div class="slide-icon" style="background: linear-gradient(135deg, #e52d27, #b31217);">
-          <svg width="50" height="50" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2">
-            <polygon points="23 7 16 12 23 17 23 7"/>
-            <rect x="1" y="5" width="15" height="14" rx="2"/>
-          </svg>
-        </div>
-        <div class="slide-title">Video Shows</div>
-        <div class="slide-subtitle">Watch and listen to our sports content!</div>
-
-        <div class="slide-content">
-          <h3>Our Shows</h3>
-          <div class="video-cards">
-            <a href="/bears-film-room" class="video-card">
-              <img src="/logos/bfr_logo.png" alt="Bears Film Room" onerror="this.src='https://a.espncdn.com/i/teamlogos/nfl/500/chi.png'">
-              <div class="video-card-info">
-                <div class="show-name">Bears Film Room</div>
-                <div class="show-desc">Deep dive into Bears plays and film breakdowns</div>
-              </div>
-            </a>
-            <a href="/pinwheels-and-ivy" class="video-card">
-              <img src="/logos/PI_logo.png" alt="Pinwheels & Ivy" onerror="this.src='https://a.espncdn.com/i/teamlogos/mlb/500/chc.png'">
-              <div class="video-card-info">
-                <div class="show-name">Pinwheels & Ivy</div>
-                <div class="show-desc">Cubs coverage and analysis</div>
-              </div>
-            </a>
-            <a href="/southside-behavior" class="video-card">
-              <img src="https://a.espncdn.com/i/teamlogos/mlb/500/chw.png" alt="Southside Behavior">
-              <div class="video-card-info">
-                <div class="show-name">Southside Behavior</div>
-                <div class="show-desc">White Sox TikToks and quick reactions</div>
-              </div>
-            </a>
-            <a href="/untold-chicago-stories" class="video-card">
-              <div style="width: 40px; height: 40px; background: #bc0000; border-radius: 8px; display: flex; align-items: center; justify-content: center;">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg>
-              </div>
-              <div class="video-card-info">
-                <div class="show-name">Untold Chicago Stories</div>
-                <div class="show-desc">Long-form stories from former athletes</div>
-              </div>
-            </a>
+      <div class="slide" data-slide="9">
+        <div class="slide-header">
+          <div class="slide-icon" style="background: linear-gradient(135deg, #e52d27, #b31217);">
+            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2">
+              <polygon points="23 7 16 12 23 17 23 7"/>
+              <rect x="1" y="5" width="15" height="14" rx="2"/>
+            </svg>
           </div>
+          <h2 class="slide-title">Video Shows</h2>
+          <p class="slide-subtitle">Watch and listen to our sports content!</p>
+        </div>
+
+        <div class="feature-card">
+          <div class="feature-card-title">Our Shows</div>
+
+          <a href="/bears-film-room" class="video-card">
+            <img src="/logos/bfr_logo.png" alt="Bears Film Room" onerror="this.src='https://a.espncdn.com/i/teamlogos/nfl/500/chi.png'" style="background: #0B162A;">
+            <div>
+              <div class="show-name">Bears Film Room</div>
+              <div class="show-desc">Deep dive into Bears plays and film breakdowns</div>
+            </div>
+          </a>
+
+          <a href="/pinwheels-and-ivy" class="video-card">
+            <img src="/logos/PI_logo.png" alt="Pinwheels & Ivy" onerror="this.src='https://a.espncdn.com/i/teamlogos/mlb/500/chc.png'" style="background: #0E3386;">
+            <div>
+              <div class="show-name">Pinwheels & Ivy</div>
+              <div class="show-desc">Cubs coverage and analysis</div>
+            </div>
+          </a>
+
+          <a href="/southside-behavior" class="video-card">
+            <img src="https://a.espncdn.com/i/teamlogos/mlb/500/chw.png" alt="Southside Behavior" style="background: #27251F;">
+            <div>
+              <div class="show-name">Southside Behavior</div>
+              <div class="show-desc">White Sox TikToks and quick reactions</div>
+            </div>
+          </a>
+
+          <a href="/untold-chicago-stories" class="video-card">
+            <div style="width: 48px; height: 48px; background: var(--sm-primary); border-radius: 10px; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg>
+            </div>
+            <div>
+              <div class="show-name">Untold Chicago Stories</div>
+              <div class="show-desc">Long-form stories from former athletes</div>
+            </div>
+          </a>
         </div>
       </div>
 
-      <!-- SLIDE 10: SM+ Subscription -->
-      <div class="slide" data-slide="10" data-name="SM+ Premium">
-        <div class="slide-icon" style="background: linear-gradient(135deg, #f5af19, #f12711);">
-          <svg width="50" height="50" viewBox="0 0 24 24" fill="white" stroke="white" stroke-width="1">
-            <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
-          </svg>
+      <!-- SLIDE 10: SM+ Premium -->
+      <div class="slide" data-slide="10">
+        <div class="slide-header">
+          <div class="slide-icon" style="background: linear-gradient(135deg, #f5af19, #f12711);">
+            <svg width="48" height="48" viewBox="0 0 24 24" fill="white" stroke="white" stroke-width="1">
+              <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+            </svg>
+          </div>
+          <h2 class="slide-title">SM+ Premium</h2>
+          <p class="slide-subtitle">Unlock the full experience!</p>
         </div>
-        <div class="slide-title">SM+ Premium</div>
-        <div class="slide-subtitle">Unlock the full experience!</div>
 
-        <div class="slide-content">
-          <h3>Choose Your Plan</h3>
+        <div class="feature-card">
+          <div class="feature-card-title">Choose Your Plan</div>
           <div class="pricing-cards">
             <div class="pricing-card">
               <div class="plan-name">Free</div>
@@ -1510,48 +1683,59 @@
           </div>
         </div>
 
-        <div class="slide-content">
-          <h3>What You Get with SM+</h3>
+        <div class="feature-card">
+          <div class="feature-card-title">What You Get with SM+</div>
           <ul class="feature-list">
-            <li>
-              <div class="icon-box" style="background: #28a74520; color: #28a745; font-weight: 700;">&#10003;</div>
-              <strong>Unlimited Scout AI</strong> - Ask as many questions as you want
+            <li class="feature-item">
+              <div class="feature-icon" style="background: rgba(34, 197, 94, 0.2); color: var(--sm-success); font-weight: 700;">&#10003;</div>
+              <div class="feature-text">
+                <strong>Unlimited Scout AI</strong>
+                <span>Ask as many questions as you want</span>
+              </div>
             </li>
-            <li>
-              <div class="icon-box" style="background: #28a74520; color: #28a745; font-weight: 700;">&#10003;</div>
-              <strong>Ad-Free Experience</strong> - No more interruptions
+            <li class="feature-item">
+              <div class="feature-icon" style="background: rgba(34, 197, 94, 0.2); color: var(--sm-success); font-weight: 700;">&#10003;</div>
+              <div class="feature-text">
+                <strong>Ad-Free Experience</strong>
+                <span>No more interruptions</span>
+              </div>
             </li>
-            <li>
-              <div class="icon-box" style="background: #28a74520; color: #28a745; font-weight: 700;">&#10003;</div>
-              <strong>Full Fan Chat Access</strong> - Chat in all rooms
+            <li class="feature-item">
+              <div class="feature-icon" style="background: rgba(34, 197, 94, 0.2); color: var(--sm-success); font-weight: 700;">&#10003;</div>
+              <div class="feature-text">
+                <strong>Full Fan Chat Access</strong>
+                <span>Chat in all rooms</span>
+              </div>
             </li>
-            <li>
-              <div class="icon-box" style="background: #28a74520; color: #28a745; font-weight: 700;">&#10003;</div>
-              <strong>AR Stadium Tours</strong> - Virtual stadium experiences
-            </li>
-            <li>
-              <div class="icon-box" style="background: #28a74520; color: #28a745; font-weight: 700;">&#10003;</div>
-              <strong>Early Access</strong> - Be first to try new features
+            <li class="feature-item">
+              <div class="feature-icon" style="background: rgba(34, 197, 94, 0.2); color: var(--sm-success); font-weight: 700;">&#10003;</div>
+              <div class="feature-text">
+                <strong>AR Stadium Tours</strong>
+                <span>Virtual stadium experiences</span>
+              </div>
             </li>
           </ul>
         </div>
 
-        <div class="tips-box">
-          <h4>That's the Tour!</h4>
+        <div class="info-box tip">
+          <div class="title">That's the Tour!</div>
           <p>Click "Finish Tour" to start exploring. Have fun, Chicago!</p>
         </div>
 
-        <a href="/pricing" class="link-btn">View Pricing</a>
+        <a href="/pricing" class="link-btn">
+          View Pricing
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+        </a>
       </div>
 
     </div>
 
-    <!-- Footer Navigation -->
+    <!-- Footer -->
     <div class="tour-footer">
-      <button class="skip-link" onclick="closeTour()">Skip tour</button>
-      <div style="display: flex; gap: 12px;">
-        <button class="tour-btn secondary" id="prevBtn" onclick="prevSlide()" style="display: none;">Back</button>
-        <button class="tour-btn primary" id="nextBtn" onclick="nextSlide()">Next</button>
+      <button class="skip-btn" onclick="closeTour()">Skip tour</button>
+      <div class="nav-buttons">
+        <button class="nav-btn secondary" id="prevBtn" onclick="prevSlide()" style="display: none;">Back</button>
+        <button class="nav-btn primary" id="nextBtn" onclick="nextSlide()">Next</button>
       </div>
     </div>
   </div>
@@ -1562,20 +1746,36 @@
   const totalSlides = 11;
   const slideNames = ['Welcome', 'Scout AI', 'GM Trades', 'Mock Draft', 'Fan Chat', 'Team Pages', 'Polls', 'Charts', 'Your Profile', 'Videos', 'SM+ Premium'];
 
+  // Generate progress dots
+  function generateProgressDots() {
+    const container = document.getElementById('progressDots');
+    container.innerHTML = '';
+    for (let i = 0; i < totalSlides; i++) {
+      const dot = document.createElement('div');
+      dot.className = 'progress-dot' + (i === 0 ? ' active' : '');
+      dot.onclick = () => goToSlide(i);
+      dot.title = slideNames[i];
+      container.appendChild(dot);
+    }
+  }
+
   function updateUI() {
+    // Update slides
     document.querySelectorAll('.slide').forEach((slide, index) => {
       slide.classList.toggle('active', index === currentSlide);
     });
 
-    const progress = ((currentSlide + 1) / totalSlides) * 100;
-    document.getElementById('progressFill').style.width = progress + '%';
-    document.getElementById('slideNumber').textContent = `${currentSlide + 1} of ${totalSlides}`;
-    document.getElementById('slideName').textContent = slideNames[currentSlide];
-
-    document.querySelectorAll('.toc-btn').forEach((btn, index) => {
-      btn.classList.toggle('active', index === currentSlide);
+    // Update progress dots
+    document.querySelectorAll('.progress-dot').forEach((dot, index) => {
+      dot.classList.remove('active', 'completed');
+      if (index === currentSlide) {
+        dot.classList.add('active');
+      } else if (index < currentSlide) {
+        dot.classList.add('completed');
+      }
     });
 
+    // Update buttons
     document.getElementById('prevBtn').style.display = currentSlide > 0 ? 'block' : 'none';
     document.getElementById('nextBtn').textContent = currentSlide === totalSlides - 1 ? 'Finish Tour' : 'Next';
   }
@@ -1612,6 +1812,8 @@
     toggle.classList.toggle('dark');
   }
 
+  // Initialize
+  generateProgressDots();
   updateUI();
 </script>
 
