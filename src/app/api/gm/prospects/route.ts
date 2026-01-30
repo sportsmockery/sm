@@ -3,13 +3,48 @@ import { datalabAdmin } from '@/lib/supabase-datalab'
 
 const DATALAB_BASE_URL = 'https://datalab.sportsmockery.com'
 
-// Map Chicago team keys to Datalab abbreviations
+// Map team keys (from gm_league_teams) to prospect table abbreviations (gm_mlb_prospects)
 const TEAM_KEY_TO_ABBREV: Record<string, string> = {
+  // Chicago teams (primary)
   'cubs': 'chc',
   'whitesox': 'chw',
   'chicago-cubs': 'chc',
   'chicago-white-sox': 'chw',
   'white-sox': 'chw',
+  // AL East
+  'orioles': 'bal',
+  'redsox': 'bos',
+  'yankees': 'nyy',
+  'rays': 'tb',
+  'bluejays': 'tor',
+  // AL Central
+  'guardians': 'cle',
+  'tigers': 'det',
+  'royals': 'kc',
+  'twins': 'min',
+  // AL West
+  'astros': 'hou',
+  'angels': 'laa',
+  'athletics': 'oak',
+  'mariners': 'sea',
+  'rangers': 'tex',
+  // NL Central
+  'reds': 'cin',
+  'brewers': 'mil',
+  'pirates': 'pit',
+  'cardinals': 'stl',
+  // NL East
+  'braves': 'atl',
+  'marlins': 'mia',
+  'mets': 'nym',
+  'phillies': 'phi',
+  'nationals': 'wsh',
+  // NL West
+  'diamondbacks': 'ari',
+  'rockies': 'col',
+  'dodgers': 'lad',
+  'padres': 'sd',
+  'giants': 'sf',
 }
 
 export async function GET(request: NextRequest) {

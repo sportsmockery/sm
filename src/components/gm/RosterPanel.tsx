@@ -420,7 +420,10 @@ export function RosterPanel({
                       prospect={prospect}
                       selected={selectedProspectIds?.has(prospect.id || prospect.prospect_id || '') || false}
                       teamColor={teamColor}
-                      onClick={() => onToggleProspect?.(prospect.id || prospect.prospect_id || '')}
+                      onClick={() => {
+                        onToggleProspect?.(prospect.id || prospect.prospect_id || '')
+                        setSearch('')
+                      }}
                     />
                   </motion.div>
                 ))}
@@ -472,7 +475,10 @@ export function RosterPanel({
                       player={player}
                       selected={selectedIds.has(player.player_id)}
                       teamColor={teamColor}
-                      onClick={() => onToggle(player.player_id)}
+                      onClick={() => {
+                        onToggle(player.player_id)
+                        setSearch('')
+                      }}
                       onViewFit={onViewFit}
                     />
                   </motion.div>
