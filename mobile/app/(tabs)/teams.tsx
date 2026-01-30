@@ -40,12 +40,12 @@ export default function TeamsScreen() {
         >
           <View style={styles.draftBannerContent}>
             <View style={styles.draftBannerLeft}>
-              <Text style={styles.draftBannerBadge}>DRAFT</Text>
+              <Text style={styles.draftBannerBadge}>NEW</Text>
               <Text style={styles.draftBannerTitle}>Mock Draft</Text>
               <Text style={styles.draftBannerDesc}>Draft prospects & get AI grades</Text>
             </View>
-            <View style={styles.draftBannerIcon}>
-              <Text style={styles.draftBannerIconText}>🏈</Text>
+            <View style={styles.gmBannerArrow}>
+              <Text style={styles.gmBannerArrowText}>{'>'}</Text>
             </View>
           </View>
         </TouchableOpacity>

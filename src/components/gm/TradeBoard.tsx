@@ -12,6 +12,23 @@ function isPlayerData(p: ReceivedPlayer): p is PlayerData {
   return 'player_id' in p
 }
 
+interface GradeResult {
+  grade: number
+  reasoning: string
+  status: string
+  is_dangerous: boolean
+  trade_summary?: string
+  improvement_score?: number
+  shared_code?: string
+  breakdown?: {
+    talent_balance: number
+    contract_value: number
+    team_fit: number
+    future_assets: number
+  }
+  cap_analysis?: string
+}
+
 interface TradeBoardProps {
   chicagoTeam: string
   chicagoLabel?: string
@@ -34,6 +51,8 @@ interface TradeBoardProps {
   validation?: ValidationState
   currentStep?: number
   mobile?: boolean
+  gradeResult?: GradeResult | null
+  onNewTrade?: () => void
 }
 
 export function TradeBoard({
@@ -46,6 +65,8 @@ export function TradeBoard({
   canGrade, grading, onGrade,
   validation,
   mobile = false,
+  gradeResult,
+  onNewTrade,
 }: TradeBoardProps) {
   const { theme } = useTheme()
   const isDark = theme === 'dark'
@@ -223,13 +244,13 @@ export function TradeBoard({
 
       {/* Validation and Grade section - stable layout */}
       <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-        {/* Validation indicator - only show when both sides have assets */}
-        {bothSidesHaveAssets && validation && validation.status !== 'idle' && (
+        {/* Validation indicator - only show when both sides have assets and no grade result */}
+        {!gradeResult && bothSidesHaveAssets && validation && validation.status !== 'idle' && (
           <ValidationIndicator validation={validation} />
         )}
 
-        {/* Grade button - always visible */}
-        {(() => {
+        {/* Grade button - hide when we have a result */}
+        {!gradeResult && (() => {
           const isBlocked = validation?.status === 'invalid'
           const canClick = canGrade && !grading && !isBlocked
           return (
@@ -253,6 +274,253 @@ export function TradeBoard({
             </button>
           )
         })()}
+
+        {/* Inline Grade Result */}
+        {gradeResult && (
+          <div style={{
+            padding: 24,
+            borderRadius: 16,
+            backgroundColor: isDark ? '#1f2937' : '#ffffff',
+            border: `1px solid ${borderColor}`,
+          }}>
+            {/* Grade number and status */}
+            <div style={{ textAlign: 'center', marginBottom: 16 }}>
+              <div style={{
+                fontSize: 64,
+                fontWeight: 900,
+                color: gradeResult.grade >= 75 ? '#22c55e' : gradeResult.grade >= 50 ? '#eab308' : '#ef4444',
+                lineHeight: 1,
+              }}>
+                {gradeResult.grade}
+              </div>
+              <div style={{ display: 'flex', justifyContent: 'center', gap: 8, marginTop: 8 }}>
+                <span style={{
+                  padding: '6px 16px',
+                  borderRadius: 20,
+                  fontWeight: 800,
+                  fontSize: 12,
+                  letterSpacing: '1px',
+                  backgroundColor: gradeResult.status === 'accepted' ? '#22c55e20' : '#ef444420',
+                  color: gradeResult.status === 'accepted' ? '#22c55e' : '#ef4444',
+                }}>
+                  {gradeResult.status === 'accepted' ? 'ACCEPTED' : 'REJECTED'}
+                </span>
+                {gradeResult.is_dangerous && (
+                  <span style={{
+                    padding: '6px 16px',
+                    borderRadius: 20,
+                    fontWeight: 800,
+                    fontSize: 12,
+                    backgroundColor: '#eab30820',
+                    color: '#eab308',
+                  }}>
+                    DANGEROUS
+                  </span>
+                )}
+              </div>
+            </div>
+
+            {/* Trade summary */}
+            {gradeResult.trade_summary && (
+              <div style={{
+                fontSize: 13,
+                color: subText,
+                fontStyle: 'italic',
+                textAlign: 'center',
+                marginBottom: 12,
+              }}>
+                {gradeResult.trade_summary}
+              </div>
+            )}
+
+            {/* Improvement score */}
+            {typeof gradeResult.improvement_score === 'number' && (
+              <div style={{
+                fontSize: 14,
+                fontWeight: 700,
+                textAlign: 'center',
+                marginBottom: 16,
+                color: gradeResult.improvement_score > 0 ? '#22c55e' : gradeResult.improvement_score < 0 ? '#ef4444' : subText,
+              }}>
+                Team Improvement: {gradeResult.improvement_score > 0 ? '+' : ''}{gradeResult.improvement_score}
+              </div>
+            )}
+
+            {/* Rejection reason box */}
+            {gradeResult.status === 'rejected' && (
+              <div style={{
+                marginBottom: 16,
+                padding: 16,
+                backgroundColor: isDark ? 'rgba(127, 29, 29, 0.3)' : 'rgba(254, 202, 202, 0.3)',
+                border: `1px solid ${isDark ? 'rgba(239, 68, 68, 0.3)' : 'rgba(239, 68, 68, 0.4)'}`,
+                borderRadius: 12,
+              }}>
+                <div style={{ display: 'flex', alignItems: 'flex-start', gap: 12 }}>
+                  <div style={{ fontSize: 20, color: '#ef4444' }}>⚠️</div>
+                  <div style={{ flex: 1 }}>
+                    <h4 style={{
+                      color: '#ef4444',
+                      fontWeight: 600,
+                      fontSize: 12,
+                      textTransform: 'uppercase',
+                      letterSpacing: '0.5px',
+                      margin: 0,
+                    }}>
+                      Why This Trade Was Rejected
+                    </h4>
+                    <p style={{
+                      color: textColor,
+                      marginTop: 8,
+                      fontSize: 13,
+                      lineHeight: 1.5,
+                      margin: '8px 0 0 0',
+                    }}>
+                      {(gradeResult as any).rejection_reason || `Trade score of ${gradeResult.grade} is below the 75-point acceptance threshold.`}
+                    </p>
+                    <div style={{
+                      marginTop: 12,
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: 8,
+                      fontSize: 12,
+                    }}>
+                      <span style={{ color: subText }}>Current score:</span>
+                      <span style={{ color: '#ef4444', fontWeight: 700 }}>{gradeResult.grade}</span>
+                      <span style={{ color: subText }}>|</span>
+                      <span style={{ color: subText }}>Needed:</span>
+                      <span style={{ color: '#22c55e', fontWeight: 700 }}>75+</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Breakdown bars */}
+            {gradeResult.breakdown && (
+              <div style={{ marginBottom: 16 }}>
+                {[
+                  { label: 'Talent Balance', value: gradeResult.breakdown.talent_balance },
+                  { label: 'Contract Value', value: gradeResult.breakdown.contract_value },
+                  { label: 'Team Fit', value: gradeResult.breakdown.team_fit },
+                  { label: 'Future Assets', value: gradeResult.breakdown.future_assets },
+                ].map((item) => (
+                  <div key={item.label} style={{ marginBottom: 8 }}>
+                    <div style={{
+                      display: 'flex',
+                      justifyContent: 'space-between',
+                      fontSize: 11,
+                      fontWeight: 600,
+                      color: subText,
+                      marginBottom: 3,
+                    }}>
+                      <span>{item.label}</span>
+                      <span>{Math.round(item.value * 100)}%</span>
+                    </div>
+                    <div style={{
+                      height: 6,
+                      borderRadius: 3,
+                      backgroundColor: isDark ? '#374151' : '#e5e7eb',
+                      overflow: 'hidden',
+                    }}>
+                      <div style={{
+                        height: '100%',
+                        width: `${item.value * 100}%`,
+                        borderRadius: 3,
+                        backgroundColor: gradeResult.grade >= 75 ? '#22c55e' : gradeResult.grade >= 50 ? '#eab308' : '#ef4444',
+                      }} />
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {/* Cap Analysis */}
+            {gradeResult.cap_analysis && (
+              <div style={{
+                marginBottom: 16,
+                padding: 12,
+                borderRadius: 10,
+                backgroundColor: isDark ? '#1e293b' : '#f0fdf4',
+                border: `1px solid ${isDark ? '#334155' : '#bbf7d0'}`,
+                display: 'flex',
+                alignItems: 'flex-start',
+                gap: 10,
+              }}>
+                <span style={{ fontSize: 18, flexShrink: 0 }}>💰</span>
+                <div>
+                  <div style={{
+                    fontSize: 11,
+                    fontWeight: 700,
+                    color: isDark ? '#94a3b8' : '#64748b',
+                    marginBottom: 4,
+                    textTransform: 'uppercase',
+                    letterSpacing: '0.5px',
+                  }}>
+                    Cap Impact
+                  </div>
+                  <div style={{
+                    fontSize: 13,
+                    lineHeight: 1.5,
+                    color: isDark ? '#e2e8f0' : '#334155',
+                  }}>
+                    {gradeResult.cap_analysis}
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Reasoning */}
+            <div style={{
+              padding: 16,
+              borderRadius: 12,
+              backgroundColor: isDark ? '#111827' : '#f3f4f6',
+              fontSize: 13,
+              lineHeight: 1.6,
+              color: textColor,
+              marginBottom: 16,
+            }}>
+              {gradeResult.reasoning}
+            </div>
+
+            {/* Action buttons */}
+            <div style={{ display: 'flex', gap: 10, justifyContent: 'center', flexWrap: 'wrap' }}>
+              <button
+                onClick={onNewTrade}
+                style={{
+                  padding: '12px 28px',
+                  borderRadius: 10,
+                  border: 'none',
+                  backgroundColor: '#bc0000',
+                  color: '#fff',
+                  fontWeight: 700,
+                  fontSize: 14,
+                  cursor: 'pointer',
+                }}
+              >
+                New Trade
+              </button>
+              {gradeResult.shared_code && (
+                <button
+                  onClick={() => {
+                    navigator.clipboard.writeText(`${window.location.origin}/gm/share/${gradeResult.shared_code}`)
+                  }}
+                  style={{
+                    padding: '12px 28px',
+                    borderRadius: 10,
+                    border: `2px solid ${borderColor}`,
+                    backgroundColor: 'transparent',
+                    color: textColor,
+                    fontWeight: 600,
+                    fontSize: 14,
+                    cursor: 'pointer',
+                  }}
+                >
+                  Copy Link
+                </button>
+              )}
+            </div>
+          </div>
+        )}
       </div>
     </div>
   )
