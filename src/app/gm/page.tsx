@@ -78,6 +78,13 @@ export default function GMPage() {
   const [validation, setValidation] = useState<ValidationState>({ status: 'idle', issues: [] })
   const validationTimeoutRef = useRef<NodeJS.Timeout | null>(null)
 
+  // Draft section ref for scrolling
+  const draftSectionRef = useRef<HTMLDivElement | null>(null)
+
+  const scrollToDraft = useCallback(() => {
+    draftSectionRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' })
+  }, [])
+
   // History & leaderboard
   const [trades, setTrades] = useState<any[]>([])
   const [tradesPage, setTradesPage] = useState(1)
@@ -268,7 +275,10 @@ export default function GMPage() {
   }
 
   const selectedPlayers = roster.filter(p => selectedPlayerIds.has(p.player_id))
-  const canGrade = selectedPlayerIds.size > 0 && opponentTeam !== null && receivedPlayers.length > 0
+  // Allow trading draft picks only (no players required) - must have something on both sides
+  const hasSomethingToSend = selectedPlayerIds.size > 0 || draftPicksSent.length > 0
+  const hasSomethingToReceive = receivedPlayers.length > 0 || draftPicksReceived.length > 0
+  const canGrade = hasSomethingToSend && opponentTeam !== null && hasSomethingToReceive
 
   // Validate trade when it changes
   const validateTrade = useCallback(async () => {
@@ -517,6 +527,7 @@ export default function GMPage() {
                   sport={sport}
                   teamColor={teamColor}
                   onViewFit={handleViewFit}
+                  onDraftClick={scrollToDraft}
                 />
               </div>
             </div>
@@ -554,7 +565,7 @@ export default function GMPage() {
               </div>
 
               {/* Draft picks */}
-              <div className={`rounded-xl border p-4 ${cardBg}`}>
+              <div ref={draftSectionRef} className={`rounded-xl border p-4 ${cardBg}`}>
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
                   <DraftPickSelector
                     sport={sport}
@@ -707,6 +718,7 @@ export default function GMPage() {
                     setLoading={setOpponentRosterLoading}
                     onAddCustomPlayer={addCustomReceivedPlayer}
                     onViewFit={handleViewFit}
+                    onDraftClick={scrollToDraft}
                   />
                 ) : (
                   <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', color: subText, textAlign: 'center', padding: 20 }}>
