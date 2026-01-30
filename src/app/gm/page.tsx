@@ -763,10 +763,13 @@ export default function GMPage() {
                 border: `1px solid ${borderColor}`,
                 borderRadius: 12,
                 padding: 16,
-                height: 'calc(100vh - 300px)',
-                minHeight: 500,
+                height: 'calc(100vh - 200px)',
+                minHeight: 600,
+                maxHeight: 900,
                 display: 'flex',
                 flexDirection: 'column',
+                position: 'sticky',
+                top: 100,
               }}>
                 <RosterPanel
                   players={roster}
@@ -861,10 +864,13 @@ export default function GMPage() {
                 border: `1px solid ${borderColor}`,
                 borderRadius: 12,
                 padding: 16,
-                height: 'calc(100vh - 300px)',
-                minHeight: 500,
+                height: 'calc(100vh - 200px)',
+                minHeight: 600,
+                maxHeight: 900,
                 display: 'flex',
                 flexDirection: 'column',
+                position: 'sticky',
+                top: 100,
               }}>
                 {/* Opponent header */}
                 <div style={{
