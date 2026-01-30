@@ -32,6 +32,24 @@ export default function TeamsScreen() {
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
       >
+        {/* Mock Draft Banner */}
+        <TouchableOpacity
+          style={styles.draftBanner}
+          activeOpacity={0.85}
+          onPress={() => router.push('/mock-draft')}
+        >
+          <View style={styles.draftBannerContent}>
+            <View style={styles.draftBannerLeft}>
+              <Text style={styles.draftBannerBadge}>DRAFT</Text>
+              <Text style={styles.draftBannerTitle}>Mock Draft</Text>
+              <Text style={styles.draftBannerDesc}>Draft prospects & get AI grades</Text>
+            </View>
+            <View style={styles.draftBannerIcon}>
+              <Text style={styles.draftBannerIconText}>🏈</Text>
+            </View>
+          </View>
+        </TouchableOpacity>
+
         {/* GM Trade Simulator Banner */}
         <TouchableOpacity
           style={styles.gmBanner}
@@ -299,5 +317,62 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontSize: 18,
     fontFamily: 'Montserrat-Bold',
+  },
+  draftBanner: {
+    borderRadius: 16,
+    marginBottom: 12,
+    overflow: 'hidden',
+    backgroundColor: '#1e40af',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.2,
+    shadowRadius: 6,
+    elevation: 4,
+  },
+  draftBannerContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: 20,
+    paddingVertical: 16,
+  },
+  draftBannerLeft: {
+    flex: 1,
+  },
+  draftBannerBadge: {
+    color: '#1e40af',
+    backgroundColor: '#fbbf24',
+    alignSelf: 'flex-start',
+    fontSize: 10,
+    fontFamily: 'Montserrat-Bold',
+    paddingHorizontal: 8,
+    paddingVertical: 2,
+    borderRadius: 4,
+    overflow: 'hidden',
+    marginBottom: 6,
+    letterSpacing: 1,
+  },
+  draftBannerTitle: {
+    color: '#fff',
+    fontSize: 18,
+    fontFamily: 'Montserrat-Bold',
+    marginBottom: 2,
+  },
+  draftBannerDesc: {
+    color: 'rgba(255,255,255,0.85)',
+    fontSize: 13,
+    fontFamily: 'Montserrat-Regular',
+  },
+  draftBannerIcon: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    backgroundColor: 'rgba(255,255,255,0.15)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginLeft: 12,
+  },
+  draftBannerIconText: {
+    fontSize: 24,
   },
 })

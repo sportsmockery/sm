@@ -14,6 +14,7 @@ import { SubscriptionProvider } from '@/hooks/useSubscription'
 import { AdsProvider } from '@/hooks/useAds'
 import { AudioPlayerProvider } from '@/hooks/useAudioPlayer'
 import { GMProvider } from '@/lib/gm-context'
+import { MockDraftProvider } from '@/lib/mock-draft-context'
 
 // Prevent splash screen from auto-hiding
 SplashScreen.preventAutoHideAsync()
@@ -67,6 +68,7 @@ export default function RootLayout() {
               <AdsProvider>
                 <AudioPlayerProvider>
                 <GMProvider>
+                <MockDraftProvider>
                 <Stack
                   screenOptions={{
                     headerShown: false,
@@ -186,8 +188,30 @@ export default function RootLayout() {
                       animation: 'slide_from_right',
                     }}
                   />
+                  <Stack.Screen
+                    name="mock-draft/index"
+                    options={{
+                      presentation: 'card',
+                      animation: 'slide_from_right',
+                    }}
+                  />
+                  <Stack.Screen
+                    name="mock-draft/draft"
+                    options={{
+                      presentation: 'card',
+                      animation: 'slide_from_right',
+                    }}
+                  />
+                  <Stack.Screen
+                    name="mock-draft/result"
+                    options={{
+                      presentation: 'card',
+                      animation: 'slide_from_bottom',
+                    }}
+                  />
                 </Stack>
                 <StatusBar style="auto" />
+                </MockDraftProvider>
                 </GMProvider>
                 </AudioPlayerProvider>
               </AdsProvider>
