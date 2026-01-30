@@ -1,4 +1,5 @@
 'use client'
+import { useState, useRef, useCallback } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
 import { PlayerData } from './PlayerCard'
 import { AssetRow } from './AssetRow'
@@ -76,6 +77,68 @@ export function TradeBoard({
   const borderColor = isDark ? '#374151' : '#e5e7eb'
 
   const displayLabel = chicagoLabel || chicagoTeam
+
+  // Share state
+  const [showShareOptions, setShowShareOptions] = useState(false)
+  const [copied, setCopied] = useState(false)
+  const [generatingImage, setGeneratingImage] = useState(false)
+  const [generatedImageUrl, setGeneratedImageUrl] = useState<string | null>(null)
+  const gradeCardRef = useRef<HTMLDivElement>(null)
+
+  const shareUrl = gradeResult?.shared_code
+    ? `${typeof window !== 'undefined' ? window.location.origin : ''}/gm/share/${gradeResult.shared_code}`
+    : ''
+
+  const handleCopyLink = useCallback(async () => {
+    if (!shareUrl) return
+    try {
+      await navigator.clipboard.writeText(shareUrl)
+      setCopied(true)
+      setShowShareOptions(true)
+      setTimeout(() => setCopied(false), 3000)
+    } catch (e) {
+      console.error('Failed to copy', e)
+    }
+  }, [shareUrl])
+
+  const handleCreateImage = useCallback(async () => {
+    if (!gradeCardRef.current || !gradeResult) return
+    setGeneratingImage(true)
+
+    try {
+      // Dynamically import html-to-image
+      const { toPng } = await import('html-to-image')
+
+      const dataUrl = await toPng(gradeCardRef.current, {
+        quality: 0.95,
+        backgroundColor: isDark ? '#1f2937' : '#ffffff',
+        style: {
+          borderRadius: '16px',
+        },
+      })
+
+      setGeneratedImageUrl(dataUrl)
+      setShowShareOptions(true)
+    } catch (e) {
+      console.error('Failed to generate image', e)
+    } finally {
+      setGeneratingImage(false)
+    }
+  }, [gradeResult, isDark])
+
+  const handleDownloadImage = useCallback(() => {
+    if (!generatedImageUrl) return
+    const link = document.createElement('a')
+    link.download = `trade-grade-${gradeResult?.grade || 0}.png`
+    link.href = generatedImageUrl
+    link.click()
+  }, [generatedImageUrl, gradeResult?.grade])
+
+  const socialShareLinks = {
+    twitter: `https://twitter.com/intent/tweet?text=${encodeURIComponent(`Check out my trade grade of ${gradeResult?.grade || 0}! Built with SportsMockery Trade Simulator`)}&url=${encodeURIComponent(shareUrl)}`,
+    facebook: `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(shareUrl)}`,
+    reddit: `https://reddit.com/submit?url=${encodeURIComponent(shareUrl)}&title=${encodeURIComponent(`My trade got a ${gradeResult?.grade || 0} grade on SportsMockery Trade Simulator`)}`,
+  }
 
   // Check if both sides have assets
   const hasSentAssets = playersSent.length > 0 || draftPicksSent.length > 0
@@ -281,12 +344,15 @@ export function TradeBoard({
 
         {/* Inline Grade Result */}
         {gradeResult && (
-          <div style={{
-            padding: 24,
-            borderRadius: 16,
-            backgroundColor: isDark ? '#1f2937' : '#ffffff',
-            border: `1px solid ${borderColor}`,
-          }}>
+          <div
+            ref={gradeCardRef}
+            style={{
+              padding: 24,
+              borderRadius: 16,
+              backgroundColor: isDark ? '#1f2937' : '#ffffff',
+              border: `1px solid ${borderColor}`,
+            }}
+          >
             {/* Grade number and status */}
             <div style={{ textAlign: 'center', marginBottom: 16 }}>
               <div style={{
