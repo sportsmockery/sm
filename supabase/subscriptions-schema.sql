@@ -34,10 +34,8 @@ CREATE POLICY "Users can view own subscription"
   ON subscriptions FOR SELECT
   USING (auth.uid() = user_id);
 
--- Service role can manage all subscriptions (for webhook updates)
-CREATE POLICY "Service role can manage subscriptions"
-  ON subscriptions FOR ALL
-  USING (true);
+-- NOTE: Service role automatically bypasses RLS, no policy needed for webhooks.
+-- DO NOT add a "USING (true)" policy - it would allow ANY user full access!
 
 -- Trigger for updated_at timestamp
 CREATE OR REPLACE FUNCTION update_subscription_timestamp()
