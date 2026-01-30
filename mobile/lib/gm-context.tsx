@@ -15,6 +15,9 @@ import type {
 } from './gm-types'
 import { CHICAGO_TEAM_SPORT } from './gm-types'
 
+// Sheet types for the new Trade Hub UI
+export type ActiveSheet = 'none' | 'roster' | 'opponent' | 'picks'
+
 interface GMState {
   chicagoTeam: ChicagoTeam | null
   sport: Sport | null
@@ -34,6 +37,9 @@ interface GMState {
   validation: ValidationResult | null
   validating: boolean
   preferences: UserPreferences | null
+  // Trade Hub UI State
+  activeSheet: ActiveSheet
+  dockExpanded: boolean
 }
 
 type GMAction =
@@ -57,6 +63,11 @@ type GMAction =
   | { type: 'SET_VALIDATION'; validation: ValidationResult | null }
   | { type: 'SET_VALIDATING'; validating: boolean }
   | { type: 'SET_PREFERENCES'; preferences: UserPreferences | null }
+  // Trade Hub UI Actions
+  | { type: 'SET_ACTIVE_SHEET'; sheet: ActiveSheet }
+  | { type: 'SET_DOCK_EXPANDED'; expanded: boolean }
+  | { type: 'REMOVE_PLAYER'; playerId: string }
+  | { type: 'REMOVE_OPPONENT_PLAYER'; playerId: string }
 
 const initialState: GMState = {
   chicagoTeam: null,
@@ -77,6 +88,9 @@ const initialState: GMState = {
   validation: null,
   validating: false,
   preferences: null,
+  // Trade Hub UI State
+  activeSheet: 'none',
+  dockExpanded: false,
 }
 
 function gmReducer(state: GMState, action: GMAction): GMState {
@@ -138,6 +152,21 @@ function gmReducer(state: GMState, action: GMAction): GMState {
       return { ...state, validating: action.validating }
     case 'SET_PREFERENCES':
       return { ...state, preferences: action.preferences }
+    // Trade Hub UI Actions
+    case 'SET_ACTIVE_SHEET':
+      return { ...state, activeSheet: action.sheet }
+    case 'SET_DOCK_EXPANDED':
+      return { ...state, dockExpanded: action.expanded }
+    case 'REMOVE_PLAYER':
+      return {
+        ...state,
+        selectedPlayers: state.selectedPlayers.filter(p => p.player_id !== action.playerId),
+      }
+    case 'REMOVE_OPPONENT_PLAYER':
+      return {
+        ...state,
+        selectedOpponentPlayers: state.selectedOpponentPlayers.filter(p => p.player_id !== action.playerId),
+      }
     default:
       return state
   }
