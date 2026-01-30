@@ -242,11 +242,15 @@ export function TradeBoard({
         </div>
       </div>
 
-      {/* Validation and Grade section - stable layout */}
+      {/* Validation and Grade section - stable layout with reserved space */}
       <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-        {/* Validation indicator - only show when both sides have assets and no grade result */}
-        {!gradeResult && bothSidesHaveAssets && validation && validation.status !== 'idle' && (
-          <ValidationIndicator validation={validation} />
+        {/* Validation indicator container - always reserve space to prevent layout shift */}
+        {!gradeResult && (
+          <div style={{ minHeight: bothSidesHaveAssets ? 60 : 0, transition: 'min-height 0.15s ease-out' }}>
+            {bothSidesHaveAssets && validation && validation.status !== 'idle' && (
+              <ValidationIndicator validation={validation} />
+            )}
+          </div>
         )}
 
         {/* Grade button - hide when we have a result */}
