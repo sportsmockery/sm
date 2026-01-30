@@ -55,6 +55,7 @@ interface OpponentRosterPanelProps {
   // Prospect props (MLB only)
   selectedProspectIds?: Set<string>
   onToggleProspect?: (prospectId: string) => void
+  onProspectsLoaded?: (prospects: MLBProspect[]) => void
   compact?: boolean
 }
 
@@ -62,7 +63,7 @@ export function OpponentRosterPanel({
   teamKey, sport, teamColor, teamName, selectedIds, onToggle,
   roster, setRoster, loading, setLoading, onAddCustomPlayer, onViewFit,
   draftPicks, onAddDraftPick, onRemoveDraftPick,
-  selectedProspectIds, onToggleProspect, compact = false,
+  selectedProspectIds, onToggleProspect, onProspectsLoaded, compact = false,
 }: OpponentRosterPanelProps) {
   const { theme } = useTheme()
   const isDark = theme === 'dark'
@@ -93,10 +94,14 @@ export function OpponentRosterPanel({
     setProspectsLoading(true)
     fetch(`/api/gm/prospects?team_key=${encodeURIComponent(teamKey)}&sport=mlb&limit=30`)
       .then(res => res.ok ? res.json() : Promise.reject('Failed'))
-      .then(data => setProspects(data.prospects || []))
+      .then(data => {
+        const fetchedProspects = data.prospects || []
+        setProspects(fetchedProspects)
+        onProspectsLoaded?.(fetchedProspects)
+      })
       .catch(() => setProspects([]))
       .finally(() => setProspectsLoading(false))
-  }, [isMLB, viewMode, teamKey])
+  }, [isMLB, viewMode, teamKey, onProspectsLoaded])
 
   // Filter prospects by search
   const filteredProspects = useMemo(() => {
