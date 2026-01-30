@@ -138,12 +138,24 @@ export async function POST(request: NextRequest) {
     if (!trade_partner || typeof trade_partner !== 'string') {
       return NextResponse.json({ error: 'trade_partner required' }, { status: 400 })
     }
-    if (!Array.isArray(players_sent) || players_sent.length === 0) {
-      return NextResponse.json({ error: 'players_sent must be non-empty array' }, { status: 400 })
+    // Validate that at least one asset is being sent and received (players OR draft picks)
+    const hasSentAssets = (Array.isArray(players_sent) && players_sent.length > 0) ||
+                          (Array.isArray(draft_picks_sent) && draft_picks_sent.length > 0)
+    const hasReceivedAssets = (Array.isArray(players_received) && players_received.length > 0) ||
+                              (Array.isArray(draft_picks_received) && draft_picks_received.length > 0)
+
+    if (!hasSentAssets) {
+      return NextResponse.json({ error: 'Must send at least one player or draft pick' }, { status: 400 })
     }
-    if (!Array.isArray(players_received) || players_received.length === 0) {
-      return NextResponse.json({ error: 'players_received must be non-empty array' }, { status: 400 })
+    if (!hasReceivedAssets) {
+      return NextResponse.json({ error: 'Must receive at least one player or draft pick' }, { status: 400 })
     }
+
+    // Ensure arrays are initialized (empty arrays, not undefined)
+    const safePlayers_sent = Array.isArray(players_sent) ? players_sent : []
+    const safePlayers_received = Array.isArray(players_received) ? players_received : []
+    const safeDraft_picks_sent = Array.isArray(draft_picks_sent) ? draft_picks_sent : []
+    const safeDraft_picks_received = Array.isArray(draft_picks_received) ? draft_picks_received : []
 
     const sport = TEAM_SPORT_MAP[chicago_team]
     const teamDisplayNames: Record<string, string> = {
@@ -182,8 +194,8 @@ export async function POST(request: NextRequest) {
 
     // Look up player value tiers for both sides
     const allPlayerNames = [
-      ...players_sent.map((p: any) => p.name || p.full_name),
-      ...players_received.map((p: any) => p.name || p.full_name),
+      ...safePlayers_sent.map((p: any) => p.name || p.full_name),
+      ...safePlayers_received.map((p: any) => p.name || p.full_name),
     ].filter(Boolean)
 
     let tierMap: Record<string, { tier: number, tier_label: string, trade_value_score: number, is_untouchable: boolean }> = {}
@@ -219,7 +231,7 @@ export async function POST(request: NextRequest) {
       // Table may not exist yet — continue without examples
     }
 
-    const sentDesc = players_sent.map((p: any) => {
+    const sentDesc = safePlayers_sent.map((p: any) => {
       const playerName = p.name || p.full_name || 'Unknown'
       let desc = `${playerName} (${p.position})`
       if (p.stat_line) desc += ` [${p.stat_line}]`
@@ -231,7 +243,7 @@ export async function POST(request: NextRequest) {
       return desc
     }).join(', ')
 
-    const recvDesc = players_received.map((p: any) => {
+    const recvDesc = safePlayers_received.map((p: any) => {
       let desc = `${p.name || p.full_name} (${p.position})`
       if (p.stat_line) desc += ` [${p.stat_line}]`
       if (p.age) desc += ` Age ${p.age}`
@@ -243,12 +255,12 @@ export async function POST(request: NextRequest) {
     }).join(', ')
 
     let picksSentDesc = ''
-    if (draft_picks_sent?.length) {
-      picksSentDesc = `\nDraft picks sent: ${draft_picks_sent.map((p: any) => `${p.year} Round ${p.round}${p.condition ? ` (${p.condition})` : ''}`).join(', ')}`
+    if (safeDraft_picks_sent.length > 0) {
+      picksSentDesc = `\nDraft picks sent: ${safeDraft_picks_sent.map((p: any) => `${p.year} Round ${p.round}${p.condition ? ` (${p.condition})` : ''}`).join(', ')}`
     }
     let picksRecvDesc = ''
-    if (draft_picks_received?.length) {
-      picksRecvDesc = `\nDraft picks received: ${draft_picks_received.map((p: any) => `${p.year} Round ${p.round}${p.condition ? ` (${p.condition})` : ''}`).join(', ')}`
+    if (safeDraft_picks_received.length > 0) {
+      picksRecvDesc = `\nDraft picks received: ${safeDraft_picks_received.map((p: any) => `${p.year} Round ${p.round}${p.condition ? ` (${p.condition})` : ''}`).join(', ')}`
     }
 
     let capContext = ''
@@ -265,24 +277,24 @@ export async function POST(request: NextRequest) {
     let valueContext = ''
     const hasTiers = Object.keys(tierMap).length > 0
     if (hasTiers) {
-      const sentValue = players_sent.reduce((sum: number, p: any) => {
+      const sentValue = safePlayers_sent.reduce((sum: number, p: any) => {
         const tier = tierMap[p.name || p.full_name]
         return sum + (tier?.trade_value_score || 0)
       }, 0)
       // Rough draft pick values
-      const pickValue = (picks: any[]) => (picks || []).reduce((sum: number, p: any) => {
+      const pickValue = (picks: any[]) => picks.reduce((sum: number, p: any) => {
         if (p.round === 1) return sum + 35
         if (p.round === 2) return sum + 18
         if (p.round === 3) return sum + 10
         return sum + 5
       }, 0)
-      const sentTotal = sentValue + pickValue(draft_picks_sent)
+      const sentTotal = sentValue + pickValue(safeDraft_picks_sent)
 
-      const recvValue = players_received.reduce((sum: number, p: any) => {
+      const recvValue = safePlayers_received.reduce((sum: number, p: any) => {
         const tier = tierMap[p.name || p.full_name]
         return sum + (tier?.trade_value_score || 0)
       }, 0)
-      const recvTotal = recvValue + pickValue(draft_picks_received)
+      const recvTotal = recvValue + pickValue(safeDraft_picks_received)
 
       const gap = recvTotal - sentTotal
       valueContext = `\n\nPlayer Value Analysis (objective tier data):
@@ -376,8 +388,8 @@ Grade this trade from the perspective of the ${teamDisplayNames[chicago_team]}.`
       chicago_team,
       sport,
       trade_partner,
-      players_sent,
-      players_received,
+      players_sent: safePlayers_sent,
+      players_received: safePlayers_received,
       grade,
       grade_reasoning: reasoning,
       status,
@@ -390,8 +402,8 @@ Grade this trade from the perspective of the ${teamDisplayNames[chicago_team]}.`
       partner_team_key: partner_team_key || null,
       partner_team_logo: partnerTeamLogo,
       chicago_team_logo: chicagoTeamLogo,
-      draft_picks_sent: draft_picks_sent || [],
-      draft_picks_received: draft_picks_received || [],
+      draft_picks_sent: safeDraft_picks_sent,
+      draft_picks_received: safeDraft_picks_received,
       talent_balance: breakdown.talent_balance,
       contract_value: breakdown.contract_value,
       team_fit: breakdown.team_fit,
@@ -401,7 +413,7 @@ Grade this trade from the perspective of the ${teamDisplayNames[chicago_team]}.`
     if (tradeError) throw tradeError
 
     const tradeItems: any[] = []
-    for (const p of players_sent) {
+    for (const p of safePlayers_sent) {
       tradeItems.push({
         trade_id: trade.id,
         side: 'sent',
@@ -421,7 +433,7 @@ Grade this trade from the perspective of the ${teamDisplayNames[chicago_team]}.`
         espn_player_id: p.espn_id || null,
       })
     }
-    for (const p of players_received) {
+    for (const p of safePlayers_received) {
       tradeItems.push({
         trade_id: trade.id,
         side: 'received',
@@ -432,8 +444,8 @@ Grade this trade from the perspective of the ${teamDisplayNames[chicago_team]}.`
         is_chicago_player: false,
       })
     }
-    if (draft_picks_sent?.length) {
-      for (const pk of draft_picks_sent) {
+    if (safeDraft_picks_sent.length > 0) {
+      for (const pk of safeDraft_picks_sent) {
         tradeItems.push({
           trade_id: trade.id, side: 'sent', asset_type: 'pick',
           pick_year: pk.year, pick_round: pk.round, pick_condition: pk.condition || null,
@@ -441,8 +453,8 @@ Grade this trade from the perspective of the ${teamDisplayNames[chicago_team]}.`
         })
       }
     }
-    if (draft_picks_received?.length) {
-      for (const pk of draft_picks_received) {
+    if (safeDraft_picks_received.length > 0) {
+      for (const pk of safeDraft_picks_received) {
         tradeItems.push({
           trade_id: trade.id, side: 'received', asset_type: 'pick',
           pick_year: pk.year, pick_round: pk.round, pick_condition: pk.condition || null,
