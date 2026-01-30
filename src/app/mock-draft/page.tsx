@@ -143,6 +143,21 @@ export default function MockDraftPage() {
   // Get unique positions for filter
   const positions = [...new Set(prospects.map(p => p.position))].sort()
 
+  // Fetch draft history
+  const fetchHistory = useCallback(async () => {
+    setHistoryLoading(true)
+    try {
+      const res = await fetch('/api/gm/draft/history')
+      if (res.ok) {
+        const data = await res.json()
+        setHistory(data.drafts || [])
+      }
+    } catch (e) {
+      console.error('Failed to fetch history:', e)
+    }
+    setHistoryLoading(false)
+  }, [])
+
   // Fetch team eligibility status from Datalab
   const fetchEligibility = useCallback(async () => {
     setEligibilityLoading(true)
@@ -179,21 +194,6 @@ export default function MockDraftPage() {
     fetchHistory()
     fetchEligibility()
   }, [authLoading, isAuthenticated, router, fetchHistory, fetchEligibility])
-
-  // Fetch draft history
-  const fetchHistory = useCallback(async () => {
-    setHistoryLoading(true)
-    try {
-      const res = await fetch('/api/gm/draft/history')
-      if (res.ok) {
-        const data = await res.json()
-        setHistory(data.drafts || [])
-      }
-    } catch (e) {
-      console.error('Failed to fetch history:', e)
-    }
-    setHistoryLoading(false)
-  }, [])
 
   // Fetch prospects when draft starts
   const fetchProspects = useCallback(async (sportParam: string, year?: number) => {
