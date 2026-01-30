@@ -11,6 +11,10 @@ const POSITION_GROUPS: Record<string, string[]> = {
   mlb: ['ALL', 'SP', 'RP', 'C', 'IF', 'OF', 'DH'],
 }
 
+const SPORT_ROUNDS: Record<string, number> = {
+  nfl: 7, nba: 2, nhl: 7, mlb: 20,
+}
+
 function getPositionGroup(pos: string, sport: string): string {
   if (sport === 'nfl') {
     if (['LT', 'RT', 'LG', 'RG', 'C', 'OT', 'OG', 'OL', 'T', 'G'].includes(pos)) return 'OL'
@@ -28,6 +32,12 @@ function getPositionGroup(pos: string, sport: string): string {
   return pos
 }
 
+interface DraftPick {
+  year: number
+  round: number
+  condition?: string
+}
+
 interface OpponentRosterPanelProps {
   teamKey: string
   sport: string
@@ -40,12 +50,16 @@ interface OpponentRosterPanelProps {
   setLoading: (v: boolean) => void
   onAddCustomPlayer: (name: string, position: string) => void
   onViewFit?: (player: PlayerData) => void
-  onDraftClick?: () => void
+  // Draft pick props
+  draftPicks: DraftPick[]
+  onAddDraftPick: (pick: DraftPick) => void
+  onRemoveDraftPick: (index: number) => void
 }
 
 export function OpponentRosterPanel({
   teamKey, sport, teamColor, selectedIds, onToggle,
-  roster, setRoster, loading, setLoading, onAddCustomPlayer, onViewFit, onDraftClick,
+  roster, setRoster, loading, setLoading, onAddCustomPlayer, onViewFit,
+  draftPicks, onAddDraftPick, onRemoveDraftPick,
 }: OpponentRosterPanelProps) {
   const { theme } = useTheme()
   const isDark = theme === 'dark'
@@ -54,8 +68,15 @@ export function OpponentRosterPanel({
   const [customName, setCustomName] = useState('')
   const [customPos, setCustomPos] = useState('')
   const [showCustom, setShowCustom] = useState(false)
+  const [showDraft, setShowDraft] = useState(false)
+  const [draftYear, setDraftYear] = useState(2026)
+  const [draftRound, setDraftRound] = useState(1)
+  const [draftCondition, setDraftCondition] = useState('')
 
   const positions = POSITION_GROUPS[sport] || POSITION_GROUPS.nfl
+  const maxRound = SPORT_ROUNDS[sport] || 7
+  const years = [2026, 2027, 2028, 2029, 2030]
+  const rounds = Array.from({ length: maxRound }, (_, i) => i + 1)
 
   useEffect(() => {
     if (!teamKey || !sport) return
@@ -93,6 +114,11 @@ export function OpponentRosterPanel({
     setShowCustom(false)
   }
 
+  const handleAddDraftPick = () => {
+    onAddDraftPick({ year: draftYear, round: draftRound, condition: draftCondition.trim() || undefined })
+    setDraftCondition('')
+  }
+
   return (
     <div style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
@@ -107,7 +133,7 @@ export function OpponentRosterPanel({
             fontWeight: 600, cursor: 'pointer',
           }}
         >
-          {showCustom ? 'Cancel' : '+ Custom Player'}
+          {showCustom ? 'Cancel' : '+ Custom'}
         </button>
       </div>
 
@@ -151,23 +177,25 @@ export function OpponentRosterPanel({
         </div>
       )}
 
-      {/* Search */}
-      <input
-        type="text"
-        placeholder="Search players..."
-        value={search}
-        onChange={e => setSearch(e.target.value)}
-        style={{
-          width: '100%', padding: '8px 12px', borderRadius: '8px',
-          border: `1px solid ${inputBorder}`, backgroundColor: inputBg,
-          color: isDark ? '#fff' : '#000', fontSize: '13px', outline: 'none',
-          marginBottom: 8,
-        }}
-      />
+      {/* Search - only show when viewing players */}
+      {!showDraft && (
+        <input
+          type="text"
+          placeholder="Search players..."
+          value={search}
+          onChange={e => setSearch(e.target.value)}
+          style={{
+            width: '100%', padding: '8px 12px', borderRadius: '8px',
+            border: `1px solid ${inputBorder}`, backgroundColor: inputBg,
+            color: isDark ? '#fff' : '#000', fontSize: '13px', outline: 'none',
+            marginBottom: 8,
+          }}
+        />
+      )}
 
       {/* Position filters + Draft button */}
       <div style={{ display: 'flex', gap: 4, flexWrap: 'wrap', marginBottom: 8, alignItems: 'center' }}>
-        {positions.map(pos => (
+        {!showDraft && positions.map(pos => (
           <button
             key={pos}
             onClick={() => setPosFilter(pos)}
@@ -181,79 +209,190 @@ export function OpponentRosterPanel({
             {pos}
           </button>
         ))}
-        {onDraftClick && (
-          <button
-            onClick={onDraftClick}
-            style={{
-              padding: '4px 10px',
-              borderRadius: '6px',
-              border: `2px solid ${teamColor}`,
-              cursor: 'pointer',
-              fontSize: '11px',
-              fontWeight: 700,
-              backgroundColor: 'transparent',
-              color: teamColor,
-              transition: 'all 0.15s',
-              marginLeft: 4,
-            }}
-          >
-            📋 Draft
-          </button>
-        )}
+        <button
+          onClick={() => setShowDraft(!showDraft)}
+          style={{
+            padding: '4px 10px',
+            borderRadius: '6px',
+            border: 'none',
+            cursor: 'pointer',
+            fontSize: '11px',
+            fontWeight: 600,
+            backgroundColor: showDraft ? teamColor : (isDark ? '#374151' : '#e5e7eb'),
+            color: showDraft ? '#fff' : subText,
+            transition: 'background-color 0.15s',
+          }}
+        >
+          Draft
+        </button>
       </div>
 
       {/* Selected count */}
-      {selectedIds.size > 0 && (
-        <div style={{ marginBottom: 6, fontSize: '12px', fontWeight: 600, color: teamColor }}>
-          {selectedIds.size} selected
+      {(selectedIds.size > 0 || draftPicks.length > 0) && !showDraft && (
+        <div style={{ marginBottom: 6, display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
+          {selectedIds.size > 0 && (
+            <span style={{ fontSize: '12px', fontWeight: 600, color: teamColor }}>
+              {selectedIds.size} player{selectedIds.size > 1 ? 's' : ''}
+            </span>
+          )}
+          {draftPicks.length > 0 && (
+            <span style={{ fontSize: '12px', fontWeight: 600, color: teamColor }}>
+              {draftPicks.length} pick{draftPicks.length > 1 ? 's' : ''}
+            </span>
+          )}
         </div>
       )}
 
-      {/* Player list - single column for better card display */}
-      <div style={{
-        flex: 1,
-        overflowY: 'auto',
-        display: 'flex',
-        flexDirection: 'column',
-        gap: '8px',
-        paddingRight: 4,
-      }}>
-        {loading ? (
-          <>
-            {Array.from({ length: 6 }).map((_, i) => (
-              <div key={i} style={{
-                height: 160, borderRadius: 12,
-                backgroundColor: isDark ? '#1f293780' : '#f3f4f680',
-                animation: 'pulse 2s ease-in-out infinite',
-              }} />
-            ))}
-          </>
-        ) : (
-          <AnimatePresence>
-            {filtered.map((player, i) => (
-              <motion.div
-                key={player.player_id}
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: Math.min(i * 0.03, 0.3) }}
-              >
-                <PlayerCard
-                  player={player}
-                  selected={selectedIds.has(player.player_id)}
-                  teamColor={teamColor}
-                  onClick={() => onToggle(player.player_id)}
-                  onViewFit={onViewFit}
-                />
-              </motion.div>
-            ))}
-          </AnimatePresence>
-        )}
-      </div>
+      {/* Draft Pick Selection View */}
+      {showDraft ? (
+        <div style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
+          <div style={{ fontSize: '12px', fontWeight: 700, color: isDark ? '#fff' : '#1a1a1a', marginBottom: 12 }}>
+            Select Draft Picks to Receive
+          </div>
 
-      {!loading && filtered.length === 0 && (
-        <div style={{ textAlign: 'center', padding: 20, color: subText, fontSize: '13px' }}>
-          No players found
+          {/* Draft pick selector */}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginBottom: 16 }}>
+            <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
+              <select
+                value={draftYear}
+                onChange={e => setDraftYear(+e.target.value)}
+                style={{
+                  padding: '8px 12px',
+                  borderRadius: '8px',
+                  border: `1px solid ${inputBorder}`,
+                  backgroundColor: inputBg,
+                  color: isDark ? '#fff' : '#000',
+                  fontSize: '13px',
+                  flex: 1,
+                }}
+              >
+                {years.map(y => <option key={y} value={y}>{y}</option>)}
+              </select>
+              <select
+                value={draftRound}
+                onChange={e => setDraftRound(+e.target.value)}
+                style={{
+                  padding: '8px 12px',
+                  borderRadius: '8px',
+                  border: `1px solid ${inputBorder}`,
+                  backgroundColor: inputBg,
+                  color: isDark ? '#fff' : '#000',
+                  fontSize: '13px',
+                  flex: 1,
+                }}
+              >
+                {rounds.map(r => <option key={r} value={r}>Round {r}</option>)}
+              </select>
+            </div>
+            <input
+              type="text"
+              value={draftCondition}
+              onChange={e => setDraftCondition(e.target.value)}
+              placeholder="Condition (optional)"
+              style={{
+                padding: '8px 12px',
+                borderRadius: '8px',
+                border: `1px solid ${inputBorder}`,
+                backgroundColor: inputBg,
+                color: isDark ? '#fff' : '#000',
+                fontSize: '13px',
+              }}
+            />
+            <button
+              onClick={handleAddDraftPick}
+              style={{
+                padding: '10px 16px',
+                borderRadius: '8px',
+                border: 'none',
+                backgroundColor: teamColor,
+                color: '#fff',
+                fontSize: '13px',
+                fontWeight: 600,
+                cursor: 'pointer',
+              }}
+            >
+              Add Pick
+            </button>
+          </div>
+
+          {/* Selected draft picks */}
+          {draftPicks.length > 0 && (
+            <div>
+              <div style={{ fontSize: '11px', fontWeight: 600, color: subText, marginBottom: 8, textTransform: 'uppercase' }}>
+                Selected Picks
+              </div>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+                {draftPicks.map((pk, i) => (
+                  <div key={i} style={{
+                    display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                    padding: '10px 12px', borderRadius: 8,
+                    backgroundColor: isDark ? '#374151' : '#f3f4f6',
+                    border: `1px solid ${teamColor}40`,
+                  }}>
+                    <span style={{ fontSize: '13px', fontWeight: 600, color: isDark ? '#fff' : '#1a1a1a' }}>
+                      {pk.year} Round {pk.round}{pk.condition ? ` (${pk.condition})` : ''}
+                    </span>
+                    <button
+                      onClick={() => onRemoveDraftPick(i)}
+                      style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#ef4444', fontWeight: 700, fontSize: '16px' }}
+                    >
+                      ×
+                    </button>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
         </div>
+      ) : (
+        <>
+          {/* Player list - single column for better card display */}
+          <div style={{
+            flex: 1,
+            overflowY: 'auto',
+            display: 'flex',
+            flexDirection: 'column',
+            gap: '8px',
+            paddingRight: 4,
+          }}>
+            {loading ? (
+              <>
+                {Array.from({ length: 6 }).map((_, i) => (
+                  <div key={i} style={{
+                    height: 160, borderRadius: 12,
+                    backgroundColor: isDark ? '#1f293780' : '#f3f4f680',
+                    animation: 'pulse 2s ease-in-out infinite',
+                  }} />
+                ))}
+              </>
+            ) : (
+              <AnimatePresence>
+                {filtered.map((player, i) => (
+                  <motion.div
+                    key={player.player_id}
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: Math.min(i * 0.03, 0.3) }}
+                  >
+                    <PlayerCard
+                      player={player}
+                      selected={selectedIds.has(player.player_id)}
+                      teamColor={teamColor}
+                      onClick={() => onToggle(player.player_id)}
+                      onViewFit={onViewFit}
+                    />
+                  </motion.div>
+                ))}
+              </AnimatePresence>
+            )}
+          </div>
+
+          {!loading && filtered.length === 0 && (
+            <div style={{ textAlign: 'center', padding: 20, color: subText, fontSize: '13px' }}>
+              No players found
+            </div>
+          )}
+        </>
       )}
     </div>
   )
