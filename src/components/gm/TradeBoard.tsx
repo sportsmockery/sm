@@ -292,7 +292,7 @@ export function TradeBoard({
               <div style={{
                 fontSize: 64,
                 fontWeight: 900,
-                color: gradeResult.grade >= 75 ? '#22c55e' : gradeResult.grade >= 50 ? '#eab308' : '#ef4444',
+                color: gradeResult.grade >= 70 ? '#22c55e' : gradeResult.grade >= 50 ? '#eab308' : '#ef4444',
                 lineHeight: 1,
               }}>
                 {gradeResult.grade}
@@ -430,7 +430,7 @@ export function TradeBoard({
                         height: '100%',
                         width: `${item.value * 100}%`,
                         borderRadius: 3,
-                        backgroundColor: gradeResult.grade >= 75 ? '#22c55e' : gradeResult.grade >= 50 ? '#eab308' : '#ef4444',
+                        backgroundColor: gradeResult.grade >= 70 ? '#22c55e' : gradeResult.grade >= 50 ? '#eab308' : '#ef4444',
                       }} />
                     </div>
                   </div>

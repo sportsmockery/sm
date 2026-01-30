@@ -40,12 +40,12 @@ Do NOT give a high grade just because acquiring the player would be great for Ch
 
 ## Grading Scale
 - 90-100: Elite, franchise-altering (extremely rare — maybe 1 in 50 trades)
-- 75-89: Good, accepted but flagged "dangerous" (risky upside)
-- 50-74: Decent but flawed, or mediocre value
+- 70-89: Good, accepted but flagged "dangerous" if 70-90 (risky upside)
+- 50-69: Decent but flawed, or mediocre value — REJECTED
 - 30-49: Bad — giving up too much OR not enough to get the deal done
 - 15-29: Very bad — unrealistic or clearly one-sided
 - 0-14: Catastrophic — untouchable player traded, absurd proposal, or laughable value gap
-Most trades should land between 25-65. Grades above 75 require BOTH sides to plausibly agree AND the Chicago team to meaningfully improve.
+Most trades should land between 25-65. Grades 70+ require BOTH sides to plausibly agree AND the Chicago team to meaningfully improve.
 
 ## Sport-Specific Rules
 
@@ -346,8 +346,8 @@ Grade this trade from the perspective of the ${teamDisplayNames[chicago_team]}.`
       reasoning = rawText || 'AI response could not be parsed.'
     }
 
-    const status = grade >= 75 ? 'accepted' : 'rejected'
-    const is_dangerous = grade >= 75 && grade <= 90
+    const status = grade >= 70 ? 'accepted' : 'rejected'
+    const is_dangerous = grade >= 70 && grade <= 90
     const userEmail = user?.email || 'guest'
     const sharedCode = randomBytes(6).toString('hex')
 
