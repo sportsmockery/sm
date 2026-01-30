@@ -2,7 +2,9 @@
 import { useState, useMemo } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { PlayerCard, PlayerData } from './PlayerCard'
+import { DraftPickList } from './DraftPickList'
 import { useTheme } from '@/contexts/ThemeContext'
+import type { DraftPick } from '@/types/gm'
 
 const POSITION_GROUPS: Record<string, string[]> = {
   nfl: ['ALL', 'QB', 'RB', 'WR', 'TE', 'OL', 'DL', 'LB', 'CB', 'S', 'K', 'P'],
@@ -31,12 +33,6 @@ function getPositionGroup(pos: string, sport: string): string {
     return pos
   }
   return pos
-}
-
-interface DraftPick {
-  year: number
-  round: number
-  condition?: string
 }
 
 interface RosterPanelProps {
@@ -92,6 +88,16 @@ export function RosterPanel({
   const handleAddDraftPick = () => {
     onAddDraftPick({ year: draftYear, round: draftRound, condition: draftCondition.trim() || undefined })
     setDraftCondition('')
+  }
+
+  // Handler for DraftPickList toggle
+  const handleToggleDraftPick = (pick: DraftPick) => {
+    const existingIndex = draftPicks.findIndex(p => p.year === pick.year && p.round === pick.round)
+    if (existingIndex >= 0) {
+      onRemoveDraftPick(existingIndex)
+    } else {
+      onAddDraftPick(pick)
+    }
   }
 
   return (
@@ -156,6 +162,18 @@ export function RosterPanel({
           Draft
         </button>
       </div>
+
+      {/* Draft Pick List (collapsible checkbox version) */}
+      {!showDraft && (
+        <DraftPickList
+          sport={sport}
+          selectedPicks={draftPicks}
+          onToggle={handleToggleDraftPick}
+          teamColor={teamColor}
+          teamName={teamName}
+          isOwn={true}
+        />
+      )}
 
       {/* Selected count */}
       {(selectedIds.size > 0 || draftPicks.length > 0) && !showDraft && (
