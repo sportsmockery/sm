@@ -101,6 +101,9 @@ export default function GMPage() {
   const [selectedProspectIds, setSelectedProspectIds] = useState<Set<string>>(new Set())
   const [selectedOpponentProspectIds, setSelectedOpponentProspectIds] = useState<Set<string>>(new Set())
   const [selectedThirdTeamProspectIds, setSelectedThirdTeamProspectIds] = useState<Set<string>>(new Set())
+  const [prospects, setProspects] = useState<MLBProspect[]>([])
+  const [opponentProspects, setOpponentProspects] = useState<MLBProspect[]>([])
+  const [thirdTeamProspects, setThirdTeamProspects] = useState<MLBProspect[]>([])
 
   // Mobile
   const [activeTab, setActiveTab] = useState<'build' | 'history' | 'leaderboard'>('build')
@@ -298,8 +301,45 @@ export default function GMPage() {
   }
 
   const selectedPlayers = roster.filter(p => selectedPlayerIds.has(p.player_id))
-  const hasSomethingToSend = selectedPlayerIds.size > 0 || draftPicksSent.length > 0
-  const hasSomethingToReceive = receivedPlayers.length > 0 || draftPicksReceived.length > 0
+  const selectedProspects = prospects.filter(p => selectedProspectIds.has(p.id || p.prospect_id || ''))
+  const selectedOpponentProspects = opponentProspects.filter(p => selectedOpponentProspectIds.has(p.id || p.prospect_id || ''))
+
+  // Convert prospects to PlayerData format for TradeBoard display
+  const prospectsAsPlayers: PlayerData[] = selectedProspects.map(p => ({
+    player_id: p.id || p.prospect_id || `prospect-${p.name}`,
+    full_name: p.name,
+    position: p.position,
+    jersey_number: null,
+    headshot_url: p.headshot_url || null,
+    age: p.age || null,
+    weight_lbs: null,
+    college: null,
+    years_exp: 0,
+    draft_info: null,
+    espn_id: null,
+    stat_line: `Prospect • ${p.current_level || p.level || 'MiLB'}`,
+    stats: {},
+    status: 'prospect',
+  }))
+  const opponentProspectsAsPlayers: PlayerData[] = selectedOpponentProspects.map(p => ({
+    player_id: p.id || p.prospect_id || `prospect-${p.name}`,
+    full_name: p.name,
+    position: p.position,
+    jersey_number: null,
+    headshot_url: p.headshot_url || null,
+    age: p.age || null,
+    weight_lbs: null,
+    college: null,
+    years_exp: 0,
+    draft_info: null,
+    espn_id: null,
+    stat_line: `Prospect • ${p.current_level || p.level || 'MiLB'}`,
+    stats: {},
+    status: 'prospect',
+  }))
+
+  const hasSomethingToSend = selectedPlayerIds.size > 0 || selectedProspectIds.size > 0 || draftPicksSent.length > 0
+  const hasSomethingToReceive = receivedPlayers.length > 0 || selectedOpponentProspectIds.size > 0 || draftPicksReceived.length > 0
   const canGrade = hasSomethingToSend && opponentTeam !== null && hasSomethingToReceive
 
   // Determine current step
@@ -696,6 +736,7 @@ export default function GMPage() {
                   onRemoveDraftPick={i => setDraftPicksSent(prev => prev.filter((_, idx) => idx !== i))}
                   selectedProspectIds={selectedProspectIds}
                   onToggleProspect={toggleProspect}
+                  onProspectsLoaded={setProspects}
                 />
               </div>
 
@@ -716,17 +757,32 @@ export default function GMPage() {
                   opponentName={opponentTeam?.team_name || ''}
                   opponentLogo={opponentTeam?.logo_url || null}
                   opponentColor={opponentTeam?.primary_color || '#666'}
-                  playersSent={selectedPlayers}
-                  playersReceived={receivedPlayers}
+                  playersSent={[...selectedPlayers, ...prospectsAsPlayers]}
+                  playersReceived={[...receivedPlayers, ...opponentProspectsAsPlayers]}
                   draftPicksSent={draftPicksSent}
                   draftPicksReceived={draftPicksReceived}
-                  onRemoveSent={id => togglePlayer(id)}
-                  onRemoveReceived={i => {
-                    const removed = receivedPlayers[i]
-                    if ('player_id' in removed) {
-                      setSelectedOpponentIds(prev => { const next = new Set(prev); next.delete(removed.player_id); return next })
+                  onRemoveSent={id => {
+                    // Check if it's a prospect or a player
+                    if (selectedProspectIds.has(id)) {
+                      toggleProspect(id)
+                    } else {
+                      togglePlayer(id)
                     }
-                    setReceivedPlayers(prev => prev.filter((_, idx) => idx !== i))
+                  }}
+                  onRemoveReceived={i => {
+                    const allReceived = [...receivedPlayers, ...opponentProspectsAsPlayers]
+                    const removed = allReceived[i]
+                    if ('player_id' in removed) {
+                      // Check if it's a prospect
+                      if (removed.status === 'prospect') {
+                        toggleOpponentProspect(removed.player_id)
+                      } else {
+                        setSelectedOpponentIds(prev => { const next = new Set(prev); next.delete(removed.player_id); return next })
+                        setReceivedPlayers(prev => prev.filter((_, idx) => idx !== i))
+                      }
+                    } else {
+                      setReceivedPlayers(prev => prev.filter((_, idx) => idx !== i))
+                    }
                   }}
                   onRemoveDraftSent={i => setDraftPicksSent(prev => prev.filter((_, idx) => idx !== i))}
                   onRemoveDraftReceived={i => setDraftPicksReceived(prev => prev.filter((_, idx) => idx !== i))}
@@ -807,6 +863,7 @@ export default function GMPage() {
                     onRemoveDraftPick={i => setDraftPicksReceived(prev => prev.filter((_, idx) => idx !== i))}
                     selectedProspectIds={selectedOpponentProspectIds}
                     onToggleProspect={toggleOpponentProspect}
+                    onProspectsLoaded={setOpponentProspects}
                   />
                 ) : (
                   <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', color: subText }}>
@@ -835,17 +892,30 @@ export default function GMPage() {
                   opponentName={opponentTeam?.team_name || ''}
                   opponentLogo={opponentTeam?.logo_url || null}
                   opponentColor={opponentTeam?.primary_color || '#666'}
-                  playersSent={selectedPlayers}
-                  playersReceived={receivedPlayers}
+                  playersSent={[...selectedPlayers, ...prospectsAsPlayers]}
+                  playersReceived={[...receivedPlayers, ...opponentProspectsAsPlayers]}
                   draftPicksSent={draftPicksSent}
                   draftPicksReceived={draftPicksReceived}
-                  onRemoveSent={id => togglePlayer(id)}
-                  onRemoveReceived={i => {
-                    const removed = receivedPlayers[i]
-                    if ('player_id' in removed) {
-                      setSelectedOpponentIds(prev => { const next = new Set(prev); next.delete(removed.player_id); return next })
+                  onRemoveSent={id => {
+                    if (selectedProspectIds.has(id)) {
+                      toggleProspect(id)
+                    } else {
+                      togglePlayer(id)
                     }
-                    setReceivedPlayers(prev => prev.filter((_, idx) => idx !== i))
+                  }}
+                  onRemoveReceived={i => {
+                    const allReceived = [...receivedPlayers, ...opponentProspectsAsPlayers]
+                    const removed = allReceived[i]
+                    if ('player_id' in removed) {
+                      if (removed.status === 'prospect') {
+                        toggleOpponentProspect(removed.player_id)
+                      } else {
+                        setSelectedOpponentIds(prev => { const next = new Set(prev); next.delete(removed.player_id); return next })
+                        setReceivedPlayers(prev => prev.filter((_, idx) => idx !== i))
+                      }
+                    } else {
+                      setReceivedPlayers(prev => prev.filter((_, idx) => idx !== i))
+                    }
                   }}
                   onRemoveDraftSent={i => setDraftPicksSent(prev => prev.filter((_, idx) => idx !== i))}
                   onRemoveDraftReceived={i => setDraftPicksReceived(prev => prev.filter((_, idx) => idx !== i))}
@@ -905,6 +975,7 @@ export default function GMPage() {
                           onRemoveDraftPick={i => setDraftPicksSent(prev => prev.filter((_, idx) => idx !== i))}
                           selectedProspectIds={selectedProspectIds}
                           onToggleProspect={toggleProspect}
+                          onProspectsLoaded={setProspects}
                           compact
                         />
                       </div>
@@ -969,6 +1040,7 @@ export default function GMPage() {
                           onRemoveDraftPick={i => setDraftPicksReceived(prev => prev.filter((_, idx) => idx !== i))}
                           selectedProspectIds={selectedOpponentProspectIds}
                           onToggleProspect={toggleOpponentProspect}
+                          onProspectsLoaded={setOpponentProspects}
                           compact
                         />
                       </div>

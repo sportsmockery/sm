@@ -53,13 +53,14 @@ interface RosterPanelProps {
   // Prospect props (MLB only)
   selectedProspectIds?: Set<string>
   onToggleProspect?: (prospectId: string) => void
+  onProspectsLoaded?: (prospects: MLBProspect[]) => void  // Callback when prospects are fetched
   compact?: boolean
 }
 
 export function RosterPanel({
   players, loading, selectedIds, onToggle, sport, teamColor, teamName, teamKey, onViewFit,
   draftPicks, onAddDraftPick, onRemoveDraftPick,
-  selectedProspectIds, onToggleProspect, compact = false,
+  selectedProspectIds, onToggleProspect, onProspectsLoaded, compact = false,
 }: RosterPanelProps) {
   const { theme } = useTheme()
   const isDark = theme === 'dark'
@@ -87,10 +88,14 @@ export function RosterPanel({
     setProspectsLoading(true)
     fetch(`/api/gm/prospects?team_key=${encodeURIComponent(teamKey)}&sport=mlb&limit=30`)
       .then(res => res.ok ? res.json() : Promise.reject('Failed'))
-      .then(data => setProspects(data.prospects || []))
+      .then(data => {
+        const fetchedProspects = data.prospects || []
+        setProspects(fetchedProspects)
+        onProspectsLoaded?.(fetchedProspects)
+      })
       .catch(() => setProspects([]))
       .finally(() => setProspectsLoading(false))
-  }, [isMLB, viewMode, teamKey])
+  }, [isMLB, viewMode, teamKey, onProspectsLoaded])
 
   const positions = POSITION_GROUPS[sport] || POSITION_GROUPS.nfl
   const maxRound = SPORT_ROUNDS[sport] || 7
