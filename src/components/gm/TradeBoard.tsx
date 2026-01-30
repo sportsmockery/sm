@@ -1,14 +1,10 @@
 'use client'
 import { motion, AnimatePresence } from 'framer-motion'
 import { PlayerCard, PlayerData } from './PlayerCard'
+import { AssetRow } from './AssetRow'
 import { ValidationIndicator, ValidationState } from './ValidationIndicator'
 import { useTheme } from '@/contexts/ThemeContext'
-
-interface DraftPick {
-  year: number
-  round: number
-  condition?: string
-}
+import type { DraftPick } from '@/types/gm'
 
 type ReceivedPlayer = PlayerData | { name: string; position: string }
 
@@ -129,38 +125,24 @@ export function TradeBoard({
           <div style={{ display: 'flex', flexDirection: 'column', gap: 6, minHeight: 80 }}>
             <AnimatePresence>
               {playersSent.map(p => (
-                <motion.div
+                <AssetRow
                   key={p.player_id}
-                  initial={{ opacity: 0, x: -20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  exit={{ opacity: 0, x: -20 }}
-                  style={{ position: 'relative' }}
-                >
-                  <PlayerCard player={p} compact teamColor={chicagoColor} />
-                  <button
-                    onClick={() => onRemoveSent(p.player_id)}
-                    style={{
-                      position: 'absolute', top: 4, right: 4,
-                      background: 'none', border: 'none', cursor: 'pointer',
-                      color: '#ef4444', fontSize: '14px', fontWeight: 700,
-                    }}
-                  >
-                    &#x2715;
-                  </button>
-                </motion.div>
+                  type="PLAYER"
+                  player={p}
+                  teamColor={chicagoColor}
+                  onRemove={() => onRemoveSent(p.player_id)}
+                />
+              ))}
+              {draftPicksSent.map((pk, i) => (
+                <AssetRow
+                  key={`sp-${i}`}
+                  type="DRAFT_PICK"
+                  pick={pk}
+                  teamColor={chicagoColor}
+                  onRemove={() => onRemoveDraftSent(i)}
+                />
               ))}
             </AnimatePresence>
-            {draftPicksSent.map((pk, i) => (
-              <div key={`sp-${i}`} style={{
-                display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-                padding: '6px 10px', borderRadius: 8,
-                backgroundColor: isDark ? '#374151' : '#e5e7eb',
-                fontSize: '12px', color: textColor,
-              }}>
-                <span>{pk.year} Rd {pk.round}{pk.condition ? ` (${pk.condition})` : ''}</span>
-                <button onClick={() => onRemoveDraftSent(i)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#ef4444', fontWeight: 700 }}>&#x2715;</button>
-              </div>
-            ))}
             {playersSent.length === 0 && draftPicksSent.length === 0 && (
               <div style={{ textAlign: 'center', padding: 20, color: subText, fontSize: '12px' }}>
                 Select players from roster
@@ -226,50 +208,54 @@ export function TradeBoard({
           <div style={{ display: 'flex', flexDirection: 'column', gap: 6, minHeight: 80 }}>
             <AnimatePresence>
               {playersReceived.map((p, i) => (
-                <motion.div
-                  key={isPlayerData(p) ? p.player_id : `r-${i}`}
-                  initial={{ opacity: 0, x: 20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  exit={{ opacity: 0, x: 20 }}
-                  style={{ position: 'relative' }}
-                >
-                  {isPlayerData(p) ? (
-                    <PlayerCard player={p} compact teamColor={opponentColor} />
-                  ) : (
-                    <div style={{
-                      display: 'flex', alignItems: 'center',
-                      padding: '8px 10px', borderRadius: 8,
-                      backgroundColor: isDark ? '#374151' : '#f3f4f6',
+                isPlayerData(p) ? (
+                  <AssetRow
+                    key={p.player_id}
+                    type="PLAYER"
+                    player={p}
+                    teamColor={opponentColor}
+                    onRemove={() => onRemoveReceived(i)}
+                  />
+                ) : (
+                  <motion.div
+                    key={`r-${i}`}
+                    initial={{ opacity: 0, x: 20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    exit={{ opacity: 0, x: 20 }}
+                    style={{
+                      display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                      padding: '10px 12px', borderRadius: 10,
+                      backgroundColor: isDark ? '#1f2937' : '#f9fafb',
                       border: `1px solid ${borderColor}`,
-                    }}>
+                      borderLeft: `3px solid ${opponentColor}`,
+                    }}
+                  >
+                    <div>
                       <span style={{ fontWeight: 600, fontSize: '13px', color: textColor }}>{p.name}</span>
                       <span style={{ fontSize: '11px', color: subText, marginLeft: 6 }}>{p.position}</span>
                     </div>
-                  )}
-                  <button
-                    onClick={() => onRemoveReceived(i)}
-                    style={{
-                      position: 'absolute', top: 4, right: 4,
-                      background: 'none', border: 'none', cursor: 'pointer',
-                      color: '#ef4444', fontSize: '14px', fontWeight: 700,
-                    }}
-                  >
-                    &#x2715;
-                  </button>
-                </motion.div>
+                    <button
+                      onClick={() => onRemoveReceived(i)}
+                      style={{
+                        background: 'none', border: 'none', cursor: 'pointer',
+                        color: '#ef4444', fontSize: '16px', fontWeight: 700,
+                      }}
+                    >
+                      &times;
+                    </button>
+                  </motion.div>
+                )
+              ))}
+              {draftPicksReceived.map((pk, i) => (
+                <AssetRow
+                  key={`rp-${i}`}
+                  type="DRAFT_PICK"
+                  pick={pk}
+                  teamColor={opponentColor}
+                  onRemove={() => onRemoveDraftReceived(i)}
+                />
               ))}
             </AnimatePresence>
-            {draftPicksReceived.map((pk, i) => (
-              <div key={`rp-${i}`} style={{
-                display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-                padding: '6px 10px', borderRadius: 8,
-                backgroundColor: isDark ? '#374151' : '#e5e7eb',
-                fontSize: '12px', color: textColor,
-              }}>
-                <span>{pk.year} Rd {pk.round}{pk.condition ? ` (${pk.condition})` : ''}</span>
-                <button onClick={() => onRemoveDraftReceived(i)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#ef4444', fontWeight: 700 }}>&#x2715;</button>
-              </div>
-            ))}
             {playersReceived.length === 0 && draftPicksReceived.length === 0 && (
               <div style={{ textAlign: 'center', padding: 20, color: subText, fontSize: '12px' }}>
                 Add players to receive
