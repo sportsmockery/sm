@@ -46,16 +46,18 @@ interface RosterPanelProps {
   onToggle: (playerId: string) => void
   sport: string
   teamColor: string
+  teamName?: string
   onViewFit?: (player: PlayerData) => void
   // Draft pick props
   draftPicks: DraftPick[]
   onAddDraftPick: (pick: DraftPick) => void
   onRemoveDraftPick: (index: number) => void
+  compact?: boolean
 }
 
 export function RosterPanel({
-  players, loading, selectedIds, onToggle, sport, teamColor, onViewFit,
-  draftPicks, onAddDraftPick, onRemoveDraftPick
+  players, loading, selectedIds, onToggle, sport, teamColor, teamName, onViewFit,
+  draftPicks, onAddDraftPick, onRemoveDraftPick, compact = false,
 }: RosterPanelProps) {
   const { theme } = useTheme()
   const isDark = theme === 'dark'

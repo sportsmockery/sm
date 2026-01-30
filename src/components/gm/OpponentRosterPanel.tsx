@@ -42,6 +42,7 @@ interface OpponentRosterPanelProps {
   teamKey: string
   sport: string
   teamColor: string
+  teamName?: string
   selectedIds: Set<string>
   onToggle: (playerId: string) => void
   roster: PlayerData[]
@@ -54,12 +55,13 @@ interface OpponentRosterPanelProps {
   draftPicks: DraftPick[]
   onAddDraftPick: (pick: DraftPick) => void
   onRemoveDraftPick: (index: number) => void
+  compact?: boolean
 }
 
 export function OpponentRosterPanel({
-  teamKey, sport, teamColor, selectedIds, onToggle,
+  teamKey, sport, teamColor, teamName, selectedIds, onToggle,
   roster, setRoster, loading, setLoading, onAddCustomPlayer, onViewFit,
-  draftPicks, onAddDraftPick, onRemoveDraftPick,
+  draftPicks, onAddDraftPick, onRemoveDraftPick, compact = false,
 }: OpponentRosterPanelProps) {
   const { theme } = useTheme()
   const isDark = theme === 'dark'
