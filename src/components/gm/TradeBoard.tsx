@@ -150,7 +150,8 @@ export function TradeBoard({
           to { transform: rotate(360deg); }
         }
       `}</style>
-      {/* Two-panel trade visualization */}
+      {/* Two-panel trade visualization - hide when we have a grade result */}
+      {!gradeResult && (
       <div style={{ display: 'flex', flexDirection: mobile ? 'column' : 'row', gap: 0, alignItems: 'stretch' }}>
         {/* Chicago side */}
         <div style={{
@@ -307,6 +308,7 @@ export function TradeBoard({
           </div>
         </div>
       </div>
+      )}
 
       {/* Validation and Grade section - stable layout with reserved space */}
       <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>

@@ -866,10 +866,10 @@ export default function GMPage() {
                   </div>
                 )}
 
-                {/* Season Simulation - inside center column */}
-                {activeSession && activeSession.num_trades > 0 && (
+                {/* Season Simulation - inside center column, only show for accepted trades */}
+                {activeSession && activeSession.num_approved > 0 && !gradeResult && (
                   <SimulationTrigger
-                    tradeCount={activeSession.num_trades}
+                    tradeCount={activeSession.num_approved}
                     sport={sport}
                     onSimulate={handleSimulateSeason}
                     isSimulating={isSimulating}
@@ -1003,10 +1003,10 @@ export default function GMPage() {
                   mobile
                 />
 
-                {/* Season Simulation - mobile */}
-                {activeSession && activeSession.num_trades > 0 && (
+                {/* Season Simulation - mobile, only show for accepted trades */}
+                {activeSession && activeSession.num_approved > 0 && !gradeResult && (
                   <SimulationTrigger
-                    tradeCount={activeSession.num_trades}
+                    tradeCount={activeSession.num_approved}
                     sport={sport}
                     onSimulate={handleSimulateSeason}
                     isSimulating={isSimulating}
