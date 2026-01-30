@@ -1,10 +1,11 @@
 'use client'
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { PlayerCard, PlayerData } from './PlayerCard'
+import { ProspectCard } from './ProspectCard'
 import { DraftPickList } from './DraftPickList'
 import { useTheme } from '@/contexts/ThemeContext'
-import type { DraftPick } from '@/types/gm'
+import type { DraftPick, MLBProspect } from '@/types/gm'
 
 const POSITION_GROUPS: Record<string, string[]> = {
   nfl: ['ALL', 'QB', 'RB', 'WR', 'TE', 'OL', 'DL', 'LB', 'CB', 'S', 'K', 'P'],
@@ -43,17 +44,22 @@ interface RosterPanelProps {
   sport: string
   teamColor: string
   teamName?: string
+  teamKey?: string  // For fetching prospects
   onViewFit?: (player: PlayerData) => void
   // Draft pick props
   draftPicks: DraftPick[]
   onAddDraftPick: (pick: DraftPick) => void
   onRemoveDraftPick: (index: number) => void
+  // Prospect props (MLB only)
+  selectedProspectIds?: Set<string>
+  onToggleProspect?: (prospectId: string) => void
   compact?: boolean
 }
 
 export function RosterPanel({
-  players, loading, selectedIds, onToggle, sport, teamColor, teamName, onViewFit,
-  draftPicks, onAddDraftPick, onRemoveDraftPick, compact = false,
+  players, loading, selectedIds, onToggle, sport, teamColor, teamName, teamKey, onViewFit,
+  draftPicks, onAddDraftPick, onRemoveDraftPick,
+  selectedProspectIds, onToggleProspect, compact = false,
 }: RosterPanelProps) {
   const { theme } = useTheme()
   const isDark = theme === 'dark'
@@ -63,6 +69,28 @@ export function RosterPanel({
   const [draftYear, setDraftYear] = useState(2026)
   const [draftRound, setDraftRound] = useState(1)
   const [draftCondition, setDraftCondition] = useState('')
+
+  // MLB-only: Roster vs Prospects view
+  const [viewMode, setViewMode] = useState<'roster' | 'prospects'>('roster')
+  const [prospects, setProspects] = useState<MLBProspect[]>([])
+  const [prospectsLoading, setProspectsLoading] = useState(false)
+
+  const isMLB = sport === 'mlb'
+
+  // Fetch prospects when MLB team is selected and view mode is prospects
+  useEffect(() => {
+    if (!isMLB || viewMode !== 'prospects' || !teamKey) {
+      setProspects([])
+      return
+    }
+
+    setProspectsLoading(true)
+    fetch(`https://datalab.sportsmockery.com/api/gm/prospects?team=${encodeURIComponent(teamKey)}&limit=30`)
+      .then(res => res.ok ? res.json() : Promise.reject('Failed'))
+      .then(data => setProspects(data.prospects || []))
+      .catch(() => setProspects([]))
+      .finally(() => setProspectsLoading(false))
+  }, [isMLB, viewMode, teamKey])
 
   const positions = POSITION_GROUPS[sport] || POSITION_GROUPS.nfl
   const maxRound = SPORT_ROUNDS[sport] || 7
