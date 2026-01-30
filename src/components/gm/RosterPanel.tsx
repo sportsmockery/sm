@@ -85,7 +85,7 @@ export function RosterPanel({
     }
 
     setProspectsLoading(true)
-    fetch(`https://datalab.sportsmockery.com/api/gm/prospects?team=${encodeURIComponent(teamKey)}&limit=30`)
+    fetch(`/api/gm/prospects?team_key=${encodeURIComponent(teamKey)}&sport=mlb&limit=30`)
       .then(res => res.ok ? res.json() : Promise.reject('Failed'))
       .then(data => setProspects(data.prospects || []))
       .catch(() => setProspects([]))
@@ -128,14 +128,66 @@ export function RosterPanel({
     }
   }
 
+  // Filter prospects by search
+  const filteredProspects = useMemo(() => {
+    if (!search) return prospects
+    const q = search.toLowerCase()
+    return prospects.filter(p => p.name.toLowerCase().includes(q))
+  }, [prospects, search])
+
   return (
     <div style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
-      {/* Search - only show when viewing players */}
+      {/* MLB Segmented Control: Roster / Prospects */}
+      {isMLB && !showDraft && (
+        <div style={{
+          display: 'flex',
+          marginBottom: 12,
+          borderRadius: 8,
+          overflow: 'hidden',
+          border: `1px solid ${inputBorder}`,
+        }}>
+          <button
+            onClick={() => setViewMode('roster')}
+            style={{
+              flex: 1,
+              padding: '8px 12px',
+              border: 'none',
+              cursor: 'pointer',
+              fontSize: 13,
+              fontWeight: 600,
+              backgroundColor: viewMode === 'roster' ? teamColor : (isDark ? '#1f2937' : '#f9fafb'),
+              color: viewMode === 'roster' ? '#fff' : subText,
+              transition: 'all 0.15s',
+            }}
+          >
+            Roster
+          </button>
+          <button
+            onClick={() => setViewMode('prospects')}
+            style={{
+              flex: 1,
+              padding: '8px 12px',
+              border: 'none',
+              borderLeft: `1px solid ${inputBorder}`,
+              cursor: 'pointer',
+              fontSize: 13,
+              fontWeight: 600,
+              backgroundColor: viewMode === 'prospects' ? '#22c55e' : (isDark ? '#1f2937' : '#f9fafb'),
+              color: viewMode === 'prospects' ? '#fff' : subText,
+              transition: 'all 0.15s',
+            }}
+          >
+            Prospects
+          </button>
+        </div>
+      )}
+
+      {/* Search - only show when viewing players/prospects (not draft) */}
       {!showDraft && (
         <div style={{ marginBottom: 12 }}>
           <input
             type="text"
-            placeholder="Search players..."
+            placeholder={viewMode === 'prospects' ? 'Search prospects...' : 'Search players...'}
             value={search}
             onChange={e => setSearch(e.target.value)}
             style={{
@@ -152,9 +204,9 @@ export function RosterPanel({
         </div>
       )}
 
-      {/* Position filters + Draft button */}
+      {/* Position filters + Draft button - hide when viewing prospects */}
       <div style={{ display: 'flex', gap: 4, flexWrap: 'wrap', marginBottom: 12, alignItems: 'center' }}>
-        {!showDraft && positions.map(pos => (
+        {!showDraft && viewMode === 'roster' && positions.map(pos => (
           <button
             key={pos}
             onClick={() => setPosFilter(pos)}
@@ -191,8 +243,8 @@ export function RosterPanel({
         </button>
       </div>
 
-      {/* Draft Pick List (collapsible checkbox version) */}
-      {!showDraft && (
+      {/* Draft Pick List (collapsible checkbox version) - hide when viewing prospects */}
+      {!showDraft && viewMode === 'roster' && (
         <DraftPickList
           sport={sport}
           selectedPicks={draftPicks}
@@ -204,15 +256,20 @@ export function RosterPanel({
       )}
 
       {/* Selected count */}
-      {(selectedIds.size > 0 || draftPicks.length > 0) && !showDraft && (
+      {(selectedIds.size > 0 || draftPicks.length > 0 || (selectedProspectIds?.size || 0) > 0) && !showDraft && (
         <div style={{ marginBottom: 8, display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
           {selectedIds.size > 0 && (
             <span style={{ fontSize: '12px', fontWeight: 600, color: teamColor }}>
               {selectedIds.size} player{selectedIds.size > 1 ? 's' : ''}
             </span>
           )}
+          {(selectedProspectIds?.size || 0) > 0 && (
+            <span style={{ fontSize: '12px', fontWeight: 600, color: '#22c55e' }}>
+              {selectedProspectIds!.size} prospect{selectedProspectIds!.size > 1 ? 's' : ''}
+            </span>
+          )}
           {draftPicks.length > 0 && (
-            <span style={{ fontSize: '12px', fontWeight: 600, color: teamColor }}>
+            <span style={{ fontSize: '12px', fontWeight: 600, color: '#8b5cf6' }}>
               {draftPicks.length} pick{draftPicks.length > 1 ? 's' : ''}
             </span>
           )}
@@ -320,6 +377,58 @@ export function RosterPanel({
             </div>
           )}
         </div>
+      ) : viewMode === 'prospects' && isMLB ? (
+        <>
+          {/* Prospect list */}
+          <div style={{
+            flex: 1,
+            overflowY: 'auto',
+            display: 'flex',
+            flexDirection: 'column',
+            gap: '8px',
+            paddingRight: 4,
+          }}>
+            {prospectsLoading ? (
+              <>
+                {Array.from({ length: 6 }).map((_, i) => (
+                  <div
+                    key={i}
+                    style={{
+                      height: 80,
+                      borderRadius: 12,
+                      backgroundColor: isDark ? '#1f293780' : '#f3f4f680',
+                      animation: 'pulse 2s ease-in-out infinite',
+                    }}
+                  />
+                ))}
+              </>
+            ) : (
+              <AnimatePresence>
+                {filteredProspects.map((prospect, i) => (
+                  <motion.div
+                    key={prospect.prospect_id}
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: Math.min(i * 0.03, 0.3) }}
+                  >
+                    <ProspectCard
+                      prospect={prospect}
+                      selected={selectedProspectIds?.has(prospect.prospect_id) || false}
+                      teamColor={teamColor}
+                      onClick={() => onToggleProspect?.(prospect.prospect_id)}
+                    />
+                  </motion.div>
+                ))}
+              </AnimatePresence>
+            )}
+          </div>
+
+          {!prospectsLoading && filteredProspects.length === 0 && (
+            <div style={{ textAlign: 'center', padding: 20, color: subText, fontSize: '13px' }}>
+              No prospects found
+            </div>
+          )}
+        </>
       ) : (
         <>
           {/* Player list - single column for better card display */}

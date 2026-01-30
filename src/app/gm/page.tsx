@@ -14,8 +14,10 @@ import { GradeReveal } from '@/components/gm/GradeReveal'
 import { TradeHistory } from '@/components/gm/TradeHistory'
 import { TeamFitOverlay } from '@/components/gm/TeamFitOverlay'
 import { PreferencesModal, GMPreferences } from '@/components/gm/PreferencesModal'
+import { TradeModePicker } from '@/components/gm/TradeModePicker'
 import type { PlayerData } from '@/components/gm/PlayerCard'
 import type { ValidationState } from '@/components/gm/ValidationIndicator'
+import type { TradeMode, MLBProspect } from '@/types/gm'
 
 const DEFAULT_PREFERENCES: GMPreferences = {
   risk_tolerance: 'moderate',
@@ -83,6 +85,22 @@ export default function GMPage() {
   // Sessions
   const [sessions, setSessions] = useState<Session[]>([])
   const [activeSession, setActiveSession] = useState<Session | null>(null)
+
+  // Trade mode (2-team vs 3-team)
+  const [tradeMode, setTradeMode] = useState<TradeMode>('2-team')
+
+  // Third team (for 3-team trades)
+  const [thirdTeam, setThirdTeam] = useState<OpponentTeam | null>(null)
+  const [thirdTeamRoster, setThirdTeamRoster] = useState<PlayerData[]>([])
+  const [thirdTeamLoading, setThirdTeamLoading] = useState(false)
+  const [selectedThirdTeamIds, setSelectedThirdTeamIds] = useState<Set<string>>(new Set())
+  const [draftPicksTeam3Sent, setDraftPicksTeam3Sent] = useState<DraftPick[]>([])
+  const [draftPicksTeam3Received, setDraftPicksTeam3Received] = useState<DraftPick[]>([])
+
+  // Prospects (MLB only)
+  const [selectedProspectIds, setSelectedProspectIds] = useState<Set<string>>(new Set())
+  const [selectedOpponentProspectIds, setSelectedOpponentProspectIds] = useState<Set<string>>(new Set())
+  const [selectedThirdTeamProspectIds, setSelectedThirdTeamProspectIds] = useState<Set<string>>(new Set())
 
   // Mobile
   const [activeTab, setActiveTab] = useState<'build' | 'history' | 'leaderboard'>('build')
@@ -248,6 +266,24 @@ export default function GMPage() {
 
   function addCustomReceivedPlayer(name: string, position: string) {
     setReceivedPlayers(prev => [...prev, { name, position }])
+  }
+
+  function toggleProspect(prospectId: string) {
+    setSelectedProspectIds(prev => {
+      const next = new Set(prev)
+      if (next.has(prospectId)) next.delete(prospectId)
+      else next.add(prospectId)
+      return next
+    })
+  }
+
+  function toggleOpponentProspect(prospectId: string) {
+    setSelectedOpponentProspectIds(prev => {
+      const next = new Set(prev)
+      if (next.has(prospectId)) next.delete(prospectId)
+      else next.add(prospectId)
+      return next
+    })
   }
 
   function handleOpponentSelect(team: OpponentTeam) {
@@ -504,7 +540,7 @@ export default function GMPage() {
       }}>
         <div style={{ maxWidth: 1440, margin: '0 auto', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 12 }}>
           {/* Team tabs */}
-          <div style={{ display: 'flex', gap: 6, overflowX: 'auto', flex: 1 }}>
+          <div style={{ display: 'flex', gap: 6, overflowX: 'auto', flex: 1, alignItems: 'center' }}>
             {TEAMS.map(t => {
               const isActive = selectedTeam === t.key
               return (
@@ -529,6 +565,28 @@ export default function GMPage() {
                 </button>
               )
             })}
+
+            {/* Trade Mode Picker */}
+            {selectedTeam && (
+              <div style={{ marginLeft: 'auto', flexShrink: 0 }}>
+                <TradeModePicker
+                  mode={tradeMode}
+                  onChange={(mode) => {
+                    setTradeMode(mode)
+                    if (mode === '2-team') {
+                      // Reset third team state when switching to 2-team
+                      setThirdTeam(null)
+                      setThirdTeamRoster([])
+                      setSelectedThirdTeamIds(new Set())
+                      setDraftPicksTeam3Sent([])
+                      setDraftPicksTeam3Received([])
+                      setSelectedThirdTeamProspectIds(new Set())
+                    }
+                  }}
+                  disabled={!selectedTeam}
+                />
+              </div>
+            )}
           </div>
 
           {/* Session info */}
@@ -631,10 +689,13 @@ export default function GMPage() {
                   sport={sport}
                   teamColor={teamColor}
                   teamName={teamLabel}
+                  teamKey={selectedTeam}
                   onViewFit={handleViewFit}
                   draftPicks={draftPicksSent}
                   onAddDraftPick={pk => setDraftPicksSent(prev => [...prev, pk])}
                   onRemoveDraftPick={i => setDraftPicksSent(prev => prev.filter((_, idx) => idx !== i))}
+                  selectedProspectIds={selectedProspectIds}
+                  onToggleProspect={toggleProspect}
                 />
               </div>
 
@@ -744,6 +805,8 @@ export default function GMPage() {
                     draftPicks={draftPicksReceived}
                     onAddDraftPick={pk => setDraftPicksReceived(prev => [...prev, pk])}
                     onRemoveDraftPick={i => setDraftPicksReceived(prev => prev.filter((_, idx) => idx !== i))}
+                    selectedProspectIds={selectedOpponentProspectIds}
+                    onToggleProspect={toggleOpponentProspect}
                   />
                 ) : (
                   <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', color: subText }}>
@@ -835,10 +898,13 @@ export default function GMPage() {
                           sport={sport}
                           teamColor={teamColor}
                           teamName={teamLabel}
+                          teamKey={selectedTeam}
                           onViewFit={handleViewFit}
                           draftPicks={draftPicksSent}
                           onAddDraftPick={pk => setDraftPicksSent(prev => [...prev, pk])}
                           onRemoveDraftPick={i => setDraftPicksSent(prev => prev.filter((_, idx) => idx !== i))}
+                          selectedProspectIds={selectedProspectIds}
+                          onToggleProspect={toggleProspect}
                           compact
                         />
                       </div>
@@ -901,6 +967,8 @@ export default function GMPage() {
                           draftPicks={draftPicksReceived}
                           onAddDraftPick={pk => setDraftPicksReceived(prev => [...prev, pk])}
                           onRemoveDraftPick={i => setDraftPicksReceived(prev => prev.filter((_, idx) => idx !== i))}
+                          selectedProspectIds={selectedOpponentProspectIds}
+                          onToggleProspect={toggleOpponentProspect}
                           compact
                         />
                       </div>

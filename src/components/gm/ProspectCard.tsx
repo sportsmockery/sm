@@ -17,6 +17,29 @@ const LEVEL_COLORS: Record<string, string> = {
   'A+': '#8b5cf6',
   'A': '#a855f7',
   'R': '#f59e0b',
+  'Rk': '#f59e0b',
+}
+
+// Grade colors for prospect badges
+const GRADE_COLORS: Record<string, string> = {
+  'A+': '#22c55e',
+  'A': '#22c55e',
+  'A-': '#22c55e',
+  'B+': '#3b82f6',
+  'B': '#3b82f6',
+  'B-': '#3b82f6',
+  'C+': '#f59e0b',
+  'C': '#f59e0b',
+  'C-': '#f59e0b',
+  'D': '#ef4444',
+}
+
+// Tier colors for valuation display
+const TIER_COLORS: Record<string, string> = {
+  'elite': '#dc2626',
+  'plus': '#22c55e',
+  'average': '#3b82f6',
+  'organizational': '#9ca3af',
 }
 
 export function ProspectCard({ prospect, selected, teamColor, onClick }: ProspectCardProps) {
@@ -26,7 +49,15 @@ export function ProspectCard({ prospect, selected, teamColor, onClick }: Prospec
   const textColor = isDark ? '#fff' : '#1a1a1a'
   const subText = isDark ? '#9ca3af' : '#6b7280'
   const borderColor = isDark ? '#374151' : '#e5e7eb'
-  const levelColor = LEVEL_COLORS[prospect.level] || '#6b7280'
+
+  // Support both field naming conventions
+  const level = prospect.current_level || prospect.level || ''
+  const rank = prospect.team_rank || prospect.rank || 0
+  const isTop100 = prospect.mlb_top_100_rank != null || prospect.isTop100 === true
+  const top100Rank = prospect.mlb_top_100_rank
+
+  const levelColor = LEVEL_COLORS[level] || '#6b7280'
+  const gradeColor = GRADE_COLORS[prospect.prospect_grade] || '#6b7280'
 
   // Generate initials for avatar placeholder
   const initials = prospect.name.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase()
@@ -54,7 +85,7 @@ export function ProspectCard({ prospect, selected, teamColor, onClick }: Prospec
       }}
     >
       {/* Rank Badge (top left corner) */}
-      {prospect.rank && (
+      {rank > 0 && (
         <div style={{
           position: 'absolute',
           top: -8,
@@ -62,7 +93,7 @@ export function ProspectCard({ prospect, selected, teamColor, onClick }: Prospec
           width: 28,
           height: 28,
           borderRadius: '50%',
-          backgroundColor: prospect.isTop100 ? '#dc2626' : teamColor,
+          backgroundColor: isTop100 ? '#dc2626' : teamColor,
           color: '#fff',
           display: 'flex',
           alignItems: 'center',
@@ -71,7 +102,7 @@ export function ProspectCard({ prospect, selected, teamColor, onClick }: Prospec
           fontWeight: 800,
           boxShadow: '0 2px 4px rgba(0,0,0,0.2)',
         }}>
-          #{prospect.rank}
+          #{rank}
         </div>
       )}
 
@@ -127,7 +158,7 @@ export function ProspectCard({ prospect, selected, teamColor, onClick }: Prospec
             backgroundColor: `${levelColor}20`,
             color: levelColor,
           }}>
-            {prospect.level}
+            {level}
           </span>
           <span style={{ fontSize: 12, color: subText }}>
             {prospect.position}
@@ -136,6 +167,54 @@ export function ProspectCard({ prospect, selected, teamColor, onClick }: Prospec
             Age {prospect.age}
           </span>
         </div>
+
+        {/* Valuation row (when available) */}
+        {(prospect.prospect_fv_bucket || prospect.prospect_tier || prospect.prospect_surplus_value_millions) && (
+          <div style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: 6,
+            marginTop: 4,
+          }}>
+            {/* FV bucket */}
+            {prospect.prospect_fv_bucket && (
+              <span style={{
+                fontSize: 10,
+                fontWeight: 700,
+                padding: '1px 5px',
+                borderRadius: 3,
+                backgroundColor: isDark ? '#374151' : '#e5e7eb',
+                color: subText,
+              }}>
+                FV {prospect.prospect_fv_bucket}
+              </span>
+            )}
+            {/* Tier badge */}
+            {prospect.prospect_tier && (
+              <span style={{
+                fontSize: 10,
+                fontWeight: 600,
+                padding: '1px 5px',
+                borderRadius: 3,
+                backgroundColor: `${TIER_COLORS[prospect.prospect_tier] || '#9ca3af'}20`,
+                color: TIER_COLORS[prospect.prospect_tier] || '#9ca3af',
+                textTransform: 'capitalize',
+              }}>
+                {prospect.prospect_tier}
+              </span>
+            )}
+            {/* Surplus value */}
+            {prospect.prospect_surplus_value_millions && (
+              <span style={{
+                fontSize: 10,
+                fontWeight: 600,
+                color: '#22c55e',
+              }}>
+                ${prospect.prospect_surplus_value_millions.toFixed(1)}M
+              </span>
+            )}
+          </div>
+        )}
       </div>
 
       {/* Right side: badges */}
@@ -146,8 +225,21 @@ export function ProspectCard({ prospect, selected, teamColor, onClick }: Prospec
         gap: 4,
         flexShrink: 0,
       }}>
+        {/* Grade badge */}
+        {prospect.prospect_grade && (
+          <span style={{
+            fontSize: 10,
+            fontWeight: 700,
+            padding: '2px 8px',
+            borderRadius: 4,
+            backgroundColor: `${gradeColor}20`,
+            color: gradeColor,
+          }}>
+            {prospect.prospect_grade}
+          </span>
+        )}
         {/* Top 100 or Org badge */}
-        {prospect.isTop100 ? (
+        {isTop100 && top100Rank ? (
           <span style={{
             fontSize: 10,
             fontWeight: 700,
@@ -156,9 +248,9 @@ export function ProspectCard({ prospect, selected, teamColor, onClick }: Prospec
             backgroundColor: '#dc262620',
             color: '#dc2626',
           }}>
-            Top 100
+            #{top100Rank} MLB
           </span>
-        ) : prospect.rank && prospect.rank <= 30 ? (
+        ) : rank <= 10 ? (
           <span style={{
             fontSize: 10,
             fontWeight: 600,
@@ -167,7 +259,7 @@ export function ProspectCard({ prospect, selected, teamColor, onClick }: Prospec
             backgroundColor: `${teamColor}20`,
             color: teamColor,
           }}>
-            Org Top 30
+            Org #{rank}
           </span>
         ) : null}
 
