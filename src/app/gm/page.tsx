@@ -756,20 +756,19 @@ export default function GMPage() {
         ) : activeTab === 'build' ? (
           <>
             {/* DESKTOP: 3-column layout */}
-            <div className="hidden lg:grid" style={{ gridTemplateColumns: '25% 40% 35%', gap: 24 }}>
+            <div className="hidden lg:grid" style={{ gridTemplateColumns: '280px 1fr 320px', gap: 20, alignItems: 'start' }}>
               {/* LEFT: Chicago Roster */}
               <div style={{
                 backgroundColor: cardBg,
                 border: `1px solid ${borderColor}`,
                 borderRadius: 12,
                 padding: 16,
-                height: 'calc(100vh - 200px)',
-                minHeight: 600,
-                maxHeight: 900,
                 display: 'flex',
                 flexDirection: 'column',
+                maxHeight: 'calc(100vh - 220px)',
                 position: 'sticky',
-                top: 100,
+                top: 180,
+                overflow: 'hidden',
               }}>
                 <RosterPanel
                   players={roster}
@@ -856,6 +855,17 @@ export default function GMPage() {
                     <button onClick={() => setGradeError(null)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#dc2626', fontWeight: 700 }}>×</button>
                   </div>
                 )}
+
+                {/* Season Simulation - inside center column */}
+                {activeSession && activeSession.num_trades > 0 && (
+                  <SimulationTrigger
+                    tradeCount={activeSession.num_trades}
+                    sport={sport}
+                    onSimulate={handleSimulateSeason}
+                    isSimulating={isSimulating}
+                    teamColor={teamColor}
+                  />
+                )}
               </div>
 
               {/* RIGHT: Opponent Roster */}
@@ -864,13 +874,12 @@ export default function GMPage() {
                 border: `1px solid ${borderColor}`,
                 borderRadius: 12,
                 padding: 16,
-                height: 'calc(100vh - 200px)',
-                minHeight: 600,
-                maxHeight: 900,
                 display: 'flex',
                 flexDirection: 'column',
+                maxHeight: 'calc(100vh - 220px)',
                 position: 'sticky',
-                top: 100,
+                top: 180,
+                overflow: 'hidden',
               }}>
                 {/* Opponent header */}
                 <div style={{
@@ -981,6 +990,17 @@ export default function GMPage() {
                   onNewTrade={resetTrade}
                   mobile
                 />
+
+                {/* Season Simulation - mobile */}
+                {activeSession && activeSession.num_trades > 0 && (
+                  <SimulationTrigger
+                    tradeCount={activeSession.num_trades}
+                    sport={sport}
+                    onSimulate={handleSimulateSeason}
+                    isSimulating={isSimulating}
+                    teamColor={teamColor}
+                  />
+                )}
               </div>
 
               {/* Chicago Roster Collapsible */}
@@ -1104,17 +1124,6 @@ export default function GMPage() {
                 </AnimatePresence>
               </div>
             </div>
-
-            {/* Season Simulation Section */}
-            {activeSession && activeSession.num_trades > 0 && (
-              <SimulationTrigger
-                tradeCount={activeSession.num_trades}
-                sport={sport}
-                onSimulate={handleSimulateSeason}
-                isSimulating={isSimulating}
-                teamColor={teamColor}
-              />
-            )}
           </>
         ) : activeTab === 'history' ? (
           <TradeHistory

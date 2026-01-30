@@ -45,6 +45,82 @@ Respond with ONLY valid JSON:
 
 Do not wrap in markdown code blocks. Just raw JSON.`
 
+// Update combined user score (trade + mock draft)
+async function updateCombinedUserScore(userId: string) {
+  // Get trade score from gm_leaderboard
+  const { data: leaderboard } = await datalabAdmin
+    .from('gm_leaderboard')
+    .select('avg_grade, trades_count, best_trade_id')
+    .eq('user_id', userId)
+    .single()
+
+  const tradeScore = leaderboard?.avg_grade || null
+  const tradeCount = leaderboard?.trades_count || 0
+
+  // Get best mock score (is_best_of_three=true, or highest)
+  let bestMock: { id: string; mock_score: number } | null = null
+
+  const { data: bestOfThreeMock } = await datalabAdmin
+    .from('draft_mocks')
+    .select('id, mock_score')
+    .eq('user_id', userId)
+    .eq('is_reset', false)
+    .eq('is_best_of_three', true)
+    .single()
+
+  if (bestOfThreeMock) {
+    bestMock = bestOfThreeMock
+  } else {
+    const { data: highestMock } = await datalabAdmin
+      .from('draft_mocks')
+      .select('id, mock_score')
+      .eq('user_id', userId)
+      .eq('is_reset', false)
+      .eq('completed', true)
+      .not('mock_score', 'is', null)
+      .order('mock_score', { ascending: false })
+      .limit(1)
+      .single()
+    bestMock = highestMock
+  }
+
+  const mockScore = bestMock?.mock_score || null
+
+  // Count completed mocks
+  const { count: mockCount } = await datalabAdmin
+    .from('draft_mocks')
+    .select('*', { count: 'exact', head: true })
+    .eq('user_id', userId)
+    .eq('is_reset', false)
+    .eq('completed', true)
+
+  // Calculate combined score (60% trade, 40% mock)
+  let combinedScore: number | null = null
+  if (tradeScore !== null && mockScore !== null) {
+    combinedScore = (tradeScore * 0.60) + (mockScore * 0.40)
+  } else if (tradeScore !== null) {
+    combinedScore = tradeScore
+  } else if (mockScore !== null) {
+    combinedScore = mockScore
+  }
+
+  // Upsert gm_user_scores
+  await datalabAdmin
+    .from('gm_user_scores')
+    .upsert({
+      user_id: userId,
+      best_trade_score: tradeScore,
+      trade_count: tradeCount,
+      best_mock_draft_id: bestMock?.id || null,
+      best_mock_draft_score: mockScore,
+      mock_count: mockCount || 0,
+      combined_gm_score: combinedScore ? Math.round(combinedScore * 10) / 10 : null,
+      trade_weight: 0.60,
+      mock_weight: 0.40,
+      updated_at: new Date().toISOString(),
+    }, { onConflict: 'user_id' })
+}
+
 export async function POST(request: NextRequest) {
   try {
     const user = await getGMAuthUser(request)
@@ -166,6 +242,25 @@ Grade this mock draft performance.`
           })
         } catch {}
       }
+    }
+
+    // Trigger mock score computation via Datalab API
+    try {
+      await fetch('https://datalab.sportsmockery.com/api/gm/mock-score', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ mock_id }),
+      })
+    } catch (scoreError) {
+      console.error('Mock score computation error:', scoreError)
+      // Non-fatal - AI grade was calculated, scoring computation can be retried
+    }
+
+    // Update combined user score
+    try {
+      await updateCombinedUserScore(user.id)
+    } catch (combinedError) {
+      console.error('Combined score update error:', combinedError)
     }
 
     return NextResponse.json({

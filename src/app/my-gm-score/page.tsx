@@ -6,6 +6,40 @@ import { useTheme } from '@/contexts/ThemeContext'
 import { useAuth } from '@/contexts/AuthContext'
 import Link from 'next/link'
 
+interface MockDraft {
+  id: string
+  chicago_team: string
+  sport: string
+  draft_year: number
+  completed: boolean
+  completed_at: string | null
+  mock_score: number | null
+  value_score: number | null
+  need_fit_score: number | null
+  upside_risk_score: number | null
+  mock_grade_letter: string | null
+  is_best_of_three: boolean
+  created_at: string
+}
+
+interface UserScore {
+  user_id: string
+  combined_gm_score: number | null
+  best_trade_score: number | null
+  best_mock_draft_score: number | null
+  best_mock_draft_id: string | null
+  trade_count: number
+  mock_count: number
+  trade_weight: number
+  mock_weight: number
+}
+
+interface TradeStats {
+  total: number
+  accepted: number
+  average_grade: number
+}
+
 interface AnalyticsData {
   total_trades: number
   accepted_trades: number
@@ -32,11 +66,6 @@ interface AnalyticsData {
     avg_grade: number
     accepted_rate: number
   }>
-  activity_timeline: Array<{
-    date: string
-    trade_count: number
-    avg_grade: number
-  }>
 }
 
 const CHICAGO_TEAMS: Record<string, { name: string; logo: string; color: string }> = {
@@ -53,9 +82,13 @@ export default function MyGMScorePage() {
   const { theme } = useTheme()
   const isDark = theme === 'dark'
 
+  const [userScore, setUserScore] = useState<UserScore | null>(null)
+  const [mockDrafts, setMockDrafts] = useState<MockDraft[]>([])
+  const [tradeStats, setTradeStats] = useState<TradeStats | null>(null)
   const [analytics, setAnalytics] = useState<AnalyticsData | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const [settingBest, setSettingBest] = useState<string | null>(null)
 
   const subText = isDark ? '#9ca3af' : '#6b7280'
   const cardBg = isDark ? 'bg-gray-800/50 border-gray-700' : 'bg-white border-gray-200 shadow-sm'
@@ -67,21 +100,26 @@ export default function MyGMScorePage() {
       return
     }
 
-    fetchAnalytics()
+    fetchData()
   }, [authLoading, isAuthenticated, router])
 
-  async function fetchAnalytics() {
+  async function fetchData() {
     try {
-      const res = await fetch('/api/gm/analytics')
-      if (!res.ok) {
-        if (res.status === 401) {
-          router.push('/login?next=/my-gm-score')
-          return
-        }
-        throw new Error('Failed to fetch analytics')
+      // Fetch combined score data
+      const scoreRes = await fetch('/api/gm/user-score')
+      if (scoreRes.ok) {
+        const scoreData = await scoreRes.json()
+        setUserScore(scoreData.user_score)
+        setMockDrafts(scoreData.mock_drafts || [])
+        setTradeStats(scoreData.trade_stats)
       }
-      const data = await res.json()
-      setAnalytics(data)
+
+      // Also fetch detailed trade analytics
+      const analyticsRes = await fetch('/api/gm/analytics')
+      if (analyticsRes.ok) {
+        const analyticsData = await analyticsRes.json()
+        setAnalytics(analyticsData)
+      }
     } catch (e) {
       setError('Failed to load GM score data')
     } finally {
@@ -89,17 +127,39 @@ export default function MyGMScorePage() {
     }
   }
 
-  // Get letter grade from numeric grade
+  async function setBestMock(mockId: string) {
+    setSettingBest(mockId)
+    try {
+      const res = await fetch('/api/gm/user-score', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ mock_id: mockId }),
+      })
+      if (res.ok) {
+        // Refresh data
+        await fetchData()
+      }
+    } catch (e) {
+      console.error('Failed to set best mock:', e)
+    } finally {
+      setSettingBest(null)
+    }
+  }
+
   function getLetterGrade(grade: number): string {
     if (grade >= 90) return 'A'
+    if (grade >= 85) return 'A-'
     if (grade >= 80) return 'B+'
-    if (grade >= 70) return 'B'
+    if (grade >= 75) return 'B'
+    if (grade >= 70) return 'B-'
+    if (grade >= 65) return 'C+'
     if (grade >= 60) return 'C'
-    if (grade >= 50) return 'D'
+    if (grade >= 55) return 'C-'
+    if (grade >= 50) return 'D+'
+    if (grade >= 40) return 'D'
     return 'F'
   }
 
-  // Get grade color
   function getGradeColor(grade: number): string {
     if (grade >= 90) return '#10b981'
     if (grade >= 80) return '#22c55e'
@@ -117,6 +177,8 @@ export default function MyGMScorePage() {
     )
   }
 
+  const hasActivity = (userScore?.trade_count || 0) > 0 || (userScore?.mock_count || 0) > 0
+
   return (
     <div className="min-h-screen" style={{ backgroundColor: 'var(--bg-page)', color: 'var(--text-primary)' }}>
       <main className="max-w-[1200px] mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 pt-20 sm:pt-24">
@@ -128,7 +190,7 @@ export default function MyGMScorePage() {
                 My GM Score
               </h1>
               <p className="text-sm" style={{ color: subText }}>
-                Track your trading performance across all Chicago teams
+                Track your combined trading and mock draft performance
               </p>
             </div>
             <div className="flex gap-2">
@@ -186,263 +248,396 @@ export default function MyGMScorePage() {
           </div>
         )}
 
-        {analytics && analytics.total_trades === 0 ? (
+        {!hasActivity ? (
           <div className={`rounded-xl border p-8 text-center ${cardBg}`}>
             <div style={{ fontSize: '48px', marginBottom: 12 }}>🏈</div>
             <h2 style={{ fontWeight: 700, fontSize: '20px', marginBottom: 8, color: isDark ? '#fff' : '#1a1a1a' }}>
-              No Trades Yet
+              No Activity Yet
             </h2>
             <p style={{ fontSize: '14px', color: subText, marginBottom: 20 }}>
-              Start trading to build your GM reputation and see your performance analytics.
+              Start trading or complete a mock draft to build your GM reputation.
             </p>
-            <Link
-              href="/gm"
-              style={{
-                padding: '12px 24px',
-                borderRadius: 8,
-                backgroundColor: '#bc0000',
-                color: '#fff',
-                fontSize: '14px',
-                fontWeight: 600,
-                textDecoration: 'none',
-                display: 'inline-block',
-              }}
-            >
-              Start Trading
-            </Link>
+            <div className="flex gap-3 justify-center">
+              <Link
+                href="/gm"
+                style={{
+                  padding: '12px 24px',
+                  borderRadius: 8,
+                  backgroundColor: '#bc0000',
+                  color: '#fff',
+                  fontSize: '14px',
+                  fontWeight: 600,
+                  textDecoration: 'none',
+                }}
+              >
+                Start Trading
+              </Link>
+              <Link
+                href="/mock-draft"
+                style={{
+                  padding: '12px 24px',
+                  borderRadius: 8,
+                  border: '2px solid #bc0000',
+                  backgroundColor: 'transparent',
+                  color: '#bc0000',
+                  fontSize: '14px',
+                  fontWeight: 600,
+                  textDecoration: 'none',
+                }}
+              >
+                Mock Draft
+              </Link>
+            </div>
           </div>
-        ) : analytics && (
+        ) : (
           <>
-            {/* Top Stats */}
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-              {/* Total GM Score */}
-              <div className={`rounded-xl border p-4 ${cardBg}`}>
-                <div style={{ fontSize: '12px', color: subText, marginBottom: 4, fontWeight: 600, textTransform: 'uppercase' }}>
-                  Total GM Score
-                </div>
-                <div style={{ fontSize: '32px', fontWeight: 800, color: '#bc0000' }}>
-                  {analytics.total_gm_score.toLocaleString()}
-                </div>
+            {/* Combined Score Hero */}
+            <div className={`rounded-xl border p-6 mb-6 ${cardBg}`} style={{ textAlign: 'center' }}>
+              <div style={{ fontSize: '12px', color: subText, marginBottom: 8, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                Combined GM Score
               </div>
-
-              {/* Average Grade */}
-              <div className={`rounded-xl border p-4 ${cardBg}`}>
-                <div style={{ fontSize: '12px', color: subText, marginBottom: 4, fontWeight: 600, textTransform: 'uppercase' }}>
-                  Avg Trade Grade
+              {userScore && userScore.combined_gm_score !== null ? (
+                <>
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 16 }}>
+                    <div
+                      style={{
+                        width: 100,
+                        height: 100,
+                        borderRadius: '50%',
+                        backgroundColor: getGradeColor(userScore.combined_gm_score),
+                        display: 'flex',
+                        flexDirection: 'column',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                      }}
+                    >
+                      <span style={{ color: '#fff', fontWeight: 800, fontSize: '32px', lineHeight: 1 }}>
+                        {getLetterGrade(userScore.combined_gm_score)}
+                      </span>
+                      <span style={{ color: 'rgba(255,255,255,0.85)', fontSize: '14px', fontWeight: 600 }}>
+                        {userScore.combined_gm_score.toFixed(1)}
+                      </span>
+                    </div>
+                  </div>
+                  <div style={{ marginTop: 16, fontSize: '13px', color: subText }}>
+                    <span style={{ fontWeight: 600 }}>{Math.round(userScore.trade_weight * 100)}%</span> Trades +
+                    <span style={{ fontWeight: 600 }}> {Math.round(userScore.mock_weight * 100)}%</span> Mock Drafts
+                  </div>
+                </>
+              ) : (
+                <div style={{ fontSize: '16px', color: subText }}>
+                  Complete both a trade and mock draft to see your combined score
                 </div>
-                <div style={{ display: 'flex', alignItems: 'baseline', gap: 8 }}>
-                  <span style={{ fontSize: '32px', fontWeight: 800, color: getGradeColor(analytics.average_grade) }}>
-                    {getLetterGrade(analytics.average_grade)}
-                  </span>
-                  <span style={{ fontSize: '16px', color: subText, fontWeight: 600 }}>
-                    {analytics.average_grade}
-                  </span>
-                </div>
-              </div>
-
-              {/* Total Trades */}
-              <div className={`rounded-xl border p-4 ${cardBg}`}>
-                <div style={{ fontSize: '12px', color: subText, marginBottom: 4, fontWeight: 600, textTransform: 'uppercase' }}>
-                  Total Trades
-                </div>
-                <div style={{ fontSize: '32px', fontWeight: 800, color: isDark ? '#fff' : '#1a1a1a' }}>
-                  {analytics.total_trades}
-                </div>
-              </div>
-
-              {/* Accepted Rate */}
-              <div className={`rounded-xl border p-4 ${cardBg}`}>
-                <div style={{ fontSize: '12px', color: subText, marginBottom: 4, fontWeight: 600, textTransform: 'uppercase' }}>
-                  Accepted Rate
-                </div>
-                <div style={{ fontSize: '32px', fontWeight: 800, color: '#10b981' }}>
-                  {analytics.total_trades > 0 ? Math.round((analytics.accepted_trades / analytics.total_trades) * 100) : 0}%
-                </div>
-              </div>
+              )}
             </div>
 
-            {/* Trade Breakdown */}
-            <div className="grid md:grid-cols-3 gap-4 mb-6">
-              <div className={`rounded-xl border p-4 text-center ${cardBg}`}>
-                <div style={{ fontSize: '28px', fontWeight: 800, color: '#10b981' }}>{analytics.accepted_trades}</div>
-                <div style={{ fontSize: '13px', color: subText, fontWeight: 600 }}>Accepted Trades</div>
-              </div>
-              <div className={`rounded-xl border p-4 text-center ${cardBg}`}>
-                <div style={{ fontSize: '28px', fontWeight: 800, color: '#ef4444' }}>{analytics.rejected_trades}</div>
-                <div style={{ fontSize: '13px', color: subText, fontWeight: 600 }}>Rejected Trades</div>
-              </div>
-              <div className={`rounded-xl border p-4 text-center ${cardBg}`}>
-                <div style={{ fontSize: '28px', fontWeight: 800, color: '#f59e0b' }}>{analytics.dangerous_trades}</div>
-                <div style={{ fontSize: '13px', color: subText, fontWeight: 600 }}>Dangerous Trades</div>
-              </div>
-            </div>
-
-            <div className="grid lg:grid-cols-2 gap-6">
-              {/* Grade Distribution */}
-              <div className={`rounded-xl border p-4 sm:p-6 ${cardBg}`}>
-                <h3 style={{ fontWeight: 700, fontSize: '16px', marginBottom: 16, color: isDark ? '#fff' : '#1a1a1a' }}>
-                  Grade Distribution
-                </h3>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-                  {analytics.grade_distribution
-                    .filter(d => d.count > 0)
-                    .map(d => (
-                      <div key={d.bucket} style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-                        <span style={{ width: 50, fontSize: '13px', fontWeight: 600, color: isDark ? '#fff' : '#1a1a1a' }}>
-                          {d.bucket}
-                        </span>
-                        <div style={{ flex: 1, height: 24, backgroundColor: isDark ? '#374151' : '#f3f4f6', borderRadius: 4, overflow: 'hidden' }}>
-                          <div
-                            style={{
-                              width: `${d.percentage}%`,
-                              height: '100%',
-                              backgroundColor: '#bc0000',
-                              borderRadius: 4,
-                              transition: 'width 0.3s ease',
-                            }}
-                          />
-                        </div>
-                        <span style={{ width: 50, fontSize: '13px', color: subText, textAlign: 'right' }}>
-                          {d.count} ({d.percentage}%)
-                        </span>
+            {/* Score Breakdown */}
+            <div className="grid md:grid-cols-2 gap-4 mb-6">
+              {/* Trade Score */}
+              <div className={`rounded-xl border p-5 ${cardBg}`}>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
+                  <h3 style={{ fontWeight: 700, fontSize: '16px', color: isDark ? '#fff' : '#1a1a1a' }}>
+                    Trade Score
+                  </h3>
+                  <span style={{
+                    fontSize: '12px',
+                    padding: '4px 8px',
+                    borderRadius: 4,
+                    backgroundColor: isDark ? '#374151' : '#f3f4f6',
+                    color: subText,
+                    fontWeight: 600,
+                  }}>
+                    {Math.round((userScore?.trade_weight || 0.60) * 100)}% weight
+                  </span>
+                </div>
+                {userScore && userScore.best_trade_score !== null ? (
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
+                    <div
+                      style={{
+                        width: 60,
+                        height: 60,
+                        borderRadius: '50%',
+                        backgroundColor: getGradeColor(userScore.best_trade_score),
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                      }}
+                    >
+                      <span style={{ color: '#fff', fontWeight: 800, fontSize: '20px' }}>
+                        {getLetterGrade(userScore.best_trade_score)}
+                      </span>
+                    </div>
+                    <div>
+                      <div style={{ fontWeight: 700, fontSize: '24px', color: isDark ? '#fff' : '#1a1a1a' }}>
+                        {userScore.best_trade_score.toFixed(1)}
                       </div>
-                    ))}
-                </div>
-              </div>
-
-              {/* Chicago Teams Performance */}
-              <div className={`rounded-xl border p-4 sm:p-6 ${cardBg}`}>
-                <h3 style={{ fontWeight: 700, fontSize: '16px', marginBottom: 16, color: isDark ? '#fff' : '#1a1a1a' }}>
-                  Performance by Team
-                </h3>
-                {analytics.chicago_teams.length === 0 ? (
-                  <p style={{ fontSize: '14px', color: subText }}>No team-specific data yet</p>
+                      <div style={{ fontSize: '13px', color: subText }}>
+                        {userScore.trade_count} trades completed
+                      </div>
+                    </div>
+                  </div>
                 ) : (
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-                    {analytics.chicago_teams.map(team => {
-                      const teamInfo = CHICAGO_TEAMS[team.team]
-                      return (
-                        <div
-                          key={team.team}
-                          style={{
-                            display: 'flex',
-                            alignItems: 'center',
-                            gap: 12,
-                            padding: '10px 12px',
-                            borderRadius: 8,
-                            backgroundColor: isDark ? '#374151' : '#f3f4f6',
-                          }}
-                        >
-                          {teamInfo && (
-                            <img src={teamInfo.logo} alt={teamInfo.name} style={{ width: 32, height: 32, objectFit: 'contain' }} />
-                          )}
-                          <div style={{ flex: 1 }}>
-                            <div style={{ fontWeight: 600, fontSize: '14px', color: isDark ? '#fff' : '#1a1a1a' }}>
-                              {teamInfo?.name || team.team}
-                            </div>
-                            <div style={{ fontSize: '12px', color: subText }}>
-                              {team.trade_count} trades • {team.accepted_rate}% accepted
-                            </div>
-                          </div>
-                          <div
-                            style={{
-                              padding: '4px 10px',
-                              borderRadius: 6,
-                              backgroundColor: getGradeColor(team.avg_grade),
-                              color: '#fff',
-                              fontWeight: 700,
-                              fontSize: '13px',
-                            }}
-                          >
-                            {team.avg_grade}
-                          </div>
-                        </div>
-                      )
-                    })}
+                  <div style={{ color: subText, fontSize: '14px' }}>
+                    Complete a trade to get your score
                   </div>
                 )}
               </div>
 
-              {/* Top Trading Partners */}
-              <div className={`rounded-xl border p-4 sm:p-6 ${cardBg}`}>
-                <h3 style={{ fontWeight: 700, fontSize: '16px', marginBottom: 16, color: isDark ? '#fff' : '#1a1a1a' }}>
-                  Top Trading Partners
-                </h3>
-                {analytics.trading_partners.length === 0 ? (
-                  <p style={{ fontSize: '14px', color: subText }}>No trading partner data yet</p>
+              {/* Mock Draft Score */}
+              <div className={`rounded-xl border p-5 ${cardBg}`}>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
+                  <h3 style={{ fontWeight: 700, fontSize: '16px', color: isDark ? '#fff' : '#1a1a1a' }}>
+                    Mock Draft Score
+                  </h3>
+                  <span style={{
+                    fontSize: '12px',
+                    padding: '4px 8px',
+                    borderRadius: 4,
+                    backgroundColor: isDark ? '#374151' : '#f3f4f6',
+                    color: subText,
+                    fontWeight: 600,
+                  }}>
+                    {Math.round((userScore?.mock_weight || 0.40) * 100)}% weight
+                  </span>
+                </div>
+                {userScore && userScore.best_mock_draft_score !== null ? (
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
+                    <div
+                      style={{
+                        width: 60,
+                        height: 60,
+                        borderRadius: '50%',
+                        backgroundColor: getGradeColor(userScore.best_mock_draft_score),
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                      }}
+                    >
+                      <span style={{ color: '#fff', fontWeight: 800, fontSize: '20px' }}>
+                        {getLetterGrade(userScore.best_mock_draft_score)}
+                      </span>
+                    </div>
+                    <div>
+                      <div style={{ fontWeight: 700, fontSize: '24px', color: isDark ? '#fff' : '#1a1a1a' }}>
+                        {userScore.best_mock_draft_score.toFixed(1)}
+                      </div>
+                      <div style={{ fontSize: '13px', color: subText }}>
+                        {userScore.mock_count} drafts completed
+                      </div>
+                    </div>
+                  </div>
                 ) : (
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-                    {analytics.trading_partners.slice(0, 5).map((partner, i) => (
+                  <div style={{ color: subText, fontSize: '14px' }}>
+                    Complete a mock draft to get your score
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* Mock Draft History */}
+            {mockDrafts.length > 0 && (
+              <div className={`rounded-xl border p-5 mb-6 ${cardBg}`}>
+                <h3 style={{ fontWeight: 700, fontSize: '16px', marginBottom: 16, color: isDark ? '#fff' : '#1a1a1a' }}>
+                  Mock Draft History
+                </h3>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+                  {mockDrafts.filter(m => m.completed).map(mock => {
+                    const teamInfo = CHICAGO_TEAMS[mock.chicago_team]
+                    const isBest = userScore?.best_mock_draft_id === mock.id || mock.is_best_of_three
+                    return (
                       <div
-                        key={partner.team_name}
+                        key={mock.id}
                         style={{
                           display: 'flex',
                           alignItems: 'center',
                           gap: 12,
-                          padding: '10px 12px',
-                          borderRadius: 8,
-                          backgroundColor: isDark ? '#374151' : '#f3f4f6',
+                          padding: '12px 14px',
+                          borderRadius: 10,
+                          backgroundColor: isBest
+                            ? (isDark ? '#22c55e20' : '#22c55e10')
+                            : (isDark ? '#374151' : '#f3f4f6'),
+                          border: isBest ? '2px solid #22c55e' : 'none',
                         }}
                       >
-                        <span style={{
-                          width: 24,
-                          height: 24,
-                          borderRadius: '50%',
-                          backgroundColor: '#bc0000',
-                          color: '#fff',
-                          fontSize: '12px',
-                          fontWeight: 700,
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'center',
-                        }}>
-                          {i + 1}
-                        </span>
+                        {teamInfo && (
+                          <img src={teamInfo.logo} alt={teamInfo.name} style={{ width: 36, height: 36, objectFit: 'contain' }} />
+                        )}
                         <div style={{ flex: 1 }}>
-                          <div style={{ fontWeight: 600, fontSize: '14px', color: isDark ? '#fff' : '#1a1a1a' }}>
-                            {partner.team_name}
+                          <div style={{ fontWeight: 600, fontSize: '14px', color: isDark ? '#fff' : '#1a1a1a', display: 'flex', alignItems: 'center', gap: 8 }}>
+                            {teamInfo?.name || mock.chicago_team} {mock.draft_year}
+                            {isBest && (
+                              <span style={{
+                                fontSize: '10px',
+                                padding: '2px 6px',
+                                borderRadius: 4,
+                                backgroundColor: '#22c55e',
+                                color: '#fff',
+                                fontWeight: 700,
+                                textTransform: 'uppercase',
+                              }}>
+                                Best
+                              </span>
+                            )}
                           </div>
                           <div style={{ fontSize: '12px', color: subText }}>
-                            {partner.trade_count} trades
+                            {mock.completed_at
+                              ? new Date(mock.completed_at).toLocaleDateString()
+                              : new Date(mock.created_at).toLocaleDateString()}
                           </div>
                         </div>
-                        <div style={{ textAlign: 'right' }}>
-                          <div style={{ fontWeight: 700, fontSize: '14px', color: getGradeColor(partner.avg_grade) }}>
-                            {partner.avg_grade}
+                        {/* Score breakdown */}
+                        {mock.mock_score !== null && (
+                          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                            {mock.value_score !== null && (
+                              <div style={{ textAlign: 'center', fontSize: '11px' }}>
+                                <div style={{ fontWeight: 700, color: isDark ? '#fff' : '#1a1a1a' }}>{mock.value_score.toFixed(0)}</div>
+                                <div style={{ color: subText }}>Value</div>
+                              </div>
+                            )}
+                            {mock.need_fit_score !== null && (
+                              <div style={{ textAlign: 'center', fontSize: '11px' }}>
+                                <div style={{ fontWeight: 700, color: isDark ? '#fff' : '#1a1a1a' }}>{mock.need_fit_score.toFixed(0)}</div>
+                                <div style={{ color: subText }}>Fit</div>
+                              </div>
+                            )}
+                            {mock.upside_risk_score !== null && (
+                              <div style={{ textAlign: 'center', fontSize: '11px' }}>
+                                <div style={{ fontWeight: 700, color: isDark ? '#fff' : '#1a1a1a' }}>{mock.upside_risk_score.toFixed(0)}</div>
+                                <div style={{ color: subText }}>Upside</div>
+                              </div>
+                            )}
                           </div>
-                          <div style={{ fontSize: '11px', color: subText }}>avg</div>
+                        )}
+                        {/* Grade */}
+                        <div
+                          style={{
+                            padding: '6px 12px',
+                            borderRadius: 6,
+                            backgroundColor: mock.mock_score !== null ? getGradeColor(mock.mock_score) : '#6b7280',
+                            color: '#fff',
+                            fontWeight: 700,
+                            fontSize: '14px',
+                            minWidth: 50,
+                            textAlign: 'center',
+                          }}
+                        >
+                          {mock.mock_grade_letter || (mock.mock_score !== null ? getLetterGrade(mock.mock_score) : '-')}
                         </div>
+                        {/* Set as best button */}
+                        {!isBest && mock.mock_score !== null && (
+                          <button
+                            onClick={() => setBestMock(mock.id)}
+                            disabled={settingBest === mock.id}
+                            style={{
+                              padding: '6px 10px',
+                              borderRadius: 6,
+                              border: `1px solid ${isDark ? '#4b5563' : '#d1d5db'}`,
+                              backgroundColor: 'transparent',
+                              color: isDark ? '#fff' : '#1a1a1a',
+                              fontSize: '11px',
+                              fontWeight: 600,
+                              cursor: settingBest === mock.id ? 'not-allowed' : 'pointer',
+                              opacity: settingBest === mock.id ? 0.5 : 1,
+                            }}
+                          >
+                            {settingBest === mock.id ? '...' : 'Set Best'}
+                          </button>
+                        )}
                       </div>
-                    ))}
-                  </div>
-                )}
-              </div>
-
-              {/* Grade Extremes */}
-              <div className={`rounded-xl border p-4 sm:p-6 ${cardBg}`}>
-                <h3 style={{ fontWeight: 700, fontSize: '16px', marginBottom: 16, color: isDark ? '#fff' : '#1a1a1a' }}>
-                  Grade Records
-                </h3>
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
-                  <div style={{ textAlign: 'center', padding: 16, borderRadius: 8, backgroundColor: isDark ? '#374151' : '#f3f4f6' }}>
-                    <div style={{ fontSize: '12px', color: subText, marginBottom: 4, fontWeight: 600, textTransform: 'uppercase' }}>
-                      Best Trade
-                    </div>
-                    <div style={{ fontSize: '36px', fontWeight: 800, color: '#10b981' }}>
-                      {analytics.highest_grade}
-                    </div>
-                  </div>
-                  <div style={{ textAlign: 'center', padding: 16, borderRadius: 8, backgroundColor: isDark ? '#374151' : '#f3f4f6' }}>
-                    <div style={{ fontSize: '12px', color: subText, marginBottom: 4, fontWeight: 600, textTransform: 'uppercase' }}>
-                      Worst Trade
-                    </div>
-                    <div style={{ fontSize: '36px', fontWeight: 800, color: '#ef4444' }}>
-                      {analytics.lowest_grade}
-                    </div>
-                  </div>
+                    )
+                  })}
                 </div>
               </div>
-            </div>
+            )}
+
+            {/* Trade Analytics (from original analytics endpoint) */}
+            {analytics && analytics.total_trades > 0 && (
+              <div className="grid lg:grid-cols-2 gap-6">
+                {/* Grade Distribution */}
+                <div className={`rounded-xl border p-4 sm:p-6 ${cardBg}`}>
+                  <h3 style={{ fontWeight: 700, fontSize: '16px', marginBottom: 16, color: isDark ? '#fff' : '#1a1a1a' }}>
+                    Trade Grade Distribution
+                  </h3>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                    {analytics.grade_distribution
+                      .filter(d => d.count > 0)
+                      .map(d => (
+                        <div key={d.bucket} style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                          <span style={{ width: 50, fontSize: '13px', fontWeight: 600, color: isDark ? '#fff' : '#1a1a1a' }}>
+                            {d.bucket}
+                          </span>
+                          <div style={{ flex: 1, height: 24, backgroundColor: isDark ? '#374151' : '#f3f4f6', borderRadius: 4, overflow: 'hidden' }}>
+                            <div
+                              style={{
+                                width: `${d.percentage}%`,
+                                height: '100%',
+                                backgroundColor: '#bc0000',
+                                borderRadius: 4,
+                              }}
+                            />
+                          </div>
+                          <span style={{ width: 60, fontSize: '13px', color: subText, textAlign: 'right' }}>
+                            {d.count} ({d.percentage}%)
+                          </span>
+                        </div>
+                      ))}
+                  </div>
+                </div>
+
+                {/* Performance by Team */}
+                <div className={`rounded-xl border p-4 sm:p-6 ${cardBg}`}>
+                  <h3 style={{ fontWeight: 700, fontSize: '16px', marginBottom: 16, color: isDark ? '#fff' : '#1a1a1a' }}>
+                    Trade Performance by Team
+                  </h3>
+                  {analytics.chicago_teams.length === 0 ? (
+                    <p style={{ fontSize: '14px', color: subText }}>No team-specific data yet</p>
+                  ) : (
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+                      {analytics.chicago_teams.map(team => {
+                        const teamInfo = CHICAGO_TEAMS[team.team]
+                        return (
+                          <div
+                            key={team.team}
+                            style={{
+                              display: 'flex',
+                              alignItems: 'center',
+                              gap: 12,
+                              padding: '10px 12px',
+                              borderRadius: 8,
+                              backgroundColor: isDark ? '#374151' : '#f3f4f6',
+                            }}
+                          >
+                            {teamInfo && (
+                              <img src={teamInfo.logo} alt={teamInfo.name} style={{ width: 32, height: 32, objectFit: 'contain' }} />
+                            )}
+                            <div style={{ flex: 1 }}>
+                              <div style={{ fontWeight: 600, fontSize: '14px', color: isDark ? '#fff' : '#1a1a1a' }}>
+                                {teamInfo?.name || team.team}
+                              </div>
+                              <div style={{ fontSize: '12px', color: subText }}>
+                                {team.trade_count} trades • {team.accepted_rate}% accepted
+                              </div>
+                            </div>
+                            <div
+                              style={{
+                                padding: '4px 10px',
+                                borderRadius: 6,
+                                backgroundColor: getGradeColor(team.avg_grade),
+                                color: '#fff',
+                                fontWeight: 700,
+                                fontSize: '13px',
+                              }}
+                            >
+                              {team.avg_grade}
+                            </div>
+                          </div>
+                        )
+                      })}
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
           </>
         )}
       </main>
