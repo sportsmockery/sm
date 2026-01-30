@@ -37,9 +37,10 @@ interface RosterPanelProps {
   sport: string
   teamColor: string
   onViewFit?: (player: PlayerData) => void
+  onDraftClick?: () => void
 }
 
-export function RosterPanel({ players, loading, selectedIds, onToggle, sport, teamColor, onViewFit }: RosterPanelProps) {
+export function RosterPanel({ players, loading, selectedIds, onToggle, sport, teamColor, onViewFit, onDraftClick }: RosterPanelProps) {
   const { theme } = useTheme()
   const isDark = theme === 'dark'
   const [search, setSearch] = useState('')
@@ -85,8 +86,8 @@ export function RosterPanel({ players, loading, selectedIds, onToggle, sport, te
         />
       </div>
 
-      {/* Position filters */}
-      <div style={{ display: 'flex', gap: 4, flexWrap: 'wrap', marginBottom: 12 }}>
+      {/* Position filters + Draft button */}
+      <div style={{ display: 'flex', gap: 4, flexWrap: 'wrap', marginBottom: 12, alignItems: 'center' }}>
         {positions.map(pos => (
           <button
             key={pos}
@@ -106,6 +107,25 @@ export function RosterPanel({ players, loading, selectedIds, onToggle, sport, te
             {pos}
           </button>
         ))}
+        {onDraftClick && (
+          <button
+            onClick={onDraftClick}
+            style={{
+              padding: '4px 10px',
+              borderRadius: '6px',
+              border: `2px solid ${teamColor}`,
+              cursor: 'pointer',
+              fontSize: '11px',
+              fontWeight: 700,
+              backgroundColor: 'transparent',
+              color: teamColor,
+              transition: 'all 0.15s',
+              marginLeft: 4,
+            }}
+          >
+            📋 Draft
+          </button>
+        )}
       </div>
 
       {/* Selected count */}
@@ -117,12 +137,12 @@ export function RosterPanel({ players, loading, selectedIds, onToggle, sport, te
         </div>
       )}
 
-      {/* Player grid */}
+      {/* Player list - single column for better card display */}
       <div style={{
         flex: 1,
         overflowY: 'auto',
-        display: 'grid',
-        gridTemplateColumns: 'repeat(2, 1fr)',
+        display: 'flex',
+        flexDirection: 'column',
         gap: '8px',
         paddingRight: 4,
       }}>

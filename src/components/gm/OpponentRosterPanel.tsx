@@ -40,11 +40,12 @@ interface OpponentRosterPanelProps {
   setLoading: (v: boolean) => void
   onAddCustomPlayer: (name: string, position: string) => void
   onViewFit?: (player: PlayerData) => void
+  onDraftClick?: () => void
 }
 
 export function OpponentRosterPanel({
   teamKey, sport, teamColor, selectedIds, onToggle,
-  roster, setRoster, loading, setLoading, onAddCustomPlayer, onViewFit,
+  roster, setRoster, loading, setLoading, onAddCustomPlayer, onViewFit, onDraftClick,
 }: OpponentRosterPanelProps) {
   const { theme } = useTheme()
   const isDark = theme === 'dark'
@@ -93,7 +94,7 @@ export function OpponentRosterPanel({
   }
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column' }}>
+    <div style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
         <span style={{ fontSize: '12px', fontWeight: 700, color: subText, textTransform: 'uppercase', letterSpacing: '0.5px' }}>
           Opponent Roster
@@ -164,8 +165,8 @@ export function OpponentRosterPanel({
         }}
       />
 
-      {/* Position filters */}
-      <div style={{ display: 'flex', gap: 4, flexWrap: 'wrap', marginBottom: 8 }}>
+      {/* Position filters + Draft button */}
+      <div style={{ display: 'flex', gap: 4, flexWrap: 'wrap', marginBottom: 8, alignItems: 'center' }}>
         {positions.map(pos => (
           <button
             key={pos}
@@ -180,6 +181,25 @@ export function OpponentRosterPanel({
             {pos}
           </button>
         ))}
+        {onDraftClick && (
+          <button
+            onClick={onDraftClick}
+            style={{
+              padding: '4px 10px',
+              borderRadius: '6px',
+              border: `2px solid ${teamColor}`,
+              cursor: 'pointer',
+              fontSize: '11px',
+              fontWeight: 700,
+              backgroundColor: 'transparent',
+              color: teamColor,
+              transition: 'all 0.15s',
+              marginLeft: 4,
+            }}
+          >
+            📋 Draft
+          </button>
+        )}
       </div>
 
       {/* Selected count */}
@@ -189,11 +209,14 @@ export function OpponentRosterPanel({
         </div>
       )}
 
-      {/* Player grid */}
+      {/* Player list - single column for better card display */}
       <div style={{
-        overflowY: 'auto', maxHeight: 400,
-        display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)',
-        gap: '8px', paddingRight: 4,
+        flex: 1,
+        overflowY: 'auto',
+        display: 'flex',
+        flexDirection: 'column',
+        gap: '8px',
+        paddingRight: 4,
       }}>
         {loading ? (
           <>
