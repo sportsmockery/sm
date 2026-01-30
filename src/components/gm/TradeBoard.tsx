@@ -18,6 +18,7 @@ function isPlayerData(p: ReceivedPlayer): p is PlayerData {
 
 interface TradeBoardProps {
   chicagoTeam: string
+  chicagoLabel?: string
   chicagoLogo: string
   chicagoColor: string
   opponentName: string
@@ -35,10 +36,12 @@ interface TradeBoardProps {
   grading: boolean
   onGrade: () => void
   validation?: ValidationState
+  currentStep?: number
+  mobile?: boolean
 }
 
 export function TradeBoard({
-  chicagoTeam, chicagoLogo, chicagoColor,
+  chicagoTeam, chicagoLabel, chicagoLogo, chicagoColor,
   opponentName, opponentLogo, opponentColor,
   playersSent, playersReceived,
   draftPicksSent, draftPicksReceived,
@@ -46,6 +49,8 @@ export function TradeBoard({
   onRemoveDraftSent, onRemoveDraftReceived,
   canGrade, grading, onGrade,
   validation,
+  currentStep = 1,
+  mobile = false,
 }: TradeBoardProps) {
   const { theme } = useTheme()
   const isDark = theme === 'dark'
@@ -54,21 +59,71 @@ export function TradeBoard({
   const panelBg = isDark ? '#111827' : '#f9fafb'
   const borderColor = isDark ? '#374151' : '#e5e7eb'
 
+  const steps = ['Select players', 'Add picks', 'Validate', 'Grade']
+  const displayLabel = chicagoLabel || chicagoTeam
+
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+      {/* Step indicator */}
+      <div style={{
+        display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 4,
+        paddingBottom: 12, borderBottom: `1px solid ${borderColor}`,
+      }}>
+        {steps.map((step, i) => {
+          const stepNum = i + 1
+          const isComplete = currentStep > stepNum
+          const isActive = currentStep === stepNum
+          return (
+            <div key={step} style={{ display: 'flex', alignItems: 'center' }}>
+              <div style={{
+                display: 'flex', alignItems: 'center', gap: 6,
+                padding: '4px 10px', borderRadius: 16,
+                backgroundColor: isActive ? '#bc000015' : 'transparent',
+              }}>
+                <div style={{
+                  width: 20, height: 20, borderRadius: '50%',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  fontSize: 11, fontWeight: 700,
+                  backgroundColor: isComplete ? '#22c55e' : isActive ? '#bc0000' : (isDark ? '#374151' : '#e5e7eb'),
+                  color: isComplete || isActive ? '#fff' : subText,
+                }}>
+                  {isComplete ? '✓' : stepNum}
+                </div>
+                <span style={{
+                  fontSize: 11, fontWeight: isActive ? 600 : 400,
+                  color: isActive ? '#bc0000' : subText,
+                  display: mobile ? 'none' : 'inline',
+                }}>
+                  {step}
+                </span>
+              </div>
+              {i < steps.length - 1 && (
+                <div style={{
+                  width: mobile ? 8 : 20, height: 2,
+                  backgroundColor: isComplete ? '#22c55e' : (isDark ? '#374151' : '#e5e7eb'),
+                  marginLeft: 4, marginRight: 4,
+                }} />
+              )}
+            </div>
+          )
+        })}
+      </div>
+
       {/* Two-panel trade visualization */}
-      <div style={{ display: 'flex', gap: 0, alignItems: 'stretch' }}>
+      <div style={{ display: 'flex', flexDirection: mobile ? 'column' : 'row', gap: 0, alignItems: 'stretch' }}>
         {/* Chicago side */}
         <div style={{
-          flex: 1, padding: 16, borderRadius: '12px 0 0 12px',
+          flex: 1, padding: 16,
+          borderRadius: mobile ? '12px 12px 0 0' : '12px 0 0 12px',
           backgroundColor: panelBg, border: `1px solid ${borderColor}`,
-          borderRight: 'none',
+          borderRight: mobile ? `1px solid ${borderColor}` : 'none',
+          borderBottom: mobile ? 'none' : `1px solid ${borderColor}`,
         }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12 }}>
-            <img src={chicagoLogo} alt={chicagoTeam} style={{ width: 28, height: 28, objectFit: 'contain' }}
+            <img src={chicagoLogo} alt={displayLabel} style={{ width: 28, height: 28, objectFit: 'contain' }}
               onError={(e) => { (e.target as HTMLImageElement).style.display = 'none' }} />
-            <span style={{ fontWeight: 700, fontSize: '14px', color: chicagoColor, textTransform: 'capitalize' }}>
-              {chicagoTeam} Send
+            <span style={{ fontWeight: 700, fontSize: '14px', color: chicagoColor }}>
+              {displayLabel} Send
             </span>
           </div>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 6, minHeight: 80 }}>
@@ -116,31 +171,48 @@ export function TradeBoard({
 
         {/* Center arrows */}
         <div style={{
-          display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
-          padding: '0 8px',
+          display: 'flex', flexDirection: mobile ? 'row' : 'column', alignItems: 'center', justifyContent: 'center',
+          padding: mobile ? '8px 0' : '0 8px',
           backgroundColor: isDark ? '#0f172a' : '#e5e7eb',
-          borderTop: `1px solid ${borderColor}`,
-          borderBottom: `1px solid ${borderColor}`,
+          borderTop: mobile ? 'none' : `1px solid ${borderColor}`,
+          borderBottom: mobile ? 'none' : `1px solid ${borderColor}`,
+          borderLeft: mobile ? `1px solid ${borderColor}` : 'none',
+          borderRight: mobile ? `1px solid ${borderColor}` : 'none',
         }}>
           <motion.div
-            animate={{ x: [-4, 4, -4] }}
+            animate={mobile ? { y: [-4, 4, -4] } : { x: [-4, 4, -4] }}
             transition={{ repeat: Infinity, duration: 2, ease: 'easeInOut' }}
-            style={{ display: 'flex', flexDirection: 'column', gap: 4 }}
+            style={{ display: 'flex', flexDirection: mobile ? 'row' : 'column', gap: 4 }}
           >
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke={chicagoColor} strokeWidth="2" strokeLinecap="round">
-              <path d="M5 12h14M12 5l7 7-7 7" />
-            </svg>
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke={opponentColor} strokeWidth="2" strokeLinecap="round">
-              <path d="M19 12H5M12 19l-7-7 7-7" />
-            </svg>
+            {mobile ? (
+              <>
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke={chicagoColor} strokeWidth="2" strokeLinecap="round">
+                  <path d="M12 5v14M5 12l7 7 7-7" />
+                </svg>
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke={opponentColor} strokeWidth="2" strokeLinecap="round">
+                  <path d="M12 19V5M19 12l-7-7-7 7" />
+                </svg>
+              </>
+            ) : (
+              <>
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke={chicagoColor} strokeWidth="2" strokeLinecap="round">
+                  <path d="M5 12h14M12 5l7 7-7 7" />
+                </svg>
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke={opponentColor} strokeWidth="2" strokeLinecap="round">
+                  <path d="M19 12H5M12 19l-7-7 7-7" />
+                </svg>
+              </>
+            )}
           </motion.div>
         </div>
 
         {/* Opponent side */}
         <div style={{
-          flex: 1, padding: 16, borderRadius: '0 12px 12px 0',
+          flex: 1, padding: 16,
+          borderRadius: mobile ? '0 0 12px 12px' : '0 12px 12px 0',
           backgroundColor: panelBg, border: `1px solid ${borderColor}`,
-          borderLeft: 'none',
+          borderLeft: mobile ? `1px solid ${borderColor}` : 'none',
+          borderTop: mobile ? 'none' : `1px solid ${borderColor}`,
         }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12 }}>
             {opponentLogo && (
