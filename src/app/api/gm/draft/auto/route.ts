@@ -1,15 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
-import Anthropic from '@anthropic-ai/sdk'
 import { getGMAuthUser } from '@/lib/gm-auth'
 import { datalabAdmin } from '@/lib/supabase-datalab'
 
 export const dynamic = 'force-dynamic'
-
-const MODEL_NAME = 'claude-sonnet-4-20250514'
-
-function getAnthropic() {
-  return new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY! })
-}
 
 // Map sport to league format for Datalab
 const SPORT_TO_LEAGUE: Record<string, string> = {
@@ -18,22 +11,6 @@ const SPORT_TO_LEAGUE: Record<string, string> = {
   nhl: 'NHL',
   mlb: 'MLB',
 }
-
-const DRAFT_AI_SYSTEM = `You are an AI simulating NFL/NBA/NHL/MLB draft picks for teams. Given the current draft state and available prospects, select the most realistic pick for the team on the clock.
-
-Consider:
-1. Team needs and roster holes
-2. Best player available (BPA) strategy
-3. Position value in that sport
-4. Prospect grade/ranking
-
-Respond with ONLY valid JSON:
-{
-  "prospect_id": "<id of selected prospect>",
-  "reasoning": "<1 sentence explanation>"
-}
-
-Do not wrap in markdown code blocks. Just raw JSON.`
 
 export async function POST(request: NextRequest) {
   const debugLog: string[] = []
@@ -226,49 +203,10 @@ export async function POST(request: NextRequest) {
         break
       }
 
-      let selectedProspect = topProspects[0] // Default to BPA
-
-      // For first round, use AI for more realistic simulation
-      if (pickData.round === 1 && topProspects.length > 1) {
-        try {
-          const prompt = `
-Draft: ${mockDraft.sport.toUpperCase()} ${mockDraft.draft_year}
-Pick #${currentPick} (Round ${pickData.round})
-Team: ${pickData.team_name}
-
-Available prospects (top 10):
-${topProspects.map((p: any, i: number) => `${i + 1}. ID: ${p.prospect_id} - ${p.name} (${p.position}) - ${p.school || p.school_team} - Grade: ${p.grade || 'N/A'} - Rank: ${p.rank}`).join('\n')}
-
-Select the most realistic pick for ${pickData.team_name}. Return the prospect_id.`
-
-          const response = await getAnthropic().messages.create({
-            model: MODEL_NAME,
-            max_tokens: 256,
-            system: DRAFT_AI_SYSTEM,
-            messages: [{ role: 'user', content: prompt }],
-          })
-
-          const textContent = response.content.find(c => c.type === 'text')
-          const rawText = textContent?.type === 'text' ? textContent.text : ''
-
-          try {
-            const parsed = JSON.parse(rawText)
-            const aiSelectedProspect = topProspects.find((p: any) =>
-              String(p.prospect_id) === String(parsed.prospect_id)
-            )
-            if (aiSelectedProspect) {
-              selectedProspect = aiSelectedProspect
-              log(`AI selected: ${selectedProspect.name}`)
-            }
-          } catch {
-            log(`AI response parse failed, using BPA: ${selectedProspect.name}`)
-          }
-        } catch (e) {
-          log(`AI error, using BPA: ${e}`)
-        }
-      } else {
-        log(`Using BPA for pick ${currentPick}: ${selectedProspect.name}`)
-      }
+      // Use BPA (Best Player Available) - AI picks disabled for speed
+      // AI calls were causing timeouts (24 picks * 5-10 sec each = 2-4 min)
+      const selectedProspect = topProspects[0]
+      log(`BPA pick ${currentPick}: ${selectedProspect.name} (${selectedProspect.position})`)
 
       // Update the pick using RPC
       const { error: updateError } = await datalabAdmin.rpc('update_mock_draft_pick', {
