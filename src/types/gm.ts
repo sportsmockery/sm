@@ -142,3 +142,37 @@ export function formatProspect(prospect: MLBProspect): { primary: string; second
   const secondary = `${level} - ${prospect.position} - Age ${prospect.age}`
   return { primary, secondary }
 }
+
+// =====================
+// Season Simulation Types
+// =====================
+
+export interface SeasonRecord {
+  wins: number
+  losses: number
+  madePlayoffs: boolean
+  playoffSeed?: number
+  divisionRank?: number
+}
+
+export interface SimulationScoreBreakdown {
+  tradeQualityScore: number
+  winImprovementScore: number
+  playoffBonusScore: number
+  winImprovement: number
+}
+
+export interface SimulationResult {
+  success: boolean
+  baseline: SeasonRecord
+  modified: SeasonRecord
+  gmScore: number
+  scoreBreakdown: SimulationScoreBreakdown
+}
+
+export interface SimulationRequest {
+  sessionId: string
+  sport: string
+  teamKey: string
+  seasonYear: number
+}
