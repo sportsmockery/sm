@@ -22,6 +22,7 @@ import type {
   SimulationResult,
   AnalyticsResult,
   MLBProspect,
+  SeasonSimulationResult,
 } from './gm-types'
 
 const BASE = API_BASE_URL
@@ -213,6 +214,23 @@ export const gmApi = {
 
   async getAnalytics() {
     return gmFetch<AnalyticsResult>('/api/gm/analytics')
+  },
+
+  async simulateSeason(params: {
+    sessionId: string
+    sport: string
+    teamKey: string
+    seasonYear?: number
+  }) {
+    return gmFetch<SeasonSimulationResult>('/api/gm/sim/season', {
+      method: 'POST',
+      body: JSON.stringify({
+        sessionId: params.sessionId,
+        sport: params.sport,
+        teamKey: params.teamKey,
+        seasonYear: params.seasonYear || 2026,
+      }),
+    })
   },
 
   async exportTrade(params: {
