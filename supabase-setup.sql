@@ -51,9 +51,8 @@ CREATE POLICY "Users can insert own preferences" ON sm_user_preferences
 CREATE POLICY "Users can update own preferences" ON sm_user_preferences
   FOR UPDATE USING (auth.uid()::TEXT = user_id);
 
--- Policy: Service role bypasses RLS (for API routes)
-CREATE POLICY "Service role full access" ON sm_user_preferences
-  FOR ALL USING (true);
+-- NOTE: Service role automatically bypasses RLS, no policy needed.
+-- DO NOT add a "USING (true)" policy - it would allow ANY user full access!
 
 -- =====================================================
 -- 3. VERIFY EXISTING TABLES HAVE REQUIRED COLUMNS
