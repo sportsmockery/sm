@@ -137,6 +137,54 @@ export const CHICAGO_TEAM_SPORT: Record<ChicagoTeam, Sport> = {
   whitesox: 'mlb',
 }
 
+// MLB farm system prospect (matches Datalab gm_mlb_prospects table)
+export interface MLBProspect {
+  // Core fields from gm_mlb_prospects table
+  id?: string                 // UUID
+  prospect_id?: string        // Alias for id
+  name: string
+  position: string
+  team_key: string            // 'chw', 'chc', etc.
+  team_name?: string          // 'Chicago White Sox'
+  org_rank: number            // Organization ranking (1-30)
+  age?: number
+  prospect_grade: string      // Letter grade: A+, A, A-, B+, B, B-, C+, C
+  prospect_grade_numeric?: number  // Numeric grade: 80, 75, 70, 65, 60, 55, 50, 45
+  trade_value: number         // Trade value (1-100)
+  source?: string             // 'Prospects1500'
+
+  // Optional extended fields
+  current_level?: string      // 'R' | 'A' | 'A+' | 'AA' | 'AAA'
+  eta?: string                // "Late 2025", "2026", etc.
+  scouting_summary?: string
+  headshot_url?: string
+
+  // Valuation fields (if available)
+  prospect_fv_bucket?: number
+  prospect_tier?: 'elite' | 'plus' | 'average' | 'organizational'
+  risk_level?: 'low' | 'medium' | 'high'
+  position_group?: 'pitcher' | 'catcher' | 'up_the_middle' | 'corner'
+  prospect_surplus_value_millions?: number
+
+  // Backwards compatibility aliases
+  team_rank?: number          // Alias for org_rank
+  rank?: number               // Alias for org_rank
+  level?: string              // Alias for current_level
+}
+
+// Format a prospect for display
+export function formatProspect(prospect: MLBProspect): { primary: string; secondary: string } {
+  const rank = prospect.org_rank || prospect.team_rank || prospect.rank
+  const rankPrefix = rank ? `#${rank} ` : ''
+  const primary = `${rankPrefix}${prospect.name}`
+  const level = prospect.current_level || prospect.level || ''
+  const secondary = `${level} - ${prospect.position}${prospect.age ? ` - Age ${prospect.age}` : ''}`
+  return { primary, secondary }
+}
+
+// Asset type for trade handling
+export type AssetType = 'player' | 'pick' | 'prospect'
+
 // GM V2 Types
 
 export type PlayerTrend = 'hot' | 'rising' | 'stable' | 'declining' | 'cold'

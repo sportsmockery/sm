@@ -18,22 +18,34 @@ import { Gesture, GestureDetector } from 'react-native-gesture-handler'
 import { useTheme } from '@/hooks/useTheme'
 import { triggerHaptic } from '@/hooks/useHaptics'
 import { COLORS } from '@/lib/config'
-import type { PlayerData, DraftPick } from '@/lib/gm-types'
+import type { PlayerData, DraftPick, MLBProspect } from '@/lib/gm-types'
 
 interface TradeAssetPillProps {
-  type: 'player' | 'pick'
+  type: 'player' | 'pick' | 'prospect'
   player?: PlayerData
   pick?: DraftPick
+  prospect?: MLBProspect
   teamColor: string
   onRemove: () => void
 }
 
 const SWIPE_THRESHOLD = -60
 
+// Level colors for prospects
+const LEVEL_COLORS: Record<string, string> = {
+  'AAA': '#22c55e',
+  'AA': '#3b82f6',
+  'A+': '#8b5cf6',
+  'A': '#a855f7',
+  'R': '#f59e0b',
+  'Rk': '#f59e0b',
+}
+
 export const TradeAssetPill = memo(function TradeAssetPill({
   type,
   player,
   pick,
+  prospect,
   teamColor,
   onRemove,
 }: TradeAssetPillProps) {
@@ -128,6 +140,55 @@ export const TradeAssetPill = memo(function TradeAssetPill({
     )
   }
 
+  if (type === 'prospect' && prospect) {
+    const rank = prospect.org_rank || prospect.team_rank || prospect.rank || 0
+    const level = prospect.current_level || prospect.level || ''
+    const levelColor = LEVEL_COLORS[level] || '#22c55e'
+    const initials = prospect.name.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase()
+
+    return (
+      <View style={styles.container}>
+        <Animated.View style={[styles.removeButton, removeButtonStyle]}>
+          <Ionicons name="trash-outline" size={16} color="#fff" />
+        </Animated.View>
+        <GestureDetector gesture={panGesture}>
+          <Animated.View style={[styles.pill, styles.prospectPill, { backgroundColor: colors.surface }, animatedStyle]}>
+            {/* Rank badge */}
+            <View style={[styles.prospectRankBadge, { backgroundColor: rank <= 5 ? '#dc2626' : levelColor }]}>
+              <Text style={styles.prospectRankText}>#{rank}</Text>
+            </View>
+            {/* Avatar */}
+            {prospect.headshot_url ? (
+              <Image source={{ uri: prospect.headshot_url }} style={styles.headshot} contentFit="cover" />
+            ) : (
+              <View style={[styles.headshot, styles.headshotPlaceholder, { backgroundColor: `${levelColor}40` }]}>
+                <Text style={[styles.headshotInitial, { color: levelColor }]}>{initials}</Text>
+              </View>
+            )}
+            <View style={styles.info}>
+              <Text style={[styles.name, { color: colors.text }]} numberOfLines={1}>
+                {prospect.name}
+              </Text>
+              <View style={styles.prospectMeta}>
+                {level && (
+                  <View style={[styles.levelBadge, { backgroundColor: `${levelColor}20` }]}>
+                    <Text style={[styles.levelText, { color: levelColor }]}>{level}</Text>
+                  </View>
+                )}
+                <Text style={[styles.position, { color: colors.textMuted }]}>
+                  {prospect.position}
+                </Text>
+              </View>
+            </View>
+            <Pressable onPress={handleRemove} hitSlop={8} style={styles.removeIcon}>
+              <Ionicons name="close-circle" size={18} color={colors.textMuted} />
+            </Pressable>
+          </Animated.View>
+        </GestureDetector>
+      </View>
+    )
+  }
+
   return null
 })
 
@@ -159,6 +220,10 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.05,
     shadowRadius: 2,
     elevation: 1,
+  },
+  prospectPill: {
+    borderLeftWidth: 3,
+    borderLeftColor: '#22c55e',
   },
   headshot: {
     width: 32,
@@ -200,6 +265,35 @@ const styles = StyleSheet.create({
   pickRound: {
     color: '#fff',
     fontSize: 12,
+    fontFamily: 'Montserrat-Bold',
+  },
+  // Prospect-specific styles
+  prospectRankBadge: {
+    width: 24,
+    height: 24,
+    borderRadius: 12,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: 6,
+  },
+  prospectRankText: {
+    color: '#fff',
+    fontSize: 9,
+    fontFamily: 'Montserrat-Bold',
+  },
+  prospectMeta: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    marginTop: 2,
+  },
+  levelBadge: {
+    paddingHorizontal: 4,
+    paddingVertical: 1,
+    borderRadius: 3,
+  },
+  levelText: {
+    fontSize: 9,
     fontFamily: 'Montserrat-Bold',
   },
 })

@@ -21,6 +21,7 @@ import type {
   ScenarioResult,
   SimulationResult,
   AnalyticsResult,
+  MLBProspect,
 } from './gm-types'
 
 const BASE = API_BASE_URL
@@ -93,6 +94,8 @@ export const gmApi = {
     players_received: PlayerData[]
     draft_picks_sent?: DraftPick[]
     draft_picks_received?: DraftPick[]
+    prospects_sent?: MLBProspect[]
+    prospects_received?: MLBProspect[]
     session_id?: string
   }) {
     return gmFetch<GradeResult>('/api/gm/grade', {
@@ -129,6 +132,12 @@ export const gmApi = {
   async getCap(teamKey: string, sport: string) {
     const params = new URLSearchParams({ team_key: teamKey, sport })
     return gmFetch<{ cap: CapData | null }>(`/api/gm/cap?${params}`)
+  },
+
+  async getProspects(teamKey: string, minGrade?: string) {
+    const params = new URLSearchParams({ team_key: teamKey })
+    if (minGrade) params.set('min_grade', minGrade)
+    return gmFetch<{ prospects: MLBProspect[]; team_key: string }>(`/api/gm/prospects?${params}`)
   },
 
   // GM V2 Endpoints
