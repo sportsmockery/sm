@@ -471,6 +471,14 @@ export default function GMPage() {
     setValidation({ status: 'idle', issues: [] })
   }
 
+  function editTrade() {
+    // Keep all selected players and assets, just clear the grade result
+    // This allows users to add more pieces to the trade
+    setGradeResult(null)
+    setGradeError(null)
+    setValidation({ status: 'idle', issues: [] })
+  }
+
   async function clearAllTrades() {
     if (!confirm('Clear all your trades and reset your GM Score?')) return
     await fetch('/api/gm/trades', { method: 'DELETE' })
@@ -841,6 +849,7 @@ export default function GMPage() {
                   validation={validation}
                   gradeResult={gradeResult}
                   onNewTrade={resetTrade}
+                  onEditTrade={editTrade}
                 />
 
                 {/* Error */}
@@ -988,6 +997,7 @@ export default function GMPage() {
                   validation={validation}
                   gradeResult={gradeResult}
                   onNewTrade={resetTrade}
+                  onEditTrade={editTrade}
                   mobile
                 />
 

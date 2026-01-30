@@ -115,6 +115,7 @@ export async function POST(request: NextRequest) {
     const user = await getGMAuthUser(request)
     const userId = user?.id || 'guest'
     const isGuest = !user
+    const displayName = user?.user_metadata?.display_name || user?.user_metadata?.full_name || user?.email?.split('@')[0] || 'Anonymous'
 
     // Rate limiting: max 10 trades per minute (only for logged-in users)
     if (!isGuest) {
@@ -495,6 +496,7 @@ Grade this trade from the perspective of the ${teamDisplayNames[chicago_team]}.`
       else streak = 0
 
       await datalabAdmin.from('gm_leaderboard').update({
+        display_name: displayName,
         total_score: newTotalScore,
         trades_count: newTradesCount,
         avg_grade: newAvg,
@@ -514,6 +516,7 @@ Grade this trade from the perspective of the ${teamDisplayNames[chicago_team]}.`
       await datalabAdmin.from('gm_leaderboard').insert({
         user_id: userId,
         user_email: userEmail,
+        display_name: displayName,
         total_score: status === 'accepted' ? grade : 0,
         trades_count: status === 'accepted' ? 1 : 0,
         avg_grade: status === 'accepted' ? grade : 0,
