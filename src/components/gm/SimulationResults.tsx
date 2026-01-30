@@ -1,7 +1,8 @@
 'use client'
-import { motion } from 'framer-motion'
+import { useState } from 'react'
+import { motion, AnimatePresence } from 'framer-motion'
 import { useTheme } from '@/contexts/ThemeContext'
-import type { SimulationResult } from '@/types/gm'
+import type { SimulationResult, TeamStanding, PlayoffMatchup } from '@/types/gm'
 
 interface SimulationResultsProps {
   result: SimulationResult
@@ -11,6 +12,8 @@ interface SimulationResultsProps {
   onSimulateAgain: () => void
   onClose: () => void
 }
+
+type Tab = 'overview' | 'standings' | 'playoffs' | 'summary'
 
 export function SimulationResults({
   result,
@@ -22,6 +25,7 @@ export function SimulationResults({
 }: SimulationResultsProps) {
   const { theme } = useTheme()
   const isDark = theme === 'dark'
+  const [activeTab, setActiveTab] = useState<Tab>('overview')
 
   const textColor = isDark ? '#fff' : '#1a1a1a'
   const subText = isDark ? '#9ca3af' : '#6b7280'
@@ -29,11 +33,10 @@ export function SimulationResults({
   const cardBg = isDark ? '#1f2937' : '#ffffff'
   const surfaceBg = isDark ? '#111827' : '#f9fafb'
 
-  const { baseline, modified, gmScore, scoreBreakdown } = result
+  const { baseline, modified, gmScore, scoreBreakdown, standings, playoffs, championship, seasonSummary } = result
   const winImprovement = modified.wins - baseline.wins
   const isImprovement = winImprovement > 0
 
-  // Grade letter based on score
   const getGradeLetter = (score: number): string => {
     if (score >= 90) return 'A+'
     if (score >= 85) return 'A'
@@ -49,7 +52,12 @@ export function SimulationResults({
     return 'F'
   }
 
-  const gradeColor = gmScore >= 75 ? '#22c55e' : gmScore >= 50 ? '#f59e0b' : '#ef4444'
+  const tabs: { id: Tab; label: string; icon: string }[] = [
+    { id: 'overview', label: 'Overview', icon: '📊' },
+    { id: 'standings', label: 'Standings', icon: '🏆' },
+    { id: 'playoffs', label: 'Playoffs', icon: '🎯' },
+    { id: 'summary', label: 'Summary', icon: '📝' },
+  ]
 
   return (
     <>
@@ -80,8 +88,8 @@ export function SimulationResults({
           top: '50%',
           left: '50%',
           transform: 'translate(-50%, -50%)',
-          width: '90%',
-          maxWidth: 700,
+          width: '95%',
+          maxWidth: 900,
           maxHeight: '90vh',
           overflowY: 'auto',
           backgroundColor: cardBg,
@@ -89,7 +97,6 @@ export function SimulationResults({
           borderRadius: 16,
           boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)',
           zIndex: 1000,
-          padding: 0,
         }}
       >
         {/* Header */}
@@ -98,16 +105,20 @@ export function SimulationResults({
             display: 'flex',
             justifyContent: 'space-between',
             alignItems: 'center',
-            padding: '20px 24px',
+            padding: '16px 20px',
             borderBottom: `1px solid ${borderColor}`,
+            position: 'sticky',
+            top: 0,
+            backgroundColor: cardBg,
+            zIndex: 10,
           }}
         >
           <div>
-            <h2 style={{ margin: 0, fontSize: 20, fontWeight: 700, color: textColor }}>
-              Season Simulation Results
+            <h2 style={{ margin: 0, fontSize: 18, fontWeight: 700, color: textColor }}>
+              2026 Season Simulation
             </h2>
-            <p style={{ margin: 0, marginTop: 4, fontSize: 13, color: subText }}>
-              {teamName} • 2026 Season
+            <p style={{ margin: 0, marginTop: 2, fontSize: 12, color: subText }}>
+              {teamName} • {tradeCount} trade{tradeCount !== 1 ? 's' : ''} executed
             </p>
           </div>
           <button
@@ -115,274 +126,512 @@ export function SimulationResults({
             style={{
               background: 'none',
               border: 'none',
-              fontSize: 28,
+              fontSize: 24,
               cursor: 'pointer',
               color: subText,
               padding: 0,
-              width: 36,
-              height: 36,
+              width: 32,
+              height: 32,
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              borderRadius: 8,
+              borderRadius: 6,
             }}
           >
             ×
           </button>
         </div>
 
-        <div style={{ padding: 24 }}>
-          {/* Before/After Comparison */}
-          <div
-            style={{
-              display: 'grid',
-              gridTemplateColumns: '1fr auto 1fr',
-              gap: 16,
-              padding: 20,
-              background: surfaceBg,
-              borderRadius: 12,
-              marginBottom: 20,
-            }}
-          >
-            {/* Before */}
-            <div style={{ textAlign: 'center' }}>
-              <div
-                style={{
-                  fontSize: 11,
-                  textTransform: 'uppercase',
-                  letterSpacing: '0.05em',
-                  color: subText,
-                  marginBottom: 8,
-                  fontWeight: 600,
-                }}
-              >
-                Before Trades
-              </div>
-              <div
-                style={{
-                  fontSize: 36,
-                  fontWeight: 800,
-                  color: textColor,
-                  lineHeight: 1,
-                }}
-              >
-                {baseline.wins}-{baseline.losses}
-              </div>
-              <div style={{ fontSize: 13, color: subText, marginTop: 8 }}>
-                {baseline.madePlayoffs ? '✅ Playoffs' : '❌ Missed Playoffs'}
-              </div>
-            </div>
-
-            {/* Arrow */}
-            <div
+        {/* Tabs */}
+        <div
+          style={{
+            display: 'flex',
+            gap: 4,
+            padding: '12px 20px',
+            borderBottom: `1px solid ${borderColor}`,
+            backgroundColor: surfaceBg,
+            overflowX: 'auto',
+          }}
+        >
+          {tabs.map(tab => (
+            <button
+              key={tab.id}
+              onClick={() => setActiveTab(tab.id)}
               style={{
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                fontSize: 28,
-                color: isImprovement ? '#22c55e' : winImprovement < 0 ? '#ef4444' : subText,
-              }}
-            >
-              →
-            </div>
-
-            {/* After */}
-            <div
-              style={{
-                textAlign: 'center',
-                background: `${teamColor}15`,
-                padding: 16,
-                borderRadius: 10,
-                marginTop: -16,
-                marginBottom: -16,
-                marginRight: -4,
-              }}
-            >
-              <div
-                style={{
-                  fontSize: 11,
-                  textTransform: 'uppercase',
-                  letterSpacing: '0.05em',
-                  color: teamColor,
-                  marginBottom: 8,
-                  fontWeight: 600,
-                }}
-              >
-                After Trades
-              </div>
-              <div
-                style={{
-                  fontSize: 36,
-                  fontWeight: 800,
-                  color: textColor,
-                  lineHeight: 1,
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  gap: 8,
-                }}
-              >
-                {modified.wins}-{modified.losses}
-                {winImprovement !== 0 && (
-                  <span
-                    style={{
-                      fontSize: 14,
-                      fontWeight: 600,
-                      padding: '4px 8px',
-                      borderRadius: 6,
-                      backgroundColor: isImprovement ? '#22c55e' : '#ef4444',
-                      color: '#fff',
-                    }}
-                  >
-                    {winImprovement > 0 ? '+' : ''}
-                    {winImprovement}W
-                  </span>
-                )}
-              </div>
-              <div style={{ fontSize: 13, color: subText, marginTop: 8 }}>
-                {modified.madePlayoffs ? '✅ Playoffs' : '❌ Missed Playoffs'}
-              </div>
-            </div>
-          </div>
-
-          {/* GM Score */}
-          <div
-            style={{
-              background: `linear-gradient(135deg, ${teamColor}, ${teamColor}dd)`,
-              color: '#fff',
-              padding: 24,
-              borderRadius: 12,
-              textAlign: 'center',
-              marginBottom: 20,
-            }}
-          >
-            <div
-              style={{
-                fontSize: 11,
-                textTransform: 'uppercase',
-                letterSpacing: '0.1em',
-                opacity: 0.9,
-                marginBottom: 4,
-              }}
-            >
-              Your GM Score
-            </div>
-            <div
-              style={{
-                fontSize: 48,
-                fontWeight: 800,
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                gap: 12,
-              }}
-            >
-              {gmScore.toFixed(1)}
-              <span
-                style={{
-                  fontSize: 24,
-                  fontWeight: 700,
-                  padding: '6px 12px',
-                  borderRadius: 8,
-                  backgroundColor: 'rgba(255,255,255,0.2)',
-                }}
-              >
-                {getGradeLetter(gmScore)}
-              </span>
-            </div>
-
-            {/* Score breakdown */}
-            <div
-              style={{
-                background: 'rgba(255, 255, 255, 0.1)',
+                padding: '8px 16px',
                 borderRadius: 8,
-                padding: 16,
-                marginTop: 16,
-                textAlign: 'left',
-              }}
-            >
-              <div
-                style={{
-                  display: 'flex',
-                  justifyContent: 'space-between',
-                  padding: '8px 0',
-                  fontSize: 13,
-                  borderBottom: '1px solid rgba(255, 255, 255, 0.1)',
-                }}
-              >
-                <span>Trade quality ({tradeCount} trade{tradeCount > 1 ? 's' : ''})</span>
-                <span style={{ fontWeight: 600 }}>
-                  {scoreBreakdown.tradeQualityScore.toFixed(1)} / 60 pts
-                </span>
-              </div>
-              <div
-                style={{
-                  display: 'flex',
-                  justifyContent: 'space-between',
-                  padding: '8px 0',
-                  fontSize: 13,
-                  borderBottom: '1px solid rgba(255, 255, 255, 0.1)',
-                }}
-              >
-                <span>
-                  Win improvement ({winImprovement > 0 ? '+' : ''}
-                  {scoreBreakdown.winImprovement} wins)
-                </span>
-                <span style={{ fontWeight: 600 }}>
-                  {scoreBreakdown.winImprovementScore.toFixed(1)} / 25 pts
-                </span>
-              </div>
-              <div
-                style={{
-                  display: 'flex',
-                  justifyContent: 'space-between',
-                  padding: '8px 0',
-                  fontSize: 13,
-                }}
-              >
-                <span>Playoff achievement</span>
-                <span style={{ fontWeight: 600 }}>
-                  {scoreBreakdown.playoffBonusScore} / 15 pts
-                </span>
-              </div>
-            </div>
-          </div>
-
-          {/* Actions */}
-          <div style={{ display: 'flex', gap: 12 }}>
-            <button
-              onClick={onSimulateAgain}
-              style={{
-                flex: 1,
-                padding: '14px 24px',
-                borderRadius: 10,
-                border: `2px solid ${borderColor}`,
-                backgroundColor: 'transparent',
-                color: textColor,
-                fontWeight: 600,
-                fontSize: 14,
-                cursor: 'pointer',
-              }}
-            >
-              🎲 Simulate Again
-            </button>
-            <button
-              onClick={onClose}
-              style={{
-                flex: 1,
-                padding: '14px 24px',
-                borderRadius: 10,
                 border: 'none',
-                backgroundColor: teamColor,
-                color: '#fff',
+                backgroundColor: activeTab === tab.id ? teamColor : 'transparent',
+                color: activeTab === tab.id ? '#fff' : subText,
                 fontWeight: 600,
-                fontSize: 14,
+                fontSize: 13,
                 cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                gap: 6,
+                whiteSpace: 'nowrap',
               }}
             >
-              Continue Trading
+              <span>{tab.icon}</span>
+              {tab.label}
             </button>
-          </div>
+          ))}
+        </div>
+
+        <div style={{ padding: 20 }}>
+          <AnimatePresence mode="wait">
+            {/* OVERVIEW TAB */}
+            {activeTab === 'overview' && (
+              <motion.div
+                key="overview"
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -10 }}
+              >
+                {/* Before/After Comparison */}
+                <div
+                  style={{
+                    display: 'grid',
+                    gridTemplateColumns: '1fr auto 1fr',
+                    gap: 16,
+                    padding: 20,
+                    background: surfaceBg,
+                    borderRadius: 12,
+                    marginBottom: 20,
+                  }}
+                >
+                  <div style={{ textAlign: 'center' }}>
+                    <div style={{ fontSize: 11, textTransform: 'uppercase', color: subText, marginBottom: 8, fontWeight: 600 }}>
+                      Before Trades
+                    </div>
+                    <div style={{ fontSize: 32, fontWeight: 800, color: textColor, lineHeight: 1 }}>
+                      {baseline.wins}-{baseline.losses}
+                    </div>
+                    <div style={{ fontSize: 12, color: subText, marginTop: 6 }}>
+                      {baseline.madePlayoffs ? '✅ Playoffs' : '❌ Missed Playoffs'}
+                    </div>
+                  </div>
+
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 24, color: isImprovement ? '#22c55e' : winImprovement < 0 ? '#ef4444' : subText }}>
+                    →
+                  </div>
+
+                  <div style={{ textAlign: 'center', background: `${teamColor}15`, padding: 16, borderRadius: 10, margin: '-16px -4px -16px 0' }}>
+                    <div style={{ fontSize: 11, textTransform: 'uppercase', color: teamColor, marginBottom: 8, fontWeight: 600 }}>
+                      After Trades
+                    </div>
+                    <div style={{ fontSize: 32, fontWeight: 800, color: textColor, lineHeight: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}>
+                      {modified.wins}-{modified.losses}
+                      {winImprovement !== 0 && (
+                        <span style={{ fontSize: 13, fontWeight: 600, padding: '4px 8px', borderRadius: 6, backgroundColor: isImprovement ? '#22c55e' : '#ef4444', color: '#fff' }}>
+                          {winImprovement > 0 ? '+' : ''}{winImprovement}W
+                        </span>
+                      )}
+                    </div>
+                    <div style={{ fontSize: 12, color: subText, marginTop: 6 }}>
+                      {modified.madePlayoffs ? `✅ #${modified.playoffSeed} Seed` : '❌ Missed Playoffs'}
+                    </div>
+                  </div>
+                </div>
+
+                {/* Championship Banner */}
+                {playoffs?.userTeamResult?.wonChampionship && championship && (
+                  <div style={{
+                    background: `linear-gradient(135deg, ${teamColor}, ${teamColor}dd)`,
+                    color: '#fff',
+                    padding: 20,
+                    borderRadius: 12,
+                    textAlign: 'center',
+                    marginBottom: 20,
+                  }}>
+                    <div style={{ fontSize: 40, marginBottom: 8 }}>🏆</div>
+                    <div style={{ fontSize: 20, fontWeight: 800 }}>CHAMPIONS!</div>
+                    <div style={{ fontSize: 14, opacity: 0.9, marginTop: 4 }}>
+                      {teamName} defeat {championship.runnerUp.teamName} {championship.seriesScore}
+                    </div>
+                  </div>
+                )}
+
+                {/* GM Score */}
+                <div style={{
+                  background: `linear-gradient(135deg, ${teamColor}, ${teamColor}dd)`,
+                  color: '#fff',
+                  padding: 20,
+                  borderRadius: 12,
+                  textAlign: 'center',
+                  marginBottom: 20,
+                }}>
+                  <div style={{ fontSize: 11, textTransform: 'uppercase', letterSpacing: '0.1em', opacity: 0.9, marginBottom: 4 }}>
+                    Your GM Score
+                  </div>
+                  <div style={{ fontSize: 44, fontWeight: 800, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 12 }}>
+                    {gmScore.toFixed(1)}
+                    <span style={{ fontSize: 22, fontWeight: 700, padding: '6px 12px', borderRadius: 8, backgroundColor: 'rgba(255,255,255,0.2)' }}>
+                      {getGradeLetter(gmScore)}
+                    </span>
+                  </div>
+
+                  <div style={{ background: 'rgba(255, 255, 255, 0.1)', borderRadius: 8, padding: 12, marginTop: 16, textAlign: 'left' }}>
+                    {[
+                      { label: `Trade quality (${tradeCount} trade${tradeCount !== 1 ? 's' : ''})`, value: scoreBreakdown.tradeQualityScore, max: 60 },
+                      { label: `Win improvement (${winImprovement > 0 ? '+' : ''}${scoreBreakdown.winImprovement} wins)`, value: scoreBreakdown.winImprovementScore, max: 25 },
+                      { label: 'Playoff achievement', value: scoreBreakdown.playoffBonusScore, max: 15 },
+                      { label: 'Championship bonus', value: scoreBreakdown.championshipBonus || 0, max: 15 },
+                    ].map((item, idx) => (
+                      <div key={idx} style={{ display: 'flex', justifyContent: 'space-between', padding: '6px 0', fontSize: 12, borderBottom: idx < 3 ? '1px solid rgba(255, 255, 255, 0.1)' : 'none' }}>
+                        <span>{item.label}</span>
+                        <span style={{ fontWeight: 600 }}>{item.value.toFixed(1)} / {item.max} pts</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Actions */}
+                <div style={{ display: 'flex', gap: 12 }}>
+                  <button onClick={onSimulateAgain} style={{ flex: 1, padding: '12px 20px', borderRadius: 10, border: `2px solid ${borderColor}`, backgroundColor: 'transparent', color: textColor, fontWeight: 600, fontSize: 14, cursor: 'pointer' }}>
+                    🎲 Simulate Again
+                  </button>
+                  <button onClick={onClose} style={{ flex: 1, padding: '12px 20px', borderRadius: 10, border: 'none', backgroundColor: teamColor, color: '#fff', fontWeight: 600, fontSize: 14, cursor: 'pointer' }}>
+                    Continue Trading
+                  </button>
+                </div>
+              </motion.div>
+            )}
+
+            {/* STANDINGS TAB */}
+            {activeTab === 'standings' && standings && (
+              <motion.div
+                key="standings"
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -10 }}
+              >
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
+                  {[
+                    { name: standings.conference1Name, teams: standings.conference1 },
+                    { name: standings.conference2Name, teams: standings.conference2 },
+                  ].map(conf => (
+                    <div key={conf.name} style={{ backgroundColor: surfaceBg, borderRadius: 12, padding: 16 }}>
+                      <h3 style={{ fontSize: 14, fontWeight: 700, color: textColor, marginBottom: 12, textAlign: 'center' }}>
+                        {conf.name}
+                      </h3>
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+                        {/* Header */}
+                        <div style={{ display: 'grid', gridTemplateColumns: '24px 1fr 48px 48px', gap: 8, padding: '4px 8px', fontSize: 10, fontWeight: 600, color: subText, textTransform: 'uppercase' }}>
+                          <span>#</span>
+                          <span>Team</span>
+                          <span style={{ textAlign: 'center' }}>W-L</span>
+                          <span style={{ textAlign: 'center' }}>GB</span>
+                        </div>
+                        {conf.teams.slice(0, 12).map((team, idx) => (
+                          <div
+                            key={team.teamKey}
+                            style={{
+                              display: 'grid',
+                              gridTemplateColumns: '24px 1fr 48px 48px',
+                              gap: 8,
+                              padding: '8px',
+                              borderRadius: 6,
+                              backgroundColor: team.isUserTeam ? `${teamColor}20` : team.isTradePartner ? '#ef444420' : idx < 7 ? (isDark ? '#1f2937' : '#fff') : 'transparent',
+                              border: team.isUserTeam ? `2px solid ${teamColor}` : team.isTradePartner ? '2px solid #ef4444' : 'none',
+                            }}
+                          >
+                            <span style={{ fontSize: 12, fontWeight: 600, color: team.playoffSeed ? '#22c55e' : subText }}>
+                              {team.conferenceRank}
+                            </span>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: 6, overflow: 'hidden' }}>
+                              <img
+                                src={team.logoUrl}
+                                alt=""
+                                style={{ width: 20, height: 20, objectFit: 'contain', flexShrink: 0 }}
+                                onError={(e) => { (e.target as HTMLImageElement).style.display = 'none' }}
+                              />
+                              <span style={{ fontSize: 12, fontWeight: team.isUserTeam ? 700 : 500, color: team.isUserTeam ? teamColor : textColor, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                                {team.abbreviation}
+                              </span>
+                              {team.tradeImpact !== undefined && team.tradeImpact !== 0 && (
+                                <span style={{ fontSize: 10, padding: '1px 4px', borderRadius: 4, backgroundColor: team.tradeImpact > 0 ? '#22c55e20' : '#ef444420', color: team.tradeImpact > 0 ? '#22c55e' : '#ef4444' }}>
+                                  {team.tradeImpact > 0 ? '+' : ''}{team.tradeImpact}
+                                </span>
+                              )}
+                            </div>
+                            <span style={{ fontSize: 12, fontWeight: 500, color: textColor, textAlign: 'center' }}>
+                              {team.wins}-{team.losses}
+                            </span>
+                            <span style={{ fontSize: 12, color: subText, textAlign: 'center' }}>
+                              {team.gamesBack === 0 ? '-' : team.gamesBack.toFixed(1)}
+                            </span>
+                          </div>
+                        ))}
+                      </div>
+                      <div style={{ marginTop: 8, fontSize: 10, color: subText, textAlign: 'center' }}>
+                        ✅ = Playoff spot • Your team highlighted
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </motion.div>
+            )}
+
+            {/* PLAYOFFS TAB */}
+            {activeTab === 'playoffs' && playoffs && (
+              <motion.div
+                key="playoffs"
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -10 }}
+              >
+                {!modified.madePlayoffs ? (
+                  <div style={{ textAlign: 'center', padding: 40 }}>
+                    <div style={{ fontSize: 48, marginBottom: 16 }}>😢</div>
+                    <h3 style={{ fontSize: 18, fontWeight: 700, color: textColor, marginBottom: 8 }}>
+                      Missed the Playoffs
+                    </h3>
+                    <p style={{ color: subText, fontSize: 14 }}>
+                      {teamName} finished with a {modified.wins}-{modified.losses} record, not enough to make the postseason.
+                    </p>
+                  </div>
+                ) : (
+                  <>
+                    {/* User team result */}
+                    {playoffs.userTeamResult && (
+                      <div style={{
+                        padding: 16,
+                        borderRadius: 12,
+                        backgroundColor: playoffs.userTeamResult.wonChampionship ? `${teamColor}20` : surfaceBg,
+                        border: playoffs.userTeamResult.wonChampionship ? `2px solid ${teamColor}` : `1px solid ${borderColor}`,
+                        marginBottom: 20,
+                        textAlign: 'center',
+                      }}>
+                        {playoffs.userTeamResult.wonChampionship ? (
+                          <>
+                            <div style={{ fontSize: 40, marginBottom: 8 }}>🏆</div>
+                            <div style={{ fontSize: 18, fontWeight: 800, color: teamColor }}>CHAMPIONS!</div>
+                          </>
+                        ) : playoffs.userTeamResult.eliminatedRound ? (
+                          <>
+                            <div style={{ fontSize: 32, marginBottom: 8 }}>💔</div>
+                            <div style={{ fontSize: 16, fontWeight: 700, color: textColor }}>
+                              Eliminated in Round {playoffs.userTeamResult.eliminatedRound}
+                            </div>
+                            <div style={{ fontSize: 13, color: subText, marginTop: 4 }}>
+                              Lost to {playoffs.userTeamResult.eliminatedBy}
+                            </div>
+                          </>
+                        ) : (
+                          <div style={{ fontSize: 14, color: textColor }}>Playoffs in progress...</div>
+                        )}
+                      </div>
+                    )}
+
+                    {/* Bracket */}
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+                      {Array.from(new Set(playoffs.bracket.map(m => m.round))).map(round => {
+                        const roundMatches = playoffs.bracket.filter(m => m.round === round)
+                        const roundName = roundMatches[0]?.roundName.split(' - ')[0] || `Round ${round}`
+                        return (
+                          <div key={round}>
+                            <h4 style={{ fontSize: 13, fontWeight: 700, color: subText, marginBottom: 8, textTransform: 'uppercase' }}>
+                              {roundName}
+                            </h4>
+                            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: 8 }}>
+                              {roundMatches.map((match, idx) => (
+                                <div
+                                  key={idx}
+                                  style={{
+                                    padding: 12,
+                                    borderRadius: 8,
+                                    backgroundColor: match.userTeamInvolved ? `${teamColor}10` : surfaceBg,
+                                    border: match.userTeamInvolved ? `2px solid ${teamColor}` : `1px solid ${borderColor}`,
+                                  }}
+                                >
+                                  {/* Home team */}
+                                  <div style={{
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'space-between',
+                                    padding: '6px 0',
+                                    borderBottom: `1px solid ${borderColor}`,
+                                    opacity: match.winner === 'away' ? 0.5 : 1,
+                                  }}>
+                                    <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                                      <span style={{ fontSize: 10, color: subText, width: 16 }}>({match.homeTeam.seed})</span>
+                                      <img src={match.homeTeam.logoUrl} alt="" style={{ width: 18, height: 18, objectFit: 'contain' }} onError={(e) => { (e.target as HTMLImageElement).style.display = 'none' }} />
+                                      <span style={{ fontSize: 12, fontWeight: match.winner === 'home' ? 700 : 500 }}>
+                                        {match.homeTeam.abbreviation}
+                                      </span>
+                                    </div>
+                                    <span style={{ fontSize: 14, fontWeight: 700, color: match.winner === 'home' ? '#22c55e' : textColor }}>
+                                      {match.seriesWins[0]}
+                                    </span>
+                                  </div>
+                                  {/* Away team */}
+                                  <div style={{
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'space-between',
+                                    padding: '6px 0',
+                                    opacity: match.winner === 'home' ? 0.5 : 1,
+                                  }}>
+                                    <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                                      <span style={{ fontSize: 10, color: subText, width: 16 }}>({match.awayTeam.seed})</span>
+                                      <img src={match.awayTeam.logoUrl} alt="" style={{ width: 18, height: 18, objectFit: 'contain' }} onError={(e) => { (e.target as HTMLImageElement).style.display = 'none' }} />
+                                      <span style={{ fontSize: 12, fontWeight: match.winner === 'away' ? 700 : 500 }}>
+                                        {match.awayTeam.abbreviation}
+                                      </span>
+                                    </div>
+                                    <span style={{ fontSize: 14, fontWeight: 700, color: match.winner === 'away' ? '#22c55e' : textColor }}>
+                                      {match.seriesWins[1]}
+                                    </span>
+                                  </div>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        )
+                      })}
+                    </div>
+
+                    {/* Championship Result */}
+                    {championship && (
+                      <div style={{
+                        marginTop: 20,
+                        padding: 20,
+                        borderRadius: 12,
+                        background: `linear-gradient(135deg, ${championship.winner.primaryColor}20, ${championship.winner.primaryColor}40)`,
+                        border: `2px solid ${championship.winner.primaryColor}`,
+                        textAlign: 'center',
+                      }}>
+                        <div style={{ fontSize: 32, marginBottom: 8 }}>🏆</div>
+                        <div style={{ fontSize: 12, textTransform: 'uppercase', letterSpacing: '0.1em', color: subText, marginBottom: 4 }}>
+                          Champion
+                        </div>
+                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10 }}>
+                          <img src={championship.winner.logoUrl} alt="" style={{ width: 40, height: 40, objectFit: 'contain' }} onError={(e) => { (e.target as HTMLImageElement).style.display = 'none' }} />
+                          <span style={{ fontSize: 20, fontWeight: 800, color: championship.winner.primaryColor }}>
+                            {championship.winner.teamName}
+                          </span>
+                        </div>
+                        <div style={{ fontSize: 13, color: subText, marginTop: 8 }}>
+                          Defeated {championship.runnerUp.teamName} {championship.seriesScore}
+                        </div>
+                      </div>
+                    )}
+                  </>
+                )}
+              </motion.div>
+            )}
+
+            {/* SUMMARY TAB */}
+            {activeTab === 'summary' && seasonSummary && (
+              <motion.div
+                key="summary"
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -10 }}
+              >
+                {/* Headline */}
+                <div style={{
+                  padding: 20,
+                  borderRadius: 12,
+                  backgroundColor: surfaceBg,
+                  marginBottom: 20,
+                  textAlign: 'center',
+                }}>
+                  <h3 style={{ fontSize: 20, fontWeight: 800, color: textColor, marginBottom: 12, lineHeight: 1.3 }}>
+                    {seasonSummary.headline}
+                  </h3>
+                  <p style={{ fontSize: 14, color: subText, lineHeight: 1.6 }}>
+                    {seasonSummary.narrative}
+                  </p>
+                </div>
+
+                {/* Trade Impact */}
+                <div style={{
+                  padding: 16,
+                  borderRadius: 12,
+                  border: `2px solid ${teamColor}`,
+                  backgroundColor: `${teamColor}10`,
+                  marginBottom: 20,
+                }}>
+                  <div style={{ fontSize: 12, textTransform: 'uppercase', letterSpacing: '0.05em', color: teamColor, marginBottom: 8, fontWeight: 600 }}>
+                    Trade Impact
+                  </div>
+                  <p style={{ fontSize: 14, color: textColor, margin: 0 }}>
+                    {seasonSummary.tradeImpactSummary}
+                  </p>
+                </div>
+
+                {/* Key Moments */}
+                <div style={{ marginBottom: 20 }}>
+                  <h4 style={{ fontSize: 14, fontWeight: 700, color: textColor, marginBottom: 12 }}>
+                    Key Moments
+                  </h4>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                    {seasonSummary.keyMoments.map((moment, idx) => (
+                      <div
+                        key={idx}
+                        style={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: 12,
+                          padding: '10px 14px',
+                          borderRadius: 8,
+                          backgroundColor: surfaceBg,
+                        }}
+                      >
+                        <div style={{
+                          width: 24,
+                          height: 24,
+                          borderRadius: '50%',
+                          backgroundColor: teamColor,
+                          color: '#fff',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          fontSize: 12,
+                          fontWeight: 700,
+                          flexShrink: 0,
+                        }}>
+                          {idx + 1}
+                        </div>
+                        <span style={{ fontSize: 13, color: textColor }}>{moment}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Affected Teams */}
+                {seasonSummary.affectedTeams.length > 0 && (
+                  <div>
+                    <h4 style={{ fontSize: 14, fontWeight: 700, color: textColor, marginBottom: 12 }}>
+                      Trade Partner Outcomes
+                    </h4>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                      {seasonSummary.affectedTeams.map((team, idx) => (
+                        <div
+                          key={idx}
+                          style={{
+                            padding: '12px 14px',
+                            borderRadius: 8,
+                            backgroundColor: '#ef444410',
+                            border: '1px solid #ef444430',
+                          }}
+                        >
+                          <div style={{ fontSize: 13, fontWeight: 600, color: '#ef4444', marginBottom: 4 }}>
+                            {team.teamName}
+                          </div>
+                          <div style={{ fontSize: 12, color: subText }}>
+                            {team.impact}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </motion.div>
+            )}
+          </AnimatePresence>
         </div>
       </motion.div>
     </>

@@ -150,16 +150,104 @@ export function formatProspect(prospect: MLBProspect): { primary: string; second
 export interface SeasonRecord {
   wins: number
   losses: number
+  otLosses?: number // NHL only
   madePlayoffs: boolean
   playoffSeed?: number
   divisionRank?: number
+  conferenceRank?: number
 }
 
 export interface SimulationScoreBreakdown {
   tradeQualityScore: number
   winImprovementScore: number
   playoffBonusScore: number
+  championshipBonus: number
   winImprovement: number
+}
+
+// Team standing in league standings
+export interface TeamStanding {
+  teamKey: string
+  teamName: string
+  abbreviation: string
+  logoUrl: string
+  primaryColor: string
+  wins: number
+  losses: number
+  otLosses?: number // NHL
+  winPct: number
+  division: string
+  conference: string
+  divisionRank: number
+  conferenceRank: number
+  playoffSeed: number | null
+  gamesBack: number
+  isUserTeam: boolean
+  isTradePartner: boolean
+  tradeImpact?: number // +/- wins from trade
+}
+
+// Playoff matchup
+export interface PlayoffMatchup {
+  round: number // 1 = Wild Card/First Round, 2 = Divisional/Semis, 3 = Conference/Finals, 4 = Championship
+  roundName: string
+  homeTeam: {
+    teamKey: string
+    teamName: string
+    abbreviation: string
+    logoUrl: string
+    primaryColor: string
+    seed: number
+    wins: number
+  }
+  awayTeam: {
+    teamKey: string
+    teamName: string
+    abbreviation: string
+    logoUrl: string
+    primaryColor: string
+    seed: number
+    wins: number
+  }
+  seriesWins: [number, number] // [home, away]
+  winner: 'home' | 'away' | null
+  isComplete: boolean
+  gamesPlayed: number
+  userTeamInvolved: boolean
+}
+
+// Championship result
+export interface ChampionshipResult {
+  winner: {
+    teamKey: string
+    teamName: string
+    abbreviation: string
+    logoUrl: string
+    primaryColor: string
+  }
+  runnerUp: {
+    teamKey: string
+    teamName: string
+    abbreviation: string
+    logoUrl: string
+    primaryColor: string
+  }
+  seriesScore: string // "4-2", "4-3", etc.
+  mvp?: string
+  userTeamWon: boolean
+  userTeamInFinals: boolean
+}
+
+// Season summary narrative
+export interface SeasonSummary {
+  headline: string // "Bears Make Playoff Push After Strategic Trade"
+  narrative: string // Full paragraph explaining the season
+  tradeImpactSummary: string // How the trade affected the team
+  keyMoments: string[] // "Week 12: Clinched playoff berth", etc.
+  affectedTeams: {
+    teamName: string
+    impact: string // "Lost their starting QB, dropped from 10-7 to 7-10"
+  }[]
 }
 
 export interface SimulationResult {
@@ -168,6 +256,24 @@ export interface SimulationResult {
   modified: SeasonRecord
   gmScore: number
   scoreBreakdown: SimulationScoreBreakdown
+  // Extended data for full simulation
+  standings?: {
+    conference1: TeamStanding[] // AFC/Eastern/etc.
+    conference2: TeamStanding[] // NFC/Western/etc.
+    conference1Name: string
+    conference2Name: string
+  }
+  playoffs?: {
+    bracket: PlayoffMatchup[]
+    userTeamResult?: {
+      madePlayoffs: boolean
+      eliminatedRound?: number
+      eliminatedBy?: string
+      wonChampionship: boolean
+    }
+  }
+  championship?: ChampionshipResult
+  seasonSummary?: SeasonSummary
 }
 
 export interface SimulationRequest {
