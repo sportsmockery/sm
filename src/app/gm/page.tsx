@@ -10,7 +10,6 @@ import { RosterPanel } from '@/components/gm/RosterPanel'
 import { TradeBoard } from '@/components/gm/TradeBoard'
 import { OpponentRosterPanel } from '@/components/gm/OpponentRosterPanel'
 import { OpponentTeamPicker } from '@/components/gm/OpponentTeamPicker'
-import { GradeReveal } from '@/components/gm/GradeReveal'
 import { TradeHistory } from '@/components/gm/TradeHistory'
 import { TeamFitOverlay } from '@/components/gm/TeamFitOverlay'
 import { PreferencesModal, GMPreferences } from '@/components/gm/PreferencesModal'
@@ -70,7 +69,6 @@ export default function GMPage() {
   // Grading
   const [grading, setGrading] = useState(false)
   const [gradeResult, setGradeResult] = useState<GradeResult | null>(null)
-  const [showGradeReveal, setShowGradeReveal] = useState(false)
   const [gradeError, setGradeError] = useState<string | null>(null)
 
   // Validation
@@ -412,7 +410,6 @@ export default function GMPage() {
     setGrading(true)
     setGradeResult(null)
     setGradeError(null)
-    setShowGradeReveal(true)
 
     try {
       const res = await fetch('/api/gm/grade', {
@@ -456,11 +453,9 @@ export default function GMPage() {
       } else {
         const err = await res.json().catch(() => ({ error: 'Unknown error' }))
         setGradeError(err.error || 'Failed to grade trade')
-        setShowGradeReveal(false)
       }
     } catch (e) {
       setGradeError('Network error. Please try again.')
-      setShowGradeReveal(false)
     }
     setGrading(false)
   }
@@ -473,7 +468,6 @@ export default function GMPage() {
     setDraftPicksReceived([])
     setGradeResult(null)
     setGradeError(null)
-    setShowGradeReveal(false)
     setValidation({ status: 'idle', issues: [] })
   }
 
@@ -843,7 +837,8 @@ export default function GMPage() {
                   grading={grading}
                   onGrade={gradeTrade}
                   validation={validation}
-                  currentStep={currentStep}
+                  gradeResult={gradeResult}
+                  onNewTrade={resetTrade}
                 />
 
                 {/* Error */}
@@ -976,7 +971,8 @@ export default function GMPage() {
                   grading={grading}
                   onGrade={gradeTrade}
                   validation={validation}
-                  currentStep={currentStep}
+                  gradeResult={gradeResult}
+                  onNewTrade={resetTrade}
                   mobile
                 />
               </div>
@@ -1156,25 +1152,6 @@ export default function GMPage() {
         chicagoTeam={selectedTeam}
       />
 
-      <GradeReveal
-        result={gradeResult}
-        show={showGradeReveal}
-        onClose={() => setShowGradeReveal(false)}
-        onNewTrade={resetTrade}
-        sport={sport}
-        tradeDetails={{
-          chicagoTeam: teamLabel,
-          chicagoLogo: currentTeamConfig?.logo,
-          chicagoColor: teamColor,
-          opponentName: opponentTeam?.team_name || '',
-          opponentLogo: opponentTeam?.logo_url,
-          opponentColor: opponentTeam?.primary_color,
-          playersSent: selectedPlayers,
-          playersReceived: receivedPlayers,
-          draftPicksSent,
-          draftPicksReceived,
-        }}
-      />
 
       <TeamFitOverlay
         player={fitPlayer}
