@@ -23,6 +23,7 @@ import type {
   AnalyticsResult,
   MLBProspect,
   SeasonSimulationResult,
+  UserScoreResponse,
 } from './gm-types'
 
 const BASE = API_BASE_URL
@@ -242,5 +243,17 @@ export const gmApi = {
     if (params.trade_id) queryParams.set('trade_id', params.trade_id)
     if (params.all) queryParams.set('all', 'true')
     return gmFetch<{ url?: string; data?: any }>(`/api/gm/export?${queryParams}`)
+  },
+
+  // User Score endpoints
+  async getUserScore() {
+    return gmFetch<UserScoreResponse>('/api/gm/user-score')
+  },
+
+  async setBestMockDraft(mockId: string) {
+    return gmFetch<{ success: boolean }>('/api/gm/user-score', {
+      method: 'POST',
+      body: JSON.stringify({ mock_id: mockId }),
+    })
   },
 }

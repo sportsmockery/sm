@@ -68,6 +68,23 @@ export default function TeamsScreen() {
           </View>
         </TouchableOpacity>
 
+        {/* My GM Score Banner */}
+        <TouchableOpacity
+          style={styles.scoreBanner}
+          activeOpacity={0.85}
+          onPress={() => router.push('/gm/my-score')}
+        >
+          <View style={styles.gmBannerContent}>
+            <View style={styles.gmBannerLeft}>
+              <Text style={styles.gmBannerTitle}>My GM Score</Text>
+              <Text style={styles.gmBannerDesc}>Track your trades & mock drafts</Text>
+            </View>
+            <View style={styles.gmBannerArrow}>
+              <Text style={styles.gmBannerArrowText}>{'>'}</Text>
+            </View>
+          </View>
+        </TouchableOpacity>
+
         {/* Team Cards */}
         {teamList.map((team) => (
           <Link key={team.id} href={`/team/${team.id}`} asChild>
@@ -374,5 +391,16 @@ const styles = StyleSheet.create({
   },
   draftBannerIconText: {
     fontSize: 24,
+  },
+  scoreBanner: {
+    borderRadius: 16,
+    marginBottom: 16,
+    overflow: 'hidden',
+    backgroundColor: '#0f172a',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.2,
+    shadowRadius: 6,
+    elevation: 4,
   },
 })

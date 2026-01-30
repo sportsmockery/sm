@@ -189,6 +189,13 @@ export default function RootLayout() {
                     }}
                   />
                   <Stack.Screen
+                    name="gm/my-score"
+                    options={{
+                      presentation: 'card',
+                      animation: 'slide_from_right',
+                    }}
+                  />
+                  <Stack.Screen
                     name="mock-draft/index"
                     options={{
                       presentation: 'card',

@@ -286,6 +286,9 @@ export default function GMTradeHub() {
                 <Ionicons name="refresh" size={20} color={colors.text} />
               </TouchableOpacity>
             )}
+            <TouchableOpacity onPress={() => router.push('/gm/my-score')} style={styles.iconBtn}>
+              <Ionicons name="stats-chart" size={20} color={colors.text} />
+            </TouchableOpacity>
             <TouchableOpacity onPress={() => router.push('/gm/history')} style={styles.iconBtn}>
               <Ionicons name="time-outline" size={22} color={colors.text} />
             </TouchableOpacity>

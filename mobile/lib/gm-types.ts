@@ -472,3 +472,45 @@ export interface SeasonSimulationResult {
   championship?: ChampionshipResult
   seasonSummary?: SeasonSummary
 }
+
+// GM Scoring Types
+export interface UserScore {
+  user_id: string
+  combined_gm_score: number | null
+  best_trade_score: number | null
+  best_mock_draft_score: number | null
+  best_mock_draft_id: string | null
+  trade_count: number
+  mock_count: number
+  trade_weight: number
+  mock_weight: number
+}
+
+export interface MockDraftSummary {
+  id: string
+  chicago_team: string
+  sport: string
+  draft_year: number
+  completed: boolean
+  completed_at: string | null
+  mock_score: number | null
+  value_score: number | null
+  need_fit_score: number | null
+  upside_risk_score: number | null
+  mock_grade_letter: string | null
+  is_best_of_three: boolean
+  feedback_json: any
+  created_at: string
+}
+
+export interface TradeStats {
+  total: number
+  accepted: number
+  average_grade: number
+}
+
+export interface UserScoreResponse {
+  user_score: UserScore
+  mock_drafts: MockDraftSummary[]
+  trade_stats: TradeStats
+}
