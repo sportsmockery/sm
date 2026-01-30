@@ -10,7 +10,7 @@ import { RosterPanel } from '@/components/gm/RosterPanel'
 import { TradeBoard } from '@/components/gm/TradeBoard'
 import { OpponentRosterPanel } from '@/components/gm/OpponentRosterPanel'
 import { OpponentTeamPicker } from '@/components/gm/OpponentTeamPicker'
-import { DraftPickSelector } from '@/components/gm/DraftPickSelector'
+// DraftPickSelector removed - now integrated into roster panels
 import { GradeReveal } from '@/components/gm/GradeReveal'
 import { TradeHistory } from '@/components/gm/TradeHistory'
 import { LeaderboardPanel } from '@/components/gm/LeaderboardPanel'
@@ -78,12 +78,6 @@ export default function GMPage() {
   const [validation, setValidation] = useState<ValidationState>({ status: 'idle', issues: [] })
   const validationTimeoutRef = useRef<NodeJS.Timeout | null>(null)
 
-  // Draft section ref for scrolling
-  const draftSectionRef = useRef<HTMLDivElement | null>(null)
-
-  const scrollToDraft = useCallback(() => {
-    draftSectionRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' })
-  }, [])
 
   // History & leaderboard
   const [trades, setTrades] = useState<any[]>([])
@@ -527,7 +521,9 @@ export default function GMPage() {
                   sport={sport}
                   teamColor={teamColor}
                   onViewFit={handleViewFit}
-                  onDraftClick={scrollToDraft}
+                  draftPicks={draftPicksSent}
+                  onAddDraftPick={pk => setDraftPicksSent(prev => [...prev, pk])}
+                  onRemoveDraftPick={i => setDraftPicksSent(prev => prev.filter((_, idx) => idx !== i))}
                 />
               </div>
             </div>
@@ -564,109 +560,6 @@ export default function GMPage() {
                 />
               </div>
 
-              {/* Draft picks */}
-              <div ref={draftSectionRef} className={`rounded-xl border p-4 ${cardBg}`}>
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
-                  <DraftPickSelector
-                    sport={sport}
-                    picks={draftPicksSent}
-                    onAdd={pk => setDraftPicksSent(prev => [...prev, pk])}
-                    onRemove={i => setDraftPicksSent(prev => prev.filter((_, idx) => idx !== i))}
-                    label="Draft Picks to Send"
-                  />
-                  <DraftPickSelector
-                    sport={sport}
-                    picks={draftPicksReceived}
-                    onAdd={pk => setDraftPicksReceived(prev => [...prev, pk])}
-                    onRemove={i => setDraftPicksReceived(prev => prev.filter((_, idx) => idx !== i))}
-                    label="Draft Picks to Receive"
-                  />
-                </div>
-              </div>
-
-              {/* Trade Partner selector */}
-              <div className={`rounded-xl border p-4 ${cardBg}`}>
-                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
-                  <span style={{ fontWeight: 700, fontSize: '14px', color: isDark ? '#fff' : '#1a1a1a' }}>Trade Partner</span>
-                  <button
-                    onClick={() => setShowOpponentPicker(true)}
-                    style={{
-                      padding: '6px 16px', borderRadius: 8, border: 'none',
-                      backgroundColor: '#bc0000', color: '#fff',
-                      fontWeight: 600, fontSize: '13px', cursor: 'pointer',
-                    }}
-                  >
-                    {opponentTeam ? 'Change Team' : 'Select Team'}
-                  </button>
-                </div>
-                {opponentTeam && (
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                    <img src={opponentTeam.logo_url} alt={opponentTeam.team_name} style={{ width: 32, height: 32, objectFit: 'contain' }}
-                      onError={(e) => { (e.target as HTMLImageElement).style.display = 'none' }} />
-                    <span style={{ fontWeight: 700, color: isDark ? '#fff' : '#1a1a1a' }}>{opponentTeam.team_name}</span>
-                  </div>
-                )}
-
-                {/* Cap status cards */}
-                {(chicagoCap || opponentCap) && opponentTeam && (
-                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8, marginTop: 12 }}>
-                    {chicagoCap && (
-                      <div style={{
-                        padding: '8px 10px', borderRadius: 8,
-                        backgroundColor: isDark ? '#1e293b' : '#f8fafc',
-                        border: `1px solid ${isDark ? '#334155' : '#e2e8f0'}`,
-                      }}>
-                        <div style={{ fontSize: '10px', fontWeight: 700, color: teamColor, marginBottom: 4, textTransform: 'uppercase' }}>
-                          {selectedTeam} Cap
-                        </div>
-                        <div style={{ fontSize: '12px', fontWeight: 600, color: isDark ? '#e2e8f0' : '#334155' }}>
-                          ${(chicagoCap.cap_used / 1_000_000).toFixed(1)}M / ${(chicagoCap.total_cap / 1_000_000).toFixed(1)}M
-                        </div>
-                        <div style={{
-                          height: 4, borderRadius: 2, marginTop: 4,
-                          backgroundColor: isDark ? '#374151' : '#e5e7eb', overflow: 'hidden',
-                        }}>
-                          <div style={{
-                            height: '100%', borderRadius: 2,
-                            width: `${Math.min(100, (chicagoCap.cap_used / chicagoCap.total_cap) * 100)}%`,
-                            backgroundColor: chicagoCap.cap_used / chicagoCap.total_cap > 0.9 ? '#ef4444' : teamColor,
-                          }} />
-                        </div>
-                        <div style={{ fontSize: '10px', color: subText, marginTop: 2 }}>
-                          ${(chicagoCap.cap_available / 1_000_000).toFixed(1)}M avail
-                        </div>
-                      </div>
-                    )}
-                    {opponentCap && (
-                      <div style={{
-                        padding: '8px 10px', borderRadius: 8,
-                        backgroundColor: isDark ? '#1e293b' : '#f8fafc',
-                        border: `1px solid ${isDark ? '#334155' : '#e2e8f0'}`,
-                      }}>
-                        <div style={{ fontSize: '10px', fontWeight: 700, color: opponentTeam.primary_color, marginBottom: 4, textTransform: 'uppercase' }}>
-                          {opponentTeam.abbreviation} Cap
-                        </div>
-                        <div style={{ fontSize: '12px', fontWeight: 600, color: isDark ? '#e2e8f0' : '#334155' }}>
-                          ${(opponentCap.cap_used / 1_000_000).toFixed(1)}M / ${(opponentCap.total_cap / 1_000_000).toFixed(1)}M
-                        </div>
-                        <div style={{
-                          height: 4, borderRadius: 2, marginTop: 4,
-                          backgroundColor: isDark ? '#374151' : '#e5e7eb', overflow: 'hidden',
-                        }}>
-                          <div style={{
-                            height: '100%', borderRadius: 2,
-                            width: `${Math.min(100, (opponentCap.cap_used / opponentCap.total_cap) * 100)}%`,
-                            backgroundColor: opponentCap.cap_used / opponentCap.total_cap > 0.9 ? '#ef4444' : opponentTeam.primary_color,
-                          }} />
-                        </div>
-                        <div style={{ fontSize: '10px', color: subText, marginTop: 2 }}>
-                          ${(opponentCap.cap_available / 1_000_000).toFixed(1)}M avail
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                )}
-              </div>
 
               {/* Stat comparison */}
               {selectedPlayers.length > 0 && receivedPlayers.length > 0 && (
@@ -704,7 +597,42 @@ export default function GMPage() {
 
             {/* Opponent Roster - Right column */}
             <div className={`lg:col-span-1 ${activeTab !== 'build' ? 'hidden lg:block' : ''}`}>
-              <div className={`rounded-xl border p-4 ${cardBg}`} style={{ height: 'calc(100vh - 280px)', minHeight: '400px', overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
+              {/* Select Team button at top */}
+              <button
+                onClick={() => setShowOpponentPicker(true)}
+                style={{
+                  width: '100%',
+                  padding: '10px 16px',
+                  marginBottom: 12,
+                  borderRadius: 8,
+                  border: 'none',
+                  backgroundColor: '#bc0000',
+                  color: '#fff',
+                  fontWeight: 600,
+                  fontSize: '14px',
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: 8,
+                }}
+              >
+                {opponentTeam ? (
+                  <>
+                    <img
+                      src={opponentTeam.logo_url}
+                      alt=""
+                      style={{ width: 20, height: 20, objectFit: 'contain' }}
+                      onError={(e) => { (e.target as HTMLImageElement).style.display = 'none' }}
+                    />
+                    {opponentTeam.team_name}
+                  </>
+                ) : (
+                  'Select Trade Partner'
+                )}
+              </button>
+
+              <div className={`rounded-xl border p-4 ${cardBg}`} style={{ height: 'calc(100vh - 340px)', minHeight: '400px', overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
                 {opponentTeam ? (
                   <OpponentRosterPanel
                     teamKey={opponentTeam.team_key}
@@ -718,13 +646,15 @@ export default function GMPage() {
                     setLoading={setOpponentRosterLoading}
                     onAddCustomPlayer={addCustomReceivedPlayer}
                     onViewFit={handleViewFit}
-                    onDraftClick={scrollToDraft}
+                    draftPicks={draftPicksReceived}
+                    onAddDraftPick={pk => setDraftPicksReceived(prev => [...prev, pk])}
+                    onRemoveDraftPick={i => setDraftPicksReceived(prev => prev.filter((_, idx) => idx !== i))}
                   />
                 ) : (
                   <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', color: subText, textAlign: 'center', padding: 20 }}>
                     <div style={{ fontSize: '32px', marginBottom: 12 }}>🤝</div>
                     <div style={{ fontWeight: 600, fontSize: '14px', marginBottom: 4 }}>Opponent Roster</div>
-                    <div style={{ fontSize: '12px' }}>Select a trade partner to browse their players</div>
+                    <div style={{ fontSize: '12px' }}>Select a trade partner above to browse their players</div>
                   </div>
                 )}
               </div>
