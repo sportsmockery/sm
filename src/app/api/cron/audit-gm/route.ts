@@ -300,7 +300,7 @@ export async function GET(request: NextRequest) {
   }
 
   // 11. Mock Draft API — verify endpoints respond
-  const draftEndpoints = ['prospects', 'history']
+  const draftEndpoints = ['prospects', 'history', 'eligibility']
   for (const endpoint of draftEndpoints) {
     const t = Date.now()
     try {
@@ -318,7 +318,42 @@ export async function GET(request: NextRequest) {
     }
   }
 
-  // 12. Draft prospects table — verify data exists for offseason sports
+  // 12. Draft eligibility view — verify it returns data for Chicago teams
+  const t12 = Date.now()
+  try {
+    const { data: eligibility, error } = await datalabAdmin
+      .from('gm_draft_eligibility')
+      .select('*')
+      .in('team_key', ['chi', 'chc', 'chw'])
+      .eq('draft_year', 2026)
+
+    if (error) {
+      checks.push({ name: 'draft_eligibility_view', status: 'fail', detail: `Query failed: ${error.message}`, duration_ms: Date.now() - t12 })
+    } else {
+      const c = eligibility?.length || 0
+      const eligibleCount = eligibility?.filter((e: any) => e.eligible).length || 0
+      checks.push({
+        name: 'draft_eligibility_view',
+        status: c >= 5 ? 'pass' : c > 0 ? 'warn' : 'fail',
+        detail: `${c} teams found, ${eligibleCount} eligible for mock draft`,
+        duration_ms: Date.now() - t12,
+      })
+
+      // Log each team's status
+      for (const elig of eligibility || []) {
+        const teamName = elig.team_name || elig.team_key
+        checks.push({
+          name: `eligibility_${elig.sport}_${elig.team_key}`,
+          status: 'pass',
+          detail: `${teamName}: ${elig.eligible ? '✓ eligible' : '✗ ' + (elig.reason || 'not eligible')} | ${elig.days_until_draft || '?'} days to draft`,
+        })
+      }
+    }
+  } catch (e) {
+    checks.push({ name: 'draft_eligibility_view', status: 'fail', detail: `Error: ${String(e)}`, duration_ms: Date.now() - t12 })
+  }
+
+  // 13. Draft prospects table — verify data exists for offseason sports
   for (const team of CHICAGO_TEAMS) {
     const status = seasonStatuses.find(s => s.team === team.key)
     if (status?.draftAvailable) {
@@ -347,7 +382,7 @@ export async function GET(request: NextRequest) {
     }
   }
 
-  // 13. Draft order table — verify data exists for offseason sports
+  // 14. Draft order table — verify data exists for offseason sports
   const checkedSports = new Set<string>()
   for (const team of CHICAGO_TEAMS) {
     const status = seasonStatuses.find(s => s.team === team.key)
@@ -359,7 +394,7 @@ export async function GET(request: NextRequest) {
           .from('gm_draft_order')
           .select('*', { count: 'exact', head: true })
           .eq('sport', team.sport)
-          .eq('draft_year', new Date().getFullYear())
+          .eq('draft_year', 2026)
 
         if (error) {
           checks.push({ name: `draft_order_${team.sport}`, status: 'warn', detail: `Query failed: ${error.message}`, duration_ms: Date.now() - t })
@@ -377,6 +412,66 @@ export async function GET(request: NextRequest) {
         checks.push({ name: `draft_order_${team.sport}`, status: 'warn', detail: `Not available: ${String(e)}`, duration_ms: Date.now() - t })
       }
     }
+  }
+
+  // 15. Mock draft sessions — check recent activity
+  const t15 = Date.now()
+  try {
+    const { count: totalMocks, error: mockError } = await datalabAdmin
+      .from('gm_mock_drafts')
+      .select('*', { count: 'exact', head: true })
+
+    if (mockError) {
+      checks.push({ name: 'mock_draft_sessions', status: 'warn', detail: `Query failed: ${mockError.message}`, duration_ms: Date.now() - t15 })
+    } else {
+      // Recent mocks (last 7 days)
+      const { count: recentMocks } = await datalabAdmin
+        .from('gm_mock_drafts')
+        .select('*', { count: 'exact', head: true })
+        .gte('created_at', new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString())
+
+      // Completed mocks
+      const { count: completedMocks } = await datalabAdmin
+        .from('gm_mock_drafts')
+        .select('*', { count: 'exact', head: true })
+        .eq('status', 'completed')
+
+      checks.push({
+        name: 'mock_draft_sessions',
+        status: 'pass',
+        detail: `${totalMocks || 0} total | ${recentMocks || 0} last 7 days | ${completedMocks || 0} completed`,
+        duration_ms: Date.now() - t15,
+      })
+    }
+  } catch (e) {
+    checks.push({ name: 'mock_draft_sessions', status: 'warn', detail: `Not available: ${String(e)}`, duration_ms: Date.now() - t15 })
+  }
+
+  // 16. Mock draft picks — verify picks are being recorded
+  const t16 = Date.now()
+  try {
+    const { count: totalPicks, error: picksError } = await datalabAdmin
+      .from('gm_mock_draft_picks')
+      .select('*', { count: 'exact', head: true })
+
+    if (picksError) {
+      checks.push({ name: 'mock_draft_picks', status: 'warn', detail: `Query failed: ${picksError.message}`, duration_ms: Date.now() - t16 })
+    } else {
+      // Picks with prospects selected
+      const { count: madePicks } = await datalabAdmin
+        .from('gm_mock_draft_picks')
+        .select('*', { count: 'exact', head: true })
+        .not('prospect_id', 'is', null)
+
+      checks.push({
+        name: 'mock_draft_picks',
+        status: 'pass',
+        detail: `${totalPicks || 0} total picks | ${madePicks || 0} with prospects selected`,
+        duration_ms: Date.now() - t16,
+      })
+    }
+  } catch (e) {
+    checks.push({ name: 'mock_draft_picks', status: 'warn', detail: `Not available: ${String(e)}`, duration_ms: Date.now() - t16 })
   }
 
   const duration = Date.now() - startTime
