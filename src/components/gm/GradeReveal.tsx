@@ -147,8 +147,11 @@ export function GradeReveal({ result, show, onClose, onNewTrade, tradeDetails, s
           position: 'fixed', inset: 0, zIndex: 60,
           backgroundColor: 'rgba(0,0,0,0.8)',
           backdropFilter: 'blur(8px)',
-          display: 'flex', alignItems: 'center', justifyContent: 'center',
+          display: 'flex', alignItems: 'flex-start', justifyContent: 'center',
           padding: 20,
+          paddingTop: 40,
+          paddingBottom: 40,
+          overflowY: 'auto',
         }}
       >
         {/* Confetti */}
@@ -167,6 +170,8 @@ export function GradeReveal({ result, show, onClose, onNewTrade, tradeDetails, s
             maxWidth: 500,
             width: '100%',
             textAlign: 'center',
+            marginTop: 'auto',
+            marginBottom: 'auto',
           }}
         >
           {/* Loading phase */}
