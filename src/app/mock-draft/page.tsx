@@ -4,6 +4,7 @@ import { useRouter } from 'next/navigation'
 import { useTheme } from '@/contexts/ThemeContext'
 import { useAuth } from '@/contexts/AuthContext'
 import Image from 'next/image'
+import MockDraftGradePanel from '@/components/mock/MockDraftGradePanel'
 
 // Types
 interface Prospect {
@@ -799,6 +800,15 @@ export default function MockDraftPage() {
                       ))}
                   </div>
                 </div>
+              )}
+
+              {/* Draft Grade Panel - shows after grading */}
+              {gradeResult && (
+                <MockDraftGradePanel
+                  grade={gradeResult}
+                  teamColor={teamColor}
+                  onViewDetails={() => setShowGradeModal(true)}
+                />
               )}
             </div>
 

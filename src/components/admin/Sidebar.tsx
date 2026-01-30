@@ -61,6 +61,11 @@ const icons = {
       <path strokeLinecap="round" strokeLinejoin="round" d="M3 4.5h14.25M3 9h9.75M3 13.5h9.75m4.5-4.5v12m0 0l-3.75-3.75M17.25 21l3.75-3.75" />
     </svg>
   ),
+  gmScoring: (
+    <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
+      <path strokeLinecap="round" strokeLinejoin="round" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+    </svg>
+  ),
   teamSync: (
     <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
       <path strokeLinecap="round" strokeLinejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0l3.181 3.183a8.25 8.25 0 0013.803-3.7M4.031 9.865a8.25 8.25 0 0113.803-3.7l3.181 3.182m0-4.991v4.99" />
@@ -141,6 +146,7 @@ const navSections: NavSection[] = [
       { name: 'Team Pages Sync', href: '/admin/team-pages-sync', icon: 'teamSync' },
       { name: 'Analytics', href: '/admin/analytics', icon: 'analytics' },
       { name: 'Feed Scoring', href: '/admin/feed-scoring', icon: 'feedScoring' },
+      { name: 'User GM Scoring', href: '/admin/user-gm-scoring', icon: 'gmScoring' },
       { name: 'Notifications', href: '/admin/notifications', icon: 'notifications' },
       { name: 'GM Errors', href: '/admin/gm-errors', icon: 'aiLogging' },
     ],
