@@ -1,0 +1,1077 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SportsMockery - New Features Tour Preview</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+      background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    /* Tour Modal Overlay */
+    .tour-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.85);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 9999;
+      padding: 16px;
+    }
+
+    /* Tour Container */
+    .tour-container {
+      background: #ffffff;
+      border-radius: 20px;
+      max-width: 600px;
+      width: 100%;
+      max-height: 90vh;
+      overflow: hidden;
+      box-shadow: 0 25px 50px rgba(0, 0, 0, 0.5);
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* Header */
+    .tour-header {
+      background: linear-gradient(135deg, #bc0000 0%, #8a0000 100%);
+      padding: 20px 24px;
+      color: white;
+      position: relative;
+    }
+
+    .tour-header h1 {
+      font-size: 22px;
+      font-weight: 800;
+      margin-bottom: 4px;
+    }
+
+    .tour-header p {
+      font-size: 14px;
+      opacity: 0.9;
+    }
+
+    .close-tour {
+      position: absolute;
+      top: 16px;
+      right: 16px;
+      background: rgba(255, 255, 255, 0.2);
+      border: none;
+      color: white;
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      cursor: pointer;
+      font-size: 18px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background 0.2s;
+    }
+
+    .close-tour:hover {
+      background: rgba(255, 255, 255, 0.3);
+    }
+
+    /* Progress Bar */
+    .progress-container {
+      padding: 16px 24px;
+      background: #f8f9fa;
+      border-bottom: 1px solid #e9ecef;
+    }
+
+    .progress-bar {
+      height: 8px;
+      background: #e9ecef;
+      border-radius: 4px;
+      overflow: hidden;
+    }
+
+    .progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #bc0000, #ff4444);
+      border-radius: 4px;
+      transition: width 0.3s ease;
+    }
+
+    .progress-text {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 8px;
+      font-size: 12px;
+      color: #666;
+    }
+
+    /* Table of Contents (Jump Menu) */
+    .toc-container {
+      padding: 12px 24px;
+      background: #f0f4f8;
+      border-bottom: 1px solid #e0e4e8;
+    }
+
+    .toc-label {
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: #666;
+      margin-bottom: 8px;
+      font-weight: 600;
+    }
+
+    .toc-buttons {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+
+    .toc-btn {
+      padding: 6px 12px;
+      border-radius: 20px;
+      border: 1px solid #ddd;
+      background: white;
+      color: #333;
+      font-size: 11px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .toc-btn:hover {
+      border-color: #bc0000;
+      color: #bc0000;
+    }
+
+    .toc-btn.active {
+      background: #bc0000;
+      border-color: #bc0000;
+      color: white;
+    }
+
+    /* Content Area */
+    .tour-content {
+      flex: 1;
+      overflow-y: auto;
+      padding: 24px;
+    }
+
+    /* Slide Styles */
+    .slide {
+      display: none;
+      animation: fadeIn 0.3s ease;
+    }
+
+    .slide.active {
+      display: block;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .slide-icon {
+      width: 80px;
+      height: 80px;
+      margin: 0 auto 20px;
+      border-radius: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 40px;
+    }
+
+    .slide-title {
+      font-size: 24px;
+      font-weight: 800;
+      text-align: center;
+      margin-bottom: 8px;
+      color: #1a1a1a;
+    }
+
+    .slide-subtitle {
+      font-size: 14px;
+      text-align: center;
+      color: #666;
+      margin-bottom: 24px;
+    }
+
+    .slide-content {
+      background: #f8f9fa;
+      border-radius: 16px;
+      padding: 20px;
+      margin-bottom: 16px;
+    }
+
+    .slide-content h3 {
+      font-size: 16px;
+      font-weight: 700;
+      color: #1a1a1a;
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .slide-content p {
+      font-size: 14px;
+      line-height: 1.6;
+      color: #444;
+      margin-bottom: 12px;
+    }
+
+    .slide-content p:last-child {
+      margin-bottom: 0;
+    }
+
+    /* Feature List */
+    .feature-list {
+      list-style: none;
+      padding: 0;
+    }
+
+    .feature-list li {
+      padding: 10px 0;
+      border-bottom: 1px solid #e9ecef;
+      font-size: 14px;
+      color: #333;
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+    }
+
+    .feature-list li:last-child {
+      border-bottom: none;
+    }
+
+    .feature-list .icon {
+      flex-shrink: 0;
+      width: 24px;
+      height: 24px;
+      background: #bc000015;
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 14px;
+    }
+
+    /* Rules/Important Box */
+    .rules-box {
+      background: #fff3cd;
+      border: 1px solid #ffc107;
+      border-radius: 12px;
+      padding: 16px;
+      margin-top: 16px;
+    }
+
+    .rules-box h4 {
+      font-size: 13px;
+      font-weight: 700;
+      color: #856404;
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .rules-box ul {
+      margin: 0;
+      padding-left: 20px;
+    }
+
+    .rules-box li {
+      font-size: 13px;
+      color: #856404;
+      margin-bottom: 4px;
+    }
+
+    /* Tips Box */
+    .tips-box {
+      background: #d4edda;
+      border: 1px solid #28a745;
+      border-radius: 12px;
+      padding: 16px;
+      margin-top: 16px;
+    }
+
+    .tips-box h4 {
+      font-size: 13px;
+      font-weight: 700;
+      color: #155724;
+      margin-bottom: 8px;
+    }
+
+    .tips-box p {
+      font-size: 13px;
+      color: #155724;
+      margin: 0;
+    }
+
+    /* Team Badges */
+    .team-badges {
+      display: flex;
+      justify-content: center;
+      gap: 12px;
+      margin: 20px 0;
+      flex-wrap: wrap;
+    }
+
+    .team-badge {
+      width: 50px;
+      height: 50px;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 24px;
+    }
+
+    .team-badge.bears { background: #0B162A; }
+    .team-badge.bulls { background: #CE1141; }
+    .team-badge.cubs { background: #0E3386; }
+    .team-badge.sox { background: #27251F; }
+    .team-badge.hawks { background: #CF0A2C; }
+
+    /* AI Personality Cards */
+    .ai-cards {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 10px;
+      margin-top: 16px;
+    }
+
+    .ai-card {
+      background: white;
+      border-radius: 10px;
+      padding: 12px;
+      text-align: center;
+      border: 1px solid #e9ecef;
+    }
+
+    .ai-card .emoji {
+      font-size: 28px;
+      margin-bottom: 6px;
+    }
+
+    .ai-card .name {
+      font-size: 12px;
+      font-weight: 700;
+      color: #1a1a1a;
+    }
+
+    .ai-card .team {
+      font-size: 11px;
+      color: #666;
+    }
+
+    /* Grade Scale */
+    .grade-scale {
+      display: flex;
+      gap: 8px;
+      margin-top: 12px;
+      flex-wrap: wrap;
+    }
+
+    .grade-item {
+      flex: 1;
+      min-width: 80px;
+      padding: 10px;
+      border-radius: 10px;
+      text-align: center;
+    }
+
+    .grade-item.green { background: #d4edda; color: #155724; }
+    .grade-item.yellow { background: #fff3cd; color: #856404; }
+    .grade-item.red { background: #f8d7da; color: #721c24; }
+
+    .grade-item .score {
+      font-size: 18px;
+      font-weight: 800;
+    }
+
+    .grade-item .label {
+      font-size: 11px;
+      margin-top: 2px;
+    }
+
+    /* Footer Navigation */
+    .tour-footer {
+      padding: 16px 24px;
+      background: #f8f9fa;
+      border-top: 1px solid #e9ecef;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .tour-btn {
+      padding: 12px 24px;
+      border-radius: 10px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+      border: none;
+    }
+
+    .tour-btn.secondary {
+      background: white;
+      border: 2px solid #ddd;
+      color: #666;
+    }
+
+    .tour-btn.secondary:hover {
+      border-color: #bc0000;
+      color: #bc0000;
+    }
+
+    .tour-btn.primary {
+      background: linear-gradient(135deg, #bc0000 0%, #8a0000 100%);
+      color: white;
+      flex: 1;
+      max-width: 200px;
+    }
+
+    .tour-btn.primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(188, 0, 0, 0.3);
+    }
+
+    .skip-link {
+      font-size: 13px;
+      color: #999;
+      text-decoration: underline;
+      cursor: pointer;
+      background: none;
+      border: none;
+    }
+
+    .skip-link:hover {
+      color: #666;
+    }
+
+    /* Welcome Slide Special */
+    .welcome-teams {
+      display: flex;
+      justify-content: center;
+      gap: 8px;
+      margin: 24px 0;
+    }
+
+    .welcome-teams img {
+      width: 48px;
+      height: 48px;
+      border-radius: 10px;
+    }
+
+    /* Responsive */
+    @media (max-width: 480px) {
+      .tour-header h1 {
+        font-size: 18px;
+      }
+
+      .slide-title {
+        font-size: 20px;
+      }
+
+      .ai-cards {
+        grid-template-columns: 1fr;
+      }
+
+      .toc-buttons {
+        max-height: 60px;
+        overflow-x: auto;
+        flex-wrap: nowrap;
+      }
+
+      .toc-btn {
+        white-space: nowrap;
+      }
+    }
+  </style>
+</head>
+<body>
+
+<div class="tour-overlay">
+  <div class="tour-container">
+    <!-- Header -->
+    <div class="tour-header">
+      <h1>Welcome to the NEW SportsMockery!</h1>
+      <p>Let's show you all the cool new features</p>
+      <button class="close-tour" onclick="closeTour()" title="Skip Tour">&times;</button>
+    </div>
+
+    <!-- Progress Bar -->
+    <div class="progress-container">
+      <div class="progress-bar">
+        <div class="progress-fill" id="progressFill" style="width: 10%"></div>
+      </div>
+      <div class="progress-text">
+        <span id="slideNumber">1 of 10</span>
+        <span id="slideName">Welcome</span>
+      </div>
+    </div>
+
+    <!-- Jump Menu (Table of Contents) -->
+    <div class="toc-container">
+      <div class="toc-label">Jump to feature:</div>
+      <div class="toc-buttons" id="tocButtons">
+        <button class="toc-btn active" onclick="goToSlide(0)">Welcome</button>
+        <button class="toc-btn" onclick="goToSlide(1)">Scout AI</button>
+        <button class="toc-btn" onclick="goToSlide(2)">GM Trades</button>
+        <button class="toc-btn" onclick="goToSlide(3)">Mock Draft</button>
+        <button class="toc-btn" onclick="goToSlide(4)">Fan Chat</button>
+        <button class="toc-btn" onclick="goToSlide(5)">Team Pages</button>
+        <button class="toc-btn" onclick="goToSlide(6)">Polls</button>
+        <button class="toc-btn" onclick="goToSlide(7)">Your Profile</button>
+        <button class="toc-btn" onclick="goToSlide(8)">Videos</button>
+        <button class="toc-btn" onclick="goToSlide(9)">SM+ Premium</button>
+      </div>
+    </div>
+
+    <!-- Content -->
+    <div class="tour-content">
+
+      <!-- SLIDE 0: Welcome -->
+      <div class="slide active" data-slide="0" data-name="Welcome">
+        <div class="slide-icon" style="background: linear-gradient(135deg, #bc0000, #ff4444);">
+          <span style="color: white;">&#127944;</span>
+        </div>
+        <div class="slide-title">Hey Chicago Sports Fan!</div>
+        <div class="slide-subtitle">We've added a LOT of new stuff. Let us show you around!</div>
+
+        <div class="team-badges">
+          <div class="team-badge bears">&#128059;</div>
+          <div class="team-badge bulls">&#128004;</div>
+          <div class="team-badge cubs">&#128059;</div>
+          <div class="team-badge sox">&#9918;</div>
+          <div class="team-badge hawks">&#129413;</div>
+        </div>
+
+        <div class="slide-content">
+          <h3>&#127881; What's New?</h3>
+          <ul class="feature-list">
+            <li><span class="icon">&#129302;</span> <strong>Scout AI</strong> - Ask any Chicago sports question and get smart answers</li>
+            <li><span class="icon">&#128176;</span> <strong>GM Trade Simulator</strong> - Build trades and see if they'd actually happen</li>
+            <li><span class="icon">&#127942;</span> <strong>Mock Draft</strong> - Pick your team's draft picks</li>
+            <li><span class="icon">&#128172;</span> <strong>Fan Chat</strong> - Talk sports with AI personalities</li>
+            <li><span class="icon">&#128202;</span> <strong>Team Pages</strong> - Stats, rosters, and scores for all 5 teams</li>
+            <li><span class="icon">&#127908;</span> <strong>Video Shows</strong> - Bears Film Room & more</li>
+          </ul>
+        </div>
+
+        <div class="tips-box">
+          <h4>&#128161; Quick Tip</h4>
+          <p>You can skip ahead to any feature using the buttons above, or close this tour anytime!</p>
+        </div>
+      </div>
+
+      <!-- SLIDE 1: Scout AI -->
+      <div class="slide" data-slide="1" data-name="Scout AI">
+        <div class="slide-icon" style="background: linear-gradient(135deg, #667eea, #764ba2);">
+          <span style="color: white;">&#129302;</span>
+        </div>
+        <div class="slide-title">Meet Scout AI</div>
+        <div class="slide-subtitle">Your personal Chicago sports expert!</div>
+
+        <div class="slide-content">
+          <h3>&#128161; What is Scout?</h3>
+          <p>Scout is like having a super-smart friend who knows EVERYTHING about Chicago sports. Just ask a question, and Scout will give you the answer!</p>
+
+          <h3 style="margin-top: 16px;">&#128172; Try asking things like:</h3>
+          <ul class="feature-list">
+            <li><span class="icon">&#127944;</span> "How many touchdowns did Caleb Williams throw?"</li>
+            <li><span class="icon">&#127936;</span> "Who leads the Bulls in scoring?"</li>
+            <li><span class="icon">&#9918;</span> "What's the Cubs record this year?"</li>
+            <li><span class="icon">&#127954;</span> "When do the Blackhawks play next?"</li>
+          </ul>
+        </div>
+
+        <div class="slide-content">
+          <h3>&#10024; Cool Features</h3>
+          <ul class="feature-list">
+            <li><span class="icon">&#128200;</span> <strong>Charts & Stats</strong> - Scout shows you graphs and tables</li>
+            <li><span class="icon">&#128173;</span> <strong>Follow-up Questions</strong> - Keep the conversation going!</li>
+            <li><span class="icon">&#127919;</span> <strong>Bonus Facts</strong> - Learn fun trivia with every answer</li>
+          </ul>
+        </div>
+
+        <div class="rules-box">
+          <h4>&#9888;&#65039; Important Rules</h4>
+          <ul>
+            <li><strong>Free users:</strong> 5 questions per day</li>
+            <li><strong>SM+ members:</strong> Unlimited questions!</li>
+            <li>Scout only knows about the 5 Chicago teams</li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- SLIDE 2: GM Trade Simulator -->
+      <div class="slide" data-slide="2" data-name="GM Trades">
+        <div class="slide-icon" style="background: linear-gradient(135deg, #11998e, #38ef7d);">
+          <span style="color: white;">&#128176;</span>
+        </div>
+        <div class="slide-title">GM Trade Simulator</div>
+        <div class="slide-subtitle">Think you can do better than your team's GM?</div>
+
+        <div class="slide-content">
+          <h3>&#128640; How It Works</h3>
+          <p>Pick your Chicago team, then build a trade with any other team in their league. Our AI (powered by Claude) will grade your trade and tell you if it would actually happen!</p>
+
+          <h3 style="margin-top: 16px;">&#128203; Steps:</h3>
+          <ul class="feature-list">
+            <li><span class="icon">1&#65039;&#8419;</span> Pick your Chicago team (Bears, Bulls, Cubs, Sox, or Hawks)</li>
+            <li><span class="icon">2&#65039;&#8419;</span> Select players you want to trade away</li>
+            <li><span class="icon">3&#65039;&#8419;</span> Pick the other team you want to trade with</li>
+            <li><span class="icon">4&#65039;&#8419;</span> Select players you want to get back</li>
+            <li><span class="icon">5&#65039;&#8419;</span> Add draft picks if you want</li>
+            <li><span class="icon">6&#65039;&#8419;</span> Submit and get your AI grade!</li>
+          </ul>
+        </div>
+
+        <div class="slide-content">
+          <h3>&#127919; Grade Scale</h3>
+          <div class="grade-scale">
+            <div class="grade-item green">
+              <div class="score">75-100</div>
+              <div class="label">ACCEPTED!</div>
+            </div>
+            <div class="grade-item yellow">
+              <div class="score">50-74</div>
+              <div class="label">REJECTED</div>
+            </div>
+            <div class="grade-item red">
+              <div class="score">0-49</div>
+              <div class="label">NO WAY!</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="rules-box">
+          <h4>&#128721; Special Rules</h4>
+          <ul>
+            <li><strong>Caleb Williams</strong> (Bears) = UNTOUCHABLE! Grade 0 if traded</li>
+            <li><strong>Connor Bedard</strong> (Blackhawks) = UNTOUCHABLE! Grade 0 if traded</li>
+            <li>Limit: 10 trades per minute</li>
+            <li>Must be logged in to use</li>
+          </ul>
+        </div>
+
+        <div class="tips-box">
+          <h4>&#127942; Leaderboard</h4>
+          <p>Your grades add up! Compete with other fans to see who's the best GM!</p>
+        </div>
+      </div>
+
+      <!-- SLIDE 3: Mock Draft -->
+      <div class="slide" data-slide="3" data-name="Mock Draft">
+        <div class="slide-icon" style="background: linear-gradient(135deg, #f093fb, #f5576c);">
+          <span style="color: white;">&#127942;</span>
+        </div>
+        <div class="slide-title">Mock Draft Simulator</div>
+        <div class="slide-subtitle">Pick your team's future stars!</div>
+
+        <div class="slide-content">
+          <h3>&#127871; What Is It?</h3>
+          <p>It's draft day and YOU'RE in charge! Pick prospects for your Chicago team and see how the AI grades your draft class.</p>
+
+          <h3 style="margin-top: 16px;">&#127939; How to Play:</h3>
+          <ul class="feature-list">
+            <li><span class="icon">&#128994;</span> Pick your team (if their draft window is open)</li>
+            <li><span class="icon">&#9193;</span> When it's your pick, choose a prospect</li>
+            <li><span class="icon">&#9209;&#65039;</span> Hit "Auto-Advance" to skip other teams' picks</li>
+            <li><span class="icon">&#128218;</span> Get your final draft grade from AI!</li>
+          </ul>
+        </div>
+
+        <div class="slide-content">
+          <h3>&#128214; Prospect Info</h3>
+          <p>Each prospect shows you:</p>
+          <ul class="feature-list">
+            <li><span class="icon">&#128100;</span> Name, position, and school</li>
+            <li><span class="icon">&#11088;</span> Scouting grade (how good they are)</li>
+            <li><span class="icon">&#128170;</span> Strengths and weaknesses</li>
+            <li><span class="icon">&#128101;</span> Pro comparison (who they play like)</li>
+          </ul>
+        </div>
+
+        <div class="rules-box">
+          <h4>&#128197; When Can I Draft?</h4>
+          <ul>
+            <li>Each sport has a draft window</li>
+            <li>Teams must be eligible (not in playoffs, etc.)</li>
+            <li>Check the team selector to see who's ready!</li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- SLIDE 4: Fan Chat -->
+      <div class="slide" data-slide="4" data-name="Fan Chat">
+        <div class="slide-icon" style="background: linear-gradient(135deg, #ff9a9e, #fecfef);">
+          <span>&#128172;</span>
+        </div>
+        <div class="slide-title">Fan Chat</div>
+        <div class="slide-subtitle">Talk sports with AI personalities!</div>
+
+        <div class="slide-content">
+          <h3>&#128075; Meet Our AI Fans</h3>
+          <p>Each team has their own AI personality who LOVES their team. They'll chat with you about games, players, and history!</p>
+
+          <div class="ai-cards">
+            <div class="ai-card">
+              <div class="emoji">&#128059;</div>
+              <div class="name">BearDownBenny</div>
+              <div class="team">Bears Fan</div>
+            </div>
+            <div class="ai-card">
+              <div class="emoji">&#127936;</div>
+              <div class="name">WindyCityHoops</div>
+              <div class="team">Bulls Fan</div>
+            </div>
+            <div class="ai-card">
+              <div class="emoji">&#9918;</div>
+              <div class="name">WrigleyWill</div>
+              <div class="team">Cubs Fan</div>
+            </div>
+            <div class="ai-card">
+              <div class="emoji">&#129402;</div>
+              <div class="name">SouthSideSoxSarah</div>
+              <div class="team">White Sox Fan</div>
+            </div>
+            <div class="ai-card" style="grid-column: span 2; max-width: 200px; margin: 0 auto;">
+              <div class="emoji">&#129413;</div>
+              <div class="name">MadhouseMike</div>
+              <div class="team">Blackhawks Fan</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="slide-content">
+          <h3>&#128221; Chat Rooms</h3>
+          <ul class="feature-list">
+            <li><span class="icon" style="background: #0B162A; color: white;">&#128059;</span> Bears Den</li>
+            <li><span class="icon" style="background: #CE1141; color: white;">&#127936;</span> Bulls Nation</li>
+            <li><span class="icon" style="background: #0E3386; color: white;">&#9918;</span> Cubs Talk</li>
+            <li><span class="icon" style="background: #27251F; color: white;">&#9918;</span> White Sox</li>
+            <li><span class="icon" style="background: #CF0A2C; color: white;">&#127954;</span> Blackhawks</li>
+            <li><span class="icon" style="background: #666;">&#127961;</span> Chicago Lounge (all teams!)</li>
+          </ul>
+        </div>
+
+        <div class="rules-box">
+          <h4>&#128220; Chat Rules</h4>
+          <ul>
+            <li>AI responds when you're alone OR if you tag them (@BearDownBenny)</li>
+            <li>Be respectful to other fans</li>
+            <li>No politics, religion, or gambling talk</li>
+            <li>Max 20 messages per hour in AI rooms</li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- SLIDE 5: Team Pages -->
+      <div class="slide" data-slide="5" data-name="Team Pages">
+        <div class="slide-icon" style="background: linear-gradient(135deg, #4facfe, #00f2fe);">
+          <span style="color: white;">&#128202;</span>
+        </div>
+        <div class="slide-title">Team Pages</div>
+        <div class="slide-subtitle">Everything about your team in one place!</div>
+
+        <div class="team-badges">
+          <div class="team-badge bears">&#128059;</div>
+          <div class="team-badge bulls">&#128004;</div>
+          <div class="team-badge cubs">&#128059;</div>
+          <div class="team-badge sox">&#9918;</div>
+          <div class="team-badge hawks">&#129413;</div>
+        </div>
+
+        <div class="slide-content">
+          <h3>&#128196; What's On Each Page?</h3>
+          <ul class="feature-list">
+            <li><span class="icon">&#128200;</span> <strong>Stats</strong> - Team stats and player leaders</li>
+            <li><span class="icon">&#128101;</span> <strong>Roster</strong> - All players with photos and info</li>
+            <li><span class="icon">&#128197;</span> <strong>Schedule</strong> - Upcoming and past games</li>
+            <li><span class="icon">&#127942;</span> <strong>Scores</strong> - Game results with box scores</li>
+            <li><span class="icon">&#128100;</span> <strong>Players</strong> - Click any player for full profile!</li>
+          </ul>
+        </div>
+
+        <div class="slide-content">
+          <h3>&#128640; Live Game Updates!</h3>
+          <p>When a game is live, we update scores every 10 seconds! Watch the action in real-time.</p>
+        </div>
+
+        <div class="tips-box">
+          <h4>&#128269; Finding Team Pages</h4>
+          <p>Click any team name in the top menu, then use the submenu for Stats, Roster, Schedule, etc.</p>
+        </div>
+      </div>
+
+      <!-- SLIDE 6: Polls -->
+      <div class="slide" data-slide="6" data-name="Polls">
+        <div class="slide-icon" style="background: linear-gradient(135deg, #a8edea, #fed6e3);">
+          <span>&#9989;</span>
+        </div>
+        <div class="slide-title">Polls & Voting</div>
+        <div class="slide-subtitle">Share your opinion with Chicago!</div>
+
+        <div class="slide-content">
+          <h3>&#128499;&#65039; How Polls Work</h3>
+          <p>Vote on hot takes, predictions, and debates! See what other Chicago fans think.</p>
+
+          <h3 style="margin-top: 16px;">&#128209; Poll Types:</h3>
+          <ul class="feature-list">
+            <li><span class="icon">&#9898;</span> <strong>Single Choice</strong> - Pick your one answer</li>
+            <li><span class="icon">&#9898;&#9898;</span> <strong>Multiple Choice</strong> - Pick several answers</li>
+            <li><span class="icon">&#128290;</span> <strong>Scale (1-10)</strong> - Rate something</li>
+            <li><span class="icon">&#128293;</span> <strong>Emoji React</strong> - Quick reactions!</li>
+          </ul>
+        </div>
+
+        <div class="slide-content">
+          <h3>&#127879; Team-Themed</h3>
+          <p>Polls can be styled with your team's colors! Bears polls are blue and orange, Bulls polls are red, etc.</p>
+        </div>
+
+        <div class="tips-box">
+          <h4>&#128204; Where to Find Polls</h4>
+          <p>Look for polls in articles, on the homepage, or visit /polls to see all active polls!</p>
+        </div>
+      </div>
+
+      <!-- SLIDE 7: Profile & Personalization -->
+      <div class="slide" data-slide="7" data-name="Your Profile">
+        <div class="slide-icon" style="background: linear-gradient(135deg, #ffecd2, #fcb69f);">
+          <span>&#128100;</span>
+        </div>
+        <div class="slide-title">Your Profile</div>
+        <div class="slide-subtitle">Make SportsMockery yours!</div>
+
+        <div class="slide-content">
+          <h3>&#10084;&#65039; Pick Your Favorite Teams</h3>
+          <p>Tell us which Chicago teams you love! Your favorite teams show up first in the feed.</p>
+
+          <div class="team-badges" style="margin: 16px 0;">
+            <div class="team-badge bears" style="border: 3px solid gold;">&#128059;</div>
+            <div class="team-badge bulls">&#128004;</div>
+            <div class="team-badge cubs">&#128059;</div>
+          </div>
+          <p style="text-align: center; font-size: 12px; color: #666;">Example: Bears as #1, then Bulls and Cubs</p>
+        </div>
+
+        <div class="slide-content">
+          <h3>&#127769; Dark Mode</h3>
+          <p>Like reading at night? Switch to dark mode! Click the sun/moon icon in the menu.</p>
+          <div style="display: flex; gap: 12px; margin-top: 12px; justify-content: center;">
+            <div style="width: 60px; height: 40px; background: #fff; border: 2px solid #ddd; border-radius: 8px; display: flex; align-items: center; justify-content: center;">&#9728;&#65039;</div>
+            <div style="width: 60px; height: 40px; background: #1a1a1a; border: 2px solid #333; border-radius: 8px; display: flex; align-items: center; justify-content: center;">&#127769;</div>
+          </div>
+        </div>
+
+        <div class="slide-content">
+          <h3>&#127881; Your Stats</h3>
+          <ul class="feature-list">
+            <li><span class="icon">&#128214;</span> Articles you've read</li>
+            <li><span class="icon">&#128172;</span> Comments you've posted</li>
+            <li><span class="icon">&#9989;</span> Votes you've cast</li>
+            <li><span class="icon">&#128293;</span> Your reading streak!</li>
+          </ul>
+        </div>
+
+        <div class="tips-box">
+          <h4>&#128276; Turn On Notifications</h4>
+          <p>Get alerts for breaking news, game starts, and when your team makes news!</p>
+        </div>
+      </div>
+
+      <!-- SLIDE 8: Video Shows -->
+      <div class="slide" data-slide="8" data-name="Videos">
+        <div class="slide-icon" style="background: linear-gradient(135deg, #e52d27, #b31217);">
+          <span style="color: white;">&#127909;</span>
+        </div>
+        <div class="slide-title">Video Shows</div>
+        <div class="slide-subtitle">Watch and listen to our sports content!</div>
+
+        <div class="slide-content">
+          <h3>&#127916; Our Shows</h3>
+          <ul class="feature-list">
+            <li>
+              <span class="icon" style="background: #0B162A; color: white;">&#128059;</span>
+              <div>
+                <strong>Bears Film Room</strong><br>
+                <span style="font-size: 12px; color: #666;">Deep dive into Bears plays and film breakdowns</span>
+              </div>
+            </li>
+            <li>
+              <span class="icon" style="background: #0E3386; color: white;">&#9918;</span>
+              <div>
+                <strong>Pinwheels & Ivy</strong><br>
+                <span style="font-size: 12px; color: #666;">Cubs coverage and analysis</span>
+              </div>
+            </li>
+            <li>
+              <span class="icon" style="background: #27251F; color: white;">&#127909;</span>
+              <div>
+                <strong>Southside Behavior</strong><br>
+                <span style="font-size: 12px; color: #666;">White Sox TikToks and quick reactions</span>
+              </div>
+            </li>
+            <li>
+              <span class="icon" style="background: #bc0000; color: white;">&#127911;</span>
+              <div>
+                <strong>Untold Chicago Stories</strong><br>
+                <span style="font-size: 12px; color: #666;">Long-form stories from former athletes</span>
+              </div>
+            </li>
+          </ul>
+        </div>
+
+        <div class="tips-box">
+          <h4>&#128250; Where to Watch</h4>
+          <p>Find all shows in the Podcasts menu or go directly to /bears-film-room, /pinwheels-and-ivy, etc.</p>
+        </div>
+      </div>
+
+      <!-- SLIDE 9: SM+ Subscription -->
+      <div class="slide" data-slide="9" data-name="SM+ Premium">
+        <div class="slide-icon" style="background: linear-gradient(135deg, #f5af19, #f12711);">
+          <span style="color: white;">&#11088;</span>
+        </div>
+        <div class="slide-title">SM+ Premium</div>
+        <div class="slide-subtitle">Unlock the full experience!</div>
+
+        <div class="slide-content">
+          <h3>&#129351; Free vs SM+ Comparison</h3>
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 12px;">
+            <div style="background: #f8f9fa; padding: 12px; border-radius: 10px; border: 1px solid #ddd;">
+              <div style="font-weight: 700; margin-bottom: 8px; font-size: 14px;">FREE</div>
+              <div style="font-size: 12px; color: #666;">
+                &#10003; Read all articles<br>
+                &#10003; 5 Scout AI questions/day<br>
+                &#10003; Basic chat access<br>
+                &#10003; Vote in polls<br>
+                &#10007; Has ads
+              </div>
+            </div>
+            <div style="background: linear-gradient(135deg, #f5af19, #f12711); padding: 12px; border-radius: 10px; color: white;">
+              <div style="font-weight: 700; margin-bottom: 8px; font-size: 14px;">SM+ &#11088;</div>
+              <div style="font-size: 12px;">
+                &#10003; Everything in Free<br>
+                &#10003; UNLIMITED Scout AI<br>
+                &#10003; Full chat access<br>
+                &#10003; No ads!<br>
+                &#10003; AR stadium tours<br>
+                &#10003; Exclusive content
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="slide-content">
+          <h3>&#128184; Pricing</h3>
+          <p style="text-align: center; margin: 16px 0;">
+            <strong style="font-size: 24px;">Monthly</strong> or <strong style="font-size: 24px;">Annual</strong> (save more!)
+          </p>
+          <p style="text-align: center; font-size: 13px; color: #666;">Visit /pricing for current prices and to subscribe</p>
+        </div>
+
+        <div class="tips-box">
+          <h4>&#127881; Thank You!</h4>
+          <p>That's the tour! Click "Finish Tour" to start exploring. Have fun, Chicago!</p>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Footer Navigation -->
+    <div class="tour-footer">
+      <button class="skip-link" onclick="closeTour()">Skip tour</button>
+      <div style="display: flex; gap: 12px;">
+        <button class="tour-btn secondary" id="prevBtn" onclick="prevSlide()" style="display: none;">Back</button>
+        <button class="tour-btn primary" id="nextBtn" onclick="nextSlide()">Next &rarr;</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  let currentSlide = 0;
+  const totalSlides = 10;
+  const slideNames = ['Welcome', 'Scout AI', 'GM Trades', 'Mock Draft', 'Fan Chat', 'Team Pages', 'Polls', 'Your Profile', 'Videos', 'SM+ Premium'];
+
+  function updateUI() {
+    // Update slides
+    document.querySelectorAll('.slide').forEach((slide, index) => {
+      slide.classList.toggle('active', index === currentSlide);
+    });
+
+    // Update progress
+    const progress = ((currentSlide + 1) / totalSlides) * 100;
+    document.getElementById('progressFill').style.width = progress + '%';
+    document.getElementById('slideNumber').textContent = `${currentSlide + 1} of ${totalSlides}`;
+    document.getElementById('slideName').textContent = slideNames[currentSlide];
+
+    // Update TOC buttons
+    document.querySelectorAll('.toc-btn').forEach((btn, index) => {
+      btn.classList.toggle('active', index === currentSlide);
+    });
+
+    // Update navigation buttons
+    document.getElementById('prevBtn').style.display = currentSlide > 0 ? 'block' : 'none';
+    document.getElementById('nextBtn').textContent = currentSlide === totalSlides - 1 ? 'Finish Tour' : 'Next →';
+  }
+
+  function nextSlide() {
+    if (currentSlide < totalSlides - 1) {
+      currentSlide++;
+      updateUI();
+    } else {
+      closeTour();
+    }
+  }
+
+  function prevSlide() {
+    if (currentSlide > 0) {
+      currentSlide--;
+      updateUI();
+    }
+  }
+
+  function goToSlide(index) {
+    currentSlide = index;
+    updateUI();
+  }
+
+  function closeTour() {
+    // In the actual implementation, this would:
+    // 1. Set a cookie/localStorage to not show again
+    // 2. Hide the overlay
+    // For preview, we'll just show an alert
+    alert('Tour closed! In the real site, this would save your preference and close the popup.');
+
+    // Example of what the real implementation would do:
+    // localStorage.setItem('sm_tour_completed', 'true');
+    // document.querySelector('.tour-overlay').style.display = 'none';
+  }
+
+  // Initialize
+  updateUI();
+</script>
+
+</body>
+</html>

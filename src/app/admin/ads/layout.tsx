@@ -1,7 +1,7 @@
 import type { Metadata } from 'next'
 
 export const metadata: Metadata = {
-  title: 'Sports Mockery | Ads',
+  title: 'Ads',
 }
 
 export default function AdsLayout({ children }: { children: React.ReactNode }) {

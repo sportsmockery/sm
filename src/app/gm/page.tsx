@@ -773,10 +773,11 @@ export default function GMPage() {
                 padding: 16,
                 display: 'flex',
                 flexDirection: 'column',
-                maxHeight: 'calc(100vh - 220px)',
+                maxHeight: 'calc(100vh - 160px)',
+                minHeight: 500,
                 position: 'sticky',
-                top: 180,
-                overflow: 'hidden',
+                top: 140,
+                overflow: 'auto',
               }}>
                 <RosterPanel
                   players={roster}
@@ -885,10 +886,11 @@ export default function GMPage() {
                 padding: 16,
                 display: 'flex',
                 flexDirection: 'column',
-                maxHeight: 'calc(100vh - 220px)',
+                maxHeight: 'calc(100vh - 160px)',
+                minHeight: 500,
                 position: 'sticky',
-                top: 180,
-                overflow: 'hidden',
+                top: 140,
+                overflow: 'auto',
               }}>
                 {/* Opponent header */}
                 <div style={{

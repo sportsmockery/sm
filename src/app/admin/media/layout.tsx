@@ -1,7 +1,7 @@
 import type { Metadata } from 'next'
 
 export const metadata: Metadata = {
-  title: 'Sports Mockery | Media Library',
+  title: 'Media Library',
 }
 
 export default function MediaLayout({ children }: { children: React.ReactNode }) {

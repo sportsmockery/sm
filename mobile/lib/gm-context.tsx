@@ -65,6 +65,7 @@ type GMAction =
   | { type: 'REMOVE_DRAFT_PICK_RECEIVED'; index: number }
   | { type: 'SET_GRADING'; grading: boolean }
   | { type: 'SET_GRADE_RESULT'; result: GradeResult | null }
+  | { type: 'CLEAR_GRADE' }
   | { type: 'SET_SESSION_ID'; id: string }
   | { type: 'RESET' }
   // MLB Prospects Actions
@@ -172,6 +173,8 @@ function gmReducer(state: GMState, action: GMAction): GMState {
       return { ...state, grading: action.grading }
     case 'SET_GRADE_RESULT':
       return { ...state, gradeResult: action.result, grading: false }
+    case 'CLEAR_GRADE':
+      return { ...state, gradeResult: null, grading: false }
     case 'SET_SESSION_ID':
       return { ...state, sessionId: action.id }
     case 'RESET':

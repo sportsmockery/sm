@@ -332,6 +332,19 @@ export default function GMResultScreen() {
           </TouchableOpacity>
         </View>
 
+        {/* Edit Trade Button */}
+        <TouchableOpacity
+          style={[styles.editTradeBtn, { borderColor: colors.border }]}
+          onPress={() => {
+            // Keep players selected, just go back to review
+            dispatch({ type: 'CLEAR_GRADE' })
+            router.replace('/gm/review')
+          }}
+        >
+          <Ionicons name="create-outline" size={18} color={colors.text} />
+          <Text style={[styles.editTradeBtnText, { color: colors.text }]}>Edit Trade</Text>
+        </TouchableOpacity>
+
         {/* V2 Actions */}
         <View style={styles.v2Actions}>
           <TouchableOpacity
@@ -465,6 +478,18 @@ const styles = StyleSheet.create({
     paddingVertical: 14, borderRadius: 12, gap: 8,
   },
   secondaryBtnText: { fontSize: 15, fontFamily: 'Montserrat-Bold' },
+  editTradeBtn: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingVertical: 12,
+    borderRadius: 10,
+    borderWidth: 1,
+    marginTop: 12,
+    gap: 8,
+    width: '100%',
+  },
+  editTradeBtnText: { fontSize: 14, fontFamily: 'Montserrat-SemiBold' },
   v2Actions: {
     flexDirection: 'row', gap: 12, marginTop: 12, width: '100%',
   },

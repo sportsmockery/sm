@@ -347,16 +347,104 @@ export interface AnalyticsResult {
 export interface SeasonRecord {
   wins: number
   losses: number
+  otLosses?: number // NHL only
   madePlayoffs: boolean
   playoffSeed?: number
   divisionRank?: number
+  conferenceRank?: number
 }
 
 export interface SeasonSimScoreBreakdown {
   tradeQualityScore: number
   winImprovementScore: number
   playoffBonusScore: number
+  championshipBonus: number
   winImprovement: number
+}
+
+// Team standing in league standings
+export interface TeamStanding {
+  teamKey: string
+  teamName: string
+  abbreviation: string
+  logoUrl: string
+  primaryColor: string
+  wins: number
+  losses: number
+  otLosses?: number // NHL
+  winPct: number
+  division: string
+  conference: string
+  divisionRank: number
+  conferenceRank: number
+  playoffSeed: number | null
+  gamesBack: number
+  isUserTeam: boolean
+  isTradePartner: boolean
+  tradeImpact?: number // +/- wins from trade
+}
+
+// Playoff matchup
+export interface PlayoffMatchup {
+  round: number
+  roundName: string
+  homeTeam: {
+    teamKey: string
+    teamName: string
+    abbreviation: string
+    logoUrl: string
+    primaryColor: string
+    seed: number
+    wins: number
+  }
+  awayTeam: {
+    teamKey: string
+    teamName: string
+    abbreviation: string
+    logoUrl: string
+    primaryColor: string
+    seed: number
+    wins: number
+  }
+  seriesWins: [number, number] // [home, away]
+  winner: 'home' | 'away' | null
+  isComplete: boolean
+  gamesPlayed: number
+  userTeamInvolved: boolean
+}
+
+// Championship result
+export interface ChampionshipResult {
+  winner: {
+    teamKey: string
+    teamName: string
+    abbreviation: string
+    logoUrl: string
+    primaryColor: string
+  }
+  runnerUp: {
+    teamKey: string
+    teamName: string
+    abbreviation: string
+    logoUrl: string
+    primaryColor: string
+  }
+  seriesScore: string // "4-2", "4-3", etc.
+  mvp?: string
+  userTeamWon: boolean
+  userTeamInFinals: boolean
+}
+
+// Season summary narrative
+export interface SeasonSummary {
+  headline: string
+  narrative: string
+  tradeImpactSummary: string
+  keyMoments: string[]
+  affectedTeams: {
+    teamName: string
+    impact: string
+  }[]
 }
 
 export interface SeasonSimulationResult {
@@ -365,4 +453,22 @@ export interface SeasonSimulationResult {
   modified: SeasonRecord
   gmScore: number
   scoreBreakdown: SeasonSimScoreBreakdown
+  // Extended data for full simulation
+  standings?: {
+    conference1: TeamStanding[]
+    conference2: TeamStanding[]
+    conference1Name: string
+    conference2Name: string
+  }
+  playoffs?: {
+    bracket: PlayoffMatchup[]
+    userTeamResult?: {
+      madePlayoffs: boolean
+      eliminatedRound?: number
+      eliminatedBy?: string
+      wonChampionship: boolean
+    }
+  }
+  championship?: ChampionshipResult
+  seasonSummary?: SeasonSummary
 }

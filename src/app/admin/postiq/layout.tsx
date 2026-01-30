@@ -1,7 +1,7 @@
 import type { Metadata } from 'next'
 
 export const metadata: Metadata = {
-  title: 'Sports Mockery | PostIQ',
+  title: 'PostIQ',
 }
 
 export default function PostIQLayout({ children }: { children: React.ReactNode }) {

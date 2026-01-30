@@ -143,6 +143,13 @@ export function TradeBoard({
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+      {/* CSS animation for spinner */}
+      <style>{`
+        @keyframes spin {
+          from { transform: rotate(0deg); }
+          to { transform: rotate(360deg); }
+        }
+      `}</style>
       {/* Two-panel trade visualization */}
       <div style={{ display: 'flex', flexDirection: mobile ? 'column' : 'row', gap: 0, alignItems: 'stretch' }}>
         {/* Chicago side */}
@@ -590,40 +597,79 @@ export function TradeBoard({
                 </button>
               )}
               {gradeResult.shared_code && (
-                <button
-                  onClick={handleCopyLink}
-                  style={{
-                    padding: '12px 28px',
-                    borderRadius: 10,
-                    border: `2px solid ${copied ? '#22c55e' : borderColor}`,
-                    backgroundColor: copied ? '#22c55e10' : 'transparent',
-                    color: copied ? '#22c55e' : textColor,
-                    fontWeight: 600,
-                    fontSize: 14,
-                    cursor: 'pointer',
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: 6,
-                    transition: 'all 0.2s',
-                  }}
-                >
-                  {copied ? (
-                    <>
-                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#22c55e" strokeWidth="2.5">
-                        <path d="M20 6L9 17l-5-5" strokeLinecap="round" strokeLinejoin="round" />
-                      </svg>
-                      Copied!
-                    </>
-                  ) : (
-                    <>
-                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                        <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" strokeLinecap="round" strokeLinejoin="round" />
-                        <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" strokeLinecap="round" strokeLinejoin="round" />
-                      </svg>
-                      Copy Link
-                    </>
-                  )}
-                </button>
+                <>
+                  <button
+                    onClick={handleCopyLink}
+                    style={{
+                      padding: '12px 28px',
+                      borderRadius: 10,
+                      border: `2px solid ${copied ? '#22c55e' : borderColor}`,
+                      backgroundColor: copied ? '#22c55e10' : 'transparent',
+                      color: copied ? '#22c55e' : textColor,
+                      fontWeight: 600,
+                      fontSize: 14,
+                      cursor: 'pointer',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: 6,
+                      transition: 'all 0.2s',
+                    }}
+                  >
+                    {copied ? (
+                      <>
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#22c55e" strokeWidth="2.5">
+                          <path d="M20 6L9 17l-5-5" strokeLinecap="round" strokeLinejoin="round" />
+                        </svg>
+                        Copied!
+                      </>
+                    ) : (
+                      <>
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                          <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" strokeLinecap="round" strokeLinejoin="round" />
+                          <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" strokeLinecap="round" strokeLinejoin="round" />
+                        </svg>
+                        Copy Link
+                      </>
+                    )}
+                  </button>
+                  <button
+                    onClick={handleCreateImage}
+                    disabled={generatingImage}
+                    style={{
+                      padding: '12px 28px',
+                      borderRadius: 10,
+                      border: `2px solid ${borderColor}`,
+                      backgroundColor: generatingImage ? (isDark ? '#374151' : '#e5e7eb') : 'transparent',
+                      color: textColor,
+                      fontWeight: 600,
+                      fontSize: 14,
+                      cursor: generatingImage ? 'wait' : 'pointer',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: 6,
+                      opacity: generatingImage ? 0.7 : 1,
+                    }}
+                  >
+                    {generatingImage ? (
+                      <>
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" style={{ animation: 'spin 1s linear infinite' }}>
+                          <circle cx="12" cy="12" r="10" strokeOpacity="0.25" />
+                          <path d="M12 2a10 10 0 0 1 10 10" strokeLinecap="round" />
+                        </svg>
+                        Creating...
+                      </>
+                    ) : (
+                      <>
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                          <rect x="3" y="3" width="18" height="18" rx="2" ry="2" strokeLinecap="round" strokeLinejoin="round" />
+                          <circle cx="8.5" cy="8.5" r="1.5" fill="currentColor" />
+                          <polyline points="21 15 16 10 5 21" strokeLinecap="round" strokeLinejoin="round" />
+                        </svg>
+                        Create Image
+                      </>
+                    )}
+                  </button>
+                </>
               )}
             </div>
 
@@ -651,6 +697,49 @@ export function TradeBoard({
                       Show off your GM skills on social media
                     </div>
                   </div>
+
+                  {/* Generated Image Preview */}
+                  {generatedImageUrl && (
+                    <div style={{ marginBottom: 16 }}>
+                      <div style={{
+                        borderRadius: 8,
+                        overflow: 'hidden',
+                        border: `1px solid ${borderColor}`,
+                        marginBottom: 12,
+                      }}>
+                        <img
+                          src={generatedImageUrl}
+                          alt="Trade Grade"
+                          style={{ width: '100%', display: 'block' }}
+                        />
+                      </div>
+                      <button
+                        onClick={handleDownloadImage}
+                        style={{
+                          width: '100%',
+                          padding: '10px 16px',
+                          borderRadius: 8,
+                          border: 'none',
+                          backgroundColor: '#22c55e',
+                          color: '#fff',
+                          fontWeight: 600,
+                          fontSize: 13,
+                          cursor: 'pointer',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          gap: 8,
+                        }}
+                      >
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" strokeLinecap="round" strokeLinejoin="round" />
+                          <polyline points="7 10 12 15 17 10" strokeLinecap="round" strokeLinejoin="round" />
+                          <line x1="12" y1="15" x2="12" y2="3" strokeLinecap="round" strokeLinejoin="round" />
+                        </svg>
+                        Download Image
+                      </button>
+                    </div>
+                  )}
 
                   {/* Social Icons */}
                   <div style={{ display: 'flex', justifyContent: 'center', gap: 12 }}>

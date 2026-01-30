@@ -1,7 +1,7 @@
 import type { Metadata } from 'next'
 
 export const metadata: Metadata = {
-  title: 'Sports Mockery | Notifications',
+  title: 'Notifications',
 }
 
 export default function NotificationsLayout({ children }: { children: React.ReactNode }) {

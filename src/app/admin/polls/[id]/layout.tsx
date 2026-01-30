@@ -1,7 +1,7 @@
 import type { Metadata } from 'next'
 
 export const metadata: Metadata = {
-  title: 'Sports Mockery | Poll Details',
+  title: 'Poll Details',
 }
 
 export default function PollDetailLayout({ children }: { children: React.ReactNode }) {
