@@ -52,9 +52,9 @@ export function ProspectCard({ prospect, selected, teamColor, onClick }: Prospec
 
   // Support both field naming conventions
   const level = prospect.current_level || prospect.level || ''
-  const rank = prospect.team_rank || prospect.rank || 0
-  const isTop100 = prospect.mlb_top_100_rank != null || prospect.isTop100 === true
-  const top100Rank = prospect.mlb_top_100_rank
+  const rank = prospect.org_rank || prospect.team_rank || prospect.rank || 0
+  const isTop100 = rank <= 5  // Top 5 org prospects highlighted
+  const gradeNumeric = prospect.prospect_grade_numeric || 0
 
   const levelColor = LEVEL_COLORS[level] || '#6b7280'
   const gradeColor = GRADE_COLORS[prospect.prospect_grade] || '#6b7280'
@@ -238,30 +238,19 @@ export function ProspectCard({ prospect, selected, teamColor, onClick }: Prospec
             {prospect.prospect_grade}
           </span>
         )}
-        {/* Top 100 or Org badge */}
-        {isTop100 && top100Rank ? (
-          <span style={{
-            fontSize: 10,
-            fontWeight: 700,
-            padding: '2px 8px',
-            borderRadius: 4,
-            backgroundColor: '#dc262620',
-            color: '#dc2626',
-          }}>
-            #{top100Rank} MLB
-          </span>
-        ) : rank <= 10 ? (
+        {/* Trade value badge */}
+        {prospect.trade_value && (
           <span style={{
             fontSize: 10,
             fontWeight: 600,
             padding: '2px 8px',
             borderRadius: 4,
-            backgroundColor: `${teamColor}20`,
-            color: teamColor,
+            backgroundColor: prospect.trade_value >= 80 ? '#dc262620' : `${teamColor}20`,
+            color: prospect.trade_value >= 80 ? '#dc2626' : teamColor,
           }}>
-            Org #{rank}
+            TV: {prospect.trade_value}
           </span>
-        ) : null}
+        )}
 
         {/* ETA */}
         {prospect.eta && (

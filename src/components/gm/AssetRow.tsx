@@ -100,14 +100,16 @@ export function AssetRow({
     rightBadge = 'Pick'
     tooltipText = 'Draft pick value varies by position'
   } else if (type === 'PROSPECT' && prospect) {
-    const rank = prospect.team_rank || prospect.rank || 0
+    const rank = prospect.org_rank || prospect.team_rank || prospect.rank || 0
     const level = prospect.current_level || prospect.level || ''
-    const isTop100 = prospect.mlb_top_100_rank != null || prospect.isTop100 === true
     const rankPrefix = rank ? `#${rank} ` : ''
     primaryText = `${rankPrefix}${prospect.name}`
-    secondaryText = `${level} - ${prospect.position} - Age ${prospect.age}`
-    rightBadge = prospect.prospect_grade || (isTop100 ? 'Top 100' : 'Prospect')
-    if (prospect.eta) {
+    secondaryText = level ? `${level} - ${prospect.position}` : prospect.position
+    if (prospect.age) secondaryText += ` - Age ${prospect.age}`
+    rightBadge = prospect.prospect_grade || 'Prospect'
+    if (prospect.trade_value) {
+      rightText = `TV: ${prospect.trade_value}`
+    } else if (prospect.eta) {
       rightText = `ETA ${prospect.eta}`
     }
     avatarInitials = prospect.name.split(' ').map(n => n[0]).join('').slice(0, 2)

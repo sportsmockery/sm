@@ -16,36 +16,37 @@ export interface DraftPick {
 
 // MLB farm system prospect (matches Datalab gm_mlb_prospects table)
 export interface MLBProspect {
-  prospect_id: string
+  // Core fields from gm_mlb_prospects table
+  id?: string                 // UUID
+  prospect_id?: string        // Alias for id
   name: string
   position: string
-  team_key: string
-  team_name?: string
-  team_rank: number           // Organization rank (1-30)
-  mlb_top_100_rank?: number   // MLB Top 100 rank (null if not in top 100)
-  prospect_grade: string      // A+, A, A-, B+, B, B-, C+, C, C-, D
-  prospect_grade_display?: string  // "Grade: A-"
-  trade_value: number         // 25-95 based on grade
-  age: number
-  current_level: string       // 'R' | 'A' | 'A+' | 'AA' | 'AAA'
+  team_key: string            // 'chw', 'chc', etc.
+  team_name?: string          // 'Chicago White Sox'
+  org_rank: number            // Organization ranking (1-30)
+  age?: number
+  prospect_grade: string      // Letter grade: A+, A, A-, B+, B, B-, C+, C
+  prospect_grade_numeric?: number  // Numeric grade: 80, 75, 70, 65, 60, 55, 50, 45
+  trade_value: number         // Trade value (1-100)
+  source?: string             // 'Prospects1500'
+
+  // Optional extended fields (may be added later)
+  current_level?: string      // 'R' | 'A' | 'A+' | 'AA' | 'AAA'
   eta?: string                // "Late 2025", "2026", etc.
   scouting_summary?: string
-  is_prospect: boolean
-  player_type: 'prospect'
-  headshot_url?: string       // Future: player headshots
+  headshot_url?: string
 
-  // New valuation fields (Jan 2026)
-  prospect_fv_bucket?: number          // Future Value: 40-80
+  // Valuation fields (if available)
+  prospect_fv_bucket?: number
   prospect_tier?: 'elite' | 'plus' | 'average' | 'organizational'
   risk_level?: 'low' | 'medium' | 'high'
   position_group?: 'pitcher' | 'catcher' | 'up_the_middle' | 'corner'
-  prospect_surplus_value_millions?: number  // Trade value in $M (1.0-80.0)
-  proximity_level?: 'MLB' | 'AAA' | 'AA' | 'A' | 'Rookie'
+  prospect_surplus_value_millions?: number
 
-  // Computed helpers for backwards compatibility
-  rank?: number               // Alias for team_rank
+  // Backwards compatibility aliases
+  team_rank?: number          // Alias for org_rank
+  rank?: number               // Alias for org_rank
   level?: string              // Alias for current_level
-  isTop100?: boolean          // true if mlb_top_100_rank exists
 }
 
 // Player data (mirrors PlayerData from PlayerCard.tsx)
