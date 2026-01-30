@@ -342,3 +342,27 @@ export interface AnalyticsResult {
     accepted_rate: number
   }>
 }
+
+// Season Simulation Types
+export interface SeasonRecord {
+  wins: number
+  losses: number
+  madePlayoffs: boolean
+  playoffSeed?: number
+  divisionRank?: number
+}
+
+export interface SeasonSimScoreBreakdown {
+  tradeQualityScore: number
+  winImprovementScore: number
+  playoffBonusScore: number
+  winImprovement: number
+}
+
+export interface SeasonSimulationResult {
+  success: boolean
+  baseline: SeasonRecord
+  modified: SeasonRecord
+  gmScore: number
+  scoreBreakdown: SeasonSimScoreBreakdown
+}
