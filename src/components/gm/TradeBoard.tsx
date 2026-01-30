@@ -1,6 +1,6 @@
 'use client'
-import { motion, AnimatePresence } from 'framer-motion'
-import { PlayerCard, PlayerData } from './PlayerCard'
+import { AnimatePresence, motion } from 'framer-motion'
+import { PlayerData } from './PlayerCard'
 import { AssetRow } from './AssetRow'
 import { ValidationIndicator, ValidationState } from './ValidationIndicator'
 import { useTheme } from '@/contexts/ThemeContext'
@@ -45,7 +45,6 @@ export function TradeBoard({
   onRemoveDraftSent, onRemoveDraftReceived,
   canGrade, grading, onGrade,
   validation,
-  currentStep = 1,
   mobile = false,
 }: TradeBoardProps) {
   const { theme } = useTheme()
@@ -55,56 +54,15 @@ export function TradeBoard({
   const panelBg = isDark ? '#111827' : '#f9fafb'
   const borderColor = isDark ? '#374151' : '#e5e7eb'
 
-  const steps = ['Select players', 'Add picks', 'Validate', 'Grade']
   const displayLabel = chicagoLabel || chicagoTeam
+
+  // Check if both sides have assets
+  const hasSentAssets = playersSent.length > 0 || draftPicksSent.length > 0
+  const hasReceivedAssets = playersReceived.length > 0 || draftPicksReceived.length > 0
+  const bothSidesHaveAssets = hasSentAssets && hasReceivedAssets
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-      {/* Step indicator */}
-      <div style={{
-        display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 4,
-        paddingBottom: 12, borderBottom: `1px solid ${borderColor}`,
-      }}>
-        {steps.map((step, i) => {
-          const stepNum = i + 1
-          const isComplete = currentStep > stepNum
-          const isActive = currentStep === stepNum
-          return (
-            <div key={step} style={{ display: 'flex', alignItems: 'center' }}>
-              <div style={{
-                display: 'flex', alignItems: 'center', gap: 6,
-                padding: '4px 10px', borderRadius: 16,
-                backgroundColor: isActive ? '#bc000015' : 'transparent',
-              }}>
-                <div style={{
-                  width: 20, height: 20, borderRadius: '50%',
-                  display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  fontSize: 11, fontWeight: 700,
-                  backgroundColor: isComplete ? '#22c55e' : isActive ? '#bc0000' : (isDark ? '#374151' : '#e5e7eb'),
-                  color: isComplete || isActive ? '#fff' : subText,
-                }}>
-                  {isComplete ? '✓' : stepNum}
-                </div>
-                <span style={{
-                  fontSize: 11, fontWeight: isActive ? 600 : 400,
-                  color: isActive ? '#bc0000' : subText,
-                  display: mobile ? 'none' : 'inline',
-                }}>
-                  {step}
-                </span>
-              </div>
-              {i < steps.length - 1 && (
-                <div style={{
-                  width: mobile ? 8 : 20, height: 2,
-                  backgroundColor: isComplete ? '#22c55e' : (isDark ? '#374151' : '#e5e7eb'),
-                  marginLeft: 4, marginRight: 4,
-                }} />
-              )}
-            </div>
-          )
-        })}
-      </div>
-
       {/* Two-panel trade visualization */}
       <div style={{ display: 'flex', flexDirection: mobile ? 'column' : 'row', gap: 0, alignItems: 'stretch' }}>
         {/* Chicago side */}
@@ -263,37 +221,39 @@ export function TradeBoard({
         </div>
       </div>
 
-      {/* Validation indicator */}
-      {validation && validation.status !== 'idle' && (
-        <ValidationIndicator validation={validation} />
-      )}
+      {/* Validation and Grade section - stable layout */}
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+        {/* Validation indicator - only show when both sides have assets */}
+        {bothSidesHaveAssets && validation && validation.status !== 'idle' && (
+          <ValidationIndicator validation={validation} />
+        )}
 
-      {/* Grade button */}
-      {(() => {
-        const isBlocked = validation?.status === 'invalid'
-        const canClick = canGrade && !grading && !isBlocked
-        return (
-          <button
-            onClick={onGrade}
-            disabled={!canClick}
-            style={{
-              width: '100%',
-              padding: '14px 32px',
-              borderRadius: '12px',
-              border: 'none',
-              backgroundColor: canClick ? '#bc0000' : (isDark ? '#374151' : '#d1d5db'),
-              color: canClick ? '#fff' : subText,
-              fontWeight: 800,
-              fontSize: '16px',
-              cursor: canClick ? 'pointer' : 'not-allowed',
-              letterSpacing: '0.5px',
-              transition: 'background-color 0.15s, transform 0.1s',
-            }}
-          >
-            {grading ? 'ANALYZING TRADE...' : isBlocked ? 'FIX ISSUES TO GRADE' : 'GRADE TRADE'}
-          </button>
-        )
-      })()}
+        {/* Grade button - always visible */}
+        {(() => {
+          const isBlocked = validation?.status === 'invalid'
+          const canClick = canGrade && !grading && !isBlocked
+          return (
+            <button
+              onClick={onGrade}
+              disabled={!canClick}
+              style={{
+                width: '100%',
+                padding: '14px 32px',
+                borderRadius: '12px',
+                border: 'none',
+                backgroundColor: canClick ? '#bc0000' : (isDark ? '#374151' : '#d1d5db'),
+                color: canClick ? '#fff' : subText,
+                fontWeight: 800,
+                fontSize: '16px',
+                cursor: canClick ? 'pointer' : 'not-allowed',
+                letterSpacing: '0.5px',
+              }}
+            >
+              {grading ? 'ANALYZING TRADE...' : isBlocked ? 'FIX ISSUES TO GRADE' : 'GRADE TRADE'}
+            </button>
+          )
+        })()}
+      </div>
     </div>
   )
 }
