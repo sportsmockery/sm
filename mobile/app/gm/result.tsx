@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import {
   View,
   Text,
@@ -7,6 +7,8 @@ import {
   StyleSheet,
   Animated,
   Share,
+  Modal,
+  Alert,
 } from 'react-native'
 import { Image } from 'expo-image'
 import { useRouter } from 'expo-router'
@@ -17,7 +19,8 @@ import { useTheme } from '@/hooks/useTheme'
 import { COLORS, TEAMS, API_BASE_URL } from '@/lib/config'
 import { useGM } from '@/lib/gm-context'
 import { gmApi } from '@/lib/gm-api'
-import type { PlayerData, DraftPick } from '@/lib/gm-types'
+import type { PlayerData, DraftPick, SeasonSimulationResult } from '@/lib/gm-types'
+import { SimulationTrigger, SimulationResults } from '@/components/gm'
 
 function formatMoney(value: number | null | undefined): string {
   if (!value) return '—'
@@ -37,6 +40,12 @@ export default function GMResultScreen() {
   const { state, dispatch } = useGM()
   const result = state.gradeResult
 
+  // Simulation state
+  const [isSimulating, setIsSimulating] = useState(false)
+  const [simulationResult, setSimulationResult] = useState<SeasonSimulationResult | null>(null)
+  const [showSimulationResults, setShowSimulationResults] = useState(false)
+  const [tradeCount, setTradeCount] = useState(1) // Track trades in session
+
   const scaleAnim = useRef(new Animated.Value(0)).current
   const fadeAnim = useRef(new Animated.Value(0)).current
   const gradeAnim = useRef(new Animated.Value(0)).current
@@ -50,6 +59,42 @@ export default function GMResultScreen() {
       ]),
     ]).start()
   }, [])
+
+  // Handle season simulation
+  const handleSimulateSeason = async () => {
+    if (!state.sessionId || !state.chicagoTeam || !state.sport) {
+      Alert.alert('Error', 'Missing session information')
+      return
+    }
+
+    setIsSimulating(true)
+    try {
+      const simResult = await gmApi.simulateSeason({
+        sessionId: state.sessionId,
+        sport: state.sport,
+        teamKey: state.chicagoTeam,
+        seasonYear: 2026,
+      })
+
+      if (simResult.success) {
+        setSimulationResult(simResult)
+        setShowSimulationResults(true)
+      } else {
+        Alert.alert('Error', 'Simulation failed. Please try again.')
+      }
+    } catch (err: any) {
+      console.error('Simulation error:', err)
+      Alert.alert('Error', err.message || 'Simulation failed')
+    } finally {
+      setIsSimulating(false)
+    }
+  }
+
+  const handleSimulateAgain = () => {
+    setShowSimulationResults(false)
+    setSimulationResult(null)
+    handleSimulateSeason()
+  }
 
   if (!result) {
     return (
@@ -317,6 +362,17 @@ export default function GMResultScreen() {
           </TouchableOpacity>
         </View>
 
+        {/* Season Simulation */}
+        {state.sessionId && state.chicagoTeam && (
+          <SimulationTrigger
+            tradeCount={tradeCount}
+            sport={state.sport || 'nfl'}
+            onSimulate={handleSimulateSeason}
+            isSimulating={isSimulating}
+            teamColor={teamConfig?.color || COLORS.primary}
+          />
+        )}
+
         <View style={styles.navLinks}>
           <TouchableOpacity onPress={() => router.push('/gm/history')}>
             <Text style={[styles.linkBtnText, { color: COLORS.primary }]}>View History</Text>
@@ -328,6 +384,25 @@ export default function GMResultScreen() {
 
         <View style={{ height: 40 }} />
       </ScrollView>
+
+      {/* Simulation Results Modal */}
+      <Modal
+        visible={showSimulationResults && simulationResult !== null}
+        animationType="slide"
+        presentationStyle="pageSheet"
+        onRequestClose={() => setShowSimulationResults(false)}
+      >
+        {simulationResult && (
+          <SimulationResults
+            result={simulationResult}
+            tradeCount={tradeCount}
+            teamName={teamConfig?.shortName || 'Chicago'}
+            teamColor={teamConfig?.color || COLORS.primary}
+            onSimulateAgain={handleSimulateAgain}
+            onClose={() => setShowSimulationResults(false)}
+          />
+        )}
+      </Modal>
     </SafeAreaView>
   )
 }
