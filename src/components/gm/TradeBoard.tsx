@@ -161,9 +161,7 @@ export function TradeBoard({
           borderLeft: mobile ? `1px solid ${borderColor}` : 'none',
           borderRight: mobile ? `1px solid ${borderColor}` : 'none',
         }}>
-          <motion.div
-            animate={mobile ? { y: [-4, 4, -4] } : { x: [-4, 4, -4] }}
-            transition={{ repeat: Infinity, duration: 2, ease: 'easeInOut' }}
+          <div
             style={{ display: 'flex', flexDirection: mobile ? 'row' : 'column', gap: 4 }}
           >
             {mobile ? (
@@ -185,7 +183,7 @@ export function TradeBoard({
                 </svg>
               </>
             )}
-          </motion.div>
+          </div>
         </div>
 
         {/* Opponent side */}
@@ -275,11 +273,7 @@ export function TradeBoard({
         const isBlocked = validation?.status === 'invalid'
         const canClick = canGrade && !grading && !isBlocked
         return (
-          <motion.button
-            whileHover={canClick ? { scale: 1.02 } : {}}
-            whileTap={canClick ? { scale: 0.98 } : {}}
-            animate={canClick ? { scale: [1, 1.03, 1] } : {}}
-            transition={canClick ? { repeat: Infinity, duration: 2 } : {}}
+          <button
             onClick={onGrade}
             disabled={!canClick}
             style={{
@@ -293,10 +287,11 @@ export function TradeBoard({
               fontSize: '16px',
               cursor: canClick ? 'pointer' : 'not-allowed',
               letterSpacing: '0.5px',
+              transition: 'background-color 0.15s, transform 0.1s',
             }}
           >
             {grading ? 'ANALYZING TRADE...' : isBlocked ? 'FIX ISSUES TO GRADE' : 'GRADE TRADE'}
-          </motion.button>
+          </button>
         )
       })()}
     </div>
