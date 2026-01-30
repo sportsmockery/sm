@@ -15,9 +15,11 @@ import { TradeHistory } from '@/components/gm/TradeHistory'
 import { TeamFitOverlay } from '@/components/gm/TeamFitOverlay'
 import { PreferencesModal, GMPreferences } from '@/components/gm/PreferencesModal'
 import { TradeModePicker } from '@/components/gm/TradeModePicker'
+import { SimulationTrigger } from '@/components/gm/SimulationTrigger'
+import { SimulationResults } from '@/components/gm/SimulationResults'
 import type { PlayerData } from '@/components/gm/PlayerCard'
 import type { ValidationState } from '@/components/gm/ValidationIndicator'
-import type { TradeMode, MLBProspect } from '@/types/gm'
+import type { TradeMode, MLBProspect, SimulationResult } from '@/types/gm'
 
 const DEFAULT_PREFERENCES: GMPreferences = {
   risk_tolerance: 'moderate',
@@ -113,6 +115,12 @@ export default function GMPage() {
   // Team Fit Overlay
   const [fitPlayer, setFitPlayer] = useState<PlayerData | null>(null)
   const [showFitOverlay, setShowFitOverlay] = useState(false)
+
+  // Season Simulation
+  const [isSimulating, setIsSimulating] = useState(false)
+  const [simulationResult, setSimulationResult] = useState<SimulationResult | null>(null)
+  const [showSimulationResults, setShowSimulationResults] = useState(false)
+  const [simulationError, setSimulationError] = useState<string | null>(null)
 
   const handleViewFit = useCallback((player: PlayerData) => {
     setFitPlayer(player)
@@ -477,6 +485,51 @@ export default function GMPage() {
     setGradeResult(null)
     fetchLeaderboard()
     fetchSessions()
+  }
+
+  // Season Simulation
+  async function handleSimulateSeason() {
+    if (!activeSession || !selectedTeam) return
+
+    setIsSimulating(true)
+    setSimulationError(null)
+
+    try {
+      const response = await fetch('/api/gm/sim/season', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          sessionId: activeSession.id,
+          sport: sport,
+          teamKey: selectedTeam,
+          seasonYear: 2026,
+        }),
+      })
+
+      if (!response.ok) {
+        throw new Error('Simulation failed')
+      }
+
+      const data: SimulationResult = await response.json()
+
+      if (data.success) {
+        setSimulationResult(data)
+        setShowSimulationResults(true)
+      } else {
+        throw new Error('Simulation returned unsuccessful')
+      }
+    } catch (error: any) {
+      console.error('Simulation error:', error)
+      setSimulationError(error.message || 'Simulation failed')
+    } finally {
+      setIsSimulating(false)
+    }
+  }
+
+  function handleSimulateAgain() {
+    setShowSimulationResults(false)
+    setSimulationResult(null)
+    handleSimulateSeason()
   }
 
   if (authLoading || pageLoading) {
@@ -1049,6 +1102,17 @@ export default function GMPage() {
                 </AnimatePresence>
               </div>
             </div>
+
+            {/* Season Simulation Section */}
+            {activeSession && activeSession.num_trades > 0 && (
+              <SimulationTrigger
+                tradeCount={activeSession.num_trades}
+                sport={sport}
+                onSimulate={handleSimulateSeason}
+                isSimulating={isSimulating}
+                teamColor={teamColor}
+              />
+            )}
           </>
         ) : activeTab === 'history' ? (
           <TradeHistory
@@ -1128,6 +1192,20 @@ export default function GMPage() {
         preferences={preferences}
         onSave={setPreferences}
       />
+
+      {/* Season Simulation Results Modal */}
+      <AnimatePresence>
+        {showSimulationResults && simulationResult && (
+          <SimulationResults
+            result={simulationResult}
+            tradeCount={activeSession?.num_trades || 0}
+            teamName={teamLabel}
+            teamColor={teamColor}
+            onSimulateAgain={handleSimulateAgain}
+            onClose={() => setShowSimulationResults(false)}
+          />
+        )}
+      </AnimatePresence>
     </div>
   )
 }
