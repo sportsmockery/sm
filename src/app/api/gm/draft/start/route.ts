@@ -28,10 +28,10 @@ export async function POST(request: NextRequest) {
     }
 
     const teamInfo = CHICAGO_TEAMS[chicago_team]
-    const year = draft_year || 2026
+    let year = draft_year || 2026
 
     // Get draft order from Supabase view
-    const { data: draftOrder, error: orderError } = await datalabAdmin
+    let { data: draftOrder, error: orderError } = await datalabAdmin
       .from('gm_draft_order')
       .select('*')
       .eq('sport', teamInfo.sport)
@@ -43,11 +43,49 @@ export async function POST(request: NextRequest) {
       throw new Error(`Failed to fetch draft order: ${orderError.message}`)
     }
 
+    // If no data for requested year, check what years are available
     if (!draftOrder || draftOrder.length === 0) {
-      return NextResponse.json({
-        error: `No draft order available for ${teamInfo.sport.toUpperCase()} ${year}`,
-        code: 'NO_DRAFT_ORDER',
-      }, { status: 400 })
+      const { data: availableYears, error: yearsError } = await datalabAdmin
+        .from('gm_draft_order')
+        .select('draft_year')
+        .eq('sport', teamInfo.sport)
+        .order('draft_year', { ascending: false })
+        .limit(10)
+
+      if (yearsError) {
+        console.error('Available years query error:', yearsError)
+      }
+
+      // Get unique years
+      const uniqueYears = [...new Set((availableYears || []).map((r: any) => r.draft_year))].sort((a, b) => b - a)
+
+      if (uniqueYears.length === 0) {
+        return NextResponse.json({
+          error: `No draft order data available for ${teamInfo.sport.toUpperCase()}. Please contact support.`,
+          code: 'NO_DRAFT_ORDER',
+        }, { status: 400 })
+      }
+
+      // Use the most recent available year
+      const fallbackYear = uniqueYears[0]
+      console.log(`No draft order for ${teamInfo.sport} ${year}, falling back to ${fallbackYear}. Available years: ${uniqueYears.join(', ')}`)
+
+      const { data: fallbackOrder, error: fallbackError } = await datalabAdmin
+        .from('gm_draft_order')
+        .select('*')
+        .eq('sport', teamInfo.sport)
+        .eq('draft_year', fallbackYear)
+        .order('pick_number')
+
+      if (fallbackError || !fallbackOrder || fallbackOrder.length === 0) {
+        return NextResponse.json({
+          error: `No draft order available for ${teamInfo.sport.toUpperCase()}. Available years: ${uniqueYears.join(', ')}`,
+          code: 'NO_DRAFT_ORDER',
+        }, { status: 400 })
+      }
+
+      draftOrder = fallbackOrder
+      year = fallbackYear
     }
 
     // 1. Create mock draft session using RPC
