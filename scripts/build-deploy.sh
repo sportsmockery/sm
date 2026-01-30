@@ -211,7 +211,7 @@ echo ""
 # ─────────────────────────────────────────────
 log_info "Deploying to Vercel (production)..."
 echo ""
-vercel --prod --archive=tgz "$@"
+vercel --prod --yes --archive=tgz "$@"
 
 echo ""
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
