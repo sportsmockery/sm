@@ -15,11 +15,13 @@ const TEAM_CONFIG: Record<string, {
   seasonValue: number
   gmRosterTeamKey: string // Team key in gm_*_rosters tables
 }> = {
-  bears: { table: 'bears_players', activeCol: 'is_active', sport: 'nfl', nameCol: 'name', statsTable: 'bears_player_game_stats', statsJoinCol: 'player_id', seasonValue: 2025, gmRosterTeamKey: 'chi' },
-  bulls: { table: 'bulls_players', activeCol: 'is_current_bulls', sport: 'nba', nameCol: 'display_name', statsTable: 'bulls_player_game_stats', statsJoinCol: 'player_id', seasonValue: 2026, gmRosterTeamKey: 'chi' },
-  blackhawks: { table: 'blackhawks_players', activeCol: 'is_active', sport: 'nhl', nameCol: 'name', statsTable: 'blackhawks_player_game_stats', statsJoinCol: 'player_id', seasonValue: 2026, gmRosterTeamKey: 'chi' },
-  cubs: { table: 'cubs_players', activeCol: 'is_active', sport: 'mlb', nameCol: 'name', statsTable: 'cubs_player_game_stats', statsJoinCol: 'player_id', seasonValue: 2025, gmRosterTeamKey: 'chc' },
-  whitesox: { table: 'whitesox_players', activeCol: 'is_active', sport: 'mlb', nameCol: 'name', statsTable: 'whitesox_player_game_stats', statsJoinCol: 'player_id', seasonValue: 2025, gmRosterTeamKey: 'chw' },
+  // NOTE: gmRosterTeamKey must match the team_key values in gm_*_rosters tables
+  // These are lowercase full team names (bears, bulls, etc.) NOT abbreviations
+  bears: { table: 'bears_players', activeCol: 'is_active', sport: 'nfl', nameCol: 'name', statsTable: 'bears_player_game_stats', statsJoinCol: 'player_id', seasonValue: 2025, gmRosterTeamKey: 'bears' },
+  bulls: { table: 'bulls_players', activeCol: 'is_current_bulls', sport: 'nba', nameCol: 'display_name', statsTable: 'bulls_player_game_stats', statsJoinCol: 'player_id', seasonValue: 2026, gmRosterTeamKey: 'bulls' },
+  blackhawks: { table: 'blackhawks_players', activeCol: 'is_active', sport: 'nhl', nameCol: 'name', statsTable: 'blackhawks_player_game_stats', statsJoinCol: 'player_id', seasonValue: 2026, gmRosterTeamKey: 'blackhawks' },
+  cubs: { table: 'cubs_players', activeCol: 'is_active', sport: 'mlb', nameCol: 'name', statsTable: 'cubs_player_game_stats', statsJoinCol: 'player_id', seasonValue: 2025, gmRosterTeamKey: 'cubs' },
+  whitesox: { table: 'whitesox_players', activeCol: 'is_active', sport: 'mlb', nameCol: 'name', statsTable: 'whitesox_player_game_stats', statsJoinCol: 'player_id', seasonValue: 2025, gmRosterTeamKey: 'whitesox' },
 }
 
 type TrendDirection = 'hot' | 'rising' | 'stable' | 'declining' | 'cold'
@@ -148,6 +150,17 @@ export async function GET(request: NextRequest) {
       search || undefined,
       posFilter || undefined
     )
+
+    // Check if roster data exists for this team
+    if (players.length === 0) {
+      console.warn(`[GM Roster] No players found for ${team} (team_key: ${config.gmRosterTeamKey})`)
+      return NextResponse.json({
+        players: [],
+        sport: config.sport,
+        warning: `Roster data for ${team.charAt(0).toUpperCase() + team.slice(1)} is being updated. Please check back soon.`,
+        code: 'ROSTER_UNAVAILABLE'
+      })
+    }
 
     // Fetch stats and build stat lines for Chicago players
     const statsMap = await fetchSeasonStats(team, config)
