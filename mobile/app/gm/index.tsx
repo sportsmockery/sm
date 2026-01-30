@@ -407,7 +407,7 @@ export default function GMTradeHub() {
                   <View style={styles.tipItem}>
                     <Ionicons name="flash" size={16} color={COLORS.primary} />
                     <Text style={[styles.tipText, { color: colors.textMuted }]}>
-                      Grade 75+ means the trade would be accepted
+                      Grade 70+ means the trade would be accepted
                     </Text>
                   </View>
                 </View>

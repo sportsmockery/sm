@@ -59,6 +59,7 @@ export interface GradeResult {
     future_assets: number
   }
   cap_analysis?: string
+  rejection_reason?: string
 }
 
 export interface Trade {

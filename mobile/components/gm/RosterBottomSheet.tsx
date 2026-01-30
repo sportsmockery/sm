@@ -84,6 +84,7 @@ export const RosterBottomSheet = forwardRef<BottomSheet, RosterBottomSheetProps>
     const handleTogglePlayer = useCallback(
       (player: PlayerData) => {
         onTogglePlayer(player)
+        setSearch('') // Clear search after selecting a player
       },
       [onTogglePlayer]
     )
