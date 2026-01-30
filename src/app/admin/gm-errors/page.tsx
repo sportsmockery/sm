@@ -12,6 +12,16 @@ interface GmError {
   route: string | null
   request_payload: any
   metadata: any
+  resolved?: boolean
+  resolved_at?: string
+  sport?: string
+  team_key?: string
+}
+
+interface ErrorStats {
+  total: number
+  unresolved: number
+  resolved: number
 }
 
 const SOURCE_COLORS: Record<string, string> = {
@@ -25,34 +35,61 @@ const SOURCE_COLORS: Record<string, string> = {
 const ERROR_TYPES = ['all', 'api', 'ai', 'network', 'timeout', 'parse', 'sync_result', 'sync_error', 'audit_result', 'audit_error', 'unknown']
 const SOURCES = ['all', 'frontend', 'backend', 'cron', 'ai', 'audit']
 
+const DATALAB_BASE = 'https://datalab.sportsmockery.com'
+
 export default function GmErrorsPage() {
-  const [errors, setErrors] = useState<GmError[]>([])
+  const [gmErrors, setGmErrors] = useState<GmError[]>([])
+  const [draftErrors, setDraftErrors] = useState<GmError[]>([])
+  const [gmStats, setGmStats] = useState<ErrorStats | null>(null)
+  const [draftStats, setDraftStats] = useState<ErrorStats | null>(null)
   const [loading, setLoading] = useState(true)
   const [refreshing, setRefreshing] = useState(false)
   const [filterType, setFilterType] = useState('all')
   const [filterSource, setFilterSource] = useState('all')
+  const [activeTab, setActiveTab] = useState<'gm' | 'draft'>('gm')
   const [lastRefresh, setLastRefresh] = useState<Date | null>(null)
   const [expandedId, setExpandedId] = useState<string | null>(null)
+  const [showResolved, setShowResolved] = useState(false)
 
   const fetchErrors = useCallback(async (isManual = false) => {
     if (isManual) setRefreshing(true)
     try {
-      const params = new URLSearchParams()
-      if (filterType !== 'all') params.set('error_type', filterType)
-      if (filterSource !== 'all') params.set('source', filterSource)
-      const res = await fetch(`/api/gm/log-error?${params}`)
-      if (res.ok) {
-        const data = await res.json()
-        setErrors(data.errors || [])
+      // Fetch GM Trade Simulator errors from Datalab
+      const gmRes = await fetch(`${DATALAB_BASE}/api/gm/errors?resolved=${showResolved}&hours=72`)
+      if (gmRes.ok) {
+        const data = await gmRes.json()
+        setGmErrors(data.errors || [])
+        setGmStats(data.stats || null)
+      }
+
+      // Fetch Mock Draft errors from Datalab
+      const draftRes = await fetch(`${DATALAB_BASE}/api/gm/draft/errors?resolved=${showResolved}`)
+      if (draftRes.ok) {
+        const data = await draftRes.json()
+        setDraftErrors(data.errors || [])
+        setDraftStats(data.stats || null)
       }
     } catch (e) {
-      console.error('Failed to fetch GM errors:', e)
+      console.error('Failed to fetch errors from Datalab:', e)
+      // Fall back to local endpoint
+      try {
+        const params = new URLSearchParams()
+        if (filterType !== 'all') params.set('error_type', filterType)
+        if (filterSource !== 'all') params.set('source', filterSource)
+        const res = await fetch(`/api/gm/log-error?${params}`)
+        if (res.ok) {
+          const data = await res.json()
+          setGmErrors(data.errors || [])
+        }
+      } catch (fallbackError) {
+        console.error('Fallback also failed:', fallbackError)
+      }
     } finally {
       setLoading(false)
       setRefreshing(false)
       setLastRefresh(new Date())
     }
-  }, [filterType, filterSource])
+  }, [filterType, filterSource, showResolved])
 
   useEffect(() => {
     fetchErrors()
@@ -60,21 +97,30 @@ export default function GmErrorsPage() {
     return () => clearInterval(interval)
   }, [fetchErrors])
 
-  const cronResults = errors.filter(e => e.source === 'cron')
-  const auditResults = errors.filter(e => e.source === 'audit')
-  const recentErrors = errors.filter(e => e.source !== 'cron' || e.error_type === 'sync_error')
-  const errorCount = errors.filter(e => !['sync_result', 'audit_result'].includes(e.error_type)).length
-  const cronCount = cronResults.length
-  const auditCount = auditResults.length
-  const auditErrors = auditResults.filter(e => e.error_type === 'audit_error').length
+  // Filter errors based on current filters
+  const filterErrors = (errors: GmError[]) => {
+    return errors.filter(e => {
+      if (filterType !== 'all' && e.error_type !== filterType) return false
+      if (filterSource !== 'all' && e.source !== filterSource) return false
+      return true
+    })
+  }
+
+  const currentErrors = activeTab === 'gm' ? filterErrors(gmErrors) : filterErrors(draftErrors)
+  const currentStats = activeTab === 'gm' ? gmStats : draftStats
+
+  const cronResults = gmErrors.filter(e => e.source === 'cron')
+  const auditResults = gmErrors.filter(e => e.source === 'audit')
+  const errorCount = gmErrors.filter(e => !['sync_result', 'audit_result'].includes(e.error_type) && !e.resolved).length
+  const draftErrorCount = draftErrors.filter(e => !e.resolved).length
 
   return (
-    <div style={{ padding: '24px', maxWidth: 1200 }}>
+    <div style={{ padding: '24px', maxWidth: 1400 }}>
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 24 }}>
         <div>
-          <h1 style={{ fontSize: '24px', fontWeight: 800, margin: 0 }}>GM Trade Simulator — Errors & Logs</h1>
+          <h1 style={{ fontSize: '24px', fontWeight: 800, margin: 0 }}>GM Trade Simulator & Mock Draft — Errors</h1>
           <p style={{ fontSize: '13px', color: '#6b7280', margin: '4px 0 0' }}>
-            Trade simulator errors, AI grading, cron syncs, league rosters, salary cap, and audit results
+            Errors from Datalab API • Auto-fixed hourly • Trade simulator, mock draft, AI grading, roster syncs
           </p>
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
@@ -98,37 +144,65 @@ export default function GmErrorsPage() {
         </div>
       </div>
 
-      {/* Summary cards */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 12, marginBottom: 12 }}>
-        <SummaryCard label="Total Logs" value={errors.length} color="#6b7280" />
-        <SummaryCard label="Errors" value={errorCount} color="#ef4444" />
-        <SummaryCard label="Cron Runs" value={cronCount} color="#8b5cf6" />
-        <SummaryCard
-          label="Last Cron"
-          value={cronResults.length > 0 ? new Date(cronResults[0].created_at).toLocaleTimeString() : '—'}
-          color="#22c55e"
-          isText
-        />
+      {/* Tabs */}
+      <div style={{ display: 'flex', gap: 4, marginBottom: 16 }}>
+        <button
+          onClick={() => setActiveTab('gm')}
+          style={{
+            padding: '10px 20px', borderRadius: '8px 8px 0 0', border: 'none',
+            backgroundColor: activeTab === 'gm' ? '#fff' : '#f3f4f6',
+            color: activeTab === 'gm' ? '#bc0000' : '#6b7280',
+            fontWeight: 700, fontSize: '13px', cursor: 'pointer',
+            borderBottom: activeTab === 'gm' ? '2px solid #bc0000' : 'none',
+          }}
+        >
+          Trade Simulator {errorCount > 0 && <span style={{ marginLeft: 6, backgroundColor: '#ef4444', color: '#fff', padding: '2px 6px', borderRadius: 10, fontSize: '11px' }}>{errorCount}</span>}
+        </button>
+        <button
+          onClick={() => setActiveTab('draft')}
+          style={{
+            padding: '10px 20px', borderRadius: '8px 8px 0 0', border: 'none',
+            backgroundColor: activeTab === 'draft' ? '#fff' : '#f3f4f6',
+            color: activeTab === 'draft' ? '#bc0000' : '#6b7280',
+            fontWeight: 700, fontSize: '13px', cursor: 'pointer',
+            borderBottom: activeTab === 'draft' ? '2px solid #bc0000' : 'none',
+          }}
+        >
+          Mock Draft {draftErrorCount > 0 && <span style={{ marginLeft: 6, backgroundColor: '#ef4444', color: '#fff', padding: '2px 6px', borderRadius: 10, fontSize: '11px' }}>{draftErrorCount}</span>}
+        </button>
       </div>
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 12, marginBottom: 24 }}>
-        <SummaryCard label="Audit Runs" value={auditCount} color="#06b6d4" />
-        <SummaryCard label="Audit Failures" value={auditErrors} color={auditErrors > 0 ? '#ef4444' : '#22c55e'} />
-        <SummaryCard
-          label="Last Audit"
-          value={auditResults.length > 0 ? new Date(auditResults[0].created_at).toLocaleTimeString() : '—'}
-          color="#06b6d4"
-          isText
-        />
-        <SummaryCard
-          label="Data Sources"
-          value="Rosters + Cap"
-          color="#8b5cf6"
-          isText
-        />
+
+      {/* Summary cards */}
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: 12, marginBottom: 16 }}>
+        <SummaryCard label="Total Logs" value={currentStats?.total || currentErrors.length} color="#6b7280" />
+        <SummaryCard label="Unresolved" value={currentStats?.unresolved || 0} color="#ef4444" />
+        <SummaryCard label="Auto-Resolved" value={currentStats?.resolved || 0} color="#22c55e" />
+        {activeTab === 'gm' && (
+          <>
+            <SummaryCard label="Cron Runs" value={cronResults.length} color="#8b5cf6" />
+            <SummaryCard
+              label="Last Cron"
+              value={cronResults.length > 0 ? new Date(cronResults[0].created_at).toLocaleTimeString() : '—'}
+              color="#22c55e"
+              isText
+            />
+          </>
+        )}
+        {activeTab === 'draft' && (
+          <>
+            <SummaryCard label="Draft Errors" value={draftErrorCount} color="#f59e0b" />
+            <SummaryCard
+              label="Data Source"
+              value="Datalab API"
+              color="#06b6d4"
+              isText
+            />
+          </>
+        )}
       </div>
 
       {/* Filters */}
-      <div style={{ display: 'flex', gap: 12, marginBottom: 16, flexWrap: 'wrap' }}>
+      <div style={{ display: 'flex', gap: 12, marginBottom: 16, flexWrap: 'wrap', alignItems: 'center' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
           <span style={{ fontSize: '12px', fontWeight: 600, color: '#6b7280' }}>Source:</span>
           {SOURCES.map(s => (
@@ -148,7 +222,7 @@ export default function GmErrorsPage() {
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
           <span style={{ fontSize: '12px', fontWeight: 600, color: '#6b7280' }}>Type:</span>
-          {ERROR_TYPES.map(t => (
+          {ERROR_TYPES.slice(0, 6).map(t => (
             <button
               key={t}
               onClick={() => setFilterType(t)}
@@ -163,31 +237,64 @@ export default function GmErrorsPage() {
             </button>
           ))}
         </div>
+        <label style={{ display: 'flex', alignItems: 'center', gap: 6, marginLeft: 'auto', cursor: 'pointer' }}>
+          <input
+            type="checkbox"
+            checked={showResolved}
+            onChange={e => setShowResolved(e.target.checked)}
+            style={{ cursor: 'pointer' }}
+          />
+          <span style={{ fontSize: '12px', color: '#6b7280' }}>Show resolved</span>
+        </label>
+      </div>
+
+      {/* Auto-fix info */}
+      <div style={{
+        padding: '10px 14px', borderRadius: 8, marginBottom: 16,
+        backgroundColor: '#f0fdf4', border: '1px solid #bbf7d0',
+        display: 'flex', alignItems: 'center', gap: 8,
+      }}>
+        <span style={{ fontSize: '16px' }}>🔄</span>
+        <span style={{ fontSize: '12px', color: '#15803d' }}>
+          <strong>Auto-fixing enabled:</strong> Datalab runs hourly cron jobs to automatically resolve test probes, logging bugs, and data integrity issues.
+        </span>
       </div>
 
       {/* Error table */}
       {loading ? (
         <div style={{ textAlign: 'center', padding: 40, color: '#9ca3af' }}>Loading...</div>
-      ) : errors.length === 0 ? (
+      ) : currentErrors.length === 0 ? (
         <div style={{ textAlign: 'center', padding: 40, color: '#9ca3af', fontSize: '14px' }}>
-          No logs found for the selected filters.
+          {showResolved ? 'No logs found for the selected filters.' : '✓ No unresolved errors! All clear.'}
         </div>
       ) : (
         <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
-          {errors.map(err => {
+          {currentErrors.map(err => {
             const isExpanded = expandedId === err.id
             const sourceColor = SOURCE_COLORS[err.source] || '#6b7280'
-            const isError = err.error_type !== 'sync_result'
+            const isError = !['sync_result', 'audit_result'].includes(err.error_type)
+            const isResolved = err.resolved
             return (
               <div
                 key={err.id}
                 onClick={() => setExpandedId(isExpanded ? null : err.id)}
                 style={{
-                  borderRadius: 8, border: '1px solid #e5e7eb', backgroundColor: '#fff',
+                  borderRadius: 8, border: '1px solid #e5e7eb', backgroundColor: isResolved ? '#f9fafb' : '#fff',
                   cursor: 'pointer', overflow: 'hidden',
+                  opacity: isResolved ? 0.7 : 1,
                 }}
               >
                 <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '10px 14px' }}>
+                  {/* Resolved badge */}
+                  {isResolved && (
+                    <span style={{
+                      fontSize: '10px', fontWeight: 700, padding: '2px 8px', borderRadius: 6,
+                      backgroundColor: '#22c55e15', color: '#22c55e',
+                      flexShrink: 0,
+                    }}>
+                      ✓ RESOLVED
+                    </span>
+                  )}
                   {/* Source badge */}
                   <span style={{
                     fontSize: '10px', fontWeight: 700, padding: '2px 8px', borderRadius: 6,
@@ -205,6 +312,16 @@ export default function GmErrorsPage() {
                   }}>
                     {err.error_type}
                   </span>
+                  {/* Sport/Team badges */}
+                  {err.sport && (
+                    <span style={{
+                      fontSize: '10px', fontWeight: 600, padding: '2px 8px', borderRadius: 6,
+                      backgroundColor: '#3b82f615', color: '#3b82f6',
+                      flexShrink: 0, textTransform: 'uppercase',
+                    }}>
+                      {err.sport}
+                    </span>
+                  )}
                   {/* Message */}
                   <span style={{
                     flex: 1, fontSize: '13px', color: '#1a1a1a', fontWeight: 500,
@@ -228,9 +345,19 @@ export default function GmErrorsPage() {
                     <div style={{ fontSize: '12px', color: '#374151', lineHeight: 1.6, marginTop: 8 }}>
                       <strong>Message:</strong> {err.error_message}
                     </div>
+                    {err.resolved_at && (
+                      <div style={{ fontSize: '11px', color: '#22c55e', marginTop: 4 }}>
+                        Resolved at: {new Date(err.resolved_at).toLocaleString()}
+                      </div>
+                    )}
                     {err.user_id && (
                       <div style={{ fontSize: '11px', color: '#6b7280', marginTop: 4 }}>
                         User: {err.user_id}
+                      </div>
+                    )}
+                    {err.team_key && (
+                      <div style={{ fontSize: '11px', color: '#6b7280', marginTop: 4 }}>
+                        Team: {err.team_key} ({err.sport})
                       </div>
                     )}
                     {err.request_payload && (
