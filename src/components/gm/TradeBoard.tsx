@@ -4,6 +4,8 @@ import { AnimatePresence, motion } from 'framer-motion'
 import { PlayerData } from './PlayerCard'
 import { AssetRow } from './AssetRow'
 import { ValidationIndicator, ValidationState } from './ValidationIndicator'
+import { DraftPickValueWidget, type DraftPickValue } from './DraftPickValueWidget'
+import { VeteranTradeValueWidget, type VeteranTradeValue } from './VeteranTradeValueWidget'
 import { useTheme } from '@/contexts/ThemeContext'
 import type { DraftPick } from '@/types/gm'
 
@@ -35,6 +37,11 @@ interface GradeResult {
   control_timeline?: string
   cbt_impact?: string
   rejection_reason?: string
+  // NFL-specific fields
+  draftPickValuesSent?: DraftPickValue[]
+  draftPickValuesReceived?: DraftPickValue[]
+  veteranValueSent?: VeteranTradeValue[]
+  veteranValueReceived?: VeteranTradeValue[]
 }
 
 interface TradeBoardProps {
@@ -703,6 +710,40 @@ export function TradeBoard({
                 </div>
               </div>
             )}
+
+            {/* NFL-Specific: Draft Pick Value Analysis */}
+            {sport === 'nfl' && gradeResult.draftPickValuesSent && gradeResult.draftPickValuesSent.length > 0 && (
+              <DraftPickValueWidget
+                picks={gradeResult.draftPickValuesSent}
+                side="sent"
+                teamColor={chicagoColor}
+              />
+            )}
+
+            {sport === 'nfl' && gradeResult.draftPickValuesReceived && gradeResult.draftPickValuesReceived.length > 0 && (
+              <DraftPickValueWidget
+                picks={gradeResult.draftPickValuesReceived}
+                side="received"
+                teamColor={opponentColor}
+              />
+            )}
+
+            {/* NFL-Specific: Veteran Trade Value Breakdown */}
+            {sport === 'nfl' && gradeResult.veteranValueSent && gradeResult.veteranValueSent.map((veteran, idx) => (
+              <VeteranTradeValueWidget
+                key={`vet-sent-${idx}`}
+                veteran={veteran}
+                teamColor={chicagoColor}
+              />
+            ))}
+
+            {sport === 'nfl' && gradeResult.veteranValueReceived && gradeResult.veteranValueReceived.map((veteran, idx) => (
+              <VeteranTradeValueWidget
+                key={`vet-recv-${idx}`}
+                veteran={veteran}
+                teamColor={opponentColor}
+              />
+            ))}
 
             {/* Reasoning */}
             <div style={{
