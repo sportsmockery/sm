@@ -1,0 +1,397 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sports Mockery 2.0 Tour | Chicago's Premier Sports Hub</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        body { font-family: 'Roboto', sans-serif; }
+        h1, h2, h3 { font-family: 'Montserrat', sans-serif; }
+        :root {
+            --primary: #bc0000;
+            --primary-dark: #8a0000;
+            --accent: #bc0000;
+            --neutral-black: #000000;
+            --neutral-white: #FFFFFF;
+            --bg-light: #FFFFFF;
+            --text-light: #000000;
+            --bg-dark: #0a0a0a;
+            --bg-dark-surface: #1a1a1a;
+            --bg-dark-card: #242424;
+            --text-dark: #FFFFFF;
+            --text-muted: #9ca3af;
+        }
+        body {
+            background-color: var(--bg-dark);
+            color: var(--text-dark);
+        }
+        .light body {
+            background-color: var(--bg-light);
+            color: var(--text-light);
+        }
+        .light .bg-dark-surface {
+            background-color: #f3f4f6;
+        }
+        .light .bg-dark-card {
+            background-color: #ffffff;
+        }
+        .light .text-white {
+            color: #000000;
+        }
+        .bg-dark-surface {
+            background-color: var(--bg-dark-surface);
+        }
+        .bg-dark-card {
+            background-color: var(--bg-dark-card);
+        }
+        /* Chicago Star Animation */
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+        .chicago-star {
+            animation: pulse 3s ease-in-out infinite;
+        }
+        /* Feature card hover */
+        .feature-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 20px 40px rgba(188, 0, 0, 0.2);
+        }
+        /* Gradient text */
+        .gradient-text {
+            background: linear-gradient(135deg, #bc0000, #ff4444);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        /* Mobile styles */
+        @media (max-width: 768px) {
+            h1 { font-size: 2rem; }
+            h2 { font-size: 1.75rem; }
+            .hero-subtitle { font-size: 1rem; }
+        }
+    </style>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@600;700;800;900&family=Roboto:wght@400;500&display=swap" rel="stylesheet">
+</head>
+<body class="text-white">
+    <!-- Header -->
+    <header class="sticky top-0 bg-[var(--bg-dark-surface)] border-b border-gray-800 p-4 flex justify-between items-center shadow-lg z-50">
+        <div class="flex items-center gap-3">
+            <img src="/logo-white.png" alt="Sports Mockery" class="h-8">
+        </div>
+        <nav class="flex items-center gap-6">
+            <ul class="hidden md:flex space-x-6 text-sm font-medium">
+                <li><a href="#features" class="hover:text-[var(--accent)] transition-colors">Features</a></li>
+                <li><a href="#scout" class="hover:text-[var(--accent)] transition-colors">Scout AI</a></li>
+                <li><a href="#simulators" class="hover:text-[var(--accent)] transition-colors">Simulators</a></li>
+                <li><a href="#premium" class="hover:text-[var(--accent)] transition-colors">SM+</a></li>
+            </ul>
+            <a href="/tour-preview.html" class="bg-[var(--accent)] text-white py-2 px-4 rounded-lg font-bold hover:bg-[var(--primary-dark)] transition-colors text-sm">
+                Take the Tour
+            </a>
+        </nav>
+    </header>
+
+    <!-- Hero Section -->
+    <section class="relative py-24 px-4 text-center overflow-hidden">
+        <!-- Background gradient -->
+        <div class="absolute inset-0 bg-gradient-to-b from-[var(--bg-dark)] via-[var(--bg-dark-surface)] to-[var(--bg-dark)]"></div>
+
+        <!-- Chicago Star Background -->
+        <div class="absolute inset-0 flex items-center justify-center opacity-5">
+            <img src="/android-chrome-512x512.png" alt="" class="w-96 h-96 chicago-star">
+        </div>
+
+        <div class="relative z-10 max-w-4xl mx-auto">
+            <!-- Logo -->
+            <img src="/android-chrome-512x512.png" alt="Chicago Star" class="mx-auto h-24 w-24 mb-6">
+
+            <h1 class="text-5xl md:text-6xl font-black mb-6 leading-tight">
+                Welcome to <span class="gradient-text">Sports Mockery 2.0</span>
+            </h1>
+            <p class="text-xl md:text-2xl text-gray-300 max-w-3xl mx-auto mb-4 hero-subtitle">
+                Chicago's Unrivaled Sports Revolution
+            </p>
+            <p class="text-lg text-gray-400 max-w-2xl mx-auto mb-10">
+                The first and only sports site with AI-powered tools, Mock Draft & Trade Simulators for ALL Chicago teams across NFL, NBA, MLB, and NHL.
+            </p>
+
+            <!-- Team Logos -->
+            <div class="flex justify-center gap-4 mb-10">
+                <div class="w-14 h-14 rounded-xl flex items-center justify-center p-2" style="background: #0B162A;">
+                    <img src="https://a.espncdn.com/i/teamlogos/nfl/500/chi.png" alt="Bears" class="w-10 h-10">
+                </div>
+                <div class="w-14 h-14 rounded-xl flex items-center justify-center p-2" style="background: #CE1141;">
+                    <img src="https://a.espncdn.com/i/teamlogos/nba/500/chi.png" alt="Bulls" class="w-10 h-10">
+                </div>
+                <div class="w-14 h-14 rounded-xl flex items-center justify-center p-2" style="background: #0E3386;">
+                    <img src="https://a.espncdn.com/i/teamlogos/mlb/500/chc.png" alt="Cubs" class="w-10 h-10">
+                </div>
+                <div class="w-14 h-14 rounded-xl flex items-center justify-center p-2" style="background: #27251F;">
+                    <img src="https://a.espncdn.com/i/teamlogos/mlb/500/chw.png" alt="White Sox" class="w-10 h-10">
+                </div>
+                <div class="w-14 h-14 rounded-xl flex items-center justify-center p-2" style="background: #CF0A2C;">
+                    <img src="https://a.espncdn.com/i/teamlogos/nhl/500/chi.png" alt="Blackhawks" class="w-10 h-10">
+                </div>
+            </div>
+
+            <div class="flex flex-col sm:flex-row gap-4 justify-center">
+                <a href="/tour-preview.html" class="bg-[var(--accent)] text-white py-4 px-8 rounded-xl font-bold hover:bg-[var(--primary-dark)] transition-all hover:scale-105 shadow-lg shadow-red-900/30">
+                    <i class="fas fa-play mr-2"></i> Start Interactive Tour
+                </a>
+                <a href="#features" class="bg-transparent border-2 border-gray-600 text-white py-4 px-8 rounded-xl font-bold hover:border-[var(--accent)] hover:text-[var(--accent)] transition-all">
+                    <i class="fas fa-arrow-down mr-2"></i> Explore Features
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Features Section -->
+    <section id="features" class="py-20 px-4 bg-dark-surface">
+        <div class="max-w-7xl mx-auto">
+            <h2 class="text-4xl font-bold text-center mb-4">Features That Redefine Chicago Fandom</h2>
+            <p class="text-gray-400 text-center mb-16 max-w-2xl mx-auto">Everything you need to follow your Chicago teams, all in one place.</p>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <!-- Scout AI -->
+                <div id="scout" class="feature-card bg-dark-card p-8 rounded-2xl border border-gray-800 transition-all duration-300">
+                    <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-purple-500/20 to-blue-500/20 flex items-center justify-center mb-6">
+                        <img src="/downloads/scout-v2.png" alt="Scout AI" class="w-10 h-10">
+                    </div>
+                    <h3 class="text-2xl font-bold mb-3">Scout AI</h3>
+                    <p class="text-gray-400 mb-4">Get instant answers to your burning Chicago sports questions—from Bears trades to Bulls stats. Powered by real-time data.</p>
+                    <p class="text-[var(--accent)] font-semibold text-sm">Exclusive to Sports Mockery—no other site offers AI tailored for Chicago fans.</p>
+                </div>
+
+                <!-- GM Trade Simulator -->
+                <div class="feature-card bg-dark-card p-8 rounded-2xl border border-gray-800 transition-all duration-300">
+                    <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-green-500/20 to-teal-500/20 flex items-center justify-center mb-6">
+                        <i class="fas fa-exchange-alt text-3xl text-green-400"></i>
+                    </div>
+                    <h3 class="text-2xl font-bold mb-3">GM Trade Simulator</h3>
+                    <p class="text-gray-400 mb-4">Play GM for your favorite Chicago team. Build trades with any team in the league and get AI grades on whether they'd actually happen.</p>
+                    <p class="text-[var(--accent)] font-semibold text-sm">Hands-on simulation exclusive to 2.0—no other site lets fans call the shots like this.</p>
+                </div>
+
+                <!-- Mock Draft Simulator -->
+                <div id="simulators" class="feature-card bg-dark-card p-8 rounded-2xl border border-gray-800 transition-all duration-300">
+                    <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-pink-500/20 to-red-500/20 flex items-center justify-center mb-6">
+                        <i class="fas fa-user-plus text-3xl text-pink-400"></i>
+                    </div>
+                    <h3 class="text-2xl font-bold mb-3">Mock Draft Simulator</h3>
+                    <p class="text-gray-400 mb-4">It's draft day and YOU'RE in charge! Pick prospects for your Chicago team and see how the AI grades your draft class.</p>
+                    <p class="text-[var(--accent)] font-semibold text-sm">Available for NFL, NBA, MLB, and NHL—a Chicago first!</p>
+                </div>
+
+                <!-- Fan Chat -->
+                <div class="feature-card bg-dark-card p-8 rounded-2xl border border-gray-800 transition-all duration-300">
+                    <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-red-500/20 to-orange-500/20 flex items-center justify-center mb-6">
+                        <i class="fas fa-comments text-3xl text-red-400"></i>
+                    </div>
+                    <h3 class="text-2xl font-bold mb-3">Fan Chat</h3>
+                    <p class="text-gray-400 mb-4">Connect in real-time with fellow Chicago die-hards. Each team has its own AI personality who loves their team as much as you do.</p>
+                    <p class="text-[var(--accent)] font-semibold text-sm">No other platform fosters Chicago-exclusive chats with AI personalities.</p>
+                </div>
+
+                <!-- Team Pages -->
+                <div class="feature-card bg-dark-card p-8 rounded-2xl border border-gray-800 transition-all duration-300">
+                    <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-blue-500/20 to-cyan-500/20 flex items-center justify-center mb-6">
+                        <i class="fas fa-chart-bar text-3xl text-blue-400"></i>
+                    </div>
+                    <h3 class="text-2xl font-bold mb-3">Comprehensive Data Hub</h3>
+                    <p class="text-gray-400 mb-4">Full rosters, box scores, schedules, and stats for all 5 Chicago teams. Interactive charts and polls keep you in the game.</p>
+                    <p class="text-[var(--accent)] font-semibold text-sm">Unlike generic sites, only 2.0 delivers Chicago-centric data with fan-driven polls.</p>
+                </div>
+
+                <!-- Video Shows -->
+                <div class="feature-card bg-dark-card p-8 rounded-2xl border border-gray-800 transition-all duration-300">
+                    <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-red-500/20 to-rose-500/20 flex items-center justify-center mb-6">
+                        <i class="fas fa-video text-3xl text-red-400"></i>
+                    </div>
+                    <h3 class="text-2xl font-bold mb-3">Original Video Shows</h3>
+                    <p class="text-gray-400 mb-4">Bears Film Room, Pinwheels & Ivy, Southside Behavior, and Untold Chicago Stories. Deep dives and analysis you won't find anywhere else.</p>
+                    <p class="text-[var(--accent)] font-semibold text-sm">Original Chicago sports content—exclusive to Sports Mockery.</p>
+                </div>
+
+                <!-- Interactive Charts -->
+                <div class="feature-card bg-dark-card p-8 rounded-2xl border border-gray-800 transition-all duration-300">
+                    <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-purple-500/20 to-indigo-500/20 flex items-center justify-center mb-6">
+                        <i class="fas fa-chart-line text-3xl text-purple-400"></i>
+                    </div>
+                    <h3 class="text-2xl font-bold mb-3">Interactive Charts</h3>
+                    <p class="text-gray-400 mb-4">Beautiful D3-powered animated charts that bring stats to life. Bars grow, lines move, and you can hover to see exact numbers.</p>
+                    <p class="text-[var(--accent)] font-semibold text-sm">Data visualization that makes stats fun and engaging.</p>
+                </div>
+
+                <!-- Polls -->
+                <div class="feature-card bg-dark-card p-8 rounded-2xl border border-gray-800 transition-all duration-300">
+                    <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-teal-500/20 to-green-500/20 flex items-center justify-center mb-6">
+                        <i class="fas fa-poll text-3xl text-teal-400"></i>
+                    </div>
+                    <h3 class="text-2xl font-bold mb-3">Polls & Voting</h3>
+                    <p class="text-gray-400 mb-4">Vote on hot takes, predictions, and debates! See what other Chicago fans think and make your voice heard.</p>
+                    <p class="text-[var(--accent)] font-semibold text-sm">Your opinion matters—shape the conversation.</p>
+                </div>
+
+                <!-- Mobile App -->
+                <div class="feature-card bg-dark-card p-8 rounded-2xl border border-gray-800 transition-all duration-300">
+                    <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-emerald-500/20 to-green-500/20 flex items-center justify-center mb-6">
+                        <i class="fas fa-mobile-alt text-3xl text-emerald-400"></i>
+                    </div>
+                    <h3 class="text-2xl font-bold mb-3">Mobile App</h3>
+                    <p class="text-gray-400 mb-4">Lightning-fast native app with push notifications, offline reading, and personalized feeds. Chicago content, your way.</p>
+                    <p class="text-[var(--accent)] font-semibold text-sm">Take Sports Mockery everywhere you go.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Comparison Section -->
+    <section class="py-20 px-4">
+        <div class="max-w-5xl mx-auto">
+            <h2 class="text-4xl font-bold text-center mb-4">Why Sports Mockery 2.0 Stands Alone</h2>
+            <p class="text-gray-400 text-center mb-12 max-w-2xl mx-auto">See how we compare to the competition.</p>
+
+            <div class="overflow-x-auto rounded-2xl border border-gray-800">
+                <table class="w-full min-w-[640px]">
+                    <thead>
+                        <tr class="bg-[var(--accent)]">
+                            <th class="p-5 text-left font-bold">Feature</th>
+                            <th class="p-5 text-center font-bold">Sports Mockery 2.0</th>
+                            <th class="p-5 text-center font-bold text-gray-200">ESPN / Bleacher Report</th>
+                        </tr>
+                    </thead>
+                    <tbody class="bg-dark-card">
+                        <tr class="border-b border-gray-800">
+                            <td class="p-5">Scout AI (Chicago Q&A)</td>
+                            <td class="p-5 text-center"><i class="fas fa-check-circle text-green-400 text-xl"></i></td>
+                            <td class="p-5 text-center"><i class="fas fa-times-circle text-gray-600 text-xl"></i></td>
+                        </tr>
+                        <tr class="border-b border-gray-800">
+                            <td class="p-5">GM Trade Simulator</td>
+                            <td class="p-5 text-center"><i class="fas fa-check-circle text-green-400 text-xl"></i></td>
+                            <td class="p-5 text-center"><i class="fas fa-times-circle text-gray-600 text-xl"></i></td>
+                        </tr>
+                        <tr class="border-b border-gray-800">
+                            <td class="p-5">Mock Draft Simulator (All 4 Leagues)</td>
+                            <td class="p-5 text-center"><i class="fas fa-check-circle text-green-400 text-xl"></i></td>
+                            <td class="p-5 text-center"><i class="fas fa-times-circle text-gray-600 text-xl"></i></td>
+                        </tr>
+                        <tr class="border-b border-gray-800">
+                            <td class="p-5">AI Fan Chat Personalities</td>
+                            <td class="p-5 text-center"><i class="fas fa-check-circle text-green-400 text-xl"></i></td>
+                            <td class="p-5 text-center"><i class="fas fa-times-circle text-gray-600 text-xl"></i></td>
+                        </tr>
+                        <tr class="border-b border-gray-800">
+                            <td class="p-5">Interactive D3 Charts</td>
+                            <td class="p-5 text-center"><i class="fas fa-check-circle text-green-400 text-xl"></i></td>
+                            <td class="p-5 text-center"><i class="fas fa-minus-circle text-yellow-500 text-xl"></i></td>
+                        </tr>
+                        <tr class="border-b border-gray-800">
+                            <td class="p-5">AR/VR Stadium Tours</td>
+                            <td class="p-5 text-center"><i class="fas fa-check-circle text-green-400 text-xl"></i></td>
+                            <td class="p-5 text-center"><i class="fas fa-times-circle text-gray-600 text-xl"></i></td>
+                        </tr>
+                        <tr>
+                            <td class="p-5">Chicago-Only Focus</td>
+                            <td class="p-5 text-center"><i class="fas fa-check-circle text-green-400 text-xl"></i></td>
+                            <td class="p-5 text-center"><i class="fas fa-times-circle text-gray-600 text-xl"></i></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </section>
+
+    <!-- SM+ Premium Section -->
+    <section id="premium" class="py-20 px-4 bg-dark-surface">
+        <div class="max-w-5xl mx-auto text-center">
+            <h2 class="text-4xl font-bold mb-4">Unlock the Full Experience with SM+</h2>
+            <p class="text-gray-400 mb-12 max-w-2xl mx-auto">Get unlimited access to all premium features.</p>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-4xl mx-auto">
+                <!-- Free -->
+                <div class="bg-dark-card p-8 rounded-2xl border border-gray-800">
+                    <h3 class="text-xl font-bold mb-2">Free</h3>
+                    <div class="text-4xl font-black mb-1">$0</div>
+                    <div class="text-gray-500 mb-6">forever</div>
+                    <ul class="text-left space-y-3 text-gray-400">
+                        <li><i class="fas fa-check text-green-400 mr-2"></i> 5 Scout AI questions/day</li>
+                        <li><i class="fas fa-check text-green-400 mr-2"></i> Basic team pages</li>
+                        <li><i class="fas fa-check text-green-400 mr-2"></i> Limited Fan Chat</li>
+                        <li><i class="fas fa-times text-gray-600 mr-2"></i> Ad-free experience</li>
+                    </ul>
+                </div>
+
+                <!-- Monthly -->
+                <div class="bg-gradient-to-br from-[var(--accent)] to-[var(--primary-dark)] p-8 rounded-2xl relative transform scale-105">
+                    <div class="absolute -top-3 left-1/2 -translate-x-1/2 bg-green-500 text-white text-xs font-bold px-3 py-1 rounded-full">POPULAR</div>
+                    <h3 class="text-xl font-bold mb-2">SM+ Monthly</h3>
+                    <div class="text-4xl font-black mb-1">$4.99</div>
+                    <div class="text-white/70 mb-6">/month</div>
+                    <ul class="text-left space-y-3">
+                        <li><i class="fas fa-check mr-2"></i> Unlimited Scout AI</li>
+                        <li><i class="fas fa-check mr-2"></i> Ad-free experience</li>
+                        <li><i class="fas fa-check mr-2"></i> Full Fan Chat access</li>
+                        <li><i class="fas fa-check mr-2"></i> AR Stadium Tours</li>
+                    </ul>
+                </div>
+
+                <!-- Annual -->
+                <div class="bg-dark-card p-8 rounded-2xl border border-gray-800 relative">
+                    <div class="absolute -top-3 left-1/2 -translate-x-1/2 bg-green-500 text-white text-xs font-bold px-3 py-1 rounded-full">BEST VALUE</div>
+                    <h3 class="text-xl font-bold mb-2">SM+ Annual</h3>
+                    <div class="text-4xl font-black mb-1">$39.99</div>
+                    <div class="text-gray-500 mb-6">/year (save 33%)</div>
+                    <ul class="text-left space-y-3 text-gray-400">
+                        <li><i class="fas fa-check text-green-400 mr-2"></i> Everything in Monthly</li>
+                        <li><i class="fas fa-check text-green-400 mr-2"></i> Early access to features</li>
+                        <li><i class="fas fa-check text-green-400 mr-2"></i> Exclusive badges</li>
+                        <li><i class="fas fa-check text-green-400 mr-2"></i> VIP events access</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- CTA Section -->
+    <section class="py-20 px-4 text-center">
+        <div class="max-w-3xl mx-auto">
+            <img src="/android-chrome-512x512.png" alt="Chicago Star" class="mx-auto h-20 w-20 mb-6 opacity-80">
+            <h2 class="text-4xl font-bold mb-4">Ready to Experience the Future?</h2>
+            <p class="text-gray-400 mb-8">Join thousands of Chicago sports fans who are already using Sports Mockery 2.0.</p>
+            <div class="flex flex-col sm:flex-row gap-4 justify-center">
+                <a href="/tour-preview.html" class="bg-[var(--accent)] text-white py-4 px-8 rounded-xl font-bold hover:bg-[var(--primary-dark)] transition-all hover:scale-105 shadow-lg shadow-red-900/30">
+                    <i class="fas fa-play mr-2"></i> Take the Interactive Tour
+                </a>
+                <a href="/" class="bg-white text-black py-4 px-8 rounded-xl font-bold hover:bg-gray-200 transition-all">
+                    <i class="fas fa-home mr-2"></i> Go to Homepage
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="bg-dark-surface border-t border-gray-800 py-12 px-4">
+        <div class="max-w-7xl mx-auto">
+            <div class="flex flex-col md:flex-row justify-between items-center gap-6">
+                <div class="flex items-center gap-4">
+                    <img src="/logo-white.png" alt="Sports Mockery" class="h-8">
+                </div>
+                <div class="flex gap-6">
+                    <a href="https://twitter.com/sportsmockery" class="text-gray-400 hover:text-white transition-colors"><i class="fab fa-twitter text-xl"></i></a>
+                    <a href="https://facebook.com/sportsmockery" class="text-gray-400 hover:text-white transition-colors"><i class="fab fa-facebook text-xl"></i></a>
+                    <a href="https://instagram.com/sportsmockery" class="text-gray-400 hover:text-white transition-colors"><i class="fab fa-instagram text-xl"></i></a>
+                    <a href="https://youtube.com/sportsmockery" class="text-gray-400 hover:text-white transition-colors"><i class="fab fa-youtube text-xl"></i></a>
+                </div>
+            </div>
+            <div class="mt-8 pt-8 border-t border-gray-800 text-center text-gray-500 text-sm">
+                <p>&copy; 2026 Sports Mockery. All rights reserved. | Chicago's #1 Sports Fan Community</p>
+            </div>
+        </div>
+    </footer>
+
+</body>
+</html>
