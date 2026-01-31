@@ -11,6 +11,7 @@ import {
   TouchableOpacity,
   ActivityIndicator,
   RefreshControl,
+  Dimensions,
 } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { useRouter } from 'expo-router'
@@ -19,7 +20,9 @@ import { Ionicons } from '@expo/vector-icons'
 import { useTheme } from '@/hooks/useTheme'
 import { useAuth } from '@/hooks/useAuth'
 import { gmApi, AuthRequiredError } from '@/lib/gm-api'
-import type { UserScoreResponse, MockDraftSummary } from '@/lib/gm-types'
+import type { UserScoreResponse, MockDraftSummary, AnalyticsResult } from '@/lib/gm-types'
+
+const { width: SCREEN_WIDTH } = Dimensions.get('window')
 
 const TEAM_CONFIG: Record<string, { name: string; color: string }> = {
   bears: { name: 'Bears', color: '#0B162A' },
@@ -52,6 +55,7 @@ export default function MyGMScorePage() {
   const [refreshing, setRefreshing] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [data, setData] = useState<UserScoreResponse | null>(null)
+  const [analytics, setAnalytics] = useState<AnalyticsResult | null>(null)
   const [settingBest, setSettingBest] = useState<string | null>(null)
 
   const bgColor = isDark ? '#0f172a' : '#f8fafc'
@@ -63,8 +67,13 @@ export default function MyGMScorePage() {
   const fetchData = useCallback(async () => {
     try {
       setError(null)
-      const result = await gmApi.getUserScore()
-      setData(result)
+      // Fetch both user score and analytics in parallel
+      const [scoreResult, analyticsResult] = await Promise.all([
+        gmApi.getUserScore(),
+        gmApi.getAnalytics().catch(() => null), // Don't fail if analytics fails
+      ])
+      setData(scoreResult)
+      setAnalytics(analyticsResult)
     } catch (err) {
       if (err instanceof AuthRequiredError) {
         setError('Please sign in to view your GM Score')
@@ -512,6 +521,360 @@ export default function MyGMScorePage() {
               </TouchableOpacity>
             </View>
           )}
+
+          {/* Analytics Section */}
+          {analytics && analytics.total_trades > 0 && (
+            <>
+              {/* Trade Results */}
+              <Text
+                style={{
+                  fontSize: 16,
+                  fontWeight: '700',
+                  color: textColor,
+                  marginTop: 24,
+                  marginBottom: 12,
+                }}
+              >
+                Trade Results
+              </Text>
+              <View style={{ flexDirection: 'row', gap: 10, marginBottom: 16 }}>
+                <View
+                  style={{
+                    flex: 1,
+                    padding: 14,
+                    borderRadius: 12,
+                    backgroundColor: '#22c55e20',
+                    alignItems: 'center',
+                  }}
+                >
+                  <Text style={{ fontSize: 24, fontWeight: '800', color: '#22c55e' }}>
+                    {analytics.accepted_trades}
+                  </Text>
+                  <Text style={{ fontSize: 11, fontWeight: '600', color: '#22c55e', marginTop: 2 }}>
+                    Accepted
+                  </Text>
+                </View>
+                <View
+                  style={{
+                    flex: 1,
+                    padding: 14,
+                    borderRadius: 12,
+                    backgroundColor: '#ef444420',
+                    alignItems: 'center',
+                  }}
+                >
+                  <Text style={{ fontSize: 24, fontWeight: '800', color: '#ef4444' }}>
+                    {analytics.rejected_trades}
+                  </Text>
+                  <Text style={{ fontSize: 11, fontWeight: '600', color: '#ef4444', marginTop: 2 }}>
+                    Rejected
+                  </Text>
+                </View>
+                <View
+                  style={{
+                    flex: 1,
+                    padding: 14,
+                    borderRadius: 12,
+                    backgroundColor: '#f59e0b20',
+                    alignItems: 'center',
+                  }}
+                >
+                  <Text style={{ fontSize: 24, fontWeight: '800', color: '#f59e0b' }}>
+                    {analytics.dangerous_trades}
+                  </Text>
+                  <Text style={{ fontSize: 11, fontWeight: '600', color: '#f59e0b', marginTop: 2 }}>
+                    Dangerous
+                  </Text>
+                </View>
+              </View>
+
+              {/* Overview Stats */}
+              <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 10, marginBottom: 16 }}>
+                <View
+                  style={{
+                    width: (SCREEN_WIDTH - 42) / 2,
+                    padding: 16,
+                    borderRadius: 12,
+                    backgroundColor: cardBg,
+                    alignItems: 'center',
+                    borderWidth: 1,
+                    borderColor: borderColor,
+                  }}
+                >
+                  <Text style={{ fontSize: 28, fontWeight: '800', color: textColor }}>
+                    {analytics.total_trades}
+                  </Text>
+                  <Text style={{ fontSize: 12, color: subText, marginTop: 4 }}>Total Trades</Text>
+                </View>
+                <View
+                  style={{
+                    width: (SCREEN_WIDTH - 42) / 2,
+                    padding: 16,
+                    borderRadius: 12,
+                    backgroundColor: cardBg,
+                    alignItems: 'center',
+                    borderWidth: 1,
+                    borderColor: borderColor,
+                  }}
+                >
+                  <Text style={{ fontSize: 28, fontWeight: '800', color: textColor }}>
+                    {analytics.average_grade.toFixed(1)}
+                  </Text>
+                  <Text style={{ fontSize: 12, color: subText, marginTop: 4 }}>Avg Grade</Text>
+                </View>
+                <View
+                  style={{
+                    width: (SCREEN_WIDTH - 42) / 2,
+                    padding: 16,
+                    borderRadius: 12,
+                    backgroundColor: cardBg,
+                    alignItems: 'center',
+                    borderWidth: 1,
+                    borderColor: borderColor,
+                  }}
+                >
+                  <Text style={{ fontSize: 28, fontWeight: '800', color: '#22c55e' }}>
+                    {analytics.highest_grade}
+                  </Text>
+                  <Text style={{ fontSize: 12, color: subText, marginTop: 4 }}>Best Grade</Text>
+                </View>
+                <View
+                  style={{
+                    width: (SCREEN_WIDTH - 42) / 2,
+                    padding: 16,
+                    borderRadius: 12,
+                    backgroundColor: cardBg,
+                    alignItems: 'center',
+                    borderWidth: 1,
+                    borderColor: borderColor,
+                  }}
+                >
+                  <Text style={{ fontSize: 28, fontWeight: '800', color: '#ef4444' }}>
+                    {analytics.lowest_grade}
+                  </Text>
+                  <Text style={{ fontSize: 12, color: subText, marginTop: 4 }}>Worst Grade</Text>
+                </View>
+              </View>
+
+              {/* Grade Distribution */}
+              {analytics.grade_distribution && analytics.grade_distribution.length > 0 && (
+                <>
+                  <Text
+                    style={{
+                      fontSize: 16,
+                      fontWeight: '700',
+                      color: textColor,
+                      marginBottom: 12,
+                    }}
+                  >
+                    Grade Distribution
+                  </Text>
+                  <View
+                    style={{
+                      backgroundColor: cardBg,
+                      borderRadius: 12,
+                      padding: 16,
+                      marginBottom: 16,
+                      borderWidth: 1,
+                      borderColor: borderColor,
+                    }}
+                  >
+                    {analytics.grade_distribution.map((bucket) => {
+                      const gradeNum = parseInt(bucket.bucket)
+                      const barColor =
+                        gradeNum >= 70 ? '#22c55e' : gradeNum >= 50 ? '#f59e0b' : '#ef4444'
+                      return (
+                        <View
+                          key={bucket.bucket}
+                          style={{
+                            flexDirection: 'row',
+                            alignItems: 'center',
+                            marginBottom: 8,
+                          }}
+                        >
+                          <Text style={{ width: 50, fontSize: 11, fontWeight: '500', color: subText }}>
+                            {bucket.bucket}
+                          </Text>
+                          <View
+                            style={{
+                              flex: 1,
+                              height: 16,
+                              backgroundColor: isDark ? '#1e293b' : '#f1f5f9',
+                              borderRadius: 4,
+                              marginHorizontal: 8,
+                              overflow: 'hidden',
+                            }}
+                          >
+                            <View
+                              style={{
+                                height: 16,
+                                borderRadius: 4,
+                                width: `${Math.max(bucket.percentage, 2)}%`,
+                                backgroundColor: barColor,
+                              }}
+                            />
+                          </View>
+                          <Text
+                            style={{
+                              width: 30,
+                              fontSize: 12,
+                              fontWeight: '700',
+                              color: textColor,
+                              textAlign: 'right',
+                            }}
+                          >
+                            {bucket.count}
+                          </Text>
+                        </View>
+                      )
+                    })}
+                  </View>
+                </>
+              )}
+
+              {/* Trading Partners */}
+              {analytics.trading_partners && analytics.trading_partners.length > 0 && (
+                <>
+                  <Text
+                    style={{
+                      fontSize: 16,
+                      fontWeight: '700',
+                      color: textColor,
+                      marginBottom: 12,
+                    }}
+                  >
+                    Top Trading Partners
+                  </Text>
+                  <View
+                    style={{
+                      backgroundColor: cardBg,
+                      borderRadius: 12,
+                      padding: 12,
+                      marginBottom: 16,
+                      borderWidth: 1,
+                      borderColor: borderColor,
+                    }}
+                  >
+                    {analytics.trading_partners.slice(0, 5).map((partner, idx) => (
+                      <View
+                        key={partner.team_key || idx}
+                        style={{
+                          flexDirection: 'row',
+                          alignItems: 'center',
+                          paddingVertical: 10,
+                          borderBottomWidth: idx < 4 ? 0.5 : 0,
+                          borderBottomColor: borderColor,
+                        }}
+                      >
+                        <Text
+                          style={{
+                            width: 24,
+                            fontSize: 14,
+                            fontWeight: '700',
+                            textAlign: 'center',
+                            color: subText,
+                          }}
+                        >
+                          {idx + 1}
+                        </Text>
+                        <View style={{ flex: 1, marginLeft: 8 }}>
+                          <Text style={{ fontSize: 14, fontWeight: '600', color: textColor }}>
+                            {partner.team_name}
+                          </Text>
+                          <Text style={{ fontSize: 11, color: subText, marginTop: 2 }}>
+                            {partner.trade_count} trades · Avg: {partner.avg_grade}
+                          </Text>
+                        </View>
+                      </View>
+                    ))}
+                  </View>
+                </>
+              )}
+
+              {/* Chicago Teams Breakdown */}
+              {analytics.chicago_teams && analytics.chicago_teams.length > 0 && (
+                <>
+                  <Text
+                    style={{
+                      fontSize: 16,
+                      fontWeight: '700',
+                      color: textColor,
+                      marginBottom: 12,
+                    }}
+                  >
+                    By Chicago Team
+                  </Text>
+                  <View
+                    style={{
+                      backgroundColor: cardBg,
+                      borderRadius: 12,
+                      padding: 12,
+                      marginBottom: 16,
+                      borderWidth: 1,
+                      borderColor: borderColor,
+                    }}
+                  >
+                    {analytics.chicago_teams.map((team, idx) => {
+                      const teamConfig = TEAM_CONFIG[team.team]
+                      return (
+                        <View
+                          key={team.team}
+                          style={{
+                            flexDirection: 'row',
+                            alignItems: 'center',
+                            paddingVertical: 10,
+                            borderBottomWidth: idx < analytics.chicago_teams!.length - 1 ? 0.5 : 0,
+                            borderBottomColor: borderColor,
+                          }}
+                        >
+                          <View
+                            style={{
+                              width: 8,
+                              height: 8,
+                              borderRadius: 4,
+                              backgroundColor: teamConfig?.color || '#666',
+                              marginRight: 10,
+                            }}
+                          />
+                          <View style={{ flex: 1 }}>
+                            <Text style={{ fontSize: 14, fontWeight: '600', color: textColor }}>
+                              {teamConfig?.name || team.team.charAt(0).toUpperCase() + team.team.slice(1)}
+                            </Text>
+                            <Text style={{ fontSize: 11, color: subText, marginTop: 2 }}>
+                              {team.trade_count} trades · Avg: {team.avg_grade} · {team.accepted_rate}%
+                              accepted
+                            </Text>
+                          </View>
+                        </View>
+                      )
+                    })}
+                  </View>
+                </>
+              )}
+            </>
+          )}
+
+          {/* No trades empty state */}
+          {(!analytics || analytics.total_trades === 0) && mockDrafts.length === 0 && (
+            <View
+              style={{
+                backgroundColor: cardBg,
+                borderRadius: 12,
+                padding: 24,
+                alignItems: 'center',
+                marginTop: 16,
+                borderWidth: 1,
+                borderColor: borderColor,
+              }}
+            >
+              <Ionicons name="bar-chart-outline" size={40} color={subText} />
+              <Text style={{ marginTop: 12, fontSize: 14, color: subText, textAlign: 'center' }}>
+                Complete some trades to see your analytics here.
+              </Text>
+            </View>
+          )}
+
+          <View style={{ height: 32 }} />
         </ScrollView>
       )}
     </SafeAreaView>
