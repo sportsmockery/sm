@@ -6,6 +6,8 @@ import { AssetRow } from './AssetRow'
 import { ValidationIndicator, ValidationState } from './ValidationIndicator'
 import { DraftPickValueWidget, type DraftPickValue } from './DraftPickValueWidget'
 import { VeteranTradeValueWidget, type VeteranTradeValue } from './VeteranTradeValueWidget'
+import { FuturePickDiscountWidget, type FuturePickValue } from './FuturePickDiscountWidget'
+import { AgingCurveWidget, type AgingCurveData } from './AgingCurveWidget'
 import { useTheme } from '@/contexts/ThemeContext'
 import type { DraftPick } from '@/types/gm'
 
@@ -42,6 +44,10 @@ interface GradeResult {
   draftPickValuesReceived?: DraftPickValue[]
   veteranValueSent?: VeteranTradeValue[]
   veteranValueReceived?: VeteranTradeValue[]
+  futurePicksSent?: FuturePickValue[]
+  futurePicksReceived?: FuturePickValue[]
+  agingCurvesSent?: AgingCurveData[]
+  agingCurvesReceived?: AgingCurveData[]
 }
 
 interface TradeBoardProps {
@@ -741,6 +747,38 @@ export function TradeBoard({
               <VeteranTradeValueWidget
                 key={`vet-recv-${idx}`}
                 veteran={veteran}
+                teamColor={opponentColor}
+              />
+            ))}
+
+            {/* NFL-Specific: Future Pick Discounts */}
+            {sport === 'nfl' && gradeResult.futurePicksSent && gradeResult.futurePicksSent.length > 0 && (
+              <FuturePickDiscountWidget
+                picks={gradeResult.futurePicksSent}
+                teamColor={chicagoColor}
+              />
+            )}
+
+            {sport === 'nfl' && gradeResult.futurePicksReceived && gradeResult.futurePicksReceived.length > 0 && (
+              <FuturePickDiscountWidget
+                picks={gradeResult.futurePicksReceived}
+                teamColor={opponentColor}
+              />
+            )}
+
+            {/* NFL-Specific: Aging Curves */}
+            {sport === 'nfl' && gradeResult.agingCurvesSent && gradeResult.agingCurvesSent.map((curve, idx) => (
+              <AgingCurveWidget
+                key={`aging-sent-${idx}`}
+                data={curve}
+                teamColor={chicagoColor}
+              />
+            ))}
+
+            {sport === 'nfl' && gradeResult.agingCurvesReceived && gradeResult.agingCurvesReceived.map((curve, idx) => (
+              <AgingCurveWidget
+                key={`aging-recv-${idx}`}
+                data={curve}
                 teamColor={opponentColor}
               />
             ))}
