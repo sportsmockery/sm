@@ -655,6 +655,47 @@ export default function MockDraftPage() {
                 </div>
               </div>
 
+              {/* Your Picks So Far - show during in_progress */}
+              {activeDraft.status === 'in_progress' && activeDraft.picks.some(p => p.is_user_pick && p.selected_prospect) && (
+                <div className={`rounded-xl border p-3 sm:p-4 ${cardBg}`}>
+                  <h3 className="text-sm sm:text-base" style={{ fontWeight: 700, marginBottom: 10, color: isDark ? '#fff' : '#1a1a1a' }}>
+                    Your Picks
+                  </h3>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+                    {activeDraft.picks
+                      .filter(p => p.is_user_pick && p.selected_prospect)
+                      .map(pick => (
+                        <div
+                          key={pick.pick_number}
+                          style={{
+                            display: 'flex', alignItems: 'center', gap: 10,
+                            padding: '8px 10px', borderRadius: 8,
+                            backgroundColor: teamColor + '15',
+                            border: `1px solid ${teamColor}30`,
+                          }}
+                        >
+                          <div style={{
+                            width: 28, height: 28, minWidth: 28, borderRadius: 6,
+                            backgroundColor: teamColor, color: '#fff',
+                            fontWeight: 700, fontSize: '11px',
+                            display: 'flex', alignItems: 'center', justifyContent: 'center',
+                          }}>
+                            #{pick.pick_number}
+                          </div>
+                          <div style={{ flex: 1, minWidth: 0 }}>
+                            <div className="text-sm" style={{ fontWeight: 600, color: isDark ? '#fff' : '#1a1a1a' }}>
+                              {pick.selected_prospect!.name}
+                            </div>
+                            <div className="text-xs" style={{ color: subText }}>
+                              {pick.selected_prospect!.position} • {pick.selected_prospect!.school}
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                  </div>
+                </div>
+              )}
+
               {/* Prospect Search (only show during draft) */}
               {activeDraft.status === 'in_progress' && isUserPick && (
                 <>
