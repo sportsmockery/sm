@@ -4,7 +4,10 @@ import { motion, AnimatePresence, useSpring, useTransform } from 'framer-motion'
 import { useTheme } from '@/contexts/ThemeContext'
 import { WhatIfPanel } from './WhatIfPanel'
 import { ExportModal } from './ExportModal'
+import { AuditButton } from './AuditButton'
+import { AuditReportCard } from './AuditReportCard'
 import type { PlayerData } from '@/components/gm/PlayerCard'
+import type { AuditResult } from '@/types/gm-audit'
 
 interface GradeResult {
   grade: number
@@ -84,12 +87,14 @@ export function GradeReveal({ result, show, onClose, onNewTrade, tradeDetails, s
   const [showConfetti, setShowConfetti] = useState(false)
   const [showWhatIf, setShowWhatIf] = useState(false)
   const [showExport, setShowExport] = useState(false)
+  const [auditResult, setAuditResult] = useState<AuditResult | null>(null)
 
   useEffect(() => {
     if (!show || !result) {
       setPhase(0)
       setDisplayGrade(0)
       setShowConfetti(false)
+      setAuditResult(null)
       return
     }
 
@@ -484,6 +489,15 @@ export function GradeReveal({ result, show, onClose, onNewTrade, tradeDetails, s
             </motion.div>
           )}
 
+          {/* Audit Report */}
+          {phase >= 4 && auditResult && (
+            <AuditReportCard
+              audit={auditResult}
+              gmGrade={result.grade}
+              isDark={isDark}
+            />
+          )}
+
           {/* Action buttons */}
           {phase >= 4 && (
             <motion.div
@@ -524,6 +538,13 @@ export function GradeReveal({ result, show, onClose, onNewTrade, tradeDetails, s
               >
                 Export
               </button>
+              {result.shared_code && !auditResult && (
+                <AuditButton
+                  tradeId={result.shared_code}
+                  onAuditComplete={setAuditResult}
+                  isDark={isDark}
+                />
+              )}
               {result.shared_code && (
                 <button
                   onClick={() => {
