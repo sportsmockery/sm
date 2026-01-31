@@ -320,6 +320,17 @@ export default function GMResultScreen() {
           </View>
         )}
 
+        {/* Draft Analysis */}
+        {result.draft_analysis && (
+          <View style={[styles.draftAnalysisCard, { backgroundColor: colors.surface }]}>
+            <View style={styles.draftAnalysisHeader}>
+              <Ionicons name="document-text" size={18} color="#8b5cf6" />
+              <Text style={[styles.draftAnalysisTitle, { color: colors.text }]}>Draft Capital Analysis</Text>
+            </View>
+            <Text style={[styles.reasoningText, { color: colors.textMuted }]}>{result.draft_analysis}</Text>
+          </View>
+        )}
+
         {/* Actions */}
         <View style={styles.actions}>
           <TouchableOpacity style={styles.primaryBtn} onPress={handleNewTrade}>
@@ -621,5 +632,24 @@ const styles = StyleSheet.create({
   rejectionScoreLabel: {
     fontSize: 13,
     fontFamily: 'Montserrat-Medium',
+  },
+  // Draft analysis styles
+  draftAnalysisCard: {
+    width: '100%',
+    borderRadius: 14,
+    padding: 16,
+    marginBottom: 12,
+    borderWidth: 1,
+    borderColor: '#8b5cf6',
+  },
+  draftAnalysisHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    marginBottom: 10,
+  },
+  draftAnalysisTitle: {
+    fontSize: 15,
+    fontFamily: 'Montserrat-Bold',
   },
 })

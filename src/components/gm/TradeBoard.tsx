@@ -28,6 +28,7 @@ interface GradeResult {
     future_assets: number
   }
   cap_analysis?: string
+  draft_analysis?: string
 }
 
 interface TradeBoardProps {
@@ -539,6 +540,41 @@ export function TradeBoard({
                     color: isDark ? '#e2e8f0' : '#334155',
                   }}>
                     {gradeResult.cap_analysis}
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Draft Analysis */}
+            {gradeResult.draft_analysis && (
+              <div style={{
+                marginBottom: 16,
+                padding: 12,
+                borderRadius: 10,
+                backgroundColor: isDark ? '#1e1b4b' : '#f5f3ff',
+                border: `1px solid ${isDark ? '#3730a3' : '#c4b5fd'}`,
+                display: 'flex',
+                alignItems: 'flex-start',
+                gap: 10,
+              }}>
+                <span style={{ fontSize: 18, flexShrink: 0 }}>📋</span>
+                <div>
+                  <div style={{
+                    fontSize: 11,
+                    fontWeight: 700,
+                    color: isDark ? '#a5b4fc' : '#6366f1',
+                    marginBottom: 4,
+                    textTransform: 'uppercase',
+                    letterSpacing: '0.5px',
+                  }}>
+                    Draft Capital Analysis
+                  </div>
+                  <div style={{
+                    fontSize: 13,
+                    lineHeight: 1.5,
+                    color: isDark ? '#e2e8f0' : '#334155',
+                  }}>
+                    {gradeResult.draft_analysis}
                   </div>
                 </div>
               </div>
