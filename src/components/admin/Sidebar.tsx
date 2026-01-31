@@ -66,6 +66,11 @@ const icons = {
       <path strokeLinecap="round" strokeLinejoin="round" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
     </svg>
   ),
+  copilot: (
+    <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
+      <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 3v1.5M4.5 8.25H3m18 0h-1.5M4.5 12H3m18 0h-1.5m-15 3.75H3m18 0h-1.5M8.25 19.5V21M12 3v1.5m0 15V21m3.75-18v1.5m0 15V21m-9-1.5h10.5a2.25 2.25 0 002.25-2.25V6.75a2.25 2.25 0 00-2.25-2.25H6.75A2.25 2.25 0 004.5 6.75v10.5a2.25 2.25 0 002.25 2.25zm.75-12h9v9h-9v-9z" />
+    </svg>
+  ),
   teamSync: (
     <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
       <path strokeLinecap="round" strokeLinejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0l3.181 3.183a8.25 8.25 0 0013.803-3.7M4.031 9.865a8.25 8.25 0 0113.803-3.7l3.181 3.182m0-4.991v4.99" />
@@ -143,6 +148,7 @@ const navSections: NavSection[] = [
       { name: 'Polls', href: '/admin/polls', icon: 'polls' },
       { name: 'PostIQ', href: '/admin/postiq', icon: 'ai' },
       { name: 'Scout AI Imports', href: '/admin/ai-logging', icon: 'aiLogging' },
+      { name: 'Copilot Monitoring', href: '/admin/copilot', icon: 'copilot' },
       { name: 'Team Pages Sync', href: '/admin/team-pages-sync', icon: 'teamSync' },
       { name: 'Analytics', href: '/admin/analytics', icon: 'analytics' },
       { name: 'Feed Scoring', href: '/admin/feed-scoring', icon: 'feedScoring' },
