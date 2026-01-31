@@ -49,6 +49,18 @@ export interface MLBProspect {
   level?: string              // Alias for current_level
 }
 
+// MLB salary retention tracking (0-50% per CBA rules)
+export interface SalaryRetention {
+  player_id: string
+  retention_pct: number  // 0-50
+}
+
+// MLB cash considerations for trades
+export interface MLBCashConsiderations {
+  cash_sent: number       // Max $100,000 per CBA
+  cash_received: number   // Max $100,000 per CBA
+}
+
 // Player data (mirrors PlayerData from PlayerCard.tsx)
 export interface GMPlayerData {
   player_id: string

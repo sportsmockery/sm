@@ -76,6 +76,9 @@ Most trades should land between 25-65. Grades 70+ require BOTH sides to plausibl
 - Years of team control dramatically affect value — 3 years of control >> rental.
 - Cubs (92-70) are CONTENDING — should be buying. Trading top prospects for proven talent = acceptable.
 - White Sox (60-102) are REBUILDING — should be selling everything for future assets.
+- **Salary Retention**: Sending team can retain 0-50% of a player's salary. Factor this into contract value — a $30M player with 50% retained is effectively a $15M acquisition. Retention makes expensive players more tradeable and increases realistic value.
+- **Cash Considerations**: CBA limits direct cash to $100,000 max. Minor value in modern trades, typically a sweetener.
+- When retention is included, note the NET salary impact for Chicago in cap_analysis.
 
 ## Untouchable Players
 - Bears: Caleb Williams (franchise QB on rookie deal) → grade 0 if traded
@@ -131,7 +134,12 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json()
-    const { chicago_team, trade_partner, players_sent, players_received, draft_picks_sent, draft_picks_received, session_id, partner_team_key } = body
+    const {
+      chicago_team, trade_partner, players_sent, players_received,
+      draft_picks_sent, draft_picks_received, session_id, partner_team_key,
+      // MLB salary retention & cash considerations
+      salary_retentions, cash_sent, cash_received,
+    } = body
 
     if (!chicago_team || !TEAM_SPORT_MAP[chicago_team]) {
       return NextResponse.json({ error: 'Invalid chicago_team' }, { status: 400 })
@@ -274,6 +282,42 @@ export async function POST(request: NextRequest) {
       if (partnerCapData.dead_money) capContext += ` (${formatMoney(partnerCapData.dead_money)} dead money)`
     }
 
+    // MLB Salary Retention & Cash Considerations context
+    let mlbFinancialContext = ''
+    if (sport === 'mlb') {
+      // Salary retention details
+      if (salary_retentions && typeof salary_retentions === 'object' && Object.keys(salary_retentions).length > 0) {
+        const retentionDetails: string[] = []
+        for (const [playerId, pct] of Object.entries(salary_retentions)) {
+          const numPct = Number(pct)
+          if (numPct > 0) {
+            // Find the player in received list
+            const player = safePlayers_received.find((p: any) =>
+              p.espn_id === playerId || p.player_id === playerId || (p.name || p.full_name) === playerId
+            )
+            if (player?.cap_hit) {
+              const retainedAmount = (player.cap_hit * numPct) / 100
+              const netSalary = player.cap_hit - retainedAmount
+              retentionDetails.push(
+                `${player.name || player.full_name}: ${numPct}% retained by sending team (${formatMoney(retainedAmount)} retained, net ${formatMoney(netSalary)} for Chicago)`
+              )
+            }
+          }
+        }
+        if (retentionDetails.length > 0) {
+          mlbFinancialContext += `\n\nSalary Retention:\n${retentionDetails.join('\n')}`
+        }
+      }
+
+      // Cash considerations
+      if (cash_sent && Number(cash_sent) > 0) {
+        mlbFinancialContext += `\nCash sent by Chicago: $${Number(cash_sent).toLocaleString()}`
+      }
+      if (cash_received && Number(cash_received) > 0) {
+        mlbFinancialContext += `\nCash received by Chicago: $${Number(cash_received).toLocaleString()}`
+      }
+    }
+
     // Calculate value gap if tiers are available
     let valueContext = ''
     const hasTiers = Object.keys(tierMap).length > 0
@@ -314,7 +358,7 @@ VALUE GAP: ${gap > 0 ? `Chicago receiving ${gap} points MORE (other team unlikel
     const tradeDescription = `
 Sport: ${sport.toUpperCase()}
 ${teamDisplayNames[chicago_team]} send: ${sentDesc}${picksSentDesc}
-${trade_partner} send: ${recvDesc}${picksRecvDesc}${capContext}${valueContext}${examplesBlock}
+${trade_partner} send: ${recvDesc}${picksRecvDesc}${capContext}${mlbFinancialContext}${valueContext}${examplesBlock}
 
 Grade this trade from the perspective of the ${teamDisplayNames[chicago_team]}.`
 

@@ -109,6 +109,11 @@ export default function GMPage() {
   const [opponentProspects, setOpponentProspects] = useState<MLBProspect[]>([])
   const [thirdTeamProspects, setThirdTeamProspects] = useState<MLBProspect[]>([])
 
+  // MLB salary retention & cash considerations
+  const [salaryRetentions, setSalaryRetentions] = useState<Record<string, number>>({})
+  const [cashSent, setCashSent] = useState(0)
+  const [cashReceived, setCashReceived] = useState(0)
+
   // Mobile
   const [activeTab, setActiveTab] = useState<'build' | 'history' | 'leaderboard'>('build')
   const [leftPanelOpen, setLeftPanelOpen] = useState(false)
@@ -127,6 +132,11 @@ export default function GMPage() {
   const handleViewFit = useCallback((player: PlayerData) => {
     setFitPlayer(player)
     setShowFitOverlay(true)
+  }, [])
+
+  // MLB salary retention handler
+  const handleSalaryRetentionChange = useCallback((playerId: string, pct: number) => {
+    setSalaryRetentions(prev => ({ ...prev, [playerId]: Math.min(50, Math.max(0, pct)) }))
   }, [])
 
   // Preferences
@@ -438,6 +448,8 @@ export default function GMPage() {
                 college: p.college, weight_lbs: p.weight_lbs, years_exp: p.years_exp,
                 draft_info: p.draft_info, espn_id: p.espn_id, stats: p.stats,
                 cap_hit: p.cap_hit, contract_years: p.contract_years,
+                // MLB salary retention
+                salary_retention_pct: sport === 'mlb' ? (salaryRetentions[p.player_id] || 0) : undefined,
               }
             }
             return p
@@ -445,6 +457,10 @@ export default function GMPage() {
           draft_picks_sent: draftPicksSent,
           draft_picks_received: draftPicksReceived,
           session_id: activeSession?.id,
+          // MLB salary retention & cash considerations
+          salary_retentions: sport === 'mlb' ? salaryRetentions : undefined,
+          cash_sent: sport === 'mlb' ? cashSent : undefined,
+          cash_received: sport === 'mlb' ? cashReceived : undefined,
         }),
       })
 
@@ -473,6 +489,10 @@ export default function GMPage() {
     setGradeResult(null)
     setGradeError(null)
     setValidation({ status: 'idle', issues: [] })
+    // Reset MLB salary retention & cash
+    setSalaryRetentions({})
+    setCashSent(0)
+    setCashReceived(0)
   }
 
   function editTrade() {
@@ -856,6 +876,12 @@ export default function GMPage() {
                   onNewTrade={resetTrade}
                   onEditTrade={editTrade}
                   sport={sport}
+                  salaryRetentions={salaryRetentions}
+                  onSalaryRetentionChange={handleSalaryRetentionChange}
+                  cashSent={cashSent}
+                  cashReceived={cashReceived}
+                  onCashSentChange={setCashSent}
+                  onCashReceivedChange={setCashReceived}
                 />
 
                 {/* Error */}
@@ -1007,6 +1033,12 @@ export default function GMPage() {
                   onEditTrade={editTrade}
                   mobile
                   sport={sport}
+                  salaryRetentions={salaryRetentions}
+                  onSalaryRetentionChange={handleSalaryRetentionChange}
+                  cashSent={cashSent}
+                  cashReceived={cashReceived}
+                  onCashSentChange={setCashSent}
+                  onCashReceivedChange={setCashReceived}
                 />
 
                 {/* Season Simulation - mobile, only show for accepted trades */}

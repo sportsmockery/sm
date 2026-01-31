@@ -76,6 +76,13 @@ interface TradeBoardProps {
   onNewTrade?: () => void
   onEditTrade?: () => void
   sport?: 'nfl' | 'nba' | 'nhl' | 'mlb'
+  // MLB salary retention & cash considerations
+  salaryRetentions?: Record<string, number>
+  onSalaryRetentionChange?: (playerId: string, pct: number) => void
+  cashSent?: number
+  cashReceived?: number
+  onCashSentChange?: (amount: number) => void
+  onCashReceivedChange?: (amount: number) => void
 }
 
 export function TradeBoard({
@@ -92,6 +99,12 @@ export function TradeBoard({
   onNewTrade,
   onEditTrade,
   sport,
+  salaryRetentions,
+  onSalaryRetentionChange,
+  cashSent,
+  cashReceived,
+  onCashSentChange,
+  onCashReceivedChange,
 }: TradeBoardProps) {
   const { theme } = useTheme()
   const isDark = theme === 'dark'
@@ -274,13 +287,43 @@ export function TradeBoard({
             <AnimatePresence>
               {playersReceived.map((p, i) => (
                 isPlayerData(p) ? (
-                  <AssetRow
-                    key={p.player_id}
-                    type="PLAYER"
-                    player={p}
-                    teamColor={opponentColor}
-                    onRemove={gradeResult ? undefined : () => onRemoveReceived(i)}
-                  />
+                  <div key={p.player_id}>
+                    <AssetRow
+                      type="PLAYER"
+                      player={p}
+                      teamColor={opponentColor}
+                      onRemove={gradeResult ? undefined : () => onRemoveReceived(i)}
+                    />
+                    {/* MLB Salary Retention Slider */}
+                    {sport === 'mlb' && p.cap_hit && !gradeResult && (
+                      <div style={{
+                        display: 'flex', alignItems: 'center', gap: 8,
+                        marginLeft: 12, marginTop: 4, marginBottom: 4,
+                        padding: '6px 10px', borderRadius: 6,
+                        backgroundColor: isDark ? '#1f2937' : '#f3f4f6',
+                        fontSize: 11, color: subText,
+                      }}>
+                        <span style={{ whiteSpace: 'nowrap' }}>Salary Retention:</span>
+                        <input
+                          type="range"
+                          min={0}
+                          max={50}
+                          step={5}
+                          value={salaryRetentions?.[p.player_id] || 0}
+                          onChange={e => onSalaryRetentionChange?.(p.player_id, Number(e.target.value))}
+                          style={{ width: 80, cursor: 'pointer' }}
+                        />
+                        <span style={{ fontWeight: 600, minWidth: 30 }}>
+                          {salaryRetentions?.[p.player_id] || 0}%
+                        </span>
+                        {(salaryRetentions?.[p.player_id] || 0) > 0 && (
+                          <span style={{ color: '#22c55e' }}>
+                            (${((p.cap_hit * (salaryRetentions?.[p.player_id] || 0)) / 100 / 1_000_000).toFixed(1)}M retained)
+                          </span>
+                        )}
+                      </div>
+                    )}
+                  </div>
                 ) : (
                   <motion.div
                     key={`r-${i}`}
@@ -340,6 +383,53 @@ export function TradeBoard({
             {bothSidesHaveAssets && validation && validation.status !== 'idle' && (
               <ValidationIndicator validation={validation} />
             )}
+          </div>
+        )}
+
+        {/* MLB Cash Considerations */}
+        {sport === 'mlb' && !gradeResult && (
+          <div style={{
+            display: 'flex', gap: 16, padding: 12, borderRadius: 10,
+            backgroundColor: isDark ? 'rgba(31, 41, 55, 0.5)' : '#f3f4f6',
+            fontSize: 12, alignItems: 'center', justifyContent: 'center',
+            flexWrap: 'wrap',
+          }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+              <span style={{ color: subText }}>Cash Sent:</span>
+              <input
+                type="number"
+                min={0}
+                max={100000}
+                step={5000}
+                value={cashSent || 0}
+                onChange={e => onCashSentChange?.(Math.min(100000, Math.max(0, Number(e.target.value))))}
+                style={{
+                  width: 90, padding: '4px 8px', borderRadius: 6,
+                  backgroundColor: isDark ? '#374151' : '#fff',
+                  border: `1px solid ${borderColor}`,
+                  color: textColor, fontSize: 12,
+                }}
+              />
+              {(cashSent || 0) > 100000 && <span style={{ color: '#ef4444', fontSize: 10 }}>Max $100K</span>}
+            </div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+              <span style={{ color: subText }}>Cash Received:</span>
+              <input
+                type="number"
+                min={0}
+                max={100000}
+                step={5000}
+                value={cashReceived || 0}
+                onChange={e => onCashReceivedChange?.(Math.min(100000, Math.max(0, Number(e.target.value))))}
+                style={{
+                  width: 90, padding: '4px 8px', borderRadius: 6,
+                  backgroundColor: isDark ? '#374151' : '#fff',
+                  border: `1px solid ${borderColor}`,
+                  color: textColor, fontSize: 12,
+                }}
+              />
+            </div>
+            <span style={{ color: subText, fontSize: 10 }}>(CBA max: $100K)</span>
           </div>
         )}
 
