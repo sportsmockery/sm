@@ -72,6 +72,96 @@
             h2 { font-size: 1.75rem; }
             .hero-subtitle { font-size: 1rem; }
         }
+
+        /* Light mode styles */
+        body.light-mode {
+            background-color: var(--bg-light);
+            color: var(--text-light);
+        }
+
+        body.light-mode .bg-dark-surface,
+        body.light-mode .bg-\[var\(--bg-dark-surface\)\] {
+            background-color: #f3f4f6 !important;
+        }
+
+        body.light-mode .bg-dark-card {
+            background-color: #ffffff !important;
+        }
+
+        body.light-mode .text-white {
+            color: #000000 !important;
+        }
+
+        body.light-mode .text-gray-300,
+        body.light-mode .text-gray-400,
+        body.light-mode .text-gray-500 {
+            color: #4b5563 !important;
+        }
+
+        body.light-mode .border-gray-800 {
+            border-color: #e5e7eb !important;
+        }
+
+        body.light-mode header {
+            background-color: #ffffff !important;
+            border-color: #e5e7eb !important;
+        }
+
+        body.light-mode footer {
+            background-color: #f9fafb !important;
+        }
+
+        body.light-mode .feature-card {
+            background-color: #ffffff !important;
+            border-color: #e5e7eb !important;
+        }
+
+        body.light-mode .feature-card:hover {
+            box-shadow: 0 20px 40px rgba(188, 0, 0, 0.1);
+        }
+
+        /* Logo switching for light/dark mode */
+        .header-logo-dark { display: block; }
+        .header-logo-light { display: none; }
+        body.light-mode .header-logo-dark { display: none; }
+        body.light-mode .header-logo-light { display: block; }
+
+        .hero-logo-dark { display: block; }
+        .hero-logo-light { display: none; }
+        body.light-mode .hero-logo-dark { display: none; }
+        body.light-mode .hero-logo-light { display: block; }
+
+        /* Theme toggle button */
+        .theme-toggle-btn {
+            background: rgba(255, 255, 255, 0.1);
+            border: none;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+            font-size: 18px;
+        }
+
+        .theme-toggle-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        body.light-mode .theme-toggle-btn {
+            background: rgba(0, 0, 0, 0.05);
+        }
+
+        body.light-mode .theme-toggle-btn:hover {
+            background: rgba(0, 0, 0, 0.1);
+        }
+
+        .theme-icon-light { display: none; }
+        .theme-icon-dark { display: block; }
+        body.light-mode .theme-icon-light { display: block; }
+        body.light-mode .theme-icon-dark { display: none; }
     </style>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@600;700;800;900&family=Roboto:wght@400;500&display=swap" rel="stylesheet">
 </head>
@@ -79,7 +169,8 @@
     <!-- Header -->
     <header class="sticky top-0 bg-[var(--bg-dark-surface)] border-b border-gray-800 p-4 flex justify-between items-center shadow-lg z-50">
         <div class="flex items-center gap-3">
-            <img src="/logo-white.png" alt="Sports Mockery" class="h-8">
+            <img src="/images/SM_v2_White.png" alt="Sports Mockery" class="h-8 header-logo-dark">
+            <img src="/images/SM_v2_No2.png" alt="Sports Mockery" class="h-8 header-logo-light">
         </div>
         <nav class="flex items-center gap-6">
             <ul class="hidden md:flex space-x-6 text-sm font-medium">
@@ -88,7 +179,11 @@
                 <li><a href="#simulators" class="hover:text-[var(--accent)] transition-colors">Simulators</a></li>
                 <li><a href="#premium" class="hover:text-[var(--accent)] transition-colors">SM+</a></li>
             </ul>
-            <a href="/tour-preview.html" class="bg-[var(--accent)] text-white py-2 px-4 rounded-lg font-bold hover:bg-[var(--primary-dark)] transition-colors text-sm">
+            <button class="theme-toggle-btn" onclick="toggleTheme()" title="Toggle Light/Dark Mode">
+                <span class="theme-icon-light">☀️</span>
+                <span class="theme-icon-dark">🌙</span>
+            </button>
+            <a href="/tour-preview.html" class="bg-[var(--accent)] text-white py-2 px-4 rounded-lg font-bold hover:bg-[var(--primary-dark)] transition-colors text-sm" style="color: white !important;">
                 Take the Tour
             </a>
         </nav>
@@ -106,7 +201,8 @@
 
         <div class="relative z-10 max-w-4xl mx-auto">
             <!-- Logo -->
-            <img src="/android-chrome-512x512.png" alt="Chicago Star" class="mx-auto h-24 w-24 mb-6">
+            <img src="/images/SM_v2_White.png" alt="Sports Mockery" class="mx-auto h-24 w-24 mb-6 hero-logo-dark" style="object-fit: contain;">
+            <img src="/images/SM_v2_No2.png" alt="Sports Mockery" class="mx-auto h-24 w-24 mb-6 hero-logo-light" style="object-fit: contain;">
 
             <h1 class="text-5xl md:text-6xl font-black mb-6 leading-tight">
                 Welcome to <span class="gradient-text">Sports Mockery 2.0</span>
@@ -378,7 +474,8 @@
         <div class="max-w-7xl mx-auto">
             <div class="flex flex-col md:flex-row justify-between items-center gap-6">
                 <div class="flex items-center gap-4">
-                    <img src="/logo-white.png" alt="Sports Mockery" class="h-8">
+                    <img src="/images/SM_v2_White.png" alt="Sports Mockery" class="h-8 header-logo-dark">
+                    <img src="/images/SM_v2_No2.png" alt="Sports Mockery" class="h-8 header-logo-light">
                 </div>
                 <div class="flex gap-6">
                     <a href="https://twitter.com/sportsmockery" class="text-gray-400 hover:text-white transition-colors"><i class="fab fa-twitter text-xl"></i></a>
@@ -393,5 +490,18 @@
         </div>
     </footer>
 
+    <script>
+        function toggleTheme() {
+            document.body.classList.toggle('light-mode');
+            // Save preference
+            const isLight = document.body.classList.contains('light-mode');
+            localStorage.setItem('sm-theme', isLight ? 'light' : 'dark');
+        }
+
+        // Check for saved theme preference
+        if (localStorage.getItem('sm-theme') === 'light') {
+            document.body.classList.add('light-mode');
+        }
+    </script>
 </body>
 </html>

@@ -20,6 +20,69 @@
       --sm-warning: #f59e0b;
     }
 
+    /* Light mode overrides */
+    body.light-mode {
+      --sm-bg-dark: #f5f5f5;
+      --sm-bg-surface: #ffffff;
+      --sm-bg-card: #f9f9f9;
+      --sm-text: #1a1a1a;
+      --sm-text-muted: #6b7280;
+      --sm-border: #e5e5e5;
+    }
+
+    body.light-mode .tour-overlay {
+      background: rgba(255, 255, 255, 0.95);
+    }
+
+    body.light-mode .tour-container {
+      box-shadow: 0 25px 80px rgba(0, 0, 0, 0.15), 0 0 0 1px rgba(0, 0, 0, 0.05);
+    }
+
+    body.light-mode .welcome-logo {
+      content: url('/images/SM_v2_No2.png');
+    }
+
+    body.light-mode .header-logo {
+      content: url('/images/SM_v2_No2.png');
+    }
+
+    /* Theme toggle button */
+    .theme-toggle-btn {
+      background: rgba(255, 255, 255, 0.1);
+      border: none;
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s;
+    }
+
+    .theme-toggle-btn:hover {
+      background: rgba(255, 255, 255, 0.15);
+    }
+
+    body.light-mode .theme-toggle-btn {
+      background: rgba(0, 0, 0, 0.1);
+    }
+
+    body.light-mode .theme-toggle-btn:hover {
+      background: rgba(0, 0, 0, 0.15);
+    }
+
+    .theme-icon-light { display: none; }
+    .theme-icon-dark { display: block; }
+    body.light-mode .theme-icon-light { display: block; }
+    body.light-mode .theme-icon-dark { display: none; }
+
+    /* Dark mode logo (default) */
+    .welcome-logo-dark { display: block; }
+    .welcome-logo-light { display: none; }
+    body.light-mode .welcome-logo-dark { display: none; }
+    body.light-mode .welcome-logo-light { display: block; }
+
     * {
       margin: 0;
       padding: 0;
@@ -951,10 +1014,16 @@
     <!-- Header -->
     <div class="tour-header">
       <div class="header-left">
-        <img src="https://test.sportsmockery.com/logos/sm-logo-dark.png" alt="SportsMockery" class="sm-logo" onerror="this.src='/logos/sm-logo-dark.png'">
+        <img src="/images/SM_v2_White.png" alt="SportsMockery" class="sm-logo header-logo">
         <span class="header-badge">New Features</span>
       </div>
-      <button class="close-btn" onclick="closeTour()" title="Skip Tour">&times;</button>
+      <div style="display: flex; align-items: center; gap: 8px;">
+        <button class="theme-toggle-btn" onclick="toggleTheme()" title="Toggle Light/Dark Mode">
+          <span class="theme-icon-light">☀️</span>
+          <span class="theme-icon-dark">🌙</span>
+        </button>
+        <button class="close-btn" onclick="closeTour()" title="Skip Tour">&times;</button>
+      </div>
     </div>
 
     <!-- Progress Dots -->
@@ -968,10 +1037,8 @@
       <!-- SLIDE 0: Welcome -->
       <div class="slide active" data-slide="0">
         <div class="slide-header">
-          <div class="slide-icon" style="background: linear-gradient(135deg, var(--sm-primary), var(--sm-primary-dark));">
-            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2">
-              <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
-            </svg>
+          <div class="slide-icon" style="background: transparent;">
+            <img src="/images/SM_v2_White.png" alt="SportsMockery" class="welcome-logo" style="width: 80px; height: 80px; object-fit: contain;">
           </div>
           <h2 class="slide-title">Welcome to the Future of Chicago Sports!</h2>
           <p class="slide-subtitle">We've built something special. Let's show you around!</p>
@@ -1005,7 +1072,7 @@
           <ul class="feature-list">
             <li class="feature-item">
               <div class="feature-icon" style="background: rgba(102, 126, 234, 0.2);">
-                <img src="/downloads/scout-mascot.png" alt="Scout" onerror="this.innerHTML='AI'">
+                <img src="/downloads/scout-v2.png" alt="Scout" onerror="this.innerHTML='AI'">
               </div>
               <div class="feature-text">
                 <strong>Scout AI</strong>
@@ -1052,7 +1119,7 @@
       <div class="slide" data-slide="1">
         <div class="slide-header">
           <div class="slide-icon" style="background: linear-gradient(135deg, #667eea, #764ba2);">
-            <img src="/downloads/scout-mascot.png" alt="Scout AI" style="width: 50px; height: 50px;">
+            <img src="/downloads/scout-v2.png" alt="Scout AI" style="width: 50px; height: 50px;">
           </div>
           <h2 class="slide-title">Meet Scout AI</h2>
           <p class="slide-subtitle">Your personal Chicago sports expert!</p>
@@ -1064,7 +1131,7 @@
 
           <div class="preview-box" style="margin-top: 16px;">
             <div class="preview-header">
-              <img src="/downloads/scout-mascot.png" alt="Scout" onerror="this.style.display='none'">
+              <img src="/downloads/scout-v2.png" alt="Scout" onerror="this.style.display='none'">
               <span>Scout AI</span>
             </div>
             <div class="chat-bubble user">
@@ -1810,6 +1877,17 @@
   function toggleDemoTheme() {
     const toggle = document.getElementById('demoToggle');
     toggle.classList.toggle('dark');
+  }
+
+  function toggleTheme() {
+    document.body.classList.toggle('light-mode');
+    // Also toggle the demo theme toggle to match
+    const demoToggle = document.getElementById('demoToggle');
+    if (document.body.classList.contains('light-mode')) {
+      demoToggle.classList.remove('dark');
+    } else {
+      demoToggle.classList.add('dark');
+    }
   }
 
   // Initialize
