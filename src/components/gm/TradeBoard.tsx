@@ -150,8 +150,7 @@ export function TradeBoard({
           to { transform: rotate(360deg); }
         }
       `}</style>
-      {/* Two-panel trade visualization - hide when we have a grade result */}
-      {!gradeResult && (
+      {/* Two-panel trade visualization - always show so users can see trade details */}
       <div style={{ display: 'flex', flexDirection: mobile ? 'column' : 'row', gap: 0, alignItems: 'stretch' }}>
         {/* Chicago side */}
         <div style={{
@@ -176,7 +175,7 @@ export function TradeBoard({
                   type="PLAYER"
                   player={p}
                   teamColor={chicagoColor}
-                  onRemove={() => onRemoveSent(p.player_id)}
+                  onRemove={gradeResult ? undefined : () => onRemoveSent(p.player_id)}
                 />
               ))}
               {draftPicksSent.map((pk, i) => (
@@ -185,11 +184,11 @@ export function TradeBoard({
                   type="DRAFT_PICK"
                   pick={pk}
                   teamColor={chicagoColor}
-                  onRemove={() => onRemoveDraftSent(i)}
+                  onRemove={gradeResult ? undefined : () => onRemoveDraftSent(i)}
                 />
               ))}
             </AnimatePresence>
-            {playersSent.length === 0 && draftPicksSent.length === 0 && (
+            {playersSent.length === 0 && draftPicksSent.length === 0 && !gradeResult && (
               <div style={{ textAlign: 'center', padding: 20, color: subText, fontSize: '12px' }}>
                 Select players from roster
               </div>
@@ -258,7 +257,7 @@ export function TradeBoard({
                     type="PLAYER"
                     player={p}
                     teamColor={opponentColor}
-                    onRemove={() => onRemoveReceived(i)}
+                    onRemove={gradeResult ? undefined : () => onRemoveReceived(i)}
                   />
                 ) : (
                   <motion.div
@@ -278,15 +277,17 @@ export function TradeBoard({
                       <span style={{ fontWeight: 600, fontSize: '13px', color: textColor }}>{p.name}</span>
                       <span style={{ fontSize: '11px', color: subText, marginLeft: 6 }}>{p.position}</span>
                     </div>
-                    <button
-                      onClick={() => onRemoveReceived(i)}
-                      style={{
-                        background: 'none', border: 'none', cursor: 'pointer',
-                        color: '#ef4444', fontSize: '16px', fontWeight: 700,
-                      }}
-                    >
-                      &times;
-                    </button>
+                    {!gradeResult && (
+                      <button
+                        onClick={() => onRemoveReceived(i)}
+                        style={{
+                          background: 'none', border: 'none', cursor: 'pointer',
+                          color: '#ef4444', fontSize: '16px', fontWeight: 700,
+                        }}
+                      >
+                        &times;
+                      </button>
+                    )}
                   </motion.div>
                 )
               ))}
@@ -296,11 +297,11 @@ export function TradeBoard({
                   type="DRAFT_PICK"
                   pick={pk}
                   teamColor={opponentColor}
-                  onRemove={() => onRemoveDraftReceived(i)}
+                  onRemove={gradeResult ? undefined : () => onRemoveDraftReceived(i)}
                 />
               ))}
             </AnimatePresence>
-            {playersReceived.length === 0 && draftPicksReceived.length === 0 && (
+            {playersReceived.length === 0 && draftPicksReceived.length === 0 && !gradeResult && (
               <div style={{ textAlign: 'center', padding: 20, color: subText, fontSize: '12px' }}>
                 Add players to receive
               </div>
@@ -308,7 +309,6 @@ export function TradeBoard({
           </div>
         </div>
       </div>
-      )}
 
       {/* Validation and Grade section - stable layout with reserved space */}
       <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
