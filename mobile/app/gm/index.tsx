@@ -247,6 +247,10 @@ export default function GMTradeHub() {
         draft_picks_sent: state.draftPicksSent,
         draft_picks_received: state.draftPicksReceived,
         session_id: state.sessionId || undefined,
+        // MLB salary retention & cash considerations
+        salary_retentions: state.sport === 'mlb' ? state.salaryRetentions : undefined,
+        cash_sent: state.sport === 'mlb' ? state.cashSent : undefined,
+        cash_received: state.sport === 'mlb' ? state.cashReceived : undefined,
       })
 
       dispatch({ type: 'SET_GRADE_RESULT', result })
@@ -467,6 +471,7 @@ export default function GMTradeHub() {
           <TradeDock
             chicagoTeam={state.chicagoTeam}
             opponent={state.opponent}
+            sport={state.sport}
             sentAssets={{
               players: state.selectedPlayers,
               picks: state.draftPicksSent,
@@ -488,6 +493,14 @@ export default function GMTradeHub() {
             onRemoveDraftPickReceived={handleRemoveDraftPickReceived}
             canGrade={canGrade}
             isGrading={state.grading}
+            salaryRetentions={state.salaryRetentions}
+            onSalaryRetentionChange={(playerId, pct) =>
+              dispatch({ type: 'SET_SALARY_RETENTION', playerId, pct })
+            }
+            cashSent={state.cashSent}
+            cashReceived={state.cashReceived}
+            onCashSentChange={(amount) => dispatch({ type: 'SET_CASH_SENT', amount })}
+            onCashReceivedChange={(amount) => dispatch({ type: 'SET_CASH_RECEIVED', amount })}
           />
         )}
 

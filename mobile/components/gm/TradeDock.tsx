@@ -31,9 +31,10 @@ import { useTheme } from '@/hooks/useTheme'
 import { triggerHaptic } from '@/hooks/useHaptics'
 import { COLORS, TEAMS } from '@/lib/config'
 import { useGM } from '@/lib/gm-context'
-import type { PlayerData, DraftPick, OpponentTeam, ChicagoTeam } from '@/lib/gm-types'
+import type { PlayerData, DraftPick, OpponentTeam, ChicagoTeam, Sport } from '@/lib/gm-types'
 
 import TradeAssetPill from './TradeAssetPill'
+import MLBFinancialsPanel from './MLBFinancialsPanel'
 import ValidationBadge, { ValidationStatus } from './ValidationBadge'
 
 // Dock heights
@@ -43,6 +44,7 @@ const DOCK_EXPANDED = 320
 interface TradeDockProps {
   chicagoTeam: ChicagoTeam | null
   opponent: OpponentTeam | null
+  sport: Sport | null
   sentAssets: { players: PlayerData[]; picks: DraftPick[] }
   receivedAssets: { players: PlayerData[]; picks: DraftPick[] }
   expanded: boolean
@@ -56,11 +58,19 @@ interface TradeDockProps {
   onRemoveDraftPickReceived: (index: number) => void
   canGrade: boolean
   isGrading: boolean
+  // MLB salary retention & cash considerations
+  salaryRetentions?: Record<string, number>
+  onSalaryRetentionChange?: (playerId: string, pct: number) => void
+  cashSent?: number
+  cashReceived?: number
+  onCashSentChange?: (amount: number) => void
+  onCashReceivedChange?: (amount: number) => void
 }
 
 function TradeDockComponent({
   chicagoTeam,
   opponent,
+  sport,
   sentAssets,
   receivedAssets,
   expanded,
@@ -74,6 +84,12 @@ function TradeDockComponent({
   onRemoveDraftPickReceived,
   canGrade,
   isGrading,
+  salaryRetentions,
+  onSalaryRetentionChange,
+  cashSent,
+  cashReceived,
+  onCashSentChange,
+  onCashReceivedChange,
 }: TradeDockProps) {
   const { colors, isDark } = useTheme()
   const insets = useSafeAreaInsets()
@@ -341,6 +357,19 @@ function TradeDockComponent({
               </ScrollView>
             </View>
           </View>
+
+          {/* MLB Salary Retention & Cash Considerations */}
+          {sport === 'mlb' && (
+            <MLBFinancialsPanel
+              receivedPlayers={receivedAssets.players}
+              salaryRetentions={salaryRetentions || {}}
+              onSalaryRetentionChange={onSalaryRetentionChange}
+              cashSent={cashSent || 0}
+              cashReceived={cashReceived || 0}
+              onCashSentChange={onCashSentChange}
+              onCashReceivedChange={onCashReceivedChange}
+            />
+          )}
         </Animated.View>
       </Animated.View>
     </GestureDetector>

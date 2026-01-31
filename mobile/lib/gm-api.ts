@@ -100,6 +100,10 @@ export const gmApi = {
     prospects_sent?: MLBProspect[]
     prospects_received?: MLBProspect[]
     session_id?: string
+    // MLB salary retention & cash considerations
+    salary_retentions?: Record<string, number>  // player_id -> retention % (0-50)
+    cash_sent?: number                          // Max $100,000
+    cash_received?: number                      // Max $100,000
   }) {
     return gmFetch<GradeResult>('/api/gm/grade', {
       method: 'POST',

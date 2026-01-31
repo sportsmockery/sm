@@ -48,6 +48,10 @@ interface GMState {
   // Trade Hub UI State
   activeSheet: ActiveSheet
   dockExpanded: boolean
+  // MLB Salary Retention & Cash Considerations
+  salaryRetentions: Record<string, number>  // player_id -> retention % (0-50)
+  cashSent: number                          // Max $100,000
+  cashReceived: number                      // Max $100,000
 }
 
 type GMAction =
@@ -86,6 +90,11 @@ type GMAction =
   | { type: 'SET_DOCK_EXPANDED'; expanded: boolean }
   | { type: 'REMOVE_PLAYER'; playerId: string }
   | { type: 'REMOVE_OPPONENT_PLAYER'; playerId: string }
+  // MLB Salary Retention & Cash Actions
+  | { type: 'SET_SALARY_RETENTION'; playerId: string; pct: number }
+  | { type: 'SET_CASH_SENT'; amount: number }
+  | { type: 'SET_CASH_RECEIVED'; amount: number }
+  | { type: 'CLEAR_MLB_FINANCIALS' }
 
 const initialState: GMState = {
   chicagoTeam: null,
@@ -116,6 +125,10 @@ const initialState: GMState = {
   // Trade Hub UI State
   activeSheet: 'none',
   dockExpanded: false,
+  // MLB Salary Retention & Cash Considerations
+  salaryRetentions: {},
+  cashSent: 0,
+  cashReceived: 0,
 }
 
 function gmReducer(state: GMState, action: GMAction): GMState {
@@ -147,6 +160,7 @@ function gmReducer(state: GMState, action: GMAction): GMState {
         opponentRoster: [],
         opponentProspects: [],
         selectedOpponentProspects: [],
+        salaryRetentions: {},  // Clear retention when switching opponents
       }
     case 'SET_OPPONENT_ROSTER':
       return { ...state, opponentRoster: action.players, opponentRosterLoading: false }
@@ -248,6 +262,21 @@ function gmReducer(state: GMState, action: GMAction): GMState {
         ...state,
         selectedOpponentPlayers: state.selectedOpponentPlayers.filter(p => p.player_id !== action.playerId),
       }
+    // MLB Salary Retention & Cash Actions
+    case 'SET_SALARY_RETENTION':
+      return {
+        ...state,
+        salaryRetentions: {
+          ...state.salaryRetentions,
+          [action.playerId]: Math.min(50, Math.max(0, action.pct)),
+        },
+      }
+    case 'SET_CASH_SENT':
+      return { ...state, cashSent: Math.min(100000, Math.max(0, action.amount)) }
+    case 'SET_CASH_RECEIVED':
+      return { ...state, cashReceived: Math.min(100000, Math.max(0, action.amount)) }
+    case 'CLEAR_MLB_FINANCIALS':
+      return { ...state, salaryRetentions: {}, cashSent: 0, cashReceived: 0 }
     default:
       return state
   }
