@@ -3,13 +3,12 @@ import { datalabAdmin } from '@/lib/supabase-datalab'
 
 export const dynamic = 'force-dynamic'
 
-// Map chicago_team to league for prospect check
-const TEAM_TO_LEAGUE: Record<string, string> = {
-  bears: 'NFL',
-  bulls: 'NBA',
-  blackhawks: 'NHL',
-  cubs: 'MLB',
-  whitesox: 'MLB',
+// Map sport field to league for prospect check
+const SPORT_TO_LEAGUE: Record<string, string> = {
+  nfl: 'NFL',
+  nba: 'NBA',
+  nhl: 'NHL',
+  mlb: 'MLB',
 }
 
 export async function GET() {
@@ -40,7 +39,9 @@ export async function GET() {
 
     // Enhance eligibility based on prospect availability
     const enhancedTeams = (teams || []).map((team: Record<string, unknown>) => {
-      const league = TEAM_TO_LEAGUE[team.chicago_team as string]
+      // Use sport field (lowercase) to look up league
+      const sport = (team.sport as string || '').toLowerCase()
+      const league = SPORT_TO_LEAGUE[sport]
       const hasProspects = league ? prospectCounts[league] > 0 : false
 
       // If prospects exist, team should be eligible regardless of eligibility table
