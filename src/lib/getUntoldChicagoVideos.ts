@@ -2,7 +2,7 @@
 import 'server-only';
 import { ShowVideo } from './youtubeTypes';
 
-const UNTOLD_HANDLE = '@untoldchicagosrtories';
+const UNTOLD_HANDLE = '@untoldchicagostories';
 const MAX_RESULTS = 20; // Fetch more to filter out shorts
 const DISPLAY_COUNT = 5; // 1 latest + 4 previous
 

@@ -30,7 +30,7 @@ export function UntoldChicagoClient({ latestVideo, previousVideos }: Props) {
               <div className="flex items-center justify-center gap-5 mt-4">
                 {/* YouTube */}
                 <a
-                  href="https://www.youtube.com/@untoldchicagosrtories?sub_confirmation=1"
+                  href="https://www.youtube.com/@untoldchicagostories?sub_confirmation=1"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="text-white hover:text-white/70 transition-colors"
@@ -76,7 +76,7 @@ export function UntoldChicagoClient({ latestVideo, previousVideos }: Props) {
             <div className="flex items-center justify-center gap-5 mt-4">
               {/* YouTube */}
               <a
-                href="https://www.youtube.com/@untoldchicagosrtories?sub_confirmation=1"
+                href="https://www.youtube.com/@untoldchicagostories?sub_confirmation=1"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="text-white hover:text-white/70 transition-colors"
@@ -141,7 +141,7 @@ export function UntoldChicagoClient({ latestVideo, previousVideos }: Props) {
             Want more Untold Chicago Stories?
           </p>
           <a
-            href="https://www.youtube.com/@untoldchicagosrtories/videos"
+            href="https://www.youtube.com/@untoldchicagostories/videos"
             target="_blank"
             rel="noopener noreferrer"
             className="sm-cta-button-untold"
