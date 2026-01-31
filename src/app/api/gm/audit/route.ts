@@ -13,10 +13,16 @@ function getAnthropic() {
 
 const AUDITOR_SYSTEM_PROMPT = `You are GM Auditor, an expert sports trade analyst who validates trade grades.
 
+CRITICAL: You will be provided with VERIFIED_PLAYER_DATA from our database. This data is authoritative and current.
+DO NOT use your training data to contradict the verified database information about:
+- Player teams (use verified_team from database)
+- Contract values (use verified salary/cap_hit from database)
+- Contract years (use verified contract info from database)
+
 Your job is to:
-1. Verify player data accuracy (ages, contracts, positions)
-2. Review the GM's methodology (did they properly value players, contracts, draft picks?)
-3. Check if the grade justification makes sense
+1. Review the GM's methodology (did they properly value players, contracts, draft picks?)
+2. Check if the grade justification makes sense given the trade assets
+3. Verify the trade logic is sound (not contradict verified player data)
 
 Return your audit as valid JSON with this structure:
 {
@@ -31,11 +37,11 @@ Return your audit as valid JSON with this structure:
   },
   "discrepancies": [
     {
-      "field": "player_age",
-      "gm_value": "25",
-      "actual_value": "27",
+      "field": "methodology",
+      "gm_value": "value used",
+      "actual_value": "correct value",
       "severity": "minor" | "moderate" | "major",
-      "sources_checked": ["ESPN", "Spotrac"]
+      "sources_checked": ["Database", "Trade Logic"]
     }
   ],
   "overall_assessment": "Brief 1-2 sentence summary of audit findings",
@@ -51,7 +57,7 @@ Grade the audit based on:
 - D (60-69): GM grade has significant issues, likely incorrect
 - F (<60): GM grade is fundamentally flawed
 
-Be concise but thorough. Focus on factual accuracy.`
+IMPORTANT: Trust the VERIFIED_PLAYER_DATA provided. Do not claim players are on different teams than what the database shows.`
 
 export async function POST(request: NextRequest) {
   const startTime = Date.now()
@@ -134,6 +140,32 @@ export async function POST(request: NextRequest) {
       .select('*')
       .eq('trade_id', tradeData.id)
 
+    // Fetch verified player data from roster tables
+    const sport = tradeData.sport?.toLowerCase() || 'nfl'
+    const rosterTable = `gm_${sport}_rosters`
+
+    // Get all player names from the trade
+    const allPlayerNames: string[] = []
+    if (tradeData.players_sent) {
+      const sent = Array.isArray(tradeData.players_sent) ? tradeData.players_sent : []
+      sent.forEach((p: any) => p?.name && allPlayerNames.push(p.name))
+    }
+    if (tradeData.players_received) {
+      const received = Array.isArray(tradeData.players_received) ? tradeData.players_received : []
+      received.forEach((p: any) => p?.name && allPlayerNames.push(p.name))
+    }
+
+    // Fetch verified player data from database
+    let verifiedPlayerData: any[] = []
+    if (allPlayerNames.length > 0) {
+      const { data: rosterData } = await datalabAdmin
+        .from(rosterTable)
+        .select('player_name, team_name, team_key, position, age, salary, cap_hit, contract_years, contract_value')
+        .in('player_name', allPlayerNames)
+
+      verifiedPlayerData = rosterData || []
+    }
+
     // Build the audit request message
     const auditRequest = {
       trade_id: tradeData.id,
@@ -159,11 +191,17 @@ export async function POST(request: NextRequest) {
 
     const userMessage = `Please audit the following trade grade:
 
+TRADE DATA:
 \`\`\`json
 ${JSON.stringify(auditRequest, null, 2)}
 \`\`\`
 
-Validate all player data, review GM's methodology, and check grade justification. Return your audit as valid JSON only, no other text.`
+VERIFIED_PLAYER_DATA (from our database - this is authoritative and current):
+\`\`\`json
+${JSON.stringify(verifiedPlayerData, null, 2)}
+\`\`\`
+
+Review the GM's methodology and grade justification. Use the VERIFIED_PLAYER_DATA as the source of truth for player teams, contracts, and salaries. Return your audit as valid JSON only, no other text.`
 
     // Call Claude for audit
     const response = await getAnthropic().messages.create({
