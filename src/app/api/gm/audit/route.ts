@@ -99,30 +99,34 @@ export async function POST(request: NextRequest) {
       })
     }
 
-    // Fetch the trade to audit
-    const { data: trade, error: tradeError } = await datalabAdmin
+    // Fetch the trade to audit - try by shared_code first (most common), then by id
+    let tradeData: any = null
+
+    // Try by shared_code first (what the frontend passes)
+    const { data: tradeByCode } = await datalabAdmin
       .from('gm_trades')
       .select('*')
-      .eq('id', trade_id)
+      .eq('shared_code', trade_id)
       .single()
 
-    if (tradeError || !trade) {
-      // Try by shared_code if not found by id
-      const { data: tradeByCode } = await datalabAdmin
+    if (tradeByCode) {
+      tradeData = tradeByCode
+    } else {
+      // Try by UUID id
+      const { data: tradeById } = await datalabAdmin
         .from('gm_trades')
         .select('*')
-        .eq('shared_code', trade_id)
+        .eq('id', trade_id)
         .single()
 
-      if (!tradeByCode) {
-        return NextResponse.json({ error: 'Trade not found' }, { status: 404 })
+      if (tradeById) {
+        tradeData = tradeById
       }
-
-      // Use the trade found by shared_code
-      Object.assign(trade || {}, tradeByCode)
     }
 
-    const tradeData = trade || {}
+    if (!tradeData) {
+      return NextResponse.json({ error: 'Trade not found' }, { status: 404 })
+    }
 
     // Fetch trade items for detailed player/pick data
     const { data: tradeItems } = await datalabAdmin
