@@ -72,6 +72,7 @@ const navItems = [
 const videoLinks = [
   { name: 'Bears Film Room', href: '/bears-film-room', icon: '/logos/bfr_logo.png', darkIcon: '/downloads/bfr.png' },
   { name: 'Pinwheels & Ivy', href: '/pinwheels-and-ivy', icon: '/logos/PI_logo.png', darkIcon: '/downloads/PI_white.png' },
+  { name: 'Untold Chicago Stories', href: '/untold-chicago-stories', icon: '/youtubelogos/untold-star-black.png', darkIcon: '/youtubelogos/untold-white.png' },
 ]
 
 const appLinks = [

@@ -1444,6 +1444,97 @@ a:hover {
   color: #ffffff;
 }
 
+/* ========== UNTOLD CHICAGO STORIES ========== */
+
+/* Light mode: black hero top, white bottom */
+.sm-untold-chicago .sm-show-hero {
+  background-color: #000000;
+}
+
+.sm-untold-chicago .sm-show-previous {
+  background-color: #ffffff;
+}
+
+.sm-untold-chicago .sm-section-title {
+  color: #222222;
+}
+
+.sm-untold-chicago .sm-video-card {
+  background-color: #f5f5f5;
+}
+
+.sm-untold-chicago .sm-video-title {
+  color: #222222;
+}
+
+.sm-untold-chicago .sm-video-meta {
+  color: #666666;
+}
+
+.sm-untold-chicago .sm-show-cta {
+  background-color: #ffffff;
+}
+
+.sm-untold-chicago .sm-cta-text {
+  color: #222222;
+}
+
+.sm-cta-button-untold {
+  display: inline-block;
+  padding: 14px 28px;
+  font-weight: 600;
+  font-size: 1rem;
+  color: #fff;
+  background-color: #bc0000;
+  border-radius: 6px;
+  text-decoration: none;
+  transition: background-color 0.2s;
+}
+.sm-cta-button-untold:hover {
+  background-color: #a00000;
+}
+
+/* Untold Chicago Dark Mode: swap colors */
+:root[data-theme="dark"] .sm-untold-chicago .sm-show-hero,
+.dark .sm-untold-chicago .sm-show-hero {
+  background-color: #000000;
+}
+
+:root[data-theme="dark"] .sm-untold-chicago .sm-show-previous,
+.dark .sm-untold-chicago .sm-show-previous {
+  background-color: #000000;
+}
+
+:root[data-theme="dark"] .sm-untold-chicago .sm-section-title,
+.dark .sm-untold-chicago .sm-section-title {
+  color: #ffffff;
+}
+
+:root[data-theme="dark"] .sm-untold-chicago .sm-video-card,
+.dark .sm-untold-chicago .sm-video-card {
+  background-color: #1a1a1a;
+}
+
+:root[data-theme="dark"] .sm-untold-chicago .sm-video-title,
+.dark .sm-untold-chicago .sm-video-title {
+  color: #ffffff;
+}
+
+:root[data-theme="dark"] .sm-untold-chicago .sm-video-meta,
+.dark .sm-untold-chicago .sm-video-meta {
+  color: #999999;
+}
+
+:root[data-theme="dark"] .sm-untold-chicago .sm-show-cta,
+.dark .sm-untold-chicago .sm-show-cta {
+  background-color: #000000;
+}
+
+:root[data-theme="dark"] .sm-untold-chicago .sm-cta-text,
+.dark .sm-untold-chicago .sm-cta-text {
+  color: #ffffff;
+}
+
 /* ========== SOUTHSIDE BEHAVIOR TIKTOK PAGE ========== */
 
 /* Hero layout for TikTok (vertical video) */
