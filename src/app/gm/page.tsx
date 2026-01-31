@@ -142,7 +142,7 @@ export default function GMPage() {
   const currentTeamConfig = TEAMS.find(t => t.key === selectedTeam)
   const teamColor = currentTeamConfig?.color || '#bc0000'
   const teamLabel = currentTeamConfig?.label || 'Team'
-  const sport = currentTeamConfig?.sport || 'nfl'
+  const sport = (currentTeamConfig?.sport || 'nfl') as 'nfl' | 'nba' | 'nhl' | 'mlb'
 
   // Handle auth redirect and initial data loading
   useEffect(() => {
