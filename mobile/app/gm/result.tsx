@@ -331,6 +331,45 @@ export default function GMResultScreen() {
           </View>
         )}
 
+        {/* MLB-Specific: Luxury Tax (CBT) Impact */}
+        {state.sport === 'mlb' && result.cbt_impact && (
+          <View style={[styles.mlbAnalysisCard, styles.cbtCard, { backgroundColor: colors.surface }]}>
+            <View style={styles.mlbAnalysisHeader}>
+              <Ionicons name="cash-outline" size={18} color="#f59e0b" />
+              <Text style={[styles.mlbAnalysisTitle, { color: colors.text }]}>Luxury Tax Impact</Text>
+            </View>
+            <Text style={[styles.reasoningText, { color: colors.textMuted }]}>{result.cbt_impact}</Text>
+          </View>
+        )}
+
+        {/* MLB-Specific: Service Time Analysis */}
+        {state.sport === 'mlb' && result.service_time_analysis && (
+          <View style={[styles.mlbAnalysisCard, styles.serviceTimeCard, { backgroundColor: colors.surface }]}>
+            <View style={styles.mlbAnalysisHeader}>
+              <Ionicons name="time-outline" size={18} color="#3b82f6" />
+              <Text style={[styles.mlbAnalysisTitle, { color: colors.text }]}>Service Time</Text>
+            </View>
+            <Text style={[styles.reasoningText, { color: colors.textMuted }]}>{result.service_time_analysis}</Text>
+            {result.arb_projection && (
+              <View style={styles.arbProjection}>
+                <Text style={[styles.arbProjectionLabel, { color: colors.textMuted }]}>Arbitration Projection:</Text>
+                <Text style={[styles.arbProjectionText, { color: colors.text }]}>{result.arb_projection}</Text>
+              </View>
+            )}
+          </View>
+        )}
+
+        {/* MLB-Specific: Team Control Timeline */}
+        {state.sport === 'mlb' && result.control_timeline && (
+          <View style={[styles.mlbAnalysisCard, styles.controlCard, { backgroundColor: colors.surface }]}>
+            <View style={styles.mlbAnalysisHeader}>
+              <Ionicons name="calendar-outline" size={18} color="#22c55e" />
+              <Text style={[styles.mlbAnalysisTitle, { color: colors.text }]}>Team Control</Text>
+            </View>
+            <Text style={[styles.reasoningText, { color: colors.textMuted }]}>{result.control_timeline}</Text>
+          </View>
+        )}
+
         {/* Actions */}
         <View style={styles.actions}>
           <TouchableOpacity style={styles.primaryBtn} onPress={handleNewTrade}>
@@ -651,5 +690,47 @@ const styles = StyleSheet.create({
   draftAnalysisTitle: {
     fontSize: 15,
     fontFamily: 'Montserrat-Bold',
+  },
+  // MLB-specific analysis styles
+  mlbAnalysisCard: {
+    width: '100%',
+    borderRadius: 14,
+    padding: 16,
+    marginBottom: 12,
+    borderWidth: 1,
+  },
+  mlbAnalysisHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    marginBottom: 10,
+  },
+  mlbAnalysisTitle: {
+    fontSize: 15,
+    fontFamily: 'Montserrat-Bold',
+  },
+  cbtCard: {
+    borderColor: '#f59e0b',
+  },
+  serviceTimeCard: {
+    borderColor: '#3b82f6',
+  },
+  controlCard: {
+    borderColor: '#22c55e',
+  },
+  arbProjection: {
+    marginTop: 12,
+    paddingTop: 12,
+    borderTopWidth: 1,
+    borderTopColor: 'rgba(59, 130, 246, 0.3)',
+  },
+  arbProjectionLabel: {
+    fontSize: 12,
+    fontFamily: 'Montserrat-SemiBold',
+    marginBottom: 4,
+  },
+  arbProjectionText: {
+    fontSize: 13,
+    fontFamily: 'Montserrat-Medium',
   },
 })

@@ -29,6 +29,12 @@ interface GradeResult {
   }
   cap_analysis?: string
   draft_analysis?: string
+  // MLB-specific fields
+  service_time_analysis?: string
+  arb_projection?: string
+  control_timeline?: string
+  cbt_impact?: string
+  rejection_reason?: string
 }
 
 interface TradeBoardProps {
@@ -56,6 +62,7 @@ interface TradeBoardProps {
   gradeResult?: GradeResult | null
   onNewTrade?: () => void
   onEditTrade?: () => void
+  sport?: 'nfl' | 'nba' | 'nhl' | 'mlb'
 }
 
 export function TradeBoard({
@@ -71,6 +78,7 @@ export function TradeBoard({
   gradeResult,
   onNewTrade,
   onEditTrade,
+  sport,
 }: TradeBoardProps) {
   const { theme } = useTheme()
   const isDark = theme === 'dark'
@@ -451,7 +459,7 @@ export function TradeBoard({
                       lineHeight: 1.5,
                       margin: '8px 0 0 0',
                     }}>
-                      {(gradeResult as any).rejection_reason || `Trade score of ${gradeResult.grade} is below the 70-point acceptance threshold.`}
+                      {gradeResult.rejection_reason || `Trade score of ${gradeResult.grade} is below the 70-point acceptance threshold.`}
                     </p>
                     <div style={{
                       marginTop: 12,
@@ -575,6 +583,122 @@ export function TradeBoard({
                     color: isDark ? '#e2e8f0' : '#334155',
                   }}>
                     {gradeResult.draft_analysis}
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* MLB-Specific: Luxury Tax (CBT) Impact */}
+            {sport === 'mlb' && gradeResult.cbt_impact && (
+              <div style={{
+                marginBottom: 16,
+                padding: 12,
+                borderRadius: 10,
+                backgroundColor: isDark ? '#422006' : '#fef3c7',
+                border: `1px solid ${isDark ? '#92400e' : '#fbbf24'}`,
+                display: 'flex',
+                alignItems: 'flex-start',
+                gap: 10,
+              }}>
+                <span style={{ fontSize: 18, flexShrink: 0 }}>💰</span>
+                <div>
+                  <div style={{
+                    fontSize: 11,
+                    fontWeight: 700,
+                    color: isDark ? '#fcd34d' : '#b45309',
+                    marginBottom: 4,
+                    textTransform: 'uppercase',
+                    letterSpacing: '0.5px',
+                  }}>
+                    Luxury Tax Impact
+                  </div>
+                  <div style={{
+                    fontSize: 13,
+                    lineHeight: 1.5,
+                    color: isDark ? '#fef3c7' : '#78350f',
+                  }}>
+                    {gradeResult.cbt_impact}
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* MLB-Specific: Service Time Analysis */}
+            {sport === 'mlb' && gradeResult.service_time_analysis && (
+              <div style={{
+                marginBottom: 16,
+                padding: 12,
+                borderRadius: 10,
+                backgroundColor: isDark ? '#172554' : '#dbeafe',
+                border: `1px solid ${isDark ? '#1e40af' : '#60a5fa'}`,
+                display: 'flex',
+                alignItems: 'flex-start',
+                gap: 10,
+              }}>
+                <span style={{ fontSize: 18, flexShrink: 0 }}>⏱️</span>
+                <div>
+                  <div style={{
+                    fontSize: 11,
+                    fontWeight: 700,
+                    color: isDark ? '#93c5fd' : '#1d4ed8',
+                    marginBottom: 4,
+                    textTransform: 'uppercase',
+                    letterSpacing: '0.5px',
+                  }}>
+                    Service Time
+                  </div>
+                  <div style={{
+                    fontSize: 13,
+                    lineHeight: 1.5,
+                    color: isDark ? '#dbeafe' : '#1e3a8a',
+                  }}>
+                    {gradeResult.service_time_analysis}
+                  </div>
+                  {gradeResult.arb_projection && (
+                    <div style={{
+                      marginTop: 8,
+                      paddingTop: 8,
+                      borderTop: `1px solid ${isDark ? '#1e40af' : '#93c5fd'}`,
+                      fontSize: 12,
+                      color: isDark ? '#bfdbfe' : '#1e40af',
+                    }}>
+                      <strong>Arbitration Projection:</strong> {gradeResult.arb_projection}
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+
+            {/* MLB-Specific: Team Control Timeline */}
+            {sport === 'mlb' && gradeResult.control_timeline && (
+              <div style={{
+                marginBottom: 16,
+                padding: 12,
+                borderRadius: 10,
+                backgroundColor: isDark ? '#14532d' : '#dcfce7',
+                border: `1px solid ${isDark ? '#166534' : '#4ade80'}`,
+                display: 'flex',
+                alignItems: 'flex-start',
+                gap: 10,
+              }}>
+                <span style={{ fontSize: 18, flexShrink: 0 }}>📅</span>
+                <div>
+                  <div style={{
+                    fontSize: 11,
+                    fontWeight: 700,
+                    color: isDark ? '#86efac' : '#166534',
+                    marginBottom: 4,
+                    textTransform: 'uppercase',
+                    letterSpacing: '0.5px',
+                  }}>
+                    Team Control
+                  </div>
+                  <div style={{
+                    fontSize: 13,
+                    lineHeight: 1.5,
+                    color: isDark ? '#dcfce7' : '#14532d',
+                  }}>
+                    {gradeResult.control_timeline}
                   </div>
                 </div>
               </div>

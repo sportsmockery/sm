@@ -61,6 +61,11 @@ export interface GradeResult {
   cap_analysis?: string
   draft_analysis?: string
   rejection_reason?: string
+  // MLB-specific fields
+  service_time_analysis?: string
+  arb_projection?: string
+  control_timeline?: string
+  cbt_impact?: string
 }
 
 export interface Trade {

@@ -32,7 +32,7 @@ const DEFAULT_PREFERENCES: GMPreferences = {
 interface DraftPick { year: number; round: number; condition?: string }
 interface OpponentTeam { team_key: string; team_name: string; abbreviation: string; logo_url: string; primary_color: string; sport: string }
 interface Session { id: string; session_name: string; chicago_team: string; is_active: boolean; num_trades: number; num_approved: number; num_dangerous: number; num_failed: number; total_improvement: number; created_at: string }
-interface GradeResult { grade: number; reasoning: string; status: string; is_dangerous: boolean; trade_summary?: string; improvement_score?: number; shared_code?: string; breakdown?: { talent_balance: number; contract_value: number; team_fit: number; future_assets: number }; cap_analysis?: string; draft_analysis?: string }
+interface GradeResult { grade: number; reasoning: string; status: string; is_dangerous: boolean; trade_summary?: string; improvement_score?: number; shared_code?: string; breakdown?: { talent_balance: number; contract_value: number; team_fit: number; future_assets: number }; cap_analysis?: string; draft_analysis?: string; service_time_analysis?: string; arb_projection?: string; control_timeline?: string; cbt_impact?: string; rejection_reason?: string }
 
 interface CapData { total_cap: number; cap_used: number; cap_available: number; dead_money: number }
 
@@ -851,6 +851,7 @@ export default function GMPage() {
                   gradeResult={gradeResult}
                   onNewTrade={resetTrade}
                   onEditTrade={editTrade}
+                  sport={sport}
                 />
 
                 {/* Error */}
@@ -1001,6 +1002,7 @@ export default function GMPage() {
                   onNewTrade={resetTrade}
                   onEditTrade={editTrade}
                   mobile
+                  sport={sport}
                 />
 
                 {/* Season Simulation - mobile, only show for accepted trades */}
