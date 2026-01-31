@@ -1,5 +1,34 @@
 /**
  * GM Trade Simulator API Client
+ *
+ * ═══════════════════════════════════════════════════════════════════
+ * DATABASE TABLE REFERENCE (Supabase-First Principle)
+ * ═══════════════════════════════════════════════════════════════════
+ *
+ * CORRECT TABLE NAMES:
+ * ┌───────────────┬─────────────────────────────────────┬───────────────────────────┐
+ * │   Data Type   │            Chicago Teams            │        Other Teams        │
+ * ├───────────────┼─────────────────────────────────────┼───────────────────────────┤
+ * │ Players       │ {team}_players                      │ gm_{sport}_rosters        │
+ * │ Contract Data │ EMBEDDED in player tables           │ EMBEDDED in roster tables │
+ * │ Salary Caps   │ gm_{sport}_salary_cap               │ gm_{sport}_salary_cap     │
+ * │ Draft Picks   │ draft_picks (unified)               │ draft_picks (unified)     │
+ * │ Prospects     │ draft_prospects or gm_mlb_prospects │ Same                      │
+ * │ Trade Rules   │ gm_logic_rules                      │ gm_logic_rules            │
+ * └───────────────┴─────────────────────────────────────┴───────────────────────────┘
+ *
+ * TABLES THAT DO NOT EXIST (never query these):
+ * - {team}_contracts      → Contract data is in {team}_players
+ * - {team}_prospects      → Use draft_prospects or gm_mlb_prospects
+ * - gm_{sport}_contracts  → Contract data is in gm_{sport}_rosters
+ * - draft_{sport}_picks   → Use unified draft_picks table
+ *
+ * KEY PRINCIPLE:
+ * GM AI only uses Supabase tables for player/contract data.
+ * GM AI only uses gm_logic_rules for trade grading knowledge.
+ *
+ * Full frontend docs: /docs/GM/GM_Database_Optimization_Frontend.md
+ * ═══════════════════════════════════════════════════════════════════
  */
 
 import { API_BASE_URL } from './config'
