@@ -8,8 +8,11 @@ import { DraftPickValueWidget, type DraftPickValue } from './DraftPickValueWidge
 import { VeteranTradeValueWidget, type VeteranTradeValue } from './VeteranTradeValueWidget'
 import { FuturePickDiscountWidget, type FuturePickValue } from './FuturePickDiscountWidget'
 import { AgingCurveWidget, type AgingCurveData } from './AgingCurveWidget'
+import { AuditButton } from './AuditButton'
+import { AuditReportCard } from './AuditReportCard'
 import { useTheme } from '@/contexts/ThemeContext'
 import type { DraftPick } from '@/types/gm'
+import type { AuditResult } from '@/types/gm-audit'
 
 type ReceivedPlayer = PlayerData | { name: string; position: string }
 
@@ -121,6 +124,9 @@ export function TradeBoard({
   const [generatingImage, setGeneratingImage] = useState(false)
   const [generatedImageUrl, setGeneratedImageUrl] = useState<string | null>(null)
   const gradeCardRef = useRef<HTMLDivElement>(null)
+
+  // Audit state
+  const [auditResult, setAuditResult] = useState<AuditResult | null>(null)
 
   const shareUrl = gradeResult?.shared_code
     ? `${typeof window !== 'undefined' ? window.location.origin : ''}/gm/share/${gradeResult.shared_code}`
@@ -886,6 +892,15 @@ export function TradeBoard({
               {gradeResult.reasoning}
             </div>
 
+            {/* Audit Report */}
+            {auditResult && (
+              <AuditReportCard
+                audit={auditResult}
+                gmGrade={gradeResult.grade}
+                isDark={isDark}
+              />
+            )}
+
             {/* Action buttons */}
             <div style={{ display: 'flex', gap: 10, justifyContent: 'center', flexWrap: 'wrap' }}>
               <button
@@ -926,6 +941,13 @@ export function TradeBoard({
                   </svg>
                   Edit Trade
                 </button>
+              )}
+              {gradeResult.shared_code && !auditResult && (
+                <AuditButton
+                  tradeId={gradeResult.shared_code}
+                  onAuditComplete={setAuditResult}
+                  isDark={isDark}
+                />
               )}
               {gradeResult.shared_code && (
                 <>
