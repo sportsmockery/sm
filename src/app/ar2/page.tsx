@@ -53,9 +53,11 @@ export default function ARHelmetPage2() {
       renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
 
       const scene = new THREE.Scene();
-      const camera = new THREE.PerspectiveCamera(50, w / h, 0.1, 100);
-      camera.position.set(0, 0, 0); // Camera at origin
-      camera.lookAt(0, 0, -1); // Looking forward
+
+      // Camera setup - set once, do not modify later
+      const camera = new THREE.PerspectiveCamera(45, w / h, 0.1, 100);
+      camera.position.set(0, 0, 3); // 3 units back
+      camera.lookAt(0, 0, 0); // Looking at origin
 
       // Lighting
       const ambientLight = new THREE.AmbientLight(0xffffff, 0.8);
@@ -73,20 +75,18 @@ export default function ARHelmetPage2() {
       setStatus('Loading helmet model...');
       const loader = new GLTFLoader();
 
-      // Group to hold helmet - will be used for positioning/tracking
-      let helmetGroup: THREE.Group | null = null;
-
       loader.load(
         '/models/sm_helmet_black2.glb',
         (gltf) => {
           if (isDestroyed) return;
 
+          const helmetGroup = new THREE.Group();
           const helmet = gltf.scene;
 
-          // Reset transforms
+          // Reset raw model transforms
           helmet.position.set(0, 0, 0);
           helmet.rotation.set(0, 0, 0);
-          helmet.scale.set(1, 1, 1);
+          helmet.scale.set(1, 1, 1); // Leave raw model at scale 1
 
           // Traverse meshes - keep original materials
           helmet.traverse((node) => {
@@ -99,16 +99,18 @@ export default function ARHelmetPage2() {
             }
           });
 
-          // Downscale heavily
-          const SCALE = 0.1;
-          helmet.scale.set(SCALE, SCALE, SCALE);
-
-          // Group it so we can move as a unit
-          helmetGroup = new THREE.Group();
           helmetGroup.add(helmet);
-          helmetGroup.position.set(0, 0, -1.0); // 1 unit in front of camera
+
+          // Scale the GROUP, not the helmet
+          const SCALE = 0.02; // Very small to start
+          helmetGroup.scale.set(SCALE, SCALE, SCALE);
+          helmetGroup.position.set(0, 0, 0); // Center of view
 
           scene.add(helmetGroup);
+
+          // Store for render loop access
+          (window as any).smHelmetGroup = helmetGroup;
+
           setStatus('Helmet V2 loaded - static test');
           console.log('Helmet V2 loaded successfully');
         },
@@ -128,8 +130,8 @@ export default function ARHelmetPage2() {
         animationId = requestAnimationFrame(animate);
 
         // Rotate group around its own center
-        if (helmetGroup) {
-          helmetGroup.rotation.y += 0.01;
+        if ((window as any).smHelmetGroup) {
+          (window as any).smHelmetGroup.rotation.y += 0.01;
         }
 
         renderer.render(scene, camera);
