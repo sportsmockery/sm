@@ -50,28 +50,29 @@ export default function AR3HelmetPage() {
         return;
       }
 
-      // Set canvas dimensions BEFORE WebAR.rocks init
-      const w = window.innerWidth;
-      const h = window.innerHeight;
-      webarCanvas.width = w;
-      webarCanvas.height = h;
-      threeCanvas.width = w;
-      threeCanvas.height = h;
+      // Set canvas size BEFORE WebAR.rocks init
+      webarCanvas.width = window.innerWidth;
+      webarCanvas.height = window.innerHeight;
+      threeCanvas.width = window.innerWidth;
+      threeCanvas.height = window.innerHeight;
 
-      // Initialize Three.js after video is ready
-      const initThree = (videoWidth: number, videoHeight: number) => {
+      // Initialize Three.js
+      const initThree = () => {
+        const w = window.innerWidth;
+        const h = window.innerHeight;
+
         threeRenderer = new THREE.WebGLRenderer({
           canvas: threeCanvas,
           alpha: true,
           antialias: true
         });
-        threeRenderer.setSize(videoWidth, videoHeight);
+        threeRenderer.setSize(w, h);
         threeRenderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-        threeRenderer.setClearColor(0x000000, 0);
+        threeRenderer.setClearColor(0x000000, 0); // Transparent
 
         threeScene = new THREE.Scene();
 
-        threeCamera = new THREE.PerspectiveCamera(40, videoWidth / videoHeight, 0.1, 100);
+        threeCamera = new THREE.PerspectiveCamera(40, w / h, 0.1, 100);
         threeCamera.position.set(0, 0, 5);
 
         // Lighting
@@ -92,7 +93,6 @@ export default function AR3HelmetPage() {
 
         // Load helmet model
         const loader = new GLTFLoader();
-        // SM_HELMET_V3.GLB - updated Feb 1 2026
         loader.load(
           '/ar/helmet_facemask.glb',
           (gltf) => {
@@ -105,8 +105,7 @@ export default function AR3HelmetPage() {
               }
             });
 
-            const baseScale = 1.0;
-            gltfHelmet.scale.setScalar(baseScale);
+            gltfHelmet.scale.setScalar(1.0);
             helmetGroup!.add(gltfHelmet);
 
             console.log('Helmet loaded successfully');
@@ -131,9 +130,7 @@ export default function AR3HelmetPage() {
           return;
         }
         console.log('WebARRocksFace initialized');
-
-        // Use window dimensions for Three.js
-        initThree(window.innerWidth, window.innerHeight);
+        initThree();
       };
 
       const callbackTrack = (detectState: any) => {
@@ -147,17 +144,17 @@ export default function AR3HelmetPage() {
 
         helmetGroup.visible = true;
 
-        const s = detectState.s;      // scale
-        const x = detectState.x;      // -1..1
-        const y = detectState.y;      // -1..1
-        const rx = detectState.rx;    // rotation X (pitch)
-        const ry = detectState.ry;    // rotation Y (yaw)
-        const rz = detectState.rz;    // rotation Z (roll)
+        const s = detectState.s;
+        const x = detectState.x;
+        const y = detectState.y;
+        const rx = detectState.rx;
+        const ry = detectState.ry;
+        const rz = detectState.rz;
 
-        // Positioning parameters - tweak these to adjust fit
-        const Z = 2.2;        // distance from camera
-        const yOffset = 0.6;  // lift helmet above center
-        const baseScale = 3.0;
+        // Tuned parameters - smaller helmet, farther back
+        const Z = 3.5;          // farther from camera
+        const yOffset = 0.7;    // lift above center
+        const baseScale = 1.5;  // much smaller
 
         helmetGroup.position.set(
           x * Z,
@@ -170,11 +167,12 @@ export default function AR3HelmetPage() {
         threeRenderer.render(threeScene, threeCamera);
       };
 
-      // Initialize WebAR.rocks
+      // Initialize WebAR.rocks with video element
       setStatus('Initializing face tracking...');
 
       WEBARROCKSFACE.init({
         canvas: webarCanvas,
+        video: video,  // Pass video element
         NNCPath: '/webarrocks/neuralNets/NN_FACE_2.json',
         videoSettings: {
           facingMode: 'user',
@@ -189,6 +187,11 @@ export default function AR3HelmetPage() {
       const handleResize = () => {
         const w = window.innerWidth;
         const h = window.innerHeight;
+
+        webarCanvas.width = w;
+        webarCanvas.height = h;
+        threeCanvas.width = w;
+        threeCanvas.height = h;
 
         if (threeRenderer && threeCamera) {
           threeRenderer.setSize(w, h);
@@ -227,7 +230,6 @@ export default function AR3HelmetPage() {
 
   return (
     <main
-      id="webar-container"
       style={{
         width: '100vw',
         height: '100vh',
@@ -236,7 +238,7 @@ export default function AR3HelmetPage() {
         backgroundColor: '#000',
       }}
     >
-      {/* Video element (hidden - WebAR.rocks uses its own) */}
+      {/* Video element - camera feed */}
       <video
         ref={videoRef}
         id="video"
@@ -244,11 +246,18 @@ export default function AR3HelmetPage() {
         playsInline
         muted
         style={{
-          display: 'none',
+          position: 'absolute',
+          top: 0,
+          left: 0,
+          width: '100%',
+          height: '100%',
+          objectFit: 'cover',
+          zIndex: 1,
+          transform: 'scaleX(-1)', // Mirror for selfie
         }}
       />
 
-      {/* WebAR.rocks canvas - shows video + does face detection */}
+      {/* WebAR.rocks canvas - face detection overlay */}
       <canvas
         ref={webarCanvasRef}
         id="webar-canvas"
@@ -258,8 +267,8 @@ export default function AR3HelmetPage() {
           left: 0,
           width: '100%',
           height: '100%',
-          zIndex: 0,
-          transform: 'scaleX(-1)', // Mirror for selfie view
+          zIndex: 2,
+          transform: 'scaleX(-1)', // Mirror
         }}
       />
 
@@ -273,9 +282,9 @@ export default function AR3HelmetPage() {
           left: 0,
           width: '100%',
           height: '100%',
-          zIndex: 1,
+          zIndex: 3,
           pointerEvents: 'none',
-          transform: 'scaleX(-1)', // Mirror to match video
+          transform: 'scaleX(-1)', // Mirror
         }}
       />
 
