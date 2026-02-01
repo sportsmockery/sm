@@ -84,6 +84,7 @@ export default function AR3HelmetPage() {
 
         // Load helmet model
         const loader = new GLTFLoader();
+        // SM_HELMET_V3.GLB - updated Feb 1 2026
         loader.load(
           '/ar/helmet_facemask.glb',
           (gltf) => {
