@@ -23,6 +23,7 @@ export default function AR3HelmetPage() {
     let helmetGroup: THREE.Group | null = null;
     let gltfHelmet: THREE.Object3D | null = null;
     let isDestroyed = false;
+    let mediaStream: MediaStream | null = null;
 
     const init = async () => {
       const video = videoRef.current;
@@ -30,7 +31,27 @@ export default function AR3HelmetPage() {
       const threeCanvas = threeCanvasRef.current;
       if (!video || !webarCanvas || !threeCanvas) return;
 
-      // Step 1: Load WebAR.rocks.face script
+      // Step 1: Get camera stream FIRST and display it
+      setStatus('Requesting camera access...');
+      try {
+        mediaStream = await navigator.mediaDevices.getUserMedia({
+          video: {
+            facingMode: 'user',
+            width: { ideal: 1280 },
+            height: { ideal: 720 }
+          },
+          audio: false
+        });
+        video.srcObject = mediaStream;
+        await video.play();
+        console.log('Camera stream started');
+      } catch (err) {
+        console.error('Camera access error:', err);
+        setStatus('Camera access denied');
+        return;
+      }
+
+      // Step 2: Load WebAR.rocks.face script
       setStatus('Loading face tracking...');
       if (!window.WEBARROCKSFACE) {
         await new Promise<void>((resolve, reject) => {
@@ -50,9 +71,9 @@ export default function AR3HelmetPage() {
         return;
       }
 
-      // Set canvas size BEFORE WebAR.rocks init
-      webarCanvas.width = window.innerWidth;
-      webarCanvas.height = window.innerHeight;
+      // Set canvas sizes
+      webarCanvas.width = 640;
+      webarCanvas.height = 480;
       threeCanvas.width = window.innerWidth;
       threeCanvas.height = window.innerHeight;
 
@@ -176,12 +197,8 @@ export default function AR3HelmetPage() {
 
       WEBARROCKSFACE.init({
         canvas: webarCanvas,
+        videoElement: video,  // Use existing video element with stream
         NNCPath: '/webarrocks/neuralNets/NN_FACE_2.json',
-        videoSettings: {
-          facingMode: 'user',
-          idealWidth: 1280,
-          idealHeight: 720
-        },
         callbackReady,
         callbackTrack
       });
@@ -220,6 +237,9 @@ export default function AR3HelmetPage() {
         } catch (e) {
           // ignore
         }
+        if (mediaStream) {
+          mediaStream.getTracks().forEach(track => track.stop());
+        }
         threeRenderer?.dispose();
       };
     };
@@ -241,7 +261,7 @@ export default function AR3HelmetPage() {
         backgroundColor: '#000',
       }}
     >
-      {/* Hidden video element - WebAR.rocks needs this ref */}
+      {/* Video element - camera feed background */}
       <video
         ref={videoRef}
         id="video"
@@ -249,11 +269,18 @@ export default function AR3HelmetPage() {
         playsInline
         muted
         style={{
-          display: 'none',
+          position: 'absolute',
+          top: 0,
+          left: 0,
+          width: '100%',
+          height: '100%',
+          objectFit: 'cover',
+          zIndex: 1,
+          transform: 'scaleX(-1)', // Mirror for selfie
         }}
       />
 
-      {/* WebAR.rocks canvas - shows camera feed + face detection */}
+      {/* WebAR.rocks canvas - hidden, just for face detection */}
       <canvas
         ref={webarCanvasRef}
         id="webar-canvas"
@@ -261,10 +288,10 @@ export default function AR3HelmetPage() {
           position: 'absolute',
           top: 0,
           left: 0,
-          width: '100%',
-          height: '100%',
-          zIndex: 1,
-          transform: 'scaleX(-1)', // Mirror for selfie
+          width: 1,
+          height: 1,
+          opacity: 0,
+          pointerEvents: 'none',
         }}
       />
 
