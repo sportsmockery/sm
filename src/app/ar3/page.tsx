@@ -180,10 +180,10 @@ export default function AR3HelmetPage() {
         const ry = detectState.ry;
         const rz = detectState.rz;
 
-        // NEW TUNED CONSTANTS - smaller and farther back
-        const Z = 5.0;          // push helmet farther away
-        const yOffset = 1.0;    // raise it more above center
-        const baseScale = 0.8;  // overall smaller helmet
+        // TUNED CONSTANTS - smaller, higher, farther back
+        const Z = 5.5;          // push a bit farther back
+        const yOffset = 1.2;    // raise a bit more
+        const baseScale = 0.65; // smaller helmet
 
         helmetGroup.position.set(
           x * Z,
