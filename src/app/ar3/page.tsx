@@ -120,10 +120,22 @@ export default function AR3HelmetPage() {
             if (isDestroyed) return;
 
             gltfHelmet = gltf.scene;
-            gltfHelmet.traverse((o) => {
-              if ((o as THREE.Mesh).isMesh) {
-                const mesh = o as THREE.Mesh;
-                mesh.frustumCulled = false;
+
+            // Ensure the front (logo side) faces the camera
+            gltfHelmet.rotation.set(0, Math.PI, 0);
+
+            // Nudge whole helmet slightly toward camera
+            gltfHelmet.position.set(0, 0, 0.25);
+
+            // If the logo is a separate mesh, make sure it's visible
+            gltfHelmet.traverse((child) => {
+              if ((child as THREE.Mesh).isMesh) {
+                const mesh = child as THREE.Mesh;
+                mesh.frustumCulled = false;   // prevent clipping of logo
+                mesh.visible = true;
+                if (mesh.name.toLowerCase().includes('logo')) {
+                  mesh.renderOrder = 2;       // draw on top if needed
+                }
                 // Ensure textures render properly
                 if (mesh.material) {
                   (mesh.material as THREE.MeshStandardMaterial).side = THREE.DoubleSide;
@@ -132,9 +144,6 @@ export default function AR3HelmetPage() {
               }
             });
 
-            // Rotate helmet to face user in selfie view
-            gltfHelmet.rotation.set(0, Math.PI, 0);
-            gltfHelmet.position.set(0, 0, 0.25); // nudge logo area toward camera
             gltfHelmet.scale.setScalar(1.0);
             helmetGroup!.add(gltfHelmet);
 
@@ -181,10 +190,10 @@ export default function AR3HelmetPage() {
         const ry = detectState.ry;
         const rz = detectState.rz;
 
-        // Very small adjustments from current values
-        const Z = 4.4;          // keep this, depth feels right
-        const yOffset = 2.4;    // was ~2.1, lift helmet a bit
-        const baseScale = 0.66; // slightly bigger so it frames the head
+        // Core tuning: depth, vertical offset, scale
+        const Z = 4.4;          // distance from camera
+        const yOffset = 1.9;    // vertical offset of helmet on head
+        const baseScale = 0.60; // overall helmet size
 
         helmetGroup.position.set(
           x * Z,
