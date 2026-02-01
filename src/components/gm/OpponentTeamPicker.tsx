@@ -30,9 +30,10 @@ interface OpponentTeamPickerProps {
   onSelect: (team: LeagueTeam) => void
   sport: string
   chicagoTeam: string
+  excludeTeam?: string // Additional team to exclude (e.g., already-selected opponent in 3-team trades)
 }
 
-export function OpponentTeamPicker({ open, onClose, onSelect, sport, chicagoTeam }: OpponentTeamPickerProps) {
+export function OpponentTeamPicker({ open, onClose, onSelect, sport, chicagoTeam, excludeTeam }: OpponentTeamPickerProps) {
   const { theme } = useTheme()
   const isDark = theme === 'dark'
   const [teams, setTeams] = useState<LeagueTeam[]>([])
@@ -57,7 +58,7 @@ export function OpponentTeamPicker({ open, onClose, onSelect, sport, chicagoTeam
   const rivals = DIVISION_RIVALS[chicagoTeam] || []
 
   const grouped = useMemo(() => {
-    let filtered = teams.filter(t => t.team_key !== chicagoTeam)
+    let filtered = teams.filter(t => t.team_key !== chicagoTeam && t.team_key !== excludeTeam)
     if (search) {
       const q = search.toLowerCase()
       filtered = filtered.filter(t =>
@@ -73,7 +74,7 @@ export function OpponentTeamPicker({ open, onClose, onSelect, sport, chicagoTeam
       groups[key].push(t)
     }
     return groups
-  }, [teams, search, chicagoTeam])
+  }, [teams, search, chicagoTeam, excludeTeam])
 
   const bgOverlay = 'rgba(0,0,0,0.6)'
   const bgModal = isDark ? '#111827' : '#ffffff'

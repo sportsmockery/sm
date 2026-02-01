@@ -57,6 +57,7 @@ export default function GMPage() {
   // Opponent
   const [opponentTeam, setOpponentTeam] = useState<OpponentTeam | null>(null)
   const [showOpponentPicker, setShowOpponentPicker] = useState(false)
+  const [showThirdTeamPicker, setShowThirdTeamPicker] = useState(false)
   const [receivedPlayers, setReceivedPlayers] = useState<ReceivedPlayer[]>([])
   const [opponentRoster, setOpponentRoster] = useState<PlayerData[]>([])
   const [opponentRosterLoading, setOpponentRosterLoading] = useState(false)
@@ -318,6 +319,33 @@ export default function GMPage() {
       .then(r => r.ok ? r.json() : null)
       .then(d => d?.cap && setOpponentCap(d.cap))
       .catch(() => {})
+  }
+
+  function handleThirdTeamSelect(team: OpponentTeam) {
+    setThirdTeam(team)
+    setSelectedThirdTeamIds(new Set())
+    setThirdTeamRoster([])
+    setDraftPicksTeam3Sent([])
+    setDraftPicksTeam3Received([])
+    setSelectedThirdTeamProspectIds(new Set())
+  }
+
+  function toggleThirdTeamPlayer(playerId: string) {
+    setSelectedThirdTeamIds(prev => {
+      const next = new Set(prev)
+      if (next.has(playerId)) next.delete(playerId)
+      else next.add(playerId)
+      return next
+    })
+  }
+
+  function toggleThirdTeamProspect(prospectId: string) {
+    setSelectedThirdTeamProspectIds(prev => {
+      const next = new Set(prev)
+      if (next.has(prospectId)) next.delete(prospectId)
+      else next.add(prospectId)
+      return next
+    })
   }
 
   const selectedPlayers = roster.filter(p => selectedPlayerIds.has(p.player_id))
@@ -909,72 +937,167 @@ export default function GMPage() {
                 )}
               </div>
 
-              {/* RIGHT: Opponent Roster */}
+              {/* RIGHT: Opponent Roster(s) */}
               <div style={{
-                backgroundColor: cardBg,
-                border: `1px solid ${borderColor}`,
-                borderRadius: 12,
-                padding: 16,
                 display: 'flex',
                 flexDirection: 'column',
+                gap: 12,
                 maxHeight: 'calc(100vh - 160px)',
-                minHeight: 500,
                 position: 'sticky',
                 top: 140,
                 overflow: 'auto',
               }}>
-                {/* Opponent header */}
+                {/* Team 2: Opponent */}
                 <div style={{
-                  display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-                  marginBottom: 12, paddingBottom: 12, borderBottom: `1px solid ${borderColor}`,
+                  backgroundColor: cardBg,
+                  border: `1px solid ${borderColor}`,
+                  borderRadius: 12,
+                  padding: 16,
+                  display: 'flex',
+                  flexDirection: 'column',
+                  minHeight: tradeMode === '3-team' ? 280 : 500,
+                  maxHeight: tradeMode === '3-team' ? 'calc(50vh - 100px)' : 'none',
+                  overflow: 'auto',
                 }}>
-                  {opponentTeam ? (
+                  {/* Opponent header */}
+                  <div style={{
+                    display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                    marginBottom: 12, paddingBottom: 12, borderBottom: `1px solid ${borderColor}`,
+                  }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                      <img src={opponentTeam.logo_url} alt="" style={{ width: 28, height: 28, objectFit: 'contain' }} onError={(e) => { (e.target as HTMLImageElement).style.display = 'none' }} />
-                      <span style={{ fontWeight: 700, fontSize: 14, color: opponentTeam.primary_color }}>{opponentTeam.team_name}</span>
+                      <span style={{
+                        fontSize: 10, fontWeight: 700, color: '#fff',
+                        backgroundColor: '#3b82f6', padding: '2px 6px', borderRadius: 4,
+                      }}>
+                        TEAM 2
+                      </span>
+                      {opponentTeam ? (
+                        <>
+                          <img src={opponentTeam.logo_url} alt="" style={{ width: 24, height: 24, objectFit: 'contain' }} onError={(e) => { (e.target as HTMLImageElement).style.display = 'none' }} />
+                          <span style={{ fontWeight: 700, fontSize: 13, color: opponentTeam.primary_color }}>{opponentTeam.team_name}</span>
+                        </>
+                      ) : (
+                        <span style={{ fontSize: 12, color: subText }}>Select opponent</span>
+                      )}
                     </div>
+                    <button
+                      onClick={() => setShowOpponentPicker(true)}
+                      style={{
+                        padding: '5px 10px', borderRadius: 6,
+                        border: `1px solid ${borderColor}`,
+                        backgroundColor: 'transparent',
+                        color: subText, fontSize: 10, fontWeight: 600, cursor: 'pointer',
+                      }}
+                    >
+                      {opponentTeam ? 'Change' : 'Select'}
+                    </button>
+                  </div>
+
+                  {opponentTeam ? (
+                    <OpponentRosterPanel
+                      teamKey={opponentTeam.team_key}
+                      sport={opponentTeam.sport}
+                      teamColor={opponentTeam.primary_color || '#666'}
+                      teamName={opponentTeam.team_name}
+                      selectedIds={selectedOpponentIds}
+                      onToggle={toggleOpponentPlayer}
+                      roster={opponentRoster}
+                      setRoster={setOpponentRoster}
+                      loading={opponentRosterLoading}
+                      setLoading={setOpponentRosterLoading}
+                      onAddCustomPlayer={addCustomReceivedPlayer}
+                      onViewFit={handleViewFit}
+                      draftPicks={draftPicksReceived}
+                      onAddDraftPick={pk => setDraftPicksReceived(prev => [...prev, pk])}
+                      onRemoveDraftPick={i => setDraftPicksReceived(prev => prev.filter((_, idx) => idx !== i))}
+                      selectedProspectIds={selectedOpponentProspectIds}
+                      onToggleProspect={toggleOpponentProspect}
+                      onProspectsLoaded={setOpponentProspects}
+                    />
                   ) : (
-                    <span style={{ fontSize: 13, color: subText }}>Select opponent</span>
+                    <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', color: subText, padding: 20 }}>
+                      <div style={{ fontSize: 32, marginBottom: 8 }}>🤝</div>
+                      <div style={{ fontWeight: 600, fontSize: 13, marginBottom: 4 }}>Select a Trade Partner</div>
+                      <div style={{ fontSize: 11, textAlign: 'center' }}>Click "Select" above</div>
+                    </div>
                   )}
-                  <button
-                    onClick={() => setShowOpponentPicker(true)}
-                    style={{
-                      padding: '6px 12px', borderRadius: 6,
-                      border: `1px solid ${borderColor}`,
-                      backgroundColor: 'transparent',
-                      color: subText, fontSize: 11, fontWeight: 600, cursor: 'pointer',
-                    }}
-                  >
-                    {opponentTeam ? 'Change' : 'Select Team'}
-                  </button>
                 </div>
 
-                {opponentTeam ? (
-                  <OpponentRosterPanel
-                    teamKey={opponentTeam.team_key}
-                    sport={opponentTeam.sport}
-                    teamColor={opponentTeam.primary_color || '#666'}
-                    teamName={opponentTeam.team_name}
-                    selectedIds={selectedOpponentIds}
-                    onToggle={toggleOpponentPlayer}
-                    roster={opponentRoster}
-                    setRoster={setOpponentRoster}
-                    loading={opponentRosterLoading}
-                    setLoading={setOpponentRosterLoading}
-                    onAddCustomPlayer={addCustomReceivedPlayer}
-                    onViewFit={handleViewFit}
-                    draftPicks={draftPicksReceived}
-                    onAddDraftPick={pk => setDraftPicksReceived(prev => [...prev, pk])}
-                    onRemoveDraftPick={i => setDraftPicksReceived(prev => prev.filter((_, idx) => idx !== i))}
-                    selectedProspectIds={selectedOpponentProspectIds}
-                    onToggleProspect={toggleOpponentProspect}
-                    onProspectsLoaded={setOpponentProspects}
-                  />
-                ) : (
-                  <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', color: subText }}>
-                    <div style={{ fontSize: 40, marginBottom: 12 }}>🤝</div>
-                    <div style={{ fontWeight: 600, fontSize: 14, marginBottom: 4 }}>Select a Trade Partner</div>
-                    <div style={{ fontSize: 12, textAlign: 'center' }}>Click "Select Team" above to browse opponent rosters</div>
+                {/* Team 3: Third Team (only in 3-team mode) */}
+                {tradeMode === '3-team' && (
+                  <div style={{
+                    backgroundColor: cardBg,
+                    border: `1px solid ${borderColor}`,
+                    borderRadius: 12,
+                    padding: 16,
+                    display: 'flex',
+                    flexDirection: 'column',
+                    minHeight: 280,
+                    maxHeight: 'calc(50vh - 100px)',
+                    overflow: 'auto',
+                  }}>
+                    {/* Third team header */}
+                    <div style={{
+                      display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                      marginBottom: 12, paddingBottom: 12, borderBottom: `1px solid ${borderColor}`,
+                    }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                        <span style={{
+                          fontSize: 10, fontWeight: 700, color: '#fff',
+                          backgroundColor: '#8b5cf6', padding: '2px 6px', borderRadius: 4,
+                        }}>
+                          TEAM 3
+                        </span>
+                        {thirdTeam ? (
+                          <>
+                            <img src={thirdTeam.logo_url} alt="" style={{ width: 24, height: 24, objectFit: 'contain' }} onError={(e) => { (e.target as HTMLImageElement).style.display = 'none' }} />
+                            <span style={{ fontWeight: 700, fontSize: 13, color: thirdTeam.primary_color }}>{thirdTeam.team_name}</span>
+                          </>
+                        ) : (
+                          <span style={{ fontSize: 12, color: subText }}>Select third team</span>
+                        )}
+                      </div>
+                      <button
+                        onClick={() => setShowThirdTeamPicker(true)}
+                        style={{
+                          padding: '5px 10px', borderRadius: 6,
+                          border: `1px solid ${borderColor}`,
+                          backgroundColor: 'transparent',
+                          color: subText, fontSize: 10, fontWeight: 600, cursor: 'pointer',
+                        }}
+                      >
+                        {thirdTeam ? 'Change' : 'Select'}
+                      </button>
+                    </div>
+
+                    {thirdTeam ? (
+                      <OpponentRosterPanel
+                        teamKey={thirdTeam.team_key}
+                        sport={thirdTeam.sport}
+                        teamColor={thirdTeam.primary_color || '#666'}
+                        teamName={thirdTeam.team_name}
+                        selectedIds={selectedThirdTeamIds}
+                        onToggle={toggleThirdTeamPlayer}
+                        roster={thirdTeamRoster}
+                        setRoster={setThirdTeamRoster}
+                        loading={thirdTeamLoading}
+                        setLoading={setThirdTeamLoading}
+                        onAddCustomPlayer={() => {}}
+                        onViewFit={handleViewFit}
+                        draftPicks={draftPicksTeam3Received}
+                        onAddDraftPick={pk => setDraftPicksTeam3Received(prev => [...prev, pk])}
+                        onRemoveDraftPick={i => setDraftPicksTeam3Received(prev => prev.filter((_, idx) => idx !== i))}
+                        selectedProspectIds={selectedThirdTeamProspectIds}
+                        onToggleProspect={toggleThirdTeamProspect}
+                        onProspectsLoaded={setThirdTeamProspects}
+                      />
+                    ) : (
+                      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', color: subText, padding: 20 }}>
+                        <div style={{ fontSize: 32, marginBottom: 8 }}>👥</div>
+                        <div style={{ fontWeight: 600, fontSize: 13, marginBottom: 4 }}>Add Third Team</div>
+                        <div style={{ fontSize: 11, textAlign: 'center' }}>Click "Select" to add a third team</div>
+                      </div>
+                    )}
                   </div>
                 )}
               </div>
@@ -1215,6 +1338,16 @@ export default function GMPage() {
         onSelect={handleOpponentSelect}
         sport={sport}
         chicagoTeam={selectedTeam}
+      />
+
+      {/* Third Team Picker (3-team trades) */}
+      <OpponentTeamPicker
+        open={showThirdTeamPicker}
+        onClose={() => setShowThirdTeamPicker(false)}
+        onSelect={handleThirdTeamSelect}
+        sport={sport}
+        chicagoTeam={selectedTeam}
+        excludeTeam={opponentTeam?.team_key}
       />
 
 
