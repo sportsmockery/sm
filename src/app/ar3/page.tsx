@@ -50,6 +50,14 @@ export default function AR3HelmetPage() {
         return;
       }
 
+      // Set canvas dimensions BEFORE WebAR.rocks init
+      const w = window.innerWidth;
+      const h = window.innerHeight;
+      webarCanvas.width = w;
+      webarCanvas.height = h;
+      threeCanvas.width = w;
+      threeCanvas.height = h;
+
       // Initialize Three.js after video is ready
       const initThree = (videoWidth: number, videoHeight: number) => {
         threeRenderer = new THREE.WebGLRenderer({
@@ -124,10 +132,8 @@ export default function AR3HelmetPage() {
         }
         console.log('WebARRocksFace initialized');
 
-        // Get video dimensions from WebAR.rocks canvas
-        const w = webarCanvas.width || window.innerWidth;
-        const h = webarCanvas.height || window.innerHeight;
-        initThree(w, h);
+        // Use window dimensions for Three.js
+        initThree(window.innerWidth, window.innerHeight);
       };
 
       const callbackTrack = (detectState: any) => {
