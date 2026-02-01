@@ -122,10 +122,18 @@ export default function AR3HelmetPage() {
             gltfHelmet = gltf.scene;
             gltfHelmet.traverse((o) => {
               if ((o as THREE.Mesh).isMesh) {
-                (o as THREE.Mesh).frustumCulled = false;
+                const mesh = o as THREE.Mesh;
+                mesh.frustumCulled = false;
+                // Ensure textures render properly
+                if (mesh.material) {
+                  (mesh.material as THREE.MeshStandardMaterial).side = THREE.DoubleSide;
+                  (mesh.material as THREE.MeshStandardMaterial).needsUpdate = true;
+                }
               }
             });
 
+            // Rotate helmet to face user in selfie view
+            gltfHelmet.rotation.set(0, Math.PI, 0);
             gltfHelmet.scale.setScalar(1.0);
             helmetGroup!.add(gltfHelmet);
 
