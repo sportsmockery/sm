@@ -43,6 +43,7 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
     ...COLORS,
     background: isDark ? COLORS.backgroundDark : COLORS.background,
     surface: isDark ? COLORS.surfaceDark : COLORS.surface,
+    surfaceHighlight: isDark ? COLORS.surfaceHighlightDark : COLORS.surfaceHighlight,
     text: isDark ? COLORS.textDark : COLORS.text,
     textMuted: isDark ? COLORS.textMutedDark : COLORS.textMuted,
     border: isDark ? COLORS.borderDark : COLORS.border,

@@ -108,6 +108,8 @@ export const COLORS = {
   backgroundDark: '#121212',
   surface: '#ffffff',
   surfaceDark: '#1e1e1e',
+  surfaceHighlight: '#f3f4f6',
+  surfaceHighlightDark: '#374151',
   text: '#1a1a1a',
   textDark: '#ffffff',
   textMuted: '#666666',
