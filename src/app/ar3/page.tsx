@@ -115,7 +115,7 @@ export default function AR3HelmetPage() {
         // Load helmet model
         const loader = new GLTFLoader();
         loader.load(
-          '/ar/SMv4.glb',
+          '/ar/SMv5.glb',
           (gltf) => {
             if (isDestroyed) return;
 
@@ -190,10 +190,10 @@ export default function AR3HelmetPage() {
         const ry = detectState.ry;
         const rz = detectState.rz;
 
-        // Core tuning: depth, vertical offset, scale
-        const Z = 4.4;          // distance from camera
-        const yOffset = 1.9;    // vertical offset of helmet on head
-        const baseScale = 0.60; // overall helmet size
+        // Tuning
+        const Z = 4.8;          // push helmet farther away
+        const yOffset = 1.4;    // lower helmet on face
+        const baseScale = 0.55; // slightly smaller so face is more visible
 
         helmetGroup.position.set(
           x * Z,
