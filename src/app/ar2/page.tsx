@@ -4,37 +4,49 @@ import { useEffect, useRef, useState } from 'react';
 import * as THREE from 'three';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 
+declare global {
+  interface Window {
+    WEBARROCKSFACE: any;
+    smHelmetGroup: THREE.Group | null;
+  }
+}
+
 export default function ARHelmetPage2() {
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
+  const detectionCanvasRef = useRef<HTMLCanvasElement | null>(null);
   const [status, setStatus] = useState('Initializing...');
 
   useEffect(() => {
     let renderer: THREE.WebGLRenderer | null = null;
     let animationId: number | null = null;
     let isDestroyed = false;
+    let faceDetected = false;
+    let lastPose: any = null;
 
     const init = async () => {
       const video = videoRef.current;
       const canvas = canvasRef.current;
-      if (!video || !canvas) return;
+      const detectionCanvas = detectionCanvasRef.current;
+      if (!video || !canvas || !detectionCanvas) return;
 
-      // Step 1: Get camera stream
-      setStatus('Requesting camera access...');
-      try {
-        const stream = await navigator.mediaDevices.getUserMedia({
-          video: {
-            facingMode: 'user',
-            width: { ideal: 1280 },
-            height: { ideal: 720 }
-          }
+      // Step 1: Load WebAR.rocks.face script
+      setStatus('Loading face tracking...');
+      if (!window.WEBARROCKSFACE) {
+        await new Promise<void>((resolve, reject) => {
+          const s = document.createElement('script');
+          s.src = '/webarrocks/WebARRocksFace.js';
+          s.async = true;
+          s.onload = () => resolve();
+          s.onerror = () => reject(new Error('Failed to load WebARRocksFace'));
+          document.head.appendChild(s);
         });
-        video.srcObject = stream;
-        await video.play();
-        setStatus('Camera ready');
-      } catch (err) {
-        console.error('Camera error:', err);
-        setStatus('Camera access denied');
+      }
+
+      const WEBARROCKSFACE = window.WEBARROCKSFACE;
+      if (!WEBARROCKSFACE) {
+        console.error('WEBARROCKSFACE not available');
+        setStatus('Face tracking failed to load');
         return;
       }
 
@@ -95,23 +107,20 @@ export default function ARHelmetPage2() {
               mesh.castShadow = true;
               mesh.receiveShadow = true;
               mesh.frustumCulled = false;
-              console.log('Mesh material:', (mesh.material as THREE.Material).type);
             }
           });
 
           helmetGroup.add(helmet);
 
-          // Scale the GROUP, not the helmet
-          const SCALE = 0.02; // Very small to start
+          // Scale the GROUP - keep this scale
+          const SCALE = 0.02;
           helmetGroup.scale.set(SCALE, SCALE, SCALE);
-          helmetGroup.position.set(0, 0, 0); // Center of view
+          helmetGroup.position.set(0, 0, 0);
+          helmetGroup.visible = false; // Hide until face detected
 
           scene.add(helmetGroup);
+          window.smHelmetGroup = helmetGroup;
 
-          // Store for render loop access
-          (window as any).smHelmetGroup = helmetGroup;
-
-          setStatus('Helmet V2 loaded - static test');
           console.log('Helmet V2 loaded successfully');
         },
         (progress) => {
@@ -124,14 +133,90 @@ export default function ARHelmetPage2() {
         }
       );
 
-      // Step 4: Basic render loop (no WebAR.rocks)
+      // Step 4: Initialize WebAR.rocks for face detection only
+      // Use hidden canvas - we only want pose data, not its rendering
+      detectionCanvas.width = 640;
+      detectionCanvas.height = 480;
+
+      setStatus('Initializing face tracking...');
+
+      WEBARROCKSFACE.init({
+        canvas: detectionCanvas,
+        NNCPath: '/webarrocks/neuralNets/NN_FACE_2.json',
+        videoSettings: {
+          facingMode: 'user',
+          idealWidth: 1280,
+          idealHeight: 720
+        },
+        callbackReady: (errCode: number) => {
+          if (errCode) {
+            console.error('WEBARROCKSFACE init error:', errCode);
+            setStatus('Face tracking error');
+            return;
+          }
+          console.log('WebARRocksFace initialized');
+          setStatus('Face tracking ready - look at camera');
+
+          // Copy the video stream to our visible video element
+          const webARVideo = detectionCanvas.parentElement?.querySelector('video');
+          if (webARVideo && webARVideo.srcObject) {
+            video.srcObject = webARVideo.srcObject;
+            video.play();
+          }
+        },
+        callbackTrack: (detectState: any) => {
+          if (isDestroyed) return;
+
+          // Store pose data for render loop
+          if (detectState.detected > 0.5) {
+            faceDetected = true;
+            lastPose = {
+              x: detectState.x,       // -1 to 1 (horizontal)
+              y: detectState.y,       // -1 to 1 (vertical)
+              s: detectState.s,       // scale
+              rx: detectState.rx,     // rotation X (pitch)
+              ry: detectState.ry,     // rotation Y (yaw)
+              rz: detectState.rz      // rotation Z (roll)
+            };
+          } else {
+            faceDetected = false;
+          }
+        }
+      });
+
+      // Step 5: Render loop - update helmet from face pose
       const animate = () => {
         if (isDestroyed || !renderer) return;
         animationId = requestAnimationFrame(animate);
 
-        // Rotate group around its own center
-        if ((window as any).smHelmetGroup) {
-          (window as any).smHelmetGroup.rotation.y += 0.01;
+        const helmetGroup = window.smHelmetGroup;
+        if (helmetGroup) {
+          if (faceDetected && lastPose) {
+            helmetGroup.visible = true;
+
+            // Map face position to 3D space
+            // x, y are in range -1 to 1, map to reasonable 3D coordinates
+            helmetGroup.position.set(
+              lastPose.x * 1.5,           // Horizontal movement
+              lastPose.y * 1.5 + 0.2,     // Vertical movement + slight offset up
+              0                            // Keep at z=0
+            );
+
+            // Apply face rotation using Euler angles
+            // Negate ry for mirror effect (video is mirrored)
+            helmetGroup.rotation.set(
+              lastPose.rx,      // Pitch (nodding)
+              -lastPose.ry,     // Yaw (turning head) - negated for mirror
+              lastPose.rz       // Roll (tilting head)
+            );
+
+            // Scale based on face size (how close to camera)
+            const baseScale = 0.02;
+            const scaleMultiplier = lastPose.s * 1.5;
+            helmetGroup.scale.setScalar(baseScale * scaleMultiplier);
+          } else {
+            helmetGroup.visible = false;
+          }
         }
 
         renderer.render(scene, camera);
@@ -147,6 +232,10 @@ export default function ARHelmetPage2() {
         }
         camera.aspect = w / h;
         camera.updateProjectionMatrix();
+
+        if (WEBARROCKSFACE.resize) {
+          WEBARROCKSFACE.resize();
+        }
       };
 
       window.addEventListener('resize', handleResize);
@@ -158,10 +247,10 @@ export default function ARHelmetPage2() {
         isDestroyed = true;
         window.removeEventListener('resize', handleResize);
         if (animationId) cancelAnimationFrame(animationId);
-        // Stop camera stream
-        const stream = video.srcObject as MediaStream;
-        if (stream) {
-          stream.getTracks().forEach(track => track.stop());
+        try {
+          WEBARROCKSFACE.destroy && WEBARROCKSFACE.destroy();
+        } catch (e) {
+          // ignore
         }
         renderer?.dispose();
       };
@@ -184,7 +273,21 @@ export default function ARHelmetPage2() {
         backgroundColor: '#000',
       }}
     >
-      {/* Native video element - camera feed background */}
+      {/* Hidden canvas for WebAR.rocks face detection */}
+      <canvas
+        ref={detectionCanvasRef}
+        style={{
+          position: 'absolute',
+          top: 0,
+          left: 0,
+          width: '100%',
+          height: '100%',
+          zIndex: 0,
+          transform: 'scaleX(-1)', // Mirror for selfie view
+        }}
+      />
+
+      {/* Native video element - camera feed background (fallback) */}
       <video
         ref={videoRef}
         id="sm-ar-video"
@@ -199,6 +302,7 @@ export default function ARHelmetPage2() {
           objectFit: 'cover',
           transform: 'scaleX(-1)', // Mirror for selfie view
           zIndex: 0,
+          display: 'none', // Hidden - WebAR.rocks canvas shows video
         }}
       />
 
