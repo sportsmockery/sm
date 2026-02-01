@@ -515,7 +515,55 @@ export default function GMPage() {
 
       setPendingPlayer(null)
     }
+
+    if (pendingPick) {
+      const { pick, fromTeamKey } = pendingPick
+
+      // Add to trade flows
+      setTradeFlows(prev => {
+        const existingFlow = prev.find(f => f.from === fromTeamKey && f.to === toTeamKey)
+        if (existingFlow) {
+          // Add pick to existing flow
+          return prev.map(f =>
+            f.from === fromTeamKey && f.to === toTeamKey
+              ? { ...f, picks: [...f.picks, pick] }
+              : f
+          )
+        } else {
+          // Create new flow
+          return [...prev, { from: fromTeamKey, to: toTeamKey, players: [], picks: [pick] }]
+        }
+      })
+
+      // Also track in the original selection sets for backward compatibility
+      if (fromTeamKey === selectedTeam) {
+        setDraftPicksSent(prev => [...prev, pick])
+      } else if (fromTeamKey === opponentTeam?.team_key) {
+        setDraftPicksReceived(prev => [...prev, pick])
+      } else if (fromTeamKey === thirdTeam?.team_key) {
+        setDraftPicksTeam3Received(prev => [...prev, pick])
+      }
+
+      setPendingPick(null)
+    }
+
     setShowDestinationPicker(false)
+  }
+
+  // Handle adding a draft pick - shows destination picker in 3-team mode
+  function handleAddDraftPick(pick: DraftPick, fromTeamKey: string) {
+    if (tradeMode === '3-team' && opponentTeam && thirdTeam) {
+      // Show destination picker
+      setPendingPick({ pick, fromTeamKey })
+      setShowDestinationPicker(true)
+    } else {
+      // 2-team mode - add directly
+      if (fromTeamKey === selectedTeam) {
+        setDraftPicksSent(prev => [...prev, pick])
+      } else if (fromTeamKey === opponentTeam?.team_key) {
+        setDraftPicksReceived(prev => [...prev, pick])
+      }
+    }
   }
 
   // Get teams for destination picker based on current trade
@@ -1146,7 +1194,7 @@ export default function GMPage() {
                   teamKey={selectedTeam}
                   onViewFit={handleViewFit}
                   draftPicks={draftPicksSent}
-                  onAddDraftPick={pk => setDraftPicksSent(prev => [...prev, pk])}
+                  onAddDraftPick={pk => handleAddDraftPick(pk, selectedTeam)}
                   onRemoveDraftPick={i => setDraftPicksSent(prev => prev.filter((_, idx) => idx !== i))}
                   selectedProspectIds={selectedProspectIds}
                   onToggleProspect={toggleProspect}
@@ -1342,7 +1390,7 @@ export default function GMPage() {
                       onAddCustomPlayer={addCustomReceivedPlayer}
                       onViewFit={handleViewFit}
                       draftPicks={draftPicksReceived}
-                      onAddDraftPick={pk => setDraftPicksReceived(prev => [...prev, pk])}
+                      onAddDraftPick={pk => handleAddDraftPick(pk, opponentTeam?.team_key || '')}
                       onRemoveDraftPick={i => setDraftPicksReceived(prev => prev.filter((_, idx) => idx !== i))}
                       selectedProspectIds={selectedOpponentProspectIds}
                       onToggleProspect={toggleOpponentProspect}
@@ -1419,7 +1467,7 @@ export default function GMPage() {
                         onAddCustomPlayer={() => {}}
                         onViewFit={handleViewFit}
                         draftPicks={draftPicksTeam3Received}
-                        onAddDraftPick={pk => setDraftPicksTeam3Received(prev => [...prev, pk])}
+                        onAddDraftPick={pk => handleAddDraftPick(pk, thirdTeam?.team_key || '')}
                         onRemoveDraftPick={i => setDraftPicksTeam3Received(prev => prev.filter((_, idx) => idx !== i))}
                         selectedProspectIds={selectedThirdTeamProspectIds}
                         onToggleProspect={toggleThirdTeamProspect}
@@ -1584,7 +1632,7 @@ export default function GMPage() {
                           teamKey={selectedTeam}
                           onViewFit={handleViewFit}
                           draftPicks={draftPicksSent}
-                          onAddDraftPick={pk => setDraftPicksSent(prev => [...prev, pk])}
+                          onAddDraftPick={pk => handleAddDraftPick(pk, selectedTeam)}
                           onRemoveDraftPick={i => setDraftPicksSent(prev => prev.filter((_, idx) => idx !== i))}
                           selectedProspectIds={selectedProspectIds}
                           onToggleProspect={toggleProspect}
@@ -1649,7 +1697,7 @@ export default function GMPage() {
                           onAddCustomPlayer={addCustomReceivedPlayer}
                           onViewFit={handleViewFit}
                           draftPicks={draftPicksReceived}
-                          onAddDraftPick={pk => setDraftPicksReceived(prev => [...prev, pk])}
+                          onAddDraftPick={pk => handleAddDraftPick(pk, opponentTeam?.team_key || '')}
                           onRemoveDraftPick={i => setDraftPicksReceived(prev => prev.filter((_, idx) => idx !== i))}
                           selectedProspectIds={selectedOpponentProspectIds}
                           onToggleProspect={toggleOpponentProspect}
