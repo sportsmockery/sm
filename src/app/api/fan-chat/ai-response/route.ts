@@ -201,7 +201,7 @@ RESPONSE FORMAT:
     }
 
     const perplexityData = await perplexityResponse.json()
-    const aiMessage = perplexityData.choices?.[0]?.message?.content
+    let aiMessage = perplexityData.choices?.[0]?.message?.content
 
     if (!aiMessage) {
       return NextResponse.json(
@@ -209,6 +209,13 @@ RESPONSE FORMAT:
         { status: 500 }
       )
     }
+
+    // Clean up the AI response - remove citation markers like [1], [2], [3] etc.
+    // Perplexity sometimes includes these when using search, but they don't belong in casual chat
+    aiMessage = aiMessage
+      .replace(/\[\d+\]/g, '') // Remove [1], [2], [3], etc.
+      .replace(/\s{2,}/g, ' ') // Collapse multiple spaces left behind
+      .trim()
 
     // Update rate limiting
     rateLimit.count++
@@ -221,7 +228,7 @@ RESPONSE FORMAT:
       message: {
         id: `ai-${Date.now()}`,
         user: personality.username,
-        content: aiMessage.trim(),
+        content: aiMessage,
         time: 'Just now',
         isOwn: false,
         isAI: true,
