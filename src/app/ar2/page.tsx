@@ -54,7 +54,8 @@ export default function ARHelmetPage2() {
 
       const scene = new THREE.Scene();
       const camera = new THREE.PerspectiveCamera(50, w / h, 0.1, 100);
-      camera.position.set(0, 0, 5); // Camera 5 units back
+      camera.position.set(0, 0, 0); // Camera at origin
+      camera.lookAt(0, 0, -1); // Looking forward
 
       // Lighting
       const ambientLight = new THREE.AmbientLight(0xffffff, 0.8);
@@ -72,14 +73,20 @@ export default function ARHelmetPage2() {
       setStatus('Loading helmet model...');
       const loader = new GLTFLoader();
 
-      let helmet: THREE.Object3D | null = null;
+      // Group to hold helmet - will be used for positioning/tracking
+      let helmetGroup: THREE.Group | null = null;
 
       loader.load(
         '/models/sm_helmet_black2.glb',
         (gltf) => {
           if (isDestroyed) return;
 
-          helmet = gltf.scene;
+          const helmet = gltf.scene;
+
+          // Reset transforms
+          helmet.position.set(0, 0, 0);
+          helmet.rotation.set(0, 0, 0);
+          helmet.scale.set(1, 1, 1);
 
           // Traverse meshes - keep original materials
           helmet.traverse((node) => {
@@ -92,12 +99,16 @@ export default function ARHelmetPage2() {
             }
           });
 
-          // Position helmet at origin, visible and static
-          helmet.position.set(0, 0, 0);
-          helmet.scale.set(1, 1, 1);
-          helmet.visible = true;
+          // Downscale heavily
+          const SCALE = 0.1;
+          helmet.scale.set(SCALE, SCALE, SCALE);
 
-          scene.add(helmet);
+          // Group it so we can move as a unit
+          helmetGroup = new THREE.Group();
+          helmetGroup.add(helmet);
+          helmetGroup.position.set(0, 0, -1.0); // 1 unit in front of camera
+
+          scene.add(helmetGroup);
           setStatus('Helmet V2 loaded - static test');
           console.log('Helmet V2 loaded successfully');
         },
@@ -116,9 +127,9 @@ export default function ARHelmetPage2() {
         if (isDestroyed || !renderer) return;
         animationId = requestAnimationFrame(animate);
 
-        // Optional: slow rotation for visibility test
-        if (helmet) {
-          helmet.rotation.y += 0.005;
+        // Rotate group around its own center
+        if (helmetGroup) {
+          helmetGroup.rotation.y += 0.01;
         }
 
         renderer.render(scene, camera);
