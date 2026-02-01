@@ -91,6 +91,49 @@ export interface GMPlayerData {
 // Trade mode for 2-team vs 3-team trades
 export type TradeMode = '2-team' | '3-team'
 
+// Asset with destination (for 3-team trades)
+export interface TradeAsset {
+  type: 'player' | 'pick' | 'prospect'
+  playerId?: string
+  player?: GMPlayerData
+  pick?: DraftPick
+  prospect?: MLBProspect
+  fromTeam: string  // team key
+  toTeam: string    // team key
+}
+
+// Trade flow between two specific teams
+export interface TradeFlow {
+  from: string
+  to: string
+  players: GMPlayerData[]
+  picks: DraftPick[]
+  prospects?: MLBProspect[]
+}
+
+// Complete 3-team trade structure
+export interface ThreeTeamTrade {
+  team1: string // Chicago team key
+  team2: string // First opponent key
+  team3: string // Second opponent key
+  flows: TradeFlow[]
+}
+
+// Helper to get flows for a specific direction
+export function getFlowBetween(trade: ThreeTeamTrade, from: string, to: string): TradeFlow | undefined {
+  return trade.flows.find(f => f.from === from && f.to === to)
+}
+
+// Helper to get all assets a team is sending
+export function getTeamSending(trade: ThreeTeamTrade, teamKey: string): TradeFlow[] {
+  return trade.flows.filter(f => f.from === teamKey)
+}
+
+// Helper to get all assets a team is receiving
+export function getTeamReceiving(trade: ThreeTeamTrade, teamKey: string): TradeFlow[] {
+  return trade.flows.filter(f => f.to === teamKey)
+}
+
 // Opponent team metadata
 export interface OpponentTeam {
   team_key: string

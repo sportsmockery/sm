@@ -16,9 +16,10 @@ import { PreferencesModal, GMPreferences } from '@/components/gm/PreferencesModa
 import { TradeModePicker } from '@/components/gm/TradeModePicker'
 import { SimulationTrigger } from '@/components/gm/SimulationTrigger'
 import { SimulationResults } from '@/components/gm/SimulationResults'
+import { DestinationPicker } from '@/components/gm/DestinationPicker'
 import type { PlayerData } from '@/components/gm/PlayerCard'
 import type { ValidationState } from '@/components/gm/ValidationIndicator'
-import type { TradeMode, MLBProspect, SimulationResult } from '@/types/gm'
+import type { TradeMode, MLBProspect, SimulationResult, TradeFlow } from '@/types/gm'
 
 const DEFAULT_PREFERENCES: GMPreferences = {
   risk_tolerance: 'moderate',
@@ -101,6 +102,14 @@ export default function GMPage() {
   const [selectedThirdTeamIds, setSelectedThirdTeamIds] = useState<Set<string>>(new Set())
   const [draftPicksTeam3Sent, setDraftPicksTeam3Sent] = useState<DraftPick[]>([])
   const [draftPicksTeam3Received, setDraftPicksTeam3Received] = useState<DraftPick[]>([])
+
+  // 3-team trade flows (who sends what to whom)
+  const [tradeFlows, setTradeFlows] = useState<TradeFlow[]>([])
+
+  // Destination picker state
+  const [showDestinationPicker, setShowDestinationPicker] = useState(false)
+  const [pendingPlayer, setPendingPlayer] = useState<{ player: PlayerData; fromTeamKey: string } | null>(null)
+  const [pendingPick, setPendingPick] = useState<{ pick: DraftPick; fromTeamKey: string } | null>(null)
 
   // Prospects (MLB only)
   const [selectedProspectIds, setSelectedProspectIds] = useState<Set<string>>(new Set())
@@ -265,27 +274,74 @@ export default function GMPage() {
   }
 
   function togglePlayer(playerId: string) {
-    setSelectedPlayerIds(prev => {
-      const next = new Set(prev)
-      if (next.has(playerId)) next.delete(playerId)
-      else next.add(playerId)
-      return next
-    })
+    const isSelected = selectedPlayerIds.has(playerId)
+
+    if (isSelected) {
+      // Removing - just remove from selection and flows
+      setSelectedPlayerIds(prev => {
+        const next = new Set(prev)
+        next.delete(playerId)
+        return next
+      })
+      // Remove from any trade flows
+      if (tradeMode === '3-team') {
+        setTradeFlows(prev => prev.map(f =>
+          f.from === selectedTeam
+            ? { ...f, players: f.players.filter((p: any) => p.player_id !== playerId) }
+            : f
+        ).filter(f => f.players.length > 0 || f.picks.length > 0))
+      }
+    } else {
+      // Adding
+      if (tradeMode === '3-team' && opponentTeam && thirdTeam) {
+        // Show destination picker
+        const player = roster.find(p => p.player_id === playerId)
+        if (player) {
+          setPendingPlayer({ player, fromTeamKey: selectedTeam })
+          setShowDestinationPicker(true)
+        }
+      } else {
+        // 2-team mode - just add to selection
+        setSelectedPlayerIds(prev => new Set([...prev, playerId]))
+      }
+    }
   }
 
   function toggleOpponentPlayer(playerId: string) {
-    setSelectedOpponentIds(prev => {
-      const next = new Set(prev)
-      if (next.has(playerId)) {
+    const isSelected = selectedOpponentIds.has(playerId)
+
+    if (isSelected) {
+      // Removing
+      setSelectedOpponentIds(prev => {
+        const next = new Set(prev)
         next.delete(playerId)
-        setReceivedPlayers(rp => rp.filter(p => !('player_id' in p) || p.player_id !== playerId))
+        return next
+      })
+      setReceivedPlayers(rp => rp.filter(p => !('player_id' in p) || p.player_id !== playerId))
+      // Remove from any trade flows
+      if (tradeMode === '3-team') {
+        setTradeFlows(prev => prev.map(f =>
+          f.from === opponentTeam?.team_key
+            ? { ...f, players: f.players.filter((p: any) => p.player_id !== playerId) }
+            : f
+        ).filter(f => f.players.length > 0 || f.picks.length > 0))
+      }
+    } else {
+      // Adding
+      if (tradeMode === '3-team' && thirdTeam) {
+        // Show destination picker - player can go to Chicago or Team 3
+        const player = opponentRoster.find(p => p.player_id === playerId)
+        if (player) {
+          setPendingPlayer({ player, fromTeamKey: opponentTeam?.team_key || '' })
+          setShowDestinationPicker(true)
+        }
       } else {
-        next.add(playerId)
+        // 2-team mode - player goes to Chicago
+        setSelectedOpponentIds(prev => new Set([...prev, playerId]))
         const player = opponentRoster.find(p => p.player_id === playerId)
         if (player) setReceivedPlayers(rp => [...rp, player])
       }
-      return next
-    })
+    }
   }
 
   function addCustomReceivedPlayer(name: string, position: string) {
@@ -331,12 +387,29 @@ export default function GMPage() {
   }
 
   function toggleThirdTeamPlayer(playerId: string) {
-    setSelectedThirdTeamIds(prev => {
-      const next = new Set(prev)
-      if (next.has(playerId)) next.delete(playerId)
-      else next.add(playerId)
-      return next
-    })
+    const isSelected = selectedThirdTeamIds.has(playerId)
+
+    if (isSelected) {
+      // Removing
+      setSelectedThirdTeamIds(prev => {
+        const next = new Set(prev)
+        next.delete(playerId)
+        return next
+      })
+      // Remove from any trade flows
+      setTradeFlows(prev => prev.map(f =>
+        f.from === thirdTeam?.team_key
+          ? { ...f, players: f.players.filter((p: any) => p.player_id !== playerId) }
+          : f
+      ).filter(f => f.players.length > 0 || f.picks.length > 0))
+    } else {
+      // Adding - show destination picker (can go to Chicago or Team 2)
+      const player = thirdTeamRoster.find(p => p.player_id === playerId)
+      if (player && opponentTeam) {
+        setPendingPlayer({ player, fromTeamKey: thirdTeam?.team_key || '' })
+        setShowDestinationPicker(true)
+      }
+    }
   }
 
   function toggleThirdTeamProspect(prospectId: string) {
@@ -346,6 +419,106 @@ export default function GMPage() {
       else next.add(prospectId)
       return next
     })
+  }
+
+  // Handle player selection with destination (for 3-team trades)
+  function handlePlayerWithDestination(player: PlayerData, fromTeamKey: string) {
+    if (tradeMode === '2-team') {
+      // In 2-team mode, directly add to appropriate list
+      if (fromTeamKey === selectedTeam) {
+        togglePlayer(player.player_id)
+      } else {
+        toggleOpponentPlayer(player.player_id)
+      }
+    } else {
+      // In 3-team mode, show destination picker
+      setPendingPlayer({ player, fromTeamKey })
+      setShowDestinationPicker(true)
+    }
+  }
+
+  // Complete the destination selection
+  function handleDestinationSelect(toTeamKey: string) {
+    if (pendingPlayer) {
+      const { player, fromTeamKey } = pendingPlayer
+
+      // Add to trade flows
+      setTradeFlows(prev => {
+        const existingFlow = prev.find(f => f.from === fromTeamKey && f.to === toTeamKey)
+        if (existingFlow) {
+          // Add player to existing flow
+          return prev.map(f =>
+            f.from === fromTeamKey && f.to === toTeamKey
+              ? { ...f, players: [...f.players, player as any] }
+              : f
+          )
+        } else {
+          // Create new flow
+          return [...prev, { from: fromTeamKey, to: toTeamKey, players: [player as any], picks: [] }]
+        }
+      })
+
+      // Also track in the original selection sets for backward compatibility
+      if (fromTeamKey === selectedTeam) {
+        setSelectedPlayerIds(prev => new Set([...prev, player.player_id]))
+      } else if (fromTeamKey === opponentTeam?.team_key) {
+        setSelectedOpponentIds(prev => new Set([...prev, player.player_id]))
+        if (toTeamKey === selectedTeam) {
+          setReceivedPlayers(prev => [...prev, player])
+        }
+      } else if (fromTeamKey === thirdTeam?.team_key) {
+        setSelectedThirdTeamIds(prev => new Set([...prev, player.player_id]))
+      }
+
+      setPendingPlayer(null)
+    }
+    setShowDestinationPicker(false)
+  }
+
+  // Get teams for destination picker based on current trade
+  function getTeamsForPicker() {
+    const teams: { key: string; name: string; logo: string | null; color: string }[] = []
+
+    // Chicago team
+    const chicagoConfig = TEAMS.find(t => t.key === selectedTeam)
+    if (chicagoConfig) {
+      teams.push({
+        key: selectedTeam,
+        name: chicagoConfig.label,
+        logo: chicagoConfig.logo,
+        color: chicagoConfig.color,
+      })
+    }
+
+    // Team 2 (opponent)
+    if (opponentTeam) {
+      teams.push({
+        key: opponentTeam.team_key,
+        name: opponentTeam.team_name,
+        logo: opponentTeam.logo_url,
+        color: opponentTeam.primary_color,
+      })
+    }
+
+    // Team 3 (third team)
+    if (thirdTeam) {
+      teams.push({
+        key: thirdTeam.team_key,
+        name: thirdTeam.team_name,
+        logo: thirdTeam.logo_url,
+        color: thirdTeam.primary_color,
+      })
+    }
+
+    return teams
+  }
+
+  // Get flows for display in TradeBoard
+  function getFlowsForTeam(teamKey: string, direction: 'sending' | 'receiving') {
+    if (direction === 'sending') {
+      return tradeFlows.filter(f => f.from === teamKey)
+    }
+    return tradeFlows.filter(f => f.to === teamKey)
   }
 
   const selectedPlayers = roster.filter(p => selectedPlayerIds.has(p.player_id))
@@ -1349,6 +1522,39 @@ export default function GMPage() {
         chicagoTeam={selectedTeam}
         excludeTeam={opponentTeam?.team_key}
       />
+
+      {/* Destination Picker (3-team trades) */}
+      {pendingPlayer && (
+        <DestinationPicker
+          open={showDestinationPicker}
+          onClose={() => {
+            setShowDestinationPicker(false)
+            setPendingPlayer(null)
+          }}
+          onSelect={handleDestinationSelect}
+          fromTeam={{
+            key: pendingPlayer.fromTeamKey,
+            name: pendingPlayer.fromTeamKey === selectedTeam
+              ? (TEAMS.find(t => t.key === selectedTeam)?.label || selectedTeam)
+              : pendingPlayer.fromTeamKey === opponentTeam?.team_key
+                ? opponentTeam?.team_name || ''
+                : thirdTeam?.team_name || '',
+            logo: pendingPlayer.fromTeamKey === selectedTeam
+              ? TEAMS.find(t => t.key === selectedTeam)?.logo || null
+              : pendingPlayer.fromTeamKey === opponentTeam?.team_key
+                ? opponentTeam?.logo_url || null
+                : thirdTeam?.logo_url || null,
+            color: pendingPlayer.fromTeamKey === selectedTeam
+              ? TEAMS.find(t => t.key === selectedTeam)?.color || '#666'
+              : pendingPlayer.fromTeamKey === opponentTeam?.team_key
+                ? opponentTeam?.primary_color || '#666'
+                : thirdTeam?.primary_color || '#666',
+          }}
+          teams={getTeamsForPicker()}
+          playerName={pendingPlayer.player.full_name}
+          assetType="player"
+        />
+      )}
 
 
       <TeamFitOverlay
