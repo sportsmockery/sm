@@ -988,6 +988,34 @@ export default function GMPage() {
                       setDraftPicksTeam3Sent([])
                       setDraftPicksTeam3Received([])
                       setSelectedThirdTeamProspectIds(new Set())
+                      setTradeFlows([])
+                    } else if (mode === '3-team' && opponentTeam) {
+                      // Migrate existing 2-team selections to tradeFlows
+                      const newFlows: TradeFlow[] = []
+
+                      // Chicago players going to opponent
+                      const chicagoPlayers = roster.filter(p => selectedPlayerIds.has(p.player_id))
+                      if (chicagoPlayers.length > 0 || draftPicksSent.length > 0) {
+                        newFlows.push({
+                          from: selectedTeam,
+                          to: opponentTeam.team_key,
+                          players: chicagoPlayers,
+                          picks: draftPicksSent,
+                        })
+                      }
+
+                      // Opponent players going to Chicago
+                      const opponentPlayers = opponentRoster.filter(p => selectedOpponentIds.has(p.player_id))
+                      if (opponentPlayers.length > 0 || draftPicksReceived.length > 0) {
+                        newFlows.push({
+                          from: opponentTeam.team_key,
+                          to: selectedTeam,
+                          players: opponentPlayers,
+                          picks: draftPicksReceived,
+                        })
+                      }
+
+                      setTradeFlows(newFlows)
                     }
                   }}
                   disabled={!selectedTeam}
