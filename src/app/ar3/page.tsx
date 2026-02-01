@@ -176,7 +176,6 @@ export default function AR3HelmetPage() {
 
       WEBARROCKSFACE.init({
         canvas: webarCanvas,
-        video: video,  // Pass video element
         NNCPath: '/webarrocks/neuralNets/NN_FACE_2.json',
         videoSettings: {
           facingMode: 'user',
@@ -242,7 +241,7 @@ export default function AR3HelmetPage() {
         backgroundColor: '#000',
       }}
     >
-      {/* Video element - camera feed */}
+      {/* Hidden video element - WebAR.rocks needs this ref */}
       <video
         ref={videoRef}
         id="video"
@@ -250,18 +249,11 @@ export default function AR3HelmetPage() {
         playsInline
         muted
         style={{
-          position: 'absolute',
-          top: 0,
-          left: 0,
-          width: '100%',
-          height: '100%',
-          objectFit: 'cover',
-          zIndex: 1,
-          transform: 'scaleX(-1)', // Mirror for selfie
+          display: 'none',
         }}
       />
 
-      {/* WebAR.rocks canvas - face detection overlay */}
+      {/* WebAR.rocks canvas - shows camera feed + face detection */}
       <canvas
         ref={webarCanvasRef}
         id="webar-canvas"
@@ -271,8 +263,8 @@ export default function AR3HelmetPage() {
           left: 0,
           width: '100%',
           height: '100%',
-          zIndex: 2,
-          transform: 'scaleX(-1)', // Mirror
+          zIndex: 1,
+          transform: 'scaleX(-1)', // Mirror for selfie
         }}
       />
 
@@ -286,7 +278,7 @@ export default function AR3HelmetPage() {
           left: 0,
           width: '100%',
           height: '100%',
-          zIndex: 3,
+          zIndex: 2,
           pointerEvents: 'none',
           transform: 'scaleX(-1)', // Mirror
         }}
