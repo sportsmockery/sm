@@ -134,6 +134,7 @@ export default function AR3HelmetPage() {
 
             // Rotate helmet to face user in selfie view
             gltfHelmet.rotation.set(0, Math.PI, 0);
+            gltfHelmet.position.set(0, 0, 0.25); // nudge logo area toward camera
             gltfHelmet.scale.setScalar(1.0);
             helmetGroup!.add(gltfHelmet);
 
@@ -180,10 +181,10 @@ export default function AR3HelmetPage() {
         const ry = detectState.ry;
         const rz = detectState.rz;
 
-        // Move helmet closer + fine tune
-        const Z = 4.8;          // closer to camera (was ~6.x)
-        const yOffset = 1.8;    // keep height
-        const baseScale = 0.58; // keep size
+        // Very small adjustments from current values
+        const Z = 4.4;          // keep this, depth feels right
+        const yOffset = 2.4;    // was ~2.1, lift helmet a bit
+        const baseScale = 0.66; // slightly bigger so it frames the head
 
         helmetGroup.position.set(
           x * Z,
