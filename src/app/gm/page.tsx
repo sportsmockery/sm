@@ -8,6 +8,7 @@ import { AnimatePresence, motion } from 'framer-motion'
 import { TeamSelector, TEAMS } from '@/components/gm/TeamSelector'
 import { RosterPanel } from '@/components/gm/RosterPanel'
 import { TradeBoard } from '@/components/gm/TradeBoard'
+import { ThreeTeamTradeBoard } from '@/components/gm/ThreeTeamTradeBoard'
 import { OpponentRosterPanel } from '@/components/gm/OpponentRosterPanel'
 import { OpponentTeamPicker } from '@/components/gm/OpponentTeamPicker'
 import { TradeHistory } from '@/components/gm/TradeHistory'
@@ -521,6 +522,33 @@ export default function GMPage() {
     return tradeFlows.filter(f => f.to === teamKey)
   }
 
+  // Remove an asset from a specific flow (for 3-team trades)
+  function handleRemoveFromFlow(fromTeam: string, toTeam: string, type: 'player' | 'pick', id: string | number) {
+    setTradeFlows(prev => {
+      return prev.map(f => {
+        if (f.from !== fromTeam || f.to !== toTeam) return f
+        if (type === 'player') {
+          return { ...f, players: f.players.filter((p: any) => p.player_id !== id) }
+        } else {
+          return { ...f, picks: f.picks.filter((_: any, idx: number) => idx !== id) }
+        }
+      }).filter(f => f.players.length > 0 || f.picks.length > 0)
+    })
+
+    // Also remove from selection sets
+    if (type === 'player') {
+      const playerId = id as string
+      if (fromTeam === selectedTeam) {
+        setSelectedPlayerIds(prev => { const next = new Set(prev); next.delete(playerId); return next })
+      } else if (fromTeam === opponentTeam?.team_key) {
+        setSelectedOpponentIds(prev => { const next = new Set(prev); next.delete(playerId); return next })
+        setReceivedPlayers(prev => prev.filter(p => !('player_id' in p) || p.player_id !== playerId))
+      } else if (fromTeam === thirdTeam?.team_key) {
+        setSelectedThirdTeamIds(prev => { const next = new Set(prev); next.delete(playerId); return next })
+      }
+    }
+  }
+
   const selectedPlayers = roster.filter(p => selectedPlayerIds.has(p.player_id))
   const selectedProspects = prospects.filter(p => selectedProspectIds.has(p.id || p.prospect_id || ''))
   const selectedOpponentProspects = opponentProspects.filter(p => selectedOpponentProspectIds.has(p.id || p.prospect_id || ''))
@@ -561,7 +589,14 @@ export default function GMPage() {
 
   const hasSomethingToSend = selectedPlayerIds.size > 0 || selectedProspectIds.size > 0 || draftPicksSent.length > 0
   const hasSomethingToReceive = receivedPlayers.length > 0 || selectedOpponentProspectIds.size > 0 || draftPicksReceived.length > 0
-  const canGrade = hasSomethingToSend && opponentTeam !== null && hasSomethingToReceive
+
+  // For 3-team trades, check if there are assets in the flows
+  const threeTeamHasAssets = tradeFlows.some(f => f.players.length > 0 || f.picks.length > 0)
+  const canGrade3Team = tradeMode === '3-team' && opponentTeam !== null && thirdTeam !== null && threeTeamHasAssets
+
+  const canGrade = tradeMode === '2-team'
+    ? (hasSomethingToSend && opponentTeam !== null && hasSomethingToReceive)
+    : canGrade3Team
 
   // Determine current step
   const currentStep = !hasSomethingToSend ? 1 : !hasSomethingToReceive ? 2 : validation.status === 'validating' ? 3 : 4
@@ -627,10 +662,50 @@ export default function GMPage() {
     setGradeError(null)
 
     try {
-      const res = await fetch('/api/gm/grade', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
+      let requestBody: Record<string, any>
+
+      if (tradeMode === '3-team' && thirdTeam) {
+        // 3-Team Trade format (per Datalab API)
+        // Build players array with from_team/to_team
+        const playersArray: any[] = []
+        const draftPicksArray: any[] = []
+
+        // Extract all players from flows
+        for (const flow of tradeFlows) {
+          for (const player of flow.players) {
+            playersArray.push({
+              player_name: player.full_name,
+              position: player.position,
+              cap_hit: player.cap_hit || 0,
+              age: player.age,
+              tier: 'starter', // TODO: calculate from stats
+              from_team: flow.from,
+              to_team: flow.to,
+            })
+          }
+          for (const pick of flow.picks) {
+            draftPicksArray.push({
+              year: pick.year,
+              round: pick.round,
+              pick_position: pick.pickNumber || null,
+              from_team: flow.from,
+              to_team: flow.to,
+            })
+          }
+        }
+
+        requestBody = {
+          chicago_team: selectedTeam,
+          trade_partner_1: opponentTeam!.abbreviation || opponentTeam!.team_key,
+          trade_partner_2: thirdTeam.abbreviation || thirdTeam.team_key,
+          sport: sport,
+          players: playersArray,
+          draft_picks: draftPicksArray,
+          session_id: activeSession?.id,
+        }
+      } else {
+        // 2-Team Trade format (original)
+        requestBody = {
           chicago_team: selectedTeam,
           trade_partner: opponentTeam!.team_name,
           partner_team_key: opponentTeam!.team_key,
@@ -662,7 +737,13 @@ export default function GMPage() {
           salary_retentions: sport === 'mlb' ? salaryRetentions : undefined,
           cash_sent: sport === 'mlb' ? cashSent : undefined,
           cash_received: sport === 'mlb' ? cashReceived : undefined,
-        }),
+        }
+      }
+
+      const res = await fetch('/api/gm/grade', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(requestBody),
       })
 
       if (res.ok) {
@@ -694,6 +775,12 @@ export default function GMPage() {
     setSalaryRetentions({})
     setCashSent(0)
     setCashReceived(0)
+    // Reset 3-team trade state
+    setTradeFlows([])
+    setSelectedThirdTeamIds(new Set())
+    setDraftPicksTeam3Sent([])
+    setDraftPicksTeam3Received([])
+    setSelectedThirdTeamProspectIds(new Set())
   }
 
   function editTrade() {
@@ -1032,58 +1119,88 @@ export default function GMPage() {
                 display: 'flex',
                 flexDirection: 'column',
               }}>
-                <TradeBoard
-                  chicagoTeam={selectedTeam}
-                  chicagoLabel={teamLabel}
-                  chicagoLogo={currentTeamConfig?.logo || ''}
-                  chicagoColor={teamColor}
-                  opponentName={opponentTeam?.team_name || ''}
-                  opponentLogo={opponentTeam?.logo_url || null}
-                  opponentColor={opponentTeam?.primary_color || '#666'}
-                  playersSent={[...selectedPlayers, ...prospectsAsPlayers]}
-                  playersReceived={[...receivedPlayers, ...opponentProspectsAsPlayers]}
-                  draftPicksSent={draftPicksSent}
-                  draftPicksReceived={draftPicksReceived}
-                  onRemoveSent={id => {
-                    // Check if it's a prospect or a player
-                    if (selectedProspectIds.has(id)) {
-                      toggleProspect(id)
-                    } else {
-                      togglePlayer(id)
-                    }
-                  }}
-                  onRemoveReceived={i => {
-                    const allReceived = [...receivedPlayers, ...opponentProspectsAsPlayers]
-                    const removed = allReceived[i]
-                    if ('player_id' in removed) {
-                      // Check if it's a prospect
-                      if (removed.status === 'prospect') {
-                        toggleOpponentProspect(removed.player_id)
+                {tradeMode === '3-team' && opponentTeam && thirdTeam ? (
+                  <ThreeTeamTradeBoard
+                    team1={{
+                      key: selectedTeam,
+                      name: teamLabel,
+                      logo: currentTeamConfig?.logo || null,
+                      color: teamColor,
+                    }}
+                    team2={{
+                      key: opponentTeam.team_key,
+                      name: opponentTeam.team_name,
+                      logo: opponentTeam.logo_url,
+                      color: opponentTeam.primary_color,
+                    }}
+                    team3={{
+                      key: thirdTeam.team_key,
+                      name: thirdTeam.team_name,
+                      logo: thirdTeam.logo_url,
+                      color: thirdTeam.primary_color,
+                    }}
+                    flows={tradeFlows}
+                    onRemoveFromFlow={handleRemoveFromFlow}
+                    canGrade={canGrade}
+                    grading={grading}
+                    onGrade={gradeTrade}
+                    validation={validation}
+                    gradeResult={gradeResult}
+                  />
+                ) : (
+                  <TradeBoard
+                    chicagoTeam={selectedTeam}
+                    chicagoLabel={teamLabel}
+                    chicagoLogo={currentTeamConfig?.logo || ''}
+                    chicagoColor={teamColor}
+                    opponentName={opponentTeam?.team_name || ''}
+                    opponentLogo={opponentTeam?.logo_url || null}
+                    opponentColor={opponentTeam?.primary_color || '#666'}
+                    playersSent={[...selectedPlayers, ...prospectsAsPlayers]}
+                    playersReceived={[...receivedPlayers, ...opponentProspectsAsPlayers]}
+                    draftPicksSent={draftPicksSent}
+                    draftPicksReceived={draftPicksReceived}
+                    onRemoveSent={id => {
+                      // Check if it's a prospect or a player
+                      if (selectedProspectIds.has(id)) {
+                        toggleProspect(id)
                       } else {
-                        setSelectedOpponentIds(prev => { const next = new Set(prev); next.delete(removed.player_id); return next })
+                        togglePlayer(id)
+                      }
+                    }}
+                    onRemoveReceived={i => {
+                      const allReceived = [...receivedPlayers, ...opponentProspectsAsPlayers]
+                      const removed = allReceived[i]
+                      if ('player_id' in removed) {
+                        // Check if it's a prospect
+                        if (removed.status === 'prospect') {
+                          toggleOpponentProspect(removed.player_id)
+                        } else {
+                          setSelectedOpponentIds(prev => { const next = new Set(prev); next.delete(removed.player_id); return next })
+                          setReceivedPlayers(prev => prev.filter((_, idx) => idx !== i))
+                        }
+                      } else {
                         setReceivedPlayers(prev => prev.filter((_, idx) => idx !== i))
                       }
-                    } else {
-                      setReceivedPlayers(prev => prev.filter((_, idx) => idx !== i))
-                    }
-                  }}
-                  onRemoveDraftSent={i => setDraftPicksSent(prev => prev.filter((_, idx) => idx !== i))}
-                  onRemoveDraftReceived={i => setDraftPicksReceived(prev => prev.filter((_, idx) => idx !== i))}
-                  canGrade={canGrade}
-                  grading={grading}
-                  onGrade={gradeTrade}
-                  validation={validation}
-                  gradeResult={gradeResult}
-                  onNewTrade={resetTrade}
-                  onEditTrade={editTrade}
-                  sport={sport}
-                  salaryRetentions={salaryRetentions}
-                  onSalaryRetentionChange={handleSalaryRetentionChange}
-                  cashSent={cashSent}
-                  cashReceived={cashReceived}
-                  onCashSentChange={setCashSent}
-                  onCashReceivedChange={setCashReceived}
-                />
+                    }}
+                    onRemoveDraftSent={i => setDraftPicksSent(prev => prev.filter((_, idx) => idx !== i))}
+                    onRemoveDraftReceived={i => setDraftPicksReceived(prev => prev.filter((_, idx) => idx !== i))}
+                    canGrade={canGrade}
+                    grading={grading}
+                    onGrade={gradeTrade}
+                    validation={validation}
+                    gradeResult={gradeResult}
+                    onNewTrade={resetTrade}
+                    onEditTrade={editTrade}
+                    sport={sport}
+                    salaryRetentions={salaryRetentions}
+                    onSalaryRetentionChange={handleSalaryRetentionChange}
+                    cashSent={cashSent}
+                    cashReceived={cashReceived}
+                    onCashSentChange={setCashSent}
+                    onCashReceivedChange={setCashReceived}
+                  />
+                )}
 
                 {/* Error */}
                 {gradeError && (
@@ -1285,57 +1402,88 @@ export default function GMPage() {
                 borderRadius: 12,
                 padding: 16,
               }}>
-                <TradeBoard
-                  chicagoTeam={selectedTeam}
-                  chicagoLabel={teamLabel}
-                  chicagoLogo={currentTeamConfig?.logo || ''}
-                  chicagoColor={teamColor}
-                  opponentName={opponentTeam?.team_name || ''}
-                  opponentLogo={opponentTeam?.logo_url || null}
-                  opponentColor={opponentTeam?.primary_color || '#666'}
-                  playersSent={[...selectedPlayers, ...prospectsAsPlayers]}
-                  playersReceived={[...receivedPlayers, ...opponentProspectsAsPlayers]}
-                  draftPicksSent={draftPicksSent}
-                  draftPicksReceived={draftPicksReceived}
-                  onRemoveSent={id => {
-                    if (selectedProspectIds.has(id)) {
-                      toggleProspect(id)
-                    } else {
-                      togglePlayer(id)
-                    }
-                  }}
-                  onRemoveReceived={i => {
-                    const allReceived = [...receivedPlayers, ...opponentProspectsAsPlayers]
-                    const removed = allReceived[i]
-                    if ('player_id' in removed) {
-                      if (removed.status === 'prospect') {
-                        toggleOpponentProspect(removed.player_id)
+                {tradeMode === '3-team' && opponentTeam && thirdTeam ? (
+                  <ThreeTeamTradeBoard
+                    team1={{
+                      key: selectedTeam,
+                      name: teamLabel,
+                      logo: currentTeamConfig?.logo || null,
+                      color: teamColor,
+                    }}
+                    team2={{
+                      key: opponentTeam.team_key,
+                      name: opponentTeam.team_name,
+                      logo: opponentTeam.logo_url,
+                      color: opponentTeam.primary_color,
+                    }}
+                    team3={{
+                      key: thirdTeam.team_key,
+                      name: thirdTeam.team_name,
+                      logo: thirdTeam.logo_url,
+                      color: thirdTeam.primary_color,
+                    }}
+                    flows={tradeFlows}
+                    onRemoveFromFlow={handleRemoveFromFlow}
+                    canGrade={canGrade}
+                    grading={grading}
+                    onGrade={gradeTrade}
+                    validation={validation}
+                    gradeResult={gradeResult}
+                    mobile
+                  />
+                ) : (
+                  <TradeBoard
+                    chicagoTeam={selectedTeam}
+                    chicagoLabel={teamLabel}
+                    chicagoLogo={currentTeamConfig?.logo || ''}
+                    chicagoColor={teamColor}
+                    opponentName={opponentTeam?.team_name || ''}
+                    opponentLogo={opponentTeam?.logo_url || null}
+                    opponentColor={opponentTeam?.primary_color || '#666'}
+                    playersSent={[...selectedPlayers, ...prospectsAsPlayers]}
+                    playersReceived={[...receivedPlayers, ...opponentProspectsAsPlayers]}
+                    draftPicksSent={draftPicksSent}
+                    draftPicksReceived={draftPicksReceived}
+                    onRemoveSent={id => {
+                      if (selectedProspectIds.has(id)) {
+                        toggleProspect(id)
                       } else {
-                        setSelectedOpponentIds(prev => { const next = new Set(prev); next.delete(removed.player_id); return next })
+                        togglePlayer(id)
+                      }
+                    }}
+                    onRemoveReceived={i => {
+                      const allReceived = [...receivedPlayers, ...opponentProspectsAsPlayers]
+                      const removed = allReceived[i]
+                      if ('player_id' in removed) {
+                        if (removed.status === 'prospect') {
+                          toggleOpponentProspect(removed.player_id)
+                        } else {
+                          setSelectedOpponentIds(prev => { const next = new Set(prev); next.delete(removed.player_id); return next })
+                          setReceivedPlayers(prev => prev.filter((_, idx) => idx !== i))
+                        }
+                      } else {
                         setReceivedPlayers(prev => prev.filter((_, idx) => idx !== i))
                       }
-                    } else {
-                      setReceivedPlayers(prev => prev.filter((_, idx) => idx !== i))
-                    }
-                  }}
-                  onRemoveDraftSent={i => setDraftPicksSent(prev => prev.filter((_, idx) => idx !== i))}
-                  onRemoveDraftReceived={i => setDraftPicksReceived(prev => prev.filter((_, idx) => idx !== i))}
-                  canGrade={canGrade}
-                  grading={grading}
-                  onGrade={gradeTrade}
-                  validation={validation}
-                  gradeResult={gradeResult}
-                  onNewTrade={resetTrade}
-                  onEditTrade={editTrade}
-                  mobile
-                  sport={sport}
-                  salaryRetentions={salaryRetentions}
-                  onSalaryRetentionChange={handleSalaryRetentionChange}
-                  cashSent={cashSent}
-                  cashReceived={cashReceived}
-                  onCashSentChange={setCashSent}
-                  onCashReceivedChange={setCashReceived}
-                />
+                    }}
+                    onRemoveDraftSent={i => setDraftPicksSent(prev => prev.filter((_, idx) => idx !== i))}
+                    onRemoveDraftReceived={i => setDraftPicksReceived(prev => prev.filter((_, idx) => idx !== i))}
+                    canGrade={canGrade}
+                    grading={grading}
+                    onGrade={gradeTrade}
+                    validation={validation}
+                    gradeResult={gradeResult}
+                    onNewTrade={resetTrade}
+                    onEditTrade={editTrade}
+                    mobile
+                    sport={sport}
+                    salaryRetentions={salaryRetentions}
+                    onSalaryRetentionChange={handleSalaryRetentionChange}
+                    cashSent={cashSent}
+                    cashReceived={cashReceived}
+                    onCashSentChange={setCashSent}
+                    onCashReceivedChange={setCashReceived}
+                  />
+                )}
 
                 {/* Season Simulation - mobile, only show for accepted trades */}
                 {activeSession && activeSession.num_approved > 0 && !gradeResult && (

@@ -3,18 +3,12 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { AssetRow } from './AssetRow'
 import { ValidationIndicator, ValidationState } from './ValidationIndicator'
 import { useTheme } from '@/contexts/ThemeContext'
-import type { DraftPick, MLBProspect } from '@/types/gm'
+import type { DraftPick, TradeFlow } from '@/types/gm'
 import type { PlayerData } from './PlayerCard'
 
-interface TeamTradeAssets {
-  players: PlayerData[]
-  prospects: MLBProspect[]
-  draftPicks: DraftPick[]
-}
-
 interface TeamInfo {
+  key: string
   name: string
-  abbreviation?: string
   logo: string | null
   color: string
 }
@@ -23,53 +17,23 @@ interface ThreeTeamTradeBoardProps {
   team1: TeamInfo  // Chicago team
   team2: TeamInfo  // Opponent 1
   team3: TeamInfo  // Opponent 2
-
-  // Assets each team sends out
-  team1Sends: TeamTradeAssets
-  team2Sends: TeamTradeAssets
-  team3Sends: TeamTradeAssets
-
-  // Which team receives assets from which team
-  // team1ReceivesFrom: { fromTeam2: TeamTradeAssets, fromTeam3: TeamTradeAssets }
-  // Simplified: we track what each team sends, and the UI shows receive = sum of what others send to them
-  team1ReceivesFromTeam2: TeamTradeAssets
-  team1ReceivesFromTeam3: TeamTradeAssets
-  team2ReceivesFromTeam1: TeamTradeAssets
-  team2ReceivesFromTeam3: TeamTradeAssets
-  team3ReceivesFromTeam1: TeamTradeAssets
-  team3ReceivesFromTeam2: TeamTradeAssets
-
-  // Remove handlers
-  onRemoveTeam1Player: (playerId: string) => void
-  onRemoveTeam1Pick: (index: number) => void
-  onRemoveTeam1Prospect: (prospectId: string) => void
-  onRemoveTeam2Player: (playerId: string) => void
-  onRemoveTeam2Pick: (index: number) => void
-  onRemoveTeam2Prospect: (prospectId: string) => void
-  onRemoveTeam3Player: (playerId: string) => void
-  onRemoveTeam3Pick: (index: number) => void
-  onRemoveTeam3Prospect: (prospectId: string) => void
-
+  flows: TradeFlow[]
+  onRemoveFromFlow: (fromTeam: string, toTeam: string, type: 'player' | 'pick', id: string | number) => void
   canGrade: boolean
   grading: boolean
   onGrade: () => void
   validation?: ValidationState
-  currentStep?: number
+  gradeResult?: any
   mobile?: boolean
 }
 
 export function ThreeTeamTradeBoard({
   team1, team2, team3,
-  team1Sends, team2Sends, team3Sends,
-  team1ReceivesFromTeam2, team1ReceivesFromTeam3,
-  team2ReceivesFromTeam1, team2ReceivesFromTeam3,
-  team3ReceivesFromTeam1, team3ReceivesFromTeam2,
-  onRemoveTeam1Player, onRemoveTeam1Pick, onRemoveTeam1Prospect,
-  onRemoveTeam2Player, onRemoveTeam2Pick, onRemoveTeam2Prospect,
-  onRemoveTeam3Player, onRemoveTeam3Pick, onRemoveTeam3Prospect,
+  flows,
+  onRemoveFromFlow,
   canGrade, grading, onGrade,
   validation,
-  currentStep = 1,
+  gradeResult,
   mobile = false,
 }: ThreeTeamTradeBoardProps) {
   const { theme } = useTheme()
@@ -78,272 +42,406 @@ export function ThreeTeamTradeBoard({
   const subText = isDark ? '#9ca3af' : '#6b7280'
   const panelBg = isDark ? '#111827' : '#f9fafb'
   const borderColor = isDark ? '#374151' : '#e5e7eb'
+  const flowBg = isDark ? '#1f2937' : '#ffffff'
 
-  const steps = ['Select assets', 'Review', 'Validate', 'Grade']
+  const teams = [team1, team2, team3]
 
-  // Helper to count total assets for a team
-  const countAssets = (assets: TeamTradeAssets) =>
-    assets.players.length + assets.prospects.length + assets.draftPicks.length
+  // Get flow between two teams
+  function getFlow(from: string, to: string): TradeFlow | undefined {
+    return flows.find(f => f.from === from && f.to === to)
+  }
 
-  // Render a team panel
-  const renderTeamPanel = (
-    team: TeamInfo,
-    sends: TeamTradeAssets,
-    receivesFrom1: TeamTradeAssets,
-    receivesFrom2: TeamTradeAssets,
-    team1Name: string,
-    team2Name: string,
-    onRemovePlayer: (id: string) => void,
-    onRemovePick: (index: number) => void,
-    onRemoveProspect: (id: string) => void,
-    position: 'left' | 'center' | 'right'
-  ) => {
-    const borderRadius = mobile
-      ? position === 'left' ? '12px 12px 0 0' : position === 'right' ? '0 0 12px 12px' : '0'
-      : position === 'left' ? '12px 0 0 12px' : position === 'right' ? '0 12px 12px 0' : '0'
+  // Count assets in a flow
+  function countFlowAssets(flow: TradeFlow | undefined): number {
+    if (!flow) return 0
+    return (flow.players?.length || 0) + (flow.picks?.length || 0)
+  }
+
+  // Get what a team is receiving (from all sources)
+  function getReceiving(teamKey: string): { from: TeamInfo; flow: TradeFlow }[] {
+    return teams
+      .filter(t => t.key !== teamKey)
+      .map(from => ({ from, flow: getFlow(from.key, teamKey) }))
+      .filter(({ flow }) => flow && countFlowAssets(flow) > 0) as { from: TeamInfo; flow: TradeFlow }[]
+  }
+
+  // Get what a team is sending (to all destinations)
+  function getSending(teamKey: string): { to: TeamInfo; flow: TradeFlow }[] {
+    return teams
+      .filter(t => t.key !== teamKey)
+      .map(to => ({ to, flow: getFlow(teamKey, to.key) }))
+      .filter(({ flow }) => flow && countFlowAssets(flow) > 0) as { to: TeamInfo; flow: TradeFlow }[]
+  }
+
+  // Render a team card
+  function renderTeamCard(team: TeamInfo) {
+    const receiving = getReceiving(team.key)
+    const sending = getSending(team.key)
+    const totalReceiving = receiving.reduce((sum, { flow }) => sum + countFlowAssets(flow), 0)
+    const totalSending = sending.reduce((sum, { flow }) => sum + countFlowAssets(flow), 0)
 
     return (
-      <div style={{
-        flex: 1,
-        minWidth: 0,
-        display: 'flex',
-        flexDirection: 'column',
-        borderRadius,
-        backgroundColor: panelBg,
-        border: `1px solid ${borderColor}`,
-        borderLeft: position !== 'left' && !mobile ? 'none' : `1px solid ${borderColor}`,
-        borderTop: position !== 'left' && mobile ? 'none' : `1px solid ${borderColor}`,
-        overflow: 'hidden',
-      }}>
+      <div
+        key={team.key}
+        style={{
+          flex: 1,
+          minWidth: mobile ? 'auto' : 0,
+          backgroundColor: panelBg,
+          borderRadius: 12,
+          border: `1px solid ${borderColor}`,
+          overflow: 'hidden',
+        }}
+      >
         {/* Team header */}
         <div style={{
           display: 'flex',
           alignItems: 'center',
-          gap: 8,
-          padding: '10px 12px',
-          borderBottom: `1px solid ${borderColor}`,
-          backgroundColor: `${team.color}10`,
+          gap: 10,
+          padding: '12px 14px',
+          backgroundColor: `${team.color}15`,
+          borderBottom: `2px solid ${team.color}`,
         }}>
           {team.logo && (
-            <img src={team.logo} alt={team.name} style={{ width: 24, height: 24, objectFit: 'contain' }}
-              onError={(e) => { (e.target as HTMLImageElement).style.display = 'none' }} />
+            <img
+              src={team.logo}
+              alt={team.name}
+              style={{ width: 32, height: 32, objectFit: 'contain' }}
+              onError={(e) => { (e.target as HTMLImageElement).style.display = 'none' }}
+            />
           )}
-          <span style={{ fontWeight: 700, fontSize: 13, color: team.color }}>
-            {team.abbreviation || team.name}
-          </span>
-        </div>
-
-        {/* Sends section */}
-        <div style={{ padding: '10px 12px', borderBottom: `1px solid ${borderColor}` }}>
-          <div style={{ fontSize: 11, fontWeight: 600, color: subText, marginBottom: 6, textTransform: 'uppercase' }}>
-            Sends
-          </div>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 4, minHeight: 40 }}>
-            <AnimatePresence>
-              {sends.players.map(p => (
-                <AssetRow
-                  key={p.player_id}
-                  type="PLAYER"
-                  player={p}
-                  teamColor={team.color}
-                  onRemove={() => onRemovePlayer(p.player_id)}
-                  compact
-                />
-              ))}
-              {sends.prospects.map((p, i) => (
-                <AssetRow
-                  key={p.id || p.prospect_id || `prospect-${i}`}
-                  type="PROSPECT"
-                  prospect={p}
-                  teamColor={team.color}
-                  onRemove={() => onRemoveProspect(p.id || p.prospect_id || '')}
-                  compact
-                />
-              ))}
-              {sends.draftPicks.map((pk, i) => (
-                <AssetRow
-                  key={`pk-${i}`}
-                  type="DRAFT_PICK"
-                  pick={pk}
-                  teamColor={team.color}
-                  onRemove={() => onRemovePick(i)}
-                  compact
-                />
-              ))}
-            </AnimatePresence>
-            {countAssets(sends) === 0 && (
-              <div style={{ fontSize: 11, color: subText, textAlign: 'center', padding: 8 }}>
-                No assets selected
-              </div>
-            )}
+          <div>
+            <div style={{ fontWeight: 700, fontSize: 14, color: team.color }}>
+              {team.name}
+            </div>
+            <div style={{ fontSize: 11, color: subText }}>
+              Sends {totalSending} · Gets {totalReceiving}
+            </div>
           </div>
         </div>
 
-        {/* Receives section */}
-        <div style={{ padding: '10px 12px', flex: 1 }}>
-          <div style={{ fontSize: 11, fontWeight: 600, color: subText, marginBottom: 6, textTransform: 'uppercase' }}>
-            Receives
+        {/* Sending section */}
+        <div style={{ padding: 12, borderBottom: `1px solid ${borderColor}` }}>
+          <div style={{
+            fontSize: 10,
+            fontWeight: 700,
+            color: '#ef4444',
+            textTransform: 'uppercase',
+            letterSpacing: '0.5px',
+            marginBottom: 8,
+            display: 'flex',
+            alignItems: 'center',
+            gap: 6,
+          }}>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#ef4444" strokeWidth="2">
+              <path d="M5 12h14M12 5l7 7-7 7" strokeLinecap="round" strokeLinejoin="round" />
+            </svg>
+            SENDS OUT
           </div>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 4, minHeight: 40 }}>
-            {/* From team 1 */}
-            {countAssets(receivesFrom1) > 0 && (
-              <div style={{ marginBottom: 4 }}>
-                <div style={{ fontSize: 10, color: subText, marginBottom: 2 }}>From {team1Name}:</div>
-                {receivesFrom1.players.map(p => (
-                  <AssetRow key={p.player_id} type="PLAYER" player={p} teamColor={team.color} compact showOnly />
-                ))}
-                {receivesFrom1.prospects.map((p, i) => (
-                  <AssetRow key={p.id || p.prospect_id || `r1-prospect-${i}`} type="PROSPECT" prospect={p} teamColor={team.color} compact showOnly />
-                ))}
-                {receivesFrom1.draftPicks.map((pk, i) => (
-                  <AssetRow key={`pk1-${i}`} type="DRAFT_PICK" pick={pk} teamColor={team.color} compact showOnly />
-                ))}
-              </div>
-            )}
-            {/* From team 2 */}
-            {countAssets(receivesFrom2) > 0 && (
-              <div>
-                <div style={{ fontSize: 10, color: subText, marginBottom: 2 }}>From {team2Name}:</div>
-                {receivesFrom2.players.map(p => (
-                  <AssetRow key={p.player_id} type="PLAYER" player={p} teamColor={team.color} compact showOnly />
-                ))}
-                {receivesFrom2.prospects.map((p, i) => (
-                  <AssetRow key={p.id || p.prospect_id || `r2-prospect-${i}`} type="PROSPECT" prospect={p} teamColor={team.color} compact showOnly />
-                ))}
-                {receivesFrom2.draftPicks.map((pk, i) => (
-                  <AssetRow key={`pk2-${i}`} type="DRAFT_PICK" pick={pk} teamColor={team.color} compact showOnly />
-                ))}
-              </div>
-            )}
-            {countAssets(receivesFrom1) === 0 && countAssets(receivesFrom2) === 0 && (
-              <div style={{ fontSize: 11, color: subText, textAlign: 'center', padding: 8 }}>
-                No assets incoming
-              </div>
-            )}
+
+          {sending.length > 0 ? (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+              {sending.map(({ to, flow }) => (
+                <div key={to.key} style={{
+                  backgroundColor: flowBg,
+                  borderRadius: 8,
+                  padding: 10,
+                  border: `1px solid ${borderColor}`,
+                }}>
+                  {/* Destination badge */}
+                  <div style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 6,
+                    marginBottom: 8,
+                    fontSize: 10,
+                    color: subText,
+                  }}>
+                    <span>To</span>
+                    {to.logo && (
+                      <img src={to.logo} alt="" style={{ width: 14, height: 14, objectFit: 'contain' }} />
+                    )}
+                    <span style={{ fontWeight: 600, color: to.color }}>{to.name}</span>
+                  </div>
+
+                  {/* Assets */}
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+                    <AnimatePresence>
+                      {flow.players?.map((p: any) => (
+                        <AssetRow
+                          key={p.player_id}
+                          type="PLAYER"
+                          player={p}
+                          teamColor={team.color}
+                          onRemove={gradeResult ? undefined : () => onRemoveFromFlow(team.key, to.key, 'player', p.player_id)}
+                          compact
+                        />
+                      ))}
+                      {flow.picks?.map((pk: DraftPick, i: number) => (
+                        <AssetRow
+                          key={`pk-${i}`}
+                          type="DRAFT_PICK"
+                          pick={pk}
+                          teamColor={team.color}
+                          onRemove={gradeResult ? undefined : () => onRemoveFromFlow(team.key, to.key, 'pick', i)}
+                          compact
+                        />
+                      ))}
+                    </AnimatePresence>
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div style={{
+              textAlign: 'center',
+              padding: '12px 0',
+              fontSize: 11,
+              color: isDark ? '#4b5563' : '#9ca3af',
+            }}>
+              Not sending any assets
+            </div>
+          )}
+        </div>
+
+        {/* Receiving section */}
+        <div style={{ padding: 12 }}>
+          <div style={{
+            fontSize: 10,
+            fontWeight: 700,
+            color: '#22c55e',
+            textTransform: 'uppercase',
+            letterSpacing: '0.5px',
+            marginBottom: 8,
+            display: 'flex',
+            alignItems: 'center',
+            gap: 6,
+          }}>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#22c55e" strokeWidth="2">
+              <path d="M19 12H5M12 19l-7-7 7-7" strokeLinecap="round" strokeLinejoin="round" />
+            </svg>
+            RECEIVES
           </div>
+
+          {receiving.length > 0 ? (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+              {receiving.map(({ from, flow }) => (
+                <div key={from.key} style={{
+                  backgroundColor: flowBg,
+                  borderRadius: 8,
+                  padding: 10,
+                  border: `1px solid ${borderColor}`,
+                }}>
+                  {/* Source badge */}
+                  <div style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 6,
+                    marginBottom: 8,
+                    fontSize: 10,
+                    color: subText,
+                  }}>
+                    <span>From</span>
+                    {from.logo && (
+                      <img src={from.logo} alt="" style={{ width: 14, height: 14, objectFit: 'contain' }} />
+                    )}
+                    <span style={{ fontWeight: 600, color: from.color }}>{from.name}</span>
+                  </div>
+
+                  {/* Assets (read-only, removal handled from sender) */}
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+                    {flow.players?.map((p: any) => (
+                      <div
+                        key={p.player_id}
+                        style={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: 8,
+                          padding: '6px 8px',
+                          backgroundColor: isDark ? '#374151' : '#f3f4f6',
+                          borderRadius: 6,
+                          borderLeft: `3px solid ${from.color}`,
+                        }}
+                      >
+                        <span style={{ fontSize: 12, fontWeight: 600, color: textColor }}>{p.full_name}</span>
+                        <span style={{ fontSize: 10, color: subText }}>{p.position}</span>
+                      </div>
+                    ))}
+                    {flow.picks?.map((pk: DraftPick, i: number) => (
+                      <div
+                        key={`rpk-${i}`}
+                        style={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: 8,
+                          padding: '6px 8px',
+                          backgroundColor: isDark ? '#374151' : '#f3f4f6',
+                          borderRadius: 6,
+                          borderLeft: '3px solid #8b5cf6',
+                        }}
+                      >
+                        <span style={{ fontSize: 12, fontWeight: 600, color: textColor }}>
+                          {pk.year} Round {pk.round}
+                        </span>
+                        {pk.condition && (
+                          <span style={{ fontSize: 10, color: subText }}>{pk.condition}</span>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div style={{
+              textAlign: 'center',
+              padding: '12px 0',
+              fontSize: 11,
+              color: isDark ? '#4b5563' : '#9ca3af',
+            }}>
+              Not receiving any assets
+            </div>
+          )}
         </div>
       </div>
     )
   }
 
-  return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-      {/* Step indicator */}
-      <div style={{
-        display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 4,
-        paddingBottom: 12, borderBottom: `1px solid ${borderColor}`,
-      }}>
-        {steps.map((step, i) => {
-          const stepNum = i + 1
-          const isComplete = currentStep > stepNum
-          const isActive = currentStep === stepNum
-          return (
-            <div key={step} style={{ display: 'flex', alignItems: 'center' }}>
-              <div style={{
-                display: 'flex', alignItems: 'center', gap: 4,
-                padding: '4px 8px', borderRadius: 16,
-                backgroundColor: isActive ? '#bc000015' : 'transparent',
-              }}>
-                <div style={{
-                  width: 18, height: 18, borderRadius: '50%',
-                  display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  fontSize: 10, fontWeight: 700,
-                  backgroundColor: isComplete ? '#22c55e' : isActive ? '#bc0000' : (isDark ? '#374151' : '#e5e7eb'),
-                  color: isComplete || isActive ? '#fff' : subText,
-                }}>
-                  {isComplete ? '✓' : stepNum}
-                </div>
-                <span style={{
-                  fontSize: 10, fontWeight: isActive ? 600 : 400,
-                  color: isActive ? '#bc0000' : subText,
-                  display: mobile ? 'none' : 'inline',
-                }}>
-                  {step}
-                </span>
-              </div>
-              {i < steps.length - 1 && (
-                <div style={{
-                  width: mobile ? 6 : 16, height: 2,
-                  backgroundColor: isComplete ? '#22c55e' : (isDark ? '#374151' : '#e5e7eb'),
-                  marginLeft: 2, marginRight: 2,
-                }} />
-              )}
-            </div>
-          )
-        })}
-      </div>
+  // Total assets in trade
+  const totalAssets = flows.reduce((sum, f) => sum + countFlowAssets(f), 0)
+  const activeFlows = flows.filter(f => countFlowAssets(f) > 0).length
 
-      {/* 3-team mode badge */}
-      <div style={{ display: 'flex', justifyContent: 'center' }}>
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+      {/* 3-Team Trade Header */}
+      <div style={{
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        gap: 12,
+        padding: '12px 16px',
+        backgroundColor: '#bc000010',
+        borderRadius: 10,
+        border: '1px solid #bc000030',
+      }}>
         <span style={{
-          fontSize: 10,
+          fontSize: 12,
           fontWeight: 700,
-          padding: '4px 12px',
-          borderRadius: 12,
-          backgroundColor: '#bc000020',
           color: '#bc0000',
           textTransform: 'uppercase',
-          letterSpacing: '0.5px',
+          letterSpacing: '1px',
         }}>
           3-Team Trade
         </span>
+        <span style={{ color: subText, fontSize: 12 }}>
+          {totalAssets} assets · {activeFlows} active flows
+        </span>
       </div>
 
-      {/* Three team panels */}
+      {/* Team Cards */}
       <div style={{
-        display: 'flex',
-        flexDirection: mobile ? 'column' : 'row',
-        gap: 0,
+        display: 'grid',
+        gridTemplateColumns: mobile ? '1fr' : 'repeat(3, 1fr)',
+        gap: 12,
       }}>
-        {renderTeamPanel(
-          team1, team1Sends,
-          team1ReceivesFromTeam2, team1ReceivesFromTeam3,
-          team2.name, team3.name,
-          onRemoveTeam1Player, onRemoveTeam1Pick, onRemoveTeam1Prospect,
-          'left'
-        )}
-        {renderTeamPanel(
-          team2, team2Sends,
-          team2ReceivesFromTeam1, team2ReceivesFromTeam3,
-          team1.name, team3.name,
-          onRemoveTeam2Player, onRemoveTeam2Pick, onRemoveTeam2Prospect,
-          'center'
-        )}
-        {renderTeamPanel(
-          team3, team3Sends,
-          team3ReceivesFromTeam1, team3ReceivesFromTeam2,
-          team1.name, team2.name,
-          onRemoveTeam3Player, onRemoveTeam3Pick, onRemoveTeam3Prospect,
-          'right'
-        )}
+        {renderTeamCard(team1)}
+        {renderTeamCard(team2)}
+        {renderTeamCard(team3)}
       </div>
 
-      {/* Validation indicator */}
+      {/* Flow Diagram (visual summary) */}
+      {!mobile && activeFlows > 0 && (
+        <div style={{
+          backgroundColor: panelBg,
+          borderRadius: 12,
+          border: `1px solid ${borderColor}`,
+          padding: 16,
+        }}>
+          <div style={{
+            fontSize: 11,
+            fontWeight: 700,
+            color: subText,
+            textTransform: 'uppercase',
+            letterSpacing: '0.5px',
+            marginBottom: 12,
+          }}>
+            Trade Summary
+          </div>
+          <div style={{
+            display: 'flex',
+            flexWrap: 'wrap',
+            gap: 8,
+          }}>
+            {flows.filter(f => countFlowAssets(f) > 0).map((flow, idx) => {
+              const from = teams.find(t => t.key === flow.from)
+              const to = teams.find(t => t.key === flow.to)
+              if (!from || !to) return null
+
+              return (
+                <div
+                  key={idx}
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 6,
+                    padding: '6px 12px',
+                    backgroundColor: flowBg,
+                    borderRadius: 20,
+                    border: `1px solid ${borderColor}`,
+                    fontSize: 11,
+                  }}
+                >
+                  {from.logo && (
+                    <img src={from.logo} alt="" style={{ width: 16, height: 16, objectFit: 'contain' }} />
+                  )}
+                  <span style={{ fontWeight: 600, color: from.color }}>{from.name.split(' ').pop()}</span>
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke={subText} strokeWidth="2">
+                    <path d="M5 12h14M12 5l7 7-7 7" strokeLinecap="round" strokeLinejoin="round" />
+                  </svg>
+                  {to.logo && (
+                    <img src={to.logo} alt="" style={{ width: 16, height: 16, objectFit: 'contain' }} />
+                  )}
+                  <span style={{ fontWeight: 600, color: to.color }}>{to.name.split(' ').pop()}</span>
+                  <span style={{
+                    backgroundColor: '#bc000020',
+                    color: '#bc0000',
+                    fontWeight: 700,
+                    padding: '2px 6px',
+                    borderRadius: 8,
+                    fontSize: 10,
+                  }}>
+                    {countFlowAssets(flow)}
+                  </span>
+                </div>
+              )
+            })}
+          </div>
+        </div>
+      )}
+
+      {/* Validation */}
       {validation && validation.status !== 'idle' && (
         <ValidationIndicator validation={validation} />
       )}
 
       {/* Grade button */}
-      {(() => {
+      {!gradeResult && (() => {
         const isBlocked = validation?.status === 'invalid'
         const canClick = canGrade && !grading && !isBlocked
         return (
           <motion.button
             whileHover={canClick ? { scale: 1.02 } : {}}
             whileTap={canClick ? { scale: 0.98 } : {}}
-            animate={canClick ? { scale: [1, 1.03, 1] } : {}}
-            transition={canClick ? { repeat: Infinity, duration: 2 } : {}}
             onClick={onGrade}
             disabled={!canClick}
             style={{
               width: '100%',
               padding: '14px 32px',
-              borderRadius: '12px',
+              borderRadius: 12,
               border: 'none',
               backgroundColor: canClick ? '#bc0000' : (isDark ? '#374151' : '#d1d5db'),
               color: canClick ? '#fff' : subText,
               fontWeight: 800,
-              fontSize: '16px',
+              fontSize: 16,
               cursor: canClick ? 'pointer' : 'not-allowed',
               letterSpacing: '0.5px',
             }}
@@ -352,6 +450,23 @@ export function ThreeTeamTradeBoard({
           </motion.button>
         )
       })()}
+
+      {/* Empty state */}
+      {totalAssets === 0 && (
+        <div style={{
+          textAlign: 'center',
+          padding: 40,
+          color: subText,
+        }}>
+          <div style={{ fontSize: 40, marginBottom: 12 }}>🔄</div>
+          <div style={{ fontWeight: 600, fontSize: 15, marginBottom: 4 }}>Build Your 3-Team Trade</div>
+          <div style={{ fontSize: 12, lineHeight: 1.5 }}>
+            Click on players from any team's roster to add them to the trade.
+            <br />
+            A modal will ask which team should receive each player.
+          </div>
+        </div>
+      )}
     </div>
   )
 }
