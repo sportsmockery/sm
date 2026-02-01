@@ -6,9 +6,53 @@ import { randomBytes } from 'crypto'
 
 export const dynamic = 'force-dynamic'
 
+// Version marker for debugging
+const API_VERSION = 'v2.0.0-edge-function'
+
+// Supabase Edge Function URL for deterministic grading
+const EDGE_FUNCTION_URL = 'https://siwoqfzzcxmngnseyzpv.supabase.co/functions/v1/grade-trade'
 
 function getAnthropic() {
   return new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY! })
+}
+
+// Call the Supabase Edge Function to get deterministic grade
+async function getDeterministicGrade(payload: {
+  chicago_team: string
+  sport: string
+  players_sent: any[]
+  players_received: any[]
+  draft_picks_sent?: any[]
+  draft_picks_received?: any[]
+}): Promise<{ grade: number; breakdown: any; debug?: any } | null> {
+  try {
+    const response = await fetch(EDGE_FUNCTION_URL, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${process.env.SUPABASE_ANON_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY}`,
+      },
+      body: JSON.stringify(payload),
+    })
+
+    if (!response.ok) {
+      console.error('Edge function error:', response.status, await response.text())
+      return null
+    }
+
+    const result = await response.json()
+    if (result.grade !== undefined) {
+      return {
+        grade: result.grade,
+        breakdown: result.breakdown,
+        debug: result.debug,
+      }
+    }
+    return null
+  } catch (error) {
+    console.error('Edge function call failed:', error)
+    return null
+  }
 }
 
 const TEAM_SPORT_MAP: Record<string, string> = {
@@ -170,6 +214,22 @@ export async function POST(request: NextRequest) {
     const teamDisplayNames: Record<string, string> = {
       bears: 'Chicago Bears', bulls: 'Chicago Bulls', blackhawks: 'Chicago Blackhawks',
       cubs: 'Chicago Cubs', whitesox: 'Chicago White Sox',
+    }
+
+    // Call Edge Function for deterministic grade FIRST
+    let deterministicResult: { grade: number; breakdown: any; debug?: any } | null = null
+    try {
+      deterministicResult = await getDeterministicGrade({
+        chicago_team,
+        sport,
+        players_sent: safePlayers_sent,
+        players_received: safePlayers_received,
+        draft_picks_sent: safeDraft_picks_sent,
+        draft_picks_received: safeDraft_picks_received,
+      })
+      console.log('Deterministic grade result:', deterministicResult)
+    } catch (e) {
+      console.error('Failed to get deterministic grade:', e)
     }
 
     // Fetch salary cap data for both teams
@@ -355,19 +415,65 @@ VALUE GAP: ${gap > 0 ? `Chicago receiving ${gap} points MORE (other team unlikel
       }
     }
 
-    const tradeDescription = `
+    // Build different prompts based on whether we have a deterministic grade
+    let tradeDescription: string
+    let systemPrompt: string
+
+    if (deterministicResult) {
+      // Deterministic mode: AI explains the pre-calculated grade (CANNOT override)
+      tradeDescription = `
+Sport: ${sport.toUpperCase()}
+${teamDisplayNames[chicago_team]} send: ${sentDesc}${picksSentDesc}
+${trade_partner} send: ${recvDesc}${picksRecvDesc}${capContext}${mlbFinancialContext}
+
+## PRE-CALCULATED GRADE: ${deterministicResult.grade}
+
+This grade was calculated using objective player value data:
+- Sent value: ${deterministicResult.debug?.sent_value || 'N/A'}
+- Received value: ${deterministicResult.debug?.received_value || 'N/A'}
+- Value difference: ${deterministicResult.debug?.value_difference || 'N/A'}
+- Team phase: ${deterministicResult.debug?.team_phase || 'N/A'}
+
+Your task: Write a 2-4 sentence explanation for WHY this trade deserves a grade of ${deterministicResult.grade}. Do NOT suggest a different grade. The grade is final.`
+
+      systemPrompt = `You are "GM", a sports trade analyst for SM Data Lab. A trade has already been graded ${deterministicResult.grade}/100 using objective player value metrics. Your job is ONLY to explain WHY this grade makes sense.
+
+CRITICAL: You MUST use the grade ${deterministicResult.grade} in your response. Do NOT suggest a different grade.
+
+Respond with valid JSON only:
+{
+  "grade": ${deterministicResult.grade},
+  "reasoning": "<2-4 sentence explanation of why the grade is ${deterministicResult.grade}>",
+  "trade_summary": "<One-line summary of the trade>",
+  "improvement_score": <number -10 to 10>,
+  "breakdown": {
+    "talent_balance": ${deterministicResult.breakdown?.talent_balance ?? 0.5},
+    "contract_value": ${deterministicResult.breakdown?.contract_value ?? 0.5},
+    "team_fit": ${deterministicResult.breakdown?.team_fit ?? 0.5},
+    "future_assets": ${deterministicResult.breakdown?.future_assets ?? 0.5}
+  },
+  "cap_analysis": "<1-2 sentences about salary cap impact>"
+}
+
+Do not wrap in markdown code blocks. Just raw JSON.`
+    } else {
+      // Fallback: Full AI grading (original behavior)
+      tradeDescription = `
 Sport: ${sport.toUpperCase()}
 ${teamDisplayNames[chicago_team]} send: ${sentDesc}${picksSentDesc}
 ${trade_partner} send: ${recvDesc}${picksRecvDesc}${capContext}${mlbFinancialContext}${valueContext}${examplesBlock}
 
 Grade this trade from the perspective of the ${teamDisplayNames[chicago_team]}.`
+      systemPrompt = GM_SYSTEM_PROMPT
+    }
 
-    const requestPayload = { model: MODEL_NAME, system: 'GM_SYSTEM_PROMPT', tradeDescription }
+    const requestPayload = { model: MODEL_NAME, system: deterministicResult ? 'DETERMINISTIC_EXPLAIN_PROMPT' : 'GM_SYSTEM_PROMPT', tradeDescription, deterministicGrade: deterministicResult?.grade }
 
     const response = await getAnthropic().messages.create({
       model: MODEL_NAME,
       max_tokens: 768,
-      system: GM_SYSTEM_PROMPT,
+      temperature: 0, // Deterministic output
+      system: systemPrompt,
       messages: [{ role: 'user', content: tradeDescription }],
     })
 
@@ -384,23 +490,47 @@ Grade this trade from the perspective of the ${teamDisplayNames[chicago_team]}.`
 
     try {
       const parsed = JSON.parse(rawText)
-      grade = Math.max(0, Math.min(100, Math.round(parsed.grade)))
+      // CRITICAL: If we have a deterministic grade, ALWAYS use it (AI cannot override)
+      if (deterministicResult) {
+        grade = deterministicResult.grade
+        // Use deterministic breakdown if AI didn't provide one or tried to change it
+        breakdown = {
+          talent_balance: deterministicResult.breakdown?.talent_balance ?? 0.5,
+          contract_value: deterministicResult.breakdown?.contract_value ?? 0.5,
+          team_fit: deterministicResult.breakdown?.team_fit ?? 0.5,
+          future_assets: deterministicResult.breakdown?.future_assets ?? 0.5,
+        }
+      } else {
+        grade = Math.max(0, Math.min(100, Math.round(parsed.grade)))
+        if (parsed.breakdown) {
+          breakdown = {
+            talent_balance: Math.max(0, Math.min(1, parsed.breakdown.talent_balance ?? 0.5)),
+            contract_value: Math.max(0, Math.min(1, parsed.breakdown.contract_value ?? 0.5)),
+            team_fit: Math.max(0, Math.min(1, parsed.breakdown.team_fit ?? 0.5)),
+            future_assets: Math.max(0, Math.min(1, parsed.breakdown.future_assets ?? 0.5)),
+          }
+        }
+      }
       reasoning = parsed.reasoning || 'No reasoning provided.'
       tradeSummary = parsed.trade_summary || ''
       improvementScore = typeof parsed.improvement_score === 'number' ? Math.max(-10, Math.min(10, parsed.improvement_score)) : 0
       capAnalysis = parsed.cap_analysis || ''
-      if (parsed.breakdown) {
-        breakdown = {
-          talent_balance: Math.max(0, Math.min(1, parsed.breakdown.talent_balance ?? 0.5)),
-          contract_value: Math.max(0, Math.min(1, parsed.breakdown.contract_value ?? 0.5)),
-          team_fit: Math.max(0, Math.min(1, parsed.breakdown.team_fit ?? 0.5)),
-          future_assets: Math.max(0, Math.min(1, parsed.breakdown.future_assets ?? 0.5)),
-        }
-      }
     } catch {
-      const gradeMatch = rawText.match(/(\d{1,3})/)
-      grade = gradeMatch ? Math.max(0, Math.min(100, parseInt(gradeMatch[1]))) : 50
-      reasoning = rawText || 'AI response could not be parsed.'
+      // CRITICAL: Still use deterministic grade on parse failure
+      if (deterministicResult) {
+        grade = deterministicResult.grade
+        breakdown = {
+          talent_balance: deterministicResult.breakdown?.talent_balance ?? 0.5,
+          contract_value: deterministicResult.breakdown?.contract_value ?? 0.5,
+          team_fit: deterministicResult.breakdown?.team_fit ?? 0.5,
+          future_assets: deterministicResult.breakdown?.future_assets ?? 0.5,
+        }
+        reasoning = `Trade graded ${grade}/100 based on objective player value analysis.`
+      } else {
+        const gradeMatch = rawText.match(/(\d{1,3})/)
+        grade = gradeMatch ? Math.max(0, Math.min(100, parseInt(gradeMatch[1]))) : 50
+        reasoning = rawText || 'AI response could not be parsed.'
+      }
     }
 
     const status = grade >= 70 ? 'accepted' : 'rejected'
@@ -442,7 +572,7 @@ Grade this trade from the perspective of the ${teamDisplayNames[chicago_team]}.`
       session_id: session_id || null,
       improvement_score: improvementScore,
       trade_summary: tradeSummary,
-      ai_version: `gm_${MODEL_NAME}`,
+      ai_version: deterministicResult ? `gm_deterministic_${API_VERSION}_${MODEL_NAME}` : `gm_${API_VERSION}_${MODEL_NAME}`,
       shared_code: sharedCode,
       partner_team_key: partner_team_key || null,
       partner_team_logo: partnerTeamLogo,
