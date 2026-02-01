@@ -184,6 +184,48 @@ export default function GMPage() {
     fetchSessions()
   }, [authLoading, isAuthenticated, router])
 
+  // Migrate 2-team selections to 3-team flows when switching modes
+  // This useEffect ensures the migration happens AFTER state updates are committed
+  useEffect(() => {
+    if (tradeMode !== '3-team' || !opponentTeam || !selectedTeam) return
+
+    // Check if we have 2-team selections but empty flows
+    const has2TeamSelections = selectedPlayerIds.size > 0 || draftPicksSent.length > 0 ||
+                               selectedOpponentIds.size > 0 || draftPicksReceived.length > 0
+    const hasExistingFlows = tradeFlows.length > 0
+
+    // Only migrate if we have 2-team selections but no flows yet
+    if (has2TeamSelections && !hasExistingFlows) {
+      const newFlows: TradeFlow[] = []
+
+      // Chicago players going to opponent
+      const chicagoPlayers = roster.filter(p => selectedPlayerIds.has(p.player_id))
+      if (chicagoPlayers.length > 0 || draftPicksSent.length > 0) {
+        newFlows.push({
+          from: selectedTeam,
+          to: opponentTeam.team_key,
+          players: chicagoPlayers,
+          picks: [...draftPicksSent], // Clone to avoid reference issues
+        })
+      }
+
+      // Opponent players going to Chicago
+      const opponentPlayers = opponentRoster.filter(p => selectedOpponentIds.has(p.player_id))
+      if (opponentPlayers.length > 0 || draftPicksReceived.length > 0) {
+        newFlows.push({
+          from: opponentTeam.team_key,
+          to: selectedTeam,
+          players: opponentPlayers,
+          picks: [...draftPicksReceived], // Clone to avoid reference issues
+        })
+      }
+
+      if (newFlows.length > 0) {
+        setTradeFlows(newFlows)
+      }
+    }
+  }, [tradeMode, opponentTeam, selectedTeam, selectedPlayerIds, draftPicksSent, selectedOpponentIds, draftPicksReceived, roster, opponentRoster, tradeFlows.length])
+
   const fetchTrades = useCallback(async (page = 1) => {
     try {
       const res = await fetch(`/api/gm/trades?page=${page}&limit=20`)
@@ -989,34 +1031,8 @@ export default function GMPage() {
                       setDraftPicksTeam3Received([])
                       setSelectedThirdTeamProspectIds(new Set())
                       setTradeFlows([])
-                    } else if (mode === '3-team' && opponentTeam) {
-                      // Migrate existing 2-team selections to tradeFlows
-                      const newFlows: TradeFlow[] = []
-
-                      // Chicago players going to opponent
-                      const chicagoPlayers = roster.filter(p => selectedPlayerIds.has(p.player_id))
-                      if (chicagoPlayers.length > 0 || draftPicksSent.length > 0) {
-                        newFlows.push({
-                          from: selectedTeam,
-                          to: opponentTeam.team_key,
-                          players: chicagoPlayers,
-                          picks: draftPicksSent,
-                        })
-                      }
-
-                      // Opponent players going to Chicago
-                      const opponentPlayers = opponentRoster.filter(p => selectedOpponentIds.has(p.player_id))
-                      if (opponentPlayers.length > 0 || draftPicksReceived.length > 0) {
-                        newFlows.push({
-                          from: opponentTeam.team_key,
-                          to: selectedTeam,
-                          players: opponentPlayers,
-                          picks: draftPicksReceived,
-                        })
-                      }
-
-                      setTradeFlows(newFlows)
                     }
+                    // Note: Migration to 3-team mode is handled by useEffect
                   }}
                   disabled={!selectedTeam}
                 />
