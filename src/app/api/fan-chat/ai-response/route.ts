@@ -76,28 +76,42 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Determine if AI should respond (if not already determined by caller)
-    if (!triggerReason) {
-      const lastHumanMessage = messages.filter(m => !m.isAI).pop()
-      const recentMessages = messages.filter(m => {
-        // Count messages from different humans in last 3 minutes
-        // This is simplified - in production, use actual timestamps
-        return !m.isAI && !m.isOwn
-      })
+    // ALWAYS validate if AI should respond based on user count
+    // This check runs regardless of triggerReason to enforce the rule:
+    // AI only responds when user is alone OR directly mentioned
+    const lastHumanMessage = messages.filter(m => !m.isAI).pop()
+    const recentMessages = messages.filter(m => {
+      // Count messages from different humans in last 3 minutes
+      // This is simplified - in production, use actual timestamps
+      return !m.isAI && !m.isOwn
+    })
 
-      const triggerCheck = shouldAIRespond({
-        authenticatedUsersOnline,
-        lastMessageTime: new Date(), // In production, use actual timestamp
-        lastMessageWasFromHuman: lastHumanMessage ? !lastHumanMessage.isAI : false,
-        aiWasMentioned: lastHumanMessage ? checkForMention(lastHumanMessage.content, personality) : false,
-        aiWasAskedQuestion: lastHumanMessage ? isQuestion(lastHumanMessage.content) : false,
-        recentHumanMessageCount: recentMessages.length
-      })
+    const aiWasMentioned = lastHumanMessage ? checkForMention(lastHumanMessage.content, personality) : false
 
-      if (!triggerCheck.shouldRespond) {
-        return NextResponse.json({ shouldRespond: false, reason: 'conditions not met' })
-      }
+    const triggerCheck = shouldAIRespond({
+      authenticatedUsersOnline,
+      lastMessageTime: new Date(), // In production, use actual timestamp
+      lastMessageWasFromHuman: lastHumanMessage ? !lastHumanMessage.isAI : false,
+      aiWasMentioned,
+      aiWasAskedQuestion: lastHumanMessage ? isQuestion(lastHumanMessage.content) : false,
+      recentHumanMessageCount: recentMessages.length
+    })
+
+    // STRICT RULE: If multiple users are online and AI wasn't directly mentioned, do NOT respond
+    if (!triggerCheck.shouldRespond) {
+      return NextResponse.json({
+        shouldRespond: false,
+        reason: authenticatedUsersOnline > 1
+          ? 'multiple_users_online'
+          : 'conditions not met',
+        hint: authenticatedUsersOnline > 1
+          ? `AI does not respond when ${authenticatedUsersOnline} users are online. Tag @${personality.username} to get a response.`
+          : undefined
+      })
     }
+
+    // Use the validated trigger reason, or fall back to provided reason
+    const effectiveTriggerReason = triggerCheck.reason || triggerReason
 
     // Build conversation context for AI
     const conversationContext = messages
@@ -107,7 +121,7 @@ export async function POST(request: NextRequest) {
 
     // Build the prompt based on trigger reason
     let contextPrompt = ''
-    switch (triggerReason) {
+    switch (effectiveTriggerReason) {
       case 'no_users_online':
         contextPrompt = 'The user is alone in the chat. Be welcoming and engaging. Always ask a follow-up question.'
         break

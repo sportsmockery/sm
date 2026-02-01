@@ -34,6 +34,7 @@ interface UseAIChatPersonalityReturn {
   error: string | null
   requestAIResponse: (
     messages: ChatMessage[],
+    authenticatedUsersOnline: number,
     triggerReason?: TriggerReason
   ) => Promise<ChatMessage | null>
   checkAndTriggerAI: (
@@ -87,9 +88,18 @@ export function useAIChatPersonality({
 
   /**
    * Request an AI response for the current conversation
+   *
+   * @param messages - Recent chat messages
+   * @param authenticatedUsersOnline - Number of authenticated users currently in the room
+   * @param triggerReason - Optional reason for triggering the response
+   *
+   * IMPORTANT: AI will only respond if:
+   * - User is completely alone (authenticatedUsersOnline <= 1), OR
+   * - AI was directly mentioned/tagged (@PersonalityName)
    */
   const requestAIResponse = useCallback(async (
     messages: ChatMessage[],
+    authenticatedUsersOnline: number,
     triggerReason?: TriggerReason
   ): Promise<ChatMessage | null> => {
     if (!enabled || !channelId) return null
@@ -117,7 +127,7 @@ export function useAIChatPersonality({
           channelId,
           messages,
           currentUser: null, // In production, get from auth context
-          authenticatedUsersOnline: 1, // In production, get from presence
+          authenticatedUsersOnline, // Pass actual user count for validation
           triggerReason
         })
       })
@@ -175,7 +185,7 @@ export function useAIChatPersonality({
       if (personality) {
         const mentionPattern = new RegExp(`@${personality.username}`, 'i')
         if (mentionPattern.test(lastMessage.content)) {
-          await requestAIResponse(messages, 'direct_mention')
+          await requestAIResponse(messages, authenticatedUsersOnline, 'direct_mention')
         }
       }
       // Otherwise, do NOT respond - don't interrupt conversations
@@ -186,14 +196,14 @@ export function useAIChatPersonality({
     if (personality) {
       const mentionPattern = new RegExp(`@?${personality.username}`, 'i')
       if (mentionPattern.test(lastMessage.content)) {
-        await requestAIResponse(messages, 'direct_mention')
+        await requestAIResponse(messages, authenticatedUsersOnline, 'direct_mention')
         return
       }
     }
 
     // User is COMPLETELY alone - respond to keep them engaged
     if (authenticatedUsersOnline <= 1) {
-      await requestAIResponse(messages, 'no_users_online')
+      await requestAIResponse(messages, authenticatedUsersOnline, 'no_users_online')
       return
     }
 

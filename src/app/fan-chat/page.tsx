@@ -218,6 +218,11 @@ export default function FanChatPage() {
     setMessages(getWelcomeMessages(activeChannel))
   }, [activeChannel])
 
+  // Track number of authenticated users online
+  // In demo mode, this is 1 (just the current user)
+  // In production with ChatContext/presence tracking, this would be the real count
+  const [authenticatedUsersOnline, setAuthenticatedUsersOnline] = useState(1)
+
   // Handle sending a message
   const handleSendMessage = useCallback(async () => {
     if (!message.trim()) return
@@ -236,12 +241,15 @@ export default function FanChatPage() {
     setHasUserInteracted(true) // Enable scrolling after first user interaction
 
     // Trigger AI response after a small delay (simulates typing)
+    // AI will only respond if:
+    // 1. User is alone (authenticatedUsersOnline <= 1), OR
+    // 2. User directly mentions the AI (@BearDownBenny, etc.)
     setIsTyping(true)
     setTimeout(async () => {
       const updatedMessages = [...messages, newMessage]
-      await requestAIResponse(updatedMessages, 'no_users_online')
+      await requestAIResponse(updatedMessages, authenticatedUsersOnline, 'no_users_online')
     }, 1500 + Math.random() * 2000) // 1.5-3.5 second delay
-  }, [message, messages, requestAIResponse])
+  }, [message, messages, requestAIResponse, authenticatedUsersOnline])
 
   // Handle Enter key
   const handleKeyDown = (e: React.KeyboardEvent) => {
