@@ -551,16 +551,16 @@ export default function GMPage() {
   }
 
   // Handle adding a draft pick - shows destination picker in 3-team mode
-  function handleAddDraftPick(pick: DraftPick, fromTeamKey: string) {
+  function handleAddDraftPick(pick: DraftPick, fromTeamKey: string, target: 'sent' | 'received' | 'team3') {
     if (tradeMode === '3-team' && opponentTeam && thirdTeam) {
       // Show destination picker
       setPendingPick({ pick, fromTeamKey })
       setShowDestinationPicker(true)
     } else {
-      // 2-team mode - add directly
-      if (fromTeamKey === selectedTeam) {
+      // 2-team mode - add directly based on explicit target
+      if (target === 'sent') {
         setDraftPicksSent(prev => [...prev, pick])
-      } else if (fromTeamKey === opponentTeam?.team_key) {
+      } else if (target === 'received') {
         setDraftPicksReceived(prev => [...prev, pick])
       }
     }
@@ -1194,7 +1194,7 @@ export default function GMPage() {
                   teamKey={selectedTeam}
                   onViewFit={handleViewFit}
                   draftPicks={draftPicksSent}
-                  onAddDraftPick={pk => handleAddDraftPick(pk, selectedTeam)}
+                  onAddDraftPick={pk => handleAddDraftPick(pk, selectedTeam, 'sent')}
                   onRemoveDraftPick={i => setDraftPicksSent(prev => prev.filter((_, idx) => idx !== i))}
                   selectedProspectIds={selectedProspectIds}
                   onToggleProspect={toggleProspect}
@@ -1390,7 +1390,7 @@ export default function GMPage() {
                       onAddCustomPlayer={addCustomReceivedPlayer}
                       onViewFit={handleViewFit}
                       draftPicks={draftPicksReceived}
-                      onAddDraftPick={pk => handleAddDraftPick(pk, opponentTeam?.team_key || '')}
+                      onAddDraftPick={pk => handleAddDraftPick(pk, opponentTeam?.team_key || '', 'received')}
                       onRemoveDraftPick={i => setDraftPicksReceived(prev => prev.filter((_, idx) => idx !== i))}
                       selectedProspectIds={selectedOpponentProspectIds}
                       onToggleProspect={toggleOpponentProspect}
@@ -1467,7 +1467,7 @@ export default function GMPage() {
                         onAddCustomPlayer={() => {}}
                         onViewFit={handleViewFit}
                         draftPicks={draftPicksTeam3Received}
-                        onAddDraftPick={pk => handleAddDraftPick(pk, thirdTeam?.team_key || '')}
+                        onAddDraftPick={pk => handleAddDraftPick(pk, thirdTeam?.team_key || '', 'team3')}
                         onRemoveDraftPick={i => setDraftPicksTeam3Received(prev => prev.filter((_, idx) => idx !== i))}
                         selectedProspectIds={selectedThirdTeamProspectIds}
                         onToggleProspect={toggleThirdTeamProspect}
@@ -1632,7 +1632,7 @@ export default function GMPage() {
                           teamKey={selectedTeam}
                           onViewFit={handleViewFit}
                           draftPicks={draftPicksSent}
-                          onAddDraftPick={pk => handleAddDraftPick(pk, selectedTeam)}
+                          onAddDraftPick={pk => handleAddDraftPick(pk, selectedTeam, 'sent')}
                           onRemoveDraftPick={i => setDraftPicksSent(prev => prev.filter((_, idx) => idx !== i))}
                           selectedProspectIds={selectedProspectIds}
                           onToggleProspect={toggleProspect}
@@ -1697,7 +1697,7 @@ export default function GMPage() {
                           onAddCustomPlayer={addCustomReceivedPlayer}
                           onViewFit={handleViewFit}
                           draftPicks={draftPicksReceived}
-                          onAddDraftPick={pk => handleAddDraftPick(pk, opponentTeam?.team_key || '')}
+                          onAddDraftPick={pk => handleAddDraftPick(pk, opponentTeam?.team_key || '', 'received')}
                           onRemoveDraftPick={i => setDraftPicksReceived(prev => prev.filter((_, idx) => idx !== i))}
                           selectedProspectIds={selectedOpponentProspectIds}
                           onToggleProspect={toggleOpponentProspect}
