@@ -115,49 +115,46 @@ async function getTeamTickerFromDatalab(teamKey: TeamKey) {
 
     // Calculate current season based on league
     // NFL: Season year is the year it starts (2025 season = Sept 2025 - Feb 2026)
-    // NBA/NHL: Season year is the year it starts (2025-26 season stored as 2025)
+    // NBA/NHL: Season year is the ENDING year (2025-26 season stored as 2026)
     // MLB: Season year is the calendar year (2025 season = Mar-Oct 2025)
     const currentYear = new Date().getFullYear()
     const currentMonth = new Date().getMonth() + 1 // 1-12
 
     let currentSeason: number
     if (config.league === 'mlb') {
-      // MLB: current year, or previous year if before March
-      currentSeason = currentMonth < 3 ? currentYear - 1 : currentYear
+      // MLB: current year, or previous year if before April
+      currentSeason = currentMonth < 4 ? currentYear - 1 : currentYear
+    } else if (config.league === 'nfl') {
+      // NFL: Season starts in Sept, stored by start year
+      currentSeason = currentMonth < 9 ? currentYear - 1 : currentYear
     } else {
-      // NBA, NHL, NFL: Season starts in fall, stored by start year
-      // If we're in Jan-June, we're in the season that started last year
-      currentSeason = currentMonth <= 6 ? currentYear - 1 : currentYear
+      // NBA, NHL: Season stored by ENDING year
+      // If we're in Oct-Dec, we're in the season that ends next year
+      currentSeason = currentMonth >= 10 ? currentYear + 1 : currentYear
     }
 
-    // Get current season record by counting wins/losses
-    const { data: seasonGames, error: recordError } = await datalabAdmin
-      .from(config.gamesTable)
-      .select('*')
-      .eq('season', currentSeason)
-      .not(config.winCol, 'is', null)
-
-    if (recordError) {
-      console.error(`${teamKey} season record fetch error:`, recordError)
-    }
-
-    // Calculate record
+    // Get record from authoritative seasons table (recommended by Datalab)
     let wins = 0
     let losses = 0
     let otLosses = 0 // For NHL
-    if (seasonGames && seasonGames.length > 0) {
-      seasonGames.forEach((game: Record<string, unknown>) => {
-        if (game[config.winCol] === true) {
-          wins++
-        } else if (game[config.winCol] === false) {
-          // Check for OT loss in NHL
-          if (config.league === 'nhl' && (game.is_overtime || game.is_shootout)) {
-            otLosses++
-          } else {
-            losses++
-          }
-        }
-      })
+
+    // Determine seasons table name
+    const seasonsTable = `${teamKey}_seasons`
+
+    const { data: seasonRecord, error: recordError } = await datalabAdmin
+      .from(seasonsTable)
+      .select('wins, losses, otl')
+      .eq('season', currentSeason)
+      .single()
+
+    if (recordError && recordError.code !== 'PGRST116') {
+      console.error(`${teamKey} season record fetch error:`, recordError)
+    }
+
+    if (seasonRecord) {
+      wins = seasonRecord.wins || 0
+      losses = seasonRecord.losses || 0
+      otLosses = seasonRecord.otl || 0 // NHL only
     }
 
     // Format record based on league

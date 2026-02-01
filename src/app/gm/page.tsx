@@ -350,7 +350,7 @@ export default function GMPage() {
     }
   }
 
-  function toggleOpponentPlayer(playerId: string) {
+  function toggleOpponentPlayer(playerId: string, playerData?: PlayerData) {
     const isSelected = selectedOpponentIds.has(playerId)
 
     if (isSelected) {
@@ -370,18 +370,17 @@ export default function GMPage() {
         ).filter(f => f.players.length > 0 || f.picks.length > 0))
       }
     } else {
-      // Adding
-      if (tradeMode === '3-team' && thirdTeam) {
+      // Adding - use passed player data directly, fall back to roster lookup
+      const player = playerData || opponentRoster.find(p => p.player_id === playerId)
+      if (tradeMode === '3-team' && thirdTeam && opponentTeam) {
         // Show destination picker - player can go to Chicago or Team 3
-        const player = opponentRoster.find(p => p.player_id === playerId)
         if (player) {
-          setPendingPlayer({ player, fromTeamKey: opponentTeam?.team_key || '' })
+          setPendingPlayer({ player, fromTeamKey: opponentTeam.team_key })
           setShowDestinationPicker(true)
         }
       } else {
         // 2-team mode - player goes to Chicago
         setSelectedOpponentIds(prev => new Set([...prev, playerId]))
-        const player = opponentRoster.find(p => p.player_id === playerId)
         if (player) setReceivedPlayers(rp => [...rp, player])
       }
     }
@@ -429,7 +428,7 @@ export default function GMPage() {
     setSelectedThirdTeamProspectIds(new Set())
   }
 
-  function toggleThirdTeamPlayer(playerId: string) {
+  function toggleThirdTeamPlayer(playerId: string, playerData?: PlayerData) {
     const isSelected = selectedThirdTeamIds.has(playerId)
 
     if (isSelected) {
@@ -447,9 +446,10 @@ export default function GMPage() {
       ).filter(f => f.players.length > 0 || f.picks.length > 0))
     } else {
       // Adding - show destination picker (can go to Chicago or Team 2)
-      const player = thirdTeamRoster.find(p => p.player_id === playerId)
-      if (player && opponentTeam) {
-        setPendingPlayer({ player, fromTeamKey: thirdTeam?.team_key || '' })
+      // Use the passed player data directly, fall back to roster lookup
+      const player = playerData || thirdTeamRoster.find(p => p.player_id === playerId)
+      if (player && opponentTeam && thirdTeam) {
+        setPendingPlayer({ player, fromTeamKey: thirdTeam.team_key })
         setShowDestinationPicker(true)
       }
     }

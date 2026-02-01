@@ -41,7 +41,7 @@ interface OpponentRosterPanelProps {
   teamColor: string
   teamName?: string
   selectedIds: Set<string>
-  onToggle: (playerId: string) => void
+  onToggle: (playerId: string, player?: PlayerData) => void
   roster: PlayerData[]
   setRoster: (players: PlayerData[]) => void
   loading: boolean
@@ -539,7 +539,7 @@ export function OpponentRosterPanel({
                       selected={selectedIds.has(player.player_id)}
                       teamColor={teamColor}
                       onClick={() => {
-                        onToggle(player.player_id)
+                        onToggle(player.player_id, player)
                         setSearch('')
                       }}
                       onViewFit={onViewFit}

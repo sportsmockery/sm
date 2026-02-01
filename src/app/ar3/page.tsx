@@ -151,17 +151,21 @@ export default function AR3HelmetPage() {
         const ry = detectState.ry;
         const rz = detectState.rz;
 
-        // Tuned parameters - smaller helmet, farther back
-        const Z = 3.5;          // farther from camera
-        const yOffset = 0.7;    // lift above center
-        const baseScale = 1.5;  // much smaller
+        // NEW TUNED CONSTANTS - smaller and farther back
+        const Z = 5.0;          // push helmet farther away
+        const yOffset = 1.0;    // raise it more above center
+        const baseScale = 0.8;  // overall smaller helmet
 
         helmetGroup.position.set(
           x * Z,
           y * Z + yOffset,
           -Z
         );
+
+        // Keep selfie mirroring (negated ry only)
         helmetGroup.rotation.set(rx, -ry, rz);
+
+        // No extra scale.x flip - CSS handles mirroring
         helmetGroup.scale.setScalar(baseScale * s);
 
         threeRenderer.render(threeScene, threeCamera);
