@@ -97,8 +97,8 @@ export default function AR3HelmetPage() {
             if (isDestroyed) return;
             const helmet = gltf.scene;
 
-            // Face forward (toward camera)
-            helmet.rotation.set(0, Math.PI, 0);
+            // No base rotation - let tracking handle it
+            helmet.rotation.set(0, 0, 0);
 
             helmet.traverse((child) => {
               if ((child as THREE.Mesh).isMesh) {
@@ -181,9 +181,15 @@ export default function AR3HelmetPage() {
 
           // Apply to helmet
           helmetGroup.visible = true;
-          helmetGroup.position.set(worldX, worldY + 0.3, worldZ);
-          helmetGroup.rotation.set(pitch, -yaw, -roll);
-          helmetGroup.scale.set(-scale, scale, scale); // negative X flips for selfie view
+
+          // Push helmet forward (positive Z = toward camera in this setup)
+          helmetGroup.position.set(worldX, worldY + 0.3, worldZ + 0.5);
+
+          // Apply base 180° Y rotation THEN face tracking rotations
+          helmetGroup.rotation.set(pitch, Math.PI - yaw, -roll);
+
+          // Flip Z scale to correct inside-out view
+          helmetGroup.scale.set(scale, scale, -scale);
 
         } else {
           helmetGroup.visible = false;

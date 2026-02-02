@@ -751,7 +751,11 @@ export default function GMPage() {
   }, [validateTrade])
 
   async function gradeTrade() {
-    if (!canGrade) return
+    console.log('[gradeTrade] called, canGrade:', canGrade, 'tradeMode:', tradeMode, 'thirdTeam:', !!thirdTeam)
+    if (!canGrade) {
+      console.log('[gradeTrade] canGrade is false, returning early')
+      return
+    }
     setGrading(true)
     setGradeResult(null)
     setGradeError(null)
@@ -760,6 +764,8 @@ export default function GMPage() {
       let requestBody: Record<string, any>
 
       if (tradeMode === '3-team' && thirdTeam) {
+        console.log('[gradeTrade] Building 3-team trade request')
+        console.log('[gradeTrade] tradeFlows:', tradeFlows)
         // 3-Team Trade format (per Datalab API)
         // Build players array with from_team/to_team
         const playersArray: any[] = []
@@ -788,6 +794,9 @@ export default function GMPage() {
             })
           }
         }
+
+        console.log('[gradeTrade] 3-team playersArray:', playersArray)
+        console.log('[gradeTrade] 3-team draftPicksArray:', draftPicksArray)
 
         requestBody = {
           chicago_team: selectedTeam,
@@ -835,23 +844,28 @@ export default function GMPage() {
         }
       }
 
+      console.log('[gradeTrade] Sending request:', requestBody)
       const res = await fetch('/api/gm/grade', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(requestBody),
       })
+      console.log('[gradeTrade] Response status:', res.status)
 
       if (res.ok) {
         const data = await res.json()
+        console.log('[gradeTrade] Success response:', data)
         setGradeResult(data)
         fetchTrades()
         fetchLeaderboard()
         fetchSessions()
       } else {
         const err = await res.json().catch(() => ({ error: 'Unknown error' }))
+        console.log('[gradeTrade] Error response:', err)
         setGradeError(err.error || 'Failed to grade trade')
       }
     } catch (e) {
+      console.error('[gradeTrade] Network error:', e)
       setGradeError('Network error. Please try again.')
     }
     setGrading(false)
