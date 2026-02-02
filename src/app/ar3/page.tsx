@@ -190,14 +190,13 @@ export default function AR3HelmetPage() {
         const ry = detectState.ry;
         const rz = detectState.rz;
 
-        // Tuning - pull helmet off face more
-        const Z = 5.8;          // further from camera
-        const yOffset = 0.9;    // drop helmet lower on head
-        const baseScale = 0.48; // slightly smaller helmet
+        // Tuning - get helmet onto head properly
+        const Z = 4.6;          // bring helmet closer to face
+        const yOffset = 0.3;    // raise helmet up on head
+        const baseScale = 0.52; // slightly larger so it wraps the skull
 
-        // Negate x for selfie mirror (since we removed CSS scaleX(-1) from canvas)
         helmetGroup.position.set(
-          -x * Z,
+          x * Z,
           y * Z + yOffset,
           -Z
         );
