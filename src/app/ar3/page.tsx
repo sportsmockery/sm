@@ -191,15 +191,16 @@ export default function AR3HelmetPage() {
         const ry = detectState.ry;
         const rz = detectState.rz;
 
-        // Use tracked depth instead of fixed Z
-        const depthScale = 4.6;   // scale the tracked depth
-        const yOffset = 0.15;     // small vertical lift
-        const baseScale = 0.52;   // match Blender scale
+        // Use tracked depth with offset to push helmet BEHIND face
+        const depthScale = 4.6;
+        const zOffset = -0.8;     // PUSH HELMET BACK behind face
+        const yOffset = 0.3;      // lift it up slightly
+        const baseScale = 0.55;   // slightly bigger to wrap head
 
         helmetGroup.position.set(
           x * depthScale,
           y * depthScale + yOffset,
-          z * depthScale          // USE TRACKED Z, NOT -Z constant
+          z * depthScale + zOffset  // ADD zOffset to push back
         );
 
         // Mirror only rotation for selfie view
