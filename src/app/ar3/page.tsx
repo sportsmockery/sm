@@ -53,7 +53,9 @@ export default function AR3HelmetPage() {
           runningMode: 'VIDEO',
           numFaces: 1,
           outputFaceBlendshapes: false,
-          outputFacialTransformationMatrixes: true // Get 3D transform matrix
+          outputFacialTransformationMatrixes: true, // Get 3D transform matrix
+          minTrackingConfidence: 0.5,
+          minDetectionConfidence: 0.5
         });
       } catch (err) {
         console.error('MediaPipe error:', err);
@@ -138,49 +140,45 @@ export default function AR3HelmetPage() {
         // Run face detection
         const results = faceLandmarker.detectForVideo(video, time);
 
-        // Base rotation confirmed: helmet needs 180° Y to face forward
-        const BASE_Y_ROTATION = Math.PI;
+        // Use facialTransformationMatrixes for robust 6DoF tracking
+        if (results.facialTransformationMatrixes && results.facialTransformationMatrixes.length > 0) {
+          const matrixData = results.facialTransformationMatrixes[0].data; // 16-element array (row-major 4x4)
 
-        if (results.faceLandmarks && results.faceLandmarks.length > 0) {
-          const landmarks = results.faceLandmarks[0];
+          // Create Three.js Matrix4 (column-major: transpose MediaPipe row-major)
+          const faceMatrix = new THREE.Matrix4().fromArray(matrixData).transpose();
 
-          // Key landmarks for head position
-          const forehead = landmarks[10];   // Top of forehead
-          const noseTip = landmarks[1];     // Nose tip
-          const chin = landmarks[152];      // Chin
+          // Mirror for selfie: flip X (since video mirrored, canvas not)
+          const mirrorMatrix = new THREE.Matrix4().makeScale(-1, 1, 1);
+          faceMatrix.multiply(mirrorMatrix);
 
-          // Calculate head center
-          const headCenterX = (forehead.x + chin.x) / 2;
-          const headCenterY = (forehead.y + chin.y) / 2;
-          const headCenterZ = (forehead.z + chin.z) / 2;
+          // Coord conversion: MediaPipe (y down, z away) to Three.js (y up, z out)
+          // Flip Y and Z signs
+          const coordMatrix = new THREE.Matrix4().makeScale(1, -1, -1);
+          faceMatrix.multiply(coordMatrix);
 
-          // Convert MediaPipe coords to Three.js coords
-          // NO CSS mirror on canvas, so flip X here for selfie view
-          const worldX = (headCenterX - 0.5) * 4;  // POSITIVE (no CSS mirror)
-          const worldY = (headCenterY - 0.5) * -3;
-          const worldZ = -2 - headCenterZ * 5;
+          // Decompose: extract position, quaternion (for rotation), scale
+          const position = new THREE.Vector3();
+          const quaternion = new THREE.Quaternion();
+          const scaleVec = new THREE.Vector3();
+          faceMatrix.decompose(position, quaternion, scaleVec);
 
-          // Calculate head size for scale
-          const headHeight = Math.abs(forehead.y - chin.y);
-          const scale = headHeight * 3.5;
+          // Uniform scale: average (matrix assumes uniform; helmet is rigid)
+          const uniformScale = (scaleVec.x + scaleVec.y + scaleVec.z) / 3 * 1.2; // Slight boost for helmet fit
 
-          // Calculate rotation from landmarks
-          const foreheadCenter = landmarks[168];
-          const leftCheek = landmarks[234];
-          const rightCheek = landmarks[454];
-          const leftEye = landmarks[33];
-          const rightEye = landmarks[263];
+          // Apply to helmetGroup
+          helmetGroup.position.copy(position);
+          helmetGroup.quaternion.copy(quaternion);
+          helmetGroup.scale.set(uniformScale, uniformScale, uniformScale);
 
-          const yaw = Math.atan2(leftCheek.z - rightCheek.z, leftCheek.x - rightCheek.x);
-          const pitch = Math.atan2(noseTip.y - foreheadCenter.y, noseTip.z - foreheadCenter.z) - Math.PI/2;
-          const roll = Math.atan2(rightEye.y - leftEye.y, rightEye.x - leftEye.x);
+          // Offsets: Matrix centers on face surface; adjust for helmet
+          // Up Y for crown, back Z to enclose head (units ~1-2 for face width)
+          helmetGroup.position.y += 0.25; // Raise for crown
+          helmetGroup.position.z -= 0.15; // Push deeper on head
 
-          // Apply to helmet with BASE rotation
-          // No CSS mirror, so negate yaw for correct left/right tracking
+          // Fix backwards: Rotate 180° Y if facemask faces user (common GLTF +Z forward issue)
+          helmetGroup.rotation.y += Math.PI;
+
           helmetGroup.visible = true;
-          helmetGroup.position.set(worldX, worldY + 0.3, worldZ);
-          helmetGroup.rotation.set(pitch, BASE_Y_ROTATION - yaw, -roll);
-          helmetGroup.scale.set(scale, scale, scale);
 
         } else {
           helmetGroup.visible = false;
