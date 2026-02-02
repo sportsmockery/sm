@@ -155,7 +155,8 @@ export default function AR3HelmetPage() {
           const headCenterZ = (forehead.z + chin.z) / 2;
 
           // Convert MediaPipe coords to Three.js coords
-          const worldX = (headCenterX - 0.5) * -4;
+          // NO CSS mirror on canvas, so flip X here for selfie view
+          const worldX = (headCenterX - 0.5) * 4;  // POSITIVE (no CSS mirror)
           const worldY = (headCenterY - 0.5) * -3;
           const worldZ = -2 - headCenterZ * 5;
 
@@ -175,9 +176,10 @@ export default function AR3HelmetPage() {
           const roll = Math.atan2(rightEye.y - leftEye.y, rightEye.x - leftEye.x);
 
           // Apply to helmet with BASE rotation
+          // No CSS mirror, so negate yaw for correct left/right tracking
           helmetGroup.visible = true;
           helmetGroup.position.set(worldX, worldY + 0.3, worldZ);
-          helmetGroup.rotation.set(pitch, BASE_Y_ROTATION + yaw, roll);
+          helmetGroup.rotation.set(pitch, BASE_Y_ROTATION - yaw, -roll);
           helmetGroup.scale.set(scale, scale, scale);
 
         } else {
@@ -243,7 +245,7 @@ export default function AR3HelmetPage() {
         }}
       />
 
-      {/* Three.js canvas - helmet overlay */}
+      {/* Three.js canvas - helmet overlay (NO CSS mirror - handled in 3D) */}
       <canvas
         ref={canvasRef}
         style={{
@@ -254,7 +256,6 @@ export default function AR3HelmetPage() {
           height: '100%',
           zIndex: 2,
           pointerEvents: 'none',
-          transform: 'scaleX(-1)', // Mirror to match video
         }}
       />
 
