@@ -115,7 +115,7 @@ export default function AR3HelmetPage() {
         // Load helmet model
         const loader = new GLTFLoader();
         loader.load(
-          '/ar/SM_v7.glb',
+          '/ar/SM_v8.glb',
           (gltf) => {
             if (isDestroyed) return;
 
