@@ -73,10 +73,11 @@ export default function AR3HelmetPage() {
           loader.load('/ar/SM_v8.glb', resolve, undefined, reject);
         });
 
-        helmetModel = gltf.scene;
+        const loadedHelmet = gltf.scene;
+        helmetModel = loadedHelmet;
 
         // Get bounding box to understand model size
-        const box = new THREE.Box3().setFromObject(helmetModel);
+        const box = new THREE.Box3().setFromObject(loadedHelmet);
         box.getSize(helmetSize);
         const center = box.getCenter(new THREE.Vector3());
 
@@ -84,16 +85,16 @@ export default function AR3HelmetPage() {
         console.log('Helmet center:', center.x.toFixed(2), center.y.toFixed(2), center.z.toFixed(2));
 
         // Center the model at origin
-        helmetModel.position.sub(center);
+        loadedHelmet.position.sub(center);
 
         // Normalize scale so helmet fits in ~0.5 units
         const maxDim = Math.max(helmetSize.x, helmetSize.y, helmetSize.z);
         const normalizeScale = 0.5 / maxDim;
-        helmetModel.scale.setScalar(normalizeScale);
+        loadedHelmet.scale.setScalar(normalizeScale);
 
         console.log('Normalize scale:', normalizeScale.toFixed(6));
 
-        helmetModel.traverse((child) => {
+        loadedHelmet.traverse((child) => {
           if ((child as THREE.Mesh).isMesh) {
             const mesh = child as THREE.Mesh;
             mesh.frustumCulled = false;
@@ -101,12 +102,12 @@ export default function AR3HelmetPage() {
         });
 
         // Rotate to face camera (helmet's front toward +Z)
-        helmetModel.rotation.y = Math.PI;
+        loadedHelmet.rotation.y = Math.PI;
 
-        scene.add(helmetModel);
+        scene.add(loadedHelmet);
 
         // TEST: Show helmet at fixed position first
-        helmetModel.visible = true;
+        loadedHelmet.visible = true;
         setDebugInfo(`Helmet loaded! Size: ${maxDim.toFixed(1)}, Scale: ${normalizeScale.toFixed(4)}`);
 
       } catch (err) {
