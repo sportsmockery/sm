@@ -16,7 +16,6 @@ export default function AR3HelmetPage() {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const [status, setStatus] = useState('Initializing...');
   const [debugInfo, setDebugInfo] = useState<string>('');
-  const [approach, setApproach] = useState<'A' | 'B'>('A'); // Toggle between approaches
 
   useEffect(() => {
     let renderer: THREE.WebGLRenderer | null = null;
@@ -32,10 +31,6 @@ export default function AR3HelmetPage() {
     const prevQuat = new THREE.Quaternion();
     let prevScl = 1;
     let videoAspect = 1;
-
-    // Get approach from URL param
-    const urlParams = new URLSearchParams(window.location.search);
-    const testApproach = urlParams.get('approach') || 'A';
 
     const init = async () => {
       console.log('========== AR3 v48 - LANDMARKS + FORCED MATERIALS ==========');
@@ -150,7 +145,7 @@ export default function AR3HelmetPage() {
         loadedHelmet.scale.setScalar(1);
         loadedHelmet.rotation.set(0, 0, 0);
 
-        // Process materials - FORCE visibility
+        // Process materials - REPLACE with MeshBasicMaterial (unlit, GUARANTEED visible)
         let meshCount = 0;
         loadedHelmet.traverse((child: THREE.Object3D) => {
           if ((child as THREE.Mesh).isMesh) {
@@ -158,25 +153,21 @@ export default function AR3HelmetPage() {
             mesh.frustumCulled = false;
             meshCount++;
 
-            if (mesh.material) {
-              const mat = mesh.material as THREE.MeshStandardMaterial;
-              console.log(`Mesh ${meshCount}: ${mesh.name}, Material type: ${mat.type}`);
+            const oldMat = mesh.material as THREE.Material;
+            console.log(`Mesh ${meshCount}: ${mesh.name}, Original material: ${oldMat.type}`);
 
-              if (mat.isMeshStandardMaterial) {
-                // Force non-metallic and visible
-                mat.metalness = 0.1;
-                mat.roughness = 0.8;
-                mat.envMapIntensity = 0.5;
-                // Add slight emissive to guarantee visibility
-                mat.emissive = new THREE.Color(0x222222);
-                mat.emissiveIntensity = 0.3;
-                mat.needsUpdate = true;
-                console.log(`  → metalness: ${mat.metalness}, roughness: ${mat.roughness}, emissive: yes`);
-              }
-            }
+            // REPLACE with MeshBasicMaterial - ignores lighting entirely
+            // Bears navy blue: #0B162A, lighter version for visibility: #1a3a5c
+            const newMat = new THREE.MeshBasicMaterial({
+              color: meshCount === 1 ? 0x1a3a5c : 0x8B8B8B, // Navy for shell, gray for facemask
+              transparent: false,
+              side: THREE.DoubleSide,
+            });
+            mesh.material = newMat;
+            console.log(`  → Replaced with MeshBasicMaterial, color: ${meshCount === 1 ? '#1a3a5c (navy)' : '#8B8B8B (gray)'}`);
           }
         });
-        console.log('Total meshes processed:', meshCount);
+        console.log('Total meshes processed:', meshCount, '- ALL replaced with MeshBasicMaterial');
 
         scene.add(loadedHelmet);
         loadedHelmet.visible = false;
@@ -244,7 +235,7 @@ export default function AR3HelmetPage() {
         }
       }
 
-      setStatus(`Ready! Approach ${testApproach} - Look at camera`);
+      setStatus('Ready! Look at camera to try on the helmet');
       console.log('========== INIT COMPLETE, STARTING ANIMATION LOOP ==========');
 
       // Step 5: Animation loop with DIAGNOSTIC LOGGING
@@ -265,195 +256,87 @@ export default function AR3HelmetPage() {
           const lm = results.faceLandmarks[0];
 
           // ========================================
-          // APPROACH A: LANDMARK-BASED (Perplexity style)
+          // LANDMARK-BASED POSITIONING
           // ========================================
-          if (testApproach === 'A') {
-            // Key landmarks
-            const foreheadCenter = lm[10]; // Top of forehead
-            const noseBridge = lm[6]; // Between eyes
-            const leftTemple = lm[234];
-            const rightTemple = lm[454];
-            const chin = lm[152];
+          const foreheadCenter = lm[10]; // Top of forehead
+          const noseBridge = lm[6]; // Between eyes
+          const leftTemple = lm[234];
+          const rightTemple = lm[454];
+          const chin = lm[152];
 
-            // Log raw landmarks every 30 frames
-            if (frameCount % 30 === 1) {
-              console.log('=== APPROACH A: LANDMARK DEBUG (Frame ' + frameCount + ') ===');
-              console.log('Forehead [10]:', { x: foreheadCenter.x.toFixed(4), y: foreheadCenter.y.toFixed(4), z: foreheadCenter.z.toFixed(4) });
-              console.log('NoseBridge [6]:', { x: noseBridge.x.toFixed(4), y: noseBridge.y.toFixed(4), z: noseBridge.z.toFixed(4) });
-              console.log('LeftTemple [234]:', { x: leftTemple.x.toFixed(4), y: leftTemple.y.toFixed(4), z: leftTemple.z.toFixed(4) });
-              console.log('RightTemple [454]:', { x: rightTemple.x.toFixed(4), y: rightTemple.y.toFixed(4), z: rightTemple.z.toFixed(4) });
-              console.log('Chin [152]:', { x: chin.x.toFixed(4), y: chin.y.toFixed(4), z: chin.z.toFixed(4) });
-            }
-
-            // Convert landmark to Three.js coordinates
-            // Landmarks are 0-1 normalized, need to map to ortho camera space
-            const toThreeJS = (landmark: { x: number; y: number; z: number }) => {
-              // X: 0-1 → -aspect/2 to +aspect/2, MIRRORED for selfie
-              const x = -(landmark.x - 0.5) * videoAspect;
-              // Y: 0-1 → +0.5 to -0.5 (flip Y)
-              const y = -(landmark.y - 0.5);
-              // Z: landmark.z is relative depth, scale it
-              const z = -landmark.z * 2;
-              return new THREE.Vector3(x, y, z);
-            };
-
-            const foreheadPos = toThreeJS(foreheadCenter);
-            const leftTemplePos = toThreeJS(leftTemple);
-            const rightTemplePos = toThreeJS(rightTemple);
-            const chinPos = toThreeJS(chin);
-
-            // Face width for scale
-            const faceWidth = leftTemplePos.distanceTo(rightTemplePos);
-            // Face height
-            const faceHeight = foreheadPos.distanceTo(chinPos);
-
-            // Position: Slightly above forehead center
-            const posX = foreheadPos.x;
-            const posY = foreheadPos.y + faceHeight * 0.1; // 10% above forehead
-            const posZ = foreheadPos.z - 0.1;
-
-            // Scale based on face width
-            // Face width ~0.25-0.35 in ortho units when face fills frame
-            // Helmet model is ~0.2m, we want it to cover the head
-            const targetScale = faceWidth * 4; // Adjust multiplier as needed
-            const uniformScl = Math.max(0.8, Math.min(2.0, targetScale));
-
-            // Rotation from landmarks
-            const faceUp = new THREE.Vector3().subVectors(foreheadPos, chinPos).normalize();
-            const faceRight = new THREE.Vector3().subVectors(rightTemplePos, leftTemplePos).normalize();
-            const faceForward = new THREE.Vector3().crossVectors(faceRight, faceUp).normalize();
-
-            // Build rotation matrix
-            const rotMat = new THREE.Matrix4().makeBasis(faceRight, faceUp, faceForward);
-            const quat = new THREE.Quaternion().setFromRotationMatrix(rotMat);
-
-            // Apply 180° Y rotation so facemask faces camera
-            const flipY = new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0, 1, 0), Math.PI);
-            quat.multiply(flipY);
-
-            // Log converted values
-            if (frameCount % 30 === 1) {
-              console.log('--- Converted Values ---');
-              console.log('Forehead 3D:', foreheadPos.toArray().map(v => v.toFixed(4)));
-              console.log('Face width:', faceWidth.toFixed(4));
-              console.log('Face height:', faceHeight.toFixed(4));
-              console.log('Target position:', { x: posX.toFixed(4), y: posY.toFixed(4), z: posZ.toFixed(4) });
-              console.log('Target scale:', uniformScl.toFixed(4));
-              console.log('Quaternion:', quat.toArray().map(v => v.toFixed(4)));
-            }
-
-            // Apply to helmet
-            helmetModel.position.set(posX, posY, posZ);
-            helmetModel.quaternion.copy(quat);
-            helmetModel.scale.setScalar(uniformScl);
-
-            tracked = true;
+          // Log raw landmarks every 30 frames
+          if (frameCount % 30 === 1) {
+            console.log('=== LANDMARK DEBUG (Frame ' + frameCount + ') ===');
+            console.log('Forehead [10]:', { x: foreheadCenter.x.toFixed(4), y: foreheadCenter.y.toFixed(4), z: foreheadCenter.z.toFixed(4) });
+            console.log('NoseBridge [6]:', { x: noseBridge.x.toFixed(4), y: noseBridge.y.toFixed(4), z: noseBridge.z.toFixed(4) });
+            console.log('LeftTemple [234]:', { x: leftTemple.x.toFixed(4), y: leftTemple.y.toFixed(4), z: leftTemple.z.toFixed(4) });
+            console.log('RightTemple [454]:', { x: rightTemple.x.toFixed(4), y: rightTemple.y.toFixed(4), z: rightTemple.z.toFixed(4) });
+            console.log('Chin [152]:', { x: chin.x.toFixed(4), y: chin.y.toFixed(4), z: chin.z.toFixed(4) });
           }
 
-          // ========================================
-          // APPROACH B: MATRIX-BASED
-          // ========================================
-          else if (testApproach === 'B') {
-            if (results.facialTransformationMatrixes && results.facialTransformationMatrixes.length > 0) {
-              const matrixData = results.facialTransformationMatrixes[0].data;
+          // Convert landmark to Three.js coordinates
+          // Landmarks are 0-1 normalized, need to map to ortho camera space
+          const toThreeJS = (landmark: { x: number; y: number; z: number }) => {
+            // X: 0-1 → -aspect/2 to +aspect/2, MIRRORED for selfie
+            const x = -(landmark.x - 0.5) * videoAspect;
+            // Y: 0-1 → +0.5 to -0.5 (flip Y)
+            const y = -(landmark.y - 0.5);
+            // Z: landmark.z is relative depth, scale it
+            const z = -landmark.z * 2;
+            return new THREE.Vector3(x, y, z);
+          };
 
-              if (frameCount % 30 === 1) {
-                console.log('=== APPROACH B: MATRIX DEBUG (Frame ' + frameCount + ') ===');
-                console.log('Raw matrix (16 floats):', Array.from(matrixData).map(v => v.toFixed(4)));
-              }
+          const foreheadPos = toThreeJS(foreheadCenter);
+          const leftTemplePos = toThreeJS(leftTemple);
+          const rightTemplePos = toThreeJS(rightTemple);
+          const chinPos = toThreeJS(chin);
 
-              // MediaPipe matrix is row-major, Three.js is column-major
-              // Row-major layout: [r0c0, r0c1, r0c2, r0c3, r1c0, ...]
-              // Translation is at indices 3, 7, 11 in row-major (last column)
-              // OR indices 12, 13, 14 if it's already column-major
+          // Face width for scale
+          const faceWidth = leftTemplePos.distanceTo(rightTemplePos);
+          // Face height
+          const faceHeight = foreheadPos.distanceTo(chinPos);
 
-              // Try extracting translation from both possible locations
-              const trans_rowmajor = [matrixData[3], matrixData[7], matrixData[11]];
-              const trans_colmajor = [matrixData[12], matrixData[13], matrixData[14]];
+          // Position: Slightly above forehead center
+          const posX = foreheadPos.x;
+          const posY = foreheadPos.y + faceHeight * 0.1; // 10% above forehead
+          const posZ = foreheadPos.z - 0.1;
 
-              if (frameCount % 30 === 1) {
-                console.log('Translation (row-major indices 3,7,11):', trans_rowmajor.map(v => v.toFixed(4)));
-                console.log('Translation (col-major indices 12,13,14):', trans_colmajor.map(v => v.toFixed(4)));
-              }
+          // Scale based on face width
+          // Face width ~0.25-0.35 in ortho units when face fills frame
+          // Helmet model is ~0.2m, we want it to cover the head
+          const targetScale = faceWidth * 4; // Adjust multiplier as needed
+          const uniformScl = Math.max(0.8, Math.min(2.0, targetScale));
 
-              // Build Three.js matrix (expects column-major)
-              const faceMatrix = new THREE.Matrix4().fromArray(matrixData);
+          // Rotation from landmarks
+          const faceUp = new THREE.Vector3().subVectors(foreheadPos, chinPos).normalize();
+          const faceRight = new THREE.Vector3().subVectors(rightTemplePos, leftTemplePos).normalize();
+          const faceForward = new THREE.Vector3().crossVectors(faceRight, faceUp).normalize();
 
-              if (frameCount % 30 === 1) {
-                console.log('Matrix after fromArray:', faceMatrix.elements.map(v => v.toFixed(4)));
-              }
+          // Build rotation matrix
+          const rotMat = new THREE.Matrix4().makeBasis(faceRight, faceUp, faceForward);
+          const quat = new THREE.Quaternion().setFromRotationMatrix(rotMat);
 
-              // Transpose if needed (row-major to column-major)
-              faceMatrix.transpose();
+          // Apply 180° Y rotation so facemask faces camera
+          const flipY = new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0, 1, 0), Math.PI);
+          quat.multiply(flipY);
 
-              if (frameCount % 30 === 1) {
-                console.log('Matrix after transpose:', faceMatrix.elements.map(v => v.toFixed(4)));
-              }
-
-              // Decompose
-              const position = new THREE.Vector3();
-              const quaternion = new THREE.Quaternion();
-              const scaleVec = new THREE.Vector3();
-              faceMatrix.decompose(position, quaternion, scaleVec);
-
-              if (frameCount % 30 === 1) {
-                console.log('Decomposed position:', position.toArray().map(v => v.toFixed(4)));
-                console.log('Decomposed quaternion:', quaternion.toArray().map(v => v.toFixed(4)));
-                console.log('Decomposed scale:', scaleVec.toArray().map(v => v.toFixed(4)));
-              }
-
-              // The matrix translation is in centimeters, convert to our ortho space
-              // Our ortho camera spans ~1 unit vertically, video is ~30cm face
-              // So 1cm ≈ 0.033 units, or translation / 30
-
-              // Use landmarks for position (more reliable)
-              const nose = lm[1];
-              const forehead = lm[10];
-              const leftCheek = lm[454];
-              const rightCheek = lm[234];
-
-              const posX = -(nose.x - 0.5) * videoAspect;
-              const posY = -(forehead.y - 0.5) + 0.05; // Offset above forehead
-              const posZ = -0.5;
-
-              const faceWidth = Math.abs(leftCheek.x - rightCheek.x);
-              const uniformScl = Math.max(0.8, Math.min(2.0, faceWidth * 6));
-
-              // Apply coordinate transforms to rotation
-              // MediaPipe: +X right, +Y down, +Z toward camera
-              // Three.js: +X right, +Y up, +Z toward camera
-              const coordConvert = new THREE.Matrix4().makeScale(1, -1, -1);
-              const rotMatrix = new THREE.Matrix4().makeRotationFromQuaternion(quaternion);
-              rotMatrix.premultiply(coordConvert);
-
-              // Mirror for selfie
-              const mirrorMatrix = new THREE.Matrix4().makeScale(-1, 1, 1);
-              rotMatrix.multiply(mirrorMatrix);
-
-              const finalQuat = new THREE.Quaternion().setFromRotationMatrix(rotMatrix);
-
-              // 180° Y flip for facemask forward
-              const flipY = new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0, 1, 0), Math.PI);
-              finalQuat.premultiply(flipY);
-
-              if (frameCount % 30 === 1) {
-                console.log('--- Final Values ---');
-                console.log('Final position:', { x: posX.toFixed(4), y: posY.toFixed(4), z: posZ.toFixed(4) });
-                console.log('Final scale:', uniformScl.toFixed(4));
-                console.log('Final quaternion:', finalQuat.toArray().map(v => v.toFixed(4)));
-              }
-
-              helmetModel.position.set(posX, posY, posZ);
-              helmetModel.quaternion.copy(finalQuat);
-              helmetModel.scale.setScalar(uniformScl);
-
-              tracked = true;
-            } else {
-              if (frameCount % 60 === 1) {
-                console.log('No transformation matrix available this frame');
-              }
-            }
+          // Log converted values
+          if (frameCount % 30 === 1) {
+            console.log('--- Converted Values ---');
+            console.log('Forehead 3D:', foreheadPos.toArray().map(v => v.toFixed(4)));
+            console.log('Face width:', faceWidth.toFixed(4));
+            console.log('Face height:', faceHeight.toFixed(4));
+            console.log('Target position:', { x: posX.toFixed(4), y: posY.toFixed(4), z: posZ.toFixed(4) });
+            console.log('Target scale:', uniformScl.toFixed(4));
+            console.log('Quaternion:', quat.toArray().map(v => v.toFixed(4)));
           }
+
+          // Apply to helmet
+          helmetModel.position.set(posX, posY, posZ);
+          helmetModel.quaternion.copy(quat);
+          helmetModel.scale.setScalar(uniformScl);
+
+          tracked = true;
         }
 
         if (tracked && helmetModel) {
@@ -473,7 +356,6 @@ export default function AR3HelmetPage() {
           // Update debug display
           if (frameCount % 10 === 0) {
             setDebugInfo(
-              `Approach ${testApproach} | ` +
               `Pos: (${helmetModel.position.x.toFixed(3)}, ${helmetModel.position.y.toFixed(3)}, ${helmetModel.position.z.toFixed(3)}) | ` +
               `Scale: ${helmetModel.scale.x.toFixed(3)} | Frame: ${frameCount}`
             );
@@ -481,7 +363,7 @@ export default function AR3HelmetPage() {
         } else if (helmetModel) {
           helmetModel.visible = false;
           if (frameCount % 30 === 0) {
-            setDebugInfo(`Approach ${testApproach} | No face detected - Frame: ${frameCount}`);
+            setDebugInfo(`No face detected - Frame: ${frameCount}`);
           }
         }
 
@@ -560,44 +442,6 @@ export default function AR3HelmetPage() {
         }}
       />
 
-      {/* Approach selector buttons */}
-      <div style={{
-        position: 'absolute',
-        top: 10,
-        right: 10,
-        display: 'flex',
-        gap: 10,
-        zIndex: 30,
-      }}>
-        <a
-          href="?approach=A"
-          style={{
-            padding: '10px 20px',
-            backgroundColor: '#2196F3',
-            color: '#fff',
-            textDecoration: 'none',
-            borderRadius: 5,
-            fontFamily: 'system-ui',
-            fontWeight: 'bold',
-          }}
-        >
-          Test A: Landmarks
-        </a>
-        <a
-          href="?approach=B"
-          style={{
-            padding: '10px 20px',
-            backgroundColor: '#4CAF50',
-            color: '#fff',
-            textDecoration: 'none',
-            borderRadius: 5,
-            fontFamily: 'system-ui',
-            fontWeight: 'bold',
-          }}
-        >
-          Test B: Matrix
-        </a>
-      </div>
 
       {/* Status indicator */}
       <div style={{
@@ -629,10 +473,10 @@ export default function AR3HelmetPage() {
         maxWidth: '60%',
       }}>
         <div style={{ marginBottom: 5, color: '#ff0', fontWeight: 'bold' }}>
-          AR3 v47 - DIAGNOSTIC TEST
+          AR3 v48 - FORCED MATERIALS
         </div>
         <div style={{ marginBottom: 5, color: '#0ff' }}>
-          Open browser console (F12) for detailed logs
+          MeshBasicMaterial (unlit) - Navy blue shell
         </div>
         <div>{debugInfo || 'Initializing...'}</div>
       </div>
@@ -653,7 +497,7 @@ export default function AR3HelmetPage() {
         textAlign: 'center',
         maxWidth: '90%',
       }}>
-        Click buttons above to switch approaches. Check browser console (F12) for diagnostic values.
+        Position your face in front of the camera to try on the Bears helmet.
       </div>
     </main>
   );
