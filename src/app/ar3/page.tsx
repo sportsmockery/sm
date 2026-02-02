@@ -38,8 +38,7 @@ export default function AR3HelmetPage() {
     const testApproach = urlParams.get('approach') || 'A';
 
     const init = async () => {
-      console.log('========== AR3 v47 DIAGNOSTIC TEST ==========');
-      console.log('Testing Approach:', testApproach);
+      console.log('========== AR3 v48 - LANDMARKS + FORCED MATERIALS ==========');
       const video = videoRef.current;
       const canvas = canvasRef.current;
       if (!video || !canvas) {

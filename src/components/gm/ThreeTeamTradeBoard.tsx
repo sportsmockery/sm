@@ -1,10 +1,14 @@
 'use client'
+import { useState, useCallback, useRef } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { AssetRow } from './AssetRow'
 import { ValidationIndicator, ValidationState } from './ValidationIndicator'
+import { AuditButton } from './AuditButton'
+import { AuditReportCard } from './AuditReportCard'
 import { useTheme } from '@/contexts/ThemeContext'
 import type { DraftPick, TradeFlow } from '@/types/gm'
 import type { PlayerData } from './PlayerCard'
+import type { AuditResult } from '@/types/gm-audit'
 
 interface TeamInfo {
   key: string
@@ -26,6 +30,7 @@ interface ThreeTeamTradeBoardProps {
   gradeResult?: any
   mobile?: boolean
   onNewTrade?: () => void
+  onEditTrade?: () => void
 }
 
 export function ThreeTeamTradeBoard({
@@ -37,6 +42,7 @@ export function ThreeTeamTradeBoard({
   gradeResult,
   mobile = false,
   onNewTrade,
+  onEditTrade,
 }: ThreeTeamTradeBoardProps) {
   const { theme } = useTheme()
   const isDark = theme === 'dark'
@@ -46,6 +52,59 @@ export function ThreeTeamTradeBoard({
   const borderColor = isDark ? '#374151' : '#e5e7eb'
   const flowBg = isDark ? '#1f2937' : '#ffffff'
   const teams = [team1, team2, team3]
+
+  // Share state
+  const [showShareOptions, setShowShareOptions] = useState(false)
+  const [copied, setCopied] = useState(false)
+  const [generatingImage, setGeneratingImage] = useState(false)
+  const [generatedImageUrl, setGeneratedImageUrl] = useState<string | null>(null)
+  const gradeCardRef = useRef<HTMLDivElement>(null)
+
+  // Audit state
+  const [auditResult, setAuditResult] = useState<AuditResult | null>(null)
+
+  const shareUrl = gradeResult?.shared_code
+    ? `${typeof window !== 'undefined' ? window.location.origin : ''}/gm/share/${gradeResult.shared_code}`
+    : ''
+
+  const handleCopyLink = useCallback(async () => {
+    if (!shareUrl) return
+    try {
+      await navigator.clipboard.writeText(shareUrl)
+      setCopied(true)
+      setShowShareOptions(true)
+      setTimeout(() => setCopied(false), 3000)
+    } catch (e) {
+      console.error('Failed to copy', e)
+    }
+  }, [shareUrl])
+
+  const handleCreateImage = useCallback(async () => {
+    if (!gradeCardRef.current || !gradeResult) return
+    setGeneratingImage(true)
+
+    try {
+      const { toPng } = await import('html-to-image')
+      const dataUrl = await toPng(gradeCardRef.current, {
+        quality: 0.95,
+        backgroundColor: isDark ? '#1f2937' : '#ffffff',
+      })
+      setGeneratedImageUrl(dataUrl)
+      setShowShareOptions(true)
+    } catch (e) {
+      console.error('Failed to generate image', e)
+    } finally {
+      setGeneratingImage(false)
+    }
+  }, [gradeResult, isDark])
+
+  const handleDownloadImage = useCallback(() => {
+    if (!generatedImageUrl) return
+    const link = document.createElement('a')
+    link.download = `3-team-trade-grade-${gradeResult?.grade || 0}.png`
+    link.href = generatedImageUrl
+    link.click()
+  }, [generatedImageUrl, gradeResult?.grade])
 
   // Get flow between two teams
   function getFlow(from: string, to: string): TradeFlow | undefined {
@@ -457,85 +516,265 @@ export function ThreeTeamTradeBoard({
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          style={{
-            backgroundColor: panelBg,
-            borderRadius: 16,
-            border: `2px solid ${borderColor}`,
-            overflow: 'hidden',
-          }}
+          style={{ marginTop: 16 }}
         >
-          {/* Overall Grade Header */}
-          <div style={{
-            padding: 20,
-            background: gradeResult.grade >= 75 ? 'linear-gradient(135deg, #22c55e20, #16a34a20)' :
-                        gradeResult.grade >= 50 ? 'linear-gradient(135deg, #eab30820, #ca8a0420)' :
-                        'linear-gradient(135deg, #ef444420, #dc262620)',
-            borderBottom: `1px solid ${borderColor}`,
-            textAlign: 'center',
-          }}>
-            <div style={{
-              fontSize: 56,
-              fontWeight: 900,
-              color: gradeResult.grade >= 75 ? '#22c55e' :
-                     gradeResult.grade >= 50 ? '#eab308' : '#ef4444',
-              lineHeight: 1,
-            }}>
-              {gradeResult.grade}
+          <div
+            ref={gradeCardRef}
+            style={{
+              padding: 24,
+              borderRadius: 16,
+              backgroundColor: isDark ? '#1f2937' : '#ffffff',
+              border: `1px solid ${borderColor}`,
+            }}
+          >
+            {/* Grade number and status */}
+            <div style={{ textAlign: 'center', marginBottom: 16 }}>
+              <div style={{
+                fontSize: 64,
+                fontWeight: 900,
+                color: gradeResult.grade >= 70 ? '#22c55e' : gradeResult.grade >= 50 ? '#eab308' : '#ef4444',
+                lineHeight: 1,
+              }}>
+                {gradeResult.grade}
+              </div>
+              <div style={{ display: 'flex', justifyContent: 'center', gap: 8, marginTop: 8 }}>
+                <span style={{
+                  padding: '6px 16px',
+                  borderRadius: 20,
+                  fontWeight: 800,
+                  fontSize: 12,
+                  letterSpacing: '1px',
+                  backgroundColor: gradeResult.status === 'accepted' ? '#22c55e20' : '#ef444420',
+                  color: gradeResult.status === 'accepted' ? '#22c55e' : '#ef4444',
+                }}>
+                  {gradeResult.status === 'accepted' ? 'ACCEPTED' : 'REJECTED'}
+                </span>
+                {gradeResult.is_dangerous && (
+                  <span style={{
+                    padding: '6px 16px',
+                    borderRadius: 20,
+                    fontWeight: 800,
+                    fontSize: 12,
+                    backgroundColor: '#eab30820',
+                    color: '#eab308',
+                  }}>
+                    DANGEROUS
+                  </span>
+                )}
+              </div>
             </div>
-            <div style={{
-              fontSize: 14,
-              fontWeight: 700,
-              color: gradeResult.grade >= 75 ? '#22c55e' :
-                     gradeResult.grade >= 50 ? '#eab308' : '#ef4444',
-              textTransform: 'uppercase',
-              letterSpacing: '1px',
-              marginTop: 4,
-            }}>
-              {gradeResult.grade >= 75 ? 'TRADE ACCEPTED' : 'TRADE REJECTED'}
-            </div>
-          </div>
 
-          {/* Team Grades (if available) */}
-          {gradeResult.team_grades && (
-            <div style={{
-              display: 'grid',
-              gridTemplateColumns: mobile ? '1fr' : 'repeat(3, 1fr)',
-              gap: 1,
-              backgroundColor: borderColor,
-            }}>
-              {Object.entries(gradeResult.team_grades).map(([teamKey, data]: [string, any]) => {
-                const team = teams.find(t => t.key === teamKey) || { name: teamKey, color: '#666' }
-                return (
-                  <div key={teamKey} style={{ backgroundColor: panelBg, padding: 16 }}>
-                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
-                      <span style={{ fontWeight: 700, color: team.color, fontSize: 13 }}>{team.name}</span>
-                      <span style={{ fontWeight: 800, fontSize: 20, color: data.grade >= 75 ? '#22c55e' : data.grade >= 50 ? '#eab308' : '#ef4444' }}>{data.grade}</span>
+            {/* Trade summary */}
+            {gradeResult.trade_summary && (
+              <div style={{
+                fontSize: 13,
+                color: subText,
+                fontStyle: 'italic',
+                textAlign: 'center',
+                marginBottom: 12,
+              }}>
+                {gradeResult.trade_summary}
+              </div>
+            )}
+
+            {/* Improvement score */}
+            {typeof gradeResult.improvement_score === 'number' && (
+              <div style={{
+                fontSize: 14,
+                fontWeight: 700,
+                textAlign: 'center',
+                marginBottom: 16,
+                color: gradeResult.improvement_score > 0 ? '#22c55e' : gradeResult.improvement_score < 0 ? '#ef4444' : subText,
+              }}>
+                Team Improvement: {gradeResult.improvement_score > 0 ? '+' : ''}{gradeResult.improvement_score}
+              </div>
+            )}
+
+            {/* Rejection reason box */}
+            {gradeResult.status === 'rejected' && (
+              <div style={{
+                marginBottom: 16,
+                padding: 16,
+                backgroundColor: isDark ? 'rgba(127, 29, 29, 0.3)' : 'rgba(254, 202, 202, 0.3)',
+                border: `1px solid ${isDark ? 'rgba(239, 68, 68, 0.3)' : 'rgba(239, 68, 68, 0.4)'}`,
+                borderRadius: 12,
+              }}>
+                <div style={{ display: 'flex', alignItems: 'flex-start', gap: 12 }}>
+                  <div style={{ fontSize: 20, color: '#ef4444' }}>⚠️</div>
+                  <div style={{ flex: 1 }}>
+                    <h4 style={{
+                      color: '#ef4444',
+                      fontWeight: 600,
+                      fontSize: 12,
+                      textTransform: 'uppercase',
+                      letterSpacing: '0.5px',
+                      margin: 0,
+                    }}>
+                      Why This Trade Was Rejected
+                    </h4>
+                    <p style={{
+                      color: textColor,
+                      fontSize: 13,
+                      lineHeight: 1.5,
+                      margin: '8px 0 0 0',
+                    }}>
+                      {gradeResult.rejection_reason || `Trade score of ${gradeResult.grade} is below the 70-point acceptance threshold.`}
+                    </p>
+                    <div style={{
+                      marginTop: 12,
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: 8,
+                      fontSize: 12,
+                    }}>
+                      <span style={{ color: subText }}>Current score:</span>
+                      <span style={{ color: '#ef4444', fontWeight: 700 }}>{gradeResult.grade}</span>
+                      <span style={{ color: subText }}>|</span>
+                      <span style={{ color: subText }}>Needed:</span>
+                      <span style={{ color: '#22c55e', fontWeight: 700 }}>70+</span>
                     </div>
-                    <div style={{ fontSize: 11, color: subText, lineHeight: 1.5 }}>{data.reasoning}</div>
                   </div>
-                )
-              })}
-            </div>
-          )}
+                </div>
+              </div>
+            )}
 
-          {/* Overall Reasoning */}
-          {gradeResult.reasoning && (
-            <div style={{ padding: 16, borderTop: `1px solid ${borderColor}` }}>
-              <div style={{ fontSize: 11, fontWeight: 700, color: subText, textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: 8 }}>Analysis</div>
-              <div style={{ fontSize: 13, color: textColor, lineHeight: 1.6 }}>{gradeResult.reasoning}</div>
-            </div>
-          )}
+            {/* Breakdown bars */}
+            {gradeResult.breakdown && (
+              <div style={{ marginBottom: 16 }}>
+                {[
+                  { label: 'Talent Balance', value: gradeResult.breakdown.talent_balance },
+                  { label: 'Contract Value', value: gradeResult.breakdown.contract_value },
+                  { label: 'Team Fit', value: gradeResult.breakdown.team_fit },
+                  { label: 'Future Assets', value: gradeResult.breakdown.future_assets },
+                ].map((item) => (
+                  <div key={item.label} style={{ marginBottom: 8 }}>
+                    <div style={{
+                      display: 'flex',
+                      justifyContent: 'space-between',
+                      fontSize: 11,
+                      fontWeight: 600,
+                      color: subText,
+                      marginBottom: 3,
+                    }}>
+                      <span>{item.label}</span>
+                      <span>{Math.round(item.value * 100)}%</span>
+                    </div>
+                    <div style={{
+                      height: 6,
+                      borderRadius: 3,
+                      backgroundColor: isDark ? '#374151' : '#e5e7eb',
+                      overflow: 'hidden',
+                    }}>
+                      <div style={{
+                        height: '100%',
+                        width: `${item.value * 100}%`,
+                        borderRadius: 3,
+                        backgroundColor: gradeResult.grade >= 70 ? '#22c55e' : gradeResult.grade >= 50 ? '#eab308' : '#ef4444',
+                      }} />
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
 
-          {/* New Trade Button */}
-          {onNewTrade && (
-            <div style={{ padding: 16, borderTop: `1px solid ${borderColor}` }}>
-              <motion.button
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
+            {/* Cap Analysis */}
+            {gradeResult.cap_analysis && (
+              <div style={{
+                marginBottom: 16,
+                padding: 12,
+                borderRadius: 10,
+                backgroundColor: isDark ? '#1e293b' : '#f0fdf4',
+                border: `1px solid ${isDark ? '#334155' : '#bbf7d0'}`,
+                display: 'flex',
+                alignItems: 'flex-start',
+                gap: 10,
+              }}>
+                <span style={{ fontSize: 18, flexShrink: 0 }}>💰</span>
+                <div>
+                  <div style={{
+                    fontSize: 11,
+                    fontWeight: 700,
+                    color: isDark ? '#94a3b8' : '#64748b',
+                    marginBottom: 4,
+                    textTransform: 'uppercase',
+                    letterSpacing: '0.5px',
+                  }}>
+                    Cap Impact
+                  </div>
+                  <div style={{
+                    fontSize: 13,
+                    lineHeight: 1.5,
+                    color: isDark ? '#e2e8f0' : '#334155',
+                  }}>
+                    {gradeResult.cap_analysis}
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Draft Analysis */}
+            {gradeResult.draft_analysis && (
+              <div style={{
+                marginBottom: 16,
+                padding: 12,
+                borderRadius: 10,
+                backgroundColor: isDark ? '#1e1b4b' : '#f5f3ff',
+                border: `1px solid ${isDark ? '#3730a3' : '#c4b5fd'}`,
+                display: 'flex',
+                alignItems: 'flex-start',
+                gap: 10,
+              }}>
+                <span style={{ fontSize: 18, flexShrink: 0 }}>📋</span>
+                <div>
+                  <div style={{
+                    fontSize: 11,
+                    fontWeight: 700,
+                    color: isDark ? '#a5b4fc' : '#6366f1',
+                    marginBottom: 4,
+                    textTransform: 'uppercase',
+                    letterSpacing: '0.5px',
+                  }}>
+                    Draft Capital Analysis
+                  </div>
+                  <div style={{
+                    fontSize: 13,
+                    lineHeight: 1.5,
+                    color: isDark ? '#e2e8f0' : '#334155',
+                  }}>
+                    {gradeResult.draft_analysis}
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Reasoning */}
+            <div style={{
+              padding: 16,
+              borderRadius: 12,
+              backgroundColor: isDark ? '#111827' : '#f3f4f6',
+              fontSize: 13,
+              lineHeight: 1.6,
+              color: textColor,
+              marginBottom: 16,
+            }}>
+              {gradeResult.reasoning}
+            </div>
+
+            {/* Audit Report */}
+            {auditResult && (
+              <AuditReportCard
+                audit={auditResult}
+                gmGrade={gradeResult.grade}
+                isDark={isDark}
+              />
+            )}
+
+            {/* Action buttons */}
+            <div style={{ display: 'flex', gap: 10, justifyContent: 'center', flexWrap: 'wrap' }}>
+              <button
                 onClick={onNewTrade}
                 style={{
-                  width: '100%',
-                  padding: '12px 24px',
+                  padding: '12px 28px',
                   borderRadius: 10,
                   border: 'none',
                   backgroundColor: '#bc0000',
@@ -543,13 +782,187 @@ export function ThreeTeamTradeBoard({
                   fontWeight: 700,
                   fontSize: 14,
                   cursor: 'pointer',
-                  letterSpacing: '0.5px',
                 }}
               >
-                START NEW TRADE
-              </motion.button>
+                New Trade
+              </button>
+              {onEditTrade && (
+                <button
+                  onClick={onEditTrade}
+                  style={{
+                    padding: '12px 28px',
+                    borderRadius: 10,
+                    border: `2px solid ${borderColor}`,
+                    backgroundColor: 'transparent',
+                    color: textColor,
+                    fontWeight: 600,
+                    fontSize: 14,
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 6,
+                  }}
+                >
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" strokeLinecap="round" strokeLinejoin="round" />
+                    <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" strokeLinecap="round" strokeLinejoin="round" />
+                  </svg>
+                  Edit Trade
+                </button>
+              )}
+              {gradeResult.shared_code && !auditResult && (
+                <AuditButton
+                  tradeId={gradeResult.shared_code}
+                  onAuditComplete={setAuditResult}
+                  isDark={isDark}
+                />
+              )}
+              {gradeResult.shared_code && (
+                <>
+                  <button
+                    onClick={handleCopyLink}
+                    style={{
+                      padding: '12px 28px',
+                      borderRadius: 10,
+                      border: `2px solid ${copied ? '#22c55e' : borderColor}`,
+                      backgroundColor: copied ? '#22c55e10' : 'transparent',
+                      color: copied ? '#22c55e' : textColor,
+                      fontWeight: 600,
+                      fontSize: 14,
+                      cursor: 'pointer',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: 6,
+                      transition: 'all 0.2s',
+                    }}
+                  >
+                    {copied ? (
+                      <>
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#22c55e" strokeWidth="2.5">
+                          <path d="M20 6L9 17l-5-5" strokeLinecap="round" strokeLinejoin="round" />
+                        </svg>
+                        Copied!
+                      </>
+                    ) : (
+                      <>
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                          <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" strokeLinecap="round" strokeLinejoin="round" />
+                          <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" strokeLinecap="round" strokeLinejoin="round" />
+                        </svg>
+                        Copy Link
+                      </>
+                    )}
+                  </button>
+                  <button
+                    onClick={handleCreateImage}
+                    disabled={generatingImage}
+                    style={{
+                      padding: '12px 28px',
+                      borderRadius: 10,
+                      border: `2px solid ${borderColor}`,
+                      backgroundColor: generatingImage ? (isDark ? '#374151' : '#e5e7eb') : 'transparent',
+                      color: textColor,
+                      fontWeight: 600,
+                      fontSize: 14,
+                      cursor: generatingImage ? 'wait' : 'pointer',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: 6,
+                      opacity: generatingImage ? 0.7 : 1,
+                    }}
+                  >
+                    {generatingImage ? (
+                      <>
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" style={{ animation: 'spin 1s linear infinite' }}>
+                          <circle cx="12" cy="12" r="10" strokeOpacity="0.25" />
+                          <path d="M12 2a10 10 0 0 1 10 10" strokeLinecap="round" />
+                        </svg>
+                        Creating...
+                      </>
+                    ) : (
+                      <>
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                          <rect x="3" y="3" width="18" height="18" rx="2" ry="2" strokeLinecap="round" strokeLinejoin="round" />
+                          <circle cx="8.5" cy="8.5" r="1.5" fill="currentColor" />
+                          <polyline points="21 15 16 10 5 21" strokeLinecap="round" strokeLinejoin="round" />
+                        </svg>
+                        Create Image
+                      </>
+                    )}
+                  </button>
+                </>
+              )}
             </div>
-          )}
+
+            {/* Share Options Panel */}
+            <AnimatePresence>
+              {showShareOptions && generatedImageUrl && (
+                <motion.div
+                  initial={{ opacity: 0, height: 0 }}
+                  animate={{ opacity: 1, height: 'auto' }}
+                  exit={{ opacity: 0, height: 0 }}
+                  style={{
+                    marginTop: 16,
+                    padding: 20,
+                    borderRadius: 12,
+                    backgroundColor: isDark ? '#111827' : '#f3f4f6',
+                    border: `1px solid ${borderColor}`,
+                    overflow: 'hidden',
+                  }}
+                >
+                  <div style={{ textAlign: 'center', marginBottom: 12 }}>
+                    <div style={{ fontSize: 13, fontWeight: 600, color: textColor, marginBottom: 4 }}>
+                      Share your 3-team trade
+                    </div>
+                    <div style={{ fontSize: 11, color: subText }}>
+                      Download the image to share on social media
+                    </div>
+                  </div>
+
+                  {/* Generated Image Preview */}
+                  <div style={{ marginBottom: 16 }}>
+                    <div style={{
+                      borderRadius: 8,
+                      overflow: 'hidden',
+                      border: `1px solid ${borderColor}`,
+                      marginBottom: 12,
+                    }}>
+                      <img
+                        src={generatedImageUrl}
+                        alt="Trade grade"
+                        style={{ width: '100%', display: 'block' }}
+                      />
+                    </div>
+                    <button
+                      onClick={handleDownloadImage}
+                      style={{
+                        width: '100%',
+                        padding: '12px 20px',
+                        borderRadius: 8,
+                        border: 'none',
+                        backgroundColor: '#bc0000',
+                        color: '#fff',
+                        fontWeight: 600,
+                        fontSize: 14,
+                        cursor: 'pointer',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        gap: 8,
+                      }}
+                    >
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" strokeLinecap="round" strokeLinejoin="round" />
+                        <polyline points="7 10 12 15 17 10" strokeLinecap="round" strokeLinejoin="round" />
+                        <line x1="12" y1="15" x2="12" y2="3" strokeLinecap="round" strokeLinejoin="round" />
+                      </svg>
+                      Download Image
+                    </button>
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </div>
         </motion.div>
       )}
 
