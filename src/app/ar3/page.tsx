@@ -138,20 +138,16 @@ export default function AR3HelmetPage() {
         // Run face detection
         const results = faceLandmarker.detectForVideo(video, time);
 
-        // DEBUG: Show helmet with NO transformations to see its natural orientation
-        // Once we know which way it faces, we can add proper base rotation
+        // Helmet faces backwards by default - needs 180° Y rotation
+        const BASE_Y_ROTATION = Math.PI;  // 180 degrees
 
+        // Static test - verify helmet faces forward with base rotation
         helmetGroup.visible = true;
-        helmetGroup.position.set(0, 0, -3);  // Just in front of camera
-        helmetGroup.rotation.set(0, 0, 0);   // No rotation
-        helmetGroup.scale.set(0.5, 0.5, 0.5); // Reasonable size
+        helmetGroup.position.set(0, 0, -3);  // In front of camera
+        helmetGroup.rotation.y = BASE_Y_ROTATION;  // Face it forward
+        helmetGroup.scale.set(0.5, 0.5, 0.5);
 
-        // SKIP face tracking for now - just see the model
-        /*
-        if (results.faceLandmarks && results.faceLandmarks.length > 0) {
-          // ... face tracking code disabled for debug
-        }
-        */
+        // Face tracking disabled - just testing base orientation
 
         renderer.render(scene, camera);
       };
