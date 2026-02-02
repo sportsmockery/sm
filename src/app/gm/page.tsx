@@ -552,15 +552,20 @@ export default function GMPage() {
 
   // Handle adding a draft pick - shows destination picker in 3-team mode
   function handleAddDraftPick(pick: DraftPick, fromTeamKey: string, target: 'sent' | 'received' | 'team3') {
+    console.log('[handleAddDraftPick] called with:', { pick, fromTeamKey, target, tradeMode, hasOpponent: !!opponentTeam, hasThirdTeam: !!thirdTeam })
     if (tradeMode === '3-team' && opponentTeam && thirdTeam) {
       // Show destination picker
+      console.log('[handleAddDraftPick] 3-team mode - showing destination picker')
       setPendingPick({ pick, fromTeamKey })
       setShowDestinationPicker(true)
     } else {
       // 2-team mode - add directly based on explicit target
+      console.log('[handleAddDraftPick] 2-team mode - adding directly, target:', target)
       if (target === 'sent') {
+        console.log('[handleAddDraftPick] Adding to draftPicksSent')
         setDraftPicksSent(prev => [...prev, pick])
       } else if (target === 'received') {
+        console.log('[handleAddDraftPick] Adding to draftPicksReceived')
         setDraftPicksReceived(prev => [...prev, pick])
       }
     }
@@ -1763,7 +1768,7 @@ export default function GMPage() {
         excludeTeam={opponentTeam?.team_key}
       />
 
-      {/* Destination Picker (3-team trades) */}
+      {/* Destination Picker for Players (3-team trades) */}
       {pendingPlayer && (
         <DestinationPicker
           open={showDestinationPicker}
@@ -1793,6 +1798,39 @@ export default function GMPage() {
           teams={getTeamsForPicker()}
           playerName={pendingPlayer.player.full_name}
           assetType="player"
+        />
+      )}
+
+      {/* Destination Picker for Draft Picks (3-team trades) */}
+      {pendingPick && (
+        <DestinationPicker
+          open={showDestinationPicker}
+          onClose={() => {
+            setShowDestinationPicker(false)
+            setPendingPick(null)
+          }}
+          onSelect={handleDestinationSelect}
+          fromTeam={{
+            key: pendingPick.fromTeamKey,
+            name: pendingPick.fromTeamKey === selectedTeam
+              ? (TEAMS.find(t => t.key === selectedTeam)?.label || selectedTeam)
+              : pendingPick.fromTeamKey === opponentTeam?.team_key
+                ? opponentTeam?.team_name || ''
+                : thirdTeam?.team_name || '',
+            logo: pendingPick.fromTeamKey === selectedTeam
+              ? TEAMS.find(t => t.key === selectedTeam)?.logo || null
+              : pendingPick.fromTeamKey === opponentTeam?.team_key
+                ? opponentTeam?.logo_url || null
+                : thirdTeam?.logo_url || null,
+            color: pendingPick.fromTeamKey === selectedTeam
+              ? TEAMS.find(t => t.key === selectedTeam)?.color || '#666'
+              : pendingPick.fromTeamKey === opponentTeam?.team_key
+                ? opponentTeam?.primary_color || '#666'
+                : thirdTeam?.primary_color || '#666',
+          }}
+          teams={getTeamsForPicker()}
+          playerName={`${pendingPick.pick.year} Round ${pendingPick.pick.round} Pick`}
+          assetType="pick"
         />
       )}
 

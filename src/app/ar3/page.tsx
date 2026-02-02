@@ -191,9 +191,9 @@ export default function AR3HelmetPage() {
         const rz = detectState.rz;
 
         // Tuning - get helmet onto head properly
-        const Z = 4.6;          // bring helmet closer to face
-        const yOffset = 0.3;    // raise helmet up on head
-        const baseScale = 0.52; // slightly larger so it wraps the skull
+        const Z = 4.2;          // closer to face
+        const yOffset = 1.8;    // raise helmet much higher onto head
+        const baseScale = 0.48; // slightly smaller
 
         helmetGroup.position.set(
           x * Z,
@@ -201,8 +201,8 @@ export default function AR3HelmetPage() {
           -Z
         );
 
-        // Selfie mirroring via rotation only (no scale.x flip to preserve logo)
-        helmetGroup.rotation.set(rx, -ry, rz);
+        // Reduce roll sensitivity to fix crookedness
+        helmetGroup.rotation.set(rx, -ry, rz * 0.5);
 
         // No negative scale - keeps logo readable
         helmetGroup.scale.setScalar(baseScale * s);

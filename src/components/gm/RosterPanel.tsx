@@ -125,10 +125,14 @@ export function RosterPanel({
 
   // Handler for DraftPickList toggle
   const handleToggleDraftPick = (pick: DraftPick) => {
+    console.log('[RosterPanel.handleToggleDraftPick] called with pick:', pick)
     const existingIndex = draftPicks.findIndex(p => p.year === pick.year && p.round === pick.round)
+    console.log('[RosterPanel.handleToggleDraftPick] existingIndex:', existingIndex, 'draftPicks:', draftPicks)
     if (existingIndex >= 0) {
+      console.log('[RosterPanel.handleToggleDraftPick] Removing pick')
       onRemoveDraftPick(existingIndex)
     } else {
+      console.log('[RosterPanel.handleToggleDraftPick] Adding pick')
       onAddDraftPick(pick)
     }
   }

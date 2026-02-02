@@ -82,6 +82,7 @@ export function DraftPickList({
   }
 
   const handleToggle = (pick: AvailablePick) => {
+    console.log('[DraftPickList.handleToggle] called with pick:', pick)
     onToggle({ year: pick.year, round: pick.round, originalTeam: pick.originalTeam })
   }
 
