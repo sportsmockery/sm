@@ -109,9 +109,10 @@ export default function AR3HelmetPage() {
 
       scene = new THREE.Scene();
 
-      // Camera positioned to match video perspective
-      camera = new THREE.PerspectiveCamera(45, w / h, 0.1, 1000);
-      camera.position.set(0, 0, 0);
+      // Camera positioned to view objects in front
+      camera = new THREE.PerspectiveCamera(50, w / h, 0.1, 1000);
+      camera.position.set(0, 0, 5); // Camera 5 units back, looking at origin
+      camera.lookAt(0, 0, 0);
 
       console.log('Three.js camera setup:');
       console.log('  FOV:', camera.fov);
@@ -191,92 +192,100 @@ export default function AR3HelmetPage() {
         // Run face detection
         const results = faceLandmarker.detectForVideo(video, time);
 
-        // Log detection status periodically
-        if (frameCount % LOG_INTERVAL === 0) {
-          console.log(`\n>>> Frame ${frameCount}: Face detected = ${results.facialTransformationMatrixes?.length > 0}`);
-          if (results.faceLandmarks && results.faceLandmarks.length > 0) {
-            const landmarks = results.faceLandmarks[0];
-            // Key landmarks: 1=nose tip, 10=forehead, 152=chin, 168=between eyebrows
-            console.log('  Nose tip (1):', landmarks[1] ? `x:${landmarks[1].x.toFixed(4)} y:${landmarks[1].y.toFixed(4)} z:${landmarks[1].z.toFixed(4)}` : 'N/A');
-            console.log('  Forehead (10):', landmarks[10] ? `x:${landmarks[10].x.toFixed(4)} y:${landmarks[10].y.toFixed(4)} z:${landmarks[10].z.toFixed(4)}` : 'N/A');
+        // Check if we have face landmarks
+        if (results.faceLandmarks && results.faceLandmarks.length > 0) {
+          const landmarks = results.faceLandmarks[0];
+
+          // Key landmarks for position calculation
+          // 10 = forehead center, 152 = chin, 1 = nose tip
+          // 234 = right cheek, 454 = left cheek (for face width)
+          const forehead = landmarks[10];
+          const chin = landmarks[152];
+          const nose = landmarks[1];
+          const rightCheek = landmarks[234];
+          const leftCheek = landmarks[454];
+
+          // Calculate face center (between forehead and chin, slightly above nose)
+          const faceCenterX = (forehead.x + chin.x) / 2;
+          const faceCenterY = (forehead.y + chin.y) / 2;
+          const faceCenterZ = (forehead.z + chin.z) / 2;
+
+          // Calculate face width for scale
+          const faceWidth = Math.sqrt(
+            Math.pow(leftCheek.x - rightCheek.x, 2) +
+            Math.pow(leftCheek.y - rightCheek.y, 2) +
+            Math.pow(leftCheek.z - rightCheek.z, 2)
+          );
+
+          // MediaPipe landmarks are normalized 0-1, convert to 3D world coordinates
+          // Camera is at z=5 looking at origin, so objects should be around z=0 to z=-2
+          // X: 0-1 → -2 to 2 (and mirror for selfie view)
+          // Y: 0-1 → 2 to -2 (flip because screen Y is down, 3D Y is up)
+          // Z: depth (closer face = smaller Z landmark value = place closer to camera)
+          const screenX = -(faceCenterX - 0.5) * 4; // Mirror and scale to visible range
+          const screenY = -(faceCenterY - 0.5) * 4; // Flip and scale
+          const screenZ = -faceCenterZ * 3; // Z depth scaling (landmarks z is small, typically -0.1 to 0.1)
+
+          // Log landmark values periodically
+          if (frameCount % LOG_INTERVAL === 0) {
+            console.log(`\n>>> Frame ${frameCount}: Face detected via landmarks`);
+            console.log('  Raw forehead:', `x:${forehead.x.toFixed(4)} y:${forehead.y.toFixed(4)} z:${forehead.z.toFixed(4)}`);
+            console.log('  Raw nose:', `x:${nose.x.toFixed(4)} y:${nose.y.toFixed(4)} z:${nose.z.toFixed(4)}`);
+            console.log('  Face center:', `x:${faceCenterX.toFixed(4)} y:${faceCenterY.toFixed(4)} z:${faceCenterZ.toFixed(4)}`);
+            console.log('  Face width:', faceWidth.toFixed(4));
+            console.log('  Screen coords:', `x:${screenX.toFixed(4)} y:${screenY.toFixed(4)} z:${screenZ.toFixed(4)}`);
           }
-        }
 
-        // Use facialTransformationMatrixes for robust 6DoF tracking
-        if (results.facialTransformationMatrixes && results.facialTransformationMatrixes.length > 0) {
-          const matrixData = results.facialTransformationMatrixes[0].data; // 16-element array (row-major 4x4)
+          // Calculate rotation from landmarks
+          // Pitch (nodding): angle between forehead-chin line and vertical
+          const faceHeightVec = new THREE.Vector3(
+            chin.x - forehead.x,
+            chin.y - forehead.y,
+            chin.z - forehead.z
+          ).normalize();
 
-          debugLog('RAW MATRIX DATA (row-major)', {
-            matrix: Array.from(matrixData)
+          // Yaw (turning): angle from nose to face center
+          const noseOffsetX = nose.x - faceCenterX;
+
+          // Roll (tilting): angle of the cheek-to-cheek line
+          const cheekVec = new THREE.Vector3(
+            leftCheek.x - rightCheek.x,
+            leftCheek.y - rightCheek.y,
+            leftCheek.z - rightCheek.z
+          );
+
+          // Calculate Euler angles
+          const pitch = Math.asin(-faceHeightVec.z) * 0.8; // Dampen
+          const yaw = noseOffsetX * Math.PI * 2; // Convert offset to angle, mirror
+          const roll = Math.atan2(cheekVec.y, cheekVec.x); // Tilt angle
+
+          // Scale based on face width (larger face = closer = bigger helmet)
+          const baseScale = 2.5; // Base scale for helmet
+          const depthScale = faceWidth * 8; // Scale factor from face width
+          const finalScale = baseScale * depthScale;
+
+          debugLog('LANDMARK-BASED TRACKING', {
+            screenPosition: new THREE.Vector3(screenX, screenY, screenZ),
+            rotation: { pitch: pitch * 180/Math.PI, yaw: yaw * 180/Math.PI, roll: roll * 180/Math.PI },
+            faceWidth: faceWidth,
+            scale: finalScale
           });
 
-          // Create Three.js Matrix4 (column-major: transpose MediaPipe row-major)
-          const faceMatrix = new THREE.Matrix4().fromArray(matrixData).transpose();
-
-          // Extract raw values before any transforms
-          const rawPos = new THREE.Vector3();
-          const rawQuat = new THREE.Quaternion();
-          const rawScale = new THREE.Vector3();
-          faceMatrix.decompose(rawPos, rawQuat, rawScale);
-
-          debugLog('AFTER TRANSPOSE (before transforms)', {
-            position: rawPos,
-            quaternion: rawQuat,
-            scale: rawScale
-          });
-
-          // Mirror for selfie: flip X (since video mirrored, canvas not)
-          const mirrorMatrix = new THREE.Matrix4().makeScale(-1, 1, 1);
-          faceMatrix.multiply(mirrorMatrix);
-
-          // Coord conversion: MediaPipe (y down, z away) to Three.js (y up, z out)
-          // Flip Y and Z signs
-          const coordMatrix = new THREE.Matrix4().makeScale(1, -1, -1);
-          faceMatrix.multiply(coordMatrix);
-
-          // Decompose: extract position, quaternion (for rotation), scale
-          const position = new THREE.Vector3();
-          const quaternion = new THREE.Quaternion();
-          const scaleVec = new THREE.Vector3();
-          faceMatrix.decompose(position, quaternion, scaleVec);
-
-          debugLog('AFTER ALL TRANSFORMS', {
-            position: position,
-            quaternion: quaternion,
-            scale: scaleVec
-          });
-
-          // Uniform scale: average (matrix assumes uniform; helmet is rigid)
-          const uniformScale = (scaleVec.x + scaleVec.y + scaleVec.z) / 3 * 1.2; // Slight boost for helmet fit
-
-          // Apply to helmetGroup
-          helmetGroup.position.copy(position);
-          helmetGroup.quaternion.copy(quaternion);
-          helmetGroup.scale.set(uniformScale, uniformScale, uniformScale);
-
-          // Offsets: Matrix centers on face surface; adjust for helmet
-          // Up Y for crown, back Z to enclose head (units ~1-2 for face width)
-          helmetGroup.position.y += 0.25; // Raise for crown
-          helmetGroup.position.z -= 0.15; // Push deeper on head
-
-          // Fix backwards: Rotate 180° Y if facemask faces user (common GLTF +Z forward issue)
-          helmetGroup.rotation.y += Math.PI;
-
+          // Apply to helmet
+          helmetGroup.position.set(screenX, screenY + 0.3, screenZ); // Offset Y up for crown
+          helmetGroup.rotation.set(
+            pitch,           // Pitch (nodding)
+            -yaw + Math.PI,  // Yaw (turning) + 180° to face camera
+            -roll + Math.PI/2 // Roll (tilting)
+          );
+          helmetGroup.scale.setScalar(finalScale);
           helmetGroup.visible = true;
 
-          // Log final helmet transform
-          debugLog('FINAL HELMET TRANSFORM', {
-            position: helmetGroup.position,
-            rotation: helmetGroup.rotation,
-            scale: helmetGroup.scale.x,
-            visible: helmetGroup.visible
-          });
-
-          // Update on-screen debug info (every 10 frames)
+          // Update on-screen debug info
           if (frameCount % 10 === 0) {
             setDebugInfo(
-              `Pos: (${position.x.toFixed(2)}, ${position.y.toFixed(2)}, ${position.z.toFixed(2)}) | ` +
-              `Scale: ${uniformScale.toFixed(3)} | ` +
+              `Pos: (${screenX.toFixed(2)}, ${screenY.toFixed(2)}, ${screenZ.toFixed(2)}) | ` +
+              `Scale: ${finalScale.toFixed(3)} | FaceW: ${faceWidth.toFixed(3)} | ` +
               `Frame: ${frameCount}`
             );
           }
@@ -284,7 +293,10 @@ export default function AR3HelmetPage() {
         } else {
           helmetGroup.visible = false;
           if (frameCount % LOG_INTERVAL === 0) {
-            console.log('  No face matrix available');
+            console.log(`>>> Frame ${frameCount}: No face detected`);
+          }
+          if (frameCount % 10 === 0) {
+            setDebugInfo('No face detected - Frame: ' + frameCount);
           }
         }
 
