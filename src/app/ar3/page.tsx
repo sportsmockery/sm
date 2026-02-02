@@ -138,16 +138,51 @@ export default function AR3HelmetPage() {
         // Run face detection
         const results = faceLandmarker.detectForVideo(video, time);
 
-        // Helmet faces backwards by default - needs 180° Y rotation
-        const BASE_Y_ROTATION = Math.PI;  // 180 degrees
+        // Base rotation confirmed: helmet needs 180° Y to face forward
+        const BASE_Y_ROTATION = Math.PI;
 
-        // Static test - verify helmet faces forward with base rotation
-        helmetGroup.visible = true;
-        helmetGroup.position.set(0, 0, -3);  // In front of camera
-        helmetGroup.rotation.y = BASE_Y_ROTATION;  // Face it forward
-        helmetGroup.scale.set(0.5, 0.5, 0.5);
+        if (results.faceLandmarks && results.faceLandmarks.length > 0) {
+          const landmarks = results.faceLandmarks[0];
 
-        // Face tracking disabled - just testing base orientation
+          // Key landmarks for head position
+          const forehead = landmarks[10];   // Top of forehead
+          const noseTip = landmarks[1];     // Nose tip
+          const chin = landmarks[152];      // Chin
+
+          // Calculate head center
+          const headCenterX = (forehead.x + chin.x) / 2;
+          const headCenterY = (forehead.y + chin.y) / 2;
+          const headCenterZ = (forehead.z + chin.z) / 2;
+
+          // Convert MediaPipe coords to Three.js coords
+          const worldX = (headCenterX - 0.5) * -4;
+          const worldY = (headCenterY - 0.5) * -3;
+          const worldZ = -2 - headCenterZ * 5;
+
+          // Calculate head size for scale
+          const headHeight = Math.abs(forehead.y - chin.y);
+          const scale = headHeight * 3.5;
+
+          // Calculate rotation from landmarks
+          const foreheadCenter = landmarks[168];
+          const leftCheek = landmarks[234];
+          const rightCheek = landmarks[454];
+          const leftEye = landmarks[33];
+          const rightEye = landmarks[263];
+
+          const yaw = Math.atan2(leftCheek.z - rightCheek.z, leftCheek.x - rightCheek.x);
+          const pitch = Math.atan2(noseTip.y - foreheadCenter.y, noseTip.z - foreheadCenter.z) - Math.PI/2;
+          const roll = Math.atan2(rightEye.y - leftEye.y, rightEye.x - leftEye.x);
+
+          // Apply to helmet with BASE rotation
+          helmetGroup.visible = true;
+          helmetGroup.position.set(worldX, worldY + 0.3, worldZ);
+          helmetGroup.rotation.set(pitch, BASE_Y_ROTATION + yaw, roll);
+          helmetGroup.scale.set(scale, scale, scale);
+
+        } else {
+          helmetGroup.visible = false;
+        }
 
         renderer.render(scene, camera);
       };
