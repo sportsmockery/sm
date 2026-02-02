@@ -33,7 +33,7 @@ export default function AR3HelmetPage() {
     let videoAspect = 1;
 
     const init = async () => {
-      console.log('========== AR3 v45 INIT START ==========');
+      console.log('========== AR3 v46 INIT START ==========');
       const video = videoRef.current;
       const canvas = canvasRef.current;
       if (!video || !canvas) {
@@ -227,7 +227,7 @@ export default function AR3HelmetPage() {
       }
 
       setStatus('Ready! Look at camera');
-      console.log('========== AR3 v45 INIT COMPLETE ==========');
+      console.log('========== AR3 v46 INIT COMPLETE ==========');
 
       // Step 5: Animation loop
       let frameCount = 0;
@@ -243,69 +243,78 @@ export default function AR3HelmetPage() {
 
         let tracked = false;
 
-        // PRIMARY: Use matrix for 6DoF pose
-        if (results.facialTransformationMatrixes && results.facialTransformationMatrixes.length > 0) {
-          const matrixData = results.facialTransformationMatrixes[0].data;
+        // Use face landmarks for position, matrix for rotation
+        if (results.faceLandmarks && results.faceLandmarks.length > 0) {
+          const lm = results.faceLandmarks[0];
 
-          // MediaPipe matrix is row-major 4x4 with translation in BOTTOM ROW:
-          // [r00,r01,r02,0, r10,r11,r12,0, r20,r21,r22,0, tx,ty,tz,1]
-          // Translation is at indices 12, 13, 14 (NOT 3, 7, 11!)
-          const rawX = matrixData[12];
-          const rawY = matrixData[13];
-          const rawZ = matrixData[14];
+          // Get face position from landmarks (normalized 0-1)
+          const nose = lm[1];
+          const forehead = lm[10];
+          const leftCheek = lm[454];
+          const rightCheek = lm[234];
 
-          // Convert MediaPipe coords to Three.js:
-          // MediaPipe: +X right, +Y down, +Z away from camera
-          // Three.js: +X right, +Y up, +Z toward camera
-          // Also mirror X for selfie view
-          const posX = -rawX;      // Mirror for selfie
-          const posY = -rawY;      // Flip Y (down to up)
-          const posZ = -rawZ - 0.6; // Flip Z + push back (target -0.5 to -0.7 range)
+          // Face center X/Y from nose, adjusted for forehead
+          const cx = nose.x;
+          const cy = forehead.y + 0.02; // Slightly above forehead for helmet crown
 
-          // Extract rotation from matrix (upper-left 3x3)
-          const rotMatrix = new THREE.Matrix4().fromArray([
-            matrixData[0], matrixData[1], matrixData[2], 0,
-            matrixData[4], matrixData[5], matrixData[6], 0,
-            matrixData[8], matrixData[9], matrixData[10], 0,
-            0, 0, 0, 1
-          ]).transpose(); // Transpose for Three.js column-major
+          // Convert to NDC with mirror for selfie
+          const ndcX = -(cx - 0.5) * 2;
+          const posX = ndcX * videoAspect;
+          const posY = -(cy - 0.5) * 2;
 
-          // Apply coordinate conversion to rotation
-          const coordConvert = new THREE.Matrix4().makeScale(1, -1, -1);
-          const mirrorConvert = new THREE.Matrix4().makeScale(-1, 1, 1);
-          rotMatrix.premultiply(coordConvert);
-          rotMatrix.multiply(mirrorConvert);
+          // Depth from face Z (average of key points)
+          const avgZ = (nose.z + forehead.z + lm[152].z) / 3;
+          const posZ = avgZ * -5 - 0.5; // Scale and offset for Z
 
-          // Extract quaternion from converted rotation matrix
-          const quat = new THREE.Quaternion().setFromRotationMatrix(rotMatrix);
+          // Face width for scale
+          const faceWidth = Math.abs(leftCheek.x - rightCheek.x);
+          const uniformScl = Math.max(1.0, Math.min(1.5, faceWidth * 8));
 
-          // Apply 180° Y rotation to face forward (helmet facemask toward camera)
-          const flipQuat = new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0, 1, 0), Math.PI);
-          quat.premultiply(flipQuat);
+          // Try to get rotation from matrix if available
+          let quat = new THREE.Quaternion();
+          if (results.facialTransformationMatrixes && results.facialTransformationMatrixes.length > 0) {
+            const matrixData = results.facialTransformationMatrixes[0].data;
 
-          // Scale: Use face width from landmarks if available, otherwise fixed
-          // Benchmark: *8 boost gives Scl ~1.2-1.5 for typical faceWidth ~0.1-0.2
-          let uniformScl = 1.2;
-          if (results.faceLandmarks && results.faceLandmarks.length > 0) {
-            const lm = results.faceLandmarks[0];
-            const faceWidth = Math.abs(lm[454].x - lm[234].x);
-            uniformScl = faceWidth * 8; // *8 boost for target 1.2-1.5
+            // Extract rotation from matrix (upper-left 3x3)
+            const rotMatrix = new THREE.Matrix4().fromArray([
+              matrixData[0], matrixData[1], matrixData[2], 0,
+              matrixData[4], matrixData[5], matrixData[6], 0,
+              matrixData[8], matrixData[9], matrixData[10], 0,
+              0, 0, 0, 1
+            ]).transpose();
+
+            // Coordinate conversion
+            const coordConvert = new THREE.Matrix4().makeScale(1, -1, -1);
+            const mirrorConvert = new THREE.Matrix4().makeScale(-1, 1, 1);
+            rotMatrix.premultiply(coordConvert);
+            rotMatrix.multiply(mirrorConvert);
+
+            quat.setFromRotationMatrix(rotMatrix);
+
+            // Apply 180° Y rotation for facemask forward
+            const flipQuat = new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0, 1, 0), Math.PI);
+            quat.premultiply(flipQuat);
+          } else {
+            // Fallback rotation from landmarks
+            const pitch = Math.atan2(lm[152].z - forehead.z, lm[152].y - forehead.y) * 0.5;
+            const yaw = (nose.x - cx) * -4;
+            const roll = Math.atan2(leftCheek.y - rightCheek.y, leftCheek.x - rightCheek.x);
+            quat.setFromEuler(new THREE.Euler(pitch, Math.PI + yaw, -roll, 'YXZ'));
           }
 
-          // Apply transforms with tuned offsets
-          // posY * 2 + 0.05 for on-head placement (reduced from 0.2)
-          helmetModel.position.set(posX * 2, posY * 2 + 0.05, posZ);
+          // Apply transforms
+          helmetModel.position.set(posX, posY, posZ);
           helmetModel.quaternion.copy(quat);
-          helmetModel.scale.setScalar(Math.max(1.0, Math.min(1.5, uniformScl))); // Clamp 1.0-1.5 per test criteria
+          helmetModel.scale.setScalar(uniformScl);
 
           tracked = true;
 
           if (frameCount % 15 === 0) {
-            console.log(`Frame ${frameCount} [MATRIX]: Raw(${rawX.toFixed(3)},${rawY.toFixed(3)},${rawZ.toFixed(3)}) → Pos(${posX.toFixed(3)},${posY.toFixed(3)},${posZ.toFixed(3)}), Scl ${uniformScl.toFixed(3)}`);
+            console.log(`Frame ${frameCount}: Pos(${posX.toFixed(2)},${posY.toFixed(2)},${posZ.toFixed(2)}), Scl ${uniformScl.toFixed(2)}, FaceW ${faceWidth.toFixed(3)}`);
           }
 
-        // FALLBACK: Use landmarks with depth calculation
-        } else if (results.faceLandmarks && results.faceLandmarks.length > 0) {
+        // No face detected
+        } else if (false) { // Disabled old fallback
           const lm = results.faceLandmarks[0];
 
           const nose = lm[1];
@@ -483,7 +492,7 @@ export default function AR3HelmetPage() {
         maxWidth: '90%',
       }}>
         <div style={{ marginBottom: 5, color: '#ff0', fontWeight: 'bold' }}>
-          AR3 v45 - Trans[12-14], Lights+
+          AR3 v46 - Landmarks+Matrix Hybrid
         </div>
         <div>{debugInfo || 'Initializing...'}</div>
       </div>
