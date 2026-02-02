@@ -184,27 +184,45 @@ export default function AR3HelmetPage() {
         helmetGroup.visible = true;
 
         const s = detectState.s;
-        const x = detectState.x;
-        const y = detectState.y;
+        const x = detectState.x;  // -1 to 1 viewport coords
+        const y = detectState.y;  // -1 to 1 viewport coords
         const rx = detectState.rx;
         const ry = detectState.ry;
         const rz = detectState.rz;
 
-        // Face tracking coordinate: +Z comes FORWARD out of head
-        // To wrap helmet AROUND head, use POSITIVE Z to push BACK into head
-        const zBackIntoHead = 0.3;    // positive = back into/behind face
-        const yOffset = -0.1;         // negative = down slightly
-        const xyScale = 1.0;          // scale for x/y tracking
-        const baseScale = 0.65;       // helmet size
+        // Convert 2D viewport coords to 3D world coords using camera FOV
+        // Camera: FOV=40deg, position=(0,0,5), looking at origin
+        const fovRad = (40 * Math.PI) / 180;
+        const aspect = window.innerWidth / window.innerHeight;
+
+        // Estimate depth from face scale (s): larger s = closer = smaller depth
+        // s is typically ~0.3-0.5 for normal distance, ~0.7-1.0 for close
+        const baseDepth = 3.0;        // base distance from camera to face
+        const depthFromScale = baseDepth / (s * 1.5 + 0.5); // inverse relationship
+
+        // Project viewport coords to world coords at estimated depth
+        const halfHeight = depthFromScale * Math.tan(fovRad / 2);
+        const halfWidth = halfHeight * aspect;
+
+        const worldX = x * halfWidth;
+        const worldY = y * halfHeight;
+        const worldZ = 5 - depthFromScale; // camera is at z=5, face is in front
+
+        // Offset to put helmet ON head (slightly back and up)
+        const yOffset = 0.15;
+        const zOffset = 0.1; // push slightly toward camera (helmet wraps head)
 
         helmetGroup.position.set(
-          x * xyScale,
-          y * xyScale + yOffset,
-          zBackIntoHead               // POSITIVE pushes back into head
+          worldX,
+          worldY + yOffset,
+          worldZ + zOffset
         );
 
         helmetGroup.rotation.set(rx, -ry, rz);
-        helmetGroup.scale.setScalar(baseScale * s);
+
+        // Scale helmet based on face size
+        const baseScale = 0.5;
+        helmetGroup.scale.setScalar(baseScale * s * 2);
 
         threeRenderer.render(threeScene, threeCamera);
       };
