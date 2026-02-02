@@ -3,303 +3,236 @@
 import { useEffect, useRef, useState } from 'react';
 import * as THREE from 'three';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
-
-declare global {
-  interface Window {
-    WEBARROCKSFACE: any;
-  }
-}
+import { FaceLandmarker, FilesetResolver } from '@mediapipe/tasks-vision';
 
 export default function AR3HelmetPage() {
   const videoRef = useRef<HTMLVideoElement | null>(null);
-  const webarCanvasRef = useRef<HTMLCanvasElement | null>(null);
-  const threeCanvasRef = useRef<HTMLCanvasElement | null>(null);
+  const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const [status, setStatus] = useState('Initializing...');
 
   useEffect(() => {
-    let threeRenderer: THREE.WebGLRenderer | null = null;
-    let threeScene: THREE.Scene | null = null;
-    let threeCamera: THREE.PerspectiveCamera | null = null;
+    let renderer: THREE.WebGLRenderer | null = null;
+    let scene: THREE.Scene | null = null;
+    let camera: THREE.PerspectiveCamera | null = null;
     let helmetGroup: THREE.Group | null = null;
-    let gltfHelmet: THREE.Object3D | null = null;
+    let faceLandmarker: FaceLandmarker | null = null;
+    let animationId: number | null = null;
     let isDestroyed = false;
-    let mediaStream: MediaStream | null = null;
 
     const init = async () => {
       const video = videoRef.current;
-      const webarCanvas = webarCanvasRef.current;
-      const threeCanvas = threeCanvasRef.current;
-      if (!video || !webarCanvas || !threeCanvas) return;
+      const canvas = canvasRef.current;
+      if (!video || !canvas) return;
 
-      // Step 1: Get camera stream FIRST and display it
-      setStatus('Requesting camera access...');
+      // Step 1: Get camera stream
+      setStatus('Requesting camera...');
       try {
-        mediaStream = await navigator.mediaDevices.getUserMedia({
-          video: {
-            facingMode: 'user',
-            width: { ideal: 1280 },
-            height: { ideal: 720 }
-          },
+        const stream = await navigator.mediaDevices.getUserMedia({
+          video: { facingMode: 'user', width: { ideal: 1280 }, height: { ideal: 720 } },
           audio: false
         });
-        video.srcObject = mediaStream;
+        video.srcObject = stream;
         await video.play();
-        console.log('Camera stream started');
       } catch (err) {
-        console.error('Camera access error:', err);
+        console.error('Camera error:', err);
         setStatus('Camera access denied');
         return;
       }
 
-      // Step 2: Load WebAR.rocks.face script
-      setStatus('Loading face tracking...');
-      if (!window.WEBARROCKSFACE) {
-        await new Promise<void>((resolve, reject) => {
-          const s = document.createElement('script');
-          s.src = '/webarrocks/WebARRocksFace.js';
-          s.async = true;
-          s.onload = () => resolve();
-          s.onerror = () => reject(new Error('Failed to load WebARRocksFace'));
-          document.head.appendChild(s);
+      // Step 2: Initialize MediaPipe Face Landmarker
+      setStatus('Loading face detection...');
+      try {
+        const vision = await FilesetResolver.forVisionTasks(
+          'https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@latest/wasm'
+        );
+        faceLandmarker = await FaceLandmarker.createFromOptions(vision, {
+          baseOptions: {
+            modelAssetPath: 'https://storage.googleapis.com/mediapipe-models/face_landmarker/face_landmarker/float16/1/face_landmarker.task',
+            delegate: 'GPU'
+          },
+          runningMode: 'VIDEO',
+          numFaces: 1,
+          outputFaceBlendshapes: false,
+          outputFacialTransformationMatrixes: true // Get 3D transform matrix
         });
-      }
-
-      const WEBARROCKSFACE = window.WEBARROCKSFACE;
-      if (!WEBARROCKSFACE) {
-        console.error('WEBARROCKSFACE not available');
-        setStatus('Face tracking failed to load');
+      } catch (err) {
+        console.error('MediaPipe error:', err);
+        setStatus('Face detection failed to load');
         return;
       }
 
-      // Set canvas sizes
-      webarCanvas.width = 640;
-      webarCanvas.height = 480;
-      threeCanvas.width = window.innerWidth;
-      threeCanvas.height = window.innerHeight;
+      // Step 3: Setup Three.js
+      const w = window.innerWidth;
+      const h = window.innerHeight;
 
-      // Initialize Three.js
-      const initThree = () => {
-        const w = window.innerWidth;
-        const h = window.innerHeight;
+      renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: true });
+      renderer.setSize(w, h);
+      renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+      renderer.setClearColor(0x000000, 0);
 
-        threeRenderer = new THREE.WebGLRenderer({
-          canvas: threeCanvas,
-          alpha: true,
-          antialias: true
-        });
-        threeRenderer.setSize(w, h);
-        threeRenderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-        threeRenderer.setClearColor(0x000000, 0); // Transparent
+      scene = new THREE.Scene();
 
-        threeScene = new THREE.Scene();
+      // Camera positioned to match video perspective
+      camera = new THREE.PerspectiveCamera(45, w / h, 0.1, 1000);
+      camera.position.set(0, 0, 0);
 
-        threeCamera = new THREE.PerspectiveCamera(40, w / h, 0.1, 100);
-        threeCamera.position.set(0, 0, 5);
+      // Lighting
+      const ambientLight = new THREE.AmbientLight(0xffffff, 0.8);
+      scene.add(ambientLight);
+      const directionalLight = new THREE.DirectionalLight(0xffffff, 1.2);
+      directionalLight.position.set(0.5, 1, 2);
+      scene.add(directionalLight);
 
-        // Lighting
-        const ambientLight = new THREE.AmbientLight(0xffffff, 0.8);
-        threeScene.add(ambientLight);
+      // Create helmet group
+      helmetGroup = new THREE.Group();
+      scene.add(helmetGroup);
 
-        const directionalLight = new THREE.DirectionalLight(0xffffff, 1.2);
-        directionalLight.position.set(0.5, 1, 2);
-        threeScene.add(directionalLight);
-
-        const backLight = new THREE.DirectionalLight(0xffffff, 0.5);
-        backLight.position.set(-0.5, -1, -2);
-        threeScene.add(backLight);
-
-        // Create helmet group
-        helmetGroup = new THREE.Group();
-        threeScene.add(helmetGroup);
-
-        // Load helmet model
-        const loader = new GLTFLoader();
+      // Step 4: Load helmet model
+      setStatus('Loading helmet...');
+      const loader = new GLTFLoader();
+      await new Promise<void>((resolve, reject) => {
         loader.load(
           '/ar/SM_v8.glb',
           (gltf) => {
             if (isDestroyed) return;
+            const helmet = gltf.scene;
 
-            gltfHelmet = gltf.scene;
+            // Face forward (toward camera)
+            helmet.rotation.set(0, Math.PI, 0);
 
-            // Ensure the front (logo side) faces the camera
-            gltfHelmet.rotation.set(0, Math.PI, 0);
-
-            // Nudge whole helmet slightly toward camera
-            gltfHelmet.position.set(0, 0, 0.25);
-
-            // If the logo is a separate mesh, make sure it's visible
-            gltfHelmet.traverse((child) => {
+            helmet.traverse((child) => {
               if ((child as THREE.Mesh).isMesh) {
                 const mesh = child as THREE.Mesh;
-                mesh.frustumCulled = false;   // prevent clipping of logo
-                mesh.visible = true;
-                if (mesh.name.toLowerCase().includes('logo')) {
-                  mesh.renderOrder = 2;       // draw on top if needed
-                }
-                // Ensure textures render properly
+                mesh.frustumCulled = false;
                 if (mesh.material) {
                   (mesh.material as THREE.MeshStandardMaterial).side = THREE.DoubleSide;
-                  (mesh.material as THREE.MeshStandardMaterial).needsUpdate = true;
                 }
               }
             });
 
-            gltfHelmet.scale.setScalar(1.0);
-            helmetGroup!.add(gltfHelmet);
-
-            console.log('Helmet loaded successfully');
-            setStatus('Face tracking ready');
+            helmetGroup!.add(helmet);
+            resolve();
           },
           (progress) => {
-            const pct = (progress.loaded / progress.total * 100).toFixed(0);
+            const pct = ((progress.loaded / progress.total) * 100).toFixed(0);
             setStatus(`Loading helmet: ${pct}%`);
           },
           (err) => {
             console.error('Helmet load error:', err);
-            setStatus('Failed to load helmet');
+            reject(err);
           }
         );
-      };
-
-      // WebAR.rocks callbacks
-      const callbackReady = (errCode: number) => {
-        if (errCode) {
-          console.error('WEBARROCKSFACE init error:', errCode);
-          setStatus('Face tracking error');
-          return;
-        }
-        console.log('WebARRocksFace initialized');
-        initThree();
-      };
-
-      const callbackTrack = (detectState: any) => {
-        if (isDestroyed || !helmetGroup || !gltfHelmet || !threeRenderer || !threeScene || !threeCamera) return;
-
-        if (!detectState.detected || detectState.detected < 0.5) {
-          helmetGroup.visible = false;
-          threeRenderer.render(threeScene, threeCamera);
-          return;
-        }
-
-        helmetGroup.visible = true;
-
-        const s = detectState.s;
-        const x = detectState.x;  // -1 to 1 viewport coords
-        const y = detectState.y;  // -1 to 1 viewport coords
-        const rx = detectState.rx;
-        const ry = detectState.ry;
-        const rz = detectState.rz;
-
-        // Convert 2D viewport coords to 3D world coords using camera FOV
-        // Camera: FOV=40deg, position=(0,0,5), looking at origin
-        const fovRad = (40 * Math.PI) / 180;
-        const aspect = window.innerWidth / window.innerHeight;
-
-        // Estimate depth from face scale (s): larger s = closer = smaller depth
-        // s is typically ~0.3-0.5 for normal distance, ~0.7-1.0 for close
-        const baseDepth = 3.0;        // base distance from camera to face
-        const depthFromScale = baseDepth / (s * 1.5 + 0.5); // inverse relationship
-
-        // Project viewport coords to world coords at estimated depth
-        const halfHeight = depthFromScale * Math.tan(fovRad / 2);
-        const halfWidth = halfHeight * aspect;
-
-        const worldX = x * halfWidth;
-        const worldY = y * halfHeight;
-        const worldZ = 5 - depthFromScale; // camera is at z=5, face is in front
-
-        // Offset to put helmet ON head (slightly back and up)
-        const yOffset = 0.15;
-        const zOffset = 0.1; // push slightly toward camera (helmet wraps head)
-
-        helmetGroup.position.set(
-          worldX,
-          worldY + yOffset,
-          worldZ + zOffset
-        );
-
-        helmetGroup.rotation.set(rx, -ry, rz);
-
-        // Scale helmet based on face size
-        const baseScale = 0.5;
-        helmetGroup.scale.setScalar(baseScale * s * 2);
-
-        threeRenderer.render(threeScene, threeCamera);
-      };
-
-      // Initialize WebAR.rocks with video element
-      setStatus('Initializing face tracking...');
-
-      WEBARROCKSFACE.init({
-        canvas: webarCanvas,
-        videoElement: video,  // Use existing video element with stream
-        NNCPath: '/webarrocks/neuralNets/NN_FACE_2.json',
-        callbackReady,
-        callbackTrack
       });
+
+      setStatus('Face tracking ready');
+
+      // Step 5: Animation loop with MediaPipe face detection
+      let lastTime = 0;
+      const animate = (time: number) => {
+        if (isDestroyed) return;
+        animationId = requestAnimationFrame(animate);
+
+        if (!faceLandmarker || !video || !renderer || !scene || !camera || !helmetGroup) return;
+        if (video.readyState < 2) return; // Video not ready
+
+        // Run face detection
+        const results = faceLandmarker.detectForVideo(video, time);
+
+        if (results.faceLandmarks && results.faceLandmarks.length > 0) {
+          const landmarks = results.faceLandmarks[0];
+
+          // Get key landmarks for head position
+          // 10 = top of head, 152 = chin, 1 = nose tip, 168 = forehead center
+          const forehead = landmarks[10];   // Top of forehead
+          const noseTip = landmarks[1];     // Nose tip
+          const chin = landmarks[152];      // Chin
+
+          // Calculate head center (between forehead and chin)
+          const headCenterX = (forehead.x + chin.x) / 2;
+          const headCenterY = (forehead.y + chin.y) / 2;
+          const headCenterZ = (forehead.z + chin.z) / 2;
+
+          // MediaPipe coords: x,y are 0-1 (normalized image coords), z is depth in meters
+          // Convert to Three.js coords (centered, y-flipped)
+          const worldX = (headCenterX - 0.5) * -4;  // Center and flip for mirror
+          const worldY = (headCenterY - 0.5) * -3;  // Center and flip (y is inverted)
+          const worldZ = -2 - headCenterZ * 5;      // Push back from camera
+
+          // Calculate head size from landmarks for scale
+          const headHeight = Math.abs(forehead.y - chin.y);
+          const scale = headHeight * 3.5;
+
+          // Calculate rotation from face orientation
+          // Use nose and forehead to estimate pitch/yaw
+          const foreheadCenter = landmarks[168]; // Between eyebrows
+
+          // Yaw (left/right turn)
+          const leftCheek = landmarks[234];
+          const rightCheek = landmarks[454];
+          const yaw = Math.atan2(leftCheek.z - rightCheek.z, leftCheek.x - rightCheek.x);
+
+          // Pitch (up/down nod)
+          const pitch = Math.atan2(noseTip.y - foreheadCenter.y, noseTip.z - foreheadCenter.z) - Math.PI/2;
+
+          // Roll (head tilt)
+          const leftEye = landmarks[33];
+          const rightEye = landmarks[263];
+          const roll = Math.atan2(rightEye.y - leftEye.y, rightEye.x - leftEye.x);
+
+          // Apply to helmet
+          helmetGroup.visible = true;
+          helmetGroup.position.set(worldX, worldY + 0.3, worldZ);
+          helmetGroup.rotation.set(pitch, -yaw, -roll);
+          helmetGroup.scale.setScalar(scale);
+
+        } else {
+          helmetGroup.visible = false;
+        }
+
+        renderer.render(scene, camera);
+      };
+
+      animationId = requestAnimationFrame(animate);
 
       // Handle resize
       const handleResize = () => {
         const w = window.innerWidth;
         const h = window.innerHeight;
-
-        webarCanvas.width = w;
-        webarCanvas.height = h;
-        threeCanvas.width = w;
-        threeCanvas.height = h;
-
-        if (threeRenderer && threeCamera) {
-          threeRenderer.setSize(w, h);
-          threeCamera.aspect = w / h;
-          threeCamera.updateProjectionMatrix();
-        }
-
-        if (WEBARROCKSFACE.resize) {
-          WEBARROCKSFACE.resize();
+        if (renderer && camera) {
+          renderer.setSize(w, h);
+          camera.aspect = w / h;
+          camera.updateProjectionMatrix();
         }
       };
-
       window.addEventListener('resize', handleResize);
-      window.addEventListener('orientationchange', () => {
-        setTimeout(handleResize, 100);
-      });
 
       return () => {
         isDestroyed = true;
         window.removeEventListener('resize', handleResize);
-        try {
-          WEBARROCKSFACE.destroy && WEBARROCKSFACE.destroy();
-        } catch (e) {
-          // ignore
-        }
-        if (mediaStream) {
-          mediaStream.getTracks().forEach(track => track.stop());
-        }
-        threeRenderer?.dispose();
+        if (animationId) cancelAnimationFrame(animationId);
+        faceLandmarker?.close();
+        renderer?.dispose();
       };
     };
 
     init();
 
     return () => {
-      if (threeRenderer) threeRenderer.dispose();
+      isDestroyed = true;
     };
   }, []);
 
   return (
-    <main
-      style={{
-        width: '100vw',
-        height: '100vh',
-        overflow: 'hidden',
-        position: 'relative',
-        backgroundColor: '#000',
-      }}
-    >
-      {/* Video element - camera feed background */}
+    <main style={{
+      width: '100vw',
+      height: '100vh',
+      overflow: 'hidden',
+      position: 'relative',
+      backgroundColor: '#000',
+    }}>
+      {/* Video element - camera feed */}
       <video
         ref={videoRef}
-        id="video"
         autoPlay
         playsInline
         muted
@@ -315,25 +248,9 @@ export default function AR3HelmetPage() {
         }}
       />
 
-      {/* WebAR.rocks canvas - hidden, just for face detection */}
+      {/* Three.js canvas - helmet overlay */}
       <canvas
-        ref={webarCanvasRef}
-        id="webar-canvas"
-        style={{
-          position: 'absolute',
-          top: 0,
-          left: 0,
-          width: 1,
-          height: 1,
-          opacity: 0,
-          pointerEvents: 'none',
-        }}
-      />
-
-      {/* Three.js canvas - 3D helmet overlay (no CSS mirror - handled in 3D) */}
-      <canvas
-        ref={threeCanvasRef}
-        id="three-canvas"
+        ref={canvasRef}
         style={{
           position: 'absolute',
           top: 0,
@@ -342,23 +259,22 @@ export default function AR3HelmetPage() {
           height: '100%',
           zIndex: 2,
           pointerEvents: 'none',
+          transform: 'scaleX(-1)', // Mirror to match video
         }}
       />
 
       {/* Status indicator */}
-      <div
-        style={{
-          position: 'absolute',
-          bottom: 20,
-          left: '50%',
-          transform: 'translateX(-50%)',
-          color: '#fff',
-          fontSize: 14,
-          fontFamily: 'system-ui, sans-serif',
-          textShadow: '0 1px 3px rgba(0,0,0,0.8)',
-          zIndex: 10,
-        }}
-      >
+      <div style={{
+        position: 'absolute',
+        bottom: 20,
+        left: '50%',
+        transform: 'translateX(-50%)',
+        color: '#fff',
+        fontSize: 14,
+        fontFamily: 'system-ui, sans-serif',
+        textShadow: '0 1px 3px rgba(0,0,0,0.8)',
+        zIndex: 10,
+      }}>
         {status}
       </div>
     </main>
