@@ -186,19 +186,20 @@ export default function AR3HelmetPage() {
         const s = detectState.s;
         const x = detectState.x;
         const y = detectState.y;
+        const z = detectState.z || 0; // tracked depth
         const rx = detectState.rx;
         const ry = detectState.ry;
         const rz = detectState.rz;
 
-        // Helmet origin is at head center in Blender - minimal offsets needed
-        const Z = 4.6;          // fixed distance in front of camera
-        const yOffset = 0.15;   // tiny lift so bottom edge is at eyebrows
-        const baseScale = 0.52; // matches Blender scale where helmet fits head
+        // Use tracked depth instead of fixed Z
+        const depthScale = 4.6;   // scale the tracked depth
+        const yOffset = 0.15;     // small vertical lift
+        const baseScale = 0.52;   // match Blender scale
 
         helmetGroup.position.set(
-          x * Z,                // no negation, canvas is NOT mirrored
-          y * Z + yOffset,      // small vertical offset only
-          -Z
+          x * depthScale,
+          y * depthScale + yOffset,
+          z * depthScale          // USE TRACKED Z, NOT -Z constant
         );
 
         // Mirror only rotation for selfie view
