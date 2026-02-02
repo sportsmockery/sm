@@ -190,19 +190,17 @@ export default function AR3HelmetPage() {
         const ry = detectState.ry;
         const rz = detectState.rz;
 
-        // CRITICAL: WebAR.rocks uses 's' (scale) for depth
-        // Larger s = closer to camera = need MORE negative Z to push helmet back
-        const baseZ = -5.5;           // base distance from camera
-        const depthFromScale = s * 2; // convert scale to depth offset
-        const finalZ = baseZ + depthFromScale; // closer face = less negative Z
-
-        const yOffset = 0.4;          // lift helmet up on head
-        const baseScale = 0.7;        // helmet size
+        // Face tracking coordinate: +Z comes FORWARD out of head
+        // To wrap helmet AROUND head, use POSITIVE Z to push BACK into head
+        const zBackIntoHead = 0.3;    // positive = back into/behind face
+        const yOffset = -0.1;         // negative = down slightly
+        const xyScale = 1.0;          // scale for x/y tracking
+        const baseScale = 0.65;       // helmet size
 
         helmetGroup.position.set(
-          x * 5,                      // horizontal tracking
-          y * 5 + yOffset,            // vertical tracking + lift
-          finalZ                      // depth based on face scale
+          x * xyScale,
+          y * xyScale + yOffset,
+          zBackIntoHead               // POSITIVE pushes back into head
         );
 
         helmetGroup.rotation.set(rx, -ry, rz);
