@@ -94,7 +94,7 @@ export default function AR3HelmetPage() {
 
         console.log('Normalize scale:', normalizeScale.toFixed(6));
 
-        loadedHelmet.traverse((child) => {
+        loadedHelmet.traverse((child: THREE.Object3D) => {
           if ((child as THREE.Mesh).isMesh) {
             const mesh = child as THREE.Mesh;
             mesh.frustumCulled = false;
