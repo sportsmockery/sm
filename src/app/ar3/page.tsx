@@ -313,50 +313,6 @@ export default function AR3HelmetPage() {
             console.log(`Frame ${frameCount}: Pos(${posX.toFixed(2)},${posY.toFixed(2)},${posZ.toFixed(2)}), Scl ${uniformScl.toFixed(2)}, FaceW ${faceWidth.toFixed(3)}`);
           }
 
-        // No face detected
-        } else if (false) { // Disabled old fallback
-          const lm = results.faceLandmarks[0];
-
-          const nose = lm[1];
-          const forehead = lm[10];
-          const chin = lm[152];
-          const leftCheek = lm[454];
-          const rightCheek = lm[234];
-
-          // Face center
-          const cx = nose.x;
-          const cy = nose.y - 0.05;
-
-          // Depth from z landmarks
-          const cz = (nose.z + forehead.z + chin.z) / 3;
-          const posZ = cz * -500 - 0.6; // Match -0.6 base offset
-
-          // Face width for scale (using *8 boost, clamped 1.0-1.5)
-          const faceWidth = Math.abs(leftCheek.x - rightCheek.x);
-          const scale = Math.max(1.0, Math.min(1.5, faceWidth * 8));
-
-          // NDC coords with mirror
-          const ndcX = -(cx - 0.5) * 2;
-          const posX = ndcX * videoAspect;
-          const posY = -(cy - 0.5) * 2 + 0.2; // Match matrix path Y offset
-
-          // Rotation from landmarks
-          const dx = chin.x - forehead.x;
-          const dy = chin.y - forehead.y;
-          const dz = chin.z - forehead.z;
-          const pitch = Math.atan2(dz, dy) * 0.5;
-          const yaw = (nose.x - cx) * -4;
-          const roll = Math.atan2(leftCheek.y - rightCheek.y, leftCheek.x - rightCheek.x);
-
-          helmetModel.position.set(posX, posY, posZ);
-          helmetModel.rotation.set(pitch, Math.PI + yaw, -roll);
-          helmetModel.scale.setScalar(scale);
-
-          tracked = true;
-
-          if (frameCount % 15 === 0) {
-            console.log(`Frame ${frameCount} [LANDMARKS]: Pos (${posX.toFixed(3)}, ${posY.toFixed(3)}, ${posZ.toFixed(3)}), Scl ${scale.toFixed(3)}, FaceW ${faceWidth.toFixed(3)}`);
-          }
         }
 
         if (tracked) {
