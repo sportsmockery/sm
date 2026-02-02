@@ -33,7 +33,7 @@ export default function AR3HelmetPage() {
     let videoAspect = 1;
 
     const init = async () => {
-      console.log('========== AR3 v48 - LANDMARKS + FORCED MATERIALS ==========');
+      console.log('========== AR3 v49 - POSITION + SCALE FIX ==========');
       const video = videoRef.current;
       const canvas = canvasRef.current;
       if (!video || !canvas) {
@@ -296,16 +296,16 @@ export default function AR3HelmetPage() {
           // Face height
           const faceHeight = foreheadPos.distanceTo(chinPos);
 
-          // Position: Slightly above forehead center
+          // Position: Well above forehead center (helmet sits ON TOP of head)
           const posX = foreheadPos.x;
-          const posY = foreheadPos.y + faceHeight * 0.1; // 10% above forehead
-          const posZ = foreheadPos.z - 0.1;
+          const posY = foreheadPos.y + faceHeight * 0.35; // 35% above forehead - helmet on top of head
+          const posZ = foreheadPos.z - 0.05;
 
           // Scale based on face width
           // Face width ~0.25-0.35 in ortho units when face fills frame
           // Helmet model is ~0.2m, we want it to cover the head
-          const targetScale = faceWidth * 4; // Adjust multiplier as needed
-          const uniformScl = Math.max(0.8, Math.min(2.0, targetScale));
+          const targetScale = faceWidth * 5; // Increased multiplier for better coverage
+          const uniformScl = Math.max(1.0, Math.min(2.5, targetScale)); // Raised minimum to 1.0
 
           // Rotation from landmarks
           const faceUp = new THREE.Vector3().subVectors(foreheadPos, chinPos).normalize();
@@ -473,10 +473,10 @@ export default function AR3HelmetPage() {
         maxWidth: '60%',
       }}>
         <div style={{ marginBottom: 5, color: '#ff0', fontWeight: 'bold' }}>
-          AR3 v48 - FORCED MATERIALS
+          AR3 v49 - POSITION FIX
         </div>
         <div style={{ marginBottom: 5, color: '#0ff' }}>
-          MeshBasicMaterial (unlit) - Navy blue shell
+          Helmet raised to sit ON TOP of head
         </div>
         <div>{debugInfo || 'Initializing...'}</div>
       </div>
