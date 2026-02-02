@@ -190,21 +190,22 @@ export default function AR3HelmetPage() {
         const ry = detectState.ry;
         const rz = detectState.rz;
 
-        // Tuning
-        const Z = 4.8;          // push helmet farther away
-        const yOffset = 1.4;    // lower helmet on face
-        const baseScale = 0.55; // slightly smaller so face is more visible
+        // Tuning - pull helmet off face more
+        const Z = 5.8;          // further from camera
+        const yOffset = 0.9;    // drop helmet lower on head
+        const baseScale = 0.48; // slightly smaller helmet
 
+        // Negate x for selfie mirror (since we removed CSS scaleX(-1) from canvas)
         helmetGroup.position.set(
-          x * Z,
+          -x * Z,
           y * Z + yOffset,
           -Z
         );
 
-        // Keep selfie mirroring (negated ry only)
+        // Selfie mirroring via rotation only (no scale.x flip to preserve logo)
         helmetGroup.rotation.set(rx, -ry, rz);
 
-        // No extra scale.x flip - CSS handles mirroring
+        // No negative scale - keeps logo readable
         helmetGroup.scale.setScalar(baseScale * s);
 
         threeRenderer.render(threeScene, threeCamera);
@@ -313,7 +314,7 @@ export default function AR3HelmetPage() {
         }}
       />
 
-      {/* Three.js canvas - 3D helmet overlay */}
+      {/* Three.js canvas - 3D helmet overlay (no CSS mirror - handled in 3D) */}
       <canvas
         ref={threeCanvasRef}
         id="three-canvas"
@@ -325,7 +326,6 @@ export default function AR3HelmetPage() {
           height: '100%',
           zIndex: 2,
           pointerEvents: 'none',
-          transform: 'scaleX(-1)', // Mirror
         }}
       />
 
