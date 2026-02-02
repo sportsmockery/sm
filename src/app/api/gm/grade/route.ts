@@ -183,38 +183,257 @@ export async function POST(request: NextRequest) {
       draft_picks_sent, draft_picks_received, session_id, partner_team_key,
       // MLB salary retention & cash considerations
       salary_retentions, cash_sent, cash_received,
+      // 3-team trade fields
+      trade_partner_1, trade_partner_2, players: threeTeamPlayers, draft_picks: threeTeamPicks,
     } = body
 
     if (!chicago_team || !TEAM_SPORT_MAP[chicago_team]) {
       return NextResponse.json({ error: 'Invalid chicago_team' }, { status: 400 })
     }
-    if (!trade_partner || typeof trade_partner !== 'string') {
-      return NextResponse.json({ error: 'trade_partner required' }, { status: 400 })
-    }
-    // Validate that at least one asset is being sent and received (players OR draft picks)
-    const hasSentAssets = (Array.isArray(players_sent) && players_sent.length > 0) ||
-                          (Array.isArray(draft_picks_sent) && draft_picks_sent.length > 0)
-    const hasReceivedAssets = (Array.isArray(players_received) && players_received.length > 0) ||
-                              (Array.isArray(draft_picks_received) && draft_picks_received.length > 0)
 
-    if (!hasSentAssets) {
-      return NextResponse.json({ error: 'Must send at least one player or draft pick' }, { status: 400 })
-    }
-    if (!hasReceivedAssets) {
-      return NextResponse.json({ error: 'Must receive at least one player or draft pick' }, { status: 400 })
-    }
+    // Detect if this is a 3-team trade
+    const isThreeTeamTrade = !!(trade_partner_1 && trade_partner_2)
 
-    // Ensure arrays are initialized (empty arrays, not undefined)
-    const safePlayers_sent = Array.isArray(players_sent) ? players_sent : []
-    const safePlayers_received = Array.isArray(players_received) ? players_received : []
-    const safeDraft_picks_sent = Array.isArray(draft_picks_sent) ? draft_picks_sent : []
-    const safeDraft_picks_received = Array.isArray(draft_picks_received) ? draft_picks_received : []
+    if (!isThreeTeamTrade) {
+      // 2-team trade validation
+      if (!trade_partner || typeof trade_partner !== 'string') {
+        return NextResponse.json({ error: 'trade_partner required' }, { status: 400 })
+      }
+      // Validate that at least one asset is being sent and received (players OR draft picks)
+      const hasSentAssets = (Array.isArray(players_sent) && players_sent.length > 0) ||
+                            (Array.isArray(draft_picks_sent) && draft_picks_sent.length > 0)
+      const hasReceivedAssets = (Array.isArray(players_received) && players_received.length > 0) ||
+                                (Array.isArray(draft_picks_received) && draft_picks_received.length > 0)
+
+      if (!hasSentAssets) {
+        return NextResponse.json({ error: 'Must send at least one player or draft pick' }, { status: 400 })
+      }
+      if (!hasReceivedAssets) {
+        return NextResponse.json({ error: 'Must receive at least one player or draft pick' }, { status: 400 })
+      }
+    } else {
+      // 3-team trade validation
+      const hasAssets = (Array.isArray(threeTeamPlayers) && threeTeamPlayers.length > 0) ||
+                        (Array.isArray(threeTeamPicks) && threeTeamPicks.length > 0)
+      if (!hasAssets) {
+        return NextResponse.json({ error: 'Must include at least one player or draft pick in 3-team trade' }, { status: 400 })
+      }
+    }
 
     const sport = TEAM_SPORT_MAP[chicago_team]
     const teamDisplayNames: Record<string, string> = {
       bears: 'Chicago Bears', bulls: 'Chicago Bulls', blackhawks: 'Chicago Blackhawks',
       cubs: 'Chicago Cubs', whitesox: 'Chicago White Sox',
     }
+
+    // Handle 3-team trades separately
+    if (isThreeTeamTrade) {
+      const safeThreeTeamPlayers = Array.isArray(threeTeamPlayers) ? threeTeamPlayers : []
+      const safeThreeTeamPicks = Array.isArray(threeTeamPicks) ? threeTeamPicks : []
+
+      // Group assets by team for display
+      const teamAssets: Record<string, { sends: string[], receives: string[] }> = {}
+      const allTeamKeys = [chicago_team, trade_partner_1, trade_partner_2]
+
+      for (const key of allTeamKeys) {
+        teamAssets[key] = { sends: [], receives: [] }
+      }
+
+      // Process players
+      for (const p of safeThreeTeamPlayers) {
+        const playerDesc = `${p.player_name} (${p.position || 'N/A'})`
+        if (p.from_team && teamAssets[p.from_team]) {
+          teamAssets[p.from_team].sends.push(playerDesc)
+        }
+        if (p.to_team && teamAssets[p.to_team]) {
+          teamAssets[p.to_team].receives.push(playerDesc)
+        }
+      }
+
+      // Process draft picks
+      for (const pk of safeThreeTeamPicks) {
+        const pickDesc = `${pk.year} Round ${pk.round} pick`
+        if (pk.from_team && teamAssets[pk.from_team]) {
+          teamAssets[pk.from_team].sends.push(pickDesc)
+        }
+        if (pk.to_team && teamAssets[pk.to_team]) {
+          teamAssets[pk.to_team].receives.push(pickDesc)
+        }
+      }
+
+      // Build trade description for AI
+      const chicagoName = teamDisplayNames[chicago_team]
+      let tradeDesc = `3-TEAM TRADE\nSport: ${sport.toUpperCase()}\n\n`
+
+      for (const [teamKey, assets] of Object.entries(teamAssets)) {
+        const teamName = teamKey === chicago_team ? chicagoName : teamKey
+        tradeDesc += `${teamName}:\n`
+        tradeDesc += `  SENDS: ${assets.sends.length > 0 ? assets.sends.join(', ') : 'Nothing'}\n`
+        tradeDesc += `  RECEIVES: ${assets.receives.length > 0 ? assets.receives.join(', ') : 'Nothing'}\n\n`
+      }
+
+      tradeDesc += `Grade this trade from the perspective of the ${chicagoName}.`
+
+      // Call AI for grading (no deterministic grade for 3-team trades)
+      const response = await getAnthropic().messages.create({
+        model: MODEL_NAME,
+        max_tokens: 768,
+        temperature: 0,
+        system: GM_SYSTEM_PROMPT,
+        messages: [{ role: 'user', content: tradeDesc }],
+      })
+
+      const responseTimeMs = Date.now() - startTime
+      const textContent = response.content.find(c => c.type === 'text')
+      const rawText = textContent?.type === 'text' ? textContent.text : ''
+
+      let grade: number
+      let reasoning: string
+      let tradeSummary = ''
+      let improvementScore = 0
+      let breakdown = { talent_balance: 0.5, contract_value: 0.5, team_fit: 0.5, future_assets: 0.5 }
+      let capAnalysis = ''
+
+      try {
+        const parsed = JSON.parse(rawText)
+        grade = Math.max(0, Math.min(100, Math.round(parsed.grade)))
+        reasoning = parsed.reasoning || 'No reasoning provided.'
+        tradeSummary = parsed.trade_summary || ''
+        improvementScore = typeof parsed.improvement_score === 'number' ? Math.max(-10, Math.min(10, parsed.improvement_score)) : 0
+        capAnalysis = parsed.cap_analysis || ''
+        if (parsed.breakdown) {
+          breakdown = {
+            talent_balance: Math.max(0, Math.min(1, parsed.breakdown.talent_balance ?? 0.5)),
+            contract_value: Math.max(0, Math.min(1, parsed.breakdown.contract_value ?? 0.5)),
+            team_fit: Math.max(0, Math.min(1, parsed.breakdown.team_fit ?? 0.5)),
+            future_assets: Math.max(0, Math.min(1, parsed.breakdown.future_assets ?? 0.5)),
+          }
+        }
+      } catch {
+        const gradeMatch = rawText.match(/(\d{1,3})/)
+        grade = gradeMatch ? Math.max(0, Math.min(100, parseInt(gradeMatch[1]))) : 50
+        reasoning = rawText || 'AI response could not be parsed.'
+      }
+
+      const status = grade >= 70 ? 'accepted' : 'rejected'
+      const is_dangerous = grade >= 70 && grade <= 90
+      const userEmail = user?.email || 'guest'
+      const sharedCode = randomBytes(6).toString('hex')
+
+      // Get team logos
+      let partner1Logo: string | null = null
+      let partner2Logo: string | null = null
+      let chicagoTeamLogo: string | null = null
+
+      const { data: p1 } = await datalabAdmin
+        .from('gm_league_teams')
+        .select('logo_url')
+        .eq('team_key', trade_partner_1)
+        .eq('sport', sport)
+        .single()
+      partner1Logo = p1?.logo_url || null
+
+      const { data: p2 } = await datalabAdmin
+        .from('gm_league_teams')
+        .select('logo_url')
+        .eq('team_key', trade_partner_2)
+        .eq('sport', sport)
+        .single()
+      partner2Logo = p2?.logo_url || null
+
+      const { data: ct } = await datalabAdmin
+        .from('gm_league_teams')
+        .select('logo_url')
+        .eq('team_key', chicago_team)
+        .eq('sport', sport)
+        .single()
+      chicagoTeamLogo = ct?.logo_url || null
+
+      // Save 3-team trade to database
+      const { data: trade, error: tradeError } = await datalabAdmin.from('gm_trades').insert({
+        user_id: userId,
+        user_email: userEmail,
+        chicago_team,
+        sport,
+        trade_partner: `${trade_partner_1} / ${trade_partner_2}`, // Combined for display
+        players_sent: safeThreeTeamPlayers.filter(p => p.from_team === chicago_team),
+        players_received: safeThreeTeamPlayers.filter(p => p.to_team === chicago_team),
+        grade,
+        grade_reasoning: reasoning,
+        status,
+        is_dangerous,
+        session_id: session_id || null,
+        improvement_score: improvementScore,
+        trade_summary: tradeSummary,
+        ai_version: `gm_3team_${API_VERSION}_${MODEL_NAME}`,
+        shared_code: sharedCode,
+        partner_team_key: trade_partner_1,
+        partner_team_logo: partner1Logo,
+        chicago_team_logo: chicagoTeamLogo,
+        draft_picks_sent: safeThreeTeamPicks.filter(pk => pk.from_team === chicago_team),
+        draft_picks_received: safeThreeTeamPicks.filter(pk => pk.to_team === chicago_team),
+        talent_balance: breakdown.talent_balance,
+        contract_value: breakdown.contract_value,
+        team_fit: breakdown.team_fit,
+        future_assets: breakdown.future_assets,
+        cap_analysis: capAnalysis,
+        is_three_team: true,
+        trade_partner_2: trade_partner_2,
+        trade_partner_2_logo: partner2Logo,
+        three_team_players: safeThreeTeamPlayers,
+        three_team_picks: safeThreeTeamPicks,
+      }).select().single()
+
+      if (tradeError) {
+        console.error('Failed to insert 3-team trade:', tradeError)
+      }
+
+      // Update session counters if applicable
+      if (session_id && trade) {
+        if (status === 'accepted') {
+          await datalabAdmin.rpc('increment_session_approved', { sid: session_id })
+        } else {
+          await datalabAdmin.rpc('increment_session_rejected', { sid: session_id })
+        }
+      }
+
+      // Log to audit
+      try {
+        await datalabAdmin.from('gm_audit_logs').insert({
+          user_id: userId,
+          user_email: userEmail,
+          chicago_team,
+          request_payload: { trade_partner_1, trade_partner_2, players: safeThreeTeamPlayers, draft_picks: safeThreeTeamPicks },
+          response_payload: { grade, reasoning, breakdown },
+          response_time_ms: responseTimeMs,
+          ai_model: MODEL_NAME,
+        })
+      } catch (auditErr) {
+        console.error('Audit log failed:', auditErr)
+      }
+
+      return NextResponse.json({
+        grade,
+        reasoning,
+        status,
+        is_dangerous,
+        trade_id: trade?.id || null,
+        shared_code: sharedCode,
+        improvement_score: improvementScore,
+        trade_summary: tradeSummary,
+        breakdown,
+        cap_analysis: capAnalysis,
+        is_three_team: true,
+      })
+    }
+
+    // ========== 2-TEAM TRADE LOGIC (original) ==========
+
+    // Ensure arrays are initialized (empty arrays, not undefined)
+    const safePlayers_sent = Array.isArray(players_sent) ? players_sent : []
+    const safePlayers_received = Array.isArray(players_received) ? players_received : []
+    const safeDraft_picks_sent = Array.isArray(draft_picks_sent) ? draft_picks_sent : []
+    const safeDraft_picks_received = Array.isArray(draft_picks_received) ? draft_picks_received : []
 
     // Call Edge Function for deterministic grade FIRST
     let deterministicResult: { grade: number; breakdown: any; debug?: any } | null = null
