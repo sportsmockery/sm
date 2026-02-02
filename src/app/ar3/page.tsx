@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from 'react';
 import * as THREE from 'three';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
+import { DRACOLoader } from 'three/examples/jsm/loaders/DRACOLoader.js';
 import { FaceLandmarker, FilesetResolver } from '@mediapipe/tasks-vision';
 
 // Lerp helper
@@ -32,12 +33,17 @@ export default function AR3HelmetPage() {
     let videoAspect = 1;
 
     const init = async () => {
+      console.log('========== AR3 v41 INIT START ==========');
       const video = videoRef.current;
       const canvas = canvasRef.current;
-      if (!video || !canvas) return;
+      if (!video || !canvas) {
+        console.error('Video or canvas ref not available');
+        return;
+      }
 
       // Step 1: Get camera stream
       setStatus('Requesting camera...');
+      console.log('Requesting camera access...');
       try {
         const stream = await navigator.mediaDevices.getUserMedia({
           video: { facingMode: 'user', width: { ideal: 1280 }, height: { ideal: 720 } },
@@ -83,11 +89,35 @@ export default function AR3HelmetPage() {
 
       // Step 3: Load helmet model (SM_v9 - Blender baked: 0.2-0.3m, origin head base, +Z facemask)
       setStatus('Loading helmet...');
+      console.log('Setting up GLTF loader with Draco support...');
+
+      // Configure DRACOLoader for compressed GLB files
+      const dracoLoader = new DRACOLoader();
+      dracoLoader.setDecoderPath('https://www.gstatic.com/draco/v1/decoders/');
+
       const loader = new GLTFLoader();
+      loader.setDRACOLoader(dracoLoader);
 
       try {
+        console.log('Loading helmet model...');
         const gltf = await new Promise<any>((resolve, reject) => {
-          loader.load('/ar/SM_v9.glb', resolve, undefined, reject);
+          loader.load(
+            '/ar/SM_v9.glb',
+            (result) => {
+              console.log('Helmet GLTF loaded successfully');
+              resolve(result);
+            },
+            (progress) => {
+              if (progress.total > 0) {
+                const pct = ((progress.loaded / progress.total) * 100).toFixed(0);
+                console.log(`Helmet loading: ${pct}%`);
+              }
+            },
+            (error) => {
+              console.error('Helmet load error:', error);
+              reject(error);
+            }
+          );
         });
 
         const loadedHelmet = gltf.scene;
@@ -128,32 +158,65 @@ export default function AR3HelmetPage() {
         return;
       }
 
-      // Step 4: Initialize MediaPipe with matrix output
+      // Step 4: Initialize MediaPipe with matrix output (with timeout and CPU fallback)
       setStatus('Loading face detection...');
+      console.log('Initializing MediaPipe FaceLandmarker...');
+
+      const mediaPipeOptions = {
+        baseOptions: {
+          modelAssetPath: 'https://storage.googleapis.com/mediapipe-models/face_landmarker/face_landmarker/float16/1/face_landmarker.task',
+          delegate: 'GPU' as const
+        },
+        runningMode: 'VIDEO' as const,
+        numFaces: 1,
+        outputFaceBlendshapes: false,
+        outputFacialTransformationMatrixes: true,
+        minFacePresenceConfidence: 0.5,
+        minFaceDetectionConfidence: 0.5
+      };
+
       try {
-        const vision = await FilesetResolver.forVisionTasks(
+        // Load vision with timeout
+        const visionPromise = FilesetResolver.forVisionTasks(
           'https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@latest/wasm'
         );
-        faceLandmarker = await FaceLandmarker.createFromOptions(vision, {
-          baseOptions: {
-            modelAssetPath: 'https://storage.googleapis.com/mediapipe-models/face_landmarker/face_landmarker/float16/1/face_landmarker.task',
-            delegate: 'GPU'
-          },
-          runningMode: 'VIDEO',
-          numFaces: 1,
-          outputFaceBlendshapes: false,
-          outputFacialTransformationMatrixes: true, // Enable matrix for pose
-          minFacePresenceConfidence: 0.5,
-          minFaceDetectionConfidence: 0.5
-        });
-        console.log('MediaPipe ready with matrix output');
+        const vision = await Promise.race([
+          visionPromise,
+          new Promise<never>((_, reject) =>
+            setTimeout(() => reject(new Error('Vision load timeout (10s)')), 10000)
+          )
+        ]);
+        console.log('Vision WASM loaded');
+
+        // Try GPU first
+        faceLandmarker = await FaceLandmarker.createFromOptions(vision, mediaPipeOptions);
+        console.log('MediaPipe ready with GPU delegate');
+
       } catch (err) {
-        console.error('MediaPipe error:', err);
-        setStatus('Face detection failed');
-        return;
+        console.warn('GPU MediaPipe failed, trying CPU fallback:', err);
+        setStatus('Trying CPU fallback...');
+
+        try {
+          const vision = await FilesetResolver.forVisionTasks(
+            'https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@latest/wasm'
+          );
+          faceLandmarker = await FaceLandmarker.createFromOptions(vision, {
+            ...mediaPipeOptions,
+            baseOptions: {
+              ...mediaPipeOptions.baseOptions,
+              delegate: 'CPU' as const
+            }
+          });
+          console.log('MediaPipe ready with CPU fallback');
+        } catch (fallbackErr) {
+          console.error('MediaPipe CPU fallback failed:', fallbackErr);
+          setStatus('Face detection failed: ' + (fallbackErr instanceof Error ? fallbackErr.message : 'Unknown error'));
+          return;
+        }
       }
 
       setStatus('Ready! Look at camera');
+      console.log('========== AR3 v41 INIT COMPLETE ==========');
 
       // Step 5: Animation loop
       let frameCount = 0;
@@ -390,7 +453,7 @@ export default function AR3HelmetPage() {
         maxWidth: '90%',
       }}>
         <div style={{ marginBottom: 5, color: '#ff0', fontWeight: 'bold' }}>
-          AR3 v40 - Matrix + Landmarks Fallback
+          AR3 v41 - DRACOLoader + CPU Fallback
         </div>
         <div>{debugInfo || 'Initializing...'}</div>
       </div>
