@@ -183,7 +183,7 @@ export default function AR3HelmetPage() {
           helmetGroup.visible = true;
           helmetGroup.position.set(worldX, worldY + 0.3, worldZ);
           helmetGroup.rotation.set(pitch, -yaw, -roll);
-          helmetGroup.scale.setScalar(scale);
+          helmetGroup.scale.set(-scale, scale, scale); // negative X flips for selfie view
 
         } else {
           helmetGroup.visible = false;
