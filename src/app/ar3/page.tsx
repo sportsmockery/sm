@@ -90,18 +90,19 @@ export default function AR3HelmetPage() {
           loader.load('/ar/SM_v9.glb', resolve, undefined, reject);
         });
 
-        helmetModel = gltf.scene;
+        const loadedHelmet = gltf.scene;
+        helmetModel = loadedHelmet;
 
         // No normalization - rely on Blender baked scale
-        helmetModel.position.set(0, 0, 0);
-        helmetModel.scale.setScalar(1);
+        loadedHelmet.position.set(0, 0, 0);
+        loadedHelmet.scale.setScalar(1);
 
         // Log model info
-        const box = new THREE.Box3().setFromObject(helmetModel);
+        const box = new THREE.Box3().setFromObject(loadedHelmet);
         const size = box.getSize(new THREE.Vector3());
         console.log('Helmet loaded - Baked size:', size.x.toFixed(3), size.y.toFixed(3), size.z.toFixed(3));
 
-        helmetModel.traverse((child: THREE.Object3D) => {
+        loadedHelmet.traverse((child: THREE.Object3D) => {
           if ((child as THREE.Mesh).isMesh) {
             const mesh = child as THREE.Mesh;
             mesh.frustumCulled = false;
@@ -114,10 +115,10 @@ export default function AR3HelmetPage() {
         const headMask = new THREE.Mesh(maskGeom, maskMat);
         headMask.position.set(0, 0, 0);
         headMask.renderOrder = -1; // Render first for depth
-        helmetModel.add(headMask);
+        loadedHelmet.add(headMask);
 
-        scene.add(helmetModel);
-        helmetModel.visible = false;
+        scene.add(loadedHelmet);
+        loadedHelmet.visible = false;
 
         console.log('Helmet ready with head mask');
 
