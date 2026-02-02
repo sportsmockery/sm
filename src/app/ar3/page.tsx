@@ -54,8 +54,8 @@ export default function AR3HelmetPage() {
           numFaces: 1,
           outputFaceBlendshapes: false,
           outputFacialTransformationMatrixes: true, // Get 3D transform matrix
-          minTrackingConfidence: 0.5,
-          minDetectionConfidence: 0.5
+          minFacePresenceConfidence: 0.5,
+          minFaceDetectionConfidence: 0.5
         });
       } catch (err) {
         console.error('MediaPipe error:', err);
