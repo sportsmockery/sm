@@ -190,19 +190,19 @@ export default function AR3HelmetPage() {
         const ry = detectState.ry;
         const rz = detectState.rz;
 
-        // Tuning - get helmet onto head properly
-        const Z = 4.2;          // closer to face
-        const yOffset = 1.8;    // raise helmet much higher onto head
-        const baseScale = 0.48; // slightly smaller
+        // Helmet origin is at head center in Blender - minimal offsets needed
+        const Z = 4.6;          // fixed distance in front of camera
+        const yOffset = 0.15;   // tiny lift so bottom edge is at eyebrows
+        const baseScale = 0.52; // matches Blender scale where helmet fits head
 
         helmetGroup.position.set(
-          x * Z,
-          y * Z + yOffset,
+          x * Z,                // no negation, canvas is NOT mirrored
+          y * Z + yOffset,      // small vertical offset only
           -Z
         );
 
-        // Reduce roll sensitivity to fix crookedness
-        helmetGroup.rotation.set(rx, -ry, rz * 0.5);
+        // Mirror only rotation for selfie view
+        helmetGroup.rotation.set(rx, -ry, rz);
 
         // No negative scale - keeps logo readable
         helmetGroup.scale.setScalar(baseScale * s);
