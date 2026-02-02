@@ -138,62 +138,20 @@ export default function AR3HelmetPage() {
         // Run face detection
         const results = faceLandmarker.detectForVideo(video, time);
 
+        // DEBUG: Show helmet with NO transformations to see its natural orientation
+        // Once we know which way it faces, we can add proper base rotation
+
+        helmetGroup.visible = true;
+        helmetGroup.position.set(0, 0, -3);  // Just in front of camera
+        helmetGroup.rotation.set(0, 0, 0);   // No rotation
+        helmetGroup.scale.set(0.5, 0.5, 0.5); // Reasonable size
+
+        // SKIP face tracking for now - just see the model
+        /*
         if (results.faceLandmarks && results.faceLandmarks.length > 0) {
-          const landmarks = results.faceLandmarks[0];
-
-          // Get key landmarks for head position
-          // 10 = top of head, 152 = chin, 1 = nose tip, 168 = forehead center
-          const forehead = landmarks[10];   // Top of forehead
-          const noseTip = landmarks[1];     // Nose tip
-          const chin = landmarks[152];      // Chin
-
-          // Calculate head center (between forehead and chin)
-          const headCenterX = (forehead.x + chin.x) / 2;
-          const headCenterY = (forehead.y + chin.y) / 2;
-          const headCenterZ = (forehead.z + chin.z) / 2;
-
-          // MediaPipe coords: x,y are 0-1 (normalized image coords), z is depth in meters
-          // Convert to Three.js coords (centered, y-flipped)
-          const worldX = (headCenterX - 0.5) * -4;  // Center and flip for mirror
-          const worldY = (headCenterY - 0.5) * -3;  // Center and flip (y is inverted)
-          const worldZ = -2 - headCenterZ * 5;      // Push back from camera
-
-          // Calculate head size from landmarks for scale
-          const headHeight = Math.abs(forehead.y - chin.y);
-          const scale = headHeight * 3.5;
-
-          // Calculate rotation from face orientation
-          // Use nose and forehead to estimate pitch/yaw
-          const foreheadCenter = landmarks[168]; // Between eyebrows
-
-          // Yaw (left/right turn)
-          const leftCheek = landmarks[234];
-          const rightCheek = landmarks[454];
-          const yaw = Math.atan2(leftCheek.z - rightCheek.z, leftCheek.x - rightCheek.x);
-
-          // Pitch (up/down nod)
-          const pitch = Math.atan2(noseTip.y - foreheadCenter.y, noseTip.z - foreheadCenter.z) - Math.PI/2;
-
-          // Roll (head tilt)
-          const leftEye = landmarks[33];
-          const rightEye = landmarks[263];
-          const roll = Math.atan2(rightEye.y - leftEye.y, rightEye.x - leftEye.x);
-
-          // Apply to helmet
-          helmetGroup.visible = true;
-
-          // Push helmet forward (positive Z = toward camera in this setup)
-          helmetGroup.position.set(worldX, worldY + 0.3, worldZ + 0.5);
-
-          // Apply base 180° Y rotation THEN face tracking rotations
-          helmetGroup.rotation.set(pitch, Math.PI - yaw, -roll);
-
-          // Flip Z scale to correct inside-out view
-          helmetGroup.scale.set(scale, scale, -scale);
-
-        } else {
-          helmetGroup.visible = false;
+          // ... face tracking code disabled for debug
         }
+        */
 
         renderer.render(scene, camera);
       };
