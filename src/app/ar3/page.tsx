@@ -33,7 +33,7 @@ export default function AR3HelmetPage() {
     let videoAspect = 1;
 
     const init = async () => {
-      console.log('========== AR3 v44 INIT START ==========');
+      console.log('========== AR3 v45 INIT START ==========');
       const video = videoRef.current;
       const canvas = canvasRef.current;
       if (!video || !canvas) {
@@ -78,12 +78,15 @@ export default function AR3HelmetPage() {
       );
       camera.position.set(0, 0, 1);
 
-      // Lighting
-      scene.add(new THREE.AmbientLight(0xffffff, 1.2));
-      const dirLight = new THREE.DirectionalLight(0xffffff, 1.5);
-      dirLight.position.set(1, 1, 2);
+      // Lighting - STRONG to fix black helmet
+      scene.add(new THREE.AmbientLight(0xffffff, 2.0)); // Increased from 1.2
+      const dirLight = new THREE.DirectionalLight(0xffffff, 2.5); // Increased from 1.5
+      dirLight.position.set(0, 1, 2);
       scene.add(dirLight);
-      const backLight = new THREE.DirectionalLight(0xffffff, 0.5);
+      const frontLight = new THREE.DirectionalLight(0xffffff, 2.0); // Added front light
+      frontLight.position.set(0, 0, 3);
+      scene.add(frontLight);
+      const backLight = new THREE.DirectionalLight(0xffffff, 1.0); // Increased from 0.5
       backLight.position.set(-1, -1, -1);
       scene.add(backLight);
 
@@ -136,6 +139,14 @@ export default function AR3HelmetPage() {
           if ((child as THREE.Mesh).isMesh) {
             const mesh = child as THREE.Mesh;
             mesh.frustumCulled = false;
+            // Ensure materials are visible and properly lit
+            if (mesh.material) {
+              const mat = mesh.material as THREE.MeshStandardMaterial;
+              if (mat.isMeshStandardMaterial) {
+                mat.metalness = Math.min(mat.metalness, 0.5); // Reduce metalness to improve visibility
+                mat.roughness = Math.max(mat.roughness, 0.3); // Ensure some roughness
+              }
+            }
           }
         });
 
@@ -216,7 +227,7 @@ export default function AR3HelmetPage() {
       }
 
       setStatus('Ready! Look at camera');
-      console.log('========== AR3 v44 INIT COMPLETE ==========');
+      console.log('========== AR3 v45 INIT COMPLETE ==========');
 
       // Step 5: Animation loop
       let frameCount = 0;
@@ -236,11 +247,12 @@ export default function AR3HelmetPage() {
         if (results.facialTransformationMatrixes && results.facialTransformationMatrixes.length > 0) {
           const matrixData = results.facialTransformationMatrixes[0].data;
 
-          // MediaPipe matrix is row-major 4x4: [r11,r12,r13,tx, r21,r22,r23,ty, r31,r32,r33,tz, 0,0,0,1]
-          // Extract translation directly from row-major positions (indices 3, 7, 11)
-          const rawX = matrixData[3];
-          const rawY = matrixData[7];
-          const rawZ = matrixData[11];
+          // MediaPipe matrix is row-major 4x4 with translation in BOTTOM ROW:
+          // [r00,r01,r02,0, r10,r11,r12,0, r20,r21,r22,0, tx,ty,tz,1]
+          // Translation is at indices 12, 13, 14 (NOT 3, 7, 11!)
+          const rawX = matrixData[12];
+          const rawY = matrixData[13];
+          const rawZ = matrixData[14];
 
           // Convert MediaPipe coords to Three.js:
           // MediaPipe: +X right, +Y down, +Z away from camera
@@ -272,17 +284,17 @@ export default function AR3HelmetPage() {
           quat.premultiply(flipQuat);
 
           // Scale: Use face width from landmarks if available, otherwise fixed
-          // Benchmark: *5 boost gives Scl ~1.5 for typical faceWidth ~0.15-0.3
-          let uniformScl = 1.0;
+          // Benchmark: *8 boost gives Scl ~1.2-1.5 for typical faceWidth ~0.1-0.2
+          let uniformScl = 1.2;
           if (results.faceLandmarks && results.faceLandmarks.length > 0) {
             const lm = results.faceLandmarks[0];
             const faceWidth = Math.abs(lm[454].x - lm[234].x);
-            uniformScl = faceWidth * 5; // *5 boost (reduced from *6)
+            uniformScl = faceWidth * 8; // *8 boost for target 1.2-1.5
           }
 
           // Apply transforms with tuned offsets
-          // posY * 2 + 0.2 for proper head placement
-          helmetModel.position.set(posX * 2, posY * 2 + 0.2, posZ);
+          // posY * 2 + 0.05 for on-head placement (reduced from 0.2)
+          helmetModel.position.set(posX * 2, posY * 2 + 0.05, posZ);
           helmetModel.quaternion.copy(quat);
           helmetModel.scale.setScalar(Math.max(1.0, Math.min(1.5, uniformScl))); // Clamp 1.0-1.5 per test criteria
 
@@ -310,9 +322,9 @@ export default function AR3HelmetPage() {
           const cz = (nose.z + forehead.z + chin.z) / 3;
           const posZ = cz * -500 - 0.6; // Match -0.6 base offset
 
-          // Face width for scale (using *5 boost, clamped 1.0-1.5)
+          // Face width for scale (using *8 boost, clamped 1.0-1.5)
           const faceWidth = Math.abs(leftCheek.x - rightCheek.x);
-          const scale = Math.max(1.0, Math.min(1.5, faceWidth * 5));
+          const scale = Math.max(1.0, Math.min(1.5, faceWidth * 8));
 
           // NDC coords with mirror
           const ndcX = -(cx - 0.5) * 2;
@@ -471,7 +483,7 @@ export default function AR3HelmetPage() {
         maxWidth: '90%',
       }}>
         <div style={{ marginBottom: 5, color: '#ff0', fontWeight: 'bold' }}>
-          AR3 v44 - Scale 1.0-1.5, Z -0.6
+          AR3 v45 - Trans[12-14], Lights+
         </div>
         <div>{debugInfo || 'Initializing...'}</div>
       </div>
