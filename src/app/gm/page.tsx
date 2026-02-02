@@ -1257,6 +1257,7 @@ export default function GMPage() {
                     onGrade={gradeTrade}
                     validation={validation}
                     gradeResult={gradeResult}
+                    onNewTrade={resetTrade}
                   />
                 ) : (
                   <TradeBoard
@@ -1540,6 +1541,7 @@ export default function GMPage() {
                     onGrade={gradeTrade}
                     validation={validation}
                     gradeResult={gradeResult}
+                    onNewTrade={resetTrade}
                     mobile
                   />
                 ) : (

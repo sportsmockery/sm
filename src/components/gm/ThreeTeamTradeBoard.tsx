@@ -25,6 +25,7 @@ interface ThreeTeamTradeBoardProps {
   validation?: ValidationState
   gradeResult?: any
   mobile?: boolean
+  onNewTrade?: () => void
 }
 
 export function ThreeTeamTradeBoard({
@@ -35,6 +36,7 @@ export function ThreeTeamTradeBoard({
   validation,
   gradeResult,
   mobile = false,
+  onNewTrade,
 }: ThreeTeamTradeBoardProps) {
   const { theme } = useTheme()
   const isDark = theme === 'dark'
@@ -43,7 +45,6 @@ export function ThreeTeamTradeBoard({
   const panelBg = isDark ? '#111827' : '#f9fafb'
   const borderColor = isDark ? '#374151' : '#e5e7eb'
   const flowBg = isDark ? '#1f2937' : '#ffffff'
-
   const teams = [team1, team2, team3]
 
   // Get flow between two teams
@@ -450,6 +451,107 @@ export function ThreeTeamTradeBoard({
           </motion.button>
         )
       })()}
+
+      {/* Grade Result Display */}
+      {gradeResult && (
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          style={{
+            backgroundColor: panelBg,
+            borderRadius: 16,
+            border: `2px solid ${borderColor}`,
+            overflow: 'hidden',
+          }}
+        >
+          {/* Overall Grade Header */}
+          <div style={{
+            padding: 20,
+            background: gradeResult.grade >= 75 ? 'linear-gradient(135deg, #22c55e20, #16a34a20)' :
+                        gradeResult.grade >= 50 ? 'linear-gradient(135deg, #eab30820, #ca8a0420)' :
+                        'linear-gradient(135deg, #ef444420, #dc262620)',
+            borderBottom: `1px solid ${borderColor}`,
+            textAlign: 'center',
+          }}>
+            <div style={{
+              fontSize: 56,
+              fontWeight: 900,
+              color: gradeResult.grade >= 75 ? '#22c55e' :
+                     gradeResult.grade >= 50 ? '#eab308' : '#ef4444',
+              lineHeight: 1,
+            }}>
+              {gradeResult.grade}
+            </div>
+            <div style={{
+              fontSize: 14,
+              fontWeight: 700,
+              color: gradeResult.grade >= 75 ? '#22c55e' :
+                     gradeResult.grade >= 50 ? '#eab308' : '#ef4444',
+              textTransform: 'uppercase',
+              letterSpacing: '1px',
+              marginTop: 4,
+            }}>
+              {gradeResult.grade >= 75 ? 'TRADE ACCEPTED' : 'TRADE REJECTED'}
+            </div>
+          </div>
+
+          {/* Team Grades (if available) */}
+          {gradeResult.team_grades && (
+            <div style={{
+              display: 'grid',
+              gridTemplateColumns: mobile ? '1fr' : 'repeat(3, 1fr)',
+              gap: 1,
+              backgroundColor: borderColor,
+            }}>
+              {Object.entries(gradeResult.team_grades).map(([teamKey, data]: [string, any]) => {
+                const team = teams.find(t => t.key === teamKey) || { name: teamKey, color: '#666' }
+                return (
+                  <div key={teamKey} style={{ backgroundColor: panelBg, padding: 16 }}>
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
+                      <span style={{ fontWeight: 700, color: team.color, fontSize: 13 }}>{team.name}</span>
+                      <span style={{ fontWeight: 800, fontSize: 20, color: data.grade >= 75 ? '#22c55e' : data.grade >= 50 ? '#eab308' : '#ef4444' }}>{data.grade}</span>
+                    </div>
+                    <div style={{ fontSize: 11, color: subText, lineHeight: 1.5 }}>{data.reasoning}</div>
+                  </div>
+                )
+              })}
+            </div>
+          )}
+
+          {/* Overall Reasoning */}
+          {gradeResult.reasoning && (
+            <div style={{ padding: 16, borderTop: `1px solid ${borderColor}` }}>
+              <div style={{ fontSize: 11, fontWeight: 700, color: subText, textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: 8 }}>Analysis</div>
+              <div style={{ fontSize: 13, color: textColor, lineHeight: 1.6 }}>{gradeResult.reasoning}</div>
+            </div>
+          )}
+
+          {/* New Trade Button */}
+          {onNewTrade && (
+            <div style={{ padding: 16, borderTop: `1px solid ${borderColor}` }}>
+              <motion.button
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+                onClick={onNewTrade}
+                style={{
+                  width: '100%',
+                  padding: '12px 24px',
+                  borderRadius: 10,
+                  border: 'none',
+                  backgroundColor: '#bc0000',
+                  color: '#fff',
+                  fontWeight: 700,
+                  fontSize: 14,
+                  cursor: 'pointer',
+                  letterSpacing: '0.5px',
+                }}
+              >
+                START NEW TRADE
+              </motion.button>
+            </div>
+          )}
+        </motion.div>
+      )}
 
       {/* Empty state */}
       {totalAssets === 0 && (
