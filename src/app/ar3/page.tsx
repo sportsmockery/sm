@@ -186,33 +186,26 @@ export default function AR3HelmetPage() {
         const s = detectState.s;
         const x = detectState.x;
         const y = detectState.y;
-        const z = detectState.z; // may be undefined!
         const rx = detectState.rx;
         const ry = detectState.ry;
         const rz = detectState.rz;
 
-        // DIAGNOSTIC: Log all tracked values
-        console.log('TRACK DATA:', { x, y, z, s, rx, ry, rz });
-        console.log('detectState keys:', Object.keys(detectState));
+        // CRITICAL: WebAR.rocks uses 's' (scale) for depth
+        // Larger s = closer to camera = need MORE negative Z to push helmet back
+        const baseZ = -5.5;           // base distance from camera
+        const depthFromScale = s * 2; // convert scale to depth offset
+        const finalZ = baseZ + depthFromScale; // closer face = less negative Z
 
-        // Use tracked depth with offset to push helmet BEHIND face
-        const depthScale = 4.6;
-        const zOffset = -0.8;     // PUSH HELMET BACK behind face
-        const yOffset = 0.3;      // lift it up slightly
-        const baseScale = 0.55;   // slightly bigger to wrap head
+        const yOffset = 0.4;          // lift helmet up on head
+        const baseScale = 0.7;        // helmet size
 
-        const posX = x * depthScale;
-        const posY = y * depthScale + yOffset;
-        const posZ = (z || 0) * depthScale + zOffset;
+        helmetGroup.position.set(
+          x * 5,                      // horizontal tracking
+          y * 5 + yOffset,            // vertical tracking + lift
+          finalZ                      // depth based on face scale
+        );
 
-        console.log('POSITION:', { posX, posY, posZ });
-
-        helmetGroup.position.set(posX, posY, posZ);
-
-        // Mirror only rotation for selfie view
         helmetGroup.rotation.set(rx, -ry, rz);
-
-        // No negative scale - keeps logo readable
         helmetGroup.scale.setScalar(baseScale * s);
 
         threeRenderer.render(threeScene, threeCamera);
