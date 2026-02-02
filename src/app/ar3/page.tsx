@@ -33,7 +33,7 @@ export default function AR3HelmetPage() {
     let videoAspect = 1;
 
     const init = async () => {
-      console.log('========== AR3 v43 INIT START ==========');
+      console.log('========== AR3 v44 INIT START ==========');
       const video = videoRef.current;
       const canvas = canvasRef.current;
       if (!video || !canvas) {
@@ -216,7 +216,7 @@ export default function AR3HelmetPage() {
       }
 
       setStatus('Ready! Look at camera');
-      console.log('========== AR3 v43 INIT COMPLETE ==========');
+      console.log('========== AR3 v44 INIT COMPLETE ==========');
 
       // Step 5: Animation loop
       let frameCount = 0;
@@ -284,7 +284,7 @@ export default function AR3HelmetPage() {
           // posY * 2 + 0.2 for proper head placement
           helmetModel.position.set(posX * 2, posY * 2 + 0.2, posZ);
           helmetModel.quaternion.copy(quat);
-          helmetModel.scale.setScalar(Math.max(1.0, Math.min(1.8, uniformScl))); // Clamp 1.0-1.8
+          helmetModel.scale.setScalar(Math.max(1.0, Math.min(1.5, uniformScl))); // Clamp 1.0-1.5 per test criteria
 
           tracked = true;
 
@@ -310,9 +310,9 @@ export default function AR3HelmetPage() {
           const cz = (nose.z + forehead.z + chin.z) / 3;
           const posZ = cz * -500 - 0.6; // Match -0.6 base offset
 
-          // Face width for scale (using *5 boost, clamped 1.0-1.8)
+          // Face width for scale (using *5 boost, clamped 1.0-1.5)
           const faceWidth = Math.abs(leftCheek.x - rightCheek.x);
-          const scale = Math.max(1.0, Math.min(1.8, faceWidth * 5));
+          const scale = Math.max(1.0, Math.min(1.5, faceWidth * 5));
 
           // NDC coords with mirror
           const ndcX = -(cx - 0.5) * 2;
@@ -471,7 +471,7 @@ export default function AR3HelmetPage() {
         maxWidth: '90%',
       }}>
         <div style={{ marginBottom: 5, color: '#ff0', fontWeight: 'bold' }}>
-          AR3 v43 - Scale/position tuned
+          AR3 v44 - Scale 1.0-1.5, Z -0.6
         </div>
         <div>{debugInfo || 'Initializing...'}</div>
       </div>
