@@ -97,15 +97,15 @@ export async function POST(request: NextRequest) {
       recentHumanMessageCount: recentMessages.length
     })
 
-    // STRICT RULE: If multiple users are online and AI wasn't directly mentioned, do NOT respond
+    // STRICT RULE: If ANY other user is online, do NOT respond - no exceptions
     if (!triggerCheck.shouldRespond) {
       return NextResponse.json({
         shouldRespond: false,
         reason: authenticatedUsersOnline > 1
-          ? 'multiple_users_online'
+          ? 'other_users_present'
           : 'conditions not met',
         hint: authenticatedUsersOnline > 1
-          ? `AI does not respond when ${authenticatedUsersOnline} users are online. Tag @${personality.username} to get a response.`
+          ? `AI only responds when you're alone in the chat. Currently ${authenticatedUsersOnline} users are online.`
           : undefined
       })
     }

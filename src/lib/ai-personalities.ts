@@ -487,8 +487,8 @@ export interface TriggerCondition {
  * Determine if AI persona should respond based on room state
  *
  * STRICT RULES:
- * - ONLY respond if directly tagged/mentioned by a user
  * - ONLY respond if user is completely alone (no other authenticated users online)
+ * - NEVER respond if ANY other user is present in the chat
  * - NEVER respond if multiple users are chatting with each other
  * - NEVER spam or interrupt ongoing conversations
  */
@@ -502,8 +502,9 @@ export function shouldAIRespond(
     recentHumanMessageCount: number // messages in last 3 min from different humans
   }
 ): TriggerCondition {
-  // STRICT: If multiple humans are chatting, NEVER respond unless directly tagged
-  if (roomState.recentHumanMessageCount >= 2 && !roomState.aiWasMentioned) {
+  // STRICT: If ANY other user is present, NEVER respond - no exceptions
+  // AI only engages when user is completely alone
+  if (roomState.authenticatedUsersOnline > 1) {
     return {
       shouldRespond: false,
       reason: null,
@@ -511,8 +512,8 @@ export function shouldAIRespond(
     }
   }
 
-  // STRICT: If there are other authenticated users online, NEVER respond unless directly tagged
-  if (roomState.authenticatedUsersOnline > 1 && !roomState.aiWasMentioned) {
+  // STRICT: If multiple humans have been chatting recently, don't respond
+  if (roomState.recentHumanMessageCount >= 2) {
     return {
       shouldRespond: false,
       reason: null,
@@ -520,17 +521,8 @@ export function shouldAIRespond(
     }
   }
 
-  // Priority 1: Direct mention/tag - ALWAYS respond (only exception to rules above)
-  if (roomState.aiWasMentioned) {
-    return {
-      shouldRespond: true,
-      reason: 'direct_mention',
-      priority: 10
-    }
-  }
-
-  // Priority 2: User is COMPLETELY alone (no other users online) and sent a message
-  // This is the ONLY other case where we respond
+  // User is COMPLETELY alone (no other users online) and sent a message
+  // This is the ONLY case where we respond
   if (roomState.authenticatedUsersOnline <= 1 && roomState.lastMessageWasFromHuman) {
     return {
       shouldRespond: true,
@@ -539,7 +531,7 @@ export function shouldAIRespond(
     }
   }
 
-  // Default: Do NOT respond - avoid spamming conversations
+  // Default: Do NOT respond
   return {
     shouldRespond: false,
     reason: null,

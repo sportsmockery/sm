@@ -9,6 +9,7 @@ interface EditorPick {
   title: string;
   slug: string;
   featured_image: string | null;
+  excerpt: string | null;
   team_slug: string | null;
   pinned_slot: number;
 }
@@ -38,34 +39,39 @@ export function EditorPicksHero({ picks = [], isMobile }: EditorPicksHeroProps) 
     <section className="editor-picks-hero" aria-label="Editor's Picks">
       {/* Visual Cards - Horizontal scroll on mobile, 3-col grid on desktop */}
       <div className={`editor-picks-visual ${isMobile ? 'mobile-scroll' : 'desktop-grid'}`}>
-        {visualPicks.map((pick) => (
-          <Link
-            key={pick.id}
-            href={`/${pick.slug}`}
-            className="editor-pick-card"
-          >
-            <div className="editor-pick-image-wrapper">
-              {pick.featured_image ? (
-                <Image
-                  src={pick.featured_image}
-                  alt={pick.title}
-                  fill
-                  sizes={isMobile ? '280px' : '33vw'}
-                  className="editor-pick-image"
-                  priority={pick.pinned_slot === 1}
-                />
-              ) : (
-                <div className="editor-pick-placeholder" />
+        {visualPicks.map((pick) => {
+          // Get first 150 chars of excerpt for subtitle
+          const subtitle = pick.excerpt
+            ? pick.excerpt.slice(0, 150) + (pick.excerpt.length > 150 ? '...' : '')
+            : null;
+
+          return (
+            <Link
+              key={pick.id}
+              href={`/${pick.slug}`}
+              className="editor-pick-card"
+            >
+              <div className="editor-pick-image-wrapper">
+                {pick.featured_image ? (
+                  <Image
+                    src={pick.featured_image}
+                    alt={pick.title}
+                    fill
+                    sizes={isMobile ? '280px' : '33vw'}
+                    className="editor-pick-image"
+                    priority={pick.pinned_slot === 1}
+                  />
+                ) : (
+                  <div className="editor-pick-placeholder" />
+                )}
+              </div>
+              <h2 className="editor-pick-title">{pick.title}</h2>
+              {subtitle && (
+                <p className="editor-pick-subtitle">{subtitle}</p>
               )}
-              {pick.team_slug && (
-                <span className={`team-badge team-badge--${pick.team_slug}`}>
-                  {pick.team_slug.toUpperCase()}
-                </span>
-              )}
-            </div>
-            <h2 className="editor-pick-title">{pick.title}</h2>
-          </Link>
-        ))}
+            </Link>
+          );
+        })}
       </div>
 
       {/* Text List for slots 4-6 */}

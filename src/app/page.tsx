@@ -29,7 +29,7 @@ async function getHomepageData() {
   // (sm_posts doesn't have editor_pick or pinned_slot columns)
   const { data: editorPicksRaw = [] } = await supabase
     .from('sm_posts')
-    .select('id, title, slug, featured_image, category:sm_categories!category_id(slug)')
+    .select('id, title, slug, featured_image, excerpt, category:sm_categories!category_id(slug)')
     .eq('status', 'published')
     .order('importance_score', { ascending: false })
     .limit(6)

@@ -93,9 +93,9 @@ export function useAIChatPersonality({
    * @param authenticatedUsersOnline - Number of authenticated users currently in the room
    * @param triggerReason - Optional reason for triggering the response
    *
-   * IMPORTANT: AI will only respond if:
-   * - User is completely alone (authenticatedUsersOnline <= 1), OR
-   * - AI was directly mentioned/tagged (@PersonalityName)
+   * IMPORTANT: AI will ONLY respond if:
+   * - User is completely alone (authenticatedUsersOnline <= 1)
+   * - NO exceptions - if any other user is present, AI stays silent
    */
   const requestAIResponse = useCallback(async (
     messages: ChatMessage[],
@@ -164,7 +164,7 @@ export function useAIChatPersonality({
    *
    * STRICT RULES:
    * - ONLY respond if user is completely alone (no other users online)
-   * - ONLY respond if directly mentioned/tagged
+   * - NEVER respond if ANY other user is present in the chat
    * - NEVER respond if multiple users are chatting
    * - NEVER spam or interrupt conversations
    */
@@ -179,26 +179,9 @@ export function useAIChatPersonality({
     // Don't respond to AI messages
     if (lastMessage.isAI) return
 
-    // STRICT: If multiple users are online, ONLY respond if directly mentioned
+    // STRICT: If ANY other user is present, do NOT respond - no exceptions
     if (authenticatedUsersOnline > 1) {
-      // Check if AI was directly mentioned/tagged
-      if (personality) {
-        const mentionPattern = new RegExp(`@${personality.username}`, 'i')
-        if (mentionPattern.test(lastMessage.content)) {
-          await requestAIResponse(messages, authenticatedUsersOnline, 'direct_mention')
-        }
-      }
-      // Otherwise, do NOT respond - don't interrupt conversations
       return
-    }
-
-    // Check if AI was mentioned (works even when alone)
-    if (personality) {
-      const mentionPattern = new RegExp(`@?${personality.username}`, 'i')
-      if (mentionPattern.test(lastMessage.content)) {
-        await requestAIResponse(messages, authenticatedUsersOnline, 'direct_mention')
-        return
-      }
     }
 
     // User is COMPLETELY alone - respond to keep them engaged
@@ -209,7 +192,7 @@ export function useAIChatPersonality({
 
     // Default: Do NOT respond
 
-  }, [channelId, enabled, personality, requestAIResponse])
+  }, [channelId, enabled, requestAIResponse])
 
   return {
     personality,
