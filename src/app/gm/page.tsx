@@ -771,7 +771,7 @@ export default function GMPage() {
         const playersArray: any[] = []
         const draftPicksArray: any[] = []
 
-        // Extract all players from flows
+        // Extract all players and prospects from flows
         for (const flow of tradeFlows) {
           for (const player of flow.players) {
             playersArray.push({
@@ -783,6 +783,24 @@ export default function GMPage() {
               from_team: flow.from,
               to_team: flow.to,
             })
+          }
+          // Include prospects with proper flags (per Datalab API spec)
+          if (flow.prospects) {
+            for (const prospect of flow.prospects) {
+              playersArray.push({
+                player_name: prospect.name,
+                position: prospect.position,
+                is_prospect: true,
+                player_type: 'prospect',
+                prospect_grade: prospect.prospect_grade_numeric || 50,
+                trade_value: prospect.trade_value || 0,
+                org_rank: prospect.org_rank,
+                current_level: prospect.current_level || prospect.level || 'MiLB',
+                age: prospect.age,
+                from_team: flow.from,
+                to_team: flow.to,
+              })
+            }
           }
           for (const pick of flow.picks) {
             draftPicksArray.push({
@@ -809,18 +827,35 @@ export default function GMPage() {
         }
       } else {
         // 2-Team Trade format (original)
-        requestBody = {
-          chicago_team: selectedTeam,
-          trade_partner: opponentTeam!.team_name,
-          partner_team_key: opponentTeam!.team_key,
-          players_sent: selectedPlayers.map(p => ({
+        // Build players_sent: regular players + prospects with flags
+        const playersSentArray = [
+          // Regular players
+          ...selectedPlayers.map(p => ({
             name: p.full_name, position: p.position, stat_line: p.stat_line,
             age: p.age, jersey_number: p.jersey_number, headshot_url: p.headshot_url,
             college: p.college, weight_lbs: p.weight_lbs, years_exp: p.years_exp,
             draft_info: p.draft_info, espn_id: p.espn_id, stats: p.stats,
             cap_hit: p.cap_hit, contract_years: p.contract_years,
           })),
-          players_received: receivedPlayers.map(p => {
+          // Prospects with required flags (per Datalab API spec)
+          ...selectedProspects.map(p => ({
+            name: p.name,
+            position: p.position,
+            is_prospect: true,
+            player_type: 'prospect' as const,
+            prospect_grade: p.prospect_grade_numeric || 50,
+            trade_value: p.trade_value || 0,
+            org_rank: p.org_rank,
+            current_level: p.current_level || p.level || 'MiLB',
+            age: p.age || null,
+            headshot_url: p.headshot_url || null,
+          })),
+        ]
+
+        // Build players_received: regular players + opponent prospects with flags
+        const playersReceivedArray = [
+          // Regular players
+          ...receivedPlayers.map(p => {
             if ('player_id' in p) {
               return {
                 name: p.full_name, position: p.position, stat_line: p.stat_line,
@@ -834,6 +869,27 @@ export default function GMPage() {
             }
             return p
           }),
+          // Opponent prospects with required flags (per Datalab API spec)
+          ...selectedOpponentProspects.map(p => ({
+            name: p.name,
+            position: p.position,
+            is_prospect: true,
+            player_type: 'prospect' as const,
+            prospect_grade: p.prospect_grade_numeric || 50,
+            trade_value: p.trade_value || 0,
+            org_rank: p.org_rank,
+            current_level: p.current_level || p.level || 'MiLB',
+            age: p.age || null,
+            headshot_url: p.headshot_url || null,
+          })),
+        ]
+
+        requestBody = {
+          chicago_team: selectedTeam,
+          trade_partner: opponentTeam!.team_name,
+          partner_team_key: opponentTeam!.team_key,
+          players_sent: playersSentArray,
+          players_received: playersReceivedArray,
           draft_picks_sent: draftPicksSent,
           draft_picks_received: draftPicksReceived,
           session_id: activeSession?.id,
