@@ -3,11 +3,11 @@ import { motion } from 'framer-motion'
 import { useTheme } from '@/contexts/ThemeContext'
 
 const TEAMS = [
-  { key: 'bears', label: 'Bears', sport: 'nfl', color: '#0B162A', logo: 'https://a.espncdn.com/i/teamlogos/nfl/500/chi.png' },
-  { key: 'bulls', label: 'Bulls', sport: 'nba', color: '#CE1141', logo: 'https://a.espncdn.com/i/teamlogos/nba/500/chi.png' },
-  { key: 'blackhawks', label: 'Blackhawks', sport: 'nhl', color: '#CF0A2C', logo: 'https://a.espncdn.com/i/teamlogos/nhl/500/chi.png' },
-  { key: 'cubs', label: 'Cubs', sport: 'mlb', color: '#0E3386', logo: 'https://a.espncdn.com/i/teamlogos/mlb/500/chc.png' },
-  { key: 'whitesox', label: 'White Sox', sport: 'mlb', color: '#27251F', logo: 'https://a.espncdn.com/i/teamlogos/mlb/500/chw.png' },
+  { key: 'bears', label: 'Chicago Bears', sport: 'nfl', color: '#0B162A', logo: 'https://a.espncdn.com/i/teamlogos/nfl/500/chi.png' },
+  { key: 'bulls', label: 'Chicago Bulls', sport: 'nba', color: '#CE1141', logo: 'https://a.espncdn.com/i/teamlogos/nba/500/chi.png' },
+  { key: 'blackhawks', label: 'Chicago Blackhawks', sport: 'nhl', color: '#CF0A2C', logo: 'https://a.espncdn.com/i/teamlogos/nhl/500/chi.png' },
+  { key: 'cubs', label: 'Chicago Cubs', sport: 'mlb', color: '#0E3386', logo: 'https://a.espncdn.com/i/teamlogos/mlb/500/chc.png' },
+  { key: 'whitesox', label: 'Chicago White Sox', sport: 'mlb', color: '#27251F', logo: 'https://a.espncdn.com/i/teamlogos/mlb/500/chw.png' },
 ]
 
 interface TeamSelectorProps {

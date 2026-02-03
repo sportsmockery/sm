@@ -86,8 +86,10 @@ export function AssetRow({
 
   if (type === 'PLAYER' && player) {
     primaryText = player.full_name
-    secondaryText = `${player.position}${teamAbbrev ? ` - ${teamAbbrev}` : ''}${player.age ? ` - ${player.age}` : ''}`
-    rightText = player.cap_hit ? `$${(player.cap_hit / 1000000).toFixed(1)}M` : ''
+    const ageStr = player.age ? `Age: ${player.age}` : ''
+    const contractStr = player.cap_hit ? `Contract: $${(player.cap_hit / 1000000).toFixed(1)}M` : ''
+    secondaryText = player.position + (ageStr ? ` - ${ageStr}` : '') + (contractStr ? ` ${contractStr}` : '')
+    rightText = ''  // Contract now shown in secondaryText
     avatarUrl = player.headshot_url
     avatarInitials = player.full_name.split(' ').map(n => n[0]).join('').slice(0, 2)
     tooltipText = player.stat_line || ''
