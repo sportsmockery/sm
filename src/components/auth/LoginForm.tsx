@@ -4,6 +4,7 @@ import { useState } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useAuth } from '@/hooks/useAuth'
+import SocialLoginButtons, { AuthDivider } from './SocialLoginButtons'
 
 interface LoginFormProps {
   redirectTo?: string
@@ -17,6 +18,7 @@ export default function LoginForm({ redirectTo = '/admin' }: LoginFormProps) {
   const [rememberMe, setRememberMe] = useState(false)
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
+  const [socialLoading, setSocialLoading] = useState(false)
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -36,7 +38,7 @@ export default function LoginForm({ redirectTo = '/admin' }: LoginFormProps) {
   }
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-6">
+    <div className="space-y-6">
       {/* Error message */}
       {error && (
         <div className="rounded-lg bg-red-50 p-4 text-sm text-red-700 dark:bg-red-900/30 dark:text-red-300">
@@ -49,6 +51,17 @@ export default function LoginForm({ redirectTo = '/admin' }: LoginFormProps) {
         </div>
       )}
 
+      {/* Social Login Buttons */}
+      <SocialLoginButtons
+        mode="login"
+        redirectTo={redirectTo}
+        onError={setError}
+        onLoading={setSocialLoading}
+      />
+
+      <AuthDivider />
+
+      <form onSubmit={handleSubmit} className="space-y-6">
       {/* Email */}
       <div>
         <label htmlFor="email" className="block text-sm font-medium text-zinc-700 dark:text-zinc-300">
@@ -105,7 +118,7 @@ export default function LoginForm({ redirectTo = '/admin' }: LoginFormProps) {
       {/* Submit button */}
       <button
         type="submit"
-        disabled={loading}
+        disabled={loading || socialLoading}
         className="flex w-full items-center justify-center gap-2 rounded-lg bg-[#8B0000] px-4 py-3 font-semibold text-white transition-colors hover:bg-red-700 disabled:cursor-not-allowed disabled:opacity-50 dark:bg-[#FF6666] dark:text-zinc-900 dark:hover:bg-red-400"
       >
         {loading ? (
@@ -117,9 +130,10 @@ export default function LoginForm({ redirectTo = '/admin' }: LoginFormProps) {
             Signing in...
           </>
         ) : (
-          'Sign in'
+          'Sign in with email'
         )}
       </button>
+      </form>
 
       {/* Sign up link */}
       <p className="text-center text-sm text-zinc-600 dark:text-zinc-400">
@@ -131,6 +145,6 @@ export default function LoginForm({ redirectTo = '/admin' }: LoginFormProps) {
           Sign up
         </Link>
       </p>
-    </form>
+    </div>
   )
 }

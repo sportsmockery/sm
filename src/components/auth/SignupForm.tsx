@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import Link from 'next/link'
 import { useAuth } from '@/hooks/useAuth'
+import SocialLoginButtons, { AuthDivider } from './SocialLoginButtons'
 
 export default function SignupForm() {
   const { signUp } = useAuth()
@@ -14,6 +15,7 @@ export default function SignupForm() {
   const [error, setError] = useState('')
   const [success, setSuccess] = useState(false)
   const [loading, setLoading] = useState(false)
+  const [socialLoading, setSocialLoading] = useState(false)
 
   // Password strength calculation
   const getPasswordStrength = (pass: string) => {
@@ -87,7 +89,7 @@ export default function SignupForm() {
   }
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-5">
+    <div className="space-y-5">
       {/* Error message */}
       {error && (
         <div className="rounded-lg bg-red-50 p-4 text-sm text-red-700 dark:bg-red-900/30 dark:text-red-300">
@@ -100,6 +102,17 @@ export default function SignupForm() {
         </div>
       )}
 
+      {/* Social Login Buttons */}
+      <SocialLoginButtons
+        mode="signup"
+        redirectTo="/profile"
+        onError={setError}
+        onLoading={setSocialLoading}
+      />
+
+      <AuthDivider />
+
+      <form onSubmit={handleSubmit} className="space-y-5">
       {/* Full Name */}
       <div>
         <label htmlFor="fullName" className="block text-sm font-medium text-zinc-700 dark:text-zinc-300">
@@ -212,7 +225,7 @@ export default function SignupForm() {
       {/* Submit button */}
       <button
         type="submit"
-        disabled={loading}
+        disabled={loading || socialLoading}
         className="flex w-full items-center justify-center gap-2 rounded-lg bg-[#8B0000] px-4 py-3 font-semibold text-white transition-colors hover:bg-red-700 disabled:cursor-not-allowed disabled:opacity-50 dark:bg-[#FF6666] dark:text-zinc-900 dark:hover:bg-red-400"
       >
         {loading ? (
@@ -224,9 +237,10 @@ export default function SignupForm() {
             Creating account...
           </>
         ) : (
-          'Create account'
+          'Create account with email'
         )}
       </button>
+      </form>
 
       {/* Login link */}
       <p className="text-center text-sm text-zinc-600 dark:text-zinc-400">
@@ -238,6 +252,6 @@ export default function SignupForm() {
           Sign in
         </Link>
       </p>
-    </form>
+    </div>
   )
 }

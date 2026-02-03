@@ -1,8 +1,10 @@
 'use client'
 
-import { createContext, useContext, useState, useEffect, ReactNode } from 'react'
+import { createContext, useContext, useState, useEffect, ReactNode, useCallback } from 'react'
 import { createBrowserClient } from '@supabase/ssr'
-import type { User as SupabaseUser, Session } from '@supabase/supabase-js'
+import type { User as SupabaseUser, Session, Provider, UserIdentity } from '@supabase/supabase-js'
+
+export type SocialProvider = 'google' | 'facebook' | 'twitter'
 
 // Session persistence constants
 const SESSION_KEY = 'sm-session-expiry'
@@ -16,6 +18,16 @@ function createSupabaseClient() {
   )
 }
 
+// Linked identity type
+export interface LinkedIdentity {
+  id: string
+  provider: string
+  createdAt: string
+  email?: string
+  name?: string
+  avatar?: string
+}
+
 // User type
 interface User {
   id: string
@@ -23,6 +35,15 @@ interface User {
   name?: string
   avatar?: string
   createdAt?: string
+  identities?: LinkedIdentity[]
+}
+
+// Disqus connection type
+export interface DisqusConnection {
+  isConnected: boolean
+  username?: string
+  userId?: string
+  connectedAt?: string
 }
 
 // Auth context type
@@ -35,6 +56,15 @@ interface AuthContextType {
   resetPassword: (email: string) => Promise<{ error?: string }>
   refreshUser: () => Promise<void>
   isAuthenticated: boolean
+  // Social login methods
+  signInWithSocial: (provider: SocialProvider, redirectTo?: string) => Promise<{ error?: string }>
+  linkSocialProvider: (provider: SocialProvider) => Promise<{ error?: string }>
+  unlinkSocialProvider: (identityId: string) => Promise<{ error?: string }>
+  getLinkedProviders: () => SocialProvider[]
+  // Disqus connection
+  disqusConnection: DisqusConnection
+  checkDisqusConnection: () => Promise<void>
+  hasDisqusConnection: boolean
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined)
@@ -45,9 +75,17 @@ function mapSupabaseUser(supabaseUser: SupabaseUser | null): User | null {
   return {
     id: supabaseUser.id,
     email: supabaseUser.email || '',
-    name: supabaseUser.user_metadata?.full_name || supabaseUser.email?.split('@')[0],
-    avatar: supabaseUser.user_metadata?.avatar_url,
+    name: supabaseUser.user_metadata?.full_name || supabaseUser.user_metadata?.name || supabaseUser.email?.split('@')[0],
+    avatar: supabaseUser.user_metadata?.avatar_url || supabaseUser.user_metadata?.picture,
     createdAt: supabaseUser.created_at,
+    identities: supabaseUser.identities?.map((identity: UserIdentity) => ({
+      id: identity.id,
+      provider: identity.provider,
+      createdAt: identity.created_at || '',
+      email: identity.identity_data?.email as string | undefined,
+      name: (identity.identity_data?.full_name || identity.identity_data?.name) as string | undefined,
+      avatar: (identity.identity_data?.avatar_url || identity.identity_data?.picture) as string | undefined,
+    })),
   }
 }
 
@@ -55,6 +93,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [supabase] = useState(() => createSupabaseClient())
   const [user, setUser] = useState<User | null>(null)
   const [loading, setLoading] = useState(true)
+  const [disqusConnection, setDisqusConnection] = useState<DisqusConnection>({ isConnected: false })
 
   // Check for existing session on mount and handle session persistence
   useEffect(() => {
@@ -253,6 +292,144 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   }
 
+  // Sign in with a social provider
+  const signInWithSocial = async (
+    provider: SocialProvider,
+    redirectTo: string = '/profile'
+  ): Promise<{ error?: string }> => {
+    try {
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider: provider as Provider,
+        options: {
+          redirectTo: `${window.location.origin}/api/auth/callback?next=${encodeURIComponent(redirectTo)}`,
+          queryParams: provider === 'google' ? {
+            access_type: 'offline',
+            prompt: 'consent',
+          } : undefined,
+        },
+      })
+
+      if (error) {
+        console.error('Social sign in failed:', error.message)
+        return { error: error.message }
+      }
+
+      return {}
+    } catch (error) {
+      console.error('Social sign in failed:', error)
+      return { error: 'Social sign in failed. Please try again.' }
+    }
+  }
+
+  // Link a social provider to the current account
+  const linkSocialProvider = async (provider: SocialProvider): Promise<{ error?: string }> => {
+    try {
+      const { error } = await supabase.auth.linkIdentity({
+        provider: provider as Provider,
+        options: {
+          redirectTo: `${window.location.origin}/api/auth/callback?next=/profile`,
+        },
+      })
+
+      if (error) {
+        console.error('Failed to link provider:', error.message)
+        return { error: error.message }
+      }
+
+      return {}
+    } catch (error) {
+      console.error('Failed to link provider:', error)
+      return { error: 'Failed to link account. Please try again.' }
+    }
+  }
+
+  // Unlink a social provider from the current account
+  const unlinkSocialProvider = async (identityId: string): Promise<{ error?: string }> => {
+    try {
+      // Find the identity to unlink
+      const identity = user?.identities?.find(i => i.id === identityId)
+      if (!identity) {
+        return { error: 'Identity not found' }
+      }
+
+      // Ensure user has at least one other auth method
+      const hasPassword = user?.identities?.some(i => i.provider === 'email')
+      const otherProviders = user?.identities?.filter(i => i.id !== identityId) || []
+
+      if (!hasPassword && otherProviders.length === 0) {
+        return { error: 'Cannot unlink your only authentication method. Add a password or another provider first.' }
+      }
+
+      // Use type assertion since we only need the id for unlinking
+      const { error } = await supabase.auth.unlinkIdentity({
+        id: identityId,
+        identity_id: identityId,
+        user_id: user?.id || '',
+        identity_data: {},
+        provider: identity.provider,
+        created_at: identity.createdAt || new Date().toISOString(),
+        updated_at: identity.createdAt || new Date().toISOString(),
+        last_sign_in_at: null,
+      } as any) // eslint-disable-line @typescript-eslint/no-explicit-any
+
+      if (error) {
+        console.error('Failed to unlink provider:', error.message)
+        return { error: error.message }
+      }
+
+      // Refresh user to get updated identities
+      await refreshUser()
+
+      return {}
+    } catch (error) {
+      console.error('Failed to unlink provider:', error)
+      return { error: 'Failed to unlink account. Please try again.' }
+    }
+  }
+
+  // Get list of linked social providers
+  const getLinkedProviders = useCallback((): SocialProvider[] => {
+    if (!user?.identities) return []
+    return user.identities
+      .map(i => i.provider)
+      .filter((p): p is SocialProvider => ['google', 'facebook', 'twitter'].includes(p))
+  }, [user?.identities])
+
+  // Check Disqus connection status
+  const checkDisqusConnection = useCallback(async () => {
+    if (!user?.id) {
+      setDisqusConnection({ isConnected: false })
+      return
+    }
+
+    try {
+      const response = await fetch('/api/user/disqus-status')
+      if (response.ok) {
+        const data = await response.json()
+        setDisqusConnection({
+          isConnected: data.isConnected,
+          username: data.username,
+          userId: data.disqusUserId,
+          connectedAt: data.connectedAt,
+        })
+      } else {
+        setDisqusConnection({ isConnected: false })
+      }
+    } catch (error) {
+      console.error('Failed to check Disqus connection:', error)
+      setDisqusConnection({ isConnected: false })
+    }
+  }, [user?.id])
+
+  // Check Disqus connection when user changes
+  useEffect(() => {
+    if (user?.id) {
+      checkDisqusConnection()
+    } else {
+      setDisqusConnection({ isConnected: false })
+    }
+  }, [user?.id, checkDisqusConnection])
+
   return (
     <AuthContext.Provider
       value={{
@@ -264,6 +441,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         resetPassword,
         refreshUser,
         isAuthenticated: !!user,
+        // Social login methods
+        signInWithSocial,
+        linkSocialProvider,
+        unlinkSocialProvider,
+        getLinkedProviders,
+        // Disqus connection
+        disqusConnection,
+        checkDisqusConnection,
+        hasDisqusConnection: disqusConnection.isConnected,
       }}
     >
       {children}

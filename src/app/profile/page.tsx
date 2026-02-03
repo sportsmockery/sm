@@ -7,6 +7,9 @@ import { useAuth } from '@/contexts/AuthContext'
 import AchievementBadge from '@/components/AchievementBadge'
 import { FavoriteTeamsSelector } from '@/components/personalization'
 import { TeamSlug } from '@/lib/types'
+import DisqusConnection from '@/components/auth/DisqusConnection'
+import SocialConnectionsManager from '@/components/auth/SocialConnectionsManager'
+import DisqusPromptModal from '@/components/auth/DisqusPromptModal'
 
 // Mock data for stats - in a real app this would come from database
 const mockStats = {
@@ -172,6 +175,7 @@ export default function ProfilePage() {
   // Settings section expanded states
   const [expandedSections, setExpandedSections] = useState<Record<string, boolean>>({
     favorites: true,
+    connections: false,
     notifications: false,
     display: false,
     privacy: false,
@@ -692,6 +696,28 @@ export default function ProfilePage() {
               </div>
             </CollapsibleSection>
 
+            {/* Connected Accounts */}
+            <CollapsibleSection
+              title="Connected Accounts"
+              description="Manage your social login connections"
+              icon={
+                <svg className="h-5 w-5 text-blue-400" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M13.19 8.688a4.5 4.5 0 011.242 7.244l-4.5 4.5a4.5 4.5 0 01-6.364-6.364l1.757-1.757m13.35-.622l1.757-1.757a4.5 4.5 0 00-6.364-6.364l-4.5 4.5a4.5 4.5 0 001.242 7.244" />
+                </svg>
+              }
+              iconBgColor="#3b82f6"
+              isExpanded={expandedSections.connections}
+              onToggle={() => toggleSection('connections')}
+            >
+              <div className="space-y-6">
+                <SocialConnectionsManager compact />
+
+                <div className="border-t border-zinc-800 pt-6">
+                  <DisqusConnection compact />
+                </div>
+              </div>
+            </CollapsibleSection>
+
             {/* Account */}
             <CollapsibleSection
               title="Account"
@@ -753,6 +779,9 @@ export default function ProfilePage() {
           Back to Home
         </Link>
       </div>
+
+      {/* Disqus Prompt Modal - Shows when user hasn't connected Disqus */}
+      <DisqusPromptModal />
     </div>
   )
 }
