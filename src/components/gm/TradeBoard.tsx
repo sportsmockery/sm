@@ -902,18 +902,20 @@ export function TradeBoard({
             )}
 
             {/* Action buttons */}
-            <div style={{ display: 'flex', gap: 10, justifyContent: 'center', flexWrap: 'wrap' }}>
+            <div style={{ display: 'flex', gap: 8, justifyContent: 'center', width: '100%', maxWidth: 600, margin: '0 auto' }}>
               <button
                 onClick={onNewTrade}
                 style={{
-                  padding: '12px 28px',
-                  borderRadius: 10,
+                  flex: 1,
+                  padding: '10px 12px',
+                  borderRadius: 8,
                   border: 'none',
                   backgroundColor: '#bc0000',
                   color: '#fff',
                   fontWeight: 700,
-                  fontSize: 14,
+                  fontSize: 13,
                   cursor: 'pointer',
+                  whiteSpace: 'nowrap',
                 }}
               >
                 New Trade
@@ -922,24 +924,27 @@ export function TradeBoard({
                 <button
                   onClick={onEditTrade}
                   style={{
-                    padding: '12px 28px',
-                    borderRadius: 10,
+                    flex: 1,
+                    padding: '10px 12px',
+                    borderRadius: 8,
                     border: `2px solid ${borderColor}`,
                     backgroundColor: 'transparent',
                     color: textColor,
                     fontWeight: 600,
-                    fontSize: 14,
+                    fontSize: 13,
                     cursor: 'pointer',
                     display: 'flex',
                     alignItems: 'center',
-                    gap: 6,
+                    justifyContent: 'center',
+                    gap: 4,
+                    whiteSpace: 'nowrap',
                   }}
                 >
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                     <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" strokeLinecap="round" strokeLinejoin="round" />
                     <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" strokeLinecap="round" strokeLinejoin="round" />
                   </svg>
-                  Edit Trade
+                  Edit
                 </button>
               )}
               {gradeResult.shared_code && !auditResult && (
@@ -954,34 +959,37 @@ export function TradeBoard({
                   <button
                     onClick={handleCopyLink}
                     style={{
-                      padding: '12px 28px',
-                      borderRadius: 10,
+                      flex: 1,
+                      padding: '10px 12px',
+                      borderRadius: 8,
                       border: `2px solid ${copied ? '#22c55e' : borderColor}`,
                       backgroundColor: copied ? '#22c55e10' : 'transparent',
                       color: copied ? '#22c55e' : textColor,
                       fontWeight: 600,
-                      fontSize: 14,
+                      fontSize: 13,
                       cursor: 'pointer',
                       display: 'flex',
                       alignItems: 'center',
-                      gap: 6,
+                      justifyContent: 'center',
+                      gap: 4,
                       transition: 'all 0.2s',
+                      whiteSpace: 'nowrap',
                     }}
                   >
                     {copied ? (
                       <>
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#22c55e" strokeWidth="2.5">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#22c55e" strokeWidth="2.5">
                           <path d="M20 6L9 17l-5-5" strokeLinecap="round" strokeLinejoin="round" />
                         </svg>
                         Copied!
                       </>
                     ) : (
                       <>
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                           <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" strokeLinecap="round" strokeLinejoin="round" />
                           <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" strokeLinecap="round" strokeLinejoin="round" />
                         </svg>
-                        Copy Link
+                        Share
                       </>
                     )}
                   </button>
@@ -989,36 +997,39 @@ export function TradeBoard({
                     onClick={handleCreateImage}
                     disabled={generatingImage}
                     style={{
-                      padding: '12px 28px',
-                      borderRadius: 10,
+                      flex: 1,
+                      padding: '10px 12px',
+                      borderRadius: 8,
                       border: `2px solid ${borderColor}`,
                       backgroundColor: generatingImage ? (isDark ? '#374151' : '#e5e7eb') : 'transparent',
                       color: textColor,
                       fontWeight: 600,
-                      fontSize: 14,
+                      fontSize: 13,
                       cursor: generatingImage ? 'wait' : 'pointer',
                       display: 'flex',
                       alignItems: 'center',
-                      gap: 6,
+                      justifyContent: 'center',
+                      gap: 4,
                       opacity: generatingImage ? 0.7 : 1,
+                      whiteSpace: 'nowrap',
                     }}
                   >
                     {generatingImage ? (
                       <>
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" style={{ animation: 'spin 1s linear infinite' }}>
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" style={{ animation: 'spin 1s linear infinite' }}>
                           <circle cx="12" cy="12" r="10" strokeOpacity="0.25" />
                           <path d="M12 2a10 10 0 0 1 10 10" strokeLinecap="round" />
                         </svg>
-                        Creating...
+                        ...
                       </>
                     ) : (
                       <>
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                           <rect x="3" y="3" width="18" height="18" rx="2" ry="2" strokeLinecap="round" strokeLinejoin="round" />
                           <circle cx="8.5" cy="8.5" r="1.5" fill="currentColor" />
                           <polyline points="21 15 16 10 5 21" strokeLinecap="round" strokeLinejoin="round" />
                         </svg>
-                        Create Image
+                        Image
                       </>
                     )}
                   </button>

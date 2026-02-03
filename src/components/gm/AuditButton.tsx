@@ -38,29 +38,33 @@ export function AuditButton({ tradeId, onAuditComplete, isDark = true }: AuditBu
   }
 
   return (
-    <div>
+    <>
       <button
         onClick={handleAudit}
         disabled={loading}
         style={{
-          padding: '10px 24px',
-          borderRadius: 10,
+          flex: 1,
+          padding: '10px 12px',
+          borderRadius: 8,
           border: `2px solid ${isDark ? '#3b82f6' : '#2563eb'}`,
           backgroundColor: loading ? (isDark ? '#1e3a5f' : '#dbeafe') : 'transparent',
           color: isDark ? '#3b82f6' : '#2563eb',
           fontWeight: 600,
-          fontSize: '14px',
+          fontSize: 13,
           cursor: loading ? 'wait' : 'pointer',
           display: 'flex',
           alignItems: 'center',
-          gap: 8,
+          justifyContent: 'center',
+          gap: 4,
           opacity: loading ? 0.7 : 1,
+          whiteSpace: 'nowrap',
         }}
+        title={error || undefined}
       >
         {loading ? (
           <>
             <svg
-              style={{ width: 16, height: 16, animation: 'spin 1s linear infinite' }}
+              style={{ width: 14, height: 14, animation: 'spin 1s linear infinite' }}
               viewBox="0 0 24 24"
               fill="none"
             >
@@ -78,12 +82,12 @@ export function AuditButton({ tradeId, onAuditComplete, isDark = true }: AuditBu
                 d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
               />
             </svg>
-            Auditing...
+            ...
           </>
         ) : (
           <>
             <svg
-              style={{ width: 16, height: 16 }}
+              style={{ width: 14, height: 14 }}
               fill="none"
               viewBox="0 0 24 24"
               stroke="currentColor"
@@ -95,19 +99,16 @@ export function AuditButton({ tradeId, onAuditComplete, isDark = true }: AuditBu
                 d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
               />
             </svg>
-            Audit Grade
+            Audit
           </>
         )}
       </button>
-      {error && (
-        <p style={{ color: '#ef4444', fontSize: '12px', marginTop: 8 }}>{error}</p>
-      )}
       <style jsx global>{`
         @keyframes spin {
           from { transform: rotate(0deg); }
           to { transform: rotate(360deg); }
         }
       `}</style>
-    </div>
+    </>
   )
 }
