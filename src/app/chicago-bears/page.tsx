@@ -6,7 +6,7 @@ import {
   BearsTrendingTopics,
 } from '@/components/bears'
 import ARTourButton from '@/components/ar/ARTourButton'
-import { CHICAGO_TEAMS, fetchTeamRecord, fetchNextGame } from '@/lib/team-config'
+import { CHICAGO_TEAMS, fetchTeamRecord, fetchNextGame, fetchLastGame } from '@/lib/team-config'
 import {
   getBearsSeasonOverview,
   getBearsKeyPlayers,
@@ -34,6 +34,7 @@ export default async function BearsHubPage() {
   const [
     record,
     nextGame,
+    lastGame,
     seasonOverview,
     keyPlayers,
     trends,
@@ -41,6 +42,7 @@ export default async function BearsHubPage() {
   ] = await Promise.all([
     fetchTeamRecord('bears'),
     fetchNextGame('bears'),
+    fetchLastGame('bears'),
     getBearsSeasonOverview(),
     getBearsKeyPlayers(),
     getBearsTrends(),
@@ -74,6 +76,7 @@ export default async function BearsHubPage() {
       team={team}
       record={record}
       nextGame={nextGame}
+      lastGame={lastGame}
       activeTab="overview"
     >
       {/* Main two-column layout */}

@@ -284,3 +284,72 @@ function formatNextGame(game: any, config: { isHomeCol: string }): NextGameInfo 
     venue: game.venue || undefined,
   }
 }
+
+/**
+ * Last game result info
+ */
+export interface LastGameInfo {
+  opponent: string
+  opponentLogo?: string
+  date: string
+  isHome: boolean
+  teamScore: number
+  opponentScore: number
+  result: 'W' | 'L' | 'T'
+}
+
+/**
+ * Fetch last completed game from DataLab Supabase
+ */
+export async function fetchLastGame(teamKey: string): Promise<LastGameInfo | null> {
+  const config = DATALAB_CONFIG[teamKey]
+  const teamInfo = CHICAGO_TEAMS[teamKey]
+  if (!config || !teamInfo || !datalabClient) return null
+
+  try {
+    const today = new Date().toISOString().split('T')[0]
+
+    // Get last completed game (game_date < today with scores)
+    const { data: games, error } = await datalabClient
+      .from(config.gamesTable)
+      .select('*')
+      .lt('game_date', today)
+      .not(config.scoreCol, 'is', null)
+      .order('game_date', { ascending: false })
+      .limit(1)
+
+    if (error || !games || games.length === 0) {
+      return null
+    }
+
+    const game = games[0]
+    const isHome = game[config.isHomeCol] || game.home_away === 'home' || game.homeAway === 'home'
+    const teamScore = Number(game[config.scoreCol]) || 0
+    const opponentScore = Number(game[config.oppScoreCol]) || 0
+
+    // Determine result
+    let result: 'W' | 'L' | 'T' = 'T'
+    if (teamScore > opponentScore) result = 'W'
+    else if (opponentScore > teamScore) result = 'L'
+
+    // Parse date
+    const gameDate = game.game_date ? new Date(game.game_date) : new Date()
+
+    return {
+      opponent: game.opponent_full_name || game.opponent || 'TBD',
+      opponentLogo: game.opponent_logo || null,
+      date: gameDate.toLocaleDateString('en-US', {
+        weekday: 'short',
+        month: 'short',
+        day: 'numeric',
+      }),
+      isHome,
+      teamScore,
+      opponentScore,
+      result,
+    }
+  } catch (error) {
+    console.error(`Error fetching ${teamKey} last game:`, error)
+    return null
+  }
+}

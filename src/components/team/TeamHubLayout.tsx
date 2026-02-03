@@ -41,6 +41,16 @@ export interface NextGameInfo {
   venue?: string
 }
 
+export interface LastGameInfo {
+  opponent: string
+  opponentLogo?: string
+  date: string
+  isHome: boolean
+  teamScore: number
+  opponentScore: number
+  result: 'W' | 'L' | 'T'
+}
+
 export interface TeamRecord {
   wins: number
   losses: number
@@ -57,6 +67,7 @@ export interface TeamRecord {
 interface TeamHubLayoutProps {
   team: TeamInfo
   nextGame?: NextGameInfo | null
+  lastGame?: LastGameInfo | null
   record?: TeamRecord | null
   children: React.ReactNode
   activeTab?: string
@@ -89,6 +100,7 @@ const NFL_TABS = [
 export default function TeamHubLayout({
   team,
   nextGame,
+  lastGame,
   record,
   children,
   activeTab,
@@ -210,50 +222,78 @@ export default function TeamHubLayout({
               </div>
             </div>
 
-            {/* Right: Next Game Summary */}
-            {nextGame && (
-              <div className="flex items-center gap-4 p-4 bg-white/10 rounded-xl backdrop-blur-sm">
-                <div className="text-right">
-                  <div className="text-xs text-white/60 uppercase tracking-wide font-medium">
-                    Next Game
-                  </div>
-                  <div className="text-sm text-white font-medium mt-0.5">
-                    {nextGame.date}
-                  </div>
-                  <div className="text-xs text-white/70">
-                    {nextGame.time}
-                  </div>
-                </div>
-
-                <div className="w-px h-10 bg-white/20" />
-
-                <div className="flex items-center gap-3">
-                  <span className="text-white/70 text-sm">
-                    {nextGame.isHome ? 'vs' : '@'}
-                  </span>
-                  {nextGame.opponentLogo && (
-                    <Image
-                      src={nextGame.opponentLogo}
-                      alt={nextGame.opponent}
-                      width={40}
-                      height={40}
-                      className="w-10 h-10 object-contain"
-                      unoptimized
-                    />
-                  )}
-                  <div>
-                    <div className="text-white font-semibold">
-                      {nextGame.opponent}
+            {/* Right: Last Game & Next Game */}
+            <div className="flex items-center gap-3">
+              {/* Last Game */}
+              {lastGame && (
+                <div className="flex items-center gap-3 p-3 bg-white/10 rounded-xl backdrop-blur-sm">
+                  <div className="text-right">
+                    <div className="text-xs text-white/60 uppercase tracking-wide font-medium">
+                      Last Game
                     </div>
-                    {nextGame.venue && (
-                      <div className="text-xs text-white/60 truncate max-w-[120px]">
-                        {nextGame.venue}
-                      </div>
+                    <div className={`text-lg font-bold ${lastGame.result === 'W' ? 'text-green-400' : lastGame.result === 'L' ? 'text-red-400' : 'text-white'}`}>
+                      {lastGame.result}
+                    </div>
+                    <div className="text-xs text-white/70">
+                      {lastGame.teamScore}-{lastGame.opponentScore}
+                    </div>
+                  </div>
+
+                  <div className="w-px h-10 bg-white/20" />
+
+                  <div className="flex items-center gap-2">
+                    <span className="text-white/70 text-xs">
+                      {lastGame.isHome ? 'vs' : '@'}
+                    </span>
+                    {lastGame.opponentLogo && (
+                      <Image
+                        src={lastGame.opponentLogo}
+                        alt={lastGame.opponent}
+                        width={36}
+                        height={36}
+                        className="w-9 h-9 object-contain"
+                        unoptimized
+                      />
                     )}
                   </div>
                 </div>
-              </div>
-            )}
+              )}
+
+              {/* Next Game */}
+              {nextGame && (
+                <div className="flex items-center gap-3 p-3 bg-white/10 rounded-xl backdrop-blur-sm">
+                  <div className="text-right">
+                    <div className="text-xs text-white/60 uppercase tracking-wide font-medium">
+                      Next Game
+                    </div>
+                    <div className="text-sm text-white font-medium mt-0.5">
+                      {nextGame.date}
+                    </div>
+                    <div className="text-xs text-white/70">
+                      {nextGame.time}
+                    </div>
+                  </div>
+
+                  <div className="w-px h-10 bg-white/20" />
+
+                  <div className="flex items-center gap-2">
+                    <span className="text-white/70 text-xs">
+                      {nextGame.isHome ? 'vs' : '@'}
+                    </span>
+                    {nextGame.opponentLogo && (
+                      <Image
+                        src={nextGame.opponentLogo}
+                        alt={nextGame.opponent}
+                        width={36}
+                        height={36}
+                        className="w-9 h-9 object-contain"
+                        unoptimized
+                      />
+                    )}
+                  </div>
+                </div>
+              )}
+            </div>
           </div>
         </div>
       </div>

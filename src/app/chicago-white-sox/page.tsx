@@ -3,7 +3,7 @@ import Image from 'next/image'
 import Link from 'next/link'
 import { TeamHubLayout } from '@/components/team'
 import ARTourButton from '@/components/ar/ARTourButton'
-import { CHICAGO_TEAMS, fetchTeamRecord, fetchNextGame } from '@/lib/team-config'
+import { CHICAGO_TEAMS, fetchTeamRecord, fetchNextGame, fetchLastGame } from '@/lib/team-config'
 import { supabaseAdmin } from '@/lib/supabase-server'
 
 export const metadata: Metadata = {
@@ -49,14 +49,15 @@ async function getWhiteSoxPosts(limit: number = 12) {
 export default async function WhiteSoxHubPage() {
   const team = CHICAGO_TEAMS.whitesox
 
-  const [record, nextGame, posts] = await Promise.all([
+  const [record, nextGame, lastGame, posts] = await Promise.all([
     fetchTeamRecord('whitesox'),
     fetchNextGame('whitesox'),
+    fetchLastGame('whitesox'),
     getWhiteSoxPosts(12),
   ])
 
   return (
-    <TeamHubLayout team={team} record={record} nextGame={nextGame} activeTab="overview">
+    <TeamHubLayout team={team} record={record} nextGame={nextGame} lastGame={lastGame} activeTab="overview">
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-8">
         <div className="lg:col-span-2 space-y-8">
           <section>

@@ -3,7 +3,7 @@ import Image from 'next/image'
 import Link from 'next/link'
 import { TeamHubLayout } from '@/components/team'
 import ARTourButton from '@/components/ar/ARTourButton'
-import { CHICAGO_TEAMS, fetchTeamRecord, fetchNextGame } from '@/lib/team-config'
+import { CHICAGO_TEAMS, fetchTeamRecord, fetchNextGame, fetchLastGame } from '@/lib/team-config'
 import { supabaseAdmin } from '@/lib/supabase-server'
 
 export const metadata: Metadata = {
@@ -62,9 +62,10 @@ export default async function CubsHubPage() {
   const team = CHICAGO_TEAMS.cubs
 
   // Fetch all data in parallel
-  const [record, nextGame, posts] = await Promise.all([
+  const [record, nextGame, lastGame, posts] = await Promise.all([
     fetchTeamRecord('cubs'),
     fetchNextGame('cubs'),
+    fetchLastGame('cubs'),
     getCubsPosts(12),
   ])
 
@@ -73,6 +74,7 @@ export default async function CubsHubPage() {
       team={team}
       record={record}
       nextGame={nextGame}
+      lastGame={lastGame}
       activeTab="overview"
     >
       {/* Main two-column layout */}
