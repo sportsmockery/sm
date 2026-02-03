@@ -74,7 +74,7 @@ export function TradeHistory({ trades, page, totalPages, onPageChange }: TradeHi
         <AnimatePresence>
           {trades.map(t => {
             const isExpanded = expandedId === t.id
-            const gradeColor = t.grade >= 75 ? '#22c55e' : t.grade >= 50 ? '#eab308' : '#ef4444'
+            const gradeColor = t.grade >= 70 ? '#22c55e' : t.grade >= 50 ? '#eab308' : '#ef4444'
 
             return (
               <motion.div

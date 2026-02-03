@@ -9,6 +9,22 @@ import { AuditReportCard } from './AuditReportCard'
 import type { PlayerData } from '@/components/gm/PlayerCard'
 import type { AuditResult } from '@/types/gm-audit'
 
+interface HistoricalTradeRef {
+  trade: string
+  haul: string
+  year: number
+  outcome: string
+}
+
+interface SuggestedTrade {
+  type: 'add_picks' | 'add_players' | 'remove_players' | 'restructure' | 'three_team'
+  summary: string
+  reasoning: string
+  specific_suggestions: string[]
+  historical_precedent?: string
+  estimated_grade_improvement: number
+}
+
 interface GradeResult {
   grade: number
   reasoning: string
@@ -24,6 +40,8 @@ interface GradeResult {
     future_assets: number
   }
   cap_analysis?: string
+  historical_comparisons?: HistoricalTradeRef[]
+  suggested_trade?: SuggestedTrade | null
 }
 
 interface DraftPick {
@@ -57,6 +75,160 @@ interface GradeRevealProps {
 function formatMoney(value: number | null | undefined): string {
   if (!value) return ''
   return `$${(value / 1_000_000).toFixed(1)}M`
+}
+
+function HistoricalComparisons({
+  comparisons,
+  isDark
+}: {
+  comparisons: HistoricalTradeRef[]
+  isDark: boolean
+}) {
+  if (!comparisons || comparisons.length === 0) return null
+
+  const subText = isDark ? '#9ca3af' : '#6b7280'
+  const textColor = isDark ? '#fff' : '#1a1a1a'
+
+  return (
+    <div style={{
+      marginTop: 16,
+      padding: 16,
+      backgroundColor: isDark ? '#1f2937' : '#f9fafb',
+      borderRadius: 12,
+      border: `1px solid ${isDark ? '#374151' : '#e5e7eb'}`,
+    }}>
+      <h4 style={{
+        fontSize: '12px',
+        fontWeight: 700,
+        color: subText,
+        marginBottom: 12,
+        textTransform: 'uppercase',
+        letterSpacing: '0.5px',
+      }}>
+        Similar Historical Trades
+      </h4>
+      {comparisons.map((comp, i) => (
+        <div key={i} style={{
+          marginBottom: i < comparisons.length - 1 ? 12 : 0,
+          paddingBottom: i < comparisons.length - 1 ? 12 : 0,
+          borderBottom: i < comparisons.length - 1 ? `1px solid ${isDark ? '#374151' : '#e5e7eb'}` : 'none',
+        }}>
+          <div style={{ fontSize: '13px', fontWeight: 600, color: textColor }}>
+            {comp.trade} <span style={{ color: subText, fontWeight: 400 }}>({comp.year})</span>
+          </div>
+          <div style={{ fontSize: '12px', color: subText, marginTop: 2 }}>
+            Haul: {comp.haul}
+          </div>
+          <div style={{ fontSize: '12px', color: '#22c55e', marginTop: 2 }}>
+            {comp.outcome}
+          </div>
+        </div>
+      ))}
+    </div>
+  )
+}
+
+function SuggestedTradePanel({
+  suggestion,
+  isDark
+}: {
+  suggestion: SuggestedTrade | null
+  isDark: boolean
+}) {
+  if (!suggestion) return null
+
+  const subText = isDark ? '#9ca3af' : '#6b7280'
+  const textColor = isDark ? '#fff' : '#1a1a1a'
+
+  const typeLabels: Record<SuggestedTrade['type'], string> = {
+    add_picks: 'Add Draft Picks',
+    add_players: 'Add Players',
+    remove_players: 'Remove Players',
+    restructure: 'Restructure Deal',
+    three_team: 'Three-Team Trade',
+  }
+
+  return (
+    <div style={{
+      marginTop: 16,
+      padding: 16,
+      backgroundColor: isDark ? 'rgba(59, 130, 246, 0.1)' : 'rgba(59, 130, 246, 0.05)',
+      borderRadius: 12,
+      border: '1px solid #3b82f6',
+    }}>
+      <h4 style={{
+        fontWeight: 700,
+        color: '#3b82f6',
+        fontSize: '14px',
+        marginBottom: 8,
+        display: 'flex',
+        alignItems: 'center',
+        gap: 8,
+      }}>
+        <span style={{ fontSize: '16px' }}>💡</span>
+        How to Improve This Trade
+      </h4>
+
+      <div style={{
+        display: 'inline-block',
+        padding: '4px 10px',
+        borderRadius: 6,
+        backgroundColor: isDark ? '#374151' : '#e5e7eb',
+        fontSize: '11px',
+        fontWeight: 600,
+        color: subText,
+        marginBottom: 12,
+      }}>
+        {typeLabels[suggestion.type]}
+      </div>
+
+      <p style={{ fontSize: '13px', color: textColor, marginBottom: 12, lineHeight: 1.5 }}>
+        {suggestion.summary}
+      </p>
+
+      <div style={{ marginBottom: 12 }}>
+        <p style={{ fontSize: '11px', color: subText, marginBottom: 6, fontWeight: 600 }}>Suggestions:</p>
+        <ul style={{
+          margin: 0,
+          paddingLeft: 16,
+          listStyleType: 'disc',
+        }}>
+          {suggestion.specific_suggestions.map((s, i) => (
+            <li key={i} style={{ fontSize: '12px', color: textColor, marginBottom: 4 }}>
+              {s}
+            </li>
+          ))}
+        </ul>
+      </div>
+
+      {suggestion.historical_precedent && (
+        <p style={{
+          fontSize: '11px',
+          color: subText,
+          fontStyle: 'italic',
+          marginBottom: 12,
+          padding: '8px 10px',
+          backgroundColor: isDark ? '#1f2937' : '#fff',
+          borderRadius: 6,
+        }}>
+          📚 {suggestion.historical_precedent}
+        </p>
+      )}
+
+      <div style={{
+        fontSize: '13px',
+        padding: '8px 12px',
+        backgroundColor: 'rgba(34, 197, 94, 0.1)',
+        borderRadius: 6,
+        display: 'inline-block',
+      }}>
+        <span style={{ color: subText }}>Estimated improvement: </span>
+        <span style={{ color: '#22c55e', fontWeight: 700 }}>
+          +{suggestion.estimated_grade_improvement} points
+        </span>
+      </div>
+    </div>
+  )
 }
 
 function ConfettiParticle({ delay }: { delay: number }) {
@@ -130,7 +302,7 @@ export function GradeReveal({ result, show, onClose, onNewTrade, tradeDetails, s
 
   if (!show || !result) return null
 
-  const gradeColor = result.grade >= 75 ? '#22c55e' : result.grade >= 50 ? '#eab308' : '#ef4444'
+  const gradeColor = result.grade >= 70 ? '#22c55e' : result.grade >= 50 ? '#eab308' : '#ef4444'
   const textColor = isDark ? '#fff' : '#1a1a1a'
   const subText = isDark ? '#9ca3af' : '#6b7280'
 
@@ -486,6 +658,28 @@ export function GradeReveal({ result, show, onClose, onNewTrade, tradeDetails, s
               }}
             >
               {result.reasoning}
+            </motion.div>
+          )}
+
+          {/* Historical Comparisons */}
+          {phase >= 4 && result.historical_comparisons && result.historical_comparisons.length > 0 && (
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.1 }}
+            >
+              <HistoricalComparisons comparisons={result.historical_comparisons} isDark={isDark} />
+            </motion.div>
+          )}
+
+          {/* Suggested Trade Improvements (for rejected trades) */}
+          {phase >= 4 && result.grade < 70 && result.suggested_trade && (
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.2 }}
+            >
+              <SuggestedTradePanel suggestion={result.suggested_trade} isDark={isDark} />
             </motion.div>
           )}
 

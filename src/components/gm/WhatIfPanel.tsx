@@ -82,7 +82,7 @@ export function WhatIfPanel({
   if (!show) return null
 
   const gradeColor = (grade: number) =>
-    grade >= 75 ? '#22c55e' : grade >= 50 ? '#eab308' : '#ef4444'
+    grade >= 70 ? '#22c55e' : grade >= 50 ? '#eab308' : '#ef4444'
 
   return (
     <motion.div
