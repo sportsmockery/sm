@@ -6,6 +6,7 @@ import { ValidationIndicator, ValidationState } from './ValidationIndicator'
 import { AuditButton } from './AuditButton'
 import { AuditReportCard } from './AuditReportCard'
 import { HistoricalContextPanel, SuggestedTradePanel } from './HistoricalContextPanel'
+import { GradeProgressButton } from './GradeProgressButton'
 import { useTheme } from '@/contexts/ThemeContext'
 import type { DraftPick, TradeFlow } from '@/types/gm'
 import type { PlayerData } from './PlayerCard'
@@ -485,32 +486,17 @@ export function ThreeTeamTradeBoard({
       )}
 
       {/* Grade button */}
-      {!gradeResult && (() => {
-        const isBlocked = validation?.status === 'invalid'
-        const canClick = canGrade && !grading && !isBlocked
-        return (
-          <motion.button
-            whileHover={canClick ? { scale: 1.02 } : {}}
-            whileTap={canClick ? { scale: 0.98 } : {}}
-            onClick={onGrade}
-            disabled={!canClick}
-            style={{
-              width: '100%',
-              padding: '14px 32px',
-              borderRadius: 12,
-              border: 'none',
-              backgroundColor: canClick ? '#bc0000' : (isDark ? '#374151' : '#d1d5db'),
-              color: canClick ? '#fff' : subText,
-              fontWeight: 800,
-              fontSize: 16,
-              cursor: canClick ? 'pointer' : 'not-allowed',
-              letterSpacing: '0.5px',
-            }}
-          >
-            {grading ? 'ANALYZING 3-TEAM TRADE...' : isBlocked ? 'FIX ISSUES TO GRADE' : 'GRADE 3-TEAM TRADE'}
-          </motion.button>
-        )
-      })()}
+      {!gradeResult && (
+        <GradeProgressButton
+          grading={grading}
+          canGrade={canGrade}
+          isBlocked={validation?.status === 'invalid'}
+          onGrade={onGrade}
+          isDark={isDark}
+          label="GRADE 3-TEAM TRADE"
+          blockedLabel="FIX ISSUES TO GRADE"
+        />
+      )}
 
       {/* Grade Result Display */}
       {gradeResult && (

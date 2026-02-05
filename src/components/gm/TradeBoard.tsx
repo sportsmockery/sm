@@ -12,6 +12,7 @@ import { AuditButton } from './AuditButton'
 import { AuditReportCard } from './AuditReportCard'
 import { HistoricalContextPanel, SuggestedTradePanel } from './HistoricalContextPanel'
 import { DataFreshnessIndicator } from './DataFreshnessIndicator'
+import { GradeProgressButton } from './GradeProgressButton'
 import { useTheme } from '@/contexts/ThemeContext'
 import type { DraftPick, HistoricalContext, EnhancedSuggestedTrade, LegacySuggestedTrade, LegacyHistoricalTradeRef, DataFreshness } from '@/types/gm'
 import type { AuditResult } from '@/types/gm-audit'
@@ -452,30 +453,17 @@ export function TradeBoard({
         )}
 
         {/* Grade button - hide when we have a result */}
-        {!gradeResult && (() => {
-          const isBlocked = validation?.status === 'invalid'
-          const canClick = canGrade && !grading && !isBlocked
-          return (
-            <button
-              onClick={onGrade}
-              disabled={!canClick}
-              style={{
-                width: '100%',
-                padding: '14px 32px',
-                borderRadius: '12px',
-                border: 'none',
-                backgroundColor: canClick ? '#bc0000' : (isDark ? '#374151' : '#d1d5db'),
-                color: canClick ? '#fff' : subText,
-                fontWeight: 800,
-                fontSize: '16px',
-                cursor: canClick ? 'pointer' : 'not-allowed',
-                letterSpacing: '0.5px',
-              }}
-            >
-              {grading ? 'ANALYZING TRADE...' : isBlocked ? 'FIX ISSUES TO GRADE' : 'GRADE TRADE'}
-            </button>
-          )
-        })()}
+        {!gradeResult && (
+          <GradeProgressButton
+            grading={grading}
+            canGrade={canGrade}
+            isBlocked={validation?.status === 'invalid'}
+            onGrade={onGrade}
+            isDark={isDark}
+            label="GRADE TRADE"
+            blockedLabel="FIX ISSUES TO GRADE"
+          />
+        )}
 
         {/* Inline Grade Result */}
         {gradeResult && (
