@@ -987,6 +987,13 @@ export default function GMPage() {
       if (res.ok) {
         const data = await res.json()
         console.log('[gradeTrade] Success response:', data)
+        console.log('[gradeTrade] New fields check:', {
+          grade: data.grade,
+          hasHistoricalComparisons: !!data.historical_comparisons,
+          historicalComparisonsCount: data.historical_comparisons?.length ?? 0,
+          hasSuggestedTrade: !!data.suggested_trade,
+          suggestedTradeType: data.suggested_trade?.type ?? 'none',
+        })
         setGradeResult(data)
         fetchTrades()
         fetchLeaderboard()
