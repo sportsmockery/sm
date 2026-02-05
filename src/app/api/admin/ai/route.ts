@@ -8,6 +8,106 @@ const anthropic = new Anthropic()
 const DATALAB_API = 'https://datalab.sportsmockery.com'
 
 /**
+ * Create a poll from DataLab's suggestion and insert it into content
+ */
+async function createPollFromDataLabSuggestion(
+  pollSuggestion: {
+    question: string
+    options: string[]
+    poll_type?: string
+    team_theme?: string
+    confidence?: number
+  },
+  content: string,
+  category?: string,
+  team?: string,
+  postId?: string
+): Promise<NextResponse> {
+  try {
+    // Determine team theme
+    const teamMap: Record<string, string> = {
+      'Chicago Bears': 'bears',
+      'Bears': 'bears',
+      'Chicago Bulls': 'bulls',
+      'Bulls': 'bulls',
+      'Chicago Cubs': 'cubs',
+      'Cubs': 'cubs',
+      'Chicago White Sox': 'whitesox',
+      'White Sox': 'whitesox',
+      'Chicago Blackhawks': 'blackhawks',
+      'Blackhawks': 'blackhawks',
+    }
+    const teamTheme = pollSuggestion.team_theme || team || (category ? teamMap[category] : null) || null
+
+    // Create the poll via internal API call
+    const pollPayload = {
+      question: pollSuggestion.question,
+      options: pollSuggestion.options.map((text: string) => ({ text })),
+      pollType: pollSuggestion.poll_type || 'single',
+      status: 'active',
+      showResults: true,
+      teamTheme,
+      source: 'postiq',
+      sourcePostId: postId || null,
+      aiConfidence: pollSuggestion.confidence || 0.8,
+    }
+
+    const baseUrl = process.env.NEXT_PUBLIC_APP_URL || process.env.VERCEL_URL
+      ? `https://${process.env.VERCEL_URL}`
+      : 'http://localhost:3000'
+
+    const pollResponse = await fetch(`${baseUrl}/api/admin/polls`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(pollPayload),
+    })
+
+    if (!pollResponse.ok) {
+      console.error('Failed to create poll from DataLab suggestion:', await pollResponse.text())
+      return NextResponse.json({
+        success: false,
+        reason: 'Failed to create poll',
+        poll: pollSuggestion,
+      })
+    }
+
+    const pollResult = await pollResponse.json()
+    const pollId = pollResult.id || pollResult.poll?.id
+    const shortcode = `[poll:${pollId}]`
+
+    // Insert shortcode after 2nd paragraph by default
+    const updatedContent = insertPollShortcodeAfterParagraph(content, shortcode, 2)
+
+    return NextResponse.json({
+      success: true,
+      pollId,
+      shortcode,
+      question: pollSuggestion.question,
+      options: pollSuggestion.options,
+      confidence: pollSuggestion.confidence || 0.8,
+      paragraphIndex: 2,
+      updatedContent,
+      poll: {
+        id: pollId,
+        question: pollSuggestion.question,
+        options: pollSuggestion.options,
+        poll_type: pollSuggestion.poll_type || 'single',
+        team_theme: teamTheme,
+        confidence: pollSuggestion.confidence || 0.8,
+      },
+      api_version: 'v2_with_creation',
+    })
+  } catch (error) {
+    console.error('Error creating poll from DataLab suggestion:', error)
+    return NextResponse.json({
+      success: false,
+      reason: 'Failed to process DataLab poll suggestion',
+      poll: pollSuggestion,
+    })
+  }
+}
+
+/**
  * Extract JSON from a response that might be wrapped in markdown code blocks
  */
 function extractJSON(text: string): string {
@@ -132,6 +232,12 @@ export async function POST(request: NextRequest) {
     const datalabResponse = await tryDataLabPostIQ(body, userId)
     if (datalabResponse) {
       const data = await datalabResponse.json()
+
+      // For poll action, DataLab returns just the suggestion - we need to create the poll
+      if ((action === 'poll' || action === 'publish-assist') && data.poll) {
+        return await createPollFromDataLabSuggestion(data.poll, content || '', category, team, postId)
+      }
+
       return NextResponse.json(data)
     }
 
