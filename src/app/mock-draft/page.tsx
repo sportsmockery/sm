@@ -482,7 +482,14 @@ export default function MockDraftPage() {
                     let statusColor = subText
                     if (teamElig) {
                       if (isEligible) {
-                        statusText = teamElig.reason || '✓ Ready to draft'
+                        // Clean up the reason text - remove "TBD" messaging for eliminated teams
+                        let reason = teamElig.reason || '✓ Ready to draft'
+                        if (teamElig.season_status === 'eliminated' && reason.includes('TBD')) {
+                          // Playoffs are over, draft position is set
+                          const eliminationRound = reason.match(/Eliminated in ([^.]+)/)?.[1] || 'playoffs'
+                          reason = `Eliminated in ${eliminationRound}. Ready to draft!`
+                        }
+                        statusText = reason
                         statusColor = '#10b981'
                       } else {
                         statusText = teamElig.reason || 'Not available'
