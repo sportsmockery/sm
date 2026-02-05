@@ -961,12 +961,28 @@ export default function GMPage() {
       }
 
       console.log('[gradeTrade] Sending request:', requestBody)
-      const res = await fetch('/api/gm/grade', {
+
+      // Try v2 API first (has historical comparisons & suggested trades)
+      let res = await fetch('/api/v2/gm/grade', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(requestBody),
       })
-      console.log('[gradeTrade] Response status:', res.status)
+      console.log('[gradeTrade] v2 Response status:', res.status)
+
+      // Fallback to v1 if v2 fails
+      if (!res.ok) {
+        const v2Data = await res.json().catch(() => ({}))
+        if (v2Data.fallback_to_legacy || res.status === 503) {
+          console.log('[gradeTrade] Falling back to v1 API')
+          res = await fetch('/api/gm/grade', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(requestBody),
+          })
+          console.log('[gradeTrade] v1 Response status:', res.status)
+        }
+      }
 
       if (res.ok) {
         const data = await res.json()
