@@ -119,7 +119,7 @@ export default function ChartBuilderModal({
   // Loading state - AI is analyzing
   if (isLoading) {
     return (
-      <div className="fixed inset-0 z-50 flex items-center justify-center">
+      <div className="fixed inset-0 z-50 flex items-center justify-center" role="dialog" aria-modal="true" aria-label="Chart Builder Loading">
         <div className="absolute inset-0 bg-black/70 backdrop-blur-sm" />
         <div className="relative z-10 w-full max-w-md rounded-2xl bg-zinc-900 p-8 text-center shadow-2xl">
           <div className="mx-auto h-16 w-16 animate-spin rounded-full border-4 border-[#8B0000] border-t-transparent" />
@@ -133,7 +133,7 @@ export default function ChartBuilderModal({
   // No data found state
   if (!hasValidData && !showDataEditor) {
     return (
-      <div className="fixed inset-0 z-50 flex items-center justify-center">
+      <div className="fixed inset-0 z-50 flex items-center justify-center" role="dialog" aria-modal="true" aria-label="No Chart Data Found">
         <div className="absolute inset-0 bg-black/70 backdrop-blur-sm" onClick={handleClose} />
         <div className="relative z-10 w-full max-w-lg rounded-2xl bg-zinc-900 p-8 shadow-2xl">
           <div className="text-center">
@@ -180,7 +180,7 @@ export default function ChartBuilderModal({
 
   // Main chart view - PostIQ created a chart
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center">
+    <div className="fixed inset-0 z-50 flex items-center justify-center" role="dialog" aria-modal="true" aria-label="PostIQ Chart Builder">
       <div className="absolute inset-0 bg-black/70 backdrop-blur-sm" onClick={handleClose} />
 
       <div className="relative z-10 w-full max-w-4xl max-h-[90vh] overflow-hidden rounded-2xl bg-zinc-900 shadow-2xl">
