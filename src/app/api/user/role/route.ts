@@ -10,20 +10,32 @@ export async function GET(request: NextRequest) {
   }
 
   try {
-    // Use ilike for case-insensitive email matching
-    const { data: author, error } = await supabaseAdmin
+    // Check sm_users table first (primary user table)
+    const { data: user } = await supabaseAdmin
+      .from('sm_users')
+      .select('role, email')
+      .ilike('email', email)
+      .single()
+
+    if (user?.role) {
+      console.log(`[User Role] Found role '${user.role}' in sm_users for: ${email}`)
+      return NextResponse.json({ role: user.role })
+    }
+
+    // Fall back to sm_authors table
+    const { data: author } = await supabaseAdmin
       .from('sm_authors')
       .select('role, email')
       .ilike('email', email)
       .single()
 
-    if (error || !author) {
-      console.log(`[User Role] No author found for email: ${email}`)
-      return NextResponse.json({ role: null })
+    if (author?.role) {
+      console.log(`[User Role] Found role '${author.role}' in sm_authors for: ${email}`)
+      return NextResponse.json({ role: author.role })
     }
 
-    console.log(`[User Role] Found role '${author.role}' for email: ${email}`)
-    return NextResponse.json({ role: author.role })
+    console.log(`[User Role] No role found for email: ${email}`)
+    return NextResponse.json({ role: null })
   } catch (err) {
     console.error('[User Role] Error:', err)
     return NextResponse.json({ role: null })
