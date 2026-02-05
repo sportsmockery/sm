@@ -73,7 +73,8 @@ const RichTextEditor = forwardRef<RichTextEditorRef, RichTextEditorProps>(functi
     },
     editorProps: {
       attributes: {
-        class: 'prose prose-zinc dark:prose-invert max-w-none min-h-[400px] focus:outline-none px-4 py-3 bg-white dark:bg-zinc-900 text-zinc-700 dark:text-zinc-300',
+        class: 'prose max-w-none min-h-[400px] focus:outline-none px-4 py-3 text-zinc-800 dark:text-zinc-200',
+        style: 'background-color: inherit;',
       },
     },
   })
@@ -402,8 +403,10 @@ const RichTextEditor = forwardRef<RichTextEditorRef, RichTextEditorProps>(functi
         </ToolbarButton>
       </div>
 
-      {/* Editor Content */}
-      <EditorContent editor={editor} />
+      {/* Editor Content - explicit white background for light mode */}
+      <div className="bg-white dark:bg-zinc-900">
+        <EditorContent editor={editor} />
+      </div>
 
       {/* Character/Word Count */}
       <div className="flex items-center justify-between border-t border-zinc-200 dark:border-zinc-700 px-4 py-2 text-xs text-zinc-500 dark:text-zinc-400 bg-zinc-50 dark:bg-zinc-800/50">
