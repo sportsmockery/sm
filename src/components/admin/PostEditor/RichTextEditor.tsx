@@ -200,9 +200,12 @@ const RichTextEditor = forwardRef<RichTextEditorRef, RichTextEditorProps>(functi
       title={title}
       className={`p-2 rounded transition-colors ${
         isActive
-          ? 'bg-zinc-200 dark:bg-zinc-700 text-zinc-900 dark:text-white'
-          : 'text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-800'
+          ? 'bg-zinc-200 dark:bg-zinc-700'
+          : 'hover:bg-zinc-100 dark:hover:bg-zinc-800'
       }`}
+      style={{
+        color: isActive ? 'var(--text-primary, #222222)' : 'var(--text-muted, #666666)',
+      }}
     >
       {children}
     </button>
@@ -211,7 +214,10 @@ const RichTextEditor = forwardRef<RichTextEditorRef, RichTextEditorProps>(functi
   return (
     <div className="rounded-lg border border-zinc-200 dark:border-zinc-700 overflow-hidden" style={{ backgroundColor: 'var(--bg-page, #ffffff)' }}>
       {/* Toolbar */}
-      <div className="flex flex-wrap items-center gap-1 border-b border-zinc-200 dark:border-zinc-700 p-2 bg-zinc-50 dark:bg-zinc-800/50">
+      <div
+        className="flex flex-wrap items-center gap-1 border-b border-zinc-200 dark:border-zinc-700 p-2"
+        style={{ backgroundColor: 'var(--bg-secondary, #f4f4f5)' }}
+      >
         {/* Text Formatting */}
         <ToolbarButton
           onClick={() => editor.chain().focus().toggleBold().run()}
@@ -241,7 +247,7 @@ const RichTextEditor = forwardRef<RichTextEditorRef, RichTextEditorProps>(functi
           </svg>
         </ToolbarButton>
 
-        <div className="w-px h-6 bg-zinc-300 dark:bg-zinc-600 mx-1" />
+        <div className="w-px h-6 mx-1" style={{ backgroundColor: 'var(--border-color, #e0e0e0)' }} />
 
         {/* Headings */}
         <ToolbarButton
@@ -259,7 +265,7 @@ const RichTextEditor = forwardRef<RichTextEditorRef, RichTextEditorProps>(functi
           <span className="font-bold text-sm">H3</span>
         </ToolbarButton>
 
-        <div className="w-px h-6 bg-zinc-300 dark:bg-zinc-600 mx-1" />
+        <div className="w-px h-6 mx-1" style={{ backgroundColor: 'var(--border-color, #e0e0e0)' }} />
 
         {/* Lists */}
         <ToolbarButton
@@ -290,7 +296,7 @@ const RichTextEditor = forwardRef<RichTextEditorRef, RichTextEditorProps>(functi
           </svg>
         </ToolbarButton>
 
-        <div className="w-px h-6 bg-zinc-300 dark:bg-zinc-600 mx-1" />
+        <div className="w-px h-6 mx-1" style={{ backgroundColor: 'var(--border-color, #e0e0e0)' }} />
 
         {/* Link */}
         <div className="relative">
@@ -333,7 +339,7 @@ const RichTextEditor = forwardRef<RichTextEditorRef, RichTextEditorProps>(functi
           )}
         </div>
 
-        <div className="w-px h-6 bg-zinc-300 dark:bg-zinc-600 mx-1" />
+        <div className="w-px h-6 mx-1" style={{ backgroundColor: 'var(--border-color, #e0e0e0)' }} />
 
         {/* Media Embeds */}
         <ToolbarButton
@@ -361,7 +367,7 @@ const RichTextEditor = forwardRef<RichTextEditorRef, RichTextEditorProps>(functi
           </svg>
         </ToolbarButton>
 
-        <div className="w-px h-6 bg-zinc-300 dark:bg-zinc-600 mx-1" />
+        <div className="w-px h-6 mx-1" style={{ backgroundColor: 'var(--border-color, #e0e0e0)' }} />
 
         {/* Charts & Polls */}
         <ToolbarButton
@@ -381,7 +387,7 @@ const RichTextEditor = forwardRef<RichTextEditorRef, RichTextEditorProps>(functi
           </svg>
         </ToolbarButton>
 
-        <div className="w-px h-6 bg-zinc-300 dark:bg-zinc-600 mx-1" />
+        <div className="w-px h-6 mx-1" style={{ backgroundColor: 'var(--border-color, #e0e0e0)' }} />
 
         {/* Undo/Redo */}
         <ToolbarButton
@@ -411,7 +417,10 @@ const RichTextEditor = forwardRef<RichTextEditorRef, RichTextEditorProps>(functi
       </div>
 
       {/* Character/Word Count */}
-      <div className="flex items-center justify-between border-t border-zinc-200 dark:border-zinc-700 px-4 py-2 text-xs text-zinc-500 dark:text-zinc-400 bg-zinc-50 dark:bg-zinc-800/50">
+      <div
+        className="flex items-center justify-between border-t border-zinc-200 dark:border-zinc-700 px-4 py-2 text-xs"
+        style={{ backgroundColor: 'var(--bg-secondary, #f4f4f5)', color: 'var(--text-muted, #71717a)' }}
+      >
         <span>{editor.storage.characterCount.words()} words</span>
         <span>{editor.storage.characterCount.characters()} characters</span>
       </div>
