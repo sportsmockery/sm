@@ -14,6 +14,8 @@ import ScrollToTop from "@/components/layout/ScrollToTop";
 import CookieBanner from "@/components/layout/CookieBanner";
 import TeamChatPanel from "@/components/chat/TeamChatPanel";
 import MotionProvider from "@/components/motion/MotionProvider";
+import { Analytics } from "@vercel/analytics/react";
+import { SpeedInsights } from "@vercel/speed-insights/next";
 
 // Floating buttons disabled - users access AI and Fan Chat via header buttons
 // import BearsAIButton from "@/components/bears/BearsAIButton";
@@ -159,6 +161,8 @@ export default function RootLayout({
               {/* Floating buttons disabled - users access AI and Fan Chat via header buttons */}
               {/* AR Tour available in article sidebars */}
             </ChatProvider>
+            <Analytics />
+            <SpeedInsights />
             </SubscriptionProvider>
           </AuthProvider>
         </ThemeProvider>
