@@ -209,7 +209,7 @@ export default function UsersPage() {
     <div className="p-6">
       <div className="flex justify-between items-center mb-6">
         <div>
-          <h1 className="text-2xl font-bold" style={{ color: 'var(--text-primary, #222222)' }}>Users</h1>
+          <h1 className="text-2xl font-bold" style={{ color: 'var(--text-primary)' }}>Users</h1>
           {syncMessage && (
             <p className={`text-sm mt-1 ${syncMessage.includes('Error') ? 'text-red-400' : 'text-green-400'}`}>
               {syncMessage}
@@ -220,7 +220,8 @@ export default function UsersPage() {
           <button
             onClick={handleSyncUsers}
             disabled={syncing}
-            className="px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-500 disabled:opacity-50 transition-colors flex items-center gap-2"
+            className="px-4 py-2 text-white rounded-lg hover:opacity-90 disabled:opacity-50 transition-opacity flex items-center gap-2"
+            style={{ backgroundColor: 'var(--text-muted)' }}
             title="Sync users from Supabase Auth"
           >
             <svg className={`w-5 h-5 ${syncing ? 'animate-spin' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -230,7 +231,8 @@ export default function UsersPage() {
           </button>
           <button
             onClick={() => setShowInvite(true)}
-            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center gap-2"
+            className="px-4 py-2 text-white rounded-lg hover:opacity-90 transition-opacity flex items-center gap-2"
+            style={{ backgroundColor: 'var(--accent-red)' }}
           >
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
@@ -251,17 +253,18 @@ export default function UsersPage() {
 
       {loading ? (
         <div className="flex items-center justify-center h-64">
-          <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-blue-500"></div>
+          <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2" style={{ borderColor: 'var(--accent-red)' }}></div>
         </div>
       ) : users.length === 0 ? (
-        <div className="text-center py-12 text-gray-400">
+        <div className="text-center py-12" style={{ color: 'var(--text-muted)' }}>
           <svg className="w-16 h-16 mx-auto mb-4 opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
           </svg>
           <p>No users found</p>
           <button
             onClick={() => setShowInvite(true)}
-            className="mt-4 text-blue-500 hover:text-blue-400"
+            className="mt-4 hover:opacity-80 transition-opacity"
+            style={{ color: 'var(--accent-red)' }}
           >
             Invite your first user
           </button>
@@ -278,11 +281,11 @@ export default function UsersPage() {
       {/* Password Reset Modal */}
       {passwordModal.isOpen && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-          <div className="bg-gray-800 rounded-lg p-6 w-full max-w-md mx-4">
-            <h3 className="text-lg font-semibold text-white mb-4">
+          <div className="rounded-lg p-6 w-full max-w-md mx-4" style={{ backgroundColor: 'var(--bg-card)', border: '1px solid var(--border-default)' }}>
+            <h3 className="text-lg font-semibold mb-4" style={{ color: 'var(--text-primary)' }}>
               Manage Password
             </h3>
-            <p className="text-gray-400 text-sm mb-4">
+            <p className="text-sm mb-4" style={{ color: 'var(--text-muted)' }}>
               User: {passwordModal.email}
             </p>
 
@@ -298,7 +301,7 @@ export default function UsersPage() {
 
             <div className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-gray-300 mb-1">
+                <label className="block text-sm font-medium mb-1" style={{ color: 'var(--text-secondary)' }}>
                   Set New Password
                 </label>
                 <input
@@ -306,7 +309,8 @@ export default function UsersPage() {
                   value={newPassword}
                   onChange={(e) => setNewPassword(e.target.value)}
                   placeholder="Enter new password (min 6 chars)"
-                  className="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:border-blue-500"
+                  className="w-full px-4 py-2 rounded-lg focus:outline-none"
+                  style={{ backgroundColor: 'var(--bg-tertiary)', border: '1px solid var(--border-default)', color: 'var(--text-primary)' }}
                 />
               </div>
 
@@ -314,24 +318,27 @@ export default function UsersPage() {
                 <button
                   onClick={handleSetPassword}
                   disabled={passwordLoading || !newPassword}
-                  className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 transition-colors"
+                  className="flex-1 px-4 py-2 text-white rounded-lg hover:opacity-90 disabled:opacity-50 transition-opacity"
+                  style={{ backgroundColor: 'var(--accent-red)' }}
                 >
                   {passwordLoading ? 'Setting...' : 'Set Password'}
                 </button>
                 <button
                   onClick={handleSendResetEmail}
                   disabled={passwordLoading}
-                  className="flex-1 px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-500 disabled:opacity-50 transition-colors"
+                  className="flex-1 px-4 py-2 text-white rounded-lg hover:opacity-90 disabled:opacity-50 transition-opacity"
+                  style={{ backgroundColor: 'var(--text-muted)' }}
                 >
                   {passwordLoading ? 'Sending...' : 'Send Reset Email'}
                 </button>
               </div>
             </div>
 
-            <div className="mt-4 pt-4 border-t border-gray-700">
+            <div className="mt-4 pt-4" style={{ borderTop: '1px solid var(--border-default)' }}>
               <button
                 onClick={() => setPasswordModal({ isOpen: false, userId: '', email: '' })}
-                className="w-full px-4 py-2 text-gray-400 hover:text-white transition-colors"
+                className="w-full px-4 py-2 hover:opacity-80 transition-opacity"
+                style={{ color: 'var(--text-muted)' }}
               >
                 Cancel
               </button>

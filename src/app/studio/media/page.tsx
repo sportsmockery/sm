@@ -94,7 +94,10 @@ export default function StudioMediaPage() {
           <h1 className="text-2xl font-bold text-[var(--text-primary)]">Media Library</h1>
           <p className="mt-1 text-[var(--text-muted)]">Manage images and files</p>
         </div>
-        <label className="inline-flex items-center rounded-lg px-4 py-2.5 text-sm font-medium cursor-pointer bg-[#bc0000] text-white dark:bg-white dark:text-[#bc0000]">
+        <label
+          className="inline-flex items-center rounded-lg px-4 py-2.5 text-sm font-medium cursor-pointer"
+          style={{ backgroundColor: '#bc0000', color: '#ffffff' }}
+        >
           {uploading ? 'Uploading...' : 'Upload Files'}
           <input
             ref={fileInputRef}
@@ -129,7 +132,10 @@ export default function StudioMediaPage() {
             <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909m-18 3.75h16.5a1.5 1.5 0 001.5-1.5V6a1.5 1.5 0 00-1.5-1.5H3.75A1.5 1.5 0 002.25 6v12a1.5 1.5 0 001.5 1.5zm10.5-11.25h.008v.008h-.008V8.25zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z" />
           </svg>
           <p className="text-[var(--text-muted)] text-center mb-4">No media files yet</p>
-          <label className="inline-flex items-center rounded-lg px-4 py-2 text-sm font-medium cursor-pointer bg-[#bc0000] text-white dark:bg-white dark:text-[#bc0000]">
+          <label
+            className="inline-flex items-center rounded-lg px-4 py-2 text-sm font-medium cursor-pointer"
+            style={{ backgroundColor: '#bc0000', color: '#ffffff' }}
+          >
             Upload your first file
             <input
               type="file"

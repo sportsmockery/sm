@@ -196,11 +196,11 @@ export default function AdInserterPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-zinc-950 p-8">
+      <div className="min-h-screen p-8" style={{ backgroundColor: 'var(--bg-surface)' }}>
         <div className="mx-auto max-w-6xl">
           <div className="flex items-center justify-center py-20">
-            <div className="h-8 w-8 animate-spin rounded-full border-2 border-red-600 border-t-transparent" />
-            <span className="ml-3 text-zinc-400">Loading ad placements...</span>
+            <div className="h-8 w-8 animate-spin rounded-full border-2 border-t-transparent" style={{ borderColor: 'var(--accent-red)' }} />
+            <span className="ml-3" style={{ color: 'var(--text-muted)' }}>Loading ad placements...</span>
           </div>
         </div>
       </div>
@@ -208,27 +208,29 @@ export default function AdInserterPage() {
   }
 
   return (
-    <div className="min-h-screen bg-zinc-950 p-8">
+    <div className="min-h-screen p-8" style={{ backgroundColor: 'var(--bg-surface)' }}>
       <div className="mx-auto max-w-6xl">
         {/* Header */}
         <div className="mb-8 flex items-center justify-between">
           <div>
-            <h1 className="text-2xl font-bold text-white">Ad Inserter</h1>
-            <p className="text-zinc-400 mt-1">
+            <h1 className="text-2xl font-bold" style={{ color: 'var(--text-primary)' }}>Ad Inserter</h1>
+            <p className="mt-1" style={{ color: 'var(--text-muted)' }}>
               Manage ad placements across your site - similar to WordPress Ad Inserter
             </p>
           </div>
           <div className="flex gap-3">
             <Link
               href="/admin"
-              className="rounded-lg border border-zinc-700 px-4 py-2 text-sm text-zinc-300 hover:bg-zinc-800"
+              className="rounded-lg px-4 py-2 text-sm hover:opacity-80 transition-opacity"
+              style={{ border: '1px solid var(--border-default)', color: 'var(--text-secondary)' }}
             >
               Back to Admin
             </Link>
             {!isCreating && (
               <button
                 onClick={() => setIsCreating(true)}
-                className="rounded-lg bg-red-600 px-4 py-2 text-sm font-medium text-white hover:bg-red-700"
+                className="rounded-lg px-4 py-2 text-sm font-medium text-white hover:opacity-90 transition-opacity"
+                style={{ backgroundColor: 'var(--accent-red)' }}
               >
                 + New Ad Placement
               </button>
@@ -243,7 +245,7 @@ export default function AdInserterPage() {
             <p className="mt-1 text-sm text-yellow-200">
               The sm_ad_placements table needs to be created. Run this SQL in Supabase:
             </p>
-            <pre className="mt-2 overflow-x-auto rounded bg-zinc-900 p-3 text-xs text-zinc-300">
+            <pre className="mt-2 overflow-x-auto rounded p-3 text-xs" style={{ backgroundColor: 'var(--bg-card)', color: 'var(--text-secondary)' }}>
 {`CREATE TABLE sm_ad_placements (
   id SERIAL PRIMARY KEY,
   name VARCHAR(255) NOT NULL,
@@ -265,14 +267,15 @@ CREATE INDEX idx_ad_placements_active ON sm_ad_placements(is_active);`}
 
         {/* Create/Edit Form */}
         {isCreating && (
-          <div className="mb-8 rounded-xl border border-zinc-800 bg-zinc-900 p-6">
+          <div className="mb-8 rounded-xl p-6" style={{ border: '1px solid var(--border-default)', backgroundColor: 'var(--bg-card)' }}>
             <div className="mb-4 flex items-center justify-between">
-              <h2 className="text-lg font-semibold text-white">
+              <h2 className="text-lg font-semibold" style={{ color: 'var(--text-primary)' }}>
                 {editingAd ? 'Edit Ad Placement' : 'New Ad Placement'}
               </h2>
               <button
                 onClick={resetForm}
-                className="text-zinc-400 hover:text-white"
+                className="hover:opacity-80 transition-opacity"
+                style={{ color: 'var(--text-muted)' }}
               >
                 Cancel
               </button>
@@ -282,7 +285,7 @@ CREATE INDEX idx_ad_placements_active ON sm_ad_placements(is_active);`}
               <div className="grid grid-cols-2 gap-4">
                 {/* Name */}
                 <div>
-                  <label className="mb-1 block text-sm font-medium text-zinc-300">
+                  <label className="mb-1 block text-sm font-medium" style={{ color: 'var(--text-secondary)' }}>
                     Ad Name
                   </label>
                   <input
@@ -290,20 +293,22 @@ CREATE INDEX idx_ad_placements_active ON sm_ad_placements(is_active);`}
                     value={formData.name}
                     onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                     placeholder="e.g., Google AdSense - Sidebar"
-                    className="w-full rounded-lg border border-zinc-700 bg-zinc-800 px-3 py-2 text-white placeholder-zinc-500 focus:border-red-600 focus:outline-none"
+                    className="w-full rounded-lg px-3 py-2 focus:outline-none"
+                    style={{ border: '1px solid var(--border-default)', backgroundColor: 'var(--bg-tertiary)', color: 'var(--text-primary)' }}
                     required
                   />
                 </div>
 
                 {/* Placement Type */}
                 <div>
-                  <label className="mb-1 block text-sm font-medium text-zinc-300">
+                  <label className="mb-1 block text-sm font-medium" style={{ color: 'var(--text-secondary)' }}>
                     Placement Location
                   </label>
                   <select
                     value={formData.placement_type}
                     onChange={(e) => setFormData({ ...formData, placement_type: e.target.value })}
-                    className="w-full rounded-lg border border-zinc-700 bg-zinc-800 px-3 py-2 text-white focus:border-red-600 focus:outline-none"
+                    className="w-full rounded-lg px-3 py-2 focus:outline-none"
+                    style={{ border: '1px solid var(--border-default)', backgroundColor: 'var(--bg-tertiary)', color: 'var(--text-primary)' }}
                   >
                     {PLACEMENT_TYPES.map((type) => (
                       <option key={type.value} value={type.value}>
@@ -311,7 +316,7 @@ CREATE INDEX idx_ad_placements_active ON sm_ad_placements(is_active);`}
                       </option>
                     ))}
                   </select>
-                  <p className="mt-1 text-xs text-zinc-500">
+                  <p className="mt-1 text-xs" style={{ color: 'var(--text-muted)' }}>
                     {PLACEMENT_TYPES.find(t => t.value === formData.placement_type)?.description}
                   </p>
                 </div>
@@ -319,7 +324,7 @@ CREATE INDEX idx_ad_placements_active ON sm_ad_placements(is_active);`}
 
               {/* HTML Code */}
               <div>
-                <label className="mb-1 block text-sm font-medium text-zinc-300">
+                <label className="mb-1 block text-sm font-medium" style={{ color: 'var(--text-secondary)' }}>
                   HTML/JavaScript Code
                 </label>
                 <textarea
@@ -327,14 +332,15 @@ CREATE INDEX idx_ad_placements_active ON sm_ad_placements(is_active);`}
                   onChange={(e) => setFormData({ ...formData, html_code: e.target.value })}
                   placeholder={`<!-- Paste your ad code here -->\n<script async src="..."></script>\n<ins class="adsbygoogle" ...></ins>`}
                   rows={8}
-                  className="w-full rounded-lg border border-zinc-700 bg-zinc-800 px-3 py-2 font-mono text-sm text-white placeholder-zinc-500 focus:border-red-600 focus:outline-none"
+                  className="w-full rounded-lg px-3 py-2 font-mono text-sm focus:outline-none"
+                  style={{ border: '1px solid var(--border-default)', backgroundColor: 'var(--bg-tertiary)', color: 'var(--text-primary)' }}
                   required
                 />
               </div>
 
               {/* CSS Code (Optional) */}
               <div>
-                <label className="mb-1 block text-sm font-medium text-zinc-300">
+                <label className="mb-1 block text-sm font-medium" style={{ color: 'var(--text-secondary)' }}>
                   Custom CSS (Optional)
                 </label>
                 <textarea
@@ -342,14 +348,15 @@ CREATE INDEX idx_ad_placements_active ON sm_ad_placements(is_active);`}
                   onChange={(e) => setFormData({ ...formData, css_code: e.target.value })}
                   placeholder={`.ad-container { margin: 20px 0; text-align: center; }`}
                   rows={3}
-                  className="w-full rounded-lg border border-zinc-700 bg-zinc-800 px-3 py-2 font-mono text-sm text-white placeholder-zinc-500 focus:border-red-600 focus:outline-none"
+                  className="w-full rounded-lg px-3 py-2 font-mono text-sm focus:outline-none"
+                  style={{ border: '1px solid var(--border-default)', backgroundColor: 'var(--bg-tertiary)', color: 'var(--text-primary)' }}
                 />
               </div>
 
               <div className="grid grid-cols-4 gap-4">
                 {/* Priority */}
                 <div>
-                  <label className="mb-1 block text-sm font-medium text-zinc-300">
+                  <label className="mb-1 block text-sm font-medium" style={{ color: 'var(--text-secondary)' }}>
                     Priority
                   </label>
                   <input
@@ -358,20 +365,22 @@ CREATE INDEX idx_ad_placements_active ON sm_ad_placements(is_active);`}
                     onChange={(e) => setFormData({ ...formData, priority: parseInt(e.target.value) || 10 })}
                     min={1}
                     max={100}
-                    className="w-full rounded-lg border border-zinc-700 bg-zinc-800 px-3 py-2 text-white focus:border-red-600 focus:outline-none"
+                    className="w-full rounded-lg px-3 py-2 focus:outline-none"
+                    style={{ border: '1px solid var(--border-default)', backgroundColor: 'var(--bg-tertiary)', color: 'var(--text-primary)' }}
                   />
-                  <p className="mt-1 text-xs text-zinc-500">Lower = higher priority</p>
+                  <p className="mt-1 text-xs" style={{ color: 'var(--text-muted)' }}>Lower = higher priority</p>
                 </div>
 
                 {/* Device Type */}
                 <div>
-                  <label className="mb-1 block text-sm font-medium text-zinc-300">
+                  <label className="mb-1 block text-sm font-medium" style={{ color: 'var(--text-secondary)' }}>
                     Device Type
                   </label>
                   <select
                     value={formData.device_type}
                     onChange={(e) => setFormData({ ...formData, device_type: e.target.value })}
-                    className="w-full rounded-lg border border-zinc-700 bg-zinc-800 px-3 py-2 text-white focus:border-red-600 focus:outline-none"
+                    className="w-full rounded-lg px-3 py-2 focus:outline-none"
+                    style={{ border: '1px solid var(--border-default)', backgroundColor: 'var(--bg-tertiary)', color: 'var(--text-primary)' }}
                   >
                     {DEVICE_TYPES.map((type) => (
                       <option key={type.value} value={type.value}>
@@ -384,7 +393,7 @@ CREATE INDEX idx_ad_placements_active ON sm_ad_placements(is_active);`}
                 {/* Min Paragraph (for in-content ads) */}
                 {formData.placement_type.startsWith('IN_CONTENT') && (
                   <div>
-                    <label className="mb-1 block text-sm font-medium text-zinc-300">
+                    <label className="mb-1 block text-sm font-medium" style={{ color: 'var(--text-secondary)' }}>
                       Min Paragraphs Required
                     </label>
                     <input
@@ -393,41 +402,45 @@ CREATE INDEX idx_ad_placements_active ON sm_ad_placements(is_active);`}
                       onChange={(e) => setFormData({ ...formData, min_paragraph: parseInt(e.target.value) || 3 })}
                       min={1}
                       max={20}
-                      className="w-full rounded-lg border border-zinc-700 bg-zinc-800 px-3 py-2 text-white focus:border-red-600 focus:outline-none"
+                      className="w-full rounded-lg px-3 py-2 focus:outline-none"
+                      style={{ border: '1px solid var(--border-default)', backgroundColor: 'var(--bg-tertiary)', color: 'var(--text-primary)' }}
                     />
                   </div>
                 )}
 
                 {/* Active Toggle */}
                 <div>
-                  <label className="mb-1 block text-sm font-medium text-zinc-300">
+                  <label className="mb-1 block text-sm font-medium" style={{ color: 'var(--text-secondary)' }}>
                     Status
                   </label>
-                  <label className="flex cursor-pointer items-center gap-2 rounded-lg border border-zinc-700 bg-zinc-800 px-3 py-2">
+                  <label className="flex cursor-pointer items-center gap-2 rounded-lg px-3 py-2" style={{ border: '1px solid var(--border-default)', backgroundColor: 'var(--bg-tertiary)' }}>
                     <input
                       type="checkbox"
                       checked={formData.is_active}
                       onChange={(e) => setFormData({ ...formData, is_active: e.target.checked })}
-                      className="h-4 w-4 rounded border-zinc-600 bg-zinc-700 text-red-600 focus:ring-red-600"
+                      className="h-4 w-4 rounded"
+                      style={{ accentColor: 'var(--accent-red)' }}
                     />
-                    <span className="text-white">Active</span>
+                    <span style={{ color: 'var(--text-primary)' }}>Active</span>
                   </label>
                 </div>
               </div>
 
               {/* Actions */}
-              <div className="flex items-center gap-3 border-t border-zinc-800 pt-4">
+              <div className="flex items-center gap-3 pt-4" style={{ borderTop: '1px solid var(--border-default)' }}>
                 <button
                   type="submit"
                   disabled={saving}
-                  className="rounded-lg bg-red-600 px-6 py-2 font-medium text-white hover:bg-red-700 disabled:opacity-50"
+                  className="rounded-lg px-6 py-2 font-medium text-white hover:opacity-90 disabled:opacity-50 transition-opacity"
+                  style={{ backgroundColor: 'var(--accent-red)' }}
                 >
                   {saving ? 'Saving...' : editingAd ? 'Update Ad' : 'Create Ad'}
                 </button>
                 <button
                   type="button"
                   onClick={handlePreview}
-                  className="rounded-lg border border-zinc-600 px-4 py-2 text-zinc-300 hover:bg-zinc-800"
+                  className="rounded-lg px-4 py-2 hover:opacity-80 transition-opacity"
+                  style={{ border: '1px solid var(--border-default)', color: 'var(--text-secondary)' }}
                 >
                   Preview
                 </button>
@@ -439,20 +452,21 @@ CREATE INDEX idx_ad_placements_active ON sm_ad_placements(is_active);`}
         {/* Preview Modal */}
         {previewHtml && (
           <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-4">
-            <div className="w-full max-w-2xl rounded-xl border border-zinc-700 bg-zinc-900 p-6">
+            <div className="w-full max-w-2xl rounded-xl p-6" style={{ border: '1px solid var(--border-default)', backgroundColor: 'var(--bg-card)' }}>
               <div className="mb-4 flex items-center justify-between">
-                <h3 className="text-lg font-semibold text-white">Ad Preview</h3>
+                <h3 className="text-lg font-semibold" style={{ color: 'var(--text-primary)' }}>Ad Preview</h3>
                 <button
                   onClick={() => setPreviewHtml(null)}
-                  className="text-zinc-400 hover:text-white"
+                  className="hover:opacity-80 transition-opacity"
+                  style={{ color: 'var(--text-muted)' }}
                 >
                   Close
                 </button>
               </div>
-              <div className="rounded-lg border border-zinc-700 bg-white p-4">
+              <div className="rounded-lg bg-white p-4" style={{ border: '1px solid var(--border-default)' }}>
                 <div dangerouslySetInnerHTML={{ __html: previewHtml }} />
               </div>
-              <p className="mt-2 text-xs text-zinc-500">
+              <p className="mt-2 text-xs" style={{ color: 'var(--text-muted)' }}>
                 Note: Some ad scripts may not render correctly in preview mode.
               </p>
             </div>
@@ -460,36 +474,35 @@ CREATE INDEX idx_ad_placements_active ON sm_ad_placements(is_active);`}
         )}
 
         {/* Ad Placements List */}
-        <div className="rounded-xl border border-zinc-800 bg-zinc-900">
-          <div className="border-b border-zinc-800 p-4">
-            <h2 className="font-semibold text-white">Active Ad Placements</h2>
+        <div className="rounded-xl" style={{ border: '1px solid var(--border-default)', backgroundColor: 'var(--bg-card)' }}>
+          <div className="p-4" style={{ borderBottom: '1px solid var(--border-default)' }}>
+            <h2 className="font-semibold" style={{ color: 'var(--text-primary)' }}>Active Ad Placements</h2>
           </div>
 
           {ads.length === 0 ? (
-            <div className="p-8 text-center text-zinc-500">
+            <div className="p-8 text-center" style={{ color: 'var(--text-muted)' }}>
               No ad placements yet. Click "New Ad Placement" to create one.
             </div>
           ) : (
-            <div className="divide-y divide-zinc-800">
-              {ads.map((ad) => (
-                <div key={ad.id} className="flex items-center justify-between p-4">
+            <div style={{ borderTop: '1px solid var(--border-subtle)' }}>
+              {ads.map((ad, index) => (
+                <div key={ad.id} className="flex items-center justify-between p-4" style={{ borderTop: index > 0 ? '1px solid var(--border-subtle)' : 'none' }}>
                   <div className="flex items-center gap-4">
                     <button
                       onClick={() => handleToggleActive(ad)}
-                      className={`h-4 w-4 rounded-full ${
-                        ad.is_active ? 'bg-green-500' : 'bg-zinc-600'
-                      }`}
+                      className="h-4 w-4 rounded-full"
+                      style={{ backgroundColor: ad.is_active ? '#22c55e' : 'var(--text-muted)' }}
                       title={ad.is_active ? 'Active - Click to disable' : 'Disabled - Click to enable'}
                     />
                     <div>
-                      <h3 className="font-medium text-white">{ad.name}</h3>
-                      <div className="flex items-center gap-2 text-sm text-zinc-400">
-                        <span className="rounded bg-zinc-800 px-2 py-0.5 text-xs">
+                      <h3 className="font-medium" style={{ color: 'var(--text-primary)' }}>{ad.name}</h3>
+                      <div className="flex items-center gap-2 text-sm" style={{ color: 'var(--text-muted)' }}>
+                        <span className="rounded px-2 py-0.5 text-xs" style={{ backgroundColor: 'var(--bg-tertiary)' }}>
                           {PLACEMENT_TYPES.find(t => t.value === ad.placement_type)?.label || ad.placement_type}
                         </span>
                         <span>Priority: {ad.priority}</span>
                         {ad.conditions?.device_type && ad.conditions.device_type !== 'all' && (
-                          <span className="rounded bg-zinc-700 px-2 py-0.5 text-xs">
+                          <span className="rounded px-2 py-0.5 text-xs" style={{ backgroundColor: 'var(--bg-hover)' }}>
                             {ad.conditions.device_type}
                           </span>
                         )}
@@ -499,7 +512,8 @@ CREATE INDEX idx_ad_placements_active ON sm_ad_placements(is_active);`}
                   <div className="flex items-center gap-2">
                     <button
                       onClick={() => handleEdit(ad)}
-                      className="rounded px-3 py-1 text-sm text-zinc-400 hover:bg-zinc-800 hover:text-white"
+                      className="rounded px-3 py-1 text-sm hover:opacity-80 transition-opacity"
+                      style={{ color: 'var(--text-muted)' }}
                     >
                       Edit
                     </button>
@@ -517,11 +531,11 @@ CREATE INDEX idx_ad_placements_active ON sm_ad_placements(is_active);`}
         </div>
 
         {/* Help Section */}
-        <div className="mt-8 rounded-xl border border-zinc-800 bg-zinc-900 p-6">
-          <h3 className="font-semibold text-white mb-4">How to Use Ad Inserter</h3>
-          <div className="grid grid-cols-2 gap-6 text-sm text-zinc-400">
+        <div className="mt-8 rounded-xl p-6" style={{ border: '1px solid var(--border-default)', backgroundColor: 'var(--bg-card)' }}>
+          <h3 className="font-semibold mb-4" style={{ color: 'var(--text-primary)' }}>How to Use Ad Inserter</h3>
+          <div className="grid grid-cols-2 gap-6 text-sm" style={{ color: 'var(--text-muted)' }}>
             <div>
-              <h4 className="font-medium text-zinc-300 mb-2">Supported Placements:</h4>
+              <h4 className="font-medium mb-2" style={{ color: 'var(--text-secondary)' }}>Supported Placements:</h4>
               <ul className="space-y-1">
                 <li>- After Featured Image (single posts)</li>
                 <li>- After Paragraph 3, 5, or 8 (in-content)</li>
@@ -531,7 +545,7 @@ CREATE INDEX idx_ad_placements_active ON sm_ad_placements(is_active);`}
               </ul>
             </div>
             <div>
-              <h4 className="font-medium text-zinc-300 mb-2">Tips:</h4>
+              <h4 className="font-medium mb-2" style={{ color: 'var(--text-secondary)' }}>Tips:</h4>
               <ul className="space-y-1">
                 <li>- Use lower priority numbers for higher priority ads</li>
                 <li>- Test ads on staging before enabling</li>

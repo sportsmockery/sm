@@ -49,7 +49,8 @@ export default function StudioPollsPage() {
         </div>
         <Link
           href="/polls/new"
-          className="inline-flex items-center rounded-lg px-4 py-2.5 text-sm font-medium bg-[#bc0000] text-white dark:bg-white dark:text-[#bc0000]"
+          className="inline-flex items-center rounded-lg px-4 py-2.5 text-sm font-medium"
+          style={{ backgroundColor: '#bc0000', color: '#ffffff' }}
         >
           New Poll
         </Link>
@@ -79,7 +80,8 @@ export default function StudioPollsPage() {
           <p className="text-[var(--text-muted)] text-center mb-4">No polls yet</p>
           <Link
             href="/polls/new"
-            className="inline-flex items-center rounded-lg px-4 py-2 text-sm font-medium bg-[#bc0000] text-white dark:bg-white dark:text-[#bc0000]"
+            className="inline-flex items-center rounded-lg px-4 py-2 text-sm font-medium"
+            style={{ backgroundColor: '#bc0000', color: '#ffffff' }}
           >
             Create your first poll
           </Link>

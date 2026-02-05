@@ -64,7 +64,8 @@ export default function StudioPostsClient({
         <p className="text-[var(--text-muted)] text-center mb-4">No posts found</p>
         <Link
           href="/studio/posts/new"
-          className="inline-flex items-center rounded-lg px-4 py-2 text-sm font-medium bg-[#bc0000] text-white dark:bg-white dark:text-[#bc0000]"
+          className="inline-flex items-center rounded-lg px-4 py-2 text-sm font-medium"
+          style={{ backgroundColor: '#bc0000', color: '#ffffff' }}
         >
           Create your first post
         </Link>

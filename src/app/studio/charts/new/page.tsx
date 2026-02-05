@@ -62,7 +62,8 @@ export default function StudioNewChartPage() {
             <p className="text-[var(--text-muted)] mb-4">Chart builder closed</p>
             <button
               onClick={() => setShowModal(true)}
-              className="inline-flex items-center rounded-lg px-4 py-2 text-sm font-medium bg-[#bc0000] text-white dark:bg-white dark:text-[#bc0000]"
+              className="inline-flex items-center rounded-lg px-4 py-2 text-sm font-medium"
+              style={{ backgroundColor: '#bc0000', color: '#ffffff' }}
             >
               Open Chart Builder
             </button>

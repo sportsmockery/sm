@@ -838,22 +838,23 @@ export default function StudioPostEditor({
                   <button type="button" onClick={() => setHeadlines([])} className="text-[var(--text-muted)] hover:text-[var(--text-primary)]"><svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" /></svg></button>
                 </div>
                 <div className="space-y-2">
-                  {headlines.map((h, i) => (<button key={i} type="button" onClick={() => { updateField('title', h); setHeadlines([]) }} className="w-full rounded-lg bg-white/50 dark:bg-gray-800/50 px-3 py-2 text-left text-sm text-[var(--text-secondary)] hover:bg-purple-500/10 hover:text-purple-500 transition-colors">{h}</button>))}
+                  {headlines.map((h, i) => (<button key={i} type="button" onClick={() => { updateField('title', h); setHeadlines([]) }} className="w-full rounded-lg px-3 py-2 text-left text-sm text-[var(--text-secondary)] hover:bg-purple-500/10 hover:text-purple-500 transition-colors" style={{ backgroundColor: 'var(--bg-tertiary)' }}>{h}</button>))}
                 </div>
               </div>
             )}
 
             {/* Content Editor - extends to fill space */}
             <div
-              className={`mb-6 overflow-hidden rounded-lg border bg-white dark:bg-gray-900 ${
+              className={`mb-6 overflow-hidden rounded-lg border ${
                 highlightMode
                   ? 'border-purple-500 ring-2 ring-purple-500/20'
                   : 'border-[var(--border-default)]'
               }`}
+              style={{ backgroundColor: 'var(--bg-card)' }}
               onMouseUp={handleContentSelection}
             >
               {highlightMode && (
-                <div className="bg-purple-500/10 border-b border-purple-500/30 px-4 py-2 text-sm text-purple-600 dark:text-purple-400 flex items-center gap-2">
+                <div className="bg-purple-500/10 border-b border-purple-500/30 px-4 py-2 text-sm text-purple-600 flex items-center gap-2">
                   <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                   </svg>
@@ -884,7 +885,7 @@ export default function StudioPostEditor({
 
               {seoExpanded && (
                 <div className="border-t border-[var(--border-default)] p-4 space-y-4">
-                  {wordCount < 150 && !seoGenerated && <p className="rounded-lg bg-amber-500/10 px-3 py-2 text-xs text-amber-600 dark:text-amber-400">SEO fields will auto-generate when content reaches 150+ words ({wordCount}/150)</p>}
+                  {wordCount < 150 && !seoGenerated && <p className="rounded-lg bg-amber-500/10 px-3 py-2 text-xs text-amber-600">SEO fields will auto-generate when content reaches 150+ words ({wordCount}/150)</p>}
                   <div className="grid gap-4 md:grid-cols-2">
                     <div>
                       <label className="mb-1.5 block text-xs font-medium text-[var(--text-muted)]">SEO Title</label>
@@ -940,14 +941,14 @@ export default function StudioPostEditor({
                   {/* Google Preview */}
                   <div>
                     <label className="mb-1.5 block text-xs font-medium text-[var(--text-muted)]">Search Preview</label>
-                    <div className="rounded-lg border border-[var(--border-default)] bg-white dark:bg-gray-900 p-3">
+                    <div className="rounded-lg border border-[var(--border-default)] p-3" style={{ backgroundColor: 'var(--bg-card)' }}>
                       <p className="truncate text-sm text-blue-600 hover:underline">
                         {formData.seo_title || formData.title || 'Page Title'}
                       </p>
-                      <p className="truncate text-xs text-emerald-700 dark:text-emerald-500">
+                      <p className="truncate text-xs text-emerald-600">
                         sportsmockery.com/{formData.slug || 'article-slug'}
                       </p>
-                      <p className="mt-1 line-clamp-2 text-xs text-gray-600 dark:text-gray-400">
+                      <p className="mt-1 line-clamp-2 text-xs text-[var(--text-muted)]">
                         {formData.seo_description || formData.excerpt || 'Meta description will appear here...'}
                       </p>
                     </div>
@@ -1057,20 +1058,20 @@ export default function StudioPostEditor({
                     {/* Push Preview */}
                     <div>
                       <label className="mb-1.5 block text-xs font-medium text-[var(--text-muted)]">Preview</label>
-                      <div className="rounded-xl bg-white p-3 shadow-lg dark:bg-gray-800">
+                      <div className="rounded-xl p-3 shadow-lg" style={{ backgroundColor: 'var(--bg-card)' }}>
                         <div className="flex items-start gap-3">
                           <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-lg bg-[#bc0000]">
                             <span className="text-xs font-bold text-white">SM</span>
                           </div>
                           <div className="flex-1 min-w-0">
                             <div className="flex items-center justify-between">
-                              <span className="text-[10px] font-semibold uppercase tracking-wide text-gray-500">Sports Mockery</span>
-                              <span className="text-[10px] text-gray-400">now</span>
+                              <span className="text-[10px] font-semibold uppercase tracking-wide text-[var(--text-muted)]">Sports Mockery</span>
+                              <span className="text-[10px] text-[var(--text-muted)]">now</span>
                             </div>
-                            <p className="mt-0.5 truncate text-sm font-semibold text-gray-900 dark:text-white">
+                            <p className="mt-0.5 truncate text-sm font-semibold text-[var(--text-primary)]">
                               {pushTitle || 'Notification Title'}
                             </p>
-                            <p className="line-clamp-2 text-xs text-gray-600 dark:text-gray-300">
+                            <p className="line-clamp-2 text-xs text-[var(--text-secondary)]">
                               {pushMessage || 'Your notification message will appear here...'}
                             </p>
                           </div>
@@ -1127,35 +1128,35 @@ export default function StudioPostEditor({
                         </svg>
                         X Preview
                       </label>
-                      <div className="rounded-xl border border-[var(--border-default)] bg-white dark:bg-black overflow-hidden">
+                      <div className="rounded-xl border border-[var(--border-default)] overflow-hidden" style={{ backgroundColor: 'var(--bg-card)' }}>
                         <div className="p-3">
                           <div className="flex gap-3">
                             <Image src="/sm-logo-preview.png" alt="Sports Mockery" width={40} height={40} className="flex-shrink-0 h-10 w-10 rounded-full bg-white p-1" />
                             <div className="flex-1 min-w-0">
                               <div className="flex items-center gap-1">
-                                <span className="font-bold text-sm text-gray-900 dark:text-white">Sports Mockery</span>
+                                <span className="font-bold text-sm text-[var(--text-primary)]">Sports Mockery</span>
                                 <svg className="h-4 w-4 text-[#1d9bf0]" viewBox="0 0 24 24" fill="currentColor">
                                   <path d="M22.5 12.5c0-1.58-.875-2.95-2.148-3.6.154-.435.238-.905.238-1.4 0-2.21-1.71-3.998-3.818-3.998-.47 0-.92.084-1.336.25C14.818 2.415 13.51 1.5 12 1.5s-2.816.917-3.437 2.25c-.415-.165-.866-.25-1.336-.25-2.11 0-3.818 1.79-3.818 4 0 .494.083.964.237 1.4-1.272.65-2.147 2.018-2.147 3.6 0 1.495.782 2.798 1.942 3.486-.02.17-.032.34-.032.514 0 2.21 1.708 4 3.818 4 .47 0 .92-.086 1.335-.25.62 1.334 1.926 2.25 3.437 2.25 1.512 0 2.818-.916 3.437-2.25.415.163.865.248 1.336.248 2.11 0 3.818-1.79 3.818-4 0-.174-.012-.344-.033-.513 1.158-.687 1.943-1.99 1.943-3.484zm-6.616-3.334l-4.334 6.5c-.145.217-.382.334-.625.334-.143 0-.288-.04-.416-.126l-.115-.094-2.415-2.415c-.293-.293-.293-.768 0-1.06s.768-.294 1.06 0l1.77 1.767 3.825-5.74c.23-.345.696-.436 1.04-.207.346.23.44.696.21 1.04z" />
                                 </svg>
-                                <span className="text-sm text-gray-500">@SportsMockery · now</span>
+                                <span className="text-sm text-[var(--text-muted)]">@SportsMockery · now</span>
                               </div>
-                              <p className="mt-1 text-sm text-gray-900 dark:text-white whitespace-pre-wrap">
+                              <p className="mt-1 text-sm text-[var(--text-primary)] whitespace-pre-wrap">
                                 {socialCaption || 'Your post text will appear here...'}
                               </p>
                               {/* X Link Card */}
-                              <div className="mt-3 rounded-xl border border-gray-200 dark:border-gray-700 overflow-hidden">
+                              <div className="mt-3 rounded-xl border border-[var(--border-default)] overflow-hidden">
                                 {formData.featured_image ? (
-                                  <div className="relative aspect-[1.91/1] bg-gray-100 dark:bg-gray-800">
+                                  <div className="relative aspect-[1.91/1]" style={{ backgroundColor: 'var(--bg-tertiary)' }}>
                                     <Image src={formData.featured_image} alt="Article preview" fill className="object-cover" />
                                   </div>
                                 ) : (
-                                  <div className="aspect-[1.91/1] bg-gray-100 dark:bg-gray-800 flex items-center justify-center">
-                                    <span className="text-xs text-gray-400">Featured image</span>
+                                  <div className="aspect-[1.91/1] flex items-center justify-center" style={{ backgroundColor: 'var(--bg-tertiary)' }}>
+                                    <span className="text-xs text-[var(--text-muted)]">Featured image</span>
                                   </div>
                                 )}
-                                <div className="p-3 bg-white dark:bg-gray-900">
-                                  <p className="text-xs text-gray-500">sportsmockery.com</p>
-                                  <p className="font-medium text-sm text-gray-900 dark:text-white truncate">{formData.title || 'Article Title'}</p>
+                                <div className="p-3" style={{ backgroundColor: 'var(--bg-surface)' }}>
+                                  <p className="text-xs text-[var(--text-muted)]">sportsmockery.com</p>
+                                  <p className="font-medium text-sm text-[var(--text-primary)] truncate">{formData.title || 'Article Title'}</p>
                                 </div>
                               </div>
                             </div>
@@ -1172,33 +1173,33 @@ export default function StudioPostEditor({
                         </svg>
                         Facebook Preview
                       </label>
-                      <div className="rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-[#242526] overflow-hidden">
+                      <div className="rounded-lg border border-[var(--border-default)] overflow-hidden" style={{ backgroundColor: 'var(--bg-card)' }}>
                         <div className="p-3">
                           <div className="flex gap-2">
                             <Image src="/sm-logo-preview.png" alt="Sports Mockery" width={40} height={40} className="flex-shrink-0 h-10 w-10 rounded-full bg-white p-1" />
                             <div>
-                              <p className="font-semibold text-sm text-gray-900 dark:text-white">Sports Mockery</p>
-                              <p className="text-xs text-gray-500">Just now · Public</p>
+                              <p className="font-semibold text-sm text-[var(--text-primary)]">Sports Mockery</p>
+                              <p className="text-xs text-[var(--text-muted)]">Just now · Public</p>
                             </div>
                           </div>
-                          <p className="mt-3 text-sm text-gray-900 dark:text-[#e4e6eb]">
+                          <p className="mt-3 text-sm text-[var(--text-primary)]">
                             {socialCaption || 'Your post text will appear here...'}
                           </p>
                         </div>
                         {/* Facebook Link Card */}
-                        <div className="border-t border-gray-200 dark:border-gray-700">
+                        <div className="border-t border-[var(--border-default)]">
                           {formData.featured_image ? (
-                            <div className="relative aspect-[1.91/1] bg-gray-100 dark:bg-gray-800">
+                            <div className="relative aspect-[1.91/1]" style={{ backgroundColor: 'var(--bg-tertiary)' }}>
                               <Image src={formData.featured_image} alt="Article preview" fill className="object-cover" />
                             </div>
                           ) : (
-                            <div className="aspect-[1.91/1] bg-gray-100 dark:bg-[#3a3b3c] flex items-center justify-center">
-                              <span className="text-xs text-gray-400">Featured image</span>
+                            <div className="aspect-[1.91/1] flex items-center justify-center" style={{ backgroundColor: 'var(--bg-tertiary)' }}>
+                              <span className="text-xs text-[var(--text-muted)]">Featured image</span>
                             </div>
                           )}
-                          <div className="p-3 bg-[#f0f2f5] dark:bg-[#3a3b3c]">
-                            <p className="text-xs uppercase text-gray-500 dark:text-gray-400">sportsmockery.com</p>
-                            <p className="font-semibold text-sm text-gray-900 dark:text-[#e4e6eb] truncate">{formData.title || 'Article Title'}</p>
+                          <div className="p-3" style={{ backgroundColor: 'var(--bg-surface)' }}>
+                            <p className="text-xs uppercase text-[var(--text-muted)]">sportsmockery.com</p>
+                            <p className="font-semibold text-sm text-[var(--text-primary)] truncate">{formData.title || 'Article Title'}</p>
                           </div>
                         </div>
                       </div>
@@ -1365,18 +1366,18 @@ export default function StudioPostEditor({
       {/* Ideas Modal */}
       {showIdeasModal && (
         <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/60 backdrop-blur-sm">
-          <div className="mx-4 w-full max-w-lg overflow-hidden rounded-xl bg-white shadow-2xl dark:bg-[#1c1c1f]">
-            <div className="flex items-center justify-between border-b border-gray-200 px-6 py-4 dark:border-gray-700">
-              <h3 className="text-lg font-bold text-gray-900 dark:text-white">💡 Article Ideas</h3>
-              <button type="button" onClick={() => setShowIdeasModal(false)} className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200"><svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" /></svg></button>
+          <div className="mx-4 w-full max-w-lg overflow-hidden rounded-xl shadow-2xl" style={{ backgroundColor: 'var(--bg-card)' }}>
+            <div className="flex items-center justify-between border-b px-6 py-4" style={{ borderColor: 'var(--border-default)' }}>
+              <h3 className="text-lg font-bold text-[var(--text-primary)]">Article Ideas</h3>
+              <button type="button" onClick={() => setShowIdeasModal(false)} className="text-[var(--text-muted)] hover:text-[var(--text-primary)]"><svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" /></svg></button>
             </div>
             <div className="max-h-80 space-y-3 overflow-y-auto p-6">
-              {loadingIdeas ? (<div className="py-8 text-center"><div className="mx-auto h-6 w-6 animate-spin rounded-full border-2 border-purple-500 border-t-transparent" /><p className="mt-3 text-gray-500 dark:text-gray-400">Generating ideas...</p></div>) : ideas.length > 0 ? (ideas.map((idea, i) => (<button key={i} type="button" onClick={() => setSelectedIdea(idea)} className={`w-full rounded-lg border-2 p-4 text-left transition-all ${selectedIdea === idea ? 'border-purple-500 bg-purple-50 dark:bg-purple-500/10' : 'border-gray-200 hover:border-purple-300 dark:border-gray-700'}`}><p className="font-medium text-gray-900 dark:text-white">{idea.headline}</p><p className="mt-1 text-sm text-gray-500 dark:text-gray-400">{idea.angle}</p><span className="mt-2 inline-block rounded bg-gray-100 px-2 py-0.5 text-xs text-gray-600 dark:bg-gray-800 dark:text-gray-400">{idea.type}</span></button>))) : (<p className="py-8 text-center text-gray-500">Click "Generate More" to get article ideas</p>)}
+              {loadingIdeas ? (<div className="py-8 text-center"><div className="mx-auto h-6 w-6 animate-spin rounded-full border-2 border-purple-500 border-t-transparent" /><p className="mt-3 text-[var(--text-muted)]">Generating ideas...</p></div>) : ideas.length > 0 ? (ideas.map((idea, i) => (<button key={i} type="button" onClick={() => setSelectedIdea(idea)} className={`w-full rounded-lg border-2 p-4 text-left transition-all ${selectedIdea === idea ? 'border-purple-500 bg-purple-500/10' : 'border-[var(--border-default)] hover:border-purple-300'}`}><p className="font-medium text-[var(--text-primary)]">{idea.headline}</p><p className="mt-1 text-sm text-[var(--text-muted)]">{idea.angle}</p><span className="mt-2 inline-block rounded px-2 py-0.5 text-xs text-[var(--text-secondary)]" style={{ backgroundColor: 'var(--bg-tertiary)' }}>{idea.type}</span></button>))) : (<p className="py-8 text-center text-[var(--text-muted)]">Click "Generate More" to get article ideas</p>)}
             </div>
-            <div className="flex items-center gap-3 border-t border-gray-200 bg-gray-50 px-6 py-4 dark:border-gray-700 dark:bg-gray-800/50">
-              <button type="button" onClick={() => generateIdeas()} disabled={loadingIdeas} className="text-sm font-medium text-purple-500 hover:text-purple-400 disabled:opacity-50">↻ Generate More</button>
+            <div className="flex items-center gap-3 border-t px-6 py-4" style={{ borderColor: 'var(--border-default)', backgroundColor: 'var(--bg-surface)' }}>
+              <button type="button" onClick={() => generateIdeas()} disabled={loadingIdeas} className="text-sm font-medium text-purple-500 hover:text-purple-400 disabled:opacity-50">Regenerate</button>
               <div className="flex-1" />
-              <button type="button" onClick={() => setShowIdeasModal(false)} className="px-4 py-2 text-sm text-gray-600 hover:text-gray-900 dark:text-gray-300 dark:hover:text-white">Cancel</button>
+              <button type="button" onClick={() => setShowIdeasModal(false)} className="px-4 py-2 text-sm text-[var(--text-secondary)] hover:text-[var(--text-primary)]">Cancel</button>
               <button type="button" onClick={useSelectedIdea} disabled={!selectedIdea} className="rounded-lg bg-purple-600 px-4 py-2 text-sm font-medium text-white hover:bg-purple-700 disabled:cursor-not-allowed disabled:opacity-50">Use Selected</button>
             </div>
           </div>
@@ -1386,24 +1387,24 @@ export default function StudioPostEditor({
       {/* Team Picker Modal for Ideas */}
       {showTeamPicker && (
         <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/60 backdrop-blur-sm">
-          <div className="mx-4 w-full max-w-sm overflow-hidden rounded-xl bg-white shadow-2xl dark:bg-[#1c1c1f]">
-            <div className="flex items-center justify-between border-b border-gray-200 px-6 py-4 dark:border-gray-700">
-              <h3 className="text-lg font-bold text-gray-900 dark:text-white">Generate Ideas</h3>
-              <button type="button" onClick={() => setShowTeamPicker(false)} className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200">
+          <div className="mx-4 w-full max-w-sm overflow-hidden rounded-xl shadow-2xl" style={{ backgroundColor: 'var(--bg-card)' }}>
+            <div className="flex items-center justify-between border-b px-6 py-4" style={{ borderColor: 'var(--border-default)' }}>
+              <h3 className="text-lg font-bold text-[var(--text-primary)]">Generate Ideas</h3>
+              <button type="button" onClick={() => setShowTeamPicker(false)} className="text-[var(--text-muted)] hover:text-[var(--text-primary)]">
                 <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
                 </svg>
               </button>
             </div>
             <div className="p-4 space-y-2">
-              <p className="text-sm text-gray-500 dark:text-gray-400 mb-4">Select a team to generate article ideas for:</p>
+              <p className="text-sm text-[var(--text-muted)] mb-4">Select a team to generate article ideas for:</p>
               {[
-                { value: '', label: 'Auto-detect from category', icon: '🎯' },
-                { value: 'Bears', label: 'Chicago Bears', icon: '🐻' },
-                { value: 'Bulls', label: 'Chicago Bulls', icon: '🐂' },
-                { value: 'Blackhawks', label: 'Chicago Blackhawks', icon: '🏒' },
-                { value: 'Cubs', label: 'Chicago Cubs', icon: '🐻' },
-                { value: 'White Sox', label: 'Chicago White Sox', icon: '⚾' },
+                { value: '', label: 'Auto-detect from category', icon: 'target' },
+                { value: 'Bears', label: 'Chicago Bears', icon: 'bear' },
+                { value: 'Bulls', label: 'Chicago Bulls', icon: 'bull' },
+                { value: 'Blackhawks', label: 'Chicago Blackhawks', icon: 'hockey' },
+                { value: 'Cubs', label: 'Chicago Cubs', icon: 'cub' },
+                { value: 'White Sox', label: 'Chicago White Sox', icon: 'baseball' },
               ].map((team) => (
                 <button
                   key={team.value || 'auto'}
@@ -1412,10 +1413,10 @@ export default function StudioPostEditor({
                     setShowTeamPicker(false)
                     generateIdeas(team.value || undefined)
                   }}
-                  className="w-full flex items-center gap-3 rounded-lg border-2 border-gray-200 px-4 py-3 text-left transition-all hover:border-purple-400 hover:bg-purple-50 dark:border-gray-700 dark:hover:border-purple-500 dark:hover:bg-purple-500/10"
+                  className="w-full flex items-center gap-3 rounded-lg border-2 px-4 py-3 text-left transition-all hover:border-purple-400 hover:bg-purple-500/10"
+                  style={{ borderColor: 'var(--border-default)' }}
                 >
-                  <span className="text-xl">{team.icon}</span>
-                  <span className="font-medium text-gray-900 dark:text-white">{team.label}</span>
+                  <span className="font-medium text-[var(--text-primary)]">{team.label}</span>
                 </button>
               ))}
             </div>

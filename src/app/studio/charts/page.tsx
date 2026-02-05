@@ -50,7 +50,8 @@ export default function StudioChartsPage() {
         </div>
         <Link
           href="/studio/charts/new"
-          className="inline-flex items-center rounded-lg px-4 py-2.5 text-sm font-medium bg-[#bc0000] text-white dark:bg-white dark:text-[#bc0000]"
+          className="inline-flex items-center rounded-lg px-4 py-2.5 text-sm font-medium"
+          style={{ backgroundColor: '#bc0000', color: '#ffffff' }}
         >
           New Chart
         </Link>
@@ -79,7 +80,8 @@ export default function StudioChartsPage() {
           <p className="text-[var(--text-muted)] text-center mb-4">No charts yet</p>
           <Link
             href="/studio/charts/new"
-            className="inline-flex items-center rounded-lg px-4 py-2 text-sm font-medium bg-[#bc0000] text-white dark:bg-white dark:text-[#bc0000]"
+            className="inline-flex items-center rounded-lg px-4 py-2 text-sm font-medium"
+            style={{ backgroundColor: '#bc0000', color: '#ffffff' }}
           >
             Create your first chart
           </Link>

@@ -237,9 +237,9 @@ export default function CopilotMonitoringPage() {
   if (error) {
     return (
       <div className="p-8">
-        <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-xl p-6">
-          <h2 className="text-red-800 dark:text-red-300 font-semibold text-lg mb-2">Error</h2>
-          <p className="text-red-600 dark:text-red-400 mb-4">{error}</p>
+        <div className="rounded-xl p-6" style={{ backgroundColor: 'rgba(239, 68, 68, 0.1)', border: '1px solid rgba(239, 68, 68, 0.3)' }}>
+          <h2 className="font-semibold text-lg mb-2" style={{ color: '#ef4444' }}>Error</h2>
+          <p className="mb-4" style={{ color: '#f87171' }}>{error}</p>
           <button
             onClick={loadData}
             className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
@@ -379,11 +379,11 @@ export default function CopilotMonitoringPage() {
                 </div>
                 <div className="flex items-center gap-3">
                   <span
-                    className={`px-3 py-1 rounded-full text-xs font-medium ${
-                      flag.enabled
-                        ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-400'
-                        : 'bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-400'
-                    }`}
+                    className="px-3 py-1 rounded-full text-xs font-medium"
+                    style={{
+                      backgroundColor: flag.enabled ? 'rgba(16, 185, 129, 0.1)' : 'var(--bg-tertiary)',
+                      color: flag.enabled ? '#10b981' : 'var(--text-muted)'
+                    }}
                   >
                     {flag.enabled ? 'Enabled' : 'Disabled'}
                   </span>
@@ -406,7 +406,8 @@ export default function CopilotMonitoringPage() {
                   step="5"
                   value={flag.rollout_percentage}
                   onChange={(e) => handleRolloutChange(flag.id, parseInt(e.target.value))}
-                  className="flex-1 h-2 bg-gray-200 dark:bg-gray-700 rounded-lg appearance-none cursor-pointer accent-[var(--accent-red)]"
+                  className="flex-1 h-2 rounded-lg appearance-none cursor-pointer"
+                  style={{ backgroundColor: 'var(--bg-tertiary)', accentColor: 'var(--accent-red)' }}
                   disabled={!flag.enabled || updating === flag.id}
                 />
                 <span className="text-sm font-semibold w-12 text-right text-[var(--text-primary)]">
@@ -442,18 +443,18 @@ export default function CopilotMonitoringPage() {
       </section>
 
       {/* Emergency Rollback */}
-      <section className="p-6 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-xl">
+      <section className="p-6 rounded-xl" style={{ backgroundColor: 'rgba(239, 68, 68, 0.1)', border: '1px solid rgba(239, 68, 68, 0.3)' }}>
         <div className="flex items-start justify-between">
           <div>
-            <h3 className="text-lg font-semibold text-red-900 dark:text-red-300 mb-2">
+            <h3 className="text-lg font-semibold mb-2" style={{ color: '#f87171' }}>
               Emergency Rollback
             </h3>
-            <p className="text-sm text-red-700 dark:text-red-400 mb-4 max-w-2xl">
+            <p className="text-sm mb-4 max-w-2xl" style={{ color: '#fca5a5' }}>
               Instantly disable ALL v2 features. All users will fall back to legacy endpoints.
               Use only when critical issues are detected in production.
             </p>
             {rollbackStatus?.last_emergency_rollback && (
-              <p className="text-xs text-red-600 dark:text-red-500">
+              <p className="text-xs" style={{ color: '#f87171' }}>
                 Last rollback: {new Date(rollbackStatus.last_emergency_rollback.timestamp).toLocaleString()}
                 {rollbackStatus.last_emergency_rollback.reason && ` - "${rollbackStatus.last_emergency_rollback.reason}"`}
               </p>
@@ -462,11 +463,11 @@ export default function CopilotMonitoringPage() {
           <div className="flex flex-col items-end gap-2">
             {rollbackStatus && (
               <span
-                className={`px-3 py-1 rounded-full text-xs font-medium ${
-                  rollbackStatus.all_features_disabled
-                    ? 'bg-red-100 text-red-800 dark:bg-red-900/50 dark:text-red-300'
-                    : 'bg-emerald-100 text-emerald-800 dark:bg-emerald-900/50 dark:text-emerald-300'
-                }`}
+                className="px-3 py-1 rounded-full text-xs font-medium"
+                style={{
+                  backgroundColor: rollbackStatus.all_features_disabled ? 'rgba(239, 68, 68, 0.2)' : 'rgba(16, 185, 129, 0.2)',
+                  color: rollbackStatus.all_features_disabled ? '#f87171' : '#34d399'
+                }}
               >
                 {rollbackStatus.enabled_feature_count}/{rollbackStatus.total_feature_count} enabled
               </span>
