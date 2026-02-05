@@ -1,0 +1,119 @@
+{
+  "test_run_id": "frontend_20260205_011727",
+  "timestamp": "2026-02-05T01:17:27.530695",
+  "environment": "https://test.sportsmockery.com/admin/posts/new",
+  "total_tests": 10,
+  "passed": 5,
+  "failed": 5,
+  "test_results": [
+    {
+      "name": "A1: Headlines button visible",
+      "passed": true,
+      "screenshot": "screenshots/A1_headlines_button.png"
+    },
+    {
+      "name": "A2: Grammar button visible",
+      "passed": true,
+      "screenshot": "screenshots/A2_grammar_button.png"
+    },
+    {
+      "name": "A3: Chart button visible",
+      "passed": true,
+      "screenshot": "screenshots/A3_chart_button.png"
+    },
+    {
+      "name": "A4: SEO button visible",
+      "passed": true,
+      "screenshot": "screenshots/A4_seo_button.png"
+    },
+    {
+      "name": "B1: Chart button clickable",
+      "passed": true,
+      "screenshot": "screenshots/B1_chart_button_enabled.png"
+    },
+    {
+      "name": "B2: Chart modal or panel appears",
+      "passed": false,
+      "error": "Page.screenshot: Timeout 30000ms exceeded.\nCall log:\n  - taking page screenshot\n  - waiting for fonts to load...\n  - fonts loaded\n",
+      "screenshot": "B2_chart_modal"
+    },
+    {
+      "name": "C1: Auto-chart toggle exists",
+      "passed": false,
+      "error": "Page.screenshot: Timeout 30000ms exceeded.\nCall log:\n  - taking page screenshot\n  - waiting for fonts to load...\n  - fonts loaded\n",
+      "screenshot": "C1_auto_chart_toggle"
+    },
+    {
+      "name": "C2: Auto-chart toggle changes state",
+      "passed": false,
+      "error": "Page.screenshot: Timeout 30000ms exceeded.\nCall log:\n  - taking page screenshot\n  - waiting for fonts to load...\n  - fonts loaded\n",
+      "screenshot": "C2_toggle_changed"
+    },
+    {
+      "name": "E1: PostIQ analyze_chart API returns 200",
+      "passed": false,
+      "error": "Page.screenshot: Timeout 30000ms exceeded.\nCall log:\n  - taking page screenshot\n  - waiting for fonts to load...\n  - fonts loaded\n",
+      "screenshot": "E1_api_test"
+    },
+    {
+      "name": "E2: PostIQ generate_chart API returns 200",
+      "passed": false,
+      "error": "Page.screenshot: Timeout 30000ms exceeded.\nCall log:\n  - taking page screenshot\n  - waiting for fonts to load...\n  - fonts loaded\n",
+      "screenshot": "E2_generate_test"
+    }
+  ],
+  "screenshots": [
+    {
+      "test": "A1: Headlines button visible",
+      "filename": "A1_headlines_button",
+      "path": "screenshots/A1_headlines_button.png"
+    },
+    {
+      "test": "A2: Grammar button visible",
+      "filename": "A2_grammar_button",
+      "path": "screenshots/A2_grammar_button.png"
+    },
+    {
+      "test": "A3: Chart button visible",
+      "filename": "A3_chart_button",
+      "path": "screenshots/A3_chart_button.png"
+    },
+    {
+      "test": "A4: SEO button visible",
+      "filename": "A4_seo_button",
+      "path": "screenshots/A4_seo_button.png"
+    },
+    {
+      "test": "B1: Chart button clickable",
+      "filename": "B1_chart_button_enabled",
+      "path": "screenshots/B1_chart_button_enabled.png"
+    }
+  ],
+  "claude_analysis": {
+    "ux_issues": [
+      "Chart modal/panel fails to appear after clicking chart button, creating broken user flow",
+      "Auto-chart toggle feature completely non-functional - users cannot enable/disable automatic chart generation",
+      "PostIQ API integration broken - chart analysis and generation features unavailable",
+      "Screenshot timeouts suggest performance issues or infinite loading states",
+      "Users can click chart button but get no visual feedback or modal response"
+    ],
+    "critical_blockers": [
+      "Chart modal does not open (B2) - core feature completely broken",
+      "Auto-chart toggle missing/broken (C1, C2) - key functionality unavailable",
+      "PostIQ API endpoints failing (E1, E2) - backend integration non-functional",
+      "50% test failure rate indicates major system instability",
+      "Font loading timeout issues suggest underlying performance problems"
+    ],
+    "improvements": [
+      "Add loading indicators for chart generation processes",
+      "Implement better error handling and user feedback for API failures",
+      "Optimize font loading to prevent screenshot timeouts",
+      "Add visual states for button interactions (hover, active, disabled)",
+      "Consider graceful degradation when PostIQ services are unavailable",
+      "Implement retry mechanisms for failed API calls"
+    ],
+    "ui_score": 25,
+    "production_ready": false,
+    "reasoning": "While basic UI buttons are visible and clickable, the core chart generation feature is completely broken. The chart modal fails to open, auto-chart functionality is missing, and PostIQ API integration is non-functional. This represents a complete failure of the primary feature being tested. The 50% failure rate and consistent timeout errors indicate systemic issues that make this unsuitable for production deployment."
+  }
+}

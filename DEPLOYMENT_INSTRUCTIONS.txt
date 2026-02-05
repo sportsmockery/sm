@@ -1,0 +1,92 @@
+
+DEPLOYMENT INSTRUCTIONS - CLAUDE-POWERED CHART TESTING
+========================================================
+
+You now have TWO autonomous Claude agents that will test your chart feature:
+
+FILE 1: DATALABS_PostIQ_Chart_Tester.py
+----------------------------------------
+WHERE: Deploy to your Datalabs environment (backend)
+WHAT: Tests PostIQ chart generation API
+NEEDS:
+  - Claude API key (from console.anthropic.com)
+  - Your PostIQ API endpoint URL
+  - Your PostIQ authentication token
+  - Python packages: anthropic, requests
+
+HOW TO RUN:
+1. pip install anthropic requests
+2. Edit configuration section (lines 271-273):
+   ANTHROPIC_API_KEY = "sk-ant-xxxxx"
+   POSTIQ_ENDPOINT = "https://datalabs.sportsmockery.com/api/postiq"
+   POSTIQ_API_KEY = "your-api-key"
+3. python DATALABS_PostIQ_Chart_Tester.py
+4. Results saved to: postiq_test_results_TIMESTAMP.json
+
+FILE 2: FRONTEND_Chart_UI_Tester.py
+------------------------------------
+WHERE: Run locally or on CI pointing to test.sportsmockery.com
+WHAT: Tests chart UI with browser automation
+NEEDS:
+  - Claude API key
+  - Admin credentials for test.sportsmockery.com
+  - Python packages: anthropic, playwright
+
+HOW TO RUN:
+1. pip install anthropic playwright
+2. playwright install chromium
+3. mkdir screenshots
+4. Edit configuration section (lines 289-292):
+   ANTHROPIC_API_KEY = "sk-ant-xxxxx"
+   BASE_URL = "https://test.sportsmockery.com"
+   ADMIN_USERNAME = "your-username"
+   ADMIN_PASSWORD = "your-password"
+5. python FRONTEND_Chart_UI_Tester.py
+6. Results saved to: frontend_test_results_TIMESTAMP.json
+7. Screenshots saved to: screenshots/ directory
+
+WHAT CLAUDE DOES:
+-----------------
+1. Runs comprehensive automated tests (8+ scenarios per system)
+2. Captures failures, errors, performance metrics
+3. Takes screenshots (frontend only)
+4. Analyzes ALL results using Claude's reasoning
+5. Provides:
+   - Root cause analysis for failures
+   - Performance assessment
+   - UX/UI recommendations
+   - Production readiness score
+   - Prioritized fix list
+
+OUTPUT FORMAT:
+--------------
+Both agents generate JSON reports you can send back to me:
+
+{
+  "test_run_id": "...",
+  "total_tests": 15,
+  "passed": 12,
+  "failed": 3,
+  "test_results": [...],
+  "claude_analysis": {
+    "root_causes": [...],
+    "recommendations": [...],
+    "production_ready": {"score": 75, "blockers": [...]}
+  }
+}
+
+NEXT STEPS:
+-----------
+1. Deploy both Python scripts to appropriate environments
+2. Configure API keys and credentials
+3. Run both agents
+4. Send me BOTH JSON reports
+5. I'll provide consolidated analysis and optimization plan
+
+TROUBLESHOOTING:
+----------------
+- "ModuleNotFoundError": Run pip install commands
+- "Login failed": Check admin credentials
+- "API timeout": Check PostIQ endpoint URL
+- "Selector not found": Your UI might use different element names
+  → Send me screenshot and I'll update selectors

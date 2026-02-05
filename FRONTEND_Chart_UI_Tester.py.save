@@ -1,0 +1,504 @@
+
+# FRONTEND_CHART_UI_TESTER.py
+# Fixed for Next.js SportsMockery app (NOT WordPress)
+# Tests PostIQ chart generation on test.sportsmockery.com
+
+import anthropic
+from playwright.sync_api import sync_playwright, Page, expect
+import json
+import time
+from datetime import datetime
+from typing import Dict, List, Any
+import base64
+import os
+
+class FrontendChartTester:
+    '''
+    Autonomous Claude agent that tests PostIQ chart generation UI on test.sportsmockery.com
+    Uses Playwright for browser automation and Claude for intelligent analysis
+
+    Correct paths for Next.js app:
+    - Login: /login (Supabase auth)
+    - Admin editor: /admin/posts/new
+    - Studio editor: /studio/posts/new
+    - PostIQ API: /api/admin/ai (actions: generate_chart, analyze_chart)
+    '''
+
+    def __init__(self, api_key: str, base_url: str, admin_email: str, admin_password: str):
+        self.client = anthropic.Anthropic(api_key=api_key)
+        self.base_url = base_url.rstrip('/')
+        self.admin_email = admin_email
+        self.admin_password = admin_password
+        self.test_results = []
+        self.screenshots = []
+
+        # Ensure screenshots directory exists
+        os.makedirs('screenshots', exist_ok=True)
+
+    def run_comprehensive_test(self) -> Dict[str, Any]:
+        '''Main entry point - runs all UI tests with browser automation'''
+
+        print("Starting Frontend PostIQ Chart UI Testing...")
+        print(f"Target: {self.base_url}")
+        print("=" * 80)
+
+        with sync_playwright() as p:
+            # Launch browser (headless=False to see what's happening)
+            browser = p.chromium.launch(headless=False)
+            context = browser.new_context(viewport={'width': 1920, 'height': 1080})
+            page = context.new_page()
+
+            try:
+                # Login to admin
+                print("\n[Setup] Logging into admin panel...")
+                self._login_to_admin(page)
+
+                # Run test suites
+                print("\n[Suite A] PostIQ Button Visibility")
+                self._test_suite_a(page)
+
+                print("\n[Suite B] Chart Analysis & Generation")
+                self._test_suite_b(page)
+
+                print("\n[Suite C] Auto-Chart Toggle")
+                self._test_suite_c(page)
+
+                print("\n[Suite D] Chart Modal Interaction")
+                self._test_suite_d(page)
+
+                print("\n[Suite E] End-to-End Chart Creation")
+                self._test_suite_e(page)
+
+                # Use Claude to analyze all screenshots and results
+                analysis = self._claude_analyze_ui_results()
+
+            finally:
+                browser.close()
+
+        # Generate final report
+        report = {
+            "test_run_id": f"frontend_{datetime.now().strftime('%Y%m%d_%H%M%S')}",
+            "timestamp": datetime.now().isoformat(),
+            "environment": f"{self.base_url}/admin/posts/new",
+            "total_tests": len(self.test_results),
+            "passed": sum(1 for r in self.test_results if r['passed']),
+            "failed": sum(1 for r in self.test_results if not r['passed']),
+            "test_results": self.test_results,
+            "screenshots": self.screenshots,
+            "claude_analysis": analysis
+        }
+
+        # Save report
+        self._save_report(report)
+
+        print("\n" + "=" * 80)
+        print("Testing Complete")
+        print(f"Results: {report['passed']}/{report['total_tests']} passed")
+        print(f"Screenshots: {len(self.screenshots)} captured")
+        print(f"Report saved: frontend_test_results_{report['test_run_id']}.json")
+
+        return report
+
+    def _login_to_admin(self, page: Page):
+        '''Login to Next.js admin via Supabase auth'''
+        try:
+            # Go to login page
+            page.goto(f"{self.base_url}/login")
+            page.wait_for_load_state('networkidle')
+
+            # Fill Supabase auth login form
+            # Look for email input
+            email_input = page.locator('input[type="email"], input[name="email"], input[placeholder*="email" i]').first
+            email_input.fill(self.admin_email)
+
+            # Fill password
+            password_input = page.locator('input[type="password"], input[name="password"]').first
+            password_input.fill(self.admin_password)
+
+            # Click sign in button
+            sign_in_btn = page.locator('button[type="submit"], button:has-text("Sign In"), button:has-text("Log In")').first
+            sign_in_btn.click()
+
+            # Wait for redirect (could go to home, admin, or profile)
+            page.wait_for_url(lambda url: '/login' not in url, timeout=15000)
+            print("  [OK] Login successful")
+
+            # Navigate to admin posts
+            page.goto(f"{self.base_url}/admin/posts/new")
+            page.wait_for_load_state('networkidle')
+
+            # Verify we're on the editor page
+            title_input = page.locator('input[placeholder*="title" i], input[placeholder*="Article" i]').first
+            title_input.wait_for(state='visible', timeout=10000)
+            print("  [OK] Admin editor loaded")
+
+        except Exception as e:
+            print(f"  [FAIL] Login failed: {e}")
+            raise
+
+    def _test_suite_a(self, page: Page):
+        '''Test Suite A: PostIQ Button Visibility'''
+
+        # Navigate to admin post editor
+        page.goto(f"{self.base_url}/admin/posts/new")
+        page.wait_for_load_state('networkidle')
+        time.sleep(1)
+
+        # Test A1: Headlines button visible
+        result = self._run_test(
+            name="A1: Headlines button visible",
+            test_func=lambda: page.locator('button').filter(has_text='Headlines').first.is_visible(),
+            page=page,
+            screenshot_name="A1_headlines_button"
+        )
+
+        # Test A2: Grammar button visible
+        result = self._run_test(
+            name="A2: Grammar button visible",
+            test_func=lambda: page.locator('button').filter(has_text='Grammar').first.is_visible(),
+            page=page,
+            screenshot_name="A2_grammar_button"
+        )
+
+        # Test A3: Chart button visible
+        result = self._run_test(
+            name="A3: Chart button visible",
+            test_func=lambda: page.locator('button').filter(has_text='Chart').first.is_visible(),
+            page=page,
+            screenshot_name="A3_chart_button"
+        )
+
+        # Test A4: SEO button visible
+        result = self._run_test(
+            name="A4: SEO button visible",
+            test_func=lambda: page.locator('button').filter(has_text='SEO').first.is_visible(),
+            page=page,
+            screenshot_name="A4_seo_button"
+        )
+
+    def _test_suite_b(self, page: Page):
+        '''Test Suite B: Chart Analysis & Generation with sample data'''
+
+        # Fill in article with chartable data
+        title_input = page.locator('input[placeholder*="title" i], input[placeholder*="Article" i]').first
+        title_input.fill("Bears 2025 Season Stats Analysis")
+
+        # Fill content with statistical data
+        content_area = page.locator('[contenteditable="true"], .ProseMirror, .tiptap, textarea[name="content"]').first
+        if content_area.is_visible():
+            content_area.click()
+
+            test_content = '''<p>The Chicago Bears had an impressive 2025 season with Caleb Williams at the helm.</p>
+<p>Here are the key offensive stats:</p>
+<p>Caleb Williams: 4,127 passing yards, 29 touchdowns</p>
+<p>D'Andre Swift: 1,245 rushing yards, 8 touchdowns</p>
+<p>DJ Moore: 1,089 receiving yards, 7 touchdowns</p>
+<p>Rome Odunze: 892 receiving yards, 5 touchdowns</p>
+<p>Cole Kmet: 645 receiving yards, 6 touchdowns</p>'''
+
+            page.evaluate(f'''(html) => {{
+                const editor = document.querySelector('[contenteditable="true"], .ProseMirror, .tiptap');
+                if (editor) editor.innerHTML = html;
+            }}''', test_content)
+
+        time.sleep(1)
+
+        # Test B1: Click Chart button
+        chart_btn = page.locator('button').filter(has_text='Chart').first
+        result = self._run_test(
+            name="B1: Chart button clickable",
+            test_func=lambda: chart_btn.is_enabled(),
+            page=page,
+            screenshot_name="B1_chart_button_enabled"
+        )
+
+        # Click the chart button
+        if chart_btn.is_enabled():
+            chart_btn.click()
+            time.sleep(2)
+
+            # Test B2: Chart modal/panel appears
+            result = self._run_test(
+                name="B2: Chart modal or panel appears",
+                test_func=lambda: (
+                    page.locator('[role="dialog"]').is_visible() or
+                    page.locator('.chart-modal').is_visible() or
+                    page.locator('[class*="chart"]').filter(has_text='Chart').first.is_visible()
+                ),
+                page=page,
+                screenshot_name="B2_chart_modal"
+            )
+
+    def _test_suite_c(self, page: Page):
+        '''Test Suite C: Auto-Chart Toggle'''
+
+        # Navigate fresh
+        page.goto(f"{self.base_url}/admin/posts/new")
+        page.wait_for_load_state('networkidle')
+        time.sleep(1)
+
+        # Look for auto-chart checkbox/toggle
+        auto_chart_label = page.locator('label').filter(has_text='chart').first
+
+        result = self._run_test(
+            name="C1: Auto-chart toggle exists",
+            test_func=lambda: auto_chart_label.is_visible() if auto_chart_label.count() > 0 else False,
+            page=page,
+            screenshot_name="C1_auto_chart_toggle"
+        )
+
+        # Try to toggle it
+        if auto_chart_label.count() > 0 and auto_chart_label.is_visible():
+            checkbox = auto_chart_label.locator('input[type="checkbox"]')
+            if checkbox.count() > 0:
+                initial_state = checkbox.is_checked()
+                checkbox.click()
+                time.sleep(0.5)
+
+                result = self._run_test(
+                    name="C2: Auto-chart toggle changes state",
+                    test_func=lambda: checkbox.is_checked() != initial_state,
+                    page=page,
+                    screenshot_name="C2_toggle_changed"
+                )
+
+    def _test_suite_d(self, page: Page):
+        '''Test Suite D: Chart Modal Interaction'''
+
+        # Fill content first
+        page.goto(f"{self.base_url}/admin/posts/new")
+        page.wait_for_load_state('networkidle')
+
+        title_input = page.locator('input[placeholder*="title" i], input[placeholder*="Article" i]').first
+        title_input.fill("Test Article for Chart Modal")
+
+        content_area = page.locator('[contenteditable="true"], .ProseMirror, .tiptap').first
+        if content_area.is_visible():
+            content_area.click()
+            page.evaluate('''() => {
+                const editor = document.querySelector('[contenteditable="true"], .ProseMirror, .tiptap');
+                if (editor) editor.innerHTML = '<p>Player stats: Tom 100, Jerry 85, Spike 72</p>';
+            }''')
+
+        time.sleep(1)
+
+        # Click chart button to open modal
+        chart_btn = page.locator('button').filter(has_text='Chart').first
+        if chart_btn.is_visible() and chart_btn.is_enabled():
+            chart_btn.click()
+            time.sleep(2)
+
+            # Test D1: Look for chart type selector
+            type_selector = page.locator('select, [role="listbox"], button:has-text("Bar"), button:has-text("Line"), button:has-text("Pie")')
+            result = self._run_test(
+                name="D1: Chart type selector exists",
+                test_func=lambda: type_selector.count() > 0,
+                page=page,
+                screenshot_name="D1_type_selector"
+            )
+
+            # Test D2: Look for preview or canvas
+            preview = page.locator('canvas, .chart-preview, svg, [class*="chart"]')
+            result = self._run_test(
+                name="D2: Chart preview area exists",
+                test_func=lambda: preview.count() > 0,
+                page=page,
+                screenshot_name="D2_chart_preview"
+            )
+
+            # Close modal if open
+            close_btn = page.locator('button:has-text("Close"), button:has-text("Cancel"), [aria-label="Close"]').first
+            if close_btn.is_visible():
+                close_btn.click()
+
+    def _test_suite_e(self, page: Page):
+        '''Test Suite E: End-to-End Chart Creation via API'''
+
+        # Test the API directly
+        print("  Testing PostIQ API directly...")
+
+        # Test E1: API analyze_chart endpoint
+        api_test_passed = False
+        try:
+            response = page.request.post(
+                f"{self.base_url}/api/admin/ai",
+                data={
+                    "action": "analyze_chart",
+                    "title": "Bears Stats Test",
+                    "content": "<p>Caleb Williams: 4127 yards. DJ Moore: 1089 yards. Swift: 1245 yards.</p>"
+                }
+            )
+            api_test_passed = response.status == 200
+
+            if api_test_passed:
+                data = response.json()
+                print(f"    API Response: {json.dumps(data, indent=2)[:500]}")
+        except Exception as e:
+            print(f"    API Error: {e}")
+
+        result = self._run_test(
+            name="E1: PostIQ analyze_chart API returns 200",
+            test_func=lambda: api_test_passed,
+            page=page,
+            screenshot_name="E1_api_test"
+        )
+
+        # Test E2: API generate_chart endpoint
+        generate_passed = False
+        try:
+            response = page.request.post(
+                f"{self.base_url}/api/admin/ai",
+                data={
+                    "action": "generate_chart",
+                    "title": "Bears Receiving Leaders",
+                    "content": "<p>DJ Moore led with 1089 yards. Odunze had 892. Kmet finished with 645.</p>",
+                    "category": "Chicago Bears"
+                }
+            )
+            generate_passed = response.status == 200
+
+            if generate_passed:
+                data = response.json()
+                print(f"    Generate Response: success={data.get('success')}, chartId={data.get('chartId')}")
+        except Exception as e:
+            print(f"    Generate Error: {e}")
+
+        result = self._run_test(
+            name="E2: PostIQ generate_chart API returns 200",
+            test_func=lambda: generate_passed,
+            page=page,
+            screenshot_name="E2_generate_test"
+        )
+
+    def _run_test(self, name: str, test_func, page: Page, screenshot_name: str) -> Dict:
+        '''Run individual test and record result'''
+
+        try:
+            passed = test_func()
+
+            # Take screenshot
+            screenshot_path = f"screenshots/{screenshot_name}.png"
+            page.screenshot(path=screenshot_path)
+
+            # Save screenshot reference
+            self.screenshots.append({
+                "test": name,
+                "filename": screenshot_name,
+                "path": screenshot_path
+            })
+
+            result = {
+                "name": name,
+                "passed": passed,
+                "screenshot": screenshot_path
+            }
+
+            print(f"  {'[OK]' if passed else '[FAIL]'} {name}")
+
+        except Exception as e:
+            result = {
+                "name": name,
+                "passed": False,
+                "error": str(e),
+                "screenshot": screenshot_name
+            }
+            print(f"  [FAIL] {name}: {e}")
+
+        self.test_results.append(result)
+        return result
+
+    def _claude_analyze_ui_results(self) -> Dict:
+        '''Use Claude to analyze UI test results'''
+
+        failures = [r for r in self.test_results if not r['passed']]
+
+        prompt = f'''You are analyzing UI test results for PostIQ chart generation feature on SportsMockery.
+
+TEST RESULTS:
+- Total tests: {len(self.test_results)}
+- Passed: {sum(1 for r in self.test_results if r['passed'])}
+- Failed: {len(failures)}
+
+FAILURES:
+{json.dumps(failures, indent=2)}
+
+ALL TESTS:
+{json.dumps(self.test_results, indent=2)}
+
+Based on these results, provide:
+1. UX issues identified (what's broken or confusing)
+2. Critical blockers (must-fix before launch)
+3. Nice-to-have improvements
+4. Overall UI/UX score (0-100)
+5. Production readiness assessment
+
+Format as JSON with keys: ux_issues, critical_blockers, improvements, ui_score, production_ready
+'''
+
+        try:
+            response = self.client.messages.create(
+                model="claude-sonnet-4-20250514",
+                max_tokens=2000,
+                messages=[{"role": "user", "content": prompt}]
+            )
+
+            analysis_text = response.content[0].text
+
+            try:
+                # Try to parse JSON from response
+                import re
+                json_match = re.search(r'\{[\s\S]*\}', analysis_text)
+                if json_match:
+                    analysis = json.loads(json_match.group())
+                else:
+                    analysis = {"raw": analysis_text}
+            except:
+                analysis = {"raw": analysis_text}
+
+            return analysis
+
+        except Exception as e:
+            return {"error": f"Claude analysis failed: {str(e)}"}
+
+    def _save_report(self, report: Dict):
+        '''Save test report to JSON file'''
+        filename = f"frontend_test_results_{report['test_run_id']}.json"
+        with open(filename, 'w') as f:
+            json.dump(report, f, indent=2)
+
+# ============================================================================
+# USAGE
+# ============================================================================
+
+if __name__ == "__main__":
+    # Configuration - REPLACE WITH YOUR ACTUAL VALUES
+    ANTHROPIC_API_KEY = "sk-ant-xxxxx"  # Your Claude API key from console.anthropic.com
+    BASE_URL = "https://test.sportsmockery.com"  # Your test site
+    ADMIN_EMAIL = "your-admin@email.com"  # Supabase auth email
+    ADMIN_PASSWORD = "your-password"  # Supabase auth password
+
+    # Initialize tester
+    tester = FrontendChartTester(
+        api_key=ANTHROPIC_API_KEY,
+        base_url=BASE_URL,
+        admin_email=ADMIN_EMAIL,
+        admin_password=ADMIN_PASSWORD
+    )
+
+    # Run comprehensive test suite
+    results = tester.run_comprehensive_test()
+
+    # Print Claude's UX analysis
+    print("\n" + "=" * 80)
+    print("CLAUDE UX ANALYSIS:")
+    print("=" * 80)
+    if "ui_score" in results.get("claude_analysis", {}):
+        print(f"UI/UX Score: {results['claude_analysis']['ui_score']}/100")
+
+    if "critical_blockers" in results.get("claude_analysis", {}):
+        print("\nCritical Blockers:")
+        for blocker in results['claude_analysis']['critical_blockers']:
+            print(f"  - {blocker}")
+
+    if "production_ready" in results.get("claude_analysis", {}):
+        print(f"\nProduction Ready: {results['claude_analysis']['production_ready']}")

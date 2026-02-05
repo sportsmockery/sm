@@ -9,13 +9,13 @@ const DATALAB_API = 'https://datalab.sportsmockery.com'
 /**
  * POST /api/v2/postiq/suggest
  * V2 PostIQ Suggestions with template engine
- * Feature flag: postiq_template_engine
+ * Uses internal API key for server-to-server auth
  */
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json()
 
-    // Get user session
+    // Verify user is authenticated via SM's Supabase session
     const cookieStore = await cookies()
     const supabase = createServerClient(
       process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -40,18 +40,30 @@ export async function POST(request: NextRequest) {
 
     const { data: { session } } = await supabase.auth.getSession()
 
-    // Call Datalab v2 endpoint
+    // Require authenticated user
+    if (!session?.user) {
+      return NextResponse.json(
+        { error: 'Unauthorized - login required' },
+        { status: 401 }
+      )
+    }
+
+    // Call Datalab v2 endpoint with internal API key
     const headers: Record<string, string> = {
       'Content-Type': 'application/json',
+      'X-PostIQ-Internal-Key': process.env.POSTIQ_INTERNAL_KEY || '',
     }
-    if (session?.access_token) {
-      headers['Authorization'] = `Bearer ${session.access_token}`
+
+    // Include user_id in request body for logging on DataLab side
+    const requestBody = {
+      ...body,
+      user_id: session.user.id,
     }
 
     const response = await fetch(`${DATALAB_API}/api/v2/postiq/suggest`, {
       method: 'POST',
       headers,
-      body: JSON.stringify(body),
+      body: JSON.stringify(requestBody),
     })
 
     // Pass through the response (including 503 with fallback_to_legacy)

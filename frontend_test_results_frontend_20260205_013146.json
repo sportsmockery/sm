@@ -1,0 +1,137 @@
+{
+  "test_run_id": "frontend_20260205_013146",
+  "timestamp": "2026-02-05T01:31:46.477174",
+  "environment": "https://test.sportsmockery.com/admin/posts/new",
+  "total_tests": 10,
+  "passed": 10,
+  "failed": 0,
+  "test_results": [
+    {
+      "name": "A1: Headlines button visible",
+      "passed": true,
+      "screenshot": "screenshots/A1_headlines_button.png"
+    },
+    {
+      "name": "A2: Grammar button visible",
+      "passed": true,
+      "screenshot": "screenshots/A2_grammar_button.png"
+    },
+    {
+      "name": "A3: Chart button visible",
+      "passed": true,
+      "screenshot": "screenshots/A3_chart_button.png"
+    },
+    {
+      "name": "A4: SEO button visible",
+      "passed": true,
+      "screenshot": "screenshots/A4_seo_button.png"
+    },
+    {
+      "name": "B1: Chart button clickable",
+      "passed": true,
+      "screenshot": "screenshots/B1_chart_button_enabled.png"
+    },
+    {
+      "name": "B2: Chart modal or panel appears",
+      "passed": true,
+      "screenshot": "screenshots/B2_chart_modal.png"
+    },
+    {
+      "name": "C1: Auto-chart toggle exists",
+      "passed": true,
+      "screenshot": "screenshots/C1_auto_chart_toggle.png"
+    },
+    {
+      "name": "C2: Auto-chart toggle changes state",
+      "passed": true,
+      "screenshot": "screenshots/C2_toggle_changed.png"
+    },
+    {
+      "name": "E1: PostIQ analyze_chart API returns 200",
+      "passed": true,
+      "screenshot": "screenshots/E1_api_test.png"
+    },
+    {
+      "name": "E2: PostIQ generate_chart API returns 200",
+      "passed": true,
+      "screenshot": "screenshots/E2_generate_test.png"
+    }
+  ],
+  "screenshots": [
+    {
+      "test": "A1: Headlines button visible",
+      "filename": "A1_headlines_button",
+      "path": "screenshots/A1_headlines_button.png"
+    },
+    {
+      "test": "A2: Grammar button visible",
+      "filename": "A2_grammar_button",
+      "path": "screenshots/A2_grammar_button.png"
+    },
+    {
+      "test": "A3: Chart button visible",
+      "filename": "A3_chart_button",
+      "path": "screenshots/A3_chart_button.png"
+    },
+    {
+      "test": "A4: SEO button visible",
+      "filename": "A4_seo_button",
+      "path": "screenshots/A4_seo_button.png"
+    },
+    {
+      "test": "B1: Chart button clickable",
+      "filename": "B1_chart_button_enabled",
+      "path": "screenshots/B1_chart_button_enabled.png"
+    },
+    {
+      "test": "B2: Chart modal or panel appears",
+      "filename": "B2_chart_modal",
+      "path": "screenshots/B2_chart_modal.png"
+    },
+    {
+      "test": "C1: Auto-chart toggle exists",
+      "filename": "C1_auto_chart_toggle",
+      "path": "screenshots/C1_auto_chart_toggle.png"
+    },
+    {
+      "test": "C2: Auto-chart toggle changes state",
+      "filename": "C2_toggle_changed",
+      "path": "screenshots/C2_toggle_changed.png"
+    },
+    {
+      "test": "E1: PostIQ analyze_chart API returns 200",
+      "filename": "E1_api_test",
+      "path": "screenshots/E1_api_test.png"
+    },
+    {
+      "test": "E2: PostIQ generate_chart API returns 200",
+      "filename": "E2_generate_test",
+      "path": "screenshots/E2_generate_test.png"
+    }
+  ],
+  "claude_analysis": {
+    "ux_issues": [
+      "No chart generation workflow test - users may face issues when actually generating charts",
+      "Missing error handling validation - no tests for API failures or edge cases",
+      "No user feedback/loading states tested - users may not know if chart generation is processing",
+      "Chart display and interaction not validated - unclear if generated charts are properly rendered",
+      "No accessibility testing - potential barriers for users with disabilities"
+    ],
+    "critical_blockers": [
+      "End-to-end chart generation flow not tested - core feature functionality unverified",
+      "Error handling for failed API calls not validated - users may encounter broken states",
+      "Chart rendering and display not confirmed - charts may not appear correctly to users"
+    ],
+    "improvements": [
+      "Add loading indicators and progress feedback during chart generation",
+      "Implement comprehensive error messages for different failure scenarios",
+      "Add keyboard navigation and screen reader support for accessibility",
+      "Include chart customization options testing (colors, types, styling)",
+      "Add responsive design tests for mobile chart viewing",
+      "Test chart export/download functionality if applicable",
+      "Validate chart data accuracy and formatting"
+    ],
+    "ui_score": 65,
+    "production_ready": false
+  }
+}
