@@ -7,10 +7,12 @@ interface AIAssistantProps {
   content: string
   category?: string
   team?: string
+  postId?: string
   onHeadlineSelect: (headline: string) => void
   onSEOUpdate: (seo: { seoTitle: string; metaDescription: string }) => void
   onExcerptGenerate: (excerpt: string) => void
   onGrammarFix: (content: string) => void
+  onPollInsert?: (pollId: string, shortcode: string, updatedContent: string) => void
 }
 
 interface GrammarIssue {
@@ -45,22 +47,46 @@ interface ArticleIdea {
   type: string
 }
 
+interface PollResult {
+  success: boolean
+  pollId?: string
+  shortcode?: string
+  question?: string
+  options?: string[]
+  confidence?: number
+  reasoning?: string
+  paragraphIndex?: number
+  updatedContent?: string
+  reason?: string
+  poll?: {
+    id: string
+    question: string
+    options: string[]
+    poll_type: string
+    team_theme: string | null
+    confidence: number
+  }
+}
+
 export default function AIAssistant({
   title,
   content,
   category,
   team,
+  postId,
   onHeadlineSelect,
   onSEOUpdate,
   onExcerptGenerate,
   onGrammarFix,
+  onPollInsert,
 }: AIAssistantProps) {
-  const [activeTab, setActiveTab] = useState<'headlines' | 'seo' | 'ideas' | 'grammar'>('headlines')
+  const [activeTab, setActiveTab] = useState<'headlines' | 'seo' | 'ideas' | 'grammar' | 'poll'>('headlines')
   const [loading, setLoading] = useState(false)
   const [headlines, setHeadlines] = useState<string[]>([])
   const [seoResult, setSeoResult] = useState<SEOResult | null>(null)
   const [ideas, setIdeas] = useState<ArticleIdea[]>([])
   const [grammarResult, setGrammarResult] = useState<GrammarResult | null>(null)
+  const [pollResult, setPollResult] = useState<PollResult | null>(null)
   const [error, setError] = useState('')
 
   const callAI = async (action: string) => {
@@ -71,7 +97,7 @@ export default function AIAssistant({
       const response = await fetch('/api/admin/ai', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ action, title, content, category, team }),
+        body: JSON.stringify({ action, title, content, category, team, postId }),
       })
 
       if (!response.ok) {
@@ -137,6 +163,19 @@ export default function AIAssistant({
     }
   }
 
+  const generatePoll = async () => {
+    const result = await callAI('poll')
+    if (result) {
+      setPollResult(result)
+    }
+  }
+
+  const applyPoll = () => {
+    if (pollResult?.success && pollResult.pollId && pollResult.shortcode && pollResult.updatedContent && onPollInsert) {
+      onPollInsert(pollResult.pollId, pollResult.shortcode, pollResult.updatedContent)
+    }
+  }
+
   return (
     <div className="rounded-lg border border-zinc-200 bg-white dark:border-zinc-800 dark:bg-zinc-900">
       <div className="border-b border-zinc-200 dark:border-zinc-800">
@@ -152,6 +191,7 @@ export default function AIAssistant({
             { key: 'seo', label: 'SEO' },
             { key: 'ideas', label: 'Ideas' },
             { key: 'grammar', label: 'Grammar' },
+            { key: 'poll', label: 'Poll' },
           ].map((tab) => (
             <button
               key={tab.key}
@@ -391,6 +431,88 @@ export default function AIAssistant({
                   >
                     Apply All Corrections
                   </button>
+                )}
+              </div>
+            )}
+          </div>
+        )}
+
+        {activeTab === 'poll' && (
+          <div className="space-y-4">
+            <p className="text-sm text-zinc-600 dark:text-zinc-400">
+              Generate an engaging poll based on your article content to boost reader engagement.
+            </p>
+            <button
+              onClick={generatePoll}
+              disabled={loading || !content}
+              className="w-full rounded-lg bg-purple-600 px-4 py-2 text-sm font-medium text-white hover:bg-purple-700 disabled:opacity-50"
+            >
+              {loading ? 'Generating Poll...' : 'Generate Poll'}
+            </button>
+
+            {pollResult && (
+              <div className="space-y-4">
+                {pollResult.success ? (
+                  <>
+                    {/* Poll Preview */}
+                    <div className="rounded-lg border border-purple-200 bg-purple-50 p-4 dark:border-purple-800 dark:bg-purple-900/30">
+                      <div className="flex items-center justify-between mb-3">
+                        <span className="text-xs font-medium uppercase text-purple-600 dark:text-purple-400">
+                          Poll Preview
+                        </span>
+                        {pollResult.confidence && (
+                          <span className="text-xs text-purple-500">
+                            {Math.round(pollResult.confidence * 100)}% confidence
+                          </span>
+                        )}
+                      </div>
+                      <h4 className="font-semibold text-zinc-900 dark:text-zinc-100 mb-3">
+                        {pollResult.question}
+                      </h4>
+                      <div className="space-y-2">
+                        {pollResult.options?.map((option, i) => (
+                          <div
+                            key={i}
+                            className="flex items-center gap-3 rounded-lg border border-zinc-200 bg-white p-3 dark:border-zinc-700 dark:bg-zinc-800"
+                          >
+                            <div className="h-4 w-4 rounded-full border-2 border-purple-500" />
+                            <span className="text-sm text-zinc-700 dark:text-zinc-300">{option}</span>
+                          </div>
+                        ))}
+                      </div>
+                      {pollResult.reasoning && (
+                        <p className="mt-3 text-xs text-zinc-500 dark:text-zinc-400 italic">
+                          {pollResult.reasoning}
+                        </p>
+                      )}
+                    </div>
+
+                    {/* Insert Poll Button */}
+                    {onPollInsert && (
+                      <button
+                        onClick={applyPoll}
+                        className="w-full rounded-lg bg-green-600 px-4 py-2 text-sm font-medium text-white hover:bg-green-700"
+                      >
+                        Insert Poll into Article
+                      </button>
+                    )}
+
+                    {/* Info about shortcode */}
+                    <div className="rounded-lg bg-zinc-50 p-3 dark:bg-zinc-800">
+                      <p className="text-xs text-zinc-500 dark:text-zinc-400">
+                        Poll will be inserted after paragraph {pollResult.paragraphIndex || 2}.
+                        {pollResult.shortcode && (
+                          <> Shortcode: <code className="bg-zinc-200 px-1 rounded dark:bg-zinc-700">{pollResult.shortcode}</code></>
+                        )}
+                      </p>
+                    </div>
+                  </>
+                ) : (
+                  <div className="rounded-lg bg-yellow-50 p-4 dark:bg-yellow-900/30">
+                    <p className="text-sm text-yellow-700 dark:text-yellow-300">
+                      {pollResult.reason || 'No suitable poll topic found in the article content.'}
+                    </p>
+                  </div>
                 )}
               </div>
             )}

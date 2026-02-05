@@ -58,6 +58,8 @@ export async function GET(request: NextRequest) {
 /**
  * POST /api/admin/polls
  * Create a new poll (used by PostIQ)
+ * Supports new PostIQ fields: source, source_post_id, ai_confidence
+ * Supports linking to posts via sm_post_polls junction table
  */
 export async function POST(request: NextRequest) {
   try {
@@ -74,21 +76,35 @@ export async function POST(request: NextRequest) {
     // Use question as title if not provided (for PostIQ auto-generation)
     const title = body.title || body.question.slice(0, 255)
 
+    // Build poll insert object with optional PostIQ tracking fields
+    const pollInsert: Record<string, unknown> = {
+      title,
+      question: body.question,
+      poll_type: body.pollType || 'single',
+      status: body.status || 'active',
+      team_theme: body.teamTheme || null,
+      show_results: body.showResults !== false,
+      show_live_results: body.showLiveResults !== false,
+      total_votes: 0,
+      starts_at: body.startsAt || new Date().toISOString(),
+      ends_at: body.endsAt || null,
+    }
+
+    // Add PostIQ tracking fields if provided (new columns from DataLab integration)
+    if (body.source) {
+      pollInsert.source = body.source // 'postiq', 'manual', 'e2e_test'
+    }
+    if (body.sourcePostId) {
+      pollInsert.source_post_id = body.sourcePostId
+    }
+    if (body.aiConfidence !== undefined) {
+      pollInsert.ai_confidence = body.aiConfidence
+    }
+
     // Create poll
     const { data: poll, error: pollError } = await supabaseAdmin
       .from('sm_polls')
-      .insert({
-        title,
-        question: body.question,
-        poll_type: body.pollType || 'single',
-        status: body.status || 'active',
-        team_theme: body.teamTheme || null,
-        show_results: body.showResults !== false,
-        show_live_results: body.showLiveResults !== false,
-        total_votes: 0,
-        starts_at: body.startsAt || new Date().toISOString(),
-        ends_at: body.endsAt || null,
-      })
+      .insert(pollInsert)
       .select()
       .single()
 
@@ -121,6 +137,25 @@ export async function POST(request: NextRequest) {
         { error: 'Failed to create poll options', details: optionsError.message },
         { status: 500 }
       )
+    }
+
+    // Link poll to post via sm_post_polls junction table if post ID provided
+    if (body.sourcePostId || body.postId) {
+      const postIdToLink = body.sourcePostId || body.postId
+      const { error: linkError } = await supabaseAdmin
+        .from('sm_post_polls')
+        .insert({
+          post_id: postIdToLink,
+          poll_id: poll.id,
+          position: body.position || 'after_content',
+          display_order: body.displayOrder || 0,
+          is_auto_generated: body.source === 'postiq',
+        })
+
+      if (linkError) {
+        // Log but don't fail - the poll was created successfully
+        console.error('Error linking poll to post:', linkError)
+      }
     }
 
     // Fetch complete poll with options

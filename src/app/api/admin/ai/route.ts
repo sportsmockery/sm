@@ -29,11 +29,12 @@ function extractJSON(text: string): string {
 }
 
 interface AIRequest {
-  action: 'headlines' | 'seo' | 'ideas' | 'grammar' | 'excerpt' | 'generate_chart' | 'generate_seo' | 'analyze_chart' | 'generate_poll'
+  action: 'headlines' | 'seo' | 'ideas' | 'grammar' | 'excerpt' | 'generate_chart' | 'generate_seo' | 'analyze_chart' | 'generate_poll' | 'poll' | 'publish-assist'
   content?: string
   title?: string
   category?: string
   team?: string
+  postId?: string // For linking generated polls to posts
 }
 
 /**
@@ -41,9 +42,9 @@ interface AIRequest {
  */
 async function tryDataLabPostIQ(body: AIRequest, userId?: string): Promise<Response | null> {
   // Only proxy certain actions to DataLab
-  const datalabActions = ['headlines', 'seo', 'generate_seo', 'ideas', 'grammar', 'excerpt', 'analyze_chart']
+  const datalabActions = ['headlines', 'seo', 'generate_seo', 'ideas', 'grammar', 'excerpt', 'analyze_chart', 'poll', 'publish-assist']
   if (!datalabActions.includes(body.action)) {
-    return null // Use local handler for chart/poll generation
+    return null // Use local handler for chart generation
   }
 
   if (!process.env.POSTIQ_INTERNAL_KEY) {
@@ -95,7 +96,7 @@ async function tryDataLabPostIQ(body: AIRequest, userId?: string): Promise<Respo
 export async function POST(request: NextRequest) {
   try {
     const body: AIRequest = await request.json()
-    const { action, content, title, category, team } = body
+    const { action, content, title, category, team, postId } = body
 
     // Get user session for logging
     let userId: string | undefined
@@ -151,8 +152,9 @@ export async function POST(request: NextRequest) {
         return await analyzeChartData(title || '', content || '', category)
       case 'generate_chart':
         return await generateChartForPost(title || '', content || '', category)
+      case 'poll':
       case 'generate_poll':
-        return await generatePollForPost(title || '', content || '', category)
+        return await generatePollForPost(title || '', content || '', category, team, postId)
       default:
         return NextResponse.json({ error: 'Invalid action' }, { status: 400 })
     }
@@ -684,10 +686,26 @@ function insertShortcodeAfterParagraph(
 /**
  * Generate a poll for a post based on its content
  * Analyzes the article to find a compelling question for readers to vote on
+ * Supports new DataLab PostIQ integration with source tracking and post linking
  */
-async function generatePollForPost(title: string, content: string, category?: string) {
+async function generatePollForPost(title: string, content: string, category?: string, team?: string, postId?: string) {
   // Strip HTML tags for analysis
   const plainText = content.replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim()
+
+  // Determine team theme from category or team param
+  const teamMap: Record<string, string> = {
+    'Chicago Bears': 'bears',
+    'Bears': 'bears',
+    'Chicago Bulls': 'bulls',
+    'Bulls': 'bulls',
+    'Chicago Cubs': 'cubs',
+    'Cubs': 'cubs',
+    'Chicago White Sox': 'whitesox',
+    'White Sox': 'whitesox',
+    'Chicago Blackhawks': 'blackhawks',
+    'Blackhawks': 'blackhawks',
+  }
+  const teamTheme = team || (category ? teamMap[category] : null) || null
 
   const prompt = `You are a sports engagement analyst for Sports Mockery, a Chicago sports fan site. Analyze this article and create an engaging poll question for readers to vote on.
 
@@ -714,7 +732,9 @@ Return a JSON object with:
   "shouldCreatePoll": true or false (false if no good poll topic found),
   "question": "The poll question to ask fans",
   "options": ["Option 1", "Option 2", "Option 3"],
+  "poll_type": "single",
   "paragraphIndex": number (1-based index of paragraph where poll should appear after),
+  "confidence": number between 0 and 1 indicating how confident you are this is a good poll,
   "reasoning": "brief explanation of why this poll engages fans"
 }
 
@@ -745,16 +765,22 @@ Return ONLY the JSON object, no explanation.`
         success: false,
         reason: 'No suitable poll topic found in article',
         updatedContent: null,
+        poll: null,
       })
     }
 
-    // Create the poll via internal API call
+    // Create the poll via internal API call with new PostIQ fields
     const pollPayload = {
       question: analysis.question,
       options: analysis.options.map((text: string) => ({ text })),
-      pollType: 'single',
+      pollType: analysis.poll_type || 'single',
       status: 'active',
       showResults: true,
+      teamTheme,
+      // New PostIQ tracking fields
+      source: 'postiq',
+      sourcePostId: postId || null,
+      aiConfidence: analysis.confidence || 0.8,
     }
 
     // Make internal request to create poll
@@ -774,11 +800,13 @@ Return ONLY the JSON object, no explanation.`
         success: false,
         reason: 'Failed to create poll',
         updatedContent: null,
+        poll: null,
       })
     }
 
     const pollResult = await pollResponse.json()
-    const shortcode = `[poll:${pollResult.poll.id}]`
+    const pollId = pollResult.id || pollResult.poll?.id
+    const shortcode = `[poll:${pollId}]`
 
     // Insert shortcode after the specified paragraph
     const updatedContent = insertPollShortcodeAfterParagraph(
@@ -789,11 +817,23 @@ Return ONLY the JSON object, no explanation.`
 
     return NextResponse.json({
       success: true,
-      pollId: pollResult.poll.id,
+      pollId,
       shortcode,
       question: analysis.question,
       options: analysis.options,
+      confidence: analysis.confidence || 0.8,
+      reasoning: analysis.reasoning,
+      paragraphIndex: analysis.paragraphIndex || 2,
       updatedContent,
+      // Return poll object for frontend preview
+      poll: {
+        id: pollId,
+        question: analysis.question,
+        options: analysis.options,
+        poll_type: analysis.poll_type || 'single',
+        team_theme: teamTheme,
+        confidence: analysis.confidence || 0.8,
+      },
     })
   } catch (e) {
     console.error('Poll generation error:', e)
@@ -801,6 +841,7 @@ Return ONLY the JSON object, no explanation.`
       success: false,
       reason: 'Failed to analyze content for poll',
       updatedContent: null,
+      poll: null,
     })
   }
 }
