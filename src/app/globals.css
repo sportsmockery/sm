@@ -96,6 +96,14 @@
   --card-border: #e0e0e0;
   --card-hover-bg: #fafafa;
 
+  /* Admin dashboard aliases */
+  --bg-card: #ffffff;
+  --border-default: #e0e0e0;
+  --accent-red: #bc0000;
+  --accent-red-glow: rgba(188, 0, 0, 0.1);
+  --success: #10b981;
+  --warning: #f59e0b;
+
   /* Footer colors - footer is always dark */
   --footer-text-muted: #999999;
   --footer-bottom-bg: #111111;
@@ -264,6 +272,14 @@
   --card-bg: #111113;
   --card-border: #27272a;
   --card-hover-bg: #1a1a1c;
+
+  /* Admin dashboard aliases */
+  --bg-card: #111113;
+  --border-default: #27272a;
+  --accent-red: #ff4444;
+  --accent-red-glow: rgba(255, 68, 68, 0.15);
+  --success: #10b981;
+  --warning: #f59e0b;
 
   /* Footer colors - still muted on dark bg */
   --footer-text-muted: #888888;
