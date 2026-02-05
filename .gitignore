@@ -44,3 +44,6 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# PostIQ test file with credentials
+FRONTEND_Chart_UI_Tester.py
