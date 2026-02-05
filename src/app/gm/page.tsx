@@ -973,8 +973,9 @@ export default function GMPage() {
       // Fallback to v1 if v2 fails
       if (!res.ok) {
         const v2Data = await res.json().catch(() => ({}))
-        if (v2Data.fallback_to_legacy || res.status === 503) {
-          console.log('[gradeTrade] Falling back to v1 API')
+        // Fall back on: fallback_to_legacy flag, 503, 401 (unauthorized), or any 4xx/5xx
+        if (v2Data.fallback_to_legacy || res.status === 503 || res.status === 401 || res.status >= 400) {
+          console.log('[gradeTrade] Falling back to v1 API (v2 status:', res.status, ')')
           res = await fetch('/api/gm/grade', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
