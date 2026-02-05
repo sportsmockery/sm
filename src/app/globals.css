@@ -103,6 +103,8 @@
   --accent-red-glow: rgba(188, 0, 0, 0.1);
   --success: #10b981;
   --warning: #f59e0b;
+  --bg-hover: #f0f0f0;
+  --text-secondary: #666666;
 
   /* Footer colors - footer is always dark */
   --footer-text-muted: #999999;
@@ -280,6 +282,8 @@
   --accent-red-glow: rgba(255, 68, 68, 0.15);
   --success: #10b981;
   --warning: #f59e0b;
+  --bg-hover: #1a1a1c;
+  --text-secondary: #a1a1aa;
 
   /* Footer colors - still muted on dark bg */
   --footer-text-muted: #888888;

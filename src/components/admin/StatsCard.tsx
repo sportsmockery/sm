@@ -34,7 +34,11 @@ export default function StatsCard({
 }: StatsCardProps) {
   const CardContent = (
     <div
-      className={`group rounded-xl border border-zinc-200 bg-white p-6 transition-all hover:border-zinc-300 hover:shadow-md dark:border-zinc-800 dark:bg-zinc-900 dark:hover:border-zinc-700 ${className}`}
+      className={`group rounded-xl p-6 transition-all hover:shadow-md ${className}`}
+      style={{
+        backgroundColor: 'var(--bg-card, #ffffff)',
+        border: '1px solid var(--border-default, #e0e0e0)',
+      }}
     >
       <div className="flex items-center justify-between">
         <div className={`flex h-10 w-10 items-center justify-center rounded-lg ${colorVariants[color]}`}>
@@ -66,14 +70,14 @@ export default function StatsCard({
       </div>
 
       <div className="mt-4">
-        <p className="text-3xl font-bold text-zinc-900 dark:text-white">
+        <p className="text-3xl font-bold" style={{ color: 'var(--text-primary, #222222)' }}>
           {typeof value === 'number' ? value.toLocaleString() : value}
         </p>
-        <p className="mt-1 text-sm text-zinc-500 dark:text-zinc-400">{title}</p>
+        <p className="mt-1 text-sm" style={{ color: 'var(--text-muted, #666666)' }}>{title}</p>
       </div>
 
       {trend && (
-        <p className="mt-2 text-xs text-zinc-400 dark:text-zinc-500">{trend.label}</p>
+        <p className="mt-2 text-xs" style={{ color: 'var(--text-muted, #666666)' }}>{trend.label}</p>
       )}
 
       {href && (
