@@ -73,7 +73,7 @@ const RichTextEditor = forwardRef<RichTextEditorRef, RichTextEditorProps>(functi
     },
     editorProps: {
       attributes: {
-        class: 'prose prose-zinc dark:prose-invert max-w-none min-h-[400px] focus:outline-none px-4 py-3',
+        class: 'prose prose-zinc dark:prose-invert max-w-none min-h-[400px] focus:outline-none px-4 py-3 bg-white dark:bg-zinc-900 text-zinc-700 dark:text-zinc-300',
       },
     },
   })
