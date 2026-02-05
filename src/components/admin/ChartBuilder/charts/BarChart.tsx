@@ -21,7 +21,7 @@ export default function BarChart({
   colors,
   animate = true,
   width = 400,
-  height = 250,
+  height = 280,
 }: BarChartProps) {
   const svgRef = useRef<SVGSVGElement>(null)
 
@@ -31,7 +31,8 @@ export default function BarChart({
     const svg = d3.select(svgRef.current)
     svg.selectAll('*').remove()
 
-    const margin = { top: 20, right: 20, bottom: 40, left: 50 }
+    // Increased bottom margin for rotated labels
+    const margin = { top: 30, right: 20, bottom: 70, left: 50 }
     const innerWidth = width - margin.left - margin.right
     const innerHeight = height - margin.top - margin.bottom
 
@@ -87,25 +88,33 @@ export default function BarChart({
 
     g.select('.grid .domain').remove()
 
-    // X axis
-    g.append('g')
+    // X axis with better label handling
+    const xAxis = g.append('g')
       .attr('transform', `translate(0,${innerHeight})`)
       .call(d3.axisBottom(xScale))
-      .selectAll('text')
-      .attr('fill', '#9CA3AF')
-      .attr('font-size', '10px')
-      .attr('transform', 'rotate(-35)')
+
+    xAxis.selectAll('text')
+      .attr('fill', '#D1D5DB')
+      .attr('font-size', '11px')
+      .attr('transform', 'rotate(-45)')
       .attr('text-anchor', 'end')
+      .attr('dx', '-0.5em')
+      .attr('dy', '0.5em')
+      .text(function(d) {
+        const label = String(d)
+        return label.length > 15 ? label.slice(0, 15) + '...' : label
+      })
 
     g.selectAll('.domain').attr('stroke', '#374151')
     g.selectAll('.tick line').attr('stroke', '#374151')
 
-    // Y axis
-    g.append('g')
+    // Y axis with better styling
+    const yAxis = g.append('g')
       .call(d3.axisLeft(yScale).ticks(5))
-      .selectAll('text')
-      .attr('fill', '#9CA3AF')
-      .attr('font-size', '10px')
+
+    yAxis.selectAll('text')
+      .attr('fill', '#D1D5DB')
+      .attr('font-size', '11px')
 
     // Bars
     const bars = g

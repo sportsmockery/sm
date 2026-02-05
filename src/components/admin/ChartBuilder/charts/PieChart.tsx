@@ -22,7 +22,7 @@ export default function PieChart({
   colors,
   animate = true,
   width = 300,
-  height = 300,
+  height = 340,
   donut = true,
 }: PieChartProps) {
   const svgRef = useRef<SVGSVGElement>(null)
@@ -33,12 +33,15 @@ export default function PieChart({
     const svg = d3.select(svgRef.current)
     svg.selectAll('*').remove()
 
-    const radius = Math.min(width, height) / 2 - 10
+    // Reserve space for legend at bottom
+    const legendSpace = 50
+    const chartHeight = height - legendSpace
+    const radius = Math.min(width, chartHeight) / 2 - 10
     const innerRadius = donut ? radius * 0.6 : 0
 
     const g = svg
       .append('g')
-      .attr('transform', `translate(${width / 2},${height / 2})`)
+      .attr('transform', `translate(${width / 2},${chartHeight / 2})`)
 
     // Color scale
     const total = d3.sum(data, (d) => d.value)
@@ -171,11 +174,15 @@ export default function PieChart({
           .attr('opacity', 1)
       })
 
-    // Legend
+    // Legend - positioned below chart in horizontal layout
+    const legendHeight = 40
+    const legendY = height - legendHeight + 10
+    const itemWidth = Math.floor(width / Math.min(data.length, 4))
+
     const legend = svg
       .append('g')
       .attr('class', 'legend')
-      .attr('transform', `translate(${width - 100}, 20)`)
+      .attr('transform', `translate(10, ${legendY})`)
 
     const legendItems = legend
       .selectAll('.legend-item')
@@ -183,22 +190,26 @@ export default function PieChart({
       .enter()
       .append('g')
       .attr('class', 'legend-item')
-      .attr('transform', (_, i) => `translate(0, ${i * 20})`)
+      .attr('transform', (_, i) => {
+        const row = Math.floor(i / 4)
+        const col = i % 4
+        return `translate(${col * itemWidth}, ${row * 18})`
+      })
 
     legendItems
       .append('rect')
-      .attr('width', 12)
-      .attr('height', 12)
+      .attr('width', 10)
+      .attr('height', 10)
       .attr('rx', 2)
       .attr('fill', (_, i) => colorScale(i))
 
     legendItems
       .append('text')
-      .attr('x', 18)
-      .attr('y', 10)
+      .attr('x', 14)
+      .attr('y', 9)
       .attr('fill', '#9CA3AF')
       .attr('font-size', '10px')
-      .text((d) => d.label.length > 10 ? d.label.slice(0, 10) + '...' : d.label)
+      .text((d) => d.label.length > 12 ? d.label.slice(0, 12) + '...' : d.label)
 
     if (animate) {
       legend
