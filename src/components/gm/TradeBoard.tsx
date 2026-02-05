@@ -11,8 +11,9 @@ import { AgingCurveWidget, type AgingCurveData } from './AgingCurveWidget'
 import { AuditButton } from './AuditButton'
 import { AuditReportCard } from './AuditReportCard'
 import { HistoricalContextPanel, SuggestedTradePanel } from './HistoricalContextPanel'
+import { DataFreshnessIndicator } from './DataFreshnessIndicator'
 import { useTheme } from '@/contexts/ThemeContext'
-import type { DraftPick, HistoricalContext, EnhancedSuggestedTrade, LegacySuggestedTrade, LegacyHistoricalTradeRef } from '@/types/gm'
+import type { DraftPick, HistoricalContext, EnhancedSuggestedTrade, LegacySuggestedTrade, LegacyHistoricalTradeRef, DataFreshness } from '@/types/gm'
 import type { AuditResult } from '@/types/gm-audit'
 
 type ReceivedPlayer = PlayerData | { name: string; position: string }
@@ -60,6 +61,8 @@ interface GradeResult {
   // Suggested trade - supports both legacy and enhanced formats
   suggested_trade?: LegacySuggestedTrade | null
   enhanced_suggested_trade?: EnhancedSuggestedTrade | null
+  // Data freshness tracking (Feb 2026)
+  data_freshness?: DataFreshness | null
 }
 
 interface TradeBoardProps {
@@ -532,6 +535,16 @@ export function TradeBoard({
                 marginBottom: 12,
               }}>
                 {gradeResult.trade_summary}
+              </div>
+            )}
+
+            {/* Data freshness indicator */}
+            {gradeResult.data_freshness && (
+              <div style={{ marginBottom: 16 }}>
+                <DataFreshnessIndicator
+                  freshness={gradeResult.data_freshness}
+                  isDark={isDark}
+                />
               </div>
             )}
 

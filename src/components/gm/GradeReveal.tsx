@@ -7,9 +7,10 @@ import { ExportModal } from './ExportModal'
 import { AuditButton } from './AuditButton'
 import { AuditReportCard } from './AuditReportCard'
 import { HistoricalContextPanel, SuggestedTradePanel } from './HistoricalContextPanel'
+import { DataFreshnessIndicator } from './DataFreshnessIndicator'
 import type { PlayerData } from '@/components/gm/PlayerCard'
 import type { AuditResult } from '@/types/gm-audit'
-import type { HistoricalContext, EnhancedSuggestedTrade, LegacySuggestedTrade, LegacyHistoricalTradeRef } from '@/types/gm'
+import type { HistoricalContext, EnhancedSuggestedTrade, LegacySuggestedTrade, LegacyHistoricalTradeRef, DataFreshness } from '@/types/gm'
 
 interface GradeResult {
   grade: number
@@ -32,6 +33,8 @@ interface GradeResult {
   // Suggested trade - supports both legacy and enhanced formats
   suggested_trade?: LegacySuggestedTrade | null
   enhanced_suggested_trade?: EnhancedSuggestedTrade | null
+  // Data freshness tracking (Feb 2026)
+  data_freshness?: DataFreshness | null
 }
 
 interface DraftPick {
@@ -263,6 +266,17 @@ export function GradeReveal({ result, show, onClose, onNewTrade, tradeDetails, s
               }}
             >
               Team Improvement: {result.improvement_score > 0 ? '+' : ''}{result.improvement_score}
+            </motion.div>
+          )}
+
+          {/* Data freshness indicator */}
+          {phase >= 2 && result.data_freshness && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              style={{ marginTop: 12 }}
+            >
+              <DataFreshnessIndicator freshness={result.data_freshness} isDark={isDark} compact />
             </motion.div>
           )}
 

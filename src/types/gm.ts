@@ -440,3 +440,33 @@ export function isEnhancedSuggestedTrade(
   if (!trade) return false
   return 'chicago_sends' in trade && 'value_balance' in trade
 }
+
+// =====================
+// Data Freshness Types (Feb 2026)
+// =====================
+
+export interface DataFreshness {
+  roster_updated_at: string        // ISO timestamp of last roster sync
+  stats_updated_at: string         // ISO timestamp of last stats sync
+  contracts_updated_at: string     // ISO timestamp of last contract data sync
+  age_hours: number                // Hours since oldest data was updated
+  is_stale: boolean                // True if any data is older than threshold (24h)
+  warning?: string                 // Optional warning message if data is stale
+}
+
+// Validity indicator for pre-submission validation
+export interface ValidityIndicator {
+  is_valid: boolean
+  issues: ValidationIssue[]
+  cap_room_available: boolean
+  roster_spots_available: boolean
+  trade_deadline_status: 'open' | 'closed' | 'approaching'
+}
+
+export interface ValidationIssue {
+  severity: 'error' | 'warning' | 'info'
+  code: string
+  message: string
+  player_name?: string
+  resolution?: string
+}
