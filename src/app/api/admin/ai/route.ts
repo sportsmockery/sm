@@ -1,8 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { createServerClient } from '@supabase/ssr'
+import { cookies } from 'next/headers'
 import Anthropic from '@anthropic-ai/sdk'
 import { getPostIQSystemPrompt, getTeamKnowledge, VOICE_GUIDELINES, HEADLINE_GUIDELINES, SOCIAL_STRATEGY, JOURNALISM_STANDARDS } from '@/lib/postiq-knowledge'
 
 const anthropic = new Anthropic()
+const DATALAB_API = 'https://datalab.sportsmockery.com'
 
 /**
  * Extract JSON from a response that might be wrapped in markdown code blocks
@@ -34,14 +37,104 @@ interface AIRequest {
 }
 
 /**
+ * Try to call DataLab's PostIQ v2 API first, fall back to local Anthropic if it fails
+ */
+async function tryDataLabPostIQ(body: AIRequest, userId?: string): Promise<Response | null> {
+  // Only proxy certain actions to DataLab
+  const datalabActions = ['headlines', 'seo', 'generate_seo', 'ideas', 'grammar', 'excerpt', 'analyze_chart']
+  if (!datalabActions.includes(body.action)) {
+    return null // Use local handler for chart/poll generation
+  }
+
+  if (!process.env.POSTIQ_INTERNAL_KEY) {
+    console.log('[PostIQ] No internal key configured, using local fallback')
+    return null
+  }
+
+  try {
+    const response = await fetch(`${DATALAB_API}/api/v2/postiq/suggest`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-PostIQ-Internal-Key': process.env.POSTIQ_INTERNAL_KEY,
+      },
+      body: JSON.stringify({
+        task: body.action,
+        articleTitle: body.title,
+        articleContent: body.content,
+        category: body.category,
+        team: body.team,
+        user_id: userId,
+      }),
+    })
+
+    if (response.ok) {
+      return response
+    }
+
+    // Check if DataLab says to fallback
+    const data = await response.json()
+    if (data.fallback_to_legacy) {
+      console.log('[PostIQ] DataLab returned fallback_to_legacy, using local handler')
+      return null
+    }
+
+    console.error('[PostIQ] DataLab error:', response.status, data)
+    return null
+  } catch (error) {
+    console.error('[PostIQ] DataLab request failed:', error)
+    return null
+  }
+}
+
+/**
  * POST /api/admin/ai
  * AI-powered content assistance for post creation
+ * Proxies to DataLab PostIQ v2 API, falls back to local Anthropic
  */
 export async function POST(request: NextRequest) {
   try {
     const body: AIRequest = await request.json()
     const { action, content, title, category, team } = body
 
+    // Get user session for logging
+    let userId: string | undefined
+    try {
+      const cookieStore = await cookies()
+      const supabase = createServerClient(
+        process.env.NEXT_PUBLIC_SUPABASE_URL!,
+        process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+        {
+          cookies: {
+            getAll() {
+              return cookieStore.getAll()
+            },
+            setAll(cookiesToSet) {
+              cookiesToSet.forEach(({ name, value, options }) => {
+                try {
+                  cookieStore.set(name, value, options)
+                } catch {
+                  // Ignore
+                }
+              })
+            },
+          },
+        }
+      )
+      const { data: { session } } = await supabase.auth.getSession()
+      userId = session?.user?.id
+    } catch {
+      // Continue without user ID
+    }
+
+    // Try DataLab first
+    const datalabResponse = await tryDataLabPostIQ(body, userId)
+    if (datalabResponse) {
+      const data = await datalabResponse.json()
+      return NextResponse.json(data)
+    }
+
+    // Fall back to local handlers
     switch (action) {
       case 'headlines':
         return await generateHeadlines(title || '', content || '', category, team)
