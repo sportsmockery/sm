@@ -3,12 +3,14 @@ import { createServerClient } from '@supabase/ssr'
 import { cookies } from 'next/headers'
 import Anthropic from '@anthropic-ai/sdk'
 import { getPostIQSystemPrompt, getTeamKnowledge, VOICE_GUIDELINES, HEADLINE_GUIDELINES, SOCIAL_STRATEGY, JOURNALISM_STANDARDS } from '@/lib/postiq-knowledge'
+import { supabaseAdmin } from '@/lib/supabase-server'
 
 const anthropic = new Anthropic()
 const DATALAB_API = 'https://datalab.sportsmockery.com'
 
 /**
  * Create a poll from DataLab's suggestion and insert it into content
+ * Uses direct Supabase calls instead of HTTP requests to avoid URL resolution issues
  */
 async function createPollFromDataLabSuggestion(
   pollSuggestion: {
@@ -39,30 +41,31 @@ async function createPollFromDataLabSuggestion(
     }
     const teamTheme = pollSuggestion.team_theme || team || (category ? teamMap[category] : null) || null
 
-    // Create the poll via internal API call
-    const pollPayload = {
+    // Build poll insert object
+    const pollInsert = {
+      title: pollSuggestion.question.slice(0, 255),
       question: pollSuggestion.question,
-      options: pollSuggestion.options.map((text: string) => ({ text })),
-      pollType: pollSuggestion.poll_type || 'single',
+      poll_type: pollSuggestion.poll_type || 'single',
       status: 'active',
-      showResults: true,
-      teamTheme,
+      team_theme: teamTheme,
+      show_results: true,
+      show_live_results: true,
+      total_votes: 0,
+      starts_at: new Date().toISOString(),
       source: 'postiq',
-      sourcePostId: postId || null,
-      aiConfidence: pollSuggestion.confidence || 0.8,
+      source_post_id: postId || null,
+      ai_confidence: pollSuggestion.confidence || 0.8,
     }
 
-    const baseUrl = process.env.NEXT_PUBLIC_APP_URL
-      || (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : 'http://localhost:3000')
+    // Create poll directly via Supabase
+    const { data: poll, error: pollError } = await supabaseAdmin
+      .from('sm_polls')
+      .insert(pollInsert)
+      .select()
+      .single()
 
-    const pollResponse = await fetch(`${baseUrl}/api/admin/polls`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(pollPayload),
-    })
-
-    if (!pollResponse.ok) {
-      console.error('Failed to create poll from DataLab suggestion:', await pollResponse.text())
+    if (pollError || !poll) {
+      console.error('Failed to create poll from DataLab suggestion:', pollError)
       return NextResponse.json({
         success: false,
         reason: 'Failed to create poll',
@@ -70,16 +73,48 @@ async function createPollFromDataLabSuggestion(
       })
     }
 
-    const pollResult = await pollResponse.json()
-    const pollId = pollResult.id || pollResult.poll?.id
-    const shortcode = `[poll:${pollId}]`
+    // Create poll options
+    const options = pollSuggestion.options.map((text: string, index: number) => ({
+      poll_id: poll.id,
+      option_text: text,
+      display_order: index,
+      vote_count: 0,
+    }))
+
+    const { error: optionsError } = await supabaseAdmin
+      .from('sm_poll_options')
+      .insert(options)
+
+    if (optionsError) {
+      // Rollback poll creation
+      await supabaseAdmin.from('sm_polls').delete().eq('id', poll.id)
+      console.error('Error creating poll options:', optionsError)
+      return NextResponse.json({
+        success: false,
+        reason: 'Failed to create poll options',
+        poll: pollSuggestion,
+      })
+    }
+
+    // Link poll to post if postId provided
+    if (postId) {
+      await supabaseAdmin.from('sm_post_polls').insert({
+        post_id: postId,
+        poll_id: poll.id,
+        position: 'after_content',
+        display_order: 0,
+        is_auto_generated: true,
+      })
+    }
+
+    const shortcode = `[poll:${poll.id}]`
 
     // Insert shortcode after 2nd paragraph by default
     const updatedContent = insertPollShortcodeAfterParagraph(content, shortcode, 2)
 
     return NextResponse.json({
       success: true,
-      pollId,
+      pollId: poll.id,
       shortcode,
       question: pollSuggestion.question,
       options: pollSuggestion.options,
@@ -87,7 +122,7 @@ async function createPollFromDataLabSuggestion(
       paragraphIndex: 2,
       updatedContent,
       poll: {
-        id: pollId,
+        id: poll.id,
         question: pollSuggestion.question,
         options: pollSuggestion.options,
         poll_type: pollSuggestion.poll_type || 'single',
