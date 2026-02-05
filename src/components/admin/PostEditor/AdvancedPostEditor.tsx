@@ -73,7 +73,7 @@ export default function AdvancedPostEditor({
   const [loadingIdeas, setLoadingIdeas] = useState(false)
 
   // Sidebar states
-  const [leftSidebarCollapsed, setLeftSidebarCollapsed] = useState(true)
+  const [leftSidebarCollapsed, setLeftSidebarCollapsed] = useState(false)
   const [rightSidebarCollapsed, setRightSidebarCollapsed] = useState(false)
 
   // Slug editing state

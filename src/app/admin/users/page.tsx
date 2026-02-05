@@ -209,7 +209,7 @@ export default function UsersPage() {
     <div className="p-6">
       <div className="flex justify-between items-center mb-6">
         <div>
-          <h1 className="text-2xl font-bold text-white">Users</h1>
+          <h1 className="text-2xl font-bold" style={{ color: 'var(--text-primary, #222222)' }}>Users</h1>
           {syncMessage && (
             <p className={`text-sm mt-1 ${syncMessage.includes('Error') ? 'text-red-400' : 'text-green-400'}`}>
               {syncMessage}

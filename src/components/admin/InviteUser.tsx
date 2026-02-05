@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { Role, STAFF_ROLES, ALL_ROLES } from '@/lib/roles'
+import { Role, ALL_ROLES } from '@/lib/roles'
 
 interface InviteUserProps {
   onSuccess: () => void
@@ -104,30 +104,43 @@ export default function InviteUser({ onSuccess, onCancel }: InviteUserProps) {
   }
 
   return (
-    <div className="bg-gray-800 rounded-lg p-6">
-      <h3 className="text-lg font-semibold text-white mb-4">Add New User</h3>
+    <div
+      className="rounded-lg p-6"
+      style={{
+        backgroundColor: 'var(--bg-surface, #f7f7f7)',
+        border: '1px solid var(--border-color, #e0e0e0)',
+      }}
+    >
+      <h3
+        className="text-lg font-semibold mb-4"
+        style={{ color: 'var(--text-primary, #222222)' }}
+      >
+        Add New User
+      </h3>
 
       {/* Mode toggle */}
       <div className="flex gap-2 mb-4">
         <button
           type="button"
           onClick={() => setMode('create')}
-          className={`flex-1 px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-            mode === 'create'
-              ? 'bg-blue-600 text-white'
-              : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
-          }`}
+          className="flex-1 px-4 py-2 rounded-lg text-sm font-medium transition-colors"
+          style={{
+            backgroundColor: mode === 'create' ? '#2563eb' : 'var(--bg-secondary, #f5f5f5)',
+            color: mode === 'create' ? '#ffffff' : 'var(--text-muted, #666666)',
+            border: mode === 'create' ? 'none' : '1px solid var(--border-color, #e0e0e0)',
+          }}
         >
           Create with Password
         </button>
         <button
           type="button"
           onClick={() => setMode('invite')}
-          className={`flex-1 px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-            mode === 'invite'
-              ? 'bg-blue-600 text-white'
-              : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
-          }`}
+          className="flex-1 px-4 py-2 rounded-lg text-sm font-medium transition-colors"
+          style={{
+            backgroundColor: mode === 'invite' ? '#2563eb' : 'var(--bg-secondary, #f5f5f5)',
+            color: mode === 'invite' ? '#ffffff' : 'var(--text-muted, #666666)',
+            border: mode === 'invite' ? 'none' : '1px solid var(--border-color, #e0e0e0)',
+          }}
         >
           Send Invite Email
         </button>
@@ -135,19 +148,22 @@ export default function InviteUser({ onSuccess, onCancel }: InviteUserProps) {
 
       <form onSubmit={mode === 'create' ? handleCreateUser : handleSendInvite} className="space-y-4">
         {error && (
-          <div className="p-3 bg-red-500/20 border border-red-500/30 rounded-lg text-red-400 text-sm">
+          <div className="p-3 bg-red-500/20 border border-red-500/30 rounded-lg text-red-600 dark:text-red-400 text-sm">
             {error}
           </div>
         )}
 
         {success && (
-          <div className="p-3 bg-green-500/20 border border-green-500/30 rounded-lg text-green-400 text-sm">
+          <div className="p-3 bg-green-500/20 border border-green-500/30 rounded-lg text-green-600 dark:text-green-400 text-sm">
             {success}
           </div>
         )}
 
         <div>
-          <label className="block text-sm font-medium text-gray-300 mb-1">
+          <label
+            className="block text-sm font-medium mb-1"
+            style={{ color: 'var(--text-primary, #222222)' }}
+          >
             Email Address
           </label>
           <input
@@ -155,27 +171,43 @@ export default function InviteUser({ onSuccess, onCancel }: InviteUserProps) {
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             required
-            className="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:border-blue-500"
+            className="w-full px-4 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+            style={{
+              backgroundColor: 'var(--input-bg, #ffffff)',
+              border: '1px solid var(--input-border, #e0e0e0)',
+              color: 'var(--input-text, #222222)',
+            }}
             placeholder="user@example.com"
           />
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-gray-300 mb-1">
+          <label
+            className="block text-sm font-medium mb-1"
+            style={{ color: 'var(--text-primary, #222222)' }}
+          >
             Name (optional)
           </label>
           <input
             type="text"
             value={name}
             onChange={(e) => setName(e.target.value)}
-            className="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:border-blue-500"
+            className="w-full px-4 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+            style={{
+              backgroundColor: 'var(--input-bg, #ffffff)',
+              border: '1px solid var(--input-border, #e0e0e0)',
+              color: 'var(--input-text, #222222)',
+            }}
             placeholder="John Doe"
           />
         </div>
 
         {mode === 'create' && (
           <div>
-            <label className="block text-sm font-medium text-gray-300 mb-1">
+            <label
+              className="block text-sm font-medium mb-1"
+              style={{ color: 'var(--text-primary, #222222)' }}
+            >
               Password
             </label>
             <input
@@ -184,20 +216,33 @@ export default function InviteUser({ onSuccess, onCancel }: InviteUserProps) {
               onChange={(e) => setPassword(e.target.value)}
               required
               minLength={6}
-              className="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:border-blue-500"
+              className="w-full px-4 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              style={{
+                backgroundColor: 'var(--input-bg, #ffffff)',
+                border: '1px solid var(--input-border, #e0e0e0)',
+                color: 'var(--input-text, #222222)',
+              }}
               placeholder="Min 6 characters"
             />
           </div>
         )}
 
         <div>
-          <label className="block text-sm font-medium text-gray-300 mb-1">
+          <label
+            className="block text-sm font-medium mb-1"
+            style={{ color: 'var(--text-primary, #222222)' }}
+          >
             Role
           </label>
           <select
             value={role}
             onChange={(e) => setRole(e.target.value as Role)}
-            className="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:border-blue-500"
+            className="w-full px-4 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+            style={{
+              backgroundColor: 'var(--input-bg, #ffffff)',
+              border: '1px solid var(--input-border, #e0e0e0)',
+              color: 'var(--input-text, #222222)',
+            }}
           >
             {ALL_ROLES.map(r => (
               <option key={r.value} value={r.value}>
@@ -211,7 +256,8 @@ export default function InviteUser({ onSuccess, onCancel }: InviteUserProps) {
           <button
             type="button"
             onClick={onCancel}
-            className="px-4 py-2 text-gray-400 hover:text-white transition-colors"
+            className="px-4 py-2 transition-colors"
+            style={{ color: 'var(--text-muted, #666666)' }}
           >
             Cancel
           </button>
