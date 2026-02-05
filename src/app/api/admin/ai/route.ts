@@ -52,9 +52,8 @@ async function createPollFromDataLabSuggestion(
       aiConfidence: pollSuggestion.confidence || 0.8,
     }
 
-    const baseUrl = process.env.NEXT_PUBLIC_APP_URL || process.env.VERCEL_URL
-      ? `https://${process.env.VERCEL_URL}`
-      : 'http://localhost:3000'
+    const baseUrl = process.env.NEXT_PUBLIC_APP_URL
+      || (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : 'http://localhost:3000')
 
     const pollResponse = await fetch(`${baseUrl}/api/admin/polls`, {
       method: 'POST',
@@ -705,9 +704,8 @@ Return ONLY the JSON object, no explanation.`
     }
 
     // Make internal request to create chart
-    const baseUrl = process.env.NEXT_PUBLIC_APP_URL || process.env.VERCEL_URL
-      ? `https://${process.env.VERCEL_URL}`
-      : 'http://localhost:3000'
+    const baseUrl = process.env.NEXT_PUBLIC_APP_URL
+      || (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : 'http://localhost:3000')
 
     const chartResponse = await fetch(`${baseUrl}/api/charts`, {
       method: 'POST',
@@ -890,9 +888,8 @@ Return ONLY the JSON object, no explanation.`
     }
 
     // Make internal request to create poll
-    const baseUrl = process.env.NEXT_PUBLIC_APP_URL || process.env.VERCEL_URL
-      ? `https://${process.env.VERCEL_URL}`
-      : 'http://localhost:3000'
+    const baseUrl = process.env.NEXT_PUBLIC_APP_URL
+      || (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : 'http://localhost:3000')
 
     const pollResponse = await fetch(`${baseUrl}/api/admin/polls`, {
       method: 'POST',
