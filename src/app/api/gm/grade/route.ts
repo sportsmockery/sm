@@ -59,6 +59,65 @@ const TEAM_SPORT_MAP: Record<string, string> = {
   bears: 'nfl', bulls: 'nba', blackhawks: 'nhl', cubs: 'mlb', whitesox: 'mlb',
 }
 
+// Fetch data freshness for a team
+async function getDataFreshness(teamKey: string, sport: string): Promise<{
+  roster_updated_at: string
+  stats_updated_at: string
+  contracts_updated_at: string
+  age_hours: number
+  is_stale: boolean
+  warning?: string
+} | null> {
+  try {
+    // Try to fetch from gm_data_freshness table if it exists
+    const { data: freshness } = await datalabAdmin
+      .from('gm_data_freshness')
+      .select('*')
+      .eq('team_key', teamKey)
+      .eq('sport', sport)
+      .single()
+
+    if (freshness) {
+      return {
+        roster_updated_at: freshness.roster_updated_at,
+        stats_updated_at: freshness.stats_updated_at,
+        contracts_updated_at: freshness.contracts_updated_at || freshness.stats_updated_at,
+        age_hours: freshness.age_hours || 0,
+        is_stale: freshness.is_stale || false,
+        warning: freshness.warning || undefined,
+      }
+    }
+
+    // Fallback: calculate from team-specific tables
+    const now = new Date()
+    const playerTable = `${teamKey}_players`
+
+    // Get most recent player update
+    const { data: recentPlayer } = await datalabAdmin
+      .from(playerTable)
+      .select('updated_at')
+      .order('updated_at', { ascending: false })
+      .limit(1)
+      .single()
+
+    const rosterUpdatedAt = recentPlayer?.updated_at || now.toISOString()
+    const ageHours = (now.getTime() - new Date(rosterUpdatedAt).getTime()) / (1000 * 60 * 60)
+    const isStale = ageHours > 24
+
+    return {
+      roster_updated_at: rosterUpdatedAt,
+      stats_updated_at: rosterUpdatedAt,
+      contracts_updated_at: rosterUpdatedAt,
+      age_hours: Math.round(ageHours * 10) / 10,
+      is_stale: isStale,
+      warning: isStale ? 'Data may be outdated. Roster information could be up to 24+ hours old.' : undefined,
+    }
+  } catch (e) {
+    console.error('Failed to fetch data freshness:', e)
+    return null
+  }
+}
+
 const MODEL_NAME = 'claude-sonnet-4-20250514'
 
 const GM_SYSTEM_PROMPT = `You are "GM", a brutally honest sports trade evaluator and general manager for SM Data Lab, a Chicago sports analytics platform. You grade proposed trades on a scale of 0-100.
@@ -147,8 +206,34 @@ You MUST respond with valid JSON only, no other text:
     "team_fit": <0.0-1.0>,
     "future_assets": <0.0-1.0>
   },
-  "cap_analysis": "<1-2 sentences about salary cap impact with specific dollar amounts when available>"
+  "cap_analysis": "<1-2 sentences about salary cap impact with specific dollar amounts when available>",
+  "historical_context": {
+    "similar_trades": [
+      {
+        "date": "<month year>",
+        "description": "<brief trade description>",
+        "teams": ["<team1>", "<team2>"],
+        "outcome": "<worked | failed | neutral>",
+        "similarity_score": <0-100>,
+        "key_difference": "<what makes it different from this trade>"
+      }
+    ],
+    "success_rate": <0-100, % of similar trades that worked>,
+    "key_patterns": ["<pattern 1>", "<pattern 2>"],
+    "why_this_fails_historically": "<only for rejected trades, explain historical failure pattern>",
+    "what_works_instead": "<only for rejected trades, suggest what historically works>"
+  },
+  "suggested_trade": <only if grade < 70, suggest improvements> {
+    "description": "<what to change>",
+    "chicago_sends": [{"type": "player|pick", "name": "<name>", "position": "<pos>", "year": <year>, "round": <round>}],
+    "chicago_receives": [{"type": "player|pick", "name": "<name>", "position": "<pos>", "year": <year>, "round": <round>}],
+    "why_this_works": "<reasoning>",
+    "likelihood": "<very likely | likely | possible | unlikely>",
+    "estimated_grade_improvement": <number 5-30>
+  }
 }
+
+IMPORTANT: Always include historical_context with 2-3 similar real trades from history. For rejected trades (grade < 70), also include suggested_trade with specific improvements.
 
 Reasoning should: name specific players, mention team phase (rebuild/contend), note cap/salary if relevant, reference comparable real trades when possible, and always frame from Chicago's perspective. Be a seasoned GM, not a robot.
 
@@ -277,7 +362,7 @@ export async function POST(request: NextRequest) {
       // Call AI for grading (no deterministic grade for 3-team trades)
       const response = await getAnthropic().messages.create({
         model: MODEL_NAME,
-        max_tokens: 768,
+        max_tokens: 1500,
         temperature: 0,
         system: GM_SYSTEM_PROMPT,
         messages: [{ role: 'user', content: tradeDesc }],
@@ -293,6 +378,8 @@ export async function POST(request: NextRequest) {
       let improvementScore = 0
       let breakdown = { talent_balance: 0.5, contract_value: 0.5, team_fit: 0.5, future_assets: 0.5 }
       let capAnalysis = ''
+      let threeTeamHistoricalContext: any = null
+      let threeTeamSuggestedTrade: any = null
 
       try {
         const parsed = JSON.parse(rawText)
@@ -307,6 +394,41 @@ export async function POST(request: NextRequest) {
             contract_value: Math.max(0, Math.min(1, parsed.breakdown.contract_value ?? 0.5)),
             team_fit: Math.max(0, Math.min(1, parsed.breakdown.team_fit ?? 0.5)),
             future_assets: Math.max(0, Math.min(1, parsed.breakdown.future_assets ?? 0.5)),
+          }
+        }
+
+        // Parse historical context for 3-team trades
+        if (parsed.historical_context) {
+          threeTeamHistoricalContext = {
+            similar_trades: Array.isArray(parsed.historical_context.similar_trades)
+              ? parsed.historical_context.similar_trades.slice(0, 3)
+              : [],
+            success_rate: typeof parsed.historical_context.success_rate === 'number'
+              ? Math.max(0, Math.min(100, parsed.historical_context.success_rate))
+              : 50,
+            key_patterns: Array.isArray(parsed.historical_context.key_patterns)
+              ? parsed.historical_context.key_patterns.slice(0, 5)
+              : [],
+            why_this_fails_historically: parsed.historical_context.why_this_fails_historically || null,
+            what_works_instead: parsed.historical_context.what_works_instead || null,
+          }
+        }
+
+        // Parse suggested trade for rejected 3-team trades
+        if (parsed.suggested_trade && grade < 70) {
+          threeTeamSuggestedTrade = {
+            description: parsed.suggested_trade.description || '',
+            chicago_sends: Array.isArray(parsed.suggested_trade.chicago_sends)
+              ? parsed.suggested_trade.chicago_sends
+              : [],
+            chicago_receives: Array.isArray(parsed.suggested_trade.chicago_receives)
+              ? parsed.suggested_trade.chicago_receives
+              : [],
+            why_this_works: parsed.suggested_trade.why_this_works || '',
+            likelihood: parsed.suggested_trade.likelihood || 'possible',
+            estimated_grade_improvement: typeof parsed.suggested_trade.estimated_grade_improvement === 'number'
+              ? Math.max(0, Math.min(50, parsed.suggested_trade.estimated_grade_improvement))
+              : 15,
           }
         }
       } catch {
@@ -412,6 +534,9 @@ export async function POST(request: NextRequest) {
         console.error('Audit log failed:', auditErr)
       }
 
+      // Fetch data freshness for 3-team trade
+      const threeTeamDataFreshness = await getDataFreshness(chicago_team, sport)
+
       return NextResponse.json({
         grade,
         reasoning,
@@ -424,6 +549,10 @@ export async function POST(request: NextRequest) {
         breakdown,
         cap_analysis: capAnalysis,
         is_three_team: true,
+        // New Feb 2026 fields
+        historical_context: threeTeamHistoricalContext,
+        enhanced_suggested_trade: threeTeamSuggestedTrade,
+        data_freshness: threeTeamDataFreshness,
       })
     }
 
@@ -690,7 +819,7 @@ Grade this trade from the perspective of the ${teamDisplayNames[chicago_team]}.`
 
     const response = await getAnthropic().messages.create({
       model: MODEL_NAME,
-      max_tokens: 768,
+      max_tokens: 1500,
       temperature: 0, // Deterministic output
       system: systemPrompt,
       messages: [{ role: 'user', content: tradeDescription }],
@@ -706,6 +835,8 @@ Grade this trade from the perspective of the ${teamDisplayNames[chicago_team]}.`
     let improvementScore = 0
     let breakdown = { talent_balance: 0.5, contract_value: 0.5, team_fit: 0.5, future_assets: 0.5 }
     let capAnalysis = ''
+    let historicalContext: any = null
+    let suggestedTrade: any = null
 
     try {
       const parsed = JSON.parse(rawText)
@@ -734,6 +865,41 @@ Grade this trade from the perspective of the ${teamDisplayNames[chicago_team]}.`
       tradeSummary = parsed.trade_summary || ''
       improvementScore = typeof parsed.improvement_score === 'number' ? Math.max(-10, Math.min(10, parsed.improvement_score)) : 0
       capAnalysis = parsed.cap_analysis || ''
+
+      // Parse historical context from AI response
+      if (parsed.historical_context) {
+        historicalContext = {
+          similar_trades: Array.isArray(parsed.historical_context.similar_trades)
+            ? parsed.historical_context.similar_trades.slice(0, 3)
+            : [],
+          success_rate: typeof parsed.historical_context.success_rate === 'number'
+            ? Math.max(0, Math.min(100, parsed.historical_context.success_rate))
+            : 50,
+          key_patterns: Array.isArray(parsed.historical_context.key_patterns)
+            ? parsed.historical_context.key_patterns.slice(0, 5)
+            : [],
+          why_this_fails_historically: parsed.historical_context.why_this_fails_historically || null,
+          what_works_instead: parsed.historical_context.what_works_instead || null,
+        }
+      }
+
+      // Parse suggested trade for rejected trades
+      if (parsed.suggested_trade && grade < 70) {
+        suggestedTrade = {
+          description: parsed.suggested_trade.description || '',
+          chicago_sends: Array.isArray(parsed.suggested_trade.chicago_sends)
+            ? parsed.suggested_trade.chicago_sends
+            : [],
+          chicago_receives: Array.isArray(parsed.suggested_trade.chicago_receives)
+            ? parsed.suggested_trade.chicago_receives
+            : [],
+          why_this_works: parsed.suggested_trade.why_this_works || '',
+          likelihood: parsed.suggested_trade.likelihood || 'possible',
+          estimated_grade_improvement: typeof parsed.suggested_trade.estimated_grade_improvement === 'number'
+            ? Math.max(0, Math.min(50, parsed.suggested_trade.estimated_grade_improvement))
+            : 15,
+        }
+      }
     } catch {
       // CRITICAL: Still use deterministic grade on parse failure
       if (deterministicResult) {
@@ -942,6 +1108,9 @@ Grade this trade from the perspective of the ${teamDisplayNames[chicago_team]}.`
       }
     }
 
+    // Fetch data freshness
+    const dataFreshness = await getDataFreshness(chicago_team, sport)
+
     return NextResponse.json({
       grade,
       reasoning,
@@ -953,6 +1122,10 @@ Grade this trade from the perspective of the ${teamDisplayNames[chicago_team]}.`
       improvement_score: improvementScore,
       breakdown,
       cap_analysis: capAnalysis,
+      // New Feb 2026 fields
+      historical_context: historicalContext,
+      enhanced_suggested_trade: suggestedTrade,
+      data_freshness: dataFreshness,
     })
 
   } catch (error) {
