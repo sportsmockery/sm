@@ -4,6 +4,40 @@ import { useEffect, useRef } from 'react'
 import * as d3 from 'd3'
 import { ChartDataEntry } from '../DataEntryForm'
 
+// Detect common units from data labels
+function detectUnit(data: ChartDataEntry[]): string {
+  const labels = data.map(d => d.label.toLowerCase())
+  const allLabels = labels.join(' ')
+
+  // Check for common sports stats units
+  if (allLabels.includes('yard') || allLabels.includes('yds')) return 'Yards'
+  if (allLabels.includes('point') || allLabels.includes('pts')) return 'Points'
+  if (allLabels.includes('touchdown') || allLabels.includes('td')) return 'Touchdowns'
+  if (allLabels.includes('reception') || allLabels.includes('rec')) return 'Receptions'
+  if (allLabels.includes('rush')) return 'Rushes'
+  if (allLabels.includes('pass')) return 'Passes'
+  if (allLabels.includes('goal')) return 'Goals'
+  if (allLabels.includes('assist')) return 'Assists'
+  if (allLabels.includes('rebound') || allLabels.includes('reb')) return 'Rebounds'
+  if (allLabels.includes('hit')) return 'Hits'
+  if (allLabels.includes('run')) return 'Runs'
+  if (allLabels.includes('rbi')) return 'RBIs'
+  if (allLabels.includes('home run') || allLabels.includes('hr')) return 'Home Runs'
+  if (allLabels.includes('sack')) return 'Sacks'
+  if (allLabels.includes('interception') || allLabels.includes('int')) return 'Interceptions'
+  if (allLabels.includes('tackle')) return 'Tackles'
+  if (allLabels.includes('save')) return 'Saves'
+  if (allLabels.includes('win')) return 'Wins'
+  if (allLabels.includes('loss')) return 'Losses'
+  if (allLabels.includes('game')) return 'Games'
+  if (allLabels.includes('%') || allLabels.includes('percent')) return 'Percentage'
+  if (allLabels.includes('$') || allLabels.includes('dollar') || allLabels.includes('salary')) return 'Dollars'
+  if (allLabels.includes('view')) return 'Views'
+  if (allLabels.includes('drop')) return 'Drops'
+
+  return 'Value'
+}
+
 interface BarChartProps {
   data: ChartDataEntry[]
   colors: {
@@ -14,6 +48,7 @@ interface BarChartProps {
   animate?: boolean
   width?: number
   height?: number
+  yAxisLabel?: string
 }
 
 export default function BarChart({
@@ -22,6 +57,7 @@ export default function BarChart({
   animate = true,
   width = 400,
   height = 280,
+  yAxisLabel,
 }: BarChartProps) {
   const svgRef = useRef<SVGSVGElement>(null)
 
@@ -31,8 +67,11 @@ export default function BarChart({
     const svg = d3.select(svgRef.current)
     svg.selectAll('*').remove()
 
-    // Increased bottom margin for rotated labels
-    const margin = { top: 30, right: 20, bottom: 70, left: 50 }
+    // Try to detect unit from data labels if not provided
+    const detectedUnit = yAxisLabel || detectUnit(data)
+
+    // Increased left margin for Y-axis label
+    const margin = { top: 30, right: 20, bottom: 70, left: 60 }
     const innerWidth = width - margin.left - margin.right
     const innerHeight = height - margin.top - margin.bottom
 
@@ -115,6 +154,17 @@ export default function BarChart({
     yAxis.selectAll('text')
       .attr('fill', '#D1D5DB')
       .attr('font-size', '11px')
+
+    // Y-axis label
+    g.append('text')
+      .attr('transform', 'rotate(-90)')
+      .attr('x', -innerHeight / 2)
+      .attr('y', -45)
+      .attr('text-anchor', 'middle')
+      .attr('fill', '#9CA3AF')
+      .attr('font-size', '12px')
+      .attr('font-weight', '500')
+      .text(detectedUnit)
 
     // Bars
     const bars = g
