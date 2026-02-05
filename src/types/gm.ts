@@ -337,3 +337,106 @@ export interface SimulationRequest {
   teamKey: string
   seasonYear: number
 }
+
+// =====================
+// Enhanced Historical Context Types (Feb 2026)
+// =====================
+
+// Similar historical trade with detailed comparison data
+export interface SimilarTrade {
+  trade_id?: string              // If from our database
+  date: string                   // When it happened
+  description: string            // "Bears traded Jay Cutler for 2 1sts + Kyle Orton"
+  teams: string[]                // ["CHI_Bears", "DEN_Broncos"]
+  outcome: 'worked' | 'failed' | 'neutral'
+  grade_given?: number           // If from our system
+  similarity_score: number       // 0-100, how similar to user's trade
+  key_difference?: string        // What makes it different
+}
+
+// Historical precedent for suggested trades
+export interface HistoricalPrecedent {
+  example_trades: string[]       // "Similar to Khalil Mack trade (2018): Bears sent 2 1sts for star EDGE"
+  success_rate_for_structure: number  // "68% of trades with this structure accepted by both teams"
+  realistic_because: string      // Why this has historical backing
+}
+
+// Trade item for suggested trade structure
+export interface TradeItem {
+  type: 'player' | 'pick' | 'prospect' | 'cash'
+  name?: string
+  position?: string
+  year?: number
+  round?: number
+  amount?: number
+}
+
+// Value balance for suggested trades
+export interface ValueBalance {
+  chicago_value: number
+  partner_value: number
+  difference: number
+  fair_value_range: [number, number]
+}
+
+// Enhanced historical context section
+export interface HistoricalContext {
+  similar_trades: SimilarTrade[]  // 2-3 most relevant historical trades
+  success_rate: number            // % of similar trades that worked (0-100)
+  key_patterns: string[]          // Bullet points of patterns from history
+  why_this_fails_historically?: string   // Only if rejected
+  what_works_instead?: string            // Only if rejected
+}
+
+// Enhanced suggested trade with full structure
+export interface EnhancedSuggestedTrade {
+  description: string
+  chicago_sends: TradeItem[]
+  chicago_receives: TradeItem[]
+  value_balance: ValueBalance
+  cap_salary_notes: string
+  why_this_works: string
+  likelihood: string
+  historical_precedent: HistoricalPrecedent
+  // Backwards compatible fields from original SuggestedTrade
+  type?: 'add_picks' | 'add_players' | 'remove_players' | 'restructure' | 'three_team'
+  summary?: string
+  reasoning?: string
+  specific_suggestions?: string[]
+  estimated_grade_improvement?: number
+}
+
+// Legacy historical trade reference (for backwards compatibility)
+export interface LegacyHistoricalTradeRef {
+  trade: string
+  haul: string
+  year: number
+  outcome: string
+}
+
+// Legacy suggested trade (for backwards compatibility)
+export interface LegacySuggestedTrade {
+  type: 'add_picks' | 'add_players' | 'remove_players' | 'restructure' | 'three_team'
+  summary: string
+  reasoning: string
+  specific_suggestions: string[]
+  historical_precedent?: string
+  estimated_grade_improvement: number
+}
+
+// Type guard to check if historical context is the new enhanced format
+export function isEnhancedHistoricalContext(
+  ctx: HistoricalContext | LegacyHistoricalTradeRef[] | undefined
+): ctx is HistoricalContext {
+  if (!ctx) return false
+  if (Array.isArray(ctx)) return false
+  return 'similar_trades' in ctx && 'success_rate' in ctx
+}
+
+// Type guard to check if suggested trade is the new enhanced format
+export function isEnhancedSuggestedTrade(
+  trade: EnhancedSuggestedTrade | LegacySuggestedTrade | null | undefined
+): trade is EnhancedSuggestedTrade {
+  if (!trade) return false
+  return 'chicago_sends' in trade && 'value_balance' in trade
+}

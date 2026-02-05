@@ -5,6 +5,7 @@ import { AssetRow } from './AssetRow'
 import { ValidationIndicator, ValidationState } from './ValidationIndicator'
 import { AuditButton } from './AuditButton'
 import { AuditReportCard } from './AuditReportCard'
+import { HistoricalContextPanel, SuggestedTradePanel } from './HistoricalContextPanel'
 import { useTheme } from '@/contexts/ThemeContext'
 import type { DraftPick, TradeFlow } from '@/types/gm'
 import type { PlayerData } from './PlayerCard'
@@ -760,129 +761,28 @@ export function ThreeTeamTradeBoard({
               {gradeResult.reasoning}
             </div>
 
-            {/* Historical Comparisons */}
-            {gradeResult.historical_comparisons && gradeResult.historical_comparisons.length > 0 && (
-              <div style={{
-                padding: 16,
-                borderRadius: 12,
-                backgroundColor: isDark ? '#1f2937' : '#f9fafb',
-                border: `1px solid ${borderColor}`,
-                marginBottom: 16,
-              }}>
-                <h4 style={{
-                  fontSize: 12,
-                  fontWeight: 700,
-                  color: subText,
-                  marginBottom: 12,
-                  textTransform: 'uppercase',
-                  letterSpacing: '0.5px',
-                }}>
-                  Similar Historical Trades
-                </h4>
-                {gradeResult.historical_comparisons.map((comp: { trade: string; haul: string; year: number; outcome: string }, i: number) => (
-                  <div key={i} style={{
-                    marginBottom: i < gradeResult.historical_comparisons.length - 1 ? 12 : 0,
-                    paddingBottom: i < gradeResult.historical_comparisons.length - 1 ? 12 : 0,
-                    borderBottom: i < gradeResult.historical_comparisons.length - 1 ? `1px solid ${borderColor}` : 'none',
-                  }}>
-                    <div style={{ fontSize: 13, fontWeight: 600, color: textColor }}>
-                      {comp.trade} <span style={{ color: subText, fontWeight: 400 }}>({comp.year})</span>
-                    </div>
-                    <div style={{ fontSize: 12, color: subText, marginTop: 2 }}>
-                      Haul: {comp.haul}
-                    </div>
-                    <div style={{ fontSize: 12, color: '#22c55e', marginTop: 2 }}>
-                      {comp.outcome}
-                    </div>
-                  </div>
-                ))}
+            {/* Historical Context - supports both enhanced and legacy formats */}
+            {(gradeResult.historical_context || (gradeResult.historical_comparisons && gradeResult.historical_comparisons.length > 0)) && (
+              <div style={{ marginBottom: 16 }}>
+                <HistoricalContextPanel
+                  historicalContext={gradeResult.historical_context}
+                  historicalComparisons={gradeResult.historical_comparisons}
+                  isDark={isDark}
+                  isRejected={gradeResult.status === 'rejected' || gradeResult.grade < 70}
+                />
               </div>
             )}
 
-            {/* Suggested Trade Improvements (for rejected trades) */}
-            {gradeResult.grade < 70 && gradeResult.suggested_trade && (
-              <div style={{
-                padding: 16,
-                borderRadius: 12,
-                backgroundColor: isDark ? 'rgba(59, 130, 246, 0.1)' : 'rgba(59, 130, 246, 0.05)',
-                border: '1px solid #3b82f6',
-                marginBottom: 16,
-              }}>
-                <h4 style={{
-                  fontWeight: 700,
-                  color: '#3b82f6',
-                  fontSize: 14,
-                  marginBottom: 8,
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: 8,
-                }}>
-                  <span style={{ fontSize: 16 }}>
-                    {gradeResult.suggested_trade.type === 'add_picks' ? '🎯' :
-                     gradeResult.suggested_trade.type === 'add_players' ? '👤' :
-                     gradeResult.suggested_trade.type === 'remove_players' ? '➖' :
-                     gradeResult.suggested_trade.type === 'restructure' ? '🔄' : '🔀'}
-                  </span>
-                  How to Improve This Trade
-                </h4>
-
-                <div style={{
-                  display: 'inline-block',
-                  padding: '4px 10px',
-                  borderRadius: 6,
-                  backgroundColor: isDark ? '#374151' : '#e5e7eb',
-                  fontSize: 11,
-                  fontWeight: 600,
-                  color: subText,
-                  marginBottom: 12,
-                }}>
-                  {gradeResult.suggested_trade.type === 'add_picks' ? 'Add Draft Picks' :
-                   gradeResult.suggested_trade.type === 'add_players' ? 'Add Players' :
-                   gradeResult.suggested_trade.type === 'remove_players' ? 'Remove Players' :
-                   gradeResult.suggested_trade.type === 'restructure' ? 'Restructure Deal' : 'Three-Team Trade'}
-                </div>
-
-                <p style={{ fontSize: 13, color: textColor, marginBottom: 12, lineHeight: 1.5 }}>
-                  {gradeResult.suggested_trade.summary}
-                </p>
-
-                <div style={{ marginBottom: 12 }}>
-                  <p style={{ fontSize: 11, color: subText, marginBottom: 6, fontWeight: 600 }}>Suggestions:</p>
-                  <ul style={{ margin: 0, paddingLeft: 16, listStyleType: 'disc' }}>
-                    {gradeResult.suggested_trade.specific_suggestions.map((s: string, i: number) => (
-                      <li key={i} style={{ fontSize: 12, color: textColor, marginBottom: 4 }}>
-                        {s}
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-
-                {gradeResult.suggested_trade.historical_precedent && (
-                  <p style={{
-                    fontSize: 11,
-                    color: subText,
-                    fontStyle: 'italic',
-                    marginBottom: 12,
-                    padding: '8px 10px',
-                    backgroundColor: isDark ? '#1f2937' : '#fff',
-                    borderRadius: 6,
-                  }}>
-                    📚 {gradeResult.suggested_trade.historical_precedent}
-                  </p>
-                )}
-
-                <div style={{
-                  fontSize: 13,
-                  padding: '8px 12px',
-                  backgroundColor: 'rgba(34, 197, 94, 0.1)',
-                  borderRadius: 6,
-                  display: 'inline-block',
-                }}>
-                  <span style={{ color: subText }}>Estimated improvement: </span>
-                  <span style={{ color: '#22c55e', fontWeight: 700 }}>
-                    +{gradeResult.suggested_trade.estimated_grade_improvement} points
-                  </span>
-                </div>
+            {/* Suggested Trade Improvements - supports both enhanced and legacy formats (for rejected trades) */}
+            {gradeResult.grade < 70 && (gradeResult.enhanced_suggested_trade || gradeResult.suggested_trade) && (
+              <div style={{ marginBottom: 16 }}>
+                <SuggestedTradePanel
+                  enhancedSuggestion={gradeResult.enhanced_suggested_trade}
+                  legacySuggestion={gradeResult.suggested_trade}
+                  isDark={isDark}
+                  chicagoTeam={team1.name}
+                  opponentTeam={team2.name}
+                />
               </div>
             )}
 
