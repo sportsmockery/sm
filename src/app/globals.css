@@ -432,6 +432,29 @@ a:hover {
   color: var(--color-primary);
 }
 
+/* ========== PROSEMIRROR/TIPTAP EDITOR STYLES ========== */
+/* Ensure editor content has proper background in light mode */
+.ProseMirror {
+  background-color: var(--bg-page, #ffffff) !important;
+  color: var(--text-primary, #222222) !important;
+}
+
+.dark .ProseMirror,
+:root[data-theme="dark"] .ProseMirror {
+  background-color: var(--bg-page, #000000) !important;
+  color: var(--text-primary, #ffffff) !important;
+}
+
+/* Prose typography inside editor */
+.ProseMirror.prose {
+  background-color: var(--bg-page, #ffffff) !important;
+}
+
+.dark .ProseMirror.prose,
+:root[data-theme="dark"] .ProseMirror.prose {
+  background-color: var(--bg-page, #000000) !important;
+}
+
 /* ========== ARTICLE STYLES ========== */
 .article-body {
   max-width: 750px;

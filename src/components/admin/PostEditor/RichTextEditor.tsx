@@ -73,8 +73,7 @@ const RichTextEditor = forwardRef<RichTextEditorRef, RichTextEditorProps>(functi
     },
     editorProps: {
       attributes: {
-        class: 'prose max-w-none min-h-[400px] focus:outline-none px-4 py-3 text-zinc-800 dark:text-zinc-200',
-        style: 'background-color: inherit;',
+        class: 'prose prose-zinc dark:prose-invert max-w-none min-h-[400px] focus:outline-none px-4 py-3',
       },
     },
   })
@@ -210,7 +209,7 @@ const RichTextEditor = forwardRef<RichTextEditorRef, RichTextEditorProps>(functi
   )
 
   return (
-    <div className="rounded-lg border border-zinc-200 bg-white dark:border-zinc-700 dark:bg-zinc-900 overflow-hidden">
+    <div className="rounded-lg border border-zinc-200 dark:border-zinc-700 overflow-hidden" style={{ backgroundColor: 'var(--bg-page, #ffffff)' }}>
       {/* Toolbar */}
       <div className="flex flex-wrap items-center gap-1 border-b border-zinc-200 dark:border-zinc-700 p-2 bg-zinc-50 dark:bg-zinc-800/50">
         {/* Text Formatting */}
@@ -404,8 +403,11 @@ const RichTextEditor = forwardRef<RichTextEditorRef, RichTextEditorProps>(functi
       </div>
 
       {/* Editor Content - explicit white background for light mode */}
-      <div className="bg-white dark:bg-zinc-900">
-        <EditorContent editor={editor} />
+      <div style={{ backgroundColor: 'var(--bg-page, #ffffff)' }}>
+        <EditorContent
+          editor={editor}
+          style={{ backgroundColor: 'var(--bg-page, #ffffff)', color: 'var(--text-primary, #222222)' }}
+        />
       </div>
 
       {/* Character/Word Count */}
