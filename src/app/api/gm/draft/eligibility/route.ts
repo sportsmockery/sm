@@ -37,17 +37,25 @@ export async function GET() {
       prospectCounts[league] = count || 0
     }
 
-    // Enhance eligibility based on prospect availability
+    // Enhance eligibility based on prospect availability AND window status
     const enhancedTeams = (teams || []).map((team: Record<string, unknown>) => {
       // Use sport field (lowercase) to look up league
       const sport = (team.sport as string || '').toLowerCase()
       const league = SPORT_TO_LEAGUE[sport]
       const hasProspects = league ? prospectCounts[league] > 0 : false
 
-      // If prospects exist, team should be eligible regardless of eligibility table
+      // Check window status - only 'open' allows drafting
+      const windowStatus = team.mock_draft_window_status as string
+      const windowOpen = windowStatus === 'open'
+
+      // Team is only eligible if:
+      // 1. Prospects exist for this sport AND
+      // 2. Draft window is open (not closed/completed/not_yet_open)
+      const isEligible = hasProspects && windowOpen
+
       return {
         ...team,
-        eligible: hasProspects || team.eligible,
+        eligible: isEligible,
         prospect_count: league ? prospectCounts[league] : 0,
         data_available: hasProspects,
       }
