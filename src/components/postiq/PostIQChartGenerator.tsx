@@ -5,6 +5,7 @@ import { ChartBuilderModal, ChartConfig, AISuggestion, ChartType } from '@/compo
 import { AnimatedBarChart } from '@/components/charts/AnimatedBarChart'
 import { AnimatedLineChart } from '@/components/charts/AnimatedLineChart'
 import { AnimatedPieChart } from '@/components/charts/AnimatedPieChart'
+import { AnimatedScatterChart } from '@/components/charts/AnimatedScatterChart'
 
 interface ChartDataPoint {
   label: string
@@ -19,7 +20,7 @@ interface ChartDataPoint {
 interface ChartSuggestion {
   success: boolean
   shouldCreateChart: boolean
-  chartType: 'bar' | 'line' | 'pie' | 'player-comparison' | 'team-stats'
+  chartType: 'bar' | 'line' | 'pie' | 'scatter' | 'player-comparison' | 'team-stats'
   chartTitle: string
   data: ChartDataPoint[]
   paragraphIndex: number
@@ -472,6 +473,16 @@ export default function PostIQChartGenerator({
                     height={200}
                     showLabels={true}
                     showLegend={false}
+                  />
+                ) : analysis.chartType === 'scatter' ? (
+                  <AnimatedScatterChart
+                    data={analysis.data}
+                    axes={analysis.axes}
+                    teamColors={analysis.teamColors}
+                    team={(analysis.teamTheme || team) as 'bears' | 'bulls' | 'cubs' | 'whitesox' | 'blackhawks'}
+                    animated={true}
+                    height={200}
+                    showTrendLine={true}
                   />
                 ) : (
                   <AnimatedBarChart

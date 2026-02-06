@@ -20,13 +20,15 @@ export interface ChartDataPoint {
   metadata?: {
     source?: string
     context?: string
+    team?: string
+    statType?: string
   }
 }
 
 export interface ChartSuggestion {
   success: boolean
   shouldCreateChart: boolean
-  chartType: 'bar' | 'line' | 'pie' | 'player-comparison' | 'team-stats'
+  chartType: 'bar' | 'line' | 'pie' | 'scatter' | 'player-comparison' | 'team-stats'
   chartTitle: string
   data: ChartDataPoint[]
   paragraphIndex: number
@@ -135,6 +137,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Forward to DataLab PostIQ /api/postiq/analyze
+    // New request format: { content: { title, body }, sport }
     const datalabResponse = await fetch(`${DATALAB_API}/api/postiq/analyze`, {
       method: 'POST',
       headers: {
@@ -145,13 +148,15 @@ export async function POST(request: NextRequest) {
         }),
       },
       body: JSON.stringify({
-        content,
-        articleTitle: title,
+        content: {
+          title: title || '',
+          body: content,
+        },
+        sport: team,
+        // Legacy fields for backwards compatibility
         category,
-        team,
         timestamp: timestamp || new Date().toISOString(),
         user_id: userId,
-        action: 'generate_chart',
       }),
     })
 
