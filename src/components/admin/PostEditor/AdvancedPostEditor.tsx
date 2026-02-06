@@ -7,6 +7,7 @@ import Link from 'next/link'
 import RichTextEditor, { RichTextEditorRef } from './RichTextEditor'
 import { CategorySelect, AuthorSelect } from './SearchableSelect'
 import { ChartBuilderModal, ChartConfig, AISuggestion, ChartType } from '@/components/admin/ChartBuilder'
+import { PostIQChartGenerator } from '@/components/postiq'
 
 interface Category {
   id: string
@@ -1832,6 +1833,23 @@ export default function AdvancedPostEditor({
           aiSuggestion={chartAiSuggestion}
           isLoading={chartLoading}
           team={getTeamFromCategory(categories.find(c => c.id === formData.category_id)?.name) || 'bears'}
+        />
+      )}
+
+      {/* PostIQ Real-Time Chart Generator - detects chartable data as you type */}
+      {!showChartModal && !highlightMode && !showPreview && (
+        <PostIQChartGenerator
+          content={formData.content}
+          title={formData.title}
+          category={categories.find(c => c.id === formData.category_id)?.name}
+          team={getTeamFromCategory(categories.find(c => c.id === formData.category_id)?.name) || 'bears'}
+          debounceMs={1500}
+          minContentLength={300}
+          showIndicator={true}
+          indicatorPosition="bottom-right"
+          onChartInsert={(chartId, shortcode, updatedContent) => {
+            setFormData(prev => ({ ...prev, content: updatedContent }))
+          }}
         />
       )}
 
