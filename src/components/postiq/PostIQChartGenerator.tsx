@@ -3,6 +3,8 @@
 import { useState, useEffect, useRef, useCallback, useMemo } from 'react'
 import { ChartBuilderModal, ChartConfig, AISuggestion, ChartType } from '@/components/admin/ChartBuilder'
 import { AnimatedBarChart } from '@/components/charts/AnimatedBarChart'
+import { AnimatedLineChart } from '@/components/charts/AnimatedLineChart'
+import { AnimatedPieChart } from '@/components/charts/AnimatedPieChart'
 
 interface ChartDataPoint {
   label: string
@@ -452,14 +454,35 @@ export default function PostIQChartGenerator({
                 </div>
               </div>
               <div className="p-4">
-                <AnimatedBarChart
-                  data={analysis.data}
-                  axes={analysis.axes}
-                  teamColors={analysis.teamColors}
-                  team={(analysis.teamTheme || team) as 'bears' | 'bulls' | 'cubs' | 'whitesox' | 'blackhawks'}
-                  animated={true}
-                  height={200}
-                />
+                {analysis.chartType === 'line' ? (
+                  <AnimatedLineChart
+                    data={analysis.data}
+                    axes={analysis.axes}
+                    teamColors={analysis.teamColors}
+                    team={(analysis.teamTheme || team) as 'bears' | 'bulls' | 'cubs' | 'whitesox' | 'blackhawks'}
+                    animated={true}
+                    height={200}
+                  />
+                ) : analysis.chartType === 'pie' ? (
+                  <AnimatedPieChart
+                    data={analysis.data}
+                    teamColors={analysis.teamColors}
+                    team={(analysis.teamTheme || team) as 'bears' | 'bulls' | 'cubs' | 'whitesox' | 'blackhawks'}
+                    animated={true}
+                    height={200}
+                    showLabels={true}
+                    showLegend={false}
+                  />
+                ) : (
+                  <AnimatedBarChart
+                    data={analysis.data}
+                    axes={analysis.axes}
+                    teamColors={analysis.teamColors}
+                    team={(analysis.teamTheme || team) as 'bears' | 'bulls' | 'cubs' | 'whitesox' | 'blackhawks'}
+                    animated={true}
+                    height={200}
+                  />
+                )}
               </div>
               {analysis.extractedFrom && (
                 <div className="px-4 py-2 border-t border-gray-100 dark:border-zinc-800 bg-gray-50 dark:bg-zinc-800/50">
