@@ -57,6 +57,17 @@ interface CapData { total_cap: number; cap_used: number; cap_available: number; 
 
 type ReceivedPlayer = PlayerData | { name: string; position: string }
 
+// Convert frontend draft pick format to API format (camelCase -> snake_case)
+function formatDraftPicksForAPI(picks: DraftPick[]): Array<{ year: number; round: number; condition?: string; pick_number?: number; original_team?: string }> {
+  return picks.map(pk => ({
+    year: pk.year,
+    round: pk.round,
+    condition: pk.condition,
+    pick_number: pk.pickNumber,
+    original_team: pk.originalTeam,
+  }))
+}
+
 export default function GMPage() {
   const { user, loading: authLoading, isAuthenticated } = useAuth()
   const [pageLoading, setPageLoading] = useState(true)
@@ -776,8 +787,8 @@ export default function GMPage() {
             }
             return { name: p.name, position: p.position }
           }),
-          draft_picks_sent: draftPicksSent,
-          draft_picks_received: draftPicksReceived,
+          draft_picks_sent: formatDraftPicksForAPI(draftPicksSent),
+          draft_picks_received: formatDraftPicksForAPI(draftPicksReceived),
         }),
       })
 
@@ -961,8 +972,8 @@ export default function GMPage() {
           partner_team_key: opponentTeam!.team_key,
           players_sent: playersSentArray,
           players_received: playersReceivedArray,
-          draft_picks_sent: draftPicksSent,
-          draft_picks_received: draftPicksReceived,
+          draft_picks_sent: formatDraftPicksForAPI(draftPicksSent),
+          draft_picks_received: formatDraftPicksForAPI(draftPicksReceived),
           session_id: activeSession?.id,
           // MLB salary retention & cash considerations
           salary_retentions: sport === 'mlb' ? salaryRetentions : undefined,
