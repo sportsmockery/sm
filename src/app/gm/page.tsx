@@ -206,6 +206,7 @@ export default function GMPage() {
     fetchTrades()
     fetchLeaderboard()
     fetchSessions()
+    fetchAnalytics()
   }, [authLoading, isAuthenticated, router])
 
   // Migrate 2-team selections to 3-team flows when switching modes
@@ -258,11 +259,22 @@ export default function GMPage() {
         setTrades(data.trades || [])
         setTradesPage(data.page || 1)
         setTradesTotalPages(data.total_pages || 1)
-        const accepted = (data.trades || []).filter((t: any) => t.status === 'accepted')
-        setGmScore(accepted.reduce((sum: number, t: any) => sum + t.grade, 0))
       }
     } catch (e) {
       console.error('Failed to fetch trades', e)
+    }
+  }, [])
+
+  // Fetch analytics for accurate GM score (total across all trades, not just first page)
+  const fetchAnalytics = useCallback(async () => {
+    try {
+      const res = await fetch('/api/gm/analytics')
+      if (res.ok) {
+        const data = await res.json()
+        setGmScore(data.total_gm_score || 0)
+      }
+    } catch (e) {
+      console.error('Failed to fetch analytics', e)
     }
   }, [])
 
@@ -1021,6 +1033,7 @@ export default function GMPage() {
         fetchTrades()
         fetchLeaderboard()
         fetchSessions()
+        fetchAnalytics()
       } else {
         const err = await res.json().catch(() => ({ error: 'Unknown error' }))
         console.log('[gradeTrade] Error response:', err)
