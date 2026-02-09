@@ -96,28 +96,43 @@ export async function GET(
         .from('bears_player_game_stats')
         .select(`player_id, passing_cmp, passing_att, passing_yds, passing_td, passing_int,
           def_sacks, rushing_car, rushing_yds, rushing_td, receiving_tgts, receiving_rec,
-          receiving_yds, receiving_td, fum_fum, def_tackles_total, interceptions,
-          bears_players!inner(id, name, position, headshot_url)`)
+          receiving_yds, receiving_td, fum_fum, def_tackles_total, interceptions, is_opponent`)
         .eq('bears_game_id', gameId)
         .eq('is_opponent', false),
       datalabAdmin
         .from('bears_player_game_stats')
         .select(`player_id, passing_cmp, passing_att, passing_yds, passing_td, passing_int,
           def_sacks, rushing_car, rushing_yds, rushing_td, receiving_tgts, receiving_rec,
-          receiving_yds, receiving_td, fum_fum, def_tackles_total, interceptions,
+          receiving_yds, receiving_td, fum_fum, def_tackles_total, interceptions, is_opponent,
           opponent_player_name, opponent_player_position, opponent_player_headshot_url`)
         .eq('bears_game_id', gameId)
         .eq('is_opponent', true),
     ])
 
-    if (bearsStatsResult.error) console.error('Bears stats error:', bearsStatsResult.error)
-    if (oppStatsResult.error) console.error('Opponent stats error:', oppStatsResult.error)
+    // Fetch Bears player info separately and join in code
+    const bearsPlayerIds = (bearsStatsResult.data || []).map(s => s.player_id).filter(Boolean)
+    let playersMap: Record<string, { name: string; position: string; headshot_url: string | null }> = {}
 
-    const transformStat = (stat: any, isOpponent: boolean): PlayerBoxStats => ({
-      playerId: stat.player_id,
-      name: isOpponent ? (stat.opponent_player_name || 'Unknown') : (stat.bears_players?.name || 'Unknown'),
-      position: isOpponent ? (stat.opponent_player_position || '') : (stat.bears_players?.position || ''),
-      headshotUrl: isOpponent ? (stat.opponent_player_headshot_url || null) : (stat.bears_players?.headshot_url || null),
+    if (bearsPlayerIds.length > 0) {
+      const { data: playersData } = await datalabAdmin
+        .from('bears_players')
+        .select('id, name, position, headshot_url')
+        .in('id', bearsPlayerIds)
+
+      if (playersData) {
+        playersMap = Object.fromEntries(
+          playersData.map(p => [String(p.id), { name: p.name, position: p.position, headshot_url: p.headshot_url }])
+        )
+      }
+    }
+
+    const transformStat = (stat: any, isOpponent: boolean): PlayerBoxStats => {
+      const playerInfo = !isOpponent ? playersMap[String(stat.player_id)] : null
+      return {
+        playerId: stat.player_id,
+        name: isOpponent ? (stat.opponent_player_name || 'Unknown') : (playerInfo?.name || 'Unknown'),
+        position: isOpponent ? (stat.opponent_player_position || '') : (playerInfo?.position || ''),
+        headshotUrl: isOpponent ? (stat.opponent_player_headshot_url || null) : (playerInfo?.headshot_url || null),
       passingCmp: stat.passing_cmp,
       passingAtt: stat.passing_att,
       passingYds: stat.passing_yds,
@@ -134,7 +149,8 @@ export async function GET(
       defSacks: parseFloat(stat.def_sacks) || null,
       defInt: stat.interceptions,
       fumFum: stat.fum_fum,
-    })
+    }
+  }
 
     const bearsStats = (bearsStatsResult.data || []).map(s => transformStat(s, false))
     const oppStats = (oppStatsResult.data || []).map(s => transformStat(s, true))

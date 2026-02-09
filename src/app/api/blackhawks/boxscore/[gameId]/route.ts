@@ -50,8 +50,7 @@ export async function GET(
       datalabAdmin
         .from('blackhawks_player_game_stats')
         .select(`player_id, goals, assists, points, plus_minus, pim, shots, hits, blocked_shots, toi,
-          saves, goals_against, shots_against, is_opponent,
-          blackhawks_players!inner(name, position, headshot_url)`)
+          saves, goals_against, shots_against, is_opponent`)
         .eq('game_id', gameData.external_id)
         .eq('is_opponent', false),
       datalabAdmin
@@ -63,10 +62,29 @@ export async function GET(
         .eq('is_opponent', true),
     ])
 
-    const transform = (s: any, isOpp: boolean): PlayerBoxStats => ({
-      name: isOpp ? (s.opponent_player_name || 'Unknown') : (s.blackhawks_players?.name || 'Unknown'),
-      position: isOpp ? (s.opponent_player_position || '') : (s.blackhawks_players?.position || ''),
-      headshotUrl: isOpp ? (s.opponent_player_headshot_url || null) : (s.blackhawks_players?.headshot_url || null),
+    // Fetch Blackhawks player info separately and join in code
+    const hawksPlayerIds = (hawksResult.data || []).map(s => s.player_id).filter(Boolean)
+    let playersMap: Record<string, { name: string; position: string; headshot_url: string | null }> = {}
+
+    if (hawksPlayerIds.length > 0) {
+      const { data: playersData } = await datalabAdmin
+        .from('blackhawks_players')
+        .select('espn_id, name, position, headshot_url')
+        .in('espn_id', hawksPlayerIds)
+
+      if (playersData) {
+        playersMap = Object.fromEntries(
+          playersData.map(p => [p.espn_id, { name: p.name, position: p.position, headshot_url: p.headshot_url }])
+        )
+      }
+    }
+
+    const transform = (s: any, isOpp: boolean): PlayerBoxStats => {
+      const playerInfo = !isOpp ? playersMap[s.player_id] : null
+      return {
+        name: isOpp ? (s.opponent_player_name || 'Unknown') : (playerInfo?.name || 'Unknown'),
+        position: isOpp ? (s.opponent_player_position || '') : (playerInfo?.position || ''),
+        headshotUrl: isOpp ? (s.opponent_player_headshot_url || null) : (playerInfo?.headshot_url || null),
       goals: s.goals,
       assists: s.assists,
       points: s.points,
@@ -79,7 +97,8 @@ export async function GET(
       saves: s.saves,
       goalsAgainst: s.goals_against,
       shotsAgainst: s.shots_against,
-    })
+      }
+    }
 
     const hawksStats = (hawksResult.data || []).map(s => transform(s, false))
     const oppStats = (oppResult.data || []).map(s => transform(s, true))

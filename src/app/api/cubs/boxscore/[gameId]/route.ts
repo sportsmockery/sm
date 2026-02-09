@@ -27,8 +27,7 @@ export async function GET(
     const [cubsResult, oppResult] = await Promise.all([
       datalabAdmin
         .from('cubs_player_game_stats')
-        .select(`player_id, ${BATTING_COLS}, ${PITCHING_COLS}, is_opponent,
-          cubs_players!inner(name, position, headshot_url)`)
+        .select(`player_id, ${BATTING_COLS}, ${PITCHING_COLS}, is_opponent`)
         .eq('cubs_game_id', gameData.id)
         .eq('is_opponent', false),
       datalabAdmin
@@ -39,15 +38,35 @@ export async function GET(
         .eq('is_opponent', true),
     ])
 
-    const transform = (s: any, isOpp: boolean) => ({
-      name: isOpp ? (s.opponent_player_name || 'Unknown') : (s.cubs_players?.name || 'Unknown'),
-      position: isOpp ? (s.opponent_player_position || '') : (s.cubs_players?.position || ''),
-      headshotUrl: isOpp ? (s.opponent_player_headshot_url || null) : (s.cubs_players?.headshot_url || null),
+    // Fetch Cubs player info separately and join in code
+    const cubsPlayerIds = (cubsResult.data || []).map(s => s.player_id).filter(Boolean)
+    let playersMap: Record<string, { name: string; position: string; headshot_url: string | null }> = {}
+
+    if (cubsPlayerIds.length > 0) {
+      const { data: playersData } = await datalabAdmin
+        .from('cubs_players')
+        .select('espn_id, name, position, headshot_url')
+        .in('espn_id', cubsPlayerIds)
+
+      if (playersData) {
+        playersMap = Object.fromEntries(
+          playersData.map(p => [p.espn_id, { name: p.name, position: p.position, headshot_url: p.headshot_url }])
+        )
+      }
+    }
+
+    const transform = (s: any, isOpp: boolean) => {
+      const playerInfo = !isOpp ? playersMap[s.player_id] : null
+      return {
+        name: isOpp ? (s.opponent_player_name || 'Unknown') : (playerInfo?.name || 'Unknown'),
+        position: isOpp ? (s.opponent_player_position || '') : (playerInfo?.position || ''),
+        headshotUrl: isOpp ? (s.opponent_player_headshot_url || null) : (playerInfo?.headshot_url || null),
       ab: s.at_bats, r: s.runs, h: s.hits, doubles: s.doubles, triples: s.triples,
       hr: s.home_runs, rbi: s.rbi, bb: s.walks, so: s.strikeouts, sb: s.stolen_bases,
       ip: s.innings_pitched, ha: s.hits_allowed, ra: s.runs_allowed, er: s.earned_runs,
       bba: s.walks_allowed, k: s.strikeouts_pitched, w: s.win, l: s.loss, sv: s.save,
-    })
+      }
+    }
 
     const splitMLB = (stats: any[]) => ({
       batters: stats.filter(s => s.ab !== null && s.ab > 0).sort((a, b) => (b.h || 0) - (a.h || 0)),
