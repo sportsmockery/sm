@@ -38,10 +38,10 @@ export async function GET(
       return NextResponse.json({ error: 'Datalab not configured' }, { status: 500 })
     }
 
-    // Get game info
+    // Get game info - include external_id for stats join
     const { data: gameData, error: gameError } = await datalabAdmin
       .from('bulls_games_master')
-      .select(`id, game_date, season, opponent, opponent_full_name,
+      .select(`id, external_id, game_date, season, opponent, opponent_full_name,
         is_bulls_home, arena, bulls_score, opponent_score, bulls_win, broadcast`)
       .eq('id', gameId)
       .single()
@@ -51,10 +51,7 @@ export async function GET(
     }
 
     // Fetch Bulls and opponent stats in parallel
-    // Bulls stats use game_date + opponent to match (no direct FK to games_master.id)
-    const gameDate = gameData.game_date
-    const opponent = gameData.opponent
-
+    // Stats table uses external_id (ESPN game ID) as game_id, not internal id
     const [bullsStatsResult, oppStatsResult] = await Promise.all([
       datalabAdmin
         .from('bulls_player_game_stats')
@@ -62,8 +59,7 @@ export async function GET(
           field_goals_made, field_goals_attempted, three_pointers_made, three_pointers_attempted,
           free_throws_made, free_throws_attempted, is_opponent,
           bulls_players!inner(name, position, headshot_url)`)
-        .eq('game_date', gameDate)
-        .eq('opponent', opponent)
+        .eq('game_id', gameData.external_id)
         .eq('is_opponent', false),
       datalabAdmin
         .from('bulls_player_game_stats')
@@ -71,8 +67,7 @@ export async function GET(
           field_goals_made, field_goals_attempted, three_pointers_made, three_pointers_attempted,
           free_throws_made, free_throws_attempted, is_opponent,
           opponent_player_name, opponent_player_position, opponent_player_headshot_url`)
-        .eq('game_date', gameDate)
-        .eq('opponent', opponent)
+        .eq('game_id', gameData.external_id)
         .eq('is_opponent', true),
     ])
 

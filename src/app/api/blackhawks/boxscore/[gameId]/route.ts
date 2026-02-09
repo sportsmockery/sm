@@ -32,9 +32,10 @@ export async function GET(
       return NextResponse.json({ error: 'Datalab not configured' }, { status: 500 })
     }
 
+    // Get game info - include external_id for stats join
     const { data: gameData, error: gameError } = await datalabAdmin
       .from('blackhawks_games_master')
-      .select(`id, game_date, season, opponent, opponent_full_name,
+      .select(`id, external_id, game_date, season, opponent, opponent_full_name,
         is_blackhawks_home, arena, blackhawks_score, opponent_score,
         blackhawks_win, overtime, shootout`)
       .eq('id', gameId)
@@ -44,20 +45,21 @@ export async function GET(
       return NextResponse.json({ error: 'Game not found' }, { status: 404 })
     }
 
+    // Stats table uses external_id (ESPN game ID) as game_id
     const [hawksResult, oppResult] = await Promise.all([
       datalabAdmin
         .from('blackhawks_player_game_stats')
         .select(`player_id, goals, assists, points, plus_minus, pim, shots, hits, blocked_shots, toi,
           saves, goals_against, shots_against, is_opponent,
           blackhawks_players!inner(name, position, headshot_url)`)
-        .eq('game_id', gameData.id)
+        .eq('game_id', gameData.external_id)
         .eq('is_opponent', false),
       datalabAdmin
         .from('blackhawks_player_game_stats')
         .select(`player_id, goals, assists, points, plus_minus, pim, shots, hits, blocked_shots, toi,
           saves, goals_against, shots_against, is_opponent,
           opponent_player_name, opponent_player_position, opponent_player_headshot_url`)
-        .eq('game_id', gameData.id)
+        .eq('game_id', gameData.external_id)
         .eq('is_opponent', true),
     ])
 

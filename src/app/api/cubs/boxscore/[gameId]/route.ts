@@ -23,18 +23,19 @@ export async function GET(
 
     if (gameError || !gameData) return NextResponse.json({ error: 'Game not found' }, { status: 404 })
 
+    // Stats table uses cubs_game_id (matches games_master.id)
     const [cubsResult, oppResult] = await Promise.all([
       datalabAdmin
         .from('cubs_player_game_stats')
         .select(`player_id, ${BATTING_COLS}, ${PITCHING_COLS}, is_opponent,
           cubs_players!inner(name, position, headshot_url)`)
-        .eq('game_id', gameData.id)
+        .eq('cubs_game_id', gameData.id)
         .eq('is_opponent', false),
       datalabAdmin
         .from('cubs_player_game_stats')
         .select(`player_id, ${BATTING_COLS}, ${PITCHING_COLS}, is_opponent,
           opponent_player_name, opponent_player_position, opponent_player_headshot_url`)
-        .eq('game_id', gameData.id)
+        .eq('cubs_game_id', gameData.id)
         .eq('is_opponent', true),
     ])
 
