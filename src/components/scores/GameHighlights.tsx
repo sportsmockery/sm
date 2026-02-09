@@ -153,7 +153,7 @@ interface GameHighlightsProps {
   homeTeam: string
   awayTeam: string
   gameDate: string
-  week: number
+  week?: number // Only relevant for NFL
   sport?: 'nfl' | 'nba' | 'nhl' | 'mlb'
   team?: 'bears' | 'bulls' | 'blackhawks' | 'cubs' | 'whitesox'
   className?: string

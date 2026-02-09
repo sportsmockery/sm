@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef } from 'react'
 import Image from 'next/image'
-import { GameHighlights } from '@/components/scores/GameHighlights'
+import GameHighlights from '@/components/scores/GameHighlights'
 
 const CUBS_LOGO = 'https://a.espncdn.com/i/teamlogos/mlb/500/chc.png'
 
