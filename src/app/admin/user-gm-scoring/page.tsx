@@ -15,7 +15,16 @@ interface UserGMScore {
   highest_grade: number
   lowest_grade: number
   last_trade_at: string | null
+  rank: number
 }
+
+const SPORT_CONFIG = [
+  { sport: '', label: 'All Sports', emoji: '🏆' },
+  { sport: 'NFL', label: 'NFL', emoji: '🏈' },
+  { sport: 'NBA', label: 'NBA', emoji: '🏀' },
+  { sport: 'MLB', label: 'MLB', emoji: '⚾' },
+  { sport: 'NHL', label: 'NHL', emoji: '🏒' },
+]
 
 interface PaginatedResponse {
   users: UserGMScore[]
@@ -36,6 +45,7 @@ export default function UserGMScoringPage() {
   const [page, setPage] = useState(1)
   const [sortBy, setSortBy] = useState('total_gm_score')
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc')
+  const [selectedSport, setSelectedSport] = useState('')
 
   const subText = isDark ? '#9ca3af' : '#6b7280'
 
@@ -48,6 +58,7 @@ export default function UserGMScoringPage() {
         sortBy,
         sortOrder,
         ...(search && { search }),
+        ...(selectedSport && { sport: selectedSport }),
       })
 
       const res = await fetch(`/api/admin/gm-scoring?${params}`)
@@ -66,7 +77,7 @@ export default function UserGMScoringPage() {
     } finally {
       setLoading(false)
     }
-  }, [page, search, sortBy, sortOrder])
+  }, [page, search, sortBy, sortOrder, selectedSport])
 
   useEffect(() => {
     fetchData()
@@ -128,11 +139,40 @@ export default function UserGMScoringPage() {
       {/* Header */}
       <div style={{ marginBottom: 24 }}>
         <h1 style={{ fontSize: '24px', fontWeight: 700, color: 'var(--text-primary)', marginBottom: 4 }}>
-          User GM Scoring
+          User GM Scoring - Admin View
         </h1>
         <p style={{ fontSize: '14px', color: subText }}>
-          View and analyze GM trade performance across all users
+          View ALL users across all sports (private data)
         </p>
+      </div>
+
+      {/* Sport Tabs */}
+      <div style={{ display: 'flex', gap: 8, marginBottom: 20, flexWrap: 'wrap' }}>
+        {SPORT_CONFIG.map(({ sport, label, emoji }) => (
+          <button
+            key={sport}
+            onClick={() => {
+              setSelectedSport(sport)
+              setPage(1)
+            }}
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: 6,
+              padding: '8px 16px',
+              borderRadius: 8,
+              border: selectedSport === sport ? 'none' : `1px solid ${isDark ? '#4b5563' : '#d1d5db'}`,
+              backgroundColor: selectedSport === sport ? '#bc0000' : (isDark ? '#374151' : '#fff'),
+              color: selectedSport === sport ? '#fff' : 'var(--text-primary)',
+              fontSize: '13px',
+              fontWeight: 600,
+              cursor: 'pointer',
+            }}
+          >
+            <span>{emoji}</span>
+            <span>{label}</span>
+          </button>
+        ))}
       </div>
 
       {error && (
@@ -192,6 +232,9 @@ export default function UserGMScoringPage() {
             <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '13px' }}>
               <thead>
                 <tr style={{ backgroundColor: isDark ? '#374151' : '#f3f4f6' }}>
+                  <th style={{ padding: '12px 16px', textAlign: 'center', fontWeight: 600, color: 'var(--text-primary)', whiteSpace: 'nowrap', width: 60 }}>
+                    Rank
+                  </th>
                   <th style={{ padding: '12px 16px', textAlign: 'left', fontWeight: 600, color: 'var(--text-primary)', whiteSpace: 'nowrap' }}>
                     User
                   </th>
@@ -239,6 +282,27 @@ export default function UserGMScoringPage() {
                       backgroundColor: i % 2 === 0 ? 'transparent' : (isDark ? '#374151/30' : '#f9fafb'),
                     }}
                   >
+                    <td style={{ padding: '12px 16px', textAlign: 'center' }}>
+                      <span style={{
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        minWidth: 36,
+                        padding: '4px 8px',
+                        borderRadius: 6,
+                        backgroundColor: user.rank <= 3 ? '#bc000020' : (isDark ? '#374151' : '#f3f4f6'),
+                        color: user.rank <= 3 ? '#bc0000' : 'var(--text-primary)',
+                        fontWeight: 700,
+                        fontSize: '13px',
+                      }}>
+                        {user.rank <= 3 && (
+                          <span style={{ marginRight: 4 }}>
+                            {user.rank === 1 ? '🥇' : user.rank === 2 ? '🥈' : '🥉'}
+                          </span>
+                        )}
+                        #{user.rank}
+                      </span>
+                    </td>
                     <td style={{ padding: '12px 16px' }}>
                       <div style={{ fontWeight: 600, color: 'var(--text-primary)' }}>
                         {user.display_name || 'Unknown'}
@@ -289,7 +353,7 @@ export default function UserGMScoringPage() {
                 ))}
                 {data?.users.length === 0 && (
                   <tr>
-                    <td colSpan={7} style={{ padding: 40, textAlign: 'center', color: subText }}>
+                    <td colSpan={8} style={{ padding: 40, textAlign: 'center', color: subText }}>
                       No users found
                     </td>
                   </tr>

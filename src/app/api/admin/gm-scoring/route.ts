@@ -69,12 +69,19 @@ export async function GET(request: NextRequest) {
     const search = searchParams.get('search') || ''
     const sortBy = searchParams.get('sortBy') || 'total_gm_score'
     const sortOrder = searchParams.get('sortOrder') || 'desc'
+    const sport = searchParams.get('sport') || ''
 
     // Fetch all trades grouped by user
-    const { data: trades, error } = await datalabAdmin
+    let tradesQuery = datalabAdmin
       .from('gm_trades')
-      .select('user_id, user_email, grade, status, created_at')
+      .select('user_id, user_email, grade, status, created_at, sport')
       .order('created_at', { ascending: false })
+
+    if (sport) {
+      tradesQuery = tradesQuery.eq('sport', sport)
+    }
+
+    const { data: trades, error } = await tradesQuery
 
     if (error) throw error
 
@@ -195,10 +202,16 @@ export async function GET(request: NextRequest) {
       return aVal > bVal ? -1 : aVal < bVal ? 1 : 0
     })
 
+    // Add rank to each user
+    const rankedScores = userScores.map((user, index) => ({
+      ...user,
+      rank: index + 1,
+    }))
+
     // Paginate
-    const total = userScores.length
+    const total = rankedScores.length
     const offset = (page - 1) * limit
-    const paginatedScores = userScores.slice(offset, offset + limit)
+    const paginatedScores = rankedScores.slice(offset, offset + limit)
 
     return NextResponse.json({
       users: paginatedScores,
@@ -206,6 +219,7 @@ export async function GET(request: NextRequest) {
       page,
       limit,
       totalPages: Math.ceil(total / limit),
+      sport: sport || 'ALL',
     })
   } catch (error) {
     console.error('Admin GM scoring error:', error)
