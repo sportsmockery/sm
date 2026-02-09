@@ -51,33 +51,41 @@ export async function GET(
     }
 
     // Fetch Bulls and opponent stats in parallel
-    // Stats table uses external_id (ESPN game ID) as game_id, not internal id
-    // Fetch all columns to debug what's available
+    // Stats table uses external_id (ESPN game ID) as game_id
+    // Bulls players: join to bulls_players for name/position/headshot
+    // Opponent players: use denormalized opponent_player_* columns
     const [bullsStatsResult, oppStatsResult] = await Promise.all([
       datalabAdmin
         .from('bulls_player_game_stats')
-        .select('*')
+        .select(`player_id, minutes_display, points, total_rebounds, assists, steals, blocks, turnovers,
+          field_goals_made, field_goals_attempted, three_pointers_made, three_pointers_attempted,
+          free_throws_made, free_throws_attempted, is_opponent,
+          bulls_players(name, position, headshot_url)`)
         .eq('game_id', gameData.external_id)
         .eq('is_opponent', false),
       datalabAdmin
         .from('bulls_player_game_stats')
-        .select('*')
+        .select(`player_id, minutes_display, points, total_rebounds, assists, steals, blocks, turnovers,
+          field_goals_made, field_goals_attempted, three_pointers_made, three_pointers_attempted,
+          free_throws_made, free_throws_attempted, is_opponent,
+          opponent_player_name, opponent_player_position, opponent_player_headshot_url`)
         .eq('game_id', gameData.external_id)
         .eq('is_opponent', true),
     ])
 
     const transformStat = (stat: any, isOpponent: boolean): PlayerBoxStats => ({
-      // Try various column name patterns for player info
+      // Bulls players: use joined bulls_players data
+      // Opponent players: use denormalized opponent_player_* columns
       name: isOpponent
-        ? (stat.opponent_player_name || stat.player_name || 'Unknown')
-        : (stat.player_name || stat.name || stat.athlete_display_name || 'Unknown'),
+        ? (stat.opponent_player_name || 'Unknown')
+        : (stat.bulls_players?.name || 'Unknown'),
       position: isOpponent
-        ? (stat.opponent_player_position || stat.player_position || '')
-        : (stat.player_position || stat.position || ''),
+        ? (stat.opponent_player_position || '')
+        : (stat.bulls_players?.position || ''),
       headshotUrl: isOpponent
-        ? (stat.opponent_player_headshot_url || stat.player_headshot_url || null)
-        : (stat.player_headshot_url || stat.headshot_url || null),
-      minutes: stat.minutes_played,
+        ? (stat.opponent_player_headshot_url || null)
+        : (stat.bulls_players?.headshot_url || null),
+      minutes: stat.minutes_display,
       points: stat.points,
       rebounds: stat.total_rebounds,
       assists: stat.assists,
@@ -95,29 +103,10 @@ export async function GET(
     const bullsPlayers = (bullsStatsResult.data || []).map(s => transformStat(s, false))
     const oppPlayers = (oppStatsResult.data || []).map(s => transformStat(s, true))
 
-    // Debug: Log external_id and stats counts
-    console.log('[Bulls Boxscore] gameId:', gameId, 'external_id:', gameData.external_id,
-      'bulls stats:', bullsStatsResult.data?.length || 0,
-      'opp stats:', oppStatsResult.data?.length || 0,
-      'bulls error:', bullsStatsResult.error,
-      'opp error:', oppStatsResult.error)
-
-    // Debug: show sample row structure
-    const sampleBullsRow = bullsStatsResult.data?.[0] || null
-    const sampleOppRow = oppStatsResult.data?.[0] || null
-
     return NextResponse.json({
       gameId: String(gameData.id),
       date: gameData.game_date,
       venue: gameData.arena,
-      _debug: {
-        external_id: gameData.external_id,
-        bullsStatsCount: bullsStatsResult.data?.length || 0,
-        oppStatsCount: oppStatsResult.data?.length || 0,
-        sampleBullsColumns: sampleBullsRow ? Object.keys(sampleBullsRow) : [],
-        sampleOppColumns: sampleOppRow ? Object.keys(sampleOppRow) : [],
-        sampleOppRow: sampleOppRow,
-      },
       bulls: {
         score: gameData.bulls_score || 0,
         result: gameData.bulls_win !== null ? (gameData.bulls_win ? 'W' : 'L') : null,
