@@ -52,30 +52,31 @@ export async function GET(
 
     // Fetch Bulls and opponent stats in parallel
     // Stats table uses external_id (ESPN game ID) as game_id, not internal id
-    // Use left join (no !inner) since player_id might not match bulls_players.id
+    // Fetch all columns to debug what's available
     const [bullsStatsResult, oppStatsResult] = await Promise.all([
       datalabAdmin
         .from('bulls_player_game_stats')
-        .select(`player_id, player_name, player_position, player_headshot_url,
-          minutes_played, points, total_rebounds, assists, steals, blocks, turnovers,
-          field_goals_made, field_goals_attempted, three_pointers_made, three_pointers_attempted,
-          free_throws_made, free_throws_attempted, is_opponent`)
+        .select('*')
         .eq('game_id', gameData.external_id)
         .eq('is_opponent', false),
       datalabAdmin
         .from('bulls_player_game_stats')
-        .select(`player_id, minutes_played, points, total_rebounds, assists, steals, blocks, turnovers,
-          field_goals_made, field_goals_attempted, three_pointers_made, three_pointers_attempted,
-          free_throws_made, free_throws_attempted, is_opponent,
-          opponent_player_name, opponent_player_position, opponent_player_headshot_url`)
+        .select('*')
         .eq('game_id', gameData.external_id)
         .eq('is_opponent', true),
     ])
 
     const transformStat = (stat: any, isOpponent: boolean): PlayerBoxStats => ({
-      name: isOpponent ? (stat.opponent_player_name || 'Unknown') : (stat.player_name || 'Unknown'),
-      position: isOpponent ? (stat.opponent_player_position || '') : (stat.player_position || ''),
-      headshotUrl: isOpponent ? (stat.opponent_player_headshot_url || null) : (stat.player_headshot_url || null),
+      // Try various column name patterns for player info
+      name: isOpponent
+        ? (stat.opponent_player_name || stat.player_name || 'Unknown')
+        : (stat.player_name || stat.name || stat.athlete_display_name || 'Unknown'),
+      position: isOpponent
+        ? (stat.opponent_player_position || stat.player_position || '')
+        : (stat.player_position || stat.position || ''),
+      headshotUrl: isOpponent
+        ? (stat.opponent_player_headshot_url || stat.player_headshot_url || null)
+        : (stat.player_headshot_url || stat.headshot_url || null),
       minutes: stat.minutes_played,
       points: stat.points,
       rebounds: stat.total_rebounds,
@@ -101,11 +102,22 @@ export async function GET(
       'bulls error:', bullsStatsResult.error,
       'opp error:', oppStatsResult.error)
 
+    // Debug: show sample row structure
+    const sampleBullsRow = bullsStatsResult.data?.[0] || null
+    const sampleOppRow = oppStatsResult.data?.[0] || null
+
     return NextResponse.json({
       gameId: String(gameData.id),
       date: gameData.game_date,
       venue: gameData.arena,
-      _debug: { external_id: gameData.external_id, bullsStatsCount: bullsStatsResult.data?.length || 0, oppStatsCount: oppStatsResult.data?.length || 0 },
+      _debug: {
+        external_id: gameData.external_id,
+        bullsStatsCount: bullsStatsResult.data?.length || 0,
+        oppStatsCount: oppStatsResult.data?.length || 0,
+        sampleBullsColumns: sampleBullsRow ? Object.keys(sampleBullsRow) : [],
+        sampleOppColumns: sampleOppRow ? Object.keys(sampleOppRow) : [],
+        sampleOppRow: sampleOppRow,
+      },
       bulls: {
         score: gameData.bulls_score || 0,
         result: gameData.bulls_win !== null ? (gameData.bulls_win ? 'W' : 'L') : null,
