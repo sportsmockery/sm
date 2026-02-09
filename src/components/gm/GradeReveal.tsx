@@ -8,6 +8,7 @@ import { AuditButton } from './AuditButton'
 import { AuditReportCard } from './AuditReportCard'
 import { HistoricalContextPanel, SuggestedTradePanel } from './HistoricalContextPanel'
 import { DataFreshnessIndicator } from './DataFreshnessIndicator'
+import { getGradeInterpretation } from '@/lib/gm-constants'
 import type { PlayerData } from '@/components/gm/PlayerCard'
 import type { AuditResult } from '@/types/gm-audit'
 import type { HistoricalContext, EnhancedSuggestedTrade, LegacySuggestedTrade, LegacyHistoricalTradeRef, DataFreshness } from '@/types/gm'
@@ -27,6 +28,11 @@ interface GradeResult {
     future_assets: number
   }
   cap_analysis?: string
+  // New factors object (Feb 2026) - includes motivation score
+  factors?: {
+    motivation_score?: number  // 0-10 combined motivation score for both sides
+    [key: string]: number | string | undefined
+  }
   // Historical context - supports both legacy and enhanced formats
   historical_comparisons?: LegacyHistoricalTradeRef[]
   historical_context?: HistoricalContext | null
@@ -141,7 +147,8 @@ export function GradeReveal({ result, show, onClose, onNewTrade, tradeDetails, s
 
   if (!show || !result) return null
 
-  const gradeColor = result.grade >= 70 ? '#22c55e' : result.grade >= 50 ? '#eab308' : '#ef4444'
+  const gradeInfo = getGradeInterpretation(result.grade)
+  const gradeColor = gradeInfo.color
   const textColor = isDark ? '#fff' : '#1a1a1a'
   const subText = isDark ? '#9ca3af' : '#6b7280'
 
@@ -244,6 +251,17 @@ export function GradeReveal({ result, show, onClose, onNewTrade, tradeDetails, s
             </motion.div>
           )}
 
+          {/* Grade interpretation message */}
+          {phase >= 2 && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              style={{ marginTop: 8, fontSize: '14px', fontWeight: 600, color: gradeColor }}
+            >
+              {gradeInfo.message}
+            </motion.div>
+          )}
+
           {/* Trade summary */}
           {phase >= 2 && result.trade_summary && (
             <motion.div
@@ -266,6 +284,23 @@ export function GradeReveal({ result, show, onClose, onNewTrade, tradeDetails, s
               }}
             >
               Team Improvement: {result.improvement_score > 0 ? '+' : ''}{result.improvement_score}
+            </motion.div>
+          )}
+
+          {/* Motivation score (if present from enhanced grading) */}
+          {phase >= 2 && result.factors?.motivation_score !== undefined && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              style={{
+                marginTop: 6, fontSize: '12px', fontWeight: 600,
+                color: result.factors.motivation_score >= 7 ? '#22c55e' : result.factors.motivation_score >= 4 ? '#eab308' : '#ef4444',
+              }}
+            >
+              Trade Realism: {result.factors.motivation_score.toFixed(1)}/10
+              {result.factors.motivation_score >= 7 && ' (Highly realistic)'}
+              {result.factors.motivation_score >= 4 && result.factors.motivation_score < 7 && ' (Plausible)'}
+              {result.factors.motivation_score < 4 && ' (Partner unlikely to accept)'}
             </motion.div>
           )}
 
