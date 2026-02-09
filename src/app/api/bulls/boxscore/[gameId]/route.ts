@@ -93,10 +93,18 @@ export async function GET(
     const bullsPlayers = (bullsStatsResult.data || []).map(s => transformStat(s, false))
     const oppPlayers = (oppStatsResult.data || []).map(s => transformStat(s, true))
 
+    // Debug: Log external_id and stats counts
+    console.log('[Bulls Boxscore] gameId:', gameId, 'external_id:', gameData.external_id,
+      'bulls stats:', bullsStatsResult.data?.length || 0,
+      'opp stats:', oppStatsResult.data?.length || 0,
+      'bulls error:', bullsStatsResult.error,
+      'opp error:', oppStatsResult.error)
+
     return NextResponse.json({
       gameId: String(gameData.id),
       date: gameData.game_date,
       venue: gameData.arena,
+      _debug: { external_id: gameData.external_id, bullsStatsCount: bullsStatsResult.data?.length || 0, oppStatsCount: oppStatsResult.data?.length || 0 },
       bulls: {
         score: gameData.bulls_score || 0,
         result: gameData.bulls_win !== null ? (gameData.bulls_win ? 'W' : 'L') : null,
