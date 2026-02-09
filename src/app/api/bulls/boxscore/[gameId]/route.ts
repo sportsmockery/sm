@@ -52,15 +52,12 @@ export async function GET(
 
     // Fetch Bulls and opponent stats in parallel
     // Stats table uses external_id (ESPN game ID) as game_id
-    // Bulls players: join to bulls_players for name/position/headshot
-    // Opponent players: use denormalized opponent_player_* columns
     const [bullsStatsResult, oppStatsResult] = await Promise.all([
       datalabAdmin
         .from('bulls_player_game_stats')
         .select(`player_id, minutes_display, points, total_rebounds, assists, steals, blocks, turnovers,
           field_goals_made, field_goals_attempted, three_pointers_made, three_pointers_attempted,
-          free_throws_made, free_throws_attempted, is_opponent,
-          bulls_players(name, position, headshot_url)`)
+          free_throws_made, free_throws_attempted, is_opponent`)
         .eq('game_id', gameData.external_id)
         .eq('is_opponent', false),
       datalabAdmin
@@ -73,32 +70,52 @@ export async function GET(
         .eq('is_opponent', true),
     ])
 
-    const transformStat = (stat: any, isOpponent: boolean): PlayerBoxStats => ({
-      // Bulls players: use joined bulls_players data
+    // Fetch Bulls player info separately and join in code
+    const bullsPlayerIds = (bullsStatsResult.data || []).map(s => s.player_id).filter(Boolean)
+    let playersMap: Record<string, { name: string; position: string; headshot_url: string | null }> = {}
+
+    if (bullsPlayerIds.length > 0) {
+      const { data: playersData } = await datalabAdmin
+        .from('bulls_players')
+        .select('player_id, name, position, headshot_url')
+        .in('player_id', bullsPlayerIds)
+
+      if (playersData) {
+        playersMap = Object.fromEntries(
+          playersData.map(p => [p.player_id, { name: p.name, position: p.position, headshot_url: p.headshot_url }])
+        )
+      }
+    }
+
+    const transformStat = (stat: any, isOpponent: boolean): PlayerBoxStats => {
+      // Bulls players: use playersMap lookup
       // Opponent players: use denormalized opponent_player_* columns
-      name: isOpponent
-        ? (stat.opponent_player_name || 'Unknown')
-        : (stat.bulls_players?.name || 'Unknown'),
-      position: isOpponent
-        ? (stat.opponent_player_position || '')
-        : (stat.bulls_players?.position || ''),
-      headshotUrl: isOpponent
-        ? (stat.opponent_player_headshot_url || null)
-        : (stat.bulls_players?.headshot_url || null),
-      minutes: stat.minutes_display,
-      points: stat.points,
-      rebounds: stat.total_rebounds,
-      assists: stat.assists,
-      steals: stat.steals,
-      blocks: stat.blocks,
-      turnovers: stat.turnovers,
-      fgm: stat.field_goals_made,
-      fga: stat.field_goals_attempted,
-      tpm: stat.three_pointers_made,
-      tpa: stat.three_pointers_attempted,
-      ftm: stat.free_throws_made,
-      fta: stat.free_throws_attempted,
-    })
+      const playerInfo = !isOpponent ? playersMap[stat.player_id] : null
+      return {
+        name: isOpponent
+          ? (stat.opponent_player_name || 'Unknown')
+          : (playerInfo?.name || 'Unknown'),
+        position: isOpponent
+          ? (stat.opponent_player_position || '')
+          : (playerInfo?.position || ''),
+        headshotUrl: isOpponent
+          ? (stat.opponent_player_headshot_url || null)
+          : (playerInfo?.headshot_url || null),
+        minutes: stat.minutes_display,
+        points: stat.points,
+        rebounds: stat.total_rebounds,
+        assists: stat.assists,
+        steals: stat.steals,
+        blocks: stat.blocks,
+        turnovers: stat.turnovers,
+        fgm: stat.field_goals_made,
+        fga: stat.field_goals_attempted,
+        tpm: stat.three_pointers_made,
+        tpa: stat.three_pointers_attempted,
+        ftm: stat.free_throws_made,
+        fta: stat.free_throws_attempted,
+      }
+    }
 
     const bullsPlayers = (bullsStatsResult.data || []).map(s => transformStat(s, false))
     const oppPlayers = (oppStatsResult.data || []).map(s => transformStat(s, true))
