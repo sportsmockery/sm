@@ -266,6 +266,8 @@ export default function BoxScoreClient({ games, initialGameId }: Props) {
             awayTeam={boxScore.bears.isHome ? boxScore.opponent.abbrev : 'CHI'}
             gameDate={boxScore.date}
             week={boxScore.week}
+            sport="nfl"
+            team="bears"
             className="mt-6"
           />
         </div>

@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef } from 'react'
 import Image from 'next/image'
+import { GameHighlights } from '@/components/scores/GameHighlights'
 
 const CUBS_LOGO = 'https://a.espncdn.com/i/teamlogos/mlb/500/chc.png'
 
@@ -171,6 +172,16 @@ export default function BoxScoreClient({ games, initialGameId }: { games: Game[]
               )}
             </div>
           </div>
+
+          {/* Game Highlights */}
+          <GameHighlights
+            gameId={boxScore.gameId}
+            homeTeam={boxScore.cubs.isHome ? 'cubs' : boxScore.opponent.abbrev}
+            awayTeam={boxScore.cubs.isHome ? boxScore.opponent.abbrev : 'cubs'}
+            gameDate={boxScore.date}
+            sport="mlb"
+            team="cubs"
+          />
         </div>
       )}
     </div>
