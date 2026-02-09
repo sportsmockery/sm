@@ -52,13 +52,14 @@ export async function GET(
 
     // Fetch Bulls and opponent stats in parallel
     // Stats table uses external_id (ESPN game ID) as game_id, not internal id
+    // Use left join (no !inner) since player_id might not match bulls_players.id
     const [bullsStatsResult, oppStatsResult] = await Promise.all([
       datalabAdmin
         .from('bulls_player_game_stats')
-        .select(`player_id, minutes_played, points, total_rebounds, assists, steals, blocks, turnovers,
+        .select(`player_id, player_name, player_position, player_headshot_url,
+          minutes_played, points, total_rebounds, assists, steals, blocks, turnovers,
           field_goals_made, field_goals_attempted, three_pointers_made, three_pointers_attempted,
-          free_throws_made, free_throws_attempted, is_opponent,
-          bulls_players!inner(name, position, headshot_url)`)
+          free_throws_made, free_throws_attempted, is_opponent`)
         .eq('game_id', gameData.external_id)
         .eq('is_opponent', false),
       datalabAdmin
@@ -72,9 +73,9 @@ export async function GET(
     ])
 
     const transformStat = (stat: any, isOpponent: boolean): PlayerBoxStats => ({
-      name: isOpponent ? (stat.opponent_player_name || 'Unknown') : (stat.bulls_players?.name || 'Unknown'),
-      position: isOpponent ? (stat.opponent_player_position || '') : (stat.bulls_players?.position || ''),
-      headshotUrl: isOpponent ? (stat.opponent_player_headshot_url || null) : (stat.bulls_players?.headshot_url || null),
+      name: isOpponent ? (stat.opponent_player_name || 'Unknown') : (stat.player_name || 'Unknown'),
+      position: isOpponent ? (stat.opponent_player_position || '') : (stat.player_position || ''),
+      headshotUrl: isOpponent ? (stat.opponent_player_headshot_url || null) : (stat.player_headshot_url || null),
       minutes: stat.minutes_played,
       points: stat.points,
       rebounds: stat.total_rebounds,
