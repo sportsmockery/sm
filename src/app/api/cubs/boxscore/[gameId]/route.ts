@@ -104,16 +104,30 @@ export async function GET(
         logo: `https://a.espncdn.com/i/teamlogos/mlb/500/${gameData.opponent.toLowerCase()}.png`,
         ...splitMLB(oppStats),
       },
-      _debug: {
-        cubsStatsCount: cubsResult.data?.length || 0,
-        oppStatsCount: oppResult.data?.length || 0,
-        cubsPlayerIds: cubsPlayerIds.slice(0, 5),
-        playersMapKeysCount: Object.keys(playersMap).length,
-        playersMapFirstKeys: Object.keys(playersMap).slice(0, 5),
-        firstCubsStat: cubsResult.data?.[0] || null,
-        cubsError: cubsResult.error,
-        oppError: oppResult.error,
-      },
+      _debug: await (async () => {
+        // Check if cubs_player_game_stats has any rows at all
+        const { data: anyData, error: anyError } = await datalabAdmin
+          .from('cubs_player_game_stats')
+          .select('*')
+          .limit(1)
+
+        // Check what game_id columns exist
+        const sampleRow = anyData?.[0] || {}
+        const availableColumns = Object.keys(sampleRow)
+
+        return {
+          lookupGameId: gameData.id,
+          lookupGameIdType: typeof gameData.id,
+          cubsStatsCount: cubsResult.data?.length || 0,
+          oppStatsCount: oppResult.data?.length || 0,
+          anyRowExists: anyData && anyData.length > 0,
+          anyRowError: anyError?.message,
+          availableColumns,
+          sampleRow,
+          cubsError: cubsResult.error?.message,
+          oppError: oppResult.error?.message,
+        }
+      })(),
     })
   } catch (error) {
     console.error('Cubs box score API error:', error)
