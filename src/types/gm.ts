@@ -329,6 +329,13 @@ export interface SimulationResult {
   }
   championship?: ChampionshipResult
   seasonSummary?: SeasonSummary
+  // Video game-style simulation data (Feb 2026)
+  games?: SimulatedGame[]
+  segments?: SeasonSegment[]
+  playerImpacts?: PlayerSimImpact[]
+  baselinePowerRating?: number
+  modifiedPowerRating?: number
+  previousSeasonRecord?: { wins: number; losses: number; otLosses?: number; playoffRound?: number }
 }
 
 export interface SimulationRequest {
@@ -336,6 +343,47 @@ export interface SimulationRequest {
   sport: string
   teamKey: string
   seasonYear: number
+}
+
+// =====================
+// Video Game Simulation Types (Feb 2026)
+// =====================
+
+export interface SimulatedGame {
+  gameNumber: number
+  week?: number
+  date: string
+  opponent: string
+  opponentName: string
+  opponentLogoUrl: string
+  isHome: boolean
+  teamScore: number
+  opponentScore: number
+  result: 'W' | 'L' | 'T' | 'OTL'
+  isOvertime: boolean
+  runningRecord: { wins: number; losses: number; otLosses?: number }
+  teamPowerRating: number
+  opponentPowerRating: number
+  highlight?: string
+  segment: string
+}
+
+export interface SeasonSegment {
+  label: string
+  wins: number
+  losses: number
+  otLosses?: number
+  winPct: number
+  avgTeamScore: number
+  avgOppScore: number
+}
+
+export interface PlayerSimImpact {
+  playerName: string
+  position: string
+  direction: 'added' | 'removed'
+  powerRatingDelta: number
+  category: string
 }
 
 // =====================
