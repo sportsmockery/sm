@@ -150,6 +150,7 @@ const navSections: NavSection[] = [
       { name: 'Scout AI Imports', href: '/admin/ai-logging', icon: 'aiLogging' },
       { name: 'Copilot Monitoring', href: '/admin/copilot', icon: 'copilot' },
       { name: 'Team Pages Sync', href: '/admin/team-pages-sync', icon: 'teamSync' },
+      { name: 'Twitter Auto Posts', href: '/admin/twitter-auto-posts', icon: 'social' },
       { name: 'Analytics', href: '/admin/analytics', icon: 'analytics' },
       { name: 'Feed Scoring', href: '/admin/feed-scoring', icon: 'feedScoring' },
       { name: 'User GM Scoring', href: '/admin/user-gm-scoring', icon: 'gmScoring' },
