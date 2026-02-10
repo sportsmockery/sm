@@ -625,16 +625,16 @@ export async function POST(request: NextRequest) {
       ...safePlayers_received.map((p: any) => p.name || p.full_name),
     ].filter(Boolean)
 
-    let tierMap: Record<string, { tier: number, tier_label: string, trade_value_score: number, is_untouchable: boolean }> = {}
+    let tierMap: Record<string, { tier: number, tier_label: string, trade_value: number }> = {}
     try {
       const { data: tiers } = await datalabAdmin
         .from('gm_player_value_tiers')
-        .select('player_name, tier, tier_label, trade_value_score, is_untouchable')
-        .in('player_name', allPlayerNames)
-        .eq('league', sport)
+        .select('full_name, tier, tier_label, trade_value')
+        .in('full_name', allPlayerNames)
+        .eq('sport', sport)
       if (tiers) {
         for (const t of tiers) {
-          tierMap[t.player_name] = { tier: t.tier, tier_label: t.tier_label, trade_value_score: t.trade_value_score, is_untouchable: t.is_untouchable }
+          tierMap[t.full_name] = { tier: t.tier, tier_label: t.tier_label, trade_value: t.trade_value }
         }
       }
     } catch {
@@ -666,7 +666,7 @@ export async function POST(request: NextRequest) {
       if (p.cap_hit) desc += `, ${formatMoney(p.cap_hit)} cap hit`
       if (p.contract_years) desc += `, ${p.contract_years}yr remaining`
       const tier = tierMap[playerName]
-      if (tier) desc += ` [Tier ${tier.tier}: ${tier.tier_label}, value ${tier.trade_value_score}${tier.is_untouchable ? ', UNTOUCHABLE' : ''}]`
+      if (tier) desc += ` [Tier ${tier.tier}: ${tier.tier_label}, value ${tier.trade_value}${tier.tier === 1 ? ', UNTOUCHABLE' : ''}]`
       return desc
     }).join(', ')
 
@@ -677,7 +677,7 @@ export async function POST(request: NextRequest) {
       if (p.cap_hit) desc += `, ${formatMoney(p.cap_hit)} cap hit`
       if (p.contract_years) desc += `, ${p.contract_years}yr remaining`
       const tier = tierMap[p.name || p.full_name]
-      if (tier) desc += ` [Tier ${tier.tier}: ${tier.tier_label}, value ${tier.trade_value_score}${tier.is_untouchable ? ', UNTOUCHABLE' : ''}]`
+      if (tier) desc += ` [Tier ${tier.tier}: ${tier.tier_label}, value ${tier.trade_value}${tier.tier === 1 ? ', UNTOUCHABLE' : ''}]`
       return desc
     }).join(', ')
 
@@ -742,7 +742,7 @@ export async function POST(request: NextRequest) {
     if (hasTiers) {
       const sentValue = safePlayers_sent.reduce((sum: number, p: any) => {
         const tier = tierMap[p.name || p.full_name]
-        return sum + (tier?.trade_value_score || 0)
+        return sum + (tier?.trade_value || 0)
       }, 0)
       // Rough draft pick values
       const pickValue = (picks: any[]) => picks.reduce((sum: number, p: any) => {
@@ -755,7 +755,7 @@ export async function POST(request: NextRequest) {
 
       const recvValue = safePlayers_received.reduce((sum: number, p: any) => {
         const tier = tierMap[p.name || p.full_name]
-        return sum + (tier?.trade_value_score || 0)
+        return sum + (tier?.trade_value || 0)
       }, 0)
       const recvTotal = recvValue + pickValue(safeDraft_picks_received)
 
