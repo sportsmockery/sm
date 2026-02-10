@@ -879,6 +879,13 @@ Grade this trade from the perspective of the ${teamDisplayNames[chicago_team]}.`
     let historicalContext: any = null
     let suggestedTrade: any = null
 
+    // DEBUG: Track grading internals
+    let debugInfo: any = {
+      api_version: API_VERSION,
+      model: MODEL_NAME,
+      timestamp: new Date().toISOString(),
+    }
+
     try {
       const parsed = JSON.parse(rawText)
       // Deterministic grade = anchor, AI grade = adjustment within GRADE_OVERRIDE_LIMITS
@@ -890,17 +897,42 @@ Grade this trade from the perspective of the ${teamDisplayNames[chicago_team]}.`
         // Apply GRADE_OVERRIDE_LIMITS to constrain AI adjustment
         // NEW - let AI actually correct bad deterministic grades
         let allowedDiff = diff
+        let overrideBracket = ''
+        let overrideLimits = { min: 0, max: 0 }
         if (deterministicGrade < 30) {
           allowedDiff = Math.max(0, Math.min(50, diff))         // Can only go up 0-50
+          overrideBracket = 'below_30'
+          overrideLimits = { min: 0, max: 50 }
         } else if (deterministicGrade < 50) {
           allowedDiff = Math.max(-15, Math.min(35, diff))       // Can adjust -15 to +35
+          overrideBracket = 'between_30_50'
+          overrideLimits = { min: -15, max: 35 }
         } else if (deterministicGrade < 70) {
           allowedDiff = Math.max(-20, Math.min(20, diff))       // Can adjust -20 to +20
+          overrideBracket = 'between_50_70'
+          overrideLimits = { min: -20, max: 20 }
         } else {
           allowedDiff = Math.max(-15, Math.min(15, diff))       // Can adjust -15 to +15
+          overrideBracket = 'above_70'
+          overrideLimits = { min: -15, max: 15 }
         }
 
         grade = Math.max(0, Math.min(100, deterministicGrade + allowedDiff))
+
+        // DEBUG: Capture all grading details
+        debugInfo = {
+          ...debugInfo,
+          deterministic_result: deterministicResult,
+          ai_raw_grade: aiGrade,
+          ai_raw_diff: diff,
+          override_bracket: overrideBracket,
+          override_limits: overrideLimits,
+          allowed_diff: allowedDiff,
+          final_grade: grade,
+          grade_formula: `${deterministicGrade} (deterministic) + ${allowedDiff} (clamped AI adjustment) = ${grade}`,
+          was_clamped: diff !== allowedDiff,
+          clamp_info: diff !== allowedDiff ? `AI wanted ${diff > 0 ? '+' : ''}${diff}, but clamped to ${allowedDiff > 0 ? '+' : ''}${allowedDiff}` : 'No clamping needed',
+        }
         // Use AI breakdown, not deterministic (AI provides context-aware breakdown)
         if (parsed.breakdown) {
           breakdown = {
@@ -978,12 +1010,38 @@ Grade this trade from the perspective of the ${teamDisplayNames[chicago_team]}.`
           future_assets: 0.5,
         }
         reasoning = `Trade graded ${grade}/100 based on objective player value analysis.`
+        debugInfo.ai_parse_error = true
+        debugInfo.fallback = 'deterministic_only'
       } else {
         const gradeMatch = rawText.match(/(\d{1,3})/)
         grade = gradeMatch ? Math.max(0, Math.min(100, parseInt(gradeMatch[1]))) : 50
         reasoning = rawText || 'AI response could not be parsed.'
+        debugInfo.ai_parse_error = true
+        debugInfo.fallback = 'regex_extraction'
       }
     }
+
+    // DEBUG: Add tier map and player lookups
+    debugInfo.tier_map = tierMap
+    debugInfo.players_sent_with_tiers = safePlayers_sent.map((p: any) => ({
+      name: p.name || p.full_name,
+      position: p.position,
+      tier_info: tierMap[p.name || p.full_name] || 'NOT_FOUND_IN_TIERS',
+    }))
+    debugInfo.players_received_with_tiers = safePlayers_received.map((p: any) => ({
+      name: p.name || p.full_name,
+      position: p.position,
+      tier_info: tierMap[p.name || p.full_name] || 'NOT_FOUND_IN_TIERS',
+    }))
+    debugInfo.draft_picks_sent = safeDraft_picks_sent.map((pk: any) => ({
+      ...pk,
+      estimated_value: pk.round === 1 ? 35 : pk.round === 2 ? 18 : pk.round === 3 ? 10 : 5,
+    }))
+    debugInfo.draft_picks_received = safeDraft_picks_received.map((pk: any) => ({
+      ...pk,
+      estimated_value: pk.round === 1 ? 35 : pk.round === 2 ? 18 : pk.round === 3 ? 10 : 5,
+    }))
+    debugInfo.raw_ai_response = rawText.substring(0, 2000) // First 2000 chars
 
     const status = grade >= 70 ? 'accepted' : 'rejected'
     const is_dangerous = grade >= 70 && grade <= 90
@@ -1193,6 +1251,8 @@ Grade this trade from the perspective of the ${teamDisplayNames[chicago_team]}.`
       historical_context: historicalContext,
       enhanced_suggested_trade: suggestedTrade,
       data_freshness: dataFreshness,
+      // TEMPORARY DEBUG - remove after testing
+      _debug: debugInfo,
     })
 
   } catch (error) {
