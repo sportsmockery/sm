@@ -104,6 +104,16 @@ export async function GET(
         logo: `https://a.espncdn.com/i/teamlogos/mlb/500/${gameData.opponent.toLowerCase()}.png`,
         ...splitMLB(oppStats),
       },
+      _debug: {
+        cubsStatsCount: cubsResult.data?.length || 0,
+        oppStatsCount: oppResult.data?.length || 0,
+        cubsPlayerIds: cubsPlayerIds.slice(0, 5),
+        playersMapKeysCount: Object.keys(playersMap).length,
+        playersMapFirstKeys: Object.keys(playersMap).slice(0, 5),
+        firstCubsStat: cubsResult.data?.[0] || null,
+        cubsError: cubsResult.error,
+        oppError: oppResult.error,
+      },
     })
   } catch (error) {
     console.error('Cubs box score API error:', error)
