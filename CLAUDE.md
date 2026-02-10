@@ -115,33 +115,29 @@ SM's reference doc is at: `/docs/Team_Pages_Query.md`
 
 ---
 
-### CRITICAL: Stats Join Patterns DIFFER BY TEAM (Jan 25, 2026)
+### CRITICAL: Stats Join Patterns — ALL TEAMS NOW USE ESPN ID (Feb 9, 2026)
 
-**Join patterns are NOT the same for all teams!** Data Lab confirmed:
+**All teams now use ESPN ID for stats joins.** Data Lab updated Bears to be consistent:
 
 | Team | Join Pattern | Code Usage |
 |------|--------------|------------|
-| **Bears** | `bp.id = bpgs.player_id` | Use `player.internalId` (number) |
-| **Bulls** | `bp.player_id = bpgs.player_id` | Use `player.playerId` (string) |
+| **Bears** | `bp.espn_id = bpgs.player_id` | Use `player.playerId` (string) |
+| **Bulls** | `bp.espn_player_id = bpgs.player_id` | Use `player.playerId` (string) |
 | **Blackhawks** | `bp.espn_id = bpgs.player_id` | Use `player.playerId` (string) |
 | **Cubs** | `cp.espn_id = cpgs.player_id` | Use `player.playerId` (string) |
 | **White Sox** | `wp.espn_id = wpgs.player_id` | Use `player.playerId` (string) |
 
-**Bears uses internal ID, all others use ESPN ID!**
-
 ```typescript
-// BEARS - use internal database ID
-const stats = await query.from('bears_player_game_stats').eq('player_id', player.internalId)
-
-// ALL OTHER TEAMS - use ESPN ID (playerId)
+// ALL TEAMS (including Bears) - use ESPN ID (playerId)
+const stats = await query.from('bears_player_game_stats').eq('player_id', player.playerId)
 const stats = await query.from('bulls_player_game_stats').eq('player_id', player.playerId)
 ```
 
 **Player Interface Structure:**
 ```typescript
 interface Player {
-  playerId: string    // ESPN ID (use for Bulls, Blackhawks, Cubs, White Sox)
-  internalId: number  // Database ID (use ONLY for Bears)
+  playerId: string    // ESPN ID (use for ALL teams including Bears)
+  internalId: number  // Database ID (legacy, no longer used for stats joins)
   // ... other fields
 }
 ```
@@ -151,9 +147,19 @@ interface Player {
 ### CRITICAL: Player Stats Column Names by Sport
 
 #### NFL (Bears)
+
+**DUAL COLUMN NAMES:** Bears stats exist in two formats. Use COALESCE/nullish coalescing:
+- Short (older data): `passing_yds`, `passing_td`, `rushing_yds`, etc.
+- Long (recent data): `passing_yards`, `passing_touchdowns`, `rushing_yards`, etc.
+- In JS: `stat.passing_yards ?? stat.passing_yds`
+
 ```
-passing_cmp, passing_att, passing_yds, passing_td, passing_int
-rushing_car, rushing_yds, rushing_td
+Short names: passing_cmp, passing_att, passing_yds, passing_td, passing_int
+Long names: passing_completions, passing_attempts, passing_yards, passing_touchdowns, passing_interceptions
+Short: rushing_car, rushing_yds, rushing_td
+Long: rushing_carries, rushing_yards, rushing_touchdowns
+Short: receiving_rec, receiving_tgts, receiving_yds, receiving_td
+Long: receiving_receptions, receiving_targets, receiving_yards, receiving_touchdowns
 receiving_rec, receiving_tgts, receiving_yds, receiving_td
 def_tackles_total, def_sacks, def_int
 fum_fum
