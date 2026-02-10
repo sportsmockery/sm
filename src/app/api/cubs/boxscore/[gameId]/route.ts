@@ -77,16 +77,6 @@ export async function GET(
     const cubsStats = (cubsResult.data || []).map(s => transform(s, false))
     const oppStats = (oppResult.data || []).map(s => transform(s, true))
 
-    // Debug: log what we're getting
-    console.log('[Cubs Boxscore Debug]', {
-      gameId: gameData.id,
-      cubsStatsCount: cubsResult.data?.length || 0,
-      oppStatsCount: oppResult.data?.length || 0,
-      cubsPlayerIds: cubsPlayerIds.slice(0, 5),
-      playersMapKeys: Object.keys(playersMap).slice(0, 5),
-      firstCubsStat: cubsResult.data?.[0],
-    })
-
     return NextResponse.json({
       gameId: String(gameData.id),
       date: gameData.game_date,
@@ -105,26 +95,6 @@ export async function GET(
         logo: `https://a.espncdn.com/i/teamlogos/mlb/500/${gameData.opponent.toLowerCase()}.png`,
         ...splitMLB(oppStats),
       },
-      _debug: await (async () => {
-        // Check if cubs_player_game_stats has any rows at all
-        const { data: anyData, error: anyError } = await datalabAdmin
-          .from('cubs_player_game_stats')
-          .select('*')
-          .limit(1)
-
-        // Check what game_id columns exist
-        const sampleRow = anyData?.[0] || {}
-        const availableColumns = Object.keys(sampleRow)
-
-        return {
-          lookupGameId: gameData.id,
-          espnGameId: espnGameId,
-          cubsStatsCount: cubsResult.data?.length || 0,
-          oppStatsCount: oppResult.data?.length || 0,
-          cubsError: cubsResult.error?.message,
-          oppError: oppResult.error?.message,
-        }
-      })(),
     })
   } catch (error) {
     console.error('Cubs box score API error:', error)

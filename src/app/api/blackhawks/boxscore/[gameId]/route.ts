@@ -58,25 +58,20 @@ export async function GET(
       }, { status: 404 })
     }
 
-    // First, check what columns exist in the stats table
-    const { data: sampleStat } = await datalabAdmin
-      .from('blackhawks_player_game_stats')
-      .select('*')
-      .limit(1)
-    const availableColumns = Object.keys(sampleStat?.[0] || {})
-
-    // Stats table uses external_id (ESPN game ID) as game_id
-    // Only select columns that exist
+    // Stats table uses blackhawks_game_id (matches games_master.id)
     const [hawksResult, oppResult] = await Promise.all([
       datalabAdmin
         .from('blackhawks_player_game_stats')
-        .select('*')
-        .eq('game_id', gameData.external_id)
+        .select(`player_id, goals, assists, points, plus_minus, penalty_minutes, shots_on_goal, hits, blocked_shots, time_on_ice,
+          saves, goals_against, shots_against, is_opponent`)
+        .eq('blackhawks_game_id', gameData.id)
         .eq('is_opponent', false),
       datalabAdmin
         .from('blackhawks_player_game_stats')
-        .select('*')
-        .eq('game_id', gameData.external_id)
+        .select(`player_id, goals, assists, points, plus_minus, penalty_minutes, shots_on_goal, hits, blocked_shots, time_on_ice,
+          saves, goals_against, shots_against, is_opponent,
+          opponent_player_name, opponent_player_position, opponent_player_headshot_url`)
+        .eq('blackhawks_game_id', gameData.id)
         .eq('is_opponent', true),
     ])
 
@@ -103,18 +98,18 @@ export async function GET(
         name: isOpp ? (s.opponent_player_name || 'Unknown') : (playerInfo?.name || 'Unknown'),
         position: isOpp ? (s.opponent_player_position || '') : (playerInfo?.position || ''),
         headshotUrl: isOpp ? (s.opponent_player_headshot_url || null) : (playerInfo?.headshot_url || null),
-      goals: s.goals,
-      assists: s.assists,
-      points: s.points,
-      plusMinus: s.plus_minus,
-      pim: s.pim,
-      shots: s.shots,
-      hits: s.hits,
-      blockedShots: s.blocked_shots,
-      toi: s.toi,
-      saves: s.saves,
-      goalsAgainst: s.goals_against,
-      shotsAgainst: s.shots_against,
+        goals: s.goals,
+        assists: s.assists,
+        points: s.points,
+        plusMinus: s.plus_minus,
+        pim: s.penalty_minutes,
+        shots: s.shots_on_goal,
+        hits: s.hits,
+        blockedShots: s.blocked_shots,
+        toi: s.time_on_ice,
+        saves: s.saves,
+        goalsAgainst: s.goals_against,
+        shotsAgainst: s.shots_against,
       }
     }
 
@@ -146,17 +141,6 @@ export async function GET(
         score: gameData.opponent_score || 0,
         logo: `https://a.espncdn.com/i/teamlogos/nhl/500/${gameData.opponent.toLowerCase()}.png`,
         ...splitStats(oppStats),
-      },
-      _debug: {
-        externalId: gameData.external_id,
-        availableColumns,
-        hawksStatsCount: hawksResult.data?.length || 0,
-        oppStatsCount: oppResult.data?.length || 0,
-        sampleStat: hawksResult.data?.[0],
-        hawksPlayerIds: hawksPlayerIds.slice(0, 5),
-        playersMapCount: Object.keys(playersMap).length,
-        hawksError: hawksResult.error?.message,
-        oppError: oppResult.error?.message,
       },
     })
   } catch (error) {
