@@ -113,13 +113,15 @@ export async function GET(
     const { data: gameStats } = await datalabAdmin
       .from('bears_player_game_stats')
       .select(`
-        passing_cmp, passing_att, passing_yds, passing_td, passing_int,
         passing_completions, passing_attempts, passing_yards, passing_touchdowns, passing_interceptions,
-        def_sacks, rushing_car, rushing_yds, rushing_td,
+        passing_cmp, passing_att, passing_yds, passing_td, passing_int,
         rushing_carries, rushing_yards, rushing_touchdowns,
-        receiving_tgts, receiving_rec, receiving_yds, receiving_td,
+        rushing_car, rushing_yds, rushing_td,
         receiving_targets, receiving_receptions, receiving_yards, receiving_touchdowns,
-        fum_fum, def_tackles_total, interceptions
+        receiving_tgts, receiving_rec, receiving_yds, receiving_td,
+        defensive_total_tackles, defensive_sacks,
+        def_tackles_total, def_sacks,
+        fum_fum, interceptions
       `)
       .eq('player_id', playerData.espn_id)
       .eq('season', 2025)
@@ -141,8 +143,8 @@ export async function GET(
         acc.targets = (acc.targets || 0) + (game.receiving_targets ?? game.receiving_tgts ?? 0)
         acc.recYards = (acc.recYards || 0) + (game.receiving_yards ?? game.receiving_yds ?? 0)
         acc.recTD = (acc.recTD || 0) + (game.receiving_touchdowns ?? game.receiving_td ?? 0)
-        acc.tackles = (acc.tackles || 0) + (game.def_tackles_total || 0)
-        acc.sacks = (acc.sacks || 0) + (parseFloat(game.def_sacks) || 0)
+        acc.tackles = (acc.tackles || 0) + (game.defensive_total_tackles ?? game.def_tackles_total ?? 0)
+        acc.sacks = (acc.sacks || 0) + (parseFloat(game.defensive_sacks ?? game.def_sacks) || 0)
         acc.passesDefended = (acc.passesDefended || 0) + 0 // Not in datalab schema
         acc.fumbles = (acc.fumbles || 0) + (game.fum_fum || 0)
         acc.interceptions = (acc.interceptions || 0) + (game.interceptions || 0)

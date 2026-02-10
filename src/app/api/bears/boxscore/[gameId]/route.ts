@@ -93,13 +93,15 @@ export async function GET(
     // Fetch Bears team stats and opponent stats in parallel
     // Select both short (passing_yds) and long (passing_yards) column variants
     const statColumns = `player_id,
-      passing_cmp, passing_att, passing_yds, passing_td, passing_int,
       passing_completions, passing_attempts, passing_yards, passing_touchdowns, passing_interceptions,
-      def_sacks, rushing_car, rushing_yds, rushing_td,
+      passing_cmp, passing_att, passing_yds, passing_td, passing_int,
       rushing_carries, rushing_yards, rushing_touchdowns,
-      receiving_tgts, receiving_rec, receiving_yds, receiving_td,
+      rushing_car, rushing_yds, rushing_td,
       receiving_targets, receiving_receptions, receiving_yards, receiving_touchdowns,
-      fum_fum, def_tackles_total, interceptions, is_opponent`
+      receiving_tgts, receiving_rec, receiving_yds, receiving_td,
+      defensive_total_tackles, defensive_sacks, defensive_tackles_for_loss,
+      def_tackles_total, def_sacks,
+      fum_fum, interceptions, is_opponent`
 
     const [bearsStatsResult, oppStatsResult] = await Promise.all([
       datalabAdmin
@@ -153,8 +155,8 @@ export async function GET(
         receivingTgts: stat.receiving_targets ?? stat.receiving_tgts,
         receivingYds: stat.receiving_yards ?? stat.receiving_yds,
         receivingTd: stat.receiving_touchdowns ?? stat.receiving_td,
-        defTacklesTotal: stat.def_tackles_total,
-        defSacks: parseFloat(stat.def_sacks) || null,
+        defTacklesTotal: stat.defensive_total_tackles ?? stat.def_tackles_total,
+        defSacks: parseFloat(stat.defensive_sacks ?? stat.def_sacks) || null,
         defInt: stat.interceptions,
         fumFum: stat.fum_fum,
       }

@@ -76,10 +76,7 @@ export async function GET(request: NextRequest) {
     if (type === 'player') {
       let query = datalabAdmin
         .from('bears_player_season_stats')
-        .select(`
-          *,
-          bears_players!inner(full_name, position, jersey_number, headshot_url)
-        `)
+        .select('*')
         .order('season', { ascending: false })
         .limit(limit)
 
@@ -88,7 +85,7 @@ export async function GET(request: NextRequest) {
       }
 
       if (playerId) {
-        query = query.eq('player_id', parseInt(playerId))
+        query = query.eq('player_id', playerId)
       }
 
       const { data, error } = await query
@@ -101,16 +98,32 @@ export async function GET(request: NextRequest) {
         )
       }
 
+      // Fetch player info separately and join in code (ESPN ID based)
+      const playerIds = [...new Set((data || []).map((s: any) => s.player_id).filter(Boolean))]
+      let playersMap: Record<string, any> = {}
+      if (playerIds.length > 0) {
+        const { data: playersData } = await datalabAdmin
+          .from('bears_players')
+          .select('espn_id, name, position, jersey_number, headshot_url')
+          .in('espn_id', playerIds)
+        if (playersData) {
+          playersMap = Object.fromEntries(
+            playersData.map(p => [String(p.espn_id), p])
+          )
+        }
+      }
+
       const playerStats = (data || []).map((stats: any) => {
+        const playerInfo = playersMap[String(stats.player_id)]
         const base = {
           playerId: stats.player_id,
           season: stats.season,
           gamesPlayed: stats.games_played,
-          player: stats.bears_players ? {
-            name: stats.bears_players.full_name,
-            position: stats.bears_players.position,
-            number: stats.bears_players.jersey_number,
-            headshot: stats.bears_players.headshot_url,
+          player: playerInfo ? {
+            name: playerInfo.name,
+            position: playerInfo.position,
+            number: playerInfo.jersey_number,
+            headshot: playerInfo.headshot_url,
           } : null,
         }
 
@@ -184,24 +197,20 @@ export async function GET(request: NextRequest) {
 
       let query = datalabAdmin
         .from('bears_player_game_stats')
-        .select(`
-          *,
-          bears_players!inner(full_name, position, jersey_number),
-          bears_games_master!inner(game_date, opponent, is_bears_home, season, week)
-        `)
-        .order('bears_games_master(game_date)', { ascending: false })
+        .select('*')
+        .order('game_date', { ascending: false })
         .limit(limit)
 
       if (gameId) {
-        query = query.eq('game_id', gameId)
+        query = query.eq('bears_game_id', gameId)
       }
 
       if (playerId) {
-        query = query.eq('player_id', parseInt(playerId))
+        query = query.eq('player_id', playerId)
       }
 
       if (season) {
-        query = query.eq('bears_games_master.season', parseInt(season))
+        query = query.eq('season', parseInt(season))
       }
 
       const { data, error } = await query
@@ -214,42 +223,78 @@ export async function GET(request: NextRequest) {
         )
       }
 
-      const gameStats = (data || []).map((stats: any) => ({
-        gameId: stats.game_id,
-        playerId: stats.player_id,
-        player: stats.bears_players ? {
-          name: stats.bears_players.full_name,
-          position: stats.bears_players.position,
-          number: stats.bears_players.jersey_number,
-        } : null,
-        game: stats.bears_games_master ? {
-          date: stats.bears_games_master.game_date,
-          opponent: stats.bears_games_master.opponent,
-          isHome: stats.bears_games_master.is_bears_home,
-          season: stats.bears_games_master.season,
-          week: stats.bears_games_master.week,
-        } : null,
-        passing: {
-          attempts: stats.pass_att,
-          completions: stats.pass_cmp,
-          yards: stats.pass_yds,
-          touchdowns: stats.pass_td,
-          interceptions: stats.pass_int,
-          sacks: stats.sacks,
-        },
-        rushing: {
-          attempts: stats.rush_att,
-          yards: stats.rush_yds,
-          touchdowns: stats.rush_td,
-        },
-        receiving: {
-          targets: stats.rec_tgt,
-          receptions: stats.rec,
-          yards: stats.rec_yds,
-          touchdowns: stats.rec_td,
-        },
-        fumbles: stats.fumbles,
-      }))
+      // Fetch player info separately and join in code (ESPN ID based)
+      const gamePlayerIds = [...new Set((data || []).map((s: any) => s.player_id).filter(Boolean))]
+      let gamePMap: Record<string, any> = {}
+      if (gamePlayerIds.length > 0) {
+        const { data: pData } = await datalabAdmin
+          .from('bears_players')
+          .select('espn_id, name, position, jersey_number')
+          .in('espn_id', gamePlayerIds)
+        if (pData) {
+          gamePMap = Object.fromEntries(pData.map(p => [String(p.espn_id), p]))
+        }
+      }
+
+      // Fetch game info separately
+      const gameIds = [...new Set((data || []).map((s: any) => s.bears_game_id).filter(Boolean))]
+      let gamesMap: Record<string, any> = {}
+      if (gameIds.length > 0) {
+        const { data: gData } = await datalabAdmin
+          .from('bears_games_master')
+          .select('id, game_date, opponent, is_bears_home, season, week')
+          .in('id', gameIds)
+        if (gData) {
+          gamesMap = Object.fromEntries(gData.map(g => [String(g.id), g]))
+        }
+      }
+
+      const gameStats = (data || []).map((stats: any) => {
+        const playerInfo = gamePMap[String(stats.player_id)]
+        const gameInfo = gamesMap[String(stats.bears_game_id)]
+        return {
+          gameId: stats.bears_game_id,
+          playerId: stats.player_id,
+          player: playerInfo ? {
+            name: playerInfo.name,
+            position: playerInfo.position,
+            number: playerInfo.jersey_number,
+          } : null,
+          game: gameInfo ? {
+            date: gameInfo.game_date,
+            opponent: gameInfo.opponent,
+            isHome: gameInfo.is_bears_home,
+            season: gameInfo.season,
+            week: gameInfo.week,
+          } : (stats.game_date ? {
+            date: stats.game_date,
+            opponent: stats.opponent,
+            isHome: stats.is_home,
+            season: stats.season,
+            week: null,
+          } : null),
+          passing: {
+            attempts: stats.passing_attempts ?? stats.passing_att,
+            completions: stats.passing_completions ?? stats.passing_cmp,
+            yards: stats.passing_yards ?? stats.passing_yds,
+            touchdowns: stats.passing_touchdowns ?? stats.passing_td,
+            interceptions: stats.passing_interceptions ?? stats.passing_int,
+            sacks: stats.defensive_sacks ?? stats.def_sacks,
+          },
+          rushing: {
+            attempts: stats.rushing_carries ?? stats.rushing_car,
+            yards: stats.rushing_yards ?? stats.rushing_yds,
+            touchdowns: stats.rushing_touchdowns ?? stats.rushing_td,
+          },
+          receiving: {
+            targets: stats.receiving_targets ?? stats.receiving_tgts,
+            receptions: stats.receiving_receptions ?? stats.receiving_rec,
+            yards: stats.receiving_yards ?? stats.receiving_yds,
+            touchdowns: stats.receiving_touchdowns ?? stats.receiving_td,
+          },
+          fumbles: stats.fum_fum,
+        }
+      })
 
       return NextResponse.json({
         type: 'game',

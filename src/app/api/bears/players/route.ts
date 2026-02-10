@@ -43,6 +43,7 @@ export async function GET() {
       .select(`
         id,
         player_id,
+        espn_id,
         name,
         first_name,
         last_name,
@@ -84,8 +85,8 @@ export async function GET() {
       const slug = (p.name || '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '')
 
       return {
-        playerId: String(p.player_id || p.id),
-        internalId: p.id,  // Internal DB ID for game stats matching
+        playerId: String(p.espn_id || p.player_id || p.id),
+        internalId: p.id,
         slug,
         fullName: p.name,
         firstName: p.first_name || (p.name || '').split(' ')[0] || '',

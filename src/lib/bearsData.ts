@@ -458,13 +458,15 @@ async function getPlayerSeasonStatsFromDatalab(espnId: string): Promise<PlayerSe
     .from('bears_player_game_stats')
     .select(`
       season,
-      passing_cmp, passing_att, passing_yds, passing_td, passing_int,
       passing_completions, passing_attempts, passing_yards, passing_touchdowns, passing_interceptions,
-      def_sacks, rushing_car, rushing_yds, rushing_td,
+      passing_cmp, passing_att, passing_yds, passing_td, passing_int,
       rushing_carries, rushing_yards, rushing_touchdowns,
-      receiving_tgts, receiving_rec, receiving_yds, receiving_td,
+      rushing_car, rushing_yds, rushing_td,
       receiving_targets, receiving_receptions, receiving_yards, receiving_touchdowns,
-      fum_fum, def_tackles_total, interceptions
+      receiving_tgts, receiving_rec, receiving_yds, receiving_td,
+      defensive_total_tackles, defensive_sacks, defensive_tackles_for_loss,
+      def_tackles_total, def_sacks,
+      fum_fum, interceptions
     `)
     .eq('player_id', espnId)
     .eq('season', 2025)
@@ -487,8 +489,8 @@ async function getPlayerSeasonStatsFromDatalab(espnId: string): Promise<PlayerSe
     acc.recYards = (acc.recYards || 0) + (game.receiving_yards ?? game.receiving_yds ?? 0)
     acc.recTD = (acc.recTD || 0) + (game.receiving_touchdowns ?? game.receiving_td ?? 0)
     acc.targets = (acc.targets || 0) + (game.receiving_targets ?? game.receiving_tgts ?? 0)
-    acc.tackles = (acc.tackles || 0) + (game.def_tackles_total || 0)
-    acc.sacks = (acc.sacks || 0) + (parseFloat(game.def_sacks) || 0)
+    acc.tackles = (acc.tackles || 0) + (game.defensive_total_tackles ?? game.def_tackles_total ?? 0)
+    acc.sacks = (acc.sacks || 0) + (parseFloat(game.defensive_sacks ?? game.def_sacks) || 0)
     acc.passesDefended = (acc.passesDefended || 0) + (game.def_passes_defended || 0)
     acc.fumbles = (acc.fumbles || 0) + (game.fum_fum || 0)
     return acc
@@ -576,15 +578,16 @@ async function getPlayerGameLogFromDatalab(espnId: string): Promise<PlayerGameLo
   const { data, error } = await datalabAdmin
     .from('bears_player_game_stats')
     .select(`
-      player_id,
-      bears_game_id,
-      passing_cmp, passing_att, passing_yds, passing_td, passing_int,
+      player_id, bears_game_id,
       passing_completions, passing_attempts, passing_yards, passing_touchdowns, passing_interceptions,
-      def_sacks, rushing_car, rushing_yds, rushing_td,
+      passing_cmp, passing_att, passing_yds, passing_td, passing_int,
       rushing_carries, rushing_yards, rushing_touchdowns,
-      receiving_tgts, receiving_rec, receiving_yds, receiving_td,
+      rushing_car, rushing_yds, rushing_td,
       receiving_targets, receiving_receptions, receiving_yards, receiving_touchdowns,
-      fum_fum, def_tackles_total, interceptions,
+      receiving_tgts, receiving_rec, receiving_yds, receiving_td,
+      defensive_total_tackles, defensive_sacks,
+      def_tackles_total, def_sacks,
+      fum_fum, interceptions,
       game_date, opponent, is_home
     `)
     .eq('player_id', espnId)
@@ -634,8 +637,8 @@ function transformGameLogEntry(stats: any, game: any): PlayerGameLogEntry {
     receptions: stats.receiving_receptions ?? stats.receiving_rec,
     recYards: stats.receiving_yards ?? stats.receiving_yds,
     recTD: stats.receiving_touchdowns ?? stats.receiving_td,
-    tackles: stats.def_tackles_total,
-    sacks: stats.def_sacks,
+    tackles: stats.defensive_total_tackles ?? stats.def_tackles_total,
+    sacks: stats.defensive_sacks ?? stats.def_sacks,
     interceptions: stats.interceptions || 0,
     fumbles: stats.fum_fum,
   }
@@ -894,12 +897,13 @@ async function getLeaderboards(season: number): Promise<BearsLeaderboard> {
   // Select both short and long column name variants
   const leaderboardColumns = `
     player_id,
-    passing_yds, passing_td, passing_int,
     passing_yards, passing_touchdowns, passing_interceptions,
-    rushing_yds, rushing_td, rushing_car,
+    passing_yds, passing_td, passing_int,
     rushing_yards, rushing_touchdowns, rushing_carries,
-    receiving_yds, receiving_td, receiving_rec,
+    rushing_yds, rushing_td, rushing_car,
     receiving_yards, receiving_touchdowns, receiving_receptions,
+    receiving_yds, receiving_td, receiving_rec,
+    defensive_total_tackles, defensive_sacks,
     def_tackles_total, def_sacks
   `
 
@@ -953,8 +957,8 @@ async function getLeaderboards(season: number): Promise<BearsLeaderboard> {
     totals.rec_yds += (stat.receiving_yards ?? stat.receiving_yds ?? 0)
     totals.rec_td += (stat.receiving_touchdowns ?? stat.receiving_td ?? 0)
     totals.rec += (stat.receiving_receptions ?? stat.receiving_rec ?? 0)
-    totals.tackles += stat.def_tackles_total || 0
-    totals.sacks += parseFloat(stat.def_sacks) || 0
+    totals.tackles += (stat.defensive_total_tackles ?? stat.def_tackles_total ?? 0)
+    totals.sacks += parseFloat(stat.defensive_sacks ?? stat.def_sacks) || 0
   }
 
   const aggregatedStats = Array.from(playerTotals.values())
