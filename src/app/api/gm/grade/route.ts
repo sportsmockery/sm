@@ -777,37 +777,42 @@ VALUE GAP: ${gap > 0 ? `Chicago receiving ${gap} points MORE (other team unlikel
     let systemPrompt: string
 
     if (deterministicResult) {
-      // Deterministic mode: AI explains the pre-calculated grade (CANNOT override)
+      // Hybrid mode: AI provides independent grade that will be constrained by GRADE_OVERRIDE_LIMITS
       tradeDescription = `
 Sport: ${sport.toUpperCase()}
 ${teamDisplayNames[chicago_team]} send: ${sentDesc}${picksSentDesc}
 ${trade_partner} send: ${recvDesc}${picksRecvDesc}${capContext}${mlbFinancialContext}
 
-## PRE-CALCULATED GRADE: ${deterministicResult.grade}
-
-This grade was calculated using objective player value data:
+## CONTEXT (for your reference):
+A formula-based analysis calculated:
 - Sent value: ${deterministicResult.debug?.sent_value || 'N/A'}
 - Received value: ${deterministicResult.debug?.received_value || 'N/A'}
 - Value difference: ${deterministicResult.debug?.value_difference || 'N/A'}
 - Team phase: ${deterministicResult.debug?.team_phase || 'N/A'}
+- Formula grade: ${deterministicResult.grade}
 
-Your task: Write a 2-4 sentence explanation for WHY this trade deserves a grade of ${deterministicResult.grade}. Do NOT suggest a different grade. The grade is final.`
+Your task: Independently grade this trade 0-100, considering factors the formula cannot capture (team needs, player fit, intangibles, recent performance trends, injury history). Your grade will be combined with the formula grade using limits.`
 
-      systemPrompt = `You are "GM", a sports trade analyst for SM Data Lab. A trade has already been graded ${deterministicResult.grade}/100 using objective player value metrics. Your job is ONLY to explain WHY this grade makes sense.
+      systemPrompt = `You are "GM", a sports trade analyst for SM Data Lab. Grade trades independently using your knowledge of player values, team needs, and trade dynamics.
 
-CRITICAL: You MUST use the grade ${deterministicResult.grade} in your response. Do NOT suggest a different grade.
+The formula provides an anchor, but you should adjust based on context it cannot capture:
+- Current team needs and roster construction
+- Player fit and chemistry
+- Injury history and durability concerns
+- Contract situations and future flexibility
+- Intangibles and locker room factors
 
 Respond with valid JSON only:
 {
-  "grade": ${deterministicResult.grade},
-  "reasoning": "<2-4 sentence explanation of why the grade is ${deterministicResult.grade}>",
+  "grade": <your independent grade 0-100>,
+  "reasoning": "<2-4 sentence explanation of your grade>",
   "trade_summary": "<One-line summary of the trade>",
   "improvement_score": <number -10 to 10>,
   "breakdown": {
-    "talent_balance": ${deterministicResult.breakdown?.talent_balance ?? 0.5},
-    "contract_value": ${deterministicResult.breakdown?.contract_value ?? 0.5},
-    "team_fit": ${deterministicResult.breakdown?.team_fit ?? 0.5},
-    "future_assets": ${deterministicResult.breakdown?.future_assets ?? 0.5}
+    "talent_balance": <0-1>,
+    "contract_value": <0-1>,
+    "team_fit": <0-1>,
+    "future_assets": <0-1>
   },
   "cap_analysis": "<1-2 sentences about salary cap impact>"
 }
@@ -849,17 +854,40 @@ Grade this trade from the perspective of the ${teamDisplayNames[chicago_team]}.`
 
     try {
       const parsed = JSON.parse(rawText)
-      // CRITICAL: If we have a deterministic grade, ALWAYS use it (AI cannot override)
-      if (deterministicResult) {
-        grade = deterministicResult.grade
-        // Use deterministic breakdown if AI didn't provide one or tried to change it
-        breakdown = {
-          talent_balance: deterministicResult.breakdown?.talent_balance ?? 0.5,
-          contract_value: deterministicResult.breakdown?.contract_value ?? 0.5,
-          team_fit: deterministicResult.breakdown?.team_fit ?? 0.5,
-          future_assets: deterministicResult.breakdown?.future_assets ?? 0.5,
+      // Deterministic grade = anchor, AI grade = adjustment within GRADE_OVERRIDE_LIMITS
+      if (deterministicResult && parsed.grade !== undefined) {
+        const deterministicGrade = deterministicResult.grade
+        const aiGrade = Math.max(0, Math.min(100, Math.round(parsed.grade)))
+        const diff = aiGrade - deterministicGrade
+
+        // Apply GRADE_OVERRIDE_LIMITS to constrain AI adjustment
+        let allowedDiff = diff
+        if (deterministicGrade < 30) {
+          allowedDiff = Math.max(0, Math.min(25, diff))        // Can only go up 0-25
+        } else if (deterministicGrade < 60) {
+          allowedDiff = Math.max(-10, Math.min(15, diff))      // Can adjust -10 to +15
+        } else {
+          allowedDiff = Math.max(-8, Math.min(10, diff))       // Can adjust -8 to +10
         }
+
+        grade = Math.max(0, Math.min(100, deterministicGrade + allowedDiff))
+        // Use AI breakdown, not deterministic (AI provides context-aware breakdown)
+        if (parsed.breakdown) {
+          breakdown = {
+            talent_balance: Math.max(0, Math.min(1, parsed.breakdown.talent_balance ?? 0.5)),
+            contract_value: Math.max(0, Math.min(1, parsed.breakdown.contract_value ?? 0.5)),
+            team_fit: Math.max(0, Math.min(1, parsed.breakdown.team_fit ?? 0.5)),
+            future_assets: Math.max(0, Math.min(1, parsed.breakdown.future_assets ?? 0.5)),
+          }
+        } else {
+          breakdown = deterministicResult.breakdown || { talent_balance: 0.5, contract_value: 0.5, team_fit: 0.5, future_assets: 0.5 }
+        }
+      } else if (deterministicResult) {
+        // AI failed to provide grade, use deterministic
+        grade = deterministicResult.grade
+        breakdown = deterministicResult.breakdown || { talent_balance: 0.5, contract_value: 0.5, team_fit: 0.5, future_assets: 0.5 }
       } else {
+        // No deterministic result, use AI grade directly
         grade = Math.max(0, Math.min(100, Math.round(parsed.grade)))
         if (parsed.breakdown) {
           breakdown = {
@@ -910,14 +938,14 @@ Grade this trade from the perspective of the ${teamDisplayNames[chicago_team]}.`
         }
       }
     } catch {
-      // CRITICAL: Still use deterministic grade on parse failure
+      // AI parse failure - fall back to deterministic grade only
       if (deterministicResult) {
         grade = deterministicResult.grade
-        breakdown = {
-          talent_balance: deterministicResult.breakdown?.talent_balance ?? 0.5,
-          contract_value: deterministicResult.breakdown?.contract_value ?? 0.5,
-          team_fit: deterministicResult.breakdown?.team_fit ?? 0.5,
-          future_assets: deterministicResult.breakdown?.future_assets ?? 0.5,
+        breakdown = deterministicResult.breakdown || {
+          talent_balance: 0.5,
+          contract_value: 0.5,
+          team_fit: 0.5,
+          future_assets: 0.5,
         }
         reasoning = `Trade graded ${grade}/100 based on objective player value analysis.`
       } else {
