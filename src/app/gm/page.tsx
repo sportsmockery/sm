@@ -1682,7 +1682,7 @@ export default function GMPage() {
             </div>
 
             {/* MOBILE: Stacked layout */}
-            <div className="lg:hidden" style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+            <div className="flex flex-col gap-4 lg:hidden">
               {/* Trade Board (center content) */}
               <div style={{
                 backgroundColor: cardBg,

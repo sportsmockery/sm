@@ -888,13 +888,16 @@ Grade this trade from the perspective of the ${teamDisplayNames[chicago_team]}.`
         const diff = aiGrade - deterministicGrade
 
         // Apply GRADE_OVERRIDE_LIMITS to constrain AI adjustment
+        // NEW - let AI actually correct bad deterministic grades
         let allowedDiff = diff
         if (deterministicGrade < 30) {
-          allowedDiff = Math.max(0, Math.min(25, diff))        // Can only go up 0-25
-        } else if (deterministicGrade < 60) {
-          allowedDiff = Math.max(-10, Math.min(15, diff))      // Can adjust -10 to +15
+          allowedDiff = Math.max(0, Math.min(50, diff))         // Can only go up 0-50
+        } else if (deterministicGrade < 50) {
+          allowedDiff = Math.max(-15, Math.min(35, diff))       // Can adjust -15 to +35
+        } else if (deterministicGrade < 70) {
+          allowedDiff = Math.max(-20, Math.min(20, diff))       // Can adjust -20 to +20
         } else {
-          allowedDiff = Math.max(-8, Math.min(10, diff))       // Can adjust -8 to +10
+          allowedDiff = Math.max(-15, Math.min(15, diff))       // Can adjust -15 to +15
         }
 
         grade = Math.max(0, Math.min(100, deterministicGrade + allowedDiff))

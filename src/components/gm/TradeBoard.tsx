@@ -10,6 +10,7 @@ import { FuturePickDiscountWidget, type FuturePickValue } from './FuturePickDisc
 import { AgingCurveWidget, type AgingCurveData } from './AgingCurveWidget'
 import { AuditButton } from './AuditButton'
 import { AuditReportCard } from './AuditReportCard'
+import { HistoricalContextPanel, SuggestedTradePanel } from './HistoricalContextPanel'
 import { DataFreshnessIndicator } from './DataFreshnessIndicator'
 import { GradeProgressButton } from './GradeProgressButton'
 import { useTheme } from '@/contexts/ThemeContext'
@@ -887,6 +888,31 @@ export function TradeBoard({
             }}>
               {gradeResult.reasoning}
             </div>
+
+            {/* Historical Context - supports both enhanced and legacy formats */}
+            {(gradeResult.historical_context || (gradeResult.historical_comparisons && gradeResult.historical_comparisons.length > 0)) && (
+              <div style={{ marginBottom: 16 }}>
+                <HistoricalContextPanel
+                  historicalContext={gradeResult.historical_context}
+                  historicalComparisons={gradeResult.historical_comparisons}
+                  isDark={isDark}
+                  isRejected={gradeResult.status === 'rejected' || gradeResult.grade < 70}
+                />
+              </div>
+            )}
+
+            {/* Suggested Trade Improvements - supports both enhanced and legacy formats (for rejected trades) */}
+            {gradeResult.grade < 70 && (gradeResult.enhanced_suggested_trade || gradeResult.suggested_trade) && (
+              <div style={{ marginBottom: 16 }}>
+                <SuggestedTradePanel
+                  enhancedSuggestion={gradeResult.enhanced_suggested_trade}
+                  legacySuggestion={gradeResult.suggested_trade}
+                  isDark={isDark}
+                  chicagoTeam={displayLabel}
+                  opponentTeam={opponentName}
+                />
+              </div>
+            )}
 
             {/* Audit Report */}
             {auditResult && (
