@@ -815,8 +815,34 @@ Respond with valid JSON only:
     "team_fit": <0-1>,
     "future_assets": <0-1>
   },
-  "cap_analysis": "<1-2 sentences about salary cap impact>"
+  "cap_analysis": "<1-2 sentences about salary cap impact>",
+  "historical_context": {
+    "similar_trades": [
+      {
+        "date": "<month year>",
+        "description": "<brief trade description>",
+        "teams": ["<team1>", "<team2>"],
+        "outcome": "<worked | failed | neutral>",
+        "similarity_score": <0-100>,
+        "key_difference": "<what makes it different from this trade>"
+      }
+    ],
+    "success_rate": <0-100, % of similar trades that worked>,
+    "key_patterns": ["<pattern 1>", "<pattern 2>"],
+    "why_this_fails_historically": "<only for rejected trades, explain historical failure pattern>",
+    "what_works_instead": "<only for rejected trades, suggest what historically works>"
+  },
+  "suggested_trade": <only if grade < 70> {
+    "description": "<what to change>",
+    "chicago_sends": [{"type": "player|pick", "name": "<name>", "position": "<pos>"}],
+    "chicago_receives": [{"type": "player|pick", "name": "<name>", "position": "<pos>"}],
+    "why_this_works": "<reasoning>",
+    "likelihood": "<very likely | likely | possible | unlikely>",
+    "estimated_grade_improvement": <number 5-30>
+  }
 }
+
+IMPORTANT: Always include historical_context with 2-3 similar real trades from history. For rejected trades (grade < 70), also include suggested_trade with specific improvements.
 
 Do not wrap in markdown code blocks. Just raw JSON.`
     } else {
