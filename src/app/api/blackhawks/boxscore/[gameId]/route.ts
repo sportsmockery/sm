@@ -142,6 +142,15 @@ export async function GET(
         logo: `https://a.espncdn.com/i/teamlogos/nhl/500/${gameData.opponent.toLowerCase()}.png`,
         ...splitStats(oppStats),
       },
+      _debug: {
+        externalId: gameData.external_id,
+        hawksStatsCount: hawksResult.data?.length || 0,
+        oppStatsCount: oppResult.data?.length || 0,
+        hawksPlayerIds: hawksPlayerIds.slice(0, 5),
+        playersMapCount: Object.keys(playersMap).length,
+        hawksError: hawksResult.error?.message,
+        oppError: oppResult.error?.message,
+      },
     })
   } catch (error) {
     console.error('Blackhawks box score API error:', error)
