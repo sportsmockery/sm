@@ -58,19 +58,24 @@ export async function GET(
       }, { status: 404 })
     }
 
+    // First, check what columns exist in the stats table
+    const { data: sampleStat } = await datalabAdmin
+      .from('blackhawks_player_game_stats')
+      .select('*')
+      .limit(1)
+    const availableColumns = Object.keys(sampleStat?.[0] || {})
+
     // Stats table uses external_id (ESPN game ID) as game_id
+    // Only select columns that exist
     const [hawksResult, oppResult] = await Promise.all([
       datalabAdmin
         .from('blackhawks_player_game_stats')
-        .select(`player_id, goals, assists, points, plus_minus, pim, shots, hits, blocked_shots, toi,
-          saves, goals_against, shots_against, is_opponent`)
+        .select('*')
         .eq('game_id', gameData.external_id)
         .eq('is_opponent', false),
       datalabAdmin
         .from('blackhawks_player_game_stats')
-        .select(`player_id, goals, assists, points, plus_minus, pim, shots, hits, blocked_shots, toi,
-          saves, goals_against, shots_against, is_opponent,
-          opponent_player_name, opponent_player_position, opponent_player_headshot_url`)
+        .select('*')
         .eq('game_id', gameData.external_id)
         .eq('is_opponent', true),
     ])
@@ -144,8 +149,10 @@ export async function GET(
       },
       _debug: {
         externalId: gameData.external_id,
+        availableColumns,
         hawksStatsCount: hawksResult.data?.length || 0,
         oppStatsCount: oppResult.data?.length || 0,
+        sampleStat: hawksResult.data?.[0],
         hawksPlayerIds: hawksPlayerIds.slice(0, 5),
         playersMapCount: Object.keys(playersMap).length,
         hawksError: hawksResult.error?.message,
