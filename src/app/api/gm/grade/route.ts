@@ -925,6 +925,11 @@ Grade this trade from the perspective of the ${teamDisplayNames[chicago_team]}.`
 
         grade = Math.max(0, Math.min(100, deterministicGrade + allowedDiff))
 
+        // Rule: Grade 69 rounds up to 70 (1 point from acceptance is frustrating)
+        if (grade === 69) {
+          grade = 70
+        }
+
         // DEBUG: Capture all grading details
         debugInfo = {
           ...debugInfo,
