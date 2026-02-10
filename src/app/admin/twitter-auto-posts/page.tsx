@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { createClient } from '@supabase/supabase-js';
+import { useTheme } from '@/contexts/ThemeContext';
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -33,6 +34,9 @@ interface CronError {
 }
 
 export default function TwitterAutoPostsPage() {
+  const { theme } = useTheme();
+  const isDark = theme === 'dark';
+
   const [predictions, setPredictions] = useState<ViralPrediction[]>([]);
   const [errors, setErrors] = useState<CronError[]>([]);
   const [loading, setLoading] = useState(true);
@@ -46,6 +50,7 @@ export default function TwitterAutoPostsPage() {
       .from('Twitter_viral_predictions')
       .select('*')
       .order('created_at', { ascending: false })
+      .order('rank', { ascending: true })
       .limit(50);
     setPredictions(data || []);
   }, []);
@@ -139,30 +144,66 @@ export default function TwitterAutoPostsPage() {
     setPosting(null);
   };
 
-  const getTeamColor = (team: string) => {
+  // Team colors - background colors for badges
+  const getTeamBgColor = (team: string) => {
     const colors: Record<string, string> = {
-      Bears: 'bg-orange-600', Bulls: 'bg-red-600', Blackhawks: 'bg-red-700',
-      Cubs: 'bg-blue-600', 'White Sox': 'bg-black'
+      Bears: '#F97316',        // orange
+      Bulls: '#dc2626',        // red
+      Blackhawks: '#991b1b',   // dark red
+      Cubs: '#2563eb',         // blue
+      'White Sox': '#000000'   // black
     };
-    return colors[team] || 'bg-gray-600';
+    return colors[team] || '#6b7280';
   };
 
   const getStatusColor = (status: string) => {
-    const colors: Record<string, string> = {
-      draft: 'bg-yellow-500', scheduled: 'bg-blue-500', posted: 'bg-green-500'
+    const colors: Record<string, { bg: string; text: string }> = {
+      draft: { bg: '#eab308', text: '#000' },      // yellow
+      scheduled: { bg: '#3b82f6', text: '#fff' },  // blue
+      posted: { bg: '#22c55e', text: '#fff' }      // green
     };
-    return colors[status] || 'bg-gray-500';
+    return colors[status] || { bg: '#6b7280', text: '#fff' };
   };
 
+  // Group predictions by date
+  const groupedPredictions = predictions.reduce((groups, p) => {
+    const date = new Date(p.created_at).toLocaleDateString();
+    if (!groups[date]) groups[date] = [];
+    groups[date].push(p);
+    return groups;
+  }, {} as Record<string, ViralPrediction[]>);
+
+  // Theme-aware colors
+  const bgPage = isDark ? '#030712' : '#f9fafb';
+  const bgCard = isDark ? '#111827' : '#ffffff';
+  const bgCardAlt = isDark ? '#1f2937' : '#f3f4f6';
+  const borderColor = isDark ? '#374151' : '#e5e7eb';
+  const textPrimary = isDark ? '#ffffff' : '#111827';
+  const textSecondary = isDark ? '#9ca3af' : '#6b7280';
+  const inputBg = isDark ? '#1f2937' : '#ffffff';
+  const inputBorder = isDark ? '#374151' : '#d1d5db';
+
   if (loading) {
-    return <div className="min-h-screen bg-gray-950 text-white p-8 text-center">Loading...</div>;
+    return (
+      <div style={{ minHeight: '100vh', backgroundColor: bgPage, color: textPrimary, padding: 32, textAlign: 'center' }}>
+        Loading...
+      </div>
+    );
   }
 
   return (
-    <div className="min-h-screen bg-gray-950 text-white p-8">
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold mb-4">Twitter Auto Posts</h1>
-        <p className="text-lg font-bold text-gray-300 bg-gray-800 p-4 rounded-lg">
+    <div style={{ minHeight: '100vh', backgroundColor: bgPage, color: textPrimary, padding: 32 }}>
+      <div style={{ marginBottom: 32 }}>
+        <h1 style={{ fontSize: 28, fontWeight: 700, marginBottom: 16 }}>Twitter Auto Posts</h1>
+        <div style={{
+          backgroundColor: bgCard,
+          border: `1px solid ${borderColor}`,
+          borderRadius: 12,
+          padding: 16,
+          color: textSecondary,
+          fontSize: 14,
+          lineHeight: 1.6,
+        }}>
           This page pulls daily viral story ideas from datalab.sportsmockery.com.
           The engine reads Media_Source.json, runs Claude every morning at 6 AM CST,
           applies the 5-criteria scoring system, stores ideas in Supabase table
@@ -170,148 +211,345 @@ export default function TwitterAutoPostsPage() {
           photo (to Supabase storage), see live embedded Twitter preview, schedule,
           or post immediately to @sportsmockery using Vercel Twitter keys. Error log
           at bottom shows cron job status from Twitter_cron_error_log.
-        </p>
+        </div>
       </div>
 
-      {/* Predictions Grid */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6 mb-12">
-        {predictions.map((p) => (
-          <div key={p.id} className="bg-gray-900 rounded-xl border border-gray-800 overflow-hidden">
-            <div className="p-4 border-b border-gray-800 flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <span className={`px-3 py-1 rounded-full text-sm font-bold ${getTeamColor(p.team)}`}>
-                  {p.team}
-                </span>
-                <span className="text-2xl font-bold text-green-400">{p.score?.toFixed(1)}</span>
-              </div>
-              <span className={`px-2 py-1 rounded text-xs font-semibold ${getStatusColor(p.status)}`}>
-                {p.status?.toUpperCase()}
-              </span>
-            </div>
+      {/* Predictions by Date */}
+      {Object.entries(groupedPredictions).map(([date, preds]) => (
+        <div key={date} style={{ marginBottom: 32 }}>
+          <h2 style={{ fontSize: 18, fontWeight: 600, marginBottom: 16, color: textPrimary }}>
+            {date} <span style={{ color: textSecondary, fontWeight: 400 }}>({preds.length} predictions)</span>
+          </h2>
 
-            {p.media_url ? (
-              <div className="aspect-video bg-gray-800">
-                <img src={p.media_url} alt="" className="w-full h-full object-cover" />
-              </div>
-            ) : (
-              <div className="aspect-video bg-gray-800 flex items-center justify-center text-gray-500 text-sm p-4 text-center">
-                <div>
-                  <p>No media. Prompt:</p>
-                  <p className="italic">{p.media_prompt}</p>
-                </div>
-              </div>
-            )}
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(350px, 1fr))', gap: 24 }}>
+            {preds.map((p) => {
+              const statusColors = getStatusColor(p.status);
+              return (
+                <div key={p.id} style={{
+                  backgroundColor: bgCard,
+                  borderRadius: 12,
+                  border: `1px solid ${borderColor}`,
+                  overflow: 'hidden',
+                }}>
+                  {/* Header */}
+                  <div style={{
+                    padding: 16,
+                    borderBottom: `1px solid ${borderColor}`,
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                  }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                      <span style={{
+                        padding: '4px 12px',
+                        borderRadius: 20,
+                        fontSize: 13,
+                        fontWeight: 700,
+                        backgroundColor: getTeamBgColor(p.team),
+                        color: '#fff',
+                      }}>
+                        {p.team}
+                      </span>
+                      <span style={{ fontSize: 24, fontWeight: 700, color: '#22c55e' }}>
+                        {p.score?.toFixed(1)}
+                      </span>
+                    </div>
+                    <span style={{
+                      padding: '4px 10px',
+                      borderRadius: 6,
+                      fontSize: 11,
+                      fontWeight: 600,
+                      backgroundColor: statusColors.bg,
+                      color: statusColors.text,
+                      textTransform: 'uppercase',
+                    }}>
+                      {p.status}
+                    </span>
+                  </div>
 
-            <div className="p-4">
-              {editingId === p.id ? (
-                <div className="space-y-2">
-                  <textarea
-                    value={editCaption}
-                    onChange={(e) => setEditCaption(e.target.value)}
-                    className="w-full bg-gray-800 border border-gray-700 rounded p-2"
-                    rows={3}
-                  />
-                  <div className="flex gap-2">
-                    <button onClick={() => saveCaption(p.id)} className="px-3 py-1 bg-green-600 rounded text-sm">Save</button>
-                    <button onClick={() => setEditingId(null)} className="px-3 py-1 bg-gray-600 rounded text-sm">Cancel</button>
+                  {/* Media */}
+                  {p.media_url ? (
+                    <div style={{ aspectRatio: '16/9', backgroundColor: bgCardAlt }}>
+                      <img src={p.media_url} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                    </div>
+                  ) : (
+                    <div style={{
+                      aspectRatio: '16/9',
+                      backgroundColor: bgCardAlt,
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      color: textSecondary,
+                      fontSize: 13,
+                      padding: 16,
+                      textAlign: 'center',
+                    }}>
+                      <div>
+                        <p style={{ marginBottom: 8 }}>No media. AI Prompt:</p>
+                        <p style={{ fontStyle: 'italic', fontSize: 12 }}>{p.media_prompt}</p>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Caption */}
+                  <div style={{ padding: 16 }}>
+                    {editingId === p.id ? (
+                      <div>
+                        <textarea
+                          value={editCaption}
+                          onChange={(e) => setEditCaption(e.target.value)}
+                          style={{
+                            width: '100%',
+                            backgroundColor: inputBg,
+                            border: `1px solid ${inputBorder}`,
+                            borderRadius: 8,
+                            padding: 8,
+                            color: textPrimary,
+                            fontSize: 14,
+                            resize: 'vertical',
+                            minHeight: 80,
+                          }}
+                          rows={3}
+                        />
+                        <div style={{ display: 'flex', gap: 8, marginTop: 8 }}>
+                          <button
+                            onClick={() => saveCaption(p.id)}
+                            style={{
+                              padding: '6px 16px',
+                              backgroundColor: '#22c55e',
+                              color: '#fff',
+                              borderRadius: 6,
+                              border: 'none',
+                              fontWeight: 600,
+                              fontSize: 13,
+                              cursor: 'pointer',
+                            }}
+                          >
+                            Save
+                          </button>
+                          <button
+                            onClick={() => setEditingId(null)}
+                            style={{
+                              padding: '6px 16px',
+                              backgroundColor: isDark ? '#374151' : '#e5e7eb',
+                              color: textPrimary,
+                              borderRadius: 6,
+                              border: 'none',
+                              fontWeight: 600,
+                              fontSize: 13,
+                              cursor: 'pointer',
+                            }}
+                          >
+                            Cancel
+                          </button>
+                        </div>
+                      </div>
+                    ) : (
+                      <div>
+                        <p style={{ color: textPrimary, marginBottom: 8, lineHeight: 1.5 }}>{p.caption}</p>
+                        <p style={{ color: '#3b82f6', fontSize: 13 }}>{p.hashtags}</p>
+                        <button
+                          onClick={() => startEditing(p)}
+                          style={{
+                            marginTop: 8,
+                            background: 'none',
+                            border: 'none',
+                            color: textSecondary,
+                            fontSize: 12,
+                            cursor: 'pointer',
+                            textDecoration: 'underline',
+                          }}
+                        >
+                          Edit Caption
+                        </button>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Twitter Preview */}
+                  <div style={{
+                    padding: 16,
+                    backgroundColor: bgCardAlt,
+                    borderTop: `1px solid ${borderColor}`,
+                  }}>
+                    <p style={{ fontSize: 11, color: textSecondary, marginBottom: 8 }}>Preview:</p>
+                    <div style={{
+                      backgroundColor: isDark ? '#000' : '#fff',
+                      borderRadius: 12,
+                      padding: 12,
+                      border: `1px solid ${borderColor}`,
+                    }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
+                        <div style={{
+                          width: 32,
+                          height: 32,
+                          backgroundColor: '#bc0000',
+                          borderRadius: '50%',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          fontSize: 11,
+                          fontWeight: 700,
+                          color: '#fff',
+                        }}>
+                          SM
+                        </div>
+                        <div>
+                          <p style={{ fontWeight: 600, fontSize: 13, color: textPrimary }}>Sports Mockery</p>
+                          <p style={{ color: textSecondary, fontSize: 11 }}>@sportsmockery</p>
+                        </div>
+                      </div>
+                      <p style={{ fontSize: 13, color: textPrimary, lineHeight: 1.4 }}>
+                        {p.caption} <span style={{ color: '#3b82f6' }}>{p.hashtags}</span>
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* Actions */}
+                  <div style={{
+                    padding: 16,
+                    borderTop: `1px solid ${borderColor}`,
+                    display: 'flex',
+                    flexDirection: 'column',
+                    gap: 12,
+                  }}>
+                    <div>
+                      <label style={{ display: 'block', fontSize: 11, color: textSecondary, marginBottom: 4 }}>
+                        Upload Photo:
+                      </label>
+                      <input
+                        type="file"
+                        accept="image/*"
+                        onChange={(e) => e.target.files?.[0] && handleFileUpload(p.id, e.target.files[0])}
+                        disabled={uploading === p.id}
+                        style={{ fontSize: 13, color: textPrimary }}
+                      />
+                      {uploading === p.id && (
+                        <p style={{ fontSize: 11, color: '#eab308', marginTop: 4 }}>Uploading...</p>
+                      )}
+                    </div>
+
+                    <div>
+                      <label style={{ display: 'block', fontSize: 11, color: textSecondary, marginBottom: 4 }}>
+                        Schedule:
+                      </label>
+                      <input
+                        type="datetime-local"
+                        onChange={(e) => handleSchedule(p.id, e.target.value)}
+                        style={{
+                          width: '100%',
+                          backgroundColor: inputBg,
+                          border: `1px solid ${inputBorder}`,
+                          borderRadius: 6,
+                          padding: 8,
+                          fontSize: 13,
+                          color: textPrimary,
+                        }}
+                      />
+                    </div>
+
+                    <button
+                      onClick={() => handlePostNow(p)}
+                      disabled={posting === p.id || p.status === 'posted'}
+                      style={{
+                        width: '100%',
+                        padding: '10px 16px',
+                        backgroundColor: posting === p.id || p.status === 'posted' ? '#6b7280' : '#3b82f6',
+                        color: '#fff',
+                        borderRadius: 8,
+                        border: 'none',
+                        fontWeight: 600,
+                        fontSize: 14,
+                        cursor: posting === p.id || p.status === 'posted' ? 'not-allowed' : 'pointer',
+                      }}
+                    >
+                      {posting === p.id ? 'Posting...' : p.status === 'posted' ? 'Already Posted' : 'Post Now'}
+                    </button>
+
+                    {p.tweet_id && (
+                      <p style={{ fontSize: 12, color: '#22c55e' }}>
+                        <a
+                          href={`https://twitter.com/sportsmockery/status/${p.tweet_id}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          style={{ color: '#22c55e', textDecoration: 'underline' }}
+                        >
+                          View Tweet →
+                        </a>
+                      </p>
+                    )}
+                  </div>
+
+                  {/* Meta info */}
+                  <div style={{
+                    padding: '12px 16px',
+                    borderTop: `1px solid ${borderColor}`,
+                    fontSize: 11,
+                    color: textSecondary,
+                  }}>
+                    <p>Format: {p.suggested_format} | Rank: #{p.rank}</p>
+                    <p>Created: {new Date(p.created_at).toLocaleString()}</p>
+                    {p.scheduled_for && (
+                      <p style={{ color: '#3b82f6' }}>Scheduled: {new Date(p.scheduled_for).toLocaleString()}</p>
+                    )}
                   </div>
                 </div>
-              ) : (
-                <div>
-                  <p className="text-gray-200 mb-2">{p.caption}</p>
-                  <p className="text-blue-400 text-sm">{p.hashtags}</p>
-                  <button onClick={() => startEditing(p)} className="text-xs text-gray-500 hover:text-gray-300 mt-2">
-                    Edit Caption
-                  </button>
-                </div>
-              )}
-            </div>
-
-            {/* Twitter Preview */}
-            <div className="p-4 bg-gray-800 border-t border-gray-700">
-              <p className="text-xs text-gray-500 mb-2">Preview:</p>
-              <div className="bg-black rounded-lg p-3 border border-gray-700">
-                <div className="flex items-center gap-2 mb-2">
-                  <div className="w-8 h-8 bg-red-600 rounded-full flex items-center justify-center text-xs font-bold">SM</div>
-                  <div>
-                    <p className="font-bold text-sm">Sports Mockery</p>
-                    <p className="text-gray-500 text-xs">@sportsmockery</p>
-                  </div>
-                </div>
-                <p className="text-sm">{p.caption} {p.hashtags}</p>
-              </div>
-            </div>
-
-            {/* Actions */}
-            <div className="p-4 border-t border-gray-800 space-y-3">
-              <div>
-                <label className="block text-xs text-gray-500 mb-1">Upload Photo:</label>
-                <input
-                  type="file"
-                  accept="image/*"
-                  onChange={(e) => e.target.files?.[0] && handleFileUpload(p.id, e.target.files[0])}
-                  disabled={uploading === p.id}
-                  className="w-full text-sm"
-                />
-                {uploading === p.id && <p className="text-xs text-yellow-400">Uploading...</p>}
-              </div>
-
-              <div>
-                <label className="block text-xs text-gray-500 mb-1">Schedule:</label>
-                <input
-                  type="datetime-local"
-                  onChange={(e) => handleSchedule(p.id, e.target.value)}
-                  className="w-full bg-gray-800 border border-gray-700 rounded p-2 text-sm"
-                />
-              </div>
-
-              <button
-                onClick={() => handlePostNow(p)}
-                disabled={posting === p.id || p.status === 'posted'}
-                className="w-full py-2 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-600 rounded font-semibold text-sm"
-              >
-                {posting === p.id ? 'Posting...' : 'Post Now'}
-              </button>
-
-              {p.tweet_id && (
-                <p className="text-xs text-green-400">
-                  <a href={`https://twitter.com/sportsmockery/status/${p.tweet_id}`} target="_blank" rel="noopener noreferrer">View Tweet</a>
-                </p>
-              )}
-            </div>
-
-            <div className="px-4 pb-4 text-xs text-gray-500">
-              <p>Format: {p.suggested_format} | Rank: #{p.rank}</p>
-              <p>Created: {new Date(p.created_at).toLocaleString()}</p>
-            </div>
+              );
+            })}
           </div>
-        ))}
-      </div>
+        </div>
+      ))}
+
+      {predictions.length === 0 && (
+        <div style={{
+          backgroundColor: bgCard,
+          border: `1px solid ${borderColor}`,
+          borderRadius: 12,
+          padding: 40,
+          textAlign: 'center',
+          color: textSecondary,
+        }}>
+          <p style={{ fontSize: 18, marginBottom: 8 }}>No viral predictions yet</p>
+          <p style={{ fontSize: 13 }}>New predictions appear daily at 6:00 AM CST</p>
+        </div>
+      )}
 
       {/* Error Log */}
-      <div className="bg-gray-900 rounded-xl border border-gray-800 p-6">
-        <h2 className="text-xl font-bold mb-4 text-red-400">Cron Error Log</h2>
+      <div style={{
+        marginTop: 48,
+        backgroundColor: bgCard,
+        borderRadius: 12,
+        border: `1px solid ${borderColor}`,
+        padding: 24,
+      }}>
+        <h2 style={{ fontSize: 20, fontWeight: 700, marginBottom: 16, color: '#ef4444' }}>
+          Cron Error Log
+        </h2>
         {errors.length === 0 ? (
-          <p className="text-gray-500">No recent errors</p>
+          <p style={{ color: textSecondary }}>No recent errors</p>
         ) : (
-          <table className="w-full text-sm">
-            <thead>
-              <tr className="text-left border-b border-gray-700">
-                <th className="pb-2">Timestamp</th>
-                <th className="pb-2">Source</th>
-                <th className="pb-2">Error</th>
-              </tr>
-            </thead>
-            <tbody>
-              {errors.map((e) => (
-                <tr key={e.id} className="border-b border-gray-800">
-                  <td className="py-2 text-gray-400">{new Date(e.timestamp).toLocaleString()}</td>
-                  <td className="py-2 text-yellow-400">{e.source}</td>
-                  <td className="py-2 text-red-400">{e.error}</td>
+          <div style={{ overflowX: 'auto' }}>
+            <table style={{ width: '100%', fontSize: 13, borderCollapse: 'collapse' }}>
+              <thead>
+                <tr style={{ textAlign: 'left', borderBottom: `1px solid ${borderColor}` }}>
+                  <th style={{ padding: '8px 12px', color: textSecondary }}>Timestamp</th>
+                  <th style={{ padding: '8px 12px', color: textSecondary }}>Source</th>
+                  <th style={{ padding: '8px 12px', color: textSecondary }}>Error</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+                {errors.map((e) => (
+                  <tr key={e.id} style={{ borderBottom: `1px solid ${borderColor}` }}>
+                    <td style={{ padding: '12px', color: textSecondary }}>
+                      {new Date(e.timestamp).toLocaleString()}
+                    </td>
+                    <td style={{ padding: '12px', color: '#eab308' }}>{e.source}</td>
+                    <td style={{ padding: '12px', color: '#ef4444' }}>{e.error}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         )}
       </div>
     </div>
