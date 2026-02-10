@@ -1223,15 +1223,15 @@ export default function GMPage() {
         </div>
       </div>
 
-      {/* BAND 2: Team Tabs + Session + Clear */}
+      {/* BAND 2: Team Tabs */}
       <div style={{
         backgroundColor: cardBg,
         borderBottom: `1px solid ${borderColor}`,
         padding: '12px 24px',
       }}>
-        <div style={{ maxWidth: 1440, margin: '0 auto', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 12 }}>
-          {/* Team tabs */}
-          <div style={{ display: 'flex', gap: 6, overflowX: 'auto', flex: 1, alignItems: 'center' }}>
+        <div style={{ maxWidth: 1440, margin: '0 auto' }}>
+          {/* Row 1: Team tabs */}
+          <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', alignItems: 'center', justifyContent: 'center' }}>
             {TEAMS.map(t => {
               const isActive = selectedTeam === t.key
               return (
@@ -1247,7 +1247,6 @@ export default function GMPage() {
                     fontWeight: isActive ? 700 : 500,
                     fontSize: isActive ? 14 : 13,
                     cursor: 'pointer',
-                    flexShrink: 0,
                     transition: 'all 0.2s',
                   }}
                 >
@@ -1256,65 +1255,66 @@ export default function GMPage() {
                 </button>
               )
             })}
-
-            {/* Trade Mode Picker */}
-            {selectedTeam && (
-              <div style={{ marginLeft: 'auto', flexShrink: 0 }}>
-                <TradeModePicker
-                  mode={tradeMode}
-                  onChange={(mode) => {
-                    setTradeMode(mode)
-                    if (mode === '2-team') {
-                      // Reset third team state when switching to 2-team
-                      setThirdTeam(null)
-                      setThirdTeamRoster([])
-                      setSelectedThirdTeamIds(new Set())
-                      setDraftPicksTeam3Sent([])
-                      setDraftPicksTeam3Received([])
-                      setSelectedThirdTeamProspectIds(new Set())
-                      setTradeFlows([])
-                    }
-                    // Note: Migration to 3-team mode is handled by useEffect
-                  }}
-                  disabled={!selectedTeam}
-                />
-              </div>
-            )}
           </div>
 
-          {/* Session info */}
-          {activeSession && (
-            <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-              <span style={{ fontSize: 12, color: subText }}>
-                Session: <strong style={{ color: textColor }}>{activeSession.session_name}</strong> ({activeSession.num_trades} trades)
-              </span>
-              <button
-                onClick={() => selectedTeam && createSession(selectedTeam)}
-                style={{
-                  padding: '6px 12px', borderRadius: 6,
-                  border: `1px solid ${borderColor}`,
-                  backgroundColor: 'transparent',
-                  color: subText, fontSize: 11, fontWeight: 600, cursor: 'pointer',
+          {/* Row 2: Trade Mode + Session + Clear (only when team selected) */}
+          {selectedTeam && (
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', flexWrap: 'wrap', gap: 12, marginTop: 12 }}>
+              {/* Trade Mode Picker */}
+              <TradeModePicker
+                mode={tradeMode}
+                onChange={(mode) => {
+                  setTradeMode(mode)
+                  if (mode === '2-team') {
+                    // Reset third team state when switching to 2-team
+                    setThirdTeam(null)
+                    setThirdTeamRoster([])
+                    setSelectedThirdTeamIds(new Set())
+                    setDraftPicksTeam3Sent([])
+                    setDraftPicksTeam3Received([])
+                    setSelectedThirdTeamProspectIds(new Set())
+                    setTradeFlows([])
+                  }
+                  // Note: Migration to 3-team mode is handled by useEffect
                 }}
-              >
-                New Session
-              </button>
-            </div>
-          )}
+                disabled={!selectedTeam}
+              />
 
-          {/* Clear trades */}
-          {trades.length > 0 && (
-            <button
-              onClick={clearAllTrades}
-              style={{
-                padding: '6px 12px', borderRadius: 6,
-                border: '1px solid #ef4444',
-                backgroundColor: 'transparent',
-                color: '#ef4444', fontSize: 11, fontWeight: 600, cursor: 'pointer',
-              }}
-            >
-              Clear All Trades
-            </button>
+              {/* Session info */}
+              {activeSession && (
+                <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                  <span style={{ fontSize: 12, color: subText }}>
+                    Session: <strong style={{ color: textColor }}>{activeSession.session_name}</strong> ({activeSession.num_trades} trades)
+                  </span>
+                  <button
+                    onClick={() => selectedTeam && createSession(selectedTeam)}
+                    style={{
+                      padding: '6px 12px', borderRadius: 6,
+                      border: `1px solid ${borderColor}`,
+                      backgroundColor: 'transparent',
+                      color: subText, fontSize: 11, fontWeight: 600, cursor: 'pointer',
+                    }}
+                  >
+                    New Session
+                  </button>
+                </div>
+              )}
+
+              {/* Clear trades */}
+              {trades.length > 0 && (
+                <button
+                  onClick={clearAllTrades}
+                  style={{
+                    padding: '6px 12px', borderRadius: 6,
+                    border: '1px solid #ef4444',
+                    backgroundColor: 'transparent',
+                    color: '#ef4444', fontSize: 11, fontWeight: 600, cursor: 'pointer',
+                  }}
+                >
+                  Clear All Trades
+                </button>
+              )}
+            </div>
           )}
         </div>
       </div>

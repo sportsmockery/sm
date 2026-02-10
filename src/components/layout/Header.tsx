@@ -89,6 +89,7 @@ export default function Header() {
   const [videoMenuOpen, setVideoMenuOpen] = useState(false)
   const [musicMenuOpen, setMusicMenuOpen] = useState(false)
   const [appMenuOpen, setAppMenuOpen] = useState(false)
+  const [newFeaturesMenuOpen, setNewFeaturesMenuOpen] = useState(false)
   const [activeTeamMenu, setActiveTeamMenu] = useState<string | null>(null)
   const [userMenuOpen, setUserMenuOpen] = useState(false)
   const [searchOpen, setSearchOpen] = useState(false)
@@ -99,6 +100,7 @@ export default function Header() {
   const videoMenuRef = useRef<HTMLDivElement>(null)
   const musicMenuRef = useRef<HTMLDivElement>(null)
   const appMenuRef = useRef<HTMLDivElement>(null)
+  const newFeaturesMenuRef = useRef<HTMLDivElement>(null)
   const teamMenuRefs = useRef<{ [key: string]: HTMLDivElement | null }>({})
   const userMenuRef = useRef<HTMLDivElement>(null)
   const { theme, toggleTheme } = useTheme()
@@ -146,6 +148,9 @@ export default function Header() {
       }
       if (appMenuRef.current && !appMenuRef.current.contains(e.target as Node)) {
         setAppMenuOpen(false)
+      }
+      if (newFeaturesMenuRef.current && !newFeaturesMenuRef.current.contains(e.target as Node)) {
+        setNewFeaturesMenuOpen(false)
       }
       // Check all team menu refs
       if (activeTeamMenu) {
@@ -638,6 +643,61 @@ export default function Header() {
                   </div>
                 )}
               </div>
+
+              {/* New Features dropdown */}
+              <div className="relative" ref={newFeaturesMenuRef}>
+                <button
+                  onClick={() => setNewFeaturesMenuOpen(!newFeaturesMenuOpen)}
+                  className="flex items-center gap-1 px-4 py-4 text-[14px] font-bold hover:text-[var(--link-color)] transition-colors"
+                  style={{ fontFamily: "'Montserrat', sans-serif", color: '#bc0000' }}
+                >
+                  New Features
+                  <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                  </svg>
+                </button>
+
+                {newFeaturesMenuOpen && (
+                  <div
+                    className="absolute top-full left-0 mt-0 w-48 shadow-md z-[100]"
+                    style={{ backgroundColor: 'var(--bg-surface)', border: '1px solid var(--border-color)' }}
+                  >
+                    <Link
+                      href="/gm"
+                      onClick={() => setNewFeaturesMenuOpen(false)}
+                      className="flex items-center gap-3 px-4 py-3 text-[14px] hover:bg-[var(--card-hover-bg)] transition-colors"
+                      style={{ color: 'var(--text-primary)' }}
+                    >
+                      <svg className="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.5}>
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M7.5 21L3 16.5m0 0L7.5 12M3 16.5h13.5m0-13.5L21 7.5m0 0L16.5 12M21 7.5H7.5" />
+                      </svg>
+                      <span className="flex-1">Trade Simulator</span>
+                    </Link>
+                    <Link
+                      href="/mock-draft"
+                      onClick={() => setNewFeaturesMenuOpen(false)}
+                      className="flex items-center gap-3 px-4 py-3 text-[14px] hover:bg-[var(--card-hover-bg)] transition-colors"
+                      style={{ color: 'var(--text-primary)' }}
+                    >
+                      <svg className="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.5}>
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M9 12h3.75M9 15h3.75M9 18h3.75m3 .75H18a2.25 2.25 0 002.25-2.25V6.108c0-1.135-.845-2.098-1.976-2.192a48.424 48.424 0 00-1.123-.08m-5.801 0c-.065.21-.1.433-.1.664 0 .414.336.75.75.75h4.5a.75.75 0 00.75-.75 2.25 2.25 0 00-.1-.664m-5.8 0A2.251 2.251 0 0113.5 2.25H15c1.012 0 1.867.668 2.15 1.586m-5.8 0c-.376.023-.75.05-1.124.08C9.095 4.01 8.25 4.973 8.25 6.108V8.25m0 0H4.875c-.621 0-1.125.504-1.125 1.125v11.25c0 .621.504 1.125 1.125 1.125h9.75c.621 0 1.125-.504 1.125-1.125V9.375c0-.621-.504-1.125-1.125-1.125H8.25z" />
+                      </svg>
+                      <span className="flex-1">Mock Draft</span>
+                    </Link>
+                    <Link
+                      href="/fan-chat"
+                      onClick={() => setNewFeaturesMenuOpen(false)}
+                      className="flex items-center gap-3 px-4 py-3 text-[14px] hover:bg-[var(--card-hover-bg)] transition-colors"
+                      style={{ color: 'var(--text-primary)' }}
+                    >
+                      <svg className="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.5}>
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+                      </svg>
+                      <span className="flex-1">Fan Chat</span>
+                    </Link>
+                  </div>
+                )}
+              </div>
             </div>
 
             {/* Right Side: Search + CTAs */}
@@ -685,30 +745,6 @@ export default function Header() {
                 </button>
               )}
 
-              {/* Fan Chat CTA - Red bg, white text in light mode; White bg, red text in dark mode */}
-              <Link
-                href="/fan-chat"
-                className="hidden md:flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded"
-                style={{
-                  fontFamily: "'Montserrat', sans-serif",
-                  backgroundColor: theme === 'dark' ? '#ffffff' : '#bc0000',
-                  color: theme === 'dark' ? '#bc0000' : '#ffffff',
-                  border: 'none',
-                  outline: 'none',
-                }}
-              >
-                <svg
-                  className="w-3.5 h-3.5"
-                  fill="none"
-                  stroke={theme === 'dark' ? '#bc0000' : '#ffffff'}
-                  strokeWidth={2}
-                  viewBox="0 0 24 24"
-                >
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
-                </svg>
-                Fan Chat
-              </Link>
-
               {/* Scout AI CTA - Red bg, white text in light mode; White bg, red text in dark mode */}
               <Link
                 href="/scout-ai"
@@ -741,29 +777,6 @@ export default function Header() {
           <div className="max-w-[1110px] mx-auto px-4 py-4">
             {/* Mobile CTAs at top */}
             <div className="flex gap-3 mb-4 pb-4" style={{ borderBottom: '1px solid var(--border-color)' }}>
-              <Link
-                href="/fan-chat"
-                onClick={() => setMobileMenuOpen(false)}
-                className="flex-1 flex items-center justify-center gap-2 px-4 py-3 text-sm font-semibold rounded-lg"
-                style={{
-                  fontFamily: "'Montserrat', sans-serif",
-                  backgroundColor: theme === 'dark' ? '#ffffff' : '#bc0000',
-                  color: theme === 'dark' ? '#bc0000' : '#ffffff',
-                  border: 'none',
-                  outline: 'none',
-                }}
-              >
-                <svg
-                  className="w-4 h-4"
-                  fill="none"
-                  stroke={theme === 'dark' ? '#bc0000' : '#ffffff'}
-                  strokeWidth={2}
-                  viewBox="0 0 24 24"
-                >
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
-                </svg>
-                Fan Chat
-              </Link>
               <Link
                 href="/scout-ai"
                 onClick={() => setMobileMenuOpen(false)}
@@ -824,6 +837,41 @@ export default function Header() {
                 </Link>
               )
             ))}
+            {/* New Features section */}
+            <div>
+              <div
+                className="py-3 text-[14px] font-bold"
+                style={{ fontFamily: "'Montserrat', sans-serif", color: '#bc0000', borderBottom: '1px solid var(--border-color)' }}
+              >
+                New Features
+              </div>
+              <div className="pl-4 border-l-2 border-[#bc0000] ml-2">
+                <Link
+                  href="/gm"
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="block py-2 text-[13px] hover:text-[var(--link-color)]"
+                  style={{ color: 'var(--text-muted)', borderBottom: '1px solid var(--border-color)' }}
+                >
+                  Trade Simulator
+                </Link>
+                <Link
+                  href="/mock-draft"
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="block py-2 text-[13px] hover:text-[var(--link-color)]"
+                  style={{ color: 'var(--text-muted)', borderBottom: '1px solid var(--border-color)' }}
+                >
+                  Mock Draft
+                </Link>
+                <Link
+                  href="/fan-chat"
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="block py-2 text-[13px] hover:text-[var(--link-color)]"
+                  style={{ color: 'var(--text-muted)', borderBottom: '1px solid var(--border-color)' }}
+                >
+                  Fan Chat
+                </Link>
+              </div>
+            </div>
             {/* Video section */}
             <div>
               <div

@@ -578,21 +578,8 @@ export function TradeBoard({
                       lineHeight: 1.5,
                       margin: '8px 0 0 0',
                     }}>
-                      {gradeResult.rejection_reason || `Trade score of ${gradeResult.grade} is below the 70-point acceptance threshold.`}
+                      {gradeResult.rejection_reason || `Trade score is below the 70-point acceptance threshold.`}
                     </p>
-                    <div style={{
-                      marginTop: 12,
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: 8,
-                      fontSize: 12,
-                    }}>
-                      <span style={{ color: subText }}>Current score:</span>
-                      <span style={{ color: '#ef4444', fontWeight: 700 }}>{gradeResult.grade}</span>
-                      <span style={{ color: subText }}>|</span>
-                      <span style={{ color: subText }}>Needed:</span>
-                      <span style={{ color: '#22c55e', fontWeight: 700 }}>70+</span>
-                    </div>
                   </div>
                 </div>
               </div>
