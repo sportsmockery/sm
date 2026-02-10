@@ -23,7 +23,7 @@ export async function GET(
 
     if (gameError || !gameData) return NextResponse.json({ error: 'Game not found' }, { status: 404 })
 
-    // Chicago team stats use whitesox_game_id, opponent stats use game_id (ESPN ID)
+    // Both Chicago team and opponent stats use whitesox_game_id
     const [soxResult, oppResult] = await Promise.all([
       datalabAdmin
         .from('whitesox_player_game_stats')
@@ -34,7 +34,7 @@ export async function GET(
         .from('whitesox_player_game_stats')
         .select(`player_id, ${BATTING_COLS}, ${PITCHING_COLS}, is_opponent,
           opponent_player_name, opponent_player_position, opponent_player_headshot_url`)
-        .eq('game_id', gameData.game_id)
+        .eq('whitesox_game_id', gameData.id)
         .eq('is_opponent', true),
     ])
 

@@ -58,13 +58,13 @@ export async function GET(
       }, { status: 404 })
     }
 
-    // Chicago team stats use game_id (NHL ID), opponent stats use blackhawks_game_id
+    // Both Chicago team and opponent stats use blackhawks_game_id
     const [hawksResult, oppResult] = await Promise.all([
       datalabAdmin
         .from('blackhawks_player_game_stats')
         .select(`player_id, goals, assists, points, plus_minus, penalty_minutes, shots_on_goal, hits, blocked_shots, time_on_ice,
           saves, goals_against, shots_against, is_opponent`)
-        .eq('game_id', gameData.external_id)
+        .eq('blackhawks_game_id', gameData.id)
         .eq('is_opponent', false),
       datalabAdmin
         .from('blackhawks_player_game_stats')
