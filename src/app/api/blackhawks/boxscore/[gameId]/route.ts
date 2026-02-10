@@ -37,7 +37,7 @@ export async function GET(
       .from('blackhawks_games_master')
       .select(`id, external_id, game_date, season, opponent, opponent_full_name,
         is_blackhawks_home, arena, blackhawks_score, opponent_score,
-        blackhawks_win, overtime, shootout`)
+        blackhawks_win, is_overtime`)
       .eq('id', gameId)
       .single()
 
@@ -121,14 +121,14 @@ export async function GET(
       goalies: stats.filter(s => s.saves !== null && s.saves > 0),
     })
 
-    const isOT = gameData.overtime || gameData.shootout
+    const isOT = gameData.is_overtime
 
     return NextResponse.json({
       gameId: String(gameData.id),
       date: gameData.game_date,
       venue: gameData.arena,
       isOT,
-      isShootout: gameData.shootout,
+      isShootout: false,  // Not tracked in DB
       blackhawks: {
         score: gameData.blackhawks_score || 0,
         result: gameData.blackhawks_win !== null ? (gameData.blackhawks_win ? 'W' : (isOT ? 'OTL' : 'L')) : null,

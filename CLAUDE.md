@@ -474,11 +474,11 @@ const { data } = await supabase.from('cubs_players').select('*').in('espn_id', e
 
 **Cause:** Different teams use different ID columns for stats joins
 
-**Fix:** Check team-specific join pattern:
+**Fix:** All teams now use ESPN ID for stats joins:
 | Team | Stats Join | Code |
 |------|------------|------|
-| Bears | `bp.id = stats.player_id` | Use `player.internalId` |
-| Bulls | `bp.player_id = stats.player_id` | Use `player.playerId` |
+| Bears | `bp.espn_id = stats.player_id` | Use `player.playerId` |
+| Bulls | `bp.espn_player_id = stats.player_id` | Use `player.playerId` |
 | Others | `bp.espn_id = stats.player_id` | Use `player.playerId` |
 
 ---
@@ -507,7 +507,7 @@ const { data } = await supabase
 
 | Team | File | Notes |
 |------|------|-------|
-| Bears | `src/lib/bearsData.ts` | Uses `is_active`, internal ID for stats |
+| Bears | `src/lib/bearsData.ts` | Uses `is_active`, ESPN ID for stats (dual column names) |
 | Bulls | `src/lib/bullsData.ts` | Uses `is_current_bulls`, playerId for stats |
 | Blackhawks | `src/lib/blackhawksData.ts` | Uses `is_active`, espn_id for stats |
 | Cubs | `src/lib/cubsData.ts` | Uses espn_id join for stats |
