@@ -1503,10 +1503,10 @@ export default function GMPage() {
                   </div>
                 )}
 
-                {/* Season Simulation - inside center column, only show for accepted trades */}
-                {activeSession && activeSession.num_approved > 0 && !gradeResult && (
+                {/* Season Simulation - inside center column, show for accepted trades */}
+                {activeSession && (activeSession.num_approved > 0 || (gradeResult && gradeResult.grade >= 70)) && (
                   <SimulationTrigger
-                    tradeCount={activeSession.num_approved}
+                    tradeCount={Math.max(activeSession.num_approved, (gradeResult && gradeResult.grade >= 70) ? 1 : 0)}
                     sport={sport}
                     onSimulate={handleSimulateSeason}
                     isSimulating={isSimulating}
@@ -1775,10 +1775,10 @@ export default function GMPage() {
                   />
                 )}
 
-                {/* Season Simulation - mobile, only show for accepted trades */}
-                {activeSession && activeSession.num_approved > 0 && !gradeResult && (
+                {/* Season Simulation - mobile, show for accepted trades */}
+                {activeSession && (activeSession.num_approved > 0 || (gradeResult && gradeResult.grade >= 70)) && (
                   <SimulationTrigger
-                    tradeCount={activeSession.num_approved}
+                    tradeCount={Math.max(activeSession.num_approved, (gradeResult && gradeResult.grade >= 70) ? 1 : 0)}
                     sport={sport}
                     onSimulate={handleSimulateSeason}
                     isSimulating={isSimulating}

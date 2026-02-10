@@ -901,8 +901,8 @@ All logged-in users can access `/gm`. No admin check — auth uses `@supabase/ss
 
 ### Grading Logic
 
-- Grade 75+ = **accepted**, 50-74 = **rejected**
-- Grade 75-90 = flagged **dangerous** (risky upside)
+- Grade 70+ = **accepted**, 0-69 = **rejected**
+- Grade 70-90 = flagged **dangerous** (risky upside)
 - Untouchable players: Caleb Williams (Bears), Connor Bedard (Blackhawks) → grade 0 if traded
 - Rate limit: 10 trades per minute per user
 
