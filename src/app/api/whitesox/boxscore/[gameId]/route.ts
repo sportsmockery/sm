@@ -16,25 +16,26 @@ export async function GET(
 
     const { data: gameData, error: gameError } = await datalabAdmin
       .from('whitesox_games_master')
-      .select(`id, game_date, season, opponent, opponent_full_name,
+      .select(`id, game_id, game_date, season, opponent, opponent_full_name,
         is_whitesox_home, venue, whitesox_score, opponent_score, whitesox_win, broadcast, game_type`)
       .eq('id', gameId)
       .single()
 
     if (gameError || !gameData) return NextResponse.json({ error: 'Game not found' }, { status: 404 })
 
-    // Stats table uses whitesox_game_id (matches games_master.id)
+    // Stats table uses game_id (ESPN game ID) for joining
+    const espnGameId = gameData.game_id
     const [soxResult, oppResult] = await Promise.all([
       datalabAdmin
         .from('whitesox_player_game_stats')
         .select(`player_id, ${BATTING_COLS}, ${PITCHING_COLS}, is_opponent`)
-        .eq('whitesox_game_id', gameData.id)
+        .eq('game_id', espnGameId)
         .eq('is_opponent', false),
       datalabAdmin
         .from('whitesox_player_game_stats')
         .select(`player_id, ${BATTING_COLS}, ${PITCHING_COLS}, is_opponent,
           opponent_player_name, opponent_player_position, opponent_player_headshot_url`)
-        .eq('whitesox_game_id', gameData.id)
+        .eq('game_id', espnGameId)
         .eq('is_opponent', true),
     ])
 

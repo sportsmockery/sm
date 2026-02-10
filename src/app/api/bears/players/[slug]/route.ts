@@ -50,6 +50,7 @@ export async function GET(
       .select(`
         id,
         player_id,
+        espn_id,
         name,
         first_name,
         last_name,
@@ -107,29 +108,20 @@ export async function GET(
     }
 
     // Get player's game stats for 2025 season and aggregate
-    // Use internal ID (playerData.id) since that's what game stats reference
-    // Column names match actual datalab schema: passing_*, rushing_*, receiving_*, def_*
+    // Use ESPN ID (playerData.espn_id) since that's what game stats now reference
+    // Select both short and long column name variants
     const { data: gameStats } = await datalabAdmin
       .from('bears_player_game_stats')
       .select(`
-        passing_cmp,
-        passing_att,
-        passing_yds,
-        passing_td,
-        passing_int,
-        def_sacks,
-        rushing_car,
-        rushing_yds,
-        rushing_td,
-        receiving_tgts,
-        receiving_rec,
-        receiving_yds,
-        receiving_td,
-        fum_fum,
-        def_tackles_total,
-        interceptions
+        passing_cmp, passing_att, passing_yds, passing_td, passing_int,
+        passing_completions, passing_attempts, passing_yards, passing_touchdowns, passing_interceptions,
+        def_sacks, rushing_car, rushing_yds, rushing_td,
+        rushing_carries, rushing_yards, rushing_touchdowns,
+        receiving_tgts, receiving_rec, receiving_yds, receiving_td,
+        receiving_targets, receiving_receptions, receiving_yards, receiving_touchdowns,
+        fum_fum, def_tackles_total, interceptions
       `)
-      .eq('player_id', playerData.id)  // Use internal ID, not ESPN ID
+      .eq('player_id', playerData.espn_id)
       .eq('season', 2025)
 
     // Aggregate stats
@@ -137,18 +129,18 @@ export async function GET(
     if (gameStats && gameStats.length > 0) {
       const totals = gameStats.reduce((acc: any, game: any) => {
         acc.gamesPlayed = (acc.gamesPlayed || 0) + 1
-        acc.passAttempts = (acc.passAttempts || 0) + (game.passing_att || 0)
-        acc.passCompletions = (acc.passCompletions || 0) + (game.passing_cmp || 0)
-        acc.passYards = (acc.passYards || 0) + (game.passing_yds || 0)
-        acc.passTD = (acc.passTD || 0) + (game.passing_td || 0)
-        acc.passINT = (acc.passINT || 0) + (game.passing_int || 0)
-        acc.rushAttempts = (acc.rushAttempts || 0) + (game.rushing_car || 0)
-        acc.rushYards = (acc.rushYards || 0) + (game.rushing_yds || 0)
-        acc.rushTD = (acc.rushTD || 0) + (game.rushing_td || 0)
-        acc.receptions = (acc.receptions || 0) + (game.receiving_rec || 0)
-        acc.targets = (acc.targets || 0) + (game.receiving_tgts || 0)
-        acc.recYards = (acc.recYards || 0) + (game.receiving_yds || 0)
-        acc.recTD = (acc.recTD || 0) + (game.receiving_td || 0)
+        acc.passAttempts = (acc.passAttempts || 0) + (game.passing_attempts ?? game.passing_att ?? 0)
+        acc.passCompletions = (acc.passCompletions || 0) + (game.passing_completions ?? game.passing_cmp ?? 0)
+        acc.passYards = (acc.passYards || 0) + (game.passing_yards ?? game.passing_yds ?? 0)
+        acc.passTD = (acc.passTD || 0) + (game.passing_touchdowns ?? game.passing_td ?? 0)
+        acc.passINT = (acc.passINT || 0) + (game.passing_interceptions ?? game.passing_int ?? 0)
+        acc.rushAttempts = (acc.rushAttempts || 0) + (game.rushing_carries ?? game.rushing_car ?? 0)
+        acc.rushYards = (acc.rushYards || 0) + (game.rushing_yards ?? game.rushing_yds ?? 0)
+        acc.rushTD = (acc.rushTD || 0) + (game.rushing_touchdowns ?? game.rushing_td ?? 0)
+        acc.receptions = (acc.receptions || 0) + (game.receiving_receptions ?? game.receiving_rec ?? 0)
+        acc.targets = (acc.targets || 0) + (game.receiving_targets ?? game.receiving_tgts ?? 0)
+        acc.recYards = (acc.recYards || 0) + (game.receiving_yards ?? game.receiving_yds ?? 0)
+        acc.recTD = (acc.recTD || 0) + (game.receiving_touchdowns ?? game.receiving_td ?? 0)
         acc.tackles = (acc.tackles || 0) + (game.def_tackles_total || 0)
         acc.sacks = (acc.sacks || 0) + (parseFloat(game.def_sacks) || 0)
         acc.passesDefended = (acc.passesDefended || 0) + 0 // Not in datalab schema

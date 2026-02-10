@@ -16,25 +16,26 @@ export async function GET(
 
     const { data: gameData, error: gameError } = await datalabAdmin
       .from('cubs_games_master')
-      .select(`id, game_date, season, opponent, opponent_full_name,
+      .select(`id, game_id, game_date, season, opponent, opponent_full_name,
         is_cubs_home, venue, cubs_score, opponent_score, cubs_win, broadcast, game_type`)
       .eq('id', gameId)
       .single()
 
     if (gameError || !gameData) return NextResponse.json({ error: 'Game not found' }, { status: 404 })
 
-    // Stats table uses cubs_game_id (matches games_master.id)
+    // Stats table uses game_id (ESPN game ID) for joining
+    const espnGameId = gameData.game_id
     const [cubsResult, oppResult] = await Promise.all([
       datalabAdmin
         .from('cubs_player_game_stats')
         .select(`player_id, ${BATTING_COLS}, ${PITCHING_COLS}, is_opponent`)
-        .eq('cubs_game_id', gameData.id)
+        .eq('game_id', espnGameId)
         .eq('is_opponent', false),
       datalabAdmin
         .from('cubs_player_game_stats')
         .select(`player_id, ${BATTING_COLS}, ${PITCHING_COLS}, is_opponent,
           opponent_player_name, opponent_player_position, opponent_player_headshot_url`)
-        .eq('cubs_game_id', gameData.id)
+        .eq('game_id', espnGameId)
         .eq('is_opponent', true),
     ])
 
@@ -117,13 +118,9 @@ export async function GET(
 
         return {
           lookupGameId: gameData.id,
-          lookupGameIdType: typeof gameData.id,
+          espnGameId: espnGameId,
           cubsStatsCount: cubsResult.data?.length || 0,
           oppStatsCount: oppResult.data?.length || 0,
-          anyRowExists: anyData && anyData.length > 0,
-          anyRowError: anyError?.message,
-          availableColumns,
-          sampleRow,
           cubsError: cubsResult.error?.message,
           oppError: oppResult.error?.message,
         }

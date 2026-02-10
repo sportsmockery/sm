@@ -91,37 +91,44 @@ export async function GET(
     }
 
     // Fetch Bears team stats and opponent stats in parallel
+    // Select both short (passing_yds) and long (passing_yards) column variants
+    const statColumns = `player_id,
+      passing_cmp, passing_att, passing_yds, passing_td, passing_int,
+      passing_completions, passing_attempts, passing_yards, passing_touchdowns, passing_interceptions,
+      def_sacks, rushing_car, rushing_yds, rushing_td,
+      rushing_carries, rushing_yards, rushing_touchdowns,
+      receiving_tgts, receiving_rec, receiving_yds, receiving_td,
+      receiving_targets, receiving_receptions, receiving_yards, receiving_touchdowns,
+      fum_fum, def_tackles_total, interceptions, is_opponent`
+
     const [bearsStatsResult, oppStatsResult] = await Promise.all([
       datalabAdmin
         .from('bears_player_game_stats')
-        .select(`player_id, passing_cmp, passing_att, passing_yds, passing_td, passing_int,
-          def_sacks, rushing_car, rushing_yds, rushing_td, receiving_tgts, receiving_rec,
-          receiving_yds, receiving_td, fum_fum, def_tackles_total, interceptions, is_opponent`)
+        .select(statColumns)
         .eq('bears_game_id', gameId)
         .eq('is_opponent', false),
       datalabAdmin
         .from('bears_player_game_stats')
-        .select(`player_id, passing_cmp, passing_att, passing_yds, passing_td, passing_int,
-          def_sacks, rushing_car, rushing_yds, rushing_td, receiving_tgts, receiving_rec,
-          receiving_yds, receiving_td, fum_fum, def_tackles_total, interceptions, is_opponent,
+        .select(`${statColumns},
           opponent_player_name, opponent_player_position, opponent_player_headshot_url`)
         .eq('bears_game_id', gameId)
         .eq('is_opponent', true),
     ])
 
     // Fetch Bears player info separately and join in code
+    // player_id in bears_player_game_stats now contains ESPN IDs
     const bearsPlayerIds = (bearsStatsResult.data || []).map(s => s.player_id).filter(Boolean)
     let playersMap: Record<string, { name: string; position: string; headshot_url: string | null }> = {}
 
     if (bearsPlayerIds.length > 0) {
       const { data: playersData } = await datalabAdmin
         .from('bears_players')
-        .select('id, name, position, headshot_url')
-        .in('id', bearsPlayerIds)
+        .select('espn_id, name, position, headshot_url')
+        .in('espn_id', bearsPlayerIds)
 
       if (playersData) {
         playersMap = Object.fromEntries(
-          playersData.map(p => [String(p.id), { name: p.name, position: p.position, headshot_url: p.headshot_url }])
+          playersData.map(p => [String(p.espn_id), { name: p.name, position: p.position, headshot_url: p.headshot_url }])
         )
       }
     }
@@ -133,24 +140,25 @@ export async function GET(
         name: isOpponent ? (stat.opponent_player_name || 'Unknown') : (playerInfo?.name || 'Unknown'),
         position: isOpponent ? (stat.opponent_player_position || '') : (playerInfo?.position || ''),
         headshotUrl: isOpponent ? (stat.opponent_player_headshot_url || null) : (playerInfo?.headshot_url || null),
-      passingCmp: stat.passing_cmp,
-      passingAtt: stat.passing_att,
-      passingYds: stat.passing_yds,
-      passingTd: stat.passing_td,
-      passingInt: stat.passing_int,
-      rushingCar: stat.rushing_car,
-      rushingYds: stat.rushing_yds,
-      rushingTd: stat.rushing_td,
-      receivingRec: stat.receiving_rec,
-      receivingTgts: stat.receiving_tgts,
-      receivingYds: stat.receiving_yds,
-      receivingTd: stat.receiving_td,
-      defTacklesTotal: stat.def_tackles_total,
-      defSacks: parseFloat(stat.def_sacks) || null,
-      defInt: stat.interceptions,
-      fumFum: stat.fum_fum,
+        // Handle both short (passing_yds) and long (passing_yards) column name formats
+        passingCmp: stat.passing_completions ?? stat.passing_cmp,
+        passingAtt: stat.passing_attempts ?? stat.passing_att,
+        passingYds: stat.passing_yards ?? stat.passing_yds,
+        passingTd: stat.passing_touchdowns ?? stat.passing_td,
+        passingInt: stat.passing_interceptions ?? stat.passing_int,
+        rushingCar: stat.rushing_carries ?? stat.rushing_car,
+        rushingYds: stat.rushing_yards ?? stat.rushing_yds,
+        rushingTd: stat.rushing_touchdowns ?? stat.rushing_td,
+        receivingRec: stat.receiving_receptions ?? stat.receiving_rec,
+        receivingTgts: stat.receiving_targets ?? stat.receiving_tgts,
+        receivingYds: stat.receiving_yards ?? stat.receiving_yds,
+        receivingTd: stat.receiving_touchdowns ?? stat.receiving_td,
+        defTacklesTotal: stat.def_tackles_total,
+        defSacks: parseFloat(stat.def_sacks) || null,
+        defInt: stat.interceptions,
+        fumFum: stat.fum_fum,
+      }
     }
-  }
 
     const bearsStats = (bearsStatsResult.data || []).map(s => transformStat(s, false))
     const oppStats = (oppStatsResult.data || []).map(s => transformStat(s, true))

@@ -277,9 +277,9 @@ export async function getBearsPlayers(): Promise<BearsPlayer[]> {
 }
 
 /**
- * Get player IDs who have game stats in a specific season
+ * Get player ESPN IDs who have game stats in a specific season
  */
-async function getSeasonPlayerIds(season: number): Promise<number[]> {
+async function getSeasonPlayerIds(season: number): Promise<string[]> {
   if (!datalabAdmin) return []
 
   const { data, error } = await datalabAdmin
@@ -289,8 +289,8 @@ async function getSeasonPlayerIds(season: number): Promise<number[]> {
 
   if (error || !data) return []
 
-  // Return unique player IDs
-  return [...new Set(data.map((d: any) => d.player_id))]
+  // Return unique player ESPN IDs
+  return [...new Set(data.map((d: any) => String(d.player_id)))]
 }
 
 /**
@@ -311,6 +311,7 @@ async function getBearsPlayersFromDatalab(): Promise<BearsPlayer[]> {
     .select(`
       id,
       player_id,
+      espn_id,
       name,
       first_name,
       last_name,
@@ -353,8 +354,8 @@ function transformPlayers(data: any[]): BearsPlayer[] {
       : null
 
     return {
-      playerId: String(p.player_id || p.espn_id || p.id),
-      internalId: p.id,  // Internal DB ID used for game stats matching
+      playerId: String(p.espn_id || p.player_id || p.id),
+      internalId: p.id,
       slug: p.slug || generateSlug(p.name || p.full_name),
       fullName: p.name || p.full_name,
       firstName: p.first_name || (p.name || p.full_name)?.split(' ')[0] || '',
@@ -421,12 +422,12 @@ export async function getPlayerProfile(slug: string): Promise<PlayerProfile | nu
 
   if (!player) return null
 
-  // Bears uses internal database ID for stats joins (bp.id = bpgs.player_id)
-  const internalId = player.internalId
-  const seasons = await getPlayerSeasonStats(internalId)
+  // Bears now uses ESPN ID for stats joins (bp.espn_id = bpgs.player_id)
+  const espnId = player.playerId
+  const seasons = await getPlayerSeasonStats(espnId)
 
   // Get game log
-  const gameLog = await getPlayerGameLog(internalId)
+  const gameLog = await getPlayerGameLog(espnId)
 
   // Current season (2024 or most recent)
   const currentYear = new Date().getFullYear()
@@ -442,58 +443,50 @@ export async function getPlayerProfile(slug: string): Promise<PlayerProfile | nu
   }
 }
 
-async function getPlayerSeasonStats(internalId: number): Promise<PlayerSeasonStats[]> {
+async function getPlayerSeasonStats(espnId: string): Promise<PlayerSeasonStats[]> {
   // Always use Datalab - aggregate from game stats for accurate data
-  return await getPlayerSeasonStatsFromDatalab(internalId)
+  return await getPlayerSeasonStatsFromDatalab(espnId)
 }
 
-async function getPlayerSeasonStatsFromDatalab(internalId: number): Promise<PlayerSeasonStats[]> {
+async function getPlayerSeasonStatsFromDatalab(espnId: string): Promise<PlayerSeasonStats[]> {
   if (!datalabAdmin) return []
 
   // Aggregate from game stats for accurate data
-  // Bears uses internal database ID: bp.id = bpgs.player_id
-  // Use actual column names from database schema
+  // Bears now uses ESPN ID: bp.espn_id = bpgs.player_id
+  // Select both short and long column name variants
   const { data, error } = await datalabAdmin
     .from('bears_player_game_stats')
     .select(`
       season,
-      passing_cmp,
-      passing_att,
-      passing_yds,
-      passing_td,
-      passing_int,
-      def_sacks,
-      rushing_car,
-      rushing_yds,
-      rushing_td,
-      receiving_tgts,
-      receiving_rec,
-      receiving_yds,
-      receiving_td,
-      fum_fum,
-      def_tackles_total,
-      interceptions
+      passing_cmp, passing_att, passing_yds, passing_td, passing_int,
+      passing_completions, passing_attempts, passing_yards, passing_touchdowns, passing_interceptions,
+      def_sacks, rushing_car, rushing_yds, rushing_td,
+      rushing_carries, rushing_yards, rushing_touchdowns,
+      receiving_tgts, receiving_rec, receiving_yds, receiving_td,
+      receiving_targets, receiving_receptions, receiving_yards, receiving_touchdowns,
+      fum_fum, def_tackles_total, interceptions
     `)
-    .eq('player_id', internalId)
+    .eq('player_id', espnId)
     .eq('season', 2025)
 
   if (error || !data || data.length === 0) return []
 
   // Aggregate all game stats into season totals
+  // Use nullish coalescing to handle both short and long column name formats
   const totals = data.reduce((acc: any, game: any) => {
     acc.gamesPlayed = (acc.gamesPlayed || 0) + 1
-    acc.passAttempts = (acc.passAttempts || 0) + (game.passing_att || 0)
-    acc.passCompletions = (acc.passCompletions || 0) + (game.passing_cmp || 0)
-    acc.passYards = (acc.passYards || 0) + (game.passing_yds || 0)
-    acc.passTD = (acc.passTD || 0) + (game.passing_td || 0)
-    acc.passINT = (acc.passINT || 0) + (game.passing_int || 0)
-    acc.rushAttempts = (acc.rushAttempts || 0) + (game.rushing_car || 0)
-    acc.rushYards = (acc.rushYards || 0) + (game.rushing_yds || 0)
-    acc.rushTD = (acc.rushTD || 0) + (game.rushing_td || 0)
-    acc.receptions = (acc.receptions || 0) + (game.receiving_rec || 0)
-    acc.recYards = (acc.recYards || 0) + (game.receiving_yds || 0)
-    acc.recTD = (acc.recTD || 0) + (game.receiving_td || 0)
-    acc.targets = (acc.targets || 0) + (game.receiving_tgts || 0)
+    acc.passAttempts = (acc.passAttempts || 0) + (game.passing_attempts ?? game.passing_att ?? 0)
+    acc.passCompletions = (acc.passCompletions || 0) + (game.passing_completions ?? game.passing_cmp ?? 0)
+    acc.passYards = (acc.passYards || 0) + (game.passing_yards ?? game.passing_yds ?? 0)
+    acc.passTD = (acc.passTD || 0) + (game.passing_touchdowns ?? game.passing_td ?? 0)
+    acc.passINT = (acc.passINT || 0) + (game.passing_interceptions ?? game.passing_int ?? 0)
+    acc.rushAttempts = (acc.rushAttempts || 0) + (game.rushing_carries ?? game.rushing_car ?? 0)
+    acc.rushYards = (acc.rushYards || 0) + (game.rushing_yards ?? game.rushing_yds ?? 0)
+    acc.rushTD = (acc.rushTD || 0) + (game.rushing_touchdowns ?? game.rushing_td ?? 0)
+    acc.receptions = (acc.receptions || 0) + (game.receiving_receptions ?? game.receiving_rec ?? 0)
+    acc.recYards = (acc.recYards || 0) + (game.receiving_yards ?? game.receiving_yds ?? 0)
+    acc.recTD = (acc.recTD || 0) + (game.receiving_touchdowns ?? game.receiving_td ?? 0)
+    acc.targets = (acc.targets || 0) + (game.receiving_targets ?? game.receiving_tgts ?? 0)
     acc.tackles = (acc.tackles || 0) + (game.def_tackles_total || 0)
     acc.sacks = (acc.sacks || 0) + (parseFloat(game.def_sacks) || 0)
     acc.passesDefended = (acc.passesDefended || 0) + (game.def_passes_defended || 0)
@@ -570,41 +563,31 @@ function transformSeasonStats(data: any[]): PlayerSeasonStats[] {
   }))
 }
 
-async function getPlayerGameLog(internalId: number): Promise<PlayerGameLogEntry[]> {
+async function getPlayerGameLog(espnId: string): Promise<PlayerGameLogEntry[]> {
   // Always use Datalab as source of truth
-  return await getPlayerGameLogFromDatalab(internalId)
+  return await getPlayerGameLogFromDatalab(espnId)
 }
 
-async function getPlayerGameLogFromDatalab(internalId: number): Promise<PlayerGameLogEntry[]> {
+async function getPlayerGameLogFromDatalab(espnId: string): Promise<PlayerGameLogEntry[]> {
   if (!datalabAdmin) return []
 
-  // Bears uses internal database ID: bp.id = bpgs.player_id
+  // Bears now uses ESPN ID: bp.espn_id = bpgs.player_id
+  // Select both short and long column name variants
   const { data, error } = await datalabAdmin
     .from('bears_player_game_stats')
     .select(`
       player_id,
       bears_game_id,
-      passing_cmp,
-      passing_att,
-      passing_yds,
-      passing_td,
-      passing_int,
-      def_sacks,
-      rushing_car,
-      rushing_yds,
-      rushing_td,
-      receiving_tgts,
-      receiving_rec,
-      receiving_yds,
-      receiving_td,
-      fum_fum,
-      def_tackles_total,
-      interceptions,
-      game_date,
-      opponent,
-      is_home
+      passing_cmp, passing_att, passing_yds, passing_td, passing_int,
+      passing_completions, passing_attempts, passing_yards, passing_touchdowns, passing_interceptions,
+      def_sacks, rushing_car, rushing_yds, rushing_td,
+      rushing_carries, rushing_yards, rushing_touchdowns,
+      receiving_tgts, receiving_rec, receiving_yds, receiving_td,
+      receiving_targets, receiving_receptions, receiving_yards, receiving_touchdowns,
+      fum_fum, def_tackles_total, interceptions,
+      game_date, opponent, is_home
     `)
-    .eq('player_id', internalId)
+    .eq('player_id', espnId)
     .eq('season', 2025)
     .order('game_date', { ascending: false })
     .limit(20)
@@ -638,19 +621,19 @@ function transformGameLogEntry(stats: any, game: any): PlayerGameLogEntry {
     result: isPlayed ? (game.bears_win ? 'W' : 'L') : null,
     bearsScore: game.bears_score,
     oppScore: game.opponent_score,
-    // Use actual column names from database
-    passAttempts: stats.passing_att,
-    passCompletions: stats.passing_cmp,
-    passYards: stats.passing_yds,
-    passTD: stats.passing_td,
-    passINT: stats.passing_int,
-    rushAttempts: stats.rushing_car,
-    rushYards: stats.rushing_yds,
-    rushTD: stats.rushing_td,
-    targets: stats.receiving_tgts,
-    receptions: stats.receiving_rec,
-    recYards: stats.receiving_yds,
-    recTD: stats.receiving_td,
+    // Handle both short and long column name formats
+    passAttempts: stats.passing_attempts ?? stats.passing_att,
+    passCompletions: stats.passing_completions ?? stats.passing_cmp,
+    passYards: stats.passing_yards ?? stats.passing_yds,
+    passTD: stats.passing_touchdowns ?? stats.passing_td,
+    passINT: stats.passing_interceptions ?? stats.passing_int,
+    rushAttempts: stats.rushing_carries ?? stats.rushing_car,
+    rushYards: stats.rushing_yards ?? stats.rushing_yds,
+    rushTD: stats.rushing_touchdowns ?? stats.rushing_td,
+    targets: stats.receiving_targets ?? stats.receiving_tgts,
+    receptions: stats.receiving_receptions ?? stats.receiving_rec,
+    recYards: stats.receiving_yards ?? stats.receiving_yds,
+    recTD: stats.receiving_touchdowns ?? stats.receiving_td,
     tackles: stats.def_tackles_total,
     sacks: stats.def_sacks,
     interceptions: stats.interceptions || 0,
@@ -904,50 +887,32 @@ async function getLeaderboards(season: number): Promise<BearsLeaderboard> {
   }
 
   const players = await getBearsPlayers()
-  // Bears uses internal database ID: bp.id = bpgs.player_id
-  const playersMap = new Map(players.map(p => [p.internalId, p]))
-
-  // Aggregate from bears_player_game_stats using actual column names from database
-  // Columns: passing_yds, passing_td, passing_int, rushing_yds, rushing_td, rushing_car,
-  //          receiving_yds, receiving_td, receiving_rec, def_tackles_total, def_sacks
+  // Bears now uses ESPN ID: bp.espn_id = bpgs.player_id
+  const playersMap = new Map(players.map(p => [p.playerId, p]))
 
   // Get all game stats for season and aggregate by player
+  // Select both short and long column name variants
+  const leaderboardColumns = `
+    player_id,
+    passing_yds, passing_td, passing_int,
+    passing_yards, passing_touchdowns, passing_interceptions,
+    rushing_yds, rushing_td, rushing_car,
+    rushing_yards, rushing_touchdowns, rushing_carries,
+    receiving_yds, receiving_td, receiving_rec,
+    receiving_yards, receiving_touchdowns, receiving_receptions,
+    def_tackles_total, def_sacks
+  `
+
   let { data: gameStats } = await datalabAdmin
     .from('bears_player_game_stats')
-    .select(`
-      player_id,
-      passing_yds,
-      passing_td,
-      passing_int,
-      rushing_yds,
-      rushing_td,
-      rushing_car,
-      receiving_yds,
-      receiving_td,
-      receiving_rec,
-      def_tackles_total,
-      def_sacks
-    `)
+    .select(leaderboardColumns)
     .eq('season', season)
 
   // Fallback to previous season if no stats
   if (!gameStats || gameStats.length === 0) {
     const { data: prevStats } = await datalabAdmin
       .from('bears_player_game_stats')
-      .select(`
-        player_id,
-        passing_yds,
-        passing_td,
-        passing_int,
-        rushing_yds,
-        rushing_td,
-        rushing_car,
-        receiving_yds,
-        receiving_td,
-        receiving_rec,
-        def_tackles_total,
-        def_sacks
-      `)
+      .select(leaderboardColumns)
       .eq('season', season - 1)
     gameStats = prevStats
   }
@@ -956,11 +921,11 @@ async function getLeaderboards(season: number): Promise<BearsLeaderboard> {
     return { passing: [], rushing: [], receiving: [], defense: [] }
   }
 
-  // Aggregate stats by player (keyed by internal ID which is a number)
-  const playerTotals = new Map<number, any>()
+  // Aggregate stats by player (keyed by ESPN ID which is a string)
+  const playerTotals = new Map<string, any>()
 
   for (const stat of gameStats) {
-    const pid = stat.player_id  // Internal ID as number
+    const pid = String(stat.player_id)  // ESPN ID as string
     if (!playerTotals.has(pid)) {
       playerTotals.set(pid, {
         player_id: pid,
@@ -978,15 +943,16 @@ async function getLeaderboards(season: number): Promise<BearsLeaderboard> {
       })
     }
     const totals = playerTotals.get(pid)!
-    totals.pass_yds += stat.passing_yds || 0
-    totals.pass_td += stat.passing_td || 0
-    totals.pass_int += stat.passing_int || 0
-    totals.rush_yds += stat.rushing_yds || 0
-    totals.rush_td += stat.rushing_td || 0
-    totals.rush_att += stat.rushing_car || 0
-    totals.rec_yds += stat.receiving_yds || 0
-    totals.rec_td += stat.receiving_td || 0
-    totals.rec += stat.receiving_rec || 0
+    // Handle both short and long column name formats
+    totals.pass_yds += (stat.passing_yards ?? stat.passing_yds ?? 0)
+    totals.pass_td += (stat.passing_touchdowns ?? stat.passing_td ?? 0)
+    totals.pass_int += (stat.passing_interceptions ?? stat.passing_int ?? 0)
+    totals.rush_yds += (stat.rushing_yards ?? stat.rushing_yds ?? 0)
+    totals.rush_td += (stat.rushing_touchdowns ?? stat.rushing_td ?? 0)
+    totals.rush_att += (stat.rushing_carries ?? stat.rushing_car ?? 0)
+    totals.rec_yds += (stat.receiving_yards ?? stat.receiving_yds ?? 0)
+    totals.rec_td += (stat.receiving_touchdowns ?? stat.receiving_td ?? 0)
+    totals.rec += (stat.receiving_receptions ?? stat.receiving_rec ?? 0)
     totals.tackles += stat.def_tackles_total || 0
     totals.sacks += parseFloat(stat.def_sacks) || 0
   }

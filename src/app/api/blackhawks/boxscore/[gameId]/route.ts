@@ -42,7 +42,20 @@ export async function GET(
       .single()
 
     if (gameError || !gameData) {
-      return NextResponse.json({ error: 'Game not found', _debug: { gameId, error: gameError?.message } }, { status: 404 })
+      // Debug: try to find any game to see what IDs look like
+      const { data: sampleGame } = await datalabAdmin
+        .from('blackhawks_games_master')
+        .select('id, external_id, game_date, opponent')
+        .limit(1)
+      return NextResponse.json({
+        error: 'Game not found',
+        _debug: {
+          requestedGameId: gameId,
+          gameIdType: typeof gameId,
+          queryError: gameError?.message,
+          sampleGame: sampleGame?.[0],
+        }
+      }, { status: 404 })
     }
 
     // Stats table uses external_id (ESPN game ID) as game_id
