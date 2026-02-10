@@ -912,13 +912,15 @@ Grade this trade from the perspective of the ${teamDisplayNames[chicago_team]}.`
           overrideBracket = 'between_30_50'
           overrideLimits = { min: -15, max: 35 }
         } else if (deterministicGrade < 70) {
-          allowedDiff = Math.max(-20, Math.min(20, diff))       // Can adjust -20 to +20
+          // between_50_70: Moderate adjustments for borderline trades
+          allowedDiff = Math.max(-10, Math.min(10, diff))       // Can adjust -10 to +10
           overrideBracket = 'between_50_70'
-          overrideLimits = { min: -20, max: 20 }
+          overrideLimits = { min: -10, max: 10 }
         } else {
-          allowedDiff = Math.max(-15, Math.min(15, diff))       // Can adjust -15 to +15
+          // above_70: Fair trades should stay fair - tight limits
+          allowedDiff = Math.max(-5, Math.min(5, diff))         // Can adjust -5 to +5
           overrideBracket = 'above_70'
-          overrideLimits = { min: -15, max: 15 }
+          overrideLimits = { min: -5, max: 5 }
         }
 
         grade = Math.max(0, Math.min(100, deterministicGrade + allowedDiff))
