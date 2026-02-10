@@ -26,11 +26,12 @@ async function getDeterministicGrade(payload: {
   draft_picks_received?: any[]
 }): Promise<{ grade: number; breakdown: any; debug?: any } | null> {
   try {
+    // Edge Function is on DATALAB project, use DATALAB anon key
     const response = await fetch(EDGE_FUNCTION_URL, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${process.env.SUPABASE_ANON_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY}`,
+        'Authorization': `Bearer ${process.env.DATALAB_SUPABASE_ANON_KEY}`,
       },
       body: JSON.stringify(payload),
     })
