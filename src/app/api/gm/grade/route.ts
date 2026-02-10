@@ -908,9 +908,10 @@ Grade this trade from the perspective of the ${teamDisplayNames[chicago_team]}.`
           overrideBracket = 'below_30'
           overrideLimits = { min: 0, max: 50 }
         } else if (deterministicGrade < 50) {
-          allowedDiff = Math.max(-15, Math.min(35, diff))       // Can adjust -15 to +35
+          // between_30_50: Allow upward correction but limit downward
+          allowedDiff = Math.max(-8, Math.min(35, diff))        // Can adjust -8 to +35
           overrideBracket = 'between_30_50'
-          overrideLimits = { min: -15, max: 35 }
+          overrideLimits = { min: -8, max: 35 }
         } else if (deterministicGrade < 70) {
           // between_50_70: Moderate adjustments for borderline trades
           allowedDiff = Math.max(-10, Math.min(10, diff))       // Can adjust -10 to +10
