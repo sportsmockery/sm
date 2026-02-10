@@ -76,6 +76,16 @@ export async function GET(
     const cubsStats = (cubsResult.data || []).map(s => transform(s, false))
     const oppStats = (oppResult.data || []).map(s => transform(s, true))
 
+    // Debug: log what we're getting
+    console.log('[Cubs Boxscore Debug]', {
+      gameId: gameData.id,
+      cubsStatsCount: cubsResult.data?.length || 0,
+      oppStatsCount: oppResult.data?.length || 0,
+      cubsPlayerIds: cubsPlayerIds.slice(0, 5),
+      playersMapKeys: Object.keys(playersMap).slice(0, 5),
+      firstCubsStat: cubsResult.data?.[0],
+    })
+
     return NextResponse.json({
       gameId: String(gameData.id),
       date: gameData.game_date,

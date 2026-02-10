@@ -42,8 +42,11 @@ export async function GET(
       .single()
 
     if (gameError || !gameData) {
+      console.log('[Blackhawks Boxscore Debug] Game lookup failed:', { gameId, error: gameError })
       return NextResponse.json({ error: 'Game not found' }, { status: 404 })
     }
+
+    console.log('[Blackhawks Boxscore Debug] Game found:', { id: gameData.id, external_id: gameData.external_id })
 
     // Stats table uses external_id (ESPN game ID) as game_id
     const [hawksResult, oppResult] = await Promise.all([
