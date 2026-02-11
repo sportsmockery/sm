@@ -6,6 +6,7 @@ import { usePathname } from 'next/navigation'
 import { useEffect, useState, useCallback, useRef } from 'react'
 import { motion, useReducedMotion } from 'framer-motion'
 import { CHICAGO_TEAMS, ESPN_TEAM_IDS } from '@/lib/team-config'
+import { useTeamRecord } from '@/contexts/TeamRecordContext'
 
 type TeamKey = 'bears' | 'bulls' | 'cubs' | 'whitesox' | 'blackhawks'
 
@@ -199,6 +200,7 @@ export default function TeamStickyBar({ teamKey, className = '', isArticlePage }
   const [isLiveGame, setIsLiveGame] = useState(false)
   const intervalRef = useRef<NodeJS.Timeout | null>(null)
   const prefersReducedMotion = useReducedMotion()
+  const { record: heroRecord } = useTeamRecord()
 
   // Detect if we're on an article page
   const isArticle = isArticlePage ?? (pathname?.match(/^\/[^/]+\/[^/]+$/) !== null && !pathname?.startsWith('/teams/'))
@@ -255,7 +257,7 @@ export default function TeamStickyBar({ teamKey, className = '', isArticlePage }
   }
 
   const data = {
-    record: tickerData?.record || '--',
+    record: heroRecord || tickerData?.record || '--',
     nextGame: tickerData?.nextGame,
     lastGame: tickerData?.lastGame,
     liveGame: tickerData?.liveGame,
