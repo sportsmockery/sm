@@ -78,6 +78,7 @@ interface TeamHubLayoutProps {
 // Note: Fan Chat uses external path format with channel query param
 const TEAM_TABS = [
   { id: 'overview', label: 'Overview', path: '' },
+  { id: 'live', label: 'Live', path: '/live' },
   { id: 'schedule', label: 'Schedule', path: '/schedule' },
   { id: 'scores', label: 'Scores', path: '/scores' },
   { id: 'stats', label: 'Stats', path: '/stats' },
@@ -90,6 +91,7 @@ const TEAM_TABS = [
 // NFL tabs (includes scores for box scores)
 const NFL_TABS = [
   { id: 'overview', label: 'Overview', path: '' },
+  { id: 'live', label: 'Live', path: '/live' },
   { id: 'schedule', label: 'Schedule', path: '/schedule' },
   { id: 'scores', label: 'Box Scores', path: '/scores' },
   { id: 'stats', label: 'Stats', path: '/stats' },

@@ -299,6 +299,22 @@ export interface LastGameInfo {
 }
 
 /**
+ * Last game with ID for live pages fallback
+ */
+export interface LastGameWithId {
+  gameId: string
+  opponent: string
+  opponentLogo?: string
+  opponentAbbrev?: string
+  date: string
+  isHome: boolean
+  teamScore: number
+  opponentScore: number
+  result: 'W' | 'L' | 'T'
+  sport: 'nfl' | 'nba' | 'nhl' | 'mlb'
+}
+
+/**
  * Fetch last completed game from DataLab Supabase
  */
 export async function fetchLastGame(teamKey: string): Promise<LastGameInfo | null> {
@@ -350,6 +366,79 @@ export async function fetchLastGame(teamKey: string): Promise<LastGameInfo | nul
     }
   } catch (error) {
     console.error(`Error fetching ${teamKey} last game:`, error)
+    return null
+  }
+}
+
+// Map team key to sport for live pages
+const TEAM_SPORT: Record<string, 'nfl' | 'nba' | 'nhl' | 'mlb'> = {
+  bears: 'nfl',
+  bulls: 'nba',
+  blackhawks: 'nhl',
+  cubs: 'mlb',
+  whitesox: 'mlb',
+}
+
+/**
+ * Fetch last completed game WITH game ID
+ * Used by live pages as fallback when no live game is in progress
+ */
+export async function fetchLastGameWithId(teamKey: string): Promise<LastGameWithId | null> {
+  const config = DATALAB_CONFIG[teamKey]
+  const teamInfo = CHICAGO_TEAMS[teamKey]
+  if (!config || !teamInfo || !datalabClient) return null
+
+  try {
+    const today = new Date().toISOString().split('T')[0]
+
+    // Get last completed game (game_date <= today with scores > 0)
+    const { data: games, error } = await datalabClient
+      .from(config.gamesTable)
+      .select('*')
+      .lte('game_date', today)
+      .gt(config.scoreCol, 0)
+      .order('game_date', { ascending: false })
+      .limit(1)
+
+    if (error || !games || games.length === 0) {
+      return null
+    }
+
+    const game = games[0]
+    const isHome = game[config.isHomeCol] || game.home_away === 'home' || game.homeAway === 'home'
+    const teamScore = Number(game[config.scoreCol]) || 0
+    const opponentScore = Number(game[config.oppScoreCol]) || 0
+
+    // Determine result
+    let result: 'W' | 'L' | 'T' = 'T'
+    if (teamScore > opponentScore) result = 'W'
+    else if (opponentScore > teamScore) result = 'L'
+
+    // Parse date
+    const gameDate = game.game_date ? new Date(game.game_date) : new Date()
+
+    // Get game ID - different columns depending on the table
+    const gameId = game.espn_game_id || game.game_id || game.id?.toString() || ''
+
+    return {
+      gameId,
+      opponent: game.opponent_full_name || game.opponent || 'TBD',
+      opponentLogo: game.opponent_logo || undefined,
+      opponentAbbrev: game.opponent_abbrev || game.opponent || undefined,
+      date: gameDate.toLocaleDateString('en-US', {
+        weekday: 'short',
+        month: 'short',
+        day: 'numeric',
+        year: 'numeric',
+      }),
+      isHome,
+      teamScore,
+      opponentScore,
+      result,
+      sport: TEAM_SPORT[teamKey] || 'nfl',
+    }
+  } catch (error) {
+    console.error(`Error fetching ${teamKey} last game with ID:`, error)
     return null
   }
 }
