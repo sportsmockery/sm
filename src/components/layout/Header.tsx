@@ -649,9 +649,22 @@ export default function Header() {
                 <button
                   onClick={() => setNewFeaturesMenuOpen(!newFeaturesMenuOpen)}
                   className="flex items-center gap-1 px-4 py-4 text-[14px] font-bold hover:text-[var(--link-color)] transition-colors"
-                  style={{ fontFamily: "'Montserrat', sans-serif", color: '#bc0000' }}
+                  style={{ fontFamily: "'Montserrat', sans-serif", color: 'var(--text-primary)' }}
                 >
-                  New Features
+                  2.0
+                  <span
+                    style={{
+                      backgroundColor: '#bc0000',
+                      color: '#ffffff',
+                      fontSize: '9px',
+                      fontWeight: 700,
+                      padding: '2px 5px',
+                      borderRadius: '4px',
+                      marginLeft: '4px',
+                    }}
+                  >
+                    New!
+                  </span>
                   <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
                   </svg>
@@ -840,10 +853,22 @@ export default function Header() {
             {/* New Features section */}
             <div>
               <div
-                className="py-3 text-[14px] font-bold"
-                style={{ fontFamily: "'Montserrat', sans-serif", color: '#bc0000', borderBottom: '1px solid var(--border-color)' }}
+                className="py-3 text-[14px] font-bold flex items-center gap-2"
+                style={{ fontFamily: "'Montserrat', sans-serif", color: 'var(--text-primary)', borderBottom: '1px solid var(--border-color)' }}
               >
-                New Features
+                2.0
+                <span
+                  style={{
+                    backgroundColor: '#bc0000',
+                    color: '#ffffff',
+                    fontSize: '9px',
+                    fontWeight: 700,
+                    padding: '2px 5px',
+                    borderRadius: '4px',
+                  }}
+                >
+                  New!
+                </span>
               </div>
               <div className="pl-4 border-l-2 border-[#bc0000] ml-2">
                 <Link
