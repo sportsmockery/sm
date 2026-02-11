@@ -1,19 +1,23 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
-import { createClient } from '@supabase/supabase-js';
 import { useTheme } from '@/contexts/ThemeContext';
 
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-);
+interface ScoreBreakdown {
+  emotion: number;
+  controversy: number;
+  humor: number;
+  timeliness: number;
+  past_match: number;
+}
 
 interface ViralPrediction {
   id: string;
   rank: number;
   team: string;
   score: number;
+  score_breakdown: ScoreBreakdown | null;
+  reasoning: string | null;
   suggested_format: string;
   caption: string;
   hashtags: string;
@@ -44,42 +48,33 @@ export default function TwitterAutoPostsPage() {
   const [editCaption, setEditCaption] = useState('');
   const [uploading, setUploading] = useState<string | null>(null);
   const [posting, setPosting] = useState<string | null>(null);
+  const [expandedReasoning, setExpandedReasoning] = useState<Set<string>>(new Set());
 
-  const fetchPredictions = useCallback(async () => {
-    const { data } = await supabase
-      .from('Twitter_viral_predictions')
-      .select('*')
-      .order('created_at', { ascending: false })
-      .order('rank', { ascending: true })
-      .limit(50);
-    setPredictions(data || []);
-  }, []);
-
-  const fetchErrors = useCallback(async () => {
-    const { data } = await supabase
-      .from('Twitter_cron_error_log')
-      .select('*')
-      .order('timestamp', { ascending: false })
-      .limit(20);
-    setErrors(data || []);
+  const fetchData = useCallback(async () => {
+    try {
+      const res = await fetch('/api/admin/twitter-posts');
+      if (res.ok) {
+        const data = await res.json();
+        setPredictions(data.predictions || []);
+        setErrors(data.errors || []);
+      }
+    } catch (err) {
+      console.error('Failed to fetch predictions:', err);
+    }
   }, []);
 
   useEffect(() => {
     const init = async () => {
       setLoading(true);
-      await Promise.all([fetchPredictions(), fetchErrors()]);
+      await fetchData();
       setLoading(false);
     };
     init();
 
     // Refresh every 30 seconds
-    const interval = setInterval(() => {
-      fetchPredictions();
-      fetchErrors();
-    }, 30000);
-
+    const interval = setInterval(fetchData, 30000);
     return () => clearInterval(interval);
-  }, [fetchPredictions, fetchErrors]);
+  }, [fetchData]);
 
   const startEditing = (p: ViralPrediction) => {
     setEditingId(p.id);
@@ -87,38 +82,64 @@ export default function TwitterAutoPostsPage() {
   };
 
   const saveCaption = async (id: string) => {
-    await supabase
-      .from('Twitter_viral_predictions')
-      .update({ caption: editCaption })
-      .eq('id', id);
-    setEditingId(null);
-    fetchPredictions();
+    try {
+      await fetch('/api/admin/twitter-posts', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id, caption: editCaption }),
+      });
+      setEditingId(null);
+      fetchData();
+    } catch (err) {
+      console.error('Failed to save caption:', err);
+    }
   };
 
   const handleFileUpload = async (id: string, file: File) => {
     setUploading(id);
     try {
-      const fileName = `twitter-media/${id}-${Date.now()}-${file.name}`;
-      await supabase.storage.from('media').upload(fileName, file);
-      const { data } = supabase.storage.from('media').getPublicUrl(fileName);
-      await supabase
-        .from('Twitter_viral_predictions')
-        .update({ media_url: data.publicUrl })
-        .eq('id', id);
-      fetchPredictions();
-    } catch (err: unknown) {
-      const errorMessage = err instanceof Error ? err.message : 'Unknown error';
-      alert('Upload failed: ' + errorMessage);
+      // Upload to our media endpoint
+      const formData = new FormData();
+      formData.append('file', file);
+      formData.append('predictionId', id);
+
+      const uploadRes = await fetch('/api/admin/media', {
+        method: 'POST',
+        body: formData,
+      });
+
+      if (uploadRes.ok) {
+        const { url } = await uploadRes.json();
+        // Update prediction with media URL
+        await fetch('/api/admin/twitter-posts', {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ id, media_url: url }),
+        });
+        fetchData();
+      }
+    } catch (err) {
+      console.error('Upload failed:', err);
+      alert('Upload failed');
     }
     setUploading(null);
   };
 
   const handleSchedule = async (id: string, date: string) => {
-    await supabase
-      .from('Twitter_viral_predictions')
-      .update({ scheduled_for: new Date(date).toISOString(), status: 'scheduled' })
-      .eq('id', id);
-    fetchPredictions();
+    try {
+      await fetch('/api/admin/twitter-posts', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          id,
+          scheduled_for: new Date(date).toISOString(),
+          status: 'scheduled',
+        }),
+      });
+      fetchData();
+    } catch (err) {
+      console.error('Failed to schedule:', err);
+    }
   };
 
   const handlePostNow = async (p: ViralPrediction) => {
@@ -136,7 +157,7 @@ export default function TwitterAutoPostsPage() {
       const result = await res.json();
       if (!res.ok) throw new Error(result.error);
       alert('Posted! Tweet ID: ' + result.tweetId);
-      fetchPredictions();
+      fetchData();
     } catch (err: unknown) {
       const errorMessage = err instanceof Error ? err.message : 'Unknown error';
       alert('Post failed: ' + errorMessage);
@@ -144,25 +165,43 @@ export default function TwitterAutoPostsPage() {
     setPosting(null);
   };
 
-  // Team colors - background colors for badges
+  const toggleReasoning = (id: string) => {
+    setExpandedReasoning(prev => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  };
+
+  // Team colors
   const getTeamBgColor = (team: string) => {
     const colors: Record<string, string> = {
-      Bears: '#F97316',        // orange
-      Bulls: '#dc2626',        // red
-      Blackhawks: '#991b1b',   // dark red
-      Cubs: '#2563eb',         // blue
-      'White Sox': '#000000'   // black
+      Bears: '#F97316',
+      Bulls: '#dc2626',
+      Blackhawks: '#991b1b',
+      Cubs: '#2563eb',
+      'White Sox': '#000000'
     };
     return colors[team] || '#6b7280';
   };
 
   const getStatusColor = (status: string) => {
     const colors: Record<string, { bg: string; text: string }> = {
-      draft: { bg: '#eab308', text: '#000' },      // yellow
-      scheduled: { bg: '#3b82f6', text: '#fff' },  // blue
-      posted: { bg: '#22c55e', text: '#fff' }      // green
+      draft: { bg: '#eab308', text: '#000' },
+      scheduled: { bg: '#3b82f6', text: '#fff' },
+      posted: { bg: '#22c55e', text: '#fff' }
     };
     return colors[status] || { bg: '#6b7280', text: '#fff' };
+  };
+
+  // Score breakdown criteria labels
+  const criteriaLabels: Record<string, string> = {
+    emotion: '😢 Emotion',
+    controversy: '🔥 Controversy',
+    humor: '😂 Humor',
+    timeliness: '⏰ Timeliness',
+    past_match: '📊 Past Match',
   };
 
   // Group predictions by date
@@ -186,7 +225,7 @@ export default function TwitterAutoPostsPage() {
   if (loading) {
     return (
       <div style={{ minHeight: '100vh', backgroundColor: bgPage, color: textPrimary, padding: 32, textAlign: 'center' }}>
-        Loading...
+        Loading predictions from DataLab...
       </div>
     );
   }
@@ -204,13 +243,10 @@ export default function TwitterAutoPostsPage() {
           fontSize: 14,
           lineHeight: 1.6,
         }}>
-          This page pulls daily viral story ideas from datalab.sportsmockery.com.
-          The engine reads Media_Source.json, runs Claude every morning at 6 AM CST,
-          applies the 5-criteria scoring system, stores ideas in Supabase table
-          Twitter_viral_predictions, and surfaces them here. Edit caption, upload
-          photo (to Supabase storage), see live embedded Twitter preview, schedule,
-          or post immediately to @sportsmockery using Vercel Twitter keys. Error log
-          at bottom shows cron job status from Twitter_cron_error_log.
+          This page pulls daily viral story ideas from DataLab. The engine reads news sources,
+          runs Claude every morning at 6 AM CST, applies a 5-criteria scoring system (emotion,
+          controversy, humor, timeliness, past_match), and surfaces the top 5 predictions here.
+          Edit caption, upload photo, schedule, or post immediately to @sportsmockery.
         </div>
       </div>
 
@@ -221,9 +257,11 @@ export default function TwitterAutoPostsPage() {
             {date} <span style={{ color: textSecondary, fontWeight: 400 }}>({preds.length} predictions)</span>
           </h2>
 
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(350px, 1fr))', gap: 24 }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(380px, 1fr))', gap: 24 }}>
             {preds.map((p) => {
               const statusColors = getStatusColor(p.status);
+              const isExpanded = expandedReasoning.has(p.id);
+
               return (
                 <div key={p.id} style={{
                   backgroundColor: bgCard,
@@ -250,22 +288,50 @@ export default function TwitterAutoPostsPage() {
                       }}>
                         {p.team}
                       </span>
-                      <span style={{ fontSize: 24, fontWeight: 700, color: '#22c55e' }}>
+                      <span style={{ fontSize: 28, fontWeight: 800, color: '#22c55e' }}>
                         {p.score?.toFixed(1)}
                       </span>
+                      <span style={{ fontSize: 12, color: textSecondary }}>/ 10</span>
                     </div>
-                    <span style={{
-                      padding: '4px 10px',
-                      borderRadius: 6,
-                      fontSize: 11,
-                      fontWeight: 600,
-                      backgroundColor: statusColors.bg,
-                      color: statusColors.text,
-                      textTransform: 'uppercase',
-                    }}>
-                      {p.status}
-                    </span>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                      <span style={{ fontSize: 11, color: textSecondary }}>#{p.rank}</span>
+                      <span style={{
+                        padding: '4px 10px',
+                        borderRadius: 6,
+                        fontSize: 11,
+                        fontWeight: 600,
+                        backgroundColor: statusColors.bg,
+                        color: statusColors.text,
+                        textTransform: 'uppercase',
+                      }}>
+                        {p.status}
+                      </span>
+                    </div>
                   </div>
+
+                  {/* Score Breakdown */}
+                  {p.score_breakdown && (
+                    <div style={{
+                      padding: '12px 16px',
+                      backgroundColor: bgCardAlt,
+                      borderBottom: `1px solid ${borderColor}`,
+                    }}>
+                      <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
+                        {Object.entries(p.score_breakdown).map(([key, val]) => (
+                          <span key={key} style={{
+                            fontSize: 11,
+                            padding: '4px 8px',
+                            borderRadius: 6,
+                            backgroundColor: isDark ? '#374151' : '#e5e7eb',
+                            color: val >= 8 ? '#22c55e' : val >= 5 ? '#eab308' : '#ef4444',
+                            fontWeight: 600,
+                          }}>
+                            {criteriaLabels[key] || key}: {val}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                  )}
 
                   {/* Media */}
                   {p.media_url ? (
@@ -285,7 +351,7 @@ export default function TwitterAutoPostsPage() {
                       textAlign: 'center',
                     }}>
                       <div>
-                        <p style={{ marginBottom: 8 }}>No media. AI Prompt:</p>
+                        <p style={{ marginBottom: 8, fontWeight: 600 }}>🎨 AI Image Prompt:</p>
                         <p style={{ fontStyle: 'italic', fontSize: 12 }}>{p.media_prompt}</p>
                       </div>
                     </div>
@@ -346,7 +412,7 @@ export default function TwitterAutoPostsPage() {
                       </div>
                     ) : (
                       <div>
-                        <p style={{ color: textPrimary, marginBottom: 8, lineHeight: 1.5 }}>{p.caption}</p>
+                        <p style={{ color: textPrimary, marginBottom: 8, lineHeight: 1.5, fontSize: 15 }}>{p.caption}</p>
                         <p style={{ color: '#3b82f6', fontSize: 13 }}>{p.hashtags}</p>
                         <button
                           onClick={() => startEditing(p)}
@@ -366,10 +432,49 @@ export default function TwitterAutoPostsPage() {
                     )}
                   </div>
 
+                  {/* Reasoning (expandable) */}
+                  {p.reasoning && (
+                    <div style={{
+                      padding: '12px 16px',
+                      backgroundColor: bgCardAlt,
+                      borderTop: `1px solid ${borderColor}`,
+                    }}>
+                      <button
+                        onClick={() => toggleReasoning(p.id)}
+                        style={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: 8,
+                          width: '100%',
+                          background: 'none',
+                          border: 'none',
+                          cursor: 'pointer',
+                          color: textSecondary,
+                          fontSize: 12,
+                          fontWeight: 600,
+                          padding: 0,
+                        }}
+                      >
+                        <span>{isExpanded ? '▼' : '▶'}</span>
+                        <span>🧠 AI Reasoning</span>
+                      </button>
+                      {isExpanded && (
+                        <p style={{
+                          marginTop: 8,
+                          fontSize: 13,
+                          color: textSecondary,
+                          lineHeight: 1.6,
+                        }}>
+                          {p.reasoning}
+                        </p>
+                      )}
+                    </div>
+                  )}
+
                   {/* Twitter Preview */}
                   <div style={{
                     padding: 16,
-                    backgroundColor: bgCardAlt,
+                    backgroundColor: isDark ? '#0f172a' : '#f8fafc',
                     borderTop: `1px solid ${borderColor}`,
                   }}>
                     <p style={{ fontSize: 11, color: textSecondary, marginBottom: 8 }}>Preview:</p>
@@ -487,7 +592,7 @@ export default function TwitterAutoPostsPage() {
                     fontSize: 11,
                     color: textSecondary,
                   }}>
-                    <p>Format: {p.suggested_format} | Rank: #{p.rank}</p>
+                    <p>Format: <strong>{p.suggested_format}</strong></p>
                     <p>Created: {new Date(p.created_at).toLocaleString()}</p>
                     {p.scheduled_for && (
                       <p style={{ color: '#3b82f6' }}>Scheduled: {new Date(p.scheduled_for).toLocaleString()}</p>
