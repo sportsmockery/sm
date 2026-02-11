@@ -14,40 +14,71 @@ export interface DraftPick {
   originalTeam?: string   // "Own" or team abbreviation
 }
 
-// MLB farm system prospect (matches Datalab gm_mlb_prospects table)
-export interface MLBProspect {
-  // Core fields from gm_mlb_prospects table
+// Universal prospect interface (works for MLB and NHL)
+export interface ProspectData {
+  // Core fields
   id?: string                 // UUID
-  prospect_id?: string        // Alias for id
+  prospect_id?: string        // Alias for id (backend compatibility)
+  prospectid?: string         // Alias for id (API compatibility)
   name: string
   position: string
-  team_key: string            // 'chw', 'chc', etc.
-  team_name?: string          // 'Chicago White Sox'
-  org_rank: number            // Organization ranking (1-30)
-  age?: number
-  prospect_grade: string      // Letter grade: A+, A, A-, B+, B, B-, C+, C
-  prospect_grade_numeric?: number  // Numeric grade: 80, 75, 70, 65, 60, 55, 50, 45
+  team_key: string            // 'chw', 'chc', 'blackhawks', etc.
+  team_name?: string          // 'Chicago White Sox', 'Chicago Blackhawks'
+  org_rank: number            // Organization ranking (1-30 for MLB, 1-20 for NHL)
+  orgrank?: number            // Alias for org_rank (API compatibility)
+  age?: number | null
+  prospect_grade: string      // Tier label: "Elite", "High-End", "A+", "B", etc.
+  prospectgrade?: string      // Alias for prospect_grade
+  prospect_grade_numeric?: number  // Numeric grade: 40-80 for NHL, 20-80 for MLB
+  prospectgradenumeric?: number    // Alias for prospect_grade_numeric
   trade_value: number         // Trade value (1-100)
-  source?: string             // 'Prospects1500'
+  tradevalue?: number         // Alias for trade_value
+  source?: string             // 'Prospects1500', 'EliteProspects', etc.
 
-  // Optional extended fields (may be added later)
-  current_level?: string      // 'R' | 'A' | 'A+' | 'AA' | 'AAA'
-  eta?: string                // "Late 2025", "2026", etc.
+  // Level and ETA
+  current_level?: string      // MLB: 'R', 'A', 'A+', 'AA', 'AAA' | NHL: 'AHL', 'OHL', 'NCAA', etc.
+  currentlevel?: string       // Alias for current_level
+  level?: string              // Alias for current_level
+  eta?: string                // "Late 2025", "2026", "2026-27", "NHL", etc.
+
+  // Scouting
   scouting_summary?: string
+  scoutingreport?: string     // Alias for scouting_summary
   headshot_url?: string
+  headshoturl?: string        // Alias for headshot_url
 
-  // Valuation fields (if available)
+  // MLB valuation fields
   prospect_fv_bucket?: number
-  prospect_tier?: 'elite' | 'plus' | 'average' | 'organizational'
+  fvbucket?: number           // Alias for prospect_fv_bucket
+  prospect_tier?: string      // 'elite', 'plus', 'average', 'organizational'
+  tier?: string               // Alias for prospect_tier
   risk_level?: 'low' | 'medium' | 'high'
   position_group?: 'pitcher' | 'catcher' | 'up_the_middle' | 'corner'
   prospect_surplus_value_millions?: number
 
+  // MLB-specific scouting grades
+  hitgrade?: number
+  powergrade?: number
+  rungrade?: number
+  armgrade?: number
+  fieldgrade?: number
+
+  // NHL-specific fields
+  shoots_catches?: string     // 'L' or 'R'
+  shootscatches?: string      // Alias for shoots_catches
+  nhl_projection?: string     // "Top-6 Forward", "Top-4 Defenseman", etc.
+  nhlprojection?: string      // Alias for nhl_projection
+  contract_status?: string    // 'ELC', 'Unsigned', 'RFA', etc.
+  contractstatus?: string     // Alias for contract_status
+  nationality?: string
+
   // Backwards compatibility aliases
   team_rank?: number          // Alias for org_rank
   rank?: number               // Alias for org_rank
-  level?: string              // Alias for current_level
 }
+
+// Backwards compatibility type alias
+export type MLBProspect = ProspectData
 
 // MLB salary retention tracking (0-50% per CBA rules)
 export interface SalaryRetention {
@@ -189,13 +220,31 @@ export function formatSalary(amount: number | null | undefined): string {
 }
 
 // Format prospect for display
-export function formatProspect(prospect: MLBProspect): { primary: string; secondary: string } {
-  const rank = prospect.team_rank || prospect.rank
+export function formatProspect(prospect: ProspectData): { primary: string; secondary: string } {
+  const rank = prospect.org_rank || prospect.orgrank || prospect.team_rank || prospect.rank
   const rankPrefix = rank ? `#${rank} ` : ''
   const primary = `${rankPrefix}${prospect.name}`
-  const level = prospect.current_level || prospect.level || ''
-  const secondary = `${level} - ${prospect.position} - Age ${prospect.age}`
+  const level = prospect.current_level || prospect.currentlevel || prospect.level || ''
+  const secondary = `${level} - ${prospect.position} - Age ${prospect.age || '?'}`
   return { primary, secondary }
+}
+
+// Get tier color for prospect display (handles both NHL and MLB tier names)
+export function getProspectTierColor(tier: string | undefined): string {
+  if (!tier) return '#808080'
+  const t = tier.toLowerCase()
+  if (t.includes('elite')) return '#FFD700'       // Gold
+  if (t.includes('high-end') || t.includes('plus')) return '#9B30FF' // Purple
+  if (t.includes('very good')) return '#1E90FF'    // Blue
+  if (t.includes('good') || t.includes('average')) return '#32CD32' // Green
+  if (t.includes('below') || t.includes('organizational')) return '#808080' // Gray
+  if (t.includes('fringe') || t.includes('longshot')) return '#404040' // Dark gray
+  // MLB letter grades
+  if (t.startsWith('a')) return '#22c55e'  // Green for A grades
+  if (t.startsWith('b')) return '#3b82f6'  // Blue for B grades
+  if (t.startsWith('c')) return '#f59e0b'  // Orange for C grades
+  if (t.startsWith('d')) return '#ef4444'  // Red for D grades
+  return '#808080'
 }
 
 // =====================

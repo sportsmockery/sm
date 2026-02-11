@@ -82,17 +82,18 @@ export function OpponentRosterPanel({
   const [prospects, setProspects] = useState<MLBProspect[]>([])
   const [prospectsLoading, setProspectsLoading] = useState(false)
 
-  const isMLB = sport === 'mlb'
+  // MLB and NHL have prospect systems
+  const hasProspects = sport === 'mlb' || sport === 'nhl'
 
-  // Fetch prospects when MLB team is selected and view mode is prospects
+  // Fetch prospects when team with prospects is selected and view mode is prospects
   useEffect(() => {
-    if (!isMLB || viewMode !== 'prospects' || !teamKey) {
+    if (!hasProspects || viewMode !== 'prospects' || !teamKey) {
       setProspects([])
       return
     }
 
     setProspectsLoading(true)
-    fetch(`/api/gm/prospects?team_key=${encodeURIComponent(teamKey)}&sport=mlb&limit=30`)
+    fetch(`/api/gm/prospects?team_key=${encodeURIComponent(teamKey)}&sport=${sport}&limit=30`)
       .then(res => res.ok ? res.json() : Promise.reject('Failed'))
       .then(data => {
         const fetchedProspects = data.prospects || []
@@ -101,7 +102,7 @@ export function OpponentRosterPanel({
       })
       .catch(() => setProspects([]))
       .finally(() => setProspectsLoading(false))
-  }, [isMLB, viewMode, teamKey, onProspectsLoaded])
+  }, [hasProspects, viewMode, teamKey, sport, onProspectsLoaded])
 
   // Filter prospects by search
   const filteredProspects = useMemo(() => {
@@ -188,8 +189,8 @@ export function OpponentRosterPanel({
         </button>
       </div>
 
-      {/* MLB Segmented Control: Roster / Prospects */}
-      {isMLB && !showDraft && (
+      {/* MLB/NHL Segmented Control: Roster / Prospects */}
+      {hasProspects && !showDraft && (
         <div style={{
           display: 'flex',
           marginBottom: 8,
@@ -457,7 +458,7 @@ export function OpponentRosterPanel({
             </div>
           )}
         </div>
-      ) : viewMode === 'prospects' && isMLB ? (
+      ) : viewMode === 'prospects' && hasProspects ? (
         <>
           {/* Prospect list */}
           <div style={{
