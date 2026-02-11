@@ -116,6 +116,72 @@ export const TEAM_NEEDS_2026 = {
   },
 } as const
 
+// Prospect tier colors (for UI display)
+export const PROSPECT_TIER_COLORS = {
+  // NHL tiers
+  elite: '#FFD700',           // Gold - franchise changers
+  'high-end': '#9B30FF',      // Purple - top-tier assets
+  plus: '#9B30FF',            // Purple - same as high-end
+  'very good': '#1E90FF',     // Blue - quality prospects
+  good: '#32CD32',            // Green - solid depth
+  average: '#32CD32',         // Green
+  'below average': '#808080', // Gray - organizational depth
+  organizational: '#808080',  // Gray
+  fringe: '#404040',          // Dark gray - long shots
+  longshot: '#404040',        // Dark gray
+  // MLB grades (letter-based)
+  'A+': '#22c55e',
+  'A': '#22c55e',
+  'A-': '#22c55e',
+  'B+': '#3b82f6',
+  'B': '#3b82f6',
+  'B-': '#3b82f6',
+  'C+': '#f59e0b',
+  'C': '#f59e0b',
+  'C-': '#f59e0b',
+  'D': '#ef4444',
+} as const
+
+// Near-untouchable prospects by team (Feb 2026)
+export const NEAR_UNTOUCHABLE_PROSPECTS = {
+  blackhawks: [
+    { name: 'Frank Nazar', position: 'C', tier: 'elite', reason: 'Top prospect, elite scoring potential' },
+    { name: 'Kevin Korchinski', position: 'D', tier: 'elite', reason: 'Top-5 pick, franchise defenseman potential' },
+    { name: 'Artyom Levshunov', position: 'D', tier: 'elite', reason: 'Top-5 pick, elite two-way defenseman' },
+    { name: 'Oliver Moore', position: 'C', tier: 'high-end', reason: 'First-round pick, future top-6 center' },
+    { name: 'Nick Lardis', position: 'LW', tier: 'high-end', reason: 'High-upside forward prospect' },
+  ],
+  cubs: [
+    { name: 'Matt Shaw', position: '3B', grade: 'A', reason: 'Top Cubs prospect, MLB-ready' },
+    { name: 'Cade Horton', position: 'RHP', grade: 'A-', reason: 'Top pitching prospect' },
+    { name: 'Moises Ballesteros', position: 'C', grade: 'B+', reason: 'Elite catching prospect' },
+  ],
+  whitesox: [
+    // White Sox are in full rebuild - everyone is tradeable
+  ],
+} as const
+
+// Get prospect tier color
+export function getProspectTierColor(tier: string | undefined): string {
+  if (!tier) return '#808080'
+  const t = tier.toLowerCase()
+
+  // Check direct match first
+  if (t in PROSPECT_TIER_COLORS) {
+    return PROSPECT_TIER_COLORS[t as keyof typeof PROSPECT_TIER_COLORS]
+  }
+
+  // Fuzzy match for NHL tiers
+  if (t.includes('elite')) return PROSPECT_TIER_COLORS.elite
+  if (t.includes('high-end') || t.includes('plus')) return PROSPECT_TIER_COLORS['high-end']
+  if (t.includes('very good')) return PROSPECT_TIER_COLORS['very good']
+  if (t.includes('good') || t.includes('average')) return PROSPECT_TIER_COLORS.good
+  if (t.includes('below') || t.includes('organizational')) return PROSPECT_TIER_COLORS.organizational
+  if (t.includes('fringe') || t.includes('longshot')) return PROSPECT_TIER_COLORS.fringe
+
+  return '#808080'
+}
+
 // Format cap number for display
 export function formatCap(value: number): string {
   return `$${(value / 1_000_000).toFixed(1)}M`

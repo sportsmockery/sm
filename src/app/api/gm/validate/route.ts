@@ -110,6 +110,56 @@ export async function POST(request: NextRequest) {
       }
     }
 
+    // Check for near-untouchable players (warning only, not blocking)
+    // Elite prospects that should rarely be traded - NHL specific
+    const nearUntouchableNHL = [
+      { name: 'Frank Nazar', reason: 'Top prospect, elite scoring potential' },
+      { name: 'Kevin Korchinski', reason: 'Top-5 pick, franchise defenseman potential' },
+      { name: 'Artyom Levshunov', reason: 'Top-5 pick, elite two-way defenseman' },
+      { name: 'Oliver Moore', reason: 'First-round pick, future top-6 center' },
+      { name: 'Nick Lardis', reason: 'High-upside forward prospect' },
+    ]
+
+    // Check NHL near-untouchables (warning, not block)
+    if (body.chicago_team === 'blackhawks') {
+      for (const player of body.players_sent) {
+        const nearUntouchable = nearUntouchableNHL.find(
+          nu => player.name.toLowerCase().includes(nu.name.toLowerCase())
+        )
+        if (nearUntouchable) {
+          quickIssues.push({
+            severity: 'warning',
+            code: 'NEAR_UNTOUCHABLE_PROSPECT',
+            message: `⚠️ ${player.name} is a near-untouchable prospect (${nearUntouchable.reason}). Trading them will significantly hurt your grade.`,
+            player_name: player.name,
+          })
+        }
+      }
+    }
+
+    // MLB elite prospects warning
+    const nearUntouchableMLB = [
+      { name: 'Matt Shaw', reason: 'Top Cubs prospect, MLB-ready' },
+      { name: 'Cade Horton', reason: 'Top pitching prospect' },
+      { name: 'Moises Ballesteros', reason: 'Elite catching prospect' },
+    ]
+
+    if (body.chicago_team === 'cubs') {
+      for (const player of body.players_sent) {
+        const nearUntouchable = nearUntouchableMLB.find(
+          nu => player.name.toLowerCase().includes(nu.name.toLowerCase())
+        )
+        if (nearUntouchable) {
+          quickIssues.push({
+            severity: 'warning',
+            code: 'NEAR_UNTOUCHABLE_PROSPECT',
+            message: `⚠️ ${player.name} is a near-untouchable prospect (${nearUntouchable.reason}). Trading them will significantly hurt your grade.`,
+            player_name: player.name,
+          })
+        }
+      }
+    }
+
     // If quick validation fails, return immediately
     if (quickIssues.some(i => i.severity === 'error')) {
       return NextResponse.json({
