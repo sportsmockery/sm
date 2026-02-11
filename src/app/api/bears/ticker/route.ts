@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server'
 import { datalabAdmin } from '@/lib/supabase-datalab'
+import { fetchTeamRecord } from '@/lib/team-config'
 
 // Revalidate every 5 minutes during non-game times, shorter during games
 export const revalidate = 300
@@ -19,7 +20,22 @@ export async function GET() {
       })
     }
 
-    // Query bears_season_record for accurate record and next game
+    // Use the same fetchTeamRecord() as the hero area for consistent records
+    const teamRecord = await fetchTeamRecord('bears')
+    let record = '--'
+    let regularRecord: string | undefined
+    let postseasonRecord: string | undefined
+
+    if (teamRecord) {
+      const tie = teamRecord.ties && teamRecord.ties > 0 ? `-${teamRecord.ties}` : ''
+      record = `${teamRecord.wins}-${teamRecord.losses}${tie}`
+      regularRecord = record
+      if (teamRecord.postseason && (teamRecord.postseason.wins > 0 || teamRecord.postseason.losses > 0)) {
+        postseasonRecord = `${teamRecord.postseason.wins}-${teamRecord.postseason.losses}`
+      }
+    }
+
+    // Query bears_season_record for next game info (still needed for next game/live game data)
     const { data: seasonRecord, error: recordError } = await datalabAdmin
       .from('bears_season_record')
       .select('*')
@@ -27,25 +43,8 @@ export async function GET() {
 
     if (recordError) {
       console.error('Bears season record fetch error:', recordError)
-      return NextResponse.json({
-        record: '--',
-        nextGame: null,
-        lastGame: null,
-        error: 'Failed to fetch season record',
-      })
     }
 
-    // Format record - combine regular season + playoffs into total record
-    // e.g., 11-6 regular + 1-0 playoffs = 12-6
-    const regWins = seasonRecord?.regular_season_wins || 0
-    const regLosses = seasonRecord?.regular_season_losses || 0
-    const postWins = seasonRecord?.postseason_wins || 0
-    const postLosses = seasonRecord?.postseason_losses || 0
-    const totalWins = regWins + postWins
-    const totalLosses = regLosses + postLosses
-    const record = `${totalWins}-${totalLosses}`
-
-    // Format next game from bears_season_record
     // Get current date in Central Time for "Tonight" logic
     const nowCT = new Date().toLocaleString('en-US', { timeZone: 'America/Chicago' })
     const todayCT = new Date(nowCT).toISOString().split('T')[0]
@@ -168,8 +167,8 @@ export async function GET() {
 
     return NextResponse.json({
       record,
-      regularRecord: seasonRecord?.regular_season_record,
-      postseasonRecord: seasonRecord?.postseason_record,
+      regularRecord,
+      postseasonRecord,
       nextGame,
       lastGame,
       liveGame,

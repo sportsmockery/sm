@@ -4,6 +4,7 @@ import { useState, useEffect, useRef } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
+import { useTeamRecord } from '@/contexts/TeamRecordContext'
 
 /**
  * Team Hub Layout Component
@@ -109,6 +110,7 @@ export default function TeamHubLayout({
   const [isSticky, setIsSticky] = useState(false)
   const navRef = useRef<HTMLDivElement>(null)
   const headerRef = useRef<HTMLDivElement>(null)
+  const { setRecord: setContextRecord } = useTeamRecord()
 
   // Determine active tab from pathname
   const tabs = team.league === 'NFL' ? NFL_TABS : TEAM_TABS
@@ -160,6 +162,13 @@ export default function TeamHubLayout({
 
     return regularSeason
   }
+
+  // Push the formatted record to context so the sticky bar can read it
+  useEffect(() => {
+    const formatted = formatRecord()
+    setContextRecord(formatted)
+    return () => setContextRecord(null)
+  }, [record, team.league, setContextRecord])
 
   return (
     <div className="min-h-screen" style={{ backgroundColor: 'var(--bg-page)' }}>

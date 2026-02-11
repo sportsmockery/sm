@@ -29,8 +29,8 @@ function getCurrentSeason(teamKey: TeamKey): number {
       return month >= 9 ? year : year - 1
     case 'bulls':
     case 'blackhawks':
-      // NBA/NHL season: October-June, use the year the season started
-      return month >= 10 ? year : year - 1
+      // NBA/NHL season: October-June, stored as ENDING year
+      return month < 10 ? year : year + 1
     case 'cubs':
     case 'whitesox':
       // MLB season: March-October, use current year

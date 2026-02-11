@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server'
 import { datalabAdmin } from '@/lib/supabase-datalab'
+import { fetchTeamRecord, CHICAGO_TEAMS } from '@/lib/team-config'
 
 // Revalidate every 5 minutes during non-game times
 export const revalidate = 300
@@ -113,56 +114,21 @@ async function getTeamTickerFromDatalab(teamKey: TeamKey) {
     const config = TEAM_CONFIG[teamKey]
     const today = new Date().toISOString().split('T')[0]
 
-    // Calculate current season based on league
-    // NFL: Season year is the year it starts (2025 season = Sept 2025 - Feb 2026)
-    // NBA/NHL: Season year is the ENDING year (2025-26 season stored as 2026)
-    // MLB: Season year is the calendar year (2025 season = Mar-Oct 2025)
-    const currentYear = new Date().getFullYear()
-    const currentMonth = new Date().getMonth() + 1 // 1-12
+    // Use the same fetchTeamRecord() as the hero area for consistent records
+    const teamRecord = await fetchTeamRecord(teamKey)
 
-    let currentSeason: number
-    if (config.league === 'mlb') {
-      // MLB: current year, or previous year if before April
-      currentSeason = currentMonth < 4 ? currentYear - 1 : currentYear
-    } else if (config.league === 'nfl') {
-      // NFL: Season starts in Sept, stored by start year
-      currentSeason = currentMonth < 9 ? currentYear - 1 : currentYear
-    } else {
-      // NBA, NHL: Season stored by ENDING year
-      // If we're in Oct-Dec, we're in the season that ends next year
-      currentSeason = currentMonth >= 10 ? currentYear + 1 : currentYear
-    }
-
-    // Get record from authoritative seasons table (recommended by Datalab)
-    let wins = 0
-    let losses = 0
-    let otLosses = 0 // For NHL
-
-    // Determine seasons table name
-    const seasonsTable = `${teamKey}_seasons`
-
-    const { data: seasonRecord, error: recordError } = await datalabAdmin
-      .from(seasonsTable)
-      .select('wins, losses, otl')
-      .eq('season', currentSeason)
-      .single()
-
-    if (recordError && recordError.code !== 'PGRST116') {
-      console.error(`${teamKey} season record fetch error:`, recordError)
-    }
-
-    if (seasonRecord) {
-      wins = seasonRecord.wins || 0
-      losses = seasonRecord.losses || 0
-      otLosses = seasonRecord.otl || 0 // NHL only
-    }
-
-    // Format record based on league
-    let record: string
-    if (config.league === 'nhl' && otLosses > 0) {
-      record = `${wins}-${losses}-${otLosses}`
-    } else {
-      record = `${wins}-${losses}`
+    let record = '--'
+    if (teamRecord) {
+      const teamInfo = CHICAGO_TEAMS[teamKey]
+      if (teamInfo?.league === 'NFL') {
+        const tie = teamRecord.ties && teamRecord.ties > 0 ? `-${teamRecord.ties}` : ''
+        record = `${teamRecord.wins}-${teamRecord.losses}${tie}`
+      } else if (teamInfo?.league === 'NHL') {
+        const ot = teamRecord.otLosses && teamRecord.otLosses > 0 ? `-${teamRecord.otLosses}` : ''
+        record = `${teamRecord.wins}-${teamRecord.losses}${ot}`
+      } else {
+        record = `${teamRecord.wins}-${teamRecord.losses}`
+      }
     }
 
     // Get next game (first game on or after today without score)
@@ -320,7 +286,22 @@ async function getBearsTickerFromDatalab() {
       })
     }
 
-    // Query bears_season_record for accurate record and next game
+    // Use the same fetchTeamRecord() as the hero area for consistent records
+    const teamRecord = await fetchTeamRecord('bears')
+    let record = '--'
+    let regularRecord: string | undefined
+    let postseasonRecord: string | undefined
+
+    if (teamRecord) {
+      const tie = teamRecord.ties && teamRecord.ties > 0 ? `-${teamRecord.ties}` : ''
+      record = `${teamRecord.wins}-${teamRecord.losses}${tie}`
+      regularRecord = record
+      if (teamRecord.postseason && (teamRecord.postseason.wins > 0 || teamRecord.postseason.losses > 0)) {
+        postseasonRecord = `${teamRecord.postseason.wins}-${teamRecord.postseason.losses}`
+      }
+    }
+
+    // Query bears_season_record for next game info (still needed for next game/live game data)
     const { data: seasonRecord, error: recordError } = await datalabAdmin
       .from('bears_season_record')
       .select('*')
@@ -328,22 +309,7 @@ async function getBearsTickerFromDatalab() {
 
     if (recordError) {
       console.error('Bears season record fetch error:', recordError)
-      return NextResponse.json({
-        record: '--',
-        nextGame: null,
-        lastGame: null,
-        error: 'Failed to fetch season record',
-      })
     }
-
-    // Format record - combine regular season + playoffs into total record
-    const regWins = seasonRecord?.regular_season_wins || 0
-    const regLosses = seasonRecord?.regular_season_losses || 0
-    const postWins = seasonRecord?.postseason_wins || 0
-    const postLosses = seasonRecord?.postseason_losses || 0
-    const totalWins = regWins + postWins
-    const totalLosses = regLosses + postLosses
-    const record = `${totalWins}-${totalLosses}`
 
     // Get current date in Central Time
     const nowCT = new Date().toLocaleString('en-US', { timeZone: 'America/Chicago' })
@@ -438,6 +404,8 @@ async function getBearsTickerFromDatalab() {
 
     return NextResponse.json({
       record,
+      regularRecord,
+      postseasonRecord,
       nextGame,
       lastGame,
       liveGame,
