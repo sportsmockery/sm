@@ -383,8 +383,18 @@ export default function TeamStickyBar({ teamKey, className = '', isArticlePage }
                   <span className="text-white font-medium text-xs">
                     {data.lastGame.score}
                   </span>
+                  {data.lastGame.opponentLogo && (
+                    <Image
+                      src={data.lastGame.opponentLogo}
+                      alt={data.lastGame.opponent}
+                      width={20}
+                      height={20}
+                      className="w-5 h-5 object-contain flex-shrink-0"
+                      unoptimized
+                    />
+                  )}
                   <span className="text-white/60 text-xs">
-                    vs {data.lastGame.opponent}
+                    {data.lastGame.opponent}
                   </span>
                 </Link>
               </>
@@ -393,29 +403,25 @@ export default function TeamStickyBar({ teamKey, className = '', isArticlePage }
 
           {/* Right: Quick Actions - Condensed on mobile */}
           <div className="flex items-center gap-1 sm:gap-2 flex-shrink-0">
-            {/* Schedule - Hidden on mobile */}
+            {/* Schedule - Hidden on mobile, styled like Alerts button */}
             {config.hasSchedulePage && (
               <Link
                 href={`/${teamInfo.slug}/schedule`}
-                className="hidden md:flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium text-white/80 hover:text-white hover:bg-white/10 transition-all"
+                className="hidden md:flex items-center px-3 py-1.5 rounded-full text-xs font-semibold transition-all bg-white hover:bg-gray-100"
+                style={{ color: teamInfo.secondaryColor }}
               >
-                <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                </svg>
-                <span>Schedule</span>
+                Schedule
               </Link>
             )}
 
-            {/* Roster - Hidden on mobile */}
+            {/* Roster - Hidden on mobile, styled like Alerts button */}
             {config.hasRosterPage && (
               <Link
                 href={`/${teamInfo.slug}/roster`}
-                className="hidden md:flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium text-white/80 hover:text-white hover:bg-white/10 transition-all"
+                className="hidden md:flex items-center px-3 py-1.5 rounded-full text-xs font-semibold transition-all bg-white hover:bg-gray-100"
+                style={{ color: teamInfo.secondaryColor }}
               >
-                <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
-                </svg>
-                <span>Roster</span>
+                Roster
               </Link>
             )}
 
