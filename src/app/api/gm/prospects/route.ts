@@ -54,15 +54,42 @@ export async function GET(request: NextRequest) {
   const limit = parseInt(searchParams.get('limit') || '30', 10)
   const minGrade = searchParams.get('min_grade')
 
-  // Only MLB teams have prospects in this context
-  if (sport && sport !== 'mlb') {
-    return NextResponse.json({ prospects: [], message: 'Prospects only available for MLB teams' })
-  }
-
   if (!teamKey) {
     return NextResponse.json({ error: 'team_key is required' }, { status: 400 })
   }
 
+  // NHL prospects - proxy to DataLab API
+  if (sport === 'nhl') {
+    try {
+      const url = new URL(`${DATALAB_BASE_URL}/api/gm/prospects`)
+      url.searchParams.set('team_key', teamKey)
+      url.searchParams.set('sport', 'nhl')
+      url.searchParams.set('limit', String(limit))
+
+      const response = await fetch(url.toString(), {
+        headers: { 'Content-Type': 'application/json' },
+        next: { revalidate: 300 }, // Cache for 5 minutes
+      })
+
+      if (!response.ok) {
+        console.error('[prospects API] DataLab NHL error:', response.status)
+        return NextResponse.json({ prospects: [], error: 'Failed to fetch NHL prospects' })
+      }
+
+      const data = await response.json()
+      return NextResponse.json(data)
+    } catch (error) {
+      console.error('[prospects API] NHL fetch error:', error)
+      return NextResponse.json({ prospects: [], error: 'Failed to fetch NHL prospects' })
+    }
+  }
+
+  // NBA and NFL don't have traditional prospects in this context
+  if (sport && sport !== 'mlb') {
+    return NextResponse.json({ prospects: [], message: `Prospects not available for ${sport.toUpperCase()} teams` })
+  }
+
+  // MLB prospects - query directly from Datalab Supabase
   // Normalize team key to Datalab format
   const normalizedKey = teamKey.toLowerCase()
   const datalabKey = TEAM_KEY_TO_ABBREV[normalizedKey] || normalizedKey
