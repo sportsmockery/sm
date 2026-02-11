@@ -379,6 +379,23 @@ const TEAM_SPORT: Record<string, 'nfl' | 'nba' | 'nhl' | 'mlb'> = {
   whitesox: 'mlb',
 }
 
+// Generate ESPN logo URL from team abbreviation
+function getOpponentLogoUrl(abbrev: string, league: string): string {
+  const cleanAbbrev = abbrev?.toLowerCase() || ''
+  switch (league) {
+    case 'NFL':
+      return `https://a.espncdn.com/i/teamlogos/nfl/500/${cleanAbbrev}.png`
+    case 'NBA':
+      return `https://a.espncdn.com/i/teamlogos/nba/500/${cleanAbbrev}.png`
+    case 'NHL':
+      return `https://a.espncdn.com/i/teamlogos/nhl/500/${cleanAbbrev}.png`
+    case 'MLB':
+      return `https://a.espncdn.com/i/teamlogos/mlb/500/${cleanAbbrev}.png`
+    default:
+      return ''
+  }
+}
+
 /**
  * Fetch last completed game WITH game ID
  * Used by live pages as fallback when no live game is in progress
@@ -417,14 +434,19 @@ export async function fetchLastGameWithId(teamKey: string): Promise<LastGameWith
     // Parse date
     const gameDate = game.game_date ? new Date(game.game_date) : new Date()
 
-    // Get game ID - different columns depending on the table
-    const gameId = game.espn_game_id || game.game_id || game.id?.toString() || ''
+    // Get game ID - all boxscore APIs use internal database id
+    const gameId = game.id?.toString() || ''
+
+    // Get opponent info - use abbreviation to generate logo URL if not stored
+    const opponentAbbrev = game.opponent_abbrev || game.opponent || ''
+    const opponentName = game.opponent_full_name || game.opponent || 'TBD'
+    const opponentLogo = game.opponent_logo || getOpponentLogoUrl(opponentAbbrev, teamInfo.league)
 
     return {
       gameId,
-      opponent: game.opponent_full_name || game.opponent || 'TBD',
-      opponentLogo: game.opponent_logo || undefined,
-      opponentAbbrev: game.opponent_abbrev || game.opponent || undefined,
+      opponent: opponentName,
+      opponentLogo: opponentLogo || undefined,
+      opponentAbbrev: opponentAbbrev || undefined,
       date: gameDate.toLocaleDateString('en-US', {
         weekday: 'short',
         month: 'short',

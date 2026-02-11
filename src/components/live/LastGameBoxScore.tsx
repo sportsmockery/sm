@@ -117,20 +117,47 @@ export default function LastGameBoxScore({ team, lastGame }: LastGameBoxScorePro
         const data = await res.json()
 
         // Transform API response to unified format
-        // Different teams have different response structures
+        // Each team's API returns data under its own key (bears, bulls, etc.)
+        const teamData = data[teamKey] || data.bears || data.bulls || data.blackhawks || data.cubs || data.whitesox
+
+        // Bears returns categorized stats, other teams return players array
+        // Flatten Bears stats into a single players array for display
+        let teamPlayers: PlayerStats[] = []
+        if (teamData?.players) {
+          teamPlayers = teamData.players
+        } else if (teamData?.passing || teamData?.rushing || teamData?.receiving || teamData?.defense) {
+          // Bears format - combine all categories
+          const passing = (teamData.passing || []).map((p: any) => ({ ...p, category: 'passing' }))
+          const rushing = (teamData.rushing || []).map((p: any) => ({ ...p, category: 'rushing' }))
+          const receiving = (teamData.receiving || []).map((p: any) => ({ ...p, category: 'receiving' }))
+          const defense = (teamData.defense || []).map((p: any) => ({ ...p, category: 'defense' }))
+          teamPlayers = [...passing, ...rushing, ...receiving, ...defense]
+        }
+
+        let oppPlayers: PlayerStats[] = []
+        if (data.opponent?.players) {
+          oppPlayers = data.opponent.players
+        } else if (data.opponent?.passing || data.opponent?.rushing) {
+          const passing = (data.opponent.passing || []).map((p: any) => ({ ...p, category: 'passing' }))
+          const rushing = (data.opponent.rushing || []).map((p: any) => ({ ...p, category: 'rushing' }))
+          const receiving = (data.opponent.receiving || []).map((p: any) => ({ ...p, category: 'receiving' }))
+          const defense = (data.opponent.defense || []).map((p: any) => ({ ...p, category: 'defense' }))
+          oppPlayers = [...passing, ...rushing, ...receiving, ...defense]
+        }
+
         const transformed: BoxScoreData = {
           team: {
-            score: data[teamKey]?.score ?? data.bulls?.score ?? data.bears?.score ?? lastGame.teamScore,
-            result: data[teamKey]?.result ?? data.bulls?.result ?? data.bears?.result ?? lastGame.result,
-            isHome: data[teamKey]?.isHome ?? data.bulls?.isHome ?? data.bears?.isHome ?? lastGame.isHome,
-            players: data[teamKey]?.players ?? data.bulls?.players ?? data.bears?.players ?? [],
+            score: teamData?.score ?? lastGame.teamScore,
+            result: teamData?.result ?? lastGame.result,
+            isHome: teamData?.isHome ?? lastGame.isHome,
+            players: teamPlayers,
           },
           opponent: {
             abbrev: data.opponent?.abbrev ?? lastGame.opponentAbbrev ?? '',
             fullName: data.opponent?.fullName ?? lastGame.opponent,
             score: data.opponent?.score ?? lastGame.opponentScore,
             logo: data.opponent?.logo ?? '',
-            players: data.opponent?.players ?? [],
+            players: oppPlayers,
           },
           venue: data.venue,
           date: data.date ?? lastGame.date,
