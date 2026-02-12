@@ -1919,12 +1919,22 @@ Grade this trade from the perspective of the ${teamDisplayNames[chicago_team]}.`
   } catch (error) {
     console.error('GM grade error:', error)
 
+    // Properly serialize the error for logging
+    let errorMessage: string
+    if (error instanceof Error) {
+      errorMessage = `${error.name}: ${error.message}${error.stack ? '\n' + error.stack : ''}`
+    } else if (typeof error === 'object' && error !== null) {
+      errorMessage = JSON.stringify(error, null, 2)
+    } else {
+      errorMessage = String(error)
+    }
+
     try {
       const user = await getGMAuthUser(request)
       await datalabAdmin.from('gm_errors').insert({
         user_id: user?.id,
         error_type: 'ai',
-        error_message: String(error),
+        error_message: errorMessage.substring(0, 10000), // Limit to 10KB
         request_payload: null,
       })
     } catch {}
