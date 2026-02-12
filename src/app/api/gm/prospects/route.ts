@@ -3,6 +3,44 @@ import { datalabAdmin } from '@/lib/supabase-datalab'
 
 const DATALAB_BASE_URL = 'https://datalab.sportsmockery.com'
 
+// Map NHL team keys (from gm_league_teams) to DataLab format (with hyphens)
+const NHL_TEAM_KEY_MAP: Record<string, string> = {
+  // Teams with multi-word names need hyphen conversion
+  'redwings': 'red-wings',
+  'mapleleafs': 'maple-leafs',
+  'bluejackets': 'blue-jackets',
+  'goldenknights': 'golden-knights',
+  // Single word teams pass through as-is
+  'blackhawks': 'blackhawks',
+  'bruins': 'bruins',
+  'sabres': 'sabres',
+  'panthers': 'panthers',
+  'canadiens': 'canadiens',
+  'senators': 'senators',
+  'lightning': 'lightning',
+  'hurricanes': 'hurricanes',
+  'devils': 'devils',
+  'islanders': 'islanders',
+  'rangers': 'rangers',
+  'flyers': 'flyers',
+  'penguins': 'penguins',
+  'capitals': 'capitals',
+  'avalanche': 'avalanche',
+  'stars': 'stars',
+  'wild': 'wild',
+  'predators': 'predators',
+  'blues': 'blues',
+  'utah': 'utah',
+  'jets': 'jets',
+  'ducks': 'ducks',
+  'flames': 'flames',
+  'oilers': 'oilers',
+  'kings': 'kings',
+  'sharks': 'sharks',
+  'kraken': 'kraken',
+  'canucks': 'canucks',
+}
+
 // Map team keys (from gm_league_teams) to prospect table abbreviations (gm_mlb_prospects)
 const TEAM_KEY_TO_ABBREV: Record<string, string> = {
   // Chicago teams (primary)
@@ -61,8 +99,12 @@ export async function GET(request: NextRequest) {
   // NHL prospects - proxy to DataLab API
   if (sport === 'nhl') {
     try {
+      // Convert team key to DataLab format (e.g., 'redwings' -> 'red-wings')
+      const normalizedKey = teamKey.toLowerCase()
+      const datalabTeamKey = NHL_TEAM_KEY_MAP[normalizedKey] || normalizedKey
+
       const url = new URL(`${DATALAB_BASE_URL}/api/gm/prospects`)
-      url.searchParams.set('team_key', teamKey)
+      url.searchParams.set('team_key', datalabTeamKey)
       url.searchParams.set('sport', 'nhl')
       url.searchParams.set('limit', String(limit))
 
