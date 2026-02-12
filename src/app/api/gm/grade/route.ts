@@ -988,7 +988,19 @@ export async function POST(request: NextRequest) {
 
       const responseTimeMs = Date.now() - startTime
       const textContent = response.content.find(c => c.type === 'text')
-      const rawText = textContent?.type === 'text' ? textContent.text : ''
+      const rawTextOriginal3T = textContent?.type === 'text' ? textContent.text : ''
+
+      // Strip markdown code blocks if present (Claude often wraps JSON in ```json ... ```)
+      let rawText = rawTextOriginal3T.trim()
+      if (rawText.startsWith('```json')) {
+        rawText = rawText.slice(7)
+      } else if (rawText.startsWith('```')) {
+        rawText = rawText.slice(3)
+      }
+      if (rawText.endsWith('```')) {
+        rawText = rawText.slice(0, -3)
+      }
+      rawText = rawText.trim()
 
       let grade: number
       let reasoning: string
@@ -1521,7 +1533,19 @@ Grade this trade from the perspective of the ${teamDisplayNames[chicago_team]}.`
 
     const responseTimeMs = Date.now() - startTime
     const textContent = response.content.find(c => c.type === 'text')
-    const rawText = textContent?.type === 'text' ? textContent.text : ''
+    const rawTextOriginal = textContent?.type === 'text' ? textContent.text : ''
+
+    // Strip markdown code blocks if present (Claude often wraps JSON in ```json ... ```)
+    let rawText = rawTextOriginal.trim()
+    if (rawText.startsWith('```json')) {
+      rawText = rawText.slice(7) // Remove ```json
+    } else if (rawText.startsWith('```')) {
+      rawText = rawText.slice(3) // Remove ```
+    }
+    if (rawText.endsWith('```')) {
+      rawText = rawText.slice(0, -3) // Remove trailing ```
+    }
+    rawText = rawText.trim()
 
     let grade: number
     let reasoning: string
