@@ -847,12 +847,14 @@ export async function POST(request: NextRequest) {
 
     // Auth is optional - guests can grade trades but won't have history saved
     const user = isTestRequest ? null : await getGMAuthUser(request)
-    const userId = isTestRequest ? 'test-runner' : (user?.id || 'guest')
-    const isGuest = !user && !isTestRequest
+    // userId must be null for guests/test requests since gm_trades.user_id is UUID type
+    const userId = user?.id || null
+    const isGuest = !user
+    const isTestMode = isTestRequest
     const displayName = isTestRequest ? 'Test Runner' : (user?.user_metadata?.display_name || user?.user_metadata?.full_name || user?.email?.split('@')[0] || 'Anonymous')
 
-    // Rate limiting: max 10 trades per minute (only for logged-in users, skip for test requests)
-    if (!isGuest && !isTestRequest) {
+    // Rate limiting: max 10 trades per minute (only for logged-in users, skip for test/guest requests)
+    if (userId && !isTestMode) {
       const oneMinAgo = new Date(Date.now() - 60000).toISOString()
       const { count: recentCount } = await datalabAdmin
         .from('gm_trades')
@@ -1795,8 +1797,8 @@ Grade this trade from the perspective of the ${teamDisplayNames[chicago_team]}.`
       response_time_ms: responseTimeMs,
     })
 
-    // Only update leaderboard for logged-in users
-    if (!isGuest) {
+    // Only update leaderboard for logged-in users (userId must be valid UUID)
+    if (userId) {
     const { data: existing } = await datalabAdmin.from('gm_leaderboard').select('*').eq('user_id', userId).single()
 
     if (existing) {
