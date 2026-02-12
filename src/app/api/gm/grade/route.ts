@@ -1916,17 +1916,33 @@ Grade this trade from the perspective of the ${teamDisplayNames[chicago_team]}.`
       _debug: debugInfo,
     })
 
-  } catch (error) {
+  } catch (error: any) {
     console.error('GM grade error:', error)
 
-    // Properly serialize the error for logging
+    // Properly serialize the error for logging (handle circular references)
     let errorMessage: string
-    if (error instanceof Error) {
-      errorMessage = `${error.name}: ${error.message}${error.stack ? '\n' + error.stack : ''}`
-    } else if (typeof error === 'object' && error !== null) {
-      errorMessage = JSON.stringify(error, null, 2)
-    } else {
-      errorMessage = String(error)
+    try {
+      if (error instanceof Error) {
+        errorMessage = `${error.name}: ${error.message}`
+        if (error.stack) errorMessage += `\nStack: ${error.stack}`
+        // Check for Anthropic SDK error properties
+        if (error.status) errorMessage += `\nStatus: ${error.status}`
+        if (error.error) errorMessage += `\nError detail: ${JSON.stringify(error.error)}`
+      } else if (typeof error === 'object' && error !== null) {
+        // Try safe stringify with circular reference handling
+        const seen = new WeakSet()
+        errorMessage = JSON.stringify(error, (key, value) => {
+          if (typeof value === 'object' && value !== null) {
+            if (seen.has(value)) return '[Circular]'
+            seen.add(value)
+          }
+          return value
+        }, 2)
+      } else {
+        errorMessage = String(error)
+      }
+    } catch (serializeErr) {
+      errorMessage = `Serialize failed. Type: ${typeof error}, Keys: ${Object.keys(error || {}).join(',')}, String: ${String(error)?.substring(0, 500)}`
     }
 
     try {
