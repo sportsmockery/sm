@@ -158,12 +158,13 @@ const mlbTeams: [string, string, string][] = [
 ]
 for (const [k, n, c] of mlbTeams) TEAM_DB.set(`mlb:${k}`, { teamName: n, abbrev: k, color: c })
 
+// Keys match the short form used by the UI ('bears', 'bulls', etc.)
 export const CHICAGO_TEAMS: Record<string, { abbrev: string; sport: string }> = {
-  'chicago-bears': { abbrev: 'CHI', sport: 'nfl' },
-  'chicago-bulls': { abbrev: 'CHI_NBA', sport: 'nba' },
-  'chicago-blackhawks': { abbrev: 'CHI_NHL', sport: 'nhl' },
-  'chicago-cubs': { abbrev: 'CHC', sport: 'mlb' },
-  'chicago-white-sox': { abbrev: 'CHW', sport: 'mlb' },
+  'bears': { abbrev: 'CHI', sport: 'nfl' },
+  'bulls': { abbrev: 'CHI_NBA', sport: 'nba' },
+  'blackhawks': { abbrev: 'CHI_NHL', sport: 'nhl' },
+  'cubs': { abbrev: 'CHC', sport: 'mlb' },
+  'whitesox': { abbrev: 'CHW', sport: 'mlb' },
 }
 
 export function getTeamInfo(abbrev: string, sport: string): { teamKey: string; teamName: string; abbreviation: string; logoUrl: string; primaryColor: string } {

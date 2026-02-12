@@ -35,6 +35,7 @@ export interface TradeData {
 }
 
 // Team-specific table/column mappings
+// Keys match the short form used by the UI ('bears', 'bulls', etc.)
 const TEAM_CONFIG: Record<string, {
   gamesTable: string
   seasonsTable: string
@@ -48,27 +49,27 @@ const TEAM_CONFIG: Record<string, {
   lossesCol: string
   otlCol?: string
 }> = {
-  'chicago-bears': {
+  'bears': {
     gamesTable: 'bears_games_master', seasonsTable: 'bears_season_record', seasonCol: 2025,
     opponentCol: 'opponent', opponentNameCol: 'opponent_full_name', homeCol: 'is_bears_home',
     dateCol: 'game_date', weekCol: 'week', winsCol: 'regular_season_wins', lossesCol: 'regular_season_losses',
   },
-  'chicago-bulls': {
+  'bulls': {
     gamesTable: 'bulls_games_master', seasonsTable: 'bulls_seasons', seasonCol: 2026,
     opponentCol: 'opponent', opponentNameCol: 'opponent_full_name', homeCol: 'is_bulls_home',
     dateCol: 'game_date', winsCol: 'wins', lossesCol: 'losses',
   },
-  'chicago-blackhawks': {
+  'blackhawks': {
     gamesTable: 'blackhawks_games_master', seasonsTable: 'blackhawks_seasons', seasonCol: 2026,
     opponentCol: 'opponent', opponentNameCol: 'opponent_full_name', homeCol: 'is_blackhawks_home',
     dateCol: 'game_date', winsCol: 'wins', lossesCol: 'losses', otlCol: 'otl',
   },
-  'chicago-cubs': {
+  'cubs': {
     gamesTable: 'cubs_games_master', seasonsTable: 'cubs_seasons', seasonCol: 2025,
     opponentCol: 'opponent', opponentNameCol: 'opponent_full_name', homeCol: 'is_cubs_home',
     dateCol: 'game_date', winsCol: 'wins', lossesCol: 'losses',
   },
-  'chicago-white-sox': {
+  'whitesox': {
     gamesTable: 'whitesox_games_master', seasonsTable: 'whitesox_seasons', seasonCol: 2025,
     opponentCol: 'opponent', opponentNameCol: 'opponent_full_name', homeCol: 'is_whitesox_home',
     dateCol: 'game_date', winsCol: 'wins', lossesCol: 'losses',
