@@ -192,7 +192,7 @@ interface StandingsResult { conf1: TeamStanding[]; conf2: TeamStanding[] }
 function generateStandings(
   chicagoAbbrev: string,
   chicagoRecord: { wins: number; losses: number; otLosses?: number },
-  trades: { partnerTeamKey: string }[],
+  trades: { partnerTeamKey: string; partnerTeamKey2?: string; isThreeTeam?: boolean }[],
   config: typeof LEAGUE_CONFIG[string],
   sport: string,
   partnerDeltas: Record<string, number>,
@@ -203,7 +203,16 @@ function generateStandings(
     for (const abbrev of teams) allTeams.push({ abbrev, division: div, conference: conf })
   }
 
-  const partnerKeys = new Set(trades.map(t => t.partnerTeamKey.toUpperCase()))
+  // Collect all trade partner keys (including second partner for 3-team trades)
+  const partnerKeys = new Set(
+    trades.flatMap(t => {
+      const keys = [t.partnerTeamKey.toUpperCase()]
+      if (t.isThreeTeam && t.partnerTeamKey2) {
+        keys.push(t.partnerTeamKey2.toUpperCase())
+      }
+      return keys
+    })
+  )
   const records: TeamStanding[] = allTeams.map(team => {
     const isUser = team.abbrev === chicagoAbbrev
     const isPartner = partnerKeys.has(team.abbrev)
