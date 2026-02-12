@@ -1925,9 +1925,10 @@ Grade this trade from the perspective of the ${teamDisplayNames[chicago_team]}.`
       if (error instanceof Error) {
         errorMessage = `${error.name}: ${error.message}`
         if (error.stack) errorMessage += `\nStack: ${error.stack}`
-        // Check for Anthropic SDK error properties
-        if (error.status) errorMessage += `\nStatus: ${error.status}`
-        if (error.error) errorMessage += `\nError detail: ${JSON.stringify(error.error)}`
+        // Check for Anthropic SDK error properties (cast to any to access extended properties)
+        const errAny = error as any
+        if (errAny.status) errorMessage += `\nStatus: ${errAny.status}`
+        if (errAny.error) errorMessage += `\nError detail: ${JSON.stringify(errAny.error)}`
       } else if (typeof error === 'object' && error !== null) {
         // Try safe stringify with circular reference handling
         const seen = new WeakSet()
