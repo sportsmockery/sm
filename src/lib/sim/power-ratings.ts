@@ -203,9 +203,22 @@ export function calculateTradeImpact(trades: TradeData[], sport: string): TradeI
     totalPlayerDelta += playerDelta
     totalPickDelta += pickDelta
 
-    const partnerKey = trade.partnerTeamKey.toUpperCase()
+    // Apply inverse delta to trade partner(s)
+    // For 3-team trades, split the inverse impact between both partners
     const inverseDelta = -(playerDelta + pickDelta) * 0.7 * 1.2
-    tradePartnerDeltas[partnerKey] = (tradePartnerDeltas[partnerKey] || 0) + inverseDelta
+
+    if (trade.isThreeTeam && trade.partnerTeamKey2) {
+      // Split the inverse impact between both trade partners
+      const splitDelta = inverseDelta / 2
+      const partnerKey1 = trade.partnerTeamKey.toUpperCase()
+      const partnerKey2 = trade.partnerTeamKey2.toUpperCase()
+      tradePartnerDeltas[partnerKey1] = (tradePartnerDeltas[partnerKey1] || 0) + splitDelta
+      tradePartnerDeltas[partnerKey2] = (tradePartnerDeltas[partnerKey2] || 0) + splitDelta
+    } else {
+      // Standard 2-team trade - all inverse impact goes to single partner
+      const partnerKey = trade.partnerTeamKey.toUpperCase()
+      tradePartnerDeltas[partnerKey] = (tradePartnerDeltas[partnerKey] || 0) + inverseDelta
+    }
   }
 
   const rawDelta = (totalPlayerDelta + totalPickDelta) * 0.7

@@ -27,6 +27,8 @@ export interface TradePick {
 
 export interface TradeData {
   partnerTeamKey: string
+  partnerTeamKey2?: string  // For 3-team trades
+  isThreeTeam: boolean
   grade: number
   playersReceived: TradePlayer[]
   playersSent: TradePlayer[]
@@ -138,6 +140,8 @@ export async function fetchTradeData(sessionId: string): Promise<TradeData[]> {
 
     return (trades as any[]).map((t: any) => ({
       partnerTeamKey: t.partner_team_key || '',
+      partnerTeamKey2: t.trade_partner_2 || undefined,  // For 3-team trades
+      isThreeTeam: !!t.is_three_team,
       grade: t.grade || 50,
       playersReceived: parsePlayersJSON(t.players_received),
       playersSent: parsePlayersJSON(t.players_sent),
