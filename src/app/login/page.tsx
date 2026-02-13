@@ -3,6 +3,7 @@ import Link from 'next/link'
 import { redirect } from 'next/navigation'
 import { createServerClient } from '@supabase/ssr'
 import { cookies } from 'next/headers'
+import Image from 'next/image'
 import LoginForm from '@/components/auth/LoginForm'
 
 export const metadata: Metadata = {
@@ -34,20 +35,44 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
   if (user) {
     redirect(redirectTo)
   }
+
+  // Comparison features
+  const features = [
+    { name: 'Scout AI (Chicago Q&A)', sm: true, espn: false },
+    { name: 'GM Trade Simulator', sm: true, espn: false },
+    { name: 'Mock Draft Simulator (All 4 Leagues)', sm: true, espn: false },
+    { name: 'AI Fan Chat Personalities', sm: true, espn: false },
+    { name: 'Interactive D3 Charts', sm: true, espn: true },
+    { name: 'AR/VR Stadium Tours', sm: true, espn: false },
+    { name: 'Chicago-Only Focus', sm: true, espn: false },
+  ]
+
   return (
     <div className="flex min-h-screen">
       {/* Left side - Form */}
-      <div className="flex flex-1 flex-col justify-center px-4 py-12 sm:px-6 lg:flex-none lg:px-20 xl:px-24">
+      <div className="flex flex-1 flex-col justify-center px-4 py-12 sm:px-6 lg:flex-none lg:px-20 xl:px-24 bg-white dark:bg-zinc-900">
         <div className="mx-auto w-full max-w-sm lg:w-96">
-          {/* Logo */}
+          {/* Logo - Light mode */}
           <div className="mb-8">
             <Link href="/" className="inline-block">
-              <span className="font-heading text-2xl font-black tracking-tight text-zinc-900 dark:text-white">
-                SPORTS
-                <span className="bg-gradient-to-r from-[#FF0000] to-[#8B0000] bg-clip-text text-transparent">
-                  MOCKERY
-                </span>
-              </span>
+              {/* Light mode logo */}
+              <Image
+                src="/logos/SM_Full_v2.png"
+                alt="Sports Mockery"
+                width={220}
+                height={50}
+                className="dark:hidden"
+                priority
+              />
+              {/* Dark mode logo */}
+              <Image
+                src="/logos/v2_SM_Whole.png"
+                alt="Sports Mockery"
+                width={220}
+                height={50}
+                className="hidden dark:block"
+                priority
+              />
             </Link>
             <h2 className="mt-6 text-2xl font-bold text-zinc-900 dark:text-white">
               Welcome back
@@ -61,7 +86,7 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
         </div>
       </div>
 
-      {/* Right side - Image/Branding */}
+      {/* Right side - Features/Branding */}
       <div className="relative hidden w-0 flex-1 lg:block">
         <div className="absolute inset-0 bg-gradient-to-br from-[#8B0000] via-red-600 to-[#8B0000]">
           {/* Decorative elements */}
@@ -71,32 +96,82 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
           </div>
 
           {/* Content */}
-          <div className="relative flex h-full flex-col justify-center px-12">
-            <blockquote className="text-white">
-              <p className="text-3xl font-bold leading-tight">
-                &ldquo;The best place for Chicago sports hot takes and insider coverage.&rdquo;
-              </p>
-              <footer className="mt-6">
-                <p className="text-lg font-semibold text-white/90">Sports Mockery</p>
-                <p className="text-white/70">Chicago&apos;s Premier Sports Commentary</p>
-              </footer>
-            </blockquote>
-
-            {/* Stats */}
-            <div className="mt-12 grid grid-cols-3 gap-8">
-              <div>
-                <p className="text-3xl font-bold text-white">50K+</p>
-                <p className="text-sm text-white/70">Daily Readers</p>
-              </div>
-              <div>
-                <p className="text-3xl font-bold text-white">5</p>
-                <p className="text-sm text-white/70">Chicago Teams</p>
-              </div>
-              <div>
-                <p className="text-3xl font-bold text-white">24/7</p>
-                <p className="text-sm text-white/70">Coverage</p>
-              </div>
+          <div className="relative flex h-full flex-col items-center justify-start px-8 py-10 overflow-y-auto">
+            {/* Logo at top center */}
+            <div className="mb-4">
+              <Image
+                src="/logos/v2_SM_Whole.png"
+                alt="Sports Mockery 2.0"
+                width={280}
+                height={70}
+                priority
+              />
             </div>
+
+            {/* Tagline */}
+            <p className="text-white text-xl font-semibold mb-8 text-center">
+              AI-Powered. Fan-Driven. Chicago-Owned.
+            </p>
+
+            {/* Section title */}
+            <div className="text-center mb-6">
+              <h3 className="text-2xl font-bold text-white mb-2">
+                Why Sports Mockery 2.0 Stands Alone
+              </h3>
+              <p className="text-white/80 text-sm">
+                See how we compare to the competition.
+              </p>
+            </div>
+
+            {/* Comparison Chart */}
+            <div className="w-full max-w-lg bg-white/10 backdrop-blur-sm rounded-xl overflow-hidden border border-white/20">
+              {/* Table Header */}
+              <div className="grid grid-cols-3 bg-white/10">
+                <div className="px-4 py-3 text-white font-bold text-sm">
+                  Feature
+                </div>
+                <div className="px-4 py-3 text-white font-bold text-sm text-center">
+                  Sports Mockery 2.0
+                </div>
+                <div className="px-4 py-3 text-white font-bold text-sm text-center">
+                  ESPN / Bleacher
+                </div>
+              </div>
+
+              {/* Table Body */}
+              {features.map((feature, idx) => (
+                <div
+                  key={feature.name}
+                  className={`grid grid-cols-3 ${idx % 2 === 0 ? 'bg-white/5' : ''}`}
+                >
+                  <div className="px-4 py-2.5 text-white/90 text-sm">
+                    {feature.name}
+                  </div>
+                  <div className="px-4 py-2.5 text-center">
+                    {feature.sm ? (
+                      <span className="text-green-400 text-lg">✓</span>
+                    ) : (
+                      <span className="text-red-400 text-lg">✗</span>
+                    )}
+                  </div>
+                  <div className="px-4 py-2.5 text-center">
+                    {feature.espn ? (
+                      <span className="text-green-400 text-lg">✓</span>
+                    ) : (
+                      <span className="text-red-400 text-lg">✗</span>
+                    )}
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            {/* "and more" link */}
+            <Link
+              href="https://test.sportsmockery.com/tour-page.html"
+              className="mt-4 text-white/80 text-sm hover:text-white transition-colors underline"
+            >
+              and more…
+            </Link>
           </div>
         </div>
       </div>
