@@ -65,10 +65,17 @@ async function createPollFromDataLabSuggestion(
       .single()
 
     if (pollError || !poll) {
-      console.error('Failed to create poll from DataLab suggestion:', pollError)
+      console.error('Failed to create poll from DataLab suggestion:', {
+        error: pollError,
+        code: pollError?.code,
+        message: pollError?.message,
+        details: pollError?.details,
+        hint: pollError?.hint,
+        insertData: pollInsert,
+      })
       return NextResponse.json({
         success: false,
-        reason: 'Failed to create poll',
+        reason: `Failed to create poll: ${pollError?.message || 'Unknown error'}`,
         poll: pollSuggestion,
       })
     }
@@ -658,12 +665,9 @@ Return ONLY the JSON object, no explanation.`
 
 /**
  * Generate a chart for a post based on its content
- * Analyzes the article to find chartable data, creates a chart, and inserts it
+ * Uses DataLab analyze_chart for analysis, then creates chart locally
  */
 async function generateChartForPost(title: string, content: string, category?: string) {
-  // Strip HTML tags for analysis
-  const plainText = content.replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim()
-
   // Determine team from category
   const teamMap: Record<string, string> = {
     'Chicago Bears': 'bears',
@@ -679,71 +683,71 @@ async function generateChartForPost(title: string, content: string, category?: s
   }
   const team = category ? (teamMap[category] || 'bears') : 'bears'
 
-  const prompt = `You are a sports data analyst for Sports Mockery. Analyze this article and identify data that would make a compelling chart visualization.
+  // First, get chart analysis from DataLab (or local fallback)
+  let analysis: {
+    shouldCreateChart: boolean
+    chartType?: string
+    chartTitle?: string
+    data?: Array<{ label: string; value: number }>
+    paragraphIndex?: number
+  }
 
-Article Title: "${title}"
-Article Content:
-${plainText.slice(0, 3000)}
+  // Try DataLab first for analysis
+  if (process.env.POSTIQ_INTERNAL_KEY) {
+    try {
+      const datalabResponse = await fetch(`${DATALAB_API}/api/v2/postiq/suggest`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-PostIQ-Internal-Key': process.env.POSTIQ_INTERNAL_KEY,
+        },
+        body: JSON.stringify({
+          task: 'analyze_chart',
+          articleTitle: title,
+          articleContent: content,
+          category,
+        }),
+      })
 
-Your task:
-1. Find statistical data, comparisons, rankings, or trends mentioned in the article that could be visualized
-2. Choose the best chart type:
-   - "bar" for comparing values (player stats, rankings, comparisons)
-   - "line" for trends over time (season progress, performance over weeks/games)
-   - "pie" for percentages or distributions (play types, snap counts)
-3. Extract the data points with labels and values
-4. Identify which paragraph contains the data (count from 1)
+      if (datalabResponse.ok) {
+        analysis = await datalabResponse.json()
+        console.log('[generate_chart] DataLab analysis:', JSON.stringify(analysis).slice(0, 200))
+      } else {
+        throw new Error('DataLab returned non-OK response')
+      }
+    } catch (error) {
+      console.error('[generate_chart] DataLab failed, using local AI:', error)
+      // Fall through to local AI
+      analysis = await analyzeChartLocally(title, content)
+    }
+  } else {
+    // No DataLab key, use local AI
+    analysis = await analyzeChartLocally(title, content)
+  }
 
-Return a JSON object with:
-{
-  "shouldCreateChart": true or false (false if no good data found),
-  "chartType": "bar" | "line" | "pie",
-  "chartTitle": "descriptive title for the chart",
-  "data": [
-    { "label": "Category/Time", "value": number }
-  ],
-  "paragraphIndex": number (1-based index of paragraph where chart should appear after),
-  "reasoning": "brief explanation of why this data makes a good chart"
-}
+  if (!analysis.shouldCreateChart || !analysis.data || analysis.data.length < 2) {
+    return NextResponse.json({
+      success: false,
+      reason: 'No suitable chart data found in article',
+      updatedContent: null,
+    })
+  }
 
-If the article doesn't contain good chartable data (no statistics, comparisons, or trends), set shouldCreateChart to false.
-Return ONLY the JSON object, no explanation.`
+  // Create the chart via internal API call
+  const chartPayload = {
+    type: analysis.chartType || 'bar',
+    title: analysis.chartTitle || `${title} - Data`,
+    size: 'medium',
+    colors: { scheme: 'team', team },
+    data: analysis.data,
+    dataSource: 'manual',
+  }
 
-  const message = await anthropic.messages.create({
-    model: 'claude-sonnet-4-20250514',
-    max_tokens: 1000,
-    messages: [{ role: 'user', content: prompt }],
-  })
-
-  const responseText = message.content[0].type === 'text' ? message.content[0].text : ''
-  console.log('Chart analysis response:', responseText.slice(0, 500))
+  // Make internal request to create chart
+  const baseUrl = process.env.NEXT_PUBLIC_APP_URL
+    || (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : 'http://localhost:3000')
 
   try {
-    const jsonText = extractJSON(responseText)
-    const analysis = JSON.parse(jsonText)
-
-    if (!analysis.shouldCreateChart || !analysis.data || analysis.data.length < 2) {
-      return NextResponse.json({
-        success: false,
-        reason: 'No suitable chart data found in article',
-        updatedContent: null,
-      })
-    }
-
-    // Create the chart via internal API call
-    const chartPayload = {
-      type: analysis.chartType || 'bar',
-      title: analysis.chartTitle || `${title} - Data`,
-      size: 'medium',
-      colors: { scheme: 'team', team },
-      data: analysis.data,
-      dataSource: 'manual',
-    }
-
-    // Make internal request to create chart
-    const baseUrl = process.env.NEXT_PUBLIC_APP_URL
-      || (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : 'http://localhost:3000')
-
     const chartResponse = await fetch(`${baseUrl}/api/charts`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -781,9 +785,53 @@ Return ONLY the JSON object, no explanation.`
     console.error('Chart generation error:', e)
     return NextResponse.json({
       success: false,
-      reason: 'Failed to analyze content for chart',
+      reason: 'Failed to create chart',
       updatedContent: null,
     })
+  }
+}
+
+/**
+ * Local AI chart analysis fallback when DataLab is unavailable
+ */
+async function analyzeChartLocally(title: string, content: string): Promise<{
+  shouldCreateChart: boolean
+  chartType?: string
+  chartTitle?: string
+  data?: Array<{ label: string; value: number }>
+  paragraphIndex?: number
+}> {
+  const plainText = content.replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim()
+
+  const prompt = `Analyze this article and identify data for a chart visualization.
+
+Article Title: "${title}"
+Article Content: ${plainText.slice(0, 3000)}
+
+Return a JSON object with:
+{
+  "shouldCreateChart": true or false,
+  "chartType": "bar" | "line" | "pie",
+  "chartTitle": "chart title",
+  "data": [{ "label": "Category", "value": number }],
+  "paragraphIndex": 1
+}
+
+Return ONLY the JSON object.`
+
+  try {
+    const message = await anthropic.messages.create({
+      model: 'claude-sonnet-4-20250514',
+      max_tokens: 1000,
+      messages: [{ role: 'user', content: prompt }],
+    })
+
+    const responseText = message.content[0].type === 'text' ? message.content[0].text : ''
+    const jsonText = extractJSON(responseText)
+    return JSON.parse(jsonText)
+  } catch (e) {
+    console.error('Local chart analysis failed:', e)
+    return { shouldCreateChart: false }
   }
 }
 
