@@ -662,23 +662,19 @@ export default function Header() {
                   className="flex items-center gap-1 px-4 py-4 text-[14px] font-bold hover:text-[var(--link-color)] transition-colors"
                   style={{ fontFamily: "'Montserrat', sans-serif", color: 'var(--text-primary)' }}
                 >
-                  <span className="flex items-center gap-1.5">
-                    2.0
-                    <span
-                      style={{
-                        backgroundColor: '#bc0000',
-                        color: '#ffffff',
-                        fontSize: '9px',
-                        fontWeight: 700,
-                        padding: '2px 5px',
-                        borderRadius: '4px',
-                        lineHeight: 1,
-                        display: 'inline-flex',
-                        alignItems: 'center',
-                      }}
-                    >
-                      New!
-                    </span>
+                  2.0
+                  <span
+                    style={{
+                      backgroundColor: '#bc0000',
+                      color: '#ffffff',
+                      fontSize: '9px',
+                      fontWeight: 700,
+                      padding: '2px 5px',
+                      borderRadius: '4px',
+                      marginLeft: '4px',
+                    }}
+                  >
+                    New!
                   </span>
                 </Link>
                 <button
@@ -879,23 +875,18 @@ export default function Header() {
                 className="py-3 text-[14px] font-bold flex items-center gap-2"
                 style={{ fontFamily: "'Montserrat', sans-serif", color: 'var(--text-primary)', borderBottom: '1px solid var(--border-color)' }}
               >
-                <span className="flex items-center gap-1.5">
-                  2.0
-                  <span
-                    style={{
-                      backgroundColor: '#bc0000',
-                      color: '#ffffff',
-                      fontSize: '9px',
-                      fontWeight: 700,
-                      padding: '2px 5px',
-                      borderRadius: '4px',
-                      lineHeight: 1,
-                      display: 'inline-flex',
-                      alignItems: 'center',
-                    }}
-                  >
-                    New!
-                  </span>
+                2.0
+                <span
+                  style={{
+                    backgroundColor: '#bc0000',
+                    color: '#ffffff',
+                    fontSize: '9px',
+                    fontWeight: 700,
+                    padding: '2px 5px',
+                    borderRadius: '4px',
+                  }}
+                >
+                  New!
                 </span>
               </Link>
               <div className="pl-4 border-l-2 border-[#bc0000] ml-2">
