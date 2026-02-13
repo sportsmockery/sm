@@ -281,11 +281,11 @@ export default function Header() {
                 transition={{ type: 'spring', stiffness: 400, damping: 17 }}
               >
                 <Image
-                  src={theme === 'dark' ? '/logos/v2_SM_Whole.png' : '/logos/v2_site_Header.png'}
+                  src={theme === 'dark' ? '/logos/v2_header_dark.png' : '/logos/v2_site_Header.png'}
                   alt="Sports Mockery"
-                  width={220}
-                  height={65}
-                  className="h-8 md:h-10 w-auto object-contain"
+                  width={180}
+                  height={45}
+                  className="h-9 md:h-10 w-auto object-contain"
                   priority
                 />
               </motion.div>
