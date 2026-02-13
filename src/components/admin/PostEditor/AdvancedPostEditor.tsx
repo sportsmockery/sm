@@ -42,9 +42,19 @@ interface Post {
 }
 
 interface ArticleIdea {
+  id?: string
   headline: string
   angle: string
-  type: string
+  hook?: string
+  article_type?: string
+  type?: string // legacy fallback
+  emotion?: string
+  emotion_score?: number
+  viral_score?: number
+  keywords?: string[]
+  players_mentioned?: string[]
+  is_breaking?: boolean
+  source_headlines?: string[]
 }
 
 interface AdvancedPostEditorProps {
@@ -72,6 +82,10 @@ export default function AdvancedPostEditor({
   const [showIdeasModal, setShowIdeasModal] = useState(false)
   const [selectedIdea, setSelectedIdea] = useState<ArticleIdea | null>(null)
   const [loadingIdeas, setLoadingIdeas] = useState(false)
+  const [ideasRefreshesRemaining, setIdeasRefreshesRemaining] = useState(3)
+  const [ideasCanRefresh, setIdeasCanRefresh] = useState(true)
+  const [ideasLastUpdated, setIdeasLastUpdated] = useState<string | null>(null)
+  const [currentIdeasTeam, setCurrentIdeasTeam] = useState<string | null>(null)
 
   // Sidebar states
   const [leftSidebarCollapsed, setLeftSidebarCollapsed] = useState(false)
@@ -330,33 +344,88 @@ export default function AdvancedPostEditor({
     }
   }
 
-  // Generate article ideas
-  const generateIdeas = async (teamOverride?: string) => {
+  // Generate article ideas from DataLab Trending Ideas API
+  const generateIdeas = async (teamOverride?: string, isRefresh = false) => {
     setLoadingIdeas(true)
     setSelectedIdea(null)
     const categoryName = categories.find(c => c.id === formData.category_id)?.name || 'Chicago Sports'
-    const team = teamOverride || getTeamFromCategory(categoryName)
+    const team = teamOverride || getTeamFromCategory(categoryName) || 'bears'
+    setCurrentIdeasTeam(team)
+
     try {
-      const response = await fetch('/api/admin/ai', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          action: 'ideas',
-          category: categoryName,
-          team,
-        }),
-      })
-      if (response.ok) {
-        const data = await response.json()
-        if (data.ideas) {
-          setIdeas(data.ideas)
+      const userId = currentUserId || 'anonymous'
+
+      if (isRefresh) {
+        // Use POST for refresh
+        const response = await fetch('https://datalab.sportsmockery.com/api/postiq/ideas', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            team,
+            user_id: userId,
+            action: 'refresh',
+          }),
+        })
+        if (response.ok) {
+          const data = await response.json()
+          if (data.ideas) {
+            setIdeas(data.ideas)
+            setIdeasRefreshesRemaining(data.refreshes_remaining ?? 0)
+            setIdeasCanRefresh(data.can_refresh ?? false)
+          }
+        } else if (response.status === 429) {
+          // Rate limited
+          setIdeasCanRefresh(false)
+          setIdeasRefreshesRemaining(0)
+        }
+      } else {
+        // Use GET for initial fetch
+        const response = await fetch(
+          `https://datalab.sportsmockery.com/api/postiq/ideas?team=${encodeURIComponent(team)}&user_id=${encodeURIComponent(userId)}&limit=5`
+        )
+        if (response.ok) {
+          const data = await response.json()
+          if (data.ideas) {
+            setIdeas(data.ideas)
+            setIdeasRefreshesRemaining(data.refreshes_remaining ?? 3)
+            setIdeasCanRefresh(data.can_refresh ?? true)
+            setIdeasLastUpdated(data.last_updated || null)
+          }
         }
       }
+      setShowIdeasModal(true)
     } catch (err) {
       console.error('Ideas generation error:', err)
+      // Fallback to local AI if DataLab fails
+      try {
+        const response = await fetch('/api/admin/ai', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            action: 'ideas',
+            category: categoryName,
+            team,
+          }),
+        })
+        if (response.ok) {
+          const data = await response.json()
+          if (data.ideas) {
+            setIdeas(data.ideas)
+          }
+        }
+        setShowIdeasModal(true)
+      } catch {
+        // Silently fail
+      }
     } finally {
       setLoadingIdeas(false)
     }
+  }
+
+  // Refresh ideas (uses POST with action: refresh)
+  const refreshIdeas = async () => {
+    if (!ideasCanRefresh || !currentIdeasTeam) return
+    await generateIdeas(currentIdeasTeam, true)
   }
 
   // Regenerate SEO manually
@@ -1688,28 +1757,38 @@ export default function AdvancedPostEditor({
         </aside>
       </div>
 
-      {/* Ideas Modal */}
+      {/* Ideas Modal - Enhanced with DataLab Trending Ideas */}
       {showIdeasModal && (
         <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/60 backdrop-blur-sm">
-          <div className="mx-4 w-full max-w-lg overflow-hidden rounded-xl bg-white shadow-2xl dark:bg-[#1c1c1f]">
+          <div className="mx-4 w-full max-w-2xl overflow-hidden rounded-xl bg-white shadow-2xl dark:bg-[#1c1c1f]">
             <div className="flex items-center justify-between border-b border-gray-200 px-6 py-4 dark:border-gray-700">
-              <h3 className="text-lg font-bold text-gray-900 dark:text-white">💡 Article Ideas</h3>
+              <div className="flex items-center gap-3">
+                <span className="text-2xl">🔥</span>
+                <div>
+                  <h3 className="text-lg font-bold text-gray-900 dark:text-white">Trending Ideas</h3>
+                  {ideasLastUpdated && (
+                    <p className="text-xs text-gray-500 dark:text-gray-400">
+                      Updated {new Date(ideasLastUpdated).toLocaleTimeString()}
+                    </p>
+                  )}
+                </div>
+              </div>
               <button type="button" onClick={() => setShowIdeasModal(false)} className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200">
                 <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
                 </svg>
               </button>
             </div>
-            <div className="max-h-80 space-y-3 overflow-y-auto p-6">
+            <div className="max-h-[60vh] space-y-3 overflow-y-auto p-6">
               {loadingIdeas ? (
                 <div className="py-8 text-center">
                   <div className="mx-auto h-6 w-6 animate-spin rounded-full border-2 border-purple-500 border-t-transparent" />
-                  <p className="mt-3 text-gray-500 dark:text-gray-400">Generating ideas...</p>
+                  <p className="mt-3 text-gray-500 dark:text-gray-400">Finding trending topics...</p>
                 </div>
               ) : ideas.length > 0 ? (
                 ideas.map((idea, i) => (
                   <button
-                    key={i}
+                    key={idea.id || i}
                     type="button"
                     onClick={() => setSelectedIdea(idea)}
                     className={`w-full rounded-lg border-2 p-4 text-left transition-all ${
@@ -1718,21 +1797,92 @@ export default function AdvancedPostEditor({
                         : 'border-gray-200 hover:border-purple-300 dark:border-gray-700'
                     }`}
                   >
-                    <p className="font-medium text-gray-900 dark:text-white">{idea.headline}</p>
-                    <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">{idea.angle}</p>
-                    <span className="mt-2 inline-block rounded bg-gray-100 px-2 py-0.5 text-xs text-gray-600 dark:bg-gray-800 dark:text-gray-400">
-                      {idea.type}
-                    </span>
+                    <div className="flex items-start justify-between gap-3">
+                      <div className="flex-1">
+                        <div className="flex items-center gap-2">
+                          {idea.is_breaking && (
+                            <span className="rounded bg-red-500 px-1.5 py-0.5 text-[10px] font-bold uppercase text-white">
+                              Breaking
+                            </span>
+                          )}
+                          <p className="font-semibold text-gray-900 dark:text-white">{idea.headline}</p>
+                        </div>
+                        <p className="mt-1.5 text-sm text-gray-600 dark:text-gray-300">{idea.angle}</p>
+                        {idea.hook && (
+                          <p className="mt-1 text-xs italic text-purple-600 dark:text-purple-400">💡 {idea.hook}</p>
+                        )}
+                      </div>
+                      {idea.viral_score !== undefined && (
+                        <div className="flex flex-col items-center">
+                          <div className={`flex h-10 w-10 items-center justify-center rounded-full text-sm font-bold text-white ${
+                            idea.viral_score >= 80 ? 'bg-green-500' :
+                            idea.viral_score >= 60 ? 'bg-yellow-500' : 'bg-gray-400'
+                          }`}>
+                            {idea.viral_score}
+                          </div>
+                          <span className="mt-0.5 text-[10px] text-gray-400">viral</span>
+                        </div>
+                      )}
+                    </div>
+                    <div className="mt-3 flex flex-wrap items-center gap-2">
+                      <span className={`rounded-full px-2 py-0.5 text-xs font-medium ${
+                        idea.emotion === 'rage' ? 'bg-red-100 text-red-700 dark:bg-red-900/40 dark:text-red-300' :
+                        idea.emotion === 'hope' ? 'bg-green-100 text-green-700 dark:bg-green-900/40 dark:text-green-300' :
+                        idea.emotion === 'LOL' ? 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/40 dark:text-yellow-300' :
+                        idea.emotion === 'panic' ? 'bg-orange-100 text-orange-700 dark:bg-orange-900/40 dark:text-orange-300' :
+                        idea.emotion === 'hype' ? 'bg-purple-100 text-purple-700 dark:bg-purple-900/40 dark:text-purple-300' :
+                        idea.emotion === 'nostalgia' ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-300' :
+                        'bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-300'
+                      }`}>
+                        {idea.emotion || 'analysis'}
+                        {idea.emotion_score !== undefined && ` ${idea.emotion_score}`}
+                      </span>
+                      <span className="rounded bg-gray-100 px-2 py-0.5 text-xs text-gray-600 dark:bg-gray-800 dark:text-gray-400">
+                        {idea.article_type || idea.type || 'article'}
+                      </span>
+                      {idea.players_mentioned && idea.players_mentioned.length > 0 && (
+                        <span className="text-xs text-gray-400">
+                          👤 {idea.players_mentioned.slice(0, 2).join(', ')}
+                        </span>
+                      )}
+                    </div>
+                    {idea.keywords && idea.keywords.length > 0 && (
+                      <div className="mt-2 flex flex-wrap gap-1">
+                        {idea.keywords.slice(0, 4).map((kw, idx) => (
+                          <span key={idx} className="text-[10px] text-gray-400">#{kw.replace(/\s+/g, '')}</span>
+                        ))}
+                      </div>
+                    )}
                   </button>
                 ))
               ) : (
-                <p className="py-8 text-center text-gray-500">Click "Generate More" to get article ideas</p>
+                <div className="py-8 text-center">
+                  <p className="text-gray-500 dark:text-gray-400">No trending ideas available</p>
+                  <button
+                    type="button"
+                    onClick={() => generateIdeas(currentIdeasTeam || undefined)}
+                    className="mt-3 text-sm font-medium text-purple-500 hover:text-purple-400"
+                  >
+                    Try again
+                  </button>
+                </div>
               )}
             </div>
             <div className="flex items-center gap-3 border-t border-gray-200 bg-gray-50 px-6 py-4 dark:border-gray-700 dark:bg-gray-800/50">
-              <button type="button" onClick={() => generateIdeas()} disabled={loadingIdeas} className="text-sm font-medium text-purple-500 hover:text-purple-400 disabled:opacity-50">
-                ↻ Generate More
+              <button
+                type="button"
+                onClick={refreshIdeas}
+                disabled={loadingIdeas || !ideasCanRefresh}
+                className="flex items-center gap-1.5 text-sm font-medium text-purple-500 hover:text-purple-400 disabled:cursor-not-allowed disabled:opacity-50"
+              >
+                <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0l3.181 3.183a8.25 8.25 0 0013.803-3.7M4.031 9.865a8.25 8.25 0 0113.803-3.7l3.181 3.182m0-4.991v4.99" />
+                </svg>
+                Refresh
               </button>
+              <span className="text-xs text-gray-400">
+                {ideasRefreshesRemaining > 0 ? `${ideasRefreshesRemaining} left` : 'Limit reached'}
+              </span>
               <div className="flex-1" />
               <button type="button" onClick={() => setShowIdeasModal(false)} className="px-4 py-2 text-sm text-gray-600 hover:text-gray-900 dark:text-gray-300 dark:hover:text-white">
                 Cancel
