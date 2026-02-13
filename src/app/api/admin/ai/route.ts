@@ -182,9 +182,11 @@ async function tryDataLabPostIQ(body: AIRequest, userId?: string): Promise<Respo
   }
 
   if (!process.env.POSTIQ_INTERNAL_KEY) {
-    console.log('[PostIQ] No internal key configured, using local fallback')
+    console.log('[PostIQ] No internal key configured, using local fallback. Available env vars:', Object.keys(process.env).filter(k => k.includes('POSTIQ')).join(', ') || 'none')
     return null
   }
+
+  console.log('[PostIQ] Internal key found, attempting DataLab call for action:', body.action)
 
   try {
     const response = await fetch(`${DATALAB_API}/api/v2/postiq/suggest`, {

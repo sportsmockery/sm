@@ -657,8 +657,8 @@ export default function Header() {
 
               {/* New Features dropdown */}
               <div className="relative" ref={newFeaturesMenuRef}>
-                <Link
-                  href="https://test.sportsmockery.com/tour-page.html"
+                <button
+                  onClick={() => setNewFeaturesMenuOpen(!newFeaturesMenuOpen)}
                   className="flex items-center gap-1 px-4 py-4 text-[14px] font-bold hover:text-[var(--link-color)] transition-colors"
                   style={{ fontFamily: "'Montserrat', sans-serif", color: 'var(--text-primary)' }}
                 >
@@ -676,13 +676,7 @@ export default function Header() {
                   >
                     New!
                   </span>
-                </Link>
-                <button
-                  onClick={() => setNewFeaturesMenuOpen(!newFeaturesMenuOpen)}
-                  className="flex items-center py-4 hover:text-[var(--link-color)] transition-colors"
-                  style={{ color: 'var(--text-primary)' }}
-                >
-                  <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg className="w-3 h-3 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
                   </svg>
                 </button>
