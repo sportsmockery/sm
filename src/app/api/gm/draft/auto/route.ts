@@ -109,11 +109,18 @@ export async function POST(request: NextRequest) {
     }
 
     // Get available prospects (not yet picked)
+    // Check for BOTH prospect_id AND prospect_name to determine if actually picked
+    // The get_mock_draft RPC may return default/placeholder values for prospect_id
     const pickedProspectIds = allPicks
-      .filter((p: any) => p.prospect_id)
+      .filter((p: any) => p.prospect_id && p.prospect_name && p.prospect_name !== 'null' && p.prospect_name !== '')
       .map((p: any) => String(p.prospect_id))
 
     log(`Already picked prospect IDs: ${pickedProspectIds.length} picks made`)
+    // Debug: show first pick's prospect data to understand the structure
+    if (allPicks.length > 0) {
+      const firstPick = allPicks[0]
+      log(`First pick prospect data: prospect_id=${firstPick.prospect_id} (type: ${typeof firstPick.prospect_id}), prospect_name=${firstPick.prospect_name}`)
+    }
 
     // Use draft_prospects table with league column (uppercase: NFL, NBA, etc.)
     const league = SPORT_TO_LEAGUE[mockDraft.sport?.toLowerCase()] || mockDraft.sport?.toUpperCase()
