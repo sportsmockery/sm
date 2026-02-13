@@ -37,6 +37,14 @@ const SPORT_CONTEXT: Record<string, string> = {
   mlb: '20-round draft but only rounds 1-5 have real trade value.',
 }
 
+// Capitalize first letter of each word in team name
+function capitalizeTeamName(name: string): string {
+  if (!name) return name
+  return name.split(' ').map(word =>
+    word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()
+  ).join(' ')
+}
+
 interface AvailablePick extends DraftPick {
   id: string // Unique identifier like "2026-1"
   label?: string
@@ -325,7 +333,7 @@ export function DraftPickList({
                             </div>
                             {pick.originalTeam && pick.originalTeam !== 'Own' && pick.originalTeam !== teamName && (
                               <span style={{ fontSize: 9, color: subText }}>
-                                via {pick.originalTeam}
+                                via {capitalizeTeamName(pick.originalTeam)}
                               </span>
                             )}
                           </div>
@@ -368,7 +376,7 @@ export function DraftPickList({
                         fontSize: 11,
                         color: isDark ? '#d4d4d4' : '#6c757d',
                       }}>
-                        {tap.label} → {tap.owedTo}
+                        {tap.label} → {capitalizeTeamName(tap.owedTo)}
                       </div>
                     ))}
                   </div>
