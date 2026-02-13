@@ -281,7 +281,7 @@ export default function Header() {
                 transition={{ type: 'spring', stiffness: 400, damping: 17 }}
               >
                 <Image
-                  src={theme === 'dark' ? '/logo-white.png' : '/logo.png'}
+                  src={theme === 'dark' ? '/logos/v2_SM_Whole.png' : '/logos/v2_site_Header.png'}
                   alt="Sports Mockery"
                   width={220}
                   height={65}
