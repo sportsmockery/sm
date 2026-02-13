@@ -176,6 +176,9 @@ export async function POST(request: NextRequest) {
     let iterations = 0
     let picksAdvanced = 0
 
+    // Track picks locally since get_mock_draft RPC may not return updated prospect data
+    const localPicksMap: Record<number, { prospect_id: string; prospect_name: string; position: string }> = {}
+
     log(`Starting simulation loop: maxIterations=${maxIterations}, from pick ${currentPick} to ${nextUserPick}`)
 
     while (currentPick < nextUserPick && currentPick <= mockDraft.total_picks && iterations < maxIterations) {
@@ -224,6 +227,13 @@ export async function POST(request: NextRequest) {
         log(`Updated pick ${currentPick} with ${selectedProspect.name}`)
       }
 
+      // Store locally for response (workaround for RPC not returning updated data)
+      localPicksMap[currentPick] = {
+        prospect_id: selectedProspect.prospect_id,
+        prospect_name: selectedProspect.name,
+        position: selectedProspect.position,
+      }
+
       // Track picked prospect
       pickedProspectIds.push(selectedProspect.prospect_id)
 
@@ -242,6 +252,8 @@ export async function POST(request: NextRequest) {
       iterations++
       picksAdvanced++
     }
+
+    log(`Local picks tracked: ${Object.keys(localPicksMap).length}`)
 
     log(`Simulation complete: advanced ${picksAdvanced} picks, now at pick ${currentPick}`)
 
@@ -290,26 +302,36 @@ export async function POST(request: NextRequest) {
       })))}`)
     }
 
-    // Build response
-    const picks = (updatedDraft.picks || []).map((p: any) => ({
-      pick_number: p.pick_number,
-      round: p.round,
-      team_key: p.team_key,
-      team_name: p.team_name,
-      team_logo: p.team_logo,
-      team_color: p.team_color,
-      is_user_pick: p.is_user_pick,
-      is_current: p.pick_number === updatedDraft.current_pick,
-      selected_prospect: p.prospect_id ? {
-        id: p.prospect_id,
-        name: p.prospect_name,
-        position: p.position,
-      } : null,
-    }))
+    // Build response - merge locally tracked picks with RPC data
+    // This is a workaround for get_mock_draft RPC not returning updated prospect data
+    const picks = (updatedDraft.picks || []).map((p: any) => {
+      const localPick = localPicksMap[p.pick_number]
+
+      // Use local data if available, otherwise try RPC data
+      const prospectId = localPick?.prospect_id || p.prospect_id
+      const prospectName = localPick?.prospect_name || p.prospect_name
+      const position = localPick?.position || p.position
+
+      return {
+        pick_number: p.pick_number,
+        round: p.round,
+        team_key: p.team_key,
+        team_name: p.team_name,
+        team_logo: p.team_logo,
+        team_color: p.team_color,
+        is_user_pick: p.is_user_pick,
+        is_current: p.pick_number === updatedDraft.current_pick,
+        selected_prospect: prospectId ? {
+          id: prospectId,
+          name: prospectName,
+          position: position,
+        } : null,
+      }
+    })
 
     // Debug: verify the final picks have selected_prospect
     const picksWithSelectedProspect = picks.filter((p: any) => p.selected_prospect !== null).length
-    log(`Final picks with selected_prospect: ${picksWithSelectedProspect}`)
+    log(`Final picks with selected_prospect: ${picksWithSelectedProspect} (using local data: ${Object.keys(localPicksMap).length})`)
     log(`First 5 final picks: ${JSON.stringify(picks.slice(0, 5).map((p: any) => ({
       pick: p.pick_number,
       hasProspect: p.selected_prospect !== null,
