@@ -42,11 +42,18 @@ async function createPollFromDataLabSuggestion(
     }
     const teamTheme = pollSuggestion.team_theme || team || (category ? teamMap[category] : null) || null
 
+    // Map poll_type to valid database values ('single' or 'multiple')
+    // DataLab may return semantic types like 'opinion', 'prediction' etc.
+    const validPollTypes = ['single', 'multiple']
+    const pollType = validPollTypes.includes(pollSuggestion.poll_type || '')
+      ? pollSuggestion.poll_type
+      : 'single' // Default to single choice
+
     // Build poll insert object
     const pollInsert = {
       title: pollSuggestion.question.slice(0, 255),
       question: pollSuggestion.question,
-      poll_type: pollSuggestion.poll_type || 'single',
+      poll_type: pollType,
       status: 'active',
       team_theme: teamTheme,
       show_results: true,
