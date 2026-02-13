@@ -114,14 +114,16 @@ export async function POST(request: NextRequest) {
 
   } catch (error) {
     console.error('Draft pick error:', error)
+    const errorMsg = error instanceof Error ? error.message : String(error)
     try {
       await datalabAdmin.from('gm_errors').insert({
         source: 'backend',
         error_type: 'api',
-        error_message: String(error),
+        error_message: errorMsg,
         route: '/api/gm/draft/pick'
       })
     } catch {}
-    return NextResponse.json({ error: 'Failed to submit pick' }, { status: 500 })
+    // Return more detailed error to help debug
+    return NextResponse.json({ error: `Failed to submit pick: ${errorMsg}` }, { status: 500 })
   }
 }
