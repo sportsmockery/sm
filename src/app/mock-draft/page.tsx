@@ -254,6 +254,28 @@ export default function MockDraftPage() {
       setSelectedTeam(teamKey)
       setActiveDraft(data.draft)
       fetchProspects(team.sport, data.draft?.draft_year)
+
+      // If user's first pick is not #1, auto-advance to fill in earlier picks
+      const firstUserPick = data.draft?.user_picks?.[0]
+      if (firstUserPick && firstUserPick > 1) {
+        // Auto-advance to fill picks before user's turn
+        try {
+          setAutoAdvancing(true)
+          const advanceRes = await fetch('/api/gm/draft/auto', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ mock_id: data.draft.id }),
+          })
+          const advanceData = await advanceRes.json()
+          if (advanceRes.ok && advanceData.draft) {
+            setActiveDraft(advanceData.draft)
+          }
+        } catch (e) {
+          console.error('Auto-advance on start failed:', e)
+        } finally {
+          setAutoAdvancing(false)
+        }
+      }
     } catch (e) {
       setError('Network error. Please try again.')
     }
@@ -617,107 +639,65 @@ export default function MockDraftPage() {
 
         {/* Active Draft */}
         {selectedTeam && activeDraft && (
-          <div className="grid lg:grid-cols-3 gap-4 sm:gap-6">
-            {/* Main Content - Shows FIRST on mobile */}
-            <div className="lg:col-span-2 lg:order-2 space-y-4">
-              {/* Current Pick Status */}
-              <div className={`rounded-xl border p-3 sm:p-4 ${cardBg}`}>
-                <div className="flex flex-col sm:flex-row sm:items-center gap-3">
-                  <div className="flex items-center gap-3 flex-1">
-                    {currentTeamConfig && (
-                      <Image src={currentTeamConfig.logo} alt={currentTeamConfig.name} width={40} height={40} className="sm:w-12 sm:h-12" style={{ objectFit: 'contain' }} />
-                    )}
-                    <div style={{ flex: 1, minWidth: 0 }}>
-                      <div className="text-base sm:text-lg" style={{ fontWeight: 700, color: isDark ? '#fff' : '#1a1a1a' }}>
-                        {activeDraft.status === 'completed' || activeDraft.status === 'graded'
-                          ? 'Draft Complete!'
-                          : isUserPick
-                            ? `Your Pick: #${currentPick?.pick_number}`
-                            : `Pick #${currentPick?.pick_number}`
-                        }
-                      </div>
-                      <div className="text-xs sm:text-sm" style={{ color: subText }}>
-                        {activeDraft.status === 'completed' && !gradeResult && 'Tap to get your AI draft grade'}
-                        {activeDraft.status === 'graded' && 'Your draft has been graded'}
-                        {activeDraft.status === 'in_progress' && (isUserPick ? 'Select a prospect' : `${currentPick?.team_name} on clock`)}
-                      </div>
-                    </div>
-                  </div>
-                  {activeDraft.status === 'in_progress' && !isUserPick && (
-                    <button
-                      onClick={autoAdvance}
-                      disabled={autoAdvancing}
-                      className="w-full sm:w-auto"
-                      style={{
-                        padding: '12px 20px', borderRadius: 8, border: 'none',
-                        backgroundColor: teamColor, color: '#fff',
-                        fontWeight: 600, fontSize: '14px', cursor: autoAdvancing ? 'not-allowed' : 'pointer',
-                        opacity: autoAdvancing ? 0.7 : 1,
-                      }}
-                    >
-                      {autoAdvancing ? 'Advancing...' : 'Auto-Advance →'}
-                    </button>
-                  )}
-                  {activeDraft.status === 'completed' && !gradeResult && (
-                    <button
-                      onClick={gradeDraft}
-                      disabled={grading}
-                      className="w-full sm:w-auto"
-                      style={{
-                        padding: '12px 20px', borderRadius: 8, border: 'none',
-                        backgroundColor: teamColor, color: '#fff',
-                        fontWeight: 600, fontSize: '14px', cursor: grading ? 'not-allowed' : 'pointer',
-                        opacity: grading ? 0.7 : 1,
-                      }}
-                    >
-                      {grading ? 'Grading...' : 'Get Draft Grade'}
-                    </button>
-                  )}
-                </div>
+          <div className="grid lg:grid-cols-12 gap-4 sm:gap-6">
+            {/* Left Column - Draft Board */}
+            <div className={`lg:col-span-3 rounded-xl border p-3 sm:p-4 ${cardBg}`} style={{ maxHeight: 'calc(100vh - 200px)', overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
+                <h3 className="text-sm sm:text-base" style={{ fontWeight: 700, color: isDark ? '#fff' : '#1a1a1a' }}>
+                  Draft Board
+                </h3>
+                <span className="text-xs" style={{ color: subText }}>
+                  Pick {activeDraft.current_pick} of {activeDraft.total_picks}
+                </span>
               </div>
-
-              {/* Your Picks So Far - show during in_progress */}
-              {activeDraft.status === 'in_progress' && activeDraft.picks.some(p => p.is_user_pick && p.selected_prospect) && (
-                <div className={`rounded-xl border p-3 sm:p-4 ${cardBg}`}>
-                  <h3 className="text-sm sm:text-base" style={{ fontWeight: 700, marginBottom: 10, color: isDark ? '#fff' : '#1a1a1a' }}>
-                    Your Picks
-                  </h3>
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-                    {activeDraft.picks
-                      .filter(p => p.is_user_pick && p.selected_prospect)
-                      .map(pick => (
-                        <div
-                          key={pick.pick_number}
-                          style={{
-                            display: 'flex', alignItems: 'center', gap: 10,
-                            padding: '8px 10px', borderRadius: 8,
-                            backgroundColor: teamColor + '15',
-                            border: `1px solid ${teamColor}30`,
-                          }}
-                        >
-                          <div style={{
-                            width: 28, height: 28, minWidth: 28, borderRadius: 6,
-                            backgroundColor: teamColor, color: '#fff',
-                            fontWeight: 700, fontSize: '11px',
-                            display: 'flex', alignItems: 'center', justifyContent: 'center',
-                          }}>
-                            #{pick.pick_number}
-                          </div>
-                          <div style={{ flex: 1, minWidth: 0 }}>
-                            <div className="text-sm" style={{ fontWeight: 600, color: isDark ? '#fff' : '#1a1a1a' }}>
-                              {pick.selected_prospect!.name}
-                            </div>
-                            <div className="text-xs" style={{ color: subText }}>
-                              {pick.selected_prospect!.position} • {pick.selected_prospect!.school}
-                            </div>
-                          </div>
+              <div style={{ flex: 1, overflowY: 'auto' }}>
+                {activeDraft.picks.map(pick => (
+                  <div
+                    key={pick.pick_number}
+                    style={{
+                      display: 'flex', alignItems: 'center', gap: 8,
+                      padding: '8px', borderRadius: 8, marginBottom: 4,
+                      backgroundColor: pick.is_current
+                        ? (pick.is_user_pick ? teamColor + '30' : (isDark ? '#374151' : '#f3f4f6'))
+                        : 'transparent',
+                      border: pick.is_current ? `2px solid ${pick.is_user_pick ? teamColor : (isDark ? '#4b5563' : '#d1d5db')}` : '1px solid transparent',
+                    }}
+                  >
+                    <div style={{
+                      width: 26, height: 26, minWidth: 26, borderRadius: 6,
+                      backgroundColor: pick.is_user_pick ? teamColor : (pick.team_color || '#666'),
+                      color: '#fff', fontWeight: 700, fontSize: '10px',
+                      display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    }}>
+                      {pick.pick_number}
+                    </div>
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      <div className="text-xs" style={{ fontWeight: 600, color: isDark ? '#fff' : '#1a1a1a', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                        {pick.team_name}
+                      </div>
+                      {pick.selected_prospect && (
+                        <div className="text-xs" style={{ color: subText, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                          {pick.selected_prospect.name}
                         </div>
-                      ))}
+                      )}
+                    </div>
+                    {pick.is_current && !pick.selected_prospect && (
+                      <div className="text-xs px-2 py-0.5" style={{
+                        borderRadius: 4,
+                        backgroundColor: pick.is_user_pick ? teamColor : '#6b7280',
+                        color: '#fff', fontWeight: 600, whiteSpace: 'nowrap',
+                      }}>
+                        {pick.is_user_pick ? 'YOU' : 'NOW'}
+                      </div>
+                    )}
                   </div>
-                </div>
-              )}
+                ))}
+              </div>
+            </div>
 
-              {/* Prospect Search (only show during draft) */}
+            {/* Center Column - Prospects */}
+            <div className="lg:col-span-6 space-y-4">
+              {/* Prospect Search (only show during draft when it's user's pick) */}
               {activeDraft.status === 'in_progress' && isUserPick && (
                 <>
                   <div className={`rounded-xl border p-4 ${cardBg}`}>
@@ -753,7 +733,7 @@ export default function MockDraftPage() {
                   </div>
 
                   {/* Prospect List */}
-                  <div className={`rounded-xl border p-4 ${cardBg}`} style={{ maxHeight: 500, overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
+                  <div className={`rounded-xl border p-4 ${cardBg}`} style={{ maxHeight: 'calc(100vh - 320px)', overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
                     <h3 style={{ fontWeight: 700, fontSize: '15px', marginBottom: 12, color: isDark ? '#fff' : '#1a1a1a' }}>
                       Available Prospects ({filteredProspects.length})
                     </h3>
@@ -823,6 +803,31 @@ export default function MockDraftPage() {
                 </>
               )}
 
+              {/* Waiting for turn message */}
+              {activeDraft.status === 'in_progress' && !isUserPick && (
+                <div className={`rounded-xl border p-6 ${cardBg}`} style={{ textAlign: 'center' }}>
+                  <div style={{ fontSize: '40px', marginBottom: 12 }}>⏳</div>
+                  <div style={{ fontWeight: 700, fontSize: '16px', marginBottom: 8, color: isDark ? '#fff' : '#1a1a1a' }}>
+                    Waiting for your pick...
+                  </div>
+                  <div style={{ fontSize: '14px', color: subText, marginBottom: 16 }}>
+                    {currentPick?.team_name} is on the clock (Pick #{currentPick?.pick_number})
+                  </div>
+                  <button
+                    onClick={autoAdvance}
+                    disabled={autoAdvancing}
+                    style={{
+                      padding: '12px 24px', borderRadius: 8, border: 'none',
+                      backgroundColor: teamColor, color: '#fff',
+                      fontWeight: 600, fontSize: '14px', cursor: autoAdvancing ? 'not-allowed' : 'pointer',
+                      opacity: autoAdvancing ? 0.7 : 1,
+                    }}
+                  >
+                    {autoAdvancing ? 'Simulating picks...' : 'Simulate to My Pick →'}
+                  </button>
+                </div>
+              )}
+
               {/* Draft Summary (after completion) */}
               {(activeDraft.status === 'completed' || activeDraft.status === 'graded') && (
                 <div className={`rounded-xl border p-4 ${cardBg}`}>
@@ -877,58 +882,91 @@ export default function MockDraftPage() {
               )}
             </div>
 
-            {/* Draft Board - Shows SECOND on mobile (below actions) */}
-            <div className={`lg:col-span-1 lg:order-1 rounded-xl border p-3 sm:p-4 ${cardBg}`} style={{ maxHeight: 'calc(100vh - 200px)', overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
-                <h3 className="text-sm sm:text-base" style={{ fontWeight: 700, color: isDark ? '#fff' : '#1a1a1a' }}>
-                  Draft Board
-                </h3>
-                <span className="text-xs" style={{ color: subText }}>
-                  Pick {activeDraft.current_pick} of {activeDraft.total_picks}
-                </span>
-              </div>
-              <div style={{ flex: 1, overflowY: 'auto' }}>
-                {activeDraft.picks.map(pick => (
-                  <div
-                    key={pick.pick_number}
+            {/* Right Column - Your Pick Status & Your Picks */}
+            <div className="lg:col-span-3 space-y-4">
+              {/* Current Pick Status */}
+              <div className={`rounded-xl border p-3 sm:p-4 ${cardBg}`}>
+                <div className="flex items-center gap-3 mb-3">
+                  {currentTeamConfig && (
+                    <Image src={currentTeamConfig.logo} alt={currentTeamConfig.name} width={40} height={40} style={{ objectFit: 'contain' }} />
+                  )}
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <div className="text-base sm:text-lg" style={{ fontWeight: 700, color: isDark ? '#fff' : '#1a1a1a' }}>
+                      {activeDraft.status === 'completed' || activeDraft.status === 'graded'
+                        ? 'Draft Complete!'
+                        : isUserPick
+                          ? `Your Pick: #${currentPick?.pick_number}`
+                          : `Pick #${currentPick?.pick_number}`
+                      }
+                    </div>
+                    <div className="text-xs sm:text-sm" style={{ color: subText }}>
+                      {activeDraft.status === 'completed' && !gradeResult && 'Get your AI draft grade'}
+                      {activeDraft.status === 'graded' && 'Your draft has been graded'}
+                      {activeDraft.status === 'in_progress' && (isUserPick ? 'Select a prospect below' : `${currentPick?.team_name} on clock`)}
+                    </div>
+                  </div>
+                </div>
+                {activeDraft.status === 'completed' && !gradeResult && (
+                  <button
+                    onClick={gradeDraft}
+                    disabled={grading}
                     style={{
-                      display: 'flex', alignItems: 'center', gap: 8,
-                      padding: '8px', borderRadius: 8, marginBottom: 4,
-                      backgroundColor: pick.is_current
-                        ? (pick.is_user_pick ? teamColor + '30' : (isDark ? '#374151' : '#f3f4f6'))
-                        : 'transparent',
-                      border: pick.is_current ? `2px solid ${pick.is_user_pick ? teamColor : (isDark ? '#4b5563' : '#d1d5db')}` : '1px solid transparent',
+                      width: '100%', padding: '12px 20px', borderRadius: 8, border: 'none',
+                      backgroundColor: teamColor, color: '#fff',
+                      fontWeight: 600, fontSize: '14px', cursor: grading ? 'not-allowed' : 'pointer',
+                      opacity: grading ? 0.7 : 1,
                     }}
                   >
-                    <div style={{
-                      width: 26, height: 26, minWidth: 26, borderRadius: 6,
-                      backgroundColor: pick.is_user_pick ? teamColor : (pick.team_color || '#666'),
-                      color: '#fff', fontWeight: 700, fontSize: '10px',
-                      display: 'flex', alignItems: 'center', justifyContent: 'center',
-                    }}>
-                      {pick.pick_number}
-                    </div>
-                    <div style={{ flex: 1, minWidth: 0 }}>
-                      <div className="text-xs" style={{ fontWeight: 600, color: isDark ? '#fff' : '#1a1a1a', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                        {pick.team_name}
-                      </div>
-                      {pick.selected_prospect && (
-                        <div className="text-xs" style={{ color: subText, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                          {pick.selected_prospect.name}
+                    {grading ? 'Grading...' : 'Get Draft Grade'}
+                  </button>
+                )}
+              </div>
+
+              {/* Your Picks - Always show user pick slots */}
+              <div className={`rounded-xl border p-3 sm:p-4 ${cardBg}`}>
+                <h3 className="text-sm sm:text-base" style={{ fontWeight: 700, marginBottom: 10, color: isDark ? '#fff' : '#1a1a1a' }}>
+                  Your Picks
+                </h3>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+                  {activeDraft.picks
+                    .filter(p => p.is_user_pick)
+                    .map(pick => (
+                      <div
+                        key={pick.pick_number}
+                        style={{
+                          display: 'flex', alignItems: 'center', gap: 10,
+                          padding: '8px 10px', borderRadius: 8,
+                          backgroundColor: pick.selected_prospect ? teamColor + '15' : (isDark ? '#374151' : '#f3f4f6'),
+                          border: pick.is_current ? `2px solid ${teamColor}` : `1px solid ${pick.selected_prospect ? teamColor + '30' : 'transparent'}`,
+                        }}
+                      >
+                        <div style={{
+                          width: 28, height: 28, minWidth: 28, borderRadius: 6,
+                          backgroundColor: teamColor, color: '#fff',
+                          fontWeight: 700, fontSize: '11px',
+                          display: 'flex', alignItems: 'center', justifyContent: 'center',
+                        }}>
+                          #{pick.pick_number}
                         </div>
-                      )}
-                    </div>
-                    {pick.is_current && !pick.selected_prospect && (
-                      <div className="text-xs px-2 py-0.5" style={{
-                        borderRadius: 4,
-                        backgroundColor: pick.is_user_pick ? teamColor : '#6b7280',
-                        color: '#fff', fontWeight: 600, whiteSpace: 'nowrap',
-                      }}>
-                        {pick.is_user_pick ? 'YOU' : 'NOW'}
+                        <div style={{ flex: 1, minWidth: 0 }}>
+                          {pick.selected_prospect ? (
+                            <>
+                              <div className="text-sm" style={{ fontWeight: 600, color: isDark ? '#fff' : '#1a1a1a' }}>
+                                {pick.selected_prospect.name}
+                              </div>
+                              <div className="text-xs" style={{ color: subText }}>
+                                {pick.selected_prospect.position}
+                              </div>
+                            </>
+                          ) : (
+                            <div className="text-sm" style={{ color: subText, fontStyle: 'italic' }}>
+                              {pick.is_current ? 'Your turn!' : 'Waiting...'}
+                            </div>
+                          )}
+                        </div>
                       </div>
-                    )}
-                  </div>
-                ))}
+                    ))}
+                </div>
               </div>
             </div>
           </div>
