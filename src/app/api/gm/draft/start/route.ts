@@ -89,6 +89,7 @@ export async function POST(request: NextRequest) {
     }
 
     // 1. Create mock draft session using RPC
+    // Must explicitly pass p_bypass_eligibility to avoid function overload ambiguity
     const { data: mockId, error: mockError } = await datalabAdmin.rpc('create_mock_draft', {
       p_user_id: user.id,
       p_user_email: user.email,
@@ -97,6 +98,7 @@ export async function POST(request: NextRequest) {
       p_draft_year: year,
       p_total_picks: draftOrder.length,
       p_mode: 'user_only',
+      p_bypass_eligibility: false,
     })
 
     if (mockError) {
