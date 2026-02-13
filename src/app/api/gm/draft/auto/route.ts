@@ -274,13 +274,19 @@ export async function POST(request: NextRequest) {
     const rawPicks = updatedDraft.picks || []
     log(`Raw picks count: ${rawPicks.length}`)
     if (rawPicks.length > 0) {
-      log(`First raw pick keys: ${Object.keys(rawPicks[0]).join(', ')}`)
-      log(`First 3 raw picks: ${JSON.stringify(rawPicks.slice(0, 3).map((p: any) => ({
+      const firstPick = rawPicks[0]
+      log(`First raw pick keys: ${Object.keys(firstPick).join(', ')}`)
+      // Log complete first pick to see full structure
+      log(`First pick FULL: ${JSON.stringify(firstPick)}`)
+      // Check if prospect_id is being set
+      const picksWithProspectId = rawPicks.filter((p: any) => p.prospect_id).length
+      log(`Picks with prospect_id: ${picksWithProspectId}`)
+      // Show picks 1-5 prospect data specifically
+      log(`Picks 1-5 prospect data: ${JSON.stringify(rawPicks.slice(0, 5).map((p: any) => ({
         pick: p.pick_number,
+        has_prospect_id: !!p.prospect_id,
         prospect_id: p.prospect_id,
         prospect_name: p.prospect_name,
-        position: p.position,
-        selected_prospect: p.selected_prospect,
       })))}`)
     }
 
@@ -300,6 +306,15 @@ export async function POST(request: NextRequest) {
         position: p.position,
       } : null,
     }))
+
+    // Debug: verify the final picks have selected_prospect
+    const picksWithSelectedProspect = picks.filter((p: any) => p.selected_prospect !== null).length
+    log(`Final picks with selected_prospect: ${picksWithSelectedProspect}`)
+    log(`First 5 final picks: ${JSON.stringify(picks.slice(0, 5).map((p: any) => ({
+      pick: p.pick_number,
+      hasProspect: p.selected_prospect !== null,
+      prospectName: p.selected_prospect?.name,
+    })))}`)
 
     return NextResponse.json({
       draft: {
