@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createServerClient } from '@supabase/ssr'
 import { cookies } from 'next/headers'
+import { randomUUID } from 'crypto'
 import Anthropic from '@anthropic-ai/sdk'
 import { getPostIQSystemPrompt, getTeamKnowledge, VOICE_GUIDELINES, HEADLINE_GUIDELINES, SOCIAL_STRATEGY, JOURNALISM_STANDARDS } from '@/lib/postiq-knowledge'
 import { supabaseAdmin } from '@/lib/supabase-server'
@@ -743,28 +744,35 @@ async function generateChartForPost(title: string, content: string, category?: s
     dataSource: 'manual',
   }
 
-  // Make internal request to create chart
-  const baseUrl = process.env.NEXT_PUBLIC_APP_URL
-    || (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : 'http://localhost:3000')
-
+  // Create chart directly via Supabase instead of HTTP call (avoids URL resolution issues in Vercel)
   try {
-    const chartResponse = await fetch(`${baseUrl}/api/charts`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(chartPayload),
-    })
+    const chartId = randomUUID()
+    const { data: chartData, error: chartError } = await supabaseAdmin
+      .from('sm_charts')
+      .insert({
+        id: chartId,
+        chart_type: chartPayload.type,
+        title: chartPayload.title,
+        config: {
+          size: chartPayload.size,
+          colors: chartPayload.colors,
+          source: { type: 'manual' },
+        },
+        data: chartPayload.data,
+      })
+      .select()
+      .single()
 
-    if (!chartResponse.ok) {
-      console.error('Failed to create chart:', await chartResponse.text())
+    if (chartError) {
+      console.error('Failed to create chart via Supabase:', chartError)
       return NextResponse.json({
         success: false,
-        reason: 'Failed to create chart',
+        reason: `Failed to create chart: ${chartError.message}`,
         updatedContent: null,
       })
     }
 
-    const chartResult = await chartResponse.json()
-    const shortcode = `[chart:${chartResult.id}]`
+    const shortcode = `[chart:${chartData.id}]`
 
     // Insert shortcode after the specified paragraph
     const updatedContent = insertShortcodeAfterParagraph(
@@ -775,7 +783,7 @@ async function generateChartForPost(title: string, content: string, category?: s
 
     return NextResponse.json({
       success: true,
-      chartId: chartResult.id,
+      chartId: chartData.id,
       shortcode,
       chartType: analysis.chartType,
       chartTitle: analysis.chartTitle,
