@@ -97,29 +97,29 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
           </div>
 
           {/* Content */}
-          <div className="relative flex h-full flex-col items-center justify-start px-6 py-10 overflow-y-auto">
+          <div className="relative flex h-full flex-col items-center justify-center px-6 py-4 overflow-y-auto">
             {/* Logo at top center */}
-            <div className="mb-4">
+            <div className="mb-2">
               <Image
                 src="/logos/v2_SM_Whole.png"
                 alt="Sports Mockery 2.0"
-                width={280}
-                height={70}
+                width={240}
+                height={60}
                 priority
               />
             </div>
 
             {/* Tagline */}
-            <p className="text-white text-xl font-semibold mb-8 text-center">
+            <p className="text-white text-lg font-semibold mb-4 text-center">
               AI-Powered. Fan-Driven. Chicago-Owned.
             </p>
 
             {/* Section title */}
-            <div className="text-center mb-6">
-              <h3 className="text-2xl font-bold text-white mb-2">
+            <div className="text-center mb-2">
+              <h3 className="text-xl font-bold text-white mb-1">
                 Sports Mockery 2.0 Stands Alone
               </h3>
-              <p className="text-white/80 text-sm">
+              <p className="text-white/80 text-xs">
                 How we compare to the competition.
               </p>
             </div>
@@ -128,13 +128,13 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
             <div className="w-full max-w-2xl bg-white/10 backdrop-blur-sm rounded-xl overflow-hidden border border-white/20">
               {/* Table Header */}
               <div className="grid grid-cols-3 bg-white/10">
-                <div className="px-4 py-3 text-white font-bold text-sm">
+                <div className="px-3 py-2 text-white font-bold text-xs">
                   Feature
                 </div>
-                <div className="px-4 py-3 text-white font-bold text-sm text-center">
+                <div className="px-3 py-2 text-white font-bold text-xs text-center">
                   Sports Mockery 2.0
                 </div>
-                <div className="px-4 py-3 text-white font-bold text-sm text-center">
+                <div className="px-3 py-2 text-white font-bold text-xs text-center">
                   ESPN / Bleacher
                 </div>
               </div>
@@ -145,23 +145,23 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
                   key={feature.name}
                   className={`grid grid-cols-3 ${idx % 2 === 0 ? 'bg-white/5' : ''}`}
                 >
-                  <div className="px-4 py-2.5 text-white/90 text-sm">
+                  <div className="px-3 py-1.5 text-white/90 text-xs">
                     {feature.name}
                   </div>
-                  <div className="px-4 py-2.5 text-center">
+                  <div className="px-3 py-1.5 text-center">
                     {feature.sm === 'coming-soon' ? (
                       <span className="text-xs font-medium" style={{ color: '#ffffff' }}>Coming Soon</span>
                     ) : feature.sm ? (
-                      <span className="text-green-400 text-lg">✓</span>
+                      <span className="text-green-400 text-base">✓</span>
                     ) : (
-                      <span className="text-red-400 text-lg">✗</span>
+                      <span className="text-red-400 text-base">✗</span>
                     )}
                   </div>
-                  <div className="px-4 py-2.5 text-center">
+                  <div className="px-3 py-1.5 text-center">
                     {feature.espn ? (
-                      <span className="text-green-400 text-lg">✓</span>
+                      <span className="text-green-400 text-base">✓</span>
                     ) : (
-                      <span className="text-red-400 text-lg">✗</span>
+                      <span className="text-red-400 text-base">✗</span>
                     )}
                   </div>
                 </div>
@@ -171,7 +171,7 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
             {/* "and more" link - bigger, white, no hover effect */}
             <Link
               href="https://test.sportsmockery.com/tour-page.html"
-              className="mt-5 text-base underline"
+              className="mt-3 text-sm underline"
               style={{ color: '#ffffff' }}
             >
               and more…
