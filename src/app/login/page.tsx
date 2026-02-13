@@ -36,15 +36,16 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
     redirect(redirectTo)
   }
 
-  // Comparison features
-  const features = [
+  // Comparison features - sm can be true, false, or 'coming-soon'
+  const features: { name: string; sm: boolean | 'coming-soon'; espn: boolean }[] = [
     { name: 'Scout AI (Chicago Q&A)', sm: true, espn: false },
     { name: 'GM Trade Simulator', sm: true, espn: false },
     { name: 'Mock Draft Simulator (All 4 Leagues)', sm: true, espn: false },
     { name: 'AI Fan Chat Personalities', sm: true, espn: false },
-    { name: 'Interactive D3 Charts', sm: true, espn: true },
-    { name: 'AR/VR Stadium Tours', sm: true, espn: false },
+    { name: 'Hands-Free Article Player (4 AI Voices, Auto-Queue by Team or Date)', sm: true, espn: false },
+    { name: 'Interactive D3 Charts', sm: true, espn: false },
     { name: 'Chicago-Only Focus', sm: true, espn: false },
+    { name: 'AR/VR Stadium Tours', sm: 'coming-soon', espn: false },
   ]
 
   return (
@@ -88,7 +89,7 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
 
       {/* Right side - Features/Branding */}
       <div className="relative hidden w-0 flex-1 lg:block">
-        <div className="absolute inset-0 bg-gradient-to-br from-[#8B0000] via-red-600 to-[#8B0000]">
+        <div className="absolute inset-0 bg-black">
           {/* Decorative elements */}
           <div className="absolute inset-0 opacity-10">
             <div className="absolute -left-20 -top-20 h-60 w-60 rounded-full bg-white blur-3xl" />
@@ -96,7 +97,7 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
           </div>
 
           {/* Content */}
-          <div className="relative flex h-full flex-col items-center justify-start px-8 py-10 overflow-y-auto">
+          <div className="relative flex h-full flex-col items-center justify-start px-6 py-10 overflow-y-auto">
             {/* Logo at top center */}
             <div className="mb-4">
               <Image
@@ -116,15 +117,15 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
             {/* Section title */}
             <div className="text-center mb-6">
               <h3 className="text-2xl font-bold text-white mb-2">
-                Why Sports Mockery 2.0 Stands Alone
+                Sports Mockery 2.0 Stands Alone
               </h3>
               <p className="text-white/80 text-sm">
-                See how we compare to the competition.
+                How we compare to the competition.
               </p>
             </div>
 
-            {/* Comparison Chart */}
-            <div className="w-full max-w-lg bg-white/10 backdrop-blur-sm rounded-xl overflow-hidden border border-white/20">
+            {/* Comparison Chart - wider */}
+            <div className="w-full max-w-2xl bg-white/10 backdrop-blur-sm rounded-xl overflow-hidden border border-white/20">
               {/* Table Header */}
               <div className="grid grid-cols-3 bg-white/10">
                 <div className="px-4 py-3 text-white font-bold text-sm">
@@ -148,7 +149,9 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
                     {feature.name}
                   </div>
                   <div className="px-4 py-2.5 text-center">
-                    {feature.sm ? (
+                    {feature.sm === 'coming-soon' ? (
+                      <span className="text-yellow-400 text-xs font-medium">Coming Soon</span>
+                    ) : feature.sm ? (
                       <span className="text-green-400 text-lg">✓</span>
                     ) : (
                       <span className="text-red-400 text-lg">✗</span>
@@ -165,10 +168,10 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
               ))}
             </div>
 
-            {/* "and more" link */}
+            {/* "and more" link - bigger, white, no hover effect */}
             <Link
               href="https://test.sportsmockery.com/tour-page.html"
-              className="mt-4 text-white/80 text-sm hover:text-white transition-colors underline"
+              className="mt-5 text-white text-base underline"
             >
               and more…
             </Link>
