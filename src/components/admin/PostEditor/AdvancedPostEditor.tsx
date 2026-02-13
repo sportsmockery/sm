@@ -1765,12 +1765,12 @@ export default function AdvancedPostEditor({
             <div className="p-4 space-y-2">
               <p className="text-sm text-gray-500 dark:text-gray-400 mb-4">Select a team to generate article ideas for:</p>
               {[
-                { value: '', label: 'Auto-detect from category', icon: '🎯' },
-                { value: 'Bears', label: 'Chicago Bears', icon: '🐻' },
-                { value: 'Bulls', label: 'Chicago Bulls', icon: '🐂' },
-                { value: 'Blackhawks', label: 'Chicago Blackhawks', icon: '🏒' },
-                { value: 'Cubs', label: 'Chicago Cubs', icon: '🐻' },
-                { value: 'White Sox', label: 'Chicago White Sox', icon: '⚾' },
+                { value: '', label: 'Auto-detect from category', logo: null },
+                { value: 'Bears', label: 'Chicago Bears', logo: 'https://a.espncdn.com/i/teamlogos/nfl/500/chi.png' },
+                { value: 'Bulls', label: 'Chicago Bulls', logo: 'https://a.espncdn.com/i/teamlogos/nba/500/chi.png' },
+                { value: 'Blackhawks', label: 'Chicago Blackhawks', logo: 'https://a.espncdn.com/i/teamlogos/nhl/500/chi.png' },
+                { value: 'Cubs', label: 'Chicago Cubs', logo: 'https://a.espncdn.com/i/teamlogos/mlb/500/chc.png' },
+                { value: 'White Sox', label: 'Chicago White Sox', logo: 'https://a.espncdn.com/i/teamlogos/mlb/500/chw.png' },
               ].map((team) => (
                 <button
                   key={team.value || 'auto'}
@@ -1781,7 +1781,13 @@ export default function AdvancedPostEditor({
                   }}
                   className="w-full flex items-center gap-3 rounded-lg border-2 border-gray-200 px-4 py-3 text-left transition-all hover:border-purple-400 hover:bg-purple-50 dark:border-gray-700 dark:hover:border-purple-500 dark:hover:bg-purple-500/10"
                 >
-                  <span className="text-xl">{team.icon}</span>
+                  {team.logo ? (
+                    <Image src={team.logo} alt={team.label} width={28} height={28} className="object-contain" />
+                  ) : (
+                    <svg className="w-7 h-7 text-purple-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                  )}
                   <span className="font-medium text-gray-900 dark:text-white">{team.label}</span>
                 </button>
               ))}

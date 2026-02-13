@@ -1400,12 +1400,12 @@ export default function StudioPostEditor({
             <div className="p-4 space-y-2">
               <p className="text-sm text-[var(--text-muted)] mb-4">Select a team to generate article ideas for:</p>
               {[
-                { value: '', label: 'Auto-detect from category', icon: 'target' },
-                { value: 'Bears', label: 'Chicago Bears', icon: 'bear' },
-                { value: 'Bulls', label: 'Chicago Bulls', icon: 'bull' },
-                { value: 'Blackhawks', label: 'Chicago Blackhawks', icon: 'hockey' },
-                { value: 'Cubs', label: 'Chicago Cubs', icon: 'cub' },
-                { value: 'White Sox', label: 'Chicago White Sox', icon: 'baseball' },
+                { value: '', label: 'Auto-detect from category', logo: null },
+                { value: 'Bears', label: 'Chicago Bears', logo: 'https://a.espncdn.com/i/teamlogos/nfl/500/chi.png' },
+                { value: 'Bulls', label: 'Chicago Bulls', logo: 'https://a.espncdn.com/i/teamlogos/nba/500/chi.png' },
+                { value: 'Blackhawks', label: 'Chicago Blackhawks', logo: 'https://a.espncdn.com/i/teamlogos/nhl/500/chi.png' },
+                { value: 'Cubs', label: 'Chicago Cubs', logo: 'https://a.espncdn.com/i/teamlogos/mlb/500/chc.png' },
+                { value: 'White Sox', label: 'Chicago White Sox', logo: 'https://a.espncdn.com/i/teamlogos/mlb/500/chw.png' },
               ].map((team) => (
                 <button
                   key={team.value || 'auto'}
@@ -1417,6 +1417,13 @@ export default function StudioPostEditor({
                   className="w-full flex items-center gap-3 rounded-lg border-2 px-4 py-3 text-left transition-all hover:border-purple-400 hover:bg-purple-500/10"
                   style={{ borderColor: 'var(--border-default)' }}
                 >
+                  {team.logo ? (
+                    <Image src={team.logo} alt={team.label} width={28} height={28} className="object-contain" />
+                  ) : (
+                    <svg className="w-7 h-7 text-purple-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                  )}
                   <span className="font-medium text-[var(--text-primary)]">{team.label}</span>
                 </button>
               ))}

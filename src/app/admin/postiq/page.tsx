@@ -1,6 +1,16 @@
 'use client'
 
 import { useState } from 'react'
+import Image from 'next/image'
+
+// Team configuration with logos
+const TEAMS = [
+  { value: 'bears', label: 'Bears', fullName: 'Chicago Bears', logo: 'https://a.espncdn.com/i/teamlogos/nfl/500/chi.png' },
+  { value: 'bulls', label: 'Bulls', fullName: 'Chicago Bulls', logo: 'https://a.espncdn.com/i/teamlogos/nba/500/chi.png' },
+  { value: 'blackhawks', label: 'Blackhawks', fullName: 'Chicago Blackhawks', logo: 'https://a.espncdn.com/i/teamlogos/nhl/500/chi.png' },
+  { value: 'cubs', label: 'Cubs', fullName: 'Chicago Cubs', logo: 'https://a.espncdn.com/i/teamlogos/mlb/500/chc.png' },
+  { value: 'whitesox', label: 'White Sox', fullName: 'Chicago White Sox', logo: 'https://a.espncdn.com/i/teamlogos/mlb/500/chw.png' },
+]
 
 interface AIGeneration {
   id: string
@@ -74,6 +84,7 @@ export default function PostIQPage() {
   const [isGenerating, setIsGenerating] = useState(false)
   const [result, setResult] = useState<string | null>(null)
   const [team, setTeam] = useState('bears')
+  const [showTeamDropdown, setShowTeamDropdown] = useState(false)
   const [history, setHistory] = useState<AIGeneration[]>([])
 
   const handleGenerate = async () => {
@@ -201,17 +212,34 @@ ${data.correctedContent || inputText}`)
           <div className="rounded-xl border border-[var(--border-default)] bg-[var(--bg-card)] p-6 space-y-4">
             <div className="flex items-center justify-between">
               <h2 className="font-semibold text-[var(--text-primary)]">{selectedTemplate.title}</h2>
-              <select
-                value={team}
-                onChange={(e) => setTeam(e.target.value)}
-                className="rounded-lg border border-[var(--border-default)] bg-[var(--bg-tertiary)] px-3 py-1.5 text-sm text-[var(--text-primary)]"
-              >
-                <option value="bears">Bears</option>
-                <option value="bulls">Bulls</option>
-                <option value="cubs">Cubs</option>
-                <option value="whitesox">White Sox</option>
-                <option value="blackhawks">Blackhawks</option>
-              </select>
+              <div className="relative">
+                <button
+                  type="button"
+                  onClick={() => setShowTeamDropdown(!showTeamDropdown)}
+                  className="flex items-center gap-2 rounded-lg border border-[var(--border-default)] bg-[var(--bg-tertiary)] px-3 py-1.5 text-sm text-[var(--text-primary)] hover:bg-[var(--bg-hover)]"
+                >
+                  <Image src={TEAMS.find(t => t.value === team)?.logo || TEAMS[0].logo} alt="" width={20} height={20} className="object-contain" />
+                  <span>{TEAMS.find(t => t.value === team)?.label || 'Bears'}</span>
+                  <svg className="h-4 w-4 text-[var(--text-muted)]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                  </svg>
+                </button>
+                {showTeamDropdown && (
+                  <div className="absolute right-0 top-full z-10 mt-1 w-48 rounded-lg border border-[var(--border-default)] bg-[var(--bg-card)] py-1 shadow-lg">
+                    {TEAMS.map((t) => (
+                      <button
+                        key={t.value}
+                        type="button"
+                        onClick={() => { setTeam(t.value); setShowTeamDropdown(false) }}
+                        className={`flex w-full items-center gap-3 px-3 py-2 text-sm hover:bg-[var(--bg-hover)] ${team === t.value ? 'bg-[var(--accent-red-glow)] text-[var(--accent-red)]' : 'text-[var(--text-primary)]'}`}
+                      >
+                        <Image src={t.logo} alt={t.fullName} width={24} height={24} className="object-contain" />
+                        <span>{t.fullName}</span>
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
             </div>
 
             <textarea
