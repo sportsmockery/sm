@@ -51,7 +51,7 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
   return (
     <div className="flex min-h-screen">
       {/* Left side - Form */}
-      <div className="flex flex-1 flex-col justify-center px-8 py-12 sm:px-12 lg:flex-none lg:w-1/2 lg:px-20 xl:px-24 bg-white dark:bg-zinc-900">
+      <div className="flex flex-1 flex-col justify-center px-8 py-12 sm:px-12 lg:flex-none lg:w-[42%] lg:px-16 xl:px-20 bg-white dark:bg-zinc-900">
         <div className="w-full max-w-sm">
           {/* Logo */}
           <div className="mb-8">
@@ -106,15 +106,15 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
           </p>
 
           {/* Section title */}
-          <h3 className="text-2xl font-bold text-white mt-6 text-center">
+          <h3 className="text-2xl font-bold text-white mt-2 text-center">
             Sports Mockery 2.0 Stands Alone
           </h3>
-          <p className="text-white/70 text-sm mt-1 mb-5 text-center">
+          <p className="text-white/70 text-sm mt-1 mb-4 text-center">
             How we compare to the competition.
           </p>
 
           {/* Comparison Chart */}
-          <div className="w-full max-w-2xl bg-white/10 backdrop-blur-sm rounded-lg overflow-hidden border border-white/20">
+          <div className="w-full max-w-3xl bg-white/10 backdrop-blur-sm rounded-lg overflow-hidden border border-white/20">
             {/* Table Header */}
             <div className="grid grid-cols-3 bg-white/10">
               <div className="px-4 py-3 text-white font-bold text-sm">
@@ -158,7 +158,7 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
           </div>
 
           {/* And More text - same style as tagline */}
-          <p className="text-white text-lg font-semibold mt-6 text-center">
+          <p className="text-white text-lg font-semibold mt-4 text-center">
             And More...
           </p>
         </div>
