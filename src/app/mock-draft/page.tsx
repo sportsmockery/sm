@@ -275,8 +275,14 @@ export default function MockDraftPage() {
 
           if (advanceRes.ok && advanceData.draft) {
             // Check if picks have prospect data
-            const picksWithProspects = advanceData.draft.picks?.filter((p: any) => p.selected_prospect) || []
-            console.log('[MockDraft] Picks with prospects:', picksWithProspects.length)
+            const picksWithProspects = advanceData.draft.picks?.filter((p: any) => p.selected_prospect?.name) || []
+            console.log('[MockDraft] Picks with prospect names:', picksWithProspects.length)
+            // Log first 3 picks to see data structure
+            console.log('[MockDraft] First 3 picks:', advanceData.draft.picks?.slice(0, 3).map((p: any) => ({
+              pick: p.pick_number,
+              team: p.team_name,
+              prospect: p.selected_prospect,
+            })))
             setActiveDraft(advanceData.draft)
           } else {
             console.error('[MockDraft] Auto-advance failed:', advanceData.error, advanceData.debug)
