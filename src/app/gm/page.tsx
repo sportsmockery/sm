@@ -97,6 +97,31 @@ export default function GMPage() {
   const [draftPicksSent, setDraftPicksSent] = useState<DraftPick[]>([])
   const [draftPicksReceived, setDraftPicksReceived] = useState<DraftPick[]>([])
 
+  // Tradeable picks from datalab API
+  interface TradeablePick {
+    id: number
+    label: string
+    year: number
+    round: number
+    originalTeam: string
+    estimatedPosition?: number
+    value: number
+    conditional?: string | null
+  }
+  interface TradedAwayPick {
+    label: string
+    owedTo: string
+    year: number
+    round: number
+  }
+  const [chicagoTradeablePicks, setChicagoTradeablePicks] = useState<TradeablePick[]>([])
+  const [chicagoTradedAwayPicks, setChicagoTradedAwayPicks] = useState<TradedAwayPick[]>([])
+  const [opponentTradeablePicks, setOpponentTradeablePicks] = useState<TradeablePick[]>([])
+  const [opponentTradedAwayPicks, setOpponentTradedAwayPicks] = useState<TradedAwayPick[]>([])
+  const [thirdTeamTradeablePicks, setThirdTeamTradeablePicks] = useState<TradeablePick[]>([])
+  const [thirdTeamTradedAwayPicks, setThirdTeamTradedAwayPicks] = useState<TradedAwayPick[]>([])
+  const [tradeablePicksLoading, setTradeablePicksLoading] = useState(false)
+
   // Grading
   const [grading, setGrading] = useState(false)
   const [gradeResult, setGradeResult] = useState<GradeResult | null>(null)
@@ -314,6 +339,56 @@ export default function GMPage() {
     setRosterLoading(false)
   }
 
+  // Fetch tradeable picks from datalab API
+  // teamType: 'chicago' | 'opponent' | 'third'
+  async function loadTradeablePicks(teamKey: string, sport: string, teamType: 'chicago' | 'opponent' | 'third') {
+    if (teamType === 'chicago') setTradeablePicksLoading(true)
+    try {
+      const res = await fetch(
+        `https://datalab.sportsmockery.com/api/gm/tradeable-picks?sport=${sport}&team=${teamKey}`
+      )
+      if (res.ok) {
+        const data = await res.json()
+        if (teamType === 'chicago') {
+          setChicagoTradeablePicks(data.availablePicks || [])
+          setChicagoTradedAwayPicks(data.tradedAwayPicks || [])
+        } else if (teamType === 'opponent') {
+          setOpponentTradeablePicks(data.availablePicks || [])
+          setOpponentTradedAwayPicks(data.tradedAwayPicks || [])
+        } else {
+          setThirdTeamTradeablePicks(data.availablePicks || [])
+          setThirdTeamTradedAwayPicks(data.tradedAwayPicks || [])
+        }
+      } else {
+        console.warn('[GM] Failed to fetch tradeable picks:', res.status)
+        // Clear on error
+        if (teamType === 'chicago') {
+          setChicagoTradeablePicks([])
+          setChicagoTradedAwayPicks([])
+        } else if (teamType === 'opponent') {
+          setOpponentTradeablePicks([])
+          setOpponentTradedAwayPicks([])
+        } else {
+          setThirdTeamTradeablePicks([])
+          setThirdTeamTradedAwayPicks([])
+        }
+      }
+    } catch (e) {
+      console.error('[GM] Error fetching tradeable picks:', e)
+      if (teamType === 'chicago') {
+        setChicagoTradeablePicks([])
+        setChicagoTradedAwayPicks([])
+      } else if (teamType === 'opponent') {
+        setOpponentTradeablePicks([])
+        setOpponentTradedAwayPicks([])
+      } else {
+        setThirdTeamTradeablePicks([])
+        setThirdTeamTradedAwayPicks([])
+      }
+    }
+    if (teamType === 'chicago') setTradeablePicksLoading(false)
+  }
+
   function handleTeamSelect(teamKey: string) {
     setSelectedTeam(teamKey)
     loadRoster(teamKey)
@@ -329,6 +404,16 @@ export default function GMPage() {
     // Clear draft picks
     setDraftPicksSent([])
     setDraftPicksReceived([])
+
+    // Clear tradeable picks
+    setChicagoTradeablePicks([])
+    setChicagoTradedAwayPicks([])
+    setOpponentTradeablePicks([])
+    setOpponentTradedAwayPicks([])
+
+    // Fetch tradeable picks for Chicago team
+    const teamSport = TEAMS.find(t => t.key === teamKey)?.sport || 'nfl'
+    loadTradeablePicks(teamKey, teamSport, 'chicago')
 
     // Clear grade state
     setGradeResult(null)
@@ -362,8 +447,7 @@ export default function GMPage() {
     // Create new session for new team
     createSession(teamKey)
 
-    // Fetch cap info for new team
-    const teamSport = TEAMS.find(t => t.key === teamKey)?.sport || 'nfl'
+    // Fetch cap info for new team (reuses teamSport from above)
     fetch(`/api/gm/cap?team_key=${teamKey}&sport=${teamSport}`)
       .then(r => r.ok ? r.json() : null)
       .then(d => d?.cap && setChicagoCap(d.cap))
@@ -488,6 +572,9 @@ export default function GMPage() {
       .then(r => r.ok ? r.json() : null)
       .then(d => d?.cap && setOpponentCap(d.cap))
       .catch(() => {})
+
+    // Fetch tradeable picks for opponent team
+    loadTradeablePicks(team.team_key, team.sport, 'opponent')
   }
 
   function handleThirdTeamSelect(team: OpponentTeam) {
@@ -497,6 +584,8 @@ export default function GMPage() {
     setDraftPicksTeam3Sent([])
     setDraftPicksTeam3Received([])
     setSelectedThirdTeamProspectIds(new Set())
+    // Fetch tradeable picks for third team
+    loadTradeablePicks(team.team_key, team.sport, 'third')
   }
 
   function toggleThirdTeamPlayer(playerId: string, playerData?: PlayerData) {
@@ -1390,6 +1479,9 @@ export default function GMPage() {
                   draftPicks={draftPicksSent}
                   onAddDraftPick={pk => handleAddDraftPick(pk, selectedTeam, 'sent')}
                   onRemoveDraftPick={i => setDraftPicksSent(prev => prev.filter((_, idx) => idx !== i))}
+                  tradeablePicks={chicagoTradeablePicks}
+                  tradedAwayPicks={chicagoTradedAwayPicks}
+                  tradeablePicksLoading={tradeablePicksLoading}
                   selectedProspectIds={selectedProspectIds}
                   onToggleProspect={toggleProspect}
                   onProspectsLoaded={setProspects}
@@ -1588,6 +1680,8 @@ export default function GMPage() {
                       draftPicks={draftPicksReceived}
                       onAddDraftPick={pk => handleAddDraftPick(pk, opponentTeam?.team_key || '', 'received')}
                       onRemoveDraftPick={i => setDraftPicksReceived(prev => prev.filter((_, idx) => idx !== i))}
+                      tradeablePicks={opponentTradeablePicks}
+                      tradedAwayPicks={opponentTradedAwayPicks}
                       selectedProspectIds={selectedOpponentProspectIds}
                       onToggleProspect={toggleOpponentProspect}
                       onProspectsLoaded={setOpponentProspects}
@@ -1665,6 +1759,8 @@ export default function GMPage() {
                         draftPicks={draftPicksTeam3Received}
                         onAddDraftPick={pk => handleAddDraftPick(pk, thirdTeam?.team_key || '', 'team3')}
                         onRemoveDraftPick={i => setDraftPicksTeam3Received(prev => prev.filter((_, idx) => idx !== i))}
+                        tradeablePicks={thirdTeamTradeablePicks}
+                        tradedAwayPicks={thirdTeamTradedAwayPicks}
                         selectedProspectIds={selectedThirdTeamProspectIds}
                         onToggleProspect={toggleThirdTeamProspect}
                         onProspectsLoaded={setThirdTeamProspects}
@@ -1832,6 +1928,9 @@ export default function GMPage() {
                           draftPicks={draftPicksSent}
                           onAddDraftPick={pk => handleAddDraftPick(pk, selectedTeam, 'sent')}
                           onRemoveDraftPick={i => setDraftPicksSent(prev => prev.filter((_, idx) => idx !== i))}
+                          tradeablePicks={chicagoTradeablePicks}
+                          tradedAwayPicks={chicagoTradedAwayPicks}
+                          tradeablePicksLoading={tradeablePicksLoading}
                           selectedProspectIds={selectedProspectIds}
                           onToggleProspect={toggleProspect}
                           onProspectsLoaded={setProspects}
@@ -1897,6 +1996,8 @@ export default function GMPage() {
                           draftPicks={draftPicksReceived}
                           onAddDraftPick={pk => handleAddDraftPick(pk, opponentTeam?.team_key || '', 'received')}
                           onRemoveDraftPick={i => setDraftPicksReceived(prev => prev.filter((_, idx) => idx !== i))}
+                          tradeablePicks={opponentTradeablePicks}
+                          tradedAwayPicks={opponentTradedAwayPicks}
                           selectedProspectIds={selectedOpponentProspectIds}
                           onToggleProspect={toggleOpponentProspect}
                           onProspectsLoaded={setOpponentProspects}

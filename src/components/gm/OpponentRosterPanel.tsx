@@ -35,6 +35,25 @@ function getPositionGroup(pos: string, sport: string): string {
   return pos
 }
 
+// Tradeable pick from datalab API
+interface TradeablePick {
+  id: number
+  label: string
+  year: number
+  round: number
+  originalTeam: string
+  estimatedPosition?: number
+  value: number
+  conditional?: string | null
+}
+
+interface TradedAwayPick {
+  label: string
+  owedTo: string
+  year: number
+  round: number
+}
+
 interface OpponentRosterPanelProps {
   teamKey: string
   sport: string
@@ -52,6 +71,10 @@ interface OpponentRosterPanelProps {
   draftPicks: DraftPick[]
   onAddDraftPick: (pick: DraftPick) => void
   onRemoveDraftPick: (index: number) => void
+  // Tradeable picks from datalab API
+  tradeablePicks?: TradeablePick[]
+  tradedAwayPicks?: TradedAwayPick[]
+  tradeablePicksLoading?: boolean
   // Prospect props (MLB only)
   selectedProspectIds?: Set<string>
   onToggleProspect?: (prospectId: string) => void
@@ -63,6 +86,7 @@ export function OpponentRosterPanel({
   teamKey, sport, teamColor, teamName, selectedIds, onToggle,
   roster, setRoster, loading, setLoading, onAddCustomPlayer, onViewFit,
   draftPicks, onAddDraftPick, onRemoveDraftPick,
+  tradeablePicks = [], tradedAwayPicks = [], tradeablePicksLoading = false,
   selectedProspectIds, onToggleProspect, onProspectsLoaded, compact = false,
 }: OpponentRosterPanelProps) {
   const { theme } = useTheme()
@@ -333,6 +357,9 @@ export function OpponentRosterPanel({
           teamColor={teamColor}
           teamName={teamName}
           isOwn={false}
+          tradeablePicks={tradeablePicks}
+          tradedAwayPicks={tradedAwayPicks}
+          loading={tradeablePicksLoading}
         />
       )}
 

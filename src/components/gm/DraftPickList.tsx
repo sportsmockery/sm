@@ -13,6 +13,29 @@ const SPORT_ROUNDS: Record<string, number> = {
 
 interface AvailablePick extends DraftPick {
   id: string // Unique identifier like "2026-1"
+  label?: string
+  estimatedPosition?: number
+  value?: number
+  conditional?: string | null
+}
+
+// Tradeable pick from datalab API
+interface TradeablePick {
+  id: number
+  label: string
+  year: number
+  round: number
+  originalTeam: string
+  estimatedPosition?: number
+  value: number
+  conditional?: string | null
+}
+
+interface TradedAwayPick {
+  label: string
+  owedTo: string
+  year: number
+  round: number
 }
 
 interface DraftPickListProps {
@@ -22,6 +45,9 @@ interface DraftPickListProps {
   teamColor: string
   teamName?: string
   isOwn?: boolean // true for Chicago, false for opponent
+  tradeablePicks?: TradeablePick[] // From datalab API
+  tradedAwayPicks?: TradedAwayPick[] // Picks owed away
+  loading?: boolean
 }
 
 function generateAvailablePicks(sport: string, years: number[]): AvailablePick[] {
@@ -53,6 +79,9 @@ export function DraftPickList({
   teamColor,
   teamName,
   isOwn = true,
+  tradeablePicks = [],
+  tradedAwayPicks = [],
+  loading = false,
 }: DraftPickListProps) {
   const { theme } = useTheme()
   const isDark = theme === 'dark'
@@ -63,9 +92,25 @@ export function DraftPickList({
   const borderColor = isDark ? '#374151' : '#e5e7eb'
   const checkboxBg = isDark ? '#374151' : '#ffffff'
 
-  // Generate available picks for the next 5 years
+  // Use tradeable picks from API if available, otherwise generate
   const years = [2026, 2027, 2028, 2029, 2030]
-  const availablePicks = useMemo(() => generateAvailablePicks(sport, years), [sport])
+  const availablePicks = useMemo(() => {
+    if (tradeablePicks.length > 0) {
+      // Convert API picks to AvailablePick format
+      return tradeablePicks.map(tp => ({
+        id: `${tp.year}-${tp.round}-${tp.originalTeam}`,
+        year: tp.year,
+        round: tp.round,
+        originalTeam: tp.originalTeam,
+        label: tp.label,
+        estimatedPosition: tp.estimatedPosition,
+        value: tp.value,
+        conditional: tp.conditional,
+      }))
+    }
+    // Fallback to generated picks
+    return generateAvailablePicks(sport, years)
+  }, [sport, tradeablePicks])
 
   // Group picks by year for display
   const picksByYear = useMemo(() => {
@@ -188,6 +233,7 @@ export function DraftPickList({
                         <button
                           key={pick.id}
                           onClick={() => handleToggle(pick)}
+                          title={pick.value ? `${pick.label || `${pick.year} Round ${pick.round}`} (${pick.value} pts)` : undefined}
                           style={{
                             display: 'flex',
                             alignItems: 'center',
@@ -217,19 +263,85 @@ export function DraftPickList({
                               </svg>
                             )}
                           </div>
-                          <span style={{
-                            fontSize: 12,
-                            fontWeight: selected ? 600 : 500,
-                            color: selected ? teamColor : textColor,
-                          }}>
-                            Rd {pick.round}
-                          </span>
+                          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}>
+                            <span style={{
+                              fontSize: 12,
+                              fontWeight: selected ? 600 : 500,
+                              color: selected ? teamColor : textColor,
+                            }}>
+                              {/* Use shortLabel from API or build it: "Rd X (#Y)" - no value shown */}
+                              Rd {pick.round}
+                              {pick.estimatedPosition && (
+                                <span style={{ fontSize: 10, color: subText, marginLeft: 4 }}>
+                                  #{pick.estimatedPosition}
+                                </span>
+                              )}
+                            </span>
+                            {pick.originalTeam && pick.originalTeam !== 'Own' && pick.originalTeam !== teamName && (
+                              <span style={{ fontSize: 9, color: subText }}>
+                                via {pick.originalTeam}
+                              </span>
+                            )}
+                          </div>
                         </button>
                       )
                     })}
                   </div>
                 </div>
               ))}
+
+              {/* Traded Away Picks Info */}
+              {tradedAwayPicks.length > 0 && (
+                <div style={{
+                  marginTop: 12,
+                  padding: '10px 12px',
+                  borderRadius: 6,
+                  backgroundColor: isDark ? '#1f1f1f' : '#fef3cd',
+                  border: `1px solid ${isDark ? '#4a4a4a' : '#ffc107'}`,
+                }}>
+                  <div style={{
+                    fontSize: 11,
+                    fontWeight: 700,
+                    color: isDark ? '#ffc107' : '#856404',
+                    textTransform: 'uppercase',
+                    marginBottom: 6,
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 6,
+                  }}>
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                      <circle cx="12" cy="12" r="10" />
+                      <line x1="12" y1="8" x2="12" y2="12" />
+                      <line x1="12" y1="16" x2="12.01" y2="16" />
+                    </svg>
+                    Picks Owed Away
+                  </div>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+                    {tradedAwayPicks.map((tap, idx) => (
+                      <div key={idx} style={{
+                        fontSize: 11,
+                        color: isDark ? '#d4d4d4' : '#6c757d',
+                      }}>
+                        {tap.label} → {tap.owedTo}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Loading state */}
+              {loading && (
+                <div style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  padding: 16,
+                  color: subText,
+                  fontSize: 12,
+                }}>
+                  Loading picks...
+                </div>
+              )}
 
               {/* Helper text */}
               <div style={{
