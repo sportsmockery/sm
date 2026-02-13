@@ -280,12 +280,22 @@ export default function Header() {
                 whileTap={{ scale: 0.98 }}
                 transition={{ type: 'spring', stiffness: 400, damping: 17 }}
               >
+                {/* Light mode logo */}
                 <Image
-                  src={theme === 'dark' ? '/logos/v2_header_dark.png' : '/logos/v2_site_Header.png'}
+                  src="/logos/v2_site_Header.png"
                   alt="Sports Mockery"
                   width={180}
-                  height={45}
-                  className="h-9 md:h-10 w-auto object-contain"
+                  height={46}
+                  className={`h-9 md:h-10 w-auto object-contain ${theme === 'dark' ? 'hidden' : 'block'}`}
+                  priority
+                />
+                {/* Dark mode logo - slightly larger to match light mode visually */}
+                <Image
+                  src="/logos/v2_header_dark.png"
+                  alt="Sports Mockery"
+                  width={200}
+                  height={58}
+                  className={`h-10 md:h-11 w-auto object-contain ${theme === 'dark' ? 'block' : 'hidden'}`}
                   priority
                 />
               </motion.div>
