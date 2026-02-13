@@ -266,6 +266,9 @@ export default function MockDraftPage() {
     setSubmittingPick(true)
     setError(null)
 
+    // Save scroll position before state update
+    const scrollY = window.scrollY
+
     try {
       const res = await fetch('/api/gm/draft/pick', {
         method: 'POST',
@@ -291,6 +294,11 @@ export default function MockDraftPage() {
       // Update the draft state
       setActiveDraft(data.draft)
 
+      // Restore scroll position after state update
+      requestAnimationFrame(() => {
+        window.scrollTo(0, scrollY)
+      })
+
       // If draft is complete, show grade option
       if (data.draft?.status === 'completed') {
         // Don't auto-grade, let user click button
@@ -307,6 +315,9 @@ export default function MockDraftPage() {
 
     setAutoAdvancing(true)
     setError(null)
+
+    // Save scroll position before state update
+    const scrollY = window.scrollY
 
     try {
       const res = await fetch('/api/gm/draft/auto', {
@@ -345,6 +356,11 @@ export default function MockDraftPage() {
 
       if (data.draft) {
         setActiveDraft(data.draft)
+
+        // Restore scroll position after state update
+        requestAnimationFrame(() => {
+          window.scrollTo(0, scrollY)
+        })
       } else {
         setError('No draft data returned from server')
       }
