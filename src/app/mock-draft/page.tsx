@@ -83,9 +83,11 @@ interface TeamEligibility {
   season_status: 'in_season' | 'eliminated' | 'champion' | 'offseason'
   eligible: boolean
   reason: string
-  mock_draft_window_status: 'open' | 'closed' | 'completed' | 'not_yet_open'
-  days_until_draft: number | null
-  draft_date: string | null
+  draft_position?: number
+  logo_url?: string
+  mock_draft_window_status?: 'open' | 'closed' | 'completed' | 'not_yet_open'
+  days_until_draft?: number | null
+  draft_date?: string | null
 }
 
 // Chicago teams config
@@ -166,15 +168,13 @@ export default function MockDraftPage() {
       const res = await fetch('/api/gm/draft/eligibility')
       if (res.ok) {
         const data = await res.json()
-        // Map by team key for easy lookup
+        // Map by team_key for easy lookup (API now uses bears, bulls, etc.)
         const eligMap: Record<string, TeamEligibility> = {}
         for (const team of data.teams || []) {
-          // Map team_key to our local keys
-          if (team.sport === 'nfl') eligMap['bears'] = team
-          else if (team.sport === 'nba') eligMap['bulls'] = team
-          else if (team.sport === 'nhl') eligMap['blackhawks'] = team
-          else if (team.sport === 'mlb' && team.team_key === 'chc') eligMap['cubs'] = team
-          else if (team.sport === 'mlb' && team.team_key === 'chw') eligMap['whitesox'] = team
+          // Use team_key directly (bears, bulls, blackhawks, cubs, whitesox)
+          if (team.team_key) {
+            eligMap[team.team_key] = team
+          }
         }
         setEligibility(eligMap)
       }
@@ -550,18 +550,14 @@ export default function MockDraftPage() {
                     const teamElig = eligibility[team.key]
                     const isEligible = teamElig?.eligible ?? false
                     const daysUntilDraft = teamElig?.days_until_draft
+                    const draftPosition = teamElig?.draft_position
 
-                    // Determine status text
+                    // Use reason from API which includes draft position context
                     let statusText = ''
                     let statusColor = subText
                     if (teamElig) {
                       if (isEligible) {
-                        // Override for Bears with known draft position
-                        if (team.key === 'bears' && teamElig.season_status === 'eliminated') {
-                          statusText = 'Eliminated in Divisional Round, Bears Pick #25'
-                        } else {
-                          statusText = teamElig.reason || '✓ Ready to draft'
-                        }
+                        statusText = teamElig.reason || '✓ Ready to draft'
                         statusColor = '#10b981'
                       } else {
                         statusText = teamElig.reason || 'Not available'
@@ -589,11 +585,25 @@ export default function MockDraftPage() {
                           backgroundColor: team.color + '20',
                           display: 'flex', alignItems: 'center', justifyContent: 'center',
                         }}>
-                          <Image src={team.logo} alt={team.name} width={28} height={28} style={{ objectFit: 'contain' }} />
+                          <Image src={teamElig?.logo_url || team.logo} alt={team.name} width={28} height={28} style={{ objectFit: 'contain' }} />
                         </div>
                         <div style={{ flex: 1, textAlign: 'left', minWidth: 0 }}>
-                          <div style={{ fontWeight: 700, color: isDark ? '#fff' : '#1a1a1a', fontSize: '14px' }}>
-                            {team.name}
+                          <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                            <span style={{ fontWeight: 700, color: isDark ? '#fff' : '#1a1a1a', fontSize: '14px' }}>
+                              {team.name}
+                            </span>
+                            {isEligible && draftPosition && (
+                              <span style={{
+                                fontSize: '10px',
+                                fontWeight: 700,
+                                padding: '2px 6px',
+                                borderRadius: 4,
+                                backgroundColor: draftPosition === 1 ? '#fef3c7' : team.color + '20',
+                                color: draftPosition === 1 ? '#b45309' : team.color,
+                              }}>
+                                Pick #{draftPosition}
+                              </span>
+                            )}
                           </div>
                           <div style={{ fontSize: '11px', color: statusColor, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                             {statusText}
