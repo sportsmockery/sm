@@ -11,6 +11,32 @@ const SPORT_ROUNDS: Record<string, number> = {
   mlb: 20,
 }
 
+// Pick value tiers (0-3000 scale)
+interface PickTier {
+  label: string
+  color: string
+  bgColor: string
+}
+
+function getPickTier(value: number | undefined): PickTier | null {
+  if (!value) return null
+  if (value >= 2000) return { label: 'Franchise', color: '#b45309', bgColor: '#fef3c7' } // Gold
+  if (value >= 1200) return { label: 'Blue Chip', color: '#1d4ed8', bgColor: '#dbeafe' } // Blue
+  if (value >= 700) return { label: 'Premium', color: '#15803d', bgColor: '#dcfce7' } // Green
+  if (value >= 300) return { label: 'Solid', color: '#0f766e', bgColor: '#ccfbf1' } // Teal
+  if (value >= 100) return { label: 'Useful', color: '#6b7280', bgColor: '#f3f4f6' } // Gray
+  if (value >= 30) return { label: 'Depth', color: '#9ca3af', bgColor: '#f9fafb' } // Light Gray
+  return { label: 'Marginal', color: '#d1d5db', bgColor: '#fafafa' } // Muted
+}
+
+// Sport-specific context for tooltips
+const SPORT_CONTEXT: Record<string, string> = {
+  nfl: 'NFL picks are the most valuable in pro sports. Even 4th rounders become starters ~20% of the time.',
+  nba: 'Only lottery picks (#1-14) and late 1st rounders matter. 2nd round = no guaranteed contract.',
+  nhl: 'NHL picks take 3-5 years to develop. Rounds 1-3 valuable, 4-7 are lottery tickets.',
+  mlb: '20-round draft but only rounds 1-5 have real trade value.',
+}
+
 interface AvailablePick extends DraftPick {
   id: string // Unique identifier like "2026-1"
   label?: string
@@ -229,11 +255,15 @@ export function DraftPickList({
                   <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
                     {picksByYear[year]?.map(pick => {
                       const selected = isSelected(pick)
+                      const tier = getPickTier(pick.value)
+                      const tooltipText = pick.value
+                        ? `${pick.label || `${pick.year} Round ${pick.round}`} (${pick.value} pts${tier ? `, ${tier.label}` : ''})${SPORT_CONTEXT[sport] ? `\n\n${SPORT_CONTEXT[sport]}` : ''}`
+                        : SPORT_CONTEXT[sport] || undefined
                       return (
                         <button
                           key={pick.id}
                           onClick={() => handleToggle(pick)}
-                          title={pick.value ? `${pick.label || `${pick.year} Round ${pick.round}`} (${pick.value} pts)` : undefined}
+                          title={tooltipText}
                           style={{
                             display: 'flex',
                             alignItems: 'center',
@@ -264,19 +294,35 @@ export function DraftPickList({
                             )}
                           </div>
                           <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}>
-                            <span style={{
-                              fontSize: 12,
-                              fontWeight: selected ? 600 : 500,
-                              color: selected ? teamColor : textColor,
-                            }}>
-                              {/* Use shortLabel from API or build it: "Rd X (#Y)" - no value shown */}
-                              Rd {pick.round}
-                              {pick.estimatedPosition && (
-                                <span style={{ fontSize: 10, color: subText, marginLeft: 4 }}>
-                                  #{pick.estimatedPosition}
+                            <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+                              <span style={{
+                                fontSize: 12,
+                                fontWeight: selected ? 600 : 500,
+                                color: selected ? teamColor : textColor,
+                              }}>
+                                Rd {pick.round}
+                                {pick.estimatedPosition && (
+                                  <span style={{ fontSize: 10, color: subText, marginLeft: 4 }}>
+                                    #{pick.estimatedPosition}
+                                  </span>
+                                )}
+                              </span>
+                              {/* Tier badge */}
+                              {tier && (
+                                <span style={{
+                                  fontSize: 8,
+                                  fontWeight: 600,
+                                  padding: '1px 4px',
+                                  borderRadius: 3,
+                                  backgroundColor: tier.bgColor,
+                                  color: tier.color,
+                                  textTransform: 'uppercase',
+                                  letterSpacing: '0.3px',
+                                }}>
+                                  {tier.label}
                                 </span>
                               )}
-                            </span>
+                            </div>
                             {pick.originalTeam && pick.originalTeam !== 'Own' && pick.originalTeam !== teamName && (
                               <span style={{ fontSize: 9, color: subText }}>
                                 via {pick.originalTeam}
