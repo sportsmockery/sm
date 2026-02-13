@@ -150,7 +150,7 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
                   </div>
                   <div className="px-4 py-2.5 text-center">
                     {feature.sm === 'coming-soon' ? (
-                      <span className="text-yellow-400 text-xs font-medium">Coming Soon</span>
+                      <span className="text-xs font-medium" style={{ color: '#ffffff' }}>Coming Soon</span>
                     ) : feature.sm ? (
                       <span className="text-green-400 text-lg">✓</span>
                     ) : (
