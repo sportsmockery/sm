@@ -171,7 +171,8 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
             {/* "and more" link - bigger, white, no hover effect */}
             <Link
               href="https://test.sportsmockery.com/tour-page.html"
-              className="mt-5 text-white text-base underline"
+              className="mt-5 text-base underline"
+              style={{ color: '#ffffff' }}
             >
               and more…
             </Link>
