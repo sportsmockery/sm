@@ -95,6 +95,7 @@ export default function Header() {
   const [searchOpen, setSearchOpen] = useState(false)
   const [searchQuery, setSearchQuery] = useState('')
   const [isScrolled, setIsScrolled] = useState(false)
+  const [loginHovered, setLoginHovered] = useState(false)
   const [userRole, setUserRole] = useState<Role | null>(null)
   const searchInputRef = useRef<HTMLInputElement>(null)
   const videoMenuRef = useRef<HTMLDivElement>(null)
@@ -656,8 +657,8 @@ export default function Header() {
 
               {/* New Features dropdown */}
               <div className="relative" ref={newFeaturesMenuRef}>
-                <button
-                  onClick={() => setNewFeaturesMenuOpen(!newFeaturesMenuOpen)}
+                <Link
+                  href="https://test.sportsmockery.com/tour-page.html"
                   className="flex items-center gap-1 px-4 py-4 text-[14px] font-bold hover:text-[var(--link-color)] transition-colors"
                   style={{ fontFamily: "'Montserrat', sans-serif", color: 'var(--text-primary)' }}
                 >
@@ -675,6 +676,12 @@ export default function Header() {
                   >
                     New!
                   </span>
+                </Link>
+                <button
+                  onClick={() => setNewFeaturesMenuOpen(!newFeaturesMenuOpen)}
+                  className="flex items-center py-4 hover:text-[var(--link-color)] transition-colors"
+                  style={{ color: 'var(--text-primary)' }}
+                >
                   <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
                   </svg>
@@ -862,7 +869,9 @@ export default function Header() {
             ))}
             {/* New Features section */}
             <div>
-              <div
+              <Link
+                href="https://test.sportsmockery.com/tour-page.html"
+                onClick={() => setMobileMenuOpen(false)}
                 className="py-3 text-[14px] font-bold flex items-center gap-2"
                 style={{ fontFamily: "'Montserrat', sans-serif", color: 'var(--text-primary)', borderBottom: '1px solid var(--border-color)' }}
               >
@@ -879,7 +888,7 @@ export default function Header() {
                 >
                   New!
                 </span>
-              </div>
+              </Link>
               <div className="pl-4 border-l-2 border-[#bc0000] ml-2">
                 <Link
                   href="/gm"
