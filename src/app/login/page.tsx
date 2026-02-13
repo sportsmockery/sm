@@ -112,7 +112,7 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
           </p>
 
           {/* Section title */}
-          <h3 className="text-xl font-bold text-white mt-5 mb-1 text-center">
+          <h3 className="text-xl font-bold text-white mt-2 mb-1 text-center">
             Sports Mockery 2.0 Stands Alone
           </h3>
           <p className="text-white/70 text-xs mb-4 text-center">
