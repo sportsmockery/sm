@@ -7,7 +7,7 @@ import { usePathname } from 'next/navigation'
 const footerColumns = [
   {
     title: 'ABOUT',
-    description: 'Your source for Chicago sports news, analysis, and commentary. Covering Bears, Bulls, Cubs, White Sox, and Blackhawks with passion.',
+    description: 'Welcome to Sports Mockery 2.0. AI-Powered. Fan-Driven. Chicago-Owned. The future of Chicago sports is here. Sports Mockery is an unfiltered voice for Chicago covering the Bears, Blackhawks, Bulls, Cubs and White Sox.',
     hasSocial: true,
   },
   {
