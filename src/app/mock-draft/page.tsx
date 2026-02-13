@@ -252,29 +252,44 @@ export default function MockDraftPage() {
       }
 
       setSelectedTeam(teamKey)
-      setActiveDraft(data.draft)
       fetchProspects(team.sport, data.draft?.draft_year)
 
       // If user's first pick is not #1, auto-advance to fill in earlier picks
       const firstUserPick = data.draft?.user_picks?.[0]
-      if (firstUserPick && firstUserPick > 1) {
+      console.log('[MockDraft] Draft started, firstUserPick:', firstUserPick, 'current_pick:', data.draft?.current_pick)
+
+      if (firstUserPick && firstUserPick > 1 && data.draft?.current_pick < firstUserPick) {
         // Auto-advance to fill picks before user's turn
+        console.log('[MockDraft] Auto-advancing from pick', data.draft.current_pick, 'to', firstUserPick)
+        setAutoAdvancing(true)
+        setActiveDraft(data.draft) // Show draft board while advancing
+
         try {
-          setAutoAdvancing(true)
           const advanceRes = await fetch('/api/gm/draft/auto', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ mock_id: data.draft.id }),
           })
           const advanceData = await advanceRes.json()
+          console.log('[MockDraft] Auto-advance response:', advanceRes.ok, 'picksAdvanced:', advanceData.picksAdvanced)
+
           if (advanceRes.ok && advanceData.draft) {
+            // Check if picks have prospect data
+            const picksWithProspects = advanceData.draft.picks?.filter((p: any) => p.selected_prospect) || []
+            console.log('[MockDraft] Picks with prospects:', picksWithProspects.length)
             setActiveDraft(advanceData.draft)
+          } else {
+            console.error('[MockDraft] Auto-advance failed:', advanceData.error, advanceData.debug)
+            setActiveDraft(data.draft)
           }
         } catch (e) {
-          console.error('Auto-advance on start failed:', e)
+          console.error('[MockDraft] Auto-advance exception:', e)
+          setActiveDraft(data.draft)
         } finally {
           setAutoAdvancing(false)
         }
+      } else {
+        setActiveDraft(data.draft)
       }
     } catch (e) {
       setError('Network error. Please try again.')
@@ -633,6 +648,29 @@ export default function MockDraftPage() {
                   })}
                 </div>
               )}
+            </div>
+          </div>
+        )}
+
+        {/* Auto-advancing overlay */}
+        {autoAdvancing && (
+          <div style={{
+            position: 'fixed', inset: 0, zIndex: 40,
+            backgroundColor: 'rgba(0,0,0,0.5)',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+          }}>
+            <div style={{
+              backgroundColor: isDark ? '#1f2937' : '#fff',
+              borderRadius: 16, padding: 32, textAlign: 'center',
+              boxShadow: '0 25px 50px rgba(0,0,0,0.3)',
+            }}>
+              <div className="w-10 h-10 border-3 border-t-transparent rounded-full animate-spin mx-auto mb-4" style={{ borderColor: teamColor, borderTopColor: 'transparent' }} />
+              <div style={{ fontWeight: 700, fontSize: '18px', marginBottom: 8, color: isDark ? '#fff' : '#1a1a1a' }}>
+                Simulating Draft Picks...
+              </div>
+              <div style={{ fontSize: '14px', color: subText }}>
+                Other teams are making their selections
+              </div>
             </div>
           </div>
         )}
