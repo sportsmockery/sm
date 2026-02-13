@@ -161,14 +161,14 @@ export default function MockDraftPage() {
     setHistoryLoading(false)
   }, [])
 
-  // Fetch team eligibility status from Datalab
+  // Fetch team eligibility status directly from Datalab
   const fetchEligibility = useCallback(async () => {
     setEligibilityLoading(true)
     try {
-      const res = await fetch('/api/gm/draft/eligibility')
+      const res = await fetch('https://datalab.sportsmockery.com/api/gm/draft/teams')
       if (res.ok) {
         const data = await res.json()
-        // Map by team_key for easy lookup (API now uses bears, bulls, etc.)
+        // Map by team_key for easy lookup (API uses bears, bulls, etc.)
         const eligMap: Record<string, TeamEligibility> = {}
         for (const team of data.teams || []) {
           // Use team_key directly (bears, bulls, blackhawks, cubs, whitesox)
