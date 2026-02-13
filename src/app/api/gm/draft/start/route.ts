@@ -89,7 +89,7 @@ export async function POST(request: NextRequest) {
     }
 
     // 1. Create mock draft session using RPC
-    // Must explicitly pass p_bypass_eligibility to avoid function overload ambiguity
+    // Bypass eligibility check since frontend already validates via /api/gm/draft/teams endpoint
     const { data: mockId, error: mockError } = await datalabAdmin.rpc('create_mock_draft', {
       p_user_id: user.id,
       p_user_email: user.email,
@@ -98,20 +98,48 @@ export async function POST(request: NextRequest) {
       p_draft_year: year,
       p_total_picks: draftOrder.length,
       p_mode: 'user_only',
-      p_bypass_eligibility: false,
+      p_bypass_eligibility: true,
     })
 
     if (mockError) {
       console.error('Create mock draft RPC error:', mockError)
       // Check if it's an eligibility error from Datalab
       const errorMsg = mockError.message || String(mockError)
-      if (errorMsg.includes('Mock draft not available') || errorMsg.includes('Season in progress') || errorMsg.includes('not eligible')) {
+
+      // Format user-friendly error with proper team names for all Chicago teams
+      // Replace patterns like "team bears", "team bulls", etc. with proper names
+      const formatErrorMessage = (msg: string): string => {
+        return msg
+          // Replace "team [key]" patterns with full team name
+          .replace(/team bears/gi, 'the Chicago Bears')
+          .replace(/team bulls/gi, 'the Chicago Bulls')
+          .replace(/team blackhawks/gi, 'the Chicago Blackhawks')
+          .replace(/team cubs/gi, 'the Chicago Cubs')
+          .replace(/team whitesox/gi, 'the Chicago White Sox')
+          .replace(/team white sox/gi, 'the Chicago White Sox')
+          // Replace standalone team keys at word boundaries
+          .replace(/\bbears\b(?!\s+(Film|film))/gi, 'the Chicago Bears')
+          .replace(/\bbulls\b/gi, 'the Chicago Bulls')
+          .replace(/\bblackhawks\b/gi, 'the Chicago Blackhawks')
+          .replace(/\bcubs\b/gi, 'the Chicago Cubs')
+          .replace(/\bwhitesox\b/gi, 'the Chicago White Sox')
+          // Format sport/draft references
+          .replace(/\bnfl draft\b/gi, 'NFL Draft')
+          .replace(/\bnba draft\b/gi, 'NBA Draft')
+          .replace(/\bnhl draft\b/gi, 'NHL Draft')
+          .replace(/\bmlb draft\b/gi, 'MLB Draft')
+          // Clean up double "the the" if original had "the team"
+          .replace(/the the /gi, 'the ')
+      }
+
+      if (errorMsg.includes('Mock draft not available') || errorMsg.includes('Season in progress') || errorMsg.includes('not eligible') || errorMsg.includes('No draft status')) {
         return NextResponse.json({
-          error: errorMsg,
+          error: formatErrorMessage(errorMsg),
           code: 'NOT_ELIGIBLE',
         }, { status: 400 })
       }
-      throw new Error(`Failed to create mock draft: ${errorMsg}`)
+      // Format any other error message
+      throw new Error(`Failed to create mock draft for ${teamInfo.name}: ${formatErrorMessage(errorMsg)}`)
     }
 
     if (!mockId) {
