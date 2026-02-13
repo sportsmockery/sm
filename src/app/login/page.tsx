@@ -51,8 +51,8 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
   return (
     <div className="flex min-h-screen">
       {/* Left side - Form */}
-      <div className="flex flex-1 flex-col justify-center px-8 py-12 sm:px-12 lg:flex-none lg:w-[42%] lg:px-16 xl:px-20 bg-white dark:bg-zinc-900">
-        <div className="w-full max-w-sm">
+      <div className="flex flex-1 flex-col items-center justify-center px-8 py-12 sm:px-12 lg:flex-none lg:w-[42%] lg:px-16 xl:px-20 bg-white dark:bg-zinc-900">
+        <div className="w-full max-w-sm lg:max-w-md">
           {/* Logo */}
           <div className="mb-8">
             <Link href="/" className="inline-block">
@@ -88,9 +88,9 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
       </div>
 
       {/* Right side - Features/Branding */}
-      <div className="relative hidden lg:flex lg:flex-1 bg-black">
-        {/* Content - centered */}
-        <div className="relative flex flex-col items-center justify-center w-full px-8">
+      <div className="relative hidden lg:flex lg:flex-1 bg-black items-center justify-center">
+        {/* Content - constrained height to prevent gaps on large screens */}
+        <div className="relative flex flex-col items-center w-full max-w-3xl px-8 py-8">
           {/* Logo */}
           <Image
             src="/logos/v2_SM_Whole.png"
