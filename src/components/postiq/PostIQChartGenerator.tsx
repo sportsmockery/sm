@@ -507,8 +507,8 @@ export default function PostIQChartGenerator({
         </div>
       )}
 
-      {/* Rejection/Warning Indicator */}
-      {showIndicator && rejection && !isAnalyzing && !analysis && (
+      {/* Rejection/Warning Indicator - don't show for empty content (avoids confusion with other PostIQ features) */}
+      {showIndicator && rejection && rejection.reason !== 'empty_content' && !isAnalyzing && !analysis && (
         <div className={`fixed ${positionClasses[indicatorPosition]} z-40 animate-in slide-in-from-bottom-4 duration-300`}>
           <div className="flex flex-col rounded-xl bg-amber-500/10 dark:bg-amber-900/20 border border-amber-400/30 shadow-lg overflow-hidden max-w-sm">
             <div className="flex items-start gap-3 px-4 py-3">
