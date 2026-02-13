@@ -51,7 +51,7 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
   return (
     <div className="flex min-h-screen">
       {/* Left side - Form */}
-      <div className="flex flex-1 flex-col justify-center px-4 py-8 sm:px-6 lg:flex-none lg:w-[45%] xl:w-[40%] lg:px-16 xl:px-20 bg-white dark:bg-zinc-900">
+      <div className="flex flex-1 flex-col items-center justify-center px-4 py-8 sm:px-6 lg:flex-none lg:w-1/2 lg:px-12 xl:px-16 bg-white dark:bg-zinc-900">
         <div className="mx-auto w-full max-w-sm">
           {/* Logo */}
           <div className="mb-6">
@@ -95,41 +95,41 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
           <div className="absolute -bottom-20 -right-20 h-60 w-60 rounded-full bg-white blur-3xl" />
         </div>
 
-        {/* Content */}
-        <div className="relative flex flex-col items-center w-full px-8 py-12">
+        {/* Content - centered vertically */}
+        <div className="relative flex flex-col items-center justify-center w-full h-full px-6 py-6">
           {/* Logo */}
           <Image
             src="/logos/v2_SM_Whole.png"
             alt="Sports Mockery 2.0"
-            width={220}
-            height={55}
+            width={180}
+            height={45}
             priority
           />
 
           {/* Tagline */}
-          <p className="text-white text-lg font-semibold mt-4 text-center">
+          <p className="text-white text-base font-semibold mt-3 text-center">
             AI-Powered. Fan-Driven. Chicago-Owned.
           </p>
 
           {/* Section title */}
-          <h3 className="text-2xl font-bold text-white mt-8 mb-2 text-center">
+          <h3 className="text-xl font-bold text-white mt-5 mb-1 text-center">
             Sports Mockery 2.0 Stands Alone
           </h3>
-          <p className="text-white/70 text-sm mb-6 text-center">
+          <p className="text-white/70 text-xs mb-4 text-center">
             How we compare to the competition.
           </p>
 
           {/* Comparison Chart */}
-          <div className="w-full max-w-xl bg-white/10 backdrop-blur-sm rounded-lg overflow-hidden border border-white/20">
+          <div className="w-full max-w-2xl bg-white/10 backdrop-blur-sm rounded-lg overflow-hidden border border-white/20">
             {/* Table Header */}
             <div className="grid grid-cols-3 bg-white/10">
-              <div className="px-4 py-3 text-white font-bold text-sm">
+              <div className="px-3 py-2 text-white font-bold text-sm">
                 Feature
               </div>
-              <div className="px-4 py-3 text-white font-bold text-sm text-center">
+              <div className="px-3 py-2 text-white font-bold text-sm text-center">
                 Sports Mockery 2.0
               </div>
-              <div className="px-4 py-3 text-white font-bold text-sm text-center">
+              <div className="px-3 py-2 text-white font-bold text-sm text-center">
                 ESPN / Bleacher
               </div>
             </div>
@@ -140,23 +140,23 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
                 key={feature.name}
                 className={`grid grid-cols-3 ${idx % 2 === 0 ? 'bg-white/5' : ''}`}
               >
-                <div className="px-4 py-2.5 text-white/90 text-sm leading-tight">
+                <div className="px-3 py-1.5 text-white/90 text-sm leading-tight">
                   {feature.name}
                 </div>
-                <div className="px-4 py-2.5 text-center flex items-center justify-center">
+                <div className="px-3 py-1.5 text-center flex items-center justify-center">
                   {feature.sm === 'coming-soon' ? (
                     <span className="text-sm font-medium" style={{ color: '#ffffff' }}>Coming Soon</span>
                   ) : feature.sm ? (
-                    <span className="text-green-400 text-lg">✓</span>
+                    <span className="text-green-400 text-base">✓</span>
                   ) : (
-                    <span className="text-red-400 text-lg">✗</span>
+                    <span className="text-red-400 text-base">✗</span>
                   )}
                 </div>
-                <div className="px-4 py-2.5 text-center flex items-center justify-center">
+                <div className="px-3 py-1.5 text-center flex items-center justify-center">
                   {feature.espn ? (
-                    <span className="text-green-400 text-lg">✓</span>
+                    <span className="text-green-400 text-base">✓</span>
                   ) : (
-                    <span className="text-red-400 text-lg">✗</span>
+                    <span className="text-red-400 text-base">✗</span>
                   )}
                 </div>
               </div>
@@ -164,7 +164,7 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
           </div>
 
           {/* And More text - same style as tagline */}
-          <p className="text-white text-lg font-semibold mt-8 text-center">
+          <p className="text-white text-base font-semibold mt-5 text-center">
             And More...
           </p>
         </div>
