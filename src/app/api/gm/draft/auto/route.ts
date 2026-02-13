@@ -270,6 +270,20 @@ export async function POST(request: NextRequest) {
 
     log(`Final state: current_pick=${updatedDraft.current_pick}, total_picks=${updatedDraft.total_picks}, isComplete=${isComplete}`)
 
+    // Debug: Log first few picks from RPC to see data structure
+    const rawPicks = updatedDraft.picks || []
+    log(`Raw picks count: ${rawPicks.length}`)
+    if (rawPicks.length > 0) {
+      log(`First raw pick keys: ${Object.keys(rawPicks[0]).join(', ')}`)
+      log(`First 3 raw picks: ${JSON.stringify(rawPicks.slice(0, 3).map((p: any) => ({
+        pick: p.pick_number,
+        prospect_id: p.prospect_id,
+        prospect_name: p.prospect_name,
+        position: p.position,
+        selected_prospect: p.selected_prospect,
+      })))}`)
+    }
+
     // Build response
     const picks = (updatedDraft.picks || []).map((p: any) => ({
       pick_number: p.pick_number,

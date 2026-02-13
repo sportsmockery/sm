@@ -274,15 +274,30 @@ export default function MockDraftPage() {
           console.log('[MockDraft] Auto-advance response:', advanceRes.ok, 'picksAdvanced:', advanceData.picksAdvanced)
 
           if (advanceRes.ok && advanceData.draft) {
-            // Check if picks have prospect data
-            const picksWithProspects = advanceData.draft.picks?.filter((p: any) => p.selected_prospect?.name) || []
-            console.log('[MockDraft] Picks with prospect names:', picksWithProspects.length)
-            // Log first 3 picks to see data structure
-            console.log('[MockDraft] First 3 picks:', advanceData.draft.picks?.slice(0, 3).map((p: any) => ({
+            // Debug: Show full structure of picks
+            const allPicks = advanceData.draft.picks || []
+            console.log('[MockDraft] Total picks:', allPicks.length)
+
+            // Show first 5 picks (should have prospects) and pick 25 (first user pick)
+            const debugPicks = [
+              ...allPicks.slice(0, 5),
+              allPicks.find((p: any) => p.pick_number === 25)
+            ].filter(Boolean)
+
+            console.log('[MockDraft] First 5 picks + pick 25:', debugPicks.map((p: any) => ({
               pick: p.pick_number,
               team: p.team_name,
-              prospect: p.selected_prospect,
+              is_user: p.is_user_pick,
+              prospect: p.selected_prospect, // Full prospect object
+              hasProspect: !!p.selected_prospect,
+              prospectName: p.selected_prospect?.name,
             })))
+
+            // Debug: Show backend debug log if available
+            if (advanceData.debug) {
+              console.log('[MockDraft] Backend debug:', advanceData.debug.slice(-10))
+            }
+
             setActiveDraft(advanceData.draft)
           } else {
             console.error('[MockDraft] Auto-advance failed:', advanceData.error, advanceData.debug)
