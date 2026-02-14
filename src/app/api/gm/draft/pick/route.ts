@@ -49,28 +49,39 @@ export async function POST(request: NextRequest) {
     const prospectName = prospect_name || 'Unknown'
     const prospectPosition = position || 'Unknown'
 
-    // Update the pick using RPC
-    const { error: updateError } = await datalabAdmin.rpc('update_mock_draft_pick', {
-      p_mock_id: mock_id,
-      p_pick_number: actualPickNumber,
-      p_prospect_id: prospect_id,
-      p_prospect_name: prospectName || 'Unknown',
-      p_position: prospectPosition || 'Unknown',
-      p_pick_grade: pick_grade || null,
-    })
+    // Update the pick directly in the database (bypassing problematic RPC)
+    const { error: updateError } = await datalabAdmin
+      .from('gm_mock_draft_picks')
+      .update({
+        prospect_id: String(prospect_id),
+        prospect_name: prospectName,
+        position: prospectPosition,
+        pick_grade: pick_grade || null,
+        updated_at: new Date().toISOString(),
+      })
+      .eq('mock_draft_id', mock_id)
+      .eq('pick_number', actualPickNumber)
 
     if (updateError) {
-      console.error('Update pick RPC error:', updateError)
+      console.error('Update pick error:', updateError)
       throw new Error(`Failed to update pick: ${updateError.message}`)
     }
 
-    // Advance to next pick
-    const { data: newPick, error: advanceError } = await datalabAdmin.rpc('advance_mock_draft_pick', {
-      p_mock_id: mock_id,
-    })
+    // Advance to next pick by updating current_pick in the mock draft
+    const nextPick = actualPickNumber + 1
+    const isNowComplete = nextPick > mockDraft.total_picks
+
+    const { error: advanceError } = await datalabAdmin
+      .from('gm_mock_drafts')
+      .update({
+        current_pick: nextPick,
+        status: isNowComplete ? 'completed' : 'in_progress',
+        updated_at: new Date().toISOString(),
+      })
+      .eq('id', mock_id)
 
     if (advanceError) {
-      console.error('Advance pick RPC error:', advanceError)
+      console.error('Advance pick error:', advanceError)
       // Non-fatal - pick was saved, just couldn't advance
     }
 

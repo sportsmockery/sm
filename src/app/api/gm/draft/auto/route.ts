@@ -218,14 +218,17 @@ export async function POST(request: NextRequest) {
       const selectedProspect = topProspects[0]
       log(`BPA pick ${currentPick}: ${selectedProspect.name} (${selectedProspect.position})`)
 
-      // Update the pick using RPC
-      const { error: updateError } = await datalabAdmin.rpc('update_mock_draft_pick', {
-        p_mock_id: mock_id,
-        p_pick_number: currentPick,
-        p_prospect_id: selectedProspect.prospect_id,
-        p_prospect_name: selectedProspect.name,
-        p_position: selectedProspect.position,
-      })
+      // Update the pick directly in the database (bypassing problematic RPC)
+      const { error: updateError } = await datalabAdmin
+        .from('gm_mock_draft_picks')
+        .update({
+          prospect_id: String(selectedProspect.prospect_id),
+          prospect_name: selectedProspect.name,
+          position: selectedProspect.position,
+          updated_at: new Date().toISOString(),
+        })
+        .eq('mock_draft_id', mock_id)
+        .eq('pick_number', currentPick)
 
       if (updateError) {
         log(`ERROR updating pick ${currentPick}: ${JSON.stringify(updateError)}`)
@@ -244,10 +247,17 @@ export async function POST(request: NextRequest) {
       // Track picked prospect
       pickedProspectIds.push(selectedProspect.prospect_id)
 
-      // Advance pick
-      const { error: advanceError } = await datalabAdmin.rpc('advance_mock_draft_pick', {
-        p_mock_id: mock_id,
-      })
+      // Advance pick directly in the database (bypassing problematic RPC)
+      const nextPick = currentPick + 1
+      const isNowComplete = nextPick > mockDraft.total_picks
+      const { error: advanceError } = await datalabAdmin
+        .from('gm_mock_drafts')
+        .update({
+          current_pick: nextPick,
+          status: isNowComplete ? 'completed' : 'in_progress',
+          updated_at: new Date().toISOString(),
+        })
+        .eq('id', mock_id)
 
       if (advanceError) {
         log(`ERROR advancing from pick ${currentPick}: ${JSON.stringify(advanceError)}`)
