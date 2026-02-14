@@ -81,6 +81,31 @@ export default function TeamScreen() {
         </View>
       </View>
 
+      {/* Quick Actions */}
+      <View style={styles.quickActions}>
+        <TouchableOpacity
+          style={[styles.actionButton, { backgroundColor: team.color }]}
+          onPress={() => router.push(`/team/${slug}/schedule`)}
+        >
+          <Ionicons name="calendar-outline" size={20} color="#fff" />
+          <Text style={styles.actionButtonText}>Schedule</Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={[styles.actionButton, { backgroundColor: team.color }]}
+          onPress={() => router.push(`/team/${slug}/roster`)}
+        >
+          <Ionicons name="people-outline" size={20} color="#fff" />
+          <Text style={styles.actionButtonText}>Roster</Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={[styles.actionButton, { backgroundColor: team.color }]}
+          onPress={() => router.push(`/team/${slug}/stats`)}
+        >
+          <Ionicons name="stats-chart-outline" size={20} color="#fff" />
+          <Text style={styles.actionButtonText}>Stats</Text>
+        </TouchableOpacity>
+      </View>
+
       {/* Chat prompt */}
       <TouchableOpacity
         style={[styles.chatPrompt, { backgroundColor: colors.surface, borderColor: colors.border }]}
@@ -185,6 +210,26 @@ const styles = StyleSheet.create({
     color: 'rgba(255,255,255,0.8)',
     textTransform: 'uppercase',
     letterSpacing: 1,
+  },
+  quickActions: {
+    flexDirection: 'row',
+    paddingHorizontal: 16,
+    paddingTop: 16,
+    gap: 8,
+  },
+  actionButton: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 6,
+    paddingVertical: 12,
+    borderRadius: 10,
+  },
+  actionButtonText: {
+    color: '#fff',
+    fontSize: 13,
+    fontFamily: 'Montserrat-SemiBold',
   },
   chatPrompt: {
     flexDirection: 'row',

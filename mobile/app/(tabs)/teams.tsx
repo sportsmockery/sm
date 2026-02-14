@@ -85,6 +85,58 @@ export default function TeamsScreen() {
           </View>
         </TouchableOpacity>
 
+        {/* Leaderboards Banner */}
+        <TouchableOpacity
+          style={styles.leaderboardBanner}
+          activeOpacity={0.85}
+          onPress={() => router.push('/leaderboards')}
+        >
+          <View style={styles.gmBannerContent}>
+            <View style={styles.gmBannerLeft}>
+              <Text style={styles.leaderboardBannerBadge}>NEW</Text>
+              <Text style={styles.gmBannerTitle}>Leaderboards</Text>
+              <Text style={styles.gmBannerDesc}>Monthly GM rankings</Text>
+            </View>
+            <View style={styles.gmBannerArrow}>
+              <Text style={styles.gmBannerArrowText}>{'>'}</Text>
+            </View>
+          </View>
+        </TouchableOpacity>
+
+        {/* Polls Banner */}
+        <TouchableOpacity
+          style={styles.pollsBanner}
+          activeOpacity={0.85}
+          onPress={() => router.push('/polls')}
+        >
+          <View style={styles.gmBannerContent}>
+            <View style={styles.gmBannerLeft}>
+              <Text style={styles.gmBannerTitle}>Polls</Text>
+              <Text style={styles.gmBannerDesc}>Vote on Chicago sports topics</Text>
+            </View>
+            <View style={styles.gmBannerArrow}>
+              <Text style={styles.gmBannerArrowText}>{'>'}</Text>
+            </View>
+          </View>
+        </TouchableOpacity>
+
+        {/* Predictions Banner */}
+        <TouchableOpacity
+          style={styles.predictionsBanner}
+          activeOpacity={0.85}
+          onPress={() => router.push('/predictions')}
+        >
+          <View style={styles.gmBannerContent}>
+            <View style={styles.gmBannerLeft}>
+              <Text style={styles.gmBannerTitle}>SM Prophecy</Text>
+              <Text style={styles.gmBannerDesc}>AI-powered predictions</Text>
+            </View>
+            <View style={styles.gmBannerArrow}>
+              <Text style={styles.gmBannerArrowText}>{'>'}</Text>
+            </View>
+          </View>
+        </TouchableOpacity>
+
         {/* Team Cards */}
         {teamList.map((team) => (
           <Link key={team.id} href={`/team/${team.id}`} asChild>
@@ -394,9 +446,55 @@ const styles = StyleSheet.create({
   },
   scoreBanner: {
     borderRadius: 16,
-    marginBottom: 16,
+    marginBottom: 12,
     overflow: 'hidden',
     backgroundColor: '#0f172a',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.2,
+    shadowRadius: 6,
+    elevation: 4,
+  },
+  leaderboardBanner: {
+    borderRadius: 16,
+    marginBottom: 12,
+    overflow: 'hidden',
+    backgroundColor: '#7c3aed',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.2,
+    shadowRadius: 6,
+    elevation: 4,
+  },
+  leaderboardBannerBadge: {
+    color: '#7c3aed',
+    backgroundColor: '#fbbf24',
+    alignSelf: 'flex-start',
+    fontSize: 10,
+    fontFamily: 'Montserrat-Bold',
+    paddingHorizontal: 8,
+    paddingVertical: 2,
+    borderRadius: 4,
+    overflow: 'hidden',
+    marginBottom: 6,
+    letterSpacing: 1,
+  },
+  pollsBanner: {
+    borderRadius: 16,
+    marginBottom: 12,
+    overflow: 'hidden',
+    backgroundColor: '#059669',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.2,
+    shadowRadius: 6,
+    elevation: 4,
+  },
+  predictionsBanner: {
+    borderRadius: 16,
+    marginBottom: 16,
+    overflow: 'hidden',
+    backgroundColor: '#dc2626',
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 3 },
     shadowOpacity: 0.2,
