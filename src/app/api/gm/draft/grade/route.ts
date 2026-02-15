@@ -237,9 +237,8 @@ Grade this mock draft performance.`
             .update({
               grade: pg.grade,
               commentary: pg.analysis,
-              updated_at: new Date().toISOString(),
             })
-            .eq('mock_draft_id', mock_id)
+            .eq('mock_id', mock_id)
             .eq('pick_number', pg.pick_number)
         } catch {}
       }

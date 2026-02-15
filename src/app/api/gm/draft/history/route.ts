@@ -35,13 +35,13 @@ export async function GET(request: NextRequest) {
     if (draftIds.length > 0) {
       const { data: pickCounts } = await datalabAdmin
         .from('gm_mock_draft_picks')
-        .select('mock_draft_id')
-        .in('mock_draft_id', draftIds)
+        .select('mock_id')
+        .in('mock_id', draftIds)
         .not('prospect_id', 'is', null)
 
       if (pickCounts) {
         for (const pc of pickCounts) {
-          pickCountsMap[pc.mock_draft_id] = (pickCountsMap[pc.mock_draft_id] || 0) + 1
+          pickCountsMap[pc.mock_id] = (pickCountsMap[pc.mock_id] || 0) + 1
         }
       }
     }
