@@ -224,7 +224,6 @@ export async function POST(request: NextRequest) {
         .update({
           prospect_id: String(selectedProspect.prospect_id),
           prospect_name: selectedProspect.name,
-          position: selectedProspect.position,
           updated_at: new Date().toISOString(),
         })
         .eq('mock_draft_id', mock_id)

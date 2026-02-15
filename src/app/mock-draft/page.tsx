@@ -161,43 +161,62 @@ export default function MockDraftPage() {
     setHistoryLoading(false)
   }, [])
 
-  // Fetch team eligibility status directly from Datalab
-  // Use include_in_season=true to get all 5 Chicago teams (some may be in-season but still shown)
+  // Fetch team eligibility status from Datalab
+  // Do NOT pass include_in_season=true — Bulls (NBA) and Blackhawks (NHL) are in season and cannot mock draft
   const fetchEligibility = useCallback(async () => {
     setEligibilityLoading(true)
     try {
-      const res = await fetch('https://datalab.sportsmockery.com/api/gm/draft/teams?include_in_season=true')
+      const res = await fetch('https://datalab.sportsmockery.com/api/gm/draft/teams')
       const eligMap: Record<string, TeamEligibility> = {}
 
       if (res.ok) {
         const data = await res.json()
-        // Map by team_key for easy lookup (API uses bears, bulls, etc.)
         for (const team of data.teams || []) {
-          // Use team_key directly (bears, bulls, blackhawks, cubs, whitesox)
           if (team.team_key) {
+            // Enforce: in-season teams are NOT eligible regardless of what DataLab returns
+            if (team.season_status === 'in_season') {
+              team.eligible = false
+              team.reason = team.reason || `${team.sport?.toUpperCase()} season in progress — mock draft unavailable`
+            }
             eligMap[team.team_key] = team
           }
         }
       }
 
-      // Only add fallback if API returned nothing (complete failure)
-      // Don't blindly enable all teams - respect DataLab's eligibility decisions
+      // Add in-season teams as disabled so they still show in the UI
+      const inSeasonSports = ['nba', 'nhl'] // NBA and NHL seasons run through spring
+      for (const team of CHICAGO_TEAMS) {
+        if (!eligMap[team.key] && inSeasonSports.includes(team.sport)) {
+          eligMap[team.key] = {
+            sport: team.sport,
+            draft_year: 2026,
+            team_key: team.key,
+            team_name: team.name,
+            season_status: 'in_season',
+            eligible: false,
+            reason: `${team.sport.toUpperCase()} season in progress`,
+            logo_url: team.logo,
+            mock_draft_window_status: 'closed',
+          }
+        }
+      }
+
+      // Fallback if API returned nothing
       if (Object.keys(eligMap).length === 0) {
-        console.warn('DataLab returned no teams, using limited fallback')
-        // Fallback: Only enable teams likely to be in offseason (Bears for NFL, Cubs/WhiteSox for MLB)
-        const offseasonTeams = ['bears', 'cubs', 'whitesox'] // NFL and MLB are in offseason in Feb
+        const offseasonTeams = ['bears', 'cubs', 'whitesox']
         for (const team of CHICAGO_TEAMS) {
           if (offseasonTeams.includes(team.key)) {
             eligMap[team.key] = {
-              sport: team.sport,
-              draft_year: 2026,
-              team_key: team.key,
-              team_name: team.name,
-              season_status: 'offseason',
-              eligible: true,
-              reason: '✓ Ready to draft',
-              logo_url: team.logo,
-              mock_draft_window_status: 'open',
+              sport: team.sport, draft_year: 2026, team_key: team.key, team_name: team.name,
+              season_status: 'offseason', eligible: true, reason: '✓ Ready to draft',
+              logo_url: team.logo, mock_draft_window_status: 'open',
+            }
+          } else {
+            eligMap[team.key] = {
+              sport: team.sport, draft_year: 2026, team_key: team.key, team_name: team.name,
+              season_status: 'in_season', eligible: false,
+              reason: `${team.sport.toUpperCase()} season in progress`,
+              logo_url: team.logo, mock_draft_window_status: 'closed',
             }
           }
         }
@@ -206,22 +225,15 @@ export default function MockDraftPage() {
       setEligibility(eligMap)
     } catch (e) {
       console.error('Failed to fetch eligibility:', e)
-      // On error, only enable offseason teams (Bears, Cubs, White Sox)
       const fallbackMap: Record<string, TeamEligibility> = {}
-      const offseasonTeams = ['bears', 'cubs', 'whitesox']
       for (const team of CHICAGO_TEAMS) {
-        if (offseasonTeams.includes(team.key)) {
-          fallbackMap[team.key] = {
-            sport: team.sport,
-            draft_year: 2026,
-            team_key: team.key,
-            team_name: team.name,
-            season_status: 'offseason',
-            eligible: true,
-            reason: '✓ Ready to draft',
-            logo_url: team.logo,
-            mock_draft_window_status: 'open',
-          }
+        const isOffseason = ['nfl', 'mlb'].includes(team.sport)
+        fallbackMap[team.key] = {
+          sport: team.sport, draft_year: 2026, team_key: team.key, team_name: team.name,
+          season_status: isOffseason ? 'offseason' : 'in_season',
+          eligible: isOffseason,
+          reason: isOffseason ? '✓ Ready to draft' : `${team.sport.toUpperCase()} season in progress`,
+          logo_url: team.logo, mock_draft_window_status: isOffseason ? 'open' : 'closed',
         }
       }
       setEligibility(fallbackMap)
@@ -578,7 +590,7 @@ export default function MockDraftPage() {
 
         {/* Team Selection */}
         {!selectedTeam && (
-          <div className="grid md:grid-cols-2 gap-4 sm:gap-6">
+          <div className="grid md:grid-cols-2 gap-4 sm:gap-6" style={{ alignItems: 'start' }}>
             {/* Team picker */}
             <div className={`rounded-xl border p-4 sm:p-6 ${cardBg}`}>
               <h2 className="text-base sm:text-lg" style={{ fontWeight: 700, marginBottom: 12, color: isDark ? '#fff' : '#1a1a1a' }}>
