@@ -162,10 +162,11 @@ export default function MockDraftPage() {
   }, [])
 
   // Fetch team eligibility status directly from Datalab
+  // Use include_in_season=true to get all 5 Chicago teams (some may be in-season but still shown)
   const fetchEligibility = useCallback(async () => {
     setEligibilityLoading(true)
     try {
-      const res = await fetch('https://datalab.sportsmockery.com/api/gm/draft/teams')
+      const res = await fetch('https://datalab.sportsmockery.com/api/gm/draft/teams?include_in_season=true')
       const eligMap: Record<string, TeamEligibility> = {}
 
       if (res.ok) {
@@ -179,10 +180,38 @@ export default function MockDraftPage() {
         }
       }
 
-      // Fallback: Enable all Chicago teams if not returned by DataLab
+      // Only add fallback if API returned nothing (complete failure)
+      // Don't blindly enable all teams - respect DataLab's eligibility decisions
+      if (Object.keys(eligMap).length === 0) {
+        console.warn('DataLab returned no teams, using limited fallback')
+        // Fallback: Only enable teams likely to be in offseason (Bears for NFL, Cubs/WhiteSox for MLB)
+        const offseasonTeams = ['bears', 'cubs', 'whitesox'] // NFL and MLB are in offseason in Feb
+        for (const team of CHICAGO_TEAMS) {
+          if (offseasonTeams.includes(team.key)) {
+            eligMap[team.key] = {
+              sport: team.sport,
+              draft_year: 2026,
+              team_key: team.key,
+              team_name: team.name,
+              season_status: 'offseason',
+              eligible: true,
+              reason: '✓ Ready to draft',
+              logo_url: team.logo,
+              mock_draft_window_status: 'open',
+            }
+          }
+        }
+      }
+
+      setEligibility(eligMap)
+    } catch (e) {
+      console.error('Failed to fetch eligibility:', e)
+      // On error, only enable offseason teams (Bears, Cubs, White Sox)
+      const fallbackMap: Record<string, TeamEligibility> = {}
+      const offseasonTeams = ['bears', 'cubs', 'whitesox']
       for (const team of CHICAGO_TEAMS) {
-        if (!eligMap[team.key]) {
-          eligMap[team.key] = {
+        if (offseasonTeams.includes(team.key)) {
+          fallbackMap[team.key] = {
             sport: team.sport,
             draft_year: 2026,
             team_key: team.key,
@@ -193,25 +222,6 @@ export default function MockDraftPage() {
             logo_url: team.logo,
             mock_draft_window_status: 'open',
           }
-        }
-      }
-
-      setEligibility(eligMap)
-    } catch (e) {
-      console.error('Failed to fetch eligibility:', e)
-      // On error, enable all teams as fallback
-      const fallbackMap: Record<string, TeamEligibility> = {}
-      for (const team of CHICAGO_TEAMS) {
-        fallbackMap[team.key] = {
-          sport: team.sport,
-          draft_year: 2026,
-          team_key: team.key,
-          team_name: team.name,
-          season_status: 'offseason',
-          eligible: true,
-          reason: '✓ Ready to draft',
-          logo_url: team.logo,
-          mock_draft_window_status: 'open',
         }
       }
       setEligibility(fallbackMap)

@@ -227,19 +227,20 @@ Grade this mock draft performance.`
       // Non-fatal - grade was calculated, just couldn't save status
     }
 
-    // Update individual pick grades using RPC (if we have them)
+    // Update individual pick grades using direct UPDATE (bypassing problematic RPC)
+    // The column is 'grade' or 'prospect_grade', NOT 'pick_grade'
     if (gradeResult.pick_grades && Array.isArray(gradeResult.pick_grades)) {
       for (const pg of gradeResult.pick_grades) {
         try {
-          await datalabAdmin.rpc('update_mock_draft_pick', {
-            p_mock_id: mock_id,
-            p_pick_number: pg.pick_number,
-            p_prospect_id: null, // Don't update prospect
-            p_prospect_name: null,
-            p_position: null,
-            p_pick_grade: pg.grade,
-            p_commentary: pg.analysis,
-          })
+          await datalabAdmin
+            .from('gm_mock_draft_picks')
+            .update({
+              grade: pg.grade,
+              commentary: pg.analysis,
+              updated_at: new Date().toISOString(),
+            })
+            .eq('mock_draft_id', mock_id)
+            .eq('pick_number', pg.pick_number)
         } catch {}
       }
     }
