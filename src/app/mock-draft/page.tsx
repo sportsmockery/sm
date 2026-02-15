@@ -166,20 +166,55 @@ export default function MockDraftPage() {
     setEligibilityLoading(true)
     try {
       const res = await fetch('https://datalab.sportsmockery.com/api/gm/draft/teams')
+      const eligMap: Record<string, TeamEligibility> = {}
+
       if (res.ok) {
         const data = await res.json()
         // Map by team_key for easy lookup (API uses bears, bulls, etc.)
-        const eligMap: Record<string, TeamEligibility> = {}
         for (const team of data.teams || []) {
           // Use team_key directly (bears, bulls, blackhawks, cubs, whitesox)
           if (team.team_key) {
             eligMap[team.team_key] = team
           }
         }
-        setEligibility(eligMap)
       }
+
+      // Fallback: Enable all Chicago teams if not returned by DataLab
+      for (const team of CHICAGO_TEAMS) {
+        if (!eligMap[team.key]) {
+          eligMap[team.key] = {
+            sport: team.sport,
+            draft_year: 2026,
+            team_key: team.key,
+            team_name: team.name,
+            season_status: 'offseason',
+            eligible: true,
+            reason: '✓ Ready to draft',
+            logo_url: team.logo,
+            mock_draft_window_status: 'open',
+          }
+        }
+      }
+
+      setEligibility(eligMap)
     } catch (e) {
       console.error('Failed to fetch eligibility:', e)
+      // On error, enable all teams as fallback
+      const fallbackMap: Record<string, TeamEligibility> = {}
+      for (const team of CHICAGO_TEAMS) {
+        fallbackMap[team.key] = {
+          sport: team.sport,
+          draft_year: 2026,
+          team_key: team.key,
+          team_name: team.name,
+          season_status: 'offseason',
+          eligible: true,
+          reason: '✓ Ready to draft',
+          logo_url: team.logo,
+          mock_draft_window_status: 'open',
+        }
+      }
+      setEligibility(fallbackMap)
     }
     setEligibilityLoading(false)
   }, [])
