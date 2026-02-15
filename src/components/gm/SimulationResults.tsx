@@ -97,12 +97,12 @@ export function SimulationResults({
         exit={{ opacity: 0, scale: 0.95, y: 20 }}
         style={{
           position: 'fixed',
-          top: '50%',
+          top: 20,
           left: '50%',
-          transform: 'translate(-50%, -50%)',
+          transform: 'translateX(-50%)',
           width: '95%',
           maxWidth: 900,
-          maxHeight: '90vh',
+          maxHeight: 'calc(100vh - 40px)',
           overflowY: 'auto',
           backgroundColor: cardBg,
           border: `1px solid ${borderColor}`,
