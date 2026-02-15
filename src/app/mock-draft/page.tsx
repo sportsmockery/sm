@@ -414,9 +414,15 @@ export default function MockDraftPage() {
         window.scrollTo(0, scrollY)
       })
 
-      // If draft is complete, show grade option
-      if (data.draft?.status === 'completed') {
-        // Don't auto-grade, let user click button
+      // If draft is not complete and next pick is not ours, auto-advance
+      if (data.draft?.status === 'in_progress') {
+        const nextPick = data.draft.picks?.find((p: DraftPick) => p.is_current)
+        if (nextPick && !nextPick.is_user_pick) {
+          // Auto-advance to next user pick after a short delay for visual feedback
+          setSubmittingPick(false)
+          setTimeout(() => autoAdvance(), 300)
+          return
+        }
       }
     } catch (e) {
       setError('Network error. Please try again.')
