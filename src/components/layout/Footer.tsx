@@ -77,8 +77,8 @@ function SocialIcon({ icon, className = '' }: { icon: string; className?: string
 export default function Footer() {
   const pathname = usePathname()
 
-  // Don't render footer on admin and studio pages
-  if (pathname?.startsWith('/admin') || pathname?.startsWith('/studio')) {
+  // Don't render footer on admin, studio, or standalone landing pages
+  if (pathname?.startsWith('/admin') || pathname?.startsWith('/studio') || pathname === '/homev1') {
     return null
   }
 

@@ -3,6 +3,7 @@
 import { useState, useRef, useEffect } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
+import { usePathname } from 'next/navigation'
 import { motion } from 'framer-motion'
 import { useTheme } from '@/contexts/ThemeContext'
 import { useAuth } from '@/contexts/AuthContext'
@@ -85,6 +86,7 @@ const appLinks = [
 ]
 
 export default function Header() {
+  const pathname = usePathname()
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const [videoMenuOpen, setVideoMenuOpen] = useState(false)
   const [musicMenuOpen, setMusicMenuOpen] = useState(false)
@@ -190,6 +192,11 @@ export default function Header() {
     if (searchQuery.trim()) {
       window.location.href = `/search?q=${encodeURIComponent(searchQuery)}`
     }
+  }
+
+  // Don't render header on standalone landing pages
+  if (pathname === '/homev1') {
+    return null
   }
 
   return (
