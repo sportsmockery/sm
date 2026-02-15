@@ -133,7 +133,7 @@ export async function POST(request: NextRequest) {
       .eq('league', league)
       .eq('draft_year', mockDraft.draft_year)
       .order('big_board_rank', { ascending: true })
-      .limit(150)
+      .limit(Math.min(mockDraft.total_picks, 1000))
 
     if (prospectError) {
       log(`Prospects fetch error: ${JSON.stringify(prospectError)}`)
@@ -172,10 +172,7 @@ export async function POST(request: NextRequest) {
     log(`After filtering picked: ${filteredProspects.length} prospects available`)
 
     if (filteredProspects.length === 0) {
-      return NextResponse.json({
-        error: 'No prospects available - all have been picked',
-        debug: debugLog
-      }, { status: 400 })
+      log('All prospects already picked, will advance without selections')
     }
 
     // Simulate picks until we reach the user's pick or end of draft
@@ -208,42 +205,39 @@ export async function POST(request: NextRequest) {
         .filter((p: any) => !pickedProspectIds.includes(p.prospect_id))
         .slice(0, 10)
 
-      if (topProspects.length === 0) {
-        log(`No more prospects available at pick ${currentPick}`)
-        break
-      }
+      if (topProspects.length > 0) {
+        // Use BPA (Best Player Available) - AI picks disabled for speed
+        const selectedProspect = topProspects[0]
+        log(`BPA pick ${currentPick}: ${selectedProspect.name} (${selectedProspect.position})`)
 
-      // Use BPA (Best Player Available) - AI picks disabled for speed
-      // AI calls were causing timeouts (24 picks * 5-10 sec each = 2-4 min)
-      const selectedProspect = topProspects[0]
-      log(`BPA pick ${currentPick}: ${selectedProspect.name} (${selectedProspect.position})`)
+        // Update the pick directly in the database
+        const { error: updateError } = await datalabAdmin
+          .from('gm_mock_draft_picks')
+          .update({
+            prospect_id: String(selectedProspect.prospect_id),
+            prospect_name: selectedProspect.name,
+          })
+          .eq('mock_id', mock_id)
+          .eq('pick_number', currentPick)
 
-      // Update the pick directly in the database (bypassing problematic RPC)
-      const { error: updateError } = await datalabAdmin
-        .from('gm_mock_draft_picks')
-        .update({
-          prospect_id: String(selectedProspect.prospect_id),
+        if (updateError) {
+          log(`ERROR updating pick ${currentPick}: ${JSON.stringify(updateError)}`)
+        } else {
+          log(`Updated pick ${currentPick} with ${selectedProspect.name}`)
+        }
+
+        // Store locally for response
+        localPicksMap[currentPick] = {
+          prospect_id: selectedProspect.prospect_id,
           prospect_name: selectedProspect.name,
-        })
-        .eq('mock_id', mock_id)
-        .eq('pick_number', currentPick)
+          position: selectedProspect.position,
+        }
 
-      if (updateError) {
-        log(`ERROR updating pick ${currentPick}: ${JSON.stringify(updateError)}`)
-        // Continue anyway to try to advance
+        // Track picked prospect
+        pickedProspectIds.push(selectedProspect.prospect_id)
       } else {
-        log(`Updated pick ${currentPick} with ${selectedProspect.name}`)
+        log(`No more prospects at pick ${currentPick}, advancing without selection`)
       }
-
-      // Store locally for response (workaround for RPC not returning updated data)
-      localPicksMap[currentPick] = {
-        prospect_id: selectedProspect.prospect_id,
-        prospect_name: selectedProspect.name,
-        position: selectedProspect.position,
-      }
-
-      // Track picked prospect
-      pickedProspectIds.push(selectedProspect.prospect_id)
 
       // Advance pick directly in the database (bypassing problematic RPC)
       const nextPick = currentPick + 1
