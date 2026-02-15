@@ -195,7 +195,7 @@ export default function Header() {
   }
 
   // Don't render header on standalone landing pages
-  if (pathname === '/homev1') {
+  if (pathname?.startsWith('/home')) {
     return null
   }
 

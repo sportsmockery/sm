@@ -78,7 +78,7 @@ export default function Footer() {
   const pathname = usePathname()
 
   // Don't render footer on admin, studio, or standalone landing pages
-  if (pathname?.startsWith('/admin') || pathname?.startsWith('/studio') || pathname === '/homev1') {
+  if (pathname?.startsWith('/admin') || pathname?.startsWith('/studio') || pathname?.startsWith('/home')) {
     return null
   }
 
