@@ -83,9 +83,12 @@ export async function POST(request: NextRequest) {
     }
 
     // Get updated draft state
-    const { data: updatedDraft } = await datalabAdmin.rpc('get_mock_draft', {
+    const { data: updatedDraftData } = await datalabAdmin.rpc('get_mock_draft', {
       p_mock_id: mock_id,
     })
+
+    // RPC can return array or single object
+    const updatedDraft = Array.isArray(updatedDraftData) ? updatedDraftData[0] : updatedDraftData
 
     const isComplete = updatedDraft?.current_pick > updatedDraft?.total_picks || updatedDraft?.status === 'completed'
 
