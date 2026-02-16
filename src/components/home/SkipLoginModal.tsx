@@ -2,6 +2,7 @@
 
 import { useEffect, useCallback } from 'react'
 import Link from 'next/link'
+import Image from 'next/image'
 
 interface SkipLoginModalProps {
   open: boolean
@@ -10,12 +11,7 @@ interface SkipLoginModalProps {
 
 const features = [
   {
-    icon: (
-      <svg width="22" height="22" fill="none" viewBox="0 0 24 24" stroke="#ff4444" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-        <circle cx="12" cy="12" r="10" />
-        <path d="M12 16v-4M12 8h.01" />
-      </svg>
-    ),
+    icon: <Image src="/downloads/scout-v2.png" alt="Scout AI" width={22} height={22} style={{ borderRadius: '50%' }} />,
     title: 'Scout AI Memory',
     desc: 'Your AI remembers past conversations, trade preferences, and hot takes — no repeating yourself',
   },
@@ -25,8 +21,8 @@ const features = [
         <path d="M16 3h5v5M4 20L21 3M21 16v5h-5M14 14l7 7M3 8V3h5M10 10L3 3" />
       </svg>
     ),
-    title: 'Save Trade Scenarios',
-    desc: 'Build complex trades, bookmark them, and share with your crew in Fan Hub',
+    title: 'Trade Simulator / Mock Draft',
+    desc: 'Build complex trades and draft like a GM, your GM score is saved on our leaderboard',
   },
   {
     icon: (
@@ -44,7 +40,7 @@ const features = [
       </svg>
     ),
     title: 'Personalized Data Feeds',
-    desc: 'Get notifications on your favorite players, teams, and trade rumors — zero noise',
+    desc: 'Your content, the way you want it. Customization features based on your history',
   },
 ]
 
@@ -86,12 +82,15 @@ export default function SkipLoginModal({ open, onClose }: SkipLoginModalProps) {
         </button>
 
         <div className="hm-modal-content">
-          {/* Icon */}
-          <div className="hm-modal-icon">
-            <svg width="28" height="28" fill="none" viewBox="0 0 24 24" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
-              <path d="M7 11V7a5 5 0 0 1 10 0v4" />
-            </svg>
+          {/* SM Logo */}
+          <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 24 }}>
+            <Image
+              src="/logos/SM_v2_White.png"
+              alt="Sports Mockery"
+              width={72}
+              height={72}
+              style={{ objectFit: 'contain' }}
+            />
           </div>
 
           {/* Title */}
@@ -101,7 +100,7 @@ export default function SkipLoginModal({ open, onClose }: SkipLoginModalProps) {
 
           {/* Subtitle */}
           <p className="hm-modal-subtitle">
-            Sports Mockery is built for fans who want more than headlines. Creating a free account unlocks personalized features designed for serious Chicago sports enthusiasts.
+            Sports Mockery is built for fans who want more than headlines. Creating a free account unlocks personalized features designed for serious Chicago sports fans.
           </p>
 
           {/* Features */}
@@ -130,7 +129,7 @@ export default function SkipLoginModal({ open, onClose }: SkipLoginModalProps) {
           {/* Footer */}
           <div className="hm-modal-footer">
             <p>
-              Takes 30 seconds. No credit card required.{' '}
+              Takes 30 seconds.{' '}
               <Link href="/privacy">Privacy Policy</Link>
             </p>
           </div>
