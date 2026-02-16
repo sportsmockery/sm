@@ -91,33 +91,40 @@ export default async function HomeLoginPage({ searchParams }: LoginPageProps) {
 
         {/* Right: Feature Comparison */}
         <div className="hm-login-feature-side">
+          {/* Scan line */}
+          <div className="hm-login-scan" />
+          {/* Glow orb */}
+          <div className="hm-glow-orb hm-glow-red hm-orb-float" style={{ width: 300, height: 300, top: -80, right: -60 }} />
+
           <div className="hm-login-feature-content">
             {/* SM Logo */}
-            <Image
-              src="/logos/v2_SM_Whole.png"
-              alt="Sports Mockery 2.0"
-              width={220}
-              height={55}
-              priority
-              style={{ height: 'auto' }}
-            />
+            <div className="hm-login-reveal hm-login-d1">
+              <Image
+                src="/logos/v2_SM_Whole.png"
+                alt="Sports Mockery 2.0"
+                width={220}
+                height={55}
+                priority
+                style={{ height: 'auto' }}
+              />
+            </div>
 
             {/* Tagline */}
-            <p style={{
+            <p className="hm-login-reveal hm-login-d2" style={{
               fontSize: 18, fontWeight: 600, color: '#fff',
               marginTop: 24, textAlign: 'center',
             }}>
               AI-Powered. Fan-Driven. Chicago-Owned.
             </p>
 
-            <h2 style={{
+            <h2 className="hm-login-reveal hm-login-d3" style={{
               fontFamily: 'var(--font-montserrat), Montserrat, sans-serif',
               fontSize: 28, fontWeight: 700, color: '#fff',
               marginTop: 8, textAlign: 'center', letterSpacing: -0.5,
             }}>
               Sports Mockery 2.0 Stands Alone
             </h2>
-            <p style={{
+            <p className="hm-login-reveal hm-login-d3" style={{
               fontSize: 15, color: '#8a8a9a', marginTop: 6, marginBottom: 28,
               textAlign: 'center',
             }}>
@@ -125,7 +132,7 @@ export default async function HomeLoginPage({ searchParams }: LoginPageProps) {
             </p>
 
             {/* Comparison Table */}
-            <div className="hm-login-table">
+            <div className="hm-login-table hm-login-reveal hm-login-d4">
               {/* Header */}
               <div className="hm-login-table-header">
                 <div className="hm-login-table-cell hm-login-table-feature">Feature</div>
@@ -137,8 +144,11 @@ export default async function HomeLoginPage({ searchParams }: LoginPageProps) {
               {features.map((feature, idx) => (
                 <div
                   key={feature.name}
-                  className="hm-login-table-row"
-                  style={{ background: idx % 2 === 0 ? 'rgba(255,255,255,0.02)' : 'transparent' }}
+                  className="hm-login-table-row hm-login-row-reveal"
+                  style={{
+                    background: idx % 2 === 0 ? 'rgba(255,255,255,0.02)' : 'transparent',
+                    animationDelay: `${0.9 + idx * 0.07}s`,
+                  }}
                 >
                   <div className="hm-login-table-cell hm-login-table-feature">
                     {feature.name}
@@ -163,7 +173,7 @@ export default async function HomeLoginPage({ searchParams }: LoginPageProps) {
               ))}
             </div>
 
-            <p style={{
+            <p className="hm-login-reveal hm-login-d6" style={{
               fontSize: 18, fontWeight: 600, color: '#fff',
               marginTop: 24, textAlign: 'center',
             }}>
