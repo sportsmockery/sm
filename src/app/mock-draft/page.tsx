@@ -162,62 +162,32 @@ export default function MockDraftPage() {
   }, [])
 
   // Fetch team eligibility status from Datalab
-  // Do NOT pass include_in_season=true — Bulls (NBA) and Blackhawks (NHL) are in season and cannot mock draft
+  // Use include_in_season=true to get ALL 5 Chicago teams
+  // TRUST DataLab's 'eligible' field - do NOT override it on frontend
   const fetchEligibility = useCallback(async () => {
     setEligibilityLoading(true)
     try {
-      const res = await fetch('https://datalab.sportsmockery.com/api/gm/draft/teams')
+      const res = await fetch('https://datalab.sportsmockery.com/api/gm/draft/teams?include_in_season=true')
       const eligMap: Record<string, TeamEligibility> = {}
 
       if (res.ok) {
         const data = await res.json()
         for (const team of data.teams || []) {
           if (team.team_key) {
-            // Enforce: in-season teams are NOT eligible regardless of what DataLab returns
-            if (team.season_status === 'in_season') {
-              team.eligible = false
-              team.reason = team.reason || `${team.sport?.toUpperCase()} season in progress — mock draft unavailable`
-            }
+            // TRUST DataLab's eligibility - do NOT override
             eligMap[team.team_key] = team
           }
         }
       }
 
-      // Add in-season teams as disabled so they still show in the UI
-      const inSeasonSports = ['nba', 'nhl'] // NBA and NHL seasons run through spring
-      for (const team of CHICAGO_TEAMS) {
-        if (!eligMap[team.key] && inSeasonSports.includes(team.sport)) {
-          eligMap[team.key] = {
-            sport: team.sport,
-            draft_year: 2026,
-            team_key: team.key,
-            team_name: team.name,
-            season_status: 'in_season',
-            eligible: false,
-            reason: `${team.sport.toUpperCase()} season in progress`,
-            logo_url: team.logo,
-            mock_draft_window_status: 'closed',
-          }
-        }
-      }
-
-      // Fallback if API returned nothing
+      // Fallback ONLY if API returned nothing at all
       if (Object.keys(eligMap).length === 0) {
-        const offseasonTeams = ['bears', 'cubs', 'whitesox']
+        console.warn('DataLab returned no teams, using fallback')
         for (const team of CHICAGO_TEAMS) {
-          if (offseasonTeams.includes(team.key)) {
-            eligMap[team.key] = {
-              sport: team.sport, draft_year: 2026, team_key: team.key, team_name: team.name,
-              season_status: 'offseason', eligible: true, reason: '✓ Ready to draft',
-              logo_url: team.logo, mock_draft_window_status: 'open',
-            }
-          } else {
-            eligMap[team.key] = {
-              sport: team.sport, draft_year: 2026, team_key: team.key, team_name: team.name,
-              season_status: 'in_season', eligible: false,
-              reason: `${team.sport.toUpperCase()} season in progress`,
-              logo_url: team.logo, mock_draft_window_status: 'closed',
-            }
+          eligMap[team.key] = {
+            sport: team.sport, draft_year: 2026, team_key: team.key, team_name: team.name,
+            season_status: 'offseason', eligible: true, reason: '✓ Ready to draft',
+            logo_url: team.logo, mock_draft_window_status: 'open',
           }
         }
       }
@@ -225,15 +195,13 @@ export default function MockDraftPage() {
       setEligibility(eligMap)
     } catch (e) {
       console.error('Failed to fetch eligibility:', e)
+      // On complete API failure, enable all teams as fallback
       const fallbackMap: Record<string, TeamEligibility> = {}
       for (const team of CHICAGO_TEAMS) {
-        const isOffseason = ['nfl', 'mlb'].includes(team.sport)
         fallbackMap[team.key] = {
           sport: team.sport, draft_year: 2026, team_key: team.key, team_name: team.name,
-          season_status: isOffseason ? 'offseason' : 'in_season',
-          eligible: isOffseason,
-          reason: isOffseason ? '✓ Ready to draft' : `${team.sport.toUpperCase()} season in progress`,
-          logo_url: team.logo, mock_draft_window_status: isOffseason ? 'open' : 'closed',
+          season_status: 'offseason', eligible: true, reason: '✓ Ready to draft',
+          logo_url: team.logo, mock_draft_window_status: 'open',
         }
       }
       setEligibility(fallbackMap)
