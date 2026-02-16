@@ -303,6 +303,143 @@ export default function HomePage() {
         </div>
       </section>
 
+      {/* SHOWCASE: Fan Hub */}
+      <section className="hm-section hm-section-alt">
+        <div className="hm-container">
+          <div className="hm-showcase-inner hm-animate">
+            <div className="hm-showcase-visual">
+              <div className="hm-mock-ui">
+                {/* Room list */}
+                <div style={{ display: 'flex', gap: 8, marginBottom: 12 }}>
+                  {[
+                    { logo: 'https://a.espncdn.com/i/teamlogos/nfl/500/chi.png', name: 'Bears Den' },
+                    { logo: 'https://a.espncdn.com/i/teamlogos/nba/500/chi.png', name: 'Bulls Court' },
+                    { logo: 'https://a.espncdn.com/i/teamlogos/mlb/500/chc.png', name: 'Cubs Dugout' },
+                  ].map((r) => (
+                    <div key={r.name} style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '4px 10px', borderRadius: 8, background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.06)', fontSize: 10, color: '#8a8a9a' }}>
+                      <img src={r.logo} alt={r.name} width={14} height={14} style={{ borderRadius: '50%' }} />
+                      {r.name}
+                    </div>
+                  ))}
+                </div>
+                {/* Chat messages */}
+                <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 10, justifyContent: 'center' }}>
+                  <div style={{ display: 'flex', gap: 8 }}>
+                    <div style={{ fontSize: 10, color: '#ff4444', fontWeight: 600, whiteSpace: 'nowrap' }}>BearDown_Mike</div>
+                    <div className="hm-mock-bar hm-mock-bar-long" style={{ height: 6 }} />
+                  </div>
+                  <div style={{ display: 'flex', gap: 8 }}>
+                    <div style={{ fontSize: 10, color: '#ff4444', fontWeight: 600, whiteSpace: 'nowrap' }}>ChiTownFan</div>
+                    <div className="hm-mock-bar hm-mock-bar-medium" style={{ height: 6 }} />
+                  </div>
+                  <div style={{ display: 'flex', gap: 8, alignItems: 'flex-start', padding: 8, borderRadius: 10, background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.04)' }}>
+                    <Image src="/downloads/scout-v2.png" alt="AI" width={18} height={18} style={{ borderRadius: '50%', flexShrink: 0 }} />
+                    <div>
+                      <div style={{ fontSize: 9, color: '#ff4444', fontWeight: 600, marginBottom: 2 }}>Bears AI Bot</div>
+                      <div className="hm-mock-bar hm-mock-bar-long" style={{ height: 5 }} />
+                      <div className="hm-mock-bar hm-mock-bar-medium" style={{ height: 5, marginTop: 4 }} />
+                    </div>
+                  </div>
+                  <div style={{ display: 'flex', gap: 8 }}>
+                    <div style={{ fontSize: 10, color: '#ff4444', fontWeight: 600, whiteSpace: 'nowrap' }}>DaBears92</div>
+                    <div className="hm-mock-bar hm-mock-bar-short" style={{ height: 6 }} />
+                  </div>
+                </div>
+                {/* Input */}
+                <div style={{ display: 'flex', gap: 8, marginTop: 'auto' }}>
+                  <div style={{ flex: 1, height: 32, borderRadius: 10, background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.06)' }} />
+                  <div style={{ width: 32, height: 32, borderRadius: 10, background: 'var(--hm-gradient-subtle)' }} />
+                </div>
+              </div>
+            </div>
+            <div className="hm-showcase-text">
+              <span className="hm-tag">Community</span>
+              <h2>Where fans come alive.</h2>
+              <p>
+                Real-time chat rooms for every Chicago team, each with an AI personality that knows the roster,
+                the stats, and the storylines. Polls, trending topics, and a community that never sleeps.
+              </p>
+              <Link href="/fan-chat" className="hm-btn-primary" style={{ marginTop: 8 }}>
+                Join the Fan Hub &rarr;
+              </Link>
+              <div className="hm-stats">
+                <div className="hm-stat-item"><h4>5</h4><span>Team Rooms</span></div>
+                <div className="hm-stat-item"><h4>AI</h4><span>Chat Bots</span></div>
+                <div className="hm-stat-item"><h4>Live</h4><span>Polls</span></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* SHOWCASE: Data Cosmos */}
+      <section className="hm-section">
+        <div className="hm-container">
+          <div className="hm-showcase-inner hm-animate" style={{ direction: 'rtl' }}>
+            <div className="hm-showcase-visual" style={{ direction: 'ltr' }}>
+              <div className="hm-mock-ui">
+                {/* Team tabs */}
+                <div style={{ display: 'flex', gap: 6, marginBottom: 12 }}>
+                  {[
+                    'https://a.espncdn.com/i/teamlogos/nfl/500/chi.png',
+                    'https://a.espncdn.com/i/teamlogos/nba/500/chi.png',
+                    'https://a.espncdn.com/i/teamlogos/mlb/500/chc.png',
+                    'https://a.espncdn.com/i/teamlogos/mlb/500/chw.png',
+                    'https://a.espncdn.com/i/teamlogos/nhl/500/chi.png',
+                  ].map((logo, i) => (
+                    <div key={i} style={{ width: 28, height: 28, borderRadius: 8, background: i === 0 ? 'rgba(188,0,0,0.15)' : 'rgba(255,255,255,0.04)', border: `1px solid ${i === 0 ? 'rgba(188,0,0,0.3)' : 'rgba(255,255,255,0.06)'}`, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                      <img src={logo} alt="" width={16} height={16} />
+                    </div>
+                  ))}
+                </div>
+                {/* Stat row */}
+                <div style={{ display: 'flex', gap: 8, marginBottom: 12 }}>
+                  {['11-6', '378', '287', '#4'].map((v) => (
+                    <div key={v} style={{ flex: 1, padding: '8px 4px', borderRadius: 8, background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.04)', textAlign: 'center' }}>
+                      <div style={{ fontSize: 14, fontWeight: 700, color: '#fff' }}>{v}</div>
+                      <div style={{ width: '60%', height: 3, borderRadius: 2, background: 'rgba(255,255,255,0.06)', margin: '4px auto 0' }} />
+                    </div>
+                  ))}
+                </div>
+                {/* Bar chart */}
+                <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 8, justifyContent: 'center' }}>
+                  {[72, 58, 81, 65].map((w, i) => (
+                    <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                      <div className="hm-mock-bar" style={{ width: 40, height: 4, opacity: 0.4 }} />
+                      <div style={{ flex: 1, height: 6, borderRadius: 3, background: 'rgba(255,255,255,0.06)', overflow: 'hidden' }}>
+                        <div style={{ width: `${w}%`, height: '100%', borderRadius: 3, background: 'linear-gradient(135deg, #bc0000, #ff4444)' }} />
+                      </div>
+                    </div>
+                  ))}
+                </div>
+                {/* Leaderboard hint */}
+                <div style={{ display: 'flex', gap: 8, marginTop: 'auto' }}>
+                  {[1, 2, 3].map((n) => (
+                    <div key={n} style={{ flex: 1, height: 28, borderRadius: 8, background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.04)' }} />
+                  ))}
+                </div>
+              </div>
+            </div>
+            <div className="hm-showcase-text" style={{ direction: 'ltr' }}>
+              <span className="hm-tag">Analytics</span>
+              <h2>Data, beautifully visualized.</h2>
+              <p>
+                Interactive stats, animated charts, player leaderboards, schedules, and box scores
+                for all five Chicago teams. The most comprehensive data experience in Chicago sports.
+              </p>
+              <Link href="/datahub" className="hm-btn-primary" style={{ marginTop: 8 }}>
+                Explore Data Cosmos &rarr;
+              </Link>
+              <div className="hm-stats">
+                <div className="hm-stat-item"><h4>5</h4><span>Teams</span></div>
+                <div className="hm-stat-item"><h4>Live</h4><span>Updates</span></div>
+                <div className="hm-stat-item"><h4>Full</h4><span>Seasons</span></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* CTA */}
       <section className="hm-cta-section">
         <div className="hm-container">
