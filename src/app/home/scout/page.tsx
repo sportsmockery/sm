@@ -17,6 +17,7 @@ export default function ScoutPage() {
       {/* Hero */}
       <section className="hm-page-hero">
         <div className="hm-page-hero-bg" />
+        <div className="hm-scan-line" />
         <div className="hm-hero-content hm-fade-in" style={{ position: 'relative', zIndex: 2 }}>
           <span className="hm-tag" style={{ marginBottom: 24 }}>AI Intelligence</span>
           <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 24 }}>

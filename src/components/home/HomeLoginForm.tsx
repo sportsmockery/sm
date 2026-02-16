@@ -4,6 +4,7 @@ import { useState } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useAuth } from '@/hooks/useAuth'
+import SkipLoginModal from '@/components/home/SkipLoginModal'
 
 interface HomeLoginFormProps {
   redirectTo?: string
@@ -17,6 +18,7 @@ export default function HomeLoginForm({ redirectTo = '/admin' }: HomeLoginFormPr
   const [rememberMe, setRememberMe] = useState(false)
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
+  const [showSkipModal, setShowSkipModal] = useState(false)
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -159,18 +161,23 @@ export default function HomeLoginForm({ redirectTo = '/admin' }: HomeLoginFormPr
       </div>
 
       {/* Skip Login */}
-      <a
-        href="https://test.sportsmockery.com"
+      <button
+        type="button"
+        onClick={() => setShowSkipModal(true)}
         style={{
-          display: 'block', textAlign: 'center',
+          display: 'block', width: '100%', textAlign: 'center',
           padding: '16px 32px', borderRadius: 100,
           border: '1px solid rgba(255,255,255,0.1)',
+          background: 'transparent',
           color: '#8a8a9a', fontSize: 15, fontWeight: 600,
-          textDecoration: 'none', transition: 'all 0.2s',
+          cursor: 'pointer', transition: 'all 0.2s',
+          fontFamily: 'inherit',
         }}
       >
         Skip Login
-      </a>
+      </button>
+
+      <SkipLoginModal open={showSkipModal} onClose={() => setShowSkipModal(false)} />
     </form>
   )
 }

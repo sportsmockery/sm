@@ -30,6 +30,7 @@ export default function FanHubPage() {
       {/* Hero */}
       <section className="hm-page-hero">
         <div className="hm-page-hero-bg" />
+        <div className="hm-scan-line" />
         <div className="hm-hero-content hm-fade-in" style={{ position: 'relative', zIndex: 2 }}>
           <span className="hm-tag" style={{ marginBottom: 24 }}>Community</span>
           <h1>The <span className="hm-gradient-text">Fan Hub</span></h1>

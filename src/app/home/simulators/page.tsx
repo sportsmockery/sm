@@ -92,6 +92,7 @@ export default function SimulatorsPage() {
       {/* Hero */}
       <section className="hm-page-hero">
         <div className="hm-page-hero-bg" />
+        <div className="hm-scan-line" />
         <div className="hm-hero-content hm-fade-in" style={{ position: 'relative', zIndex: 2 }}>
           <span className="hm-tag" style={{ marginBottom: 24 }}>Simulators</span>
           <h1>Think like a <span className="hm-gradient-text">GM</span></h1>
