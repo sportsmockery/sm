@@ -737,8 +737,8 @@
   display: flex; min-height: calc(100vh - 80px);
 }
 .hm-login-form-side {
-  flex: 0 0 42%; display: flex; align-items: center; justify-content: center;
-  padding: 60px 56px;
+  flex: 0 0 38%; display: flex; align-items: center; justify-content: center;
+  padding: 60px 48px;
   background: var(--hm-dark);
   position: relative;
 }
@@ -748,11 +748,11 @@
   background: linear-gradient(to bottom, transparent, rgba(188,0,0,0.25), rgba(255,255,255,0.08), rgba(188,0,0,0.25), transparent);
 }
 .hm-login-form-wrapper {
-  width: 100%; max-width: 480px;
+  width: 100%; max-width: 440px;
 }
 .hm-login-feature-side {
   flex: 1; display: flex; align-items: center; justify-content: center;
-  padding: 60px 48px;
+  padding: 60px 56px;
   background: var(--hm-surface);
   position: relative; overflow: hidden;
 }
@@ -764,7 +764,7 @@
 .hm-login-feature-content {
   position: relative; z-index: 1;
   display: flex; flex-direction: column; align-items: center;
-  width: 100%; max-width: 600px;
+  width: 100%; max-width: 720px;
 }
 .hm-login-table {
   width: 100%; border-radius: 16px; overflow: hidden;
@@ -881,7 +881,7 @@
   top: 0; left: 0; right: 0;
   height: 2px;
   background: linear-gradient(90deg, transparent, rgba(188,0,0,0.6), rgba(255,68,68,0.3), transparent);
-  animation: hm-scanDown 3s ease-in-out 0.5s forwards;
+  animation: hm-scanDown 5s ease-in-out 0.5s forwards;
   opacity: 0;
   z-index: 3;
   pointer-events: none;
@@ -928,6 +928,28 @@
 }
 
 /* ── RESPONSIVE ── */
+
+/* Tablet: login/signup stacks, features still visible */
+@media (max-width: 1024px) {
+  .hm-login-layout { flex-direction: column; }
+  .hm-login-form-side {
+    flex: none; padding: 48px 32px;
+  }
+  .hm-login-form-side::after { display: none; }
+  .hm-login-form-wrapper { max-width: 480px; margin: 0 auto; }
+  .hm-login-feature-side {
+    flex: none; padding: 48px 32px;
+    border-top: 1px solid rgba(255,255,255,0.06);
+  }
+  .hm-login-feature-content { max-width: 560px; }
+  .hm-features-grid { grid-template-columns: repeat(2, 1fr); }
+  .hm-showcase-inner { grid-template-columns: 1fr; gap: 40px; }
+  .hm-fan-layout { grid-template-columns: 1fr; }
+  .hm-pricing-grid { grid-template-columns: 1fr; max-width: 420px; }
+  .hm-perks-grid { grid-template-columns: repeat(2, 1fr); }
+}
+
+/* Mobile */
 @media (max-width: 768px) {
   .hm-features-grid { grid-template-columns: 1fr; }
   .hm-showcase-inner { grid-template-columns: 1fr; }
@@ -946,10 +968,19 @@
   .hm-perks-grid { grid-template-columns: 1fr; }
   .hm-related-grid { grid-template-columns: 1fr; }
   .hm-page-hero { padding: 120px 24px 60px; }
-  .hm-login-layout { flex-direction: column; }
-  .hm-login-form-side { flex: none; padding: 32px 24px; }
-  .hm-login-form-side::after { display: none; }
+  .hm-login-form-side { padding: 36px 20px; }
+  .hm-login-feature-side { padding: 36px 20px; }
+  .hm-login-feature-content { max-width: 100%; }
+  .hm-login-table-cell { padding: 12px 14px; font-size: 13px; }
+  .hm-login-table-header .hm-login-table-cell { padding: 12px 14px; font-size: 11px; }
+}
+
+/* Small mobile */
+@media (max-width: 480px) {
   .hm-login-feature-side { display: none; }
+  .hm-hero { padding: 100px 16px 60px; }
+  .hm-container { padding: 0 16px; }
+  .hm-stat-cards { grid-template-columns: 1fr 1fr; gap: 10px; }
 }
 
 @media (prefers-reduced-motion: reduce) {
