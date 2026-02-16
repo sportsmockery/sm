@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import Link from 'next/link'
 
 const TEAM_TABS = [
@@ -148,13 +148,22 @@ export default function DataPage() {
   const [activeTeam, setActiveTeam] = useState('Bears')
   const data = TEAM_DATA[activeTeam]
 
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => { entries.forEach((e) => { if (e.isIntersecting) e.target.classList.add('hm-visible') }) },
+      { threshold: 0.1 }
+    )
+    document.querySelectorAll('.hm-animate').forEach((el) => observer.observe(el))
+    return () => observer.disconnect()
+  }, [])
+
   return (
     <>
       {/* Hero */}
       <section className="hm-page-hero">
         <div className="hm-page-hero-bg" />
         <div className="hm-scan-line" />
-        <div className="hm-hero-content hm-fade-in" style={{ position: 'relative', zIndex: 2 }}>
+        <div className="hm-hero-content hm-animate" style={{ position: 'relative', zIndex: 2 }}>
           <span className="hm-tag" style={{ marginBottom: 24 }}>Analytics</span>
           <h1><span className="hm-gradient-text">Data Cosmos</span></h1>
           <p>Interactive stats, animated charts, rosters, schedules, and box scores for all five Chicago teams — beautifully visualized.</p>

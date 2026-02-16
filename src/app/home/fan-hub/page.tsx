@@ -1,5 +1,6 @@
 'use client'
 
+import { useEffect } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
 
@@ -25,13 +26,22 @@ const TRENDING = [
 ]
 
 export default function FanHubPage() {
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => { entries.forEach((e) => { if (e.isIntersecting) e.target.classList.add('hm-visible') }) },
+      { threshold: 0.1 }
+    )
+    document.querySelectorAll('.hm-animate').forEach((el) => observer.observe(el))
+    return () => observer.disconnect()
+  }, [])
+
   return (
     <>
       {/* Hero */}
       <section className="hm-page-hero">
         <div className="hm-page-hero-bg" />
         <div className="hm-scan-line" />
-        <div className="hm-hero-content hm-fade-in" style={{ position: 'relative', zIndex: 2 }}>
+        <div className="hm-hero-content hm-animate" style={{ position: 'relative', zIndex: 2 }}>
           <span className="hm-tag" style={{ marginBottom: 24 }}>Community</span>
           <h1>The <span className="hm-gradient-text">Fan Hub</span></h1>
           <p>Real-time chat rooms for every Chicago team. AI-powered personalities. Polls. Trending topics. Your home for Chicago sports conversation.</p>
@@ -40,7 +50,7 @@ export default function FanHubPage() {
 
       {/* Fan Layout */}
       <div className="hm-container" style={{ paddingBottom: 120 }}>
-        <div className="hm-fan-layout hm-fade-in">
+        <div className="hm-fan-layout hm-animate">
           {/* Room List */}
           <div className="hm-room-list">
             <h4 style={{ fontSize: 12, fontWeight: 600, color: '#8a8a9a', textTransform: 'uppercase', letterSpacing: 1, marginBottom: 16 }}>Chat Rooms</h4>

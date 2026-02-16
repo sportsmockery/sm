@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import Link from 'next/link'
 
 const TABS = ['NFL Trade', 'NBA Trade', 'MLB Trade', 'NHL Trade', 'Mock Draft']
@@ -87,13 +87,22 @@ export default function SimulatorsPage() {
   const [activeTab, setActiveTab] = useState('NFL Trade')
   const trade = TRADE_TEAMS[activeTab as keyof typeof TRADE_TEAMS]
 
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => { entries.forEach((e) => { if (e.isIntersecting) e.target.classList.add('hm-visible') }) },
+      { threshold: 0.1 }
+    )
+    document.querySelectorAll('.hm-animate').forEach((el) => observer.observe(el))
+    return () => observer.disconnect()
+  }, [])
+
   return (
     <>
       {/* Hero */}
       <section className="hm-page-hero">
         <div className="hm-page-hero-bg" />
         <div className="hm-scan-line" />
-        <div className="hm-hero-content hm-fade-in" style={{ position: 'relative', zIndex: 2 }}>
+        <div className="hm-hero-content hm-animate" style={{ position: 'relative', zIndex: 2 }}>
           <span className="hm-tag" style={{ marginBottom: 24 }}>Simulators</span>
           <h1>Think like a <span className="hm-gradient-text">GM</span></h1>
           <p>Build trades across any team, run mock drafts, and let AI grade every move. 124 teams. 4 leagues. Infinite possibilities.</p>

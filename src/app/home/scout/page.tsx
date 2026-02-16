@@ -1,5 +1,6 @@
 'use client'
 
+import { useEffect } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
 
@@ -12,13 +13,22 @@ const SUGGESTIONS = [
 ]
 
 export default function ScoutPage() {
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => { entries.forEach((e) => { if (e.isIntersecting) e.target.classList.add('hm-visible') }) },
+      { threshold: 0.1 }
+    )
+    document.querySelectorAll('.hm-animate').forEach((el) => observer.observe(el))
+    return () => observer.disconnect()
+  }, [])
+
   return (
     <>
       {/* Hero */}
       <section className="hm-page-hero">
         <div className="hm-page-hero-bg" />
         <div className="hm-scan-line" />
-        <div className="hm-hero-content hm-fade-in" style={{ position: 'relative', zIndex: 2 }}>
+        <div className="hm-hero-content hm-animate" style={{ position: 'relative', zIndex: 2 }}>
           <span className="hm-tag" style={{ marginBottom: 24 }}>AI Intelligence</span>
           <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 24 }}>
             <Image src="/downloads/scout-v2.png" alt="Scout AI" width={80} height={80} style={{ borderRadius: '50%' }} />
@@ -29,7 +39,7 @@ export default function ScoutPage() {
       </section>
 
       {/* Chat Demo */}
-      <div className="hm-chat-container hm-fade-in">
+      <div className="hm-chat-container hm-animate">
         <div className="hm-chat-window">
           <div className="hm-chat-header">
             <div className="hm-chat-status" />
@@ -59,14 +69,14 @@ export default function ScoutPage() {
       </div>
 
       {/* Suggestion Chips */}
-      <div className="hm-suggestions hm-fade-in">
+      <div className="hm-suggestions hm-animate">
         {SUGGESTIONS.map((s) => (
           <span key={s} className="hm-chip">{s}</span>
         ))}
       </div>
 
       {/* Capabilities */}
-      <div className="hm-cap-grid hm-fade-in">
+      <div className="hm-cap-grid hm-animate">
         <div className="hm-cap-card">
           <div className="hm-cap-icon">
             <svg width="24" height="24" fill="none" stroke="#ff4444" strokeWidth="2" strokeLinecap="round" viewBox="0 0 24 24">

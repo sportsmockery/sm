@@ -960,7 +960,9 @@
 }
 .hm-modal-btn-primary:hover {
   transform: translateY(-2px);
-  box-shadow: 0 0 32px rgba(188,0,0,0.5);
+  background: #fff;
+  color: #bc0000;
+  box-shadow: 0 0 32px rgba(255,255,255,0.2);
 }
 .hm-modal-btn-secondary {
   flex: 0.7; background: transparent;
@@ -1160,6 +1162,45 @@
   .hm-login-table-header .hm-login-table-cell { padding: 12px 14px; font-size: 11px; }
 }
 
+/* Mobile animations — staggered entrance for sub-page content */
+@media (max-width: 768px) {
+  .hm-page-hero .hm-hero-content {
+    opacity: 0;
+    transform: translateY(30px);
+    animation: hm-heroReveal 0.8s cubic-bezier(0.16, 1, 0.3, 1) 0.2s forwards;
+  }
+  .hm-page-hero .hm-tag {
+    opacity: 0;
+    animation: hm-heroReveal 0.6s cubic-bezier(0.16, 1, 0.3, 1) 0.1s forwards;
+  }
+  .hm-chat-container,
+  .hm-tab-bar,
+  .hm-fan-layout,
+  .hm-team-tabs,
+  .hm-pricing-grid,
+  .hm-cap-grid,
+  .hm-suggestions {
+    opacity: 0;
+    transform: translateY(25px);
+    animation: hm-heroReveal 0.7s cubic-bezier(0.16, 1, 0.3, 1) 0.5s forwards;
+  }
+  .hm-trade-builder,
+  .hm-stat-cards,
+  .hm-chart-row,
+  .hm-leaderboard,
+  .hm-perks-grid,
+  .hm-faq-list {
+    opacity: 0;
+    transform: translateY(25px);
+    animation: hm-heroReveal 0.7s cubic-bezier(0.16, 1, 0.3, 1) 0.7s forwards;
+  }
+  .hm-cta-section {
+    opacity: 0;
+    transform: translateY(20px);
+    animation: hm-heroReveal 0.6s cubic-bezier(0.16, 1, 0.3, 1) 0.9s forwards;
+  }
+}
+
 /* Small mobile */
 @media (max-width: 480px) {
   .hm-login-feature-side { display: none; }
@@ -1184,4 +1225,22 @@
   .hm-login-reveal { animation: none; opacity: 1; transform: none; filter: none; }
   .hm-login-row-reveal { animation: none; opacity: 1; transform: none; }
   .hm-login-scan { animation: none; display: none; }
+  .hm-page-hero .hm-hero-content,
+  .hm-page-hero .hm-tag,
+  .hm-chat-container,
+  .hm-tab-bar,
+  .hm-fan-layout,
+  .hm-team-tabs,
+  .hm-pricing-grid,
+  .hm-cap-grid,
+  .hm-suggestions,
+  .hm-trade-builder,
+  .hm-stat-cards,
+  .hm-chart-row,
+  .hm-leaderboard,
+  .hm-perks-grid,
+  .hm-faq-list,
+  .hm-cta-section {
+    animation: none; opacity: 1; transform: none;
+  }
 }
