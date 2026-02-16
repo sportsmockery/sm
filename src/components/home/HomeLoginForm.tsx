@@ -154,6 +154,27 @@ export default function HomeLoginForm({ redirectTo = '/admin' }: HomeLoginFormPr
           Sign up
         </Link>
       </p>
+
+      {/* Skip login divider */}
+      <div style={{ display: 'flex', alignItems: 'center', gap: 16, margin: '4px 0' }}>
+        <div style={{ flex: 1, height: 1, background: 'rgba(255,255,255,0.06)' }} />
+        <span style={{ fontSize: 12, color: '#55556a', textTransform: 'uppercase', letterSpacing: 1 }}>or</span>
+        <div style={{ flex: 1, height: 1, background: 'rgba(255,255,255,0.06)' }} />
+      </div>
+
+      {/* Skip Login */}
+      <a
+        href="https://test.sportsmockery.com"
+        style={{
+          display: 'block', textAlign: 'center',
+          padding: '14px 32px', borderRadius: 100,
+          border: '1px solid rgba(255,255,255,0.1)',
+          color: '#8a8a9a', fontSize: 14, fontWeight: 600,
+          textDecoration: 'none', transition: 'all 0.2s',
+        }}
+      >
+        Skip Login
+      </a>
     </form>
   )
 }

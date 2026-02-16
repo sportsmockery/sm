@@ -67,7 +67,7 @@ export default function HomeNav() {
           </Link>
         ))}
         <Link
-          href="/home"
+          href="/home/login"
           style={{
             background: 'linear-gradient(135deg, #bc0000, #ff4444)',
             color: '#fff',
@@ -138,7 +138,7 @@ export default function HomeNav() {
             </Link>
           ))}
           <Link
-            href="/home"
+            href="/home/login"
             onClick={() => setMenuOpen(false)}
             style={{
               background: 'linear-gradient(135deg, #bc0000, #ff4444)',

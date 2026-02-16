@@ -108,28 +108,34 @@ export default function HomePage() {
       <section className="hm-hero">
         <div className="hm-hero-bg" />
         <div className="hm-hero-grid" />
-        <div className="hm-glow-orb hm-glow-red" style={{ width: 500, height: 500, top: -200, right: -100, animation: 'hm-pulse 4s infinite' }} />
-        <div className="hm-glow-orb hm-glow-white" style={{ width: 400, height: 400, bottom: -150, left: -100, animation: 'hm-pulse 5s infinite 1s' }} />
+        {/* Animated scan line */}
+        <div className="hm-scan-line" />
+        {/* Floating particle orbs */}
+        <div className="hm-glow-orb hm-glow-red hm-orb-float" style={{ width: 500, height: 500, top: -200, right: -100 }} />
+        <div className="hm-glow-orb hm-glow-white hm-orb-float-slow" style={{ width: 400, height: 400, bottom: -150, left: -100 }} />
+        <div className="hm-glow-orb hm-glow-red hm-orb-float-slow" style={{ width: 200, height: 200, bottom: 100, right: '20%', opacity: 0.5 }} />
 
-        <div className="hm-hero-content hm-fade-in">
-          <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 32 }}>
+        <div className="hm-hero-content">
+          <div className="hm-hero-stagger hm-stagger-1" style={{ display: 'flex', justifyContent: 'center', marginBottom: 32 }}>
             <Image src="/logos/v2_header_dark.png" alt="Sports Mockery" width={240} height={69} priority style={{ height: 'auto' }} />
           </div>
-          <div className="hm-eyebrow">
-            <span className="hm-eyebrow-dot" />
-            Introducing Sports Mockery 2.0
+          <div className="hm-hero-stagger hm-stagger-2">
+            <div className="hm-eyebrow">
+              <span className="hm-eyebrow-dot" />
+              Introducing Sports Mockery 2.0
+            </div>
           </div>
-          <h1>
+          <h1 className="hm-hero-stagger hm-stagger-3 hm-hero-title-reveal">
             The future of<br />
             <span className="hm-gradient-text">Chicago sports</span><br />
             starts here.
           </h1>
-          <p className="hm-subtitle">
+          <p className="hm-subtitle hm-hero-stagger hm-stagger-4">
             AI-powered intelligence. Immersive simulators. Real-time fan experiences.
             The most advanced sports platform ever built — designed for the next generation of fandom.
           </p>
-          <div className="hm-hero-actions">
-            <Link href="/scout-ai" className="hm-btn-primary">
+          <div className="hm-hero-actions hm-hero-stagger hm-stagger-5">
+            <Link href="/home/login" className="hm-btn-primary hm-btn-glow-pulse">
               <svg width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" viewBox="0 0 24 24">
                 <polygon points="5,3 19,12 5,21" />
               </svg>
@@ -139,16 +145,16 @@ export default function HomePage() {
               Learn about SM+
             </Link>
           </div>
-          <div className="hm-hero-teams">
-            {TEAMS.map((team) => (
-              <Link key={team.name} href={team.href} className="hm-hero-team">
+          <div className="hm-hero-teams hm-hero-stagger hm-stagger-6">
+            {TEAMS.map((team, i) => (
+              <Link key={team.name} href={team.href} className="hm-hero-team hm-team-pop" style={{ animationDelay: `${1.4 + i * 0.08}s` }}>
                 <img src={team.logo} alt={team.name} width={28} height={28} />
               </Link>
             ))}
           </div>
         </div>
 
-        <div className="hm-scroll-indicator">
+        <div className="hm-scroll-indicator hm-hero-stagger hm-stagger-7">
           <div className="hm-scroll-line" />
           <span>Discover</span>
         </div>
