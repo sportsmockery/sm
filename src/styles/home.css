@@ -174,9 +174,9 @@
   margin-bottom: 24px;
   color: #fff;
   text-shadow:
-    0 0 10px rgba(255, 255, 255, 0.15),
-    0 0 30px rgba(255, 255, 255, 0.08),
-    0 0 60px rgba(255, 255, 255, 0.04);
+    0 0 10px rgba(255, 255, 255, 0.3),
+    0 0 30px rgba(255, 255, 255, 0.15),
+    0 0 60px rgba(255, 255, 255, 0.08);
 }
 .hm-subtitle {
   font-size: clamp(1rem, 2vw, 1.25rem);
