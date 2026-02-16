@@ -95,12 +95,12 @@ export default function SkipLoginModal({ open, onClose }: SkipLoginModalProps) {
 
           {/* Title */}
           <h2 className="hm-modal-title">
-            You&apos;re Missing Out on the Full Experience
+            Create an Account to Get the Full Experience
           </h2>
 
           {/* Subtitle */}
           <p className="hm-modal-subtitle">
-            Sports Mockery is built for fans who want more than headlines. Creating a free account unlocks personalized features designed for serious Chicago sports fans.
+            AI-Driven. Fan-Owned. Made For Chicago. Sports Mockery 2.0 is a new kind of sports platform.
           </p>
 
           {/* Features */}
