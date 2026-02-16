@@ -35,8 +35,16 @@ export default function HomeLoginForm({ redirectTo = '/admin' }: HomeLoginFormPr
     router.refresh()
   }
 
+  const inputStyle = {
+    width: '100%', padding: '16px 20px', borderRadius: 14,
+    background: '#0c0c12', border: '1px solid rgba(255,255,255,0.08)',
+    color: '#fff', fontSize: 16, fontFamily: 'inherit',
+    outline: 'none', transition: 'border-color 0.2s',
+    boxSizing: 'border-box' as const,
+  }
+
   return (
-    <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
+    <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 28 }}>
       {/* Error message */}
       {error && (
         <div style={{
@@ -55,7 +63,7 @@ export default function HomeLoginForm({ redirectTo = '/admin' }: HomeLoginFormPr
 
       {/* Email */}
       <div>
-        <label htmlFor="hm-email" style={{ display: 'block', fontSize: 13, fontWeight: 600, color: '#8a8a9a', marginBottom: 8 }}>
+        <label htmlFor="hm-email" style={{ display: 'block', fontSize: 14, fontWeight: 600, color: '#8a8a9a', marginBottom: 10, letterSpacing: 0.2 }}>
           Email address
         </label>
         <input
@@ -66,13 +74,7 @@ export default function HomeLoginForm({ redirectTo = '/admin' }: HomeLoginFormPr
           required
           autoComplete="email"
           placeholder="you@example.com"
-          style={{
-            width: '100%', padding: '14px 18px', borderRadius: 14,
-            background: '#0c0c12', border: '1px solid rgba(255,255,255,0.08)',
-            color: '#fff', fontSize: 15, fontFamily: 'inherit',
-            outline: 'none', transition: 'border-color 0.2s',
-            boxSizing: 'border-box',
-          }}
+          style={inputStyle}
           onFocus={(e) => e.target.style.borderColor = 'rgba(188,0,0,0.4)'}
           onBlur={(e) => e.target.style.borderColor = 'rgba(255,255,255,0.08)'}
         />
@@ -80,7 +82,7 @@ export default function HomeLoginForm({ redirectTo = '/admin' }: HomeLoginFormPr
 
       {/* Password */}
       <div>
-        <label htmlFor="hm-password" style={{ display: 'block', fontSize: 13, fontWeight: 600, color: '#8a8a9a', marginBottom: 8 }}>
+        <label htmlFor="hm-password" style={{ display: 'block', fontSize: 14, fontWeight: 600, color: '#8a8a9a', marginBottom: 10, letterSpacing: 0.2 }}>
           Password
         </label>
         <input
@@ -91,13 +93,7 @@ export default function HomeLoginForm({ redirectTo = '/admin' }: HomeLoginFormPr
           required
           autoComplete="current-password"
           placeholder="••••••••"
-          style={{
-            width: '100%', padding: '14px 18px', borderRadius: 14,
-            background: '#0c0c12', border: '1px solid rgba(255,255,255,0.08)',
-            color: '#fff', fontSize: 15, fontFamily: 'inherit',
-            outline: 'none', transition: 'border-color 0.2s',
-            boxSizing: 'border-box',
-          }}
+          style={inputStyle}
           onFocus={(e) => e.target.style.borderColor = 'rgba(188,0,0,0.4)'}
           onBlur={(e) => e.target.style.borderColor = 'rgba(255,255,255,0.08)'}
         />
@@ -112,11 +108,11 @@ export default function HomeLoginForm({ redirectTo = '/admin' }: HomeLoginFormPr
             onChange={(e) => setRememberMe(e.target.checked)}
             style={{ accentColor: '#bc0000', width: 16, height: 16 }}
           />
-          <span style={{ fontSize: 13, color: '#8a8a9a' }}>Remember me</span>
+          <span style={{ fontSize: 14, color: '#8a8a9a' }}>Remember me</span>
         </label>
         <Link
           href="/forgot-password"
-          style={{ fontSize: 13, fontWeight: 600, color: '#ff4444', textDecoration: 'none' }}
+          style={{ fontSize: 14, fontWeight: 600, color: '#ff4444', textDecoration: 'none' }}
         >
           Forgot password?
         </Link>
@@ -129,7 +125,7 @@ export default function HomeLoginForm({ redirectTo = '/admin' }: HomeLoginFormPr
         className="hm-btn-primary"
         style={{
           width: '100%', justifyContent: 'center',
-          padding: '16px 32px', fontSize: 16,
+          padding: '18px 32px', fontSize: 16,
           opacity: loading ? 0.6 : 1,
           cursor: loading ? 'not-allowed' : 'pointer',
         }}
@@ -148,15 +144,15 @@ export default function HomeLoginForm({ redirectTo = '/admin' }: HomeLoginFormPr
       </button>
 
       {/* Sign up link */}
-      <p style={{ textAlign: 'center', fontSize: 14, color: '#8a8a9a', margin: 0 }}>
+      <p style={{ textAlign: 'center', fontSize: 15, color: '#8a8a9a', margin: 0 }}>
         Don&apos;t have an account?{' '}
-        <Link href="/signup" style={{ fontWeight: 600, color: '#ff4444', textDecoration: 'none' }}>
+        <Link href="/home/signup" style={{ fontWeight: 600, color: '#ff4444', textDecoration: 'none' }}>
           Sign up
         </Link>
       </p>
 
       {/* Skip login divider */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: 16, margin: '4px 0' }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 16, margin: '0' }}>
         <div style={{ flex: 1, height: 1, background: 'rgba(255,255,255,0.06)' }} />
         <span style={{ fontSize: 12, color: '#55556a', textTransform: 'uppercase', letterSpacing: 1 }}>or</span>
         <div style={{ flex: 1, height: 1, background: 'rgba(255,255,255,0.06)' }} />
@@ -167,9 +163,9 @@ export default function HomeLoginForm({ redirectTo = '/admin' }: HomeLoginFormPr
         href="https://test.sportsmockery.com"
         style={{
           display: 'block', textAlign: 'center',
-          padding: '14px 32px', borderRadius: 100,
+          padding: '16px 32px', borderRadius: 100,
           border: '1px solid rgba(255,255,255,0.1)',
-          color: '#8a8a9a', fontSize: 14, fontWeight: 600,
+          color: '#8a8a9a', fontSize: 15, fontWeight: 600,
           textDecoration: 'none', transition: 'all 0.2s',
         }}
       >

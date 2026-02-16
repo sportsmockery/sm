@@ -4,17 +4,13 @@ import Image from 'next/image'
 import { redirect } from 'next/navigation'
 import { createServerClient } from '@supabase/ssr'
 import { cookies } from 'next/headers'
-import HomeLoginForm from '@/components/home/HomeLoginForm'
+import HomeSignupForm from '@/components/home/HomeSignupForm'
 
 export const metadata: Metadata = {
   title: {
-    absolute: 'Sign In | Sports Mockery 2.0',
+    absolute: 'Sign Up | Sports Mockery 2.0',
   },
-  description: 'Sign in to your Sports Mockery account',
-}
-
-interface LoginPageProps {
-  searchParams: Promise<{ next?: string }>
+  description: 'Create your Sports Mockery account',
 }
 
 const features: { name: string; sm: boolean | 'coming-soon'; espn: boolean }[] = [
@@ -28,11 +24,8 @@ const features: { name: string; sm: boolean | 'coming-soon'; espn: boolean }[] =
   { name: 'AR/VR Stadium Tours', sm: 'coming-soon', espn: false },
 ]
 
-export default async function HomeLoginPage({ searchParams }: LoginPageProps) {
-  const params = await searchParams
-  const redirectTo = params.next || '/admin'
-
-  // If already logged in, redirect to destination
+export default async function HomeSignupPage() {
+  // If already logged in, redirect
   const cookieStore = await cookies()
   const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -46,7 +39,7 @@ export default async function HomeLoginPage({ searchParams }: LoginPageProps) {
   )
   const { data: { user } } = await supabase.auth.getUser()
   if (user) {
-    redirect(redirectTo)
+    redirect('/admin')
   }
 
   return (
@@ -55,7 +48,7 @@ export default async function HomeLoginPage({ searchParams }: LoginPageProps) {
       <div style={{ paddingTop: 80 }} />
 
       <div className="hm-login-layout">
-        {/* Left: Login Form */}
+        {/* Left: Signup Form */}
         <div className="hm-login-form-side">
           <div className="hm-login-form-wrapper">
             {/* Logo */}
@@ -76,16 +69,16 @@ export default async function HomeLoginPage({ searchParams }: LoginPageProps) {
               fontSize: 38, fontWeight: 800, letterSpacing: -1.5,
               color: '#fff', marginBottom: 10, lineHeight: 1.1,
             }}>
-              Welcome back
+              Create your account
             </h1>
             <p style={{
               fontSize: 16, color: '#8a8a9a', lineHeight: 1.5,
-              marginBottom: 40,
+              marginBottom: 36,
             }}>
-              Sign in to access your dashboard and manage content
+              Join the next generation of Chicago sports fans
             </p>
 
-            <HomeLoginForm redirectTo={redirectTo} />
+            <HomeSignupForm />
           </div>
         </div>
 
