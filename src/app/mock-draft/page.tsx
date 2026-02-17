@@ -162,12 +162,12 @@ export default function MockDraftPage() {
   }, [])
 
   // Fetch team eligibility status from Datalab
-  // Use include_in_season=true to get ALL 5 Chicago teams
-  // TRUST DataLab's 'eligible' field - do NOT override it on frontend
+  // DO NOT pass include_in_season=true - DataLab's default filters out in-season teams
+  // Bulls (NBA) and Blackhawks (NHL) are in-season and should NOT be shown
   const fetchEligibility = useCallback(async () => {
     setEligibilityLoading(true)
     try {
-      const res = await fetch('https://datalab.sportsmockery.com/api/gm/draft/teams?include_in_season=true')
+      const res = await fetch('https://datalab.sportsmockery.com/api/gm/draft/teams')
       const eligMap: Record<string, TeamEligibility> = {}
 
       if (res.ok) {
