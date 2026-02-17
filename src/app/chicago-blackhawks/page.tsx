@@ -62,7 +62,14 @@ export default async function BlackhawksHubPage() {
         <div className="lg:col-span-2 space-y-8">
           <section>
             <div className="flex items-center justify-between mb-4">
-              <h2 className="text-lg font-bold border-b-2 pb-1" style={{ fontFamily: "'Montserrat', sans-serif", color: 'var(--text-primary)', borderColor: team.primaryColor }}>
+              <h2
+                className="text-lg font-bold border-b-2 pb-1"
+                style={{
+                  fontFamily: "'Montserrat', sans-serif",
+                  color: 'var(--sm-text)',
+                  borderColor: team.primaryColor,
+                }}
+              >
                 Latest Blackhawks News
               </h2>
             </div>
@@ -74,15 +81,29 @@ export default async function BlackhawksHubPage() {
                 ))}
               </div>
             ) : (
-              <div className="text-center py-12 rounded-xl" style={{ backgroundColor: 'var(--bg-surface)', border: '1px solid var(--border-color)' }}>
-                <p style={{ color: 'var(--text-muted)' }}>No Blackhawks articles found. Check back soon!</p>
+              <div
+                className="text-center py-12"
+                style={{
+                  borderRadius: 'var(--sm-radius-lg)',
+                  backgroundColor: 'var(--sm-card)',
+                  border: '1px solid var(--sm-border)',
+                }}
+              >
+                <p style={{ color: 'var(--sm-text-muted)' }}>No Blackhawks articles found. Check back soon!</p>
               </div>
             )}
           </section>
 
           {posts.length > 6 && (
             <section>
-              <h2 className="text-lg font-bold mb-4 border-b-2 pb-1" style={{ fontFamily: "'Montserrat', sans-serif", color: 'var(--text-primary)', borderColor: team.primaryColor }}>
+              <h2
+                className="text-lg font-bold mb-4 border-b-2 pb-1"
+                style={{
+                  fontFamily: "'Montserrat', sans-serif",
+                  color: 'var(--sm-text)',
+                  borderColor: team.primaryColor,
+                }}
+              >
                 More Blackhawks Stories
               </h2>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -110,7 +131,14 @@ function ArticleCard({ post, team, isLarge = false }: { post: any; team: typeof 
   if (isLarge) {
     return (
       <Link href={href} className="group block">
-        <article className="rounded-xl overflow-hidden transition-shadow hover:shadow-lg" style={{ backgroundColor: 'var(--bg-surface)', border: '1px solid var(--border-color)' }}>
+        <article
+          className="overflow-hidden transition-shadow hover:shadow-lg"
+          style={{
+            borderRadius: 'var(--sm-radius-lg)',
+            backgroundColor: 'var(--sm-card)',
+            border: '1px solid var(--sm-border)',
+          }}
+        >
           <div className="flex flex-col md:flex-row">
             {post.featuredImage && (
               <div className="relative aspect-[16/9] md:aspect-auto md:w-1/2 overflow-hidden">
@@ -120,9 +148,19 @@ function ArticleCard({ post, team, isLarge = false }: { post: any; team: typeof 
             )}
             <div className="p-4 md:p-5 flex-1">
               <span className="text-[10px] font-bold uppercase tracking-wide" style={{ color: team.primaryColor }}>Blackhawks</span>
-              <h3 className="font-bold mt-1 line-clamp-3 group-hover:underline" style={{ fontFamily: "'Montserrat', sans-serif", color: 'var(--text-primary)', fontSize: '18px', lineHeight: '1.3' }}>{post.title}</h3>
-              {post.excerpt && <p className="text-sm mt-2 line-clamp-2" style={{ color: 'var(--text-muted)' }}>{post.excerpt}</p>}
-              <div className="flex items-center gap-2 mt-3 text-xs" style={{ color: 'var(--text-muted)' }}>
+              <h3
+                className="font-bold mt-1 line-clamp-3 group-hover:underline"
+                style={{
+                  fontFamily: "'Montserrat', sans-serif",
+                  color: 'var(--sm-text)',
+                  fontSize: '18px',
+                  lineHeight: '1.3',
+                }}
+              >
+                {post.title}
+              </h3>
+              {post.excerpt && <p className="text-sm mt-2 line-clamp-2" style={{ color: 'var(--sm-text-muted)' }}>{post.excerpt}</p>}
+              <div className="flex items-center gap-2 mt-3 text-xs" style={{ color: 'var(--sm-text-muted)' }}>
                 <span>{new Date(post.publishedAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}</span>
               </div>
             </div>
@@ -134,15 +172,32 @@ function ArticleCard({ post, team, isLarge = false }: { post: any; team: typeof 
 
   return (
     <Link href={href} className="group block">
-      <article className="rounded-xl overflow-hidden flex gap-4 p-3 transition-colors hover:bg-[var(--bg-hover)]" style={{ backgroundColor: 'var(--bg-surface)' }}>
+      <article
+        className="overflow-hidden flex gap-4 p-3 transition-colors"
+        style={{
+          borderRadius: 'var(--sm-radius-lg)',
+          backgroundColor: 'var(--sm-card)',
+          border: '1px solid var(--sm-border)',
+        }}
+      >
         {post.featuredImage && (
           <div className="relative w-20 h-20 md:w-24 md:h-24 flex-shrink-0 rounded-lg overflow-hidden">
             <Image src={post.featuredImage} alt="" fill className="object-cover group-hover:scale-105 transition-transform duration-300" />
           </div>
         )}
         <div className="flex-1 min-w-0">
-          <h3 className="font-semibold line-clamp-2 group-hover:underline" style={{ fontFamily: "'Montserrat', sans-serif", color: 'var(--text-primary)', fontSize: '14px', lineHeight: '1.4' }}>{post.title}</h3>
-          <div className="flex items-center gap-2 mt-2 text-xs" style={{ color: 'var(--text-muted)' }}>
+          <h3
+            className="font-semibold line-clamp-2 group-hover:underline"
+            style={{
+              fontFamily: "'Montserrat', sans-serif",
+              color: 'var(--sm-text)',
+              fontSize: '14px',
+              lineHeight: '1.4',
+            }}
+          >
+            {post.title}
+          </h3>
+          <div className="flex items-center gap-2 mt-2 text-xs" style={{ color: 'var(--sm-text-muted)' }}>
             <span>{new Date(post.publishedAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}</span>
           </div>
         </div>
@@ -159,7 +214,14 @@ function SeasonSnapshotCard({ team, record }: { team: typeof CHICAGO_TEAMS.black
   }
 
   return (
-    <div className="rounded-xl overflow-hidden" style={{ backgroundColor: 'var(--bg-surface)', border: '1px solid var(--border-color)' }}>
+    <div
+      className="overflow-hidden"
+      style={{
+        borderRadius: 'var(--sm-radius-lg)',
+        backgroundColor: 'var(--sm-card)',
+        border: '1px solid var(--sm-border)',
+      }}
+    >
       <div className="px-5 py-4" style={{ backgroundColor: team.primaryColor }}>
         <div className="flex items-center gap-3">
           <Image src={team.logo} alt={team.name} width={40} height={40} className="w-10 h-10 object-contain" unoptimized />
@@ -170,9 +232,9 @@ function SeasonSnapshotCard({ team, record }: { team: typeof CHICAGO_TEAMS.black
         </div>
       </div>
       <div className="p-5">
-        <div className="text-center pb-4" style={{ borderBottom: '1px solid var(--border-color)' }}>
+        <div className="text-center pb-4" style={{ borderBottom: '1px solid var(--sm-border)' }}>
           <div className="text-4xl font-bold" style={{ color: team.primaryColor }}>{formatRecord()}</div>
-          <div className="text-sm text-[var(--text-muted)] mt-1">Record</div>
+          <div className="text-sm mt-1" style={{ color: 'var(--sm-text-muted)' }}>Record</div>
         </div>
       </div>
     </div>
@@ -181,11 +243,21 @@ function SeasonSnapshotCard({ team, record }: { team: typeof CHICAGO_TEAMS.black
 
 function QuickLinksCard({ team }: { team: typeof CHICAGO_TEAMS.blackhawks }) {
   return (
-    <div className="rounded-xl p-5" style={{ backgroundColor: 'var(--bg-surface)', border: '1px solid var(--border-color)' }}>
-      <h3 className="font-bold mb-4" style={{ fontFamily: "'Montserrat', sans-serif", color: 'var(--text-primary)' }}>Quick Links</h3>
-      <Link href="/chicago-blackhawks" className="flex items-center gap-3 px-3 py-2.5 rounded-lg transition-colors hover:bg-[var(--bg-hover)]">
-        <span className="text-sm font-medium" style={{ color: 'var(--text-primary)' }}>All Blackhawks News</span>
-        <svg className="w-4 h-4 ml-auto" style={{ color: 'var(--text-muted)' }} fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" /></svg>
+    <div
+      style={{
+        borderRadius: 'var(--sm-radius-lg)',
+        padding: '20px',
+        backgroundColor: 'var(--sm-card)',
+        border: '1px solid var(--sm-border)',
+      }}
+    >
+      <h3 className="font-bold mb-4" style={{ fontFamily: "'Montserrat', sans-serif", color: 'var(--sm-text)' }}>Quick Links</h3>
+      <Link
+        href="/chicago-blackhawks"
+        className="flex items-center gap-3 px-3 py-2.5 rounded-lg transition-colors hover:bg-[var(--sm-card-hover)]"
+      >
+        <span className="text-sm font-medium" style={{ color: 'var(--sm-text)' }}>All Blackhawks News</span>
+        <svg className="w-4 h-4 ml-auto" style={{ color: 'var(--sm-text-muted)' }} fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" /></svg>
       </Link>
     </div>
   )
@@ -193,36 +265,88 @@ function QuickLinksCard({ team }: { team: typeof CHICAGO_TEAMS.blackhawks }) {
 
 function AskAIWidget({ team }: { team: typeof CHICAGO_TEAMS.blackhawks }) {
   return (
-    <div className="rounded-xl p-5" style={{ backgroundColor: 'var(--bg-surface)', border: '1px solid var(--border-color)' }}>
+    <div
+      style={{
+        borderRadius: 'var(--sm-radius-lg)',
+        padding: '20px',
+        backgroundColor: 'var(--sm-card)',
+        border: '1px solid var(--sm-border)',
+      }}
+    >
       <div className="flex items-center gap-3 mb-4">
         <div className="w-10 h-10 rounded-full flex items-center justify-center" style={{ backgroundColor: `${team.primaryColor}20` }}>
-          <svg className="w-5 h-5" style={{ color: team.primaryColor }} fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" /></svg>
+          <Image
+            src="/downloads/scout-v2.png"
+            alt="Scout AI"
+            width={20}
+            height={20}
+            className="w-5 h-5"
+          />
         </div>
         <div>
-          <h3 className="font-bold" style={{ fontFamily: "'Montserrat', sans-serif", color: 'var(--text-primary)' }}>Ask Hawks AI</h3>
-          <p className="text-xs" style={{ color: 'var(--text-muted)' }}>Get instant answers</p>
+          <h3 className="font-bold" style={{ fontFamily: "'Montserrat', sans-serif", color: 'var(--sm-text)' }}>Scout AI</h3>
+          <p className="text-xs" style={{ color: 'var(--sm-text-muted)' }}>Get instant answers about the Blackhawks</p>
         </div>
       </div>
-      <Link href={`/scout-ai?team=${team.slug}`} className="block w-full text-center py-2.5 rounded-lg font-semibold text-sm transition-colors text-white" style={{ backgroundColor: team.primaryColor }}>Ask a Question</Link>
+      <Link
+        href={`/scout-ai?team=${team.slug}`}
+        style={{
+          display: 'block',
+          width: '100%',
+          textAlign: 'center',
+          padding: '10px 20px',
+          borderRadius: '100px',
+          fontWeight: 600,
+          fontSize: '14px',
+          color: '#fff',
+          backgroundColor: team.primaryColor,
+          textDecoration: 'none',
+        }}
+      >
+        Ask Scout
+      </Link>
     </div>
   )
 }
 
 function FanChatWidget({ team }: { team: typeof CHICAGO_TEAMS.blackhawks }) {
   return (
-    <div className="rounded-xl p-5" style={{ backgroundColor: 'var(--bg-surface)', border: '1px solid var(--border-color)' }}>
+    <div
+      style={{
+        borderRadius: 'var(--sm-radius-lg)',
+        padding: '20px',
+        backgroundColor: 'var(--sm-card)',
+        border: '1px solid var(--sm-border)',
+      }}
+    >
       <div className="flex items-center gap-3 mb-4">
         <div className="w-10 h-10 rounded-full flex items-center justify-center" style={{ backgroundColor: `${team.primaryColor}20` }}>
           <svg className="w-5 h-5" style={{ color: team.primaryColor }} fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8h2a2 2 0 012 2v6a2 2 0 01-2 2h-2v4l-4-4H9a1.994 1.994 0 01-1.414-.586m0 0L11 14h4a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2v4l.586-.586z" /></svg>
         </div>
         <div>
-          <h3 className="font-bold" style={{ fontFamily: "'Montserrat', sans-serif", color: 'var(--text-primary)' }}>Hawks Fan Chat</h3>
-          <div className="flex items-center gap-1.5 text-xs" style={{ color: 'var(--text-muted)' }}>
+          <h3 className="font-bold" style={{ fontFamily: "'Montserrat', sans-serif", color: 'var(--sm-text)' }}>Hawks Fan Chat</h3>
+          <div className="flex items-center gap-1.5 text-xs" style={{ color: 'var(--sm-text-muted)' }}>
             <span className="w-2 h-2 bg-green-500 rounded-full animate-pulse" /><span>Fans online</span>
           </div>
         </div>
       </div>
-      <Link href="/fan-chat?channel=blackhawks" className="block w-full text-center py-2.5 rounded-lg font-semibold text-sm transition-colors text-white" style={{ backgroundColor: team.primaryColor }}>Join Hawks Chat</Link>
+      <Link
+        href="/fan-chat?channel=blackhawks"
+        style={{
+          display: 'block',
+          width: '100%',
+          textAlign: 'center',
+          padding: '10px 20px',
+          borderRadius: '100px',
+          fontWeight: 600,
+          fontSize: '14px',
+          color: '#fff',
+          backgroundColor: team.primaryColor,
+          textDecoration: 'none',
+        }}
+      >
+        Join Hawks Chat
+      </Link>
     </div>
   )
 }

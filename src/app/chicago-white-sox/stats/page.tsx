@@ -35,8 +35,16 @@ export default async function WhiteSoxStatsPage() {
     >
       <div>
         {/* Team Overview */}
-        <section className="mb-10">
-          <h2 className="text-xl font-bold text-[var(--text-primary)] mb-6" style={{ fontFamily: "'Montserrat', sans-serif" }}>
+        <section style={{ marginBottom: 40 }}>
+          <h2
+            style={{
+              fontSize: 20,
+              fontWeight: 700,
+              color: 'var(--sm-text)',
+              marginBottom: 24,
+              fontFamily: "'Montserrat', sans-serif",
+            }}
+          >
             Team Overview
           </h2>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
@@ -57,8 +65,16 @@ export default async function WhiteSoxStatsPage() {
         </section>
 
         {/* Batting Leaderboards */}
-        <section className="mb-10">
-          <h2 className="text-xl font-bold text-[var(--text-primary)] mb-6" style={{ fontFamily: "'Montserrat', sans-serif" }}>
+        <section style={{ marginBottom: 40 }}>
+          <h2
+            style={{
+              fontSize: 20,
+              fontWeight: 700,
+              color: 'var(--sm-text)',
+              marginBottom: 24,
+              fontFamily: "'Montserrat', sans-serif",
+            }}
+          >
             Batting Leaders
           </h2>
 
@@ -90,8 +106,16 @@ export default async function WhiteSoxStatsPage() {
         </section>
 
         {/* Pitching Leaderboards */}
-        <section className="mb-10">
-          <h2 className="text-xl font-bold text-[var(--text-primary)] mb-6" style={{ fontFamily: "'Montserrat', sans-serif" }}>
+        <section style={{ marginBottom: 40 }}>
+          <h2
+            style={{
+              fontSize: 20,
+              fontWeight: 700,
+              color: 'var(--sm-text)',
+              marginBottom: 24,
+              fontFamily: "'Montserrat', sans-serif",
+            }}
+          >
             Pitching Leaders
           </h2>
 
@@ -123,10 +147,22 @@ export default async function WhiteSoxStatsPage() {
         </section>
 
         {/* Links */}
-        <div className="flex flex-wrap gap-4 justify-center">
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 16, justifyContent: 'center' }}>
           <Link
             href="/chicago-white-sox/roster"
-            className="inline-flex items-center gap-2 px-6 py-3 bg-[var(--bg-elevated)] border border-[var(--border-subtle)] hover:border-[#27251F] dark:hover:border-[#C4CED4] text-[var(--text-primary)] font-medium rounded-xl transition-colors"
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: 8,
+              padding: '12px 24px',
+              backgroundColor: 'var(--sm-card)',
+              border: '1px solid var(--sm-border)',
+              borderRadius: '100px',
+              color: 'var(--sm-text)',
+              fontWeight: 500,
+              fontSize: 14,
+              textDecoration: 'none',
+            }}
           >
             View Full Roster
           </Link>
@@ -148,11 +184,23 @@ function StatCard({
   negative?: boolean
 }) {
   return (
-    <div className="bg-[var(--bg-elevated)] border border-[var(--border-subtle)] rounded-2xl p-5">
-      <div className="text-sm text-[var(--text-muted)] mb-1">{label}</div>
-      <div className={`text-3xl font-bold ${
-        positive ? 'text-green-500' : negative ? 'text-red-500' : 'text-[var(--text-primary)]'
-      }`}>
+    <div
+      style={{
+        backgroundColor: 'var(--sm-card)',
+        border: '1px solid var(--sm-border)',
+        borderRadius: 'var(--sm-radius-lg)',
+        padding: '20px',
+      }}
+    >
+      <div style={{ fontSize: 14, color: 'var(--sm-text-muted)', marginBottom: 4 }}>{label}</div>
+      <div
+        style={{
+          fontSize: 28,
+          fontWeight: 800,
+          color: positive ? '#10b981' : negative ? '#ef4444' : 'var(--sm-text)',
+          fontFamily: "'Montserrat', sans-serif",
+        }}
+      >
         {value}
       </div>
     </div>
@@ -171,26 +219,59 @@ function LeaderboardCard({
   emptyText: string
 }) {
   return (
-    <div className="bg-[var(--bg-elevated)] border border-[var(--border-subtle)] rounded-2xl overflow-hidden">
+    <div
+      style={{
+        backgroundColor: 'var(--sm-card)',
+        border: '1px solid var(--sm-border)',
+        borderRadius: 'var(--sm-radius-xl)',
+        overflow: 'hidden',
+      }}
+    >
       {/* Header */}
-      <div className="px-5 py-4 border-b border-[var(--border-subtle)] flex items-center gap-3">
-        <span className="w-8 h-8 rounded-lg bg-[#27251F]/10 dark:bg-[#C4CED4]/10 flex items-center justify-center text-[#27251F] dark:text-[#C4CED4]">
+      <div
+        style={{
+          padding: '16px 20px',
+          borderBottom: '1px solid var(--sm-border)',
+          display: 'flex',
+          alignItems: 'center',
+          gap: 12,
+        }}
+      >
+        <span
+          style={{
+            width: 32,
+            height: 32,
+            borderRadius: 8,
+            backgroundColor: 'rgba(39, 37, 31, 0.1)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            color: '#27251F',
+          }}
+        >
           {icon}
         </span>
-        <h3 className="font-bold text-[var(--text-primary)]" style={{ fontFamily: "'Montserrat', sans-serif" }}>
+        <h3
+          style={{
+            fontWeight: 700,
+            color: 'var(--sm-text)',
+            fontFamily: "'Montserrat', sans-serif",
+            margin: 0,
+          }}
+        >
           {title}
         </h3>
       </div>
 
       {/* Entries */}
       {entries.length === 0 ? (
-        <div className="p-6 text-center text-[var(--text-muted)]">
+        <div style={{ padding: 24, textAlign: 'center', color: 'var(--sm-text-muted)' }}>
           {emptyText}
         </div>
       ) : (
-        <div className="divide-y divide-[var(--border-subtle)]">
+        <div>
           {entries.map((entry, index) => (
-            <LeaderboardRow key={entry.player?.playerId || index} entry={entry} rank={index + 1} />
+            <LeaderboardRow key={entry.player?.playerId || index} entry={entry} rank={index + 1} isLast={index === entries.length - 1} />
           ))}
         </div>
       )}
@@ -198,24 +279,69 @@ function LeaderboardCard({
   )
 }
 
-function LeaderboardRow({ entry, rank }: { entry: LeaderboardEntry; rank: number }) {
+function LeaderboardRow({ entry, rank, isLast }: { entry: LeaderboardEntry; rank: number; isLast?: boolean }) {
   if (!entry.player) return null
 
   return (
     <Link
       href={`/chicago-white-sox/players/${entry.player.slug}`}
-      className="flex items-center gap-4 px-5 py-4 hover:bg-[var(--bg-hover)] transition-colors group"
+      className="flex items-center gap-4 px-5 py-4 hover:bg-[var(--sm-card-hover)] transition-colors group"
+      style={{
+        borderBottom: isLast ? 'none' : '1px solid var(--sm-border)',
+        textDecoration: 'none',
+      }}
     >
       {/* Rank */}
-      <span className={`w-6 h-6 rounded-full flex items-center justify-center text-sm font-bold ${
-        rank === 1
-          ? 'bg-[#27251F] text-white dark:bg-[#C4CED4] dark:text-[#27251F]'
-          : rank === 2
-            ? 'bg-[var(--bg-tertiary)] text-[var(--text-primary)]'
-            : 'text-[var(--text-muted)]'
-      }`}>
-        {rank}
-      </span>
+      {rank === 1 ? (
+        <span
+          style={{
+            width: 24,
+            height: 24,
+            borderRadius: '100%',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            fontSize: 12,
+            fontWeight: 700,
+            backgroundColor: '#27251F',
+            color: '#fff',
+          }}
+        >
+          {rank}
+        </span>
+      ) : rank === 2 ? (
+        <span
+          style={{
+            width: 24,
+            height: 24,
+            borderRadius: '100%',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            fontSize: 12,
+            fontWeight: 700,
+            backgroundColor: 'var(--sm-surface)',
+            color: 'var(--sm-text)',
+          }}
+        >
+          {rank}
+        </span>
+      ) : (
+        <span
+          style={{
+            width: 24,
+            height: 24,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            fontSize: 12,
+            fontWeight: 700,
+            color: 'var(--sm-text-muted)',
+          }}
+        >
+          {rank}
+        </span>
+      )}
 
       {/* Player Info */}
       <div className="flex items-center gap-3 flex-1 min-w-0">
@@ -231,17 +357,23 @@ function LeaderboardRow({ entry, rank }: { entry: LeaderboardEntry; rank: number
             />
           </div>
         ) : (
-          <div className="w-10 h-10 rounded-full bg-[var(--bg-tertiary)] flex items-center justify-center flex-shrink-0">
-            <span className="text-sm font-bold text-[var(--text-muted)]">
+          <div
+            className="w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0"
+            style={{ backgroundColor: 'var(--sm-surface)' }}
+          >
+            <span style={{ fontSize: 14, fontWeight: 700, color: 'var(--sm-text-muted)' }}>
               {entry.player.jerseyNumber}
             </span>
           </div>
         )}
         <div className="min-w-0">
-          <div className="font-medium text-[var(--text-primary)] group-hover:text-[#27251F] dark:group-hover:text-[#C4CED4] transition-colors truncate">
+          <div
+            className="font-medium group-hover:text-[#27251F] dark:group-hover:text-[#C4CED4] transition-colors truncate"
+            style={{ color: 'var(--sm-text)' }}
+          >
             {entry.player.fullName}
           </div>
-          <div className="text-xs text-[var(--text-muted)]">
+          <div style={{ fontSize: 12, color: 'var(--sm-text-muted)' }}>
             {entry.player.position} #{entry.player.jerseyNumber}
           </div>
         </div>
@@ -250,27 +382,33 @@ function LeaderboardRow({ entry, rank }: { entry: LeaderboardEntry; rank: number
       {/* Stats */}
       <div className="flex items-center gap-4 text-right flex-shrink-0">
         <div>
-          <div className="text-lg font-bold text-[var(--text-primary)]">
+          <div style={{ fontSize: 18, fontWeight: 700, color: 'var(--sm-text)' }}>
             {typeof entry.primaryStat === 'number'
               ? (entry.primaryLabel === 'AVG' || entry.primaryLabel === 'ERA'
                   ? entry.primaryStat.toFixed(3)
                   : entry.primaryStat)
               : entry.primaryStat}
           </div>
-          <div className="text-xs text-[var(--text-muted)]">{entry.primaryLabel}</div>
+          <div style={{ fontSize: 12, color: 'var(--sm-text-muted)' }}>{entry.primaryLabel}</div>
         </div>
         {entry.secondaryStat !== null && (
           <div className="hidden sm:block">
-            <div className="text-sm font-medium text-[var(--text-secondary)]">
+            <div style={{ fontSize: 14, fontWeight: 500, color: 'var(--sm-text-muted)' }}>
               {entry.secondaryStat}
             </div>
-            <div className="text-xs text-[var(--text-muted)]">{entry.secondaryLabel}</div>
+            <div style={{ fontSize: 12, color: 'var(--sm-text-muted)' }}>{entry.secondaryLabel}</div>
           </div>
         )}
       </div>
 
       {/* Arrow */}
-      <svg className="w-4 h-4 text-[var(--text-muted)] group-hover:text-[#27251F] dark:group-hover:text-[#C4CED4] transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <svg
+        className="w-4 h-4 group-hover:text-[#27251F] dark:group-hover:text-[#C4CED4] transition-colors"
+        style={{ color: 'var(--sm-text-muted)' }}
+        fill="none"
+        stroke="currentColor"
+        viewBox="0 0 24 24"
+      >
         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
       </svg>
     </Link>

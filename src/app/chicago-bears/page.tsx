@@ -95,7 +95,7 @@ export default async function BearsHubPage() {
                 className="text-lg font-bold border-b-2 pb-1"
                 style={{
                   fontFamily: "'Montserrat', sans-serif",
-                  color: 'var(--text-primary)',
+                  color: 'var(--sm-text)',
                   borderColor: team.secondaryColor,
                 }}
               >
@@ -129,7 +129,7 @@ export default async function BearsHubPage() {
                 className="text-lg font-bold mb-4 border-b-2 pb-1"
                 style={{
                   fontFamily: "'Montserrat', sans-serif",
-                  color: 'var(--text-primary)',
+                  color: 'var(--sm-text)',
                   borderColor: team.secondaryColor,
                 }}
               >
@@ -196,10 +196,11 @@ function ArticleCard({
     return (
       <Link href={href} className="group block">
         <article
-          className="rounded-xl overflow-hidden transition-shadow hover:shadow-lg"
+          className="overflow-hidden transition-shadow hover:shadow-lg"
           style={{
-            backgroundColor: 'var(--bg-surface)',
-            border: '1px solid var(--border-color)',
+            borderRadius: 'var(--sm-radius-lg)',
+            backgroundColor: 'var(--sm-card)',
+            border: '1px solid var(--sm-border)',
           }}
         >
           <div className="flex flex-col md:flex-row">
@@ -229,7 +230,7 @@ function ArticleCard({
                 className="font-bold mt-1 line-clamp-3 group-hover:underline"
                 style={{
                   fontFamily: "'Montserrat', sans-serif",
-                  color: 'var(--text-primary)',
+                  color: 'var(--sm-text)',
                   fontSize: '18px',
                   lineHeight: '1.3',
                 }}
@@ -239,14 +240,14 @@ function ArticleCard({
               {post.excerpt && (
                 <p
                   className="text-sm mt-2 line-clamp-2"
-                  style={{ color: 'var(--text-muted)' }}
+                  style={{ color: 'var(--sm-text-muted)' }}
                 >
                   {post.excerpt}
                 </p>
               )}
               <div
                 className="flex items-center gap-2 mt-3 text-xs"
-                style={{ color: 'var(--text-muted)' }}
+                style={{ color: 'var(--sm-text-muted)' }}
               >
                 {post.author && <span>{post.author.name}</span>}
                 <span>•</span>
@@ -267,8 +268,12 @@ function ArticleCard({
   return (
     <Link href={href} className="group block">
       <article
-        className="rounded-xl overflow-hidden flex gap-4 p-3 transition-colors hover:bg-[var(--bg-hover)]"
-        style={{ backgroundColor: 'var(--bg-surface)' }}
+        className="overflow-hidden flex gap-4 p-3 transition-colors"
+        style={{
+          borderRadius: 'var(--sm-radius-lg)',
+          backgroundColor: 'var(--sm-card)',
+          border: '1px solid var(--sm-border)',
+        }}
       >
         {post.featuredImage && (
           <div className="relative w-20 h-20 md:w-24 md:h-24 flex-shrink-0 rounded-lg overflow-hidden">
@@ -285,7 +290,7 @@ function ArticleCard({
             className="font-semibold line-clamp-2 group-hover:underline"
             style={{
               fontFamily: "'Montserrat', sans-serif",
-              color: 'var(--text-primary)',
+              color: 'var(--sm-text)',
               fontSize: '14px',
               lineHeight: '1.4',
             }}
@@ -294,7 +299,7 @@ function ArticleCard({
           </h3>
           <div
             className="flex items-center gap-2 mt-2 text-xs"
-            style={{ color: 'var(--text-muted)' }}
+            style={{ color: 'var(--sm-text-muted)' }}
           >
             <span>
               {new Date(post.publishedAt).toLocaleDateString('en-US', {
@@ -313,10 +318,11 @@ function ArticleCard({
 function AskAIWidget({ team }: { team: typeof CHICAGO_TEAMS.bears }) {
   return (
     <div
-      className="rounded-xl p-5"
       style={{
-        backgroundColor: 'var(--bg-surface)',
-        border: '1px solid var(--border-color)',
+        borderRadius: 'var(--sm-radius-lg)',
+        padding: '20px',
+        backgroundColor: 'var(--sm-card)',
+        border: '1px solid var(--sm-border)',
       }}
     >
       <div className="flex items-center gap-3 mb-4">
@@ -337,12 +343,12 @@ function AskAIWidget({ team }: { team: typeof CHICAGO_TEAMS.bears }) {
             className="font-bold"
             style={{
               fontFamily: "'Montserrat', sans-serif",
-              color: 'var(--text-primary)',
+              color: 'var(--sm-text)',
             }}
           >
             Scout AI
           </h3>
-          <p className="text-xs" style={{ color: 'var(--text-muted)' }}>
+          <p className="text-xs" style={{ color: 'var(--sm-text-muted)' }}>
             Get instant answers about the Bears
           </p>
         </div>
@@ -353,8 +359,8 @@ function AskAIWidget({ team }: { team: typeof CHICAGO_TEAMS.bears }) {
           href="/scout-ai?team=chicago-bears&q=What%20is%20the%20Bears%20record%20this%20season"
           className="block px-3 py-2 rounded-lg text-sm transition-colors"
           style={{
-            backgroundColor: 'var(--bg-tertiary)',
-            color: 'var(--text-secondary)',
+            backgroundColor: 'var(--sm-surface)',
+            color: 'var(--sm-text-muted)',
           }}
         >
           &quot;What&apos;s the Bears record?&quot;
@@ -363,8 +369,8 @@ function AskAIWidget({ team }: { team: typeof CHICAGO_TEAMS.bears }) {
           href="/scout-ai?team=chicago-bears&q=Who%20is%20the%20Bears%20quarterback"
           className="block px-3 py-2 rounded-lg text-sm transition-colors"
           style={{
-            backgroundColor: 'var(--bg-tertiary)',
-            color: 'var(--text-secondary)',
+            backgroundColor: 'var(--sm-surface)',
+            color: 'var(--sm-text-muted)',
           }}
         >
           &quot;Who is the Bears quarterback?&quot;
@@ -373,8 +379,18 @@ function AskAIWidget({ team }: { team: typeof CHICAGO_TEAMS.bears }) {
 
       <Link
         href="/scout-ai?team=chicago-bears"
-        className="block w-full text-center py-2.5 rounded-lg font-semibold text-sm transition-colors text-white"
-        style={{ backgroundColor: team.secondaryColor }}
+        style={{
+          display: 'block',
+          width: '100%',
+          textAlign: 'center',
+          padding: '10px 20px',
+          borderRadius: '100px',
+          fontWeight: 600,
+          fontSize: '14px',
+          color: '#fff',
+          backgroundColor: team.secondaryColor,
+          textDecoration: 'none',
+        }}
       >
         Ask Scout
       </Link>
@@ -386,10 +402,11 @@ function AskAIWidget({ team }: { team: typeof CHICAGO_TEAMS.bears }) {
 function FanChatWidget({ team }: { team: typeof CHICAGO_TEAMS.bears }) {
   return (
     <div
-      className="rounded-xl p-5"
       style={{
-        backgroundColor: 'var(--bg-surface)',
-        border: '1px solid var(--border-color)',
+        borderRadius: 'var(--sm-radius-lg)',
+        padding: '20px',
+        backgroundColor: 'var(--sm-card)',
+        border: '1px solid var(--sm-border)',
       }}
     >
       <div className="flex items-center gap-3 mb-4">
@@ -417,26 +434,36 @@ function FanChatWidget({ team }: { team: typeof CHICAGO_TEAMS.bears }) {
             className="font-bold"
             style={{
               fontFamily: "'Montserrat', sans-serif",
-              color: 'var(--text-primary)',
+              color: 'var(--sm-text)',
             }}
           >
             Bears Fan Chat
           </h3>
-          <div className="flex items-center gap-1.5 text-xs" style={{ color: 'var(--text-muted)' }}>
+          <div className="flex items-center gap-1.5 text-xs" style={{ color: 'var(--sm-text-muted)' }}>
             <span className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
             <span>247 fans online</span>
           </div>
         </div>
       </div>
 
-      <p className="text-sm mb-4" style={{ color: 'var(--text-secondary)' }}>
+      <p className="text-sm mb-4" style={{ color: 'var(--sm-text-muted)' }}>
         Join the conversation with fellow Bears fans.
       </p>
 
       <Link
         href="/fan-chat?channel=bears"
-        className="block w-full text-center py-2.5 rounded-lg font-semibold text-sm transition-colors text-white"
-        style={{ backgroundColor: team.primaryColor }}
+        style={{
+          display: 'block',
+          width: '100%',
+          textAlign: 'center',
+          padding: '10px 20px',
+          borderRadius: '100px',
+          fontWeight: 600,
+          fontSize: '14px',
+          color: '#fff',
+          backgroundColor: team.primaryColor,
+          textDecoration: 'none',
+        }}
       >
         Join Bears Chat
       </Link>

@@ -88,7 +88,7 @@ export default async function BullsHubPage() {
                 className="text-lg font-bold border-b-2 pb-1"
                 style={{
                   fontFamily: "'Montserrat', sans-serif",
-                  color: 'var(--text-primary)',
+                  color: 'var(--sm-text)',
                   borderColor: team.secondaryColor,
                 }}
               >
@@ -109,13 +109,14 @@ export default async function BullsHubPage() {
               </div>
             ) : (
               <div
-                className="text-center py-12 rounded-xl"
+                className="text-center py-12"
                 style={{
-                  backgroundColor: 'var(--bg-surface)',
-                  border: '1px solid var(--border-color)',
+                  borderRadius: 'var(--sm-radius-lg)',
+                  backgroundColor: 'var(--sm-card)',
+                  border: '1px solid var(--sm-border)',
                 }}
               >
-                <p style={{ color: 'var(--text-muted)' }}>
+                <p style={{ color: 'var(--sm-text-muted)' }}>
                   No Bulls articles found. Check back soon!
                 </p>
               </div>
@@ -129,7 +130,7 @@ export default async function BullsHubPage() {
                 className="text-lg font-bold mb-4 border-b-2 pb-1"
                 style={{
                   fontFamily: "'Montserrat', sans-serif",
-                  color: 'var(--text-primary)',
+                  color: 'var(--sm-text)',
                   borderColor: team.secondaryColor,
                 }}
               >
@@ -182,10 +183,11 @@ function ArticleCard({
     return (
       <Link href={href} className="group block">
         <article
-          className="rounded-xl overflow-hidden transition-shadow hover:shadow-lg"
+          className="overflow-hidden transition-shadow hover:shadow-lg"
           style={{
-            backgroundColor: 'var(--bg-surface)',
-            border: '1px solid var(--border-color)',
+            borderRadius: 'var(--sm-radius-lg)',
+            backgroundColor: 'var(--sm-card)',
+            border: '1px solid var(--sm-border)',
           }}
         >
           <div className="flex flex-col md:flex-row">
@@ -215,7 +217,7 @@ function ArticleCard({
                 className="font-bold mt-1 line-clamp-3 group-hover:underline"
                 style={{
                   fontFamily: "'Montserrat', sans-serif",
-                  color: 'var(--text-primary)',
+                  color: 'var(--sm-text)',
                   fontSize: '18px',
                   lineHeight: '1.3',
                 }}
@@ -225,14 +227,14 @@ function ArticleCard({
               {post.excerpt && (
                 <p
                   className="text-sm mt-2 line-clamp-2"
-                  style={{ color: 'var(--text-muted)' }}
+                  style={{ color: 'var(--sm-text-muted)' }}
                 >
                   {post.excerpt}
                 </p>
               )}
               <div
                 className="flex items-center gap-2 mt-3 text-xs"
-                style={{ color: 'var(--text-muted)' }}
+                style={{ color: 'var(--sm-text-muted)' }}
               >
                 <span>
                   {new Date(post.publishedAt).toLocaleDateString('en-US', {
@@ -251,8 +253,12 @@ function ArticleCard({
   return (
     <Link href={href} className="group block">
       <article
-        className="rounded-xl overflow-hidden flex gap-4 p-3 transition-colors hover:bg-[var(--bg-hover)]"
-        style={{ backgroundColor: 'var(--bg-surface)' }}
+        className="overflow-hidden flex gap-4 p-3 transition-colors"
+        style={{
+          borderRadius: 'var(--sm-radius-lg)',
+          backgroundColor: 'var(--sm-card)',
+          border: '1px solid var(--sm-border)',
+        }}
       >
         {post.featuredImage && (
           <div className="relative w-20 h-20 md:w-24 md:h-24 flex-shrink-0 rounded-lg overflow-hidden">
@@ -269,7 +275,7 @@ function ArticleCard({
             className="font-semibold line-clamp-2 group-hover:underline"
             style={{
               fontFamily: "'Montserrat', sans-serif",
-              color: 'var(--text-primary)',
+              color: 'var(--sm-text)',
               fontSize: '14px',
               lineHeight: '1.4',
             }}
@@ -278,7 +284,7 @@ function ArticleCard({
           </h3>
           <div
             className="flex items-center gap-2 mt-2 text-xs"
-            style={{ color: 'var(--text-muted)' }}
+            style={{ color: 'var(--sm-text-muted)' }}
           >
             <span>
               {new Date(post.publishedAt).toLocaleDateString('en-US', {
@@ -308,10 +314,11 @@ function SeasonSnapshotCard({
 
   return (
     <div
-      className="rounded-xl overflow-hidden"
+      className="overflow-hidden"
       style={{
-        backgroundColor: 'var(--bg-surface)',
-        border: '1px solid var(--border-color)',
+        borderRadius: 'var(--sm-radius-lg)',
+        backgroundColor: 'var(--sm-card)',
+        border: '1px solid var(--sm-border)',
       }}
     >
       <div className="px-5 py-4" style={{ backgroundColor: team.primaryColor }}>
@@ -337,14 +344,14 @@ function SeasonSnapshotCard({
       </div>
 
       <div className="p-5">
-        <div className="text-center pb-4" style={{ borderBottom: '1px solid var(--border-color)' }}>
+        <div className="text-center pb-4" style={{ borderBottom: '1px solid var(--sm-border)' }}>
           <div
             className="text-4xl font-bold"
             style={{ color: team.primaryColor }}
           >
             {formatRecord()}
           </div>
-          <div className="text-sm text-[var(--text-muted)] mt-1">Record</div>
+          <div className="text-sm mt-1" style={{ color: 'var(--sm-text-muted)' }}>Record</div>
         </div>
       </div>
     </div>
@@ -355,17 +362,18 @@ function SeasonSnapshotCard({
 function QuickLinksCard({ team }: { team: typeof CHICAGO_TEAMS.bulls }) {
   return (
     <div
-      className="rounded-xl p-5"
       style={{
-        backgroundColor: 'var(--bg-surface)',
-        border: '1px solid var(--border-color)',
+        borderRadius: 'var(--sm-radius-lg)',
+        padding: '20px',
+        backgroundColor: 'var(--sm-card)',
+        border: '1px solid var(--sm-border)',
       }}
     >
       <h3
         className="font-bold mb-4"
         style={{
           fontFamily: "'Montserrat', sans-serif",
-          color: 'var(--text-primary)',
+          color: 'var(--sm-text)',
         }}
       >
         Quick Links
@@ -389,17 +397,17 @@ function QuickLink({
   return (
     <Link
       href={href}
-      className="flex items-center gap-3 px-3 py-2.5 rounded-lg transition-colors hover:bg-[var(--bg-hover)]"
+      className="flex items-center gap-3 px-3 py-2.5 rounded-lg transition-colors hover:bg-[var(--sm-card-hover)]"
     >
       <span
         className="text-sm font-medium"
-        style={{ color: 'var(--text-primary)' }}
+        style={{ color: 'var(--sm-text)' }}
       >
         {label}
       </span>
       <svg
         className="w-4 h-4 ml-auto"
-        style={{ color: 'var(--text-muted)' }}
+        style={{ color: 'var(--sm-text-muted)' }}
         fill="none"
         stroke="currentColor"
         viewBox="0 0 24 24"
@@ -419,10 +427,11 @@ function QuickLink({
 function AskAIWidget({ team }: { team: typeof CHICAGO_TEAMS.bulls }) {
   return (
     <div
-      className="rounded-xl p-5"
       style={{
-        backgroundColor: 'var(--bg-surface)',
-        border: '1px solid var(--border-color)',
+        borderRadius: 'var(--sm-radius-lg)',
+        padding: '20px',
+        backgroundColor: 'var(--sm-card)',
+        border: '1px solid var(--sm-border)',
       }}
     >
       <div className="flex items-center gap-3 mb-4">
@@ -443,12 +452,12 @@ function AskAIWidget({ team }: { team: typeof CHICAGO_TEAMS.bulls }) {
             className="font-bold"
             style={{
               fontFamily: "'Montserrat', sans-serif",
-              color: 'var(--text-primary)',
+              color: 'var(--sm-text)',
             }}
           >
             Scout AI
           </h3>
-          <p className="text-xs" style={{ color: 'var(--text-muted)' }}>
+          <p className="text-xs" style={{ color: 'var(--sm-text-muted)' }}>
             Get instant answers about the Bulls
           </p>
         </div>
@@ -456,8 +465,18 @@ function AskAIWidget({ team }: { team: typeof CHICAGO_TEAMS.bulls }) {
 
       <Link
         href={`/scout-ai?team=${team.slug}`}
-        className="block w-full text-center py-2.5 rounded-lg font-semibold text-sm transition-colors text-white"
-        style={{ backgroundColor: team.primaryColor }}
+        style={{
+          display: 'block',
+          width: '100%',
+          textAlign: 'center',
+          padding: '10px 20px',
+          borderRadius: '100px',
+          fontWeight: 600,
+          fontSize: '14px',
+          color: '#fff',
+          backgroundColor: team.primaryColor,
+          textDecoration: 'none',
+        }}
       >
         Ask Scout
       </Link>
@@ -469,10 +488,11 @@ function AskAIWidget({ team }: { team: typeof CHICAGO_TEAMS.bulls }) {
 function FanChatWidget({ team }: { team: typeof CHICAGO_TEAMS.bulls }) {
   return (
     <div
-      className="rounded-xl p-5"
       style={{
-        backgroundColor: 'var(--bg-surface)',
-        border: '1px solid var(--border-color)',
+        borderRadius: 'var(--sm-radius-lg)',
+        padding: '20px',
+        backgroundColor: 'var(--sm-card)',
+        border: '1px solid var(--sm-border)',
       }}
     >
       <div className="flex items-center gap-3 mb-4">
@@ -500,12 +520,12 @@ function FanChatWidget({ team }: { team: typeof CHICAGO_TEAMS.bulls }) {
             className="font-bold"
             style={{
               fontFamily: "'Montserrat', sans-serif",
-              color: 'var(--text-primary)',
+              color: 'var(--sm-text)',
             }}
           >
             Bulls Fan Chat
           </h3>
-          <div className="flex items-center gap-1.5 text-xs" style={{ color: 'var(--text-muted)' }}>
+          <div className="flex items-center gap-1.5 text-xs" style={{ color: 'var(--sm-text-muted)' }}>
             <span className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
             <span>Fans online</span>
           </div>
@@ -514,8 +534,18 @@ function FanChatWidget({ team }: { team: typeof CHICAGO_TEAMS.bulls }) {
 
       <Link
         href="/fan-chat?channel=bulls"
-        className="block w-full text-center py-2.5 rounded-lg font-semibold text-sm transition-colors text-white"
-        style={{ backgroundColor: team.primaryColor }}
+        style={{
+          display: 'block',
+          width: '100%',
+          textAlign: 'center',
+          padding: '10px 20px',
+          borderRadius: '100px',
+          fontWeight: 600,
+          fontSize: '14px',
+          color: '#fff',
+          backgroundColor: team.primaryColor,
+          textDecoration: 'none',
+        }}
       >
         Join Bulls Chat
       </Link>

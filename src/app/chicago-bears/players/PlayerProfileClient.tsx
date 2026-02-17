@@ -111,14 +111,17 @@ export default function PlayerProfileClient({ players, initialPlayerSlug, initia
       {/* Player Selector */}
       <div className="mb-6">
         <div className="flex items-center justify-between mb-4">
-          <h1 className="text-2xl font-bold text-[var(--text-primary)]" style={{ fontFamily: "'Montserrat', sans-serif" }}>
+          <h1
+            className="text-2xl font-bold"
+            style={{ fontFamily: "'Montserrat', sans-serif", color: 'var(--sm-text)' }}
+          >
             Players
           </h1>
           <Link
             href="/chicago-bears/roster"
             className="text-sm text-[#C83200] hover:underline"
           >
-            View Full Roster →
+            View Full Roster &rarr;
           </Link>
         </div>
 
@@ -126,7 +129,12 @@ export default function PlayerProfileClient({ players, initialPlayerSlug, initia
         <div className="relative">
           <button
             onClick={() => setDropdownOpen(!dropdownOpen)}
-            className="w-full md:w-96 flex items-center justify-between gap-3 px-4 py-3 bg-[var(--bg-elevated)] border border-[var(--border-subtle)] rounded-xl hover:border-[#C83200]/50 transition-colors"
+            className="w-full md:w-96 flex items-center justify-between gap-3 px-4 py-3 hover:border-[#C83200]/50 transition-colors"
+            style={{
+              backgroundColor: 'var(--sm-card)',
+              border: '1px solid var(--sm-border)',
+              borderRadius: 'var(--sm-radius-lg)',
+            }}
           >
             <div className="flex items-center gap-3">
               {selectedPlayer?.headshotUrl ? (
@@ -138,22 +146,28 @@ export default function PlayerProfileClient({ players, initialPlayerSlug, initia
                   className="w-10 h-10 rounded-full object-cover"
                 />
               ) : (
-                <div className="w-10 h-10 rounded-full bg-[var(--bg-tertiary)] flex items-center justify-center">
-                  <span className="text-xs font-bold text-[var(--text-muted)]">
+                <div
+                  className="w-10 h-10 rounded-full flex items-center justify-center"
+                  style={{ backgroundColor: 'var(--sm-surface)' }}
+                >
+                  <span className="text-xs font-bold" style={{ color: 'var(--sm-text-muted)' }}>
                     {selectedPlayer?.fullName.split(' ').map(n => n[0]).join('')}
                   </span>
                 </div>
               )}
               <div className="text-left">
-                <div className="font-semibold text-[var(--text-primary)]">
+                <div className="font-semibold" style={{ color: 'var(--sm-text)' }}>
                   {selectedPlayer?.jerseyNumber && `#${selectedPlayer.jerseyNumber} `}
                   {selectedPlayer?.fullName}
                 </div>
-                <div className="text-xs text-[var(--text-muted)]">{selectedPlayer?.position}</div>
+                <div className="text-xs" style={{ color: 'var(--sm-text-muted)' }}>
+                  {selectedPlayer?.position}
+                </div>
               </div>
             </div>
             <svg
-              className={`w-5 h-5 text-[var(--text-muted)] transition-transform ${dropdownOpen ? 'rotate-180' : ''}`}
+              className={`w-5 h-5 transition-transform ${dropdownOpen ? 'rotate-180' : ''}`}
+              style={{ color: 'var(--sm-text-muted)' }}
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"
@@ -164,12 +178,19 @@ export default function PlayerProfileClient({ players, initialPlayerSlug, initia
 
           {/* Dropdown Menu */}
           {dropdownOpen && (
-            <div className="absolute z-50 mt-2 w-full md:w-96 max-h-80 overflow-y-auto bg-[var(--bg-elevated)] border border-[var(--border-subtle)] rounded-xl shadow-xl">
+            <div
+              className="absolute z-50 mt-2 w-full md:w-96 max-h-80 overflow-y-auto shadow-xl"
+              style={{
+                backgroundColor: 'var(--sm-card)',
+                border: '1px solid var(--sm-border)',
+                borderRadius: 'var(--sm-radius-lg)',
+              }}
+            >
               {players.map(player => (
                 <button
                   key={player.playerId}
                   onClick={() => handlePlayerSelect(player.slug)}
-                  className={`w-full flex items-center gap-3 px-4 py-3 hover:bg-[var(--bg-hover)] transition-colors ${
+                  className={`w-full flex items-center gap-3 px-4 py-3 hover:bg-[var(--sm-card-hover)] transition-colors ${
                     player.slug === selectedSlug ? 'bg-[#C83200]/10' : ''
                   }`}
                 >
@@ -182,18 +203,23 @@ export default function PlayerProfileClient({ players, initialPlayerSlug, initia
                       className="w-9 h-9 rounded-full object-cover"
                     />
                   ) : (
-                    <div className="w-9 h-9 rounded-full bg-[var(--bg-tertiary)] flex items-center justify-center">
-                      <span className="text-xs font-bold text-[var(--text-muted)]">
+                    <div
+                      className="w-9 h-9 rounded-full flex items-center justify-center"
+                      style={{ backgroundColor: 'var(--sm-surface)' }}
+                    >
+                      <span className="text-xs font-bold" style={{ color: 'var(--sm-text-muted)' }}>
                         {player.fullName.split(' ').map(n => n[0]).join('')}
                       </span>
                     </div>
                   )}
                   <div className="text-left">
-                    <div className="font-medium text-[var(--text-primary)]">
+                    <div className="font-medium" style={{ color: 'var(--sm-text)' }}>
                       {player.jerseyNumber && `#${player.jerseyNumber} `}
                       {player.fullName}
                     </div>
-                    <div className="text-xs text-[var(--text-muted)]">{player.position}</div>
+                    <div className="text-xs" style={{ color: 'var(--sm-text-muted)' }}>
+                      {player.position}
+                    </div>
                   </div>
                 </button>
               ))}
@@ -204,16 +230,26 @@ export default function PlayerProfileClient({ players, initialPlayerSlug, initia
 
       {/* Player Profile */}
       {loading ? (
-        <div className="bg-[var(--bg-elevated)] border border-[var(--border-subtle)] rounded-2xl p-12">
+        <div
+          className="p-12"
+          style={{
+            backgroundColor: 'var(--sm-card)',
+            border: '1px solid var(--sm-border)',
+            borderRadius: 'var(--sm-radius-xl)',
+          }}
+        >
           <div className="flex items-center justify-center gap-3">
             <div className="w-6 h-6 border-2 border-[#C83200] border-t-transparent rounded-full animate-spin" />
-            <span className="text-[var(--text-muted)]">Loading player...</span>
+            <span style={{ color: 'var(--sm-text-muted)' }}>Loading player...</span>
           </div>
         </div>
       ) : profile ? (
         <div className="space-y-6">
           {/* Player Header Card */}
-          <div className="bg-gradient-to-r from-[#0B162A] to-[#0B162A]/90 rounded-2xl overflow-hidden">
+          <div
+            className="bg-gradient-to-r from-[#0B162A] to-[#0B162A]/90 overflow-hidden"
+            style={{ borderRadius: 'var(--sm-radius-xl)' }}
+          >
             <div className="flex flex-col md:flex-row">
               {/* Photo */}
               <div className="md:w-64 aspect-[3/4] md:aspect-auto relative bg-[#0B162A]">
@@ -290,18 +326,25 @@ export default function PlayerProfileClient({ players, initialPlayerSlug, initia
 
           {/* Season Stats */}
           {profile.currentSeason && (
-            <div className="bg-[var(--bg-elevated)] border border-[var(--border-subtle)] rounded-2xl p-6">
-              <h3 className="text-lg font-bold text-[var(--text-primary)] mb-4">
+            <div
+              className="p-6"
+              style={{
+                backgroundColor: 'var(--sm-card)',
+                border: '1px solid var(--sm-border)',
+                borderRadius: 'var(--sm-radius-xl)',
+              }}
+            >
+              <h3 className="text-lg font-bold mb-4" style={{ color: 'var(--sm-text)' }}>
                 {profile.currentSeason.season} Season Stats
               </h3>
-              <div className="text-sm text-[var(--text-muted)] mb-4">
+              <div className="text-sm mb-4" style={{ color: 'var(--sm-text-muted)' }}>
                 {profile.currentSeason.gamesPlayed} Games Played
               </div>
 
               {/* Passing Stats */}
               {profile.currentSeason.passAttempts && profile.currentSeason.passAttempts > 0 && (
                 <div className="mb-6">
-                  <h4 className="text-sm font-semibold text-[var(--text-muted)] uppercase tracking-wider mb-3">Passing</h4>
+                  <h4 className="text-sm font-semibold uppercase tracking-wider mb-3" style={{ color: 'var(--sm-text-muted)' }}>Passing</h4>
                   <div className="grid grid-cols-3 md:grid-cols-6 gap-4">
                     <StatBox label="CMP/ATT" value={`${profile.currentSeason.passCompletions}/${profile.currentSeason.passAttempts}`} />
                     <StatBox label="YDS" value={profile.currentSeason.passYards} highlight />
@@ -316,7 +359,7 @@ export default function PlayerProfileClient({ players, initialPlayerSlug, initia
               {/* Rushing Stats */}
               {profile.currentSeason.rushAttempts && profile.currentSeason.rushAttempts > 0 && (
                 <div className="mb-6">
-                  <h4 className="text-sm font-semibold text-[var(--text-muted)] uppercase tracking-wider mb-3">Rushing</h4>
+                  <h4 className="text-sm font-semibold uppercase tracking-wider mb-3" style={{ color: 'var(--sm-text-muted)' }}>Rushing</h4>
                   <div className="grid grid-cols-3 md:grid-cols-4 gap-4">
                     <StatBox label="CAR" value={profile.currentSeason.rushAttempts} />
                     <StatBox label="YDS" value={profile.currentSeason.rushYards} highlight />
@@ -329,7 +372,7 @@ export default function PlayerProfileClient({ players, initialPlayerSlug, initia
               {/* Receiving Stats */}
               {profile.currentSeason.receptions && profile.currentSeason.receptions > 0 && (
                 <div className="mb-6">
-                  <h4 className="text-sm font-semibold text-[var(--text-muted)] uppercase tracking-wider mb-3">Receiving</h4>
+                  <h4 className="text-sm font-semibold uppercase tracking-wider mb-3" style={{ color: 'var(--sm-text-muted)' }}>Receiving</h4>
                   <div className="grid grid-cols-3 md:grid-cols-5 gap-4">
                     <StatBox label="REC" value={profile.currentSeason.receptions} />
                     <StatBox label="TGTS" value={profile.currentSeason.targets || '-'} />
@@ -343,7 +386,7 @@ export default function PlayerProfileClient({ players, initialPlayerSlug, initia
               {/* Defensive Stats */}
               {profile.currentSeason.tackles && profile.currentSeason.tackles > 0 && (
                 <div>
-                  <h4 className="text-sm font-semibold text-[var(--text-muted)] uppercase tracking-wider mb-3">Defense</h4>
+                  <h4 className="text-sm font-semibold uppercase tracking-wider mb-3" style={{ color: 'var(--sm-text-muted)' }}>Defense</h4>
                   <div className="grid grid-cols-3 md:grid-cols-4 gap-4">
                     <StatBox label="TKL" value={profile.currentSeason.tackles} highlight />
                     <StatBox label="SACK" value={profile.currentSeason.sacks || 0} />
@@ -358,7 +401,7 @@ export default function PlayerProfileClient({ players, initialPlayerSlug, initia
                (!profile.currentSeason.rushAttempts || profile.currentSeason.rushAttempts === 0) &&
                (!profile.currentSeason.receptions || profile.currentSeason.receptions === 0) &&
                (!profile.currentSeason.tackles || profile.currentSeason.tackles === 0) && (
-                <div className="text-center py-8 text-[var(--text-muted)]">
+                <div className="text-center py-8" style={{ color: 'var(--sm-text-muted)' }}>
                   No stats recorded this season
                 </div>
               )}
@@ -369,7 +412,8 @@ export default function PlayerProfileClient({ players, initialPlayerSlug, initia
           <div className="text-center">
             <Link
               href={`/chicago-bears/players/${profile.player.slug}`}
-              className="inline-flex items-center gap-2 px-6 py-3 bg-[#C83200] hover:bg-[#a82900] text-white font-semibold rounded-xl transition-colors"
+              className="inline-flex items-center gap-2 px-6 py-3 bg-[#C83200] hover:bg-[#a82900] text-white font-semibold transition-colors"
+              style={{ borderRadius: '100px' }}
             >
               View Full Profile
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -379,8 +423,15 @@ export default function PlayerProfileClient({ players, initialPlayerSlug, initia
           </div>
         </div>
       ) : (
-        <div className="bg-[var(--bg-elevated)] border border-[var(--border-subtle)] rounded-2xl p-12 text-center">
-          <p className="text-[var(--text-muted)]">Player not found</p>
+        <div
+          className="p-12 text-center"
+          style={{
+            backgroundColor: 'var(--sm-card)',
+            border: '1px solid var(--sm-border)',
+            borderRadius: 'var(--sm-radius-xl)',
+          }}
+        >
+          <p style={{ color: 'var(--sm-text-muted)' }}>Player not found</p>
         </div>
       )}
     </div>
@@ -389,9 +440,15 @@ export default function PlayerProfileClient({ players, initialPlayerSlug, initia
 
 function StatBox({ label, value, highlight }: { label: string; value: string | number | null; highlight?: boolean }) {
   return (
-    <div className="bg-[var(--bg-tertiary)] rounded-lg p-3 text-center">
-      <div className="text-xs text-[var(--text-muted)] uppercase tracking-wider mb-1">{label}</div>
-      <div className={`text-lg font-bold ${highlight ? 'text-[#C83200]' : 'text-[var(--text-primary)]'}`}>
+    <div
+      className="p-3 text-center"
+      style={{ backgroundColor: 'var(--sm-surface)', borderRadius: 'var(--sm-radius-lg)' }}
+    >
+      <div className="text-xs uppercase tracking-wider mb-1" style={{ color: 'var(--sm-text-muted)' }}>{label}</div>
+      <div
+        className={`text-lg font-bold ${highlight ? 'text-[#C83200]' : ''}`}
+        style={!highlight ? { color: 'var(--sm-text)' } : {}}
+      >
         {value ?? '-'}
       </div>
     </div>

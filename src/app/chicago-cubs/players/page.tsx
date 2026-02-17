@@ -74,10 +74,10 @@ export default async function CubsPlayersPage() {
         {/* Header */}
         <div className="mb-6 flex items-center justify-between">
           <div>
-            <h1 className="text-2xl font-bold text-[var(--text-primary)]" style={{ fontFamily: "'Montserrat', sans-serif" }}>
+            <h1 className="text-2xl font-bold text-[var(--sm-text)]" style={{ fontFamily: "'Montserrat', sans-serif" }}>
               Players
             </h1>
-            <p className="text-sm text-[var(--text-muted)]">{players.length} players on roster</p>
+            <p className="text-sm text-[var(--sm-text-muted)]">{players.length} players on roster</p>
           </div>
           <Link
             href="/chicago-cubs/roster"
@@ -94,7 +94,7 @@ export default async function CubsPlayersPage() {
 
           return (
             <div key={group} className="mb-8">
-              <h2 className="text-lg font-bold text-[var(--text-primary)] mb-4 border-b border-[var(--border-subtle)] pb-2">
+              <h2 className="text-lg font-bold text-[var(--sm-text)] mb-4 border-b border-[var(--sm-border)] pb-2">
                 {POSITION_GROUP_LABELS[group]} ({groupPlayers.length})
               </h2>
               <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
@@ -114,10 +114,11 @@ function PlayerCard({ player }: { player: CubsPlayer }) {
   return (
     <Link
       href={`/chicago-cubs/players/${player.slug}`}
-      className="group bg-[var(--bg-elevated)] border border-[var(--border-subtle)] rounded-xl overflow-hidden hover:border-[#0E3386]/50 transition-colors"
+      className="group overflow-hidden hover:border-[#0E3386]/50 transition-colors"
+      style={{ backgroundColor: 'var(--sm-card)', border: '1px solid var(--sm-border)', borderRadius: 'var(--sm-radius-lg)' }}
     >
       {/* Player Photo */}
-      <div className="aspect-[4/5] bg-[var(--bg-tertiary)] relative overflow-hidden">
+      <div className="aspect-[4/5] bg-[var(--sm-surface)] relative overflow-hidden">
         {player.headshotUrl ? (
           <Image
             src={player.headshotUrl}
@@ -127,7 +128,7 @@ function PlayerCard({ player }: { player: CubsPlayer }) {
             sizes="(max-width: 640px) 50vw, (max-width: 768px) 33vw, (max-width: 1024px) 25vw, 20vw"
           />
         ) : (
-          <div className="w-full h-full flex items-center justify-center text-[var(--text-muted)]">
+          <div className="w-full h-full flex items-center justify-center text-[var(--sm-text-muted)]">
             <svg className="w-16 h-16 opacity-20" fill="currentColor" viewBox="0 0 24 24">
               <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
             </svg>
@@ -143,19 +144,19 @@ function PlayerCard({ player }: { player: CubsPlayer }) {
 
       {/* Player Info */}
       <div className="p-3">
-        <h3 className="font-semibold text-[var(--text-primary)] text-sm truncate group-hover:text-[#0E3386] transition-colors">
+        <h3 className="font-semibold text-[var(--sm-text)] text-sm truncate group-hover:text-[#0E3386] transition-colors">
           {player.fullName}
         </h3>
         <div className="flex items-center justify-between mt-1">
-          <span className="text-xs text-[var(--text-muted)]">{player.position}</span>
+          <span className="text-xs text-[var(--sm-text-muted)]">{player.position}</span>
           {player.height && player.weight && (
-            <span className="text-xs text-[var(--text-muted)]">
+            <span className="text-xs text-[var(--sm-text-muted)]">
               {player.height}, {player.weight} lbs
             </span>
           )}
         </div>
         {player.bats && player.throws && (
-          <div className="text-xs text-[var(--text-muted)] mt-1">
+          <div className="text-xs text-[var(--sm-text-muted)] mt-1">
             B/T: {player.bats}/{player.throws}
           </div>
         )}

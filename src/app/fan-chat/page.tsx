@@ -260,27 +260,27 @@ export default function FanChatPage() {
   }
 
   return (
-    <div className="min-h-screen" style={{ backgroundColor: 'var(--bg-page)' }}>
+    <div className="min-h-screen" style={{ backgroundColor: 'var(--sm-dark)' }}>
       <div className="max-w-[1320px] mx-auto px-4 md:px-6 lg:px-8 py-6">
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-6" style={{ minHeight: 'calc(100vh - 200px)' }}>
           {/* Channel List - Sidebar */}
           <div className={`lg:col-span-1 ${showChannels ? 'block' : 'hidden lg:block'}`}>
             <div
-              className="rounded-2xl overflow-hidden sticky top-24"
-              style={{ backgroundColor: 'var(--bg-surface)', border: '1px solid var(--border-color)' }}
+              className="overflow-hidden sticky top-24"
+              style={{ backgroundColor: 'var(--sm-card)', border: '1px solid var(--sm-border)', borderRadius: 'var(--sm-radius-xl)' }}
             >
               {/* Header */}
               <div
                 className="px-5 py-4"
-                style={{ borderBottom: '1px solid var(--border-color)' }}
+                style={{ borderBottom: '1px solid var(--sm-border)' }}
               >
                 <h2
                   className="font-bold"
-                  style={{ fontFamily: "'Montserrat', sans-serif", color: 'var(--text-primary)' }}
+                  style={{ fontFamily: "'Montserrat', sans-serif", color: 'var(--sm-text)' }}
                 >
                   Chat Channels
                 </h2>
-                <p className="text-xs mt-1" style={{ color: 'var(--text-muted)' }}>
+                <p className="text-xs mt-1" style={{ color: 'var(--sm-text-muted)' }}>
                   Join a conversation
                 </p>
               </div>
@@ -294,11 +294,17 @@ export default function FanChatPage() {
                       setActiveChannel(channel.id)
                       setShowChannels(false)
                     }}
-                    className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-colors ${
-                      activeChannel === channel.id
-                        ? 'bg-[var(--link-color)]/10'
-                        : 'hover:bg-[var(--card-hover-bg)]'
-                    }`}
+                    className="w-full flex items-center gap-3 px-4 py-3 transition-colors"
+                    style={{
+                      borderRadius: 'var(--sm-radius-lg)',
+                      backgroundColor: activeChannel === channel.id ? 'rgba(188, 0, 0, 0.1)' : undefined,
+                    }}
+                    onMouseEnter={(e) => {
+                      if (activeChannel !== channel.id) e.currentTarget.style.backgroundColor = 'var(--sm-card-hover)'
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.backgroundColor = activeChannel === channel.id ? 'rgba(188, 0, 0, 0.1)' : ''
+                    }}
                   >
                     {/* Icon/Logo */}
                     <div
@@ -324,7 +330,7 @@ export default function FanChatPage() {
                       <div className="flex items-center gap-2">
                         <span
                           className="font-semibold text-sm truncate"
-                          style={{ color: activeChannel === channel.id ? 'var(--link-color)' : 'var(--text-primary)' }}
+                          style={{ color: activeChannel === channel.id ? 'var(--sm-red)' : 'var(--sm-text)' }}
                         >
                           {channel.name}
                         </span>
@@ -335,7 +341,7 @@ export default function FanChatPage() {
                           </span>
                         )}
                       </div>
-                      <p className="text-xs truncate" style={{ color: 'var(--text-muted)' }}>
+                      <p className="text-xs truncate" style={{ color: 'var(--sm-text-muted)' }}>
                         {channel.aiPersonality} is here
                       </p>
                     </div>
@@ -347,8 +353,8 @@ export default function FanChatPage() {
               </div>
 
               {/* AI Info */}
-              <div className="px-5 py-4" style={{ borderTop: '1px solid var(--border-color)' }}>
-                <p className="text-xs" style={{ color: 'var(--text-muted)' }}>
+              <div className="px-5 py-4" style={{ borderTop: '1px solid var(--sm-border)' }}>
+                <p className="text-xs" style={{ color: 'var(--sm-text-muted)' }}>
                   Our superfans are always online and ready to chat about Chicago sports
                 </p>
               </div>
@@ -358,17 +364,18 @@ export default function FanChatPage() {
           {/* Main Chat Area */}
           <div className="lg:col-span-3">
             <div
-              className="rounded-2xl overflow-hidden flex flex-col h-full"
+              className="overflow-hidden flex flex-col h-full"
               style={{
-                backgroundColor: 'var(--bg-surface)',
-                border: '1px solid var(--border-color)',
+                backgroundColor: 'var(--sm-card)',
+                border: '1px solid var(--sm-border)',
+                borderRadius: 'var(--sm-radius-xl)',
                 minHeight: 'calc(100vh - 200px)',
               }}
             >
               {/* Chat Header */}
               <div
                 className="px-5 py-4 flex items-center justify-between"
-                style={{ borderBottom: '1px solid var(--border-color)', backgroundColor: currentChannel.color }}
+                style={{ borderBottom: '1px solid var(--sm-border)', backgroundColor: currentChannel.color }}
               >
                 <div className="flex items-center gap-3">
                   {/* Mobile channel toggle */}
@@ -423,7 +430,7 @@ export default function FanChatPage() {
               {/* Messages Area */}
               <div ref={messagesContainerRef} className="flex-1 overflow-y-auto p-5">
                 {/* Welcome Message */}
-                <div className="text-center py-8 mb-6" style={{ borderBottom: '1px solid var(--border-color)' }}>
+                <div className="text-center py-8 mb-6" style={{ borderBottom: '1px solid var(--sm-border)' }}>
                   <div
                     className="w-16 h-16 rounded-full mx-auto mb-4 flex items-center justify-center"
                     style={{ backgroundColor: currentChannel.color }}
@@ -442,17 +449,17 @@ export default function FanChatPage() {
                   </div>
                   <h3
                     className="font-bold text-lg mb-1"
-                    style={{ fontFamily: "'Montserrat', sans-serif", color: 'var(--text-primary)' }}
+                    style={{ fontFamily: "'Montserrat', sans-serif", color: 'var(--sm-text)' }}
                   >
                     Welcome to {currentChannel.name}
                   </h3>
-                  <p className="text-sm mb-2" style={{ color: 'var(--text-muted)' }}>
+                  <p className="text-sm mb-2" style={{ color: 'var(--sm-text-muted)' }}>
                     Chat with {currentChannel.aiPersonality} and other fans. Be respectful and have fun!
                   </p>
                   {personality && (
-                    <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-xs" style={{ backgroundColor: 'var(--bg-page)' }}>
+                    <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-xs" style={{ backgroundColor: 'var(--sm-surface)' }}>
                       <span className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
-                      <span style={{ color: 'var(--text-muted)' }}>
+                      <span style={{ color: 'var(--sm-text-muted)' }}>
                         {personality.username} is here to talk {personality.teamFullName}
                       </span>
                     </div>
@@ -474,7 +481,7 @@ export default function FanChatPage() {
                         {msg.user.charAt(0)}
                         {/* Online indicator for AI personalities */}
                         {msg.isAI && (
-                          <span className="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 bg-green-500 rounded-full border-2 border-[var(--bg-surface)]" />
+                          <span className="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 bg-green-500 rounded-full" style={{ border: '2px solid var(--sm-card)' }} />
                         )}
                       </div>
 
@@ -484,12 +491,12 @@ export default function FanChatPage() {
                           {!msg.isOwn && (
                             <span
                               className="text-sm font-semibold"
-                              style={{ color: msg.isAI ? currentChannel.color : 'var(--text-primary)' }}
+                              style={{ color: msg.isAI ? currentChannel.color : 'var(--sm-text)' }}
                             >
                               {msg.user}
                             </span>
                           )}
-                          <span className="text-xs" style={{ color: 'var(--text-muted)' }}>
+                          <span className="text-xs" style={{ color: 'var(--sm-text-muted)' }}>
                             {msg.time}
                           </span>
                         </div>
@@ -499,7 +506,7 @@ export default function FanChatPage() {
                               ? 'bg-[#bc0000] text-white rounded-tr-sm'
                               : 'rounded-tl-sm'
                           }`}
-                          style={!msg.isOwn ? { backgroundColor: 'var(--bg-page)', color: 'var(--text-primary)' } : {}}
+                          style={!msg.isOwn ? { backgroundColor: 'var(--sm-surface)', color: 'var(--sm-text)' } : {}}
                         >
                           {msg.content}
                         </div>
@@ -515,7 +522,7 @@ export default function FanChatPage() {
                         style={{ backgroundColor: currentChannel.color }}
                       >
                         {currentChannel.aiPersonality?.charAt(0) || 'A'}
-                        <span className="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 bg-green-500 rounded-full border-2 border-[var(--bg-surface)]" />
+                        <span className="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 bg-green-500 rounded-full" style={{ border: '2px solid var(--sm-card)' }} />
                       </div>
                       <div className="max-w-[75%]">
                         <div className="flex items-center gap-2 mb-1">
@@ -525,7 +532,7 @@ export default function FanChatPage() {
                         </div>
                         <div
                           className="inline-flex items-center gap-1 px-4 py-3 rounded-2xl rounded-tl-sm"
-                          style={{ backgroundColor: 'var(--bg-page)' }}
+                          style={{ backgroundColor: 'var(--sm-surface)' }}
                         >
                           <span className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
                           <span className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
@@ -540,12 +547,14 @@ export default function FanChatPage() {
               </div>
 
               {/* Input Area */}
-              <div className="p-4" style={{ borderTop: '1px solid var(--border-color)' }}>
+              <div className="p-4" style={{ borderTop: '1px solid var(--sm-border)' }}>
                 <div className="flex items-center gap-3">
                   {/* Emoji Button */}
                   <button
-                    className="p-2 rounded-lg transition-colors hover:bg-[var(--card-hover-bg)] min-w-[44px] min-h-[44px] flex items-center justify-center"
-                    style={{ color: 'var(--text-muted)' }}
+                    className="p-2 transition-colors min-w-[44px] min-h-[44px] flex items-center justify-center"
+                    style={{ color: 'var(--sm-text-muted)', borderRadius: 'var(--sm-radius-lg)' }}
+                    onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'var(--sm-card-hover)'}
+                    onMouseLeave={(e) => e.currentTarget.style.backgroundColor = ''}
                   >
                     <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14.828 14.828a4 4 0 01-5.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -554,8 +563,10 @@ export default function FanChatPage() {
 
                   {/* GIF Button */}
                   <button
-                    className="p-2 rounded-lg transition-colors hover:bg-[var(--card-hover-bg)] min-w-[44px] min-h-[44px] flex items-center justify-center"
-                    style={{ color: 'var(--text-muted)' }}
+                    className="p-2 transition-colors min-w-[44px] min-h-[44px] flex items-center justify-center"
+                    style={{ color: 'var(--sm-text-muted)', borderRadius: 'var(--sm-radius-lg)' }}
+                    onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'var(--sm-card-hover)'}
+                    onMouseLeave={(e) => e.currentTarget.style.backgroundColor = ''}
                   >
                     <span className="text-xs font-bold">GIF</span>
                   </button>
@@ -567,11 +578,12 @@ export default function FanChatPage() {
                     onChange={(e) => setMessage(e.target.value)}
                     onKeyDown={handleKeyDown}
                     placeholder={`Message ${currentChannel.aiPersonality}...`}
-                    className="flex-1 px-4 py-3 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[#bc0000]"
+                    className="flex-1 px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#bc0000]"
                     style={{
-                      backgroundColor: 'var(--bg-page)',
-                      color: 'var(--text-primary)',
-                      border: '1px solid var(--border-color)',
+                      backgroundColor: 'var(--sm-surface)',
+                      color: 'var(--sm-text)',
+                      border: '1px solid var(--sm-border)',
+                      borderRadius: 'var(--sm-radius-lg)',
                     }}
                   />
 
@@ -579,7 +591,13 @@ export default function FanChatPage() {
                   <button
                     onClick={handleSendMessage}
                     disabled={!message.trim() || aiLoading}
-                    className="px-5 py-3 bg-[#bc0000] text-white font-semibold rounded-xl hover:bg-[#a00000] transition-colors disabled:opacity-50 disabled:cursor-not-allowed min-h-[44px]"
+                    className="px-5 py-3 text-white font-semibold transition-colors disabled:opacity-50 disabled:cursor-not-allowed min-h-[44px]"
+                    style={{
+                      backgroundColor: '#bc0000',
+                      borderRadius: '100px',
+                    }}
+                    onMouseEnter={(e) => { if (!e.currentTarget.disabled) e.currentTarget.style.backgroundColor = '#a00000' }}
+                    onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#bc0000'}
                   >
                     Send
                   </button>
@@ -587,7 +605,7 @@ export default function FanChatPage() {
 
                 {/* Sign in prompt for non-logged-in users */}
                 <div className="mt-3 text-center">
-                  <p className="text-xs" style={{ color: 'var(--text-muted)' }}>
+                  <p className="text-xs" style={{ color: 'var(--sm-text-muted)' }}>
                     <Link href="/login" className="text-[#bc0000] hover:underline">Sign in</Link> to save your chat history
                   </p>
                 </div>

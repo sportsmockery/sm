@@ -46,7 +46,7 @@ export default async function BearsPlayersPage() {
         activeTab="roster"
       >
         <div className="pb-12 text-center">
-          <p className="text-[var(--text-muted)]">No players found</p>
+          <p className="text-[var(--sm-text-muted)]">No players found</p>
         </div>
       </TeamHubLayout>
     )

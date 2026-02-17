@@ -12,6 +12,8 @@ export const metadata: Metadata = {
 
 export const revalidate = 3600
 
+const TEAM_COLOR = '#27251F'
+
 const POSITION_ORDER: PositionGroup[] = ['pitchers', 'catchers', 'infielders', 'outfielders']
 
 export default async function WhiteSoxRosterPage() {
@@ -39,24 +41,25 @@ export default async function WhiteSoxRosterPage() {
     >
       {/* Summary Bar */}
       <div
-        className="rounded-xl p-4 mb-6"
+        className="p-4 mb-6"
         style={{
-          backgroundColor: 'var(--bg-surface)',
-          border: '1px solid var(--border-color)',
+          backgroundColor: 'var(--sm-card)',
+          border: '1px solid var(--sm-border)',
+          borderRadius: 'var(--sm-radius-lg)',
         }}
       >
         <div className="flex flex-wrap gap-6 text-sm">
           <div>
-            <span style={{ color: 'var(--text-muted)' }}>Total: </span>
-            <span className="font-semibold" style={{ color: 'var(--text-primary)' }}>{allPlayers.length} players</span>
+            <span style={{ color: 'var(--sm-text-muted)' }}>Total: </span>
+            <span className="font-semibold" style={{ color: 'var(--sm-text)' }}>{allPlayers.length} players</span>
           </div>
           {POSITION_ORDER.map(group => {
             const count = roster[group]?.length || 0
             if (count === 0) return null
             return (
               <div key={group}>
-                <span style={{ color: 'var(--text-muted)' }}>{POSITION_GROUP_NAMES[group]}: </span>
-                <span className="font-semibold" style={{ color: 'var(--text-primary)' }}>{count}</span>
+                <span style={{ color: 'var(--sm-text-muted)' }}>{POSITION_GROUP_NAMES[group]}: </span>
+                <span className="font-semibold" style={{ color: 'var(--sm-text)' }}>{count}</span>
               </div>
             )
           })}
@@ -70,12 +73,28 @@ export default async function WhiteSoxRosterPage() {
           if (!players || players.length === 0) return null
 
           return (
-            <div key={group} className={`bg-[var(--bg-elevated)] border border-[var(--border-subtle)] rounded-2xl overflow-hidden ${group === 'pitchers' ? 'lg:col-span-2' : ''}`}>
-              <div className="px-4 py-3 bg-[var(--bg-tertiary)] border-b border-[var(--border-subtle)] flex items-center justify-between">
-                <h2 className="font-bold text-[var(--text-primary)]" style={{ fontFamily: "'Montserrat', sans-serif" }}>
+            <div
+              key={group}
+              className={`overflow-hidden ${group === 'pitchers' ? 'lg:col-span-2' : ''}`}
+              style={{
+                backgroundColor: 'var(--sm-card)',
+                border: '1px solid var(--sm-border)',
+                borderRadius: 'var(--sm-radius-xl)',
+              }}
+            >
+              <div
+                className="flex items-center justify-between"
+                style={{
+                  padding: '12px 20px',
+                  backgroundColor: 'var(--sm-surface)',
+                  borderBottom: '1px solid var(--sm-border)',
+                  borderLeft: `3px solid ${TEAM_COLOR}`,
+                }}
+              >
+                <h2 className="font-bold" style={{ color: 'var(--sm-text)', fontFamily: "'Montserrat', sans-serif" }}>
                   {POSITION_GROUP_NAMES[group]}
                 </h2>
-                <span className="text-sm text-[var(--text-muted)]">
+                <span className="text-sm" style={{ color: 'var(--sm-text-muted)' }}>
                   {players.length} player{players.length !== 1 ? 's' : ''}
                 </span>
               </div>
@@ -83,7 +102,7 @@ export default async function WhiteSoxRosterPage() {
               <div className="overflow-x-auto">
                 <table className="w-full">
                   <thead>
-                    <tr className="text-left text-xs text-[var(--text-muted)] uppercase tracking-wider border-b border-[var(--border-subtle)]">
+                    <tr className="text-left text-xs uppercase tracking-wider" style={{ color: 'var(--sm-text-muted)', borderBottom: '1px solid var(--sm-border)' }}>
                       <th className="px-4 py-2 w-12">#</th>
                       <th className="px-4 py-2">Player</th>
                       <th className="px-4 py-2 hidden sm:table-cell">Size</th>
@@ -95,10 +114,24 @@ export default async function WhiteSoxRosterPage() {
                     {players.map((player) => (
                       <tr
                         key={player.playerId}
-                        className="border-b border-[var(--border-subtle)] last:border-0 hover:bg-[var(--bg-hover)] transition-colors"
+                        className="transition-colors hover:bg-[var(--sm-card-hover)]"
+                        style={{ borderBottom: '1px solid var(--sm-border)' }}
                       >
                         <td className="px-4 py-3">
-                          <span className="inline-flex items-center justify-center w-8 h-8 rounded-lg bg-[#27251F] text-white text-sm font-bold">
+                          <span
+                            style={{
+                              display: 'inline-flex',
+                              alignItems: 'center',
+                              justifyContent: 'center',
+                              width: 32,
+                              height: 32,
+                              borderRadius: 8,
+                              backgroundColor: TEAM_COLOR,
+                              color: '#fff',
+                              fontSize: 13,
+                              fontWeight: 700,
+                            }}
+                          >
                             {player.jerseyNumber ?? '-'}
                           </span>
                         </td>
@@ -108,7 +141,10 @@ export default async function WhiteSoxRosterPage() {
                             className="flex items-center gap-3 group"
                           >
                             {player.headshotUrl ? (
-                              <div className="w-10 h-10 rounded-full overflow-hidden flex-shrink-0 border-2 border-[var(--border-subtle)]">
+                              <div
+                                className="w-10 h-10 rounded-full overflow-hidden flex-shrink-0"
+                                style={{ border: '2px solid var(--sm-border)' }}
+                              >
                                 <Image
                                   src={player.headshotUrl}
                                   alt={player.fullName}
@@ -119,33 +155,36 @@ export default async function WhiteSoxRosterPage() {
                                 />
                               </div>
                             ) : (
-                              <div className="w-10 h-10 rounded-full bg-[var(--bg-tertiary)] flex items-center justify-center flex-shrink-0">
-                                <svg className="w-5 h-5 text-[var(--text-muted)]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <div
+                                className="w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0"
+                                style={{ backgroundColor: 'var(--sm-surface)' }}
+                              >
+                                <svg className="w-5 h-5" style={{ color: 'var(--sm-text-muted)' }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                                 </svg>
                               </div>
                             )}
                             <div>
-                              <span className="font-medium text-[var(--text-primary)] group-hover:text-[#27251F] dark:group-hover:text-[#C4CED4] transition-colors">
+                              <span className="font-medium transition-colors" style={{ color: 'var(--sm-text)' }}>
                                 {player.fullName}
                               </span>
-                              <div className="text-xs text-[var(--text-muted)]">
+                              <div className="text-xs" style={{ color: 'var(--sm-text-muted)' }}>
                                 {player.position}
                               </div>
                             </div>
                           </Link>
                         </td>
-                        <td className="px-4 py-3 text-sm text-[var(--text-secondary)] hidden sm:table-cell">
+                        <td className="px-4 py-3 text-sm hidden sm:table-cell" style={{ color: 'var(--sm-text-muted)' }}>
                           {player.height && player.weight
                             ? `${player.height} · ${player.weight} lbs`
                             : '-'}
                         </td>
-                        <td className="px-4 py-3 text-sm text-[var(--text-secondary)] hidden md:table-cell">
+                        <td className="px-4 py-3 text-sm hidden md:table-cell" style={{ color: 'var(--sm-text-muted)' }}>
                           {player.bats && player.throws
                             ? `${player.bats}/${player.throws}`
                             : '-'}
                         </td>
-                        <td className="px-4 py-3 text-sm text-[var(--text-secondary)] hidden lg:table-cell">
+                        <td className="px-4 py-3 text-sm hidden lg:table-cell" style={{ color: 'var(--sm-text-muted)' }}>
                           {player.age || '-'}
                         </td>
                       </tr>
