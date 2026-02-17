@@ -136,14 +136,24 @@ export default function BoxScoreClient({ games, initialGameId }: Props) {
       {/* Game Selector */}
       <div className="mb-8">
         <div className="flex items-center justify-between mb-3">
-          <h2 className="text-sm font-semibold text-[var(--text-muted)] uppercase tracking-wider">Select Game</h2>
+          <h2 className="text-sm font-semibold uppercase tracking-wider" style={{ color: 'var(--sm-text-muted)' }}>Select Game</h2>
           <div className="flex gap-2">
             <button onClick={() => scrollGames('left')} disabled={!canScrollLeft}
-              className={`p-2 rounded-lg border transition-all ${canScrollLeft ? 'bg-[var(--bg-elevated)] border-[var(--border-subtle)] hover:bg-[var(--bg-hover)] text-[var(--text-primary)]' : 'bg-[var(--bg-tertiary)] border-transparent text-[var(--text-muted)] cursor-not-allowed opacity-40'}`}>
+              className={`p-2 rounded-lg transition-all ${!canScrollLeft ? 'cursor-not-allowed opacity-40' : 'hover:brightness-95 dark:hover:brightness-110'}`}
+              style={{
+                backgroundColor: canScrollLeft ? 'var(--sm-card)' : 'var(--sm-surface)',
+                border: canScrollLeft ? '1px solid var(--sm-border)' : '1px solid transparent',
+                color: canScrollLeft ? 'var(--sm-text)' : 'var(--sm-text-muted)',
+              }}>
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" /></svg>
             </button>
             <button onClick={() => scrollGames('right')} disabled={!canScrollRight}
-              className={`p-2 rounded-lg border transition-all ${canScrollRight ? 'bg-[var(--bg-elevated)] border-[var(--border-subtle)] hover:bg-[var(--bg-hover)] text-[var(--text-primary)]' : 'bg-[var(--bg-tertiary)] border-transparent text-[var(--text-muted)] cursor-not-allowed opacity-40'}`}>
+              className={`p-2 rounded-lg transition-all ${!canScrollRight ? 'cursor-not-allowed opacity-40' : 'hover:brightness-95 dark:hover:brightness-110'}`}
+              style={{
+                backgroundColor: canScrollRight ? 'var(--sm-card)' : 'var(--sm-surface)',
+                border: canScrollRight ? '1px solid var(--sm-border)' : '1px solid transparent',
+                color: canScrollRight ? 'var(--sm-text)' : 'var(--sm-text-muted)',
+              }}>
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" /></svg>
             </button>
           </div>
@@ -155,20 +165,25 @@ export default function BoxScoreClient({ games, initialGameId }: Props) {
             const isWin = game.result === 'W'
             return (
               <button key={game.gameId} onClick={() => setSelectedGameId(game.gameId)}
-                className={`flex-shrink-0 flex items-center gap-3 px-4 py-3 rounded-xl border transition-all ${isSelected ? 'bg-[#0B162A] border-[#C83200] text-white ring-2 ring-[#C83200]/30' : 'bg-[var(--bg-elevated)] border-[var(--border-subtle)] hover:border-[var(--border-strong)] hover:shadow-md'}`}>
+                className={`flex-shrink-0 flex items-center gap-3 px-4 py-3 rounded-xl transition-all ${isSelected ? 'text-white' : 'hover:brightness-95 dark:hover:brightness-110 hover:shadow-md'}`}
+                style={{
+                  backgroundColor: isSelected ? '#0B162A' : 'var(--sm-card)',
+                  border: isSelected ? '1px solid #C83200' : '1px solid var(--sm-border)',
+                  ...(isSelected ? { boxShadow: '0 0 0 3px rgba(200, 50, 0, 0.3)' } : {}),
+                }}>
                 {game.opponentLogo && <Image src={game.opponentLogo} alt={game.opponent} width={36} height={36} className="w-9 h-9" unoptimized />}
                 <div className="text-left">
-                  <div className={`text-xs ${isSelected ? 'text-white/60' : 'text-[var(--text-muted)]'}`}>
+                  <div className="text-xs" style={{ color: isSelected ? 'rgba(255,255,255,0.6)' : 'var(--sm-text-muted)' }}>
                     {game.playoffRound || `Week ${game.week}`} &bull; {gameDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
                   </div>
                   <div className="flex items-center gap-2">
-                    <span className={`font-semibold ${isSelected ? 'text-white' : 'text-[var(--text-primary)]'}`}>
+                    <span className="font-semibold" style={{ color: isSelected ? '#ffffff' : 'var(--sm-text)' }}>
                       {game.homeAway === 'home' ? 'vs' : '@'} {game.opponent}
                     </span>
                   </div>
                   <div className="flex items-center gap-2 mt-1">
                     <span className={`text-sm font-bold ${isWin ? 'text-green-500' : 'text-red-500'}`}>{game.result}</span>
-                    <span className={`text-sm font-semibold ${isSelected ? 'text-white' : 'text-[var(--text-primary)]'}`}>{game.bearsScore}-{game.oppScore}</span>
+                    <span className="text-sm font-semibold" style={{ color: isSelected ? '#ffffff' : 'var(--sm-text)' }}>{game.bearsScore}-{game.oppScore}</span>
                   </div>
                 </div>
               </button>
@@ -179,15 +194,15 @@ export default function BoxScoreClient({ games, initialGameId }: Props) {
 
       {/* Box Score Display */}
       {loading ? (
-        <div className="bg-[var(--bg-elevated)] border border-[var(--border-subtle)] rounded-2xl p-12">
+        <div className="rounded-2xl p-12" style={{ backgroundColor: 'var(--sm-card)', border: '1px solid var(--sm-border)' }}>
           <div className="flex items-center justify-center gap-3">
             <div className="w-6 h-6 border-2 border-[#C83200] border-t-transparent rounded-full animate-spin" />
-            <span className="text-[var(--text-muted)]">Loading box score...</span>
+            <span style={{ color: 'var(--sm-text-muted)' }}>Loading box score...</span>
           </div>
         </div>
       ) : !boxScore || !selectedGame ? (
-        <div className="bg-[var(--bg-elevated)] border border-[var(--border-subtle)] rounded-2xl p-12 text-center">
-          <p className="text-[var(--text-muted)]">Select a game to view the box score</p>
+        <div className="rounded-2xl p-12 text-center" style={{ backgroundColor: 'var(--sm-card)', border: '1px solid var(--sm-border)' }}>
+          <p style={{ color: 'var(--sm-text-muted)' }}>Select a game to view the box score</p>
         </div>
       ) : (
         <div className="space-y-6">
@@ -228,25 +243,37 @@ export default function BoxScoreClient({ games, initialGameId }: Props) {
           </div>
 
           {/* Team Toggle */}
-          <div className="flex rounded-xl overflow-hidden border border-[var(--border-subtle)]">
+          <div className="flex rounded-xl overflow-hidden" style={{ border: '1px solid var(--sm-border)' }}>
             <button onClick={() => setActiveTeam('bears')}
-              className={`flex-1 flex items-center justify-center gap-2 px-4 py-3 font-semibold transition-colors ${activeTeam === 'bears' ? 'bg-[#0B162A] text-white' : 'bg-[var(--bg-elevated)] text-[var(--text-muted)] hover:bg-[var(--bg-hover)]'}`}>
+              className="flex-1 flex items-center justify-center gap-2 px-4 py-3 font-semibold transition-all hover:brightness-95 dark:hover:brightness-110"
+              style={{
+                backgroundColor: activeTeam === 'bears' ? '#0B162A' : 'var(--sm-card)',
+                color: activeTeam === 'bears' ? '#ffffff' : 'var(--sm-text-muted)',
+              }}>
               <Image src={BEARS_LOGO} alt="Bears" width={24} height={24} className="w-6 h-6" unoptimized />
               Bears
             </button>
             <button onClick={() => setActiveTeam('opponent')}
-              className={`flex-1 flex items-center justify-center gap-2 px-4 py-3 font-semibold transition-colors ${activeTeam === 'opponent' ? 'bg-[#0B162A] text-white' : 'bg-[var(--bg-elevated)] text-[var(--text-muted)] hover:bg-[var(--bg-hover)]'}`}>
+              className="flex-1 flex items-center justify-center gap-2 px-4 py-3 font-semibold transition-all hover:brightness-95 dark:hover:brightness-110"
+              style={{
+                backgroundColor: activeTeam === 'opponent' ? '#0B162A' : 'var(--sm-card)',
+                color: activeTeam === 'opponent' ? '#ffffff' : 'var(--sm-text-muted)',
+              }}>
               <Image src={boxScore.opponent.logo} alt={boxScore.opponent.abbrev} width={24} height={24} className="w-6 h-6" unoptimized />
               {boxScore.opponent.fullName}
             </button>
           </div>
 
           {/* Stats Tabs */}
-          <div className="bg-[var(--bg-elevated)] border border-[var(--border-subtle)] rounded-2xl overflow-hidden">
-            <div className="flex border-b border-[var(--border-subtle)]">
+          <div className="rounded-2xl overflow-hidden" style={{ backgroundColor: 'var(--sm-card)', border: '1px solid var(--sm-border)' }}>
+            <div className="flex" style={{ borderBottom: '1px solid var(--sm-border)' }}>
               {(['passing', 'rushing', 'receiving', 'defense'] as const).map((tab) => (
                 <button key={tab} onClick={() => setActiveTab(tab)}
-                  className={`flex-1 px-6 py-4 text-sm font-semibold uppercase tracking-wider transition-colors ${activeTab === tab ? 'bg-[#C83200] text-white' : 'text-[var(--text-muted)] hover:bg-[var(--bg-hover)]'}`}>
+                  className="flex-1 px-6 py-4 text-sm font-semibold uppercase tracking-wider transition-all hover:brightness-95 dark:hover:brightness-110"
+                  style={{
+                    backgroundColor: activeTab === tab ? '#C83200' : 'transparent',
+                    color: activeTab === tab ? '#ffffff' : 'var(--sm-text-muted)',
+                  }}>
                   {tab}
                 </button>
               ))}
@@ -282,7 +309,7 @@ function PassingTable({ players }: { players: PlayerStats[] }) {
     <div className="overflow-x-auto">
       <table className="w-full">
         <thead>
-          <tr className="text-left text-xs text-[var(--text-muted)] uppercase tracking-wider border-b border-[var(--border-subtle)]">
+          <tr className="text-left text-xs uppercase tracking-wider" style={{ color: 'var(--sm-text-muted)', borderBottom: '1px solid var(--sm-border)' }}>
             <th className="px-4 py-3">Player</th>
             <th className="px-4 py-3 text-center">C/ATT</th>
             <th className="px-4 py-3 text-center">YDS</th>
@@ -293,11 +320,11 @@ function PassingTable({ players }: { players: PlayerStats[] }) {
         </thead>
         <tbody>
           {players.map((player) => (
-            <tr key={player.playerId} className="border-b border-[var(--border-subtle)] last:border-0 hover:bg-[var(--bg-hover)]">
+            <tr key={player.playerId} className="last:border-0 transition-all hover:brightness-95 dark:hover:brightness-110" style={{ borderBottom: '1px solid var(--sm-border)' }}>
               <td className="px-4 py-3"><PlayerCell player={player} /></td>
               <td className="px-4 py-3 text-center font-mono">{player.passingCmp}/{player.passingAtt}</td>
               <td className="px-4 py-3 text-center font-bold">{player.passingYds}</td>
-              <td className="px-4 py-3 text-center font-mono text-[var(--text-secondary)]">
+              <td className="px-4 py-3 text-center font-mono" style={{ color: 'var(--sm-text-dim)' }}>
                 {player.passingAtt ? (player.passingYds! / player.passingAtt).toFixed(1) : '-'}
               </td>
               <td className="px-4 py-3 text-center font-bold text-green-500">{player.passingTd}</td>
@@ -316,7 +343,7 @@ function RushingTable({ players }: { players: PlayerStats[] }) {
     <div className="overflow-x-auto">
       <table className="w-full">
         <thead>
-          <tr className="text-left text-xs text-[var(--text-muted)] uppercase tracking-wider border-b border-[var(--border-subtle)]">
+          <tr className="text-left text-xs uppercase tracking-wider" style={{ color: 'var(--sm-text-muted)', borderBottom: '1px solid var(--sm-border)' }}>
             <th className="px-4 py-3">Player</th>
             <th className="px-4 py-3 text-center">CAR</th>
             <th className="px-4 py-3 text-center">YDS</th>
@@ -326,11 +353,11 @@ function RushingTable({ players }: { players: PlayerStats[] }) {
         </thead>
         <tbody>
           {players.map((player) => (
-            <tr key={player.playerId} className="border-b border-[var(--border-subtle)] last:border-0 hover:bg-[var(--bg-hover)]">
+            <tr key={player.playerId} className="last:border-0 transition-all hover:brightness-95 dark:hover:brightness-110" style={{ borderBottom: '1px solid var(--sm-border)' }}>
               <td className="px-4 py-3"><PlayerCell player={player} /></td>
               <td className="px-4 py-3 text-center font-mono">{player.rushingCar}</td>
               <td className="px-4 py-3 text-center font-bold">{player.rushingYds}</td>
-              <td className="px-4 py-3 text-center font-mono text-[var(--text-secondary)]">
+              <td className="px-4 py-3 text-center font-mono" style={{ color: 'var(--sm-text-dim)' }}>
                 {player.rushingCar ? (player.rushingYds! / player.rushingCar).toFixed(1) : '-'}
               </td>
               <td className="px-4 py-3 text-center font-bold text-green-500">{player.rushingTd}</td>
@@ -348,7 +375,7 @@ function ReceivingTable({ players }: { players: PlayerStats[] }) {
     <div className="overflow-x-auto">
       <table className="w-full">
         <thead>
-          <tr className="text-left text-xs text-[var(--text-muted)] uppercase tracking-wider border-b border-[var(--border-subtle)]">
+          <tr className="text-left text-xs uppercase tracking-wider" style={{ color: 'var(--sm-text-muted)', borderBottom: '1px solid var(--sm-border)' }}>
             <th className="px-4 py-3">Player</th>
             <th className="px-4 py-3 text-center">REC</th>
             <th className="px-4 py-3 text-center">TGTS</th>
@@ -359,12 +386,12 @@ function ReceivingTable({ players }: { players: PlayerStats[] }) {
         </thead>
         <tbody>
           {players.map((player) => (
-            <tr key={player.playerId} className="border-b border-[var(--border-subtle)] last:border-0 hover:bg-[var(--bg-hover)]">
+            <tr key={player.playerId} className="last:border-0 transition-all hover:brightness-95 dark:hover:brightness-110" style={{ borderBottom: '1px solid var(--sm-border)' }}>
               <td className="px-4 py-3"><PlayerCell player={player} /></td>
               <td className="px-4 py-3 text-center font-mono">{player.receivingRec}</td>
-              <td className="px-4 py-3 text-center font-mono text-[var(--text-secondary)]">{player.receivingTgts}</td>
+              <td className="px-4 py-3 text-center font-mono" style={{ color: 'var(--sm-text-dim)' }}>{player.receivingTgts}</td>
               <td className="px-4 py-3 text-center font-bold">{player.receivingYds}</td>
-              <td className="px-4 py-3 text-center font-mono text-[var(--text-secondary)]">
+              <td className="px-4 py-3 text-center font-mono" style={{ color: 'var(--sm-text-dim)' }}>
                 {player.receivingRec ? (player.receivingYds! / player.receivingRec).toFixed(1) : '-'}
               </td>
               <td className="px-4 py-3 text-center font-bold text-green-500">{player.receivingTd}</td>
@@ -382,7 +409,7 @@ function DefenseTable({ players }: { players: PlayerStats[] }) {
     <div className="overflow-x-auto">
       <table className="w-full">
         <thead>
-          <tr className="text-left text-xs text-[var(--text-muted)] uppercase tracking-wider border-b border-[var(--border-subtle)]">
+          <tr className="text-left text-xs uppercase tracking-wider" style={{ color: 'var(--sm-text-muted)', borderBottom: '1px solid var(--sm-border)' }}>
             <th className="px-4 py-3">Player</th>
             <th className="px-4 py-3 text-center">TOT</th>
             <th className="px-4 py-3 text-center">SACK</th>
@@ -392,7 +419,7 @@ function DefenseTable({ players }: { players: PlayerStats[] }) {
         </thead>
         <tbody>
           {players.map((player) => (
-            <tr key={player.playerId} className="border-b border-[var(--border-subtle)] last:border-0 hover:bg-[var(--bg-hover)]">
+            <tr key={player.playerId} className="last:border-0 transition-all hover:brightness-95 dark:hover:brightness-110" style={{ borderBottom: '1px solid var(--sm-border)' }}>
               <td className="px-4 py-3"><PlayerCell player={player} /></td>
               <td className="px-4 py-3 text-center font-bold">{player.defTacklesTotal}</td>
               <td className="px-4 py-3 text-center font-bold text-[#C83200]">{player.defSacks || '-'}</td>
@@ -411,22 +438,22 @@ function PlayerCell({ player }: { player: PlayerStats }) {
     <div className="flex items-center gap-3">
       {player.headshotUrl ? (
         <Image src={player.headshotUrl} alt={player.name} width={36} height={36}
-          className="w-9 h-9 rounded-full object-cover border border-[var(--border-subtle)]" unoptimized />
+          className="w-9 h-9 rounded-full object-cover" style={{ border: '1px solid var(--sm-border)' }} unoptimized />
       ) : (
-        <div className="w-9 h-9 rounded-full bg-[var(--bg-tertiary)] flex items-center justify-center">
-          <span className="text-xs font-bold text-[var(--text-muted)]">
+        <div className="w-9 h-9 rounded-full flex items-center justify-center" style={{ backgroundColor: 'var(--sm-surface)' }}>
+          <span className="text-xs font-bold" style={{ color: 'var(--sm-text-muted)' }}>
             {player.name.split(' ').map(n => n[0]).join('')}
           </span>
         </div>
       )}
       <div>
-        <div className="font-medium text-[var(--text-primary)]">{player.name}</div>
-        <div className="text-xs text-[var(--text-muted)]">{player.position}</div>
+        <div className="font-medium" style={{ color: 'var(--sm-text)' }}>{player.name}</div>
+        <div className="text-xs" style={{ color: 'var(--sm-text-muted)' }}>{player.position}</div>
       </div>
     </div>
   )
 }
 
 function EmptyStats({ message }: { message: string }) {
-  return <div className="py-12 text-center text-[var(--text-muted)]">{message}</div>
+  return <div className="py-12 text-center" style={{ color: 'var(--sm-text-muted)' }}>{message}</div>
 }

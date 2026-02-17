@@ -96,14 +96,24 @@ export default function BoxScoreClient({ games, initialGameId }: { games: Game[]
       {/* Game Selector */}
       <div className="mb-8">
         <div className="flex items-center justify-between mb-3">
-          <h2 className="text-sm font-semibold text-[var(--text-muted)] uppercase tracking-wider">Select Game</h2>
+          <h2 className="text-sm font-semibold uppercase tracking-wider" style={{ color: 'var(--sm-text-muted)' }}>Select Game</h2>
           <div className="flex gap-2">
             <button onClick={() => scroll('left')} disabled={!canScrollLeft}
-              className={`p-2 rounded-lg border transition-all ${canScrollLeft ? 'bg-[var(--bg-elevated)] border-[var(--border-subtle)] hover:bg-[var(--bg-hover)] text-[var(--text-primary)]' : 'bg-[var(--bg-tertiary)] border-transparent text-[var(--text-muted)] cursor-not-allowed opacity-40'}`}>
+              className={`p-2 rounded-lg transition-all ${!canScrollLeft ? 'cursor-not-allowed opacity-40' : 'hover:brightness-95 dark:hover:brightness-110'}`}
+              style={{
+                backgroundColor: canScrollLeft ? 'var(--sm-card)' : 'var(--sm-surface)',
+                border: canScrollLeft ? '1px solid var(--sm-border)' : '1px solid transparent',
+                color: canScrollLeft ? 'var(--sm-text)' : 'var(--sm-text-muted)',
+              }}>
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" /></svg>
             </button>
             <button onClick={() => scroll('right')} disabled={!canScrollRight}
-              className={`p-2 rounded-lg border transition-all ${canScrollRight ? 'bg-[var(--bg-elevated)] border-[var(--border-subtle)] hover:bg-[var(--bg-hover)] text-[var(--text-primary)]' : 'bg-[var(--bg-tertiary)] border-transparent text-[var(--text-muted)] cursor-not-allowed opacity-40'}`}>
+              className={`p-2 rounded-lg transition-all ${!canScrollRight ? 'cursor-not-allowed opacity-40' : 'hover:brightness-95 dark:hover:brightness-110'}`}
+              style={{
+                backgroundColor: canScrollRight ? 'var(--sm-card)' : 'var(--sm-surface)',
+                border: canScrollRight ? '1px solid var(--sm-border)' : '1px solid transparent',
+                color: canScrollRight ? 'var(--sm-text)' : 'var(--sm-text-muted)',
+              }}>
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" /></svg>
             </button>
           </div>
@@ -114,18 +124,23 @@ export default function BoxScoreClient({ games, initialGameId }: { games: Game[]
             const isWin = game.result === 'W'
             return (
               <button key={game.gameId} onClick={() => setSelectedGameId(game.gameId)}
-                className={`flex-shrink-0 flex items-center gap-3 px-4 py-3 rounded-xl border transition-all ${isSelected ? 'bg-[#0E0E0E] border-[#CE1141] text-white ring-2 ring-[#CE1141]/30' : 'bg-[var(--bg-elevated)] border-[var(--border-subtle)] hover:border-[var(--border-strong)] hover:shadow-md'}`}>
+                className={`flex-shrink-0 flex items-center gap-3 px-4 py-3 rounded-xl transition-all ${isSelected ? 'text-white' : 'hover:brightness-95 dark:hover:brightness-110 hover:shadow-md'}`}
+                style={{
+                  backgroundColor: isSelected ? '#0E0E0E' : 'var(--sm-card)',
+                  border: isSelected ? '1px solid #CE1141' : '1px solid var(--sm-border)',
+                  ...(isSelected ? { boxShadow: '0 0 0 3px rgba(206, 17, 65, 0.3)' } : {}),
+                }}>
                 {game.opponentLogo && <Image src={game.opponentLogo} alt={game.opponent} width={36} height={36} className="w-9 h-9" unoptimized />}
                 <div className="text-left">
-                  <div className={`text-xs ${isSelected ? 'text-white/60' : 'text-[var(--text-muted)]'}`}>
+                  <div className="text-xs" style={{ color: isSelected ? 'rgba(255,255,255,0.6)' : 'var(--sm-text-muted)' }}>
                     {new Date(game.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
                   </div>
-                  <div className={`font-semibold ${isSelected ? 'text-white' : 'text-[var(--text-primary)]'}`}>
+                  <div className="font-semibold" style={{ color: isSelected ? '#ffffff' : 'var(--sm-text)' }}>
                     {game.homeAway === 'home' ? 'vs' : '@'} {game.opponent}
                   </div>
                   <div className="flex items-center gap-2 mt-1">
                     <span className={`text-sm font-bold ${isWin ? 'text-green-500' : 'text-red-500'}`}>{game.result}</span>
-                    <span className={`text-sm font-semibold ${isSelected ? 'text-white' : 'text-[var(--text-primary)]'}`}>{game.bullsScore}-{game.oppScore}</span>
+                    <span className="text-sm font-semibold" style={{ color: isSelected ? '#ffffff' : 'var(--sm-text)' }}>{game.bullsScore}-{game.oppScore}</span>
                   </div>
                 </div>
               </button>
@@ -136,15 +151,15 @@ export default function BoxScoreClient({ games, initialGameId }: { games: Game[]
 
       {/* Box Score */}
       {loading ? (
-        <div className="bg-[var(--bg-elevated)] border border-[var(--border-subtle)] rounded-2xl p-12">
+        <div className="rounded-2xl p-12" style={{ backgroundColor: 'var(--sm-card)', border: '1px solid var(--sm-border)' }}>
           <div className="flex items-center justify-center gap-3">
             <div className="w-6 h-6 border-2 border-[#CE1141] border-t-transparent rounded-full animate-spin" />
-            <span className="text-[var(--text-muted)]">Loading box score...</span>
+            <span style={{ color: 'var(--sm-text-muted)' }}>Loading box score...</span>
           </div>
         </div>
       ) : !boxScore ? (
-        <div className="bg-[var(--bg-elevated)] border border-[var(--border-subtle)] rounded-2xl p-12 text-center">
-          <p className="text-[var(--text-muted)]">Select a game to view the box score</p>
+        <div className="rounded-2xl p-12 text-center" style={{ backgroundColor: 'var(--sm-card)', border: '1px solid var(--sm-border)' }}>
+          <p style={{ color: 'var(--sm-text-muted)' }}>Select a game to view the box score</p>
         </div>
       ) : (
         <div className="space-y-6">
@@ -178,32 +193,40 @@ export default function BoxScoreClient({ games, initialGameId }: { games: Game[]
           </div>
 
           {/* Team Toggle */}
-          <div className="flex rounded-xl overflow-hidden border border-[var(--border-subtle)]">
+          <div className="flex rounded-xl overflow-hidden" style={{ border: '1px solid var(--sm-border)' }}>
             <button onClick={() => setActiveTeam('bulls')}
-              className={`flex-1 flex items-center justify-center gap-2 px-4 py-3 font-semibold transition-colors ${activeTeam === 'bulls' ? 'bg-[#CE1141] text-white' : 'bg-[var(--bg-elevated)] text-[var(--text-muted)] hover:bg-[var(--bg-hover)]'}`}>
+              className="flex-1 flex items-center justify-center gap-2 px-4 py-3 font-semibold transition-all hover:brightness-95 dark:hover:brightness-110"
+              style={{
+                backgroundColor: activeTeam === 'bulls' ? '#CE1141' : 'var(--sm-card)',
+                color: activeTeam === 'bulls' ? '#ffffff' : 'var(--sm-text-muted)',
+              }}>
               <Image src={BULLS_LOGO} alt="Bulls" width={24} height={24} className="w-6 h-6" unoptimized />
               Bulls
             </button>
             <button onClick={() => setActiveTeam('opponent')}
-              className={`flex-1 flex items-center justify-center gap-2 px-4 py-3 font-semibold transition-colors ${activeTeam === 'opponent' ? 'bg-[#CE1141] text-white' : 'bg-[var(--bg-elevated)] text-[var(--text-muted)] hover:bg-[var(--bg-hover)]'}`}>
+              className="flex-1 flex items-center justify-center gap-2 px-4 py-3 font-semibold transition-all hover:brightness-95 dark:hover:brightness-110"
+              style={{
+                backgroundColor: activeTeam === 'opponent' ? '#CE1141' : 'var(--sm-card)',
+                color: activeTeam === 'opponent' ? '#ffffff' : 'var(--sm-text-muted)',
+              }}>
               <Image src={boxScore.opponent.logo} alt={boxScore.opponent.abbrev} width={24} height={24} className="w-6 h-6" unoptimized />
               {boxScore.opponent.fullName}
             </button>
           </div>
 
           {/* Stats Table */}
-          <div className="bg-[var(--bg-elevated)] border border-[var(--border-subtle)] rounded-2xl overflow-hidden">
-            <div className="p-4 border-b border-[var(--border-subtle)]">
-              <h3 className="font-bold text-[var(--text-primary)]">Player Stats</h3>
+          <div className="rounded-2xl overflow-hidden" style={{ backgroundColor: 'var(--sm-card)', border: '1px solid var(--sm-border)' }}>
+            <div className="p-4" style={{ borderBottom: '1px solid var(--sm-border)' }}>
+              <h3 className="font-bold" style={{ color: 'var(--sm-text)' }}>Player Stats</h3>
             </div>
             <div className="p-4">
               {currentPlayers.length === 0 ? (
-                <div className="py-12 text-center text-[var(--text-muted)]">No player stats available</div>
+                <div className="py-12 text-center" style={{ color: 'var(--sm-text-muted)' }}>No player stats available</div>
               ) : (
                 <div className="overflow-x-auto">
                   <table className="w-full">
                     <thead>
-                      <tr className="text-left text-xs text-[var(--text-muted)] uppercase tracking-wider border-b border-[var(--border-subtle)]">
+                      <tr className="text-left text-xs uppercase tracking-wider" style={{ color: 'var(--sm-text-muted)', borderBottom: '1px solid var(--sm-border)' }}>
                         <th className="px-3 py-3">Player</th>
                         <th className="px-2 py-3 text-center">MIN</th>
                         <th className="px-2 py-3 text-center">PTS</th>
@@ -219,23 +242,23 @@ export default function BoxScoreClient({ games, initialGameId }: { games: Game[]
                     </thead>
                     <tbody>
                       {currentPlayers.map((p, i) => (
-                        <tr key={i} className="border-b border-[var(--border-subtle)] last:border-0 hover:bg-[var(--bg-hover)]">
+                        <tr key={i} className="last:border-0 transition-all hover:brightness-95 dark:hover:brightness-110" style={{ borderBottom: '1px solid var(--sm-border)' }}>
                           <td className="px-3 py-3">
                             <div className="flex items-center gap-2">
                               {p.headshotUrl ? (
-                                <Image src={p.headshotUrl} alt={p.name} width={32} height={32} className="w-8 h-8 rounded-full object-cover border border-[var(--border-subtle)]" unoptimized />
+                                <Image src={p.headshotUrl} alt={p.name} width={32} height={32} className="w-8 h-8 rounded-full object-cover" style={{ border: '1px solid var(--sm-border)' }} unoptimized />
                               ) : (
-                                <div className="w-8 h-8 rounded-full bg-[var(--bg-tertiary)] flex items-center justify-center">
-                                  <span className="text-xs font-bold text-[var(--text-muted)]">{p.name.split(' ').map(n => n[0]).join('')}</span>
+                                <div className="w-8 h-8 rounded-full flex items-center justify-center" style={{ backgroundColor: 'var(--sm-surface)' }}>
+                                  <span className="text-xs font-bold" style={{ color: 'var(--sm-text-muted)' }}>{p.name.split(' ').map(n => n[0]).join('')}</span>
                                 </div>
                               )}
                               <div>
-                                <div className="font-medium text-[var(--text-primary)] text-sm">{p.name}</div>
-                                <div className="text-xs text-[var(--text-muted)]">{p.position}</div>
+                                <div className="font-medium text-sm" style={{ color: 'var(--sm-text)' }}>{p.name}</div>
+                                <div className="text-xs" style={{ color: 'var(--sm-text-muted)' }}>{p.position}</div>
                               </div>
                             </div>
                           </td>
-                          <td className="px-2 py-3 text-center text-sm text-[var(--text-secondary)]">{p.minutes || '-'}</td>
+                          <td className="px-2 py-3 text-center text-sm" style={{ color: 'var(--sm-text-dim)' }}>{p.minutes || '-'}</td>
                           <td className="px-2 py-3 text-center font-bold text-sm">{p.points ?? '-'}</td>
                           <td className="px-2 py-3 text-center text-sm">{p.rebounds ?? '-'}</td>
                           <td className="px-2 py-3 text-center text-sm">{p.assists ?? '-'}</td>
