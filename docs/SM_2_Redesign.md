@@ -886,6 +886,148 @@ Added team taglines map (Bears: "Monsters of the Midway", Bulls: "See Red", etc.
 
 ---
 
+## PHASE 3: DATA PAGES REDESIGN
+
+> Source: `/Users/christopherburhans/Downloads/redesign_data_pages.md`
+
+---
+
+### SECTION 27: Schedule Pages (Bears + Bulls)
+**Status:** COMPLETE
+**Files:**
+- `src/app/chicago-bears/schedule/page.tsx`
+- `src/app/chicago-bulls/schedule/page.tsx`
+
+**Task:** Convert Bears and Bulls schedule pages from old `--bg-elevated`/`--border-subtle`/`--text-primary` Tailwind bracket classes to inline `style={{}}` with `--sm-*` CSS variables. (Blackhawks, Cubs, White Sox schedule pages were already done in commit `5548440a`.)
+
+**Changes applied:**
+- Next Game Highlight card: `bg-[var(--bg-elevated)]` → `style={{ backgroundColor: 'var(--sm-card)' }}`, added team accent border-left
+- "UP NEXT" badge: Tailwind bracket class → inline pill style with rgba team color background
+- Record Summary card: converted to --sm-* inline styles with upgraded font sizing (22px, weight 800, Montserrat)
+- Schedule table container: bracket-class bg/border → inline --sm-card, --sm-border, --sm-radius-xl
+- GameRow component: border-left win/loss coloring, all text converted to inline --sm-* styles
+- W/L/T badges: Tailwind green/red/yellow → inline rgba pill badges
+- Empty state: converted to inline styles
+
+**Notes:**
+All 5 schedule pages now use --sm-* variables consistently. Bears has 36 --sm-* refs, Bulls/Blackhawks have 33 each. No old-pattern variables remain.
+
+---
+
+### SECTION 28: Scores Pages (All 5 Teams)
+**Status:** COMPLETE
+**Files:**
+- `src/app/chicago-bears/scores/page.tsx`
+- `src/app/chicago-bulls/scores/page.tsx`
+- `src/app/chicago-blackhawks/scores/page.tsx`
+- `src/app/chicago-cubs/scores/page.tsx`
+- `src/app/chicago-white-sox/scores/page.tsx`
+
+**Task:** Convert all 5 scores pages from old Tailwind bracket-class pattern to inline `style={{}}` with `--sm-*` CSS variables.
+
+**Changes applied:**
+- Record Summary card: `bg-[var(--bg-elevated)] border border-[var(--border-subtle)]` → inline --sm-card, --sm-border
+- All text: `text-[var(--text-muted)]` → `style={{ color: 'var(--sm-text-muted)' }}`, `text-[var(--text-primary)]` → --sm-text
+- Team-colored CTA buttons: Tailwind `bg-[#hex]` → inline `style={{ backgroundColor: '#hex' }}`
+- Empty state containers: converted to inline styles
+- Team accent colors preserved (Bears #C83200, Bulls #CE1141, Hawks #CF0A2C, Cubs #0E3386, White Sox #27251F)
+
+**Notes:**
+BoxScoreClient components (client-side) were not modified. Only server page.tsx files updated. Zero old-pattern variables remain.
+
+---
+
+## PHASE 4: UTILITY PAGES REDESIGN
+
+> Source: `/Users/christopherburhans/Downloads/redesign_utility_pages.md`
+
+---
+
+### SECTION 29: About Page
+**Status:** COMPLETE
+**File:** `src/app/about/page.tsx`
+
+**Task:** Full redesign from plain Tailwind `zinc-*`/`prose` to 2030 premium design.
+
+**Changes:**
+- Hero section: gradient background (--sm-surface → --sm-dark), 140px top padding, clamp title (2.5-4rem, 900 weight), subtitle 20px muted
+- Content area: max-width 800px, 80px vertical padding
+- Section headings: 32px, weight 800, Montserrat, -0.5px letter-spacing
+- Paragraphs: 17px, line-height 1.8, --sm-text-muted
+- Values grid: auto-fit minmax(280px, 1fr), --sm-card bg, --sm-border, --sm-radius-lg
+- Contact CTA card with gradient pill button
+- No emojis (text labels only for value icons)
+
+---
+
+### SECTION 30: Contact Page
+**Status:** COMPLETE
+**File:** `src/app/contact/page.tsx`
+
+**Task:** Full redesign from plain Tailwind to 2030 premium design.
+
+**Changes:**
+- Hero section matching about page pattern
+- Form card: --sm-card bg, --sm-border, --sm-radius-xl, 40px padding
+- Labels: 14px, weight 600, --sm-text
+- Inputs: --sm-surface bg, --sm-border, 12px border-radius, --sm-text color
+- Submit button: gradient pill (135deg, #bc0000, #ff4444), white text, 700 weight, full width
+- Contact info section below form, centered, --sm-text-muted
+
+---
+
+### SECTION 31: Privacy Page
+**Status:** COMPLETE
+**File:** `src/app/privacy/page.tsx`
+
+**Task:** Full redesign from plain Tailwind `prose` to 2030 premium legal page layout.
+
+**Changes:**
+- Hero section: 40px title, weight 900, centered + "Last updated" in --sm-text-dim
+- Content: max-width 800px, 80px padding
+- h2: 24px, weight 700, Montserrat, marginTop 48px
+- Paragraphs: 16px, line-height 1.8, --sm-text-muted
+- Lists: paddingLeft 24px, 16px items, --sm-text-muted
+- Strong tags: --sm-text for contrast
+
+---
+
+### SECTION 32: 404 Not Found Page
+**Status:** COMPLETE
+**File:** `src/app/not-found.tsx`
+
+**Task:** Full redesign from plain Tailwind to 2030 premium 404 page.
+
+**Changes:**
+- Full viewport centered: minHeight 100vh, --sm-dark background
+- "404" gradient text: clamp(120px, 20vw, 200px), weight 900, gradient clip
+- Headline: 24px, weight 600, Montserrat, --sm-text
+- Description: 16px, --sm-text-muted, line-height 1.6
+- Primary CTA: gradient pill with home SVG icon
+- Secondary CTA: --sm-card bg with --sm-border, pill with search icon
+- Team links: pill buttons with inline backgroundColor per team color
+- Chicago skyline SVG removed for cleaner 2030 aesthetic
+
+---
+
+### SECTION 33: Build Validation (Phases 3-4)
+**Status:** COMPLETE
+
+**Checklist:**
+- [x] Build succeeds (`next build` completed without errors)
+- [x] All schedule pages compile (5/5)
+- [x] All scores pages compile (5/5)
+- [x] All utility pages compile (4/4)
+- [x] No old-pattern variables remain (--bg-elevated, --border-subtle, --text-primary, --text-muted)
+- [x] No Tailwind bracket-class color references remain in modified files
+- [x] No data fetching logic changed
+- [x] No component structure changed
+- [x] No emojis added
+- [ ] Visual verification in browser (requires manual testing)
+- [ ] Light/dark mode works on all redesigned pages
+
+---
+
 ## EXECUTION ORDER
 
 1. Sections 1-3: Global design tokens, light mode variables, light mode overrides
@@ -902,3 +1044,10 @@ Added team taglines map (Bears: "Monsters of the Midway", Bulls: "See Red", etc.
 12. Section 24: TeamHubLayout redesign
 13. Section 25: Team hub overview pages
 14. Section 26: Team pages build validation
+15. Section 27: Schedule pages (Bears + Bulls)
+16. Section 28: Scores pages (all 5 teams)
+17. Section 29: About page
+18. Section 30: Contact page
+19. Section 31: Privacy page
+20. Section 32: 404 Not Found page
+21. Section 33: Build validation (Phases 3-4)

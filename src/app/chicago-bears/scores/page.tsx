@@ -76,23 +76,23 @@ export default async function BearsScoresPage() {
     >
       <div className="pb-12">
         {/* Record Summary */}
-        <div className="mb-6 p-4 rounded-xl bg-[var(--bg-elevated)] border border-[var(--border-subtle)]">
+        <div className="mb-6 p-4 rounded-xl" style={{ backgroundColor: 'var(--sm-card)', border: '1px solid var(--sm-border)' }}>
           <div className="flex flex-wrap gap-6 justify-center text-center">
             <div>
-              <div className="text-xs text-[var(--text-muted)] uppercase tracking-wider mb-1">Regular Season</div>
-              <div className="text-xl font-bold text-[var(--text-primary)]">
+              <div className="text-xs uppercase tracking-wider mb-1" style={{ color: 'var(--sm-text-muted)' }}>Regular Season</div>
+              <div className="text-xl font-bold" style={{ color: 'var(--sm-text)' }}>
                 {separatedRecord.regularSeason.wins}-{separatedRecord.regularSeason.losses}
                 {separatedRecord.regularSeason.ties > 0 && `-${separatedRecord.regularSeason.ties}`}
               </div>
-              <div className="text-xs text-[var(--text-muted)]">{regularGames.length} games</div>
+              <div className="text-xs" style={{ color: 'var(--sm-text-muted)' }}>{regularGames.length} games</div>
             </div>
             {postseasonGames.length > 0 && (
               <div>
-                <div className="text-xs text-[var(--text-muted)] uppercase tracking-wider mb-1">Postseason</div>
-                <div className="text-xl font-bold text-[#C83200]">
+                <div className="text-xs uppercase tracking-wider mb-1" style={{ color: 'var(--sm-text-muted)' }}>Postseason</div>
+                <div className="text-xl font-bold" style={{ color: '#C83200' }}>
                   {separatedRecord.postseason.wins}-{separatedRecord.postseason.losses}
                 </div>
-                <div className="text-xs text-[var(--text-muted)]">{postseasonGames.length} games</div>
+                <div className="text-xs" style={{ color: 'var(--sm-text-muted)' }}>{postseasonGames.length} games</div>
               </div>
             )}
           </div>
@@ -102,8 +102,8 @@ export default async function BearsScoresPage() {
         {games.length > 0 ? (
           <BoxScoreClient games={games} initialGameId={initialGameId} />
         ) : (
-          <div className="bg-[var(--bg-elevated)] border border-[var(--border-subtle)] rounded-2xl p-12 text-center">
-            <p className="text-[var(--text-muted)]">No completed games yet</p>
+          <div className="rounded-2xl p-12 text-center" style={{ backgroundColor: 'var(--sm-card)', border: '1px solid var(--sm-border)' }}>
+            <p style={{ color: 'var(--sm-text-muted)' }}>No completed games yet</p>
           </div>
         )}
 
@@ -111,7 +111,8 @@ export default async function BearsScoresPage() {
         <div className="mt-8 text-center">
           <Link
             href="/chicago-bears/schedule"
-            className="inline-flex items-center gap-2 px-6 py-3 bg-[#C83200] hover:bg-[#a82900] text-white font-semibold rounded-xl transition-colors"
+            className="inline-flex items-center gap-2 px-6 py-3 font-semibold rounded-xl transition-colors"
+            style={{ backgroundColor: '#C83200', color: '#ffffff' }}
           >
             View Full Schedule
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
