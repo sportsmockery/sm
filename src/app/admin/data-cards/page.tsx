@@ -6,7 +6,7 @@ import { datalabClient } from '@/lib/supabase-datalab'
 interface StatCard {
   id: string
   created_at: string
-  player_name: string
+  title: string
   headline: string
   subheadline: string | null
   hook: string | null
@@ -19,10 +19,9 @@ interface StatCard {
   video_url: string | null
   viral_score: number | null
   status: string
-  tier: string | null
+  tier: number | null
   confidence_level: string | null
   template_id: string | null
-  metadata: Record<string, unknown> | null
 }
 
 interface CardTemplate {
@@ -77,12 +76,12 @@ function getViralColor(score: number): string {
   return match?.color || '#22c55e'
 }
 
-const TIER_COLORS: Record<string, { bg: string; text: string }> = {
-  S: { bg: '#fbbf2420', text: '#d97706' },
-  A: { bg: '#22c55e20', text: '#16a34a' },
-  B: { bg: '#3b82f620', text: '#2563eb' },
-  C: { bg: '#6b728020', text: '#6b7280' },
-  D: { bg: '#ef444420', text: '#ef4444' },
+const TIER_COLORS: Record<number, { bg: string; text: string }> = {
+  1: { bg: '#fbbf2420', text: '#d97706' },
+  2: { bg: '#22c55e20', text: '#16a34a' },
+  3: { bg: '#3b82f620', text: '#2563eb' },
+  4: { bg: '#6b728020', text: '#6b7280' },
+  5: { bg: '#ef444420', text: '#ef4444' },
 }
 
 const CONFIDENCE_COLORS: Record<string, { bg: string; text: string }> = {
@@ -277,7 +276,7 @@ export default function DataCardsPage() {
     try {
       let query = datalabClient
         .from('stat_cards')
-        .select('id, created_at, player_name, headline, subheadline, hook, insight, chicago_take, card_type, svg_content, thumbnail_url, image_url, video_url, viral_score, status, tier, confidence_level, template_id, metadata')
+        .select('id, created_at, title, headline, subheadline, hook, insight, chicago_take, card_type, svg_content, thumbnail_url, image_url, video_url, viral_score, status, tier, confidence_level, template_id')
         .order('created_at', { ascending: false })
       if (statusFilter !== 'all') query = query.eq('status', statusFilter)
       const { data, error } = await query
@@ -499,7 +498,7 @@ export default function DataCardsPage() {
                       <div style={{ position: 'relative', aspectRatio: '9/16', maxHeight: 220, overflow: 'hidden', backgroundColor: '#111' }}>
                         <img
                           src={card.thumbnail_url}
-                          alt={card.headline || card.player_name}
+                          alt={card.headline || card.title}
                           style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
                         />
                         {/* Media badges */}
@@ -565,7 +564,7 @@ export default function DataCardsPage() {
                         fontSize: '14px', fontWeight: 700, color: '#1a1a1a', marginBottom: 10,
                         overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
                       }}>
-                        {card.headline || card.player_name}
+                        {card.headline || card.title}
                       </div>
 
                       {/* Badges row */}
@@ -792,7 +791,7 @@ export default function DataCardsPage() {
             {/* Card header */}
             <div style={{ padding: '20px 24px', borderBottom: '1px solid #f3f4f6' }}>
               <h3 style={{ fontSize: '16px', fontWeight: 700, margin: 0, paddingRight: 40 }}>
-                {selectedCard.headline || selectedCard.player_name}
+                {selectedCard.headline || selectedCard.title}
               </h3>
               {selectedCard.subheadline && (
                 <p style={{ fontSize: '13px', color: '#6b7280', margin: '4px 0 0' }}>
@@ -815,7 +814,7 @@ export default function DataCardsPage() {
                 }}>
                   {selectedCard.status}
                 </span>
-                {selectedCard.tier && (() => {
+                {selectedCard.tier != null && (() => {
                   const tc = TIER_COLORS[selectedCard.tier] || { bg: '#6b728020', text: '#6b7280' }
                   return (
                     <span style={{
@@ -884,7 +883,7 @@ export default function DataCardsPage() {
               <div style={{ padding: 24, display: 'flex', justifyContent: 'center', backgroundColor: '#f9fafb' }}>
                 <img
                   src={selectedCard.image_url}
-                  alt={selectedCard.headline || selectedCard.player_name}
+                  alt={selectedCard.headline || selectedCard.title}
                   style={{ maxWidth: '100%', maxHeight: 600, borderRadius: 8 }}
                 />
               </div>

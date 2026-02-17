@@ -494,8 +494,6 @@ export async function getBullsSchedule(season?: number): Promise<BullsGame[]> {
     return []
   }
 
-  console.log(`[Bulls Schedule] Fetching for season ${targetSeason}`)
-
   // Note: Removed game_type filter - may not exist in database
   // Datalab integration guide shows no game_type filter for schedules
   const { data, error } = await datalabAdmin
@@ -522,11 +520,8 @@ export async function getBullsSchedule(season?: number): Promise<BullsGame[]> {
     return []
   }
 
-  console.log(`[Bulls Schedule] Found ${data?.length || 0} games for season ${targetSeason}`)
-
   // If no games in current season, fall back to previous season
   if (!data || data.length === 0) {
-    console.log(`[Bulls Schedule] No games for season ${targetSeason}, falling back to ${targetSeason - 1}`)
     const { data: prevData, error: prevError } = await datalabAdmin
       .from('bulls_games_master')
       .select(`
