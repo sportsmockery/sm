@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, useRef } from 'react'
 import { datalabClient } from '@/lib/supabase-datalab'
 
 interface StatCard {
@@ -8,10 +8,19 @@ interface StatCard {
   created_at: string
   player_name: string
   headline: string
+  subheadline: string | null
+  hook: string | null
+  insight: string | null
+  chicago_take: string | null
   card_type: string
   svg_content: string
+  thumbnail_url: string | null
+  image_url: string | null
+  video_url: string | null
   viral_score: number | null
   status: string
+  tier: string | null
+  confidence_level: string | null
   template_id: string | null
   metadata: Record<string, unknown> | null
 }
@@ -23,6 +32,13 @@ interface CardTemplate {
   times_used: number
   avg_viral_score: number | null
   status: string
+}
+
+interface VideoManifest {
+  frames: { url: string; duration_ms: number }[]
+  total_duration_ms: number
+  width: number
+  height: number
 }
 
 type Tab = 'library' | 'generate' | 'templates'
@@ -42,6 +58,11 @@ const CARD_TYPE_COLORS: Record<string, { bg: string; text: string }> = {
   game_recap: { bg: '#ef444415', text: '#ef4444' },
   season_leader: { bg: '#f59e0b15', text: '#f59e0b' },
   trade_impact: { bg: '#06b6d415', text: '#06b6d4' },
+  offseason_trade_rumor: { bg: '#f9731615', text: '#f97316' },
+  offseason_draft_prospect: { bg: '#a855f715', text: '#a855f7' },
+  offseason_free_agent: { bg: '#14b8a615', text: '#14b8a6' },
+  offseason_roster_projection: { bg: '#3b82f615', text: '#3b82f6' },
+  offseason_historical: { bg: '#f59e0b15', text: '#f59e0b' },
 }
 
 const VIRAL_COLORS = [
@@ -56,6 +77,183 @@ function getViralColor(score: number): string {
   return match?.color || '#22c55e'
 }
 
+const TIER_COLORS: Record<string, { bg: string; text: string }> = {
+  S: { bg: '#fbbf2420', text: '#d97706' },
+  A: { bg: '#22c55e20', text: '#16a34a' },
+  B: { bg: '#3b82f620', text: '#2563eb' },
+  C: { bg: '#6b728020', text: '#6b7280' },
+  D: { bg: '#ef444420', text: '#ef4444' },
+}
+
+const CONFIDENCE_COLORS: Record<string, { bg: string; text: string }> = {
+  high: { bg: '#22c55e20', text: '#16a34a' },
+  medium: { bg: '#f59e0b20', text: '#d97706' },
+  low: { bg: '#ef444420', text: '#ef4444' },
+}
+
+// --- Video Player Component ---
+function VideoPlayer({ videoUrl }: { videoUrl: string }) {
+  const [manifest, setManifest] = useState<VideoManifest | null>(null)
+  const [currentFrame, setCurrentFrame] = useState(0)
+  const [playing, setPlaying] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+  const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+
+  useEffect(() => {
+    let cancelled = false
+    async function loadManifest() {
+      try {
+        const res = await fetch(videoUrl)
+        if (!res.ok) throw new Error(`Failed to load video manifest: ${res.status}`)
+        const data = await res.json()
+        if (!cancelled) setManifest(data)
+      } catch (e) {
+        if (!cancelled) setError(e instanceof Error ? e.message : 'Failed to load video')
+      }
+    }
+    loadManifest()
+    return () => { cancelled = true }
+  }, [videoUrl])
+
+  useEffect(() => {
+    if (!playing || !manifest) return
+    const frame = manifest.frames[currentFrame]
+    if (!frame) {
+      setPlaying(false)
+      setCurrentFrame(0)
+      return
+    }
+    timerRef.current = setTimeout(() => {
+      setCurrentFrame(prev => {
+        const next = prev + 1
+        if (next >= manifest.frames.length) {
+          setPlaying(false)
+          return 0
+        }
+        return next
+      })
+    }, frame.duration_ms)
+    return () => {
+      if (timerRef.current) clearTimeout(timerRef.current)
+    }
+  }, [playing, currentFrame, manifest])
+
+  const togglePlay = () => {
+    if (!manifest) return
+    if (!playing && currentFrame >= manifest.frames.length - 1) {
+      setCurrentFrame(0)
+    }
+    setPlaying(p => !p)
+  }
+
+  if (error) {
+    return (
+      <div style={{ padding: 24, textAlign: 'center', color: '#ef4444', fontSize: '13px' }}>
+        {error}
+      </div>
+    )
+  }
+
+  if (!manifest) {
+    return (
+      <div style={{ padding: 24, textAlign: 'center', color: '#9ca3af', fontSize: '13px' }}>
+        Loading video...
+      </div>
+    )
+  }
+
+  const progress = manifest.frames.length > 1
+    ? (currentFrame / (manifest.frames.length - 1)) * 100
+    : 100
+
+  return (
+    <div style={{ position: 'relative', backgroundColor: '#000' }}>
+      {/* Frame display */}
+      <img
+        src={manifest.frames[currentFrame]?.url}
+        alt={`Frame ${currentFrame + 1}`}
+        style={{ width: '100%', display: 'block' }}
+      />
+
+      {/* Controls overlay */}
+      <div style={{
+        position: 'absolute', bottom: 0, left: 0, right: 0,
+        background: 'linear-gradient(transparent, rgba(0,0,0,0.7))',
+        padding: '24px 16px 12px',
+      }}>
+        {/* Progress bar */}
+        <div
+          style={{
+            height: 4, borderRadius: 2, backgroundColor: 'rgba(255,255,255,0.3)',
+            marginBottom: 8, cursor: 'pointer',
+          }}
+          onClick={(e) => {
+            const rect = e.currentTarget.getBoundingClientRect()
+            const pct = (e.clientX - rect.left) / rect.width
+            const frameIdx = Math.round(pct * (manifest.frames.length - 1))
+            setCurrentFrame(Math.max(0, Math.min(frameIdx, manifest.frames.length - 1)))
+          }}
+        >
+          <div style={{
+            height: '100%', borderRadius: 2,
+            width: `${progress}%`,
+            backgroundColor: '#bc0000',
+            transition: playing ? 'none' : 'width 0.2s',
+          }} />
+        </div>
+
+        {/* Play/Pause + frame counter */}
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+          <button
+            onClick={togglePlay}
+            style={{
+              background: 'none', border: 'none', cursor: 'pointer',
+              color: '#fff', fontSize: '14px', fontWeight: 600,
+              display: 'flex', alignItems: 'center', gap: 6, padding: 0,
+            }}
+          >
+            {playing ? (
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+                <rect x="3" y="2" width="4" height="12" rx="1" />
+                <rect x="9" y="2" width="4" height="12" rx="1" />
+              </svg>
+            ) : (
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+                <path d="M4 2l10 6-10 6V2z" />
+              </svg>
+            )}
+            {playing ? 'Pause' : 'Play'}
+          </button>
+          <span style={{ color: 'rgba(255,255,255,0.7)', fontSize: '11px' }}>
+            {currentFrame + 1} / {manifest.frames.length}
+          </span>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+// --- Media badge icons ---
+function ImageIcon() {
+  return (
+    <svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5">
+      <rect x="1" y="2" width="14" height="12" rx="2" />
+      <circle cx="5.5" cy="6" r="1.5" />
+      <path d="M1 12l4-4 2.5 2.5L11 7l4 5" />
+    </svg>
+  )
+}
+
+function VideoIcon() {
+  return (
+    <svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5">
+      <rect x="1" y="3" width="10" height="10" rx="2" />
+      <path d="M11 6l4-2v8l-4-2" />
+    </svg>
+  )
+}
+
+// --- Main Page ---
 export default function DataCardsPage() {
   const [activeTab, setActiveTab] = useState<Tab>('library')
   const [cards, setCards] = useState<StatCard[]>([])
@@ -71,12 +269,15 @@ export default function DataCardsPage() {
 
   const [lastRefresh, setLastRefresh] = useState<Date | null>(null)
 
+  // Modal tab for switching between image and video
+  const [modalView, setModalView] = useState<'image' | 'video'>('image')
+
   const fetchCards = useCallback(async () => {
     setLoading(true)
     try {
       let query = datalabClient
         .from('stat_cards')
-        .select('*')
+        .select('id, created_at, player_name, headline, subheadline, hook, insight, chicago_take, card_type, svg_content, thumbnail_url, image_url, video_url, viral_score, status, tier, confidence_level, template_id, metadata')
         .order('created_at', { ascending: false })
       if (statusFilter !== 'all') query = query.eq('status', statusFilter)
       const { data, error } = await query
@@ -116,7 +317,6 @@ export default function DataCardsPage() {
         body: JSON.stringify({ cardId, newStatus }),
       })
       if (!res.ok) throw new Error('Failed to update status')
-      // Refresh cards and update modal if open
       await fetchCards()
       if (selectedCard?.id === cardId) {
         setSelectedCard(prev => prev ? { ...prev, status: newStatus } : null)
@@ -161,6 +361,11 @@ export default function DataCardsPage() {
     } finally {
       setGenerating(false)
     }
+  }
+
+  const openCardModal = (card: StatCard) => {
+    setSelectedCard(card)
+    setModalView(card.image_url ? 'image' : card.video_url ? 'video' : 'image')
   }
 
   const getWorkflowButton = (status: string, cardId: string, size: 'small' | 'normal' = 'small') => {
@@ -276,10 +481,12 @@ export default function DataCardsPage() {
                 const statusColor = STATUS_COLORS[card.status] || STATUS_COLORS.draft
                 const typeColor = CARD_TYPE_COLORS[card.card_type] || { bg: '#6b728015', text: '#6b7280' }
                 const viralScore = card.viral_score ?? 0
+                const hasImage = !!card.image_url
+                const hasVideo = !!card.video_url
                 return (
                   <div
                     key={card.id}
-                    onClick={() => setSelectedCard(card)}
+                    onClick={() => openCardModal(card)}
                     style={{
                       borderRadius: 10, border: '1px solid #e5e7eb', backgroundColor: '#fff',
                       cursor: 'pointer', overflow: 'hidden', transition: 'box-shadow 0.2s',
@@ -287,6 +494,71 @@ export default function DataCardsPage() {
                     onMouseEnter={e => (e.currentTarget.style.boxShadow = '0 4px 12px rgba(0,0,0,0.08)')}
                     onMouseLeave={e => (e.currentTarget.style.boxShadow = 'none')}
                   >
+                    {/* Thumbnail area */}
+                    {card.thumbnail_url ? (
+                      <div style={{ position: 'relative', aspectRatio: '9/16', maxHeight: 220, overflow: 'hidden', backgroundColor: '#111' }}>
+                        <img
+                          src={card.thumbnail_url}
+                          alt={card.headline || card.player_name}
+                          style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
+                        />
+                        {/* Media badges */}
+                        {(hasImage || hasVideo) && (
+                          <div style={{
+                            position: 'absolute', top: 8, right: 8,
+                            display: 'flex', gap: 4,
+                          }}>
+                            {hasImage && (
+                              <span style={{
+                                display: 'flex', alignItems: 'center', gap: 3,
+                                padding: '2px 6px', borderRadius: 4,
+                                backgroundColor: 'rgba(0,0,0,0.6)', color: '#fff',
+                                fontSize: '10px', fontWeight: 600,
+                              }}>
+                                <ImageIcon /> IMG
+                              </span>
+                            )}
+                            {hasVideo && (
+                              <span style={{
+                                display: 'flex', alignItems: 'center', gap: 3,
+                                padding: '2px 6px', borderRadius: 4,
+                                backgroundColor: 'rgba(188,0,0,0.8)', color: '#fff',
+                                fontSize: '10px', fontWeight: 600,
+                              }}>
+                                <VideoIcon /> VID
+                              </span>
+                            )}
+                          </div>
+                        )}
+                      </div>
+                    ) : (
+                      /* No thumbnail — show media badges inline if media exists */
+                      (hasImage || hasVideo) && (
+                        <div style={{ padding: '8px 16px 0', display: 'flex', gap: 4 }}>
+                          {hasImage && (
+                            <span style={{
+                              display: 'flex', alignItems: 'center', gap: 3,
+                              padding: '2px 6px', borderRadius: 4,
+                              backgroundColor: '#3b82f615', color: '#3b82f6',
+                              fontSize: '10px', fontWeight: 600,
+                            }}>
+                              <ImageIcon /> Image
+                            </span>
+                          )}
+                          {hasVideo && (
+                            <span style={{
+                              display: 'flex', alignItems: 'center', gap: 3,
+                              padding: '2px 6px', borderRadius: 4,
+                              backgroundColor: '#bc000015', color: '#bc0000',
+                              fontSize: '10px', fontWeight: 600,
+                            }}>
+                              <VideoIcon /> Video
+                            </span>
+                          )}
+                        </div>
+                      )
+                    )}
+
                     <div style={{ padding: '14px 16px' }}>
                       {/* Headline */}
                       <div style={{
@@ -463,7 +735,7 @@ export default function DataCardsPage() {
                             {Math.round(t.avg_viral_score)}
                           </span>
                         ) : (
-                          <span style={{ color: '#9ca3af' }}>—</span>
+                          <span style={{ color: '#9ca3af' }}>&mdash;</span>
                         )}
                       </td>
                       <td style={{ padding: '10px 14px' }}>
@@ -484,7 +756,7 @@ export default function DataCardsPage() {
         </div>
       )}
 
-      {/* SVG Preview Modal */}
+      {/* Detail Modal */}
       {selectedCard && (
         <div
           onClick={() => setSelectedCard(null)}
@@ -499,7 +771,7 @@ export default function DataCardsPage() {
             onClick={e => e.stopPropagation()}
             style={{
               backgroundColor: '#fff', borderRadius: 12,
-              maxWidth: 600, width: '100%', maxHeight: '90vh',
+              maxWidth: 650, width: '100%', maxHeight: '90vh',
               overflow: 'auto', position: 'relative',
             }}
           >
@@ -519,10 +791,15 @@ export default function DataCardsPage() {
 
             {/* Card header */}
             <div style={{ padding: '20px 24px', borderBottom: '1px solid #f3f4f6' }}>
-              <h3 style={{ fontSize: '16px', fontWeight: 700, margin: 0 }}>
+              <h3 style={{ fontSize: '16px', fontWeight: 700, margin: 0, paddingRight: 40 }}>
                 {selectedCard.headline || selectedCard.player_name}
               </h3>
-              <div style={{ display: 'flex', gap: 6, marginTop: 8, alignItems: 'center' }}>
+              {selectedCard.subheadline && (
+                <p style={{ fontSize: '13px', color: '#6b7280', margin: '4px 0 0' }}>
+                  {selectedCard.subheadline}
+                </p>
+              )}
+              <div style={{ display: 'flex', gap: 6, marginTop: 8, alignItems: 'center', flexWrap: 'wrap' }}>
                 <span style={{
                   fontSize: '10px', fontWeight: 700, padding: '2px 8px', borderRadius: 6,
                   backgroundColor: (CARD_TYPE_COLORS[selectedCard.card_type] || { bg: '#6b728015' }).bg,
@@ -538,6 +815,28 @@ export default function DataCardsPage() {
                 }}>
                   {selectedCard.status}
                 </span>
+                {selectedCard.tier && (() => {
+                  const tc = TIER_COLORS[selectedCard.tier] || { bg: '#6b728020', text: '#6b7280' }
+                  return (
+                    <span style={{
+                      fontSize: '10px', fontWeight: 700, padding: '2px 8px', borderRadius: 6,
+                      backgroundColor: tc.bg, color: tc.text,
+                    }}>
+                      Tier {selectedCard.tier}
+                    </span>
+                  )
+                })()}
+                {selectedCard.confidence_level && (() => {
+                  const cc = CONFIDENCE_COLORS[selectedCard.confidence_level] || { bg: '#6b728020', text: '#6b7280' }
+                  return (
+                    <span style={{
+                      fontSize: '10px', fontWeight: 700, padding: '2px 8px', borderRadius: 6,
+                      backgroundColor: cc.bg, color: cc.text, textTransform: 'capitalize',
+                    }}>
+                      {selectedCard.confidence_level} confidence
+                    </span>
+                  )
+                })()}
                 {selectedCard.viral_score != null && (
                   <span style={{ fontSize: '12px', fontWeight: 700, color: getViralColor(selectedCard.viral_score), marginLeft: 'auto' }}>
                     Viral: {selectedCard.viral_score}
@@ -546,8 +845,50 @@ export default function DataCardsPage() {
               </div>
             </div>
 
-            {/* SVG preview */}
-            {selectedCard.svg_content ? (
+            {/* Media view toggle (if both image and video available) */}
+            {selectedCard.image_url && selectedCard.video_url && (
+              <div style={{ display: 'flex', gap: 4, padding: '12px 24px 0' }}>
+                <button
+                  onClick={() => setModalView('image')}
+                  style={{
+                    padding: '6px 14px', borderRadius: 6, border: 'none', cursor: 'pointer',
+                    fontSize: '12px', fontWeight: 600,
+                    backgroundColor: modalView === 'image' ? '#bc0000' : '#e5e7eb',
+                    color: modalView === 'image' ? '#fff' : '#6b7280',
+                    display: 'flex', alignItems: 'center', gap: 4,
+                  }}
+                >
+                  <ImageIcon /> Image
+                </button>
+                <button
+                  onClick={() => setModalView('video')}
+                  style={{
+                    padding: '6px 14px', borderRadius: 6, border: 'none', cursor: 'pointer',
+                    fontSize: '12px', fontWeight: 600,
+                    backgroundColor: modalView === 'video' ? '#bc0000' : '#e5e7eb',
+                    color: modalView === 'video' ? '#fff' : '#6b7280',
+                    display: 'flex', alignItems: 'center', gap: 4,
+                  }}
+                >
+                  <VideoIcon /> Video
+                </button>
+              </div>
+            )}
+
+            {/* Media content */}
+            {modalView === 'video' && selectedCard.video_url ? (
+              <div style={{ padding: '16px 24px' }}>
+                <VideoPlayer videoUrl={selectedCard.video_url} />
+              </div>
+            ) : selectedCard.image_url ? (
+              <div style={{ padding: 24, display: 'flex', justifyContent: 'center', backgroundColor: '#f9fafb' }}>
+                <img
+                  src={selectedCard.image_url}
+                  alt={selectedCard.headline || selectedCard.player_name}
+                  style={{ maxWidth: '100%', maxHeight: 600, borderRadius: 8 }}
+                />
+              </div>
+            ) : selectedCard.svg_content ? (
               <div
                 style={{
                   padding: 24, display: 'flex', justifyContent: 'center',
@@ -557,7 +898,48 @@ export default function DataCardsPage() {
               />
             ) : (
               <div style={{ padding: 60, textAlign: 'center', color: '#9ca3af', fontSize: '14px' }}>
-                No SVG content available for this card.
+                No media available for this card.
+              </div>
+            )}
+
+            {/* Only-video button (when no image but has video) */}
+            {!selectedCard.image_url && selectedCard.video_url && modalView === 'image' && (
+              <div style={{ padding: '0 24px 16px', textAlign: 'center' }}>
+                <button
+                  onClick={() => setModalView('video')}
+                  style={{
+                    padding: '8px 16px', borderRadius: 8, border: 'none', cursor: 'pointer',
+                    fontSize: '13px', fontWeight: 600,
+                    backgroundColor: '#bc0000', color: '#fff',
+                    display: 'inline-flex', alignItems: 'center', gap: 6,
+                  }}
+                >
+                  <VideoIcon /> Play Video
+                </button>
+              </div>
+            )}
+
+            {/* Text content fields */}
+            {(selectedCard.hook || selectedCard.insight || selectedCard.chicago_take) && (
+              <div style={{ padding: '0 24px 16px', display: 'flex', flexDirection: 'column', gap: 12 }}>
+                {selectedCard.hook && (
+                  <div>
+                    <div style={{ fontSize: '11px', fontWeight: 700, color: '#9ca3af', textTransform: 'uppercase', marginBottom: 4 }}>Hook</div>
+                    <div style={{ fontSize: '13px', color: '#374151', lineHeight: 1.5 }}>{selectedCard.hook}</div>
+                  </div>
+                )}
+                {selectedCard.insight && (
+                  <div>
+                    <div style={{ fontSize: '11px', fontWeight: 700, color: '#9ca3af', textTransform: 'uppercase', marginBottom: 4 }}>Insight</div>
+                    <div style={{ fontSize: '13px', color: '#374151', lineHeight: 1.5 }}>{selectedCard.insight}</div>
+                  </div>
+                )}
+                {selectedCard.chicago_take && (
+                  <div>
+                    <div style={{ fontSize: '11px', fontWeight: 700, color: '#9ca3af', textTransform: 'uppercase', marginBottom: 4 }}>Chicago Take</div>
+                    <div style={{ fontSize: '13px', color: '#374151', lineHeight: 1.5 }}>{selectedCard.chicago_take}</div>
+                  </div>
+                )}
               </div>
             )}
 

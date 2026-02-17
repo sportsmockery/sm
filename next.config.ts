@@ -26,6 +26,10 @@ const nextConfig: NextConfig = {
         protocol: 'https',
         hostname: 'a.espncdn.com',
       },
+      {
+        protocol: 'https',
+        hostname: 'siwoqfzzcxmngnseyzpv.supabase.co',
+      },
     ],
     // Enable modern image formats
     formats: ['image/avif', 'image/webp'],
