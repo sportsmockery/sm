@@ -19,6 +19,30 @@
   --hm-gradient: linear-gradient(135deg, #bc0000, #ff4444);
   --hm-gradient-subtle: linear-gradient(135deg, rgba(188,0,0,0.15), rgba(255,68,68,0.05));
 
+  /* Functional */
+  --hm-success: #00d084;
+  --hm-warning: #ffa500;
+  --hm-error: #ff4444;
+
+  /* Spacing */
+  --hm-nav-height: 72px;
+  --hm-radius-sm: 10px;
+  --hm-radius-md: 16px;
+  --hm-radius-lg: 20px;
+  --hm-radius-xl: 24px;
+  --hm-radius-pill: 100px;
+
+  /* Transitions */
+  --hm-ease: cubic-bezier(0.16, 1, 0.3, 1);
+  --hm-transition-fast: 0.2s ease;
+  --hm-transition-med: 0.3s ease;
+  --hm-transition-slow: 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+
+  /* Feed */
+  --hm-feed-max-width: 1400px;
+  --hm-card-spacing: 20px;
+  --hm-sidebar-width: 320px;
+
   background: var(--hm-dark);
   color: var(--hm-text);
   font-family: var(--font-inter), 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;

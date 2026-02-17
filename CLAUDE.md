@@ -1026,6 +1026,17 @@ const startRes = await fetch('/api/gm/draft/start', {
 | `src/app/api/gm/draft/eligibility/route.ts` | Mobile eligibility API (proxies to DataLab) |
 | `mobile/app/mock-draft/index.tsx` | Mobile mock draft page |
 
+### Mock Draft Picks Table (`gm_mock_draft_picks`)
+
+**Constraint fix deployed Feb 17, 2026:**
+- The `create_mock_draft_picks` RPC sets `prospect_id = 'pending'` for empty pick slots (column is NOT NULL)
+- Old constraint `UNIQUE (mock_id, prospect_id)` caused failures — all 224 pending slots collided
+- **New constraint:** Partial unique index `UNIQUE (mock_id, prospect_id) WHERE prospect_id != 'pending'`
+  - Allows unlimited `'pending'` slots per mock draft
+  - Still prevents the same real prospect from being drafted twice in one mock
+- `UNIQUE (mock_id, overall_pick)` still enforces one pick per slot
+- **No frontend changes needed** — RPC and field names unchanged
+
 ### If You're Tempted to Override
 
 **STOP.** Ask the user first. If DataLab is returning wrong data, the fix belongs in DataLab, not in frontend overrides.
