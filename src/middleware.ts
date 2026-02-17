@@ -95,7 +95,22 @@ export async function middleware(request: NextRequest) {
     return NextResponse.next()
   }
 
-  // 3. First-time visitor redirect — send to /home and save intended destination
+  // 3. Allow public routes and content pages (articles, team pages, etc.)
+  const isPublicRoute = publicRoutes.includes(pathname)
+  const isPublicPath = publicPaths.some((path) => pathname.startsWith(path))
+
+  if (isPublicRoute || isPublicPath) {
+    return NextResponse.next()
+  }
+
+  // 4. Allow article URLs — any /{category}/{slug} pattern (2+ path segments)
+  //    These are content pages that should always be accessible for SEO and sharing
+  const segments = pathname.split('/').filter(Boolean)
+  if (segments.length >= 2 && !pathname.startsWith('/admin') && !pathname.startsWith('/gm') && !pathname.startsWith('/studio')) {
+    return NextResponse.next()
+  }
+
+  // 5. First-time visitor redirect — only for "app" pages (e.g., /gm, /scout-ai, /fan-chat)
   const hasVisited = request.cookies.get('sm_visited')?.value
   const isAuthPage = SKIP_VISITOR_REDIRECT.includes(pathname)
 
@@ -119,15 +134,7 @@ export async function middleware(request: NextRequest) {
     return response
   }
 
-  // 4. Allow public routes
-  const isPublicRoute = publicRoutes.includes(pathname)
-  const isPublicPath = publicPaths.some((path) => pathname.startsWith(path))
-
-  if (isPublicRoute || isPublicPath) {
-    return NextResponse.next()
-  }
-
-  // 5. Admin route protection — require authentication
+  // 6. Admin route protection — require authentication
   if (pathname.startsWith('/admin')) {
     const { supabase, response } = createSupabaseMiddlewareClient(request)
     const { data: { user } } = await supabase.auth.getUser()
