@@ -119,7 +119,8 @@ export default function PlayerProfileClient({ players, initialPlayerSlug, initia
           </h1>
           <Link
             href="/chicago-bears/roster"
-            className="text-sm text-[#C83200] hover:underline"
+            className="text-sm hover:underline"
+            style={{ color: '#C83200' }}
           >
             View Full Roster &rarr;
           </Link>
@@ -129,7 +130,7 @@ export default function PlayerProfileClient({ players, initialPlayerSlug, initia
         <div className="relative">
           <button
             onClick={() => setDropdownOpen(!dropdownOpen)}
-            className="w-full md:w-96 flex items-center justify-between gap-3 px-4 py-3 hover:border-[#C83200]/50 transition-colors"
+            className="w-full md:w-96 flex items-center justify-between gap-3 px-4 py-3 transition-colors"
             style={{
               backgroundColor: 'var(--sm-card)',
               border: '1px solid var(--sm-border)',
@@ -190,9 +191,8 @@ export default function PlayerProfileClient({ players, initialPlayerSlug, initia
                 <button
                   key={player.playerId}
                   onClick={() => handlePlayerSelect(player.slug)}
-                  className={`w-full flex items-center gap-3 px-4 py-3 hover:bg-[var(--sm-card-hover)] transition-colors ${
-                    player.slug === selectedSlug ? 'bg-[#C83200]/10' : ''
-                  }`}
+                  className="w-full flex items-center gap-3 px-4 py-3 transition-colors"
+                  style={player.slug === selectedSlug ? { backgroundColor: 'rgba(200, 50, 0, 0.1)' } : {}}
                 >
                   {player.headshotUrl ? (
                     <Image
@@ -239,7 +239,7 @@ export default function PlayerProfileClient({ players, initialPlayerSlug, initia
           }}
         >
           <div className="flex items-center justify-center gap-3">
-            <div className="w-6 h-6 border-2 border-[#C83200] border-t-transparent rounded-full animate-spin" />
+            <div className="w-6 h-6 rounded-full animate-spin" style={{ border: '2px solid #C83200', borderTopColor: 'transparent' }} />
             <span style={{ color: 'var(--sm-text-muted)' }}>Loading player...</span>
           </div>
         </div>
@@ -247,12 +247,12 @@ export default function PlayerProfileClient({ players, initialPlayerSlug, initia
         <div className="space-y-6">
           {/* Player Header Card */}
           <div
-            className="bg-gradient-to-r from-[#0B162A] to-[#0B162A]/90 overflow-hidden"
-            style={{ borderRadius: 'var(--sm-radius-xl)' }}
+            className="overflow-hidden"
+            style={{ background: 'linear-gradient(to right, #0B162A, rgba(11, 22, 42, 0.9))', borderRadius: 'var(--sm-radius-xl)' }}
           >
             <div className="flex flex-col md:flex-row">
               {/* Photo */}
-              <div className="md:w-64 aspect-[3/4] md:aspect-auto relative bg-[#0B162A]">
+              <div className="md:w-64 aspect-[3/4] md:aspect-auto relative" style={{ backgroundColor: '#0B162A' }}>
                 {profile.player.headshotUrl ? (
                   <Image
                     src={profile.player.headshotUrl}
@@ -280,7 +280,7 @@ export default function PlayerProfileClient({ players, initialPlayerSlug, initia
                     </div>
                     <h2 className="text-3xl font-bold mb-2">
                       {profile.player.jerseyNumber && (
-                        <span className="text-[#C83200]">#{profile.player.jerseyNumber} </span>
+                        <span style={{ color: '#C83200' }}>#{profile.player.jerseyNumber} </span>
                       )}
                       {profile.player.fullName}
                     </h2>
@@ -412,8 +412,8 @@ export default function PlayerProfileClient({ players, initialPlayerSlug, initia
           <div className="text-center">
             <Link
               href={`/chicago-bears/players/${profile.player.slug}`}
-              className="inline-flex items-center gap-2 px-6 py-3 bg-[#C83200] hover:bg-[#a82900] text-white font-semibold transition-colors"
-              style={{ borderRadius: '100px' }}
+              className="inline-flex items-center gap-2 px-6 py-3 text-white font-semibold transition-colors"
+              style={{ backgroundColor: '#C83200', borderRadius: '100px' }}
             >
               View Full Profile
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -446,8 +446,8 @@ function StatBox({ label, value, highlight }: { label: string; value: string | n
     >
       <div className="text-xs uppercase tracking-wider mb-1" style={{ color: 'var(--sm-text-muted)' }}>{label}</div>
       <div
-        className={`text-lg font-bold ${highlight ? 'text-[#C83200]' : ''}`}
-        style={!highlight ? { color: 'var(--sm-text)' } : {}}
+        className="text-lg font-bold"
+        style={{ color: highlight ? '#C83200' : 'var(--sm-text)' }}
       >
         {value ?? '-'}
       </div>

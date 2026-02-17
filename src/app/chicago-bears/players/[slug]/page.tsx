@@ -62,7 +62,7 @@ export default async function PlayerProfilePage({ params }: PlayerPageProps) {
   }))
 
   return (
-    <main className="min-h-screen bg-[var(--sm-dark)]">
+    <main className="min-h-screen" style={{ backgroundColor: 'var(--sm-dark)' }}>
       {/* Scroll to top on page load */}
       <ScrollToTop />
 
@@ -94,7 +94,7 @@ export default async function PlayerProfilePage({ params }: PlayerPageProps) {
             {/* Left: Headshot */}
             <div className="flex-shrink-0">
               {player.headshotUrl ? (
-                <div className="w-28 h-28 sm:w-40 sm:h-40 md:w-48 md:h-48 rounded-2xl overflow-hidden border-4 border-[#C83200]/30 shadow-2xl">
+                <div className="w-28 h-28 sm:w-40 sm:h-40 md:w-48 md:h-48 rounded-2xl overflow-hidden shadow-2xl" style={{ border: '4px solid rgba(200, 50, 0, 0.3)' }}>
                   <Image
                     src={player.headshotUrl}
                     alt={player.fullName}
@@ -120,7 +120,7 @@ export default async function PlayerProfilePage({ params }: PlayerPageProps) {
                 <span className="px-2 sm:px-3 py-1 bg-white/20 rounded-lg text-base sm:text-lg font-bold">
                   #{player.jerseyNumber}
                 </span>
-                <span className="px-2 sm:px-3 py-1 bg-[#C83200] rounded-lg text-xs sm:text-sm font-semibold">
+                <span className="px-2 sm:px-3 py-1 rounded-lg text-xs sm:text-sm font-semibold" style={{ backgroundColor: '#C83200' }}>
                   {player.position}
                 </span>
               </div>
@@ -190,8 +190,8 @@ export default async function PlayerProfilePage({ params }: PlayerPageProps) {
           <div className="lg:col-span-2 space-y-4 sm:space-y-8">
             {/* Season Overview */}
             {currentSeason && (
-              <section className="bg-[var(--sm-card)] border border-[var(--sm-border)] rounded-2xl p-4 sm:p-6">
-                <h2 className="text-lg sm:text-xl font-bold text-[var(--sm-text)] mb-4 sm:mb-6" style={{ fontFamily: "'Montserrat', sans-serif" }}>
+              <section className="rounded-2xl p-4 sm:p-6" style={{ backgroundColor: 'var(--sm-card)', border: '1px solid var(--sm-border)' }}>
+                <h2 className="text-lg sm:text-xl font-bold mb-4 sm:mb-6" style={{ fontFamily: "'Montserrat', sans-serif", color: 'var(--sm-text)' }}>
                   2025 Season Overview
                 </h2>
                 <SeasonOverviewCards player={player} stats={currentSeason} />
@@ -200,8 +200,8 @@ export default async function PlayerProfilePage({ params }: PlayerPageProps) {
 
             {/* Strength Profile */}
             {currentSeason && (
-              <section className="bg-[var(--sm-card)] border border-[var(--sm-border)] rounded-2xl p-4 sm:p-6">
-                <h2 className="text-lg sm:text-xl font-bold text-[var(--sm-text)] mb-4 sm:mb-6" style={{ fontFamily: "'Montserrat', sans-serif" }}>
+              <section className="rounded-2xl p-4 sm:p-6" style={{ backgroundColor: 'var(--sm-card)', border: '1px solid var(--sm-border)' }}>
+                <h2 className="text-lg sm:text-xl font-bold mb-4 sm:mb-6" style={{ fontFamily: "'Montserrat', sans-serif", color: 'var(--sm-text)' }}>
                   Strength Profile
                 </h2>
                 <StrengthProfileBars player={player} stats={currentSeason} />
@@ -210,9 +210,9 @@ export default async function PlayerProfilePage({ params }: PlayerPageProps) {
 
             {/* Game Log */}
             {gameLog.length > 0 && (
-              <section className="bg-[var(--sm-card)] border border-[var(--sm-border)] rounded-2xl overflow-hidden">
-                <div className="p-4 sm:p-6 border-b border-[var(--sm-border)]">
-                  <h2 className="text-lg sm:text-xl font-bold text-[var(--sm-text)]" style={{ fontFamily: "'Montserrat', sans-serif" }}>
+              <section className="rounded-2xl overflow-hidden" style={{ backgroundColor: 'var(--sm-card)', border: '1px solid var(--sm-border)' }}>
+                <div className="p-4 sm:p-6" style={{ borderBottom: '1px solid var(--sm-border)' }}>
+                  <h2 className="text-lg sm:text-xl font-bold" style={{ fontFamily: "'Montserrat', sans-serif", color: 'var(--sm-text)' }}>
                     Game Log 2025
                   </h2>
                 </div>
@@ -225,8 +225,8 @@ export default async function PlayerProfilePage({ params }: PlayerPageProps) {
           <div className="space-y-4 sm:space-y-6">
             {/* Similar Bears */}
             {similarPlayers.length > 0 && (
-              <section className="bg-[var(--sm-card)] border border-[var(--sm-border)] rounded-2xl p-4 sm:p-6">
-                <h3 className="text-base sm:text-lg font-bold text-[var(--sm-text)] mb-3 sm:mb-4" style={{ fontFamily: "'Montserrat', sans-serif" }}>
+              <section className="rounded-2xl p-4 sm:p-6" style={{ backgroundColor: 'var(--sm-card)', border: '1px solid var(--sm-border)' }}>
+                <h3 className="text-base sm:text-lg font-bold mb-3 sm:mb-4" style={{ fontFamily: "'Montserrat', sans-serif", color: 'var(--sm-text)' }}>
                   Similar Bears
                 </h3>
                 <div className="space-y-2 sm:space-y-3">
@@ -234,7 +234,7 @@ export default async function PlayerProfilePage({ params }: PlayerPageProps) {
                     <Link
                       key={p.playerId}
                       href={`/chicago-bears/players/${p.slug}`}
-                      className="flex items-center gap-2 sm:gap-3 p-2 sm:p-3 rounded-xl hover:bg-[var(--sm-card-hover)] transition-colors group min-h-[44px]"
+                      className="flex items-center gap-2 sm:gap-3 p-2 sm:p-3 rounded-xl transition-colors group min-h-[44px]"
                     >
                       {p.headshotUrl ? (
                         <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-full overflow-hidden flex-shrink-0">
@@ -248,21 +248,21 @@ export default async function PlayerProfilePage({ params }: PlayerPageProps) {
                           />
                         </div>
                       ) : (
-                        <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-[var(--sm-surface)] flex items-center justify-center flex-shrink-0">
-                          <span className="text-base sm:text-lg font-bold text-[var(--sm-text-muted)]">
+                        <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-full flex items-center justify-center flex-shrink-0" style={{ backgroundColor: 'var(--sm-surface)' }}>
+                          <span className="text-base sm:text-lg font-bold" style={{ color: 'var(--sm-text-muted)' }}>
                             {p.jerseyNumber}
                           </span>
                         </div>
                       )}
                       <div className="flex-1 min-w-0">
-                        <div className="font-medium text-sm sm:text-base text-[var(--sm-text)] group-hover:text-[#C83200] transition-colors truncate">
+                        <div className="font-medium text-sm sm:text-base transition-colors truncate" style={{ color: 'var(--sm-text)' }}>
                           {p.fullName}
                         </div>
-                        <div className="text-xs sm:text-sm text-[var(--sm-text-muted)]">
+                        <div className="text-xs sm:text-sm" style={{ color: 'var(--sm-text-muted)' }}>
                           {p.position} #{p.jerseyNumber}
                         </div>
                       </div>
-                      <svg className="w-4 h-4 text-[var(--sm-text-muted)]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <svg className="w-4 h-4" style={{ color: 'var(--sm-text-muted)' }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                       </svg>
                     </Link>
@@ -272,14 +272,15 @@ export default async function PlayerProfilePage({ params }: PlayerPageProps) {
             )}
 
             {/* Quick Links */}
-            <section className="bg-[var(--sm-card)] border border-[var(--sm-border)] rounded-2xl p-4 sm:p-6">
-              <h3 className="text-base sm:text-lg font-bold text-[var(--sm-text)] mb-3 sm:mb-4" style={{ fontFamily: "'Montserrat', sans-serif" }}>
+            <section className="rounded-2xl p-4 sm:p-6" style={{ backgroundColor: 'var(--sm-card)', border: '1px solid var(--sm-border)' }}>
+              <h3 className="text-base sm:text-lg font-bold mb-3 sm:mb-4" style={{ fontFamily: "'Montserrat', sans-serif", color: 'var(--sm-text)' }}>
                 Quick Links
               </h3>
               <div className="space-y-1 sm:space-y-2">
                 <Link
                   href="/chicago-bears/players"
-                  className="flex items-center gap-2 sm:gap-3 p-2 sm:p-3 rounded-xl hover:bg-[var(--sm-card-hover)] transition-colors text-[var(--sm-text-muted)] hover:text-[#C83200] min-h-[44px] text-sm sm:text-base"
+                  className="flex items-center gap-2 sm:gap-3 p-2 sm:p-3 rounded-xl transition-colors min-h-[44px] text-sm sm:text-base"
+                  style={{ color: 'var(--sm-text-muted)' }}
                 >
                   <svg className="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
@@ -288,7 +289,8 @@ export default async function PlayerProfilePage({ params }: PlayerPageProps) {
                 </Link>
                 <Link
                   href="/chicago-bears/roster"
-                  className="flex items-center gap-2 sm:gap-3 p-2 sm:p-3 rounded-xl hover:bg-[var(--sm-card-hover)] transition-colors text-[var(--sm-text-muted)] hover:text-[#C83200] min-h-[44px] text-sm sm:text-base"
+                  className="flex items-center gap-2 sm:gap-3 p-2 sm:p-3 rounded-xl transition-colors min-h-[44px] text-sm sm:text-base"
+                  style={{ color: 'var(--sm-text-muted)' }}
                 >
                   <svg className="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z" />
@@ -297,7 +299,8 @@ export default async function PlayerProfilePage({ params }: PlayerPageProps) {
                 </Link>
                 <Link
                   href="/chicago-bears/stats"
-                  className="flex items-center gap-2 sm:gap-3 p-2 sm:p-3 rounded-xl hover:bg-[var(--sm-card-hover)] transition-colors text-[var(--sm-text-muted)] hover:text-[#C83200] min-h-[44px] text-sm sm:text-base"
+                  className="flex items-center gap-2 sm:gap-3 p-2 sm:p-3 rounded-xl transition-colors min-h-[44px] text-sm sm:text-base"
+                  style={{ color: 'var(--sm-text-muted)' }}
                 >
                   <svg className="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 3.055A9.001 9.001 0 1020.945 13H11V3.055z" />
@@ -431,15 +434,15 @@ function SeasonOverviewCards({ player, stats }: { player: BearsPlayer; stats: an
   return (
     <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
       {cards.map((card, i) => (
-        <div key={i} className="bg-[var(--sm-surface)] rounded-xl p-4">
-          <h4 className="text-sm font-semibold text-[var(--sm-text-muted)] uppercase tracking-wider mb-3">
+        <div key={i} className="rounded-xl p-4" style={{ backgroundColor: 'var(--sm-surface)' }}>
+          <h4 className="text-sm font-semibold uppercase tracking-wider mb-3" style={{ color: 'var(--sm-text-muted)' }}>
             {card.title}
           </h4>
           <div className="space-y-2">
             {card.stats.map((stat, j) => (
               <div key={j} className="flex justify-between">
-                <span className="text-[var(--sm-text-muted)]">{stat.label}</span>
-                <span className="font-semibold text-[var(--sm-text)]">{stat.value}</span>
+                <span style={{ color: 'var(--sm-text-muted)' }}>{stat.label}</span>
+                <span className="font-semibold" style={{ color: 'var(--sm-text)' }}>{stat.value}</span>
               </div>
             ))}
           </div>
@@ -492,10 +495,10 @@ function StrengthProfileBars({ player, stats }: { player: BearsPlayer; stats: an
       {bars.map((bar, i) => (
         <div key={i}>
           <div className="flex justify-between text-sm mb-1">
-            <span className="text-[var(--sm-text-muted)]">{bar.label}</span>
-            <span className="font-medium text-[var(--sm-text)]">{Math.round(bar.value)}%</span>
+            <span style={{ color: 'var(--sm-text-muted)' }}>{bar.label}</span>
+            <span className="font-medium" style={{ color: 'var(--sm-text)' }}>{Math.round(bar.value)}%</span>
           </div>
-          <div className="h-3 bg-[var(--sm-surface)] rounded-full overflow-hidden">
+          <div className="h-3 rounded-full overflow-hidden" style={{ backgroundColor: 'var(--sm-surface)' }}>
             <div
               className="h-full rounded-full transition-all"
               style={{
@@ -550,8 +553,8 @@ function GameLogTable({ player, gameLog }: { player: BearsPlayer; gameLog: Playe
       {/* Desktop Table */}
       <div className="hidden md:block overflow-x-auto">
         <table className="w-full">
-          <thead className="sticky top-0 bg-[var(--sm-surface)]">
-            <tr className="text-left text-xs text-[var(--sm-text-muted)] uppercase tracking-wider">
+          <thead className="sticky top-0" style={{ backgroundColor: 'var(--sm-surface)' }}>
+            <tr className="text-left text-xs uppercase tracking-wider" style={{ color: 'var(--sm-text-muted)' }}>
               <th className="px-6 py-3">Date</th>
               <th className="px-6 py-3">Opp</th>
               <th className="px-6 py-3">Result</th>
@@ -562,11 +565,11 @@ function GameLogTable({ player, gameLog }: { player: BearsPlayer; gameLog: Playe
           </thead>
           <tbody>
             {gameLog.map((game, i) => (
-              <tr key={i} className="border-t border-[var(--sm-border)] hover:bg-[var(--sm-card-hover)]">
-                <td className="px-6 py-3 text-[var(--sm-text-muted)]">
+              <tr key={i} style={{ borderTop: '1px solid var(--sm-border)' }}>
+                <td className="px-6 py-3" style={{ color: 'var(--sm-text-muted)' }}>
                   {game.date ? new Date(game.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) : '—'}
                 </td>
-                <td className="px-6 py-3 text-[var(--sm-text)] font-medium">
+                <td className="px-6 py-3 font-medium" style={{ color: 'var(--sm-text)' }}>
                   {game.isHome ? 'vs' : '@'} {game.opponent}
                 </td>
                 <td className="px-6 py-3">
@@ -579,7 +582,7 @@ function GameLogTable({ player, gameLog }: { player: BearsPlayer; gameLog: Playe
                   )}
                 </td>
                 {columns.map(col => (
-                  <td key={col.key} className="px-6 py-3 text-right text-[var(--sm-text)]">
+                  <td key={col.key} className="px-6 py-3 text-right" style={{ color: 'var(--sm-text)' }}>
                     {col.render(game)}
                   </td>
                 ))}
@@ -592,13 +595,13 @@ function GameLogTable({ player, gameLog }: { player: BearsPlayer; gameLog: Playe
       {/* Mobile Cards */}
       <div className="md:hidden p-4 space-y-3">
         {gameLog.map((game, i) => (
-          <div key={i} className="bg-[var(--sm-surface)] rounded-xl p-4">
+          <div key={i} className="rounded-xl p-4" style={{ backgroundColor: 'var(--sm-surface)' }}>
             <div className="flex justify-between items-center mb-3">
               <div>
-                <div className="text-sm text-[var(--sm-text-muted)]">
+                <div className="text-sm" style={{ color: 'var(--sm-text-muted)' }}>
                   {game.date ? new Date(game.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) : '—'}
                 </div>
-                <div className="font-medium text-[var(--sm-text)]">
+                <div className="font-medium" style={{ color: 'var(--sm-text)' }}>
                   {game.isHome ? 'vs' : '@'} {game.opponent}
                 </div>
               </div>
@@ -613,8 +616,8 @@ function GameLogTable({ player, gameLog }: { player: BearsPlayer; gameLog: Playe
             <div className="grid grid-cols-3 gap-2 text-center">
               {columns.map(col => (
                 <div key={col.key}>
-                  <div className="text-lg font-semibold text-[var(--sm-text)]">{col.render(game)}</div>
-                  <div className="text-xs text-[var(--sm-text-muted)]">{col.label}</div>
+                  <div className="text-lg font-semibold" style={{ color: 'var(--sm-text)' }}>{col.render(game)}</div>
+                  <div className="text-xs" style={{ color: 'var(--sm-text-muted)' }}>{col.label}</div>
                 </div>
               ))}
             </div>

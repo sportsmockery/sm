@@ -53,7 +53,7 @@ export default async function WhiteSoxPlayerPage({ params }: PlayerPageProps) {
   }))
 
   return (
-    <main className="min-h-screen bg-[var(--sm-dark)]">
+    <main className="min-h-screen" style={{ backgroundColor: 'var(--sm-dark)' }}>
       {/* Hero Section */}
       <div
         className="relative overflow-hidden"
@@ -108,7 +108,7 @@ export default async function WhiteSoxPlayerPage({ params }: PlayerPageProps) {
                 <span className="px-3 py-1 bg-white/20 rounded-lg text-lg font-bold">
                   #{profile.player.jerseyNumber}
                 </span>
-                <span className="px-3 py-1 bg-[#C4CED4] text-[#27251F] rounded-lg text-sm font-semibold">
+                <span className="px-3 py-1 rounded-lg text-sm font-semibold" style={{ backgroundColor: '#C4CED4', color: '#27251F' }}>
                   {profile.player.position}
                 </span>
               </div>
@@ -219,8 +219,8 @@ export default async function WhiteSoxPlayerPage({ params }: PlayerPageProps) {
           <div className="lg:col-span-2 space-y-8">
             {/* Season Stats */}
             {profile.currentSeason && (
-              <section className="bg-[var(--sm-card)] border border-[var(--sm-border)] rounded-2xl p-6">
-                <h2 className="text-xl font-bold text-[var(--sm-text)] mb-6" style={{ fontFamily: "'Montserrat', sans-serif" }}>
+              <section className="rounded-2xl p-6" style={{ backgroundColor: 'var(--sm-card)', border: '1px solid var(--sm-border)' }}>
+                <h2 className="text-xl font-bold mb-6" style={{ fontFamily: "'Montserrat', sans-serif", color: 'var(--sm-text)' }}>
                   2025 Season Stats
                 </h2>
                 {isPitcher ? (
@@ -251,16 +251,16 @@ export default async function WhiteSoxPlayerPage({ params }: PlayerPageProps) {
 
             {/* Game Log */}
             {profile.gameLog.length > 0 && (
-              <section className="bg-[var(--sm-card)] border border-[var(--sm-border)] rounded-2xl overflow-hidden">
-                <div className="p-6 border-b border-[var(--sm-border)]">
-                  <h2 className="text-xl font-bold text-[var(--sm-text)]" style={{ fontFamily: "'Montserrat', sans-serif" }}>
+              <section className="rounded-2xl overflow-hidden" style={{ backgroundColor: 'var(--sm-card)', border: '1px solid var(--sm-border)' }}>
+                <div className="p-6" style={{ borderBottom: '1px solid var(--sm-border)' }}>
+                  <h2 className="text-xl font-bold" style={{ fontFamily: "'Montserrat', sans-serif", color: 'var(--sm-text)' }}>
                     Recent Games
                   </h2>
                 </div>
                 <div className="overflow-x-auto">
                   <table className="w-full">
                     <thead>
-                      <tr className="text-left text-xs text-[var(--sm-text-muted)] uppercase tracking-wider border-b border-[var(--sm-border)]">
+                      <tr className="text-left text-xs uppercase tracking-wider" style={{ color: 'var(--sm-text-muted)', borderBottom: '1px solid var(--sm-border)' }}>
                         <th className="px-4 py-3">Date</th>
                         <th className="px-4 py-3">Opp</th>
                         <th className="px-4 py-3">Result</th>
@@ -294,14 +294,15 @@ export default async function WhiteSoxPlayerPage({ params }: PlayerPageProps) {
 
           {/* Sidebar */}
           <div className="space-y-6">
-            <section className="bg-[var(--sm-card)] border border-[var(--sm-border)] rounded-2xl p-6">
-              <h3 className="text-lg font-bold text-[var(--sm-text)] mb-4" style={{ fontFamily: "'Montserrat', sans-serif" }}>
+            <section className="rounded-2xl p-6" style={{ backgroundColor: 'var(--sm-card)', border: '1px solid var(--sm-border)' }}>
+              <h3 className="text-lg font-bold mb-4" style={{ fontFamily: "'Montserrat', sans-serif", color: 'var(--sm-text)' }}>
                 Quick Links
               </h3>
               <div className="space-y-2">
                 <Link
                   href="/chicago-white-sox/roster"
-                  className="flex items-center gap-3 p-3 rounded-xl hover:bg-[var(--sm-card-hover)] transition-colors text-[var(--sm-text-muted)] hover:text-[#27251F] dark:hover:text-[#C4CED4]"
+                  className="flex items-center gap-3 p-3 rounded-xl transition-colors"
+                  style={{ color: 'var(--sm-text-muted)' }}
                 >
                   <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z" />
@@ -310,7 +311,8 @@ export default async function WhiteSoxPlayerPage({ params }: PlayerPageProps) {
                 </Link>
                 <Link
                   href="/chicago-white-sox/stats"
-                  className="flex items-center gap-3 p-3 rounded-xl hover:bg-[var(--sm-card-hover)] transition-colors text-[var(--sm-text-muted)] hover:text-[#27251F] dark:hover:text-[#C4CED4]"
+                  className="flex items-center gap-3 p-3 rounded-xl transition-colors"
+                  style={{ color: 'var(--sm-text-muted)' }}
                 >
                   <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 3.055A9.001 9.001 0 1020.945 13H11V3.055z" />
@@ -319,7 +321,8 @@ export default async function WhiteSoxPlayerPage({ params }: PlayerPageProps) {
                 </Link>
                 <Link
                   href="/chicago-white-sox/schedule"
-                  className="flex items-center gap-3 p-3 rounded-xl hover:bg-[var(--sm-card-hover)] transition-colors text-[var(--sm-text-muted)] hover:text-[#27251F] dark:hover:text-[#C4CED4]"
+                  className="flex items-center gap-3 p-3 rounded-xl transition-colors"
+                  style={{ color: 'var(--sm-text-muted)' }}
                 >
                   <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
@@ -337,20 +340,20 @@ export default async function WhiteSoxPlayerPage({ params }: PlayerPageProps) {
 
 function StatCard({ label, value }: { label: string; value: string }) {
   return (
-    <div className="bg-[var(--sm-surface)] rounded-xl p-4 text-center">
-      <div className="text-2xl font-bold text-[var(--sm-text)]">{value}</div>
-      <div className="text-xs text-[var(--sm-text-muted)] uppercase">{label}</div>
+    <div className="rounded-xl p-4 text-center" style={{ backgroundColor: 'var(--sm-surface)' }}>
+      <div className="text-2xl font-bold" style={{ color: 'var(--sm-text)' }}>{value}</div>
+      <div className="text-xs uppercase" style={{ color: 'var(--sm-text-muted)' }}>{label}</div>
     </div>
   )
 }
 
 function GameLogRow({ game, isPitcher }: { game: PlayerGameLogEntry; isPitcher: boolean }) {
   return (
-    <tr className="border-b border-[var(--sm-border)] last:border-0 hover:bg-[var(--sm-card-hover)] transition-colors">
-      <td className="px-4 py-3 text-sm text-[var(--sm-text-muted)]">
+    <tr className="last:border-0 transition-colors" style={{ borderBottom: '1px solid var(--sm-border)' }}>
+      <td className="px-4 py-3 text-sm" style={{ color: 'var(--sm-text-muted)' }}>
         {new Date(game.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
       </td>
-      <td className="px-4 py-3 text-sm text-[var(--sm-text)] font-medium">
+      <td className="px-4 py-3 text-sm font-medium" style={{ color: 'var(--sm-text)' }}>
         {game.isHome ? 'vs' : '@'} {game.opponent}
       </td>
       <td className="px-4 py-3">
@@ -366,34 +369,34 @@ function GameLogRow({ game, isPitcher }: { game: PlayerGameLogEntry; isPitcher: 
       </td>
       {isPitcher ? (
         <>
-          <td className="px-4 py-3 text-sm font-semibold text-[var(--sm-text)]">
+          <td className="px-4 py-3 text-sm font-semibold" style={{ color: 'var(--sm-text)' }}>
             {game.inningsPitched?.toFixed(1) ?? '-'}
             {game.pitchingDecision && (
-              <span className="ml-1 text-xs text-[var(--sm-text-muted)]">({game.pitchingDecision})</span>
+              <span className="ml-1 text-xs" style={{ color: 'var(--sm-text-muted)' }}>({game.pitchingDecision})</span>
             )}
           </td>
-          <td className="px-4 py-3 text-sm text-[var(--sm-text-muted)]">
+          <td className="px-4 py-3 text-sm" style={{ color: 'var(--sm-text-muted)' }}>
             {game.hitsAllowed ?? '-'}
           </td>
-          <td className="px-4 py-3 text-sm text-[var(--sm-text-muted)]">
+          <td className="px-4 py-3 text-sm" style={{ color: 'var(--sm-text-muted)' }}>
             {game.earnedRuns ?? '-'}
           </td>
-          <td className="px-4 py-3 text-sm text-[var(--sm-text-muted)] hidden sm:table-cell">
+          <td className="px-4 py-3 text-sm hidden sm:table-cell" style={{ color: 'var(--sm-text-muted)' }}>
             {game.strikeoutsPitched ?? '-'}
           </td>
         </>
       ) : (
         <>
-          <td className="px-4 py-3 text-sm font-semibold text-[var(--sm-text)]">
+          <td className="px-4 py-3 text-sm font-semibold" style={{ color: 'var(--sm-text)' }}>
             {game.atBats ?? '-'}
           </td>
-          <td className="px-4 py-3 text-sm text-[var(--sm-text-muted)]">
+          <td className="px-4 py-3 text-sm" style={{ color: 'var(--sm-text-muted)' }}>
             {game.hits ?? '-'}
           </td>
-          <td className="px-4 py-3 text-sm text-[var(--sm-text-muted)]">
+          <td className="px-4 py-3 text-sm" style={{ color: 'var(--sm-text-muted)' }}>
             {game.homeRuns ?? '-'}
           </td>
-          <td className="px-4 py-3 text-sm text-[var(--sm-text-muted)] hidden sm:table-cell">
+          <td className="px-4 py-3 text-sm hidden sm:table-cell" style={{ color: 'var(--sm-text-muted)' }}>
             {game.rbi ?? '-'}
           </td>
         </>
