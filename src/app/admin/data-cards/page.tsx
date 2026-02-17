@@ -362,7 +362,8 @@ export default function DataCardsPage() {
 
   const openCardModal = (card: StatCard) => {
     setSelectedCard(card)
-    setModalView(card.image_url ? 'image' : card.video_url ? 'video' : 'image')
+    // Default to video view if video exists, otherwise image
+    setModalView(card.video_url ? 'video' : 'image')
   }
 
   const getWorkflowButton = (status: string, cardId: string, size: 'small' | 'normal' = 'small') => {
@@ -493,19 +494,37 @@ export default function DataCardsPage() {
                   >
                     {/* Thumbnail area */}
                     {card.thumbnail_url ? (
-                      <div style={{ position: 'relative', aspectRatio: '9/16', maxHeight: 220, overflow: 'hidden', backgroundColor: '#111' }}>
+                      <div style={{ position: 'relative', height: 180, overflow: 'hidden', backgroundColor: '#0B162A' }}>
                         <img
                           src={card.thumbnail_url}
                           alt={card.headline || card.title}
-                          style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
+                          style={{ width: '100%', height: '100%', objectFit: 'contain', display: 'block' }}
                         />
+                        {/* Video play overlay */}
+                        {hasVideo && (
+                          <div style={{
+                            position: 'absolute', inset: 0,
+                            display: 'flex', alignItems: 'center', justifyContent: 'center',
+                            background: 'rgba(0,0,0,0.3)',
+                          }}>
+                            <div style={{
+                              width: 48, height: 48, borderRadius: '50%',
+                              backgroundColor: 'rgba(188,0,0,0.9)',
+                              display: 'flex', alignItems: 'center', justifyContent: 'center',
+                            }}>
+                              <svg width="20" height="20" viewBox="0 0 16 16" fill="#fff">
+                                <path d="M4 2l10 6-10 6V2z" />
+                              </svg>
+                            </div>
+                          </div>
+                        )}
                         {/* Media badges */}
                         {(hasImage || hasVideo) && (
                           <div style={{
                             position: 'absolute', top: 8, right: 8,
                             display: 'flex', gap: 4,
                           }}>
-                            {hasImage && (
+                            {hasImage && !hasVideo && (
                               <span style={{
                                 display: 'flex', alignItems: 'center', gap: 3,
                                 padding: '2px 6px', borderRadius: 4,
@@ -513,16 +532,6 @@ export default function DataCardsPage() {
                                 fontSize: '10px', fontWeight: 600,
                               }}>
                                 <ImageIcon /> IMG
-                              </span>
-                            )}
-                            {hasVideo && (
-                              <span style={{
-                                display: 'flex', alignItems: 'center', gap: 3,
-                                padding: '2px 6px', borderRadius: 4,
-                                backgroundColor: 'rgba(188,0,0,0.8)', color: '#fff',
-                                fontSize: '10px', fontWeight: 600,
-                              }}>
-                                <VideoIcon /> VID
                               </span>
                             )}
                           </div>
@@ -842,8 +851,8 @@ export default function DataCardsPage() {
               </div>
             </div>
 
-            {/* Media view toggle (if both image and video available) */}
-            {selectedCard.image_url && selectedCard.video_url && (
+            {/* Media view toggle (if video available) */}
+            {selectedCard.video_url && (
               <div style={{ display: 'flex', gap: 4, padding: '12px 24px 0' }}>
                 <button
                   onClick={() => setModalView('image')}
@@ -896,23 +905,6 @@ export default function DataCardsPage() {
             ) : (
               <div style={{ padding: 60, textAlign: 'center', color: '#9ca3af', fontSize: '14px' }}>
                 No media available for this card.
-              </div>
-            )}
-
-            {/* Only-video button (when no image but has video) */}
-            {!selectedCard.image_url && selectedCard.video_url && modalView === 'image' && (
-              <div style={{ padding: '0 24px 16px', textAlign: 'center' }}>
-                <button
-                  onClick={() => setModalView('video')}
-                  style={{
-                    padding: '8px 16px', borderRadius: 8, border: 'none', cursor: 'pointer',
-                    fontSize: '13px', fontWeight: 600,
-                    backgroundColor: '#bc0000', color: '#fff',
-                    display: 'inline-flex', alignItems: 'center', gap: 6,
-                  }}
-                >
-                  <VideoIcon /> Play Video
-                </button>
               </div>
             )}
 
