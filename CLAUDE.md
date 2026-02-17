@@ -18,6 +18,30 @@
 - **Auth:** Supabase Auth
 - **Styling:** Tailwind CSS
 
+### MCP Servers
+
+| Server | Package | Auth | Purpose |
+|--------|---------|------|---------|
+| **SEMRush** | `github:mrkooblu/semrush-mcp` | API Key via `SEMRUSH_API_KEY` env var | SEO keyword research, domain analytics, backlink analysis |
+
+**Configuration** (in `~/.claude.json` under this project's `mcpServers`):
+```json
+{
+  "semrush": {
+    "type": "stdio",
+    "command": "npx",
+    "args": ["-y", "github:mrkooblu/semrush-mcp"],
+    "env": {
+      "SEMRUSH_API_KEY": "34ea83b1d84e233f4d827d721c7108df"
+    }
+  }
+}
+```
+
+**Note:** Each SEMRush API call consumes 10-100 API units depending on the tool used.
+
+**Default Domain Rule:** When using the SEMRush MCP connector, always analyze **sportsmockery.com** (the live WordPress site) by default, unless explicitly told to use test.sportsmockery.com. All SEO data, Site Audit, keyword tracking, and content analysis should target the live domain **sportsmockery.com**.
+
 ---
 
 ## Styling Rules (IMPORTANT)

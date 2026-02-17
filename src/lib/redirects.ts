@@ -24,3 +24,12 @@ export function clearIntendedDestination(): void {
   if (typeof document === 'undefined') return
   document.cookie = 'sm_intended_destination=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;'
 }
+
+export function getIntendedOrFallback(fallback: string = '/'): string {
+  const destination = getIntendedDestination()
+  if (destination) {
+    clearIntendedDestination()
+    return destination
+  }
+  return fallback
+}

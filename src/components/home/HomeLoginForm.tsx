@@ -4,7 +4,7 @@ import { useState } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useAuth } from '@/hooks/useAuth'
-import { clearIntendedDestination } from '@/lib/redirects'
+import { getIntendedOrFallback } from '@/lib/redirects'
 import SkipLoginModal from '@/components/home/SkipLoginModal'
 
 interface HomeLoginFormProps {
@@ -34,8 +34,8 @@ export default function HomeLoginForm({ redirectTo = '/admin' }: HomeLoginFormPr
       return
     }
 
-    clearIntendedDestination()
-    router.push(redirectTo)
+    const destination = getIntendedOrFallback(redirectTo)
+    router.push(destination)
     router.refresh()
   }
 
