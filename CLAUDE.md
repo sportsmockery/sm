@@ -1,6 +1,6 @@
 # SportsMockery - Claude Project Knowledge Base
 
-> **Last Updated:** January 27, 2026 (GM Trade Simulator added)
+> **Last Updated:** February 17, 2026 (Mock Draft eligibility rules added)
 > **Purpose:** This file contains everything Claude needs to know to work on this project.
 
 ---
@@ -905,6 +905,61 @@ All logged-in users can access `/gm`. No admin check — auth uses `@supabase/ss
 - Grade 70-90 = flagged **dangerous** (risky upside)
 - Untouchable players: Caleb Williams (Bears), Connor Bedard (Blackhawks) → grade 0 if traded
 - Rate limit: 10 trades per minute per user
+
+---
+
+## Mock Draft (CRITICAL - DO NOT OVERRIDE)
+
+**ALL mock draft data and logic comes from DataLab. NEVER override, assume, or modify eligibility on the frontend.**
+
+### The Rule (MANDATORY)
+
+```
+DO NOT pass include_in_season=true to DataLab
+DO NOT override eligibility values returned by DataLab
+DO NOT create fallback logic that enables teams
+DO NOT assume which teams should be eligible
+JUST call the API and display what it returns
+```
+
+### How Eligibility Works
+
+1. **DataLab's `draft_calendar` table** defines mock draft windows per sport/year
+2. **DataLab's sync cron** marks teams eligible/ineligible based on calendar
+3. **DataLab's API** (`GET /api/gm/draft/teams`) returns only eligible offseason teams by default
+4. **Frontend** calls API and displays exactly what's returned - NO MODIFICATIONS
+
+### Current Eligibility (Feb 2026)
+
+| Team | Sport | Season Status | Eligible? |
+|------|-------|---------------|-----------|
+| Bears | NFL | offseason | ✓ Yes |
+| Cubs | MLB | offseason | ✓ Yes |
+| White Sox | MLB | offseason | ✓ Yes |
+| Bulls | NBA | **in_season** | ✗ No |
+| Blackhawks | NHL | **in_season** | ✗ No |
+
+### API Calls (Correct Usage)
+
+```typescript
+// CORRECT - use default filtering (hides in-season teams)
+fetch('https://datalab.sportsmockery.com/api/gm/draft/teams')
+
+// WRONG - do NOT use this unless explicitly told to
+fetch('https://datalab.sportsmockery.com/api/gm/draft/teams?include_in_season=true')
+```
+
+### Key Files
+
+| File | Purpose |
+|------|---------|
+| `src/app/mock-draft/page.tsx` | Web mock draft page |
+| `src/app/api/gm/draft/eligibility/route.ts` | Mobile eligibility API (proxies to DataLab) |
+| `mobile/app/mock-draft/index.tsx` | Mobile mock draft page |
+
+### If You're Tempted to Override
+
+**STOP.** Ask the user first. If DataLab is returning wrong data, the fix belongs in DataLab, not in frontend overrides.
 
 ---
 
