@@ -139,38 +139,19 @@ The redesign guide was written for standalone HTML files. Our project is Next.js
 ---
 
 ### SECTION 1: Global CSS Variables and Design Tokens
-**Status:** PENDING
+**Status:** COMPLETE
 **File:** `src/styles/home.css`
 
 **Task:** Update CSS custom properties in `.hm-root` to add new design tokens from the guide (Section 1.1). Add spacing, radius, and transition tokens. Keep all existing variables. Add new ones.
 
-**New variables to ADD (do not remove existing):**
-```
---hm-success: #00d084
---hm-warning: #ffa500
---hm-error: #ff4444
---hm-nav-height: 72px
---hm-radius-sm: 10px
---hm-radius-md: 16px
---hm-radius-lg: 20px
---hm-radius-xl: 24px
---hm-radius-pill: 100px
---hm-ease: cubic-bezier(0.16, 1, 0.3, 1)
---hm-transition-fast: 0.2s ease
---hm-transition-med: 0.3s ease
---hm-transition-slow: 0.4s cubic-bezier(0.16, 1, 0.3, 1)
-```
-
 **Verification:**
 ```bash
-grep -c "hm-radius" src/styles/home.css
-# Should return > 0
-grep "hm-transition-fast" src/styles/home.css
-# Should show the variable definition
+grep -c "hm-radius" src/styles/home.css       # Returns 13
+grep -c "hm-transition-fast" src/styles/home.css  # Returns 7
 ```
 
 **Notes:**
-_(filled after completion)_
+Added 18 new CSS custom properties: functional colors (success/warning/error), spacing (nav-height, radius-sm through radius-pill), transitions (ease, fast/med/slow), and feed variables (feed-max-width, card-spacing, sidebar-width). All existing variables preserved.
 
 ---
 
