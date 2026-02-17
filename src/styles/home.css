@@ -50,6 +50,178 @@
   min-height: 100vh;
 }
 
+/* ── LIGHT MODE ── */
+[data-theme="light"] .hm-root {
+  --hm-dark: #f8f8fa;
+  --hm-surface: #ffffff;
+  --hm-card: #ffffff;
+  --hm-card-hover: #f0f0f5;
+  --hm-border: rgba(0,0,0,0.08);
+  --hm-text: #111118;
+  --hm-text-muted: #555566;
+  --hm-text-dim: #888899;
+  --hm-red-glow: rgba(188, 0, 0, 0.12);
+  --hm-gradient-subtle: linear-gradient(135deg, rgba(188,0,0,0.08), rgba(255,68,68,0.03));
+}
+
+/* Light mode global overrides */
+[data-theme="light"] .hm-glass-card {
+  box-shadow: 0 1px 3px rgba(0,0,0,0.04), 0 4px 12px rgba(0,0,0,0.02);
+}
+[data-theme="light"] .hm-glass-card:hover {
+  box-shadow: 0 2px 8px rgba(0,0,0,0.06), 0 8px 24px rgba(0,0,0,0.04);
+}
+[data-theme="light"] .hm-glass-card h3,
+[data-theme="light"] .hm-features-header h2,
+[data-theme="light"] .hm-showcase-text h2,
+[data-theme="light"] .hm-cta-section h2,
+[data-theme="light"] .hm-page-hero h1,
+[data-theme="light"] .hm-cap-card h4,
+[data-theme="light"] .hm-stat-value,
+[data-theme="light"] .hm-chart-card h3,
+[data-theme="light"] .hm-leaderboard h3,
+[data-theme="light"] .hm-room-name,
+[data-theme="light"] .hm-player-name,
+[data-theme="light"] .hm-price-name,
+[data-theme="light"] .hm-price-amount,
+[data-theme="light"] .hm-stat-item h4,
+[data-theme="light"] .hm-article-title,
+[data-theme="light"] .hm-article-content h2,
+[data-theme="light"] .hm-article-content h3,
+[data-theme="light"] .hm-hero h1,
+[data-theme="light"] .hm-faq-question,
+[data-theme="light"] .hm-modal-title {
+  color: var(--hm-text);
+}
+[data-theme="light"] .hm-glow-orb { display: none; }
+[data-theme="light"] .hm-hero-grid,
+[data-theme="light"] .hm-page-hero-bg { opacity: 0.3; }
+[data-theme="light"] .hm-hero-bg {
+  background:
+    radial-gradient(ellipse 80% 50% at 50% 0%, rgba(188,0,0,0.04) 0%, transparent 60%),
+    var(--hm-dark);
+}
+[data-theme="light"] .hm-hero h1 {
+  text-shadow:
+    0 0 10px rgba(188, 0, 0, 0.15),
+    0 0 40px rgba(188, 0, 0, 0.08);
+}
+[data-theme="light"] .hm-btn-secondary {
+  color: var(--hm-text);
+  border-color: var(--hm-border);
+}
+[data-theme="light"] .hm-btn-secondary:hover {
+  background: rgba(0,0,0,0.03);
+  border-color: rgba(0,0,0,0.15);
+}
+[data-theme="light"] .hm-tag {
+  background: rgba(188,0,0,0.06);
+  border-color: rgba(188,0,0,0.12);
+  color: var(--hm-red);
+}
+[data-theme="light"] .hm-chat-input-field { color: var(--hm-text); }
+[data-theme="light"] .hm-ticker-team { color: var(--hm-text); }
+[data-theme="light"] .hm-scroll-indicator { color: var(--hm-text-dim); }
+
+/* Light mode: Scout AI */
+[data-theme="light"] .hm-chat-window {
+  box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+}
+[data-theme="light"] .hm-chat-msg-ai {
+  background: var(--hm-surface);
+  border-color: var(--hm-border);
+}
+[data-theme="light"] .hm-chip {
+  background: var(--hm-card);
+  border-color: var(--hm-border);
+}
+[data-theme="light"] .hm-chip:hover {
+  background: var(--hm-card-hover);
+  border-color: rgba(188,0,0,0.2);
+}
+[data-theme="light"] .hm-cap-card {
+  box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+}
+
+/* Light mode: Trade Simulator */
+[data-theme="light"] .hm-trade-panel {
+  box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+}
+[data-theme="light"] .hm-player-slot {
+  background: var(--hm-surface);
+  border-color: rgba(0,0,0,0.08);
+}
+[data-theme="light"] .hm-player-slot:hover {
+  background: var(--hm-card-hover);
+  border-color: rgba(188,0,0,0.2);
+}
+
+/* Light mode: Fan Hub */
+[data-theme="light"] .hm-room-list,
+[data-theme="light"] .hm-fan-chat,
+[data-theme="light"] .hm-fan-sidebar {
+  box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+}
+[data-theme="light"] .hm-room-active {
+  background: rgba(188,0,0,0.04);
+}
+[data-theme="light"] .hm-poll-option {
+  background: var(--hm-surface);
+  border-color: var(--hm-border);
+}
+
+/* Light mode: Data Cosmos */
+[data-theme="light"] .hm-stat-card,
+[data-theme="light"] .hm-chart-card,
+[data-theme="light"] .hm-leaderboard,
+[data-theme="light"] .hm-game-card {
+  box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+}
+[data-theme="light"] .hm-radar-placeholder {
+  background: linear-gradient(135deg, #f0f0f5, #ffffff);
+}
+[data-theme="light"] .hm-team-tab {
+  background: var(--hm-card);
+  border-color: var(--hm-border);
+}
+[data-theme="light"] .hm-team-tab-active {
+  background: var(--hm-gradient);
+  color: #fff;
+  border-color: transparent;
+}
+
+/* Light mode: Premium */
+[data-theme="light"] .hm-price-card {
+  box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+}
+[data-theme="light"] .hm-price-featured {
+  background: linear-gradient(180deg, rgba(188,0,0,0.03), #ffffff);
+  border-color: rgba(188,0,0,0.2);
+}
+[data-theme="light"] .hm-faq-item {
+  border-bottom-color: var(--hm-border);
+}
+
+/* Light mode: Article */
+[data-theme="light"] .hm-article-content blockquote {
+  background: rgba(188,0,0,0.03);
+  border-left-color: var(--hm-red);
+}
+[data-theme="light"] .hm-author-bio {
+  box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+}
+[data-theme="light"] .hm-related-card {
+  box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+}
+
+/* Light mode: Modal */
+[data-theme="light"] .hm-modal-overlay {
+  background: rgba(248, 248, 250, 0.92);
+}
+[data-theme="light"] .hm-modal-container {
+  box-shadow: 0 0 0 1px rgba(0,0,0,0.05), 0 24px 48px rgba(0,0,0,0.12);
+}
+
 /* UTILITY */
 .hm-container { max-width: 1200px; margin: 0 auto; padding: 0 24px; }
 .hm-section { padding: 120px 0; background: var(--hm-dark); }
