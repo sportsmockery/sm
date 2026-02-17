@@ -246,9 +246,9 @@ function transformPlayers(data: any[]): BlackhawksPlayer[] {
     const yearsExp = p.years_pro ?? p.years_exp ?? p.experience
 
     return {
-      // CRITICAL: Use espn_id for playerId since blackhawks_player_game_stats uses ESPN IDs
-      // The player_id column contains NHL IDs which don't match the stats table
-      playerId: String(p.espn_id || p.player_id || p.id),
+      // CRITICAL: Stats table (blackhawks_player_game_stats) uses NHL API IDs in player_id column
+      // Confirmed by boxscore API route which joins on nhl_id
+      playerId: String(p.nhl_id || p.player_id || p.espn_id || p.id),
       internalId: p.id,
       slug: p.slug || generateSlug(p.name || p.full_name),
       fullName: p.name || p.full_name,
@@ -306,10 +306,10 @@ export async function getPlayerProfile(slug: string): Promise<PlayerProfile | nu
 
   if (!player) return null
 
-  // Use playerId (ESPN ID) since stats tables use ESPN IDs in player_id column
-  const espnId = player.playerId
-  const seasons = await getPlayerSeasonStats(espnId, player.positionGroup === 'goalies')
-  const gameLog = await getPlayerGameLog(espnId)
+  // Use playerId (NHL API ID) since stats tables use NHL IDs in player_id column
+  const statsId = player.playerId
+  const seasons = await getPlayerSeasonStats(statsId, player.positionGroup === 'goalies')
+  const gameLog = await getPlayerGameLog(statsId)
 
   const currentYear = getCurrentSeason()
   const currentSeason = seasons.find(s => s.season === currentYear) ||
@@ -324,7 +324,7 @@ export async function getPlayerProfile(slug: string): Promise<PlayerProfile | nu
   }
 }
 
-async function getPlayerSeasonStats(espnId: string, isGoalie: boolean): Promise<PlayerSeasonStats[]> {
+async function getPlayerSeasonStats(statsId: string, isGoalie: boolean): Promise<PlayerSeasonStats[]> {
   if (!datalabAdmin) return []
 
   // Query all seasons for this player, not just current
@@ -345,7 +345,7 @@ async function getPlayerSeasonStats(espnId: string, isGoalie: boolean): Promise<
       goals_against,
       shots_against
     `)
-    .eq('player_id', espnId)
+    .eq('player_id', statsId)
 
   if (error || !data || data.length === 0) return []
 
@@ -401,7 +401,7 @@ async function getPlayerSeasonStats(espnId: string, isGoalie: boolean): Promise<
     })
 }
 
-async function getPlayerGameLog(espnId: string): Promise<PlayerGameLogEntry[]> {
+async function getPlayerGameLog(statsId: string): Promise<PlayerGameLogEntry[]> {
   if (!datalabAdmin) return []
 
   const { data, error } = await datalabAdmin
@@ -431,7 +431,7 @@ async function getPlayerGameLog(espnId: string): Promise<PlayerGameLogEntry[]> {
         season
       )
     `)
-    .eq('player_id', espnId)
+    .eq('player_id', statsId)
     .in('season', [getCurrentSeason(), getCurrentSeason() - 1])
     .order('game_date', { ascending: false })
     .limit(20)
