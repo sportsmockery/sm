@@ -51,6 +51,33 @@ const SKIP_VISITOR_REDIRECT = [
   '/api/auth/callback',
 ]
 
+function createSupabaseMiddlewareClient(request: NextRequest) {
+  let response = NextResponse.next({ request: { headers: request.headers } })
+
+  const supabase = createServerClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    {
+      cookies: {
+        getAll() {
+          return request.cookies.getAll()
+        },
+        setAll(cookiesToSet) {
+          cookiesToSet.forEach(({ name, value }) =>
+            request.cookies.set(name, value)
+          )
+          response = NextResponse.next({ request })
+          cookiesToSet.forEach(({ name, value, options }) =>
+            response.cookies.set(name, value, options)
+          )
+        },
+      },
+    }
+  )
+
+  return { supabase, response }
+}
+
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl
 
@@ -58,17 +85,21 @@ export async function middleware(request: NextRequest) {
   const isApiPath = pathname.startsWith('/api')
   const isHomePath = pathname === '/home' || pathname.startsWith('/home/')
 
-  // Allow static assets and API routes immediately
+  // 1. Allow static assets and API routes immediately
   if (isStaticAsset || isApiPath) {
     return NextResponse.next()
   }
 
-  // --- First-time visitor redirect ---
-  // If no sm_visited cookie, not on a /home page, and not an auth page → redirect to /home
+  // 2. Allow /home/* marketing pages through (no auth check needed)
+  if (isHomePath) {
+    return NextResponse.next()
+  }
+
+  // 3. First-time visitor redirect — send to /home and save intended destination
   const hasVisited = request.cookies.get('sm_visited')?.value
   const isAuthPage = SKIP_VISITOR_REDIRECT.includes(pathname)
 
-  if (!hasVisited && !isHomePath && !isAuthPage) {
+  if (!hasVisited && !isAuthPage && pathname !== '/') {
     const response = NextResponse.redirect(new URL('/home', request.url))
 
     response.cookies.set('sm_visited', 'true', {
@@ -77,7 +108,6 @@ export async function middleware(request: NextRequest) {
       sameSite: 'lax',
     })
 
-    // Save intended destination (only valid paths, prevent open redirect)
     if (pathname.startsWith('/') && !pathname.startsWith('//')) {
       response.cookies.set('sm_intended_destination', pathname, {
         maxAge: 60 * 60 * 24, // 24 hours
@@ -89,50 +119,20 @@ export async function middleware(request: NextRequest) {
     return response
   }
 
-  // --- Existing public route logic ---
+  // 4. Allow public routes
   const isPublicRoute = publicRoutes.includes(pathname)
   const isPublicPath = publicPaths.some((path) => pathname.startsWith(path))
 
-  // Allow public routes, home pages
-  if (isPublicRoute || isPublicPath || isHomePath) {
+  if (isPublicRoute || isPublicPath) {
     return NextResponse.next()
   }
 
-  // Check authentication for protected routes (e.g., /admin/*)
+  // 5. Admin route protection — require authentication
   if (pathname.startsWith('/admin')) {
-    let response = NextResponse.next({
-      request: {
-        headers: request.headers,
-      },
-    })
-
-    const supabase = createServerClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-      {
-        cookies: {
-          getAll() {
-            return request.cookies.getAll()
-          },
-          setAll(cookiesToSet) {
-            cookiesToSet.forEach(({ name, value }) =>
-              request.cookies.set(name, value)
-            )
-            response = NextResponse.next({
-              request,
-            })
-            cookiesToSet.forEach(({ name, value, options }) =>
-              response.cookies.set(name, value, options)
-            )
-          },
-        },
-      }
-    )
-
+    const { supabase, response } = createSupabaseMiddlewareClient(request)
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) {
-      // Redirect to login with return URL
       const loginUrl = new URL('/login', request.url)
       loginUrl.searchParams.set('next', pathname)
       return NextResponse.redirect(loginUrl)
@@ -146,12 +146,6 @@ export async function middleware(request: NextRequest) {
 
 export const config = {
   matcher: [
-    /*
-     * Match all request paths except for the ones starting with:
-     * - _next/static (static files)
-     * - _next/image (image optimization files)
-     * - favicon.ico (favicon file)
-     */
     '/((?!_next/static|_next/image|favicon.ico).*)',
   ],
 }
