@@ -246,9 +246,8 @@ function transformPlayers(data: any[]): BlackhawksPlayer[] {
     const yearsExp = p.years_pro ?? p.years_exp ?? p.experience
 
     return {
-      // CRITICAL: Stats table (blackhawks_player_game_stats) uses NHL API IDs in player_id column
-      // Confirmed by boxscore API route which joins on nhl_id
-      playerId: String(p.nhl_id || p.player_id || p.espn_id || p.id),
+      // Stats table uses ESPN IDs in player_id column (confirmed by DB inspection)
+      playerId: String(p.espn_id || p.player_id || p.id),
       internalId: p.id,
       slug: p.slug || generateSlug(p.name || p.full_name),
       fullName: p.name || p.full_name,
@@ -306,7 +305,7 @@ export async function getPlayerProfile(slug: string): Promise<PlayerProfile | nu
 
   if (!player) return null
 
-  // Use playerId (NHL API ID) since stats tables use NHL IDs in player_id column
+  // Use playerId (ESPN ID) since stats tables use ESPN IDs in player_id column
   const statsId = player.playerId
   const seasons = await getPlayerSeasonStats(statsId, player.positionGroup === 'goalies')
   const gameLog = await getPlayerGameLog(statsId)
@@ -336,11 +335,11 @@ async function getPlayerSeasonStats(statsId: string, isGoalie: boolean): Promise
       assists,
       points,
       plus_minus,
-      pim,
-      shots,
+      penalty_minutes,
+      shots_on_goal,
       hits,
       blocked_shots,
-      toi,
+      time_on_ice,
       saves,
       goals_against,
       shots_against
@@ -366,8 +365,8 @@ async function getPlayerSeasonStats(statsId: string, isGoalie: boolean): Promise
         acc.assists = (acc.assists || 0) + (game.assists || 0)
         acc.points = (acc.points || 0) + (game.points || 0)
         acc.plusMinus = (acc.plusMinus || 0) + (game.plus_minus || 0)
-        acc.pim = (acc.pim || 0) + (game.pim || 0)
-        acc.shots = (acc.shots || 0) + (game.shots || 0)
+        acc.pim = (acc.pim || 0) + (game.penalty_minutes || 0)
+        acc.shots = (acc.shots || 0) + (game.shots_on_goal || 0)
         acc.hits = (acc.hits || 0) + (game.hits || 0)
         acc.blockedShots = (acc.blockedShots || 0) + (game.blocked_shots || 0)
         acc.saves = (acc.saves || 0) + (game.saves || 0)
@@ -413,9 +412,9 @@ async function getPlayerGameLog(statsId: string): Promise<PlayerGameLogEntry[]> 
       assists,
       points,
       plus_minus,
-      pim,
-      shots,
-      toi,
+      penalty_minutes,
+      shots_on_goal,
+      time_on_ice,
       saves,
       goals_against,
       blackhawks_games_master!inner(
@@ -426,8 +425,8 @@ async function getPlayerGameLog(statsId: string): Promise<PlayerGameLogEntry[]> 
         blackhawks_score,
         opponent_score,
         blackhawks_win,
-        overtime,
-        shootout,
+        is_overtime,
+        is_shootout,
         season
       )
     `)
@@ -446,7 +445,7 @@ async function getPlayerGameLog(statsId: string): Promise<PlayerGameLogEntry[]> 
     if (isPlayed) {
       if (game.blackhawks_win) {
         result = 'W'
-      } else if (game.overtime || game.shootout) {
+      } else if (game.is_overtime || game.is_shootout) {
         result = 'OTL'
       } else {
         result = 'L'
@@ -466,9 +465,9 @@ async function getPlayerGameLog(statsId: string): Promise<PlayerGameLogEntry[]> 
       assists: s.assists,
       points: s.points,
       plusMinus: s.plus_minus,
-      pim: s.pim,
-      shots: s.shots,
-      toi: s.toi,
+      pim: s.penalty_minutes,
+      shots: s.shots_on_goal,
+      toi: s.time_on_ice,
       saves: s.saves,
       goalsAgainst: s.goals_against,
     }
