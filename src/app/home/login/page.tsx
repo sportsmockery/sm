@@ -30,10 +30,13 @@ const features: { name: string; sm: boolean | 'coming-soon'; espn: boolean }[] =
 
 export default async function HomeLoginPage({ searchParams }: LoginPageProps) {
   const params = await searchParams
-  const redirectTo = params.next || '/admin'
 
   // If already logged in, redirect to destination
   const cookieStore = await cookies()
+
+  // Check for intended destination cookie (set by first-time visitor redirect)
+  const intendedDestination = cookieStore.get('sm_intended_destination')?.value
+  const redirectTo = params.next || intendedDestination || '/'
   const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,

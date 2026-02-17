@@ -3,6 +3,7 @@
 import { useEffect, useCallback } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
+import { getIntendedDestination, clearIntendedDestination } from '@/lib/redirects'
 
 interface SkipLoginModalProps {
   open: boolean
@@ -47,7 +48,9 @@ const features = [
 export default function SkipLoginModal({ open, onClose }: SkipLoginModalProps) {
   const handleSkip = useCallback(() => {
     localStorage.setItem('sm_skipped_login', 'true')
-    window.location.href = 'https://test.sportsmockery.com'
+    const destination = getIntendedDestination() || '/'
+    clearIntendedDestination()
+    window.location.href = destination
   }, [])
 
   useEffect(() => {
@@ -70,11 +73,14 @@ export default function SkipLoginModal({ open, onClose }: SkipLoginModalProps) {
         {/* Top accent line */}
         <div className="hm-modal-accent" />
 
-        {/* Close button → goes to test.sportsmockery.com */}
+        {/* Close button → goes to intended destination or home */}
         <button
           className="hm-modal-close"
           onClick={() => {
-            window.location.href = 'https://test.sportsmockery.com'
+            const destination = getIntendedDestination() || '/'
+            clearIntendedDestination()
+            localStorage.setItem('sm_skipped_login', 'true')
+            window.location.href = destination
           }}
           aria-label="Close"
         >
