@@ -46,15 +46,34 @@ export default async function BlackhawksSchedulePage() {
       nextGame={nextGame}
       activeTab="schedule"
     >
-      <div>
-        {/* Show only the next upcoming game */}
+      <div className="pb-12">
+        {/* Next Game Highlight */}
         {nextScheduledGame && (
-          <div className="mb-6 p-4 rounded-xl bg-[var(--bg-elevated)] border border-[var(--border-subtle)]">
+          <div
+            style={{
+              marginBottom: '24px',
+              padding: '20px',
+              borderRadius: 'var(--sm-radius-lg)',
+              backgroundColor: 'var(--sm-card)',
+              border: '1px solid var(--sm-border)',
+              borderLeft: '4px solid #CF0A2C',
+            }}
+          >
             <div className="flex items-center justify-between gap-4">
               <div className="flex items-center gap-3">
-                <div className="px-2 py-1 bg-[#CF0A2C]/10 text-[#CF0A2C] text-xs font-semibold rounded">
+                <span
+                  style={{
+                    padding: '4px 12px',
+                    backgroundColor: 'rgba(207, 10, 44, 0.1)',
+                    color: '#CF0A2C',
+                    fontSize: '11px',
+                    fontWeight: 700,
+                    borderRadius: '100px',
+                    letterSpacing: '0.5px',
+                  }}
+                >
                   UP NEXT
-                </div>
+                </span>
                 <div className="flex items-center gap-2">
                   {nextScheduledGame.opponentLogo && (
                     <Image
@@ -66,36 +85,84 @@ export default async function BlackhawksSchedulePage() {
                       unoptimized
                     />
                   )}
-                  <span className="font-semibold text-[var(--text-primary)]">
+                  <span style={{ fontWeight: 600, color: 'var(--sm-text)' }}>
                     {nextScheduledGame.homeAway === 'home' ? 'vs' : '@'} {nextScheduledGame.opponentFullName || nextScheduledGame.opponent}
                   </span>
                 </div>
               </div>
               <div className="text-right text-sm">
-                <div className="text-[var(--text-primary)] font-medium">
+                <div style={{ color: 'var(--sm-text)', fontWeight: 500 }}>
                   {new Date(nextScheduledGame.date).toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })}
                 </div>
-                <div className="text-[var(--text-muted)]">
-                  {nextScheduledGame.time || 'TBD'} {nextScheduledGame.tv && `• ${nextScheduledGame.tv}`}
+                <div style={{ color: 'var(--sm-text-muted)' }}>
+                  {nextScheduledGame.time || 'TBD'} {nextScheduledGame.tv && `· ${nextScheduledGame.tv}`}
                 </div>
               </div>
             </div>
           </div>
         )}
 
-        {/* Full Schedule - upcoming first, then completed */}
+        {/* Record Summary */}
+        <div
+          style={{
+            marginBottom: '24px',
+            padding: '20px',
+            borderRadius: 'var(--sm-radius-lg)',
+            backgroundColor: 'var(--sm-card)',
+            border: '1px solid var(--sm-border)',
+          }}
+        >
+          <div className="flex flex-wrap gap-6 justify-center text-center">
+            <div>
+              <div style={{ fontSize: '11px', color: 'var(--sm-text-muted)', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '4px' }}>2025-26 Season</div>
+              <div style={{ fontSize: '22px', fontWeight: 800, color: 'var(--sm-text)', fontFamily: "'Montserrat', sans-serif" }}>
+                {hawksRecord.wins}-{hawksRecord.losses}-{hawksRecord.otLosses}
+              </div>
+            </div>
+            {hawksRecord.streak && (
+              <div>
+                <div style={{ fontSize: '11px', color: 'var(--sm-text-muted)', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '4px' }}>Streak</div>
+                <div style={{ fontSize: '22px', fontWeight: 800, color: hawksRecord.streak.startsWith('W') ? '#10b981' : '#ef4444', fontFamily: "'Montserrat', sans-serif" }}>
+                  {hawksRecord.streak}
+                </div>
+              </div>
+            )}
+            <div>
+              <div style={{ fontSize: '11px', color: 'var(--sm-text-muted)', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '4px' }}>Games Played</div>
+              <div style={{ fontSize: '22px', fontWeight: 800, color: 'var(--sm-text)', fontFamily: "'Montserrat', sans-serif" }}>
+                {completedGames.length}
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Full Schedule */}
         {schedule.length > 0 && (
-          <div className="bg-[var(--bg-elevated)] border border-[var(--border-subtle)] rounded-2xl overflow-hidden">
-            <div className="p-4 border-b border-[var(--border-subtle)] flex items-center justify-between">
-              <h2 className="font-bold text-[var(--text-primary)]" style={{ fontFamily: "'Montserrat', sans-serif" }}>
+          <div
+            style={{
+              backgroundColor: 'var(--sm-card)',
+              border: '1px solid var(--sm-border)',
+              borderRadius: 'var(--sm-radius-xl)',
+              overflow: 'hidden',
+            }}
+          >
+            <div
+              style={{
+                padding: '16px 20px',
+                borderBottom: '1px solid var(--sm-border)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+              }}
+            >
+              <h2 style={{ fontWeight: 700, color: 'var(--sm-text)', fontFamily: "'Montserrat', sans-serif" }}>
                 Chicago Blackhawks 2025-26 Schedule
               </h2>
-              <span className="text-sm text-[var(--text-muted)]">
+              <span style={{ fontSize: '14px', color: 'var(--sm-text-muted)' }}>
                 {schedule.length} games
               </span>
             </div>
-
-            <div className="divide-y divide-[var(--border-subtle)]">
+            <div>
               {[...upcomingGames, ...completedGames].map((game) => (
                 <GameRow key={game.gameId} game={game} />
               ))}
@@ -105,8 +172,16 @@ export default async function BlackhawksSchedulePage() {
 
         {/* Empty state */}
         {schedule.length === 0 && (
-          <div className="bg-[var(--bg-elevated)] border border-[var(--border-subtle)] rounded-2xl p-12 text-center">
-            <p className="text-[var(--text-muted)]">No schedule data available</p>
+          <div
+            style={{
+              backgroundColor: 'var(--sm-card)',
+              border: '1px solid var(--sm-border)',
+              borderRadius: 'var(--sm-radius-xl)',
+              padding: '48px',
+              textAlign: 'center',
+            }}
+          >
+            <p style={{ color: 'var(--sm-text-muted)' }}>No schedule data available</p>
           </div>
         )}
       </div>
@@ -119,14 +194,26 @@ function GameRow({ game }: { game: BlackhawksGame }) {
   const isPast = game.status === 'final'
   const isInProgress = game.status === 'in_progress'
 
+  const borderColor = isPast
+    ? game.result === 'W' ? '#10b981' : game.result === 'OTL' ? '#eab308' : '#ef4444'
+    : '#CF0A2C'
+
   return (
-    <div className={`p-4 hover:bg-[var(--bg-hover)] transition-colors ${isPast ? '' : 'bg-[var(--bg-tertiary)]/30'}`}>
+    <div
+      style={{
+        padding: '16px 20px',
+        borderBottom: '1px solid var(--sm-border)',
+        borderLeft: `3px solid ${borderColor}`,
+        transition: 'background-color 0.15s ease',
+      }}
+      className="hover:brightness-95 dark:hover:brightness-110"
+    >
       <div className="grid grid-cols-[auto_1fr_auto] sm:grid-cols-[100px_1fr_140px] gap-4 items-center">
         <div className="flex-shrink-0">
-          <div className="font-medium text-[var(--text-primary)]">
+          <div style={{ fontWeight: 500, color: 'var(--sm-text)' }}>
             {gameDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
           </div>
-          <div className="text-xs text-[var(--text-muted)]">
+          <div style={{ fontSize: '12px', color: 'var(--sm-text-muted)' }}>
             {game.dayOfWeek}
           </div>
         </div>
@@ -142,11 +229,9 @@ function GameRow({ game }: { game: BlackhawksGame }) {
               unoptimized
             />
           </div>
-
-          <span className="text-xs text-[var(--text-muted)] font-medium flex-shrink-0">
+          <span style={{ fontSize: '12px', color: 'var(--sm-text-muted)', fontWeight: 500 }} className="flex-shrink-0">
             {game.homeAway === 'home' ? 'vs' : '@'}
           </span>
-
           {game.opponentLogo && (
             <div className="w-7 h-7 flex-shrink-0">
               <Image
@@ -159,9 +244,8 @@ function GameRow({ game }: { game: BlackhawksGame }) {
               />
             </div>
           )}
-
           <div className="min-w-0 flex-1">
-            <span className="text-sm sm:text-base font-semibold text-[var(--text-primary)] truncate block">
+            <span className="text-sm sm:text-base truncate block" style={{ fontWeight: 600, color: 'var(--sm-text)' }}>
               {game.opponentFullName || game.opponent}
             </span>
           </div>
@@ -170,35 +254,48 @@ function GameRow({ game }: { game: BlackhawksGame }) {
         <div className="text-right flex-shrink-0">
           {isPast ? (
             <div className="flex items-center gap-2 justify-end">
-              <span className={`px-2 py-0.5 rounded text-xs font-bold ${
-                game.result === 'W'
-                  ? 'bg-green-500/10 text-green-500'
-                  : game.result === 'OTL'
-                    ? 'bg-yellow-500/10 text-yellow-500'
-                    : 'bg-red-500/10 text-red-500'
-              }`}>
+              <span
+                style={{
+                  padding: '2px 8px',
+                  borderRadius: '100px',
+                  fontSize: '11px',
+                  fontWeight: 700,
+                  backgroundColor: game.result === 'W' ? 'rgba(16, 185, 129, 0.1)' : game.result === 'OTL' ? 'rgba(234, 179, 8, 0.1)' : 'rgba(239, 68, 68, 0.1)',
+                  color: game.result === 'W' ? '#10b981' : game.result === 'OTL' ? '#eab308' : '#ef4444',
+                }}
+              >
                 {game.result}{game.overtime ? ' (OT)' : ''}{game.shootout ? ' (SO)' : ''}
               </span>
-              <span className="font-semibold text-[var(--text-primary)] text-sm">
+              <span style={{ fontWeight: 600, color: 'var(--sm-text)', fontSize: '14px' }}>
                 {game.blackhawksScore}-{game.oppScore}
               </span>
             </div>
           ) : isInProgress ? (
             <div className="flex items-center gap-2 justify-end">
-              <span className="px-2 py-0.5 bg-[#CF0A2C]/10 text-[#CF0A2C] rounded text-xs font-medium animate-pulse">
+              <span
+                className="animate-pulse"
+                style={{
+                  padding: '2px 8px',
+                  backgroundColor: 'rgba(207, 10, 44, 0.1)',
+                  color: '#CF0A2C',
+                  borderRadius: '100px',
+                  fontSize: '11px',
+                  fontWeight: 600,
+                }}
+              >
                 LIVE
               </span>
-              <span className="font-semibold text-[var(--text-primary)] text-sm">
+              <span style={{ fontWeight: 600, color: 'var(--sm-text)', fontSize: '14px' }}>
                 {game.blackhawksScore}-{game.oppScore}
               </span>
             </div>
           ) : (
             <div>
-              <div className="font-medium text-[var(--text-primary)] text-sm">
+              <div style={{ fontWeight: 500, color: 'var(--sm-text)', fontSize: '14px' }}>
                 {game.time || 'TBD'}
               </div>
               {game.tv && (
-                <div className="text-xs text-[var(--text-muted)]">
+                <div style={{ fontSize: '12px', color: 'var(--sm-text-muted)' }}>
                   {game.tv}
                 </div>
               )}
