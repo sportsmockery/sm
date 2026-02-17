@@ -12,6 +12,7 @@ interface StatCard {
   hook: string | null
   insight: string | null
   chicago_take: string | null
+  key_stats: Record<string, unknown> | null
   card_type: string
   svg_content: string
   thumbnail_url: string | null
@@ -50,11 +51,15 @@ const STATUS_COLORS: Record<string, { bg: string; text: string }> = {
 }
 
 const CARD_TYPE_COLORS: Record<string, { bg: string; text: string }> = {
-  stat_comparison: { bg: '#8b5cf615', text: '#8b5cf6' },
+  // In-season types
   player_spotlight: { bg: '#3b82f615', text: '#3b82f6' },
-  game_recap: { bg: '#ef444415', text: '#ef4444' },
-  season_leader: { bg: '#f59e0b15', text: '#f59e0b' },
-  trade_impact: { bg: '#06b6d415', text: '#06b6d4' },
+  comparison: { bg: '#8b5cf615', text: '#8b5cf6' },
+  hot_take: { bg: '#ef444415', text: '#ef4444' },
+  milestone: { bg: '#f59e0b15', text: '#f59e0b' },
+  game_recap: { bg: '#22c55e15', text: '#22c55e' },
+  matchup: { bg: '#06b6d415', text: '#06b6d4' },
+  trend: { bg: '#ec489915', text: '#ec4899' },
+  // Offseason types
   offseason_trade_rumor: { bg: '#f9731615', text: '#f97316' },
   offseason_draft_prospect: { bg: '#a855f715', text: '#a855f7' },
   offseason_free_agent: { bg: '#14b8a615', text: '#14b8a6' },
@@ -274,7 +279,7 @@ export default function DataCardsPage() {
     try {
       let query = datalabClient
         .from('stat_cards')
-        .select('id, created_at, title, headline, subheadline, hook, insight, chicago_take, card_type, svg_content, thumbnail_url, image_url, video_url, viral_score, status, tier, confidence_level, template_id')
+        .select('id, created_at, title, headline, subheadline, hook, insight, chicago_take, key_stats, card_type, svg_content, thumbnail_url, image_url, video_url, viral_score, status, tier, confidence_level, template_id')
         .order('created_at', { ascending: false })
       if (statusFilter !== 'all') query = query.eq('status', statusFilter)
       const { data, error } = await query
@@ -932,7 +937,25 @@ export default function DataCardsPage() {
               </div>
             )}
 
-            {/* Metadata */}
+            {/* Key Stats */}
+            {selectedCard.key_stats && Object.keys(selectedCard.key_stats).length > 0 && (
+              <div style={{ padding: '0 24px 16px' }}>
+                <div style={{ fontSize: '11px', fontWeight: 700, color: '#9ca3af', textTransform: 'uppercase', marginBottom: 8 }}>Key Stats</div>
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
+                  {Object.entries(selectedCard.key_stats).map(([key, val]) => (
+                    <div key={key} style={{
+                      padding: '6px 12px', borderRadius: 8,
+                      backgroundColor: '#f3f4f6', fontSize: '12px',
+                    }}>
+                      <span style={{ color: '#6b7280' }}>{key.replace(/_/g, ' ')}: </span>
+                      <span style={{ fontWeight: 700, color: '#1a1a1a' }}>{String(val)}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Created date */}
             <div style={{ padding: '12px 24px', borderTop: '1px solid #f3f4f6', fontSize: '12px', color: '#6b7280' }}>
               Created: {new Date(selectedCard.created_at).toLocaleString()}
             </div>
