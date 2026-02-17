@@ -327,6 +327,7 @@ export async function getPlayerProfile(slug: string): Promise<PlayerProfile | nu
 async function getPlayerSeasonStats(espnId: string, isGoalie: boolean): Promise<PlayerSeasonStats[]> {
   if (!datalabAdmin) return []
 
+  // Query all seasons for this player, not just current
   const { data, error } = await datalabAdmin
     .from('blackhawks_player_game_stats')
     .select(`
@@ -345,51 +346,59 @@ async function getPlayerSeasonStats(espnId: string, isGoalie: boolean): Promise<
       shots_against
     `)
     .eq('player_id', espnId)
-    .eq('season', getCurrentSeason())
 
   if (error || !data || data.length === 0) return []
 
-  // Aggregate all game stats into season totals
-  const totals = data.reduce((acc: any, game: any) => {
-    acc.gamesPlayed = (acc.gamesPlayed || 0) + 1
-    acc.goals = (acc.goals || 0) + (game.goals || 0)
-    acc.assists = (acc.assists || 0) + (game.assists || 0)
-    acc.points = (acc.points || 0) + (game.points || 0)
-    acc.plusMinus = (acc.plusMinus || 0) + (game.plus_minus || 0)
-    acc.pim = (acc.pim || 0) + (game.pim || 0)
-    acc.shots = (acc.shots || 0) + (game.shots || 0)
-    acc.hits = (acc.hits || 0) + (game.hits || 0)
-    acc.blockedShots = (acc.blockedShots || 0) + (game.blocked_shots || 0)
-    // Goalie stats
-    acc.saves = (acc.saves || 0) + (game.saves || 0)
-    acc.goalsAgainst = (acc.goalsAgainst || 0) + (game.goals_against || 0)
-    acc.shotsAgainst = (acc.shotsAgainst || 0) + (game.shots_against || 0)
-    return acc
-  }, {})
+  // Group by season and aggregate
+  const bySeason: Record<number, any[]> = {}
+  for (const game of data) {
+    const s = game.season
+    if (!bySeason[s]) bySeason[s] = []
+    bySeason[s].push(game)
+  }
 
-  return [{
-    season: getCurrentSeason(),
-    gamesPlayed: totals.gamesPlayed || 0,
-    goals: totals.goals || null,
-    assists: totals.assists || null,
-    points: totals.points || null,
-    plusMinus: totals.plusMinus || null,
-    pim: totals.pim || null,
-    shots: totals.shots || null,
-    shotPct: totals.shots > 0 ? Math.round((totals.goals / totals.shots) * 1000) / 10 : null,
-    hits: totals.hits || null,
-    blockedShots: totals.blockedShots || null,
-    toi: null,
-    // Goalie stats
-    wins: null, // Calculate from game results if needed
-    losses: null,
-    otLosses: null,
-    saves: totals.saves || null,
-    goalsAgainst: totals.goalsAgainst || null,
-    savePct: totals.shotsAgainst > 0 ? Math.round((totals.saves / totals.shotsAgainst) * 1000) / 1000 : null,
-    gaa: totals.gamesPlayed > 0 && totals.goalsAgainst ? Math.round((totals.goalsAgainst / totals.gamesPlayed) * 100) / 100 : null,
-    shutouts: null,
-  }]
+  return Object.entries(bySeason)
+    .sort(([a], [b]) => Number(b) - Number(a))
+    .map(([season, games]) => {
+      const totals = games.reduce((acc: any, game: any) => {
+        acc.gamesPlayed = (acc.gamesPlayed || 0) + 1
+        acc.goals = (acc.goals || 0) + (game.goals || 0)
+        acc.assists = (acc.assists || 0) + (game.assists || 0)
+        acc.points = (acc.points || 0) + (game.points || 0)
+        acc.plusMinus = (acc.plusMinus || 0) + (game.plus_minus || 0)
+        acc.pim = (acc.pim || 0) + (game.pim || 0)
+        acc.shots = (acc.shots || 0) + (game.shots || 0)
+        acc.hits = (acc.hits || 0) + (game.hits || 0)
+        acc.blockedShots = (acc.blockedShots || 0) + (game.blocked_shots || 0)
+        acc.saves = (acc.saves || 0) + (game.saves || 0)
+        acc.goalsAgainst = (acc.goalsAgainst || 0) + (game.goals_against || 0)
+        acc.shotsAgainst = (acc.shotsAgainst || 0) + (game.shots_against || 0)
+        return acc
+      }, {})
+
+      return {
+        season: Number(season),
+        gamesPlayed: totals.gamesPlayed || 0,
+        goals: totals.goals || null,
+        assists: totals.assists || null,
+        points: totals.points || null,
+        plusMinus: totals.plusMinus || null,
+        pim: totals.pim || null,
+        shots: totals.shots || null,
+        shotPct: totals.shots > 0 ? Math.round((totals.goals / totals.shots) * 1000) / 10 : null,
+        hits: totals.hits || null,
+        blockedShots: totals.blockedShots || null,
+        toi: null,
+        wins: null,
+        losses: null,
+        otLosses: null,
+        saves: totals.saves || null,
+        goalsAgainst: totals.goalsAgainst || null,
+        savePct: totals.shotsAgainst > 0 ? Math.round((totals.saves / totals.shotsAgainst) * 1000) / 1000 : null,
+        gaa: totals.gamesPlayed > 0 && totals.goalsAgainst ? Math.round((totals.goalsAgainst / totals.gamesPlayed) * 100) / 100 : null,
+        shutouts: null,
+      }
+    })
 }
 
 async function getPlayerGameLog(espnId: string): Promise<PlayerGameLogEntry[]> {
@@ -423,7 +432,7 @@ async function getPlayerGameLog(espnId: string): Promise<PlayerGameLogEntry[]> {
       )
     `)
     .eq('player_id', espnId)
-    .eq('season', getCurrentSeason())
+    .in('season', [getCurrentSeason(), getCurrentSeason() - 1])
     .order('game_date', { ascending: false })
     .limit(20)
 

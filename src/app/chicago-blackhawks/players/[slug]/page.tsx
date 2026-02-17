@@ -161,7 +161,7 @@ export default async function BlackhawksPlayerPage({ params }: PlayerPageProps) 
               <div className="w-full md:w-auto md:min-w-[280px]">
                 <div className="bg-white/10 backdrop-blur rounded-2xl p-5">
                   <h3 className="text-white/70 text-sm font-semibold uppercase tracking-wider mb-4">
-                    2024-25 Season
+                    {profile.currentSeason.season ? `${profile.currentSeason.season - 1}-${String(profile.currentSeason.season).slice(-2)} Season` : 'Season'}
                   </h3>
                   {isGoalie ? (
                     <div className="grid grid-cols-3 gap-3">
@@ -215,7 +215,7 @@ export default async function BlackhawksPlayerPage({ params }: PlayerPageProps) 
             {profile.currentSeason && (
               <section className="bg-[var(--bg-elevated)] border border-[var(--border-subtle)] rounded-2xl p-6">
                 <h2 className="text-xl font-bold text-[var(--text-primary)] mb-6" style={{ fontFamily: "'Montserrat', sans-serif" }}>
-                  2024-25 Season Stats
+                  {profile.currentSeason.season ? `${profile.currentSeason.season - 1}-${String(profile.currentSeason.season).slice(-2)}` : ''} Season Stats
                 </h2>
                 {isGoalie ? (
                   <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
