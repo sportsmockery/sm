@@ -6,8 +6,9 @@ const DATALAB_URL = 'https://datalab.sportsmockery.com'
 
 export async function GET() {
   try {
-    // Fetch eligibility from new datalab endpoint
-    const res = await fetch(`${DATALAB_URL}/api/gm/draft/teams`, {
+    // Fetch eligibility from datalab endpoint
+    // Use include_in_season=true to get all 5 Chicago teams (DataLab determines eligibility)
+    const res = await fetch(`${DATALAB_URL}/api/gm/draft/teams?include_in_season=true`, {
       headers: { 'Content-Type': 'application/json' },
       cache: 'no-store',
     })
