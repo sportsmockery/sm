@@ -58,21 +58,13 @@ export default async function WhiteSoxHubPage() {
 
   return (
     <TeamHubLayout team={team} record={record} nextGame={nextGame} lastGame={lastGame} activeTab="overview">
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-8">
+      <div
+        className="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-8"
+        style={{ maxWidth: '1400px', margin: '0 auto' }}
+      >
         <div className="lg:col-span-2 space-y-8">
           <section>
-            <div className="flex items-center justify-between mb-4">
-              <h2
-                className="text-lg font-bold border-b-2 pb-1"
-                style={{
-                  fontFamily: "'Montserrat', sans-serif",
-                  color: 'var(--sm-text)',
-                  borderColor: team.secondaryColor,
-                }}
-              >
-                Latest White Sox News
-              </h2>
-            </div>
+            <SectionHeader title="Latest White Sox News" team={team} />
 
             {posts.length > 0 ? (
               <div className="space-y-4">
@@ -83,11 +75,7 @@ export default async function WhiteSoxHubPage() {
             ) : (
               <div
                 className="text-center py-12"
-                style={{
-                  borderRadius: 'var(--sm-radius-lg)',
-                  backgroundColor: 'var(--sm-card)',
-                  border: '1px solid var(--sm-border)',
-                }}
+                style={{ borderRadius: 'var(--sm-radius-lg)', backgroundColor: 'var(--sm-card)', border: '1px solid var(--sm-border)' }}
               >
                 <p style={{ color: 'var(--sm-text-muted)' }}>No White Sox articles found. Check back soon!</p>
               </div>
@@ -96,16 +84,7 @@ export default async function WhiteSoxHubPage() {
 
           {posts.length > 6 && (
             <section>
-              <h2
-                className="text-lg font-bold mb-4 border-b-2 pb-1"
-                style={{
-                  fontFamily: "'Montserrat', sans-serif",
-                  color: 'var(--sm-text)',
-                  borderColor: team.secondaryColor,
-                }}
-              >
-                More White Sox Stories
-              </h2>
+              <SectionHeader title="More White Sox Stories" team={team} />
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 {posts.slice(6, 12).map((post) => <ArticleCard key={post.id} post={post} team={team} />)}
               </div>
@@ -114,14 +93,34 @@ export default async function WhiteSoxHubPage() {
         </div>
 
         <div className="space-y-6">
-          <SeasonSnapshotCard team={team} record={record} />
-          <QuickLinksCard team={team} />
+          <SeasonSnapshotCard team={team} record={record} seasonLabel="2025 Season" />
+          <QuickLinksCard team={team} teamSlug="chicago-white-sox" />
           <ARTourButton team="chicago-white-sox" />
-          <AskAIWidget team={team} />
-          <FanChatWidget team={team} />
+          <AskAIWidget team={team} teamLabel="White Sox" />
+          <FanChatWidget team={team} teamLabel="Sox" channel="whitesox" />
         </div>
       </div>
     </TeamHubLayout>
+  )
+}
+
+function SectionHeader({ title, team }: { title: string; team: typeof CHICAGO_TEAMS.whitesox }) {
+  return (
+    <div className="flex items-center justify-between mb-5">
+      <h2
+        style={{
+          fontFamily: "'Montserrat', sans-serif",
+          color: 'var(--sm-text)',
+          fontSize: '22px',
+          fontWeight: 700,
+          letterSpacing: '-0.5px',
+          paddingBottom: '8px',
+          borderBottom: `3px solid ${team.secondaryColor}`,
+        }}
+      >
+        {title}
+      </h2>
+    </div>
   )
 }
 
@@ -132,12 +131,8 @@ function ArticleCard({ post, team, isLarge = false }: { post: any; team: typeof 
     return (
       <Link href={href} className="group block">
         <article
-          className="overflow-hidden transition-shadow hover:shadow-lg"
-          style={{
-            borderRadius: 'var(--sm-radius-lg)',
-            backgroundColor: 'var(--sm-card)',
-            border: '1px solid var(--sm-border)',
-          }}
+          className="overflow-hidden transition-all duration-300"
+          style={{ borderRadius: 'var(--sm-radius-lg)', backgroundColor: 'var(--sm-card)', border: '1px solid var(--sm-border)' }}
         >
           <div className="flex flex-col md:flex-row">
             {post.featuredImage && (
@@ -146,21 +141,18 @@ function ArticleCard({ post, team, isLarge = false }: { post: any; team: typeof 
                 <div className="absolute top-0 left-0 w-1 h-full" style={{ backgroundColor: team.primaryColor }} />
               </div>
             )}
-            <div className="p-4 md:p-5 flex-1">
-              <span className="text-[10px] font-bold uppercase tracking-wide" style={{ color: team.secondaryColor }}>White Sox</span>
+            <div className="p-5 md:p-6 flex-1">
+              <span className="text-[11px] font-bold uppercase tracking-wider" style={{ color: team.secondaryColor }}>White Sox</span>
               <h3
-                className="font-bold mt-1 line-clamp-3 group-hover:underline"
-                style={{
-                  fontFamily: "'Montserrat', sans-serif",
-                  color: 'var(--sm-text)',
-                  fontSize: '18px',
-                  lineHeight: '1.3',
-                }}
+                className="font-bold mt-2 line-clamp-3 group-hover:underline"
+                style={{ fontFamily: "'Montserrat', sans-serif", color: 'var(--sm-text)', fontSize: '20px', lineHeight: '1.3' }}
               >
                 {post.title}
               </h3>
-              {post.excerpt && <p className="text-sm mt-2 line-clamp-2" style={{ color: 'var(--sm-text-muted)' }}>{post.excerpt}</p>}
-              <div className="flex items-center gap-2 mt-3 text-xs" style={{ color: 'var(--sm-text-muted)' }}>
+              {post.excerpt && (
+                <p className="mt-3 line-clamp-2" style={{ color: 'var(--sm-text-muted)', fontSize: '15px', lineHeight: '1.6' }}>{post.excerpt}</p>
+              )}
+              <div className="flex items-center gap-2 mt-4 text-xs" style={{ color: 'var(--sm-text-dim)' }}>
                 <span>{new Date(post.publishedAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}</span>
               </div>
             </div>
@@ -173,12 +165,8 @@ function ArticleCard({ post, team, isLarge = false }: { post: any; team: typeof 
   return (
     <Link href={href} className="group block">
       <article
-        className="overflow-hidden flex gap-4 p-3 transition-colors"
-        style={{
-          borderRadius: 'var(--sm-radius-lg)',
-          backgroundColor: 'var(--sm-card)',
-          border: '1px solid var(--sm-border)',
-        }}
+        className="overflow-hidden flex gap-4 p-3 transition-all duration-200"
+        style={{ borderRadius: 'var(--sm-radius-lg)', backgroundColor: 'var(--sm-card)', border: '1px solid var(--sm-border)' }}
       >
         {post.featuredImage && (
           <div className="relative w-20 h-20 md:w-24 md:h-24 flex-shrink-0 rounded-lg overflow-hidden">
@@ -186,18 +174,8 @@ function ArticleCard({ post, team, isLarge = false }: { post: any; team: typeof 
           </div>
         )}
         <div className="flex-1 min-w-0">
-          <h3
-            className="font-semibold line-clamp-2 group-hover:underline"
-            style={{
-              fontFamily: "'Montserrat', sans-serif",
-              color: 'var(--sm-text)',
-              fontSize: '14px',
-              lineHeight: '1.4',
-            }}
-          >
-            {post.title}
-          </h3>
-          <div className="flex items-center gap-2 mt-2 text-xs" style={{ color: 'var(--sm-text-muted)' }}>
+          <h3 className="font-semibold line-clamp-2 group-hover:underline" style={{ fontFamily: "'Montserrat', sans-serif", color: 'var(--sm-text)', fontSize: '15px', lineHeight: '1.4' }}>{post.title}</h3>
+          <div className="flex items-center gap-2 mt-2 text-xs" style={{ color: 'var(--sm-text-dim)' }}>
             <span>{new Date(post.publishedAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}</span>
           </div>
         </div>
@@ -206,22 +184,15 @@ function ArticleCard({ post, team, isLarge = false }: { post: any; team: typeof 
   )
 }
 
-function SeasonSnapshotCard({ team, record }: { team: typeof CHICAGO_TEAMS.whitesox; record: { wins: number; losses: number } | null }) {
+function SeasonSnapshotCard({ team, record, seasonLabel }: { team: typeof CHICAGO_TEAMS.whitesox; record: { wins: number; losses: number } | null; seasonLabel: string }) {
   return (
-    <div
-      className="overflow-hidden"
-      style={{
-        borderRadius: 'var(--sm-radius-lg)',
-        backgroundColor: 'var(--sm-card)',
-        border: '1px solid var(--sm-border)',
-      }}
-    >
+    <div className="overflow-hidden" style={{ borderRadius: 'var(--sm-radius-lg)', backgroundColor: 'var(--sm-card)', border: '1px solid var(--sm-border)' }}>
       <div className="px-5 py-4" style={{ backgroundColor: team.primaryColor }}>
         <div className="flex items-center gap-3">
           <Image src={team.logo} alt={team.name} width={40} height={40} className="w-10 h-10 object-contain" unoptimized />
           <div>
             <h3 className="font-bold text-white" style={{ fontFamily: "'Montserrat', sans-serif" }}>Season Snapshot</h3>
-            <p className="text-xs text-white/70">2025 Season</p>
+            <p className="text-xs text-white/70">{seasonLabel}</p>
           </div>
         </div>
       </div>
@@ -235,112 +206,61 @@ function SeasonSnapshotCard({ team, record }: { team: typeof CHICAGO_TEAMS.white
   )
 }
 
-function QuickLinksCard({ team }: { team: typeof CHICAGO_TEAMS.whitesox }) {
+function QuickLinksCard({ team, teamSlug }: { team: typeof CHICAGO_TEAMS.whitesox; teamSlug: string }) {
+  const links = [
+    { href: `/${teamSlug}/schedule`, label: 'Schedule' },
+    { href: `/${teamSlug}/roster`, label: 'Roster' },
+    { href: `/${teamSlug}/stats`, label: 'Team Stats' },
+    { href: `/${teamSlug}/scores`, label: 'Scores' },
+  ]
+
   return (
-    <div
-      style={{
-        borderRadius: 'var(--sm-radius-lg)',
-        padding: '20px',
-        backgroundColor: 'var(--sm-card)',
-        border: '1px solid var(--sm-border)',
-      }}
-    >
+    <div style={{ borderRadius: 'var(--sm-radius-lg)', padding: '24px', backgroundColor: 'var(--sm-card)', border: '1px solid var(--sm-border)' }}>
       <h3 className="font-bold mb-4" style={{ fontFamily: "'Montserrat', sans-serif", color: 'var(--sm-text)' }}>Quick Links</h3>
-      <Link
-        href="/chicago-white-sox"
-        className="flex items-center gap-3 px-3 py-2.5 rounded-lg transition-colors hover:bg-[var(--sm-card-hover)]"
-      >
-        <span className="text-sm font-medium" style={{ color: 'var(--sm-text)' }}>All White Sox News</span>
-        <svg className="w-4 h-4 ml-auto" style={{ color: 'var(--sm-text-muted)' }} fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" /></svg>
-      </Link>
+      <div className="space-y-2">
+        {links.map((link) => (
+          <Link key={link.label} href={link.href} className="flex items-center gap-3 px-3 py-2.5 rounded-lg transition-colors" style={{ color: 'var(--sm-text)' }}>
+            <span className="text-sm font-medium">{link.label}</span>
+            <svg className="w-4 h-4 ml-auto" style={{ color: 'var(--sm-text-dim)' }} fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" /></svg>
+          </Link>
+        ))}
+      </div>
     </div>
   )
 }
 
-function AskAIWidget({ team }: { team: typeof CHICAGO_TEAMS.whitesox }) {
+function AskAIWidget({ team, teamLabel }: { team: typeof CHICAGO_TEAMS.whitesox; teamLabel: string }) {
   return (
-    <div
-      style={{
-        borderRadius: 'var(--sm-radius-lg)',
-        padding: '20px',
-        backgroundColor: 'var(--sm-card)',
-        border: '1px solid var(--sm-border)',
-      }}
-    >
+    <div style={{ borderRadius: 'var(--sm-radius-lg)', padding: '24px', backgroundColor: 'var(--sm-card)', border: '1px solid var(--sm-border)' }}>
       <div className="flex items-center gap-3 mb-4">
         <div className="w-10 h-10 rounded-full flex items-center justify-center" style={{ backgroundColor: `${team.primaryColor}20` }}>
-          <Image
-            src="/downloads/scout-v2.png"
-            alt="Scout AI"
-            width={20}
-            height={20}
-            className="w-5 h-5"
-          />
+          <Image src="/downloads/scout-v2.png" alt="Scout AI" width={20} height={20} className="w-5 h-5" />
         </div>
         <div>
           <h3 className="font-bold" style={{ fontFamily: "'Montserrat', sans-serif", color: 'var(--sm-text)' }}>Scout AI</h3>
-          <p className="text-xs" style={{ color: 'var(--sm-text-muted)' }}>Get instant answers about the White Sox</p>
+          <p className="text-xs" style={{ color: 'var(--sm-text-dim)' }}>Get instant answers about the {teamLabel}</p>
         </div>
       </div>
-      <Link
-        href={`/scout-ai?team=${team.slug}`}
-        style={{
-          display: 'block',
-          width: '100%',
-          textAlign: 'center',
-          padding: '10px 20px',
-          borderRadius: '100px',
-          fontWeight: 600,
-          fontSize: '14px',
-          color: '#fff',
-          backgroundColor: team.primaryColor,
-          textDecoration: 'none',
-        }}
-      >
-        Ask Scout
-      </Link>
+      <Link href={`/scout-ai?team=${team.slug}`} style={{ display: 'block', width: '100%', textAlign: 'center', padding: '12px 20px', borderRadius: '100px', fontWeight: 600, fontSize: '14px', color: '#fff', backgroundColor: team.primaryColor, textDecoration: 'none' }}>Ask Scout</Link>
     </div>
   )
 }
 
-function FanChatWidget({ team }: { team: typeof CHICAGO_TEAMS.whitesox }) {
+function FanChatWidget({ team, teamLabel, channel }: { team: typeof CHICAGO_TEAMS.whitesox; teamLabel: string; channel: string }) {
   return (
-    <div
-      style={{
-        borderRadius: 'var(--sm-radius-lg)',
-        padding: '20px',
-        backgroundColor: 'var(--sm-card)',
-        border: '1px solid var(--sm-border)',
-      }}
-    >
+    <div style={{ borderRadius: 'var(--sm-radius-lg)', padding: '24px', backgroundColor: 'var(--sm-card)', border: '1px solid var(--sm-border)' }}>
       <div className="flex items-center gap-3 mb-4">
         <div className="w-10 h-10 rounded-full flex items-center justify-center" style={{ backgroundColor: `${team.secondaryColor}20` }}>
           <svg className="w-5 h-5" style={{ color: team.secondaryColor }} fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8h2a2 2 0 012 2v6a2 2 0 01-2 2h-2v4l-4-4H9a1.994 1.994 0 01-1.414-.586m0 0L11 14h4a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2v4l.586-.586z" /></svg>
         </div>
         <div>
-          <h3 className="font-bold" style={{ fontFamily: "'Montserrat', sans-serif", color: 'var(--sm-text)' }}>White Sox Fan Chat</h3>
-          <div className="flex items-center gap-1.5 text-xs" style={{ color: 'var(--sm-text-muted)' }}>
+          <h3 className="font-bold" style={{ fontFamily: "'Montserrat', sans-serif", color: 'var(--sm-text)' }}>{teamLabel} Fan Chat</h3>
+          <div className="flex items-center gap-1.5 text-xs" style={{ color: 'var(--sm-text-dim)' }}>
             <span className="w-2 h-2 bg-green-500 rounded-full animate-pulse" /><span>Fans online</span>
           </div>
         </div>
       </div>
-      <Link
-        href="/fan-chat?channel=whitesox"
-        style={{
-          display: 'block',
-          width: '100%',
-          textAlign: 'center',
-          padding: '10px 20px',
-          borderRadius: '100px',
-          fontWeight: 600,
-          fontSize: '14px',
-          color: '#fff',
-          backgroundColor: team.primaryColor,
-          textDecoration: 'none',
-        }}
-      >
-        Join Sox Chat
-      </Link>
+      <Link href={`/fan-chat?channel=${channel}`} style={{ display: 'block', width: '100%', textAlign: 'center', padding: '12px 20px', borderRadius: '100px', fontWeight: 600, fontSize: '14px', color: '#fff', backgroundColor: team.primaryColor, textDecoration: 'none' }}>Join {teamLabel} Chat</Link>
     </div>
   )
 }

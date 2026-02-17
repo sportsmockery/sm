@@ -1,5 +1,7 @@
 import { Metadata } from 'next'
-import { TeamHubLayout, TeamHubOverview } from '@/components/team'
+import Image from 'next/image'
+import Link from 'next/link'
+import { TeamHubLayout } from '@/components/team'
 import {
   BearsSeasonCard,
   BearsRosterHighlights,
@@ -49,7 +51,7 @@ export default async function BearsHubPage() {
     getBearsPosts(12),
   ])
 
-  // Transform posts for TeamHubOverview component
+  // Transform posts for display
   const teamPosts = posts.map(post => ({
     id: post.id,
     title: post.title,
@@ -65,12 +67,6 @@ export default async function BearsHubPage() {
     publishedAt: post.publishedAt,
   }))
 
-  // Build season stats from overview
-  const seasonStats = seasonOverview ? {
-    record: `${seasonOverview.record?.wins || 0}-${seasonOverview.record?.losses || 0}`,
-    standing: seasonOverview.standing,
-  } : undefined
-
   return (
     <TeamHubLayout
       team={team}
@@ -79,8 +75,10 @@ export default async function BearsHubPage() {
       lastGame={lastGame}
       activeTab="overview"
     >
-      {/* Main two-column layout */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-8">
+      <div
+        className="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-8"
+        style={{ maxWidth: '1400px', margin: '0 auto' }}
+      >
         {/* Left Column: Main Content - 2/3 width */}
         <div className="lg:col-span-2 space-y-8">
           {/* Season Snapshot - Mobile Only */}
@@ -90,26 +88,7 @@ export default async function BearsHubPage() {
 
           {/* Latest Headlines */}
           <section>
-            <div className="flex items-center justify-between mb-4">
-              <h2
-                className="text-lg font-bold border-b-2 pb-1"
-                style={{
-                  fontFamily: "'Montserrat', sans-serif",
-                  color: 'var(--sm-text)',
-                  borderColor: team.secondaryColor,
-                }}
-              >
-                Latest Bears News
-              </h2>
-              <a
-                href="/chicago-bears/news"
-                className="text-sm font-medium hover:underline"
-                style={{ color: team.secondaryColor }}
-              >
-                View All
-              </a>
-            </div>
-
+            <SectionHeader title="Latest Bears News" team={team} href="/chicago-bears/news" />
             <div className="space-y-4">
               {teamPosts.slice(0, 6).map((post, index) => (
                 <ArticleCard
@@ -125,16 +104,7 @@ export default async function BearsHubPage() {
           {/* More Stories */}
           {teamPosts.length > 6 && (
             <section>
-              <h2
-                className="text-lg font-bold mb-4 border-b-2 pb-1"
-                style={{
-                  fontFamily: "'Montserrat', sans-serif",
-                  color: 'var(--sm-text)',
-                  borderColor: team.secondaryColor,
-                }}
-              >
-                More Bears Stories
-              </h2>
+              <SectionHeader title="More Bears Stories" team={team} />
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 {teamPosts.slice(6, 12).map((post) => (
                   <ArticleCard key={post.id} post={post} team={team} />
@@ -175,10 +145,45 @@ export default async function BearsHubPage() {
   )
 }
 
-// Article Card Component
-import Image from 'next/image'
-import Link from 'next/link'
+// Section Header
+function SectionHeader({
+  title,
+  team,
+  href,
+}: {
+  title: string
+  team: typeof CHICAGO_TEAMS.bears
+  href?: string
+}) {
+  return (
+    <div className="flex items-center justify-between mb-5">
+      <h2
+        style={{
+          fontFamily: "'Montserrat', sans-serif",
+          color: 'var(--sm-text)',
+          fontSize: '22px',
+          fontWeight: 700,
+          letterSpacing: '-0.5px',
+          paddingBottom: '8px',
+          borderBottom: `3px solid ${team.secondaryColor}`,
+        }}
+      >
+        {title}
+      </h2>
+      {href && (
+        <Link
+          href={href}
+          className="text-sm font-semibold hover:underline"
+          style={{ color: team.secondaryColor }}
+        >
+          View All
+        </Link>
+      )}
+    </div>
+  )
+}
 
+// Article Card Component
 function ArticleCard({
   post,
   team,
@@ -196,7 +201,7 @@ function ArticleCard({
     return (
       <Link href={href} className="group block">
         <article
-          className="overflow-hidden transition-shadow hover:shadow-lg"
+          className="overflow-hidden transition-all duration-300"
           style={{
             borderRadius: 'var(--sm-radius-lg)',
             backgroundColor: 'var(--sm-card)',
@@ -219,19 +224,19 @@ function ArticleCard({
                 />
               </div>
             )}
-            <div className="p-4 md:p-5 flex-1">
+            <div className="p-5 md:p-6 flex-1">
               <span
-                className="text-[10px] font-bold uppercase tracking-wide"
+                className="text-[11px] font-bold uppercase tracking-wider"
                 style={{ color: team.secondaryColor }}
               >
                 {post.category || 'Bears'}
               </span>
               <h3
-                className="font-bold mt-1 line-clamp-3 group-hover:underline"
+                className="font-bold mt-2 line-clamp-3 group-hover:underline"
                 style={{
                   fontFamily: "'Montserrat', sans-serif",
                   color: 'var(--sm-text)',
-                  fontSize: '18px',
+                  fontSize: '20px',
                   lineHeight: '1.3',
                 }}
               >
@@ -239,18 +244,18 @@ function ArticleCard({
               </h3>
               {post.excerpt && (
                 <p
-                  className="text-sm mt-2 line-clamp-2"
-                  style={{ color: 'var(--sm-text-muted)' }}
+                  className="mt-3 line-clamp-2"
+                  style={{ color: 'var(--sm-text-muted)', fontSize: '15px', lineHeight: '1.6' }}
                 >
                   {post.excerpt}
                 </p>
               )}
               <div
-                className="flex items-center gap-2 mt-3 text-xs"
-                style={{ color: 'var(--sm-text-muted)' }}
+                className="flex items-center gap-2 mt-4 text-xs"
+                style={{ color: 'var(--sm-text-dim)' }}
               >
-                {post.author && <span>{post.author.name}</span>}
-                <span>•</span>
+                {post.author && <span className="font-medium">{post.author.name}</span>}
+                <span>-</span>
                 <span>
                   {new Date(post.publishedAt).toLocaleDateString('en-US', {
                     month: 'short',
@@ -268,7 +273,7 @@ function ArticleCard({
   return (
     <Link href={href} className="group block">
       <article
-        className="overflow-hidden flex gap-4 p-3 transition-colors"
+        className="overflow-hidden flex gap-4 p-3 transition-all duration-200"
         style={{
           borderRadius: 'var(--sm-radius-lg)',
           backgroundColor: 'var(--sm-card)',
@@ -291,7 +296,7 @@ function ArticleCard({
             style={{
               fontFamily: "'Montserrat', sans-serif",
               color: 'var(--sm-text)',
-              fontSize: '14px',
+              fontSize: '15px',
               lineHeight: '1.4',
             }}
           >
@@ -299,8 +304,10 @@ function ArticleCard({
           </h3>
           <div
             className="flex items-center gap-2 mt-2 text-xs"
-            style={{ color: 'var(--sm-text-muted)' }}
+            style={{ color: 'var(--sm-text-dim)' }}
           >
+            {post.author && <span>{post.author.name}</span>}
+            {post.author && <span>-</span>}
             <span>
               {new Date(post.publishedAt).toLocaleDateString('en-US', {
                 month: 'short',
@@ -320,7 +327,7 @@ function AskAIWidget({ team }: { team: typeof CHICAGO_TEAMS.bears }) {
     <div
       style={{
         borderRadius: 'var(--sm-radius-lg)',
-        padding: '20px',
+        padding: '24px',
         backgroundColor: 'var(--sm-card)',
         border: '1px solid var(--sm-border)',
       }}
@@ -348,7 +355,7 @@ function AskAIWidget({ team }: { team: typeof CHICAGO_TEAMS.bears }) {
           >
             Scout AI
           </h3>
-          <p className="text-xs" style={{ color: 'var(--sm-text-muted)' }}>
+          <p className="text-xs" style={{ color: 'var(--sm-text-dim)' }}>
             Get instant answers about the Bears
           </p>
         </div>
@@ -361,6 +368,7 @@ function AskAIWidget({ team }: { team: typeof CHICAGO_TEAMS.bears }) {
           style={{
             backgroundColor: 'var(--sm-surface)',
             color: 'var(--sm-text-muted)',
+            border: '1px solid var(--sm-border)',
           }}
         >
           &quot;What&apos;s the Bears record?&quot;
@@ -371,6 +379,7 @@ function AskAIWidget({ team }: { team: typeof CHICAGO_TEAMS.bears }) {
           style={{
             backgroundColor: 'var(--sm-surface)',
             color: 'var(--sm-text-muted)',
+            border: '1px solid var(--sm-border)',
           }}
         >
           &quot;Who is the Bears quarterback?&quot;
@@ -383,7 +392,7 @@ function AskAIWidget({ team }: { team: typeof CHICAGO_TEAMS.bears }) {
           display: 'block',
           width: '100%',
           textAlign: 'center',
-          padding: '10px 20px',
+          padding: '12px 20px',
           borderRadius: '100px',
           fontWeight: 600,
           fontSize: '14px',
@@ -404,7 +413,7 @@ function FanChatWidget({ team }: { team: typeof CHICAGO_TEAMS.bears }) {
     <div
       style={{
         borderRadius: 'var(--sm-radius-lg)',
-        padding: '20px',
+        padding: '24px',
         backgroundColor: 'var(--sm-card)',
         border: '1px solid var(--sm-border)',
       }}
@@ -439,9 +448,9 @@ function FanChatWidget({ team }: { team: typeof CHICAGO_TEAMS.bears }) {
           >
             Bears Fan Chat
           </h3>
-          <div className="flex items-center gap-1.5 text-xs" style={{ color: 'var(--sm-text-muted)' }}>
+          <div className="flex items-center gap-1.5 text-xs" style={{ color: 'var(--sm-text-dim)' }}>
             <span className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
-            <span>247 fans online</span>
+            <span>Fans online</span>
           </div>
         </div>
       </div>
@@ -456,7 +465,7 @@ function FanChatWidget({ team }: { team: typeof CHICAGO_TEAMS.bears }) {
           display: 'block',
           width: '100%',
           textAlign: 'center',
-          padding: '10px 20px',
+          padding: '12px 20px',
           borderRadius: '100px',
           fontWeight: 600,
           fontSize: '14px',

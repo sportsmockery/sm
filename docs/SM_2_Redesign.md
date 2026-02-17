@@ -796,6 +796,96 @@ All home page CSS classes use the `hm-` prefix to avoid conflicts with the main 
 
 ---
 
+## PHASE 2: TEAM HUB PAGES REDESIGN
+
+> Source: `/Users/christopherburhans/Downloads/redesign_team_pages.md`
+
+---
+
+### SECTION 23: Team Pages CSS Variables (--sm-*)
+**Status:** COMPLETE
+**File:** `src/app/globals.css`
+
+**Task:** Define `--sm-*` CSS variables used by all team hub pages and sub-pages. These were referenced throughout team page code but never defined, causing fallback/empty values.
+
+**Variables added (light mode):**
+```
+--sm-dark, --sm-surface, --sm-card, --sm-card-hover, --sm-border
+--sm-text, --sm-text-muted, --sm-text-dim
+--sm-radius-lg, --sm-radius-xl
+--sm-gradient, --sm-red-light, --sm-red-glow
+--sm-success, --sm-error, --sm-font-body
+```
+
+**Dark mode equivalents also added.**
+
+**Notes:**
+Variables map to existing theme values (e.g., --sm-card = #ffffff light / #13131d dark). Added to both `:root` light and `[data-theme="dark"]` blocks alongside existing card/legacy variables.
+
+---
+
+### SECTION 24: TeamHubLayout Redesign
+**Status:** COMPLETE
+**File:** `src/components/team/TeamHubLayout.tsx`
+
+**Task:** Redesign the shared team hub layout component to match the 2030 design guide. Changes:
+- **Hero section:** Larger with team gradient bg, 100px logo in glassmorphism container, team name (clamp 2-3.5rem, weight 900), team taglines
+- **Stats bar:** Grid of glassmorphism stat cards (record, division rank, last game result, next game info) with backdrop-filter blur
+- **Quick links:** Pill-shaped links (Schedule, Roster, Stats, Scores) with frosted glass bg
+- **Subnav:** Cleaner styling with proper --sm-* variable colors, font-semibold tabs
+- **Content area:** Max-width 1400px, improved padding
+
+**No logic/functionality changes.** Tabs, sticky behavior, record formatting, Fan Chat external link all preserved.
+
+**Notes:**
+Added team taglines map (Bears: "Monsters of the Midway", Bulls: "See Red", etc.). Accent border at bottom of hero using secondaryColor. Background pattern using subtle radial gradient dots.
+
+---
+
+### SECTION 25: Team Hub Overview Pages (5 pages)
+**Status:** COMPLETE
+**Files:**
+- `src/app/chicago-bears/page.tsx`
+- `src/app/chicago-bulls/page.tsx`
+- `src/app/chicago-blackhawks/page.tsx`
+- `src/app/chicago-cubs/page.tsx`
+- `src/app/chicago-white-sox/page.tsx`
+
+**Task:** Redesign all 5 team hub overview pages with 2030 premium design:
+- **Section headers:** Larger (22px), bolder (700), 3px team-colored bottom border, -0.5px letter spacing
+- **Article cards:** Improved spacing (p-5/p-6), larger title (20px), better excerpt styling (15px, 1.6 line-height), --sm-text-dim for meta
+- **Sidebar widgets:** 24px padding, enhanced QuickLinks with full navigation (Schedule, Roster, Stats, Scores), consistent --sm-* variable usage
+- **Scout AI widget:** Styled suggestion prompts with border + surface background
+- **Fan Chat widget:** Consistent styling across all teams
+- **Layout:** maxWidth 1400px on content grid
+
+**Key fixes:**
+- All `var(--sm-*)` references now resolve correctly (Section 23)
+- Consistent card border radius, backgrounds, and borders across all pages
+- All widget padding standardized to 24px
+- QuickLinksCard now has actual navigation links (was just "All [Team] News" before)
+
+**No data fetching, routing, or logic changes.** All Supabase queries, post transformations, and component structures preserved.
+
+---
+
+### SECTION 26: Team Pages Build Validation
+**Status:** COMPLETE
+
+**Checklist:**
+- [x] Build succeeds (`next build` completed without errors)
+- [x] All 5 team hub pages compile
+- [x] No features, buttons, links, or interactive elements removed
+- [x] No data fetching logic changed
+- [x] All CSS variables properly defined in light and dark modes
+- [x] TeamHubLayout preserves sticky nav, tab switching, Fan Chat external link
+- [x] Bears page preserves Bears-specific components (BearsSeasonCard, BearsRosterHighlights, BearsTrendingTopics)
+- [ ] Visual verification in browser (requires manual testing)
+- [ ] Light/dark mode toggle works on team pages
+- [ ] Hero stats bar displays correctly on mobile
+
+---
+
 ## EXECUTION ORDER
 
 1. Sections 1-3: Global design tokens, light mode variables, light mode overrides
@@ -808,3 +898,7 @@ All home page CSS classes use the `hm-` prefix to avoid conflicts with the main 
 8. Section 20: Page-specific light mode
 9. Section 21: Responsive audit
 10. Section 22: Final validation
+11. Section 23: Team pages CSS variables
+12. Section 24: TeamHubLayout redesign
+13. Section 25: Team hub overview pages
+14. Section 26: Team pages build validation

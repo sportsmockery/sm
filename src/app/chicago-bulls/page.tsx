@@ -77,24 +77,15 @@ export default async function BullsHubPage() {
       lastGame={lastGame}
       activeTab="overview"
     >
-      {/* Main two-column layout */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-8">
+      <div
+        className="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-8"
+        style={{ maxWidth: '1400px', margin: '0 auto' }}
+      >
         {/* Left Column: Main Content - 2/3 width */}
         <div className="lg:col-span-2 space-y-8">
           {/* Latest Headlines */}
           <section>
-            <div className="flex items-center justify-between mb-4">
-              <h2
-                className="text-lg font-bold border-b-2 pb-1"
-                style={{
-                  fontFamily: "'Montserrat', sans-serif",
-                  color: 'var(--sm-text)',
-                  borderColor: team.secondaryColor,
-                }}
-              >
-                Latest Bulls News
-              </h2>
-            </div>
+            <SectionHeader title="Latest Bulls News" team={team} />
 
             {posts.length > 0 ? (
               <div className="space-y-4">
@@ -126,16 +117,7 @@ export default async function BullsHubPage() {
           {/* More Stories */}
           {posts.length > 6 && (
             <section>
-              <h2
-                className="text-lg font-bold mb-4 border-b-2 pb-1"
-                style={{
-                  fontFamily: "'Montserrat', sans-serif",
-                  color: 'var(--sm-text)',
-                  borderColor: team.secondaryColor,
-                }}
-              >
-                More Bulls Stories
-              </h2>
+              <SectionHeader title="More Bulls Stories" team={team} />
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 {posts.slice(6, 12).map((post) => (
                   <ArticleCard key={post.id} post={post} team={team} />
@@ -148,7 +130,7 @@ export default async function BullsHubPage() {
         {/* Right Column: Sidebar - 1/3 width */}
         <div className="space-y-6">
           {/* Season Snapshot */}
-          <SeasonSnapshotCard team={team} record={record} />
+          <SeasonSnapshotCard team={team} record={record} seasonLabel="2025-26 Season" />
 
           {/* Quick Links */}
           <QuickLinksCard team={team} />
@@ -160,10 +142,31 @@ export default async function BullsHubPage() {
           <AskAIWidget team={team} />
 
           {/* Fan Chat Widget */}
-          <FanChatWidget team={team} />
+          <FanChatWidget team={team} teamLabel="Bulls" channel="bulls" />
         </div>
       </div>
     </TeamHubLayout>
+  )
+}
+
+// Section Header
+function SectionHeader({ title, team }: { title: string; team: typeof CHICAGO_TEAMS.bulls }) {
+  return (
+    <div className="flex items-center justify-between mb-5">
+      <h2
+        style={{
+          fontFamily: "'Montserrat', sans-serif",
+          color: 'var(--sm-text)',
+          fontSize: '22px',
+          fontWeight: 700,
+          letterSpacing: '-0.5px',
+          paddingBottom: '8px',
+          borderBottom: `3px solid ${team.primaryColor}`,
+        }}
+      >
+        {title}
+      </h2>
+    </div>
   )
 }
 
@@ -183,7 +186,7 @@ function ArticleCard({
     return (
       <Link href={href} className="group block">
         <article
-          className="overflow-hidden transition-shadow hover:shadow-lg"
+          className="overflow-hidden transition-all duration-300"
           style={{
             borderRadius: 'var(--sm-radius-lg)',
             backgroundColor: 'var(--sm-card)',
@@ -206,19 +209,19 @@ function ArticleCard({
                 />
               </div>
             )}
-            <div className="p-4 md:p-5 flex-1">
+            <div className="p-5 md:p-6 flex-1">
               <span
-                className="text-[10px] font-bold uppercase tracking-wide"
+                className="text-[11px] font-bold uppercase tracking-wider"
                 style={{ color: team.primaryColor }}
               >
                 Bulls
               </span>
               <h3
-                className="font-bold mt-1 line-clamp-3 group-hover:underline"
+                className="font-bold mt-2 line-clamp-3 group-hover:underline"
                 style={{
                   fontFamily: "'Montserrat', sans-serif",
                   color: 'var(--sm-text)',
-                  fontSize: '18px',
+                  fontSize: '20px',
                   lineHeight: '1.3',
                 }}
               >
@@ -226,15 +229,15 @@ function ArticleCard({
               </h3>
               {post.excerpt && (
                 <p
-                  className="text-sm mt-2 line-clamp-2"
-                  style={{ color: 'var(--sm-text-muted)' }}
+                  className="mt-3 line-clamp-2"
+                  style={{ color: 'var(--sm-text-muted)', fontSize: '15px', lineHeight: '1.6' }}
                 >
                   {post.excerpt}
                 </p>
               )}
               <div
-                className="flex items-center gap-2 mt-3 text-xs"
-                style={{ color: 'var(--sm-text-muted)' }}
+                className="flex items-center gap-2 mt-4 text-xs"
+                style={{ color: 'var(--sm-text-dim)' }}
               >
                 <span>
                   {new Date(post.publishedAt).toLocaleDateString('en-US', {
@@ -253,7 +256,7 @@ function ArticleCard({
   return (
     <Link href={href} className="group block">
       <article
-        className="overflow-hidden flex gap-4 p-3 transition-colors"
+        className="overflow-hidden flex gap-4 p-3 transition-all duration-200"
         style={{
           borderRadius: 'var(--sm-radius-lg)',
           backgroundColor: 'var(--sm-card)',
@@ -276,7 +279,7 @@ function ArticleCard({
             style={{
               fontFamily: "'Montserrat', sans-serif",
               color: 'var(--sm-text)',
-              fontSize: '14px',
+              fontSize: '15px',
               lineHeight: '1.4',
             }}
           >
@@ -284,7 +287,7 @@ function ArticleCard({
           </h3>
           <div
             className="flex items-center gap-2 mt-2 text-xs"
-            style={{ color: 'var(--sm-text-muted)' }}
+            style={{ color: 'var(--sm-text-dim)' }}
           >
             <span>
               {new Date(post.publishedAt).toLocaleDateString('en-US', {
@@ -303,9 +306,11 @@ function ArticleCard({
 function SeasonSnapshotCard({
   team,
   record,
+  seasonLabel,
 }: {
   team: typeof CHICAGO_TEAMS.bulls
   record: { wins: number; losses: number } | null
+  seasonLabel: string
 }) {
   const formatRecord = () => {
     if (!record) return '--'
@@ -338,7 +343,7 @@ function SeasonSnapshotCard({
             >
               Season Snapshot
             </h3>
-            <p className="text-xs text-white/70">2025-26 Season</p>
+            <p className="text-xs text-white/70">{seasonLabel}</p>
           </div>
         </div>
       </div>
@@ -360,11 +365,18 @@ function SeasonSnapshotCard({
 
 // Quick Links Card
 function QuickLinksCard({ team }: { team: typeof CHICAGO_TEAMS.bulls }) {
+  const links = [
+    { href: `/chicago-bulls/schedule`, label: 'Schedule' },
+    { href: `/chicago-bulls/roster`, label: 'Roster' },
+    { href: `/chicago-bulls/stats`, label: 'Team Stats' },
+    { href: `/chicago-bulls/scores`, label: 'Scores' },
+  ]
+
   return (
     <div
       style={{
         borderRadius: 'var(--sm-radius-lg)',
-        padding: '20px',
+        padding: '24px',
         backgroundColor: 'var(--sm-card)',
         border: '1px solid var(--sm-border)',
       }}
@@ -379,47 +391,27 @@ function QuickLinksCard({ team }: { team: typeof CHICAGO_TEAMS.bulls }) {
         Quick Links
       </h3>
       <div className="space-y-2">
-        <QuickLink href="/chicago-bulls" label="All Bulls News" team={team} />
+        {links.map((link) => (
+          <Link
+            key={link.label}
+            href={link.href}
+            className="flex items-center gap-3 px-3 py-2.5 rounded-lg transition-colors"
+            style={{ color: 'var(--sm-text)' }}
+          >
+            <span className="text-sm font-medium">{link.label}</span>
+            <svg
+              className="w-4 h-4 ml-auto"
+              style={{ color: 'var(--sm-text-dim)' }}
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+            </svg>
+          </Link>
+        ))}
       </div>
     </div>
-  )
-}
-
-function QuickLink({
-  href,
-  label,
-  team,
-}: {
-  href: string
-  label: string
-  team: typeof CHICAGO_TEAMS.bulls
-}) {
-  return (
-    <Link
-      href={href}
-      className="flex items-center gap-3 px-3 py-2.5 rounded-lg transition-colors hover:bg-[var(--sm-card-hover)]"
-    >
-      <span
-        className="text-sm font-medium"
-        style={{ color: 'var(--sm-text)' }}
-      >
-        {label}
-      </span>
-      <svg
-        className="w-4 h-4 ml-auto"
-        style={{ color: 'var(--sm-text-muted)' }}
-        fill="none"
-        stroke="currentColor"
-        viewBox="0 0 24 24"
-      >
-        <path
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          strokeWidth={2}
-          d="M9 5l7 7-7 7"
-        />
-      </svg>
-    </Link>
   )
 }
 
@@ -429,7 +421,7 @@ function AskAIWidget({ team }: { team: typeof CHICAGO_TEAMS.bulls }) {
     <div
       style={{
         borderRadius: 'var(--sm-radius-lg)',
-        padding: '20px',
+        padding: '24px',
         backgroundColor: 'var(--sm-card)',
         border: '1px solid var(--sm-border)',
       }}
@@ -439,27 +431,11 @@ function AskAIWidget({ team }: { team: typeof CHICAGO_TEAMS.bulls }) {
           className="w-10 h-10 rounded-full flex items-center justify-center"
           style={{ backgroundColor: `${team.primaryColor}20` }}
         >
-          <Image
-            src="/downloads/scout-v2.png"
-            alt="Scout AI"
-            width={20}
-            height={20}
-            className="w-5 h-5"
-          />
+          <Image src="/downloads/scout-v2.png" alt="Scout AI" width={20} height={20} className="w-5 h-5" />
         </div>
         <div>
-          <h3
-            className="font-bold"
-            style={{
-              fontFamily: "'Montserrat', sans-serif",
-              color: 'var(--sm-text)',
-            }}
-          >
-            Scout AI
-          </h3>
-          <p className="text-xs" style={{ color: 'var(--sm-text-muted)' }}>
-            Get instant answers about the Bulls
-          </p>
+          <h3 className="font-bold" style={{ fontFamily: "'Montserrat', sans-serif", color: 'var(--sm-text)' }}>Scout AI</h3>
+          <p className="text-xs" style={{ color: 'var(--sm-text-dim)' }}>Get instant answers about the Bulls</p>
         </div>
       </div>
 
@@ -469,7 +445,7 @@ function AskAIWidget({ team }: { team: typeof CHICAGO_TEAMS.bulls }) {
           display: 'block',
           width: '100%',
           textAlign: 'center',
-          padding: '10px 20px',
+          padding: '12px 20px',
           borderRadius: '100px',
           fontWeight: 600,
           fontSize: '14px',
@@ -485,12 +461,20 @@ function AskAIWidget({ team }: { team: typeof CHICAGO_TEAMS.bulls }) {
 }
 
 // Fan Chat Widget
-function FanChatWidget({ team }: { team: typeof CHICAGO_TEAMS.bulls }) {
+function FanChatWidget({
+  team,
+  teamLabel,
+  channel,
+}: {
+  team: typeof CHICAGO_TEAMS.bulls
+  teamLabel: string
+  channel: string
+}) {
   return (
     <div
       style={{
         borderRadius: 'var(--sm-radius-lg)',
-        padding: '20px',
+        padding: '24px',
         backgroundColor: 'var(--sm-card)',
         border: '1px solid var(--sm-border)',
       }}
@@ -498,11 +482,11 @@ function FanChatWidget({ team }: { team: typeof CHICAGO_TEAMS.bulls }) {
       <div className="flex items-center gap-3 mb-4">
         <div
           className="w-10 h-10 rounded-full flex items-center justify-center"
-          style={{ backgroundColor: `${team.secondaryColor}20` }}
+          style={{ backgroundColor: `${team.secondaryColor || team.primaryColor}20` }}
         >
           <svg
             className="w-5 h-5"
-            style={{ color: team.secondaryColor }}
+            style={{ color: team.secondaryColor || team.primaryColor }}
             fill="none"
             stroke="currentColor"
             viewBox="0 0 24 24"
@@ -516,16 +500,10 @@ function FanChatWidget({ team }: { team: typeof CHICAGO_TEAMS.bulls }) {
           </svg>
         </div>
         <div>
-          <h3
-            className="font-bold"
-            style={{
-              fontFamily: "'Montserrat', sans-serif",
-              color: 'var(--sm-text)',
-            }}
-          >
-            Bulls Fan Chat
+          <h3 className="font-bold" style={{ fontFamily: "'Montserrat', sans-serif", color: 'var(--sm-text)' }}>
+            {teamLabel} Fan Chat
           </h3>
-          <div className="flex items-center gap-1.5 text-xs" style={{ color: 'var(--sm-text-muted)' }}>
+          <div className="flex items-center gap-1.5 text-xs" style={{ color: 'var(--sm-text-dim)' }}>
             <span className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
             <span>Fans online</span>
           </div>
@@ -533,12 +511,12 @@ function FanChatWidget({ team }: { team: typeof CHICAGO_TEAMS.bulls }) {
       </div>
 
       <Link
-        href="/fan-chat?channel=bulls"
+        href={`/fan-chat?channel=${channel}`}
         style={{
           display: 'block',
           width: '100%',
           textAlign: 'center',
-          padding: '10px 20px',
+          padding: '12px 20px',
           borderRadius: '100px',
           fontWeight: 600,
           fontSize: '14px',
@@ -547,7 +525,7 @@ function FanChatWidget({ team }: { team: typeof CHICAGO_TEAMS.bulls }) {
           textDecoration: 'none',
         }}
       >
-        Join Bulls Chat
+        Join {teamLabel} Chat
       </Link>
     </div>
   )
