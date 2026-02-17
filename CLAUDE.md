@@ -922,32 +922,77 @@ DO NOT assume which teams should be eligible
 JUST call the API and display what it returns
 ```
 
-### How Eligibility Works
+### Eligible Teams API
 
-1. **DataLab's `draft_calendar` table** defines mock draft windows per sport/year
-2. **DataLab's sync cron** marks teams eligible/ineligible based on calendar
-3. **DataLab's API** (`GET /api/gm/draft/teams`) returns only eligible offseason teams by default
-4. **Frontend** calls API and displays exactly what's returned - NO MODIFICATIONS
+**Endpoint:** `GET https://datalab.sportsmockery.com/api/gm/draft/teams`
+
+| Param | Type | Default | Description |
+|-------|------|---------|-------------|
+| year | number | 2026 | Draft year |
+| include_in_season | "true" | omit | Include in-season teams (for display only - DO NOT USE) |
+
+**Standard Call (ALWAYS USE THIS):**
+```typescript
+const res = await fetch('https://datalab.sportsmockery.com/api/gm/draft/teams');
+const data = await res.json();
+// data.teams = only teams that are eligible RIGHT NOW
+```
+
+### How Eligibility Works (API handles this - you don't implement it)
+
+A team is eligible when ALL THREE conditions are true:
+1. **Season is over** — `season_status = "offseason"`
+2. **Mock draft window is open** — `mock_draft_window_status = "open"`
+3. **Draft hasn't happened yet** — window hasn't closed
+
+A daily cron updates eligibility automatically based on real-world calendar dates.
 
 ### Current Eligibility (Feb 2026)
 
-| Team | Sport | Season Status | Eligible? |
-|------|-------|---------------|-----------|
-| Bears | NFL | offseason | ✓ Yes |
-| Cubs | MLB | offseason | ✓ Yes |
-| White Sox | MLB | offseason | ✓ Yes |
-| Bulls | NBA | **in_season** | ✗ No |
-| Blackhawks | NHL | **in_season** | ✗ No |
+| Team | Season Status | Window | Eligible | Why |
+|------|---------------|--------|----------|-----|
+| Bears | offseason | open | **YES** | NFL season ended Jan 4, window opened Jan 5 |
+| Cubs | offseason | open | **YES** | MLB 2025 ended, window opened Nov 2 |
+| White Sox | offseason | open | **YES** | MLB 2025 ended, window opened Nov 2 |
+| Bulls | in_season | closed | NO | NBA season ends Apr 12, window opens Apr 13 |
+| Blackhawks | in_season | closed | NO | NHL season ends Apr 16, window opens Apr 17 |
 
-### API Calls (Correct Usage)
+### Frontend Logic (FOLLOW THIS EXACTLY)
 
 ```typescript
-// CORRECT - use default filtering (hides in-season teams)
-fetch('https://datalab.sportsmockery.com/api/gm/draft/teams')
+// 1. Fetch eligible teams on page load
+const { teams } = await fetch('https://datalab.sportsmockery.com/api/gm/draft/teams').then(r => r.json());
 
-// WRONG - do NOT use this unless explicitly told to
-fetch('https://datalab.sportsmockery.com/api/gm/draft/teams?include_in_season=true')
+// 2. If teams.length === 0, show "No mock drafts available right now"
+// 3. If teams.length === 1, go straight to that team's draft
+// 4. If teams.length > 1, show team picker using the returned data:
+//    - team_key (pass to /api/gm/draft/start as chicago_team)
+//    - team_name, logo_url, primary_color for display
+//    - league for grouping/labels
+
+// 5. Start draft with selected team:
+const startRes = await fetch('/api/gm/draft/start', {
+  method: 'POST',
+  headers: { 'Content-Type': 'application/json' },
+  body: JSON.stringify({
+    sport: selectedTeam.sport,           // "nfl", "mlb", etc.
+    draft_year: 2026,
+    chicago_team: selectedTeam.team_name, // "Chicago Bears", "Chicago Cubs", etc.
+  }),
+});
 ```
+
+### team_key to chicago_team Mapping
+
+| team_key | chicago_team value |
+|----------|-------------------|
+| bears | Chicago Bears |
+| cubs | Chicago Cubs |
+| whitesox | Chicago White Sox |
+| bulls | Chicago Bulls |
+| blackhawks | Chicago Blackhawks |
+
+**Note:** Just use the `team_name` field from the teams response directly.
 
 ### Key Files
 
