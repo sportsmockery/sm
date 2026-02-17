@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono, Inter, JetBrains_Mono, Bebas_Neue } from "next/font/google";
+import { Geist, Geist_Mono, Inter, JetBrains_Mono, Bebas_Neue, Exo_2 } from "next/font/google";
 import { Montserrat } from "next/font/google";
 import "./globals.css";
 import "@/styles/homepage.css";
@@ -53,6 +53,12 @@ const bebasNeue = Bebas_Neue({
   variable: "--font-bebas-neue",
   subsets: ["latin"],
   weight: "400",
+});
+
+const exo2 = Exo_2({
+  variable: "--font-exo2",
+  subsets: ["latin"],
+  weight: ["400", "500", "600", "700", "800"],
 });
 
 export const metadata: Metadata = {
@@ -144,7 +150,7 @@ export default function RootLayout({
         />
       </head>
       <body
-        className={`${geistSans.variable} ${geistMono.variable} ${montserrat.variable} ${inter.variable} ${jetbrainsMono.variable} ${bebasNeue.variable} font-sans antialiased bg-[var(--bg-primary)] text-[var(--text-primary)]`}
+        className={`${geistSans.variable} ${geistMono.variable} ${montserrat.variable} ${inter.variable} ${jetbrainsMono.variable} ${bebasNeue.variable} ${exo2.variable} font-sans antialiased bg-[var(--bg-primary)] text-[var(--text-primary)]`}
       >
         <ThemeProvider>
           <AuthProvider>

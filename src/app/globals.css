@@ -317,6 +317,25 @@
   --color-foreground: var(--foreground);
   --font-sans: var(--font-body);
   --font-mono: ui-monospace, monospace;
+
+  /* ===== 2030 REDESIGN: Remap zinc palette (blue-tinted) ===== */
+  /* Affects all 1741 zinc-* class usages site-wide */
+  --color-zinc-50: #f8f8fa;
+  --color-zinc-100: #ededf2;
+  --color-zinc-200: #d5d5e0;
+  --color-zinc-300: #a5a5b8;
+  --color-zinc-400: #8a8a9a;
+  --color-zinc-500: #66667a;
+  --color-zinc-600: #44445a;
+  --color-zinc-700: #2a2a3d;
+  --color-zinc-800: #1a1a28;
+  --color-zinc-900: #0c0c12;
+  --color-zinc-950: #050508;
+
+  /* ===== 2030 REDESIGN: Larger border radii ===== */
+  --radius-lg: 0.625rem;  /* 10px (was 8px) */
+  --radius-xl: 1rem;      /* 16px (was 12px) */
+  --radius-2xl: 1.25rem;  /* 20px (was 16px) */
 }
 
 /* ========== BASE STYLES ========== */
