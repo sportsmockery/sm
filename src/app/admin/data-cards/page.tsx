@@ -34,10 +34,8 @@ interface CardTemplate {
 }
 
 interface VideoManifest {
-  frames: { url: string; duration_ms: number }[]
+  frames: { label: string; png_url: string; duration_ms: number }[]
   total_duration_ms: number
-  width: number
-  height: number
 }
 
 type Tab = 'library' | 'generate' | 'templates'
@@ -169,8 +167,8 @@ function VideoPlayer({ videoUrl }: { videoUrl: string }) {
     <div style={{ position: 'relative', backgroundColor: '#000' }}>
       {/* Frame display */}
       <img
-        src={manifest.frames[currentFrame]?.url}
-        alt={`Frame ${currentFrame + 1}`}
+        src={manifest.frames[currentFrame]?.png_url}
+        alt={manifest.frames[currentFrame]?.label || `Frame ${currentFrame + 1}`}
         style={{ width: '100%', display: 'block' }}
       />
 
@@ -760,7 +758,7 @@ export default function DataCardsPage() {
         <div
           onClick={() => setSelectedCard(null)}
           style={{
-            position: 'fixed', inset: 0, zIndex: 50,
+            position: 'fixed', inset: 0, zIndex: 300,
             backgroundColor: 'rgba(0,0,0,0.8)', backdropFilter: 'blur(4px)',
             display: 'flex', alignItems: 'center', justifyContent: 'center',
             padding: 24,
