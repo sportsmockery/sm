@@ -101,6 +101,7 @@ function VideoPlayer({ videoUrl }: { videoUrl: string }) {
   const [error, setError] = useState<string | null>(null)
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
+  // Load manifest and preload all frame images
   useEffect(() => {
     let cancelled = false
     async function loadManifest() {
@@ -108,7 +109,14 @@ function VideoPlayer({ videoUrl }: { videoUrl: string }) {
         const res = await fetch(videoUrl)
         if (!res.ok) throw new Error(`Failed to load video manifest: ${res.status}`)
         const data = await res.json()
-        if (!cancelled) setManifest(data)
+        if (!cancelled) {
+          setManifest(data)
+          // Preload all frame images so transitions are instant
+          data.frames?.forEach((f: { png_url: string }) => {
+            const img = new Image()
+            img.src = f.png_url
+          })
+        }
       } catch (e) {
         if (!cancelled) setError(e instanceof Error ? e.message : 'Failed to load video')
       }
@@ -117,6 +125,9 @@ function VideoPlayer({ videoUrl }: { videoUrl: string }) {
     return () => { cancelled = true }
   }, [videoUrl])
 
+  // Playback engine — advances frames via setTimeout chain
+  // Uses currentFrame directly in closure (not functional updater) to avoid
+  // side effects inside state updaters which can break in React strict mode
   useEffect(() => {
     if (!playing || !manifest) return
     const frame = manifest.frames[currentFrame]
@@ -126,17 +137,19 @@ function VideoPlayer({ videoUrl }: { videoUrl: string }) {
       return
     }
     timerRef.current = setTimeout(() => {
-      setCurrentFrame(prev => {
-        const next = prev + 1
-        if (next >= manifest.frames.length) {
-          setPlaying(false)
-          return 0
-        }
-        return next
-      })
+      const nextIdx = currentFrame + 1
+      if (nextIdx >= manifest.frames.length) {
+        setPlaying(false)
+        setCurrentFrame(0)
+      } else {
+        setCurrentFrame(nextIdx)
+      }
     }, frame.duration_ms)
     return () => {
-      if (timerRef.current) clearTimeout(timerRef.current)
+      if (timerRef.current) {
+        clearTimeout(timerRef.current)
+        timerRef.current = null
+      }
     }
   }, [playing, currentFrame, manifest])
 
