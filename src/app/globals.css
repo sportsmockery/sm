@@ -332,6 +332,32 @@
   --color-zinc-900: #0c0c12;
   --color-zinc-950: #050508;
 
+  /* ===== 2030 REDESIGN: Remap gray palette (GM, Mock Draft pages) ===== */
+  --color-gray-50: #f8f8fa;
+  --color-gray-100: #ededf2;
+  --color-gray-200: #d5d5e0;
+  --color-gray-300: #a5a5b8;
+  --color-gray-400: #8a8a9a;
+  --color-gray-500: #66667a;
+  --color-gray-600: #44445a;
+  --color-gray-700: #2a2a3d;
+  --color-gray-800: #1a1a28;
+  --color-gray-900: #0c0c12;
+  --color-gray-950: #050508;
+
+  /* ===== 2030 REDESIGN: Remap slate palette ===== */
+  --color-slate-50: #f8f8fa;
+  --color-slate-100: #ededf2;
+  --color-slate-200: #d5d5e0;
+  --color-slate-300: #a5a5b8;
+  --color-slate-400: #8a8a9a;
+  --color-slate-500: #66667a;
+  --color-slate-600: #44445a;
+  --color-slate-700: #2a2a3d;
+  --color-slate-800: #1a1a28;
+  --color-slate-900: #0c0c12;
+  --color-slate-950: #050508;
+
   /* ===== 2030 REDESIGN: Larger border radii ===== */
   --radius-lg: 0.625rem;  /* 10px (was 8px) */
   --radius-xl: 1rem;      /* 16px (was 12px) */
@@ -2527,5 +2553,220 @@ a:hover {
   .roster-player-card:hover,
   .sm-btn-glow:hover {
     transform: none;
+  }
+}
+
+/* ==========================================================
+   2030 REDESIGN — AUTOMATIC VISUAL UPGRADE
+   ==========================================================
+   These rules target existing HTML element patterns and layer
+   2030 premium effects on top. No component files are modified.
+
+   Targeted patterns:
+   - div.rounded-2xl.border  → Team page cards, stats, schedule
+   - div.rounded-xl.border   → Content cards, widgets, GM cards
+   - table rows              → Refined hover transitions
+   - inline-style buttons    → Red glow on #bc0000 buttons
+   - input/textarea          → Focus glow
+   - body                    → Depth gradient background
+   - scrollbar               → Thin refined scrollbar (dark)
+   ========================================================== */
+
+/* ── PAGE DEPTH — Radial gradient behind all content ── */
+/* Creates the 2030 "lit from above" feel seen on /home pages */
+.dark body {
+  background:
+    radial-gradient(ellipse 80% 40% at 50% 0%, rgba(188,0,0,0.04) 0%, transparent 50%),
+    radial-gradient(ellipse 50% 30% at 80% 90%, rgba(188,0,0,0.02) 0%, transparent 40%),
+    var(--bg-page);
+}
+
+.light body {
+  background:
+    radial-gradient(ellipse 80% 40% at 50% 0%, rgba(188,0,0,0.012) 0%, transparent 50%),
+    var(--bg-page);
+}
+
+/* ── CARD GLASS UPGRADE — Automatic for all bordered rounded cards ── */
+/* Matches the primary card pattern: rounded-2xl + border, rounded-xl + border */
+/* Team pages, Scout AI, Fan Chat, GM all use these patterns */
+
+:is(div, section, article).rounded-2xl.border,
+:is(div, section, article).rounded-xl.border {
+  position: relative;
+  transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1),
+              border-color 0.3s ease,
+              box-shadow 0.4s ease;
+}
+
+/* Dark mode: gradient accent line on card top (hidden until hover) */
+.dark :is(div, section, article).rounded-2xl.border::before,
+.dark :is(div, section, article).rounded-xl.border::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent 5%, rgba(188,0,0,0.5) 50%, transparent 95%);
+  opacity: 0;
+  transition: opacity 0.4s ease;
+  z-index: 10;
+  pointer-events: none;
+}
+
+/* Dark mode: card hover — lift + reveal accent line + deep shadow */
+.dark :is(div, section, article).rounded-2xl.border:hover,
+.dark :is(div, section, article).rounded-xl.border:hover {
+  transform: translateY(-2px);
+  border-color: rgba(188,0,0,0.12);
+  box-shadow:
+    0 12px 40px rgba(0,0,0,0.5),
+    0 0 0 1px rgba(188,0,0,0.06),
+    0 0 60px rgba(188,0,0,0.03);
+}
+
+.dark :is(div, section, article).rounded-2xl.border:hover::before,
+.dark :is(div, section, article).rounded-xl.border:hover::before {
+  opacity: 1;
+}
+
+/* Light mode: subtle shadow baseline + hover lift */
+.light :is(div, section, article).rounded-2xl.border,
+.light :is(div, section, article).rounded-xl.border {
+  box-shadow: 0 1px 3px rgba(0,0,0,0.04), 0 1px 2px rgba(0,0,0,0.02);
+}
+
+.light :is(div, section, article).rounded-2xl.border:hover,
+.light :is(div, section, article).rounded-xl.border:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 30px rgba(0,0,0,0.08), 0 2px 8px rgba(0,0,0,0.04);
+}
+
+/* ── INLINE-STYLE CARD UPGRADE ── */
+/* Some components (Scout AI, Fan Chat) use inline style for borders */
+/* Target rounded containers with inline border style */
+.dark :is(div, section).rounded-2xl[style*="border"],
+.dark :is(div, section).rounded-xl[style*="border"] {
+  position: relative;
+  transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1),
+              box-shadow 0.4s ease;
+}
+
+.dark :is(div, section).rounded-2xl[style*="border"]:hover,
+.dark :is(div, section).rounded-xl[style*="border"]:hover {
+  box-shadow:
+    0 8px 32px rgba(0,0,0,0.4),
+    0 0 40px rgba(188,0,0,0.03);
+}
+
+/* ── TABLE & LIST ROW TRANSITIONS ── */
+.dark tr {
+  transition: background-color 0.15s ease;
+}
+
+.dark .divide-y > * {
+  transition: background-color 0.15s ease;
+}
+
+/* ── BUTTON GLOW — Red buttons get ambient glow in dark mode ── */
+/* Per CLAUDE.md, buttons use inline style={{backgroundColor: '#bc0000'}} */
+.dark button[style*="bc0000"],
+.dark a[style*="bc0000"],
+.dark button[style*="BC0000"],
+.dark a[style*="BC0000"] {
+  box-shadow: 0 0 24px rgba(188,0,0,0.25);
+  transition: all 0.3s ease;
+}
+
+.dark button[style*="bc0000"]:hover,
+.dark a[style*="bc0000"]:hover,
+.dark button[style*="BC0000"]:hover,
+.dark a[style*="BC0000"]:hover {
+  box-shadow: 0 0 36px rgba(188,0,0,0.4);
+  transform: translateY(-1px);
+}
+
+/* Also catch team-color buttons (Bears orange) */
+.dark button[style*="C83200"]:hover,
+.dark a[style*="C83200"]:hover,
+.dark button[style*="c83200"]:hover,
+.dark a[style*="c83200"]:hover {
+  box-shadow: 0 0 30px rgba(200,50,0,0.3);
+  transform: translateY(-1px);
+}
+
+/* ── INPUT FOCUS GLOW ── */
+/* Refined red glow on focus for all form inputs */
+.dark input:focus,
+.dark textarea:focus,
+.dark select:focus {
+  border-color: rgba(188,0,0,0.3) !important;
+  box-shadow: 0 0 0 3px rgba(188,0,0,0.08), 0 0 20px rgba(188,0,0,0.04);
+  outline: none;
+}
+
+.light input:focus,
+.light textarea:focus,
+.light select:focus {
+  border-color: rgba(188,0,0,0.25) !important;
+  box-shadow: 0 0 0 3px rgba(188,0,0,0.06);
+  outline: none;
+}
+
+/* ── SCROLLBAR REFINEMENT (dark mode) ── */
+/* Thinner, more subtle scrollbar matching 2030 aesthetic */
+.dark ::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+.dark ::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.dark ::-webkit-scrollbar-thumb {
+  background: rgba(255,255,255,0.08);
+  border-radius: 3px;
+}
+
+.dark ::-webkit-scrollbar-thumb:hover {
+  background: rgba(255,255,255,0.15);
+}
+
+/* ── DARK MODE SELECTION COLOR ── */
+.dark ::selection {
+  background-color: rgba(188,0,0,0.3);
+  color: #ffffff;
+}
+
+/* ── DARK MODE LINK HOVER ── */
+/* Consistent red hover color for all links */
+.dark a:hover {
+  color: #ff4444;
+}
+
+/* ── ENHANCED DARK MODE DIVIDERS ── */
+/* Make horizontal rules more subtle in dark mode */
+.dark hr {
+  border-color: rgba(255,255,255,0.06);
+}
+
+/* ── ENHANCED SKELETON LOADING (dark mode) ── */
+.dark .skeleton {
+  background: linear-gradient(90deg, #0c0c12 25%, #1a1a28 50%, #0c0c12 75%);
+  background-size: 200% 100%;
+}
+
+/* ── REDUCED MOTION — Disable auto-upgrade hover effects ── */
+@media (prefers-reduced-motion: reduce) {
+  :is(div, section, article).rounded-2xl.border:hover,
+  :is(div, section, article).rounded-xl.border:hover {
+    transform: none !important;
+  }
+
+  .dark button[style*="bc0000"]:hover,
+  .dark a[style*="bc0000"]:hover {
+    transform: none !important;
   }
 }
