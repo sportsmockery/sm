@@ -45,7 +45,7 @@ export default async function BullsScoresPage() {
     <TeamHubLayout team={team} record={record} nextGame={nextGame} activeTab="scores">
       <div className="pb-12">
         {/* Record Summary */}
-        <div className="mb-6 p-4 rounded-xl" style={{ backgroundColor: 'var(--sm-card)', border: '1px solid var(--sm-border)' }}>
+        <div className="glass-card glass-card-sm glass-card-static"  >
           <div className="flex flex-wrap gap-6 justify-center text-center">
             <div>
               <div className="text-xs uppercase tracking-wider mb-1" style={{ color: 'var(--sm-text-muted)' }}>2025-26 Season</div>
@@ -63,15 +63,15 @@ export default async function BullsScoresPage() {
         {games.length > 0 ? (
           <BoxScoreClient games={games} initialGameId={initialGameId} />
         ) : (
-          <div className="rounded-2xl p-12 text-center" style={{ backgroundColor: 'var(--sm-card)', border: '1px solid var(--sm-border)' }}>
+          <div className="glass-card glass-card-static" >
             <p style={{ color: 'var(--sm-text-muted)' }}>No completed games yet</p>
           </div>
         )}
 
         <div className="mt-8 text-center">
           <Link href="/chicago-bulls/schedule"
-            className="inline-flex items-center gap-2 px-6 py-3 font-semibold rounded-xl transition-colors"
-            style={{ backgroundColor: '#CE1141', color: '#ffffff' }}>
+            className="btn btn-md btn-primary"
+            style={{ display: 'inline-flex', textDecoration: 'none' }}>
             View Full Schedule
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
