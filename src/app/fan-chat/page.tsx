@@ -577,26 +577,15 @@ export default function FanChatPage() {
                     onChange={(e) => setMessage(e.target.value)}
                     onKeyDown={handleKeyDown}
                     placeholder={`Message ${currentChannel.aiPersonality}...`}
-                    className="flex-1 px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#bc0000]"
-                    style={{
-                      backgroundColor: 'var(--sm-surface)',
-                      color: 'var(--sm-text)',
-                      border: '1px solid var(--sm-border)',
-                      borderRadius: 'var(--sm-radius-lg)',
-                    }}
+                    className="sm-input flex-1"
                   />
 
                   {/* Send Button */}
                   <button
                     onClick={handleSendMessage}
                     disabled={!message.trim() || aiLoading}
-                    className="px-5 py-3 text-white font-semibold transition-colors disabled:opacity-50 disabled:cursor-not-allowed min-h-[44px]"
-                    style={{
-                      backgroundColor: '#bc0000',
-                      borderRadius: '100px',
-                    }}
-                    onMouseEnter={(e) => { if (!e.currentTarget.disabled) e.currentTarget.style.backgroundColor = '#a00000' }}
-                    onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#bc0000'}
+                    className="btn btn-primary btn-md"
+                    style={{ borderRadius: 'var(--sm-radius-pill)', minHeight: 44, paddingLeft: 20, paddingRight: 20 }}
                   >
                     Send
                   </button>
