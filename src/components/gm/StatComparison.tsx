@@ -18,8 +18,8 @@ interface StatComparisonProps {
 export function StatComparison({ playersSent, playersReceived, sport }: StatComparisonProps) {
   const { theme } = useTheme()
   const isDark = theme === 'dark'
-  const subText = isDark ? '#9ca3af' : '#6b7280'
-  const textColor = isDark ? '#fff' : '#1a1a1a'
+  const subText = 'var(--sm-text-muted)'
+  const textColor = 'var(--sm-text)'
 
   const sentStats = useMemo(() => {
     if (playersSent.length === 0) return null

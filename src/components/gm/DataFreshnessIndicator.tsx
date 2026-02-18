@@ -30,9 +30,9 @@ export function DataFreshnessIndicator({
 }: DataFreshnessIndicatorProps) {
   const [expanded, setExpanded] = useState(false)
 
-  const textColor = isDark ? '#fff' : '#1a1a1a'
-  const subText = isDark ? '#9ca3af' : '#6b7280'
-  const borderColor = isDark ? '#374151' : '#e5e7eb'
+  const textColor = 'var(--sm-text)'
+  const subText = 'var(--sm-text-muted)'
+  const borderColor = 'var(--sm-border)'
 
   // Determine status color
   const getStatusColor = () => {
@@ -200,8 +200,8 @@ function DataRow({
   timestamp: string
   isDark: boolean
 }) {
-  const subText = isDark ? '#9ca3af' : '#6b7280'
-  const textColor = isDark ? '#fff' : '#1a1a1a'
+  const subText = 'var(--sm-text-muted)'
+  const textColor = 'var(--sm-text)'
   const timeAgo = formatTimeAgo(timestamp)
 
   // Determine color based on age

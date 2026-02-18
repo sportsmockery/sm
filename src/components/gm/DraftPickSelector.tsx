@@ -84,7 +84,7 @@ export function DraftPickSelector({ sport, picks, onAdd, onRemove, label }: Draf
 
   return (
     <div style={{ marginTop: 8 }}>
-      <div style={{ fontSize: '11px', fontWeight: 600, color: isDark ? '#9ca3af' : '#6b7280', marginBottom: 6 }}>
+      <div style={{ fontSize: '11px', fontWeight: 600, color: 'var(--sm-text-muted)', marginBottom: 6 }}>
         {label}
       </div>
       <div style={{ display: 'flex', gap: 6, alignItems: 'center', flexWrap: 'wrap' }}>
@@ -150,8 +150,8 @@ export function DraftPickSelector({ sport, picks, onAdd, onRemove, label }: Draf
               <div key={i} style={{
                 display: 'flex', alignItems: 'center', gap: 4,
                 padding: '4px 10px', borderRadius: 6,
-                backgroundColor: isDark ? '#374151' : '#e5e7eb',
-                fontSize: '11px', color: isDark ? '#fff' : '#1a1a1a',
+                backgroundColor: 'var(--sm-border)',
+                fontSize: '11px', color: 'var(--sm-text)',
                 fontWeight: 600,
               }}>
                 {pickLabel}

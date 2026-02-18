@@ -46,9 +46,9 @@ function OptionButton({ label, selected, onClick, description }: OptionButtonPro
         flex: 1,
         padding: description ? '10px 12px' : '8px 12px',
         borderRadius: 8,
-        border: `2px solid ${selected ? '#bc0000' : (isDark ? '#374151' : '#e5e7eb')}`,
+        border: `2px solid ${selected ? '#bc0000' : 'var(--sm-border)'}`,
         backgroundColor: selected ? '#bc000015' : 'transparent',
-        color: selected ? '#bc0000' : (isDark ? '#fff' : '#1a1a1a'),
+        color: selected ? '#bc0000' : 'var(--sm-text)',
         fontWeight: selected ? 700 : 500,
         fontSize: '12px',
         cursor: 'pointer',
@@ -58,7 +58,7 @@ function OptionButton({ label, selected, onClick, description }: OptionButtonPro
     >
       <div>{label}</div>
       {description && (
-        <div style={{ fontSize: '10px', color: isDark ? '#9ca3af' : '#6b7280', marginTop: 2 }}>
+        <div style={{ fontSize: '10px', color: 'var(--sm-text-muted)', marginTop: 2 }}>
           {description}
         </div>
       )}
@@ -72,9 +72,9 @@ export function PreferencesModal({ show, onClose, preferences, onSave }: Prefere
   const [localPrefs, setLocalPrefs] = useState<GMPreferences>(preferences)
   const [saving, setSaving] = useState(false)
 
-  const textColor = isDark ? '#fff' : '#1a1a1a'
-  const subText = isDark ? '#9ca3af' : '#6b7280'
-  const borderColor = isDark ? '#374151' : '#e5e7eb'
+  const textColor = 'var(--sm-text)'
+  const subText = 'var(--sm-text-muted)'
+  const borderColor = 'var(--sm-border)'
 
   useEffect(() => {
     if (show) {
@@ -124,10 +124,8 @@ export function PreferencesModal({ show, onClose, preferences, onSave }: Prefere
           animate={{ scale: 1, opacity: 1 }}
           exit={{ scale: 0.9, opacity: 0 }}
           onClick={e => e.stopPropagation()}
+          className="glass-card glass-card-static"
           style={{
-            backgroundColor: isDark ? '#111827' : '#fff',
-            borderRadius: 16,
-            padding: 24,
             maxWidth: 500,
             width: '100%',
             maxHeight: '90vh',

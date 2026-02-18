@@ -121,9 +121,9 @@ export function DraftPickList({
   const isDark = theme === 'dark'
   const [collapsed, setCollapsed] = useState(true)
 
-  const textColor = isDark ? '#fff' : '#1a1a1a'
-  const subText = isDark ? '#9ca3af' : '#6b7280'
-  const borderColor = isDark ? '#374151' : '#e5e7eb'
+  const textColor = 'var(--sm-text)'
+  const subText = 'var(--sm-text-muted)'
+  const borderColor = 'var(--sm-border)'
   const checkboxBg = isDark ? '#374151' : '#ffffff'
 
   // Use tradeable picks from API if available, otherwise generate
@@ -178,7 +178,7 @@ export function DraftPickList({
           padding: '10px 12px',
           borderRadius: 8,
           border: `1px solid ${borderColor}`,
-          backgroundColor: isDark ? '#1f2937' : '#f9fafb',
+          backgroundColor: 'var(--sm-surface)',
           cursor: 'pointer',
         }}
       >

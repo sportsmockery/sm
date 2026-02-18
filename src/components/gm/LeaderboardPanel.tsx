@@ -24,8 +24,8 @@ interface LeaderboardPanelProps {
 export function LeaderboardPanel({ entries, currentUserEmail }: LeaderboardPanelProps) {
   const { theme } = useTheme()
   const isDark = theme === 'dark'
-  const textColor = isDark ? '#fff' : '#1a1a1a'
-  const subText = isDark ? '#9ca3af' : '#6b7280'
+  const textColor = 'var(--sm-text)'
+  const subText = 'var(--sm-text-muted)'
   const cardBg = isDark ? '#1f293780' : '#f9fafb'
 
   const rankColors = ['#eab308', '#9ca3af', '#b45309']

@@ -16,8 +16,8 @@ interface WarRoomHeaderProps {
 export function WarRoomHeader({ gmScore, rank, sessionName, numApproved = 0, numDangerous = 0, numFailed = 0, onOpenPreferences }: WarRoomHeaderProps) {
   const { theme } = useTheme()
   const isDark = theme === 'dark'
-  const textColor = isDark ? '#fff' : '#1a1a1a'
-  const subText = isDark ? '#9ca3af' : '#6b7280'
+  const textColor = 'var(--sm-text)'
+  const subText = 'var(--sm-text-muted)'
 
   return (
     <div style={{
@@ -41,7 +41,7 @@ export function WarRoomHeader({ gmScore, rank, sessionName, numApproved = 0, num
           style={{
             padding: 8,
             borderRadius: 8,
-            border: `1px solid ${isDark ? '#374151' : '#e5e7eb'}`,
+            border: `1px solid ${'var(--sm-border)'}`,
             backgroundColor: 'transparent',
             cursor: 'pointer',
             display: 'flex',
@@ -71,7 +71,7 @@ export function WarRoomHeader({ gmScore, rank, sessionName, numApproved = 0, num
             style={{
               padding: 8,
               borderRadius: 8,
-              border: `1px solid ${isDark ? '#374151' : '#e5e7eb'}`,
+              border: `1px solid ${'var(--sm-border)'}`,
               backgroundColor: 'transparent',
               cursor: 'pointer',
               display: 'flex',
@@ -108,7 +108,7 @@ export function WarRoomHeader({ gmScore, rank, sessionName, numApproved = 0, num
         <div style={{
           textAlign: 'center', padding: '8px 20px', borderRadius: 12,
           backgroundColor: isDark ? '#1f293780' : '#f3f4f6',
-          border: `1px solid ${isDark ? '#374151' : '#e5e7eb'}`,
+          border: `1px solid ${'var(--sm-border)'}`,
         }}>
           <motion.div
             key={gmScore}

@@ -54,9 +54,9 @@ export function SimulationChart({ tradeId, originalGrade, show, onClose }: Simul
   const [includeInjury, setIncludeInjury] = useState(true)
   const [includeDevelopment, setIncludeDevelopment] = useState(true)
 
-  const textColor = isDark ? '#fff' : '#1a1a1a'
-  const subText = isDark ? '#9ca3af' : '#6b7280'
-  const borderColor = isDark ? '#374151' : '#e5e7eb'
+  const textColor = 'var(--sm-text)'
+  const subText = 'var(--sm-text-muted)'
+  const borderColor = 'var(--sm-border)'
 
   async function runSimulation() {
     setLoading(true)
@@ -115,7 +115,7 @@ export function SimulationChart({ tradeId, originalGrade, show, onClose }: Simul
     const maxPercentage = Math.max(...result.distribution.map(d => d.percentage))
 
     // Y-axis grid lines
-    ctx.strokeStyle = isDark ? '#374151' : '#e5e7eb'
+    ctx.strokeStyle = 'var(--sm-border)'
     ctx.lineWidth = 1
     for (let i = 0; i <= 4; i++) {
       const y = padding.top + (chartHeight * i) / 4
@@ -189,7 +189,7 @@ export function SimulationChart({ tradeId, originalGrade, show, onClose }: Simul
         marginTop: 20,
         padding: 20,
         borderRadius: 12,
-        backgroundColor: isDark ? '#1f2937' : '#f9fafb',
+        backgroundColor: 'var(--sm-surface)',
         border: `1px solid ${borderColor}`,
         overflow: 'hidden',
       }}
@@ -348,7 +348,7 @@ export function SimulationChart({ tradeId, originalGrade, show, onClose }: Simul
                     textAlign: 'center',
                     padding: 10,
                     borderRadius: 8,
-                    backgroundColor: isDark ? '#111827' : '#fff',
+                    backgroundColor: 'var(--sm-card)',
                     border: `1px solid ${borderColor}`,
                   }}
                 >
@@ -413,7 +413,7 @@ export function SimulationChart({ tradeId, originalGrade, show, onClose }: Simul
                       gap: 10,
                       padding: '8px 12px',
                       borderRadius: 8,
-                      backgroundColor: isDark ? '#111827' : '#fff',
+                      backgroundColor: 'var(--sm-card)',
                       border: `1px solid ${borderColor}`,
                     }}
                   >
@@ -435,7 +435,7 @@ export function SimulationChart({ tradeId, originalGrade, show, onClose }: Simul
                       width: 40,
                       height: 4,
                       borderRadius: 2,
-                      backgroundColor: isDark ? '#374151' : '#e5e7eb',
+                      backgroundColor: 'var(--sm-border)',
                       overflow: 'hidden',
                     }}>
                       <div style={{

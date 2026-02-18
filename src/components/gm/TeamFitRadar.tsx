@@ -45,8 +45,8 @@ export function TeamFitRadar({ breakdown, teamColor = '#bc0000', size = 200 }: T
     ctx.clearRect(0, 0, size, size)
 
     // Colors
-    const gridColor = isDark ? '#374151' : '#e5e7eb'
-    const textColor = isDark ? '#9ca3af' : '#6b7280'
+    const gridColor = 'var(--sm-border)'
+    const textColor = 'var(--sm-text-muted)'
 
     // Draw concentric circles (grid)
     for (let i = 1; i <= 4; i++) {
@@ -149,7 +149,7 @@ export function TeamFitRadar({ breakdown, teamColor = '#bc0000', size = 200 }: T
 export function TeamFitBars({ breakdown, teamColor = '#bc0000' }: Omit<TeamFitRadarProps, 'size'>) {
   const { theme } = useTheme()
   const isDark = theme === 'dark'
-  const subText = isDark ? '#9ca3af' : '#6b7280'
+  const subText = 'var(--sm-text-muted)'
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
@@ -160,7 +160,7 @@ export function TeamFitBars({ breakdown, teamColor = '#bc0000' }: Omit<TeamFitRa
         return (
           <div key={key}>
             <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 4 }}>
-              <span style={{ fontSize: '12px', fontWeight: 600, color: isDark ? '#fff' : '#1a1a1a' }}>
+              <span style={{ fontSize: '12px', fontWeight: 600, color: 'var(--sm-text)' }}>
                 {label}
               </span>
               <span style={{ fontSize: '12px', fontWeight: 700, color: teamColor }}>
@@ -170,7 +170,7 @@ export function TeamFitBars({ breakdown, teamColor = '#bc0000' }: Omit<TeamFitRa
             <div style={{
               height: 8,
               borderRadius: 4,
-              backgroundColor: isDark ? '#374151' : '#e5e7eb',
+              backgroundColor: 'var(--sm-border)',
               overflow: 'hidden',
             }}>
               <motion.div

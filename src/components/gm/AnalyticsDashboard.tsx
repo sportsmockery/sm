@@ -51,10 +51,10 @@ export function AnalyticsDashboard() {
   const distributionCanvasRef = useRef<HTMLCanvasElement>(null)
   const timelineCanvasRef = useRef<HTMLCanvasElement>(null)
 
-  const textColor = isDark ? '#fff' : '#1a1a1a'
-  const subText = isDark ? '#9ca3af' : '#6b7280'
+  const textColor = 'var(--sm-text)'
+  const subText = 'var(--sm-text-muted)'
   const cardBg = isDark ? '#1f2937' : '#fff'
-  const borderColor = isDark ? '#374151' : '#e5e7eb'
+  const borderColor = 'var(--sm-border)'
 
   useEffect(() => {
     async function fetchAnalytics() {

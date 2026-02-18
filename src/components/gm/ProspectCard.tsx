@@ -65,9 +65,9 @@ export function ProspectCard({ prospect, selected, teamColor, onClick }: Prospec
   const { theme } = useTheme()
   const isDark = theme === 'dark'
 
-  const textColor = isDark ? '#fff' : '#1a1a1a'
-  const subText = isDark ? '#9ca3af' : '#6b7280'
-  const borderColor = isDark ? '#374151' : '#e5e7eb'
+  const textColor = 'var(--sm-text)'
+  const subText = 'var(--sm-text-muted)'
+  const borderColor = 'var(--sm-border)'
 
   // Support multiple field naming conventions (API compatibility)
   const level = prospect.current_level || prospect.currentlevel || prospect.level || ''
@@ -107,7 +107,7 @@ export function ProspectCard({ prospect, selected, teamColor, onClick }: Prospec
         borderRadius: 12,
         backgroundColor: selected
           ? `${teamColor}15`
-          : isDark ? '#1f2937' : '#ffffff',
+          : 'var(--sm-card)',
         border: selected
           ? `2px solid ${teamColor}`
           : `1px solid ${borderColor}`,
@@ -214,7 +214,7 @@ export function ProspectCard({ prospect, selected, teamColor, onClick }: Prospec
                 fontWeight: 700,
                 padding: '1px 5px',
                 borderRadius: 3,
-                backgroundColor: isDark ? '#374151' : '#e5e7eb',
+                backgroundColor: 'var(--sm-border)',
                 color: subText,
               }}>
                 FV {fvBucket}
@@ -262,7 +262,7 @@ export function ProspectCard({ prospect, selected, teamColor, onClick }: Prospec
                 fontSize: 10,
                 padding: '2px 6px',
                 borderRadius: 4,
-                backgroundColor: isDark ? '#374151' : '#e5e7eb',
+                backgroundColor: 'var(--sm-border)',
                 color: subText,
                 fontWeight: 600,
               }}>

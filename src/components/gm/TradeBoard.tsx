@@ -124,10 +124,10 @@ export function TradeBoard({
 }: TradeBoardProps) {
   const { theme } = useTheme()
   const isDark = theme === 'dark'
-  const textColor = isDark ? '#fff' : '#1a1a1a'
-  const subText = isDark ? '#9ca3af' : '#6b7280'
+  const textColor = 'var(--sm-text)'
+  const subText = 'var(--sm-text-muted)'
   const panelBg = isDark ? '#111827' : '#f9fafb'
-  const borderColor = isDark ? '#374151' : '#e5e7eb'
+  const borderColor = 'var(--sm-border)'
 
   const displayLabel = chicagoLabel || chicagoTeam
 
@@ -165,7 +165,7 @@ export function TradeBoard({
       const { toPng } = await import('html-to-image')
       const dataUrl = await toPng(gradeCardRef.current, {
         quality: 0.95,
-        backgroundColor: isDark ? '#1f2937' : '#ffffff',
+        backgroundColor: 'var(--sm-card)',
       })
       setGeneratedImageUrl(dataUrl)
       setShowShareOptions(true)
@@ -319,7 +319,7 @@ export function TradeBoard({
                         display: 'flex', alignItems: 'center', gap: 8,
                         marginLeft: 12, marginTop: 4, marginBottom: 4,
                         padding: '6px 10px', borderRadius: 6,
-                        backgroundColor: isDark ? '#1f2937' : '#f3f4f6',
+                        backgroundColor: 'var(--sm-surface)',
                         fontSize: 11, color: subText,
                       }}>
                         <span style={{ whiteSpace: 'nowrap' }}>Salary Retention:</span>
@@ -352,7 +352,7 @@ export function TradeBoard({
                     style={{
                       display: 'flex', alignItems: 'center', justifyContent: 'space-between',
                       padding: '10px 12px', borderRadius: 10,
-                      backgroundColor: isDark ? '#1f2937' : '#f9fafb',
+                      backgroundColor: 'var(--sm-surface)',
                       border: `1px solid ${borderColor}`,
                       borderLeft: `3px solid ${opponentColor}`,
                     }}
@@ -472,7 +472,7 @@ export function TradeBoard({
             style={{
               padding: 24,
               borderRadius: 16,
-              backgroundColor: isDark ? '#1f2937' : '#ffffff',
+              backgroundColor: 'var(--sm-card)',
               border: `1px solid ${borderColor}`,
             }}
           >
@@ -609,7 +609,7 @@ export function TradeBoard({
                     <div style={{
                       height: 6,
                       borderRadius: 3,
-                      backgroundColor: isDark ? '#374151' : '#e5e7eb',
+                      backgroundColor: 'var(--sm-border)',
                       overflow: 'hidden',
                     }}>
                       <div style={{
@@ -1023,7 +1023,7 @@ export function TradeBoard({
                       padding: '10px 12px',
                       borderRadius: 8,
                       border: `2px solid ${borderColor}`,
-                      backgroundColor: generatingImage ? (isDark ? '#374151' : '#e5e7eb') : 'transparent',
+                      backgroundColor: generatingImage ? ('var(--sm-border)') : 'transparent',
                       color: textColor,
                       fontWeight: 600,
                       fontSize: 13,
@@ -1204,7 +1204,7 @@ export function TradeBoard({
                       style={{
                         width: 48, height: 48,
                         borderRadius: 12,
-                        backgroundColor: isDark ? '#374151' : '#e5e7eb',
+                        backgroundColor: 'var(--sm-border)',
                         border: 'none',
                         display: 'flex',
                         alignItems: 'center',

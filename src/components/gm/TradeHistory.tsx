@@ -39,10 +39,10 @@ export function TradeHistory({ trades, page, totalPages, onPageChange }: TradeHi
   const [expandedId, setExpandedId] = useState<string | null>(null)
   const [showExportModal, setShowExportModal] = useState(false)
 
-  const textColor = isDark ? '#fff' : '#1a1a1a'
-  const subText = isDark ? '#9ca3af' : '#6b7280'
+  const textColor = 'var(--sm-text)'
+  const subText = 'var(--sm-text-muted)'
   const cardBg = isDark ? '#1f2937' : '#fff'
-  const borderColor = isDark ? '#374151' : '#e5e7eb'
+  const borderColor = 'var(--sm-border)'
 
   if (trades.length === 0) return null
 

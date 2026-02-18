@@ -26,9 +26,9 @@ export function ExportModal({ show, onClose, tradeIds, singleTrade = false }: Ex
   const [error, setError] = useState<string | null>(null)
   const [success, setSuccess] = useState(false)
 
-  const textColor = isDark ? '#fff' : '#1a1a1a'
-  const subText = isDark ? '#9ca3af' : '#6b7280'
-  const borderColor = isDark ? '#374151' : '#e5e7eb'
+  const textColor = 'var(--sm-text)'
+  const subText = 'var(--sm-text-muted)'
+  const borderColor = 'var(--sm-border)'
 
   async function handleExport() {
     if (tradeIds.length === 0) {
@@ -136,10 +136,8 @@ export function ExportModal({ show, onClose, tradeIds, singleTrade = false }: Ex
           animate={{ scale: 1, opacity: 1 }}
           exit={{ scale: 0.9, opacity: 0 }}
           onClick={e => e.stopPropagation()}
+          className="glass-card glass-card-static"
           style={{
-            backgroundColor: isDark ? '#111827' : '#fff',
-            borderRadius: 16,
-            padding: 24,
             maxWidth: 400,
             width: '100%',
           }}

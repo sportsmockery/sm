@@ -23,7 +23,7 @@ interface ValidationIndicatorProps {
 export function ValidationIndicator({ validation, compact = false }: ValidationIndicatorProps) {
   const { theme } = useTheme()
   const isDark = theme === 'dark'
-  const subText = isDark ? '#9ca3af' : '#6b7280'
+  const subText = 'var(--sm-text-muted)'
 
   // Remember the last displayable state to prevent blinking during validation
   const lastDisplayableRef = useRef<ValidationState | null>(null)

@@ -166,7 +166,7 @@ export function OpponentRosterPanel({
 
   const inputBg = isDark ? '#374151' : '#ffffff'
   const inputBorder = isDark ? '#4b5563' : '#d1d5db'
-  const subText = isDark ? '#9ca3af' : '#6b7280'
+  const subText = 'var(--sm-text-muted)'
 
   function handleAddCustom() {
     if (!customName.trim()) return
@@ -231,7 +231,7 @@ export function OpponentRosterPanel({
               cursor: 'pointer',
               fontSize: 13,
               fontWeight: 600,
-              backgroundColor: viewMode === 'roster' ? teamColor : (isDark ? '#1f2937' : '#f9fafb'),
+              backgroundColor: viewMode === 'roster' ? teamColor : ('var(--sm-surface)'),
               color: viewMode === 'roster' ? '#fff' : subText,
               transition: 'all 0.15s',
             }}
@@ -248,7 +248,7 @@ export function OpponentRosterPanel({
               cursor: 'pointer',
               fontSize: 13,
               fontWeight: 600,
-              backgroundColor: viewMode === 'prospects' ? '#22c55e' : (isDark ? '#1f2937' : '#f9fafb'),
+              backgroundColor: viewMode === 'prospects' ? '#22c55e' : ('var(--sm-surface)'),
               color: viewMode === 'prospects' ? '#fff' : subText,
               transition: 'all 0.15s',
             }}
@@ -323,7 +323,7 @@ export function OpponentRosterPanel({
             style={{
               padding: '4px 10px', borderRadius: '6px', border: 'none',
               cursor: 'pointer', fontSize: '11px', fontWeight: 600,
-              backgroundColor: posFilter === pos ? teamColor : (isDark ? '#374151' : '#e5e7eb'),
+              backgroundColor: posFilter === pos ? teamColor : ('var(--sm-border)'),
               color: posFilter === pos ? '#fff' : subText,
             }}
           >
@@ -339,7 +339,7 @@ export function OpponentRosterPanel({
             cursor: 'pointer',
             fontSize: '11px',
             fontWeight: 600,
-            backgroundColor: showDraft ? teamColor : (isDark ? '#374151' : '#e5e7eb'),
+            backgroundColor: showDraft ? teamColor : ('var(--sm-border)'),
             color: showDraft ? '#fff' : subText,
             transition: 'background-color 0.15s',
           }}
@@ -387,7 +387,7 @@ export function OpponentRosterPanel({
       {/* Draft Pick Selection View */}
       {showDraft ? (
         <div style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
-          <div style={{ fontSize: '12px', fontWeight: 700, color: isDark ? '#fff' : '#1a1a1a', marginBottom: 12 }}>
+          <div style={{ fontSize: '12px', fontWeight: 700, color: 'var(--sm-text)', marginBottom: 12 }}>
             Select Draft Picks to Receive
           </div>
 
@@ -470,7 +470,7 @@ export function OpponentRosterPanel({
                     backgroundColor: isDark ? '#374151' : '#f3f4f6',
                     border: `1px solid ${teamColor}40`,
                   }}>
-                    <span style={{ fontSize: '13px', fontWeight: 600, color: isDark ? '#fff' : '#1a1a1a' }}>
+                    <span style={{ fontSize: '13px', fontWeight: 600, color: 'var(--sm-text)' }}>
                       {pk.year} Round {pk.round}{pk.condition ? ` (${pk.condition})` : ''}
                     </span>
                     <button

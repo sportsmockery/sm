@@ -67,37 +67,29 @@ const TEAMS = [
 
 export default function DataHubLandingPage() {
   return (
-    <div className="min-h-screen" style={{ backgroundColor: 'var(--sm-surface)' }}>
+    <div className="sm-hero-bg" style={{ minHeight: '100vh' }}>
+      <div className="sm-grid-overlay" />
       {/* Hero header */}
-      <header className="relative py-12 md:py-20 bg-gradient-to-br from-[#0B162A] via-[#1a2940] to-[#2d3748]">
-        <div className="absolute inset-0 bg-[url('/grid-pattern.svg')] opacity-5" />
-        <div className="max-w-[1200px] mx-auto px-4 relative">
-          <div className="text-center">
-            <div className="inline-flex items-center gap-2 px-4 py-2 bg-white/10 rounded-full text-white/80 text-sm mb-6">
-              <span className="w-2 h-2 bg-green-400 rounded-full animate-pulse" />
-              Live Data
-            </div>
-            <h1
-              className="text-white text-3xl md:text-5xl font-black uppercase mb-4"
-              style={{ fontFamily: "'Montserrat', sans-serif" }}
-            >
-              Chicago Sports Data Hub
-            </h1>
-            <p className="text-white/70 text-base md:text-lg max-w-2xl mx-auto">
-              Your one-stop destination for live stats, schedules, standings, and comprehensive data
-              for all five Chicago professional sports teams.
-            </p>
-          </div>
+      <header style={{ paddingTop: 96, paddingBottom: 48, position: 'relative', zIndex: 1, textAlign: 'center' }}>
+        <div style={{ maxWidth: 'var(--sm-max-width)', margin: '0 auto', padding: '0 16px' }}>
+          <span className="sm-tag" style={{ display: 'inline-flex', alignItems: 'center', gap: 8, marginBottom: 24 }}>
+            <span style={{ width: 8, height: 8, borderRadius: '50%', backgroundColor: 'var(--sm-success)', animation: 'pulse 2s infinite' }} />
+            Live Data
+          </span>
+          <h1 style={{ fontFamily: 'var(--sm-font-heading)', fontSize: 'clamp(1.75rem, 5vw, 3rem)', fontWeight: 800, color: 'var(--sm-text)', textTransform: 'uppercase', marginBottom: 16, letterSpacing: '-0.02em' }}>
+            Chicago Sports Data Hub
+          </h1>
+          <p style={{ color: 'var(--sm-text-muted)', fontSize: 'clamp(0.9rem, 2vw, 1.1rem)', maxWidth: 600, margin: '0 auto' }}>
+            Your one-stop destination for live stats, schedules, standings, and comprehensive data
+            for all five Chicago professional sports teams.
+          </p>
         </div>
       </header>
 
       {/* Team selection */}
-      <main className="max-w-[1200px] mx-auto px-4 py-12">
-        <div className="text-center mb-10">
-          <h2
-            className="text-2xl md:text-3xl font-bold mb-3"
-            style={{ color: 'var(--sm-text)', fontFamily: "'Montserrat', sans-serif" }}
-          >
+      <main style={{ maxWidth: 'var(--sm-max-width)', margin: '0 auto', padding: '0 16px 48px', position: 'relative', zIndex: 1 }}>
+        <div style={{ textAlign: 'center', marginBottom: 40 }}>
+          <h2 style={{ fontFamily: 'var(--sm-font-heading)', fontSize: 'clamp(1.5rem, 3vw, 1.875rem)', fontWeight: 700, marginBottom: 12, color: 'var(--sm-text)' }}>
             Select Your Team
           </h2>
           <p style={{ color: 'var(--sm-text-muted)' }}>
@@ -111,90 +103,73 @@ export default function DataHubLandingPage() {
             <Link
               key={team.key}
               href={`/${team.key}/datahub`}
-              className="group relative rounded-2xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-300 hover:-translate-y-1"
-              style={{ backgroundColor: 'var(--sm-card)' }}
+              className="glass-card group"
+              style={{ padding: 0, overflow: 'hidden', position: 'relative' }}
             >
               {/* Top accent bar */}
-              <div
-                className="h-2 w-full"
-                style={{ backgroundColor: team.primaryColor }}
-              />
+              <div style={{ height: 3, width: '100%', backgroundColor: team.primaryColor }} />
 
               {/* Content */}
-              <div className="p-6">
-                <div className="flex items-start gap-4">
+              <div style={{ padding: 24 }}>
+                <div style={{ display: 'flex', alignItems: 'flex-start', gap: 16 }}>
                   {/* Logo */}
                   <div
-                    className="w-16 h-16 rounded-xl flex items-center justify-center p-2 group-hover:scale-110 transition-transform duration-300"
-                    style={{ backgroundColor: `${team.primaryColor}15` }}
+                    style={{
+                      width: 64,
+                      height: 64,
+                      borderRadius: 'var(--sm-radius-md)',
+                      backgroundColor: `${team.primaryColor}15`,
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      padding: 8,
+                      transition: 'transform 0.3s',
+                    }}
                   >
                     <Image
                       src={team.logo}
                       alt={team.name}
                       width={48}
                       height={48}
-                      className="w-full h-full object-contain"
+                      style={{ width: '100%', height: '100%', objectFit: 'contain' }}
                     />
                   </div>
 
                   {/* Team info */}
-                  <div className="flex-1">
-                    <div className="flex items-center gap-2 mb-1">
-                      <span
-                        className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded"
-                        style={{
-                          backgroundColor: `${team.primaryColor}20`,
-                          color: team.primaryColor,
-                        }}
-                      >
-                        {team.league}
-                      </span>
-                    </div>
-                    <h3
-                      className="text-lg font-bold mb-1"
-                      style={{ color: 'var(--sm-text)', fontFamily: "'Montserrat', sans-serif" }}
+                  <div style={{ flex: 1 }}>
+                    <span
+                      className="sm-tag"
+                      style={{
+                        backgroundColor: `${team.primaryColor}20`,
+                        color: team.primaryColor,
+                        borderColor: 'transparent',
+                        fontSize: 10,
+                        marginBottom: 8,
+                        display: 'inline-block',
+                      }}
                     >
+                      {team.league}
+                    </span>
+                    <h3 style={{ fontFamily: 'var(--sm-font-heading)', fontSize: 18, fontWeight: 700, marginBottom: 4, color: 'var(--sm-text)' }}>
                       {team.name}
                     </h3>
-                    <p className="text-sm" style={{ color: 'var(--sm-text-muted)' }}>
+                    <p style={{ fontSize: 14, color: 'var(--sm-text-muted)' }}>
                       {team.description}
                     </p>
                   </div>
                 </div>
 
                 {/* Features list */}
-                <div className="mt-4 pt-4" style={{ borderTop: '1px solid var(--sm-border)' }}>
-                  <div className="flex flex-wrap gap-2">
-                    {['Live Scores', 'Schedule', 'Roster', 'Stats'].map((feature) => (
-                      <span
-                        key={feature}
-                        className="text-[11px] px-2 py-1 rounded"
-                        style={{ backgroundColor: 'var(--sm-surface)', color: 'var(--sm-text-muted)' }}
-                      >
-                        {feature}
-                      </span>
-                    ))}
-                  </div>
-                </div>
-
-                {/* Arrow indicator */}
-                <div
-                  className="absolute bottom-4 right-4 w-8 h-8 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
-                  style={{ backgroundColor: team.primaryColor }}
-                >
-                  <svg
-                    className="w-4 h-4 text-white"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M9 5l7 7-7 7"
-                    />
-                  </svg>
+                <div style={{ marginTop: 16, paddingTop: 16, borderTop: '1px solid var(--sm-border)', display: 'flex', flexWrap: 'wrap', gap: 8 }}>
+                  {['Live Scores', 'Schedule', 'Roster', 'Stats'].map((feature) => (
+                    <span
+                      key={feature}
+                      className="sm-tag"
+                      style={{ fontSize: 11, borderColor: 'transparent', backgroundColor: 'var(--sm-surface)' }}
+                    >
+                      {feature}
+                    </span>
+                  ))}
                 </div>
               </div>
             </Link>
@@ -202,8 +177,8 @@ export default function DataHubLandingPage() {
         </div>
 
         {/* Additional info */}
-        <div className="mt-12 text-center">
-          <div className="inline-flex flex-col sm:flex-row items-center gap-4 sm:gap-8 text-sm" style={{ color: 'var(--sm-text-muted)' }}>
+        <div style={{ marginTop: 48, textAlign: 'center' }}>
+          <div style={{ display: 'inline-flex', flexWrap: 'wrap', justifyContent: 'center', gap: 32, fontSize: 14, color: 'var(--sm-text-muted)' }}>
             <div className="flex items-center gap-2">
               <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />

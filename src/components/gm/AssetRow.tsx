@@ -57,9 +57,9 @@ export function AssetRow({
   const isDark = theme === 'dark'
   const [hovered, setHovered] = useState(false)
 
-  const textColor = isDark ? '#fff' : '#1a1a1a'
-  const subText = isDark ? '#9ca3af' : '#6b7280'
-  const borderColor = isDark ? '#374151' : '#e5e7eb'
+  const textColor = 'var(--sm-text)'
+  const subText = 'var(--sm-text-muted)'
+  const borderColor = 'var(--sm-border)'
 
   // Compact sizing
   const padding = compact ? '6px 8px' : '10px 12px'
@@ -132,7 +132,7 @@ export function AssetRow({
         gap: compact ? 6 : 10,
         padding,
         borderRadius: compact ? 6 : 10,
-        backgroundColor: isDark ? '#1f2937' : '#f9fafb',
+        backgroundColor: 'var(--sm-surface)',
         border: `1px solid ${borderColor}`,
         borderLeft: `3px solid ${accentColor}`,
         minHeight,

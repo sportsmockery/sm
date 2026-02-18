@@ -279,7 +279,7 @@ function PlayerCard({ player, index }: { player: typeof FEATURED_PLAYERS[0]; ind
           background: `linear-gradient(135deg, ${player.color} 0%, transparent 100%)`,
         }}
       >
-        <div className="rounded-xl p-4" style={{ backgroundColor: '#0a0a0a' }}>
+        <div className="rounded-xl p-4" style={{ backgroundColor: 'var(--sm-dark)' }}>
           {/* Player image */}
           <div className="relative h-48 mb-4 overflow-hidden rounded-lg bg-gradient-to-b from-white/5 to-transparent">
             <Image
@@ -328,9 +328,10 @@ export default function FanZonePage() {
   const [email, setEmail] = useState('')
 
   return (
-    <div className="min-h-screen text-white" style={{ backgroundColor: '#050505' }}>
+    <div className="sm-hero-bg" style={{ minHeight: '100vh', color: '#fff' }}>
+      <div className="sm-grid-overlay" />
       {/* Hero Section with Video Background */}
-      <section ref={heroRef} className="relative h-screen overflow-hidden">
+      <section ref={heroRef} className="relative h-screen overflow-hidden" style={{ position: 'relative', zIndex: 1 }}>
         {/* Video Background */}
         <motion.div style={{ scale: heroScale }} className="absolute inset-0">
           <video
@@ -347,15 +348,15 @@ export default function FanZonePage() {
             />
           </video>
           {/* Fallback gradient */}
-          <div className="absolute inset-0 bg-gradient-to-br from-[#0B162A] via-[#1a1a2e] to-[#C83803]/30" />
+          <div className="absolute inset-0" style={{ background: 'linear-gradient(135deg, #0B162A 0%, #1a1a2e 50%, rgba(200,56,3,0.3) 100%)' }} />
         </motion.div>
 
         {/* Overlay */}
-        <div className="absolute inset-0 bg-black/50" />
-        <div className="absolute inset-0 bg-gradient-to-t from-[#050505] via-transparent to-transparent" />
+        <div className="absolute inset-0" style={{ backgroundColor: 'rgba(0,0,0,0.5)' }} />
+        <div className="absolute inset-0" style={{ background: 'linear-gradient(to top, var(--sm-dark), transparent)' }} />
 
         {/* Chicago skyline silhouette */}
-        <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-[#050505] to-transparent" />
+        <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-[var(--sm-dark)] to-transparent" />
 
         {/* Hero Content */}
         <motion.div
@@ -369,7 +370,7 @@ export default function FanZonePage() {
             transition={{ duration: 0.8, delay: 0.2 }}
             className="mb-6"
           >
-            <svg className="w-16 h-16" style={{ color: '#C83803' }} viewBox="0 0 24 24" fill="currentColor">
+            <svg className="w-16 h-16" style={{ color: 'var(--sm-red)' }} viewBox="0 0 24 24" fill="currentColor">
               <polygon points="12,0 14.5,8 24,8 16.5,13 19,22 12,17 5,22 7.5,13 0,8 9.5,8" />
             </svg>
           </motion.div>
@@ -379,10 +380,11 @@ export default function FanZonePage() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.4 }}
             className="text-5xl md:text-7xl lg:text-8xl font-black mb-6 tracking-tight"
+            style={{ fontFamily: 'var(--sm-font-heading)' }}
           >
             <span className="text-white">CHICAGO</span>
             <br />
-            <span className="bg-gradient-to-r from-[#C83803] via-[#CE1141] to-[#0E3386] bg-clip-text text-transparent">
+            <span style={{ background: 'var(--sm-gradient)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
               FAN ZONE
             </span>
           </motion.h1>
@@ -438,7 +440,7 @@ export default function FanZonePage() {
       </section>
 
       {/* Featured Players Section */}
-      <section className="py-24 px-4">
+      <section className="py-24 px-4" style={{ position: 'relative', zIndex: 1 }}>
         <div className="max-w-7xl mx-auto">
           <motion.div
             initial={{ opacity: 0, y: 30 }}
@@ -446,7 +448,7 @@ export default function FanZonePage() {
             viewport={{ once: true }}
             className="text-center mb-16"
           >
-            <h2 className="text-sm uppercase tracking-[0.3em] mb-4" style={{ color: '#C83803' }}>Chicago&apos;s Finest</h2>
+            <h2 className="text-sm uppercase tracking-[0.3em] mb-4" style={{ color: 'var(--sm-red)' }}>Chicago&apos;s Finest</h2>
             <p className="text-4xl md:text-5xl font-black">PLAYER SPOTLIGHT</p>
           </motion.div>
 
@@ -459,7 +461,7 @@ export default function FanZonePage() {
       </section>
 
       {/* Contests Section */}
-      <section className="py-24 px-4 bg-gradient-to-b from-transparent via-[#0a0a0a] to-transparent">
+      <section className="py-24 px-4" style={{ background: 'linear-gradient(to bottom, transparent, var(--sm-dark), transparent)', position: 'relative', zIndex: 1 }}>
         <div className="max-w-7xl mx-auto">
           <motion.div
             initial={{ opacity: 0, y: 30 }}
@@ -467,7 +469,7 @@ export default function FanZonePage() {
             viewport={{ once: true }}
             className="text-center mb-16"
           >
-            <h2 className="text-sm uppercase tracking-[0.3em] mb-4" style={{ color: '#C83803' }}>Win Big</h2>
+            <h2 className="text-sm uppercase tracking-[0.3em] mb-4" style={{ color: 'var(--sm-red)' }}>Win Big</h2>
             <p className="text-4xl md:text-5xl font-black mb-6">ACTIVE CONTESTS</p>
             <p className="text-white/60 max-w-2xl mx-auto">
               Enter for your chance to win exclusive experiences with your favorite Chicago teams.
@@ -484,7 +486,7 @@ export default function FanZonePage() {
       </section>
 
       {/* Newsletter / Entry Form Section */}
-      <section className="py-24 px-4">
+      <section className="py-24 px-4" style={{ position: 'relative', zIndex: 1 }}>
         <div className="max-w-4xl mx-auto">
           <motion.div
             initial={{ opacity: 0, y: 30 }}
@@ -561,7 +563,7 @@ export default function FanZonePage() {
       </section>
 
       {/* Social Feed Section */}
-      <section className="py-24 px-4" style={{ backgroundColor: '#0a0a0a' }}>
+      <section className="py-24 px-4" style={{ backgroundColor: 'var(--sm-dark)', position: 'relative', zIndex: 1 }}>
         <div className="max-w-7xl mx-auto">
           <motion.div
             initial={{ opacity: 0, y: 30 }}
@@ -569,7 +571,7 @@ export default function FanZonePage() {
             viewport={{ once: true }}
             className="text-center mb-12"
           >
-            <h2 className="text-sm uppercase tracking-[0.3em] mb-4" style={{ color: '#C83803' }}>@SportsMockery</h2>
+            <h2 className="text-sm uppercase tracking-[0.3em] mb-4" style={{ color: 'var(--sm-red)' }}>@SportsMockery</h2>
             <p className="text-4xl md:text-5xl font-black">FROM THE COMMUNITY</p>
           </motion.div>
 
@@ -596,7 +598,7 @@ export default function FanZonePage() {
       </section>
 
       {/* Footer CTA */}
-      <section className="py-16 px-4 text-center">
+      <section className="py-16 px-4 text-center" style={{ position: 'relative', zIndex: 1 }}>
         <Link
           href="/"
           className="inline-flex items-center gap-2 text-white/50 hover:text-white transition-colors"

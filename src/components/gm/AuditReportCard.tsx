@@ -31,11 +31,11 @@ const severityColors: Record<string, string> = {
 }
 
 export function AuditReportCard({ audit, gmGrade, isDark = true }: AuditReportCardProps) {
-  const textColor = isDark ? '#fff' : '#1a1a1a'
-  const subText = isDark ? '#9ca3af' : '#6b7280'
+  const textColor = 'var(--sm-text)'
+  const subText = 'var(--sm-text-muted)'
   const cardBg = isDark ? '#111827' : '#f9fafb'
-  const innerBg = isDark ? '#1f2937' : '#ffffff'
-  const borderColor = isDark ? '#374151' : '#e5e7eb'
+  const innerBg = 'var(--sm-card)'
+  const borderColor = 'var(--sm-border)'
 
   return (
     <motion.div

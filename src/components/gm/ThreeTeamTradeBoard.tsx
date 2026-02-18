@@ -48,11 +48,11 @@ export function ThreeTeamTradeBoard({
 }: ThreeTeamTradeBoardProps) {
   const { theme } = useTheme()
   const isDark = theme === 'dark'
-  const textColor = isDark ? '#fff' : '#1a1a1a'
-  const subText = isDark ? '#9ca3af' : '#6b7280'
+  const textColor = 'var(--sm-text)'
+  const subText = 'var(--sm-text-muted)'
   const panelBg = isDark ? '#111827' : '#f9fafb'
-  const borderColor = isDark ? '#374151' : '#e5e7eb'
-  const flowBg = isDark ? '#1f2937' : '#ffffff'
+  const borderColor = 'var(--sm-border)'
+  const flowBg = 'var(--sm-card)'
   const teams = [team1, team2, team3]
 
   // Share state
@@ -89,7 +89,7 @@ export function ThreeTeamTradeBoard({
       const { toPng } = await import('html-to-image')
       const dataUrl = await toPng(gradeCardRef.current, {
         quality: 0.95,
-        backgroundColor: isDark ? '#1f2937' : '#ffffff',
+        backgroundColor: 'var(--sm-card)',
       })
       setGeneratedImageUrl(dataUrl)
       setShowShareOptions(true)
@@ -510,7 +510,7 @@ export function ThreeTeamTradeBoard({
             style={{
               padding: 24,
               borderRadius: 16,
-              backgroundColor: isDark ? '#1f2937' : '#ffffff',
+              backgroundColor: 'var(--sm-card)',
               border: `1px solid ${borderColor}`,
             }}
           >
@@ -649,7 +649,7 @@ export function ThreeTeamTradeBoard({
                     <div style={{
                       height: 6,
                       borderRadius: 3,
-                      backgroundColor: isDark ? '#374151' : '#e5e7eb',
+                      backgroundColor: 'var(--sm-border)',
                       overflow: 'hidden',
                     }}>
                       <div style={{
@@ -881,7 +881,7 @@ export function ThreeTeamTradeBoard({
                       padding: '10px 12px',
                       borderRadius: 8,
                       border: `2px solid ${borderColor}`,
-                      backgroundColor: generatingImage ? (isDark ? '#374151' : '#e5e7eb') : 'transparent',
+                      backgroundColor: generatingImage ? ('var(--sm-border)') : 'transparent',
                       color: textColor,
                       fontWeight: 600,
                       fontSize: 13,

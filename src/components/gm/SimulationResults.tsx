@@ -37,10 +37,10 @@ export function SimulationResults({
   const isDark = theme === 'dark'
   const [activeTab, setActiveTab] = useState<Tab>('overview')
 
-  const textColor = isDark ? '#fff' : '#1a1a1a'
-  const subText = isDark ? '#9ca3af' : '#6b7280'
-  const borderColor = isDark ? '#374151' : '#e5e7eb'
-  const cardBg = isDark ? '#1f2937' : '#ffffff'
+  const textColor = 'var(--sm-text)'
+  const subText = 'var(--sm-text-muted)'
+  const borderColor = 'var(--sm-border)'
+  const cardBg = 'var(--sm-card)'
   const surfaceBg = isDark ? '#111827' : '#f9fafb'
 
   const { baseline, modified, gmScore, scoreBreakdown, standings, playoffs, championship, seasonSummary,

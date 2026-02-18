@@ -55,8 +55,8 @@ export function ScenarioTabs({ playersSent, playersReceived, onRunScenario, load
     years_forward: 1,
   })
 
-  const textColor = isDark ? '#fff' : '#1a1a1a'
-  const subText = isDark ? '#9ca3af' : '#6b7280'
+  const textColor = 'var(--sm-text)'
+  const subText = 'var(--sm-text-muted)'
   const inputBg = isDark ? '#374151' : '#fff'
   const inputBorder = isDark ? '#4b5563' : '#d1d5db'
 
@@ -110,8 +110,8 @@ export function ScenarioTabs({ playersSent, playersReceived, onRunScenario, load
         style={{
           padding: 16,
           borderRadius: 10,
-          backgroundColor: isDark ? '#1f2937' : '#f9fafb',
-          border: `1px solid ${isDark ? '#374151' : '#e5e7eb'}`,
+          backgroundColor: 'var(--sm-surface)',
+          border: `1px solid ${'var(--sm-border)'}`,
         }}
       >
         {/* Player Improvement */}

@@ -43,10 +43,10 @@ export function PlayerCard({ player, selected = false, compact = false, teamColo
   const { theme } = useTheme()
   const isDark = theme === 'dark'
 
-  const cardBg = isDark ? '#1f2937' : '#ffffff'
-  const borderColor = selected ? teamColor : (isDark ? '#374151' : '#e5e7eb')
-  const textColor = isDark ? '#ffffff' : '#1a1a1a'
-  const subTextColor = isDark ? '#9ca3af' : '#6b7280'
+  const cardBg = 'var(--sm-card)'
+  const borderColor = selected ? teamColor : 'var(--sm-border)'
+  const textColor = 'var(--sm-text)'
+  const subTextColor = 'var(--sm-text-muted)'
 
   if (compact) {
     return (
@@ -155,7 +155,7 @@ export function PlayerCard({ player, selected = false, compact = false, teamColo
           <img
             src={player.headshot_url}
             alt={player.full_name}
-            style={{ width: 56, height: 56, borderRadius: '50%', objectFit: 'cover', border: `2px solid ${isDark ? '#374151' : '#e5e7eb'}` }}
+            style={{ width: 56, height: 56, borderRadius: '50%', objectFit: 'cover', border: `2px solid ${'var(--sm-border)'}` }}
             onError={(e) => {
               const el = e.target as HTMLImageElement
               el.style.display = 'none'
@@ -287,7 +287,7 @@ export function PlayerCard({ player, selected = false, compact = false, teamColo
             padding: '4px 8px',
             borderRadius: 6,
             border: 'none',
-            backgroundColor: isDark ? '#374151' : '#e5e7eb',
+            backgroundColor: 'var(--sm-border)',
             color: teamColor,
             fontSize: '9px',
             fontWeight: 700,

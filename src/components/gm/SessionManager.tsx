@@ -24,8 +24,8 @@ interface SessionManagerProps {
 export function SessionManager({ sessions, activeSession, onNewSession, onSelectSession }: SessionManagerProps) {
   const { theme } = useTheme()
   const isDark = theme === 'dark'
-  const subText = isDark ? '#9ca3af' : '#6b7280'
-  const textColor = isDark ? '#fff' : '#1a1a1a'
+  const subText = 'var(--sm-text-muted)'
+  const textColor = 'var(--sm-text)'
 
   return (
     <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>

@@ -149,8 +149,8 @@ export function GradeReveal({ result, show, onClose, onNewTrade, tradeDetails, s
 
   const gradeInfo = getGradeInterpretation(result.grade)
   const gradeColor = gradeInfo.color
-  const textColor = isDark ? '#fff' : '#1a1a1a'
-  const subText = isDark ? '#9ca3af' : '#6b7280'
+  const textColor = 'var(--sm-text)'
+  const subText = 'var(--sm-text-muted)'
 
   const breakdownItems = result.breakdown ? [
     { label: 'Talent Balance', value: result.breakdown.talent_balance },
@@ -186,10 +186,8 @@ export function GradeReveal({ result, show, onClose, onNewTrade, tradeDetails, s
           initial={{ scale: 0.9 }}
           animate={{ scale: 1 }}
           onClick={e => e.stopPropagation()}
+          className="glass-card glass-card-static"
           style={{
-            backgroundColor: isDark ? '#111827' : '#fff',
-            borderRadius: 20,
-            padding: 32,
             maxWidth: 500,
             width: '100%',
             textAlign: 'center',
@@ -227,11 +225,12 @@ export function GradeReveal({ result, show, onClose, onNewTrade, tradeDetails, s
               transition={{ type: 'spring', stiffness: 300, damping: 15 }}
               style={{ marginTop: 12, display: 'flex', justifyContent: 'center', gap: 8 }}
             >
-              <span style={{
-                padding: '6px 20px', borderRadius: 20,
+              <span className="sm-tag" style={{
+                padding: '6px 20px',
                 fontWeight: 800, fontSize: '14px', letterSpacing: '1px',
-                backgroundColor: result.status === 'accepted' ? '#22c55e20' : '#ef444420',
-                color: result.status === 'accepted' ? '#22c55e' : '#ef4444',
+                backgroundColor: result.status === 'accepted' ? 'rgba(34,197,94,0.15)' : 'rgba(239,68,68,0.15)',
+                color: result.status === 'accepted' ? 'var(--sm-success)' : 'var(--sm-error)',
+                borderColor: 'transparent',
               }}>
                 {result.status === 'accepted' ? 'ACCEPTED' : 'REJECTED'}
               </span>
@@ -239,10 +238,12 @@ export function GradeReveal({ result, show, onClose, onNewTrade, tradeDetails, s
                 <motion.span
                   animate={{ opacity: [1, 0.3, 1, 0.3, 1] }}
                   transition={{ duration: 1 }}
+                  className="sm-tag"
                   style={{
-                    padding: '6px 16px', borderRadius: 20,
+                    padding: '6px 16px',
                     fontWeight: 800, fontSize: '14px',
-                    backgroundColor: '#eab30820', color: '#eab308',
+                    backgroundColor: 'rgba(234,179,8,0.15)', color: 'var(--sm-warning)',
+                    borderColor: 'transparent',
                   }}
                 >
                   DANGEROUS
@@ -332,8 +333,8 @@ export function GradeReveal({ result, show, onClose, onNewTrade, tradeDetails, s
               <div style={{
                 padding: 12,
                 borderRadius: 10,
-                backgroundColor: isDark ? '#1f2937' : '#f9fafb',
-                border: `1px solid ${isDark ? '#374151' : '#e5e7eb'}`,
+                backgroundColor: 'var(--sm-surface)',
+                border: '1px solid var(--sm-border)',
               }}>
                 <div style={{
                   display: 'flex',
@@ -341,7 +342,7 @@ export function GradeReveal({ result, show, onClose, onNewTrade, tradeDetails, s
                   gap: 8,
                   marginBottom: 10,
                   paddingBottom: 8,
-                  borderBottom: `1px solid ${isDark ? '#374151' : '#e5e7eb'}`,
+                  borderBottom: '1px solid var(--sm-border)',
                 }}>
                   {tradeDetails.chicagoLogo && (
                     <img
@@ -407,8 +408,8 @@ export function GradeReveal({ result, show, onClose, onNewTrade, tradeDetails, s
               <div style={{
                 padding: 12,
                 borderRadius: 10,
-                backgroundColor: isDark ? '#1f2937' : '#f9fafb',
-                border: `1px solid ${isDark ? '#374151' : '#e5e7eb'}`,
+                backgroundColor: 'var(--sm-surface)',
+                border: '1px solid var(--sm-border)',
               }}>
                 <div style={{
                   display: 'flex',
@@ -416,7 +417,7 @@ export function GradeReveal({ result, show, onClose, onNewTrade, tradeDetails, s
                   gap: 8,
                   marginBottom: 10,
                   paddingBottom: 8,
-                  borderBottom: `1px solid ${isDark ? '#374151' : '#e5e7eb'}`,
+                  borderBottom: '1px solid var(--sm-border)',
                 }}>
                   {tradeDetails.opponentLogo && (
                     <img
@@ -493,7 +494,7 @@ export function GradeReveal({ result, show, onClose, onNewTrade, tradeDetails, s
                     <span>{item.label}</span>
                     <span>{Math.round(item.value * 100)}%</span>
                   </div>
-                  <div style={{ height: 6, borderRadius: 3, backgroundColor: isDark ? '#1f2937' : '#e5e7eb', overflow: 'hidden' }}>
+                  <div style={{ height: 6, borderRadius: 3, backgroundColor: 'var(--sm-surface)', overflow: 'hidden' }}>
                     <motion.div
                       initial={{ width: 0 }}
                       animate={{ width: `${item.value * 100}%` }}
@@ -512,18 +513,18 @@ export function GradeReveal({ result, show, onClose, onNewTrade, tradeDetails, s
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               style={{
-                marginTop: 16, padding: 12, borderRadius: 10,
-                backgroundColor: isDark ? '#1e293b' : '#f0fdf4',
-                border: `1px solid ${isDark ? '#334155' : '#bbf7d0'}`,
+                marginTop: 16, padding: 12, borderRadius: 'var(--sm-radius-md)',
+                backgroundColor: 'var(--sm-surface)',
+                border: '1px solid var(--sm-border)',
                 display: 'flex', alignItems: 'flex-start', gap: 10,
               }}
             >
               <span style={{ fontSize: '18px', flexShrink: 0 }}>$</span>
               <div>
-                <div style={{ fontSize: '11px', fontWeight: 700, color: isDark ? '#94a3b8' : '#64748b', marginBottom: 4, textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+                <div style={{ fontSize: '11px', fontWeight: 700, color: 'var(--sm-text-dim)', marginBottom: 4, textTransform: 'uppercase', letterSpacing: '0.5px' }}>
                   Cap Impact
                 </div>
-                <div style={{ fontSize: '13px', lineHeight: 1.5, color: isDark ? '#e2e8f0' : '#334155' }}>
+                <div style={{ fontSize: '13px', lineHeight: 1.5, color: 'var(--sm-text)' }}>
                   {result.cap_analysis}
                 </div>
               </div>
@@ -536,8 +537,8 @@ export function GradeReveal({ result, show, onClose, onNewTrade, tradeDetails, s
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               style={{
-                marginTop: 20, padding: 16, borderRadius: 12,
-                backgroundColor: isDark ? '#1f2937' : '#f3f4f6',
+                marginTop: 20, padding: 16, borderRadius: 'var(--sm-radius-md)',
+                backgroundColor: 'var(--sm-surface)',
                 fontSize: '13px', lineHeight: 1.6, color: textColor,
                 textAlign: 'left',
               }}
@@ -597,37 +598,17 @@ export function GradeReveal({ result, show, onClose, onNewTrade, tradeDetails, s
               animate={{ opacity: 1 }}
               style={{ marginTop: 20, display: 'flex', gap: 10, justifyContent: 'center', flexWrap: 'wrap' }}
             >
-              <button
-                onClick={onNewTrade}
-                style={{
-                  padding: '10px 24px', borderRadius: 10, border: 'none',
-                  backgroundColor: '#bc0000', color: '#fff',
-                  fontWeight: 700, fontSize: '14px', cursor: 'pointer',
-                }}
-              >
+              <button onClick={onNewTrade} className="btn btn-primary btn-md">
                 New Trade
               </button>
               <button
                 onClick={() => setShowWhatIf(!showWhatIf)}
-                style={{
-                  padding: '10px 24px', borderRadius: 10,
-                  border: `2px solid ${showWhatIf ? '#3b82f6' : (isDark ? '#374151' : '#d1d5db')}`,
-                  backgroundColor: showWhatIf ? '#3b82f615' : 'transparent',
-                  color: showWhatIf ? '#3b82f6' : textColor,
-                  fontWeight: 600, fontSize: '14px', cursor: 'pointer',
-                }}
+                className="btn btn-secondary btn-md"
+                style={showWhatIf ? { borderColor: '#3b82f6', color: '#3b82f6', backgroundColor: 'rgba(59,130,246,0.1)' } : {}}
               >
                 {showWhatIf ? 'Hide What-If' : 'What If?'}
               </button>
-              <button
-                onClick={() => setShowExport(true)}
-                style={{
-                  padding: '10px 24px', borderRadius: 10,
-                  border: `2px solid ${isDark ? '#374151' : '#d1d5db'}`,
-                  backgroundColor: 'transparent', color: textColor,
-                  fontWeight: 600, fontSize: '14px', cursor: 'pointer',
-                }}
-              >
+              <button onClick={() => setShowExport(true)} className="btn btn-secondary btn-md">
                 Export
               </button>
               {result.shared_code && !auditResult && (
@@ -642,25 +623,12 @@ export function GradeReveal({ result, show, onClose, onNewTrade, tradeDetails, s
                   onClick={() => {
                     navigator.clipboard.writeText(`${window.location.origin}/gm/share/${result.shared_code}`)
                   }}
-                  style={{
-                    padding: '10px 24px', borderRadius: 10,
-                    border: `2px solid ${isDark ? '#374151' : '#d1d5db'}`,
-                    backgroundColor: 'transparent', color: textColor,
-                    fontWeight: 600, fontSize: '14px', cursor: 'pointer',
-                  }}
+                  className="btn btn-secondary btn-md"
                 >
                   Share Trade
                 </button>
               )}
-              <button
-                onClick={onClose}
-                style={{
-                  padding: '10px 24px', borderRadius: 10,
-                  border: `2px solid ${isDark ? '#374151' : '#d1d5db'}`,
-                  backgroundColor: 'transparent', color: textColor,
-                  fontWeight: 600, fontSize: '14px', cursor: 'pointer',
-                }}
-              >
+              <button onClick={onClose} className="btn btn-secondary btn-md">
                 Close
               </button>
             </motion.div>

@@ -28,7 +28,7 @@ export function GradeProgressButton({
   const [phase, setPhase] = useState<'idle' | 'validating' | 'analyzing' | 'grading' | 'complete'>('idle')
 
   const canClick = canGrade && !grading && !isBlocked
-  const subText = isDark ? '#9ca3af' : '#6b7280'
+  const subText = 'var(--sm-text-muted)'
 
   // Progress animation when grading
   useEffect(() => {

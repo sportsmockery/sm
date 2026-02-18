@@ -47,8 +47,8 @@ export function WhatIfPanel({
   const [history, setHistory] = useState<ScenarioResult[]>([])
   const [activeMode, setActiveMode] = useState<'scenarios' | 'simulate'>('scenarios')
 
-  const textColor = isDark ? '#fff' : '#1a1a1a'
-  const subText = isDark ? '#9ca3af' : '#6b7280'
+  const textColor = 'var(--sm-text)'
+  const subText = 'var(--sm-text-muted)'
 
   async function handleRunScenario(type: ScenarioType, params: ScenarioParameters) {
     setLoading(true)
@@ -93,8 +93,8 @@ export function WhatIfPanel({
         marginTop: 20,
         padding: 20,
         borderRadius: 12,
-        backgroundColor: isDark ? '#1f2937' : '#f9fafb',
-        border: `1px solid ${isDark ? '#374151' : '#e5e7eb'}`,
+        backgroundColor: 'var(--sm-surface)',
+        border: `1px solid ${'var(--sm-border)'}`,
         overflow: 'hidden',
       }}
     >
@@ -132,7 +132,7 @@ export function WhatIfPanel({
             padding: '10px 16px',
             borderRadius: 8,
             border: 'none',
-            backgroundColor: activeMode === 'scenarios' ? '#bc0000' : (isDark ? '#374151' : '#e5e7eb'),
+            backgroundColor: activeMode === 'scenarios' ? '#bc0000' : ('var(--sm-border)'),
             color: activeMode === 'scenarios' ? '#fff' : subText,
             fontWeight: 700,
             fontSize: '13px',
@@ -148,7 +148,7 @@ export function WhatIfPanel({
             padding: '10px 16px',
             borderRadius: 8,
             border: 'none',
-            backgroundColor: activeMode === 'simulate' ? '#3b82f6' : (isDark ? '#374151' : '#e5e7eb'),
+            backgroundColor: activeMode === 'simulate' ? '#3b82f6' : ('var(--sm-border)'),
             color: activeMode === 'simulate' ? '#fff' : subText,
             fontWeight: 700,
             fontSize: '13px',
@@ -205,8 +205,8 @@ export function WhatIfPanel({
               marginTop: 20,
               padding: 16,
               borderRadius: 10,
-              backgroundColor: isDark ? '#111827' : '#fff',
-              border: `1px solid ${isDark ? '#374151' : '#e5e7eb'}`,
+              backgroundColor: 'var(--sm-card)',
+              border: `1px solid ${'var(--sm-border)'}`,
             }}
           >
             {/* Grade comparison */}
@@ -304,8 +304,8 @@ export function WhatIfPanel({
                   justifyContent: 'space-between',
                   padding: '8px 12px',
                   borderRadius: 8,
-                  backgroundColor: isDark ? '#111827' : '#fff',
-                  border: `1px solid ${isDark ? '#374151' : '#e5e7eb'}`,
+                  backgroundColor: 'var(--sm-card)',
+                  border: `1px solid ${'var(--sm-border)'}`,
                 }}
               >
                 <span style={{ fontSize: '12px', color: textColor }}>{h.description}</span>

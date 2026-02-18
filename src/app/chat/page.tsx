@@ -221,34 +221,34 @@ function ChatContent() {
 
         {/* Info Cards */}
         <div className="grid md:grid-cols-3 gap-4 mt-6">
-          <div className="bg-white/5 rounded-xl p-4 border border-white/10">
-            <div className="w-10 h-10 rounded-lg flex items-center justify-center mb-3" style={{ backgroundColor: 'rgba(200, 56, 3, 0.2)' }}>
-              <svg className="w-5 h-5" style={{ color: '#C83803' }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <div className="glass-card glass-card-sm glass-card-static">
+            <div style={{ width: 40, height: 40, borderRadius: 'var(--sm-radius-sm)', backgroundColor: 'rgba(188,0,0,0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: 12 }}>
+              <svg className="w-5 h-5" style={{ color: 'var(--sm-red)' }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8h2a2 2 0 012 2v6a2 2 0 01-2 2h-2v4l-4-4H9a1.994 1.994 0 01-1.414-.586m0 0L11 14h4a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2v4l.586-.586z" />
               </svg>
             </div>
-            <h3 className="text-white font-semibold mb-1">Live Discussion</h3>
-            <p className="text-white/60 text-sm">Chat in real-time during games and breaking news</p>
+            <h3 style={{ color: 'var(--sm-text)', fontWeight: 600, marginBottom: 4 }}>Live Discussion</h3>
+            <p style={{ color: 'var(--sm-text-muted)', fontSize: 14 }}>Chat in real-time during games and breaking news</p>
           </div>
 
-          <div className="bg-white/5 rounded-xl p-4 border border-white/10">
-            <div className="w-10 h-10 rounded-lg flex items-center justify-center mb-3" style={{ backgroundColor: 'rgba(200, 56, 3, 0.2)' }}>
-              <svg className="w-5 h-5" style={{ color: '#C83803' }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <div className="glass-card glass-card-sm glass-card-static">
+            <div style={{ width: 40, height: 40, borderRadius: 'var(--sm-radius-sm)', backgroundColor: 'rgba(188,0,0,0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: 12 }}>
+              <svg className="w-5 h-5" style={{ color: 'var(--sm-red)' }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
               </svg>
             </div>
-            <h3 className="text-white font-semibold mb-1">Moderated</h3>
-            <p className="text-white/60 text-sm">Safe, friendly environment for all Bears fans</p>
+            <h3 style={{ color: 'var(--sm-text)', fontWeight: 600, marginBottom: 4 }}>Moderated</h3>
+            <p style={{ color: 'var(--sm-text-muted)', fontSize: 14 }}>Safe, friendly environment for all Bears fans</p>
           </div>
 
-          <div className="bg-white/5 rounded-xl p-4 border border-white/10">
-            <div className="w-10 h-10 rounded-lg flex items-center justify-center mb-3" style={{ backgroundColor: 'rgba(200, 56, 3, 0.2)' }}>
-              <svg className="w-5 h-5" style={{ color: '#C83803' }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <div className="glass-card glass-card-sm glass-card-static">
+            <div style={{ width: 40, height: 40, borderRadius: 'var(--sm-radius-sm)', backgroundColor: 'rgba(188,0,0,0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: 12 }}>
+              <svg className="w-5 h-5" style={{ color: 'var(--sm-red)' }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
               </svg>
             </div>
-            <h3 className="text-white font-semibold mb-1">@Mentions</h3>
-            <p className="text-white/60 text-sm">Tag other fans with @ and get notified when mentioned</p>
+            <h3 style={{ color: 'var(--sm-text)', fontWeight: 600, marginBottom: 4 }}>@Mentions</h3>
+            <p style={{ color: 'var(--sm-text-muted)', fontSize: 14 }}>Tag other fans with @ and get notified when mentioned</p>
           </div>
         </div>
       </div>
@@ -258,8 +258,9 @@ function ChatContent() {
 
 function ChatPageContent() {
   return (
-    <Suspense fallback={<div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: '#0B162A' }}>
-      <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2" style={{ borderColor: '#C83803' }} />
+    <Suspense fallback={<div className="sm-hero-bg" style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+      <div className="sm-grid-overlay" />
+      <div style={{ width: 32, height: 32, border: '3px solid var(--sm-red)', borderTopColor: 'transparent', borderRadius: '50%', animation: 'spin-2030 1s linear infinite' }} />
     </div>}>
       <ChatContent />
     </Suspense>

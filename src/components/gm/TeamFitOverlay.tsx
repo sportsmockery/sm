@@ -57,8 +57,8 @@ export function TeamFitOverlay({
   const [error, setError] = useState<string | null>(null)
   const [showRadar, setShowRadar] = useState(true)
 
-  const textColor = isDark ? '#fff' : '#1a1a1a'
-  const subText = isDark ? '#9ca3af' : '#6b7280'
+  const textColor = 'var(--sm-text)'
+  const subText = 'var(--sm-text-muted)'
 
   useEffect(() => {
     if (!show || !player || !targetTeam) {
@@ -128,7 +128,7 @@ export function TeamFitOverlay({
           exit={{ scale: 0.9, opacity: 0 }}
           onClick={e => e.stopPropagation()}
           style={{
-            backgroundColor: isDark ? '#111827' : '#fff',
+            backgroundColor: 'var(--sm-card)',
             borderRadius: 16,
             padding: 24,
             maxWidth: 500,
@@ -171,7 +171,7 @@ export function TeamFitOverlay({
                 style={{
                   width: 40,
                   height: 40,
-                  border: `3px solid ${isDark ? '#374151' : '#e5e7eb'}`,
+                  border: `3px solid ${'var(--sm-border)'}`,
                   borderTopColor: targetTeamColor,
                   borderRadius: '50%',
                   margin: '0 auto 16px',
@@ -201,7 +201,7 @@ export function TeamFitOverlay({
                 marginBottom: 24,
                 padding: 16,
                 borderRadius: 12,
-                backgroundColor: isDark ? '#1f2937' : '#f9fafb',
+                backgroundColor: 'var(--sm-surface)',
               }}>
                 <div style={{
                   width: 80,
@@ -235,7 +235,7 @@ export function TeamFitOverlay({
                     padding: '6px 16px',
                     borderRadius: 8,
                     border: 'none',
-                    backgroundColor: showRadar ? targetTeamColor : (isDark ? '#374151' : '#e5e7eb'),
+                    backgroundColor: showRadar ? targetTeamColor : ('var(--sm-border)'),
                     color: showRadar ? '#fff' : subText,
                     fontSize: '12px',
                     fontWeight: 600,
@@ -250,7 +250,7 @@ export function TeamFitOverlay({
                     padding: '6px 16px',
                     borderRadius: 8,
                     border: 'none',
-                    backgroundColor: !showRadar ? targetTeamColor : (isDark ? '#374151' : '#e5e7eb'),
+                    backgroundColor: !showRadar ? targetTeamColor : ('var(--sm-border)'),
                     color: !showRadar ? '#fff' : subText,
                     fontSize: '12px',
                     fontWeight: 600,
@@ -290,8 +290,8 @@ export function TeamFitOverlay({
                         style={{
                           padding: 12,
                           borderRadius: 8,
-                          backgroundColor: isDark ? '#1f2937' : '#f9fafb',
-                          border: `1px solid ${isDark ? '#374151' : '#e5e7eb'}`,
+                          backgroundColor: 'var(--sm-surface)',
+                          border: `1px solid ${'var(--sm-border)'}`,
                         }}
                       >
                         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 4 }}>
@@ -346,7 +346,7 @@ export function TeamFitOverlay({
                           justifyContent: 'space-between',
                           padding: '8px 12px',
                           borderRadius: 8,
-                          backgroundColor: isDark ? '#1f2937' : '#f9fafb',
+                          backgroundColor: 'var(--sm-surface)',
                         }}
                       >
                         <div>
@@ -386,7 +386,7 @@ export function TeamFitOverlay({
               marginTop: 20,
               padding: '12px 24px',
               borderRadius: 10,
-              border: `2px solid ${isDark ? '#374151' : '#e5e7eb'}`,
+              border: `2px solid ${'var(--sm-border)'}`,
               backgroundColor: 'transparent',
               color: textColor,
               fontWeight: 600,

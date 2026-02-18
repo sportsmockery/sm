@@ -12,11 +12,11 @@ export function TradeModePicker({ mode, onChange, disabled = false }: TradeModeP
   const { theme } = useTheme()
   const isDark = theme === 'dark'
 
-  const bgColor = isDark ? '#1f2937' : '#f3f4f6'
-  const borderColor = isDark ? '#374151' : '#e5e7eb'
+  const bgColor = 'var(--sm-surface)'
+  const borderColor = 'var(--sm-border)'
   const activeColor = '#bc0000'
-  const textColor = isDark ? '#fff' : '#1a1a1a'
-  const subText = isDark ? '#9ca3af' : '#6b7280'
+  const textColor = 'var(--sm-text)'
+  const subText = 'var(--sm-text-muted)'
 
   return (
     <div style={{

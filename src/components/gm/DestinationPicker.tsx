@@ -33,9 +33,9 @@ export function DestinationPicker({
 
   const bgOverlay = 'rgba(0,0,0,0.6)'
   const bgModal = isDark ? '#111827' : '#ffffff'
-  const borderColor = isDark ? '#374151' : '#e5e7eb'
-  const textColor = isDark ? '#ffffff' : '#1a1a1a'
-  const subText = isDark ? '#9ca3af' : '#6b7280'
+  const borderColor = 'var(--sm-border)'
+  const textColor = 'var(--sm-text)'
+  const subText = 'var(--sm-text-muted)'
 
   // Filter out the source team - can't send to self
   const destinationTeams = teams.filter(t => t.key !== fromTeam.key)
@@ -86,7 +86,7 @@ export function DestinationPicker({
             {/* Source team indicator */}
             <div style={{
               padding: '12px 20px',
-              backgroundColor: isDark ? '#1f2937' : '#f9fafb',
+              backgroundColor: 'var(--sm-surface)',
               display: 'flex',
               alignItems: 'center',
               gap: 10,
@@ -121,7 +121,7 @@ export function DestinationPicker({
                       padding: '14px 16px',
                       borderRadius: 12,
                       border: `2px solid ${borderColor}`,
-                      backgroundColor: isDark ? '#1f2937' : '#ffffff',
+                      backgroundColor: 'var(--sm-card)',
                       cursor: 'pointer',
                       width: '100%',
                       textAlign: 'left',
@@ -162,7 +162,7 @@ export function DestinationPicker({
                   padding: '10px 16px',
                   borderRadius: 8,
                   border: 'none',
-                  backgroundColor: isDark ? '#374151' : '#e5e7eb',
+                  backgroundColor: 'var(--sm-border)',
                   color: textColor,
                   fontWeight: 600,
                   fontSize: 13,

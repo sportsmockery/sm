@@ -23,9 +23,9 @@ export function SimulationTrigger({
   // Only show if user has made at least 1 trade
   if (tradeCount === 0) return null
 
-  const subText = isDark ? '#9ca3af' : '#6b7280'
-  const borderColor = isDark ? '#374151' : '#e5e7eb'
-  const cardBg = isDark ? '#1f2937' : '#ffffff'
+  const subText = 'var(--sm-text-muted)'
+  const borderColor = 'var(--sm-border)'
+  const cardBg = 'var(--sm-card)'
 
   // Game counts by sport
   const gameCount = sport === 'nfl' ? '17' : sport === 'mlb' ? '162' : sport === 'nba' ? '82' : sport === 'nhl' ? '82' : '82'
@@ -43,7 +43,7 @@ export function SimulationTrigger({
       {/* Header */}
       <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 12 }}>
         <span style={{ fontSize: 20 }}>🎮</span>
-        <span style={{ fontSize: 16, fontWeight: 600, color: isDark ? '#fff' : '#1a1a1a' }}>
+        <span style={{ fontSize: 16, fontWeight: 600, color: 'var(--sm-text)' }}>
           Simulate Season
         </span>
         <span

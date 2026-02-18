@@ -78,9 +78,9 @@ export function OpponentTeamPicker({ open, onClose, onSelect, sport, chicagoTeam
 
   const bgOverlay = 'rgba(0,0,0,0.6)'
   const bgModal = isDark ? '#111827' : '#ffffff'
-  const borderColor = isDark ? '#374151' : '#e5e7eb'
-  const textColor = isDark ? '#ffffff' : '#1a1a1a'
-  const subText = isDark ? '#9ca3af' : '#6b7280'
+  const borderColor = 'var(--sm-border)'
+  const textColor = 'var(--sm-text)'
+  const subText = 'var(--sm-text-muted)'
 
   return (
     <AnimatePresence>
@@ -136,7 +136,7 @@ export function OpponentTeamPicker({ open, onClose, onSelect, sport, chicagoTeam
                   padding: '8px 12px',
                   borderRadius: '8px',
                   border: `1px solid ${borderColor}`,
-                  backgroundColor: isDark ? '#1f2937' : '#f9fafb',
+                  backgroundColor: 'var(--sm-surface)',
                   color: textColor,
                   fontSize: '14px',
                   outline: 'none',
@@ -162,7 +162,7 @@ export function OpponentTeamPicker({ open, onClose, onSelect, sport, chicagoTeam
                         return (
                           <motion.button
                             key={t.team_key}
-                            whileHover={{ scale: 1.01, backgroundColor: isDark ? '#1f2937' : '#f3f4f6' }}
+                            whileHover={{ scale: 1.01, backgroundColor: 'var(--sm-surface)' }}
                             onClick={() => { onSelect(t); onClose() }}
                             style={{
                               display: 'flex',

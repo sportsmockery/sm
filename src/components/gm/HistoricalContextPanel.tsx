@@ -22,9 +22,9 @@ interface SimilarTradeCardProps {
 }
 
 function SimilarTradeCard({ trade, isDark, index }: SimilarTradeCardProps) {
-  const textColor = isDark ? '#fff' : '#1a1a1a'
-  const subText = isDark ? '#9ca3af' : '#6b7280'
-  const borderColor = isDark ? '#374151' : '#e5e7eb'
+  const textColor = 'var(--sm-text)'
+  const subText = 'var(--sm-text-muted)'
+  const borderColor = 'var(--sm-border)'
 
   const outcomeColors = {
     worked: { bg: 'rgba(34, 197, 94, 0.15)', text: '#22c55e', label: 'Worked' },
@@ -124,9 +124,9 @@ interface LegacyHistoricalDisplayProps {
 }
 
 function LegacyHistoricalDisplay({ comparisons, isDark }: LegacyHistoricalDisplayProps) {
-  const textColor = isDark ? '#fff' : '#1a1a1a'
-  const subText = isDark ? '#9ca3af' : '#6b7280'
-  const borderColor = isDark ? '#374151' : '#e5e7eb'
+  const textColor = 'var(--sm-text)'
+  const subText = 'var(--sm-text-muted)'
+  const borderColor = 'var(--sm-border)'
 
   if (!comparisons || comparisons.length === 0) return null
 
@@ -134,7 +134,7 @@ function LegacyHistoricalDisplay({ comparisons, isDark }: LegacyHistoricalDispla
     <div style={{
       padding: 16,
       borderRadius: 12,
-      backgroundColor: isDark ? '#1f2937' : '#f9fafb',
+      backgroundColor: 'var(--sm-surface)',
       border: `1px solid ${borderColor}`,
     }}>
       <h4 style={{
@@ -179,9 +179,9 @@ interface EnhancedHistoricalContextPanelProps {
 }
 
 function EnhancedHistoricalContextPanel({ context, isDark, isRejected = false }: EnhancedHistoricalContextPanelProps) {
-  const textColor = isDark ? '#fff' : '#1a1a1a'
-  const subText = isDark ? '#9ca3af' : '#6b7280'
-  const borderColor = isDark ? '#374151' : '#e5e7eb'
+  const textColor = 'var(--sm-text)'
+  const subText = 'var(--sm-text-muted)'
+  const borderColor = 'var(--sm-border)'
 
   const successColor = context.success_rate >= 60 ? '#22c55e' : context.success_rate >= 40 ? '#eab308' : '#ef4444'
 
@@ -189,7 +189,7 @@ function EnhancedHistoricalContextPanel({ context, isDark, isRejected = false }:
     <div style={{
       padding: 16,
       borderRadius: 12,
-      backgroundColor: isDark ? '#1f2937' : '#f9fafb',
+      backgroundColor: 'var(--sm-surface)',
       border: `1px solid ${borderColor}`,
     }}>
       {/* Header with success rate */}
@@ -215,7 +215,7 @@ function EnhancedHistoricalContextPanel({ context, isDark, isRejected = false }:
             gap: 6,
             padding: '6px 12px',
             borderRadius: 8,
-            backgroundColor: isDark ? '#111827' : '#fff',
+            backgroundColor: 'var(--sm-card)',
             border: `1px solid ${borderColor}`,
           }}>
             <span style={{ fontSize: 11, color: subText }}>Success Rate:</span>
@@ -330,9 +330,9 @@ function EnhancedSuggestedTradePanel({
   chicagoTeam = 'Chicago',
   opponentTeam = 'Partner',
 }: EnhancedSuggestedTradePanelProps) {
-  const textColor = isDark ? '#fff' : '#1a1a1a'
-  const subText = isDark ? '#9ca3af' : '#6b7280'
-  const borderColor = isDark ? '#374151' : '#e5e7eb'
+  const textColor = 'var(--sm-text)'
+  const subText = 'var(--sm-text-muted)'
+  const borderColor = 'var(--sm-border)'
 
   const formatTradeItem = (item: { type: string; name?: string; year?: number; round?: number; amount?: number; position?: string }) => {
     if (item.type === 'player') return `${item.name}${item.position ? ` (${item.position})` : ''}`
@@ -568,8 +568,8 @@ interface LegacySuggestedTradePanelProps {
 }
 
 function LegacySuggestedTradePanel({ suggestion, isDark }: LegacySuggestedTradePanelProps) {
-  const textColor = isDark ? '#fff' : '#1a1a1a'
-  const subText = isDark ? '#9ca3af' : '#6b7280'
+  const textColor = 'var(--sm-text)'
+  const subText = 'var(--sm-text-muted)'
 
   const typeLabels: Record<string, string> = {
     add_picks: 'Add Draft Picks',
@@ -611,7 +611,7 @@ function LegacySuggestedTradePanel({ suggestion, isDark }: LegacySuggestedTradeP
         display: 'inline-block',
         padding: '4px 10px',
         borderRadius: 6,
-        backgroundColor: isDark ? '#374151' : '#e5e7eb',
+        backgroundColor: 'var(--sm-border)',
         fontSize: 11,
         fontWeight: 600,
         color: subText,
