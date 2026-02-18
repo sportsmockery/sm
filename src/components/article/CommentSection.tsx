@@ -72,11 +72,11 @@ export default function CommentSection({
   }, [articleId, articleUrl, articleTitle, disqusShortname])
 
   return (
-    <section className={`border-t py-10 ${className}`} style={{ borderColor: 'var(--border-color)' }}>
+    <section className={`border-t py-10 ${className}`} style={{ borderColor: 'var(--sm-border)' }}>
       <div className="mb-6">
         <h2
           className="flex items-center gap-2 text-xl font-bold"
-          style={{ fontFamily: "'Montserrat', sans-serif", color: 'var(--text-primary)' }}
+          style={{ fontFamily: "'Montserrat', sans-serif", color: 'var(--sm-text)' }}
         >
           <svg
             className="h-6 w-6"
@@ -94,7 +94,7 @@ export default function CommentSection({
           </svg>
           Comments
         </h2>
-        <p className="text-sm mt-1" style={{ color: 'var(--text-muted)' }}>
+        <p className="text-sm mt-1" style={{ color: 'var(--sm-text-muted)' }}>
           Join the discussion below. Keep it civil and focused on the content.
         </p>
       </div>
@@ -103,19 +103,19 @@ export default function CommentSection({
       <div
         id="disqus_thread"
         className="min-h-[200px] rounded-lg p-4"
-        style={{ backgroundColor: 'var(--bg-elevated)', border: '1px solid var(--border-color)' }}
+        style={{ backgroundColor: 'var(--sm-card)', border: '1px solid var(--sm-border)' }}
       >
         {!isLoaded && (
           <div className="flex flex-col items-center justify-center py-12">
             <div className="w-8 h-8 border-2 border-t-transparent rounded-full animate-spin mb-4" style={{ borderColor: '#bc0000' }} />
-            <p style={{ color: 'var(--text-muted)' }}>Loading comments...</p>
+            <p style={{ color: 'var(--sm-text-muted)' }}>Loading comments...</p>
           </div>
         )}
       </div>
 
       {/* Disqus noscript fallback */}
       <noscript>
-        <p style={{ color: 'var(--text-muted)', textAlign: 'center', marginTop: '1rem' }}>
+        <p style={{ color: 'var(--sm-text-muted)', textAlign: 'center', marginTop: '1rem' }}>
           Please enable JavaScript to view the{' '}
           <a href="https://disqus.com/?ref_noscript" style={{ color: '#bc0000' }}>
             comments powered by Disqus.

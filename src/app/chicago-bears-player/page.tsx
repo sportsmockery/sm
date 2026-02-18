@@ -140,9 +140,9 @@ export default function BearsPlayerSelectorPage() {
   ]
 
   return (
-    <main className="min-h-screen bg-[var(--bg-primary)]">
+    <main className="min-h-screen" style={{ backgroundColor: 'var(--sm-dark)' }}>
       {/* Header */}
-      <div className="bg-gradient-to-r from-[#0B162A] to-[#0B162A]/90 border-b border-[var(--border-subtle)]">
+      <div style={{ background: 'linear-gradient(to right, #0B162A, rgba(11,22,42,0.9))', borderBottom: '1px solid var(--sm-border)' }}>
         <div className="max-w-7xl mx-auto px-4 py-8">
           <nav className="flex items-center gap-2 text-sm text-white/60 mb-4">
             <Link href="/" className="hover:text-white">Home</Link>
@@ -169,7 +169,8 @@ export default function BearsPlayerSelectorPage() {
             <div className="mb-4">
               <div className="relative">
                 <svg
-                  className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-[var(--text-muted)]"
+                  className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5"
+                  style={{ color: 'var(--sm-text-muted)' }}
                   fill="none"
                   stroke="currentColor"
                   viewBox="0 0 24 24"
@@ -181,7 +182,13 @@ export default function BearsPlayerSelectorPage() {
                   placeholder="Search players by name or number"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full pl-10 pr-4 py-3 bg-[var(--bg-elevated)] border border-[var(--border-subtle)] rounded-xl text-[var(--text-primary)] placeholder:text-[var(--text-muted)] focus:outline-none focus:border-[#C83200] transition-colors"
+                  className="w-full pl-10 pr-4 py-3 rounded-xl focus:outline-none transition-colors"
+                  style={{
+                    backgroundColor: 'var(--sm-card)',
+                    border: '1px solid var(--sm-border)',
+                    color: 'var(--sm-text)',
+                    borderRadius: '12px',
+                  }}
                 />
               </div>
             </div>
@@ -192,11 +199,12 @@ export default function BearsPlayerSelectorPage() {
                 <button
                   key={option.value}
                   onClick={() => setSideFilter(option.value)}
-                  className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${
+                  className="px-4 py-2 rounded-full text-sm font-medium transition-colors"
+                  style={
                     sideFilter === option.value
-                      ? 'bg-[#C83200] text-white'
-                      : 'bg-[var(--bg-elevated)] text-[var(--text-secondary)] hover:bg-[var(--bg-hover)] border border-[var(--border-subtle)]'
-                  }`}
+                      ? { backgroundColor: '#C83200', color: '#fff' }
+                      : { backgroundColor: 'var(--sm-card)', color: 'var(--sm-text-muted)', border: '1px solid var(--sm-border)' }
+                  }
                 >
                   {option.label}
                 </button>
@@ -204,20 +212,20 @@ export default function BearsPlayerSelectorPage() {
             </div>
 
             {/* Player List */}
-            <div className="bg-[var(--bg-elevated)] border border-[var(--border-subtle)] rounded-2xl overflow-hidden">
-              <div className="p-3 border-b border-[var(--border-subtle)] bg-[var(--bg-tertiary)]">
-                <span className="text-sm text-[var(--text-muted)]">
+            <div className="rounded-2xl overflow-hidden" style={{ backgroundColor: 'var(--sm-card)', border: '1px solid var(--sm-border)' }}>
+              <div className="p-3" style={{ borderBottom: '1px solid var(--sm-border)', backgroundColor: 'var(--sm-surface)' }}>
+                <span className="text-sm" style={{ color: 'var(--sm-text-muted)' }}>
                   {filteredPlayers.length} player{filteredPlayers.length !== 1 ? 's' : ''}
                 </span>
               </div>
 
               <div className="max-h-[60vh] overflow-y-auto">
                 {loading ? (
-                  <div className="p-8 text-center text-[var(--text-muted)]">
+                  <div className="p-8 text-center" style={{ color: 'var(--sm-text-muted)' }}>
                     Loading players...
                   </div>
                 ) : filteredPlayers.length === 0 ? (
-                  <div className="p-8 text-center text-[var(--text-muted)]">
+                  <div className="p-8 text-center" style={{ color: 'var(--sm-text-muted)' }}>
                     No players found
                   </div>
                 ) : (
@@ -230,9 +238,11 @@ export default function BearsPlayerSelectorPage() {
                       >
                         <Link
                           href={`/chicago-bears/players/${player.slug}`}
-                          className={`flex items-center gap-3 px-4 py-3 hover:bg-[var(--bg-hover)] transition-colors border-b border-[var(--border-subtle)] last:border-0 ${
-                            selectedPlayer?.playerId === player.playerId ? 'bg-[var(--bg-hover)]' : ''
-                          }`}
+                          className="flex items-center gap-3 px-4 py-3 transition-colors"
+                          style={{
+                            borderBottom: '1px solid var(--sm-border)',
+                            backgroundColor: selectedPlayer?.playerId === player.playerId ? 'var(--sm-card-hover)' : 'transparent',
+                          }}
                         >
                           <PlayerRow player={player} />
                         </Link>
@@ -241,7 +251,8 @@ export default function BearsPlayerSelectorPage() {
                       {/* Mobile: Direct link */}
                       <Link
                         href={`/chicago-bears/players/${player.slug}`}
-                        className="lg:hidden flex items-center gap-3 px-4 py-3 hover:bg-[var(--bg-hover)] transition-colors border-b border-[var(--border-subtle)] last:border-0"
+                        className="lg:hidden flex items-center gap-3 px-4 py-3 transition-colors"
+                        style={{ borderBottom: '1px solid var(--sm-border)' }}
                       >
                         <PlayerRow player={player} />
                       </Link>
@@ -262,13 +273,13 @@ export default function BearsPlayerSelectorPage() {
                   loading={loadingProfile}
                 />
               ) : (
-                <div className="bg-[var(--bg-elevated)] border border-[var(--border-subtle)] rounded-2xl p-8 text-center">
-                  <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-[var(--bg-tertiary)] flex items-center justify-center">
-                    <svg className="w-8 h-8 text-[var(--text-muted)]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <div className="rounded-2xl p-8 text-center" style={{ backgroundColor: 'var(--sm-card)', border: '1px solid var(--sm-border)' }}>
+                  <div className="w-16 h-16 mx-auto mb-4 rounded-full flex items-center justify-center" style={{ backgroundColor: 'var(--sm-surface)' }}>
+                    <svg className="w-8 h-8" style={{ color: 'var(--sm-text-muted)' }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                     </svg>
                   </div>
-                  <p className="text-[var(--text-muted)]">
+                  <p style={{ color: 'var(--sm-text-muted)' }}>
                     Hover over a player to see a quick preview
                   </p>
                 </div>
@@ -286,13 +297,13 @@ function PlayerRow({ player }: { player: BearsPlayer }) {
   return (
     <>
       {/* Jersey Number */}
-      <span className="w-8 h-8 rounded-lg bg-[#0B162A] text-white text-sm font-bold flex items-center justify-center flex-shrink-0">
-        {player.jerseyNumber ?? '—'}
+      <span className="w-8 h-8 rounded-lg text-white text-sm font-bold flex items-center justify-center flex-shrink-0" style={{ backgroundColor: '#0B162A' }}>
+        {player.jerseyNumber ?? '--'}
       </span>
 
       {/* Headshot */}
       {player.headshotUrl ? (
-        <div className="w-10 h-10 rounded-full overflow-hidden flex-shrink-0 border-2 border-[var(--border-subtle)]">
+        <div className="w-10 h-10 rounded-full overflow-hidden flex-shrink-0" style={{ border: '2px solid var(--sm-border)' }}>
           <Image
             src={player.headshotUrl}
             alt={player.fullName}
@@ -302,8 +313,8 @@ function PlayerRow({ player }: { player: BearsPlayer }) {
           />
         </div>
       ) : (
-        <div className="w-10 h-10 rounded-full bg-[var(--bg-tertiary)] flex items-center justify-center flex-shrink-0">
-          <svg className="w-5 h-5 text-[var(--text-muted)]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <div className="w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0" style={{ backgroundColor: 'var(--sm-surface)' }}>
+          <svg className="w-5 h-5" style={{ color: 'var(--sm-text-muted)' }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
           </svg>
         </div>
@@ -311,16 +322,16 @@ function PlayerRow({ player }: { player: BearsPlayer }) {
 
       {/* Name and Position */}
       <div className="flex-1 min-w-0">
-        <div className="font-medium text-[var(--text-primary)] truncate">
+        <div className="font-medium truncate" style={{ color: 'var(--sm-text)' }}>
           {player.fullName}
         </div>
-        <div className="text-sm text-[var(--text-muted)]">
+        <div className="text-sm" style={{ color: 'var(--sm-text-muted)' }}>
           {player.position}
         </div>
       </div>
 
       {/* Arrow */}
-      <svg className="w-4 h-4 text-[var(--text-muted)]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <svg className="w-4 h-4" style={{ color: 'var(--sm-text-muted)' }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
       </svg>
     </>
@@ -340,7 +351,7 @@ function QuickViewPanel({
   const stats = profile?.currentSeason
 
   return (
-    <div className="bg-[var(--bg-elevated)] border border-[var(--border-subtle)] rounded-2xl overflow-hidden">
+    <div className="rounded-2xl overflow-hidden" style={{ backgroundColor: 'var(--sm-card)', border: '1px solid var(--sm-border)' }}>
       {/* Header with gradient */}
       <div
         className="p-6 text-white"
@@ -372,7 +383,7 @@ function QuickViewPanel({
               <span className="px-2 py-0.5 bg-white/20 rounded text-sm font-bold">
                 #{player.jerseyNumber}
               </span>
-              <span className="px-2 py-0.5 bg-[#C83200] rounded text-sm font-medium">
+              <span className="px-2 py-0.5 rounded text-sm font-medium" style={{ backgroundColor: '#C83200' }}>
                 {player.position}
               </span>
             </div>
@@ -380,7 +391,7 @@ function QuickViewPanel({
               {player.fullName}
             </h2>
             <div className="text-white/70 text-sm mt-1">
-              Chicago Bears • {player.side === 'OFF' ? 'Offense' : player.side === 'DEF' ? 'Defense' : 'Special Teams'}
+              Chicago Bears {player.side === 'OFF' ? 'Offense' : player.side === 'DEF' ? 'Defense' : 'Special Teams'}
             </div>
           </div>
         </div>
@@ -388,12 +399,12 @@ function QuickViewPanel({
 
       {/* Stats Section */}
       <div className="p-6">
-        <h3 className="text-sm font-semibold text-[var(--text-muted)] uppercase tracking-wider mb-4">
+        <h3 className="text-sm font-semibold uppercase tracking-wider mb-4" style={{ color: 'var(--sm-text-muted)' }}>
           2025 Season Stats
         </h3>
 
         {loading ? (
-          <div className="text-center py-4 text-[var(--text-muted)]">
+          <div className="text-center py-4" style={{ color: 'var(--sm-text-muted)' }}>
             Loading stats...
           </div>
         ) : stats ? (
@@ -446,12 +457,12 @@ function QuickViewPanel({
               <>
                 <StatCard label="Games" value={stats.gamesPlayed} />
                 <StatCard label="Snaps" value={stats.snaps ?? 0} />
-                <StatCard label="—" value="—" />
+                <StatCard label="--" value="--" />
               </>
             )}
           </div>
         ) : (
-          <div className="text-center py-4 text-[var(--text-muted)]">
+          <div className="text-center py-4" style={{ color: 'var(--sm-text-muted)' }}>
             No stats available
           </div>
         )}
@@ -459,7 +470,8 @@ function QuickViewPanel({
         {/* View Profile Link */}
         <Link
           href={`/chicago-bears/players/${player.slug}`}
-          className="mt-6 flex items-center justify-center gap-2 w-full py-3 bg-[#C83200] hover:bg-[#a82900] text-white font-semibold rounded-xl transition-colors"
+          className="mt-6 flex items-center justify-center gap-2 w-full py-3 font-semibold rounded-xl transition-colors"
+          style={{ backgroundColor: '#C83200', color: '#fff' }}
         >
           View Full Profile
           <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -473,11 +485,11 @@ function QuickViewPanel({
 
 function StatCard({ label, value }: { label: string; value: number | string }) {
   return (
-    <div className="bg-[var(--bg-tertiary)] rounded-xl p-3 text-center">
-      <div className="text-2xl font-bold text-[var(--text-primary)]">
+    <div className="rounded-xl p-3 text-center" style={{ backgroundColor: 'var(--sm-surface)' }}>
+      <div className="text-2xl font-bold" style={{ color: 'var(--sm-text)' }}>
         {typeof value === 'number' ? value.toLocaleString() : value}
       </div>
-      <div className="text-xs text-[var(--text-muted)] uppercase tracking-wider">
+      <div className="text-xs uppercase tracking-wider" style={{ color: 'var(--sm-text-muted)' }}>
         {label}
       </div>
     </div>

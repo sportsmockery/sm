@@ -72,23 +72,24 @@ export default function AuthorByline({
       <div className={sizes.text}>
         <Link
           href={`/author/${author.id}`}
-          className="font-medium text-zinc-900 transition-colors hover:text-[#8B0000] dark:text-white dark:hover:text-[#FF6666]"
+          className="font-medium transition-colors hover:text-[var(--sm-accent)]"
+          style={{ color: 'var(--sm-text)' }}
         >
           {author.name}
         </Link>
 
         {additionalAuthors && additionalAuthors > 0 && (
-          <span className="text-zinc-500 dark:text-zinc-500">
+          <span style={{ color: 'var(--sm-text-muted)' }}>
             {' '}and {additionalAuthors} other{additionalAuthors > 1 ? 's' : ''}
           </span>
         )}
 
         {date && (
           <>
-            <span className="mx-1.5 text-zinc-400 dark:text-zinc-600">•</span>
+            <span className="mx-1.5" style={{ color: 'var(--sm-text-dim)' }}>•</span>
             <time
               dateTime={date}
-              className="text-zinc-500 dark:text-zinc-500"
+              style={{ color: 'var(--sm-text-muted)' }}
             >
               {format(new Date(date), 'MMM d, yyyy')}
             </time>
