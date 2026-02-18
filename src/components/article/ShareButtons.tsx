@@ -93,6 +93,7 @@ export default function ShareButtons({
         target="_blank"
         rel="noopener noreferrer"
         className={`${buttonClass} hover:bg-[#0A66C2] hover:text-white`}
+        style={buttonStyle}
         aria-label="Share on LinkedIn"
       >
         <svg className={iconSizes[size]} fill="currentColor" viewBox="0 0 24 24">
@@ -106,6 +107,7 @@ export default function ShareButtons({
         className={`${buttonClass} relative ${
           copied ? 'bg-emerald-500 text-white hover:bg-emerald-500' : ''
         }`}
+        style={copied ? { backgroundColor: '#10b981', color: '#ffffff' } : buttonStyle}
         aria-label="Copy link"
       >
         {copied ? (
@@ -124,7 +126,7 @@ export default function ShareButtons({
 
         {/* Copied toast */}
         {copied && (
-          <span className="absolute -top-8 left-1/2 -translate-x-1/2 whitespace-nowrap rounded bg-zinc-900 px-2 py-1 text-xs text-white dark:bg-white dark:text-zinc-900">
+          <span className="absolute -top-8 left-1/2 -translate-x-1/2 whitespace-nowrap rounded px-2 py-1 text-xs" style={{ backgroundColor: 'var(--sm-text)', color: 'var(--sm-card)' }}>
             Copied!
           </span>
         )}

@@ -61,9 +61,9 @@ export default async function AuthorsPage({ searchParams }: AuthorsPageProps) {
   const totalArticles = authorsWithCounts.reduce((sum, a) => sum + a.post_count, 0)
 
   return (
-    <div className="min-h-screen bg-zinc-50 dark:bg-zinc-950">
+    <div className="min-h-screen" style={{ backgroundColor: 'var(--sm-dark)' }}>
       {/* Hero Header */}
-      <header className="relative overflow-hidden bg-gradient-to-br from-zinc-900 via-zinc-800 to-[#8B0000]/30 py-16 lg:py-24">
+      <header className="relative overflow-hidden py-16 lg:py-24" style={{ background: 'linear-gradient(135deg, var(--sm-dark), #1a1a1a, rgba(188,0,0,0.15))' }}>
         {/* Background pattern */}
         <div className="absolute inset-0 opacity-5">
           <div
@@ -75,26 +75,26 @@ export default async function AuthorsPage({ searchParams }: AuthorsPageProps) {
         </div>
 
         <div className="relative mx-auto max-w-7xl px-4 text-center">
-          <h1 className="mb-4 font-heading text-4xl font-black text-white sm:text-5xl lg:text-6xl">
+          <h1 className="mb-4 font-heading text-4xl font-black sm:text-5xl lg:text-6xl" style={{ color: 'var(--sm-text)' }}>
             Our Authors
           </h1>
-          <p className="mx-auto max-w-2xl text-lg text-zinc-300">
+          <p className="mx-auto max-w-2xl text-lg" style={{ color: 'var(--sm-text-muted)' }}>
             Meet the passionate writers and analysts behind SportsMockery. Our team brings you the hottest takes and deepest insights on Chicago sports.
           </p>
 
           {/* Stats */}
           <div className="mt-8 flex flex-wrap justify-center gap-8">
             <div className="text-center">
-              <p className="text-3xl font-bold text-[#FF6666]">{authorsWithCounts.length}</p>
-              <p className="text-sm text-zinc-400">Writers</p>
+              <p className="text-3xl font-bold" style={{ color: '#bc0000' }}>{authorsWithCounts.length}</p>
+              <p className="text-sm" style={{ color: 'var(--sm-text-muted)' }}>Writers</p>
             </div>
             <div className="text-center">
-              <p className="text-3xl font-bold text-[#FF6666]">{totalArticles.toLocaleString()}</p>
-              <p className="text-sm text-zinc-400">Articles</p>
+              <p className="text-3xl font-bold" style={{ color: '#bc0000' }}>{totalArticles.toLocaleString()}</p>
+              <p className="text-sm" style={{ color: 'var(--sm-text-muted)' }}>Articles</p>
             </div>
             <div className="text-center">
-              <p className="text-3xl font-bold text-[#FF6666]">5</p>
-              <p className="text-sm text-zinc-400">Teams Covered</p>
+              <p className="text-3xl font-bold" style={{ color: '#bc0000' }}>5</p>
+              <p className="text-sm" style={{ color: 'var(--sm-text-muted)' }}>Teams Covered</p>
             </div>
           </div>
         </div>
@@ -104,28 +104,30 @@ export default async function AuthorsPage({ searchParams }: AuthorsPageProps) {
       <main className="mx-auto max-w-7xl px-4 py-12">
         {/* Sort Filters */}
         <div className="mb-8 flex flex-wrap items-center justify-between gap-4">
-          <h2 className="font-heading text-xl font-bold text-zinc-900 dark:text-white">
+          <h2 className="font-heading text-xl font-bold" style={{ color: 'var(--sm-text)' }}>
             {authorsWithCounts.length} {authorsWithCounts.length === 1 ? 'Author' : 'Authors'}
           </h2>
 
           <div className="flex gap-2">
             <a
               href="/authors"
-              className={`rounded-full px-4 py-2 text-sm font-medium transition-colors ${
+              className="rounded-full px-4 py-2 text-sm font-medium transition-colors"
+              style={
                 !sort || sort === 'articles'
-                  ? 'bg-[#8B0000] text-white dark:bg-[#FF6666]'
-                  : 'bg-zinc-100 text-zinc-700 hover:bg-zinc-200 dark:bg-zinc-800 dark:text-zinc-300 dark:hover:bg-zinc-700'
-              }`}
+                  ? { backgroundColor: '#bc0000', color: '#fff' }
+                  : { backgroundColor: 'var(--sm-surface)', color: 'var(--sm-text-muted)' }
+              }
             >
               Most Active
             </a>
             <a
               href="/authors?sort=name"
-              className={`rounded-full px-4 py-2 text-sm font-medium transition-colors ${
+              className="rounded-full px-4 py-2 text-sm font-medium transition-colors"
+              style={
                 sort === 'name'
-                  ? 'bg-[#8B0000] text-white dark:bg-[#FF6666]'
-                  : 'bg-zinc-100 text-zinc-700 hover:bg-zinc-200 dark:bg-zinc-800 dark:text-zinc-300 dark:hover:bg-zinc-700'
-              }`}
+                  ? { backgroundColor: '#bc0000', color: '#fff' }
+                  : { backgroundColor: 'var(--sm-surface)', color: 'var(--sm-text-muted)' }
+              }
             >
               A-Z
             </a>
@@ -136,7 +138,10 @@ export default async function AuthorsPage({ searchParams }: AuthorsPageProps) {
         <AuthorsGrid authors={authorsWithCounts} />
 
         {/* Join CTA */}
-        <div className="mt-16 rounded-2xl bg-gradient-to-r from-[#8B0000] to-[#a00000] p-8 text-center dark:from-[#FF6666] dark:to-[#FF8888]">
+        <div
+          className="mt-16 rounded-2xl p-8 text-center"
+          style={{ background: 'linear-gradient(135deg, #bc0000, #ff4444)' }}
+        >
           <h3 className="mb-3 font-heading text-2xl font-bold text-white">
             Want to Write for SportsMockery?
           </h3>
@@ -145,7 +150,8 @@ export default async function AuthorsPage({ searchParams }: AuthorsPageProps) {
           </p>
           <a
             href="/contact"
-            className="inline-flex items-center gap-2 rounded-xl bg-white px-6 py-3 font-semibold text-[#8B0000] transition-colors hover:bg-zinc-100"
+            className="inline-flex items-center gap-2 rounded-xl px-6 py-3 font-semibold transition-colors"
+            style={{ backgroundColor: '#fff', color: '#bc0000' }}
           >
             Apply Now
             <svg
