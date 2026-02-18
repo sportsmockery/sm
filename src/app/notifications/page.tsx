@@ -13,27 +13,9 @@ interface Notification {
   is_read: boolean
   created_at: string
   read_at?: string
-  message?: {
-    id: string
-    content: string
-    content_type: string
-    created_at: string
-    user?: {
-      display_name: string
-      avatar_url?: string
-      badge?: string
-    }
-  }
-  room?: {
-    team_slug: string
-    team_name: string
-    team_color: string
-  }
-  from_user?: {
-    display_name: string
-    avatar_url?: string
-    badge?: string
-  }
+  message?: { id: string; content: string; content_type: string; created_at: string; user?: { display_name: string; avatar_url?: string; badge?: string } }
+  room?: { team_slug: string; team_name: string; team_color: string }
+  from_user?: { display_name: string; avatar_url?: string; badge?: string }
 }
 
 const TEAM_COLORS: Record<string, { primary: string; accent: string }> = {
@@ -59,18 +41,12 @@ export default function NotificationsPage() {
       const params = new URLSearchParams()
       if (filter === 'unread') params.set('unread', 'true')
       params.set('limit', '50')
-
       const response = await fetch(`/api/chat/notifications?${params}`)
       const data = await response.json()
-
       if (data.error) {
-        if (response.status === 401) {
-          router.push('/login?redirect=/notifications')
-          return
-        }
+        if (response.status === 401) { router.push('/login?redirect=/notifications'); return }
         throw new Error(data.error)
       }
-
       setNotifications(data.notifications)
       setUnreadCount(data.unreadCount)
     } catch (err) {
@@ -80,53 +56,27 @@ export default function NotificationsPage() {
     }
   }, [filter, router])
 
-  useEffect(() => {
-    fetchNotifications()
-  }, [fetchNotifications])
+  useEffect(() => { fetchNotifications() }, [fetchNotifications])
 
   const markAsRead = async (notificationId: string) => {
     try {
-      await fetch('/api/chat/notifications', {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ notificationId }),
-      })
-
-      setNotifications(prev =>
-        prev.map(n => n.id === notificationId ? { ...n, is_read: true } : n)
-      )
+      await fetch('/api/chat/notifications', { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ notificationId }) })
+      setNotifications(prev => prev.map(n => n.id === notificationId ? { ...n, is_read: true } : n))
       setUnreadCount(prev => Math.max(0, prev - 1))
-    } catch (err) {
-      console.error('Failed to mark as read:', err)
-    }
+    } catch (err) { console.error('Failed to mark as read:', err) }
   }
 
   const markAllAsRead = async () => {
     try {
-      await fetch('/api/chat/notifications', {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ markAllRead: true }),
-      })
-
+      await fetch('/api/chat/notifications', { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ markAllRead: true }) })
       setNotifications(prev => prev.map(n => ({ ...n, is_read: true })))
       setUnreadCount(0)
-    } catch (err) {
-      console.error('Failed to mark all as read:', err)
-    }
+    } catch (err) { console.error('Failed to mark all as read:', err) }
   }
 
   const handleNotificationClick = (notification: Notification) => {
-    // Mark as read
-    if (!notification.is_read) {
-      markAsRead(notification.id)
-    }
-
-    // Navigate to chat with message highlight
-    // Use the Bears chat page with highlight parameter
-    // The chat page will scroll to and highlight the mentioned message
-    const messageId = notification.message_id
-    router.push(`/chat?highlight=${messageId}`)
+    if (!notification.is_read) markAsRead(notification.id)
+    router.push(`/chat?highlight=${notification.message_id}`)
   }
 
   const formatTime = (dateStr: string) => {
@@ -136,12 +86,10 @@ export default function NotificationsPage() {
     const diffMins = Math.floor(diffMs / 60000)
     const diffHours = Math.floor(diffMs / 3600000)
     const diffDays = Math.floor(diffMs / 86400000)
-
     if (diffMins < 1) return 'Just now'
     if (diffMins < 60) return `${diffMins}m ago`
     if (diffHours < 24) return `${diffHours}h ago`
     if (diffDays < 7) return `${diffDays}d ago`
-
     return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
   }
 
@@ -157,74 +105,77 @@ export default function NotificationsPage() {
   }
 
   return (
-    <div className="notifications-page">
-      <div className="notifications-container">
+    <div className="sm-hero-bg" style={{ minHeight: '100vh', padding: '24px' }}>
+      <div className="sm-grid-overlay" />
+      <div style={{ position: 'relative', maxWidth: '640px', margin: '0 auto' }}>
         {/* Header */}
-        <div className="notifications-header">
-          <div className="notifications-header__left">
-            <h1 className="notifications-title">Notifications</h1>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '20px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+            <h1 style={{
+              fontSize: '28px', fontWeight: 700, color: 'var(--sm-text)', margin: 0,
+              fontFamily: "'Space Grotesk', var(--font-heading), sans-serif",
+            }}>
+              Notifications
+            </h1>
             {unreadCount > 0 && (
-              <span className="notifications-badge">{unreadCount}</span>
+              <span style={{ background: '#ef4444', color: '#fff', fontSize: '12px', fontWeight: 700, padding: '2px 8px', borderRadius: '12px' }}>
+                {unreadCount}
+              </span>
             )}
           </div>
-          <div className="notifications-header__actions">
-            {unreadCount > 0 && (
-              <button
-                onClick={markAllAsRead}
-                className="notifications-btn notifications-btn--text"
-              >
-                Mark all read
-              </button>
-            )}
-          </div>
+          {unreadCount > 0 && (
+            <button onClick={markAllAsRead} style={{ background: 'none', border: 'none', color: '#bc0000', fontSize: '14px', fontWeight: 500, cursor: 'pointer' }}>
+              Mark all read
+            </button>
+          )}
         </div>
 
         {/* Filter tabs */}
-        <div className="notifications-tabs">
-          <button
-            className={`notifications-tab ${filter === 'all' ? 'notifications-tab--active' : ''}`}
-            onClick={() => setFilter('all')}
-          >
-            All
-          </button>
-          <button
-            className={`notifications-tab ${filter === 'unread' ? 'notifications-tab--active' : ''}`}
-            onClick={() => setFilter('unread')}
-          >
-            Unread {unreadCount > 0 && `(${unreadCount})`}
-          </button>
+        <div className="glass-card glass-card-static" style={{ display: 'flex', gap: '4px', padding: '4px', marginBottom: '16px' }}>
+          {(['all', 'unread'] as const).map(f => (
+            <button
+              key={f}
+              onClick={() => setFilter(f)}
+              style={{
+                flex: 1, padding: '10px 16px', borderRadius: 'var(--sm-radius-md)', border: 'none', cursor: 'pointer',
+                fontSize: '14px', fontWeight: 500, transition: 'all 0.15s',
+                background: filter === f ? 'var(--sm-surface)' : 'transparent',
+                color: filter === f ? 'var(--sm-text)' : 'var(--sm-text-muted)',
+              }}
+            >
+              {f === 'all' ? 'All' : `Unread${unreadCount > 0 ? ` (${unreadCount})` : ''}`}
+            </button>
+          ))}
         </div>
 
         {/* Content */}
-        <div className="notifications-content">
+        <div className="glass-card glass-card-static" style={{ padding: 0, overflow: 'hidden' }}>
           {loading ? (
-            <div className="notifications-loading">
-              <div className="notifications-spinner" />
-              <span>Loading notifications...</span>
+            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '12px', padding: '48px 24px' }}>
+              <div style={{ width: 32, height: 32, border: '3px solid var(--sm-border)', borderTopColor: '#bc0000', borderRadius: '50%', animation: 'spin 0.8s linear infinite' }} />
+              <span style={{ color: 'var(--sm-text-muted)', fontSize: '14px' }}>Loading notifications...</span>
             </div>
           ) : error ? (
-            <div className="notifications-error">
-              <p>{error}</p>
-              <button onClick={fetchNotifications} className="notifications-btn">
-                Try again
-              </button>
+            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '12px', padding: '48px 24px', textAlign: 'center' }}>
+              <p style={{ color: 'var(--sm-text-muted)' }}>{error}</p>
+              <button onClick={fetchNotifications} className="btn-secondary btn-sm">Try again</button>
             </div>
           ) : notifications.length === 0 ? (
-            <div className="notifications-empty">
-              <svg className="notifications-empty__icon" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '12px', padding: '48px 24px', textAlign: 'center' }}>
+              <svg style={{ width: 48, height: 48, color: 'var(--sm-text-muted)', opacity: 0.5 }} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
                 <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" />
                 <path d="M13.73 21a2 2 0 0 1-3.46 0" />
               </svg>
-              <p className="notifications-empty__title">No notifications yet</p>
-              <p className="notifications-empty__sub">
+              <p style={{ fontSize: '17px', fontWeight: 600, color: 'var(--sm-text)', margin: 0 }}>No notifications yet</p>
+              <p style={{ fontSize: '14px', color: 'var(--sm-text-muted)', margin: 0 }}>
                 When someone @mentions you in chat, you&apos;ll see it here.
               </p>
-              <Link href="/fan-chat" className="notifications-btn notifications-btn--primary">
+              <Link href="/fan-chat" className="btn-primary btn-sm" style={{ marginTop: '8px' }}>
                 Go to Fan Chat
               </Link>
             </div>
           ) : (
-            <div className="notifications-list">
+            <div style={{ display: 'flex', flexDirection: 'column' }}>
               {notifications.map((notification) => {
                 const teamColors = TEAM_COLORS[notification.room?.team_slug || 'bears'] || TEAM_COLORS.bears
                 const badgeStyle = getBadgeStyle(notification.from_user?.badge)
@@ -232,57 +183,64 @@ export default function NotificationsPage() {
                 return (
                   <button
                     key={notification.id}
-                    className={`notification-item ${!notification.is_read ? 'notification-item--unread' : ''}`}
                     onClick={() => handleNotificationClick(notification)}
+                    style={{
+                      display: 'flex', alignItems: 'flex-start', gap: '12px', padding: '16px',
+                      background: !notification.is_read ? 'rgba(188,0,0,0.03)' : 'transparent',
+                      border: 'none', borderBottom: '1px solid var(--sm-border)', cursor: 'pointer',
+                      textAlign: 'left', width: '100%', position: 'relative', transition: 'background 0.15s',
+                    }}
                   >
                     {/* Unread indicator */}
                     {!notification.is_read && (
-                      <div className="notification-item__unread" style={{ background: teamColors.accent }} />
+                      <div style={{ position: 'absolute', left: 0, top: 0, bottom: 0, width: 3, background: teamColors.accent }} />
                     )}
 
                     {/* Avatar */}
-                    <div className="notification-item__avatar">
+                    <div style={{
+                      width: 40, height: 40, borderRadius: '50%', background: '#bc0000',
+                      display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden', flexShrink: 0,
+                    }}>
                       {notification.from_user?.avatar_url ? (
-                        <img src={notification.from_user.avatar_url} alt="" />
+                        <img src={notification.from_user.avatar_url} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                       ) : (
-                        <span>{notification.from_user?.display_name?.charAt(0).toUpperCase() || '?'}</span>
+                        <span style={{ color: '#fff', fontWeight: 600, fontSize: '16px' }}>
+                          {notification.from_user?.display_name?.charAt(0).toUpperCase() || '?'}
+                        </span>
                       )}
                     </div>
 
                     {/* Content */}
-                    <div className="notification-item__content">
-                      <div className="notification-item__header">
-                        <span className="notification-item__name">
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap', marginBottom: '4px' }}>
+                        <span style={{ fontWeight: 600, color: 'var(--sm-text)', fontSize: '14px' }}>
                           {notification.from_user?.display_name || 'Someone'}
                         </span>
                         {badgeStyle && (
-                          <span
-                            className="notification-item__badge"
-                            style={{ background: badgeStyle.bg, color: badgeStyle.color }}
-                          >
+                          <span style={{ fontSize: '10px', fontWeight: 600, padding: '2px 5px', borderRadius: '4px', textTransform: 'uppercase', background: badgeStyle.bg, color: badgeStyle.color }}>
                             {notification.from_user?.badge?.replace('_', ' ')}
                           </span>
                         )}
-                        <span className="notification-item__action">mentioned you</span>
+                        <span style={{ color: 'var(--sm-text-muted)', fontSize: '14px' }}>mentioned you</span>
                       </div>
-                      <p className="notification-item__preview">
+                      <p style={{
+                        fontSize: '14px', color: 'var(--sm-text-muted)', margin: '0 0 8px',
+                        overflow: 'hidden', textOverflow: 'ellipsis', display: '-webkit-box',
+                        WebkitLineClamp: 2, WebkitBoxOrient: 'vertical',
+                      }}>
                         {notification.content_preview || notification.message?.content || ''}
                       </p>
-                      <div className="notification-item__meta">
-                        <span
-                          className="notification-item__team"
-                          style={{ background: teamColors.primary }}
-                        >
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                        <span style={{ fontSize: '11px', fontWeight: 600, padding: '2px 8px', borderRadius: '4px', color: '#fff', background: teamColors.primary }}>
                           {notification.room?.team_name || 'Chat'}
                         </span>
-                        <span className="notification-item__time">
+                        <span style={{ fontSize: '12px', color: 'var(--sm-text-muted)' }}>
                           {formatTime(notification.created_at)}
                         </span>
                       </div>
                     </div>
 
-                    {/* Arrow */}
-                    <svg className="notification-item__arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <svg style={{ width: 16, height: 16, color: 'var(--sm-text-muted)', flexShrink: 0, marginTop: 12 }} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                       <path d="M9 18l6-6-6-6" />
                     </svg>
                   </button>
@@ -292,311 +250,6 @@ export default function NotificationsPage() {
           )}
         </div>
       </div>
-
-      <style jsx>{`
-        .notifications-page {
-          min-height: 100vh;
-          background: var(--sm-bg);
-          padding: 24px;
-        }
-
-        .notifications-container {
-          max-width: 640px;
-          margin: 0 auto;
-        }
-
-        .notifications-header {
-          display: flex;
-          align-items: center;
-          justify-content: space-between;
-          margin-bottom: 20px;
-        }
-
-        .notifications-header__left {
-          display: flex;
-          align-items: center;
-          gap: 12px;
-        }
-
-        .notifications-title {
-          font-size: 1.75rem;
-          font-weight: 700;
-          color: var(--sm-text);
-          margin: 0;
-        }
-
-        .notifications-badge {
-          background: #ef4444;
-          color: white;
-          font-size: 0.75rem;
-          font-weight: 700;
-          padding: 2px 8px;
-          border-radius: 12px;
-        }
-
-        .notifications-btn {
-          padding: 8px 16px;
-          background: var(--sm-card);
-          border: 1px solid var(--sm-border);
-          border-radius: 8px;
-          color: var(--sm-text);
-          font-size: 0.875rem;
-          font-weight: 500;
-          cursor: pointer;
-          transition: background 0.15s;
-        }
-
-        .notifications-btn:hover {
-          background: var(--sm-card-hover);
-        }
-
-        .notifications-btn--primary {
-          background: var(--sm-accent, #3b82f6);
-          border-color: var(--sm-accent, #3b82f6);
-        }
-
-        .notifications-btn--primary:hover {
-          background: var(--sm-accent-hover, #2563eb);
-        }
-
-        .notifications-btn--text {
-          background: transparent;
-          border: none;
-          color: var(--sm-accent, #3b82f6);
-        }
-
-        .notifications-btn--text:hover {
-          text-decoration: underline;
-        }
-
-        .notifications-tabs {
-          display: flex;
-          gap: 4px;
-          padding: 4px;
-          background: var(--sm-card);
-          border-radius: 12px;
-          margin-bottom: 16px;
-        }
-
-        .notifications-tab {
-          flex: 1;
-          padding: 10px 16px;
-          background: transparent;
-          border: none;
-          border-radius: 8px;
-          color: var(--sm-text-muted);
-          font-size: 0.875rem;
-          font-weight: 500;
-          cursor: pointer;
-          transition: all 0.15s;
-        }
-
-        .notifications-tab:hover {
-          color: var(--sm-text);
-        }
-
-        .notifications-tab--active {
-          background: var(--sm-card-hover);
-          color: var(--sm-text);
-        }
-
-        .notifications-content {
-          background: var(--sm-card);
-          border: 1px solid var(--sm-border);
-          border-radius: 16px;
-          overflow: hidden;
-        }
-
-        .notifications-loading,
-        .notifications-error,
-        .notifications-empty {
-          display: flex;
-          flex-direction: column;
-          align-items: center;
-          justify-content: center;
-          gap: 12px;
-          padding: 48px 24px;
-          text-align: center;
-        }
-
-        .notifications-spinner {
-          width: 32px;
-          height: 32px;
-          border: 3px solid var(--sm-border);
-          border-top-color: var(--sm-accent, #3b82f6);
-          border-radius: 50%;
-          animation: spin 0.8s linear infinite;
-        }
-
-        @keyframes spin {
-          to { transform: rotate(360deg); }
-        }
-
-        .notifications-empty__icon {
-          color: var(--sm-text-muted);
-          opacity: 0.5;
-        }
-
-        .notifications-empty__title {
-          font-size: 1.1rem;
-          font-weight: 600;
-          color: var(--sm-text);
-          margin: 0;
-        }
-
-        .notifications-empty__sub {
-          font-size: 0.875rem;
-          color: var(--sm-text-muted);
-          margin: 0;
-        }
-
-        .notifications-list {
-          display: flex;
-          flex-direction: column;
-        }
-
-        .notification-item {
-          display: flex;
-          align-items: flex-start;
-          gap: 12px;
-          padding: 16px;
-          background: transparent;
-          border: none;
-          border-bottom: 1px solid var(--sm-border);
-          cursor: pointer;
-          text-align: left;
-          width: 100%;
-          transition: background 0.15s;
-          position: relative;
-        }
-
-        .notification-item:last-child {
-          border-bottom: none;
-        }
-
-        .notification-item:hover {
-          background: var(--sm-card-hover);
-        }
-
-        .notification-item--unread {
-          background: rgba(59, 130, 246, 0.05);
-        }
-
-        .notification-item__unread {
-          position: absolute;
-          left: 0;
-          top: 0;
-          bottom: 0;
-          width: 3px;
-        }
-
-        .notification-item__avatar {
-          width: 40px;
-          height: 40px;
-          border-radius: 50%;
-          background: var(--sm-accent, #3b82f6);
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          overflow: hidden;
-          flex-shrink: 0;
-        }
-
-        .notification-item__avatar img {
-          width: 100%;
-          height: 100%;
-          object-fit: cover;
-        }
-
-        .notification-item__avatar span {
-          color: white;
-          font-weight: 600;
-          font-size: 1rem;
-        }
-
-        .notification-item__content {
-          flex: 1;
-          min-width: 0;
-        }
-
-        .notification-item__header {
-          display: flex;
-          align-items: center;
-          gap: 6px;
-          flex-wrap: wrap;
-          margin-bottom: 4px;
-        }
-
-        .notification-item__name {
-          font-weight: 600;
-          color: var(--sm-text);
-        }
-
-        .notification-item__badge {
-          font-size: 0.6rem;
-          font-weight: 600;
-          padding: 2px 5px;
-          border-radius: 4px;
-          text-transform: uppercase;
-        }
-
-        .notification-item__action {
-          color: var(--sm-text-muted);
-          font-size: 0.875rem;
-        }
-
-        .notification-item__preview {
-          font-size: 0.875rem;
-          color: var(--sm-text-muted);
-          margin: 0 0 8px 0;
-          overflow: hidden;
-          text-overflow: ellipsis;
-          display: -webkit-box;
-          -webkit-line-clamp: 2;
-          -webkit-box-orient: vertical;
-        }
-
-        .notification-item__meta {
-          display: flex;
-          align-items: center;
-          gap: 8px;
-        }
-
-        .notification-item__team {
-          font-size: 0.7rem;
-          font-weight: 600;
-          padding: 2px 8px;
-          border-radius: 4px;
-          color: white;
-        }
-
-        .notification-item__time {
-          font-size: 0.75rem;
-          color: var(--sm-text-muted);
-        }
-
-        .notification-item__arrow {
-          color: var(--sm-text-muted);
-          flex-shrink: 0;
-          margin-top: 12px;
-        }
-
-        /* Light mode overrides removed -- --sm-* vars handle light/dark automatically */
-
-        @media (max-width: 640px) {
-          .notifications-page {
-            padding: 16px;
-          }
-
-          .notifications-title {
-            font-size: 1.5rem;
-          }
-
-          .notification-item {
-            padding: 14px 12px;
-          }
-        }
-      `}</style>
     </div>
   )
 }

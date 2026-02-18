@@ -12,10 +12,8 @@ export default function SubscriptionSuccessPage() {
   const [isRefreshing, setIsRefreshing] = useState(true)
 
   useEffect(() => {
-    // Refresh subscription status after successful checkout
     const refreshStatus = async () => {
       setIsRefreshing(true)
-      // Give Stripe webhook time to process
       await new Promise((resolve) => setTimeout(resolve, 2000))
       await refresh()
       setIsRefreshing(false)
@@ -29,21 +27,19 @@ export default function SubscriptionSuccessPage() {
   }, [sessionId, refresh])
 
   return (
-    <main
-      className="min-h-screen flex items-center justify-center px-4"
-      style={{ background: 'var(--sm-bg)' }}
-    >
-      <div className="max-w-md w-full text-center">
+    <main className="sm-hero-bg" style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '16px' }}>
+      <div className="sm-grid-overlay" />
+      <div className="glass-card glass-card-static" style={{ position: 'relative', maxWidth: '480px', width: '100%', padding: '40px 32px', textAlign: 'center' }}>
         {isRefreshing ? (
-          <div className="space-y-4">
-            <div className="w-16 h-16 border-4 border-orange-500 border-t-transparent rounded-full animate-spin mx-auto" />
-            <h1
-              className="text-2xl font-bold"
-              style={{
-                fontFamily: "'Montserrat', sans-serif",
-                color: 'var(--sm-text)',
-              }}
-            >
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', alignItems: 'center' }}>
+            <div style={{
+              width: 64, height: 64, border: '4px solid var(--sm-border)', borderTopColor: '#bc0000',
+              borderRadius: '50%', animation: 'spin 0.8s linear infinite',
+            }} />
+            <h1 style={{
+              fontSize: '24px', fontWeight: 700, color: 'var(--sm-text)',
+              fontFamily: "'Space Grotesk', var(--font-heading), sans-serif",
+            }}>
               Processing your subscription...
             </h1>
             <p style={{ color: 'var(--sm-text-muted)' }}>
@@ -51,57 +47,35 @@ export default function SubscriptionSuccessPage() {
             </p>
           </div>
         ) : (
-          <div className="space-y-6">
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '24px', alignItems: 'center' }}>
             {/* Success Icon */}
-            <div className="w-20 h-20 bg-green-500 rounded-full flex items-center justify-center mx-auto">
-              <svg
-                className="w-10 h-10 text-white"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={3}
-                  d="M5 13l4 4L19 7"
-                />
+            <div style={{
+              width: 80, height: 80, borderRadius: '50%', background: '#22c55e',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+            }}>
+              <svg style={{ width: 40, height: 40, color: '#fff' }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
               </svg>
             </div>
 
             <div>
-              <h1
-                className="text-3xl font-black mb-2"
-                style={{
-                  fontFamily: "'Montserrat', sans-serif",
-                  color: 'var(--sm-text)',
-                }}
-              >
+              <h1 style={{
+                fontSize: '28px', fontWeight: 900, color: 'var(--sm-text)', marginBottom: '8px',
+                fontFamily: "'Space Grotesk', var(--font-heading), sans-serif",
+              }}>
                 Welcome to SM+!
               </h1>
-              <p
-                className="text-lg"
-                style={{ color: 'var(--sm-text-muted)' }}
-              >
+              <p style={{ fontSize: '18px', color: 'var(--sm-text-muted)' }}>
                 Your subscription is now active.
               </p>
             </div>
 
             {/* Features unlocked */}
-            <div
-              className="rounded-xl p-6 text-left"
-              style={{
-                background: 'var(--sm-surface)',
-                border: '1px solid var(--sm-border)',
-              }}
-            >
-              <h2
-                className="font-bold mb-4"
-                style={{ color: 'var(--sm-text)' }}
-              >
+            <div className="glass-card glass-card-static" style={{ width: '100%', padding: '24px', textAlign: 'left' }}>
+              <h2 style={{ fontWeight: 700, color: 'var(--sm-text)', marginBottom: '16px' }}>
                 You now have access to:
               </h2>
-              <ul className="space-y-3">
+              <ul style={{ listStyle: 'none', padding: 0, display: 'flex', flexDirection: 'column', gap: '12px' }}>
                 {[
                   'AR Stadium Tours',
                   'Fan Chat',
@@ -109,21 +83,9 @@ export default function SubscriptionSuccessPage() {
                   'Unlimited AI Queries',
                   'Early Access to Features',
                 ].map((feature) => (
-                  <li
-                    key={feature}
-                    className="flex items-center gap-3"
-                    style={{ color: 'var(--sm-text)' }}
-                  >
-                    <svg
-                      className="w-5 h-5 text-green-500 flex-shrink-0"
-                      fill="currentColor"
-                      viewBox="0 0 20 20"
-                    >
-                      <path
-                        fillRule="evenodd"
-                        d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
-                        clipRule="evenodd"
-                      />
+                  <li key={feature} style={{ display: 'flex', alignItems: 'center', gap: '12px', color: 'var(--sm-text)' }}>
+                    <svg style={{ width: 20, height: 20, color: '#22c55e', flexShrink: 0 }} fill="currentColor" viewBox="0 0 20 20">
+                      <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
                     </svg>
                     {feature}
                   </li>
@@ -132,26 +94,16 @@ export default function SubscriptionSuccessPage() {
             </div>
 
             {/* CTA buttons */}
-            <div className="flex flex-col sm:flex-row gap-3 justify-center">
-              <Link
-                href="/chicago-bears"
-                className="bg-orange-500 text-white font-bold px-6 py-3 rounded-lg hover:bg-orange-600 transition-colors"
-              >
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '12px', justifyContent: 'center' }}>
+              <Link href="/chicago-bears" className="btn-primary">
                 Explore AR Tours
               </Link>
-              <Link
-                href="/chat"
-                className="border border-orange-500 text-orange-500 font-bold px-6 py-3 rounded-lg hover:bg-orange-500/10 transition-colors"
-              >
+              <Link href="/chat" className="btn-secondary">
                 Join Fan Chat
               </Link>
             </div>
 
-            <Link
-              href="/"
-              className="inline-block text-sm hover:underline"
-              style={{ color: 'var(--sm-text-muted)' }}
-            >
+            <Link href="/" style={{ fontSize: '14px', color: 'var(--sm-text-muted)', textDecoration: 'none' }}>
               Return to homepage
             </Link>
           </div>

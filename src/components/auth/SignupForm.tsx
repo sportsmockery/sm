@@ -28,13 +28,12 @@ export default function SignupForm() {
 
   const passwordStrength = getPasswordStrength(password)
   const strengthLabels = ['Very Weak', 'Weak', 'Fair', 'Good', 'Strong']
-  const strengthColors = ['bg-red-500', 'bg-orange-500', 'bg-yellow-500', 'bg-lime-500', 'bg-emerald-500']
+  const strengthColors = ['#ef4444', '#f97316', '#eab308', '#84cc16', '#10b981']
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setError('')
 
-    // Validation
     if (password !== confirmPassword) {
       setError('Passwords do not match')
       return
@@ -66,19 +65,22 @@ export default function SignupForm() {
 
   if (success) {
     return (
-      <div className="text-center">
-        <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-emerald-100 dark:bg-emerald-900/30">
-          <svg className="h-8 w-8 text-emerald-600 dark:text-emerald-400" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
+      <div style={{ textAlign: 'center' }}>
+        <div style={{
+          width: 64, height: 64, borderRadius: '50%', margin: '0 auto 16px',
+          background: 'rgba(16,185,129,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center',
+        }}>
+          <svg style={{ width: 32, height: 32, color: '#10b981' }} fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
           </svg>
         </div>
-        <h3 className="mb-2 text-lg font-semibold" style={{ color: 'var(--sm-text)' }}>Check your email</h3>
-        <p className="text-sm" style={{ color: 'var(--sm-text-muted)' }}>
+        <h3 style={{ fontSize: '18px', fontWeight: 600, color: 'var(--sm-text)', marginBottom: '8px' }}>Check your email</h3>
+        <p style={{ fontSize: '14px', color: 'var(--sm-text-muted)' }}>
           We&apos;ve sent a confirmation link to <strong>{email}</strong>. Click the link to activate your account.
         </p>
         <Link
           href="/login"
-          className="mt-6 inline-block text-sm font-medium text-[#8B0000] hover:text-red-700 dark:text-[#FF6666] dark:hover:text-red-400"
+          style={{ display: 'inline-block', marginTop: '24px', fontSize: '14px', fontWeight: 500, color: '#bc0000', textDecoration: 'none' }}
         >
           Back to login
         </Link>
@@ -87,22 +89,30 @@ export default function SignupForm() {
   }
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-5">
+    <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
       {/* Error message */}
       {error && (
-        <div className="rounded-lg bg-red-50 p-4 text-sm text-red-700 dark:bg-red-900/30 dark:text-red-300">
-          <div className="flex items-center gap-2">
-            <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z" />
-            </svg>
-            {error}
-          </div>
+        <div style={{
+          borderRadius: 'var(--sm-radius-md)',
+          background: 'rgba(188,0,0,0.1)',
+          border: '1px solid rgba(188,0,0,0.2)',
+          padding: '14px 16px',
+          fontSize: '14px',
+          color: '#ff6666',
+          display: 'flex',
+          alignItems: 'center',
+          gap: '8px',
+        }}>
+          <svg style={{ width: 20, height: 20, flexShrink: 0 }} fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z" />
+          </svg>
+          {error}
         </div>
       )}
 
       {/* Full Name */}
       <div>
-        <label htmlFor="fullName" className="block text-sm font-medium" style={{ color: 'var(--sm-text)' }}>
+        <label htmlFor="fullName" style={{ display: 'block', fontSize: '14px', fontWeight: 500, color: 'var(--sm-text)', marginBottom: '6px' }}>
           Full Name
         </label>
         <input
@@ -112,15 +122,14 @@ export default function SignupForm() {
           onChange={(e) => setFullName(e.target.value)}
           required
           autoComplete="name"
-          className="mt-1 block w-full rounded-lg border px-4 py-3 placeholder-zinc-400 focus:border-[#8B0000] focus:outline-none focus:ring-1 focus:ring-[#8B0000] dark:placeholder-zinc-500 dark:focus:border-[#FF6666] dark:focus:ring-[#FF6666]"
-          style={{ borderColor: 'var(--sm-border)', backgroundColor: 'var(--sm-card)', color: 'var(--sm-text)' }}
+          className="sm-input"
           placeholder="John Doe"
         />
       </div>
 
       {/* Email */}
       <div>
-        <label htmlFor="email" className="block text-sm font-medium" style={{ color: 'var(--sm-text)' }}>
+        <label htmlFor="email" style={{ display: 'block', fontSize: '14px', fontWeight: 500, color: 'var(--sm-text)', marginBottom: '6px' }}>
           Email address
         </label>
         <input
@@ -130,15 +139,14 @@ export default function SignupForm() {
           onChange={(e) => setEmail(e.target.value)}
           required
           autoComplete="email"
-          className="mt-1 block w-full rounded-lg border px-4 py-3 placeholder-zinc-400 focus:border-[#8B0000] focus:outline-none focus:ring-1 focus:ring-[#8B0000] dark:placeholder-zinc-500 dark:focus:border-[#FF6666] dark:focus:ring-[#FF6666]"
-          style={{ borderColor: 'var(--sm-border)', backgroundColor: 'var(--sm-card)', color: 'var(--sm-text)' }}
+          className="sm-input"
           placeholder="you@example.com"
         />
       </div>
 
       {/* Password */}
       <div>
-        <label htmlFor="password" className="block text-sm font-medium" style={{ color: 'var(--sm-text)' }}>
+        <label htmlFor="password" style={{ display: 'block', fontSize: '14px', fontWeight: 500, color: 'var(--sm-text)', marginBottom: '6px' }}>
           Password
         </label>
         <input
@@ -148,25 +156,26 @@ export default function SignupForm() {
           onChange={(e) => setPassword(e.target.value)}
           required
           autoComplete="new-password"
-          className="mt-1 block w-full rounded-lg border px-4 py-3 placeholder-zinc-400 focus:border-[#8B0000] focus:outline-none focus:ring-1 focus:ring-[#8B0000] dark:placeholder-zinc-500 dark:focus:border-[#FF6666] dark:focus:ring-[#FF6666]"
-          style={{ borderColor: 'var(--sm-border)', backgroundColor: 'var(--sm-card)', color: 'var(--sm-text)' }}
-          placeholder="••••••••"
+          className="sm-input"
+          placeholder="********"
         />
         {/* Password strength indicator */}
         {password && (
-          <div className="mt-2">
-            <div className="flex gap-1">
+          <div style={{ marginTop: '8px' }}>
+            <div style={{ display: 'flex', gap: '4px' }}>
               {[0, 1, 2, 3, 4].map((i) => (
                 <div
                   key={i}
-                  className={`h-1.5 flex-1 rounded-full ${
-                    i < passwordStrength ? strengthColors[passwordStrength - 1] : ''
-                  }`}
-                  style={i >= passwordStrength ? { backgroundColor: 'var(--sm-surface)' } : undefined}
+                  style={{
+                    height: '6px',
+                    flex: 1,
+                    borderRadius: '9999px',
+                    background: i < passwordStrength ? strengthColors[passwordStrength - 1] : 'var(--sm-surface)',
+                  }}
                 />
               ))}
             </div>
-            <p className="mt-1 text-xs" style={{ color: 'var(--sm-text-dim)' }}>
+            <p style={{ marginTop: '4px', fontSize: '12px', color: 'var(--sm-text-dim)' }}>
               Password strength: {strengthLabels[passwordStrength - 1] || 'Too weak'}
             </p>
           </div>
@@ -175,7 +184,7 @@ export default function SignupForm() {
 
       {/* Confirm Password */}
       <div>
-        <label htmlFor="confirmPassword" className="block text-sm font-medium" style={{ color: 'var(--sm-text)' }}>
+        <label htmlFor="confirmPassword" style={{ display: 'block', fontSize: '14px', fontWeight: 500, color: 'var(--sm-text)', marginBottom: '6px' }}>
           Confirm Password
         </label>
         <input
@@ -185,30 +194,29 @@ export default function SignupForm() {
           onChange={(e) => setConfirmPassword(e.target.value)}
           required
           autoComplete="new-password"
-          className="mt-1 block w-full rounded-lg border px-4 py-3 placeholder-zinc-400 focus:border-[#8B0000] focus:outline-none focus:ring-1 focus:ring-[#8B0000] dark:placeholder-zinc-500 dark:focus:border-[#FF6666] dark:focus:ring-[#FF6666]"
-          style={{ borderColor: 'var(--sm-border)', backgroundColor: 'var(--sm-card)', color: 'var(--sm-text)' }}
-          placeholder="••••••••"
+          className="sm-input"
+          placeholder="********"
         />
         {confirmPassword && password !== confirmPassword && (
-          <p className="mt-1 text-xs text-red-500">Passwords do not match</p>
+          <p style={{ marginTop: '4px', fontSize: '12px', color: '#ef4444' }}>Passwords do not match</p>
         )}
       </div>
 
       {/* Terms checkbox */}
-      <label className="flex items-start gap-3">
+      <label style={{ display: 'flex', alignItems: 'flex-start', gap: '12px', cursor: 'pointer' }}>
         <input
           type="checkbox"
           checked={acceptTerms}
           onChange={(e) => setAcceptTerms(e.target.checked)}
-          className="mt-1 h-4 w-4 rounded border-zinc-300 text-[#8B0000] focus:ring-[#8B0000] dark:border-zinc-600 dark:bg-zinc-700 dark:focus:ring-[#FF6666]"
+          style={{ marginTop: 4, width: 16, height: 16, accentColor: '#bc0000' }}
         />
-        <span className="text-sm" style={{ color: 'var(--sm-text-muted)' }}>
+        <span style={{ fontSize: '14px', color: 'var(--sm-text-muted)' }}>
           I agree to the{' '}
-          <Link href="/terms" className="font-medium text-[#8B0000] hover:text-red-700 dark:text-[#FF6666]">
+          <Link href="/terms" style={{ fontWeight: 500, color: '#bc0000', textDecoration: 'none' }}>
             Terms of Service
           </Link>{' '}
           and{' '}
-          <Link href="/privacy" className="font-medium text-[#8B0000] hover:text-red-700 dark:text-[#FF6666]">
+          <Link href="/privacy" style={{ fontWeight: 500, color: '#bc0000', textDecoration: 'none' }}>
             Privacy Policy
           </Link>
         </span>
@@ -218,28 +226,26 @@ export default function SignupForm() {
       <button
         type="submit"
         disabled={loading}
-        className="flex w-full items-center justify-center gap-2 rounded-lg bg-[#8B0000] px-4 py-3 font-semibold text-white transition-colors hover:bg-red-700 disabled:cursor-not-allowed disabled:opacity-50 dark:bg-[#FF6666] dark:text-zinc-900 dark:hover:bg-red-400"
+        className="btn-primary btn-full"
+        style={loading ? { opacity: 0.6, cursor: 'not-allowed' } : undefined}
       >
         {loading ? (
-          <>
-            <svg className="h-5 w-5 animate-spin" fill="none" viewBox="0 0 24 24">
-              <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-              <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+          <span style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <svg style={{ width: 20, height: 20, animation: 'spin 1s linear infinite' }} fill="none" viewBox="0 0 24 24">
+              <circle style={{ opacity: 0.25 }} cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+              <path style={{ opacity: 0.75 }} fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
             </svg>
             Creating account...
-          </>
+          </span>
         ) : (
           'Create account'
         )}
       </button>
 
       {/* Login link */}
-      <p className="text-center text-sm" style={{ color: 'var(--sm-text-muted)' }}>
+      <p style={{ textAlign: 'center', fontSize: '14px', color: 'var(--sm-text-muted)' }}>
         Already have an account?{' '}
-        <Link
-          href="/login"
-          className="font-medium text-[#8B0000] hover:text-red-700 dark:text-[#FF6666] dark:hover:text-red-400"
-        >
+        <Link href="/login" style={{ fontWeight: 500, color: '#bc0000', textDecoration: 'none' }}>
           Sign in
         </Link>
       </p>

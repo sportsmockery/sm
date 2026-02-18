@@ -35,7 +35,7 @@ export function ForYouFeed({
   isLoggedIn,
   isMobile,
   showTrendingInline,
-  trendingPosts
+  trendingPosts,
 }: ForYouFeedProps) {
   const [displayCount, setDisplayCount] = useState(POSTS_PER_PAGE);
   const [isLoading, setIsLoading] = useState(false);
@@ -45,7 +45,7 @@ export function ForYouFeed({
     if (isLoading || displayCount >= posts.length) return;
     setIsLoading(true);
     setTimeout(() => {
-      setDisplayCount(prev => Math.min(prev + POSTS_PER_PAGE, posts.length));
+      setDisplayCount((prev) => Math.min(prev + POSTS_PER_PAGE, posts.length));
       setIsLoading(false);
     }, 300);
   }, [isLoading, displayCount, posts.length]);
@@ -68,49 +68,40 @@ export function ForYouFeed({
   }, [loadMore]);
 
   const visiblePosts = posts.slice(0, displayCount);
-  const sectionHeader = isLoggedIn ? 'For You' : 'Trending in Chicago Sports';
+
+  // Suppress unused variable warnings for props used conditionally
+  void isLoggedIn;
 
   // Handle empty state
   if (!posts || posts.length === 0) {
     return (
-      <section className="for-you-feed" aria-label={sectionHeader}>
-        <h2 className="feed-section-header">{sectionHeader}</h2>
-        <div className="feed-empty-state">
-          <p className="feed-empty-message">
-            Welcome to SportsMockery! Fresh Chicago sports content is on the way.
-          </p>
-          <p className="feed-empty-submessage">
-            Check back soon for Bears, Bulls, Blackhawks, Cubs, and White Sox coverage.
-          </p>
-        </div>
-      </section>
+      <div className="glass-card feed-empty-state">
+        <p className="feed-empty-message">
+          Welcome to SportsMockery! Fresh Chicago sports content is on the way.
+        </p>
+        <p className="feed-empty-submessage">
+          Check back soon for Bears, Bulls, Blackhawks, Cubs, and White Sox
+          coverage.
+        </p>
+      </div>
     );
   }
 
   return (
-    <section className="for-you-feed" aria-label={sectionHeader}>
-      <h2 className="feed-section-header">{sectionHeader}</h2>
+    <div className="feed-grid">
+      {visiblePosts.map((post, index) => (
+        <div key={post.id}>
+          <PostCard post={post} priority={index < 3} />
 
-      <div className="feed-posts-list">
-        {visiblePosts.map((post, index) => (
-          <div key={post.id}>
-            <PostCard
-              post={post}
-              isMobile={isMobile}
-              showImage={post.is_evergreen}
-              priority={index < 3}
-            />
-
-            {/* Insert trending drawer after position 3 on mobile */}
-            {showTrendingInline && index === 2 && (
-              <TrendingInlineDrawer posts={trendingPosts} />
-            )}
-          </div>
-        ))}
-      </div>
+          {/* Insert trending drawer after index 5 on mobile */}
+          {showTrendingInline && isMobile && index === 5 && (
+            <TrendingInlineDrawer posts={trendingPosts} />
+          )}
+        </div>
+      ))}
 
       {/* Infinite scroll trigger */}
-      <div ref={loadMoreRef} className="load-more-trigger">
+      <div ref={loadMoreRef}>
         {isLoading && <FeedSkeleton count={3} />}
         {displayCount >= posts.length && posts.length > 0 && (
           <p className="feed-end-message">You&apos;re all caught up!</p>
@@ -121,11 +112,12 @@ export function ForYouFeed({
       {displayCount < posts.length && !isLoading && (
         <button
           onClick={loadMore}
-          className="load-more-button"
+          className="btn-secondary"
+          style={{ width: '100%', marginTop: 24 }}
         >
           Load More Stories
         </button>
       )}
-    </section>
+    </div>
   );
 }

@@ -36,7 +36,7 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
     redirect(redirectTo)
   }
 
-  // Comparison features - sm can be true, false, or 'coming-soon'
+  // Comparison features
   const features: { name: string; sm: boolean | 'coming-soon'; espn: boolean }[] = [
     { name: 'Scout AI (Chicago Q&A)', sm: true, espn: false },
     { name: 'GM Trade Simulator', sm: true, espn: false },
@@ -49,16 +49,22 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
   ]
 
   return (
-    <div className="flex min-h-screen">
+    <div style={{ display: 'flex', minHeight: '100vh' }}>
       {/* Left side - Form */}
-      <div
-        className="flex flex-1 flex-col items-center justify-center px-8 py-12 sm:px-12 lg:flex-none lg:w-[42%] lg:px-16 xl:px-20"
-        style={{ backgroundColor: 'var(--sm-card)' }}
-      >
-        <div className="w-full max-w-sm lg:max-w-md">
+      <div style={{
+        flex: '1 1 0%',
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        justifyContent: 'center',
+        padding: '48px 32px',
+        background: 'var(--sm-card)',
+        maxWidth: '520px',
+      }}>
+        <div style={{ width: '100%', maxWidth: '420px' }}>
           {/* Logo */}
-          <div className="mb-8">
-            <Link href="/" className="inline-block">
+          <div style={{ marginBottom: '32px', textAlign: 'center' }}>
+            <Link href="/" style={{ display: 'inline-block' }}>
               {/* Light mode logo */}
               <Image
                 src="/logos/SM_Full_v2.png"
@@ -78,10 +84,16 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
                 priority
               />
             </Link>
-            <h2 className="mt-8 text-3xl font-bold" style={{ color: 'var(--sm-text)' }}>
+            <h2 style={{
+              marginTop: '32px',
+              fontSize: '28px',
+              fontWeight: 700,
+              fontFamily: "'Space Grotesk', var(--font-heading), sans-serif",
+              color: 'var(--sm-text)',
+            }}>
               Welcome back
             </h2>
-            <p className="mt-2 text-base" style={{ color: 'var(--sm-text-muted)' }}>
+            <p style={{ marginTop: '8px', fontSize: '15px', color: 'var(--sm-text-muted)' }}>
               Sign in to access your dashboard and manage content
             </p>
           </div>
@@ -90,11 +102,25 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
         </div>
       </div>
 
-      {/* Right side - Features/Branding */}
-      <div className="relative hidden lg:flex lg:flex-1 bg-black items-center justify-center">
-        {/* Content - constrained height to prevent gaps on large screens */}
-        <div className="relative flex flex-col items-center w-full max-w-3xl px-8 py-8">
-          {/* Logo */}
+      {/* Right side - Features/Branding (hidden on mobile) */}
+      <div className="hidden lg:flex" style={{
+        flex: '1 1 0%',
+        position: 'relative',
+        alignItems: 'center',
+        justifyContent: 'center',
+        background: 'var(--sm-dark)',
+      }}>
+        <div className="sm-grid-overlay" />
+        {/* Content */}
+        <div style={{
+          position: 'relative',
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          width: '100%',
+          maxWidth: '720px',
+          padding: '32px',
+        }}>
           <Image
             src="/logos/v2_SM_Whole.png"
             alt="Sports Mockery 2.0"
@@ -103,65 +129,59 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
             priority
           />
 
-          {/* Tagline */}
-          <p className="text-white text-lg font-semibold mt-4 text-center">
+          <p style={{ color: '#fff', fontSize: '18px', fontWeight: 600, marginTop: '16px', textAlign: 'center' }}>
             AI-Powered. Fan-Driven. Chicago-Owned.
           </p>
 
-          {/* Section title */}
-          <h3 className="text-2xl font-bold text-white mt-2 text-center">
+          <h3 style={{
+            fontSize: '24px', fontWeight: 700, color: '#fff', marginTop: '8px', textAlign: 'center',
+            fontFamily: "'Space Grotesk', var(--font-heading), sans-serif",
+          }}>
             Sports Mockery 2.0 Stands Alone
           </h3>
-          <p className="text-white/70 text-sm mt-1 mb-4 text-center">
+          <p style={{ color: 'rgba(255,255,255,0.6)', fontSize: '14px', marginTop: '4px', marginBottom: '16px', textAlign: 'center' }}>
             How we compare to the competition.
           </p>
 
           {/* Comparison Chart */}
-          <div className="w-full max-w-3xl bg-white/10 backdrop-blur-sm rounded-lg overflow-hidden border border-white/20">
+          <div className="glass-card glass-card-static" style={{ width: '100%', maxWidth: '720px', padding: 0, overflow: 'hidden' }}>
             {/* Table Header */}
-            <div className="grid grid-cols-3 bg-white/10">
-              <div className="px-4 py-3 text-white font-bold text-sm">
-                Feature
-              </div>
-              <div className="px-4 py-3 text-white font-bold text-sm text-center">
-                Sports Mockery 2.0
-              </div>
-              <div className="px-4 py-3 text-white font-bold text-sm text-center">
-                ESPN / Bleacher
-              </div>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', background: 'rgba(255,255,255,0.05)' }}>
+              <div style={{ padding: '12px 16px', color: '#fff', fontWeight: 700, fontSize: '14px' }}>Feature</div>
+              <div style={{ padding: '12px 16px', color: '#fff', fontWeight: 700, fontSize: '14px', textAlign: 'center' }}>Sports Mockery 2.0</div>
+              <div style={{ padding: '12px 16px', color: '#fff', fontWeight: 700, fontSize: '14px', textAlign: 'center' }}>ESPN / Bleacher</div>
             </div>
-
-            {/* Table Body */}
             {features.map((feature, idx) => (
               <div
                 key={feature.name}
-                className={`grid grid-cols-3 ${idx % 2 === 0 ? 'bg-white/5' : ''}`}
+                style={{
+                  display: 'grid',
+                  gridTemplateColumns: '1fr 1fr 1fr',
+                  background: idx % 2 === 0 ? 'rgba(255,255,255,0.02)' : 'transparent',
+                }}
               >
-                <div className="px-4 py-2 text-white/90 text-sm leading-snug">
-                  {feature.name}
-                </div>
-                <div className="px-4 py-2 text-center flex items-center justify-center">
+                <div style={{ padding: '8px 16px', color: 'rgba(255,255,255,0.85)', fontSize: '14px', lineHeight: '1.4' }}>{feature.name}</div>
+                <div style={{ padding: '8px 16px', textAlign: 'center', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                   {feature.sm === 'coming-soon' ? (
-                    <span className="text-sm font-medium" style={{ color: '#ffffff' }}>Coming Soon</span>
+                    <span style={{ fontSize: '14px', fontWeight: 500, color: '#fff' }}>Coming Soon</span>
                   ) : feature.sm ? (
-                    <span className="text-green-400 text-lg">✓</span>
+                    <span style={{ color: '#4ade80', fontSize: '18px' }}>&#10003;</span>
                   ) : (
-                    <span className="text-red-400 text-lg">✗</span>
+                    <span style={{ color: '#f87171', fontSize: '18px' }}>&#10007;</span>
                   )}
                 </div>
-                <div className="px-4 py-2 text-center flex items-center justify-center">
+                <div style={{ padding: '8px 16px', textAlign: 'center', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                   {feature.espn ? (
-                    <span className="text-green-400 text-lg">✓</span>
+                    <span style={{ color: '#4ade80', fontSize: '18px' }}>&#10003;</span>
                   ) : (
-                    <span className="text-red-400 text-lg">✗</span>
+                    <span style={{ color: '#f87171', fontSize: '18px' }}>&#10007;</span>
                   )}
                 </div>
               </div>
             ))}
           </div>
 
-          {/* And More text - same style as tagline */}
-          <p className="text-white text-lg font-semibold mt-4 text-center">
+          <p style={{ color: '#fff', fontSize: '18px', fontWeight: 600, marginTop: '16px', textAlign: 'center' }}>
             And More...
           </p>
         </div>

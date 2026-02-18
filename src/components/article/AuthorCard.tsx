@@ -25,20 +25,44 @@ export default function AuthorCard({
 }: AuthorCardProps) {
   return (
     <div
-      className={`rounded-2xl border border-white/10 bg-white/5 p-6 backdrop-blur-xl ${className}`}
+      className={`glass-card glass-card-static ${className}`}
+      style={{ padding: '28px' }}
     >
       {/* Avatar */}
-      <div className="mb-4 flex justify-center">
-        <div className="relative h-24 w-24 overflow-hidden rounded-full ring-4 ring-[#8B0000]/30">
+      <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '16px' }}>
+        <div
+          style={{
+            position: 'relative',
+            width: '48px',
+            height: '48px',
+            borderRadius: '50%',
+            overflow: 'hidden',
+            border: '3px solid var(--sm-red)',
+            flexShrink: 0,
+          }}
+        >
           {author.avatar_url ? (
             <Image
               src={author.avatar_url}
               alt={author.name}
               fill
-              className="object-cover"
+              style={{ objectFit: 'cover' }}
             />
           ) : (
-            <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-[#8B0000] to-[#FF6666] text-3xl font-bold text-white">
+            <div
+              style={{
+                display: 'flex',
+                width: '100%',
+                height: '100%',
+                alignItems: 'center',
+                justifyContent: 'center',
+                background: 'linear-gradient(135deg, var(--sm-red), var(--sm-red-light))',
+                color: '#ffffff',
+                fontFamily: "'Space Grotesk', sans-serif",
+                fontSize: '20px',
+                fontWeight: 700,
+              }}
+            >
               {author.name.charAt(0).toUpperCase()}
             </div>
           )}
@@ -46,12 +70,27 @@ export default function AuthorCard({
       </div>
 
       {/* Name and title */}
-      <div className="mb-3 text-center">
-        <h3 className="font-heading text-xl font-bold" style={{ color: 'var(--sm-text)' }}>
+      <div style={{ textAlign: 'center', marginBottom: '12px' }}>
+        <h3
+          style={{
+            fontFamily: "'Space Grotesk', sans-serif",
+            fontSize: '18px',
+            fontWeight: 700,
+            color: 'var(--sm-text)',
+            margin: 0,
+          }}
+        >
           {author.name}
         </h3>
         {author.title && (
-          <p className="text-sm" style={{ color: 'var(--sm-accent)' }}>
+          <p
+            style={{
+              fontFamily: "'Inter', sans-serif",
+              fontSize: '13px',
+              color: 'var(--sm-red)',
+              marginTop: '4px',
+            }}
+          >
             {author.title}
           </p>
         )}
@@ -59,34 +98,64 @@ export default function AuthorCard({
 
       {/* Bio */}
       {author.bio && (
-        <p className="mb-4 text-center text-sm leading-relaxed" style={{ color: 'var(--sm-text-muted)' }}>
+        <p
+          style={{
+            fontFamily: "'Inter', sans-serif",
+            fontSize: '14px',
+            lineHeight: 1.6,
+            color: 'var(--sm-text-muted)',
+            textAlign: 'center',
+            marginBottom: '16px',
+          }}
+        >
           {author.bio}
         </p>
       )}
 
       {/* Stats */}
       {postCount !== undefined && (
-        <div className="mb-4 flex justify-center">
-          <div className="rounded-full px-4 py-1.5" style={{ backgroundColor: 'var(--sm-surface)' }}>
-            <span className="text-sm font-medium" style={{ color: 'var(--sm-text)' }}>
-              {postCount} {postCount === 1 ? 'Article' : 'Articles'}
-            </span>
-          </div>
+        <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '16px' }}>
+          <span
+            className="sm-tag"
+            style={{ fontSize: '13px' }}
+          >
+            {postCount} {postCount === 1 ? 'Article' : 'Articles'}
+          </span>
         </div>
       )}
 
       {/* Social links */}
-      <div className="mb-4 flex justify-center gap-3">
+      <div style={{ display: 'flex', justifyContent: 'center', gap: '12px', marginBottom: '16px' }}>
         {author.twitter_url && (
           <a
             href={author.twitter_url}
             target="_blank"
             rel="noopener noreferrer"
-            className="flex h-10 w-10 items-center justify-center rounded-full transition-all hover:bg-[#1DA1F2] hover:text-white"
-            style={{ backgroundColor: 'var(--sm-surface)', color: 'var(--sm-text-muted)' }}
+            style={{
+              display: 'flex',
+              width: '40px',
+              height: '40px',
+              alignItems: 'center',
+              justifyContent: 'center',
+              borderRadius: '50%',
+              background: 'var(--sm-surface)',
+              color: 'var(--sm-text-muted)',
+              border: '1px solid var(--sm-border)',
+              transition: 'all 0.2s ease',
+            }}
             aria-label={`Follow ${author.name} on Twitter`}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.background = '#1DA1F2'
+              e.currentTarget.style.color = '#ffffff'
+              e.currentTarget.style.borderColor = '#1DA1F2'
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.background = 'var(--sm-surface)'
+              e.currentTarget.style.color = 'var(--sm-text-muted)'
+              e.currentTarget.style.borderColor = 'var(--sm-border)'
+            }}
           >
-            <svg className="h-5 w-5" fill="currentColor" viewBox="0 0 24 24">
+            <svg width="20" height="20" fill="currentColor" viewBox="0 0 24 24">
               <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
             </svg>
           </a>
@@ -94,12 +163,33 @@ export default function AuthorCard({
         {author.email && (
           <a
             href={`mailto:${author.email}`}
-            className="flex h-10 w-10 items-center justify-center rounded-full transition-all hover:bg-[#8B0000] hover:text-white"
-            style={{ backgroundColor: 'var(--sm-surface)', color: 'var(--sm-text-muted)' }}
+            style={{
+              display: 'flex',
+              width: '40px',
+              height: '40px',
+              alignItems: 'center',
+              justifyContent: 'center',
+              borderRadius: '50%',
+              background: 'var(--sm-surface)',
+              color: 'var(--sm-text-muted)',
+              border: '1px solid var(--sm-border)',
+              transition: 'all 0.2s ease',
+            }}
             aria-label={`Email ${author.name}`}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.background = 'var(--sm-red)'
+              e.currentTarget.style.color = '#ffffff'
+              e.currentTarget.style.borderColor = 'var(--sm-red)'
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.background = 'var(--sm-surface)'
+              e.currentTarget.style.color = 'var(--sm-text-muted)'
+              e.currentTarget.style.borderColor = 'var(--sm-border)'
+            }}
           >
             <svg
-              className="h-5 w-5"
+              width="20"
+              height="20"
               fill="none"
               viewBox="0 0 24 24"
               strokeWidth={1.5}
@@ -118,9 +208,16 @@ export default function AuthorCard({
       {/* View all posts link */}
       <Link
         href={`/author/${author.slug}`}
-        className="block w-full rounded-xl border border-[#8B0000]/30 bg-[#8B0000]/10 py-2.5 text-center text-sm font-semibold text-[#8B0000] transition-all hover:bg-[#8B0000] hover:text-white dark:border-[#FF6666]/30 dark:bg-[#FF6666]/10 dark:text-[#FF6666] dark:hover:bg-[#FF6666] dark:hover:text-white"
+        className="btn-primary btn-sm btn-full"
+        style={{
+          display: 'block',
+          width: '100%',
+          textAlign: 'center',
+          textDecoration: 'none',
+          borderRadius: 'var(--sm-radius-md)',
+        }}
       >
-        View All Posts →
+        View All Posts
       </Link>
     </div>
   )

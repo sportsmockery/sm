@@ -197,34 +197,84 @@ export default async function CategoryPage({ params, searchParams }: CategoryPag
   })
 
   return (
-    <div className="min-h-screen" style={{ backgroundColor: 'var(--sm-surface)' }}>
-      {/* Sort bar directly below navigation */}
+    <div style={{ backgroundColor: 'var(--sm-dark)', minHeight: '100vh' }}>
+      {/* Category header with sm-hero-bg */}
+      <header className="sm-hero-bg" style={{ position: 'relative', overflow: 'hidden' }}>
+        <div className="sm-grid-overlay" />
+        <div
+          style={{
+            position: 'relative',
+            zIndex: 1,
+            maxWidth: 'var(--sm-max-width)',
+            margin: '0 auto',
+            padding: '100px 24px 40px',
+          }}
+        >
+          <div className="sm-tag" style={{ marginBottom: '16px' }}>
+            <span className="pulse-dot" />
+            {category.name}
+          </div>
+          <h2
+            style={{
+              fontFamily: 'var(--sm-font-heading)',
+              fontSize: 'clamp(1.75rem, 4vw, 2.5rem)',
+              fontWeight: 800,
+              letterSpacing: '-1px',
+              color: 'var(--sm-text)',
+              margin: '0 0 8px',
+              lineHeight: 1.1,
+            }}
+          >
+            {category.name} News & Rumors
+          </h2>
+          <p
+            style={{
+              fontFamily: 'var(--sm-font-body)',
+              fontSize: '16px',
+              color: 'var(--sm-text-muted)',
+              margin: 0,
+            }}
+          >
+            {totalPosts.toLocaleString()} articles
+          </p>
+        </div>
+      </header>
+
+      {/* Sort bar */}
       <CategoryFilters
         categorySlug={category.slug}
         categoryName={category.name}
         postCount={totalPosts}
       />
 
-      {/* Main content container - 1110px max per spec */}
-      <main className="mx-auto max-w-[1110px] px-4 py-8">
-
+      {/* Main content container */}
+      <main
+        style={{
+          maxWidth: 'var(--sm-max-width)',
+          margin: '0 auto',
+          padding: '40px 24px 80px',
+        }}
+      >
         {/* Featured Section (only on first page with default filters) */}
         {currentPage === 1 && sortBy === 'latest' && timeFilter === 'all' && formattedFeatured.length > 0 && (
-          <CategoryFeatured posts={formattedFeatured} className="mb-10" />
+          <div style={{ marginBottom: '48px' }}>
+            <CategoryFeatured posts={formattedFeatured} />
+          </div>
         )}
 
-        {/* Articles Grid - 3 column layout per spec section 8.3 */}
+        {/* Articles Grid - 3 col to 1 col */}
         {formattedPosts.length > 0 ? (
           <>
             <CategoryGrid articles={formattedPosts} />
 
-            {/* Pagination per spec */}
-            <Pagination
-              currentPage={currentPage}
-              totalPages={totalPages}
-              basePath={`/${categorySlug}`}
-              className="mt-12"
-            />
+            {/* Pagination with btn-secondary pills */}
+            <div style={{ marginTop: '48px' }}>
+              <Pagination
+                currentPage={currentPage}
+                totalPages={totalPages}
+                basePath={`/${categorySlug}`}
+              />
+            </div>
           </>
         ) : (
           <NoResults categoryName={category.name} />

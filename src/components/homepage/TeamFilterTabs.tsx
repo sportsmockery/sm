@@ -8,12 +8,12 @@ interface TeamFilterTabsProps {
 }
 
 const TEAMS = [
-  { slug: 'all', label: 'All', color: '#1a1a1a' },
-  { slug: 'bears', label: 'Bears', color: '#0B162A' },
-  { slug: 'bulls', label: 'Bulls', color: '#CE1141' },
-  { slug: 'blackhawks', label: 'Blackhawks', color: '#CF0A2C' },
-  { slug: 'cubs', label: 'Cubs', color: '#0E3386' },
-  { slug: 'white-sox', label: 'White Sox', color: '#27251F' }
+  { slug: 'all', label: 'All' },
+  { slug: 'bears', label: 'Bears' },
+  { slug: 'bulls', label: 'Bulls' },
+  { slug: 'blackhawks', label: 'Blackhawks' },
+  { slug: 'cubs', label: 'Cubs' },
+  { slug: 'white-sox', label: 'White Sox' }
 ];
 
 export function TeamFilterTabs({
@@ -22,25 +22,18 @@ export function TeamFilterTabs({
   userPreferredTeam
 }: TeamFilterTabsProps) {
   return (
-    <nav className="team-filter-tabs" aria-label="Filter by team">
-      <div className="team-filter-scroll-container">
-        {TEAMS.map((team) => (
-          <button
-            key={team.slug}
-            onClick={() => onTeamChange(team.slug)}
-            className={`team-filter-tab ${activeTeam === team.slug ? 'active' : ''} ${userPreferredTeam === team.slug ? 'preferred' : ''}`}
-            style={{
-              '--team-color': team.color
-            } as React.CSSProperties}
-            aria-pressed={activeTeam === team.slug}
-          >
-            {team.label}
-            {userPreferredTeam === team.slug && activeTeam !== team.slug && (
-              <span className="preferred-indicator" aria-label="Your team">&#9733;</span>
-            )}
-          </button>
-        ))}
-      </div>
+    <nav className="team-filter-bar" aria-label="Filter by team">
+      {TEAMS.map((team) => (
+        <button
+          key={team.slug}
+          onClick={() => onTeamChange(team.slug)}
+          className={`team-pill ${activeTeam === team.slug ? 'active' : ''}`}
+          aria-pressed={activeTeam === team.slug}
+        >
+          {team.label}
+          {userPreferredTeam === team.slug && activeTeam !== team.slug && ' \u2605'}
+        </button>
+      ))}
     </nav>
   );
 }

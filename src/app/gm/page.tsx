@@ -1221,28 +1221,31 @@ export default function GMPage() {
 
   if (authLoading || pageLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: 'var(--bg-page)' }}>
-        <div className="w-8 h-8 border-2 border-t-transparent rounded-full animate-spin" style={{ borderColor: '#bc0000', borderTopColor: 'transparent' }} />
+      <div className="sm-hero-bg" style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+        <div className="sm-grid-overlay" />
+        <div style={{ width: 32, height: 32, border: '3px solid var(--sm-red)', borderTopColor: 'transparent', borderRadius: '50%', animation: 'spin-2030 1s linear infinite' }} />
       </div>
     )
   }
 
-  const cardBg = isDark ? '#1f2937' : '#ffffff'
-  const borderColor = isDark ? '#374151' : '#e5e7eb'
-  const textColor = isDark ? '#f9fafb' : '#1f2937'
-  const subText = isDark ? '#9ca3af' : '#6b7280'
-  const pageBg = isDark ? '#111827' : '#f3f4f6'
+  const cardBg = 'var(--sm-card)'
+  const borderColor = 'var(--sm-border)'
+  const textColor = 'var(--sm-text)'
+  const subText = 'var(--sm-text-muted)'
+  const pageBg = 'var(--sm-dark)'
 
   return (
-    <div className="min-h-screen" style={{ backgroundColor: pageBg, color: textColor }}>
+    <div className="sm-hero-bg" style={{ minHeight: '100vh', color: textColor }}>
+      <div className="sm-grid-overlay" />
       {/* BAND 1: Header + GM Score */}
       <div style={{
-        backgroundColor: cardBg,
-        borderBottom: `1px solid ${borderColor}`,
+        background: 'var(--sm-surface)',
+        borderBottom: '1px solid var(--sm-border)',
         padding: '12px 24px',
         position: 'sticky',
         top: 64,
         zIndex: 40,
+        backdropFilter: 'blur(12px)',
       }}>
         <div style={{ maxWidth: 1440, margin: '0 auto', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 12 }}>
           {/* Left: Title */}
@@ -1314,8 +1317,8 @@ export default function GMPage() {
 
       {/* BAND 2: Team Tabs */}
       <div style={{
-        backgroundColor: cardBg,
-        borderBottom: `1px solid ${borderColor}`,
+        background: 'var(--sm-surface)',
+        borderBottom: '1px solid var(--sm-border)',
         padding: '12px 24px',
       }}>
         <div style={{ maxWidth: 1440, margin: '0 auto' }}>
@@ -1410,8 +1413,8 @@ export default function GMPage() {
 
       {/* MODE TABS: Build Trade / History / Leaderboard */}
       <div style={{
-        backgroundColor: cardBg,
-        borderBottom: `1px solid ${borderColor}`,
+        background: 'var(--sm-surface)',
+        borderBottom: '1px solid var(--sm-border)',
         position: 'sticky',
         top: 130,
         zIndex: 35,
@@ -1426,9 +1429,9 @@ export default function GMPage() {
                 onClick={() => setActiveTab(tab)}
                 style={{
                   flex: 1, padding: '12px 16px',
-                  border: 'none', borderBottom: isActive ? '3px solid #bc0000' : '3px solid transparent',
+                  border: 'none', borderBottom: isActive ? '3px solid var(--sm-red)' : '3px solid transparent',
                   backgroundColor: 'transparent',
-                  color: isActive ? '#bc0000' : subText,
+                  color: isActive ? 'var(--sm-red)' : subText,
                   fontWeight: isActive ? 700 : 500,
                   fontSize: 14, cursor: 'pointer',
                 }}
@@ -1441,22 +1444,21 @@ export default function GMPage() {
       </div>
 
       {/* MAIN CONTENT */}
-      <main style={{ maxWidth: 1440, margin: '0 auto', padding: '24px' }}>
+      <main style={{ maxWidth: 1440, margin: '0 auto', padding: '24px', position: 'relative', zIndex: 1 }}>
         {!selectedTeam ? (
-          <div style={{ textAlign: 'center', padding: '80px 20px', color: subText }}>
-            <div style={{ fontSize: 64, marginBottom: 20 }}>🏈</div>
-            <div style={{ fontSize: 22, fontWeight: 700, color: textColor, marginBottom: 8 }}>Select a Team to Start</div>
-            <div style={{ fontSize: 15 }}>Choose a Chicago team above to begin building trades</div>
+          <div className="glass-card glass-card-static" style={{ textAlign: 'center', padding: '80px 20px' }}>
+            <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="var(--sm-text-dim)" strokeWidth="1" style={{ margin: '0 auto 20px' }}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4" />
+            </svg>
+            <div style={{ fontSize: 22, fontWeight: 700, color: textColor, marginBottom: 8, fontFamily: 'var(--sm-font-heading)' }}>Select a Team to Start</div>
+            <div style={{ fontSize: 15, color: subText }}>Choose a Chicago team above to begin building trades</div>
           </div>
         ) : activeTab === 'build' ? (
           <>
             {/* DESKTOP: 3-column layout */}
             <div className="hidden lg:grid" style={{ gridTemplateColumns: '280px 1fr 320px', gap: 20, alignItems: 'start' }}>
               {/* LEFT: Chicago Roster */}
-              <div style={{
-                backgroundColor: cardBg,
-                border: `1px solid ${borderColor}`,
-                borderRadius: 12,
+              <div className="glass-card glass-card-static" style={{
                 padding: 16,
                 display: 'flex',
                 flexDirection: 'column',
@@ -1489,10 +1491,7 @@ export default function GMPage() {
               </div>
 
               {/* CENTER: Trade Board */}
-              <div style={{
-                backgroundColor: cardBg,
-                border: `1px solid ${borderColor}`,
-                borderRadius: 12,
+              <div className="glass-card glass-card-static" style={{
                 padding: 16,
                 display: 'flex',
                 flexDirection: 'column',
@@ -1585,9 +1584,9 @@ export default function GMPage() {
                 {/* Error */}
                 {gradeError && (
                   <div style={{
-                    marginTop: 12, padding: 12, borderRadius: 8,
-                    backgroundColor: '#fef2f2', border: '1px solid #fecaca',
-                    color: '#dc2626', fontSize: 13, fontWeight: 500,
+                    marginTop: 12, padding: 12, borderRadius: 'var(--sm-radius-sm)',
+                    backgroundColor: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.2)',
+                    color: 'var(--sm-error)', fontSize: 13, fontWeight: 500,
                     display: 'flex', alignItems: 'center', justifyContent: 'space-between',
                   }}>
                     <span>{gradeError}</span>
@@ -1618,10 +1617,7 @@ export default function GMPage() {
                 overflow: 'auto',
               }}>
                 {/* Team 2: Opponent */}
-                <div style={{
-                  backgroundColor: cardBg,
-                  border: `1px solid ${borderColor}`,
-                  borderRadius: 12,
+                <div className="glass-card glass-card-static" style={{
                   padding: 16,
                   display: 'flex',
                   flexDirection: 'column',
@@ -1697,10 +1693,7 @@ export default function GMPage() {
 
                 {/* Team 3: Third Team (only in 3-team mode) */}
                 {tradeMode === '3-team' && (
-                  <div style={{
-                    backgroundColor: cardBg,
-                    border: `1px solid ${borderColor}`,
-                    borderRadius: 12,
+                  <div className="glass-card glass-card-static" style={{
                     padding: 16,
                     display: 'flex',
                     flexDirection: 'column',
@@ -1780,10 +1773,7 @@ export default function GMPage() {
             {/* MOBILE: Stacked layout */}
             <div className="flex flex-col gap-4 lg:hidden">
               {/* Trade Board (center content) */}
-              <div style={{
-                backgroundColor: cardBg,
-                border: `1px solid ${borderColor}`,
-                borderRadius: 12,
+              <div className="glass-card glass-card-static" style={{
                 padding: 16,
               }}>
                 {tradeMode === '3-team' && opponentTeam && thirdTeam ? (
@@ -1884,7 +1874,7 @@ export default function GMPage() {
               </div>
 
               {/* Chicago Roster Collapsible */}
-              <div style={{ backgroundColor: cardBg, border: `1px solid ${borderColor}`, borderRadius: 12, overflow: 'hidden' }}>
+              <div className="glass-card glass-card-static" style={{ padding: 0, overflow: 'hidden' }}>
                 <button
                   onClick={() => setLeftPanelOpen(!leftPanelOpen)}
                   style={{
@@ -1943,7 +1933,7 @@ export default function GMPage() {
               </div>
 
               {/* Opponent Roster Collapsible */}
-              <div style={{ backgroundColor: cardBg, border: `1px solid ${borderColor}`, borderRadius: 12, overflow: 'hidden' }}>
+              <div className="glass-card glass-card-static" style={{ padding: 0, overflow: 'hidden' }}>
                 <button
                   onClick={() => { if (!opponentTeam) setShowOpponentPicker(true); else setRightPanelOpen(!rightPanelOpen) }}
                   style={{
@@ -2018,23 +2008,22 @@ export default function GMPage() {
             onPageChange={p => fetchTrades(p)}
           />
         ) : (
-          <div style={{ backgroundColor: cardBg, border: `1px solid ${borderColor}`, borderRadius: 12, padding: 24 }}>
-            <h2 style={{ fontSize: 18, fontWeight: 700, marginBottom: 16 }}>Leaderboard</h2>
+          <div className="glass-card glass-card-static">
+            <h2 style={{ fontSize: 18, fontWeight: 700, marginBottom: 16, fontFamily: 'var(--sm-font-heading)', color: 'var(--sm-text)' }}>Leaderboard</h2>
             {leaderboard.length === 0 ? (
               <p style={{ color: subText }}>No trades graded yet. Be the first!</p>
             ) : (
               <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
                 {leaderboard.map((entry: any, i: number) => (
-                  <div key={entry.user_id || i} style={{
+                  <div key={entry.user_id || i} className="glass-card-sm glass-card-static" style={{
                     display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-                    padding: '12px 16px', borderRadius: 8,
-                    backgroundColor: isDark ? '#374151' : '#f9fafb',
+                    padding: '12px 16px',
                   }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-                      <span style={{ fontSize: 16, fontWeight: 700, color: i < 3 ? '#bc0000' : subText }}>#{i + 1}</span>
-                      <span style={{ fontWeight: 600 }}>{entry.display_name || 'Anonymous'}</span>
+                      <span style={{ fontSize: 16, fontWeight: 700, color: i < 3 ? 'var(--sm-red)' : subText }}>#{i + 1}</span>
+                      <span style={{ fontWeight: 600, color: 'var(--sm-text)' }}>{entry.display_name || 'Anonymous'}</span>
                     </div>
-                    <span style={{ fontSize: 18, fontWeight: 800, color: '#bc0000' }}>{entry.total_score}</span>
+                    <span style={{ fontSize: 18, fontWeight: 800, color: 'var(--sm-red)' }}>{entry.total_score}</span>
                   </div>
                 ))}
               </div>

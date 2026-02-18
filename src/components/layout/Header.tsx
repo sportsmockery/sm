@@ -1,113 +1,43 @@
 'use client'
 
-import { useState, useRef, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
 import { usePathname } from 'next/navigation'
-import { motion } from 'framer-motion'
 import { useTheme } from '@/contexts/ThemeContext'
 import { useAuth } from '@/contexts/AuthContext'
 import TeamStickyBarRouter from './TeamStickyBarRouter'
 import LiveGamesTopBar from './LiveGamesTopBar'
 import type { Role } from '@/lib/roles'
 
-// Navigation items - proper casing (not all caps) per spec
-const navItems = [
-  {
-    name: 'Bears',
-    href: '/chicago-bears',
-    submenu: [
-      { name: 'News', href: '/chicago-bears' },
-      { name: 'Schedule', href: '/chicago-bears/schedule' },
-      { name: 'Scores', href: '/chicago-bears/scores' },
-      { name: 'Stats', href: '/chicago-bears/stats' },
-      { name: 'Roster', href: '/chicago-bears/roster' },
-    ]
-  },
-  {
-    name: 'Bulls',
-    href: '/chicago-bulls',
-    submenu: [
-      { name: 'News', href: '/chicago-bulls' },
-      { name: 'Schedule', href: '/chicago-bulls/schedule' },
-      { name: 'Scores', href: '/chicago-bulls/scores' },
-      { name: 'Stats', href: '/chicago-bulls/stats' },
-      { name: 'Roster', href: '/chicago-bulls/roster' },
-    ]
-  },
-  {
-    name: 'Cubs',
-    href: '/chicago-cubs',
-    submenu: [
-      { name: 'News', href: '/chicago-cubs' },
-      { name: 'Schedule', href: '/chicago-cubs/schedule' },
-      { name: 'Scores', href: '/chicago-cubs/scores' },
-      { name: 'Stats', href: '/chicago-cubs/stats' },
-      { name: 'Roster', href: '/chicago-cubs/roster' },
-    ]
-  },
-  {
-    name: 'White Sox',
-    href: '/chicago-white-sox',
-    submenu: [
-      { name: 'News', href: '/chicago-white-sox' },
-      { name: 'Schedule', href: '/chicago-white-sox/schedule' },
-      { name: 'Scores', href: '/chicago-white-sox/scores' },
-      { name: 'Stats', href: '/chicago-white-sox/stats' },
-      { name: 'Roster', href: '/chicago-white-sox/roster' },
-    ]
-  },
-  {
-    name: 'Blackhawks',
-    href: '/chicago-blackhawks',
-    submenu: [
-      { name: 'News', href: '/chicago-blackhawks' },
-      { name: 'Schedule', href: '/chicago-blackhawks/schedule' },
-      { name: 'Scores', href: '/chicago-blackhawks/scores' },
-      { name: 'Stats', href: '/chicago-blackhawks/stats' },
-      { name: 'Roster', href: '/chicago-blackhawks/roster' },
-    ]
-  },
+// 2030 nav links (center section)
+const navLinks = [
+  { name: 'Scout AI', href: '/scout-ai' },
+  { name: 'Simulators', href: '/gm' },
+  { name: 'Fan Hub', href: '/fan-zone' },
+  { name: 'Data Cosmos', href: '/datahub' },
+  { name: 'SM+ Premium', href: '/pricing', cta: true },
 ]
 
-const videoLinks = [
-  { name: 'Bears Film Room', href: '/bears-film-room', icon: '/logos/bfr_logo.png', darkIcon: '/downloads/bfr.png' },
-  { name: 'Pinwheels & Ivy', href: '/pinwheels-and-ivy', icon: '/logos/PI_logo.png', darkIcon: '/downloads/PI_white.png' },
-  { name: 'Untold Chicago Stories', href: '/untold-chicago-stories', icon: '/youtubelogos/untold-star-black.png', darkIcon: '/youtubelogos/untold-white.png' },
-]
-
-const musicLinks = [
-  { name: 'Untold Chicago Stories', href: 'https://open.spotify.com/track/0LV2TlOspytIK9K2IJRilB?si=80a2f03758c442f1', icon: 'spotify' },
-]
-
-const appLinks = [
-  { name: 'Apple', href: 'https://apps.apple.com/us/app/sports-mockery/id680797716', icon: 'apple' },
-  { name: 'Google Play', href: 'https://play.google.com/store/search?q=sports%20mockery&c=apps&hl=en_US', icon: 'google-play' },
+// Team links for mobile drawer
+const teamLinks = [
+  { name: 'Bears', href: '/chicago-bears' },
+  { name: 'Bulls', href: '/chicago-bulls' },
+  { name: 'Cubs', href: '/chicago-cubs' },
+  { name: 'White Sox', href: '/chicago-white-sox' },
+  { name: 'Blackhawks', href: '/chicago-blackhawks' },
 ]
 
 export default function Header() {
   const pathname = usePathname()
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
-  const [videoMenuOpen, setVideoMenuOpen] = useState(false)
-  const [musicMenuOpen, setMusicMenuOpen] = useState(false)
-  const [appMenuOpen, setAppMenuOpen] = useState(false)
-  const [newFeaturesMenuOpen, setNewFeaturesMenuOpen] = useState(false)
-  const [activeTeamMenu, setActiveTeamMenu] = useState<string | null>(null)
-  const [userMenuOpen, setUserMenuOpen] = useState(false)
-  const [searchOpen, setSearchOpen] = useState(false)
-  const [searchQuery, setSearchQuery] = useState('')
-  const [isScrolled, setIsScrolled] = useState(false)
-  const [loginHovered, setLoginHovered] = useState(false)
-  const [userRole, setUserRole] = useState<Role | null>(null)
-  const searchInputRef = useRef<HTMLInputElement>(null)
-  const videoMenuRef = useRef<HTMLDivElement>(null)
-  const musicMenuRef = useRef<HTMLDivElement>(null)
-  const appMenuRef = useRef<HTMLDivElement>(null)
-  const newFeaturesMenuRef = useRef<HTMLDivElement>(null)
-  const teamMenuRefs = useRef<{ [key: string]: HTMLDivElement | null }>({})
-  const userMenuRef = useRef<HTMLDivElement>(null)
   const { theme, toggleTheme } = useTheme()
   const { user, isAuthenticated, signOut } = useAuth()
+
+  const [scrolled, setScrolled] = useState(false)
+  const [drawerOpen, setDrawerOpen] = useState(false)
+  const [userMenuOpen, setUserMenuOpen] = useState(false)
+  const [userRole, setUserRole] = useState<Role | null>(null)
+  const userMenuRef = useRef<HTMLDivElement>(null)
 
   // Fetch user role when authenticated
   useEffect(() => {
@@ -123,63 +53,20 @@ export default function Header() {
     }
   }, [isAuthenticated, user?.email])
 
-  // Track scroll position for glass effect
+  // Scroll detection: add .scrolled class when > 50px
   useEffect(() => {
     const handleScroll = () => {
-      setIsScrolled(window.scrollY > 10)
+      setScrolled(window.scrollY > 50)
     }
-
     window.addEventListener('scroll', handleScroll, { passive: true })
     return () => window.removeEventListener('scroll', handleScroll)
   }, [])
 
-  // Focus search input when opened
-  useEffect(() => {
-    if (searchOpen && searchInputRef.current) {
-      searchInputRef.current.focus()
-    }
-  }, [searchOpen])
-
-  // Close dropdown when clicking outside
-  useEffect(() => {
-    const handleClickOutside = (e: MouseEvent) => {
-      if (videoMenuRef.current && !videoMenuRef.current.contains(e.target as Node)) {
-        setVideoMenuOpen(false)
-      }
-      if (musicMenuRef.current && !musicMenuRef.current.contains(e.target as Node)) {
-        setMusicMenuOpen(false)
-      }
-      if (appMenuRef.current && !appMenuRef.current.contains(e.target as Node)) {
-        setAppMenuOpen(false)
-      }
-      if (newFeaturesMenuRef.current && !newFeaturesMenuRef.current.contains(e.target as Node)) {
-        setNewFeaturesMenuOpen(false)
-      }
-      // Check all team menu refs
-      if (activeTeamMenu) {
-        const activeRef = teamMenuRefs.current[activeTeamMenu]
-        if (activeRef && !activeRef.contains(e.target as Node)) {
-          setActiveTeamMenu(null)
-        }
-      }
-      if (userMenuRef.current && !userMenuRef.current.contains(e.target as Node)) {
-        setUserMenuOpen(false)
-      }
-    }
-    document.addEventListener('mousedown', handleClickOutside)
-    return () => document.removeEventListener('mousedown', handleClickOutside)
-  }, [activeTeamMenu])
-
-  // Close menus on escape
+  // Close drawer on escape key
   useEffect(() => {
     const handleEscape = (e: KeyboardEvent) => {
       if (e.key === 'Escape') {
-        setMobileMenuOpen(false)
-        setSearchOpen(false)
-        setVideoMenuOpen(false)
-        setMusicMenuOpen(false)
-        setAppMenuOpen(false)
-        setActiveTeamMenu(null)
+        setDrawerOpen(false)
         setUserMenuOpen(false)
       }
     }
@@ -187,945 +74,543 @@ export default function Header() {
     return () => document.removeEventListener('keydown', handleEscape)
   }, [])
 
-  const handleSearch = (e: React.FormEvent) => {
-    e.preventDefault()
-    if (searchQuery.trim()) {
-      window.location.href = `/search?q=${encodeURIComponent(searchQuery)}`
+  // Close user menu on outside click
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (userMenuRef.current && !userMenuRef.current.contains(e.target as Node)) {
+        setUserMenuOpen(false)
+      }
     }
-  }
+    document.addEventListener('mousedown', handleClickOutside)
+    return () => document.removeEventListener('mousedown', handleClickOutside)
+  }, [])
+
+  // Lock body scroll when drawer is open
+  useEffect(() => {
+    if (drawerOpen) {
+      document.body.style.overflow = 'hidden'
+    } else {
+      document.body.style.overflow = ''
+    }
+    return () => {
+      document.body.style.overflow = ''
+    }
+  }, [drawerOpen])
 
   // Don't render header on standalone landing pages
   if (pathname?.startsWith('/home')) {
     return null
   }
 
+  const closeDrawer = () => setDrawerOpen(false)
+
   return (
-    <header
-      className={`sticky top-0 z-[200] transition-all duration-300 ${
-        isScrolled
-          ? 'shadow-md backdrop-blur-md'
-          : ''
-      }`}
-      style={{
-        backgroundColor: isScrolled
-          ? theme === 'dark'
-            ? 'rgba(0, 0, 0, 0.85)'
-            : 'rgba(255, 255, 255, 0.9)'
-          : 'var(--sm-card)',
-      }}
-    >
-      {/* Live Games Top Bar - Shows when Chicago teams are playing */}
-      <LiveGamesTopBar isHomepage />
-
-      {/* Top Header Bar - Logo and Social */}
-      <div
-        className="border-b transition-colors duration-300"
-        style={{
-          borderColor: 'var(--sm-border)',
-          backgroundColor: isScrolled ? 'transparent' : 'var(--sm-card)',
-        }}
-      >
-        <div className="max-w-[1110px] mx-auto px-4">
-          <div className="flex items-center justify-between h-[52px]">
-            {/* Left: Social icons - hidden on mobile, show on tablet+ */}
-            <div className="hidden sm:flex items-center gap-1 w-[140px]">
-              <a
-                href="https://facebook.com/sportsmockery"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="hover:text-[var(--link-color)] transition-colors p-2 min-w-[36px] min-h-[36px] flex items-center justify-center"
-                style={{ color: 'var(--sm-text)' }}
-                aria-label="Facebook"
-              >
-                <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 320 512">
-                  <path d="M279.14 288l14.22-92.66h-88.91v-60.13c0-25.35 12.42-50.06 52.24-50.06h40.42V6.26S260.43 0 225.36 0c-73.22 0-121.08 44.38-121.08 124.72v70.62H22.89V288h81.39v224h100.17V288z" />
-                </svg>
-              </a>
-              <a
-                href="https://twitter.com/sportsmockery"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="hover:text-[var(--link-color)] transition-colors p-2 min-w-[36px] min-h-[36px] flex items-center justify-center"
-                style={{ color: 'var(--sm-text)' }}
-                aria-label="X (Twitter)"
-              >
-                <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 512 512">
-                  <path d="M389.2 48h70.6L305.6 224.2 487 464H345L233.7 318.6 106.5 464H35.8L200.7 275.5 26.8 48H172.4L272.9 180.9 389.2 48zM364.4 421.8h39.1L151.1 88h-42L364.4 421.8z" />
-                </svg>
-              </a>
-              <a
-                href="https://www.youtube.com/@bearsfilmroom"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="hover:text-[var(--link-color)] transition-colors p-2 min-w-[36px] min-h-[36px] flex items-center justify-center"
-                style={{ color: 'var(--sm-text)' }}
-                aria-label="Bears Film Room YouTube"
-              >
-                <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 576 512">
-                  <path d="M549.655 124.083c-6.281-23.65-24.787-42.276-48.284-48.597C458.781 64 288 64 288 64S117.22 64 74.629 75.486c-23.497 6.322-42.003 24.947-48.284 48.597-11.412 42.867-11.412 132.305-11.412 132.305s0 89.438 11.412 132.305c6.281 23.65 24.787 41.5 48.284 47.821C117.22 448 288 448 288 448s170.78 0 213.371-11.486c23.497-6.321 42.003-24.171 48.284-47.821 11.412-42.867 11.412-132.305 11.412-132.305s0-89.438-11.412-132.305zm-317.51 213.508V175.185l142.739 81.205-142.739 81.201z" />
-                </svg>
-              </a>
-              <a
-                href="https://www.tiktok.com/@sportsmockerychi"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="hover:text-[var(--link-color)] transition-colors p-2 min-w-[36px] min-h-[36px] flex items-center justify-center"
-                style={{ color: 'var(--sm-text)' }}
-                aria-label="TikTok"
-              >
-                <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 448 512">
-                  <path d="M448,209.91a210.06,210.06,0,0,1-122.77-39.25V349.38A162.55,162.55,0,1,1,185,188.31V278.2a74.62,74.62,0,1,0,52.23,71.18V0l88,0a121.18,121.18,0,0,0,1.86,22.17h0A122.18,122.18,0,0,0,381,102.39a121.43,121.43,0,0,0,67,20.14Z" />
-                </svg>
-              </a>
-            </div>
-            {/* Mobile: Empty spacer for centering */}
-            <div className="sm:hidden w-[44px]" />
-
-            {/* Center: Logo - swaps based on theme with hover animation */}
-            <Link href="/" className="flex-shrink-0">
-              <motion.div
-                whileHover={{ scale: 1.03 }}
-                whileTap={{ scale: 0.98 }}
-                transition={{ type: 'spring', stiffness: 400, damping: 17 }}
-              >
-                {/* Light mode logo */}
-                <Image
-                  src="/logos/v2_site_Header.png"
-                  alt="Sports Mockery"
-                  width={180}
-                  height={46}
-                  className={`h-9 md:h-10 w-auto object-contain ${theme === 'dark' ? 'hidden' : 'block'}`}
-                  priority
-                />
-                {/* Dark mode logo - slightly larger to match light mode visually */}
-                <Image
-                  src="/logos/v2_header_dark.png"
-                  alt="Sports Mockery"
-                  width={200}
-                  height={58}
-                  className={`h-10 md:h-11 w-auto object-contain ${theme === 'dark' ? 'block' : 'hidden'}`}
-                  priority
-                />
-              </motion.div>
-            </Link>
-
-            {/* Right: Theme toggle and Login */}
-            <div className="flex items-center gap-3 justify-end">
-              <button
-                onClick={toggleTheme}
-                className={`relative w-[52px] h-[26px] rounded-full border border-[#bc0000] transition-colors ${
-                  theme === 'dark' ? 'bg-[#bc0000]' : 'bg-white'
-                }`}
-                aria-label={`Switch to ${theme === 'dark' ? 'light' : 'dark'} mode`}
-              >
-                {/* Toggle circle with star icon */}
-                <span
-                  className={`absolute top-[2px] w-[20px] h-[20px] rounded-full flex items-center justify-center transition-all duration-200 ${
-                    theme === 'dark' ? 'left-[28px] bg-white' : 'left-[2px] bg-[#bc0000]'
-                  }`}
-                >
-                  {/* Chicago 6-pointed star */}
-                  <svg
-                    className={`w-3 h-3 ${theme === 'dark' ? 'text-[#bc0000]' : 'text-white'}`}
-                    viewBox="0 0 24 24"
-                    fill="currentColor"
-                  >
-                    <polygon points="12,0 14.5,8 24,8 16.5,13 19,22 12,17 5,22 7.5,13 0,8 9.5,8" />
-                  </svg>
-                </span>
-              </button>
-              {/* User Profile / Login */}
-              {isAuthenticated && user ? (
-                <div className="relative hidden sm:block" ref={userMenuRef}>
-                  <button
-                    onClick={() => setUserMenuOpen(!userMenuOpen)}
-                    className="flex items-center gap-2 px-2 py-1.5 rounded-full hover:bg-[var(--sm-surface)] transition-colors"
-                  >
-                    {/* User Avatar - show image if available, otherwise initials */}
-                    {user.avatar ? (
-                      <Image
-                        src={user.avatar}
-                        alt={user.name || 'User'}
-                        width={32}
-                        height={32}
-                        className="w-8 h-8 rounded-full object-cover"
-                        unoptimized
-                      />
-                    ) : (
-                      <div className="w-8 h-8 rounded-full bg-[#bc0000] flex items-center justify-center text-white text-sm font-bold">
-                        {(user.name || user.email)?.charAt(0).toUpperCase() || 'U'}
-                      </div>
-                    )}
-                    <span
-                      className="text-xs font-medium max-w-[100px] truncate"
-                      style={{ color: 'var(--sm-text)' }}
-                    >
-                      {user.name || user.email?.split('@')[0] || 'User'}
-                    </span>
-                    <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" style={{ color: 'var(--sm-text-muted)' }}>
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                    </svg>
-                  </button>
-
-                  {/* User Dropdown Menu */}
-                  {userMenuOpen && (
-                    <div
-                      className="absolute top-full right-0 mt-1 w-48 rounded-lg shadow-lg z-[100]"
-                      style={{ backgroundColor: 'var(--sm-surface)', border: '1px solid var(--sm-border)' }}
-                    >
-                      <div className="py-1">
-                        {/* Admin Dashboard link for admins - FIRST item */}
-                        {userRole === 'admin' && (
-                          <Link
-                            href="/admin"
-                            onClick={() => setUserMenuOpen(false)}
-                            className="flex items-center gap-2 px-4 py-2 text-sm hover:bg-[var(--sm-card-hover)] transition-colors"
-                            style={{ color: 'var(--sm-text)' }}
-                          >
-                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                            </svg>
-                            Admin Dashboard
-                          </Link>
-                        )}
-                        {/* Creator Studio link for editors and authors only (not admins) */}
-                        {(userRole === 'editor' || userRole === 'author') && (
-                          <Link
-                            href="/studio"
-                            onClick={() => setUserMenuOpen(false)}
-                            className="flex items-center gap-2 px-4 py-2 text-sm hover:bg-[var(--sm-card-hover)] transition-colors"
-                            style={{ color: 'var(--sm-text)' }}
-                          >
-                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
-                            </svg>
-                            Creator Studio
-                          </Link>
-                        )}
-                        <Link
-                          href="/profile"
-                          onClick={() => setUserMenuOpen(false)}
-                          className="flex items-center gap-2 px-4 py-2 text-sm hover:bg-[var(--sm-card-hover)] transition-colors"
-                          style={{ color: 'var(--sm-text)' }}
-                        >
-                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                          </svg>
-                          My Profile
-                        </Link>
-                        <Link
-                          href="/my-gm-score"
-                          onClick={() => setUserMenuOpen(false)}
-                          className="flex items-center gap-2 px-4 py-2 text-sm hover:bg-[var(--sm-card-hover)] transition-colors"
-                          style={{ color: 'var(--sm-text)' }}
-                        >
-                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-                          </svg>
-                          My GM Score
-                        </Link>
-                        <div className="my-1" style={{ borderTop: '1px solid var(--sm-border)' }} />
-                        <button
-                          onClick={() => {
-                            setUserMenuOpen(false)
-                            signOut()
-                          }}
-                          className="flex items-center gap-2 px-4 py-2 text-sm w-full text-left hover:bg-[var(--sm-card-hover)] transition-colors text-red-500"
-                        >
-                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
-                          </svg>
-                          Sign Out
-                        </button>
-                      </div>
-                    </div>
-                  )}
-                </div>
-              ) : (
-                <Link
-                  href="/login"
-                  className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded border border-[#bc0000] text-[#bc0000] hover:bg-[#bc0000] hover:text-white transition-colors"
-                  style={{ fontFamily: "'Montserrat', sans-serif" }}
-                >
-                  <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1" />
-                  </svg>
-                  Login
-                </Link>
-              )}
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Main Navigation Bar - with red underline */}
-      <nav
-        className="border-b-[3px] border-[#bc0000] transition-colors duration-300"
-        style={{ backgroundColor: isScrolled ? 'transparent' : 'var(--sm-card)' }}
-      >
-        <div className="max-w-[1110px] mx-auto px-4">
-          <div className="flex items-center justify-between h-[44px]">
-            {/* Mobile menu button - 44px min tap target */}
-            <button
-              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="lg:hidden p-2 hover:text-[var(--link-color)] min-w-[44px] min-h-[44px] flex items-center justify-center"
-              style={{ color: 'var(--sm-text)' }}
-              aria-label="Toggle menu"
+    <>
+      {/* ===== FIXED NAV BAR (72px, frosted glass) ===== */}
+      <nav className={`sm-nav${scrolled ? ' scrolled' : ''}`}>
+        {/* LEFT: Logo */}
+        <Link href="/" className="nav-logo">
+          {/* SM shield icon */}
+          <svg viewBox="0 0 28 28" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path
+              d="M14 2L3 7v7c0 7.18 4.7 13.89 11 15.5C20.3 27.89 25 21.18 25 14V7L14 2z"
+              fill="var(--sm-red)"
+            />
+            <text
+              x="14"
+              y="18"
+              textAnchor="middle"
+              fill="#fff"
+              fontFamily="'Space Grotesk', sans-serif"
+              fontWeight="700"
+              fontSize="11"
             >
-              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                {mobileMenuOpen ? (
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                ) : (
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
-                )}
+              SM
+            </text>
+          </svg>
+          <span>
+            Sports <span className="logo-accent">Mockery</span>
+          </span>
+        </Link>
+
+        {/* CENTER: Nav links (hidden at <=768px by CSS) */}
+        <div className="nav-links">
+          {navLinks.map((link) => (
+            <Link
+              key={link.href}
+              href={link.href}
+              className={link.cta ? 'nav-cta' : ''}
+            >
+              {link.name}
+            </Link>
+          ))}
+        </div>
+
+        {/* RIGHT: Theme toggle + Auth + Search + Hamburger */}
+        <div className="nav-right">
+          {/* Search icon */}
+          <Link
+            href="/search"
+            aria-label="Search"
+            style={{
+              color: 'var(--sm-text-muted)',
+              display: 'flex',
+              alignItems: 'center',
+            }}
+          >
+            <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+            </svg>
+          </Link>
+
+          {/* Theme toggle (Sun/Moon) */}
+          <button
+            onClick={toggleTheme}
+            aria-label={`Switch to ${theme === 'dark' ? 'light' : 'dark'} mode`}
+            style={{
+              background: 'none',
+              border: 'none',
+              cursor: 'pointer',
+              color: 'var(--sm-text-muted)',
+              display: 'flex',
+              alignItems: 'center',
+              padding: '4px',
+            }}
+          >
+            {theme === 'dark' ? (
+              /* Sun icon */
+              <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
               </svg>
-            </button>
+            ) : (
+              /* Moon icon */
+              <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
+              </svg>
+            )}
+          </button>
 
-            {/* Desktop Navigation - Centered */}
-            <div className="hidden lg:flex items-center justify-center flex-1 gap-0">
-              {navItems.map((item) => (
-                item.submenu ? (
-                  <div
-                    key={item.name}
-                    className="relative"
-                    ref={(el) => { teamMenuRefs.current[item.name] = el }}
-                  >
-                    <button
-                      onClick={() => setActiveTeamMenu(activeTeamMenu === item.name ? null : item.name)}
-                      className="flex items-center gap-1 px-4 py-4 text-[14px] font-bold hover:text-[var(--link-color)] transition-colors"
-                      style={{ fontFamily: "'Montserrat', sans-serif", color: 'var(--sm-text)' }}
-                    >
-                      {item.name}
-                      <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                      </svg>
-                    </button>
-
-                    {activeTeamMenu === item.name && (
-                      <div
-                        className="absolute top-full left-0 mt-0 w-48 shadow-md z-[100]"
-                        style={{ backgroundColor: 'var(--sm-surface)', border: '1px solid var(--sm-border)' }}
-                      >
-                        {item.submenu.map((subItem) => (
-                          <Link
-                            key={subItem.name}
-                            href={subItem.href}
-                            onClick={() => setActiveTeamMenu(null)}
-                            className="block px-5 py-2 text-[14px] hover:bg-[var(--sm-card-hover)] transition-colors"
-                            style={{ color: 'var(--sm-text)' }}
-                          >
-                            {subItem.name}
-                          </Link>
-                        ))}
-                      </div>
-                    )}
-                  </div>
-                ) : (
-                  <Link
-                    key={item.name}
-                    href={item.href}
-                    className="px-4 py-4 text-[14px] font-bold hover:text-[var(--link-color)] transition-colors"
-                    style={{ fontFamily: "'Montserrat', sans-serif", color: 'var(--sm-text)' }}
-                  >
-                    {item.name}
-                  </Link>
-                )
-              ))}
-
-              {/* Video dropdown */}
-              <div className="relative" ref={videoMenuRef}>
-                <button
-                  onClick={() => setVideoMenuOpen(!videoMenuOpen)}
-                  className="flex items-center gap-1 px-4 py-4 text-[14px] font-bold hover:text-[var(--link-color)] transition-colors"
-                  style={{ fontFamily: "'Montserrat', sans-serif", color: 'var(--sm-text)' }}
-                >
-                  Video
-                  <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                  </svg>
-                </button>
-
-                {videoMenuOpen && (
-                  <div
-                    className="absolute top-full left-0 mt-0 w-56 shadow-md z-[100]"
-                    style={{ backgroundColor: 'var(--sm-surface)', border: '1px solid var(--sm-border)' }}
-                  >
-                    {videoLinks.map((video) => (
-                      <Link
-                        key={video.name}
-                        href={video.href}
-                        onClick={() => setVideoMenuOpen(false)}
-                        className="flex items-center gap-3 px-4 py-3 text-[14px] hover:bg-[var(--sm-card-hover)] transition-colors"
-                        style={{ color: 'var(--sm-text)' }}
-                      >
-                        <Image
-                          src={theme === 'dark' ? video.darkIcon : video.icon}
-                          alt={video.name}
-                          width={28}
-                          height={28}
-                          className="rounded-md flex-shrink-0"
-                        />
-                        <span className="flex-1">{video.name}</span>
-                      </Link>
-                    ))}
-                  </div>
-                )}
-              </div>
-
-              {/* Music dropdown */}
-              <div className="relative" ref={musicMenuRef}>
-                <button
-                  onClick={() => setMusicMenuOpen(!musicMenuOpen)}
-                  className="flex items-center gap-1 px-4 py-4 text-[14px] font-bold hover:text-[var(--link-color)] transition-colors"
-                  style={{ fontFamily: "'Montserrat', sans-serif", color: 'var(--sm-text)' }}
-                >
-                  Music
-                  <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                  </svg>
-                </button>
-
-                {musicMenuOpen && (
-                  <div
-                    className="absolute top-full left-0 mt-0 w-56 shadow-md z-[100]"
-                    style={{ backgroundColor: 'var(--sm-surface)', border: '1px solid var(--sm-border)' }}
-                  >
-                    {musicLinks.map((music) => (
-                      <a
-                        key={music.name}
-                        href={music.href}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        onClick={() => setMusicMenuOpen(false)}
-                        className="flex items-center gap-3 px-4 py-3 text-[14px] hover:bg-[var(--sm-card-hover)] transition-colors"
-                        style={{ color: 'var(--sm-text)' }}
-                      >
-                        {/* Spotify icon */}
-                        <svg className="w-6 h-6 flex-shrink-0 text-[#1DB954]" fill="currentColor" viewBox="0 0 496 512">
-                          <path d="M248 8C111.1 8 0 119.1 0 256s111.1 248 248 248 248-111.1 248-248S384.9 8 248 8zm100.7 364.9c-4.2 0-6.8-1.3-10.7-3.6-62.4-37.6-135-39.2-206.7-24.5-3.9 1-9 2.6-11.9 2.6-9.7 0-15.8-7.7-15.8-15.8 0-10.3 6.1-15.2 13.6-16.8 81.9-18.1 165.6-16.5 237 26.2 6.1 3.9 9.7 7.4 9.7 16.5s-7.1 15.4-15.2 15.4zm26.9-65.6c-5.2 0-8.7-2.3-12.3-4.2-62.5-37-155.7-51.9-238.6-29.4-4.8 1.3-7.4 2.6-11.9 2.6-10.7 0-19.4-8.7-19.4-19.4s5.2-17.8 15.5-20.7c27.8-7.8 56.2-13.6 97.8-13.6 64.9 0 127.6 16.1 177 45.5 8.1 4.8 11.3 11 11.3 19.7-.1 10.8-8.5 19.5-19.4 19.5zm31-76.2c-5.2 0-8.4-1.3-12.9-3.9-71.2-42.5-198.5-52.7-280.9-29.7-3.6 1-8.1 2.6-12.9 2.6-13.2 0-23.3-10.3-23.3-23.6 0-13.6 8.4-21.3 17.4-23.9 35.2-10.3 74.6-15.2 117.5-15.2 73 0 149.5 15.2 205.4 47.8 7.8 4.5 12.9 10.7 12.9 22.6 0 13.6-11 23.3-23.2 23.3z"/>
-                        </svg>
-                        <span className="flex-1">{music.name}</span>
-                        <svg className="w-3 h-3 opacity-50 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
-                        </svg>
-                      </a>
-                    ))}
-                  </div>
-                )}
-              </div>
-
-              {/* App dropdown */}
-              <div className="relative" ref={appMenuRef}>
-                <button
-                  onClick={() => setAppMenuOpen(!appMenuOpen)}
-                  className="flex items-center gap-1 px-4 py-4 text-[14px] font-bold hover:text-[var(--link-color)] transition-colors"
-                  style={{ fontFamily: "'Montserrat', sans-serif", color: 'var(--sm-text)' }}
-                >
-                  App
-                  <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                  </svg>
-                </button>
-
-                {appMenuOpen && (
-                  <div
-                    className="absolute top-full left-0 mt-0 w-48 shadow-md z-[100]"
-                    style={{ backgroundColor: 'var(--sm-surface)', border: '1px solid var(--sm-border)' }}
-                  >
-                    {appLinks.map((app) => (
-                      <a
-                        key={app.name}
-                        href={app.href}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        onClick={() => setAppMenuOpen(false)}
-                        className="flex items-center gap-3 px-4 py-3 text-[14px] hover:bg-[var(--sm-card-hover)] transition-colors"
-                        style={{ color: 'var(--sm-text)' }}
-                      >
-                        {app.icon === 'apple' ? (
-                          <svg className="w-5 h-5 flex-shrink-0" fill="currentColor" viewBox="0 0 384 512">
-                            <path d="M318.7 268.7c-.2-36.7 16.4-64.4 50-84.8-18.8-26.9-47.2-41.7-84.7-44.6-35.5-2.8-74.3 20.7-88.5 20.7-15 0-49.4-19.7-76.4-19.7C63.3 141.2 4 184.8 4 273.5q0 39.3 14.4 81.2c12.8 36.7 59 126.7 107.2 125.2 25.2-.6 43-17.9 75.8-17.9 31.8 0 48.3 17.9 76.4 17.9 48.6-.7 90.4-82.5 102.6-119.3-65.2-30.7-61.7-90-61.7-91.9zm-56.6-164.2c27.3-32.4 24.8-61.9 24-72.5-24.1 1.4-52 16.4-67.9 34.9-17.5 19.8-27.8 44.3-25.6 71.9 26.1 2 49.9-11.4 69.5-34.3z"/>
-                          </svg>
-                        ) : (
-                          <svg className="w-5 h-5 flex-shrink-0" fill="currentColor" viewBox="0 0 512 512">
-                            <path d="M325.3 234.3L104.6 13l280.8 161.2-60.1 60.1zM47 0C34 6.8 25.3 19.2 25.3 35.3v441.3c0 16.1 8.7 28.5 21.7 35.3l256.6-256L47 0zm425.2 225.6l-58.9-34.1-65.7 64.5 65.7 64.5 60.1-34.1c18-14.3 18-46.5-1.2-60.8zM104.6 499l280.8-161.2-60.1-60.1L104.6 499z"/>
-                          </svg>
-                        )}
-                        <span className="flex-1">{app.name}</span>
-                        <svg className="w-3 h-3 opacity-50 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
-                        </svg>
-                      </a>
-                    ))}
-                  </div>
-                )}
-              </div>
-
-              {/* New Features dropdown */}
-              <div className="relative" ref={newFeaturesMenuRef}>
-                <button
-                  onClick={() => setNewFeaturesMenuOpen(!newFeaturesMenuOpen)}
-                  className="flex items-center gap-1 px-4 py-4 text-[14px] font-bold hover:text-[var(--link-color)] transition-colors"
-                  style={{ fontFamily: "'Montserrat', sans-serif", color: 'var(--sm-text)' }}
-                >
-                  2.0
-                  <span
-                    style={{
-                      backgroundColor: '#bc0000',
-                      color: '#ffffff',
-                      fontSize: '9px',
-                      fontWeight: 700,
-                      padding: '2px 5px',
-                      borderRadius: '4px',
-                      marginLeft: '4px',
-                    }}
-                  >
-                    New!
-                  </span>
-                  <svg className="w-3 h-3 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                  </svg>
-                </button>
-
-                {newFeaturesMenuOpen && (
-                  <div
-                    className="absolute top-full left-0 mt-0 w-48 shadow-md z-[100]"
-                    style={{ backgroundColor: 'var(--sm-surface)', border: '1px solid var(--sm-border)' }}
-                  >
-                    <Link
-                      href="/gm"
-                      onClick={() => setNewFeaturesMenuOpen(false)}
-                      className="flex items-center gap-3 px-4 py-3 text-[14px] hover:bg-[var(--sm-card-hover)] transition-colors"
-                      style={{ color: 'var(--sm-text)' }}
-                    >
-                      <svg className="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.5}>
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M7.5 21L3 16.5m0 0L7.5 12M3 16.5h13.5m0-13.5L21 7.5m0 0L16.5 12M21 7.5H7.5" />
-                      </svg>
-                      <span className="flex-1">Trade Simulator</span>
-                    </Link>
-                    <Link
-                      href="/mock-draft"
-                      onClick={() => setNewFeaturesMenuOpen(false)}
-                      className="flex items-center gap-3 px-4 py-3 text-[14px] hover:bg-[var(--sm-card-hover)] transition-colors"
-                      style={{ color: 'var(--sm-text)' }}
-                    >
-                      <svg className="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.5}>
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M9 12h3.75M9 15h3.75M9 18h3.75m3 .75H18a2.25 2.25 0 002.25-2.25V6.108c0-1.135-.845-2.098-1.976-2.192a48.424 48.424 0 00-1.123-.08m-5.801 0c-.065.21-.1.433-.1.664 0 .414.336.75.75.75h4.5a.75.75 0 00.75-.75 2.25 2.25 0 00-.1-.664m-5.8 0A2.251 2.251 0 0113.5 2.25H15c1.012 0 1.867.668 2.15 1.586m-5.8 0c-.376.023-.75.05-1.124.08C9.095 4.01 8.25 4.973 8.25 6.108V8.25m0 0H4.875c-.621 0-1.125.504-1.125 1.125v11.25c0 .621.504 1.125 1.125 1.125h9.75c.621 0 1.125-.504 1.125-1.125V9.375c0-.621-.504-1.125-1.125-1.125H8.25z" />
-                      </svg>
-                      <span className="flex-1">Mock Draft</span>
-                    </Link>
-                    <Link
-                      href="/fan-chat"
-                      onClick={() => setNewFeaturesMenuOpen(false)}
-                      className="flex items-center gap-3 px-4 py-3 text-[14px] hover:bg-[var(--sm-card-hover)] transition-colors"
-                      style={{ color: 'var(--sm-text)' }}
-                    >
-                      <svg className="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.5}>
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
-                      </svg>
-                      <span className="flex-1">Fan Chat</span>
-                    </Link>
-                  </div>
-                )}
-              </div>
-            </div>
-
-            {/* Right Side: Search + CTAs */}
-            <div className="flex items-center gap-2">
-              {/* Search */}
-              {searchOpen ? (
-                <form onSubmit={handleSearch} className="flex items-center">
-                  <input
-                    ref={searchInputRef}
-                    type="text"
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    placeholder="Search..."
-                    className="w-40 lg:w-56 px-3 py-1.5 text-sm focus:outline-none focus:border-[#bc0000]"
-                    style={{
-                      backgroundColor: 'var(--input-bg)',
-                      border: '1px solid var(--input-border)',
-                      color: 'var(--input-text)'
-                    }}
-                  />
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setSearchOpen(false)
-                      setSearchQuery('')
-                    }}
-                    className="p-2 hover:text-[var(--link-color)]"
-                    style={{ color: 'var(--sm-text-muted)' }}
-                  >
-                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                    </svg>
-                  </button>
-                </form>
-              ) : (
-                <button
-                  onClick={() => setSearchOpen(true)}
-                  className="p-2 hover:text-[var(--link-color)] transition-colors min-w-[44px] min-h-[44px] flex items-center justify-center"
-                  style={{ color: 'var(--sm-text)' }}
-                  aria-label="Search"
-                >
-                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                  </svg>
-                </button>
-              )}
-
-              {/* Scout AI CTA - Red bg, white text in light mode; White bg, red text in dark mode */}
-              <Link
-                href="/scout-ai"
-                className="hidden md:flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded"
+          {/* Auth: User menu or Login/Sign Up */}
+          {isAuthenticated && user ? (
+            <div className="relative" ref={userMenuRef}>
+              <button
+                onClick={() => setUserMenuOpen(!userMenuOpen)}
                 style={{
-                  fontFamily: "'Montserrat', sans-serif",
-                  backgroundColor: theme === 'dark' ? '#ffffff' : '#bc0000',
-                  color: theme === 'dark' ? '#bc0000' : '#ffffff',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '8px',
+                  background: 'none',
                   border: 'none',
-                  outline: 'none',
+                  cursor: 'pointer',
+                  padding: '4px',
                 }}
               >
-                <Image
-                  src="/downloads/scout-v2.png"
-                  alt="Scout AI"
-                  width={14}
-                  height={14}
-                  className="w-3.5 h-3.5"
-                />
-                Scout AI
+                {user.avatar ? (
+                  <Image
+                    src={user.avatar}
+                    alt={user.name || 'User'}
+                    width={32}
+                    height={32}
+                    className="rounded-full object-cover"
+                    style={{ width: '32px', height: '32px' }}
+                    unoptimized
+                  />
+                ) : (
+                  <div
+                    style={{
+                      width: '32px',
+                      height: '32px',
+                      borderRadius: '50%',
+                      backgroundColor: '#bc0000',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      color: '#fff',
+                      fontSize: '14px',
+                      fontWeight: 700,
+                    }}
+                  >
+                    {(user.name || user.email)?.charAt(0).toUpperCase() || 'U'}
+                  </div>
+                )}
+                <svg width="12" height="12" fill="none" stroke="var(--sm-text-muted)" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                </svg>
+              </button>
+
+              {/* User dropdown */}
+              {userMenuOpen && (
+                <div
+                  style={{
+                    position: 'absolute',
+                    top: '100%',
+                    right: 0,
+                    marginTop: '8px',
+                    width: '200px',
+                    borderRadius: '12px',
+                    backgroundColor: 'var(--sm-surface)',
+                    border: '1px solid var(--sm-border)',
+                    boxShadow: '0 8px 32px rgba(0,0,0,0.2)',
+                    zIndex: 1001,
+                    overflow: 'hidden',
+                  }}
+                >
+                  {/* User info header */}
+                  <div
+                    style={{
+                      padding: '12px 16px',
+                      borderBottom: '1px solid var(--sm-border)',
+                    }}
+                  >
+                    <div style={{ color: 'var(--sm-text)', fontWeight: 600, fontSize: '14px' }}>
+                      {user.name || user.email?.split('@')[0] || 'User'}
+                    </div>
+                    <div style={{ color: 'var(--sm-text-muted)', fontSize: '12px', marginTop: '2px' }}>
+                      {user.email}
+                    </div>
+                  </div>
+
+                  <div style={{ padding: '4px 0' }}>
+                    {/* Admin Dashboard link */}
+                    {userRole === 'admin' && (
+                      <Link
+                        href="/admin"
+                        onClick={() => setUserMenuOpen(false)}
+                        style={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '10px',
+                          padding: '10px 16px',
+                          color: 'var(--sm-text)',
+                          fontSize: '14px',
+                          textDecoration: 'none',
+                        }}
+                        className="hover:bg-[var(--sm-card-hover)] transition-colors"
+                      >
+                        <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                        </svg>
+                        Admin Dashboard
+                      </Link>
+                    )}
+                    {/* Creator Studio link for editors/authors */}
+                    {(userRole === 'editor' || userRole === 'author') && (
+                      <Link
+                        href="/studio"
+                        onClick={() => setUserMenuOpen(false)}
+                        style={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '10px',
+                          padding: '10px 16px',
+                          color: 'var(--sm-text)',
+                          fontSize: '14px',
+                          textDecoration: 'none',
+                        }}
+                        className="hover:bg-[var(--sm-card-hover)] transition-colors"
+                      >
+                        <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+                        </svg>
+                        Creator Studio
+                      </Link>
+                    )}
+                    <Link
+                      href="/profile"
+                      onClick={() => setUserMenuOpen(false)}
+                      style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '10px',
+                        padding: '10px 16px',
+                        color: 'var(--sm-text)',
+                        fontSize: '14px',
+                        textDecoration: 'none',
+                      }}
+                      className="hover:bg-[var(--sm-card-hover)] transition-colors"
+                    >
+                      <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                      </svg>
+                      My Profile
+                    </Link>
+                    <Link
+                      href="/my-gm-score"
+                      onClick={() => setUserMenuOpen(false)}
+                      style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '10px',
+                        padding: '10px 16px',
+                        color: 'var(--sm-text)',
+                        fontSize: '14px',
+                        textDecoration: 'none',
+                      }}
+                      className="hover:bg-[var(--sm-card-hover)] transition-colors"
+                    >
+                      <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                      </svg>
+                      My GM Score
+                    </Link>
+
+                    <div style={{ borderTop: '1px solid var(--sm-border)', margin: '4px 0' }} />
+
+                    <button
+                      onClick={() => {
+                        setUserMenuOpen(false)
+                        signOut()
+                      }}
+                      style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '10px',
+                        padding: '10px 16px',
+                        color: '#ef4444',
+                        fontSize: '14px',
+                        width: '100%',
+                        textAlign: 'left',
+                        background: 'none',
+                        border: 'none',
+                        cursor: 'pointer',
+                      }}
+                      className="hover:bg-[var(--sm-card-hover)] transition-colors"
+                    >
+                      <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                      </svg>
+                      Sign Out
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
+          ) : (
+            /* Login / Sign Up buttons when not authenticated */
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <Link
+                href="/login"
+                style={{
+                  color: 'var(--sm-text-muted)',
+                  fontSize: '14px',
+                  fontWeight: 500,
+                  textDecoration: 'none',
+                  fontFamily: "'Inter', sans-serif",
+                }}
+              >
+                Log in
+              </Link>
+              <Link
+                href="/signup"
+                className="nav-cta"
+                style={{
+                  fontSize: '13px',
+                  padding: '8px 18px',
+                  textDecoration: 'none',
+                }}
+              >
+                Sign Up
               </Link>
             </div>
-          </div>
+          )}
+
+          {/* Hamburger (shown at <=768px by CSS) */}
+          <button
+            className="nav-hamburger"
+            onClick={() => setDrawerOpen(!drawerOpen)}
+            aria-label="Toggle menu"
+          >
+            <span />
+            <span />
+            <span />
+          </button>
         </div>
       </nav>
 
-      {/* Mobile Navigation */}
-      {mobileMenuOpen && (
-        <div className="lg:hidden" style={{ backgroundColor: 'var(--sm-card)', borderBottom: '1px solid var(--sm-border)' }}>
-          <div className="max-w-[1110px] mx-auto px-4 py-4">
-            {/* Mobile CTAs at top */}
-            <div className="flex gap-3 mb-4 pb-4" style={{ borderBottom: '1px solid var(--sm-border)' }}>
-              <Link
-                href="/scout-ai"
-                onClick={() => setMobileMenuOpen(false)}
-                className="flex-1 flex items-center justify-center gap-2 px-4 py-3 text-sm font-semibold rounded-lg"
+      {/* ===== MOBILE DRAWER (slides in from right) ===== */}
+      <div className={`mobile-drawer${drawerOpen ? ' open' : ''}`}>
+        <div className="drawer-overlay" onClick={closeDrawer} />
+        <div className="drawer-panel">
+          {/* Close button at top of drawer */}
+          <button
+            onClick={closeDrawer}
+            aria-label="Close menu"
+            style={{
+              position: 'absolute',
+              top: '24px',
+              right: '24px',
+              background: 'none',
+              border: 'none',
+              cursor: 'pointer',
+              color: 'var(--sm-text-muted)',
+              padding: '4px',
+            }}
+          >
+            <svg width="24" height="24" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+
+          {/* Nav links in drawer */}
+          {navLinks.map((link) => (
+            <Link key={link.href} href={link.href} onClick={closeDrawer}>
+              {link.name}
+            </Link>
+          ))}
+
+          <hr />
+
+          {/* Team links section header */}
+          <div
+            style={{
+              color: 'var(--sm-text-muted)',
+              fontSize: '11px',
+              fontWeight: 600,
+              textTransform: 'uppercase',
+              letterSpacing: '1px',
+              padding: '4px 0',
+            }}
+          >
+            Teams
+          </div>
+          {teamLinks.map((team) => (
+            <Link key={team.href} href={team.href} onClick={closeDrawer}>
+              {team.name}
+            </Link>
+          ))}
+
+          <hr />
+
+          {/* Auth section in drawer */}
+          {isAuthenticated && user ? (
+            <>
+              <div
                 style={{
-                  fontFamily: "'Montserrat', sans-serif",
-                  backgroundColor: theme === 'dark' ? '#ffffff' : '#bc0000',
-                  color: theme === 'dark' ? '#bc0000' : '#ffffff',
-                  border: 'none',
-                  outline: 'none',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '12px',
+                  padding: '12px 0',
                 }}
               >
-                <Image
-                  src="/downloads/scout-v2.png"
-                  alt="Scout AI"
-                  width={16}
-                  height={16}
-                  className="w-4 h-4"
-                />
-                Scout AI
-              </Link>
-            </div>
-
-            {navItems.map((item) => (
-              item.submenu ? (
-                <div key={item.name}>
-                  <Link
-                    href={item.href}
-                    onClick={() => setMobileMenuOpen(false)}
-                    className="block py-3 text-[14px] font-bold hover:text-[var(--link-color)]"
-                    style={{ fontFamily: "'Montserrat', sans-serif", color: 'var(--sm-text)', borderBottom: '1px solid var(--sm-border)' }}
+                {user.avatar ? (
+                  <Image
+                    src={user.avatar}
+                    alt={user.name || 'User'}
+                    width={36}
+                    height={36}
+                    className="rounded-full object-cover"
+                    style={{ width: '36px', height: '36px' }}
+                    unoptimized
+                  />
+                ) : (
+                  <div
+                    style={{
+                      width: '36px',
+                      height: '36px',
+                      borderRadius: '50%',
+                      backgroundColor: '#bc0000',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      color: '#fff',
+                      fontSize: '14px',
+                      fontWeight: 700,
+                      flexShrink: 0,
+                    }}
                   >
-                    {item.name}
-                  </Link>
-                  <div className="pl-4 border-l-2 border-[#C83200] ml-2">
-                    {item.submenu.map((subItem) => (
-                      <Link
-                        key={subItem.name}
-                        href={subItem.href}
-                        onClick={() => setMobileMenuOpen(false)}
-                        className="block py-2 text-[13px] hover:text-[var(--link-color)]"
-                        style={{ color: 'var(--sm-text-muted)', borderBottom: '1px solid var(--sm-border)' }}
-                      >
-                        {subItem.name}
-                      </Link>
-                    ))}
+                    {(user.name || user.email)?.charAt(0).toUpperCase() || 'U'}
+                  </div>
+                )}
+                <div>
+                  <div style={{ color: 'var(--sm-text)', fontWeight: 600, fontSize: '14px' }}>
+                    {user.name || user.email?.split('@')[0] || 'User'}
+                  </div>
+                  <div style={{ color: 'var(--sm-text-muted)', fontSize: '12px' }}>
+                    {user.email}
                   </div>
                 </div>
-              ) : (
-                <Link
-                  key={item.name}
-                  href={item.href}
-                  onClick={() => setMobileMenuOpen(false)}
-                  className="block py-3 text-[14px] font-bold hover:text-[var(--link-color)] last:border-0"
-                  style={{ fontFamily: "'Montserrat', sans-serif", color: 'var(--sm-text)', borderBottom: '1px solid var(--sm-border)' }}
-                >
-                  {item.name}
-                </Link>
-              )
-            ))}
-            {/* New Features section */}
-            <div>
-              <Link
-                href="https://test.sportsmockery.com/tour-page.html"
-                onClick={() => setMobileMenuOpen(false)}
-                className="py-3 text-[14px] font-bold flex items-center gap-2"
-                style={{ fontFamily: "'Montserrat', sans-serif", color: 'var(--sm-text)', borderBottom: '1px solid var(--sm-border)' }}
-              >
-                2.0
-                <span
-                  style={{
-                    backgroundColor: '#bc0000',
-                    color: '#ffffff',
-                    fontSize: '9px',
-                    fontWeight: 700,
-                    padding: '2px 5px',
-                    borderRadius: '4px',
-                  }}
-                >
-                  New!
-                </span>
-              </Link>
-              <div className="pl-4 border-l-2 border-[#bc0000] ml-2">
-                <Link
-                  href="/gm"
-                  onClick={() => setMobileMenuOpen(false)}
-                  className="block py-2 text-[13px] hover:text-[var(--link-color)]"
-                  style={{ color: 'var(--sm-text-muted)', borderBottom: '1px solid var(--sm-border)' }}
-                >
-                  Trade Simulator
-                </Link>
-                <Link
-                  href="/mock-draft"
-                  onClick={() => setMobileMenuOpen(false)}
-                  className="block py-2 text-[13px] hover:text-[var(--link-color)]"
-                  style={{ color: 'var(--sm-text-muted)', borderBottom: '1px solid var(--sm-border)' }}
-                >
-                  Mock Draft
-                </Link>
-                <Link
-                  href="/fan-chat"
-                  onClick={() => setMobileMenuOpen(false)}
-                  className="block py-2 text-[13px] hover:text-[var(--link-color)]"
-                  style={{ color: 'var(--sm-text-muted)', borderBottom: '1px solid var(--sm-border)' }}
-                >
-                  Fan Chat
-                </Link>
               </div>
-            </div>
-            {/* Video section */}
-            <div>
-              <div
-                className="py-3 text-[14px] font-bold"
-                style={{ fontFamily: "'Montserrat', sans-serif", color: 'var(--sm-text)', borderBottom: '1px solid var(--sm-border)' }}
-              >
-                Video
-              </div>
-              <div className="pl-4 border-l-2 border-[#C83200] ml-2">
-                {videoLinks.map((video) => (
-                  <Link
-                    key={video.name}
-                    href={video.href}
-                    onClick={() => setMobileMenuOpen(false)}
-                    className="flex items-center gap-3 py-3 text-[13px] hover:text-[var(--link-color)]"
-                    style={{ color: 'var(--sm-text-muted)', borderBottom: '1px solid var(--sm-border)' }}
-                  >
-                    <Image
-                      src={theme === 'dark' ? video.darkIcon : video.icon}
-                      alt={video.name}
-                      width={24}
-                      height={24}
-                      className="rounded-md flex-shrink-0"
-                    />
-                    <span className="flex-1">{video.name}</span>
-                  </Link>
-                ))}
-              </div>
-            </div>
-            {/* Music section */}
-            <div>
-              <div
-                className="py-3 text-[14px] font-bold"
-                style={{ fontFamily: "'Montserrat', sans-serif", color: 'var(--sm-text)', borderBottom: '1px solid var(--sm-border)' }}
-              >
-                Music
-              </div>
-              <div className="pl-4 border-l-2 border-[#C83200] ml-2">
-                {musicLinks.map((music) => (
-                  <a
-                    key={music.name}
-                    href={music.href}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    onClick={() => setMobileMenuOpen(false)}
-                    className="flex items-center gap-3 py-3 text-[13px] hover:text-[var(--link-color)]"
-                    style={{ color: 'var(--sm-text-muted)', borderBottom: '1px solid var(--sm-border)' }}
-                  >
-                    {/* Spotify icon */}
-                    <svg className="w-5 h-5 flex-shrink-0 text-[#1DB954]" fill="currentColor" viewBox="0 0 496 512">
-                      <path d="M248 8C111.1 8 0 119.1 0 256s111.1 248 248 248 248-111.1 248-248S384.9 8 248 8zm100.7 364.9c-4.2 0-6.8-1.3-10.7-3.6-62.4-37.6-135-39.2-206.7-24.5-3.9 1-9 2.6-11.9 2.6-9.7 0-15.8-7.7-15.8-15.8 0-10.3 6.1-15.2 13.6-16.8 81.9-18.1 165.6-16.5 237 26.2 6.1 3.9 9.7 7.4 9.7 16.5s-7.1 15.4-15.2 15.4zm26.9-65.6c-5.2 0-8.7-2.3-12.3-4.2-62.5-37-155.7-51.9-238.6-29.4-4.8 1.3-7.4 2.6-11.9 2.6-10.7 0-19.4-8.7-19.4-19.4s5.2-17.8 15.5-20.7c27.8-7.8 56.2-13.6 97.8-13.6 64.9 0 127.6 16.1 177 45.5 8.1 4.8 11.3 11 11.3 19.7-.1 10.8-8.5 19.5-19.4 19.5zm31-76.2c-5.2 0-8.4-1.3-12.9-3.9-71.2-42.5-198.5-52.7-280.9-29.7-3.6 1-8.1 2.6-12.9 2.6-13.2 0-23.3-10.3-23.3-23.6 0-13.6 8.4-21.3 17.4-23.9 35.2-10.3 74.6-15.2 117.5-15.2 73 0 149.5 15.2 205.4 47.8 7.8 4.5 12.9 10.7 12.9 22.6 0 13.6-11 23.3-23.2 23.3z"/>
-                    </svg>
-                    <span className="flex-1">{music.name}</span>
-                    <svg className="w-3 h-3 opacity-50 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
-                    </svg>
-                  </a>
-                ))}
-              </div>
-            </div>
-            {/* App section */}
-            <div>
-              <div
-                className="py-3 text-[14px] font-bold"
-                style={{ fontFamily: "'Montserrat', sans-serif", color: 'var(--sm-text)', borderBottom: '1px solid var(--sm-border)' }}
-              >
-                App
-              </div>
-              <div className="pl-4 border-l-2 border-[#C83200] ml-2">
-                {appLinks.map((app) => (
-                  <a
-                    key={app.name}
-                    href={app.href}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    onClick={() => setMobileMenuOpen(false)}
-                    className="flex items-center gap-3 py-3 text-[13px] hover:text-[var(--link-color)]"
-                    style={{ color: 'var(--sm-text-muted)', borderBottom: '1px solid var(--sm-border)' }}
-                  >
-                    {app.icon === 'apple' ? (
-                      <svg className="w-5 h-5 flex-shrink-0" fill="currentColor" viewBox="0 0 384 512">
-                        <path d="M318.7 268.7c-.2-36.7 16.4-64.4 50-84.8-18.8-26.9-47.2-41.7-84.7-44.6-35.5-2.8-74.3 20.7-88.5 20.7-15 0-49.4-19.7-76.4-19.7C63.3 141.2 4 184.8 4 273.5q0 39.3 14.4 81.2c12.8 36.7 59 126.7 107.2 125.2 25.2-.6 43-17.9 75.8-17.9 31.8 0 48.3 17.9 76.4 17.9 48.6-.7 90.4-82.5 102.6-119.3-65.2-30.7-61.7-90-61.7-91.9zm-56.6-164.2c27.3-32.4 24.8-61.9 24-72.5-24.1 1.4-52 16.4-67.9 34.9-17.5 19.8-27.8 44.3-25.6 71.9 26.1 2 49.9-11.4 69.5-34.3z"/>
-                      </svg>
-                    ) : (
-                      <svg className="w-5 h-5 flex-shrink-0" fill="currentColor" viewBox="0 0 512 512">
-                        <path d="M325.3 234.3L104.6 13l280.8 161.2-60.1 60.1zM47 0C34 6.8 25.3 19.2 25.3 35.3v441.3c0 16.1 8.7 28.5 21.7 35.3l256.6-256L47 0zm425.2 225.6l-58.9-34.1-65.7 64.5 65.7 64.5 60.1-34.1c18-14.3 18-46.5-1.2-60.8zM104.6 499l280.8-161.2-60.1-60.1L104.6 499z"/>
-                      </svg>
-                    )}
-                    <span className="flex-1">{app.name}</span>
-                    <svg className="w-3 h-3 opacity-50 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
-                    </svg>
-                  </a>
-                ))}
-              </div>
-            </div>
 
-            {/* Mobile Account Section */}
-            <div className="mt-4 pt-4" style={{ borderTop: '1px solid var(--sm-border)' }}>
-              {isAuthenticated && user ? (
-                <>
-                  <div className="flex items-center gap-3 py-3" style={{ borderBottom: '1px solid var(--sm-border)' }}>
-                    {user.avatar ? (
-                      <Image
-                        src={user.avatar}
-                        alt={user.name || 'User'}
-                        width={40}
-                        height={40}
-                        className="w-10 h-10 rounded-full object-cover"
-                        unoptimized
-                      />
-                    ) : (
-                      <div className="w-10 h-10 rounded-full bg-[#bc0000] flex items-center justify-center text-white font-bold">
-                        {(user.name || user.email)?.charAt(0).toUpperCase() || 'U'}
-                      </div>
-                    )}
-                    <div>
-                      <div className="font-semibold" style={{ color: 'var(--sm-text)' }}>
-                        {user.name || user.email?.split('@')[0] || 'User'}
-                      </div>
-                      <div className="text-xs" style={{ color: 'var(--sm-text-muted)' }}>
-                        {user.email}
-                      </div>
-                    </div>
-                  </div>
-                  {/* Admin Dashboard link for admins - FIRST item */}
-                  {userRole === 'admin' && (
-                    <Link
-                      href="/admin"
-                      onClick={() => setMobileMenuOpen(false)}
-                      className="flex items-center gap-3 py-3 text-[14px] hover:text-[var(--link-color)]"
-                      style={{ color: 'var(--sm-text)', borderBottom: '1px solid var(--sm-border)' }}
-                    >
-                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                      </svg>
-                      Admin Dashboard
-                    </Link>
-                  )}
-                  {/* Creator Studio link for editors/authors only (not admins) */}
-                  {(userRole === 'editor' || userRole === 'author') && (
-                    <Link
-                      href="/studio"
-                      onClick={() => setMobileMenuOpen(false)}
-                      className="flex items-center gap-3 py-3 text-[14px] hover:text-[var(--link-color)]"
-                      style={{ color: 'var(--sm-text)', borderBottom: '1px solid var(--sm-border)' }}
-                    >
-                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                      </svg>
-                      Creator Studio
-                    </Link>
-                  )}
-                  <Link
-                    href="/profile"
-                    onClick={() => setMobileMenuOpen(false)}
-                    className="flex items-center gap-3 py-3 text-[14px] hover:text-[var(--link-color)]"
-                    style={{ color: 'var(--sm-text)', borderBottom: '1px solid var(--sm-border)' }}
-                  >
-                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                    </svg>
-                    My Profile
-                  </Link>
-                  <Link
-                    href="/my-gm-score"
-                    onClick={() => setMobileMenuOpen(false)}
-                    className="flex items-center gap-3 py-3 text-[14px] hover:text-[var(--link-color)]"
-                    style={{ color: 'var(--sm-text)', borderBottom: '1px solid var(--sm-border)' }}
-                  >
-                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-                    </svg>
-                    My GM Score
-                  </Link>
-                  <button
-                    onClick={() => {
-                      setMobileMenuOpen(false)
-                      signOut()
-                    }}
-                    className="flex items-center gap-3 py-3 text-[14px] w-full text-left text-red-500"
-                  >
-                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
-                    </svg>
-                    Sign Out
-                  </button>
-                </>
-              ) : (
-                <Link
-                  href="/login"
-                  onClick={() => setMobileMenuOpen(false)}
-                  className="flex items-center justify-center gap-2 py-3 text-[14px] font-semibold rounded-lg bg-[#bc0000] text-white"
-                  style={{ fontFamily: "'Montserrat', sans-serif" }}
-                >
-                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1" />
-                  </svg>
-                  Login / Sign Up
+              {userRole === 'admin' && (
+                <Link href="/admin" onClick={closeDrawer}>
+                  Admin Dashboard
                 </Link>
               )}
+              {(userRole === 'editor' || userRole === 'author') && (
+                <Link href="/studio" onClick={closeDrawer}>
+                  Creator Studio
+                </Link>
+              )}
+              <Link href="/profile" onClick={closeDrawer}>
+                My Profile
+              </Link>
+              <Link href="/my-gm-score" onClick={closeDrawer}>
+                My GM Score
+              </Link>
+              <button
+                onClick={() => {
+                  closeDrawer()
+                  signOut()
+                }}
+                style={{
+                  background: 'none',
+                  border: 'none',
+                  cursor: 'pointer',
+                  color: '#ef4444',
+                  fontSize: '16px',
+                  fontWeight: 500,
+                  fontFamily: "'Inter', sans-serif",
+                  padding: '12px 0',
+                  textAlign: 'left',
+                  borderBottom: '1px solid var(--sm-border)',
+                }}
+              >
+                Sign Out
+              </button>
+            </>
+          ) : (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', paddingTop: '8px' }}>
+              <Link
+                href="/login"
+                onClick={closeDrawer}
+                style={{
+                  textAlign: 'center',
+                  padding: '12px',
+                  border: '1px solid var(--sm-border)',
+                  borderRadius: '8px',
+                  color: 'var(--sm-text)',
+                  textDecoration: 'none',
+                  fontWeight: 500,
+                }}
+              >
+                Log In
+              </Link>
+              <Link
+                href="/signup"
+                onClick={closeDrawer}
+                className="nav-cta"
+                style={{
+                  textAlign: 'center',
+                  display: 'block',
+                  textDecoration: 'none',
+                }}
+              >
+                Sign Up
+              </Link>
             </div>
-          </div>
+          )}
         </div>
-      )}
+      </div>
 
-      {/* Team Sticky Bar - Shows appropriate team bar based on current page */}
+      {/* ===== SPACER for fixed nav (72px) ===== */}
+      <div style={{ height: 'var(--sm-nav-height)' }} />
+
+      {/* ===== Live Games Top Bar - renders BELOW the nav ===== */}
+      <LiveGamesTopBar isHomepage />
+
+      {/* ===== Team Sticky Bar - contextual per team page ===== */}
       <TeamStickyBarRouter />
-    </header>
+    </>
   )
 }

@@ -25,10 +25,7 @@ interface Plan {
 
 const PLANS: Plan[] = [
   {
-    id: 'free',
-    name: 'Free',
-    price: '$0',
-    period: 'forever',
+    id: 'free', name: 'Free', price: '$0', period: 'forever',
     description: 'Basic access to Sports Mockery content',
     features: [
       { text: 'All articles and news', included: true },
@@ -39,14 +36,10 @@ const PLANS: Plan[] = [
       { text: 'Ad-Free Experience', included: false },
       { text: 'Unlimited AI Queries', included: false },
     ],
-    cta: 'Current Plan',
-    popular: false,
+    cta: 'Current Plan', popular: false,
   },
   {
-    id: 'sm_plus_monthly',
-    name: 'SM+ Monthly',
-    price: '$4.99',
-    period: '/month',
+    id: 'sm_plus_monthly', name: 'SM+ Monthly', price: '$4.99', period: '/month',
     description: 'Full access to all premium features',
     features: [
       { text: 'All articles and news', included: true },
@@ -57,14 +50,10 @@ const PLANS: Plan[] = [
       { text: 'Ad-Free Experience', included: true },
       { text: 'Early access to features', included: true },
     ],
-    cta: 'Get SM+ Monthly',
-    popular: true,
+    cta: 'Get SM+ Monthly', popular: true,
   },
   {
-    id: 'sm_plus_annual',
-    name: 'SM+ Annual',
-    price: '$39.99',
-    period: '/year',
+    id: 'sm_plus_annual', name: 'SM+ Annual', price: '$39.99', period: '/year',
     description: 'Save 33% with annual billing',
     features: [
       { text: 'All articles and news', included: true },
@@ -76,9 +65,7 @@ const PLANS: Plan[] = [
       { text: 'Early access to features', included: true },
       { text: '2 months FREE', included: true, highlight: true },
     ],
-    cta: 'Get SM+ Annual',
-    popular: false,
-    badge: 'Best Value',
+    cta: 'Get SM+ Annual', popular: false, badge: 'Best Value',
   },
 ]
 
@@ -89,7 +76,6 @@ export default function PricingPageClient() {
 
   const handleSelectPlan = async (planId: string) => {
     if (planId === 'free') return
-
     setLoadingPlan(planId)
     try {
       await openCheckout(planId as 'sm_plus_monthly' | 'sm_plus_annual')
@@ -99,124 +85,98 @@ export default function PricingPageClient() {
   }
 
   return (
-    <main
-      className="min-h-screen py-16 px-4"
-      style={{ backgroundColor: 'var(--sm-dark)' }}
-    >
-      <div className="max-w-6xl mx-auto">
+    <main className="sm-hero-bg" style={{ minHeight: '100vh', padding: '64px 16px' }}>
+      <div className="sm-grid-overlay" />
+      <div style={{ position: 'relative', maxWidth: '1200px', margin: '0 auto' }}>
         {/* Header */}
-        <div className="text-center mb-12">
-          <h1
-            className="text-4xl md:text-5xl font-black mb-4"
-            style={{
-              fontFamily: "'Montserrat', sans-serif",
-              color: 'var(--sm-text)',
-            }}
-          >
+        <div style={{ textAlign: 'center', marginBottom: '48px' }}>
+          <h1 style={{
+            fontSize: 'clamp(2rem, 4vw, 3rem)', fontWeight: 900, color: 'var(--sm-text)', marginBottom: '16px',
+            fontFamily: "'Space Grotesk', var(--font-heading), sans-serif",
+          }}>
             Upgrade to SM+
           </h1>
-          <p
-            className="text-lg"
-            style={{ color: 'var(--sm-text-muted)' }}
-          >
+          <p style={{ fontSize: '18px', color: 'var(--sm-text-muted)' }}>
             Get the full Sports Mockery experience with premium features
           </p>
         </div>
 
         {/* Pricing Grid */}
-        <div className="grid md:grid-cols-3 gap-6 mb-12">
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '24px', marginBottom: '48px' }}>
           {PLANS.map((plan) => {
             const isCurrentPlan = tier === plan.id
-            const isUpgrade = !isPro && plan.id !== 'free'
+            const isPopular = plan.popular
 
             return (
               <div
                 key={plan.id}
-                className={`relative rounded-2xl p-6 ${
-                  plan.popular
-                    ? 'bg-gradient-to-br from-orange-500 to-orange-600 text-white ring-4 ring-orange-300'
-                    : ''
-                }`}
-                style={plan.popular ? undefined : { backgroundColor: 'var(--sm-card)', border: '1px solid var(--sm-border)' }}
+                className={isPopular ? '' : 'glass-card glass-card-static'}
+                style={{
+                  position: 'relative', padding: '28px', borderRadius: 'var(--sm-radius-lg)',
+                  ...(isPopular ? {
+                    background: 'linear-gradient(135deg, #bc0000, #ff4444)',
+                    color: '#fff',
+                    border: '2px solid rgba(255,255,255,0.2)',
+                  } : {}),
+                }}
               >
                 {plan.badge && (
-                  <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-green-500 text-white text-xs font-bold px-3 py-1 rounded-full">
+                  <div style={{
+                    position: 'absolute', top: -12, left: '50%', transform: 'translateX(-50%)',
+                    background: '#22c55e', color: '#fff', fontSize: '12px', fontWeight: 700,
+                    padding: '4px 12px', borderRadius: '9999px', whiteSpace: 'nowrap',
+                  }}>
                     {plan.badge}
                   </div>
                 )}
 
-                {plan.popular && (
-                  <div className="absolute -top-3 right-4 bg-white text-orange-600 text-xs font-bold px-3 py-1 rounded-full">
+                {isPopular && (
+                  <div style={{
+                    position: 'absolute', top: -12, right: 16,
+                    background: '#fff', color: '#bc0000', fontSize: '12px', fontWeight: 700,
+                    padding: '4px 12px', borderRadius: '9999px',
+                  }}>
                     Most Popular
                   </div>
                 )}
 
-                <div className="mb-6">
-                  <h3
-                    className="text-xl font-bold mb-1"
-                    style={{
-                      fontFamily: "'Montserrat', sans-serif",
-                      color: plan.popular
-                        ? 'white'
-                        : 'var(--sm-text)',
-                    }}
-                  >
+                <div style={{ marginBottom: '24px' }}>
+                  <h3 style={{
+                    fontSize: '20px', fontWeight: 700, marginBottom: '4px',
+                    fontFamily: "'Space Grotesk', var(--font-heading), sans-serif",
+                    color: isPopular ? '#fff' : 'var(--sm-text)',
+                  }}>
                     {plan.name}
                   </h3>
-                  <div className="flex items-baseline gap-1">
-                    <span
-                      className="text-4xl font-black"
-                      style={{ fontFamily: "'Montserrat', sans-serif" }}
-                    >
+                  <div style={{ display: 'flex', alignItems: 'baseline', gap: '4px' }}>
+                    <span style={{ fontSize: '36px', fontWeight: 900, fontFamily: "'Space Grotesk', var(--font-heading), sans-serif" }}>
                       {plan.price}
                     </span>
-                    <span
-                      style={{ color: plan.popular ? 'rgba(255,255,255,0.7)' : 'var(--sm-text-muted)' }}
-                    >
+                    <span style={{ color: isPopular ? 'rgba(255,255,255,0.7)' : 'var(--sm-text-muted)' }}>
                       {plan.period}
                     </span>
                   </div>
-                  <p
-                    className="text-sm mt-2"
-                    style={{ color: plan.popular ? 'rgba(255,255,255,0.8)' : 'var(--sm-text-muted)' }}
-                  >
+                  <p style={{ fontSize: '14px', marginTop: '8px', color: isPopular ? 'rgba(255,255,255,0.8)' : 'var(--sm-text-muted)' }}>
                     {plan.description}
                   </p>
                 </div>
 
-                <ul className="space-y-3 mb-6">
+                <ul style={{ listStyle: 'none', padding: 0, display: 'flex', flexDirection: 'column', gap: '12px', marginBottom: '24px' }}>
                   {plan.features.map((feature, idx) => (
-                    <li key={idx} className="flex items-start gap-2">
+                    <li key={idx} style={{ display: 'flex', alignItems: 'flex-start', gap: '8px' }}>
                       {feature.included ? (
-                        <svg
-                          className={`w-5 h-5 flex-shrink-0 ${plan.popular ? 'text-white' : 'text-green-500'}`}
-                          fill="currentColor"
-                          viewBox="0 0 20 20"
-                        >
-                          <path
-                            fillRule="evenodd"
-                            d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
-                            clipRule="evenodd"
-                          />
+                        <svg style={{ width: 20, height: 20, flexShrink: 0, color: isPopular ? '#fff' : '#22c55e' }} fill="currentColor" viewBox="0 0 20 20">
+                          <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
                         </svg>
                       ) : (
-                        <svg
-                          className="w-5 h-5 flex-shrink-0"
-                          style={{ color: 'var(--sm-text-muted)' }}
-                          fill="currentColor"
-                          viewBox="0 0 20 20"
-                        >
-                          <path
-                            fillRule="evenodd"
-                            d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
-                            clipRule="evenodd"
-                          />
+                        <svg style={{ width: 20, height: 20, flexShrink: 0, color: 'var(--sm-text-muted)' }} fill="currentColor" viewBox="0 0 20 20">
+                          <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
                         </svg>
                       )}
-                      <span
-                        className={`text-sm ${feature.highlight ? 'font-bold' : ''}`}
-                        style={{ color: plan.popular ? 'white' : 'var(--sm-text)' }}
-                      >
+                      <span style={{
+                        fontSize: '14px', color: isPopular ? '#fff' : 'var(--sm-text)',
+                        fontWeight: feature.highlight ? 700 : 400,
+                      }}>
                         {feature.text}
                       </span>
                     </li>
@@ -224,37 +184,34 @@ export default function PricingPageClient() {
                 </ul>
 
                 {isCurrentPlan ? (
-                  <button
-                    disabled
-                    className="w-full py-3 rounded-lg font-bold text-center cursor-not-allowed"
-                    style={{ backgroundColor: 'var(--sm-surface)', color: 'var(--sm-text-muted)' }}
-                  >
+                  <button disabled style={{
+                    width: '100%', padding: '14px', borderRadius: 'var(--sm-radius-md)', fontWeight: 700, textAlign: 'center',
+                    background: 'var(--sm-surface)', color: 'var(--sm-text-muted)', border: 'none', cursor: 'not-allowed',
+                  }}>
                     Current Plan
                   </button>
                 ) : isPro && plan.id === 'free' ? (
-                  <button
-                    onClick={openPortal}
-                    className="w-full py-3 rounded-lg font-bold text-center transition-colors"
-                    style={{ color: 'var(--sm-text)', border: '1px solid var(--sm-border)' }}
-                  >
+                  <button onClick={openPortal} className="btn-secondary btn-full">
                     Manage Subscription
                   </button>
                 ) : plan.id === 'free' ? (
-                  <div
-                    className="w-full py-3 rounded-lg font-bold text-center"
-                    style={{ backgroundColor: 'var(--sm-surface)', color: 'var(--sm-text-muted)' }}
-                  >
+                  <div style={{
+                    width: '100%', padding: '14px', borderRadius: 'var(--sm-radius-md)', fontWeight: 700, textAlign: 'center',
+                    background: 'var(--sm-surface)', color: 'var(--sm-text-muted)',
+                  }}>
                     Free Forever
                   </div>
                 ) : (
                   <button
                     onClick={() => handleSelectPlan(plan.id)}
                     disabled={isLoading || loadingPlan === plan.id}
-                    className={`w-full py-3 rounded-lg font-bold text-center transition-all ${
-                      plan.popular
-                        ? 'bg-white text-orange-600 hover:bg-orange-50'
-                        : 'bg-orange-500 text-white hover:bg-orange-600'
-                    } ${loadingPlan === plan.id ? 'opacity-50 cursor-wait' : ''}`}
+                    className={isPopular ? 'btn-full' : 'btn-primary btn-full'}
+                    style={isPopular ? {
+                      width: '100%', padding: '14px', borderRadius: 'var(--sm-radius-md)', fontWeight: 700, textAlign: 'center',
+                      background: '#fff', color: '#bc0000', border: 'none', cursor: 'pointer', fontSize: '15px',
+                      display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
+                      ...(loadingPlan === plan.id ? { opacity: 0.5, cursor: 'wait' } : {}),
+                    } : (loadingPlan === plan.id ? { opacity: 0.5, cursor: 'wait' } : undefined)}
                   >
                     {loadingPlan === plan.id ? 'Loading...' : plan.cta}
                   </button>
@@ -265,30 +222,22 @@ export default function PricingPageClient() {
         </div>
 
         {/* Trust section */}
-        <div className="text-center space-y-4">
-          <p className="text-sm" style={{ color: 'var(--sm-text-muted)' }}>
+        <div style={{ textAlign: 'center', display: 'flex', flexDirection: 'column', gap: '16px' }}>
+          <p style={{ fontSize: '14px', color: 'var(--sm-text-muted)' }}>
             Secure payments powered by Stripe. Cancel anytime.
           </p>
-
           {!isAuthenticated && (
-            <p className="text-sm" style={{ color: 'var(--sm-text-muted)' }}>
+            <p style={{ fontSize: '14px', color: 'var(--sm-text-muted)' }}>
               Already have an account?{' '}
-              <Link
-                href="/login?next=/pricing"
-                className="text-orange-500 hover:underline font-medium"
-              >
+              <Link href="/login?next=/pricing" style={{ color: '#bc0000', fontWeight: 500, textDecoration: 'none' }}>
                 Sign in
               </Link>
             </p>
           )}
-
           {isPro && (
-            <p className="text-sm" style={{ color: 'var(--sm-text-muted)' }}>
+            <p style={{ fontSize: '14px', color: 'var(--sm-text-muted)' }}>
               Need to manage your subscription?{' '}
-              <button
-                onClick={openPortal}
-                className="text-orange-500 hover:underline font-medium"
-              >
+              <button onClick={openPortal} style={{ color: '#bc0000', fontWeight: 500, background: 'none', border: 'none', cursor: 'pointer', textDecoration: 'underline' }}>
                 Open billing portal
               </button>
             </p>

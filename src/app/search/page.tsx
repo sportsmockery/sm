@@ -67,21 +67,51 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
 
   const totalPages = Math.ceil(total / pageSize)
 
+  const TEAMS = [
+    { name: 'Bears', slug: 'chicago-bears', color: '#C83803' },
+    { name: 'Bulls', slug: 'chicago-bulls', color: '#CE1141' },
+    { name: 'Cubs', slug: 'chicago-cubs', color: '#0E3386' },
+    { name: 'White Sox', slug: 'chicago-white-sox', color: '#27251F' },
+    { name: 'Blackhawks', slug: 'chicago-blackhawks', color: '#CF0A2C' },
+  ]
+
   return (
-    <div className="min-h-screen" style={{ backgroundColor: 'var(--sm-surface)' }}>
+    <div style={{ backgroundColor: 'var(--sm-dark)', minHeight: '100vh' }}>
       {/* Hero Section */}
-      <header className="py-16" style={{ background: 'linear-gradient(to bottom, var(--sm-surface), var(--sm-card))' }}>
-        <div className="mx-auto max-w-4xl px-4">
-          <h1 className="mb-6 text-center font-heading text-4xl font-black" style={{ color: 'var(--sm-text)' }}>
+      <header className="sm-hero-bg" style={{ position: 'relative', overflow: 'hidden' }}>
+        <div className="sm-grid-overlay" />
+        <div
+          style={{
+            position: 'relative',
+            zIndex: 1,
+            maxWidth: '720px',
+            margin: '0 auto',
+            padding: '120px 24px 64px',
+            textAlign: 'center',
+          }}
+        >
+          <h1
+            style={{
+              fontFamily: 'var(--sm-font-heading)',
+              fontSize: 'clamp(2rem, 4vw, 3rem)',
+              fontWeight: 800,
+              letterSpacing: '-1px',
+              color: 'var(--sm-text)',
+              margin: '0 0 32px',
+              lineHeight: 1.1,
+            }}
+          >
             Search SportsMockery
           </h1>
 
-          {/* Search Input */}
-          <SearchInput initialQuery={query} autoFocus={!query} />
+          {/* Search Input - 48px height */}
+          <div style={{ maxWidth: '600px', margin: '0 auto' }}>
+            <SearchInput initialQuery={query} autoFocus={!query} />
+          </div>
 
           {/* Popular Searches (when no query) */}
           {!query && (
-            <div className="mt-8">
+            <div style={{ marginTop: '32px' }}>
               <PopularSearches />
             </div>
           )}
@@ -89,110 +119,199 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
       </header>
 
       {/* Main Content */}
-      <main className="mx-auto max-w-6xl px-4 py-12">
+      <main
+        style={{
+          maxWidth: 'var(--sm-max-width)',
+          margin: '0 auto',
+          padding: '48px 24px 80px',
+        }}
+      >
         {query ? (
-          <div className="grid gap-8 lg:grid-cols-4">
-            {/* Sidebar Filters */}
-            <aside className="lg:col-span-1">
-              <SearchFiltersClient
-                categories={filterCategories}
-                authors={filterAuthors}
-                selectedCategory={category}
-                selectedAuthor={author}
-                dateRange={dateRange}
-                query={query}
-              />
-            </aside>
+          <div
+            style={{
+              display: 'grid',
+              gridTemplateColumns: '1fr',
+              gap: '32px',
+            }}
+          >
+            {/* Desktop: sidebar + results */}
+            <div
+              style={{
+                display: 'grid',
+                gap: '32px',
+              }}
+              className="search-layout"
+            >
+              {/* Sidebar Filters */}
+              <aside className="glass-card glass-card-static" style={{ alignSelf: 'start' }}>
+                <SearchFiltersClient
+                  categories={filterCategories}
+                  authors={filterAuthors}
+                  selectedCategory={category}
+                  selectedAuthor={author}
+                  dateRange={dateRange}
+                  query={query}
+                />
+              </aside>
 
-            {/* Results */}
-            <div className="lg:col-span-3">
-              {results.length > 0 ? (
-                <>
-                  <SearchResults
-                    articles={results}
-                    query={query}
-                    totalCount={total}
-                  />
+              {/* Results */}
+              <div>
+                {results.length > 0 ? (
+                  <>
+                    <div className="glass-card glass-card-static" style={{ marginBottom: '24px' }}>
+                      <SearchResults
+                        articles={results}
+                        query={query}
+                        totalCount={total}
+                      />
+                    </div>
 
-                  {/* Pagination */}
-                  {totalPages > 1 && (
-                    <nav className="mt-8 flex items-center justify-center gap-2">
-                      {currentPage > 1 && (
-                        <a
-                          href={`/search?q=${encodeURIComponent(query)}${category ? `&category=${category}` : ''}${author ? `&author=${author}` : ''}${dateRange ? `&dateRange=${dateRange}` : ''}&page=${currentPage - 1}`}
-                          className="rounded-lg border px-4 py-2 font-medium transition-colors"
-                          style={{ borderColor: 'var(--sm-border)', backgroundColor: 'var(--sm-card)', color: 'var(--sm-text)' }}
+                    {/* Pagination */}
+                    {totalPages > 1 && (
+                      <nav
+                        style={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          gap: '8px',
+                          marginTop: '32px',
+                        }}
+                      >
+                        {currentPage > 1 && (
+                          <a
+                            href={`/search?q=${encodeURIComponent(query)}${category ? `&category=${category}` : ''}${author ? `&author=${author}` : ''}${dateRange ? `&dateRange=${dateRange}` : ''}&page=${currentPage - 1}`}
+                            className="btn-secondary btn-sm"
+                          >
+                            Previous
+                          </a>
+                        )}
+
+                        <span
+                          style={{
+                            padding: '0 16px',
+                            fontSize: '14px',
+                            color: 'var(--sm-text-muted)',
+                            fontFamily: 'var(--sm-font-body)',
+                          }}
                         >
-                          Previous
-                        </a>
-                      )}
+                          Page {currentPage} of {totalPages}
+                        </span>
 
-                      <span className="px-4 text-sm" style={{ color: 'var(--sm-text-muted)' }}>
-                        Page {currentPage} of {totalPages}
-                      </span>
-
-                      {currentPage < totalPages && (
-                        <a
-                          href={`/search?q=${encodeURIComponent(query)}${category ? `&category=${category}` : ''}${author ? `&author=${author}` : ''}${dateRange ? `&dateRange=${dateRange}` : ''}&page=${currentPage + 1}`}
-                          className="rounded-lg border px-4 py-2 font-medium transition-colors"
-                          style={{ borderColor: 'var(--sm-border)', backgroundColor: 'var(--sm-card)', color: 'var(--sm-text)' }}
-                        >
-                          Next
-                        </a>
-                      )}
-                    </nav>
-                  )}
-                </>
-              ) : (
-                <NoSearchResults query={query} />
-              )}
+                        {currentPage < totalPages && (
+                          <a
+                            href={`/search?q=${encodeURIComponent(query)}${category ? `&category=${category}` : ''}${author ? `&author=${author}` : ''}${dateRange ? `&dateRange=${dateRange}` : ''}&page=${currentPage + 1}`}
+                            className="btn-secondary btn-sm"
+                          >
+                            Next
+                          </a>
+                        )}
+                      </nav>
+                    )}
+                  </>
+                ) : (
+                  <div className="glass-card glass-card-static">
+                    <NoSearchResults query={query} />
+                  </div>
+                )}
+              </div>
             </div>
+
+            {/* Responsive grid for search layout */}
+            <style>{`
+              .search-layout {
+                grid-template-columns: 1fr;
+              }
+              @media (min-width: 1024px) {
+                .search-layout {
+                  grid-template-columns: 280px 1fr;
+                }
+              }
+            `}</style>
           </div>
         ) : (
-          <div className="mx-auto max-w-2xl">
+          <div style={{ maxWidth: '680px', margin: '0 auto' }}>
             {/* Recent Searches */}
-            <div className="mb-8">
+            <div style={{ marginBottom: '32px' }}>
               <RecentSearches />
             </div>
 
             {/* Browse by team */}
-            <div className="rounded-2xl border p-6" style={{ borderColor: 'var(--sm-border)', backgroundColor: 'var(--sm-card)' }}>
-              <h2 className="mb-4 font-heading text-xl font-bold" style={{ color: 'var(--sm-text)' }}>
+            <div className="glass-card glass-card-static">
+              <h2
+                style={{
+                  fontFamily: 'var(--sm-font-heading)',
+                  fontSize: '20px',
+                  fontWeight: 700,
+                  color: 'var(--sm-text)',
+                  margin: '0 0 20px',
+                }}
+              >
                 Browse by Team
               </h2>
-              <div className="grid grid-cols-2 gap-3 sm:grid-cols-5">
-                {[
-                  { name: 'Bears', slug: 'chicago-bears', emoji: '🐻', color: 'from-[#0B162A] to-[#C83200]' },
-                  { name: 'Bulls', slug: 'chicago-bulls', emoji: '🐂', color: 'from-[#CE1141] to-[#000000]' },
-                  { name: 'Cubs', slug: 'chicago-cubs', emoji: '🧸', color: 'from-[#0E3386] to-[#CC3433]' },
-                  { name: 'White Sox', slug: 'chicago-white-sox', emoji: '⚾', color: 'from-[#27251F] to-[#C4CED4]' },
-                  { name: 'Blackhawks', slug: 'chicago-blackhawks', emoji: '🦅', color: 'from-[#CF0A2C] to-[#000000]' },
-                ].map((team) => (
+              <div
+                style={{
+                  display: 'grid',
+                  gap: '12px',
+                }}
+                className="team-browse-grid"
+              >
+                {TEAMS.map((team) => (
                   <a
                     key={team.slug}
                     href={`/${team.slug}`}
-                    className={`flex flex-col items-center justify-center rounded-xl bg-gradient-to-br ${team.color} p-4 text-white transition-transform hover:scale-105`}
+                    style={{
+                      display: 'flex',
+                      flexDirection: 'column',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      padding: '20px 12px',
+                      borderRadius: 'var(--sm-radius-md)',
+                      background: `linear-gradient(135deg, ${team.color}, ${team.color}88)`,
+                      color: '#ffffff',
+                      textDecoration: 'none',
+                      transition: 'transform 0.2s, box-shadow 0.2s',
+                      fontFamily: 'var(--sm-font-heading)',
+                    }}
+                    className="team-browse-link"
                   >
-                    <span className="text-3xl">{team.emoji}</span>
-                    <span className="mt-2 text-sm font-semibold">{team.name}</span>
+                    <span style={{ fontSize: '15px', fontWeight: 700 }}>{team.name}</span>
                   </a>
                 ))}
               </div>
+
+              {/* Responsive grid for team browse */}
+              <style>{`
+                .team-browse-grid {
+                  grid-template-columns: repeat(2, 1fr);
+                }
+                @media (min-width: 640px) {
+                  .team-browse-grid {
+                    grid-template-columns: repeat(5, 1fr);
+                  }
+                }
+                .team-browse-link:hover {
+                  transform: translateY(-3px);
+                  box-shadow: 0 8px 24px rgba(0,0,0,0.3);
+                }
+              `}</style>
             </div>
 
             {/* Latest articles teaser */}
-            <div className="mt-8 text-center">
-              <p className="mb-4" style={{ color: 'var(--sm-text-muted)' }}>
+            <div style={{ marginTop: '40px', textAlign: 'center' }}>
+              <p
+                style={{
+                  color: 'var(--sm-text-muted)',
+                  fontFamily: 'var(--sm-font-body)',
+                  fontSize: '15px',
+                  marginBottom: '16px',
+                }}
+              >
                 Or check out the latest news
               </p>
-              <a
-                href="/"
-                className="inline-flex items-center gap-2 rounded-xl px-6 py-3 font-semibold transition-colors"
-                style={{ backgroundColor: 'var(--badge-bg)', color: 'var(--badge-text)' }}
-              >
+              <a href="/" className="btn-primary btn-sm">
                 Browse All Articles
                 <svg
-                  className="h-4 w-4"
+                  style={{ width: '16px', height: '16px' }}
                   fill="none"
                   viewBox="0 0 24 24"
                   strokeWidth={2}

@@ -131,7 +131,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className="scroll-smooth light" suppressHydrationWarning>
+    <html lang="en" className="scroll-smooth dark" suppressHydrationWarning>
       <head>
         <script
           dangerouslySetInnerHTML={{
@@ -139,9 +139,10 @@ export default function RootLayout({
               (function() {
                 try {
                   var theme = localStorage.getItem('sm-theme');
-                  if (theme === 'dark') {
-                    document.documentElement.classList.remove('light');
-                    document.documentElement.classList.add('dark');
+                  if (theme === 'light') {
+                    document.documentElement.classList.remove('dark');
+                    document.documentElement.classList.add('light');
+                    document.documentElement.setAttribute('data-theme', 'light');
                   }
                 } catch (e) {}
               })();
@@ -151,7 +152,7 @@ export default function RootLayout({
       </head>
       <body
         className={`${geistSans.variable} ${geistMono.variable} ${montserrat.variable} ${inter.variable} ${jetbrainsMono.variable} ${bebasNeue.variable} ${exo2.variable} font-sans antialiased`}
-        style={{ backgroundColor: 'var(--sm-card)', color: 'var(--sm-text)' }}
+        style={{ backgroundColor: 'var(--sm-dark)', color: 'var(--sm-text)' }}
       >
         <ThemeProvider>
           <AuthProvider>

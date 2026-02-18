@@ -62,104 +62,84 @@ export default async function CubsHubPage() {
 
   return (
     <TeamHubLayout team={team} record={record} nextGame={nextGame} lastGame={lastGame} activeTab="overview">
-      <div
-        className="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-8"
-        style={{ maxWidth: '1400px', margin: '0 auto' }}
-      >
-        <div className="lg:col-span-2 space-y-8">
-          <section>
-            <SectionHeader title="Latest Cubs News" team={team} />
-
-            {posts.length > 0 ? (
-              <div className="space-y-4">
-                {posts.slice(0, 6).map((post, index) => (
-                  <ArticleCard key={post.id} post={post} team={team} isLarge={index === 0} />
-                ))}
-              </div>
-            ) : (
-              <div
-                className="text-center py-12"
-                style={{ borderRadius: 'var(--sm-radius-lg)', backgroundColor: 'var(--sm-card)', border: '1px solid var(--sm-border)' }}
-              >
-                <p style={{ color: 'var(--sm-text-muted)' }}>No Cubs articles found. Check back soon!</p>
-              </div>
-            )}
-          </section>
-
-          {posts.length > 6 && (
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '32px', maxWidth: '1320px', margin: '0 auto' }}>
+        <style>{`@media (min-width: 1024px) { .hub-grid-cubs { grid-template-columns: 2fr 1fr !important; } }`}</style>
+        <div className="hub-grid-cubs" style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '32px' }}>
+          {/* Main Content */}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '32px' }}>
             <section>
-              <SectionHeader title="More Cubs Stories" team={team} />
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                {posts.slice(6, 12).map((post) => (
-                  <ArticleCard key={post.id} post={post} team={team} />
-                ))}
-              </div>
+              <SectionHeader title="Latest Cubs News" />
+              {posts.length > 0 ? (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                  {posts.slice(0, 6).map((post, index) => (
+                    <ArticleCard key={post.id} post={post} isLarge={index === 0} />
+                  ))}
+                </div>
+              ) : (
+                <div className="glass-card glass-card-static" style={{ textAlign: 'center', padding: '48px 24px' }}>
+                  <p style={{ color: 'var(--sm-text-muted)', margin: 0 }}>No Cubs articles found. Check back soon!</p>
+                </div>
+              )}
             </section>
-          )}
-        </div>
 
-        <div className="space-y-6">
-          <SeasonSnapshotCard team={team} record={record} seasonLabel="2025 Season" />
-          <QuickLinksCard team={team} teamSlug="chicago-cubs" />
-          <ARTourButton team="chicago-cubs" />
-          <AskAIWidget team={team} teamLabel="Cubs" />
-          <FanChatWidget team={team} teamLabel="Cubs" channel="cubs" />
+            {posts.length > 6 && (
+              <section>
+                <SectionHeader title="More Cubs Stories" />
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '16px' }}>
+                  {posts.slice(6, 12).map((post) => (
+                    <ArticleCard key={post.id} post={post} />
+                  ))}
+                </div>
+              </section>
+            )}
+          </div>
+
+          {/* Sidebar */}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
+            <SeasonSnapshotCard record={record} seasonLabel="2025 Season" />
+            <QuickLinksCard slug="chicago-cubs" />
+            <ARTourButton team="chicago-cubs" />
+            <AskAIWidget teamSlug="chicago-cubs" teamLabel="Cubs" />
+            <FanChatWidget teamLabel="Cubs" channel="cubs" />
+          </div>
         </div>
       </div>
     </TeamHubLayout>
   )
 }
 
-function SectionHeader({ title, team }: { title: string; team: typeof CHICAGO_TEAMS.cubs }) {
+function SectionHeader({ title }: { title: string }) {
   return (
-    <div className="flex items-center justify-between mb-5">
-      <h2
-        style={{
-          fontFamily: "'Montserrat', sans-serif",
-          color: 'var(--sm-text)',
-          fontSize: '22px',
-          fontWeight: 700,
-          letterSpacing: '-0.5px',
-          paddingBottom: '8px',
-          borderBottom: `3px solid ${team.secondaryColor}`,
-        }}
-      >
+    <div style={{ marginBottom: '20px' }}>
+      <h2 style={{ fontFamily: "'Space Grotesk', sans-serif", color: 'var(--sm-text)', fontSize: '22px', fontWeight: 700, letterSpacing: '-0.5px', paddingBottom: '8px', borderBottom: '3px solid var(--sm-red)', margin: 0 }}>
         {title}
       </h2>
     </div>
   )
 }
 
-function ArticleCard({ post, team, isLarge = false }: { post: any; team: typeof CHICAGO_TEAMS.cubs; isLarge?: boolean }) {
+function ArticleCard({ post, isLarge = false }: { post: any; isLarge?: boolean }) {
   const href = `/${post.categorySlug}/${post.slug}`
 
   if (isLarge) {
     return (
-      <Link href={href} className="group block">
-        <article
-          className="overflow-hidden transition-all duration-300"
-          style={{ borderRadius: 'var(--sm-radius-lg)', backgroundColor: 'var(--sm-card)', border: '1px solid var(--sm-border)' }}
-        >
-          <div className="flex flex-col md:flex-row">
-            {post.featuredImage && (
-              <div className="relative aspect-[16/9] md:aspect-auto md:w-1/2 overflow-hidden">
-                <Image src={post.featuredImage} alt="" fill className="object-cover group-hover:scale-105 transition-transform duration-300" priority />
-                <div className="absolute top-0 left-0 w-1 h-full" style={{ backgroundColor: team.primaryColor }} />
-              </div>
-            )}
-            <div className="p-5 md:p-6 flex-1">
-              <span className="text-[11px] font-bold uppercase tracking-wider" style={{ color: team.primaryColor }}>Cubs</span>
-              <h3
-                className="font-bold mt-2 line-clamp-3 group-hover:underline"
-                style={{ fontFamily: "'Montserrat', sans-serif", color: 'var(--sm-text)', fontSize: '20px', lineHeight: '1.3' }}
-              >
-                {post.title}
-              </h3>
-              {post.excerpt && (
-                <p className="mt-3 line-clamp-2" style={{ color: 'var(--sm-text-muted)', fontSize: '15px', lineHeight: '1.6' }}>{post.excerpt}</p>
+      <Link href={href} className="group" style={{ textDecoration: 'none', display: 'block' }}>
+        <article className="glass-card" style={{ overflow: 'hidden', padding: 0 }}>
+          <div style={{ display: 'flex', flexDirection: 'column' }}>
+            <style>{`@media (min-width: 768px) { .cubs-hero-row { flex-direction: row !important; } .cubs-hero-img { width: 50% !important; } }`}</style>
+            <div className="cubs-hero-row" style={{ display: 'flex', flexDirection: 'column' }}>
+              {post.featuredImage && (
+                <div className="cubs-hero-img" style={{ position: 'relative', aspectRatio: '16/9', overflow: 'hidden', width: '100%' }}>
+                  <Image src={post.featuredImage} alt="" fill style={{ objectFit: 'cover', transition: 'transform 0.3s' }} priority />
+                </div>
               )}
-              <div className="flex items-center gap-2 mt-4 text-xs" style={{ color: 'var(--sm-text-dim)' }}>
-                <span>{new Date(post.publishedAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}</span>
+              <div style={{ padding: '24px', flex: 1 }}>
+                <span className="sm-tag" style={{ marginBottom: '12px', display: 'inline-block' }}>Cubs</span>
+                <h3 style={{ fontFamily: "'Space Grotesk', sans-serif", color: 'var(--sm-text)', fontSize: '20px', fontWeight: 700, lineHeight: 1.3, margin: '0 0 12px 0', display: '-webkit-box', WebkitLineClamp: 3, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>{post.title}</h3>
+                {post.excerpt && <p style={{ color: 'var(--sm-text-muted)', fontSize: '15px', lineHeight: 1.6, margin: 0, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>{post.excerpt}</p>}
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginTop: '12px', fontSize: '12px', color: 'var(--sm-text-dim)' }}>
+                  <span>{new Date(post.publishedAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}</span>
+                </div>
               </div>
             </div>
           </div>
@@ -169,19 +149,16 @@ function ArticleCard({ post, team, isLarge = false }: { post: any; team: typeof 
   }
 
   return (
-    <Link href={href} className="group block">
-      <article
-        className="overflow-hidden flex gap-4 p-3 transition-all duration-200"
-        style={{ borderRadius: 'var(--sm-radius-lg)', backgroundColor: 'var(--sm-card)', border: '1px solid var(--sm-border)' }}
-      >
+    <Link href={href} className="group" style={{ textDecoration: 'none', display: 'block' }}>
+      <article className="glass-card glass-card-sm" style={{ display: 'flex', gap: '16px', overflow: 'hidden' }}>
         {post.featuredImage && (
-          <div className="relative w-20 h-20 md:w-24 md:h-24 flex-shrink-0 rounded-lg overflow-hidden">
-            <Image src={post.featuredImage} alt="" fill className="object-cover group-hover:scale-105 transition-transform duration-300" />
+          <div style={{ position: 'relative', width: '80px', height: '80px', flexShrink: 0, borderRadius: 'var(--sm-radius-sm)', overflow: 'hidden' }}>
+            <Image src={post.featuredImage} alt="" fill style={{ objectFit: 'cover', transition: 'transform 0.3s' }} />
           </div>
         )}
-        <div className="flex-1 min-w-0">
-          <h3 className="font-semibold line-clamp-2 group-hover:underline" style={{ fontFamily: "'Montserrat', sans-serif", color: 'var(--sm-text)', fontSize: '15px', lineHeight: '1.4' }}>{post.title}</h3>
-          <div className="flex items-center gap-2 mt-2 text-xs" style={{ color: 'var(--sm-text-dim)' }}>
+        <div style={{ flex: 1, minWidth: 0 }}>
+          <h3 style={{ fontFamily: "'Space Grotesk', sans-serif", color: 'var(--sm-text)', fontSize: '15px', fontWeight: 600, lineHeight: 1.4, margin: 0, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>{post.title}</h3>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginTop: '8px', fontSize: '12px', color: 'var(--sm-text-dim)' }}>
             <span>{new Date(post.publishedAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}</span>
           </div>
         </div>
@@ -190,44 +167,36 @@ function ArticleCard({ post, team, isLarge = false }: { post: any; team: typeof 
   )
 }
 
-function SeasonSnapshotCard({ team, record, seasonLabel }: { team: typeof CHICAGO_TEAMS.cubs; record: { wins: number; losses: number } | null; seasonLabel: string }) {
+function SeasonSnapshotCard({ record, seasonLabel }: { record: { wins: number; losses: number } | null; seasonLabel: string }) {
   return (
-    <div className="overflow-hidden" style={{ borderRadius: 'var(--sm-radius-lg)', backgroundColor: 'var(--sm-card)', border: '1px solid var(--sm-border)' }}>
-      <div className="px-5 py-4" style={{ backgroundColor: team.primaryColor }}>
-        <div className="flex items-center gap-3">
-          <Image src={team.logo} alt={team.name} width={40} height={40} className="w-10 h-10 object-contain" unoptimized />
-          <div>
-            <h3 className="font-bold text-white" style={{ fontFamily: "'Montserrat', sans-serif" }}>Season Snapshot</h3>
-            <p className="text-xs text-white/70">{seasonLabel}</p>
-          </div>
-        </div>
+    <div className="glass-card glass-card-static">
+      <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '16px' }}>
+        <h3 style={{ fontFamily: "'Space Grotesk', sans-serif", color: 'var(--sm-text)', fontWeight: 700, fontSize: '16px', margin: 0 }}>Season Snapshot</h3>
+        <span className="sm-tag">{seasonLabel}</span>
       </div>
-      <div className="p-5">
-        <div className="text-center pb-4" style={{ borderBottom: '1px solid var(--sm-border)' }}>
-          <div className="text-4xl font-bold" style={{ color: team.primaryColor }}>{record ? `${record.wins}-${record.losses}` : '--'}</div>
-          <div className="text-sm mt-1" style={{ color: 'var(--sm-text-muted)' }}>Record</div>
-        </div>
+      <div style={{ textAlign: 'center', padding: '16px 0', borderTop: '1px solid var(--sm-border)' }}>
+        <div style={{ fontSize: '36px', fontWeight: 700, color: 'var(--sm-text)', fontFamily: "'Space Grotesk', sans-serif" }}>{record ? `${record.wins}-${record.losses}` : '--'}</div>
+        <div style={{ fontSize: '12px', textTransform: 'uppercase', letterSpacing: '1px', color: 'var(--sm-text-dim)', fontWeight: 600, marginTop: '4px' }}>Record</div>
       </div>
     </div>
   )
 }
 
-function QuickLinksCard({ team, teamSlug }: { team: typeof CHICAGO_TEAMS.cubs; teamSlug: string }) {
+function QuickLinksCard({ slug }: { slug: string }) {
   const links = [
-    { href: `/${teamSlug}/schedule`, label: 'Schedule' },
-    { href: `/${teamSlug}/roster`, label: 'Roster' },
-    { href: `/${teamSlug}/stats`, label: 'Team Stats' },
-    { href: `/${teamSlug}/scores`, label: 'Scores' },
+    { href: `/${slug}/schedule`, label: 'Schedule' },
+    { href: `/${slug}/roster`, label: 'Roster' },
+    { href: `/${slug}/stats`, label: 'Team Stats' },
+    { href: `/${slug}/scores`, label: 'Scores' },
   ]
-
   return (
-    <div style={{ borderRadius: 'var(--sm-radius-lg)', padding: '24px', backgroundColor: 'var(--sm-card)', border: '1px solid var(--sm-border)' }}>
-      <h3 className="font-bold mb-4" style={{ fontFamily: "'Montserrat', sans-serif", color: 'var(--sm-text)' }}>Quick Links</h3>
-      <div className="space-y-2">
+    <div className="glass-card glass-card-static">
+      <h3 style={{ fontFamily: "'Space Grotesk', sans-serif", color: 'var(--sm-text)', fontWeight: 700, fontSize: '16px', margin: '0 0 16px 0' }}>Quick Links</h3>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
         {links.map((link) => (
-          <Link key={link.label} href={link.href} className="flex items-center gap-3 px-3 py-2.5 rounded-lg transition-colors" style={{ color: 'var(--sm-text)' }}>
-            <span className="text-sm font-medium">{link.label}</span>
-            <svg className="w-4 h-4 ml-auto" style={{ color: 'var(--sm-text-dim)' }} fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" /></svg>
+          <Link key={link.label} href={link.href} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '10px 12px', borderRadius: 'var(--sm-radius-sm)', color: 'var(--sm-text)', textDecoration: 'none', fontSize: '14px', fontWeight: 500, background: 'var(--sm-surface)', border: '1px solid var(--sm-border)', transition: 'background 0.2s' }}>
+            <span>{link.label}</span>
+            <svg width="16" height="16" style={{ color: 'var(--sm-text-dim)' }} fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" /></svg>
           </Link>
         ))}
       </div>
@@ -235,38 +204,39 @@ function QuickLinksCard({ team, teamSlug }: { team: typeof CHICAGO_TEAMS.cubs; t
   )
 }
 
-function AskAIWidget({ team, teamLabel }: { team: typeof CHICAGO_TEAMS.cubs; teamLabel: string }) {
+function AskAIWidget({ teamSlug, teamLabel }: { teamSlug: string; teamLabel: string }) {
   return (
-    <div style={{ borderRadius: 'var(--sm-radius-lg)', padding: '24px', backgroundColor: 'var(--sm-card)', border: '1px solid var(--sm-border)' }}>
-      <div className="flex items-center gap-3 mb-4">
-        <div className="w-10 h-10 rounded-full flex items-center justify-center" style={{ backgroundColor: `${team.primaryColor}20` }}>
-          <Image src="/downloads/scout-v2.png" alt="Scout AI" width={20} height={20} className="w-5 h-5" />
+    <div className="glass-card glass-card-static">
+      <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '16px' }}>
+        <div style={{ width: '40px', height: '40px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'var(--sm-gradient-subtle)' }}>
+          <Image src="/downloads/scout-v2.png" alt="Scout AI" width={20} height={20} />
         </div>
         <div>
-          <h3 className="font-bold" style={{ fontFamily: "'Montserrat', sans-serif", color: 'var(--sm-text)' }}>Scout AI</h3>
-          <p className="text-xs" style={{ color: 'var(--sm-text-dim)' }}>Get instant answers about the {teamLabel}</p>
+          <h3 style={{ fontFamily: "'Space Grotesk', sans-serif", color: 'var(--sm-text)', fontWeight: 700, fontSize: '16px', margin: 0 }}>Scout AI</h3>
+          <p style={{ color: 'var(--sm-text-dim)', fontSize: '12px', margin: 0 }}>Get instant answers about the {teamLabel}</p>
         </div>
       </div>
-      <Link href={`/scout-ai?team=${team.slug}`} style={{ display: 'block', width: '100%', textAlign: 'center', padding: '12px 20px', borderRadius: '100px', fontWeight: 600, fontSize: '14px', color: '#fff', backgroundColor: team.primaryColor, textDecoration: 'none' }}>Ask Scout</Link>
+      <Link href={`/scout-ai?team=${teamSlug}`} className="btn btn-md btn-primary" style={{ display: 'block', width: '100%', textAlign: 'center', textDecoration: 'none', borderRadius: 'var(--sm-radius-pill)' }}>Ask Scout</Link>
     </div>
   )
 }
 
-function FanChatWidget({ team, teamLabel, channel }: { team: typeof CHICAGO_TEAMS.cubs; teamLabel: string; channel: string }) {
+function FanChatWidget({ teamLabel, channel }: { teamLabel: string; channel: string }) {
   return (
-    <div style={{ borderRadius: 'var(--sm-radius-lg)', padding: '24px', backgroundColor: 'var(--sm-card)', border: '1px solid var(--sm-border)' }}>
-      <div className="flex items-center gap-3 mb-4">
-        <div className="w-10 h-10 rounded-full flex items-center justify-center" style={{ backgroundColor: `${team.secondaryColor}20` }}>
-          <svg className="w-5 h-5" style={{ color: team.secondaryColor }} fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8h2a2 2 0 012 2v6a2 2 0 01-2 2h-2v4l-4-4H9a1.994 1.994 0 01-1.414-.586m0 0L11 14h4a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2v4l.586-.586z" /></svg>
+    <div className="glass-card glass-card-static">
+      <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '16px' }}>
+        <div style={{ width: '40px', height: '40px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'var(--sm-gradient-subtle)' }}>
+          <svg width="20" height="20" style={{ color: 'var(--sm-red-light)' }} fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8h2a2 2 0 012 2v6a2 2 0 01-2 2h-2v4l-4-4H9a1.994 1.994 0 01-1.414-.586m0 0L11 14h4a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2v4l.586-.586z" /></svg>
         </div>
         <div>
-          <h3 className="font-bold" style={{ fontFamily: "'Montserrat', sans-serif", color: 'var(--sm-text)' }}>{teamLabel} Fan Chat</h3>
-          <div className="flex items-center gap-1.5 text-xs" style={{ color: 'var(--sm-text-dim)' }}>
-            <span className="w-2 h-2 bg-green-500 rounded-full animate-pulse" /><span>Fans online</span>
+          <h3 style={{ fontFamily: "'Space Grotesk', sans-serif", color: 'var(--sm-text)', fontWeight: 700, fontSize: '16px', margin: 0 }}>{teamLabel} Fan Chat</h3>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '12px', color: 'var(--sm-text-dim)' }}>
+            <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: 'var(--sm-success)', display: 'inline-block' }} />
+            <span>Fans online</span>
           </div>
         </div>
       </div>
-      <Link href={`/fan-chat?channel=${channel}`} style={{ display: 'block', width: '100%', textAlign: 'center', padding: '12px 20px', borderRadius: '100px', fontWeight: 600, fontSize: '14px', color: '#fff', backgroundColor: team.primaryColor, textDecoration: 'none' }}>Join {teamLabel} Chat</Link>
+      <Link href={`/fan-chat?channel=${channel}`} className="btn btn-md btn-secondary" style={{ display: 'block', width: '100%', textAlign: 'center', textDecoration: 'none', borderRadius: 'var(--sm-radius-pill)' }}>Join {teamLabel} Chat</Link>
     </div>
   )
 }

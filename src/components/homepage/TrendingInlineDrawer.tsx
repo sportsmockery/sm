@@ -20,26 +20,21 @@ export function TrendingInlineDrawer({ posts }: TrendingInlineDrawerProps) {
   const topFive = posts.slice(0, 5);
 
   return (
-    <div className="trending-inline-drawer">
+    <div className="glass-card-sm trending-inline-drawer">
       <button
         className="trending-drawer-toggle"
         onClick={() => setIsExpanded(!isExpanded)}
         aria-expanded={isExpanded}
       >
-        <span className="trending-drawer-label">Trending Now</span>
-        <span className={`trending-drawer-chevron ${isExpanded ? 'expanded' : ''}`}>
-          &#8250;
-        </span>
+        <span>Trending Now</span>
+        <span className={`trending-drawer-chevron ${isExpanded ? 'expanded' : ''}`}>&rsaquo;</span>
       </button>
-
       {isExpanded && (
         <ol className="trending-drawer-list">
           {topFive.map((post, index) => (
             <li key={post.id} className="trending-drawer-item">
               <span className="trending-drawer-rank">{index + 1}</span>
-              <Link href={`/${post.slug}`} className="trending-drawer-link">
-                {post.title}
-              </Link>
+              <Link href={`/${post.slug}`} className="trending-drawer-link">{post.title}</Link>
             </li>
           ))}
         </ol>

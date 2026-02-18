@@ -72,19 +72,34 @@ export default function CommentSection({
   }, [articleId, articleUrl, articleTitle, disqusShortname])
 
   return (
-    <section className={`border-t py-10 ${className}`} style={{ borderColor: 'var(--sm-border)' }}>
-      <div className="mb-6">
+    <section
+      className={`glass-card glass-card-static ${className}`}
+      style={{
+        padding: '28px',
+        marginTop: '32px',
+      }}
+    >
+      {/* Header */}
+      <div style={{ marginBottom: '24px' }}>
         <h2
-          className="flex items-center gap-2 text-xl font-bold"
-          style={{ fontFamily: "'Montserrat', sans-serif", color: 'var(--sm-text)' }}
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '10px',
+            fontFamily: "'Space Grotesk', sans-serif",
+            fontSize: '20px',
+            fontWeight: 700,
+            color: 'var(--sm-text)',
+            margin: 0,
+          }}
         >
           <svg
-            className="h-6 w-6"
-            style={{ color: '#bc0000' }}
+            width="24"
+            height="24"
             fill="none"
             viewBox="0 0 24 24"
             strokeWidth={2}
-            stroke="currentColor"
+            stroke="var(--sm-red)"
           >
             <path
               strokeLinecap="round"
@@ -94,7 +109,14 @@ export default function CommentSection({
           </svg>
           Comments
         </h2>
-        <p className="text-sm mt-1" style={{ color: 'var(--sm-text-muted)' }}>
+        <p
+          style={{
+            fontFamily: "'Inter', sans-serif",
+            fontSize: '14px',
+            color: 'var(--sm-text-muted)',
+            marginTop: '6px',
+          }}
+        >
           Join the discussion below. Keep it civil and focused on the content.
         </p>
       </div>
@@ -102,26 +124,58 @@ export default function CommentSection({
       {/* Disqus Thread Container */}
       <div
         id="disqus_thread"
-        className="min-h-[200px] rounded-lg p-4"
-        style={{ backgroundColor: 'var(--sm-card)', border: '1px solid var(--sm-border)' }}
+        style={{
+          minHeight: '200px',
+          borderRadius: 'var(--sm-radius-md)',
+          padding: '16px',
+          background: 'var(--sm-surface)',
+          border: '1px solid var(--sm-border)',
+        }}
       >
         {!isLoaded && (
-          <div className="flex flex-col items-center justify-center py-12">
-            <div className="w-8 h-8 border-2 border-t-transparent rounded-full animate-spin mb-4" style={{ borderColor: '#bc0000' }} />
-            <p style={{ color: 'var(--sm-text-muted)' }}>Loading comments...</p>
+          <div
+            style={{
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              justifyContent: 'center',
+              padding: '48px 0',
+            }}
+          >
+            <div
+              style={{
+                width: '32px',
+                height: '32px',
+                border: '2px solid var(--sm-red)',
+                borderTopColor: 'transparent',
+                borderRadius: '50%',
+                marginBottom: '16px',
+                animation: 'spin 1s linear infinite',
+              }}
+            />
+            <p style={{ fontFamily: "'Inter', sans-serif", fontSize: '14px', color: 'var(--sm-text-muted)' }}>
+              Loading comments...
+            </p>
           </div>
         )}
       </div>
 
       {/* Disqus noscript fallback */}
       <noscript>
-        <p style={{ color: 'var(--sm-text-muted)', textAlign: 'center', marginTop: '1rem' }}>
+        <p style={{ color: 'var(--sm-text-muted)', textAlign: 'center', marginTop: '16px', fontFamily: "'Inter', sans-serif", fontSize: '14px' }}>
           Please enable JavaScript to view the{' '}
-          <a href="https://disqus.com/?ref_noscript" style={{ color: '#bc0000' }}>
+          <a href="https://disqus.com/?ref_noscript" style={{ color: 'var(--sm-red)' }}>
             comments powered by Disqus.
           </a>
         </p>
       </noscript>
+
+      {/* Spinner keyframes */}
+      <style>{`
+        @keyframes spin {
+          to { transform: rotate(360deg); }
+        }
+      `}</style>
     </section>
   )
 }

@@ -260,14 +260,15 @@ export default function FanChatPage() {
   }
 
   return (
-    <div className="min-h-screen" style={{ backgroundColor: 'var(--sm-dark)' }}>
-      <div className="max-w-[1320px] mx-auto px-4 md:px-6 lg:px-8 py-6">
+    <div className="sm-hero-bg" style={{ minHeight: '100vh' }}>
+      <div className="sm-grid-overlay" />
+      <div style={{ maxWidth: 'var(--sm-max-width)', margin: '0 auto', padding: '24px 16px', paddingTop: 96, position: 'relative', zIndex: 1 }}>
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-6" style={{ minHeight: 'calc(100vh - 200px)' }}>
           {/* Channel List - Sidebar */}
           <div className={`lg:col-span-1 ${showChannels ? 'block' : 'hidden lg:block'}`}>
             <div
-              className="overflow-hidden sticky top-24"
-              style={{ backgroundColor: 'var(--sm-card)', border: '1px solid var(--sm-border)', borderRadius: 'var(--sm-radius-xl)' }}
+              className="glass-card glass-card-static overflow-hidden sticky top-24"
+              style={{ padding: 0 }}
             >
               {/* Header */}
               <div
@@ -276,7 +277,7 @@ export default function FanChatPage() {
               >
                 <h2
                   className="font-bold"
-                  style={{ fontFamily: "'Montserrat', sans-serif", color: 'var(--sm-text)' }}
+                  style={{ fontFamily: 'var(--sm-font-heading)', color: 'var(--sm-text)' }}
                 >
                   Chat Channels
                 </h2>
@@ -335,8 +336,8 @@ export default function FanChatPage() {
                           {channel.name}
                         </span>
                         {channel.isLive && (
-                          <span className="flex items-center gap-1 px-1.5 py-0.5 bg-green-500/20 rounded text-[10px] text-green-600 font-medium">
-                            <span className="w-1.5 h-1.5 bg-green-500 rounded-full animate-pulse" />
+                          <span className="sm-tag" style={{ background: 'rgba(34,197,94,0.15)', color: 'var(--sm-success)', borderColor: 'transparent', fontSize: 10, padding: '2px 6px' }}>
+                            <span style={{ width: 6, height: 6, borderRadius: '50%', backgroundColor: 'var(--sm-success)', display: 'inline-block', marginRight: 4, animation: 'pulse 2s infinite' }} />
                             LIVE
                           </span>
                         )}
@@ -364,11 +365,9 @@ export default function FanChatPage() {
           {/* Main Chat Area */}
           <div className="lg:col-span-3">
             <div
-              className="overflow-hidden flex flex-col h-full"
+              className="glass-card glass-card-static overflow-hidden flex flex-col h-full"
               style={{
-                backgroundColor: 'var(--sm-card)',
-                border: '1px solid var(--sm-border)',
-                borderRadius: 'var(--sm-radius-xl)',
+                padding: 0,
                 minHeight: 'calc(100vh - 200px)',
               }}
             >
@@ -404,7 +403,7 @@ export default function FanChatPage() {
                     </div>
                   )}
                   <div>
-                    <h2 className="font-bold text-white" style={{ fontFamily: "'Montserrat', sans-serif" }}>
+                    <h2 className="font-bold text-white" style={{ fontFamily: 'var(--sm-font-heading)' }}>
                       {currentChannel.name}
                     </h2>
                     <p className="text-xs text-white/70">
@@ -449,7 +448,7 @@ export default function FanChatPage() {
                   </div>
                   <h3
                     className="font-bold text-lg mb-1"
-                    style={{ fontFamily: "'Montserrat', sans-serif", color: 'var(--sm-text)' }}
+                    style={{ fontFamily: 'var(--sm-font-heading)', color: 'var(--sm-text)' }}
                   >
                     Welcome to {currentChannel.name}
                   </h3>

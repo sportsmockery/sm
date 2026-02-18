@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
+import Image from 'next/image'
 import { updatePassword } from '@/lib/auth'
 
 export default function ResetPasswordPage() {
@@ -40,7 +41,6 @@ export default function ResetPasswordPage() {
     setSuccess(true)
     setLoading(false)
 
-    // Redirect to login after 3 seconds
     setTimeout(() => {
       router.push('/login')
     }, 3000)
@@ -48,119 +48,139 @@ export default function ResetPasswordPage() {
 
   if (success) {
     return (
-      <div className="flex min-h-screen items-center justify-center px-4" style={{ backgroundColor: 'var(--sm-dark)' }}>
-        <div className="w-full max-w-md">
-          <div className="rounded-2xl p-8 shadow-sm" style={{ border: '1px solid var(--sm-border)', backgroundColor: 'var(--sm-card)' }}>
-            <div className="text-center">
-              <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-emerald-900/30">
-                <svg className="h-8 w-8 text-emerald-400" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
-              </div>
-              <h3 className="mb-2 text-lg font-semibold" style={{ color: 'var(--sm-text)' }}>Password reset successful</h3>
-              <p className="text-sm" style={{ color: 'var(--sm-text-muted)' }}>
-                Your password has been updated. Redirecting to login...
-              </p>
-            </div>
+      <div className="sm-hero-bg" style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '48px 16px' }}>
+        <div className="sm-grid-overlay" />
+        <div className="glass-card glass-card-static" style={{ position: 'relative', width: '100%', maxWidth: '420px', padding: '40px 32px', textAlign: 'center' }}>
+          <div style={{
+            width: 64, height: 64, borderRadius: '50%', margin: '0 auto 16px',
+            background: 'rgba(16,185,129,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center',
+          }}>
+            <svg style={{ width: 32, height: 32, color: '#10b981' }} fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
           </div>
+          <h3 style={{ fontSize: '18px', fontWeight: 600, color: 'var(--sm-text)', marginBottom: '8px' }}>Password reset successful</h3>
+          <p style={{ fontSize: '14px', color: 'var(--sm-text-muted)' }}>
+            Your password has been updated. Redirecting to login...
+          </p>
         </div>
       </div>
     )
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center px-4" style={{ backgroundColor: 'var(--sm-dark)' }}>
-      <div className="w-full max-w-md">
-        {/* Card */}
-        <div className="rounded-2xl p-8 shadow-sm" style={{ border: '1px solid var(--sm-border)', backgroundColor: 'var(--sm-card)' }}>
-          {/* Logo */}
-          <div className="mb-8 text-center">
-            <Link href="/" className="inline-block">
-              <span className="font-heading text-2xl font-black tracking-tight" style={{ color: 'var(--sm-text)' }}>
-                SPORTS
-                <span className="bg-gradient-to-r from-[#FF0000] to-[#8B0000] bg-clip-text text-transparent">
-                  MOCKERY
-                </span>
-              </span>
-            </Link>
-            <h2 className="mt-6 text-xl font-bold" style={{ color: 'var(--sm-text)' }}>
-              Reset your password
-            </h2>
-            <p className="mt-2 text-sm" style={{ color: 'var(--sm-text-muted)' }}>
-              Enter your new password below.
-            </p>
+    <div className="sm-hero-bg" style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '48px 16px' }}>
+      <div className="sm-grid-overlay" />
+      <div className="glass-card glass-card-static" style={{ position: 'relative', width: '100%', maxWidth: '420px', padding: '40px 32px' }}>
+        {/* Logo */}
+        <div style={{ textAlign: 'center', marginBottom: '32px' }}>
+          <Link href="/" style={{ display: 'inline-block' }}>
+            <Image
+              src="/logos/SM_Full_v2.png"
+              alt="Sports Mockery"
+              width={180}
+              height={45}
+              className="dark:hidden"
+              priority
+            />
+            <Image
+              src="/logos/v2_SM_Whole.png"
+              alt="Sports Mockery"
+              width={180}
+              height={45}
+              className="hidden dark:block"
+              priority
+            />
+          </Link>
+          <h2 style={{
+            marginTop: '24px',
+            fontSize: '24px',
+            fontWeight: 700,
+            fontFamily: "'Space Grotesk', var(--font-heading), sans-serif",
+            color: 'var(--sm-text)',
+          }}>
+            Choose a new password
+          </h2>
+          <p style={{ marginTop: '8px', fontSize: '14px', color: 'var(--sm-text-muted)' }}>
+            Enter your new password below.
+          </p>
+        </div>
+
+        <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
+          {/* Error message */}
+          {error && (
+            <div style={{
+              borderRadius: 'var(--sm-radius-md)',
+              background: 'rgba(188,0,0,0.1)',
+              border: '1px solid rgba(188,0,0,0.2)',
+              padding: '14px 16px',
+              fontSize: '14px',
+              color: '#ff6666',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '8px',
+            }}>
+              <svg style={{ width: 20, height: 20, flexShrink: 0 }} fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z" />
+              </svg>
+              {error}
+            </div>
+          )}
+
+          {/* New Password */}
+          <div>
+            <label htmlFor="password" style={{ display: 'block', fontSize: '14px', fontWeight: 500, color: 'var(--sm-text)', marginBottom: '6px' }}>
+              New Password
+            </label>
+            <input
+              id="password"
+              type="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+              autoComplete="new-password"
+              className="sm-input"
+              placeholder="********"
+            />
           </div>
 
-          <form onSubmit={handleSubmit} className="space-y-6">
-            {/* Error message */}
-            {error && (
-              <div className="rounded-lg bg-red-900/30 p-4 text-sm text-red-300">
-                <div className="flex items-center gap-2">
-                  <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z" />
-                  </svg>
-                  {error}
-                </div>
-              </div>
+          {/* Confirm Password */}
+          <div>
+            <label htmlFor="confirmPassword" style={{ display: 'block', fontSize: '14px', fontWeight: 500, color: 'var(--sm-text)', marginBottom: '6px' }}>
+              Confirm New Password
+            </label>
+            <input
+              id="confirmPassword"
+              type="password"
+              value={confirmPassword}
+              onChange={(e) => setConfirmPassword(e.target.value)}
+              required
+              autoComplete="new-password"
+              className="sm-input"
+              placeholder="********"
+            />
+          </div>
+
+          {/* Submit button */}
+          <button
+            type="submit"
+            disabled={loading}
+            className="btn-primary btn-full"
+            style={loading ? { opacity: 0.6, cursor: 'not-allowed' } : undefined}
+          >
+            {loading ? (
+              <span style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <svg style={{ width: 20, height: 20, animation: 'spin 1s linear infinite' }} fill="none" viewBox="0 0 24 24">
+                  <circle style={{ opacity: 0.25 }} cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                  <path style={{ opacity: 0.75 }} fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                </svg>
+                Resetting...
+              </span>
+            ) : (
+              'Reset password'
             )}
-
-            {/* New Password */}
-            <div>
-              <label htmlFor="password" className="block text-sm font-medium" style={{ color: 'var(--sm-text-muted)' }}>
-                New Password
-              </label>
-              <input
-                id="password"
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                required
-                autoComplete="new-password"
-                className="mt-1 block w-full px-4 py-3 focus:outline-none focus:ring-1"
-                style={{ backgroundColor: 'var(--sm-surface)', border: '1px solid var(--sm-border)', color: 'var(--sm-text)', borderRadius: '12px' }}
-                placeholder="••••••••"
-              />
-            </div>
-
-            {/* Confirm Password */}
-            <div>
-              <label htmlFor="confirmPassword" className="block text-sm font-medium" style={{ color: 'var(--sm-text-muted)' }}>
-                Confirm New Password
-              </label>
-              <input
-                id="confirmPassword"
-                type="password"
-                value={confirmPassword}
-                onChange={(e) => setConfirmPassword(e.target.value)}
-                required
-                autoComplete="new-password"
-                className="mt-1 block w-full px-4 py-3 focus:outline-none focus:ring-1"
-                style={{ backgroundColor: 'var(--sm-surface)', border: '1px solid var(--sm-border)', color: 'var(--sm-text)', borderRadius: '12px' }}
-                placeholder="••••••••"
-              />
-            </div>
-
-            {/* Submit button */}
-            <button
-              type="submit"
-              disabled={loading}
-              className="flex w-full items-center justify-center gap-2 px-4 py-3 font-semibold transition-colors disabled:cursor-not-allowed disabled:opacity-50"
-              style={{ background: 'linear-gradient(135deg, #bc0000, #ff4444)', color: '#fff', borderRadius: '9999px' }}
-            >
-              {loading ? (
-                <>
-                  <svg className="h-5 w-5 animate-spin" fill="none" viewBox="0 0 24 24">
-                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
-                  </svg>
-                  Resetting...
-                </>
-              ) : (
-                'Reset password'
-              )}
-            </button>
-          </form>
-        </div>
+          </button>
+        </form>
       </div>
     </div>
   )

@@ -44,6 +44,12 @@ const suggestedPrompts = [
   "White Sox trade deadline moves",
 ]
 
+const capabilities = [
+  { icon: 'M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z', title: 'Stats & Analysis', desc: 'Compare players, advanced metrics, season stats' },
+  { icon: 'M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9a2 2 0 00-2-2h-2m-4-3H9M7 16h6M7 8h6v4H7V8z', title: 'News & Updates', desc: 'Latest moves, trades, injuries, and rumors' },
+  { icon: 'M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z', title: 'Schedules & History', desc: 'Game results, upcoming matchups, team history' },
+]
+
 export default function AskAIPage() {
   const [messages, setMessages] = useState<Message[]>([])
   const [input, setInput] = useState('')
@@ -268,17 +274,17 @@ export default function AskAIPage() {
   const getSourceBadge = (source?: string) => {
     if (!source) return null
 
-    const badges: Record<string, { label: string; color: string }> = {
-      web_fallback: { label: 'From Web Sources', color: 'bg-blue-500' },
-      error: { label: 'Error', color: 'bg-red-500' },
-      empty: { label: 'No Data', color: 'bg-yellow-500' },
+    const badges: Record<string, { label: string; bg: string }> = {
+      web_fallback: { label: 'From Web Sources', bg: 'rgba(59,130,246,0.2)' },
+      error: { label: 'Error', bg: 'rgba(239,68,68,0.2)' },
+      empty: { label: 'No Data', bg: 'rgba(245,158,11,0.2)' },
     }
 
     const badge = badges[source]
     if (!badge) return null
 
     return (
-      <span className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium text-white ${badge.color}`}>
+      <span className="sm-tag" style={{ background: badge.bg, fontSize: '10px', padding: '2px 8px' }}>
         {badge.label}
       </span>
     )
@@ -287,10 +293,11 @@ export default function AskAIPage() {
   // Loading state
   if (isPageLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: 'var(--sm-card)' }}>
-        <div className="text-center">
-          <div className="w-12 h-12 border-4 border-t-transparent rounded-full animate-spin mx-auto mb-4" style={{ borderColor: '#bc0000', borderTopColor: 'transparent' }} />
-          <p style={{ color: 'var(--sm-text-muted)' }}>Loading...</p>
+      <div className="sm-hero-bg" style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+        <div className="sm-grid-overlay" />
+        <div style={{ textAlign: 'center', position: 'relative', zIndex: 1 }}>
+          <div style={{ width: 48, height: 48, border: '3px solid var(--sm-red)', borderTopColor: 'transparent', borderRadius: '50%', animation: 'spin-2030 1s linear infinite', margin: '0 auto 16px' }} />
+          <p style={{ color: 'var(--sm-text-muted)', fontFamily: 'var(--sm-font-body)' }}>Loading...</p>
         </div>
       </div>
     )
@@ -299,45 +306,32 @@ export default function AskAIPage() {
   // Not logged in - show login prompt
   if (!isAuthenticated) {
     return (
-      <div className="min-h-screen" style={{ backgroundColor: 'var(--sm-card)' }}>
-        <div className="max-w-lg mx-auto px-4 py-16">
-          <div
-            className="rounded-2xl p-8 text-center"
-            style={{ backgroundColor: 'var(--sm-surface)', border: '1px solid var(--sm-border)' }}
-          >
-            <div className="w-20 h-20 rounded-full bg-gradient-to-br from-[#bc0000] to-[#ff4444] flex items-center justify-center mx-auto mb-6">
-              <Image
-                src="/downloads/scout-v2.png"
-                alt="Scout AI"
-                width={40}
-                height={40}
-                className="w-10 h-10"
-              />
+      <div className="sm-hero-bg" style={{ minHeight: '100vh' }}>
+        <div className="sm-grid-overlay" />
+        <div style={{ maxWidth: 480, margin: '0 auto', padding: '80px 16px', position: 'relative', zIndex: 1 }}>
+          <div className="glass-card" style={{ textAlign: 'center' }}>
+            <div style={{
+              width: 80, height: 80, borderRadius: 'var(--sm-radius-lg)',
+              background: 'var(--sm-gradient)', display: 'flex', alignItems: 'center', justifyContent: 'center',
+              margin: '0 auto 24px',
+            }}>
+              <Image src="/downloads/scout-v2.png" alt="Scout AI" width={40} height={40} style={{ width: 40, height: 40 }} />
             </div>
-            <h1
-              className="text-2xl font-bold mb-3"
-              style={{ fontFamily: "'Montserrat', sans-serif", color: 'var(--sm-text)' }}
-            >
+            <h1 style={{ fontFamily: 'var(--sm-font-heading)', fontSize: '1.75rem', fontWeight: 700, color: 'var(--sm-text)', marginBottom: 12 }}>
               Sign in to Scout AI
             </h1>
-            <p className="text-sm mb-6" style={{ color: 'var(--sm-text-muted)' }}>
+            <p style={{ color: 'var(--sm-text-muted)', fontSize: 14, marginBottom: 24, lineHeight: 1.6 }}>
               Get instant answers about the Bears, Bulls, Cubs, White Sox, and Blackhawks with our AI-powered sports assistant.
             </p>
-            <Link
-              href="/login?next=/scout-ai"
-              className="inline-flex items-center gap-2 px-6 py-3 text-white font-semibold rounded-xl transition-colors hover:brightness-95"
-              style={{ backgroundColor: '#bc0000', color: '#ffffff' }}
-            >
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <Link href="/login?next=/scout-ai" className="btn btn-primary btn-lg" style={{ display: 'inline-flex', gap: 8 }}>
+              <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
               </svg>
               Sign In
             </Link>
-            <p className="text-xs mt-4" style={{ color: 'var(--sm-text-muted)' }}>
+            <p style={{ fontSize: 12, marginTop: 16, color: 'var(--sm-text-muted)' }}>
               Don&apos;t have an account?{' '}
-              <Link href="/login?next=/scout-ai" className="hover:underline" style={{ color: '#bc0000' }}>
-                Sign up free
-              </Link>
+              <Link href="/login?next=/scout-ai" style={{ color: 'var(--sm-red)' }}>Sign up free</Link>
             </p>
           </div>
         </div>
@@ -348,42 +342,38 @@ export default function AskAIPage() {
   // Logged in but doesn't have access (free tier with limit reached or no access)
   if (!hasAccess) {
     return (
-      <div className="min-h-screen" style={{ backgroundColor: 'var(--sm-card)' }}>
-        <div className="max-w-lg mx-auto px-4 py-16">
-          <div
-            className="rounded-2xl p-8 text-center"
-            style={{ backgroundColor: 'var(--sm-surface)', border: '1px solid var(--sm-border)' }}
-          >
-            <div className="w-20 h-20 rounded-full bg-gradient-to-br from-amber-500 to-orange-500 flex items-center justify-center mx-auto mb-6">
-              <svg className="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <div className="sm-hero-bg" style={{ minHeight: '100vh' }}>
+        <div className="sm-grid-overlay" />
+        <div style={{ maxWidth: 480, margin: '0 auto', padding: '80px 16px', position: 'relative', zIndex: 1 }}>
+          <div className="glass-card" style={{ textAlign: 'center' }}>
+            <div style={{
+              width: 80, height: 80, borderRadius: 'var(--sm-radius-lg)',
+              background: 'linear-gradient(135deg, #f59e0b, #f97316)', display: 'flex', alignItems: 'center', justifyContent: 'center',
+              margin: '0 auto 24px',
+            }}>
+              <svg width="40" height="40" fill="none" stroke="white" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
               </svg>
             </div>
-            <h1
-              className="text-2xl font-bold mb-3"
-              style={{ fontFamily: "'Montserrat', sans-serif", color: 'var(--sm-text)' }}
-            >
+            <h1 style={{ fontFamily: 'var(--sm-font-heading)', fontSize: '1.75rem', fontWeight: 700, color: 'var(--sm-text)', marginBottom: 12 }}>
               Upgrade to SM+ for Unlimited Access
             </h1>
-            <p className="text-sm mb-6" style={{ color: 'var(--sm-text-muted)' }}>
+            <p style={{ color: 'var(--sm-text-muted)', fontSize: 14, marginBottom: 24, lineHeight: 1.6 }}>
               Free accounts get {features.ask_ai.limit} AI questions per day. Upgrade to SM+ for unlimited access to Scout AI, plus Fan Chat and ad-free browsing.
             </p>
-            <button
-              onClick={() => openCheckout('sm_plus_monthly')}
-              className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-amber-500 to-orange-500 text-white font-semibold rounded-xl hover:from-amber-600 hover:to-orange-600 transition-colors"
-            >
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <button onClick={() => openCheckout('sm_plus_monthly')} className="btn btn-lg" style={{
+              display: 'inline-flex', gap: 8,
+              background: 'linear-gradient(135deg, #f59e0b, #f97316)', color: '#fff',
+              border: 'none', borderRadius: 'var(--sm-radius-md)', cursor: 'pointer',
+            }}>
+              <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
               </svg>
               Upgrade to SM+ ($4.99/mo)
             </button>
-            <p className="text-xs mt-4" style={{ color: 'var(--sm-text-muted)' }}>
+            <p style={{ fontSize: 12, marginTop: 16, color: 'var(--sm-text-muted)' }}>
               Or{' '}
-              <button
-                onClick={() => openCheckout('sm_plus_annual')}
-                className="hover:underline"
-                style={{ color: '#bc0000' }}
-              >
+              <button onClick={() => openCheckout('sm_plus_annual')} style={{ color: 'var(--sm-red)', background: 'none', border: 'none', cursor: 'pointer', textDecoration: 'underline', fontSize: 12 }}>
                 save 33% with annual ($39.99/yr)
               </button>
             </p>
@@ -406,308 +396,303 @@ export default function AskAIPage() {
           animation: thinking 1.5s ease-in-out infinite;
         }
       `}</style>
-      <div className="min-h-screen" style={{ backgroundColor: 'var(--sm-card)' }}>
-        <div className="max-w-[1320px] mx-auto px-4 md:px-6 lg:px-8 py-8">
-          <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
-          {/* Left Sidebar - Explanation */}
-          <div className="lg:col-span-1">
-            <div
-              className="sticky top-24 rounded-2xl p-6"
-              style={{ backgroundColor: 'var(--sm-surface)', border: '1px solid var(--sm-border)' }}
-            >
-              {/* Logo/Icon and Title */}
-              <div className="flex items-center gap-4 mb-4">
-                <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-[#bc0000] to-[#ff4444] flex items-center justify-center flex-shrink-0">
-                  <Image
-                    src="/downloads/scout-v2.png"
-                    alt="Scout AI"
-                    width={28}
-                    height={28}
-                    className="w-7 h-7"
-                  />
-                </div>
-                <h1
-                  className="text-2xl font-bold"
-                  style={{ fontFamily: "'Montserrat', sans-serif", color: 'var(--sm-text)' }}
-                >
-                  Scout AI
-                </h1>
-              </div>
+      <div className="sm-hero-bg" style={{ minHeight: '100vh' }}>
+        <div className="sm-grid-overlay" />
+        <div style={{ maxWidth: 'var(--sm-max-width)', margin: '0 auto', padding: '32px 16px', position: 'relative', zIndex: 1 }}>
 
-              <p className="text-sm mb-6" style={{ color: 'var(--sm-text-muted)' }}>
-                Scout AI is a high-IQ sports engine that's locked in to answer all your Chicago sports questions.
-              </p>
-
-              {/* What you can ask */}
-              <div className="space-y-3">
-                <h3
-                  className="text-xs font-bold uppercase tracking-wider"
-                  style={{ color: 'var(--sm-text-muted)' }}
-                >
-                  What you can ask
-                </h3>
-                <ul className="space-y-2">
-                  {[
-                    { icon: '📊', text: 'Compare players & stats' },
-                    { icon: '📈', text: 'Explain advanced metrics' },
-                    { icon: '📰', text: 'Summarize recent news' },
-                    { icon: '🏈', text: 'Analyze matchups' },
-                    { icon: '📅', text: 'Check schedules & scores' },
-                    { icon: '🏆', text: 'Review team history' },
-                  ].map((item) => (
-                    <li
-                      key={item.text}
-                      className="flex items-center gap-2 text-sm"
-                      style={{ color: 'var(--sm-text)' }}
-                    >
-                      <span>{item.icon}</span>
-                      <span>{item.text}</span>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-
-              {/* Query History Section */}
-              <div className="mt-6 pt-6" style={{ borderTop: '1px solid var(--sm-border)' }}>
-                <button
-                  onClick={() => setShowHistory(!showHistory)}
-                  className="w-full flex items-center justify-between text-sm font-medium px-3 py-2 rounded-lg transition-colors"
-                  onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'rgba(188, 0, 0, 0.1)'}
-                  onMouseLeave={(e) => e.currentTarget.style.backgroundColor = ''}
-                  style={{ color: 'var(--sm-text)' }}
-                >
-                  <span className="flex items-center gap-2">
-                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+          {/* Feature capability cards - 3 column grid */}
+          {messages.length === 0 && (
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 16, marginBottom: 24 }}>
+              {capabilities.map((cap) => (
+                <div key={cap.title} className="glass-card glass-card-sm" style={{ textAlign: 'center' }}>
+                  <div style={{
+                    width: 40, height: 40, borderRadius: 'var(--sm-radius-sm)', background: 'var(--sm-gradient-subtle)',
+                    display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 12px',
+                  }}>
+                    <svg width="20" height="20" fill="none" stroke="var(--sm-red)" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d={cap.icon} />
                     </svg>
-                    Query History
-                  </span>
-                  <span className="text-xs px-2 py-0.5 rounded-full" style={{ backgroundColor: 'rgba(188, 0, 0, 0.2)', color: '#bc0000' }}>
-                    {queryHistory.length}
-                  </span>
-                </button>
-
-                {showHistory && (
-                  <div className="mt-3 space-y-2 max-h-60 overflow-y-auto">
-                    {historyLoading ? (
-                      <p className="text-xs text-center py-4" style={{ color: 'var(--sm-text-muted)' }}>Loading...</p>
-                    ) : queryHistory.length === 0 ? (
-                      <p className="text-xs text-center py-4" style={{ color: 'var(--sm-text-muted)' }}>No recent queries</p>
-                    ) : (
-                      <>
-                        {queryHistory.slice(0, 10).map((entry) => (
-                          <button
-                            key={entry.id}
-                            onClick={() => loadFromHistory(entry)}
-                            className="w-full flex items-center justify-between gap-2 p-2 rounded-lg text-xs transition-colors"
-                            onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'rgba(188, 0, 0, 0.1)'}
-                            onMouseLeave={(e) => e.currentTarget.style.backgroundColor = ''}
-                            style={{ color: 'var(--sm-text)' }}
-                          >
-                            <span className="font-medium truncate flex-1 text-left">{entry.query}</span>
-                            <span className="text-[10px] flex-shrink-0" style={{ color: 'var(--sm-text-muted)' }}>
-                              {new Date(entry.timestamp).toLocaleDateString()}
-                            </span>
-                          </button>
-                        ))}
-                        {queryHistory.length > 0 && (
-                          <button
-                            onClick={handleClearHistory}
-                            className="w-full text-center text-xs py-2 text-red-500 hover:text-red-600"
-                          >
-                            Clear History
-                          </button>
-                        )}
-                      </>
-                    )}
                   </div>
-                )}
-              </div>
-
+                  <h3 style={{ fontFamily: 'var(--sm-font-heading)', fontSize: 14, fontWeight: 600, color: 'var(--sm-text)', marginBottom: 4 }}>{cap.title}</h3>
+                  <p style={{ fontSize: 12, color: 'var(--sm-text-muted)', lineHeight: 1.4 }}>{cap.desc}</p>
+                </div>
+              ))}
             </div>
-          </div>
+          )}
 
-          {/* Main Chat Area */}
-          <div className="lg:col-span-3">
-            <div
-              className="rounded-2xl overflow-hidden flex flex-col"
-              style={{
-                backgroundColor: 'var(--sm-surface)',
-                border: '1px solid var(--sm-border)',
-                minHeight: 'calc(100vh - 200px)',
-                maxHeight: 'calc(100vh - 200px)',
-              }}
-            >
-              {/* Messages Area */}
-              <div ref={messagesContainerRef} className="flex-1 overflow-y-auto p-6">
-                {messages.length === 0 ? (
-                  <div className="h-full flex flex-col items-center justify-center text-center">
-                    <div className={`w-24 h-24 mb-6 ${isAnimating ? 'animate-thinking' : ''}`}>
-                      <Image
-                        src="/downloads/scout-v2.png"
-                        alt="Scout AI"
-                        width={96}
-                        height={96}
-                        className="w-full h-full object-contain"
-                      />
-                    </div>
-                    <h3
-                      className="text-xl font-bold mb-2"
-                      style={{ fontFamily: "'Montserrat', sans-serif", color: 'var(--sm-text)' }}
-                    >
-                      Ask me anything about Chicago sports
-                    </h3>
-                    <p className="text-sm max-w-md mb-8" style={{ color: 'var(--sm-text-muted)' }}>
-                      I can help with stats, history, analysis, and more for the Bears, Bulls, Cubs, White Sox, and Blackhawks.
-                    </p>
-
-                    {/* Suggested Prompts */}
-                    <div className="w-full max-w-2xl">
-                      <p className="text-xs font-medium uppercase tracking-wider mb-3" style={{ color: 'var(--sm-text-muted)' }}>
-                        Try asking
-                      </p>
-                      <div className="flex flex-wrap justify-center gap-2">
-                        {suggestedPrompts.map((prompt) => (
-                          <button
-                            key={prompt}
-                            onClick={() => handlePromptClick(prompt)}
-                            className="px-4 py-2 rounded-full text-sm transition-colors"
-                            onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = '#bc0000'; e.currentTarget.style.color = '#ffffff' }}
-                            onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = 'var(--sm-card)'; e.currentTarget.style.color = 'var(--sm-text)' }}
-                            style={{
-                              backgroundColor: 'var(--sm-card)',
-                              color: 'var(--sm-text)',
-                              border: '1px solid var(--sm-border)',
-                            }}
-                          >
-                            {prompt}
-                          </button>
-                        ))}
-                      </div>
-                    </div>
+          <div style={{ display: 'grid', gridTemplateColumns: '280px 1fr', gap: 24 }}>
+            {/* Left Sidebar */}
+            <div>
+              <div className="glass-card glass-card-static" style={{ position: 'sticky', top: 96 }}>
+                {/* Logo/Icon and Title */}
+                <div style={{ display: 'flex', alignItems: 'center', gap: 16, marginBottom: 16 }}>
+                  <div style={{
+                    width: 56, height: 56, borderRadius: 'var(--sm-radius-md)',
+                    background: 'var(--sm-gradient)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
+                  }}>
+                    <Image src="/downloads/scout-v2.png" alt="Scout AI" width={28} height={28} style={{ width: 28, height: 28 }} />
                   </div>
-                ) : (
-                  <div className="space-y-6">
-                    {messages.map((message) => (
-                      <div
-                        key={message.id}
-                        className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}
-                      >
-                        <div
-                          className="max-w-[80%] rounded-2xl px-4 py-3"
-                          style={
-                            message.role === 'assistant'
-                              ? { backgroundColor: 'var(--sm-card)', color: 'var(--sm-text)' }
-                              : { backgroundColor: '#bc0000', color: '#ffffff' }
-                          }
-                        >
-                          {message.role === 'assistant' && (
-                            <div className="flex items-center gap-2 mb-2">
-                              {message.team && (
-                                <span className="text-xs font-medium" style={{ color: 'var(--sm-text-muted)' }}>
-                                  {message.team}
-                                </span>
-                              )}
-                              {getSourceBadge(message.source)}
-                            </div>
-                          )}
-                          <div className="text-sm leading-relaxed prose prose-sm max-w-none">
-                            {message.role === 'assistant' ? (
-                              <>
-                                <ReactMarkdown
-                                  components={{
-                                    table: ({ children }) => (
-                                      <div className="overflow-x-auto my-2">
-                                        <table className="min-w-full text-sm">{children}</table>
-                                      </div>
-                                    ),
-                                    th: ({ children }) => (
-                                      <th className="px-2 py-1 text-left font-semibold border-b" style={{ borderColor: 'var(--sm-border)' }}>{children}</th>
-                                    ),
-                                    td: ({ children }) => (
-                                      <td className="px-2 py-1 border-b" style={{ borderColor: 'var(--sm-border)' }}>{children}</td>
-                                    ),
-                                    strong: ({ children }) => (
-                                      <strong className="font-semibold">{children}</strong>
-                                    ),
-                                  }}
-                                >
-                                  {message.content}
-                                </ReactMarkdown>
-                                {message.chartData && (
-                                  <DataVisualization
-                                    chartData={message.chartData}
-                                    bonusInsight={message.bonusInsight}
-                                  />
-                                )}
-                              </>
-                            ) : (
-                              <p>{message.content}</p>
-                            )}
-                          </div>
-                        </div>
+                  <h1 style={{ fontFamily: 'var(--sm-font-heading)', fontSize: '1.5rem', fontWeight: 700, color: 'var(--sm-text)' }}>
+                    Scout AI
+                  </h1>
+                </div>
+
+                <p style={{ fontSize: 13, color: 'var(--sm-text-muted)', marginBottom: 24, lineHeight: 1.6 }}>
+                  Scout AI is a high-IQ sports engine that&apos;s locked in to answer all your Chicago sports questions.
+                </p>
+
+                {/* What you can ask */}
+                <div>
+                  <h3 style={{ fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em', color: 'var(--sm-text-dim)', marginBottom: 12 }}>
+                    What you can ask
+                  </h3>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                    {[
+                      { icon: 'M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z', text: 'Compare players & stats' },
+                      { icon: 'M13 7h8m0 0v8m0-8l-8 8-4-4-6 6', text: 'Explain advanced metrics' },
+                      { icon: 'M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9a2 2 0 00-2-2h-2m-4-3H9M7 16h6M7 8h6v4H7V8z', text: 'Summarize recent news' },
+                      { icon: 'M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064', text: 'Analyze matchups' },
+                      { icon: 'M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z', text: 'Check schedules & scores' },
+                      { icon: 'M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z', text: 'Review team history' },
+                    ].map((item) => (
+                      <div key={item.text} style={{ display: 'flex', alignItems: 'center', gap: 10, fontSize: 13, color: 'var(--sm-text)' }}>
+                        <svg width="14" height="14" fill="none" stroke="var(--sm-text-dim)" viewBox="0 0 24 24" style={{ flexShrink: 0 }}>
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d={item.icon} />
+                        </svg>
+                        <span>{item.text}</span>
                       </div>
                     ))}
-                    {isLoading && (
-                      <div className="flex justify-start">
-                        <div
-                          className="rounded-2xl px-4 py-3 flex items-center gap-2"
-                          style={{ backgroundColor: 'var(--sm-card)' }}
-                        >
-                          <span className="text-sm" style={{ color: 'var(--sm-text-muted)' }}>
-                            Scout is thinking
-                          </span>
-                          <span className="flex gap-1">
-                            <span className="w-2 h-2 rounded-full animate-bounce" style={{ backgroundColor: '#bc0000', animationDelay: '0ms' }}></span>
-                            <span className="w-2 h-2 rounded-full animate-bounce" style={{ backgroundColor: '#bc0000', animationDelay: '150ms' }}></span>
-                            <span className="w-2 h-2 rounded-full animate-bounce" style={{ backgroundColor: '#bc0000', animationDelay: '300ms' }}></span>
-                          </span>
-                        </div>
-                      </div>
-                    )}
-                    <div ref={messagesEndRef} />
                   </div>
-                )}
-              </div>
+                </div>
 
-              {/* Input Area */}
-              <div className="p-4" style={{ borderTop: '1px solid var(--sm-border)' }}>
-                <form onSubmit={handleSubmit} className="flex items-center gap-3">
-                  {/* Scout Icon - Always visible, animates on question */}
-                  <div className={`w-12 h-12 flex-shrink-0 ${isAnimating ? 'animate-thinking' : ''}`}>
-                    <Image
-                      src="/downloads/scout-v2.png"
-                      alt="Scout AI"
-                      width={48}
-                      height={48}
-                      className="w-full h-full object-contain"
-                    />
-                  </div>
-                  <input
-                    type="text"
-                    value={input}
-                    onChange={(e) => setInput(e.target.value)}
-                    placeholder="Ask about the Bears, Bulls, Cubs, White Sox, or Blackhawks..."
-                    className="flex-1 px-4 py-3 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[#bc0000]"
-                    style={{
-                      backgroundColor: 'var(--sm-card)',
-                      color: 'var(--sm-text)',
-                      border: '1px solid var(--sm-border)',
-                    }}
-                    disabled={isLoading}
-                  />
+                {/* Query History Section */}
+                <div style={{ marginTop: 24, paddingTop: 24, borderTop: '1px solid var(--sm-border)' }}>
                   <button
-                    type="submit"
-                    disabled={!input.trim() || isLoading}
-                    className="px-5 py-3 font-semibold rounded-xl transition-colors disabled:opacity-50 disabled:cursor-not-allowed text-sm whitespace-nowrap hover:brightness-95"
-                    style={{ backgroundColor: '#bc0000', color: '#ffffff' }}
+                    onClick={() => setShowHistory(!showHistory)}
+                    style={{
+                      width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                      fontSize: 13, fontWeight: 500, padding: '8px 12px', borderRadius: 'var(--sm-radius-sm)',
+                      color: 'var(--sm-text)', background: 'none', border: 'none', cursor: 'pointer',
+                      transition: 'background 0.2s',
+                    }}
+                    onMouseEnter={(e) => e.currentTarget.style.background = 'var(--sm-gradient-subtle)'}
+                    onMouseLeave={(e) => e.currentTarget.style.background = 'none'}
                   >
-                    Ask Scout
+                    <span style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                      <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                      </svg>
+                      Query History
+                    </span>
+                    <span className="sm-tag" style={{ fontSize: 10, padding: '2px 8px' }}>
+                      {queryHistory.length}
+                    </span>
                   </button>
-                </form>
+
+                  {showHistory && (
+                    <div style={{ marginTop: 12, maxHeight: 240, overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: 4 }}>
+                      {historyLoading ? (
+                        <p style={{ fontSize: 12, textAlign: 'center', padding: '16px 0', color: 'var(--sm-text-muted)' }}>Loading...</p>
+                      ) : queryHistory.length === 0 ? (
+                        <p style={{ fontSize: 12, textAlign: 'center', padding: '16px 0', color: 'var(--sm-text-muted)' }}>No recent queries</p>
+                      ) : (
+                        <>
+                          {queryHistory.slice(0, 10).map((entry) => (
+                            <button
+                              key={entry.id}
+                              onClick={() => loadFromHistory(entry)}
+                              style={{
+                                width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                                gap: 8, padding: '8px 12px', borderRadius: 'var(--sm-radius-sm)', fontSize: 12,
+                                color: 'var(--sm-text)', background: 'none', border: 'none', cursor: 'pointer',
+                                transition: 'background 0.2s', textAlign: 'left',
+                              }}
+                              onMouseEnter={(e) => e.currentTarget.style.background = 'var(--sm-gradient-subtle)'}
+                              onMouseLeave={(e) => e.currentTarget.style.background = 'none'}
+                            >
+                              <span style={{ fontWeight: 500, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', flex: 1 }}>{entry.query}</span>
+                              <span style={{ fontSize: 10, flexShrink: 0, color: 'var(--sm-text-dim)' }}>
+                                {new Date(entry.timestamp).toLocaleDateString()}
+                              </span>
+                            </button>
+                          ))}
+                          {queryHistory.length > 0 && (
+                            <button
+                              onClick={handleClearHistory}
+                              style={{
+                                width: '100%', textAlign: 'center', fontSize: 11, padding: '8px 0',
+                                color: 'var(--sm-error)', background: 'none', border: 'none', cursor: 'pointer',
+                              }}
+                            >
+                              Clear History
+                            </button>
+                          )}
+                        </>
+                      )}
+                    </div>
+                  )}
+                </div>
               </div>
             </div>
-          </div>
+
+            {/* Main Chat Area */}
+            <div>
+              <div className="glass-card glass-card-static" style={{
+                padding: 0, overflow: 'hidden', display: 'flex', flexDirection: 'column',
+                minHeight: 'calc(100vh - 200px)', maxHeight: 'calc(100vh - 200px)',
+              }}>
+                {/* Messages Area */}
+                <div ref={messagesContainerRef} style={{ flex: 1, overflowY: 'auto', padding: 24 }}>
+                  {messages.length === 0 ? (
+                    <div style={{ height: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', textAlign: 'center' }}>
+                      <div className={isAnimating ? 'animate-thinking' : ''} style={{ width: 96, height: 96, marginBottom: 24 }}>
+                        <Image src="/downloads/scout-v2.png" alt="Scout AI" width={96} height={96} style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
+                      </div>
+                      <h3 style={{ fontFamily: 'var(--sm-font-heading)', fontSize: '1.25rem', fontWeight: 700, color: 'var(--sm-text)', marginBottom: 8 }}>
+                        Ask me anything about Chicago sports
+                      </h3>
+                      <p style={{ fontSize: 14, maxWidth: 420, marginBottom: 32, color: 'var(--sm-text-muted)', lineHeight: 1.6 }}>
+                        I can help with stats, history, analysis, and more for the Bears, Bulls, Cubs, White Sox, and Blackhawks.
+                      </p>
+
+                      {/* Suggested Prompts as sm-tag pills */}
+                      <div style={{ width: '100%', maxWidth: 640 }}>
+                        <p style={{ fontSize: 11, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 12, color: 'var(--sm-text-dim)' }}>
+                          Try asking
+                        </p>
+                        <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center', gap: 8 }}>
+                          {suggestedPrompts.map((prompt) => (
+                            <button
+                              key={prompt}
+                              onClick={() => handlePromptClick(prompt)}
+                              className="glass-card-sm"
+                              style={{
+                                padding: '8px 16px', fontSize: 13, cursor: 'pointer',
+                                color: 'var(--sm-text)', background: 'var(--sm-card)',
+                                border: '1px solid var(--sm-border)', borderRadius: 'var(--sm-radius-pill)',
+                                transition: 'all 0.2s', whiteSpace: 'nowrap',
+                              }}
+                              onMouseEnter={(e) => { e.currentTarget.style.background = 'var(--sm-red)'; e.currentTarget.style.color = '#fff'; e.currentTarget.style.borderColor = 'var(--sm-red)' }}
+                              onMouseLeave={(e) => { e.currentTarget.style.background = 'var(--sm-card)'; e.currentTarget.style.color = 'var(--sm-text)'; e.currentTarget.style.borderColor = 'var(--sm-border)' }}
+                            >
+                              {prompt}
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+                  ) : (
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
+                      {messages.map((message) => (
+                        <div
+                          key={message.id}
+                          style={{ display: 'flex', justifyContent: message.role === 'user' ? 'flex-end' : 'flex-start' }}
+                        >
+                          <div
+                            className={message.role === 'assistant' ? 'glass-card glass-card-sm glass-card-static' : ''}
+                            style={{
+                              maxWidth: '80%',
+                              borderRadius: 'var(--sm-radius-md)',
+                              padding: '12px 16px',
+                              ...(message.role === 'user'
+                                ? { background: 'var(--sm-gradient)', color: '#ffffff' }
+                                : {}),
+                            }}
+                          >
+                            {message.role === 'assistant' && (
+                              <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
+                                {message.team && (
+                                  <span className="sm-tag" style={{ fontSize: 10, padding: '2px 8px' }}>
+                                    {message.team}
+                                  </span>
+                                )}
+                                {getSourceBadge(message.source)}
+                              </div>
+                            )}
+                            <div style={{ fontSize: 14, lineHeight: 1.7 }}>
+                              {message.role === 'assistant' ? (
+                                <>
+                                  <ReactMarkdown
+                                    components={{
+                                      table: ({ children }) => (
+                                        <div className="sm-table-wrapper" style={{ margin: '8px 0' }}>
+                                          <table className="sm-table">{children}</table>
+                                        </div>
+                                      ),
+                                      th: ({ children }) => (
+                                        <th>{children}</th>
+                                      ),
+                                      td: ({ children }) => (
+                                        <td>{children}</td>
+                                      ),
+                                      strong: ({ children }) => (
+                                        <strong style={{ fontWeight: 600 }}>{children}</strong>
+                                      ),
+                                    }}
+                                  >
+                                    {message.content}
+                                  </ReactMarkdown>
+                                  {message.chartData && (
+                                    <DataVisualization
+                                      chartData={message.chartData}
+                                      bonusInsight={message.bonusInsight}
+                                    />
+                                  )}
+                                </>
+                              ) : (
+                                <p style={{ margin: 0 }}>{message.content}</p>
+                              )}
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                      {isLoading && (
+                        <div style={{ display: 'flex', justifyContent: 'flex-start' }}>
+                          <div className="glass-card glass-card-sm glass-card-static" style={{
+                            display: 'flex', alignItems: 'center', gap: 10, borderRadius: 'var(--sm-radius-md)', padding: '12px 16px',
+                          }}>
+                            <span style={{ fontSize: 13, color: 'var(--sm-text-muted)' }}>Scout is thinking</span>
+                            <span style={{ display: 'flex', gap: 4 }}>
+                              <span style={{ width: 8, height: 8, borderRadius: '50%', background: 'var(--sm-red)', animation: 'bounce 1s infinite', animationDelay: '0ms' }} />
+                              <span style={{ width: 8, height: 8, borderRadius: '50%', background: 'var(--sm-red)', animation: 'bounce 1s infinite', animationDelay: '150ms' }} />
+                              <span style={{ width: 8, height: 8, borderRadius: '50%', background: 'var(--sm-red)', animation: 'bounce 1s infinite', animationDelay: '300ms' }} />
+                            </span>
+                          </div>
+                        </div>
+                      )}
+                      <div ref={messagesEndRef} />
+                    </div>
+                  )}
+                </div>
+
+                {/* Input Area - glass-card-sm bottom bar */}
+                <div className="glass-card-sm" style={{ borderTop: '1px solid var(--sm-border)', borderRadius: 0, padding: '16px 24px' }}>
+                  <form onSubmit={handleSubmit} style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                    {/* Scout Icon - Always visible, animates on question */}
+                    <div className={isAnimating ? 'animate-thinking' : ''} style={{ width: 48, height: 48, flexShrink: 0 }}>
+                      <Image src="/downloads/scout-v2.png" alt="Scout AI" width={48} height={48} style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
+                    </div>
+                    <input
+                      type="text"
+                      value={input}
+                      onChange={(e) => setInput(e.target.value)}
+                      placeholder="Ask about the Bears, Bulls, Cubs, White Sox, or Blackhawks..."
+                      className="sm-input"
+                      style={{ flex: 1 }}
+                      disabled={isLoading}
+                    />
+                    <button
+                      type="submit"
+                      disabled={!input.trim() || isLoading}
+                      className="btn btn-primary btn-md"
+                      style={{ whiteSpace: 'nowrap' }}
+                    >
+                      Ask Scout
+                    </button>
+                  </form>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </div>

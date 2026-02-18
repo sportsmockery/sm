@@ -83,9 +83,9 @@ export default function MockDraftSharePage() {
     }
   }, [mockId])
 
-  const subText = isDark ? '#9ca3af' : '#6b7280'
-  const cardBg = isDark ? '#1f2937' : '#ffffff'
-  const borderColor = isDark ? '#374151' : '#e5e7eb'
+  const subText = 'var(--sm-text-muted)'
+  const cardBg = 'var(--sm-card)'
+  const borderColor = 'var(--sm-border)'
 
   const team = draftData ? CHICAGO_TEAMS[draftData.chicago_team] : null
   const teamColor = team?.color || '#bc0000'
@@ -101,35 +101,28 @@ export default function MockDraftSharePage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: 'var(--bg-page)' }}>
-        <div className="w-8 h-8 border-2 border-t-transparent rounded-full animate-spin" style={{ borderColor: '#bc0000', borderTopColor: 'transparent' }} />
+      <div className="sm-hero-bg" style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+        <div className="sm-grid-overlay" />
+        <div style={{ width: 32, height: 32, border: '3px solid var(--sm-red)', borderTopColor: 'transparent', borderRadius: '50%', animation: 'spin-2030 1s linear infinite' }} />
       </div>
     )
   }
 
   if (error || !draftData) {
     return (
-      <div className="min-h-screen flex flex-col items-center justify-center p-8" style={{ backgroundColor: 'var(--bg-page)' }}>
-        <div style={{ fontSize: 48, marginBottom: 16 }}>📋</div>
-        <h1 style={{ fontSize: 24, fontWeight: 700, color: isDark ? '#fff' : '#1a1a1a', marginBottom: 8 }}>
-          {error || 'Draft not found'}
-        </h1>
-        <p style={{ color: subText, marginBottom: 24 }}>
-          This mock draft may have been removed or the link is incorrect.
-        </p>
-        <Link
-          href="/mock-draft"
-          style={{
-            padding: '12px 24px',
-            borderRadius: 10,
-            backgroundColor: '#bc0000',
-            color: '#fff',
-            fontWeight: 600,
-            textDecoration: 'none',
-          }}
-        >
-          Create Your Own Mock Draft
-        </Link>
+      <div className="sm-hero-bg" style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: 32 }}>
+        <div className="sm-grid-overlay" />
+        <div className="glass-card" style={{ textAlign: 'center', maxWidth: 400, position: 'relative', zIndex: 1 }}>
+          <h1 style={{ fontFamily: 'var(--sm-font-heading)', fontSize: 24, fontWeight: 700, color: 'var(--sm-text)', marginBottom: 8 }}>
+            {error || 'Draft not found'}
+          </h1>
+          <p style={{ color: subText, marginBottom: 24 }}>
+            This mock draft may have been removed or the link is incorrect.
+          </p>
+          <Link href="/mock-draft" className="btn btn-primary btn-md">
+            Create Your Own Mock Draft
+          </Link>
+        </div>
       </div>
     )
   }
@@ -138,14 +131,15 @@ export default function MockDraftSharePage() {
   const userPicks = draftData.picks?.filter(p => p.is_user_pick && p.selected_prospect) || []
 
   return (
-    <div className="min-h-screen" style={{ backgroundColor: 'var(--bg-page)', color: 'var(--sm-text)' }}>
-      <main className="max-w-3xl mx-auto px-4 py-8 pt-24">
+    <div className="sm-hero-bg" style={{ minHeight: '100vh', color: 'var(--sm-text)' }}>
+      <div className="sm-grid-overlay" />
+      <main style={{ maxWidth: 768, margin: '0 auto', padding: '32px 16px', paddingTop: 96, position: 'relative', zIndex: 1 }}>
         {/* Header */}
         <div style={{ textAlign: 'center', marginBottom: 32 }}>
           {team && (
             <Image src={team.logo} alt={team.name} width={80} height={80} style={{ margin: '0 auto 16px', objectFit: 'contain' }} />
           )}
-          <h1 style={{ fontSize: 28, fontWeight: 800, color: isDark ? '#fff' : '#1a1a1a', marginBottom: 8 }}>
+          <h1 style={{ fontFamily: 'var(--sm-font-heading)', fontSize: 28, fontWeight: 800, color: 'var(--sm-text)', marginBottom: 8 }}>
             {team?.name || draftData.chicago_team} {draftData.draft_year} Mock Draft
           </h1>
           <p style={{ color: subText, fontSize: 14 }}>
@@ -155,13 +149,7 @@ export default function MockDraftSharePage() {
 
         {/* Grade Card */}
         {draftData.overall_grade && draftData.letter_grade && (
-          <div style={{
-            backgroundColor: cardBg,
-            border: `1px solid ${borderColor}`,
-            borderRadius: 16,
-            padding: 24,
-            marginBottom: 24,
-          }}>
+          <div className="glass-card glass-card-static" style={{ marginBottom: 24 }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 20, marginBottom: 20 }}>
               <div style={{
                 width: 100,
@@ -182,7 +170,7 @@ export default function MockDraftSharePage() {
                 </span>
               </div>
               <div style={{ flex: 1 }}>
-                <h2 style={{ fontWeight: 700, fontSize: 20, color: isDark ? '#fff' : '#1a1a1a', marginBottom: 8 }}>
+                <h2 style={{ fontWeight: 700, fontSize: 20, color: 'var(--sm-text)', marginBottom: 8 }}>
                   Draft Grade
                 </h2>
                 {draftData.analysis && (
@@ -196,7 +184,7 @@ export default function MockDraftSharePage() {
             {/* Pick Grades */}
             {draftData.pick_grades && draftData.pick_grades.length > 0 && (
               <div style={{ marginBottom: 20 }}>
-                <h3 style={{ fontWeight: 600, fontSize: 14, color: isDark ? '#fff' : '#1a1a1a', marginBottom: 12 }}>
+                <h3 style={{ fontWeight: 600, fontSize: 14, color: 'var(--sm-text)', marginBottom: 12 }}>
                   Pick Grades
                 </h3>
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(180px, 1fr))', gap: 8 }}>
@@ -209,7 +197,7 @@ export default function MockDraftSharePage() {
                         gap: 10,
                         padding: '10px 12px',
                         borderRadius: 8,
-                        backgroundColor: isDark ? '#374151' : '#f3f4f6',
+                        backgroundColor: 'var(--sm-surface)',
                       }}
                     >
                       <div style={{
@@ -230,7 +218,7 @@ export default function MockDraftSharePage() {
                         <div style={{
                           fontWeight: 600,
                           fontSize: 12,
-                          color: isDark ? '#fff' : '#1a1a1a',
+                          color: 'var(--sm-text)',
                           whiteSpace: 'nowrap',
                           overflow: 'hidden',
                           textOverflow: 'ellipsis',
@@ -248,7 +236,7 @@ export default function MockDraftSharePage() {
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
               {draftData.strengths && draftData.strengths.length > 0 && (
                 <div>
-                  <h4 style={{ fontWeight: 600, fontSize: 13, color: '#10b981', marginBottom: 8 }}>
+                  <h4 style={{ fontWeight: 600, fontSize: 13, color: 'var(--sm-success)', marginBottom: 8 }}>
                     Strengths
                   </h4>
                   <ul style={{ margin: 0, paddingLeft: 16 }}>
@@ -260,7 +248,7 @@ export default function MockDraftSharePage() {
               )}
               {draftData.weaknesses && draftData.weaknesses.length > 0 && (
                 <div>
-                  <h4 style={{ fontWeight: 600, fontSize: 13, color: '#ef4444', marginBottom: 8 }}>
+                  <h4 style={{ fontWeight: 600, fontSize: 13, color: 'var(--sm-error)', marginBottom: 8 }}>
                     Areas to Improve
                   </h4>
                   <ul style={{ margin: 0, paddingLeft: 16 }}>
@@ -276,14 +264,8 @@ export default function MockDraftSharePage() {
 
         {/* User Picks */}
         {userPicks.length > 0 && (
-          <div style={{
-            backgroundColor: cardBg,
-            border: `1px solid ${borderColor}`,
-            borderRadius: 16,
-            padding: 24,
-            marginBottom: 24,
-          }}>
-            <h3 style={{ fontWeight: 700, fontSize: 16, color: isDark ? '#fff' : '#1a1a1a', marginBottom: 16 }}>
+          <div className="glass-card glass-card-static" style={{ marginBottom: 24 }}>
+            <h3 style={{ fontWeight: 700, fontSize: 16, color: 'var(--sm-text)', marginBottom: 16 }}>
               Draft Picks Made
             </h3>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
@@ -295,7 +277,7 @@ export default function MockDraftSharePage() {
                     alignItems: 'center',
                     gap: 12,
                     padding: 12,
-                    borderRadius: 10,
+                    borderRadius: 'var(--sm-radius-md)',
                     backgroundColor: teamColor + '20',
                     border: `1px solid ${teamColor}40`,
                   }}
@@ -303,7 +285,7 @@ export default function MockDraftSharePage() {
                   <div style={{
                     width: 36,
                     height: 36,
-                    borderRadius: 8,
+                    borderRadius: 'var(--sm-radius-sm)',
                     backgroundColor: teamColor,
                     color: '#fff',
                     fontWeight: 700,
@@ -315,7 +297,7 @@ export default function MockDraftSharePage() {
                     #{pick.pick_number}
                   </div>
                   <div>
-                    <div style={{ fontWeight: 700, fontSize: 14, color: isDark ? '#fff' : '#1a1a1a' }}>
+                    <div style={{ fontWeight: 700, fontSize: 14, color: 'var(--sm-text)' }}>
                       {pick.selected_prospect!.name}
                     </div>
                     <div style={{ fontSize: 12, color: subText }}>
@@ -329,55 +311,54 @@ export default function MockDraftSharePage() {
         )}
 
         {/* CTA Card */}
-        <div style={{
-          backgroundColor: isDark ? 'rgba(188, 0, 0, 0.15)' : 'rgba(188, 0, 0, 0.08)',
-          border: '2px solid rgba(188, 0, 0, 0.4)',
-          borderRadius: 16,
-          padding: 32,
+        <div className="glass-card glass-card-static" style={{
+          background: 'var(--sm-gradient)',
+          borderColor: 'transparent',
           textAlign: 'center',
+          color: '#fff',
         }}>
-          <div style={{ fontSize: 32, marginBottom: 12 }}>🏈</div>
-          <h2 style={{ fontSize: 22, fontWeight: 800, color: '#bc0000', marginBottom: 8 }}>
+          <div style={{ fontSize: 28, fontWeight: 800, marginBottom: 8, fontFamily: 'var(--sm-font-heading)' }}>
             Think You Can Draft Better?
-          </h2>
-          <p style={{ fontSize: 14, color: subText, marginBottom: 20, maxWidth: 400, margin: '0 auto 20px' }}>
-            Test your GM skills with the Mock Draft Simulator and Trade Simulator on Sports Mockery.
+          </div>
+          <p style={{ fontSize: 16, opacity: 0.9, marginBottom: 24 }}>
+            Test your GM skills with the Mock Draft Simulator and Trade Simulator.
             Get AI-powered grades and compete with your friends!
           </p>
           <div style={{ display: 'flex', gap: 12, justifyContent: 'center', flexWrap: 'wrap' }}>
             <Link
               href="/mock-draft"
+              className="btn btn-lg"
               style={{
-                padding: '14px 28px',
-                borderRadius: 10,
-                backgroundColor: '#bc0000',
-                color: '#fff',
-                fontWeight: 700,
-                fontSize: 15,
-                textDecoration: 'none',
+                background: '#fff',
+                color: 'var(--sm-red)',
+                borderRadius: 'var(--sm-radius-md)',
+                fontWeight: 800,
+                fontSize: 16,
+                border: 'none',
+                display: 'inline-flex',
               }}
             >
               Try Mock Draft
             </Link>
             <Link
               href="/gm"
+              className="btn btn-lg"
               style={{
-                padding: '14px 28px',
-                borderRadius: 10,
-                backgroundColor: 'transparent',
-                border: '2px solid #bc0000',
-                color: '#bc0000',
+                background: 'transparent',
+                color: '#fff',
+                borderRadius: 'var(--sm-radius-md)',
                 fontWeight: 700,
-                fontSize: 15,
-                textDecoration: 'none',
+                fontSize: 16,
+                border: '2px solid rgba(255,255,255,0.5)',
+                display: 'inline-flex',
               }}
             >
               Try Trade Simulator
             </Link>
           </div>
-          <p style={{ fontSize: 12, color: subText, marginTop: 16 }}>
-            Free to use! Register at <span style={{ color: '#bc0000', fontWeight: 600 }}>sportsmockery.com</span>
-          </p>
+          <div style={{ marginTop: 16, fontSize: 13, opacity: 0.8 }}>
+            Free for all SportsMockery members
+          </div>
         </div>
       </main>
     </div>

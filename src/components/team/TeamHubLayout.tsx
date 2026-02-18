@@ -10,9 +10,9 @@ import { useTeamRecord } from '@/contexts/TeamRecordContext'
  * Team Hub Layout Component
  *
  * 2030 Premium Design System: Team Hubs
- * Features:
- * - Team Hero with gradient bg, large logo, stats bar, quick links
- * - Sticky Team Subnav with tabs
+ * - Team Hero with team-hero-{slug} accent background + sm-grid-overlay
+ * - Glass-card stat pills, Space Grotesk headings
+ * - Sticky subnav with team-pill quick-nav
  * - Slot for main content
  */
 
@@ -101,6 +101,15 @@ const TEAM_TAGLINES: Record<string, string> = {
   'chicago-white-sox': 'Change the Game',
 }
 
+// Map team slugs to CSS hero classes
+const TEAM_HERO_CLASS: Record<string, string> = {
+  'chicago-bears': 'team-hero-bears',
+  'chicago-bulls': 'team-hero-bulls',
+  'chicago-blackhawks': 'team-hero-hawks',
+  'chicago-cubs': 'team-hero-cubs',
+  'chicago-white-sox': 'team-hero-whitesox',
+}
+
 export default function TeamHubLayout({
   team,
   nextGame,
@@ -167,109 +176,93 @@ export default function TeamHubLayout({
     return () => setContextRecord(null)
   }, [record, team.league, setContextRecord])
 
-  // Build quick links for team
-  const quickLinks = [
-    { label: 'Schedule', href: `/${team.slug}/schedule` },
-    { label: 'Roster', href: `/${team.slug}/roster` },
-    { label: 'Stats', href: `/${team.slug}/stats` },
-    { label: 'Scores', href: `/${team.slug}/scores` },
-  ]
+  const heroClass = TEAM_HERO_CLASS[team.slug] || ''
 
   return (
-    <div className="min-h-screen" style={{ backgroundColor: 'var(--sm-bg)' }}>
-      {/* Team Hero Section */}
+    <div style={{ minHeight: '100vh', background: 'var(--sm-dark)' }}>
+      {/* ===== TEAM HERO SECTION ===== */}
       <div
         ref={headerRef}
-        className="relative overflow-hidden"
+        className={heroClass}
         style={{
-          background: `linear-gradient(135deg, ${team.primaryColor} 0%, ${team.secondaryColor} 100%)`,
-          borderBottom: `2px solid ${team.secondaryColor}`,
+          position: 'relative',
+          overflow: 'hidden',
+          paddingTop: '48px',
+          paddingBottom: '48px',
         }}
       >
-        {/* Background pattern - faded team logo */}
-        <div
-          className="absolute inset-0 pointer-events-none"
-          style={{
-            backgroundImage: 'radial-gradient(circle at 25px 25px, rgba(255,255,255,0.03) 2px, transparent 0)',
-            backgroundSize: '50px 50px',
-          }}
-        />
+        {/* Grid overlay */}
+        <div className="sm-grid-overlay" />
 
-        <div className="relative max-w-[1200px] mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-10 md:py-12">
-          {/* Team Header Row */}
-          <div className="flex flex-col sm:flex-row items-center sm:items-start gap-6 sm:gap-8 mb-6">
-            {/* Team Logo */}
+        {/* Content */}
+        <div style={{ position: 'relative', zIndex: 1, maxWidth: '1320px', margin: '0 auto', padding: '0 24px' }}>
+          {/* Team header row */}
+          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '24px', marginBottom: '32px' }}>
+            {/* Logo */}
             <div
-              className="flex-shrink-0 flex items-center justify-center"
               style={{
-                width: '100px',
-                height: '100px',
-                borderRadius: '20px',
-                background: 'rgba(255,255,255,0.1)',
+                width: '96px',
+                height: '96px',
+                borderRadius: 'var(--sm-radius-lg)',
+                background: 'rgba(255,255,255,0.06)',
+                border: '1px solid rgba(255,255,255,0.1)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                padding: '12px',
                 backdropFilter: 'blur(12px)',
-                padding: '16px',
-                border: '1px solid rgba(255,255,255,0.2)',
               }}
             >
               <Image
                 src={team.logo}
                 alt={team.name}
-                width={80}
-                height={80}
-                className="w-full h-full object-contain"
+                width={72}
+                height={72}
+                style={{ width: '100%', height: '100%', objectFit: 'contain' }}
                 unoptimized
               />
             </div>
 
-            {/* Team Name & Info */}
-            <div className="text-center sm:text-left">
+            {/* Name + tagline */}
+            <div style={{ textAlign: 'center' }}>
               <h1
                 style={{
-                  fontSize: 'clamp(2rem, 5vw, 3.5rem)',
-                  fontWeight: 900,
-                  color: '#fff',
+                  fontFamily: "'Space Grotesk', sans-serif",
+                  fontSize: '48px',
+                  fontWeight: 700,
+                  color: 'var(--sm-text)',
                   letterSpacing: '-1.5px',
                   lineHeight: 1.1,
-                  fontFamily: "'Montserrat', sans-serif",
-                  marginBottom: '8px',
+                  margin: '0 0 8px 0',
                 }}
               >
                 {team.name}
               </h1>
-              <p
-                style={{
-                  fontSize: '18px',
-                  color: 'rgba(255,255,255,0.8)',
-                  fontWeight: 500,
-                }}
-              >
+              <p style={{ fontSize: '16px', color: 'var(--sm-text-muted)', fontWeight: 500, margin: 0 }}>
                 {TEAM_TAGLINES[team.slug] || team.league}
               </p>
             </div>
           </div>
 
-          {/* Stats Bar */}
+          {/* Stats bar - glass pills */}
           <div
-            className="grid gap-4 sm:gap-6 mb-6"
             style={{
-              gridTemplateColumns: 'repeat(auto-fit, minmax(130px, 1fr))',
+              display: 'flex',
+              flexWrap: 'wrap',
+              justifyContent: 'center',
+              gap: '12px',
+              marginBottom: '28px',
             }}
           >
             {/* Record */}
             <div
-              style={{
-                textAlign: 'center',
-                padding: '16px 12px',
-                background: 'rgba(255,255,255,0.1)',
-                backdropFilter: 'blur(12px)',
-                borderRadius: '16px',
-                border: '1px solid rgba(255,255,255,0.15)',
-              }}
+              className="glass-card glass-card-sm glass-card-static"
+              style={{ textAlign: 'center', minWidth: '120px', padding: '16px 20px' }}
             >
-              <div style={{ fontSize: '28px', fontWeight: 800, color: '#fff', marginBottom: '4px' }}>
+              <div style={{ fontSize: '24px', fontWeight: 700, color: 'var(--sm-text)', fontFamily: "'Space Grotesk', sans-serif" }}>
                 {formatRecord() || '--'}
               </div>
-              <div style={{ fontSize: '12px', textTransform: 'uppercase', letterSpacing: '1px', color: 'rgba(255,255,255,0.7)', fontWeight: 600 }}>
+              <div style={{ fontSize: '11px', textTransform: 'uppercase', letterSpacing: '1px', color: 'var(--sm-text-dim)', fontWeight: 600 }}>
                 Record
               </div>
             </div>
@@ -277,19 +270,13 @@ export default function TeamHubLayout({
             {/* Division Rank */}
             {record?.divisionRank && (
               <div
-                style={{
-                  textAlign: 'center',
-                  padding: '16px 12px',
-                  background: 'rgba(255,255,255,0.1)',
-                  backdropFilter: 'blur(12px)',
-                  borderRadius: '16px',
-                  border: '1px solid rgba(255,255,255,0.15)',
-                }}
+                className="glass-card glass-card-sm glass-card-static"
+                style={{ textAlign: 'center', minWidth: '120px', padding: '16px 20px' }}
               >
-                <div style={{ fontSize: '28px', fontWeight: 800, color: '#fff', marginBottom: '4px' }}>
+                <div style={{ fontSize: '24px', fontWeight: 700, color: 'var(--sm-text)', fontFamily: "'Space Grotesk', sans-serif" }}>
                   {record.divisionRank}
                 </div>
-                <div style={{ fontSize: '12px', textTransform: 'uppercase', letterSpacing: '1px', color: 'rgba(255,255,255,0.7)', fontWeight: 600 }}>
+                <div style={{ fontSize: '11px', textTransform: 'uppercase', letterSpacing: '1px', color: 'var(--sm-text-dim)', fontWeight: 600 }}>
                   Division
                 </div>
               </div>
@@ -298,26 +285,18 @@ export default function TeamHubLayout({
             {/* Last Game */}
             {lastGame && (
               <div
-                style={{
-                  textAlign: 'center',
-                  padding: '16px 12px',
-                  background: 'rgba(255,255,255,0.1)',
-                  backdropFilter: 'blur(12px)',
-                  borderRadius: '16px',
-                  border: '1px solid rgba(255,255,255,0.15)',
-                }}
+                className="glass-card glass-card-sm glass-card-static"
+                style={{ textAlign: 'center', minWidth: '120px', padding: '16px 20px' }}
               >
-                <div
-                  style={{
-                    fontSize: '28px',
-                    fontWeight: 800,
-                    color: lastGame.result === 'W' ? '#4ade80' : lastGame.result === 'L' ? '#f87171' : '#fff',
-                    marginBottom: '4px',
-                  }}
-                >
+                <div style={{
+                  fontSize: '24px',
+                  fontWeight: 700,
+                  fontFamily: "'Space Grotesk', sans-serif",
+                  color: lastGame.result === 'W' ? 'var(--sm-success)' : lastGame.result === 'L' ? 'var(--sm-error)' : 'var(--sm-text)',
+                }}>
                   {lastGame.result} {lastGame.teamScore}-{lastGame.opponentScore}
                 </div>
-                <div style={{ fontSize: '12px', textTransform: 'uppercase', letterSpacing: '1px', color: 'rgba(255,255,255,0.7)', fontWeight: 600 }}>
+                <div style={{ fontSize: '11px', textTransform: 'uppercase', letterSpacing: '1px', color: 'var(--sm-text-dim)', fontWeight: 600 }}>
                   {lastGame.isHome ? 'vs' : '@'} {lastGame.opponent}
                 </div>
               </div>
@@ -326,44 +305,32 @@ export default function TeamHubLayout({
             {/* Next Game */}
             {nextGame && (
               <div
-                style={{
-                  textAlign: 'center',
-                  padding: '16px 12px',
-                  background: 'rgba(255,255,255,0.1)',
-                  backdropFilter: 'blur(12px)',
-                  borderRadius: '16px',
-                  border: '1px solid rgba(255,255,255,0.15)',
-                }}
+                className="glass-card glass-card-sm glass-card-static"
+                style={{ textAlign: 'center', minWidth: '120px', padding: '16px 20px' }}
               >
-                <div style={{ fontSize: '18px', fontWeight: 700, color: '#fff', marginBottom: '4px' }}>
+                <div style={{ fontSize: '16px', fontWeight: 600, color: 'var(--sm-text)', fontFamily: "'Space Grotesk', sans-serif" }}>
                   {nextGame.isHome ? 'vs' : '@'} {nextGame.opponent}
                 </div>
-                <div style={{ fontSize: '12px', textTransform: 'uppercase', letterSpacing: '1px', color: 'rgba(255,255,255,0.7)', fontWeight: 600 }}>
+                <div style={{ fontSize: '11px', textTransform: 'uppercase', letterSpacing: '1px', color: 'var(--sm-text-dim)', fontWeight: 600 }}>
                   {nextGame.date} {nextGame.time}
                 </div>
               </div>
             )}
           </div>
 
-          {/* Quick Links */}
-          <div className="flex flex-wrap gap-3">
-            {quickLinks.map((link) => (
+          {/* Quick-nav pills */}
+          <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center', gap: '8px' }}>
+            {[
+              { label: 'Schedule', href: `/${team.slug}/schedule` },
+              { label: 'Roster', href: `/${team.slug}/roster` },
+              { label: 'Stats', href: `/${team.slug}/stats` },
+              { label: 'Scores', href: `/${team.slug}/scores` },
+              { label: 'Players', href: `/${team.slug}/players` },
+            ].map((link) => (
               <Link
                 key={link.label}
                 href={link.href}
-                style={{
-                  padding: '10px 24px',
-                  background: 'rgba(255,255,255,0.15)',
-                  backdropFilter: 'blur(12px)',
-                  border: '1px solid rgba(255,255,255,0.25)',
-                  borderRadius: '100px',
-                  color: '#fff',
-                  fontWeight: 600,
-                  fontSize: '14px',
-                  textDecoration: 'none',
-                  transition: 'all 0.3s ease',
-                }}
-                className="hover:bg-white/25 hover:-translate-y-0.5"
+                className="team-pill"
               >
                 {link.label}
               </Link>
@@ -372,20 +339,21 @@ export default function TeamHubLayout({
         </div>
       </div>
 
-      {/* Sticky Team Subnav */}
+      {/* ===== STICKY SUBNAV ===== */}
       <div
         ref={navRef}
-        className={`z-40 ${isSticky ? 'sticky top-[140px] shadow-md' : ''}`}
+        className={isSticky ? 'sticky' : ''}
         style={{
-          backgroundColor: 'var(--sm-surface)',
+          ...(isSticky ? { top: '140px', zIndex: 40, boxShadow: '0 4px 12px rgba(0,0,0,0.3)' } : {}),
+          background: 'var(--sm-surface)',
           borderBottom: '1px solid var(--sm-border)',
           transition: 'box-shadow 0.2s ease',
         }}
       >
-        <div className="max-w-[1200px] mx-auto px-4 sm:px-6 lg:px-8">
-          {/* Desktop: Horizontal bar */}
-          <nav className="hidden md:flex items-center gap-1 py-1 overflow-x-auto">
-            {tabs.map((tab: any) => {
+        <div style={{ maxWidth: '1320px', margin: '0 auto', padding: '0 24px' }}>
+          {/* Desktop tabs */}
+          <nav style={{ display: 'flex', alignItems: 'center', gap: '4px', overflowX: 'auto', padding: '4px 0' }}>
+            {tabs.map((tab: typeof tabs[number]) => {
               const isActive = tab.id === currentTab
               const href = tab.external
                 ? `${tab.external}?channel=${team.slug.replace('chicago-', '')}`
@@ -395,45 +363,31 @@ export default function TeamHubLayout({
                 <Link
                   key={tab.id}
                   href={href}
-                  className="px-4 py-3 text-sm font-semibold whitespace-nowrap transition-colors relative"
                   style={{
+                    padding: '12px 16px',
+                    fontSize: '14px',
+                    fontWeight: 600,
+                    whiteSpace: 'nowrap',
                     color: isActive ? 'var(--sm-text)' : 'var(--sm-text-muted)',
+                    textDecoration: 'none',
+                    position: 'relative',
+                    transition: 'color 0.2s',
                   }}
                 >
                   {tab.label}
                   {isActive && (
                     <span
-                      className="absolute bottom-0 left-0 right-0 h-0.5 rounded-full"
-                      style={{ backgroundColor: team.secondaryColor || team.primaryColor }}
+                      style={{
+                        position: 'absolute',
+                        bottom: 0,
+                        left: 0,
+                        right: 0,
+                        height: '2px',
+                        borderRadius: '2px',
+                        background: 'var(--sm-red)',
+                      }}
                     />
                   )}
-                </Link>
-              )
-            })}
-          </nav>
-
-          {/* Mobile: Scrollable pill row */}
-          <nav className="flex md:hidden items-center gap-2 py-2 overflow-x-auto scrollbar-hide">
-            {tabs.map((tab: any) => {
-              const isActive = tab.id === currentTab
-              const href = tab.external
-                ? `${tab.external}?channel=${team.slug.replace('chicago-', '')}`
-                : basePath + tab.path
-
-              return (
-                <Link
-                  key={tab.id}
-                  href={href}
-                  className="px-4 py-2.5 text-sm font-medium whitespace-nowrap rounded-full transition-colors min-h-[44px] flex items-center"
-                  style={isActive ? {
-                    backgroundColor: team.secondaryColor || team.primaryColor,
-                    color: '#fff',
-                  } : {
-                    backgroundColor: 'var(--sm-surface)',
-                    color: 'var(--sm-text-muted)',
-                  }}
-                >
-                  {tab.label}
                 </Link>
               )
             })}
@@ -441,12 +395,13 @@ export default function TeamHubLayout({
         </div>
       </div>
 
-      {/* Main Content */}
+      {/* ===== MAIN CONTENT ===== */}
       <div
-        className="mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 md:py-10"
         style={{
-          maxWidth: '1400px',
-          backgroundColor: 'var(--sm-bg)',
+          maxWidth: '1320px',
+          margin: '0 auto',
+          padding: '32px 24px 48px',
+          background: 'var(--sm-dark)',
         }}
       >
         {children}

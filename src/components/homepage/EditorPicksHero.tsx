@@ -16,76 +16,119 @@ interface EditorPick {
 
 interface EditorPicksHeroProps {
   picks: EditorPick[];
-  isMobile: boolean;
 }
 
-export function EditorPicksHero({ picks = [], isMobile }: EditorPicksHeroProps) {
+function formatTeamName(slug: string | null): string {
+  if (!slug) return '';
+  return slug
+    .split('-')
+    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+    .join(' ');
+}
+
+export function EditorPicksHero({ picks = [] }: EditorPicksHeroProps) {
   const safePicks = Array.isArray(picks) ? picks : [];
 
-  // Return null if no picks
   if (safePicks.length === 0) {
     return null;
   }
 
-  // Slots 1-3: Visual cards with images
-  const visualPicks = safePicks.filter(p => p.pinned_slot >= 1 && p.pinned_slot <= 3)
-    .sort((a, b) => a.pinned_slot - b.pinned_slot);
+  const sorted = [...safePicks].sort((a, b) => a.pinned_slot - b.pinned_slot);
 
-  // Slots 4-6: Text-only list
-  const textPicks = safePicks.filter(p => p.pinned_slot >= 4 && p.pinned_slot <= 6)
-    .sort((a, b) => a.pinned_slot - b.pinned_slot);
+  // Slot 1: Large featured card (left column)
+  const mainPick = sorted[0];
+
+  // Slots 2-3: Stacked side cards (right column)
+  const sidePicks = sorted.slice(1, 3);
+
+  // Slots 4-6: Remaining picks shown as a simple list
+  const remainingPicks = sorted.slice(3, 6);
 
   return (
-    <section className="editor-picks-hero" aria-label="Editor's Picks">
-      {/* Visual Cards - Horizontal scroll on mobile, 3-col grid on desktop */}
-      <div className={`editor-picks-visual ${isMobile ? 'mobile-scroll' : 'desktop-grid'}`}>
-        {visualPicks.map((pick) => {
-          // Get first 150 chars of excerpt for subtitle
-          const subtitle = pick.excerpt
-            ? pick.excerpt.slice(0, 150) + (pick.excerpt.length > 150 ? '...' : '')
-            : null;
+    <section className="sm-featured-shell" aria-label="Featured Content">
+      <div className="featured-grid">
+        {/* Left column: Large featured card */}
+        <div className="featured-main">
+          <Link href={`/${mainPick.slug}`} className="glass-card featured-main-link">
+            <div className="featured-image">
+              {mainPick.featured_image ? (
+                <Image
+                  src={mainPick.featured_image}
+                  alt={mainPick.title}
+                  fill
+                  sizes="(max-width: 768px) 100vw, 60vw"
+                  priority
+                />
+              ) : (
+                <div className="featured-image-empty" />
+              )}
+              {mainPick.team_slug && (
+                <span className="sm-tag featured-pill" style={{ display: 'inline-flex' }}>
+                  {formatTeamName(mainPick.team_slug)}
+                </span>
+              )}
+            </div>
+            <h3>{mainPick.title}</h3>
+            {mainPick.excerpt && (
+              <p className="featured-excerpt">{mainPick.excerpt}</p>
+            )}
+            <div className="featured-meta">
+              {mainPick.team_slug && (
+                <span>{formatTeamName(mainPick.team_slug)}</span>
+              )}
+            </div>
+          </Link>
+        </div>
 
-          return (
+        {/* Right column: Stacked side cards */}
+        <div className="featured-side">
+          {sidePicks.map((pick) => (
             <Link
               key={pick.id}
               href={`/${pick.slug}`}
-              className="editor-pick-card"
+              className="glass-card-sm featured-side-card"
             >
-              <div className="editor-pick-image-wrapper">
+              <div className="side-image">
                 {pick.featured_image ? (
                   <Image
                     src={pick.featured_image}
                     alt={pick.title}
                     fill
-                    sizes={isMobile ? '280px' : '33vw'}
-                    className="editor-pick-image"
-                    priority={pick.pinned_slot === 1}
+                    sizes="120px"
                   />
                 ) : (
-                  <div className="editor-pick-placeholder" />
+                  <div className="side-image-empty" />
                 )}
               </div>
-              <h2 className="editor-pick-title">{pick.title}</h2>
-              {subtitle && (
-                <p className="editor-pick-subtitle">{subtitle}</p>
-              )}
+              <div className="side-content">
+                {pick.team_slug && (
+                  <span className="sm-tag" style={{ display: 'inline-flex' }}>
+                    {formatTeamName(pick.team_slug)}
+                  </span>
+                )}
+                <h4>{pick.title}</h4>
+                <span className="side-meta">
+                  {pick.team_slug ? formatTeamName(pick.team_slug) : ''}
+                </span>
+              </div>
             </Link>
-          );
-        })}
+          ))}
+        </div>
       </div>
 
-      {/* Text List for slots 4-6 */}
-      {textPicks.length > 0 && (
-        <div className="editor-picks-text-list">
-          <h3 className="editor-picks-text-header">More Featured</h3>
-          <ul>
-            {textPicks.map((pick) => (
-              <li key={pick.id}>
-                <Link href={`/${pick.slug}`} className="editor-pick-text-link">
+      {/* Remaining picks (slots 4-6) as a simple list */}
+      {remainingPicks.length > 0 && (
+        <div className="featured-remaining">
+          <ul className="featured-remaining-list">
+            {remainingPicks.map((pick) => (
+              <li key={pick.id} className="featured-remaining-item">
+                <Link href={`/${pick.slug}`} className="featured-remaining-link">
                   {pick.team_slug && (
-                    <span className={`team-indicator team-indicator--${pick.team_slug}`} />
+                    <span
+                      className={`featured-remaining-dot featured-remaining-dot--${pick.team_slug}`}
+                    />
                   )}
-                  {pick.title}
+                  <span className="featured-remaining-title">{pick.title}</span>
                 </Link>
               </li>
             ))}

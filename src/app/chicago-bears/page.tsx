@@ -76,96 +76,101 @@ export default async function BearsHubPage() {
       activeTab="overview"
     >
       <div
-        className="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-8"
-        style={{ maxWidth: '1400px', margin: '0 auto' }}
+        style={{
+          display: 'grid',
+          gridTemplateColumns: '1fr',
+          gap: '32px',
+          maxWidth: '1320px',
+          margin: '0 auto',
+        }}
       >
-        {/* Left Column: Main Content - 2/3 width */}
-        <div className="lg:col-span-2 space-y-8">
-          {/* Season Snapshot - Mobile Only */}
-          <div className="lg:hidden">
-            <BearsSeasonCard season={seasonOverview} />
-          </div>
-
-          {/* Latest Headlines */}
-          <section>
-            <SectionHeader title="Latest Bears News" team={team} href="/chicago-bears/news" />
-            <div className="space-y-4">
-              {teamPosts.slice(0, 6).map((post, index) => (
-                <ArticleCard
-                  key={post.id}
-                  post={post}
-                  team={team}
-                  isLarge={index === 0}
-                />
-              ))}
+        {/* Responsive 2-column at lg */}
+        <style>{`
+          @media (min-width: 1024px) {
+            .hub-grid { grid-template-columns: 2fr 1fr !important; }
+          }
+        `}</style>
+        <div className="hub-grid" style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '32px' }}>
+          {/* Left Column: Main Content */}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '32px' }}>
+            {/* Season Snapshot - Mobile Only */}
+            <div className="lg:hidden">
+              <BearsSeasonCard season={seasonOverview} />
             </div>
-          </section>
 
-          {/* More Stories */}
-          {teamPosts.length > 6 && (
+            {/* Latest Headlines */}
             <section>
-              <SectionHeader title="More Bears Stories" team={team} />
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                {teamPosts.slice(6, 12).map((post) => (
-                  <ArticleCard key={post.id} post={post} team={team} />
+              <SectionHeader title="Latest Bears News" href="/chicago-bears/news" />
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                {teamPosts.slice(0, 6).map((post, index) => (
+                  <ArticleCard
+                    key={post.id}
+                    post={post}
+                    isLarge={index === 0}
+                  />
                 ))}
               </div>
             </section>
-          )}
-        </div>
 
-        {/* Right Column: Sidebar - 1/3 width */}
-        <div className="space-y-6">
-          {/* Season Card - Desktop Only */}
-          <div className="hidden lg:block">
-            <BearsSeasonCard season={seasonOverview} />
+            {/* More Stories */}
+            {teamPosts.length > 6 && (
+              <section>
+                <SectionHeader title="More Bears Stories" />
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '16px' }}>
+                  {teamPosts.slice(6, 12).map((post) => (
+                    <ArticleCard key={post.id} post={post} />
+                  ))}
+                </div>
+              </section>
+            )}
           </div>
 
-          {/* Key Players */}
-          {keyPlayers && keyPlayers.length > 0 && (
-            <BearsRosterHighlights players={keyPlayers} />
-          )}
+          {/* Right Column: Sidebar */}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
+            {/* Season Card - Desktop Only */}
+            <div className="hidden lg:block">
+              <BearsSeasonCard season={seasonOverview} />
+            </div>
 
-          {/* AR Stadium Tour */}
-          <ARTourButton team="chicago-bears" />
+            {/* Key Players */}
+            {keyPlayers && keyPlayers.length > 0 && (
+              <BearsRosterHighlights players={keyPlayers} />
+            )}
 
-          {/* Trending Topics */}
-          {trends && trends.length > 0 && (
-            <BearsTrendingTopics trends={trends} />
-          )}
+            {/* AR Stadium Tour */}
+            <ARTourButton team="chicago-bears" />
 
-          {/* Ask AI Widget */}
-          <AskAIWidget team={team} />
+            {/* Trending Topics */}
+            {trends && trends.length > 0 && (
+              <BearsTrendingTopics trends={trends} />
+            )}
 
-          {/* Fan Chat Widget */}
-          <FanChatWidget team={team} />
+            {/* Ask AI Widget */}
+            <AskAIWidget teamSlug="chicago-bears" teamLabel="Bears" />
+
+            {/* Fan Chat Widget */}
+            <FanChatWidget teamLabel="Bears" channel="bears" />
+          </div>
         </div>
       </div>
     </TeamHubLayout>
   )
 }
 
-// Section Header
-function SectionHeader({
-  title,
-  team,
-  href,
-}: {
-  title: string
-  team: typeof CHICAGO_TEAMS.bears
-  href?: string
-}) {
+// Section Header - 2030 Design
+function SectionHeader({ title, href }: { title: string; href?: string }) {
   return (
-    <div className="flex items-center justify-between mb-5">
+    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '20px' }}>
       <h2
         style={{
-          fontFamily: "'Montserrat', sans-serif",
+          fontFamily: "'Space Grotesk', sans-serif",
           color: 'var(--sm-text)',
           fontSize: '22px',
           fontWeight: 700,
           letterSpacing: '-0.5px',
           paddingBottom: '8px',
-          borderBottom: `3px solid ${team.secondaryColor}`,
+          borderBottom: '3px solid var(--sm-red)',
+          margin: 0,
         }}
       >
         {title}
@@ -173,8 +178,8 @@ function SectionHeader({
       {href && (
         <Link
           href={href}
-          className="text-sm font-semibold hover:underline"
-          style={{ color: team.secondaryColor }}
+          className="btn btn-sm btn-secondary"
+          style={{ textDecoration: 'none' }}
         >
           View All
         </Link>
@@ -183,85 +188,73 @@ function SectionHeader({
   )
 }
 
-// Article Card Component
-function ArticleCard({
-  post,
-  team,
-  isLarge = false,
-}: {
-  post: any
-  team: typeof CHICAGO_TEAMS.bears
-  isLarge?: boolean
-}) {
+// Article Card - 2030 Glass Card
+function ArticleCard({ post, isLarge = false }: { post: any; isLarge?: boolean }) {
   const href = post.categorySlug
     ? `/${post.categorySlug}/${post.slug}`
     : `/bears/${post.slug}`
 
   if (isLarge) {
     return (
-      <Link href={href} className="group block">
-        <article
-          className="overflow-hidden transition-all duration-300"
-          style={{
-            borderRadius: 'var(--sm-radius-lg)',
-            backgroundColor: 'var(--sm-card)',
-            border: '1px solid var(--sm-border)',
-          }}
-        >
-          <div className="flex flex-col md:flex-row">
-            {post.featuredImage && (
-              <div className="relative aspect-[16/9] md:aspect-auto md:w-1/2 overflow-hidden">
-                <Image
-                  src={post.featuredImage}
-                  alt=""
-                  fill
-                  className="object-cover group-hover:scale-105 transition-transform duration-300"
-                  priority
-                />
-                <div
-                  className="absolute top-0 left-0 w-1 h-full"
-                  style={{ backgroundColor: team.secondaryColor }}
-                />
-              </div>
-            )}
-            <div className="p-5 md:p-6 flex-1">
-              <span
-                className="text-[11px] font-bold uppercase tracking-wider"
-                style={{ color: team.secondaryColor }}
-              >
-                {post.category || 'Bears'}
-              </span>
-              <h3
-                className="font-bold mt-2 line-clamp-3 group-hover:underline"
-                style={{
-                  fontFamily: "'Montserrat', sans-serif",
-                  color: 'var(--sm-text)',
-                  fontSize: '20px',
-                  lineHeight: '1.3',
-                }}
-              >
-                {post.title}
-              </h3>
-              {post.excerpt && (
-                <p
-                  className="mt-3 line-clamp-2"
-                  style={{ color: 'var(--sm-text-muted)', fontSize: '15px', lineHeight: '1.6' }}
-                >
-                  {post.excerpt}
-                </p>
+      <Link href={href} className="group" style={{ textDecoration: 'none', display: 'block' }}>
+        <article className="glass-card" style={{ overflow: 'hidden', padding: 0 }}>
+          <div style={{ display: 'flex', flexDirection: 'column' }}>
+            <style>{`@media (min-width: 768px) { .article-hero-row { flex-direction: row !important; } .article-hero-img { width: 50% !important; aspectRatio: auto !important; } }`}</style>
+            <div className="article-hero-row" style={{ display: 'flex', flexDirection: 'column' }}>
+              {post.featuredImage && (
+                <div className="article-hero-img" style={{ position: 'relative', aspectRatio: '16/9', overflow: 'hidden', width: '100%' }}>
+                  <Image
+                    src={post.featuredImage}
+                    alt=""
+                    fill
+                    style={{ objectFit: 'cover', transition: 'transform 0.3s' }}
+                    priority
+                  />
+                </div>
               )}
-              <div
-                className="flex items-center gap-2 mt-4 text-xs"
-                style={{ color: 'var(--sm-text-dim)' }}
-              >
-                {post.author && <span className="font-medium">{post.author.name}</span>}
-                <span>-</span>
-                <span>
-                  {new Date(post.publishedAt).toLocaleDateString('en-US', {
-                    month: 'short',
-                    day: 'numeric',
-                  })}
+              <div style={{ padding: '24px', flex: 1 }}>
+                <span className="sm-tag" style={{ marginBottom: '12px', display: 'inline-block' }}>
+                  {post.category || 'Bears'}
                 </span>
+                <h3
+                  style={{
+                    fontFamily: "'Space Grotesk', sans-serif",
+                    color: 'var(--sm-text)',
+                    fontSize: '20px',
+                    fontWeight: 700,
+                    lineHeight: 1.3,
+                    margin: '0 0 12px 0',
+                    display: '-webkit-box',
+                    WebkitLineClamp: 3,
+                    WebkitBoxOrient: 'vertical',
+                    overflow: 'hidden',
+                  }}
+                >
+                  {post.title}
+                </h3>
+                {post.excerpt && (
+                  <p
+                    style={{
+                      color: 'var(--sm-text-muted)',
+                      fontSize: '15px',
+                      lineHeight: 1.6,
+                      margin: '0 0 12px 0',
+                      display: '-webkit-box',
+                      WebkitLineClamp: 2,
+                      WebkitBoxOrient: 'vertical',
+                      overflow: 'hidden',
+                    }}
+                  >
+                    {post.excerpt}
+                  </p>
+                )}
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '12px', color: 'var(--sm-text-dim)' }}>
+                  {post.author && <span style={{ fontWeight: 500 }}>{post.author.name}</span>}
+                  <span>-</span>
+                  <span>
+                    {new Date(post.publishedAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+                  </span>
+                </div>
               </div>
             </div>
           </div>
@@ -271,48 +264,40 @@ function ArticleCard({
   }
 
   return (
-    <Link href={href} className="group block">
-      <article
-        className="overflow-hidden flex gap-4 p-3 transition-all duration-200"
-        style={{
-          borderRadius: 'var(--sm-radius-lg)',
-          backgroundColor: 'var(--sm-card)',
-          border: '1px solid var(--sm-border)',
-        }}
-      >
+    <Link href={href} className="group" style={{ textDecoration: 'none', display: 'block' }}>
+      <article className="glass-card glass-card-sm" style={{ display: 'flex', gap: '16px', overflow: 'hidden' }}>
         {post.featuredImage && (
-          <div className="relative w-20 h-20 md:w-24 md:h-24 flex-shrink-0 rounded-lg overflow-hidden">
+          <div style={{ position: 'relative', width: '80px', height: '80px', flexShrink: 0, borderRadius: 'var(--sm-radius-sm)', overflow: 'hidden' }}>
             <Image
               src={post.featuredImage}
               alt=""
               fill
-              className="object-cover group-hover:scale-105 transition-transform duration-300"
+              style={{ objectFit: 'cover', transition: 'transform 0.3s' }}
             />
           </div>
         )}
-        <div className="flex-1 min-w-0">
+        <div style={{ flex: 1, minWidth: 0 }}>
           <h3
-            className="font-semibold line-clamp-2 group-hover:underline"
             style={{
-              fontFamily: "'Montserrat', sans-serif",
+              fontFamily: "'Space Grotesk', sans-serif",
               color: 'var(--sm-text)',
               fontSize: '15px',
-              lineHeight: '1.4',
+              fontWeight: 600,
+              lineHeight: 1.4,
+              margin: 0,
+              display: '-webkit-box',
+              WebkitLineClamp: 2,
+              WebkitBoxOrient: 'vertical',
+              overflow: 'hidden',
             }}
           >
             {post.title}
           </h3>
-          <div
-            className="flex items-center gap-2 mt-2 text-xs"
-            style={{ color: 'var(--sm-text-dim)' }}
-          >
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginTop: '8px', fontSize: '12px', color: 'var(--sm-text-dim)' }}>
             {post.author && <span>{post.author.name}</span>}
             {post.author && <span>-</span>}
             <span>
-              {new Date(post.publishedAt).toLocaleDateString('en-US', {
-                month: 'short',
-                day: 'numeric',
-              })}
+              {new Date(post.publishedAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
             </span>
           </div>
         </div>
@@ -321,84 +306,62 @@ function ArticleCard({
   )
 }
 
-// Scout AI Widget
-function AskAIWidget({ team }: { team: typeof CHICAGO_TEAMS.bears }) {
+// Scout AI Widget - 2030
+function AskAIWidget({ teamSlug, teamLabel }: { teamSlug: string; teamLabel: string }) {
   return (
-    <div
-      style={{
-        borderRadius: 'var(--sm-radius-lg)',
-        padding: '24px',
-        backgroundColor: 'var(--sm-card)',
-        border: '1px solid var(--sm-border)',
-      }}
-    >
-      <div className="flex items-center gap-3 mb-4">
+    <div className="glass-card glass-card-static">
+      <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '16px' }}>
         <div
-          className="w-10 h-10 rounded-full flex items-center justify-center"
-          style={{ backgroundColor: `${team.secondaryColor}20` }}
+          style={{
+            width: '40px',
+            height: '40px',
+            borderRadius: '50%',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            background: 'var(--sm-gradient-subtle)',
+          }}
         >
-          <Image
-            src="/downloads/scout-v2.png"
-            alt="Scout AI"
-            width={20}
-            height={20}
-            className="w-5 h-5"
-          />
+          <Image src="/downloads/scout-v2.png" alt="Scout AI" width={20} height={20} />
         </div>
         <div>
-          <h3
-            className="font-bold"
-            style={{
-              fontFamily: "'Montserrat', sans-serif",
-              color: 'var(--sm-text)',
-            }}
-          >
+          <h3 style={{ fontFamily: "'Space Grotesk', sans-serif", color: 'var(--sm-text)', fontWeight: 700, fontSize: '16px', margin: 0 }}>
             Scout AI
           </h3>
-          <p className="text-xs" style={{ color: 'var(--sm-text-dim)' }}>
-            Get instant answers about the Bears
+          <p style={{ color: 'var(--sm-text-dim)', fontSize: '12px', margin: 0 }}>
+            Get instant answers about the {teamLabel}
           </p>
         </div>
       </div>
 
-      <div className="space-y-2 mb-4">
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginBottom: '16px' }}>
         <Link
-          href="/scout-ai?team=chicago-bears&q=What%20is%20the%20Bears%20record%20this%20season"
-          className="block px-3 py-2 rounded-lg text-sm transition-colors"
+          href={`/scout-ai?team=${teamSlug}&q=What%20is%20the%20${teamLabel}%20record%20this%20season`}
           style={{
-            backgroundColor: 'var(--sm-surface)',
+            display: 'block',
+            padding: '8px 12px',
+            borderRadius: 'var(--sm-radius-sm)',
+            fontSize: '14px',
+            background: 'var(--sm-surface)',
             color: 'var(--sm-text-muted)',
             border: '1px solid var(--sm-border)',
+            textDecoration: 'none',
+            transition: 'border-color 0.2s',
           }}
         >
-          &quot;What&apos;s the Bears record?&quot;
-        </Link>
-        <Link
-          href="/scout-ai?team=chicago-bears&q=Who%20is%20the%20Bears%20quarterback"
-          className="block px-3 py-2 rounded-lg text-sm transition-colors"
-          style={{
-            backgroundColor: 'var(--sm-surface)',
-            color: 'var(--sm-text-muted)',
-            border: '1px solid var(--sm-border)',
-          }}
-        >
-          &quot;Who is the Bears quarterback?&quot;
+          &quot;What&apos;s the {teamLabel} record?&quot;
         </Link>
       </div>
 
       <Link
-        href="/scout-ai?team=chicago-bears"
+        href={`/scout-ai?team=${teamSlug}`}
+        className="btn btn-md btn-primary"
         style={{
           display: 'block',
           width: '100%',
           textAlign: 'center',
-          padding: '12px 20px',
-          borderRadius: '100px',
-          fontWeight: 600,
-          fontSize: '14px',
-          color: '#fff',
-          backgroundColor: team.secondaryColor,
           textDecoration: 'none',
+          borderRadius: 'var(--sm-radius-pill)',
         }}
       >
         Ask Scout
@@ -407,74 +370,53 @@ function AskAIWidget({ team }: { team: typeof CHICAGO_TEAMS.bears }) {
   )
 }
 
-// Fan Chat Widget
-function FanChatWidget({ team }: { team: typeof CHICAGO_TEAMS.bears }) {
+// Fan Chat Widget - 2030
+function FanChatWidget({ teamLabel, channel }: { teamLabel: string; channel: string }) {
   return (
-    <div
-      style={{
-        borderRadius: 'var(--sm-radius-lg)',
-        padding: '24px',
-        backgroundColor: 'var(--sm-card)',
-        border: '1px solid var(--sm-border)',
-      }}
-    >
-      <div className="flex items-center gap-3 mb-4">
+    <div className="glass-card glass-card-static">
+      <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '16px' }}>
         <div
-          className="w-10 h-10 rounded-full flex items-center justify-center"
-          style={{ backgroundColor: `${team.primaryColor}20` }}
+          style={{
+            width: '40px',
+            height: '40px',
+            borderRadius: '50%',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            background: 'var(--sm-gradient-subtle)',
+          }}
         >
-          <svg
-            className="w-5 h-5"
-            style={{ color: team.primaryColor }}
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M17 8h2a2 2 0 012 2v6a2 2 0 01-2 2h-2v4l-4-4H9a1.994 1.994 0 01-1.414-.586m0 0L11 14h4a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2v4l.586-.586z"
-            />
+          <svg width="20" height="20" style={{ color: 'var(--sm-red-light)' }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8h2a2 2 0 012 2v6a2 2 0 01-2 2h-2v4l-4-4H9a1.994 1.994 0 01-1.414-.586m0 0L11 14h4a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2v4l.586-.586z" />
           </svg>
         </div>
         <div>
-          <h3
-            className="font-bold"
-            style={{
-              fontFamily: "'Montserrat', sans-serif",
-              color: 'var(--sm-text)',
-            }}
-          >
-            Bears Fan Chat
+          <h3 style={{ fontFamily: "'Space Grotesk', sans-serif", color: 'var(--sm-text)', fontWeight: 700, fontSize: '16px', margin: 0 }}>
+            {teamLabel} Fan Chat
           </h3>
-          <div className="flex items-center gap-1.5 text-xs" style={{ color: 'var(--sm-text-dim)' }}>
-            <span className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
+          <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '12px', color: 'var(--sm-text-dim)' }}>
+            <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: 'var(--sm-success)', display: 'inline-block' }} />
             <span>Fans online</span>
           </div>
         </div>
       </div>
 
-      <p className="text-sm mb-4" style={{ color: 'var(--sm-text-muted)' }}>
-        Join the conversation with fellow Bears fans.
+      <p style={{ color: 'var(--sm-text-muted)', fontSize: '14px', margin: '0 0 16px 0' }}>
+        Join the conversation with fellow {teamLabel} fans.
       </p>
 
       <Link
-        href="/fan-chat?channel=bears"
+        href={`/fan-chat?channel=${channel}`}
+        className="btn btn-md btn-secondary"
         style={{
           display: 'block',
           width: '100%',
           textAlign: 'center',
-          padding: '12px 20px',
-          borderRadius: '100px',
-          fontWeight: 600,
-          fontSize: '14px',
-          color: '#fff',
-          backgroundColor: team.primaryColor,
           textDecoration: 'none',
+          borderRadius: 'var(--sm-radius-pill)',
         }}
       >
-        Join Bears Chat
+        Join {teamLabel} Chat
       </Link>
     </div>
   )

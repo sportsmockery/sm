@@ -26,22 +26,57 @@ export default function NextPrevArticle({
 
   return (
     <section
-      className={`py-8 ${className}`}
-      style={{ borderTop: '1px solid var(--sm-border)', backgroundColor: 'var(--sm-surface)' }}
+      className={className}
+      style={{
+        padding: '32px 0',
+        borderTop: '1px solid var(--sm-border)',
+        background: 'var(--sm-surface)',
+      }}
     >
-      <div className="mx-auto grid max-w-7xl gap-4 px-4 sm:grid-cols-2 sm:gap-8">
+      <div
+        className="next-prev-grid"
+        style={{
+          maxWidth: '1280px',
+          margin: '0 auto',
+          padding: '0 16px',
+          display: 'grid',
+          gap: '16px',
+          gridTemplateColumns: '1fr',
+        }}
+      >
         {/* Previous Article */}
         <div>
           {prevArticle ? (
             <Link
               href={`/${prevArticle.category.slug}/${prevArticle.slug}`}
-              className="group flex items-center gap-4 rounded-2xl p-4 transition-all hover:shadow-lg"
-              style={{ backgroundColor: 'var(--sm-card)', border: '1px solid var(--sm-border)' }}
+              className="glass-card glass-card-sm"
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '16px',
+                padding: '16px',
+                textDecoration: 'none',
+                transition: 'all 0.3s ease',
+              }}
             >
               {/* Arrow */}
-              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full transition-all group-hover:text-white" style={{ backgroundColor: 'var(--sm-surface)', color: 'var(--sm-text-dim)' }}>
+              <div
+                style={{
+                  display: 'flex',
+                  width: '40px',
+                  height: '40px',
+                  flexShrink: 0,
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  borderRadius: '50%',
+                  background: 'var(--sm-surface)',
+                  color: 'var(--sm-text-dim)',
+                  border: '1px solid var(--sm-border)',
+                }}
+              >
                 <svg
-                  className="h-5 w-5"
+                  width="20"
+                  height="20"
                   fill="none"
                   viewBox="0 0 24 24"
                   strokeWidth={2}
@@ -57,31 +92,67 @@ export default function NextPrevArticle({
 
               {/* Thumbnail */}
               {prevArticle.featured_image && (
-                <div className="relative hidden h-16 w-16 shrink-0 overflow-hidden rounded-lg sm:block">
+                <div
+                  className="next-prev-thumb"
+                  style={{
+                    position: 'relative',
+                    width: '64px',
+                    height: '64px',
+                    flexShrink: 0,
+                    overflow: 'hidden',
+                    borderRadius: '12px',
+                  }}
+                >
                   <Image
                     src={prevArticle.featured_image}
                     alt=""
                     fill
-                    className="object-cover transition-transform group-hover:scale-105"
+                    style={{ objectFit: 'cover', transition: 'transform 0.3s ease' }}
                   />
                 </div>
               )}
 
               {/* Content */}
-              <div className="min-w-0 flex-1">
-                <p className="mb-1 text-xs font-semibold uppercase tracking-wider" style={{ color: 'var(--sm-text-muted)' }}>
+              <div style={{ flex: 1, minWidth: 0 }}>
+                <p
+                  style={{
+                    fontFamily: "'Inter', sans-serif",
+                    fontSize: '11px',
+                    fontWeight: 600,
+                    textTransform: 'uppercase',
+                    letterSpacing: '0.05em',
+                    color: 'var(--sm-text-dim)',
+                    marginBottom: '6px',
+                  }}
+                >
                   Previous Article
                 </p>
-                <span className="mb-1 inline-block rounded px-2 py-0.5 text-xs font-medium" style={{ backgroundColor: 'var(--sm-surface)', color: 'var(--sm-text-muted)' }}>
+                <span
+                  className="sm-tag"
+                  style={{ fontSize: '11px', padding: '3px 10px', marginBottom: '6px' }}
+                >
                   {prevArticle.category.name}
                 </span>
-                <h4 className="line-clamp-2 font-semibold transition-colors group-hover:text-[var(--sm-accent)]" style={{ color: 'var(--sm-text)' }}>
+                <h4
+                  style={{
+                    fontFamily: "'Space Grotesk', sans-serif",
+                    fontSize: '15px',
+                    fontWeight: 600,
+                    color: 'var(--sm-text)',
+                    lineHeight: 1.35,
+                    marginTop: '6px',
+                    display: '-webkit-box',
+                    WebkitLineClamp: 2,
+                    WebkitBoxOrient: 'vertical',
+                    overflow: 'hidden',
+                  }}
+                >
                   {prevArticle.title}
                 </h4>
               </div>
             </Link>
           ) : (
-            <div className="h-full" />
+            <div style={{ height: '100%' }} />
           )}
         </div>
 
@@ -90,38 +161,96 @@ export default function NextPrevArticle({
           {nextArticle ? (
             <Link
               href={`/${nextArticle.category.slug}/${nextArticle.slug}`}
-              className="group flex items-center gap-4 rounded-2xl p-4 text-right transition-all hover:shadow-lg"
-              style={{ backgroundColor: 'var(--sm-card)', border: '1px solid var(--sm-border)' }}
+              className="glass-card glass-card-sm"
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '16px',
+                padding: '16px',
+                textDecoration: 'none',
+                textAlign: 'right',
+                transition: 'all 0.3s ease',
+              }}
             >
               {/* Content */}
-              <div className="min-w-0 flex-1">
-                <p className="mb-1 text-xs font-semibold uppercase tracking-wider" style={{ color: 'var(--sm-text-muted)' }}>
+              <div style={{ flex: 1, minWidth: 0 }}>
+                <p
+                  style={{
+                    fontFamily: "'Inter', sans-serif",
+                    fontSize: '11px',
+                    fontWeight: 600,
+                    textTransform: 'uppercase',
+                    letterSpacing: '0.05em',
+                    color: 'var(--sm-text-dim)',
+                    marginBottom: '6px',
+                  }}
+                >
                   Next Article
                 </p>
-                <span className="mb-1 inline-block rounded px-2 py-0.5 text-xs font-medium" style={{ backgroundColor: 'var(--sm-surface)', color: 'var(--sm-text-muted)' }}>
+                <span
+                  className="sm-tag"
+                  style={{ fontSize: '11px', padding: '3px 10px', marginBottom: '6px', display: 'inline-flex' }}
+                >
                   {nextArticle.category.name}
                 </span>
-                <h4 className="line-clamp-2 font-semibold transition-colors group-hover:text-[var(--sm-accent)]" style={{ color: 'var(--sm-text)' }}>
+                <h4
+                  style={{
+                    fontFamily: "'Space Grotesk', sans-serif",
+                    fontSize: '15px',
+                    fontWeight: 600,
+                    color: 'var(--sm-text)',
+                    lineHeight: 1.35,
+                    marginTop: '6px',
+                    display: '-webkit-box',
+                    WebkitLineClamp: 2,
+                    WebkitBoxOrient: 'vertical',
+                    overflow: 'hidden',
+                  }}
+                >
                   {nextArticle.title}
                 </h4>
               </div>
 
               {/* Thumbnail */}
               {nextArticle.featured_image && (
-                <div className="relative hidden h-16 w-16 shrink-0 overflow-hidden rounded-lg sm:block">
+                <div
+                  className="next-prev-thumb"
+                  style={{
+                    position: 'relative',
+                    width: '64px',
+                    height: '64px',
+                    flexShrink: 0,
+                    overflow: 'hidden',
+                    borderRadius: '12px',
+                  }}
+                >
                   <Image
                     src={nextArticle.featured_image}
                     alt=""
                     fill
-                    className="object-cover transition-transform group-hover:scale-105"
+                    style={{ objectFit: 'cover', transition: 'transform 0.3s ease' }}
                   />
                 </div>
               )}
 
               {/* Arrow */}
-              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full transition-all group-hover:text-white" style={{ backgroundColor: 'var(--sm-surface)', color: 'var(--sm-text-dim)' }}>
+              <div
+                style={{
+                  display: 'flex',
+                  width: '40px',
+                  height: '40px',
+                  flexShrink: 0,
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  borderRadius: '50%',
+                  background: 'var(--sm-surface)',
+                  color: 'var(--sm-text-dim)',
+                  border: '1px solid var(--sm-border)',
+                }}
+              >
                 <svg
-                  className="h-5 w-5"
+                  width="20"
+                  height="20"
                   fill="none"
                   viewBox="0 0 24 24"
                   strokeWidth={2}
@@ -136,10 +265,26 @@ export default function NextPrevArticle({
               </div>
             </Link>
           ) : (
-            <div className="h-full" />
+            <div style={{ height: '100%' }} />
           )}
         </div>
       </div>
+
+      {/* Responsive: hide thumbnails on mobile, 2-col on desktop */}
+      <style>{`
+        .next-prev-thumb {
+          display: none;
+        }
+        @media (min-width: 640px) {
+          .next-prev-grid {
+            grid-template-columns: repeat(2, 1fr) !important;
+            gap: 32px !important;
+          }
+          .next-prev-thumb {
+            display: block;
+          }
+        }
+      `}</style>
     </section>
   )
 }

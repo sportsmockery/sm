@@ -14,41 +14,38 @@ interface ThemeContextType {
 const ThemeContext = createContext<ThemeContextType | undefined>(undefined)
 
 export function ThemeProvider({ children }: { children: ReactNode }) {
-  const [theme, setThemeState] = useState<Theme>('light')
+  const [theme, setThemeState] = useState<Theme>('dark')
   const [mounted, setMounted] = useState(false)
 
-  // On mount, check localStorage or system preference
+  // On mount, check localStorage
   useEffect(() => {
     setMounted(true)
-    
-    // Check localStorage first
+
     const stored = localStorage.getItem('sm-theme') as Theme | null
-    if (stored && (stored === 'light' || stored === 'dark')) {
-      setThemeState(stored)
-      return
+    if (stored === 'light') {
+      setThemeState('light')
     }
-    
-    // Default to light mode (don't check system preference - we want light as default)
-    setThemeState('light')
+    // Default is dark (no action needed)
   }, [])
 
   // Apply theme to document
   useEffect(() => {
     if (!mounted) return
-    
+
     const root = document.documentElement
-    
+
     // Remove both classes first
     root.classList.remove('light', 'dark')
-    
-    // Add current theme class
-    root.classList.add(theme)
-    
-    // Also set data attribute for CSS variable switching
-    root.setAttribute('data-theme', theme)
-    
-    // Store preference
-    localStorage.setItem('sm-theme', theme)
+
+    if (theme === 'light') {
+      root.classList.add('light')
+      root.setAttribute('data-theme', 'light')
+      localStorage.setItem('sm-theme', 'light')
+    } else {
+      root.classList.add('dark')
+      root.removeAttribute('data-theme')
+      localStorage.setItem('sm-theme', 'dark')
+    }
   }, [theme, mounted])
 
   const toggleTheme = () => {
@@ -59,7 +56,6 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
     setThemeState(newTheme)
   }
 
-  // Always provide context, but hide content until mounted to prevent flash
   return (
     <ThemeContext.Provider value={{ theme, resolvedTheme: theme, toggleTheme, setTheme }}>
       {mounted ? children : <div style={{ visibility: 'hidden' }}>{children}</div>}

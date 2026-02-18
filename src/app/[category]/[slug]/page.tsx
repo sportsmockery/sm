@@ -281,305 +281,171 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
         url={articleUrl}
       />
 
-      {/* Premium Hero Section */}
-      <header className="relative">
-        {/* Full-width featured image with overlay */}
-        {post.featured_image ? (
-          <div className="relative h-[50vh] min-h-[400px] w-full lg:h-[60vh]">
-            <Image
-              src={post.featured_image}
-              alt={post.title}
-              fill
-              className="object-cover"
-              priority
-            />
-            {/* Gradient overlay */}
-            <div className="absolute inset-0 bg-gradient-to-t from-black via-black/60 to-transparent" />
+      {/* 2030 Hero Header */}
+      <header className="sm-hero-bg" style={{ padding: '120px 0 60px', minHeight: 250 }}>
+        <div className="sm-grid-overlay" />
+        <div style={{ position: 'relative', zIndex: 1, maxWidth: 760, margin: '0 auto', padding: '0 24px' }}>
+          {/* Breadcrumb */}
+          <nav style={{ marginBottom: 16 }}>
+            <ol style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 13, color: 'var(--sm-text-dim)', listStyle: 'none', padding: 0, margin: 0 }}>
+              <li><Link href="/" style={{ color: 'inherit', transition: 'color 0.2s' }}>Home</Link></li>
+              <li>/</li>
+              <li><Link href={`/${categoryData?.slug || category}`} style={{ color: 'inherit' }}>{categoryData?.name || category}</Link></li>
+            </ol>
+          </nav>
 
-            {/* Content overlay */}
-            <div className="absolute inset-0 flex flex-col justify-end">
-              <div className="mx-auto w-full max-w-4xl px-4 pb-8 lg:pb-12">
-                {/* Breadcrumb */}
-                <nav className="mb-4">
-                  <ol className="flex items-center gap-2 text-sm" style={{ color: 'var(--sm-text-muted)' }}>
-                    <li>
-                      <Link href="/" className="hover:text-white transition-colors">
-                        Home
-                      </Link>
-                    </li>
-                    <li style={{ color: 'var(--sm-text-dim)' }}>/</li>
-                    <li>
-                      <Link
-                        href={`/${categoryData?.slug || category}`}
-                        className="hover:text-white transition-colors"
-                      >
-                        {categoryData?.name || category}
-                      </Link>
-                    </li>
-                  </ol>
-                </nav>
+          {/* Category + Context tags */}
+          <div style={{ display: 'flex', gap: 8, marginBottom: 16, flexWrap: 'wrap' }}>
+            <Link href={`/${categoryData?.slug || category}`} className="sm-tag">{categoryData?.name || category}</Link>
+            {contextLabel && <span className="sm-tag">{contextLabel.label}</span>}
+          </div>
 
-                {/* Context label above title (Rumor, Film Room, Opinion) */}
-                {contextLabel && (
-                  <span className="mb-2 inline-block text-xs font-semibold uppercase tracking-[0.06em] px-2 py-[2px] rounded-full bg-white/20 text-white/90">
-                    {contextLabel.label}
-                  </span>
-                )}
+          {/* Title */}
+          <h1 style={{ fontFamily: "'Space Grotesk', sans-serif", fontSize: 'clamp(2rem, 4vw, 3rem)', fontWeight: 700, letterSpacing: '-1px', lineHeight: 1.15, color: 'var(--sm-text)', marginBottom: 24 }}>
+            {post.title}
+          </h1>
 
-                {/* Category Badge per spec: red bg #bc0000 */}
-                <Link
-                  href={`/${categoryData?.slug || category}`}
-                  className="mb-4 inline-block text-[11px] font-bold uppercase tracking-[0.5px] px-[10px] py-[4px]"
-                  style={{ fontFamily: "'Montserrat', sans-serif", backgroundColor: 'var(--badge-bg)', color: 'var(--badge-text)' }}
-                >
-                  {categoryData?.name || category}
-                </Link>
-
-                {/* Title per spec: 28-36px, Montserrat 700-900, line-height 1.2 - no text-transform */}
-                <h1
-                  className="mb-4 text-[24px] sm:text-[28px] lg:text-[36px] font-black leading-[1.2] text-white max-w-4xl"
-                  style={{ fontFamily: "'Montserrat', sans-serif", letterSpacing: '-0.5px' }}
-                >
-                  {post.title}
-                </h1>
-
-                {/* Meta info with author avatar */}
-                <div className="flex flex-wrap items-center gap-4">
-                  {author && (
-                    <Link href={`/author/${author.slug || author.id}`} className="flex items-center gap-3 group">
-                      {author.avatar_url ? (
-                        <div className="relative h-10 w-10 overflow-hidden rounded-full ring-2 ring-white/30 transition-all group-hover:ring-white/60">
-                          <Image
-                            src={author.avatar_url}
-                            alt={author.display_name}
-                            fill
-                            className="object-cover"
-                          />
-                        </div>
-                      ) : (
-                        <div className="flex h-10 w-10 items-center justify-center rounded-full text-sm font-bold" style={{ backgroundColor: 'var(--badge-bg)', color: 'var(--badge-text)' }}>
-                          {author.display_name.charAt(0).toUpperCase()}
-                        </div>
-                      )}
-                      <span className="font-semibold text-white group-hover:opacity-80 transition-colors">
-                        {author.display_name}
-                      </span>
-                    </Link>
-                  )}
-                  <div className="flex items-center gap-3 text-sm" style={{ color: 'var(--sm-text-muted)' }}>
-                    <time dateTime={post.published_at} className="flex items-center gap-1.5">
-                      <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5" />
-                      </svg>
-                      {format(new Date(post.published_at), 'MMMM d, yyyy')}
-                    </time>
-                    <span className="flex items-center gap-1.5">
-                      <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" />
-                      </svg>
-                      {readingTime} min read
-                    </span>
-                    <span style={{ color: 'var(--sm-text-muted)' }}>
-                      <ViewCounterCompact views={post.views || 0} />
-                    </span>
+          {/* Author row */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap' }}>
+            {author && (
+              <Link href={`/author/${author.slug || author.id}`} style={{ display: 'flex', alignItems: 'center', gap: 10, textDecoration: 'none' }}>
+                {author.avatar_url ? (
+                  <div style={{ width: 32, height: 32, borderRadius: '50%', overflow: 'hidden', position: 'relative' }}>
+                    <Image src={author.avatar_url} alt={author.display_name} fill style={{ objectFit: 'cover' }} />
                   </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        ) : (
-          /* Fallback header without image - dark background for white text */
-          <div className="py-10 border-b" style={{ backgroundColor: 'var(--sm-card)', borderColor: 'var(--sm-border)' }}>
-            <div className="mx-auto max-w-[1110px] px-4">
-              {/* Breadcrumb */}
-              <nav className="mb-4">
-                <ol className="flex items-center gap-2 text-[12px]" style={{ color: 'var(--sm-text-muted)' }}>
-                  <li>
-                    <Link href="/" className="hover:text-white transition-colors">
-                      Home
-                    </Link>
-                  </li>
-                  <li style={{ color: 'var(--sm-text-dim)' }}>/</li>
-                  <li>
-                    <Link
-                      href={`/${categoryData?.slug || category}`}
-                      className="hover:text-white transition-colors"
-                    >
-                      {categoryData?.name || category}
-                    </Link>
-                  </li>
-                </ol>
-              </nav>
-
-              {/* Context label above title (Rumor, Film Room, Opinion) */}
-              {contextLabel && (
-                <span className="mb-2 inline-block text-xs font-semibold uppercase tracking-[0.06em] px-2 py-[2px] rounded-full bg-white/20 text-white/90">
-                  {contextLabel.label}
-                </span>
-              )}
-
-              {/* Category Badge per spec */}
-              <Link
-                href={`/${categoryData?.slug || category}`}
-                className="mb-4 inline-block text-[11px] font-bold uppercase tracking-[0.5px] px-[10px] py-[4px]"
-                style={{ fontFamily: "'Montserrat', sans-serif", backgroundColor: 'var(--badge-bg)', color: 'var(--badge-text)' }}
-              >
-                {categoryData?.name || category}
-              </Link>
-
-              {/* Title per spec: 28-36px, Montserrat 700-900 - no text-transform */}
-              <h1
-                className="mb-4 text-[24px] sm:text-[28px] lg:text-[36px] font-black leading-[1.2] text-white max-w-4xl"
-                style={{ fontFamily: "'Montserrat', sans-serif", letterSpacing: '-0.5px' }}
-              >
-                {post.title}
-              </h1>
-
-              {/* Meta line per spec: "By {author} · {Date} · {X min read} · {Category}" */}
-              <p className="text-[14px]" style={{ color: 'var(--sm-text-muted)' }}>
-                {author && (
-                  <>
-                    By{' '}
-                    <Link
-                      href={`/author/${author.slug || author.id}`}
-                      className="font-medium transition-colors"
-                      style={{ color: 'var(--sm-text)' }}
-                    >
-                      {author.display_name}
-                    </Link>
-                    {' · '}
-                  </>
+                ) : (
+                  <div style={{ width: 32, height: 32, borderRadius: '50%', background: 'var(--sm-gradient-subtle)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 14, fontWeight: 600, color: 'var(--sm-text)' }}>
+                    {author.display_name.charAt(0)}
+                  </div>
                 )}
-                {format(new Date(post.published_at), 'MMMM d, yyyy')}
-                {' · '}
-                {readingTime} min read
-                {' · '}
-                {categoryData?.name || category}
-              </p>
+                <span style={{ fontSize: 14, fontWeight: 600, color: 'var(--sm-text)' }}>{author.display_name}</span>
+              </Link>
+            )}
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 14, color: 'var(--sm-text-muted)', flexWrap: 'wrap' }}>
+              <time dateTime={post.published_at}>{format(new Date(post.published_at), 'MMMM d, yyyy')}</time>
+              <span style={{ color: 'var(--sm-text-dim)' }}>·</span>
+              <span>{readingTime} min read</span>
+              <span style={{ color: 'var(--sm-text-dim)' }}>·</span>
+              <ViewCounterCompact views={post.views || 0} />
             </div>
           </div>
-        )}
+
+          {/* Featured image */}
+          {post.featured_image && (
+            <div style={{ marginTop: 32, borderRadius: 16, overflow: 'hidden', position: 'relative', aspectRatio: '16/9' }}>
+              <Image src={post.featured_image} alt={post.title} fill style={{ objectFit: 'cover' }} priority />
+            </div>
+          )}
+        </div>
       </header>
 
-      {/* Main Content Area - Athletic-style layout with TOC on LEFT */}
-      <div style={{ backgroundColor: 'var(--sm-card)' }}>
-        <div className="mx-auto max-w-[1400px] px-4 py-10">
-          <div className="flex justify-center gap-0">
-            {/* Left Sidebar - TOC (Desktop only) */}
-            {readingTime >= 5 && (
-              <aside className="hidden xl:block w-[220px] flex-shrink-0">
-                <div className="sticky top-24 pr-6">
-                  <ArticleTableOfContents
-                    contentHtml={post.content || ''}
-                    className="border-0 bg-transparent"
-                  />
-                </div>
-              </aside>
+      {/* 2030 Article Body Area */}
+      <div style={{ backgroundColor: 'var(--sm-dark)' }}>
+        <div style={{ maxWidth: 1400, margin: '0 auto', padding: '48px 24px', display: 'flex', justifyContent: 'center', gap: 0 }}>
+          {/* Left Sidebar - TOC (Desktop only) */}
+          {readingTime >= 5 && (
+            <aside className="hidden xl:block" style={{ width: 220, flexShrink: 0 }}>
+              <div style={{ position: 'sticky', top: 96, paddingRight: 24 }}>
+                <ArticleTableOfContents
+                  contentHtml={post.content || ''}
+                />
+              </div>
+            </aside>
+          )}
+
+          {/* Main article column */}
+          <div style={{ width: '100%', maxWidth: 720, borderColor: 'var(--sm-border)' }}>
+            {/* Article Audio Player */}
+            {audioInfo && (
+              <ArticleAudioPlayer
+                initialArticle={audioInfo.article}
+                initialAudioUrl={audioInfo.audioUrl}
+                articleContent={post.content || ''}
+              />
             )}
 
-            {/* Main article column - centered */}
-            <div className={`w-full max-w-[720px] ${readingTime >= 5 ? 'xl:border-l xl:border-r xl:px-12' : ''}`} style={{ borderColor: 'var(--sm-border)' }}>
-              {/* Note: Featured image is shown in hero section above, not duplicated here */}
-
-              {/* Article Audio Player - Listen to this article */}
-              {audioInfo && (
-                <ArticleAudioPlayer
-                  initialArticle={audioInfo.article}
-                  initialAudioUrl={audioInfo.audioUrl}
-                  articleContent={post.content || ''}
+            <article className="article-body-2030">
+              {/* Mobile TOC - shown at top on smaller screens */}
+              {readingTime >= 5 && (
+                <ArticleTableOfContents
+                  contentHtml={post.content || ''}
+                  className="xl:hidden"
                 />
               )}
 
-              {/* Article body per spec section 7.3: Fira Sans 16-17px, line-height 1.7 */}
-              <article
-                className="article-body"
-                style={{ fontFamily: "'Fira Sans', sans-serif" }}
-              >
-                {/* Mobile TOC - shown at top on smaller screens */}
-                {readingTime >= 5 && (
-                  <ArticleTableOfContents
-                    contentHtml={post.content || ''}
-                    className="mb-8 xl:hidden"
-                  />
-                )}
+              {/* Auto-linked content with duplicate featured image stripped */}
+              <ArticleContentWithEmbeds
+                content={stripDuplicateFeaturedImage(autoLinkedContent, post.featured_image)}
+              />
 
-                {/* Article body content - using globals.css .article-body styles */}
-                {/* Auto-linked content with duplicate featured image stripped, Twitter embeds processed */}
-                <ArticleContentWithEmbeds
-                  content={stripDuplicateFeaturedImage(autoLinkedContent, post.featured_image)}
-                />
-
-                {/* Share buttons placed after article body per spec */}
-                <div className="my-8 flex items-center gap-3 border-y py-6" style={{ borderColor: 'var(--sm-border)' }}>
-                  <ShareButtons url={articleUrl} title={post.title} />
-                </div>
-
-                {/* Tags per spec section 15.4 */}
-                {tags.length > 0 && (
-                  <div className="mt-10 border-t pt-6" style={{ borderColor: 'var(--sm-border)' }}>
-                    <ArticleTags tags={tags} />
-                  </div>
-                )}
-
-                {/* Author Card per spec section 15.3 */}
-                {author && (
-                  <div className="mt-10 border-t pt-10" style={{ borderColor: 'var(--sm-border)' }}>
-                    <AuthorCard
-                      author={{
-                        id: author.id,
-                        name: author.display_name,
-                        slug: author.slug || String(author.id),
-                        avatar_url: author.avatar_url,
-                        bio: author.bio,
-                        twitter_url: author.twitter,
-                        email: author.email,
-                      }}
-                    />
-                  </div>
-                )}
-
-                {/* Disqus Comments Section */}
-                <CommentSection
-                  articleId={post.id}
-                  articleUrl={articleUrl}
-                  articleTitle={post.title}
-                />
-              </article>
-            </div>
-
-            {/* Right Sidebar - More from team (Desktop only) */}
-            <aside className="hidden xl:block w-[280px] flex-shrink-0">
-              <div className="sticky top-24 pl-6 space-y-6">
-                {/* More from this team */}
-                {relatedPosts.length > 0 && categoryData && (
-                  <MoreFromTeam
-                    posts={relatedPosts.map(p => ({
-                      id: p.id,
-                      slug: p.slug,
-                      title: p.title,
-                      excerpt: p.excerpt,
-                      featuredImage: p.featured_image,
-                      publishedAt: p.published_at,
-                      views: 0,
-                      author: {
-                        id: author?.id || 0,
-                        displayName: author?.display_name || 'Staff',
-                        avatarUrl: author?.avatar_url || null,
-                      },
-                      team: categorySlugToTeam(categoryData.slug),
-                      categorySlug: categoryData.slug,
-                      categoryName: categoryData.name,
-                    }))}
-                    team={categorySlugToTeam(categoryData.slug)}
-                    currentPostId={post.id}
-                  />
-                )}
-
-                {/* AR Stadium Tour */}
-                <ARTourButton team={categoryData?.slug || category} />
+              {/* Share buttons */}
+              <div style={{ margin: '32px 0', display: 'flex', alignItems: 'center', gap: 12, borderTop: '1px solid var(--sm-border)', borderBottom: '1px solid var(--sm-border)', padding: '24px 0' }}>
+                <ShareButtons url={articleUrl} title={post.title} />
               </div>
-            </aside>
+
+              {/* Tags */}
+              {tags.length > 0 && (
+                <div style={{ marginTop: 40, borderTop: '1px solid var(--sm-border)', paddingTop: 24 }}>
+                  <ArticleTags tags={tags} />
+                </div>
+              )}
+
+              {/* Author Card */}
+              {author && (
+                <div style={{ marginTop: 40, borderTop: '1px solid var(--sm-border)', paddingTop: 40 }}>
+                  <AuthorCard
+                    author={{
+                      id: author.id,
+                      name: author.display_name,
+                      slug: author.slug || String(author.id),
+                      avatar_url: author.avatar_url,
+                      bio: author.bio,
+                      twitter_url: author.twitter,
+                      email: author.email,
+                    }}
+                  />
+                </div>
+              )}
+
+              {/* Comments */}
+              <CommentSection
+                articleId={post.id}
+                articleUrl={articleUrl}
+                articleTitle={post.title}
+              />
+            </article>
           </div>
+
+          {/* Right Sidebar (Desktop only) */}
+          <aside className="hidden xl:block" style={{ width: 280, flexShrink: 0 }}>
+            <div style={{ position: 'sticky', top: 96, paddingLeft: 24 }}>
+              {relatedPosts.length > 0 && categoryData && (
+                <MoreFromTeam
+                  posts={relatedPosts.map(p => ({
+                    id: p.id,
+                    slug: p.slug,
+                    title: p.title,
+                    excerpt: p.excerpt,
+                    featuredImage: p.featured_image,
+                    publishedAt: p.published_at,
+                    views: 0,
+                    author: {
+                      id: author?.id || 0,
+                      displayName: author?.display_name || 'Staff',
+                      avatarUrl: author?.avatar_url || null,
+                    },
+                    team: categorySlugToTeam(categoryData.slug),
+                    categorySlug: categoryData.slug,
+                    categoryName: categoryData.name,
+                  }))}
+                  team={categorySlugToTeam(categoryData.slug)}
+                  currentPostId={post.id}
+                />
+              )}
+
+              <ARTourButton team={categoryData?.slug || category} />
+            </div>
+          </aside>
         </div>
       </div>
 
@@ -605,10 +471,10 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
         } : undefined}
       />
 
-      {/* Full-width Related Articles Section */}
+      {/* Related Articles Section */}
       {relatedPosts.length > 0 && categoryData && (
-        <section className="border-t py-12" style={{ borderColor: 'var(--sm-border)', backgroundColor: 'var(--sm-surface)' }}>
-          <div className="mx-auto max-w-7xl px-4">
+        <section style={{ borderTop: '1px solid var(--sm-border)', padding: '48px 0', backgroundColor: 'var(--sm-surface)' }}>
+          <div className="sm-container">
             <RelatedArticles
               articles={relatedPosts.map(p => ({
                 id: p.id,
@@ -640,7 +506,7 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
         articleTitle={post.title}
       />
 
-      {/* Team Chat Widget - Floating chat for team fan engagement */}
+      {/* Team Chat Widget */}
       <TeamChatWidget categorySlug={category} />
     </>
   )

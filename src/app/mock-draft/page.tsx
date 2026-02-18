@@ -507,39 +507,36 @@ export default function MockDraftPage() {
   // Loading state
   if (authLoading || pageLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: 'var(--bg-page)' }}>
-        <div className="w-8 h-8 border-2 border-t-transparent rounded-full animate-spin" style={{ borderColor: '#bc0000', borderTopColor: 'transparent' }} />
+      <div className="sm-hero-bg" style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+        <div className="sm-grid-overlay" />
+        <div style={{ width: 32, height: 32, border: '3px solid var(--sm-red)', borderTopColor: 'transparent', borderRadius: '50%', animation: 'spin-2030 1s linear infinite' }} />
       </div>
     )
   }
 
-  const cardBg = isDark ? 'bg-gray-800/50 border-gray-700' : 'bg-white border-gray-200 shadow-sm'
-  const subText = isDark ? '#9ca3af' : '#6b7280'
+  const cardBg = 'glass-card glass-card-static'
+  const subText = 'var(--sm-text-muted)'
 
   return (
-    <div className="min-h-screen" style={{ backgroundColor: 'var(--bg-page)', color: 'var(--sm-text)' }}>
-      <main className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 pt-20 sm:pt-24">
+    <div className="sm-hero-bg" style={{ minHeight: '100vh', color: 'var(--sm-text)' }}>
+      <div className="sm-grid-overlay" />
+      <main style={{ maxWidth: 1400, margin: '0 auto', padding: '24px 16px', paddingTop: 80, position: 'relative', zIndex: 1 }}>
         {/* Header - stacks on mobile */}
         <div style={{ marginBottom: 20 }}>
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
             <div>
-              <h1 className="text-xl sm:text-2xl" style={{ fontWeight: 800, color: isDark ? '#fff' : '#1a1a1a', marginBottom: 4 }}>
+              <h1 style={{ fontFamily: 'var(--sm-font-heading)', fontWeight: 800, fontSize: '1.5rem', color: 'var(--sm-text)', marginBottom: 4 }}>
                 Mock Draft Simulator
               </h1>
-              <p className="text-xs sm:text-sm" style={{ color: subText }}>
+              <p style={{ color: 'var(--sm-text-muted)', fontSize: 14 }}>
                 Take control of your team&apos;s draft picks
               </p>
             </div>
             {activeDraft && (
               <button
                 onClick={resetDraft}
-                className="self-start sm:self-auto"
-                style={{
-                  padding: '8px 16px', borderRadius: 8,
-                  border: `2px solid ${teamColor}`, backgroundColor: 'transparent',
-                  color: teamColor, fontSize: '13px', fontWeight: 600, cursor: 'pointer',
-                  whiteSpace: 'nowrap',
-                }}
+                className="btn btn-secondary btn-sm"
+                style={{ borderColor: teamColor, color: teamColor }}
               >
                 New Draft
               </button>
@@ -550,9 +547,9 @@ export default function MockDraftPage() {
         {/* Error */}
         {error && (
           <div style={{
-            padding: '12px 16px', borderRadius: 10, marginBottom: 16,
-            backgroundColor: '#ef444420', border: '1px solid #ef444440',
-            color: '#ef4444', fontSize: '13px', fontWeight: 600,
+            padding: '12px 16px', borderRadius: 'var(--sm-radius-sm)', marginBottom: 16,
+            backgroundColor: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.2)',
+            color: 'var(--sm-error)', fontSize: 13, fontWeight: 600,
             display: 'flex', alignItems: 'center', justifyContent: 'space-between',
           }}>
             <span>{error}</span>
@@ -566,8 +563,8 @@ export default function MockDraftPage() {
         {!selectedTeam && (
           <div className="grid md:grid-cols-2 gap-4 sm:gap-6" style={{ alignItems: 'start' }}>
             {/* Team picker */}
-            <div className={`rounded-xl border p-4 sm:p-6 ${cardBg}`}>
-              <h2 className="text-base sm:text-lg" style={{ fontWeight: 700, marginBottom: 12, color: isDark ? '#fff' : '#1a1a1a' }}>
+            <div className={cardBg}>
+              <h2 style={{ fontFamily: 'var(--sm-font-heading)', fontWeight: 700, fontSize: '1.125rem', marginBottom: 12, color: 'var(--sm-text)' }}>
                 Select Your Team
               </h2>
               {eligibilityLoading ? (
@@ -602,9 +599,9 @@ export default function MockDraftPage() {
                         disabled={!isEligible}
                         style={{
                           display: 'flex', alignItems: 'center', gap: 10,
-                          padding: '12px', borderRadius: 12,
-                          border: `2px solid ${isEligible ? team.color : (isDark ? '#4b5563' : '#d1d5db')}`,
-                          backgroundColor: isDark ? '#1f2937' : '#fff',
+                          padding: 12, borderRadius: 'var(--sm-radius-md)',
+                          border: `2px solid ${isEligible ? team.color : 'var(--sm-border)'}`,
+                          backgroundColor: 'var(--sm-card)',
                           opacity: isEligible ? 1 : 0.5,
                           cursor: isEligible ? 'pointer' : 'not-allowed',
                           transition: 'all 0.2s',
@@ -658,8 +655,8 @@ export default function MockDraftPage() {
             </div>
 
             {/* History */}
-            <div className={`rounded-xl border p-4 sm:p-6 ${cardBg}`}>
-              <h2 className="text-base sm:text-lg" style={{ fontWeight: 700, marginBottom: 12, color: isDark ? '#fff' : '#1a1a1a' }}>
+            <div className={cardBg}>
+              <h2 style={{ fontFamily: 'var(--sm-font-heading)', fontWeight: 700, fontSize: '1.125rem', marginBottom: 12, color: 'var(--sm-text)' }}>
                 Draft History
               </h2>
               {historyLoading ? (
@@ -718,19 +715,16 @@ export default function MockDraftPage() {
         {autoAdvancing && (
           <div style={{
             position: 'fixed', inset: 0, zIndex: 40,
-            backgroundColor: 'rgba(0,0,0,0.5)',
+            backgroundColor: 'rgba(0,0,0,0.6)',
+            backdropFilter: 'blur(8px)',
             display: 'flex', alignItems: 'center', justifyContent: 'center',
           }}>
-            <div style={{
-              backgroundColor: isDark ? '#1f2937' : '#fff',
-              borderRadius: 16, padding: 32, textAlign: 'center',
-              boxShadow: '0 25px 50px rgba(0,0,0,0.3)',
-            }}>
-              <div className="w-10 h-10 border-3 border-t-transparent rounded-full animate-spin mx-auto mb-4" style={{ borderColor: teamColor, borderTopColor: 'transparent' }} />
-              <div style={{ fontWeight: 700, fontSize: '18px', marginBottom: 8, color: isDark ? '#fff' : '#1a1a1a' }}>
+            <div className="glass-card" style={{ textAlign: 'center', maxWidth: 360 }}>
+              <div style={{ width: 40, height: 40, border: `3px solid ${teamColor}`, borderTopColor: 'transparent', borderRadius: '50%', animation: 'spin-2030 1s linear infinite', margin: '0 auto 16px' }} />
+              <div style={{ fontFamily: 'var(--sm-font-heading)', fontWeight: 700, fontSize: 18, marginBottom: 8, color: 'var(--sm-text)' }}>
                 Simulating Draft Picks...
               </div>
-              <div style={{ fontSize: '14px', color: subText }}>
+              <div style={{ fontSize: 14, color: 'var(--sm-text-muted)' }}>
                 Other teams are making their selections
               </div>
             </div>
@@ -807,22 +801,14 @@ export default function MockDraftPage() {
                         placeholder="Search prospects..."
                         value={searchQuery}
                         onChange={e => setSearchQuery(e.target.value)}
-                        style={{
-                          flex: 1, minWidth: 200, padding: '10px 14px', borderRadius: 8,
-                          border: `1px solid ${isDark ? '#4b5563' : '#d1d5db'}`,
-                          backgroundColor: isDark ? '#374151' : '#fff',
-                          color: isDark ? '#fff' : '#000', fontSize: '14px',
-                        }}
+                        className="sm-input"
+                        style={{ flex: 1, minWidth: 200 }}
                       />
                       <select
                         value={positionFilter}
                         onChange={e => setPositionFilter(e.target.value)}
-                        style={{
-                          padding: '10px 14px', borderRadius: 8,
-                          border: `1px solid ${isDark ? '#4b5563' : '#d1d5db'}`,
-                          backgroundColor: isDark ? '#374151' : '#fff',
-                          color: isDark ? '#fff' : '#000', fontSize: '14px',
-                        }}
+                        className="sm-input"
+                        style={{ width: 'auto' }}
                       >
                         <option value="">All Positions</option>
                         {positions.map(pos => (
@@ -1078,16 +1064,17 @@ export default function MockDraftPage() {
         <div
           style={{
             position: 'fixed', inset: 0, zIndex: 50,
-            backgroundColor: 'rgba(0,0,0,0.7)',
+            backgroundColor: 'rgba(0,0,0,0.6)',
+            backdropFilter: 'blur(8px)',
             display: 'flex', alignItems: 'center', justifyContent: 'center',
             padding: 20,
           }}
           onClick={() => setShowGradeModal(false)}
         >
           <div
+            className="glass-card glass-card-static"
             style={{
-              backgroundColor: isDark ? '#1f2937' : '#fff',
-              borderRadius: 16, padding: 24, maxWidth: 500, width: '100%',
+              maxWidth: 500, width: '100%',
               maxHeight: '80vh', overflowY: 'auto',
             }}
             onClick={e => e.stopPropagation()}
@@ -1143,11 +1130,8 @@ export default function MockDraftPage() {
 
             <button
               onClick={() => setShowGradeModal(false)}
-              style={{
-                width: '100%', padding: '12px', borderRadius: 10, border: 'none',
-                backgroundColor: teamColor, color: '#fff',
-                fontWeight: 600, fontSize: '14px', cursor: 'pointer',
-              }}
+              className="btn btn-primary btn-md"
+              style={{ width: '100%', backgroundColor: teamColor }}
             >
               Close
             </button>

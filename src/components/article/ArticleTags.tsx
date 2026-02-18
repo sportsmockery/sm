@@ -9,34 +9,51 @@ export default function ArticleTags({ tags, className = '' }: ArticleTagsProps) 
   if (!tags || tags.length === 0) return null
 
   return (
-    <div className={`flex flex-wrap items-center gap-2 ${className}`}>
-      <span className="text-sm font-semibold" style={{ color: 'var(--sm-text-muted)' }}>
+    <div
+      className={className}
+      style={{
+        display: 'flex',
+        flexWrap: 'wrap',
+        alignItems: 'center',
+        gap: '8px',
+      }}
+    >
+      <span
+        style={{
+          fontFamily: "'Inter', sans-serif",
+          fontSize: '13px',
+          fontWeight: 600,
+          color: 'var(--sm-text-muted)',
+        }}
+      >
         Tags:
       </span>
       {tags.map((tag) => (
         <Link
           key={tag}
           href={`/search?tag=${encodeURIComponent(tag)}`}
-          className="inline-flex items-center rounded-full px-3 py-1 text-sm font-medium transition-all hover:text-white"
+          className="sm-tag"
           style={{
-            color: 'var(--sm-accent)',
-            border: '1px solid color-mix(in srgb, var(--sm-accent) 30%, transparent)',
+            textDecoration: 'none',
+            transition: 'all 0.2s ease',
+            cursor: 'pointer',
           }}
           onMouseEnter={(e) => {
-            const el = e.currentTarget;
-            el.style.backgroundColor = 'var(--sm-accent)';
-            el.style.borderColor = 'var(--sm-accent)';
-            el.style.color = '#ffffff';
+            const el = e.currentTarget
+            el.style.background = 'var(--sm-red)'
+            el.style.color = '#ffffff'
+            el.style.borderColor = 'var(--sm-red)'
           }}
           onMouseLeave={(e) => {
-            const el = e.currentTarget;
-            el.style.backgroundColor = 'transparent';
-            el.style.borderColor = 'color-mix(in srgb, var(--sm-accent) 30%, transparent)';
-            el.style.color = 'var(--sm-accent)';
+            const el = e.currentTarget
+            el.style.background = ''
+            el.style.color = ''
+            el.style.borderColor = ''
           }}
         >
           <svg
-            className="mr-1.5 h-3 w-3"
+            width="12"
+            height="12"
             fill="none"
             viewBox="0 0 24 24"
             strokeWidth={2}

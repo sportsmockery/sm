@@ -150,7 +150,7 @@ export default async function BearsSchedulePage() {
           <div className="flex flex-wrap gap-6 justify-center text-center">
             <div>
               <div style={{ fontSize: '11px', color: 'var(--sm-text-muted)', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '4px' }}>Regular Season</div>
-              <div style={{ fontSize: '22px', fontWeight: 800, color: 'var(--sm-text)', fontFamily: "'Montserrat', sans-serif" }}>
+              <div style={{ fontSize: '22px', fontWeight: 800, color: 'var(--sm-text)', fontFamily: "'Space Grotesk', sans-serif" }}>
                 {separatedRecord.regularSeason.wins}-{separatedRecord.regularSeason.losses}
                 {separatedRecord.regularSeason.ties > 0 && `-${separatedRecord.regularSeason.ties}`}
               </div>
@@ -161,7 +161,7 @@ export default async function BearsSchedulePage() {
             {(separatedRecord.postseason.wins > 0 || separatedRecord.postseason.losses > 0) && (
               <div>
                 <div style={{ fontSize: '11px', color: 'var(--sm-text-muted)', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '4px' }}>Postseason</div>
-                <div style={{ fontSize: '22px', fontWeight: 800, color: '#C83200', fontFamily: "'Montserrat', sans-serif" }}>
+                <div style={{ fontSize: '22px', fontWeight: 800, color: '#C83200', fontFamily: "'Space Grotesk', sans-serif" }}>
                   {separatedRecord.postseason.wins}-{separatedRecord.postseason.losses}
                 </div>
               </div>
@@ -188,7 +188,7 @@ export default async function BearsSchedulePage() {
                 justifyContent: 'space-between',
               }}
             >
-              <h2 style={{ fontWeight: 700, color: 'var(--sm-text)', fontFamily: "'Montserrat', sans-serif" }}>
+              <h2 style={{ fontWeight: 700, color: 'var(--sm-text)', fontFamily: "'Space Grotesk', sans-serif" }}>
                 Chicago Bears 2025 Schedule
               </h2>
               <span style={{ fontSize: '14px', color: 'var(--sm-text-muted)' }}>

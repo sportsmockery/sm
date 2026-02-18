@@ -21,10 +21,16 @@ interface Post {
 
 interface PostCardProps {
   post: Post;
-  isMobile: boolean;
-  showImage: boolean;
   priority?: boolean;
 }
+
+const TEAM_DISPLAY_NAMES: Record<string, string> = {
+  bears: 'Bears',
+  bulls: 'Bulls',
+  blackhawks: 'Blackhawks',
+  cubs: 'Cubs',
+  'white-sox': 'White Sox',
+};
 
 function formatRecency(publishedAt: string): string {
   const date = new Date(publishedAt);
@@ -41,77 +47,66 @@ function formatRecency(publishedAt: string): string {
 
 function getContentTypeBadge(contentType: string): string | null {
   const badges: Record<string, string> = {
-    'video': 'VIDEO',
-    'analysis': 'ANALYSIS',
-    'podcast': 'PODCAST',
-    'gallery': 'GALLERY'
+    video: 'VIDEO',
+    analysis: 'ANALYSIS',
+    podcast: 'PODCAST',
+    gallery: 'GALLERY',
   };
   return badges[contentType] || null;
 }
 
-export function PostCard({ post, isMobile, showImage, priority = false }: PostCardProps) {
-  const contentBadge = getContentTypeBadge(post.content_type);
+export type { Post };
+
+export function PostCard({ post, priority = false }: PostCardProps) {
   const recencyLabel = formatRecency(post.published_at);
+  const teamName = post.team_slug
+    ? TEAM_DISPLAY_NAMES[post.team_slug] || post.team_slug.replace('-', ' ')
+    : null;
 
-  // Evergreen cards show small thumbnail, standard cards are text-only
-  if (post.is_evergreen && showImage) {
-    return (
-      <article className="post-card post-card--evergreen">
-        <Link href={`/${post.slug}`} className="post-card-link">
-          <div className="post-card-thumbnail">
-            {post.featured_image ? (
-              <Image
-                src={post.featured_image}
-                alt=""
-                width={80}
-                height={80}
-                className="post-card-thumb-image"
-                priority={priority}
-              />
-            ) : (
-              <div className="post-card-thumb-placeholder" />
-            )}
-          </div>
-          <div className="post-card-content">
-            <div className="post-card-meta-top">
-              {post.team_slug && (
-                <span className={`team-pill team-pill--${post.team_slug}`}>
-                  {post.team_slug.replace('-', ' ')}
-                </span>
-              )}
-              <span className="evergreen-badge">GUIDE</span>
-            </div>
-            <h3 className="post-card-title">{post.title}</h3>
-          </div>
-        </Link>
-      </article>
-    );
-  }
+  // Keep getContentTypeBadge available for future use
+  void getContentTypeBadge;
 
-  // Standard text-first card (no image)
   return (
-    <article className="post-card post-card--standard">
-      <Link href={`/${post.slug}`} className="post-card-link">
-        <div className="post-card-content">
-          <div className="post-card-meta-top">
-            {post.team_slug && (
-              <span className={`team-pill team-pill--${post.team_slug}`}>
-                {post.team_slug.replace('-', ' ')}
-              </span>
-            )}
-            {post.is_trending && (
-              <span className="trending-badge">TRENDING</span>
-            )}
-            {contentBadge && (
-              <span className="content-type-badge">{contentBadge}</span>
-            )}
-          </div>
-          <h3 className="post-card-title">{post.title}</h3>
-          <div className="post-card-meta-bottom">
-            {post.author_name && (
-              <span className="post-card-author">{post.author_name}</span>
-            )}
-            <span className="post-card-recency">{recencyLabel}</span>
+    <article className="glass-card feed-card">
+      <Link href={`/${post.slug}`}>
+        <div className="card-image">
+          {post.featured_image ? (
+            <Image
+              src={post.featured_image}
+              alt=""
+              fill
+              sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw"
+              priority={priority}
+            />
+          ) : (
+            <div className="card-placeholder" />
+          )}
+          {teamName && (
+            <span className="sm-tag card-team-pill">{teamName}</span>
+          )}
+          {post.is_trending && (
+            <span
+              className="sm-tag card-team-pill"
+              style={{
+                background: 'rgba(255,107,53,0.9)',
+                right: 12,
+                left: 'auto',
+                top: 12,
+                position: 'absolute',
+              }}
+            >
+              Trending
+            </span>
+          )}
+        </div>
+        <div className="card-body">
+          <h3>{post.title}</h3>
+          {post.excerpt && <p className="card-excerpt">{post.excerpt}</p>}
+          <div className="card-meta">
+            <div className="author-avatar" />
+            <span>
+              {post.author_name || 'Sports Mockery'} &middot; {recencyLabel}
+            </span>
           </div>
         </div>
       </Link>
