@@ -40,7 +40,7 @@ export default async function BearsHubPage() {
   ])
 
   return (
-    <div className="min-h-screen bg-[#f5f5f5] dark:bg-[#0a0a0b]">
+    <div className="min-h-screen" style={{ backgroundColor: 'var(--sm-dark)' }}>
       {/* Hero header */}
       <header
         className="relative py-12 md:py-16"
@@ -99,16 +99,17 @@ export default async function BearsHubPage() {
             <section>
               <div className="flex items-center justify-between mb-6">
                 <h2
-                  className="text-[18px] font-bold text-[#222] dark:text-white uppercase pb-2 border-b-[3px] border-[#bc0000]"
-                  style={{ fontFamily: "'Montserrat', sans-serif" }}
+                  className="text-[18px] font-bold uppercase pb-2"
+                  style={{ fontFamily: "'Montserrat', sans-serif", color: 'var(--sm-text)', borderBottom: '3px solid #bc0000' }}
                 >
                   Latest Bears News
                 </h2>
                 <Link
                   href="/chicago-bears"
-                  className="text-sm text-[#bc0000] hover:underline"
+                  className="text-sm hover:underline"
+                  style={{ color: '#bc0000' }}
                 >
-                  View All →
+                  View All &rarr;
                 </Link>
               </div>
 
@@ -116,9 +117,10 @@ export default async function BearsHubPage() {
                 {posts.slice(0, 6).map((post, index) => (
                   <article
                     key={post.id}
-                    className={`group bg-white dark:bg-[#111] rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-all ${
+                    className={`group rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-all ${
                       index === 0 ? 'md:col-span-2' : ''
                     }`}
+                    style={{ backgroundColor: 'var(--sm-card)' }}
                   >
                     <Link
                       href={`/${post.categorySlug}/${post.slug}`}
@@ -152,21 +154,21 @@ export default async function BearsHubPage() {
                           Bears
                         </span>
                         <h3
-                          className={`font-bold text-[#222] dark:text-white leading-tight group-hover:text-[#bc0000] transition-colors ${
+                          className={`font-bold leading-tight transition-colors ${
                             index === 0 ? 'text-[18px] md:text-[22px] line-clamp-3' : 'text-[15px] line-clamp-2'
                           }`}
-                          style={{ fontFamily: "'Montserrat', sans-serif" }}
+                          style={{ fontFamily: "'Montserrat', sans-serif", color: 'var(--sm-text)' }}
                         >
                           {post.title}
                         </h3>
                         {index === 0 && post.excerpt && (
-                          <p className="text-gray-500 dark:text-gray-400 text-sm mt-3 line-clamp-2">
+                          <p className="text-sm mt-3 line-clamp-2" style={{ color: 'var(--sm-text-muted)' }}>
                             {post.excerpt}
                           </p>
                         )}
-                        <div className="flex items-center gap-2 mt-3 text-[11px] text-gray-400">
+                        <div className="flex items-center gap-2 mt-3 text-[11px]" style={{ color: 'var(--sm-text-dim)' }}>
                           <span>{post.author.displayName}</span>
-                          <span>•</span>
+                          <span>&bull;</span>
                           <span>
                             {new Date(post.publishedAt).toLocaleDateString('en-US', {
                               month: 'short',

@@ -31,7 +31,7 @@ export default function BearsSubscribePage() {
 
   if (isSubmitted) {
     return (
-      <div className="min-h-screen bg-gradient-to-b from-zinc-900 to-zinc-800">
+      <div className="min-h-screen" style={{ backgroundColor: 'var(--sm-dark)' }}>
         <div className="mx-auto max-w-2xl px-4 py-20 text-center">
           <div
             className="mx-auto mb-8 flex h-24 w-24 items-center justify-center rounded-full"
@@ -41,10 +41,10 @@ export default function BearsSubscribePage() {
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
             </svg>
           </div>
-          <h1 className="mb-4 text-4xl font-black text-white" style={{ fontFamily: "'Montserrat', sans-serif" }}>
+          <h1 className="mb-4 text-4xl font-black" style={{ fontFamily: "'Montserrat', sans-serif", color: 'var(--sm-text)' }}>
             You're Subscribed!
           </h1>
-          <p className="mb-8 text-lg text-zinc-300">
+          <p className="mb-8 text-lg" style={{ color: 'var(--sm-text-muted)' }}>
             You'll receive Bears news, game updates, and breaking alerts directly to your inbox.
           </p>
           <Link
@@ -63,7 +63,7 @@ export default function BearsSubscribePage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-zinc-900 to-zinc-800">
+    <div className="min-h-screen" style={{ backgroundColor: 'var(--sm-dark)' }}>
       {/* Hero Section */}
       <div
         className="py-16"
@@ -89,10 +89,10 @@ export default function BearsSubscribePage() {
 
       {/* Subscribe Form */}
       <div className="mx-auto max-w-xl px-4 py-12">
-        <div className="rounded-2xl border border-zinc-700 bg-zinc-800/50 p-8">
+        <div className="rounded-2xl p-8" style={{ border: '1px solid var(--sm-border)', backgroundColor: 'var(--sm-card)' }}>
           <form onSubmit={handleSubmit} className="space-y-6">
             <div>
-              <label htmlFor="email" className="mb-2 block text-sm font-medium text-white">
+              <label htmlFor="email" className="mb-2 block text-sm font-medium" style={{ color: 'var(--sm-text)' }}>
                 Email Address
               </label>
               <input
@@ -102,12 +102,18 @@ export default function BearsSubscribePage() {
                 onChange={(e) => setEmail(e.target.value)}
                 required
                 placeholder="your@email.com"
-                className="w-full rounded-xl border border-zinc-600 bg-zinc-700 px-4 py-3 text-white placeholder-zinc-400 focus:border-[#C83200] focus:outline-none focus:ring-2 focus:ring-[#C83200]/20"
+                className="w-full px-4 py-3 focus:outline-none"
+                style={{
+                  backgroundColor: 'var(--sm-surface)',
+                  border: '1px solid var(--sm-border)',
+                  color: 'var(--sm-text)',
+                  borderRadius: '12px',
+                }}
               />
             </div>
 
             <div className="space-y-3">
-              <label className="mb-2 block text-sm font-medium text-white">
+              <label className="mb-2 block text-sm font-medium" style={{ color: 'var(--sm-text)' }}>
                 Alert Preferences
               </label>
               {[
@@ -118,23 +124,25 @@ export default function BearsSubscribePage() {
               ].map((pref) => (
                 <label
                   key={pref.id}
-                  className="flex cursor-pointer items-start gap-3 rounded-lg border border-zinc-600 bg-zinc-700/50 p-3 transition-colors hover:bg-zinc-700"
+                  className="flex cursor-pointer items-start gap-3 rounded-lg p-3 transition-colors"
+                  style={{ border: '1px solid var(--sm-border)', backgroundColor: 'var(--sm-surface)' }}
                 >
                   <input
                     type="checkbox"
                     defaultChecked
-                    className="mt-1 h-4 w-4 rounded border-zinc-500 text-[#C83200] focus:ring-[#C83200]"
+                    className="mt-1 h-4 w-4 rounded"
+                    style={{ accentColor: '#C83200' }}
                   />
                   <div>
-                    <div className="font-medium text-white">{pref.label}</div>
-                    <div className="text-sm text-zinc-400">{pref.desc}</div>
+                    <div className="font-medium" style={{ color: 'var(--sm-text)' }}>{pref.label}</div>
+                    <div className="text-sm" style={{ color: 'var(--sm-text-muted)' }}>{pref.desc}</div>
                   </div>
                 </label>
               ))}
             </div>
 
             {error && (
-              <div className="rounded-lg bg-red-900/20 border border-red-800 px-4 py-3 text-sm text-red-400">
+              <div className="rounded-lg px-4 py-3 text-sm" style={{ backgroundColor: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.3)', color: '#ef4444' }}>
                 {error}
               </div>
             )}
@@ -159,7 +167,7 @@ export default function BearsSubscribePage() {
             </button>
           </form>
 
-          <p className="mt-4 text-center text-xs text-zinc-500">
+          <p className="mt-4 text-center text-xs" style={{ color: 'var(--sm-text-dim)' }}>
             By subscribing, you agree to receive email updates from Sports Mockery. You can unsubscribe at any time.
           </p>
         </div>
@@ -197,15 +205,15 @@ export default function BearsSubscribePage() {
               desc: 'Hot takes and in-depth coverage you won\'t find anywhere else.',
             },
           ].map((feature, index) => (
-            <div key={index} className="rounded-xl border border-zinc-700 bg-zinc-800/30 p-6 text-center">
+            <div key={index} className="rounded-xl p-6 text-center" style={{ border: '1px solid var(--sm-border)', backgroundColor: 'var(--sm-card)' }}>
               <div
                 className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full text-white"
                 style={{ backgroundColor: bearsInfo.primaryColor }}
               >
                 {feature.icon}
               </div>
-              <h3 className="mb-2 font-bold text-white">{feature.title}</h3>
-              <p className="text-sm text-zinc-400">{feature.desc}</p>
+              <h3 className="mb-2 font-bold" style={{ color: 'var(--sm-text)' }}>{feature.title}</h3>
+              <p className="text-sm" style={{ color: 'var(--sm-text-muted)' }}>{feature.desc}</p>
             </div>
           ))}
         </div>

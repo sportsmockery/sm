@@ -40,11 +40,11 @@ export default async function StandingsPage({ params }: StandingsPageProps) {
     <main className="mx-auto max-w-7xl px-4 py-8">
       {/* Header */}
       <div className="mb-6">
-        <h1 className="text-2xl font-bold text-zinc-900 dark:text-white">
+        <h1 className="text-2xl font-bold" style={{ color: 'var(--sm-text)' }}>
           {team.division} Standings
         </h1>
         {position && (
-          <p className="text-zinc-500 dark:text-zinc-400">
+          <p style={{ color: 'var(--sm-text-muted)' }}>
             {team.shortName} are currently {position === 1 ? '1st' : position === 2 ? '2nd' : position === 3 ? '3rd' : `${position}th`} in the {team.division}
           </p>
         )}
@@ -58,8 +58,8 @@ export default async function StandingsPage({ params }: StandingsPageProps) {
           showConference
         />
       ) : (
-        <div className="rounded-xl border border-zinc-200 bg-white p-8 text-center dark:border-zinc-800 dark:bg-zinc-900">
-          <p className="text-zinc-500 dark:text-zinc-400">
+        <div className="rounded-xl p-8 text-center" style={{ border: '1px solid var(--sm-border)', backgroundColor: 'var(--sm-card)' }}>
+          <p style={{ color: 'var(--sm-text-muted)' }}>
             Standings data is not available at this time.
           </p>
         </div>
@@ -68,11 +68,11 @@ export default async function StandingsPage({ params }: StandingsPageProps) {
       {/* Playoff Picture - placeholder for now */}
       {team.sport === 'nfl' && (
         <section className="mt-8">
-          <h2 className="mb-4 text-lg font-bold text-zinc-900 dark:text-white">
+          <h2 className="mb-4 text-lg font-bold" style={{ color: 'var(--sm-text)' }}>
             Playoff Picture
           </h2>
-          <div className="rounded-xl border border-zinc-200 bg-white p-6 dark:border-zinc-800 dark:bg-zinc-900">
-            <p className="text-sm text-zinc-500 dark:text-zinc-400">
+          <div className="rounded-xl p-6" style={{ border: '1px solid var(--sm-border)', backgroundColor: 'var(--sm-card)' }}>
+            <p className="text-sm" style={{ color: 'var(--sm-text-muted)' }}>
               Playoff scenarios and wild card standings will be displayed here as the season progresses.
             </p>
           </div>

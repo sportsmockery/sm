@@ -36,8 +36,8 @@ export default function ReadingProgressBar({
       style={{ top: `${headerHeight}px` }}
     >
       <div
-        className="h-full bg-[#bc0000] transition-all duration-100 ease-out"
-        style={{ width: `${progress}%` }}
+        className="h-full transition-all duration-100 ease-out"
+        style={{ width: `${progress}%`, backgroundColor: 'var(--sm-accent)' }}
       />
     </div>
   )

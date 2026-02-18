@@ -32,13 +32,13 @@ export default function ArticleList({
       {title && (
         <div className="mb-4 flex items-center gap-3">
           <div className="h-6 w-1 rounded-full bg-gradient-to-b from-[#8B0000] to-[#FF0000]" />
-          <h3 className="font-heading text-lg font-bold text-zinc-900 dark:text-white">
+          <h3 className="font-heading text-lg font-bold" style={{ color: 'var(--sm-text)' }}>
             {title}
           </h3>
         </div>
       )}
 
-      <div className="divide-y divide-zinc-100 dark:divide-zinc-800">
+      <div className="divide-y" style={{ borderColor: 'var(--sm-border)' }}>
         {articles.map((article, index) => (
           <ArticleCardCompact
             key={article.id}

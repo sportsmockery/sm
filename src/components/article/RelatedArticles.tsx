@@ -33,9 +33,10 @@ export default function RelatedArticles({
 
   return (
     <section className={className}>
-      <h2 className="mb-6 flex items-center gap-2 font-heading text-2xl font-bold text-zinc-900 dark:text-white">
+      <h2 className="mb-6 flex items-center gap-2 font-heading text-2xl font-bold" style={{ color: 'var(--sm-text)' }}>
         <svg
-          className="h-6 w-6 text-[#8B0000] dark:text-[#FF6666]"
+          className="h-6 w-6"
+          style={{ color: 'var(--sm-accent)' }}
           fill="none"
           viewBox="0 0 24 24"
           strokeWidth={2}

@@ -167,7 +167,7 @@ export default function ImageGallery({ images, className = '' }: ImageGalleryPro
             />
             {/* Caption */}
             {images[currentIndex].caption && (
-              <p className="mt-4 text-center text-sm text-zinc-400">
+              <p className="mt-4 text-center text-sm" style={{ color: 'var(--sm-text-muted)' }}>
                 {images[currentIndex].caption}
               </p>
             )}
@@ -219,7 +219,7 @@ export default function ImageGallery({ images, className = '' }: ImageGalleryPro
           )}
 
           {/* Counter */}
-          <div className="absolute bottom-8 right-4 text-sm text-zinc-400">
+          <div className="absolute bottom-8 right-4 text-sm" style={{ color: 'var(--sm-text-muted)' }}>
             {currentIndex + 1} / {images.length}
           </div>
         </div>

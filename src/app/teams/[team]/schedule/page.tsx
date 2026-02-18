@@ -57,11 +57,11 @@ export default async function SchedulePage({ params, searchParams }: SchedulePag
       {/* Header */}
       <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-zinc-900 dark:text-white">
+          <h1 className="text-2xl font-bold" style={{ color: 'var(--sm-text)' }}>
             {team.shortName} Schedule
           </h1>
-          <p className="text-zinc-500 dark:text-zinc-400">
-            {wins}-{losses}{ties > 0 ? `-${ties}` : ''} • {schedule.filter(g => g.status === 'final').length} games played
+          <p style={{ color: 'var(--sm-text-muted)' }}>
+            {wins}-{losses}{ties > 0 ? `-${ties}` : ''} &bull; {schedule.filter(g => g.status === 'final').length} games played
           </p>
         </div>
 
@@ -71,7 +71,7 @@ export default async function SchedulePage({ params, searchParams }: SchedulePag
       </div>
 
       {/* Filter tabs */}
-      <div className="mb-6 flex gap-1 rounded-lg bg-zinc-100 p-1 dark:bg-zinc-800 w-fit">
+      <div className="mb-6 flex gap-1 rounded-lg p-1 w-fit" style={{ backgroundColor: 'var(--sm-surface)' }}>
         {[
           { label: 'All Games', value: '' },
           { label: 'Home', value: 'home' },
@@ -80,13 +80,12 @@ export default async function SchedulePage({ params, searchParams }: SchedulePag
           <a
             key={tab.value}
             href={tab.value ? `?filter=${tab.value}` : '?'}
-            className={`
-              rounded-md px-3 py-1.5 text-sm font-medium transition-colors
-              ${(filter || '') === tab.value
-                ? 'bg-white text-zinc-900 shadow dark:bg-zinc-700 dark:text-white'
-                : 'text-zinc-600 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-white'
-              }
-            `}
+            className="rounded-md px-3 py-1.5 text-sm font-medium transition-colors"
+            style={
+              (filter || '') === tab.value
+                ? { backgroundColor: 'var(--sm-card)', color: 'var(--sm-text)', boxShadow: '0 1px 2px rgba(0,0,0,0.1)' }
+                : { color: 'var(--sm-text-muted)' }
+            }
           >
             {tab.label}
           </a>

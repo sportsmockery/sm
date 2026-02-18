@@ -10,14 +10,30 @@ export default function ArticleTags({ tags, className = '' }: ArticleTagsProps) 
 
   return (
     <div className={`flex flex-wrap items-center gap-2 ${className}`}>
-      <span className="text-sm font-semibold text-zinc-500 dark:text-zinc-400">
+      <span className="text-sm font-semibold" style={{ color: 'var(--sm-text-muted)' }}>
         Tags:
       </span>
       {tags.map((tag) => (
         <Link
           key={tag}
           href={`/search?tag=${encodeURIComponent(tag)}`}
-          className="inline-flex items-center rounded-full border border-[#8B0000]/30 px-3 py-1 text-sm font-medium text-[#8B0000] transition-all hover:border-[#8B0000] hover:bg-[#8B0000] hover:text-white dark:border-[#FF6666]/30 dark:text-[#FF6666] dark:hover:border-[#FF6666] dark:hover:bg-[#FF6666] dark:hover:text-white"
+          className="inline-flex items-center rounded-full px-3 py-1 text-sm font-medium transition-all hover:text-white"
+          style={{
+            color: 'var(--sm-accent)',
+            border: '1px solid color-mix(in srgb, var(--sm-accent) 30%, transparent)',
+          }}
+          onMouseEnter={(e) => {
+            const el = e.currentTarget;
+            el.style.backgroundColor = 'var(--sm-accent)';
+            el.style.borderColor = 'var(--sm-accent)';
+            el.style.color = '#ffffff';
+          }}
+          onMouseLeave={(e) => {
+            const el = e.currentTarget;
+            el.style.backgroundColor = 'transparent';
+            el.style.borderColor = 'color-mix(in srgb, var(--sm-accent) 30%, transparent)';
+            el.style.color = 'var(--sm-accent)';
+          }}
         >
           <svg
             className="mr-1.5 h-3 w-3"

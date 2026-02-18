@@ -36,11 +36,12 @@ export default function ReaderModeToggle({ className = '' }: ReaderModeTogglePro
   return (
     <button
       onClick={() => setIsReaderMode(!isReaderMode)}
-      className={`flex items-center gap-2 px-3 py-1.5 text-sm rounded-md transition-colors ${
+      className={`flex items-center gap-2 px-3 py-1.5 text-sm rounded-md transition-colors hover:brightness-95 dark:hover:brightness-110 ${className}`}
+      style={
         isReaderMode
-          ? 'bg-[#bc0000] text-white'
-          : 'bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-300 hover:bg-zinc-200 dark:hover:bg-zinc-700'
-      } ${className}`}
+          ? { backgroundColor: '#bc0000', color: '#ffffff' }
+          : { backgroundColor: 'var(--sm-surface)', color: 'var(--sm-text-muted)' }
+      }
       aria-pressed={isReaderMode}
       title={isReaderMode ? 'Exit reader mode' : 'Enter reader mode'}
     >

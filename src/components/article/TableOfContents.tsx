@@ -82,9 +82,10 @@ export default function TableOfContents({
 
   return (
     <nav
-      className={`sticky top-24 rounded-2xl border border-zinc-200 bg-white p-5 dark:border-zinc-800 dark:bg-zinc-900 ${className}`}
+      className={`sticky top-24 rounded-2xl p-5 ${className}`}
+      style={{ backgroundColor: 'var(--sm-card)', border: '1px solid var(--sm-border)' }}
     >
-      <h3 className="mb-4 flex items-center gap-2 font-heading text-sm font-bold uppercase tracking-wider text-zinc-900 dark:text-white">
+      <h3 className="mb-4 flex items-center gap-2 font-heading text-sm font-bold uppercase tracking-wider" style={{ color: 'var(--sm-text)' }}>
         <svg
           className="h-4 w-4"
           fill="none"
@@ -109,11 +110,12 @@ export default function TableOfContents({
           >
             <button
               onClick={() => handleClick(heading.id)}
-              className={`w-full text-left text-sm transition-colors ${
+              className="w-full text-left text-sm transition-colors"
+              style={
                 activeId === heading.id
-                  ? 'font-medium text-[#8B0000] dark:text-[#FF6666]'
-                  : 'text-zinc-600 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-white'
-              }`}
+                  ? { color: 'var(--sm-accent)', fontWeight: 500 }
+                  : { color: 'var(--sm-text-muted)' }
+              }
             >
               <span className="line-clamp-2">{heading.text}</span>
             </button>

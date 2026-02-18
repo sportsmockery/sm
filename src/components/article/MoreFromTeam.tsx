@@ -33,16 +33,16 @@ export default function MoreFromTeam({
   }
 
   return (
-    <section className={`bg-white dark:bg-[#111] rounded-xl overflow-hidden ${className}`}>
+    <section className={`rounded-xl overflow-hidden ${className}`} style={{ backgroundColor: 'var(--sm-card)' }}>
       {/* Header */}
       <div
-        className="px-6 py-4 border-b border-gray-100 dark:border-gray-800"
-        style={{ borderLeftColor: teamInfo.secondaryColor, borderLeftWidth: '4px' }}
+        className="px-6 py-4"
+        style={{ borderBottom: '1px solid var(--sm-border)', borderLeftColor: teamInfo.secondaryColor, borderLeftWidth: '4px', borderLeftStyle: 'solid' }}
       >
         <div className="flex items-center justify-between">
           <h3
-            className="text-[16px] font-bold text-[#222] dark:text-white uppercase"
-            style={{ fontFamily: "'Montserrat', sans-serif" }}
+            className="text-[16px] font-bold uppercase"
+            style={{ fontFamily: "'Montserrat', sans-serif", color: 'var(--sm-text)' }}
           >
             More {teamInfo.shortName} News
           </h3>
@@ -57,7 +57,7 @@ export default function MoreFromTeam({
       </div>
 
       {/* Posts list */}
-      <div className="divide-y divide-gray-100 dark:divide-gray-800">
+      <div className="divide-y" style={{ borderColor: 'var(--sm-border)' }}>
         {relatedPosts.map((post) => (
           <RelatedPostCard key={post.id} post={post} teamColor={teamInfo.secondaryColor} />
         ))}
@@ -79,7 +79,7 @@ function RelatedPostCard({
   return (
     <Link
       href={`/${post.categorySlug}/${post.slug}`}
-      className="group flex gap-4 p-4 hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors"
+      className="group flex gap-4 p-4 transition-colors hover:brightness-95 dark:hover:brightness-110"
     >
       {/* Thumbnail */}
       <div className="relative w-24 h-16 flex-shrink-0 overflow-hidden rounded">
@@ -98,12 +98,12 @@ function RelatedPostCard({
       {/* Content */}
       <div className="flex-1 min-w-0">
         <h4
-          className="text-[14px] font-semibold text-[#222] dark:text-white leading-tight line-clamp-2 group-hover:text-[#bc0000] transition-colors"
-          style={{ fontFamily: "'Montserrat', sans-serif" }}
+          className="text-[14px] font-semibold leading-tight line-clamp-2 transition-colors"
+          style={{ fontFamily: "'Montserrat', sans-serif", color: 'var(--sm-text)' }}
         >
           {post.title}
         </h4>
-        <p className="text-[11px] text-gray-400 mt-1">
+        <p className="text-[11px] mt-1" style={{ color: 'var(--sm-text-muted)' }}>
           {new Date(post.publishedAt).toLocaleDateString('en-US', {
             month: 'short',
             day: 'numeric',

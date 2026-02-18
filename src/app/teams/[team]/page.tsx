@@ -67,10 +67,10 @@ export default async function TeamOverviewPage({ params }: TeamPageProps) {
 
     if (team.sport === 'nfl') {
       return [
-        { label: 'PPG', value: offense.pointsPerGame || '—' },
-        { label: 'YPG', value: offense.yardsPerGame || '—' },
-        { label: 'Opp PPG', value: defense.pointsAllowed || '—' },
-        { label: 'Sacks', value: defense.sacks || '—' },
+        { label: 'PPG', value: offense.pointsPerGame || '--' },
+        { label: 'YPG', value: offense.yardsPerGame || '--' },
+        { label: 'Opp PPG', value: defense.pointsAllowed || '--' },
+        { label: 'Sacks', value: defense.sacks || '--' },
       ];
     }
     return [];
@@ -89,12 +89,13 @@ export default async function TeamOverviewPage({ params }: TeamPageProps) {
               {keyStats.map((stat) => (
                 <div
                   key={stat.label}
-                  className="rounded-xl border border-zinc-200 bg-white p-4 text-center dark:border-zinc-800 dark:bg-zinc-900"
+                  className="rounded-xl p-4 text-center"
+                  style={{ border: '1px solid var(--sm-border)', backgroundColor: 'var(--sm-card)' }}
                 >
-                  <p className="text-2xl font-bold text-zinc-900 dark:text-white">
+                  <p className="text-2xl font-bold" style={{ color: 'var(--sm-text)' }}>
                     {stat.value}
                   </p>
-                  <p className="text-sm text-zinc-500 dark:text-zinc-400">{stat.label}</p>
+                  <p className="text-sm" style={{ color: 'var(--sm-text-muted)' }}>{stat.label}</p>
                 </div>
               ))}
             </div>
@@ -103,7 +104,7 @@ export default async function TeamOverviewPage({ params }: TeamPageProps) {
           {/* Standings Preview */}
           {standings.length > 0 && (
             <section>
-              <h2 className="mb-4 text-lg font-bold text-zinc-900 dark:text-white">
+              <h2 className="mb-4 text-lg font-bold" style={{ color: 'var(--sm-text)' }}>
                 {team.division} Standings
               </h2>
               <StandingsTable standings={standings} currentTeam={team} />

@@ -28,7 +28,8 @@ export default function ArticleCardCompact({
 }: ArticleCardCompactProps) {
   return (
     <article
-      className={`group flex gap-3 rounded-lg p-2 transition-colors hover:bg-zinc-100 dark:hover:bg-zinc-800/50 ${className}`}
+      className={`group flex gap-3 rounded-lg p-2 transition-colors hover:brightness-95 dark:hover:brightness-110 ${className}`}
+      style={{ backgroundColor: 'transparent' }}
     >
       {/* Number for rankings */}
       {showNumber && typeof index === 'number' && (
@@ -52,8 +53,11 @@ export default function ArticleCardCompact({
             sizes="96px"
           />
         ) : (
-          <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-zinc-200 to-zinc-300 dark:from-zinc-800 dark:to-zinc-900">
-            <span className="text-xs font-black text-zinc-400 dark:text-zinc-600">SM</span>
+          <div
+            className="flex h-full w-full items-center justify-center"
+            style={{ background: 'linear-gradient(to bottom right, var(--sm-surface), var(--sm-border))' }}
+          >
+            <span className="text-xs font-black" style={{ color: 'var(--sm-text-dim)' }}>SM</span>
           </div>
         )}
       </Link>
@@ -61,14 +65,18 @@ export default function ArticleCardCompact({
       {/* Content */}
       <div className="flex min-w-0 flex-1 flex-col justify-center">
         {/* Title */}
-        <h4 className="line-clamp-2 text-sm font-semibold leading-tight text-zinc-900 transition-colors group-hover:text-[#8B0000] dark:text-white dark:group-hover:text-[#FF6666]">
-          <Link href={`/${category.slug}/${slug}`}>{title}</Link>
+        <h4
+          className="line-clamp-2 text-sm font-semibold leading-tight transition-colors"
+          style={{ color: 'var(--sm-text)' }}
+        >
+          <Link href={`/${category.slug}/${slug}`} className="hover:text-[var(--sm-accent)]">{title}</Link>
         </h4>
 
         {/* Date */}
         <time
           dateTime={publishedAt}
-          className="mt-1 text-xs text-zinc-500 dark:text-zinc-500"
+          className="mt-1 text-xs"
+          style={{ color: 'var(--sm-text-muted)' }}
         >
           {format(new Date(publishedAt), 'MMM d, yyyy')}
         </time>

@@ -54,10 +54,10 @@ export default async function StatsPage({ params, searchParams }: StatsPageProps
       {/* Header */}
       <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-zinc-900 dark:text-white">
+          <h1 className="text-2xl font-bold" style={{ color: 'var(--sm-text)' }}>
             {team.shortName} Stats
           </h1>
-          <p className="text-zinc-500 dark:text-zinc-400">
+          <p style={{ color: 'var(--sm-text-muted)' }}>
             {stats.season} Season Statistics
           </p>
         </div>
@@ -71,7 +71,7 @@ export default async function StatsPage({ params, searchParams }: StatsPageProps
       {/* Stat Leaders */}
       {statLeaders.length > 0 && (
         <section className="mt-8">
-          <h2 className="mb-4 text-lg font-bold text-zinc-900 dark:text-white">
+          <h2 className="mb-4 text-lg font-bold" style={{ color: 'var(--sm-text)' }}>
             Team Leaders
           </h2>
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
@@ -79,9 +79,10 @@ export default async function StatsPage({ params, searchParams }: StatsPageProps
               <Link
                 key={leader.category}
                 href={`/players/${leader.player?.slug}`}
-                className="flex items-center gap-4 rounded-xl border border-zinc-200 bg-white p-4 transition-colors hover:border-zinc-300 dark:border-zinc-800 dark:bg-zinc-900 dark:hover:border-zinc-700"
+                className="flex items-center gap-4 rounded-xl p-4 transition-colors"
+                style={{ border: '1px solid var(--sm-border)', backgroundColor: 'var(--sm-card)' }}
               >
-                <div className="relative h-12 w-12 flex-shrink-0 overflow-hidden rounded-full bg-zinc-100 dark:bg-zinc-800">
+                <div className="relative h-12 w-12 flex-shrink-0 overflow-hidden rounded-full" style={{ backgroundColor: 'var(--sm-surface)' }}>
                   {leader.player && (
                     <Image
                       src={leader.player.headshot}
@@ -92,15 +93,15 @@ export default async function StatsPage({ params, searchParams }: StatsPageProps
                   )}
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className="text-xs font-medium uppercase text-zinc-500 dark:text-zinc-400">
+                  <p className="text-xs font-medium uppercase" style={{ color: 'var(--sm-text-muted)' }}>
                     {leader.category}
                   </p>
-                  <p className="font-semibold text-zinc-900 dark:text-white truncate">
+                  <p className="font-semibold truncate" style={{ color: 'var(--sm-text)' }}>
                     {leader.player?.name}
                   </p>
                 </div>
                 <div className="text-right">
-                  <p className="text-xl font-bold text-zinc-900 dark:text-white">
+                  <p className="text-xl font-bold" style={{ color: 'var(--sm-text)' }}>
                     {leader.value}
                   </p>
                 </div>

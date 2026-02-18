@@ -17,7 +17,8 @@ export default function ArticleMeta({
 }: ArticleMetaProps) {
   return (
     <div
-      className={`flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-zinc-500 dark:text-zinc-500 ${className}`}
+      className={`flex flex-wrap items-center gap-x-3 gap-y-1 text-sm ${className}`}
+      style={{ color: 'var(--sm-text-muted)' }}
     >
       {/* Date */}
       <time dateTime={publishedAt}>
@@ -27,7 +28,7 @@ export default function ArticleMeta({
       {/* Reading time */}
       {content && (
         <>
-          <span className="text-zinc-300 dark:text-zinc-700">•</span>
+          <span style={{ color: 'var(--sm-text-dim)' }}>•</span>
           <ReadingTime content={content} />
         </>
       )}
@@ -35,7 +36,7 @@ export default function ArticleMeta({
       {/* View count */}
       {typeof viewCount === 'number' && (
         <>
-          <span className="text-zinc-300 dark:text-zinc-700">•</span>
+          <span style={{ color: 'var(--sm-text-dim)' }}>•</span>
           <ViewCount count={viewCount} animate={false} />
         </>
       )}

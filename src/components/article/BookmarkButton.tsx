@@ -55,11 +55,12 @@ export default function BookmarkButton({
   return (
     <button
       onClick={handleToggleBookmark}
-      className={`group flex items-center justify-center rounded-full transition-all ${
+      className={`group flex items-center justify-center rounded-full transition-all hover:brightness-95 dark:hover:brightness-110 ${sizeClasses[size]} ${isAnimating ? 'scale-110' : ''} ${className}`}
+      style={
         isBookmarked
-          ? 'bg-[#8B0000] text-white hover:bg-[#6d0000]'
-          : 'bg-zinc-100 text-zinc-600 hover:bg-zinc-200 dark:bg-zinc-800 dark:text-zinc-400 dark:hover:bg-zinc-700'
-      } ${sizeClasses[size]} ${isAnimating ? 'scale-110' : ''} ${className}`}
+          ? { backgroundColor: '#8B0000', color: '#ffffff' }
+          : { backgroundColor: 'var(--sm-surface)', color: 'var(--sm-text-muted)' }
+      }
       aria-label={isBookmarked ? 'Remove bookmark' : 'Add bookmark'}
     >
       <svg

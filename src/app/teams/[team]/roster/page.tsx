@@ -41,11 +41,11 @@ export default async function RosterPage({ params }: RosterPageProps) {
     <main className="mx-auto max-w-7xl px-4 py-8">
       {/* Header */}
       <div className="mb-6">
-        <h1 className="text-2xl font-bold text-zinc-900 dark:text-white">
+        <h1 className="text-2xl font-bold" style={{ color: 'var(--sm-text)' }}>
           {team.shortName} Roster
         </h1>
-        <p className="text-zinc-500 dark:text-zinc-400">
-          {roster.length} players • {offenseCount} offense, {defenseCount} defense, {specialCount} special teams
+        <p style={{ color: 'var(--sm-text-muted)' }}>
+          {roster.length} players &bull; {offenseCount} offense, {defenseCount} defense, {specialCount} special teams
         </p>
       </div>
 
