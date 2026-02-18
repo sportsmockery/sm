@@ -73,11 +73,12 @@ export default function ReactionButtons({
           <button
             key={key}
             onClick={() => handleReaction(key)}
-            className={`flex items-center rounded-full transition-all ${sizeClasses[size]} ${
+            className={`flex items-center rounded-full transition-all ${sizeClasses[size]} ${isAnimating ? 'scale-110' : ''}`}
+            style={
               isActive
-                ? 'bg-[#8B0000]/10 ring-2 ring-[#8B0000]/30 dark:bg-[#8B0000]/20'
-                : 'bg-zinc-100 hover:bg-zinc-200 dark:bg-zinc-800 dark:hover:bg-zinc-700'
-            } ${isAnimating ? 'scale-110' : ''}`}
+                ? { backgroundColor: 'color-mix(in srgb, var(--sm-accent) 10%, transparent)', boxShadow: '0 0 0 2px color-mix(in srgb, var(--sm-accent) 30%, transparent)' }
+                : { backgroundColor: 'var(--sm-surface)' }
+            }
             aria-label={label}
           >
             <span
@@ -88,11 +89,8 @@ export default function ReactionButtons({
               {emoji}
             </span>
             <span
-              className={`font-medium ${
-                isActive
-                  ? 'text-[#8B0000] dark:text-[#FF6666]'
-                  : 'text-zinc-600 dark:text-zinc-400'
-              }`}
+              className="font-medium"
+              style={{ color: isActive ? 'var(--sm-accent)' : 'var(--sm-text-muted)' }}
             >
               {counts[key]}
             </span>
