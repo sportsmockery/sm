@@ -39,10 +39,10 @@ export default async function PlayerGameLogPage({ params, searchParams }: GameLo
   const losses = gameLog.filter((g) => g.result === 'L').length;
 
   return (
-    <main className="mx-auto max-w-7xl px-4 py-8">
+    <main style={{ maxWidth: 'var(--container-xl)', margin: '0 auto', padding: '32px 16px' }}>
       <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="text-2xl font-bold" style={{ color: 'var(--sm-text)' }}>
+          <h1 style={{ fontSize: 'var(--text-2xl)', fontWeight: 700, color: 'var(--sm-text)' }}>
             Game Log
           </h1>
           <p style={{ color: 'var(--sm-text-muted)' }}>
@@ -56,7 +56,7 @@ export default async function PlayerGameLogPage({ params, searchParams }: GameLo
       {gameLog.length > 0 ? (
         <PlayerGameLog gameLog={gameLog} player={player} />
       ) : (
-        <div className="rounded-xl p-8 text-center" style={{ border: '1px solid var(--sm-border)', backgroundColor: 'var(--sm-card)' }}>
+        <div className="glass-card" style={{ padding: '32px', textAlign: 'center' }}>
           <p style={{ color: 'var(--sm-text-muted)' }}>
             No game log available for {player.name}.
           </p>

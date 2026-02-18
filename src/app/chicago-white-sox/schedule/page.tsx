@@ -46,30 +46,12 @@ export default async function WhiteSoxSchedulePage() {
         {/* Next Game Highlight */}
         {nextScheduledGame && (
           <div
-            style={{
-              marginBottom: '24px',
-              padding: '20px',
-              borderRadius: 'var(--sm-radius-lg)',
-              backgroundColor: 'var(--sm-card)',
-              border: '1px solid var(--sm-border)',
-              borderLeft: '4px solid #27251F',
-            }}
+            className="glass-card glass-card-sm glass-card-static"
+            style={{ marginBottom: '24px', borderLeft: '4px solid var(--sm-red)' }}
           >
             <div className="flex items-center justify-between gap-4">
               <div className="flex items-center gap-3">
-                <span
-                  style={{
-                    padding: '4px 12px',
-                    backgroundColor: 'rgba(39, 37, 31, 0.1)',
-                    color: '#27251F',
-                    fontSize: '11px',
-                    fontWeight: 700,
-                    borderRadius: '100px',
-                    letterSpacing: '0.5px',
-                  }}
-                >
-                  UP NEXT
-                </span>
+                <span className="sm-tag">UP NEXT</span>
                 <div className="flex items-center gap-2">
                   {nextScheduledGame.opponentLogo && (
                     <Image
@@ -99,15 +81,7 @@ export default async function WhiteSoxSchedulePage() {
         )}
 
         {/* Record Summary */}
-        <div
-          style={{
-            marginBottom: '24px',
-            padding: '20px',
-            borderRadius: 'var(--sm-radius-lg)',
-            backgroundColor: 'var(--sm-card)',
-            border: '1px solid var(--sm-border)',
-          }}
-        >
+        <div className="glass-card glass-card-sm glass-card-static" style={{ marginBottom: '24px' }}>
           <div className="flex flex-wrap gap-6 justify-center text-center">
             <div>
               <div style={{ fontSize: '11px', color: 'var(--sm-text-muted)', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '4px' }}>2025 Season</div>
@@ -119,14 +93,7 @@ export default async function WhiteSoxSchedulePage() {
         </div>
 
         {/* All Games */}
-        <div
-          style={{
-            backgroundColor: 'var(--sm-card)',
-            border: '1px solid var(--sm-border)',
-            borderRadius: 'var(--sm-radius-xl)',
-            overflow: 'hidden',
-          }}
-        >
+        <div className="glass-card glass-card-static" style={{ overflow: 'hidden', padding: 0 }}>
           <div
             style={{
               padding: '16px 20px',
@@ -161,7 +128,7 @@ function GameRow({ game }: { game: WhiteSoxGame }) {
 
   const borderColor = isPast
     ? game.result === 'W' ? '#10b981' : '#ef4444'
-    : '#27251F'
+    : 'var(--sm-red)'
 
   return (
     <div
@@ -242,7 +209,7 @@ function GameRow({ game }: { game: WhiteSoxGame }) {
                 style={{
                   padding: '2px 8px',
                   backgroundColor: 'rgba(39, 37, 31, 0.1)',
-                  color: '#27251F',
+                  color: 'var(--sm-red)',
                   borderRadius: '100px',
                   fontSize: '11px',
                   fontWeight: 600,

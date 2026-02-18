@@ -32,16 +32,14 @@ export default function PollResults({
     if (option.team_tag) {
       return getTeamColors(option.team_tag).primary
     }
-    // Use team color variants
-    const opacity = 1 - (index * 0.15)
     return teamColors.primary
   }
 
   // Emoji poll results
   if (pollType === 'emoji') {
     return (
-      <div className="space-y-4">
-        <div className="flex flex-wrap gap-4 justify-center">
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 16, justifyContent: 'center' }}>
           {options.map((option, index) => {
             const percentage = totalVotes > 0 ? Math.round(((option.vote_count || 0) / totalVotes) * 100) : 0
             const isWinner = showWinner && winningOptions.some(w => w.id === option.id)
@@ -53,32 +51,52 @@ export default function PollResults({
                 initial={{ scale: 0.8, opacity: 0 }}
                 animate={{ scale: 1, opacity: 1 }}
                 transition={{ delay: index * 0.1, duration: 0.3 }}
-                className={`relative flex flex-col items-center p-4 rounded-xl ${
-                  isWinner ? 'bg-amber-50 dark:bg-amber-900/20 ring-2 ring-amber-400' :
-                  isUserVote ? 'bg-gray-100 dark:bg-gray-800' : ''
-                }`}
+                style={{
+                  position: 'relative',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'center',
+                  padding: 16,
+                  borderRadius: 'var(--sm-radius-md)',
+                  background: isWinner
+                    ? 'rgba(245, 158, 11, 0.1)'
+                    : isUserVote
+                      ? 'var(--sm-surface)'
+                      : 'transparent',
+                  border: isWinner ? '2px solid rgba(245, 158, 11, 0.4)' : '2px solid transparent',
+                }}
               >
-                <span className="text-4xl mb-2">{option.emoji || option.option_text}</span>
+                <span style={{ fontSize: 36, marginBottom: 8 }}>{option.emoji || option.option_text}</span>
                 <motion.div
                   initial={{ width: 0 }}
                   animate={{ width: '100%' }}
                   transition={{ duration: 0.5, delay: index * 0.1 }}
-                  className="text-center"
+                  style={{ textAlign: 'center' }}
                 >
-                  <span className="text-lg font-bold" style={{ color: teamColors.primary }}>
+                  <span style={{ fontSize: 18, fontWeight: 800, color: teamColors.primary }}>
                     {percentage}%
                   </span>
-                  <span className="block text-xs text-gray-500 dark:text-gray-400">
+                  <span style={{ display: 'block', fontSize: 12, color: 'var(--sm-text-muted)' }}>
                     {(option.vote_count || 0).toLocaleString()}
                   </span>
                 </motion.div>
                 {isUserVote && (
-                  <span className="absolute -top-1 -right-1 text-xs bg-purple-500 text-white px-1.5 py-0.5 rounded-full">
+                  <span style={{
+                    position: 'absolute',
+                    top: -4,
+                    right: -4,
+                    fontSize: 11,
+                    padding: '2px 8px',
+                    borderRadius: 'var(--sm-radius-pill)',
+                    background: 'var(--sm-red)',
+                    color: '#fff',
+                    fontWeight: 700,
+                  }}>
                     You
                   </span>
                 )}
                 {isWinner && (
-                  <span className="absolute -top-1 -left-1 text-sm">🏆</span>
+                  <span style={{ position: 'absolute', top: -4, left: -4, fontSize: 14 }}>🏆</span>
                 )}
               </motion.div>
             )
@@ -86,8 +104,8 @@ export default function PollResults({
         </div>
 
         {/* Total votes */}
-        <div className="pt-3 mt-3 border-t border-gray-200 dark:border-gray-700 text-center">
-          <span className="text-sm text-gray-500 dark:text-gray-400">
+        <div style={{ paddingTop: 12, marginTop: 12, borderTop: '1px solid var(--sm-border)', textAlign: 'center' }}>
+          <span style={{ fontSize: 13, color: 'var(--sm-text-muted)' }}>
             {totalVotes.toLocaleString()} total {totalVotes === 1 ? 'vote' : 'votes'}
           </span>
         </div>
@@ -102,50 +120,72 @@ export default function PollResults({
       : 0
 
     return (
-      <div className="space-y-4">
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
         {/* Average score display */}
-        <div className="text-center py-4">
+        <div style={{ textAlign: 'center', padding: 16 }}>
           <motion.div
             initial={{ scale: 0 }}
             animate={{ scale: 1 }}
             transition={{ type: 'spring', bounce: 0.5 }}
-            className="inline-flex items-center justify-center w-20 h-20 rounded-full text-white text-3xl font-bold"
-            style={{ backgroundColor: teamColors.primary }}
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              width: 80,
+              height: 80,
+              borderRadius: '50%',
+              color: '#fff',
+              fontSize: 28,
+              fontWeight: 800,
+              background: teamColors.primary,
+            }}
           >
             {avgScore.toFixed(1)}
           </motion.div>
-          <p className="mt-2 text-sm text-gray-500 dark:text-gray-400">Average score</p>
+          <p style={{ marginTop: 8, fontSize: 13, color: 'var(--sm-text-muted)' }}>Average score</p>
         </div>
 
         {/* Distribution bars */}
-        <div className="space-y-2">
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
           {options.map((option, index) => {
             const percentage = totalVotes > 0 ? Math.round(((option.vote_count || 0) / totalVotes) * 100) : 0
             const isUserVote = userVotedOptions.includes(option.id)
 
             return (
-              <div key={option.id} className="flex items-center gap-2">
-                <span className="w-6 text-xs text-gray-500 dark:text-gray-400 text-right">
+              <div key={option.id} style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                <span style={{ width: 24, fontSize: 12, color: 'var(--sm-text-muted)', textAlign: 'right' }}>
                   {option.option_text}
                 </span>
-                <div className="flex-1 h-6 bg-gray-100 dark:bg-gray-800 rounded-full overflow-hidden">
+                <div style={{ flex: 1, height: 24, background: 'var(--sm-surface)', borderRadius: 'var(--sm-radius-pill)', overflow: 'hidden' }}>
                   <motion.div
                     initial={{ width: 0 }}
                     animate={{ width: `${percentage}%` }}
                     transition={{ duration: 0.6, delay: index * 0.05 }}
-                    className="h-full rounded-full flex items-center justify-end pr-2"
                     style={{
-                      backgroundColor: teamColors.primary,
-                      opacity: 0.5 + (parseInt(option.option_text) / 20)
+                      height: '100%',
+                      borderRadius: 'var(--sm-radius-pill)',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'flex-end',
+                      paddingRight: 8,
+                      background: teamColors.primary,
+                      opacity: 0.5 + (parseInt(option.option_text) / 20),
                     }}
                   >
                     {percentage > 10 && (
-                      <span className="text-xs font-medium text-white">{percentage}%</span>
+                      <span style={{ fontSize: 11, fontWeight: 600, color: '#fff' }}>{percentage}%</span>
                     )}
                   </motion.div>
                 </div>
                 {isUserVote && (
-                  <span className="text-xs px-1.5 py-0.5 rounded-full" style={{ backgroundColor: `${teamColors.primary}20`, color: teamColors.primary }}>
+                  <span style={{
+                    fontSize: 11,
+                    padding: '2px 8px',
+                    borderRadius: 'var(--sm-radius-pill)',
+                    background: `${teamColors.primary}20`,
+                    color: teamColors.primary,
+                    fontWeight: 600,
+                  }}>
                     You
                   </span>
                 )}
@@ -155,8 +195,8 @@ export default function PollResults({
         </div>
 
         {/* Total votes */}
-        <div className="pt-3 mt-3 border-t border-gray-200 dark:border-gray-700 text-center">
-          <span className="text-sm text-gray-500 dark:text-gray-400">
+        <div style={{ paddingTop: 12, marginTop: 12, borderTop: '1px solid var(--sm-border)', textAlign: 'center' }}>
+          <span style={{ fontSize: 13, color: 'var(--sm-text-muted)' }}>
             {totalVotes.toLocaleString()} total {totalVotes === 1 ? 'vote' : 'votes'}
           </span>
         </div>
@@ -166,7 +206,7 @@ export default function PollResults({
 
   // Standard poll results
   return (
-    <div className="space-y-3">
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
       {options.map((option, index) => {
         const percentage = totalVotes > 0 ? Math.round(((option.vote_count || 0) / totalVotes) * 100) : 0
         const isWinner = showWinner && winningOptions.some(w => w.id === option.id)
@@ -174,72 +214,95 @@ export default function PollResults({
         const barColor = generateOptionColor(index, option)
 
         return (
-          <div key={option.id} className="relative">
+          <div key={option.id} style={{ position: 'relative' }}>
             {/* Option label and percentage */}
-            <div className="flex items-center justify-between mb-1.5">
-              <div className="flex items-center gap-2">
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 6 }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                 {option.option_image && (
                   <img
                     src={option.option_image}
                     alt={option.option_text}
-                    className="h-6 w-6 rounded object-cover"
+                    style={{ height: 24, width: 24, borderRadius: 4, objectFit: 'cover' }}
                   />
                 )}
-                <span className="text-sm font-medium text-gray-900 dark:text-white">
+                <span style={{ fontSize: 14, fontWeight: 600, color: 'var(--sm-text)' }}>
                   {option.option_text}
                 </span>
                 {option.team_tag && (
-                  <span
-                    className="text-xs px-1.5 py-0.5 rounded-full"
-                    style={{
-                      backgroundColor: `${getTeamColors(option.team_tag).primary}15`,
-                      color: getTeamColors(option.team_tag).primary
-                    }}
-                  >
+                  <span className="sm-tag" style={{
+                    padding: '2px 8px',
+                    fontSize: 10,
+                    background: `${getTeamColors(option.team_tag).primary}15`,
+                    color: getTeamColors(option.team_tag).primary,
+                    borderColor: `${getTeamColors(option.team_tag).primary}30`,
+                  }}>
                     {option.team_tag}
                   </span>
                 )}
                 {isUserVote && (
-                  <span
-                    className="inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-medium"
-                    style={{
-                      backgroundColor: `${teamColors.primary}15`,
-                      color: teamColors.primary
-                    }}
-                  >
-                    <svg className="h-3 w-3" fill="currentColor" viewBox="0 0 20 20">
+                  <span style={{
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: 4,
+                    borderRadius: 'var(--sm-radius-pill)',
+                    padding: '2px 8px',
+                    fontSize: 11,
+                    fontWeight: 600,
+                    background: `${teamColors.primary}15`,
+                    color: teamColors.primary,
+                  }}>
+                    <svg style={{ height: 12, width: 12 }} fill="currentColor" viewBox="0 0 20 20">
                       <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
                     </svg>
                     Your vote
                   </span>
                 )}
                 {isWinner && (
-                  <span className="inline-flex items-center gap-1 rounded-full bg-amber-500/10 px-2 py-0.5 text-xs font-medium text-amber-500">
-                    <svg className="h-3 w-3" fill="currentColor" viewBox="0 0 20 20">
+                  <span style={{
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: 4,
+                    borderRadius: 'var(--sm-radius-pill)',
+                    padding: '2px 8px',
+                    fontSize: 11,
+                    fontWeight: 600,
+                    background: 'rgba(245, 158, 11, 0.1)',
+                    color: '#f59e0b',
+                  }}>
+                    <svg style={{ height: 12, width: 12 }} fill="currentColor" viewBox="0 0 20 20">
                       <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.857-9.809a.75.75 0 00-1.214-.882l-3.483 4.79-1.88-1.88a.75.75 0 10-1.06 1.061l2.5 2.5a.75.75 0 001.137-.089l4-5.5z" clipRule="evenodd" />
                     </svg>
                     Leading
                   </span>
                 )}
               </div>
-              <div className="flex items-center gap-2 text-sm">
-                <span className="font-bold text-gray-900 dark:text-white">
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 14 }}>
+                <span style={{ fontWeight: 800, color: 'var(--sm-text)' }}>
                   {percentage}%
                 </span>
-                <span className="text-gray-500 dark:text-gray-400">
+                <span style={{ color: 'var(--sm-text-muted)' }}>
                   ({(option.vote_count || 0).toLocaleString()} {(option.vote_count || 0) === 1 ? 'vote' : 'votes'})
                 </span>
               </div>
             </div>
 
             {/* Progress bar */}
-            <div className="h-8 overflow-hidden rounded-full bg-gray-100 dark:bg-gray-800">
+            <div style={{
+              height: 32,
+              overflow: 'hidden',
+              borderRadius: 'var(--sm-radius-pill)',
+              background: 'var(--sm-surface)',
+            }}>
               <motion.div
                 initial={{ width: 0 }}
                 animate={{ width: `${percentage}%` }}
                 transition={{ duration: 0.8, ease: 'easeOut', delay: index * 0.1 }}
-                className="h-full rounded-full relative"
-                style={{ backgroundColor: barColor }}
+                style={{
+                  height: '100%',
+                  borderRadius: 'var(--sm-radius-pill)',
+                  position: 'relative',
+                  background: isWinner ? 'var(--sm-gradient)' : barColor,
+                }}
               >
                 {/* Shimmer effect for winner */}
                 {isWinner && (
@@ -247,7 +310,13 @@ export default function PollResults({
                     initial={{ x: '-100%' }}
                     animate={{ x: '200%' }}
                     transition={{ duration: 1.5, repeat: Infinity, repeatDelay: 1 }}
-                    className="absolute inset-0 w-1/3 bg-gradient-to-r from-transparent via-white/30 to-transparent skew-x-12"
+                    style={{
+                      position: 'absolute',
+                      inset: 0,
+                      width: '33%',
+                      background: 'linear-gradient(to right, transparent, rgba(255,255,255,0.3), transparent)',
+                      transform: 'skewX(12deg)',
+                    }}
                   />
                 )}
               </motion.div>
@@ -257,12 +326,12 @@ export default function PollResults({
       })}
 
       {/* Total votes with microcopy */}
-      <div className="pt-3 mt-3 border-t border-gray-200 dark:border-gray-700">
-        <div className="flex items-center justify-between">
-          <span className="text-sm font-medium" style={{ color: teamColors.primary }}>
+      <div style={{ paddingTop: 12, marginTop: 12, borderTop: '1px solid var(--sm-border)' }}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+          <span style={{ fontSize: 13, fontWeight: 600, color: teamColors.primary }}>
             {getRandomMicrocopy('results_header')}
           </span>
-          <span className="text-sm text-gray-500 dark:text-gray-400">
+          <span style={{ fontSize: 13, color: 'var(--sm-text-muted)' }}>
             {totalVotes.toLocaleString()} total {totalVotes === 1 ? 'vote' : 'votes'}
           </span>
         </div>

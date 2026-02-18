@@ -21,7 +21,7 @@ export default async function PlayerLayout({ children, params }: PlayerLayoutPro
   const currentStats = stats[0]; // Most recent season
 
   return (
-    <div className="min-h-screen" style={{ backgroundColor: 'var(--sm-dark)' }}>
+    <div style={{ minHeight: '100vh', background: 'var(--sm-dark)' }}>
       <PlayerHeader player={player} stats={currentStats} />
       <PlayerNav player={player} />
       {children}

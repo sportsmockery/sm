@@ -32,9 +32,9 @@ export default async function PlayerStatsPage({ params }: StatsPageProps) {
   const stats = await getPlayerStats(playerId);
 
   return (
-    <main className="mx-auto max-w-7xl px-4 py-8">
-      <div className="mb-6">
-        <h1 className="text-2xl font-bold" style={{ color: 'var(--sm-text)' }}>
+    <main style={{ maxWidth: 'var(--container-xl)', margin: '0 auto', padding: '32px 16px' }}>
+      <div style={{ marginBottom: '24px' }}>
+        <h1 style={{ fontSize: 'var(--text-2xl)', fontWeight: 700, color: 'var(--sm-text)' }}>
           Career Statistics
         </h1>
         <p style={{ color: 'var(--sm-text-muted)' }}>
@@ -45,7 +45,7 @@ export default async function PlayerStatsPage({ params }: StatsPageProps) {
       {stats.length > 0 ? (
         <PlayerStatsTable stats={stats} player={player} />
       ) : (
-        <div className="rounded-xl p-8 text-center" style={{ border: '1px solid var(--sm-border)', backgroundColor: 'var(--sm-card)' }}>
+        <div className="glass-card" style={{ padding: '32px', textAlign: 'center' }}>
           <p style={{ color: 'var(--sm-text-muted)' }}>
             No career statistics available for {player.name}.
           </p>

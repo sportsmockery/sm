@@ -57,14 +57,14 @@ export default async function PlayerOverviewPage({ params }: PlayerPageProps) {
     .limit(5);
 
   return (
-    <main className="mx-auto max-w-7xl px-4 py-8">
+    <main style={{ maxWidth: 'var(--container-xl)', margin: '0 auto', padding: '32px 16px' }}>
       <div className="grid gap-8 lg:grid-cols-3">
         {/* Main Content */}
         <div className="lg:col-span-2 space-y-8">
           {/* Season Stats */}
           {stats.length > 0 && (
             <section>
-              <h2 className="mb-4 text-lg font-bold" style={{ color: 'var(--sm-text)' }}>
+              <h2 style={{ marginBottom: '16px', fontSize: 'var(--text-lg)', fontWeight: 700, color: 'var(--sm-text)' }}>
                 {stats[0].season} Season Stats
               </h2>
               <PlayerStatsTable stats={stats.slice(0, 1)} player={player} />
@@ -74,7 +74,7 @@ export default async function PlayerOverviewPage({ params }: PlayerPageProps) {
           {/* Recent Games */}
           {gameLog.length > 0 && (
             <section>
-              <h2 className="mb-4 text-lg font-bold" style={{ color: 'var(--sm-text)' }}>
+              <h2 style={{ marginBottom: '16px', fontSize: 'var(--text-lg)', fontWeight: 700, color: 'var(--sm-text)' }}>
                 Recent Games
               </h2>
               <PlayerGameLog gameLog={gameLog} player={player} limit={5} />

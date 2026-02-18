@@ -37,18 +37,18 @@ export default function PollResultsPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50 dark:bg-gray-950 flex items-center justify-center">
-        <div className="h-8 w-8 animate-spin rounded-full border-2 border-purple-500 border-t-transparent" />
+      <div className="sm-hero-bg" style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+        <div style={{ width: 32, height: 32, borderRadius: '50%', border: '2px solid var(--sm-red)', borderTopColor: 'transparent', animation: 'spin 1s linear infinite' }} />
       </div>
     )
   }
 
   if (error || !poll) {
     return (
-      <div className="min-h-screen bg-gray-50 dark:bg-gray-950 flex items-center justify-center">
-        <div className="text-center">
-          <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-2">Poll not found</h2>
-          <Link href="/polls" className="text-purple-600 dark:text-purple-400 hover:underline">
+      <div className="sm-hero-bg" style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+        <div style={{ textAlign: 'center' }}>
+          <h2 style={{ fontSize: 20, fontWeight: 800, color: 'var(--sm-text)', marginBottom: 8 }}>Poll not found</h2>
+          <Link href="/polls" style={{ color: 'var(--sm-red-light)', textDecoration: 'none' }}>
             Back to polls
           </Link>
         </div>
@@ -61,56 +61,54 @@ export default function PollResultsPage() {
   const winningOption = poll.options.find(o => o.vote_count === maxVotes && maxVotes > 0)
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-950">
-      <div className="mx-auto max-w-4xl px-4 py-8">
+    <div className="sm-hero-bg" style={{ minHeight: '100vh' }}>
+      <div className="sm-grid-overlay" />
+      <div style={{ position: 'relative', maxWidth: 900, margin: '0 auto', padding: '32px 16px' }}>
         {/* Breadcrumb */}
-        <nav className="mb-6">
-          <ol className="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400">
+        <nav style={{ marginBottom: 24 }}>
+          <ol style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 14, listStyle: 'none', padding: 0, margin: 0 }}>
             <li>
-              <Link href="/polls" className="hover:text-purple-600 dark:hover:text-purple-400">
+              <Link href="/polls" style={{ color: 'var(--sm-text-muted)', textDecoration: 'none' }}>
                 Polls
               </Link>
             </li>
-            <li>
-              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <li style={{ color: 'var(--sm-text-dim)' }}>
+              <svg style={{ width: 16, height: 16 }} fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
               </svg>
             </li>
-            <li className="text-gray-900 dark:text-white font-medium">Results</li>
+            <li style={{ color: 'var(--sm-text)', fontWeight: 600 }}>Results</li>
           </ol>
         </nav>
 
         {/* Header */}
-        <div className="mb-8">
-          <div className="flex items-center justify-between">
+        <div style={{ marginBottom: 32 }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 16 }}>
             <div>
-              <h1 className="text-2xl font-bold text-gray-900 dark:text-white">{poll.title || 'Poll Results'}</h1>
-              <p className="text-gray-500 dark:text-gray-400 mt-1">{poll.question}</p>
+              <h1 style={{ fontSize: 28, fontWeight: 800, color: 'var(--sm-text)', fontFamily: 'var(--sm-font-heading)', margin: 0 }}>
+                {poll.title || 'Poll Results'}
+              </h1>
+              <p style={{ color: 'var(--sm-text-muted)', marginTop: 4, fontSize: 15 }}>{poll.question}</p>
             </div>
-            <Link
-              href={`/polls/${id}/edit`}
-              className="px-4 py-2 border border-gray-200 dark:border-gray-700 rounded-lg text-sm text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800"
-            >
+            <Link href={`/polls/${id}/edit`} className="btn-secondary btn-sm">
               Edit Poll
             </Link>
           </div>
 
-          {/* Live indicator */}
-          <div className="mt-4 flex items-center gap-4">
+          {/* Live indicator & team tag */}
+          <div style={{ marginTop: 16, display: 'flex', alignItems: 'center', gap: 12 }}>
             {poll.status === 'active' && (
-              <span className="inline-flex items-center gap-2 px-3 py-1 bg-green-100 dark:bg-green-900/30 text-green-600 dark:text-green-400 rounded-full text-sm">
-                <span className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
+              <span className="sm-tag">
+                <span className="pulse-dot" />
                 Live
               </span>
             )}
             {poll.team_theme && (
-              <span
-                className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium"
-                style={{
-                  backgroundColor: `${teamColors.primary}15`,
-                  color: teamColors.primary
-                }}
-              >
+              <span className="sm-tag" style={{
+                background: `${teamColors.primary}15`,
+                color: teamColors.primary,
+                borderColor: `${teamColors.primary}30`,
+              }}>
                 {poll.team_theme.charAt(0).toUpperCase() + poll.team_theme.slice(1)}
               </span>
             )}
@@ -118,40 +116,40 @@ export default function PollResultsPage() {
         </div>
 
         {/* Stats Cards */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
-          <div className="bg-white dark:bg-gray-900 rounded-xl p-6 border border-gray-200 dark:border-gray-800">
-            <p className="text-3xl font-bold" style={{ color: teamColors.primary }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: 16, marginBottom: 32 }}>
+          <div className="glass-card glass-card-sm glass-card-static">
+            <p style={{ fontSize: 28, fontWeight: 800, color: teamColors.primary, margin: 0 }}>
               {poll.total_votes.toLocaleString()}
             </p>
-            <p className="text-sm text-gray-500 dark:text-gray-400">Total Votes</p>
+            <p style={{ fontSize: 13, color: 'var(--sm-text-muted)', margin: 0 }}>Total Votes</p>
           </div>
-          <div className="bg-white dark:bg-gray-900 rounded-xl p-6 border border-gray-200 dark:border-gray-800">
-            <p className="text-3xl font-bold text-gray-900 dark:text-white">
+          <div className="glass-card glass-card-sm glass-card-static">
+            <p style={{ fontSize: 28, fontWeight: 800, color: 'var(--sm-text)', margin: 0 }}>
               {poll.options.length}
             </p>
-            <p className="text-sm text-gray-500 dark:text-gray-400">Options</p>
+            <p style={{ fontSize: 13, color: 'var(--sm-text-muted)', margin: 0 }}>Options</p>
           </div>
-          <div className="bg-white dark:bg-gray-900 rounded-xl p-6 border border-gray-200 dark:border-gray-800">
-            <p className="text-3xl font-bold text-gray-900 dark:text-white capitalize">
+          <div className="glass-card glass-card-sm glass-card-static">
+            <p style={{ fontSize: 28, fontWeight: 800, color: 'var(--sm-text)', margin: 0, textTransform: 'capitalize' }}>
               {poll.poll_type}
             </p>
-            <p className="text-sm text-gray-500 dark:text-gray-400">Poll Type</p>
+            <p style={{ fontSize: 13, color: 'var(--sm-text-muted)', margin: 0 }}>Poll Type</p>
           </div>
-          <div className="bg-white dark:bg-gray-900 rounded-xl p-6 border border-gray-200 dark:border-gray-800">
-            <p className="text-3xl font-bold text-gray-900 dark:text-white capitalize">
+          <div className="glass-card glass-card-sm glass-card-static">
+            <p style={{ fontSize: 28, fontWeight: 800, color: 'var(--sm-text)', margin: 0, textTransform: 'capitalize' }}>
               {poll.status}
             </p>
-            <p className="text-sm text-gray-500 dark:text-gray-400">Status</p>
+            <p style={{ fontSize: 13, color: 'var(--sm-text-muted)', margin: 0 }}>Status</p>
           </div>
         </div>
 
         {/* Results Chart */}
-        <div className="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800 p-6 mb-8">
-          <h2 className="text-lg font-bold text-gray-900 dark:text-white mb-6">
+        <div className="glass-card glass-card-static" style={{ marginBottom: 32 }}>
+          <h2 style={{ fontSize: 18, fontWeight: 700, color: 'var(--sm-text)', marginBottom: 24, margin: 0, paddingBottom: 24 }}>
             {getRandomMicrocopy('results_header')}
           </h2>
 
-          <div className="space-y-4">
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
             {poll.options
               .sort((a, b) => (b.vote_count || 0) - (a.vote_count || 0))
               .map((option, index) => {
@@ -162,37 +160,52 @@ export default function PollResultsPage() {
 
                 return (
                   <div key={option.id}>
-                    <div className="flex items-center justify-between mb-2">
-                      <div className="flex items-center gap-3">
-                        {option.emoji && <span className="text-2xl">{option.emoji}</span>}
-                        <span className="font-medium text-gray-900 dark:text-white">
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                        {option.emoji && <span style={{ fontSize: 22 }}>{option.emoji}</span>}
+                        <span style={{ fontWeight: 600, color: 'var(--sm-text)', fontSize: 15 }}>
                           {option.option_text}
                         </span>
                         {isWinner && (
-                          <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-amber-100 dark:bg-amber-900/30 text-amber-600 dark:text-amber-400 rounded-full text-xs font-medium">
-                            <span>🏆</span> Winner
+                          <span className="sm-tag" style={{
+                            background: 'rgba(245, 158, 11, 0.15)',
+                            color: '#f59e0b',
+                            borderColor: 'rgba(245, 158, 11, 0.3)',
+                            padding: '4px 10px',
+                            fontSize: 11,
+                          }}>
+                            Winner
                           </span>
                         )}
                       </div>
-                      <div className="text-right">
-                        <span className="font-bold text-gray-900 dark:text-white">
+                      <div style={{ textAlign: 'right' }}>
+                        <span style={{ fontWeight: 800, color: 'var(--sm-text)', fontSize: 16 }}>
                           {percentage}%
                         </span>
-                        <span className="ml-2 text-sm text-gray-500 dark:text-gray-400">
+                        <span style={{ marginLeft: 8, fontSize: 13, color: 'var(--sm-text-muted)' }}>
                           ({(option.vote_count || 0).toLocaleString()})
                         </span>
                       </div>
                     </div>
-                    <div className="h-10 bg-gray-100 dark:bg-gray-800 rounded-full overflow-hidden">
+                    <div style={{
+                      height: 40,
+                      background: 'var(--sm-surface)',
+                      borderRadius: 'var(--sm-radius-pill)',
+                      overflow: 'hidden',
+                    }}>
                       <motion.div
                         initial={{ width: 0 }}
                         animate={{ width: `${percentage}%` }}
                         transition={{ duration: 0.8, ease: 'easeOut', delay: index * 0.1 }}
-                        className="h-full rounded-full relative"
                         style={{
-                          backgroundColor: option.team_tag
-                            ? getTeamColors(option.team_tag).primary
-                            : teamColors.primary,
+                          height: '100%',
+                          borderRadius: 'var(--sm-radius-pill)',
+                          position: 'relative',
+                          background: isWinner
+                            ? 'var(--sm-gradient)'
+                            : (option.team_tag
+                              ? getTeamColors(option.team_tag).primary
+                              : teamColors.primary),
                         }}
                       >
                         {isWinner && (
@@ -200,7 +213,13 @@ export default function PollResultsPage() {
                             initial={{ x: '-100%' }}
                             animate={{ x: '200%' }}
                             transition={{ duration: 1.5, repeat: Infinity, repeatDelay: 1 }}
-                            className="absolute inset-0 w-1/3 bg-gradient-to-r from-transparent via-white/30 to-transparent skew-x-12"
+                            style={{
+                              position: 'absolute',
+                              inset: 0,
+                              width: '33%',
+                              background: 'linear-gradient(to right, transparent, rgba(255,255,255,0.3), transparent)',
+                              transform: 'skewX(12deg)',
+                            }}
                           />
                         )}
                       </motion.div>
@@ -212,21 +231,32 @@ export default function PollResultsPage() {
         </div>
 
         {/* Embed Code */}
-        <div className="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800 p-6">
-          <h2 className="text-lg font-bold text-gray-900 dark:text-white mb-4">Embed This Poll</h2>
+        <div className="glass-card glass-card-static">
+          <h2 style={{ fontSize: 18, fontWeight: 700, color: 'var(--sm-text)', marginBottom: 16, margin: 0, paddingBottom: 16 }}>
+            Embed This Poll
+          </h2>
 
-          <div className="space-y-4">
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
             <div>
-              <label className="block text-sm font-medium text-gray-600 dark:text-gray-400 mb-2">
+              <label style={{ display: 'block', fontSize: 13, fontWeight: 600, color: 'var(--sm-text-muted)', marginBottom: 8 }}>
                 Shortcode (for articles)
               </label>
-              <div className="flex gap-2">
-                <code className="flex-1 px-4 py-3 bg-gray-100 dark:bg-gray-800 rounded-lg text-sm font-mono">
+              <div style={{ display: 'flex', gap: 8 }}>
+                <code style={{
+                  flex: 1,
+                  padding: '12px 16px',
+                  background: 'var(--sm-surface)',
+                  borderRadius: 'var(--sm-radius-sm)',
+                  fontSize: 14,
+                  fontFamily: 'monospace',
+                  color: 'var(--sm-text)',
+                  border: '1px solid var(--sm-border)',
+                }}>
                   [poll:{poll.id}]
                 </code>
                 <button
                   onClick={() => navigator.clipboard.writeText(`[poll:${poll.id}]`)}
-                  className="px-4 py-2 bg-purple-600 text-white rounded-lg text-sm hover:bg-purple-700"
+                  className="btn-primary btn-sm"
                 >
                   Copy
                 </button>
@@ -234,16 +264,28 @@ export default function PollResultsPage() {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-600 dark:text-gray-400 mb-2">
+              <label style={{ display: 'block', fontSize: 13, fontWeight: 600, color: 'var(--sm-text-muted)', marginBottom: 8 }}>
                 Embed URL
               </label>
-              <div className="flex gap-2">
-                <code className="flex-1 px-4 py-3 bg-gray-100 dark:bg-gray-800 rounded-lg text-sm font-mono truncate">
+              <div style={{ display: 'flex', gap: 8 }}>
+                <code style={{
+                  flex: 1,
+                  padding: '12px 16px',
+                  background: 'var(--sm-surface)',
+                  borderRadius: 'var(--sm-radius-sm)',
+                  fontSize: 14,
+                  fontFamily: 'monospace',
+                  color: 'var(--sm-text)',
+                  border: '1px solid var(--sm-border)',
+                  overflow: 'hidden',
+                  textOverflow: 'ellipsis',
+                  whiteSpace: 'nowrap',
+                }}>
                   {typeof window !== 'undefined' ? `${window.location.origin}/polls/embed/${poll.id}` : `/polls/embed/${poll.id}`}
                 </code>
                 <button
                   onClick={() => navigator.clipboard.writeText(`${window.location.origin}/polls/embed/${poll.id}`)}
-                  className="px-4 py-2 bg-purple-600 text-white rounded-lg text-sm hover:bg-purple-700"
+                  className="btn-primary btn-sm"
                 >
                   Copy
                 </button>

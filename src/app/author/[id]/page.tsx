@@ -220,7 +220,7 @@ export default async function AuthorPage({ params, searchParams }: AuthorPagePro
   }
 
   return (
-    <div className="min-h-screen" style={{ backgroundColor: 'var(--sm-dark)' }}>
+    <div style={{ minHeight: '100vh', background: 'var(--sm-dark)' }}>
       {/* Author Header */}
       <AuthorHeader
         author={authorData}
@@ -229,8 +229,8 @@ export default async function AuthorPage({ params, searchParams }: AuthorPagePro
       />
 
       {/* Stats Section */}
-      <div className="py-8" style={{ borderBottom: '1px solid var(--sm-border)', backgroundColor: 'var(--sm-card)' }}>
-        <div className="mx-auto max-w-7xl px-4">
+      <div style={{ padding: '32px 0', borderBottom: '1px solid var(--sm-border)', background: 'var(--sm-card)' }}>
+        <div style={{ maxWidth: 'var(--container-xl)', margin: '0 auto', padding: '0 16px' }}>
           <AuthorStats
             totalPosts={allPosts?.length || 0}
             totalViews={totalViews}
@@ -240,11 +240,11 @@ export default async function AuthorPage({ params, searchParams }: AuthorPagePro
       </div>
 
       {/* Main Content */}
-      <main className="mx-auto max-w-7xl px-4 py-12">
+      <main style={{ maxWidth: 'var(--container-xl)', margin: '0 auto', padding: '48px 16px' }}>
         <div className="grid gap-8 lg:grid-cols-3">
           {/* Main Column - Articles */}
           <div className="lg:col-span-2">
-            <h2 className="mb-6 font-heading text-2xl font-bold" style={{ color: 'var(--sm-text)' }}>
+            <h2 style={{ marginBottom: '24px', fontSize: 'var(--text-2xl)', fontWeight: 700, fontFamily: 'var(--sm-font-heading)', color: 'var(--sm-text)' }}>
               Articles {category && `in ${categories?.find(c => c.slug === category)?.name || category}`}
             </h2>
 
@@ -273,11 +273,19 @@ export default async function AuthorPage({ params, searchParams }: AuthorPagePro
             />
 
             {/* Ad Placeholder */}
-            <div className="overflow-hidden rounded-2xl p-8 text-center" style={{ border: '1px dashed var(--sm-border)', backgroundColor: 'var(--sm-surface)' }}>
-              <p className="text-sm" style={{ color: 'var(--sm-text-muted)' }}>
+            <div className="glass-card" style={{ padding: '32px', textAlign: 'center', borderStyle: 'dashed' }}>
+              <p style={{ fontSize: 'var(--text-sm)', color: 'var(--sm-text-muted)' }}>
                 Advertisement
               </p>
-              <div className="mt-2 flex h-48 items-center justify-center rounded-lg" style={{ backgroundColor: 'var(--sm-card)' }}>
+              <div style={{
+                marginTop: '8px',
+                display: 'flex',
+                height: '192px',
+                alignItems: 'center',
+                justifyContent: 'center',
+                borderRadius: 'var(--sm-radius-md)',
+                background: 'var(--sm-surface)',
+              }}>
                 <span style={{ color: 'var(--sm-text-dim)' }}>
                   300x250
                 </span>

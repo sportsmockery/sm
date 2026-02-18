@@ -86,30 +86,12 @@ export default async function BearsSchedulePage() {
         {/* Next Game Highlight - Compact */}
         {nextScheduledGame && (
           <div
-            style={{
-              marginBottom: '24px',
-              padding: '20px',
-              borderRadius: 'var(--sm-radius-lg)',
-              backgroundColor: 'var(--sm-card)',
-              border: '1px solid var(--sm-border)',
-              borderLeft: '4px solid #C83200',
-            }}
+            className="glass-card glass-card-sm glass-card-static"
+            style={{ marginBottom: '24px', borderLeft: '4px solid var(--sm-red)' }}
           >
             <div className="flex items-center justify-between gap-4">
               <div className="flex items-center gap-3">
-                <span
-                  style={{
-                    padding: '4px 12px',
-                    backgroundColor: 'rgba(200, 50, 0, 0.1)',
-                    color: '#C83200',
-                    fontSize: '11px',
-                    fontWeight: 700,
-                    borderRadius: '100px',
-                    letterSpacing: '0.5px',
-                  }}
-                >
-                  UP NEXT
-                </span>
+                <span className="sm-tag">UP NEXT</span>
                 <div className="flex items-center gap-2">
                   {nextScheduledGame.opponentLogo && (
                     <Image
@@ -138,15 +120,7 @@ export default async function BearsSchedulePage() {
         )}
 
         {/* Record Summary */}
-        <div
-          style={{
-            marginBottom: '24px',
-            padding: '20px',
-            borderRadius: 'var(--sm-radius-lg)',
-            backgroundColor: 'var(--sm-card)',
-            border: '1px solid var(--sm-border)',
-          }}
-        >
+        <div className="glass-card glass-card-sm glass-card-static" style={{ marginBottom: '24px' }}>
           <div className="flex flex-wrap gap-6 justify-center text-center">
             <div>
               <div style={{ fontSize: '11px', color: 'var(--sm-text-muted)', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '4px' }}>Regular Season</div>
@@ -161,7 +135,7 @@ export default async function BearsSchedulePage() {
             {(separatedRecord.postseason.wins > 0 || separatedRecord.postseason.losses > 0) && (
               <div>
                 <div style={{ fontSize: '11px', color: 'var(--sm-text-muted)', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '4px' }}>Postseason</div>
-                <div style={{ fontSize: '22px', fontWeight: 800, color: '#C83200', fontFamily: "'Space Grotesk', sans-serif" }}>
+                <div style={{ fontSize: '22px', fontWeight: 800, color: 'var(--sm-red)', fontFamily: "'Space Grotesk', sans-serif" }}>
                   {separatedRecord.postseason.wins}-{separatedRecord.postseason.losses}
                 </div>
               </div>
@@ -171,14 +145,7 @@ export default async function BearsSchedulePage() {
 
         {/* All Games - most recent first (for out-of-season display) */}
         {schedule.length > 0 && (
-          <div
-            style={{
-              backgroundColor: 'var(--sm-card)',
-              border: '1px solid var(--sm-border)',
-              borderRadius: 'var(--sm-radius-xl)',
-              overflow: 'hidden',
-            }}
-          >
+          <div className="glass-card glass-card-static" style={{ overflow: 'hidden', padding: 0 }}>
             <div
               style={{
                 padding: '16px 20px',
@@ -209,15 +176,7 @@ export default async function BearsSchedulePage() {
 
         {/* Empty state */}
         {schedule.length === 0 && (
-          <div
-            style={{
-              backgroundColor: 'var(--sm-card)',
-              border: '1px solid var(--sm-border)',
-              borderRadius: 'var(--sm-radius-xl)',
-              padding: '48px',
-              textAlign: 'center',
-            }}
-          >
+          <div className="glass-card glass-card-static" style={{ textAlign: 'center' }}>
             <p style={{ color: 'var(--sm-text-muted)' }}>No schedule data available</p>
           </div>
         )}
@@ -242,7 +201,7 @@ function GameRow({
 
   const borderColor = isPast
     ? game.result === 'W' ? '#10b981' : game.result === 'T' ? '#eab308' : '#ef4444'
-    : '#C83200'
+    : 'var(--sm-red)'
 
   return (
     <div
@@ -262,7 +221,7 @@ function GameRow({
               style={{
                 padding: '2px 8px',
                 backgroundColor: 'rgba(200, 50, 0, 0.1)',
-                color: '#C83200',
+                color: 'var(--sm-red)',
                 fontSize: '11px',
                 fontWeight: 700,
                 borderRadius: '100px',
@@ -358,7 +317,7 @@ function GameRow({
                 style={{
                   padding: '2px 8px',
                   backgroundColor: 'rgba(200, 50, 0, 0.1)',
-                  color: '#C83200',
+                  color: 'var(--sm-red)',
                   borderRadius: '100px',
                   fontSize: '11px',
                   fontWeight: 600,
@@ -392,7 +351,7 @@ function GameRow({
           {game.articleSlug && (
             <Link
               href={`/bears/${game.articleSlug}`}
-              style={{ fontSize: '12px', color: '#C83200', marginTop: '4px', display: 'inline-block' }}
+              style={{ fontSize: '12px', color: 'var(--sm-red)', marginTop: '4px', display: 'inline-block' }}
               className="hover:underline"
             >
               Recap →

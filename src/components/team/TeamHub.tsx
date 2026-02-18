@@ -28,7 +28,7 @@ export default function TeamHub({
   const displayPosts = posts.slice(0, 12)
 
   return (
-    <div className={`min-h-screen bg-[#f5f5f5] dark:bg-[#0a0a0b] ${className}`}>
+    <div className={`min-h-screen ${className}`} style={{ backgroundColor: 'var(--sm-dark)' }}>
       {/* Hero header */}
       <header
         className="relative py-12 md:py-16"
@@ -50,7 +50,7 @@ export default function TeamHub({
             <div>
               <h1
                 className="text-white text-3xl md:text-5xl font-black uppercase"
-                style={{ fontFamily: "'Montserrat', sans-serif" }}
+                style={{ fontFamily: "'Space Grotesk', sans-serif" }}
               >
                 {teamInfo.name}
               </h1>
@@ -77,10 +77,11 @@ export default function TeamHub({
         {featuredPosts.length > 0 && (
           <section className="mb-10">
             <h2
-              className="text-[18px] font-bold text-[#222] dark:text-white uppercase mb-6 pb-2 border-b-[3px]"
+              className="text-[18px] font-bold uppercase mb-6 pb-2 border-b-[3px]"
               style={{
-                fontFamily: "'Montserrat', sans-serif",
-                borderColor: teamInfo.secondaryColor,
+                fontFamily: "'Space Grotesk', sans-serif",
+                borderColor: 'var(--sm-red)',
+                color: 'var(--sm-text)',
               }}
             >
               Featured Stories
@@ -102,10 +103,11 @@ export default function TeamHub({
         <section>
           <div className="flex items-center justify-between mb-6">
             <h2
-              className="text-[18px] font-bold text-[#222] dark:text-white uppercase pb-2 border-b-[3px]"
+              className="text-[18px] font-bold uppercase pb-2 border-b-[3px]"
               style={{
-                fontFamily: "'Montserrat', sans-serif",
-                borderColor: teamInfo.secondaryColor,
+                fontFamily: "'Space Grotesk', sans-serif",
+                borderColor: 'var(--sm-red)',
+                color: 'var(--sm-text)',
               }}
             >
               Latest {teamInfo.shortName} News
@@ -114,7 +116,7 @@ export default function TeamHub({
               <Link
                 href={`/${getTeamCategorySlug(team)}?page=2`}
                 className="text-sm hover:underline"
-                style={{ color: teamInfo.secondaryColor }}
+                style={{ color: 'var(--sm-red)' }}
               >
                 View All →
               </Link>
@@ -134,8 +136,8 @@ export default function TeamHub({
                 href={`/${getTeamCategorySlug(team)}`}
                 className="inline-flex items-center gap-2 px-6 py-3 rounded-lg font-semibold text-white transition-transform hover:scale-105"
                 style={{
-                  backgroundColor: teamInfo.primaryColor,
-                  fontFamily: "'Montserrat', sans-serif",
+                  backgroundColor: 'var(--sm-red)',
+                  fontFamily: "'Space Grotesk', sans-serif",
                 }}
               >
                 Browse All {teamInfo.shortName} Articles
@@ -194,14 +196,14 @@ function FeaturedCard({
         {/* Team accent */}
         <div
           className="absolute top-0 left-0 w-1 h-full"
-          style={{ backgroundColor: teamInfo.secondaryColor }}
+          style={{ backgroundColor: 'var(--sm-red)' }}
         />
 
         {/* Content */}
         <div className="absolute bottom-0 left-0 right-0 p-4 md:p-6">
           <span
             className="inline-block px-2 py-1 text-[10px] font-bold uppercase tracking-wide text-white mb-2 rounded"
-            style={{ backgroundColor: teamInfo.secondaryColor }}
+            style={{ backgroundColor: 'var(--sm-red)' }}
           >
             {teamInfo.shortName}
           </span>
@@ -209,7 +211,7 @@ function FeaturedCard({
             className={`text-white font-bold leading-tight group-hover:underline decoration-1 underline-offset-2 ${
               isPrimary ? 'text-xl md:text-2xl line-clamp-3' : 'text-base line-clamp-2'
             }`}
-            style={{ fontFamily: "'Montserrat', sans-serif" }}
+            style={{ fontFamily: "'Space Grotesk', sans-serif" }}
           >
             {post.title}
           </h3>
@@ -241,7 +243,7 @@ function ArticleCard({
       href={`/${post.categorySlug}/${post.slug}`}
       className="group block"
     >
-      <article className="bg-white dark:bg-[#111] rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-all">
+      <article className="glass-card" style={{ overflow: 'hidden', padding: 0 }}>
         {/* Image */}
         <div className="relative aspect-[16/10] overflow-hidden">
           <Image
@@ -252,7 +254,7 @@ function ArticleCard({
           />
           <div
             className="absolute top-0 left-0 w-1 h-full"
-            style={{ backgroundColor: teamInfo.primaryColor }}
+            style={{ backgroundColor: 'var(--sm-red)' }}
           />
         </div>
 
@@ -260,17 +262,17 @@ function ArticleCard({
         <div className="p-4">
           <span
             className="inline-block text-[10px] font-bold uppercase tracking-wide mb-2"
-            style={{ color: teamInfo.secondaryColor }}
+            style={{ color: 'var(--sm-red)' }}
           >
             {teamInfo.shortName}
           </span>
           <h3
-            className="text-[15px] font-bold text-[#222] dark:text-white leading-tight line-clamp-2 group-hover:text-[#bc0000] transition-colors"
-            style={{ fontFamily: "'Montserrat', sans-serif" }}
+            className="text-[15px] font-bold leading-tight line-clamp-2 transition-colors"
+            style={{ color: 'var(--sm-text)', fontFamily: "'Space Grotesk', sans-serif" }}
           >
             {post.title}
           </h3>
-          <div className="flex items-center gap-2 mt-3 text-[11px] text-gray-400">
+          <div className="flex items-center gap-2 mt-3 text-[11px]" style={{ color: 'var(--sm-text-muted)' }}>
             <span>{post.author.displayName}</span>
             <span>•</span>
             <span>

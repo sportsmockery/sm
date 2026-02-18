@@ -37,10 +37,10 @@ export default async function StandingsPage({ params }: StandingsPageProps) {
   const position = teamStanding ? standings.indexOf(teamStanding) + 1 : null;
 
   return (
-    <main className="mx-auto max-w-7xl px-4 py-8">
+    <main style={{ maxWidth: 'var(--container-xl)', margin: '0 auto', padding: '32px 16px' }}>
       {/* Header */}
-      <div className="mb-6">
-        <h1 className="text-2xl font-bold" style={{ color: 'var(--sm-text)' }}>
+      <div style={{ marginBottom: '24px' }}>
+        <h1 style={{ fontSize: 'var(--text-2xl)', fontWeight: 700, color: 'var(--sm-text)' }}>
           {team.division} Standings
         </h1>
         {position && (
@@ -58,7 +58,7 @@ export default async function StandingsPage({ params }: StandingsPageProps) {
           showConference
         />
       ) : (
-        <div className="rounded-xl p-8 text-center" style={{ border: '1px solid var(--sm-border)', backgroundColor: 'var(--sm-card)' }}>
+        <div className="glass-card" style={{ padding: '32px', textAlign: 'center' }}>
           <p style={{ color: 'var(--sm-text-muted)' }}>
             Standings data is not available at this time.
           </p>
@@ -67,12 +67,12 @@ export default async function StandingsPage({ params }: StandingsPageProps) {
 
       {/* Playoff Picture - placeholder for now */}
       {team.sport === 'nfl' && (
-        <section className="mt-8">
-          <h2 className="mb-4 text-lg font-bold" style={{ color: 'var(--sm-text)' }}>
+        <section style={{ marginTop: '32px' }}>
+          <h2 style={{ marginBottom: '16px', fontSize: 'var(--text-lg)', fontWeight: 700, color: 'var(--sm-text)' }}>
             Playoff Picture
           </h2>
-          <div className="rounded-xl p-6" style={{ border: '1px solid var(--sm-border)', backgroundColor: 'var(--sm-card)' }}>
-            <p className="text-sm" style={{ color: 'var(--sm-text-muted)' }}>
+          <div className="glass-card" style={{ padding: '24px' }}>
+            <p style={{ fontSize: 'var(--text-sm)', color: 'var(--sm-text-muted)' }}>
               Playoff scenarios and wild card standings will be displayed here as the season progresses.
             </p>
           </div>

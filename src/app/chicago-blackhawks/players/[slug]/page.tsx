@@ -56,8 +56,7 @@ export default async function BlackhawksPlayerPage({ params }: PlayerPageProps) 
     <main className="min-h-screen" style={{ backgroundColor: 'var(--sm-dark)' }}>
       {/* Hero Section */}
       <div
-        className="relative overflow-hidden"
-        style={{ background: 'linear-gradient(135deg, #CF0A2C 0%, #CF0A2C 70%, #000000 100%)' }}
+        className="relative overflow-hidden team-hero-hawks"
       >
         <div className="max-w-7xl mx-auto px-4 py-8">
           {/* Breadcrumb & Player Switcher */}
@@ -213,7 +212,7 @@ export default async function BlackhawksPlayerPage({ params }: PlayerPageProps) 
           <div className="lg:col-span-2 space-y-8">
             {/* Season Stats */}
             {profile.currentSeason && (
-              <section className="rounded-2xl p-6" style={{ backgroundColor: 'var(--sm-card)', border: '1px solid var(--sm-border)' }}>
+              <section className="glass-card glass-card-static">
                 <h2 className="text-xl font-bold mb-6" style={{ fontFamily: "'Space Grotesk', sans-serif", color: 'var(--sm-text)' }}>
                   {profile.currentSeason.season ? `${profile.currentSeason.season - 1}-${String(profile.currentSeason.season).slice(-2)}` : ''} Season Stats
                 </h2>
@@ -248,7 +247,7 @@ export default async function BlackhawksPlayerPage({ params }: PlayerPageProps) 
 
             {/* Game Log */}
             {profile.gameLog.length > 0 && (
-              <section className="rounded-2xl overflow-hidden" style={{ backgroundColor: 'var(--sm-card)', border: '1px solid var(--sm-border)' }}>
+              <section className="glass-card glass-card-static" style={{ overflow: 'hidden', padding: 0 }}>
                 <div className="p-6" style={{ borderBottom: '1px solid var(--sm-border)' }}>
                   <h2 className="text-xl font-bold" style={{ fontFamily: "'Space Grotesk', sans-serif", color: 'var(--sm-text)' }}>
                     Recent Games
@@ -290,7 +289,7 @@ export default async function BlackhawksPlayerPage({ params }: PlayerPageProps) 
 
           {/* Sidebar */}
           <div className="space-y-6">
-            <section className="rounded-2xl p-6" style={{ backgroundColor: 'var(--sm-card)', border: '1px solid var(--sm-border)' }}>
+            <section className="glass-card glass-card-static">
               <h3 className="text-lg font-bold mb-4" style={{ fontFamily: "'Space Grotesk', sans-serif", color: 'var(--sm-text)' }}>
                 Quick Links
               </h3>
@@ -337,7 +336,7 @@ export default async function BlackhawksPlayerPage({ params }: PlayerPageProps) 
 function StatCard({ label, value, positive, negative }: { label: string; value: string; positive?: boolean; negative?: boolean }) {
   return (
     <div className="rounded-xl p-4 text-center" style={{ backgroundColor: 'var(--sm-surface)' }}>
-      <div className="text-2xl font-bold" style={{ color: positive ? '#22c55e' : negative ? '#ef4444' : 'var(--sm-text)' }}>{value}</div>
+      <div className="text-2xl font-bold" style={{ color: positive ? 'var(--sm-success)' : negative ? 'var(--sm-error)' : 'var(--sm-text)' }}>{value}</div>
       <div className="text-xs uppercase" style={{ color: 'var(--sm-text-muted)' }}>{label}</div>
     </div>
   )

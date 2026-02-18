@@ -54,8 +54,7 @@ export default async function BullsPlayerPage({ params }: PlayerPageProps) {
     <main className="min-h-screen" style={{ backgroundColor: 'var(--sm-dark)' }}>
       {/* Hero Section */}
       <div
-        className="relative overflow-hidden"
-        style={{ background: 'linear-gradient(135deg, #CE1141 0%, #CE1141 70%, #000000 100%)' }}
+        className="relative overflow-hidden team-hero-bulls"
       >
         <div className="max-w-7xl mx-auto px-4 py-8">
           {/* Breadcrumb & Player Switcher */}
@@ -188,7 +187,7 @@ export default async function BullsPlayerPage({ params }: PlayerPageProps) {
           <div className="lg:col-span-2 space-y-8">
             {/* Season Stats */}
             {profile.currentSeason && (
-              <section className="rounded-2xl p-6" style={{ backgroundColor: 'var(--sm-card)', border: '1px solid var(--sm-border)' }}>
+              <section className="glass-card glass-card-static">
                 <h2 className="text-xl font-bold mb-6" style={{ fontFamily: "'Space Grotesk', sans-serif", color: 'var(--sm-text)' }}>
                   2024-25 Season Stats
                 </h2>
@@ -207,7 +206,7 @@ export default async function BullsPlayerPage({ params }: PlayerPageProps) {
 
             {/* Game Log */}
             {profile.gameLog.length > 0 && (
-              <section className="rounded-2xl overflow-hidden" style={{ backgroundColor: 'var(--sm-card)', border: '1px solid var(--sm-border)' }}>
+              <section className="glass-card glass-card-static" style={{ overflow: 'hidden', padding: 0 }}>
                 <div className="p-6" style={{ borderBottom: '1px solid var(--sm-border)' }}>
                   <h2 className="text-xl font-bold" style={{ fontFamily: "'Space Grotesk', sans-serif", color: 'var(--sm-text)' }}>
                     Recent Games
@@ -239,7 +238,7 @@ export default async function BullsPlayerPage({ params }: PlayerPageProps) {
 
           {/* Sidebar */}
           <div className="space-y-6">
-            <section className="rounded-2xl p-6" style={{ backgroundColor: 'var(--sm-card)', border: '1px solid var(--sm-border)' }}>
+            <section className="glass-card glass-card-static">
               <h3 className="text-lg font-bold mb-4" style={{ fontFamily: "'Space Grotesk', sans-serif", color: 'var(--sm-text)' }}>
                 Quick Links
               </h3>

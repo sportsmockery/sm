@@ -40,45 +40,63 @@ export default async function BearsHubPage() {
   ])
 
   return (
-    <div className="min-h-screen" style={{ backgroundColor: 'var(--sm-dark)' }}>
+    <div style={{ minHeight: '100vh', background: 'var(--sm-dark)' }}>
       {/* Hero header */}
       <header
-        className="relative py-12 md:py-16"
+        className="sm-hero-bg"
         style={{
+          position: 'relative',
+          padding: '48px 0 64px',
           background: `linear-gradient(135deg, ${bearsInfo.primaryColor} 0%, #1a2940 100%)`,
         }}
       >
-        <div className="max-w-[1110px] mx-auto px-4">
-          <div className="flex items-center gap-6">
+        <div className="sm-grid-overlay" />
+        <div style={{ position: 'relative', maxWidth: 'var(--sm-max-width)', margin: '0 auto', padding: '0 16px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '24px' }}>
             {/* Team logo */}
             <div
-              className="w-20 h-20 md:w-24 md:h-24 rounded-full flex items-center justify-center text-white font-black text-3xl md:text-4xl shadow-lg"
-              style={{ backgroundColor: bearsInfo.secondaryColor }}
+              style={{
+                width: '80px',
+                height: '80px',
+                borderRadius: '50%',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                color: '#fff',
+                fontWeight: 900,
+                fontSize: 'var(--text-3xl)',
+                backgroundColor: bearsInfo.secondaryColor,
+                boxShadow: 'var(--shadow-lg)',
+              }}
             >
               B
             </div>
 
             {/* Team name and tagline */}
             <div>
-              <h1
-                className="text-white text-3xl md:text-5xl font-black uppercase"
-                style={{ fontFamily: "'Montserrat', sans-serif" }}
-              >
+              <h1 style={{
+                color: '#fff',
+                fontSize: 'clamp(1.875rem, 4vw, 3rem)',
+                fontWeight: 900,
+                textTransform: 'uppercase',
+                fontFamily: 'var(--sm-font-heading)',
+              }}>
                 Chicago Bears
               </h1>
-              <p className="text-white/70 text-sm md:text-base mt-1">
+              <p style={{ color: 'rgba(255,255,255,0.7)', fontSize: 'var(--text-sm)', marginTop: '4px' }}>
                 Your #1 Source for Bears News, Stats & Analysis
               </p>
             </div>
           </div>
 
           {/* Quick nav */}
-          <nav className="mt-8 flex flex-wrap gap-3">
+          <nav style={{ marginTop: '32px', display: 'flex', flexWrap: 'wrap', gap: '12px' }}>
             {storylines.map((link) => (
               <Link
                 key={link.slug}
                 href={link.slug}
-                className="px-4 py-2 bg-white/10 hover:bg-white/20 rounded-lg text-white text-sm font-medium transition-colors"
+                className="sm-tag"
+                style={{ background: 'rgba(255,255,255,0.1)', color: '#fff', textDecoration: 'none' }}
               >
                 {link.title}
               </Link>
@@ -88,7 +106,7 @@ export default async function BearsHubPage() {
       </header>
 
       {/* Main content */}
-      <main className="max-w-[1110px] mx-auto px-4 py-8">
+      <main style={{ maxWidth: 'var(--sm-max-width)', margin: '0 auto', padding: '32px 16px' }}>
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Main column */}
           <div className="lg:col-span-2 space-y-8">
@@ -97,17 +115,21 @@ export default async function BearsHubPage() {
 
             {/* Latest articles */}
             <section>
-              <div className="flex items-center justify-between mb-6">
-                <h2
-                  className="text-[18px] font-bold uppercase pb-2"
-                  style={{ fontFamily: "'Montserrat', sans-serif", color: 'var(--sm-text)', borderBottom: '3px solid #bc0000' }}
-                >
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '24px' }}>
+                <h2 style={{
+                  fontSize: 'var(--text-lg)',
+                  fontWeight: 700,
+                  textTransform: 'uppercase',
+                  paddingBottom: '8px',
+                  fontFamily: 'var(--sm-font-heading)',
+                  color: 'var(--sm-text)',
+                  borderBottom: '3px solid var(--accent-red)',
+                }}>
                   Latest Bears News
                 </h2>
                 <Link
                   href="/chicago-bears"
-                  className="text-sm hover:underline"
-                  style={{ color: '#bc0000' }}
+                  style={{ fontSize: 'var(--text-sm)', color: 'var(--accent-red)', textDecoration: 'none' }}
                 >
                   View All &rarr;
                 </Link>
@@ -117,14 +139,13 @@ export default async function BearsHubPage() {
                 {posts.slice(0, 6).map((post, index) => (
                   <article
                     key={post.id}
-                    className={`group rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-all ${
-                      index === 0 ? 'md:col-span-2' : ''
-                    }`}
-                    style={{ backgroundColor: 'var(--sm-card)' }}
+                    className={`glass-card ${index === 0 ? 'md:col-span-2' : ''}`}
+                    style={{ overflow: 'hidden' }}
                   >
                     <Link
                       href={`/${post.categorySlug}/${post.slug}`}
                       className="flex flex-col md:flex-row"
+                      style={{ textDecoration: 'none' }}
                     >
                       {/* Image */}
                       <div
@@ -136,37 +157,47 @@ export default async function BearsHubPage() {
                           src={post.featuredImage || '/placeholder.jpg'}
                           alt=""
                           fill
-                          className="object-cover group-hover:scale-105 transition-transform duration-300"
+                          className="object-cover"
                           priority={index < 2}
                         />
-                        <div
-                          className="absolute top-0 left-0 w-1 h-full"
-                          style={{ backgroundColor: bearsInfo.secondaryColor }}
-                        />
+                        <div style={{
+                          position: 'absolute',
+                          top: 0,
+                          left: 0,
+                          width: '3px',
+                          height: '100%',
+                          backgroundColor: bearsInfo.secondaryColor,
+                        }} />
                       </div>
 
                       {/* Content */}
-                      <div className={`p-4 ${index === 0 ? 'md:w-1/2 md:p-6' : ''}`}>
-                        <span
-                          className="inline-block text-[10px] font-bold uppercase tracking-wide mb-2"
-                          style={{ color: bearsInfo.secondaryColor }}
-                        >
+                      <div style={{ padding: index === 0 ? '24px' : '16px', flex: index === 0 ? undefined : undefined }} className={index === 0 ? 'md:w-1/2' : ''}>
+                        <span style={{
+                          display: 'inline-block',
+                          fontSize: 'var(--text-xs)',
+                          fontWeight: 700,
+                          textTransform: 'uppercase',
+                          letterSpacing: '0.05em',
+                          marginBottom: '8px',
+                          color: bearsInfo.secondaryColor,
+                        }}>
                           Bears
                         </span>
-                        <h3
-                          className={`font-bold leading-tight transition-colors ${
-                            index === 0 ? 'text-[18px] md:text-[22px] line-clamp-3' : 'text-[15px] line-clamp-2'
-                          }`}
-                          style={{ fontFamily: "'Montserrat', sans-serif", color: 'var(--sm-text)' }}
-                        >
+                        <h3 style={{
+                          fontWeight: 700,
+                          lineHeight: 1.3,
+                          fontSize: index === 0 ? 'clamp(1.125rem, 2vw, 1.375rem)' : 'var(--text-base)',
+                          fontFamily: 'var(--sm-font-heading)',
+                          color: 'var(--sm-text)',
+                        }}>
                           {post.title}
                         </h3>
                         {index === 0 && post.excerpt && (
-                          <p className="text-sm mt-3 line-clamp-2" style={{ color: 'var(--sm-text-muted)' }}>
+                          <p className="line-clamp-2" style={{ fontSize: 'var(--text-sm)', marginTop: '12px', color: 'var(--sm-text-muted)' }}>
                             {post.excerpt}
                           </p>
                         )}
-                        <div className="flex items-center gap-2 mt-3 text-[11px]" style={{ color: 'var(--sm-text-dim)' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginTop: '12px', fontSize: 'var(--text-xs)', color: 'var(--sm-text-dim)' }}>
                           <span>{post.author.displayName}</span>
                           <span>&bull;</span>
                           <span>

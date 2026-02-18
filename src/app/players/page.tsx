@@ -56,27 +56,26 @@ export default async function PlayersPage({ searchParams }: PlayersPageProps) {
     : null;
 
   return (
-    <main className="mx-auto max-w-7xl px-4 py-8" style={{ backgroundColor: 'var(--sm-dark)' }}>
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold" style={{ color: 'var(--sm-text)' }}>
+    <main style={{ maxWidth: 'var(--container-xl)', margin: '0 auto', padding: '32px 16px', background: 'var(--sm-dark)' }}>
+      <div style={{ marginBottom: '32px' }}>
+        <h1 style={{ fontSize: 'var(--text-3xl)', fontWeight: 700, color: 'var(--sm-text)' }}>
           Players
         </h1>
-        <p className="mt-2" style={{ color: 'var(--sm-text-muted)' }}>
+        <p style={{ marginTop: '8px', color: 'var(--sm-text-muted)' }}>
           Search and browse Chicago sports players
         </p>
       </div>
 
       {/* Filters */}
-      <div className="mb-8 flex flex-wrap gap-4">
+      <div style={{ marginBottom: '32px', display: 'flex', flexWrap: 'wrap', gap: '16px' }}>
         {/* Search */}
-        <form className="flex-1 min-w-[200px]">
+        <form style={{ flex: 1, minWidth: '200px' }}>
           <input
             type="search"
             name="q"
             placeholder="Search players..."
             defaultValue={searchQuery}
-            className="w-full px-4 py-2 focus:outline-none"
-            style={{ backgroundColor: 'var(--sm-surface)', border: '1px solid var(--sm-border)', color: 'var(--sm-text)', borderRadius: '12px' }}
+            className="input"
           />
         </form>
 
@@ -93,8 +92,8 @@ export default async function PlayersPage({ searchParams }: PlayersPageProps) {
             }
             window.location.href = url.toString();
           }}
-          className="px-4 py-2 focus:outline-none"
-          style={{ backgroundColor: 'var(--sm-surface)', border: '1px solid var(--sm-border)', color: 'var(--sm-text)', borderRadius: '12px' }}
+          className="input select"
+          style={{ width: 'auto', minWidth: '140px' }}
         >
           <option value="">All Teams</option>
           {teams.map((team) => (
@@ -117,8 +116,8 @@ export default async function PlayersPage({ searchParams }: PlayersPageProps) {
             }
             window.location.href = url.toString();
           }}
-          className="px-4 py-2 focus:outline-none"
-          style={{ backgroundColor: 'var(--sm-surface)', border: '1px solid var(--sm-border)', color: 'var(--sm-text)', borderRadius: '12px' }}
+          className="input select"
+          style={{ width: 'auto', minWidth: '140px' }}
         >
           <option value="">All Positions</option>
           {positions.map((pos) => (
@@ -135,7 +134,7 @@ export default async function PlayersPage({ searchParams }: PlayersPageProps) {
           {Object.entries(featuredByPosition).map(([position, players]) => (
             players.length > 0 && (
               <section key={position}>
-                <h2 className="mb-4 text-lg font-bold" style={{ color: 'var(--sm-text)' }}>
+                <h2 style={{ marginBottom: '16px', fontSize: 'var(--text-lg)', fontWeight: 700, color: 'var(--sm-text)' }}>
                   {position === 'QB' ? 'Quarterbacks' : position === 'RB' ? 'Running Backs' : 'Wide Receivers'}
                 </h2>
                 <div className="grid gap-4 sm:grid-cols-2 md:grid-cols-4">
@@ -152,7 +151,7 @@ export default async function PlayersPage({ searchParams }: PlayersPageProps) {
       {/* Filtered results */}
       {(teamFilter || positionFilter || searchQuery) && (
         <>
-          <p className="mb-4 text-sm" style={{ color: 'var(--sm-text-muted)' }}>
+          <p style={{ marginBottom: '16px', fontSize: 'var(--text-sm)', color: 'var(--sm-text-muted)' }}>
             {filteredPlayers.length} player{filteredPlayers.length !== 1 ? 's' : ''} found
           </p>
           <div className="grid gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
@@ -164,7 +163,7 @@ export default async function PlayersPage({ searchParams }: PlayersPageProps) {
       )}
 
       {filteredPlayers.length === 0 && (
-        <div className="rounded-xl p-8 text-center" style={{ border: '1px solid var(--sm-border)', backgroundColor: 'var(--sm-card)' }}>
+        <div className="glass-card" style={{ padding: '32px', textAlign: 'center' }}>
           <p style={{ color: 'var(--sm-text-muted)' }}>
             No players found matching your criteria.
           </p>
@@ -178,10 +177,17 @@ function PlayerCard({ player }: { player: Player }) {
   return (
     <Link
       href={`/players/${player.slug}`}
-      className="group flex items-center gap-3 rounded-xl p-4 transition-all"
-      style={{ border: '1px solid var(--sm-border)', backgroundColor: 'var(--sm-card)' }}
+      className="glass-card"
+      style={{
+        display: 'flex',
+        alignItems: 'center',
+        gap: '12px',
+        padding: '16px',
+        textDecoration: 'none',
+        transition: 'all 0.15s ease',
+      }}
     >
-      <div className="relative h-14 w-14 flex-shrink-0 overflow-hidden rounded-full" style={{ backgroundColor: 'var(--sm-surface)' }}>
+      <div style={{ position: 'relative', width: '56px', height: '56px', flexShrink: 0, overflow: 'hidden', borderRadius: '50%', background: 'var(--sm-surface)' }}>
         <Image
           src={player.headshot}
           alt={player.name}
@@ -189,15 +195,15 @@ function PlayerCard({ player }: { player: Player }) {
           className="object-cover"
         />
       </div>
-      <div className="flex-1 min-w-0">
-        <p className="font-semibold truncate" style={{ color: 'var(--sm-text)' }}>
+      <div style={{ flex: 1, minWidth: 0 }}>
+        <p className="truncate" style={{ fontWeight: 600, color: 'var(--sm-text)' }}>
           {player.name}
         </p>
-        <p className="text-sm" style={{ color: 'var(--sm-text-muted)' }}>
+        <p style={{ fontSize: 'var(--text-sm)', color: 'var(--sm-text-muted)' }}>
           {player.position} • #{player.number}
         </p>
       </div>
-      <div className="relative h-8 w-8 flex-shrink-0">
+      <div style={{ position: 'relative', width: '32px', height: '32px', flexShrink: 0 }}>
         <Image
           src={player.team.logo}
           alt={player.team.name}

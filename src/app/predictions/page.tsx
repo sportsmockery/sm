@@ -107,50 +107,67 @@ export default function PredictionsPage() {
     : 0
 
   return (
-    <div className="min-h-screen" style={{ backgroundColor: 'var(--sm-dark)' }}>
+    <div style={{ minHeight: '100vh', background: 'var(--sm-dark)' }}>
       {/* Hero Section */}
-      <section className="relative overflow-hidden py-16 lg:py-24" style={{ borderBottom: '1px solid var(--sm-border)' }}>
-        {/* Background effects */}
-        <div className="absolute inset-0 bg-[linear-gradient(rgba(255,165,0,0.03)_1px,transparent_1px),linear-gradient(90deg,rgba(255,165,0,0.03)_1px,transparent_1px)] bg-[size:48px_48px]" />
-        <div className="absolute left-1/4 top-0 h-64 w-64 rounded-full bg-amber-500/10 blur-[100px]" />
-        <div className="absolute right-1/4 bottom-0 h-64 w-64 rounded-full bg-orange-500/10 blur-[100px]" />
+      <section className="sm-hero-bg" style={{ position: 'relative', overflow: 'hidden', padding: '64px 0 80px', borderBottom: '1px solid var(--sm-border)' }}>
+        <div className="sm-grid-overlay" />
+        {/* Glow orbs */}
+        <div className="glow-orb" style={{ background: 'rgba(245, 158, 11, 0.08)', width: 400, height: 400, top: -100, left: '25%' }} />
+        <div className="glow-orb" style={{ background: 'rgba(249, 115, 22, 0.06)', width: 400, height: 400, bottom: -100, right: '25%' }} />
 
-        <div className="relative mx-auto max-w-6xl px-4">
-          <div className="flex flex-col items-center text-center">
+        <div style={{ position: 'relative', maxWidth: 'var(--sm-max-width)', margin: '0 auto', padding: '0 16px' }}>
+          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center' }}>
             {/* Logo */}
-            <div className="mb-6 flex h-20 w-20 items-center justify-center rounded-2xl bg-gradient-to-br from-amber-500 to-orange-600 shadow-2xl shadow-amber-500/30">
-              <svg className="h-10 w-10 text-white" fill="currentColor" viewBox="0 0 24 24">
+            <div style={{
+              marginBottom: 24,
+              display: 'flex',
+              height: 80,
+              width: 80,
+              alignItems: 'center',
+              justifyContent: 'center',
+              borderRadius: 'var(--sm-radius-lg)',
+              background: 'linear-gradient(135deg, #f59e0b, #ea580c)',
+              boxShadow: '0 0 40px rgba(245, 158, 11, 0.3)',
+            }}>
+              <svg style={{ height: 40, width: 40, color: '#fff' }} fill="currentColor" viewBox="0 0 24 24">
                 <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" />
               </svg>
             </div>
 
             {/* Title */}
-            <h1 className="mb-4 font-heading text-4xl font-black sm:text-5xl lg:text-6xl" style={{ color: 'var(--sm-text)' }}>
+            <h1 style={{
+              marginBottom: 16,
+              fontFamily: 'var(--sm-font-heading)',
+              fontSize: 'clamp(32px, 6vw, 56px)',
+              fontWeight: 900,
+              color: 'var(--sm-text)',
+              lineHeight: 1.1,
+            }}>
               SM{' '}
-              <span className="bg-gradient-to-r from-amber-400 to-orange-500 bg-clip-text text-transparent">
+              <span className="gradient-text" style={{ background: 'linear-gradient(135deg, #f59e0b, #ea580c)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>
                 Prophecy
               </span>
             </h1>
 
             {/* Subtitle */}
-            <p className="mb-8 max-w-2xl text-lg" style={{ color: 'var(--sm-text-muted)' }}>
+            <p style={{ marginBottom: 32, maxWidth: 600, fontSize: 17, lineHeight: 1.6, color: 'var(--sm-text-muted)' }}>
               AI-powered predictions and analysis for Chicago sports. Our models analyze thousands of data points
               to forecast outcomes and provide insights.
             </p>
 
             {/* Stats */}
-            <div className="flex flex-wrap justify-center gap-8">
-              <div className="text-center">
-                <div className="text-3xl font-black" style={{ color: 'var(--sm-text)' }}>{predictions.length}</div>
-                <div className="text-sm" style={{ color: 'var(--sm-text-muted)' }}>Active Predictions</div>
+            <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center', gap: 40 }}>
+              <div style={{ textAlign: 'center' }}>
+                <div style={{ fontSize: 32, fontWeight: 900, color: 'var(--sm-text)' }}>{predictions.length}</div>
+                <div style={{ fontSize: 13, color: 'var(--sm-text-muted)' }}>Active Predictions</div>
               </div>
-              <div className="text-center">
-                <div className="text-3xl font-black text-emerald-400">{accuracy}%</div>
-                <div className="text-sm" style={{ color: 'var(--sm-text-muted)' }}>Historical Accuracy</div>
+              <div style={{ textAlign: 'center' }}>
+                <div style={{ fontSize: 32, fontWeight: 900, color: 'var(--sm-success)' }}>{accuracy}%</div>
+                <div style={{ fontSize: 13, color: 'var(--sm-text-muted)' }}>Historical Accuracy</div>
               </div>
-              <div className="text-center">
-                <div className="text-3xl font-black text-amber-400">{resolvedPredictions.length}</div>
-                <div className="text-sm" style={{ color: 'var(--sm-text-muted)' }}>Resolved Predictions</div>
+              <div style={{ textAlign: 'center' }}>
+                <div style={{ fontSize: 32, fontWeight: 900, color: '#f59e0b' }}>{resolvedPredictions.length}</div>
+                <div style={{ fontSize: 13, color: 'var(--sm-text-muted)' }}>Resolved Predictions</div>
               </div>
             </div>
           </div>
@@ -158,15 +175,15 @@ export default function PredictionsPage() {
       </section>
 
       {/* Active Predictions */}
-      <section className="mx-auto max-w-6xl px-4 py-12">
-        <div className="mb-8 flex items-center gap-4">
-          <div className="h-8 w-1.5 rounded-full bg-gradient-to-b from-amber-500 to-orange-500" />
-          <h2 className="text-2xl font-black uppercase tracking-tight" style={{ color: 'var(--sm-text)' }}>
+      <section style={{ maxWidth: 'var(--sm-max-width)', margin: '0 auto', padding: '48px 16px' }}>
+        <div style={{ marginBottom: 32, display: 'flex', alignItems: 'center', gap: 16 }}>
+          <div style={{ height: 32, width: 6, borderRadius: 'var(--sm-radius-pill)', background: 'linear-gradient(to bottom, #f59e0b, #ea580c)' }} />
+          <h2 style={{ fontSize: 24, fontWeight: 900, textTransform: 'uppercase', letterSpacing: '-0.02em', color: 'var(--sm-text)', fontFamily: 'var(--sm-font-heading)', margin: 0 }}>
             Active Predictions
           </h2>
         </div>
 
-        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+        <div style={{ display: 'grid', gap: 24, gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))' }}>
           {predictions.map((prediction, index) => (
             <div
               key={prediction.id}
@@ -180,20 +197,20 @@ export default function PredictionsPage() {
       </section>
 
       {/* Past Predictions */}
-      <section className="mx-auto max-w-6xl px-4 py-12">
-        <div className="mb-8 flex items-center justify-between">
-          <div className="flex items-center gap-4">
-            <div className="h-8 w-1.5 rounded-full" style={{ background: 'linear-gradient(to bottom, var(--sm-text-muted), var(--sm-text-dim))' }} />
-            <h2 className="text-2xl font-black uppercase tracking-tight" style={{ color: 'var(--sm-text)' }}>
+      <section style={{ maxWidth: 'var(--sm-max-width)', margin: '0 auto', padding: '48px 16px' }}>
+        <div style={{ marginBottom: 32, display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 16 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
+            <div style={{ height: 32, width: 6, borderRadius: 'var(--sm-radius-pill)', background: 'linear-gradient(to bottom, var(--sm-text-muted), var(--sm-text-dim))' }} />
+            <h2 style={{ fontSize: 24, fontWeight: 900, textTransform: 'uppercase', letterSpacing: '-0.02em', color: 'var(--sm-text)', fontFamily: 'var(--sm-font-heading)', margin: 0 }}>
               Past Predictions
             </h2>
           </div>
-          <span className="rounded-full px-3 py-1 text-xs font-semibold" style={{ backgroundColor: 'var(--sm-surface)', color: 'var(--sm-text-muted)' }}>
+          <span className="sm-tag">
             {correctPredictions.length}/{resolvedPredictions.length} Correct
           </span>
         </div>
 
-        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+        <div style={{ display: 'grid', gap: 24, gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))' }}>
           {pastPredictions.map((prediction, index) => (
             <div
               key={prediction.id}
@@ -207,10 +224,10 @@ export default function PredictionsPage() {
       </section>
 
       {/* Disclaimer */}
-      <section className="mx-auto max-w-6xl px-4 pb-12">
-        <div className="rounded-2xl bg-amber-500/10 p-6 text-center">
-          <p className="text-sm text-amber-300/80">
-            <strong className="text-amber-300">Disclaimer:</strong> SM Prophecy predictions are generated
+      <section style={{ maxWidth: 'var(--sm-max-width)', margin: '0 auto', padding: '0 16px 48px' }}>
+        <div className="glass-card glass-card-static glass-card-sm" style={{ textAlign: 'center', background: 'rgba(245, 158, 11, 0.06)', border: '1px solid rgba(245, 158, 11, 0.15)' }}>
+          <p style={{ fontSize: 13, color: 'rgba(245, 158, 11, 0.7)', margin: 0 }}>
+            <strong style={{ color: '#f59e0b' }}>Disclaimer:</strong> SM Prophecy predictions are generated
             for entertainment purposes only. They should not be used as the basis for betting or gambling
             decisions. Past performance does not guarantee future results.
           </p>
@@ -218,13 +235,12 @@ export default function PredictionsPage() {
       </section>
 
       {/* Back link */}
-      <div className="mx-auto max-w-6xl px-4 pb-16">
+      <div style={{ maxWidth: 'var(--sm-max-width)', margin: '0 auto', padding: '0 16px 64px' }}>
         <Link
           href="/"
-          className="inline-flex items-center gap-2 text-sm transition-colors"
-          style={{ color: 'var(--sm-text-muted)' }}
+          style={{ display: 'inline-flex', alignItems: 'center', gap: 8, fontSize: 14, color: 'var(--sm-text-muted)', textDecoration: 'none', transition: 'color 0.2s' }}
         >
-          <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
+          <svg style={{ height: 16, width: 16 }} fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18" />
           </svg>
           Back to Home

@@ -67,10 +67,7 @@ export default async function PlayerProfilePage({ params }: PlayerPageProps) {
       <ScrollToTop />
 
       {/* Hero Section */}
-      <div
-        className="relative overflow-hidden"
-        style={{ background: 'linear-gradient(135deg, #0B162A 0%, #0B162A 70%, #C83200 100%)' }}
-      >
+      <div className="relative overflow-hidden team-hero-bears">
         <div className="max-w-7xl mx-auto px-3 sm:px-4 py-4 sm:py-8">
           {/* Breadcrumb & Player Switcher */}
           <div className="flex flex-wrap items-center justify-between gap-3 sm:gap-4 mb-4 sm:mb-6">
@@ -120,7 +117,7 @@ export default async function PlayerProfilePage({ params }: PlayerPageProps) {
                 <span className="px-2 sm:px-3 py-1 bg-white/20 rounded-lg text-base sm:text-lg font-bold">
                   #{player.jerseyNumber}
                 </span>
-                <span className="px-2 sm:px-3 py-1 rounded-lg text-xs sm:text-sm font-semibold" style={{ backgroundColor: '#C83200' }}>
+                <span className="px-2 sm:px-3 py-1 rounded-lg text-xs sm:text-sm font-semibold" style={{ backgroundColor: 'var(--sm-red)' }}>
                   {player.position}
                 </span>
               </div>
@@ -190,7 +187,7 @@ export default async function PlayerProfilePage({ params }: PlayerPageProps) {
           <div className="lg:col-span-2 space-y-4 sm:space-y-8">
             {/* Season Overview */}
             {currentSeason && (
-              <section className="rounded-2xl p-4 sm:p-6" style={{ backgroundColor: 'var(--sm-card)', border: '1px solid var(--sm-border)' }}>
+              <section className="glass-card glass-card-static">
                 <h2 className="text-lg sm:text-xl font-bold mb-4 sm:mb-6" style={{ fontFamily: "'Space Grotesk', sans-serif", color: 'var(--sm-text)' }}>
                   2025 Season Overview
                 </h2>
@@ -200,7 +197,7 @@ export default async function PlayerProfilePage({ params }: PlayerPageProps) {
 
             {/* Strength Profile */}
             {currentSeason && (
-              <section className="rounded-2xl p-4 sm:p-6" style={{ backgroundColor: 'var(--sm-card)', border: '1px solid var(--sm-border)' }}>
+              <section className="glass-card glass-card-static">
                 <h2 className="text-lg sm:text-xl font-bold mb-4 sm:mb-6" style={{ fontFamily: "'Space Grotesk', sans-serif", color: 'var(--sm-text)' }}>
                   Strength Profile
                 </h2>
@@ -210,7 +207,7 @@ export default async function PlayerProfilePage({ params }: PlayerPageProps) {
 
             {/* Game Log */}
             {gameLog.length > 0 && (
-              <section className="rounded-2xl overflow-hidden" style={{ backgroundColor: 'var(--sm-card)', border: '1px solid var(--sm-border)' }}>
+              <section className="glass-card glass-card-static" style={{ overflow: 'hidden', padding: 0 }}>
                 <div className="p-4 sm:p-6" style={{ borderBottom: '1px solid var(--sm-border)' }}>
                   <h2 className="text-lg sm:text-xl font-bold" style={{ fontFamily: "'Space Grotesk', sans-serif", color: 'var(--sm-text)' }}>
                     Game Log 2025
@@ -225,7 +222,7 @@ export default async function PlayerProfilePage({ params }: PlayerPageProps) {
           <div className="space-y-4 sm:space-y-6">
             {/* Similar Bears */}
             {similarPlayers.length > 0 && (
-              <section className="rounded-2xl p-4 sm:p-6" style={{ backgroundColor: 'var(--sm-card)', border: '1px solid var(--sm-border)' }}>
+              <section className="glass-card glass-card-static">
                 <h3 className="text-base sm:text-lg font-bold mb-3 sm:mb-4" style={{ fontFamily: "'Space Grotesk', sans-serif", color: 'var(--sm-text)' }}>
                   Similar Bears
                 </h3>
@@ -272,7 +269,7 @@ export default async function PlayerProfilePage({ params }: PlayerPageProps) {
             )}
 
             {/* Quick Links */}
-            <section className="rounded-2xl p-4 sm:p-6" style={{ backgroundColor: 'var(--sm-card)', border: '1px solid var(--sm-border)' }}>
+            <section className="glass-card glass-card-static">
               <h3 className="text-base sm:text-lg font-bold mb-3 sm:mb-4" style={{ fontFamily: "'Space Grotesk', sans-serif", color: 'var(--sm-text)' }}>
                 Quick Links
               </h3>
@@ -503,7 +500,7 @@ function StrengthProfileBars({ player, stats }: { player: BearsPlayer; stats: an
               className="h-full rounded-full transition-all"
               style={{
                 width: `${Math.max(bar.value, 5)}%`,
-                background: 'linear-gradient(90deg, #0B162A 0%, #C83200 100%)',
+                background: 'linear-gradient(90deg, #0B162A 0%, var(--sm-red) 100%)',
               }}
             />
           </div>

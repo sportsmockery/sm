@@ -8,8 +8,9 @@ export const metadata: Metadata = {
 
 export default function PollsPage() {
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-950">
-      <div className="mx-auto max-w-7xl px-4 py-8">
+    <div className="sm-hero-bg" style={{ minHeight: '100vh' }}>
+      <div className="sm-grid-overlay" />
+      <div style={{ position: 'relative', maxWidth: 'var(--sm-max-width)', margin: '0 auto', padding: '32px 16px' }}>
         <PollList />
       </div>
     </div>

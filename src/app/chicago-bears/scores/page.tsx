@@ -76,7 +76,7 @@ export default async function BearsScoresPage() {
     >
       <div className="pb-12">
         {/* Record Summary */}
-        <div className="glass-card glass-card-sm glass-card-static" style={{ marginBottom: '24px' }}>
+        <div className="glass-card glass-card-sm glass-card-static">
           <div style={{ display: 'flex', flexWrap: 'wrap', gap: '24px', justifyContent: 'center', textAlign: 'center' }}>
             <div>
               <div style={{ fontSize: '11px', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '4px', color: 'var(--sm-text-muted)' }}>Regular Season</div>

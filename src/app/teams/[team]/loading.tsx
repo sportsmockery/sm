@@ -1,24 +1,24 @@
 export default function TeamLoading() {
   return (
-    <div className="min-h-screen" style={{ backgroundColor: 'var(--sm-card)' }}>
+    <div style={{ minHeight: '100vh', background: 'var(--sm-dark)' }}>
       {/* Header skeleton */}
-      <div className="h-64 animate-pulse" style={{ backgroundColor: 'var(--sm-surface)' }} />
+      <div className="skeleton" style={{ height: '256px' }} />
 
       {/* Nav skeleton */}
-      <div className="h-14 border-b" style={{ borderColor: 'var(--sm-border)', backgroundColor: 'var(--sm-card)' }}>
-        <div className="mx-auto flex max-w-7xl gap-4 px-4 py-4">
+      <div style={{ height: '56px', borderBottom: '1px solid var(--sm-border)', background: 'var(--sm-card)' }}>
+        <div style={{ display: 'flex', maxWidth: 'var(--container-xl)', margin: '0 auto', gap: '16px', padding: '16px' }}>
           {[1, 2, 3, 4, 5].map((i) => (
             <div
               key={i}
-              className="h-6 w-20 animate-pulse rounded"
-              style={{ backgroundColor: 'var(--sm-surface)' }}
+              className="skeleton"
+              style={{ height: '24px', width: '80px', borderRadius: 'var(--sm-radius-sm)' }}
             />
           ))}
         </div>
       </div>
 
       {/* Content skeleton */}
-      <main className="mx-auto max-w-7xl px-4 py-8">
+      <main style={{ maxWidth: 'var(--container-xl)', margin: '0 auto', padding: '32px 16px' }}>
         <div className="grid gap-8 lg:grid-cols-3">
           <div className="lg:col-span-2 space-y-6">
             {/* Stats cards */}
@@ -26,14 +26,14 @@ export default function TeamLoading() {
               {[1, 2, 3, 4].map((i) => (
                 <div
                   key={i}
-                  className="h-24 animate-pulse rounded-xl"
-                  style={{ backgroundColor: 'var(--sm-surface)' }}
+                  className="skeleton"
+                  style={{ height: '96px', borderRadius: 'var(--sm-radius-md)' }}
                 />
               ))}
             </div>
 
             {/* Table skeleton */}
-            <div className="h-96 animate-pulse rounded-xl" style={{ backgroundColor: 'var(--sm-surface)' }} />
+            <div className="skeleton" style={{ height: '384px', borderRadius: 'var(--sm-radius-md)' }} />
           </div>
 
           {/* Sidebar skeleton */}
@@ -41,8 +41,8 @@ export default function TeamLoading() {
             {[1, 2, 3].map((i) => (
               <div
                 key={i}
-                className="h-48 animate-pulse rounded-xl"
-                style={{ backgroundColor: 'var(--sm-surface)' }}
+                className="skeleton"
+                style={{ height: '192px', borderRadius: 'var(--sm-radius-md)' }}
               />
             ))}
           </div>

@@ -270,7 +270,7 @@ export default function ARHelmetPage() {
         height: '100vh',
         overflow: 'hidden',
         position: 'relative',
-        backgroundColor: '#000',
+        backgroundColor: 'var(--sm-dark, #000)',
       }}
     >
       {/* Hidden canvas for WebAR.rocks face detection */}
@@ -283,7 +283,7 @@ export default function ARHelmetPage() {
           width: '100%',
           height: '100%',
           zIndex: 0,
-          transform: 'scaleX(-1)', // Mirror for selfie view
+          transform: 'scaleX(-1)',
         }}
       />
 
@@ -300,9 +300,9 @@ export default function ARHelmetPage() {
           width: '100%',
           height: '100%',
           objectFit: 'cover',
-          transform: 'scaleX(-1)', // Mirror for selfie view
+          transform: 'scaleX(-1)',
           zIndex: 0,
-          display: 'none', // Hidden - WebAR.rocks canvas shows video
+          display: 'none',
         }}
       />
 
@@ -327,11 +327,16 @@ export default function ARHelmetPage() {
           bottom: 20,
           left: '50%',
           transform: 'translateX(-50%)',
-          color: '#fff',
-          fontSize: 14,
-          fontFamily: 'system-ui, sans-serif',
+          color: 'var(--sm-text, #fff)',
+          fontSize: 'var(--text-sm, 14px)',
+          fontFamily: 'var(--font-sans, system-ui, sans-serif)',
           textShadow: '0 1px 3px rgba(0,0,0,0.8)',
           zIndex: 10,
+          background: 'rgba(0,0,0,0.5)',
+          backdropFilter: 'blur(10px)',
+          padding: '8px 16px',
+          borderRadius: 'var(--sm-radius-pill, 100px)',
+          border: '1px solid var(--sm-border, rgba(255,255,255,0.06))',
         }}
       >
         {status}

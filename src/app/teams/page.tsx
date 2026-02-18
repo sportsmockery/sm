@@ -24,34 +24,37 @@ export default async function TeamsPage() {
   );
 
   return (
-    <main className="mx-auto max-w-7xl px-4 py-8">
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold" style={{ color: 'var(--sm-text)' }}>
+    <main style={{ maxWidth: 'var(--container-xl)', margin: '0 auto', padding: '32px 16px' }}>
+      <div style={{ marginBottom: '32px' }}>
+        <h1 style={{ fontSize: 'var(--text-3xl)', fontWeight: 700, color: 'var(--sm-text)' }}>
           Chicago Teams
         </h1>
-        <p className="mt-2" style={{ color: 'var(--sm-text-muted)' }}>
+        <p style={{ marginTop: '8px', color: 'var(--sm-text-muted)' }}>
           Follow all your favorite Chicago sports teams
         </p>
       </div>
 
-      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+      <div style={{ display: 'grid', gap: '24px', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))' }}>
         {teamsWithData.map((team) => (
           <div
             key={team.slug}
-            className="group overflow-hidden rounded-2xl transition-all"
-            style={{ border: '1px solid var(--sm-border)', backgroundColor: 'var(--sm-card)' }}
+            className="glass-card"
+            style={{ overflow: 'hidden' }}
           >
             {/* Team Header - Main link */}
             <Link
               href={`/teams/${team.slug}`}
-              className="block relative p-6"
               style={{
+                display: 'block',
+                position: 'relative',
+                padding: '24px',
                 background: `linear-gradient(135deg, ${team.colors.primary} 0%, ${team.colors.secondary} 100%)`,
+                textDecoration: 'none',
               }}
             >
-              <div className="flex items-center gap-4">
-                <div className="relative h-20 w-20 flex-shrink-0">
-                  <div className="absolute inset-0 rounded-full bg-white/20 backdrop-blur-sm" />
+              <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+                <div style={{ position: 'relative', width: '80px', height: '80px', flexShrink: 0 }}>
+                  <div style={{ position: 'absolute', inset: 0, borderRadius: '50%', background: 'rgba(255,255,255,0.2)', backdropFilter: 'blur(8px)' }} />
                   <Image
                     src={team.logo}
                     alt={team.name}
@@ -60,16 +63,16 @@ export default async function TeamsPage() {
                   />
                 </div>
                 <div>
-                  <p className="text-sm font-medium text-white/70">{team.league}</p>
-                  <h2 className="text-xl font-bold text-white">{team.name}</h2>
-                  <p className="text-sm text-white/70">{team.division}</p>
+                  <p style={{ fontSize: 'var(--text-sm)', fontWeight: 500, color: 'rgba(255,255,255,0.7)' }}>{team.league}</p>
+                  <h2 style={{ fontSize: 'var(--text-xl)', fontWeight: 700, color: '#fff' }}>{team.name}</h2>
+                  <p style={{ fontSize: 'var(--text-sm)', color: 'rgba(255,255,255,0.7)' }}>{team.division}</p>
                 </div>
               </div>
 
               {/* Record */}
               {team.record && (team.record.wins > 0 || team.record.losses > 0) && (
-                <div className="mt-4">
-                  <p className="text-2xl font-bold text-white">
+                <div style={{ marginTop: '16px' }}>
+                  <p style={{ fontSize: 'var(--text-2xl)', fontWeight: 700, color: '#fff' }}>
                     {team.record.wins}-{team.record.losses}
                     {team.record.ties > 0 ? `-${team.record.ties}` : ''}
                   </p>
@@ -78,7 +81,7 @@ export default async function TeamsPage() {
             </Link>
 
             {/* Quick Links */}
-            <div className="grid grid-cols-4" style={{ borderTop: '1px solid var(--sm-border)' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', borderTop: '1px solid var(--sm-border)' }}>
               {[
                 { label: 'Schedule', href: `/teams/${team.slug}/schedule` },
                 { label: 'Roster', href: `/teams/${team.slug}/roster` },
@@ -88,10 +91,15 @@ export default async function TeamsPage() {
                 <Link
                   key={link.label}
                   href={link.href}
-                  className="py-3 text-center text-xs font-medium transition-colors"
                   style={{
+                    padding: '12px',
+                    textAlign: 'center',
+                    fontSize: 'var(--text-xs)',
+                    fontWeight: 500,
                     color: 'var(--sm-text-muted)',
+                    textDecoration: 'none',
                     borderRight: idx < 3 ? '1px solid var(--sm-border)' : 'none',
+                    transition: 'color 0.15s ease',
                   }}
                 >
                   {link.label}
@@ -103,15 +111,20 @@ export default async function TeamsPage() {
             {team.nextGame && (
               <Link
                 href={`/teams/${team.slug}/schedule`}
-                className="block p-4 transition-colors"
-                style={{ borderTop: '1px solid var(--sm-border)' }}
+                style={{
+                  display: 'block',
+                  padding: '16px',
+                  borderTop: '1px solid var(--sm-border)',
+                  textDecoration: 'none',
+                  transition: 'background 0.15s ease',
+                }}
               >
-                <p className="mb-1 text-xs font-medium uppercase" style={{ color: 'var(--sm-text-muted)' }}>
+                <p style={{ marginBottom: '4px', fontSize: 'var(--text-xs)', fontWeight: 500, textTransform: 'uppercase', color: 'var(--sm-text-muted)' }}>
                   Next Game
                 </p>
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <div className="relative h-6 w-6">
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <div style={{ position: 'relative', width: '24px', height: '24px' }}>
                       <Image
                         src={team.nextGame.isHome ? team.nextGame.awayTeam.logo : team.nextGame.homeTeam.logo}
                         alt=""
@@ -119,14 +132,14 @@ export default async function TeamsPage() {
                         className="object-contain"
                       />
                     </div>
-                    <span className="text-sm font-medium" style={{ color: 'var(--sm-text)' }}>
+                    <span style={{ fontSize: 'var(--text-sm)', fontWeight: 500, color: 'var(--sm-text)' }}>
                       {team.nextGame.isHome ? 'vs' : '@'}{' '}
                       {team.nextGame.isHome
                         ? team.nextGame.awayTeam.shortName
                         : team.nextGame.homeTeam.shortName}
                     </span>
                   </div>
-                  <span className="text-xs" style={{ color: 'var(--sm-text-muted)' }}>
+                  <span style={{ fontSize: 'var(--text-xs)', color: 'var(--sm-text-muted)' }}>
                     {new Date(team.nextGame.date).toLocaleDateString('en-US', {
                       month: 'short',
                       day: 'numeric',

@@ -53,11 +53,11 @@ export default async function SchedulePage({ params, searchParams }: SchedulePag
   const ties = schedule.filter(g => g.result === 'T').length;
 
   return (
-    <main className="mx-auto max-w-7xl px-4 py-8">
+    <main style={{ maxWidth: 'var(--container-xl)', margin: '0 auto', padding: '32px 16px' }}>
       {/* Header */}
       <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="text-2xl font-bold" style={{ color: 'var(--sm-text)' }}>
+          <h1 style={{ fontSize: 'var(--text-2xl)', fontWeight: 700, color: 'var(--sm-text)' }}>
             {team.shortName} Schedule
           </h1>
           <p style={{ color: 'var(--sm-text-muted)' }}>
@@ -65,13 +65,21 @@ export default async function SchedulePage({ params, searchParams }: SchedulePag
           </p>
         </div>
 
-        <div className="flex items-center gap-4">
+        <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
           <SeasonSelector team={team} currentSeason={season} />
         </div>
       </div>
 
       {/* Filter tabs */}
-      <div className="mb-6 flex gap-1 rounded-lg p-1 w-fit" style={{ backgroundColor: 'var(--sm-surface)' }}>
+      <div style={{
+        marginBottom: '24px',
+        display: 'flex',
+        gap: '4px',
+        borderRadius: 'var(--sm-radius-md)',
+        padding: '4px',
+        width: 'fit-content',
+        background: 'var(--sm-surface)',
+      }}>
         {[
           { label: 'All Games', value: '' },
           { label: 'Home', value: 'home' },
@@ -80,12 +88,17 @@ export default async function SchedulePage({ params, searchParams }: SchedulePag
           <a
             key={tab.value}
             href={tab.value ? `?filter=${tab.value}` : '?'}
-            className="rounded-md px-3 py-1.5 text-sm font-medium transition-colors"
-            style={
-              (filter || '') === tab.value
-                ? { backgroundColor: 'var(--sm-card)', color: 'var(--sm-text)', boxShadow: '0 1px 2px rgba(0,0,0,0.1)' }
+            style={{
+              borderRadius: 'var(--sm-radius-sm)',
+              padding: '6px 12px',
+              fontSize: 'var(--text-sm)',
+              fontWeight: 500,
+              textDecoration: 'none',
+              transition: 'all 0.15s ease',
+              ...(filter || '') === tab.value
+                ? { background: 'var(--sm-card)', color: 'var(--sm-text)', boxShadow: 'var(--shadow-sm)' }
                 : { color: 'var(--sm-text-muted)' }
-            }
+            }}
           >
             {tab.label}
           </a>

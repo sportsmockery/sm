@@ -9,35 +9,40 @@ export const metadata: Metadata = {
 
 export default function NewPollPage() {
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-950">
-      <div className="mx-auto max-w-7xl px-4 py-8">
+    <div className="sm-hero-bg" style={{ minHeight: '100vh' }}>
+      <div className="sm-grid-overlay" />
+      <div style={{ position: 'relative', maxWidth: 'var(--sm-max-width)', margin: '0 auto', padding: '32px 16px' }}>
         {/* Breadcrumb */}
-        <nav className="mb-6">
-          <ol className="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400">
+        <nav style={{ marginBottom: 24 }}>
+          <ol style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 14, listStyle: 'none', padding: 0, margin: 0 }}>
             <li>
-              <Link href="/polls" className="hover:text-purple-600 dark:hover:text-purple-400">
+              <Link href="/polls" style={{ color: 'var(--sm-text-muted)', textDecoration: 'none', transition: 'color 0.2s' }}>
                 Polls
               </Link>
             </li>
-            <li>
-              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <li style={{ color: 'var(--sm-text-dim)' }}>
+              <svg style={{ width: 16, height: 16 }} fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
               </svg>
             </li>
-            <li className="text-gray-900 dark:text-white font-medium">New Poll</li>
+            <li style={{ color: 'var(--sm-text)', fontWeight: 600 }}>New Poll</li>
           </ol>
         </nav>
 
         {/* Header */}
-        <div className="mb-8">
-          <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Create New Poll</h1>
-          <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
+        <div style={{ marginBottom: 32 }}>
+          <h1 style={{ fontSize: 28, fontWeight: 800, color: 'var(--sm-text)', fontFamily: 'var(--sm-font-heading)', margin: 0 }}>
+            Create New Poll
+          </h1>
+          <p style={{ fontSize: 14, color: 'var(--sm-text-muted)', marginTop: 4 }}>
             Create an interactive poll to engage your readers
           </p>
         </div>
 
         {/* Form */}
-        <PollCreateForm />
+        <div className="glass-card glass-card-static">
+          <PollCreateForm />
+        </div>
       </div>
     </div>
   )

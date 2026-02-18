@@ -60,48 +60,53 @@ export default async function EditPollPage({ params }: EditPollPageProps) {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-950">
-      <div className="mx-auto max-w-7xl px-4 py-8">
+    <div className="sm-hero-bg" style={{ minHeight: '100vh' }}>
+      <div className="sm-grid-overlay" />
+      <div style={{ position: 'relative', maxWidth: 'var(--sm-max-width)', margin: '0 auto', padding: '32px 16px' }}>
         {/* Breadcrumb */}
-        <nav className="mb-6">
-          <ol className="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400">
+        <nav style={{ marginBottom: 24 }}>
+          <ol style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 14, listStyle: 'none', padding: 0, margin: 0 }}>
             <li>
-              <Link href="/polls" className="hover:text-purple-600 dark:hover:text-purple-400">
+              <Link href="/polls" style={{ color: 'var(--sm-text-muted)', textDecoration: 'none' }}>
                 Polls
               </Link>
             </li>
-            <li>
-              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <li style={{ color: 'var(--sm-text-dim)' }}>
+              <svg style={{ width: 16, height: 16 }} fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
               </svg>
             </li>
-            <li className="text-gray-900 dark:text-white font-medium">Edit Poll</li>
+            <li style={{ color: 'var(--sm-text)', fontWeight: 600 }}>Edit Poll</li>
           </ol>
         </nav>
 
         {/* Header */}
-        <div className="mb-8 flex items-center justify-between">
+        <div style={{ marginBottom: 32, display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 16 }}>
           <div>
-            <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Edit Poll</h1>
-            <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
+            <h1 style={{ fontSize: 28, fontWeight: 800, color: 'var(--sm-text)', fontFamily: 'var(--sm-font-heading)', margin: 0 }}>
+              Edit Poll
+            </h1>
+            <p style={{ fontSize: 14, color: 'var(--sm-text-muted)', marginTop: 4 }}>
               {poll.title || poll.question}
             </p>
           </div>
-          <div className="flex items-center gap-3">
+          <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
             <Link
               href={`/polls/${id}/results`}
-              className="px-4 py-2 border border-gray-200 dark:border-gray-700 rounded-lg text-sm text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800"
+              className="btn-secondary btn-sm"
             >
               View Results
             </Link>
-            <span className="text-sm text-gray-500 dark:text-gray-400">
+            <span className="sm-tag">
               {poll.total_votes.toLocaleString()} votes
             </span>
           </div>
         </div>
 
         {/* Form */}
-        <PollCreateForm editMode initialData={initialData} />
+        <div className="glass-card glass-card-static">
+          <PollCreateForm editMode initialData={initialData} />
+        </div>
       </div>
     </div>
   )

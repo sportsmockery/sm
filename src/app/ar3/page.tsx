@@ -408,7 +408,7 @@ export default function AR3HelmetPage() {
       height: '100vh',
       overflow: 'hidden',
       position: 'relative',
-      backgroundColor: '#000',
+      backgroundColor: 'var(--sm-dark, #000)',
     }}>
       {/* Video element - camera feed */}
       <video
@@ -424,7 +424,7 @@ export default function AR3HelmetPage() {
           height: '100%',
           objectFit: 'cover',
           zIndex: 1,
-          transform: 'scaleX(-1)', // Mirror for selfie
+          transform: 'scaleX(-1)',
         }}
       />
 
@@ -442,18 +442,22 @@ export default function AR3HelmetPage() {
         }}
       />
 
-
       {/* Status indicator */}
       <div style={{
         position: 'absolute',
         bottom: 20,
         left: '50%',
         transform: 'translateX(-50%)',
-        color: '#fff',
-        fontSize: 14,
-        fontFamily: 'system-ui, sans-serif',
+        color: 'var(--sm-text, #fff)',
+        fontSize: 'var(--text-sm, 14px)',
+        fontFamily: 'var(--font-sans, system-ui, sans-serif)',
         textShadow: '0 1px 3px rgba(0,0,0,0.8)',
         zIndex: 10,
+        background: 'rgba(0,0,0,0.5)',
+        backdropFilter: 'blur(10px)',
+        padding: '8px 16px',
+        borderRadius: 'var(--sm-radius-pill, 100px)',
+        border: '1px solid var(--sm-border, rgba(255,255,255,0.06))',
       }}>
         {status}
       </div>
@@ -465,10 +469,12 @@ export default function AR3HelmetPage() {
         left: 10,
         padding: '10px 15px',
         backgroundColor: 'rgba(0,0,0,0.85)',
+        backdropFilter: 'blur(10px)',
         color: '#0f0',
-        fontSize: 12,
-        fontFamily: 'monospace',
-        borderRadius: 5,
+        fontSize: 'var(--text-xs, 12px)',
+        fontFamily: 'var(--font-mono, monospace)',
+        borderRadius: 'var(--sm-radius-sm, 10px)',
+        border: '1px solid var(--sm-border, rgba(255,255,255,0.06))',
         zIndex: 20,
         maxWidth: '60%',
       }}>
@@ -488,11 +494,13 @@ export default function AR3HelmetPage() {
         left: '50%',
         transform: 'translateX(-50%)',
         padding: '10px 20px',
-        backgroundColor: 'rgba(0,0,0,0.7)',
-        color: '#fff',
-        fontSize: 13,
-        fontFamily: 'system-ui',
-        borderRadius: 5,
+        backgroundColor: 'rgba(0,0,0,0.5)',
+        backdropFilter: 'blur(10px)',
+        color: 'var(--sm-text, #fff)',
+        fontSize: 'var(--text-sm, 13px)',
+        fontFamily: 'var(--font-sans, system-ui, sans-serif)',
+        borderRadius: 'var(--sm-radius-pill, 100px)',
+        border: '1px solid var(--sm-border, rgba(255,255,255,0.06))',
         zIndex: 10,
         textAlign: 'center',
         maxWidth: '90%',

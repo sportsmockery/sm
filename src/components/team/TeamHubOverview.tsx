@@ -77,7 +77,7 @@ export default function TeamHubOverview({
             <h2
               className="text-lg font-bold"
               style={{
-                fontFamily: "'Montserrat', sans-serif",
+                fontFamily: "'Space Grotesk', sans-serif",
                 color: 'var(--sm-text)',
               }}
             >
@@ -86,7 +86,7 @@ export default function TeamHubOverview({
             <Link
               href={`/${team.slug}/news`}
               className="text-sm font-medium hover:underline"
-              style={{ color: team.secondaryColor }}
+              style={{ color: 'var(--sm-red)' }}
             >
               View All
             </Link>
@@ -110,7 +110,7 @@ export default function TeamHubOverview({
             <h2
               className="text-lg font-bold mb-4"
               style={{
-                fontFamily: "'Montserrat', sans-serif",
+                fontFamily: "'Space Grotesk', sans-serif",
                 color: 'var(--sm-text)',
               }}
             >
@@ -133,17 +133,11 @@ export default function TeamHubOverview({
         </div>
 
         {/* Quick Links */}
-        <div
-          className="rounded-xl p-5"
-          style={{
-            backgroundColor: 'var(--sm-surface)',
-            border: '1px solid var(--sm-border)',
-          }}
-        >
+        <div className="glass-card glass-card-static">
           <h3
             className="font-bold mb-4"
             style={{
-              fontFamily: "'Montserrat', sans-serif",
+              fontFamily: "'Space Grotesk', sans-serif",
               color: 'var(--sm-text)',
             }}
           >
@@ -208,11 +202,8 @@ function ArticleCard({
     return (
       <Link href={href} className="group block">
         <article
-          className="rounded-xl overflow-hidden transition-shadow hover:shadow-lg"
-          style={{
-            backgroundColor: 'var(--sm-surface)',
-            border: '1px solid var(--sm-border)',
-          }}
+          className="glass-card glass-card-static"
+          style={{ overflow: 'hidden' }}
         >
           <div className="flex flex-col md:flex-row">
             {post.featuredImage && (
@@ -225,21 +216,21 @@ function ArticleCard({
                 />
                 <div
                   className="absolute top-0 left-0 w-1 h-full"
-                  style={{ backgroundColor: team.secondaryColor }}
+                  style={{ backgroundColor: 'var(--sm-red)' }}
                 />
               </div>
             )}
             <div className="p-4 md:p-5 flex-1">
               <span
                 className="text-[10px] font-bold uppercase tracking-wide"
-                style={{ color: team.secondaryColor }}
+                style={{ color: 'var(--sm-red)' }}
               >
                 {post.category || team.shortName}
               </span>
               <h3
                 className="font-bold mt-1 line-clamp-3 group-hover:underline"
                 style={{
-                  fontFamily: "'Montserrat', sans-serif",
+                  fontFamily: "'Space Grotesk', sans-serif",
                   color: 'var(--sm-text)',
                   fontSize: '18px',
                   lineHeight: '1.3',
@@ -295,7 +286,7 @@ function ArticleCard({
           <h3
             className="font-semibold line-clamp-2 group-hover:underline"
             style={{
-              fontFamily: "'Montserrat', sans-serif",
+              fontFamily: "'Space Grotesk', sans-serif",
               color: 'var(--sm-text)',
               fontSize: '14px',
               lineHeight: '1.4',
@@ -345,16 +336,13 @@ function SeasonSnapshotCard({
 
   return (
     <div
-      className="rounded-xl overflow-hidden"
-      style={{
-        backgroundColor: 'var(--sm-surface)',
-        border: '1px solid var(--sm-border)',
-      }}
+      className="glass-card glass-card-static"
+      style={{ overflow: 'hidden', padding: 0 }}
     >
       {/* Header */}
       <div
         className="px-5 py-4"
-        style={{ backgroundColor: team.primaryColor }}
+        style={{ background: 'var(--sm-gradient-subtle)' }}
       >
         <div className="flex items-center gap-3">
           <Image
@@ -368,7 +356,7 @@ function SeasonSnapshotCard({
           <div>
             <h3
               className="font-bold text-white"
-              style={{ fontFamily: "'Montserrat', sans-serif" }}
+              style={{ fontFamily: "'Space Grotesk', sans-serif" }}
             >
               Season Snapshot
             </h3>
@@ -383,7 +371,7 @@ function SeasonSnapshotCard({
         <div className="text-center pb-4" style={{ borderBottom: '1px solid var(--sm-border)' }}>
           <div
             className="text-4xl font-bold"
-            style={{ color: team.secondaryColor }}
+            style={{ color: 'var(--sm-red)' }}
           >
             {formatRecord()}
           </div>
@@ -446,7 +434,7 @@ function QuickLink({
       href={href}
       className="flex items-center gap-3 px-3 py-2.5 rounded-lg transition-colors hover:bg-[var(--sm-card-hover)]"
     >
-      <span style={{ color: team.secondaryColor }}>{icon}</span>
+      <span style={{ color: 'var(--sm-red)' }}>{icon}</span>
       <span
         className="text-sm font-medium"
         style={{ color: 'var(--sm-text)' }}
@@ -474,17 +462,11 @@ function QuickLink({
 // Scout AI Widget
 function AskAIWidget({ team }: { team: TeamInfo }) {
   return (
-    <div
-      className="rounded-xl p-5"
-      style={{
-        backgroundColor: 'var(--sm-surface)',
-        border: '1px solid var(--sm-border)',
-      }}
-    >
+    <div className="glass-card glass-card-static">
       <div className="flex items-center gap-3 mb-4">
         <div
           className="w-10 h-10 rounded-full flex items-center justify-center"
-          style={{ backgroundColor: `${team.secondaryColor}20` }}
+          style={{ background: 'var(--sm-gradient-subtle)' }}
         >
           <Image
             src="/downloads/scout-v2.png"
@@ -498,7 +480,7 @@ function AskAIWidget({ team }: { team: TeamInfo }) {
           <h3
             className="font-bold"
             style={{
-              fontFamily: "'Montserrat', sans-serif",
+              fontFamily: "'Space Grotesk', sans-serif",
               color: 'var(--sm-text)',
             }}
           >
@@ -524,7 +506,7 @@ function AskAIWidget({ team }: { team: TeamInfo }) {
       <Link
         href={`/scout-ai?team=${team.slug}`}
         className="block w-full text-center py-2.5 rounded-lg font-semibold text-sm transition-colors text-white"
-        style={{ backgroundColor: team.secondaryColor }}
+        style={{ backgroundColor: 'var(--sm-red)' }}
       >
         Ask Scout
       </Link>
@@ -552,21 +534,15 @@ function FanChatWidget({ team }: { team: TeamInfo }) {
   const chatRoomId = team.slug.replace('chicago-', '')
 
   return (
-    <div
-      className="rounded-xl p-5"
-      style={{
-        backgroundColor: 'var(--sm-surface)',
-        border: '1px solid var(--sm-border)',
-      }}
-    >
+    <div className="glass-card glass-card-static">
       <div className="flex items-center gap-3 mb-4">
         <div
           className="w-10 h-10 rounded-full flex items-center justify-center"
-          style={{ backgroundColor: `${team.primaryColor}20` }}
+          style={{ background: 'var(--sm-gradient-subtle)' }}
         >
           <svg
             className="w-5 h-5"
-            style={{ color: team.primaryColor }}
+            style={{ color: 'var(--sm-red)' }}
             fill="none"
             stroke="currentColor"
             viewBox="0 0 24 24"
@@ -583,7 +559,7 @@ function FanChatWidget({ team }: { team: TeamInfo }) {
           <h3
             className="font-bold"
             style={{
-              fontFamily: "'Montserrat', sans-serif",
+              fontFamily: "'Space Grotesk', sans-serif",
               color: 'var(--sm-text)',
             }}
           >
@@ -603,7 +579,7 @@ function FanChatWidget({ team }: { team: TeamInfo }) {
       <Link
         href={`/fan-chat?channel=${chatRoomId}`}
         className="block w-full text-center py-2.5 rounded-lg font-semibold text-sm transition-colors text-white"
-        style={{ backgroundColor: team.primaryColor }}
+        style={{ backgroundColor: 'var(--sm-red)' }}
       >
         Join Chat
       </Link>
@@ -615,15 +591,13 @@ function FanChatWidget({ team }: { team: TeamInfo }) {
 function ARExperienceWidget({ team }: { team: TeamInfo }) {
   return (
     <div
-      className="rounded-xl overflow-hidden"
-      style={{
-        border: '1px solid var(--sm-border)',
-      }}
+      className="glass-card glass-card-static"
+      style={{ overflow: 'hidden', padding: 0 }}
     >
       <div
         className="p-5"
         style={{
-          background: `linear-gradient(135deg, ${team.primaryColor} 0%, ${team.secondaryColor} 100%)`,
+          background: 'var(--sm-gradient-subtle)',
         }}
       >
         <div className="flex items-center gap-3 mb-3">
@@ -633,7 +607,7 @@ function ARExperienceWidget({ team }: { team: TeamInfo }) {
             </svg>
           </div>
           <div>
-            <h3 className="font-bold text-white" style={{ fontFamily: "'Montserrat', sans-serif" }}>
+            <h3 className="font-bold text-white" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
               AR Stadium Tour
             </h3>
             <p className="text-xs text-white/70">

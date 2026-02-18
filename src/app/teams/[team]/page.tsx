@@ -79,7 +79,7 @@ export default async function TeamOverviewPage({ params }: TeamPageProps) {
   const keyStats = getKeyStats();
 
   return (
-    <main className="mx-auto max-w-7xl px-4 py-8">
+    <main style={{ maxWidth: 'var(--container-xl)', margin: '0 auto', padding: '32px 16px' }}>
       <div className="grid gap-8 lg:grid-cols-3">
         {/* Main Content */}
         <div className="lg:col-span-2 space-y-8">
@@ -89,13 +89,13 @@ export default async function TeamOverviewPage({ params }: TeamPageProps) {
               {keyStats.map((stat) => (
                 <div
                   key={stat.label}
-                  className="rounded-xl p-4 text-center"
-                  style={{ border: '1px solid var(--sm-border)', backgroundColor: 'var(--sm-card)' }}
+                  className="glass-card-sm"
+                  style={{ padding: '16px', textAlign: 'center' }}
                 >
-                  <p className="text-2xl font-bold" style={{ color: 'var(--sm-text)' }}>
+                  <p style={{ fontSize: 'var(--text-2xl)', fontWeight: 700, color: 'var(--sm-text)' }}>
                     {stat.value}
                   </p>
-                  <p className="text-sm" style={{ color: 'var(--sm-text-muted)' }}>{stat.label}</p>
+                  <p style={{ fontSize: 'var(--text-sm)', color: 'var(--sm-text-muted)' }}>{stat.label}</p>
                 </div>
               ))}
             </div>
@@ -104,7 +104,7 @@ export default async function TeamOverviewPage({ params }: TeamPageProps) {
           {/* Standings Preview */}
           {standings.length > 0 && (
             <section>
-              <h2 className="mb-4 text-lg font-bold" style={{ color: 'var(--sm-text)' }}>
+              <h2 style={{ marginBottom: '16px', fontSize: 'var(--text-lg)', fontWeight: 700, color: 'var(--sm-text)' }}>
                 {team.division} Standings
               </h2>
               <StandingsTable standings={standings} currentTeam={team} />

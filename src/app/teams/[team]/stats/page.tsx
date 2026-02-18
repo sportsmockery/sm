@@ -50,11 +50,11 @@ export default async function StatsPage({ params, searchParams }: StatsPageProps
   ].filter(l => l.player);
 
   return (
-    <main className="mx-auto max-w-7xl px-4 py-8">
+    <main style={{ maxWidth: 'var(--container-xl)', margin: '0 auto', padding: '32px 16px' }}>
       {/* Header */}
       <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="text-2xl font-bold" style={{ color: 'var(--sm-text)' }}>
+          <h1 style={{ fontSize: 'var(--text-2xl)', fontWeight: 700, color: 'var(--sm-text)' }}>
             {team.shortName} Stats
           </h1>
           <p style={{ color: 'var(--sm-text-muted)' }}>
@@ -70,8 +70,8 @@ export default async function StatsPage({ params, searchParams }: StatsPageProps
 
       {/* Stat Leaders */}
       {statLeaders.length > 0 && (
-        <section className="mt-8">
-          <h2 className="mb-4 text-lg font-bold" style={{ color: 'var(--sm-text)' }}>
+        <section style={{ marginTop: '32px' }}>
+          <h2 style={{ marginBottom: '16px', fontSize: 'var(--text-lg)', fontWeight: 700, color: 'var(--sm-text)' }}>
             Team Leaders
           </h2>
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
@@ -79,10 +79,17 @@ export default async function StatsPage({ params, searchParams }: StatsPageProps
               <Link
                 key={leader.category}
                 href={`/players/${leader.player?.slug}`}
-                className="flex items-center gap-4 rounded-xl p-4 transition-colors"
-                style={{ border: '1px solid var(--sm-border)', backgroundColor: 'var(--sm-card)' }}
+                className="glass-card"
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '16px',
+                  padding: '16px',
+                  textDecoration: 'none',
+                  transition: 'all 0.15s ease',
+                }}
               >
-                <div className="relative h-12 w-12 flex-shrink-0 overflow-hidden rounded-full" style={{ backgroundColor: 'var(--sm-surface)' }}>
+                <div style={{ position: 'relative', width: '48px', height: '48px', flexShrink: 0, overflow: 'hidden', borderRadius: '50%', background: 'var(--sm-surface)' }}>
                   {leader.player && (
                     <Image
                       src={leader.player.headshot}
@@ -92,16 +99,16 @@ export default async function StatsPage({ params, searchParams }: StatsPageProps
                     />
                   )}
                 </div>
-                <div className="flex-1 min-w-0">
-                  <p className="text-xs font-medium uppercase" style={{ color: 'var(--sm-text-muted)' }}>
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <p style={{ fontSize: 'var(--text-xs)', fontWeight: 500, textTransform: 'uppercase', color: 'var(--sm-text-muted)' }}>
                     {leader.category}
                   </p>
-                  <p className="font-semibold truncate" style={{ color: 'var(--sm-text)' }}>
+                  <p className="truncate" style={{ fontWeight: 600, color: 'var(--sm-text)' }}>
                     {leader.player?.name}
                   </p>
                 </div>
-                <div className="text-right">
-                  <p className="text-xl font-bold" style={{ color: 'var(--sm-text)' }}>
+                <div style={{ textAlign: 'right' }}>
+                  <p style={{ fontSize: 'var(--text-xl)', fontWeight: 700, color: 'var(--sm-text)' }}>
                     {leader.value}
                   </p>
                 </div>

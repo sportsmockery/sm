@@ -80,7 +80,7 @@ export default function TeamSeasonCard({
             <div>
               <h3
                 className="text-white text-lg font-bold"
-                style={{ fontFamily: "'Montserrat', sans-serif" }}
+                style={{ fontFamily: "'Space Grotesk', sans-serif" }}
               >
                 {season.season} Season
               </h3>
@@ -103,7 +103,7 @@ export default function TeamSeasonCard({
           <div className="text-center">
             <div
               className="text-5xl font-black text-white"
-              style={{ fontFamily: "'Montserrat', sans-serif" }}
+              style={{ fontFamily: "'Space Grotesk', sans-serif" }}
             >
               {record.wins}
             </div>
@@ -117,7 +117,7 @@ export default function TeamSeasonCard({
           <div className="text-center">
             <div
               className="text-5xl font-black text-white"
-              style={{ fontFamily: "'Montserrat', sans-serif" }}
+              style={{ fontFamily: "'Space Grotesk', sans-serif" }}
             >
               {record.losses}
             </div>
@@ -131,7 +131,7 @@ export default function TeamSeasonCard({
               <div className="text-center">
                 <div
                   className="text-5xl font-black text-white"
-                  style={{ fontFamily: "'Montserrat', sans-serif" }}
+                  style={{ fontFamily: "'Space Grotesk', sans-serif" }}
                 >
                   {record.otLosses ?? record.ties}
                 </div>
@@ -146,7 +146,7 @@ export default function TeamSeasonCard({
           <div className="text-center border-l border-white/10 pl-8">
             <div
               className="text-3xl font-bold text-white/80"
-              style={{ fontFamily: "'Montserrat', sans-serif" }}
+              style={{ fontFamily: "'Space Grotesk', sans-serif" }}
             >
               {winPct}%
             </div>
@@ -174,7 +174,7 @@ export default function TeamSeasonCard({
                 )}
                 <span
                   className="text-white font-bold"
-                  style={{ fontFamily: "'Montserrat', sans-serif" }}
+                  style={{ fontFamily: "'Space Grotesk', sans-serif" }}
                 >
                   {nextGame.isHome ? 'vs' : '@'} {nextGame.opponent}
                 </span>
@@ -207,7 +207,7 @@ export default function TeamSeasonCard({
                 </span>
                 <span
                   className="text-white font-bold"
-                  style={{ fontFamily: "'Montserrat', sans-serif" }}
+                  style={{ fontFamily: "'Space Grotesk', sans-serif" }}
                 >
                   {lastGame.opponent}
                 </span>
@@ -246,9 +246,8 @@ export default function TeamSeasonCard({
           href={`/${team.categorySlug}`}
           className="text-sm font-semibold px-3 py-1 rounded transition-colors"
           style={{
-            backgroundColor: team.secondaryColor,
-            color: team.secondaryColor === '#000000' ? 'white' :
-                   team.secondaryColor === '#C4CED4' ? '#27251F' : 'white',
+            backgroundColor: 'var(--sm-red)',
+            color: 'white',
           }}
         >
           All News

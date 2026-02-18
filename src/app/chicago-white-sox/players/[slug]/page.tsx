@@ -56,8 +56,7 @@ export default async function WhiteSoxPlayerPage({ params }: PlayerPageProps) {
     <main className="min-h-screen" style={{ backgroundColor: 'var(--sm-dark)' }}>
       {/* Hero Section */}
       <div
-        className="relative overflow-hidden"
-        style={{ background: 'linear-gradient(135deg, #27251F 0%, #27251F 70%, #C4CED4 100%)' }}
+        className="relative overflow-hidden team-hero-whitesox"
       >
         <div className="max-w-7xl mx-auto px-4 py-8">
           {/* Breadcrumb & Player Switcher */}
@@ -108,7 +107,7 @@ export default async function WhiteSoxPlayerPage({ params }: PlayerPageProps) {
                 <span className="px-3 py-1 bg-white/20 rounded-lg text-lg font-bold">
                   #{profile.player.jerseyNumber}
                 </span>
-                <span className="px-3 py-1 rounded-lg text-sm font-semibold" style={{ backgroundColor: '#C4CED4', color: '#27251F' }}>
+                <span className="px-3 py-1 bg-black rounded-lg text-sm font-semibold">
                   {profile.player.position}
                 </span>
               </div>
@@ -219,7 +218,7 @@ export default async function WhiteSoxPlayerPage({ params }: PlayerPageProps) {
           <div className="lg:col-span-2 space-y-8">
             {/* Season Stats */}
             {profile.currentSeason && (
-              <section className="rounded-2xl p-6" style={{ backgroundColor: 'var(--sm-card)', border: '1px solid var(--sm-border)' }}>
+              <section className="glass-card glass-card-static">
                 <h2 className="text-xl font-bold mb-6" style={{ fontFamily: "'Space Grotesk', sans-serif", color: 'var(--sm-text)' }}>
                   2025 Season Stats
                 </h2>
@@ -251,7 +250,7 @@ export default async function WhiteSoxPlayerPage({ params }: PlayerPageProps) {
 
             {/* Game Log */}
             {profile.gameLog.length > 0 && (
-              <section className="rounded-2xl overflow-hidden" style={{ backgroundColor: 'var(--sm-card)', border: '1px solid var(--sm-border)' }}>
+              <section className="glass-card glass-card-static" style={{ overflow: 'hidden', padding: 0 }}>
                 <div className="p-6" style={{ borderBottom: '1px solid var(--sm-border)' }}>
                   <h2 className="text-xl font-bold" style={{ fontFamily: "'Space Grotesk', sans-serif", color: 'var(--sm-text)' }}>
                     Recent Games
@@ -294,7 +293,7 @@ export default async function WhiteSoxPlayerPage({ params }: PlayerPageProps) {
 
           {/* Sidebar */}
           <div className="space-y-6">
-            <section className="rounded-2xl p-6" style={{ backgroundColor: 'var(--sm-card)', border: '1px solid var(--sm-border)' }}>
+            <section className="glass-card glass-card-static">
               <h3 className="text-lg font-bold mb-4" style={{ fontFamily: "'Space Grotesk', sans-serif", color: 'var(--sm-text)' }}>
                 Quick Links
               </h3>

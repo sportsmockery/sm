@@ -56,30 +56,12 @@ export default async function CubsSchedulePage() {
         {/* Next Game Highlight */}
         {nextScheduledGame && (
           <div
-            style={{
-              marginBottom: '24px',
-              padding: '20px',
-              borderRadius: 'var(--sm-radius-lg)',
-              backgroundColor: 'var(--sm-card)',
-              border: '1px solid var(--sm-border)',
-              borderLeft: '4px solid #0E3386',
-            }}
+            className="glass-card glass-card-sm glass-card-static"
+            style={{ marginBottom: '24px', borderLeft: '4px solid var(--sm-red)' }}
           >
             <div className="flex items-center justify-between gap-4">
               <div className="flex items-center gap-3">
-                <span
-                  style={{
-                    padding: '4px 12px',
-                    backgroundColor: 'rgba(14, 51, 134, 0.1)',
-                    color: '#0E3386',
-                    fontSize: '11px',
-                    fontWeight: 700,
-                    borderRadius: '100px',
-                    letterSpacing: '0.5px',
-                  }}
-                >
-                  UP NEXT
-                </span>
+                <span className="sm-tag">UP NEXT</span>
                 <div className="flex items-center gap-2">
                   {nextScheduledGame.opponentLogo && (
                     <Image
@@ -109,15 +91,7 @@ export default async function CubsSchedulePage() {
         )}
 
         {/* Record Summary */}
-        <div
-          style={{
-            marginBottom: '24px',
-            padding: '20px',
-            borderRadius: 'var(--sm-radius-lg)',
-            backgroundColor: 'var(--sm-card)',
-            border: '1px solid var(--sm-border)',
-          }}
-        >
+        <div className="glass-card glass-card-sm glass-card-static" style={{ marginBottom: '24px' }}>
           <div className="flex flex-wrap gap-6 justify-center text-center">
             <div>
               <div style={{ fontSize: '11px', color: 'var(--sm-text-muted)', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '4px' }}>Regular Season</div>
@@ -131,7 +105,7 @@ export default async function CubsSchedulePage() {
             {hasPostseason && (
               <div>
                 <div style={{ fontSize: '11px', color: 'var(--sm-text-muted)', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '4px' }}>Postseason</div>
-                <div style={{ fontSize: '22px', fontWeight: 800, color: '#0E3386', fontFamily: "'Space Grotesk', sans-serif" }}>
+                <div style={{ fontSize: '22px', fontWeight: 800, color: 'var(--sm-red)', fontFamily: "'Space Grotesk', sans-serif" }}>
                   {separatedRecord.postseason.wins}-{separatedRecord.postseason.losses}
                 </div>
               </div>
@@ -140,14 +114,7 @@ export default async function CubsSchedulePage() {
         </div>
 
         {/* All Games */}
-        <div
-          style={{
-            backgroundColor: 'var(--sm-card)',
-            border: '1px solid var(--sm-border)',
-            borderRadius: 'var(--sm-radius-xl)',
-            overflow: 'hidden',
-          }}
-        >
+        <div className="glass-card glass-card-static" style={{ overflow: 'hidden', padding: 0 }}>
           <div
             style={{
               padding: '16px 20px',
@@ -183,7 +150,7 @@ function GameRow({ game }: { game: CubsGame }) {
 
   const borderColor = isPast
     ? game.result === 'W' ? '#10b981' : '#ef4444'
-    : '#0E3386'
+    : 'var(--sm-red)'
 
   return (
     <div
@@ -203,7 +170,7 @@ function GameRow({ game }: { game: CubsGame }) {
                 display: 'inline-block',
                 padding: '2px 8px',
                 backgroundColor: 'rgba(14, 51, 134, 0.1)',
-                color: '#0E3386',
+                color: 'var(--sm-red)',
                 fontSize: '11px',
                 borderRadius: '100px',
                 fontWeight: 700,
@@ -280,7 +247,7 @@ function GameRow({ game }: { game: CubsGame }) {
                 style={{
                   padding: '2px 8px',
                   backgroundColor: 'rgba(14, 51, 134, 0.1)',
-                  color: '#0E3386',
+                  color: 'var(--sm-red)',
                   borderRadius: '100px',
                   fontSize: '11px',
                   fontWeight: 600,

@@ -57,6 +57,12 @@ const SPORT_CONFIG = [
   { sport: 'NHL', emoji: '🏒', label: 'NHL', color: '#CF0A2C' },
 ]
 
+const MEDAL_COLORS: Record<number, { bg: string; text: string; border: string }> = {
+  1: { bg: 'rgba(255, 215, 0, 0.12)', text: '#ffd700', border: 'rgba(255, 215, 0, 0.3)' },
+  2: { bg: 'rgba(192, 192, 192, 0.10)', text: '#c0c0c0', border: 'rgba(192, 192, 192, 0.25)' },
+  3: { bg: 'rgba(205, 127, 50, 0.10)', text: '#cd7f32', border: 'rgba(205, 127, 50, 0.25)' },
+}
+
 export default function LeaderboardsPage() {
   const { user, loading: authLoading, isAuthenticated } = useAuth()
   const router = useRouter()
@@ -65,10 +71,6 @@ export default function LeaderboardsPage() {
   const [userPosition, setUserPosition] = useState<UserPosition | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
-
-  const subText = 'var(--sm-text-muted)'
-  const cardBg = 'var(--sm-card)'
-  const cardBorder = 'var(--sm-border)'
 
   const fetchData = useCallback(async () => {
     setLoading(true)
@@ -110,10 +112,6 @@ export default function LeaderboardsPage() {
     fetchData()
   }, [authLoading, isAuthenticated, fetchData, router])
 
-  function calculatePercentile(rank: number, total: number): number {
-    return Math.round(100 - (rank / total) * 100)
-  }
-
   function getOrdinal(n: number): string {
     const s = ['th', 'st', 'nd', 'rd']
     const v = n % 100
@@ -122,10 +120,10 @@ export default function LeaderboardsPage() {
 
   if (authLoading || loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: 'var(--sm-dark)' }}>
-        <div className="text-center">
-          <div className="w-8 h-8 border-2 border-t-transparent rounded-full animate-spin mx-auto mb-4" style={{ borderColor: '#bc0000', borderTopColor: 'transparent' }} />
-          <p style={{ color: subText }}>Loading leaderboard...</p>
+      <div className="sm-hero-bg" style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+        <div style={{ textAlign: 'center' }}>
+          <div style={{ width: 32, height: 32, border: '2px solid var(--sm-red)', borderTopColor: 'transparent', borderRadius: '50%', animation: 'spin 1s linear infinite', margin: '0 auto 16px' }} />
+          <p style={{ color: 'var(--sm-text-muted)' }}>Loading leaderboard...</p>
         </div>
       </div>
     )
@@ -133,21 +131,10 @@ export default function LeaderboardsPage() {
 
   if (error) {
     return (
-      <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: 'var(--sm-dark)' }}>
-        <div className="text-center">
-          <p style={{ color: '#ef4444', marginBottom: 16 }}>{error}</p>
-          <button
-            onClick={fetchData}
-            style={{
-              padding: '10px 20px',
-              borderRadius: 8,
-              backgroundColor: '#bc0000',
-              color: '#fff',
-              fontWeight: 600,
-              border: 'none',
-              cursor: 'pointer',
-            }}
-          >
+      <div className="sm-hero-bg" style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+        <div style={{ textAlign: 'center' }}>
+          <p style={{ color: 'var(--sm-error)', marginBottom: 16 }}>{error}</p>
+          <button onClick={fetchData} className="btn-primary btn-sm">
             Try Again
           </button>
         </div>
@@ -160,104 +147,101 @@ export default function LeaderboardsPage() {
   const daysLeft = leaderboard?.days_remaining || 0
 
   return (
-    <div className="min-h-screen" style={{ backgroundColor: 'var(--sm-dark)', color: 'var(--sm-text)' }}>
-      <main className="max-w-[1000px] mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 pt-20 sm:pt-24">
-        {/* Page Header */}
-        <div style={{ textAlign: 'center', marginBottom: 24 }}>
-          <h1 style={{ fontSize: '28px', fontWeight: 800, marginBottom: 4 }}>
-            🏆 Leaderboards
-          </h1>
-          <p style={{ fontSize: '16px', color: subText }}>
-            {leaderboard?.month_name} {leaderboard?.year}
-          </p>
-        </div>
-
-        {/* Sport Tabs */}
-        <div style={{
-          display: 'flex',
-          justifyContent: 'center',
-          gap: 8,
-          marginBottom: 24,
-          flexWrap: 'wrap',
-        }}>
-          {SPORT_CONFIG.map(({ sport, emoji, label }) => (
-            <button
-              key={sport}
-              onClick={() => setSelectedSport(sport)}
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: 8,
-                padding: '10px 20px',
-                borderRadius: 12,
-                border: selectedSport === sport ? 'none' : `2px solid ${cardBorder}`,
-                backgroundColor: selectedSport === sport ? '#bc0000' : cardBg,
-                color: selectedSport === sport ? '#fff' : 'var(--sm-text)',
-                fontSize: '14px',
-                fontWeight: 600,
-                cursor: 'pointer',
-                transition: 'all 0.2s',
-              }}
-            >
-              <span style={{ fontSize: '18px' }}>{emoji}</span>
-              <span>{label}</span>
-            </button>
-          ))}
-        </div>
-
-        {/* Competition Info Bar */}
-        <div style={{
-          display: 'flex',
-          justifyContent: 'center',
-          gap: 32,
-          marginBottom: 24,
-          flexWrap: 'wrap',
-        }}>
-          <div style={{ textAlign: 'center' }}>
-            <div style={{ fontSize: '12px', color: subText, marginBottom: 4, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-              Competition Ends
-            </div>
-            <div style={{ fontSize: '16px', fontWeight: 700, color: daysLeft > 0 ? 'var(--sm-text)' : '#10b981' }}>
-              {daysLeft > 0 ? `${daysLeft} days` : 'Completed'}
-            </div>
+    <div style={{ minHeight: '100vh', background: 'var(--sm-dark)', color: 'var(--sm-text)' }}>
+      {/* Hero */}
+      <section className="sm-hero-bg" style={{ position: 'relative', overflow: 'hidden', paddingBottom: 0 }}>
+        <div className="sm-grid-overlay" />
+        <main style={{ position: 'relative', maxWidth: 1000, margin: '0 auto', padding: '24px 16px 0', paddingTop: 96 }}>
+          {/* Page Header */}
+          <div style={{ textAlign: 'center', marginBottom: 24 }}>
+            <h1 style={{ fontSize: 32, fontWeight: 900, marginBottom: 4, fontFamily: 'var(--sm-font-heading)', margin: 0 }}>
+              Leaderboards
+            </h1>
+            <p style={{ fontSize: 16, color: 'var(--sm-text-muted)', marginTop: 8 }}>
+              {leaderboard?.month_name} {leaderboard?.year}
+            </p>
           </div>
-          <div style={{ textAlign: 'center' }}>
-            <div style={{ fontSize: '12px', color: subText, marginBottom: 4, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-              Total Competitors
-            </div>
-            <div style={{ fontSize: '16px', fontWeight: 700 }}>
-              {leaderboard?.total_participants || 0}
-            </div>
-          </div>
-          <div style={{ textAlign: 'center' }}>
-            <div style={{ fontSize: '12px', color: subText, marginBottom: 4, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-              Status
-            </div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 6, justifyContent: 'center' }}>
-              {leaderboard?.status === 'active' && (
-                <span style={{
-                  width: 8,
-                  height: 8,
-                  borderRadius: '50%',
-                  backgroundColor: '#10b981',
-                  animation: 'pulse 2s infinite',
-                }} />
-              )}
-              <span style={{ fontSize: '16px', fontWeight: 700, color: leaderboard?.status === 'active' ? '#10b981' : subText }}>
-                {leaderboard?.status === 'active' ? 'LIVE' : 'Completed'}
-              </span>
-            </div>
-          </div>
-        </div>
 
-        {/* YOUR POSITION CARD - Always show if competing */}
-        {userPosition?.competing && (
+          {/* Sport Tabs */}
           <div style={{
-            backgroundColor: userInTop20 ? 'rgba(34, 197, 94, 0.1)' : cardBg,
-            border: `2px solid ${userInTop20 ? '#22c55e' : '#bc0000'}`,
-            borderRadius: 16,
-            padding: 24,
+            display: 'flex',
+            justifyContent: 'center',
+            gap: 8,
             marginBottom: 24,
+            flexWrap: 'wrap',
+          }}>
+            {SPORT_CONFIG.map(({ sport, emoji, label }) => (
+              <button
+                key={sport}
+                onClick={() => setSelectedSport(sport)}
+                className={selectedSport === sport ? 'btn-primary btn-sm' : 'btn-secondary btn-sm'}
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 8,
+                }}
+              >
+                <span style={{ fontSize: 18 }}>{emoji}</span>
+                <span>{label}</span>
+              </button>
+            ))}
+          </div>
+
+          {/* Competition Info Bar */}
+          <div style={{
+            display: 'flex',
+            justifyContent: 'center',
+            gap: 32,
+            marginBottom: 32,
+            flexWrap: 'wrap',
+          }}>
+            <div style={{ textAlign: 'center' }}>
+              <div style={{ fontSize: 11, color: 'var(--sm-text-dim)', marginBottom: 4, textTransform: 'uppercase', letterSpacing: '0.08em', fontWeight: 600 }}>
+                Competition Ends
+              </div>
+              <div style={{ fontSize: 16, fontWeight: 700, color: daysLeft > 0 ? 'var(--sm-text)' : 'var(--sm-success)' }}>
+                {daysLeft > 0 ? `${daysLeft} days` : 'Completed'}
+              </div>
+            </div>
+            <div style={{ textAlign: 'center' }}>
+              <div style={{ fontSize: 11, color: 'var(--sm-text-dim)', marginBottom: 4, textTransform: 'uppercase', letterSpacing: '0.08em', fontWeight: 600 }}>
+                Total Competitors
+              </div>
+              <div style={{ fontSize: 16, fontWeight: 700 }}>
+                {leaderboard?.total_participants || 0}
+              </div>
+            </div>
+            <div style={{ textAlign: 'center' }}>
+              <div style={{ fontSize: 11, color: 'var(--sm-text-dim)', marginBottom: 4, textTransform: 'uppercase', letterSpacing: '0.08em', fontWeight: 600 }}>
+                Status
+              </div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 6, justifyContent: 'center' }}>
+                {leaderboard?.status === 'active' && (
+                  <span style={{
+                    width: 8,
+                    height: 8,
+                    borderRadius: '50%',
+                    background: 'var(--sm-success)',
+                    display: 'inline-block',
+                    animation: 'pulse-glow 2s ease-in-out infinite',
+                  }} />
+                )}
+                <span style={{ fontSize: 16, fontWeight: 700, color: leaderboard?.status === 'active' ? 'var(--sm-success)' : 'var(--sm-text-muted)' }}>
+                  {leaderboard?.status === 'active' ? 'LIVE' : 'Completed'}
+                </span>
+              </div>
+            </div>
+          </div>
+        </main>
+      </section>
+
+      <main style={{ maxWidth: 1000, margin: '0 auto', padding: '0 16px 48px' }}>
+        {/* YOUR POSITION CARD */}
+        {userPosition?.competing && (
+          <div className="glass-card glass-card-static" style={{
+            marginBottom: 24,
+            border: userInTop20 ? '2px solid var(--sm-success)' : '2px solid var(--sm-red)',
+            background: userInTop20 ? 'rgba(0, 208, 132, 0.06)' : 'var(--sm-card)',
           }}>
             {/* Card Header */}
             <div style={{
@@ -266,39 +250,27 @@ export default function LeaderboardsPage() {
               alignItems: 'center',
               marginBottom: 20,
               paddingBottom: 16,
-              borderBottom: `1px solid ${cardBorder}`,
+              borderBottom: '1px solid var(--sm-border)',
             }}>
-              <h3 style={{ margin: 0, fontSize: '18px', fontWeight: 700 }}>
-                📍 Your Position
+              <h3 style={{ margin: 0, fontSize: 18, fontWeight: 700, fontFamily: 'var(--sm-font-heading)' }}>
+                Your Position
               </h3>
               {userInTop20 ? (
-                <span style={{
-                  padding: '6px 12px',
-                  backgroundColor: '#22c55e',
+                <span className="sm-tag" style={{
+                  background: 'var(--sm-success)',
                   color: '#fff',
-                  borderRadius: 20,
-                  fontSize: '12px',
-                  fontWeight: 700,
-                  textTransform: 'uppercase',
+                  border: 'none',
                 }}>
                   Top 20!
                 </span>
               ) : (
-                <span style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: 6,
-                  padding: '6px 12px',
-                  backgroundColor: 'var(--sm-surface)',
-                  border: `1px solid ${cardBorder}`,
-                  borderRadius: 20,
-                  fontSize: '11px',
-                  fontWeight: 600,
-                  color: subText,
-                  textTransform: 'uppercase',
-                  letterSpacing: '0.05em',
+                <span className="sm-tag" style={{
+                  background: 'var(--sm-surface)',
+                  color: 'var(--sm-text-dim)',
+                  border: '1px solid var(--sm-border)',
+                  fontSize: 10,
                 }}>
-                  🔒 Only You Can See This
+                  Only You Can See This
                 </span>
               )}
             </div>
@@ -313,17 +285,17 @@ export default function LeaderboardsPage() {
               <div style={{
                 textAlign: 'center',
                 padding: 16,
-                backgroundColor: 'var(--sm-surface)',
-                borderRadius: 12,
-                border: `1px solid ${cardBorder}`,
+                background: 'var(--sm-surface)',
+                borderRadius: 'var(--sm-radius-sm)',
+                border: '1px solid var(--sm-border)',
               }}>
-                <div style={{ fontSize: '12px', color: subText, marginBottom: 8, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                <div style={{ fontSize: 11, color: 'var(--sm-text-dim)', marginBottom: 8, textTransform: 'uppercase', letterSpacing: '0.08em', fontWeight: 600 }}>
                   Your Rank
                 </div>
-                <div style={{ fontSize: '32px', fontWeight: 800, color: '#bc0000' }}>
+                <div style={{ fontSize: 32, fontWeight: 800, color: 'var(--sm-red)' }}>
                   #{userPosition.rank}
                 </div>
-                <div style={{ fontSize: '12px', color: subText }}>
+                <div style={{ fontSize: 12, color: 'var(--sm-text-muted)' }}>
                   out of {userPosition.total_participants}
                 </div>
               </div>
@@ -331,89 +303,63 @@ export default function LeaderboardsPage() {
               <div style={{
                 textAlign: 'center',
                 padding: 16,
-                backgroundColor: 'var(--sm-surface)',
-                borderRadius: 12,
-                border: `1px solid ${cardBorder}`,
+                background: 'var(--sm-surface)',
+                borderRadius: 'var(--sm-radius-sm)',
+                border: '1px solid var(--sm-border)',
               }}>
-                <div style={{ fontSize: '12px', color: subText, marginBottom: 8, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                <div style={{ fontSize: 11, color: 'var(--sm-text-dim)', marginBottom: 8, textTransform: 'uppercase', letterSpacing: '0.08em', fontWeight: 600 }}>
                   Your Score
                 </div>
-                <div style={{ fontSize: '32px', fontWeight: 800 }}>
+                <div style={{ fontSize: 32, fontWeight: 800 }}>
                   {userPosition.score}
                 </div>
-                <div style={{ fontSize: '12px', color: subText }}>
-                  {userInTop20 ? 'Top 20 🎯' : `Top ${userPosition.percentile}%`}
+                <div style={{ fontSize: 12, color: 'var(--sm-text-muted)' }}>
+                  {userInTop20 ? 'Top 20' : `Top ${userPosition.percentile}%`}
                 </div>
               </div>
 
               <div style={{
                 textAlign: 'center',
                 padding: 16,
-                backgroundColor: 'var(--sm-surface)',
-                borderRadius: 12,
-                border: `1px solid ${cardBorder}`,
+                background: 'var(--sm-surface)',
+                borderRadius: 'var(--sm-radius-sm)',
+                border: '1px solid var(--sm-border)',
               }}>
-                <div style={{ fontSize: '12px', color: subText, marginBottom: 8, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                <div style={{ fontSize: 11, color: 'var(--sm-text-dim)', marginBottom: 8, textTransform: 'uppercase', letterSpacing: '0.08em', fontWeight: 600 }}>
                   Your Activities
                 </div>
-                <div style={{ fontSize: '32px', fontWeight: 800 }}>
+                <div style={{ fontSize: 32, fontWeight: 800 }}>
                   {userPosition.activities_count}
                 </div>
-                <div style={{ fontSize: '12px', color: subText }}>
-                  {userPosition.trades_count}T • {userPosition.drafts_count}D • {userPosition.sims_count}S
+                <div style={{ fontSize: 12, color: 'var(--sm-text-muted)' }}>
+                  {userPosition.trades_count}T / {userPosition.drafts_count}D / {userPosition.sims_count}S
                 </div>
               </div>
             </div>
 
-            {/* Improvement Tips - Only show if not in top 20 */}
+            {/* Improvement Tips */}
             {!userInTop20 && userPosition.points_to_top20 !== undefined && userPosition.points_to_top20 > 0 && (
-              <div style={{ borderTop: `1px solid ${cardBorder}`, paddingTop: 20 }}>
-                <p style={{ fontWeight: 600, marginBottom: 12 }}>How to reach top 20:</p>
-                <ul style={{ margin: 0, paddingLeft: 20, listStyle: 'none' }}>
-                  <li style={{
-                    position: 'relative',
-                    paddingLeft: 20,
-                    marginBottom: 8,
-                    fontSize: '14px',
-                    color: subText,
-                  }}>
-                    <span style={{ position: 'absolute', left: 0, color: '#bc0000' }}>→</span>
-                    <strong>Score needed:</strong> You need {Math.ceil(userPosition.points_to_top20)} more points
-                  </li>
-                  <li style={{
-                    position: 'relative',
-                    paddingLeft: 20,
-                    marginBottom: 8,
-                    fontSize: '14px',
-                    color: subText,
-                  }}>
-                    <span style={{ position: 'absolute', left: 0, color: '#bc0000' }}>→</span>
-                    <strong>Current top 20 cutoff:</strong> {userPosition.top20_cutoff} points (#{top20[19]?.rank || 20})
-                  </li>
-                  <li style={{
-                    position: 'relative',
-                    paddingLeft: 20,
-                    marginBottom: 16,
-                    fontSize: '14px',
-                    color: subText,
-                  }}>
-                    <span style={{ position: 'absolute', left: 0, color: '#bc0000' }}>→</span>
-                    <strong>Tip:</strong> Make high-quality trades to improve your average score
-                  </li>
+              <div style={{ borderTop: '1px solid var(--sm-border)', paddingTop: 20 }}>
+                <p style={{ fontWeight: 600, marginBottom: 12, fontSize: 14 }}>How to reach top 20:</p>
+                <ul style={{ margin: 0, paddingLeft: 0, listStyle: 'none' }}>
+                  {[
+                    { text: <><strong>Score needed:</strong> You need {Math.ceil(userPosition.points_to_top20)} more points</> },
+                    { text: <><strong>Current top 20 cutoff:</strong> {userPosition.top20_cutoff} points (#{top20[19]?.rank || 20})</> },
+                    { text: <><strong>Tip:</strong> Make high-quality trades to improve your average score</> },
+                  ].map((item, i) => (
+                    <li key={i} style={{
+                      position: 'relative',
+                      paddingLeft: 20,
+                      marginBottom: 8,
+                      fontSize: 14,
+                      color: 'var(--sm-text-muted)',
+                    }}>
+                      <span style={{ position: 'absolute', left: 0, color: 'var(--sm-red)' }}>→</span>
+                      {item.text}
+                    </li>
+                  ))}
                 </ul>
-                <Link
-                  href="/gm"
-                  style={{
-                    display: 'inline-block',
-                    padding: '12px 24px',
-                    borderRadius: 8,
-                    backgroundColor: '#bc0000',
-                    color: '#fff',
-                    fontSize: '14px',
-                    fontWeight: 600,
-                    textDecoration: 'none',
-                  }}
-                >
+                <Link href="/gm" className="btn-primary btn-sm" style={{ marginTop: 16, display: 'inline-flex' }}>
                   Make More Trades
                 </Link>
               </div>
@@ -423,13 +369,13 @@ export default function LeaderboardsPage() {
             {userInTop20 && (
               <div style={{
                 padding: 16,
-                backgroundColor: 'rgba(34, 197, 94, 0.1)',
-                border: '1px solid rgba(34, 197, 94, 0.2)',
-                borderRadius: 12,
+                background: 'rgba(0, 208, 132, 0.08)',
+                border: '1px solid rgba(0, 208, 132, 0.2)',
+                borderRadius: 'var(--sm-radius-sm)',
                 textAlign: 'center',
               }}>
-                <p style={{ margin: 0, color: '#22c55e', fontWeight: 600 }}>
-                  🎉 You're in the top 20! Keep up the great work!
+                <p style={{ margin: 0, color: 'var(--sm-success)', fontWeight: 600 }}>
+                  You're in the top 20! Keep up the great work!
                 </p>
               </div>
             )}
@@ -437,67 +383,64 @@ export default function LeaderboardsPage() {
         )}
 
         {/* Top 20 Public Leaderboard */}
-        <div style={{
-          backgroundColor: cardBg,
-          border: `1px solid ${cardBorder}`,
-          borderRadius: 16,
-          overflow: 'hidden',
-        }}>
+        <div className="glass-card glass-card-static" style={{ padding: 0, overflow: 'hidden' }}>
           {/* Leaderboard Header */}
           <div style={{
-            padding: '16px 20px',
-            borderBottom: `1px solid ${cardBorder}`,
+            padding: '16px 24px',
+            borderBottom: '1px solid var(--sm-border)',
             display: 'flex',
             justifyContent: 'space-between',
             alignItems: 'center',
           }}>
-            <h2 style={{ margin: 0, fontSize: '18px', fontWeight: 700 }}>
+            <h2 style={{ margin: 0, fontSize: 18, fontWeight: 700, fontFamily: 'var(--sm-font-heading)' }}>
               Top 20 - Public Leaderboard
             </h2>
             {daysLeft > 0 && (
-              <span style={{ fontSize: '12px', color: subText }}>
+              <span style={{ fontSize: 12, color: 'var(--sm-text-dim)' }}>
                 Updates in real-time
               </span>
             )}
           </div>
 
-          {/* Leaderboard Table */}
-          <div style={{ overflowX: 'auto' }}>
-            <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+          {/* Desktop Table */}
+          <div className="sm-table-wrapper" style={{ display: 'block' }}>
+            <table className="sm-table">
               <thead>
-                <tr style={{ backgroundColor: 'var(--sm-surface)' }}>
-                  <th style={{ padding: '12px 16px', textAlign: 'left', fontWeight: 600, fontSize: '13px' }}>Rank</th>
-                  <th style={{ padding: '12px 16px', textAlign: 'left', fontWeight: 600, fontSize: '13px' }}>Player</th>
-                  <th style={{ padding: '12px 16px', textAlign: 'right', fontWeight: 600, fontSize: '13px' }}>Score</th>
-                  <th style={{ padding: '12px 16px', textAlign: 'right', fontWeight: 600, fontSize: '13px' }}>Activities</th>
-                  <th style={{ padding: '12px 16px', textAlign: 'left', fontWeight: 600, fontSize: '13px' }}>Breakdown</th>
+                <tr>
+                  <th>Rank</th>
+                  <th>Player</th>
+                  <th style={{ textAlign: 'right' }}>Score</th>
+                  <th style={{ textAlign: 'right' }}>Activities</th>
+                  <th>Breakdown</th>
                 </tr>
               </thead>
               <tbody>
                 {top20.map((entry, idx) => {
                   const isCurrentUser = entry.user_id === user?.id
                   const isMedal = entry.rank <= 3
+                  const medalStyle = MEDAL_COLORS[entry.rank]
 
                   return (
                     <tr
                       key={entry.id || idx}
                       style={{
-                        borderTop: `1px solid ${cardBorder}`,
-                        backgroundColor: isCurrentUser
-                          ? 'rgba(188, 0, 0, 0.1)'
-                          : 'transparent',
+                        background: isCurrentUser
+                          ? 'rgba(188, 0, 0, 0.08)'
+                          : isMedal
+                            ? medalStyle?.bg
+                            : undefined,
                       }}
                     >
                       {/* Rank */}
-                      <td style={{ padding: '14px 16px' }}>
+                      <td>
                         <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                          {entry.rank === 1 && <span style={{ fontSize: '20px' }}>🥇</span>}
-                          {entry.rank === 2 && <span style={{ fontSize: '20px' }}>🥈</span>}
-                          {entry.rank === 3 && <span style={{ fontSize: '20px' }}>🥉</span>}
+                          {entry.rank === 1 && <span style={{ fontSize: 20 }}>🥇</span>}
+                          {entry.rank === 2 && <span style={{ fontSize: 20 }}>🥈</span>}
+                          {entry.rank === 3 && <span style={{ fontSize: 20 }}>🥉</span>}
                           <span style={{
                             fontWeight: 700,
-                            fontSize: isMedal ? '16px' : '14px',
-                            color: isMedal ? '#bc0000' : 'var(--sm-text)',
+                            fontSize: isMedal ? 16 : 14,
+                            color: isMedal ? (medalStyle?.text || 'var(--sm-text)') : 'var(--sm-text)',
                           }}>
                             #{entry.rank}
                           </span>
@@ -505,20 +448,18 @@ export default function LeaderboardsPage() {
                       </td>
 
                       {/* Username */}
-                      <td style={{ padding: '14px 16px' }}>
+                      <td>
                         <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                           <span style={{ fontWeight: 600 }}>
                             {entry.users?.username || `User ${entry.user_id.slice(0, 6)}`}
                           </span>
                           {isCurrentUser && (
-                            <span style={{
+                            <span className="sm-tag" style={{
                               padding: '2px 8px',
-                              backgroundColor: '#bc0000',
+                              fontSize: 10,
+                              background: 'var(--sm-red)',
                               color: '#fff',
-                              borderRadius: 4,
-                              fontSize: '10px',
-                              fontWeight: 700,
-                              textTransform: 'uppercase',
+                              border: 'none',
                             }}>
                               YOU
                             </span>
@@ -527,50 +468,30 @@ export default function LeaderboardsPage() {
                       </td>
 
                       {/* Score */}
-                      <td style={{ padding: '14px 16px', textAlign: 'right' }}>
-                        <span style={{ fontWeight: 700, fontSize: '16px' }}>
-                          {entry.score}
-                        </span>
+                      <td className="stat-num" style={{ fontWeight: 700, fontSize: 16 }}>
+                        {entry.score}
                       </td>
 
                       {/* Activities */}
-                      <td style={{ padding: '14px 16px', textAlign: 'right' }}>
+                      <td className="stat-num">
                         {entry.activities_count}
                       </td>
 
                       {/* Breakdown */}
-                      <td style={{ padding: '14px 16px' }}>
+                      <td>
                         <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
                           {entry.trades_count > 0 && (
-                            <span style={{
-                              padding: '4px 8px',
-                              backgroundColor: 'var(--sm-surface)',
-                              borderRadius: 6,
-                              fontSize: '11px',
-                              fontWeight: 600,
-                            }}>
+                            <span className="sm-tag" style={{ padding: '4px 8px', fontSize: 11 }}>
                               {entry.trades_count} trades
                             </span>
                           )}
                           {entry.drafts_count > 0 && (
-                            <span style={{
-                              padding: '4px 8px',
-                              backgroundColor: 'var(--sm-surface)',
-                              borderRadius: 6,
-                              fontSize: '11px',
-                              fontWeight: 600,
-                            }}>
+                            <span className="sm-tag" style={{ padding: '4px 8px', fontSize: 11 }}>
                               {entry.drafts_count} drafts
                             </span>
                           )}
                           {entry.sims_count > 0 && (
-                            <span style={{
-                              padding: '4px 8px',
-                              backgroundColor: 'var(--sm-surface)',
-                              borderRadius: 6,
-                              fontSize: '11px',
-                              fontWeight: 600,
-                            }}>
+                            <span className="sm-tag" style={{ padding: '4px 8px', fontSize: 11 }}>
                               {entry.sims_count} sims
                             </span>
                           )}
@@ -581,7 +502,7 @@ export default function LeaderboardsPage() {
                 })}
                 {top20.length === 0 && (
                   <tr>
-                    <td colSpan={5} style={{ padding: 40, textAlign: 'center', color: subText }}>
+                    <td colSpan={5} style={{ padding: 40, textAlign: 'center', color: 'var(--sm-text-muted)' }}>
                       No competitors yet. Be the first!
                     </td>
                   </tr>
@@ -593,11 +514,11 @@ export default function LeaderboardsPage() {
           {/* Leaderboard Footer */}
           <div style={{
             padding: 16,
-            backgroundColor: 'var(--sm-surface)',
-            borderTop: `1px solid ${cardBorder}`,
+            background: 'var(--sm-surface)',
+            borderTop: '1px solid var(--sm-border)',
             textAlign: 'center',
           }}>
-            <p style={{ margin: 0, fontSize: '13px', color: subText }}>
+            <p style={{ margin: 0, fontSize: 13, color: 'var(--sm-text-dim)' }}>
               Only top 20 players are shown publicly.
               {userPosition?.competing && !userInTop20 && ' You can see your personal rank above.'}
             </p>
@@ -606,64 +527,28 @@ export default function LeaderboardsPage() {
 
         {/* Not Competing CTA */}
         {!userPosition?.competing && (
-          <div style={{
-            backgroundColor: cardBg,
-            border: `1px solid ${cardBorder}`,
-            borderRadius: 16,
-            padding: 32,
-            textAlign: 'center',
-            marginTop: 24,
-          }}>
-            <div style={{ fontSize: '48px', marginBottom: 12 }}>🎯</div>
-            <h3 style={{ fontWeight: 700, fontSize: '20px', marginBottom: 8 }}>
+          <div className="glass-card glass-card-static" style={{ textAlign: 'center', marginTop: 24 }}>
+            <div style={{ fontSize: 48, marginBottom: 12 }}>🎯</div>
+            <h3 style={{ fontWeight: 700, fontSize: 20, marginBottom: 8, fontFamily: 'var(--sm-font-heading)' }}>
               You're Not Competing Yet!
             </h3>
-            <p style={{ fontSize: '14px', color: subText, marginBottom: 20 }}>
+            <p style={{ fontSize: 14, color: 'var(--sm-text-muted)', marginBottom: 20 }}>
               Complete a trade or mock draft for {selectedSport} to join the leaderboard.
             </p>
             <div style={{ display: 'flex', gap: 12, justifyContent: 'center', flexWrap: 'wrap' }}>
-              <Link
-                href="/gm"
-                style={{
-                  padding: '12px 24px',
-                  borderRadius: 8,
-                  backgroundColor: '#bc0000',
-                  color: '#fff',
-                  fontSize: '14px',
-                  fontWeight: 600,
-                  textDecoration: 'none',
-                }}
-              >
-                🏈 Make a Trade
+              <Link href="/gm" className="btn-primary btn-sm">
+                Make a Trade
               </Link>
-              <Link
-                href="/mock-draft"
-                style={{
-                  padding: '12px 24px',
-                  borderRadius: 8,
-                  border: '2px solid #bc0000',
-                  backgroundColor: 'transparent',
-                  color: '#bc0000',
-                  fontSize: '14px',
-                  fontWeight: 600,
-                  textDecoration: 'none',
-                }}
-              >
-                📋 Mock Draft
+              <Link href="/mock-draft" className="btn-secondary btn-sm">
+                Mock Draft
               </Link>
             </div>
           </div>
         )}
 
         {/* How Scoring Works */}
-        <div style={{
-          backgroundColor: cardBg,
-          border: `1px solid ${cardBorder}`,
-          borderRadius: 16,
-          padding: 24,
-          marginTop: 24,
-        }}>
-          <h3 style={{ fontWeight: 700, fontSize: '18px', marginBottom: 20, textAlign: 'center' }}>
+        <div className="glass-card glass-card-static" style={{ marginTop: 24 }}>
+          <h3 style={{ fontWeight: 700, fontSize: 18, marginBottom: 20, textAlign: 'center', fontFamily: 'var(--sm-font-heading)', margin: '0 0 20px' }}>
             How Scoring Works
           </h3>
           <div style={{
@@ -682,8 +567,9 @@ export default function LeaderboardsPage() {
                 alignItems: 'flex-start',
                 gap: 12,
                 padding: 16,
-                backgroundColor: 'var(--sm-surface)',
-                borderRadius: 12,
+                background: 'var(--sm-surface)',
+                borderRadius: 'var(--sm-radius-sm)',
+                border: '1px solid var(--sm-border)',
               }}>
                 <span style={{
                   display: 'flex',
@@ -692,15 +578,15 @@ export default function LeaderboardsPage() {
                   width: 32,
                   height: 32,
                   borderRadius: '50%',
-                  backgroundColor: '#bc0000',
+                  background: 'var(--sm-gradient)',
                   color: '#fff',
                   fontWeight: 700,
-                  fontSize: '14px',
+                  fontSize: 14,
                   flexShrink: 0,
                 }}>
                   {step}
                 </span>
-                <p style={{ margin: 0, fontSize: '14px', color: subText }}>
+                <p style={{ margin: 0, fontSize: 14, color: 'var(--sm-text-muted)' }}>
                   {text}
                 </p>
               </div>
@@ -708,13 +594,6 @@ export default function LeaderboardsPage() {
           </div>
         </div>
       </main>
-
-      <style jsx>{`
-        @keyframes pulse {
-          0%, 100% { opacity: 1; }
-          50% { opacity: 0.5; }
-        }
-      `}</style>
     </div>
   )
 }

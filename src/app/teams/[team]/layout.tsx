@@ -36,7 +36,7 @@ export default async function TeamLayout({ children, params }: TeamLayoutProps) 
   const divisionRank = teamStanding ? standings.indexOf(teamStanding) + 1 : undefined;
 
   return (
-    <div className="min-h-screen" style={{ backgroundColor: 'var(--sm-card)' }}>
+    <div style={{ minHeight: '100vh', background: 'var(--sm-dark)' }}>
       <TeamHeader
         team={team}
         record={record}

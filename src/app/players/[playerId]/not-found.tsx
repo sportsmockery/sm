@@ -2,26 +2,34 @@ import Link from 'next/link';
 
 export default function PlayerNotFound() {
   return (
-    <div className="flex min-h-screen items-center justify-center px-4" style={{ backgroundColor: 'var(--sm-card)' }}>
-      <div className="text-center">
-        <h1 className="mb-4 text-6xl font-black" style={{ color: 'var(--sm-text)' }}>404</h1>
-        <h2 className="mb-4 text-2xl font-bold" style={{ color: 'var(--sm-text)' }}>
+    <div style={{
+      display: 'flex',
+      minHeight: '100vh',
+      alignItems: 'center',
+      justifyContent: 'center',
+      padding: '16px',
+      background: 'var(--sm-dark)',
+    }}>
+      <div style={{ textAlign: 'center' }}>
+        <h1 style={{ marginBottom: '16px', fontSize: 'var(--text-6xl)', fontWeight: 900, color: 'var(--sm-text)' }}>404</h1>
+        <h2 style={{ marginBottom: '16px', fontSize: 'var(--text-2xl)', fontWeight: 700, color: 'var(--sm-text)' }}>
           Player Not Found
         </h2>
-        <p className="mb-8" style={{ color: 'var(--sm-text-muted)' }}>
+        <p style={{ marginBottom: '32px', color: 'var(--sm-text-muted)' }}>
           We couldn&apos;t find the player you&apos;re looking for.
         </p>
-        <div className="flex flex-col gap-4 sm:flex-row sm:justify-center">
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', alignItems: 'center' }}>
           <Link
             href="/players"
-            className="rounded-lg bg-[#8B0000] px-6 py-3 font-semibold text-white transition-colors hover:bg-red-800"
+            className="btn btn-md btn-primary"
+            style={{ textDecoration: 'none' }}
           >
             Search Players
           </Link>
           <Link
             href="/teams"
-            className="rounded-lg border px-6 py-3 font-semibold transition-colors"
-            style={{ borderColor: 'var(--sm-border)', color: 'var(--sm-text)' }}
+            className="btn btn-md btn-secondary"
+            style={{ textDecoration: 'none' }}
           >
             View Teams
           </Link>
