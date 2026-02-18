@@ -168,10 +168,10 @@ export function HomepageFeed({
             <span className="pulse-dot" /> The Future of Chicago Sports
           </div>
 
-          <h1 className="animate-fade-in-up delay-100">
+          <h1 className="homepage-hero-title animate-fade-in-up delay-100">
             Your AI-powered
             <br />
-            <span className="gradient-text">sports command center</span>
+            <span className="gradient-text homepage-hero-accent">sports command center</span>
           </h1>
 
           <p className="hero-subtitle animate-fade-in-up delay-200">

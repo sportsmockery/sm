@@ -25,14 +25,60 @@
   padding: 0 24px;
 }
 
-.homepage-hero h1 {
-  font-family: 'Space Grotesk', sans-serif;
-  font-size: clamp(2.5rem, 6vw, 4.5rem);
-  font-weight: 800;
-  letter-spacing: -2px;
-  line-height: 1.1;
-  color: var(--sm-text);
+.homepage-hero h1,
+.homepage-hero .homepage-hero-title {
+  font-family: var(--font-bebas-neue), 'Bebas Neue', Impact, sans-serif;
+  font-size: clamp(4rem, 9vw, 7.5rem);
+  font-weight: 400;
+  letter-spacing: 0.01em;
+  line-height: 0.95;
+  text-transform: uppercase;
+  color: #fff;
   margin-top: 24px;
+  text-shadow:
+    0 0 10px rgba(188, 0, 0, 0.6),
+    0 0 40px rgba(188, 0, 0, 0.4),
+    0 0 80px rgba(188, 0, 0, 0.3),
+    0 0 140px rgba(188, 0, 0, 0.2),
+    0 0 200px rgba(188, 0, 0, 0.1);
+  animation: homepage-glowBurst 2s ease-out forwards;
+}
+
+/* Gradient accent text ("sports command center") */
+.homepage-hero .homepage-hero-accent {
+  background: linear-gradient(135deg, #bc0000, #ff4444);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  text-shadow: none;
+  filter: drop-shadow(0 0 10px rgba(255, 255, 255, 0.25))
+         drop-shadow(0 0 30px rgba(255, 255, 255, 0.12))
+         drop-shadow(0 0 60px rgba(255, 255, 255, 0.06));
+}
+
+/* Red glow burst animation matching /home hero */
+@keyframes homepage-glowBurst {
+  0% {
+    text-shadow:
+      0 0 10px rgba(188, 0, 0, 0),
+      0 0 40px rgba(188, 0, 0, 0),
+      0 0 80px rgba(188, 0, 0, 0);
+  }
+  40% {
+    text-shadow:
+      0 0 20px rgba(188, 0, 0, 0.8),
+      0 0 60px rgba(188, 0, 0, 0.5),
+      0 0 120px rgba(188, 0, 0, 0.4),
+      0 0 200px rgba(188, 0, 0, 0.2);
+  }
+  100% {
+    text-shadow:
+      0 0 10px rgba(188, 0, 0, 0.6),
+      0 0 40px rgba(188, 0, 0, 0.4),
+      0 0 80px rgba(188, 0, 0, 0.3),
+      0 0 140px rgba(188, 0, 0, 0.2),
+      0 0 200px rgba(188, 0, 0, 0.1);
+  }
 }
 
 .homepage-hero .hero-subtitle {
@@ -801,8 +847,10 @@
 }
 
 @media (max-width: 768px) {
-  .homepage-hero h1 {
-    letter-spacing: -1px;
+  .homepage-hero h1,
+  .homepage-hero .homepage-hero-title {
+    font-size: clamp(3rem, 8vw, 5rem);
+    letter-spacing: 0;
   }
 
   .homepage-hero .hero-teams {
