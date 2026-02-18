@@ -12,11 +12,11 @@ interface InjuryReportProps {
 export default function InjuryReport({ injuries, team }: InjuryReportProps) {
   if (injuries.length === 0) {
     return (
-      <div className="rounded-xl border border-zinc-200 bg-white p-5 dark:border-zinc-800 dark:bg-zinc-900">
-        <h3 className="mb-4 text-sm font-bold uppercase tracking-wide text-zinc-900 dark:text-white">
+      <div className="rounded-xl border p-5" style={{ borderColor: 'var(--sm-border)', backgroundColor: 'var(--sm-card)' }}>
+        <h3 className="mb-4 text-sm font-bold uppercase tracking-wide" style={{ color: 'var(--sm-text)' }}>
           Injury Report
         </h3>
-        <p className="text-sm text-zinc-500 dark:text-zinc-400">
+        <p className="text-sm" style={{ color: 'var(--sm-text-muted)' }}>
           No injuries reported.
         </p>
       </div>
@@ -43,18 +43,18 @@ export default function InjuryReport({ injuries, team }: InjuryReportProps) {
   };
 
   return (
-    <div className="rounded-xl border border-zinc-200 bg-white dark:border-zinc-800 dark:bg-zinc-900">
-      <div className="border-b border-zinc-200 px-5 py-4 dark:border-zinc-800">
-        <h3 className="text-sm font-bold uppercase tracking-wide text-zinc-900 dark:text-white">
+    <div className="rounded-xl border" style={{ borderColor: 'var(--sm-border)', backgroundColor: 'var(--sm-card)' }}>
+      <div className="border-b px-5 py-4" style={{ borderColor: 'var(--sm-border)' }}>
+        <h3 className="text-sm font-bold uppercase tracking-wide" style={{ color: 'var(--sm-text)' }}>
           Injury Report
         </h3>
       </div>
 
-      <div className="divide-y divide-zinc-100 dark:divide-zinc-800">
+      <div className="divide-y" style={{ '--tw-divide-color': 'var(--sm-border)' } as React.CSSProperties}>
         {injuries.map((injury, index) => (
           <div key={`${injury.player.id}-${index}`} className="p-4">
             <div className="flex items-start gap-3">
-              <div className="relative h-10 w-10 flex-shrink-0 overflow-hidden rounded-full bg-zinc-100 dark:bg-zinc-800">
+              <div className="relative h-10 w-10 flex-shrink-0 overflow-hidden rounded-full" style={{ backgroundColor: 'var(--sm-surface)' }}>
                 <Image
                   src={injury.player.headshot}
                   alt={injury.player.name}
@@ -67,15 +67,16 @@ export default function InjuryReport({ injuries, team }: InjuryReportProps) {
                 <div className="flex items-center gap-2">
                   <Link
                     href={`/players/${injury.player.slug}`}
-                    className="font-medium text-zinc-900 hover:underline dark:text-white"
+                    className="font-medium hover:underline"
+                    style={{ color: 'var(--sm-text)' }}
                   >
                     {injury.player.name}
                   </Link>
-                  <span className="text-sm text-zinc-500 dark:text-zinc-400">
+                  <span className="text-sm" style={{ color: 'var(--sm-text-muted)' }}>
                     {injury.player.position}
                   </span>
                 </div>
-                <p className="text-sm text-zinc-600 dark:text-zinc-400">
+                <p className="text-sm" style={{ color: 'var(--sm-text-muted)' }}>
                   {injury.injury}
                 </p>
               </div>
@@ -88,8 +89,8 @@ export default function InjuryReport({ injuries, team }: InjuryReportProps) {
         ))}
       </div>
 
-      <div className="border-t border-zinc-200 px-5 py-3 dark:border-zinc-800">
-        <p className="text-xs text-zinc-500 dark:text-zinc-400">
+      <div className="border-t px-5 py-3" style={{ borderColor: 'var(--sm-border)' }}>
+        <p className="text-xs" style={{ color: 'var(--sm-text-muted)' }}>
           Last updated: {new Date(injuries[0]?.updated || Date.now()).toLocaleDateString('en-US', {
             weekday: 'long',
             month: 'short',

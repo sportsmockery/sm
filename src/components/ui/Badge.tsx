@@ -1,4 +1,4 @@
-import { ReactNode } from 'react'
+import React, { ReactNode } from 'react'
 
 interface BadgeProps {
   children: ReactNode
@@ -7,14 +7,14 @@ interface BadgeProps {
   className?: string
 }
 
-const variantClasses = {
-  default: 'bg-zinc-100 text-zinc-700 dark:bg-zinc-800 dark:text-zinc-300',
-  primary: 'bg-[#8B0000] text-white',
-  secondary: 'bg-zinc-700 text-white dark:bg-zinc-600',
-  success: 'bg-emerald-500 text-white',
-  warning: 'bg-amber-500 text-white',
-  danger: 'bg-red-500 text-white',
-  outline: 'border border-zinc-300 text-zinc-700 dark:border-zinc-600 dark:text-zinc-300',
+const variantStyles: Record<string, React.CSSProperties> = {
+  default: { backgroundColor: 'var(--sm-surface)', color: 'var(--sm-text-muted)' },
+  primary: { backgroundColor: '#8B0000', color: '#ffffff' },
+  secondary: { backgroundColor: 'var(--sm-surface)', color: '#ffffff' },
+  success: { backgroundColor: '#10b981', color: '#ffffff' },
+  warning: { backgroundColor: '#f59e0b', color: '#ffffff' },
+  danger: { backgroundColor: '#ef4444', color: '#ffffff' },
+  outline: { border: '1px solid var(--sm-border)', color: 'var(--sm-text-muted)' },
 }
 
 const sizeClasses = {
@@ -33,10 +33,10 @@ export default function Badge({
     <span
       className={`
         inline-flex items-center rounded-full font-medium
-        ${variantClasses[variant]}
         ${sizeClasses[size]}
         ${className}
       `}
+      style={variantStyles[variant]}
     >
       {children}
     </span>

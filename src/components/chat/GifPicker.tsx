@@ -119,8 +119,8 @@ export default function GifPicker({ onSelect, onClose }: GifPickerProps) {
 
       <style jsx>{`
         .gif-picker {
-          background: var(--bg-card, #1a1a2e);
-          border: 1px solid var(--border-subtle, #333);
+          background: var(--sm-card, #1a1a2e);
+          border: 1px solid var(--sm-border, #333);
           border-radius: 12px;
           box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
           overflow: hidden;
@@ -134,7 +134,7 @@ export default function GifPicker({ onSelect, onClose }: GifPickerProps) {
           align-items: center;
           gap: 8px;
           padding: 10px 12px;
-          border-bottom: 1px solid var(--border-subtle, #333);
+          border-bottom: 1px solid var(--sm-border, #333);
         }
 
         .gif-picker__search {
@@ -142,23 +142,23 @@ export default function GifPicker({ onSelect, onClose }: GifPickerProps) {
           display: flex;
           align-items: center;
           gap: 8px;
-          background: var(--bg-subtle, #111);
+          background: var(--sm-surface, #111);
           border-radius: 8px;
           padding: 6px 10px;
-          color: var(--text-subtle, #888);
+          color: var(--sm-text-muted, #888);
         }
 
         .gif-picker__input {
           flex: 1;
           background: transparent;
           border: none;
-          color: var(--text-main, #fff);
+          color: var(--sm-text, #fff);
           font-size: 0.85rem;
           outline: none;
         }
 
         .gif-picker__input::placeholder {
-          color: var(--text-subtle, #888);
+          color: var(--sm-text-muted, #888);
         }
 
         .gif-picker__close {
@@ -171,12 +171,12 @@ export default function GifPicker({ onSelect, onClose }: GifPickerProps) {
           border: none;
           border-radius: 6px;
           cursor: pointer;
-          color: var(--text-subtle, #888);
+          color: var(--sm-text-muted, #888);
           transition: background 0.15s;
         }
 
         .gif-picker__close:hover {
-          background: var(--bg-hover, #2a2a2a);
+          background: var(--sm-card-hover, #2a2a2a);
         }
 
         .gif-picker__content {
@@ -192,14 +192,14 @@ export default function GifPicker({ onSelect, onClose }: GifPickerProps) {
           align-items: center;
           justify-content: center;
           height: 200px;
-          color: var(--text-subtle, #888);
+          color: var(--sm-text-muted, #888);
           font-size: 0.85rem;
         }
 
         .gif-picker__spinner {
           width: 24px;
           height: 24px;
-          border: 2px solid var(--border-subtle, #333);
+          border: 2px solid var(--sm-border, #333);
           border-top-color: var(--accent, #3b82f6);
           border-radius: 50%;
           animation: spin 0.8s linear infinite;
@@ -217,7 +217,7 @@ export default function GifPicker({ onSelect, onClose }: GifPickerProps) {
         }
 
         .gif-picker__gif {
-          background: var(--bg-subtle, #111);
+          background: var(--sm-surface, #111);
           border: none;
           border-radius: 8px;
           overflow: hidden;
@@ -238,13 +238,13 @@ export default function GifPicker({ onSelect, onClose }: GifPickerProps) {
 
         .gif-picker__footer {
           padding: 8px 12px;
-          border-top: 1px solid var(--border-subtle, #333);
+          border-top: 1px solid var(--sm-border, #333);
           text-align: center;
         }
 
         .gif-picker__powered {
           font-size: 0.7rem;
-          color: var(--text-subtle, #888);
+          color: var(--sm-text-muted, #888);
         }
 
         /* Light mode */

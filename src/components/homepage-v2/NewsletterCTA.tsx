@@ -63,7 +63,8 @@ export default function NewsletterCTA({
 
   return (
     <section
-      className={`bg-zinc-900 dark:bg-zinc-950 border-4 border-red-600 p-6 md:p-8 ${className}`}
+      className={`border-4 border-red-600 p-6 md:p-8 ${className}`}
+      style={{ backgroundColor: 'var(--sm-surface)' }}
       aria-labelledby="newsletter-title"
     >
       <div className="max-w-2xl mx-auto text-center">
@@ -76,7 +77,7 @@ export default function NewsletterCTA({
         </h2>
 
         {/* Subtitle */}
-        <p className="text-zinc-400 text-base mb-6 font-serif">{subtitle}</p>
+        <p className="text-base mb-6 font-serif" style={{ color: 'var(--sm-text-muted)' }}>{subtitle}</p>
 
         {/* Form */}
         <form onSubmit={handleSubmit} className="flex flex-col sm:flex-row gap-3">
@@ -90,7 +91,8 @@ export default function NewsletterCTA({
             onChange={(e) => setEmail(e.target.value)}
             placeholder="Enter your email"
             disabled={status === 'loading' || status === 'success'}
-            className="flex-1 px-4 py-3 bg-white dark:bg-zinc-800 text-black dark:text-white border border-zinc-300 dark:border-zinc-700 focus:outline-none focus:ring-2 focus:ring-red-600 focus:border-transparent disabled:opacity-50"
+            className="flex-1 px-4 py-3 border focus:outline-none focus:ring-2 focus:ring-red-600 focus:border-transparent disabled:opacity-50"
+            style={{ backgroundColor: 'var(--sm-card)', color: 'var(--sm-text)', borderColor: 'var(--sm-border)' }}
             aria-describedby="newsletter-status"
           />
           <button
@@ -145,7 +147,7 @@ export default function NewsletterCTA({
         </AnimatePresence>
 
         {/* Privacy note */}
-        <p className="mt-4 text-xs text-zinc-500">
+        <p className="mt-4 text-xs" style={{ color: 'var(--sm-text-muted)' }}>
           No spam. Unsubscribe anytime. We respect your inbox.
         </p>
       </div>

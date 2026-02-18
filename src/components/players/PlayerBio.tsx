@@ -35,18 +35,18 @@ export default function PlayerBio({ player }: PlayerBioProps) {
   ];
 
   return (
-    <div className="rounded-xl border border-zinc-200 bg-white dark:border-zinc-800 dark:bg-zinc-900">
-      <div className="border-b border-zinc-200 px-5 py-4 dark:border-zinc-800">
-        <h3 className="text-sm font-bold uppercase tracking-wide text-zinc-900 dark:text-white">
+    <div className="rounded-xl border" style={{ borderColor: 'var(--sm-border)', backgroundColor: 'var(--sm-card)' }}>
+      <div className="border-b px-5 py-4" style={{ borderColor: 'var(--sm-border)' }}>
+        <h3 className="text-sm font-bold uppercase tracking-wide" style={{ color: 'var(--sm-text)' }}>
           Player Info
         </h3>
       </div>
 
-      <div className="divide-y divide-zinc-100 dark:divide-zinc-800">
+      <div className="divide-y" style={{ '--tw-divide-color': 'var(--sm-border)' } as React.CSSProperties}>
         {bioItems.map((item) => (
           <div key={item.label} className="flex items-center justify-between px-5 py-3">
-            <span className="text-sm text-zinc-500 dark:text-zinc-400">{item.label}</span>
-            <span className="text-sm font-medium text-zinc-900 dark:text-white">{item.value}</span>
+            <span className="text-sm" style={{ color: 'var(--sm-text-muted)' }}>{item.label}</span>
+            <span className="text-sm font-medium" style={{ color: 'var(--sm-text)' }}>{item.value}</span>
           </div>
         ))}
       </div>

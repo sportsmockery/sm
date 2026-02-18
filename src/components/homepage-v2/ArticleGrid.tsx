@@ -55,7 +55,8 @@ export default function ArticleGrid({
         <header className="mb-6 pb-3 border-b-4 border-red-600">
           <h2
             id="article-grid-title"
-            className={`text-2xl text-black dark:text-white uppercase tracking-wide ${montserrat.className}`}
+            className={`text-2xl uppercase tracking-wide ${montserrat.className}`}
+            style={{ color: 'var(--sm-text)' }}
           >
             {title}
           </h2>
@@ -90,7 +91,8 @@ function ArticleCard({
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: index * 0.05 }}
-      className="group bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 hover:border-red-600 dark:hover:border-red-600 transition-colors"
+      className="group border hover:border-red-600 transition-colors"
+      style={{ backgroundColor: 'var(--sm-card)', borderColor: 'var(--sm-border)' }}
     >
       <Link
         href={`/${article.category.slug}/${article.slug}`}
@@ -99,7 +101,7 @@ function ArticleCard({
         <div className="flex gap-4">
           {/* Thumbnail - 80x80 rounded */}
           {showThumbnail && article.featured_image && (
-            <div className="flex-shrink-0 w-20 h-20 relative rounded overflow-hidden bg-zinc-200 dark:bg-zinc-800">
+            <div className="flex-shrink-0 w-20 h-20 relative rounded overflow-hidden" style={{ backgroundColor: 'var(--sm-surface)' }}>
               <Image
                 src={article.featured_image}
                 alt=""
@@ -119,7 +121,8 @@ function ArticleCard({
 
             {/* Title - 24pt */}
             <h3
-              className={`text-lg text-black dark:text-white leading-snug group-hover:text-red-600 dark:group-hover:text-red-500 transition-colors line-clamp-2 ${montserrat.className}`}
+              className={`text-lg leading-snug group-hover:text-red-600 transition-colors line-clamp-2 ${montserrat.className}`}
+              style={{ color: 'var(--sm-text)' }}
             >
               {article.title}
             </h3>
@@ -127,12 +130,12 @@ function ArticleCard({
         </div>
 
         {/* Excerpt */}
-        <p className="mt-3 text-base text-zinc-600 dark:text-zinc-400 line-clamp-2 font-serif">
+        <p className="mt-3 text-base line-clamp-2 font-serif" style={{ color: 'var(--sm-text-muted)' }}>
           {article.excerpt}
         </p>
 
         {/* Meta */}
-        <div className="mt-3 flex items-center justify-between text-xs text-zinc-500 dark:text-zinc-500">
+        <div className="mt-3 flex items-center justify-between text-xs" style={{ color: 'var(--sm-text-muted)' }}>
           <span>{article.author?.name || 'Staff'}</span>
           <time dateTime={article.published_at}>
             {formatDate(article.published_at)}

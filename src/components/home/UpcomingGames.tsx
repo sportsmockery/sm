@@ -81,16 +81,17 @@ export default function UpcomingGames({ games = sampleGames, compact = false, cl
           return (
             <div
               key={game.id}
-              className={`border-l-4 ${colors.border} bg-zinc-50 p-3 dark:bg-zinc-800/50`}
+              className={`border-l-4 ${colors.border} p-3`}
+              style={{ backgroundColor: 'var(--sm-surface)' }}
             >
               {/* Teams */}
               <div className="mb-1 flex items-center justify-between text-sm font-semibold">
-                <span className="text-zinc-700 dark:text-zinc-300">{game.awayTeam.abbreviation}</span>
-                <span className="text-xs text-zinc-400">@</span>
-                <span className="text-zinc-900 dark:text-white">{game.homeTeam.abbreviation}</span>
+                <span style={{ color: 'var(--sm-text)' }}>{game.awayTeam.abbreviation}</span>
+                <span className="text-xs" style={{ color: 'var(--sm-text-dim)' }}>@</span>
+                <span style={{ color: 'var(--sm-text)' }}>{game.homeTeam.abbreviation}</span>
               </div>
               {/* Date/Time */}
-              <div className="text-xs text-zinc-500 dark:text-zinc-400">
+              <div className="text-xs" style={{ color: 'var(--sm-text-muted)' }}>
                 {game.date} · {game.time}
               </div>
             </div>
@@ -103,10 +104,10 @@ export default function UpcomingGames({ games = sampleGames, compact = false, cl
   // Full version with filters
   return (
     <section className={className}>
-      <div className="rounded-xl border border-zinc-200 bg-white p-6 dark:border-zinc-800 dark:bg-zinc-900">
+      <div className="rounded-xl p-6" style={{ backgroundColor: 'var(--sm-card)', border: '1px solid var(--sm-border)' }}>
         {/* Header */}
         <div className="mb-4 flex items-center justify-between">
-          <h3 className="flex items-center gap-2 text-lg font-bold text-zinc-900 dark:text-white">
+          <h3 className="flex items-center gap-2 text-lg font-bold" style={{ color: 'var(--sm-text)' }}>
             <svg
               className="h-5 w-5 text-[#8B0000]"
               fill="none"
@@ -129,8 +130,9 @@ export default function UpcomingGames({ games = sampleGames, compact = false, cl
               className={`rounded-full px-3 py-1 text-xs font-medium transition-colors ${
                 filter === team
                   ? 'bg-[#8B0000] text-white'
-                  : 'bg-zinc-100 text-zinc-600 hover:bg-zinc-200 dark:bg-zinc-800 dark:text-zinc-400 dark:hover:bg-zinc-700'
+                  : ''
               }`}
+              style={filter !== team ? { backgroundColor: 'var(--sm-surface)', color: 'var(--sm-text-muted)' } : undefined}
             >
               {team === 'all' ? 'All' : team === 'whitesox' ? 'White Sox' : team.charAt(0).toUpperCase() + team.slice(1)}
             </button>
@@ -140,33 +142,33 @@ export default function UpcomingGames({ games = sampleGames, compact = false, cl
         {/* Games list */}
         <div className="space-y-3">
           {filteredGames.length === 0 ? (
-            <p className="py-4 text-center text-sm text-zinc-500 dark:text-zinc-400">
+            <p className="py-4 text-center text-sm" style={{ color: 'var(--sm-text-muted)' }}>
               No upcoming games for this team
             </p>
           ) : (
             filteredGames.map((game) => {
               const colors = teamColors[game.chicagoTeam]
               return (
-                <div key={game.id} className={`border-l-4 ${colors.border} rounded-r-lg bg-zinc-50 p-4 dark:bg-zinc-800/50`}>
+                <div key={game.id} className={`border-l-4 ${colors.border} rounded-r-lg p-4`} style={{ backgroundColor: 'var(--sm-surface)' }}>
                   {/* Teams */}
                   <div className="mb-2 flex items-center justify-between">
                     <div className="text-sm">
-                      <span className="font-medium text-zinc-700 dark:text-zinc-300">{game.awayTeam.name}</span>
+                      <span className="font-medium" style={{ color: 'var(--sm-text)' }}>{game.awayTeam.name}</span>
                       {game.awayTeam.record && (
-                        <span className="ml-1 text-xs text-zinc-400">({game.awayTeam.record})</span>
+                        <span className="ml-1 text-xs" style={{ color: 'var(--sm-text-dim)' }}>({game.awayTeam.record})</span>
                       )}
                     </div>
-                    <span className="text-xs text-zinc-400">@</span>
+                    <span className="text-xs" style={{ color: 'var(--sm-text-dim)' }}>@</span>
                     <div className="text-right text-sm">
-                      <span className="font-semibold text-zinc-900 dark:text-white">{game.homeTeam.name}</span>
+                      <span className="font-semibold" style={{ color: 'var(--sm-text)' }}>{game.homeTeam.name}</span>
                       {game.homeTeam.record && (
-                        <span className="ml-1 text-xs text-zinc-400">({game.homeTeam.record})</span>
+                        <span className="ml-1 text-xs" style={{ color: 'var(--sm-text-dim)' }}>({game.homeTeam.record})</span>
                       )}
                     </div>
                   </div>
 
                   {/* Game info */}
-                  <div className="flex flex-wrap items-center gap-3 text-xs text-zinc-500 dark:text-zinc-400">
+                  <div className="flex flex-wrap items-center gap-3 text-xs" style={{ color: 'var(--sm-text-muted)' }}>
                     <span>{game.date}</span>
                     <span>·</span>
                     <span>{game.time}</span>
@@ -188,7 +190,8 @@ export default function UpcomingGames({ games = sampleGames, compact = false, cl
         {/* View full schedule link */}
         <a
           href="/schedule"
-          className="mt-4 flex items-center justify-center gap-2 rounded-lg border border-zinc-200 py-2 text-sm font-medium text-zinc-600 transition-colors hover:border-zinc-300 hover:text-zinc-900 dark:border-zinc-700 dark:text-zinc-400 dark:hover:border-zinc-600 dark:hover:text-white"
+          className="mt-4 flex items-center justify-center gap-2 rounded-lg py-2 text-sm font-medium transition-colors"
+          style={{ border: '1px solid var(--sm-border)', color: 'var(--sm-text-muted)' }}
         >
           View Full Schedule
           <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">

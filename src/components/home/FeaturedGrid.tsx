@@ -50,7 +50,7 @@ export default function FeaturedGrid({ articles, className = '' }: FeaturedGridP
                     className="object-cover transition-transform duration-500 group-hover:scale-105"
                   />
                 ) : (
-                  <div className="h-full w-full bg-gradient-to-br from-zinc-200 to-zinc-300 dark:from-zinc-700 dark:to-zinc-800" />
+                  <div className="h-full w-full" style={{ background: 'linear-gradient(to bottom right, var(--sm-surface), var(--sm-border))' }} />
                 )}
                 <div className="absolute inset-0 bg-gradient-to-t from-black via-black/50 to-transparent" />
 
@@ -95,7 +95,7 @@ export default function FeaturedGrid({ articles, className = '' }: FeaturedGridP
                       className="object-cover transition-transform duration-300 group-hover:scale-105"
                     />
                   ) : (
-                    <div className="h-full w-full bg-gradient-to-br from-zinc-200 to-zinc-300 dark:from-zinc-700 dark:to-zinc-800" />
+                    <div className="h-full w-full" style={{ background: 'linear-gradient(to bottom right, var(--sm-surface), var(--sm-border))' }} />
                   )}
                 </div>
 
@@ -104,10 +104,10 @@ export default function FeaturedGrid({ articles, className = '' }: FeaturedGridP
                   <TeamColorBadge team={article.category.slug} size="sm" className="mb-2 w-fit">
                     {article.category.name}
                   </TeamColorBadge>
-                  <h4 className="line-clamp-2 font-semibold text-zinc-900 transition-colors group-hover:text-[#8B0000] dark:text-white dark:group-hover:text-[#FF6666]">
+                  <h4 className="line-clamp-2 font-semibold transition-colors" style={{ color: 'var(--sm-text)' }}>
                     {article.title}
                   </h4>
-                  <div className="mt-2 flex items-center gap-2 text-xs text-zinc-500 dark:text-zinc-400">
+                  <div className="mt-2 flex items-center gap-2 text-xs" style={{ color: 'var(--sm-text-muted)' }}>
                     {article.author && <span>{article.author.name}</span>}
                     <span>•</span>
                     <span>{format(new Date(article.published_at), 'MMM d')}</span>

@@ -112,7 +112,7 @@ export default function PersonalizedFeed({
     : articles.filter(a => a.matchReason === filter)
 
   return (
-    <section className="rounded-2xl bg-gradient-to-br from-zinc-900 via-zinc-900 to-[#8B0000]/10 p-6">
+    <section className="rounded-2xl p-6" style={{ background: 'linear-gradient(to bottom right, var(--sm-surface), var(--sm-surface), rgba(139,0,0,0.1))' }}>
       {/* Header */}
       <div className="mb-6 flex items-center justify-between">
         <div className="flex items-center gap-3">
@@ -122,8 +122,8 @@ export default function PersonalizedFeed({
             </svg>
           </div>
           <div>
-            <h3 className="font-bold text-white">For You</h3>
-            <p className="text-xs text-zinc-500">Personalized based on your interests</p>
+            <h3 className="font-bold" style={{ color: 'var(--sm-text)' }}>For You</h3>
+            <p className="text-xs" style={{ color: 'var(--sm-text-muted)' }}>Personalized based on your interests</p>
           </div>
         </div>
 
@@ -142,8 +142,9 @@ export default function PersonalizedFeed({
           className={`rounded-full px-3 py-1 text-xs font-semibold transition-all ${
             filter === 'all'
               ? 'bg-[#8B0000] text-white'
-              : 'bg-white/5 text-zinc-400 hover:bg-white/10 hover:text-white'
+              : 'text-[var(--sm-text-muted)]'
           }`}
+          style={filter !== 'all' ? { backgroundColor: 'var(--sm-surface)' } : undefined}
         >
           All
         </button>
@@ -154,7 +155,7 @@ export default function PersonalizedFeed({
             className={`flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-semibold transition-all ${
               filter === reason
                 ? 'bg-[#8B0000] text-white'
-                : 'bg-white/5 text-zinc-400 hover:bg-white/10 hover:text-white'
+                : 'text-[var(--sm-text-muted)]'
             }`}
           >
             {matchReasonIcons[reason]}
@@ -169,8 +170,8 @@ export default function PersonalizedFeed({
           <Link
             key={article.id}
             href={`/${article.category.slug}/${article.slug}`}
-            className="group flex gap-4 rounded-xl border border-white/5 bg-white/5 p-4 transition-all hover:border-[#8B0000]/30 hover:bg-white/10"
-            style={{ animationDelay: `${index * 50}ms` }}
+            className="group flex gap-4 rounded-xl p-4 transition-all"
+            style={{ backgroundColor: 'var(--sm-surface)', border: '1px solid var(--sm-border)', animationDelay: `${index * 50}ms` }}
           >
             {/* Thumbnail */}
             {article.featuredImage ? (
@@ -196,24 +197,24 @@ export default function PersonalizedFeed({
                   {matchReasonIcons[article.matchReason]}
                   {matchReasonLabels[article.matchReason]}
                 </span>
-                <span className="text-[10px] text-zinc-600">
+                <span className="text-[10px]" style={{ color: 'var(--sm-text-muted)' }}>
                   {article.matchScore}% match
                 </span>
               </div>
 
               {/* Category */}
-              <span className="text-[10px] font-bold uppercase tracking-wider text-zinc-500">
+              <span className="text-[10px] font-bold uppercase tracking-wider" style={{ color: 'var(--sm-text-muted)' }}>
                 {article.category.name}
               </span>
 
               {/* Title */}
-              <h4 className="line-clamp-2 font-semibold text-white transition-colors group-hover:text-[#FF0000]">
+              <h4 className="line-clamp-2 font-semibold transition-colors group-hover:text-[#FF0000]" style={{ color: 'var(--sm-text)' }}>
                 {article.title}
               </h4>
 
               {/* Excerpt */}
               {article.excerpt && (
-                <p className="mt-1 line-clamp-1 text-xs text-zinc-500">
+                <p className="mt-1 line-clamp-1 text-xs" style={{ color: 'var(--sm-text-muted)' }}>
                   {article.excerpt}
                 </p>
               )}
@@ -222,7 +223,8 @@ export default function PersonalizedFeed({
             {/* Arrow */}
             <div className="flex shrink-0 items-center">
               <svg
-                className="h-5 w-5 text-zinc-600 transition-all group-hover:translate-x-1 group-hover:text-[#FF0000]"
+                className="h-5 w-5 transition-all group-hover:translate-x-1 group-hover:text-[#FF0000]"
+                style={{ color: 'var(--sm-text-muted)' }}
                 fill="none"
                 viewBox="0 0 24 24"
                 strokeWidth={2}
@@ -236,12 +238,12 @@ export default function PersonalizedFeed({
       </div>
 
       {/* View more */}
-      <button className="mt-4 w-full rounded-xl bg-white/5 py-3 text-sm font-semibold text-zinc-400 transition-colors hover:bg-white/10 hover:text-white">
+      <button className="mt-4 w-full rounded-xl py-3 text-sm font-semibold transition-colors" style={{ backgroundColor: 'var(--sm-surface)', color: 'var(--sm-text-muted)' }}>
         View More Recommendations
       </button>
 
       {/* Info */}
-      <p className="mt-4 text-center text-[10px] text-zinc-600">
+      <p className="mt-4 text-center text-[10px]" style={{ color: 'var(--sm-text-muted)' }}>
         Based on your reading history and preferences.{' '}
         <Link href="/profile/settings" className="text-[#FF6666] hover:underline">
           Adjust settings

@@ -36,7 +36,7 @@ interface ChicagoLiveProps {
 
 export default function ChicagoLive({ heroStory, upcomingGames }: ChicagoLiveProps) {
   return (
-    <section className="py-6 md:py-8 lg:py-10" style={{ backgroundColor: 'var(--bg-page)' }}>
+    <section className="py-6 md:py-8 lg:py-10" style={{ backgroundColor: 'var(--sm-card)' }}>
       <div className="max-w-[1320px] mx-auto px-4 md:px-6 lg:px-8">
         {/* Section Header */}
         <div className="flex items-center gap-3 mb-6">
@@ -44,12 +44,12 @@ export default function ChicagoLive({ heroStory, upcomingGames }: ChicagoLivePro
             <span className="w-2 h-2 bg-red-500 rounded-full animate-pulse" />
             <h2
               className="text-lg md:text-xl font-bold"
-              style={{ fontFamily: "'Montserrat', sans-serif", color: 'var(--text-primary)' }}
+              style={{ fontFamily: "'Montserrat', sans-serif", color: 'var(--sm-text)' }}
             >
               Chicago Live
             </h2>
           </div>
-          <div className="flex-1 h-px" style={{ backgroundColor: 'var(--border-color)' }} />
+          <div className="flex-1 h-px" style={{ backgroundColor: 'var(--sm-border)' }} />
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-8">
@@ -60,7 +60,7 @@ export default function ChicagoLive({ heroStory, upcomingGames }: ChicagoLivePro
                 href={`/${heroStory.category?.slug || 'chicago-bears'}/${heroStory.slug}`}
                 className="group block"
               >
-                <article className="relative overflow-hidden rounded-xl" style={{ backgroundColor: 'var(--bg-surface)' }}>
+                <article className="relative overflow-hidden rounded-xl" style={{ backgroundColor: 'var(--sm-surface)' }}>
                   {/* Image */}
                   <div className="relative aspect-[16/9] overflow-hidden">
                     {heroStory.featured_image ? (
@@ -112,9 +112,9 @@ export default function ChicagoLive({ heroStory, upcomingGames }: ChicagoLivePro
             ) : (
               <div
                 className="rounded-xl aspect-[16/9] flex items-center justify-center"
-                style={{ backgroundColor: 'var(--bg-surface)' }}
+                style={{ backgroundColor: 'var(--sm-surface)' }}
               >
-                <p style={{ color: 'var(--text-muted)' }}>No featured story available</p>
+                <p style={{ color: 'var(--sm-text-muted)' }}>No featured story available</p>
               </div>
             )}
           </div>
@@ -123,13 +123,13 @@ export default function ChicagoLive({ heroStory, upcomingGames }: ChicagoLivePro
           <div className="lg:col-span-1">
             <div
               className="rounded-xl p-4 md:p-5 h-full"
-              style={{ backgroundColor: 'var(--bg-surface)', border: '1px solid var(--border-color)' }}
+              style={{ backgroundColor: 'var(--sm-surface)', border: '1px solid var(--sm-border)' }}
             >
               <h3
                 className="text-sm font-bold uppercase tracking-wider mb-4 pb-3"
                 style={{
                   fontFamily: "'Montserrat', sans-serif",
-                  color: 'var(--text-primary)',
+                  color: 'var(--sm-text)',
                   borderBottom: '2px solid #bc0000'
                 }}
               >
@@ -142,8 +142,8 @@ export default function ChicagoLive({ heroStory, upcomingGames }: ChicagoLivePro
                     <Link
                       key={`${game.team}-${index}`}
                       href={`/${game.teamSlug}`}
-                      className="flex items-center gap-3 p-3 rounded-lg transition-colors hover:bg-[var(--card-hover-bg)] min-h-[48px]"
-                      style={{ borderBottom: index < upcomingGames.length - 1 ? '1px solid var(--border-subtle)' : 'none' }}
+                      className="flex items-center gap-3 p-3 rounded-lg transition-colors hover:bg-[var(--sm-card-hover)] min-h-[48px]"
+                      style={{ borderBottom: index < upcomingGames.length - 1 ? '1px solid var(--sm-border)' : 'none' }}
                     >
                       {/* Team Logo - 44px minimum tap target */}
                       <div className="w-11 h-11 rounded-full overflow-hidden flex-shrink-0 bg-white flex items-center justify-center">
@@ -161,13 +161,13 @@ export default function ChicagoLive({ heroStory, upcomingGames }: ChicagoLivePro
                       <div className="flex-1 min-w-0">
                         <p
                           className="font-semibold text-sm truncate"
-                          style={{ color: 'var(--text-primary)' }}
+                          style={{ color: 'var(--sm-text)' }}
                         >
                           {game.team}
                         </p>
                         <p
                           className="text-xs truncate"
-                          style={{ color: 'var(--text-muted)' }}
+                          style={{ color: 'var(--sm-text-muted)' }}
                         >
                           {game.isHome ? 'vs' : '@'} {game.opponent}
                         </p>
@@ -177,13 +177,13 @@ export default function ChicagoLive({ heroStory, upcomingGames }: ChicagoLivePro
                       <div className="text-right flex-shrink-0">
                         <p
                           className="text-xs font-medium"
-                          style={{ color: 'var(--text-primary)' }}
+                          style={{ color: 'var(--sm-text)' }}
                         >
                           {game.date}
                         </p>
                         <p
                           className="text-xs"
-                          style={{ color: 'var(--text-muted)' }}
+                          style={{ color: 'var(--sm-text-muted)' }}
                         >
                           {game.time}
                         </p>
@@ -193,7 +193,7 @@ export default function ChicagoLive({ heroStory, upcomingGames }: ChicagoLivePro
                 ) : (
                   <p
                     className="text-sm text-center py-8"
-                    style={{ color: 'var(--text-muted)' }}
+                    style={{ color: 'var(--sm-text-muted)' }}
                   >
                     No upcoming games scheduled
                   </p>
@@ -205,8 +205,8 @@ export default function ChicagoLive({ heroStory, upcomingGames }: ChicagoLivePro
                 href="/teams"
                 className="flex items-center justify-center gap-2 mt-4 pt-4 text-sm font-semibold transition-colors hover:text-[#bc0000]"
                 style={{
-                  color: 'var(--link-color)',
-                  borderTop: '1px solid var(--border-color)'
+                  color: 'var(--sm-text)',
+                  borderTop: '1px solid var(--sm-border)'
                 }}
               >
                 View All Teams

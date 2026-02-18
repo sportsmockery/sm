@@ -39,9 +39,10 @@ export default function EmbedVideo({
   if (type === 'unknown') {
     return (
       <div
-        className={`flex items-center justify-center rounded-xl bg-zinc-100 p-8 dark:bg-zinc-800 ${className}`}
+        className={`flex items-center justify-center rounded-xl p-8 ${className}`}
+        style={{ backgroundColor: 'var(--sm-surface)' }}
       >
-        <p className="text-zinc-500 dark:text-zinc-400">
+        <p className="text-[var(--sm-text-muted)]">
           Unable to embed video from this URL
         </p>
       </div>
@@ -53,10 +54,10 @@ export default function EmbedVideo({
       <div className={`relative overflow-hidden rounded-xl ${className}`}>
         {/* Loading placeholder */}
         {!isLoaded && (
-          <div className="absolute inset-0 flex items-center justify-center bg-zinc-100 dark:bg-zinc-800">
+          <div className="absolute inset-0 flex items-center justify-center bg-[var(--sm-surface)]">
             <div className="flex flex-col items-center gap-3">
-              <div className="h-8 w-8 animate-spin rounded-full border-2 border-zinc-300 border-t-[#8B0000] dark:border-zinc-600 dark:border-t-[#FF6666]" />
-              <p className="text-sm text-zinc-500 dark:text-zinc-400">
+              <div className="h-8 w-8 animate-spin rounded-full border-2 border-[var(--sm-border)] border-t-[#8B0000]" />
+              <p className="text-sm text-[var(--sm-text-muted)]">
                 Loading video...
               </p>
             </div>
@@ -76,11 +77,11 @@ export default function EmbedVideo({
         </div>
 
         {/* YouTube attribution */}
-        <div className="flex items-center gap-2 bg-zinc-100 px-4 py-2 dark:bg-zinc-800">
+        <div className="flex items-center gap-2 px-4 py-2" style={{ backgroundColor: 'var(--sm-surface)' }}>
           <svg className="h-4 w-4 text-red-600" viewBox="0 0 24 24" fill="currentColor">
             <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z" />
           </svg>
-          <span className="text-xs text-zinc-500 dark:text-zinc-400">
+          <span className="text-xs text-[var(--sm-text-muted)]">
             Video from YouTube
           </span>
         </div>
@@ -90,13 +91,13 @@ export default function EmbedVideo({
 
   if (type === 'twitter') {
     return (
-      <div className={`overflow-hidden rounded-xl bg-zinc-100 dark:bg-zinc-800 ${className}`}>
+      <div className={`overflow-hidden rounded-xl bg-[var(--sm-surface)] ${className}`}>
         {/* Twitter embed placeholder - would need Twitter widget script */}
         <div className="flex flex-col items-center justify-center p-8">
           <svg className="mb-3 h-8 w-8 text-zinc-400" fill="currentColor" viewBox="0 0 24 24">
             <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
           </svg>
-          <p className="mb-4 text-sm text-zinc-500 dark:text-zinc-400">
+          <p className="mb-4 text-sm text-[var(--sm-text-muted)]">
             Twitter/X Post
           </p>
           <a

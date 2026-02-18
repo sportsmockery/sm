@@ -27,7 +27,7 @@ export default function AuthorLatest({ articles, className = '' }: AuthorLatestP
 
   return (
     <section className={className}>
-      <h2 className="mb-6 flex items-center gap-2 font-heading text-xl font-bold text-zinc-900 dark:text-white">
+      <h2 className="mb-6 flex items-center gap-2 font-heading text-xl font-bold" style={{ color: 'var(--sm-text)' }}>
         <svg
           className="h-5 w-5 text-[#8B0000] dark:text-[#FF6666]"
           fill="none"
@@ -60,7 +60,7 @@ export default function AuthorLatest({ articles, className = '' }: AuthorLatestP
                   className="object-cover transition-transform duration-500 group-hover:scale-105"
                 />
               ) : (
-                <div className="h-full w-full bg-gradient-to-br from-zinc-200 to-zinc-300 dark:from-zinc-700 dark:to-zinc-800" />
+                <div className="h-full w-full" style={{ background: 'linear-gradient(to bottom right, var(--sm-surface), var(--sm-border))' }} />
               )}
             </div>
 
@@ -73,7 +73,7 @@ export default function AuthorLatest({ articles, className = '' }: AuthorLatestP
               <h3 className="mb-2 font-heading text-xl font-bold text-white transition-colors group-hover:text-[#FF6666] lg:text-2xl">
                 {featured.title}
               </h3>
-              <time className="text-sm text-zinc-400">
+              <time className="text-sm" style={{ color: 'var(--sm-text-dim)' }}>
                 {format(new Date(featured.published_at), 'MMM d, yyyy')}
               </time>
             </div>
@@ -86,7 +86,8 @@ export default function AuthorLatest({ articles, className = '' }: AuthorLatestP
             <Link
               key={article.id}
               href={`/${article.category.slug}/${article.slug}`}
-              className="group flex gap-4 rounded-xl border border-zinc-200 bg-white p-4 transition-all hover:border-[#8B0000]/30 hover:shadow-lg dark:border-zinc-800 dark:bg-zinc-900 dark:hover:border-[#FF6666]/30"
+              className="group flex gap-4 rounded-xl border p-4 transition-all hover:border-[#8B0000]/30 hover:shadow-lg dark:hover:border-[#FF6666]/30"
+              style={{ borderColor: 'var(--sm-border)', backgroundColor: 'var(--sm-card)' }}
             >
               {article.featured_image && (
                 <div className="relative h-24 w-24 shrink-0 overflow-hidden rounded-lg">
@@ -102,10 +103,10 @@ export default function AuthorLatest({ articles, className = '' }: AuthorLatestP
                 <span className="mb-1 text-xs font-medium text-[#8B0000] dark:text-[#FF6666]">
                   {article.category.name}
                 </span>
-                <h4 className="line-clamp-2 font-semibold text-zinc-900 transition-colors group-hover:text-[#8B0000] dark:text-white dark:group-hover:text-[#FF6666]">
+                <h4 className="line-clamp-2 font-semibold transition-colors group-hover:text-[#8B0000] dark:group-hover:text-[#FF6666]" style={{ color: 'var(--sm-text)' }}>
                   {article.title}
                 </h4>
-                <time className="mt-1 text-xs text-zinc-500 dark:text-zinc-400">
+                <time className="mt-1 text-xs" style={{ color: 'var(--sm-text-muted)' }}>
                   {format(new Date(article.published_at), 'MMM d, yyyy')}
                 </time>
               </div>

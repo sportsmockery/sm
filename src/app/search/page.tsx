@@ -68,11 +68,11 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
   const totalPages = Math.ceil(total / pageSize)
 
   return (
-    <div className="min-h-screen" style={{ backgroundColor: 'var(--bg-surface)' }}>
+    <div className="min-h-screen" style={{ backgroundColor: 'var(--sm-surface)' }}>
       {/* Hero Section */}
-      <header className="py-16" style={{ background: 'linear-gradient(to bottom, var(--bg-footer), var(--sm-card))' }}>
+      <header className="py-16" style={{ background: 'linear-gradient(to bottom, var(--sm-surface), var(--sm-card))' }}>
         <div className="mx-auto max-w-4xl px-4">
-          <h1 className="mb-6 text-center font-heading text-4xl font-black" style={{ color: 'var(--text-inverse)' }}>
+          <h1 className="mb-6 text-center font-heading text-4xl font-black" style={{ color: 'var(--sm-text)' }}>
             Search SportsMockery
           </h1>
 
@@ -121,7 +121,7 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
                         <a
                           href={`/search?q=${encodeURIComponent(query)}${category ? `&category=${category}` : ''}${author ? `&author=${author}` : ''}${dateRange ? `&dateRange=${dateRange}` : ''}&page=${currentPage - 1}`}
                           className="rounded-lg border px-4 py-2 font-medium transition-colors"
-                          style={{ borderColor: 'var(--border-color)', backgroundColor: 'var(--card-bg)', color: 'var(--sm-text)' }}
+                          style={{ borderColor: 'var(--sm-border)', backgroundColor: 'var(--sm-card)', color: 'var(--sm-text)' }}
                         >
                           Previous
                         </a>
@@ -135,7 +135,7 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
                         <a
                           href={`/search?q=${encodeURIComponent(query)}${category ? `&category=${category}` : ''}${author ? `&author=${author}` : ''}${dateRange ? `&dateRange=${dateRange}` : ''}&page=${currentPage + 1}`}
                           className="rounded-lg border px-4 py-2 font-medium transition-colors"
-                          style={{ borderColor: 'var(--border-color)', backgroundColor: 'var(--card-bg)', color: 'var(--sm-text)' }}
+                          style={{ borderColor: 'var(--sm-border)', backgroundColor: 'var(--sm-card)', color: 'var(--sm-text)' }}
                         >
                           Next
                         </a>
@@ -156,7 +156,7 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
             </div>
 
             {/* Browse by team */}
-            <div className="rounded-2xl border p-6" style={{ borderColor: 'var(--border-color)', backgroundColor: 'var(--card-bg)' }}>
+            <div className="rounded-2xl border p-6" style={{ borderColor: 'var(--sm-border)', backgroundColor: 'var(--sm-card)' }}>
               <h2 className="mb-4 font-heading text-xl font-bold" style={{ color: 'var(--sm-text)' }}>
                 Browse by Team
               </h2>

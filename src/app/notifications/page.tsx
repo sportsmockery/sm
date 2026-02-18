@@ -296,7 +296,7 @@ export default function NotificationsPage() {
       <style jsx>{`
         .notifications-page {
           min-height: 100vh;
-          background: var(--bg-main, #0a0a0f);
+          background: var(--sm-bg);
           padding: 24px;
         }
 
@@ -321,7 +321,7 @@ export default function NotificationsPage() {
         .notifications-title {
           font-size: 1.75rem;
           font-weight: 700;
-          color: var(--text-main, #fff);
+          color: var(--sm-text);
           margin: 0;
         }
 
@@ -336,10 +336,10 @@ export default function NotificationsPage() {
 
         .notifications-btn {
           padding: 8px 16px;
-          background: var(--bg-card, #1a1a2e);
-          border: 1px solid var(--border-subtle, #333);
+          background: var(--sm-card);
+          border: 1px solid var(--sm-border);
           border-radius: 8px;
-          color: var(--text-main, #fff);
+          color: var(--sm-text);
           font-size: 0.875rem;
           font-weight: 500;
           cursor: pointer;
@@ -347,22 +347,22 @@ export default function NotificationsPage() {
         }
 
         .notifications-btn:hover {
-          background: var(--bg-hover, #252538);
+          background: var(--sm-card-hover);
         }
 
         .notifications-btn--primary {
-          background: var(--accent, #3b82f6);
-          border-color: var(--accent, #3b82f6);
+          background: var(--sm-accent, #3b82f6);
+          border-color: var(--sm-accent, #3b82f6);
         }
 
         .notifications-btn--primary:hover {
-          background: var(--accent-hover, #2563eb);
+          background: var(--sm-accent-hover, #2563eb);
         }
 
         .notifications-btn--text {
           background: transparent;
           border: none;
-          color: var(--accent, #3b82f6);
+          color: var(--sm-accent, #3b82f6);
         }
 
         .notifications-btn--text:hover {
@@ -373,7 +373,7 @@ export default function NotificationsPage() {
           display: flex;
           gap: 4px;
           padding: 4px;
-          background: var(--bg-card, #1a1a2e);
+          background: var(--sm-card);
           border-radius: 12px;
           margin-bottom: 16px;
         }
@@ -384,7 +384,7 @@ export default function NotificationsPage() {
           background: transparent;
           border: none;
           border-radius: 8px;
-          color: var(--text-subtle, #888);
+          color: var(--sm-text-muted);
           font-size: 0.875rem;
           font-weight: 500;
           cursor: pointer;
@@ -392,17 +392,17 @@ export default function NotificationsPage() {
         }
 
         .notifications-tab:hover {
-          color: var(--text-main, #fff);
+          color: var(--sm-text);
         }
 
         .notifications-tab--active {
-          background: var(--bg-hover, #252538);
-          color: var(--text-main, #fff);
+          background: var(--sm-card-hover);
+          color: var(--sm-text);
         }
 
         .notifications-content {
-          background: var(--bg-card, #1a1a2e);
-          border: 1px solid var(--border-subtle, #333);
+          background: var(--sm-card);
+          border: 1px solid var(--sm-border);
           border-radius: 16px;
           overflow: hidden;
         }
@@ -422,8 +422,8 @@ export default function NotificationsPage() {
         .notifications-spinner {
           width: 32px;
           height: 32px;
-          border: 3px solid var(--border-subtle, #333);
-          border-top-color: var(--accent, #3b82f6);
+          border: 3px solid var(--sm-border);
+          border-top-color: var(--sm-accent, #3b82f6);
           border-radius: 50%;
           animation: spin 0.8s linear infinite;
         }
@@ -433,20 +433,20 @@ export default function NotificationsPage() {
         }
 
         .notifications-empty__icon {
-          color: var(--text-subtle, #888);
+          color: var(--sm-text-muted);
           opacity: 0.5;
         }
 
         .notifications-empty__title {
           font-size: 1.1rem;
           font-weight: 600;
-          color: var(--text-main, #fff);
+          color: var(--sm-text);
           margin: 0;
         }
 
         .notifications-empty__sub {
           font-size: 0.875rem;
-          color: var(--text-subtle, #888);
+          color: var(--sm-text-muted);
           margin: 0;
         }
 
@@ -462,7 +462,7 @@ export default function NotificationsPage() {
           padding: 16px;
           background: transparent;
           border: none;
-          border-bottom: 1px solid var(--border-subtle, #222);
+          border-bottom: 1px solid var(--sm-border);
           cursor: pointer;
           text-align: left;
           width: 100%;
@@ -475,7 +475,7 @@ export default function NotificationsPage() {
         }
 
         .notification-item:hover {
-          background: var(--bg-hover, #1f1f2f);
+          background: var(--sm-card-hover);
         }
 
         .notification-item--unread {
@@ -494,7 +494,7 @@ export default function NotificationsPage() {
           width: 40px;
           height: 40px;
           border-radius: 50%;
-          background: var(--accent, #3b82f6);
+          background: var(--sm-accent, #3b82f6);
           display: flex;
           align-items: center;
           justify-content: center;
@@ -529,7 +529,7 @@ export default function NotificationsPage() {
 
         .notification-item__name {
           font-weight: 600;
-          color: var(--text-main, #fff);
+          color: var(--sm-text);
         }
 
         .notification-item__badge {
@@ -541,13 +541,13 @@ export default function NotificationsPage() {
         }
 
         .notification-item__action {
-          color: var(--text-subtle, #888);
+          color: var(--sm-text-muted);
           font-size: 0.875rem;
         }
 
         .notification-item__preview {
           font-size: 0.875rem;
-          color: var(--text-subtle, #aaa);
+          color: var(--sm-text-muted);
           margin: 0 0 8px 0;
           overflow: hidden;
           text-overflow: ellipsis;
@@ -572,26 +572,16 @@ export default function NotificationsPage() {
 
         .notification-item__time {
           font-size: 0.75rem;
-          color: var(--text-subtle, #888);
+          color: var(--sm-text-muted);
         }
 
         .notification-item__arrow {
-          color: var(--text-subtle, #888);
+          color: var(--sm-text-muted);
           flex-shrink: 0;
           margin-top: 12px;
         }
 
-        /* Light mode */
-        @media (prefers-color-scheme: light) {
-          .notifications-page {
-            --bg-main: #f3f4f6;
-            --bg-card: #fff;
-            --bg-hover: #f9fafb;
-            --border-subtle: #e5e7eb;
-            --text-main: #111;
-            --text-subtle: #666;
-          }
-        }
+        /* Light mode overrides removed -- --sm-* vars handle light/dark automatically */
 
         @media (max-width: 640px) {
           .notifications-page {

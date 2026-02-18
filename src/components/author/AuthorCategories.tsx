@@ -41,9 +41,10 @@ export default function AuthorCategories({
 
   return (
     <section
-      className={`rounded-2xl border border-zinc-200 bg-white p-6 dark:border-zinc-800 dark:bg-zinc-900 ${className}`}
+      className={`rounded-2xl border p-6 ${className}`}
+      style={{ borderColor: 'var(--sm-border)', backgroundColor: 'var(--sm-card)' }}
     >
-      <h2 className="mb-4 flex items-center gap-2 font-heading text-lg font-bold text-zinc-900 dark:text-white">
+      <h2 className="mb-4 flex items-center gap-2 font-heading text-lg font-bold" style={{ color: 'var(--sm-text)' }}>
         <svg
           className="h-5 w-5 text-[#8B0000] dark:text-[#FF6666]"
           fill="none"
@@ -74,14 +75,14 @@ export default function AuthorCategories({
             className="group block"
           >
             <div className="mb-1 flex items-center justify-between">
-              <span className="text-sm font-medium text-zinc-700 transition-colors group-hover:text-[#8B0000] dark:text-zinc-300 dark:group-hover:text-[#FF6666]">
+              <span className="text-sm font-medium transition-colors group-hover:text-[#8B0000] dark:group-hover:text-[#FF6666]" style={{ color: 'var(--sm-text)' }}>
                 {cat.name}
               </span>
-              <span className="text-sm text-zinc-500 dark:text-zinc-400">
+              <span className="text-sm" style={{ color: 'var(--sm-text-muted)' }}>
                 {cat.count} ({Math.round((cat.count / total) * 100)}%)
               </span>
             </div>
-            <div className="h-3 overflow-hidden rounded-full bg-zinc-100 dark:bg-zinc-800">
+            <div className="h-3 overflow-hidden rounded-full" style={{ backgroundColor: 'var(--sm-surface)' }}>
               <div
                 className={`h-full rounded-full transition-all group-hover:opacity-80 ${getTeamColor(cat.slug)}`}
                 style={{ width: `${(cat.count / total) * 100}%` }}
@@ -92,8 +93,8 @@ export default function AuthorCategories({
       </div>
 
       {/* Legend */}
-      <div className="mt-4 border-t border-zinc-200 pt-4 dark:border-zinc-700">
-        <p className="text-center text-xs text-zinc-500 dark:text-zinc-400">
+      <div className="mt-4 border-t pt-4" style={{ borderColor: 'var(--sm-border)' }}>
+        <p className="text-center text-xs" style={{ color: 'var(--sm-text-muted)' }}>
           Total: {total} articles across {categories.length} teams
         </p>
       </div>

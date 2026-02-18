@@ -40,10 +40,11 @@ export default function PlayerCard({ player, team, showStats = false }: PlayerCa
   return (
     <Link
       href={`/players/${player.slug}`}
-      className="group block overflow-hidden rounded-xl border border-zinc-200 bg-white transition-all hover:border-zinc-300 hover:shadow-lg dark:border-zinc-800 dark:bg-zinc-900 dark:hover:border-zinc-700"
+      className="group block overflow-hidden rounded-xl border transition-all hover:shadow-lg"
+      style={{ borderColor: 'var(--sm-border)', backgroundColor: 'var(--sm-card)' }}
     >
       {/* Player Image */}
-      <div className="relative aspect-square overflow-hidden bg-zinc-100 dark:bg-zinc-800">
+      <div className="relative aspect-square overflow-hidden" style={{ backgroundColor: 'var(--sm-surface)' }}>
         <Image
           src={player.headshot}
           alt={player.name}
@@ -87,14 +88,14 @@ export default function PlayerCard({ player, team, showStats = false }: PlayerCa
 
       {/* Player Info */}
       <div className="p-3">
-        <p className="font-semibold text-zinc-900 dark:text-white">
+        <p className="font-semibold" style={{ color: 'var(--sm-text)' }}>
           {player.name}
         </p>
         <div className="flex items-center justify-between">
-          <p className="text-sm text-zinc-500 dark:text-zinc-400">
+          <p className="text-sm" style={{ color: 'var(--sm-text-muted)' }}>
             {player.position}
           </p>
-          <p className="text-xs text-zinc-400 dark:text-zinc-500">
+          <p className="text-xs" style={{ color: 'var(--sm-text-dim)' }}>
             {player.experience}
           </p>
         </div>

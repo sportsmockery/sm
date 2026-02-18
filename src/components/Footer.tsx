@@ -42,7 +42,7 @@ function InstagramIcon() {
 
 export default function Footer() {
   return (
-    <footer className="relative border-t border-zinc-200 bg-zinc-900 dark:border-zinc-800 dark:bg-zinc-950 overflow-hidden">
+    <footer className="relative border-t overflow-hidden" style={{ borderColor: 'var(--sm-border)', backgroundColor: 'var(--sm-surface)' }}>
       {/* Chicago Skyline Background */}
       <div className="absolute bottom-0 left-0 right-0 h-32 pointer-events-none">
         <ChicagoSkyline
@@ -69,7 +69,7 @@ export default function Footer() {
                 <span className="text-lg font-black text-[#FF0000] font-[var(--font-montserrat)] leading-none">MOCKERY</span>
               </div>
             </Link>
-            <p className="mt-6 text-sm text-zinc-400 leading-relaxed">
+            <p className="mt-6 text-sm text-[var(--sm-text-muted)] leading-relaxed">
               Your source for Chicago sports news, rumors, and the hottest takes in the Windy City.
             </p>
 
@@ -79,7 +79,7 @@ export default function Footer() {
                 href="https://twitter.com/sportsmockery"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex items-center justify-center w-10 h-10 rounded-full bg-zinc-800 text-zinc-400 hover:bg-[#8B0000] hover:text-white transition-all"
+                className="flex items-center justify-center w-10 h-10 rounded-full bg-[var(--sm-card)] text-[var(--sm-text-muted)] hover:bg-[#8B0000] hover:text-white transition-all"
                 aria-label="Twitter"
               >
                 <TwitterIcon />
@@ -88,7 +88,7 @@ export default function Footer() {
                 href="https://facebook.com/sportsmockery"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex items-center justify-center w-10 h-10 rounded-full bg-zinc-800 text-zinc-400 hover:bg-[#8B0000] hover:text-white transition-all"
+                className="flex items-center justify-center w-10 h-10 rounded-full bg-[var(--sm-card)] text-[var(--sm-text-muted)] hover:bg-[#8B0000] hover:text-white transition-all"
                 aria-label="Facebook"
               >
                 <FacebookIcon />
@@ -97,7 +97,7 @@ export default function Footer() {
                 href="https://instagram.com/sportsmockery"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex items-center justify-center w-10 h-10 rounded-full bg-zinc-800 text-zinc-400 hover:bg-[#8B0000] hover:text-white transition-all"
+                className="flex items-center justify-center w-10 h-10 rounded-full bg-[var(--sm-card)] text-[var(--sm-text-muted)] hover:bg-[#8B0000] hover:text-white transition-all"
                 aria-label="Instagram"
               >
                 <InstagramIcon />
@@ -113,7 +113,7 @@ export default function Footer() {
                 <li key={team.slug}>
                   <Link
                     href={`/${team.slug}`}
-                    className="group flex items-center gap-3 text-sm text-zinc-400 hover:text-white transition-colors"
+                    className="group flex items-center gap-3 text-sm text-[var(--sm-text-muted)] hover:text-white transition-colors"
                   >
                     <span
                       className="w-2.5 h-2.5 rounded-full transition-all group-hover:scale-150 group-hover:shadow-lg"
@@ -134,7 +134,7 @@ export default function Footer() {
                 <li key={item.href}>
                   <Link
                     href={item.href}
-                    className="group flex items-center gap-2 text-sm text-zinc-400 hover:text-white transition-colors"
+                    className="group flex items-center gap-2 text-sm text-[var(--sm-text-muted)] hover:text-white transition-colors"
                   >
                     <span className="transition-transform group-hover:translate-x-1">{item.name}</span>
                   </Link>
@@ -146,14 +146,14 @@ export default function Footer() {
           {/* Newsletter */}
           <div>
             <h3 className="text-sm font-bold text-white uppercase tracking-wider font-[var(--font-montserrat)]">Newsletter</h3>
-            <p className="mt-6 text-sm text-zinc-400">
+            <p className="mt-6 text-sm text-[var(--sm-text-muted)]">
               Get the latest takes delivered to your inbox.
             </p>
             <form className="mt-4 space-y-3">
               <input
                 type="email"
                 placeholder="Enter your email"
-                className="w-full px-4 py-3 rounded-lg bg-zinc-800 border border-zinc-700 text-white text-sm placeholder:text-zinc-500 focus:outline-none focus:border-[#8B0000] focus:ring-2 focus:ring-[#8B0000]/20 transition-all"
+                className="w-full px-4 py-3 rounded-lg bg-[var(--sm-card)] border border-[var(--sm-border)] text-white text-sm placeholder:text-[var(--sm-text-muted)] focus:outline-none focus:border-[#8B0000] focus:ring-2 focus:ring-[#8B0000]/20 transition-all"
               />
               <button
                 type="submit"
@@ -166,11 +166,11 @@ export default function Footer() {
         </div>
 
         {/* Copyright */}
-        <div className="mt-16 border-t border-zinc-800 pt-8 flex flex-col sm:flex-row items-center justify-between gap-4">
-          <p className="text-sm text-zinc-500">
+        <div className="mt-16 border-t border-[var(--sm-border)] pt-8 flex flex-col sm:flex-row items-center justify-between gap-4">
+          <p className="text-sm text-[var(--sm-text-muted)]">
             © 2026 Sports Mockery. All rights reserved.
           </p>
-          <div className="flex items-center gap-6 text-sm text-zinc-500">
+          <div className="flex items-center gap-6 text-sm text-[var(--sm-text-muted)]">
             <Link href="/privacy" className="hover:text-white transition-colors">Privacy Policy</Link>
             <Link href="/terms" className="hover:text-white transition-colors">Terms of Service</Link>
           </div>

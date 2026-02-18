@@ -51,7 +51,7 @@ export default function PulsingDot({
         />
       </span>
       {label && (
-        <span className="text-sm font-medium text-zinc-700 dark:text-zinc-300">
+        <span className="text-sm font-medium" style={{ color: 'var(--sm-text-muted)' }}>
           {label}
         </span>
       )}

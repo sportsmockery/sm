@@ -83,8 +83,8 @@ export default function ModelViewerFallback({
 
   if (!config) {
     return (
-      <div className={`bg-zinc-900 p-8 text-center ${className}`}>
-        <p className="text-zinc-400">Stadium not found</p>
+      <div className={`p-8 text-center ${className}`} style={{ backgroundColor: 'var(--sm-surface)' }}>
+        <p style={{ color: 'var(--sm-text-muted)' }}>Stadium not found</p>
       </div>
     )
   }
@@ -92,17 +92,19 @@ export default function ModelViewerFallback({
   return (
     <div
       ref={containerRef}
-      className={`bg-zinc-900 dark:bg-zinc-950 rounded-lg overflow-hidden ${className}`}
+      className={`rounded-lg overflow-hidden ${className}`}
+      style={{ backgroundColor: 'var(--sm-surface)' }}
     >
       {/* Header */}
-      <div className="flex items-center justify-between px-4 py-3 border-b border-zinc-800">
-        <h3 className={`text-white text-lg ${montserrat.className}`}>
+      <div className="flex items-center justify-between px-4 py-3" style={{ borderBottom: '1px solid var(--sm-border)' }}>
+        <h3 className={`text-lg ${montserrat.className}`} style={{ color: 'var(--sm-text)' }}>
           {config.name} - 3D View
         </h3>
         {onClose && (
           <button
             onClick={onClose}
-            className="text-zinc-400 hover:text-white transition-colors focus:outline-none focus:ring-2 focus:ring-red-600 rounded"
+            className="transition-colors focus:outline-none focus:ring-2 focus:ring-red-600 rounded"
+            style={{ color: 'var(--sm-text-muted)' }}
             aria-label="Close 3D viewer"
           >
             <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -113,13 +115,13 @@ export default function ModelViewerFallback({
       </div>
 
       {/* Model viewer container */}
-      <div className="relative aspect-video bg-zinc-800" ref={containerRef}>
+      <div className="relative aspect-video" ref={containerRef} style={{ backgroundColor: 'var(--sm-surface)' }}>
         {/* Loading state */}
         <div className="absolute inset-0 flex items-center justify-center">
           <div className="text-center">
             <div className="w-12 h-12 border-4 border-red-600 border-t-transparent rounded-full animate-spin mx-auto mb-4" />
-            <p className="text-zinc-400">Loading 3D model...</p>
-            <p className="text-zinc-500 text-xs mt-2">Model viewer will appear here</p>
+            <p style={{ color: 'var(--sm-text-muted)' }}>Loading 3D model...</p>
+            <p className="text-xs mt-2" style={{ color: 'var(--sm-text-muted)' }}>Model viewer will appear here</p>
           </div>
         </div>
 
@@ -132,15 +134,15 @@ export default function ModelViewerFallback({
       </div>
 
       {/* Controls hint */}
-      <div className="px-4 py-3 bg-zinc-800/50 text-center">
-        <p className="text-zinc-500 text-sm">
+      <div className="px-4 py-3 text-center" style={{ backgroundColor: 'var(--sm-surface)' }}>
+        <p className="text-sm" style={{ color: 'var(--sm-text-muted)' }}>
           Click and drag to rotate • Scroll to zoom • Double-click to reset
         </p>
       </div>
 
       {/* Footer */}
-      <div className="px-4 py-3 border-t border-zinc-800 text-center">
-        <p className="text-zinc-500 text-xs">
+      <div className="px-4 py-3 text-center" style={{ borderTop: '1px solid var(--sm-border)' }}>
+        <p className="text-xs" style={{ color: 'var(--sm-text-muted)' }}>
           For the full AR experience, open on iPhone with Safari
         </p>
       </div>

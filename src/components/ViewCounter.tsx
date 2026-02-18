@@ -38,7 +38,7 @@ export default function ViewCounter({
   }, [postId, incrementOnMount, hasTracked])
 
   return (
-    <div className={`flex items-center gap-1.5 text-zinc-500 dark:text-zinc-400 ${className}`}>
+    <div className={`flex items-center gap-1.5 ${className}`} style={{ color: 'var(--sm-text-muted)' }}>
       {showIcon && (
         <svg
           className="w-4 h-4"
@@ -74,7 +74,7 @@ export function ViewCounterCompact({
   className?: string
 }) {
   return (
-    <span className={`flex items-center gap-1 text-xs text-zinc-500 ${className}`}>
+    <span className={`flex items-center gap-1 text-xs ${className}`} style={{ color: 'var(--sm-text-muted)' }}>
       <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
         <path
           strokeLinecap="round"

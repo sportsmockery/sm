@@ -99,7 +99,8 @@ function TeamCard({ team, index }: { team: Team; index: number }) {
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: index * 0.1 }}
-      className="flex-1 bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800"
+      className="flex-1 border"
+      style={{ backgroundColor: 'var(--sm-card)', borderColor: 'var(--sm-border)' }}
     >
       {/* Team header */}
       <header className={`${colors.primary} px-4 py-3`}>
@@ -120,19 +121,20 @@ function TeamCard({ team, index }: { team: Team; index: number }) {
       </header>
 
       {/* Articles list */}
-      <ul className="divide-y divide-zinc-100 dark:divide-zinc-800">
+      <ul className="divide-y" style={{ borderColor: 'var(--sm-border)' }}>
         {team.articles.slice(0, 3).map((article) => (
           <li key={article.id}>
             <Link
               href={`/${article.category.slug}/${article.slug}`}
-              className={`block p-4 hover:bg-zinc-50 dark:hover:bg-zinc-900 transition-colors focus:outline-none focus:ring-2 focus:ring-inset focus:ring-red-600 group`}
+              className="block p-4 transition-colors focus:outline-none focus:ring-2 focus:ring-inset focus:ring-red-600 group hover:opacity-80"
             >
-              <h3 className="text-sm text-black dark:text-white font-medium leading-snug group-hover:text-red-600 dark:group-hover:text-red-500 transition-colors line-clamp-2">
+              <h3 className="text-sm font-medium leading-snug group-hover:text-red-600 transition-colors line-clamp-2" style={{ color: 'var(--sm-text)' }}>
                 {article.title}
               </h3>
               <time
                 dateTime={article.published_at}
-                className="text-xs text-zinc-500 mt-1 block"
+                className="text-xs mt-1 block"
+                style={{ color: 'var(--sm-text-muted)' }}
               >
                 {formatRelativeTime(article.published_at)}
               </time>

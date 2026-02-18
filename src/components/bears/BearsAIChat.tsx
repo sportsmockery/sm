@@ -123,12 +123,12 @@ export default function BearsAIChat({ isOpen, onClose }: BearsAIChatProps) {
 
       {/* Chat Panel */}
       <div
-        className="fixed inset-0 md:inset-auto md:bottom-4 md:right-4 md:w-[400px] md:h-[600px] md:max-h-[80vh] z-[301] flex flex-col bg-white dark:bg-zinc-900 md:rounded-2xl md:shadow-2xl overflow-hidden"
+        className="fixed inset-0 md:inset-auto md:bottom-4 md:right-4 md:w-[400px] md:h-[600px] md:max-h-[80vh] z-[301] flex flex-col bg-[var(--sm-card)] md:rounded-2xl md:shadow-2xl overflow-hidden"
         onClick={e => e.stopPropagation()}
       >
         {/* Header */}
         <div
-          className="flex items-center justify-between px-4 py-3 border-b border-zinc-200 dark:border-zinc-700"
+          className="flex items-center justify-between px-4 py-3 border-b border-[var(--sm-border)]"
           style={{
             background: `linear-gradient(to right, ${bearsInfo.primaryColor}, #1a2940)`,
           }}
@@ -167,7 +167,7 @@ export default function BearsAIChat({ isOpen, onClose }: BearsAIChatProps) {
               <div
                 className={`max-w-[85%] rounded-2xl px-4 py-3 ${
                   msg.role === 'user'
-                    ? 'bg-zinc-100 dark:bg-zinc-800 text-zinc-900 dark:text-white'
+                    ? 'bg-[var(--sm-surface)] text-[var(--sm-text)]'
                     : 'text-white'
                 }`}
                 style={
@@ -214,13 +214,13 @@ export default function BearsAIChat({ isOpen, onClose }: BearsAIChatProps) {
         {/* Suggestions (only show when few messages) */}
         {messages.length <= 2 && !isLoading && (
           <div className="px-4 pb-2">
-            <p className="text-xs text-zinc-500 dark:text-zinc-400 mb-2">Try asking:</p>
+            <p className="text-xs text-[var(--sm-text-muted)] mb-2">Try asking:</p>
             <div className="flex flex-wrap gap-2">
               {SUGGESTED_QUESTIONS.slice(0, 3).map((q, i) => (
                 <button
                   key={i}
                   onClick={() => handleSuggestionClick(q)}
-                  className="text-xs px-3 py-1.5 rounded-full border border-zinc-200 dark:border-zinc-700 text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors"
+                  className="text-xs px-3 py-1.5 rounded-full border border-[var(--sm-border)] text-[var(--sm-text-dim)] hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors"
                 >
                   {q}
                 </button>
@@ -230,7 +230,7 @@ export default function BearsAIChat({ isOpen, onClose }: BearsAIChatProps) {
         )}
 
         {/* Input */}
-        <form onSubmit={handleSubmit} className="p-4 border-t border-zinc-200 dark:border-zinc-700">
+        <form onSubmit={handleSubmit} className="p-4 border-t border-[var(--sm-border)]">
           <div className="flex gap-2">
             <input
               ref={inputRef}
@@ -239,7 +239,7 @@ export default function BearsAIChat({ isOpen, onClose }: BearsAIChatProps) {
               onChange={e => setInput(e.target.value)}
               placeholder="Ask about the Bears..."
               disabled={isLoading}
-              className="flex-1 px-4 py-3 rounded-xl border border-zinc-200 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-800 text-zinc-900 dark:text-white placeholder-zinc-500 focus:outline-none focus:ring-2 focus:ring-[#C83200] disabled:opacity-50"
+              className="flex-1 px-4 py-3 rounded-xl border border-[var(--sm-border)] bg-[var(--sm-surface)] text-[var(--sm-text)] placeholder-zinc-500 focus:outline-none focus:ring-2 focus:ring-[#C83200] disabled:opacity-50"
             />
             <button
               type="submit"

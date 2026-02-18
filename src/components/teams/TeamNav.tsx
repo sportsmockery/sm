@@ -30,7 +30,7 @@ export default function TeamNav({ team }: TeamNavProps) {
   };
 
   return (
-    <nav className="border-b border-zinc-200 bg-white dark:border-zinc-800 dark:bg-zinc-900">
+    <nav className="border-b" style={{ borderColor: 'var(--sm-border)', backgroundColor: 'var(--sm-card)' }}>
       <div className="mx-auto max-w-7xl px-4">
         <div className="scrollbar-hide flex overflow-x-auto">
           {navItems.map((item) => {
@@ -41,13 +41,8 @@ export default function TeamNav({ team }: TeamNavProps) {
               <Link
                 key={item.label}
                 href={href}
-                className={`
-                  relative flex-shrink-0 px-4 py-4 text-sm font-medium transition-colors
-                  ${active
-                    ? 'text-zinc-900 dark:text-white'
-                    : 'text-zinc-500 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-white'
-                  }
-                `}
+                className="relative flex-shrink-0 px-4 py-4 text-sm font-medium transition-colors"
+                style={{ color: active ? 'var(--sm-text)' : 'var(--sm-text-muted)' }}
               >
                 {item.label}
                 {active && (

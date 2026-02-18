@@ -78,7 +78,7 @@ export default function TeamHubOverview({
               className="text-lg font-bold"
               style={{
                 fontFamily: "'Montserrat', sans-serif",
-                color: 'var(--text-primary)',
+                color: 'var(--sm-text)',
               }}
             >
               Latest Headlines
@@ -111,7 +111,7 @@ export default function TeamHubOverview({
               className="text-lg font-bold mb-4"
               style={{
                 fontFamily: "'Montserrat', sans-serif",
-                color: 'var(--text-primary)',
+                color: 'var(--sm-text)',
               }}
             >
               Analysis & Features
@@ -136,15 +136,15 @@ export default function TeamHubOverview({
         <div
           className="rounded-xl p-5"
           style={{
-            backgroundColor: 'var(--bg-surface)',
-            border: '1px solid var(--border-color)',
+            backgroundColor: 'var(--sm-surface)',
+            border: '1px solid var(--sm-border)',
           }}
         >
           <h3
             className="font-bold mb-4"
             style={{
               fontFamily: "'Montserrat', sans-serif",
-              color: 'var(--text-primary)',
+              color: 'var(--sm-text)',
             }}
           >
             Quick Links
@@ -210,8 +210,8 @@ function ArticleCard({
         <article
           className="rounded-xl overflow-hidden transition-shadow hover:shadow-lg"
           style={{
-            backgroundColor: 'var(--bg-surface)',
-            border: '1px solid var(--border-color)',
+            backgroundColor: 'var(--sm-surface)',
+            border: '1px solid var(--sm-border)',
           }}
         >
           <div className="flex flex-col md:flex-row">
@@ -240,7 +240,7 @@ function ArticleCard({
                 className="font-bold mt-1 line-clamp-3 group-hover:underline"
                 style={{
                   fontFamily: "'Montserrat', sans-serif",
-                  color: 'var(--text-primary)',
+                  color: 'var(--sm-text)',
                   fontSize: '18px',
                   lineHeight: '1.3',
                 }}
@@ -250,14 +250,14 @@ function ArticleCard({
               {post.excerpt && (
                 <p
                   className="text-sm mt-2 line-clamp-2"
-                  style={{ color: 'var(--text-muted)' }}
+                  style={{ color: 'var(--sm-text-muted)' }}
                 >
                   {post.excerpt}
                 </p>
               )}
               <div
                 className="flex items-center gap-2 mt-3 text-xs"
-                style={{ color: 'var(--text-muted)' }}
+                style={{ color: 'var(--sm-text-muted)' }}
               >
                 {post.author && <span>{post.author.name}</span>}
                 <span>•</span>
@@ -279,7 +279,7 @@ function ArticleCard({
     <Link href={href} className="group block">
       <article
         className="rounded-xl overflow-hidden flex gap-4 p-3 transition-colors"
-        style={{ backgroundColor: 'var(--bg-surface)' }}
+        style={{ backgroundColor: 'var(--sm-surface)' }}
       >
         {post.featuredImage && (
           <div className="relative w-20 h-20 md:w-24 md:h-24 flex-shrink-0 rounded-lg overflow-hidden">
@@ -296,7 +296,7 @@ function ArticleCard({
             className="font-semibold line-clamp-2 group-hover:underline"
             style={{
               fontFamily: "'Montserrat', sans-serif",
-              color: 'var(--text-primary)',
+              color: 'var(--sm-text)',
               fontSize: '14px',
               lineHeight: '1.4',
             }}
@@ -305,7 +305,7 @@ function ArticleCard({
           </h3>
           <div
             className="flex items-center gap-2 mt-2 text-xs"
-            style={{ color: 'var(--text-muted)' }}
+            style={{ color: 'var(--sm-text-muted)' }}
           >
             <span>
               {new Date(post.publishedAt).toLocaleDateString('en-US', {
@@ -347,8 +347,8 @@ function SeasonSnapshotCard({
     <div
       className="rounded-xl overflow-hidden"
       style={{
-        backgroundColor: 'var(--bg-surface)',
-        border: '1px solid var(--border-color)',
+        backgroundColor: 'var(--sm-surface)',
+        border: '1px solid var(--sm-border)',
       }}
     >
       {/* Header */}
@@ -380,14 +380,14 @@ function SeasonSnapshotCard({
       {/* Stats */}
       <div className="p-5 space-y-4">
         {/* Record */}
-        <div className="text-center pb-4" style={{ borderBottom: '1px solid var(--border-color)' }}>
+        <div className="text-center pb-4" style={{ borderBottom: '1px solid var(--sm-border)' }}>
           <div
             className="text-4xl font-bold"
             style={{ color: team.secondaryColor }}
           >
             {formatRecord()}
           </div>
-          <div className="text-sm text-[var(--text-muted)] mt-1">Record</div>
+          <div className="text-sm text-[var(--sm-text-muted)] mt-1">Record</div>
         </div>
 
         {/* Key Stats */}
@@ -419,10 +419,10 @@ function SeasonSnapshotCard({
 function StatItem({ label, value }: { label: string; value: string }) {
   return (
     <div className="text-center">
-      <div className="text-xl font-bold" style={{ color: 'var(--text-primary)' }}>
+      <div className="text-xl font-bold" style={{ color: 'var(--sm-text)' }}>
         {value}
       </div>
-      <div className="text-xs" style={{ color: 'var(--text-muted)' }}>
+      <div className="text-xs" style={{ color: 'var(--sm-text-muted)' }}>
         {label}
       </div>
     </div>
@@ -444,18 +444,18 @@ function QuickLink({
   return (
     <Link
       href={href}
-      className="flex items-center gap-3 px-3 py-2.5 rounded-lg transition-colors hover:bg-[var(--bg-hover)]"
+      className="flex items-center gap-3 px-3 py-2.5 rounded-lg transition-colors hover:bg-[var(--sm-card-hover)]"
     >
       <span style={{ color: team.secondaryColor }}>{icon}</span>
       <span
         className="text-sm font-medium"
-        style={{ color: 'var(--text-primary)' }}
+        style={{ color: 'var(--sm-text)' }}
       >
         {label}
       </span>
       <svg
         className="w-4 h-4 ml-auto"
-        style={{ color: 'var(--text-muted)' }}
+        style={{ color: 'var(--sm-text-muted)' }}
         fill="none"
         stroke="currentColor"
         viewBox="0 0 24 24"
@@ -477,8 +477,8 @@ function AskAIWidget({ team }: { team: TeamInfo }) {
     <div
       className="rounded-xl p-5"
       style={{
-        backgroundColor: 'var(--bg-surface)',
-        border: '1px solid var(--border-color)',
+        backgroundColor: 'var(--sm-surface)',
+        border: '1px solid var(--sm-border)',
       }}
     >
       <div className="flex items-center gap-3 mb-4">
@@ -499,12 +499,12 @@ function AskAIWidget({ team }: { team: TeamInfo }) {
             className="font-bold"
             style={{
               fontFamily: "'Montserrat', sans-serif",
-              color: 'var(--text-primary)',
+              color: 'var(--sm-text)',
             }}
           >
             Scout AI
           </h3>
-          <p className="text-xs" style={{ color: 'var(--text-muted)' }}>
+          <p className="text-xs" style={{ color: 'var(--sm-text-muted)' }}>
             Get instant answers
           </p>
         </div>
@@ -538,8 +538,8 @@ function SuggestedQuestion({ question, team }: { question: string; team: TeamInf
       href={`/scout-ai?team=${team.slug}&q=${encodeURIComponent(question)}`}
       className="block px-3 py-2 rounded-lg text-sm transition-colors"
       style={{
-        backgroundColor: 'var(--bg-tertiary)',
-        color: 'var(--text-secondary)',
+        backgroundColor: 'var(--sm-surface)',
+        color: 'var(--sm-text-dim)',
       }}
     >
       &quot;{question}&quot;
@@ -555,8 +555,8 @@ function FanChatWidget({ team }: { team: TeamInfo }) {
     <div
       className="rounded-xl p-5"
       style={{
-        backgroundColor: 'var(--bg-surface)',
-        border: '1px solid var(--border-color)',
+        backgroundColor: 'var(--sm-surface)',
+        border: '1px solid var(--sm-border)',
       }}
     >
       <div className="flex items-center gap-3 mb-4">
@@ -584,19 +584,19 @@ function FanChatWidget({ team }: { team: TeamInfo }) {
             className="font-bold"
             style={{
               fontFamily: "'Montserrat', sans-serif",
-              color: 'var(--text-primary)',
+              color: 'var(--sm-text)',
             }}
           >
             {team.shortName} Fan Chat
           </h3>
-          <div className="flex items-center gap-1.5 text-xs" style={{ color: 'var(--text-muted)' }}>
+          <div className="flex items-center gap-1.5 text-xs" style={{ color: 'var(--sm-text-muted)' }}>
             <span className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
             <span>247 fans online</span>
           </div>
         </div>
       </div>
 
-      <p className="text-sm mb-4" style={{ color: 'var(--text-secondary)' }}>
+      <p className="text-sm mb-4" style={{ color: 'var(--sm-text-dim)' }}>
         Join the conversation with fellow {team.shortName} fans.
       </p>
 
@@ -617,7 +617,7 @@ function ARExperienceWidget({ team }: { team: TeamInfo }) {
     <div
       className="rounded-xl overflow-hidden"
       style={{
-        border: '1px solid var(--border-color)',
+        border: '1px solid var(--sm-border)',
       }}
     >
       <div

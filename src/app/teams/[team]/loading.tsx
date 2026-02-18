@@ -1,16 +1,17 @@
 export default function TeamLoading() {
   return (
-    <div className="min-h-screen bg-zinc-50 dark:bg-zinc-950">
+    <div className="min-h-screen" style={{ backgroundColor: 'var(--sm-card)' }}>
       {/* Header skeleton */}
-      <div className="h-64 animate-pulse bg-zinc-200 dark:bg-zinc-800" />
+      <div className="h-64 animate-pulse" style={{ backgroundColor: 'var(--sm-surface)' }} />
 
       {/* Nav skeleton */}
-      <div className="h-14 border-b border-zinc-200 bg-white dark:border-zinc-800 dark:bg-zinc-900">
+      <div className="h-14 border-b" style={{ borderColor: 'var(--sm-border)', backgroundColor: 'var(--sm-card)' }}>
         <div className="mx-auto flex max-w-7xl gap-4 px-4 py-4">
           {[1, 2, 3, 4, 5].map((i) => (
             <div
               key={i}
-              className="h-6 w-20 animate-pulse rounded bg-zinc-200 dark:bg-zinc-700"
+              className="h-6 w-20 animate-pulse rounded"
+              style={{ backgroundColor: 'var(--sm-surface)' }}
             />
           ))}
         </div>
@@ -25,13 +26,14 @@ export default function TeamLoading() {
               {[1, 2, 3, 4].map((i) => (
                 <div
                   key={i}
-                  className="h-24 animate-pulse rounded-xl bg-zinc-200 dark:bg-zinc-800"
+                  className="h-24 animate-pulse rounded-xl"
+                  style={{ backgroundColor: 'var(--sm-surface)' }}
                 />
               ))}
             </div>
 
             {/* Table skeleton */}
-            <div className="h-96 animate-pulse rounded-xl bg-zinc-200 dark:bg-zinc-800" />
+            <div className="h-96 animate-pulse rounded-xl" style={{ backgroundColor: 'var(--sm-surface)' }} />
           </div>
 
           {/* Sidebar skeleton */}
@@ -39,7 +41,8 @@ export default function TeamLoading() {
             {[1, 2, 3].map((i) => (
               <div
                 key={i}
-                className="h-48 animate-pulse rounded-xl bg-zinc-200 dark:bg-zinc-800"
+                className="h-48 animate-pulse rounded-xl"
+                style={{ backgroundColor: 'var(--sm-surface)' }}
               />
             ))}
           </div>

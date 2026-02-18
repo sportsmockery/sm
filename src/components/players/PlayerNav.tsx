@@ -26,7 +26,7 @@ export default function PlayerNav({ player }: PlayerNavProps) {
   };
 
   return (
-    <nav className="border-b border-zinc-200 bg-white dark:border-zinc-800 dark:bg-zinc-900">
+    <nav className="border-b" style={{ borderColor: 'var(--sm-border)', backgroundColor: 'var(--sm-card)' }}>
       <div className="mx-auto max-w-7xl px-4">
         <div className="flex">
           {navItems.map((item) => {
@@ -36,13 +36,8 @@ export default function PlayerNav({ player }: PlayerNavProps) {
               <Link
                 key={item.label}
                 href={`${basePath}${item.href}`}
-                className={`
-                  relative px-4 py-4 text-sm font-medium transition-colors
-                  ${active
-                    ? 'text-zinc-900 dark:text-white'
-                    : 'text-zinc-500 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-white'
-                  }
-                `}
+                className="relative px-4 py-4 text-sm font-medium transition-colors"
+                style={{ color: active ? 'var(--sm-text)' : 'var(--sm-text-muted)' }}
               >
                 {item.label}
                 {active && (

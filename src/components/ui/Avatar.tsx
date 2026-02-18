@@ -41,7 +41,7 @@ export default function Avatar({
   const statusColors = {
     online: 'bg-[var(--success)]',
     away: 'bg-[var(--warning)]',
-    offline: 'bg-[var(--text-muted)]',
+    offline: 'bg-[var(--sm-text-muted)]',
   }
 
   // Get initials from name
@@ -56,7 +56,7 @@ export default function Avatar({
   return (
     <div className={`relative inline-block ${className}`}>
       <div
-        className={`${sizeClasses[size]} rounded-full overflow-hidden bg-[var(--bg-tertiary)] flex items-center justify-center font-semibold text-[var(--text-secondary)]`}
+        className={`${sizeClasses[size]} rounded-full overflow-hidden bg-[var(--sm-surface)] flex items-center justify-center font-semibold text-[var(--sm-text-dim)]`}
       >
         {src ? (
           <Image
@@ -69,7 +69,7 @@ export default function Avatar({
           getInitials(name)
         ) : (
           <svg
-            className="w-1/2 h-1/2 text-[var(--text-muted)]"
+            className="w-1/2 h-1/2 text-[var(--sm-text-muted)]"
             fill="currentColor"
             viewBox="0 0 24 24"
           >
@@ -80,7 +80,8 @@ export default function Avatar({
 
       {status && (
         <span
-          className={`absolute bottom-0 right-0 ${statusSizes[size]} ${statusColors[status]} rounded-full border-[var(--bg-primary)]`}
+          className={`absolute bottom-0 right-0 ${statusSizes[size]} ${statusColors[status]} rounded-full`}
+          style={{ borderColor: 'var(--sm-surface)' }}
         />
       )}
     </div>
@@ -117,13 +118,14 @@ export function AvatarGroup({
   return (
     <div className={`flex -space-x-2 ${className}`}>
       {visibleAvatars.map((avatar, i) => (
-        <div key={i} className="ring-2 ring-[var(--bg-primary)] rounded-full">
+        <div key={i} className="ring-2 rounded-full" style={{ '--tw-ring-color': 'var(--sm-surface)' } as React.CSSProperties}>
           {avatar}
         </div>
       ))}
       {remainingCount > 0 && (
         <div
-          className={`${sizeClasses[size]} rounded-full bg-[var(--bg-tertiary)] flex items-center justify-center font-semibold text-[var(--text-secondary)] ring-2 ring-[var(--bg-primary)]`}
+          className={`${sizeClasses[size]} rounded-full flex items-center justify-center font-semibold ring-2`}
+          style={{ backgroundColor: 'var(--sm-surface)', color: 'var(--sm-text-dim)', '--tw-ring-color': 'var(--sm-surface)' } as React.CSSProperties}
         >
           +{remainingCount}
         </div>

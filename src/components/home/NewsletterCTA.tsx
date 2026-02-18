@@ -25,16 +25,16 @@ export default function NewsletterCTA({ variant = 'compact', className = '' }: N
   // Compact version for sidebar
   if (variant === 'compact') {
     return (
-      <div className={`rounded-xl border border-zinc-200 bg-white p-5 dark:border-zinc-800 dark:bg-zinc-900 ${className}`}>
-        <h3 className="mb-2 text-sm font-bold uppercase tracking-wide text-zinc-900 dark:text-white">
+      <div className={`rounded-xl p-5 ${className}`} style={{ backgroundColor: 'var(--sm-card)', border: '1px solid var(--sm-border)' }}>
+        <h3 className="mb-2 text-sm font-bold uppercase tracking-wide" style={{ color: 'var(--sm-text)' }}>
           Newsletter
         </h3>
-        <p className="mb-4 text-sm text-zinc-600 dark:text-zinc-400">
+        <p className="mb-4 text-sm" style={{ color: 'var(--sm-text-muted)' }}>
           Get Chicago sports news delivered to your inbox.
         </p>
 
         {status === 'success' ? (
-          <div className="flex items-center gap-2 rounded-lg bg-emerald-50 p-3 text-sm text-emerald-700 dark:bg-emerald-900/20 dark:text-emerald-400">
+          <div className="flex items-center gap-2 rounded-lg p-3 text-sm" style={{ backgroundColor: 'var(--sm-surface)', color: '#059669' }}>
             <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
             </svg>
@@ -48,7 +48,8 @@ export default function NewsletterCTA({ variant = 'compact', className = '' }: N
               onChange={(e) => setEmail(e.target.value)}
               placeholder="Your email"
               required
-              className="w-full rounded-lg border border-zinc-200 bg-white px-3 py-2 text-sm text-zinc-900 placeholder-zinc-400 focus:border-[#8B0000] focus:outline-none focus:ring-1 focus:ring-[#8B0000] dark:border-zinc-700 dark:bg-zinc-800 dark:text-white dark:placeholder-zinc-500"
+              className="w-full rounded-lg px-3 py-2 text-sm focus:border-[#8B0000] focus:outline-none focus:ring-1 focus:ring-[#8B0000]"
+              style={{ border: '1px solid var(--sm-border)', backgroundColor: 'var(--sm-surface)', color: 'var(--sm-text)' }}
             />
             <button
               type="submit"
@@ -105,7 +106,8 @@ export default function NewsletterCTA({ variant = 'compact', className = '' }: N
               <button
                 type="submit"
                 disabled={status === 'loading'}
-                className="inline-flex items-center justify-center gap-2 rounded-xl bg-white px-6 py-3 font-semibold text-[#8B0000] transition-colors hover:bg-zinc-100 disabled:opacity-70"
+                className="inline-flex items-center justify-center gap-2 rounded-xl px-6 py-3 font-semibold transition-colors disabled:opacity-70"
+                style={{ backgroundColor: 'var(--sm-card)', color: '#8B0000' }}
               >
                 {status === 'loading' ? (
                   <>

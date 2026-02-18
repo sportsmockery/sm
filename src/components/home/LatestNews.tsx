@@ -46,7 +46,7 @@ export default function LatestNews({
       {/* Section header */}
       <div className="mb-6 flex items-center gap-3">
         <div className="h-8 w-1 rounded-full bg-gradient-to-b from-[#FF0000] to-[#8B0000]" />
-        <h2 className="font-heading text-2xl font-bold text-zinc-900 dark:text-white">
+        <h2 className="font-heading text-2xl font-bold" style={{ color: 'var(--sm-text)' }}>
           {title}
         </h2>
       </div>
@@ -81,7 +81,8 @@ export default function LatestNews({
         <div className="mt-8 text-center">
           <button
             onClick={handleLoadMore}
-            className="inline-flex items-center gap-2 rounded-xl border border-zinc-300 bg-white px-6 py-3 font-semibold text-zinc-700 transition-all hover:border-[#8B0000] hover:bg-[#8B0000] hover:text-white dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-300 dark:hover:border-[#FF6666] dark:hover:bg-[#FF6666] dark:hover:text-white"
+            className="inline-flex items-center gap-2 rounded-xl px-6 py-3 font-semibold transition-all hover:border-[#8B0000] hover:bg-[#8B0000] hover:text-white"
+            style={{ border: '1px solid var(--sm-border)', backgroundColor: 'var(--sm-card)', color: 'var(--sm-text)' }}
           >
             Load More
             <svg

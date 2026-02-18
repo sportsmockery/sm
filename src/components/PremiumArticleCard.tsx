@@ -32,7 +32,7 @@ export default function PremiumArticleCard({
       <div className="absolute -inset-[1px] rounded-2xl bg-gradient-to-r from-amber-400 via-orange-500 to-red-500 opacity-0 transition-opacity duration-500 group-hover:opacity-75" />
 
       {/* Card content */}
-      <div className="relative overflow-hidden rounded-2xl border border-zinc-200 bg-white transition-all duration-300 group-hover:border-transparent dark:border-zinc-800 dark:bg-zinc-900">
+      <div className="relative overflow-hidden rounded-2xl transition-all duration-300 group-hover:border-transparent" style={{ backgroundColor: 'var(--sm-card)', border: '1px solid var(--sm-border)' }}>
         {/* Image */}
         {featuredImage && (
           <Link href={`/${category.slug}/${slug}`}>
@@ -74,22 +74,22 @@ export default function PremiumArticleCard({
         {/* Text content */}
         <div className="p-5">
           <Link href={`/${category.slug}/${slug}`}>
-            <h2 className="text-lg font-bold leading-tight text-zinc-900 transition-colors group-hover:text-orange-600 dark:text-zinc-100 dark:group-hover:text-orange-400">
+            <h2 className="text-lg font-bold leading-tight transition-colors group-hover:text-orange-600" style={{ color: 'var(--sm-text)' }}>
               {title}
             </h2>
           </Link>
 
           {excerpt && (
-            <p className="mt-2 line-clamp-2 text-sm text-zinc-600 dark:text-zinc-400">
+            <p className="mt-2 line-clamp-2 text-sm" style={{ color: 'var(--sm-text-muted)' }}>
               {excerpt}
             </p>
           )}
 
           {/* Meta */}
-          <div className="mt-4 flex items-center gap-3 text-xs text-zinc-500 dark:text-zinc-500">
+          <div className="mt-4 flex items-center gap-3 text-xs" style={{ color: 'var(--sm-text-muted)' }}>
             {author && (
               <>
-                <span className="font-medium text-zinc-700 dark:text-zinc-300">{author}</span>
+                <span className="font-medium" style={{ color: 'var(--sm-text-dim)' }}>{author}</span>
                 <span>•</span>
               </>
             )}

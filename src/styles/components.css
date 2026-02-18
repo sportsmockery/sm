@@ -55,7 +55,7 @@
 /* Button Variants */
 .btn-primary {
   background: var(--accent-red);
-  color: var(--text-primary);
+  color: var(--sm-text);
 }
 
 .btn-primary:hover:not(:disabled) {
@@ -68,24 +68,24 @@
 }
 
 .btn-secondary {
-  background: var(--bg-tertiary);
-  color: var(--text-primary);
+  background: var(--sm-surface);
+  color: var(--sm-text);
   border: 1px solid var(--border-default);
 }
 
 .btn-secondary:hover:not(:disabled) {
-  background: var(--bg-hover);
+  background: var(--sm-card-hover);
   border-color: var(--border-strong);
 }
 
 .btn-ghost {
   background: transparent;
-  color: var(--text-secondary);
+  color: var(--sm-text-dim);
 }
 
 .btn-ghost:hover:not(:disabled) {
-  background: var(--bg-hover);
-  color: var(--text-primary);
+  background: var(--sm-card-hover);
+  color: var(--sm-text);
 }
 
 .btn-danger {
@@ -96,7 +96,7 @@
 
 .btn-danger:hover:not(:disabled) {
   background: var(--error);
-  color: var(--text-primary);
+  color: var(--sm-text);
 }
 
 .btn-link {
@@ -151,7 +151,7 @@
 .card-footer {
   padding: var(--space-4) var(--space-5);
   border-top: 1px solid var(--border-default);
-  background: var(--bg-tertiary);
+  background: var(--sm-surface);
 }
 
 /* Card Variants */
@@ -196,7 +196,7 @@
 .stat-card-label {
   font-size: var(--text-xs);
   font-weight: var(--font-semibold);
-  color: var(--text-muted);
+  color: var(--sm-text-muted);
   text-transform: uppercase;
   letter-spacing: var(--tracking-wide);
 }
@@ -204,7 +204,7 @@
 .stat-card-value {
   font-size: var(--text-4xl);
   font-weight: var(--font-extrabold);
-  color: var(--text-primary);
+  color: var(--sm-text);
   margin: var(--space-2) 0;
   font-family: var(--font-sans);
 }
@@ -230,17 +230,17 @@
   width: 100%;
   height: var(--input-height);
   padding: var(--input-padding);
-  background: var(--bg-tertiary);
+  background: var(--sm-surface);
   border: 1px solid var(--border-default);
   border-radius: var(--input-radius);
-  color: var(--text-primary);
+  color: var(--sm-text);
   font-size: var(--text-sm);
   font-family: var(--font-sans);
   transition: var(--transition-colors);
 }
 
 .input::placeholder {
-  color: var(--text-muted);
+  color: var(--sm-text-muted);
 }
 
 .input:hover:not(:disabled) {
@@ -271,7 +271,7 @@
   display: block;
   font-size: var(--text-sm);
   font-weight: var(--font-medium);
-  color: var(--text-secondary);
+  color: var(--sm-text-dim);
   margin-bottom: var(--space-2);
 }
 
@@ -283,7 +283,7 @@
 /* Input Helper Text */
 .input-helper {
   font-size: var(--text-xs);
-  color: var(--text-muted);
+  color: var(--sm-text-muted);
   margin-top: var(--space-1);
 }
 
@@ -313,7 +313,7 @@
   width: 18px;
   height: 18px;
   appearance: none;
-  background: var(--bg-tertiary);
+  background: var(--sm-surface);
   border: 1px solid var(--border-default);
   cursor: pointer;
   transition: var(--transition-all);
@@ -360,7 +360,7 @@
   padding: var(--table-cell-padding);
   font-size: var(--text-xs);
   font-weight: var(--font-bold);
-  color: var(--text-muted);
+  color: var(--sm-text-muted);
   text-transform: uppercase;
   letter-spacing: var(--tracking-wide);
   border-bottom: 1px solid var(--border-default);
@@ -369,8 +369,8 @@
 
 .table td {
   padding: var(--table-cell-padding);
-  border-bottom: 1px solid var(--border-subtle);
-  color: var(--text-primary);
+  border-bottom: 1px solid var(--sm-border);
+  color: var(--sm-text);
 }
 
 .table tr:last-child td {
@@ -378,7 +378,7 @@
 }
 
 .table tr:hover td {
-  background: var(--bg-hover);
+  background: var(--sm-card-hover);
 }
 
 .table-sortable th {
@@ -387,7 +387,7 @@
 }
 
 .table-sortable th:hover {
-  color: var(--text-primary);
+  color: var(--sm-text);
 }
 
 /* =========================================
@@ -441,8 +441,8 @@
 }
 
 .badge-final {
-  background: var(--bg-tertiary);
-  color: var(--text-secondary);
+  background: var(--sm-surface);
+  color: var(--sm-text-dim);
 }
 
 .badge-upcoming {
@@ -521,7 +521,7 @@
 .modal-title {
   font-size: var(--text-lg);
   font-weight: var(--font-semibold);
-  color: var(--text-primary);
+  color: var(--sm-text);
 }
 
 .modal-close {
@@ -531,14 +531,14 @@
   align-items: center;
   justify-content: center;
   border-radius: var(--radius-md);
-  color: var(--text-muted);
+  color: var(--sm-text-muted);
   cursor: pointer;
   transition: var(--transition-colors);
 }
 
 .modal-close:hover {
-  background: var(--bg-hover);
-  color: var(--text-primary);
+  background: var(--sm-card-hover);
+  color: var(--sm-text);
 }
 
 .modal-body {
@@ -594,14 +594,14 @@
   gap: var(--space-3);
   padding: var(--space-3) var(--space-4);
   font-size: var(--text-sm);
-  color: var(--text-secondary);
+  color: var(--sm-text-dim);
   cursor: pointer;
   transition: var(--transition-colors);
 }
 
 .dropdown-item:hover {
-  background: var(--bg-hover);
-  color: var(--text-primary);
+  background: var(--sm-card-hover);
+  color: var(--sm-text);
 }
 
 .dropdown-item.active {
@@ -628,7 +628,7 @@
   padding: var(--space-3) var(--space-5);
   font-size: var(--text-sm);
   font-weight: var(--font-medium);
-  color: var(--text-secondary);
+  color: var(--sm-text-dim);
   cursor: pointer;
   border-bottom: 2px solid transparent;
   margin-bottom: -1px;
@@ -636,7 +636,7 @@
 }
 
 .tab:hover {
-  color: var(--text-primary);
+  color: var(--sm-text);
 }
 
 .tab.active {
@@ -660,8 +660,8 @@
   align-items: center;
   justify-content: center;
   border-radius: var(--radius-full);
-  background: var(--bg-tertiary);
-  color: var(--text-secondary);
+  background: var(--sm-surface);
+  color: var(--sm-text-dim);
   font-weight: var(--font-semibold);
   overflow: hidden;
   flex-shrink: 0;
@@ -685,7 +685,7 @@
 }
 
 .avatar-group .avatar {
-  border: 2px solid var(--bg-primary);
+  border: 2px solid var(--sm-surface);
   margin-left: -8px;
 }
 
@@ -698,7 +698,7 @@
    ========================================= */
 
 .skeleton {
-  background: var(--bg-tertiary);
+  background: var(--sm-surface);
   border-radius: var(--radius-md);
   position: relative;
   overflow: hidden;
@@ -778,17 +778,17 @@
 .toast-message {
   flex: 1;
   font-size: var(--text-sm);
-  color: var(--text-primary);
+  color: var(--sm-text);
 }
 
 .toast-dismiss {
-  color: var(--text-muted);
+  color: var(--sm-text-muted);
   cursor: pointer;
   padding: var(--space-1);
 }
 
 .toast-dismiss:hover {
-  color: var(--text-primary);
+  color: var(--sm-text);
 }
 
 /* =========================================

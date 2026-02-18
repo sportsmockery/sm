@@ -78,12 +78,12 @@ export function CardHeader({
         <>
           <div>
             {title && (
-              <h3 className="text-lg font-semibold text-[var(--text-primary)]">
+              <h3 className="text-lg font-semibold text-[var(--sm-text)]">
                 {title}
               </h3>
             )}
             {subtitle && (
-              <p className="text-sm text-[var(--text-muted)] mt-1">{subtitle}</p>
+              <p className="text-sm text-[var(--sm-text-muted)] mt-1">{subtitle}</p>
             )}
           </div>
           {action && <div>{action}</div>}
@@ -147,10 +147,10 @@ export function StatCard({
     <Card className={className}>
       <div className="flex items-start justify-between">
         <div>
-          <p className="text-xs font-semibold uppercase tracking-wide text-[var(--text-muted)]">
+          <p className="text-xs font-semibold uppercase tracking-wide text-[var(--sm-text-muted)]">
             {label}
           </p>
-          <p className="text-3xl font-extrabold text-[var(--text-primary)] mt-2 font-sans">
+          <p className="text-3xl font-extrabold text-[var(--sm-text)] mt-2 font-sans">
             {value}
           </p>
           {trend && (
@@ -159,13 +159,13 @@ export function StatCard({
             >
               {isPositive ? '↑' : '↓'} {Math.abs(trend.value)}%
               {trend.label && (
-                <span className="text-[var(--text-muted)]"> {trend.label}</span>
+                <span className="text-[var(--sm-text-muted)]"> {trend.label}</span>
               )}
             </p>
           )}
         </div>
         {icon && (
-          <div className="p-3 rounded-lg bg-[var(--bg-tertiary)] text-[var(--text-muted)]">
+          <div className="p-3 rounded-lg bg-[var(--sm-surface)] text-[var(--sm-text-muted)]">
             {icon}
           </div>
         )}

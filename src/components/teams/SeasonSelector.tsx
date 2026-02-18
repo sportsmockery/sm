@@ -43,14 +43,15 @@ export default function SeasonSelector({ team, currentSeason }: SeasonSelectorPr
 
   return (
     <div className="inline-flex items-center gap-2">
-      <label htmlFor="season-select" className="text-sm font-medium text-zinc-600 dark:text-zinc-400">
+      <label htmlFor="season-select" className="text-sm font-medium" style={{ color: 'var(--sm-text-muted)' }}>
         Season:
       </label>
       <select
         id="season-select"
         value={selectedSeason}
         onChange={(e) => handleSeasonChange(e.target.value)}
-        className="rounded-lg border border-zinc-200 bg-white px-3 py-2 text-sm font-medium text-zinc-900 focus:border-zinc-400 focus:outline-none dark:border-zinc-700 dark:bg-zinc-800 dark:text-white"
+        className="rounded-lg border px-3 py-2 text-sm font-medium focus:outline-none"
+        style={{ borderColor: 'var(--sm-border)', backgroundColor: 'var(--sm-card)', color: 'var(--sm-text)' }}
       >
         {seasons.map((season) => (
           <option key={season.value} value={season.value}>

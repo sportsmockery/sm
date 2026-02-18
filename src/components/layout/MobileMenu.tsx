@@ -60,18 +60,20 @@ export default function MobileMenu({ isOpen, onClose }: MobileMenuProps) {
       <div
         className={`
           fixed right-0 top-0 z-50 flex h-full w-80 max-w-[90vw] flex-col
-          bg-white shadow-xl transition-transform duration-300 dark:bg-zinc-900
+          shadow-xl transition-transform duration-300
           ${isOpen ? 'translate-x-0' : 'translate-x-full'}
         `}
+        style={{ backgroundColor: 'var(--sm-card)' }}
       >
         {/* Header */}
-        <div className="flex items-center justify-between border-b border-zinc-200 p-4 dark:border-zinc-800">
-          <span className="font-heading text-lg font-bold text-zinc-900 dark:text-white">
+        <div className="flex items-center justify-between p-4" style={{ borderBottom: '1px solid var(--sm-border)' }}>
+          <span className="font-heading text-lg font-bold" style={{ color: 'var(--sm-text)' }}>
             Menu
           </span>
           <button
             onClick={onClose}
-            className="flex h-10 w-10 items-center justify-center rounded-lg text-zinc-600 transition-colors hover:bg-zinc-100 dark:text-zinc-400 dark:hover:bg-zinc-800"
+            className="flex h-10 w-10 items-center justify-center rounded-lg transition-colors"
+            style={{ color: 'var(--sm-text-muted)' }}
             aria-label="Close menu"
           >
             <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
@@ -84,7 +86,7 @@ export default function MobileMenu({ isOpen, onClose }: MobileMenuProps) {
         <div className="flex-1 overflow-y-auto p-4">
           {/* Teams */}
           <div className="mb-6">
-            <h3 className="mb-3 text-xs font-semibold uppercase tracking-wider text-zinc-500 dark:text-zinc-400">
+            <h3 className="mb-3 text-xs font-semibold uppercase tracking-wider" style={{ color: 'var(--sm-text-muted)' }}>
               Teams
             </h3>
             <div className="space-y-1">
@@ -93,11 +95,11 @@ export default function MobileMenu({ isOpen, onClose }: MobileMenuProps) {
                   key={team.slug}
                   href={`/${team.slug}`}
                   onClick={onClose}
-                  className="flex items-center gap-3 rounded-lg px-3 py-3 transition-all hover:bg-zinc-100 dark:hover:bg-zinc-800 animate-slide-up"
+                  className="flex items-center gap-3 rounded-lg px-3 py-3 transition-all animate-slide-up"
                   style={{ animationDelay: `${index * 50}ms` }}
                 >
                   <span className="text-xl">{team.emoji}</span>
-                  <span className="font-medium text-zinc-700 dark:text-zinc-300">{team.name}</span>
+                  <span className="font-medium" style={{ color: 'var(--sm-text)' }}>{team.name}</span>
                   <div
                     className="ml-auto h-2 w-2 rounded-full"
                     style={{ backgroundColor: team.color }}
@@ -109,7 +111,7 @@ export default function MobileMenu({ isOpen, onClose }: MobileMenuProps) {
 
           {/* Other links */}
           <div className="mb-6">
-            <h3 className="mb-3 text-xs font-semibold uppercase tracking-wider text-zinc-500 dark:text-zinc-400">
+            <h3 className="mb-3 text-xs font-semibold uppercase tracking-wider" style={{ color: 'var(--sm-text-muted)' }}>
               More
             </h3>
             <div className="space-y-1">
@@ -118,8 +120,8 @@ export default function MobileMenu({ isOpen, onClose }: MobileMenuProps) {
                   key={link.href}
                   href={link.href}
                   onClick={onClose}
-                  className="block rounded-lg px-3 py-3 font-medium text-zinc-700 transition-colors hover:bg-zinc-100 dark:text-zinc-300 dark:hover:bg-zinc-800 animate-slide-up"
-                  style={{ animationDelay: `${(teams.length + index) * 50}ms` }}
+                  className="block rounded-lg px-3 py-3 font-medium transition-colors animate-slide-up"
+                  style={{ color: 'var(--sm-text)', animationDelay: `${(teams.length + index) * 50}ms` }}
                 >
                   {link.name}
                 </Link>
@@ -129,11 +131,12 @@ export default function MobileMenu({ isOpen, onClose }: MobileMenuProps) {
         </div>
 
         {/* Footer */}
-        <div className="border-t border-zinc-200 p-4 dark:border-zinc-800">
+        <div className="p-4" style={{ borderTop: '1px solid var(--sm-border)' }}>
           <Link
             href="/search"
             onClick={onClose}
-            className="flex w-full items-center justify-center gap-2 rounded-xl bg-[#8B0000] px-4 py-3 font-semibold text-white transition-colors hover:bg-[#a00000] dark:bg-[#FF6666] dark:hover:bg-[#FF8888]"
+            className="flex w-full items-center justify-center gap-2 rounded-xl px-4 py-3 font-semibold text-white transition-colors"
+            style={{ backgroundColor: '#8B0000' }}
           >
             <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />

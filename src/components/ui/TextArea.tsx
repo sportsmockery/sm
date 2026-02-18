@@ -18,7 +18,7 @@ const TextArea = forwardRef<HTMLTextAreaElement, TextAreaProps>(
     const inputId = id || label?.toLowerCase().replace(/\s+/g, '-')
 
     const baseClasses =
-      'w-full min-h-[100px] px-4 py-3 bg-[var(--bg-tertiary)] border border-[var(--border-default)] rounded-lg text-[var(--text-primary)] text-sm font-sans transition-all duration-200 placeholder:text-[var(--text-muted)] hover:border-[var(--border-strong)] focus:outline-none focus:border-[var(--accent-red)] focus:ring-2 focus:ring-[var(--accent-red-glow)] disabled:opacity-50 disabled:cursor-not-allowed resize-y'
+      'w-full min-h-[100px] px-4 py-3 bg-[var(--sm-surface)] border border-[var(--border-default)] rounded-lg text-[var(--sm-text)] text-sm font-sans transition-all duration-200 placeholder:text-[var(--sm-text-muted)] hover:border-[var(--border-strong)] focus:outline-none focus:border-[var(--accent-red)] focus:ring-2 focus:ring-[var(--accent-red-glow)] disabled:opacity-50 disabled:cursor-not-allowed resize-y'
 
     const errorClasses = error
       ? 'border-[var(--error)] focus:border-[var(--error)] focus:ring-red-500/20'
@@ -29,7 +29,7 @@ const TextArea = forwardRef<HTMLTextAreaElement, TextAreaProps>(
         {label && (
           <label
             htmlFor={inputId}
-            className="block text-sm font-medium text-[var(--text-secondary)] mb-2"
+            className="block text-sm font-medium text-[var(--sm-text-dim)] mb-2"
           >
             {label}
             {required && <span className="text-[var(--error)] ml-1">*</span>}
@@ -45,7 +45,7 @@ const TextArea = forwardRef<HTMLTextAreaElement, TextAreaProps>(
 
         {(error || helper) && (
           <p
-            className={`text-xs mt-1 ${error ? 'text-[var(--error)]' : 'text-[var(--text-muted)]'}`}
+            className={`text-xs mt-1 ${error ? 'text-[var(--error)]' : 'text-[var(--sm-text-muted)]'}`}
           >
             {error || helper}
           </p>

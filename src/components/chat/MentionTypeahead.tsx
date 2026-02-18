@@ -90,8 +90,8 @@ export default function MentionTypeahead({
       <style jsx>{`
         .mention-typeahead {
           position: absolute;
-          background: var(--bg-card, #1a1a2e);
-          border: 1px solid var(--border-subtle, #333);
+          background: var(--sm-card, #1a1a2e);
+          border: 1px solid var(--sm-border, #333);
           border-radius: 12px;
           box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
           overflow: hidden;
@@ -102,10 +102,10 @@ export default function MentionTypeahead({
           padding: 8px 12px;
           font-size: 0.75rem;
           font-weight: 600;
-          color: var(--text-subtle, #888);
+          color: var(--sm-text-muted, #888);
           text-transform: uppercase;
           letter-spacing: 0.05em;
-          border-bottom: 1px solid var(--border-subtle, #333);
+          border-bottom: 1px solid var(--sm-border, #333);
           background: var(--bg-subtle, #111);
         }
 
@@ -129,7 +129,7 @@ export default function MentionTypeahead({
 
         .mention-typeahead__item:hover,
         .mention-typeahead__item--selected {
-          background: var(--bg-hover, #2a2a3e);
+          background: var(--sm-card-hover, #2a2a3e);
         }
 
         .mention-typeahead__avatar {
@@ -166,7 +166,7 @@ export default function MentionTypeahead({
         .mention-typeahead__name {
           font-size: 0.9rem;
           font-weight: 500;
-          color: var(--text-main, #fff);
+          color: var(--sm-text, #fff);
           white-space: nowrap;
           overflow: hidden;
           text-overflow: ellipsis;

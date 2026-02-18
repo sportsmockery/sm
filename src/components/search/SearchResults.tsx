@@ -36,8 +36,8 @@ export default function SearchResults({
     <div className={className}>
       {/* Results header */}
       <div className="mb-6 flex items-center justify-between">
-        <p className="text-zinc-600 dark:text-zinc-400">
-          Found <span className="font-semibold text-zinc-900 dark:text-white">{count}</span>{' '}
+        <p style={{ color: 'var(--sm-text-muted)' }}>
+          Found <span className="font-semibold" style={{ color: 'var(--sm-text)' }}>{count}</span>{' '}
           {count === 1 ? 'result' : 'results'} for{' '}
           <span className="font-semibold text-[#8B0000] dark:text-[#FF6666]">
             &ldquo;{query}&rdquo;

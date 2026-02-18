@@ -22,7 +22,7 @@
   --sm-card-shadow-hover: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
 
   /* Section backgrounds */
-  --sm-section-bg: var(--bg-surface);
+  --sm-section-bg: var(--sm-surface);
   --sm-section-alt-bg: var(--bg-secondary);
 
   /* Headlines box */
@@ -53,7 +53,7 @@
 .sm-main {
   width: 100%;
   min-height: 100vh;
-  background-color: var(--bg-surface);
+  background-color: var(--sm-surface);
 }
 
 .sm-main-loading {
@@ -106,7 +106,7 @@
   font-family: 'Montserrat', sans-serif;
   font-size: 1.5rem;
   font-weight: 800;
-  color: var(--text-primary);
+  color: var(--sm-text);
   margin: 0 0 8px 0;
   letter-spacing: -0.025em;
 }
@@ -119,7 +119,7 @@
 
 .sm-section-header p {
   font-size: 0.875rem;
-  color: var(--text-muted);
+  color: var(--sm-text-muted);
   margin: 0;
 }
 
@@ -394,7 +394,7 @@
   font-family: 'Montserrat', sans-serif;
   font-size: 0.75rem;
   font-weight: 700;
-  color: var(--text-muted);
+  color: var(--sm-text-muted);
   background: var(--bg-secondary);
   border-radius: 4px;
 }
@@ -448,7 +448,7 @@
   flex: 1;
   font-size: 0.875rem;
   font-weight: 500;
-  color: var(--text-primary);
+  color: var(--sm-text);
   text-decoration: none;
   line-height: 1.4;
   transition: color 0.15s ease;
@@ -730,8 +730,8 @@
 }
 
 .sm-latest-item {
-  background-color: var(--bg-primary);
-  border: 1px solid var(--border-primary);
+  background-color: var(--sm-surface);
+  border: 1px solid var(--sm-border);
   border-radius: 8px;
   overflow: hidden;
   transition: box-shadow 0.2s ease, border-color 0.2s ease;
@@ -739,7 +739,7 @@
 
 .sm-latest-item:hover {
   box-shadow: var(--sm-card-shadow);
-  border-color: var(--border-secondary);
+  border-color: var(--sm-border);
 }
 
 /* Preferred team highlight for returning users */
@@ -813,12 +813,12 @@
 
 .sm-latest-time {
   font-size: 0.75rem;
-  color: var(--text-muted);
+  color: var(--sm-text-muted);
 }
 
 .sm-latest-age-label {
   font-size: 0.6875rem;
-  color: var(--text-muted);
+  color: var(--sm-text-muted);
   background: var(--bg-secondary);
   padding: 2px 6px;
   border-radius: 3px;
@@ -828,7 +828,7 @@
   font-family: 'Montserrat', sans-serif;
   font-size: 0.9375rem;
   font-weight: 600;
-  color: var(--text-primary);
+  color: var(--sm-text);
   line-height: 1.35;
   margin: 0;
   display: -webkit-box;
@@ -1007,7 +1007,7 @@
 
 .sm-seasonal-link {
   font-size: 0.875rem;
-  color: var(--text-secondary);
+  color: var(--sm-text-dim);
   text-decoration: none;
   line-height: 1.4;
   display: -webkit-box;
@@ -1025,7 +1025,7 @@
   grid-column: 1 / -1;
   text-align: center;
   padding: 48px 24px;
-  color: var(--text-muted);
+  color: var(--sm-text-muted);
   background: var(--bg-secondary);
   border-radius: 10px;
 }

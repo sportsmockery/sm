@@ -30,12 +30,12 @@ export default function TeamSpotlight({
   }
 
   return (
-    <section className={`bg-white dark:bg-[#111] ${className}`}>
+    <section className={className} style={{ backgroundColor: 'var(--sm-card)' }}>
       <div className="max-w-[1110px] mx-auto px-4 py-8">
         {/* Section header */}
         <h2
-          className="text-[18px] font-bold text-[#222] dark:text-white uppercase mb-6 pb-2 border-b-[3px] border-[#bc0000]"
-          style={{ fontFamily: "'Montserrat', sans-serif" }}
+          className="text-[18px] font-bold uppercase mb-6 pb-2 border-b-[3px] border-[#bc0000]"
+          style={{ color: 'var(--sm-text)', fontFamily: "'Montserrat', sans-serif" }}
         >
           Team Spotlight
         </h2>
@@ -54,13 +54,14 @@ export default function TeamSpotlight({
                 className={`border rounded-lg overflow-hidden transition-all ${
                   isBears
                     ? 'border-[#C83803] shadow-md'
-                    : 'border-gray-200 dark:border-gray-700'
+                    : ''
                 }`}
+                style={!isBears ? { borderColor: 'var(--sm-border)' } : undefined}
               >
                 {/* Card header - always visible */}
                 <button
                   onClick={() => toggleTeam(teamSlug)}
-                  className="w-full flex items-center justify-between p-4 hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors"
+                  className="w-full flex items-center justify-between p-4 transition-colors"
                   style={{
                     borderLeft: `4px solid ${teamInfo.primaryColor}`,
                   }}
@@ -77,8 +78,8 @@ export default function TeamSpotlight({
                     {/* Team name and record */}
                     <div className="text-left">
                       <h3
-                        className="text-[16px] font-bold text-[#222] dark:text-white"
-                        style={{ fontFamily: "'Montserrat', sans-serif" }}
+                        className="text-[16px] font-bold"
+                        style={{ color: 'var(--sm-text)', fontFamily: "'Montserrat', sans-serif" }}
                       >
                         {teamInfo.name}
                         {isBears && (
@@ -88,7 +89,7 @@ export default function TeamSpotlight({
                         )}
                       </h3>
                       {data?.quickStats?.record && (
-                        <p className="text-sm text-gray-500 dark:text-gray-400">
+                        <p className="text-sm" style={{ color: 'var(--sm-text-muted)' }}>
                           {data.quickStats.record}
                           {data.quickStats.standing && ` • ${data.quickStats.standing}`}
                         </p>
@@ -99,14 +100,15 @@ export default function TeamSpotlight({
                   {/* Expand/collapse indicator */}
                   <div className="flex items-center gap-3">
                     {data?.latestPosts?.length > 0 && (
-                      <span className="text-xs text-gray-400 hidden sm:inline">
+                      <span className="text-xs hidden sm:inline" style={{ color: 'var(--sm-text-dim)' }}>
                         {data.latestPosts.length} articles
                       </span>
                     )}
                     <svg
-                      className={`w-5 h-5 text-gray-400 transition-transform ${
+                      className={`w-5 h-5 transition-transform ${
                         isExpanded ? 'rotate-180' : ''
                       }`}
+                      style={{ color: 'var(--sm-text-dim)' }}
                       fill="none"
                       stroke="currentColor"
                       viewBox="0 0 24 24"
@@ -118,7 +120,7 @@ export default function TeamSpotlight({
 
                 {/* Expanded content */}
                 {isExpanded && data && (
-                  <div className="border-t border-gray-100 dark:border-gray-700">
+                  <div style={{ borderTop: '1px solid var(--sm-border)' }}>
                     {/* Quick stats row */}
                     {data.quickStats && (
                       <div
@@ -127,16 +129,16 @@ export default function TeamSpotlight({
                       >
                         {data.quickStats.streak && (
                           <div>
-                            <span className="text-gray-500 dark:text-gray-400">Streak:</span>{' '}
-                            <span className="font-semibold text-[#222] dark:text-white">
+                            <span style={{ color: 'var(--sm-text-muted)' }}>Streak:</span>{' '}
+                            <span className="font-semibold" style={{ color: 'var(--sm-text)' }}>
                               {data.quickStats.streak}
                             </span>
                           </div>
                         )}
                         {data.quickStats.nextGame && (
                           <div>
-                            <span className="text-gray-500 dark:text-gray-400">Next:</span>{' '}
-                            <span className="font-semibold text-[#222] dark:text-white">
+                            <span style={{ color: 'var(--sm-text-muted)' }}>Next:</span>{' '}
+                            <span className="font-semibold" style={{ color: 'var(--sm-text)' }}>
                               {data.quickStats.nextGame}
                             </span>
                           </div>
@@ -204,12 +206,12 @@ function SpotlightPostCard({
         {/* Content */}
         <div className="flex-1 min-w-0">
           <h4
-            className="text-[13px] font-semibold text-[#222] dark:text-white leading-tight line-clamp-2 group-hover:text-[#bc0000] transition-colors"
-            style={{ fontFamily: "'Montserrat', sans-serif" }}
+            className="text-[13px] font-semibold leading-tight line-clamp-2 group-hover:text-[#bc0000] transition-colors"
+            style={{ color: 'var(--sm-text)', fontFamily: "'Montserrat', sans-serif" }}
           >
             {post.title}
           </h4>
-          <p className="text-[11px] text-gray-400 mt-1">
+          <p className="text-[11px] mt-1" style={{ color: 'var(--sm-text-dim)' }}>
             {new Date(post.publishedAt).toLocaleDateString('en-US', {
               month: 'short',
               day: 'numeric',

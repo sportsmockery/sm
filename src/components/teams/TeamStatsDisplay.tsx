@@ -34,15 +34,15 @@ export default function TeamStatsDisplay({ stats, team }: TeamStatsDisplayProps)
   return (
     <div className="space-y-6">
       {/* Overall Rankings */}
-      <div className="rounded-xl border border-zinc-200 bg-white p-6 dark:border-zinc-800 dark:bg-zinc-900">
-        <h3 className="mb-4 text-lg font-bold text-zinc-900 dark:text-white">League Rankings</h3>
+      <div className="rounded-xl border p-6" style={{ borderColor: 'var(--sm-border)', backgroundColor: 'var(--sm-card)' }}>
+        <h3 className="mb-4 text-lg font-bold" style={{ color: 'var(--sm-text)' }}>League Rankings</h3>
         <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
           {Object.entries(stats.rankings).map(([key, value]) => (
             <div key={key} className="text-center">
               <div className={`mx-auto mb-2 flex h-12 w-12 items-center justify-center rounded-full ${getRankBg(value)}`}>
                 <span className={`text-xl font-bold ${getRankColor(value)}`}>{value}</span>
               </div>
-              <p className="text-sm capitalize text-zinc-600 dark:text-zinc-400">
+              <p className="text-sm capitalize" style={{ color: 'var(--sm-text-muted)' }}>
                 {key.replace(/([A-Z])/g, ' $1').trim()}
               </p>
             </div>
@@ -53,17 +53,17 @@ export default function TeamStatsDisplay({ stats, team }: TeamStatsDisplayProps)
       {/* Offense & Defense Cards */}
       <div className="grid gap-6 md:grid-cols-2">
         {/* Offense Stats */}
-        <div className="rounded-xl border border-zinc-200 bg-white dark:border-zinc-800 dark:bg-zinc-900">
-          <div className="border-b border-zinc-200 px-6 py-4 dark:border-zinc-800">
-            <h3 className="font-bold text-zinc-900 dark:text-white">Offense</h3>
+        <div className="rounded-xl border" style={{ borderColor: 'var(--sm-border)', backgroundColor: 'var(--sm-card)' }}>
+          <div className="border-b px-6 py-4" style={{ borderColor: 'var(--sm-border)' }}>
+            <h3 className="font-bold" style={{ color: 'var(--sm-text)' }}>Offense</h3>
           </div>
-          <div className="divide-y divide-zinc-100 dark:divide-zinc-800">
+          <div className="divide-y" style={{ '--tw-divide-color': 'var(--sm-border)' } as React.CSSProperties}>
             {Object.entries(stats.offense).map(([key, value]) => (
               <div key={key} className="flex items-center justify-between px-6 py-3">
-                <span className="text-sm capitalize text-zinc-600 dark:text-zinc-400">
+                <span className="text-sm capitalize" style={{ color: 'var(--sm-text-muted)' }}>
                   {key.replace(/([A-Z])/g, ' $1').trim()}
                 </span>
-                <span className="font-semibold text-zinc-900 dark:text-white">
+                <span className="font-semibold" style={{ color: 'var(--sm-text)' }}>
                   {formatStat(value)}
                 </span>
               </div>
@@ -72,17 +72,17 @@ export default function TeamStatsDisplay({ stats, team }: TeamStatsDisplayProps)
         </div>
 
         {/* Defense Stats */}
-        <div className="rounded-xl border border-zinc-200 bg-white dark:border-zinc-800 dark:bg-zinc-900">
-          <div className="border-b border-zinc-200 px-6 py-4 dark:border-zinc-800">
-            <h3 className="font-bold text-zinc-900 dark:text-white">Defense</h3>
+        <div className="rounded-xl border" style={{ borderColor: 'var(--sm-border)', backgroundColor: 'var(--sm-card)' }}>
+          <div className="border-b px-6 py-4" style={{ borderColor: 'var(--sm-border)' }}>
+            <h3 className="font-bold" style={{ color: 'var(--sm-text)' }}>Defense</h3>
           </div>
-          <div className="divide-y divide-zinc-100 dark:divide-zinc-800">
+          <div className="divide-y" style={{ '--tw-divide-color': 'var(--sm-border)' } as React.CSSProperties}>
             {Object.entries(stats.defense).map(([key, value]) => (
               <div key={key} className="flex items-center justify-between px-6 py-3">
-                <span className="text-sm capitalize text-zinc-600 dark:text-zinc-400">
+                <span className="text-sm capitalize" style={{ color: 'var(--sm-text-muted)' }}>
                   {key.replace(/([A-Z])/g, ' $1').trim()}
                 </span>
-                <span className="font-semibold text-zinc-900 dark:text-white">
+                <span className="font-semibold" style={{ color: 'var(--sm-text)' }}>
                   {formatStat(value)}
                 </span>
               </div>

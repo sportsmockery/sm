@@ -440,12 +440,12 @@ export default function PostIQChartGenerator({
 
           {/* Live Chart Preview */}
           {showPreview && analysis && (
-            <div className="absolute bottom-full mb-2 right-0 w-96 rounded-xl bg-white dark:bg-zinc-900 border border-gray-200 dark:border-zinc-700 shadow-2xl overflow-hidden">
-              <div className="px-4 py-3 border-b border-gray-100 dark:border-zinc-800 bg-gray-50 dark:bg-zinc-800/50">
+            <div className="absolute bottom-full mb-2 right-0 w-96 rounded-xl shadow-2xl overflow-hidden" style={{ backgroundColor: 'var(--sm-card)', border: '1px solid var(--sm-border)' }}>
+              <div className="px-4 py-3" style={{ borderBottom: '1px solid var(--sm-border)', backgroundColor: 'var(--sm-surface)' }}>
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="font-semibold text-gray-900 dark:text-white">{analysis.chartTitle}</p>
-                    <p className="text-xs text-gray-500 dark:text-zinc-400">
+                    <p className="font-semibold" style={{ color: 'var(--sm-text)' }}>{analysis.chartTitle}</p>
+                    <p className="text-xs" style={{ color: 'var(--sm-text-muted)' }}>
                       {analysis.chartType} chart • {analysis.data.length} data points
                     </p>
                   </div>
@@ -496,8 +496,8 @@ export default function PostIQChartGenerator({
                 )}
               </div>
               {analysis.extractedFrom && (
-                <div className="px-4 py-2 border-t border-gray-100 dark:border-zinc-800 bg-gray-50 dark:bg-zinc-800/50">
-                  <p className="text-xs text-gray-500 dark:text-zinc-500">
+                <div className="px-4 py-2" style={{ borderTop: '1px solid var(--sm-border)', backgroundColor: 'var(--sm-surface)' }}>
+                  <p className="text-xs" style={{ color: 'var(--sm-text-muted)' }}>
                     Extracted from: "{analysis.extractedFrom}"
                   </p>
                 </div>
@@ -568,9 +568,9 @@ export default function PostIQChartGenerator({
       {/* Analyzing Indicator */}
       {isAnalyzing && showIndicator && (
         <div className={`fixed ${positionClasses[indicatorPosition]} z-40`}>
-          <div className="flex items-center gap-3 rounded-full bg-gray-800/90 dark:bg-zinc-800/90 backdrop-blur-sm px-4 py-2.5 shadow-lg">
+          <div className="flex items-center gap-3 rounded-full backdrop-blur-sm px-4 py-2.5 shadow-lg" style={{ backgroundColor: 'var(--sm-surface)' }}>
             <div className="h-4 w-4 border-2 border-purple-400 border-t-transparent rounded-full animate-spin" />
-            <span className="text-sm text-gray-300 dark:text-zinc-400">PostIQ analyzing content...</span>
+            <span className="text-sm" style={{ color: 'var(--sm-text-muted)' }}>PostIQ analyzing content...</span>
           </div>
         </div>
       )}

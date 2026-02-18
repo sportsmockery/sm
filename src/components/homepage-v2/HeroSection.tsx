@@ -47,10 +47,11 @@ export default function HeroSection({
   if (!article) {
     return (
       <section
-        className={`h-[200px] flex items-center justify-center bg-zinc-100 dark:bg-zinc-900 ${className}`}
+        className={`h-[200px] flex items-center justify-center ${className}`}
+        style={{ backgroundColor: 'var(--sm-surface)' }}
         aria-label="Featured article loading"
       >
-        <div className="animate-pulse text-zinc-400">Loading featured story...</div>
+        <div className="animate-pulse" style={{ color: 'var(--sm-text-muted)' }}>Loading featured story...</div>
       </section>
     )
   }
@@ -60,7 +61,8 @@ export default function HeroSection({
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.4 }}
-      className={`relative h-[200px] flex flex-col justify-center px-6 md:px-12 bg-gradient-to-r from-zinc-100 to-white dark:from-zinc-900 dark:to-zinc-950 border-b-4 border-red-600 ${className}`}
+      className={`relative h-[200px] flex flex-col justify-center px-6 md:px-12 border-b-4 border-red-600 ${className}`}
+      style={{ background: 'linear-gradient(to right, var(--sm-surface), var(--sm-card))' }}
       role="banner"
       aria-label="Featured article"
     >
@@ -77,20 +79,21 @@ export default function HeroSection({
         <h1 className="mb-3">
           <Link
             href={`/${article.category.slug}/${article.slug}`}
-            className={`text-4xl md:text-5xl text-black dark:text-white hover:text-red-600 dark:hover:text-red-500 transition-colors focus:outline-none focus:underline focus:decoration-red-600 ${montserrat.className}`}
+            className={`text-4xl md:text-5xl hover:text-red-600 transition-colors focus:outline-none focus:underline focus:decoration-red-600 ${montserrat.className}`}
+            style={{ color: 'var(--sm-text)' }}
           >
             {article.title}
           </Link>
         </h1>
 
         {/* Excerpt - 16pt */}
-        <p className="text-base text-zinc-600 dark:text-zinc-400 line-clamp-2 max-w-2xl font-serif">
+        <p className="text-base line-clamp-2 max-w-2xl font-serif" style={{ color: 'var(--sm-text-muted)' }}>
           {article.excerpt}
         </p>
 
         {/* Meta and AR button row */}
         <div className="mt-4 flex items-center gap-4">
-          <span className="text-sm text-zinc-500 dark:text-zinc-500">
+          <span className="text-sm" style={{ color: 'var(--sm-text-muted)' }}>
             By {article.author?.name || 'Staff'} • {formatDate(article.published_at)}
           </span>
 

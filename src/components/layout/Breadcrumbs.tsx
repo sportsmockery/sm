@@ -14,14 +14,15 @@ export default function Breadcrumbs({ items, className = '' }: BreadcrumbsProps)
   return (
     <nav
       aria-label="Breadcrumb"
-      className={`text-sm text-zinc-600 dark:text-zinc-400 ${className}`}
+      className={`text-sm ${className}`}
+      style={{ color: 'var(--sm-text-muted)' }}
     >
       <ol className="flex flex-wrap items-center gap-1">
         {/* Home */}
         <li className="flex items-center">
           <Link
             href="/"
-            className="flex items-center transition-colors hover:text-[#8B0000] dark:hover:text-[#FF6666]"
+            className="flex items-center transition-colors hover:text-[#8B0000]"
           >
             <svg
               className="h-4 w-4"
@@ -48,7 +49,8 @@ export default function Breadcrumbs({ items, className = '' }: BreadcrumbsProps)
             <li key={index} className="flex items-center">
               {/* Separator */}
               <svg
-                className="mx-1 h-4 w-4 text-zinc-400"
+                className="mx-1 h-4 w-4"
+                style={{ color: 'var(--sm-text-dim)' }}
                 fill="none"
                 viewBox="0 0 24 24"
                 strokeWidth={2}
@@ -64,7 +66,8 @@ export default function Breadcrumbs({ items, className = '' }: BreadcrumbsProps)
               {/* Link or text */}
               {isLast || !item.href ? (
                 <span
-                  className={isLast ? 'font-medium text-zinc-900 dark:text-white' : ''}
+                  className={isLast ? 'font-medium' : ''}
+                  style={isLast ? { color: 'var(--sm-text)' } : undefined}
                   aria-current={isLast ? 'page' : undefined}
                 >
                   {item.label}
@@ -72,7 +75,7 @@ export default function Breadcrumbs({ items, className = '' }: BreadcrumbsProps)
               ) : (
                 <Link
                   href={item.href}
-                  className="transition-colors hover:text-[#8B0000] dark:hover:text-[#FF6666]"
+                  className="transition-colors hover:text-[#8B0000]"
                 >
                   {item.label}
                 </Link>

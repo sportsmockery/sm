@@ -389,7 +389,7 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
           </div>
         ) : (
           /* Fallback header without image - dark background for white text */
-          <div className="py-10 border-b" style={{ backgroundColor: 'var(--sm-card)', borderColor: 'var(--border-color)' }}>
+          <div className="py-10 border-b" style={{ backgroundColor: 'var(--sm-card)', borderColor: 'var(--sm-border)' }}>
             <div className="mx-auto max-w-[1110px] px-4">
               {/* Breadcrumb */}
               <nav className="mb-4">
@@ -436,14 +436,14 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
               </h1>
 
               {/* Meta line per spec: "By {author} · {Date} · {X min read} · {Category}" */}
-              <p className="text-[14px]" style={{ color: 'var(--text-muted)' }}>
+              <p className="text-[14px]" style={{ color: 'var(--sm-text-muted)' }}>
                 {author && (
                   <>
                     By{' '}
                     <Link
                       href={`/author/${author.slug || author.id}`}
                       className="font-medium transition-colors"
-                      style={{ color: 'var(--text-primary)' }}
+                      style={{ color: 'var(--sm-text)' }}
                     >
                       {author.display_name}
                     </Link>
@@ -462,7 +462,7 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
       </header>
 
       {/* Main Content Area - Athletic-style layout with TOC on LEFT */}
-      <div style={{ backgroundColor: 'var(--bg-page)' }}>
+      <div style={{ backgroundColor: 'var(--sm-card)' }}>
         <div className="mx-auto max-w-[1400px] px-4 py-10">
           <div className="flex justify-center gap-0">
             {/* Left Sidebar - TOC (Desktop only) */}
@@ -478,7 +478,7 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
             )}
 
             {/* Main article column - centered */}
-            <div className={`w-full max-w-[720px] ${readingTime >= 5 ? 'xl:border-l xl:border-r xl:px-12' : ''}`} style={{ borderColor: 'var(--border-color)' }}>
+            <div className={`w-full max-w-[720px] ${readingTime >= 5 ? 'xl:border-l xl:border-r xl:px-12' : ''}`} style={{ borderColor: 'var(--sm-border)' }}>
               {/* Note: Featured image is shown in hero section above, not duplicated here */}
 
               {/* Article Audio Player - Listen to this article */}
@@ -510,20 +510,20 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
                 />
 
                 {/* Share buttons placed after article body per spec */}
-                <div className="my-8 flex items-center gap-3 border-y py-6" style={{ borderColor: 'var(--border-color)' }}>
+                <div className="my-8 flex items-center gap-3 border-y py-6" style={{ borderColor: 'var(--sm-border)' }}>
                   <ShareButtons url={articleUrl} title={post.title} />
                 </div>
 
                 {/* Tags per spec section 15.4 */}
                 {tags.length > 0 && (
-                  <div className="mt-10 border-t pt-6" style={{ borderColor: 'var(--border-color)' }}>
+                  <div className="mt-10 border-t pt-6" style={{ borderColor: 'var(--sm-border)' }}>
                     <ArticleTags tags={tags} />
                   </div>
                 )}
 
                 {/* Author Card per spec section 15.3 */}
                 {author && (
-                  <div className="mt-10 border-t pt-10" style={{ borderColor: 'var(--border-color)' }}>
+                  <div className="mt-10 border-t pt-10" style={{ borderColor: 'var(--sm-border)' }}>
                     <AuthorCard
                       author={{
                         id: author.id,
@@ -607,7 +607,7 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
 
       {/* Full-width Related Articles Section */}
       {relatedPosts.length > 0 && categoryData && (
-        <section className="border-t py-12" style={{ borderColor: 'var(--border-color)', backgroundColor: 'var(--bg-surface)' }}>
+        <section className="border-t py-12" style={{ borderColor: 'var(--sm-border)', backgroundColor: 'var(--sm-surface)' }}>
           <div className="mx-auto max-w-7xl px-4">
             <RelatedArticles
               articles={relatedPosts.map(p => ({

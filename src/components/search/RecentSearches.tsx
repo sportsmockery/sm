@@ -67,9 +67,10 @@ export default function RecentSearches({
   return (
     <div className={className}>
       <div className="mb-3 flex items-center justify-between">
-        <h3 className="flex items-center gap-2 font-semibold text-zinc-900 dark:text-white">
+        <h3 className="flex items-center gap-2 font-semibold" style={{ color: 'var(--sm-text)' }}>
           <svg
-            className="h-4 w-4 text-zinc-500"
+            className="h-4 w-4"
+            style={{ color: 'var(--sm-text-muted)' }}
             fill="none"
             viewBox="0 0 24 24"
             strokeWidth={2}
@@ -85,7 +86,8 @@ export default function RecentSearches({
         </h3>
         <button
           onClick={handleClear}
-          className="text-sm text-zinc-500 hover:text-[#8B0000] dark:hover:text-[#FF6666]"
+          className="text-sm hover:text-[#8B0000] dark:hover:text-[#FF6666]"
+          style={{ color: 'var(--sm-text-muted)' }}
         >
           Clear all
         </button>
@@ -95,20 +97,23 @@ export default function RecentSearches({
         {searches.map((query) => (
           <div
             key={query}
-            className="group flex items-center gap-1 rounded-full border border-zinc-200 bg-white pl-3 pr-1 py-1.5 transition-colors hover:border-[#8B0000]/30 dark:border-zinc-700 dark:bg-zinc-800 dark:hover:border-[#FF6666]/30"
+            className="group flex items-center gap-1 rounded-full border pl-3 pr-1 py-1.5 transition-colors hover:border-[#8B0000]/30 dark:hover:border-[#FF6666]/30"
+            style={{ borderColor: 'var(--sm-border)', backgroundColor: 'var(--sm-card)' }}
           >
             {onSearchClick ? (
               <button
                 type="button"
                 onClick={() => onSearchClick(query)}
-                className="text-sm text-zinc-700 hover:text-[#8B0000] dark:text-zinc-300 dark:hover:text-[#FF6666] cursor-pointer"
+                className="text-sm hover:text-[#8B0000] dark:hover:text-[#FF6666] cursor-pointer"
+                style={{ color: 'var(--sm-text)' }}
               >
                 {query}
               </button>
             ) : (
               <Link
                 href={`/search?q=${encodeURIComponent(query)}`}
-                className="text-sm text-zinc-700 hover:text-[#8B0000] dark:text-zinc-300 dark:hover:text-[#FF6666] cursor-pointer"
+                className="text-sm hover:text-[#8B0000] dark:hover:text-[#FF6666] cursor-pointer"
+                style={{ color: 'var(--sm-text)' }}
               >
                 {query}
               </Link>
@@ -116,7 +121,8 @@ export default function RecentSearches({
             <button
               type="button"
               onClick={() => handleRemove(query)}
-              className="ml-1 flex h-5 w-5 items-center justify-center rounded-full text-zinc-400 opacity-0 transition-all hover:bg-zinc-100 hover:text-zinc-600 group-hover:opacity-100 dark:hover:bg-zinc-700 dark:hover:text-zinc-300 cursor-pointer"
+              className="ml-1 flex h-5 w-5 items-center justify-center rounded-full opacity-0 transition-all group-hover:opacity-100 cursor-pointer"
+              style={{ color: 'var(--sm-text-dim)' }}
               aria-label={`Remove "${query}" from recent searches`}
             >
               <svg

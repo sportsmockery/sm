@@ -48,8 +48,9 @@ export default function AuthorArticles({
             className={`rounded-full px-4 py-2 text-sm font-medium transition-colors ${
               !selectedCategory
                 ? 'bg-[#8B0000] text-white dark:bg-[#FF6666]'
-                : 'bg-zinc-100 text-zinc-700 hover:bg-zinc-200 dark:bg-zinc-800 dark:text-zinc-300 dark:hover:bg-zinc-700'
+                : ''
             }`}
+            style={selectedCategory ? { backgroundColor: 'var(--sm-surface)', color: 'var(--sm-text)' } : undefined}
           >
             All ({categories.reduce((sum, c) => sum + c.count, 0)})
           </a>
@@ -60,8 +61,9 @@ export default function AuthorArticles({
               className={`rounded-full px-4 py-2 text-sm font-medium transition-colors ${
                 selectedCategory === cat.slug
                   ? 'bg-[#8B0000] text-white dark:bg-[#FF6666]'
-                  : 'bg-zinc-100 text-zinc-700 hover:bg-zinc-200 dark:bg-zinc-800 dark:text-zinc-300 dark:hover:bg-zinc-700'
+                  : ''
               }`}
+              style={selectedCategory !== cat.slug ? { backgroundColor: 'var(--sm-surface)', color: 'var(--sm-text)' } : undefined}
             >
               {cat.name} ({cat.count})
             </a>
@@ -100,8 +102,8 @@ export default function AuthorArticles({
           />
         </>
       ) : (
-        <div className="rounded-2xl border border-dashed border-zinc-300 bg-zinc-50 p-12 text-center dark:border-zinc-700 dark:bg-zinc-900/50">
-          <p className="text-zinc-500 dark:text-zinc-400">
+        <div className="rounded-2xl border border-dashed p-12 text-center" style={{ borderColor: 'var(--sm-border)', backgroundColor: 'var(--sm-card)' }}>
+          <p style={{ color: 'var(--sm-text-muted)' }}>
             No articles found in this category.
           </p>
         </div>

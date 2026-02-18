@@ -69,12 +69,12 @@ export default function ARQuickLookButton({ team, className = '' }: ARQuickLookB
   }
 
   return (
-    <div className={`bg-zinc-900 dark:bg-zinc-950 p-4 border border-zinc-800 ${className}`}>
-      <h3 className={`text-white text-lg mb-2 ${montserrat.className}`}>
+    <div className={`p-4 ${className}`} style={{ backgroundColor: 'var(--sm-surface)', border: '1px solid var(--sm-border)' }}>
+      <h3 className={`text-lg mb-2 ${montserrat.className}`} style={{ color: 'var(--sm-text)' }}>
         AR Stadium Tour
       </h3>
 
-      <p className="text-zinc-400 text-sm mb-4 font-serif">
+      <p className="text-sm mb-4 font-serif" style={{ color: 'var(--sm-text-muted)' }}>
         Place {config.name} in your room using AR!
       </p>
 
@@ -121,12 +121,12 @@ export default function ARQuickLookButton({ team, className = '' }: ARQuickLookB
       </a>
 
       {/* Fallback note */}
-      <p className="text-zinc-500 text-xs mt-3 text-center">
+      <p className="text-xs mt-3 text-center" style={{ color: 'var(--sm-text-muted)' }}>
         Best on iPhone (Safari) – place the stadium in your room!
       </p>
 
       {/* Device compatibility note */}
-      <p className="text-zinc-600 text-[10px] mt-2 text-center">
+      <p className="text-[10px] mt-2 text-center" style={{ color: 'var(--sm-text-muted)' }}>
         Requires iPhone 6s+ with iOS 12+ and Safari
       </p>
     </div>

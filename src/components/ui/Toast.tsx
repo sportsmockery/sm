@@ -158,10 +158,10 @@ function ToastItem({
       role="alert"
     >
       <span className={colors[toast.type].icon}>{icons[toast.type]}</span>
-      <p className="flex-1 text-sm text-[var(--text-primary)]">{toast.message}</p>
+      <p className="flex-1 text-sm text-[var(--sm-text)]">{toast.message}</p>
       <button
         onClick={() => onDismiss(toast.id)}
-        className="text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-colors p-1"
+        className="text-[var(--sm-text-muted)] hover:text-[var(--sm-text)] transition-colors p-1"
         aria-label="Dismiss"
       >
         <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">

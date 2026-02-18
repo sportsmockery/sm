@@ -141,8 +141,8 @@ export function WeatherWidgetCompact({ className = '' }: WeatherWidgetProps) {
     <div className={`flex items-center gap-2 rounded-lg bg-blue-500/10 px-3 py-2 ${className}`}>
       <span className="text-lg">⛅</span>
       <div>
-        <span className="text-sm font-semibold text-zinc-900 dark:text-white">28°F</span>
-        <span className="ml-1 text-xs text-zinc-500 dark:text-zinc-400">Chicago</span>
+        <span className="text-sm font-semibold" style={{ color: 'var(--sm-text)' }}>28°F</span>
+        <span className="ml-1 text-xs" style={{ color: 'var(--sm-text-muted)' }}>Chicago</span>
       </div>
     </div>
   )

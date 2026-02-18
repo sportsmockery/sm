@@ -23,9 +23,10 @@ export default function AuthorPopular({ articles, className = '' }: AuthorPopula
 
   return (
     <section
-      className={`rounded-2xl border border-zinc-200 bg-white p-6 dark:border-zinc-800 dark:bg-zinc-900 ${className}`}
+      className={`rounded-2xl border p-6 ${className}`}
+      style={{ borderColor: 'var(--sm-border)', backgroundColor: 'var(--sm-card)' }}
     >
-      <h2 className="mb-4 flex items-center gap-2 font-heading text-lg font-bold text-zinc-900 dark:text-white">
+      <h2 className="mb-4 flex items-center gap-2 font-heading text-lg font-bold" style={{ color: 'var(--sm-text)' }}>
         <svg
           className="h-5 w-5 text-[#8B0000] dark:text-[#FF6666]"
           fill="none"
@@ -58,17 +59,18 @@ export default function AuthorPopular({ articles, className = '' }: AuthorPopula
                     ? 'bg-zinc-400 text-white'
                     : index === 2
                     ? 'bg-amber-700 text-white'
-                    : 'bg-zinc-200 text-zinc-600 dark:bg-zinc-700 dark:text-zinc-300'
+                    : ''
                 }`}
+                style={index > 2 ? { backgroundColor: 'var(--sm-surface)', color: 'var(--sm-text)' } : undefined}
               >
                 {index + 1}
               </span>
 
               <div className="min-w-0 flex-1">
-                <h4 className="line-clamp-2 text-sm font-semibold text-zinc-900 transition-colors group-hover:text-[#8B0000] dark:text-white dark:group-hover:text-[#FF6666]">
+                <h4 className="line-clamp-2 text-sm font-semibold transition-colors group-hover:text-[#8B0000] dark:group-hover:text-[#FF6666]" style={{ color: 'var(--sm-text)' }}>
                   {article.title}
                 </h4>
-                <div className="mt-1 flex items-center gap-2 text-xs text-zinc-500 dark:text-zinc-400">
+                <div className="mt-1 flex items-center gap-2 text-xs" style={{ color: 'var(--sm-text-muted)' }}>
                   <span>{article.views.toLocaleString()} views</span>
                   <span>•</span>
                   <time dateTime={article.published_at}>

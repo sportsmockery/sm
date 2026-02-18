@@ -152,7 +152,7 @@ export const AnimatedScatterChart = memo(function AnimatedScatterChart({
         .attr('x2', innerWidth)
         .attr('y1', yScale(tick))
         .attr('y2', yScale(tick))
-        .attr('stroke', 'var(--border-default, #e0e0e0)')
+        .attr('stroke', 'var(--sm-border, #e0e0e0)')
         .attr('stroke-opacity', 0.3)
         .attr('stroke-dasharray', '3,3')
     })
@@ -164,7 +164,7 @@ export const AnimatedScatterChart = memo(function AnimatedScatterChart({
         .attr('x2', xScale(tick))
         .attr('y1', 0)
         .attr('y2', innerHeight)
-        .attr('stroke', 'var(--border-default, #e0e0e0)')
+        .attr('stroke', 'var(--sm-border, #e0e0e0)')
         .attr('stroke-opacity', 0.3)
         .attr('stroke-dasharray', '3,3')
     })
@@ -182,10 +182,10 @@ export const AnimatedScatterChart = memo(function AnimatedScatterChart({
     xAxisGroup
       .selectAll('text')
       .style('font-size', '12px')
-      .style('fill', 'var(--text-muted, #666)')
+      .style('fill', 'var(--sm-text-muted, #666)')
 
-    xAxisGroup.selectAll('line').style('stroke', 'var(--border-default, #e0e0e0)')
-    xAxisGroup.selectAll('path').style('stroke', 'var(--border-default, #e0e0e0)')
+    xAxisGroup.selectAll('line').style('stroke', 'var(--sm-border, #e0e0e0)')
+    xAxisGroup.selectAll('path').style('stroke', 'var(--sm-border, #e0e0e0)')
 
     // Y Axis
     const yAxis = d3
@@ -201,10 +201,10 @@ export const AnimatedScatterChart = memo(function AnimatedScatterChart({
 
     yAxisGroup.selectAll('text')
       .style('font-size', '12px')
-      .style('fill', 'var(--text-muted, #666)')
+      .style('fill', 'var(--sm-text-muted, #666)')
 
-    yAxisGroup.selectAll('line').style('stroke', 'var(--border-default, #e0e0e0)')
-    yAxisGroup.selectAll('path').style('stroke', 'var(--border-default, #e0e0e0)')
+    yAxisGroup.selectAll('line').style('stroke', 'var(--sm-border, #e0e0e0)')
+    yAxisGroup.selectAll('path').style('stroke', 'var(--sm-border, #e0e0e0)')
 
     // Axis labels
     g.select('.x-axis-label')
@@ -213,7 +213,7 @@ export const AnimatedScatterChart = memo(function AnimatedScatterChart({
       .attr('text-anchor', 'middle')
       .style('font-size', '14px')
       .style('font-weight', '600')
-      .style('fill', 'var(--text-primary, #222)')
+      .style('fill', 'var(--sm-text, #222)')
       .text(axes?.x?.label || '')
 
     g.select('.y-axis-label')
@@ -223,7 +223,7 @@ export const AnimatedScatterChart = memo(function AnimatedScatterChart({
       .attr('text-anchor', 'middle')
       .style('font-size', '14px')
       .style('font-weight', '600')
-      .style('fill', 'var(--text-primary, #222)')
+      .style('fill', 'var(--sm-text, #222)')
       .text(axes?.y?.label || '')
 
     // Trend line (linear regression)
@@ -287,7 +287,7 @@ export const AnimatedScatterChart = memo(function AnimatedScatterChart({
       .attr('cy', innerHeight)
       .attr('r', 0)
       .attr('fill', (d, i) => d.color || (i % 2 === 0 ? colors.primary : colors.secondary))
-      .attr('stroke', 'var(--bg-card, #fff)')
+      .attr('stroke', 'var(--sm-card, #fff)')
       .attr('stroke-width', 2)
       .style('cursor', 'pointer')
 
@@ -366,8 +366,8 @@ export const AnimatedScatterChart = memo(function AnimatedScatterChart({
     tooltip.className = 'chart-tooltip'
     tooltip.style.cssText = `
       position: fixed;
-      background: var(--bg-card, #fff);
-      border: 1px solid var(--border-default, #e0e0e0);
+      background: var(--sm-card, #fff);
+      border: 1px solid var(--sm-border, #e0e0e0);
       border-radius: 8px;
       padding: 12px 16px;
       box-shadow: 0 10px 25px -5px rgba(0,0,0,0.1), 0 10px 10px -5px rgba(0,0,0,0.04);
@@ -380,20 +380,20 @@ export const AnimatedScatterChart = memo(function AnimatedScatterChart({
     `
 
     const contextHtml = d.metadata?.context
-      ? `<div style="color: var(--text-muted, #666); font-size: 12px; margin-top: 8px; padding-top: 8px; border-top: 1px solid var(--border-default, #e0e0e0);">${d.metadata.context}</div>`
+      ? `<div style="color: var(--sm-text-muted, #666); font-size: 12px; margin-top: 8px; padding-top: 8px; border-top: 1px solid var(--sm-border, #e0e0e0);">${d.metadata.context}</div>`
       : ''
 
     const statTypeHtml = d.metadata?.statType
-      ? `<div style="color: var(--text-muted, #666); font-size: 11px; margin-top: 4px;">Type: ${d.metadata.statType}</div>`
+      ? `<div style="color: var(--sm-text-muted, #666); font-size: 11px; margin-top: 4px;">Type: ${d.metadata.statType}</div>`
       : ''
 
     tooltip.innerHTML = `
-      <div style="font-weight: 600; margin-bottom: 4px; color: var(--text-primary, #222);">${d.label}</div>
-      <div style="color: var(--text-secondary, #666); font-size: 13px;">
-        ${axes?.x?.label || 'X'}: <strong style="color: var(--text-primary, #222);">${d.x}</strong>
+      <div style="font-weight: 600; margin-bottom: 4px; color: var(--sm-text, #222);">${d.label}</div>
+      <div style="color: var(--sm-text-dim, #666); font-size: 13px;">
+        ${axes?.x?.label || 'X'}: <strong style="color: var(--sm-text, #222);">${d.x}</strong>
       </div>
-      <div style="color: var(--text-secondary, #666); font-size: 13px;">
-        ${axes?.y?.label || 'Y'}: <strong style="color: var(--text-primary, #222);">${formatValue(d.value, axes?.y?.format)}</strong>
+      <div style="color: var(--sm-text-dim, #666); font-size: 13px;">
+        ${axes?.y?.label || 'Y'}: <strong style="color: var(--sm-text, #222);">${formatValue(d.value, axes?.y?.format)}</strong>
       </div>
       ${statTypeHtml}
       ${contextHtml}
@@ -441,7 +441,7 @@ export const AnimatedScatterChart = memo(function AnimatedScatterChart({
 
   if (!data || data.length < 2) {
     return (
-      <div className="flex items-center justify-center h-64 text-center" style={{ color: 'var(--text-muted, #666)' }}>
+      <div className="flex items-center justify-center h-64 text-center" style={{ color: 'var(--sm-text-muted, #666)' }}>
         <div>
           <svg className="w-12 h-12 mx-auto mb-3 opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <circle cx="6" cy="18" r="2" strokeWidth={1.5} />

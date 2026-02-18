@@ -45,14 +45,16 @@ export default function UpcomingGames({
 
   return (
     <section
-      className={`bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 ${className}`}
+      className={`border ${className}`}
+      style={{ backgroundColor: 'var(--sm-card)', borderColor: 'var(--sm-border)' }}
       aria-labelledby="upcoming-games-title"
     >
       {/* Header */}
-      <header className="px-4 py-3 border-b border-red-600 bg-zinc-50 dark:bg-zinc-900">
+      <header className="px-4 py-3 border-b border-red-600" style={{ backgroundColor: 'var(--sm-surface)' }}>
         <h2
           id="upcoming-games-title"
-          className={`text-lg text-black dark:text-white uppercase tracking-wide ${montserrat.className}`}
+          className={`text-lg uppercase tracking-wide ${montserrat.className}`}
+          style={{ color: 'var(--sm-text)' }}
         >
           {title}
         </h2>
@@ -69,14 +71,14 @@ export default function UpcomingGames({
               <th>Prediction</th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-zinc-100 dark:divide-zinc-800">
+          <tbody className="divide-y" style={{ borderColor: 'var(--sm-border)' }}>
             {games.map((game, index) => (
               <motion.tr
                 key={game.id}
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 transition={{ delay: index * 0.05 }}
-                className="hover:bg-zinc-50 dark:hover:bg-zinc-900 transition-colors"
+                className="transition-colors hover:opacity-80"
               >
                 {/* Teams */}
                 <td className="px-4 py-3">
@@ -92,11 +94,11 @@ export default function UpcomingGames({
                           className="w-6 h-6 object-contain"
                         />
                       )}
-                      <span className={`font-bold text-black dark:text-white ${montserrat.className}`}>
+                      <span className={`font-bold ${montserrat.className}`} style={{ color: 'var(--sm-text)' }}>
                         {game.team}
                       </span>
                     </div>
-                    <span className="text-zinc-400">vs</span>
+                    <span style={{ color: 'var(--sm-text-muted)' }}>vs</span>
                     <div className="flex items-center gap-1">
                       {game.opponentLogo && (
                         <Image
@@ -107,22 +109,22 @@ export default function UpcomingGames({
                           className="w-6 h-6 object-contain"
                         />
                       )}
-                      <span className="text-black dark:text-white">{game.opponent}</span>
+                      <span style={{ color: 'var(--sm-text)' }}>{game.opponent}</span>
                     </div>
                   </div>
                 </td>
 
                 {/* Date/Time */}
                 <td className="px-4 py-3 whitespace-nowrap">
-                  <div className="text-black dark:text-white">{formatDate(game.date)}</div>
-                  <div className="text-xs text-zinc-500">{game.time}</div>
+                  <div style={{ color: 'var(--sm-text)' }}>{formatDate(game.date)}</div>
+                  <div className="text-xs" style={{ color: 'var(--sm-text-muted)' }}>{game.time}</div>
                 </td>
 
                 {/* Venue & broadcast */}
                 <td className="px-4 py-3 hidden md:table-cell">
-                  <div className="text-zinc-600 dark:text-zinc-400">{game.venue}</div>
+                  <div style={{ color: 'var(--sm-text-muted)' }}>{game.venue}</div>
                   {game.broadcast && (
-                    <div className="text-xs text-zinc-500">{game.broadcast}</div>
+                    <div className="text-xs" style={{ color: 'var(--sm-text-muted)' }}>{game.broadcast}</div>
                   )}
                 </td>
 
@@ -141,7 +143,7 @@ export default function UpcomingGames({
       </div>
 
       {/* View all link */}
-      <div className="px-4 py-3 border-t border-zinc-100 dark:border-zinc-800">
+      <div className="px-4 py-3 border-t" style={{ borderColor: 'var(--sm-border)' }}>
         <Link
           href="/chicago-bears/schedule"
           className="text-sm text-red-600 font-bold hover:underline focus:outline-none focus:underline"

@@ -27,7 +27,7 @@ export default function PopularSearches({
 }: PopularSearchesProps) {
   return (
     <div className={className}>
-      <h3 className="mb-3 flex items-center gap-2 font-semibold text-zinc-900 dark:text-white">
+      <h3 className="mb-3 flex items-center gap-2 font-semibold" style={{ color: 'var(--sm-text)' }}>
         <svg
           className="h-4 w-4 text-[#8B0000] dark:text-[#FF6666]"
           fill="none"
@@ -56,7 +56,8 @@ export default function PopularSearches({
               key={query}
               type="button"
               onClick={() => onSearchClick(query)}
-              className="inline-flex items-center gap-1.5 rounded-full border border-zinc-200 bg-white px-3 py-1.5 text-sm text-zinc-700 transition-all hover:border-[#8B0000]/30 hover:bg-[#8B0000]/5 hover:text-[#8B0000] dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-300 dark:hover:border-[#FF6666]/30 dark:hover:bg-[#FF6666]/5 dark:hover:text-[#FF6666] cursor-pointer"
+              className="inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-sm transition-all hover:border-[#8B0000]/30 hover:bg-[#8B0000]/5 hover:text-[#8B0000] dark:hover:border-[#FF6666]/30 dark:hover:bg-[#FF6666]/5 dark:hover:text-[#FF6666] cursor-pointer"
+              style={{ borderColor: 'var(--sm-border)', backgroundColor: 'var(--sm-card)', color: 'var(--sm-text)' }}
             >
               {index < 3 && (
                 <span className="text-[#8B0000] dark:text-[#FF6666]">🔥</span>
@@ -67,7 +68,8 @@ export default function PopularSearches({
             <Link
               key={query}
               href={`/search?q=${encodeURIComponent(query)}`}
-              className="inline-flex items-center gap-1.5 rounded-full border border-zinc-200 bg-white px-3 py-1.5 text-sm text-zinc-700 transition-all hover:border-[#8B0000]/30 hover:bg-[#8B0000]/5 hover:text-[#8B0000] dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-300 dark:hover:border-[#FF6666]/30 dark:hover:bg-[#FF6666]/5 dark:hover:text-[#FF6666] cursor-pointer"
+              className="inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-sm transition-all hover:border-[#8B0000]/30 hover:bg-[#8B0000]/5 hover:text-[#8B0000] dark:hover:border-[#FF6666]/30 dark:hover:bg-[#FF6666]/5 dark:hover:text-[#FF6666] cursor-pointer"
+              style={{ borderColor: 'var(--sm-border)', backgroundColor: 'var(--sm-card)', color: 'var(--sm-text)' }}
             >
               {index < 3 && (
                 <span className="text-[#8B0000] dark:text-[#FF6666]">🔥</span>

@@ -18,11 +18,11 @@ export default function RecentResultsWidget({ games, team, limit = 5 }: RecentRe
 
   if (recentGames.length === 0) {
     return (
-      <div className="rounded-xl border border-zinc-200 bg-white p-5 dark:border-zinc-800 dark:bg-zinc-900">
-        <h3 className="mb-4 text-sm font-bold uppercase tracking-wide text-zinc-900 dark:text-white">
+      <div className="rounded-xl border p-5" style={{ borderColor: 'var(--sm-border)', backgroundColor: 'var(--sm-card)' }}>
+        <h3 className="mb-4 text-sm font-bold uppercase tracking-wide" style={{ color: 'var(--sm-text)' }}>
           Recent Results
         </h3>
-        <p className="text-sm text-zinc-500 dark:text-zinc-400">No recent games.</p>
+        <p className="text-sm" style={{ color: 'var(--sm-text-muted)' }}>No recent games.</p>
       </div>
     );
   }
@@ -34,10 +34,10 @@ export default function RecentResultsWidget({ games, team, limit = 5 }: RecentRe
   };
 
   return (
-    <div className="rounded-xl border border-zinc-200 bg-white dark:border-zinc-800 dark:bg-zinc-900">
-      <div className="border-b border-zinc-200 px-5 py-4 dark:border-zinc-800">
+    <div className="rounded-xl border" style={{ borderColor: 'var(--sm-border)', backgroundColor: 'var(--sm-card)' }}>
+      <div className="border-b px-5 py-4" style={{ borderColor: 'var(--sm-border)' }}>
         <div className="flex items-center justify-between">
-          <h3 className="text-sm font-bold uppercase tracking-wide text-zinc-900 dark:text-white">
+          <h3 className="text-sm font-bold uppercase tracking-wide" style={{ color: 'var(--sm-text)' }}>
             Recent Results
           </h3>
           {/* Streak indicator */}
@@ -53,7 +53,7 @@ export default function RecentResultsWidget({ games, team, limit = 5 }: RecentRe
         </div>
       </div>
 
-      <div className="divide-y divide-zinc-100 dark:divide-zinc-800">
+      <div className="divide-y" style={{ '--tw-divide-color': 'var(--sm-border)' } as React.CSSProperties}>
         {recentGames.map((game) => {
           const opponent = game.isHome ? game.awayTeam : game.homeTeam;
           const teamScore = game.isHome ? game.homeScore : game.awayScore;
@@ -77,16 +77,16 @@ export default function RecentResultsWidget({ games, team, limit = 5 }: RecentRe
               </div>
 
               <div className="flex-1 min-w-0">
-                <p className="font-medium text-zinc-900 dark:text-white truncate">
+                <p className="font-medium truncate" style={{ color: 'var(--sm-text)' }}>
                   {game.isHome ? 'vs' : '@'} {opponent.shortName}
                 </p>
-                <p className="text-xs text-zinc-500 dark:text-zinc-400">
+                <p className="text-xs" style={{ color: 'var(--sm-text-muted)' }}>
                   {new Date(game.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
                 </p>
               </div>
 
               <div className="text-right">
-                <p className="font-bold text-zinc-900 dark:text-white">
+                <p className="font-bold" style={{ color: 'var(--sm-text)' }}>
                   {teamScore}-{oppScore}
                 </p>
               </div>
@@ -97,7 +97,8 @@ export default function RecentResultsWidget({ games, team, limit = 5 }: RecentRe
 
       <Link
         href={`/teams/${team.slug}/schedule`}
-        className="block border-t border-zinc-200 px-5 py-3 text-center text-sm font-semibold text-zinc-600 transition-colors hover:bg-zinc-50 hover:text-zinc-900 dark:border-zinc-800 dark:text-zinc-400 dark:hover:bg-zinc-800 dark:hover:text-white"
+        className="block border-t px-5 py-3 text-center text-sm font-semibold transition-colors"
+        style={{ borderColor: 'var(--sm-border)', color: 'var(--sm-text-muted)' }}
       >
         View Full Schedule →
       </Link>

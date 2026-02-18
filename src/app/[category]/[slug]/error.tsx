@@ -16,10 +16,10 @@ export default function ArticleError({
 
   return (
     <div className="max-w-4xl mx-auto px-4 py-16 text-center">
-      <h1 className="text-2xl font-bold text-zinc-900 dark:text-zinc-100 mb-4">
+      <h1 className="text-2xl font-bold mb-4" style={{ color: 'var(--sm-text)' }}>
         Couldn't load article
       </h1>
-      <p className="text-zinc-600 dark:text-zinc-400 mb-8">
+      <p className="mb-8" style={{ color: 'var(--sm-text-muted)' }}>
         We had trouble loading this article. It may have been moved or deleted.
       </p>
       <div className="flex gap-4 justify-center">
@@ -31,7 +31,8 @@ export default function ArticleError({
         </button>
         <Link
           href="/"
-          className="px-6 py-2 bg-zinc-200 hover:bg-zinc-300 dark:bg-zinc-800 dark:hover:bg-zinc-700 text-zinc-900 dark:text-zinc-100 font-medium rounded-lg transition-colors"
+          className="px-6 py-2 font-medium rounded-lg transition-colors"
+          style={{ backgroundColor: 'var(--sm-surface)', color: 'var(--sm-text)' }}
         >
           Go home
         </Link>

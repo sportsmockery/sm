@@ -61,15 +61,16 @@ export default function Header() {
     <header
       className={`sticky top-0 z-50 transition-all duration-300 ${
         isScrolled
-          ? 'bg-white/80 dark:bg-zinc-950/80 backdrop-blur-lg shadow-lg'
-          : 'bg-white dark:bg-zinc-950'
+          ? 'backdrop-blur-lg shadow-lg'
+          : ''
       }`}
+      style={{ backgroundColor: isScrolled ? 'color-mix(in srgb, var(--sm-card) 80%, transparent)' : 'var(--sm-card)' }}
     >
       {/* Red accent bar */}
       <div className="h-1 bg-gradient-to-r from-[#FF0000] via-[#8B0000] to-[#FF0000]" />
 
       {/* Trending ticker */}
-      <div className="bg-zinc-900 dark:bg-black overflow-hidden">
+      <div className="overflow-hidden" style={{ backgroundColor: 'var(--sm-surface)' }}>
         <div className="flex items-center">
           <div className="shrink-0 bg-[#8B0000] px-3 py-1">
             <span className="text-xs font-bold text-white uppercase tracking-wider">Trending</span>
@@ -79,7 +80,8 @@ export default function Header() {
               {[...trendingHeadlines, ...trendingHeadlines].map((headline, i) => (
                 <span
                   key={i}
-                  className="inline-block px-8 text-xs text-zinc-300 hover:text-white cursor-pointer transition-colors"
+                  className="inline-block px-8 text-xs cursor-pointer transition-colors"
+                  style={{ color: 'var(--sm-text-dim)' }}
                 >
                   {headline}
                   <span className="mx-8 text-[#8B0000]">•</span>
@@ -100,7 +102,7 @@ export default function Header() {
               <div className="absolute inset-0 rounded-xl bg-white opacity-0 group-hover:opacity-10 transition-opacity" />
             </div>
             <div className="hidden sm:flex flex-col">
-              <span className="text-xl font-black tracking-tight text-zinc-900 dark:text-white font-[var(--font-montserrat)] leading-none">
+              <span className="text-xl font-black tracking-tight font-[var(--font-montserrat)] leading-none" style={{ color: 'var(--sm-text)' }}>
                 SPORTS
               </span>
               <span className="text-xl font-black tracking-tight text-[#8B0000] font-[var(--font-montserrat)] leading-none">
@@ -115,7 +117,7 @@ export default function Header() {
             <div ref={dropdownRef} className="relative">
               <button
                 onClick={() => setTeamsDropdownOpen(!teamsDropdownOpen)}
-                className="flex items-center gap-1 px-4 py-2 text-sm font-semibold text-zinc-700 hover:text-zinc-900 dark:text-zinc-300 dark:hover:text-white transition-colors"
+                className="flex items-center gap-1 px-4 py-2 text-sm font-semibold text-[var(--sm-text-dim)] hover:text-[var(--sm-text)] transition-colors"
               >
                 Teams
                 <svg
@@ -129,19 +131,19 @@ export default function Header() {
               </button>
 
               {teamsDropdownOpen && (
-                <div className="absolute top-full left-0 mt-2 w-56 bg-white dark:bg-zinc-900 rounded-xl shadow-2xl border border-zinc-200 dark:border-zinc-800 overflow-hidden animate-scale-in">
+                <div className="absolute top-full left-0 mt-2 w-56 rounded-xl shadow-2xl overflow-hidden animate-scale-in" style={{ backgroundColor: 'var(--sm-card)', border: '1px solid var(--sm-border)' }}>
                   {navLinks.map((link) => (
                     <Link
                       key={link.href}
                       href={link.href}
-                      className="flex items-center gap-3 px-4 py-3 hover:bg-zinc-50 dark:hover:bg-zinc-800 transition-colors group"
+                      className="flex items-center gap-3 px-4 py-3 hover:bg-[var(--sm-card-hover)] transition-colors group"
                       onClick={() => setTeamsDropdownOpen(false)}
                     >
                       <span
                         className="w-3 h-3 rounded-full shadow-sm group-hover:scale-110 transition-transform"
                         style={{ backgroundColor: link.color }}
                       />
-                      <span className="font-medium text-zinc-700 dark:text-zinc-300 group-hover:text-zinc-900 dark:group-hover:text-white">
+                      <span className="font-medium" style={{ color: 'var(--sm-text-dim)' }}>
                         {link.name}
                       </span>
                     </Link>
@@ -152,14 +154,14 @@ export default function Header() {
 
             <Link
               href="/about"
-              className="px-4 py-2 text-sm font-semibold text-zinc-700 hover:text-zinc-900 dark:text-zinc-300 dark:hover:text-white transition-colors"
+              className="px-4 py-2 text-sm font-semibold text-[var(--sm-text-dim)] hover:text-[var(--sm-text)] transition-colors"
             >
               About
             </Link>
 
             <Link
               href="/contact"
-              className="px-4 py-2 text-sm font-semibold text-zinc-700 hover:text-zinc-900 dark:text-zinc-300 dark:hover:text-white transition-colors"
+              className="px-4 py-2 text-sm font-semibold text-[var(--sm-text-dim)] hover:text-[var(--sm-text)] transition-colors"
             >
               Contact
             </Link>
@@ -175,7 +177,8 @@ export default function Header() {
                   placeholder="Search articles..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-56 rounded-full border border-zinc-200 bg-zinc-50 px-4 py-2 text-sm placeholder:text-zinc-400 focus:border-[#8B0000] focus:outline-none focus:ring-2 focus:ring-[#8B0000]/20 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-100 transition-all"
+                  className="w-56 rounded-full px-4 py-2 text-sm placeholder:text-[var(--sm-text-muted)] focus:border-[#8B0000] focus:outline-none focus:ring-2 focus:ring-[#8B0000]/20 transition-all"
+                  style={{ border: '1px solid var(--sm-border)', backgroundColor: 'var(--sm-surface)', color: 'var(--sm-text)' }}
                 />
                 <button
                   type="submit"
@@ -191,7 +194,8 @@ export default function Header() {
 
             {/* User icon placeholder */}
             <button
-              className="hidden md:flex items-center justify-center w-10 h-10 rounded-full bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400 hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-colors"
+              className="hidden md:flex items-center justify-center w-10 h-10 rounded-full transition-colors"
+              style={{ backgroundColor: 'var(--sm-surface)', color: 'var(--sm-text-muted)' }}
               aria-label="User account"
             >
               <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -202,7 +206,8 @@ export default function Header() {
             {/* Mobile Menu Button */}
             <button
               type="button"
-              className="lg:hidden flex items-center justify-center w-10 h-10 rounded-full bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400"
+              className="lg:hidden flex items-center justify-center w-10 h-10 rounded-full"
+              style={{ backgroundColor: 'var(--sm-surface)', color: 'var(--sm-text-muted)' }}
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
               aria-label="Toggle menu"
             >
@@ -221,7 +226,7 @@ export default function Header() {
 
         {/* Mobile Navigation */}
         {mobileMenuOpen && (
-          <nav className="border-t border-zinc-200 py-4 lg:hidden dark:border-zinc-800 animate-slide-down">
+          <nav className="py-4 lg:hidden animate-slide-down" style={{ borderTop: '1px solid var(--sm-border)' }}>
             {/* Mobile Search */}
             <form onSubmit={handleSearch} className="mb-4">
               <div className="relative">
@@ -230,7 +235,8 @@ export default function Header() {
                   placeholder="Search articles..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full rounded-full border border-zinc-200 bg-zinc-50 px-4 py-3 text-sm placeholder:text-zinc-400 focus:border-[#8B0000] focus:outline-none focus:ring-2 focus:ring-[#8B0000]/20 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-100"
+                  className="w-full rounded-full px-4 py-3 text-sm placeholder:text-[var(--sm-text-muted)] focus:border-[#8B0000] focus:outline-none focus:ring-2 focus:ring-[#8B0000]/20"
+                  style={{ border: '1px solid var(--sm-border)', backgroundColor: 'var(--sm-surface)', color: 'var(--sm-text)' }}
                 />
                 <button
                   type="submit"
@@ -246,13 +252,13 @@ export default function Header() {
 
             {/* Teams section */}
             <div className="mb-4">
-              <h3 className="px-3 mb-2 text-xs font-bold text-zinc-400 uppercase tracking-wider">Teams</h3>
+              <h3 className="px-3 mb-2 text-xs font-bold uppercase tracking-wider" style={{ color: 'var(--sm-text-muted)' }}>Teams</h3>
               <div className="grid grid-cols-2 gap-2">
                 {navLinks.map((link) => (
                   <Link
                     key={link.href}
                     href={link.href}
-                    className="flex items-center gap-2 rounded-lg px-3 py-3 text-sm font-medium text-zinc-700 hover:bg-zinc-100 dark:text-zinc-300 dark:hover:bg-zinc-800 transition-colors"
+                    className="flex items-center gap-2 rounded-lg px-3 py-3 text-sm font-medium text-[var(--sm-text-dim)] hover:bg-[var(--sm-card-hover)] transition-colors"
                     onClick={() => setMobileMenuOpen(false)}
                   >
                     <span
@@ -266,17 +272,17 @@ export default function Header() {
             </div>
 
             {/* Other links */}
-            <div className="border-t border-zinc-200 dark:border-zinc-800 pt-4">
+            <div className="pt-4" style={{ borderTop: '1px solid var(--sm-border)' }}>
               <Link
                 href="/about"
-                className="block rounded-lg px-3 py-3 text-sm font-medium text-zinc-700 hover:bg-zinc-100 dark:text-zinc-300 dark:hover:bg-zinc-800"
+                className="block rounded-lg px-3 py-3 text-sm font-medium text-[var(--sm-text-dim)] hover:bg-[var(--sm-card-hover)]"
                 onClick={() => setMobileMenuOpen(false)}
               >
                 About
               </Link>
               <Link
                 href="/contact"
-                className="block rounded-lg px-3 py-3 text-sm font-medium text-zinc-700 hover:bg-zinc-100 dark:text-zinc-300 dark:hover:bg-zinc-800"
+                className="block rounded-lg px-3 py-3 text-sm font-medium text-[var(--sm-text-dim)] hover:bg-[var(--sm-card-hover)]"
                 onClick={() => setMobileMenuOpen(false)}
               >
                 Contact

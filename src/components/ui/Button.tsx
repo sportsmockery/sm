@@ -34,9 +34,9 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
       primary:
         'bg-[var(--accent-red)] text-white hover:bg-[var(--accent-red-hover)] focus-visible:ring-red-500 hover:shadow-[0_0_20px_rgba(255,0,0,0.3)]',
       secondary:
-        'bg-[var(--bg-tertiary)] text-[var(--text-primary)] border border-[var(--border-default)] hover:bg-[var(--bg-hover)] hover:border-[var(--border-strong)] focus-visible:ring-zinc-400',
+        'bg-[var(--sm-surface)] text-[var(--sm-text)] border border-[var(--border-default)] hover:bg-[var(--sm-card-hover)] hover:border-[var(--border-strong)] focus-visible:ring-zinc-400',
       ghost:
-        'bg-transparent text-[var(--text-secondary)] hover:bg-[var(--bg-hover)] hover:text-[var(--text-primary)] focus-visible:ring-zinc-400',
+        'bg-transparent text-[var(--sm-text-dim)] hover:bg-[var(--sm-card-hover)] hover:text-[var(--sm-text)] focus-visible:ring-zinc-400',
       danger:
         'bg-transparent text-[var(--error)] border border-[var(--error)] hover:bg-[var(--error)] hover:text-white focus-visible:ring-red-500',
       link: 'bg-transparent text-[var(--accent-red)] hover:underline p-0 h-auto focus-visible:ring-red-500',

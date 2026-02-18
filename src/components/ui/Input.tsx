@@ -29,7 +29,7 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
     const inputId = id || label?.toLowerCase().replace(/\s+/g, '-')
 
     const baseClasses =
-      'w-full h-[42px] px-4 bg-[var(--bg-tertiary)] border border-[var(--border-default)] rounded-lg text-[var(--text-primary)] text-sm font-sans transition-all duration-200 placeholder:text-[var(--text-muted)] hover:border-[var(--border-strong)] focus:outline-none focus:border-[var(--accent-red)] focus:ring-2 focus:ring-[var(--accent-red-glow)] disabled:opacity-50 disabled:cursor-not-allowed'
+      'w-full h-[42px] px-4 bg-[var(--sm-surface)] border border-[var(--border-default)] rounded-lg text-[var(--sm-text)] text-sm font-sans transition-all duration-200 placeholder:text-[var(--sm-text-muted)] hover:border-[var(--border-strong)] focus:outline-none focus:border-[var(--accent-red)] focus:ring-2 focus:ring-[var(--accent-red-glow)] disabled:opacity-50 disabled:cursor-not-allowed'
 
     const errorClasses = error
       ? 'border-[var(--error)] focus:border-[var(--error)] focus:ring-red-500/20'
@@ -46,7 +46,7 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
         {label && (
           <label
             htmlFor={inputId}
-            className="block text-sm font-medium text-[var(--text-secondary)] mb-2"
+            className="block text-sm font-medium text-[var(--sm-text-dim)] mb-2"
           >
             {label}
             {required && <span className="text-[var(--error)] ml-1">*</span>}
@@ -55,7 +55,7 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
 
         <div className="relative">
           {icon && iconPosition === 'left' && (
-            <div className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--text-muted)]">
+            <div className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--sm-text-muted)]">
               {icon}
             </div>
           )}
@@ -68,7 +68,7 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
           />
 
           {icon && iconPosition === 'right' && (
-            <div className="absolute right-3 top-1/2 -translate-y-1/2 text-[var(--text-muted)]">
+            <div className="absolute right-3 top-1/2 -translate-y-1/2 text-[var(--sm-text-muted)]">
               {icon}
             </div>
           )}
@@ -76,7 +76,7 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
 
         {(error || helper) && (
           <p
-            className={`text-xs mt-1 ${error ? 'text-[var(--error)]' : 'text-[var(--text-muted)]'}`}
+            className={`text-xs mt-1 ${error ? 'text-[var(--error)]' : 'text-[var(--sm-text-muted)]'}`}
           >
             {error || helper}
           </p>

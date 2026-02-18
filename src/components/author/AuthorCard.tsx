@@ -25,14 +25,15 @@ export default function AuthorCard({
   return (
     <Link
       href={authorUrl}
-      className={`group relative flex flex-col items-center overflow-hidden rounded-2xl border border-zinc-200 bg-white p-6 text-center transition-all duration-300 hover:-translate-y-1 hover:border-[#8B0000]/30 hover:shadow-lg hover:shadow-[#8B0000]/10 dark:border-zinc-800 dark:bg-zinc-900 dark:hover:border-[#FF6666]/30 dark:hover:shadow-[#FF6666]/10 ${className}`}
+      className={`group relative flex flex-col items-center overflow-hidden rounded-2xl border p-6 text-center transition-all duration-300 hover:-translate-y-1 hover:border-[#8B0000]/30 hover:shadow-lg hover:shadow-[#8B0000]/10 dark:hover:border-[#FF6666]/30 dark:hover:shadow-[#FF6666]/10 ${className}`}
+      style={{ borderColor: 'var(--sm-border)', backgroundColor: 'var(--sm-card)' }}
     >
       {/* Background gradient on hover */}
       <div className="absolute inset-0 bg-gradient-to-b from-[#8B0000]/5 to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100 dark:from-[#FF6666]/5" />
 
       {/* Avatar */}
       <div className="relative mb-4">
-        <div className="relative h-24 w-24 overflow-hidden rounded-full ring-4 ring-zinc-100 transition-all duration-300 group-hover:ring-[#8B0000]/20 dark:ring-zinc-800 dark:group-hover:ring-[#FF6666]/20">
+        <div className="relative h-24 w-24 overflow-hidden rounded-full ring-4 transition-all duration-300 group-hover:ring-[#8B0000]/20 dark:group-hover:ring-[#FF6666]/20" style={{ '--tw-ring-color': 'var(--sm-border)' } as React.CSSProperties}>
           {avatar_url ? (
             <Image
               src={avatar_url}
@@ -48,28 +49,28 @@ export default function AuthorCard({
         </div>
 
         {/* Online indicator */}
-        <div className="absolute bottom-0 right-0 h-5 w-5 rounded-full border-3 border-white bg-green-500 dark:border-zinc-900" />
+        <div className="absolute bottom-0 right-0 h-5 w-5 rounded-full border-3 bg-green-500" style={{ borderColor: 'var(--sm-card)' }} />
       </div>
 
       {/* Name */}
-      <h3 className="relative mb-1 font-heading text-lg font-bold text-zinc-900 transition-colors group-hover:text-[#8B0000] dark:text-white dark:group-hover:text-[#FF6666]">
+      <h3 className="relative mb-1 font-heading text-lg font-bold transition-colors group-hover:text-[#8B0000] dark:group-hover:text-[#FF6666]" style={{ color: 'var(--sm-text)' }}>
         {name}
       </h3>
 
       {/* Post count */}
-      <p className="relative mb-3 text-sm text-zinc-500 dark:text-zinc-400">
+      <p className="relative mb-3 text-sm" style={{ color: 'var(--sm-text-muted)' }}>
         {post_count} {post_count === 1 ? 'article' : 'articles'}
       </p>
 
       {/* Bio snippet */}
       {bio && (
-        <p className="relative mb-4 line-clamp-2 text-sm text-zinc-600 dark:text-zinc-400">
+        <p className="relative mb-4 line-clamp-2 text-sm" style={{ color: 'var(--sm-text-muted)' }}>
           {bio}
         </p>
       )}
 
       {/* View profile button */}
-      <span className="relative mt-auto inline-flex items-center gap-1 rounded-full bg-zinc-100 px-4 py-2 text-sm font-medium text-zinc-700 transition-all duration-300 group-hover:bg-[#8B0000] group-hover:text-white dark:bg-zinc-800 dark:text-zinc-300 dark:group-hover:bg-[#FF6666] dark:group-hover:text-white">
+      <span className="relative mt-auto inline-flex items-center gap-1 rounded-full px-4 py-2 text-sm font-medium transition-all duration-300 group-hover:bg-[#8B0000] group-hover:text-white dark:group-hover:bg-[#FF6666] dark:group-hover:text-white" style={{ backgroundColor: 'var(--sm-surface)', color: 'var(--sm-text)' }}>
         View Profile
         <svg
           className="h-4 w-4 transition-transform duration-300 group-hover:translate-x-1"

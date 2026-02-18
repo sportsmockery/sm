@@ -43,14 +43,16 @@ export default function TrendingSidebar({
 
   return (
     <aside
-      className={`bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 ${className}`}
+      className={`border ${className}`}
+      style={{ backgroundColor: 'var(--sm-card)', borderColor: 'var(--sm-border)' }}
       aria-labelledby="trending-sidebar-title"
     >
       {/* Header */}
-      <header className="px-4 py-3 border-b border-red-600 bg-zinc-50 dark:bg-zinc-900">
+      <header className="px-4 py-3 border-b border-red-600" style={{ backgroundColor: 'var(--sm-surface)' }}>
         <h2
           id="trending-sidebar-title"
-          className={`text-lg text-black dark:text-white uppercase tracking-wide flex items-center gap-2 ${montserrat.className}`}
+          className={`text-lg uppercase tracking-wide flex items-center gap-2 ${montserrat.className}`}
+          style={{ color: 'var(--sm-text)' }}
         >
           <span className="text-red-600">🔥</span>
           {title}
@@ -58,7 +60,7 @@ export default function TrendingSidebar({
       </header>
 
       {/* Trending list */}
-      <ul className="divide-y divide-zinc-100 dark:divide-zinc-800" role="list">
+      <ul className="divide-y" style={{ borderColor: 'var(--sm-border)' }} role="list">
         {items.map((item, index) => (
           <motion.li
             key={item.id}
@@ -68,7 +70,7 @@ export default function TrendingSidebar({
           >
             <Link
               href={`/${item.category.slug}/${item.slug}`}
-              className="block p-4 hover:bg-zinc-50 dark:hover:bg-zinc-900 transition-colors focus:outline-none focus:ring-2 focus:ring-inset focus:ring-red-600 group"
+              className="block p-4 transition-colors focus:outline-none focus:ring-2 focus:ring-inset focus:ring-red-600 group hover:opacity-80"
             >
               {/* Category and mockery score */}
               <div className="flex items-center justify-between mb-1">
@@ -91,13 +93,13 @@ export default function TrendingSidebar({
               </div>
 
               {/* Title */}
-              <h3 className="text-sm text-black dark:text-white font-medium leading-snug group-hover:text-red-600 dark:group-hover:text-red-500 transition-colors line-clamp-2">
+              <h3 className="text-sm font-medium leading-snug group-hover:text-red-600 transition-colors line-clamp-2" style={{ color: 'var(--sm-text)' }}>
                 {item.title}
               </h3>
 
               {/* Views */}
               {item.views && (
-                <div className="mt-2 text-xs text-zinc-500 dark:text-zinc-500 flex items-center gap-1">
+                <div className="mt-2 text-xs flex items-center gap-1" style={{ color: 'var(--sm-text-muted)' }}>
                   <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
                     <path d="M10 12a2 2 0 100-4 2 2 0 000 4z" />
                     <path

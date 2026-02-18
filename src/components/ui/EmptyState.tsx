@@ -60,9 +60,10 @@ export default function EmptyState({
   return (
     <div className={`py-12 text-center ${className}`}>
       {/* Icon */}
-      <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-zinc-100 dark:bg-zinc-800">
+      <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full" style={{ backgroundColor: 'var(--sm-surface)' }}>
         <svg
-          className="h-8 w-8 text-zinc-400 dark:text-zinc-500"
+          className="h-8 w-8"
+          style={{ color: 'var(--sm-text-muted)' }}
           fill="none"
           viewBox="0 0 24 24"
           strokeWidth={1.5}
@@ -73,13 +74,13 @@ export default function EmptyState({
       </div>
 
       {/* Title */}
-      <h3 className="mb-2 font-semibold text-zinc-900 dark:text-white">
+      <h3 className="mb-2 font-semibold" style={{ color: 'var(--sm-text)' }}>
         {title}
       </h3>
 
       {/* Description */}
       {description && (
-        <p className="mb-6 text-sm text-zinc-500 dark:text-zinc-400 max-w-sm mx-auto">
+        <p className="mb-6 text-sm max-w-sm mx-auto" style={{ color: 'var(--sm-text-muted)' }}>
           {description}
         </p>
       )}

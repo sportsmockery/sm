@@ -35,7 +35,7 @@ export default function ArticleGrid({ articles, columns = 2, className = '' }: A
         <article key={article.id} className="group">
           <Link href={`/${article.category.slug}/${article.slug}`}>
             {/* Image */}
-            <div className="relative aspect-[16/10] overflow-hidden rounded-lg bg-zinc-100 dark:bg-zinc-800 mb-3">
+            <div className="relative aspect-[16/10] overflow-hidden rounded-lg mb-3" style={{ backgroundColor: 'var(--sm-surface)' }}>
               {article.featured_image ? (
                 <Image
                   src={article.featured_image}
@@ -63,24 +63,24 @@ export default function ArticleGrid({ articles, columns = 2, className = '' }: A
             </div>
 
             {/* Category */}
-            <span className="text-xs font-semibold uppercase tracking-wide text-[#8B0000] dark:text-[#FF6666]">
+            <span className="text-xs font-semibold uppercase tracking-wide" style={{ color: '#8B0000' }}>
               {article.category.name}
             </span>
 
             {/* Title */}
-            <h3 className="mt-1 text-base font-bold leading-tight text-zinc-900 dark:text-white group-hover:text-[#8B0000] dark:group-hover:text-[#FF6666] transition-colors line-clamp-2">
+            <h3 className="mt-1 text-base font-bold leading-tight transition-colors line-clamp-2" style={{ color: 'var(--sm-text)' }}>
               {article.title}
             </h3>
 
             {/* Excerpt */}
             {article.excerpt && (
-              <p className="mt-2 text-sm text-zinc-600 dark:text-zinc-400 line-clamp-2">
+              <p className="mt-2 text-sm line-clamp-2" style={{ color: 'var(--sm-text-muted)' }}>
                 {article.excerpt}
               </p>
             )}
 
             {/* Meta */}
-            <div className="mt-2 flex items-center gap-2 text-xs text-zinc-500 dark:text-zinc-500">
+            <div className="mt-2 flex items-center gap-2 text-xs" style={{ color: 'var(--sm-text-muted)' }}>
               {article.author && <span>{article.author.name}</span>}
               {article.author && <span>·</span>}
               <time dateTime={article.published_at}>

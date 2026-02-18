@@ -15,7 +15,7 @@ export default function ArticleTags({ tags }: ArticleTagsProps) {
 
   return (
     <div className="flex flex-wrap items-center gap-2">
-      <span className="text-sm font-medium text-zinc-500 dark:text-zinc-400">Tags:</span>
+      <span className="text-sm font-medium" style={{ color: 'var(--sm-text-muted)' }}>Tags:</span>
       {tags.map((tag) => (
         <Link
           key={tag.id}

@@ -77,13 +77,14 @@ export default function OracleScoresBar({ className = '' }: OracleScoresBarProps
   if (loading) {
     return (
       <div
-        className={`sticky top-0 z-50 bg-white dark:bg-zinc-950 border-b border-red-600 p-2 ${className}`}
+        className={`sticky top-0 z-50 border-b border-red-600 p-2 ${className}`}
+        style={{ backgroundColor: 'var(--sm-card)' }}
         role="region"
         aria-label="Loading scores"
       >
         <div className="flex gap-4 overflow-x-auto">
           {[1, 2, 3, 4].map((i) => (
-            <div key={i} className="flex-shrink-0 w-40 h-8 bg-zinc-200 dark:bg-zinc-800 rounded animate-pulse" />
+            <div key={i} className="flex-shrink-0 w-40 h-8 rounded animate-pulse" style={{ backgroundColor: 'var(--sm-surface)' }} />
           ))}
         </div>
       </div>
@@ -92,13 +93,15 @@ export default function OracleScoresBar({ className = '' }: OracleScoresBarProps
 
   return (
     <div
-      className={`sticky top-0 z-50 bg-white dark:bg-zinc-950 border-b border-red-600 ${className}`}
+      className={`sticky top-0 z-50 border-b border-red-600 ${className}`}
+      style={{ backgroundColor: 'var(--sm-card)' }}
       role="region"
       aria-label="Live scores and mockery odds"
     >
       {/* Mobile collapse toggle */}
       <button
-        className="md:hidden w-full p-2 flex items-center justify-between text-sm text-black dark:text-white focus:outline-none focus:ring-2 focus:ring-red-600"
+        className="md:hidden w-full p-2 flex items-center justify-between text-sm focus:outline-none focus:ring-2 focus:ring-red-600"
+        style={{ color: 'var(--sm-text)' }}
         onClick={() => setIsCollapsed(!isCollapsed)}
         aria-expanded={!isCollapsed}
         aria-controls="oracle-scores-content"
@@ -123,7 +126,8 @@ export default function OracleScoresBar({ className = '' }: OracleScoresBarProps
             animate={{ height: 'auto', opacity: 1 }}
             exit={{ height: 0, opacity: 0 }}
             transition={{ duration: 0.2 }}
-            className="p-2 flex overflow-x-auto gap-4 text-black dark:text-white text-sm scrollbar-hide"
+            className="p-2 flex overflow-x-auto gap-4 text-sm scrollbar-hide"
+            style={{ color: 'var(--sm-text)' }}
           >
             {scores.map((score) => (
               <ScoreItem key={score.id} score={score} />
@@ -140,7 +144,8 @@ function ScoreItem({ score }: { score: OracleScore }) {
     <motion.div
       initial={{ opacity: 0, x: -10 }}
       animate={{ opacity: 1, x: 0 }}
-      className="flex-shrink-0 flex items-center gap-3 px-3 py-1 bg-zinc-50 dark:bg-zinc-900 rounded border border-zinc-200 dark:border-zinc-800 hover:border-red-600 transition-colors cursor-pointer focus:outline-none focus:ring-2 focus:ring-red-600"
+      className="flex-shrink-0 flex items-center gap-3 px-3 py-1 rounded border hover:border-red-600 transition-colors cursor-pointer focus:outline-none focus:ring-2 focus:ring-red-600"
+      style={{ backgroundColor: 'var(--sm-surface)', borderColor: 'var(--sm-border)' }}
       tabIndex={0}
       role="article"
       aria-label={`${score.team} vs ${score.opponent}${score.status === 'live' ? ', live game' : ''}`}
@@ -159,7 +164,7 @@ function ScoreItem({ score }: { score: OracleScore }) {
         {score.teamScore !== null && (
           <span className="font-mono">{score.teamScore}</span>
         )}
-        <span className="text-zinc-400">-</span>
+        <span style={{ color: 'var(--sm-text-muted)' }}>-</span>
         {score.opponentScore !== null && (
           <span className="font-mono">{score.opponentScore}</span>
         )}
@@ -168,12 +173,12 @@ function ScoreItem({ score }: { score: OracleScore }) {
 
       {/* Time or status */}
       {score.time && (
-        <span className="text-xs text-zinc-500 dark:text-zinc-400">
+        <span className="text-xs" style={{ color: 'var(--sm-text-muted)' }}>
           {score.time}
         </span>
       )}
       {score.status === 'final' && (
-        <span className="text-xs text-zinc-500 dark:text-zinc-400">FINAL</span>
+        <span className="text-xs" style={{ color: 'var(--sm-text-muted)' }}>FINAL</span>
       )}
 
       {/* Mockery odds */}

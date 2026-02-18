@@ -88,11 +88,11 @@ export default function AdvancedSearch({
 
       {/* Expanded panel */}
       {isExpanded && (
-        <div className="mt-4 rounded-xl border border-zinc-200 bg-white p-6 dark:border-zinc-800 dark:bg-zinc-900">
+        <div className="mt-4 rounded-xl border p-6" style={{ borderColor: 'var(--sm-border)', backgroundColor: 'var(--sm-card)' }}>
           <div className="grid gap-4 md:grid-cols-2">
             {/* Exact phrase */}
             <div>
-              <label className="mb-1.5 block text-sm font-medium text-zinc-700 dark:text-zinc-300">
+              <label className="mb-1.5 block text-sm font-medium" style={{ color: 'var(--sm-text)' }}>
                 Exact phrase
               </label>
               <input
@@ -100,16 +100,17 @@ export default function AdvancedSearch({
                 value={exactPhrase}
                 onChange={(e) => setExactPhrase(e.target.value)}
                 placeholder='e.g., "trade deadline"'
-                className="w-full rounded-lg border border-zinc-200 bg-white px-3 py-2 text-zinc-900 placeholder-zinc-400 focus:border-[#8B0000] focus:outline-none focus:ring-1 focus:ring-[#8B0000] dark:border-zinc-700 dark:bg-zinc-800 dark:text-white dark:placeholder-zinc-500 dark:focus:border-[#FF6666] dark:focus:ring-[#FF6666]"
+                className="w-full rounded-lg border px-3 py-2 focus:border-[#8B0000] focus:outline-none focus:ring-1 focus:ring-[#8B0000] dark:focus:border-[#FF6666] dark:focus:ring-[#FF6666]"
+                style={{ borderColor: 'var(--sm-border)', backgroundColor: 'var(--sm-card)', color: 'var(--sm-text)' }}
               />
-              <p className="mt-1 text-xs text-zinc-500">
+              <p className="mt-1 text-xs" style={{ color: 'var(--sm-text-muted)' }}>
                 Find results with this exact phrase
               </p>
             </div>
 
             {/* Exclude words */}
             <div>
-              <label className="mb-1.5 block text-sm font-medium text-zinc-700 dark:text-zinc-300">
+              <label className="mb-1.5 block text-sm font-medium" style={{ color: 'var(--sm-text)' }}>
                 Exclude words
               </label>
               <input
@@ -117,22 +118,24 @@ export default function AdvancedSearch({
                 value={excludeWords}
                 onChange={(e) => setExcludeWords(e.target.value)}
                 placeholder="e.g., rumors, speculation"
-                className="w-full rounded-lg border border-zinc-200 bg-white px-3 py-2 text-zinc-900 placeholder-zinc-400 focus:border-[#8B0000] focus:outline-none focus:ring-1 focus:ring-[#8B0000] dark:border-zinc-700 dark:bg-zinc-800 dark:text-white dark:placeholder-zinc-500 dark:focus:border-[#FF6666] dark:focus:ring-[#FF6666]"
+                className="w-full rounded-lg border px-3 py-2 focus:border-[#8B0000] focus:outline-none focus:ring-1 focus:ring-[#8B0000] dark:focus:border-[#FF6666] dark:focus:ring-[#FF6666]"
+                style={{ borderColor: 'var(--sm-border)', backgroundColor: 'var(--sm-card)', color: 'var(--sm-text)' }}
               />
-              <p className="mt-1 text-xs text-zinc-500">
+              <p className="mt-1 text-xs" style={{ color: 'var(--sm-text-muted)' }}>
                 Separate words with commas
               </p>
             </div>
 
             {/* Category */}
             <div>
-              <label className="mb-1.5 block text-sm font-medium text-zinc-700 dark:text-zinc-300">
+              <label className="mb-1.5 block text-sm font-medium" style={{ color: 'var(--sm-text)' }}>
                 Category
               </label>
               <select
                 value={selectedCategory}
                 onChange={(e) => setSelectedCategory(e.target.value)}
-                className="w-full rounded-lg border border-zinc-200 bg-white px-3 py-2 text-zinc-900 focus:border-[#8B0000] focus:outline-none focus:ring-1 focus:ring-[#8B0000] dark:border-zinc-700 dark:bg-zinc-800 dark:text-white dark:focus:border-[#FF6666] dark:focus:ring-[#FF6666]"
+                className="w-full rounded-lg border px-3 py-2 focus:border-[#8B0000] focus:outline-none focus:ring-1 focus:ring-[#8B0000] dark:focus:border-[#FF6666] dark:focus:ring-[#FF6666]"
+                style={{ borderColor: 'var(--sm-border)', backgroundColor: 'var(--sm-card)', color: 'var(--sm-text)' }}
               >
                 <option value="">All categories</option>
                 {categories.map((cat) => (
@@ -146,25 +149,27 @@ export default function AdvancedSearch({
             {/* Date range */}
             <div className="grid grid-cols-2 gap-3">
               <div>
-                <label className="mb-1.5 block text-sm font-medium text-zinc-700 dark:text-zinc-300">
+                <label className="mb-1.5 block text-sm font-medium" style={{ color: 'var(--sm-text)' }}>
                   From date
                 </label>
                 <input
                   type="date"
                   value={dateFrom}
                   onChange={(e) => setDateFrom(e.target.value)}
-                  className="w-full rounded-lg border border-zinc-200 bg-white px-3 py-2 text-zinc-900 focus:border-[#8B0000] focus:outline-none focus:ring-1 focus:ring-[#8B0000] dark:border-zinc-700 dark:bg-zinc-800 dark:text-white dark:focus:border-[#FF6666] dark:focus:ring-[#FF6666]"
+                  className="w-full rounded-lg border px-3 py-2 focus:border-[#8B0000] focus:outline-none focus:ring-1 focus:ring-[#8B0000] dark:focus:border-[#FF6666] dark:focus:ring-[#FF6666]"
+                  style={{ borderColor: 'var(--sm-border)', backgroundColor: 'var(--sm-card)', color: 'var(--sm-text)' }}
                 />
               </div>
               <div>
-                <label className="mb-1.5 block text-sm font-medium text-zinc-700 dark:text-zinc-300">
+                <label className="mb-1.5 block text-sm font-medium" style={{ color: 'var(--sm-text)' }}>
                   To date
                 </label>
                 <input
                   type="date"
                   value={dateTo}
                   onChange={(e) => setDateTo(e.target.value)}
-                  className="w-full rounded-lg border border-zinc-200 bg-white px-3 py-2 text-zinc-900 focus:border-[#8B0000] focus:outline-none focus:ring-1 focus:ring-[#8B0000] dark:border-zinc-700 dark:bg-zinc-800 dark:text-white dark:focus:border-[#FF6666] dark:focus:ring-[#FF6666]"
+                  className="w-full rounded-lg border px-3 py-2 focus:border-[#8B0000] focus:outline-none focus:ring-1 focus:ring-[#8B0000] dark:focus:border-[#FF6666] dark:focus:ring-[#FF6666]"
+                  style={{ borderColor: 'var(--sm-border)', backgroundColor: 'var(--sm-card)', color: 'var(--sm-text)' }}
                 />
               </div>
             </div>
@@ -174,7 +179,8 @@ export default function AdvancedSearch({
           <div className="mt-6 flex justify-end gap-3">
             <button
               onClick={handleReset}
-              className="rounded-lg px-4 py-2 text-sm font-medium text-zinc-600 hover:bg-zinc-100 dark:text-zinc-400 dark:hover:bg-zinc-800"
+              className="rounded-lg px-4 py-2 text-sm font-medium"
+              style={{ color: 'var(--sm-text-muted)' }}
             >
               Reset
             </button>

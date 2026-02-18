@@ -91,7 +91,7 @@ export default function Modal({
             {title && (
               <h2
                 id="modal-title"
-                className="text-lg font-semibold text-[var(--text-primary)]"
+                className="text-lg font-semibold text-[var(--sm-text)]"
               >
                 {title}
               </h2>
@@ -99,7 +99,7 @@ export default function Modal({
             {showCloseButton && (
               <button
                 onClick={onClose}
-                className="w-8 h-8 flex items-center justify-center rounded-lg text-[var(--text-muted)] hover:bg-[var(--bg-hover)] hover:text-[var(--text-primary)] transition-colors"
+                className="w-8 h-8 flex items-center justify-center rounded-lg text-[var(--sm-text-muted)] hover:bg-[var(--sm-card-hover)] hover:text-[var(--sm-text)] transition-colors"
                 aria-label="Close modal"
               >
                 <svg
@@ -173,13 +173,13 @@ export function ConfirmModal({
 
   return (
     <Modal isOpen={isOpen} onClose={onClose} title={title} size="sm">
-      <p className="text-[var(--text-secondary)]">{message}</p>
+      <p className="text-[var(--sm-text-dim)]">{message}</p>
 
       <div className="flex justify-end gap-3 mt-6">
         <button
           onClick={onClose}
           disabled={loading}
-          className="px-4 py-2 text-sm font-medium text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors disabled:opacity-50"
+          className="px-4 py-2 text-sm font-medium text-[var(--sm-text-dim)] hover:text-[var(--sm-text)] transition-colors disabled:opacity-50"
         >
           {cancelText}
         </button>

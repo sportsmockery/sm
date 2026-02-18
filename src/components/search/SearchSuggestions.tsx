@@ -113,22 +113,23 @@ export default function SearchSuggestions({
   return (
     <div
       ref={listRef}
-      className={`overflow-hidden rounded-xl border border-zinc-200 bg-white shadow-lg dark:border-zinc-800 dark:bg-zinc-900 ${className}`}
+      className={`overflow-hidden rounded-xl border shadow-lg ${className}`}
+      style={{ borderColor: 'var(--sm-border)', backgroundColor: 'var(--sm-card)' }}
     >
       {isLoading ? (
         <div className="flex items-center justify-center p-4">
-          <div className="h-5 w-5 animate-spin rounded-full border-2 border-zinc-300 border-t-[#8B0000] dark:border-zinc-600 dark:border-t-[#FF6666]" />
-          <span className="ml-2 text-sm text-zinc-500">Searching...</span>
+          <div className="h-5 w-5 animate-spin rounded-full border-2 border-t-[#8B0000] dark:border-t-[#FF6666]" style={{ borderColor: 'var(--sm-border)' }} />
+          <span className="ml-2 text-sm" style={{ color: 'var(--sm-text-muted)' }}>Searching...</span>
         </div>
       ) : suggestions.length === 0 ? (
-        <div className="p-4 text-center text-sm text-zinc-500 dark:text-zinc-400">
+        <div className="p-4 text-center text-sm" style={{ color: 'var(--sm-text-muted)' }}>
           No suggestions found for &ldquo;{query}&rdquo;
         </div>
       ) : (
         Object.entries(groupedSuggestions).map(([type, items]) => (
           <div key={type}>
-            <div className="border-b border-zinc-100 bg-zinc-50 px-3 py-2 dark:border-zinc-800 dark:bg-zinc-800/50">
-              <h4 className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-zinc-500 dark:text-zinc-400">
+            <div className="border-b px-3 py-2" style={{ borderColor: 'var(--sm-border)', backgroundColor: 'var(--sm-surface)' }}>
+              <h4 className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider" style={{ color: 'var(--sm-text-muted)' }}>
                 {typeIcons[type]}
                 {typeLabels[type]}
               </h4>
@@ -154,7 +155,7 @@ export default function SearchSuggestions({
                       className={`flex items-center gap-3 px-4 py-3 transition-colors ${
                         isSelected
                           ? 'bg-[#8B0000]/5 dark:bg-[#FF6666]/5'
-                          : 'hover:bg-zinc-50 dark:hover:bg-zinc-800'
+                          : ''
                       }`}
                     >
                       {suggestion.image && (
@@ -169,22 +170,19 @@ export default function SearchSuggestions({
                       )}
                       <div className="min-w-0 flex-1">
                         <p
-                          className={`truncate font-medium ${
-                            isSelected
-                              ? 'text-[#8B0000] dark:text-[#FF6666]'
-                              : 'text-zinc-900 dark:text-white'
-                          }`}
+                          className={`truncate font-medium ${isSelected ? 'text-[#8B0000] dark:text-[#FF6666]' : ''}`}
+                          style={isSelected ? {} : { color: 'var(--sm-text)' }}
                         >
                           {suggestion.title}
                         </p>
                         {suggestion.subtitle && (
-                          <p className="truncate text-sm text-zinc-500 dark:text-zinc-400">
+                          <p className="truncate text-sm" style={{ color: 'var(--sm-text-muted)' }}>
                             {suggestion.subtitle}
                           </p>
                         )}
                       </div>
                       {isSelected && (
-                        <kbd className="hidden rounded border border-zinc-200 bg-zinc-100 px-1.5 py-0.5 font-mono text-xs text-zinc-500 sm:block dark:border-zinc-700 dark:bg-zinc-800">
+                        <kbd className="hidden rounded border px-1.5 py-0.5 font-mono text-xs sm:block" style={{ borderColor: 'var(--sm-border)', backgroundColor: 'var(--sm-surface)', color: 'var(--sm-text-muted)' }}>
                           Enter
                         </kbd>
                       )}
@@ -201,7 +199,8 @@ export default function SearchSuggestions({
       {suggestions.length > 0 && (
         <Link
           href={`/search?q=${encodeURIComponent(query)}`}
-          className="flex items-center justify-center gap-2 border-t border-zinc-200 bg-zinc-50 px-4 py-3 text-sm font-medium text-[#8B0000] transition-colors hover:bg-zinc-100 dark:border-zinc-800 dark:bg-zinc-800/50 dark:text-[#FF6666] dark:hover:bg-zinc-800"
+          className="flex items-center justify-center gap-2 border-t px-4 py-3 text-sm font-medium text-[#8B0000] transition-colors dark:text-[#FF6666]"
+          style={{ borderColor: 'var(--sm-border)', backgroundColor: 'var(--sm-surface)' }}
         >
           View all results for &ldquo;{query}&rdquo;
           <svg

@@ -17,7 +17,7 @@ export default function TeamSection({ className = '' }: TeamSectionProps) {
     <section className={className}>
       {/* Section header */}
       <div className="mb-5 flex items-center gap-3 border-b-2 border-[#8B0000] pb-2">
-        <h2 className="text-lg font-bold uppercase tracking-tight text-zinc-900 dark:text-white">
+        <h2 className="text-lg font-bold uppercase tracking-tight" style={{ color: 'var(--sm-text)' }}>
           Chicago Teams
         </h2>
       </div>

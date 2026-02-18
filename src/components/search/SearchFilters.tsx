@@ -42,7 +42,8 @@ export default function SearchFilters({
       {/* Mobile filter toggle */}
       <button
         onClick={() => setIsExpanded(!isExpanded)}
-        className="mb-4 flex w-full items-center justify-between rounded-xl border border-zinc-200 bg-white px-4 py-3 font-medium text-zinc-700 transition-colors hover:bg-zinc-50 dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-300 dark:hover:bg-zinc-800 md:hidden"
+        className="mb-4 flex w-full items-center justify-between rounded-xl border px-4 py-3 font-medium transition-colors md:hidden"
+        style={{ borderColor: 'var(--sm-border)', backgroundColor: 'var(--sm-card)', color: 'var(--sm-text)' }}
       >
         <div className="flex items-center gap-2">
           <svg
@@ -78,12 +79,13 @@ export default function SearchFilters({
 
       {/* Filters panel */}
       <div
-        className={`space-y-4 rounded-xl border border-zinc-200 bg-white p-4 dark:border-zinc-800 dark:bg-zinc-900 md:block ${
+        className={`space-y-4 rounded-xl border p-4 md:block ${
           isExpanded ? 'block' : 'hidden'
         }`}
+        style={{ borderColor: 'var(--sm-border)', backgroundColor: 'var(--sm-card)' }}
       >
         <div className="flex items-center justify-between">
-          <h3 className="font-semibold text-zinc-900 dark:text-white">
+          <h3 className="font-semibold" style={{ color: 'var(--sm-text)' }}>
             Filter Results
           </h3>
           {hasActiveFilters && (
@@ -99,7 +101,7 @@ export default function SearchFilters({
         {/* Category filter */}
         {categories.length > 0 && (
           <div>
-            <label className="mb-2 block text-sm font-medium text-zinc-700 dark:text-zinc-300">
+            <label className="mb-2 block text-sm font-medium" style={{ color: 'var(--sm-text)' }}>
               Category
             </label>
             <select
@@ -111,7 +113,8 @@ export default function SearchFilters({
                   dateRange,
                 })
               }
-              className="w-full rounded-lg border border-zinc-200 bg-white px-3 py-2 text-zinc-900 focus:border-[#8B0000] focus:outline-none focus:ring-1 focus:ring-[#8B0000] dark:border-zinc-700 dark:bg-zinc-800 dark:text-white dark:focus:border-[#FF6666] dark:focus:ring-[#FF6666]"
+              className="w-full rounded-lg border px-3 py-2 focus:border-[#8B0000] focus:outline-none focus:ring-1 focus:ring-[#8B0000] dark:focus:border-[#FF6666] dark:focus:ring-[#FF6666]"
+              style={{ borderColor: 'var(--sm-border)', backgroundColor: 'var(--sm-card)', color: 'var(--sm-text)' }}
             >
               <option value="">All categories</option>
               {categories.map((cat) => (
@@ -126,7 +129,7 @@ export default function SearchFilters({
         {/* Author filter */}
         {authors.length > 0 && (
           <div>
-            <label className="mb-2 block text-sm font-medium text-zinc-700 dark:text-zinc-300">
+            <label className="mb-2 block text-sm font-medium" style={{ color: 'var(--sm-text)' }}>
               Author
             </label>
             <select
@@ -138,7 +141,8 @@ export default function SearchFilters({
                   dateRange,
                 })
               }
-              className="w-full rounded-lg border border-zinc-200 bg-white px-3 py-2 text-zinc-900 focus:border-[#8B0000] focus:outline-none focus:ring-1 focus:ring-[#8B0000] dark:border-zinc-700 dark:bg-zinc-800 dark:text-white dark:focus:border-[#FF6666] dark:focus:ring-[#FF6666]"
+              className="w-full rounded-lg border px-3 py-2 focus:border-[#8B0000] focus:outline-none focus:ring-1 focus:ring-[#8B0000] dark:focus:border-[#FF6666] dark:focus:ring-[#FF6666]"
+              style={{ borderColor: 'var(--sm-border)', backgroundColor: 'var(--sm-card)', color: 'var(--sm-text)' }}
             >
               <option value="">All authors</option>
               {authors.map((author) => (
@@ -152,7 +156,7 @@ export default function SearchFilters({
 
         {/* Date range filter */}
         <div>
-          <label className="mb-2 block text-sm font-medium text-zinc-700 dark:text-zinc-300">
+          <label className="mb-2 block text-sm font-medium" style={{ color: 'var(--sm-text)' }}>
             Date Range
           </label>
           <select
@@ -164,7 +168,8 @@ export default function SearchFilters({
                 dateRange: e.target.value || undefined,
               })
             }
-            className="w-full rounded-lg border border-zinc-200 bg-white px-3 py-2 text-zinc-900 focus:border-[#8B0000] focus:outline-none focus:ring-1 focus:ring-[#8B0000] dark:border-zinc-700 dark:bg-zinc-800 dark:text-white dark:focus:border-[#FF6666] dark:focus:ring-[#FF6666]"
+            className="w-full rounded-lg border px-3 py-2 focus:border-[#8B0000] focus:outline-none focus:ring-1 focus:ring-[#8B0000] dark:focus:border-[#FF6666] dark:focus:ring-[#FF6666]"
+            style={{ borderColor: 'var(--sm-border)', backgroundColor: 'var(--sm-card)', color: 'var(--sm-text)' }}
           >
             {dateRanges.map((range) => (
               <option key={range.value} value={range.value}>

@@ -26,7 +26,7 @@ const Checkbox = forwardRef<HTMLInputElement, CheckboxProps>(
               className="peer sr-only"
               {...props}
             />
-            <div className="w-5 h-5 bg-[var(--bg-tertiary)] border border-[var(--border-default)] rounded transition-all duration-200 peer-hover:border-[var(--border-strong)] peer-focus:ring-2 peer-focus:ring-[var(--accent-red-glow)] peer-checked:bg-[var(--accent-red)] peer-checked:border-[var(--accent-red)] peer-disabled:opacity-50 peer-disabled:cursor-not-allowed">
+            <div className="w-5 h-5 bg-[var(--sm-surface)] border border-[var(--border-default)] rounded transition-all duration-200 peer-hover:border-[var(--border-strong)] peer-focus:ring-2 peer-focus:ring-[var(--accent-red-glow)] peer-checked:bg-[var(--accent-red)] peer-checked:border-[var(--accent-red)] peer-disabled:opacity-50 peer-disabled:cursor-not-allowed">
               <svg
                 className="w-5 h-5 text-white opacity-0 peer-checked:opacity-100 transition-opacity"
                 fill="none"
@@ -57,7 +57,7 @@ const Checkbox = forwardRef<HTMLInputElement, CheckboxProps>(
             </svg>
           </div>
           {label && (
-            <span className="text-sm text-[var(--text-primary)]">{label}</span>
+            <span className="text-sm text-[var(--sm-text)]">{label}</span>
           )}
         </label>
 

@@ -176,7 +176,7 @@ export default function TeamHubLayout({
   ]
 
   return (
-    <div className="min-h-screen" style={{ backgroundColor: 'var(--bg-page)' }}>
+    <div className="min-h-screen" style={{ backgroundColor: 'var(--sm-bg)' }}>
       {/* Team Hero Section */}
       <div
         ref={headerRef}
@@ -377,8 +377,8 @@ export default function TeamHubLayout({
         ref={navRef}
         className={`z-40 ${isSticky ? 'sticky top-[140px] shadow-md' : ''}`}
         style={{
-          backgroundColor: 'var(--bg-surface)',
-          borderBottom: '1px solid var(--border-color)',
+          backgroundColor: 'var(--sm-surface)',
+          borderBottom: '1px solid var(--sm-border)',
           transition: 'box-shadow 0.2s ease',
         }}
       >
@@ -429,7 +429,7 @@ export default function TeamHubLayout({
                     backgroundColor: team.secondaryColor || team.primaryColor,
                     color: '#fff',
                   } : {
-                    backgroundColor: 'var(--bg-tertiary)',
+                    backgroundColor: 'var(--sm-surface)',
                     color: 'var(--sm-text-muted)',
                   }}
                 >
@@ -446,7 +446,7 @@ export default function TeamHubLayout({
         className="mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 md:py-10"
         style={{
           maxWidth: '1400px',
-          backgroundColor: 'var(--bg-page)',
+          backgroundColor: 'var(--sm-bg)',
         }}
       >
         {children}

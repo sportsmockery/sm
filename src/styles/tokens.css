@@ -261,7 +261,7 @@
 
   /* Tables */
   --table-cell-padding: var(--space-4);
-  --table-header-bg: var(--bg-tertiary);
+  --table-header-bg: var(--sm-surface);
 
   /* Modals */
   --modal-padding: var(--space-6);

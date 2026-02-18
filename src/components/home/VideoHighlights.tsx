@@ -69,13 +69,14 @@ export default function VideoHighlights({ videos = sampleVideos, className = '' 
       <div className="mb-6 flex items-center justify-between">
         <div className="flex items-center gap-3">
           <div className="h-8 w-1 rounded-full bg-gradient-to-b from-[#FF0000] to-[#8B0000]" />
-          <h2 className="font-heading text-2xl font-bold text-zinc-900 dark:text-white">
+          <h2 className="font-heading text-2xl font-bold" style={{ color: 'var(--sm-text)' }}>
             Video Highlights
           </h2>
         </div>
         <a
           href="/videos"
-          className="flex items-center gap-1 text-sm font-medium text-[#8B0000] transition-colors hover:text-red-700 dark:text-[#FF6666] dark:hover:text-red-400"
+          className="flex items-center gap-1 text-sm font-medium transition-colors hover:text-red-700"
+          style={{ color: '#8B0000' }}
         >
           View All
           <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
@@ -176,10 +177,10 @@ export default function VideoHighlights({ videos = sampleVideos, className = '' 
 
               {/* Content */}
               <div className="flex-1">
-                <h4 className="line-clamp-2 text-sm font-semibold text-zinc-900 transition-colors group-hover:text-[#8B0000] dark:text-white dark:group-hover:text-[#FF6666]">
+                <h4 className="line-clamp-2 text-sm font-semibold transition-colors" style={{ color: 'var(--sm-text)' }}>
                   {video.title}
                 </h4>
-                <div className="mt-1 flex items-center gap-2 text-xs text-zinc-500 dark:text-zinc-400">
+                <div className="mt-1 flex items-center gap-2 text-xs" style={{ color: 'var(--sm-text-muted)' }}>
                   <span className="capitalize">{video.team}</span>
                   <span>•</span>
                   <span>{formatViews(video.views)} views</span>

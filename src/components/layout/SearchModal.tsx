@@ -91,12 +91,13 @@ export default function SearchModal({ isOpen, onClose }: SearchModalProps) {
 
       {/* Modal */}
       <div className="relative mx-4 w-full max-w-2xl animate-scale-in">
-        <div className="overflow-hidden rounded-2xl border border-zinc-200 bg-white shadow-2xl dark:border-zinc-800 dark:bg-zinc-900">
+        <div className="overflow-hidden rounded-2xl shadow-2xl" style={{ backgroundColor: 'var(--sm-card)', border: '1px solid var(--sm-border)' }}>
           {/* Search input */}
           <form onSubmit={handleSubmit}>
-            <div className="flex items-center border-b border-zinc-200 dark:border-zinc-800">
+            <div className="flex items-center" style={{ borderBottom: '1px solid var(--sm-border)' }}>
               <svg
-                className="ml-4 h-5 w-5 text-zinc-400"
+                className="ml-4 h-5 w-5"
+                style={{ color: 'var(--sm-text-dim)' }}
                 fill="none"
                 viewBox="0 0 24 24"
                 strokeWidth={2}
@@ -110,16 +111,18 @@ export default function SearchModal({ isOpen, onClose }: SearchModalProps) {
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
                 placeholder="Search articles, teams, authors..."
-                className="flex-1 bg-transparent px-4 py-5 text-lg text-zinc-900 outline-none placeholder:text-zinc-400 dark:text-white"
+                className="flex-1 bg-transparent px-4 py-5 text-lg outline-none"
+                style={{ color: 'var(--sm-text)' }}
               />
               <div className="mr-4 flex items-center gap-2">
-                <kbd className="hidden rounded border border-zinc-300 bg-zinc-100 px-2 py-1 text-xs text-zinc-500 sm:inline dark:border-zinc-700 dark:bg-zinc-800">
+                <kbd className="hidden rounded px-2 py-1 text-xs sm:inline" style={{ backgroundColor: 'var(--sm-surface)', border: '1px solid var(--sm-border)', color: 'var(--sm-text-muted)' }}>
                   ESC
                 </kbd>
                 <button
                   type="button"
                   onClick={onClose}
-                  className="flex h-8 w-8 items-center justify-center rounded-lg text-zinc-400 transition-colors hover:bg-zinc-100 hover:text-zinc-600 sm:hidden dark:hover:bg-zinc-800"
+                  className="flex h-8 w-8 items-center justify-center rounded-lg transition-colors sm:hidden"
+                  style={{ color: 'var(--sm-text-dim)' }}
                 >
                   <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
@@ -133,12 +136,13 @@ export default function SearchModal({ isOpen, onClose }: SearchModalProps) {
           {recentSearches.length > 0 && (
             <div className="p-4">
               <div className="mb-2 flex items-center justify-between">
-                <span className="text-xs font-semibold uppercase tracking-wider text-zinc-500 dark:text-zinc-400">
+                <span className="text-xs font-semibold uppercase tracking-wider" style={{ color: 'var(--sm-text-muted)' }}>
                   Recent Searches
                 </span>
                 <button
                   onClick={clearRecentSearches}
-                  className="text-xs text-zinc-500 hover:text-[#8B0000] dark:text-zinc-400 dark:hover:text-[#FF6666]"
+                  className="text-xs"
+                  style={{ color: 'var(--sm-text-muted)' }}
                 >
                   Clear all
                 </button>
@@ -148,9 +152,10 @@ export default function SearchModal({ isOpen, onClose }: SearchModalProps) {
                   <button
                     key={index}
                     onClick={() => handleSearch(search)}
-                    className="flex w-full items-center gap-3 rounded-lg px-3 py-2 text-left text-zinc-700 transition-colors hover:bg-zinc-100 dark:text-zinc-300 dark:hover:bg-zinc-800"
+                    className="flex w-full items-center gap-3 rounded-lg px-3 py-2 text-left transition-colors"
+                    style={{ color: 'var(--sm-text)' }}
                   >
-                    <svg className="h-4 w-4 text-zinc-400" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
+                    <svg className="h-4 w-4" style={{ color: 'var(--sm-text-dim)' }} fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
                       <path strokeLinecap="round" strokeLinejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" />
                     </svg>
                     {search}
@@ -161,8 +166,8 @@ export default function SearchModal({ isOpen, onClose }: SearchModalProps) {
           )}
 
           {/* Quick links */}
-          <div className="border-t border-zinc-200 p-4 dark:border-zinc-800">
-            <span className="mb-2 block text-xs font-semibold uppercase tracking-wider text-zinc-500 dark:text-zinc-400">
+          <div className="p-4" style={{ borderTop: '1px solid var(--sm-border)' }}>
+            <span className="mb-2 block text-xs font-semibold uppercase tracking-wider" style={{ color: 'var(--sm-text-muted)' }}>
               Quick Links
             </span>
             <div className="flex flex-wrap gap-2">
@@ -170,7 +175,8 @@ export default function SearchModal({ isOpen, onClose }: SearchModalProps) {
                 <button
                   key={team}
                   onClick={() => handleSearch(team)}
-                  className="rounded-full bg-zinc-100 px-3 py-1.5 text-sm font-medium text-zinc-700 transition-colors hover:bg-[#8B0000] hover:text-white dark:bg-zinc-800 dark:text-zinc-300 dark:hover:bg-[#FF6666]"
+                  className="rounded-full px-3 py-1.5 text-sm font-medium transition-colors hover:bg-[#8B0000] hover:text-white"
+                  style={{ backgroundColor: 'var(--sm-surface)', color: 'var(--sm-text)' }}
                 >
                   {team}
                 </button>

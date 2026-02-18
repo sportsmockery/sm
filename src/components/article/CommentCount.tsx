@@ -95,7 +95,7 @@ export default function CommentCount({
   return (
     <span
       className={`inline-flex items-center font-medium ${sizeClasses[size]} ${className}`}
-      style={{ color: 'var(--text-muted)' }}
+      style={{ color: 'var(--sm-text-muted)' }}
       title={`${count} comment${count !== 1 ? 's' : ''}`}
     >
       {showIcon && (

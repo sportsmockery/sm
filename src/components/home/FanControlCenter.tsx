@@ -5,19 +5,19 @@ import Image from 'next/image'
 
 export default function FanControlCenter() {
   return (
-    <section className="py-8 md:py-10 lg:py-12" style={{ backgroundColor: 'var(--bg-surface)' }}>
+    <section className="py-8 md:py-10 lg:py-12" style={{ backgroundColor: 'var(--sm-surface)' }}>
       <div className="max-w-[1320px] mx-auto px-4 md:px-6 lg:px-8">
         {/* Section Header */}
         <div className="text-center mb-8">
           <h2
             className="text-2xl md:text-3xl font-bold mb-2"
-            style={{ fontFamily: "'Montserrat', sans-serif", color: 'var(--text-primary)' }}
+            style={{ fontFamily: "'Montserrat', sans-serif", color: 'var(--sm-text)' }}
           >
             Chicago Fan Control Center
           </h2>
           <p
             className="text-sm md:text-base max-w-xl mx-auto"
-            style={{ color: 'var(--text-muted)' }}
+            style={{ color: 'var(--sm-text-muted)' }}
           >
             Connect with fellow fans and get instant answers about your Chicago teams
           </p>

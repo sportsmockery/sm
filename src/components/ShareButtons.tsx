@@ -25,14 +25,15 @@ export default function ShareButtons({ url, title }: ShareButtonsProps) {
 
   return (
     <div className="flex items-center gap-2">
-      <span className="text-sm font-medium text-zinc-600 dark:text-zinc-400 hidden sm:inline">Share:</span>
+      <span className="text-sm font-medium hidden sm:inline" style={{ color: 'var(--sm-text-muted)' }}>Share:</span>
 
       {/* 44px minimum tap target for mobile accessibility */}
       <a
         href={`https://twitter.com/intent/tweet?url=${encodedUrl}&text=${encodedTitle}`}
         target="_blank"
         rel="noopener noreferrer"
-        className="flex h-11 w-11 items-center justify-center rounded-full bg-zinc-100 text-zinc-600 transition-colors hover:bg-blue-100 hover:text-blue-600 dark:bg-zinc-800 dark:text-zinc-400 dark:hover:bg-blue-900 dark:hover:text-blue-400"
+        className="flex h-11 w-11 items-center justify-center rounded-full transition-colors hover:bg-blue-100 hover:text-blue-600"
+        style={{ backgroundColor: 'var(--sm-surface)', color: 'var(--sm-text-muted)' }}
         aria-label="Share on Twitter"
       >
         <svg className="h-5 w-5" fill="currentColor" viewBox="0 0 24 24">
@@ -44,7 +45,8 @@ export default function ShareButtons({ url, title }: ShareButtonsProps) {
         href={`https://www.facebook.com/sharer/sharer.php?u=${encodedUrl}`}
         target="_blank"
         rel="noopener noreferrer"
-        className="flex h-11 w-11 items-center justify-center rounded-full bg-zinc-100 text-zinc-600 transition-colors hover:bg-blue-100 hover:text-blue-700 dark:bg-zinc-800 dark:text-zinc-400 dark:hover:bg-blue-900 dark:hover:text-blue-400"
+        className="flex h-11 w-11 items-center justify-center rounded-full transition-colors hover:bg-blue-100 hover:text-blue-700"
+        style={{ backgroundColor: 'var(--sm-surface)', color: 'var(--sm-text-muted)' }}
         aria-label="Share on Facebook"
       >
         <svg className="h-5 w-5" fill="currentColor" viewBox="0 0 24 24">
@@ -54,7 +56,8 @@ export default function ShareButtons({ url, title }: ShareButtonsProps) {
 
       <button
         onClick={handleCopyLink}
-        className="flex h-11 w-11 items-center justify-center rounded-full bg-zinc-100 text-zinc-600 transition-colors hover:bg-zinc-200 dark:bg-zinc-800 dark:text-zinc-400 dark:hover:bg-zinc-700"
+        className="flex h-11 w-11 items-center justify-center rounded-full transition-colors hover:opacity-80"
+        style={{ backgroundColor: 'var(--sm-surface)', color: 'var(--sm-text-muted)' }}
         aria-label="Copy link"
       >
         {copied ? (

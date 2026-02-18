@@ -88,11 +88,12 @@ export default function SentimentOrb({ sentiments = sampleSentiments, className 
 
   return (
     <section className={className}>
-      <div className="rounded-2xl border border-zinc-200 bg-white p-6 dark:border-zinc-800 dark:bg-zinc-900">
+      <div className="rounded-2xl p-6" style={{ backgroundColor: 'var(--sm-card)', border: '1px solid var(--sm-border)' }}>
         {/* Header */}
         <div className="mb-4 flex items-center gap-2">
           <svg
-            className="h-5 w-5 text-[#8B0000] dark:text-[#FF6666]"
+            className="h-5 w-5"
+            style={{ color: '#8B0000' }}
             fill="none"
             viewBox="0 0 24 24"
             strokeWidth={2}
@@ -100,7 +101,7 @@ export default function SentimentOrb({ sentiments = sampleSentiments, className 
           >
             <path strokeLinecap="round" strokeLinejoin="round" d="M15.182 15.182a4.5 4.5 0 01-6.364 0M21 12a9 9 0 11-18 0 9 9 0 0118 0zM9.75 9.75c0 .414-.168.75-.375.75S9 10.164 9 9.75 9.168 9 9.375 9s.375.336.375.75zm-.375 0h.008v.015h-.008V9.75zm5.625 0c0 .414-.168.75-.375.75s-.375-.336-.375-.75.168-.75.375-.75.375.336.375.75zm-.375 0h.008v.015h-.008V9.75z" />
           </svg>
-          <h3 className="font-heading text-lg font-bold text-zinc-900 dark:text-white">
+          <h3 className="font-heading text-lg font-bold" style={{ color: 'var(--sm-text)' }}>
             Fan Sentiment
           </h3>
         </div>
@@ -136,7 +137,7 @@ export default function SentimentOrb({ sentiments = sampleSentiments, className 
 
         {/* Team info */}
         <div className={`text-center transition-opacity duration-300 ${isAnimating ? 'opacity-0' : 'opacity-100'}`}>
-          <h4 className="mb-1 font-heading text-xl font-bold text-zinc-900 dark:text-white">
+          <h4 className="mb-1 font-heading text-xl font-bold" style={{ color: 'var(--sm-text)' }}>
             {currentSentiment.team}
           </h4>
           <div className="mb-3 flex items-center justify-center gap-1 text-sm">
@@ -158,10 +159,10 @@ export default function SentimentOrb({ sentiments = sampleSentiments, className 
             )}
             {currentSentiment.trend === 'stable' && (
               <>
-                <svg className="h-4 w-4 text-zinc-500" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
+                <svg className="h-4 w-4" style={{ color: 'var(--sm-text-muted)' }} fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" d="M18 12H6" />
                 </svg>
-                <span className="text-zinc-500">Stable</span>
+                <span style={{ color: 'var(--sm-text-muted)' }}>Stable</span>
               </>
             )}
           </div>
@@ -169,7 +170,7 @@ export default function SentimentOrb({ sentiments = sampleSentiments, className 
           {/* Recent events */}
           <div className="space-y-1">
             {currentSentiment.recentEvents.map((event, i) => (
-              <p key={i} className="text-xs text-zinc-500 dark:text-zinc-400">
+              <p key={i} className="text-xs" style={{ color: 'var(--sm-text-muted)' }}>
                 • {event}
               </p>
             ))}
@@ -190,9 +191,10 @@ export default function SentimentOrb({ sentiments = sampleSentiments, className 
               }}
               className={`h-2 w-2 rounded-full transition-all ${
                 i === activeTeam
-                  ? 'w-6 bg-[#8B0000] dark:bg-[#FF6666]'
-                  : 'bg-zinc-300 hover:bg-zinc-400 dark:bg-zinc-600 dark:hover:bg-zinc-500'
+                  ? 'w-6'
+                  : ''
               }`}
+              style={{ backgroundColor: i === activeTeam ? '#8B0000' : 'var(--sm-border)' }}
               aria-label={`View ${s.team} sentiment`}
             />
           ))}
@@ -200,7 +202,7 @@ export default function SentimentOrb({ sentiments = sampleSentiments, className 
 
         {/* Meter bar */}
         <div className="mt-4">
-          <div className="mb-1 flex justify-between text-xs text-zinc-500 dark:text-zinc-400">
+          <div className="mb-1 flex justify-between text-xs" style={{ color: 'var(--sm-text-muted)' }}>
             <span>😤 Angry</span>
             <span>😊 Happy</span>
           </div>
@@ -213,7 +215,7 @@ export default function SentimentOrb({ sentiments = sampleSentiments, className 
         </div>
 
         {/* Powered by badge */}
-        <p className="mt-4 text-center text-xs text-zinc-400 dark:text-zinc-500">
+        <p className="mt-4 text-center text-xs" style={{ color: 'var(--sm-text-dim)' }}>
           Powered by social media analysis
         </p>
       </div>

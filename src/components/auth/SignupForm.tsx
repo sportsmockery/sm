@@ -72,8 +72,8 @@ export default function SignupForm() {
             <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
           </svg>
         </div>
-        <h3 className="mb-2 text-lg font-semibold text-zinc-900 dark:text-white">Check your email</h3>
-        <p className="text-sm text-zinc-600 dark:text-zinc-400">
+        <h3 className="mb-2 text-lg font-semibold" style={{ color: 'var(--sm-text)' }}>Check your email</h3>
+        <p className="text-sm" style={{ color: 'var(--sm-text-muted)' }}>
           We&apos;ve sent a confirmation link to <strong>{email}</strong>. Click the link to activate your account.
         </p>
         <Link
@@ -102,7 +102,7 @@ export default function SignupForm() {
 
       {/* Full Name */}
       <div>
-        <label htmlFor="fullName" className="block text-sm font-medium text-zinc-700 dark:text-zinc-300">
+        <label htmlFor="fullName" className="block text-sm font-medium" style={{ color: 'var(--sm-text)' }}>
           Full Name
         </label>
         <input
@@ -112,14 +112,15 @@ export default function SignupForm() {
           onChange={(e) => setFullName(e.target.value)}
           required
           autoComplete="name"
-          className="mt-1 block w-full rounded-lg border border-zinc-300 bg-white px-4 py-3 text-zinc-900 placeholder-zinc-400 focus:border-[#8B0000] focus:outline-none focus:ring-1 focus:ring-[#8B0000] dark:border-zinc-700 dark:bg-zinc-800 dark:text-white dark:placeholder-zinc-500 dark:focus:border-[#FF6666] dark:focus:ring-[#FF6666]"
+          className="mt-1 block w-full rounded-lg border px-4 py-3 placeholder-zinc-400 focus:border-[#8B0000] focus:outline-none focus:ring-1 focus:ring-[#8B0000] dark:placeholder-zinc-500 dark:focus:border-[#FF6666] dark:focus:ring-[#FF6666]"
+          style={{ borderColor: 'var(--sm-border)', backgroundColor: 'var(--sm-card)', color: 'var(--sm-text)' }}
           placeholder="John Doe"
         />
       </div>
 
       {/* Email */}
       <div>
-        <label htmlFor="email" className="block text-sm font-medium text-zinc-700 dark:text-zinc-300">
+        <label htmlFor="email" className="block text-sm font-medium" style={{ color: 'var(--sm-text)' }}>
           Email address
         </label>
         <input
@@ -129,14 +130,15 @@ export default function SignupForm() {
           onChange={(e) => setEmail(e.target.value)}
           required
           autoComplete="email"
-          className="mt-1 block w-full rounded-lg border border-zinc-300 bg-white px-4 py-3 text-zinc-900 placeholder-zinc-400 focus:border-[#8B0000] focus:outline-none focus:ring-1 focus:ring-[#8B0000] dark:border-zinc-700 dark:bg-zinc-800 dark:text-white dark:placeholder-zinc-500 dark:focus:border-[#FF6666] dark:focus:ring-[#FF6666]"
+          className="mt-1 block w-full rounded-lg border px-4 py-3 placeholder-zinc-400 focus:border-[#8B0000] focus:outline-none focus:ring-1 focus:ring-[#8B0000] dark:placeholder-zinc-500 dark:focus:border-[#FF6666] dark:focus:ring-[#FF6666]"
+          style={{ borderColor: 'var(--sm-border)', backgroundColor: 'var(--sm-card)', color: 'var(--sm-text)' }}
           placeholder="you@example.com"
         />
       </div>
 
       {/* Password */}
       <div>
-        <label htmlFor="password" className="block text-sm font-medium text-zinc-700 dark:text-zinc-300">
+        <label htmlFor="password" className="block text-sm font-medium" style={{ color: 'var(--sm-text)' }}>
           Password
         </label>
         <input
@@ -146,7 +148,8 @@ export default function SignupForm() {
           onChange={(e) => setPassword(e.target.value)}
           required
           autoComplete="new-password"
-          className="mt-1 block w-full rounded-lg border border-zinc-300 bg-white px-4 py-3 text-zinc-900 placeholder-zinc-400 focus:border-[#8B0000] focus:outline-none focus:ring-1 focus:ring-[#8B0000] dark:border-zinc-700 dark:bg-zinc-800 dark:text-white dark:placeholder-zinc-500 dark:focus:border-[#FF6666] dark:focus:ring-[#FF6666]"
+          className="mt-1 block w-full rounded-lg border px-4 py-3 placeholder-zinc-400 focus:border-[#8B0000] focus:outline-none focus:ring-1 focus:ring-[#8B0000] dark:placeholder-zinc-500 dark:focus:border-[#FF6666] dark:focus:ring-[#FF6666]"
+          style={{ borderColor: 'var(--sm-border)', backgroundColor: 'var(--sm-card)', color: 'var(--sm-text)' }}
           placeholder="••••••••"
         />
         {/* Password strength indicator */}
@@ -157,12 +160,13 @@ export default function SignupForm() {
                 <div
                   key={i}
                   className={`h-1.5 flex-1 rounded-full ${
-                    i < passwordStrength ? strengthColors[passwordStrength - 1] : 'bg-zinc-200 dark:bg-zinc-700'
+                    i < passwordStrength ? strengthColors[passwordStrength - 1] : ''
                   }`}
+                  style={i >= passwordStrength ? { backgroundColor: 'var(--sm-surface)' } : undefined}
                 />
               ))}
             </div>
-            <p className="mt-1 text-xs text-zinc-500 dark:text-zinc-400">
+            <p className="mt-1 text-xs" style={{ color: 'var(--sm-text-dim)' }}>
               Password strength: {strengthLabels[passwordStrength - 1] || 'Too weak'}
             </p>
           </div>
@@ -171,7 +175,7 @@ export default function SignupForm() {
 
       {/* Confirm Password */}
       <div>
-        <label htmlFor="confirmPassword" className="block text-sm font-medium text-zinc-700 dark:text-zinc-300">
+        <label htmlFor="confirmPassword" className="block text-sm font-medium" style={{ color: 'var(--sm-text)' }}>
           Confirm Password
         </label>
         <input
@@ -181,7 +185,8 @@ export default function SignupForm() {
           onChange={(e) => setConfirmPassword(e.target.value)}
           required
           autoComplete="new-password"
-          className="mt-1 block w-full rounded-lg border border-zinc-300 bg-white px-4 py-3 text-zinc-900 placeholder-zinc-400 focus:border-[#8B0000] focus:outline-none focus:ring-1 focus:ring-[#8B0000] dark:border-zinc-700 dark:bg-zinc-800 dark:text-white dark:placeholder-zinc-500 dark:focus:border-[#FF6666] dark:focus:ring-[#FF6666]"
+          className="mt-1 block w-full rounded-lg border px-4 py-3 placeholder-zinc-400 focus:border-[#8B0000] focus:outline-none focus:ring-1 focus:ring-[#8B0000] dark:placeholder-zinc-500 dark:focus:border-[#FF6666] dark:focus:ring-[#FF6666]"
+          style={{ borderColor: 'var(--sm-border)', backgroundColor: 'var(--sm-card)', color: 'var(--sm-text)' }}
           placeholder="••••••••"
         />
         {confirmPassword && password !== confirmPassword && (
@@ -197,7 +202,7 @@ export default function SignupForm() {
           onChange={(e) => setAcceptTerms(e.target.checked)}
           className="mt-1 h-4 w-4 rounded border-zinc-300 text-[#8B0000] focus:ring-[#8B0000] dark:border-zinc-600 dark:bg-zinc-700 dark:focus:ring-[#FF6666]"
         />
-        <span className="text-sm text-zinc-600 dark:text-zinc-400">
+        <span className="text-sm" style={{ color: 'var(--sm-text-muted)' }}>
           I agree to the{' '}
           <Link href="/terms" className="font-medium text-[#8B0000] hover:text-red-700 dark:text-[#FF6666]">
             Terms of Service
@@ -229,7 +234,7 @@ export default function SignupForm() {
       </button>
 
       {/* Login link */}
-      <p className="text-center text-sm text-zinc-600 dark:text-zinc-400">
+      <p className="text-center text-sm" style={{ color: 'var(--sm-text-muted)' }}>
         Already have an account?{' '}
         <Link
           href="/login"

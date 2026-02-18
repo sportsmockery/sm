@@ -287,7 +287,7 @@ export default function AskAIPage() {
   // Loading state
   if (isPageLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: 'var(--bg-page)' }}>
+      <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: 'var(--sm-card)' }}>
         <div className="text-center">
           <div className="w-12 h-12 border-4 border-t-transparent rounded-full animate-spin mx-auto mb-4" style={{ borderColor: '#bc0000', borderTopColor: 'transparent' }} />
           <p style={{ color: 'var(--sm-text-muted)' }}>Loading...</p>
@@ -299,11 +299,11 @@ export default function AskAIPage() {
   // Not logged in - show login prompt
   if (!isAuthenticated) {
     return (
-      <div className="min-h-screen" style={{ backgroundColor: 'var(--bg-page)' }}>
+      <div className="min-h-screen" style={{ backgroundColor: 'var(--sm-card)' }}>
         <div className="max-w-lg mx-auto px-4 py-16">
           <div
             className="rounded-2xl p-8 text-center"
-            style={{ backgroundColor: 'var(--bg-surface)', border: '1px solid var(--border-color)' }}
+            style={{ backgroundColor: 'var(--sm-surface)', border: '1px solid var(--sm-border)' }}
           >
             <div className="w-20 h-20 rounded-full bg-gradient-to-br from-[#bc0000] to-[#ff4444] flex items-center justify-center mx-auto mb-6">
               <Image
@@ -348,11 +348,11 @@ export default function AskAIPage() {
   // Logged in but doesn't have access (free tier with limit reached or no access)
   if (!hasAccess) {
     return (
-      <div className="min-h-screen" style={{ backgroundColor: 'var(--bg-page)' }}>
+      <div className="min-h-screen" style={{ backgroundColor: 'var(--sm-card)' }}>
         <div className="max-w-lg mx-auto px-4 py-16">
           <div
             className="rounded-2xl p-8 text-center"
-            style={{ backgroundColor: 'var(--bg-surface)', border: '1px solid var(--border-color)' }}
+            style={{ backgroundColor: 'var(--sm-surface)', border: '1px solid var(--sm-border)' }}
           >
             <div className="w-20 h-20 rounded-full bg-gradient-to-br from-amber-500 to-orange-500 flex items-center justify-center mx-auto mb-6">
               <svg className="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -406,14 +406,14 @@ export default function AskAIPage() {
           animation: thinking 1.5s ease-in-out infinite;
         }
       `}</style>
-      <div className="min-h-screen" style={{ backgroundColor: 'var(--bg-page)' }}>
+      <div className="min-h-screen" style={{ backgroundColor: 'var(--sm-card)' }}>
         <div className="max-w-[1320px] mx-auto px-4 md:px-6 lg:px-8 py-8">
           <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
           {/* Left Sidebar - Explanation */}
           <div className="lg:col-span-1">
             <div
               className="sticky top-24 rounded-2xl p-6"
-              style={{ backgroundColor: 'var(--bg-surface)', border: '1px solid var(--border-color)' }}
+              style={{ backgroundColor: 'var(--sm-surface)', border: '1px solid var(--sm-border)' }}
             >
               {/* Logo/Icon and Title */}
               <div className="flex items-center gap-4 mb-4">
@@ -468,7 +468,7 @@ export default function AskAIPage() {
               </div>
 
               {/* Query History Section */}
-              <div className="mt-6 pt-6" style={{ borderTop: '1px solid var(--border-color)' }}>
+              <div className="mt-6 pt-6" style={{ borderTop: '1px solid var(--sm-border)' }}>
                 <button
                   onClick={() => setShowHistory(!showHistory)}
                   className="w-full flex items-center justify-between text-sm font-medium px-3 py-2 rounded-lg transition-colors"
@@ -532,8 +532,8 @@ export default function AskAIPage() {
             <div
               className="rounded-2xl overflow-hidden flex flex-col"
               style={{
-                backgroundColor: 'var(--bg-surface)',
-                border: '1px solid var(--border-color)',
+                backgroundColor: 'var(--sm-surface)',
+                border: '1px solid var(--sm-border)',
                 minHeight: 'calc(100vh - 200px)',
                 maxHeight: 'calc(100vh - 200px)',
               }}
@@ -573,11 +573,11 @@ export default function AskAIPage() {
                             onClick={() => handlePromptClick(prompt)}
                             className="px-4 py-2 rounded-full text-sm transition-colors"
                             onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = '#bc0000'; e.currentTarget.style.color = '#ffffff' }}
-                            onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = 'var(--bg-page)'; e.currentTarget.style.color = 'var(--sm-text)' }}
+                            onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = 'var(--sm-card)'; e.currentTarget.style.color = 'var(--sm-text)' }}
                             style={{
-                              backgroundColor: 'var(--bg-page)',
+                              backgroundColor: 'var(--sm-card)',
                               color: 'var(--sm-text)',
-                              border: '1px solid var(--border-color)',
+                              border: '1px solid var(--sm-border)',
                             }}
                           >
                             {prompt}
@@ -597,7 +597,7 @@ export default function AskAIPage() {
                           className="max-w-[80%] rounded-2xl px-4 py-3"
                           style={
                             message.role === 'assistant'
-                              ? { backgroundColor: 'var(--bg-page)', color: 'var(--sm-text)' }
+                              ? { backgroundColor: 'var(--sm-card)', color: 'var(--sm-text)' }
                               : { backgroundColor: '#bc0000', color: '#ffffff' }
                           }
                         >
@@ -622,10 +622,10 @@ export default function AskAIPage() {
                                       </div>
                                     ),
                                     th: ({ children }) => (
-                                      <th className="px-2 py-1 text-left font-semibold border-b" style={{ borderColor: 'var(--border-color)' }}>{children}</th>
+                                      <th className="px-2 py-1 text-left font-semibold border-b" style={{ borderColor: 'var(--sm-border)' }}>{children}</th>
                                     ),
                                     td: ({ children }) => (
-                                      <td className="px-2 py-1 border-b" style={{ borderColor: 'var(--border-color)' }}>{children}</td>
+                                      <td className="px-2 py-1 border-b" style={{ borderColor: 'var(--sm-border)' }}>{children}</td>
                                     ),
                                     strong: ({ children }) => (
                                       <strong className="font-semibold">{children}</strong>
@@ -652,7 +652,7 @@ export default function AskAIPage() {
                       <div className="flex justify-start">
                         <div
                           className="rounded-2xl px-4 py-3 flex items-center gap-2"
-                          style={{ backgroundColor: 'var(--bg-page)' }}
+                          style={{ backgroundColor: 'var(--sm-card)' }}
                         >
                           <span className="text-sm" style={{ color: 'var(--sm-text-muted)' }}>
                             Scout is thinking
@@ -671,7 +671,7 @@ export default function AskAIPage() {
               </div>
 
               {/* Input Area */}
-              <div className="p-4" style={{ borderTop: '1px solid var(--border-color)' }}>
+              <div className="p-4" style={{ borderTop: '1px solid var(--sm-border)' }}>
                 <form onSubmit={handleSubmit} className="flex items-center gap-3">
                   {/* Scout Icon - Always visible, animates on question */}
                   <div className={`w-12 h-12 flex-shrink-0 ${isAnimating ? 'animate-thinking' : ''}`}>
@@ -690,9 +690,9 @@ export default function AskAIPage() {
                     placeholder="Ask about the Bears, Bulls, Cubs, White Sox, or Blackhawks..."
                     className="flex-1 px-4 py-3 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[#bc0000]"
                     style={{
-                      backgroundColor: 'var(--bg-page)',
+                      backgroundColor: 'var(--sm-card)',
                       color: 'var(--sm-text)',
-                      border: '1px solid var(--border-color)',
+                      border: '1px solid var(--sm-border)',
                     }}
                     disabled={isLoading}
                   />

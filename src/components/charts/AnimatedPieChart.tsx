@@ -153,7 +153,7 @@ export const AnimatedPieChart = memo(function AnimatedPieChart({
       .append('path')
       .attr('class', 'slice')
       .attr('fill', (_, i) => colorScale(i))
-      .attr('stroke', 'var(--bg-card, #fff)')
+      .attr('stroke', 'var(--sm-card, #fff)')
       .attr('stroke-width', 2)
       .style('cursor', 'pointer')
 
@@ -325,7 +325,7 @@ export const AnimatedPieChart = memo(function AnimatedPieChart({
         .attr('x', 24)
         .attr('y', 12)
         .style('font-size', '13px')
-        .style('fill', 'var(--text-primary, #222)')
+        .style('fill', 'var(--sm-text, #222)')
         .text(d => d.label.length > 15 ? d.label.slice(0, 15) + '...' : d.label)
 
       if (animated) {
@@ -368,7 +368,7 @@ export const AnimatedPieChart = memo(function AnimatedPieChart({
       .attr('dy', '-0.2em')
       .style('font-size', '24px')
       .style('font-weight', '700')
-      .style('fill', 'var(--text-primary, #222)')
+      .style('fill', 'var(--sm-text, #222)')
       .text(d3.format(',')(Math.round(total)))
 
     g.append('text')
@@ -376,7 +376,7 @@ export const AnimatedPieChart = memo(function AnimatedPieChart({
       .attr('text-anchor', 'middle')
       .attr('dy', '1.2em')
       .style('font-size', '13px')
-      .style('fill', 'var(--text-muted, #666)')
+      .style('fill', 'var(--sm-text-muted, #666)')
       .text('Total')
 
   }, [data, dimensions, colors, animated, showLabels, showLegend])
@@ -391,8 +391,8 @@ export const AnimatedPieChart = memo(function AnimatedPieChart({
     tooltip.className = 'chart-tooltip'
     tooltip.style.cssText = `
       position: fixed;
-      background: var(--bg-card, #fff);
-      border: 1px solid var(--border-default, #e0e0e0);
+      background: var(--sm-card, #fff);
+      border: 1px solid var(--sm-border, #e0e0e0);
       border-radius: 8px;
       padding: 12px 16px;
       box-shadow: 0 10px 25px -5px rgba(0,0,0,0.1), 0 10px 10px -5px rgba(0,0,0,0.04);
@@ -405,16 +405,16 @@ export const AnimatedPieChart = memo(function AnimatedPieChart({
     `
 
     const contextHtml = d.data.metadata?.context
-      ? `<div style="color: var(--text-muted, #666); font-size: 12px; margin-top: 8px; padding-top: 8px; border-top: 1px solid var(--border-default, #e0e0e0);">${d.data.metadata.context}</div>`
+      ? `<div style="color: var(--sm-text-muted, #666); font-size: 12px; margin-top: 8px; padding-top: 8px; border-top: 1px solid var(--sm-border, #e0e0e0);">${d.data.metadata.context}</div>`
       : ''
 
     tooltip.innerHTML = `
-      <div style="font-weight: 600; margin-bottom: 4px; color: var(--text-primary, #222);">${d.data.label}</div>
-      <div style="color: var(--text-secondary, #666); font-size: 13px;">
-        Value: <strong style="color: var(--text-primary, #222);">${d3.format(',')(d.data.value)}</strong>
+      <div style="font-weight: 600; margin-bottom: 4px; color: var(--sm-text, #222);">${d.data.label}</div>
+      <div style="color: var(--sm-text-dim, #666); font-size: 13px;">
+        Value: <strong style="color: var(--sm-text, #222);">${d3.format(',')(d.data.value)}</strong>
       </div>
-      <div style="color: var(--text-secondary, #666); font-size: 13px;">
-        Share: <strong style="color: var(--text-primary, #222);">${percentage}%</strong>
+      <div style="color: var(--sm-text-dim, #666); font-size: 13px;">
+        Share: <strong style="color: var(--sm-text, #222);">${percentage}%</strong>
       </div>
       ${contextHtml}
     `
@@ -461,7 +461,7 @@ export const AnimatedPieChart = memo(function AnimatedPieChart({
 
   if (!data || data.length < 2) {
     return (
-      <div className="flex items-center justify-center h-64 text-center" style={{ color: 'var(--text-muted, #666)' }}>
+      <div className="flex items-center justify-center h-64 text-center" style={{ color: 'var(--sm-text-muted, #666)' }}>
         <div>
           <svg className="w-12 h-12 mx-auto mb-3 opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M11 3.055A9.001 9.001 0 1020.945 13H11V3.055z" />

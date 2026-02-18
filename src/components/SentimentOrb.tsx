@@ -48,7 +48,7 @@ export default function SentimentOrb({ data = defaultData }: SentimentOrbProps) 
     : 'neutral'
 
   return (
-    <div className="relative overflow-hidden rounded-2xl border border-white/20 bg-white/70 p-6 backdrop-blur-xl dark:border-zinc-700/50 dark:bg-zinc-900/70">
+    <div className="relative overflow-hidden rounded-2xl p-6 backdrop-blur-xl" style={{ backgroundColor: 'var(--sm-card)', border: '1px solid var(--sm-border)' }}>
       {/* Animated background gradient */}
       <div
         className="absolute inset-0 opacity-20 animate-[spin_10s_linear_infinite]"
@@ -59,7 +59,7 @@ export default function SentimentOrb({ data = defaultData }: SentimentOrbProps) 
 
       {/* Content */}
       <div className="relative">
-        <h3 className="mb-4 text-center text-sm font-semibold text-zinc-600 dark:text-zinc-400">
+        <h3 className="mb-4 text-center text-sm font-semibold" style={{ color: 'var(--sm-text-muted)' }}>
           Fan Sentiment
         </h3>
 
@@ -75,7 +75,7 @@ export default function SentimentOrb({ data = defaultData }: SentimentOrbProps) 
               stroke="currentColor"
               strokeWidth="8"
               fill="transparent"
-              className="text-zinc-200 dark:text-zinc-700"
+              className="text-[var(--sm-border)]"
             />
             {/* Progress circle */}
             <circle
@@ -113,10 +113,10 @@ export default function SentimentOrb({ data = defaultData }: SentimentOrbProps) 
 
         {/* Label */}
         <p className="mt-4 text-center">
-          <span className="font-semibold text-zinc-900 dark:text-zinc-100">
+          <span className="font-semibold" style={{ color: 'var(--sm-text)' }}>
             {data.team} fans
           </span>
-          <span className="text-zinc-600 dark:text-zinc-400">
+          <span style={{ color: 'var(--sm-text-muted)' }}>
             {' '}are{' '}
           </span>
           <span className={`font-semibold bg-gradient-to-r ${sentimentColor} bg-clip-text text-transparent`}>
@@ -125,7 +125,7 @@ export default function SentimentOrb({ data = defaultData }: SentimentOrbProps) 
         </p>
 
         {/* Mini stats */}
-        <div className="mt-4 flex justify-center gap-4 text-xs text-zinc-500 dark:text-zinc-400">
+        <div className="mt-4 flex justify-center gap-4 text-xs" style={{ color: 'var(--sm-text-muted)' }}>
           <span className="flex items-center gap-1">
             <span className="h-2 w-2 rounded-full bg-green-500" />
             Trending up

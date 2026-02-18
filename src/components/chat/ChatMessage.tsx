@@ -182,7 +182,7 @@ export default function ChatMessage({ message, isOwn, showAvatar = true, isHighl
         }
 
         .chat-message:hover {
-          background: var(--bg-hover, rgba(255, 255, 255, 0.03));
+          background: var(--sm-card-hover, rgba(255, 255, 255, 0.03));
         }
 
         .chat-message--highlighted {
@@ -221,13 +221,13 @@ export default function ChatMessage({ message, isOwn, showAvatar = true, isHighl
           width: 36px;
           height: 36px;
           border-radius: 50%;
-          background: var(--bg-subtle, #2a2a2a);
+          background: var(--sm-surface, #2a2a2a);
           display: flex;
           align-items: center;
           justify-content: center;
           font-weight: 600;
           font-size: 0.9rem;
-          color: var(--text-subtle, #888);
+          color: var(--sm-text-muted, #888);
         }
 
         .chat-message__content {
@@ -251,7 +251,7 @@ export default function ChatMessage({ message, isOwn, showAvatar = true, isHighl
 
         .chat-message__name {
           font-weight: 600;
-          color: var(--text-main, #fff);
+          color: var(--sm-text, #fff);
         }
 
         .chat-message__badge {
@@ -264,12 +264,12 @@ export default function ChatMessage({ message, isOwn, showAvatar = true, isHighl
         }
 
         .chat-message__time {
-          color: var(--text-subtle, #888);
+          color: var(--sm-text-muted, #888);
           font-size: 0.7rem;
         }
 
         .chat-message__bubble {
-          background: var(--bg-bubble, #1a1a2e);
+          background: var(--sm-surface, #1a1a2e);
           padding: 10px 14px;
           border-radius: 16px;
           border-top-left-radius: 4px;
@@ -278,7 +278,7 @@ export default function ChatMessage({ message, isOwn, showAvatar = true, isHighl
         }
 
         .chat-message--own .chat-message__bubble {
-          background: var(--bg-bubble-own, #0B162A);
+          background: var(--sm-surface-own, #0B162A);
           border-top-left-radius: 16px;
           border-top-right-radius: 4px;
         }
@@ -287,7 +287,7 @@ export default function ChatMessage({ message, isOwn, showAvatar = true, isHighl
           margin: 0;
           font-size: 0.9rem;
           line-height: 1.4;
-          color: var(--text-main, #fff);
+          color: var(--sm-text, #fff);
         }
 
         .chat-message__gif {
@@ -297,7 +297,7 @@ export default function ChatMessage({ message, isOwn, showAvatar = true, isHighl
 
         .chat-message__edited {
           font-size: 0.7rem;
-          color: var(--text-subtle, #888);
+          color: var(--sm-text-muted, #888);
           margin-left: 6px;
         }
 
@@ -309,8 +309,8 @@ export default function ChatMessage({ message, isOwn, showAvatar = true, isHighl
         }
 
         .chat-message__reaction {
-          background: var(--bg-subtle, #2a2a2a);
-          border: 1px solid var(--border-subtle, #333);
+          background: var(--sm-surface, #2a2a2a);
+          border: 1px solid var(--sm-border, #333);
           border-radius: 12px;
           padding: 2px 8px;
           font-size: 0.75rem;
@@ -319,7 +319,7 @@ export default function ChatMessage({ message, isOwn, showAvatar = true, isHighl
         }
 
         .chat-message__reaction:hover {
-          background: var(--bg-hover, #3a3a3a);
+          background: var(--sm-card-hover, #3a3a3a);
         }
 
         .chat-message__actions {
@@ -328,8 +328,8 @@ export default function ChatMessage({ message, isOwn, showAvatar = true, isHighl
           right: 12px;
           display: flex;
           gap: 2px;
-          background: var(--bg-card, #1a1a2e);
-          border: 1px solid var(--border-subtle, #333);
+          background: var(--sm-card, #1a1a2e);
+          border: 1px solid var(--sm-border, #333);
           border-radius: 6px;
           padding: 2px;
         }
@@ -349,13 +349,13 @@ export default function ChatMessage({ message, isOwn, showAvatar = true, isHighl
           border: none;
           border-radius: 4px;
           cursor: pointer;
-          color: var(--text-subtle, #888);
+          color: var(--sm-text-muted, #888);
           transition: background 0.15s, color 0.15s;
         }
 
         .chat-message__action:hover {
-          background: var(--bg-hover, #2a2a2a);
-          color: var(--text-main, #fff);
+          background: var(--sm-card-hover, #2a2a2a);
+          color: var(--sm-text, #fff);
         }
 
         .chat-message__action--delete:hover {
@@ -368,8 +368,8 @@ export default function ChatMessage({ message, isOwn, showAvatar = true, isHighl
           right: 12px;
           display: flex;
           gap: 4px;
-          background: var(--bg-card, #1a1a2e);
-          border: 1px solid var(--border-subtle, #333);
+          background: var(--sm-card, #1a1a2e);
+          border: 1px solid var(--sm-border, #333);
           border-radius: 20px;
           padding: 6px 10px;
           box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
@@ -391,7 +391,7 @@ export default function ChatMessage({ message, isOwn, showAvatar = true, isHighl
 
         .chat-message__reaction-btn:hover {
           transform: scale(1.2);
-          background: var(--bg-hover, #2a2a2a);
+          background: var(--sm-card-hover, #2a2a2a);
         }
 
         /* Light mode */

@@ -21,9 +21,10 @@ export default function NoSearchResults({
   return (
     <div className={`text-center ${className}`}>
       {/* Illustration */}
-      <div className="mx-auto mb-6 flex h-32 w-32 items-center justify-center rounded-full bg-zinc-100 dark:bg-zinc-800">
+      <div className="mx-auto mb-6 flex h-32 w-32 items-center justify-center rounded-full" style={{ backgroundColor: 'var(--sm-surface)' }}>
         <svg
-          className="h-16 w-16 text-zinc-400 dark:text-zinc-500"
+          className="h-16 w-16"
+          style={{ color: 'var(--sm-text-dim)' }}
           fill="none"
           viewBox="0 0 24 24"
           strokeWidth={1.5}
@@ -38,10 +39,10 @@ export default function NoSearchResults({
       </div>
 
       {/* Message */}
-      <h2 className="mb-2 font-heading text-2xl font-bold text-zinc-900 dark:text-white">
+      <h2 className="mb-2 font-heading text-2xl font-bold" style={{ color: 'var(--sm-text)' }}>
         No results found
       </h2>
-      <p className="mb-6 text-zinc-600 dark:text-zinc-400">
+      <p className="mb-6" style={{ color: 'var(--sm-text-muted)' }}>
         We couldn&apos;t find any articles matching{' '}
         <span className="font-semibold text-[#8B0000] dark:text-[#FF6666]">
           &ldquo;{query}&rdquo;
@@ -49,15 +50,16 @@ export default function NoSearchResults({
       </p>
 
       {/* Suggestions */}
-      <div className="mx-auto mb-8 max-w-md rounded-xl border border-zinc-200 bg-zinc-50 p-6 text-left dark:border-zinc-800 dark:bg-zinc-900/50">
-        <h3 className="mb-3 font-semibold text-zinc-900 dark:text-white">
+      <div className="mx-auto mb-8 max-w-md rounded-xl border p-6 text-left" style={{ borderColor: 'var(--sm-border)', backgroundColor: 'var(--sm-surface)' }}>
+        <h3 className="mb-3 font-semibold" style={{ color: 'var(--sm-text)' }}>
           Search tips:
         </h3>
         <ul className="space-y-2">
           {suggestions.map((suggestion, index) => (
             <li
               key={index}
-              className="flex items-start gap-2 text-sm text-zinc-600 dark:text-zinc-400"
+              className="flex items-start gap-2 text-sm"
+              style={{ color: 'var(--sm-text-muted)' }}
             >
               <svg
                 className="mt-0.5 h-4 w-4 flex-shrink-0 text-[#8B0000] dark:text-[#FF6666]"
@@ -84,8 +86,8 @@ export default function NoSearchResults({
       </div>
 
       {/* Browse teams */}
-      <div className="mt-8 border-t border-zinc-200 pt-8 dark:border-zinc-800">
-        <h3 className="mb-4 text-sm font-semibold text-zinc-900 dark:text-white">
+      <div className="mt-8 border-t pt-8" style={{ borderColor: 'var(--sm-border)' }}>
+        <h3 className="mb-4 text-sm font-semibold" style={{ color: 'var(--sm-text)' }}>
           Browse by team:
         </h3>
         <div className="flex flex-wrap justify-center gap-3">
@@ -99,7 +101,8 @@ export default function NoSearchResults({
             <Link
               key={team.slug}
               href={`/${team.slug}`}
-              className="flex items-center gap-2 rounded-xl border border-zinc-200 bg-white px-4 py-2 font-medium text-zinc-700 transition-colors hover:border-[#8B0000]/30 hover:bg-zinc-50 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-300 dark:hover:border-[#FF6666]/30 dark:hover:bg-zinc-700"
+              className="flex items-center gap-2 rounded-xl border px-4 py-2 font-medium transition-colors hover:border-[#8B0000]/30 dark:hover:border-[#FF6666]/30"
+              style={{ borderColor: 'var(--sm-border)', backgroundColor: 'var(--sm-card)', color: 'var(--sm-text)' }}
             >
               <span>{team.emoji}</span>
               <span>{team.name}</span>

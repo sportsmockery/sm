@@ -96,12 +96,13 @@ export default function SocialFeed({ posts = samplePosts, className = '' }: Soci
 
   return (
     <section className={className}>
-      <div className="rounded-2xl border border-zinc-200 bg-white p-6 dark:border-zinc-800 dark:bg-zinc-900">
+      <div className="rounded-2xl p-6" style={{ backgroundColor: 'var(--sm-card)', border: '1px solid var(--sm-border)' }}>
         {/* Header */}
         <div className="mb-4 flex items-center justify-between">
-          <h3 className="flex items-center gap-2 font-heading text-lg font-bold text-zinc-900 dark:text-white">
+          <h3 className="flex items-center gap-2 font-heading text-lg font-bold" style={{ color: 'var(--sm-text)' }}>
             <svg
-              className="h-5 w-5 text-[#8B0000] dark:text-[#FF6666]"
+              className="h-5 w-5"
+              style={{ color: '#8B0000' }}
               fill="none"
               viewBox="0 0 24 24"
               strokeWidth={2}
@@ -120,9 +121,10 @@ export default function SocialFeed({ posts = samplePosts, className = '' }: Soci
                 onClick={() => setFilter(tab)}
                 className={`rounded-lg px-3 py-1 text-xs font-medium transition-colors ${
                   filter === tab
-                    ? 'bg-[#8B0000] text-white dark:bg-[#FF6666]'
-                    : 'text-zinc-500 hover:bg-zinc-100 dark:text-zinc-400 dark:hover:bg-zinc-800'
+                    ? 'bg-[#8B0000] text-white'
+                    : ''
                 }`}
+                style={filter !== tab ? { color: 'var(--sm-text-muted)' } : undefined}
               >
                 {tab === 'all' ? 'All' : tab.charAt(0).toUpperCase() + tab.slice(1)}
               </button>
@@ -141,16 +143,16 @@ export default function SocialFeed({ posts = samplePosts, className = '' }: Soci
                     <span className="text-xs font-bold">SM</span>
                   </div>
                   <div>
-                    <p className="text-sm font-semibold text-zinc-900 dark:text-white">
+                    <p className="text-sm font-semibold" style={{ color: 'var(--sm-text)' }}>
                       {post.author}
                     </p>
-                    <p className="text-xs text-zinc-500 dark:text-zinc-400">
+                    <p className="text-xs" style={{ color: 'var(--sm-text-muted)' }}>
                       {post.handle}
                     </p>
                   </div>
                 </div>
-                <div className={`${
-                  post.platform === 'twitter' ? 'text-zinc-900 dark:text-white' :
+                <div style={post.platform === 'twitter' ? { color: 'var(--sm-text)' } : undefined} className={`${
+                  post.platform === 'twitter' ? '' :
                   post.platform === 'instagram' ? 'text-pink-500' : 'text-blue-600'
                 }`}>
                   <PlatformIcon platform={post.platform} />
@@ -158,12 +160,12 @@ export default function SocialFeed({ posts = samplePosts, className = '' }: Soci
               </div>
 
               {/* Post content */}
-              <p className="mb-3 text-sm text-zinc-700 dark:text-zinc-300">
+              <p className="mb-3 text-sm" style={{ color: 'var(--sm-text)' }}>
                 {post.content}
               </p>
 
               {/* Post meta */}
-              <div className="flex items-center justify-between text-xs text-zinc-500 dark:text-zinc-400">
+              <div className="flex items-center justify-between text-xs" style={{ color: 'var(--sm-text-muted)' }}>
                 <div className="flex items-center gap-4">
                   <span className="flex items-center gap-1">
                     <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
@@ -197,7 +199,8 @@ export default function SocialFeed({ posts = samplePosts, className = '' }: Soci
           href="https://twitter.com/SportsMockery"
           target="_blank"
           rel="noopener noreferrer"
-          className="mt-4 flex items-center justify-center gap-2 rounded-lg border border-zinc-200 py-2 text-sm font-medium text-zinc-600 transition-colors hover:border-zinc-300 hover:text-zinc-900 dark:border-zinc-700 dark:text-zinc-400 dark:hover:border-zinc-600 dark:hover:text-white"
+          className="mt-4 flex items-center justify-center gap-2 rounded-lg py-2 text-sm font-medium transition-colors"
+          style={{ border: '1px solid var(--sm-border)', color: 'var(--sm-text-muted)' }}
         >
           Follow Us
           <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">

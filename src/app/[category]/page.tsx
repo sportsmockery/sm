@@ -197,7 +197,7 @@ export default async function CategoryPage({ params, searchParams }: CategoryPag
   })
 
   return (
-    <div className="min-h-screen" style={{ backgroundColor: 'var(--bg-surface)' }}>
+    <div className="min-h-screen" style={{ backgroundColor: 'var(--sm-surface)' }}>
       {/* Sort bar directly below navigation */}
       <CategoryFilters
         categorySlug={category.slug}

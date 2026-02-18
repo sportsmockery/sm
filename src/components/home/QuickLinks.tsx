@@ -62,7 +62,7 @@ const defaultLinks: QuickLink[] = [
     label: 'Schedule',
     href: '/schedule',
     icon: (
-      <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-zinc-700 text-sm">📅</span>
+      <span className="flex h-8 w-8 items-center justify-center rounded-lg text-sm" style={{ backgroundColor: 'var(--sm-surface)' }}>📅</span>
     ),
   },
 ]
@@ -81,7 +81,8 @@ export default function QuickLinks({ links = defaultLinks, className = '' }: Qui
             <li key={link.href}>
               <Link
                 href={link.href}
-                className="group flex flex-col items-center gap-1.5 rounded-xl bg-white p-3 transition-all hover:bg-zinc-50 hover:shadow-md dark:bg-zinc-900 dark:hover:bg-zinc-800"
+                className="group flex flex-col items-center gap-1.5 rounded-xl p-3 transition-all hover:shadow-md"
+                style={{ backgroundColor: 'var(--sm-card)' }}
               >
                 {/* Icon */}
                 <div className="relative">
@@ -94,7 +95,7 @@ export default function QuickLinks({ links = defaultLinks, className = '' }: Qui
                 </div>
 
                 {/* Label */}
-                <span className="whitespace-nowrap text-xs font-medium text-zinc-600 transition-colors group-hover:text-zinc-900 dark:text-zinc-400 dark:group-hover:text-white">
+                <span className="whitespace-nowrap text-xs font-medium transition-colors" style={{ color: 'var(--sm-text-muted)' }}>
                   {link.label}
                 </span>
               </Link>
@@ -115,7 +116,8 @@ export function QuickLinksCompact({ links = defaultLinks, className = '' }: Quic
           <Link
             key={link.href}
             href={link.href}
-            className="inline-flex items-center gap-1.5 rounded-full bg-zinc-100 px-3 py-1.5 text-sm font-medium text-zinc-700 transition-colors hover:bg-zinc-200 dark:bg-zinc-800 dark:text-zinc-300 dark:hover:bg-zinc-700"
+            className="inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-sm font-medium transition-colors"
+            style={{ backgroundColor: 'var(--sm-surface)', color: 'var(--sm-text)' }}
           >
             {link.label}
             {link.badge && (

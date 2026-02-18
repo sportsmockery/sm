@@ -49,20 +49,18 @@ export default function SearchInput({
   return (
     <form onSubmit={handleSubmit} className={className}>
       <div
-        className={`relative flex items-center overflow-hidden rounded-2xl border-2 bg-white transition-all dark:bg-zinc-900 ${
+        className={`relative flex items-center overflow-hidden rounded-2xl border-2 transition-all ${
           isFocused
             ? 'border-[#8B0000] shadow-lg shadow-[#8B0000]/10 dark:border-[#FF6666] dark:shadow-[#FF6666]/10'
-            : 'border-zinc-200 dark:border-zinc-800'
+            : ''
         }`}
+        style={isFocused ? { backgroundColor: 'var(--sm-card)' } : { borderColor: 'var(--sm-border)', backgroundColor: 'var(--sm-card)' }}
       >
         {/* Search icon */}
         <div className="flex items-center pl-4">
           <svg
-            className={`h-5 w-5 transition-colors ${
-              isFocused
-                ? 'text-[#8B0000] dark:text-[#FF6666]'
-                : 'text-zinc-400 dark:text-zinc-500'
-            }`}
+            className={`h-5 w-5 transition-colors ${isFocused ? 'text-[#8B0000] dark:text-[#FF6666]' : ''}`}
+            style={isFocused ? {} : { color: 'var(--sm-text-dim)' }}
             fill="none"
             viewBox="0 0 24 24"
             strokeWidth={2}
@@ -85,7 +83,8 @@ export default function SearchInput({
           onFocus={() => setIsFocused(true)}
           onBlur={() => setIsFocused(false)}
           placeholder={placeholder}
-          className="flex-1 bg-transparent px-3 py-4 text-lg text-zinc-900 placeholder-zinc-400 outline-none dark:text-white dark:placeholder-zinc-500"
+          className="flex-1 bg-transparent px-3 py-4 text-lg outline-none"
+          style={{ color: 'var(--sm-text)' }}
         />
 
         {/* Clear button */}
@@ -93,7 +92,8 @@ export default function SearchInput({
           <button
             type="button"
             onClick={handleClear}
-            className="mr-2 flex h-8 w-8 items-center justify-center rounded-full text-zinc-400 transition-colors hover:bg-zinc-100 hover:text-zinc-600 dark:hover:bg-zinc-800 dark:hover:text-zinc-300"
+            className="mr-2 flex h-8 w-8 items-center justify-center rounded-full transition-colors"
+            style={{ color: 'var(--sm-text-dim)' }}
           >
             <svg
               className="h-4 w-4"
@@ -134,8 +134,8 @@ export default function SearchInput({
       </div>
 
       {/* Keyboard shortcut hint */}
-      <p className="mt-2 text-center text-xs text-zinc-500 dark:text-zinc-400">
-        Press <kbd className="rounded border border-zinc-300 bg-zinc-100 px-1.5 py-0.5 font-mono text-xs dark:border-zinc-700 dark:bg-zinc-800">Enter</kbd> to search
+      <p className="mt-2 text-center text-xs" style={{ color: 'var(--sm-text-muted)' }}>
+        Press <kbd className="rounded border px-1.5 py-0.5 font-mono text-xs" style={{ borderColor: 'var(--sm-border)', backgroundColor: 'var(--sm-surface)' }}>Enter</kbd> to search
       </p>
     </form>
   )

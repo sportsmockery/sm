@@ -40,9 +40,10 @@ export default function FollowButton({
     return (
       <button
         disabled
-        className={`rounded-xl border border-zinc-300 bg-white px-6 py-2.5 text-sm font-semibold text-zinc-400 dark:border-zinc-700 dark:bg-zinc-800 ${className}`}
+        className={`rounded-xl border px-6 py-2.5 text-sm font-semibold ${className}`}
+        style={{ borderColor: 'var(--sm-border)', backgroundColor: 'var(--sm-card)', color: 'var(--sm-text-dim)' }}
       >
-        <span className="inline-block h-4 w-16 animate-pulse rounded bg-zinc-200 dark:bg-zinc-700" />
+        <span className="inline-block h-4 w-16 animate-pulse rounded" style={{ backgroundColor: 'var(--sm-surface)' }} />
       </button>
     )
   }

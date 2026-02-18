@@ -211,7 +211,7 @@ export default function Header() {
           ? theme === 'dark'
             ? 'rgba(0, 0, 0, 0.85)'
             : 'rgba(255, 255, 255, 0.9)'
-          : 'var(--bg-header)',
+          : 'var(--sm-card)',
       }}
     >
       {/* Live Games Top Bar - Shows when Chicago teams are playing */}
@@ -221,8 +221,8 @@ export default function Header() {
       <div
         className="border-b transition-colors duration-300"
         style={{
-          borderColor: 'var(--border-color)',
-          backgroundColor: isScrolled ? 'transparent' : 'var(--bg-header)',
+          borderColor: 'var(--sm-border)',
+          backgroundColor: isScrolled ? 'transparent' : 'var(--sm-card)',
         }}
       >
         <div className="max-w-[1110px] mx-auto px-4">
@@ -234,7 +234,7 @@ export default function Header() {
                 target="_blank"
                 rel="noopener noreferrer"
                 className="hover:text-[var(--link-color)] transition-colors p-2 min-w-[36px] min-h-[36px] flex items-center justify-center"
-                style={{ color: 'var(--text-primary)' }}
+                style={{ color: 'var(--sm-text)' }}
                 aria-label="Facebook"
               >
                 <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 320 512">
@@ -246,7 +246,7 @@ export default function Header() {
                 target="_blank"
                 rel="noopener noreferrer"
                 className="hover:text-[var(--link-color)] transition-colors p-2 min-w-[36px] min-h-[36px] flex items-center justify-center"
-                style={{ color: 'var(--text-primary)' }}
+                style={{ color: 'var(--sm-text)' }}
                 aria-label="X (Twitter)"
               >
                 <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 512 512">
@@ -258,7 +258,7 @@ export default function Header() {
                 target="_blank"
                 rel="noopener noreferrer"
                 className="hover:text-[var(--link-color)] transition-colors p-2 min-w-[36px] min-h-[36px] flex items-center justify-center"
-                style={{ color: 'var(--text-primary)' }}
+                style={{ color: 'var(--sm-text)' }}
                 aria-label="Bears Film Room YouTube"
               >
                 <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 576 512">
@@ -270,7 +270,7 @@ export default function Header() {
                 target="_blank"
                 rel="noopener noreferrer"
                 className="hover:text-[var(--link-color)] transition-colors p-2 min-w-[36px] min-h-[36px] flex items-center justify-center"
-                style={{ color: 'var(--text-primary)' }}
+                style={{ color: 'var(--sm-text)' }}
                 aria-label="TikTok"
               >
                 <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 448 512">
@@ -339,7 +339,7 @@ export default function Header() {
                 <div className="relative hidden sm:block" ref={userMenuRef}>
                   <button
                     onClick={() => setUserMenuOpen(!userMenuOpen)}
-                    className="flex items-center gap-2 px-2 py-1.5 rounded-full hover:bg-[var(--bg-surface)] transition-colors"
+                    className="flex items-center gap-2 px-2 py-1.5 rounded-full hover:bg-[var(--sm-surface)] transition-colors"
                   >
                     {/* User Avatar - show image if available, otherwise initials */}
                     {user.avatar ? (
@@ -358,11 +358,11 @@ export default function Header() {
                     )}
                     <span
                       className="text-xs font-medium max-w-[100px] truncate"
-                      style={{ color: 'var(--text-primary)' }}
+                      style={{ color: 'var(--sm-text)' }}
                     >
                       {user.name || user.email?.split('@')[0] || 'User'}
                     </span>
-                    <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" style={{ color: 'var(--text-muted)' }}>
+                    <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" style={{ color: 'var(--sm-text-muted)' }}>
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
                     </svg>
                   </button>
@@ -371,7 +371,7 @@ export default function Header() {
                   {userMenuOpen && (
                     <div
                       className="absolute top-full right-0 mt-1 w-48 rounded-lg shadow-lg z-[100]"
-                      style={{ backgroundColor: 'var(--bg-surface)', border: '1px solid var(--border-color)' }}
+                      style={{ backgroundColor: 'var(--sm-surface)', border: '1px solid var(--sm-border)' }}
                     >
                       <div className="py-1">
                         {/* Admin Dashboard link for admins - FIRST item */}
@@ -379,8 +379,8 @@ export default function Header() {
                           <Link
                             href="/admin"
                             onClick={() => setUserMenuOpen(false)}
-                            className="flex items-center gap-2 px-4 py-2 text-sm hover:bg-[var(--card-hover-bg)] transition-colors"
-                            style={{ color: 'var(--text-primary)' }}
+                            className="flex items-center gap-2 px-4 py-2 text-sm hover:bg-[var(--sm-card-hover)] transition-colors"
+                            style={{ color: 'var(--sm-text)' }}
                           >
                             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
@@ -394,8 +394,8 @@ export default function Header() {
                           <Link
                             href="/studio"
                             onClick={() => setUserMenuOpen(false)}
-                            className="flex items-center gap-2 px-4 py-2 text-sm hover:bg-[var(--card-hover-bg)] transition-colors"
-                            style={{ color: 'var(--text-primary)' }}
+                            className="flex items-center gap-2 px-4 py-2 text-sm hover:bg-[var(--sm-card-hover)] transition-colors"
+                            style={{ color: 'var(--sm-text)' }}
                           >
                             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
@@ -406,8 +406,8 @@ export default function Header() {
                         <Link
                           href="/profile"
                           onClick={() => setUserMenuOpen(false)}
-                          className="flex items-center gap-2 px-4 py-2 text-sm hover:bg-[var(--card-hover-bg)] transition-colors"
-                          style={{ color: 'var(--text-primary)' }}
+                          className="flex items-center gap-2 px-4 py-2 text-sm hover:bg-[var(--sm-card-hover)] transition-colors"
+                          style={{ color: 'var(--sm-text)' }}
                         >
                           <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
@@ -417,21 +417,21 @@ export default function Header() {
                         <Link
                           href="/my-gm-score"
                           onClick={() => setUserMenuOpen(false)}
-                          className="flex items-center gap-2 px-4 py-2 text-sm hover:bg-[var(--card-hover-bg)] transition-colors"
-                          style={{ color: 'var(--text-primary)' }}
+                          className="flex items-center gap-2 px-4 py-2 text-sm hover:bg-[var(--sm-card-hover)] transition-colors"
+                          style={{ color: 'var(--sm-text)' }}
                         >
                           <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
                           </svg>
                           My GM Score
                         </Link>
-                        <div className="my-1" style={{ borderTop: '1px solid var(--border-color)' }} />
+                        <div className="my-1" style={{ borderTop: '1px solid var(--sm-border)' }} />
                         <button
                           onClick={() => {
                             setUserMenuOpen(false)
                             signOut()
                           }}
-                          className="flex items-center gap-2 px-4 py-2 text-sm w-full text-left hover:bg-[var(--card-hover-bg)] transition-colors text-red-500"
+                          className="flex items-center gap-2 px-4 py-2 text-sm w-full text-left hover:bg-[var(--sm-card-hover)] transition-colors text-red-500"
                         >
                           <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
@@ -462,7 +462,7 @@ export default function Header() {
       {/* Main Navigation Bar - with red underline */}
       <nav
         className="border-b-[3px] border-[#bc0000] transition-colors duration-300"
-        style={{ backgroundColor: isScrolled ? 'transparent' : 'var(--bg-header)' }}
+        style={{ backgroundColor: isScrolled ? 'transparent' : 'var(--sm-card)' }}
       >
         <div className="max-w-[1110px] mx-auto px-4">
           <div className="flex items-center justify-between h-[44px]">
@@ -470,7 +470,7 @@ export default function Header() {
             <button
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
               className="lg:hidden p-2 hover:text-[var(--link-color)] min-w-[44px] min-h-[44px] flex items-center justify-center"
-              style={{ color: 'var(--text-primary)' }}
+              style={{ color: 'var(--sm-text)' }}
               aria-label="Toggle menu"
             >
               <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -494,7 +494,7 @@ export default function Header() {
                     <button
                       onClick={() => setActiveTeamMenu(activeTeamMenu === item.name ? null : item.name)}
                       className="flex items-center gap-1 px-4 py-4 text-[14px] font-bold hover:text-[var(--link-color)] transition-colors"
-                      style={{ fontFamily: "'Montserrat', sans-serif", color: 'var(--text-primary)' }}
+                      style={{ fontFamily: "'Montserrat', sans-serif", color: 'var(--sm-text)' }}
                     >
                       {item.name}
                       <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -505,15 +505,15 @@ export default function Header() {
                     {activeTeamMenu === item.name && (
                       <div
                         className="absolute top-full left-0 mt-0 w-48 shadow-md z-[100]"
-                        style={{ backgroundColor: 'var(--bg-surface)', border: '1px solid var(--border-color)' }}
+                        style={{ backgroundColor: 'var(--sm-surface)', border: '1px solid var(--sm-border)' }}
                       >
                         {item.submenu.map((subItem) => (
                           <Link
                             key={subItem.name}
                             href={subItem.href}
                             onClick={() => setActiveTeamMenu(null)}
-                            className="block px-5 py-2 text-[14px] hover:bg-[var(--card-hover-bg)] transition-colors"
-                            style={{ color: 'var(--text-primary)' }}
+                            className="block px-5 py-2 text-[14px] hover:bg-[var(--sm-card-hover)] transition-colors"
+                            style={{ color: 'var(--sm-text)' }}
                           >
                             {subItem.name}
                           </Link>
@@ -526,7 +526,7 @@ export default function Header() {
                     key={item.name}
                     href={item.href}
                     className="px-4 py-4 text-[14px] font-bold hover:text-[var(--link-color)] transition-colors"
-                    style={{ fontFamily: "'Montserrat', sans-serif", color: 'var(--text-primary)' }}
+                    style={{ fontFamily: "'Montserrat', sans-serif", color: 'var(--sm-text)' }}
                   >
                     {item.name}
                   </Link>
@@ -538,7 +538,7 @@ export default function Header() {
                 <button
                   onClick={() => setVideoMenuOpen(!videoMenuOpen)}
                   className="flex items-center gap-1 px-4 py-4 text-[14px] font-bold hover:text-[var(--link-color)] transition-colors"
-                  style={{ fontFamily: "'Montserrat', sans-serif", color: 'var(--text-primary)' }}
+                  style={{ fontFamily: "'Montserrat', sans-serif", color: 'var(--sm-text)' }}
                 >
                   Video
                   <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -549,15 +549,15 @@ export default function Header() {
                 {videoMenuOpen && (
                   <div
                     className="absolute top-full left-0 mt-0 w-56 shadow-md z-[100]"
-                    style={{ backgroundColor: 'var(--bg-surface)', border: '1px solid var(--border-color)' }}
+                    style={{ backgroundColor: 'var(--sm-surface)', border: '1px solid var(--sm-border)' }}
                   >
                     {videoLinks.map((video) => (
                       <Link
                         key={video.name}
                         href={video.href}
                         onClick={() => setVideoMenuOpen(false)}
-                        className="flex items-center gap-3 px-4 py-3 text-[14px] hover:bg-[var(--card-hover-bg)] transition-colors"
-                        style={{ color: 'var(--text-primary)' }}
+                        className="flex items-center gap-3 px-4 py-3 text-[14px] hover:bg-[var(--sm-card-hover)] transition-colors"
+                        style={{ color: 'var(--sm-text)' }}
                       >
                         <Image
                           src={theme === 'dark' ? video.darkIcon : video.icon}
@@ -578,7 +578,7 @@ export default function Header() {
                 <button
                   onClick={() => setMusicMenuOpen(!musicMenuOpen)}
                   className="flex items-center gap-1 px-4 py-4 text-[14px] font-bold hover:text-[var(--link-color)] transition-colors"
-                  style={{ fontFamily: "'Montserrat', sans-serif", color: 'var(--text-primary)' }}
+                  style={{ fontFamily: "'Montserrat', sans-serif", color: 'var(--sm-text)' }}
                 >
                   Music
                   <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -589,7 +589,7 @@ export default function Header() {
                 {musicMenuOpen && (
                   <div
                     className="absolute top-full left-0 mt-0 w-56 shadow-md z-[100]"
-                    style={{ backgroundColor: 'var(--bg-surface)', border: '1px solid var(--border-color)' }}
+                    style={{ backgroundColor: 'var(--sm-surface)', border: '1px solid var(--sm-border)' }}
                   >
                     {musicLinks.map((music) => (
                       <a
@@ -598,8 +598,8 @@ export default function Header() {
                         target="_blank"
                         rel="noopener noreferrer"
                         onClick={() => setMusicMenuOpen(false)}
-                        className="flex items-center gap-3 px-4 py-3 text-[14px] hover:bg-[var(--card-hover-bg)] transition-colors"
-                        style={{ color: 'var(--text-primary)' }}
+                        className="flex items-center gap-3 px-4 py-3 text-[14px] hover:bg-[var(--sm-card-hover)] transition-colors"
+                        style={{ color: 'var(--sm-text)' }}
                       >
                         {/* Spotify icon */}
                         <svg className="w-6 h-6 flex-shrink-0 text-[#1DB954]" fill="currentColor" viewBox="0 0 496 512">
@@ -620,7 +620,7 @@ export default function Header() {
                 <button
                   onClick={() => setAppMenuOpen(!appMenuOpen)}
                   className="flex items-center gap-1 px-4 py-4 text-[14px] font-bold hover:text-[var(--link-color)] transition-colors"
-                  style={{ fontFamily: "'Montserrat', sans-serif", color: 'var(--text-primary)' }}
+                  style={{ fontFamily: "'Montserrat', sans-serif", color: 'var(--sm-text)' }}
                 >
                   App
                   <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -631,7 +631,7 @@ export default function Header() {
                 {appMenuOpen && (
                   <div
                     className="absolute top-full left-0 mt-0 w-48 shadow-md z-[100]"
-                    style={{ backgroundColor: 'var(--bg-surface)', border: '1px solid var(--border-color)' }}
+                    style={{ backgroundColor: 'var(--sm-surface)', border: '1px solid var(--sm-border)' }}
                   >
                     {appLinks.map((app) => (
                       <a
@@ -640,8 +640,8 @@ export default function Header() {
                         target="_blank"
                         rel="noopener noreferrer"
                         onClick={() => setAppMenuOpen(false)}
-                        className="flex items-center gap-3 px-4 py-3 text-[14px] hover:bg-[var(--card-hover-bg)] transition-colors"
-                        style={{ color: 'var(--text-primary)' }}
+                        className="flex items-center gap-3 px-4 py-3 text-[14px] hover:bg-[var(--sm-card-hover)] transition-colors"
+                        style={{ color: 'var(--sm-text)' }}
                       >
                         {app.icon === 'apple' ? (
                           <svg className="w-5 h-5 flex-shrink-0" fill="currentColor" viewBox="0 0 384 512">
@@ -667,7 +667,7 @@ export default function Header() {
                 <button
                   onClick={() => setNewFeaturesMenuOpen(!newFeaturesMenuOpen)}
                   className="flex items-center gap-1 px-4 py-4 text-[14px] font-bold hover:text-[var(--link-color)] transition-colors"
-                  style={{ fontFamily: "'Montserrat', sans-serif", color: 'var(--text-primary)' }}
+                  style={{ fontFamily: "'Montserrat', sans-serif", color: 'var(--sm-text)' }}
                 >
                   2.0
                   <span
@@ -691,13 +691,13 @@ export default function Header() {
                 {newFeaturesMenuOpen && (
                   <div
                     className="absolute top-full left-0 mt-0 w-48 shadow-md z-[100]"
-                    style={{ backgroundColor: 'var(--bg-surface)', border: '1px solid var(--border-color)' }}
+                    style={{ backgroundColor: 'var(--sm-surface)', border: '1px solid var(--sm-border)' }}
                   >
                     <Link
                       href="/gm"
                       onClick={() => setNewFeaturesMenuOpen(false)}
-                      className="flex items-center gap-3 px-4 py-3 text-[14px] hover:bg-[var(--card-hover-bg)] transition-colors"
-                      style={{ color: 'var(--text-primary)' }}
+                      className="flex items-center gap-3 px-4 py-3 text-[14px] hover:bg-[var(--sm-card-hover)] transition-colors"
+                      style={{ color: 'var(--sm-text)' }}
                     >
                       <svg className="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.5}>
                         <path strokeLinecap="round" strokeLinejoin="round" d="M7.5 21L3 16.5m0 0L7.5 12M3 16.5h13.5m0-13.5L21 7.5m0 0L16.5 12M21 7.5H7.5" />
@@ -707,8 +707,8 @@ export default function Header() {
                     <Link
                       href="/mock-draft"
                       onClick={() => setNewFeaturesMenuOpen(false)}
-                      className="flex items-center gap-3 px-4 py-3 text-[14px] hover:bg-[var(--card-hover-bg)] transition-colors"
-                      style={{ color: 'var(--text-primary)' }}
+                      className="flex items-center gap-3 px-4 py-3 text-[14px] hover:bg-[var(--sm-card-hover)] transition-colors"
+                      style={{ color: 'var(--sm-text)' }}
                     >
                       <svg className="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.5}>
                         <path strokeLinecap="round" strokeLinejoin="round" d="M9 12h3.75M9 15h3.75M9 18h3.75m3 .75H18a2.25 2.25 0 002.25-2.25V6.108c0-1.135-.845-2.098-1.976-2.192a48.424 48.424 0 00-1.123-.08m-5.801 0c-.065.21-.1.433-.1.664 0 .414.336.75.75.75h4.5a.75.75 0 00.75-.75 2.25 2.25 0 00-.1-.664m-5.8 0A2.251 2.251 0 0113.5 2.25H15c1.012 0 1.867.668 2.15 1.586m-5.8 0c-.376.023-.75.05-1.124.08C9.095 4.01 8.25 4.973 8.25 6.108V8.25m0 0H4.875c-.621 0-1.125.504-1.125 1.125v11.25c0 .621.504 1.125 1.125 1.125h9.75c.621 0 1.125-.504 1.125-1.125V9.375c0-.621-.504-1.125-1.125-1.125H8.25z" />
@@ -718,8 +718,8 @@ export default function Header() {
                     <Link
                       href="/fan-chat"
                       onClick={() => setNewFeaturesMenuOpen(false)}
-                      className="flex items-center gap-3 px-4 py-3 text-[14px] hover:bg-[var(--card-hover-bg)] transition-colors"
-                      style={{ color: 'var(--text-primary)' }}
+                      className="flex items-center gap-3 px-4 py-3 text-[14px] hover:bg-[var(--sm-card-hover)] transition-colors"
+                      style={{ color: 'var(--sm-text)' }}
                     >
                       <svg className="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.5}>
                         <path strokeLinecap="round" strokeLinejoin="round" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
@@ -756,7 +756,7 @@ export default function Header() {
                       setSearchQuery('')
                     }}
                     className="p-2 hover:text-[var(--link-color)]"
-                    style={{ color: 'var(--text-muted)' }}
+                    style={{ color: 'var(--sm-text-muted)' }}
                   >
                     <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -767,7 +767,7 @@ export default function Header() {
                 <button
                   onClick={() => setSearchOpen(true)}
                   className="p-2 hover:text-[var(--link-color)] transition-colors min-w-[44px] min-h-[44px] flex items-center justify-center"
-                  style={{ color: 'var(--text-primary)' }}
+                  style={{ color: 'var(--sm-text)' }}
                   aria-label="Search"
                 >
                   <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -804,10 +804,10 @@ export default function Header() {
 
       {/* Mobile Navigation */}
       {mobileMenuOpen && (
-        <div className="lg:hidden" style={{ backgroundColor: 'var(--bg-header)', borderBottom: '1px solid var(--border-color)' }}>
+        <div className="lg:hidden" style={{ backgroundColor: 'var(--sm-card)', borderBottom: '1px solid var(--sm-border)' }}>
           <div className="max-w-[1110px] mx-auto px-4 py-4">
             {/* Mobile CTAs at top */}
-            <div className="flex gap-3 mb-4 pb-4" style={{ borderBottom: '1px solid var(--border-color)' }}>
+            <div className="flex gap-3 mb-4 pb-4" style={{ borderBottom: '1px solid var(--sm-border)' }}>
               <Link
                 href="/scout-ai"
                 onClick={() => setMobileMenuOpen(false)}
@@ -838,7 +838,7 @@ export default function Header() {
                     href={item.href}
                     onClick={() => setMobileMenuOpen(false)}
                     className="block py-3 text-[14px] font-bold hover:text-[var(--link-color)]"
-                    style={{ fontFamily: "'Montserrat', sans-serif", color: 'var(--text-primary)', borderBottom: '1px solid var(--border-color)' }}
+                    style={{ fontFamily: "'Montserrat', sans-serif", color: 'var(--sm-text)', borderBottom: '1px solid var(--sm-border)' }}
                   >
                     {item.name}
                   </Link>
@@ -849,7 +849,7 @@ export default function Header() {
                         href={subItem.href}
                         onClick={() => setMobileMenuOpen(false)}
                         className="block py-2 text-[13px] hover:text-[var(--link-color)]"
-                        style={{ color: 'var(--text-muted)', borderBottom: '1px solid var(--border-color)' }}
+                        style={{ color: 'var(--sm-text-muted)', borderBottom: '1px solid var(--sm-border)' }}
                       >
                         {subItem.name}
                       </Link>
@@ -862,7 +862,7 @@ export default function Header() {
                   href={item.href}
                   onClick={() => setMobileMenuOpen(false)}
                   className="block py-3 text-[14px] font-bold hover:text-[var(--link-color)] last:border-0"
-                  style={{ fontFamily: "'Montserrat', sans-serif", color: 'var(--text-primary)', borderBottom: '1px solid var(--border-color)' }}
+                  style={{ fontFamily: "'Montserrat', sans-serif", color: 'var(--sm-text)', borderBottom: '1px solid var(--sm-border)' }}
                 >
                   {item.name}
                 </Link>
@@ -874,7 +874,7 @@ export default function Header() {
                 href="https://test.sportsmockery.com/tour-page.html"
                 onClick={() => setMobileMenuOpen(false)}
                 className="py-3 text-[14px] font-bold flex items-center gap-2"
-                style={{ fontFamily: "'Montserrat', sans-serif", color: 'var(--text-primary)', borderBottom: '1px solid var(--border-color)' }}
+                style={{ fontFamily: "'Montserrat', sans-serif", color: 'var(--sm-text)', borderBottom: '1px solid var(--sm-border)' }}
               >
                 2.0
                 <span
@@ -895,7 +895,7 @@ export default function Header() {
                   href="/gm"
                   onClick={() => setMobileMenuOpen(false)}
                   className="block py-2 text-[13px] hover:text-[var(--link-color)]"
-                  style={{ color: 'var(--text-muted)', borderBottom: '1px solid var(--border-color)' }}
+                  style={{ color: 'var(--sm-text-muted)', borderBottom: '1px solid var(--sm-border)' }}
                 >
                   Trade Simulator
                 </Link>
@@ -903,7 +903,7 @@ export default function Header() {
                   href="/mock-draft"
                   onClick={() => setMobileMenuOpen(false)}
                   className="block py-2 text-[13px] hover:text-[var(--link-color)]"
-                  style={{ color: 'var(--text-muted)', borderBottom: '1px solid var(--border-color)' }}
+                  style={{ color: 'var(--sm-text-muted)', borderBottom: '1px solid var(--sm-border)' }}
                 >
                   Mock Draft
                 </Link>
@@ -911,7 +911,7 @@ export default function Header() {
                   href="/fan-chat"
                   onClick={() => setMobileMenuOpen(false)}
                   className="block py-2 text-[13px] hover:text-[var(--link-color)]"
-                  style={{ color: 'var(--text-muted)', borderBottom: '1px solid var(--border-color)' }}
+                  style={{ color: 'var(--sm-text-muted)', borderBottom: '1px solid var(--sm-border)' }}
                 >
                   Fan Chat
                 </Link>
@@ -921,7 +921,7 @@ export default function Header() {
             <div>
               <div
                 className="py-3 text-[14px] font-bold"
-                style={{ fontFamily: "'Montserrat', sans-serif", color: 'var(--text-primary)', borderBottom: '1px solid var(--border-color)' }}
+                style={{ fontFamily: "'Montserrat', sans-serif", color: 'var(--sm-text)', borderBottom: '1px solid var(--sm-border)' }}
               >
                 Video
               </div>
@@ -932,7 +932,7 @@ export default function Header() {
                     href={video.href}
                     onClick={() => setMobileMenuOpen(false)}
                     className="flex items-center gap-3 py-3 text-[13px] hover:text-[var(--link-color)]"
-                    style={{ color: 'var(--text-muted)', borderBottom: '1px solid var(--border-color)' }}
+                    style={{ color: 'var(--sm-text-muted)', borderBottom: '1px solid var(--sm-border)' }}
                   >
                     <Image
                       src={theme === 'dark' ? video.darkIcon : video.icon}
@@ -950,7 +950,7 @@ export default function Header() {
             <div>
               <div
                 className="py-3 text-[14px] font-bold"
-                style={{ fontFamily: "'Montserrat', sans-serif", color: 'var(--text-primary)', borderBottom: '1px solid var(--border-color)' }}
+                style={{ fontFamily: "'Montserrat', sans-serif", color: 'var(--sm-text)', borderBottom: '1px solid var(--sm-border)' }}
               >
                 Music
               </div>
@@ -963,7 +963,7 @@ export default function Header() {
                     rel="noopener noreferrer"
                     onClick={() => setMobileMenuOpen(false)}
                     className="flex items-center gap-3 py-3 text-[13px] hover:text-[var(--link-color)]"
-                    style={{ color: 'var(--text-muted)', borderBottom: '1px solid var(--border-color)' }}
+                    style={{ color: 'var(--sm-text-muted)', borderBottom: '1px solid var(--sm-border)' }}
                   >
                     {/* Spotify icon */}
                     <svg className="w-5 h-5 flex-shrink-0 text-[#1DB954]" fill="currentColor" viewBox="0 0 496 512">
@@ -981,7 +981,7 @@ export default function Header() {
             <div>
               <div
                 className="py-3 text-[14px] font-bold"
-                style={{ fontFamily: "'Montserrat', sans-serif", color: 'var(--text-primary)', borderBottom: '1px solid var(--border-color)' }}
+                style={{ fontFamily: "'Montserrat', sans-serif", color: 'var(--sm-text)', borderBottom: '1px solid var(--sm-border)' }}
               >
                 App
               </div>
@@ -994,7 +994,7 @@ export default function Header() {
                     rel="noopener noreferrer"
                     onClick={() => setMobileMenuOpen(false)}
                     className="flex items-center gap-3 py-3 text-[13px] hover:text-[var(--link-color)]"
-                    style={{ color: 'var(--text-muted)', borderBottom: '1px solid var(--border-color)' }}
+                    style={{ color: 'var(--sm-text-muted)', borderBottom: '1px solid var(--sm-border)' }}
                   >
                     {app.icon === 'apple' ? (
                       <svg className="w-5 h-5 flex-shrink-0" fill="currentColor" viewBox="0 0 384 512">
@@ -1015,10 +1015,10 @@ export default function Header() {
             </div>
 
             {/* Mobile Account Section */}
-            <div className="mt-4 pt-4" style={{ borderTop: '1px solid var(--border-color)' }}>
+            <div className="mt-4 pt-4" style={{ borderTop: '1px solid var(--sm-border)' }}>
               {isAuthenticated && user ? (
                 <>
-                  <div className="flex items-center gap-3 py-3" style={{ borderBottom: '1px solid var(--border-color)' }}>
+                  <div className="flex items-center gap-3 py-3" style={{ borderBottom: '1px solid var(--sm-border)' }}>
                     {user.avatar ? (
                       <Image
                         src={user.avatar}
@@ -1034,10 +1034,10 @@ export default function Header() {
                       </div>
                     )}
                     <div>
-                      <div className="font-semibold" style={{ color: 'var(--text-primary)' }}>
+                      <div className="font-semibold" style={{ color: 'var(--sm-text)' }}>
                         {user.name || user.email?.split('@')[0] || 'User'}
                       </div>
-                      <div className="text-xs" style={{ color: 'var(--text-muted)' }}>
+                      <div className="text-xs" style={{ color: 'var(--sm-text-muted)' }}>
                         {user.email}
                       </div>
                     </div>
@@ -1048,7 +1048,7 @@ export default function Header() {
                       href="/admin"
                       onClick={() => setMobileMenuOpen(false)}
                       className="flex items-center gap-3 py-3 text-[14px] hover:text-[var(--link-color)]"
-                      style={{ color: 'var(--text-primary)', borderBottom: '1px solid var(--border-color)' }}
+                      style={{ color: 'var(--sm-text)', borderBottom: '1px solid var(--sm-border)' }}
                     >
                       <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
@@ -1063,7 +1063,7 @@ export default function Header() {
                       href="/studio"
                       onClick={() => setMobileMenuOpen(false)}
                       className="flex items-center gap-3 py-3 text-[14px] hover:text-[var(--link-color)]"
-                      style={{ color: 'var(--text-primary)', borderBottom: '1px solid var(--border-color)' }}
+                      style={{ color: 'var(--sm-text)', borderBottom: '1px solid var(--sm-border)' }}
                     >
                       <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
@@ -1075,7 +1075,7 @@ export default function Header() {
                     href="/profile"
                     onClick={() => setMobileMenuOpen(false)}
                     className="flex items-center gap-3 py-3 text-[14px] hover:text-[var(--link-color)]"
-                    style={{ color: 'var(--text-primary)', borderBottom: '1px solid var(--border-color)' }}
+                    style={{ color: 'var(--sm-text)', borderBottom: '1px solid var(--sm-border)' }}
                   >
                     <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
@@ -1086,7 +1086,7 @@ export default function Header() {
                     href="/my-gm-score"
                     onClick={() => setMobileMenuOpen(false)}
                     className="flex items-center gap-3 py-3 text-[14px] hover:text-[var(--link-color)]"
-                    style={{ color: 'var(--text-primary)', borderBottom: '1px solid var(--border-color)' }}
+                    style={{ color: 'var(--sm-text)', borderBottom: '1px solid var(--sm-border)' }}
                   >
                     <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />

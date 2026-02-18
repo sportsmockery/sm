@@ -192,14 +192,14 @@ export default function ChatInput({ onSend }: ChatInputProps) {
           .chat-input--auth {
             padding: 16px;
             text-align: center;
-            border-top: 1px solid var(--border-subtle, #333);
-            background: var(--bg-card, #1a1a2e);
+            border-top: 1px solid var(--sm-border, #333);
+            background: var(--sm-card, #1a1a2e);
           }
 
           .chat-input__auth-text {
             margin: 0;
             font-size: 0.9rem;
-            color: var(--text-subtle, #888);
+            color: var(--sm-text-muted, #888);
           }
 
           .chat-input__auth-link {
@@ -310,8 +310,8 @@ export default function ChatInput({ onSend }: ChatInputProps) {
       <style jsx>{`
         .chat-input {
           padding: 12px;
-          border-top: 1px solid var(--border-subtle, #333);
-          background: var(--bg-card, #1a1a2e);
+          border-top: 1px solid var(--sm-border, #333);
+          background: var(--sm-card, #1a1a2e);
           position: relative;
         }
 
@@ -346,14 +346,14 @@ export default function ChatInput({ onSend }: ChatInputProps) {
           border: none;
           border-radius: 8px;
           cursor: pointer;
-          color: var(--text-subtle, #888);
+          color: var(--sm-text-muted, #888);
           transition: background 0.15s, color 0.15s;
         }
 
         .chat-input__btn:hover,
         .chat-input__btn--active {
-          background: var(--bg-hover, #2a2a2a);
-          color: var(--text-main, #fff);
+          background: var(--sm-card-hover, #2a2a2a);
+          color: var(--sm-text, #fff);
         }
 
         .chat-input__gif-label {
@@ -372,10 +372,10 @@ export default function ChatInput({ onSend }: ChatInputProps) {
         .chat-input__field {
           width: 100%;
           padding: 10px 14px;
-          background: var(--bg-subtle, #111);
-          border: 1px solid var(--border-subtle, #333);
+          background: var(--sm-surface, #111);
+          border: 1px solid var(--sm-border, #333);
           border-radius: 20px;
-          color: var(--text-main, #fff);
+          color: var(--sm-text, #fff);
           font-size: 0.9rem;
           line-height: 1.4;
           resize: none;
@@ -388,7 +388,7 @@ export default function ChatInput({ onSend }: ChatInputProps) {
         }
 
         .chat-input__field::placeholder {
-          color: var(--text-subtle, #888);
+          color: var(--sm-text-muted, #888);
         }
 
         .chat-input__char-count {
@@ -396,7 +396,7 @@ export default function ChatInput({ onSend }: ChatInputProps) {
           bottom: 8px;
           right: 12px;
           font-size: 0.7rem;
-          color: var(--text-subtle, #888);
+          color: var(--sm-text-muted, #888);
         }
 
         .chat-input__char-count--limit {

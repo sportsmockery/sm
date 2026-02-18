@@ -26,13 +26,13 @@ export default function GlowCard({
     <div
       onClick={onClick}
       className={`
-        relative overflow-hidden rounded-2xl border border-zinc-200 bg-white
+        relative overflow-hidden rounded-2xl
         transition-all duration-300 ease-out
-        dark:border-zinc-800 dark:bg-zinc-900
         ${glowColors[color]}
         ${onClick ? 'cursor-pointer' : ''}
         ${className}
       `}
+      style={{ backgroundColor: 'var(--sm-card)', border: '1px solid var(--sm-border)' }}
     >
       {/* Glow effect overlay */}
       <div

@@ -120,7 +120,7 @@ body.theme-dark .sm-main,
 .sm-loading-spinner {
   width: 40px;
   height: 40px;
-  border: 3px solid var(--border-subtle);
+  border: 3px solid var(--sm-border);
   border-top-color: var(--color-bears-accent);
   border-radius: 50%;
   animation: spin 1s linear infinite;
@@ -159,7 +159,7 @@ body.theme-dark .sm-main,
 .sm-primary-card {
   background-color: var(--bg-card);
   border-radius: 10px;
-  border: 1px solid var(--border-subtle);
+  border: 1px solid var(--sm-border);
   padding: 16px;
   display: flex;
   flex-direction: column;
@@ -289,7 +289,7 @@ body.theme-light .sm-tag--cubs,
 .sm-support-card {
   background-color: var(--bg-card-subtle);
   border-radius: 8px;
-  border: 1px solid var(--border-subtle);
+  border: 1px solid var(--sm-border);
   padding: 10px 12px;
 }
 
@@ -328,7 +328,7 @@ body.theme-light .sm-tag--cubs,
 .sm-headlines-box {
   background-color: var(--bg-card);
   border-radius: 12px;
-  border: 1px solid var(--border-subtle);
+  border: 1px solid var(--sm-border);
   padding: 16px;
   flex: 1;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
@@ -352,7 +352,7 @@ body.theme-light .sm-tag--cubs,
   gap: 8px;
   line-height: 1.45;
   padding: 8px 0;
-  border-bottom: 1px solid var(--border-subtle);
+  border-bottom: 1px solid var(--sm-border);
 }
 
 .sm-headline-row:last-child {
@@ -427,7 +427,7 @@ body.theme-light .sm-tag--cubs,
 .sm-tonight-item {
   background-color: var(--bg-card);
   border-radius: 10px;
-  border: 1px solid var(--border-subtle);
+  border: 1px solid var(--sm-border);
   padding: 10px 12px;
   font-size: 0.82rem;
 }
@@ -458,7 +458,7 @@ body.theme-light .sm-tag--cubs,
 .sm-status-pill {
   padding: 2px 8px;
   border-radius: 999px;
-  border: 1px solid var(--border-subtle);
+  border: 1px solid var(--sm-border);
   font-size: 0.68rem;
   color: var(--text-subtle);
 }
@@ -535,7 +535,7 @@ body.theme-light .sm-tag--cubs,
 /* FEATURED SHELL */
 .sm-featured-section {
   background-color: var(--bg-section);
-  border-top: 1px solid var(--border-subtle);
+  border-top: 1px solid var(--sm-border);
 }
 
 .sm-featured-grid {
@@ -553,7 +553,7 @@ body.theme-light .sm-tag--cubs,
   flex-direction: column;
   background-color: var(--bg-card);
   border-radius: 12px;
-  border: 1px solid var(--border-subtle);
+  border: 1px solid var(--sm-border);
   overflow: hidden;
   text-decoration: none;
   transition: transform 0.2s ease, box-shadow 0.2s ease;
@@ -656,7 +656,7 @@ body.theme-light .sm-tag--cubs,
   padding: 12px;
   background-color: var(--bg-card);
   border-radius: 10px;
-  border: 1px solid var(--border-subtle);
+  border: 1px solid var(--sm-border);
 }
 
 .sm-latest-content {
@@ -700,7 +700,7 @@ body.theme-light .sm-tag--cubs,
 /* SEASONAL FOCUS */
 .sm-seasonal-focus {
   background-color: var(--bg-section);
-  border-top: 1px solid var(--border-subtle);
+  border-top: 1px solid var(--sm-border);
 }
 
 .sm-seasonal-grid {
@@ -712,7 +712,7 @@ body.theme-light .sm-tag--cubs,
 .sm-seasonal-team {
   background-color: var(--bg-card);
   border-radius: 10px;
-  border: 1px solid var(--border-subtle);
+  border: 1px solid var(--sm-border);
   padding: 16px;
 }
 
@@ -749,7 +749,7 @@ body.theme-light .sm-tag--cubs,
 /* EVERGREEN */
 .sm-evergreen {
   background-color: var(--bg-page);
-  border-top: 1px solid var(--border-subtle);
+  border-top: 1px solid var(--sm-border);
 }
 
 .sm-evergreen-grid {
@@ -761,7 +761,7 @@ body.theme-light .sm-tag--cubs,
 .sm-evergreen-card {
   background-color: var(--bg-card);
   border-radius: 10px;
-  border: 1px solid var(--border-subtle);
+  border: 1px solid var(--sm-border);
   padding: 16px;
   display: flex;
   flex-direction: column;
@@ -993,7 +993,7 @@ body.theme-light .sm-tag--cubs,
   border-radius: 12px;
   overflow: hidden;
   background: var(--bg-card);
-  border: 1px solid var(--border-subtle);
+  border: 1px solid var(--sm-border);
 }
 
 .sm-primary-image-link {
@@ -1086,7 +1086,7 @@ body.theme-light .sm-tag--cubs,
   padding: 12px;
   background: var(--bg-card);
   border-radius: 10px;
-  border: 1px solid var(--border-subtle);
+  border: 1px solid var(--sm-border);
   text-decoration: none;
   transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
@@ -1147,7 +1147,7 @@ body.theme-light .sm-tag--cubs,
 .sm-headlines-box {
   background: var(--bg-card);
   border-radius: 12px;
-  border: 1px solid var(--border-subtle);
+  border: 1px solid var(--sm-border);
   padding: 20px;
 }
 
@@ -1159,7 +1159,7 @@ body.theme-light .sm-tag--cubs,
   color: var(--text-subtle);
   margin: 0 0 16px;
   padding-bottom: 12px;
-  border-bottom: 1px solid var(--border-subtle);
+  border-bottom: 1px solid var(--sm-border);
   font-family: var(--font-heading);
 }
 
@@ -1175,7 +1175,7 @@ body.theme-light .sm-tag--cubs,
   align-items: flex-start;
   gap: 12px;
   padding: 12px 0;
-  border-bottom: 1px solid var(--border-subtle);
+  border-bottom: 1px solid var(--sm-border);
 }
 
 .sm-headline-item:last-child {
@@ -1296,7 +1296,7 @@ body.theme-light .sm-tag--cubs,
 
 .sm-latest-section {
   background-color: var(--bg-page);
-  border-top: 1px solid var(--border-subtle);
+  border-top: 1px solid var(--sm-border);
 }
 
 .sm-latest-grid {
@@ -1309,7 +1309,7 @@ body.theme-light .sm-tag--cubs,
   display: flex;
   gap: 16px;
   padding: 20px 24px;
-  border-bottom: 1px solid var(--border-subtle);
+  border-bottom: 1px solid var(--sm-border);
   transition: background-color 0.15s ease;
 }
 
@@ -1319,7 +1319,7 @@ body.theme-light .sm-tag--cubs,
 
 /* Alternate items go to second column */
 .sm-latest-item:nth-child(odd) {
-  border-right: 1px solid var(--border-subtle);
+  border-right: 1px solid var(--sm-border);
 }
 
 .sm-latest-marker {
@@ -1473,7 +1473,7 @@ body.theme-light .sm-tag--cubs,
 
 .sm-seasonal-section {
   background-color: var(--bg-section);
-  border-top: 1px solid var(--border-subtle);
+  border-top: 1px solid var(--sm-border);
 }
 
 .sm-seasonal-grid {
@@ -1485,7 +1485,7 @@ body.theme-light .sm-tag--cubs,
 .sm-team-card {
   background: var(--bg-card);
   border-radius: 16px;
-  border: 1px solid var(--border-subtle);
+  border: 1px solid var(--sm-border);
   padding: 0;
   overflow: hidden;
   transition: transform 0.2s ease, box-shadow 0.2s ease;
@@ -1603,12 +1603,12 @@ body.theme-light .sm-tag--cubs,
   list-style: none;
   margin: 0;
   padding: 0 20px;
-  border-top: 1px solid var(--border-subtle);
+  border-top: 1px solid var(--sm-border);
 }
 
 .sm-team-post {
   padding: 14px 0;
-  border-bottom: 1px solid var(--border-subtle);
+  border-bottom: 1px solid var(--sm-border);
 }
 
 .sm-team-post:last-child {
@@ -1632,7 +1632,7 @@ body.theme-light .sm-tag--cubs,
 .sm-team-links {
   padding: 16px 20px;
   background: var(--bg-card-subtle);
-  border-top: 1px solid var(--border-subtle);
+  border-top: 1px solid var(--sm-border);
 }
 
 /* Responsive */

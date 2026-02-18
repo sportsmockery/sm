@@ -17,11 +17,11 @@ export default function UpcomingGamesWidget({ games, team, limit = 5 }: Upcoming
 
   if (upcomingGames.length === 0) {
     return (
-      <div className="rounded-xl border border-zinc-200 bg-white p-5 dark:border-zinc-800 dark:bg-zinc-900">
-        <h3 className="mb-4 text-sm font-bold uppercase tracking-wide text-zinc-900 dark:text-white">
+      <div className="rounded-xl border p-5" style={{ borderColor: 'var(--sm-border)', backgroundColor: 'var(--sm-card)' }}>
+        <h3 className="mb-4 text-sm font-bold uppercase tracking-wide" style={{ color: 'var(--sm-text)' }}>
           Upcoming Games
         </h3>
-        <p className="text-sm text-zinc-500 dark:text-zinc-400">No upcoming games scheduled.</p>
+        <p className="text-sm" style={{ color: 'var(--sm-text-muted)' }}>No upcoming games scheduled.</p>
       </div>
     );
   }
@@ -36,25 +36,25 @@ export default function UpcomingGamesWidget({ games, team, limit = 5 }: Upcoming
   };
 
   return (
-    <div className="rounded-xl border border-zinc-200 bg-white dark:border-zinc-800 dark:bg-zinc-900">
-      <div className="border-b border-zinc-200 px-5 py-4 dark:border-zinc-800">
-        <h3 className="text-sm font-bold uppercase tracking-wide text-zinc-900 dark:text-white">
+    <div className="rounded-xl border" style={{ borderColor: 'var(--sm-border)', backgroundColor: 'var(--sm-card)' }}>
+      <div className="border-b px-5 py-4" style={{ borderColor: 'var(--sm-border)' }}>
+        <h3 className="text-sm font-bold uppercase tracking-wide" style={{ color: 'var(--sm-text)' }}>
           Upcoming Games
         </h3>
       </div>
 
-      <div className="divide-y divide-zinc-100 dark:divide-zinc-800">
+      <div className="divide-y" style={{ '--tw-divide-color': 'var(--sm-border)' } as React.CSSProperties}>
         {upcomingGames.map((game) => {
           const opponent = game.isHome ? game.awayTeam : game.homeTeam;
 
           return (
             <div key={game.id} className="p-4">
               <div className="mb-2 flex items-center justify-between">
-                <span className="text-xs text-zinc-500 dark:text-zinc-400">
+                <span className="text-xs" style={{ color: 'var(--sm-text-muted)' }}>
                   {formatDate(game.date)}
                 </span>
                 {game.week && (
-                  <span className="text-xs font-medium text-zinc-400 dark:text-zinc-500">
+                  <span className="text-xs font-medium" style={{ color: 'var(--sm-text-dim)' }}>
                     Week {game.week}
                   </span>
                 )}
@@ -70,16 +70,16 @@ export default function UpcomingGamesWidget({ games, team, limit = 5 }: Upcoming
                   />
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className="font-semibold text-zinc-900 dark:text-white truncate">
+                  <p className="font-semibold truncate" style={{ color: 'var(--sm-text)' }}>
                     {game.isHome ? 'vs' : '@'} {opponent.shortName}
                   </p>
-                  <p className="text-sm text-zinc-500 dark:text-zinc-400">
+                  <p className="text-sm" style={{ color: 'var(--sm-text-muted)' }}>
                     {game.time}
                   </p>
                 </div>
               </div>
 
-              <div className="mt-2 flex items-center justify-between text-xs text-zinc-500 dark:text-zinc-400">
+              <div className="mt-2 flex items-center justify-between text-xs" style={{ color: 'var(--sm-text-muted)' }}>
                 <span className="truncate">{game.venue}</span>
                 {game.broadcast && (
                   <span className="flex-shrink-0 ml-2">📺 {game.broadcast}</span>
@@ -92,7 +92,8 @@ export default function UpcomingGamesWidget({ games, team, limit = 5 }: Upcoming
 
       <Link
         href={`/teams/${team.slug}/schedule`}
-        className="block border-t border-zinc-200 px-5 py-3 text-center text-sm font-semibold text-zinc-600 transition-colors hover:bg-zinc-50 hover:text-zinc-900 dark:border-zinc-800 dark:text-zinc-400 dark:hover:bg-zinc-800 dark:hover:text-white"
+        className="block border-t px-5 py-3 text-center text-sm font-semibold transition-colors"
+        style={{ borderColor: 'var(--sm-border)', color: 'var(--sm-text-muted)' }}
       >
         View Full Schedule →
       </Link>

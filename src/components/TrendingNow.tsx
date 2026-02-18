@@ -29,10 +29,10 @@ export default async function TrendingNow({ limit = 4, className = '' }: Trendin
           <div className="absolute inset-0 rounded-xl bg-[#FF0000] animate-ping opacity-25" />
         </div>
         <div>
-          <h2 className="font-black text-xl text-zinc-900 dark:text-zinc-100 font-[var(--font-montserrat)] uppercase tracking-tight">
+          <h2 className="font-black text-xl font-[var(--font-montserrat)] uppercase tracking-tight" style={{ color: 'var(--sm-text)' }}>
             Trending Now
           </h2>
-          <p className="text-xs text-zinc-500 dark:text-zinc-400">
+          <p className="text-xs" style={{ color: 'var(--sm-text-muted)' }}>
             Hot stories in the last 24 hours
           </p>
         </div>
@@ -92,29 +92,29 @@ export async function TrendingNowCompact({ limit = 3, className = '' }: Trending
   }
 
   return (
-    <div className={`rounded-2xl bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 overflow-hidden ${className}`}>
+    <div className={`rounded-2xl overflow-hidden ${className}`} style={{ backgroundColor: 'var(--sm-card)', border: '1px solid var(--sm-border)' }}>
       {/* Header */}
-      <div className="flex items-center gap-2 px-4 py-3 border-b border-zinc-100 dark:border-zinc-800">
+      <div className="flex items-center gap-2 px-4 py-3" style={{ borderBottom: '1px solid var(--sm-border)' }}>
         <div className="relative">
           <svg className="w-4 h-4 text-[#FF0000]" fill="currentColor" viewBox="0 0 24 24">
             <path d="M17.657 18.657A8 8 0 016.343 7.343S7 9 9 10c0-2 .5-5 2.986-7C14 5 16.09 5.777 17.656 7.343A7.975 7.975 0 0120 13a7.975 7.975 0 01-2.343 5.657z" />
           </svg>
         </div>
-        <h3 className="font-bold text-sm text-zinc-900 dark:text-zinc-100">Trending Now</h3>
+        <h3 className="font-bold text-sm" style={{ color: 'var(--sm-text)' }}>Trending Now</h3>
       </div>
 
       {/* Posts */}
-      <div className="divide-y divide-zinc-100 dark:divide-zinc-800">
+      <div className="divide-y divide-[var(--sm-border)]">
         {posts.map((post, index) => (
           <Link
             key={post.id}
             href={`/${post.categorySlug}/${post.slug}`}
-            className="group flex items-center gap-3 px-4 py-3 hover:bg-zinc-50 dark:hover:bg-zinc-800/50 transition-colors"
+            className="group flex items-center gap-3 px-4 py-3 hover:bg-[var(--sm-card-hover)] transition-colors"
           >
             <span className="shrink-0 w-5 h-5 rounded bg-[#8B0000] text-white text-xs font-bold flex items-center justify-center">
               {index + 1}
             </span>
-            <span className="flex-1 text-sm text-zinc-700 dark:text-zinc-300 line-clamp-1 group-hover:text-[#8B0000] transition-colors">
+            <span className="flex-1 text-sm line-clamp-1 group-hover:text-[#8B0000] transition-colors" style={{ color: 'var(--sm-text-dim)' }}>
               {post.title}
             </span>
           </Link>
@@ -129,15 +129,15 @@ export function TrendingNowSkeleton() {
   return (
     <section>
       <div className="flex items-center gap-3 mb-6">
-        <div className="w-10 h-10 rounded-xl bg-zinc-200 dark:bg-zinc-800 animate-pulse" />
+        <div className="w-10 h-10 rounded-xl bg-[var(--sm-surface)] animate-pulse" />
         <div className="space-y-2">
-          <div className="h-5 w-32 bg-zinc-200 dark:bg-zinc-800 rounded animate-pulse" />
-          <div className="h-3 w-40 bg-zinc-100 dark:bg-zinc-800/50 rounded animate-pulse" />
+          <div className="h-5 w-32 bg-[var(--sm-surface)] rounded animate-pulse" />
+          <div className="h-3 w-40 bg-[var(--sm-surface)] rounded animate-pulse" />
         </div>
       </div>
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         {Array.from({ length: 4 }).map((_, i) => (
-          <div key={i} className="rounded-xl bg-zinc-200 dark:bg-zinc-800 aspect-[4/3] animate-pulse" />
+          <div key={i} className="rounded-xl bg-[var(--sm-surface)] aspect-[4/3] animate-pulse" />
         ))}
       </div>
     </section>

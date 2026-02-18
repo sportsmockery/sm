@@ -40,7 +40,7 @@ export default function PaywallGate({
   // Show loading skeleton while checking subscription
   if (isLoading) {
     return (
-      <div className="animate-pulse bg-zinc-200 dark:bg-zinc-800 rounded-lg h-32" />
+      <div className="animate-pulse rounded-lg h-32" style={{ backgroundColor: 'var(--sm-surface)' }} />
     )
   }
 

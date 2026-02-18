@@ -44,21 +44,23 @@ export default function HeadlineStack({
 
   return (
     <section
-      className={`bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 ${className}`}
+      className={`border ${className}`}
+      style={{ backgroundColor: 'var(--sm-card)', borderColor: 'var(--sm-border)' }}
       aria-labelledby="headline-stack-title"
     >
       {/* Header */}
-      <header className="px-4 py-3 border-b border-red-600 bg-zinc-50 dark:bg-zinc-900">
+      <header className="px-4 py-3 border-b border-red-600" style={{ backgroundColor: 'var(--sm-surface)' }}>
         <h2
           id="headline-stack-title"
-          className={`text-lg text-black dark:text-white uppercase tracking-wide ${montserrat.className}`}
+          className={`text-lg uppercase tracking-wide ${montserrat.className}`}
+          style={{ color: 'var(--sm-text)' }}
         >
           {title}
         </h2>
       </header>
 
       {/* Headlines list */}
-      <ol className="divide-y divide-zinc-100 dark:divide-zinc-800" role="list">
+      <ol className="divide-y" style={{ borderColor: 'var(--sm-border)' }} role="list">
         {headlines.map((headline, index) => (
           <motion.li
             key={headline.id}
@@ -68,15 +70,16 @@ export default function HeadlineStack({
           >
             <Link
               href={`/${headline.category.slug}/${headline.slug}`}
-              className="flex items-start gap-3 p-4 hover:bg-zinc-50 dark:hover:bg-zinc-900 transition-colors focus:outline-none focus:ring-2 focus:ring-inset focus:ring-red-600 group"
+              className="flex items-start gap-3 p-4 transition-colors focus:outline-none focus:ring-2 focus:ring-inset focus:ring-red-600 group hover:opacity-80"
             >
               {/* Number */}
               <span
                 className={`flex-shrink-0 w-6 h-6 flex items-center justify-center text-sm font-bold rounded ${
                   index < 3
                     ? 'bg-red-600 text-white'
-                    : 'bg-zinc-200 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400'
+                    : ''
                 } ${montserrat.className}`}
+                style={index >= 3 ? { backgroundColor: 'var(--sm-surface)', color: 'var(--sm-text-muted)' } : undefined}
               >
                 {index + 1}
               </span>
@@ -96,14 +99,15 @@ export default function HeadlineStack({
                 </div>
 
                 {/* Title */}
-                <h3 className="text-sm text-black dark:text-white font-medium leading-snug group-hover:text-red-600 dark:group-hover:text-red-500 transition-colors line-clamp-2">
+                <h3 className="text-sm font-medium leading-snug group-hover:text-red-600 transition-colors line-clamp-2" style={{ color: 'var(--sm-text)' }}>
                   {headline.title}
                 </h3>
 
                 {/* Time */}
                 <time
                   dateTime={headline.published_at}
-                  className="text-xs text-zinc-500 dark:text-zinc-500 mt-1 block"
+                  className="text-xs mt-1 block"
+                  style={{ color: 'var(--sm-text-muted)' }}
                 >
                   {formatRelativeTime(headline.published_at)}
                 </time>
@@ -114,7 +118,7 @@ export default function HeadlineStack({
       </ol>
 
       {/* View all link */}
-      <div className="px-4 py-3 border-t border-zinc-100 dark:border-zinc-800">
+      <div className="px-4 py-3 border-t" style={{ borderColor: 'var(--sm-border)' }}>
         <Link
           href="/search"
           className="text-sm text-red-600 font-bold hover:underline focus:outline-none focus:underline"

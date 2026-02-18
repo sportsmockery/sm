@@ -24,28 +24,24 @@ export default function StandingsTable({ standings, currentTeam, showConference 
     <div>
       {/* View toggle */}
       {showConference && (
-        <div className="mb-4 flex gap-1 rounded-lg bg-zinc-100 p-1 dark:bg-zinc-800 w-fit">
+        <div className="mb-4 flex gap-1 rounded-lg p-1 w-fit" style={{ backgroundColor: 'var(--sm-surface)' }}>
           <button
             onClick={() => setView('division')}
-            className={`
-              rounded-md px-3 py-1.5 text-sm font-medium transition-colors
-              ${view === 'division'
-                ? 'bg-white text-zinc-900 shadow dark:bg-zinc-700 dark:text-white'
-                : 'text-zinc-600 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-white'
-              }
-            `}
+            className="rounded-md px-3 py-1.5 text-sm font-medium transition-colors"
+            style={view === 'division'
+              ? { backgroundColor: 'var(--sm-card)', color: 'var(--sm-text)', boxShadow: '0 1px 2px rgba(0,0,0,0.05)' }
+              : { color: 'var(--sm-text-muted)' }
+            }
           >
             Division
           </button>
           <button
             onClick={() => setView('conference')}
-            className={`
-              rounded-md px-3 py-1.5 text-sm font-medium transition-colors
-              ${view === 'conference'
-                ? 'bg-white text-zinc-900 shadow dark:bg-zinc-700 dark:text-white'
-                : 'text-zinc-600 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-white'
-              }
-            `}
+            className="rounded-md px-3 py-1.5 text-sm font-medium transition-colors"
+            style={view === 'conference'
+              ? { backgroundColor: 'var(--sm-card)', color: 'var(--sm-text)', boxShadow: '0 1px 2px rgba(0,0,0,0.05)' }
+              : { color: 'var(--sm-text-muted)' }
+            }
           >
             Conference
           </button>
@@ -53,7 +49,7 @@ export default function StandingsTable({ standings, currentTeam, showConference 
       )}
 
       {/* Standings Table */}
-      <div className="overflow-hidden rounded-xl border border-zinc-200 bg-white dark:border-zinc-800 dark:bg-zinc-900">
+      <div className="overflow-hidden rounded-xl border" style={{ borderColor: 'var(--sm-border)', backgroundColor: 'var(--sm-card)' }}>
         {/* Mobile view */}
         <div className="md:hidden">
           {standings.map((entry, index) => {
@@ -63,13 +59,14 @@ export default function StandingsTable({ standings, currentTeam, showConference 
               <div
                 key={entry.team.id}
                 className={`
-                  border-b border-zinc-100 p-4 last:border-b-0 dark:border-zinc-800
+                  border-b p-4 last:border-b-0
                   ${isCurrentTeam ? 'bg-amber-50 dark:bg-amber-900/20' : ''}
                 `}
+                style={{ borderColor: 'var(--sm-border)' }}
               >
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-3">
-                    <span className="text-lg font-bold text-zinc-400 dark:text-zinc-500">
+                    <span className="text-lg font-bold" style={{ color: 'var(--sm-text-dim)' }}>
                       {index + 1}
                     </span>
                     <div className="relative h-8 w-8">
@@ -81,16 +78,16 @@ export default function StandingsTable({ standings, currentTeam, showConference 
                       />
                     </div>
                     <div>
-                      <p className={`font-semibold ${isCurrentTeam ? 'text-zinc-900 dark:text-white' : 'text-zinc-700 dark:text-zinc-300'}`}>
+                      <p className="font-semibold" style={{ color: 'var(--sm-text)' }}>
                         {entry.team.shortName}
                       </p>
-                      <p className="text-sm text-zinc-500 dark:text-zinc-400">
+                      <p className="text-sm" style={{ color: 'var(--sm-text-muted)' }}>
                         {entry.wins}-{entry.losses}{entry.ties ? `-${entry.ties}` : ''}
                       </p>
                     </div>
                   </div>
                   <div className="text-right">
-                    <p className="font-bold text-zinc-900 dark:text-white">{entry.pct}</p>
+                    <p className="font-bold" style={{ color: 'var(--sm-text)' }}>{entry.pct}</p>
                     <p className={`text-sm ${getStreakColor(entry.streak)}`}>{entry.streak}</p>
                   </div>
                 </div>
@@ -102,7 +99,7 @@ export default function StandingsTable({ standings, currentTeam, showConference 
         {/* Desktop view */}
         <table className="hidden w-full md:table">
           <thead>
-            <tr className="border-b border-zinc-200 bg-zinc-50 text-left text-xs font-semibold uppercase tracking-wider text-zinc-500 dark:border-zinc-800 dark:bg-zinc-800/50 dark:text-zinc-400">
+            <tr className="border-b text-left text-xs font-semibold uppercase tracking-wider" style={{ borderColor: 'var(--sm-border)', backgroundColor: 'var(--sm-surface)', color: 'var(--sm-text-muted)' }}>
               <th className="px-4 py-3 w-10">#</th>
               <th className="px-4 py-3">Team</th>
               <th className="px-4 py-3 text-center">W</th>
@@ -118,7 +115,7 @@ export default function StandingsTable({ standings, currentTeam, showConference 
               <th className="px-4 py-3 text-center">Strk</th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-zinc-100 dark:divide-zinc-800">
+          <tbody className="divide-y" style={{ '--tw-divide-color': 'var(--sm-border)' } as React.CSSProperties}>
             {standings.map((entry, index) => {
               const isCurrentTeam = entry.team.slug === currentTeam.slug;
 
@@ -133,7 +130,7 @@ export default function StandingsTable({ standings, currentTeam, showConference 
                     }
                   `}
                 >
-                  <td className="px-4 py-3 text-sm font-bold text-zinc-400 dark:text-zinc-500">
+                  <td className="px-4 py-3 text-sm font-bold" style={{ color: 'var(--sm-text-dim)' }}>
                     {index + 1}
                   </td>
                   <td className="px-4 py-3">
@@ -149,35 +146,35 @@ export default function StandingsTable({ standings, currentTeam, showConference 
                           className="object-contain"
                         />
                       </div>
-                      <span className={`font-medium ${isCurrentTeam ? 'text-zinc-900 dark:text-white' : 'text-zinc-700 dark:text-zinc-300'}`}>
+                      <span className="font-medium" style={{ color: 'var(--sm-text)' }}>
                         {entry.team.name}
                       </span>
                     </Link>
                   </td>
-                  <td className="px-4 py-3 text-center text-sm font-semibold text-zinc-900 dark:text-white">
+                  <td className="px-4 py-3 text-center text-sm font-semibold" style={{ color: 'var(--sm-text)' }}>
                     {entry.wins}
                   </td>
-                  <td className="px-4 py-3 text-center text-sm font-semibold text-zinc-900 dark:text-white">
+                  <td className="px-4 py-3 text-center text-sm font-semibold" style={{ color: 'var(--sm-text)' }}>
                     {entry.losses}
                   </td>
                   {entry.ties !== undefined && (
-                    <td className="px-4 py-3 text-center text-sm font-semibold text-zinc-900 dark:text-white">
+                    <td className="px-4 py-3 text-center text-sm font-semibold" style={{ color: 'var(--sm-text)' }}>
                       {entry.ties}
                     </td>
                   )}
-                  <td className="px-4 py-3 text-center text-sm font-bold text-zinc-900 dark:text-white">
+                  <td className="px-4 py-3 text-center text-sm font-bold" style={{ color: 'var(--sm-text)' }}>
                     {entry.pct}
                   </td>
-                  <td className="px-4 py-3 text-center text-sm text-zinc-600 dark:text-zinc-400">
+                  <td className="px-4 py-3 text-center text-sm" style={{ color: 'var(--sm-text-muted)' }}>
                     {entry.gb}
                   </td>
-                  <td className="hidden px-4 py-3 text-center text-sm text-zinc-600 dark:text-zinc-400 lg:table-cell">
+                  <td className="hidden px-4 py-3 text-center text-sm lg:table-cell" style={{ color: 'var(--sm-text-muted)' }}>
                     {entry.homeRecord}
                   </td>
-                  <td className="hidden px-4 py-3 text-center text-sm text-zinc-600 dark:text-zinc-400 lg:table-cell">
+                  <td className="hidden px-4 py-3 text-center text-sm lg:table-cell" style={{ color: 'var(--sm-text-muted)' }}>
                     {entry.awayRecord}
                   </td>
-                  <td className="hidden px-4 py-3 text-center text-sm text-zinc-600 dark:text-zinc-400 xl:table-cell">
+                  <td className="hidden px-4 py-3 text-center text-sm xl:table-cell" style={{ color: 'var(--sm-text-muted)' }}>
                     {entry.divisionRecord}
                   </td>
                   <td className={`px-4 py-3 text-center text-sm font-semibold ${getStreakColor(entry.streak)}`}>

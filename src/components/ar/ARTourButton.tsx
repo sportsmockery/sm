@@ -123,7 +123,7 @@ export default function ARTourButton({ team, className = '' }: ARTourButtonProps
 
   return (
     <>
-      <div className={`rounded-xl border overflow-hidden ${className}`} style={{ borderColor: config.teamColor, backgroundColor: 'var(--bg-surface)' }}>
+      <div className={`rounded-xl border overflow-hidden ${className}`} style={{ borderColor: config.teamColor, backgroundColor: 'var(--sm-surface)' }}>
         {/* Preview Image */}
         <div className="relative h-32 bg-zinc-800">
           <div
@@ -141,10 +141,10 @@ export default function ARTourButton({ team, className = '' }: ARTourButtonProps
 
         {/* Content */}
         <div className="p-4">
-          <h3 className="text-lg font-bold mb-1" style={{ color: 'var(--text-primary)', fontFamily: "'Montserrat', sans-serif" }}>
+          <h3 className="text-lg font-bold mb-1" style={{ color: 'var(--sm-text)', fontFamily: "'Montserrat', sans-serif" }}>
             {deviceType === 'desktop' ? '3D Stadium Tour' : 'AR Stadium Tour'}
           </h3>
-          <p className="text-sm mb-3" style={{ color: 'var(--text-muted)' }}>
+          <p className="text-sm mb-3" style={{ color: 'var(--sm-text-muted)' }}>
             {deviceType === 'ios'
               ? `Place ${config.name} in your room!`
               : deviceType === 'android'
@@ -173,7 +173,7 @@ export default function ARTourButton({ team, className = '' }: ARTourButtonProps
             {config.buttonText}
           </button>
 
-          <p className="text-xs text-center mt-3" style={{ color: 'var(--text-muted)' }}>
+          <p className="text-xs text-center mt-3" style={{ color: 'var(--sm-text-muted)' }}>
             {deviceType === 'ios'
               ? 'Best on iPhone Safari'
               : deviceType === 'android'

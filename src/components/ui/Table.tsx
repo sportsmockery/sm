@@ -109,14 +109,14 @@ export default function Table<T extends Record<string, unknown>>({
     >
       <table className="w-full border-collapse text-sm">
         <thead>
-          <tr className="bg-[var(--bg-tertiary)]">
+          <tr className="bg-[var(--sm-surface)]">
             {selectable && (
               <th className="w-12 px-4 py-3">
                 <input
                   type="checkbox"
                   checked={allSelected}
                   onChange={handleSelectAll}
-                  className="w-4 h-4 rounded border-[var(--border-default)] bg-[var(--bg-tertiary)] text-[var(--accent-red)] focus:ring-[var(--accent-red)]"
+                  className="w-4 h-4 rounded border-[var(--border-default)] bg-[var(--sm-surface)] text-[var(--accent-red)] focus:ring-[var(--accent-red)]"
                 />
               </th>
             )}
@@ -124,10 +124,10 @@ export default function Table<T extends Record<string, unknown>>({
               <th
                 key={column.key}
                 className={`
-                  px-4 py-3 font-bold text-xs uppercase tracking-wide text-[var(--text-muted)] border-b border-[var(--border-default)]
+                  px-4 py-3 font-bold text-xs uppercase tracking-wide text-[var(--sm-text-muted)] border-b border-[var(--border-default)]
                   ${alignClasses[column.align || 'left']}
-                  ${stickyHeader ? 'sticky top-0 bg-[var(--bg-tertiary)] z-10' : ''}
-                  ${column.sortable !== false && sortable ? 'cursor-pointer select-none hover:text-[var(--text-primary)]' : ''}
+                  ${stickyHeader ? 'sticky top-0 bg-[var(--sm-surface)] z-10' : ''}
+                  ${column.sortable !== false && sortable ? 'cursor-pointer select-none hover:text-[var(--sm-text)]' : ''}
                 `}
                 style={{ width: column.width }}
                 onClick={() =>
@@ -158,7 +158,7 @@ export default function Table<T extends Record<string, unknown>>({
                 colSpan={columns.length + (selectable ? 1 : 0)}
                 className="px-4 py-12 text-center"
               >
-                <div className="flex items-center justify-center gap-2 text-[var(--text-muted)]">
+                <div className="flex items-center justify-center gap-2 text-[var(--sm-text-muted)]">
                   <svg
                     className="w-5 h-5 animate-spin"
                     fill="none"
@@ -186,7 +186,7 @@ export default function Table<T extends Record<string, unknown>>({
             <tr>
               <td
                 colSpan={columns.length + (selectable ? 1 : 0)}
-                className="px-4 py-12 text-center text-[var(--text-muted)]"
+                className="px-4 py-12 text-center text-[var(--sm-text-muted)]"
               >
                 {emptyMessage}
               </td>
@@ -201,9 +201,9 @@ export default function Table<T extends Record<string, unknown>>({
                   key={rowKey}
                   onClick={() => onRowClick?.(row)}
                   className={`
-                    border-b border-[var(--border-subtle)] transition-colors
+                    border-b border-[var(--sm-border)] transition-colors
                     ${onRowClick ? 'cursor-pointer' : ''}
-                    ${isSelected ? 'bg-[var(--accent-red-glow)]' : 'hover:bg-[var(--bg-hover)]'}
+                    ${isSelected ? 'bg-[var(--accent-red-glow)]' : 'hover:bg-[var(--sm-card-hover)]'}
                   `}
                 >
                   {selectable && (
@@ -213,14 +213,14 @@ export default function Table<T extends Record<string, unknown>>({
                         checked={isSelected}
                         onChange={() => handleSelectRow(rowKey)}
                         onClick={(e) => e.stopPropagation()}
-                        className="w-4 h-4 rounded border-[var(--border-default)] bg-[var(--bg-tertiary)] text-[var(--accent-red)] focus:ring-[var(--accent-red)]"
+                        className="w-4 h-4 rounded border-[var(--border-default)] bg-[var(--sm-surface)] text-[var(--accent-red)] focus:ring-[var(--accent-red)]"
                       />
                     </td>
                   )}
                   {columns.map((column) => (
                     <td
                       key={column.key}
-                      className={`px-4 py-3 text-[var(--text-primary)] ${alignClasses[column.align || 'left']}`}
+                      className={`px-4 py-3 text-[var(--sm-text)] ${alignClasses[column.align || 'left']}`}
                     >
                       {column.render
                         ? column.render(row[column.key], row, rowIndex)
@@ -248,14 +248,14 @@ function SortIndicator({
   return (
     <span className="flex flex-col">
       <svg
-        className={`w-3 h-3 -mb-1 ${active && direction === 'asc' ? 'text-[var(--accent-red)]' : 'text-[var(--text-muted)]'}`}
+        className={`w-3 h-3 -mb-1 ${active && direction === 'asc' ? 'text-[var(--accent-red)]' : 'text-[var(--sm-text-muted)]'}`}
         fill="currentColor"
         viewBox="0 0 24 24"
       >
         <path d="M7 14l5-5 5 5z" />
       </svg>
       <svg
-        className={`w-3 h-3 ${active && direction === 'desc' ? 'text-[var(--accent-red)]' : 'text-[var(--text-muted)]'}`}
+        className={`w-3 h-3 ${active && direction === 'desc' ? 'text-[var(--accent-red)]' : 'text-[var(--sm-text-muted)]'}`}
         fill="currentColor"
         viewBox="0 0 24 24"
       >

@@ -29,7 +29,8 @@ export default function TeamDropdown() {
     <div ref={dropdownRef} className="relative">
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="flex items-center gap-1 rounded-lg px-4 py-2 text-sm font-medium text-zinc-700 transition-colors hover:bg-zinc-100 hover:text-[#8B0000] dark:text-zinc-300 dark:hover:bg-zinc-800 dark:hover:text-[#FF6666]"
+        className="flex items-center gap-1 rounded-lg px-4 py-2 text-sm font-medium transition-colors"
+        style={{ color: 'var(--sm-text)' }}
       >
         Teams
         <svg
@@ -47,10 +48,11 @@ export default function TeamDropdown() {
       <div
         className={`
           absolute left-0 top-full z-50 mt-1 w-56 origin-top-left overflow-hidden rounded-xl
-          border border-zinc-200 bg-white shadow-lg
-          transition-all duration-200 dark:border-zinc-800 dark:bg-zinc-900
+          shadow-lg
+          transition-all duration-200
           ${isOpen ? 'visible scale-100 opacity-100' : 'invisible scale-95 opacity-0'}
         `}
+        style={{ backgroundColor: 'var(--sm-card)', border: '1px solid var(--sm-border)' }}
       >
         <div className="p-2">
           {teams.map((team) => (
@@ -58,10 +60,10 @@ export default function TeamDropdown() {
               <Link
                 href={`/teams/${team.slug}`}
                 onClick={() => setIsOpen(false)}
-                className="flex items-center gap-3 rounded-lg px-3 py-2.5 transition-colors hover:bg-zinc-100 dark:hover:bg-zinc-800"
+                className="flex items-center gap-3 rounded-lg px-3 py-2.5 transition-colors"
               >
                 <span className="text-xl">{team.emoji}</span>
-                <span className="font-medium text-zinc-700 group-hover:text-zinc-900 dark:text-zinc-300 dark:group-hover:text-white">
+                <span className="font-medium" style={{ color: 'var(--sm-text)' }}>
                   {team.name}
                 </span>
                 <div
@@ -76,7 +78,8 @@ export default function TeamDropdown() {
                     key={subPage}
                     href={`/teams/${team.slug}/${subPage.toLowerCase()}`}
                     onClick={() => setIsOpen(false)}
-                    className="text-xs text-zinc-400 hover:text-zinc-600 dark:text-zinc-500 dark:hover:text-zinc-300"
+                    className="text-xs"
+                    style={{ color: 'var(--sm-text-dim)' }}
                   >
                     {subPage}
                   </Link>
@@ -87,11 +90,12 @@ export default function TeamDropdown() {
         </div>
 
         {/* View all link */}
-        <div className="border-t border-zinc-200 p-2 dark:border-zinc-800">
+        <div className="p-2" style={{ borderTop: '1px solid var(--sm-border)' }}>
           <Link
             href="/teams"
             onClick={() => setIsOpen(false)}
-            className="flex items-center justify-center gap-2 rounded-lg px-3 py-2 text-sm font-medium text-[#8B0000] transition-colors hover:bg-[#8B0000]/10 dark:text-[#FF6666] dark:hover:bg-[#FF6666]/10"
+            className="flex items-center justify-center gap-2 rounded-lg px-3 py-2 text-sm font-medium transition-colors"
+            style={{ color: '#8B0000' }}
           >
             View All Teams
             <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">

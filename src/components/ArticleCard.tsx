@@ -45,9 +45,10 @@ export default function ArticleCard({
         ease: [0.25, 0.46, 0.45, 0.94],
       }}
       whileHover={prefersReducedMotion ? {} : { y: -4, transition: { duration: 0.2 } }}
-      className="group relative overflow-hidden rounded-xl border bg-white shadow-sm dark:border-zinc-800 dark:bg-zinc-900"
+      className="group relative overflow-hidden rounded-xl border shadow-sm"
       style={{
-        borderColor: 'var(--border-color)',
+        backgroundColor: 'var(--sm-card)',
+        borderColor: 'var(--sm-border)',
         boxShadow: 'var(--shadow-sm)',
       }}
     >
@@ -104,27 +105,27 @@ export default function ArticleCard({
         )}
 
         <Link href={`/${category.slug}/${slug}`}>
-          <h2 className="mt-3 text-lg font-bold text-zinc-900 line-clamp-2 transition-colors duration-300 group-hover:text-[#8B0000] dark:text-zinc-100 dark:group-hover:text-[#ff6b6b] font-[var(--font-montserrat)]">
+          <h2 className="mt-3 text-lg font-bold line-clamp-2 transition-colors duration-300 group-hover:text-[#8B0000] font-[var(--font-montserrat)]" style={{ color: 'var(--sm-text)' }}>
             {title}
           </h2>
         </Link>
 
         {excerpt && (
-          <p className="mt-3 line-clamp-2 text-sm text-zinc-600 dark:text-zinc-400 leading-relaxed">
+          <p className="mt-3 line-clamp-2 text-sm leading-relaxed" style={{ color: 'var(--sm-text-muted)' }}>
             {excerpt}
           </p>
         )}
 
-        <div className="mt-4 pt-4 border-t border-zinc-100 dark:border-zinc-800 flex items-center justify-between text-xs text-zinc-500 dark:text-zinc-500">
+        <div className="mt-4 pt-4 border-t flex items-center justify-between text-xs" style={{ borderColor: 'var(--sm-border)', color: 'var(--sm-text-muted)' }}>
           <div className="flex items-center gap-2">
             {author && (
               <>
-                <div className="w-6 h-6 rounded-full bg-gradient-to-br from-zinc-300 to-zinc-400 dark:from-zinc-600 dark:to-zinc-700 flex items-center justify-center">
+                <div className="w-6 h-6 rounded-full flex items-center justify-center" style={{ background: 'linear-gradient(to bottom right, var(--sm-surface), var(--sm-border))' }}>
                   <span className="text-[10px] font-bold text-white uppercase">
                     {author.charAt(0)}
                   </span>
                 </div>
-                <span className="font-medium text-zinc-700 dark:text-zinc-300">{author}</span>
+                <span className="font-medium" style={{ color: 'var(--sm-text-dim)' }}>{author}</span>
               </>
             )}
           </div>

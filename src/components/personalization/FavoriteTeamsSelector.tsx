@@ -117,7 +117,7 @@ export default function FavoriteTeamsSelector({
   return (
     <div className={`${className}`}>
       {/* Instructions */}
-      <p className="text-sm text-gray-500 dark:text-gray-400 mb-4">
+      <p className="text-sm text-[var(--sm-text-muted)] mb-4">
         Select your favorite Chicago teams. Content from your favorites will be prioritized in your feed.
         {selectedTeams.includes('bears') && (
           <span className="block mt-1 text-xs text-[#C83803]">
@@ -140,7 +140,7 @@ export default function FavoriteTeamsSelector({
               className={`relative flex items-center gap-3 p-4 rounded-xl border-2 transition-all ${
                 isSelected
                   ? 'border-opacity-100 bg-opacity-10'
-                  : 'border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 hover:border-gray-300 dark:hover:border-gray-600'
+                  : 'border-[var(--sm-border)] bg-[var(--sm-card)] hover:border-[var(--sm-text-muted)]'
               }`}
               style={{
                 borderColor: isSelected ? teamInfo.secondaryColor : undefined,
@@ -161,10 +161,10 @@ export default function FavoriteTeamsSelector({
 
               {/* Team name */}
               <div className="flex-1 text-left">
-                <p className="font-semibold text-[#222] dark:text-white">
+                <p className="font-semibold text-[var(--sm-text)]">
                   {teamInfo.name}
                 </p>
-                <p className="text-xs text-gray-400 capitalize">
+                <p className="text-xs text-[var(--sm-text-muted)] capitalize">
                   {teamInfo.sport}
                 </p>
               </div>
@@ -202,13 +202,13 @@ export default function FavoriteTeamsSelector({
 
       {/* Selection summary */}
       <div className="mt-4 flex items-center justify-between">
-        <p className="text-sm text-gray-500 dark:text-gray-400">
+        <p className="text-sm text-[var(--sm-text-muted)]">
           {selectedTeams.length} of {maxSelections} teams selected
         </p>
 
         {/* Priority order */}
         {selectedTeams.length > 1 && (
-          <div className="flex items-center gap-1 text-xs text-gray-400">
+          <div className="flex items-center gap-1 text-xs text-[var(--sm-text-muted)]">
             <span>Priority:</span>
             {selectedTeams.map((team, index) => (
               <span
@@ -228,7 +228,7 @@ export default function FavoriteTeamsSelector({
 
       {/* Error message */}
       {error && (
-        <p className="mt-3 text-sm text-red-500 bg-red-50 dark:bg-red-900/20 px-4 py-2 rounded-lg">
+        <p className="mt-3 text-sm text-red-500 bg-red-50 dark:bg-red-900/20 px-4 py-2 rounded-lg" style={{ borderColor: 'var(--sm-border)' }}>
           {error}
         </p>
       )}
@@ -259,7 +259,7 @@ export default function FavoriteTeamsSelector({
 
         {/* Success message */}
         {saved && (
-          <span className="flex items-center gap-2 text-sm text-emerald-600 dark:text-emerald-400">
+          <span className="flex items-center gap-2 text-sm text-emerald-600">
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
             </svg>

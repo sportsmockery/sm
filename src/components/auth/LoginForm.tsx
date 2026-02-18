@@ -51,7 +51,7 @@ export default function LoginForm({ redirectTo = '/admin' }: LoginFormProps) {
 
       {/* Email */}
       <div>
-        <label htmlFor="email" className="block text-sm font-medium text-zinc-700 dark:text-zinc-300">
+        <label htmlFor="email" className="block text-sm font-medium" style={{ color: 'var(--sm-text)' }}>
           Email address
         </label>
         <input
@@ -61,14 +61,15 @@ export default function LoginForm({ redirectTo = '/admin' }: LoginFormProps) {
           onChange={(e) => setEmail(e.target.value)}
           required
           autoComplete="email"
-          className="mt-1 block w-full rounded-lg border border-zinc-300 bg-white px-4 py-3 text-zinc-900 placeholder-zinc-400 focus:border-[#8B0000] focus:outline-none focus:ring-1 focus:ring-[#8B0000] dark:border-zinc-700 dark:bg-zinc-800 dark:text-white dark:placeholder-zinc-500 dark:focus:border-[#FF6666] dark:focus:ring-[#FF6666]"
+          className="mt-1 block w-full rounded-lg border px-4 py-3 placeholder-zinc-400 focus:border-[#8B0000] focus:outline-none focus:ring-1 focus:ring-[#8B0000] dark:placeholder-zinc-500 dark:focus:border-[#FF6666] dark:focus:ring-[#FF6666]"
+          style={{ borderColor: 'var(--sm-border)', backgroundColor: 'var(--sm-card)', color: 'var(--sm-text)' }}
           placeholder="you@example.com"
         />
       </div>
 
       {/* Password */}
       <div>
-        <label htmlFor="password" className="block text-sm font-medium text-zinc-700 dark:text-zinc-300">
+        <label htmlFor="password" className="block text-sm font-medium" style={{ color: 'var(--sm-text)' }}>
           Password
         </label>
         <input
@@ -78,7 +79,8 @@ export default function LoginForm({ redirectTo = '/admin' }: LoginFormProps) {
           onChange={(e) => setPassword(e.target.value)}
           required
           autoComplete="current-password"
-          className="mt-1 block w-full rounded-lg border border-zinc-300 bg-white px-4 py-3 text-zinc-900 placeholder-zinc-400 focus:border-[#8B0000] focus:outline-none focus:ring-1 focus:ring-[#8B0000] dark:border-zinc-700 dark:bg-zinc-800 dark:text-white dark:placeholder-zinc-500 dark:focus:border-[#FF6666] dark:focus:ring-[#FF6666]"
+          className="mt-1 block w-full rounded-lg border px-4 py-3 placeholder-zinc-400 focus:border-[#8B0000] focus:outline-none focus:ring-1 focus:ring-[#8B0000] dark:placeholder-zinc-500 dark:focus:border-[#FF6666] dark:focus:ring-[#FF6666]"
+          style={{ borderColor: 'var(--sm-border)', backgroundColor: 'var(--sm-card)', color: 'var(--sm-text)' }}
           placeholder="••••••••"
         />
       </div>
@@ -92,7 +94,7 @@ export default function LoginForm({ redirectTo = '/admin' }: LoginFormProps) {
             onChange={(e) => setRememberMe(e.target.checked)}
             className="h-4 w-4 rounded border-zinc-300 text-[#8B0000] focus:ring-[#8B0000] dark:border-zinc-600 dark:bg-zinc-700 dark:focus:ring-[#FF6666]"
           />
-          <span className="text-sm text-zinc-600 dark:text-zinc-400">Remember me</span>
+          <span className="text-sm" style={{ color: 'var(--sm-text-muted)' }}>Remember me</span>
         </label>
         <Link
           href="/forgot-password"
@@ -122,7 +124,7 @@ export default function LoginForm({ redirectTo = '/admin' }: LoginFormProps) {
       </button>
 
       {/* Sign up link */}
-      <p className="text-center text-sm text-zinc-600 dark:text-zinc-400">
+      <p className="text-center text-sm" style={{ color: 'var(--sm-text-muted)' }}>
         Don&apos;t have an account?{' '}
         <Link
           href="/signup"

@@ -146,7 +146,7 @@ export function Tooltip({
       position: 'absolute',
       width: 8,
       height: 8,
-      backgroundColor: 'var(--bg-elevated)',
+      backgroundColor: 'var(--sm-card)',
       transform: 'rotate(45deg)',
     }
 
@@ -196,7 +196,7 @@ export function Tooltip({
           className={`animate-in fade-in zoom-in-95 duration-150 ${className}`}
         >
           <div
-            className="relative rounded-lg border border-[var(--border-default)] bg-[var(--bg-elevated)] px-3 py-2 text-sm text-[var(--text-primary)] shadow-lg"
+            className="relative rounded-lg border border-[var(--border-default)] bg-[var(--sm-card)] px-3 py-2 text-sm text-[var(--sm-text)] shadow-lg"
             style={{ maxWidth }}
           >
             {content}
@@ -221,7 +221,7 @@ export function HelpTooltip({ content, position = 'top', className = '' }: HelpT
     <Tooltip content={content} position={position} className={className}>
       <button
         type="button"
-        className="inline-flex h-5 w-5 items-center justify-center rounded-full text-[var(--text-muted)] transition-colors hover:bg-[var(--bg-tertiary)] hover:text-[var(--text-primary)]"
+        className="inline-flex h-5 w-5 items-center justify-center rounded-full text-[var(--sm-text-muted)] transition-colors hover:bg-[var(--sm-surface)] hover:text-[var(--sm-text)]"
         aria-label="Help"
       >
         <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
@@ -241,7 +241,7 @@ interface InfoBadgeProps {
 
 export function InfoBadge({ label, tooltip, variant = 'default' }: InfoBadgeProps) {
   const variantClasses = {
-    default: 'bg-[var(--bg-tertiary)] text-[var(--text-secondary)]',
+    default: 'bg-[var(--sm-surface)] text-[var(--sm-text-dim)]',
     success: 'bg-emerald-500/10 text-emerald-500',
     warning: 'bg-amber-500/10 text-amber-500',
     error: 'bg-red-500/10 text-red-500',
@@ -276,8 +276,8 @@ export function ShortcutTooltip({ description, shortcut, children, position = 'b
       <div className="flex items-center gap-1">
         {shortcuts.map((key, i) => (
           <span key={i}>
-            {i > 0 && <span className="mx-0.5 text-[var(--text-muted)]">+</span>}
-            <kbd className="inline-flex min-w-[1.5rem] items-center justify-center rounded bg-[var(--bg-tertiary)] px-1.5 py-0.5 font-mono text-xs font-medium text-[var(--text-primary)]">
+            {i > 0 && <span className="mx-0.5 text-[var(--sm-text-muted)]">+</span>}
+            <kbd className="inline-flex min-w-[1.5rem] items-center justify-center rounded bg-[var(--sm-surface)] px-1.5 py-0.5 font-mono text-xs font-medium text-[var(--sm-text)]">
               {key}
             </kbd>
           </span>
@@ -406,10 +406,10 @@ export function FeatureTooltip({ id, title, description, children, position = 'b
             maxWidth: 280,
           }}
         >
-          <div className="relative rounded-xl border border-[var(--accent-red)]/30 bg-[var(--bg-elevated)] p-4 shadow-lg shadow-red-500/5">
+          <div className="relative rounded-xl border border-[var(--accent-red)]/30 bg-[var(--sm-card)] p-4 shadow-lg shadow-red-500/5">
             {/* Arrow */}
             <div
-              className={`absolute left-1/2 h-3 w-3 -translate-x-1/2 rotate-45 border-[var(--accent-red)]/30 bg-[var(--bg-elevated)] ${
+              className={`absolute left-1/2 h-3 w-3 -translate-x-1/2 rotate-45 border-[var(--accent-red)]/30 bg-[var(--sm-card)] ${
                 position === 'top' ? '-bottom-1.5 border-b border-r' : '-top-1.5 border-l border-t'
               }`}
             />
@@ -421,8 +421,8 @@ export function FeatureTooltip({ id, title, description, children, position = 'b
                 </svg>
               </div>
               <div className="flex-1">
-                <p className="font-semibold text-[var(--text-primary)]">{title}</p>
-                <p className="mt-1 text-sm text-[var(--text-secondary)]">{description}</p>
+                <p className="font-semibold text-[var(--sm-text)]">{title}</p>
+                <p className="mt-1 text-sm text-[var(--sm-text-dim)]">{description}</p>
               </div>
             </div>
 

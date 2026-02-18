@@ -130,7 +130,7 @@ export default function TeamDataHubContent({ teamKey }: TeamDataHubContentProps)
   }, [teamKey, team.league])
 
   return (
-    <div className="min-h-screen bg-[#f5f5f5] dark:bg-[#0a0a0b]">
+    <div className="min-h-screen" style={{ backgroundColor: 'var(--sm-bg)' }}>
       {/* Hero header */}
       <header
         className="relative py-8 md:py-12"
@@ -216,7 +216,7 @@ export default function TeamDataHubContent({ teamKey }: TeamDataHubContentProps)
           <div className="lg:col-span-2 space-y-8">
             {/* Season overview */}
             {isLoading ? (
-              <div className="h-64 bg-gray-100 dark:bg-gray-800 rounded-xl animate-pulse" />
+              <div className="h-64 bg-[var(--sm-surface)] rounded-xl animate-pulse" />
             ) : seasonData ? (
               <TeamSeasonCard team={team} season={seasonData} />
             ) : null}
@@ -225,7 +225,7 @@ export default function TeamDataHubContent({ teamKey }: TeamDataHubContentProps)
             <section>
               <div className="flex items-center justify-between mb-6">
                 <h2
-                  className="text-[18px] font-bold text-[#222] dark:text-white uppercase pb-2 border-b-[3px]"
+                  className="text-[18px] font-bold text-[var(--sm-text)] uppercase pb-2 border-b-[3px]"
                   style={{ borderColor: team.secondaryColor, fontFamily: "'Montserrat', sans-serif" }}
                 >
                   Latest {team.shortName} News
@@ -242,7 +242,7 @@ export default function TeamDataHubContent({ teamKey }: TeamDataHubContentProps)
               {isLoading ? (
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   {[1, 2, 3, 4].map((i) => (
-                    <div key={i} className="h-48 bg-gray-100 dark:bg-gray-800 rounded-lg animate-pulse" />
+                    <div key={i} className="h-48 bg-[var(--sm-surface)] rounded-lg animate-pulse" />
                   ))}
                 </div>
               ) : posts.length > 0 ? (
@@ -250,7 +250,7 @@ export default function TeamDataHubContent({ teamKey }: TeamDataHubContentProps)
                   {posts.slice(0, 6).map((post, index) => (
                     <article
                       key={post.id}
-                      className={`group bg-white dark:bg-[#111] rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-all ${
+                      className={`group bg-[var(--sm-card)] rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-all ${
                         index === 0 ? 'md:col-span-2' : ''
                       }`}
                     >
@@ -301,7 +301,7 @@ export default function TeamDataHubContent({ teamKey }: TeamDataHubContentProps)
                             {team.shortName}
                           </span>
                           <h3
-                            className={`font-bold text-[#222] dark:text-white leading-tight group-hover:opacity-80 transition-colors ${
+                            className={`font-bold text-[var(--sm-text)] leading-tight group-hover:opacity-80 transition-colors ${
                               index === 0 ? 'text-[18px] md:text-[22px] line-clamp-3' : 'text-[15px] line-clamp-2'
                             }`}
                             style={{ fontFamily: "'Montserrat', sans-serif" }}
@@ -309,11 +309,11 @@ export default function TeamDataHubContent({ teamKey }: TeamDataHubContentProps)
                             {post.title}
                           </h3>
                           {index === 0 && post.excerpt && (
-                            <p className="text-gray-500 dark:text-gray-400 text-sm mt-3 line-clamp-2">
+                            <p className="text-[var(--sm-text-muted)] text-sm mt-3 line-clamp-2">
                               {post.excerpt}
                             </p>
                           )}
-                          <div className="flex items-center gap-2 mt-3 text-[11px] text-gray-400">
+                          <div className="flex items-center gap-2 mt-3 text-[11px] text-[var(--sm-text-muted)]">
                             <span>{post.author.displayName}</span>
                             <span>•</span>
                             <span>
@@ -329,7 +329,7 @@ export default function TeamDataHubContent({ teamKey }: TeamDataHubContentProps)
                   ))}
                 </div>
               ) : (
-                <div className="text-center py-12 text-gray-500 dark:text-gray-400">
+                <div className="text-center py-12 text-[var(--sm-text-muted)]">
                   <p>No recent articles found for {team.shortName}</p>
                   <Link
                     href={`/${team.categorySlug}`}
@@ -346,9 +346,9 @@ export default function TeamDataHubContent({ teamKey }: TeamDataHubContentProps)
           {/* Sidebar */}
           <div className="space-y-8">
             {/* Quick links */}
-            <div className="bg-white dark:bg-[#111] rounded-xl p-6 shadow-sm">
+            <div className="bg-[var(--sm-card)] rounded-xl p-6 shadow-sm">
               <h3
-                className="text-[16px] font-bold text-[#222] dark:text-white uppercase mb-4 pb-2 border-b-2"
+                className="text-[16px] font-bold text-[var(--sm-text)] uppercase mb-4 pb-2 border-b-2"
                 style={{ borderColor: team.secondaryColor, fontFamily: "'Montserrat', sans-serif" }}
               >
                 Quick Links
@@ -356,31 +356,31 @@ export default function TeamDataHubContent({ teamKey }: TeamDataHubContentProps)
               <nav className="space-y-2">
                 <Link
                   href={`/${team.categorySlug}`}
-                  className="flex items-center gap-3 p-3 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
+                  className="flex items-center gap-3 p-3 rounded-lg hover:bg-[var(--sm-card-hover)] transition-colors"
                 >
                   <span className="text-2xl">📰</span>
-                  <span className="font-medium text-[#222] dark:text-white">All {team.shortName} News</span>
+                  <span className="font-medium text-[var(--sm-text)]">All {team.shortName} News</span>
                 </Link>
                 <Link
                   href={`/${team.categorySlug}/schedule`}
-                  className="flex items-center gap-3 p-3 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
+                  className="flex items-center gap-3 p-3 rounded-lg hover:bg-[var(--sm-card-hover)] transition-colors"
                 >
                   <span className="text-2xl">📅</span>
-                  <span className="font-medium text-[#222] dark:text-white">Schedule</span>
+                  <span className="font-medium text-[var(--sm-text)]">Schedule</span>
                 </Link>
                 <Link
                   href={`/${team.categorySlug}/roster`}
-                  className="flex items-center gap-3 p-3 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
+                  className="flex items-center gap-3 p-3 rounded-lg hover:bg-[var(--sm-card-hover)] transition-colors"
                 >
                   <span className="text-2xl">👥</span>
-                  <span className="font-medium text-[#222] dark:text-white">Roster</span>
+                  <span className="font-medium text-[var(--sm-text)]">Roster</span>
                 </Link>
                 <Link
                   href={`/${team.categorySlug}/stats`}
-                  className="flex items-center gap-3 p-3 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
+                  className="flex items-center gap-3 p-3 rounded-lg hover:bg-[var(--sm-card-hover)] transition-colors"
                 >
                   <span className="text-2xl">📊</span>
-                  <span className="font-medium text-[#222] dark:text-white">Stats</span>
+                  <span className="font-medium text-[var(--sm-text)]">Stats</span>
                 </Link>
               </nav>
             </div>
@@ -389,9 +389,9 @@ export default function TeamDataHubContent({ teamKey }: TeamDataHubContentProps)
             <ARTourButton team={team.categorySlug} />
 
             {/* Other teams */}
-            <div className="bg-white dark:bg-[#111] rounded-xl p-6 shadow-sm">
+            <div className="bg-[var(--sm-card)] rounded-xl p-6 shadow-sm">
               <h3
-                className="text-[16px] font-bold text-[#222] dark:text-white uppercase mb-4 pb-2 border-b-2 border-gray-200 dark:border-gray-700"
+                className="text-[16px] font-bold text-[var(--sm-text)] uppercase mb-4 pb-2 border-b-2 border-[var(--sm-border)]"
                 style={{ fontFamily: "'Montserrat', sans-serif" }}
               >
                 Other Teams
@@ -401,7 +401,7 @@ export default function TeamDataHubContent({ teamKey }: TeamDataHubContentProps)
                   <Link
                     key={otherTeam.key}
                     href={`/${otherTeam.key}/datahub`}
-                    className="flex items-center gap-3 p-3 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
+                    className="flex items-center gap-3 p-3 rounded-lg hover:bg-[var(--sm-card-hover)] transition-colors"
                   >
                     <Image
                       src={otherTeam.logo}
@@ -410,8 +410,8 @@ export default function TeamDataHubContent({ teamKey }: TeamDataHubContentProps)
                       height={28}
                       className="w-7 h-7"
                     />
-                    <span className="font-medium text-[#222] dark:text-white">{otherTeam.shortName}</span>
-                    <span className="text-xs text-gray-400 ml-auto">{otherTeam.league}</span>
+                    <span className="font-medium text-[var(--sm-text)]">{otherTeam.shortName}</span>
+                    <span className="text-xs text-[var(--sm-text-muted)] ml-auto">{otherTeam.league}</span>
                   </Link>
                 ))}
               </div>
@@ -420,12 +420,12 @@ export default function TeamDataHubContent({ teamKey }: TeamDataHubContentProps)
             {/* Back to all teams */}
             <Link
               href="/datahub"
-              className="flex items-center justify-center gap-2 p-4 bg-gray-100 dark:bg-gray-800 rounded-xl hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
+              className="flex items-center justify-center gap-2 p-4 bg-[var(--sm-surface)] rounded-xl hover:bg-[var(--sm-card-hover)] transition-colors"
             >
-              <svg className="w-5 h-5 text-gray-600 dark:text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <svg className="w-5 h-5 text-[var(--sm-text-muted)]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
               </svg>
-              <span className="font-medium text-gray-600 dark:text-gray-400">View All Teams</span>
+              <span className="font-medium text-[var(--sm-text-muted)]">View All Teams</span>
             </Link>
           </div>
         </div>

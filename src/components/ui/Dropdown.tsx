@@ -95,8 +95,8 @@ export function DropdownItem({
       disabled={disabled}
       className={`
         w-full flex items-center gap-3 px-4 py-2.5 text-sm text-left transition-colors
-        ${active ? 'text-[var(--accent-red)]' : danger ? 'text-[var(--error)]' : 'text-[var(--text-secondary)]'}
-        ${disabled ? 'opacity-50 cursor-not-allowed' : 'hover:bg-[var(--bg-hover)] hover:text-[var(--text-primary)]'}
+        ${active ? 'text-[var(--accent-red)]' : danger ? 'text-[var(--error)]' : 'text-[var(--sm-text-dim)]'}
+        ${disabled ? 'opacity-50 cursor-not-allowed' : 'hover:bg-[var(--sm-card-hover)] hover:text-[var(--sm-text)]'}
         ${className}
       `}
     >
@@ -118,7 +118,7 @@ export interface DropdownLabelProps {
 
 export function DropdownLabel({ children }: DropdownLabelProps) {
   return (
-    <div className="px-4 py-2 text-xs font-semibold text-[var(--text-muted)] uppercase tracking-wide">
+    <div className="px-4 py-2 text-xs font-semibold text-[var(--sm-text-muted)] uppercase tracking-wide">
       {children}
     </div>
   )

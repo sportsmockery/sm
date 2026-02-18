@@ -56,8 +56,8 @@ export default function EmojiPicker({ onSelect, onClose }: EmojiPickerProps) {
 
       <style jsx>{`
         .emoji-picker {
-          background: var(--bg-card, #1a1a2e);
-          border: 1px solid var(--border-subtle, #333);
+          background: var(--sm-card, #1a1a2e);
+          border: 1px solid var(--sm-border, #333);
           border-radius: 12px;
           box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
           overflow: hidden;
@@ -71,13 +71,13 @@ export default function EmojiPicker({ onSelect, onClose }: EmojiPickerProps) {
           align-items: center;
           justify-content: space-between;
           padding: 10px 12px;
-          border-bottom: 1px solid var(--border-subtle, #333);
+          border-bottom: 1px solid var(--sm-border, #333);
         }
 
         .emoji-picker__title {
           font-weight: 600;
           font-size: 0.85rem;
-          color: var(--text-main, #fff);
+          color: var(--sm-text, #fff);
         }
 
         .emoji-picker__close {
@@ -90,12 +90,12 @@ export default function EmojiPicker({ onSelect, onClose }: EmojiPickerProps) {
           border: none;
           border-radius: 4px;
           cursor: pointer;
-          color: var(--text-subtle, #888);
+          color: var(--sm-text-muted, #888);
           transition: background 0.15s;
         }
 
         .emoji-picker__close:hover {
-          background: var(--bg-hover, #2a2a2a);
+          background: var(--sm-card-hover, #2a2a2a);
         }
 
         .emoji-picker__categories {
@@ -103,7 +103,7 @@ export default function EmojiPicker({ onSelect, onClose }: EmojiPickerProps) {
           gap: 2px;
           padding: 8px;
           overflow-x: auto;
-          border-bottom: 1px solid var(--border-subtle, #333);
+          border-bottom: 1px solid var(--sm-border, #333);
           -webkit-overflow-scrolling: touch;
         }
 
@@ -115,15 +115,15 @@ export default function EmojiPicker({ onSelect, onClose }: EmojiPickerProps) {
           cursor: pointer;
           font-size: 0.75rem;
           font-weight: 500;
-          color: var(--text-subtle, #888);
+          color: var(--sm-text-muted, #888);
           white-space: nowrap;
           transition: background 0.15s, color 0.15s;
         }
 
         .emoji-picker__category:hover,
         .emoji-picker__category--active {
-          background: var(--bg-hover, #2a2a2a);
-          color: var(--text-main, #fff);
+          background: var(--sm-card-hover, #2a2a2a);
+          color: var(--sm-text, #fff);
         }
 
         .emoji-picker__grid {
@@ -150,7 +150,7 @@ export default function EmojiPicker({ onSelect, onClose }: EmojiPickerProps) {
         }
 
         .emoji-picker__emoji:hover {
-          background: var(--bg-hover, #2a2a2a);
+          background: var(--sm-card-hover, #2a2a2a);
           transform: scale(1.15);
         }
 

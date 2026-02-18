@@ -31,7 +31,7 @@ export default function SubscriptionSuccessPage() {
   return (
     <main
       className="min-h-screen flex items-center justify-center px-4"
-      style={{ background: 'var(--bg-primary, #0a0a0a)' }}
+      style={{ background: 'var(--sm-bg)' }}
     >
       <div className="max-w-md w-full text-center">
         {isRefreshing ? (
@@ -41,12 +41,12 @@ export default function SubscriptionSuccessPage() {
               className="text-2xl font-bold"
               style={{
                 fontFamily: "'Montserrat', sans-serif",
-                color: 'var(--text-primary, #fff)',
+                color: 'var(--sm-text)',
               }}
             >
               Processing your subscription...
             </h1>
-            <p style={{ color: 'var(--text-muted, #888)' }}>
+            <p style={{ color: 'var(--sm-text-muted)' }}>
               Please wait while we confirm your payment.
             </p>
           </div>
@@ -74,14 +74,14 @@ export default function SubscriptionSuccessPage() {
                 className="text-3xl font-black mb-2"
                 style={{
                   fontFamily: "'Montserrat', sans-serif",
-                  color: 'var(--text-primary, #fff)',
+                  color: 'var(--sm-text)',
                 }}
               >
                 Welcome to SM+!
               </h1>
               <p
                 className="text-lg"
-                style={{ color: 'var(--text-muted, #888)' }}
+                style={{ color: 'var(--sm-text-muted)' }}
               >
                 Your subscription is now active.
               </p>
@@ -91,13 +91,13 @@ export default function SubscriptionSuccessPage() {
             <div
               className="rounded-xl p-6 text-left"
               style={{
-                background: 'var(--bg-surface, #1a1a1a)',
-                border: '1px solid var(--border-primary, #333)',
+                background: 'var(--sm-surface)',
+                border: '1px solid var(--sm-border)',
               }}
             >
               <h2
                 className="font-bold mb-4"
-                style={{ color: 'var(--text-primary, #fff)' }}
+                style={{ color: 'var(--sm-text)' }}
               >
                 You now have access to:
               </h2>
@@ -112,7 +112,7 @@ export default function SubscriptionSuccessPage() {
                   <li
                     key={feature}
                     className="flex items-center gap-3"
-                    style={{ color: 'var(--text-primary, #fff)' }}
+                    style={{ color: 'var(--sm-text)' }}
                   >
                     <svg
                       className="w-5 h-5 text-green-500 flex-shrink-0"
@@ -150,7 +150,7 @@ export default function SubscriptionSuccessPage() {
             <Link
               href="/"
               className="inline-block text-sm hover:underline"
-              style={{ color: 'var(--text-muted, #888)' }}
+              style={{ color: 'var(--sm-text-muted)' }}
             >
               Return to homepage
             </Link>

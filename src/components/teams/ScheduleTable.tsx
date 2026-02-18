@@ -46,7 +46,7 @@ export default function ScheduleTable({ games, team, showWeek = true }: Schedule
   };
 
   return (
-    <div className="overflow-hidden rounded-xl border border-zinc-200 bg-white dark:border-zinc-800 dark:bg-zinc-900">
+    <div className="overflow-hidden rounded-xl border" style={{ borderColor: 'var(--sm-border)', backgroundColor: 'var(--sm-card)' }}>
       {/* Mobile view */}
       <div className="md:hidden">
         {games.map((game) => {
@@ -58,18 +58,19 @@ export default function ScheduleTable({ games, team, showWeek = true }: Schedule
             <div
               key={game.id}
               className={`
-                border-b border-zinc-100 p-4 last:border-b-0 dark:border-zinc-800
+                border-b p-4 last:border-b-0
                 ${isCurrent ? 'bg-amber-50 dark:bg-amber-900/20' : ''}
               `}
+              style={{ borderColor: 'var(--sm-border)' }}
             >
               <div className="mb-2 flex items-center justify-between">
                 <div className="flex items-center gap-2">
                   {showWeek && game.week && (
-                    <span className="text-xs font-medium text-zinc-500 dark:text-zinc-400">
+                    <span className="text-xs font-medium" style={{ color: 'var(--sm-text-muted)' }}>
                       Week {game.week}
                     </span>
                   )}
-                  <span className="text-sm text-zinc-600 dark:text-zinc-400">
+                  <span className="text-sm" style={{ color: 'var(--sm-text-muted)' }}>
                     {formatDate(game.date)}
                   </span>
                 </div>
@@ -90,23 +91,23 @@ export default function ScheduleTable({ games, team, showWeek = true }: Schedule
                   />
                 </div>
                 <div className="flex-1">
-                  <p className="font-semibold text-zinc-900 dark:text-white">
+                  <p className="font-semibold" style={{ color: 'var(--sm-text)' }}>
                     {game.isHome ? 'vs' : '@'} {opponent.name}
                   </p>
-                  <p className="text-sm text-zinc-500 dark:text-zinc-400">
+                  <p className="text-sm" style={{ color: 'var(--sm-text-muted)' }}>
                     {game.venue}
                   </p>
                 </div>
                 <div className="text-right">
                   {score ? (
-                    <p className="font-bold text-zinc-900 dark:text-white">{score}</p>
+                    <p className="font-bold" style={{ color: 'var(--sm-text)' }}>{score}</p>
                   ) : (
-                    <p className="text-sm font-medium text-zinc-600 dark:text-zinc-400">
+                    <p className="text-sm font-medium" style={{ color: 'var(--sm-text-muted)' }}>
                       {game.time}
                     </p>
                   )}
                   {game.broadcast && (
-                    <p className="text-xs text-zinc-500 dark:text-zinc-400">{game.broadcast}</p>
+                    <p className="text-xs" style={{ color: 'var(--sm-text-muted)' }}>{game.broadcast}</p>
                   )}
                 </div>
               </div>
@@ -118,7 +119,7 @@ export default function ScheduleTable({ games, team, showWeek = true }: Schedule
       {/* Desktop view */}
       <table className="hidden w-full md:table">
         <thead>
-          <tr className="border-b border-zinc-200 bg-zinc-50 text-left text-xs font-semibold uppercase tracking-wider text-zinc-500 dark:border-zinc-800 dark:bg-zinc-800/50 dark:text-zinc-400">
+          <tr className="border-b text-left text-xs font-semibold uppercase tracking-wider" style={{ borderColor: 'var(--sm-border)', backgroundColor: 'var(--sm-surface)', color: 'var(--sm-text-muted)' }}>
             {showWeek && <th className="px-4 py-3">Wk</th>}
             <th className="px-4 py-3">Date</th>
             <th className="px-4 py-3">Opponent</th>
@@ -128,7 +129,7 @@ export default function ScheduleTable({ games, team, showWeek = true }: Schedule
             <th className="px-4 py-3">TV</th>
           </tr>
         </thead>
-        <tbody className="divide-y divide-zinc-100 dark:divide-zinc-800">
+        <tbody className="divide-y" style={{ '--tw-divide-color': 'var(--sm-border)' } as React.CSSProperties}>
           {games.map((game) => {
             const opponent = getOpponent(game);
             const score = getScore(game);
@@ -143,16 +144,16 @@ export default function ScheduleTable({ games, team, showWeek = true }: Schedule
                 `}
               >
                 {showWeek && (
-                  <td className="px-4 py-3 text-sm font-medium text-zinc-500 dark:text-zinc-400">
+                  <td className="px-4 py-3 text-sm font-medium" style={{ color: 'var(--sm-text-muted)' }}>
                     {game.week}
                   </td>
                 )}
                 <td className="px-4 py-3">
                   <div>
-                    <p className="text-sm font-medium text-zinc-900 dark:text-white">
+                    <p className="text-sm font-medium" style={{ color: 'var(--sm-text)' }}>
                       {formatDate(game.date)}
                     </p>
-                    <p className="text-xs text-zinc-500 dark:text-zinc-400">{game.time}</p>
+                    <p className="text-xs" style={{ color: 'var(--sm-text-muted)' }}>{game.time}</p>
                   </div>
                 </td>
                 <td className="px-4 py-3">
@@ -166,10 +167,10 @@ export default function ScheduleTable({ games, team, showWeek = true }: Schedule
                       />
                     </div>
                     <div>
-                      <span className="mr-1 text-xs text-zinc-400">
+                      <span className="mr-1 text-xs" style={{ color: 'var(--sm-text-dim)' }}>
                         {game.isHome ? 'vs' : '@'}
                       </span>
-                      <span className="font-medium text-zinc-900 dark:text-white">
+                      <span className="font-medium" style={{ color: 'var(--sm-text)' }}>
                         {opponent.name}
                       </span>
                     </div>
@@ -181,20 +182,20 @@ export default function ScheduleTable({ games, team, showWeek = true }: Schedule
                       {game.result}
                     </span>
                   ) : (
-                    <span className="text-sm text-zinc-400">—</span>
+                    <span className="text-sm" style={{ color: 'var(--sm-text-dim)' }}>—</span>
                   )}
                 </td>
                 <td className="px-4 py-3">
                   {score ? (
-                    <span className="font-semibold text-zinc-900 dark:text-white">{score}</span>
+                    <span className="font-semibold" style={{ color: 'var(--sm-text)' }}>{score}</span>
                   ) : (
-                    <span className="text-sm text-zinc-400">—</span>
+                    <span className="text-sm" style={{ color: 'var(--sm-text-dim)' }}>—</span>
                   )}
                 </td>
-                <td className="px-4 py-3 text-sm text-zinc-600 dark:text-zinc-400">
+                <td className="px-4 py-3 text-sm" style={{ color: 'var(--sm-text-muted)' }}>
                   {game.venue}
                 </td>
-                <td className="px-4 py-3 text-sm font-medium text-zinc-500 dark:text-zinc-400">
+                <td className="px-4 py-3 text-sm font-medium" style={{ color: 'var(--sm-text-muted)' }}>
                   {game.broadcast || '—'}
                 </td>
               </tr>

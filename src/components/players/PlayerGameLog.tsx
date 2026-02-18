@@ -14,8 +14,8 @@ export default function PlayerGameLog({ gameLog, player, limit }: PlayerGameLogP
 
   if (displayGames.length === 0) {
     return (
-      <div className="rounded-xl border border-zinc-200 bg-white p-8 text-center dark:border-zinc-800 dark:bg-zinc-900">
-        <p className="text-zinc-500 dark:text-zinc-400">No game log available.</p>
+      <div className="rounded-xl border p-8 text-center" style={{ borderColor: 'var(--sm-border)', backgroundColor: 'var(--sm-card)' }}>
+        <p style={{ color: 'var(--sm-text-muted)' }}>No game log available.</p>
       </div>
     );
   }
@@ -54,11 +54,11 @@ export default function PlayerGameLog({ gameLog, player, limit }: PlayerGameLogP
   const columns = getStatColumns();
 
   return (
-    <div className="overflow-hidden rounded-xl border border-zinc-200 bg-white dark:border-zinc-800 dark:bg-zinc-900">
+    <div className="overflow-hidden rounded-xl border" style={{ borderColor: 'var(--sm-border)', backgroundColor: 'var(--sm-card)' }}>
       <div className="overflow-x-auto">
         <table className="w-full">
           <thead>
-            <tr className="border-b border-zinc-200 bg-zinc-50 text-left text-xs font-semibold uppercase tracking-wider text-zinc-500 dark:border-zinc-800 dark:bg-zinc-800/50 dark:text-zinc-400">
+            <tr className="border-b text-left text-xs font-semibold uppercase tracking-wider" style={{ borderColor: 'var(--sm-border)', backgroundColor: 'var(--sm-surface)', color: 'var(--sm-text-muted)' }}>
               <th className="px-4 py-3">Date</th>
               <th className="px-4 py-3">Opp</th>
               <th className="px-4 py-3 text-center">Result</th>
@@ -69,14 +69,14 @@ export default function PlayerGameLog({ gameLog, player, limit }: PlayerGameLogP
               ))}
             </tr>
           </thead>
-          <tbody className="divide-y divide-zinc-100 dark:divide-zinc-800">
+          <tbody className="divide-y" style={{ '--tw-divide-color': 'var(--sm-border)' } as React.CSSProperties}>
             {displayGames.map((game) => (
               <tr
                 key={game.gameId}
-                className="transition-colors hover:bg-zinc-50 dark:hover:bg-zinc-800/50"
+                className="transition-colors"
               >
                 <td className="px-4 py-3">
-                  <span className="text-sm font-medium text-zinc-900 dark:text-white">
+                  <span className="text-sm font-medium" style={{ color: 'var(--sm-text)' }}>
                     {new Date(game.date).toLocaleDateString('en-US', {
                       month: 'short',
                       day: 'numeric',
@@ -93,7 +93,7 @@ export default function PlayerGameLog({ gameLog, player, limit }: PlayerGameLogP
                         className="object-contain"
                       />
                     </div>
-                    <span className="text-sm text-zinc-600 dark:text-zinc-400">
+                    <span className="text-sm" style={{ color: 'var(--sm-text-muted)' }}>
                       {game.isHome ? 'vs' : '@'} {game.opponent.abbreviation}
                     </span>
                   </div>
@@ -103,7 +103,7 @@ export default function PlayerGameLog({ gameLog, player, limit }: PlayerGameLogP
                     <span className={`rounded px-2 py-0.5 text-xs font-bold ${getResultColor(game.result)}`}>
                       {game.result}
                     </span>
-                    <span className="text-sm text-zinc-600 dark:text-zinc-400">
+                    <span className="text-sm" style={{ color: 'var(--sm-text-muted)' }}>
                       {game.score}
                     </span>
                   </div>
@@ -111,7 +111,8 @@ export default function PlayerGameLog({ gameLog, player, limit }: PlayerGameLogP
                 {columns.map((col) => (
                   <td
                     key={col.key}
-                    className="px-4 py-3 text-center text-sm font-medium text-zinc-900 dark:text-white"
+                    className="px-4 py-3 text-center text-sm font-medium"
+                    style={{ color: 'var(--sm-text)' }}
                   >
                     {game.stats[col.key] ?? '—'}
                   </td>

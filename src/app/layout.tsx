@@ -150,7 +150,8 @@ export default function RootLayout({
         />
       </head>
       <body
-        className={`${geistSans.variable} ${geistMono.variable} ${montserrat.variable} ${inter.variable} ${jetbrainsMono.variable} ${bebasNeue.variable} ${exo2.variable} font-sans antialiased bg-[var(--bg-primary)] text-[var(--text-primary)]`}
+        className={`${geistSans.variable} ${geistMono.variable} ${montserrat.variable} ${inter.variable} ${jetbrainsMono.variable} ${bebasNeue.variable} ${exo2.variable} font-sans antialiased`}
+        style={{ backgroundColor: 'var(--sm-card)', color: 'var(--sm-text)' }}
       >
         <ThemeProvider>
           <AuthProvider>

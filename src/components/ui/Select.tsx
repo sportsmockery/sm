@@ -36,7 +36,7 @@ const Select = forwardRef<HTMLSelectElement, SelectProps>(
     const inputId = id || label?.toLowerCase().replace(/\s+/g, '-')
 
     const baseClasses =
-      'w-full h-[42px] px-4 pr-10 bg-[var(--bg-tertiary)] border border-[var(--border-default)] rounded-lg text-[var(--text-primary)] text-sm font-sans transition-all duration-200 hover:border-[var(--border-strong)] focus:outline-none focus:border-[var(--accent-red)] focus:ring-2 focus:ring-[var(--accent-red-glow)] disabled:opacity-50 disabled:cursor-not-allowed appearance-none cursor-pointer'
+      'w-full h-[42px] px-4 pr-10 bg-[var(--sm-surface)] border border-[var(--border-default)] rounded-lg text-[var(--sm-text)] text-sm font-sans transition-all duration-200 hover:border-[var(--border-strong)] focus:outline-none focus:border-[var(--accent-red)] focus:ring-2 focus:ring-[var(--accent-red-glow)] disabled:opacity-50 disabled:cursor-not-allowed appearance-none cursor-pointer'
 
     const errorClasses = error
       ? 'border-[var(--error)] focus:border-[var(--error)] focus:ring-red-500/20'
@@ -47,7 +47,7 @@ const Select = forwardRef<HTMLSelectElement, SelectProps>(
         {label && (
           <label
             htmlFor={inputId}
-            className="block text-sm font-medium text-[var(--text-secondary)] mb-2"
+            className="block text-sm font-medium text-[var(--sm-text-dim)] mb-2"
           >
             {label}
             {required && <span className="text-[var(--error)] ml-1">*</span>}
@@ -78,7 +78,7 @@ const Select = forwardRef<HTMLSelectElement, SelectProps>(
           </select>
 
           {/* Dropdown arrow */}
-          <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-[var(--text-muted)]">
+          <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-[var(--sm-text-muted)]">
             <svg
               className="w-4 h-4"
               fill="none"
@@ -97,7 +97,7 @@ const Select = forwardRef<HTMLSelectElement, SelectProps>(
 
         {(error || helper) && (
           <p
-            className={`text-xs mt-1 ${error ? 'text-[var(--error)]' : 'text-[var(--text-muted)]'}`}
+            className={`text-xs mt-1 ${error ? 'text-[var(--error)]' : 'text-[var(--sm-text-muted)]'}`}
           >
             {error || helper}
           </p>

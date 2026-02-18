@@ -10,8 +10,8 @@ interface PlayerStatsTableProps {
 export default function PlayerStatsTable({ stats, player }: PlayerStatsTableProps) {
   if (stats.length === 0) {
     return (
-      <div className="rounded-xl border border-zinc-200 bg-white p-8 text-center dark:border-zinc-800 dark:bg-zinc-900">
-        <p className="text-zinc-500 dark:text-zinc-400">No statistics available.</p>
+      <div className="rounded-xl border p-8 text-center" style={{ borderColor: 'var(--sm-border)', backgroundColor: 'var(--sm-card)' }}>
+        <p style={{ color: 'var(--sm-text-muted)' }}>No statistics available.</p>
       </div>
     );
   }
@@ -60,12 +60,12 @@ export default function PlayerStatsTable({ stats, player }: PlayerStatsTableProp
   const columns = getStatColumns();
 
   return (
-    <div className="overflow-hidden rounded-xl border border-zinc-200 bg-white dark:border-zinc-800 dark:bg-zinc-900">
+    <div className="overflow-hidden rounded-xl border" style={{ borderColor: 'var(--sm-border)', backgroundColor: 'var(--sm-card)' }}>
       <div className="overflow-x-auto">
         <table className="w-full">
           <thead>
-            <tr className="border-b border-zinc-200 bg-zinc-50 text-left text-xs font-semibold uppercase tracking-wider text-zinc-500 dark:border-zinc-800 dark:bg-zinc-800/50 dark:text-zinc-400">
-              <th className="sticky left-0 bg-zinc-50 px-4 py-3 dark:bg-zinc-800/50">Season</th>
+            <tr className="border-b text-left text-xs font-semibold uppercase tracking-wider" style={{ borderColor: 'var(--sm-border)', backgroundColor: 'var(--sm-surface)', color: 'var(--sm-text-muted)' }}>
+              <th className="sticky left-0 px-4 py-3" style={{ backgroundColor: 'var(--sm-surface)' }}>Season</th>
               <th className="px-4 py-3">Team</th>
               <th className="px-4 py-3 text-center">G</th>
               {columns.map((col) => (
@@ -75,25 +75,26 @@ export default function PlayerStatsTable({ stats, player }: PlayerStatsTableProp
               ))}
             </tr>
           </thead>
-          <tbody className="divide-y divide-zinc-100 dark:divide-zinc-800">
+          <tbody className="divide-y" style={{ '--tw-divide-color': 'var(--sm-border)' } as React.CSSProperties}>
             {stats.map((seasonStats, index) => (
               <tr
                 key={`${seasonStats.season}-${index}`}
-                className="transition-colors hover:bg-zinc-50 dark:hover:bg-zinc-800/50"
+                className="transition-colors"
               >
-                <td className="sticky left-0 bg-white px-4 py-3 font-semibold text-zinc-900 dark:bg-zinc-900 dark:text-white">
+                <td className="sticky left-0 px-4 py-3 font-semibold" style={{ backgroundColor: 'var(--sm-card)', color: 'var(--sm-text)' }}>
                   {seasonStats.season}
                 </td>
-                <td className="px-4 py-3 text-zinc-600 dark:text-zinc-400">
+                <td className="px-4 py-3" style={{ color: 'var(--sm-text-muted)' }}>
                   {seasonStats.team}
                 </td>
-                <td className="px-4 py-3 text-center text-zinc-600 dark:text-zinc-400">
+                <td className="px-4 py-3 text-center" style={{ color: 'var(--sm-text-muted)' }}>
                   {seasonStats.games}
                 </td>
                 {columns.map((col) => (
                   <td
                     key={col.key}
-                    className="px-4 py-3 text-center text-zinc-900 dark:text-white"
+                    className="px-4 py-3 text-center"
+                    style={{ color: 'var(--sm-text)' }}
                   >
                     {seasonStats.stats[col.key] ?? '—'}
                   </td>
@@ -104,12 +105,12 @@ export default function PlayerStatsTable({ stats, player }: PlayerStatsTableProp
           {/* Career totals row */}
           {stats.length > 1 && (
             <tfoot>
-              <tr className="border-t-2 border-zinc-300 bg-zinc-100 font-semibold dark:border-zinc-700 dark:bg-zinc-800">
-                <td className="sticky left-0 bg-zinc-100 px-4 py-3 text-zinc-900 dark:bg-zinc-800 dark:text-white">
+              <tr className="border-t-2 font-semibold" style={{ borderColor: 'var(--sm-border)', backgroundColor: 'var(--sm-surface)' }}>
+                <td className="sticky left-0 px-4 py-3" style={{ backgroundColor: 'var(--sm-surface)', color: 'var(--sm-text)' }}>
                   Career
                 </td>
-                <td className="px-4 py-3 text-zinc-600 dark:text-zinc-400">—</td>
-                <td className="px-4 py-3 text-center text-zinc-900 dark:text-white">
+                <td className="px-4 py-3" style={{ color: 'var(--sm-text-muted)' }}>—</td>
+                <td className="px-4 py-3 text-center" style={{ color: 'var(--sm-text)' }}>
                   {stats.reduce((sum, s) => sum + s.games, 0)}
                 </td>
                 {columns.map((col) => {
@@ -117,7 +118,7 @@ export default function PlayerStatsTable({ stats, player }: PlayerStatsTableProp
                   const isRate = ['completionPct', 'rating', 'qbr', 'yardsPerAttempt', 'yardsPerReception'].includes(col.key);
                   if (isRate) {
                     return (
-                      <td key={col.key} className="px-4 py-3 text-center text-zinc-400">
+                      <td key={col.key} className="px-4 py-3 text-center" style={{ color: 'var(--sm-text-dim)' }}>
                         —
                       </td>
                     );
@@ -129,7 +130,7 @@ export default function PlayerStatsTable({ stats, player }: PlayerStatsTableProp
                   }, 0);
 
                   return (
-                    <td key={col.key} className="px-4 py-3 text-center text-zinc-900 dark:text-white">
+                    <td key={col.key} className="px-4 py-3 text-center" style={{ color: 'var(--sm-text)' }}>
                       {total}
                     </td>
                   );

@@ -53,7 +53,8 @@ export default function SearchResultCard({
   return (
     <Link
       href={`/${article.category.slug}/${article.slug}`}
-      className={`group flex gap-4 rounded-2xl border border-zinc-200 bg-white p-4 transition-all hover:border-[#8B0000]/30 hover:shadow-lg dark:border-zinc-800 dark:bg-zinc-900 dark:hover:border-[#FF6666]/30 ${className}`}
+      className={`group flex gap-4 rounded-2xl border p-4 transition-all hover:border-[#8B0000]/30 hover:shadow-lg dark:hover:border-[#FF6666]/30 ${className}`}
+      style={{ borderColor: 'var(--sm-border)', backgroundColor: 'var(--sm-card)' }}
     >
       {/* Thumbnail */}
       {article.featured_image && (
@@ -75,19 +76,19 @@ export default function SearchResultCard({
         </span>
 
         {/* Title with highlighted match */}
-        <h3 className="mb-2 line-clamp-2 font-heading text-lg font-bold text-zinc-900 transition-colors group-hover:text-[#8B0000] dark:text-white dark:group-hover:text-[#FF6666]">
+        <h3 className="mb-2 line-clamp-2 font-heading text-lg font-bold transition-colors group-hover:text-[#8B0000] dark:group-hover:text-[#FF6666]" style={{ color: 'var(--sm-text)' }}>
           {highlightMatch(article.title, query)}
         </h3>
 
         {/* Excerpt with highlighted match */}
         {article.excerpt && (
-          <p className="mb-3 line-clamp-2 text-sm text-zinc-600 dark:text-zinc-400">
+          <p className="mb-3 line-clamp-2 text-sm" style={{ color: 'var(--sm-text-muted)' }}>
             {highlightMatch(article.excerpt, query)}
           </p>
         )}
 
         {/* Meta */}
-        <div className="flex items-center gap-3 text-xs text-zinc-500 dark:text-zinc-400">
+        <div className="flex items-center gap-3 text-xs" style={{ color: 'var(--sm-text-muted)' }}>
           {article.author && (
             <>
               <div className="flex items-center gap-1.5">
@@ -100,7 +101,7 @@ export default function SearchResultCard({
                     className="rounded-full"
                   />
                 ) : (
-                  <div className="flex h-4 w-4 items-center justify-center rounded-full bg-zinc-200 text-[8px] font-bold text-zinc-600 dark:bg-zinc-700 dark:text-zinc-400">
+                  <div className="flex h-4 w-4 items-center justify-center rounded-full text-[8px] font-bold" style={{ backgroundColor: 'var(--sm-surface)', color: 'var(--sm-text-muted)' }}>
                     {article.author.name.charAt(0)}
                   </div>
                 )}
@@ -118,7 +119,8 @@ export default function SearchResultCard({
       {/* Arrow indicator */}
       <div className="hidden items-center sm:flex">
         <svg
-          className="h-5 w-5 text-zinc-300 transition-all group-hover:translate-x-1 group-hover:text-[#8B0000] dark:text-zinc-600 dark:group-hover:text-[#FF6666]"
+          className="h-5 w-5 transition-all group-hover:translate-x-1 group-hover:text-[#8B0000] dark:group-hover:text-[#FF6666]"
+          style={{ color: 'var(--sm-text-dim)' }}
           fill="none"
           viewBox="0 0 24 24"
           strokeWidth={2}

@@ -76,7 +76,7 @@ export default function HeadlineStack({
       {/* Section header - only show if showTitle is true */}
       {showTitle && (
         <div className="mb-4 flex items-center justify-between">
-          <h2 className="text-lg font-bold uppercase tracking-tight text-zinc-900 dark:text-white">
+          <h2 className="text-lg font-bold uppercase tracking-tight" style={{ color: 'var(--sm-text)' }}>
             {title}
           </h2>
           <Link
@@ -89,7 +89,7 @@ export default function HeadlineStack({
       )}
 
       {/* Headlines list - Clean text-based list like ESPN */}
-      <div className="divide-y divide-zinc-100 dark:divide-zinc-800">
+      <div style={{ borderColor: 'var(--sm-border)' }} className="divide-y divide-[var(--sm-border)]">
         {headlines.map((headline) => (
           <Link
             key={headline.id}
@@ -110,13 +110,13 @@ export default function HeadlineStack({
             </div>
 
             {/* Title */}
-            <h3 className="text-base font-bold leading-snug text-zinc-900 transition-colors group-hover:text-[#8B0000] dark:text-white dark:group-hover:text-[#FF6666]">
+            <h3 className="text-base font-bold leading-snug transition-colors group-hover:text-[#8B0000]" style={{ color: 'var(--sm-text)' }}>
               {headline.title}
             </h3>
 
             {/* Excerpt - only show for first headline */}
             {headline.excerpt && headlines.indexOf(headline) === 0 && (
-              <p className="mt-1 text-sm text-zinc-600 dark:text-zinc-400 line-clamp-2">
+              <p className="mt-1 text-sm line-clamp-2" style={{ color: 'var(--sm-text-muted)' }}>
                 {headline.excerpt}
               </p>
             )}

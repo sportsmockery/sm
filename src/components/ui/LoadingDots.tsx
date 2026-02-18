@@ -1,3 +1,5 @@
+import React from 'react'
+
 interface LoadingDotsProps {
   size?: 'sm' | 'md' | 'lg'
   color?: 'primary' | 'white' | 'current' | 'muted'
@@ -16,11 +18,11 @@ const gaps = {
   lg: 'gap-2',
 }
 
-const colors = {
-  primary: 'bg-[#8B0000] dark:bg-[#FF6666]',
-  white: 'bg-white',
-  current: 'bg-current',
-  muted: 'bg-zinc-400 dark:bg-zinc-600',
+const colorStyles: Record<string, React.CSSProperties> = {
+  primary: { backgroundColor: 'var(--accent-red)' },
+  white: { backgroundColor: '#ffffff' },
+  current: { backgroundColor: 'currentColor' },
+  muted: { backgroundColor: 'var(--sm-text-muted)' },
 }
 
 export default function LoadingDots({
@@ -37,8 +39,9 @@ export default function LoadingDots({
       {[0, 1, 2].map((i) => (
         <span
           key={i}
-          className={`${sizes[size]} ${colors[color]} rounded-full animate-bounce`}
+          className={`${sizes[size]} rounded-full animate-bounce`}
           style={{
+            ...colorStyles[color],
             animationDelay: `${i * 150}ms`,
             animationDuration: '600ms',
           }}

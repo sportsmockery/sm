@@ -117,11 +117,11 @@ export default function DataVisualization({ chartData, bonusInsight }: DataVisua
     scales: chartData.type === 'bar' || chartData.type === 'line' ? {
       x: {
         ticks: { color: 'var(--sm-text-muted)', font: { size: 10 } },
-        grid: { color: 'var(--border-color)', display: false },
+        grid: { color: 'var(--sm-border)', display: false },
       },
       y: {
         ticks: { color: 'var(--sm-text-muted)', font: { size: 10 } },
-        grid: { color: 'var(--border-color)' },
+        grid: { color: 'var(--sm-border)' },
         beginAtZero: true,
       },
     } : undefined,
@@ -136,18 +136,18 @@ export default function DataVisualization({ chartData, bonusInsight }: DataVisua
             {chartData.title}
           </h4>
         )}
-        <div className="overflow-x-auto rounded-lg" style={{ border: '1px solid var(--border-color)' }}>
+        <div className="overflow-x-auto rounded-lg" style={{ border: '1px solid var(--sm-border)' }}>
           <table className="min-w-full text-sm">
             <thead>
-              <tr style={{ backgroundColor: 'var(--bg-surface)' }}>
-                <th className="px-3 py-2 text-left font-semibold" style={{ color: 'var(--sm-text)', borderBottom: '1px solid var(--border-color)' }}>
+              <tr style={{ backgroundColor: 'var(--sm-surface)' }}>
+                <th className="px-3 py-2 text-left font-semibold" style={{ color: 'var(--sm-text)', borderBottom: '1px solid var(--sm-border)' }}>
                   {chartData.datasets.length > 0 ? '' : 'Item'}
                 </th>
                 {chartData.datasets.map((ds, idx) => (
                   <th
                     key={idx}
                     className="px-3 py-2 text-right font-semibold"
-                    style={{ color: 'var(--sm-text)', borderBottom: '1px solid var(--border-color)' }}
+                    style={{ color: 'var(--sm-text)', borderBottom: '1px solid var(--sm-border)' }}
                   >
                     {ds.label}
                   </th>
@@ -159,11 +159,11 @@ export default function DataVisualization({ chartData, bonusInsight }: DataVisua
                 <tr
                   key={rowIdx}
                   className="hover:bg-opacity-50"
-                  style={{ backgroundColor: rowIdx % 2 === 0 ? 'transparent' : 'var(--bg-surface)' }}
+                  style={{ backgroundColor: rowIdx % 2 === 0 ? 'transparent' : 'var(--sm-surface)' }}
                 >
                   <td
                     className="px-3 py-2 font-medium"
-                    style={{ color: 'var(--sm-text)', borderBottom: '1px solid var(--border-color)' }}
+                    style={{ color: 'var(--sm-text)', borderBottom: '1px solid var(--sm-border)' }}
                   >
                     {label}
                   </td>
@@ -171,7 +171,7 @@ export default function DataVisualization({ chartData, bonusInsight }: DataVisua
                     <td
                       key={colIdx}
                       className="px-3 py-2 text-right tabular-nums"
-                      style={{ color: 'var(--sm-text)', borderBottom: '1px solid var(--border-color)' }}
+                      style={{ color: 'var(--sm-text)', borderBottom: '1px solid var(--sm-border)' }}
                     >
                       {typeof ds.data[rowIdx] === 'number'
                         ? ds.data[rowIdx].toLocaleString()
@@ -210,7 +210,7 @@ export default function DataVisualization({ chartData, bonusInsight }: DataVisua
     <div className="my-4" ref={chartRef}>
       <div
         className="rounded-lg p-4"
-        style={{ backgroundColor: 'var(--bg-surface)', border: '1px solid var(--border-color)' }}
+        style={{ backgroundColor: 'var(--sm-surface)', border: '1px solid var(--sm-border)' }}
       >
         <div style={{ height: chartData.type === 'pie' || chartData.type === 'doughnut' ? '250px' : '200px' }}>
           <ChartComponent data={enhancedData} options={chartOptions} />

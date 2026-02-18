@@ -47,7 +47,8 @@ export default function Pagination({ currentPage, totalPages, basePath }: Pagina
       {currentPage > 1 ? (
         <Link
           href={getPageUrl(currentPage - 1)}
-          className="group flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold text-zinc-600 hover:text-zinc-900 bg-white hover:bg-zinc-50 border border-zinc-200 hover:border-zinc-300 dark:text-zinc-400 dark:hover:text-zinc-100 dark:bg-zinc-900 dark:hover:bg-zinc-800 dark:border-zinc-800 dark:hover:border-zinc-700 transition-all duration-300 shadow-sm hover:shadow"
+          className="group flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold transition-all duration-300 shadow-sm hover:shadow"
+          style={{ color: 'var(--sm-text-dim)', backgroundColor: 'var(--sm-card)', border: '1px solid var(--sm-border)' }}
           aria-label="Previous page"
         >
           <svg className="w-4 h-4 transition-transform duration-300 group-hover:-translate-x-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -56,7 +57,7 @@ export default function Pagination({ currentPage, totalPages, basePath }: Pagina
           <span className="hidden sm:inline">Previous</span>
         </Link>
       ) : (
-        <span className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold text-zinc-300 dark:text-zinc-700 bg-zinc-50 dark:bg-zinc-900 border border-zinc-100 dark:border-zinc-800 cursor-not-allowed">
+        <span className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold cursor-not-allowed" style={{ color: 'var(--sm-text-muted)', backgroundColor: 'var(--sm-surface)', border: '1px solid var(--sm-border)' }}>
           <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
           </svg>
@@ -70,7 +71,7 @@ export default function Pagination({ currentPage, totalPages, basePath }: Pagina
           page === 'ellipsis' ? (
             <span
               key={`ellipsis-${index}`}
-              className="px-2 py-2 text-zinc-400 dark:text-zinc-600"
+              className="px-2 py-2" style={{ color: 'var(--sm-text-muted)' }}
             >
               ...
             </span>
@@ -81,7 +82,7 @@ export default function Pagination({ currentPage, totalPages, basePath }: Pagina
               className={`relative px-4 py-2 rounded-xl text-sm font-semibold transition-all duration-300 ${
                 page === currentPage
                   ? 'bg-gradient-to-r from-[#FF0000] to-[#8B0000] text-white shadow-lg hover:shadow-xl scale-105'
-                  : 'text-zinc-600 hover:text-zinc-900 hover:bg-zinc-100 dark:text-zinc-400 dark:hover:text-zinc-100 dark:hover:bg-zinc-800'
+                  : 'text-[var(--sm-text-dim)] hover:text-[var(--sm-text)] hover:bg-[var(--sm-card-hover)]'
               }`}
               aria-current={page === currentPage ? 'page' : undefined}
             >
@@ -95,17 +96,18 @@ export default function Pagination({ currentPage, totalPages, basePath }: Pagina
       </div>
 
       {/* Mobile page indicator */}
-      <div className="sm:hidden flex items-center gap-2 px-4 py-2 rounded-xl bg-zinc-100 dark:bg-zinc-800">
+      <div className="sm:hidden flex items-center gap-2 px-4 py-2 rounded-xl" style={{ backgroundColor: 'var(--sm-surface)' }}>
         <span className="text-sm font-semibold text-[#8B0000]">{currentPage}</span>
-        <span className="text-xs text-zinc-400">/</span>
-        <span className="text-sm text-zinc-500 dark:text-zinc-400">{totalPages}</span>
+        <span className="text-xs" style={{ color: 'var(--sm-text-muted)' }}>/</span>
+        <span className="text-sm" style={{ color: 'var(--sm-text-muted)' }}>{totalPages}</span>
       </div>
 
       {/* Next button */}
       {currentPage < totalPages ? (
         <Link
           href={getPageUrl(currentPage + 1)}
-          className="group flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold text-zinc-600 hover:text-zinc-900 bg-white hover:bg-zinc-50 border border-zinc-200 hover:border-zinc-300 dark:text-zinc-400 dark:hover:text-zinc-100 dark:bg-zinc-900 dark:hover:bg-zinc-800 dark:border-zinc-800 dark:hover:border-zinc-700 transition-all duration-300 shadow-sm hover:shadow"
+          className="group flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold transition-all duration-300 shadow-sm hover:shadow"
+          style={{ color: 'var(--sm-text-dim)', backgroundColor: 'var(--sm-card)', border: '1px solid var(--sm-border)' }}
           aria-label="Next page"
         >
           <span className="hidden sm:inline">Next</span>
@@ -114,7 +116,7 @@ export default function Pagination({ currentPage, totalPages, basePath }: Pagina
           </svg>
         </Link>
       ) : (
-        <span className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold text-zinc-300 dark:text-zinc-700 bg-zinc-50 dark:bg-zinc-900 border border-zinc-100 dark:border-zinc-800 cursor-not-allowed">
+        <span className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold cursor-not-allowed" style={{ color: 'var(--sm-text-muted)', backgroundColor: 'var(--sm-surface)', border: '1px solid var(--sm-border)' }}>
           <span className="hidden sm:inline">Next</span>
           <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />

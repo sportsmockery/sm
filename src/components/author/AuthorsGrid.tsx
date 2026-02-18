@@ -17,8 +17,8 @@ interface AuthorsGridProps {
 export default function AuthorsGrid({ authors, className = '' }: AuthorsGridProps) {
   if (authors.length === 0) {
     return (
-      <div className="rounded-2xl border border-dashed border-zinc-300 bg-zinc-50 p-12 text-center dark:border-zinc-700 dark:bg-zinc-900/50">
-        <p className="text-zinc-500 dark:text-zinc-400">No authors found.</p>
+      <div className="rounded-2xl border border-dashed p-12 text-center" style={{ borderColor: 'var(--sm-border)', backgroundColor: 'var(--sm-card)' }}>
+        <p style={{ color: 'var(--sm-text-muted)' }}>No authors found.</p>
       </div>
     )
   }

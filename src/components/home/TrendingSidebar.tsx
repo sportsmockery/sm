@@ -36,15 +36,16 @@ export default function TrendingSidebar({ articles, compact = false, className =
                   text-xs font-bold
                   ${index < 3
                     ? 'bg-[#8B0000] text-white'
-                    : 'bg-zinc-100 text-zinc-500 dark:bg-zinc-800 dark:text-zinc-400'
+                    : ''
                   }
                 `}
+                style={index >= 3 ? { backgroundColor: 'var(--sm-surface)', color: 'var(--sm-text-muted)' } : undefined}
               >
                 {index + 1}
               </span>
 
               {/* Title */}
-              <span className="flex-1 text-sm font-medium leading-snug text-zinc-700 transition-colors group-hover:text-[#8B0000] dark:text-zinc-300 dark:group-hover:text-[#FF6666]">
+              <span className="flex-1 text-sm font-medium leading-snug transition-colors" style={{ color: 'var(--sm-text)' }}>
                 {article.title}
               </span>
             </Link>
@@ -56,11 +57,11 @@ export default function TrendingSidebar({ articles, compact = false, className =
 
   // Full version with card styling
   return (
-    <div className={`rounded-xl bg-zinc-900 p-6 ${className}`}>
+    <div className={`rounded-xl p-6 ${className}`} style={{ backgroundColor: 'var(--sm-card)' }}>
       {/* Header */}
       <div className="mb-4 flex items-center gap-2">
         <span className="text-xl">🔥</span>
-        <h3 className="font-heading text-lg font-bold text-white">
+        <h3 className="font-heading text-lg font-bold" style={{ color: 'var(--sm-text)' }}>
           Trending Now
         </h3>
       </div>
@@ -80,15 +81,16 @@ export default function TrendingSidebar({ articles, compact = false, className =
                   text-sm font-bold
                   ${index < 3
                     ? 'bg-gradient-to-br from-[#FF0000] to-[#8B0000] text-white'
-                    : 'bg-zinc-800 text-zinc-400'
+                    : ''
                   }
                 `}
+                style={index >= 3 ? { backgroundColor: 'var(--sm-surface)', color: 'var(--sm-text-dim)' } : undefined}
               >
                 {index + 1}
               </span>
 
               {/* Title */}
-              <span className="flex-1 text-sm font-medium leading-snug text-zinc-300 transition-colors group-hover:text-white">
+              <span className="flex-1 text-sm font-medium leading-snug transition-colors" style={{ color: 'var(--sm-text-muted)' }}>
                 {article.title}
               </span>
             </Link>
@@ -99,7 +101,8 @@ export default function TrendingSidebar({ articles, compact = false, className =
       {/* View all link */}
       <Link
         href="/trending"
-        className="mt-6 flex items-center justify-center gap-2 rounded-lg border border-zinc-700 py-2 text-sm font-medium text-zinc-400 transition-colors hover:border-zinc-500 hover:text-white"
+        className="mt-6 flex items-center justify-center gap-2 rounded-lg py-2 text-sm font-medium transition-colors"
+        style={{ border: '1px solid var(--sm-border)', color: 'var(--sm-text-muted)' }}
       >
         View All Trending
         <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">

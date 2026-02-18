@@ -36,8 +36,8 @@ export default function ForgotPasswordForm() {
             <path strokeLinecap="round" strokeLinejoin="round" d="M21.75 6.75v10.5a2.25 2.25 0 01-2.25 2.25h-15a2.25 2.25 0 01-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25m19.5 0v.243a2.25 2.25 0 01-1.07 1.916l-7.5 4.615a2.25 2.25 0 01-2.36 0L3.32 8.91a2.25 2.25 0 01-1.07-1.916V6.75" />
           </svg>
         </div>
-        <h3 className="mb-2 text-lg font-semibold text-zinc-900 dark:text-white">Check your email</h3>
-        <p className="text-sm text-zinc-600 dark:text-zinc-400">
+        <h3 className="mb-2 text-lg font-semibold" style={{ color: 'var(--sm-text)' }}>Check your email</h3>
+        <p className="text-sm" style={{ color: 'var(--sm-text-muted)' }}>
           We&apos;ve sent a password reset link to <strong>{email}</strong>. Click the link to reset your password.
         </p>
         <Link
@@ -64,13 +64,13 @@ export default function ForgotPasswordForm() {
         </div>
       )}
 
-      <p className="text-sm text-zinc-600 dark:text-zinc-400">
+      <p className="text-sm" style={{ color: 'var(--sm-text-muted)' }}>
         Enter your email address and we&apos;ll send you a link to reset your password.
       </p>
 
       {/* Email */}
       <div>
-        <label htmlFor="email" className="block text-sm font-medium text-zinc-700 dark:text-zinc-300">
+        <label htmlFor="email" className="block text-sm font-medium" style={{ color: 'var(--sm-text)' }}>
           Email address
         </label>
         <input
@@ -80,7 +80,8 @@ export default function ForgotPasswordForm() {
           onChange={(e) => setEmail(e.target.value)}
           required
           autoComplete="email"
-          className="mt-1 block w-full rounded-lg border border-zinc-300 bg-white px-4 py-3 text-zinc-900 placeholder-zinc-400 focus:border-[#8B0000] focus:outline-none focus:ring-1 focus:ring-[#8B0000] dark:border-zinc-700 dark:bg-zinc-800 dark:text-white dark:placeholder-zinc-500 dark:focus:border-[#FF6666] dark:focus:ring-[#FF6666]"
+          className="mt-1 block w-full rounded-lg border px-4 py-3 placeholder-zinc-400 focus:border-[#8B0000] focus:outline-none focus:ring-1 focus:ring-[#8B0000] dark:placeholder-zinc-500 dark:focus:border-[#FF6666] dark:focus:ring-[#FF6666]"
+          style={{ borderColor: 'var(--sm-border)', backgroundColor: 'var(--sm-card)', color: 'var(--sm-text)' }}
           placeholder="you@example.com"
         />
       </div>
@@ -105,7 +106,7 @@ export default function ForgotPasswordForm() {
       </button>
 
       {/* Back to login */}
-      <p className="text-center text-sm text-zinc-600 dark:text-zinc-400">
+      <p className="text-center text-sm" style={{ color: 'var(--sm-text-muted)' }}>
         Remember your password?{' '}
         <Link
           href="/login"

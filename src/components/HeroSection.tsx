@@ -49,9 +49,9 @@ export default function HeroSection({ featuredArticle, secondaryArticles = [] }:
   }
 
   return (
-    <section ref={heroRef} className="relative overflow-hidden bg-zinc-900">
+    <section ref={heroRef} className="relative overflow-hidden" style={{ backgroundColor: 'var(--sm-surface)' }}>
       {/* Background gradient */}
-      <div className="absolute inset-0 bg-gradient-to-br from-zinc-900 via-zinc-800 to-zinc-900" />
+      <div className="absolute inset-0" style={{ background: 'linear-gradient(to bottom right, var(--sm-surface), var(--sm-card), var(--sm-surface))' }} />
 
       {/* Animated background pattern */}
       <div className="absolute inset-0 opacity-5">
@@ -129,7 +129,7 @@ export default function HeroSection({ featuredArticle, secondaryArticles = [] }:
                 {/* Excerpt */}
                 {mainArticle.excerpt && (
                   <p
-                    className={`mt-4 text-zinc-300 text-sm lg:text-base line-clamp-2 max-w-2xl transform transition-all duration-500 ${
+                    className={`mt-4 text-sm lg:text-base line-clamp-2 max-w-2xl transform transition-all duration-500 ${
                       isVisible ? 'translate-y-0 opacity-100' : 'translate-y-4 opacity-0'
                     }`}
                     style={{ transitionDelay: '300ms' }}
@@ -140,7 +140,7 @@ export default function HeroSection({ featuredArticle, secondaryArticles = [] }:
 
                 {/* Meta info */}
                 <div
-                  className={`flex items-center gap-4 mt-4 text-sm text-zinc-400 transform transition-all duration-500 ${
+                  className={`flex items-center gap-4 mt-4 text-sm transform transition-all duration-500 ${
                     isVisible ? 'translate-y-0 opacity-100' : 'translate-y-4 opacity-0'
                   }`}
                   style={{ transitionDelay: '400ms' }}
@@ -150,7 +150,7 @@ export default function HeroSection({ featuredArticle, secondaryArticles = [] }:
                   )}
                   {mainArticle.publishedAt && (
                     <>
-                      <span className="w-1 h-1 rounded-full bg-zinc-500" />
+                      <span className="w-1 h-1 rounded-full" style={{ backgroundColor: 'var(--sm-text-muted)' }} />
                       <span>{formatDate(mainArticle.publishedAt)}</span>
                     </>
                   )}
@@ -216,7 +216,7 @@ export default function HeroSection({ featuredArticle, secondaryArticles = [] }:
                     {article.title}
                   </h3>
                   {article.publishedAt && (
-                    <span className="mt-2 text-xs text-zinc-500">
+                    <span className="mt-2 text-xs" style={{ color: 'var(--sm-text-muted)' }}>
                       {formatDate(article.publishedAt)}
                     </span>
                   )}
@@ -242,7 +242,7 @@ export default function HeroSection({ featuredArticle, secondaryArticles = [] }:
                     }`}
                     style={{ transitionDelay: `${i * 150 + 200}ms` }}
                   >
-                    <div className="shrink-0 w-24 h-24 rounded-lg bg-zinc-800 animate-pulse" />
+                    <div className="shrink-0 w-24 h-24 rounded-lg bg-[var(--sm-surface)] animate-pulse" />
                     <div className="flex-1 flex flex-col justify-center gap-2">
                       <div className="h-3 w-16 bg-zinc-800 rounded animate-pulse" />
                       <div className="h-4 w-full bg-zinc-800 rounded animate-pulse" />

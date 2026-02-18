@@ -143,7 +143,7 @@ export const AnimatedBarChart = memo(function AnimatedBarChart({
         .attr('x2', innerWidth)
         .attr('y1', yScale(tick))
         .attr('y2', yScale(tick))
-        .attr('stroke', 'var(--border-default, #e0e0e0)')
+        .attr('stroke', 'var(--sm-border, #e0e0e0)')
         .attr('stroke-opacity', 0.3)
         .attr('stroke-dasharray', '3,3')
     })
@@ -167,10 +167,10 @@ export const AnimatedBarChart = memo(function AnimatedBarChart({
       .attr('dy', needsRotation ? '.15em' : '.71em')
       .style('font-size', '13px')
       .style('font-weight', '500')
-      .style('fill', 'var(--text-primary, #222)')
+      .style('fill', 'var(--sm-text, #222)')
 
-    xAxisGroup.selectAll('line').style('stroke', 'var(--border-default, #e0e0e0)')
-    xAxisGroup.selectAll('path').style('stroke', 'var(--border-default, #e0e0e0)')
+    xAxisGroup.selectAll('line').style('stroke', 'var(--sm-border, #e0e0e0)')
+    xAxisGroup.selectAll('path').style('stroke', 'var(--sm-border, #e0e0e0)')
 
     // Y Axis
     const yAxis = d3
@@ -186,10 +186,10 @@ export const AnimatedBarChart = memo(function AnimatedBarChart({
 
     yAxisGroup.selectAll('text')
       .style('font-size', '12px')
-      .style('fill', 'var(--text-muted, #666)')
+      .style('fill', 'var(--sm-text-muted, #666)')
 
-    yAxisGroup.selectAll('line').style('stroke', 'var(--border-default, #e0e0e0)')
-    yAxisGroup.selectAll('path').style('stroke', 'var(--border-default, #e0e0e0)')
+    yAxisGroup.selectAll('line').style('stroke', 'var(--sm-border, #e0e0e0)')
+    yAxisGroup.selectAll('path').style('stroke', 'var(--sm-border, #e0e0e0)')
 
     // Axis labels
     g.select('.x-axis-label')
@@ -198,7 +198,7 @@ export const AnimatedBarChart = memo(function AnimatedBarChart({
       .attr('text-anchor', 'middle')
       .style('font-size', '14px')
       .style('font-weight', '600')
-      .style('fill', 'var(--text-primary, #222)')
+      .style('fill', 'var(--sm-text, #222)')
       .text(axes?.x?.label || '')
 
     g.select('.y-axis-label')
@@ -208,7 +208,7 @@ export const AnimatedBarChart = memo(function AnimatedBarChart({
       .attr('text-anchor', 'middle')
       .style('font-size', '14px')
       .style('font-weight', '600')
-      .style('fill', 'var(--text-primary, #222)')
+      .style('fill', 'var(--sm-text, #222)')
       .text(axes?.y?.label || '')
 
     // Color function - use data color, team colors, or alternate
@@ -316,7 +316,7 @@ export const AnimatedBarChart = memo(function AnimatedBarChart({
       .attr('text-anchor', 'middle')
       .style('font-size', '14px')
       .style('font-weight', '700')
-      .style('fill', 'var(--text-primary, #222)')
+      .style('fill', 'var(--sm-text, #222)')
       .style('opacity', 0)
       .text((d) => formatValue(d.value, axes?.y?.format))
 
@@ -375,8 +375,8 @@ export const AnimatedBarChart = memo(function AnimatedBarChart({
     tooltip.className = 'chart-tooltip'
     tooltip.style.cssText = `
       position: fixed;
-      background: var(--bg-card, #fff);
-      border: 1px solid var(--border-default, #e0e0e0);
+      background: var(--sm-card, #fff);
+      border: 1px solid var(--sm-border, #e0e0e0);
       border-radius: 8px;
       padding: 12px 16px;
       box-shadow: 0 10px 25px -5px rgba(0,0,0,0.1), 0 10px 10px -5px rgba(0,0,0,0.04);
@@ -389,13 +389,13 @@ export const AnimatedBarChart = memo(function AnimatedBarChart({
     `
 
     const contextHtml = d.metadata?.context
-      ? `<div style="color: var(--text-muted, #666); font-size: 12px; margin-top: 8px; padding-top: 8px; border-top: 1px solid var(--border-default, #e0e0e0);">${d.metadata.context}</div>`
+      ? `<div style="color: var(--sm-text-muted, #666); font-size: 12px; margin-top: 8px; padding-top: 8px; border-top: 1px solid var(--sm-border, #e0e0e0);">${d.metadata.context}</div>`
       : ''
 
     tooltip.innerHTML = `
-      <div style="font-weight: 600; margin-bottom: 4px; color: var(--text-primary, #222);">${d.label}</div>
-      <div style="color: var(--text-secondary, #666); font-size: 13px;">
-        ${axes?.y?.label || 'Value'}: <strong style="color: var(--text-primary, #222);">${formatValue(d.value, axes?.y?.format)}</strong>
+      <div style="font-weight: 600; margin-bottom: 4px; color: var(--sm-text, #222);">${d.label}</div>
+      <div style="color: var(--sm-text-dim, #666); font-size: 13px;">
+        ${axes?.y?.label || 'Value'}: <strong style="color: var(--sm-text, #222);">${formatValue(d.value, axes?.y?.format)}</strong>
       </div>
       ${contextHtml}
     `
@@ -446,7 +446,7 @@ export const AnimatedBarChart = memo(function AnimatedBarChart({
 
   if (!data || data.length < 2) {
     return (
-      <div className="flex items-center justify-center h-64 text-center" style={{ color: 'var(--text-muted, #666)' }}>
+      <div className="flex items-center justify-center h-64 text-center" style={{ color: 'var(--sm-text-muted, #666)' }}>
         <div>
           <svg className="w-12 h-12 mx-auto mb-3 opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />

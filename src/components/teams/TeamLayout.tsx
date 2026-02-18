@@ -21,7 +21,7 @@ export default function TeamLayout({
   children,
 }: TeamLayoutProps) {
   return (
-    <div className="min-h-screen bg-zinc-50 dark:bg-zinc-950">
+    <div className="min-h-screen" style={{ backgroundColor: 'var(--sm-surface)' }}>
       <TeamHeader
         team={team}
         record={record}

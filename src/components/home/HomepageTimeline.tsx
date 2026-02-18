@@ -33,12 +33,12 @@ export default function HomepageTimeline({
   }
 
   return (
-    <section className={`bg-[#f5f5f5] dark:bg-[#0a0a0b] ${className}`}>
+    <section className={className} style={{ backgroundColor: 'var(--sm-surface)' }}>
       <div className="max-w-[1110px] mx-auto px-4 py-8">
         {/* Section header */}
         <h2
-          className="text-[18px] font-bold text-[#222] dark:text-white uppercase mb-6 pb-2 border-b-[3px] border-[#bc0000]"
-          style={{ fontFamily: "'Montserrat', sans-serif" }}
+          className="text-[18px] font-bold uppercase mb-6 pb-2 border-b-[3px] border-[#bc0000]"
+          style={{ color: 'var(--sm-text)', fontFamily: "'Montserrat', sans-serif" }}
         >
           Latest Updates
         </h2>
@@ -46,7 +46,7 @@ export default function HomepageTimeline({
         {/* Timeline */}
         <div className="relative">
           {/* Timeline line */}
-          <div className="absolute left-4 md:left-6 top-0 bottom-0 w-0.5 bg-gray-200 dark:bg-gray-700" />
+          <div className="absolute left-4 md:left-6 top-0 bottom-0 w-0.5" style={{ backgroundColor: 'var(--sm-border)' }} />
 
           {/* Timeline items */}
           <div className="space-y-6">
@@ -65,8 +65,8 @@ export default function HomepageTimeline({
           <div className="mt-8 text-center">
             <button
               onClick={loadMore}
-              className="inline-flex items-center gap-2 px-6 py-3 bg-white dark:bg-[#111] border border-gray-200 dark:border-gray-700 text-[#222] dark:text-white font-semibold text-sm hover:border-[#bc0000] hover:text-[#bc0000] transition-colors rounded-lg"
-              style={{ fontFamily: "'Montserrat', sans-serif" }}
+              className="inline-flex items-center gap-2 px-6 py-3 font-semibold text-sm hover:border-[#bc0000] hover:text-[#bc0000] transition-colors rounded-lg"
+              style={{ backgroundColor: 'var(--sm-card)', border: '1px solid var(--sm-border)', color: 'var(--sm-text)', fontFamily: "'Montserrat', sans-serif" }}
             >
               Load More
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -107,23 +107,25 @@ function TimelineItem({
     <article className="relative pl-12 md:pl-16">
       {/* Timeline dot */}
       <div
-        className={`absolute left-2 md:left-4 w-4 h-4 rounded-full border-2 bg-white dark:bg-[#0a0a0b] ${
+        className={`absolute left-2 md:left-4 w-4 h-4 rounded-full border-2 ${
           isBreaking
             ? 'border-red-500 animate-pulse'
             : isBears
             ? 'border-[#C83803]'
-            : 'border-gray-300 dark:border-gray-600'
+            : ''
         }`}
         style={{
-          borderColor: !isBreaking && !isBears ? undefined : (isBreaking ? '#ef4444' : teamInfo.secondaryColor),
+          backgroundColor: 'var(--sm-card)',
+          borderColor: !isBreaking && !isBears ? 'var(--sm-border)' : (isBreaking ? '#ef4444' : teamInfo.secondaryColor),
         }}
       />
 
       {/* Content card */}
       <div
-        className={`bg-white dark:bg-[#111] rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-shadow ${
+        className={`rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-shadow ${
           isBreaking ? 'ring-2 ring-red-500' : ''
         }`}
+        style={{ backgroundColor: 'var(--sm-card)' }}
       >
         <Link
           href={`/${post.categorySlug}/${post.slug}`}
@@ -158,15 +160,15 @@ function TimelineItem({
               <span
                 className="inline-block px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide rounded"
                 style={{
-                  backgroundColor: isBears ? `${teamInfo.secondaryColor}20` : '#f5f5f5',
-                  color: isBears ? teamInfo.secondaryColor : '#666',
+                  backgroundColor: isBears ? `${teamInfo.secondaryColor}20` : 'var(--sm-surface)',
+                  color: isBears ? teamInfo.secondaryColor : 'var(--sm-text-muted)',
                 }}
               >
                 {post.categoryName.replace('Chicago ', '')}
               </span>
 
               {/* Time */}
-              <span className="text-[11px] text-gray-400">
+              <span className="text-[11px]" style={{ color: 'var(--sm-text-dim)' }}>
                 {timeAgo} • {formattedTime}
               </span>
 
@@ -180,21 +182,21 @@ function TimelineItem({
 
             {/* Title */}
             <h3
-              className="text-[15px] md:text-[16px] font-bold text-[#222] dark:text-white leading-tight line-clamp-2 group-hover:text-[#bc0000] transition-colors"
-              style={{ fontFamily: "'Montserrat', sans-serif" }}
+              className="text-[15px] md:text-[16px] font-bold leading-tight line-clamp-2 group-hover:text-[#bc0000] transition-colors"
+              style={{ color: 'var(--sm-text)', fontFamily: "'Montserrat', sans-serif" }}
             >
               {post.title}
             </h3>
 
             {/* Excerpt (hidden on mobile) */}
             {post.excerpt && (
-              <p className="hidden md:block text-[13px] text-gray-500 dark:text-gray-400 mt-2 line-clamp-2">
+              <p className="hidden md:block text-[13px] mt-2 line-clamp-2" style={{ color: 'var(--sm-text-muted)' }}>
                 {post.excerpt}
               </p>
             )}
 
             {/* Author */}
-            <p className="text-[11px] text-gray-400 mt-2">
+            <p className="text-[11px] mt-2" style={{ color: 'var(--sm-text-dim)' }}>
               By {post.author.displayName}
             </p>
           </div>

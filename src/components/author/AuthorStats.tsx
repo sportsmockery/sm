@@ -51,16 +51,16 @@ function StatCard({
   const animatedValue = useAnimatedCounter(value)
 
   return (
-    <div className="flex flex-col items-center rounded-2xl border border-zinc-200 bg-white p-6 dark:border-zinc-800 dark:bg-zinc-900">
+    <div className="flex flex-col items-center rounded-2xl border p-6" style={{ borderColor: 'var(--sm-border)', backgroundColor: 'var(--sm-card)' }}>
       <div
         className={`mb-3 flex h-12 w-12 items-center justify-center rounded-xl ${color}`}
       >
         {icon}
       </div>
-      <p className="text-3xl font-bold text-zinc-900 dark:text-white">
+      <p className="text-3xl font-bold" style={{ color: 'var(--sm-text)' }}>
         {animatedValue.toLocaleString()}
       </p>
-      <p className="text-sm text-zinc-500 dark:text-zinc-400">{label}</p>
+      <p className="text-sm" style={{ color: 'var(--sm-text-muted)' }}>{label}</p>
     </div>
   )
 }

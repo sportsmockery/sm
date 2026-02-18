@@ -152,9 +152,9 @@ export default function HomepageV2() {
 
   if (error && !data) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-white dark:bg-zinc-950">
+      <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: 'var(--sm-card)' }}>
         <div className="text-center">
-          <p className="text-zinc-600 dark:text-zinc-400 mb-4">{error}</p>
+          <p className="mb-4" style={{ color: 'var(--sm-text-muted)' }}>{error}</p>
           <button
             onClick={() => window.location.reload()}
             className={`px-6 py-3 bg-red-600 text-white font-bold hover:bg-red-700 ${montserrat.className}`}
@@ -167,7 +167,7 @@ export default function HomepageV2() {
   }
 
   return (
-    <div className="min-h-screen bg-white dark:bg-zinc-950">
+    <div className="min-h-screen" style={{ backgroundColor: 'var(--sm-card)' }}>
       {/* Oracle Scores Bar - Sticky top */}
       <OracleScoresBar />
 
@@ -222,11 +222,11 @@ export default function HomepageV2() {
             />
 
             {/* AR Button in sidebar */}
-            <div className="bg-zinc-900 p-4 border border-red-600">
+            <div className="p-4 border border-red-600" style={{ backgroundColor: 'var(--sm-surface)' }}>
               <h3 className={`text-white text-lg mb-3 ${montserrat.className}`}>
                 AR Experience
               </h3>
-              <p className="text-zinc-400 text-sm mb-4 font-serif">
+              <p className="text-sm mb-4 font-serif" style={{ color: 'var(--sm-text-muted)' }}>
                 Tour Chicago stadiums in augmented reality.
               </p>
               <button
@@ -258,12 +258,12 @@ export default function HomepageV2() {
 // Loading state
 function HomepageLoading() {
   return (
-    <div className="min-h-screen bg-white dark:bg-zinc-950">
+    <div className="min-h-screen" style={{ backgroundColor: 'var(--sm-card)' }}>
       {/* Skeleton scores bar */}
-      <div className="sticky top-0 z-50 bg-white dark:bg-zinc-950 border-b border-red-600 p-2">
+      <div className="sticky top-0 z-50 border-b border-red-600 p-2" style={{ backgroundColor: 'var(--sm-card)' }}>
         <div className="flex gap-4 overflow-hidden">
           {[1, 2, 3, 4].map((i) => (
-            <div key={i} className="w-40 h-8 bg-zinc-200 dark:bg-zinc-800 rounded animate-pulse" />
+            <div key={i} className="w-40 h-8 rounded animate-pulse" style={{ backgroundColor: 'var(--sm-surface)' }} />
           ))}
         </div>
       </div>
@@ -274,13 +274,14 @@ function HomepageLoading() {
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
-          className="h-[200px] bg-zinc-100 dark:bg-zinc-900 my-6 animate-pulse"
+          className="h-[200px] my-6 animate-pulse"
+          style={{ backgroundColor: 'var(--sm-surface)' }}
         />
 
         {/* Grid skeleton */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {[1, 2, 3, 4, 5, 6].map((i) => (
-            <div key={i} className="h-48 bg-zinc-100 dark:bg-zinc-900 animate-pulse" />
+            <div key={i} className="h-48 animate-pulse" style={{ backgroundColor: 'var(--sm-surface)' }} />
           ))}
         </div>
       </div>

@@ -106,7 +106,7 @@ export function Tab({
       onClick={() => setActiveTab(id)}
       className={`
         px-5 py-3 text-sm font-medium border-b-2 -mb-px transition-colors
-        ${isActive ? activeClass : 'border-transparent text-[var(--text-secondary)] hover:text-[var(--text-primary)]'}
+        ${isActive ? activeClass : 'border-transparent text-[var(--sm-text-dim)] hover:text-[var(--sm-text)]'}
         ${disabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}
         ${className}
       `}

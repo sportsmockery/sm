@@ -14,7 +14,7 @@ export default function Error({ error, reset }: ErrorProps) {
   }, [error])
 
   return (
-    <div className="min-h-screen bg-zinc-50 dark:bg-zinc-950 flex items-center justify-center px-4">
+    <div className="min-h-screen flex items-center justify-center px-4" style={{ backgroundColor: 'var(--sm-card)' }}>
       <div className="text-center max-w-lg">
         {/* Error icon */}
         <div className="mb-8 inline-flex h-24 w-24 items-center justify-center rounded-full bg-red-100 dark:bg-red-900/20">
@@ -34,24 +34,24 @@ export default function Error({ error, reset }: ErrorProps) {
         </div>
 
         {/* Error message */}
-        <h1 className="text-2xl font-bold text-zinc-900 dark:text-white mb-4 font-[var(--font-montserrat)]">
+        <h1 className="text-2xl font-bold mb-4 font-[var(--font-montserrat)]" style={{ color: 'var(--sm-text)' }}>
           Technical Difficulties
         </h1>
-        <p className="text-zinc-600 dark:text-zinc-400 mb-2">
+        <p className="mb-2" style={{ color: 'var(--sm-text-muted)' }}>
           Looks like we threw an interception. Something went wrong on our end.
         </p>
-        <p className="text-sm text-zinc-500 dark:text-zinc-500 mb-8">
+        <p className="text-sm mb-8" style={{ color: 'var(--sm-text-dim)' }}>
           Our team has been notified and is working on it. Please try again.
         </p>
 
         {/* Error details (development only) */}
         {process.env.NODE_ENV === 'development' && error.message && (
-          <div className="mb-8 rounded-lg bg-zinc-100 dark:bg-zinc-900 p-4 text-left">
-            <p className="text-xs font-mono text-zinc-600 dark:text-zinc-400 break-all">
+          <div className="mb-8 rounded-lg p-4 text-left" style={{ backgroundColor: 'var(--sm-surface)' }}>
+            <p className="text-xs font-mono break-all" style={{ color: 'var(--sm-text-muted)' }}>
               {error.message}
             </p>
             {error.digest && (
-              <p className="mt-2 text-xs text-zinc-500">
+              <p className="mt-2 text-xs" style={{ color: 'var(--sm-text-dim)' }}>
                 Error ID: {error.digest}
               </p>
             )}
@@ -71,7 +71,8 @@ export default function Error({ error, reset }: ErrorProps) {
           </button>
           <a
             href="/"
-            className="inline-flex items-center justify-center gap-2 rounded-xl border-2 border-zinc-300 dark:border-zinc-700 px-6 py-3 font-semibold text-zinc-700 dark:text-zinc-300 transition-all hover:border-zinc-400 dark:hover:border-zinc-600"
+            className="inline-flex items-center justify-center gap-2 rounded-xl border-2 px-6 py-3 font-semibold transition-all"
+            style={{ borderColor: 'var(--sm-border)', color: 'var(--sm-text)' }}
           >
             <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 12l8.954-8.955c.44-.439 1.152-.439 1.591 0L21.75 12M4.5 9.75v10.125c0 .621.504 1.125 1.125 1.125H9.75v-4.875c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21h4.125c.621 0 1.125-.504 1.125-1.125V9.75M8.25 21h8.25" />
@@ -81,7 +82,7 @@ export default function Error({ error, reset }: ErrorProps) {
         </div>
 
         {/* Support info */}
-        <p className="mt-8 text-sm text-zinc-500 dark:text-zinc-400">
+        <p className="mt-8 text-sm" style={{ color: 'var(--sm-text-dim)' }}>
           If this problem persists,{' '}
           <a href="/contact" className="text-[#8B0000] dark:text-[#FF6666] hover:underline">
             contact our support team
