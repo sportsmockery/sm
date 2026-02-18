@@ -12,7 +12,7 @@ export const metadata: Metadata = {
 
 export const revalidate = 3600
 
-const TEAM_COLOR = '#27251F'
+const TEAM_COLOR = 'var(--sm-red)'
 
 const POSITION_ORDER: PositionGroup[] = ['pitchers', 'catchers', 'infielders', 'outfielders']
 
@@ -40,14 +40,7 @@ export default async function WhiteSoxRosterPage() {
       activeTab="roster"
     >
       {/* Summary Bar */}
-      <div
-        className="p-4 mb-6"
-        style={{
-          backgroundColor: 'var(--sm-card)',
-          border: '1px solid var(--sm-border)',
-          borderRadius: 'var(--sm-radius-lg)',
-        }}
-      >
+      <div className="glass-card glass-card-sm glass-card-static mb-6">
         <div className="flex flex-wrap gap-6 text-sm">
           <div>
             <span style={{ color: 'var(--sm-text-muted)' }}>Total: </span>
@@ -75,12 +68,8 @@ export default async function WhiteSoxRosterPage() {
           return (
             <div
               key={group}
-              className={`overflow-hidden ${group === 'pitchers' ? 'lg:col-span-2' : ''}`}
-              style={{
-                backgroundColor: 'var(--sm-card)',
-                border: '1px solid var(--sm-border)',
-                borderRadius: 'var(--sm-radius-xl)',
-              }}
+              className={`glass-card glass-card-static ${group === 'pitchers' ? 'lg:col-span-2' : ''}`}
+              style={{ overflow: 'hidden', padding: 0 }}
             >
               <div
                 className="flex items-center justify-between"
