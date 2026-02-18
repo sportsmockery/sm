@@ -104,7 +104,7 @@ export default function ArticleTableOfContents({
         <div className="mb-4">
           <span
             className="text-[11px] font-semibold tracking-[0.1em] uppercase"
-            style={{ color: 'var(--text-muted)', fontFamily: "'Montserrat', sans-serif" }}
+            style={{ color: 'var(--sm-text-muted)', fontFamily: "'Montserrat', sans-serif" }}
           >
             Contents
           </span>
@@ -118,7 +118,7 @@ export default function ArticleTableOfContents({
                   item.level === 3 ? 'pl-3' : ''
                 }`}
                 style={{
-                  color: activeId === item.id ? '#bc0000' : 'var(--text-muted)',
+                  color: activeId === item.id ? '#bc0000' : 'var(--sm-text-muted)',
                   fontWeight: activeId === item.id ? 600 : 400,
                 }}
               >
@@ -129,7 +129,7 @@ export default function ArticleTableOfContents({
                     style={{ backgroundColor: '#bc0000' }}
                   />
                 )}
-                <span className="line-clamp-2 group-hover:text-[var(--text-primary)] transition-colors pl-3">
+                <span className="line-clamp-2 group-hover:text-[var(--sm-text)] transition-colors pl-3">
                   {item.text}
                 </span>
               </button>
@@ -137,8 +137,8 @@ export default function ArticleTableOfContents({
           ))}
         </ul>
         {/* Progress indicator */}
-        <div className="mt-6 pt-4 border-t" style={{ borderColor: 'var(--border-color)' }}>
-          <div className="flex items-center gap-2 text-[11px]" style={{ color: 'var(--text-muted)' }}>
+        <div className="mt-6 pt-4 border-t" style={{ borderColor: 'var(--sm-border)' }}>
+          <div className="flex items-center gap-2 text-[11px]" style={{ color: 'var(--sm-text-muted)' }}>
             <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" />
             </svg>
@@ -155,7 +155,7 @@ export default function ArticleTableOfContents({
       className={`rounded-lg overflow-hidden ${className}`}
       style={{
         backgroundColor: 'var(--bg-elevated)',
-        border: '1px solid var(--border-color)'
+        border: '1px solid var(--sm-border)'
       }}
       aria-label="Table of contents"
     >
@@ -163,7 +163,7 @@ export default function ArticleTableOfContents({
       <button
         onClick={() => setIsExpanded(!isExpanded)}
         className="w-full flex items-center justify-between px-4 py-3 transition-colors"
-        style={{ borderBottom: isExpanded ? '1px solid var(--border-color)' : 'none' }}
+        style={{ borderBottom: isExpanded ? '1px solid var(--sm-border)' : 'none' }}
       >
         <div className="flex items-center gap-2">
           <svg
@@ -182,20 +182,20 @@ export default function ArticleTableOfContents({
           </svg>
           <span
             className="text-[13px] font-semibold uppercase tracking-wide"
-            style={{ color: 'var(--text-primary)', fontFamily: "'Montserrat', sans-serif" }}
+            style={{ color: 'var(--sm-text)', fontFamily: "'Montserrat', sans-serif" }}
           >
             In This Article
           </span>
           <span
             className="text-[11px] px-1.5 py-0.5 rounded"
-            style={{ backgroundColor: 'var(--bg-surface)', color: 'var(--text-muted)' }}
+            style={{ backgroundColor: 'var(--bg-surface)', color: 'var(--sm-text-muted)' }}
           >
             {items.length}
           </span>
         </div>
         <svg
           className={`w-4 h-4 transition-transform duration-200 ${isExpanded ? 'rotate-180' : ''}`}
-          style={{ color: 'var(--text-muted)' }}
+          style={{ color: 'var(--sm-text-muted)' }}
           fill="none"
           stroke="currentColor"
           viewBox="0 0 24 24"

@@ -68,7 +68,7 @@ export default function ArticleSidebar({
 
       {/* Related Articles */}
       {showRelated && relatedPosts.length > 0 && (
-        <div className="rounded-2xl border border-zinc-200 bg-white p-5 dark:border-zinc-800 dark:bg-zinc-900">
+        <div className="rounded-2xl p-5" style={{ backgroundColor: 'var(--sm-card)', border: '1px solid var(--sm-border)' }}>
           <ArticleList
             articles={relatedPosts}
             title="Related Articles"
@@ -78,12 +78,12 @@ export default function ArticleSidebar({
 
       {/* Ad Placeholder */}
       {showAd && (
-        <div className="flex h-[250px] items-center justify-center rounded-2xl border border-dashed border-zinc-300 bg-zinc-100 dark:border-zinc-700 dark:bg-zinc-800/50">
+        <div className="flex h-[250px] items-center justify-center rounded-2xl" style={{ border: '1px dashed var(--sm-border)', backgroundColor: 'var(--sm-surface)' }}>
           <div className="text-center">
-            <p className="text-sm font-medium text-zinc-400 dark:text-zinc-500">
+            <p className="text-sm font-medium" style={{ color: 'var(--sm-text-dim)' }}>
               Advertisement
             </p>
-            <p className="text-xs text-zinc-400 dark:text-zinc-600">300x250</p>
+            <p className="text-xs" style={{ color: 'var(--sm-text-dim)' }}>300x250</p>
           </div>
         </div>
       )}
