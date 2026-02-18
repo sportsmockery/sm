@@ -26,10 +26,10 @@ export default async function TeamsPage() {
   return (
     <main className="mx-auto max-w-7xl px-4 py-8">
       <div className="mb-8">
-        <h1 className="text-3xl font-bold text-zinc-900 dark:text-white">
+        <h1 className="text-3xl font-bold" style={{ color: 'var(--sm-text)' }}>
           Chicago Teams
         </h1>
-        <p className="mt-2 text-zinc-600 dark:text-zinc-400">
+        <p className="mt-2" style={{ color: 'var(--sm-text-muted)' }}>
           Follow all your favorite Chicago sports teams
         </p>
       </div>
@@ -38,7 +38,8 @@ export default async function TeamsPage() {
         {teamsWithData.map((team) => (
           <div
             key={team.slug}
-            className="group overflow-hidden rounded-2xl border border-zinc-200 bg-white transition-all hover:border-zinc-300 hover:shadow-xl dark:border-zinc-800 dark:bg-zinc-900 dark:hover:border-zinc-700"
+            className="group overflow-hidden rounded-2xl transition-all"
+            style={{ border: '1px solid var(--sm-border)', backgroundColor: 'var(--sm-card)' }}
           >
             {/* Team Header - Main link */}
             <Link
@@ -77,17 +78,21 @@ export default async function TeamsPage() {
             </Link>
 
             {/* Quick Links */}
-            <div className="grid grid-cols-4 divide-x divide-zinc-100 border-t border-zinc-100 dark:divide-zinc-800 dark:border-zinc-800">
+            <div className="grid grid-cols-4" style={{ borderTop: '1px solid var(--sm-border)' }}>
               {[
                 { label: 'Schedule', href: `/teams/${team.slug}/schedule` },
                 { label: 'Roster', href: `/teams/${team.slug}/roster` },
                 { label: 'Stats', href: `/teams/${team.slug}/stats` },
                 { label: 'News', href: `/${team.slug}` },
-              ].map((link) => (
+              ].map((link, idx) => (
                 <Link
                   key={link.label}
                   href={link.href}
-                  className="py-3 text-center text-xs font-medium text-zinc-500 transition-colors hover:bg-zinc-50 hover:text-zinc-900 dark:text-zinc-400 dark:hover:bg-zinc-800 dark:hover:text-white"
+                  className="py-3 text-center text-xs font-medium transition-colors"
+                  style={{
+                    color: 'var(--sm-text-muted)',
+                    borderRight: idx < 3 ? '1px solid var(--sm-border)' : 'none',
+                  }}
                 >
                   {link.label}
                 </Link>
@@ -98,9 +103,10 @@ export default async function TeamsPage() {
             {team.nextGame && (
               <Link
                 href={`/teams/${team.slug}/schedule`}
-                className="block border-t border-zinc-100 p-4 dark:border-zinc-800 hover:bg-zinc-50 dark:hover:bg-zinc-800/50 transition-colors"
+                className="block p-4 transition-colors"
+                style={{ borderTop: '1px solid var(--sm-border)' }}
               >
-                <p className="mb-1 text-xs font-medium uppercase text-zinc-500 dark:text-zinc-400">
+                <p className="mb-1 text-xs font-medium uppercase" style={{ color: 'var(--sm-text-muted)' }}>
                   Next Game
                 </p>
                 <div className="flex items-center justify-between">
@@ -113,14 +119,14 @@ export default async function TeamsPage() {
                         className="object-contain"
                       />
                     </div>
-                    <span className="text-sm font-medium text-zinc-900 dark:text-white">
+                    <span className="text-sm font-medium" style={{ color: 'var(--sm-text)' }}>
                       {team.nextGame.isHome ? 'vs' : '@'}{' '}
                       {team.nextGame.isHome
                         ? team.nextGame.awayTeam.shortName
                         : team.nextGame.homeTeam.shortName}
                     </span>
                   </div>
-                  <span className="text-xs text-zinc-500 dark:text-zinc-400">
+                  <span className="text-xs" style={{ color: 'var(--sm-text-muted)' }}>
                     {new Date(team.nextGame.date).toLocaleDateString('en-US', {
                       month: 'short',
                       day: 'numeric',
