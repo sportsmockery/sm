@@ -167,7 +167,7 @@ function ChatContent() {
                 <div className="flex-1 overflow-y-auto" id="chat-messages-container">
                   {isLoading ? (
                     <div className="flex items-center justify-center h-full">
-                      <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2" style={{ borderColor: '#C83803' }} />
+                      <div style={{ width: 32, height: 32, border: '3px solid var(--sm-red)', borderTopColor: 'transparent', borderRadius: '50%', animation: 'spin-2030 1s linear infinite' }} />
                     </div>
                   ) : error ? (
                     <div className="flex flex-col items-center justify-center h-full text-center p-6">
