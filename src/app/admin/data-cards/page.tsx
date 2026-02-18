@@ -12,7 +12,7 @@ interface StatCard {
   hook: string | null
   insight: string | null
   chicago_take: string | null
-  key_stats: Record<string, unknown> | null
+  stat_data: Record<string, unknown> | null
   card_type: string
   svg_content: string
   thumbnail_url: string | null
@@ -292,7 +292,7 @@ export default function DataCardsPage() {
     try {
       let query = datalabClient
         .from('stat_cards')
-        .select('id, created_at, title, headline, subheadline, hook, insight, chicago_take, key_stats, card_type, svg_content, thumbnail_url, image_url, video_url, viral_score, status, tier, confidence_level, template_id')
+        .select('id, created_at, title, headline, subheadline, hook, insight, chicago_take, stat_data, card_type, svg_content, thumbnail_url, image_url, video_url, viral_score, status, tier, confidence_level, template_id')
         .order('created_at', { ascending: false })
       if (statusFilter !== 'all') query = query.eq('status', statusFilter)
       const { data, error } = await query
@@ -951,11 +951,11 @@ export default function DataCardsPage() {
             )}
 
             {/* Key Stats */}
-            {selectedCard.key_stats && Object.keys(selectedCard.key_stats).length > 0 && (
+            {selectedCard.stat_data && Object.keys(selectedCard.stat_data).length > 0 && (
               <div style={{ padding: '0 24px 16px' }}>
                 <div style={{ fontSize: '11px', fontWeight: 700, color: '#9ca3af', textTransform: 'uppercase', marginBottom: 8 }}>Key Stats</div>
                 <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
-                  {Object.entries(selectedCard.key_stats).map(([key, val]) => (
+                  {Object.entries(selectedCard.stat_data).map(([key, val]) => (
                     <div key={key} style={{
                       padding: '6px 12px', borderRadius: 8,
                       backgroundColor: '#f3f4f6', fontSize: '12px',
