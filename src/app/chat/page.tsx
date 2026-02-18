@@ -113,48 +113,50 @@ function ChatContent() {
               <>
                 <div className="flex-1 overflow-y-auto p-6">
                   <div className="flex flex-col items-center justify-center h-full text-center">
-                    <div className="w-20 h-20 rounded-full flex items-center justify-center mb-4" style={{ backgroundColor: 'rgba(200, 56, 3, 0.2)' }}>
-                      <svg className="w-10 h-10" style={{ color: '#C83803' }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <div style={{ width: 80, height: 80, borderRadius: '50%', backgroundColor: 'rgba(188,0,0,0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: 16 }}>
+                      <svg className="w-10 h-10" style={{ color: 'var(--sm-red)' }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
                       </svg>
                     </div>
-                    <h2 className="text-xl font-bold text-white mb-2">Welcome to Bears Fan Chat!</h2>
-                    <p className="text-white/60 max-w-md mb-6">
+                    <h2 style={{ fontSize: 20, fontWeight: 700, color: 'var(--sm-text)', marginBottom: 8, fontFamily: 'var(--sm-font-heading)' }}>Welcome to Bears Fan Chat!</h2>
+                    <p style={{ color: 'var(--sm-text-muted)', maxWidth: 400, marginBottom: 24 }}>
                       Join the conversation with fellow Chicago Bears fans. Discuss games, trades, rumors, and everything Bears football.
                     </p>
                     <div className="flex flex-col gap-3 w-full max-w-sm">
                       <Link
                         href="/login"
-                        className="w-full py-3 px-6 text-white font-semibold rounded-xl transition-colors text-center hover:brightness-95"
-                        style={{ backgroundColor: '#C83803' }}
+                        className="btn btn-primary btn-md"
+                        style={{ width: '100%', textAlign: 'center', justifyContent: 'center' }}
                       >
                         Sign In to Chat
                       </Link>
                       <Link
                         href="/signup"
-                        className="w-full py-3 px-6 bg-white/10 text-white font-semibold rounded-xl hover:bg-white/20 transition-colors text-center"
+                        className="btn btn-secondary btn-md"
+                        style={{ width: '100%', textAlign: 'center', justifyContent: 'center' }}
                       >
                         Create Account
                       </Link>
                     </div>
-                    <p className="text-white/40 text-sm mt-6">
+                    <p style={{ color: 'var(--sm-text-dim)', fontSize: 13, marginTop: 24 }}>
                       Chat is moderated. Be respectful and follow our community guidelines.
                     </p>
                   </div>
                 </div>
 
-                <div className="border-t border-white/10 p-4">
+                <div style={{ borderTop: '1px solid var(--sm-border)', padding: 16 }}>
                   <div className="flex items-center gap-3">
                     <input
                       type="text"
                       placeholder="Sign in to send messages..."
                       disabled
-                      className="flex-1 px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white placeholder-white/40 cursor-not-allowed"
+                      className="sm-input flex-1"
+                      style={{ opacity: 0.5, cursor: 'not-allowed' }}
                     />
                     <button
                       disabled
-                      className="px-6 py-3 text-white/50 font-semibold rounded-xl cursor-not-allowed"
-                      style={{ backgroundColor: 'rgba(200, 56, 3, 0.5)' }}
+                      className="btn btn-primary btn-md"
+                      style={{ opacity: 0.5, cursor: 'not-allowed' }}
                     >
                       Send
                     </button>
