@@ -27,7 +27,8 @@ export default function ArticleCardVideo({
 }: ArticleCardVideoProps) {
   return (
     <article
-      className={`group relative overflow-hidden rounded-2xl bg-white transition-all duration-300 hover:scale-[1.02] hover:shadow-xl hover:shadow-zinc-900/10 dark:bg-zinc-900 dark:hover:shadow-zinc-900/50 ${className}`}
+      className={`group relative overflow-hidden rounded-2xl transition-all duration-300 hover:scale-[1.02] hover:shadow-xl ${className}`}
+      style={{ backgroundColor: 'var(--sm-card)' }}
     >
       {/* Glow effect on hover */}
       <div className="absolute -inset-1 rounded-2xl bg-gradient-to-r from-[#8B0000]/0 to-[#FF0000]/0 opacity-0 blur-xl transition-opacity duration-300 group-hover:from-[#8B0000]/20 group-hover:to-[#FF0000]/20 group-hover:opacity-100" />
@@ -48,8 +49,8 @@ export default function ArticleCardVideo({
               sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
             />
           ) : (
-            <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-zinc-200 to-zinc-300 dark:from-zinc-800 dark:to-zinc-900">
-              <span className="text-4xl font-black text-zinc-400 dark:text-zinc-600">SM</span>
+            <div className="flex h-full w-full items-center justify-center" style={{ background: 'linear-gradient(to bottom right, var(--sm-surface), var(--sm-border))' }}>
+              <span className="text-4xl font-black" style={{ color: 'var(--sm-text-dim)' }}>SM</span>
             </div>
           )}
 
@@ -58,7 +59,7 @@ export default function ArticleCardVideo({
 
           {/* Play Button Overlay */}
           <div className="absolute inset-0 flex items-center justify-center">
-            <div className="flex h-16 w-16 items-center justify-center rounded-full bg-white/90 shadow-lg transition-transform duration-300 group-hover:scale-110 dark:bg-zinc-900/90">
+            <div className="flex h-16 w-16 items-center justify-center rounded-full shadow-lg transition-transform duration-300 group-hover:scale-110" style={{ backgroundColor: 'color-mix(in srgb, var(--sm-card) 90%, transparent)' }}>
               <svg
                 className="ml-1 h-8 w-8 text-[#8B0000]"
                 fill="currentColor"
@@ -95,14 +96,15 @@ export default function ArticleCardVideo({
         {/* Content */}
         <div className="p-4">
           {/* Title */}
-          <h3 className="mb-2 line-clamp-2 font-heading text-lg font-bold leading-tight text-zinc-900 transition-colors group-hover:text-[#8B0000] dark:text-white dark:group-hover:text-[#FF6666]">
+          <h3 className="mb-2 line-clamp-2 font-heading text-lg font-bold leading-tight transition-colors group-hover:text-[var(--sm-accent)]" style={{ color: 'var(--sm-text)' }}>
             <Link href={`/${category.slug}/${slug}`}>{title}</Link>
           </h3>
 
           {/* Date */}
           <time
             dateTime={publishedAt}
-            className="text-xs text-zinc-500 dark:text-zinc-500"
+            className="text-xs"
+            style={{ color: 'var(--sm-text-muted)' }}
           >
             {format(new Date(publishedAt), 'MMM d, yyyy')}
           </time>

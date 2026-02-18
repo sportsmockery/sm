@@ -101,7 +101,7 @@ export default function PricingPageClient() {
   return (
     <main
       className="min-h-screen py-16 px-4"
-      style={{ background: 'var(--bg-primary, #0a0a0a)' }}
+      style={{ backgroundColor: 'var(--sm-dark)' }}
     >
       <div className="max-w-6xl mx-auto">
         {/* Header */}
@@ -110,14 +110,14 @@ export default function PricingPageClient() {
             className="text-4xl md:text-5xl font-black mb-4"
             style={{
               fontFamily: "'Montserrat', sans-serif",
-              color: 'var(--text-primary, #fff)',
+              color: 'var(--sm-text)',
             }}
           >
             Upgrade to SM+
           </h1>
           <p
             className="text-lg"
-            style={{ color: 'var(--text-muted, #888)' }}
+            style={{ color: 'var(--sm-text-muted)' }}
           >
             Get the full Sports Mockery experience with premium features
           </p>
@@ -135,8 +135,9 @@ export default function PricingPageClient() {
                 className={`relative rounded-2xl p-6 ${
                   plan.popular
                     ? 'bg-gradient-to-br from-orange-500 to-orange-600 text-white ring-4 ring-orange-300'
-                    : 'bg-[var(--bg-surface,#1a1a1a)] border border-[var(--border-primary,#333)]'
+                    : ''
                 }`}
+                style={plan.popular ? undefined : { backgroundColor: 'var(--sm-card)', border: '1px solid var(--sm-border)' }}
               >
                 {plan.badge && (
                   <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-green-500 text-white text-xs font-bold px-3 py-1 rounded-full">
@@ -152,12 +153,12 @@ export default function PricingPageClient() {
 
                 <div className="mb-6">
                   <h3
-                    className={`text-xl font-bold mb-1`}
+                    className="text-xl font-bold mb-1"
                     style={{
                       fontFamily: "'Montserrat', sans-serif",
                       color: plan.popular
                         ? 'white'
-                        : 'var(--text-primary, #fff)',
+                        : 'var(--sm-text)',
                     }}
                   >
                     {plan.name}
@@ -170,17 +171,14 @@ export default function PricingPageClient() {
                       {plan.price}
                     </span>
                     <span
-                      className={
-                        plan.popular
-                          ? 'text-white/70'
-                          : 'text-[var(--text-muted,#888)]'
-                      }
+                      style={{ color: plan.popular ? 'rgba(255,255,255,0.7)' : 'var(--sm-text-muted)' }}
                     >
                       {plan.period}
                     </span>
                   </div>
                   <p
-                    className={`text-sm mt-2 ${plan.popular ? 'text-white/80' : 'text-[var(--text-muted,#888)]'}`}
+                    className="text-sm mt-2"
+                    style={{ color: plan.popular ? 'rgba(255,255,255,0.8)' : 'var(--sm-text-muted)' }}
                   >
                     {plan.description}
                   </p>
@@ -203,7 +201,8 @@ export default function PricingPageClient() {
                         </svg>
                       ) : (
                         <svg
-                          className="w-5 h-5 flex-shrink-0 text-zinc-400"
+                          className="w-5 h-5 flex-shrink-0"
+                          style={{ color: 'var(--sm-text-muted)' }}
                           fill="currentColor"
                           viewBox="0 0 20 20"
                         >
@@ -215,7 +214,8 @@ export default function PricingPageClient() {
                         </svg>
                       )}
                       <span
-                        className={`text-sm ${feature.highlight ? 'font-bold' : ''} ${plan.popular ? 'text-white' : 'text-[var(--text-primary,#fff)]'}`}
+                        className={`text-sm ${feature.highlight ? 'font-bold' : ''}`}
+                        style={{ color: plan.popular ? 'white' : 'var(--sm-text)' }}
                       >
                         {feature.text}
                       </span>
@@ -226,20 +226,24 @@ export default function PricingPageClient() {
                 {isCurrentPlan ? (
                   <button
                     disabled
-                    className="w-full py-3 rounded-lg font-bold text-center bg-zinc-300 text-zinc-500 cursor-not-allowed"
+                    className="w-full py-3 rounded-lg font-bold text-center cursor-not-allowed"
+                    style={{ backgroundColor: 'var(--sm-surface)', color: 'var(--sm-text-muted)' }}
                   >
                     Current Plan
                   </button>
                 ) : isPro && plan.id === 'free' ? (
                   <button
                     onClick={openPortal}
-                    className="w-full py-3 rounded-lg font-bold text-center border border-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors"
-                    style={{ color: 'var(--text-primary, #fff)' }}
+                    className="w-full py-3 rounded-lg font-bold text-center transition-colors"
+                    style={{ color: 'var(--sm-text)', border: '1px solid var(--sm-border)' }}
                   >
                     Manage Subscription
                   </button>
                 ) : plan.id === 'free' ? (
-                  <div className="w-full py-3 rounded-lg font-bold text-center bg-zinc-700 text-zinc-400">
+                  <div
+                    className="w-full py-3 rounded-lg font-bold text-center"
+                    style={{ backgroundColor: 'var(--sm-surface)', color: 'var(--sm-text-muted)' }}
+                  >
                     Free Forever
                   </div>
                 ) : (
@@ -262,12 +266,12 @@ export default function PricingPageClient() {
 
         {/* Trust section */}
         <div className="text-center space-y-4">
-          <p className="text-sm" style={{ color: 'var(--text-muted, #888)' }}>
+          <p className="text-sm" style={{ color: 'var(--sm-text-muted)' }}>
             Secure payments powered by Stripe. Cancel anytime.
           </p>
 
           {!isAuthenticated && (
-            <p className="text-sm" style={{ color: 'var(--text-muted, #888)' }}>
+            <p className="text-sm" style={{ color: 'var(--sm-text-muted)' }}>
               Already have an account?{' '}
               <Link
                 href="/login?next=/pricing"
@@ -279,7 +283,7 @@ export default function PricingPageClient() {
           )}
 
           {isPro && (
-            <p className="text-sm" style={{ color: 'var(--text-muted, #888)' }}>
+            <p className="text-sm" style={{ color: 'var(--sm-text-muted)' }}>
               Need to manage your subscription?{' '}
               <button
                 onClick={openPortal}

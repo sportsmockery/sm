@@ -107,9 +107,9 @@ export default function PredictionsPage() {
     : 0
 
   return (
-    <div className="min-h-screen bg-zinc-950">
+    <div className="min-h-screen" style={{ backgroundColor: 'var(--sm-dark)' }}>
       {/* Hero Section */}
-      <section className="relative overflow-hidden border-b border-zinc-800 py-16 lg:py-24">
+      <section className="relative overflow-hidden py-16 lg:py-24" style={{ borderBottom: '1px solid var(--sm-border)' }}>
         {/* Background effects */}
         <div className="absolute inset-0 bg-[linear-gradient(rgba(255,165,0,0.03)_1px,transparent_1px),linear-gradient(90deg,rgba(255,165,0,0.03)_1px,transparent_1px)] bg-[size:48px_48px]" />
         <div className="absolute left-1/4 top-0 h-64 w-64 rounded-full bg-amber-500/10 blur-[100px]" />
@@ -125,7 +125,7 @@ export default function PredictionsPage() {
             </div>
 
             {/* Title */}
-            <h1 className="mb-4 font-heading text-4xl font-black text-white sm:text-5xl lg:text-6xl">
+            <h1 className="mb-4 font-heading text-4xl font-black sm:text-5xl lg:text-6xl" style={{ color: 'var(--sm-text)' }}>
               SM{' '}
               <span className="bg-gradient-to-r from-amber-400 to-orange-500 bg-clip-text text-transparent">
                 Prophecy
@@ -133,7 +133,7 @@ export default function PredictionsPage() {
             </h1>
 
             {/* Subtitle */}
-            <p className="mb-8 max-w-2xl text-lg text-zinc-400">
+            <p className="mb-8 max-w-2xl text-lg" style={{ color: 'var(--sm-text-muted)' }}>
               AI-powered predictions and analysis for Chicago sports. Our models analyze thousands of data points
               to forecast outcomes and provide insights.
             </p>
@@ -141,16 +141,16 @@ export default function PredictionsPage() {
             {/* Stats */}
             <div className="flex flex-wrap justify-center gap-8">
               <div className="text-center">
-                <div className="text-3xl font-black text-white">{predictions.length}</div>
-                <div className="text-sm text-zinc-500">Active Predictions</div>
+                <div className="text-3xl font-black" style={{ color: 'var(--sm-text)' }}>{predictions.length}</div>
+                <div className="text-sm" style={{ color: 'var(--sm-text-muted)' }}>Active Predictions</div>
               </div>
               <div className="text-center">
                 <div className="text-3xl font-black text-emerald-400">{accuracy}%</div>
-                <div className="text-sm text-zinc-500">Historical Accuracy</div>
+                <div className="text-sm" style={{ color: 'var(--sm-text-muted)' }}>Historical Accuracy</div>
               </div>
               <div className="text-center">
                 <div className="text-3xl font-black text-amber-400">{resolvedPredictions.length}</div>
-                <div className="text-sm text-zinc-500">Resolved Predictions</div>
+                <div className="text-sm" style={{ color: 'var(--sm-text-muted)' }}>Resolved Predictions</div>
               </div>
             </div>
           </div>
@@ -161,7 +161,7 @@ export default function PredictionsPage() {
       <section className="mx-auto max-w-6xl px-4 py-12">
         <div className="mb-8 flex items-center gap-4">
           <div className="h-8 w-1.5 rounded-full bg-gradient-to-b from-amber-500 to-orange-500" />
-          <h2 className="text-2xl font-black uppercase tracking-tight text-white">
+          <h2 className="text-2xl font-black uppercase tracking-tight" style={{ color: 'var(--sm-text)' }}>
             Active Predictions
           </h2>
         </div>
@@ -183,12 +183,12 @@ export default function PredictionsPage() {
       <section className="mx-auto max-w-6xl px-4 py-12">
         <div className="mb-8 flex items-center justify-between">
           <div className="flex items-center gap-4">
-            <div className="h-8 w-1.5 rounded-full bg-gradient-to-b from-zinc-500 to-zinc-700" />
-            <h2 className="text-2xl font-black uppercase tracking-tight text-white">
+            <div className="h-8 w-1.5 rounded-full" style={{ background: 'linear-gradient(to bottom, var(--sm-text-muted), var(--sm-text-dim))' }} />
+            <h2 className="text-2xl font-black uppercase tracking-tight" style={{ color: 'var(--sm-text)' }}>
               Past Predictions
             </h2>
           </div>
-          <span className="rounded-full bg-zinc-800 px-3 py-1 text-xs font-semibold text-zinc-400">
+          <span className="rounded-full px-3 py-1 text-xs font-semibold" style={{ backgroundColor: 'var(--sm-surface)', color: 'var(--sm-text-muted)' }}>
             {correctPredictions.length}/{resolvedPredictions.length} Correct
           </span>
         </div>
@@ -221,7 +221,8 @@ export default function PredictionsPage() {
       <div className="mx-auto max-w-6xl px-4 pb-16">
         <Link
           href="/"
-          className="inline-flex items-center gap-2 text-sm text-zinc-500 transition-colors hover:text-white"
+          className="inline-flex items-center gap-2 text-sm transition-colors"
+          style={{ color: 'var(--sm-text-muted)' }}
         >
           <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18" />

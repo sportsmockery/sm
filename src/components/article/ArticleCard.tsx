@@ -37,7 +37,8 @@ export default function ArticleCard({
 }: ArticleCardProps) {
   return (
     <article
-      className={`group relative overflow-hidden rounded-2xl bg-white transition-all duration-300 hover:scale-[1.02] hover:shadow-xl hover:shadow-zinc-900/10 dark:bg-zinc-900 dark:hover:shadow-zinc-900/50 ${className}`}
+      className={`group relative overflow-hidden rounded-2xl transition-all duration-300 hover:scale-[1.02] hover:shadow-xl ${className}`}
+      style={{ backgroundColor: 'var(--sm-card)' }}
     >
       {/* Glow effect on hover */}
       <div className="absolute -inset-1 rounded-2xl bg-gradient-to-r from-[#8B0000]/0 to-[#FF0000]/0 opacity-0 blur-xl transition-opacity duration-300 group-hover:from-[#8B0000]/20 group-hover:to-[#FF0000]/20 group-hover:opacity-100" />
@@ -58,8 +59,8 @@ export default function ArticleCard({
               sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
             />
           ) : (
-            <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-zinc-200 to-zinc-300 dark:from-zinc-800 dark:to-zinc-900">
-              <span className="text-4xl font-black text-zinc-400 dark:text-zinc-600">SM</span>
+            <div className="flex h-full w-full items-center justify-center" style={{ background: 'linear-gradient(to bottom right, var(--sm-surface), var(--sm-border))' }}>
+              <span className="text-4xl font-black" style={{ color: 'var(--sm-text-dim)' }}>SM</span>
             </div>
           )}
 
@@ -75,19 +76,19 @@ export default function ArticleCard({
         {/* Content */}
         <div className="p-4">
           {/* Title */}
-          <h3 className="mb-2 line-clamp-2 font-heading text-lg font-bold leading-tight text-zinc-900 transition-colors group-hover:text-[#8B0000] dark:text-white dark:group-hover:text-[#FF6666]">
+          <h3 className="mb-2 line-clamp-2 font-heading text-lg font-bold leading-tight transition-colors group-hover:text-[var(--sm-accent)]" style={{ color: 'var(--sm-text)' }}>
             <Link href={`/${category.slug}/${slug}`}>{title}</Link>
           </h3>
 
           {/* Excerpt */}
           {excerpt && (
-            <p className="mb-3 line-clamp-3 text-sm text-zinc-600 dark:text-zinc-400">
+            <p className="mb-3 line-clamp-3 text-sm" style={{ color: 'var(--sm-text-muted)' }}>
               {excerpt}
             </p>
           )}
 
           {/* Meta */}
-          <div className="flex flex-wrap items-center gap-3 text-xs text-zinc-500 dark:text-zinc-500">
+          <div className="flex flex-wrap items-center gap-3 text-xs" style={{ color: 'var(--sm-text-muted)' }}>
             {author && (
               <AuthorByline
                 author={author}
@@ -104,7 +105,7 @@ export default function ArticleCard({
 
             {content && (
               <>
-                <span className="text-zinc-300 dark:text-zinc-700">•</span>
+                <span style={{ color: 'var(--sm-text-dim)' }}>•</span>
                 <ReadingTime content={content} />
               </>
             )}
