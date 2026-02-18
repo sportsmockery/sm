@@ -179,7 +179,7 @@ function PositionCard({
                   className="transition-colors hover:bg-[var(--sm-card-hover)]"
                   style={{
                     borderBottom: '1px solid var(--sm-border)',
-                    backgroundColor: isStarter ? `${TEAM_COLOR}08` : undefined,
+                    backgroundColor: isStarter ? 'rgba(188, 0, 0, 0.03)' : undefined,
                   }}
                 >
                   <td className="px-4 py-3">
