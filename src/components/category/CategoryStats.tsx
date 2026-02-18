@@ -16,13 +16,15 @@ export default function CategoryStats({
 }: CategoryStatsProps) {
   return (
     <div
-      className={`flex flex-wrap items-center justify-center gap-4 rounded-xl border border-zinc-200 bg-white px-6 py-4 dark:border-zinc-800 dark:bg-zinc-900 sm:justify-start sm:gap-8 ${className}`}
+      className={`flex flex-wrap items-center justify-center gap-4 rounded-xl px-6 py-4 sm:justify-start sm:gap-8 ${className}`}
+      style={{ backgroundColor: 'var(--sm-card)', border: '1px solid var(--sm-border)' }}
     >
       {/* Total articles */}
       <div className="flex items-center gap-3">
-        <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-[#8B0000]/10 dark:bg-[#FF6666]/10">
+        <div className="flex h-10 w-10 items-center justify-center rounded-lg" style={{ backgroundColor: 'color-mix(in srgb, var(--sm-accent) 10%, transparent)' }}>
           <svg
-            className="h-5 w-5 text-[#8B0000] dark:text-[#FF6666]"
+            className="h-5 w-5"
+            style={{ color: 'var(--sm-accent)' }}
             fill="none"
             viewBox="0 0 24 24"
             strokeWidth={2}
@@ -36,15 +38,15 @@ export default function CategoryStats({
           </svg>
         </div>
         <div>
-          <p className="text-2xl font-bold text-zinc-900 dark:text-white">
+          <p className="text-2xl font-bold" style={{ color: 'var(--sm-text)' }}>
             {totalArticles.toLocaleString()}
           </p>
-          <p className="text-xs text-zinc-500 dark:text-zinc-400">Total Articles</p>
+          <p className="text-xs" style={{ color: 'var(--sm-text-muted)' }}>Total Articles</p>
         </div>
       </div>
 
       {/* Divider */}
-      <div className="hidden h-10 w-px bg-zinc-200 dark:bg-zinc-700 sm:block" />
+      <div className="hidden h-10 w-px sm:block" style={{ backgroundColor: 'var(--sm-border)' }} />
 
       {/* This week */}
       <div className="flex items-center gap-3">
@@ -64,16 +66,16 @@ export default function CategoryStats({
           </svg>
         </div>
         <div>
-          <p className="text-2xl font-bold text-zinc-900 dark:text-white">
+          <p className="text-2xl font-bold" style={{ color: 'var(--sm-text)' }}>
             {articlesThisWeek.toLocaleString()}
           </p>
-          <p className="text-xs text-zinc-500 dark:text-zinc-400">This Week</p>
+          <p className="text-xs" style={{ color: 'var(--sm-text-muted)' }}>This Week</p>
         </div>
       </div>
 
       {/* Divider */}
       {topAuthor && (
-        <div className="hidden h-10 w-px bg-zinc-200 dark:bg-zinc-700 sm:block" />
+        <div className="hidden h-10 w-px sm:block" style={{ backgroundColor: 'var(--sm-border)' }} />
       )}
 
       {/* Top author */}
@@ -95,10 +97,10 @@ export default function CategoryStats({
             </svg>
           </div>
           <div>
-            <p className="font-bold text-zinc-900 dark:text-white">
+            <p className="font-bold" style={{ color: 'var(--sm-text)' }}>
               {topAuthor.name}
             </p>
-            <p className="text-xs text-zinc-500 dark:text-zinc-400">
+            <p className="text-xs" style={{ color: 'var(--sm-text-muted)' }}>
               Top Author ({topAuthor.postCount} articles)
             </p>
           </div>

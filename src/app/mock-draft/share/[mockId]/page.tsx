@@ -102,7 +102,7 @@ export default function MockDraftSharePage() {
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: 'var(--bg-page)' }}>
-        <div className="w-8 h-8 border-2 border-[#bc0000] border-t-transparent rounded-full animate-spin" />
+        <div className="w-8 h-8 border-2 border-t-transparent rounded-full animate-spin" style={{ borderColor: '#bc0000', borderTopColor: 'transparent' }} />
       </div>
     )
   }
@@ -138,7 +138,7 @@ export default function MockDraftSharePage() {
   const userPicks = draftData.picks?.filter(p => p.is_user_pick && p.selected_prospect) || []
 
   return (
-    <div className="min-h-screen" style={{ backgroundColor: 'var(--bg-page)', color: 'var(--text-primary)' }}>
+    <div className="min-h-screen" style={{ backgroundColor: 'var(--bg-page)', color: 'var(--sm-text)' }}>
       <main className="max-w-3xl mx-auto px-4 py-8 pt-24">
         {/* Header */}
         <div style={{ textAlign: 'center', marginBottom: 32 }}>

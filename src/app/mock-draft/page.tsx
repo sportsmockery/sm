@@ -508,7 +508,7 @@ export default function MockDraftPage() {
   if (authLoading || pageLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: 'var(--bg-page)' }}>
-        <div className="w-8 h-8 border-2 border-[#bc0000] border-t-transparent rounded-full animate-spin" />
+        <div className="w-8 h-8 border-2 border-t-transparent rounded-full animate-spin" style={{ borderColor: '#bc0000', borderTopColor: 'transparent' }} />
       </div>
     )
   }
@@ -517,7 +517,7 @@ export default function MockDraftPage() {
   const subText = isDark ? '#9ca3af' : '#6b7280'
 
   return (
-    <div className="min-h-screen" style={{ backgroundColor: 'var(--bg-page)', color: 'var(--text-primary)' }}>
+    <div className="min-h-screen" style={{ backgroundColor: 'var(--bg-page)', color: 'var(--sm-text)' }}>
       <main className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 pt-20 sm:pt-24">
         {/* Header - stacks on mobile */}
         <div style={{ marginBottom: 20 }}>
@@ -572,7 +572,7 @@ export default function MockDraftPage() {
               </h2>
               {eligibilityLoading ? (
                 <div style={{ textAlign: 'center', padding: 40 }}>
-                  <div className="w-6 h-6 border-2 border-[#bc0000] border-t-transparent rounded-full animate-spin mx-auto" />
+                  <div className="w-6 h-6 border-2 border-t-transparent rounded-full animate-spin mx-auto" style={{ borderColor: '#bc0000', borderTopColor: 'transparent' }} />
                   <div style={{ marginTop: 12, fontSize: '13px', color: subText }}>Loading team status...</div>
                 </div>
               ) : (
@@ -664,7 +664,7 @@ export default function MockDraftPage() {
               </h2>
               {historyLoading ? (
                 <div style={{ textAlign: 'center', padding: 40 }}>
-                  <div className="w-6 h-6 border-2 border-[#bc0000] border-t-transparent rounded-full animate-spin mx-auto" />
+                  <div className="w-6 h-6 border-2 border-t-transparent rounded-full animate-spin mx-auto" style={{ borderColor: '#bc0000', borderTopColor: 'transparent' }} />
                 </div>
               ) : history.length === 0 ? (
                 <div style={{ textAlign: 'center', padding: '40px 20px', color: subText }}>
@@ -839,7 +839,7 @@ export default function MockDraftPage() {
                     </h3>
                     {prospectsLoading ? (
                       <div style={{ textAlign: 'center', padding: 40 }}>
-                        <div className="w-6 h-6 border-2 border-[#bc0000] border-t-transparent rounded-full animate-spin mx-auto" />
+                        <div className="w-6 h-6 border-2 border-t-transparent rounded-full animate-spin mx-auto" style={{ borderColor: '#bc0000', borderTopColor: 'transparent' }} />
                       </div>
                     ) : (
                       <div style={{ flex: 1, overflowY: 'auto' }}>

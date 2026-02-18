@@ -94,7 +94,7 @@ export default function DataVisualization({ chartData, bonusInsight }: DataVisua
       legend: {
         position: 'bottom' as const,
         labels: {
-          color: 'var(--text-primary)',
+          color: 'var(--sm-text)',
           font: { size: 11 },
           padding: 10,
         },
@@ -102,7 +102,7 @@ export default function DataVisualization({ chartData, bonusInsight }: DataVisua
       title: {
         display: !!chartData.title,
         text: chartData.title || '',
-        color: 'var(--text-primary)',
+        color: 'var(--sm-text)',
         font: { size: 14, weight: 'bold' as const },
         padding: { bottom: 15 },
       },
@@ -116,11 +116,11 @@ export default function DataVisualization({ chartData, bonusInsight }: DataVisua
     },
     scales: chartData.type === 'bar' || chartData.type === 'line' ? {
       x: {
-        ticks: { color: 'var(--text-muted)', font: { size: 10 } },
+        ticks: { color: 'var(--sm-text-muted)', font: { size: 10 } },
         grid: { color: 'var(--border-color)', display: false },
       },
       y: {
-        ticks: { color: 'var(--text-muted)', font: { size: 10 } },
+        ticks: { color: 'var(--sm-text-muted)', font: { size: 10 } },
         grid: { color: 'var(--border-color)' },
         beginAtZero: true,
       },
@@ -132,7 +132,7 @@ export default function DataVisualization({ chartData, bonusInsight }: DataVisua
     return (
       <div className="my-4">
         {chartData.title && (
-          <h4 className="font-semibold mb-3" style={{ color: 'var(--text-primary)' }}>
+          <h4 className="font-semibold mb-3" style={{ color: 'var(--sm-text)' }}>
             {chartData.title}
           </h4>
         )}
@@ -140,14 +140,14 @@ export default function DataVisualization({ chartData, bonusInsight }: DataVisua
           <table className="min-w-full text-sm">
             <thead>
               <tr style={{ backgroundColor: 'var(--bg-surface)' }}>
-                <th className="px-3 py-2 text-left font-semibold" style={{ color: 'var(--text-primary)', borderBottom: '1px solid var(--border-color)' }}>
+                <th className="px-3 py-2 text-left font-semibold" style={{ color: 'var(--sm-text)', borderBottom: '1px solid var(--border-color)' }}>
                   {chartData.datasets.length > 0 ? '' : 'Item'}
                 </th>
                 {chartData.datasets.map((ds, idx) => (
                   <th
                     key={idx}
                     className="px-3 py-2 text-right font-semibold"
-                    style={{ color: 'var(--text-primary)', borderBottom: '1px solid var(--border-color)' }}
+                    style={{ color: 'var(--sm-text)', borderBottom: '1px solid var(--border-color)' }}
                   >
                     {ds.label}
                   </th>
@@ -163,7 +163,7 @@ export default function DataVisualization({ chartData, bonusInsight }: DataVisua
                 >
                   <td
                     className="px-3 py-2 font-medium"
-                    style={{ color: 'var(--text-primary)', borderBottom: '1px solid var(--border-color)' }}
+                    style={{ color: 'var(--sm-text)', borderBottom: '1px solid var(--border-color)' }}
                   >
                     {label}
                   </td>
@@ -171,7 +171,7 @@ export default function DataVisualization({ chartData, bonusInsight }: DataVisua
                     <td
                       key={colIdx}
                       className="px-3 py-2 text-right tabular-nums"
-                      style={{ color: 'var(--text-primary)', borderBottom: '1px solid var(--border-color)' }}
+                      style={{ color: 'var(--sm-text)', borderBottom: '1px solid var(--border-color)' }}
                     >
                       {typeof ds.data[rowIdx] === 'number'
                         ? ds.data[rowIdx].toLocaleString()
@@ -185,8 +185,8 @@ export default function DataVisualization({ chartData, bonusInsight }: DataVisua
         </div>
         {bonusInsight && (
           <div className="mt-3 p-3 rounded-lg" style={{ backgroundColor: 'rgba(188, 0, 0, 0.1)' }}>
-            <p className="text-xs" style={{ color: 'var(--text-muted)' }}>
-              <span className="font-semibold text-[#bc0000]">Insight:</span> {bonusInsight}
+            <p className="text-xs" style={{ color: 'var(--sm-text-muted)' }}>
+              <span className="font-semibold" style={{ color: '#bc0000' }}>Insight:</span> {bonusInsight}
             </p>
           </div>
         )}
@@ -218,8 +218,8 @@ export default function DataVisualization({ chartData, bonusInsight }: DataVisua
       </div>
       {bonusInsight && (
         <div className="mt-3 p-3 rounded-lg" style={{ backgroundColor: 'rgba(188, 0, 0, 0.1)' }}>
-          <p className="text-xs" style={{ color: 'var(--text-muted)' }}>
-            <span className="font-semibold text-[#bc0000]">Insight:</span> {bonusInsight}
+          <p className="text-xs" style={{ color: 'var(--sm-text-muted)' }}>
+            <span className="font-semibold" style={{ color: '#bc0000' }}>Insight:</span> {bonusInsight}
           </p>
         </div>
       )}

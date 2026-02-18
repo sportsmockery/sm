@@ -78,7 +78,8 @@ export default function Pagination({
       {currentPage > 1 ? (
         <Link
           href={getPageUrl(currentPage - 1)}
-          className="flex items-center justify-center w-[40px] h-[40px] bg-white text-[#222222] border border-[#e0e0e0] text-[14px] font-medium transition-colors hover:bg-[#f5f5f5]"
+          className="flex items-center justify-center w-[40px] h-[40px] text-[14px] font-medium transition-colors"
+          style={{ backgroundColor: 'var(--sm-card)', color: 'var(--sm-text)', border: '1px solid var(--sm-border)' }}
           aria-label="Previous page"
         >
           <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
@@ -86,7 +87,7 @@ export default function Pagination({
           </svg>
         </Link>
       ) : (
-        <span className="flex items-center justify-center w-[40px] h-[40px] bg-[#f5f5f5] text-[#999999] border border-[#e0e0e0] cursor-not-allowed">
+        <span className="flex items-center justify-center w-[40px] h-[40px] cursor-not-allowed" style={{ backgroundColor: 'var(--sm-surface)', color: 'var(--sm-text-dim)', border: '1px solid var(--sm-border)' }}>
           <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
           </svg>
@@ -98,7 +99,8 @@ export default function Pagination({
         page === 'ellipsis' ? (
           <span
             key={`ellipsis-${index}`}
-            className="flex items-center justify-center w-[40px] h-[40px] text-[#999999] text-[14px]"
+            className="flex items-center justify-center w-[40px] h-[40px] text-[14px]"
+            style={{ color: 'var(--sm-text-dim)' }}
           >
             ...
           </span>
@@ -106,11 +108,12 @@ export default function Pagination({
           <Link
             key={page}
             href={getPageUrl(page)}
-            className={`flex items-center justify-center w-[40px] h-[40px] text-[14px] font-medium transition-colors ${
+            className="flex items-center justify-center w-[40px] h-[40px] text-[14px] font-medium transition-colors"
+            style={
               currentPage === page
-                ? 'bg-[#bc0000] text-white border border-[#bc0000]'
-                : 'bg-white text-[#222222] border border-[#e0e0e0] hover:bg-[#f5f5f5]'
-            }`}
+                ? { backgroundColor: '#bc0000', color: '#ffffff', border: '1px solid #bc0000' }
+                : { backgroundColor: 'var(--sm-card)', color: 'var(--sm-text)', border: '1px solid var(--sm-border)' }
+            }
           >
             {page}
           </Link>
@@ -121,7 +124,8 @@ export default function Pagination({
       {currentPage < totalPages ? (
         <Link
           href={getPageUrl(currentPage + 1)}
-          className="flex items-center justify-center w-[40px] h-[40px] bg-white text-[#222222] border border-[#e0e0e0] text-[14px] font-medium transition-colors hover:bg-[#f5f5f5]"
+          className="flex items-center justify-center w-[40px] h-[40px] text-[14px] font-medium transition-colors"
+          style={{ backgroundColor: 'var(--sm-card)', color: 'var(--sm-text)', border: '1px solid var(--sm-border)' }}
           aria-label="Next page"
         >
           <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
@@ -129,7 +133,7 @@ export default function Pagination({
           </svg>
         </Link>
       ) : (
-        <span className="flex items-center justify-center w-[40px] h-[40px] bg-[#f5f5f5] text-[#999999] border border-[#e0e0e0] cursor-not-allowed">
+        <span className="flex items-center justify-center w-[40px] h-[40px] cursor-not-allowed" style={{ backgroundColor: 'var(--sm-surface)', color: 'var(--sm-text-dim)', border: '1px solid var(--sm-border)' }}>
           <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
           </svg>

@@ -45,16 +45,17 @@ export default function SubcategoryNav({
 
   return (
     <nav className={`overflow-x-auto ${className}`}>
-      <div className="flex gap-1 rounded-xl bg-zinc-100 p-1 dark:bg-zinc-800">
+      <div className="flex gap-1 rounded-xl p-1" style={{ backgroundColor: 'var(--sm-surface)' }}>
         {subcategories.map((tab) => (
           <button
             key={tab.value}
             onClick={() => handleTabChange(tab.value)}
-            className={`flex items-center gap-2 whitespace-nowrap rounded-lg px-4 py-2.5 text-sm font-medium transition-all ${
+            className="flex items-center gap-2 whitespace-nowrap rounded-lg px-4 py-2.5 text-sm font-medium transition-all"
+            style={
               activeTab === tab.value
-                ? 'bg-white text-[#8B0000] shadow-sm dark:bg-zinc-700 dark:text-[#FF6666]'
-                : 'text-zinc-600 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-white'
-            }`}
+                ? { backgroundColor: 'var(--sm-card)', color: 'var(--sm-accent)', boxShadow: '0 1px 2px rgba(0,0,0,0.05)' }
+                : { color: 'var(--sm-text-muted)' }
+            }
           >
             <span>{tab.icon}</span>
             <span>{tab.label}</span>

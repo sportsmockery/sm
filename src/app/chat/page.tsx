@@ -41,9 +41,9 @@ function ChatContent() {
   }, [highlightId, messages.length, scrollToMessage])
 
   return (
-    <div className="min-h-screen bg-[#0B162A]">
+    <div className="min-h-screen" style={{ backgroundColor: '#0B162A' }}>
       {/* Header */}
-      <header className="bg-[#0B162A] border-b border-white/10">
+      <header className="border-b border-white/10" style={{ backgroundColor: '#0B162A' }}>
         <div className="max-w-4xl mx-auto px-4 py-4 flex items-center justify-between">
           <Link href="/" className="flex items-center gap-3">
             <Image
@@ -87,9 +87,9 @@ function ChatContent() {
 
       {/* Chat Container - Full Page */}
       <div className="max-w-4xl mx-auto px-4 py-6">
-        <div className="bg-[#0f0f1a] rounded-2xl overflow-hidden shadow-2xl" style={{ height: 'calc(100vh - 140px)' }}>
+        <div className="rounded-2xl overflow-hidden shadow-2xl" style={{ backgroundColor: '#0f0f1a', height: 'calc(100vh - 140px)' }}>
           {/* Chat Header */}
-          <div className="bg-[#C83803] px-6 py-4">
+          <div className="px-6 py-4" style={{ backgroundColor: '#C83803' }}>
             <div className="flex items-center justify-between">
               <div>
                 <h1 className="text-xl font-bold text-white">Chicago Bears Fan Chat</h1>
@@ -111,8 +111,8 @@ function ChatContent() {
               <>
                 <div className="flex-1 overflow-y-auto p-6">
                   <div className="flex flex-col items-center justify-center h-full text-center">
-                    <div className="w-20 h-20 rounded-full bg-[#C83803]/20 flex items-center justify-center mb-4">
-                      <svg className="w-10 h-10 text-[#C83803]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <div className="w-20 h-20 rounded-full flex items-center justify-center mb-4" style={{ backgroundColor: 'rgba(200, 56, 3, 0.2)' }}>
+                      <svg className="w-10 h-10" style={{ color: '#C83803' }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
                       </svg>
                     </div>
@@ -123,7 +123,8 @@ function ChatContent() {
                     <div className="flex flex-col gap-3 w-full max-w-sm">
                       <Link
                         href="/login"
-                        className="w-full py-3 px-6 bg-[#C83803] text-white font-semibold rounded-xl hover:bg-[#a52d02] transition-colors text-center"
+                        className="w-full py-3 px-6 text-white font-semibold rounded-xl transition-colors text-center hover:brightness-95"
+                        style={{ backgroundColor: '#C83803' }}
                       >
                         Sign In to Chat
                       </Link>
@@ -150,7 +151,8 @@ function ChatContent() {
                     />
                     <button
                       disabled
-                      className="px-6 py-3 bg-[#C83803]/50 text-white/50 font-semibold rounded-xl cursor-not-allowed"
+                      className="px-6 py-3 text-white/50 font-semibold rounded-xl cursor-not-allowed"
+                      style={{ backgroundColor: 'rgba(200, 56, 3, 0.5)' }}
                     >
                       Send
                     </button>
@@ -163,22 +165,23 @@ function ChatContent() {
                 <div className="flex-1 overflow-y-auto" id="chat-messages-container">
                   {isLoading ? (
                     <div className="flex items-center justify-center h-full">
-                      <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-[#C83803]" />
+                      <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2" style={{ borderColor: '#C83803' }} />
                     </div>
                   ) : error ? (
                     <div className="flex flex-col items-center justify-center h-full text-center p-6">
                       <p className="text-red-400 mb-4">{error}</p>
                       <button
                         onClick={() => joinRoom('bears')}
-                        className="px-4 py-2 bg-[#C83803] text-white rounded-lg hover:bg-[#a52d02]"
+                        className="px-4 py-2 text-white rounded-lg hover:brightness-95"
+                        style={{ backgroundColor: '#C83803' }}
                       >
                         Try Again
                       </button>
                     </div>
                   ) : messages.length === 0 ? (
                     <div className="flex flex-col items-center justify-center h-full text-center p-6">
-                      <div className="w-16 h-16 rounded-full bg-[#C83803]/20 flex items-center justify-center mb-4">
-                        <svg className="w-8 h-8 text-[#C83803]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <div className="w-16 h-16 rounded-full flex items-center justify-center mb-4" style={{ backgroundColor: 'rgba(200, 56, 3, 0.2)' }}>
+                        <svg className="w-8 h-8" style={{ color: '#C83803' }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
                         </svg>
                       </div>
@@ -216,8 +219,8 @@ function ChatContent() {
         {/* Info Cards */}
         <div className="grid md:grid-cols-3 gap-4 mt-6">
           <div className="bg-white/5 rounded-xl p-4 border border-white/10">
-            <div className="w-10 h-10 rounded-lg bg-[#C83803]/20 flex items-center justify-center mb-3">
-              <svg className="w-5 h-5 text-[#C83803]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <div className="w-10 h-10 rounded-lg flex items-center justify-center mb-3" style={{ backgroundColor: 'rgba(200, 56, 3, 0.2)' }}>
+              <svg className="w-5 h-5" style={{ color: '#C83803' }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8h2a2 2 0 012 2v6a2 2 0 01-2 2h-2v4l-4-4H9a1.994 1.994 0 01-1.414-.586m0 0L11 14h4a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2v4l.586-.586z" />
               </svg>
             </div>
@@ -226,8 +229,8 @@ function ChatContent() {
           </div>
 
           <div className="bg-white/5 rounded-xl p-4 border border-white/10">
-            <div className="w-10 h-10 rounded-lg bg-[#C83803]/20 flex items-center justify-center mb-3">
-              <svg className="w-5 h-5 text-[#C83803]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <div className="w-10 h-10 rounded-lg flex items-center justify-center mb-3" style={{ backgroundColor: 'rgba(200, 56, 3, 0.2)' }}>
+              <svg className="w-5 h-5" style={{ color: '#C83803' }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
               </svg>
             </div>
@@ -236,8 +239,8 @@ function ChatContent() {
           </div>
 
           <div className="bg-white/5 rounded-xl p-4 border border-white/10">
-            <div className="w-10 h-10 rounded-lg bg-[#C83803]/20 flex items-center justify-center mb-3">
-              <svg className="w-5 h-5 text-[#C83803]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <div className="w-10 h-10 rounded-lg flex items-center justify-center mb-3" style={{ backgroundColor: 'rgba(200, 56, 3, 0.2)' }}>
+              <svg className="w-5 h-5" style={{ color: '#C83803' }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
               </svg>
             </div>
@@ -252,8 +255,8 @@ function ChatContent() {
 
 function ChatPageContent() {
   return (
-    <Suspense fallback={<div className="min-h-screen bg-[#0B162A] flex items-center justify-center">
-      <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-[#C83803]" />
+    <Suspense fallback={<div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: '#0B162A' }}>
+      <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2" style={{ borderColor: '#C83803' }} />
     </div>}>
       <ChatContent />
     </Suspense>

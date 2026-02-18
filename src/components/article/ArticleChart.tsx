@@ -74,9 +74,9 @@ export default function ArticleChart({ chartId, config: propConfig, className = 
   if (loading) {
     return (
       <div className={`animate-pulse ${className}`}>
-        <div className="rounded-xl bg-zinc-100 dark:bg-zinc-800 p-6">
-          <div className="h-6 w-48 bg-zinc-200 dark:bg-zinc-700 rounded mb-4" />
-          <div className="h-64 bg-zinc-200 dark:bg-zinc-700 rounded" />
+        <div className="rounded-xl bg-[var(--sm-surface)] p-6">
+          <div className="h-6 w-48 bg-[var(--sm-surface)] rounded mb-4" />
+          <div className="h-64 bg-[var(--sm-surface)] rounded" />
         </div>
       </div>
     )
@@ -142,16 +142,16 @@ export default function ArticleChart({ chartId, config: propConfig, className = 
       className={`my-8 ${size === 'full' ? 'w-full' : 'mx-auto'} ${className}`}
       style={{ maxWidth: size === 'full' ? '100%' : dimensions.width }}
     >
-      <div className="rounded-xl border border-zinc-200 bg-white shadow-lg dark:border-zinc-800 dark:bg-zinc-900 overflow-hidden">
+      <div className="rounded-xl shadow-lg overflow-hidden" style={{ backgroundColor: 'var(--sm-card)', border: '1px solid var(--sm-border)' }}>
         {/* Chart Header */}
-        <div className="border-b border-zinc-100 dark:border-zinc-800 px-6 py-4">
+        <div className="px-6 py-4" style={{ borderBottom: '1px solid var(--sm-border)' }}>
           <div className="flex items-center justify-between">
-            <h3 className="text-lg font-bold text-zinc-900 dark:text-white font-heading">
+            <h3 className="text-lg font-bold font-heading" style={{ color: 'var(--sm-text)' }}>
               {title}
             </h3>
             <div className="flex items-center gap-2">
               {colors.scheme === 'team' && colors.team && (
-                <span className="flex items-center gap-1 text-xs text-zinc-500">
+                <span className="flex items-center gap-1 text-xs" style={{ color: 'var(--sm-text-muted)' }}>
                   <span
                     className="w-2 h-2 rounded-full"
                     style={{ backgroundColor: chartColors.primary }}
@@ -160,7 +160,8 @@ export default function ArticleChart({ chartId, config: propConfig, className = 
                 </span>
               )}
               <button
-                className="p-1.5 text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors"
+                className="p-1.5 rounded-lg transition-colors"
+                style={{ color: 'var(--sm-text-dim)' }}
                 title="Share chart"
               >
                 <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -177,8 +178,8 @@ export default function ArticleChart({ chartId, config: propConfig, className = 
         </div>
 
         {/* Chart Footer */}
-        <div className="border-t border-zinc-100 dark:border-zinc-800 px-6 py-3 bg-zinc-50 dark:bg-zinc-900/50">
-          <div className="flex items-center justify-between text-xs text-zinc-500">
+        <div className="px-6 py-3" style={{ borderTop: '1px solid var(--sm-border)', backgroundColor: 'var(--sm-surface)' }}>
+          <div className="flex items-center justify-between text-xs" style={{ color: 'var(--sm-text-muted)' }}>
             <span className="flex items-center gap-1">
               <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
@@ -192,7 +193,7 @@ export default function ArticleChart({ chartId, config: propConfig, className = 
 
       {/* Caption */}
       {config.dataLabQuery && (
-        <figcaption className="mt-2 text-center text-sm text-zinc-500 dark:text-zinc-400">
+        <figcaption className="mt-2 text-center text-sm" style={{ color: 'var(--sm-text-muted)' }}>
           Data: {config.dataLabQuery.statCategory} • {config.dataLabQuery.season} Season
         </figcaption>
       )}

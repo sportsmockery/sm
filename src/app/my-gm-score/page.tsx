@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { useTheme } from '@/contexts/ThemeContext'
+
 import { useAuth } from '@/contexts/AuthContext'
 import Link from 'next/link'
 
@@ -79,9 +79,6 @@ const CHICAGO_TEAMS: Record<string, { name: string; logo: string; color: string 
 export default function MyGMScorePage() {
   const { user, loading: authLoading, isAuthenticated } = useAuth()
   const router = useRouter()
-  const { theme } = useTheme()
-  const isDark = theme === 'dark'
-
   const [userScore, setUserScore] = useState<UserScore | null>(null)
   const [mockDrafts, setMockDrafts] = useState<MockDraft[]>([])
   const [tradeStats, setTradeStats] = useState<TradeStats | null>(null)
@@ -90,8 +87,8 @@ export default function MyGMScorePage() {
   const [error, setError] = useState<string | null>(null)
   const [settingBest, setSettingBest] = useState<string | null>(null)
 
-  const subText = isDark ? '#9ca3af' : '#6b7280'
-  const cardBg = isDark ? 'bg-gray-800/50 border-gray-700' : 'bg-white border-gray-200 shadow-sm'
+  const subText = 'var(--sm-text-muted)'
+  const cardBg = ''
 
   useEffect(() => {
     if (authLoading) return
@@ -171,8 +168,8 @@ export default function MyGMScorePage() {
 
   if (authLoading || loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: 'var(--bg-page)' }}>
-        <div className="w-8 h-8 border-2 border-[#bc0000] border-t-transparent rounded-full animate-spin" />
+      <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: 'var(--sm-dark)' }}>
+        <div className="w-8 h-8 border-2 rounded-full animate-spin" style={{ borderColor: '#bc0000', borderTopColor: 'transparent' }} />
       </div>
     )
   }
@@ -180,13 +177,13 @@ export default function MyGMScorePage() {
   const hasActivity = (userScore?.trade_count || 0) > 0 || (userScore?.mock_count || 0) > 0
 
   return (
-    <div className="min-h-screen" style={{ backgroundColor: 'var(--bg-page)', color: 'var(--text-primary)' }}>
+    <div className="min-h-screen" style={{ backgroundColor: 'var(--sm-dark)', color: 'var(--sm-text)' }}>
       <main className="max-w-[1200px] mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 pt-20 sm:pt-24">
         {/* Header */}
         <div style={{ marginBottom: 24 }}>
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
             <div>
-              <h1 className="text-2xl sm:text-3xl" style={{ fontWeight: 800, color: isDark ? '#fff' : '#1a1a1a', marginBottom: 4 }}>
+              <h1 className="text-2xl sm:text-3xl" style={{ fontWeight: 800, color: 'var(--sm-text)', marginBottom: 4 }}>
                 My GM Score
               </h1>
               <p className="text-sm" style={{ color: subText }}>
@@ -216,9 +213,9 @@ export default function MyGMScorePage() {
                 style={{
                   padding: '10px 16px',
                   borderRadius: 8,
-                  border: `2px solid ${isDark ? '#4b5563' : '#d1d5db'}`,
+                  border: '2px solid var(--sm-border)',
                   backgroundColor: 'transparent',
-                  color: isDark ? '#fff' : '#1a1a1a',
+                  color: 'var(--sm-text)',
                   fontSize: '13px',
                   fontWeight: 600,
                   textDecoration: 'none',
@@ -249,9 +246,9 @@ export default function MyGMScorePage() {
         )}
 
         {!hasActivity ? (
-          <div className={`rounded-xl border p-8 text-center ${cardBg}`}>
+          <div className="rounded-xl p-8 text-center" style={{ border: '1px solid var(--sm-border)', backgroundColor: 'var(--sm-card)' }}>
             <div style={{ fontSize: '48px', marginBottom: 12 }}>🏈</div>
-            <h2 style={{ fontWeight: 700, fontSize: '20px', marginBottom: 8, color: isDark ? '#fff' : '#1a1a1a' }}>
+            <h2 style={{ fontWeight: 700, fontSize: '20px', marginBottom: 8, color: 'var(--sm-text)' }}>
               No Activity Yet
             </h2>
             <p style={{ fontSize: '14px', color: subText, marginBottom: 20 }}>
@@ -292,7 +289,7 @@ export default function MyGMScorePage() {
         ) : (
           <>
             {/* Combined Score Hero */}
-            <div className={`rounded-xl border p-6 mb-6 ${cardBg}`} style={{ textAlign: 'center' }}>
+            <div className="rounded-xl p-6 mb-6" style={{ textAlign: 'center', border: '1px solid var(--sm-border)', backgroundColor: 'var(--sm-card)' }}>
               <div style={{ fontSize: '12px', color: subText, marginBottom: 8, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
                 Combined GM Score
               </div>
@@ -334,16 +331,16 @@ export default function MyGMScorePage() {
             {/* Score Breakdown */}
             <div className="grid md:grid-cols-2 gap-4 mb-6">
               {/* Trade Score */}
-              <div className={`rounded-xl border p-5 ${cardBg}`}>
+              <div className="rounded-xl p-5" style={{ border: '1px solid var(--sm-border)', backgroundColor: 'var(--sm-card)' }}>
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
-                  <h3 style={{ fontWeight: 700, fontSize: '16px', color: isDark ? '#fff' : '#1a1a1a' }}>
+                  <h3 style={{ fontWeight: 700, fontSize: '16px', color: 'var(--sm-text)' }}>
                     Trade Score
                   </h3>
                   <span style={{
                     fontSize: '12px',
                     padding: '4px 8px',
                     borderRadius: 4,
-                    backgroundColor: isDark ? '#374151' : '#f3f4f6',
+                    backgroundColor: 'var(--sm-surface)',
                     color: subText,
                     fontWeight: 600,
                   }}>
@@ -368,7 +365,7 @@ export default function MyGMScorePage() {
                       </span>
                     </div>
                     <div>
-                      <div style={{ fontWeight: 700, fontSize: '24px', color: isDark ? '#fff' : '#1a1a1a' }}>
+                      <div style={{ fontWeight: 700, fontSize: '24px', color: 'var(--sm-text)' }}>
                         {userScore.best_trade_score.toFixed(1)}
                       </div>
                       <div style={{ fontSize: '13px', color: subText }}>
@@ -384,16 +381,16 @@ export default function MyGMScorePage() {
               </div>
 
               {/* Mock Draft Score */}
-              <div className={`rounded-xl border p-5 ${cardBg}`}>
+              <div className="rounded-xl p-5" style={{ border: '1px solid var(--sm-border)', backgroundColor: 'var(--sm-card)' }}>
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
-                  <h3 style={{ fontWeight: 700, fontSize: '16px', color: isDark ? '#fff' : '#1a1a1a' }}>
+                  <h3 style={{ fontWeight: 700, fontSize: '16px', color: 'var(--sm-text)' }}>
                     Mock Draft Score
                   </h3>
                   <span style={{
                     fontSize: '12px',
                     padding: '4px 8px',
                     borderRadius: 4,
-                    backgroundColor: isDark ? '#374151' : '#f3f4f6',
+                    backgroundColor: 'var(--sm-surface)',
                     color: subText,
                     fontWeight: 600,
                   }}>
@@ -418,7 +415,7 @@ export default function MyGMScorePage() {
                       </span>
                     </div>
                     <div>
-                      <div style={{ fontWeight: 700, fontSize: '24px', color: isDark ? '#fff' : '#1a1a1a' }}>
+                      <div style={{ fontWeight: 700, fontSize: '24px', color: 'var(--sm-text)' }}>
                         {userScore.best_mock_draft_score.toFixed(1)}
                       </div>
                       <div style={{ fontSize: '13px', color: subText }}>
@@ -436,8 +433,8 @@ export default function MyGMScorePage() {
 
             {/* Mock Draft History */}
             {mockDrafts.length > 0 && (
-              <div className={`rounded-xl border p-5 mb-6 ${cardBg}`}>
-                <h3 style={{ fontWeight: 700, fontSize: '16px', marginBottom: 16, color: isDark ? '#fff' : '#1a1a1a' }}>
+              <div className="rounded-xl p-5 mb-6" style={{ border: '1px solid var(--sm-border)', backgroundColor: 'var(--sm-card)' }}>
+                <h3 style={{ fontWeight: 700, fontSize: '16px', marginBottom: 16, color: 'var(--sm-text)' }}>
                   Mock Draft History
                 </h3>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
@@ -454,8 +451,8 @@ export default function MyGMScorePage() {
                           padding: '12px 14px',
                           borderRadius: 10,
                           backgroundColor: isBest
-                            ? (isDark ? '#22c55e20' : '#22c55e10')
-                            : (isDark ? '#374151' : '#f3f4f6'),
+                            ? 'rgba(34, 197, 94, 0.1)'
+                            : 'var(--sm-surface)',
                           border: isBest ? '2px solid #22c55e' : 'none',
                         }}
                       >
@@ -463,7 +460,7 @@ export default function MyGMScorePage() {
                           <img src={teamInfo.logo} alt={teamInfo.name} style={{ width: 36, height: 36, objectFit: 'contain' }} />
                         )}
                         <div style={{ flex: 1 }}>
-                          <div style={{ fontWeight: 600, fontSize: '14px', color: isDark ? '#fff' : '#1a1a1a', display: 'flex', alignItems: 'center', gap: 8 }}>
+                          <div style={{ fontWeight: 600, fontSize: '14px', color: 'var(--sm-text)', display: 'flex', alignItems: 'center', gap: 8 }}>
                             {teamInfo?.name || mock.chicago_team} {mock.draft_year}
                             {isBest && (
                               <span style={{
@@ -490,19 +487,19 @@ export default function MyGMScorePage() {
                           <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                             {mock.value_score !== null && (
                               <div style={{ textAlign: 'center', fontSize: '11px' }}>
-                                <div style={{ fontWeight: 700, color: isDark ? '#fff' : '#1a1a1a' }}>{mock.value_score.toFixed(0)}</div>
+                                <div style={{ fontWeight: 700, color: 'var(--sm-text)' }}>{mock.value_score.toFixed(0)}</div>
                                 <div style={{ color: subText }}>Value</div>
                               </div>
                             )}
                             {mock.need_fit_score !== null && (
                               <div style={{ textAlign: 'center', fontSize: '11px' }}>
-                                <div style={{ fontWeight: 700, color: isDark ? '#fff' : '#1a1a1a' }}>{mock.need_fit_score.toFixed(0)}</div>
+                                <div style={{ fontWeight: 700, color: 'var(--sm-text)' }}>{mock.need_fit_score.toFixed(0)}</div>
                                 <div style={{ color: subText }}>Fit</div>
                               </div>
                             )}
                             {mock.upside_risk_score !== null && (
                               <div style={{ textAlign: 'center', fontSize: '11px' }}>
-                                <div style={{ fontWeight: 700, color: isDark ? '#fff' : '#1a1a1a' }}>{mock.upside_risk_score.toFixed(0)}</div>
+                                <div style={{ fontWeight: 700, color: 'var(--sm-text)' }}>{mock.upside_risk_score.toFixed(0)}</div>
                                 <div style={{ color: subText }}>Upside</div>
                               </div>
                             )}
@@ -531,9 +528,9 @@ export default function MyGMScorePage() {
                             style={{
                               padding: '6px 10px',
                               borderRadius: 6,
-                              border: `1px solid ${isDark ? '#4b5563' : '#d1d5db'}`,
+                              border: '1px solid var(--sm-border)',
                               backgroundColor: 'transparent',
-                              color: isDark ? '#fff' : '#1a1a1a',
+                              color: 'var(--sm-text)',
                               fontSize: '11px',
                               fontWeight: 600,
                               cursor: settingBest === mock.id ? 'not-allowed' : 'pointer',
@@ -554,8 +551,8 @@ export default function MyGMScorePage() {
             {analytics && analytics.total_trades > 0 && (
               <div className="grid lg:grid-cols-2 gap-6">
                 {/* Grade Distribution */}
-                <div className={`rounded-xl border p-4 sm:p-6 ${cardBg}`}>
-                  <h3 style={{ fontWeight: 700, fontSize: '16px', marginBottom: 16, color: isDark ? '#fff' : '#1a1a1a' }}>
+                <div className="rounded-xl p-4 sm:p-6" style={{ border: '1px solid var(--sm-border)', backgroundColor: 'var(--sm-card)' }}>
+                  <h3 style={{ fontWeight: 700, fontSize: '16px', marginBottom: 16, color: 'var(--sm-text)' }}>
                     Trade Grade Distribution
                   </h3>
                   <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
@@ -563,10 +560,10 @@ export default function MyGMScorePage() {
                       .filter(d => d.count > 0)
                       .map(d => (
                         <div key={d.bucket} style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-                          <span style={{ width: 50, fontSize: '13px', fontWeight: 600, color: isDark ? '#fff' : '#1a1a1a' }}>
+                          <span style={{ width: 50, fontSize: '13px', fontWeight: 600, color: 'var(--sm-text)' }}>
                             {d.bucket}
                           </span>
-                          <div style={{ flex: 1, height: 24, backgroundColor: isDark ? '#374151' : '#f3f4f6', borderRadius: 4, overflow: 'hidden' }}>
+                          <div style={{ flex: 1, height: 24, backgroundColor: 'var(--sm-surface)', borderRadius: 4, overflow: 'hidden' }}>
                             <div
                               style={{
                                 width: `${d.percentage}%`,
@@ -585,8 +582,8 @@ export default function MyGMScorePage() {
                 </div>
 
                 {/* Performance by Team */}
-                <div className={`rounded-xl border p-4 sm:p-6 ${cardBg}`}>
-                  <h3 style={{ fontWeight: 700, fontSize: '16px', marginBottom: 16, color: isDark ? '#fff' : '#1a1a1a' }}>
+                <div className="rounded-xl p-4 sm:p-6" style={{ border: '1px solid var(--sm-border)', backgroundColor: 'var(--sm-card)' }}>
+                  <h3 style={{ fontWeight: 700, fontSize: '16px', marginBottom: 16, color: 'var(--sm-text)' }}>
                     Trade Performance by Team
                   </h3>
                   {analytics.chicago_teams.length === 0 ? (
@@ -604,14 +601,14 @@ export default function MyGMScorePage() {
                               gap: 12,
                               padding: '10px 12px',
                               borderRadius: 8,
-                              backgroundColor: isDark ? '#374151' : '#f3f4f6',
+                              backgroundColor: 'var(--sm-surface)',
                             }}
                           >
                             {teamInfo && (
                               <img src={teamInfo.logo} alt={teamInfo.name} style={{ width: 32, height: 32, objectFit: 'contain' }} />
                             )}
                             <div style={{ flex: 1 }}>
-                              <div style={{ fontWeight: 600, fontSize: '14px', color: isDark ? '#fff' : '#1a1a1a' }}>
+                              <div style={{ fontWeight: 600, fontSize: '14px', color: 'var(--sm-text)' }}>
                                 {teamInfo?.name || team.team}
                               </div>
                               <div style={{ fontSize: '12px', color: subText }}>

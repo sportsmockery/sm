@@ -15,7 +15,7 @@ export default function GMAnalyticsPage() {
 
   const textColor = isDark ? '#fff' : '#1a1a1a'
   const subText = isDark ? '#9ca3af' : '#6b7280'
-  const cardBg = isDark ? 'bg-gray-800/50 border-gray-700' : 'bg-white border-gray-200 shadow-sm'
+  const cardBg = 'shadow-sm'
 
   useEffect(() => {
     if (authLoading) return
@@ -29,13 +29,13 @@ export default function GMAnalyticsPage() {
   if (authLoading || pageLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: 'var(--bg-page)' }}>
-        <div className="w-8 h-8 border-2 border-[#bc0000] border-t-transparent rounded-full animate-spin" />
+        <div className="w-8 h-8 border-2 border-t-transparent rounded-full animate-spin" style={{ borderColor: '#bc0000', borderTopColor: 'transparent' }} />
       </div>
     )
   }
 
   return (
-    <div className="min-h-screen" style={{ backgroundColor: 'var(--bg-page)', color: 'var(--text-primary)' }}>
+    <div className="min-h-screen" style={{ backgroundColor: 'var(--bg-page)', color: 'var(--sm-text)' }}>
       <main className="max-w-[1200px] mx-auto px-4 sm:px-6 lg:px-8 py-8 pt-24">
         {/* Header */}
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 24 }}>
@@ -70,7 +70,7 @@ export default function GMAnalyticsPage() {
         </div>
 
         {/* Dashboard */}
-        <div className={`rounded-xl border p-6 ${cardBg}`}>
+        <div className={`rounded-xl p-6 ${cardBg}`} style={{ backgroundColor: 'var(--sm-card)', border: '1px solid var(--sm-border)' }}>
           <AnalyticsDashboard />
         </div>
       </main>

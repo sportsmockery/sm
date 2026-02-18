@@ -9,65 +9,21 @@ interface CategoryBadgeProps {
 }
 
 // Team color mapping based on category slug
-function getTeamColors(slug: string): { bg: string; text: string; hover: string } {
-  const teamColors: Record<string, { bg: string; text: string; hover: string }> = {
-    'chicago-bears': {
-      bg: 'bg-[#C83200]',
-      text: 'text-white',
-      hover: 'hover:bg-[#a02800]',
-    },
-    bears: {
-      bg: 'bg-[#C83200]',
-      text: 'text-white',
-      hover: 'hover:bg-[#a02800]',
-    },
-    'chicago-bulls': {
-      bg: 'bg-[#CE1141]',
-      text: 'text-white',
-      hover: 'hover:bg-[#a00d33]',
-    },
-    bulls: {
-      bg: 'bg-[#CE1141]',
-      text: 'text-white',
-      hover: 'hover:bg-[#a00d33]',
-    },
-    'chicago-cubs': {
-      bg: 'bg-[#0E3386]',
-      text: 'text-white',
-      hover: 'hover:bg-[#0a266b]',
-    },
-    cubs: {
-      bg: 'bg-[#0E3386]',
-      text: 'text-white',
-      hover: 'hover:bg-[#0a266b]',
-    },
-    'chicago-white-sox': {
-      bg: 'bg-[#27251F]',
-      text: 'text-white',
-      hover: 'hover:bg-[#3a3830]',
-    },
-    'white-sox': {
-      bg: 'bg-[#27251F]',
-      text: 'text-white',
-      hover: 'hover:bg-[#3a3830]',
-    },
-    'chicago-blackhawks': {
-      bg: 'bg-[#CF0A2C]',
-      text: 'text-white',
-      hover: 'hover:bg-[#a00822]',
-    },
-    blackhawks: {
-      bg: 'bg-[#CF0A2C]',
-      text: 'text-white',
-      hover: 'hover:bg-[#a00822]',
-    },
+function getTeamColors(slug: string): { bg: string; color: string } {
+  const teamColors: Record<string, { bg: string; color: string }> = {
+    'chicago-bears': { bg: '#C83200', color: '#ffffff' },
+    bears: { bg: '#C83200', color: '#ffffff' },
+    'chicago-bulls': { bg: '#CE1141', color: '#ffffff' },
+    bulls: { bg: '#CE1141', color: '#ffffff' },
+    'chicago-cubs': { bg: '#0E3386', color: '#ffffff' },
+    cubs: { bg: '#0E3386', color: '#ffffff' },
+    'chicago-white-sox': { bg: '#27251F', color: '#ffffff' },
+    'white-sox': { bg: '#27251F', color: '#ffffff' },
+    'chicago-blackhawks': { bg: '#CF0A2C', color: '#ffffff' },
+    blackhawks: { bg: '#CF0A2C', color: '#ffffff' },
   }
 
-  return teamColors[slug.toLowerCase()] || {
-    bg: 'bg-[#8B0000]',
-    text: 'text-white',
-    hover: 'hover:bg-[#6d0000]',
-  }
+  return teamColors[slug.toLowerCase()] || { bg: '#8B0000', color: '#ffffff' }
 }
 
 const sizeClasses = {
@@ -84,15 +40,16 @@ export default function CategoryBadge({
   className = '',
 }: CategoryBadgeProps) {
   const colors = getTeamColors(slug)
-  const baseClasses = `inline-flex items-center rounded-full font-bold uppercase tracking-wider transition-colors ${colors.bg} ${colors.text} ${sizeClasses[size]} ${className}`
+  const baseClasses = `inline-flex items-center rounded-full font-bold uppercase tracking-wider transition-colors ${sizeClasses[size]} ${className}`
+  const baseStyle = { backgroundColor: colors.bg, color: colors.color }
 
   if (clickable) {
     return (
-      <Link href={`/${slug}`} className={`${baseClasses} ${colors.hover}`}>
+      <Link href={`/${slug}`} className={baseClasses} style={baseStyle}>
         {name}
       </Link>
     )
   }
 
-  return <span className={baseClasses}>{name}</span>
+  return <span className={baseClasses} style={baseStyle}>{name}</span>
 }

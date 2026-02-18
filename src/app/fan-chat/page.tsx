@@ -503,10 +503,10 @@ export default function FanChatPage() {
                         <div
                           className={`inline-block px-4 py-2 rounded-2xl text-sm ${
                             msg.isOwn
-                              ? 'bg-[#bc0000] text-white rounded-tr-sm'
+                              ? 'rounded-tr-sm'
                               : 'rounded-tl-sm'
                           }`}
-                          style={!msg.isOwn ? { backgroundColor: 'var(--sm-surface)', color: 'var(--sm-text)' } : {}}
+                          style={msg.isOwn ? { backgroundColor: '#bc0000', color: '#ffffff' } : { backgroundColor: 'var(--sm-surface)', color: 'var(--sm-text)' }}
                         >
                           {msg.content}
                         </div>
@@ -606,7 +606,7 @@ export default function FanChatPage() {
                 {/* Sign in prompt for non-logged-in users */}
                 <div className="mt-3 text-center">
                   <p className="text-xs" style={{ color: 'var(--sm-text-muted)' }}>
-                    <Link href="/login" className="text-[#bc0000] hover:underline">Sign in</Link> to save your chat history
+                    <Link href="/login" className="hover:underline" style={{ color: '#bc0000' }}>Sign in</Link> to save your chat history
                   </p>
                 </div>
               </div>

@@ -41,7 +41,7 @@ function ArticleCard({ article }: { article: GridArticle }) {
         className="block"
       >
         {/* Image container - 16:10 aspect ratio */}
-        <div className="relative w-full pb-[62.5%] mb-3 rounded-lg overflow-hidden" style={{ backgroundColor: 'var(--bg-elevated)' }}>
+        <div className="relative w-full pb-[62.5%] mb-3 rounded-lg overflow-hidden" style={{ backgroundColor: 'var(--sm-card)' }}>
           {article.featured_image ? (
             <Image
               src={article.featured_image}
@@ -75,14 +75,14 @@ function ArticleCard({ article }: { article: GridArticle }) {
             className="text-[17px] font-bold leading-[1.3] line-clamp-3 transition-colors"
             style={{
               fontFamily: "'Montserrat', sans-serif",
-              color: 'var(--text-primary)',
+              color: 'var(--sm-text)',
             }}
             dangerouslySetInnerHTML={{ __html: processIconShortcodes(article.title) }}
           />
           {/* Metadata */}
           <p
             className="mt-2 text-[12px] flex items-center gap-1.5"
-            style={{ color: 'var(--text-muted)' }}
+            style={{ color: 'var(--sm-text-muted)' }}
           >
             <span>{article.author?.name || 'Staff'}</span>
             <span style={{ opacity: 0.4 }}>·</span>

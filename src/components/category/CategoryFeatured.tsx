@@ -52,7 +52,7 @@ export default function CategoryFeatured({
                   priority
                 />
               ) : (
-                <div className="h-full w-full bg-gradient-to-br from-zinc-200 to-zinc-300 dark:from-zinc-700 dark:to-zinc-800" />
+                <div className="h-full w-full" style={{ background: 'linear-gradient(to bottom right, var(--sm-surface), var(--sm-border))' }} />
               )}
             </div>
 
@@ -62,7 +62,7 @@ export default function CategoryFeatured({
             {/* Content */}
             <div className="absolute inset-0 flex flex-col justify-end p-6">
               {/* Featured badge */}
-              <span className="mb-3 inline-block w-fit rounded-full bg-[#8B0000] px-3 py-1 text-xs font-bold uppercase tracking-wider text-white">
+              <span className="mb-3 inline-block w-fit rounded-full px-3 py-1 text-xs font-bold uppercase tracking-wider" style={{ backgroundColor: 'var(--sm-accent)', color: '#ffffff' }}>
                 Featured
               </span>
 
@@ -73,7 +73,8 @@ export default function CategoryFeatured({
 
               {mainPost.excerpt && (
                 <p
-                  className="mb-4 line-clamp-2 text-xs text-zinc-300 sm:text-sm md:text-base"
+                  className="mb-4 line-clamp-2 text-xs sm:text-sm md:text-base"
+                  style={{ color: 'rgba(255,255,255,0.7)' }}
                   dangerouslySetInnerHTML={{ __html: processIconShortcodes(mainPost.excerpt) }}
                 />
               )}
@@ -102,7 +103,7 @@ export default function CategoryFeatured({
               key={post.id}
               href={`/${post.category.slug}/${post.slug}`}
               className="group flex gap-4 rounded-xl p-4 transition-all hover:shadow-lg"
-              style={{ backgroundColor: 'var(--card-bg)', border: '1px solid var(--card-border)' }}
+              style={{ backgroundColor: 'var(--sm-card)', border: '1px solid var(--sm-border)' }}
             >
               {/* Thumbnail */}
               <div className="relative h-24 w-24 shrink-0 overflow-hidden rounded-lg sm:h-32 sm:w-32">
@@ -114,19 +115,19 @@ export default function CategoryFeatured({
                     className="object-cover transition-transform duration-300 group-hover:scale-105"
                   />
                 ) : (
-                  <div className="h-full w-full" style={{ background: 'linear-gradient(to bottom right, var(--bg-surface), var(--border-color))' }} />
+                  <div className="h-full w-full" style={{ background: 'linear-gradient(to bottom right, var(--sm-surface), var(--sm-border))' }} />
                 )}
               </div>
 
               {/* Content */}
               <div className="flex min-w-0 flex-1 flex-col justify-center">
                 <h3
-                  className="mb-2 line-clamp-2 font-heading text-lg font-bold transition-colors group-hover:text-[var(--link-color)]"
-                  style={{ color: 'var(--text-primary)' }}
+                  className="mb-2 line-clamp-2 font-heading text-lg font-bold transition-colors group-hover:text-[var(--sm-accent)]"
+                  style={{ color: 'var(--sm-text)' }}
                   dangerouslySetInnerHTML={{ __html: processIconShortcodes(post.title) }}
                 />
 
-                <div className="flex items-center gap-2 text-sm" style={{ color: 'var(--text-muted)' }}>
+                <div className="flex items-center gap-2 text-sm" style={{ color: 'var(--sm-text-muted)' }}>
                   {post.author && (
                     <>
                       <span>{post.author.name}</span>

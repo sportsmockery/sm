@@ -65,19 +65,19 @@ export default function CategoryFilters({
   ]
 
   return (
-    <div className={`bg-[var(--bg-surface)] border-b border-[var(--border-color)] ${className}`}>
+    <div className={`bg-[var(--sm-surface)] border-b border-[var(--sm-border)] ${className}`}>
       <div className="max-w-[1600px] mx-auto px-4 lg:px-6">
         <div className="flex items-center justify-between h-14">
           {/* Category Title */}
           <div className="flex items-baseline gap-3">
             <h1
-              className="text-xl font-bold text-[var(--text-primary)]"
+              className="text-xl font-bold text-[var(--sm-text)]"
               style={{ fontFamily: "'Montserrat', sans-serif" }}
             >
               {categoryName}
             </h1>
             {postCount !== undefined && (
-              <span className="text-sm text-[var(--text-muted)]">
+              <span className="text-sm text-[var(--sm-text-muted)]">
                 {postCount.toLocaleString()} articles
               </span>
             )}
@@ -93,8 +93,8 @@ export default function CategoryFilters({
                   onClick={() => handleSortChange(option.value)}
                   className={`px-3 py-1.5 text-xs font-medium rounded-md transition-colors ${
                     sortBy === option.value
-                      ? 'bg-[var(--text-primary)] text-[var(--bg-surface)]'
-                      : 'text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-elevated)]'
+                      ? 'bg-[var(--sm-text)] text-[var(--sm-surface)]'
+                      : 'text-[var(--sm-text-muted)] hover:text-[var(--sm-text)] hover:bg-[var(--sm-card)]'
                   }`}
                 >
                   {option.label}
@@ -103,7 +103,7 @@ export default function CategoryFilters({
             </div>
 
             {/* Divider */}
-            <div className="w-px h-5 bg-[var(--border-color)]" />
+            <div className="w-px h-5 bg-[var(--sm-border)]" />
 
             {/* Time */}
             <div className="flex items-center gap-1.5">
@@ -113,8 +113,8 @@ export default function CategoryFilters({
                   onClick={() => handleTimeChange(option.value)}
                   className={`px-3 py-1.5 text-xs font-medium rounded-md transition-colors ${
                     timeFilter === option.value
-                      ? 'bg-[var(--text-primary)] text-[var(--bg-surface)]'
-                      : 'text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-elevated)]'
+                      ? 'bg-[var(--sm-text)] text-[var(--sm-surface)]'
+                      : 'text-[var(--sm-text-muted)] hover:text-[var(--sm-text)] hover:bg-[var(--sm-card)]'
                   }`}
                 >
                   {option.label}

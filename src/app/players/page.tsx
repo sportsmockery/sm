@@ -56,12 +56,12 @@ export default async function PlayersPage({ searchParams }: PlayersPageProps) {
     : null;
 
   return (
-    <main className="mx-auto max-w-7xl px-4 py-8">
+    <main className="mx-auto max-w-7xl px-4 py-8" style={{ backgroundColor: 'var(--sm-dark)' }}>
       <div className="mb-8">
-        <h1 className="text-3xl font-bold text-zinc-900 dark:text-white">
+        <h1 className="text-3xl font-bold" style={{ color: 'var(--sm-text)' }}>
           Players
         </h1>
-        <p className="mt-2 text-zinc-600 dark:text-zinc-400">
+        <p className="mt-2" style={{ color: 'var(--sm-text-muted)' }}>
           Search and browse Chicago sports players
         </p>
       </div>
@@ -75,7 +75,8 @@ export default async function PlayersPage({ searchParams }: PlayersPageProps) {
             name="q"
             placeholder="Search players..."
             defaultValue={searchQuery}
-            className="w-full rounded-lg border border-zinc-200 bg-white px-4 py-2 text-zinc-900 placeholder:text-zinc-400 focus:border-zinc-400 focus:outline-none dark:border-zinc-700 dark:bg-zinc-800 dark:text-white"
+            className="w-full px-4 py-2 focus:outline-none"
+            style={{ backgroundColor: 'var(--sm-surface)', border: '1px solid var(--sm-border)', color: 'var(--sm-text)', borderRadius: '12px' }}
           />
         </form>
 
@@ -92,7 +93,8 @@ export default async function PlayersPage({ searchParams }: PlayersPageProps) {
             }
             window.location.href = url.toString();
           }}
-          className="rounded-lg border border-zinc-200 bg-white px-4 py-2 text-zinc-900 focus:border-zinc-400 focus:outline-none dark:border-zinc-700 dark:bg-zinc-800 dark:text-white"
+          className="px-4 py-2 focus:outline-none"
+          style={{ backgroundColor: 'var(--sm-surface)', border: '1px solid var(--sm-border)', color: 'var(--sm-text)', borderRadius: '12px' }}
         >
           <option value="">All Teams</option>
           {teams.map((team) => (
@@ -115,7 +117,8 @@ export default async function PlayersPage({ searchParams }: PlayersPageProps) {
             }
             window.location.href = url.toString();
           }}
-          className="rounded-lg border border-zinc-200 bg-white px-4 py-2 text-zinc-900 focus:border-zinc-400 focus:outline-none dark:border-zinc-700 dark:bg-zinc-800 dark:text-white"
+          className="px-4 py-2 focus:outline-none"
+          style={{ backgroundColor: 'var(--sm-surface)', border: '1px solid var(--sm-border)', color: 'var(--sm-text)', borderRadius: '12px' }}
         >
           <option value="">All Positions</option>
           {positions.map((pos) => (
@@ -132,7 +135,7 @@ export default async function PlayersPage({ searchParams }: PlayersPageProps) {
           {Object.entries(featuredByPosition).map(([position, players]) => (
             players.length > 0 && (
               <section key={position}>
-                <h2 className="mb-4 text-lg font-bold text-zinc-900 dark:text-white">
+                <h2 className="mb-4 text-lg font-bold" style={{ color: 'var(--sm-text)' }}>
                   {position === 'QB' ? 'Quarterbacks' : position === 'RB' ? 'Running Backs' : 'Wide Receivers'}
                 </h2>
                 <div className="grid gap-4 sm:grid-cols-2 md:grid-cols-4">
@@ -149,7 +152,7 @@ export default async function PlayersPage({ searchParams }: PlayersPageProps) {
       {/* Filtered results */}
       {(teamFilter || positionFilter || searchQuery) && (
         <>
-          <p className="mb-4 text-sm text-zinc-500 dark:text-zinc-400">
+          <p className="mb-4 text-sm" style={{ color: 'var(--sm-text-muted)' }}>
             {filteredPlayers.length} player{filteredPlayers.length !== 1 ? 's' : ''} found
           </p>
           <div className="grid gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
@@ -161,8 +164,8 @@ export default async function PlayersPage({ searchParams }: PlayersPageProps) {
       )}
 
       {filteredPlayers.length === 0 && (
-        <div className="rounded-xl border border-zinc-200 bg-white p-8 text-center dark:border-zinc-800 dark:bg-zinc-900">
-          <p className="text-zinc-500 dark:text-zinc-400">
+        <div className="rounded-xl p-8 text-center" style={{ border: '1px solid var(--sm-border)', backgroundColor: 'var(--sm-card)' }}>
+          <p style={{ color: 'var(--sm-text-muted)' }}>
             No players found matching your criteria.
           </p>
         </div>
@@ -175,9 +178,10 @@ function PlayerCard({ player }: { player: Player }) {
   return (
     <Link
       href={`/players/${player.slug}`}
-      className="group flex items-center gap-3 rounded-xl border border-zinc-200 bg-white p-4 transition-all hover:border-zinc-300 hover:shadow-lg dark:border-zinc-800 dark:bg-zinc-900 dark:hover:border-zinc-700"
+      className="group flex items-center gap-3 rounded-xl p-4 transition-all"
+      style={{ border: '1px solid var(--sm-border)', backgroundColor: 'var(--sm-card)' }}
     >
-      <div className="relative h-14 w-14 flex-shrink-0 overflow-hidden rounded-full bg-zinc-100 dark:bg-zinc-800">
+      <div className="relative h-14 w-14 flex-shrink-0 overflow-hidden rounded-full" style={{ backgroundColor: 'var(--sm-surface)' }}>
         <Image
           src={player.headshot}
           alt={player.name}
@@ -186,10 +190,10 @@ function PlayerCard({ player }: { player: Player }) {
         />
       </div>
       <div className="flex-1 min-w-0">
-        <p className="font-semibold text-zinc-900 truncate dark:text-white">
+        <p className="font-semibold truncate" style={{ color: 'var(--sm-text)' }}>
           {player.name}
         </p>
-        <p className="text-sm text-zinc-500 dark:text-zinc-400">
+        <p className="text-sm" style={{ color: 'var(--sm-text-muted)' }}>
           {player.position} • #{player.number}
         </p>
       </div>

@@ -70,7 +70,7 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
   return (
     <div className="min-h-screen" style={{ backgroundColor: 'var(--bg-surface)' }}>
       {/* Hero Section */}
-      <header className="py-16" style={{ background: 'linear-gradient(to bottom, var(--bg-footer), var(--bg-elevated))' }}>
+      <header className="py-16" style={{ background: 'linear-gradient(to bottom, var(--bg-footer), var(--sm-card))' }}>
         <div className="mx-auto max-w-4xl px-4">
           <h1 className="mb-6 text-center font-heading text-4xl font-black" style={{ color: 'var(--text-inverse)' }}>
             Search SportsMockery
@@ -121,13 +121,13 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
                         <a
                           href={`/search?q=${encodeURIComponent(query)}${category ? `&category=${category}` : ''}${author ? `&author=${author}` : ''}${dateRange ? `&dateRange=${dateRange}` : ''}&page=${currentPage - 1}`}
                           className="rounded-lg border px-4 py-2 font-medium transition-colors"
-                          style={{ borderColor: 'var(--border-color)', backgroundColor: 'var(--card-bg)', color: 'var(--text-primary)' }}
+                          style={{ borderColor: 'var(--border-color)', backgroundColor: 'var(--card-bg)', color: 'var(--sm-text)' }}
                         >
                           Previous
                         </a>
                       )}
 
-                      <span className="px-4 text-sm" style={{ color: 'var(--text-muted)' }}>
+                      <span className="px-4 text-sm" style={{ color: 'var(--sm-text-muted)' }}>
                         Page {currentPage} of {totalPages}
                       </span>
 
@@ -135,7 +135,7 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
                         <a
                           href={`/search?q=${encodeURIComponent(query)}${category ? `&category=${category}` : ''}${author ? `&author=${author}` : ''}${dateRange ? `&dateRange=${dateRange}` : ''}&page=${currentPage + 1}`}
                           className="rounded-lg border px-4 py-2 font-medium transition-colors"
-                          style={{ borderColor: 'var(--border-color)', backgroundColor: 'var(--card-bg)', color: 'var(--text-primary)' }}
+                          style={{ borderColor: 'var(--border-color)', backgroundColor: 'var(--card-bg)', color: 'var(--sm-text)' }}
                         >
                           Next
                         </a>
@@ -157,7 +157,7 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
 
             {/* Browse by team */}
             <div className="rounded-2xl border p-6" style={{ borderColor: 'var(--border-color)', backgroundColor: 'var(--card-bg)' }}>
-              <h2 className="mb-4 font-heading text-xl font-bold" style={{ color: 'var(--text-primary)' }}>
+              <h2 className="mb-4 font-heading text-xl font-bold" style={{ color: 'var(--sm-text)' }}>
                 Browse by Team
               </h2>
               <div className="grid grid-cols-2 gap-3 sm:grid-cols-5">
@@ -182,7 +182,7 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
 
             {/* Latest articles teaser */}
             <div className="mt-8 text-center">
-              <p className="mb-4" style={{ color: 'var(--text-muted)' }}>
+              <p className="mb-4" style={{ color: 'var(--sm-text-muted)' }}>
                 Or check out the latest news
               </p>
               <a

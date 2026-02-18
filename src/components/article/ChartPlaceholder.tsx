@@ -67,7 +67,8 @@ export default function ChartPlaceholder({
 
   return (
     <div
-      className="relative my-6 rounded-xl border-2 border-dashed border-zinc-300 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-900 overflow-hidden transition-all duration-200"
+      className="relative my-6 rounded-xl border-2 border-dashed overflow-hidden transition-all duration-200"
+      style={{ borderColor: 'var(--sm-border)', backgroundColor: 'var(--sm-surface)' }}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
@@ -87,19 +88,19 @@ export default function ChartPlaceholder({
           {/* Chart Info */}
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-2 mb-1">
-              <span className="px-2 py-0.5 text-xs font-medium rounded-full bg-zinc-200 dark:bg-zinc-700 text-zinc-600 dark:text-zinc-300">
+              <span className="px-2 py-0.5 text-xs font-medium rounded-full bg-[var(--sm-surface)] text-[var(--sm-text)]">
                 {chartTypeLabels[config.type]}
               </span>
-              <span className="px-2 py-0.5 text-xs font-medium rounded-full text-zinc-500 dark:text-zinc-400 bg-zinc-100 dark:bg-zinc-800">
+              <span className="px-2 py-0.5 text-xs font-medium rounded-full text-[var(--sm-text-muted)] bg-[var(--sm-surface)]">
                 {config.size}
               </span>
             </div>
 
-            <h4 className="text-lg font-bold text-zinc-900 dark:text-white truncate">
+            <h4 className="text-lg font-bold text-[var(--sm-text)] truncate">
               {config.title || 'Untitled Chart'}
             </h4>
 
-            <div className="mt-2 flex items-center gap-4 text-sm text-zinc-500 dark:text-zinc-400">
+            <div className="mt-2 flex items-center gap-4 text-sm text-[var(--sm-text-muted)]">
               <span className="flex items-center gap-1">
                 <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4" />
@@ -130,7 +131,7 @@ export default function ChartPlaceholder({
         </div>
 
         {/* Mini Preview */}
-        <div className="mt-4 h-20 rounded-lg bg-zinc-100 dark:bg-zinc-800 flex items-end justify-center gap-1 p-2 overflow-hidden">
+        <div className="mt-4 h-20 rounded-lg flex items-end justify-center gap-1 p-2 overflow-hidden" style={{ backgroundColor: 'var(--sm-surface)' }}>
           {config.type === 'bar' && config.data.slice(0, 6).map((d, i) => (
             <div
               key={i}
@@ -165,7 +166,7 @@ export default function ChartPlaceholder({
             }).join(', ')})` }} />
           )}
           {(config.type === 'player-comparison' || config.type === 'team-stats') && (
-            <div className="text-4xl text-zinc-400">📊</div>
+            <div className="text-4xl" style={{ color: 'var(--sm-text-dim)' }}>📊</div>
           )}
         </div>
       </div>

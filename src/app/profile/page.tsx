@@ -290,18 +290,18 @@ export default function ProfilePage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-zinc-950 flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-[#8B0000]"></div>
+      <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: 'var(--sm-dark)' }}>
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2" style={{ borderColor: '#bc0000' }}></div>
       </div>
     )
   }
 
   return (
-    <div className="min-h-screen bg-zinc-950">
+    <div className="min-h-screen" style={{ backgroundColor: 'var(--sm-dark)' }}>
       {/* Profile Header */}
-      <section className="relative overflow-hidden border-b border-zinc-800 py-8 sm:py-12 lg:py-16">
+      <section className="relative overflow-hidden py-8 sm:py-12 lg:py-16" style={{ borderBottom: '1px solid var(--sm-border)' }}>
         <div className="absolute inset-0 bg-[linear-gradient(rgba(139,0,0,0.03)_1px,transparent_1px),linear-gradient(90deg,rgba(139,0,0,0.03)_1px,transparent_1px)] bg-[size:48px_48px]" />
-        <div className="absolute left-1/4 top-0 h-64 w-64 rounded-full bg-[#8B0000]/10 blur-[100px]" />
+        <div className="absolute left-1/4 top-0 h-64 w-64 rounded-full blur-[100px]" style={{ backgroundColor: 'rgba(188, 0, 0, 0.1)' }} />
 
         <div className="relative mx-auto max-w-6xl px-4">
           <div className="flex flex-col items-center gap-4 sm:gap-6 sm:flex-row sm:items-start">
@@ -309,7 +309,8 @@ export default function ProfilePage() {
             <div className="relative group">
               <button
                 onClick={handleAvatarClick}
-                className="relative block focus:outline-none focus:ring-2 focus:ring-[#8B0000] focus:ring-offset-2 focus:ring-offset-zinc-950 rounded-full"
+                className="relative block focus:outline-none focus:ring-2 focus:ring-offset-2 rounded-full"
+                style={{ '--tw-ring-color': '#bc0000', '--tw-ring-offset-color': 'var(--sm-dark)' } as React.CSSProperties}
                 aria-label="Change profile picture"
               >
                 {displayAvatar ? (
@@ -318,11 +319,12 @@ export default function ProfilePage() {
                     alt={displayName}
                     width={120}
                     height={120}
-                    className="h-24 w-24 sm:h-28 sm:w-28 rounded-full ring-4 ring-[#8B0000]/30 object-cover"
+                    className="h-24 w-24 sm:h-28 sm:w-28 rounded-full object-cover"
+                    style={{ boxShadow: '0 0 0 4px rgba(188, 0, 0, 0.3)' }}
                     unoptimized
                   />
                 ) : (
-                  <div className="flex h-24 w-24 sm:h-28 sm:w-28 items-center justify-center rounded-full bg-gradient-to-br from-[#8B0000] to-[#FF0000] text-3xl sm:text-4xl font-bold text-white ring-4 ring-[#8B0000]/30">
+                  <div className="flex h-24 w-24 sm:h-28 sm:w-28 items-center justify-center rounded-full text-3xl sm:text-4xl font-bold" style={{ background: 'linear-gradient(135deg, #bc0000, #ff4444)', color: '#fff', boxShadow: '0 0 0 4px rgba(188, 0, 0, 0.3)' }}>
                     {displayName.charAt(0).toUpperCase()}
                   </div>
                 )}
@@ -365,7 +367,8 @@ export default function ProfilePage() {
                       type="text"
                       value={editedName}
                       onChange={(e) => setEditedName(e.target.value)}
-                      className="bg-zinc-800 border border-zinc-600 rounded-lg px-3 py-1.5 text-xl sm:text-2xl font-black text-white focus:outline-none focus:ring-2 focus:ring-[#8B0000] w-full max-w-[200px] sm:max-w-none sm:w-auto"
+                      className="px-3 py-1.5 text-xl sm:text-2xl font-black focus:outline-none focus:ring-2 w-full max-w-[200px] sm:max-w-none sm:w-auto"
+                      style={{ backgroundColor: 'var(--sm-surface)', border: '1px solid var(--sm-border)', color: 'var(--sm-text)', borderRadius: '12px' }}
                       autoFocus
                     />
                     <div className="flex gap-1">
@@ -394,13 +397,14 @@ export default function ProfilePage() {
                   </div>
                 ) : (
                   <>
-                    <h1 className="text-2xl sm:text-3xl font-black text-white truncate">
+                    <h1 className="text-2xl sm:text-3xl font-black truncate" style={{ color: 'var(--sm-text)' }}>
                       {displayName}
                     </h1>
                     {isOwnProfile && (
                       <button
                         onClick={handleNameEdit}
-                        className="p-1.5 rounded-lg bg-white/5 text-zinc-400 hover:bg-white/10 hover:text-white transition-colors flex-shrink-0"
+                        className="p-1.5 rounded-lg transition-colors flex-shrink-0"
+                        style={{ backgroundColor: 'rgba(255,255,255,0.05)', color: 'var(--sm-text-muted)' }}
                         aria-label="Edit username"
                       >
                         <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
@@ -412,12 +416,12 @@ export default function ProfilePage() {
                 )}
               </div>
 
-              <p className="mb-3 sm:mb-4 text-zinc-500 text-sm sm:text-base">Member since {formatMemberSince(user?.createdAt)}</p>
+              <p className="mb-3 sm:mb-4 text-sm sm:text-base" style={{ color: 'var(--sm-text-muted)' }}>Member since {formatMemberSince(user?.createdAt)}</p>
 
               {/* Favorite team badge */}
-              <div className="mb-3 sm:mb-4 inline-flex items-center gap-2 rounded-full bg-[#C83200]/20 px-3 sm:px-4 py-1.5 sm:py-2">
-                <span className="h-2 w-2 rounded-full bg-[#C83200]" />
-                <span className="text-xs sm:text-sm font-semibold text-[#C83200]">
+              <div className="mb-3 sm:mb-4 inline-flex items-center gap-2 rounded-full px-3 sm:px-4 py-1.5 sm:py-2" style={{ backgroundColor: 'rgba(200, 50, 0, 0.2)' }}>
+                <span className="h-2 w-2 rounded-full" style={{ backgroundColor: '#C83200' }} />
+                <span className="text-xs sm:text-sm font-semibold" style={{ color: '#C83200' }}>
                   {mockStats.favoriteTeam} Fan
                 </span>
               </div>
@@ -425,20 +429,20 @@ export default function ProfilePage() {
               {/* Stats */}
               <div className="flex flex-wrap justify-center gap-4 sm:gap-6 sm:justify-start">
                 <div>
-                  <div className="text-xl sm:text-2xl font-black text-white">{mockStats.articlesRead}</div>
-                  <div className="text-[10px] sm:text-xs text-zinc-500">Articles Read</div>
+                  <div className="text-xl sm:text-2xl font-black" style={{ color: 'var(--sm-text)' }}>{mockStats.articlesRead}</div>
+                  <div className="text-[10px] sm:text-xs" style={{ color: 'var(--sm-text-muted)' }}>Articles Read</div>
                 </div>
                 <div>
-                  <div className="text-xl sm:text-2xl font-black text-white">{mockStats.commentsPosted}</div>
-                  <div className="text-[10px] sm:text-xs text-zinc-500">Comments</div>
+                  <div className="text-xl sm:text-2xl font-black" style={{ color: 'var(--sm-text)' }}>{mockStats.commentsPosted}</div>
+                  <div className="text-[10px] sm:text-xs" style={{ color: 'var(--sm-text-muted)' }}>Comments</div>
                 </div>
                 <div>
-                  <div className="text-xl sm:text-2xl font-black text-white">{mockStats.votescast}</div>
-                  <div className="text-[10px] sm:text-xs text-zinc-500">Votes Cast</div>
+                  <div className="text-xl sm:text-2xl font-black" style={{ color: 'var(--sm-text)' }}>{mockStats.votescast}</div>
+                  <div className="text-[10px] sm:text-xs" style={{ color: 'var(--sm-text-muted)' }}>Votes Cast</div>
                 </div>
                 <div>
                   <div className="text-xl sm:text-2xl font-black text-amber-400">{mockStats.streak} days</div>
-                  <div className="text-[10px] sm:text-xs text-zinc-500">Current Streak</div>
+                  <div className="text-[10px] sm:text-xs" style={{ color: 'var(--sm-text-muted)' }}>Current Streak</div>
                 </div>
               </div>
             </div>
@@ -451,7 +455,7 @@ export default function ProfilePage() {
         <div className="mb-6 sm:mb-8 flex items-center justify-between">
           <div className="flex items-center gap-3 sm:gap-4">
             <div className="h-6 sm:h-8 w-1 sm:w-1.5 rounded-full bg-gradient-to-b from-amber-500 to-orange-500" />
-            <h2 className="text-xl sm:text-2xl font-black uppercase tracking-tight text-white">
+            <h2 className="text-xl sm:text-2xl font-black uppercase tracking-tight" style={{ color: 'var(--sm-text)' }}>
               Achievements
             </h2>
           </div>
@@ -464,7 +468,10 @@ export default function ProfilePage() {
           {achievements.map((achievement) => (
             <div key={achievement.id} className="flex flex-col items-center gap-1 sm:gap-2">
               <AchievementBadge achievement={achievement} size="lg" showProgress />
-              <span className={`text-[10px] sm:text-xs font-medium text-center ${achievement.earned ? 'text-white' : 'text-zinc-600'}`}>
+              <span
+                className="text-[10px] sm:text-xs font-medium text-center"
+                style={{ color: achievement.earned ? 'var(--sm-text)' : 'var(--sm-text-dim)' }}
+              >
                 {achievement.name}
               </span>
             </div>
@@ -478,8 +485,8 @@ export default function ProfilePage() {
           {/* Saved Articles */}
           <section>
             <div className="mb-4 sm:mb-6 flex items-center gap-3 sm:gap-4">
-              <div className="h-6 sm:h-8 w-1 sm:w-1.5 rounded-full bg-gradient-to-b from-[#8B0000] to-[#FF0000]" />
-              <h2 className="text-lg sm:text-xl font-black uppercase tracking-tight text-white">
+              <div className="h-6 sm:h-8 w-1 sm:w-1.5 rounded-full" style={{ background: 'linear-gradient(to bottom, #bc0000, #ff4444)' }} />
+              <h2 className="text-lg sm:text-xl font-black uppercase tracking-tight" style={{ color: 'var(--sm-text)' }}>
                 Saved Articles
               </h2>
             </div>
@@ -490,26 +497,27 @@ export default function ProfilePage() {
                   <Link
                     key={article.id}
                     href={`/${article.categorySlug}/${article.slug}`}
-                    className="group flex items-start justify-between rounded-xl border border-zinc-800 bg-zinc-900/50 p-3 sm:p-4 transition-all hover:border-zinc-700 hover:bg-zinc-900"
+                    className="group flex items-start justify-between rounded-xl p-3 sm:p-4 transition-all"
+                    style={{ border: '1px solid var(--sm-border)', backgroundColor: 'var(--sm-card)' }}
                   >
                     <div className="flex-1 min-w-0">
-                      <span className="mb-1 inline-block rounded bg-[#8B0000]/20 px-1.5 sm:px-2 py-0.5 text-[9px] sm:text-[10px] font-bold uppercase tracking-wider text-[#8B0000]">
+                      <span className="mb-1 inline-block rounded px-1.5 sm:px-2 py-0.5 text-[9px] sm:text-[10px] font-bold uppercase tracking-wider" style={{ backgroundColor: 'rgba(188, 0, 0, 0.2)', color: '#bc0000' }}>
                         {article.category}
                       </span>
-                      <h3 className="font-semibold text-sm sm:text-base text-white transition-colors group-hover:text-[#FF0000] line-clamp-2">
+                      <h3 className="font-semibold text-sm sm:text-base transition-colors line-clamp-2" style={{ color: 'var(--sm-text)' }}>
                         {article.title}
                       </h3>
                     </div>
-                    <span className="ml-3 sm:ml-4 text-[10px] sm:text-xs text-zinc-500 flex-shrink-0">{article.savedAt}</span>
+                    <span className="ml-3 sm:ml-4 text-[10px] sm:text-xs flex-shrink-0" style={{ color: 'var(--sm-text-muted)' }}>{article.savedAt}</span>
                   </Link>
                 ))}
               </div>
             ) : (
-              <div className="rounded-xl border border-zinc-800 bg-zinc-900/50 p-6 sm:p-8 text-center">
-                <svg className="mx-auto mb-4 h-10 w-10 sm:h-12 sm:w-12 text-zinc-700" fill="none" viewBox="0 0 24 24" strokeWidth={1} stroke="currentColor">
+              <div className="rounded-xl p-6 sm:p-8 text-center" style={{ border: '1px solid var(--sm-border)', backgroundColor: 'var(--sm-card)' }}>
+                <svg className="mx-auto mb-4 h-10 w-10 sm:h-12 sm:w-12" style={{ color: 'var(--sm-text-dim)' }} fill="none" viewBox="0 0 24 24" strokeWidth={1} stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" d="M17.593 3.322c1.1.128 1.907 1.077 1.907 2.185V21L12 17.25 4.5 21V5.507c0-1.108.806-2.057 1.907-2.185a48.507 48.507 0 0111.186 0z" />
                 </svg>
-                <p className="text-zinc-500 text-sm">No saved articles yet</p>
+                <p className="text-sm" style={{ color: 'var(--sm-text-muted)' }}>No saved articles yet</p>
               </div>
             )}
           </section>
@@ -517,8 +525,8 @@ export default function ProfilePage() {
           {/* Reading History */}
           <section>
             <div className="mb-4 sm:mb-6 flex items-center gap-3 sm:gap-4">
-              <div className="h-6 sm:h-8 w-1 sm:w-1.5 rounded-full bg-gradient-to-b from-zinc-500 to-zinc-700" />
-              <h2 className="text-lg sm:text-xl font-black uppercase tracking-tight text-white">
+              <div className="h-6 sm:h-8 w-1 sm:w-1.5 rounded-full" style={{ background: 'linear-gradient(to bottom, var(--sm-text-muted), var(--sm-text-dim))' }} />
+              <h2 className="text-lg sm:text-xl font-black uppercase tracking-tight" style={{ color: 'var(--sm-text)' }}>
                 Reading History
               </h2>
             </div>
@@ -528,22 +536,23 @@ export default function ProfilePage() {
                 <Link
                   key={article.id}
                   href={`/${article.categorySlug}/${article.slug}`}
-                  className="group flex items-start justify-between rounded-xl border border-zinc-800 bg-zinc-900/50 p-3 sm:p-4 transition-all hover:border-zinc-700 hover:bg-zinc-900"
+                  className="group flex items-start justify-between rounded-xl p-3 sm:p-4 transition-all"
+                  style={{ border: '1px solid var(--sm-border)', backgroundColor: 'var(--sm-card)' }}
                 >
                   <div className="flex-1 min-w-0">
-                    <span className="mb-1 inline-block text-[9px] sm:text-[10px] font-bold uppercase tracking-wider text-zinc-500">
+                    <span className="mb-1 inline-block text-[9px] sm:text-[10px] font-bold uppercase tracking-wider" style={{ color: 'var(--sm-text-muted)' }}>
                       {article.category}
                     </span>
-                    <h3 className="font-semibold text-sm sm:text-base text-white transition-colors group-hover:text-[#FF0000] line-clamp-2">
+                    <h3 className="font-semibold text-sm sm:text-base transition-colors line-clamp-2" style={{ color: 'var(--sm-text)' }}>
                       {article.title}
                     </h3>
                   </div>
-                  <span className="ml-3 sm:ml-4 text-[10px] sm:text-xs text-zinc-500 flex-shrink-0">{article.readAt}</span>
+                  <span className="ml-3 sm:ml-4 text-[10px] sm:text-xs flex-shrink-0" style={{ color: 'var(--sm-text-muted)' }}>{article.readAt}</span>
                 </Link>
               ))}
             </div>
 
-            <button className="mt-3 sm:mt-4 w-full rounded-xl bg-white/5 py-2.5 sm:py-3 text-xs sm:text-sm font-semibold text-zinc-400 transition-colors hover:bg-white/10 hover:text-white">
+            <button className="mt-3 sm:mt-4 w-full rounded-xl py-2.5 sm:py-3 text-xs sm:text-sm font-semibold transition-colors" style={{ backgroundColor: 'rgba(255,255,255,0.05)', color: 'var(--sm-text-muted)' }}>
               View Full History
             </button>
           </section>
@@ -555,7 +564,7 @@ export default function ProfilePage() {
         <section className="mx-auto max-w-6xl px-4 pb-12 sm:pb-16">
           <div className="mb-6 sm:mb-8 flex items-center gap-3 sm:gap-4">
             <div className="h-6 sm:h-8 w-1 sm:w-1.5 rounded-full bg-gradient-to-b from-purple-500 to-purple-700" />
-            <h2 className="text-xl sm:text-2xl font-black uppercase tracking-tight text-white">
+            <h2 className="text-xl sm:text-2xl font-black uppercase tracking-tight" style={{ color: 'var(--sm-text)' }}>
               Settings
             </h2>
           </div>
@@ -566,7 +575,7 @@ export default function ProfilePage() {
               title="Favorite Teams"
               description="Select your favorite Chicago teams for personalized content"
               icon={
-                <svg className="h-5 w-5 text-[#C83803]" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
+                <svg className="h-5 w-5" style={{ color: '#C83803' }} fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" d="M11.48 3.499a.562.562 0 011.04 0l2.125 5.111a.563.563 0 00.475.345l5.518.442c.499.04.701.663.321.988l-4.204 3.602a.563.563 0 00-.182.557l1.285 5.385a.562.562 0 01-.84.61l-4.725-2.885a.563.563 0 00-.586 0L6.982 20.54a.562.562 0 01-.84-.61l1.285-5.386a.562.562 0 00-.182-.557l-4.204-3.602a.563.563 0 01.321-.988l5.518-.442a.563.563 0 00.475-.345L11.48 3.5z" />
                 </svg>
               }
@@ -586,39 +595,19 @@ export default function ProfilePage() {
               title="Notifications"
               description="Choose what updates you receive"
               icon={
-                <svg className="h-5 w-5 text-[#8B0000]" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
+                <svg className="h-5 w-5" style={{ color: '#bc0000' }} fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" d="M14.857 17.082a23.848 23.848 0 005.454-1.31A8.967 8.967 0 0118 9.75v-.7V9A6 6 0 006 9v.75a8.967 8.967 0 01-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 01-5.714 0m5.714 0a3 3 0 11-5.714 0" />
                 </svg>
               }
-              iconBgColor="#8B0000"
+              iconBgColor="#bc0000"
               isExpanded={expandedSections.notifications}
               onToggle={() => toggleSection('notifications')}
             >
               <div className="space-y-4">
-                <ToggleSetting
-                  label="Breaking News Alerts"
-                  description="Get notified about major breaking stories"
-                  enabled={settings.breakingNews}
-                  onChange={() => handleToggle('breakingNews')}
-                />
-                <ToggleSetting
-                  label="Team Updates"
-                  description="Updates about your favorite team"
-                  enabled={settings.teamUpdates}
-                  onChange={() => handleToggle('teamUpdates')}
-                />
-                <ToggleSetting
-                  label="Weekly Digest"
-                  description="Summary of the week's top stories"
-                  enabled={settings.weeklyDigest}
-                  onChange={() => handleToggle('weeklyDigest')}
-                />
-                <ToggleSetting
-                  label="Prediction Results"
-                  description="When SM Prophecy predictions are resolved"
-                  enabled={settings.predictionResults}
-                  onChange={() => handleToggle('predictionResults')}
-                />
+                <ToggleSetting label="Breaking News Alerts" description="Get notified about major breaking stories" enabled={settings.breakingNews} onChange={() => handleToggle('breakingNews')} />
+                <ToggleSetting label="Team Updates" description="Updates about your favorite team" enabled={settings.teamUpdates} onChange={() => handleToggle('teamUpdates')} />
+                <ToggleSetting label="Weekly Digest" description="Summary of the week's top stories" enabled={settings.weeklyDigest} onChange={() => handleToggle('weeklyDigest')} />
+                <ToggleSetting label="Prediction Results" description="When SM Prophecy predictions are resolved" enabled={settings.predictionResults} onChange={() => handleToggle('predictionResults')} />
               </div>
             </CollapsibleSection>
 
@@ -636,24 +625,9 @@ export default function ProfilePage() {
               onToggle={() => toggleSection('display')}
             >
               <div className="space-y-4">
-                <ToggleSetting
-                  label="Dark Mode"
-                  description="Use dark theme throughout the site"
-                  enabled={settings.darkMode}
-                  onChange={() => handleToggle('darkMode')}
-                />
-                <ToggleSetting
-                  label="Reduced Motion"
-                  description="Minimize animations for accessibility"
-                  enabled={settings.reducedMotion}
-                  onChange={() => handleToggle('reducedMotion')}
-                />
-                <ToggleSetting
-                  label="Compact Mode"
-                  description="Denser layout with smaller elements"
-                  enabled={settings.compactMode}
-                  onChange={() => handleToggle('compactMode')}
-                />
+                <ToggleSetting label="Dark Mode" description="Use dark theme throughout the site" enabled={settings.darkMode} onChange={() => handleToggle('darkMode')} />
+                <ToggleSetting label="Reduced Motion" description="Minimize animations for accessibility" enabled={settings.reducedMotion} onChange={() => handleToggle('reducedMotion')} />
+                <ToggleSetting label="Compact Mode" description="Denser layout with smaller elements" enabled={settings.compactMode} onChange={() => handleToggle('compactMode')} />
               </div>
             </CollapsibleSection>
 
@@ -671,24 +645,9 @@ export default function ProfilePage() {
               onToggle={() => toggleSection('privacy')}
             >
               <div className="space-y-4">
-                <ToggleSetting
-                  label="Public Profile"
-                  description="Allow others to see your profile"
-                  enabled={settings.showProfile}
-                  onChange={() => handleToggle('showProfile')}
-                />
-                <ToggleSetting
-                  label="Activity Visibility"
-                  description="Show your reading activity on profile"
-                  enabled={settings.showActivity}
-                  onChange={() => handleToggle('showActivity')}
-                />
-                <ToggleSetting
-                  label="Analytics"
-                  description="Help improve SM with anonymous usage data"
-                  enabled={settings.allowAnalytics}
-                  onChange={() => handleToggle('allowAnalytics')}
-                />
+                <ToggleSetting label="Public Profile" description="Allow others to see your profile" enabled={settings.showProfile} onChange={() => handleToggle('showProfile')} />
+                <ToggleSetting label="Activity Visibility" description="Show your reading activity on profile" enabled={settings.showActivity} onChange={() => handleToggle('showActivity')} />
+                <ToggleSetting label="Analytics" description="Help improve SM with anonymous usage data" enabled={settings.allowAnalytics} onChange={() => handleToggle('allowAnalytics')} />
               </div>
             </CollapsibleSection>
 
@@ -697,7 +656,7 @@ export default function ProfilePage() {
               title="Account"
               description="Manage your account settings"
               icon={
-                <svg className="h-5 w-5 text-zinc-400" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
+                <svg className="h-5 w-5" style={{ color: 'var(--sm-text-muted)' }} fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z" />
                 </svg>
               }
@@ -706,22 +665,22 @@ export default function ProfilePage() {
               onToggle={() => toggleSection('account')}
             >
               <div className="space-y-3">
-                <button className="flex w-full items-center justify-between rounded-xl bg-white/5 p-3 sm:p-4 text-left transition-colors hover:bg-white/10">
+                <button className="flex w-full items-center justify-between rounded-xl p-3 sm:p-4 text-left transition-colors" style={{ backgroundColor: 'rgba(255,255,255,0.05)' }}>
                   <div>
-                    <p className="font-medium text-white text-sm sm:text-base">Change Password</p>
-                    <p className="text-[10px] sm:text-xs text-zinc-500">Update your account password</p>
+                    <p className="font-medium text-sm sm:text-base" style={{ color: 'var(--sm-text)' }}>Change Password</p>
+                    <p className="text-[10px] sm:text-xs" style={{ color: 'var(--sm-text-muted)' }}>Update your account password</p>
                   </div>
-                  <svg className="h-5 w-5 text-zinc-500 flex-shrink-0" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
+                  <svg className="h-5 w-5 flex-shrink-0" style={{ color: 'var(--sm-text-muted)' }} fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
                   </svg>
                 </button>
 
-                <button className="flex w-full items-center justify-between rounded-xl bg-white/5 p-3 sm:p-4 text-left transition-colors hover:bg-white/10">
+                <button className="flex w-full items-center justify-between rounded-xl p-3 sm:p-4 text-left transition-colors" style={{ backgroundColor: 'rgba(255,255,255,0.05)' }}>
                   <div>
-                    <p className="font-medium text-white text-sm sm:text-base">Export Data</p>
-                    <p className="text-[10px] sm:text-xs text-zinc-500">Download all your data</p>
+                    <p className="font-medium text-sm sm:text-base" style={{ color: 'var(--sm-text)' }}>Export Data</p>
+                    <p className="text-[10px] sm:text-xs" style={{ color: 'var(--sm-text-muted)' }}>Download all your data</p>
                   </div>
-                  <svg className="h-5 w-5 text-zinc-500 flex-shrink-0" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
+                  <svg className="h-5 w-5 flex-shrink-0" style={{ color: 'var(--sm-text-muted)' }} fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
                   </svg>
                 </button>
@@ -745,7 +704,8 @@ export default function ProfilePage() {
       <div className="mx-auto max-w-6xl px-4 pb-12 sm:pb-16">
         <Link
           href="/"
-          className="inline-flex items-center gap-2 text-sm text-zinc-500 transition-colors hover:text-white"
+          className="inline-flex items-center gap-2 text-sm transition-colors"
+          style={{ color: 'var(--sm-text-muted)' }}
         >
           <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18" />
@@ -776,10 +736,11 @@ function CollapsibleSection({
   children: React.ReactNode
 }) {
   return (
-    <div className="rounded-2xl border border-zinc-800 bg-zinc-900/50 overflow-hidden">
+    <div className="rounded-2xl overflow-hidden" style={{ border: '1px solid var(--sm-border)', backgroundColor: 'var(--sm-card)' }}>
       <button
         onClick={onToggle}
-        className="w-full flex items-center justify-between p-4 sm:p-6 hover:bg-zinc-800/30 transition-colors"
+        className="w-full flex items-center justify-between p-4 sm:p-6 transition-colors"
+        style={{ backgroundColor: 'transparent' }}
       >
         <div className="flex items-center gap-3">
           <div
@@ -789,12 +750,13 @@ function CollapsibleSection({
             {icon}
           </div>
           <div className="text-left">
-            <h3 className="font-bold text-white text-sm sm:text-base">{title}</h3>
-            <p className="text-[10px] sm:text-xs text-zinc-500">{description}</p>
+            <h3 className="font-bold text-sm sm:text-base" style={{ color: 'var(--sm-text)' }}>{title}</h3>
+            <p className="text-[10px] sm:text-xs" style={{ color: 'var(--sm-text-muted)' }}>{description}</p>
           </div>
         </div>
         <svg
-          className={`h-5 w-5 text-zinc-500 transition-transform ${isExpanded ? 'rotate-180' : ''}`}
+          className={`h-5 w-5 transition-transform ${isExpanded ? 'rotate-180' : ''}`}
+          style={{ color: 'var(--sm-text-muted)' }}
           fill="none"
           viewBox="0 0 24 24"
           strokeWidth={2}
@@ -805,7 +767,7 @@ function CollapsibleSection({
       </button>
 
       {isExpanded && (
-        <div className="px-4 pb-4 sm:px-6 sm:pb-6 border-t border-zinc-800">
+        <div className="px-4 pb-4 sm:px-6 sm:pb-6" style={{ borderTop: '1px solid var(--sm-border)' }}>
           <div className="pt-4 sm:pt-6">
             {children}
           </div>
@@ -830,14 +792,13 @@ function ToggleSetting({
   return (
     <div className="flex items-center justify-between gap-4">
       <div className="min-w-0">
-        <p className="font-medium text-white text-sm sm:text-base">{label}</p>
-        <p className="text-[10px] sm:text-xs text-zinc-500">{description}</p>
+        <p className="font-medium text-sm sm:text-base" style={{ color: 'var(--sm-text)' }}>{label}</p>
+        <p className="text-[10px] sm:text-xs" style={{ color: 'var(--sm-text-muted)' }}>{description}</p>
       </div>
       <button
         onClick={onChange}
-        className={`relative h-6 w-11 rounded-full transition-colors flex-shrink-0 ${
-          enabled ? 'bg-[#8B0000]' : 'bg-zinc-700'
-        }`}
+        className="relative h-6 w-11 rounded-full transition-colors flex-shrink-0"
+        style={{ backgroundColor: enabled ? '#bc0000' : 'var(--sm-surface)' }}
       >
         <span
           className={`absolute left-0.5 top-0.5 h-5 w-5 rounded-full bg-white transition-transform ${

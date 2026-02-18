@@ -44,7 +44,7 @@ export default function TeamLivePage({ team, teamKey, lastGame }: TeamLivePagePr
               style={{ borderColor: team.secondaryColor, borderTopColor: 'transparent' }}
             />
           </div>
-          <div className="text-[var(--text-muted)]">Checking for live game...</div>
+          <div style={{ color: 'var(--sm-text-muted)' }}>Checking for live game...</div>
         </div>
       </div>
     )
@@ -95,8 +95,8 @@ export default function TeamLivePage({ team, teamKey, lastGame }: TeamLivePagePr
           />
         </svg>
       </div>
-      <h2 className="text-xl font-bold text-[var(--text-primary)] mb-2">No Game Available</h2>
-      <p className="text-[var(--text-muted)]">
+      <h2 className="text-xl font-bold mb-2" style={{ color: 'var(--sm-text)' }}>No Game Available</h2>
+      <p style={{ color: 'var(--sm-text-muted)' }}>
         {error
           ? 'Unable to check for live games right now'
           : `Check back when the ${team.shortName} are playing`}

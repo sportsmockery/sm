@@ -39,12 +39,12 @@ export default function Linescore({ game }: LinescoreProps) {
   if (periods.length === 0) return null
 
   return (
-    <div className="bg-[var(--bg-surface)] border-b border-[var(--border-color)]">
+    <div style={{ backgroundColor: 'var(--sm-card)', borderBottom: '1px solid var(--sm-border)' }}>
       <div className="max-w-[1200px] mx-auto px-4 py-3">
         <div className="overflow-x-auto">
           <table className="w-full text-sm min-w-[300px]">
             <thead>
-              <tr className="text-[var(--text-muted)]">
+              <tr style={{ color: 'var(--sm-text-muted)' }}>
                 <th className="px-3 py-1 text-left font-medium w-24">Team</th>
                 {periods.map(p => (
                   <th key={p} className="px-2 py-1 text-center font-medium min-w-[32px]">{p}</th>
@@ -54,30 +54,30 @@ export default function Linescore({ game }: LinescoreProps) {
             </thead>
             <tbody>
               {/* Away */}
-              <tr className="border-t border-[var(--border-color)]">
+              <tr style={{ borderTop: '1px solid var(--sm-border)' }}>
                 <td className="px-3 py-1.5">
                   <div className="flex items-center gap-1.5">
                     <Image src={game.away_team.logo_url} alt="" width={18} height={18} className="object-contain" unoptimized />
-                    <span className="font-medium text-[var(--text-primary)]">{game.away_team.abbr}</span>
+                    <span className="font-medium" style={{ color: 'var(--sm-text)' }}>{game.away_team.abbr}</span>
                   </div>
                 </td>
                 {periods.map(p => (
-                  <td key={p} className="px-2 py-1.5 text-center text-[var(--text-muted)]">{linescore[p].away}</td>
+                  <td key={p} className="px-2 py-1.5 text-center" style={{ color: 'var(--sm-text-muted)' }}>{linescore[p].away}</td>
                 ))}
-                <td className="px-3 py-1.5 text-center font-bold text-[var(--text-primary)]">{game.away_team.score}</td>
+                <td className="px-3 py-1.5 text-center font-bold" style={{ color: 'var(--sm-text)' }}>{game.away_team.score}</td>
               </tr>
               {/* Home */}
-              <tr className="border-t border-[var(--border-color)]">
+              <tr style={{ borderTop: '1px solid var(--sm-border)' }}>
                 <td className="px-3 py-1.5">
                   <div className="flex items-center gap-1.5">
                     <Image src={game.home_team.logo_url} alt="" width={18} height={18} className="object-contain" unoptimized />
-                    <span className="font-medium text-[var(--text-primary)]">{game.home_team.abbr}</span>
+                    <span className="font-medium" style={{ color: 'var(--sm-text)' }}>{game.home_team.abbr}</span>
                   </div>
                 </td>
                 {periods.map(p => (
-                  <td key={p} className="px-2 py-1.5 text-center text-[var(--text-muted)]">{linescore[p].home}</td>
+                  <td key={p} className="px-2 py-1.5 text-center" style={{ color: 'var(--sm-text-muted)' }}>{linescore[p].home}</td>
                 ))}
-                <td className="px-3 py-1.5 text-center font-bold text-[var(--text-primary)]">{game.home_team.score}</td>
+                <td className="px-3 py-1.5 text-center font-bold" style={{ color: 'var(--sm-text)' }}>{game.home_team.score}</td>
               </tr>
             </tbody>
           </table>

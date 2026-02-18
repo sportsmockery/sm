@@ -114,12 +114,12 @@ export default function ArticleActions({
         isVisible ? 'translate-y-0' : 'translate-y-full'
       } ${className}`}
     >
-      <div className="border-t border-zinc-200 bg-white/95 px-4 py-3 backdrop-blur-lg dark:border-zinc-800 dark:bg-zinc-900/95">
-        <div className="mx-auto flex max-w-lg items-center justify-around">
+      <div className="px-4 py-3 backdrop-blur-lg" style={{ borderTop: '1px solid var(--sm-border)', backgroundColor: 'color-mix(in srgb, var(--sm-card) 95%, transparent)' }}>
+        <div className="mx-auto flex max-w-lg items-center justify-around" style={{ color: 'var(--sm-text-muted)' }}>
           {/* Share */}
           <button
             onClick={() => handleShare('twitter')}
-            className="flex flex-col items-center gap-1 text-zinc-600 transition-colors hover:text-[#1DA1F2] dark:text-zinc-400"
+            className="flex flex-col items-center gap-1 transition-colors hover:text-[#1DA1F2]"
           >
             <svg className="h-5 w-5" fill="currentColor" viewBox="0 0 24 24">
               <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
@@ -130,7 +130,7 @@ export default function ArticleActions({
           {/* Facebook */}
           <button
             onClick={() => handleShare('facebook')}
-            className="flex flex-col items-center gap-1 text-zinc-600 transition-colors hover:text-[#1877F2] dark:text-zinc-400"
+            className="flex flex-col items-center gap-1 transition-colors hover:text-[#1877F2]"
           >
             <svg className="h-5 w-5" fill="currentColor" viewBox="0 0 24 24">
               <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z" />
@@ -144,7 +144,7 @@ export default function ArticleActions({
             className={`flex flex-col items-center gap-1 transition-colors ${
               copied
                 ? 'text-green-500'
-                : 'text-zinc-600 hover:text-[#8B0000] dark:text-zinc-400'
+                : 'hover:text-[#8B0000]'
             }`}
           >
             {copied ? (
@@ -164,8 +164,8 @@ export default function ArticleActions({
             onClick={handleBookmark}
             className={`flex flex-col items-center gap-1 transition-colors ${
               isBookmarked
-                ? 'text-[#8B0000] dark:text-[#FF6666]'
-                : 'text-zinc-600 hover:text-[#8B0000] dark:text-zinc-400 dark:hover:text-[#FF6666]'
+                ? 'text-[var(--sm-accent)]'
+                : 'hover:text-[var(--sm-accent)]'
             }`}
           >
             <svg
@@ -190,8 +190,8 @@ export default function ArticleActions({
               onClick={() => setShowReactions(!showReactions)}
               className={`flex flex-col items-center gap-1 transition-colors ${
                 reaction
-                  ? 'text-[#8B0000] dark:text-[#FF6666]'
-                  : 'text-zinc-600 hover:text-[#8B0000] dark:text-zinc-400 dark:hover:text-[#FF6666]'
+                  ? 'text-[var(--sm-accent)]'
+                  : 'hover:text-[var(--sm-accent)]'
               }`}
             >
               <span className="text-xl">{reaction || '❤️'}</span>
@@ -200,13 +200,13 @@ export default function ArticleActions({
 
             {/* Reactions popup */}
             {showReactions && (
-              <div className="absolute -top-16 left-1/2 flex -translate-x-1/2 gap-2 rounded-full border border-zinc-200 bg-white p-2 shadow-lg dark:border-zinc-700 dark:bg-zinc-800">
+              <div className="absolute -top-16 left-1/2 flex -translate-x-1/2 gap-2 rounded-full p-2 shadow-lg" style={{ backgroundColor: 'var(--sm-card)', border: '1px solid var(--sm-border)' }}>
                 {reactions_list.map((r) => (
                   <button
                     key={r.emoji}
                     onClick={() => handleReaction(r.emoji)}
                     className={`rounded-full p-1 text-2xl transition-transform hover:scale-125 ${
-                      reaction === r.emoji ? 'bg-zinc-100 dark:bg-zinc-700' : ''
+                      reaction === r.emoji ? 'bg-[var(--sm-surface)]' : ''
                     }`}
                     title={r.label}
                   >

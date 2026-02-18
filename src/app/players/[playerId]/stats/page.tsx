@@ -34,10 +34,10 @@ export default async function PlayerStatsPage({ params }: StatsPageProps) {
   return (
     <main className="mx-auto max-w-7xl px-4 py-8">
       <div className="mb-6">
-        <h1 className="text-2xl font-bold text-zinc-900 dark:text-white">
+        <h1 className="text-2xl font-bold" style={{ color: 'var(--sm-text)' }}>
           Career Statistics
         </h1>
-        <p className="text-zinc-500 dark:text-zinc-400">
+        <p style={{ color: 'var(--sm-text-muted)' }}>
           {player.name}&apos;s season-by-season stats
         </p>
       </div>
@@ -45,8 +45,8 @@ export default async function PlayerStatsPage({ params }: StatsPageProps) {
       {stats.length > 0 ? (
         <PlayerStatsTable stats={stats} player={player} />
       ) : (
-        <div className="rounded-xl border border-zinc-200 bg-white p-8 text-center dark:border-zinc-800 dark:bg-zinc-900">
-          <p className="text-zinc-500 dark:text-zinc-400">
+        <div className="rounded-xl p-8 text-center" style={{ border: '1px solid var(--sm-border)', backgroundColor: 'var(--sm-card)' }}>
+          <p style={{ color: 'var(--sm-text-muted)' }}>
             No career statistics available for {player.name}.
           </p>
         </div>

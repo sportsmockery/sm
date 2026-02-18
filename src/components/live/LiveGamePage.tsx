@@ -32,7 +32,7 @@ export default function LiveGamePage({ sport, gameId }: LiveGamePageProps) {
   // Loading state
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-[var(--bg-primary)] flex items-center justify-center">
+      <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: 'var(--sm-bg)' }}>
         <div className="animate-pulse flex flex-col items-center gap-4">
           <div className="w-16 h-16 rounded-full bg-gray-300 dark:bg-gray-700" />
           <div className="h-4 w-32 bg-gray-300 dark:bg-gray-700 rounded" />
@@ -44,12 +44,12 @@ export default function LiveGamePage({ sport, gameId }: LiveGamePageProps) {
   // Error state
   if (error || !game) {
     return (
-      <div className="min-h-screen bg-[var(--bg-primary)] flex items-center justify-center">
+      <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: 'var(--sm-bg)' }}>
         <div className="text-center">
-          <h1 className="text-2xl font-bold text-[var(--text-primary)] mb-2">
+          <h1 className="text-2xl font-bold mb-2" style={{ color: 'var(--sm-text)' }}>
             {error || 'Game not found'}
           </h1>
-          <p className="text-[var(--text-muted)] mb-4">
+          <p className="mb-4" style={{ color: 'var(--sm-text-muted)' }}>
             This game may have ended or is not available.
           </p>
           <Link
@@ -75,7 +75,7 @@ export default function LiveGamePage({ sport, gameId }: LiveGamePageProps) {
       case 'mlb':
         return <MLBBoxScore homeTeam={game.home_team} awayTeam={game.away_team} players={game.players} />
       default:
-        return <div className="text-[var(--text-muted)]">Box score not available</div>
+        return <div style={{ color: 'var(--sm-text-muted)' }}>Box score not available</div>
     }
   }
 
@@ -83,7 +83,7 @@ export default function LiveGamePage({ sport, gameId }: LiveGamePageProps) {
   const tabLabels = { plays: 'Play-by-Play', boxscore: 'Box Score', stats: 'Team Stats' }
 
   return (
-    <div className="min-h-screen bg-[var(--bg-primary)]">
+    <div className="min-h-screen" style={{ backgroundColor: 'var(--sm-bg)' }}>
       {/* Game Switcher */}
       <GameSwitcher currentGameId={gameId} />
 
@@ -116,16 +116,19 @@ export default function LiveGamePage({ sport, gameId }: LiveGamePageProps) {
       {gameState !== 'pre_game' && (
         <div className="max-w-[1200px] mx-auto px-4 py-4">
           {/* Tab bar */}
-          <div className="flex gap-2 mb-4 border-b border-[var(--border-color)] overflow-x-auto snap-x snap-mandatory">
+          <div className="flex gap-2 mb-4 overflow-x-auto snap-x snap-mandatory" style={{ borderBottom: '1px solid var(--sm-border)' }}>
             {tabs.map(tab => (
               <button
                 key={tab}
                 onClick={() => setActiveTab(tab)}
                 className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors whitespace-nowrap snap-start ${
                   activeTab === tab
-                    ? 'border-[#bc0000] text-[#bc0000]'
-                    : 'border-transparent text-[var(--text-muted)] hover:text-[var(--text-primary)]'
+                    ? 'border-[#bc0000]'
+                    : 'border-transparent'
                 }`}
+                style={{
+                  color: activeTab === tab ? '#bc0000' : 'var(--sm-text-muted)',
+                }}
               >
                 {tabLabels[tab]}
               </button>
@@ -140,7 +143,7 @@ export default function LiveGamePage({ sport, gameId }: LiveGamePageProps) {
       )}
 
       {/* Cache age indicator */}
-      <div className="fixed bottom-2 right-2 text-xs text-[var(--text-muted)] bg-[var(--bg-surface)] px-2 py-1 rounded shadow">
+      <div className="fixed bottom-2 right-2 text-xs px-2 py-1 rounded shadow" style={{ color: 'var(--sm-text-muted)', backgroundColor: 'var(--sm-card)' }}>
         {game.cache_age_seconds > 30 && (
           <span className="text-amber-500 mr-1">&#9888;</span>
         )}

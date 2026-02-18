@@ -64,7 +64,7 @@ export default async function PlayerOverviewPage({ params }: PlayerPageProps) {
           {/* Season Stats */}
           {stats.length > 0 && (
             <section>
-              <h2 className="mb-4 text-lg font-bold text-zinc-900 dark:text-white">
+              <h2 className="mb-4 text-lg font-bold" style={{ color: 'var(--sm-text)' }}>
                 {stats[0].season} Season Stats
               </h2>
               <PlayerStatsTable stats={stats.slice(0, 1)} player={player} />
@@ -74,7 +74,7 @@ export default async function PlayerOverviewPage({ params }: PlayerPageProps) {
           {/* Recent Games */}
           {gameLog.length > 0 && (
             <section>
-              <h2 className="mb-4 text-lg font-bold text-zinc-900 dark:text-white">
+              <h2 className="mb-4 text-lg font-bold" style={{ color: 'var(--sm-text)' }}>
                 Recent Games
               </h2>
               <PlayerGameLog gameLog={gameLog} player={player} limit={5} />

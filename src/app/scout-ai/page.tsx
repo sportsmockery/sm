@@ -289,8 +289,8 @@ export default function AskAIPage() {
     return (
       <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: 'var(--bg-page)' }}>
         <div className="text-center">
-          <div className="w-12 h-12 border-4 border-[#bc0000] border-t-transparent rounded-full animate-spin mx-auto mb-4" />
-          <p style={{ color: 'var(--text-muted)' }}>Loading...</p>
+          <div className="w-12 h-12 border-4 border-t-transparent rounded-full animate-spin mx-auto mb-4" style={{ borderColor: '#bc0000', borderTopColor: 'transparent' }} />
+          <p style={{ color: 'var(--sm-text-muted)' }}>Loading...</p>
         </div>
       </div>
     )
@@ -316,25 +316,26 @@ export default function AskAIPage() {
             </div>
             <h1
               className="text-2xl font-bold mb-3"
-              style={{ fontFamily: "'Montserrat', sans-serif", color: 'var(--text-primary)' }}
+              style={{ fontFamily: "'Montserrat', sans-serif", color: 'var(--sm-text)' }}
             >
               Sign in to Scout AI
             </h1>
-            <p className="text-sm mb-6" style={{ color: 'var(--text-muted)' }}>
+            <p className="text-sm mb-6" style={{ color: 'var(--sm-text-muted)' }}>
               Get instant answers about the Bears, Bulls, Cubs, White Sox, and Blackhawks with our AI-powered sports assistant.
             </p>
             <Link
               href="/login?next=/scout-ai"
-              className="inline-flex items-center gap-2 px-6 py-3 bg-[#bc0000] text-white font-semibold rounded-xl hover:bg-[#a00000] transition-colors"
+              className="inline-flex items-center gap-2 px-6 py-3 text-white font-semibold rounded-xl transition-colors hover:brightness-95"
+              style={{ backgroundColor: '#bc0000', color: '#ffffff' }}
             >
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
               </svg>
               Sign In
             </Link>
-            <p className="text-xs mt-4" style={{ color: 'var(--text-muted)' }}>
+            <p className="text-xs mt-4" style={{ color: 'var(--sm-text-muted)' }}>
               Don&apos;t have an account?{' '}
-              <Link href="/login?next=/scout-ai" className="text-[#bc0000] hover:underline">
+              <Link href="/login?next=/scout-ai" className="hover:underline" style={{ color: '#bc0000' }}>
                 Sign up free
               </Link>
             </p>
@@ -360,11 +361,11 @@ export default function AskAIPage() {
             </div>
             <h1
               className="text-2xl font-bold mb-3"
-              style={{ fontFamily: "'Montserrat', sans-serif", color: 'var(--text-primary)' }}
+              style={{ fontFamily: "'Montserrat', sans-serif", color: 'var(--sm-text)' }}
             >
               Upgrade to SM+ for Unlimited Access
             </h1>
-            <p className="text-sm mb-6" style={{ color: 'var(--text-muted)' }}>
+            <p className="text-sm mb-6" style={{ color: 'var(--sm-text-muted)' }}>
               Free accounts get {features.ask_ai.limit} AI questions per day. Upgrade to SM+ for unlimited access to Scout AI, plus Fan Chat and ad-free browsing.
             </p>
             <button
@@ -376,11 +377,12 @@ export default function AskAIPage() {
               </svg>
               Upgrade to SM+ ($4.99/mo)
             </button>
-            <p className="text-xs mt-4" style={{ color: 'var(--text-muted)' }}>
+            <p className="text-xs mt-4" style={{ color: 'var(--sm-text-muted)' }}>
               Or{' '}
               <button
                 onClick={() => openCheckout('sm_plus_annual')}
-                className="text-[#bc0000] hover:underline"
+                className="hover:underline"
+                style={{ color: '#bc0000' }}
               >
                 save 33% with annual ($39.99/yr)
               </button>
@@ -426,13 +428,13 @@ export default function AskAIPage() {
                 </div>
                 <h1
                   className="text-2xl font-bold"
-                  style={{ fontFamily: "'Montserrat', sans-serif", color: 'var(--text-primary)' }}
+                  style={{ fontFamily: "'Montserrat', sans-serif", color: 'var(--sm-text)' }}
                 >
                   Scout AI
                 </h1>
               </div>
 
-              <p className="text-sm mb-6" style={{ color: 'var(--text-muted)' }}>
+              <p className="text-sm mb-6" style={{ color: 'var(--sm-text-muted)' }}>
                 Scout AI is a high-IQ sports engine that's locked in to answer all your Chicago sports questions.
               </p>
 
@@ -440,7 +442,7 @@ export default function AskAIPage() {
               <div className="space-y-3">
                 <h3
                   className="text-xs font-bold uppercase tracking-wider"
-                  style={{ color: 'var(--text-muted)' }}
+                  style={{ color: 'var(--sm-text-muted)' }}
                 >
                   What you can ask
                 </h3>
@@ -456,7 +458,7 @@ export default function AskAIPage() {
                     <li
                       key={item.text}
                       className="flex items-center gap-2 text-sm"
-                      style={{ color: 'var(--text-primary)' }}
+                      style={{ color: 'var(--sm-text)' }}
                     >
                       <span>{item.icon}</span>
                       <span>{item.text}</span>
@@ -469,8 +471,10 @@ export default function AskAIPage() {
               <div className="mt-6 pt-6" style={{ borderTop: '1px solid var(--border-color)' }}>
                 <button
                   onClick={() => setShowHistory(!showHistory)}
-                  className="w-full flex items-center justify-between text-sm font-medium px-3 py-2 rounded-lg transition-colors hover:bg-[#bc0000]/10"
-                  style={{ color: 'var(--text-primary)' }}
+                  className="w-full flex items-center justify-between text-sm font-medium px-3 py-2 rounded-lg transition-colors"
+                  onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'rgba(188, 0, 0, 0.1)'}
+                  onMouseLeave={(e) => e.currentTarget.style.backgroundColor = ''}
+                  style={{ color: 'var(--sm-text)' }}
                 >
                   <span className="flex items-center gap-2">
                     <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -478,7 +482,7 @@ export default function AskAIPage() {
                     </svg>
                     Query History
                   </span>
-                  <span className="text-xs px-2 py-0.5 rounded-full bg-[#bc0000]/20 text-[#bc0000]">
+                  <span className="text-xs px-2 py-0.5 rounded-full" style={{ backgroundColor: 'rgba(188, 0, 0, 0.2)', color: '#bc0000' }}>
                     {queryHistory.length}
                   </span>
                 </button>
@@ -486,20 +490,22 @@ export default function AskAIPage() {
                 {showHistory && (
                   <div className="mt-3 space-y-2 max-h-60 overflow-y-auto">
                     {historyLoading ? (
-                      <p className="text-xs text-center py-4" style={{ color: 'var(--text-muted)' }}>Loading...</p>
+                      <p className="text-xs text-center py-4" style={{ color: 'var(--sm-text-muted)' }}>Loading...</p>
                     ) : queryHistory.length === 0 ? (
-                      <p className="text-xs text-center py-4" style={{ color: 'var(--text-muted)' }}>No recent queries</p>
+                      <p className="text-xs text-center py-4" style={{ color: 'var(--sm-text-muted)' }}>No recent queries</p>
                     ) : (
                       <>
                         {queryHistory.slice(0, 10).map((entry) => (
                           <button
                             key={entry.id}
                             onClick={() => loadFromHistory(entry)}
-                            className="w-full flex items-center justify-between gap-2 p-2 rounded-lg text-xs transition-colors hover:bg-[#bc0000]/10"
-                            style={{ color: 'var(--text-primary)' }}
+                            className="w-full flex items-center justify-between gap-2 p-2 rounded-lg text-xs transition-colors"
+                            onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'rgba(188, 0, 0, 0.1)'}
+                            onMouseLeave={(e) => e.currentTarget.style.backgroundColor = ''}
+                            style={{ color: 'var(--sm-text)' }}
                           >
                             <span className="font-medium truncate flex-1 text-left">{entry.query}</span>
-                            <span className="text-[10px] flex-shrink-0" style={{ color: 'var(--text-muted)' }}>
+                            <span className="text-[10px] flex-shrink-0" style={{ color: 'var(--sm-text-muted)' }}>
                               {new Date(entry.timestamp).toLocaleDateString()}
                             </span>
                           </button>
@@ -547,17 +553,17 @@ export default function AskAIPage() {
                     </div>
                     <h3
                       className="text-xl font-bold mb-2"
-                      style={{ fontFamily: "'Montserrat', sans-serif", color: 'var(--text-primary)' }}
+                      style={{ fontFamily: "'Montserrat', sans-serif", color: 'var(--sm-text)' }}
                     >
                       Ask me anything about Chicago sports
                     </h3>
-                    <p className="text-sm max-w-md mb-8" style={{ color: 'var(--text-muted)' }}>
+                    <p className="text-sm max-w-md mb-8" style={{ color: 'var(--sm-text-muted)' }}>
                       I can help with stats, history, analysis, and more for the Bears, Bulls, Cubs, White Sox, and Blackhawks.
                     </p>
 
                     {/* Suggested Prompts */}
                     <div className="w-full max-w-2xl">
-                      <p className="text-xs font-medium uppercase tracking-wider mb-3" style={{ color: 'var(--text-muted)' }}>
+                      <p className="text-xs font-medium uppercase tracking-wider mb-3" style={{ color: 'var(--sm-text-muted)' }}>
                         Try asking
                       </p>
                       <div className="flex flex-wrap justify-center gap-2">
@@ -565,10 +571,12 @@ export default function AskAIPage() {
                           <button
                             key={prompt}
                             onClick={() => handlePromptClick(prompt)}
-                            className="px-4 py-2 rounded-full text-sm transition-colors hover:bg-[#bc0000] hover:text-white"
+                            className="px-4 py-2 rounded-full text-sm transition-colors"
+                            onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = '#bc0000'; e.currentTarget.style.color = '#ffffff' }}
+                            onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = 'var(--bg-page)'; e.currentTarget.style.color = 'var(--sm-text)' }}
                             style={{
                               backgroundColor: 'var(--bg-page)',
-                              color: 'var(--text-primary)',
+                              color: 'var(--sm-text)',
                               border: '1px solid var(--border-color)',
                             }}
                           >
@@ -586,21 +594,17 @@ export default function AskAIPage() {
                         className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}
                       >
                         <div
-                          className={`max-w-[80%] rounded-2xl px-4 py-3 ${
-                            message.role === 'user'
-                              ? 'bg-[#bc0000] text-white'
-                              : ''
-                          }`}
+                          className="max-w-[80%] rounded-2xl px-4 py-3"
                           style={
                             message.role === 'assistant'
-                              ? { backgroundColor: 'var(--bg-page)', color: 'var(--text-primary)' }
-                              : {}
+                              ? { backgroundColor: 'var(--bg-page)', color: 'var(--sm-text)' }
+                              : { backgroundColor: '#bc0000', color: '#ffffff' }
                           }
                         >
                           {message.role === 'assistant' && (
                             <div className="flex items-center gap-2 mb-2">
                               {message.team && (
-                                <span className="text-xs font-medium" style={{ color: 'var(--text-muted)' }}>
+                                <span className="text-xs font-medium" style={{ color: 'var(--sm-text-muted)' }}>
                                   {message.team}
                                 </span>
                               )}
@@ -650,13 +654,13 @@ export default function AskAIPage() {
                           className="rounded-2xl px-4 py-3 flex items-center gap-2"
                           style={{ backgroundColor: 'var(--bg-page)' }}
                         >
-                          <span className="text-sm" style={{ color: 'var(--text-muted)' }}>
+                          <span className="text-sm" style={{ color: 'var(--sm-text-muted)' }}>
                             Scout is thinking
                           </span>
                           <span className="flex gap-1">
-                            <span className="w-2 h-2 rounded-full bg-[#bc0000] animate-bounce" style={{ animationDelay: '0ms' }}></span>
-                            <span className="w-2 h-2 rounded-full bg-[#bc0000] animate-bounce" style={{ animationDelay: '150ms' }}></span>
-                            <span className="w-2 h-2 rounded-full bg-[#bc0000] animate-bounce" style={{ animationDelay: '300ms' }}></span>
+                            <span className="w-2 h-2 rounded-full animate-bounce" style={{ backgroundColor: '#bc0000', animationDelay: '0ms' }}></span>
+                            <span className="w-2 h-2 rounded-full animate-bounce" style={{ backgroundColor: '#bc0000', animationDelay: '150ms' }}></span>
+                            <span className="w-2 h-2 rounded-full animate-bounce" style={{ backgroundColor: '#bc0000', animationDelay: '300ms' }}></span>
                           </span>
                         </div>
                       </div>
@@ -687,7 +691,7 @@ export default function AskAIPage() {
                     className="flex-1 px-4 py-3 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[#bc0000]"
                     style={{
                       backgroundColor: 'var(--bg-page)',
-                      color: 'var(--text-primary)',
+                      color: 'var(--sm-text)',
                       border: '1px solid var(--border-color)',
                     }}
                     disabled={isLoading}
@@ -695,7 +699,8 @@ export default function AskAIPage() {
                   <button
                     type="submit"
                     disabled={!input.trim() || isLoading}
-                    className="px-5 py-3 bg-[#bc0000] text-white font-semibold rounded-xl hover:bg-[#a00000] transition-colors disabled:opacity-50 disabled:cursor-not-allowed text-sm whitespace-nowrap"
+                    className="px-5 py-3 font-semibold rounded-xl transition-colors disabled:opacity-50 disabled:cursor-not-allowed text-sm whitespace-nowrap hover:brightness-95"
+                    style={{ backgroundColor: '#bc0000', color: '#ffffff' }}
                   >
                     Ask Scout
                   </button>

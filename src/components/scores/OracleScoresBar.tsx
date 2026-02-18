@@ -81,13 +81,14 @@ export default function OracleScoresBar({ scores = sampleScores, className = '' 
 
   return (
     <div
-      className={`relative h-[50px] overflow-hidden bg-zinc-900 ${className}`}
+      className={`relative h-[50px] overflow-hidden ${className}`}
+      style={{ backgroundColor: 'var(--sm-card)' }}
       onMouseEnter={() => setIsPaused(true)}
       onMouseLeave={() => setIsPaused(false)}
     >
       {/* Left branding */}
-      <div className="absolute left-0 top-0 z-10 flex h-full items-center bg-gradient-to-r from-zinc-900 via-zinc-900 to-transparent pl-4 pr-10">
-        <span className="text-xs font-bold uppercase tracking-wider text-zinc-400">Scores</span>
+      <div className="absolute left-0 top-0 z-10 flex h-full items-center pl-4 pr-10" style={{ background: 'linear-gradient(to right, var(--sm-card), var(--sm-card), transparent)' }}>
+        <span className="text-xs font-bold uppercase tracking-wider" style={{ color: 'var(--sm-text-muted)' }}>Scores</span>
       </div>
 
       {/* Scores ticker */}
@@ -99,27 +100,26 @@ export default function OracleScoresBar({ scores = sampleScores, className = '' 
           <Link
             key={`${game.id}-${index}`}
             href={`/scores/${game.sport}/${game.id}`}
-            className={`
-              mx-1 flex items-center gap-2 rounded px-3 py-1
-              transition-colors hover:bg-zinc-800
-              ${game.isChicagoTeam ? 'bg-zinc-800/50' : ''}
-            `}
+            className="mx-1 flex items-center gap-2 rounded px-3 py-1 transition-colors"
+            style={{ backgroundColor: game.isChicagoTeam ? 'var(--sm-surface)' : undefined }}
+            onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'var(--sm-surface)'}
+            onMouseLeave={(e) => e.currentTarget.style.backgroundColor = game.isChicagoTeam ? 'var(--sm-surface)' : ''}
           >
             {/* Teams and scores */}
             <div className="flex items-center gap-2 text-xs">
               {/* Away team */}
-              <span className="font-semibold text-zinc-400">{game.awayTeam.abbreviation}</span>
-              <span className={`font-bold ${game.status === 'final' && game.awayTeam.score > game.homeTeam.score ? 'text-white' : 'text-zinc-500'}`}>
+              <span className="font-semibold" style={{ color: 'var(--sm-text-muted)' }}>{game.awayTeam.abbreviation}</span>
+              <span className="font-bold" style={{ color: game.status === 'final' && game.awayTeam.score > game.homeTeam.score ? 'var(--sm-text)' : 'var(--sm-text-muted)' }}>
                 {game.status !== 'upcoming' ? game.awayTeam.score : '-'}
               </span>
 
-              <span className="text-zinc-600">-</span>
+              <span style={{ color: 'var(--sm-text-dim)' }}>-</span>
 
               {/* Home team */}
-              <span className={`font-bold ${game.status === 'final' && game.homeTeam.score > game.awayTeam.score ? 'text-white' : 'text-zinc-500'}`}>
+              <span className="font-bold" style={{ color: game.status === 'final' && game.homeTeam.score > game.awayTeam.score ? 'var(--sm-text)' : 'var(--sm-text-muted)' }}>
                 {game.status !== 'upcoming' ? game.homeTeam.score : '-'}
               </span>
-              <span className="font-semibold text-zinc-400">{game.homeTeam.abbreviation}</span>
+              <span className="font-semibold" style={{ color: 'var(--sm-text-muted)' }}>{game.homeTeam.abbreviation}</span>
             </div>
 
             {/* Status */}
@@ -130,20 +130,20 @@ export default function OracleScoresBar({ scores = sampleScores, className = '' 
               </span>
             )}
             {game.status === 'final' && (
-              <span className="text-[10px] font-medium text-zinc-600">F</span>
+              <span className="text-[10px] font-medium" style={{ color: 'var(--sm-text-dim)' }}>F</span>
             )}
             {game.status === 'upcoming' && (
-              <span className="text-[10px] text-zinc-500">{game.startTime}</span>
+              <span className="text-[10px]" style={{ color: 'var(--sm-text-muted)' }}>{game.startTime}</span>
             )}
 
             {/* Divider */}
-            <span className="ml-1 text-zinc-700">|</span>
+            <span className="ml-1" style={{ color: 'var(--sm-border)' }}>|</span>
           </Link>
         ))}
       </div>
 
       {/* Gradient fade right */}
-      <div className="absolute right-0 top-0 z-10 h-full w-16 bg-gradient-to-l from-zinc-900 to-transparent" />
+      <div className="absolute right-0 top-0 z-10 h-full w-16" style={{ background: 'linear-gradient(to left, var(--sm-card), transparent)' }} />
     </div>
   )
 }

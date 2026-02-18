@@ -42,8 +42,8 @@ export default function ArticleHero({
             priority
           />
         ) : (
-          <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-zinc-800 to-zinc-900">
-            <span className="text-8xl font-black text-zinc-700">SM</span>
+          <div className="flex h-full w-full items-center justify-center" style={{ background: 'linear-gradient(to bottom right, #27272a, #18181b)' }}>
+            <span className="text-8xl font-black" style={{ color: '#3f3f46' }}>SM</span>
           </div>
         )}
 

@@ -67,7 +67,7 @@ const TEAMS = [
 
 export default function DataHubLandingPage() {
   return (
-    <div className="min-h-screen bg-[#f5f5f5] dark:bg-[#0a0a0b]">
+    <div className="min-h-screen" style={{ backgroundColor: 'var(--sm-surface)' }}>
       {/* Hero header */}
       <header className="relative py-12 md:py-20 bg-gradient-to-br from-[#0B162A] via-[#1a2940] to-[#2d3748]">
         <div className="absolute inset-0 bg-[url('/grid-pattern.svg')] opacity-5" />
@@ -95,12 +95,12 @@ export default function DataHubLandingPage() {
       <main className="max-w-[1200px] mx-auto px-4 py-12">
         <div className="text-center mb-10">
           <h2
-            className="text-2xl md:text-3xl font-bold text-[#222] dark:text-white mb-3"
-            style={{ fontFamily: "'Montserrat', sans-serif" }}
+            className="text-2xl md:text-3xl font-bold mb-3"
+            style={{ color: 'var(--sm-text)', fontFamily: "'Montserrat', sans-serif" }}
           >
             Select Your Team
           </h2>
-          <p className="text-gray-500 dark:text-gray-400">
+          <p style={{ color: 'var(--sm-text-muted)' }}>
             Choose a team to view their complete data hub with live stats, schedules, and more.
           </p>
         </div>
@@ -111,7 +111,8 @@ export default function DataHubLandingPage() {
             <Link
               key={team.key}
               href={`/${team.key}/datahub`}
-              className="group relative bg-white dark:bg-[#111] rounded-2xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-300 hover:-translate-y-1"
+              className="group relative rounded-2xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-300 hover:-translate-y-1"
+              style={{ backgroundColor: 'var(--sm-card)' }}
             >
               {/* Top accent bar */}
               <div
@@ -150,24 +151,25 @@ export default function DataHubLandingPage() {
                       </span>
                     </div>
                     <h3
-                      className="text-lg font-bold text-[#222] dark:text-white mb-1"
-                      style={{ fontFamily: "'Montserrat', sans-serif" }}
+                      className="text-lg font-bold mb-1"
+                      style={{ color: 'var(--sm-text)', fontFamily: "'Montserrat', sans-serif" }}
                     >
                       {team.name}
                     </h3>
-                    <p className="text-sm text-gray-500 dark:text-gray-400">
+                    <p className="text-sm" style={{ color: 'var(--sm-text-muted)' }}>
                       {team.description}
                     </p>
                   </div>
                 </div>
 
                 {/* Features list */}
-                <div className="mt-4 pt-4 border-t border-gray-100 dark:border-gray-800">
+                <div className="mt-4 pt-4" style={{ borderTop: '1px solid var(--sm-border)' }}>
                   <div className="flex flex-wrap gap-2">
                     {['Live Scores', 'Schedule', 'Roster', 'Stats'].map((feature) => (
                       <span
                         key={feature}
-                        className="text-[11px] px-2 py-1 bg-gray-100 dark:bg-gray-800 rounded text-gray-600 dark:text-gray-400"
+                        className="text-[11px] px-2 py-1 rounded"
+                        style={{ backgroundColor: 'var(--sm-surface)', color: 'var(--sm-text-muted)' }}
                       >
                         {feature}
                       </span>
@@ -201,7 +203,7 @@ export default function DataHubLandingPage() {
 
         {/* Additional info */}
         <div className="mt-12 text-center">
-          <div className="inline-flex flex-col sm:flex-row items-center gap-4 sm:gap-8 text-sm text-gray-500 dark:text-gray-400">
+          <div className="inline-flex flex-col sm:flex-row items-center gap-4 sm:gap-8 text-sm" style={{ color: 'var(--sm-text-muted)' }}>
             <div className="flex items-center gap-2">
               <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />

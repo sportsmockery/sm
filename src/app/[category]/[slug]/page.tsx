@@ -301,13 +301,13 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
               <div className="mx-auto w-full max-w-4xl px-4 pb-8 lg:pb-12">
                 {/* Breadcrumb */}
                 <nav className="mb-4">
-                  <ol className="flex items-center gap-2 text-sm text-zinc-300">
+                  <ol className="flex items-center gap-2 text-sm" style={{ color: 'var(--sm-text-muted)' }}>
                     <li>
                       <Link href="/" className="hover:text-white transition-colors">
                         Home
                       </Link>
                     </li>
-                    <li className="text-zinc-500">/</li>
+                    <li style={{ color: 'var(--sm-text-dim)' }}>/</li>
                     <li>
                       <Link
                         href={`/${categoryData?.slug || category}`}
@@ -361,12 +361,12 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
                           {author.display_name.charAt(0).toUpperCase()}
                         </div>
                       )}
-                      <span className="font-semibold text-white group-hover:text-zinc-200 transition-colors">
+                      <span className="font-semibold text-white group-hover:opacity-80 transition-colors">
                         {author.display_name}
                       </span>
                     </Link>
                   )}
-                  <div className="flex items-center gap-3 text-sm text-zinc-300">
+                  <div className="flex items-center gap-3 text-sm" style={{ color: 'var(--sm-text-muted)' }}>
                     <time dateTime={post.published_at} className="flex items-center gap-1.5">
                       <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
                         <path strokeLinecap="round" strokeLinejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5" />
@@ -379,7 +379,9 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
                       </svg>
                       {readingTime} min read
                     </span>
-                    <ViewCounterCompact views={post.views || 0} className="text-zinc-300" />
+                    <span style={{ color: 'var(--sm-text-muted)' }}>
+                      <ViewCounterCompact views={post.views || 0} />
+                    </span>
                   </div>
                 </div>
               </div>
@@ -387,17 +389,17 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
           </div>
         ) : (
           /* Fallback header without image - dark background for white text */
-          <div className="py-10 border-b" style={{ backgroundColor: 'var(--bg-elevated)', borderColor: 'var(--border-color)' }}>
+          <div className="py-10 border-b" style={{ backgroundColor: 'var(--sm-card)', borderColor: 'var(--border-color)' }}>
             <div className="mx-auto max-w-[1110px] px-4">
               {/* Breadcrumb */}
               <nav className="mb-4">
-                <ol className="flex items-center gap-2 text-[12px] text-zinc-400">
+                <ol className="flex items-center gap-2 text-[12px]" style={{ color: 'var(--sm-text-muted)' }}>
                   <li>
                     <Link href="/" className="hover:text-white transition-colors">
                       Home
                     </Link>
                   </li>
-                  <li className="text-zinc-500">/</li>
+                  <li style={{ color: 'var(--sm-text-dim)' }}>/</li>
                   <li>
                     <Link
                       href={`/${categoryData?.slug || category}`}

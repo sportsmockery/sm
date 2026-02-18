@@ -227,9 +227,9 @@ export default function GameHighlights({
   const teamColor = getTeamColor(sport, team)
 
   return (
-    <div className={`bg-[var(--bg-elevated)] border border-[var(--border-subtle)] rounded-2xl overflow-hidden ${className}`}>
+    <div className={`rounded-2xl overflow-hidden ${className}`} style={{ backgroundColor: 'var(--sm-card)', border: '1px solid var(--sm-border)' }}>
       {/* Header */}
-      <div className="px-4 py-3 border-b border-[var(--border-subtle)]" style={{ backgroundColor: teamColor }}>
+      <div className="px-4 py-3" style={{ backgroundColor: teamColor, borderBottom: '1px solid var(--sm-border)' }}>
         <h3 className={`text-white text-lg flex items-center gap-2 ${montserrat.className}`}>
           <span>🎬</span> Chicago Sports Coverage
         </h3>
@@ -239,13 +239,13 @@ export default function GameHighlights({
       {loading ? (
         <div className="p-8 flex items-center justify-center">
           <div className="w-6 h-6 border-2 border-t-transparent rounded-full animate-spin" style={{ borderColor: teamColor, borderTopColor: 'transparent' }} />
-          <span className="ml-3 text-[var(--text-muted)]">Loading videos...</span>
+          <span className="ml-3" style={{ color: 'var(--sm-text-muted)' }}>Loading videos...</span>
         </div>
       ) : error || videos.length === 0 ? (
         <>
           {/* Show featured channels when no specific game videos found */}
           <div className="p-4">
-            <p className="text-sm text-[var(--text-muted)] mb-4">
+            <p className="text-sm mb-4" style={{ color: 'var(--sm-text-muted)' }}>
               Check out these Chicago sports channels for coverage:
             </p>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -255,7 +255,10 @@ export default function GameHighlights({
                   href={channel.url}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="flex items-center gap-3 p-3 rounded-xl bg-[var(--bg-tertiary)] hover:bg-[var(--bg-hover)] transition-colors group"
+                  className="flex items-center gap-3 p-3 rounded-xl transition-colors group"
+                  style={{ backgroundColor: 'var(--sm-surface)' }}
+                  onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'var(--sm-card-hover)'}
+                  onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'var(--sm-surface)'}
                 >
                   <div
                     className="w-12 h-12 rounded-full flex items-center justify-center text-white font-bold text-lg"
@@ -264,14 +267,14 @@ export default function GameHighlights({
                     {channel.name.charAt(0)}
                   </div>
                   <div className="flex-1 min-w-0">
-                    <div className="font-semibold text-[var(--text-primary)] group-hover:opacity-80 transition-colors">
+                    <div className="font-semibold group-hover:opacity-80 transition-colors" style={{ color: 'var(--sm-text)' }}>
                       {channel.name}
                     </div>
-                    <div className="text-xs text-[var(--text-muted)] line-clamp-1">
+                    <div className="text-xs line-clamp-1" style={{ color: 'var(--sm-text-muted)' }}>
                       {channel.description}
                     </div>
                   </div>
-                  <svg className="w-5 h-5 text-[var(--text-muted)] group-hover:opacity-80 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg className="w-5 h-5 group-hover:opacity-80 transition-colors" style={{ color: 'var(--sm-text-muted)' }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
                   </svg>
                 </a>
@@ -298,8 +301,8 @@ export default function GameHighlights({
 
           {/* Video Info & Channel Attribution */}
           {activeVideoData && (
-            <div className="px-4 py-3 border-b border-[var(--border-subtle)]">
-              <h4 className="font-semibold text-[var(--text-primary)] line-clamp-2">
+            <div className="px-4 py-3" style={{ borderBottom: '1px solid var(--sm-border)' }}>
+              <h4 className="font-semibold line-clamp-2" style={{ color: 'var(--sm-text)' }}>
                 {activeVideoData.title}
               </h4>
               <div className="flex items-center justify-between mt-2">
@@ -317,12 +320,12 @@ export default function GameHighlights({
                       >
                         {activeChannel.name.charAt(0)}
                       </div>
-                      <span className="text-sm font-medium text-[var(--text-secondary)]">
+                      <span className="text-sm font-medium" style={{ color: 'var(--sm-text-muted)' }}>
                         {activeChannel.name}
                       </span>
                     </a>
                   )}
-                  <span className="text-xs text-[var(--text-muted)]">
+                  <span className="text-xs" style={{ color: 'var(--sm-text-muted)' }}>
                     • {formatDate(activeVideoData.publishedAt)}
                   </span>
                 </div>
@@ -330,7 +333,8 @@ export default function GameHighlights({
                   href={`https://www.youtube.com/watch?v=${activeVideo}`}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-xs text-[var(--text-muted)] hover:opacity-80 flex items-center gap-1"
+                  className="text-xs hover:opacity-80 flex items-center gap-1"
+                  style={{ color: 'var(--sm-text-muted)' }}
                 >
                   Watch on YouTube
                   <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -343,8 +347,8 @@ export default function GameHighlights({
 
           {/* Video Thumbnails (if multiple) */}
           {videos.length > 1 && (
-            <div className="p-3 border-b border-[var(--border-subtle)]">
-              <p className="text-xs text-[var(--text-muted)] uppercase tracking-wider mb-2">More Coverage</p>
+            <div className="p-3" style={{ borderBottom: '1px solid var(--sm-border)' }}>
+              <p className="text-xs uppercase tracking-wider mb-2" style={{ color: 'var(--sm-text-muted)' }}>More Coverage</p>
               <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-hide">
                 {videos.map((video) => {
                   const channel = channels.find(c => c.channelId === video.channelId)

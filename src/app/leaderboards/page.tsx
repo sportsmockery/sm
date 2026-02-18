@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
-import { useTheme } from '@/contexts/ThemeContext'
+
 import { useAuth } from '@/contexts/AuthContext'
 import Link from 'next/link'
 
@@ -60,18 +60,15 @@ const SPORT_CONFIG = [
 export default function LeaderboardsPage() {
   const { user, loading: authLoading, isAuthenticated } = useAuth()
   const router = useRouter()
-  const { theme } = useTheme()
-  const isDark = theme === 'dark'
-
   const [selectedSport, setSelectedSport] = useState('NFL')
   const [leaderboard, setLeaderboard] = useState<LeaderboardData | null>(null)
   const [userPosition, setUserPosition] = useState<UserPosition | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
-  const subText = isDark ? '#9ca3af' : '#6b7280'
-  const cardBg = isDark ? '#1f2937' : '#ffffff'
-  const cardBorder = isDark ? '#374151' : '#e5e7eb'
+  const subText = 'var(--sm-text-muted)'
+  const cardBg = 'var(--sm-card)'
+  const cardBorder = 'var(--sm-border)'
 
   const fetchData = useCallback(async () => {
     setLoading(true)
@@ -125,9 +122,9 @@ export default function LeaderboardsPage() {
 
   if (authLoading || loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: 'var(--bg-page)' }}>
+      <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: 'var(--sm-dark)' }}>
         <div className="text-center">
-          <div className="w-8 h-8 border-2 border-[#bc0000] border-t-transparent rounded-full animate-spin mx-auto mb-4" />
+          <div className="w-8 h-8 border-2 border-t-transparent rounded-full animate-spin mx-auto mb-4" style={{ borderColor: '#bc0000', borderTopColor: 'transparent' }} />
           <p style={{ color: subText }}>Loading leaderboard...</p>
         </div>
       </div>
@@ -136,7 +133,7 @@ export default function LeaderboardsPage() {
 
   if (error) {
     return (
-      <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: 'var(--bg-page)' }}>
+      <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: 'var(--sm-dark)' }}>
         <div className="text-center">
           <p style={{ color: '#ef4444', marginBottom: 16 }}>{error}</p>
           <button
@@ -163,7 +160,7 @@ export default function LeaderboardsPage() {
   const daysLeft = leaderboard?.days_remaining || 0
 
   return (
-    <div className="min-h-screen" style={{ backgroundColor: 'var(--bg-page)', color: 'var(--text-primary)' }}>
+    <div className="min-h-screen" style={{ backgroundColor: 'var(--sm-dark)', color: 'var(--sm-text)' }}>
       <main className="max-w-[1000px] mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 pt-20 sm:pt-24">
         {/* Page Header */}
         <div style={{ textAlign: 'center', marginBottom: 24 }}>
@@ -195,7 +192,7 @@ export default function LeaderboardsPage() {
                 borderRadius: 12,
                 border: selectedSport === sport ? 'none' : `2px solid ${cardBorder}`,
                 backgroundColor: selectedSport === sport ? '#bc0000' : cardBg,
-                color: selectedSport === sport ? '#fff' : 'var(--text-primary)',
+                color: selectedSport === sport ? '#fff' : 'var(--sm-text)',
                 fontSize: '14px',
                 fontWeight: 600,
                 cursor: 'pointer',
@@ -220,7 +217,7 @@ export default function LeaderboardsPage() {
             <div style={{ fontSize: '12px', color: subText, marginBottom: 4, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
               Competition Ends
             </div>
-            <div style={{ fontSize: '16px', fontWeight: 700, color: daysLeft > 0 ? 'var(--text-primary)' : '#10b981' }}>
+            <div style={{ fontSize: '16px', fontWeight: 700, color: daysLeft > 0 ? 'var(--sm-text)' : '#10b981' }}>
               {daysLeft > 0 ? `${daysLeft} days` : 'Completed'}
             </div>
           </div>
@@ -256,7 +253,7 @@ export default function LeaderboardsPage() {
         {/* YOUR POSITION CARD - Always show if competing */}
         {userPosition?.competing && (
           <div style={{
-            backgroundColor: userInTop20 ? (isDark ? 'rgba(34, 197, 94, 0.1)' : 'rgba(34, 197, 94, 0.05)') : cardBg,
+            backgroundColor: userInTop20 ? 'rgba(34, 197, 94, 0.1)' : cardBg,
             border: `2px solid ${userInTop20 ? '#22c55e' : '#bc0000'}`,
             borderRadius: 16,
             padding: 24,
@@ -292,7 +289,7 @@ export default function LeaderboardsPage() {
                   alignItems: 'center',
                   gap: 6,
                   padding: '6px 12px',
-                  backgroundColor: isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.05)',
+                  backgroundColor: 'var(--sm-surface)',
                   border: `1px solid ${cardBorder}`,
                   borderRadius: 20,
                   fontSize: '11px',
@@ -316,7 +313,7 @@ export default function LeaderboardsPage() {
               <div style={{
                 textAlign: 'center',
                 padding: 16,
-                backgroundColor: isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.02)',
+                backgroundColor: 'var(--sm-surface)',
                 borderRadius: 12,
                 border: `1px solid ${cardBorder}`,
               }}>
@@ -334,7 +331,7 @@ export default function LeaderboardsPage() {
               <div style={{
                 textAlign: 'center',
                 padding: 16,
-                backgroundColor: isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.02)',
+                backgroundColor: 'var(--sm-surface)',
                 borderRadius: 12,
                 border: `1px solid ${cardBorder}`,
               }}>
@@ -352,7 +349,7 @@ export default function LeaderboardsPage() {
               <div style={{
                 textAlign: 'center',
                 padding: 16,
-                backgroundColor: isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.02)',
+                backgroundColor: 'var(--sm-surface)',
                 borderRadius: 12,
                 border: `1px solid ${cardBorder}`,
               }}>
@@ -468,7 +465,7 @@ export default function LeaderboardsPage() {
           <div style={{ overflowX: 'auto' }}>
             <table style={{ width: '100%', borderCollapse: 'collapse' }}>
               <thead>
-                <tr style={{ backgroundColor: isDark ? '#374151' : '#f9fafb' }}>
+                <tr style={{ backgroundColor: 'var(--sm-surface)' }}>
                   <th style={{ padding: '12px 16px', textAlign: 'left', fontWeight: 600, fontSize: '13px' }}>Rank</th>
                   <th style={{ padding: '12px 16px', textAlign: 'left', fontWeight: 600, fontSize: '13px' }}>Player</th>
                   <th style={{ padding: '12px 16px', textAlign: 'right', fontWeight: 600, fontSize: '13px' }}>Score</th>
@@ -487,7 +484,7 @@ export default function LeaderboardsPage() {
                       style={{
                         borderTop: `1px solid ${cardBorder}`,
                         backgroundColor: isCurrentUser
-                          ? (isDark ? 'rgba(188, 0, 0, 0.1)' : 'rgba(188, 0, 0, 0.05)')
+                          ? 'rgba(188, 0, 0, 0.1)'
                           : 'transparent',
                       }}
                     >
@@ -500,7 +497,7 @@ export default function LeaderboardsPage() {
                           <span style={{
                             fontWeight: 700,
                             fontSize: isMedal ? '16px' : '14px',
-                            color: isMedal ? '#bc0000' : 'var(--text-primary)',
+                            color: isMedal ? '#bc0000' : 'var(--sm-text)',
                           }}>
                             #{entry.rank}
                           </span>
@@ -547,7 +544,7 @@ export default function LeaderboardsPage() {
                           {entry.trades_count > 0 && (
                             <span style={{
                               padding: '4px 8px',
-                              backgroundColor: isDark ? '#374151' : '#f3f4f6',
+                              backgroundColor: 'var(--sm-surface)',
                               borderRadius: 6,
                               fontSize: '11px',
                               fontWeight: 600,
@@ -558,7 +555,7 @@ export default function LeaderboardsPage() {
                           {entry.drafts_count > 0 && (
                             <span style={{
                               padding: '4px 8px',
-                              backgroundColor: isDark ? '#374151' : '#f3f4f6',
+                              backgroundColor: 'var(--sm-surface)',
                               borderRadius: 6,
                               fontSize: '11px',
                               fontWeight: 600,
@@ -569,7 +566,7 @@ export default function LeaderboardsPage() {
                           {entry.sims_count > 0 && (
                             <span style={{
                               padding: '4px 8px',
-                              backgroundColor: isDark ? '#374151' : '#f3f4f6',
+                              backgroundColor: 'var(--sm-surface)',
                               borderRadius: 6,
                               fontSize: '11px',
                               fontWeight: 600,
@@ -596,7 +593,7 @@ export default function LeaderboardsPage() {
           {/* Leaderboard Footer */}
           <div style={{
             padding: 16,
-            backgroundColor: isDark ? '#374151' : '#f9fafb',
+            backgroundColor: 'var(--sm-surface)',
             borderTop: `1px solid ${cardBorder}`,
             textAlign: 'center',
           }}>
@@ -685,7 +682,7 @@ export default function LeaderboardsPage() {
                 alignItems: 'flex-start',
                 gap: 12,
                 padding: 16,
-                backgroundColor: isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.02)',
+                backgroundColor: 'var(--sm-surface)',
                 borderRadius: 12,
               }}>
                 <span style={{

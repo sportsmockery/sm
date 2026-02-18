@@ -37,7 +37,8 @@ export default function ArticleCardLarge({
 }: ArticleCardLargeProps) {
   return (
     <article
-      className={`group relative overflow-hidden rounded-2xl bg-white transition-all duration-300 hover:shadow-xl hover:shadow-zinc-900/10 dark:bg-zinc-900 dark:hover:shadow-zinc-900/50 ${className}`}
+      className={`group relative overflow-hidden rounded-2xl transition-all duration-300 hover:shadow-xl ${className}`}
+      style={{ backgroundColor: 'var(--sm-card)' }}
     >
       {/* Glow effect on hover */}
       <div className="absolute -inset-1 rounded-2xl bg-gradient-to-r from-[#8B0000]/0 to-[#FF0000]/0 opacity-0 blur-xl transition-opacity duration-300 group-hover:from-[#8B0000]/20 group-hover:to-[#FF0000]/20 group-hover:opacity-100" />
@@ -58,8 +59,8 @@ export default function ArticleCardLarge({
               sizes="(max-width: 768px) 100vw, 50vw"
             />
           ) : (
-            <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-zinc-200 to-zinc-300 dark:from-zinc-800 dark:to-zinc-900">
-              <span className="text-6xl font-black text-zinc-400 dark:text-zinc-600">SM</span>
+            <div className="flex h-full w-full items-center justify-center" style={{ background: 'linear-gradient(to bottom right, var(--sm-surface), var(--sm-border))' }}>
+              <span className="text-6xl font-black" style={{ color: 'var(--sm-text-dim)' }}>SM</span>
             </div>
           )}
 
@@ -75,19 +76,19 @@ export default function ArticleCardLarge({
           </div>
 
           {/* Title */}
-          <h3 className="mb-3 font-heading text-xl font-bold leading-tight text-zinc-900 transition-colors group-hover:text-[#8B0000] dark:text-white dark:group-hover:text-[#FF6666] md:text-2xl lg:text-3xl">
+          <h3 className="mb-3 font-heading text-xl font-bold leading-tight transition-colors group-hover:text-[var(--sm-accent)] md:text-2xl lg:text-3xl" style={{ color: 'var(--sm-text)' }}>
             <Link href={`/${category.slug}/${slug}`}>{title}</Link>
           </h3>
 
           {/* Full Excerpt */}
           {excerpt && (
-            <p className="mb-4 text-zinc-600 dark:text-zinc-400 md:text-lg">
+            <p className="mb-4 md:text-lg" style={{ color: 'var(--sm-text-muted)' }}>
               {excerpt}
             </p>
           )}
 
           {/* Meta */}
-          <div className="flex flex-wrap items-center gap-4 text-sm text-zinc-500 dark:text-zinc-500">
+          <div className="flex flex-wrap items-center gap-4 text-sm" style={{ color: 'var(--sm-text-muted)' }}>
             {author && (
               <AuthorByline
                 author={author}
@@ -104,7 +105,7 @@ export default function ArticleCardLarge({
 
             {content && (
               <>
-                <span className="text-zinc-300 dark:text-zinc-700">•</span>
+                <span style={{ color: 'var(--sm-text-dim)' }}>•</span>
                 <ReadingTime content={content} />
               </>
             )}

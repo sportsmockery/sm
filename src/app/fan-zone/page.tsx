@@ -279,7 +279,7 @@ function PlayerCard({ player, index }: { player: typeof FEATURED_PLAYERS[0]; ind
           background: `linear-gradient(135deg, ${player.color} 0%, transparent 100%)`,
         }}
       >
-        <div className="bg-[#0a0a0a] rounded-xl p-4">
+        <div className="rounded-xl p-4" style={{ backgroundColor: '#0a0a0a' }}>
           {/* Player image */}
           <div className="relative h-48 mb-4 overflow-hidden rounded-lg bg-gradient-to-b from-white/5 to-transparent">
             <Image
@@ -328,7 +328,7 @@ export default function FanZonePage() {
   const [email, setEmail] = useState('')
 
   return (
-    <div className="min-h-screen bg-[#050505] text-white">
+    <div className="min-h-screen text-white" style={{ backgroundColor: '#050505' }}>
       {/* Hero Section with Video Background */}
       <section ref={heroRef} className="relative h-screen overflow-hidden">
         {/* Video Background */}
@@ -369,7 +369,7 @@ export default function FanZonePage() {
             transition={{ duration: 0.8, delay: 0.2 }}
             className="mb-6"
           >
-            <svg className="w-16 h-16 text-[#C83803]" viewBox="0 0 24 24" fill="currentColor">
+            <svg className="w-16 h-16" style={{ color: '#C83803' }} viewBox="0 0 24 24" fill="currentColor">
               <polygon points="12,0 14.5,8 24,8 16.5,13 19,22 12,17 5,22 7.5,13 0,8 9.5,8" />
             </svg>
           </motion.div>
@@ -446,7 +446,7 @@ export default function FanZonePage() {
             viewport={{ once: true }}
             className="text-center mb-16"
           >
-            <h2 className="text-sm uppercase tracking-[0.3em] text-[#C83803] mb-4">Chicago&apos;s Finest</h2>
+            <h2 className="text-sm uppercase tracking-[0.3em] mb-4" style={{ color: '#C83803' }}>Chicago&apos;s Finest</h2>
             <p className="text-4xl md:text-5xl font-black">PLAYER SPOTLIGHT</p>
           </motion.div>
 
@@ -467,7 +467,7 @@ export default function FanZonePage() {
             viewport={{ once: true }}
             className="text-center mb-16"
           >
-            <h2 className="text-sm uppercase tracking-[0.3em] text-[#C83803] mb-4">Win Big</h2>
+            <h2 className="text-sm uppercase tracking-[0.3em] mb-4" style={{ color: '#C83803' }}>Win Big</h2>
             <p className="text-4xl md:text-5xl font-black mb-6">ACTIVE CONTESTS</p>
             <p className="text-white/60 max-w-2xl mx-auto">
               Enter for your chance to win exclusive experiences with your favorite Chicago teams.
@@ -534,9 +534,9 @@ export default function FanZonePage() {
                     onChange={(e) => setSelectedTeam(e.target.value)}
                     className="w-full px-5 py-4 rounded-xl bg-white/10 backdrop-blur-sm border border-white/20 text-white focus:outline-none focus:border-white/50 transition-colors appearance-none cursor-pointer"
                   >
-                    <option value="" className="bg-[#1a1a1a]">Select your favorite team</option>
+                    <option value="" style={{ backgroundColor: '#1a1a1a' }}>Select your favorite team</option>
                     {CHICAGO_TEAMS.map((team) => (
-                      <option key={team.slug} value={team.slug} className="bg-[#1a1a1a]">
+                      <option key={team.slug} value={team.slug} style={{ backgroundColor: '#1a1a1a' }}>
                         {team.name}
                       </option>
                     ))}
@@ -545,7 +545,8 @@ export default function FanZonePage() {
 
                 <button
                   type="submit"
-                  className="w-full py-4 rounded-xl bg-white text-[#0B162A] font-bold text-lg hover:bg-white/90 transition-colors"
+                  className="w-full py-4 rounded-xl font-bold text-lg hover:bg-white/90 transition-colors"
+                  style={{ backgroundColor: '#ffffff', color: '#0B162A' }}
                 >
                   Join Now
                 </button>
@@ -560,7 +561,7 @@ export default function FanZonePage() {
       </section>
 
       {/* Social Feed Section */}
-      <section className="py-24 px-4 bg-[#0a0a0a]">
+      <section className="py-24 px-4" style={{ backgroundColor: '#0a0a0a' }}>
         <div className="max-w-7xl mx-auto">
           <motion.div
             initial={{ opacity: 0, y: 30 }}
@@ -568,7 +569,7 @@ export default function FanZonePage() {
             viewport={{ once: true }}
             className="text-center mb-12"
           >
-            <h2 className="text-sm uppercase tracking-[0.3em] text-[#C83803] mb-4">@SportsMockery</h2>
+            <h2 className="text-sm uppercase tracking-[0.3em] mb-4" style={{ color: '#C83803' }}>@SportsMockery</h2>
             <p className="text-4xl md:text-5xl font-black">FROM THE COMMUNITY</p>
           </motion.div>
 

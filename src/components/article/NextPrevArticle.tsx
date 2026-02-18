@@ -26,7 +26,8 @@ export default function NextPrevArticle({
 
   return (
     <section
-      className={`border-t border-zinc-200 bg-zinc-50 py-8 dark:border-zinc-800 dark:bg-zinc-900/50 ${className}`}
+      className={`py-8 ${className}`}
+      style={{ borderTop: '1px solid var(--sm-border)', backgroundColor: 'var(--sm-surface)' }}
     >
       <div className="mx-auto grid max-w-7xl gap-4 px-4 sm:grid-cols-2 sm:gap-8">
         {/* Previous Article */}
@@ -34,10 +35,11 @@ export default function NextPrevArticle({
           {prevArticle ? (
             <Link
               href={`/${prevArticle.category.slug}/${prevArticle.slug}`}
-              className="group flex items-center gap-4 rounded-2xl border border-zinc-200 bg-white p-4 transition-all hover:border-[#8B0000]/30 hover:shadow-lg dark:border-zinc-800 dark:bg-zinc-900 dark:hover:border-[#FF6666]/30"
+              className="group flex items-center gap-4 rounded-2xl p-4 transition-all hover:shadow-lg"
+              style={{ backgroundColor: 'var(--sm-card)', border: '1px solid var(--sm-border)' }}
             >
               {/* Arrow */}
-              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-zinc-100 text-zinc-400 transition-all group-hover:bg-[#8B0000] group-hover:text-white dark:bg-zinc-800 dark:group-hover:bg-[#FF6666]">
+              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full transition-all group-hover:text-white" style={{ backgroundColor: 'var(--sm-surface)', color: 'var(--sm-text-dim)' }}>
                 <svg
                   className="h-5 w-5"
                   fill="none"
@@ -67,13 +69,13 @@ export default function NextPrevArticle({
 
               {/* Content */}
               <div className="min-w-0 flex-1">
-                <p className="mb-1 text-xs font-semibold uppercase tracking-wider text-zinc-500 dark:text-zinc-400">
+                <p className="mb-1 text-xs font-semibold uppercase tracking-wider" style={{ color: 'var(--sm-text-muted)' }}>
                   Previous Article
                 </p>
-                <span className="mb-1 inline-block rounded bg-zinc-100 px-2 py-0.5 text-xs font-medium text-zinc-600 dark:bg-zinc-800 dark:text-zinc-400">
+                <span className="mb-1 inline-block rounded px-2 py-0.5 text-xs font-medium" style={{ backgroundColor: 'var(--sm-surface)', color: 'var(--sm-text-muted)' }}>
                   {prevArticle.category.name}
                 </span>
-                <h4 className="line-clamp-2 font-semibold text-zinc-900 transition-colors group-hover:text-[#8B0000] dark:text-white dark:group-hover:text-[#FF6666]">
+                <h4 className="line-clamp-2 font-semibold transition-colors group-hover:text-[var(--sm-accent)]" style={{ color: 'var(--sm-text)' }}>
                   {prevArticle.title}
                 </h4>
               </div>
@@ -88,17 +90,18 @@ export default function NextPrevArticle({
           {nextArticle ? (
             <Link
               href={`/${nextArticle.category.slug}/${nextArticle.slug}`}
-              className="group flex items-center gap-4 rounded-2xl border border-zinc-200 bg-white p-4 text-right transition-all hover:border-[#8B0000]/30 hover:shadow-lg dark:border-zinc-800 dark:bg-zinc-900 dark:hover:border-[#FF6666]/30"
+              className="group flex items-center gap-4 rounded-2xl p-4 text-right transition-all hover:shadow-lg"
+              style={{ backgroundColor: 'var(--sm-card)', border: '1px solid var(--sm-border)' }}
             >
               {/* Content */}
               <div className="min-w-0 flex-1">
-                <p className="mb-1 text-xs font-semibold uppercase tracking-wider text-zinc-500 dark:text-zinc-400">
+                <p className="mb-1 text-xs font-semibold uppercase tracking-wider" style={{ color: 'var(--sm-text-muted)' }}>
                   Next Article
                 </p>
-                <span className="mb-1 inline-block rounded bg-zinc-100 px-2 py-0.5 text-xs font-medium text-zinc-600 dark:bg-zinc-800 dark:text-zinc-400">
+                <span className="mb-1 inline-block rounded px-2 py-0.5 text-xs font-medium" style={{ backgroundColor: 'var(--sm-surface)', color: 'var(--sm-text-muted)' }}>
                   {nextArticle.category.name}
                 </span>
-                <h4 className="line-clamp-2 font-semibold text-zinc-900 transition-colors group-hover:text-[#8B0000] dark:text-white dark:group-hover:text-[#FF6666]">
+                <h4 className="line-clamp-2 font-semibold transition-colors group-hover:text-[var(--sm-accent)]" style={{ color: 'var(--sm-text)' }}>
                   {nextArticle.title}
                 </h4>
               </div>
@@ -116,7 +119,7 @@ export default function NextPrevArticle({
               )}
 
               {/* Arrow */}
-              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-zinc-100 text-zinc-400 transition-all group-hover:bg-[#8B0000] group-hover:text-white dark:bg-zinc-800 dark:group-hover:bg-[#FF6666]">
+              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full transition-all group-hover:text-white" style={{ backgroundColor: 'var(--sm-surface)', color: 'var(--sm-text-dim)' }}>
                 <svg
                   className="h-5 w-5"
                   fill="none"

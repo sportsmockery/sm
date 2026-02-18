@@ -47,10 +47,11 @@ export default function CategorySidebar({
     <aside className={`space-y-6 ${className}`}>
       {/* Trending in Category */}
       {trendingPosts.length > 0 && (
-        <div className="rounded-2xl border border-zinc-200 bg-white p-5 dark:border-zinc-800 dark:bg-zinc-900">
-          <h3 className="mb-4 flex items-center gap-2 font-heading text-sm font-bold uppercase tracking-wider text-zinc-900 dark:text-white">
+        <div className="rounded-2xl p-5" style={{ backgroundColor: 'var(--sm-card)', border: '1px solid var(--sm-border)' }}>
+          <h3 className="mb-4 flex items-center gap-2 font-heading text-sm font-bold uppercase tracking-wider" style={{ color: 'var(--sm-text)' }}>
             <svg
-              className="h-4 w-4 text-[#8B0000] dark:text-[#FF6666]"
+              className="h-4 w-4"
+              style={{ color: 'var(--sm-accent)' }}
               fill="none"
               viewBox="0 0 24 24"
               strokeWidth={2}
@@ -73,15 +74,15 @@ export default function CategorySidebar({
                   className="group flex gap-3"
                 >
                   {/* Rank number */}
-                  <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-[#8B0000]/10 text-xs font-bold text-[#8B0000] dark:bg-[#FF6666]/10 dark:text-[#FF6666]">
+                  <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-xs font-bold" style={{ backgroundColor: 'color-mix(in srgb, var(--sm-accent) 10%, transparent)', color: 'var(--sm-accent)' }}>
                     {index + 1}
                   </span>
 
                   <div className="min-w-0 flex-1">
-                    <h4 className="line-clamp-2 text-sm font-semibold text-zinc-900 transition-colors group-hover:text-[#8B0000] dark:text-white dark:group-hover:text-[#FF6666]">
+                    <h4 className="line-clamp-2 text-sm font-semibold transition-colors group-hover:text-[var(--sm-accent)]" style={{ color: 'var(--sm-text)' }}>
                       {post.title}
                     </h4>
-                    <p className="mt-1 flex items-center gap-2 text-xs text-zinc-500 dark:text-zinc-400">
+                    <p className="mt-1 flex items-center gap-2 text-xs" style={{ color: 'var(--sm-text-muted)' }}>
                       <time dateTime={post.published_at}>
                         {format(new Date(post.published_at), 'MMM d')}
                       </time>
@@ -102,10 +103,11 @@ export default function CategorySidebar({
 
       {/* Popular Authors */}
       {popularAuthors.length > 0 && (
-        <div className="rounded-2xl border border-zinc-200 bg-white p-5 dark:border-zinc-800 dark:bg-zinc-900">
-          <h3 className="mb-4 flex items-center gap-2 font-heading text-sm font-bold uppercase tracking-wider text-zinc-900 dark:text-white">
+        <div className="rounded-2xl p-5" style={{ backgroundColor: 'var(--sm-card)', border: '1px solid var(--sm-border)' }}>
+          <h3 className="mb-4 flex items-center gap-2 font-heading text-sm font-bold uppercase tracking-wider" style={{ color: 'var(--sm-text)' }}>
             <svg
-              className="h-4 w-4 text-[#8B0000] dark:text-[#FF6666]"
+              className="h-4 w-4"
+              style={{ color: 'var(--sm-accent)' }}
               fill="none"
               viewBox="0 0 24 24"
               strokeWidth={2}
@@ -137,17 +139,17 @@ export default function CategorySidebar({
                         className="object-cover"
                       />
                     ) : (
-                      <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-[#8B0000] to-[#FF6666] text-sm font-bold text-white">
+                      <div className="flex h-full w-full items-center justify-center text-sm font-bold text-white" style={{ background: 'linear-gradient(to bottom right, var(--sm-accent), #FF6666)' }}>
                         {author.name.charAt(0).toUpperCase()}
                       </div>
                     )}
                   </div>
 
                   <div className="min-w-0 flex-1">
-                    <h4 className="font-semibold text-zinc-900 transition-colors group-hover:text-[#8B0000] dark:text-white dark:group-hover:text-[#FF6666]">
+                    <h4 className="font-semibold transition-colors group-hover:text-[var(--sm-accent)]" style={{ color: 'var(--sm-text)' }}>
                       {author.name}
                     </h4>
-                    <p className="text-xs text-zinc-500 dark:text-zinc-400">
+                    <p className="text-xs" style={{ color: 'var(--sm-text-muted)' }}>
                       {author.post_count} articles
                     </p>
                   </div>
@@ -160,10 +162,11 @@ export default function CategorySidebar({
 
       {/* Related Categories */}
       {relatedCategories.length > 0 && (
-        <div className="rounded-2xl border border-zinc-200 bg-white p-5 dark:border-zinc-800 dark:bg-zinc-900">
-          <h3 className="mb-4 flex items-center gap-2 font-heading text-sm font-bold uppercase tracking-wider text-zinc-900 dark:text-white">
+        <div className="rounded-2xl p-5" style={{ backgroundColor: 'var(--sm-card)', border: '1px solid var(--sm-border)' }}>
+          <h3 className="mb-4 flex items-center gap-2 font-heading text-sm font-bold uppercase tracking-wider" style={{ color: 'var(--sm-text)' }}>
             <svg
-              className="h-4 w-4 text-[#8B0000] dark:text-[#FF6666]"
+              className="h-4 w-4"
+              style={{ color: 'var(--sm-accent)' }}
               fill="none"
               viewBox="0 0 24 24"
               strokeWidth={2}
@@ -188,12 +191,13 @@ export default function CategorySidebar({
               <li key={category.id}>
                 <Link
                   href={`/${category.slug}`}
-                  className="flex items-center justify-between rounded-lg px-3 py-2 transition-colors hover:bg-zinc-100 dark:hover:bg-zinc-800"
+                  className="flex items-center justify-between rounded-lg px-3 py-2 transition-colors hover:brightness-95"
+                  style={{ color: 'var(--sm-text)' }}
                 >
-                  <span className="font-medium text-zinc-900 dark:text-white">
+                  <span className="font-medium" style={{ color: 'var(--sm-text)' }}>
                     {category.name}
                   </span>
-                  <span className="rounded-full bg-zinc-100 px-2 py-0.5 text-xs text-zinc-500 dark:bg-zinc-800 dark:text-zinc-400">
+                  <span className="rounded-full px-2 py-0.5 text-xs" style={{ backgroundColor: 'var(--sm-surface)', color: 'var(--sm-text-muted)' }}>
                     {category.post_count}
                   </span>
                 </Link>
@@ -204,8 +208,8 @@ export default function CategorySidebar({
       )}
 
       {/* Ad Placeholder */}
-      <div className="rounded-2xl border border-dashed border-zinc-300 bg-zinc-50 p-8 text-center dark:border-zinc-700 dark:bg-zinc-800/50">
-        <p className="text-xs font-semibold uppercase tracking-wider text-zinc-400">
+      <div className="rounded-2xl border-dashed p-8 text-center" style={{ border: '1px dashed var(--sm-border)', backgroundColor: 'var(--sm-surface)' }}>
+        <p className="text-xs font-semibold uppercase tracking-wider" style={{ color: 'var(--sm-text-dim)' }}>
           Advertisement
         </p>
       </div>

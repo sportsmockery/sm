@@ -51,7 +51,10 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
   return (
     <div className="flex min-h-screen">
       {/* Left side - Form */}
-      <div className="flex flex-1 flex-col items-center justify-center px-8 py-12 sm:px-12 lg:flex-none lg:w-[42%] lg:px-16 xl:px-20 bg-white dark:bg-zinc-900">
+      <div
+        className="flex flex-1 flex-col items-center justify-center px-8 py-12 sm:px-12 lg:flex-none lg:w-[42%] lg:px-16 xl:px-20"
+        style={{ backgroundColor: 'var(--sm-card)' }}
+      >
         <div className="w-full max-w-sm lg:max-w-md">
           {/* Logo */}
           <div className="mb-8">
@@ -75,10 +78,10 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
                 priority
               />
             </Link>
-            <h2 className="mt-8 text-3xl font-bold text-zinc-900 dark:text-white">
+            <h2 className="mt-8 text-3xl font-bold" style={{ color: 'var(--sm-text)' }}>
               Welcome back
             </h2>
-            <p className="mt-2 text-base text-zinc-600 dark:text-zinc-400">
+            <p className="mt-2 text-base" style={{ color: 'var(--sm-text-muted)' }}>
               Sign in to access your dashboard and manage content
             </p>
           </div>

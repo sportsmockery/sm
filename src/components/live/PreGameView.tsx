@@ -33,40 +33,40 @@ export default function PreGameView({ game }: PreGameViewProps) {
 
   return (
     <div className="max-w-[1200px] mx-auto px-4 py-8">
-      <div className="bg-[var(--bg-surface)] rounded-lg p-6 text-center">
+      <div className="rounded-lg p-6 text-center" style={{ backgroundColor: 'var(--sm-card)' }}>
         {/* Matchup */}
         <div className="flex items-center justify-center gap-6 sm:gap-12 mb-6">
           <div className="flex flex-col items-center gap-2">
             <Image src={game.away_team.logo_url} alt={game.away_team.name} width={80} height={80} className="object-contain" unoptimized />
-            <span className="font-bold text-lg text-[var(--text-primary)]">{game.away_team.name}</span>
+            <span className="font-bold text-lg" style={{ color: 'var(--sm-text)' }}>{game.away_team.name}</span>
           </div>
-          <span className="text-2xl font-bold text-[var(--text-muted)]">VS</span>
+          <span className="text-2xl font-bold" style={{ color: 'var(--sm-text-muted)' }}>VS</span>
           <div className="flex flex-col items-center gap-2">
             <Image src={game.home_team.logo_url} alt={game.home_team.name} width={80} height={80} className="object-contain" unoptimized />
-            <span className="font-bold text-lg text-[var(--text-primary)]">{game.home_team.name}</span>
+            <span className="font-bold text-lg" style={{ color: 'var(--sm-text)' }}>{game.home_team.name}</span>
           </div>
         </div>
 
         {/* Countdown */}
         {countdown && (
           <div className="mb-4">
-            <div className="text-3xl font-bold text-[#bc0000]">{countdown}</div>
-            <div className="text-sm text-[var(--text-muted)] mt-1">until game time</div>
+            <div className="text-3xl font-bold" style={{ color: '#bc0000' }}>{countdown}</div>
+            <div className="text-sm mt-1" style={{ color: 'var(--sm-text-muted)' }}>until game time</div>
           </div>
         )}
 
         {/* Game info */}
-        <div className="flex flex-wrap items-center justify-center gap-3 text-sm text-[var(--text-muted)]">
+        <div className="flex flex-wrap items-center justify-center gap-3 text-sm" style={{ color: 'var(--sm-text-muted)' }}>
           {game.venue.name && <span>{game.venue.name}{game.venue.city ? `, ${game.venue.city}` : ''}</span>}
           {game.broadcast.network && (
             <>
-              <span className="text-[var(--border-color)]">|</span>
+              <span style={{ color: 'var(--sm-border)' }}>|</span>
               <span>TV: {game.broadcast.network}</span>
             </>
           )}
           {game.weather.temperature && (game.sport === 'nfl' || game.sport === 'mlb') && (
             <>
-              <span className="text-[var(--border-color)]">|</span>
+              <span style={{ color: 'var(--sm-border)' }}>|</span>
               <span>{game.weather.temperature}&deg;F {game.weather.condition}</span>
             </>
           )}
@@ -74,7 +74,7 @@ export default function PreGameView({ game }: PreGameViewProps) {
 
         {/* Odds */}
         {game.odds.over_under != null && (
-          <div className="mt-4 flex flex-wrap items-center justify-center gap-4 text-sm text-[var(--text-muted)]">
+          <div className="mt-4 flex flex-wrap items-center justify-center gap-4 text-sm" style={{ color: 'var(--sm-text-muted)' }}>
             {game.odds.spread_points != null && (
               <span>Spread: {game.odds.spread_points > 0 ? '+' : ''}{game.odds.spread_points}</span>
             )}

@@ -47,11 +47,11 @@ export default function AuthorCard({
 
       {/* Name and title */}
       <div className="mb-3 text-center">
-        <h3 className="font-heading text-xl font-bold text-zinc-900 dark:text-white">
+        <h3 className="font-heading text-xl font-bold" style={{ color: 'var(--sm-text)' }}>
           {author.name}
         </h3>
         {author.title && (
-          <p className="text-sm text-[#8B0000] dark:text-[#FF6666]">
+          <p className="text-sm" style={{ color: 'var(--sm-accent)' }}>
             {author.title}
           </p>
         )}
@@ -59,7 +59,7 @@ export default function AuthorCard({
 
       {/* Bio */}
       {author.bio && (
-        <p className="mb-4 text-center text-sm leading-relaxed text-zinc-600 dark:text-zinc-400">
+        <p className="mb-4 text-center text-sm leading-relaxed" style={{ color: 'var(--sm-text-muted)' }}>
           {author.bio}
         </p>
       )}
@@ -67,8 +67,8 @@ export default function AuthorCard({
       {/* Stats */}
       {postCount !== undefined && (
         <div className="mb-4 flex justify-center">
-          <div className="rounded-full bg-zinc-100 px-4 py-1.5 dark:bg-zinc-800">
-            <span className="text-sm font-medium text-zinc-700 dark:text-zinc-300">
+          <div className="rounded-full px-4 py-1.5" style={{ backgroundColor: 'var(--sm-surface)' }}>
+            <span className="text-sm font-medium" style={{ color: 'var(--sm-text)' }}>
               {postCount} {postCount === 1 ? 'Article' : 'Articles'}
             </span>
           </div>
@@ -82,7 +82,8 @@ export default function AuthorCard({
             href={author.twitter_url}
             target="_blank"
             rel="noopener noreferrer"
-            className="flex h-10 w-10 items-center justify-center rounded-full bg-zinc-100 text-zinc-600 transition-all hover:bg-[#1DA1F2] hover:text-white dark:bg-zinc-800 dark:text-zinc-400"
+            className="flex h-10 w-10 items-center justify-center rounded-full transition-all hover:bg-[#1DA1F2] hover:text-white"
+            style={{ backgroundColor: 'var(--sm-surface)', color: 'var(--sm-text-muted)' }}
             aria-label={`Follow ${author.name} on Twitter`}
           >
             <svg className="h-5 w-5" fill="currentColor" viewBox="0 0 24 24">
@@ -93,7 +94,8 @@ export default function AuthorCard({
         {author.email && (
           <a
             href={`mailto:${author.email}`}
-            className="flex h-10 w-10 items-center justify-center rounded-full bg-zinc-100 text-zinc-600 transition-all hover:bg-[#8B0000] hover:text-white dark:bg-zinc-800 dark:text-zinc-400"
+            className="flex h-10 w-10 items-center justify-center rounded-full transition-all hover:bg-[#8B0000] hover:text-white"
+            style={{ backgroundColor: 'var(--sm-surface)', color: 'var(--sm-text-muted)' }}
             aria-label={`Email ${author.name}`}
           >
             <svg

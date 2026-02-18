@@ -180,13 +180,13 @@ export default function LastGameBoxScore({ team, lastGame }: LastGameBoxScorePro
   if (isLoading) {
     return (
       <div className="max-w-4xl mx-auto py-8">
-        <div className="bg-[var(--bg-surface)] rounded-xl p-12 text-center">
+        <div className="rounded-xl p-12 text-center" style={{ backgroundColor: 'var(--sm-card)' }}>
           <div className="flex items-center justify-center gap-3">
             <div
               className="w-6 h-6 border-2 border-t-transparent rounded-full animate-spin"
               style={{ borderColor: team.secondaryColor, borderTopColor: 'transparent' }}
             />
-            <span className="text-[var(--text-muted)]">Loading box score...</span>
+            <span style={{ color: 'var(--sm-text-muted)' }}>Loading box score...</span>
           </div>
         </div>
       </div>
@@ -198,8 +198,8 @@ export default function LastGameBoxScore({ team, lastGame }: LastGameBoxScorePro
     return (
       <div className="max-w-4xl mx-auto py-8">
         <LastGameHeader team={team} lastGame={lastGame} teamLogo={teamLogo} />
-        <div className="bg-[var(--bg-surface)] rounded-xl p-12 text-center mt-6">
-          <p className="text-[var(--text-muted)]">
+        <div className="rounded-xl p-12 text-center mt-6" style={{ backgroundColor: 'var(--sm-card)' }}>
+          <p style={{ color: 'var(--sm-text-muted)' }}>
             {error || 'Box score not available for this game'}
           </p>
           <Link
@@ -220,9 +220,9 @@ export default function LastGameBoxScore({ team, lastGame }: LastGameBoxScorePro
     <div className="max-w-4xl mx-auto py-8 space-y-6">
       {/* Header */}
       <div className="text-center mb-4">
-        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[var(--bg-tertiary)]">
+        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full" style={{ backgroundColor: 'var(--sm-surface)' }}>
           <div className="w-2 h-2 rounded-full bg-gray-400" />
-          <span className="text-xs font-medium text-[var(--text-muted)] uppercase tracking-wide">
+          <span className="text-xs font-medium uppercase tracking-wide" style={{ color: 'var(--sm-text-muted)' }}>
             Last Game
           </span>
         </div>
@@ -292,15 +292,18 @@ export default function LastGameBoxScore({ team, lastGame }: LastGameBoxScorePro
       </div>
 
       {/* Team Toggle */}
-      <div className="flex rounded-xl overflow-hidden border border-[var(--border-color)]">
+      <div className="flex rounded-xl overflow-hidden" style={{ border: '1px solid var(--sm-border)' }}>
         <button
           onClick={() => setActiveTeam('team')}
           className={`flex-1 flex items-center justify-center gap-2 px-4 py-3 font-semibold transition-colors ${
             activeTeam === 'team'
               ? 'text-white'
-              : 'bg-[var(--bg-surface)] text-[var(--text-muted)] hover:bg-[var(--bg-hover)]'
+              : 'hover:brightness-95 dark:hover:brightness-110'
           }`}
-          style={activeTeam === 'team' ? { backgroundColor: team.primaryColor } : {}}
+          style={activeTeam === 'team'
+            ? { backgroundColor: team.primaryColor }
+            : { backgroundColor: 'var(--sm-card)', color: 'var(--sm-text-muted)' }
+          }
         >
           <Image src={teamLogo} alt={team.shortName} width={24} height={24} className="w-6 h-6" unoptimized />
           {team.shortName}
@@ -310,9 +313,12 @@ export default function LastGameBoxScore({ team, lastGame }: LastGameBoxScorePro
           className={`flex-1 flex items-center justify-center gap-2 px-4 py-3 font-semibold transition-colors ${
             activeTeam === 'opponent'
               ? 'text-white'
-              : 'bg-[var(--bg-surface)] text-[var(--text-muted)] hover:bg-[var(--bg-hover)]'
+              : 'hover:brightness-95 dark:hover:brightness-110'
           }`}
-          style={activeTeam === 'opponent' ? { backgroundColor: team.primaryColor } : {}}
+          style={activeTeam === 'opponent'
+            ? { backgroundColor: team.primaryColor }
+            : { backgroundColor: 'var(--sm-card)', color: 'var(--sm-text-muted)' }
+          }
         >
           {boxScore.opponent.logo && (
             <Image
@@ -329,7 +335,7 @@ export default function LastGameBoxScore({ team, lastGame }: LastGameBoxScorePro
       </div>
 
       {/* Player Stats */}
-      <div className="bg-[var(--bg-surface)] border border-[var(--border-color)] rounded-2xl overflow-hidden">
+      <div className="rounded-2xl overflow-hidden" style={{ backgroundColor: 'var(--sm-card)', border: '1px solid var(--sm-border)' }}>
         {lastGame.sport === 'nba' && <NBAStatsTable players={currentPlayers} />}
         {lastGame.sport === 'nfl' && <NFLStatsTable players={currentPlayers} />}
         {lastGame.sport === 'nhl' && <NHLStatsTable players={currentPlayers} />}
@@ -408,8 +414,8 @@ function NBAStatsTable({ players }: { players: PlayerStats[] }) {
     <div className="overflow-x-auto">
       <table className="w-full">
         <thead>
-          <tr className="text-left text-xs text-[var(--text-muted)] uppercase tracking-wider border-b border-[var(--border-color)] bg-[var(--bg-secondary)]">
-            <th className="px-4 py-3 sticky left-0 bg-[var(--bg-secondary)]">Player</th>
+          <tr className="text-left text-xs uppercase tracking-wider" style={{ color: 'var(--sm-text-muted)', borderBottom: '1px solid var(--sm-border)', backgroundColor: 'var(--sm-surface)' }}>
+            <th className="px-4 py-3 sticky left-0" style={{ backgroundColor: 'var(--sm-surface)' }}>Player</th>
             <th className="px-3 py-3 text-center">MIN</th>
             <th className="px-3 py-3 text-center">PTS</th>
             <th className="px-3 py-3 text-center">REB</th>
@@ -420,18 +426,18 @@ function NBAStatsTable({ players }: { players: PlayerStats[] }) {
         </thead>
         <tbody>
           {players.map((player, i) => (
-            <tr key={i} className="border-b border-[var(--border-color)] last:border-0 hover:bg-[var(--bg-hover)]">
-              <td className="px-4 py-3 sticky left-0 bg-[var(--bg-surface)]">
+            <tr key={i} className="last:border-0 hover:brightness-95 dark:hover:brightness-110" style={{ borderBottom: '1px solid var(--sm-border)' }}>
+              <td className="px-4 py-3 sticky left-0" style={{ backgroundColor: 'var(--sm-card)' }}>
                 <PlayerCell player={player} />
               </td>
-              <td className="px-3 py-3 text-center font-mono text-sm text-[var(--text-muted)]">{player.minutes || '-'}</td>
-              <td className="px-3 py-3 text-center font-bold text-[var(--text-primary)]">{player.points ?? '-'}</td>
-              <td className="px-3 py-3 text-center text-[var(--text-secondary)]">{player.rebounds ?? '-'}</td>
-              <td className="px-3 py-3 text-center text-[var(--text-secondary)]">{player.assists ?? '-'}</td>
-              <td className="px-3 py-3 text-center text-[var(--text-muted)] font-mono text-sm">
+              <td className="px-3 py-3 text-center font-mono text-sm" style={{ color: 'var(--sm-text-muted)' }}>{player.minutes || '-'}</td>
+              <td className="px-3 py-3 text-center font-bold" style={{ color: 'var(--sm-text)' }}>{player.points ?? '-'}</td>
+              <td className="px-3 py-3 text-center" style={{ color: 'var(--sm-text-muted)' }}>{player.rebounds ?? '-'}</td>
+              <td className="px-3 py-3 text-center" style={{ color: 'var(--sm-text-muted)' }}>{player.assists ?? '-'}</td>
+              <td className="px-3 py-3 text-center font-mono text-sm" style={{ color: 'var(--sm-text-muted)' }}>
                 {player.fgm ?? 0}-{player.fga ?? 0}
               </td>
-              <td className="px-3 py-3 text-center text-[var(--text-muted)] font-mono text-sm">
+              <td className="px-3 py-3 text-center font-mono text-sm" style={{ color: 'var(--sm-text-muted)' }}>
                 {player.tpm ?? 0}-{player.tpa ?? 0}
               </td>
             </tr>
@@ -452,14 +458,14 @@ function NFLStatsTable({ players }: { players: PlayerStats[] }) {
   const receivers = players.filter(p => p.receivingRec && p.receivingRec > 0)
 
   return (
-    <div className="divide-y divide-[var(--border-color)]">
+    <div>
       {passers.length > 0 && (
-        <div className="p-4">
-          <h4 className="text-xs font-semibold text-[var(--text-muted)] uppercase mb-3">Passing</h4>
+        <div className="p-4" style={{ borderBottom: '1px solid var(--sm-border)' }}>
+          <h4 className="text-xs font-semibold uppercase mb-3" style={{ color: 'var(--sm-text-muted)' }}>Passing</h4>
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
-                <tr className="text-xs text-[var(--text-muted)]">
+                <tr className="text-xs" style={{ color: 'var(--sm-text-muted)' }}>
                   <th className="text-left pb-2">Player</th>
                   <th className="text-center pb-2">C/ATT</th>
                   <th className="text-center pb-2">YDS</th>
@@ -481,12 +487,12 @@ function NFLStatsTable({ players }: { players: PlayerStats[] }) {
         </div>
       )}
       {rushers.length > 0 && (
-        <div className="p-4">
-          <h4 className="text-xs font-semibold text-[var(--text-muted)] uppercase mb-3">Rushing</h4>
+        <div className="p-4" style={{ borderBottom: '1px solid var(--sm-border)' }}>
+          <h4 className="text-xs font-semibold uppercase mb-3" style={{ color: 'var(--sm-text-muted)' }}>Rushing</h4>
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
-                <tr className="text-xs text-[var(--text-muted)]">
+                <tr className="text-xs" style={{ color: 'var(--sm-text-muted)' }}>
                   <th className="text-left pb-2">Player</th>
                   <th className="text-center pb-2">CAR</th>
                   <th className="text-center pb-2">YDS</th>
@@ -509,11 +515,11 @@ function NFLStatsTable({ players }: { players: PlayerStats[] }) {
       )}
       {receivers.length > 0 && (
         <div className="p-4">
-          <h4 className="text-xs font-semibold text-[var(--text-muted)] uppercase mb-3">Receiving</h4>
+          <h4 className="text-xs font-semibold uppercase mb-3" style={{ color: 'var(--sm-text-muted)' }}>Receiving</h4>
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
-                <tr className="text-xs text-[var(--text-muted)]">
+                <tr className="text-xs" style={{ color: 'var(--sm-text-muted)' }}>
                   <th className="text-left pb-2">Player</th>
                   <th className="text-center pb-2">REC</th>
                   <th className="text-center pb-2">YDS</th>
@@ -545,7 +551,7 @@ function NHLStatsTable({ players }: { players: PlayerStats[] }) {
     <div className="overflow-x-auto">
       <table className="w-full">
         <thead>
-          <tr className="text-left text-xs text-[var(--text-muted)] uppercase tracking-wider border-b border-[var(--border-color)] bg-[var(--bg-secondary)]">
+          <tr className="text-left text-xs uppercase tracking-wider" style={{ color: 'var(--sm-text-muted)', borderBottom: '1px solid var(--sm-border)', backgroundColor: 'var(--sm-surface)' }}>
             <th className="px-4 py-3">Player</th>
             <th className="px-3 py-3 text-center">G</th>
             <th className="px-3 py-3 text-center">A</th>
@@ -556,13 +562,13 @@ function NHLStatsTable({ players }: { players: PlayerStats[] }) {
         </thead>
         <tbody>
           {players.map((player, i) => (
-            <tr key={i} className="border-b border-[var(--border-color)] last:border-0 hover:bg-[var(--bg-hover)]">
+            <tr key={i} className="last:border-0 hover:brightness-95 dark:hover:brightness-110" style={{ borderBottom: '1px solid var(--sm-border)' }}>
               <td className="px-4 py-3"><PlayerCell player={player} /></td>
-              <td className="px-3 py-3 text-center font-bold text-[var(--text-primary)]">{player.goals ?? '-'}</td>
-              <td className="px-3 py-3 text-center text-[var(--text-secondary)]">{player.nhlAssists ?? '-'}</td>
+              <td className="px-3 py-3 text-center font-bold" style={{ color: 'var(--sm-text)' }}>{player.goals ?? '-'}</td>
+              <td className="px-3 py-3 text-center" style={{ color: 'var(--sm-text-muted)' }}>{player.nhlAssists ?? '-'}</td>
               <td className="px-3 py-3 text-center font-bold">{player.nhlPoints ?? '-'}</td>
-              <td className="px-3 py-3 text-center text-[var(--text-muted)]">{player.shots ?? '-'}</td>
-              <td className="px-3 py-3 text-center text-[var(--text-muted)]">
+              <td className="px-3 py-3 text-center" style={{ color: 'var(--sm-text-muted)' }}>{player.shots ?? '-'}</td>
+              <td className="px-3 py-3 text-center" style={{ color: 'var(--sm-text-muted)' }}>
                 {player.plusMinus != null ? (player.plusMinus > 0 ? `+${player.plusMinus}` : player.plusMinus) : '-'}
               </td>
             </tr>
@@ -581,14 +587,14 @@ function MLBStatsTable({ players }: { players: PlayerStats[] }) {
   const pitchers = players.filter(p => p.inningsPitched)
 
   return (
-    <div className="divide-y divide-[var(--border-color)]">
+    <div>
       {batters.length > 0 && (
-        <div className="p-4">
-          <h4 className="text-xs font-semibold text-[var(--text-muted)] uppercase mb-3">Batting</h4>
+        <div className="p-4" style={{ borderBottom: '1px solid var(--sm-border)' }}>
+          <h4 className="text-xs font-semibold uppercase mb-3" style={{ color: 'var(--sm-text-muted)' }}>Batting</h4>
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
-                <tr className="text-xs text-[var(--text-muted)]">
+                <tr className="text-xs" style={{ color: 'var(--sm-text-muted)' }}>
                   <th className="text-left pb-2">Player</th>
                   <th className="text-center pb-2">AB</th>
                   <th className="text-center pb-2">H</th>
@@ -613,11 +619,11 @@ function MLBStatsTable({ players }: { players: PlayerStats[] }) {
       )}
       {pitchers.length > 0 && (
         <div className="p-4">
-          <h4 className="text-xs font-semibold text-[var(--text-muted)] uppercase mb-3">Pitching</h4>
+          <h4 className="text-xs font-semibold uppercase mb-3" style={{ color: 'var(--sm-text-muted)' }}>Pitching</h4>
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
-                <tr className="text-xs text-[var(--text-muted)]">
+                <tr className="text-xs" style={{ color: 'var(--sm-text-muted)' }}>
                   <th className="text-left pb-2">Player</th>
                   <th className="text-center pb-2">IP</th>
                   <th className="text-center pb-2">K</th>
@@ -655,15 +661,15 @@ function PlayerCell({ player }: { player: PlayerStats }) {
           unoptimized
         />
       ) : (
-        <div className="w-8 h-8 rounded-full bg-[var(--bg-tertiary)] flex items-center justify-center">
-          <span className="text-xs font-bold text-[var(--text-muted)]">
+        <div className="w-8 h-8 rounded-full flex items-center justify-center" style={{ backgroundColor: 'var(--sm-surface)' }}>
+          <span className="text-xs font-bold" style={{ color: 'var(--sm-text-muted)' }}>
             {player.name.split(' ').map(n => n[0]).join('')}
           </span>
         </div>
       )}
       <div>
-        <div className="font-medium text-[var(--text-primary)] text-sm">{player.name}</div>
-        {player.position && <div className="text-xs text-[var(--text-muted)]">{player.position}</div>}
+        <div className="font-medium text-sm" style={{ color: 'var(--sm-text)' }}>{player.name}</div>
+        {player.position && <div className="text-xs" style={{ color: 'var(--sm-text-muted)' }}>{player.position}</div>}
       </div>
     </div>
   )
@@ -671,7 +677,7 @@ function PlayerCell({ player }: { player: PlayerStats }) {
 
 function EmptyStats() {
   return (
-    <div className="py-12 text-center text-[var(--text-muted)]">
+    <div className="py-12 text-center" style={{ color: 'var(--sm-text-muted)' }}>
       No player stats available for this game
     </div>
   )
