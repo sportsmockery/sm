@@ -102,8 +102,8 @@ export default async function BearsScoresPage() {
         {games.length > 0 ? (
           <BoxScoreClient games={games} initialGameId={initialGameId} />
         ) : (
-          <div className="rounded-2xl p-12 text-center" style={{ backgroundColor: 'var(--sm-card)', border: '1px solid var(--sm-border)' }}>
-            <p style={{ color: 'var(--sm-text-muted)' }}>No completed games yet</p>
+          <div className="glass-card glass-card-static" style={{ textAlign: 'center', padding: '48px' }}>
+            <p style={{ color: 'var(--sm-text-muted)', margin: 0 }}>No completed games yet</p>
           </div>
         )}
 
@@ -111,8 +111,8 @@ export default async function BearsScoresPage() {
         <div className="mt-8 text-center">
           <Link
             href="/chicago-bears/schedule"
-            className="inline-flex items-center gap-2 px-6 py-3 font-semibold rounded-xl transition-colors"
-            style={{ backgroundColor: '#C83200', color: '#ffffff' }}
+            className="btn btn-md btn-primary"
+            style={{ display: 'inline-flex', textDecoration: 'none' }}
           >
             View Full Schedule
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
