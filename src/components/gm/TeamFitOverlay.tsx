@@ -171,7 +171,7 @@ export function TeamFitOverlay({
                 style={{
                   width: 40,
                   height: 40,
-                  border: `3px solid ${'var(--sm-border)'}`,
+                  border: '3px solid var(--sm-border)',
                   borderTopColor: targetTeamColor,
                   borderRadius: '50%',
                   margin: '0 auto 16px',
@@ -291,7 +291,7 @@ export function TeamFitOverlay({
                           padding: 12,
                           borderRadius: 8,
                           backgroundColor: 'var(--sm-surface)',
-                          border: `1px solid ${'var(--sm-border)'}`,
+                          border: '1px solid var(--sm-border)',
                         }}
                       >
                         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 4 }}>
@@ -386,7 +386,7 @@ export function TeamFitOverlay({
               marginTop: 20,
               padding: '12px 24px',
               borderRadius: 10,
-              border: `2px solid ${'var(--sm-border)'}`,
+              border: '2px solid var(--sm-border)',
               backgroundColor: 'transparent',
               color: textColor,
               fontWeight: 600,

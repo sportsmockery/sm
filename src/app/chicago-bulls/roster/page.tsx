@@ -91,7 +91,7 @@ export default async function BullsRosterPage() {
                   borderLeft: `3px solid ${TEAM_COLOR}`,
                 }}
               >
-                <h2 className="font-bold" style={{ color: 'var(--sm-text)', fontFamily: "'Montserrat', sans-serif" }}>
+                <h2 className="font-bold" style={{ color: 'var(--sm-text)', fontFamily: "'Space Grotesk', sans-serif" }}>
                   {POSITION_GROUP_NAMES[group]}
                 </h2>
                 <span className="text-sm" style={{ color: 'var(--sm-text-muted)' }}>

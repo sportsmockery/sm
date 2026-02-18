@@ -125,7 +125,7 @@ export default async function PlayerProfilePage({ params }: PlayerPageProps) {
                 </span>
               </div>
 
-              <h1 className="text-2xl sm:text-4xl md:text-5xl font-bold mb-2" style={{ fontFamily: "'Montserrat', sans-serif" }}>
+              <h1 className="text-2xl sm:text-4xl md:text-5xl font-bold mb-2" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
                 {player.fullName}
               </h1>
 
@@ -191,7 +191,7 @@ export default async function PlayerProfilePage({ params }: PlayerPageProps) {
             {/* Season Overview */}
             {currentSeason && (
               <section className="rounded-2xl p-4 sm:p-6" style={{ backgroundColor: 'var(--sm-card)', border: '1px solid var(--sm-border)' }}>
-                <h2 className="text-lg sm:text-xl font-bold mb-4 sm:mb-6" style={{ fontFamily: "'Montserrat', sans-serif", color: 'var(--sm-text)' }}>
+                <h2 className="text-lg sm:text-xl font-bold mb-4 sm:mb-6" style={{ fontFamily: "'Space Grotesk', sans-serif", color: 'var(--sm-text)' }}>
                   2025 Season Overview
                 </h2>
                 <SeasonOverviewCards player={player} stats={currentSeason} />
@@ -201,7 +201,7 @@ export default async function PlayerProfilePage({ params }: PlayerPageProps) {
             {/* Strength Profile */}
             {currentSeason && (
               <section className="rounded-2xl p-4 sm:p-6" style={{ backgroundColor: 'var(--sm-card)', border: '1px solid var(--sm-border)' }}>
-                <h2 className="text-lg sm:text-xl font-bold mb-4 sm:mb-6" style={{ fontFamily: "'Montserrat', sans-serif", color: 'var(--sm-text)' }}>
+                <h2 className="text-lg sm:text-xl font-bold mb-4 sm:mb-6" style={{ fontFamily: "'Space Grotesk', sans-serif", color: 'var(--sm-text)' }}>
                   Strength Profile
                 </h2>
                 <StrengthProfileBars player={player} stats={currentSeason} />
@@ -212,7 +212,7 @@ export default async function PlayerProfilePage({ params }: PlayerPageProps) {
             {gameLog.length > 0 && (
               <section className="rounded-2xl overflow-hidden" style={{ backgroundColor: 'var(--sm-card)', border: '1px solid var(--sm-border)' }}>
                 <div className="p-4 sm:p-6" style={{ borderBottom: '1px solid var(--sm-border)' }}>
-                  <h2 className="text-lg sm:text-xl font-bold" style={{ fontFamily: "'Montserrat', sans-serif", color: 'var(--sm-text)' }}>
+                  <h2 className="text-lg sm:text-xl font-bold" style={{ fontFamily: "'Space Grotesk', sans-serif", color: 'var(--sm-text)' }}>
                     Game Log 2025
                   </h2>
                 </div>
@@ -226,7 +226,7 @@ export default async function PlayerProfilePage({ params }: PlayerPageProps) {
             {/* Similar Bears */}
             {similarPlayers.length > 0 && (
               <section className="rounded-2xl p-4 sm:p-6" style={{ backgroundColor: 'var(--sm-card)', border: '1px solid var(--sm-border)' }}>
-                <h3 className="text-base sm:text-lg font-bold mb-3 sm:mb-4" style={{ fontFamily: "'Montserrat', sans-serif", color: 'var(--sm-text)' }}>
+                <h3 className="text-base sm:text-lg font-bold mb-3 sm:mb-4" style={{ fontFamily: "'Space Grotesk', sans-serif", color: 'var(--sm-text)' }}>
                   Similar Bears
                 </h3>
                 <div className="space-y-2 sm:space-y-3">
@@ -273,7 +273,7 @@ export default async function PlayerProfilePage({ params }: PlayerPageProps) {
 
             {/* Quick Links */}
             <section className="rounded-2xl p-4 sm:p-6" style={{ backgroundColor: 'var(--sm-card)', border: '1px solid var(--sm-border)' }}>
-              <h3 className="text-base sm:text-lg font-bold mb-3 sm:mb-4" style={{ fontFamily: "'Montserrat', sans-serif", color: 'var(--sm-text)' }}>
+              <h3 className="text-base sm:text-lg font-bold mb-3 sm:mb-4" style={{ fontFamily: "'Space Grotesk', sans-serif", color: 'var(--sm-text)' }}>
                 Quick Links
               </h3>
               <div className="space-y-1 sm:space-y-2">

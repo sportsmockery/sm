@@ -111,7 +111,7 @@ export function ScenarioTabs({ playersSent, playersReceived, onRunScenario, load
           padding: 16,
           borderRadius: 10,
           backgroundColor: 'var(--sm-surface)',
-          border: `1px solid ${'var(--sm-border)'}`,
+          border: '1px solid var(--sm-border)',
         }}
       >
         {/* Player Improvement */}

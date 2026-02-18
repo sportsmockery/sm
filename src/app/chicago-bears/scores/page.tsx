@@ -76,23 +76,23 @@ export default async function BearsScoresPage() {
     >
       <div className="pb-12">
         {/* Record Summary */}
-        <div className="mb-6 p-4 rounded-xl" style={{ backgroundColor: 'var(--sm-card)', border: '1px solid var(--sm-border)' }}>
-          <div className="flex flex-wrap gap-6 justify-center text-center">
+        <div className="glass-card glass-card-sm glass-card-static" style={{ marginBottom: '24px' }}>
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '24px', justifyContent: 'center', textAlign: 'center' }}>
             <div>
-              <div className="text-xs uppercase tracking-wider mb-1" style={{ color: 'var(--sm-text-muted)' }}>Regular Season</div>
-              <div className="text-xl font-bold" style={{ color: 'var(--sm-text)' }}>
+              <div style={{ fontSize: '11px', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '4px', color: 'var(--sm-text-muted)' }}>Regular Season</div>
+              <div style={{ fontSize: '22px', fontWeight: 700, color: 'var(--sm-text)', fontFamily: "'Space Grotesk', sans-serif" }}>
                 {separatedRecord.regularSeason.wins}-{separatedRecord.regularSeason.losses}
                 {separatedRecord.regularSeason.ties > 0 && `-${separatedRecord.regularSeason.ties}`}
               </div>
-              <div className="text-xs" style={{ color: 'var(--sm-text-muted)' }}>{regularGames.length} games</div>
+              <div style={{ fontSize: '12px', color: 'var(--sm-text-muted)' }}>{regularGames.length} games</div>
             </div>
             {postseasonGames.length > 0 && (
               <div>
-                <div className="text-xs uppercase tracking-wider mb-1" style={{ color: 'var(--sm-text-muted)' }}>Postseason</div>
-                <div className="text-xl font-bold" style={{ color: '#C83200' }}>
+                <div style={{ fontSize: '11px', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '4px', color: 'var(--sm-text-muted)' }}>Postseason</div>
+                <div style={{ fontSize: '22px', fontWeight: 700, color: 'var(--sm-red)', fontFamily: "'Space Grotesk', sans-serif" }}>
                   {separatedRecord.postseason.wins}-{separatedRecord.postseason.losses}
                 </div>
-                <div className="text-xs" style={{ color: 'var(--sm-text-muted)' }}>{postseasonGames.length} games</div>
+                <div style={{ fontSize: '12px', color: 'var(--sm-text-muted)' }}>{postseasonGames.length} games</div>
               </div>
             )}
           </div>

@@ -41,7 +41,7 @@ export function WarRoomHeader({ gmScore, rank, sessionName, numApproved = 0, num
           style={{
             padding: 8,
             borderRadius: 8,
-            border: `1px solid ${'var(--sm-border)'}`,
+            border: '1px solid var(--sm-border)',
             backgroundColor: 'transparent',
             cursor: 'pointer',
             display: 'flex',
@@ -71,7 +71,7 @@ export function WarRoomHeader({ gmScore, rank, sessionName, numApproved = 0, num
             style={{
               padding: 8,
               borderRadius: 8,
-              border: `1px solid ${'var(--sm-border)'}`,
+              border: '1px solid var(--sm-border)',
               backgroundColor: 'transparent',
               cursor: 'pointer',
               display: 'flex',
@@ -108,7 +108,7 @@ export function WarRoomHeader({ gmScore, rank, sessionName, numApproved = 0, num
         <div style={{
           textAlign: 'center', padding: '8px 20px', borderRadius: 12,
           backgroundColor: isDark ? '#1f293780' : '#f3f4f6',
-          border: `1px solid ${'var(--sm-border)'}`,
+          border: '1px solid var(--sm-border)',
         }}>
           <motion.div
             key={gmScore}

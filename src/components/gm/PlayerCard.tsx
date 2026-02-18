@@ -155,7 +155,7 @@ export function PlayerCard({ player, selected = false, compact = false, teamColo
           <img
             src={player.headshot_url}
             alt={player.full_name}
-            style={{ width: 56, height: 56, borderRadius: '50%', objectFit: 'cover', border: `2px solid ${'var(--sm-border)'}` }}
+            style={{ width: 56, height: 56, borderRadius: '50%', objectFit: 'cover', border: '2px solid var(--sm-border)' }}
             onError={(e) => {
               const el = e.target as HTMLImageElement
               el.style.display = 'none'

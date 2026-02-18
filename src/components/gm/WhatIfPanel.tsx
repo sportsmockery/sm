@@ -94,7 +94,7 @@ export function WhatIfPanel({
         padding: 20,
         borderRadius: 12,
         backgroundColor: 'var(--sm-surface)',
-        border: `1px solid ${'var(--sm-border)'}`,
+        border: '1px solid var(--sm-border)',
         overflow: 'hidden',
       }}
     >
@@ -206,7 +206,7 @@ export function WhatIfPanel({
               padding: 16,
               borderRadius: 10,
               backgroundColor: 'var(--sm-card)',
-              border: `1px solid ${'var(--sm-border)'}`,
+              border: '1px solid var(--sm-border)',
             }}
           >
             {/* Grade comparison */}
@@ -305,7 +305,7 @@ export function WhatIfPanel({
                   padding: '8px 12px',
                   borderRadius: 8,
                   backgroundColor: 'var(--sm-card)',
-                  border: `1px solid ${'var(--sm-border)'}`,
+                  border: '1px solid var(--sm-border)',
                 }}
               >
                 <span style={{ fontSize: '12px', color: textColor }}>{h.description}</span>
