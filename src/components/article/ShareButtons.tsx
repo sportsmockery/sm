@@ -50,7 +50,8 @@ export default function ShareButtons({
     lg: 'h-6 w-6',
   }
 
-  const buttonClass = `flex items-center justify-center rounded-full bg-zinc-100 text-zinc-600 transition-all hover:scale-110 hover:bg-zinc-200 dark:bg-zinc-800 dark:text-zinc-400 dark:hover:bg-zinc-700 ${sizeClasses[size]}`
+  const buttonClass = `flex items-center justify-center rounded-full transition-all hover:scale-110 ${sizeClasses[size]}`
+  const buttonStyle = { backgroundColor: 'var(--sm-surface)', color: 'var(--sm-text-muted)' }
 
   return (
     <div
@@ -64,6 +65,7 @@ export default function ShareButtons({
         target="_blank"
         rel="noopener noreferrer"
         className={`${buttonClass} hover:bg-[#1DA1F2] hover:text-white`}
+        style={buttonStyle}
         aria-label="Share on Twitter"
       >
         <svg className={iconSizes[size]} fill="currentColor" viewBox="0 0 24 24">
@@ -77,6 +79,7 @@ export default function ShareButtons({
         target="_blank"
         rel="noopener noreferrer"
         className={`${buttonClass} hover:bg-[#1877F2] hover:text-white`}
+        style={buttonStyle}
         aria-label="Share on Facebook"
       >
         <svg className={iconSizes[size]} fill="currentColor" viewBox="0 0 24 24">
