@@ -156,19 +156,17 @@ export default async function BearsStatsPage() {
         {/* Postseason Section (if applicable) */}
         {(separatedRecord.postseason.wins > 0 || separatedRecord.postseason.losses > 0) && (
           <section
+            className="glass-card glass-card-static"
             style={{
               marginTop: 40,
-              padding: 24,
-              borderRadius: 'var(--sm-radius-xl)',
-              backgroundColor: 'rgba(200, 56, 3, 0.05)',
-              border: '1px solid rgba(200, 56, 3, 0.2)',
+              borderLeft: '3px solid var(--sm-red)',
             }}
           >
             <h2
               style={{
                 fontSize: 20,
                 fontWeight: 700,
-                color: '#C83803',
+                color: 'var(--sm-red)',
                 marginBottom: 16,
                 fontFamily: "'Space Grotesk', sans-serif",
               }}
@@ -190,19 +188,8 @@ export default async function BearsStatsPage() {
         <div style={{ marginTop: 40, paddingBottom: 48, display: 'flex', flexWrap: 'wrap', gap: 16, justifyContent: 'center' }}>
           <Link
             href="/chicago-bears/roster"
-            style={{
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: 8,
-              padding: '12px 24px',
-              backgroundColor: 'var(--sm-card)',
-              border: '1px solid var(--sm-border)',
-              borderRadius: '100px',
-              color: 'var(--sm-text)',
-              fontWeight: 500,
-              fontSize: 14,
-              textDecoration: 'none',
-            }}
+            className="btn btn-md btn-secondary"
+            style={{ display: 'inline-flex', textDecoration: 'none' }}
           >
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z" />
@@ -211,19 +198,8 @@ export default async function BearsStatsPage() {
           </Link>
           <Link
             href="/chicago-bears/players"
-            style={{
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: 8,
-              padding: '12px 24px',
-              backgroundColor: '#C83803',
-              border: '1px solid #C83803',
-              borderRadius: '100px',
-              color: '#ffffff',
-              fontWeight: 600,
-              fontSize: 14,
-              textDecoration: 'none',
-            }}
+            className="btn btn-md btn-primary"
+            style={{ display: 'inline-flex', textDecoration: 'none' }}
           >
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
@@ -250,20 +226,13 @@ function TeamStatCard({
   negative?: boolean
 }) {
   return (
-    <div
-      style={{
-        backgroundColor: 'var(--sm-card)',
-        border: '1px solid var(--sm-border)',
-        borderRadius: 'var(--sm-radius-lg)',
-        padding: '20px',
-      }}
-    >
+    <div className="glass-card glass-card-sm glass-card-static">
       <div style={{ fontSize: 14, color: 'var(--sm-text-muted)', marginBottom: 4 }}>{label}</div>
       <div
         style={{
           fontSize: 28,
           fontWeight: 800,
-          color: positive ? '#10b981' : negative ? '#ef4444' : 'var(--sm-text)',
+          color: positive ? 'var(--sm-success)' : negative ? 'var(--sm-error)' : 'var(--sm-text)',
           fontFamily: "'Space Grotesk', sans-serif",
         }}
       >
@@ -288,14 +257,7 @@ function LeaderboardCard({
   emptyText: string
 }) {
   return (
-    <div
-      style={{
-        backgroundColor: 'var(--sm-card)',
-        border: '1px solid var(--sm-border)',
-        borderRadius: 'var(--sm-radius-xl)',
-        overflow: 'hidden',
-      }}
-    >
+    <div className="glass-card glass-card-static" style={{ overflow: 'hidden', padding: 0 }}>
       {/* Header */}
       <div
         style={{
@@ -311,11 +273,11 @@ function LeaderboardCard({
             width: 32,
             height: 32,
             borderRadius: 8,
-            backgroundColor: 'rgba(200, 56, 3, 0.1)',
+            background: 'var(--sm-gradient-subtle)',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            color: '#C83803',
+            color: 'var(--sm-red)',
           }}
         >
           {icon}
@@ -372,7 +334,7 @@ function LeaderboardRow({ entry, rank, isLast }: { entry: LeaderboardEntry; rank
             justifyContent: 'center',
             fontSize: 12,
             fontWeight: 700,
-            backgroundColor: '#C83803',
+            backgroundColor: 'var(--sm-red)',
             color: '#fff',
           }}
         >
@@ -436,7 +398,7 @@ function LeaderboardRow({ entry, rank, isLast }: { entry: LeaderboardEntry; rank
         )}
         <div className="min-w-0">
           <div
-            className="font-medium group-hover:text-[#C83803] transition-colors truncate"
+            className="font-medium group-hover:text-[var(--sm-red-light)] transition-colors truncate"
             style={{ color: 'var(--sm-text)' }}
           >
             {entry.player.fullName}
@@ -467,7 +429,7 @@ function LeaderboardRow({ entry, rank, isLast }: { entry: LeaderboardEntry; rank
 
       {/* Arrow */}
       <svg
-        className="w-4 h-4 group-hover:text-[#C83803] transition-colors"
+        className="w-4 h-4 group-hover:text-[var(--sm-red-light)] transition-colors"
         style={{ color: 'var(--sm-text-muted)' }}
         fill="none"
         stroke="currentColor"

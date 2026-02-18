@@ -133,21 +133,17 @@ export default async function CubsStatsPage() {
         <div style={{ display: 'flex', flexWrap: 'wrap', gap: 16, justifyContent: 'center' }}>
           <Link
             href="/chicago-cubs/roster"
-            style={{
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: 8,
-              padding: '12px 24px',
-              backgroundColor: 'var(--sm-card)',
-              border: '1px solid var(--sm-border)',
-              borderRadius: '100px',
-              color: 'var(--sm-text)',
-              fontWeight: 500,
-              fontSize: 14,
-              textDecoration: 'none',
-            }}
+            className="btn btn-md btn-secondary"
+            style={{ display: 'inline-flex', textDecoration: 'none' }}
           >
             View Full Roster
+          </Link>
+          <Link
+            href="/chicago-cubs/players"
+            className="btn btn-md btn-primary"
+            style={{ display: 'inline-flex', textDecoration: 'none' }}
+          >
+            Search All Players
           </Link>
         </div>
       </div>
@@ -167,20 +163,13 @@ function StatCard({
   negative?: boolean
 }) {
   return (
-    <div
-      style={{
-        backgroundColor: 'var(--sm-card)',
-        border: '1px solid var(--sm-border)',
-        borderRadius: 'var(--sm-radius-lg)',
-        padding: '20px',
-      }}
-    >
+    <div className="glass-card glass-card-sm glass-card-static">
       <div style={{ fontSize: 14, color: 'var(--sm-text-muted)', marginBottom: 4 }}>{label}</div>
       <div
         style={{
           fontSize: 28,
           fontWeight: 800,
-          color: positive ? '#10b981' : negative ? '#ef4444' : 'var(--sm-text)',
+          color: positive ? 'var(--sm-success)' : negative ? 'var(--sm-error)' : 'var(--sm-text)',
           fontFamily: "'Space Grotesk', sans-serif",
         }}
       >
@@ -202,14 +191,7 @@ function LeaderboardCard({
   emptyText: string
 }) {
   return (
-    <div
-      style={{
-        backgroundColor: 'var(--sm-card)',
-        border: '1px solid var(--sm-border)',
-        borderRadius: 'var(--sm-radius-xl)',
-        overflow: 'hidden',
-      }}
-    >
+    <div className="glass-card glass-card-static" style={{ overflow: 'hidden', padding: 0 }}>
       {/* Header */}
       <div
         style={{
@@ -225,11 +207,11 @@ function LeaderboardCard({
             width: 32,
             height: 32,
             borderRadius: 8,
-            backgroundColor: 'rgba(14, 51, 134, 0.1)',
+            background: 'var(--sm-gradient-subtle)',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            color: '#0E3386',
+            color: 'var(--sm-red)',
           }}
         >
           {icon}
@@ -286,7 +268,7 @@ function LeaderboardRow({ entry, rank, isLast }: { entry: LeaderboardEntry; rank
             justifyContent: 'center',
             fontSize: 12,
             fontWeight: 700,
-            backgroundColor: '#0E3386',
+            backgroundColor: 'var(--sm-red)',
             color: '#fff',
           }}
         >
@@ -351,7 +333,7 @@ function LeaderboardRow({ entry, rank, isLast }: { entry: LeaderboardEntry; rank
         )}
         <div className="min-w-0">
           <div
-            className="font-medium group-hover:text-[#0E3386] transition-colors truncate"
+            className="font-medium group-hover:text-[var(--sm-red-light)] transition-colors truncate"
             style={{ color: 'var(--sm-text)' }}
           >
             {entry.player.fullName}
@@ -386,7 +368,7 @@ function LeaderboardRow({ entry, rank, isLast }: { entry: LeaderboardEntry; rank
 
       {/* Arrow */}
       <svg
-        className="w-4 h-4 group-hover:text-[#0E3386] transition-colors"
+        className="w-4 h-4 group-hover:text-[var(--sm-red-light)] transition-colors"
         style={{ color: 'var(--sm-text-muted)' }}
         fill="none"
         stroke="currentColor"

@@ -13,7 +13,7 @@ export const metadata: Metadata = {
 // Revalidate every hour
 export const revalidate = 3600
 
-const TEAM_COLOR = '#C83803'
+const TEAM_COLOR = 'var(--sm-red)'
 
 const POSITION_GROUP_NAMES: Record<PositionGroup, string> = {
   QB: 'Quarterbacks',
@@ -65,14 +65,7 @@ export default async function BearsRosterPage() {
       activeTab="roster"
     >
       {/* Summary Bar */}
-      <div
-        className="p-4 mb-6"
-        style={{
-          backgroundColor: 'var(--sm-card)',
-          border: '1px solid var(--sm-border)',
-          borderRadius: 'var(--sm-radius-lg)',
-        }}
-      >
+      <div className="glass-card glass-card-sm glass-card-static mb-6">
         <div className="flex flex-wrap gap-6 text-sm">
           <div>
             <span style={{ color: 'var(--sm-text-muted)' }}>Total: </span>
@@ -145,14 +138,7 @@ function PositionCard({
   players: BearsPlayer[]
 }) {
   return (
-    <div
-      className="overflow-hidden"
-      style={{
-        backgroundColor: 'var(--sm-card)',
-        border: '1px solid var(--sm-border)',
-        borderRadius: 'var(--sm-radius-xl)',
-      }}
-    >
+    <div className="glass-card glass-card-static" style={{ overflow: 'hidden', padding: 0 }}>
       {/* Header */}
       <div
         className="flex items-center justify-between"
