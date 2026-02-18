@@ -154,7 +154,7 @@ export default function ArticleTableOfContents({
     <nav
       className={`rounded-lg overflow-hidden ${className}`}
       style={{
-        backgroundColor: 'var(--bg-elevated)',
+        backgroundColor: 'var(--sm-card)',
         border: '1px solid var(--sm-border)'
       }}
       aria-label="Table of contents"
@@ -188,7 +188,7 @@ export default function ArticleTableOfContents({
           </span>
           <span
             className="text-[11px] px-1.5 py-0.5 rounded"
-            style={{ backgroundColor: 'var(--bg-surface)', color: 'var(--sm-text-muted)' }}
+            style={{ backgroundColor: 'var(--sm-surface)', color: 'var(--sm-text-muted)' }}
           >
             {items.length}
           </span>
@@ -215,7 +215,7 @@ export default function ArticleTableOfContents({
                   item.level === 3 ? 'pl-7' : ''
                 }`}
                 style={{
-                  color: activeId === item.id ? '#bc0000' : 'var(--text-secondary)',
+                  color: activeId === item.id ? '#bc0000' : 'var(--sm-text-muted)',
                   backgroundColor: activeId === item.id ? 'rgba(188, 0, 0, 0.05)' : 'transparent',
                   borderLeft: activeId === item.id ? '2px solid #bc0000' : '2px solid transparent',
                   fontWeight: activeId === item.id ? 500 : 400,

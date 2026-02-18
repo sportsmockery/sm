@@ -220,7 +220,7 @@ export default async function AuthorPage({ params, searchParams }: AuthorPagePro
   }
 
   return (
-    <div className="min-h-screen bg-zinc-50 dark:bg-zinc-950">
+    <div className="min-h-screen" style={{ backgroundColor: 'var(--sm-dark)' }}>
       {/* Author Header */}
       <AuthorHeader
         author={authorData}
@@ -229,7 +229,7 @@ export default async function AuthorPage({ params, searchParams }: AuthorPagePro
       />
 
       {/* Stats Section */}
-      <div className="border-b border-zinc-200 bg-white py-8 dark:border-zinc-800 dark:bg-zinc-900">
+      <div className="py-8" style={{ borderBottom: '1px solid var(--sm-border)', backgroundColor: 'var(--sm-card)' }}>
         <div className="mx-auto max-w-7xl px-4">
           <AuthorStats
             totalPosts={allPosts?.length || 0}
@@ -244,7 +244,7 @@ export default async function AuthorPage({ params, searchParams }: AuthorPagePro
         <div className="grid gap-8 lg:grid-cols-3">
           {/* Main Column - Articles */}
           <div className="lg:col-span-2">
-            <h2 className="mb-6 font-heading text-2xl font-bold text-zinc-900 dark:text-white">
+            <h2 className="mb-6 font-heading text-2xl font-bold" style={{ color: 'var(--sm-text)' }}>
               Articles {category && `in ${categories?.find(c => c.slug === category)?.name || category}`}
             </h2>
 
@@ -273,12 +273,12 @@ export default async function AuthorPage({ params, searchParams }: AuthorPagePro
             />
 
             {/* Ad Placeholder */}
-            <div className="overflow-hidden rounded-2xl border border-dashed border-zinc-300 bg-zinc-100 p-8 text-center dark:border-zinc-700 dark:bg-zinc-800">
-              <p className="text-sm text-zinc-500 dark:text-zinc-400">
+            <div className="overflow-hidden rounded-2xl p-8 text-center" style={{ border: '1px dashed var(--sm-border)', backgroundColor: 'var(--sm-surface)' }}>
+              <p className="text-sm" style={{ color: 'var(--sm-text-muted)' }}>
                 Advertisement
               </p>
-              <div className="mt-2 flex h-48 items-center justify-center rounded-lg bg-zinc-200 dark:bg-zinc-700">
-                <span className="text-zinc-400 dark:text-zinc-500">
+              <div className="mt-2 flex h-48 items-center justify-center rounded-lg" style={{ backgroundColor: 'var(--sm-card)' }}>
+                <span style={{ color: 'var(--sm-text-dim)' }}>
                   300x250
                 </span>
               </div>
