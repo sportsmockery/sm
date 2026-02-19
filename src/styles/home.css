@@ -1637,7 +1637,7 @@
   top: 0; left: 0; right: 0;
   height: 2px;
   background: linear-gradient(90deg, transparent, rgba(188,0,0,0.6), rgba(255,68,68,0.3), transparent);
-  animation: hm-scanDown 5s ease-in-out 0.5s forwards;
+  animation: hm-scanDown 8s ease-in-out 0.5s infinite;
   opacity: 0;
   z-index: 3;
   pointer-events: none;
@@ -1645,9 +1645,12 @@
 }
 @keyframes hm-scanDown {
   0% { top: 0; opacity: 0; }
-  5% { opacity: 1; }
-  85% { opacity: 0.6; }
-  100% { top: 100%; opacity: 0; }
+  2.5% { opacity: 1; }
+  42% { opacity: 0.6; }
+  50% { top: 100%; opacity: 0; }
+  52.5% { opacity: 1; }
+  92% { opacity: 0.6; }
+  100% { top: 0; opacity: 0; }
 }
 
 /* Floating orb animations */
