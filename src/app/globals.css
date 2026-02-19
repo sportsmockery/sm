@@ -3077,18 +3077,21 @@ p {
 .nav-logo {
   display: flex;
   align-items: center;
-  gap: 10px;
   text-decoration: none;
 }
-.nav-logo svg { height: 28px; width: 28px; }
-.nav-logo span {
-  font-family: 'Space Grotesk', sans-serif;
-  font-weight: 700;
-  font-size: 18px;
-  color: var(--sm-text);
-  letter-spacing: -0.5px;
+.nav-logo-img {
+  height: 36px;
+  width: auto;
+  object-fit: contain;
 }
-.nav-logo .logo-accent { color: var(--sm-red); }
+/* Dark mode (default): show white-letter logo, hide dark-letter logo */
+.nav-logo-dark { display: block; }
+.nav-logo-light { display: none; }
+/* Light mode: show dark-letter logo, hide white-letter logo */
+[data-theme="light"] .nav-logo-dark,
+.light .nav-logo-dark { display: none; }
+[data-theme="light"] .nav-logo-light,
+.light .nav-logo-light { display: block; }
 
 .nav-links {
   display: flex;

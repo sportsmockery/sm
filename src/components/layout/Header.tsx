@@ -109,27 +109,22 @@ export default function Header() {
       <nav className={`sm-nav${scrolled ? ' scrolled' : ''}`}>
         {/* LEFT: Logo */}
         <Link href="/" className="nav-logo">
-          {/* SM shield icon */}
-          <svg viewBox="0 0 28 28" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <path
-              d="M14 2L3 7v7c0 7.18 4.7 13.89 11 15.5C20.3 27.89 25 21.18 25 14V7L14 2z"
-              fill="var(--sm-red)"
-            />
-            <text
-              x="14"
-              y="18"
-              textAnchor="middle"
-              fill="#fff"
-              fontFamily="'Space Grotesk', sans-serif"
-              fontWeight="700"
-              fontSize="11"
-            >
-              SM
-            </text>
-          </svg>
-          <span>
-            Sports <span className="logo-accent">Mockery</span>
-          </span>
+          <Image
+            src="/downloads/sm-logo-dark.png"
+            alt="Sports Mockery"
+            width={160}
+            height={40}
+            className="nav-logo-img nav-logo-light"
+            priority
+          />
+          <Image
+            src="/downloads/sm-logo-light.png"
+            alt="Sports Mockery"
+            width={160}
+            height={40}
+            className="nav-logo-img nav-logo-dark"
+            priority
+          />
         </Link>
 
         {/* CENTER: Nav links (hidden at <=768px by CSS) */}
