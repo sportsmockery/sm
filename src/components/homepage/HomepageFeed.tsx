@@ -70,8 +70,7 @@ export function HomepageFeed({
           </div>
 
           <h1 className="hero-headline">
-            Sports Mockery<br />
-            <span className="gradient-text">2.0</span>
+            Sports Mockery <span className="gradient-text">2.0</span>
           </h1>
 
           <p className="hero-subtitle animate-fade-in-up delay-200">
