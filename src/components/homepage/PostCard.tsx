@@ -85,8 +85,7 @@ export function PostCard({ post, priority = false }: PostCardProps) {
     ? `/${post.category_slug}/${post.slug}`
     : `/${post.slug}`;
 
-  // Keep getContentTypeBadge available for future use
-  void getContentTypeBadge;
+  const contentBadge = getContentTypeBadge(post.content_type);
 
   return (
     <article className="glass-card feed-card">
@@ -123,6 +122,12 @@ export function PostCard({ post, priority = false }: PostCardProps) {
         </div>
         <div className="card-body">
           <h3>{post.title}</h3>
+          {(contentBadge || post.is_evergreen) && (
+            <div className="card-badges">
+              {contentBadge && <span className="card-badge">{contentBadge}</span>}
+              {post.is_evergreen && <span className="card-badge card-badge--guide">GUIDE</span>}
+            </div>
+          )}
           {post.excerpt && <p className="card-excerpt">{post.excerpt}</p>}
           <div className="card-meta">
             <div className="author-avatar" />

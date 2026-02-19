@@ -12,8 +12,16 @@ interface EditorPick {
   excerpt: string | null;
   team_slug: string | null;
   category_slug: string | null;
+  content_type?: string;
   pinned_slot: number;
 }
+
+const CONTENT_BADGES: Record<string, string> = {
+  video: 'VIDEO',
+  analysis: 'ANALYSIS',
+  podcast: 'PODCAST',
+  gallery: 'GALLERY',
+};
 
 interface EditorPicksHeroProps {
   picks: EditorPick[];
@@ -41,6 +49,9 @@ export function EditorPicksHero({ picks = [] }: EditorPicksHeroProps) {
 
   // Slots 2-3: Stacked side cards (right column)
   const sidePicks = sorted.slice(1, 3);
+
+  // Slots 4-6: More featured headline links
+  const morePicks = sorted.slice(3, 6);
 
   return (
     <section className="sm-featured-shell" aria-label="Featured Content">
@@ -113,6 +124,35 @@ export function EditorPicksHero({ picks = [] }: EditorPicksHeroProps) {
           ))}
         </div>
       </div>
+
+      {/* More Featured (slots 4-6) */}
+      {morePicks.length > 0 && (
+        <div className="featured-more">
+          <h4 className="featured-more-title">More Featured</h4>
+          <ul className="featured-more-list">
+            {morePicks.map((pick) => (
+              <li key={pick.id}>
+                <Link
+                  href={pick.category_slug ? `/${pick.category_slug}/${pick.slug}` : `/${pick.slug}`}
+                  className="featured-more-link"
+                >
+                  {pick.team_slug && (
+                    <span className="sm-tag" style={{ display: 'inline-flex', fontSize: '10px', padding: '2px 8px' }}>
+                      {formatTeamName(pick.team_slug)}
+                    </span>
+                  )}
+                  {pick.content_type && CONTENT_BADGES[pick.content_type] && (
+                    <span className="card-badge" style={{ fontSize: '9px', padding: '1px 6px' }}>
+                      {CONTENT_BADGES[pick.content_type]}
+                    </span>
+                  )}
+                  <span className="featured-more-headline">{pick.title}</span>
+                </Link>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
     </section>
   );
 }

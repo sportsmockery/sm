@@ -1956,3 +1956,260 @@ html {
   from { opacity: 0; transform: translateY(10px); }
   to { opacity: 1; transform: translateY(0); }
 }
+
+/* ========== Content-Type & Evergreen Badges ========== */
+.card-badges {
+  display: flex;
+  gap: 6px;
+  margin-bottom: 8px;
+  flex-wrap: wrap;
+}
+
+.card-badge {
+  display: inline-block;
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+  padding: 2px 8px;
+  border-radius: 4px;
+  background: rgba(188, 0, 0, 0.12);
+  color: var(--sm-red-light);
+  line-height: 1.6;
+}
+
+.card-badge--guide {
+  background: rgba(34, 197, 94, 0.12);
+  color: #22c55e;
+}
+
+[data-theme="light"] .card-badge,
+.light .card-badge {
+  background: rgba(188, 0, 0, 0.08);
+  color: #bc0000;
+}
+
+[data-theme="light"] .card-badge--guide,
+.light .card-badge--guide {
+  background: rgba(22, 163, 74, 0.1);
+  color: #16a34a;
+}
+
+/* ========== More Featured (slots 4-6) ========== */
+.featured-more {
+  margin-top: 24px;
+  padding-top: 20px;
+  border-top: 1px solid var(--sm-border);
+}
+
+.featured-more-title {
+  font-family: 'Inter', sans-serif;
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  color: var(--sm-text-muted);
+  margin-bottom: 12px;
+}
+
+.featured-more-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.featured-more-link {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 12px;
+  border-radius: 10px;
+  text-decoration: none;
+  color: inherit;
+  transition: background 0.2s ease;
+}
+
+.featured-more-link:hover {
+  background: rgba(255, 255, 255, 0.04);
+}
+
+[data-theme="light"] .featured-more-link:hover,
+.light .featured-more-link:hover {
+  background: rgba(0, 0, 0, 0.03);
+}
+
+.featured-more-headline {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--sm-text);
+  line-height: 1.4;
+  display: -webkit-box;
+  -webkit-line-clamp: 1;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.featured-more-link:hover .featured-more-headline {
+  color: var(--sm-red-light);
+}
+
+/* ========== Trending Content Layout ========== */
+.trending-content {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.trending-team-pill {
+  display: inline-block;
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--sm-text-dim);
+  white-space: nowrap;
+}
+
+.trending-title {
+  flex: 1;
+  min-width: 0;
+}
+
+.trending-empty {
+  font-size: 14px;
+  color: var(--sm-text-dim);
+  text-align: center;
+  padding: 20px 0;
+}
+
+/* ========== Personalize Feed Banner ========== */
+.personalize-banner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 20px;
+  margin: 16px 0 0;
+  border-radius: 10px;
+  background: linear-gradient(135deg, rgba(188, 0, 0, 0.08), rgba(255, 68, 68, 0.04));
+  border: 1px solid rgba(188, 0, 0, 0.15);
+  text-decoration: none;
+  transition: all 0.25s ease;
+}
+
+.personalize-banner:hover {
+  background: linear-gradient(135deg, rgba(188, 0, 0, 0.12), rgba(255, 68, 68, 0.06));
+  border-color: rgba(188, 0, 0, 0.25);
+}
+
+.personalize-text {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--sm-red-light);
+}
+
+.personalize-arrow {
+  font-size: 18px;
+  color: var(--sm-red-light);
+  transition: transform 0.2s ease;
+}
+
+.personalize-banner:hover .personalize-arrow {
+  transform: translateX(3px);
+}
+
+[data-theme="light"] .personalize-banner,
+.light .personalize-banner {
+  background: linear-gradient(135deg, rgba(188, 0, 0, 0.06), rgba(255, 68, 68, 0.03));
+}
+
+[data-theme="light"] .personalize-text,
+.light .personalize-text {
+  color: #bc0000;
+}
+
+[data-theme="light"] .personalize-arrow,
+.light .personalize-arrow {
+  color: #bc0000;
+}
+
+/* ========== "For You" Nav Link ========== */
+.nav-feed-link {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--sm-red-light) !important;
+  font-weight: 600;
+  font-size: 14px;
+  text-decoration: none;
+  transition: opacity 0.2s ease;
+}
+
+.nav-feed-link:hover {
+  opacity: 0.8;
+}
+
+[data-theme="light"] .nav-feed-link,
+.light .nav-feed-link {
+  color: #bc0000 !important;
+}
+
+/* ========== Animation Pause (tab hidden) ========== */
+.homepage-feed {
+  --anim-state: running;
+}
+
+.hero-bg-mesh::before,
+.glow-orb,
+.hero-headline .gradient-text,
+.sm-grid-overlay,
+.pulse-dot::before,
+.pulse-dot::after {
+  animation-play-state: var(--anim-state, running);
+}
+
+/* ========== Featured Skeleton ========== */
+.featured-skeleton {
+  display: grid;
+  grid-template-columns: 1.5fr 1fr;
+  gap: 24px;
+}
+
+.featured-skeleton-main .skeleton-image {
+  background: var(--sm-surface);
+  animation: skeleton-pulse 1.5s infinite;
+}
+
+.featured-skeleton-side {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.featured-skeleton-side-card {
+  display: flex;
+  gap: 16px;
+}
+
+.featured-skeleton-side-card .skeleton-image {
+  background: var(--sm-surface);
+  animation: skeleton-pulse 1.5s infinite;
+  flex-shrink: 0;
+}
+
+@media (max-width: 768px) {
+  .featured-skeleton {
+    grid-template-columns: 1fr;
+  }
+
+  .personalize-banner {
+    margin: 12px 0 0;
+    padding: 10px 16px;
+  }
+}

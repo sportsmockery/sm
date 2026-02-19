@@ -105,9 +105,7 @@ export function HomepageSidebar({ trendingPosts }: HomepageSidebarProps) {
       </div>
 
       {/* Widget 3: Trending Stories */}
-      {trendingPosts.length > 0 && (
-        <TrendingSection posts={trendingPosts} />
-      )}
+      <TrendingSection posts={trendingPosts} />
 
       {/* Widget 4: Active Poll */}
       <div className="sidebar-widget glass-card-static">

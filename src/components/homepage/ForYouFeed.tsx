@@ -27,9 +27,18 @@ interface ForYouFeedProps {
   isMobile: boolean;
   showTrendingInline: boolean;
   trendingPosts: Post[];
+  activeTeam?: string;
 }
 
 const POSTS_PER_PAGE = 15;
+
+const TEAM_NAMES: Record<string, string> = {
+  bears: 'Bears',
+  bulls: 'Bulls',
+  blackhawks: 'Blackhawks',
+  cubs: 'Cubs',
+  'white-sox': 'White Sox',
+};
 
 export function ForYouFeed({
   posts,
@@ -37,6 +46,7 @@ export function ForYouFeed({
   isMobile,
   showTrendingInline,
   trendingPosts,
+  activeTeam,
 }: ForYouFeedProps) {
   const [displayCount, setDisplayCount] = useState(POSTS_PER_PAGE);
   const [isLoading, setIsLoading] = useState(false);
@@ -123,15 +133,29 @@ export function ForYouFeed({
 
   // Handle empty state
   if (!posts || posts.length === 0) {
+    const teamLabel = activeTeam && activeTeam !== 'all' ? TEAM_NAMES[activeTeam] : null;
     return (
       <div className="glass-card feed-empty-state">
-        <p className="feed-empty-message">
-          Welcome to SportsMockery! Fresh Chicago sports content is on the way.
-        </p>
-        <p className="feed-empty-submessage">
-          Check back soon for Bears, Bulls, Blackhawks, Cubs, and White Sox
-          coverage.
-        </p>
+        {teamLabel ? (
+          <>
+            <p className="feed-empty-message">
+              No {teamLabel} articles right now
+            </p>
+            <p className="feed-empty-submessage">
+              Try showing all teams to see the latest Chicago sports content.
+            </p>
+          </>
+        ) : (
+          <>
+            <p className="feed-empty-message">
+              Welcome to SportsMockery! Fresh Chicago sports content is on the way.
+            </p>
+            <p className="feed-empty-submessage">
+              Check back soon for Bears, Bulls, Blackhawks, Cubs, and White Sox
+              coverage.
+            </p>
+          </>
+        )}
       </div>
     );
   }

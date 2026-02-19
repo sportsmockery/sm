@@ -5,6 +5,7 @@ import { useState, useEffect, useRef, useCallback } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
+import { useAuth } from '@/contexts/AuthContext';
 import { EditorPicksHero } from './EditorPicksHero';
 import { TeamFilterTabs } from './TeamFilterTabs';
 import { ForYouFeed } from './ForYouFeed';
@@ -183,6 +184,8 @@ export function HomepageFeed({
   const [activeTeam, setActiveTeam] = useState<string>('all');
   const [isMobile, setIsMobile] = useState<boolean>(false);
   const router = useRouter();
+  const { isAuthenticated } = useAuth();
+  const actuallyLoggedIn = isAuthenticated || isLoggedIn;
 
   // Feature 1: Team preference memory (localStorage)
   const handleTeamChange = useCallback((team: string) => {
@@ -259,6 +262,21 @@ export function HomepageFeed({
     return () => observer.disconnect();
   }, []);
 
+  // Pause CSS animations when tab is hidden
+  const feedRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    const handleVisibility = () => {
+      if (feedRef.current) {
+        feedRef.current.style.setProperty(
+          '--anim-state',
+          document.hidden ? 'paused' : 'running'
+        );
+      }
+    };
+    document.addEventListener('visibilitychange', handleVisibility);
+    return () => document.removeEventListener('visibilitychange', handleVisibility);
+  }, []);
+
   const safePosts = Array.isArray(initialPosts) ? initialPosts : [];
   const safeEditorPicks = Array.isArray(editorPicks) ? editorPicks : [];
   const safeTrendingPosts = Array.isArray(trendingPosts) ? trendingPosts : [];
@@ -280,7 +298,7 @@ export function HomepageFeed({
         })();
 
   return (
-    <div className="homepage-feed">
+    <div className="homepage-feed" ref={feedRef}>
       {/* ===== Scroll Progress Bar ===== */}
       <ScrollProgress />
 
@@ -339,6 +357,21 @@ export function HomepageFeed({
         </div>
       </div>
 
+      {/* ===== Personalize Banner (logged-in only) ===== */}
+      {actuallyLoggedIn && (
+        <div className="sm-container">
+          <Link href="/feed" className="personalize-banner">
+            <span className="personalize-text">
+              <svg width="16" height="16" fill="currentColor" viewBox="0 0 24 24" style={{ flexShrink: 0 }}>
+                <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" />
+              </svg>
+              Personalize your feed
+            </span>
+            <span className="personalize-arrow">&rarr;</span>
+          </Link>
+        </div>
+      )}
+
       {/* ===== SECTION 3: Featured Content ===== */}
       <section className="homepage-section">
         <div className="sm-container">
@@ -373,6 +406,7 @@ export function HomepageFeed({
                 isMobile={isMobile}
                 showTrendingInline={isMobile}
                 trendingPosts={safeTrendingPosts}
+                activeTeam={activeTeam}
               />
             </main>
 

@@ -1,42 +1,65 @@
 // src/lib/homepage-fallbacks.ts
 // Fallback data for when database queries return empty
 
+const TEAM_GRADIENTS: Record<string, string> = {
+  bears: 'linear-gradient(135deg, #0B162A, #C83803)',
+  bulls: 'linear-gradient(135deg, #CE1141, #000000)',
+  blackhawks: 'linear-gradient(135deg, #CF0A2C, #000000)',
+  cubs: 'linear-gradient(135deg, #0E3386, #CC3433)',
+  'white-sox': 'linear-gradient(135deg, #27251F, #C4CED4)',
+};
+
+export function getPlaceholderGradient(teamSlug: string | null): string {
+  if (!teamSlug) return 'linear-gradient(135deg, #1a1a2e, #bc0000)';
+  return TEAM_GRADIENTS[teamSlug] || 'linear-gradient(135deg, #1a1a2e, #bc0000)';
+}
+
+export function getArticleImage(post: { featured_image: string | null; team_slug: string | null }): string | null {
+  return post.featured_image;
+}
+
 export const FALLBACK_EDITOR_PICKS = [
   {
     id: 'fallback-1',
-    title: 'Welcome to SportsMockery - Your Source for Chicago Sports',
-    slug: 'welcome-to-sportsmockery',
+    title: 'Meet Scout AI — Your Chicago Sports Expert',
+    slug: 'scout-ai',
     featured_image: null,
-    team_slug: 'bears',
+    team_slug: null,
     category_slug: null,
-    pinned_slot: 1
+    content_type: 'analysis',
+    pinned_slot: 1,
+    placeholder_gradient: 'linear-gradient(135deg, #1a1a2e, #bc0000)',
   },
   {
     id: 'fallback-2',
-    title: 'Bears News and Analysis - Daily Updates',
-    slug: 'bears-news-analysis',
+    title: 'GM Simulator — Build Your Dream Roster',
+    slug: 'gm',
     featured_image: null,
-    team_slug: 'bears',
+    team_slug: null,
     category_slug: null,
-    pinned_slot: 2
+    content_type: 'article',
+    pinned_slot: 2,
+    placeholder_gradient: 'linear-gradient(135deg, #0B162A, #C83803)',
   },
   {
     id: 'fallback-3',
-    title: 'Bulls Coverage - Scores, Trades, and Rumors',
-    slug: 'bulls-coverage',
+    title: 'Mock Draft — Make Your Picks Before the Pros',
+    slug: 'mock-draft',
     featured_image: null,
-    team_slug: 'bulls',
+    team_slug: null,
     category_slug: null,
-    pinned_slot: 3
-  }
+    content_type: 'article',
+    pinned_slot: 3,
+    placeholder_gradient: 'linear-gradient(135deg, #0E3386, #CC3433)',
+  },
 ];
 
 export const FALLBACK_POSTS = [
   {
     id: 'fallback-post-1',
-    title: 'Welcome to SportsMockery - Chicago Sports Coverage',
-    slug: 'welcome',
-    excerpt: 'Your home for Bears, Bulls, Blackhawks, Cubs, and White Sox news.',
+    title: 'Welcome to SportsMockery — Chicago Sports, Reimagined',
+    slug: 'scout-ai',
+    excerpt: 'AI-powered analysis, real-time scores, trade simulators — all five Chicago teams, one platform.',
     featured_image: null,
     team_slug: 'bears',
     author_name: 'SportsMockery Staff',
@@ -48,78 +71,85 @@ export const FALLBACK_POSTS = [
     views: 100,
     author_id: null,
     primary_topic: 'general',
-    category_slug: null
+    category_slug: null,
+    placeholder_gradient: getPlaceholderGradient('bears'),
   },
   {
     id: 'fallback-post-2',
-    title: 'Chicago Bears - Latest News and Rumors',
-    slug: 'bears-news',
-    excerpt: 'Stay updated with the latest Bears coverage.',
-    featured_image: null,
-    team_slug: 'bears',
-    author_name: 'SportsMockery Staff',
-    published_at: new Date().toISOString(),
-    content_type: 'article',
-    is_trending: true,
-    is_evergreen: false,
-    importance_score: 75,
-    views: 50,
-    author_id: null,
-    primary_topic: 'bears',
-    category_slug: null
-  },
-  {
-    id: 'fallback-post-3',
-    title: 'Chicago Bulls - Scores and Updates',
-    slug: 'bulls-news',
-    excerpt: 'Follow the Bulls throughout the season.',
+    title: 'Ask Scout AI Anything About Chicago Sports',
+    slug: 'scout-ai',
+    excerpt: 'Get instant answers about Bears, Bulls, Blackhawks, Cubs, and White Sox.',
     featured_image: null,
     team_slug: 'bulls',
     author_name: 'SportsMockery Staff',
     published_at: new Date().toISOString(),
-    content_type: 'article',
-    is_trending: false,
-    is_evergreen: false,
-    importance_score: 70,
-    views: 40,
+    content_type: 'analysis',
+    is_trending: true,
+    is_evergreen: true,
+    importance_score: 75,
+    views: 50,
     author_id: null,
-    primary_topic: 'bulls',
-    category_slug: null
+    primary_topic: 'general',
+    category_slug: null,
+    placeholder_gradient: getPlaceholderGradient('bulls'),
   },
   {
-    id: 'fallback-post-4',
-    title: 'Chicago Blackhawks - Season Coverage',
-    slug: 'blackhawks-news',
-    excerpt: 'Your source for Blackhawks news and analysis.',
-    featured_image: null,
-    team_slug: 'blackhawks',
-    author_name: 'SportsMockery Staff',
-    published_at: new Date().toISOString(),
-    content_type: 'article',
-    is_trending: false,
-    is_evergreen: false,
-    importance_score: 65,
-    views: 30,
-    author_id: null,
-    primary_topic: 'blackhawks'
-  },
-  {
-    id: 'fallback-post-5',
-    title: 'Chicago Cubs - News and Updates',
-    slug: 'cubs-news',
-    excerpt: 'Cubs coverage throughout the season.',
+    id: 'fallback-post-3',
+    title: 'Build & Grade Trades in the GM Simulator',
+    slug: 'gm',
+    excerpt: 'Think you can be a better GM? Put your trades to the test.',
     featured_image: null,
     team_slug: 'cubs',
     author_name: 'SportsMockery Staff',
     published_at: new Date().toISOString(),
     content_type: 'article',
     is_trending: false,
-    is_evergreen: false,
+    is_evergreen: true,
+    importance_score: 70,
+    views: 40,
+    author_id: null,
+    primary_topic: 'general',
+    category_slug: null,
+    placeholder_gradient: getPlaceholderGradient('cubs'),
+  },
+  {
+    id: 'fallback-post-4',
+    title: 'Simulate Your Mock Draft',
+    slug: 'mock-draft',
+    excerpt: 'Make your picks before the pros do. NFL and MLB drafts available.',
+    featured_image: null,
+    team_slug: 'blackhawks',
+    author_name: 'SportsMockery Staff',
+    published_at: new Date().toISOString(),
+    content_type: 'article',
+    is_trending: false,
+    is_evergreen: true,
+    importance_score: 65,
+    views: 30,
+    author_id: null,
+    primary_topic: 'general',
+    category_slug: null,
+    placeholder_gradient: getPlaceholderGradient('blackhawks'),
+  },
+  {
+    id: 'fallback-post-5',
+    title: 'Join the Fan Zone — Chat With Chicago Fans',
+    slug: 'fan-zone',
+    excerpt: 'Talk sports with AI-powered personalities and fellow Chicago fans.',
+    featured_image: null,
+    team_slug: 'white-sox',
+    author_name: 'SportsMockery Staff',
+    published_at: new Date().toISOString(),
+    content_type: 'article',
+    is_trending: false,
+    is_evergreen: true,
     importance_score: 60,
     views: 25,
     author_id: null,
-    primary_topic: 'cubs'
-  }
+    primary_topic: 'general',
+    category_slug: null,
+    placeholder_gradient: getPlaceholderGradient('white-sox'),
+  },
 ];
 
 export function getHomepageDataWithFallbacks(
@@ -138,6 +168,6 @@ export function getHomepageDataWithFallbacks(
   return {
     editorPicks: hasEditorPicks ? editorPicks : FALLBACK_EDITOR_PICKS,
     rankedPosts: hasRankedPosts ? rankedPosts : FALLBACK_POSTS,
-    trendingPosts: hasTrendingPosts ? trendingPosts : FALLBACK_POSTS.filter(p => p.is_trending)
+    trendingPosts: hasTrendingPosts ? trendingPosts : FALLBACK_POSTS.filter(p => p.is_trending),
   };
 }
