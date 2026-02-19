@@ -1842,3 +1842,104 @@
     animation: none; opacity: 1; transform: none;
   }
 }
+
+/* ========== Feature Preview Windows ========== */
+.preview-window {
+  background: #0a0a10;
+  border: 1px solid rgba(255,255,255,0.06);
+  border-radius: 12px;
+  overflow: hidden;
+  font-family: 'Inter', sans-serif;
+}
+.preview-topbar {
+  display: flex; align-items: center; gap: 8px;
+  padding: 12px 16px;
+  background: rgba(255,255,255,0.03);
+  border-bottom: 1px solid rgba(255,255,255,0.04);
+}
+.preview-dot { width: 10px; height: 10px; border-radius: 50%; }
+.preview-dot.red { background: #ff5f57; }
+.preview-dot.yellow { background: #febc2e; }
+.preview-dot.green { background: #28c840; }
+.preview-title { margin-left: 8px; font-size: 12px; color: var(--hm-text-dim, #6a6a7a); font-weight: 500; }
+
+/* Scout AI preview */
+.preview-chat { padding: 16px; display: flex; flex-direction: column; gap: 12px; }
+.preview-user-msg { align-self: flex-end; background: rgba(188,0,0,0.15); padding: 10px 14px; border-radius: 16px 16px 4px 16px; max-width: 75%; }
+.preview-user-msg .msg-text { font-size: 13px; color: var(--hm-text, #e0e0e8); }
+.preview-ai-msg { display: flex; gap: 10px; }
+.ai-avatar { width: 32px; height: 32px; border-radius: 50%; background: rgba(188,0,0,0.2); display: flex; align-items: center; justify-content: center; font-size: 14px; flex-shrink: 0; }
+.msg-body { background: rgba(255,255,255,0.04); padding: 12px 14px; border-radius: 4px 16px 16px 16px; }
+.ai-name { font-size: 11px; font-weight: 600; color: var(--hm-red-light, #ff6666); }
+.msg-body .msg-text { font-size: 13px; color: var(--hm-text-muted, #9a9ab0); margin-top: 4px; line-height: 1.5; }
+.ai-sources { display: flex; gap: 6px; margin-top: 8px; flex-wrap: wrap; }
+.source-pill { font-size: 10px; padding: 3px 8px; border-radius: 10px; background: rgba(255,255,255,0.06); color: var(--hm-text-dim, #6a6a7a); }
+
+/* Trade simulator preview */
+.preview-trade { display: flex; align-items: flex-start; gap: 12px; padding: 16px; }
+.trade-side { flex: 1; }
+.team-header { display: flex; align-items: center; gap: 8px; margin-bottom: 10px; font-size: 12px; font-weight: 600; color: var(--hm-text-muted, #9a9ab0); }
+.preview-team-logo { width: 20px; height: 20px; }
+.trade-asset { padding: 8px 12px; background: rgba(255,255,255,0.04); border-radius: 8px; font-size: 13px; color: var(--hm-text, #e0e0e8); margin-bottom: 6px; display: flex; justify-content: space-between; }
+.trade-asset .pos { font-size: 11px; color: var(--hm-text-dim, #6a6a7a); }
+.trade-arrow { font-size: 20px; color: var(--hm-text-dim, #6a6a7a); padding-top: 40px; }
+.trade-grade-bar { display: flex; align-items: center; gap: 12px; padding: 12px 16px; border-top: 1px solid rgba(255,255,255,0.04); }
+.grade-label { font-size: 11px; color: var(--hm-text-dim, #6a6a7a); font-weight: 500; }
+.grade-meter { flex: 1; height: 6px; background: rgba(255,255,255,0.06); border-radius: 3px; overflow: hidden; }
+.grade-fill { height: 100%; background: var(--hm-gradient, linear-gradient(135deg, #bc0000, #ff4444)); border-radius: 3px; }
+.grade-value { font-size: 16px; font-weight: 700; color: #4ade80; }
+.trade-insight { display: flex; align-items: center; gap: 8px; padding: 10px 16px; font-size: 12px; color: var(--hm-text-dim, #6a6a7a); background: rgba(255,255,255,0.02); }
+.insight-icon { flex-shrink: 0; }
+
+/* Chat preview */
+.preview-room-tabs { display: flex; gap: 8px; padding: 10px 16px; border-bottom: 1px solid rgba(255,255,255,0.04); overflow-x: auto; }
+.room-tab { font-size: 12px; padding: 4px 10px; border-radius: 12px; color: var(--hm-text-dim, #6a6a7a); background: rgba(255,255,255,0.04); white-space: nowrap; }
+.room-tab.active { background: rgba(188,0,0,0.15); color: var(--hm-red-light, #ff6666); }
+.preview-messages { padding: 12px 16px; display: flex; flex-direction: column; gap: 10px; }
+.chat-msg { display: flex; flex-direction: column; gap: 2px; }
+.chat-name { font-size: 11px; font-weight: 600; }
+.bears-color { color: #C83803; }
+.ai-color { color: var(--hm-red-light, #ff6666); }
+.chat-text { font-size: 13px; color: var(--hm-text-muted, #9a9ab0); line-height: 1.4; }
+.chat-time { font-size: 10px; color: var(--hm-text-dim, #6a6a7a); }
+.chat-msg.ai-msg { background: rgba(188,0,0,0.05); padding: 10px 12px; border-radius: 8px; border-left: 2px solid var(--hm-red, #bc0000); }
+.preview-poll-inline { padding: 10px 16px; border-top: 1px solid rgba(255,255,255,0.04); }
+.poll-q { font-size: 12px; font-weight: 600; color: var(--hm-text-muted, #9a9ab0); }
+.poll-bar { margin-top: 6px; height: 24px; background: rgba(255,255,255,0.06); border-radius: 12px; overflow: hidden; position: relative; }
+.poll-fill { height: 100%; background: var(--hm-gradient, linear-gradient(135deg, #bc0000, #ff4444)); border-radius: 12px; }
+.poll-bar span { position: absolute; right: 10px; top: 4px; font-size: 11px; font-weight: 600; color: #fff; }
+
+/* Stats / Data Cosmos preview */
+.preview-stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; padding: 16px; }
+.stat-card-mini { background: rgba(255,255,255,0.03); padding: 12px; border-radius: 8px; display: flex; flex-direction: column; gap: 4px; }
+.stat-label { font-size: 10px; color: var(--hm-text-dim, #6a6a7a); text-transform: uppercase; letter-spacing: 0.5px; }
+.stat-value { font-size: 22px; font-weight: 700; color: var(--hm-text, #e0e0e8); }
+.stat-rank { font-size: 11px; font-weight: 500; }
+.rank-good { color: #4ade80; }
+.rank-mid { color: #fbbf24; }
+.rank-bad { color: #f87171; }
+.preview-chart { padding: 0 16px 16px; }
+.chart-label { font-size: 11px; color: var(--hm-text-dim, #6a6a7a); margin-bottom: 8px; }
+.mini-bar-chart { display: flex; align-items: flex-end; gap: 6px; height: 80px; }
+.mini-bar-chart .bar { flex: 1; background: rgba(188,0,0,0.3); border-radius: 4px 4px 0 0; display: flex; align-items: flex-start; justify-content: center; min-height: 4px; }
+.mini-bar-chart .bar.highlight { background: linear-gradient(135deg, #bc0000, #ff4444); }
+.mini-bar-chart .bar span { font-size: 9px; font-weight: 600; color: var(--hm-text-dim, #6a6a7a); padding-top: 4px; }
+
+/* Light mode overrides for preview windows */
+[data-theme="light"] .preview-window { background: #f5f5f7; border-color: rgba(0,0,0,0.08); }
+[data-theme="light"] .preview-topbar { background: rgba(0,0,0,0.03); border-bottom-color: rgba(0,0,0,0.06); }
+[data-theme="light"] .trade-asset,
+[data-theme="light"] .stat-card-mini,
+[data-theme="light"] .room-tab { background: rgba(0,0,0,0.04); }
+[data-theme="light"] .preview-user-msg { background: rgba(188,0,0,0.08); }
+[data-theme="light"] .msg-body { background: rgba(0,0,0,0.03); }
+[data-theme="light"] .source-pill { background: rgba(0,0,0,0.05); }
+[data-theme="light"] .trade-grade-bar { border-top-color: rgba(0,0,0,0.06); }
+[data-theme="light"] .grade-meter { background: rgba(0,0,0,0.06); }
+[data-theme="light"] .trade-insight { background: rgba(0,0,0,0.02); }
+[data-theme="light"] .preview-room-tabs { border-bottom-color: rgba(0,0,0,0.06); }
+[data-theme="light"] .room-tab.active { background: rgba(188,0,0,0.08); }
+[data-theme="light"] .chat-msg.ai-msg { background: rgba(188,0,0,0.04); }
+[data-theme="light"] .preview-poll-inline { border-top-color: rgba(0,0,0,0.06); }
+[data-theme="light"] .poll-bar { background: rgba(0,0,0,0.06); }
+[data-theme="light"] .mini-bar-chart .bar { background: rgba(188,0,0,0.15); }

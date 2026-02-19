@@ -203,25 +203,27 @@ export default function HomePage() {
         <div className="hm-container">
           <div className="hm-showcase-inner hm-animate">
             <div className="hm-showcase-visual">
-              <div className="hm-mock-ui">
-                <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 12 }}>
-                  <Image src="/downloads/scout-v2.png" alt="Scout AI" width={32} height={32} style={{ borderRadius: '50%' }} />
-                  <div>
-                    <div className="hm-mock-bar hm-mock-bar-short" style={{ height: 6, marginBottom: 6 }} />
-                    <div className="hm-mock-bar hm-mock-bar-medium" style={{ height: 4, opacity: 0.5 }} />
+              <div className="preview-window">
+                <div className="preview-topbar">
+                  <div className="preview-dot red" /><div className="preview-dot yellow" /><div className="preview-dot green" />
+                  <span className="preview-title">Scout AI</span>
+                </div>
+                <div className="preview-chat">
+                  <div className="preview-user-msg">
+                    <span className="msg-text">Who should the Bears draft at #1 overall?</span>
                   </div>
-                </div>
-                <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 10, justifyContent: 'center' }}>
-                  <div className="hm-mock-bar hm-mock-bar-long" />
-                  <div className="hm-mock-bar hm-mock-bar-medium" />
-                  <div className="hm-mock-bar hm-mock-bar-accent" />
-                  <div style={{ height: 16 }} />
-                  <div className="hm-mock-bar hm-mock-bar-long" />
-                  <div className="hm-mock-bar hm-mock-bar-short" />
-                </div>
-                <div style={{ display: 'flex', gap: 8, marginTop: 'auto' }}>
-                  <div style={{ flex: 1, height: 36, borderRadius: 10, background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.06)' }} />
-                  <div style={{ width: 36, height: 36, borderRadius: 10, background: 'var(--hm-gradient-subtle)' }} />
+                  <div className="preview-ai-msg">
+                    <div className="ai-avatar">🔴</div>
+                    <div className="msg-body">
+                      <span className="ai-name">Scout AI</span>
+                      <p className="msg-text">Based on team needs and draft projections, the Bears should target <strong>Shedeur Sanders (QB, Colorado)</strong>. Their pass rush ranks 28th in pressures generated, but the QB position takes priority given Caleb Williams&apos; inconsistency.</p>
+                      <div className="ai-sources">
+                        <span className="source-pill">Cap Data</span>
+                        <span className="source-pill">Draft Board</span>
+                        <span className="source-pill">Team Stats</span>
+                      </div>
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
@@ -251,40 +253,38 @@ export default function HomePage() {
         <div className="hm-container">
           <div className="hm-showcase-inner hm-animate" style={{ direction: 'rtl' }}>
             <div className="hm-showcase-visual" style={{ direction: 'ltr' }}>
-              <div className="hm-mock-ui">
-                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 16 }}>
-                  <div style={{ display: 'flex', gap: 8 }}>
-                    <div style={{ width: 36, height: 36, borderRadius: 10, background: 'rgba(188,0,0,0.12)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                      <img src="https://a.espncdn.com/i/teamlogos/nfl/500/chi.png" alt="Bears" width={20} height={20} />
+              <div className="preview-window">
+                <div className="preview-topbar">
+                  <div className="preview-dot red" /><div className="preview-dot yellow" /><div className="preview-dot green" />
+                  <span className="preview-title">Trade Simulator</span>
+                </div>
+                <div className="preview-trade">
+                  <div className="trade-side">
+                    <div className="team-header">
+                      <img src="https://a.espncdn.com/i/teamlogos/nfl/500/chi.png" alt="Bears" className="preview-team-logo" />
+                      <span>Bears Send</span>
                     </div>
-                    <div>
-                      <div className="hm-mock-bar" style={{ width: 60, height: 6, marginBottom: 6 }} />
-                      <div className="hm-mock-bar" style={{ width: 40, height: 4, opacity: 0.4 }} />
-                    </div>
+                    <div className="trade-asset">DJ Moore <span className="pos">WR</span></div>
+                    <div className="trade-asset">2027 1st Round <span className="pos">Pick</span></div>
                   </div>
-                  <div style={{ display: 'flex', alignItems: 'center' }}>
-                    <svg width="16" height="16" fill="none" stroke="#ff4444" strokeWidth="2" viewBox="0 0 24 24"><path d="M16 3h5v5M4 20L21 3" /></svg>
-                  </div>
-                  <div style={{ display: 'flex', gap: 8 }}>
-                    <div>
-                      <div className="hm-mock-bar" style={{ width: 60, height: 6, marginBottom: 6 }} />
-                      <div className="hm-mock-bar" style={{ width: 40, height: 4, opacity: 0.4 }} />
+                  <div className="trade-arrow">⇄</div>
+                  <div className="trade-side">
+                    <div className="team-header">
+                      <img src="https://a.espncdn.com/i/teamlogos/nfl/500/gb.png" alt="Packers" className="preview-team-logo" />
+                      <span>Packers Send</span>
                     </div>
-                    <div style={{ width: 36, height: 36, borderRadius: 10, background: 'rgba(255,255,255,0.04)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                      <img src="https://a.espncdn.com/i/teamlogos/nfl/500/gb.png" alt="Packers" width={20} height={20} />
-                    </div>
+                    <div className="trade-asset">Rashan Gary <span className="pos">EDGE</span></div>
+                    <div className="trade-asset">2026 3rd Round <span className="pos">Pick</span></div>
                   </div>
                 </div>
-                <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 8, justifyContent: 'center' }}>
-                  <div className="hm-mock-bar hm-mock-bar-long" />
-                  <div className="hm-mock-bar hm-mock-bar-medium" />
-                  <div className="hm-mock-bar hm-mock-bar-short" />
-                  <div style={{ height: 8 }} />
-                  <div className="hm-mock-bar hm-mock-bar-accent" />
-                  <div className="hm-mock-bar hm-mock-bar-medium" />
+                <div className="trade-grade-bar">
+                  <div className="grade-label">AI Grade</div>
+                  <div className="grade-meter"><div className="grade-fill" style={{ width: '78%' }} /></div>
+                  <div className="grade-value">B+</div>
                 </div>
-                <div style={{ marginTop: 'auto', textAlign: 'center' }}>
-                  <span className="hm-grade-badge">GRADE: A-</span>
+                <div className="trade-insight">
+                  <span className="insight-icon">💡</span>
+                  <span>Bears improve pass rush by +18% but lose a top-10 WR asset</span>
                 </div>
               </div>
             </div>
@@ -314,47 +314,41 @@ export default function HomePage() {
         <div className="hm-container">
           <div className="hm-showcase-inner hm-animate">
             <div className="hm-showcase-visual">
-              <div className="hm-mock-ui">
-                {/* Room list */}
-                <div style={{ display: 'flex', gap: 8, marginBottom: 12 }}>
-                  {[
-                    { logo: 'https://a.espncdn.com/i/teamlogos/nfl/500/chi.png', name: 'Bears Den' },
-                    { logo: 'https://a.espncdn.com/i/teamlogos/nba/500/chi.png', name: 'Bulls Court' },
-                    { logo: 'https://a.espncdn.com/i/teamlogos/mlb/500/chc.png', name: 'Cubs Dugout' },
-                  ].map((r) => (
-                    <div key={r.name} style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '4px 10px', borderRadius: 8, background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.06)', fontSize: 10, color: '#8a8a9a' }}>
-                      <img src={r.logo} alt={r.name} width={14} height={14} style={{ borderRadius: '50%' }} />
-                      {r.name}
-                    </div>
-                  ))}
+              <div className="preview-window">
+                <div className="preview-topbar">
+                  <div className="preview-dot red" /><div className="preview-dot yellow" /><div className="preview-dot green" />
+                  <span className="preview-title">Fan Hub — Bears Den</span>
                 </div>
-                {/* Chat messages */}
-                <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 10, justifyContent: 'center' }}>
-                  <div style={{ display: 'flex', gap: 8 }}>
-                    <div style={{ fontSize: 10, color: '#ff4444', fontWeight: 600, whiteSpace: 'nowrap' }}>BearDown_Mike</div>
-                    <div className="hm-mock-bar hm-mock-bar-long" style={{ height: 6 }} />
+                <div className="preview-room-tabs">
+                  <span className="room-tab active">🐻 Bears Den</span>
+                  <span className="room-tab">🐂 Bulls Court</span>
+                  <span className="room-tab">⚾ Cubs Dugout</span>
+                </div>
+                <div className="preview-messages">
+                  <div className="chat-msg user-msg">
+                    <span className="chat-name bears-color">BearDown_Mike</span>
+                    <span className="chat-text">Poles needs to trade up for a pass rusher. This defense can&apos;t generate pressure.</span>
+                    <span className="chat-time">2m ago</span>
                   </div>
-                  <div style={{ display: 'flex', gap: 8 }}>
-                    <div style={{ fontSize: 10, color: '#ff4444', fontWeight: 600, whiteSpace: 'nowrap' }}>ChiTownFan</div>
-                    <div className="hm-mock-bar hm-mock-bar-medium" style={{ height: 6 }} />
+                  <div className="chat-msg user-msg">
+                    <span className="chat-name bears-color">ChiTownFan</span>
+                    <span className="chat-text">Agree 💯 but the cap situation is brutal. We&apos;d have to move DJ Moore.</span>
+                    <span className="chat-time">1m ago</span>
                   </div>
-                  <div style={{ display: 'flex', gap: 8, alignItems: 'flex-start', padding: 8, borderRadius: 10, background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.04)' }}>
-                    <Image src="/downloads/scout-v2.png" alt="AI" width={18} height={18} style={{ borderRadius: '50%', flexShrink: 0 }} />
-                    <div>
-                      <div style={{ fontSize: 9, color: '#ff4444', fontWeight: 600, marginBottom: 2 }}>Bears AI Bot</div>
-                      <div className="hm-mock-bar hm-mock-bar-long" style={{ height: 5 }} />
-                      <div className="hm-mock-bar hm-mock-bar-medium" style={{ height: 5, marginTop: 4 }} />
-                    </div>
+                  <div className="chat-msg ai-msg">
+                    <span className="chat-name ai-color">🤖 Bears AI Bot</span>
+                    <span className="chat-text">Fun fact: The Bears rank 28th in pressures generated this season. A top EDGE rusher would project a +22% improvement based on historical trade comps.</span>
+                    <span className="chat-time">just now</span>
                   </div>
-                  <div style={{ display: 'flex', gap: 8 }}>
-                    <div style={{ fontSize: 10, color: '#ff4444', fontWeight: 600, whiteSpace: 'nowrap' }}>DaBears92</div>
-                    <div className="hm-mock-bar hm-mock-bar-short" style={{ height: 6 }} />
+                  <div className="chat-msg user-msg">
+                    <span className="chat-name bears-color">DaBears92</span>
+                    <span className="chat-text">See, even the bot agrees. Make the trade, Poles! 🔥</span>
+                    <span className="chat-time">just now</span>
                   </div>
                 </div>
-                {/* Input */}
-                <div style={{ display: 'flex', gap: 8, marginTop: 'auto' }}>
-                  <div style={{ flex: 1, height: 32, borderRadius: 10, background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.06)' }} />
-                  <div style={{ width: 32, height: 32, borderRadius: 10, background: 'var(--hm-gradient-subtle)' }} />
+                <div className="preview-poll-inline">
+                  <span className="poll-q">🗳 Should Bears trade up for EDGE?</span>
+                  <div className="poll-bar"><div className="poll-fill" style={{ width: '73%' }} /><span>Yes — 73%</span></div>
                 </div>
               </div>
             </div>
@@ -383,46 +377,45 @@ export default function HomePage() {
         <div className="hm-container">
           <div className="hm-showcase-inner hm-animate" style={{ direction: 'rtl' }}>
             <div className="hm-showcase-visual" style={{ direction: 'ltr' }}>
-              <div className="hm-mock-ui">
-                {/* Team tabs */}
-                <div style={{ display: 'flex', gap: 6, marginBottom: 12 }}>
-                  {[
-                    'https://a.espncdn.com/i/teamlogos/nfl/500/chi.png',
-                    'https://a.espncdn.com/i/teamlogos/nba/500/chi.png',
-                    'https://a.espncdn.com/i/teamlogos/mlb/500/chc.png',
-                    'https://a.espncdn.com/i/teamlogos/mlb/500/chw.png',
-                    'https://a.espncdn.com/i/teamlogos/nhl/500/chi.png',
-                  ].map((logo, i) => (
-                    <div key={i} style={{ width: 28, height: 28, borderRadius: 8, background: i === 0 ? 'rgba(188,0,0,0.15)' : 'rgba(255,255,255,0.04)', border: `1px solid ${i === 0 ? 'rgba(188,0,0,0.3)' : 'rgba(255,255,255,0.06)'}`, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                      <img src={logo} alt="" width={16} height={16} />
-                    </div>
-                  ))}
+              <div className="preview-window">
+                <div className="preview-topbar">
+                  <div className="preview-dot red" /><div className="preview-dot yellow" /><div className="preview-dot green" />
+                  <span className="preview-title">Data Cosmos — Bears Stats</span>
                 </div>
-                {/* Stat row */}
-                <div style={{ display: 'flex', gap: 8, marginBottom: 12 }}>
-                  {['11-6', '378', '287', '#4'].map((v) => (
-                    <div key={v} style={{ flex: 1, padding: '8px 4px', borderRadius: 8, background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.04)', textAlign: 'center' }}>
-                      <div style={{ fontSize: 14, fontWeight: 700, color: '#fff' }}>{v}</div>
-                      <div style={{ width: '60%', height: 3, borderRadius: 2, background: 'rgba(255,255,255,0.06)', margin: '4px auto 0' }} />
-                    </div>
-                  ))}
+                <div className="preview-stats-grid">
+                  <div className="stat-card-mini">
+                    <span className="stat-label">Passing YDS</span>
+                    <span className="stat-value">3,847</span>
+                    <span className="stat-rank rank-mid">#18 in NFL</span>
+                  </div>
+                  <div className="stat-card-mini">
+                    <span className="stat-label">Rush YDS</span>
+                    <span className="stat-value">2,211</span>
+                    <span className="stat-rank rank-good">#6 in NFL</span>
+                  </div>
+                  <div className="stat-card-mini">
+                    <span className="stat-label">Points/G</span>
+                    <span className="stat-value">21.4</span>
+                    <span className="stat-rank rank-mid">#20 in NFL</span>
+                  </div>
+                  <div className="stat-card-mini">
+                    <span className="stat-label">Sacks</span>
+                    <span className="stat-value">31</span>
+                    <span className="stat-rank rank-bad">#27 in NFL</span>
+                  </div>
                 </div>
-                {/* Bar chart */}
-                <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 8, justifyContent: 'center' }}>
-                  {[72, 58, 81, 65].map((w, i) => (
-                    <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                      <div className="hm-mock-bar" style={{ width: 40, height: 4, opacity: 0.4 }} />
-                      <div style={{ flex: 1, height: 6, borderRadius: 3, background: 'rgba(255,255,255,0.06)', overflow: 'hidden' }}>
-                        <div style={{ width: `${w}%`, height: '100%', borderRadius: 3, background: 'linear-gradient(135deg, #bc0000, #ff4444)' }} />
-                      </div>
-                    </div>
-                  ))}
-                </div>
-                {/* Leaderboard hint */}
-                <div style={{ display: 'flex', gap: 8, marginTop: 'auto' }}>
-                  {[1, 2, 3].map((n) => (
-                    <div key={n} style={{ flex: 1, height: 28, borderRadius: 8, background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.04)' }} />
-                  ))}
+                <div className="preview-chart">
+                  <div className="chart-label">Scoring Trend (Last 8 Games)</div>
+                  <div className="mini-bar-chart">
+                    <div className="bar" style={{ height: '60%' }}><span>17</span></div>
+                    <div className="bar" style={{ height: '80%' }}><span>24</span></div>
+                    <div className="bar" style={{ height: '45%' }}><span>13</span></div>
+                    <div className="bar" style={{ height: '95%' }}><span>31</span></div>
+                    <div className="bar" style={{ height: '70%' }}><span>21</span></div>
+                    <div className="bar" style={{ height: '55%' }}><span>16</span></div>
+                    <div className="bar highlight" style={{ height: '85%' }}><span>27</span></div>
+                    <div className="bar highlight" style={{ height: '75%' }}><span>23</span></div>
+                  </div>
                 </div>
               </div>
             </div>
