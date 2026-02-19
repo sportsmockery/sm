@@ -83,7 +83,7 @@ export function HomepageFeed({
             <span className="pulse-dot" /> Chicago Sports Hub
           </div>
 
-          <h1 className="hero-headline">
+          <h1 className="hero-headline" style={{ whiteSpace: 'nowrap' }}>
             Sports Mockery <span className="gradient-text">2.0</span>
           </h1>
 
