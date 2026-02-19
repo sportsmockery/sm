@@ -68,6 +68,38 @@ export function ForYouFeed({
   }, [loadMore]);
 
   const visiblePosts = posts.slice(0, displayCount);
+  const feedGridRef = useRef<HTMLDivElement>(null);
+
+  // Scroll-in animation: first 6 cards show immediately, rest animate in
+  useEffect(() => {
+    if (!feedGridRef.current) return;
+    const IMMEDIATE_COUNT = 6;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            entry.target.classList.remove('card-scroll-hidden');
+            entry.target.classList.add('card-scroll-in');
+            observer.unobserve(entry.target);
+          }
+        });
+      },
+      { rootMargin: '50px', threshold: 0.1 }
+    );
+
+    const cards = feedGridRef.current.querySelectorAll('[data-feed-card]');
+    cards.forEach((card, i) => {
+      if (i < IMMEDIATE_COUNT) {
+        card.classList.remove('card-scroll-hidden');
+      } else if (!card.classList.contains('card-scroll-in')) {
+        card.classList.add('card-scroll-hidden');
+        observer.observe(card);
+      }
+    });
+
+    return () => observer.disconnect();
+  }, [visiblePosts.length]);
 
   // Suppress unused variable warnings for props used conditionally
   void isLoggedIn;
@@ -88,9 +120,9 @@ export function ForYouFeed({
   }
 
   return (
-    <div className="feed-grid">
+    <div className="feed-grid" ref={feedGridRef}>
       {visiblePosts.map((post, index) => (
-        <div key={post.id}>
+        <div key={post.id} data-feed-card>
           <PostCard post={post} priority={index < 3} />
 
           {/* Insert trending drawer after index 5 on mobile */}

@@ -35,13 +35,16 @@ const TEAM_DISPLAY_NAMES: Record<string, string> = {
 function formatRecency(publishedAt: string): string {
   const date = new Date(publishedAt);
   const now = new Date();
+  const diffMs = now.getTime() - date.getTime();
+  const minutesAgo = Math.floor(diffMs / 60000);
   const hoursAgo = differenceInHours(now, date);
   const daysAgo = differenceInDays(now, date);
 
-  if (hoursAgo < 2) return 'Just now';
-  if (hoursAgo < 24) return 'Today';
+  if (minutesAgo < 1) return 'Just now';
+  if (minutesAgo < 60) return `${minutesAgo}m ago`;
+  if (hoursAgo < 24) return `${hoursAgo}h ago`;
   if (daysAgo === 1) return 'Yesterday';
-  if (daysAgo <= 6) return `${daysAgo} days ago`;
+  if (daysAgo <= 6) return `${daysAgo}d ago`;
   return format(date, 'MMM d');
 }
 

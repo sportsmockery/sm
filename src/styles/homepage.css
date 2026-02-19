@@ -1081,4 +1081,427 @@
   .tool-grid {
     grid-template-columns: repeat(2, 1fr);
   }
+
+  .hero-search-bar {
+    max-width: 100%;
+  }
+}
+
+/* ========== Performance: will-change on animated elements ========== */
+.feed-card,
+.featured-main-link,
+.featured-side-card,
+.team-logo-link {
+  will-change: transform;
+}
+
+/* ========== Blanket prefers-reduced-motion for ALL homepage animations ========== */
+@media (prefers-reduced-motion: reduce) {
+  .hero-headline,
+  .feed-card,
+  .featured-main-link,
+  .featured-side-card,
+  .team-logo-link,
+  .card-scroll-in,
+  .poll-fill,
+  .score-status.live,
+  .trending-section h3::before,
+  .trending-drawer-toggle::before {
+    animation: none !important;
+    transition: none !important;
+  }
+  .card-scroll-in {
+    opacity: 1 !important;
+    transform: none !important;
+  }
+}
+
+/* ========== Scroll-in animation for article cards ========== */
+@keyframes cardScrollIn {
+  from {
+    opacity: 0;
+    transform: translateY(24px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.card-scroll-in {
+  animation: cardScrollIn 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.card-scroll-hidden {
+  opacity: 0;
+}
+
+/* ========== Enhanced feed card hover effects ========== */
+.feed-card {
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+}
+
+.feed-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+}
+
+.feed-card .card-image img {
+  transition: transform 0.4s ease;
+}
+
+.feed-card:hover .card-image img {
+  transform: scale(1.05);
+}
+
+.feed-card:hover .card-body h3 {
+  color: #bc0000;
+}
+
+.feed-card .card-body h3 {
+  transition: color 0.2s ease;
+}
+
+/* ========== Enhanced featured card hover effects ========== */
+.featured-main-link {
+  transition: transform 0.3s ease;
+}
+
+.featured-main-link:hover {
+  transform: translateY(-4px);
+}
+
+.featured-main-link .featured-image img {
+  transition: transform 0.5s ease;
+}
+
+.featured-main-link:hover .featured-image img {
+  transform: scale(1.04);
+}
+
+.featured-side-card {
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+  border-radius: 12px;
+}
+
+.featured-side-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.12);
+}
+
+.featured-side-card .side-image img {
+  transition: transform 0.4s ease;
+}
+
+.featured-side-card:hover .side-image img {
+  transform: scale(1.05);
+}
+
+/* ========== Gradient overlay on featured main image for text readability ========== */
+.featured-main .featured-image::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 50%;
+  background: linear-gradient(to top, rgba(0, 0, 0, 0.6), transparent);
+  pointer-events: none;
+  z-index: 0;
+  border-radius: 0 0 16px 16px;
+}
+
+/* ========== Better glass-card-static styling ========== */
+.glass-card-static {
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: var(--sm-radius-lg, 16px);
+  padding: 20px;
+}
+
+[data-theme="light"] .glass-card-static,
+.light .glass-card-static {
+  background: rgba(255, 255, 255, 0.7);
+  border-color: rgba(0, 0, 0, 0.08);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+
+/* ========== Team filter bar glassmorphism ========== */
+.team-filter-bar-sticky {
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  background: rgba(17, 17, 24, 0.8);
+}
+
+[data-theme="light"] .team-filter-bar-sticky,
+.light .team-filter-bar-sticky {
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+}
+
+/* ========== Better active state for team pills ========== */
+.team-pill.active,
+.team-pill[data-active="true"] {
+  background: rgba(188, 0, 0, 0.15) !important;
+  border-color: rgba(188, 0, 0, 0.4) !important;
+  color: #ff4444 !important;
+}
+
+[data-theme="light"] .team-pill.active,
+[data-theme="light"] .team-pill[data-active="true"],
+.light .team-pill.active,
+.light .team-pill[data-active="true"] {
+  background: rgba(188, 0, 0, 0.1) !important;
+  border-color: rgba(188, 0, 0, 0.3) !important;
+  color: #bc0000 !important;
+}
+
+/* ========== Team logo hover labels ========== */
+.team-logo-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+
+.team-logo-label {
+  font-size: 11px;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.5);
+  opacity: 0;
+  transform: translateY(-4px);
+  transition: opacity 0.25s ease, transform 0.25s ease;
+  white-space: nowrap;
+}
+
+.team-logo-item:hover .team-logo-label {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+[data-theme="light"] .team-logo-label,
+.light .team-logo-label {
+  color: rgba(0, 0, 0, 0.5);
+}
+
+/* ========== Hero search bar ========== */
+.hero-search-bar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  max-width: 480px;
+  margin: 28px auto 0;
+  padding: 12px 20px;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  color: rgba(255, 255, 255, 0.4);
+  font-size: 14px;
+  text-decoration: none;
+  transition: all 0.25s ease;
+  cursor: pointer;
+}
+
+.hero-search-bar:hover {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: rgba(255, 255, 255, 0.18);
+  color: rgba(255, 255, 255, 0.6);
+}
+
+.hero-search-bar .search-icon {
+  flex-shrink: 0;
+  opacity: 0.5;
+}
+
+.hero-search-bar .search-placeholder {
+  flex: 1;
+  text-align: left;
+}
+
+.hero-search-bar kbd {
+  font-family: inherit;
+  font-size: 11px;
+  font-weight: 600;
+  padding: 2px 6px;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 4px;
+  color: rgba(255, 255, 255, 0.5);
+  line-height: 1;
+}
+
+[data-theme="light"] .hero-search-bar,
+.light .hero-search-bar {
+  background: rgba(0, 0, 0, 0.04);
+  border-color: rgba(0, 0, 0, 0.1);
+  color: rgba(0, 0, 0, 0.4);
+}
+
+[data-theme="light"] .hero-search-bar:hover,
+.light .hero-search-bar:hover {
+  background: rgba(0, 0, 0, 0.07);
+  border-color: rgba(0, 0, 0, 0.15);
+  color: rgba(0, 0, 0, 0.6);
+}
+
+[data-theme="light"] .hero-search-bar kbd,
+.light .hero-search-bar kbd {
+  background: rgba(0, 0, 0, 0.06);
+  border-color: rgba(0, 0, 0, 0.12);
+  color: rgba(0, 0, 0, 0.4);
+}
+
+/* ========== Platform tools vertical list layout ========== */
+.tool-list {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.tool-list-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 12px;
+  border-radius: 10px;
+  text-decoration: none;
+  color: inherit;
+  transition: background 0.2s ease;
+}
+
+.tool-list-item:hover {
+  background: rgba(255, 255, 255, 0.05);
+}
+
+[data-theme="light"] .tool-list-item:hover,
+.light .tool-list-item:hover {
+  background: rgba(0, 0, 0, 0.04);
+}
+
+.tool-list-icon {
+  flex-shrink: 0;
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: rgba(188, 0, 0, 0.1);
+}
+
+.tool-list-icon svg,
+.tool-list-icon img {
+  width: 20px;
+  height: 20px;
+}
+
+.tool-list-text {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  min-width: 0;
+}
+
+.tool-list-name {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--sm-text);
+}
+
+.tool-list-desc {
+  font-size: 11px;
+  color: var(--sm-text-dim);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* ========== SM+ CTA Widget ========== */
+.sm-plus-cta {
+  position: relative;
+  padding: 24px 20px;
+  border-radius: var(--sm-radius-lg, 16px);
+  background: rgba(188, 0, 0, 0.06);
+  border: 1px solid rgba(188, 0, 0, 0.2);
+  text-align: center;
+  overflow: hidden;
+}
+
+.sm-plus-cta::before {
+  content: '';
+  position: absolute;
+  inset: -1px;
+  border-radius: var(--sm-radius-lg, 16px);
+  padding: 1px;
+  background: linear-gradient(135deg, rgba(188, 0, 0, 0.4), rgba(255, 68, 68, 0.2), rgba(188, 0, 0, 0.4));
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  pointer-events: none;
+}
+
+.sm-plus-icon {
+  width: 40px;
+  height: 40px;
+  margin: 0 auto 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: rgba(188, 0, 0, 0.15);
+}
+
+.sm-plus-icon svg {
+  width: 20px;
+  height: 20px;
+}
+
+.sm-plus-cta h4 {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--sm-text);
+  margin-bottom: 6px;
+}
+
+.sm-plus-cta p {
+  font-size: 13px;
+  color: var(--sm-text-muted);
+  line-height: 1.5;
+  margin-bottom: 16px;
+}
+
+.sm-plus-btn {
+  display: inline-block;
+  padding: 10px 24px;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 700;
+  text-decoration: none;
+  transition: opacity 0.2s ease, transform 0.2s ease;
+}
+
+.sm-plus-btn:hover {
+  opacity: 0.9;
+  transform: translateY(-1px);
+}
+
+/* ========== Light mode overrides for new styles ========== */
+[data-theme="light"] .feed-card:hover,
+.light .feed-card:hover {
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+}
+
+[data-theme="light"] .featured-side-card:hover,
+.light .featured-side-card:hover {
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.06);
+}
+
+[data-theme="light"] .sm-plus-cta,
+.light .sm-plus-cta {
+  background: rgba(188, 0, 0, 0.04);
 }

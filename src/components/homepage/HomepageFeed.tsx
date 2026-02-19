@@ -4,6 +4,7 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
+import { useRouter } from 'next/navigation';
 import { EditorPicksHero } from './EditorPicksHero';
 import { TeamFilterTabs } from './TeamFilterTabs';
 import { ForYouFeed } from './ForYouFeed';
@@ -18,11 +19,11 @@ interface HomepageFeedProps {
 }
 
 const TEAM_LOGOS = [
-  { slug: 'chicago-bears', src: 'https://a.espncdn.com/i/teamlogos/nfl/500/chi.png', alt: 'Chicago Bears' },
-  { slug: 'chicago-bulls', src: 'https://a.espncdn.com/i/teamlogos/nba/500/chi.png', alt: 'Chicago Bulls' },
-  { slug: 'chicago-cubs', src: 'https://a.espncdn.com/i/teamlogos/mlb/500/chc.png', alt: 'Chicago Cubs' },
-  { slug: 'chicago-white-sox', src: 'https://a.espncdn.com/i/teamlogos/mlb/500/chw.png', alt: 'Chicago White Sox' },
-  { slug: 'chicago-blackhawks', src: 'https://a.espncdn.com/i/teamlogos/nhl/500/chi.png', alt: 'Chicago Blackhawks' },
+  { slug: 'chicago-bears', src: 'https://a.espncdn.com/i/teamlogos/nfl/500/chi.png', alt: 'Chicago Bears', label: 'Bears' },
+  { slug: 'chicago-bulls', src: 'https://a.espncdn.com/i/teamlogos/nba/500/chi.png', alt: 'Chicago Bulls', label: 'Bulls' },
+  { slug: 'chicago-cubs', src: 'https://a.espncdn.com/i/teamlogos/mlb/500/chc.png', alt: 'Chicago Cubs', label: 'Cubs' },
+  { slug: 'chicago-white-sox', src: 'https://a.espncdn.com/i/teamlogos/mlb/500/chw.png', alt: 'Chicago White Sox', label: 'White Sox' },
+  { slug: 'chicago-blackhawks', src: 'https://a.espncdn.com/i/teamlogos/nhl/500/chi.png', alt: 'Chicago Blackhawks', label: 'Hawks' },
 ];
 
 export function HomepageFeed({
@@ -34,6 +35,7 @@ export function HomepageFeed({
 }: HomepageFeedProps) {
   const [activeTeam, setActiveTeam] = useState<string>('all');
   const [isMobile, setIsMobile] = useState<boolean>(false);
+  const router = useRouter();
 
   useEffect(() => {
     const checkMobile = () => setIsMobile(window.innerWidth < 768);
@@ -41,6 +43,18 @@ export function HomepageFeed({
     window.addEventListener('resize', checkMobile);
     return () => window.removeEventListener('resize', checkMobile);
   }, []);
+
+  // Cmd+K / Ctrl+K shortcut to navigate to search
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
+        e.preventDefault();
+        router.push('/search');
+      }
+    };
+    document.addEventListener('keydown', handleKeyDown);
+    return () => document.removeEventListener('keydown', handleKeyDown);
+  }, [router]);
 
   useEffect(() => {
     if (userTeamPreference && userTeamPreference !== 'all') {
@@ -66,7 +80,7 @@ export function HomepageFeed({
 
         <div className="sm-container hero-content">
           <div className="sm-tag animate-fade-in-up">
-            <span className="pulse-dot" /> Live Coverage
+            <span className="pulse-dot" /> Chicago Sports Hub
           </div>
 
           <h1 className="hero-headline">
@@ -79,11 +93,23 @@ export function HomepageFeed({
 
           <div className="team-logo-row animate-fade-in-up delay-300">
             {TEAM_LOGOS.map((logo) => (
-              <Link key={logo.slug} href={`/${logo.slug}`} className="team-logo-link">
-                <Image src={logo.src} alt={logo.alt} width={32} height={32} />
-              </Link>
+              <div key={logo.slug} className="team-logo-item">
+                <Link href={`/${logo.slug}`} className="team-logo-link">
+                  <Image src={logo.src} alt={logo.alt} width={32} height={32} />
+                </Link>
+                <span className="team-logo-label">{logo.label}</span>
+              </div>
             ))}
           </div>
+
+          <Link href="/search" className="hero-search-bar animate-fade-in-up delay-300">
+            <svg className="search-icon" width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <circle cx="11" cy="11" r="8" />
+              <path d="m21 21-4.3-4.3" />
+            </svg>
+            <span className="search-placeholder">Search articles, teams, players...</span>
+            <kbd>⌘K</kbd>
+          </Link>
         </div>
       </section>
 

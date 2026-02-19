@@ -10,10 +10,19 @@ const teams = [
   { name: 'Blackhawks', slug: 'chicago-blackhawks', color: teamColors['chicago-blackhawks'].primary },
 ]
 
+const platform = [
+  { name: 'Scout AI', href: '/scout-ai' },
+  { name: 'Trade Simulator', href: '/gm' },
+  { name: 'Mock Draft', href: '/mock-draft' },
+  { name: 'Fan Hub', href: '/fan-zone' },
+  { name: 'Data Hub', href: '/datahub' },
+]
+
 const company = [
   { name: 'About', href: '/about' },
   { name: 'Contact', href: '/contact' },
   { name: 'Privacy', href: '/privacy' },
+  { name: 'SM+ Premium', href: '/pricing' },
 ]
 
 function TwitterIcon() {
@@ -40,6 +49,14 @@ function InstagramIcon() {
   )
 }
 
+function YouTubeIcon() {
+  return (
+    <svg className="h-5 w-5" fill="currentColor" viewBox="0 0 24 24">
+      <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z" />
+    </svg>
+  )
+}
+
 export default function Footer() {
   return (
     <footer className="relative border-t overflow-hidden" style={{ borderColor: 'var(--sm-border)', backgroundColor: 'var(--sm-surface)' }}>
@@ -56,7 +73,7 @@ export default function Footer() {
       <div className="h-1 bg-gradient-to-r from-[#FF0000] via-[#8B0000] to-[#FF0000]" />
 
       <div className="relative mx-auto max-w-6xl px-4 py-16">
-        <div className="grid grid-cols-2 gap-8 md:grid-cols-4">
+        <div className="grid grid-cols-2 gap-8 md:grid-cols-5">
           {/* Logo & Description */}
           <div className="col-span-2 md:col-span-1">
             <Link href="/" className="group flex items-center gap-3">
@@ -102,6 +119,15 @@ export default function Footer() {
               >
                 <InstagramIcon />
               </a>
+              <a
+                href="https://youtube.com/@sportsmockery"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center justify-center w-10 h-10 rounded-full bg-[var(--sm-card)] text-[var(--sm-text-muted)] hover:bg-[#8B0000] hover:text-white transition-all"
+                aria-label="YouTube"
+              >
+                <YouTubeIcon />
+              </a>
             </div>
           </div>
 
@@ -120,6 +146,23 @@ export default function Footer() {
                       style={{ backgroundColor: team.color, boxShadow: `0 0 0 0 ${team.color}` }}
                     />
                     <span className="transition-transform group-hover:translate-x-1">{team.name}</span>
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          {/* Platform */}
+          <div>
+            <h3 className="text-sm font-bold uppercase tracking-wider font-[var(--font-montserrat)]" style={{ color: 'var(--sm-text)' }}>Platform</h3>
+            <ul className="mt-6 space-y-3">
+              {platform.map((item) => (
+                <li key={item.href}>
+                  <Link
+                    href={item.href}
+                    className="group flex items-center gap-2 text-sm text-[var(--sm-text-muted)] hover:text-[var(--sm-text)] transition-colors"
+                  >
+                    <span className="transition-transform group-hover:translate-x-1">{item.name}</span>
                   </Link>
                 </li>
               ))}
