@@ -65,7 +65,7 @@ export default function Footer() {
                 <div className="absolute inset-0 rounded-xl bg-white opacity-0 group-hover:opacity-10 transition-opacity" />
               </div>
               <div className="flex flex-col">
-                <span className="text-lg font-black text-white font-[var(--font-montserrat)] leading-none">SPORTS</span>
+                <span className="text-lg font-black font-[var(--font-montserrat)] leading-none" style={{ color: 'var(--sm-text)' }}>SPORTS</span>
                 <span className="text-lg font-black text-[#FF0000] font-[var(--font-montserrat)] leading-none">MOCKERY</span>
               </div>
             </Link>
@@ -107,13 +107,13 @@ export default function Footer() {
 
           {/* Teams */}
           <div>
-            <h3 className="text-sm font-bold text-white uppercase tracking-wider font-[var(--font-montserrat)]">Teams</h3>
+            <h3 className="text-sm font-bold uppercase tracking-wider font-[var(--font-montserrat)]" style={{ color: 'var(--sm-text)' }}>Teams</h3>
             <ul className="mt-6 space-y-3">
               {teams.map((team) => (
                 <li key={team.slug}>
                   <Link
                     href={`/${team.slug}`}
-                    className="group flex items-center gap-3 text-sm text-[var(--sm-text-muted)] hover:text-white transition-colors"
+                    className="group flex items-center gap-3 text-sm text-[var(--sm-text-muted)] hover:text-[var(--sm-text)] transition-colors"
                   >
                     <span
                       className="w-2.5 h-2.5 rounded-full transition-all group-hover:scale-150 group-hover:shadow-lg"
@@ -128,13 +128,13 @@ export default function Footer() {
 
           {/* Company */}
           <div>
-            <h3 className="text-sm font-bold text-white uppercase tracking-wider font-[var(--font-montserrat)]">Company</h3>
+            <h3 className="text-sm font-bold uppercase tracking-wider font-[var(--font-montserrat)]" style={{ color: 'var(--sm-text)' }}>Company</h3>
             <ul className="mt-6 space-y-3">
               {company.map((item) => (
                 <li key={item.href}>
                   <Link
                     href={item.href}
-                    className="group flex items-center gap-2 text-sm text-[var(--sm-text-muted)] hover:text-white transition-colors"
+                    className="group flex items-center gap-2 text-sm text-[var(--sm-text-muted)] hover:text-[var(--sm-text)] transition-colors"
                   >
                     <span className="transition-transform group-hover:translate-x-1">{item.name}</span>
                   </Link>
@@ -145,7 +145,7 @@ export default function Footer() {
 
           {/* Newsletter */}
           <div>
-            <h3 className="text-sm font-bold text-white uppercase tracking-wider font-[var(--font-montserrat)]">Newsletter</h3>
+            <h3 className="text-sm font-bold uppercase tracking-wider font-[var(--font-montserrat)]" style={{ color: 'var(--sm-text)' }}>Newsletter</h3>
             <p className="mt-6 text-sm text-[var(--sm-text-muted)]">
               Get the latest takes delivered to your inbox.
             </p>
@@ -153,7 +153,8 @@ export default function Footer() {
               <input
                 type="email"
                 placeholder="Enter your email"
-                className="w-full px-4 py-3 rounded-lg bg-[var(--sm-card)] border border-[var(--sm-border)] text-white text-sm placeholder:text-[var(--sm-text-muted)] focus:outline-none focus:border-[#8B0000] focus:ring-2 focus:ring-[#8B0000]/20 transition-all"
+                className="w-full px-4 py-3 rounded-lg bg-[var(--sm-card)] border border-[var(--sm-border)] text-sm placeholder:text-[var(--sm-text-muted)] focus:outline-none focus:border-[#8B0000] focus:ring-2 focus:ring-[#8B0000]/20 transition-all"
+                  style={{ color: 'var(--sm-text)' }}
               />
               <button
                 type="submit"

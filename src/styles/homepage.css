@@ -81,6 +81,24 @@
   }
 }
 
+/* Light mode: dark text with subtle red glow instead of white */
+[data-theme="light"] .homepage-hero h1,
+[data-theme="light"] .homepage-hero .homepage-hero-title,
+.light .homepage-hero h1,
+.light .homepage-hero .homepage-hero-title {
+  color: #111118;
+  text-shadow:
+    0 0 40px rgba(188, 0, 0, 0.15),
+    0 0 80px rgba(188, 0, 0, 0.08);
+  animation: none;
+}
+
+[data-theme="light"] .homepage-hero .homepage-hero-accent,
+.light .homepage-hero .homepage-hero-accent {
+  filter: drop-shadow(0 0 10px rgba(188, 0, 0, 0.2))
+         drop-shadow(0 0 30px rgba(188, 0, 0, 0.1));
+}
+
 .homepage-hero .hero-subtitle {
   font-size: clamp(1rem, 2vw, 1.15rem);
   color: var(--sm-text-muted);
