@@ -614,10 +614,13 @@
 .filter-scroll {
   display: flex;
   gap: 8px;
+  justify-content: center;
+  flex-wrap: wrap;
   overflow-x: auto;
   -webkit-overflow-scrolling: touch;
   scrollbar-width: none;
   -ms-overflow-style: none;
+  padding: 0 24px;
 }
 
 .filter-scroll::-webkit-scrollbar {
@@ -1025,6 +1028,11 @@
 }
 
 @media (max-width: 768px) {
+  .filter-scroll {
+    justify-content: flex-start;
+    flex-wrap: nowrap;
+  }
+
   .homepage-hero {
     min-height: 300px;
     padding: 40px 0 32px;
@@ -1095,25 +1103,375 @@
   will-change: transform;
 }
 
-/* ========== Blanket prefers-reduced-motion for ALL homepage animations ========== */
+/* ========== LAYER 1: Ambient Atmosphere ========== */
+
+/* A) Animated gradient mesh background */
+.hero-bg-mesh {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.hero-bg-mesh::before {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background:
+    radial-gradient(ellipse 600px 600px at 20% 50%, rgba(188,0,0,0.12), transparent),
+    radial-gradient(ellipse 500px 500px at 80% 20%, rgba(255,68,68,0.06), transparent),
+    radial-gradient(ellipse 400px 400px at 50% 80%, rgba(188,0,0,0.04), transparent);
+  animation: meshFloat 20s ease-in-out infinite;
+  will-change: transform;
+}
+
+@keyframes meshFloat {
+  0%, 100% { transform: translate(0, 0) rotate(0deg); }
+  25% { transform: translate(2%, -1%) rotate(0.5deg); }
+  50% { transform: translate(-1%, 2%) rotate(-0.5deg); }
+  75% { transform: translate(1%, -2%) rotate(0.3deg); }
+}
+
+[data-theme="light"] .hero-bg-mesh::before,
+.light .hero-bg-mesh::before {
+  background:
+    radial-gradient(ellipse 600px 600px at 20% 50%, rgba(188,0,0,0.05), transparent),
+    radial-gradient(ellipse 500px 500px at 80% 20%, rgba(255,68,68,0.03), transparent),
+    radial-gradient(ellipse 400px 400px at 50% 80%, rgba(188,0,0,0.02), transparent);
+}
+
+/* B) Particle canvas */
+.hero-particles {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  opacity: 0.4;
+}
+
+[data-theme="light"] .hero-particles,
+.light .hero-particles {
+  opacity: 0.15;
+}
+
+/* C) Animated grid lines */
+.sm-grid-overlay {
+  animation: gridPulse 8s ease-in-out infinite;
+}
+
+@keyframes gridPulse {
+  0%, 100% { opacity: 0.3; }
+  50% { opacity: 0.6; }
+}
+
+/* D) Dual glow orbs */
+.glow-orb {
+  position: absolute;
+  border-radius: 50%;
+  pointer-events: none;
+  filter: blur(80px);
+  will-change: transform;
+}
+
+.glow-red-1 {
+  top: -80px;
+  right: -120px;
+  width: 350px;
+  height: 350px;
+  background: radial-gradient(circle, rgba(188,0,0,0.15), transparent 70%);
+  animation: orbFloat1 15s ease-in-out infinite;
+}
+
+.glow-red-2 {
+  bottom: -60px;
+  left: -100px;
+  width: 280px;
+  height: 280px;
+  background: radial-gradient(circle, rgba(255,68,68,0.08), transparent 70%);
+  animation: orbFloat2 18s ease-in-out infinite;
+}
+
+@keyframes orbFloat1 {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  33% { transform: translate(-30px, 20px) scale(1.05); }
+  66% { transform: translate(20px, -15px) scale(0.95); }
+}
+
+@keyframes orbFloat2 {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  33% { transform: translate(25px, -20px) scale(1.1); }
+  66% { transform: translate(-15px, 25px) scale(0.9); }
+}
+
+[data-theme="light"] .glow-red-1,
+.light .glow-red-1 {
+  background: radial-gradient(circle, rgba(188,0,0,0.06), transparent 70%);
+}
+
+[data-theme="light"] .glow-red-2,
+.light .glow-red-2 {
+  background: radial-gradient(circle, rgba(255,68,68,0.04), transparent 70%);
+}
+
+/* ========== LAYER 2: Entrance Choreography ========== */
+
+/* A) Staggered entrance */
+.animate-entrance {
+  opacity: 0;
+  transform: translateY(24px);
+  animation: entranceFade 0.7s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes entranceFade {
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.entrance-delay-1 { animation-delay: 0.1s; }
+.entrance-delay-2 { animation-delay: 0.25s; }
+.entrance-delay-3 { animation-delay: 0.4s; }
+.entrance-delay-4 { animation-delay: 0.55s; }
+.entrance-delay-5 { animation-delay: 0.7s; }
+
+/* B) Headline text sweep */
+.hero-headline {
+  position: relative;
+}
+
+.hero-headline::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 60%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255,68,68,0.15), transparent);
+  animation: textSweep 2s ease-in-out 0.8s forwards;
+  pointer-events: none;
+}
+
+@keyframes textSweep {
+  0% { left: -60%; }
+  100% { left: 160%; }
+}
+
+/* C) "2.0" glow pulse */
+.hero-headline .gradient-text {
+  animation: glowPulse 3s ease-in-out 1.5s infinite;
+}
+
+@keyframes glowPulse {
+  0%, 100% { filter: drop-shadow(0 0 20px rgba(188,0,0,0.2)); }
+  50% { filter: drop-shadow(0 0 40px rgba(188,0,0,0.4)); }
+}
+
+/* D) Team logos pop-in with stagger */
+.team-logo-item .team-logo-link {
+  opacity: 0;
+  transform: scale(0.5);
+  animation: logoPop 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+}
+
+.team-logo-item:nth-child(1) .team-logo-link { animation-delay: 0.6s; }
+.team-logo-item:nth-child(2) .team-logo-link { animation-delay: 0.7s; }
+.team-logo-item:nth-child(3) .team-logo-link { animation-delay: 0.8s; }
+.team-logo-item:nth-child(4) .team-logo-link { animation-delay: 0.9s; }
+.team-logo-item:nth-child(5) .team-logo-link { animation-delay: 1.0s; }
+
+@keyframes logoPop {
+  0% { opacity: 0; transform: scale(0.5); }
+  70% { transform: scale(1.1); }
+  100% { opacity: 1; transform: scale(1); }
+}
+
+/* E) Search bar expand-in */
+.hero-search-bar {
+  opacity: 0;
+  transform: scaleX(0.6);
+  animation: searchExpand 0.6s cubic-bezier(0.16, 1, 0.3, 1) 0.85s forwards;
+}
+
+@keyframes searchExpand {
+  to { opacity: 1; transform: scaleX(1); }
+}
+
+/* ========== LAYER 3: Scroll-Triggered Reveals ========== */
+
+/* Base hidden state */
+.scroll-reveal {
+  opacity: 0;
+  transform: translateY(32px);
+  transition: opacity 0.6s cubic-bezier(0.16, 1, 0.3, 1),
+              transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.scroll-reveal.revealed {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* Slide from right (sidebar) */
+.scroll-reveal-right {
+  opacity: 0;
+  transform: translateX(32px);
+  transition: opacity 0.6s cubic-bezier(0.16, 1, 0.3, 1),
+              transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.scroll-reveal-right.revealed {
+  opacity: 1;
+  transform: translateX(0);
+}
+
+/* Scale up (featured card) */
+.scroll-reveal-scale {
+  opacity: 0;
+  transform: scale(0.92);
+  transition: opacity 0.5s ease, transform 0.5s ease;
+}
+.scroll-reveal-scale.revealed {
+  opacity: 1;
+  transform: scale(1);
+}
+
+/* Team filter bar slide-down */
+.team-filter-bar {
+  opacity: 0;
+  transform: translateY(-10px);
+  animation: filterSlideIn 0.5s ease 0.6s forwards;
+}
+
+@keyframes filterSlideIn {
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* Enhanced card hover — shine sweep */
+.feed-card {
+  position: relative;
+  overflow: hidden;
+}
+
+.feed-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 50%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.03), transparent);
+  transition: left 0.6s ease;
+  pointer-events: none;
+  z-index: 2;
+}
+
+.feed-card:hover::before {
+  left: 150%;
+}
+
+/* ========== LAYER 4: Scroll Progress Indicator ========== */
+.scroll-progress {
+  position: fixed;
+  top: 0;
+  left: 0;
+  height: 3px;
+  width: 0%;
+  background: var(--sm-gradient);
+  z-index: 9999;
+  transition: width 0.1s linear;
+  border-radius: 0 2px 2px 0;
+  box-shadow: 0 0 8px rgba(188,0,0,0.3);
+}
+
+/* ========== LAYER 5: Live Pulse Indicators ========== */
+.pulse-dot {
+  width: 8px;
+  height: 8px;
+  background: #ff3333;
+  border-radius: 50%;
+  position: relative;
+  display: inline-block;
+}
+
+.pulse-dot::before {
+  content: '';
+  position: absolute;
+  inset: -3px;
+  border-radius: 50%;
+  border: 2px solid rgba(255,51,51,0.4);
+  animation: livePulseRing 2s ease-in-out infinite;
+}
+
+.pulse-dot::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  background: #ff3333;
+  animation: livePulseDot 2s ease-in-out infinite;
+}
+
+@keyframes livePulseRing {
+  0%, 100% { transform: scale(1); opacity: 0.6; }
+  50% { transform: scale(1.8); opacity: 0; }
+}
+
+@keyframes livePulseDot {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+
+/* Active team logo glow when game is live */
+.team-logo-link.game-live img {
+  border-color: rgba(255,51,51,0.5);
+  box-shadow: 0 0 16px rgba(255,51,51,0.25);
+  animation: logoLiveGlow 3s ease-in-out infinite;
+}
+
+@keyframes logoLiveGlow {
+  0%, 100% { box-shadow: 0 0 12px rgba(255,51,51,0.2); }
+  50% { box-shadow: 0 0 24px rgba(255,51,51,0.4); }
+}
+
+/* ========== LAYER 6: Smooth Scroll ========== */
+html {
+  scroll-behavior: smooth;
+}
+
+/* ========== PERFORMANCE: Comprehensive reduced motion ========== */
 @media (prefers-reduced-motion: reduce) {
-  .hero-headline,
-  .feed-card,
-  .featured-main-link,
-  .featured-side-card,
-  .team-logo-link,
-  .card-scroll-in,
-  .poll-fill,
-  .score-status.live,
-  .trending-section h3::before,
-  .trending-drawer-toggle::before {
-    animation: none !important;
-    transition: none !important;
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
   }
-  .card-scroll-in {
+  .hero-particles { display: none; }
+  .hero-bg-mesh::before { animation: none; }
+  .glow-orb { animation: none; }
+  .scroll-progress { display: none; }
+  .scroll-reveal,
+  .scroll-reveal-right,
+  .scroll-reveal-scale {
+    opacity: 1;
+    transform: none;
+  }
+  .hero-headline::after { display: none; }
+  .card-scroll-in,
+  .card-scroll-hidden {
     opacity: 1 !important;
     transform: none !important;
   }
+}
+
+/* ========== Mobile performance adjustments ========== */
+@media (max-width: 768px) {
+  .hero-particles { opacity: 0.2; }
+  .glow-orb { filter: blur(60px); }
+  .glow-red-2 { display: none; }
+  .scroll-reveal { transform: translateY(20px); }
 }
 
 /* ========== Scroll-in animation for article cards ========== */
