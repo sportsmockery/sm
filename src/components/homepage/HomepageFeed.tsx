@@ -69,10 +69,9 @@ export function HomepageFeed({
             <span className="pulse-dot" /> Live Coverage
           </div>
 
-          <h1 className="hero-headline animate-fade-in-up delay-100">
-            Welcome to<br />
-            <span className="gradient-text">Sports Mockery</span><br />
-            2.0
+          <h1 className="hero-headline">
+            Sports Mockery<br />
+            <span className="gradient-text">2.0</span>
           </h1>
 
           <p className="hero-subtitle animate-fade-in-up delay-200">
