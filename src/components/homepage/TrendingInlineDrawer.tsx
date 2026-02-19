@@ -9,6 +9,7 @@ interface Post {
   title: string;
   slug: string;
   team_slug: string;
+  category_slug?: string | null;
 }
 
 interface TrendingInlineDrawerProps {
@@ -34,7 +35,7 @@ export function TrendingInlineDrawer({ posts }: TrendingInlineDrawerProps) {
           {topFive.map((post, index) => (
             <li key={post.id} className="trending-drawer-item">
               <span className="trending-drawer-rank">{index + 1}</span>
-              <Link href={`/${post.slug}`} className="trending-drawer-link">{post.title}</Link>
+              <Link href={post.category_slug ? `/${post.category_slug}/${post.slug}` : `/${post.slug}`} className="trending-drawer-link">{post.title}</Link>
             </li>
           ))}
         </ol>

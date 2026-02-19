@@ -8,6 +8,7 @@ interface Post {
   title: string;
   slug: string;
   team_slug: string;
+  category_slug?: string | null;
 }
 
 interface TrendingSectionProps {
@@ -24,7 +25,7 @@ export function TrendingSection({ posts }: TrendingSectionProps) {
         {topFive.map((post, index) => (
           <li key={post.id} className="trending-item">
             <span className="trending-rank">{index + 1}</span>
-            <Link href={`/${post.slug}`} className="trending-link">
+            <Link href={post.category_slug ? `/${post.category_slug}/${post.slug}` : `/${post.slug}`} className="trending-link">
               {post.team_slug && (
                 <span className={`trending-team-indicator trending-team-indicator--${post.team_slug}`} />
               )}

@@ -11,6 +11,7 @@ interface EditorPick {
   featured_image: string | null;
   excerpt: string | null;
   team_slug: string | null;
+  category_slug: string | null;
   pinned_slot: number;
 }
 
@@ -46,7 +47,7 @@ export function EditorPicksHero({ picks = [] }: EditorPicksHeroProps) {
       <div className="featured-grid">
         {/* Left column: Large featured card */}
         <div className="featured-main">
-          <Link href={`/${mainPick.slug}`} className="glass-card featured-main-link">
+          <Link href={mainPick.category_slug ? `/${mainPick.category_slug}/${mainPick.slug}` : `/${mainPick.slug}`} className="glass-card featured-main-link">
             <div className="featured-image">
               {mainPick.featured_image ? (
                 <Image
@@ -82,7 +83,7 @@ export function EditorPicksHero({ picks = [] }: EditorPicksHeroProps) {
           {sidePicks.map((pick) => (
             <Link
               key={pick.id}
-              href={`/${pick.slug}`}
+              href={pick.category_slug ? `/${pick.category_slug}/${pick.slug}` : `/${pick.slug}`}
               className="glass-card-sm featured-side-card"
             >
               <div className="side-image">

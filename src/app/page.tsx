@@ -39,12 +39,16 @@ async function getHomepageData() {
     .order('importance_score', { ascending: false })
     .limit(6)
 
-  // Map to include team_slug derived from category
-  const editorPicks = (editorPicksRaw || []).map((post: any, index: number) => ({
-    ...post,
-    team_slug: getTeamSlug(post.category),
-    pinned_slot: index + 1 // Simulate pinned_slot for UI
-  }))
+  // Map to include team_slug and category_slug derived from category
+  const editorPicks = (editorPicksRaw || []).map((post: any, index: number) => {
+    const cat = Array.isArray(post.category) ? post.category[0] : post.category
+    return {
+      ...post,
+      team_slug: getTeamSlug(post.category),
+      category_slug: cat?.slug || null,
+      pinned_slot: index + 1 // Simulate pinned_slot for UI
+    }
+  })
 
   // 2) Trending posts (based strictly on views in last 7 days)
   const sevenDaysAgo = new Date()
@@ -58,11 +62,15 @@ async function getHomepageData() {
     .order('views', { ascending: false })
     .limit(20)
 
-  const trendingPosts = (trendingPostsRaw || []).map((post: any) => ({
-    ...post,
-    team_slug: getTeamSlug(post.category),
-    is_evergreen: false // Default since column doesn't exist
-  }))
+  const trendingPosts = (trendingPostsRaw || []).map((post: any) => {
+    const cat = Array.isArray(post.category) ? post.category[0] : post.category
+    return {
+      ...post,
+      team_slug: getTeamSlug(post.category),
+      category_slug: cat?.slug || null,
+      is_evergreen: false // Default since column doesn't exist
+    }
+  })
 
   const trendingIds = new Set(trendingPosts.map(p => p.id))
 
@@ -79,14 +87,18 @@ async function getHomepageData() {
     .order('published_at', { ascending: false })
     .limit(200)
 
-  // 4) Add team_slug and flags for UI (no scoring)
-  const postsWithFlags = (allPostsRaw || []).map((post: any) => ({
-    ...post,
-    team_slug: getTeamSlug(post.category),
-    is_trending: trendingIds.has(post.id),
-    is_evergreen: false, // Default since column doesn't exist
-    author_name: null
-  }))
+  // 4) Add team_slug, category_slug, and flags for UI (no scoring)
+  const postsWithFlags = (allPostsRaw || []).map((post: any) => {
+    const cat = Array.isArray(post.category) ? post.category[0] : post.category
+    return {
+      ...post,
+      team_slug: getTeamSlug(post.category),
+      category_slug: cat?.slug || null,
+      is_trending: trendingIds.has(post.id),
+      is_evergreen: false, // Default since column doesn't exist
+      author_name: null
+    }
+  })
 
   // 5) Apply fallbacks only if there is truly no data
   const finalData = getHomepageDataWithFallbacks(

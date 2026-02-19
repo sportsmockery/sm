@@ -12,6 +12,7 @@ interface Post {
   excerpt: string | null;
   featured_image: string | null;
   team_slug: string | null;
+  category_slug: string | null;
   author_name: string | null;
   published_at: string;
   content_type: string;
@@ -66,12 +67,17 @@ export function PostCard({ post, priority = false }: PostCardProps) {
     ? TEAM_DISPLAY_NAMES[post.team_slug] || post.team_slug.replace('-', ' ')
     : null;
 
+  // Build URL with category prefix: /chicago-bears/article-slug
+  const postUrl = post.category_slug
+    ? `/${post.category_slug}/${post.slug}`
+    : `/${post.slug}`;
+
   // Keep getContentTypeBadge available for future use
   void getContentTypeBadge;
 
   return (
     <article className="glass-card feed-card">
-      <Link href={`/${post.slug}`}>
+      <Link href={postUrl}>
         <div className="card-image">
           {post.featured_image ? (
             <Image

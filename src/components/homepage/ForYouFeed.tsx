@@ -13,6 +13,7 @@ interface Post {
   excerpt: string | null;
   featured_image: string | null;
   team_slug: string;
+  category_slug: string | null;
   author_name: string | null;
   published_at: string;
   content_type: string;

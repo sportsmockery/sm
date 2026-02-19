@@ -8,6 +8,7 @@ export const FALLBACK_EDITOR_PICKS = [
     slug: 'welcome-to-sportsmockery',
     featured_image: null,
     team_slug: 'bears',
+    category_slug: null,
     pinned_slot: 1
   },
   {
@@ -16,6 +17,7 @@ export const FALLBACK_EDITOR_PICKS = [
     slug: 'bears-news-analysis',
     featured_image: null,
     team_slug: 'bears',
+    category_slug: null,
     pinned_slot: 2
   },
   {
@@ -24,6 +26,7 @@ export const FALLBACK_EDITOR_PICKS = [
     slug: 'bulls-coverage',
     featured_image: null,
     team_slug: 'bulls',
+    category_slug: null,
     pinned_slot: 3
   }
 ];
@@ -44,7 +47,8 @@ export const FALLBACK_POSTS = [
     importance_score: 80,
     views: 100,
     author_id: null,
-    primary_topic: 'general'
+    primary_topic: 'general',
+    category_slug: null
   },
   {
     id: 'fallback-post-2',
@@ -61,7 +65,8 @@ export const FALLBACK_POSTS = [
     importance_score: 75,
     views: 50,
     author_id: null,
-    primary_topic: 'bears'
+    primary_topic: 'bears',
+    category_slug: null
   },
   {
     id: 'fallback-post-3',
@@ -78,7 +83,8 @@ export const FALLBACK_POSTS = [
     importance_score: 70,
     views: 40,
     author_id: null,
-    primary_topic: 'bulls'
+    primary_topic: 'bulls',
+    category_slug: null
   },
   {
     id: 'fallback-post-4',
