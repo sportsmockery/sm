@@ -129,7 +129,7 @@ export function HomepageFeed({
         <div className="sm-container">
           <div className="section-header">
             <span className="sm-tag">Trending Now</span>
-            <h2>What Chicago is Talking About</h2>
+            <h2 style={{ fontFamily: "var(--font-bebas-neue), 'Bebas Neue', Impact, sans-serif" }}>What Chicago is Talking About</h2>
           </div>
           <EditorPicksHero picks={safeEditorPicks} />
         </div>
