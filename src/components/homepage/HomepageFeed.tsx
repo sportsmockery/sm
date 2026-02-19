@@ -7,7 +7,7 @@ import Image from 'next/image';
 import { EditorPicksHero } from './EditorPicksHero';
 import { TeamFilterTabs } from './TeamFilterTabs';
 import { ForYouFeed } from './ForYouFeed';
-import { TrendingSection } from './TrendingSection';
+import { HomepageSidebar } from './HomepageSidebar';
 
 interface HomepageFeedProps {
   initialPosts: any[];
@@ -16,72 +16,6 @@ interface HomepageFeedProps {
   userTeamPreference: string | null;
   isLoggedIn: boolean;
 }
-
-const PLATFORM_TOOLS = [
-  {
-    title: 'Scout AI',
-    href: '/scout-ai',
-    icon: (
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-        <path d="M12 2a8 8 0 0 1 8 8c0 3.4-2.1 6.3-5 7.5V20a1 1 0 0 1-1 1h-4a1 1 0 0 1-1-1v-2.5C6.1 16.3 4 13.4 4 10a8 8 0 0 1 8-8z" />
-        <line x1="10" y1="22" x2="14" y2="22" />
-      </svg>
-    ),
-  },
-  {
-    title: 'Trade Sim',
-    href: '/gm',
-    icon: (
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-        <polyline points="7 8 3 12 7 16" />
-        <polyline points="17 8 21 12 17 16" />
-        <line x1="3" y1="12" x2="21" y2="12" />
-      </svg>
-    ),
-  },
-  {
-    title: 'Mock Draft',
-    href: '/mock-draft',
-    icon: (
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-        <path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2" />
-        <rect x="8" y="2" width="8" height="4" rx="1" ry="1" />
-        <line x1="9" y1="10" x2="15" y2="10" />
-        <line x1="9" y1="14" x2="15" y2="14" />
-        <line x1="9" y1="18" x2="12" y2="18" />
-      </svg>
-    ),
-  },
-  {
-    title: 'Fan Hub',
-    href: '/fan-zone',
-    icon: (
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-        <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
-      </svg>
-    ),
-  },
-  {
-    title: 'Data Hub',
-    href: '/datahub',
-    icon: (
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-        <line x1="18" y1="20" x2="18" y2="10" />
-        <line x1="12" y1="20" x2="12" y2="4" />
-        <line x1="6" y1="20" x2="6" y2="14" />
-      </svg>
-    ),
-  },
-  {
-    title: 'SM+',
-    href: '/pricing',
-    icon: (
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-        <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
-      </svg>
-    ),
-  },
-];
 
 const TEAM_LOGOS = [
   { slug: 'chicago-bears', src: 'https://a.espncdn.com/i/teamlogos/nfl/500/chi.png', alt: 'Chicago Bears' },
@@ -197,25 +131,7 @@ export function HomepageFeed({
             </main>
 
             {/* Sidebar (desktop) */}
-            <aside className="sidebar">
-              {/* Widget 1: Platform Tools */}
-              <div className="sidebar-widget glass-card-static">
-                <h4 className="widget-title">Platform Tools</h4>
-                <div className="tool-grid">
-                  {PLATFORM_TOOLS.map((tool) => (
-                    <Link key={tool.title} href={tool.href} className="tool-link">
-                      <div className="tool-icon">{tool.icon}</div>
-                      <span>{tool.title}</span>
-                    </Link>
-                  ))}
-                </div>
-              </div>
-
-              {/* Widget 2: Trending Stories */}
-              {safeTrendingPosts.length > 0 && (
-                <TrendingSection posts={safeTrendingPosts} />
-              )}
-            </aside>
+            <HomepageSidebar trendingPosts={safeTrendingPosts} />
           </div>
         </div>
       </section>
