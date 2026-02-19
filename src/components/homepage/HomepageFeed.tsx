@@ -207,6 +207,17 @@ export function HomepageFeed({
       ? safePosts
       : safePosts.filter((post) => post.team_slug === activeTeam);
 
+  // Filter editor picks by team too — fall back to top 3 from filtered posts
+  const filteredEditorPicks =
+    activeTeam === 'all'
+      ? safeEditorPicks
+      : (() => {
+          const teamPicks = safeEditorPicks.filter((p: any) => p.team_slug === activeTeam);
+          return teamPicks.length > 0
+            ? teamPicks
+            : filteredPosts.slice(0, 3).map((p: any, i: number) => ({ ...p, pinned_slot: i + 1 }));
+        })();
+
   return (
     <div className="homepage-feed">
       {/* ===== Scroll Progress Bar ===== */}
@@ -274,7 +285,7 @@ export function HomepageFeed({
             <span className="sm-tag">Trending Now</span>
             <h2 style={{ fontFamily: "var(--font-bebas-neue), 'Bebas Neue', Impact, sans-serif" }}>What Chicago is Talking About</h2>
           </div>
-          <EditorPicksHero picks={safeEditorPicks} />
+          <EditorPicksHero picks={filteredEditorPicks} />
         </div>
       </section>
 

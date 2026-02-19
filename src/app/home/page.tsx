@@ -460,7 +460,7 @@ export default function HomePage() {
               <Link href="/home/login" className="hm-btn-primary">
                 Unlock SM+ Premium
               </Link>
-              <Link href="/home/login" className="hm-btn-secondary">
+              <Link href="/" className="hm-btn-secondary">
                 Explore Free
               </Link>
             </div>
