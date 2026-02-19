@@ -15,6 +15,8 @@ import ScrollToTop from "@/components/layout/ScrollToTop";
 import CookieBanner from "@/components/layout/CookieBanner";
 import TeamChatPanel from "@/components/chat/TeamChatPanel";
 import MotionProvider from "@/components/motion/MotionProvider";
+import NavigationProgress from "@/components/layout/NavigationProgress";
+import Breadcrumb from "@/components/layout/Breadcrumb";
 
 // Floating buttons disabled - users access AI and Fan Chat via header buttons
 // import BearsAIButton from "@/components/bears/BearsAIButton";
@@ -133,6 +135,13 @@ export default function RootLayout({
   return (
     <html lang="en" className="scroll-smooth dark" suppressHydrationWarning>
       <head>
+        <link rel="dns-prefetch" href="https://izwhcuccuwvlqqhpprbb.supabase.co" />
+        <link rel="preconnect" href="https://izwhcuccuwvlqqhpprbb.supabase.co" />
+        <link rel="dns-prefetch" href="https://a.espncdn.com" />
+        <link rel="preconnect" href="https://a.espncdn.com" crossOrigin="anonymous" />
+        <link rel="prefetch" href="/chicago-bears" />
+        <link rel="prefetch" href="/scout-ai" />
+        <link rel="prefetch" href="/gm" />
         <script
           dangerouslySetInnerHTML={{
             __html: `
@@ -160,9 +169,13 @@ export default function RootLayout({
               <TeamRecordProvider>
               <ChatProvider teamSlug="bears">
               <SkipToContent />
+              <NavigationProgress />
               <div className="flex min-h-screen flex-col">
                 <Header />
                 <div id="main-content" className="flex-1" tabIndex={-1}>
+                  <div className="sm-container">
+                    <Breadcrumb />
+                  </div>
                   <MotionProvider>
                     {children}
                   </MotionProvider>

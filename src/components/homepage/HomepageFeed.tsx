@@ -303,7 +303,7 @@ export function HomepageFeed({
       <ScrollProgress />
 
       {/* ===== SECTION 1: Hero ===== */}
-      <section className="sm-hero-bg homepage-hero">
+      <section className="sm-hero-bg homepage-hero" aria-label="Hero">
         {/* Ambient layers */}
         <div className="hero-bg-mesh" />
         <div className="sm-grid-overlay" />
@@ -335,7 +335,7 @@ export function HomepageFeed({
             ))}
           </div>
 
-          <Link href="/search" className="hero-search-bar animate-entrance entrance-delay-5">
+          <Link href="/search" className="hero-search-bar animate-entrance entrance-delay-5" role="search" aria-label="Search articles, teams, players">
             <svg className="search-icon" width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
               <circle cx="11" cy="11" r="8" />
               <path d="m21 21-4.3-4.3" />
@@ -371,7 +371,7 @@ export function HomepageFeed({
       )}
 
       {/* ===== SECTION 3: Featured Content ===== */}
-      <section className="homepage-section">
+      <section className="homepage-section" aria-label="Featured stories">
         <div className="sm-container">
           <div className="section-header scroll-reveal">
             <span className="sm-tag">Trending Now</span>
@@ -393,7 +393,7 @@ export function HomepageFeed({
           )}
           <div className="content-wrapper">
             {/* Main feed */}
-            <main className="main-feed">
+            <main className="main-feed" aria-label="Latest articles">
               <div className="section-header scroll-reveal">
                 <span className="sm-tag">Latest</span>
                 <h2>Chicago Sports News</h2>

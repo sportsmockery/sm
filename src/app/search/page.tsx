@@ -1,5 +1,10 @@
 import { Metadata } from 'next'
 import { supabaseAdmin } from '@/lib/supabase-server'
+
+export const metadata: Metadata = {
+  title: 'Search',
+  description: 'Search Sports Mockery for articles, teams, and players across all five Chicago teams.',
+}
 import { searchPosts, trackSearch } from '@/lib/search'
 import SearchInput from '@/components/search/SearchInput'
 import SearchResults from '@/components/search/SearchResults'

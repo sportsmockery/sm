@@ -36,7 +36,7 @@ export default function Footer() {
   }
 
   return (
-    <footer className="sm-footer">
+    <footer className="sm-footer" aria-label="Site footer">
       <div className="sm-container">
         {/* 4-column grid */}
         <div className="footer-grid">

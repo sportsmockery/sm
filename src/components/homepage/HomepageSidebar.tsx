@@ -76,7 +76,7 @@ const PLATFORM_TOOLS = [
 
 export function HomepageSidebar({ trendingPosts }: HomepageSidebarProps) {
   return (
-    <aside className="sidebar">
+    <aside className="sidebar" aria-label="Sidebar widgets">
       {/* Widget 1: Quick Tools (vertical list) */}
       <div className="sidebar-widget glass-card-static">
         <h4 className="widget-title">Platform Tools</h4>

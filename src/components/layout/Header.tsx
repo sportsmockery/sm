@@ -106,7 +106,7 @@ export default function Header() {
   return (
     <>
       {/* ===== FIXED NAV BAR (72px, frosted glass) ===== */}
-      <nav className={`sm-nav${scrolled ? ' scrolled' : ''}`}>
+      <nav className={`sm-nav${scrolled ? ' scrolled' : ''}`} aria-label="Main navigation">
         {/* LEFT: Logo */}
         <Link href="/" className="nav-logo">
           <Image

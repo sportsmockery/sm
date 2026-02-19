@@ -3318,3 +3318,279 @@ main, .page-content, [role="main"] {
 @media (max-width: 768px) {
   .article-body-2030 p { font-size: 16px; }
 }
+
+/* ========== FINAL POLISH: Upgrade 1 — Haptic Micro-Interactions ========== */
+
+/* A) Button press — scale down on :active */
+button:active:not(:disabled),
+a.glass-card:active,
+a.glass-card-sm:active,
+.feed-card:active,
+.tool-list-item:active,
+.team-pill:active,
+.nav-cta:active,
+.sm-plus-btn:active {
+  transform: scale(0.97);
+  transition-duration: 0.08s;
+}
+
+/* B) Nav link hover — underline slide-in from center */
+.nav-links a {
+  position: relative;
+  padding-bottom: 2px;
+}
+.nav-links a::after {
+  content: '';
+  position: absolute;
+  bottom: -4px;
+  left: 50%;
+  width: 0;
+  height: 2px;
+  background: var(--sm-red);
+  border-radius: 1px;
+  transition: width 0.3s ease, left 0.3s ease;
+}
+.nav-links a:hover::after {
+  width: 100%;
+  left: 0;
+}
+/* Don't apply underline to CTA button */
+.nav-links a.nav-cta::after,
+.nav-links a.nav-feed-link::after {
+  display: none;
+}
+
+/* C) Card hover — red glow border trace */
+.glass-card::after,
+.glass-card-sm::after,
+.glass-card-static::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  padding: 1px;
+  background: linear-gradient(135deg, transparent 40%, rgba(188,0,0,0.15) 50%, transparent 60%);
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  opacity: 0;
+  transition: opacity 0.4s ease;
+  pointer-events: none;
+}
+.glass-card:hover::after,
+.glass-card-sm:hover::after,
+.glass-card-static:hover::after {
+  opacity: 1;
+}
+
+/* ========== FINAL POLISH: Upgrade 4 — Focus Ring (keyboard) ========== */
+*:focus-visible {
+  outline: 2px solid var(--sm-red);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+*:focus:not(:focus-visible) {
+  outline: none;
+}
+
+/* ========== FINAL POLISH: Upgrade 9 — Powered-by Badge + AI Thinking Dots ========== */
+.powered-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  border-radius: 20px;
+  background: rgba(255,255,255,0.03);
+  border: 1px solid rgba(255,255,255,0.06);
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--sm-text-dim);
+  margin-bottom: 16px;
+}
+.powered-badge img {
+  width: 14px;
+  height: 14px;
+}
+[data-theme="light"] .powered-badge,
+.light .powered-badge {
+  background: rgba(0,0,0,0.03);
+  border-color: rgba(0,0,0,0.06);
+}
+
+.ai-thinking {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 16px;
+  color: var(--sm-text-muted);
+  font-size: 13px;
+}
+.ai-thinking-dots {
+  display: flex;
+  gap: 4px;
+}
+.ai-thinking-dots span {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--sm-red);
+  animation: aiDot 1.2s ease-in-out infinite;
+}
+.ai-thinking-dots span:nth-child(2) { animation-delay: 0.2s; }
+.ai-thinking-dots span:nth-child(3) { animation-delay: 0.4s; }
+@keyframes aiDot {
+  0%, 100% { opacity: 0.3; transform: scale(0.8); }
+  50% { opacity: 1; transform: scale(1.2); }
+}
+
+/* ========== FINAL POLISH: Upgrade 11 — Team Hub Color Wash Entrance ========== */
+.team-page-bears { --team-color: rgba(11,22,42,0.15); }
+.team-page-bulls { --team-color: rgba(206,17,65,0.1); }
+.team-page-cubs { --team-color: rgba(14,51,134,0.1); }
+.team-page-white-sox { --team-color: rgba(39,37,31,0.15); }
+.team-page-blackhawks { --team-color: rgba(207,10,44,0.1); }
+
+.team-color-wash {
+  position: fixed;
+  inset: 0;
+  background: radial-gradient(ellipse at center, var(--team-color, transparent), transparent 70%);
+  z-index: 0;
+  pointer-events: none;
+  animation: colorWashFade 2s ease-out forwards;
+}
+@keyframes colorWashFade {
+  0% { opacity: 1; }
+  100% { opacity: 0.15; }
+}
+
+/* ========== FINAL POLISH: Upgrade 12 — Premium Light Mode ========== */
+[data-theme="light"] .glass-card,
+.light .glass-card {
+  background: #ffffff;
+  border-color: rgba(0,0,0,0.06);
+  box-shadow: 0 1px 3px rgba(0,0,0,0.04), 0 4px 12px rgba(0,0,0,0.02);
+}
+[data-theme="light"] .glass-card:hover,
+.light .glass-card:hover {
+  box-shadow: 0 4px 16px rgba(0,0,0,0.08), 0 1px 3px rgba(0,0,0,0.04);
+}
+[data-theme="light"] .glass-card-sm,
+.light .glass-card-sm {
+  background: #ffffff;
+  border-color: rgba(0,0,0,0.06);
+  box-shadow: 0 1px 2px rgba(0,0,0,0.03);
+}
+[data-theme="light"] .glass-card-sm:hover,
+.light .glass-card-sm:hover {
+  box-shadow: 0 4px 12px rgba(0,0,0,0.06);
+}
+
+/* ========== FINAL POLISH: Upgrade 10 — Scroll-Linked Navbar ========== */
+.sm-nav {
+  transition: padding 0.3s ease, background 0.3s ease, backdrop-filter 0.3s ease;
+}
+.sm-nav.scrolled {
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+}
+[data-theme="light"] .sm-nav,
+.light .sm-nav {
+  background: rgba(255,255,255,0.7);
+  border-bottom-color: rgba(0,0,0,0.04);
+}
+[data-theme="light"] .sm-nav.scrolled,
+.light .sm-nav.scrolled {
+  background: rgba(255,255,255,0.92);
+  border-bottom-color: rgba(0,0,0,0.06);
+}
+
+/* ========== FINAL POLISH: Upgrade 2 — Page Transition ========== */
+.page-transition-in {
+  animation: pageIn 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+}
+@keyframes pageIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* ========== FINAL POLISH: Upgrade 3 — Breadcrumbs ========== */
+.breadcrumb {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 0;
+  font-family: 'Inter', sans-serif;
+  font-size: 12px;
+}
+.bc-link {
+  color: var(--sm-text-dim);
+  text-decoration: none;
+  transition: color 0.2s;
+}
+.bc-link:hover {
+  color: var(--sm-red-light);
+}
+.bc-sep {
+  color: var(--sm-text-dim);
+  opacity: 0.4;
+}
+.bc-current {
+  color: var(--sm-text-muted);
+  font-weight: 500;
+}
+
+/* ========== FINAL POLISH: Upgrade 13 — Extra Responsive Breakpoints ========== */
+@media (min-width: 1400px) {
+  .sm-container { max-width: 1320px; }
+}
+@media (max-width: 480px) {
+  .team-logo-row { gap: 12px; }
+  .team-logo-link { width: 38px; height: 38px; }
+  .team-logo-link img { width: 26px; height: 26px; }
+}
+
+/* Touch targets — ensure 44x44px minimum on mobile */
+@media (max-width: 768px) {
+  .team-pill,
+  .nav-hamburger,
+  .back-to-top,
+  .poll-option,
+  .tool-list-item {
+    min-height: 44px;
+    min-width: 44px;
+  }
+}
+
+/* ========== FINAL POLISH: Upgrade 8 — Navigation Progress Bar ========== */
+.nav-progress-bar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  height: 3px;
+  background: var(--sm-gradient);
+  z-index: 10000;
+  animation: navProgress 1.5s ease-out forwards;
+  box-shadow: 0 0 8px rgba(188,0,0,0.3);
+}
+@keyframes navProgress {
+  0% { width: 0%; }
+  20% { width: 30%; }
+  50% { width: 60%; }
+  80% { width: 85%; }
+  100% { width: 95%; }
+}
+.nav-progress-bar.complete {
+  width: 100%;
+  animation: none;
+  transition: width 0.2s ease, opacity 0.3s 0.2s;
+  opacity: 0;
+}
+
+/* ========== FINAL POLISH: Upgrade 5 — Reduced Motion ========== */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}

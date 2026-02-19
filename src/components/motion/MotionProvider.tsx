@@ -33,7 +33,7 @@ export default function MotionProvider({ children }: MotionProviderProps) {
           }
         }}
       >
-        <div key={pathname}>
+        <div key={pathname} className="page-transition-in">
           {children}
         </div>
       </AnimatePresence>

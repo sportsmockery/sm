@@ -1,4 +1,10 @@
+import type { Metadata } from 'next'
 import { redirect } from 'next/navigation'
+
+export const metadata: Metadata = {
+  title: 'For You — Personalized Feed',
+  description: 'Your personalized Chicago sports feed, curated based on your favorite teams and reading history.',
+}
 import { cookies } from 'next/headers'
 import { createServerClient } from '@supabase/ssr'
 import { HomepageFeed } from '@/components/homepage/HomepageFeed'
