@@ -1,8 +1,10 @@
 'use client'
 
 import Link from 'next/link'
+import Image from 'next/image'
 import { useRouter } from 'next/navigation'
 import { useState, useEffect, useRef } from 'react'
+import { ThemeToggle } from '@/components/ThemeToggle'
 
 const navLinks = [
   { name: 'Bears', href: '/chicago-bears', color: '#C83200', bg: '#0B162A' },
@@ -96,19 +98,27 @@ export default function Header() {
       <div className="mx-auto max-w-6xl px-4">
         <div className="flex h-16 items-center justify-between gap-4">
           {/* Logo */}
-          <Link href="/" className="shrink-0 flex items-center gap-3 group">
-            <div className="relative flex items-center justify-center w-11 h-11 bg-gradient-to-br from-[#FF0000] to-[#8B0000] rounded-xl shadow-lg group-hover:shadow-xl transition-shadow">
-              <span className="text-white font-black text-xl tracking-tighter font-[var(--font-montserrat)]">SM</span>
-              <div className="absolute inset-0 rounded-xl bg-white opacity-0 group-hover:opacity-10 transition-opacity" />
-            </div>
-            <div className="hidden sm:flex flex-col">
-              <span className="text-xl font-black tracking-tight font-[var(--font-montserrat)] leading-none" style={{ color: 'var(--sm-text)' }}>
-                SPORTS
-              </span>
-              <span className="text-xl font-black tracking-tight text-[#8B0000] font-[var(--font-montserrat)] leading-none">
-                MOCKERY
-              </span>
-            </div>
+          <Link href="/" className="shrink-0 flex items-center">
+            {/* Light mode logo (black text) */}
+            <Image
+              src="/logos/v2_site_Header.png"
+              alt="Sports Mockery"
+              width={160}
+              height={40}
+              className="dark:hidden"
+              priority
+              style={{ objectFit: 'contain' }}
+            />
+            {/* Dark mode logo (light text) */}
+            <Image
+              src="/logos/v2_header_dark.png"
+              alt="Sports Mockery"
+              width={160}
+              height={40}
+              className="hidden dark:block"
+              priority
+              style={{ objectFit: 'contain' }}
+            />
           </Link>
 
           {/* Desktop Navigation */}
@@ -169,6 +179,9 @@ export default function Header() {
 
           {/* Right side actions */}
           <div className="flex items-center gap-3">
+            {/* Theme Toggle */}
+            <ThemeToggle />
+
             {/* Desktop Search */}
             <form onSubmit={handleSearch} className="hidden md:block">
               <div className="relative">

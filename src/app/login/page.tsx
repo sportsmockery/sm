@@ -102,13 +102,13 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
         </div>
       </div>
 
-      {/* Right side - Features/Branding (hidden on mobile) */}
-      <div className="hidden lg:flex" style={{
+      {/* Right side - Features/Branding (hidden on mobile, always dark) */}
+      <div className="hidden lg:flex dark" data-theme="dark" style={{
         flex: '1 1 0%',
         position: 'relative',
         alignItems: 'center',
         justifyContent: 'center',
-        background: 'var(--sm-dark)',
+        background: '#0a0a0b',
       }}>
         <div className="sm-grid-overlay" />
         {/* Content */}
