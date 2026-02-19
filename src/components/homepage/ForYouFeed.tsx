@@ -112,10 +112,10 @@ export function ForYouFeed({
       {displayCount < posts.length && !isLoading && (
         <button
           onClick={loadMore}
-          className="btn-secondary"
+          className="btn-secondary btn-load-more"
           style={{ width: '100%', marginTop: 24 }}
         >
-          Load More Stories
+          Load More Articles
         </button>
       )}
     </div>

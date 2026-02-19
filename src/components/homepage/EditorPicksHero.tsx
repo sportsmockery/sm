@@ -41,9 +41,6 @@ export function EditorPicksHero({ picks = [] }: EditorPicksHeroProps) {
   // Slots 2-3: Stacked side cards (right column)
   const sidePicks = sorted.slice(1, 3);
 
-  // Slots 4-6: Remaining picks shown as a simple list
-  const remainingPicks = sorted.slice(3, 6);
-
   return (
     <section className="sm-featured-shell" aria-label="Featured Content">
       <div className="featured-grid">
@@ -115,26 +112,6 @@ export function EditorPicksHero({ picks = [] }: EditorPicksHeroProps) {
           ))}
         </div>
       </div>
-
-      {/* Remaining picks (slots 4-6) as a simple list */}
-      {remainingPicks.length > 0 && (
-        <div className="featured-remaining">
-          <ul className="featured-remaining-list">
-            {remainingPicks.map((pick) => (
-              <li key={pick.id} className="featured-remaining-item">
-                <Link href={`/${pick.slug}`} className="featured-remaining-link">
-                  {pick.team_slug && (
-                    <span
-                      className={`featured-remaining-dot featured-remaining-dot--${pick.team_slug}`}
-                    />
-                  )}
-                  <span className="featured-remaining-title">{pick.title}</span>
-                </Link>
-              </li>
-            ))}
-          </ul>
-        </div>
-      )}
     </section>
   );
 }
