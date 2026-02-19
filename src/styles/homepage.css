@@ -26,16 +26,77 @@
   padding: 0 24px;
 }
 
-/* Main headline: Space Grotesk 800 */
+/* Main headline: Bebas Neue (matches /home hero exactly) */
 .hero-headline {
-  font-family: 'Space Grotesk', var(--font-heading), sans-serif;
-  font-size: clamp(2.5rem, 5.5vw, 4rem);
-  font-weight: 800;
-  letter-spacing: -1.8px;
-  line-height: 1.1;
-  color: var(--sm-text);
+  font-family: var(--font-bebas-neue), 'Bebas Neue', Impact, sans-serif;
+  font-size: clamp(4rem, 9vw, 7.5rem);
+  font-weight: 400;
+  line-height: 0.95;
+  letter-spacing: 0.01em;
+  text-transform: uppercase;
+  color: #fff;
   margin: 24px 0 0;
   text-align: center;
+  text-shadow:
+    0 0 10px rgba(188, 0, 0, 0.6),
+    0 0 40px rgba(188, 0, 0, 0.4),
+    0 0 80px rgba(188, 0, 0, 0.3),
+    0 0 140px rgba(188, 0, 0, 0.2),
+    0 0 200px rgba(188, 0, 0, 0.1);
+  animation: hero-glowBurst 1.8s ease forwards;
+}
+
+/* Gradient accent text (e.g. "2.0") */
+.hero-headline .gradient-text {
+  background: linear-gradient(135deg, #bc0000, #ff4444);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  text-shadow: none;
+  filter: drop-shadow(0 0 10px rgba(255, 255, 255, 0.25))
+         drop-shadow(0 0 30px rgba(255, 255, 255, 0.12))
+         drop-shadow(0 0 60px rgba(255, 255, 255, 0.06));
+}
+
+/* Glow burst animation (matches /home) */
+@keyframes hero-glowBurst {
+  0% {
+    text-shadow:
+      0 0 10px rgba(188, 0, 0, 0),
+      0 0 40px rgba(188, 0, 0, 0),
+      0 0 80px rgba(188, 0, 0, 0);
+  }
+  40% {
+    text-shadow:
+      0 0 20px rgba(188, 0, 0, 0.8),
+      0 0 60px rgba(188, 0, 0, 0.5),
+      0 0 120px rgba(188, 0, 0, 0.4),
+      0 0 200px rgba(188, 0, 0, 0.2);
+  }
+  100% {
+    text-shadow:
+      0 0 10px rgba(188, 0, 0, 0.6),
+      0 0 40px rgba(188, 0, 0, 0.4),
+      0 0 80px rgba(188, 0, 0, 0.3),
+      0 0 140px rgba(188, 0, 0, 0.2),
+      0 0 200px rgba(188, 0, 0, 0.1);
+  }
+}
+
+/* Light mode: dark text, subtle glow */
+[data-theme="light"] .hero-headline,
+.light .hero-headline {
+  color: #111118;
+  text-shadow:
+    0 0 10px rgba(188, 0, 0, 0.15),
+    0 0 40px rgba(188, 0, 0, 0.08);
+  animation: none;
+}
+
+[data-theme="light"] .hero-headline .gradient-text,
+.light .hero-headline .gradient-text {
+  filter: drop-shadow(0 0 10px rgba(188, 0, 0, 0.2))
+         drop-shadow(0 0 30px rgba(188, 0, 0, 0.1));
 }
 
 /* Subtitle */
@@ -839,8 +900,8 @@
   }
 
   .hero-headline {
-    font-size: clamp(2rem, 8vw, 3rem);
-    letter-spacing: -1.2px;
+    font-size: clamp(3rem, 8vw, 5rem);
+    letter-spacing: 0;
   }
 
   .hero-subtitle {

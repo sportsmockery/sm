@@ -84,11 +84,11 @@ const PLATFORM_TOOLS = [
 ];
 
 const TEAM_LOGOS = [
-  { slug: 'chicago-bears', src: '/logos/bears.svg', alt: 'Chicago Bears' },
-  { slug: 'chicago-bulls', src: '/logos/bulls.svg', alt: 'Chicago Bulls' },
-  { slug: 'chicago-cubs', src: '/logos/cubs.svg', alt: 'Chicago Cubs' },
-  { slug: 'chicago-white-sox', src: '/logos/whitesox.svg', alt: 'Chicago White Sox' },
-  { slug: 'chicago-blackhawks', src: '/logos/blackhawks.svg', alt: 'Chicago Blackhawks' },
+  { slug: 'chicago-bears', src: 'https://a.espncdn.com/i/teamlogos/nfl/500/chi.png', alt: 'Chicago Bears' },
+  { slug: 'chicago-bulls', src: 'https://a.espncdn.com/i/teamlogos/nba/500/chi.png', alt: 'Chicago Bulls' },
+  { slug: 'chicago-cubs', src: 'https://a.espncdn.com/i/teamlogos/mlb/500/chc.png', alt: 'Chicago Cubs' },
+  { slug: 'chicago-white-sox', src: 'https://a.espncdn.com/i/teamlogos/mlb/500/chw.png', alt: 'Chicago White Sox' },
+  { slug: 'chicago-blackhawks', src: 'https://a.espncdn.com/i/teamlogos/nhl/500/chi.png', alt: 'Chicago Blackhawks' },
 ];
 
 export function HomepageFeed({
@@ -136,7 +136,9 @@ export function HomepageFeed({
           </div>
 
           <h1 className="hero-headline animate-fade-in-up delay-100">
-            Welcome to Sports Mockery <span className="gradient-text">2.0</span>
+            Welcome to<br />
+            <span className="gradient-text">Sports Mockery</span><br />
+            2.0
           </h1>
 
           <p className="hero-subtitle animate-fade-in-up delay-200">
