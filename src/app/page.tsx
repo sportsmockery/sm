@@ -1,7 +1,12 @@
+import { Metadata } from 'next'
 import { createClient } from '@supabase/supabase-js'
 import { HomepageFeed } from '@/components/homepage/HomepageFeed'
 import { getHomepageDataWithFallbacks, FALLBACK_POSTS, FALLBACK_EDITOR_PICKS } from '@/lib/homepage-fallbacks'
 import '@/styles/homepage.css'
+
+export const metadata: Metadata = {
+  title: { absolute: 'Sports Mockery | 2.0' },
+}
 
 // Force dynamic rendering
 export const dynamic = 'force-dynamic'
