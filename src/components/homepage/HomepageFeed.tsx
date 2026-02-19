@@ -1,7 +1,7 @@
 // src/components/homepage/HomepageFeed.tsx
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
@@ -9,6 +9,41 @@ import { EditorPicksHero } from './EditorPicksHero';
 import { TeamFilterTabs } from './TeamFilterTabs';
 import { ForYouFeed } from './ForYouFeed';
 import { HomepageSidebar } from './HomepageSidebar';
+
+const TEAM_LABELS: Record<string, string> = {
+  bears: 'Bears',
+  bulls: 'Bulls',
+  blackhawks: 'Blackhawks',
+  cubs: 'Cubs',
+  'white-sox': 'White Sox',
+};
+
+/* ── Back to Top Button ── */
+function BackToTop() {
+  const [visible, setVisible] = useState(false);
+
+  useEffect(() => {
+    const onScroll = () => {
+      setVisible(window.scrollY > window.innerHeight * 2);
+    };
+    window.addEventListener('scroll', onScroll, { passive: true });
+    return () => window.removeEventListener('scroll', onScroll);
+  }, []);
+
+  if (!visible) return null;
+
+  return (
+    <button
+      className="back-to-top"
+      onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+      aria-label="Back to top"
+    >
+      <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+        <path d="m18 15-6-6-6 6" />
+      </svg>
+    </button>
+  );
+}
 
 /* ── Scroll Progress Bar ── */
 function ScrollProgress() {
@@ -149,6 +184,38 @@ export function HomepageFeed({
   const [isMobile, setIsMobile] = useState<boolean>(false);
   const router = useRouter();
 
+  // Feature 1: Team preference memory (localStorage)
+  const handleTeamChange = useCallback((team: string) => {
+    setActiveTeam(team);
+    try {
+      if (team === 'all') {
+        localStorage.removeItem('sm-preferred-team');
+      } else {
+        localStorage.setItem('sm-preferred-team', team);
+      }
+    } catch {}
+  }, []);
+
+  const clearTeamPreference = useCallback(() => {
+    setActiveTeam('all');
+    try { localStorage.removeItem('sm-preferred-team'); } catch {}
+  }, []);
+
+  // Load team preference from localStorage on mount
+  useEffect(() => {
+    try {
+      const saved = localStorage.getItem('sm-preferred-team');
+      if (saved && saved !== 'all') {
+        setActiveTeam(saved);
+        return; // localStorage takes priority
+      }
+    } catch {}
+    // Fall back to server-side user preference
+    if (userTeamPreference && userTeamPreference !== 'all') {
+      setActiveTeam(userTeamPreference);
+    }
+  }, [userTeamPreference]);
+
   useEffect(() => {
     const checkMobile = () => setIsMobile(window.innerWidth < 768);
     checkMobile();
@@ -167,12 +234,6 @@ export function HomepageFeed({
     document.addEventListener('keydown', handleKeyDown);
     return () => document.removeEventListener('keydown', handleKeyDown);
   }, [router]);
-
-  useEffect(() => {
-    if (userTeamPreference && userTeamPreference !== 'all') {
-      setActiveTeam(userTeamPreference);
-    }
-  }, [userTeamPreference]);
 
   // Scroll-reveal IntersectionObserver
   useEffect(() => {
@@ -272,7 +333,7 @@ export function HomepageFeed({
         <div className="sm-container">
           <TeamFilterTabs
             activeTeam={activeTeam}
-            onTeamChange={setActiveTeam}
+            onTeamChange={handleTeamChange}
             userPreferredTeam={userTeamPreference}
           />
         </div>
@@ -292,6 +353,13 @@ export function HomepageFeed({
       {/* ===== SECTION 4: Main Content + Sidebar ===== */}
       <section id="feed" className="homepage-section">
         <div className="sm-container">
+          {/* Team preference banner */}
+          {activeTeam !== 'all' && TEAM_LABELS[activeTeam] && (
+            <div className="team-pref-banner">
+              Showing <strong>{TEAM_LABELS[activeTeam]}</strong> news first
+              <button onClick={clearTeamPreference} className="team-pref-clear">Show All</button>
+            </div>
+          )}
           <div className="content-wrapper">
             {/* Main feed */}
             <main className="main-feed">
@@ -313,6 +381,9 @@ export function HomepageFeed({
           </div>
         </div>
       </section>
+
+      {/* Back to Top */}
+      <BackToTop />
     </div>
   );
 }

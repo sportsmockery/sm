@@ -61,6 +61,19 @@ function getContentTypeBadge(contentType: string): string | null {
 
 export type { Post };
 
+function markAsRead(slug: string) {
+  try {
+    const raw = localStorage.getItem('sm-read-articles');
+    const arr: string[] = raw ? JSON.parse(raw) : [];
+    if (!arr.includes(slug)) {
+      arr.push(slug);
+      // Cap at 200 to avoid bloating localStorage
+      if (arr.length > 200) arr.shift();
+      localStorage.setItem('sm-read-articles', JSON.stringify(arr));
+    }
+  } catch {}
+}
+
 export function PostCard({ post, priority = false }: PostCardProps) {
   const recencyLabel = formatRecency(post.published_at);
   const teamName = post.team_slug
@@ -77,7 +90,7 @@ export function PostCard({ post, priority = false }: PostCardProps) {
 
   return (
     <article className="glass-card feed-card">
-      <Link href={postUrl}>
+      <Link href={postUrl} onClick={() => markAsRead(post.slug)}>
         <div className="card-image">
           {post.featured_image ? (
             <Image

@@ -46,6 +46,9 @@
 
 ## Styling Rules (IMPORTANT)
 
+### DO NOT Modify the Theme Toggle
+The theme toggle in `src/components/layout/Header.tsx` uses the `<ThemeToggle />` component from `src/components/ThemeToggle.tsx`. This is the Chicago star sliding pill toggle. **Do not replace, revert, or modify this toggle.** It is finalized.
+
 ### Always Use Inline Styles for Button Colors
 Tailwind classes for colors/borders on buttons often get overridden by other CSS. **Always use inline `style={{}}` for:**
 - `backgroundColor`

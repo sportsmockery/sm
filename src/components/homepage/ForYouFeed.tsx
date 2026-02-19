@@ -102,6 +102,22 @@ export function ForYouFeed({
     return () => observer.disconnect();
   }, [visiblePosts.length]);
 
+  // Feature 2: Mark read articles from localStorage
+  useEffect(() => {
+    if (!feedGridRef.current) return;
+    try {
+      const raw = localStorage.getItem('sm-read-articles');
+      if (!raw) return;
+      const readSlugs: string[] = JSON.parse(raw);
+      const slugSet = new Set(readSlugs);
+      feedGridRef.current.querySelectorAll('[data-slug]').forEach((el) => {
+        if (slugSet.has((el as HTMLElement).dataset.slug || '')) {
+          el.classList.add('is-read');
+        }
+      });
+    } catch {}
+  }, [visiblePosts.length]);
+
   // Suppress unused variable warnings for props used conditionally
   void isLoggedIn;
 
@@ -123,7 +139,7 @@ export function ForYouFeed({
   return (
     <div className="feed-grid" ref={feedGridRef}>
       {visiblePosts.map((post, index) => (
-        <div key={post.id} data-feed-card>
+        <div key={post.id} data-feed-card data-slug={post.slug}>
           <PostCard post={post} priority={index < 3} />
 
           {/* Insert trending drawer after index 5 on mobile */}

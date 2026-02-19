@@ -54,7 +54,8 @@
   text-shadow: none;
   filter: drop-shadow(0 0 10px rgba(255, 255, 255, 0.25))
          drop-shadow(0 0 30px rgba(255, 255, 255, 0.12))
-         drop-shadow(0 0 60px rgba(255, 255, 255, 0.06));
+         drop-shadow(0 0 20px rgba(188, 0, 0, 0.3))
+         drop-shadow(0 0 60px rgba(188, 0, 0, 0.15));
 }
 
 /* Reveal animation: opacity + transform + blur (matches /home hm-heroReveal) */
@@ -1258,14 +1259,27 @@
   100% { left: 160%; }
 }
 
-/* C) "2.0" glow pulse */
+/* C) "2.0" glow pulse — matches /home dramatic multi-layer glow */
 .hero-headline .gradient-text {
   animation: glowPulse 3s ease-in-out 1.5s infinite;
 }
 
 @keyframes glowPulse {
-  0%, 100% { filter: drop-shadow(0 0 20px rgba(188,0,0,0.2)); }
-  50% { filter: drop-shadow(0 0 40px rgba(188,0,0,0.4)); }
+  0%, 100% {
+    filter:
+      drop-shadow(0 0 10px rgba(255,255,255,0.25))
+      drop-shadow(0 0 30px rgba(255,255,255,0.12))
+      drop-shadow(0 0 20px rgba(188,0,0,0.3))
+      drop-shadow(0 0 60px rgba(188,0,0,0.15));
+  }
+  50% {
+    filter:
+      drop-shadow(0 0 10px rgba(255,255,255,0.35))
+      drop-shadow(0 0 30px rgba(255,255,255,0.18))
+      drop-shadow(0 0 30px rgba(188,0,0,0.6))
+      drop-shadow(0 0 80px rgba(188,0,0,0.35))
+      drop-shadow(0 0 140px rgba(188,0,0,0.2));
+  }
 }
 
 /* D) Team logos pop-in with stagger */
@@ -1862,4 +1876,83 @@ html {
 [data-theme="light"] .sm-plus-cta,
 .light .sm-plus-cta {
   background: rgba(188, 0, 0, 0.04);
+}
+
+/* ========== Feature 1: Team Preference Banner ========== */
+.team-pref-banner {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 10px 20px;
+  margin-bottom: 20px;
+  border-radius: 10px;
+  font-size: 14px;
+  color: var(--sm-text-muted);
+  background: var(--sm-surface);
+  border: 1px solid var(--sm-border);
+}
+
+.team-pref-banner strong {
+  color: var(--sm-text);
+}
+
+.team-pref-clear {
+  background: none;
+  border: 1px solid var(--sm-border);
+  border-radius: 6px;
+  padding: 4px 12px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--sm-text-muted);
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.team-pref-clear:hover {
+  color: var(--sm-text);
+  border-color: var(--sm-text-muted);
+}
+
+/* ========== Feature 2: Read Article Tracking ========== */
+[data-feed-card].is-read {
+  opacity: 0.65;
+  transition: opacity 0.3s;
+}
+
+[data-feed-card].is-read:hover {
+  opacity: 1;
+}
+
+/* ========== Feature 3: Back to Top Button ========== */
+.back-to-top {
+  position: fixed;
+  bottom: 28px;
+  left: 28px;
+  z-index: 900;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  border: 1px solid var(--sm-border);
+  background: var(--sm-surface);
+  color: var(--sm-text-muted);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+  transition: all 0.25s;
+  animation: bttFadeIn 0.3s ease;
+}
+
+.back-to-top:hover {
+  color: var(--sm-text);
+  border-color: var(--sm-text-muted);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.2);
+}
+
+@keyframes bttFadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
 }
