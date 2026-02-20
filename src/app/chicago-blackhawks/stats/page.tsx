@@ -358,7 +358,7 @@ function LeaderboardRow({ entry, rank, isGoaltending, isLast }: { entry: Leaderb
         <div>
           <div style={{ fontSize: 18, fontWeight: 700, color: 'var(--sm-text)' }}>
             {isGoaltending && entry.primaryLabel === 'SV%'
-              ? `.${Math.round(entry.primaryStat * 1000)}`
+              ? entry.primaryStat > 0 ? `.${String(Math.round(entry.primaryStat * 1000)).padStart(3, '0')}` : '—'
               : entry.primaryStat}
           </div>
           <div style={{ fontSize: 12, color: 'var(--sm-text-muted)' }}>{entry.primaryLabel}</div>

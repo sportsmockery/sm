@@ -857,11 +857,11 @@ async function getLeaderboards(season: number): Promise<WhiteSoxLeaderboard> {
   const aggregatedStats = Array.from(playerTotals.values())
 
   const batting = aggregatedStats
-    .filter(s => s.atBats >= 50 && playersMap.has(s.player_id))
+    .filter(s => s.atBats >= 50 && playersMap.has(String(s.player_id)))
     .sort((a, b) => (b.hits / b.atBats) - (a.hits / a.atBats))
     .slice(0, 5)
     .map(s => ({
-      player: playersMap.get(s.player_id)!,
+      player: playersMap.get(String(s.player_id))!,
       primaryStat: Math.round((s.hits / s.atBats) * 1000) / 1000,
       primaryLabel: 'AVG',
       secondaryStat: s.hits,
@@ -871,11 +871,11 @@ async function getLeaderboards(season: number): Promise<WhiteSoxLeaderboard> {
     }))
 
   const homeRuns = aggregatedStats
-    .filter(s => s.homeRuns > 0 && playersMap.has(s.player_id))
+    .filter(s => s.homeRuns > 0 && playersMap.has(String(s.player_id)))
     .sort((a, b) => b.homeRuns - a.homeRuns)
     .slice(0, 5)
     .map(s => ({
-      player: playersMap.get(s.player_id)!,
+      player: playersMap.get(String(s.player_id))!,
       primaryStat: s.homeRuns,
       primaryLabel: 'HR',
       secondaryStat: s.rbi,
@@ -885,7 +885,7 @@ async function getLeaderboards(season: number): Promise<WhiteSoxLeaderboard> {
     }))
 
   const pitching = aggregatedStats
-    .filter(s => s.inningsPitched >= 20 && playersMap.has(s.player_id))
+    .filter(s => s.inningsPitched >= 20 && playersMap.has(String(s.player_id)))
     .sort((a, b) => {
       const aEra = a.inningsPitched > 0 ? (a.earnedRuns / a.inningsPitched) * 9 : 99
       const bEra = b.inningsPitched > 0 ? (b.earnedRuns / b.inningsPitched) * 9 : 99
@@ -895,7 +895,7 @@ async function getLeaderboards(season: number): Promise<WhiteSoxLeaderboard> {
     .map(s => {
       const era = s.inningsPitched > 0 ? Math.round((s.earnedRuns / s.inningsPitched) * 9 * 100) / 100 : 0
       return {
-        player: playersMap.get(s.player_id)!,
+        player: playersMap.get(String(s.player_id))!,
         primaryStat: era,
         primaryLabel: 'ERA',
         secondaryStat: s.wins,
@@ -906,11 +906,11 @@ async function getLeaderboards(season: number): Promise<WhiteSoxLeaderboard> {
     })
 
   const saves = aggregatedStats
-    .filter(s => s.saves > 0 && playersMap.has(s.player_id))
+    .filter(s => s.saves > 0 && playersMap.has(String(s.player_id)))
     .sort((a, b) => b.saves - a.saves)
     .slice(0, 5)
     .map(s => ({
-      player: playersMap.get(s.player_id)!,
+      player: playersMap.get(String(s.player_id))!,
       primaryStat: s.saves,
       primaryLabel: 'SV',
       secondaryStat: s.games,

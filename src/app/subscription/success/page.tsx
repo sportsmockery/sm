@@ -1,11 +1,23 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { Suspense, useEffect, useState } from 'react'
 import { useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import { useSubscription } from '@/contexts/SubscriptionContext'
 
 export default function SubscriptionSuccessPage() {
+  return (
+    <Suspense fallback={
+      <main className="sm-hero-bg" style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+        <div style={{ width: 48, height: 48, border: '4px solid var(--sm-border)', borderTopColor: '#bc0000', borderRadius: '50%', animation: 'spin 0.8s linear infinite' }} />
+      </main>
+    }>
+      <SubscriptionSuccessContent />
+    </Suspense>
+  )
+}
+
+function SubscriptionSuccessContent() {
   const searchParams = useSearchParams()
   const sessionId = searchParams.get('session_id')
   const { refresh, tier, isPro } = useSubscription()

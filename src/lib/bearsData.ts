@@ -966,11 +966,11 @@ async function getLeaderboards(season: number): Promise<BearsLeaderboard> {
   // Build leaderboards from aggregated stats
   // Only include players we have in playersMap (active roster)
   const passing = aggregatedStats
-    .filter(s => s.pass_yds > 0 && playersMap.has(s.player_id))
+    .filter(s => s.pass_yds > 0 && playersMap.has(String(s.player_id)))
     .sort((a, b) => b.pass_yds - a.pass_yds)
     .slice(0, 5)
     .map(s => ({
-      player: playersMap.get(s.player_id)!,
+      player: playersMap.get(String(s.player_id))!,
       primaryStat: s.pass_yds,
       primaryLabel: 'YDS',
       secondaryStat: s.pass_td,
@@ -980,11 +980,11 @@ async function getLeaderboards(season: number): Promise<BearsLeaderboard> {
     }))
 
   const rushing = aggregatedStats
-    .filter(s => s.rush_yds > 0 && playersMap.has(s.player_id))
+    .filter(s => s.rush_yds > 0 && playersMap.has(String(s.player_id)))
     .sort((a, b) => b.rush_yds - a.rush_yds)
     .slice(0, 5)
     .map(s => ({
-      player: playersMap.get(s.player_id)!,
+      player: playersMap.get(String(s.player_id))!,
       primaryStat: s.rush_yds,
       primaryLabel: 'YDS',
       secondaryStat: s.rush_td,
@@ -994,11 +994,11 @@ async function getLeaderboards(season: number): Promise<BearsLeaderboard> {
     }))
 
   const receiving = aggregatedStats
-    .filter(s => s.rec_yds > 0 && playersMap.has(s.player_id))
+    .filter(s => s.rec_yds > 0 && playersMap.has(String(s.player_id)))
     .sort((a, b) => b.rec_yds - a.rec_yds)
     .slice(0, 5)
     .map(s => ({
-      player: playersMap.get(s.player_id)!,
+      player: playersMap.get(String(s.player_id))!,
       primaryStat: s.rec_yds,
       primaryLabel: 'YDS',
       secondaryStat: s.rec_td,
@@ -1008,11 +1008,11 @@ async function getLeaderboards(season: number): Promise<BearsLeaderboard> {
     }))
 
   const defense = aggregatedStats
-    .filter(s => s.tackles > 0 && playersMap.has(s.player_id))
+    .filter(s => s.tackles > 0 && playersMap.has(String(s.player_id)))
     .sort((a, b) => b.tackles - a.tackles)
     .slice(0, 5)
     .map(s => ({
-      player: playersMap.get(s.player_id)!,
+      player: playersMap.get(String(s.player_id))!,
       primaryStat: s.tackles,
       primaryLabel: 'TKL',
       secondaryStat: s.sacks,

@@ -772,18 +772,19 @@ async function getLeaderboards(season: number): Promise<BlackhawksLeaderboard> {
     totals.points += stat.points || 0
     totals.saves += stat.saves || 0
     totals.goalsAgainst += stat.goals_against || 0
-    totals.shotsAgainst += stat.shots_against || 0
+    // shots_against may be null — compute from saves + goals_against as fallback
+    totals.shotsAgainst += stat.shots_against ?? ((stat.saves || 0) + (stat.goals_against || 0))
     totals.games += 1
   }
 
   const aggregatedStats = Array.from(playerTotals.values())
 
   const goals = aggregatedStats
-    .filter(s => s.goals > 0 && playersMap.has(s.player_id))
+    .filter(s => s.goals > 0 && playersMap.has(String(s.player_id)))
     .sort((a, b) => b.goals - a.goals)
     .slice(0, 5)
     .map(s => ({
-      player: playersMap.get(s.player_id)!,
+      player: playersMap.get(String(s.player_id))!,
       primaryStat: s.goals,
       primaryLabel: 'G',
       secondaryStat: s.assists,
@@ -793,11 +794,11 @@ async function getLeaderboards(season: number): Promise<BlackhawksLeaderboard> {
     }))
 
   const assists = aggregatedStats
-    .filter(s => s.assists > 0 && playersMap.has(s.player_id))
+    .filter(s => s.assists > 0 && playersMap.has(String(s.player_id)))
     .sort((a, b) => b.assists - a.assists)
     .slice(0, 5)
     .map(s => ({
-      player: playersMap.get(s.player_id)!,
+      player: playersMap.get(String(s.player_id))!,
       primaryStat: s.assists,
       primaryLabel: 'A',
       secondaryStat: s.goals,
@@ -807,11 +808,11 @@ async function getLeaderboards(season: number): Promise<BlackhawksLeaderboard> {
     }))
 
   const points = aggregatedStats
-    .filter(s => s.points > 0 && playersMap.has(s.player_id))
+    .filter(s => s.points > 0 && playersMap.has(String(s.player_id)))
     .sort((a, b) => b.points - a.points)
     .slice(0, 5)
     .map(s => ({
-      player: playersMap.get(s.player_id)!,
+      player: playersMap.get(String(s.player_id))!,
       primaryStat: s.points,
       primaryLabel: 'PTS',
       secondaryStat: s.goals,
@@ -821,7 +822,7 @@ async function getLeaderboards(season: number): Promise<BlackhawksLeaderboard> {
     }))
 
   const goaltending = aggregatedStats
-    .filter(s => s.saves > 0 && playersMap.has(s.player_id))
+    .filter(s => s.saves > 0 && playersMap.has(String(s.player_id)))
     .sort((a, b) => {
       const aSvPct = a.shotsAgainst > 0 ? a.saves / a.shotsAgainst : 0
       const bSvPct = b.shotsAgainst > 0 ? b.saves / b.shotsAgainst : 0
@@ -832,7 +833,7 @@ async function getLeaderboards(season: number): Promise<BlackhawksLeaderboard> {
       const svPct = s.shotsAgainst > 0 ? Math.round((s.saves / s.shotsAgainst) * 1000) / 1000 : 0
       const gaa = s.games > 0 ? Math.round((s.goalsAgainst / s.games) * 100) / 100 : 0
       return {
-        player: playersMap.get(s.player_id)!,
+        player: playersMap.get(String(s.player_id))!,
         primaryStat: svPct,
         primaryLabel: 'SV%',
         secondaryStat: gaa,

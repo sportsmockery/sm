@@ -751,11 +751,11 @@ async function getLeaderboards(season: number): Promise<BullsLeaderboard> {
   const aggregatedStats = Array.from(playerTotals.values())
 
   const scoring = aggregatedStats
-    .filter(s => s.points > 0 && playersMap.has(s.player_id))
+    .filter(s => s.points > 0 && playersMap.has(String(s.player_id)))
     .sort((a, b) => (b.points / b.games) - (a.points / a.games))
     .slice(0, 5)
     .map(s => ({
-      player: playersMap.get(s.player_id)!,
+      player: playersMap.get(String(s.player_id))!,
       primaryStat: Math.round((s.points / s.games) * 10) / 10,
       primaryLabel: 'PPG',
       secondaryStat: s.points,
@@ -765,11 +765,11 @@ async function getLeaderboards(season: number): Promise<BullsLeaderboard> {
     }))
 
   const rebounding = aggregatedStats
-    .filter(s => s.rebounds > 0 && playersMap.has(s.player_id))
+    .filter(s => s.rebounds > 0 && playersMap.has(String(s.player_id)))
     .sort((a, b) => (b.rebounds / b.games) - (a.rebounds / a.games))
     .slice(0, 5)
     .map(s => ({
-      player: playersMap.get(s.player_id)!,
+      player: playersMap.get(String(s.player_id))!,
       primaryStat: Math.round((s.rebounds / s.games) * 10) / 10,
       primaryLabel: 'RPG',
       secondaryStat: s.rebounds,
@@ -779,11 +779,11 @@ async function getLeaderboards(season: number): Promise<BullsLeaderboard> {
     }))
 
   const assists = aggregatedStats
-    .filter(s => s.assists > 0 && playersMap.has(s.player_id))
+    .filter(s => s.assists > 0 && playersMap.has(String(s.player_id)))
     .sort((a, b) => (b.assists / b.games) - (a.assists / a.games))
     .slice(0, 5)
     .map(s => ({
-      player: playersMap.get(s.player_id)!,
+      player: playersMap.get(String(s.player_id))!,
       primaryStat: Math.round((s.assists / s.games) * 10) / 10,
       primaryLabel: 'APG',
       secondaryStat: s.assists,
@@ -793,11 +793,11 @@ async function getLeaderboards(season: number): Promise<BullsLeaderboard> {
     }))
 
   const defense = aggregatedStats
-    .filter(s => (s.steals + s.blocks) > 0 && playersMap.has(s.player_id))
+    .filter(s => (s.steals + s.blocks) > 0 && playersMap.has(String(s.player_id)))
     .sort((a, b) => ((b.steals + b.blocks) / b.games) - ((a.steals + a.blocks) / a.games))
     .slice(0, 5)
     .map(s => ({
-      player: playersMap.get(s.player_id)!,
+      player: playersMap.get(String(s.player_id))!,
       primaryStat: Math.round((s.steals / s.games) * 10) / 10,
       primaryLabel: 'SPG',
       secondaryStat: Math.round((s.blocks / s.games) * 10) / 10,
