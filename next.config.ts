@@ -48,10 +48,9 @@ const nextConfig: NextConfig = {
   },
 
   // Redirects for legacy WordPress routes
+  // NOTE: Do NOT redirect /home — it's the first-time visitor marketing page used by middleware
   async redirects() {
     return [
-      { source: '/home', destination: '/', permanent: true },
-      { source: '/home/:path*', destination: '/', permanent: true },
       { source: '/category/chicago-bears/:path*', destination: '/chicago-bears', permanent: true },
       { source: '/category/chicago-bulls/:path*', destination: '/chicago-bulls', permanent: true },
       { source: '/category/chicago-cubs/:path*', destination: '/chicago-cubs', permanent: true },

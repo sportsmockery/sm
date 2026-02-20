@@ -35,6 +35,16 @@ const publicPaths = [
   '/predictions',
   '/players',
   '/teams',
+  '/scout-ai',        // Public content pages
+  '/fan-chat',
+  '/fan-zone',
+  '/polls',
+  '/mock-draft',
+  '/bears-film-room',       // Show pages
+  '/pinwheels-and-ivy',
+  '/southside-behavior',
+  '/untold-chicago-stories',
+  '/subscription',
   '/api/public',
   '/api/bears',  // Bears data API (ticker, schedule, roster, etc.)
   '/api/feed',   // Oracle feed API

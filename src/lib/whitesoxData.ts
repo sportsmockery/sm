@@ -233,6 +233,7 @@ async function getSeasonPlayerIds(season: number): Promise<number[]> {
     .from('whitesox_player_game_stats')
     .select('player_id')
     .eq('season', season)
+    .eq('is_opponent', false)
 
   if (error || !data) return []
 
@@ -366,6 +367,7 @@ async function getPlayerSeasonStats(espnId: string, isPitcher: boolean): Promise
     `)
     .eq('player_id', espnId)
     .eq('season', getCurrentSeason())
+    .eq('is_opponent', false)
 
   if (error || !data || data.length === 0) return []
 
@@ -475,6 +477,7 @@ async function getPlayerGameLog(espnId: string): Promise<PlayerGameLogEntry[]> {
     `)
     .eq('player_id', espnId)
     .eq('season', getCurrentSeason())
+    .eq('is_opponent', false)
     .order('game_date', { ascending: false })
     .limit(20)
 
@@ -793,6 +796,7 @@ async function getLeaderboards(season: number): Promise<WhiteSoxLeaderboard> {
       save
     `)
     .eq('season', season)
+    .eq('is_opponent', false)
 
   // Fallback to previous season if no stats (off-season)
   if (!gameStats || gameStats.length === 0) {
@@ -812,6 +816,7 @@ async function getLeaderboards(season: number): Promise<WhiteSoxLeaderboard> {
         save
       `)
       .eq('season', season - 1)
+      .eq('is_opponent', false)
     gameStats = prevStats
   }
 

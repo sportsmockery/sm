@@ -2,24 +2,31 @@ import { Metadata } from 'next';
 import Image from 'next/image';
 import Link from 'next/link';
 import { getAllTeams } from '@/lib/teams';
-import { getTeamRecord, getNextGame } from '@/lib/sportsApi';
+import { fetchTeamRecord } from '@/lib/team-config';
 
 export const metadata: Metadata = {
   title: 'Chicago Teams | Sports Mockery',
   description: 'Follow all Chicago sports teams - Bears, Bulls, Cubs, White Sox, and Blackhawks. Schedules, rosters, stats, and standings.',
 };
 
+// Map team slugs to team-config keys
+const SLUG_TO_KEY: Record<string, string> = {
+  'chicago-bears': 'bears',
+  'chicago-bulls': 'bulls',
+  'chicago-cubs': 'cubs',
+  'chicago-white-sox': 'whitesox',
+  'chicago-blackhawks': 'blackhawks',
+};
+
 export default async function TeamsPage() {
   const teams = getAllTeams();
 
-  // Fetch records for all teams
+  // Fetch records for all teams from DataLab (real data, not mock)
   const teamsWithData = await Promise.all(
     teams.map(async (team) => {
-      const [record, nextGame] = await Promise.all([
-        getTeamRecord(team.slug),
-        getNextGame(team.slug),
-      ]);
-      return { ...team, record, nextGame };
+      const teamKey = SLUG_TO_KEY[team.slug];
+      const record = teamKey ? await fetchTeamRecord(teamKey) : null;
+      return { ...team, record, nextGame: null as any };
     })
   );
 
@@ -74,7 +81,8 @@ export default async function TeamsPage() {
                 <div style={{ marginTop: '16px' }}>
                   <p style={{ fontSize: 'var(--text-2xl)', fontWeight: 700, color: '#fff' }}>
                     {team.record.wins}-{team.record.losses}
-                    {team.record.ties > 0 ? `-${team.record.ties}` : ''}
+                    {team.record.otLosses ? `-${team.record.otLosses}` : ''}
+                    {team.record.ties ? `-${team.record.ties}` : ''}
                   </p>
                 </div>
               )}
