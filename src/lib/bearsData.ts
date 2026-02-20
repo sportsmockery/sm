@@ -987,7 +987,7 @@ async function getLeaderboards(season: number, gameType: GameType = 'regular'): 
     rushing_yds, rushing_td, rushing_car,
     receiving_yards, receiving_touchdowns, receiving_receptions,
     receiving_yds, receiving_td, receiving_rec,
-    defensive_total_tackles, defensive_sacks, interceptions, def_int,
+    defensive_total_tackles, defensive_sacks, def_int,
     def_tackles_total, def_sacks
   `
 
@@ -1059,7 +1059,7 @@ async function getLeaderboards(season: number, gameType: GameType = 'regular'): 
     totals.rec += (stat.receiving_receptions ?? stat.receiving_rec ?? 0)
     totals.tackles += (stat.defensive_total_tackles ?? stat.def_tackles_total ?? 0)
     totals.sacks += parseFloat(stat.defensive_sacks ?? stat.def_sacks) || 0
-    totals.interceptions += (stat.interceptions ?? stat.def_int ?? 0)
+    totals.interceptions += (stat.def_int ?? 0)
     totals.games_played += 1
   }
 
