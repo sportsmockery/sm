@@ -69,7 +69,7 @@ interface TeamHubLayoutProps {
 
 // Standard tabs for all team hubs
 const TEAM_TABS = [
-  { id: 'overview', label: 'Overview', path: '' },
+  { id: 'overview', label: 'Hub', path: '' },
   { id: 'live', label: 'Live', path: '/live' },
   { id: 'schedule', label: 'Schedule', path: '/schedule' },
   { id: 'scores', label: 'Scores', path: '/scores' },
@@ -82,7 +82,7 @@ const TEAM_TABS = [
 
 // NFL tabs
 const NFL_TABS = [
-  { id: 'overview', label: 'Overview', path: '' },
+  { id: 'overview', label: 'Hub', path: '' },
   { id: 'live', label: 'Live', path: '/live' },
   { id: 'schedule', label: 'Schedule', path: '/schedule' },
   { id: 'scores', label: 'Box Scores', path: '/scores' },
