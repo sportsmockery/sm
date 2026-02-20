@@ -128,6 +128,7 @@ export interface BearsGame {
   venue: string | null
   tv: string | null
   isPlayoff: boolean
+  isOvertime: boolean
   isPreseason: boolean
   gameType: 'preseason' | 'regular' | 'postseason'
   articleSlug: string | null
@@ -174,6 +175,8 @@ export interface BearsLeaderboard {
   rushing: LeaderboardEntry[]
   receiving: LeaderboardEntry[]
   defense: LeaderboardEntry[]
+  sacks: LeaderboardEntry[]
+  interceptions: LeaderboardEntry[]
 }
 
 export interface LeaderboardEntry {
@@ -184,6 +187,7 @@ export interface LeaderboardEntry {
   secondaryLabel: string | null
   tertiaryStat: number | null
   tertiaryLabel: string | null
+  gamesPlayed?: number
 }
 
 export type GameType = 'regular' | 'postseason'
@@ -787,6 +791,7 @@ function transformGame(game: any, context?: any): BearsGame {
     result,
     venue: game.stadium,
     tv: game.broadcast || (game.broadcast_window === 'primetime' ? 'Prime' : (game.nationally_televised ? 'National' : null)),
+    isOvertime: game.is_overtime === true,
     isPlayoff,
     isPreseason,
     gameType: gameTypeEnum,
@@ -964,7 +969,7 @@ function getDefaultTeamStats(season: number): BearsTeamStats {
 
 async function getLeaderboards(season: number, gameType: GameType = 'regular'): Promise<BearsLeaderboard> {
   if (!datalabAdmin) {
-    return { passing: [], rushing: [], receiving: [], defense: [] }
+    return { passing: [], rushing: [], receiving: [], defense: [], sacks: [], interceptions: [] }
   }
 
   const players = await getBearsPlayers()
@@ -982,7 +987,7 @@ async function getLeaderboards(season: number, gameType: GameType = 'regular'): 
     rushing_yds, rushing_td, rushing_car,
     receiving_yards, receiving_touchdowns, receiving_receptions,
     receiving_yds, receiving_td, receiving_rec,
-    defensive_total_tackles, defensive_sacks,
+    defensive_total_tackles, defensive_sacks, interceptions, def_int,
     def_tackles_total, def_sacks
   `
 
@@ -1003,7 +1008,7 @@ async function getLeaderboards(season: number, gameType: GameType = 'regular'): 
   }
 
   if (!gameStats || gameStats.length === 0) {
-    return { passing: [], rushing: [], receiving: [], defense: [] }
+    return { passing: [], rushing: [], receiving: [], defense: [], sacks: [], interceptions: [] }
   }
 
   // Aggregate stats by player (keyed by ESPN ID which is a string)
@@ -1025,6 +1030,8 @@ async function getLeaderboards(season: number, gameType: GameType = 'regular'): 
         rec: 0,
         tackles: 0,
         sacks: 0,
+        interceptions: 0,
+        games_played: 0,
       })
     }
     const totals = playerTotals.get(pid)!
@@ -1040,6 +1047,8 @@ async function getLeaderboards(season: number, gameType: GameType = 'regular'): 
     totals.rec += (stat.receiving_receptions ?? stat.receiving_rec ?? 0)
     totals.tackles += (stat.defensive_total_tackles ?? stat.def_tackles_total ?? 0)
     totals.sacks += parseFloat(stat.defensive_sacks ?? stat.def_sacks) || 0
+    totals.interceptions += (stat.interceptions ?? stat.def_int ?? 0)
+    totals.games_played += 1
   }
 
   const aggregatedStats = Array.from(playerTotals.values())
@@ -1058,6 +1067,7 @@ async function getLeaderboards(season: number, gameType: GameType = 'regular'): 
       secondaryLabel: 'TD',
       tertiaryStat: s.pass_int,
       tertiaryLabel: 'INT',
+      gamesPlayed: s.games_played,
     }))
 
   const rushing = aggregatedStats
@@ -1072,6 +1082,7 @@ async function getLeaderboards(season: number, gameType: GameType = 'regular'): 
       secondaryLabel: 'TD',
       tertiaryStat: s.rush_att,
       tertiaryLabel: 'ATT',
+      gamesPlayed: s.games_played,
     }))
 
   const receiving = aggregatedStats
@@ -1086,6 +1097,7 @@ async function getLeaderboards(season: number, gameType: GameType = 'regular'): 
       secondaryLabel: 'TD',
       tertiaryStat: s.rec,
       tertiaryLabel: 'REC',
+      gamesPlayed: s.games_played,
     }))
 
   const defense = aggregatedStats
@@ -1098,11 +1110,42 @@ async function getLeaderboards(season: number, gameType: GameType = 'regular'): 
       primaryLabel: 'TKL',
       secondaryStat: s.sacks,
       secondaryLabel: 'SACK',
-      tertiaryStat: 0,
+      tertiaryStat: s.interceptions,
       tertiaryLabel: 'INT',
+      gamesPlayed: s.games_played,
     }))
 
-  return { passing, rushing, receiving, defense }
+  const sackLeaders = aggregatedStats
+    .filter(s => s.sacks > 0 && playersMap.has(String(s.player_id)))
+    .sort((a, b) => b.sacks - a.sacks)
+    .slice(0, 5)
+    .map(s => ({
+      player: playersMap.get(String(s.player_id))!,
+      primaryStat: s.sacks,
+      primaryLabel: 'SACKS',
+      secondaryStat: s.tackles,
+      secondaryLabel: 'TKL',
+      tertiaryStat: null,
+      tertiaryLabel: null,
+      gamesPlayed: s.games_played,
+    }))
+
+  const intLeaders = aggregatedStats
+    .filter(s => s.interceptions > 0 && playersMap.has(String(s.player_id)))
+    .sort((a, b) => b.interceptions - a.interceptions)
+    .slice(0, 5)
+    .map(s => ({
+      player: playersMap.get(String(s.player_id))!,
+      primaryStat: s.interceptions,
+      primaryLabel: 'INT',
+      secondaryStat: s.tackles,
+      secondaryLabel: 'TKL',
+      tertiaryStat: null,
+      tertiaryLabel: null,
+      gamesPlayed: s.games_played,
+    }))
+
+  return { passing, rushing, receiving, defense, sacks: sackLeaders, interceptions: intLeaders }
 }
 
 /**

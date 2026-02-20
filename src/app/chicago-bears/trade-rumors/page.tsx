@@ -5,21 +5,22 @@ import { TeamHubLayout } from '@/components/team'
 import { CHICAGO_TEAMS, fetchNextGame } from '@/lib/team-config'
 import { getBearsSeparatedRecord } from '@/lib/bearsData'
 import { getBearsPosts, getBearsPostsByType } from '@/lib/bears'
+import { HubUpdatesFeed } from '@/components/hub'
 
 export const metadata: Metadata = {
-  title: 'Chicago Bears Trade Rumors & News (Live Updates) | Sports Mockery',
+  title: 'Chicago Bears Trade Rumors (Live) | Sports Mockery',
   description:
-    'Latest Chicago Bears trade rumors, rumors tracker, cap implications, and breaking news. Live updates on Ryan Poles moves, free agency targets, and draft trade speculation.',
+    'Live Bears trade tracker, rumor mill, cap analysis. Ryan Poles rumors hourly.',
   openGraph: {
-    title: 'Chicago Bears Trade Rumors & News (Live Updates)',
+    title: 'Chicago Bears Trade Rumors (Live)',
     description:
-      'Live Chicago Bears trade tracker. Ryan Poles rumors, cap analysis, free agency targets updated hourly.',
+      'Live Bears trade tracker, rumor mill, cap analysis. Ryan Poles rumors hourly.',
     type: 'website',
   },
   twitter: {
     title: 'Chicago Bears Trade Rumors (Live)',
     description:
-      'Latest Bears trade rumors, cap implications, fan reactions. Updated hourly.',
+      'Live Bears trade tracker, rumor mill, cap analysis. Ryan Poles rumors hourly.',
   },
 }
 
@@ -140,6 +141,9 @@ export default async function BearsTradeRumorsPage() {
           ))}
         </div>
 
+        {/* Hub Updates Feed */}
+        <HubUpdatesFeed hubSlug="trade-rumors" title="Live Updates" emptyState="No trade updates yet. Check back soon." />
+
         {/* Rumors Feed */}
         <section>
           <div
@@ -162,7 +166,7 @@ export default async function BearsTradeRumorsPage() {
                 margin: 0,
               }}
             >
-              Latest Trade & Rumor News
+              Latest Trade & Rumor Stories
             </h2>
           </div>
 

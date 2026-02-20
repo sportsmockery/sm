@@ -5,19 +5,20 @@ import { TeamHubLayout } from '@/components/team'
 import { CHICAGO_TEAMS, fetchNextGame } from '@/lib/team-config'
 import { getBearsSeparatedRecord } from '@/lib/bearsData'
 import { datalabAdmin } from '@/lib/supabase-datalab'
+import { HubUpdatesFeed } from '@/components/hub'
 
 export const metadata: Metadata = {
-  title: 'Chicago Bears Salary Cap Tracker 2026 | Sports Mockery',
+  title: 'Chicago Bears Salary Cap 2026 | Sports Mockery',
   description:
-    'Chicago Bears 2026 salary cap tracker: live cap space, contract breakdowns, dead money, and cut/trade simulator. Track every Bears cap move.',
+    'Live cap space, contracts, cut/trade simulator.',
   openGraph: {
-    title: 'Chicago Bears Salary Cap Tracker 2026',
-    description: 'Live Bears cap space, contract details, and cap move projections.',
+    title: 'Chicago Bears Salary Cap 2026',
+    description: 'Live cap space, contracts, cut/trade simulator.',
     type: 'website',
   },
   twitter: {
     title: 'Chicago Bears Salary Cap 2026',
-    description: 'Bears cap space, contracts, dead money tracker. Updated live.',
+    description: 'Live cap space, contracts, cut/trade simulator.',
   },
 }
 
@@ -295,6 +296,9 @@ export default async function BearsCapTrackerPage() {
             </Link>
           ))}
         </div>
+
+        {/* Hub Updates Feed */}
+        <HubUpdatesFeed hubSlug="cap-tracker" title="Cap Moves" emptyState="No cap updates yet." />
 
         {/* Top 5 Cap Hits */}
         {hasContracts && topFive.length > 0 && (

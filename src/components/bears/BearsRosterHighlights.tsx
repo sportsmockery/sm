@@ -24,22 +24,32 @@ export default function BearsRosterHighlights({
   }
 
   return (
-    <div className={`bg-white dark:bg-[#111] rounded-xl overflow-hidden ${className}`}>
+    <div className={`glass-card glass-card-static ${className}`} style={{ overflow: 'hidden', padding: 0 }}>
       {/* Header */}
       <div
-        className="px-6 py-4 border-b border-gray-100 dark:border-gray-800"
-        style={{ borderLeftColor: bearsInfo.secondaryColor, borderLeftWidth: '4px' }}
+        style={{
+          padding: '16px 20px',
+          borderBottom: '1px solid var(--sm-border)',
+          borderLeft: `4px solid ${bearsInfo.secondaryColor}`,
+        }}
       >
         <div className="flex items-center justify-between">
           <h3
-            className="text-[16px] font-bold text-[#222] dark:text-white uppercase"
-            style={{ fontFamily: "'Montserrat', sans-serif" }}
+            style={{
+              fontSize: 16,
+              fontWeight: 700,
+              color: 'var(--sm-text)',
+              textTransform: 'uppercase',
+              fontFamily: "'Space Grotesk', sans-serif",
+              margin: 0,
+            }}
           >
             Key Players
           </h3>
           <Link
-            href="/bears/roster"
-            className="text-sm text-[#bc0000] hover:underline"
+            href="/chicago-bears/roster"
+            className="text-sm hover:underline"
+            style={{ color: '#bc0000' }}
           >
             Full Roster →
           </Link>
@@ -47,7 +57,7 @@ export default function BearsRosterHighlights({
       </div>
 
       {/* Player cards */}
-      <div className="divide-y divide-gray-100 dark:divide-gray-800">
+      <div>
         {players.slice(0, 5).map((player) => (
           <PlayerCard key={player.id} player={player} teamColor={bearsInfo.secondaryColor} />
         ))}
@@ -71,8 +81,9 @@ function PlayerCard({
 
   return (
     <Link
-      href={`/bears/players/${player.id}`}
-      className="group flex items-center gap-4 p-4 hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors"
+      href={`/chicago-bears/players/${player.id}`}
+      className="group flex items-center gap-4 p-4 hover:bg-[var(--sm-card-hover)] transition-colors"
+      style={{ borderBottom: '1px solid var(--sm-border)' }}
     >
       {/* Player image/number */}
       <div className="relative w-14 h-14 flex-shrink-0">
@@ -104,7 +115,7 @@ function PlayerCard({
       <div className="flex-1 min-w-0">
         <h4
           className="text-[14px] font-bold text-[#222] dark:text-white group-hover:text-[#bc0000] transition-colors"
-          style={{ fontFamily: "'Montserrat', sans-serif" }}
+          style={{ fontFamily: "'Space Grotesk', sans-serif" }}
         >
           {player.name}
         </h4>
@@ -118,7 +129,7 @@ function PlayerCard({
         <div className="text-right">
           <div
             className="text-[18px] font-bold text-[#222] dark:text-white"
-            style={{ fontFamily: "'Montserrat', sans-serif" }}
+            style={{ fontFamily: "'Space Grotesk', sans-serif" }}
           >
             {primaryStat.value}
           </div>
@@ -150,24 +161,24 @@ function getPrimaryStat(player: BearsPlayer): { label: string; value: string } |
   switch (position) {
     case 'QB':
       if (stats.passingYards) {
-        return { label: 'Pass Yds', value: formatStat(stats.passingYards) }
+        return { label: 'Passing Yards', value: formatStat(stats.passingYards) }
       }
       if (stats.touchdowns) {
-        return { label: 'TDs', value: String(stats.touchdowns) }
+        return { label: 'Touchdowns', value: String(stats.touchdowns) }
       }
       break
     case 'RB':
       if (stats.rushingYards) {
-        return { label: 'Rush Yds', value: formatStat(stats.rushingYards) }
+        return { label: 'Rushing Yards', value: formatStat(stats.rushingYards) }
       }
       break
     case 'WR':
     case 'TE':
       if (stats.receivingYards) {
-        return { label: 'Rec Yds', value: formatStat(stats.receivingYards) }
+        return { label: 'Receiving Yards', value: formatStat(stats.receivingYards) }
       }
       if (stats.receptions) {
-        return { label: 'Rec', value: String(stats.receptions) }
+        return { label: 'Receptions', value: String(stats.receptions) }
       }
       break
     case 'DE':
@@ -183,7 +194,7 @@ function getPrimaryStat(player: BearsPlayer): { label: string; value: string } |
     case 'CB':
     case 'S':
       if (stats.interceptions) {
-        return { label: 'INTs', value: String(stats.interceptions) }
+        return { label: 'Interceptions', value: String(stats.interceptions) }
       }
       if (stats.tackles) {
         return { label: 'Tackles', value: String(stats.tackles) }
@@ -203,7 +214,7 @@ function getPrimaryStat(player: BearsPlayer): { label: string; value: string } |
 
 function formatStat(value: string | number): string {
   if (typeof value === 'number') {
-    return value >= 1000 ? `${(value / 1000).toFixed(1)}K` : String(value)
+    return value.toLocaleString()
   }
   return value
 }

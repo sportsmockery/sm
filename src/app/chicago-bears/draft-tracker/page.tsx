@@ -1,15 +1,20 @@
 import { Metadata } from 'next'
 import Link from 'next/link'
 import Image from 'next/image'
+import { Suspense } from 'react'
 import { TeamHubLayout } from '@/components/team'
 import { CHICAGO_TEAMS, fetchNextGame } from '@/lib/team-config'
 import { getBearsSeparatedRecord } from '@/lib/bearsData'
 import { getBearsPosts } from '@/lib/bears'
+import { datalabAdmin } from '@/lib/supabase-datalab'
+import DraftTrackerTabs from './DraftTrackerTabs'
+import type { HubItem } from '@/types/hub'
 
 export const metadata: Metadata = {
   title: 'Chicago Bears Draft Tracker & Mock Drafts 2026 | Sports Mockery',
   description:
-    'Chicago Bears 2026 NFL Draft tracker: mock drafts, prospect rankings, trade scenarios, big board. Build your Bears mock draft.',
+    'Bears 2026 draft prospects, mock drafts, trade scenarios. Build your draft.',
+  keywords: 'Chicago Bears mock draft, Bears draft prospects 2026, NFL Draft Bears picks, Bears draft news',
   openGraph: {
     title: 'Chicago Bears Draft Tracker & Mock Drafts 2026',
     description:
@@ -28,10 +33,20 @@ export const revalidate = 3600
 export default async function BearsDraftTrackerPage() {
   const team = CHICAGO_TEAMS.bears
 
-  const [separatedRecord, nextGame, posts] = await Promise.all([
+  const [separatedRecord, nextGame, posts, hubItemsResult] = await Promise.all([
     getBearsSeparatedRecord(2025),
     fetchNextGame('bears'),
     getBearsPosts(20),
+    datalabAdmin
+      .from('hub_items')
+      .select('*')
+      .eq('team_slug', 'chicago-bears')
+      .eq('hub_slug', 'draft-tracker')
+      .eq('status', 'published')
+      .order('featured', { ascending: false })
+      .order('timestamp', { ascending: false })
+      .limit(10)
+      .then(res => res.data || []) as Promise<HubItem[]>,
   ])
 
   const record = {
@@ -51,6 +66,17 @@ export default async function BearsDraftTrackerPage() {
     .filter((p) => draftKeywords.some((kw) => p.title.toLowerCase().includes(kw)))
     .slice(0, 8)
   const displayPosts = draftPosts.length > 0 ? draftPosts : posts.slice(0, 6)
+
+  // Serialize posts for client component
+  const serializedPosts = displayPosts.map(p => ({
+    id: p.id,
+    title: p.title,
+    slug: p.slug,
+    categorySlug: p.categorySlug || undefined,
+    featuredImage: p.featuredImage || null,
+    publishedAt: p.publishedAt,
+    author: p.author ? { displayName: p.author.displayName } : null,
+  }))
 
   return (
     <TeamHubLayout team={team} record={record} nextGame={nextGame} activeTab="draft-tracker">
@@ -94,52 +120,8 @@ export default async function BearsDraftTrackerPage() {
           </p>
         </div>
 
-        {/* Mock Draft CTA */}
-        <div
-          className="glass-card glass-card-static"
-          style={{
-            marginBottom: '32px',
-            padding: '28px',
-            background: 'linear-gradient(135deg, rgba(11,22,42,0.4), rgba(200,56,3,0.1))',
-            borderColor: 'rgba(200,56,3,0.2)',
-          }}
-        >
-          <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'space-between', gap: '16px' }}>
-            <div>
-              <h2
-                style={{
-                  fontFamily: "'Space Grotesk', sans-serif",
-                  color: 'var(--sm-text)',
-                  fontSize: '20px',
-                  fontWeight: 700,
-                  margin: '0 0 6px 0',
-                }}
-              >
-                Build Your Bears Mock Draft
-              </h2>
-              <p style={{ color: 'var(--sm-text-muted)', fontSize: '14px', margin: 0 }}>
-                Use our interactive mock draft tool to build your ideal Bears draft board.
-              </p>
-            </div>
-            <Link
-              href="/mock-draft"
-              className="btn btn-md btn-primary"
-              style={{
-                textDecoration: 'none',
-                borderRadius: 'var(--sm-radius-pill)',
-                flexShrink: 0,
-              }}
-            >
-              Launch Mock Draft
-              <svg width="16" height="16" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24" style={{ marginLeft: '6px' }}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" />
-              </svg>
-            </Link>
-          </div>
-        </div>
-
         {/* Quick Links */}
-        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', marginBottom: '32px' }}>
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', marginBottom: '24px' }}>
           {[
             { label: 'Trade Rumors', href: '/chicago-bears/trade-rumors' },
             { label: 'Cap Tracker', href: '/chicago-bears/cap-tracker' },
@@ -152,149 +134,13 @@ export default async function BearsDraftTrackerPage() {
           ))}
         </div>
 
-        {/* Draft Needs */}
-        <section style={{ marginBottom: '32px' }}>
-          <h2
-            style={{
-              fontFamily: "'Space Grotesk', sans-serif",
-              color: 'var(--sm-text)',
-              fontSize: '22px',
-              fontWeight: 700,
-              letterSpacing: '-0.5px',
-              paddingBottom: '8px',
-              borderBottom: '3px solid var(--sm-red)',
-              margin: '0 0 20px 0',
-            }}
-          >
-            2026 Draft Needs
-          </h2>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(160px, 1fr))', gap: '10px' }}>
-            {[
-              { position: 'OL', priority: 'High', note: 'Protect Caleb' },
-              { position: 'EDGE', priority: 'High', note: 'Pass rush depth' },
-              { position: 'CB', priority: 'Medium', note: 'Secondary help' },
-              { position: 'WR', priority: 'Medium', note: 'Another weapon' },
-              { position: 'LB', priority: 'Medium', note: 'Run defense' },
-              { position: 'S', priority: 'Low', note: 'Depth piece' },
-            ].map((need) => (
-              <div
-                key={need.position}
-                className="glass-card glass-card-sm glass-card-static"
-                style={{ padding: '14px 16px', textAlign: 'center' }}
-              >
-                <div
-                  style={{
-                    fontFamily: "'Space Grotesk', sans-serif",
-                    fontSize: '18px',
-                    fontWeight: 700,
-                    color: 'var(--sm-text)',
-                    marginBottom: '4px',
-                  }}
-                >
-                  {need.position}
-                </div>
-                <div
-                  style={{
-                    fontSize: '11px',
-                    fontWeight: 600,
-                    textTransform: 'uppercase',
-                    letterSpacing: '0.5px',
-                    color:
-                      need.priority === 'High'
-                        ? 'var(--sm-red-light)'
-                        : need.priority === 'Medium'
-                          ? 'var(--sm-warning, #f59e0b)'
-                          : 'var(--sm-text-dim)',
-                    marginBottom: '2px',
-                  }}
-                >
-                  {need.priority} Priority
-                </div>
-                <div style={{ fontSize: '12px', color: 'var(--sm-text-muted)' }}>{need.note}</div>
-              </div>
-            ))}
-          </div>
-        </section>
-
-        {/* Draft News */}
-        <section>
-          <h2
-            style={{
-              fontFamily: "'Space Grotesk', sans-serif",
-              color: 'var(--sm-text)',
-              fontSize: '22px',
-              fontWeight: 700,
-              letterSpacing: '-0.5px',
-              paddingBottom: '8px',
-              borderBottom: '3px solid var(--sm-red)',
-              margin: '0 0 20px 0',
-            }}
-          >
-            Latest Draft News
-          </h2>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-            {displayPosts.map((post) => {
-              const href = post.categorySlug ? `/${post.categorySlug}/${post.slug}` : `/bears/${post.slug}`
-              return (
-                <Link key={post.id} href={href} style={{ textDecoration: 'none', display: 'block' }}>
-                  <article className="glass-card glass-card-sm" style={{ display: 'flex', gap: '16px', overflow: 'hidden' }}>
-                    {post.featuredImage && (
-                      <div
-                        style={{
-                          position: 'relative',
-                          width: '80px',
-                          height: '80px',
-                          flexShrink: 0,
-                          borderRadius: 'var(--sm-radius-sm)',
-                          overflow: 'hidden',
-                        }}
-                      >
-                        <Image src={post.featuredImage} alt="" fill style={{ objectFit: 'cover' }} />
-                      </div>
-                    )}
-                    <div style={{ flex: 1, minWidth: 0 }}>
-                      <h3
-                        style={{
-                          fontFamily: "'Space Grotesk', sans-serif",
-                          color: 'var(--sm-text)',
-                          fontSize: '15px',
-                          fontWeight: 600,
-                          lineHeight: 1.4,
-                          margin: 0,
-                          display: '-webkit-box',
-                          WebkitLineClamp: 2,
-                          WebkitBoxOrient: 'vertical',
-                          overflow: 'hidden',
-                        }}
-                      >
-                        {post.title}
-                      </h3>
-                      <div
-                        style={{
-                          display: 'flex',
-                          alignItems: 'center',
-                          gap: '8px',
-                          marginTop: '8px',
-                          fontSize: '12px',
-                          color: 'var(--sm-text-dim)',
-                        }}
-                      >
-                        <span>{post.author?.displayName || 'Staff'}</span>
-                        <span>-</span>
-                        <span>
-                          {new Date(post.publishedAt).toLocaleDateString('en-US', {
-                            month: 'short',
-                            day: 'numeric',
-                          })}
-                        </span>
-                      </div>
-                    </div>
-                  </article>
-                </Link>
-              )
-            })}
-          </div>
-        </section>
+        {/* Tabs */}
+        <Suspense fallback={null}>
+          <DraftTrackerTabs
+            hubItems={hubItemsResult as HubItem[]}
+            displayPosts={serializedPosts}
+          />
+        </Suspense>
 
         {/* Ask Scout CTA */}
         <div

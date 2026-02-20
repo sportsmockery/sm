@@ -23,11 +23,14 @@ export default function BearsTrendingTopics({
   }
 
   return (
-    <div className={`bg-white dark:bg-[#111] rounded-xl overflow-hidden ${className}`}>
+    <div className={`glass-card glass-card-static ${className}`} style={{ overflow: 'hidden', padding: 0 }}>
       {/* Header */}
       <div
-        className="px-6 py-4 border-b border-gray-100 dark:border-gray-800"
-        style={{ borderLeftColor: bearsInfo.secondaryColor, borderLeftWidth: '4px' }}
+        style={{
+          padding: '16px 20px',
+          borderBottom: '1px solid var(--sm-border)',
+          borderLeft: `4px solid ${bearsInfo.secondaryColor}`,
+        }}
       >
         <div className="flex items-center gap-2">
           <svg
@@ -43,8 +46,14 @@ export default function BearsTrendingTopics({
             />
           </svg>
           <h3
-            className="text-[16px] font-bold text-[#222] dark:text-white uppercase"
-            style={{ fontFamily: "'Montserrat', sans-serif" }}
+            style={{
+              fontSize: 16,
+              fontWeight: 700,
+              color: 'var(--sm-text)',
+              textTransform: 'uppercase',
+              fontFamily: "'Space Grotesk', sans-serif",
+              margin: 0,
+            }}
           >
             Trending Topics
           </h3>
@@ -52,7 +61,7 @@ export default function BearsTrendingTopics({
       </div>
 
       {/* Trends list */}
-      <div className="divide-y divide-gray-100 dark:divide-gray-800">
+      <div>
         {trends.map((trend, index) => (
           <TrendItem
             key={trend.id}
@@ -64,10 +73,11 @@ export default function BearsTrendingTopics({
       </div>
 
       {/* Footer */}
-      <div className="px-6 py-3 bg-gray-50 dark:bg-gray-800/50 border-t border-gray-100 dark:border-gray-800">
+      <div style={{ padding: '12px 20px', borderTop: '1px solid var(--sm-border)', backgroundColor: 'var(--sm-surface)' }}>
         <Link
-          href="/bears/topics"
-          className="text-sm text-[#bc0000] hover:underline font-medium"
+          href="/chicago-bears"
+          className="text-sm hover:underline font-medium"
+          style={{ color: '#bc0000' }}
         >
           View All Topics →
         </Link>
@@ -90,8 +100,9 @@ function TrendItem({
 }) {
   return (
     <Link
-      href={`/bears/topics/${trend.slug}`}
-      className="group flex items-center gap-4 px-6 py-4 hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors"
+      href={`/chicago-bears`}
+      className="group flex items-center gap-4 px-6 py-4 hover:bg-[var(--sm-card-hover)] transition-colors"
+      style={{ borderBottom: '1px solid var(--sm-border)' }}
     >
       {/* Rank */}
       <div
@@ -109,8 +120,8 @@ function TrendItem({
       <div className="flex-1 min-w-0">
         <div className="flex items-center gap-2">
           <h4
-            className="text-[14px] font-semibold text-[#222] dark:text-white group-hover:text-[#bc0000] transition-colors truncate"
-            style={{ fontFamily: "'Montserrat', sans-serif" }}
+            className="text-[14px] font-semibold group-hover:text-[#bc0000] transition-colors truncate"
+            style={{ fontFamily: "'Space Grotesk', sans-serif", color: 'var(--sm-text)' }}
           >
             {trend.title}
           </h4>
@@ -120,7 +131,7 @@ function TrendItem({
             </span>
           )}
         </div>
-        <p className="text-[12px] text-gray-500 dark:text-gray-400 mt-0.5">
+        <p className="text-[12px] mt-0.5" style={{ color: 'var(--sm-text-muted)' }}>
           {trend.postCount} {trend.postCount === 1 ? 'article' : 'articles'}
         </p>
       </div>

@@ -43,7 +43,7 @@ export default function BearsSeasonCard({
             <div>
               <h3
                 className="text-white text-lg font-bold"
-                style={{ fontFamily: "'Montserrat', sans-serif" }}
+                style={{ fontFamily: "'Space Grotesk', sans-serif" }}
               >
                 {season.season} Season
               </h3>
@@ -51,7 +51,7 @@ export default function BearsSeasonCard({
             </div>
           </div>
           <Link
-            href="/bears/schedule"
+            href="/chicago-bears/schedule"
             className="text-sm text-white/70 hover:text-white transition-colors"
           >
             Full Schedule →
@@ -66,7 +66,7 @@ export default function BearsSeasonCard({
           <div className="text-center">
             <div
               className="text-5xl font-black text-white"
-              style={{ fontFamily: "'Montserrat', sans-serif" }}
+              style={{ fontFamily: "'Space Grotesk', sans-serif" }}
             >
               {record.wins}
             </div>
@@ -80,7 +80,7 @@ export default function BearsSeasonCard({
           <div className="text-center">
             <div
               className="text-5xl font-black text-white"
-              style={{ fontFamily: "'Montserrat', sans-serif" }}
+              style={{ fontFamily: "'Space Grotesk', sans-serif" }}
             >
               {record.losses}
             </div>
@@ -91,7 +91,7 @@ export default function BearsSeasonCard({
           <div className="text-center border-l border-white/10 pl-8">
             <div
               className="text-3xl font-bold text-white/80"
-              style={{ fontFamily: "'Montserrat', sans-serif" }}
+              style={{ fontFamily: "'Space Grotesk', sans-serif" }}
             >
               {winPct}%
             </div>
@@ -110,7 +110,7 @@ export default function BearsSeasonCard({
               <div className="flex items-center gap-2">
                 <span
                   className="text-white font-bold"
-                  style={{ fontFamily: "'Montserrat', sans-serif" }}
+                  style={{ fontFamily: "'Space Grotesk', sans-serif" }}
                 >
                   {nextGame.isHome ? 'vs' : '@'} {nextGame.opponent}
                 </span>
@@ -149,7 +149,7 @@ export default function BearsSeasonCard({
                 </span>
                 <span
                   className="text-white font-bold"
-                  style={{ fontFamily: "'Montserrat', sans-serif" }}
+                  style={{ fontFamily: "'Space Grotesk', sans-serif" }}
                 >
                   {lastGame.opponent}
                 </span>
@@ -166,22 +166,22 @@ export default function BearsSeasonCard({
       <div className="px-6 py-3 bg-black/20 flex items-center justify-between">
         <div className="flex items-center gap-4">
           <Link
-            href="/bears/roster"
+            href="/chicago-bears/roster"
             className="text-sm text-white/70 hover:text-white transition-colors"
           >
             Roster
           </Link>
           <Link
-            href="/bears/stats"
+            href="/chicago-bears/stats"
             className="text-sm text-white/70 hover:text-white transition-colors"
           >
             Stats
           </Link>
           <Link
-            href="/bears/standings"
+            href="/chicago-bears/schedule"
             className="text-sm text-white/70 hover:text-white transition-colors"
           >
-            Standings
+            Schedule
           </Link>
         </div>
         <Link

@@ -6,8 +6,8 @@ import { TeamHubLayout } from '@/components/team'
 import { CHICAGO_TEAMS, fetchNextGame } from '@/lib/team-config'
 
 export const metadata: Metadata = {
-  title: 'Chicago Bears Roster 2026 | SportsMockery',
-  description: 'Complete 2026 Chicago Bears roster with player profiles, positions, measurements, and stats. View all players by position group.',
+  title: 'Chicago Bears Roster 2025 | SportsMockery',
+  description: 'Complete 2025 Chicago Bears roster with player profiles, positions, measurements, and stats. View all players by position group.',
 }
 
 // Revalidate every hour
@@ -130,6 +130,24 @@ export default async function BearsRosterPage() {
   )
 }
 
+function getStatusBadge(status: string | null) {
+  if (!status) return null
+  const s = status.toLowerCase()
+  if (s.includes('injured reserve') || s === 'ir') {
+    return { label: 'IR', bg: 'rgba(239, 68, 68, 0.1)', color: '#ef4444' }
+  }
+  if (s.includes('practice squad') || s === 'ps') {
+    return { label: 'PS', bg: 'rgba(59, 130, 246, 0.1)', color: '#3b82f6' }
+  }
+  if (s.includes('pup') || s.includes('physically unable')) {
+    return { label: 'PUP', bg: 'rgba(234, 179, 8, 0.1)', color: '#eab308' }
+  }
+  if (s.includes('suspend')) {
+    return { label: 'SUS', bg: 'rgba(239, 68, 68, 0.1)', color: '#ef4444' }
+  }
+  return null
+}
+
 function PositionCard({
   groupName,
   players,
@@ -137,6 +155,9 @@ function PositionCard({
   groupName: string
   players: BearsPlayer[]
 }) {
+  // Check if any player in this group has size data
+  const hasSizeData = players.some(p => p.height && p.weight)
+
   return (
     <div className="glass-card glass-card-static" style={{ overflow: 'hidden', padding: 0 }}>
       {/* Header */}
@@ -164,7 +185,7 @@ function PositionCard({
             <tr className="text-left text-xs uppercase tracking-wider" style={{ color: 'var(--sm-text-muted)', borderBottom: '1px solid var(--sm-border)' }}>
               <th className="px-4 py-2 w-12">#</th>
               <th className="px-4 py-2">Player</th>
-              <th className="px-4 py-2 hidden sm:table-cell">Size</th>
+              {hasSizeData && <th className="px-4 py-2 hidden sm:table-cell">Size</th>}
               <th className="px-4 py-2 hidden md:table-cell">College</th>
               <th className="px-4 py-2 hidden lg:table-cell">Exp</th>
             </tr>
@@ -172,6 +193,7 @@ function PositionCard({
           <tbody>
             {players.map((player) => {
               const isStarter = player.primaryRole?.toLowerCase().includes('starter')
+              const badge = getStatusBadge(player.status)
 
               return (
                 <tr
@@ -228,21 +250,40 @@ function PositionCard({
                           </svg>
                         </div>
                       )}
-                      <div>
-                        <span className="font-medium transition-colors" style={{ color: 'var(--sm-text)' }}>
-                          {player.fullName}
-                        </span>
-                        <div className="text-xs" style={{ color: 'var(--sm-text-muted)' }}>
-                          {player.position}
+                      <div className="flex items-center gap-2">
+                        <div>
+                          <span className="font-medium transition-colors" style={{ color: 'var(--sm-text)' }}>
+                            {player.fullName}
+                          </span>
+                          <div className="text-xs" style={{ color: 'var(--sm-text-muted)' }}>
+                            {player.position}
+                          </div>
                         </div>
+                        {badge && (
+                          <span
+                            style={{
+                              padding: '1px 6px',
+                              borderRadius: '4px',
+                              fontSize: 10,
+                              fontWeight: 700,
+                              backgroundColor: badge.bg,
+                              color: badge.color,
+                              lineHeight: '16px',
+                            }}
+                          >
+                            {badge.label}
+                          </span>
+                        )}
                       </div>
                     </Link>
                   </td>
-                  <td className="px-4 py-3 text-sm hidden sm:table-cell" style={{ color: 'var(--sm-text-muted)' }}>
-                    {player.height && player.weight
-                      ? `${player.height} · ${player.weight} lbs`
-                      : '—'}
-                  </td>
+                  {hasSizeData && (
+                    <td className="px-4 py-3 text-sm hidden sm:table-cell" style={{ color: 'var(--sm-text-muted)' }}>
+                      {player.height && player.weight
+                        ? `${player.height} · ${player.weight} lbs`
+                        : '—'}
+                    </td>
+                  )}
                   <td className="px-4 py-3 text-sm hidden md:table-cell" style={{ color: 'var(--sm-text-muted)' }}>
                     {player.college || '—'}
                   </td>

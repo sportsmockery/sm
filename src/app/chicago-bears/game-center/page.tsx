@@ -4,19 +4,20 @@ import Image from 'next/image'
 import { TeamHubLayout } from '@/components/team'
 import { CHICAGO_TEAMS, fetchNextGame, fetchLastGame } from '@/lib/team-config'
 import { getBearsSeparatedRecord, getBearsSchedule, type BearsGame } from '@/lib/bearsData'
+import { HubUpdatesFeed } from '@/components/hub'
 
 export const metadata: Metadata = {
-  title: 'Chicago Bears Game Center & Live Scores | Sports Mockery',
+  title: 'Chicago Bears Game Center | Sports Mockery',
   description:
-    'Chicago Bears Game Center: live scores, play-by-play, game previews, and box scores. Every Bears game covered.',
+    'Live scores, play-by-play, previews.',
   openGraph: {
-    title: 'Chicago Bears Game Center & Live Scores',
-    description: 'Live Bears scores, play-by-play, previews, and post-game analysis.',
+    title: 'Chicago Bears Game Center',
+    description: 'Live scores, play-by-play, previews.',
     type: 'website',
   },
   twitter: {
     title: 'Chicago Bears Game Center',
-    description: 'Live scores, box scores, and previews for every Bears game.',
+    description: 'Live scores, play-by-play, previews.',
   },
 }
 
@@ -227,6 +228,9 @@ export default async function BearsGameCenterPage() {
             </Link>
           ))}
         </div>
+
+        {/* Hub Updates Feed */}
+        <HubUpdatesFeed hubSlug="game-center" title="Game Notes" emptyState="No game notes yet." />
 
         {/* Recent Results */}
         {completedGames.length > 0 && (

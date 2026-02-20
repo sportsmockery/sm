@@ -3,19 +3,20 @@ import { TeamHubLayout } from '@/components/team'
 import { CHICAGO_TEAMS, fetchNextGame } from '@/lib/team-config'
 import { getBearsSeparatedRecord, getBearsRosterGrouped, type BearsPlayer, type PositionGroup } from '@/lib/bearsData'
 import DepthChartClient from './DepthChartClient'
+import { HubUpdatesFeed } from '@/components/hub'
 
 export const metadata: Metadata = {
-  title: 'Chicago Bears Depth Chart & Roster 2026 | Sports Mockery',
+  title: 'Chicago Bears Depth Chart 2026 | Sports Mockery',
   description:
-    'Interactive Chicago Bears depth chart: 53-man roster, starter/backup hierarchy, position groups, and player profiles. Updated for 2026.',
+    'Interactive 53-man roster, starters/backups.',
   openGraph: {
-    title: 'Chicago Bears Depth Chart & Roster 2026',
-    description: 'Interactive Bears depth chart with starter/backup hierarchy and player profiles.',
+    title: 'Chicago Bears Depth Chart 2026',
+    description: 'Interactive 53-man roster, starters/backups.',
     type: 'website',
   },
   twitter: {
     title: 'Chicago Bears Depth Chart 2026',
-    description: 'Interactive 53-man roster with starters, backups, and position breakdowns.',
+    description: 'Interactive 53-man roster, starters/backups.',
   },
 }
 
@@ -86,6 +87,9 @@ export default async function BearsDepthChartPage() {
 
   return (
     <TeamHubLayout team={team} record={record} nextGame={nextGame} activeTab="depth-chart">
+      <div style={{ maxWidth: '900px', margin: '0 auto' }}>
+        <HubUpdatesFeed hubSlug="depth-chart" title="Depth Chart Updates" emptyState="No roster updates yet." />
+      </div>
       <DepthChartClient
         positionGroups={positionGroups}
         totalPlayers={allPlayers}

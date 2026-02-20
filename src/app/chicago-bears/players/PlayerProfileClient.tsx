@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
 
@@ -13,487 +13,166 @@ interface PlayerListItem {
   headshotUrl: string | null
 }
 
-interface PlayerSeasonStats {
-  season: number
-  gamesPlayed: number
-  passAttempts: number | null
-  passCompletions: number | null
-  passYards: number | null
-  passTD: number | null
-  passINT: number | null
-  completionPct: number | null
-  yardsPerAttempt: number | null
-  rushAttempts: number | null
-  rushYards: number | null
-  rushTD: number | null
-  yardsPerCarry: number | null
-  receptions: number | null
-  recYards: number | null
-  recTD: number | null
-  targets: number | null
-  yardsPerReception: number | null
-  tackles: number | null
-  sacks: number | null
-  interceptions: number | null
-  passesDefended: number | null
-  forcedFumbles: number | null
-  fumbleRecoveries: number | null
-  fumbles: number | null
-  snaps: number | null
-}
-
-interface PlayerProfile {
-  player: {
-    playerId: string
-    slug: string
-    fullName: string
-    firstName: string
-    lastName: string
-    jerseyNumber: number | null
-    position: string
-    positionGroup: string | null
-    side: string
-    height: string | null
-    weight: number | null
-    age: number | null
-    experience: string | null
-    college: string | null
-    headshotUrl: string | null
-    status: string | null
-  }
-  seasons: PlayerSeasonStats[]
-  currentSeason: PlayerSeasonStats | null
-  postseasonStats: PlayerSeasonStats | null
-  gameLog: any[]
-}
-
 interface Props {
   players: PlayerListItem[]
-  initialPlayerSlug: string
-  initialProfile: PlayerProfile | null
 }
 
-export default function PlayerProfileClient({ players, initialPlayerSlug, initialProfile }: Props) {
-  const [selectedSlug, setSelectedSlug] = useState(initialPlayerSlug)
-  const [profile, setProfile] = useState<PlayerProfile | null>(initialProfile)
-  const [loading, setLoading] = useState(false)
-  const [dropdownOpen, setDropdownOpen] = useState(false)
-  const [statsView, setStatsView] = useState<'regular' | 'postseason'>('regular')
+const PLAYERS_PER_PAGE = 12
 
-  const selectedPlayer = players.find(p => p.slug === selectedSlug)
-
-  // Fetch new profile when selection changes
-  useEffect(() => {
-    if (selectedSlug === initialPlayerSlug && initialProfile) {
-      setProfile(initialProfile)
-      return
-    }
-
-    setLoading(true)
-    fetch(`/api/bears/players/${selectedSlug}`)
-      .then(res => res.json())
-      .then(data => {
-        if (!data.error) {
-          setProfile(data)
-        }
-        setLoading(false)
-      })
-      .catch(() => {
-        setLoading(false)
-      })
-  }, [selectedSlug, initialPlayerSlug, initialProfile])
-
-  const handlePlayerSelect = (slug: string) => {
-    setSelectedSlug(slug)
-    setDropdownOpen(false)
-    setStatsView('regular')
-  }
-
-  // Determine which stats to show based on toggle
-  const displayedStats = statsView === 'postseason' && profile?.postseasonStats
-    ? profile.postseasonStats
-    : profile?.currentSeason || null
-  const hasPostseason = !!(profile?.postseasonStats && profile.postseasonStats.gamesPlayed > 0)
+export default function PlayerProfileClient({ players }: Props) {
+  const [page, setPage] = useState(0)
+  const totalPages = Math.ceil(players.length / PLAYERS_PER_PAGE)
+  const start = page * PLAYERS_PER_PAGE
+  const visible = players.slice(start, start + PLAYERS_PER_PAGE)
 
   return (
     <div className="pb-12">
-      {/* Player Selector */}
-      <div className="mb-6">
-        <div className="flex items-center justify-between mb-4">
-          <h1
-            className="text-2xl font-bold"
-            style={{ fontFamily: "'Montserrat', sans-serif", color: 'var(--sm-text)' }}
-          >
-            Players
-          </h1>
-          <Link
-            href="/chicago-bears/roster"
-            className="text-sm hover:underline"
-            style={{ color: '#C83200' }}
-          >
-            View Full Roster &rarr;
-          </Link>
-        </div>
+      {/* Header */}
+      <div className="flex items-center justify-between mb-6">
+        <h1
+          className="text-2xl font-bold"
+          style={{ fontFamily: "'Space Grotesk', sans-serif", color: 'var(--sm-text)' }}
+        >
+          Players
+        </h1>
+        <Link
+          href="/chicago-bears/roster"
+          className="text-sm hover:underline"
+          style={{ color: '#C83200' }}
+        >
+          View Full Roster &rarr;
+        </Link>
+      </div>
 
-        {/* Dropdown Selector */}
-        <div className="relative">
-          <button
-            onClick={() => setDropdownOpen(!dropdownOpen)}
-            className="w-full md:w-96 flex items-center justify-between gap-3 px-4 py-3 transition-colors"
-            style={{
-              backgroundColor: 'var(--sm-card)',
-              border: '1px solid var(--sm-border)',
-              borderRadius: 'var(--sm-radius-lg)',
-            }}
+      {/* Card Grid */}
+      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+        {visible.map((player) => (
+          <Link
+            key={player.playerId}
+            href={`/chicago-bears/players/${player.slug}`}
+            className="group"
+            style={{ textDecoration: 'none', display: 'block' }}
           >
-            <div className="flex items-center gap-3">
-              {selectedPlayer?.headshotUrl ? (
-                <Image
-                  src={selectedPlayer.headshotUrl}
-                  alt={selectedPlayer.fullName}
-                  width={40}
-                  height={40}
-                  className="w-10 h-10 rounded-full object-cover"
-                />
+            <div
+              className="glass-card glass-card-static"
+              style={{
+                padding: '24px 16px',
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                textAlign: 'center',
+                transition: 'border-color 0.2s, transform 0.2s',
+              }}
+            >
+              {/* Headshot */}
+              {player.headshotUrl ? (
+                <div
+                  className="w-20 h-20 rounded-full overflow-hidden flex-shrink-0"
+                  style={{ border: '3px solid var(--sm-border)', marginBottom: 12 }}
+                >
+                  <Image
+                    src={player.headshotUrl}
+                    alt={player.fullName}
+                    width={80}
+                    height={80}
+                    className="w-full h-full object-cover"
+                  />
+                </div>
               ) : (
                 <div
-                  className="w-10 h-10 rounded-full flex items-center justify-center"
-                  style={{ backgroundColor: 'var(--sm-surface)' }}
+                  className="w-20 h-20 rounded-full flex items-center justify-center flex-shrink-0"
+                  style={{
+                    backgroundColor: '#C83200',
+                    color: '#fff',
+                    fontSize: 24,
+                    fontWeight: 800,
+                    marginBottom: 12,
+                  }}
                 >
-                  <span className="text-xs font-bold" style={{ color: 'var(--sm-text-muted)' }}>
-                    {selectedPlayer?.fullName.split(' ').map(n => n[0]).join('')}
-                  </span>
+                  {player.jerseyNumber ?? '?'}
                 </div>
               )}
-              <div className="text-left">
-                <div className="font-semibold" style={{ color: 'var(--sm-text)' }}>
-                  {selectedPlayer?.jerseyNumber && `#${selectedPlayer.jerseyNumber} `}
-                  {selectedPlayer?.fullName}
-                </div>
-                <div className="text-xs" style={{ color: 'var(--sm-text-muted)' }}>
-                  {selectedPlayer?.position}
-                </div>
+
+              {/* Name */}
+              <div
+                className="font-semibold group-hover:text-[#C83200] transition-colors"
+                style={{
+                  color: 'var(--sm-text)',
+                  fontSize: 14,
+                  lineHeight: 1.3,
+                  marginBottom: 4,
+                }}
+              >
+                {player.fullName}
+              </div>
+
+              {/* Position & Number */}
+              <div style={{ color: 'var(--sm-text-muted)', fontSize: 12 }}>
+                {player.position}
+                {player.jerseyNumber && ` · #${player.jerseyNumber}`}
+              </div>
+
+              {/* View Profile Button */}
+              <div
+                className="flex items-center gap-1 mt-3"
+                style={{
+                  fontSize: 12,
+                  fontWeight: 600,
+                  color: '#C83200',
+                }}
+              >
+                View Full Profile
+                <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M14 5l7 7m0 0l-7 7m7-7H3" />
+                </svg>
               </div>
             </div>
-            <svg
-              className={`w-5 h-5 transition-transform ${dropdownOpen ? 'rotate-180' : ''}`}
-              style={{ color: 'var(--sm-text-muted)' }}
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+          </Link>
+        ))}
+      </div>
+
+      {/* Pagination */}
+      {totalPages > 1 && (
+        <div className="flex items-center justify-center gap-4 mt-8">
+          <button
+            onClick={() => setPage(p => Math.max(0, p - 1))}
+            disabled={page === 0}
+            className="flex items-center gap-1 px-4 py-2 text-sm font-semibold rounded-lg transition-colors"
+            style={{
+              backgroundColor: page === 0 ? 'var(--sm-surface)' : '#C83200',
+              color: page === 0 ? 'var(--sm-text-muted)' : '#ffffff',
+              cursor: page === 0 ? 'not-allowed' : 'pointer',
+              opacity: page === 0 ? 0.5 : 1,
+            }}
+          >
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
             </svg>
+            Previous
           </button>
 
-          {/* Dropdown Menu */}
-          {dropdownOpen && (
-            <div
-              className="absolute z-50 mt-2 w-full md:w-96 max-h-80 overflow-y-auto shadow-xl"
-              style={{
-                backgroundColor: 'var(--sm-card)',
-                border: '1px solid var(--sm-border)',
-                borderRadius: 'var(--sm-radius-lg)',
-              }}
-            >
-              {players.map(player => (
-                <button
-                  key={player.playerId}
-                  onClick={() => handlePlayerSelect(player.slug)}
-                  className="w-full flex items-center gap-3 px-4 py-3 transition-colors"
-                  style={player.slug === selectedSlug ? { backgroundColor: 'rgba(200, 50, 0, 0.1)' } : {}}
-                >
-                  {player.headshotUrl ? (
-                    <Image
-                      src={player.headshotUrl}
-                      alt={player.fullName}
-                      width={36}
-                      height={36}
-                      className="w-9 h-9 rounded-full object-cover"
-                    />
-                  ) : (
-                    <div
-                      className="w-9 h-9 rounded-full flex items-center justify-center"
-                      style={{ backgroundColor: 'var(--sm-surface)' }}
-                    >
-                      <span className="text-xs font-bold" style={{ color: 'var(--sm-text-muted)' }}>
-                        {player.fullName.split(' ').map(n => n[0]).join('')}
-                      </span>
-                    </div>
-                  )}
-                  <div className="text-left">
-                    <div className="font-medium" style={{ color: 'var(--sm-text)' }}>
-                      {player.jerseyNumber && `#${player.jerseyNumber} `}
-                      {player.fullName}
-                    </div>
-                    <div className="text-xs" style={{ color: 'var(--sm-text-muted)' }}>
-                      {player.position}
-                    </div>
-                  </div>
-                </button>
-              ))}
-            </div>
-          )}
-        </div>
-      </div>
+          <span style={{ color: 'var(--sm-text-muted)', fontSize: 14 }}>
+            Page {page + 1} of {totalPages}
+          </span>
 
-      {/* Player Profile */}
-      {loading ? (
-        <div
-          className="p-12"
-          style={{
-            backgroundColor: 'var(--sm-card)',
-            border: '1px solid var(--sm-border)',
-            borderRadius: 'var(--sm-radius-xl)',
-          }}
-        >
-          <div className="flex items-center justify-center gap-3">
-            <div className="w-6 h-6 rounded-full animate-spin" style={{ border: '2px solid #C83200', borderTopColor: 'transparent' }} />
-            <span style={{ color: 'var(--sm-text-muted)' }}>Loading player...</span>
-          </div>
-        </div>
-      ) : profile ? (
-        <div className="space-y-6">
-          {/* Player Header Card */}
-          <div
-            className="overflow-hidden"
-            style={{ background: 'linear-gradient(to right, #0B162A, rgba(11, 22, 42, 0.9))', borderRadius: 'var(--sm-radius-xl)' }}
+          <button
+            onClick={() => setPage(p => Math.min(totalPages - 1, p + 1))}
+            disabled={page === totalPages - 1}
+            className="flex items-center gap-1 px-4 py-2 text-sm font-semibold rounded-lg transition-colors"
+            style={{
+              backgroundColor: page === totalPages - 1 ? 'var(--sm-surface)' : '#C83200',
+              color: page === totalPages - 1 ? 'var(--sm-text-muted)' : '#ffffff',
+              cursor: page === totalPages - 1 ? 'not-allowed' : 'pointer',
+              opacity: page === totalPages - 1 ? 0.5 : 1,
+            }}
           >
-            <div className="flex flex-col md:flex-row">
-              {/* Photo */}
-              <div className="md:w-64 aspect-[3/4] md:aspect-auto relative" style={{ backgroundColor: '#0B162A' }}>
-                {profile.player.headshotUrl ? (
-                  <Image
-                    src={profile.player.headshotUrl}
-                    alt={profile.player.fullName}
-                    fill
-                    className="object-cover object-top"
-                    sizes="(max-width: 768px) 100vw, 256px"
-                    priority
-                  />
-                ) : (
-                  <div className="w-full h-full min-h-[300px] flex items-center justify-center">
-                    <span className="text-6xl font-bold text-white/20">
-                      {profile.player.jerseyNumber || '?'}
-                    </span>
-                  </div>
-                )}
-              </div>
-
-              {/* Info */}
-              <div className="flex-1 p-6 text-white">
-                <div className="flex items-start justify-between">
-                  <div>
-                    <div className="text-sm text-white/60 uppercase tracking-wider mb-1">
-                      {profile.player.position}
-                    </div>
-                    <h2 className="text-3xl font-bold mb-2">
-                      {profile.player.jerseyNumber && (
-                        <span style={{ color: '#C83200' }}>#{profile.player.jerseyNumber} </span>
-                      )}
-                      {profile.player.fullName}
-                    </h2>
-                  </div>
-                </div>
-
-                {/* Bio Grid */}
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-6">
-                  {profile.player.height && (
-                    <div>
-                      <div className="text-xs text-white/50 uppercase">Height</div>
-                      <div className="font-semibold">{profile.player.height}</div>
-                    </div>
-                  )}
-                  {profile.player.weight && (
-                    <div>
-                      <div className="text-xs text-white/50 uppercase">Weight</div>
-                      <div className="font-semibold">{profile.player.weight} lbs</div>
-                    </div>
-                  )}
-                  {profile.player.age && (
-                    <div>
-                      <div className="text-xs text-white/50 uppercase">Age</div>
-                      <div className="font-semibold">{profile.player.age}</div>
-                    </div>
-                  )}
-                  {profile.player.experience && (
-                    <div>
-                      <div className="text-xs text-white/50 uppercase">Experience</div>
-                      <div className="font-semibold">{profile.player.experience}</div>
-                    </div>
-                  )}
-                  {profile.player.college && (
-                    <div className="col-span-2">
-                      <div className="text-xs text-white/50 uppercase">College</div>
-                      <div className="font-semibold">{profile.player.college}</div>
-                    </div>
-                  )}
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Season Stats */}
-          {(profile.currentSeason || profile.postseasonStats) && (
-            <div
-              className="p-6"
-              style={{
-                backgroundColor: 'var(--sm-card)',
-                border: '1px solid var(--sm-border)',
-                borderRadius: 'var(--sm-radius-xl)',
-              }}
-            >
-              <div className="flex items-center justify-between mb-4">
-                <h3 className="text-lg font-bold" style={{ color: 'var(--sm-text)' }}>
-                  {displayedStats?.season || 2025} {statsView === 'postseason' ? 'Postseason' : 'Season'} Stats
-                </h3>
-                {/* Regular/Postseason Toggle */}
-                {hasPostseason && (
-                  <div
-                    className="flex rounded-lg overflow-hidden"
-                    style={{ border: '1px solid var(--sm-border)' }}
-                  >
-                    <button
-                      onClick={() => setStatsView('regular')}
-                      className="px-3 py-1.5 text-xs font-semibold transition-colors"
-                      style={{
-                        backgroundColor: statsView === 'regular' ? '#C83200' : 'transparent',
-                        color: statsView === 'regular' ? '#ffffff' : 'var(--sm-text-muted)',
-                      }}
-                    >
-                      Regular Season
-                    </button>
-                    <button
-                      onClick={() => setStatsView('postseason')}
-                      className="px-3 py-1.5 text-xs font-semibold transition-colors"
-                      style={{
-                        backgroundColor: statsView === 'postseason' ? '#C83200' : 'transparent',
-                        color: statsView === 'postseason' ? '#ffffff' : 'var(--sm-text-muted)',
-                      }}
-                    >
-                      Postseason
-                    </button>
-                  </div>
-                )}
-              </div>
-              {displayedStats && (
-                <>
-                  <div className="text-sm mb-4" style={{ color: 'var(--sm-text-muted)' }}>
-                    {displayedStats.gamesPlayed} Games Played
-                  </div>
-
-                  {/* Passing Stats */}
-                  {displayedStats.passAttempts && displayedStats.passAttempts > 0 && (
-                    <div className="mb-6">
-                      <h4 className="text-sm font-semibold uppercase tracking-wider mb-3" style={{ color: 'var(--sm-text-muted)' }}>Passing</h4>
-                      <div className="grid grid-cols-3 md:grid-cols-6 gap-4">
-                        <StatBox label="CMP/ATT" value={`${displayedStats.passCompletions}/${displayedStats.passAttempts}`} />
-                        <StatBox label="YDS" value={displayedStats.passYards} highlight />
-                        <StatBox label="TD" value={displayedStats.passTD} highlight />
-                        <StatBox label="INT" value={displayedStats.passINT} />
-                        <StatBox label="CMP%" value={displayedStats.completionPct ? `${displayedStats.completionPct}%` : '-'} />
-                        <StatBox label="Y/A" value={displayedStats.yardsPerAttempt || '-'} />
-                      </div>
-                    </div>
-                  )}
-
-                  {/* Rushing Stats */}
-                  {displayedStats.rushAttempts && displayedStats.rushAttempts > 0 && (
-                    <div className="mb-6">
-                      <h4 className="text-sm font-semibold uppercase tracking-wider mb-3" style={{ color: 'var(--sm-text-muted)' }}>Rushing</h4>
-                      <div className="grid grid-cols-3 md:grid-cols-4 gap-4">
-                        <StatBox label="CAR" value={displayedStats.rushAttempts} />
-                        <StatBox label="YDS" value={displayedStats.rushYards} highlight />
-                        <StatBox label="TD" value={displayedStats.rushTD} highlight />
-                        <StatBox label="Y/C" value={displayedStats.yardsPerCarry || '-'} />
-                      </div>
-                    </div>
-                  )}
-
-                  {/* Receiving Stats */}
-                  {displayedStats.receptions && displayedStats.receptions > 0 && (
-                    <div className="mb-6">
-                      <h4 className="text-sm font-semibold uppercase tracking-wider mb-3" style={{ color: 'var(--sm-text-muted)' }}>Receiving</h4>
-                      <div className="grid grid-cols-3 md:grid-cols-5 gap-4">
-                        <StatBox label="REC" value={displayedStats.receptions} />
-                        <StatBox label="TGTS" value={displayedStats.targets || '-'} />
-                        <StatBox label="YDS" value={displayedStats.recYards} highlight />
-                        <StatBox label="TD" value={displayedStats.recTD} highlight />
-                        <StatBox label="Y/R" value={displayedStats.yardsPerReception || '-'} />
-                      </div>
-                    </div>
-                  )}
-
-                  {/* Defensive Stats */}
-                  {displayedStats.tackles && displayedStats.tackles > 0 && (
-                    <div>
-                      <h4 className="text-sm font-semibold uppercase tracking-wider mb-3" style={{ color: 'var(--sm-text-muted)' }}>Defense</h4>
-                      <div className="grid grid-cols-3 md:grid-cols-4 gap-4">
-                        <StatBox label="TKL" value={displayedStats.tackles} highlight />
-                        <StatBox label="SACK" value={displayedStats.sacks || 0} />
-                        <StatBox label="INT" value={displayedStats.interceptions || 0} />
-                        <StatBox label="PD" value={displayedStats.passesDefended || 0} />
-                      </div>
-                    </div>
-                  )}
-
-                  {/* No Stats Message */}
-                  {(!displayedStats.passAttempts || displayedStats.passAttempts === 0) &&
-                   (!displayedStats.rushAttempts || displayedStats.rushAttempts === 0) &&
-                   (!displayedStats.receptions || displayedStats.receptions === 0) &&
-                   (!displayedStats.tackles || displayedStats.tackles === 0) && (
-                    <div className="text-center py-8" style={{ color: 'var(--sm-text-muted)' }}>
-                      No {statsView === 'postseason' ? 'postseason ' : ''}stats recorded this season
-                    </div>
-                  )}
-                </>
-              )}
-            </div>
-          )}
-
-          {/* View Full Profile Link */}
-          <div className="text-center">
-            <Link
-              href={`/chicago-bears/players/${profile.player.slug}`}
-              className="inline-flex items-center gap-2 px-6 py-3 text-white font-semibold transition-colors"
-              style={{ backgroundColor: '#C83200', borderRadius: '100px' }}
-            >
-              View Full Profile
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
-              </svg>
-            </Link>
-          </div>
-        </div>
-      ) : (
-        <div
-          className="p-12 text-center"
-          style={{
-            backgroundColor: 'var(--sm-card)',
-            border: '1px solid var(--sm-border)',
-            borderRadius: 'var(--sm-radius-xl)',
-          }}
-        >
-          <p style={{ color: 'var(--sm-text-muted)' }}>Player not found</p>
+            Next
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+            </svg>
+          </button>
         </div>
       )}
-    </div>
-  )
-}
-
-function StatBox({ label, value, highlight }: { label: string; value: string | number | null; highlight?: boolean }) {
-  return (
-    <div
-      className="p-3 text-center"
-      style={{ backgroundColor: 'var(--sm-surface)', borderRadius: 'var(--sm-radius-lg)' }}
-    >
-      <div className="text-xs uppercase tracking-wider mb-1" style={{ color: 'var(--sm-text-muted)' }}>{label}</div>
-      <div
-        className="text-lg font-bold"
-        style={{ color: highlight ? '#C83200' : 'var(--sm-text)' }}
-      >
-        {value ?? '-'}
-      </div>
     </div>
   )
 }

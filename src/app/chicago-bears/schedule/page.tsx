@@ -143,8 +143,8 @@ export default async function BearsSchedulePage() {
           </div>
         </div>
 
-        {/* All Games - most recent first (for out-of-season display) */}
-        {schedule.length > 0 && (
+        {/* Regular Season */}
+        {regularGames.length > 0 && (
           <div className="glass-card glass-card-static" style={{ overflow: 'hidden', padding: 0 }}>
             <div
               style={{
@@ -156,18 +156,113 @@ export default async function BearsSchedulePage() {
               }}
             >
               <h2 style={{ fontWeight: 700, color: 'var(--sm-text)', fontFamily: "'Space Grotesk', sans-serif" }}>
-                Chicago Bears 2025 Schedule
+                Regular Season ({regularGames.length} Games)
               </h2>
-              <span style={{ fontSize: '14px', color: 'var(--sm-text-muted)' }}>
-                {schedule.length} games
-              </span>
             </div>
             <div>
-              {sortedSchedule.map((game) => (
+              {regularWithRecord.map((game, idx) => {
+                // Insert BYE WEEK row before the game that follows the bye
+                const showBye = idx > 0 && regularWithRecord[idx - 1].week < BYE_WEEK && game.week > BYE_WEEK
+                return (
+                  <div key={game.gameId}>
+                    {showBye && (
+                      <div
+                        style={{
+                          padding: '12px 20px',
+                          borderBottom: '1px solid var(--sm-border)',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          gap: 12,
+                          backgroundColor: 'var(--sm-surface)',
+                        }}
+                      >
+                        <div style={{ flex: 1, height: 1, background: 'var(--sm-border)' }} />
+                        <span style={{
+                          padding: '4px 16px',
+                          borderRadius: '100px',
+                          fontSize: 12,
+                          fontWeight: 700,
+                          textTransform: 'uppercase',
+                          letterSpacing: '1px',
+                          color: 'var(--sm-text-muted)',
+                          backgroundColor: 'var(--sm-card)',
+                          border: '1px solid var(--sm-border)',
+                        }}>
+                          Week {BYE_WEEK} — BYE
+                        </span>
+                        <div style={{ flex: 1, height: 1, background: 'var(--sm-border)' }} />
+                      </div>
+                    )}
+                    <GameRow
+                      game={game}
+                      progressiveRecord={game.progressiveRecord}
+                    />
+                  </div>
+                )
+              })}
+            </div>
+          </div>
+        )}
+
+        {/* Postseason */}
+        {postseasonGames.length > 0 && (
+          <div className="glass-card glass-card-static" style={{ overflow: 'hidden', padding: 0, marginTop: 24 }}>
+            <div
+              style={{
+                padding: '16px 20px',
+                borderBottom: '1px solid var(--sm-border)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+              }}
+            >
+              <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                <h2 style={{ fontWeight: 700, color: 'var(--sm-red)', fontFamily: "'Space Grotesk', sans-serif", margin: 0 }}>
+                  Postseason
+                </h2>
+                <span style={{
+                  padding: '3px 10px',
+                  borderRadius: '100px',
+                  fontSize: 12,
+                  fontWeight: 700,
+                  backgroundColor: 'rgba(188, 0, 0, 0.1)',
+                  color: 'var(--sm-red)',
+                }}>
+                  {separatedRecord.postseason.wins}-{separatedRecord.postseason.losses}
+                </span>
+              </div>
+            </div>
+            <div>
+              {postseasonGames.map((game) => (
                 <GameRow
                   key={game.gameId}
                   game={game}
-                  isPreseason={game.gameType === 'preseason'}
+                />
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Preseason (collapsed) */}
+        {preseasonGames.length > 0 && (
+          <div className="glass-card glass-card-static" style={{ overflow: 'hidden', padding: 0, marginTop: 24 }}>
+            <div
+              style={{
+                padding: '16px 20px',
+                borderBottom: '1px solid var(--sm-border)',
+              }}
+            >
+              <h2 style={{ fontWeight: 700, color: 'var(--sm-text-muted)', fontFamily: "'Space Grotesk', sans-serif", fontSize: 16 }}>
+                Preseason
+              </h2>
+            </div>
+            <div>
+              {preseasonGames.map((game) => (
+                <GameRow
+                  key={game.gameId}
+                  game={game}
+                  isPreseason
                 />
               ))}
             </div>
@@ -203,6 +298,10 @@ function GameRow({
     ? game.result === 'W' ? '#10b981' : game.result === 'T' ? '#eab308' : '#ef4444'
     : 'var(--sm-red)'
 
+  const rowBg = isPast
+    ? game.result === 'W' ? 'rgba(16, 185, 129, 0.03)' : game.result === 'L' ? 'rgba(239, 68, 68, 0.03)' : undefined
+    : undefined
+
   return (
     <div
       style={{
@@ -210,6 +309,7 @@ function GameRow({
         borderBottom: '1px solid var(--sm-border)',
         borderLeft: `3px solid ${borderColor}`,
         transition: 'background-color 0.15s ease',
+        backgroundColor: rowBg,
       }}
       className="hover:brightness-95 dark:hover:brightness-110"
     >
@@ -306,6 +406,20 @@ function GameRow({
               >
                 {game.result}
               </span>
+              {game.isOvertime && (
+                <span
+                  style={{
+                    padding: '2px 6px',
+                    borderRadius: '100px',
+                    fontSize: '10px',
+                    fontWeight: 700,
+                    backgroundColor: 'rgba(234, 179, 8, 0.1)',
+                    color: '#eab308',
+                  }}
+                >
+                  OT
+                </span>
+              )}
               <span style={{ fontWeight: 600, color: 'var(--sm-text)', fontSize: '14px' }}>
                 {game.bearsScore}-{game.oppScore}
               </span>

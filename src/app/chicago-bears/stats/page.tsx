@@ -108,7 +108,7 @@ export default async function BearsStatsPage() {
             Player Leaderboards
           </h2>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
             {/* Passing Leaders */}
             <LeaderboardCard
               title="Passing Leaders"
@@ -156,6 +156,30 @@ export default async function BearsStatsPage() {
               entries={stats.leaderboards.defense}
               emptyText="No defensive stats available"
             />
+
+            {/* Sack Leaders */}
+            <LeaderboardCard
+              title="Sack Leaders"
+              icon={
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+                </svg>
+              }
+              entries={stats.leaderboards.sacks}
+              emptyText="No sack stats available"
+            />
+
+            {/* Interceptions Leaders */}
+            <LeaderboardCard
+              title="Interception Leaders"
+              icon={
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 11.5V14m0-2.5v-6a1.5 1.5 0 113 0m-3 6a1.5 1.5 0 00-3 0v2a7.5 7.5 0 0015 0v-5a1.5 1.5 0 00-3 0m-6-3V11m0-5.5v-1a1.5 1.5 0 013 0v1m0 0V11m0-5.5a1.5 1.5 0 013 0v3m0 0V11" />
+                </svg>
+              }
+              entries={stats.leaderboards.interceptions}
+              emptyText="No interception stats available"
+            />
           </div>
         </section>
 
@@ -163,34 +187,46 @@ export default async function BearsStatsPage() {
         {postseasonStats && (separatedRecord.postseason.wins > 0 || separatedRecord.postseason.losses > 0) && (
           <>
             {/* Postseason Team Overview */}
-            <section style={{ marginTop: 40 }}>
-              <h2
-                style={{
-                  fontSize: 20,
-                  fontWeight: 700,
-                  color: 'var(--sm-red)',
-                  marginBottom: 24,
-                  fontFamily: "'Space Grotesk', sans-serif",
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: 10,
-                }}
-              >
+            <section style={{ marginTop: 40, paddingTop: 32, borderTop: '2px solid var(--sm-border)' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 24 }}>
+                <h2
+                  style={{
+                    fontSize: 20,
+                    fontWeight: 700,
+                    color: 'var(--sm-red)',
+                    fontFamily: "'Space Grotesk', sans-serif",
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 10,
+                    margin: 0,
+                  }}
+                >
+                  <span style={{
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    width: 28,
+                    height: 28,
+                    borderRadius: 8,
+                    background: 'rgba(188, 0, 0, 0.1)',
+                  }}>
+                    <svg className="w-4 h-4" fill="none" stroke="var(--sm-red)" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
+                    </svg>
+                  </span>
+                  Postseason Stats
+                </h2>
                 <span style={{
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  width: 28,
-                  height: 28,
-                  borderRadius: 8,
-                  background: 'rgba(188, 0, 0, 0.1)',
+                  padding: '4px 12px',
+                  borderRadius: '100px',
+                  backgroundColor: 'rgba(234, 138, 0, 0.12)',
+                  color: '#ea8a00',
+                  fontSize: 12,
+                  fontWeight: 700,
                 }}>
-                  <svg className="w-4 h-4" fill="none" stroke="var(--sm-red)" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
-                  </svg>
+                  Playoffs {separatedRecord.postseason.wins}-{separatedRecord.postseason.losses}
                 </span>
-                Postseason Stats
-              </h2>
+              </div>
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                 <TeamStatCard
                   label="Playoff Record"
@@ -243,7 +279,7 @@ export default async function BearsStatsPage() {
                   Postseason Player Leaderboards
                 </h2>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
                   {postseasonStats.leaderboards.passing.length > 0 && (
                     <LeaderboardCard
                       title="Passing Leaders"
@@ -525,6 +561,14 @@ function LeaderboardRow({ entry, rank, isLast }: { entry: LeaderboardEntry; rank
 
       {/* Stats */}
       <div className="flex items-center gap-4 text-right flex-shrink-0">
+        {entry.gamesPlayed !== undefined && (
+          <div className="hidden sm:block" style={{ minWidth: 28 }}>
+            <div style={{ fontSize: 14, fontWeight: 500, color: 'var(--sm-text-muted)' }}>
+              {entry.gamesPlayed}
+            </div>
+            <div style={{ fontSize: 10, color: 'var(--sm-text-dim)', textTransform: 'uppercase' }}>GP</div>
+          </div>
+        )}
         <div>
           <div style={{ fontSize: 18, fontWeight: 700, color: 'var(--sm-text)' }}>
             {entry.primaryStat.toLocaleString()}
