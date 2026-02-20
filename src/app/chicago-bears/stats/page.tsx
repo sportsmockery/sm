@@ -1,7 +1,7 @@
 import { Metadata } from 'next'
 import Link from 'next/link'
 import Image from 'next/image'
-import { getBearsStats, getBearsSeparatedRecord, type BearsStats, type LeaderboardEntry, type BearsPlayer } from '@/lib/bearsData'
+import { getBearsStats, getBearsSeparatedRecord, hasBearsPostseasonStats, type BearsStats, type LeaderboardEntry, type BearsPlayer } from '@/lib/bearsData'
 import { TeamHubLayout } from '@/components/team'
 import { CHICAGO_TEAMS, fetchNextGame } from '@/lib/team-config'
 
@@ -18,11 +18,17 @@ export default async function BearsStatsPage() {
   const team = CHICAGO_TEAMS.bears
 
   // Fetch all data in parallel
-  const [stats, separatedRecord, nextGame] = await Promise.all([
-    getBearsStats(currentSeason),
+  const [stats, separatedRecord, nextGame, hasPostseason] = await Promise.all([
+    getBearsStats(currentSeason, 'regular'),
     getBearsSeparatedRecord(currentSeason),
     fetchNextGame('bears'),
+    hasBearsPostseasonStats(currentSeason),
   ])
+
+  // Fetch postseason stats only if they exist
+  const postseasonStats = hasPostseason
+    ? await getBearsStats(currentSeason, 'postseason')
+    : null
 
   // Build record object for TeamHubLayout (regular season only in main display)
   const record = {
@@ -154,34 +160,142 @@ export default async function BearsStatsPage() {
         </section>
 
         {/* Postseason Section (if applicable) */}
-        {(separatedRecord.postseason.wins > 0 || separatedRecord.postseason.losses > 0) && (
-          <section
-            className="glass-card glass-card-static"
-            style={{
-              marginTop: 40,
-              borderLeft: '3px solid var(--sm-red)',
-            }}
-          >
-            <h2
-              style={{
-                fontSize: 20,
-                fontWeight: 700,
-                color: 'var(--sm-red)',
-                marginBottom: 16,
-                fontFamily: "'Space Grotesk', sans-serif",
-              }}
-            >
-              Postseason
-            </h2>
-            <div className="flex flex-wrap gap-6">
-              <div>
-                <div style={{ fontSize: 28, fontWeight: 700, color: 'var(--sm-text)' }}>
-                  {separatedRecord.postseason.wins}-{separatedRecord.postseason.losses}
-                </div>
-                <div style={{ fontSize: 14, color: 'var(--sm-text-muted)' }}>Playoff Record</div>
+        {postseasonStats && (separatedRecord.postseason.wins > 0 || separatedRecord.postseason.losses > 0) && (
+          <>
+            {/* Postseason Team Overview */}
+            <section style={{ marginTop: 40 }}>
+              <h2
+                style={{
+                  fontSize: 20,
+                  fontWeight: 700,
+                  color: 'var(--sm-red)',
+                  marginBottom: 24,
+                  fontFamily: "'Space Grotesk', sans-serif",
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 10,
+                }}
+              >
+                <span style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  width: 28,
+                  height: 28,
+                  borderRadius: 8,
+                  background: 'rgba(188, 0, 0, 0.1)',
+                }}>
+                  <svg className="w-4 h-4" fill="none" stroke="var(--sm-red)" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
+                  </svg>
+                </span>
+                Postseason Stats
+              </h2>
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <TeamStatCard
+                  label="Playoff Record"
+                  value={`${separatedRecord.postseason.wins}-${separatedRecord.postseason.losses}`}
+                  sublabel={`${postseasonStats.team.ppg > 0 ? postseasonStats.team.ppg.toFixed(1) + ' PPG' : ''}`}
+                />
+                {postseasonStats.team.ppg > 0 && (
+                  <TeamStatCard
+                    label="Points/Game"
+                    value={postseasonStats.team.ppg.toFixed(1)}
+                    sublabel={`${postseasonStats.team.pointsFor} total pts`}
+                    positive
+                  />
+                )}
+                {postseasonStats.team.papg > 0 && (
+                  <TeamStatCard
+                    label="Points Allowed/Game"
+                    value={postseasonStats.team.papg.toFixed(1)}
+                    sublabel={`${postseasonStats.team.pointsAgainst} total pts`}
+                    negative={postseasonStats.team.papg > postseasonStats.team.ppg}
+                  />
+                )}
+                {(postseasonStats.team.pointDifferential !== 0) && (
+                  <TeamStatCard
+                    label="Point Diff"
+                    value={postseasonStats.team.pointDifferential > 0 ? `+${postseasonStats.team.pointDifferential}` : postseasonStats.team.pointDifferential.toString()}
+                    sublabel="Postseason"
+                    positive={postseasonStats.team.pointDifferential > 0}
+                    negative={postseasonStats.team.pointDifferential < 0}
+                  />
+                )}
               </div>
-            </div>
-          </section>
+            </section>
+
+            {/* Postseason Leaderboards */}
+            {(postseasonStats.leaderboards.passing.length > 0 ||
+              postseasonStats.leaderboards.rushing.length > 0 ||
+              postseasonStats.leaderboards.receiving.length > 0 ||
+              postseasonStats.leaderboards.defense.length > 0) && (
+              <section style={{ marginTop: 24 }}>
+                <h2
+                  style={{
+                    fontSize: 20,
+                    fontWeight: 700,
+                    color: 'var(--sm-text)',
+                    marginBottom: 24,
+                    fontFamily: "'Space Grotesk', sans-serif",
+                  }}
+                >
+                  Postseason Player Leaderboards
+                </h2>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  {postseasonStats.leaderboards.passing.length > 0 && (
+                    <LeaderboardCard
+                      title="Passing Leaders"
+                      icon={
+                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+                        </svg>
+                      }
+                      entries={postseasonStats.leaderboards.passing}
+                      emptyText="No passing stats available"
+                    />
+                  )}
+                  {postseasonStats.leaderboards.rushing.length > 0 && (
+                    <LeaderboardCard
+                      title="Rushing Leaders"
+                      icon={
+                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
+                        </svg>
+                      }
+                      entries={postseasonStats.leaderboards.rushing}
+                      emptyText="No rushing stats available"
+                    />
+                  )}
+                  {postseasonStats.leaderboards.receiving.length > 0 && (
+                    <LeaderboardCard
+                      title="Receiving Leaders"
+                      icon={
+                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                      }
+                      entries={postseasonStats.leaderboards.receiving}
+                      emptyText="No receiving stats available"
+                    />
+                  )}
+                  {postseasonStats.leaderboards.defense.length > 0 && (
+                    <LeaderboardCard
+                      title="Defense Leaders"
+                      icon={
+                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+                        </svg>
+                      }
+                      entries={postseasonStats.leaderboards.defense}
+                      emptyText="No defensive stats available"
+                    />
+                  )}
+                </div>
+              </section>
+            )}
+          </>
         )}
 
         {/* Links */}

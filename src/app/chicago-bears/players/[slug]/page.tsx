@@ -49,7 +49,7 @@ export default async function PlayerProfilePage({ params }: PlayerPageProps) {
     notFound()
   }
 
-  const { player, currentSeason, gameLog } = profile
+  const { player, currentSeason, postseasonStats, gameLog } = profile
   const similarPlayers = await getSimilarPlayers(player, 3)
 
   // Prepare players for switcher
@@ -202,6 +202,19 @@ export default async function PlayerProfilePage({ params }: PlayerPageProps) {
                   Strength Profile
                 </h2>
                 <StrengthProfileBars player={player} stats={currentSeason} />
+              </section>
+            )}
+
+            {/* Postseason Stats (if applicable) */}
+            {postseasonStats && postseasonStats.gamesPlayed > 0 && (
+              <section className="glass-card glass-card-static" style={{ borderLeft: '3px solid var(--sm-red)' }}>
+                <h2 className="text-lg sm:text-xl font-bold mb-4 sm:mb-6" style={{ fontFamily: "'Space Grotesk', sans-serif", color: 'var(--sm-red)' }}>
+                  2025 Postseason Stats
+                </h2>
+                <div className="text-sm mb-4" style={{ color: 'var(--sm-text-muted)' }}>
+                  {postseasonStats.gamesPlayed} Postseason Games
+                </div>
+                <SeasonOverviewCards player={player} stats={postseasonStats} />
               </section>
             )}
 

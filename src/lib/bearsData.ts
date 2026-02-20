@@ -41,6 +41,7 @@ export interface BearsPlayer {
 export interface PlayerSeasonStats {
   season: number
   gamesPlayed: number
+  gameType?: GameType
   // Passing
   passAttempts: number | null
   passCompletions: number | null
@@ -105,6 +106,7 @@ export interface PlayerProfile {
   player: BearsPlayer
   seasons: PlayerSeasonStats[]
   currentSeason: PlayerSeasonStats | null
+  postseasonStats: PlayerSeasonStats | null
   gameLog: PlayerGameLogEntry[]
 }
 
@@ -184,9 +186,12 @@ export interface LeaderboardEntry {
   tertiaryLabel: string | null
 }
 
+export type GameType = 'regular' | 'postseason'
+
 export interface BearsStats {
   team: BearsTeamStats
   leaderboards: BearsLeaderboard
+  gameType: GameType
 }
 
 // Live game types
@@ -424,40 +429,49 @@ export async function getPlayerProfile(slug: string): Promise<PlayerProfile | nu
 
   // Bears now uses ESPN ID for stats joins (bp.espn_id = bpgs.player_id)
   const espnId = player.playerId
-  const seasons = await getPlayerSeasonStats(espnId)
 
-  // Get game log
-  const gameLog = await getPlayerGameLog(espnId)
+  // Fetch regular and postseason stats separately
+  const [regularSeasons, postseasonSeasons, gameLog] = await Promise.all([
+    getPlayerSeasonStats(espnId, 'regular'),
+    getPlayerSeasonStats(espnId, 'postseason'),
+    getPlayerGameLog(espnId),
+  ])
 
-  // Current season (2024 or most recent)
+  // Current regular season stats
   const currentYear = new Date().getFullYear()
-  const currentSeason = seasons.find(s => s.season === currentYear) ||
-                        seasons.find(s => s.season === currentYear - 1) ||
-                        seasons[0] || null
+  const currentSeason = regularSeasons.find(s => s.season === currentYear) ||
+                        regularSeasons.find(s => s.season === currentYear - 1) ||
+                        regularSeasons[0] || null
+
+  // Current postseason stats (if any)
+  const postseasonStats = postseasonSeasons.find(s => s.season === currentYear) ||
+                          postseasonSeasons.find(s => s.season === currentYear - 1) ||
+                          postseasonSeasons[0] || null
 
   return {
     player,
-    seasons,
+    seasons: regularSeasons,
     currentSeason,
+    postseasonStats,
     gameLog,
   }
 }
 
-async function getPlayerSeasonStats(espnId: string): Promise<PlayerSeasonStats[]> {
+async function getPlayerSeasonStats(espnId: string, gameType?: GameType): Promise<PlayerSeasonStats[]> {
   // Always use Datalab - aggregate from game stats for accurate data
-  return await getPlayerSeasonStatsFromDatalab(espnId)
+  return await getPlayerSeasonStatsFromDatalab(espnId, gameType)
 }
 
-async function getPlayerSeasonStatsFromDatalab(espnId: string): Promise<PlayerSeasonStats[]> {
+async function getPlayerSeasonStatsFromDatalab(espnId: string, gameType?: GameType): Promise<PlayerSeasonStats[]> {
   if (!datalabAdmin) return []
 
   // Aggregate from game stats for accurate data
   // Bears now uses ESPN ID: bp.espn_id = bpgs.player_id
   // Select both short and long column name variants
-  const { data, error } = await datalabAdmin
+  let query = datalabAdmin
     .from('bears_player_game_stats')
     .select(`
-      season,
+      season, game_type,
       passing_completions, passing_attempts, passing_yards, passing_touchdowns, passing_interceptions,
       passing_cmp, passing_att, passing_yds, passing_td, passing_int,
       rushing_carries, rushing_yards, rushing_touchdowns,
@@ -471,8 +485,33 @@ async function getPlayerSeasonStatsFromDatalab(espnId: string): Promise<PlayerSe
     .eq('player_id', espnId)
     .eq('season', 2025)
 
+  if (gameType) {
+    query = query.eq('game_type', gameType)
+  }
+
+  const { data, error } = await query
+
   if (error || !data || data.length === 0) return []
 
+  // If no gameType specified, group by game_type and return separate entries
+  if (!gameType) {
+    const grouped: Record<string, any[]> = {}
+    for (const game of data) {
+      const gt = game.game_type || 'regular'
+      if (!grouped[gt]) grouped[gt] = []
+      grouped[gt].push(game)
+    }
+    const results: PlayerSeasonStats[] = []
+    for (const [gt, games] of Object.entries(grouped)) {
+      results.push(aggregateGameStats(games, gt as GameType))
+    }
+    return results
+  }
+
+  return [aggregateGameStats(data, gameType)]
+}
+
+function aggregateGameStats(data: any[], gameType: GameType): PlayerSeasonStats {
   // Aggregate all game stats into season totals
   // Use nullish coalescing to handle both short and long column name formats
   const totals = data.reduce((acc: any, game: any) => {
@@ -496,9 +535,10 @@ async function getPlayerSeasonStatsFromDatalab(espnId: string): Promise<PlayerSe
     return acc
   }, {})
 
-  return [{
+  return {
     season: 2025,
     gamesPlayed: totals.gamesPlayed || 0,
+    gameType,
     passAttempts: totals.passAttempts || null,
     passCompletions: totals.passCompletions || null,
     passYards: totals.passYards || null,
@@ -531,7 +571,7 @@ async function getPlayerSeasonStatsFromDatalab(espnId: string): Promise<PlayerSe
     fumbleRecoveries: null,
     fumbles: totals.fumbles || null,
     snaps: null,
-  }]
+  }
 }
 
 function transformSeasonStats(data: any[]): PlayerSeasonStats[] {
@@ -578,7 +618,7 @@ async function getPlayerGameLogFromDatalab(espnId: string): Promise<PlayerGameLo
   const { data, error } = await datalabAdmin
     .from('bears_player_game_stats')
     .select(`
-      player_id, bears_game_id,
+      player_id, bears_game_id, game_type,
       passing_completions, passing_attempts, passing_yards, passing_touchdowns, passing_interceptions,
       passing_cmp, passing_att, passing_yds, passing_td, passing_int,
       rushing_carries, rushing_yards, rushing_touchdowns,
@@ -770,41 +810,60 @@ export async function getBearsRecentScores(limit: number = 10): Promise<BearsGam
 }
 
 /**
- * Get Bears stats for a season
+ * Get Bears stats for a season, filtered by game type
  */
 export async function getBearsStats(
   season?: number,
-  split: 'regular' | 'playoffs' = 'regular'
+  gameType: GameType = 'regular'
 ): Promise<BearsStats> {
   const targetSeason = season || getCurrentSeason()
 
   // Get team stats
-  const teamStats = await getTeamStats(targetSeason)
+  const teamStats = await getTeamStats(targetSeason, gameType)
 
   // Get leaderboards
-  const leaderboards = await getLeaderboards(targetSeason)
+  const leaderboards = await getLeaderboards(targetSeason, gameType)
 
   return {
     team: teamStats,
     leaderboards,
+    gameType,
   }
 }
 
-async function getTeamStats(season: number): Promise<BearsTeamStats> {
-  // Always use Datalab as source of truth
-  return await getTeamStatsFromDatalab(season)
+/**
+ * Check if postseason stats exist for a given season
+ */
+export async function hasBearsPostseasonStats(season?: number): Promise<boolean> {
+  const targetSeason = season || getCurrentSeason()
+  if (!datalabAdmin) return false
+
+  const { data } = await datalabAdmin
+    .from('bears_team_season_stats')
+    .select('id')
+    .eq('season', targetSeason)
+    .eq('game_type', 'postseason')
+    .limit(1)
+
+  return !!(data && data.length > 0)
 }
 
-async function getTeamStatsFromDatalab(season: number): Promise<BearsTeamStats> {
+async function getTeamStats(season: number, gameType: GameType = 'regular'): Promise<BearsTeamStats> {
+  // Always use Datalab as source of truth
+  return await getTeamStatsFromDatalab(season, gameType)
+}
+
+async function getTeamStatsFromDatalab(season: number, gameType: GameType = 'regular'): Promise<BearsTeamStats> {
   if (!datalabAdmin) {
     return getDefaultTeamStats(season)
   }
 
-  // Get team season stats
+  // Get team season stats filtered by game_type
   const { data: teamData } = await datalabAdmin
     .from('bears_team_season_stats')
     .select('*')
     .eq('season', season)
+    .eq('game_type', gameType)
     .single()
 
   // Get season record for accurate W-L
@@ -813,20 +872,39 @@ async function getTeamStatsFromDatalab(season: number): Promise<BearsTeamStats> 
     .select('*')
     .single()
 
-  // Calculate points against from completed games
+  // Calculate points against from completed games, filtered by game_type
+  const gameTypeFilter = gameType === 'postseason'
+    ? 'game_type.eq.postseason,game_type.eq.post,game_type.eq.playoff'
+    : 'game_type.eq.regular,game_type.is.null'
+
   const { data: gamesData } = await datalabAdmin
     .from('bears_games_master')
-    .select('bears_score, opponent_score')
+    .select('bears_score, opponent_score, game_type')
     .eq('season', season)
     .or('bears_score.gt.0,opponent_score.gt.0')
 
-  const pointsAgainst = gamesData?.reduce((sum: number, g: any) => sum + (g.opponent_score || 0), 0) || 0
-  const pointsFor = teamData?.total_points || gamesData?.reduce((sum: number, g: any) => sum + (g.bears_score || 0), 0) || 0
-  const gamesPlayed = gamesData?.length || 0
+  // Filter games by type in JS (more reliable than complex OR filters)
+  const filteredGames = (gamesData || []).filter((g: any) => {
+    const gt = (g.game_type || '').toLowerCase()
+    if (gameType === 'postseason') {
+      return gt === 'postseason' || gt === 'post' || gt === 'playoff'
+    }
+    return gt === 'regular' || gt === '' || !g.game_type
+  })
 
-  // Combine regular + playoff record
-  const wins = (recordData?.regular_season_wins || 0) + (recordData?.postseason_wins || 0)
-  const losses = (recordData?.regular_season_losses || 0) + (recordData?.postseason_losses || 0)
+  const pointsAgainst = filteredGames.reduce((sum: number, g: any) => sum + (g.opponent_score || 0), 0)
+  const pointsFor = teamData?.total_points || filteredGames.reduce((sum: number, g: any) => sum + (g.bears_score || 0), 0)
+  const gamesPlayed = teamData?.games_played || filteredGames.length
+
+  // Use appropriate record based on game type
+  let wins: number, losses: number
+  if (gameType === 'postseason') {
+    wins = recordData?.postseason_wins || 0
+    losses = recordData?.postseason_losses || 0
+  } else {
+    wins = recordData?.regular_season_wins || 0
+    losses = recordData?.regular_season_losses || 0
+  }
 
   return {
     season: season,
@@ -884,7 +962,7 @@ function getDefaultTeamStats(season: number): BearsTeamStats {
   }
 }
 
-async function getLeaderboards(season: number): Promise<BearsLeaderboard> {
+async function getLeaderboards(season: number, gameType: GameType = 'regular'): Promise<BearsLeaderboard> {
   if (!datalabAdmin) {
     return { passing: [], rushing: [], receiving: [], defense: [] }
   }
@@ -897,6 +975,7 @@ async function getLeaderboards(season: number): Promise<BearsLeaderboard> {
   // Select both short and long column name variants
   const leaderboardColumns = `
     player_id,
+    game_type,
     passing_yards, passing_touchdowns, passing_interceptions,
     passing_yds, passing_td, passing_int,
     rushing_yards, rushing_touchdowns, rushing_carries,
@@ -911,13 +990,15 @@ async function getLeaderboards(season: number): Promise<BearsLeaderboard> {
     .from('bears_player_game_stats')
     .select(leaderboardColumns)
     .eq('season', season)
+    .eq('game_type', gameType)
 
-  // Fallback to previous season if no stats
-  if (!gameStats || gameStats.length === 0) {
+  // Fallback to previous season if no stats (only for regular season)
+  if ((!gameStats || gameStats.length === 0) && gameType === 'regular') {
     const { data: prevStats } = await datalabAdmin
       .from('bears_player_game_stats')
       .select(leaderboardColumns)
       .eq('season', season - 1)
+      .eq('game_type', 'regular')
     gameStats = prevStats
   }
 

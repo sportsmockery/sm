@@ -57,9 +57,9 @@ export async function POST(request: NextRequest) {
       'primary_role', 'created_at', 'updated_at'
     ], 'player_id'))
 
-    // 2. Sync bears_player_season_stats
+    // 2. Sync bears_player_season_stats (VIEW with game_type column)
     results.push(await syncTable('bears_player_season_stats', [
-      'id', 'player_id', 'season', 'games_played',
+      'id', 'player_id', 'season', 'game_type', 'games_played',
       'pass_att', 'pass_cmp', 'pass_yds', 'pass_td', 'pass_int',
       'rush_att', 'rush_yds', 'rush_td',
       'rec', 'rec_yds', 'rec_td', 'rec_tgt',
@@ -68,9 +68,9 @@ export async function POST(request: NextRequest) {
       'snaps', 'created_at', 'updated_at'
     ], 'id'))
 
-    // 3. Sync bears_player_game_stats
+    // 3. Sync bears_player_game_stats (now includes game_type column)
     results.push(await syncTable('bears_player_game_stats', [
-      'id', 'game_id', 'player_id', 'team_key', 'opp_key',
+      'id', 'game_id', 'player_id', 'team_key', 'opp_key', 'game_type',
       'pass_att', 'pass_cmp', 'pass_yds', 'pass_td', 'pass_int', 'sacks',
       'rush_att', 'rush_yds', 'rush_td',
       'rec_tgt', 'rec', 'rec_yds', 'rec_td',
@@ -93,14 +93,14 @@ export async function POST(request: NextRequest) {
       'is_playoff', 'article_slug', 'created_at', 'updated_at'
     ], 'game_id'))
 
-    // 6. Sync bears_team_season_stats
+    // 6. Sync bears_team_season_stats (now has game_type column: 'regular' or 'postseason')
     results.push(await syncTable('bears_team_season_stats', [
-      'id', 'season', 'wins', 'losses', 'ties',
+      'id', 'season', 'game_type', 'wins', 'losses', 'ties',
       'points_for', 'points_against',
       'yards_for', 'yards_against',
       'turnovers_committed', 'turnovers_forced',
       'offensive_rank', 'defensive_rank'
-    ], 'season'))
+    ], 'id'))
 
   } catch (error: any) {
     console.error('Sync job failed:', error)
@@ -230,11 +230,11 @@ export async function GET(request: NextRequest) {
     description: 'Syncs Bears data from Datalab to SportsMockery DB',
     tables: [
       'bears_players',
-      'bears_player_season_stats',
-      'bears_player_game_stats',
+      'bears_player_season_stats (with game_type)',
+      'bears_player_game_stats (with game_type)',
       'bears_games_master',
       'bears_game_context',
-      'bears_team_season_stats',
+      'bears_team_season_stats (with game_type: regular/postseason)',
     ],
     authentication: 'Bearer token required (CRON_SECRET)',
     schedule: 'Every hour',

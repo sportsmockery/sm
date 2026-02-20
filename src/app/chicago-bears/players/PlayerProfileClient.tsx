@@ -63,6 +63,7 @@ interface PlayerProfile {
   }
   seasons: PlayerSeasonStats[]
   currentSeason: PlayerSeasonStats | null
+  postseasonStats: PlayerSeasonStats | null
   gameLog: any[]
 }
 
@@ -77,6 +78,7 @@ export default function PlayerProfileClient({ players, initialPlayerSlug, initia
   const [profile, setProfile] = useState<PlayerProfile | null>(initialProfile)
   const [loading, setLoading] = useState(false)
   const [dropdownOpen, setDropdownOpen] = useState(false)
+  const [statsView, setStatsView] = useState<'regular' | 'postseason'>('regular')
 
   const selectedPlayer = players.find(p => p.slug === selectedSlug)
 
@@ -104,7 +106,14 @@ export default function PlayerProfileClient({ players, initialPlayerSlug, initia
   const handlePlayerSelect = (slug: string) => {
     setSelectedSlug(slug)
     setDropdownOpen(false)
+    setStatsView('regular')
   }
+
+  // Determine which stats to show based on toggle
+  const displayedStats = statsView === 'postseason' && profile?.postseasonStats
+    ? profile.postseasonStats
+    : profile?.currentSeason || null
+  const hasPostseason = !!(profile?.postseasonStats && profile.postseasonStats.gamesPlayed > 0)
 
   return (
     <div className="pb-12">
@@ -325,7 +334,7 @@ export default function PlayerProfileClient({ players, initialPlayerSlug, initia
           </div>
 
           {/* Season Stats */}
-          {profile.currentSeason && (
+          {(profile.currentSeason || profile.postseasonStats) && (
             <div
               className="p-6"
               style={{
@@ -334,76 +343,110 @@ export default function PlayerProfileClient({ players, initialPlayerSlug, initia
                 borderRadius: 'var(--sm-radius-xl)',
               }}
             >
-              <h3 className="text-lg font-bold mb-4" style={{ color: 'var(--sm-text)' }}>
-                {profile.currentSeason.season} Season Stats
-              </h3>
-              <div className="text-sm mb-4" style={{ color: 'var(--sm-text-muted)' }}>
-                {profile.currentSeason.gamesPlayed} Games Played
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-lg font-bold" style={{ color: 'var(--sm-text)' }}>
+                  {displayedStats?.season || 2025} {statsView === 'postseason' ? 'Postseason' : 'Season'} Stats
+                </h3>
+                {/* Regular/Postseason Toggle */}
+                {hasPostseason && (
+                  <div
+                    className="flex rounded-lg overflow-hidden"
+                    style={{ border: '1px solid var(--sm-border)' }}
+                  >
+                    <button
+                      onClick={() => setStatsView('regular')}
+                      className="px-3 py-1.5 text-xs font-semibold transition-colors"
+                      style={{
+                        backgroundColor: statsView === 'regular' ? '#C83200' : 'transparent',
+                        color: statsView === 'regular' ? '#ffffff' : 'var(--sm-text-muted)',
+                      }}
+                    >
+                      Regular Season
+                    </button>
+                    <button
+                      onClick={() => setStatsView('postseason')}
+                      className="px-3 py-1.5 text-xs font-semibold transition-colors"
+                      style={{
+                        backgroundColor: statsView === 'postseason' ? '#C83200' : 'transparent',
+                        color: statsView === 'postseason' ? '#ffffff' : 'var(--sm-text-muted)',
+                      }}
+                    >
+                      Postseason
+                    </button>
+                  </div>
+                )}
               </div>
-
-              {/* Passing Stats */}
-              {profile.currentSeason.passAttempts && profile.currentSeason.passAttempts > 0 && (
-                <div className="mb-6">
-                  <h4 className="text-sm font-semibold uppercase tracking-wider mb-3" style={{ color: 'var(--sm-text-muted)' }}>Passing</h4>
-                  <div className="grid grid-cols-3 md:grid-cols-6 gap-4">
-                    <StatBox label="CMP/ATT" value={`${profile.currentSeason.passCompletions}/${profile.currentSeason.passAttempts}`} />
-                    <StatBox label="YDS" value={profile.currentSeason.passYards} highlight />
-                    <StatBox label="TD" value={profile.currentSeason.passTD} highlight />
-                    <StatBox label="INT" value={profile.currentSeason.passINT} />
-                    <StatBox label="CMP%" value={profile.currentSeason.completionPct ? `${profile.currentSeason.completionPct}%` : '-'} />
-                    <StatBox label="Y/A" value={profile.currentSeason.yardsPerAttempt || '-'} />
+              {displayedStats && (
+                <>
+                  <div className="text-sm mb-4" style={{ color: 'var(--sm-text-muted)' }}>
+                    {displayedStats.gamesPlayed} Games Played
                   </div>
-                </div>
-              )}
 
-              {/* Rushing Stats */}
-              {profile.currentSeason.rushAttempts && profile.currentSeason.rushAttempts > 0 && (
-                <div className="mb-6">
-                  <h4 className="text-sm font-semibold uppercase tracking-wider mb-3" style={{ color: 'var(--sm-text-muted)' }}>Rushing</h4>
-                  <div className="grid grid-cols-3 md:grid-cols-4 gap-4">
-                    <StatBox label="CAR" value={profile.currentSeason.rushAttempts} />
-                    <StatBox label="YDS" value={profile.currentSeason.rushYards} highlight />
-                    <StatBox label="TD" value={profile.currentSeason.rushTD} highlight />
-                    <StatBox label="Y/C" value={profile.currentSeason.yardsPerCarry || '-'} />
-                  </div>
-                </div>
-              )}
+                  {/* Passing Stats */}
+                  {displayedStats.passAttempts && displayedStats.passAttempts > 0 && (
+                    <div className="mb-6">
+                      <h4 className="text-sm font-semibold uppercase tracking-wider mb-3" style={{ color: 'var(--sm-text-muted)' }}>Passing</h4>
+                      <div className="grid grid-cols-3 md:grid-cols-6 gap-4">
+                        <StatBox label="CMP/ATT" value={`${displayedStats.passCompletions}/${displayedStats.passAttempts}`} />
+                        <StatBox label="YDS" value={displayedStats.passYards} highlight />
+                        <StatBox label="TD" value={displayedStats.passTD} highlight />
+                        <StatBox label="INT" value={displayedStats.passINT} />
+                        <StatBox label="CMP%" value={displayedStats.completionPct ? `${displayedStats.completionPct}%` : '-'} />
+                        <StatBox label="Y/A" value={displayedStats.yardsPerAttempt || '-'} />
+                      </div>
+                    </div>
+                  )}
 
-              {/* Receiving Stats */}
-              {profile.currentSeason.receptions && profile.currentSeason.receptions > 0 && (
-                <div className="mb-6">
-                  <h4 className="text-sm font-semibold uppercase tracking-wider mb-3" style={{ color: 'var(--sm-text-muted)' }}>Receiving</h4>
-                  <div className="grid grid-cols-3 md:grid-cols-5 gap-4">
-                    <StatBox label="REC" value={profile.currentSeason.receptions} />
-                    <StatBox label="TGTS" value={profile.currentSeason.targets || '-'} />
-                    <StatBox label="YDS" value={profile.currentSeason.recYards} highlight />
-                    <StatBox label="TD" value={profile.currentSeason.recTD} highlight />
-                    <StatBox label="Y/R" value={profile.currentSeason.yardsPerReception || '-'} />
-                  </div>
-                </div>
-              )}
+                  {/* Rushing Stats */}
+                  {displayedStats.rushAttempts && displayedStats.rushAttempts > 0 && (
+                    <div className="mb-6">
+                      <h4 className="text-sm font-semibold uppercase tracking-wider mb-3" style={{ color: 'var(--sm-text-muted)' }}>Rushing</h4>
+                      <div className="grid grid-cols-3 md:grid-cols-4 gap-4">
+                        <StatBox label="CAR" value={displayedStats.rushAttempts} />
+                        <StatBox label="YDS" value={displayedStats.rushYards} highlight />
+                        <StatBox label="TD" value={displayedStats.rushTD} highlight />
+                        <StatBox label="Y/C" value={displayedStats.yardsPerCarry || '-'} />
+                      </div>
+                    </div>
+                  )}
 
-              {/* Defensive Stats */}
-              {profile.currentSeason.tackles && profile.currentSeason.tackles > 0 && (
-                <div>
-                  <h4 className="text-sm font-semibold uppercase tracking-wider mb-3" style={{ color: 'var(--sm-text-muted)' }}>Defense</h4>
-                  <div className="grid grid-cols-3 md:grid-cols-4 gap-4">
-                    <StatBox label="TKL" value={profile.currentSeason.tackles} highlight />
-                    <StatBox label="SACK" value={profile.currentSeason.sacks || 0} />
-                    <StatBox label="INT" value={profile.currentSeason.interceptions || 0} />
-                    <StatBox label="PD" value={profile.currentSeason.passesDefended || 0} />
-                  </div>
-                </div>
-              )}
+                  {/* Receiving Stats */}
+                  {displayedStats.receptions && displayedStats.receptions > 0 && (
+                    <div className="mb-6">
+                      <h4 className="text-sm font-semibold uppercase tracking-wider mb-3" style={{ color: 'var(--sm-text-muted)' }}>Receiving</h4>
+                      <div className="grid grid-cols-3 md:grid-cols-5 gap-4">
+                        <StatBox label="REC" value={displayedStats.receptions} />
+                        <StatBox label="TGTS" value={displayedStats.targets || '-'} />
+                        <StatBox label="YDS" value={displayedStats.recYards} highlight />
+                        <StatBox label="TD" value={displayedStats.recTD} highlight />
+                        <StatBox label="Y/R" value={displayedStats.yardsPerReception || '-'} />
+                      </div>
+                    </div>
+                  )}
 
-              {/* No Stats Message */}
-              {(!profile.currentSeason.passAttempts || profile.currentSeason.passAttempts === 0) &&
-               (!profile.currentSeason.rushAttempts || profile.currentSeason.rushAttempts === 0) &&
-               (!profile.currentSeason.receptions || profile.currentSeason.receptions === 0) &&
-               (!profile.currentSeason.tackles || profile.currentSeason.tackles === 0) && (
-                <div className="text-center py-8" style={{ color: 'var(--sm-text-muted)' }}>
-                  No stats recorded this season
-                </div>
+                  {/* Defensive Stats */}
+                  {displayedStats.tackles && displayedStats.tackles > 0 && (
+                    <div>
+                      <h4 className="text-sm font-semibold uppercase tracking-wider mb-3" style={{ color: 'var(--sm-text-muted)' }}>Defense</h4>
+                      <div className="grid grid-cols-3 md:grid-cols-4 gap-4">
+                        <StatBox label="TKL" value={displayedStats.tackles} highlight />
+                        <StatBox label="SACK" value={displayedStats.sacks || 0} />
+                        <StatBox label="INT" value={displayedStats.interceptions || 0} />
+                        <StatBox label="PD" value={displayedStats.passesDefended || 0} />
+                      </div>
+                    </div>
+                  )}
+
+                  {/* No Stats Message */}
+                  {(!displayedStats.passAttempts || displayedStats.passAttempts === 0) &&
+                   (!displayedStats.rushAttempts || displayedStats.rushAttempts === 0) &&
+                   (!displayedStats.receptions || displayedStats.receptions === 0) &&
+                   (!displayedStats.tackles || displayedStats.tackles === 0) && (
+                    <div className="text-center py-8" style={{ color: 'var(--sm-text-muted)' }}>
+                      No {statsView === 'postseason' ? 'postseason ' : ''}stats recorded this season
+                    </div>
+                  )}
+                </>
               )}
             </div>
           )}

@@ -107,90 +107,37 @@ export async function GET(
       status: playerData.status,
     }
 
-    // Get player's game stats for 2025 season and aggregate
-    // Use ESPN ID (playerData.espn_id) since that's what game stats now reference
-    // Select both short and long column name variants
+    // Get player's game stats for 2025 season, separated by game_type
+    const statColumns = `
+      game_type,
+      passing_completions, passing_attempts, passing_yards, passing_touchdowns, passing_interceptions,
+      passing_cmp, passing_att, passing_yds, passing_td, passing_int,
+      rushing_carries, rushing_yards, rushing_touchdowns,
+      rushing_car, rushing_yds, rushing_td,
+      receiving_targets, receiving_receptions, receiving_yards, receiving_touchdowns,
+      receiving_tgts, receiving_rec, receiving_yds, receiving_td,
+      defensive_total_tackles, defensive_sacks,
+      def_tackles_total, def_sacks,
+      fum_fum, interceptions
+    `
+
     const { data: gameStats } = await datalabAdmin
       .from('bears_player_game_stats')
-      .select(`
-        passing_completions, passing_attempts, passing_yards, passing_touchdowns, passing_interceptions,
-        passing_cmp, passing_att, passing_yds, passing_td, passing_int,
-        rushing_carries, rushing_yards, rushing_touchdowns,
-        rushing_car, rushing_yds, rushing_td,
-        receiving_targets, receiving_receptions, receiving_yards, receiving_touchdowns,
-        receiving_tgts, receiving_rec, receiving_yds, receiving_td,
-        defensive_total_tackles, defensive_sacks,
-        def_tackles_total, def_sacks,
-        fum_fum, interceptions
-      `)
+      .select(statColumns)
       .eq('player_id', playerData.espn_id)
       .eq('season', 2025)
 
-    // Aggregate stats
-    let currentSeason = null
-    if (gameStats && gameStats.length > 0) {
-      const totals = gameStats.reduce((acc: any, game: any) => {
-        acc.gamesPlayed = (acc.gamesPlayed || 0) + 1
-        acc.passAttempts = (acc.passAttempts || 0) + (game.passing_attempts ?? game.passing_att ?? 0)
-        acc.passCompletions = (acc.passCompletions || 0) + (game.passing_completions ?? game.passing_cmp ?? 0)
-        acc.passYards = (acc.passYards || 0) + (game.passing_yards ?? game.passing_yds ?? 0)
-        acc.passTD = (acc.passTD || 0) + (game.passing_touchdowns ?? game.passing_td ?? 0)
-        acc.passINT = (acc.passINT || 0) + (game.passing_interceptions ?? game.passing_int ?? 0)
-        acc.rushAttempts = (acc.rushAttempts || 0) + (game.rushing_carries ?? game.rushing_car ?? 0)
-        acc.rushYards = (acc.rushYards || 0) + (game.rushing_yards ?? game.rushing_yds ?? 0)
-        acc.rushTD = (acc.rushTD || 0) + (game.rushing_touchdowns ?? game.rushing_td ?? 0)
-        acc.receptions = (acc.receptions || 0) + (game.receiving_receptions ?? game.receiving_rec ?? 0)
-        acc.targets = (acc.targets || 0) + (game.receiving_targets ?? game.receiving_tgts ?? 0)
-        acc.recYards = (acc.recYards || 0) + (game.receiving_yards ?? game.receiving_yds ?? 0)
-        acc.recTD = (acc.recTD || 0) + (game.receiving_touchdowns ?? game.receiving_td ?? 0)
-        acc.tackles = (acc.tackles || 0) + (game.defensive_total_tackles ?? game.def_tackles_total ?? 0)
-        acc.sacks = (acc.sacks || 0) + (parseFloat(game.defensive_sacks ?? game.def_sacks) || 0)
-        acc.passesDefended = (acc.passesDefended || 0) + 0 // Not in datalab schema
-        acc.fumbles = (acc.fumbles || 0) + (game.fum_fum || 0)
-        acc.interceptions = (acc.interceptions || 0) + (game.interceptions || 0)
-        return acc
-      }, {})
+    // Separate by game_type and aggregate
+    const regularGames = (gameStats || []).filter((g: any) => g.game_type === 'regular' || !g.game_type)
+    const postseasonGames = (gameStats || []).filter((g: any) => g.game_type === 'postseason')
 
-      currentSeason = {
-        season: 2025,
-        gamesPlayed: totals.gamesPlayed || 0,
-        passAttempts: totals.passAttempts || null,
-        passCompletions: totals.passCompletions || null,
-        passYards: totals.passYards || null,
-        passTD: totals.passTD || null,
-        passINT: totals.passINT || null,
-        completionPct: totals.passAttempts > 0
-          ? Math.round((totals.passCompletions / totals.passAttempts) * 1000) / 10
-          : null,
-        yardsPerAttempt: totals.passAttempts > 0
-          ? Math.round((totals.passYards / totals.passAttempts) * 10) / 10
-          : null,
-        rushAttempts: totals.rushAttempts || null,
-        rushYards: totals.rushYards || null,
-        rushTD: totals.rushTD || null,
-        yardsPerCarry: totals.rushAttempts > 0
-          ? Math.round((totals.rushYards / totals.rushAttempts) * 10) / 10
-          : null,
-        receptions: totals.receptions || null,
-        targets: totals.targets || null,
-        recYards: totals.recYards || null,
-        recTD: totals.recTD || null,
-        yardsPerReception: totals.receptions > 0
-          ? Math.round((totals.recYards / totals.receptions) * 10) / 10
-          : null,
-        tackles: totals.tackles || null,
-        sacks: totals.sacks || null,
-        interceptions: totals.interceptions || null,
-        passesDefended: totals.passesDefended || null,
-        forcedFumbles: null,
-        fumbles: totals.fumbles || null,
-        snaps: null,
-      }
-    }
+    const currentSeason = regularGames.length > 0 ? aggregatePlayerStats(regularGames, 2025, 'regular') : null
+    const postseasonStats = postseasonGames.length > 0 ? aggregatePlayerStats(postseasonGames, 2025, 'postseason') : null
 
     return NextResponse.json({
       player,
       currentSeason,
+      postseasonStats,
       updatedAt: new Date().toISOString(),
     })
   } catch (error) {
@@ -199,5 +146,65 @@ export async function GET(
       player: null,
       error: 'Internal server error',
     })
+  }
+}
+
+function aggregatePlayerStats(games: any[], season: number, gameType: string) {
+  const totals = games.reduce((acc: any, game: any) => {
+    acc.gamesPlayed = (acc.gamesPlayed || 0) + 1
+    acc.passAttempts = (acc.passAttempts || 0) + (game.passing_attempts ?? game.passing_att ?? 0)
+    acc.passCompletions = (acc.passCompletions || 0) + (game.passing_completions ?? game.passing_cmp ?? 0)
+    acc.passYards = (acc.passYards || 0) + (game.passing_yards ?? game.passing_yds ?? 0)
+    acc.passTD = (acc.passTD || 0) + (game.passing_touchdowns ?? game.passing_td ?? 0)
+    acc.passINT = (acc.passINT || 0) + (game.passing_interceptions ?? game.passing_int ?? 0)
+    acc.rushAttempts = (acc.rushAttempts || 0) + (game.rushing_carries ?? game.rushing_car ?? 0)
+    acc.rushYards = (acc.rushYards || 0) + (game.rushing_yards ?? game.rushing_yds ?? 0)
+    acc.rushTD = (acc.rushTD || 0) + (game.rushing_touchdowns ?? game.rushing_td ?? 0)
+    acc.receptions = (acc.receptions || 0) + (game.receiving_receptions ?? game.receiving_rec ?? 0)
+    acc.targets = (acc.targets || 0) + (game.receiving_targets ?? game.receiving_tgts ?? 0)
+    acc.recYards = (acc.recYards || 0) + (game.receiving_yards ?? game.receiving_yds ?? 0)
+    acc.recTD = (acc.recTD || 0) + (game.receiving_touchdowns ?? game.receiving_td ?? 0)
+    acc.tackles = (acc.tackles || 0) + (game.defensive_total_tackles ?? game.def_tackles_total ?? 0)
+    acc.sacks = (acc.sacks || 0) + (parseFloat(game.defensive_sacks ?? game.def_sacks) || 0)
+    acc.fumbles = (acc.fumbles || 0) + (game.fum_fum || 0)
+    acc.interceptions = (acc.interceptions || 0) + (game.interceptions || 0)
+    return acc
+  }, {})
+
+  return {
+    season,
+    gameType,
+    gamesPlayed: totals.gamesPlayed || 0,
+    passAttempts: totals.passAttempts || null,
+    passCompletions: totals.passCompletions || null,
+    passYards: totals.passYards || null,
+    passTD: totals.passTD || null,
+    passINT: totals.passINT || null,
+    completionPct: totals.passAttempts > 0
+      ? Math.round((totals.passCompletions / totals.passAttempts) * 1000) / 10
+      : null,
+    yardsPerAttempt: totals.passAttempts > 0
+      ? Math.round((totals.passYards / totals.passAttempts) * 10) / 10
+      : null,
+    rushAttempts: totals.rushAttempts || null,
+    rushYards: totals.rushYards || null,
+    rushTD: totals.rushTD || null,
+    yardsPerCarry: totals.rushAttempts > 0
+      ? Math.round((totals.rushYards / totals.rushAttempts) * 10) / 10
+      : null,
+    receptions: totals.receptions || null,
+    targets: totals.targets || null,
+    recYards: totals.recYards || null,
+    recTD: totals.recTD || null,
+    yardsPerReception: totals.receptions > 0
+      ? Math.round((totals.recYards / totals.receptions) * 10) / 10
+      : null,
+    tackles: totals.tackles || null,
+    sacks: totals.sacks || null,
+    interceptions: totals.interceptions || null,
+    passesDefended: null,
+    forcedFumbles: null,
+    fumbles: totals.fumbles || null,
+    snaps: null,
   }
 }

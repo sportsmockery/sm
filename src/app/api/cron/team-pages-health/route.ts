@@ -355,13 +355,21 @@ async function runTeamHealthCheck(team: string, key: string): Promise<HealthChec
   }
 
   // 3. Team stats table check
+  // Bears now has game_type column ('regular'/'postseason'), so filter to avoid .single() failure
   let teamStatsPopulated = false
   let teamStatsNullColumns: string[] = []
   try {
-    const { data: teamStats, error: tsError } = await datalabAdmin
+    let teamStatsQuery = datalabAdmin
       .from(config.teamStatsTable)
       .select('*')
       .eq('season', config.season)
+
+    // Bears team stats has multiple rows per season (regular + postseason)
+    if (key === 'bears') {
+      teamStatsQuery = teamStatsQuery.eq('game_type', 'regular')
+    }
+
+    const { data: teamStats, error: tsError } = await teamStatsQuery
       .limit(1)
       .single()
 
