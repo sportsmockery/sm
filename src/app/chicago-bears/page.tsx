@@ -102,45 +102,36 @@ export default async function BearsHubPage() {
             <section>
               <style>{`
                 .bears-features-grid {
-                  display: grid;
-                  grid-template-columns: 1fr;
-                  gap: 16px;
-                }
-                @media (min-width: 640px) {
-                  .bears-features-grid {
-                    grid-template-columns: repeat(2, 1fr);
-                  }
-                }
-                @media (min-width: 1024px) {
-                  .bears-features-grid {
-                    grid-template-columns: repeat(3, 1fr);
-                  }
+                  display: flex;
+                  flex-direction: column;
+                  gap: 10px;
                 }
                 .bears-feature-card {
                   position: relative;
                   background: var(--sm-card);
                   border: 1px solid var(--sm-border);
-                  border-radius: 20px;
-                  padding: 24px;
+                  border-radius: 14px;
+                  padding: 16px 20px;
                   overflow: hidden;
                   transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
                   display: flex;
-                  flex-direction: column;
-                  gap: 14px;
+                  flex-direction: row;
+                  align-items: center;
+                  gap: 16px;
                 }
                 .bears-feature-card::before {
                   content: '';
                   position: absolute;
                   top: 0;
                   left: 0;
-                  right: 0;
-                  height: 3px;
-                  background: linear-gradient(90deg, #0B162A, #C83200);
+                  bottom: 0;
+                  width: 3px;
+                  background: linear-gradient(180deg, #0B162A, #C83200);
                   opacity: 0.7;
                   transition: opacity 0.4s;
                 }
                 .bears-feature-card:hover {
-                  transform: translateY(-4px);
+                  transform: translateX(4px);
                   border-color: rgba(200, 50, 0, 0.2);
                   background: var(--sm-card-hover);
                 }
@@ -158,8 +149,8 @@ export default async function BearsHubPage() {
                   font-weight: 600;
                   text-decoration: none;
                   transition: all 0.2s;
-                  margin-top: auto;
-                  width: fit-content;
+                  white-space: nowrap;
+                  flex-shrink: 0;
                 }
               `}</style>
               <div className="bears-features-grid">
@@ -492,28 +483,29 @@ function BearsFeatureCard({
       <div className="bears-feature-card">
         <div
           style={{
-            width: '44px',
-            height: '44px',
-            borderRadius: '12px',
+            width: '40px',
+            height: '40px',
+            borderRadius: '10px',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
             background: 'linear-gradient(135deg, rgba(11,22,42,0.5), rgba(200,50,0,0.15))',
             border: '1px solid rgba(200,50,0,0.2)',
             color: '#C83200',
+            flexShrink: 0,
           }}
         >
           {icon}
         </div>
-        <div>
+        <div style={{ flex: 1, minWidth: 0 }}>
           <h3
             style={{
               fontFamily: "'Space Grotesk', sans-serif",
               color: 'var(--sm-text)',
-              fontSize: '17px',
+              fontSize: '15px',
               fontWeight: 700,
-              letterSpacing: '-0.3px',
-              margin: '0 0 6px 0',
+              letterSpacing: '-0.2px',
+              margin: '0 0 2px 0',
             }}
           >
             {title}
@@ -521,9 +513,12 @@ function BearsFeatureCard({
           <p
             style={{
               color: 'var(--sm-text-muted)',
-              fontSize: '13px',
-              lineHeight: 1.5,
+              fontSize: '12px',
+              lineHeight: 1.4,
               margin: 0,
+              whiteSpace: 'nowrap',
+              overflow: 'hidden',
+              textOverflow: 'ellipsis',
             }}
           >
             {description}
@@ -537,7 +532,7 @@ function BearsFeatureCard({
           }}
         >
           {buttonText}
-          <svg width="14" height="14" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
+          <svg width="12" height="12" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" />
           </svg>
         </span>
