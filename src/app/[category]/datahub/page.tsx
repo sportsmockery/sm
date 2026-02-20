@@ -16,11 +16,11 @@ const TEAM_META: Record<TeamKey, { name: string; league: string }> = {
 }
 
 interface PageProps {
-  params: Promise<{ team: string }>
+  params: Promise<{ category: string }>
 }
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
-  const { team } = await params
+  const { category: team } = await params
 
   if (!VALID_TEAMS.includes(team as TeamKey)) {
     return {
@@ -42,11 +42,11 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 }
 
 export function generateStaticParams() {
-  return VALID_TEAMS.map((team) => ({ team }))
+  return VALID_TEAMS.map((team) => ({ category: team }))
 }
 
 export default async function TeamDataHubPage({ params }: PageProps) {
-  const { team } = await params
+  const { category: team } = await params
 
   // Validate team parameter
   if (!VALID_TEAMS.includes(team as TeamKey)) {

@@ -370,8 +370,8 @@ export function HomepageFeed({
         </div>
       )}
 
-      {/* ===== SECTION 3: Featured Content ===== */}
-      <section className="homepage-section" aria-label="Featured stories">
+      {/* ===== SECTION 3: Featured Content (full width, no sidebar) ===== */}
+      <section className="featured-section" aria-label="Featured stories">
         <div className="sm-container">
           <div className="section-header scroll-reveal">
             <span className="sm-tag">Trending Now</span>
@@ -381,8 +381,8 @@ export function HomepageFeed({
         </div>
       </section>
 
-      {/* ===== SECTION 4: Main Content + Sidebar ===== */}
-      <section id="feed" className="homepage-section">
+      {/* ===== SECTION 4: Feed + Sidebar (two-column starts here) ===== */}
+      <section id="feed" className="feed-section">
         <div className="sm-container">
           {/* Team preference banner */}
           {activeTeam !== 'all' && TEAM_LABELS[activeTeam] && (
@@ -391,9 +391,9 @@ export function HomepageFeed({
               <button onClick={clearTeamPreference} className="team-pref-clear">Show All</button>
             </div>
           )}
-          <div className="content-wrapper">
+          <div className="content-grid">
             {/* Main feed */}
-            <main className="main-feed" aria-label="Latest articles">
+            <main className="feed-column" aria-label="Latest articles">
               <div className="section-header scroll-reveal">
                 <span className="sm-tag">Latest</span>
                 <h2>Chicago Sports News</h2>
