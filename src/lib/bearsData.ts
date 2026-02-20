@@ -977,25 +977,12 @@ async function getLeaderboards(season: number, gameType: GameType = 'regular'): 
   const playersMap = new Map(players.map(p => [p.playerId, p]))
 
   // Get all game stats for season and aggregate by player
-  // Select both short and long column name variants
-  const leaderboardColumns = `
-    player_id,
-    game_type,
-    passing_yards, passing_touchdowns, passing_interceptions,
-    passing_yds, passing_td, passing_int,
-    rushing_yards, rushing_touchdowns, rushing_carries,
-    rushing_yds, rushing_td, rushing_car,
-    receiving_yards, receiving_touchdowns, receiving_receptions,
-    receiving_yds, receiving_td, receiving_rec,
-    defensive_total_tackles, defensive_sacks, def_int,
-    def_tackles_total, def_sacks
-  `
-
+  // Use select('*') to avoid column name mismatches between short/long formats
   // Fetch all stats for the season, then filter game_type in JS
   // (game_type values are inconsistent: null, empty, 'regular', 'postseason', 'post', 'playoff')
   let { data: allGameStats } = await datalabAdmin
     .from('bears_player_game_stats')
-    .select(leaderboardColumns)
+    .select('*')
     .eq('season', season)
 
   // Filter by game type in JS for reliability
@@ -1011,7 +998,7 @@ async function getLeaderboards(season: number, gameType: GameType = 'regular'): 
   if (gameStats.length === 0 && gameType === 'regular') {
     const { data: prevStats } = await datalabAdmin
       .from('bears_player_game_stats')
-      .select(leaderboardColumns)
+      .select('*')
       .eq('season', season - 1)
     gameStats = (prevStats || []).filter((g: any) => {
       const gt = (g.game_type || '').toLowerCase()
