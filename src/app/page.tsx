@@ -109,10 +109,29 @@ async function getHomepageData() {
     }
   })
 
+  // 4b) Interleave: put posts with real authors first so the feed
+  //     doesn't start with a wall of "Sports Mockery" from AI posts.
+  //     Within each group, maintain published_at order.
+  const authored = postsWithFlags.filter((p: any) => p.author_name !== null)
+  const unAuthored = postsWithFlags.filter((p: any) => p.author_name === null)
+  // Merge: 3 authored, then 1 un-authored, repeat. Remainder appended.
+  const interleaved: any[] = []
+  let ai = 0, ri = 0
+  while (ri < authored.length || ai < unAuthored.length) {
+    // Add up to 3 real-author posts
+    for (let k = 0; k < 3 && ri < authored.length; k++) {
+      interleaved.push(authored[ri++])
+    }
+    // Add 1 AI post
+    if (ai < unAuthored.length) {
+      interleaved.push(unAuthored[ai++])
+    }
+  }
+
   // 5) Apply fallbacks only if there is truly no data
   const finalData = getHomepageDataWithFallbacks(
     editorPicks,
-    postsWithFlags,
+    interleaved,
     trendingPosts
   )
 

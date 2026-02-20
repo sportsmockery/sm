@@ -132,6 +132,20 @@ async function getFeedData() {
     }
   })
 
+  // Interleave: real-author posts first so the feed isn't all "Sports Mockery"
+  const authored = postsWithFlags.filter((p: any) => p.author_name !== null)
+  const unAuthored = postsWithFlags.filter((p: any) => p.author_name === null)
+  const interleaved: any[] = []
+  let feedAi = 0, feedRi = 0
+  while (feedRi < authored.length || feedAi < unAuthored.length) {
+    for (let k = 0; k < 3 && feedRi < authored.length; k++) {
+      interleaved.push(authored[feedRi++])
+    }
+    if (feedAi < unAuthored.length) {
+      interleaved.push(unAuthored[feedAi++])
+    }
+  }
+
   // 5) Load personalization data
   const { data: profileData } = await authClient
     .from('user_engagement_profile')
@@ -159,7 +173,7 @@ async function getFeedData() {
     isLoggedIn: true
   }
 
-  const rankedPosts = sortPostsByScore(postsWithFlags as any, scoringContext)
+  const rankedPosts = sortPostsByScore(interleaved as any, scoringContext)
 
   // 7) Fallbacks
   const finalData = getHomepageDataWithFallbacks(

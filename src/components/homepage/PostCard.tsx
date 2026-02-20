@@ -153,7 +153,7 @@ export function PostCard({ post, priority = false }: PostCardProps) {
               </div>
             )}
             <span>
-              {post.author_name || 'Sports Mockery'} &middot; {recencyLabel}
+              {post.author_name || 'SM Staff'} &middot; {recencyLabel}
               {post.views != null && post.views > 0 && (
                 <> &middot; {formatViews(post.views)} views</>
               )}
