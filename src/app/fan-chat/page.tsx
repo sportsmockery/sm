@@ -6,6 +6,7 @@ import Link from 'next/link'
 import Image from 'next/image'
 import { useAIChatPersonality } from '@/hooks/useAIChatPersonality'
 import { AI_PERSONALITIES } from '@/lib/ai-personalities'
+import { TeamPortalHub } from '@/components/fan-chat/TeamPortalHub'
 
 // Message type
 interface ChatMessage {
@@ -259,10 +260,43 @@ export default function FanChatPage() {
     }
   }
 
+  // Generate AI suggested replies based on last few messages
+  const [aiSuggestions, setAiSuggestions] = useState<string[]>([])
+
+  useEffect(() => {
+    // Simple contextual suggestions based on channel
+    const channelSuggestions: Record<string, string[]> = {
+      bears: ["What about the draft?", "Caleb looks solid!", "Defense needs work"],
+      bulls: ["Trade rumors?", "Rebuild is working", "Need a center badly"],
+      cubs: ["Pitching looks good", "Wrigley is beautiful", "Who's the closer?"],
+      whitesox: ["Rebuild takes time", "Any prospects?", "South side pride"],
+      blackhawks: ["Bedard is special", "When do we compete?", "Hockey town!"],
+      global: ["Hot take time!", "Best Chicago team?", "Who wins it all?"],
+    }
+    setAiSuggestions(channelSuggestions[activeChannel] || channelSuggestions.global)
+  }, [activeChannel])
+
+  const handleSuggestionClick = (suggestion: string) => {
+    setMessage(suggestion)
+  }
+
+  // Echo Chamber digest (shown every 10 messages)
+  const showEchoDigest = messages.length > 0 && messages.length % 10 === 0 && messages.length > 5
+
   return (
     <div className="sm-hero-bg" style={{ minHeight: '100vh' }}>
       <div className="sm-grid-overlay" />
       <div style={{ maxWidth: 'var(--sm-max-width)', margin: '0 auto', padding: '24px 16px', paddingTop: 96, position: 'relative', zIndex: 1 }}>
+
+        {/* Portal Hub */}
+        <TeamPortalHub
+          activeTeam={activeChannel === 'global' ? 'bears' : activeChannel}
+          onSelectTeam={(slug) => {
+            setActiveChannel(slug)
+            setShowChannels(false)
+          }}
+        />
+
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-6" style={{ minHeight: 'calc(100vh - 200px)' }}>
           {/* Channel List - Sidebar */}
           <div className={`lg:col-span-1 ${showChannels ? 'block' : 'hidden lg:block'}`}>
@@ -544,6 +578,61 @@ export default function FanChatPage() {
                   <div ref={messagesEndRef} />
                 </div>
               </div>
+
+              {/* Echo Chamber Digest */}
+              {showEchoDigest && (
+                <div className="echo-digest" style={{ margin: '0 20px 8px' }}>
+                  <div className="echo-header">
+                    <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="1.5">
+                      <circle cx="7" cy="7" r="6"/>
+                      <path d="M4 7h6M7 4v6" strokeLinecap="round"/>
+                    </svg>
+                    <span>Fan Consensus</span>
+                  </div>
+                  <p className="echo-text">
+                    The chat is buzzing about {currentChannel.name}! Fans are engaging with {currentChannel.aiPersonality} about the latest developments.
+                  </p>
+                  <span className="echo-meta">AI summary based on {messages.length} messages</span>
+                </div>
+              )}
+
+              {/* AI Suggested Replies */}
+              {aiSuggestions.length > 0 && (
+                <div className="ai-suggestions" style={{ borderTop: '1px solid var(--sm-border)', padding: '8px 16px', display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
+                  <span style={{ fontSize: 11, color: 'var(--sm-text-dim)', fontWeight: 500, whiteSpace: 'nowrap' }}>AI suggests:</span>
+                  <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
+                    {aiSuggestions.map((s, i) => (
+                      <button
+                        key={i}
+                        onClick={() => handleSuggestionClick(s)}
+                        style={{
+                          padding: '5px 12px',
+                          borderRadius: 100,
+                          background: 'rgba(255, 255, 255, 0.04)',
+                          border: '1px solid rgba(255, 255, 255, 0.08)',
+                          color: 'var(--sm-text-muted)',
+                          fontFamily: "'Space Grotesk', sans-serif",
+                          fontSize: 12,
+                          cursor: 'pointer',
+                          transition: 'all 0.15s',
+                        }}
+                        onMouseEnter={(e) => {
+                          e.currentTarget.style.background = 'var(--sm-gradient-subtle)'
+                          e.currentTarget.style.borderColor = 'rgba(188, 0, 0, 0.2)'
+                          e.currentTarget.style.color = 'var(--sm-red-light)'
+                        }}
+                        onMouseLeave={(e) => {
+                          e.currentTarget.style.background = 'rgba(255, 255, 255, 0.04)'
+                          e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.08)'
+                          e.currentTarget.style.color = 'var(--sm-text-muted)'
+                        }}
+                      >
+                        {s}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
 
               {/* Input Area */}
               <div className="p-4" style={{ borderTop: '1px solid var(--sm-border)' }}>

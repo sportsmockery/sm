@@ -5,7 +5,7 @@ import { getHomepageDataWithFallbacks, FALLBACK_POSTS, FALLBACK_EDITOR_PICKS } f
 import '@/styles/homepage.css'
 
 export const metadata: Metadata = {
-  title: { absolute: 'Sports Mockery | 2.0' },
+  title: { absolute: 'Sports Mockery | Where Chicago Fans Come First' },
 }
 
 // Force dynamic rendering

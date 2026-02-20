@@ -1,16 +1,21 @@
 import type { Metadata } from 'next'
 import { redirect } from 'next/navigation'
-
-export const metadata: Metadata = {
-  title: 'For You — Personalized Feed',
-  description: 'Your personalized Chicago sports feed, curated based on your favorite teams and reading history.',
-}
 import { cookies } from 'next/headers'
 import { createServerClient } from '@supabase/ssr'
 import { HomepageFeed } from '@/components/homepage/HomepageFeed'
+import { FeedPersonalization } from '@/components/feed/FeedPersonalization'
 import { sortPostsByScore, type ScoringContext } from '@/lib/scoring-v2'
 import { getHomepageDataWithFallbacks } from '@/lib/homepage-fallbacks'
 import { supabaseAdmin } from '@/lib/supabase-server'
+
+export const metadata: Metadata = {
+  title: { absolute: 'Sports Mockery | Feed' },
+  description: 'Your personalized Chicago sports feed — Bears, Bulls, Cubs, White Sox, Blackhawks.',
+  openGraph: {
+    title: 'Sports Mockery | Feed',
+    description: 'Your personalized Chicago sports feed — Bears, Bulls, Cubs, White Sox, Blackhawks.',
+  },
+}
 
 export const revalidate = 60
 
@@ -52,19 +57,25 @@ async function getFeedData() {
   const supabase = supabaseAdmin
 
   // 2) Editor picks - use top posts by importance_score as a proxy
-  // (sm_posts doesn't have editor_pick or pinned_slot columns)
   const { data: editorPicksRaw = [] } = await supabase
     .from('sm_posts')
-    .select('id, title, slug, featured_image, category:sm_categories!category_id(slug)')
+    .select('id, title, slug, featured_image, author:sm_authors!author_id(display_name, avatar_url), category:sm_categories!category_id(slug)')
     .eq('status', 'published')
     .order('importance_score', { ascending: false })
     .limit(6)
 
-  const editorPicks = (editorPicksRaw || []).map((post: any, index: number) => ({
-    ...post,
-    team_slug: getTeamSlug(post.category),
-    pinned_slot: index + 1
-  }))
+  const editorPicks = (editorPicksRaw || []).map((post: any, index: number) => {
+    const cat = Array.isArray(post.category) ? post.category[0] : post.category
+    const auth = Array.isArray(post.author) ? post.author[0] : post.author
+    return {
+      ...post,
+      team_slug: getTeamSlug(post.category),
+      category_slug: cat?.slug || null,
+      author_name: auth?.display_name || null,
+      author_avatar_url: auth?.avatar_url || null,
+      pinned_slot: index + 1
+    }
+  })
 
   // 3) Trending posts (same view-based logic as homepage)
   const sevenDaysAgo = new Date()
@@ -72,42 +83,56 @@ async function getFeedData() {
 
   const { data: trendingPostsRaw = [] } = await supabase
     .from('sm_posts')
-    .select('id, title, slug, views, published_at, importance_score, content_type, primary_topic, author_id, category:sm_categories!category_id(slug)')
+    .select('id, title, slug, views, published_at, importance_score, content_type, primary_topic, author:sm_authors!author_id(display_name, avatar_url), category:sm_categories!category_id(slug)')
     .eq('status', 'published')
     .gte('published_at', sevenDaysAgo.toISOString())
     .order('views', { ascending: false })
     .limit(20)
 
-  const trendingPosts = (trendingPostsRaw || []).map((post: any) => ({
-    ...post,
-    team_slug: getTeamSlug(post.category),
-    is_evergreen: false
-  }))
+  const trendingPosts = (trendingPostsRaw || []).map((post: any) => {
+    const cat = Array.isArray(post.category) ? post.category[0] : post.category
+    const auth = Array.isArray(post.author) ? post.author[0] : post.author
+    return {
+      ...post,
+      team_slug: getTeamSlug(post.category),
+      category_slug: cat?.slug || null,
+      author_name: auth?.display_name || null,
+      author_avatar_url: auth?.avatar_url || null,
+      is_evergreen: false
+    }
+  })
 
   const trendingIds = new Set(trendingPosts.map(p => p.id))
 
-  // 4) Main feed posts: full set, same as homepage
+  // 4) Main feed posts: full set
   const { data: allPostsRaw = [] } = await supabase
     .from('sm_posts')
     .select(`
       id, title, slug, excerpt, featured_image,
       published_at, importance_score, content_type, primary_topic,
-      author_id, views,
+      views,
+      author:sm_authors!author_id(display_name, avatar_url),
       category:sm_categories!category_id(slug)
     `)
     .eq('status', 'published')
     .order('published_at', { ascending: false })
     .limit(200)
 
-  const postsWithFlags = (allPostsRaw || []).map((post: any) => ({
-    ...post,
-    team_slug: getTeamSlug(post.category),
-    is_trending: trendingIds.has(post.id),
-    is_evergreen: false,
-    author_name: null
-  }))
+  const postsWithFlags = (allPostsRaw || []).map((post: any) => {
+    const cat = Array.isArray(post.category) ? post.category[0] : post.category
+    const auth = Array.isArray(post.author) ? post.author[0] : post.author
+    return {
+      ...post,
+      team_slug: getTeamSlug(post.category),
+      category_slug: cat?.slug || null,
+      is_trending: trendingIds.has(post.id),
+      is_evergreen: false,
+      author_name: auth?.display_name || null,
+      author_avatar_url: auth?.avatar_url || null,
+    }
+  })
 
-  // 5) Load personalization data (use authClient for user-specific data)
+  // 5) Load personalization data
   const { data: profileData } = await authClient
     .from('user_engagement_profile')
     .select('*')
@@ -136,14 +161,14 @@ async function getFeedData() {
 
   const rankedPosts = sortPostsByScore(postsWithFlags as any, scoringContext)
 
-  // 7) Fallbacks (unlikely needed, but keep consistent)
+  // 7) Fallbacks
   const finalData = getHomepageDataWithFallbacks(
     editorPicks || [],
     rankedPosts,
     trendingPosts || []
   )
 
-  // 8) Determine preferred team for UI highlighting (not filtering)
+  // 8) Determine preferred team for UI highlighting
   let userTeamPreference: string | null = null
   if (userProfile?.team_scores) {
     const teams = Object.entries(userProfile.team_scores)
@@ -158,7 +183,8 @@ async function getFeedData() {
     trendingPosts: finalData.trendingPosts,
     rankedPosts: finalData.rankedPosts,
     userTeamPreference,
-    isLoggedIn: true
+    userId,
+    userProfile,
   }
 }
 
@@ -168,16 +194,36 @@ export default async function FeedPage() {
     trendingPosts,
     rankedPosts,
     userTeamPreference,
-    isLoggedIn
+    userId,
+    userProfile,
   } = await getFeedData()
 
   return (
-    <HomepageFeed
-      initialPosts={rankedPosts}
-      editorPicks={editorPicks}
-      trendingPosts={trendingPosts}
-      userTeamPreference={userTeamPreference}
-      isLoggedIn={isLoggedIn}
-    />
+    <>
+      <div className="sm-container">
+        <div className="feed-page-header">
+          <h2>
+            <span className="gradient-text">For You</span>
+          </h2>
+          <p className="feed-subheader">
+            Personalized based on your team interests and reading habits
+          </p>
+        </div>
+
+        <FeedPersonalization
+          userId={userId}
+          initialTeamScores={userProfile?.team_scores || undefined}
+          initialFormatPrefs={userProfile?.format_prefs || undefined}
+        />
+      </div>
+
+      <HomepageFeed
+        initialPosts={rankedPosts}
+        editorPicks={editorPicks}
+        trendingPosts={trendingPosts}
+        userTeamPreference={userTeamPreference}
+        isLoggedIn={true}
+      />
+    </>
   )
 }

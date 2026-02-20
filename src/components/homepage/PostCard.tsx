@@ -148,7 +148,9 @@ export function PostCard({ post, priority = false }: PostCardProps) {
                 unoptimized
               />
             ) : (
-              <div className="author-avatar" />
+              <div className="author-avatar-placeholder">
+                {(post.author_name || 'S').charAt(0)}
+              </div>
             )}
             <span>
               {post.author_name || 'Sports Mockery'} &middot; {recencyLabel}

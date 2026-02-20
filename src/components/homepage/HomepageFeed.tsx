@@ -4,12 +4,13 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { useRouter } from 'next/navigation';
+
 import { useAuth } from '@/contexts/AuthContext';
 import { EditorPicksHero } from './EditorPicksHero';
 import { TeamFilterTabs } from './TeamFilterTabs';
 import { ForYouFeed } from './ForYouFeed';
 import { HomepageSidebar } from './HomepageSidebar';
+import { InlineSearch } from '@/components/search/InlineSearch';
 
 const TEAM_LABELS: Record<string, string> = {
   bears: 'Bears',
@@ -174,6 +175,35 @@ const TEAM_LOGOS = [
   { slug: 'chicago-blackhawks', src: 'https://a.espncdn.com/i/teamlogos/nhl/500/chi.png', alt: 'Chicago Blackhawks', label: 'Hawks' },
 ];
 
+// Team slugs that are valid team filters (vs. content type filters)
+const TEAM_SLUGS = new Set(['all', 'bears', 'bulls', 'blackhawks', 'cubs', 'white-sox']);
+
+// Map for team_slug matching (handles both whitesox and white-sox variants)
+const TEAM_SLUG_MAP: Record<string, string[]> = {
+  'bears': ['bears'],
+  'bulls': ['bulls'],
+  'blackhawks': ['blackhawks'],
+  'cubs': ['cubs'],
+  'white-sox': ['whitesox', 'white-sox'],
+};
+
+function filterPosts(posts: any[], activeFilter: string): any[] {
+  if (activeFilter === 'all') return posts;
+
+  // Team filter
+  if (TEAM_SLUG_MAP[activeFilter]) {
+    const slugs = TEAM_SLUG_MAP[activeFilter];
+    return posts.filter(p =>
+      slugs.some(s => p.team_slug?.toLowerCase() === s.toLowerCase())
+    );
+  }
+
+  // Content type filter
+  return posts.filter(p =>
+    p.content_type?.toLowerCase() === activeFilter.toLowerCase()
+  );
+}
+
 export function HomepageFeed({
   initialPosts = [],
   editorPicks = [],
@@ -181,26 +211,29 @@ export function HomepageFeed({
   userTeamPreference = null,
   isLoggedIn = false,
 }: HomepageFeedProps) {
-  const [activeTeam, setActiveTeam] = useState<string>('all');
+  const [activeFilter, setActiveFilter] = useState<string>('all');
   const [isMobile, setIsMobile] = useState<boolean>(false);
-  const router = useRouter();
+
   const { isAuthenticated } = useAuth();
   const actuallyLoggedIn = isAuthenticated || isLoggedIn;
 
   // Feature 1: Team preference memory (localStorage)
-  const handleTeamChange = useCallback((team: string) => {
-    setActiveTeam(team);
+  const handleFilterChange = useCallback((filter: string) => {
+    setActiveFilter(filter);
     try {
-      if (team === 'all') {
-        localStorage.removeItem('sm-preferred-team');
-      } else {
-        localStorage.setItem('sm-preferred-team', team);
+      // Only persist team filters, not content type filters
+      if (TEAM_SLUGS.has(filter)) {
+        if (filter === 'all') {
+          localStorage.removeItem('sm-preferred-team');
+        } else {
+          localStorage.setItem('sm-preferred-team', filter);
+        }
       }
     } catch {}
   }, []);
 
   const clearTeamPreference = useCallback(() => {
-    setActiveTeam('all');
+    setActiveFilter('all');
     try { localStorage.removeItem('sm-preferred-team'); } catch {}
   }, []);
 
@@ -209,13 +242,13 @@ export function HomepageFeed({
     try {
       const saved = localStorage.getItem('sm-preferred-team');
       if (saved && saved !== 'all') {
-        setActiveTeam(saved);
+        setActiveFilter(saved);
         return; // localStorage takes priority
       }
     } catch {}
     // Fall back to server-side user preference
     if (userTeamPreference && userTeamPreference !== 'all') {
-      setActiveTeam(userTeamPreference);
+      setActiveFilter(userTeamPreference);
     }
   }, [userTeamPreference]);
 
@@ -226,17 +259,21 @@ export function HomepageFeed({
     return () => window.removeEventListener('resize', checkMobile);
   }, []);
 
-  // Cmd+K / Ctrl+K shortcut to navigate to search
+  // Cmd+K / Ctrl+K shortcut to focus inline search
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
         e.preventDefault();
-        router.push('/search');
+        const searchInput = document.getElementById('sm-search-input');
+        if (searchInput) {
+          searchInput.focus();
+          searchInput.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
       }
     };
     document.addEventListener('keydown', handleKeyDown);
     return () => document.removeEventListener('keydown', handleKeyDown);
-  }, [router]);
+  }, []);
 
   // Scroll-reveal IntersectionObserver
   useEffect(() => {
@@ -281,21 +318,21 @@ export function HomepageFeed({
   const safeEditorPicks = Array.isArray(editorPicks) ? editorPicks : [];
   const safeTrendingPosts = Array.isArray(trendingPosts) ? trendingPosts : [];
 
-  const filteredPosts =
-    activeTeam === 'all'
-      ? safePosts
-      : safePosts.filter((post) => post.team_slug === activeTeam);
+  const filteredPosts = filterPosts(safePosts, activeFilter);
 
-  // Filter editor picks by team too — fall back to top 3 from filtered posts
+  // Filter editor picks by active filter too — fall back to top 3 from filtered posts
   const filteredEditorPicks =
-    activeTeam === 'all'
+    activeFilter === 'all'
       ? safeEditorPicks
       : (() => {
-          const teamPicks = safeEditorPicks.filter((p: any) => p.team_slug === activeTeam);
-          return teamPicks.length > 0
-            ? teamPicks
+          const filtered = filterPosts(safeEditorPicks, activeFilter);
+          return filtered.length > 0
+            ? filtered
             : filteredPosts.slice(0, 3).map((p: any, i: number) => ({ ...p, pinned_slot: i + 1 }));
         })();
+
+  // Determine if the active filter is a team filter
+  const isTeamFilter = TEAM_SLUGS.has(activeFilter) && activeFilter !== 'all';
 
   return (
     <div className="homepage-feed" ref={feedRef}>
@@ -335,27 +372,11 @@ export function HomepageFeed({
             ))}
           </div>
 
-          <Link href="/search" className="hero-search-bar animate-entrance entrance-delay-5" role="search" aria-label="Search articles, teams, players">
-            <svg className="search-icon" width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <circle cx="11" cy="11" r="8" />
-              <path d="m21 21-4.3-4.3" />
-            </svg>
-            <span className="search-placeholder">Search articles, teams, players...</span>
-            <kbd>⌘K</kbd>
-          </Link>
+          <div className="animate-entrance entrance-delay-5">
+            <InlineSearch />
+          </div>
         </div>
       </section>
-
-      {/* ===== SECTION 2: Sticky Team Filter Bar ===== */}
-      <div className="team-filter-bar-sticky">
-        <div className="sm-container">
-          <TeamFilterTabs
-            activeTeam={activeTeam}
-            onTeamChange={handleTeamChange}
-            userPreferredTeam={userTeamPreference}
-          />
-        </div>
-      </div>
 
       {/* ===== Personalize Banner (logged-in only) ===== */}
       {actuallyLoggedIn && (
@@ -370,24 +391,65 @@ export function HomepageFeed({
         </div>
       )}
 
-      {/* ===== SECTION 3: Featured Content (full width, no sidebar) ===== */}
+      {/* ===== SECTION 2: Featured Content (full width, no sidebar) ===== */}
       <section className="featured-section" aria-label="Featured stories">
         <div className="sm-container">
-          <div className="section-header scroll-reveal">
-            <span className="sm-tag">Trending Now</span>
-            <h2 style={{ fontFamily: "var(--font-bebas-neue), 'Bebas Neue', Impact, sans-serif" }}>What Chicago is Talking About</h2>
-          </div>
           <EditorPicksHero picks={filteredEditorPicks} />
         </div>
       </section>
 
-      {/* ===== SECTION 4: Feed + Sidebar (two-column starts here) ===== */}
+      {/* ===== SECTION 3: What Chicago is Talking About ===== */}
+      {safeTrendingPosts.length > 0 && (
+        <section className="homepage-section talking-about-section">
+          <div className="sm-container">
+            <h3 className="talking-section-header">What Chicago is Talking About</h3>
+            <div className="talking-about-list">
+              {safeTrendingPosts.slice(0, 5).map((post: any, i: number) => {
+                const postUrl = post.category_slug
+                  ? `/${post.category_slug}/${post.slug}`
+                  : `/${post.slug}`;
+                return (
+                  <Link key={post.id} href={postUrl} className="talking-item">
+                    <span className="talking-rank">{i + 1}</span>
+                    <div className="talking-content">
+                      <span className="talking-team-pill">
+                        {post.team_slug ? TEAM_LABELS[post.team_slug] || post.team_slug : 'Sports'}
+                      </span>
+                      <span className="talking-title">{post.title}</span>
+                    </div>
+                    {post.views > 0 && (
+                      <span className="talking-views">
+                        {post.views >= 1000
+                          ? `${(post.views / 1000).toFixed(1)}K`
+                          : post.views} views
+                      </span>
+                    )}
+                  </Link>
+                );
+              })}
+            </div>
+          </div>
+        </section>
+      )}
+
+      {/* ===== SECTION 4: Sticky Filter Bar ===== */}
+      <div className="team-filter-bar-sticky">
+        <div className="sm-container">
+          <TeamFilterTabs
+            activeFilter={activeFilter}
+            onFilterChange={handleFilterChange}
+            userPreferredTeam={userTeamPreference}
+          />
+        </div>
+      </div>
+
+      {/* ===== SECTION 5: Feed + Sidebar (two-column starts here) ===== */}
       <section id="feed" className="feed-section">
         <div className="sm-container">
           {/* Team preference banner */}
-          {activeTeam !== 'all' && TEAM_LABELS[activeTeam] && (
+          {isTeamFilter && TEAM_LABELS[activeFilter] && (
             <div className="team-pref-banner">
-              Showing <strong>{TEAM_LABELS[activeTeam]}</strong> news first
+              Showing <strong>{TEAM_LABELS[activeFilter]}</strong> news first
               <button onClick={clearTeamPreference} className="team-pref-clear">Show All</button>
             </div>
           )}
@@ -396,7 +458,7 @@ export function HomepageFeed({
             <main className="feed-column" aria-label="Latest articles">
               <div className="section-header scroll-reveal">
                 <span className="sm-tag">Latest</span>
-                <h2>Chicago Sports News</h2>
+                <h2>Latest Stories</h2>
               </div>
               <ForYouFeed
                 posts={filteredPosts}
@@ -404,7 +466,7 @@ export function HomepageFeed({
                 isMobile={isMobile}
                 showTrendingInline={isMobile}
                 trendingPosts={safeTrendingPosts}
-                activeTeam={activeTeam}
+                activeTeam={activeFilter}
               />
             </main>
 
