@@ -3,7 +3,8 @@ import Link from 'next/link'
 import Image from 'next/image'
 import { TeamHubLayout } from '@/components/team'
 import { CHICAGO_TEAMS, fetchNextGame } from '@/lib/team-config'
-import { getBearsSeparatedRecord, getBearsPlayers } from '@/lib/bearsData'
+import { getBearsSeparatedRecord } from '@/lib/bearsData'
+import { datalabAdmin } from '@/lib/supabase-datalab'
 
 export const metadata: Metadata = {
   title: 'Chicago Bears Salary Cap Tracker 2026 | Sports Mockery',
@@ -20,15 +21,78 @@ export const metadata: Metadata = {
   },
 }
 
+// Revalidate every hour per user request
 export const revalidate = 3600
+
+function formatMoney(n: number | null | undefined): string {
+  if (n == null) return '--'
+  const abs = Math.abs(n)
+  const sign = n < 0 ? '-' : ''
+  if (abs >= 1_000_000) return `${sign}$${(abs / 1_000_000).toFixed(1)}M`
+  if (abs >= 1_000) return `${sign}$${(abs / 1_000).toFixed(0)}K`
+  return `${sign}$${abs}`
+}
+
+function getPositionGroup(pos: string): string {
+  const offense = ['QB', 'RB', 'WR', 'TE', 'OT', 'OG', 'G', 'C', 'OL', 'T', 'FB']
+  const defense = ['DE', 'DT', 'DL', 'LB', 'OLB', 'ILB', 'MLB', 'CB', 'S', 'FS', 'SS', 'DB', 'EDGE', 'NT']
+  const specialTeams = ['K', 'P', 'LS']
+  if (offense.includes(pos)) return 'Offense'
+  if (defense.includes(pos)) return 'Defense'
+  if (specialTeams.includes(pos)) return 'Special Teams'
+  return 'Other'
+}
+
+function timeAgo(dateStr: string): string {
+  const date = new Date(dateStr)
+  const now = new Date()
+  const hours = Math.round((now.getTime() - date.getTime()) / 3600000)
+  if (hours < 1) return 'Updated just now'
+  if (hours === 1) return 'Updated 1 hour ago'
+  if (hours < 24) return `Updated ${hours} hours ago`
+  const days = Math.round(hours / 24)
+  if (days === 1) return 'Updated yesterday'
+  return `Updated ${days} days ago`
+}
+
+interface CapSummary {
+  total_cap: number
+  total_committed: number
+  cap_space: number
+  dead_money: number
+  top_51_cap: number
+  updated_at: string
+}
+
+interface ContractRow {
+  player_id: string
+  cap_hit: number | null
+  base_salary: number | null
+  dead_cap: number | null
+  contract_years: number | null
+  free_agent_year: number | null
+  name: string
+  position: string
+  headshot_url: string | null
+  jersey_number: number | null
+}
 
 export default async function BearsCapTrackerPage() {
   const team = CHICAGO_TEAMS.bears
 
-  const [separatedRecord, nextGame, players] = await Promise.all([
+  const [separatedRecord, nextGame, capResult, contractsResult] = await Promise.all([
     getBearsSeparatedRecord(2025),
     fetchNextGame('bears'),
-    getBearsPlayers(),
+    datalabAdmin
+      .from('bears_salary_cap')
+      .select('*')
+      .eq('season', 2026)
+      .single(),
+    datalabAdmin
+      .from('bears_contracts')
+      .select('player_id, cap_hit, base_salary, dead_cap, contract_years, free_agent_year, updated_at')
+      .eq('season', 2026)
+      .order('cap_hit', { ascending: false }),
   ])
 
   const record = {
@@ -42,135 +106,184 @@ export default async function BearsCapTrackerPage() {
     divisionRank: separatedRecord.divisionRank || undefined,
   }
 
-  const rosterCount = players.length
+  const cap: CapSummary | null = capResult.data
+  const contracts = contractsResult.data || []
+
+  // Fetch player details for contracts
+  const playerIds = contracts.map((c: { player_id: string }) => c.player_id).filter(Boolean)
+  let playerMap = new Map<string, { name: string; position: string; headshot_url: string | null; jersey_number: number | null }>()
+
+  if (playerIds.length > 0) {
+    const { data: players } = await datalabAdmin
+      .from('bears_players')
+      .select('espn_id, name, position, headshot_url, jersey_number')
+      .in('espn_id', playerIds)
+
+    if (players) {
+      playerMap = new Map(players.map((p: { espn_id: string; name: string; position: string; headshot_url: string | null; jersey_number: number | null }) => [p.espn_id, p]))
+    }
+  }
+
+  // Merge contracts with player data
+  const rows: ContractRow[] = contracts.map((c: { player_id: string; cap_hit: number | null; base_salary: number | null; dead_cap: number | null; contract_years: number | null; free_agent_year: number | null }) => ({
+    ...c,
+    name: playerMap.get(c.player_id)?.name || 'Unknown',
+    position: playerMap.get(c.player_id)?.position || '',
+    headshot_url: playerMap.get(c.player_id)?.headshot_url || null,
+    jersey_number: playerMap.get(c.player_id)?.jersey_number || null,
+  }))
+
+  const isOverCap = cap ? cap.cap_space < 0 : false
+  const topFive = rows.slice(0, 5)
+  const maxHit = topFive[0]?.cap_hit || 1
+  const usedPct = cap ? (cap.total_committed / cap.total_cap) * 100 : 0
+  const deadPct = cap ? (cap.dead_money / cap.total_cap) * 100 : 0
+
+  // Position group breakdown
+  const groupTotals = rows.reduce((acc, r) => {
+    const group = getPositionGroup(r.position)
+    acc[group] = (acc[group] || 0) + (r.cap_hit || 0)
+    return acc
+  }, {} as Record<string, number>)
+
+  const hasCapData = cap !== null
+  const hasContracts = rows.length > 0
 
   return (
     <TeamHubLayout team={team} record={record} nextGame={nextGame} activeTab="cap-tracker">
       <div style={{ maxWidth: '900px', margin: '0 auto' }}>
         {/* Page Header */}
-        <div style={{ marginBottom: '32px' }}>
-          <h1
-            style={{
-              fontFamily: "'Space Grotesk', sans-serif",
-              fontSize: '32px',
-              fontWeight: 700,
-              color: 'var(--sm-text)',
-              letterSpacing: '-1px',
-              margin: '0 0 8px 0',
-            }}
-          >
-            Bears Salary Cap Tracker
-          </h1>
+        <div style={{ marginBottom: '24px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '8px' }}>
+            <h1
+              style={{
+                fontFamily: "'Space Grotesk', sans-serif",
+                fontSize: '32px',
+                fontWeight: 700,
+                color: 'var(--sm-text)',
+                letterSpacing: '-1px',
+                margin: '0 0 8px 0',
+              }}
+            >
+              Bears Salary Cap Tracker
+            </h1>
+            {cap && (
+              <div
+                style={{
+                  fontSize: '12px',
+                  color: 'var(--sm-text-dim)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '6px',
+                }}
+              >
+                <svg width="14" height="14" fill="none" stroke="currentColor" strokeWidth={1.5} viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                {timeAgo(cap.updated_at)}
+              </div>
+            )}
+          </div>
           <p style={{ color: 'var(--sm-text-muted)', fontSize: '16px', margin: 0, lineHeight: 1.6 }}>
-            Live cap space, contract breakdowns, cut/trade simulator for the 2026 season.
+            Live cap space, contract breakdowns, and position spending for the 2026 season.
           </p>
         </div>
 
-        {/* Cap Overview Cards */}
-        <div
-          style={{
-            display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))',
-            gap: '12px',
-            marginBottom: '32px',
-          }}
-        >
-          <div className="glass-card glass-card-sm glass-card-static" style={{ textAlign: 'center', padding: '20px' }}>
-            <div
-              style={{
-                fontFamily: "'Space Grotesk', sans-serif",
-                fontSize: '28px',
-                fontWeight: 700,
-                color: 'var(--sm-text)',
-              }}
-            >
-              {rosterCount}
+        {/* Cap Overview Banner */}
+        {hasCapData ? (
+          <div
+            style={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(auto-fit, minmax(190px, 1fr))',
+              gap: '12px',
+              marginBottom: '24px',
+            }}
+          >
+            <CapCard label="Salary Cap" value={formatMoney(cap!.total_cap)} />
+            <CapCard
+              label="Cap Space"
+              value={formatMoney(cap!.cap_space)}
+              subtitle={isOverCap ? 'OVER CAP' : 'AVAILABLE'}
+              color={isOverCap ? 'var(--sm-error, #ef4444)' : 'var(--sm-success, #22c55e)'}
+            />
+            <CapCard label="Dead Money" value={formatMoney(cap!.dead_money)} color="var(--sm-text-muted)" />
+            <CapCard label="Committed" value={formatMoney(cap!.total_committed)} />
+          </div>
+        ) : (
+          <div
+            style={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(auto-fit, minmax(190px, 1fr))',
+              gap: '12px',
+              marginBottom: '24px',
+            }}
+          >
+            <CapCard label="Salary Cap" value="--" />
+            <CapCard label="Cap Space" value="--" />
+            <CapCard label="Dead Money" value="--" />
+            <CapCard label="Committed" value="--" />
+          </div>
+        )}
+
+        {/* Cap Usage Gauge */}
+        {hasCapData && (
+          <div
+            className="glass-card glass-card-sm glass-card-static"
+            style={{ padding: '16px 20px', marginBottom: '24px' }}
+          >
+            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
+              <span style={{ fontSize: '13px', fontWeight: 600, color: 'var(--sm-text)' }}>
+                Cap Usage
+              </span>
+              <span style={{ fontSize: '13px', fontWeight: 700, color: isOverCap ? 'var(--sm-error, #ef4444)' : 'var(--sm-success, #22c55e)' }}>
+                {usedPct.toFixed(1)}%
+              </span>
             </div>
             <div
               style={{
-                fontSize: '11px',
-                textTransform: 'uppercase',
-                letterSpacing: '1px',
-                color: 'var(--sm-text-dim)',
-                fontWeight: 600,
+                width: '100%',
+                height: '12px',
+                borderRadius: '6px',
+                backgroundColor: 'var(--sm-surface)',
+                overflow: 'hidden',
+                position: 'relative',
               }}
             >
-              Active Roster
+              {/* Dead money segment */}
+              <div
+                style={{
+                  position: 'absolute',
+                  left: 0,
+                  top: 0,
+                  height: '100%',
+                  width: `${Math.min(deadPct, 100)}%`,
+                  backgroundColor: 'rgba(239, 68, 68, 0.3)',
+                  borderRadius: '6px 0 0 6px',
+                }}
+              />
+              {/* Total committed */}
+              <div
+                style={{
+                  position: 'absolute',
+                  left: 0,
+                  top: 0,
+                  height: '100%',
+                  width: `${Math.min(usedPct, 100)}%`,
+                  backgroundColor: isOverCap ? 'var(--sm-error, #ef4444)' : '#C83200',
+                  borderRadius: '6px',
+                  opacity: 0.85,
+                }}
+              />
+            </div>
+            <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '6px', fontSize: '11px', color: 'var(--sm-text-dim)' }}>
+              <span>$0</span>
+              <span>{formatMoney(cap!.total_cap)} cap</span>
             </div>
           </div>
-          <div className="glass-card glass-card-sm glass-card-static" style={{ textAlign: 'center', padding: '20px' }}>
-            <div
-              style={{
-                fontFamily: "'Space Grotesk', sans-serif",
-                fontSize: '28px',
-                fontWeight: 700,
-                color: 'var(--sm-success, #22c55e)',
-              }}
-            >
-              --
-            </div>
-            <div
-              style={{
-                fontSize: '11px',
-                textTransform: 'uppercase',
-                letterSpacing: '1px',
-                color: 'var(--sm-text-dim)',
-                fontWeight: 600,
-              }}
-            >
-              Cap Space
-            </div>
-          </div>
-          <div className="glass-card glass-card-sm glass-card-static" style={{ textAlign: 'center', padding: '20px' }}>
-            <div
-              style={{
-                fontFamily: "'Space Grotesk', sans-serif",
-                fontSize: '28px',
-                fontWeight: 700,
-                color: 'var(--sm-text)',
-              }}
-            >
-              --
-            </div>
-            <div
-              style={{
-                fontSize: '11px',
-                textTransform: 'uppercase',
-                letterSpacing: '1px',
-                color: 'var(--sm-text-dim)',
-                fontWeight: 600,
-              }}
-            >
-              Dead Money
-            </div>
-          </div>
-          <div className="glass-card glass-card-sm glass-card-static" style={{ textAlign: 'center', padding: '20px' }}>
-            <div
-              style={{
-                fontFamily: "'Space Grotesk', sans-serif",
-                fontSize: '28px',
-                fontWeight: 700,
-                color: 'var(--sm-text)',
-              }}
-            >
-              --
-            </div>
-            <div
-              style={{
-                fontSize: '11px',
-                textTransform: 'uppercase',
-                letterSpacing: '1px',
-                color: 'var(--sm-text-dim)',
-                fontWeight: 600,
-              }}
-            >
-              Total Cap Hit
-            </div>
-          </div>
-        </div>
+        )}
 
         {/* Quick Links */}
-        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', marginBottom: '32px' }}>
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', marginBottom: '24px' }}>
           {[
             { label: 'Trade Rumors', href: '/chicago-bears/trade-rumors' },
             { label: 'Draft Tracker', href: '/chicago-bears/draft-tracker' },
@@ -183,99 +296,378 @@ export default async function BearsCapTrackerPage() {
           ))}
         </div>
 
-        {/* Top Contracts by Position Group */}
-        <section style={{ marginBottom: '32px' }}>
-          <h2
-            style={{
-              fontFamily: "'Space Grotesk', sans-serif",
-              color: 'var(--sm-text)',
-              fontSize: '22px',
-              fontWeight: 700,
-              letterSpacing: '-0.5px',
-              paddingBottom: '8px',
-              borderBottom: '3px solid var(--sm-red)',
-              margin: '0 0 20px 0',
-            }}
-          >
-            Roster by Position
-          </h2>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(140px, 1fr))', gap: '10px' }}>
-            {(() => {
-              const groups: Record<string, number> = {}
-              players.forEach((p) => {
-                const g = p.positionGroup || p.side || 'Other'
-                groups[g] = (groups[g] || 0) + 1
-              })
-              return Object.entries(groups)
-                .sort((a, b) => b[1] - a[1])
-                .map(([group, count]) => (
+        {/* Top 5 Cap Hits */}
+        {hasContracts && topFive.length > 0 && (
+          <section style={{ marginBottom: '32px' }}>
+            <h2
+              style={{
+                fontFamily: "'Space Grotesk', sans-serif",
+                color: 'var(--sm-text)',
+                fontSize: '22px',
+                fontWeight: 700,
+                letterSpacing: '-0.5px',
+                paddingBottom: '8px',
+                borderBottom: '3px solid var(--sm-red)',
+                margin: '0 0 20px 0',
+              }}
+            >
+              Top Cap Hits
+            </h2>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+              {topFive.map((p, idx) => {
+                const barWidth = ((p.cap_hit || 0) / maxHit) * 100
+                return (
                   <div
-                    key={group}
+                    key={p.player_id}
                     className="glass-card glass-card-sm glass-card-static"
-                    style={{ padding: '14px', textAlign: 'center' }}
+                    style={{ padding: '12px 16px', display: 'flex', alignItems: 'center', gap: '12px' }}
                   >
-                    <div
+                    <span
                       style={{
-                        fontFamily: "'Space Grotesk', sans-serif",
-                        fontSize: '22px',
+                        width: '20px',
+                        fontSize: '13px',
                         fontWeight: 700,
-                        color: 'var(--sm-text)',
+                        color: idx === 0 ? '#C83200' : 'var(--sm-text-dim)',
+                        flexShrink: 0,
+                        textAlign: 'center',
                       }}
                     >
-                      {count}
+                      {idx + 1}
+                    </span>
+                    <div
+                      style={{
+                        width: '32px',
+                        height: '32px',
+                        borderRadius: '50%',
+                        overflow: 'hidden',
+                        flexShrink: 0,
+                        border: '2px solid var(--sm-border)',
+                        background: 'var(--sm-surface)',
+                      }}
+                    >
+                      {p.headshot_url ? (
+                        <Image
+                          src={p.headshot_url}
+                          alt={p.name}
+                          width={32}
+                          height={32}
+                          style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                        />
+                      ) : (
+                        <div
+                          style={{
+                            width: '100%',
+                            height: '100%',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                          }}
+                        >
+                          <svg width="16" height="16" fill="none" stroke="currentColor" strokeWidth={1.5} viewBox="0 0 24 24" style={{ color: 'var(--sm-text-dim)' }}>
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0" />
+                          </svg>
+                        </div>
+                      )}
                     </div>
-                    <div style={{ fontSize: '12px', color: 'var(--sm-text-muted)', fontWeight: 600 }}>
-                      {group}
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '4px' }}>
+                        <span
+                          style={{
+                            fontFamily: "'Space Grotesk', sans-serif",
+                            fontSize: '14px',
+                            fontWeight: 600,
+                            color: 'var(--sm-text)',
+                            whiteSpace: 'nowrap',
+                            overflow: 'hidden',
+                            textOverflow: 'ellipsis',
+                          }}
+                        >
+                          {p.name}
+                          {p.position && (
+                            <span style={{ color: 'var(--sm-text-dim)', fontWeight: 400, marginLeft: '6px', fontSize: '12px' }}>
+                              {p.position}
+                            </span>
+                          )}
+                        </span>
+                        <span
+                          style={{
+                            fontFamily: "'Space Grotesk', sans-serif",
+                            fontSize: '14px',
+                            fontWeight: 700,
+                            color: '#C83200',
+                            flexShrink: 0,
+                            marginLeft: '8px',
+                          }}
+                        >
+                          {formatMoney(p.cap_hit)}
+                        </span>
+                      </div>
+                      <div
+                        style={{
+                          width: '100%',
+                          height: '6px',
+                          borderRadius: '3px',
+                          backgroundColor: 'var(--sm-surface)',
+                          overflow: 'hidden',
+                        }}
+                      >
+                        <div
+                          style={{
+                            height: '100%',
+                            width: `${barWidth}%`,
+                            backgroundColor: '#C83200',
+                            borderRadius: '3px',
+                            opacity: 1 - idx * 0.12,
+                          }}
+                        />
+                      </div>
                     </div>
                   </div>
-                ))
-            })()}
-          </div>
-        </section>
+                )
+              })}
+            </div>
+          </section>
+        )}
 
-        {/* Placeholder: Cap data coming from DataLab */}
-        <section>
-          <h2
-            style={{
-              fontFamily: "'Space Grotesk', sans-serif",
-              color: 'var(--sm-text)',
-              fontSize: '22px',
-              fontWeight: 700,
-              letterSpacing: '-0.5px',
-              paddingBottom: '8px',
-              borderBottom: '3px solid var(--sm-red)',
-              margin: '0 0 20px 0',
-            }}
-          >
-            Contract Details
-          </h2>
-          <div
-            className="glass-card glass-card-static"
-            style={{ textAlign: 'center', padding: '48px 24px' }}
-          >
-            <svg
-              width="48"
-              height="48"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth={1.5}
-              viewBox="0 0 24 24"
-              style={{ color: 'var(--sm-text-dim)', margin: '0 auto 16px' }}
+        {/* Position Group Breakdown */}
+        {hasContracts && Object.keys(groupTotals).length > 0 && (
+          <section style={{ marginBottom: '32px' }}>
+            <h2
+              style={{
+                fontFamily: "'Space Grotesk', sans-serif",
+                color: 'var(--sm-text)',
+                fontSize: '22px',
+                fontWeight: 700,
+                letterSpacing: '-0.5px',
+                paddingBottom: '8px',
+                borderBottom: '3px solid var(--sm-red)',
+                margin: '0 0 20px 0',
+              }}
             >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                d="M12 6v12m-3-2.818l.879.659c1.171.879 3.07.879 4.242 0 1.172-.879 1.172-2.303 0-3.182C13.536 12.219 12.768 12 12 12c-.725 0-1.45-.22-2.003-.659-1.106-.879-1.106-2.303 0-3.182s2.9-.879 4.006 0l.415.33M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-              />
-            </svg>
-            <p style={{ color: 'var(--sm-text-muted)', fontSize: '16px', margin: '0 0 8px 0' }}>
-              Detailed contract data coming soon
-            </p>
-            <p style={{ color: 'var(--sm-text-dim)', fontSize: '13px', margin: 0 }}>
-              Cap hits, dead money, and contract details will be populated by DataLab.
-            </p>
-          </div>
-        </section>
+              Cap Spend by Unit
+            </h2>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(180px, 1fr))', gap: '10px' }}>
+              {Object.entries(groupTotals)
+                .sort((a, b) => b[1] - a[1])
+                .map(([group, total]) => {
+                  const pct = cap ? ((total / cap.total_committed) * 100).toFixed(1) : '0'
+                  return (
+                    <div
+                      key={group}
+                      className="glass-card glass-card-sm glass-card-static"
+                      style={{ padding: '16px', textAlign: 'center' }}
+                    >
+                      <div
+                        style={{
+                          fontFamily: "'Space Grotesk', sans-serif",
+                          fontSize: '22px',
+                          fontWeight: 700,
+                          color: 'var(--sm-text)',
+                        }}
+                      >
+                        {formatMoney(total)}
+                      </div>
+                      <div style={{ fontSize: '12px', color: 'var(--sm-text-muted)', fontWeight: 600, marginTop: '2px' }}>
+                        {group}
+                      </div>
+                      <div style={{ fontSize: '11px', color: 'var(--sm-text-dim)', marginTop: '2px' }}>
+                        {pct}% of total
+                      </div>
+                    </div>
+                  )
+                })}
+            </div>
+          </section>
+        )}
+
+        {/* Full Contracts Table */}
+        {hasContracts ? (
+          <section style={{ marginBottom: '32px' }}>
+            <h2
+              style={{
+                fontFamily: "'Space Grotesk', sans-serif",
+                color: 'var(--sm-text)',
+                fontSize: '22px',
+                fontWeight: 700,
+                letterSpacing: '-0.5px',
+                paddingBottom: '8px',
+                borderBottom: '3px solid var(--sm-red)',
+                margin: '0 0 20px 0',
+              }}
+            >
+              Contract Details
+            </h2>
+            <div
+              style={{
+                background: 'var(--sm-card)',
+                border: '1px solid var(--sm-border)',
+                borderRadius: '16px',
+                overflow: 'hidden',
+              }}
+            >
+              {/* Table Header */}
+              <div
+                style={{
+                  display: 'grid',
+                  gridTemplateColumns: '2fr 0.5fr 1fr 1fr 1fr 0.7fr 0.7fr',
+                  padding: '12px 16px',
+                  backgroundColor: 'var(--sm-surface)',
+                  borderBottom: '1px solid var(--sm-border)',
+                  fontSize: '11px',
+                  fontWeight: 700,
+                  textTransform: 'uppercase',
+                  letterSpacing: '0.5px',
+                  color: 'var(--sm-text-dim)',
+                  gap: '8px',
+                }}
+              >
+                <div>Player</div>
+                <div>Pos</div>
+                <div style={{ textAlign: 'right' }}>Cap Hit</div>
+                <div style={{ textAlign: 'right' }}>Base Salary</div>
+                <div style={{ textAlign: 'right' }}>Dead Cap</div>
+                <div style={{ textAlign: 'center' }}>Years</div>
+                <div style={{ textAlign: 'center' }}>FA Year</div>
+              </div>
+
+              {/* Table Rows */}
+              {rows.map((row, idx) => (
+                <div
+                  key={row.player_id}
+                  style={{
+                    display: 'grid',
+                    gridTemplateColumns: '2fr 0.5fr 1fr 1fr 1fr 0.7fr 0.7fr',
+                    padding: '10px 16px',
+                    borderBottom: idx < rows.length - 1 ? '1px solid var(--sm-border)' : 'none',
+                    alignItems: 'center',
+                    fontSize: '13px',
+                    gap: '8px',
+                    backgroundColor: idx % 2 === 0 ? 'transparent' : 'rgba(255,255,255,0.01)',
+                  }}
+                >
+                  {/* Player */}
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', minWidth: 0 }}>
+                    <div
+                      style={{
+                        width: '28px',
+                        height: '28px',
+                        borderRadius: '50%',
+                        overflow: 'hidden',
+                        flexShrink: 0,
+                        border: '1px solid var(--sm-border)',
+                        background: 'var(--sm-surface)',
+                      }}
+                    >
+                      {row.headshot_url ? (
+                        <Image
+                          src={row.headshot_url}
+                          alt={row.name}
+                          width={28}
+                          height={28}
+                          style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                        />
+                      ) : (
+                        <div
+                          style={{
+                            width: '100%',
+                            height: '100%',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                          }}
+                        >
+                          <svg width="14" height="14" fill="none" stroke="currentColor" strokeWidth={1.5} viewBox="0 0 24 24" style={{ color: 'var(--sm-text-dim)' }}>
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0" />
+                          </svg>
+                        </div>
+                      )}
+                    </div>
+                    <span
+                      style={{
+                        fontFamily: "'Space Grotesk', sans-serif",
+                        fontWeight: 600,
+                        color: 'var(--sm-text)',
+                        whiteSpace: 'nowrap',
+                        overflow: 'hidden',
+                        textOverflow: 'ellipsis',
+                      }}
+                    >
+                      {row.name}
+                    </span>
+                  </div>
+                  {/* Position */}
+                  <div style={{ color: 'var(--sm-text-muted)', fontSize: '12px' }}>{row.position}</div>
+                  {/* Cap Hit */}
+                  <div style={{ textAlign: 'right', fontWeight: 700, color: 'var(--sm-text)', fontFamily: "'Space Grotesk', sans-serif" }}>
+                    {formatMoney(row.cap_hit)}
+                  </div>
+                  {/* Base Salary */}
+                  <div style={{ textAlign: 'right', color: 'var(--sm-text-muted)' }}>
+                    {formatMoney(row.base_salary)}
+                  </div>
+                  {/* Dead Cap */}
+                  <div style={{ textAlign: 'right', color: 'var(--sm-text-muted)' }}>
+                    {formatMoney(row.dead_cap)}
+                  </div>
+                  {/* Years Left */}
+                  <div style={{ textAlign: 'center', color: 'var(--sm-text-muted)' }}>
+                    {row.contract_years != null ? `${row.contract_years} yr` : '--'}
+                  </div>
+                  {/* FA Year */}
+                  <div style={{ textAlign: 'center', color: 'var(--sm-text-muted)' }}>
+                    {row.free_agent_year ?? '--'}
+                  </div>
+                </div>
+              ))}
+            </div>
+            <div style={{ fontSize: '12px', color: 'var(--sm-text-dim)', marginTop: '8px' }}>
+              {rows.length} player{rows.length !== 1 ? 's' : ''} with cap hits
+            </div>
+          </section>
+        ) : (
+          <section style={{ marginBottom: '32px' }}>
+            <h2
+              style={{
+                fontFamily: "'Space Grotesk', sans-serif",
+                color: 'var(--sm-text)',
+                fontSize: '22px',
+                fontWeight: 700,
+                letterSpacing: '-0.5px',
+                paddingBottom: '8px',
+                borderBottom: '3px solid var(--sm-red)',
+                margin: '0 0 20px 0',
+              }}
+            >
+              Contract Details
+            </h2>
+            <div
+              className="glass-card glass-card-static"
+              style={{ textAlign: 'center', padding: '48px 24px' }}
+            >
+              <svg
+                width="48"
+                height="48"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth={1.5}
+                viewBox="0 0 24 24"
+                style={{ color: 'var(--sm-text-dim)', margin: '0 auto 16px' }}
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="M12 6v12m-3-2.818l.879.659c1.171.879 3.07.879 4.242 0 1.172-.879 1.172-2.303 0-3.182C13.536 12.219 12.768 12 12 12c-.725 0-1.45-.22-2.003-.659-1.106-.879-1.106-2.303 0-3.182s2.9-.879 4.006 0l.415.33M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                />
+              </svg>
+              <p style={{ color: 'var(--sm-text-muted)', fontSize: '16px', margin: '0 0 8px 0' }}>
+                Contract data loading...
+              </p>
+              <p style={{ color: 'var(--sm-text-dim)', fontSize: '13px', margin: 0 }}>
+                Cap hits, dead money, and contract details are synced from Spotrac twice daily.
+              </p>
+            </div>
+          </section>
+        )}
 
         {/* Ask Scout CTA */}
         <div
@@ -309,5 +701,58 @@ export default async function BearsCapTrackerPage() {
         </div>
       </div>
     </TeamHubLayout>
+  )
+}
+
+function CapCard({
+  label,
+  value,
+  subtitle,
+  color,
+}: {
+  label: string
+  value: string
+  subtitle?: string
+  color?: string
+}) {
+  return (
+    <div className="glass-card glass-card-sm glass-card-static" style={{ textAlign: 'center', padding: '20px' }}>
+      <div
+        style={{
+          fontFamily: "'Space Grotesk', sans-serif",
+          fontSize: '28px',
+          fontWeight: 700,
+          color: color || 'var(--sm-text)',
+        }}
+      >
+        {value}
+      </div>
+      {subtitle && (
+        <div
+          style={{
+            fontSize: '10px',
+            fontWeight: 700,
+            color: color || 'var(--sm-text-dim)',
+            textTransform: 'uppercase',
+            letterSpacing: '1px',
+            marginTop: '2px',
+          }}
+        >
+          {subtitle}
+        </div>
+      )}
+      <div
+        style={{
+          fontSize: '11px',
+          textTransform: 'uppercase',
+          letterSpacing: '1px',
+          color: 'var(--sm-text-dim)',
+          fontWeight: 600,
+          marginTop: subtitle ? '4px' : '0',
+        }}
+      >
+        {label}
+      </div>
+    </div>
   )
 }
