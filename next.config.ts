@@ -47,6 +47,21 @@ const nextConfig: NextConfig = {
     optimizePackageImports: ['date-fns', '@supabase/supabase-js'],
   },
 
+  // Redirects for legacy WordPress routes
+  async redirects() {
+    return [
+      { source: '/home', destination: '/', permanent: true },
+      { source: '/home/:path*', destination: '/', permanent: true },
+      { source: '/category/chicago-bears/:path*', destination: '/chicago-bears', permanent: true },
+      { source: '/category/chicago-bulls/:path*', destination: '/chicago-bulls', permanent: true },
+      { source: '/category/chicago-cubs/:path*', destination: '/chicago-cubs', permanent: true },
+      { source: '/category/chicago-white-sox/:path*', destination: '/chicago-white-sox', permanent: true },
+      { source: '/category/chicago-blackhawks/:path*', destination: '/chicago-blackhawks', permanent: true },
+      { source: '/category/:path*', destination: '/', permanent: true },
+      { source: '/chat', destination: '/fan-chat', permanent: true },
+    ]
+  },
+
   // Headers for caching and security
   async headers() {
     return [

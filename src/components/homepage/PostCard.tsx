@@ -14,10 +14,12 @@ interface Post {
   team_slug: string | null;
   category_slug: string | null;
   author_name: string | null;
+  author_avatar_url: string | null;
   published_at: string;
   content_type: string;
   is_trending: boolean;
   is_evergreen: boolean;
+  views: number | null;
 }
 
 interface PostCardProps {
@@ -72,6 +74,12 @@ function markAsRead(slug: string) {
       localStorage.setItem('sm-read-articles', JSON.stringify(arr));
     }
   } catch {}
+}
+
+function formatViews(views: number): string {
+  if (views >= 1000000) return `${(views / 1000000).toFixed(1)}M`;
+  if (views >= 1000) return `${(views / 1000).toFixed(1)}K`;
+  return views.toString();
 }
 
 export function PostCard({ post, priority = false }: PostCardProps) {
@@ -130,9 +138,23 @@ export function PostCard({ post, priority = false }: PostCardProps) {
           )}
           {post.excerpt && <p className="card-excerpt">{post.excerpt}</p>}
           <div className="card-meta">
-            <div className="author-avatar" />
+            {post.author_avatar_url ? (
+              <Image
+                src={post.author_avatar_url}
+                alt=""
+                width={24}
+                height={24}
+                className="author-avatar-img"
+                unoptimized
+              />
+            ) : (
+              <div className="author-avatar" />
+            )}
             <span>
               {post.author_name || 'Sports Mockery'} &middot; {recencyLabel}
+              {post.views != null && post.views > 0 && (
+                <> &middot; {formatViews(post.views)} views</>
+              )}
             </span>
           </div>
         </div>

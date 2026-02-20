@@ -15,10 +15,12 @@ interface Post {
   team_slug: string;
   category_slug: string | null;
   author_name: string | null;
+  author_avatar_url: string | null;
   published_at: string;
   content_type: string;
   is_trending: boolean;
   is_evergreen: boolean;
+  views: number | null;
 }
 
 interface ForYouFeedProps {

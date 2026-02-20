@@ -34,7 +34,7 @@ async function getHomepageData() {
   // (sm_posts doesn't have editor_pick or pinned_slot columns)
   const { data: editorPicksRaw = [] } = await supabase
     .from('sm_posts')
-    .select('id, title, slug, featured_image, excerpt, category:sm_categories!category_id(slug)')
+    .select('id, title, slug, featured_image, excerpt, views, author:sm_authors!author_id(display_name, avatar_url), category:sm_categories!category_id(slug)')
     .eq('status', 'published')
     .order('importance_score', { ascending: false })
     .limit(6)
@@ -42,10 +42,13 @@ async function getHomepageData() {
   // Map to include team_slug and category_slug derived from category
   const editorPicks = (editorPicksRaw || []).map((post: any, index: number) => {
     const cat = Array.isArray(post.category) ? post.category[0] : post.category
+    const auth = Array.isArray(post.author) ? post.author[0] : post.author
     return {
       ...post,
       team_slug: getTeamSlug(post.category),
       category_slug: cat?.slug || null,
+      author_name: auth?.display_name || null,
+      author_avatar_url: auth?.avatar_url || null,
       pinned_slot: index + 1 // Simulate pinned_slot for UI
     }
   })
@@ -56,7 +59,7 @@ async function getHomepageData() {
 
   const { data: trendingPostsRaw = [] } = await supabase
     .from('sm_posts')
-    .select('id, title, slug, views, published_at, importance_score, content_type, primary_topic, author_id, category:sm_categories!category_id(slug)')
+    .select('id, title, slug, views, published_at, importance_score, content_type, primary_topic, author:sm_authors!author_id(display_name, avatar_url), category:sm_categories!category_id(slug)')
     .eq('status', 'published')
     .gte('published_at', sevenDaysAgo.toISOString())
     .order('views', { ascending: false })
@@ -64,10 +67,13 @@ async function getHomepageData() {
 
   const trendingPosts = (trendingPostsRaw || []).map((post: any) => {
     const cat = Array.isArray(post.category) ? post.category[0] : post.category
+    const auth = Array.isArray(post.author) ? post.author[0] : post.author
     return {
       ...post,
       team_slug: getTeamSlug(post.category),
       category_slug: cat?.slug || null,
+      author_name: auth?.display_name || null,
+      author_avatar_url: auth?.avatar_url || null,
       is_evergreen: false // Default since column doesn't exist
     }
   })
@@ -80,7 +86,8 @@ async function getHomepageData() {
     .select(`
       id, title, slug, excerpt, featured_image,
       published_at, importance_score, content_type, primary_topic,
-      author_id, views,
+      views,
+      author:sm_authors!author_id(display_name, avatar_url),
       category:sm_categories!category_id(slug)
     `)
     .eq('status', 'published')
@@ -90,13 +97,15 @@ async function getHomepageData() {
   // 4) Add team_slug, category_slug, and flags for UI (no scoring)
   const postsWithFlags = (allPostsRaw || []).map((post: any) => {
     const cat = Array.isArray(post.category) ? post.category[0] : post.category
+    const auth = Array.isArray(post.author) ? post.author[0] : post.author
     return {
       ...post,
       team_slug: getTeamSlug(post.category),
       category_slug: cat?.slug || null,
       is_trending: trendingIds.has(post.id),
       is_evergreen: false, // Default since column doesn't exist
-      author_name: null
+      author_name: auth?.display_name || null,
+      author_avatar_url: auth?.avatar_url || null,
     }
   })
 

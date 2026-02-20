@@ -760,6 +760,14 @@
   height: 24px;
   border-radius: 50%;
   background: var(--sm-surface);
+  flex-shrink: 0;
+}
+.feed-card .card-body .card-meta .author-avatar-img {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  object-fit: cover;
+  flex-shrink: 0;
 }
 
 /* ========== Trending Sidebar (Desktop) ========== */

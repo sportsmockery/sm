@@ -38,7 +38,7 @@ export function BearsFilmRoomClient({ latestVideo, previousVideos }: Props) {
             <div className="sm-hero-text">
               <img src="/youtubelogos/bfr-wide.png" alt="Bears Film Room" style={{ marginBottom: '0.5rem', maxWidth: '320px', height: 'auto', display: 'block', marginLeft: 'auto', marginRight: 'auto' }} />
               <span className="sm-tag" style={{ display: 'inline-flex', margin: '0 auto 8px' }}>Bears Film Room</span>
-              <h1 style={{ fontSize: '36px', fontWeight: 700, color: '#fff', fontFamily: "'Space Grotesk', var(--font-heading), sans-serif", margin: '0 0 8px', textAlign: 'center' }}>
+              <h1 style={{ fontSize: '36px', fontWeight: 700, color: 'var(--sm-text)', fontFamily: "'Space Grotesk', var(--font-heading), sans-serif", margin: '0 0 8px', textAlign: 'center' }}>
                 Videos temporarily unavailable
               </h1>
               <p className="sm-hero-description">Please check back soon. We&apos;re having trouble loading the latest episodes.</p>
@@ -61,7 +61,7 @@ export function BearsFilmRoomClient({ latestVideo, previousVideos }: Props) {
           <div className="sm-hero-text">
             <img src="/youtubelogos/bfr-wide.png" alt="Bears Film Room" style={{ marginBottom: '0.5rem', maxWidth: '320px', height: 'auto', display: 'block', marginLeft: 'auto', marginRight: 'auto' }} />
             <span className="sm-tag" style={{ display: 'inline-flex', margin: '0 auto 8px' }}>Bears Film Room</span>
-            <h1 style={{ fontSize: '36px', fontWeight: 700, color: '#fff', fontFamily: "'Space Grotesk', var(--font-heading), sans-serif", margin: '0 0 8px', textAlign: 'center' }}>
+            <h1 style={{ fontSize: '36px', fontWeight: 700, color: 'var(--sm-text)', fontFamily: "'Space Grotesk', var(--font-heading), sans-serif", margin: '0 0 8px', textAlign: 'center' }}>
               {latestVideo.title}
             </h1>
             <p className="sm-hero-meta">{formatDate(latestVideo.publishedAt)} &middot; Latest episode</p>

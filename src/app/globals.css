@@ -1207,8 +1207,8 @@ p {
 }
 
 .sm-show-hero {
-  background-color: #050608;
-  color: #ffffff;
+  background-color: var(--sm-dark, #050608);
+  color: var(--sm-text);
   padding: 32px 0;
 }
 
