@@ -991,20 +991,32 @@ async function getLeaderboards(season: number, gameType: GameType = 'regular'): 
     def_tackles_total, def_sacks
   `
 
-  let { data: gameStats } = await datalabAdmin
+  // Fetch all stats for the season, then filter game_type in JS
+  // (game_type values are inconsistent: null, empty, 'regular', 'postseason', 'post', 'playoff')
+  let { data: allGameStats } = await datalabAdmin
     .from('bears_player_game_stats')
     .select(leaderboardColumns)
     .eq('season', season)
-    .eq('game_type', gameType)
+
+  // Filter by game type in JS for reliability
+  let gameStats = (allGameStats || []).filter((g: any) => {
+    const gt = (g.game_type || '').toLowerCase()
+    if (gameType === 'postseason') {
+      return gt === 'postseason' || gt === 'post' || gt === 'playoff'
+    }
+    return gt === 'regular' || gt === '' || !g.game_type
+  })
 
   // Fallback to previous season if no stats (only for regular season)
-  if ((!gameStats || gameStats.length === 0) && gameType === 'regular') {
+  if (gameStats.length === 0 && gameType === 'regular') {
     const { data: prevStats } = await datalabAdmin
       .from('bears_player_game_stats')
       .select(leaderboardColumns)
       .eq('season', season - 1)
-      .eq('game_type', 'regular')
-    gameStats = prevStats
+    gameStats = (prevStats || []).filter((g: any) => {
+      const gt = (g.game_type || '').toLowerCase()
+      return gt === 'regular' || gt === '' || !g.game_type
+    })
   }
 
   if (!gameStats || gameStats.length === 0) {
