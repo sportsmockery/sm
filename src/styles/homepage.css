@@ -225,12 +225,12 @@
 
 /* Feed section: tighter top padding, sidebar starts here */
 .feed-section {
-  padding: 32px 0 60px;
+  padding: 16px 0 60px;
   position: relative;
 }
 
 .feed-section .section-header {
-  margin-bottom: 32px;
+  margin-bottom: 24px;
 }
 
 .homepage-section .section-header h2,
@@ -404,13 +404,14 @@
   flex-shrink: 0;
   position: sticky;
   top: 80px;
-  height: calc(100vh - 96px);
+  max-height: calc(100vh - 96px);
   overflow-y: auto;
   scrollbar-width: thin;
   scrollbar-color: rgba(255,255,255,0.08) transparent;
   display: flex;
   flex-direction: column;
   gap: 24px;
+  padding-bottom: 24px;
 }
 
 .sidebar::-webkit-scrollbar {
@@ -1075,7 +1076,7 @@
   }
 
   .feed-section {
-    padding: 24px 0 40px;
+    padding: 12px 0 40px;
   }
 
   .feed-grid {
@@ -1957,7 +1958,7 @@ html {
   justify-content: center;
   gap: 12px;
   padding: 10px 20px;
-  margin-bottom: 20px;
+  margin-bottom: 8px;
   border-radius: 10px;
   font-size: 14px;
   color: var(--sm-text-muted);
