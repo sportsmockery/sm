@@ -1046,7 +1046,7 @@ async function getLeaderboards(season: number, gameType: GameType = 'regular'): 
     totals.rec += (stat.receiving_receptions ?? stat.receiving_rec ?? 0)
     totals.tackles += (stat.defensive_total_tackles ?? stat.def_tackles_total ?? 0)
     totals.sacks += parseFloat(stat.defensive_sacks ?? stat.def_sacks) || 0
-    totals.interceptions += (stat.def_int ?? 0)
+    totals.interceptions += (stat.defensive_interceptions ?? stat.def_int ?? stat.interceptions ?? 0)
     totals.games_played += 1
   }
 
