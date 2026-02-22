@@ -542,24 +542,51 @@ export async function getBullsSchedule(season?: number): Promise<BullsGame[]> {
       .order('game_date', { ascending: false })
 
     if (prevError || !prevData) return []
-    // Only include regular season + postseason games (whitelist approach)
-    const filtered = prevData.filter((g: any) => {
-      const gt = (g.game_type || '').toUpperCase()
-      // Include: null, empty, 'REGULAR', 'REGULAR SEASON', 'POST', 'POSTSEASON', 'PLAYOFF', 'PLAYOFFS'
-      // Exclude everything else: preseason, All-Star, NBA Cup/IST, exhibition, etc.
-      return !gt || gt === 'REGULAR' || gt === 'REGULAR SEASON' || gt === 'POST' || gt === 'POSTSEASON' || gt === 'PLAYOFF' || gt === 'PLAYOFFS'
-    })
-    return filtered.map((g: any) => transformGame(g))
+    // Deduplicate by game_date and filter out bad data
+    const prevSeenDates = new Map<string, any>()
+    for (const g of prevData) {
+      const date = g.game_date
+      const existing = prevSeenDates.get(date)
+      if (!existing) {
+        prevSeenDates.set(date, g)
+      } else {
+        const existingHasScore = (existing.bulls_score ?? 0) > 0 || (existing.opponent_score ?? 0) > 0
+        const newHasScore = (g.bulls_score ?? 0) > 0 || (g.opponent_score ?? 0) > 0
+        if (newHasScore && !existingHasScore) {
+          prevSeenDates.set(date, g)
+        }
+      }
+    }
+    const prevDeduped = Array.from(prevSeenDates.values()).filter(
+      (g: any) => g.opponent_full_name !== 'Unknown'
+    )
+    return prevDeduped.map((g: any) => transformGame(g))
   }
 
-  // Only include regular season + postseason games (whitelist approach)
-  // NBA regular season is exactly 82 games — exclude NBA Cup, All-Star, preseason, etc.
-  const filtered = data.filter((g: any) => {
-    const gt = (g.game_type || '').toUpperCase()
-    return !gt || gt === 'REGULAR' || gt === 'REGULAR SEASON' || gt === 'POST' || gt === 'POSTSEASON' || gt === 'PLAYOFF' || gt === 'PLAYOFFS'
-  })
+  // Deduplicate by game_date — NBA teams never play two games on the same day
+  // DB may have duplicate entries (e.g. same date, different opponents); keep the one with scores
+  const seenDates = new Map<string, any>()
+  for (const g of data) {
+    const date = g.game_date
+    const existing = seenDates.get(date)
+    if (!existing) {
+      seenDates.set(date, g)
+    } else {
+      // Keep the entry with scores (or the one with a real opponent name)
+      const existingHasScore = (existing.bulls_score ?? 0) > 0 || (existing.opponent_score ?? 0) > 0
+      const newHasScore = (g.bulls_score ?? 0) > 0 || (g.opponent_score ?? 0) > 0
+      if (newHasScore && !existingHasScore) {
+        seenDates.set(date, g)
+      }
+    }
+  }
 
-  return filtered.map((g: any) => transformGame(g))
+  // Also filter out entries with opponent "Unknown" (bad data)
+  const deduped = Array.from(seenDates.values()).filter(
+    (g: any) => g.opponent_full_name !== 'Unknown'
+  )
+
+  return deduped.map((g: any) => transformGame(g))
 }
 
 // Format time from 24-hour (17:30:00) to 12-hour (5:30 PM CT)
