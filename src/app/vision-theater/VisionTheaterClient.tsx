@@ -838,7 +838,7 @@ export default function VisionTheaterClient({ data }: { data: VisionTheaterData 
             }}
           >
             {channelFilter === 'all'
-              ? 'Videos & Live'
+              ? 'Latest Videos'
               : CHANNEL_FILTERS.find((f) => f.slug === channelFilter)?.label ?? 'Videos'}
           </h2>
           <span style={{ fontSize: '13px', color: '#55556a' }}>
