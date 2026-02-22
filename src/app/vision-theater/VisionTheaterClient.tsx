@@ -327,6 +327,44 @@ export default function VisionTheaterClient({ data }: { data: VisionTheaterData 
 
   const isDark = theme === 'dark'
 
+  // Generate 1000 floating orbs with randomized properties
+  const orbs = useMemo(() => {
+    // Seeded pseudo-random for consistent SSR/CSR
+    const seed = (n: number) => {
+      let s = n
+      return () => {
+        s = (s * 16807 + 0) % 2147483647
+        return (s - 1) / 2147483646
+      }
+    }
+    const rand = seed(42)
+
+    return Array.from({ length: 1000 }, (_, i) => {
+      const r = rand()
+      const size = r < 0.7 ? 2 + rand() * 4 : r < 0.95 ? 5 + rand() * 8 : 10 + rand() * 18
+      const x = rand() * 100
+      const y = rand() * 100
+      const duration = 4 + rand() * 14
+      const delay = rand() * -20
+      const driftX = -30 + rand() * 60
+      const driftY = -30 + rand() * 60
+      const opacity = size > 10 ? 0.15 + rand() * 0.25 : size > 5 ? 0.2 + rand() * 0.4 : 0.3 + rand() * 0.5
+      // Color variety: mostly reds, some oranges/whites
+      const colorPick = rand()
+      const color =
+        colorPick < 0.5
+          ? `rgba(188,0,0,${opacity})`
+          : colorPick < 0.75
+            ? `rgba(255,68,68,${opacity})`
+            : colorPick < 0.9
+              ? `rgba(255,120,60,${opacity * 0.7})`
+              : `rgba(255,255,255,${opacity * 0.5})`
+      const blur = size > 8 ? 2 + rand() * 4 : size > 4 ? 0.5 + rand() * 2 : 0
+
+      return { i, size, x, y, duration, delay, driftX, driftY, color, blur }
+    })
+  }, [])
+
   return (
     <div
       style={{
@@ -348,38 +386,39 @@ export default function VisionTheaterClient({ data }: { data: VisionTheaterData 
           background: 'linear-gradient(135deg, rgba(188,0,0,0.15) 0%, rgba(5,5,8,1) 50%, rgba(255,68,68,0.05) 100%)',
         }}
       >
-        {/* Animated gradient orbs */}
+        {/* 1000 floating orbs */}
         <div
           style={{
             position: 'absolute',
-            top: '30%',
-            left: '20%',
-            width: '400px',
-            height: '400px',
-            borderRadius: '50%',
-            background: 'radial-gradient(circle, rgba(188,0,0,0.18) 0%, transparent 70%)',
-            transform: 'translate(-50%, -50%)',
-            filter: 'blur(80px)',
-            animation: 'orbFloat1 8s ease-in-out infinite',
+            inset: 0,
             pointerEvents: 'none',
+            overflow: 'hidden',
           }}
-        />
-        <div
-          style={{
-            position: 'absolute',
-            top: '60%',
-            left: '75%',
-            width: '350px',
-            height: '350px',
-            borderRadius: '50%',
-            background: 'radial-gradient(circle, rgba(255,68,68,0.12) 0%, transparent 70%)',
-            transform: 'translate(-50%, -50%)',
-            filter: 'blur(90px)',
-            animation: 'orbFloat2 10s ease-in-out infinite',
-            pointerEvents: 'none',
-          }}
-        />
-        <div style={{ position: 'relative', textAlign: 'center', padding: '48px 24px', maxWidth: '700px' }}>
+          aria-hidden="true"
+        >
+          {orbs.map((o) => (
+            <div
+              key={o.i}
+              className="vt-orb"
+              style={{
+                position: 'absolute',
+                left: `${o.x}%`,
+                top: `${o.y}%`,
+                width: `${o.size}px`,
+                height: `${o.size}px`,
+                borderRadius: '50%',
+                background: o.color,
+                filter: o.blur > 0 ? `blur(${o.blur}px)` : undefined,
+                animation: `vtOrbDrift ${o.duration}s ease-in-out ${o.delay}s infinite`,
+                ['--drift-x' as string]: `${o.driftX}px`,
+                ['--drift-y' as string]: `${o.driftY}px`,
+                willChange: 'transform, opacity',
+              }}
+            />
+          ))}
+        </div>
+
+        <div style={{ position: 'relative', textAlign: 'center', padding: '48px 24px', maxWidth: '700px', zIndex: 1 }}>
           {/* Eyebrow pill — matches SM 2.0 homepage */}
           <div
             style={{
@@ -424,7 +463,6 @@ export default function VisionTheaterClient({ data }: { data: VisionTheaterData 
                 '0 0 10px rgba(188, 0, 0, 0.6), 0 0 40px rgba(188, 0, 0, 0.4), 0 0 80px rgba(188, 0, 0, 0.3), 0 0 140px rgba(188, 0, 0, 0.2), 0 0 200px rgba(188, 0, 0, 0.1)',
             }}
           >
-            Your Chicago<br />
             <span
               style={{
                 background: 'linear-gradient(135deg, #bc0000, #ff4444)',
@@ -433,8 +471,10 @@ export default function VisionTheaterClient({ data }: { data: VisionTheaterData 
                 backgroundClip: 'text',
               }}
             >
-              Sports Hub
+              Vision
             </span>
+            <br />
+            Theater
           </h1>
 
           <p
@@ -1438,13 +1478,23 @@ export default function VisionTheaterClient({ data }: { data: VisionTheaterData 
 
       {/* ========== CSS ANIMATION ========== */}
       <style jsx global>{`
-        @keyframes orbFloat1 {
-          0%, 100% { opacity: 0.5; transform: translate(-50%, -50%) scale(1) translateY(0); }
-          50% { opacity: 0.8; transform: translate(-50%, -50%) scale(1.15) translateY(-20px); }
-        }
-        @keyframes orbFloat2 {
-          0%, 100% { opacity: 0.4; transform: translate(-50%, -50%) scale(1) translateX(0); }
-          50% { opacity: 0.7; transform: translate(-50%, -50%) scale(1.1) translateX(-15px); }
+        @keyframes vtOrbDrift {
+          0%, 100% {
+            transform: translate(0, 0) scale(1);
+            opacity: 1;
+          }
+          25% {
+            transform: translate(calc(var(--drift-x) * 0.5), var(--drift-y)) scale(1.1);
+            opacity: 0.6;
+          }
+          50% {
+            transform: translate(var(--drift-x), calc(var(--drift-y) * 0.3)) scale(0.9);
+            opacity: 1;
+          }
+          75% {
+            transform: translate(calc(var(--drift-x) * 0.3), calc(var(--drift-y) * -0.5)) scale(1.05);
+            opacity: 0.7;
+          }
         }
         @keyframes vtEyebrowPulse {
           0%, 100% { opacity: 1; transform: scale(1); }
