@@ -4,8 +4,10 @@ import { useState, useEffect } from 'react'
 import type { HubItem, HubSlug, HubItemFormData } from '@/types/hub'
 import { HUB_PAGES, TEAM_OPTIONS } from '@/types/hub'
 
+const DEFAULT_TEAM = 'chicago-bears'
+
 const EMPTY_FORM: HubItemFormData = {
-  team_slug: 'chicago-bears',
+  team_slug: DEFAULT_TEAM,
   hub_slug: 'trade-rumors',
   status: 'draft',
   headline: '',
@@ -30,6 +32,7 @@ export default function AdminHubPage() {
   const [saving, setSaving] = useState(false)
   const [filter, setFilter] = useState<'all' | 'published' | 'draft'>('all')
   const [search, setSearch] = useState('')
+  const [selectedTeam, setSelectedTeam] = useState<string>('chicago-bears')
   const [selectedHub, setSelectedHub] = useState<HubSlug>('trade-rumors')
   const [showForm, setShowForm] = useState(false)
   const [editingId, setEditingId] = useState<string | null>(null)
@@ -37,13 +40,13 @@ export default function AdminHubPage() {
 
   useEffect(() => {
     fetchItems()
-  }, [selectedHub, filter])
+  }, [selectedHub, selectedTeam, filter])
 
   async function fetchItems() {
     try {
       setLoading(true)
       const params = new URLSearchParams({
-        team_slug: 'chicago-bears',
+        team_slug: selectedTeam,
         hub_slug: selectedHub,
       })
       if (filter !== 'all') params.set('status', filter)
@@ -59,7 +62,7 @@ export default function AdminHubPage() {
 
   function handleNewItem() {
     setEditingId(null)
-    setForm({ ...EMPTY_FORM, hub_slug: selectedHub, timestamp: new Date().toISOString().slice(0, 16) })
+    setForm({ ...EMPTY_FORM, team_slug: selectedTeam as any, hub_slug: selectedHub, timestamp: new Date().toISOString().slice(0, 16) })
     setShowForm(true)
   }
 
@@ -168,12 +171,12 @@ export default function AdminHubPage() {
       {/* Controls Row 1: Team + Hub Page */}
       <div style={{ display: 'flex', gap: 12, marginBottom: 16, flexWrap: 'wrap' }}>
         <select
-          value="chicago-bears"
-          disabled
+          value={selectedTeam}
+          onChange={e => setSelectedTeam(e.target.value)}
           style={{
             padding: '8px 12px', borderRadius: 8, fontSize: 14,
             background: 'var(--bg-card)', color: 'var(--text-primary)',
-            border: '1px solid var(--border-default)', cursor: 'not-allowed', opacity: 0.7,
+            border: '1px solid var(--border-default)',
           }}
         >
           {TEAM_OPTIONS.map(t => (

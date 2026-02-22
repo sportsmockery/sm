@@ -1,5 +1,5 @@
 export type HubSlug = 'trade-rumors' | 'draft-tracker' | 'cap-tracker' | 'depth-chart' | 'game-center'
-export type TeamSlug = 'chicago-bears'
+export type TeamSlug = 'chicago-bears' | 'chicago-bulls' | 'chicago-blackhawks' | 'chicago-cubs' | 'chicago-white-sox'
 export type HubItemStatus = 'draft' | 'published'
 
 export interface HubItem {
@@ -82,4 +82,8 @@ export const HUB_PAGES: { slug: HubSlug; label: string }[] = [
 
 export const TEAM_OPTIONS: { slug: TeamSlug; label: string }[] = [
   { slug: 'chicago-bears', label: 'Chicago Bears' },
+  { slug: 'chicago-bulls', label: 'Chicago Bulls' },
+  { slug: 'chicago-blackhawks', label: 'Chicago Blackhawks' },
+  { slug: 'chicago-cubs', label: 'Chicago Cubs' },
+  { slug: 'chicago-white-sox', label: 'Chicago White Sox' },
 ]
