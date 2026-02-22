@@ -7,16 +7,16 @@ import { datalabAdmin } from '@/lib/supabase-datalab'
 import { HubUpdatesFeed } from '@/components/hub'
 
 export const metadata: Metadata = {
-  title: 'Chicago Cubs Payroll Tracker 2025 | Sports Mockery',
+  title: 'Chicago Cubs Payroll Tracker 2026 | Sports Mockery',
   description:
     'Live Cubs payroll, contracts, luxury tax analysis.',
   openGraph: {
-    title: 'Chicago Cubs Payroll Tracker 2025',
+    title: 'Chicago Cubs Payroll Tracker 2026',
     description: 'Live Cubs payroll, contracts, luxury tax analysis.',
     type: 'website',
   },
   twitter: {
-    title: 'Chicago Cubs Payroll Tracker 2025',
+    title: 'Chicago Cubs Payroll Tracker 2026',
     description: 'Live Cubs payroll, contracts, luxury tax analysis.',
   },
 }
@@ -61,21 +61,19 @@ interface CapSummary {
   total_committed: number
   cap_space: number
   dead_money: number
-  top_51_cap: number
   updated_at: string
 }
 
 interface ContractRow {
   player_id: string
+  player_name: string
+  position: string
+  age: number | null
   cap_hit: number | null
   base_salary: number | null
   dead_cap: number | null
   contract_years: number | null
   free_agent_year: number | null
-  name: string
-  position: string
-  headshot_url: string | null
-  jersey_number: number | null
 }
 
 export default async function CubsCapTrackerPage() {
@@ -87,41 +85,17 @@ export default async function CubsCapTrackerPage() {
     datalabAdmin
       .from('cubs_salary_cap')
       .select('*')
-      .eq('season', 2025)
+      .eq('season', 2026)
       .single(),
     datalabAdmin
       .from('cubs_contracts')
-      .select('player_id, cap_hit, base_salary, dead_cap, contract_years, free_agent_year, updated_at')
-      .eq('season', 2025)
+      .select('player_id, player_name, position, age, cap_hit, base_salary, dead_cap, contract_years, free_agent_year')
+      .eq('season', 2026)
       .order('cap_hit', { ascending: false }),
   ])
 
   const cap: CapSummary | null = capResult.data
-  const contracts = contractsResult.data || []
-
-  // Fetch player details for contracts
-  const playerIds = contracts.map((c: { player_id: string }) => c.player_id).filter(Boolean)
-  let playerMap = new Map<string, { name: string; position: string; headshot_url: string | null; jersey_number: number | null }>()
-
-  if (playerIds.length > 0) {
-    const { data: players } = await datalabAdmin
-      .from('cubs_players')
-      .select('espn_id, name, position, headshot_url, jersey_number')
-      .in('espn_id', playerIds)
-
-    if (players) {
-      playerMap = new Map(players.map((p: { espn_id: string; name: string; position: string; headshot_url: string | null; jersey_number: number | null }) => [p.espn_id, p]))
-    }
-  }
-
-  // Merge contracts with player data
-  const rows: ContractRow[] = contracts.map((c: { player_id: string; cap_hit: number | null; base_salary: number | null; dead_cap: number | null; contract_years: number | null; free_agent_year: number | null }) => ({
-    ...c,
-    name: playerMap.get(c.player_id)?.name || 'Unknown',
-    position: playerMap.get(c.player_id)?.position || '',
-    headshot_url: playerMap.get(c.player_id)?.headshot_url || null,
-    jersey_number: playerMap.get(c.player_id)?.jersey_number || null,
-  }))
+  const rows: ContractRow[] = (contractsResult.data || []) as ContractRow[]
 
   const isOverThreshold = cap ? cap.cap_space < 0 : false
   const topFive = rows.slice(0, 5)
@@ -175,7 +149,7 @@ export default async function CubsCapTrackerPage() {
             )}
           </div>
           <p style={{ color: 'var(--sm-text-muted)', fontSize: '16px', margin: 0, lineHeight: 1.6 }}>
-            Live payroll, contract breakdowns, and position spending for the 2025 season.
+            Live payroll, contract breakdowns, and position spending for the 2026 season.
           </p>
         </div>
 
@@ -338,29 +312,19 @@ export default async function CubsCapTrackerPage() {
                         background: 'var(--sm-surface)',
                       }}
                     >
-                      {p.headshot_url ? (
-                        <Image
-                          src={p.headshot_url}
-                          alt={p.name}
-                          width={32}
-                          height={32}
-                          style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-                        />
-                      ) : (
-                        <div
-                          style={{
-                            width: '100%',
-                            height: '100%',
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                          }}
-                        >
-                          <svg width="16" height="16" fill="none" stroke="currentColor" strokeWidth={1.5} viewBox="0 0 24 24" style={{ color: 'var(--sm-text-dim)' }}>
-                            <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0" />
-                          </svg>
-                        </div>
-                      )}
+                      <div
+                        style={{
+                          width: '100%',
+                          height: '100%',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                        }}
+                      >
+                        <svg width="16" height="16" fill="none" stroke="currentColor" strokeWidth={1.5} viewBox="0 0 24 24" style={{ color: 'var(--sm-text-dim)' }}>
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0" />
+                        </svg>
+                      </div>
                     </div>
                     <div style={{ flex: 1, minWidth: 0 }}>
                       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '4px' }}>
@@ -375,7 +339,7 @@ export default async function CubsCapTrackerPage() {
                             textOverflow: 'ellipsis',
                           }}
                         >
-                          {p.name}
+                          {p.player_name}
                           {p.position && (
                             <span style={{ color: 'var(--sm-text-dim)', fontWeight: 400, marginLeft: '6px', fontSize: '12px' }}>
                               {p.position}
@@ -551,29 +515,19 @@ export default async function CubsCapTrackerPage() {
                         background: 'var(--sm-surface)',
                       }}
                     >
-                      {row.headshot_url ? (
-                        <Image
-                          src={row.headshot_url}
-                          alt={row.name}
-                          width={28}
-                          height={28}
-                          style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-                        />
-                      ) : (
-                        <div
-                          style={{
-                            width: '100%',
-                            height: '100%',
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                          }}
-                        >
-                          <svg width="14" height="14" fill="none" stroke="currentColor" strokeWidth={1.5} viewBox="0 0 24 24" style={{ color: 'var(--sm-text-dim)' }}>
-                            <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0" />
-                          </svg>
-                        </div>
-                      )}
+                      <div
+                        style={{
+                          width: '100%',
+                          height: '100%',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                        }}
+                      >
+                        <svg width="14" height="14" fill="none" stroke="currentColor" strokeWidth={1.5} viewBox="0 0 24 24" style={{ color: 'var(--sm-text-dim)' }}>
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0" />
+                        </svg>
+                      </div>
                     </div>
                     <span
                       style={{
@@ -585,7 +539,7 @@ export default async function CubsCapTrackerPage() {
                         textOverflow: 'ellipsis',
                       }}
                     >
-                      {row.name}
+                      {row.player_name}
                     </span>
                   </div>
                   {/* Position */}

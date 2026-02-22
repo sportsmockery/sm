@@ -7,16 +7,16 @@ import { datalabAdmin } from '@/lib/supabase-datalab'
 import { HubUpdatesFeed } from '@/components/hub'
 
 export const metadata: Metadata = {
-  title: 'Chicago White Sox Payroll Tracker 2025 | Sports Mockery',
+  title: 'Chicago White Sox Payroll Tracker 2026 | Sports Mockery',
   description:
     'Live payroll, contracts, spending breakdown.',
   openGraph: {
-    title: 'Chicago White Sox Payroll Tracker 2025',
+    title: 'Chicago White Sox Payroll Tracker 2026',
     description: 'Live payroll, contracts, spending breakdown.',
     type: 'website',
   },
   twitter: {
-    title: 'Chicago White Sox Payroll Tracker 2025',
+    title: 'Chicago White Sox Payroll Tracker 2026',
     description: 'Live payroll, contracts, spending breakdown.',
   },
 }
@@ -57,26 +57,24 @@ function timeAgo(dateStr: string): string {
   return `Updated ${days} days ago`
 }
 
-interface PayrollSummary {
-  total_payroll: number | null
-  total_committed: number | null
-  payroll_space: number | null
-  dead_money: number | null
-  luxury_tax_threshold: number | null
+interface CapSummary {
+  total_cap: number
+  total_committed: number
+  cap_space: number
+  dead_money: number
   updated_at: string
 }
 
 interface ContractRow {
   player_id: string
+  player_name: string
+  position: string
+  age: number | null
   cap_hit: number | null
   base_salary: number | null
   dead_cap: number | null
   contract_years: number | null
   free_agent_year: number | null
-  name: string
-  position: string
-  headshot_url: string | null
-  jersey_number: number | null
 }
 
 export default async function WhiteSoxPayrollTrackerPage() {
@@ -88,57 +86,23 @@ export default async function WhiteSoxPayrollTrackerPage() {
     datalabAdmin
       .from('whitesox_salary_cap')
       .select('*')
-      .eq('season', 2025)
+      .eq('season', 2026)
       .single(),
     datalabAdmin
       .from('whitesox_contracts')
-      .select('player_id, cap_hit, base_salary, dead_cap, contract_years, free_agent_year, updated_at')
-      .eq('season', 2025)
+      .select('player_id, player_name, position, age, cap_hit, base_salary, dead_cap, contract_years, free_agent_year')
+      .eq('season', 2026)
       .order('cap_hit', { ascending: false }),
   ])
 
-  const capData = capResult.data
-  const contracts = contractsResult.data || []
-
-  // Normalize cap data fields (MLB tables may use different column names)
-  const cap: PayrollSummary | null = capData ? {
-    total_payroll: capData.total_cap ?? capData.total_payroll ?? null,
-    total_committed: capData.total_committed ?? null,
-    payroll_space: capData.cap_space ?? capData.payroll_space ?? null,
-    dead_money: capData.dead_money ?? null,
-    luxury_tax_threshold: capData.luxury_tax_threshold ?? null,
-    updated_at: capData.updated_at || new Date().toISOString(),
-  } : null
-
-  // Fetch player details for contracts
-  const playerIds = contracts.map((c: { player_id: string }) => c.player_id).filter(Boolean)
-  let playerMap = new Map<string, { name: string; position: string; headshot_url: string | null; jersey_number: number | null }>()
-
-  if (playerIds.length > 0) {
-    const { data: players } = await datalabAdmin
-      .from('whitesox_players')
-      .select('espn_id, name, position, headshot_url, jersey_number')
-      .in('espn_id', playerIds)
-
-    if (players) {
-      playerMap = new Map(players.map((p: { espn_id: string; name: string; position: string; headshot_url: string | null; jersey_number: number | null }) => [p.espn_id, p]))
-    }
-  }
-
-  // Merge contracts with player data
-  const rows: ContractRow[] = contracts.map((c: { player_id: string; cap_hit: number | null; base_salary: number | null; dead_cap: number | null; contract_years: number | null; free_agent_year: number | null }) => ({
-    ...c,
-    name: playerMap.get(c.player_id)?.name || 'Unknown',
-    position: playerMap.get(c.player_id)?.position || '',
-    headshot_url: playerMap.get(c.player_id)?.headshot_url || null,
-    jersey_number: playerMap.get(c.player_id)?.jersey_number || null,
-  }))
+  const cap: CapSummary | null = capResult.data
+  const rows: ContractRow[] = (contractsResult.data || []) as ContractRow[]
 
   const topFive = rows.slice(0, 5)
   const maxHit = topFive[0]?.cap_hit || 1
-  const totalPayroll = cap?.total_payroll || cap?.total_committed || 0
   const totalCommitted = cap?.total_committed || 0
-  const usedPct = totalPayroll > 0 && totalCommitted > 0 ? (totalCommitted / totalPayroll) * 100 : 0
+  const totalCap = cap?.total_cap || 0
+  const usedPct = totalCap > 0 && totalCommitted > 0 ? (totalCommitted / totalCap) * 100 : 0
 
   // Position group breakdown
   const groupTotals = rows.reduce((acc, r) => {
@@ -186,7 +150,7 @@ export default async function WhiteSoxPayrollTrackerPage() {
             )}
           </div>
           <p style={{ color: 'var(--sm-text-muted)', fontSize: '16px', margin: 0, lineHeight: 1.6 }}>
-            Live payroll, contract breakdowns, and position spending for the 2025 season. MLB has no hard salary cap, but luxury tax thresholds apply.
+            Live payroll, contract breakdowns, and position spending for the 2026 season. MLB has no hard salary cap, but luxury tax thresholds apply.
           </p>
         </div>
 
@@ -200,15 +164,15 @@ export default async function WhiteSoxPayrollTrackerPage() {
               marginBottom: '24px',
             }}
           >
-            <CapCard label="Total Payroll" value={formatMoney(cap!.total_payroll)} />
+            <CapCard label="Total Payroll" value={formatMoney(cap!.total_committed)} />
             <CapCard
               label="Payroll Space"
-              value={formatMoney(cap!.payroll_space)}
-              subtitle={cap!.payroll_space && cap!.payroll_space < 0 ? 'OVER THRESHOLD' : 'VS LUXURY TAX'}
-              color={cap!.payroll_space && cap!.payroll_space < 0 ? 'var(--sm-error, #ef4444)' : 'var(--sm-success, #22c55e)'}
+              value={formatMoney(cap!.cap_space)}
+              subtitle={cap!.cap_space && cap!.cap_space < 0 ? 'OVER THRESHOLD' : 'VS LUXURY TAX'}
+              color={cap!.cap_space && cap!.cap_space < 0 ? 'var(--sm-error, #ef4444)' : 'var(--sm-success, #22c55e)'}
             />
             <CapCard label="Dead Money" value={formatMoney(cap!.dead_money)} color="var(--sm-text-muted)" />
-            <CapCard label="Committed" value={formatMoney(cap!.total_committed)} />
+            <CapCard label="Luxury Tax" value={formatMoney(cap!.total_cap)} />
           </div>
         ) : (
           <div
@@ -227,7 +191,7 @@ export default async function WhiteSoxPayrollTrackerPage() {
         )}
 
         {/* Payroll Usage Gauge */}
-        {hasCapData && totalPayroll > 0 && (
+        {hasCapData && totalCap > 0 && (
           <div
             className="glass-card glass-card-sm glass-card-static"
             style={{ padding: '16px 20px', marginBottom: '24px' }}
@@ -265,7 +229,7 @@ export default async function WhiteSoxPayrollTrackerPage() {
             </div>
             <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '6px', fontSize: '11px', color: 'var(--sm-text-dim)' }}>
               <span>$0</span>
-              <span>{formatMoney(totalPayroll)} payroll</span>
+              <span>{formatMoney(totalCap)} payroll</span>
             </div>
           </div>
         )}
@@ -334,31 +298,14 @@ export default async function WhiteSoxPayrollTrackerPage() {
                         flexShrink: 0,
                         border: '2px solid var(--sm-border)',
                         background: 'var(--sm-surface)',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
                       }}
                     >
-                      {p.headshot_url ? (
-                        <Image
-                          src={p.headshot_url}
-                          alt={p.name}
-                          width={32}
-                          height={32}
-                          style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-                        />
-                      ) : (
-                        <div
-                          style={{
-                            width: '100%',
-                            height: '100%',
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                          }}
-                        >
-                          <svg width="16" height="16" fill="none" stroke="currentColor" strokeWidth={1.5} viewBox="0 0 24 24" style={{ color: 'var(--sm-text-dim)' }}>
-                            <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0" />
-                          </svg>
-                        </div>
-                      )}
+                      <svg width="16" height="16" fill="none" stroke="currentColor" strokeWidth={1.5} viewBox="0 0 24 24" style={{ color: 'var(--sm-text-dim)' }}>
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0" />
+                      </svg>
                     </div>
                     <div style={{ flex: 1, minWidth: 0 }}>
                       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '4px' }}>
@@ -373,7 +320,7 @@ export default async function WhiteSoxPayrollTrackerPage() {
                             textOverflow: 'ellipsis',
                           }}
                         >
-                          {p.name}
+                          {p.player_name}
                           {p.position && (
                             <span style={{ color: 'var(--sm-text-dim)', fontWeight: 400, marginLeft: '6px', fontSize: '12px' }}>
                               {p.position}
@@ -548,31 +495,14 @@ export default async function WhiteSoxPayrollTrackerPage() {
                         flexShrink: 0,
                         border: '1px solid var(--sm-border)',
                         background: 'var(--sm-surface)',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
                       }}
                     >
-                      {row.headshot_url ? (
-                        <Image
-                          src={row.headshot_url}
-                          alt={row.name}
-                          width={28}
-                          height={28}
-                          style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-                        />
-                      ) : (
-                        <div
-                          style={{
-                            width: '100%',
-                            height: '100%',
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                          }}
-                        >
-                          <svg width="14" height="14" fill="none" stroke="currentColor" strokeWidth={1.5} viewBox="0 0 24 24" style={{ color: 'var(--sm-text-dim)' }}>
-                            <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0" />
-                          </svg>
-                        </div>
-                      )}
+                      <svg width="14" height="14" fill="none" stroke="currentColor" strokeWidth={1.5} viewBox="0 0 24 24" style={{ color: 'var(--sm-text-dim)' }}>
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0" />
+                      </svg>
                     </div>
                     <span
                       style={{
@@ -584,7 +514,7 @@ export default async function WhiteSoxPayrollTrackerPage() {
                         textOverflow: 'ellipsis',
                       }}
                     >
-                      {row.name}
+                      {row.player_name}
                     </span>
                   </div>
                   {/* Position */}
