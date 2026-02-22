@@ -494,8 +494,6 @@ export async function getBullsSchedule(season?: number): Promise<BullsGame[]> {
     return []
   }
 
-  // Note: Removed game_type filter - may not exist in database
-  // Datalab integration guide shows no game_type filter for schedules
   const { data, error } = await datalabAdmin
     .from('bulls_games_master')
     .select(`
@@ -503,6 +501,7 @@ export async function getBullsSchedule(season?: number): Promise<BullsGame[]> {
       game_date,
       game_time,
       season,
+      game_type,
       opponent,
       opponent_full_name,
       is_bulls_home,
@@ -529,6 +528,7 @@ export async function getBullsSchedule(season?: number): Promise<BullsGame[]> {
         game_date,
         game_time,
         season,
+        game_type,
         opponent,
         opponent_full_name,
         is_bulls_home,
@@ -542,10 +542,21 @@ export async function getBullsSchedule(season?: number): Promise<BullsGame[]> {
       .order('game_date', { ascending: false })
 
     if (prevError || !prevData) return []
-    return prevData.map((g: any) => transformGame(g))
+    // Filter out preseason/All-Star games
+    const filtered = prevData.filter((g: any) => {
+      const gt = (g.game_type || '').toUpperCase()
+      return gt !== 'PRE' && gt !== 'PRESEASON' && gt !== 'ALL-STAR' && gt !== 'ALLSTAR'
+    })
+    return filtered.map((g: any) => transformGame(g))
   }
 
-  return data.map((g: any) => transformGame(g))
+  // Filter out preseason/All-Star games — NBA regular season is 82 games
+  const filtered = data.filter((g: any) => {
+    const gt = (g.game_type || '').toUpperCase()
+    return gt !== 'PRE' && gt !== 'PRESEASON' && gt !== 'ALL-STAR' && gt !== 'ALLSTAR'
+  })
+
+  return filtered.map((g: any) => transformGame(g))
 }
 
 // Format time from 24-hour (17:30:00) to 12-hour (5:30 PM CT)

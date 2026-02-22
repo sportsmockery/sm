@@ -418,6 +418,25 @@ When encountering data issues, communicate with Data Lab using this format:
 | NHL | `2026` | ENDING year |
 | MLB | `2025` | Calendar year |
 
+### Regular Season Game Counts (MEMORIZE THESE)
+
+**CRITICAL: Schedule pages must NEVER show more than the correct number of regular season games. Filter out preseason, All-Star, and exhibition games.**
+
+| League | Regular Season Games | Notes |
+|--------|---------------------|-------|
+| NFL | **17** | 18 weeks with 1 bye |
+| NBA | **82** | NOT 83, NOT 84 — exactly 82 |
+| NHL | **82** | Same as NBA |
+| MLB | **162** | April through September |
+
+**How to enforce:** Always filter by `game_type` to exclude preseason/All-Star/exhibition games. Use JS-side filtering (not `.eq()`) since `game_type` values are inconsistent across teams:
+```typescript
+const filtered = data.filter((g: any) => {
+  const gt = (g.game_type || '').toUpperCase()
+  return gt !== 'PRE' && gt !== 'PRESEASON' && gt !== 'ALL-STAR' && gt !== 'ALLSTAR'
+})
+```
+
 ### Automatic Verification Steps
 
 1. **Check records match official sources** (ESPN, league sites)
@@ -426,8 +445,9 @@ When encountering data issues, communicate with Data Lab using this format:
    - NBA: 15-18
    - NHL: 20-23
    - MLB: 32-40 (NOT 200+!)
-3. **Check all pages load without errors**
-4. **Check stats are populated (not "—" or 0.0)**
+3. **Check schedule game counts match sport** (see table above)
+4. **Check all pages load without errors**
+5. **Check stats are populated (not "—" or 0.0)**
 
 ### If Issues Found
 
