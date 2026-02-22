@@ -17,6 +17,7 @@ const TEAMS = [
     key: 'bears',
     name: 'Chicago Bears',
     shortName: 'Bears',
+    hubPath: '/chicago-bears',
     logo: 'https://a.espncdn.com/i/teamlogos/nfl/500/chi.png',
     primaryColor: '#0B162A',
     secondaryColor: '#C83200',
@@ -27,6 +28,7 @@ const TEAMS = [
     key: 'bulls',
     name: 'Chicago Bulls',
     shortName: 'Bulls',
+    hubPath: '/chicago-bulls',
     logo: 'https://a.espncdn.com/i/teamlogos/nba/500/chi.png',
     primaryColor: '#CE1141',
     secondaryColor: '#000000',
@@ -37,6 +39,7 @@ const TEAMS = [
     key: 'cubs',
     name: 'Chicago Cubs',
     shortName: 'Cubs',
+    hubPath: '/chicago-cubs',
     logo: 'https://a.espncdn.com/i/teamlogos/mlb/500/chc.png',
     primaryColor: '#0E3386',
     secondaryColor: '#CC3433',
@@ -47,6 +50,7 @@ const TEAMS = [
     key: 'whitesox',
     name: 'Chicago White Sox',
     shortName: 'White Sox',
+    hubPath: '/chicago-white-sox',
     logo: 'https://a.espncdn.com/i/teamlogos/mlb/500/chw.png',
     primaryColor: '#27251F',
     secondaryColor: '#C4CED4',
@@ -57,6 +61,7 @@ const TEAMS = [
     key: 'blackhawks',
     name: 'Chicago Blackhawks',
     shortName: 'Blackhawks',
+    hubPath: '/chicago-blackhawks',
     logo: 'https://a.espncdn.com/i/teamlogos/nhl/500/chi.png',
     primaryColor: '#CF0A2C',
     secondaryColor: '#000000',
@@ -102,7 +107,7 @@ export default function DataHubLandingPage() {
           {TEAMS.map((team) => (
             <Link
               key={team.key}
-              href={`/${team.key}/datahub`}
+              href={team.hubPath}
               className="glass-card group"
               style={{ padding: 0, overflow: 'hidden', position: 'relative' }}
             >
@@ -140,8 +145,8 @@ export default function DataHubLandingPage() {
                     <span
                       className="sm-tag"
                       style={{
-                        backgroundColor: `${team.primaryColor}20`,
-                        color: team.primaryColor,
+                        backgroundColor: team.primaryColor,
+                        color: '#fff',
                         borderColor: 'transparent',
                         fontSize: 10,
                         marginBottom: 8,
@@ -160,7 +165,7 @@ export default function DataHubLandingPage() {
                 </div>
 
                 {/* Features list */}
-                <div style={{ marginTop: 16, paddingTop: 16, borderTop: '1px solid var(--sm-border)', display: 'flex', flexWrap: 'wrap', gap: 8 }}>
+                <div style={{ marginTop: 16, paddingTop: 16, borderTop: '1px solid var(--sm-border)', display: 'flex', flexWrap: 'nowrap', gap: 8 }}>
                   {['Live Scores', 'Schedule', 'Roster', 'Stats'].map((feature) => (
                     <span
                       key={feature}
