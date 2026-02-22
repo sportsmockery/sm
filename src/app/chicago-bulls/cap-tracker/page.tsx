@@ -456,7 +456,7 @@ export default async function BullsCapTrackerPage() {
               <div
                 style={{
                   display: 'grid',
-                  gridTemplateColumns: '2fr 0.5fr 1fr 1fr 0.7fr 0.7fr',
+                  gridTemplateColumns: '2fr 0.5fr 0.5fr 1fr 1fr 0.7fr 0.7fr',
                   padding: '12px 16px',
                   backgroundColor: 'var(--sm-surface)',
                   borderBottom: '1px solid var(--sm-border)',
@@ -470,8 +470,9 @@ export default async function BullsCapTrackerPage() {
               >
                 <div>Player</div>
                 <div>Pos</div>
+                <div style={{ textAlign: 'center' }}>Age</div>
                 <div style={{ textAlign: 'right' }}>Cap Hit</div>
-                <div style={{ textAlign: 'right' }}>Dead Cap</div>
+                <div style={{ textAlign: 'right' }}>Base Salary</div>
                 <div style={{ textAlign: 'center' }}>Years</div>
                 <div style={{ textAlign: 'center' }}>FA Year</div>
               </div>
@@ -482,7 +483,7 @@ export default async function BullsCapTrackerPage() {
                   key={row.player_id}
                   style={{
                     display: 'grid',
-                    gridTemplateColumns: '2fr 0.5fr 1fr 1fr 0.7fr 0.7fr',
+                    gridTemplateColumns: '2fr 0.5fr 0.5fr 1fr 1fr 0.7fr 0.7fr',
                     padding: '10px 16px',
                     borderBottom: idx < rows.length - 1 ? '1px solid var(--sm-border)' : 'none',
                     alignItems: 'center',
@@ -533,13 +534,17 @@ export default async function BullsCapTrackerPage() {
                   </div>
                   {/* Position */}
                   <div style={{ color: 'var(--sm-text-muted)', fontSize: '12px' }}>{row.position}</div>
+                  {/* Age */}
+                  <div style={{ textAlign: 'center', color: 'var(--sm-text-muted)' }}>
+                    {row.age ?? '--'}
+                  </div>
                   {/* Cap Hit */}
                   <div style={{ textAlign: 'right', fontWeight: 700, color: 'var(--sm-text)', fontFamily: "'Space Grotesk', sans-serif" }}>
                     {formatMoney(row.cap_hit)}
                   </div>
-                  {/* Dead Cap */}
+                  {/* Base Salary */}
                   <div style={{ textAlign: 'right', color: 'var(--sm-text-muted)' }}>
-                    {formatMoney(row.dead_cap)}
+                    {formatMoney(row.base_salary)}
                   </div>
                   {/* Years Left */}
                   <div style={{ textAlign: 'center', color: 'var(--sm-text-muted)' }}>
