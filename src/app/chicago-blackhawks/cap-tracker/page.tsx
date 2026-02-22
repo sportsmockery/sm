@@ -464,7 +464,7 @@ export default async function BlackhawksCapTrackerPage() {
               <div
                 style={{
                   display: 'grid',
-                  gridTemplateColumns: '2fr 0.5fr 1fr 1fr 1fr 0.7fr 0.7fr',
+                  gridTemplateColumns: '2fr 0.5fr 1fr 1fr 0.7fr 0.7fr',
                   padding: '12px 16px',
                   backgroundColor: 'var(--sm-surface)',
                   borderBottom: '1px solid var(--sm-border)',
@@ -480,7 +480,6 @@ export default async function BlackhawksCapTrackerPage() {
                 <div>Pos</div>
                 <div style={{ textAlign: 'right' }}>Cap Hit</div>
                 <div style={{ textAlign: 'right' }}>Base Salary</div>
-                <div style={{ textAlign: 'right' }}>Dead Cap</div>
                 <div style={{ textAlign: 'center' }}>Years</div>
                 <div style={{ textAlign: 'center' }}>FA Year</div>
               </div>
@@ -491,7 +490,7 @@ export default async function BlackhawksCapTrackerPage() {
                   key={row.player_id}
                   style={{
                     display: 'grid',
-                    gridTemplateColumns: '2fr 0.5fr 1fr 1fr 1fr 0.7fr 0.7fr',
+                    gridTemplateColumns: '2fr 0.5fr 1fr 1fr 0.7fr 0.7fr',
                     padding: '10px 16px',
                     borderBottom: idx < rows.length - 1 ? '1px solid var(--sm-border)' : 'none',
                     alignItems: 'center',
@@ -550,10 +549,6 @@ export default async function BlackhawksCapTrackerPage() {
                   <div style={{ textAlign: 'right', color: 'var(--sm-text-muted)' }}>
                     {formatMoney(row.base_salary)}
                   </div>
-                  {/* Dead Cap */}
-                  <div style={{ textAlign: 'right', color: 'var(--sm-text-muted)' }}>
-                    {formatMoney(row.dead_cap)}
-                  </div>
                   {/* Years Left */}
                   <div style={{ textAlign: 'center', color: 'var(--sm-text-muted)' }}>
                     {row.contract_years != null ? `${row.contract_years} yr` : '--'}
@@ -608,7 +603,7 @@ export default async function BlackhawksCapTrackerPage() {
                 Contract data loading...
               </p>
               <p style={{ color: 'var(--sm-text-dim)', fontSize: '13px', margin: 0 }}>
-                Cap hits, dead money, and contract details are synced from CapFriendly twice daily.
+                Cap hits, dead money, and contract details are synced from Spotrac hourly.
               </p>
             </div>
           </section>

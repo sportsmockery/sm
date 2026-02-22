@@ -466,7 +466,7 @@ export default async function CubsCapTrackerPage() {
               <div
                 style={{
                   display: 'grid',
-                  gridTemplateColumns: '2fr 0.5fr 1fr 1fr 1fr 0.7fr 0.7fr',
+                  gridTemplateColumns: '2fr 0.5fr 1fr 1fr 0.7fr 0.7fr',
                   padding: '12px 16px',
                   backgroundColor: 'var(--sm-surface)',
                   borderBottom: '1px solid var(--sm-border)',
@@ -480,9 +480,8 @@ export default async function CubsCapTrackerPage() {
               >
                 <div>Player</div>
                 <div>Pos</div>
-                <div style={{ textAlign: 'right' }}>Salary</div>
+                <div style={{ textAlign: 'right' }}>Luxury Tax</div>
                 <div style={{ textAlign: 'right' }}>Base Salary</div>
-                <div style={{ textAlign: 'right' }}>Dead Money</div>
                 <div style={{ textAlign: 'center' }}>Years</div>
                 <div style={{ textAlign: 'center' }}>FA Year</div>
               </div>
@@ -493,7 +492,7 @@ export default async function CubsCapTrackerPage() {
                   key={row.player_id}
                   style={{
                     display: 'grid',
-                    gridTemplateColumns: '2fr 0.5fr 1fr 1fr 1fr 0.7fr 0.7fr',
+                    gridTemplateColumns: '2fr 0.5fr 1fr 1fr 0.7fr 0.7fr',
                     padding: '10px 16px',
                     borderBottom: idx < rows.length - 1 ? '1px solid var(--sm-border)' : 'none',
                     alignItems: 'center',
@@ -544,17 +543,13 @@ export default async function CubsCapTrackerPage() {
                   </div>
                   {/* Position */}
                   <div style={{ color: 'var(--sm-text-muted)', fontSize: '12px' }}>{row.position}</div>
-                  {/* Cap Hit / Salary */}
+                  {/* Luxury Tax Value */}
                   <div style={{ textAlign: 'right', fontWeight: 700, color: 'var(--sm-text)', fontFamily: "'Space Grotesk', sans-serif" }}>
                     {formatMoney(row.cap_hit)}
                   </div>
                   {/* Base Salary */}
                   <div style={{ textAlign: 'right', color: 'var(--sm-text-muted)' }}>
                     {formatMoney(row.base_salary)}
-                  </div>
-                  {/* Dead Money */}
-                  <div style={{ textAlign: 'right', color: 'var(--sm-text-muted)' }}>
-                    {formatMoney(row.dead_cap)}
                   </div>
                   {/* Years Left */}
                   <div style={{ textAlign: 'center', color: 'var(--sm-text-muted)' }}>
@@ -610,7 +605,7 @@ export default async function CubsCapTrackerPage() {
                 Contract data loading...
               </p>
               <p style={{ color: 'var(--sm-text-dim)', fontSize: '13px', margin: 0 }}>
-                Salaries, dead money, and contract details are synced from Spotrac twice daily.
+                Salaries and contract details are synced from Spotrac hourly.
               </p>
             </div>
           </section>

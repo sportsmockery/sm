@@ -273,7 +273,7 @@ export default async function BearsCapTrackerPage() {
         </div>
 
         {/* Hub Updates Feed */}
-        <HubUpdatesFeed hubSlug="cap-tracker" title="Cap Moves" emptyState="No cap updates yet." />
+        <HubUpdatesFeed teamSlug="chicago-bears" hubSlug="cap-tracker" title="Cap Moves" emptyState="No cap updates yet." />
 
         {/* Top 5 Cap Hits */}
         {hasContracts && topFive.length > 0 && (
@@ -622,7 +622,7 @@ export default async function BearsCapTrackerPage() {
                 Contract data loading...
               </p>
               <p style={{ color: 'var(--sm-text-dim)', fontSize: '13px', margin: 0 }}>
-                Cap hits, dead money, and contract details are synced from Spotrac twice daily.
+                Cap hits, dead money, and contract details are synced from Spotrac hourly.
               </p>
             </div>
           </section>

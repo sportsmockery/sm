@@ -261,7 +261,7 @@ export default async function BullsCapTrackerPage() {
         </div>
 
         {/* Hub Updates Feed */}
-        <HubUpdatesFeed hubSlug="cap-tracker" title="Cap Moves" emptyState="No cap updates yet." />
+        <HubUpdatesFeed teamSlug="chicago-bulls" hubSlug="cap-tracker" title="Cap Moves" emptyState="No cap updates yet." />
 
         {/* Top 5 Cap Hits */}
         {hasContracts && topFive.length > 0 && (
@@ -466,7 +466,7 @@ export default async function BullsCapTrackerPage() {
               <div
                 style={{
                   display: 'grid',
-                  gridTemplateColumns: '2fr 0.5fr 1fr 1fr 1fr 0.7fr 0.7fr',
+                  gridTemplateColumns: '2fr 0.5fr 1fr 1fr 0.7fr 0.7fr',
                   padding: '12px 16px',
                   backgroundColor: 'var(--sm-surface)',
                   borderBottom: '1px solid var(--sm-border)',
@@ -481,7 +481,6 @@ export default async function BullsCapTrackerPage() {
                 <div>Player</div>
                 <div>Pos</div>
                 <div style={{ textAlign: 'right' }}>Cap Hit</div>
-                <div style={{ textAlign: 'right' }}>Base Salary</div>
                 <div style={{ textAlign: 'right' }}>Dead Cap</div>
                 <div style={{ textAlign: 'center' }}>Years</div>
                 <div style={{ textAlign: 'center' }}>FA Year</div>
@@ -493,7 +492,7 @@ export default async function BullsCapTrackerPage() {
                   key={row.player_id}
                   style={{
                     display: 'grid',
-                    gridTemplateColumns: '2fr 0.5fr 1fr 1fr 1fr 0.7fr 0.7fr',
+                    gridTemplateColumns: '2fr 0.5fr 1fr 1fr 0.7fr 0.7fr',
                     padding: '10px 16px',
                     borderBottom: idx < rows.length - 1 ? '1px solid var(--sm-border)' : 'none',
                     alignItems: 'center',
@@ -547,10 +546,6 @@ export default async function BullsCapTrackerPage() {
                   {/* Cap Hit */}
                   <div style={{ textAlign: 'right', fontWeight: 700, color: 'var(--sm-text)', fontFamily: "'Space Grotesk', sans-serif" }}>
                     {formatMoney(row.cap_hit)}
-                  </div>
-                  {/* Base Salary */}
-                  <div style={{ textAlign: 'right', color: 'var(--sm-text-muted)' }}>
-                    {formatMoney(row.base_salary)}
                   </div>
                   {/* Dead Cap */}
                   <div style={{ textAlign: 'right', color: 'var(--sm-text-muted)' }}>
@@ -610,7 +605,7 @@ export default async function BullsCapTrackerPage() {
                 Contract data loading...
               </p>
               <p style={{ color: 'var(--sm-text-dim)', fontSize: '13px', margin: 0 }}>
-                Cap hits, dead money, and contract details are synced from Spotrac twice daily.
+                Cap hits, dead money, and contract details are synced from Spotrac hourly.
               </p>
             </div>
           </section>

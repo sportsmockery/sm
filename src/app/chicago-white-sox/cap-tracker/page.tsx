@@ -100,9 +100,11 @@ export default async function WhiteSoxPayrollTrackerPage() {
 
   const topFive = rows.slice(0, 5)
   const maxHit = topFive[0]?.cap_hit || 1
+  const isOverThreshold = cap ? cap.cap_space < 0 : false
   const totalCommitted = cap?.total_committed || 0
   const totalCap = cap?.total_cap || 0
   const usedPct = totalCap > 0 && totalCommitted > 0 ? (totalCommitted / totalCap) * 100 : 0
+  const deadPct = cap ? (cap.dead_money / (cap.total_cap || 1)) * 100 : 0
 
   // Position group breakdown
   const groupTotals = rows.reduce((acc, r) => {
@@ -168,11 +170,11 @@ export default async function WhiteSoxPayrollTrackerPage() {
             <CapCard
               label="Payroll Space"
               value={formatMoney(cap!.cap_space)}
-              subtitle={cap!.cap_space && cap!.cap_space < 0 ? 'OVER THRESHOLD' : 'VS LUXURY TAX'}
+              subtitle={cap!.cap_space && cap!.cap_space < 0 ? 'OVER THRESHOLD' : 'UNDER THRESHOLD'}
               color={cap!.cap_space && cap!.cap_space < 0 ? 'var(--sm-error, #ef4444)' : 'var(--sm-success, #22c55e)'}
             />
             <CapCard label="Dead Money" value={formatMoney(cap!.dead_money)} color="var(--sm-text-muted)" />
-            <CapCard label="Luxury Tax" value={formatMoney(cap!.total_cap)} />
+            <CapCard label="Luxury Tax Threshold" value={formatMoney(cap!.total_cap)} />
           </div>
         ) : (
           <div
@@ -198,9 +200,9 @@ export default async function WhiteSoxPayrollTrackerPage() {
           >
             <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
               <span style={{ fontSize: '13px', fontWeight: 600, color: 'var(--sm-text)' }}>
-                Payroll Usage
+                Luxury Tax Usage
               </span>
-              <span style={{ fontSize: '13px', fontWeight: 700, color: 'var(--sm-text-muted)' }}>
+              <span style={{ fontSize: '13px', fontWeight: 700, color: isOverThreshold ? 'var(--sm-error, #ef4444)' : 'var(--sm-success, #22c55e)' }}>
                 {usedPct.toFixed(1)}%
               </span>
             </div>
@@ -214,6 +216,19 @@ export default async function WhiteSoxPayrollTrackerPage() {
                 position: 'relative',
               }}
             >
+              {/* Dead money segment */}
+              <div
+                style={{
+                  position: 'absolute',
+                  left: 0,
+                  top: 0,
+                  height: '100%',
+                  width: `${Math.min(deadPct, 100)}%`,
+                  backgroundColor: 'rgba(239, 68, 68, 0.3)',
+                  borderRadius: '6px 0 0 6px',
+                }}
+              />
+              {/* Total committed */}
               <div
                 style={{
                   position: 'absolute',
@@ -221,7 +236,7 @@ export default async function WhiteSoxPayrollTrackerPage() {
                   top: 0,
                   height: '100%',
                   width: `${Math.min(usedPct, 100)}%`,
-                  backgroundColor: '#27251F',
+                  backgroundColor: isOverThreshold ? 'var(--sm-error, #ef4444)' : '#27251F',
                   borderRadius: '6px',
                   opacity: 0.85,
                 }}
@@ -229,7 +244,7 @@ export default async function WhiteSoxPayrollTrackerPage() {
             </div>
             <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '6px', fontSize: '11px', color: 'var(--sm-text-dim)' }}>
               <span>$0</span>
-              <span>{formatMoney(totalCap)} payroll</span>
+              <span>{formatMoney(totalCap)} threshold</span>
             </div>
           </div>
         )}
@@ -266,7 +281,7 @@ export default async function WhiteSoxPayrollTrackerPage() {
                 margin: '0 0 20px 0',
               }}
             >
-              Top Payroll Hits
+              Top Contracts
             </h2>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
               {topFive.map((p, idx) => {
@@ -382,14 +397,13 @@ export default async function WhiteSoxPayrollTrackerPage() {
                 margin: '0 0 20px 0',
               }}
             >
-              Spend by Position Group
+              Payroll by Position Group
             </h2>
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(180px, 1fr))', gap: '10px' }}>
               {Object.entries(groupTotals)
                 .sort((a, b) => b[1] - a[1])
                 .map(([group, total]) => {
-                  const committedTotal = rows.reduce((s, r) => s + (r.cap_hit || 0), 0)
-                  const pct = committedTotal > 0 ? ((total / committedTotal) * 100).toFixed(1) : '0'
+                  const pct = cap ? ((total / cap.total_committed) * 100).toFixed(1) : '0'
                   return (
                     <div
                       key={group}
@@ -448,7 +462,7 @@ export default async function WhiteSoxPayrollTrackerPage() {
               <div
                 style={{
                   display: 'grid',
-                  gridTemplateColumns: '2fr 0.5fr 1fr 1fr 1fr 0.7fr 0.7fr',
+                  gridTemplateColumns: '2fr 0.5fr 1fr 1fr 0.7fr 0.7fr',
                   padding: '12px 16px',
                   backgroundColor: 'var(--sm-surface)',
                   borderBottom: '1px solid var(--sm-border)',
@@ -462,9 +476,8 @@ export default async function WhiteSoxPayrollTrackerPage() {
               >
                 <div>Player</div>
                 <div>Pos</div>
-                <div style={{ textAlign: 'right' }}>Salary</div>
-                <div style={{ textAlign: 'right' }}>Base</div>
-                <div style={{ textAlign: 'right' }}>Dead $</div>
+                <div style={{ textAlign: 'right' }}>Luxury Tax</div>
+                <div style={{ textAlign: 'right' }}>Base Salary</div>
                 <div style={{ textAlign: 'center' }}>Years</div>
                 <div style={{ textAlign: 'center' }}>FA Year</div>
               </div>
@@ -475,7 +488,7 @@ export default async function WhiteSoxPayrollTrackerPage() {
                   key={row.player_id}
                   style={{
                     display: 'grid',
-                    gridTemplateColumns: '2fr 0.5fr 1fr 1fr 1fr 0.7fr 0.7fr',
+                    gridTemplateColumns: '2fr 0.5fr 1fr 1fr 0.7fr 0.7fr',
                     padding: '10px 16px',
                     borderBottom: idx < rows.length - 1 ? '1px solid var(--sm-border)' : 'none',
                     alignItems: 'center',
@@ -519,17 +532,13 @@ export default async function WhiteSoxPayrollTrackerPage() {
                   </div>
                   {/* Position */}
                   <div style={{ color: 'var(--sm-text-muted)', fontSize: '12px' }}>{row.position}</div>
-                  {/* Cap Hit / Salary */}
+                  {/* Luxury Tax Value */}
                   <div style={{ textAlign: 'right', fontWeight: 700, color: 'var(--sm-text)', fontFamily: "'Space Grotesk', sans-serif" }}>
                     {formatMoney(row.cap_hit)}
                   </div>
                   {/* Base Salary */}
                   <div style={{ textAlign: 'right', color: 'var(--sm-text-muted)' }}>
                     {formatMoney(row.base_salary)}
-                  </div>
-                  {/* Dead Money */}
-                  <div style={{ textAlign: 'right', color: 'var(--sm-text-muted)' }}>
-                    {formatMoney(row.dead_cap)}
                   </div>
                   {/* Years Left */}
                   <div style={{ textAlign: 'center', color: 'var(--sm-text-muted)' }}>
@@ -585,7 +594,7 @@ export default async function WhiteSoxPayrollTrackerPage() {
                 Contract data loading...
               </p>
               <p style={{ color: 'var(--sm-text-dim)', fontSize: '13px', margin: 0 }}>
-                Payroll and contract details are synced from Spotrac twice daily.
+                Payroll and contract details are synced from Spotrac hourly.
               </p>
             </div>
           </section>
