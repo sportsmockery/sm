@@ -16,6 +16,7 @@ const navLinks = [
   { name: 'Simulators', href: '/gm' },
   { name: 'Fan Hub', href: '/fan-zone' },
   { name: 'Data Cosmos', href: '/datahub' },
+  { name: 'Vision Theater', href: '/vision-theater' },
   { name: 'SM+ Premium', href: '/pricing', cta: true },
 ]
 

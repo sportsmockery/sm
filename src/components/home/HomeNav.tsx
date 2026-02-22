@@ -10,6 +10,7 @@ const NAV_LINKS = [
   { label: 'Simulators', href: '/home/simulators' },
   { label: 'Fan Hub', href: '/home/fan-hub' },
   { label: 'Data Cosmos', href: '/home/data' },
+  { label: 'Vision Theater', href: '/vision-theater' },
   { label: 'SM+', href: '/home/premium' },
 ]
 
