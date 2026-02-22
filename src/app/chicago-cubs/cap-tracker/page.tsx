@@ -79,7 +79,7 @@ interface ContractRow {
 export default async function CubsCapTrackerPage() {
   const team = CHICAGO_TEAMS.cubs
 
-  const [record, nextGame, capResult, contractsResult] = await Promise.all([
+  const [record, nextGame, capResult, contractsResult, headshotsResult] = await Promise.all([
     fetchTeamRecord('cubs'),
     fetchNextGame('cubs'),
     datalabAdmin
@@ -92,10 +92,21 @@ export default async function CubsCapTrackerPage() {
       .select('player_id, player_name, position, age, cap_hit, base_salary, dead_cap, contract_years, free_agent_year')
       .eq('season', 2026)
       .order('cap_hit', { ascending: false }),
+    datalabAdmin
+      .from('cubs_players')
+      .select('espn_id, headshot_url'),
   ])
 
   const cap: CapSummary | null = capResult.data
   const rows: ContractRow[] = (contractsResult.data || []) as ContractRow[]
+
+  // Build headshot map: ESPN ID -> headshot URL
+  const headshotMap = new Map<string, string>()
+  if (headshotsResult.data) {
+    for (const p of headshotsResult.data as { espn_id: string; headshot_url: string }[]) {
+      if (p.espn_id && p.headshot_url) headshotMap.set(String(p.espn_id), p.headshot_url)
+    }
+  }
 
   const isOverThreshold = cap ? cap.cap_space < 0 : false
   const topFive = rows.slice(0, 5)
@@ -291,31 +302,7 @@ export default async function CubsCapTrackerPage() {
                     >
                       {idx + 1}
                     </span>
-                    <div
-                      style={{
-                        width: '32px',
-                        height: '32px',
-                        borderRadius: '50%',
-                        overflow: 'hidden',
-                        flexShrink: 0,
-                        border: '2px solid var(--sm-border)',
-                        background: 'var(--sm-surface)',
-                      }}
-                    >
-                      <div
-                        style={{
-                          width: '100%',
-                          height: '100%',
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'center',
-                        }}
-                      >
-                        <svg width="16" height="16" fill="none" stroke="currentColor" strokeWidth={1.5} viewBox="0 0 24 24" style={{ color: 'var(--sm-text-dim)' }}>
-                          <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0" />
-                        </svg>
-                      </div>
-                    </div>
+                    <PlayerAvatar playerId={p.player_id} name={p.player_name} size={32} headshotMap={headshotMap} />
                     <div style={{ flex: 1, minWidth: 0 }}>
                       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '4px' }}>
                         <span
@@ -493,31 +480,7 @@ export default async function CubsCapTrackerPage() {
                 >
                   {/* Player */}
                   <div style={{ display: 'flex', alignItems: 'center', gap: '8px', minWidth: 0 }}>
-                    <div
-                      style={{
-                        width: '28px',
-                        height: '28px',
-                        borderRadius: '50%',
-                        overflow: 'hidden',
-                        flexShrink: 0,
-                        border: '1px solid var(--sm-border)',
-                        background: 'var(--sm-surface)',
-                      }}
-                    >
-                      <div
-                        style={{
-                          width: '100%',
-                          height: '100%',
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'center',
-                        }}
-                      >
-                        <svg width="14" height="14" fill="none" stroke="currentColor" strokeWidth={1.5} viewBox="0 0 24 24" style={{ color: 'var(--sm-text-dim)' }}>
-                          <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0" />
-                        </svg>
-                      </div>
-                    </div>
+                    <PlayerAvatar playerId={row.player_id} name={row.player_name} size={28} headshotMap={headshotMap} />
                     <span
                       style={{
                         fontFamily: "'Space Grotesk', sans-serif",
@@ -633,6 +596,34 @@ export default async function CubsCapTrackerPage() {
         </div>
       </div>
     </TeamHubLayout>
+  )
+}
+
+function PlayerAvatar({ playerId, name, size, headshotMap }: { playerId: string; name: string; size: number; headshotMap: Map<string, string> }) {
+  const url = headshotMap.get(playerId)
+  const iconSize = size >= 32 ? 16 : 14
+  return (
+    <div
+      style={{
+        width: `${size}px`,
+        height: `${size}px`,
+        borderRadius: '50%',
+        overflow: 'hidden',
+        flexShrink: 0,
+        border: size >= 32 ? '2px solid var(--sm-border)' : '1px solid var(--sm-border)',
+        background: 'var(--sm-surface)',
+      }}
+    >
+      {url ? (
+        <Image src={url} alt={name} width={size} height={size} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+      ) : (
+        <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <svg width={iconSize} height={iconSize} fill="none" stroke="currentColor" strokeWidth={1.5} viewBox="0 0 24 24" style={{ color: 'var(--sm-text-dim)' }}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0" />
+          </svg>
+        </div>
+      )}
+    </div>
   )
 }
 
