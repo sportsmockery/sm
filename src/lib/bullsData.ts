@@ -557,9 +557,7 @@ export async function getBullsSchedule(season?: number): Promise<BullsGame[]> {
         }
       }
     }
-    const prevDeduped = Array.from(prevSeenDates.values()).filter(
-      (g: any) => g.opponent_full_name !== 'Unknown'
-    )
+    const prevDeduped = Array.from(prevSeenDates.values())
     return prevDeduped.map((g: any) => transformGame(g))
   }
 
@@ -581,10 +579,7 @@ export async function getBullsSchedule(season?: number): Promise<BullsGame[]> {
     }
   }
 
-  // Also filter out entries with opponent "Unknown" (bad data)
-  const deduped = Array.from(seenDates.values()).filter(
-    (g: any) => g.opponent_full_name !== 'Unknown'
-  )
+  const deduped = Array.from(seenDates.values())
 
   return deduped.map((g: any) => transformGame(g))
 }
@@ -615,7 +610,7 @@ function transformGame(game: any): BullsGame {
     time: formatGameTime(game.game_time),
     dayOfWeek: gameDate.toLocaleDateString('en-US', { weekday: 'long' }),
     opponent: game.opponent,
-    opponentFullName: game.opponent_full_name || null,
+    opponentFullName: (game.opponent_full_name && game.opponent_full_name !== 'Unknown') ? game.opponent_full_name : null,
     opponentLogo: getTeamLogo(game.opponent),
     homeAway: game.is_bulls_home ? 'home' : 'away',
     status: isPlayed ? 'final' : (game.status === 'in_progress' ? 'in_progress' : 'scheduled'),
