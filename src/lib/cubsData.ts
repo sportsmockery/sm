@@ -926,29 +926,40 @@ export async function getCubsRecord(season?: number): Promise<CubsRecord> {
  * Shows regular season record and postseason record separately
  */
 export async function getCubsSeparatedRecord(season?: number): Promise<CubsSeparatedRecord> {
-  const schedule = await getCubsSchedule(season)
+  const targetSeason = season || getCurrentSeason()
 
-  // Calculate regular season record (max 162 games)
-  const regularGames = schedule.filter(g => g.status === 'final' && g.gameType === 'regular')
-  const regWins = regularGames.filter(g => g.result === 'W').length
-  const regLosses = regularGames.filter(g => g.result === 'L').length
+  // Use authoritative cubs_seasons table for regular season record
+  let regWins = 0
+  let regLosses = 0
+  let divisionRank: string | null = null
 
-  // Calculate postseason record
+  if (datalabAdmin) {
+    const { data: seasonRecord } = await datalabAdmin
+      .from('cubs_seasons')
+      .select('wins, losses, division_rank')
+      .eq('season', targetSeason)
+      .single()
+
+    if (seasonRecord) {
+      regWins = seasonRecord.wins || 0
+      regLosses = seasonRecord.losses || 0
+      divisionRank = seasonRecord.division_rank || null
+    }
+  }
+
+  // Fallback: calculate from schedule if seasons table unavailable
+  if (regWins === 0 && regLosses === 0) {
+    const schedule = await getCubsSchedule(targetSeason)
+    const regularGames = schedule.filter(g => g.status === 'final' && g.gameType === 'regular')
+    regWins = regularGames.filter(g => g.result === 'W').length
+    regLosses = regularGames.filter(g => g.result === 'L').length
+  }
+
+  // Calculate postseason record from schedule (not in seasons table)
+  const schedule = await getCubsSchedule(targetSeason)
   const postGames = schedule.filter(g => g.status === 'final' && g.gameType === 'postseason')
   const postWins = postGames.filter(g => g.result === 'W').length
   const postLosses = postGames.filter(g => g.result === 'L').length
-
-  // Get division rank from seasons table if available
-  let divisionRank: string | null = null
-  if (datalabAdmin) {
-    const targetSeason = season || getCurrentSeason()
-    const { data } = await datalabAdmin
-      .from('cubs_seasons')
-      .select('division_rank')
-      .eq('season', targetSeason)
-      .single()
-    divisionRank = data?.division_rank || null
-  }
 
   return {
     regularSeason: { wins: regWins, losses: regLosses },

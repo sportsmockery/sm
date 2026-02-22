@@ -502,6 +502,7 @@ export async function getBullsSchedule(season?: number): Promise<BullsGame[]> {
       game_time,
       season,
       game_type,
+      data_status,
       opponent,
       opponent_full_name,
       is_bulls_home,
@@ -512,6 +513,7 @@ export async function getBullsSchedule(season?: number): Promise<BullsGame[]> {
       broadcast
     `)
     .eq('season', targetSeason)
+    .neq('data_status', 'postponed')
     .order('game_date', { ascending: false })
 
   if (error) {
@@ -529,6 +531,7 @@ export async function getBullsSchedule(season?: number): Promise<BullsGame[]> {
         game_time,
         season,
         game_type,
+        data_status,
         opponent,
         opponent_full_name,
         is_bulls_home,
@@ -539,6 +542,7 @@ export async function getBullsSchedule(season?: number): Promise<BullsGame[]> {
         broadcast
       `)
       .eq('season', targetSeason - 1)
+      .neq('data_status', 'postponed')
       .order('game_date', { ascending: false })
 
     if (prevError || !prevData) return []
