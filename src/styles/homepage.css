@@ -449,12 +449,7 @@
   margin-bottom: 16px;
 }
 
-/* Tool grid (3x2) */
-.tool-grid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 12px;
-}
+/* Tool grid — defined in globals.css, do not duplicate here */
 
 .tool-link {
   display: flex;
@@ -1226,14 +1221,6 @@
 
   .feed-skeleton {
     grid-template-columns: 1fr;
-  }
-
-  .tool-grid {
-    grid-template-columns: repeat(2, 1fr);
-  }
-
-  .hero-search-bar {
-    max-width: 100%;
   }
 }
 

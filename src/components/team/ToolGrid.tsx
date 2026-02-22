@@ -248,6 +248,7 @@ export default function ToolGrid({ teamSlug, accentColor, secondaryColor }: Tool
         {tools.map((tool, index) => (
           <motion.div
             key={tool.title}
+            style={{ minWidth: 0, overflow: 'hidden' }}
             initial={prefersReducedMotion ? {} : { opacity: 0, y: 20 }}
             animate={prefersReducedMotion ? {} : { opacity: 1, y: 0 }}
             transition={{ delay: index * 0.08, duration: 0.4, ease: [0.25, 0.46, 0.45, 0.94] }}

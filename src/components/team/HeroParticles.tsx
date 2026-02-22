@@ -62,9 +62,9 @@ export default function HeroParticles({ accentColor = '#bc0000' }: HeroParticles
         size = 8 + rn2 * 6
       }
 
-      // Color variations based on accent
+      // Color variations based on accent — visible opacity range
       let color: string
-      const baseOpacity = 0.08 + rn3 * 0.18
+      const baseOpacity = 0.25 + rn3 * 0.45
       if (rn4 < 0.5) {
         // Team accent color
         color = `rgba(${r},${g},${b},${baseOpacity})`
@@ -73,13 +73,13 @@ export default function HeroParticles({ accentColor = '#bc0000' }: HeroParticles
         const br = Math.min(255, r + 60)
         const bg2 = Math.min(255, g + 40)
         const bb = Math.min(255, b + 40)
-        color = `rgba(${br},${bg2},${bb},${baseOpacity * 0.8})`
+        color = `rgba(${br},${bg2},${bb},${baseOpacity * 0.85})`
       } else if (rn4 < 0.9) {
         // Warm tint
-        color = `rgba(${Math.min(255, r + 80)},${Math.min(255, g + 60)},${Math.min(255, b + 20)},${baseOpacity * 0.6})`
+        color = `rgba(${Math.min(255, r + 80)},${Math.min(255, g + 60)},${Math.min(255, b + 20)},${baseOpacity * 0.7})`
       } else {
         // White highlight
-        color = `rgba(255,255,255,${baseOpacity * 0.4})`
+        color = `rgba(255,255,255,${baseOpacity * 0.5})`
       }
 
       // Drift distances (how far the orb floats)
