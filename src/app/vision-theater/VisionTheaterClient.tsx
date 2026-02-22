@@ -82,7 +82,7 @@ export default function VisionTheaterClient({ data }: { data: VisionTheaterData 
 
   // ---------- Filtered videos ----------
 
-  const filteredVideos = useMemo(() => {
+  const { fullVideos, shorts } = useMemo(() => {
     let vids = data.allVideos
 
     // Channel filter
@@ -114,8 +114,14 @@ export default function VisionTheaterClient({ data }: { data: VisionTheaterData 
       )
     }
 
-    return vids
+    // Split into full videos and shorts
+    const fullVideos = vids.filter((v) => !v.isShort)
+    const shorts = vids.filter((v) => v.isShort)
+
+    return { fullVideos, shorts }
   }, [data.allVideos, channelFilter, keywordFilter, searchQuery])
+
+  const totalFilteredCount = fullVideos.length + shorts.length
 
   // ---------- Load YouTube IFrame API ----------
 
@@ -212,8 +218,8 @@ export default function VisionTheaterClient({ data }: { data: VisionTheaterData 
 
     const observer = new IntersectionObserver(
       ([entry]) => {
-        if (entry.isIntersecting && visibleCount < filteredVideos.length) {
-          setVisibleCount((prev) => Math.min(prev + PAGE_SIZE, filteredVideos.length))
+        if (entry.isIntersecting && visibleCount < fullVideos.length) {
+          setVisibleCount((prev) => Math.min(prev + PAGE_SIZE, fullVideos.length))
         }
       },
       { threshold: 0.1 }
@@ -221,7 +227,7 @@ export default function VisionTheaterClient({ data }: { data: VisionTheaterData 
 
     observer.observe(sentinel)
     return () => observer.disconnect()
-  }, [visibleCount, filteredVideos.length])
+  }, [visibleCount, fullVideos.length])
 
   // Reset visible count on filter change
   useEffect(() => {
@@ -342,19 +348,34 @@ export default function VisionTheaterClient({ data }: { data: VisionTheaterData 
           background: 'linear-gradient(135deg, rgba(188,0,0,0.15) 0%, rgba(5,5,8,1) 50%, rgba(255,68,68,0.05) 100%)',
         }}
       >
-        {/* Animated gradient orb */}
+        {/* Animated gradient orbs */}
         <div
           style={{
             position: 'absolute',
-            top: '50%',
-            left: '50%',
-            width: '600px',
-            height: '600px',
+            top: '30%',
+            left: '20%',
+            width: '400px',
+            height: '400px',
             borderRadius: '50%',
-            background: 'radial-gradient(circle, rgba(188,0,0,0.2) 0%, transparent 70%)',
+            background: 'radial-gradient(circle, rgba(188,0,0,0.18) 0%, transparent 70%)',
             transform: 'translate(-50%, -50%)',
             filter: 'blur(80px)',
-            animation: 'pulse 6s ease-in-out infinite',
+            animation: 'orbFloat1 8s ease-in-out infinite',
+            pointerEvents: 'none',
+          }}
+        />
+        <div
+          style={{
+            position: 'absolute',
+            top: '60%',
+            left: '75%',
+            width: '350px',
+            height: '350px',
+            borderRadius: '50%',
+            background: 'radial-gradient(circle, rgba(255,68,68,0.12) 0%, transparent 70%)',
+            transform: 'translate(-50%, -50%)',
+            filter: 'blur(90px)',
+            animation: 'orbFloat2 10s ease-in-out infinite',
             pointerEvents: 'none',
           }}
         />
@@ -724,7 +745,7 @@ export default function VisionTheaterClient({ data }: { data: VisionTheaterData 
         )}
       </AnimatePresence>
 
-      {/* ========== VIDEO GRID ========== */}
+      {/* ========== VIDEOS & LIVE SECTION ========== */}
       <section style={{ maxWidth: '1200px', margin: '0 auto', padding: '32px 24px 48px' }}>
         <div
           style={{
@@ -744,24 +765,24 @@ export default function VisionTheaterClient({ data }: { data: VisionTheaterData 
             }}
           >
             {channelFilter === 'all'
-              ? 'All Videos'
+              ? 'Videos & Live'
               : CHANNEL_FILTERS.find((f) => f.slug === channelFilter)?.label ?? 'Videos'}
           </h2>
           <span style={{ fontSize: '13px', color: '#55556a' }}>
-            {filteredVideos.length} video{filteredVideos.length !== 1 ? 's' : ''}
+            {fullVideos.length} video{fullVideos.length !== 1 ? 's' : ''}
           </span>
         </div>
 
-        {filteredVideos.length === 0 ? (
+        {fullVideos.length === 0 ? (
           <div
             style={{
               textAlign: 'center',
-              padding: '80px 24px',
+              padding: '60px 24px',
               color: '#55556a',
               fontSize: '16px',
             }}
           >
-            No videos match your filters. Try adjusting your search.
+            No full-length videos match your filters.
           </div>
         ) : (
           <div
@@ -771,7 +792,7 @@ export default function VisionTheaterClient({ data }: { data: VisionTheaterData 
               gap: '20px',
             }}
           >
-            {filteredVideos.slice(0, visibleCount).map((video, index) => (
+            {fullVideos.slice(0, visibleCount).map((video, index) => (
               <AnimatedCard
                 key={video.videoId}
                 index={index % PAGE_SIZE}
@@ -891,8 +912,8 @@ export default function VisionTheaterClient({ data }: { data: VisionTheaterData 
           </div>
         )}
 
-        {/* Infinite scroll sentinel */}
-        {visibleCount < filteredVideos.length && (
+        {/* Infinite scroll sentinel for full videos */}
+        {visibleCount < fullVideos.length && (
           <div
             ref={sentinelRef}
             style={{
@@ -909,6 +930,172 @@ export default function VisionTheaterClient({ data }: { data: VisionTheaterData 
           </div>
         )}
       </section>
+
+      {/* ========== SHORTS SECTION ========== */}
+      {shorts.length > 0 && (
+        <section
+          style={{
+            maxWidth: '1200px',
+            margin: '0 auto',
+            padding: '0 24px 48px',
+          }}
+        >
+          <div
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '10px',
+              marginBottom: '20px',
+            }}
+          >
+            {/* Shorts icon */}
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="#bc0000">
+              <path d="M10 9.35 15 12l-5 2.65zM12 1a2.13 2.13 0 0 0-.64.1A9.84 9.84 0 0 0 4.17 5a9.9 9.9 0 0 0 0 14 9.84 9.84 0 0 0 7.19 3.9A10.07 10.07 0 0 0 12 23a9.84 9.84 0 0 0 7.19-3.9 9.9 9.9 0 0 0 0-14A9.84 9.84 0 0 0 12.64 1.1 2.13 2.13 0 0 0 12 1z" />
+            </svg>
+            <h2
+              style={{
+                fontFamily: '"Space Grotesk", sans-serif',
+                fontSize: '22px',
+                fontWeight: 700,
+                color: '#ffffff',
+                margin: 0,
+              }}
+            >
+              Shorts
+            </h2>
+            <span style={{ fontSize: '13px', color: '#55556a' }}>
+              {shorts.length} clip{shorts.length !== 1 ? 's' : ''}
+            </span>
+          </div>
+
+          <div
+            style={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(auto-fill, minmax(160px, 1fr))',
+              gap: '14px',
+            }}
+          >
+            {shorts.map((video, index) => (
+              <AnimatedCard
+                key={video.videoId}
+                index={index}
+                hoverLift
+                as="article"
+                style={{
+                  background: '#13131d',
+                  borderRadius: '14px',
+                  overflow: 'hidden',
+                  border: '1px solid rgba(255,255,255,0.06)',
+                  cursor: 'pointer',
+                  transition: 'box-shadow 0.2s',
+                }}
+                onClick={() => handleSelectVideo(video)}
+              >
+                {/* Vertical thumbnail (9:16 aspect) */}
+                <div style={{ position: 'relative', paddingBottom: '177%', overflow: 'hidden' }}>
+                  <img
+                    src={video.thumbnailUrl}
+                    alt={video.title}
+                    loading="lazy"
+                    style={{
+                      position: 'absolute',
+                      top: 0,
+                      left: 0,
+                      width: '100%',
+                      height: '100%',
+                      objectFit: 'cover',
+                    }}
+                  />
+                  {/* Play overlay */}
+                  <div
+                    style={{
+                      position: 'absolute',
+                      inset: 0,
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      background: 'rgba(0,0,0,0.25)',
+                      opacity: 0,
+                      transition: 'opacity 0.2s',
+                    }}
+                    className="vt-play-overlay"
+                  >
+                    <div
+                      style={{
+                        width: '40px',
+                        height: '40px',
+                        borderRadius: '50%',
+                        background: 'rgba(188,0,0,0.9)',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                      }}
+                    >
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="#fff">
+                        <path d="M8 5v14l11-7z" />
+                      </svg>
+                    </div>
+                  </div>
+                  {/* Shorts badge */}
+                  <span
+                    style={{
+                      position: 'absolute',
+                      bottom: '8px',
+                      left: '8px',
+                      background: 'rgba(188,0,0,0.85)',
+                      color: '#ffffff',
+                      fontSize: '10px',
+                      fontWeight: 700,
+                      padding: '2px 7px',
+                      borderRadius: '4px',
+                      textTransform: 'uppercase',
+                      letterSpacing: '0.5px',
+                    }}
+                  >
+                    Short
+                  </span>
+                  {/* Channel badge */}
+                  <span
+                    style={{
+                      position: 'absolute',
+                      top: '6px',
+                      left: '6px',
+                      background: 'rgba(0,0,0,0.7)',
+                      color: '#ffffff',
+                      fontSize: '10px',
+                      fontWeight: 600,
+                      padding: '2px 6px',
+                      borderRadius: '4px',
+                      backdropFilter: 'blur(4px)',
+                    }}
+                  >
+                    {video.channelName}
+                  </span>
+                </div>
+
+                {/* Card content */}
+                <div style={{ padding: '10px 12px' }}>
+                  <h3
+                    style={{
+                      fontSize: '12px',
+                      fontWeight: 700,
+                      color: '#ffffff',
+                      margin: 0,
+                      lineHeight: 1.3,
+                      display: '-webkit-box',
+                      WebkitLineClamp: 2,
+                      WebkitBoxOrient: 'vertical',
+                      overflow: 'hidden',
+                    }}
+                  >
+                    {video.title}
+                  </h3>
+                </div>
+              </AnimatedCard>
+            ))}
+          </div>
+        </section>
+      )}
 
       {/* ========== CATEGORIES ========== */}
       <section
@@ -1216,9 +1403,13 @@ export default function VisionTheaterClient({ data }: { data: VisionTheaterData 
 
       {/* ========== CSS ANIMATION ========== */}
       <style jsx global>{`
-        @keyframes pulse {
-          0%, 100% { opacity: 0.5; transform: translate(-50%, -50%) scale(1); }
-          50% { opacity: 0.8; transform: translate(-50%, -50%) scale(1.1); }
+        @keyframes orbFloat1 {
+          0%, 100% { opacity: 0.5; transform: translate(-50%, -50%) scale(1) translateY(0); }
+          50% { opacity: 0.8; transform: translate(-50%, -50%) scale(1.15) translateY(-20px); }
+        }
+        @keyframes orbFloat2 {
+          0%, 100% { opacity: 0.4; transform: translate(-50%, -50%) scale(1) translateX(0); }
+          50% { opacity: 0.7; transform: translate(-50%, -50%) scale(1.1) translateX(-15px); }
         }
         article:hover .vt-play-overlay {
           opacity: 1 !important;

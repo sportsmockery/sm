@@ -8,6 +8,7 @@ const DISPLAY_COUNT = 15
 export interface VisionTheaterVideo extends ShowVideo {
   channelSlug: string
   channelName: string
+  isShort: boolean
 }
 
 export interface VisionTheaterChannel {
@@ -140,19 +141,20 @@ async function fetchChannelVideos(
     }
   })
 
-  // 5) Filter out shorts (videos under 60 seconds)
-  const filteredVideos = videoDetails.filter((video) => {
+  // 5) Tag shorts (under 60 seconds) instead of filtering them out
+  const taggedVideos = videoDetails.map((video) => {
     const durationSeconds = parseDuration(video.duration)
-    return durationSeconds >= 60
+    return { ...video, isShort: durationSeconds < 60 && durationSeconds > 0 }
   })
 
-  // 6) Sort by publish date (most recent first)
-  filteredVideos.sort((a, b) => {
+  // 6) Sort: full videos first (by date), then shorts (by date)
+  taggedVideos.sort((a, b) => {
+    if (a.isShort !== b.isShort) return a.isShort ? 1 : -1
     return new Date(b.publishedAt).getTime() - new Date(a.publishedAt).getTime()
   })
 
-  // 7) Convert to VisionTheaterVideo format and limit to display count
-  return filteredVideos.slice(0, DISPLAY_COUNT).map((v) => ({
+  // 7) Convert to VisionTheaterVideo format
+  return taggedVideos.slice(0, DISPLAY_COUNT + 10).map((v) => ({
     videoId: v.videoId,
     title: v.title,
     description: v.description,
@@ -160,6 +162,7 @@ async function fetchChannelVideos(
     thumbnailUrl: v.thumbnailUrl,
     channelSlug: channelSlug,
     channelName: channelName,
+    isShort: v.isShort,
   }))
 }
 
