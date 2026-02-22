@@ -320,7 +320,7 @@ export default function AdminHubPage() {
             </div>
 
             {/* Hub-specific meta fields */}
-            <HubMetaFields hubSlug={form.hub_slug} meta={form.hub_meta} updateMeta={updateMeta} />
+            <HubMetaFields hubSlug={form.hub_slug} meta={form.hub_meta} updateMeta={updateMeta} formData={{ headline: form.headline, summary: form.summary }} selectedTeam={selectedTeam} />
 
             {/* Actions */}
             <div style={{ display: 'flex', gap: 10, marginTop: 8 }}>
@@ -454,12 +454,64 @@ const actionBtnStyle: React.CSSProperties = {
   border: '1px solid var(--border-default)', cursor: 'pointer',
 }
 
-function HubMetaFields({ hubSlug, meta, updateMeta }: {
+function HubMetaFields({ hubSlug, meta, updateMeta, formData, selectedTeam }: {
   hubSlug: HubSlug
   meta: Record<string, unknown>
   updateMeta: (key: string, value: string) => void
+  formData?: { headline: string; summary: string }
+  selectedTeam?: string
 }) {
   const m = (key: string) => (meta[key] as string) || ''
+  const [capLoading, setCapLoading] = useState(false)
+  const [capMessage, setCapMessage] = useState('')
+  const [capConfidence, setCapConfidence] = useState<{ level: string; sources: string[] } | null>(null)
+
+  async function handleAskScout() {
+    const playerName = m('playerName')
+    const otherTeam = m('otherTeam')
+    if (!playerName || !otherTeam) {
+      setCapMessage('Please fill in Player Name and Other Team first.')
+      return
+    }
+
+    setCapMessage('')
+    setCapLoading(true)
+    setCapConfidence(null)
+
+    const chicagoTeam = TEAM_OPTIONS.find(t => t.slug === selectedTeam)?.label || 'Chicago Bears'
+
+    try {
+      const res = await fetch('https://datalab.sportsmockery.com/api/scout/cap-impact', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          player_name: playerName,
+          other_team: otherTeam,
+          chicago_team: chicagoTeam,
+          position: m('position') || undefined,
+          estimated_cost: m('estimatedCost') || undefined,
+          headline: formData?.headline || undefined,
+          summary: formData?.summary || undefined,
+        }),
+      })
+
+      const data = await res.json()
+
+      if (!res.ok) {
+        updateMeta('capImpact', `Error: ${data.error}`)
+        return
+      }
+
+      updateMeta('capImpact', data.cap_impact)
+      if (data.confidence) {
+        setCapConfidence({ level: data.confidence, sources: data.sources || [] })
+      }
+    } catch {
+      updateMeta('capImpact', 'Failed to reach Scout. Please try again.')
+    } finally {
+      setCapLoading(false)
+    }
+  }
 
   if (hubSlug === 'trade-rumors') {
     return (
@@ -483,9 +535,41 @@ function HubMetaFields({ hubSlug, meta, updateMeta }: {
           <label style={labelStyle}>Estimated Cost</label>
           <input type="text" value={m('estimatedCost')} onChange={e => updateMeta('estimatedCost', e.target.value)} placeholder="E.g., 2nd round pick" style={inputStyle} />
         </div>
-        <div>
-          <label style={labelStyle}>Cap Impact</label>
-          <input type="text" value={m('capImpact')} onChange={e => updateMeta('capImpact', e.target.value)} placeholder="E.g., $12M/year" style={inputStyle} />
+        <div style={{ gridColumn: 'span 2' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
+            <span style={{ fontSize: 12, fontWeight: 600, color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Cap Impact</span>
+            <button
+              onClick={handleAskScout}
+              disabled={capLoading}
+              style={{
+                display: 'inline-flex', alignItems: 'center', gap: 4,
+                background: 'none', border: 'none', cursor: capLoading ? 'wait' : 'pointer',
+                color: '#bc0000', fontSize: 12, fontWeight: 600, padding: 0,
+                opacity: capLoading ? 0.6 : 1,
+              }}
+            >
+              <img src="/downloads/scout-v2.png" alt="Scout" width={16} height={16} style={{ borderRadius: 3 }} />
+              <span>{capLoading ? 'Analyzing...' : 'Ask Scout'}</span>
+            </button>
+          </div>
+          {capMessage && (
+            <div style={{ fontSize: 11, color: '#f59e0b', marginBottom: 4 }}>{capMessage}</div>
+          )}
+          <textarea
+            value={m('capImpact')}
+            onChange={e => updateMeta('capImpact', e.target.value)}
+            placeholder="E.g., $12M/year — or click Ask Scout to auto-fill"
+            rows={3}
+            style={{ ...inputStyle, resize: 'vertical' }}
+          />
+          {capConfidence && (
+            <div style={{
+              fontSize: 11, marginTop: 4,
+              color: capConfidence.level === 'high' ? '#22c55e' : capConfidence.level === 'medium' ? '#f59e0b' : '#ef4444',
+            }}>
+              {capConfidence.level} confidence &middot; {capConfidence.sources.length} sources
+            </div>
+          )}
         </div>
       </div>
     )
