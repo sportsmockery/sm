@@ -1021,10 +1021,6 @@ export default function VisionTheaterClient({ data }: { data: VisionTheaterData 
               marginBottom: '20px',
             }}
           >
-            {/* Shorts icon */}
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="#bc0000">
-              <path d="M10 9.35 15 12l-5 2.65zM12 1a2.13 2.13 0 0 0-.64.1A9.84 9.84 0 0 0 4.17 5a9.9 9.9 0 0 0 0 14 9.84 9.84 0 0 0 7.19 3.9A10.07 10.07 0 0 0 12 23a9.84 9.84 0 0 0 7.19-3.9 9.9 9.9 0 0 0 0-14A9.84 9.84 0 0 0 12.64 1.1 2.13 2.13 0 0 0 12 1z" />
-            </svg>
             <h2
               style={{
                 fontFamily: '"Space Grotesk", sans-serif',
