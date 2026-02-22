@@ -166,7 +166,7 @@ export default function DataHubLandingPage() {
 
                 {/* Features list */}
                 <div style={{ marginTop: 16, paddingTop: 16, borderTop: '1px solid var(--sm-border)', display: 'flex', flexWrap: 'nowrap', gap: 8 }}>
-                  {['Live Scores', 'Schedule', 'Roster', 'Stats'].map((feature) => (
+                  {['Scores', 'Schedule', 'Roster', 'Stats'].map((feature) => (
                     <span
                       key={feature}
                       className="sm-tag"
