@@ -542,18 +542,21 @@ export async function getBullsSchedule(season?: number): Promise<BullsGame[]> {
       .order('game_date', { ascending: false })
 
     if (prevError || !prevData) return []
-    // Filter out preseason/All-Star games
+    // Only include regular season + postseason games (whitelist approach)
     const filtered = prevData.filter((g: any) => {
       const gt = (g.game_type || '').toUpperCase()
-      return gt !== 'PRE' && gt !== 'PRESEASON' && gt !== 'ALL-STAR' && gt !== 'ALLSTAR'
+      // Include: null, empty, 'REGULAR', 'REGULAR SEASON', 'POST', 'POSTSEASON', 'PLAYOFF', 'PLAYOFFS'
+      // Exclude everything else: preseason, All-Star, NBA Cup/IST, exhibition, etc.
+      return !gt || gt === 'REGULAR' || gt === 'REGULAR SEASON' || gt === 'POST' || gt === 'POSTSEASON' || gt === 'PLAYOFF' || gt === 'PLAYOFFS'
     })
     return filtered.map((g: any) => transformGame(g))
   }
 
-  // Filter out preseason/All-Star games — NBA regular season is 82 games
+  // Only include regular season + postseason games (whitelist approach)
+  // NBA regular season is exactly 82 games — exclude NBA Cup, All-Star, preseason, etc.
   const filtered = data.filter((g: any) => {
     const gt = (g.game_type || '').toUpperCase()
-    return gt !== 'PRE' && gt !== 'PRESEASON' && gt !== 'ALL-STAR' && gt !== 'ALLSTAR'
+    return !gt || gt === 'REGULAR' || gt === 'REGULAR SEASON' || gt === 'POST' || gt === 'POSTSEASON' || gt === 'PLAYOFF' || gt === 'PLAYOFFS'
   })
 
   return filtered.map((g: any) => transformGame(g))
