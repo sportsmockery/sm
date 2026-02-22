@@ -460,19 +460,10 @@ export default function VisionTheaterClient({ data }: { data: VisionTheaterData 
               color: '#ffffff',
               margin: '0 0 24px',
               textShadow:
-                '0 0 10px rgba(188, 0, 0, 0.6), 0 0 40px rgba(188, 0, 0, 0.4), 0 0 80px rgba(188, 0, 0, 0.3), 0 0 140px rgba(188, 0, 0, 0.2), 0 0 200px rgba(188, 0, 0, 0.1)',
+                '0 0 8px rgba(188, 0, 0, 0.4), 0 0 20px rgba(188, 0, 0, 0.25), 0 0 40px rgba(188, 0, 0, 0.15)',
             }}
           >
-            <span
-              style={{
-                background: 'linear-gradient(135deg, #bc0000, #ff4444)',
-                WebkitBackgroundClip: 'text',
-                WebkitTextFillColor: 'transparent',
-                backgroundClip: 'text',
-              }}
-            >
-              Vision Theater
-            </span>
+            Vision Theater
           </h1>
 
           <p
