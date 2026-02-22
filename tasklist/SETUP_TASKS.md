@@ -102,6 +102,25 @@ Add these environment variables in your hosting dashboard:
 | `RESEND_API_KEY` | (Optional) For email functionality |
 | `ANTHROPIC_API_KEY` | (Optional) For AI features |
 
+### Disqus Integration (for comments)
+
+| Variable | Description |
+|----------|-------------|
+| `NEXT_PUBLIC_DISQUS_SHORTNAME` | `sportsmockery` |
+| `NEXT_PUBLIC_DISQUS_PUBLIC_KEY` | Disqus API public key |
+| `DISQUS_API_KEY` | Disqus API key (for OAuth) |
+| `DISQUS_API_SECRET` | Disqus API secret (for OAuth) |
+
+Get Disqus keys at: https://disqus.com/api/applications/
+Set OAuth callback: `https://test.sportsmockery.com/api/auth/disqus/callback`
+
+### Social Login (Google, Facebook, X/Twitter)
+
+Social login providers are configured in **Supabase Dashboard**, not Vercel:
+1. Go to Supabase Dashboard → Authentication → Providers
+2. Enable Google, Facebook, and Twitter
+3. Add API keys from each provider's developer console
+
 ---
 
 ## 3. Dependencies
