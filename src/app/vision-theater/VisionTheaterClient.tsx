@@ -380,28 +380,63 @@ export default function VisionTheaterClient({ data }: { data: VisionTheaterData 
           }}
         />
         <div style={{ position: 'relative', textAlign: 'center', padding: '48px 24px', maxWidth: '700px' }}>
+          {/* Eyebrow pill — matches SM 2.0 homepage */}
+          <div
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '8px',
+              padding: '8px 20px',
+              borderRadius: '100px',
+              background: 'rgba(188, 0, 0, 0.08)',
+              border: '1px solid rgba(188, 0, 0, 0.15)',
+              fontSize: '13px',
+              fontWeight: 600,
+              color: '#ff4444',
+              letterSpacing: '0.3px',
+              marginBottom: '32px',
+            }}
+          >
+            <span
+              style={{
+                width: '6px',
+                height: '6px',
+                borderRadius: '50%',
+                background: '#ff4444',
+                animation: 'vtEyebrowPulse 2s infinite',
+              }}
+            />
+            Vision Theater
+          </div>
+
+          {/* Title — Bebas Neue with red glow, matching SM 2.0 hero */}
           <h1
             style={{
-              fontFamily: '"Space Grotesk", sans-serif',
-              fontSize: 'clamp(32px, 5vw, 48px)',
-              fontWeight: 700,
-              color: '#ffffff',
-              margin: '0 0 12px',
-              lineHeight: 1.1,
-            }}
-          >
-            Vision <span style={{ color: '#bc0000' }}>Theater</span>
-          </h1>
-          <p
-            style={{
-              fontSize: 'clamp(16px, 2.5vw, 24px)',
+              fontFamily: 'var(--font-bebas-neue), "Bebas Neue", Impact, sans-serif',
+              fontSize: 'clamp(4rem, 9vw, 7.5rem)',
               fontWeight: 400,
-              color: '#8a8a9a',
+              lineHeight: 0.95,
+              letterSpacing: '0.01em',
+              textTransform: 'uppercase',
+              color: '#ffffff',
               margin: '0 0 24px',
+              textShadow:
+                '0 0 10px rgba(188, 0, 0, 0.6), 0 0 40px rgba(188, 0, 0, 0.4), 0 0 80px rgba(188, 0, 0, 0.3), 0 0 140px rgba(188, 0, 0, 0.2), 0 0 200px rgba(188, 0, 0, 0.1)',
             }}
           >
-            Your Chicago Sports Video Hub
-          </p>
+            Your Chicago<br />
+            <span
+              style={{
+                background: 'linear-gradient(135deg, #bc0000, #ff4444)',
+                WebkitBackgroundClip: 'text',
+                WebkitTextFillColor: 'transparent',
+                backgroundClip: 'text',
+              }}
+            >
+              Sports Hub
+            </span>
+          </h1>
+
           <p
             style={{
               fontSize: '16px',
@@ -1410,6 +1445,10 @@ export default function VisionTheaterClient({ data }: { data: VisionTheaterData 
         @keyframes orbFloat2 {
           0%, 100% { opacity: 0.4; transform: translate(-50%, -50%) scale(1) translateX(0); }
           50% { opacity: 0.7; transform: translate(-50%, -50%) scale(1.1) translateX(-15px); }
+        }
+        @keyframes vtEyebrowPulse {
+          0%, 100% { opacity: 1; transform: scale(1); }
+          50% { opacity: 0.4; transform: scale(1.3); }
         }
         article:hover .vt-play-overlay {
           opacity: 1 !important;
