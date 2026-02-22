@@ -4029,3 +4029,212 @@ a.glass-card-sm:active,
   transform: translateY(-2px);
   box-shadow: 0 0 25px rgba(188,0,0,0.5);
 }
+
+/* ========== TEAM HUB NAV & LAYOUT UPGRADES ========== */
+
+/* === Team Orb Nav (top-right on team hubs) === */
+.team-orb-nav {
+  position: fixed;
+  top: 100px;
+  right: 24px;
+  z-index: 998;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 12px;
+}
+.team-orb-nav .nav-orb {
+  position: relative;
+  bottom: auto;
+  right: auto;
+}
+.nav-orb-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+  padding: 16px;
+  background: var(--sm-card);
+  border: 1px solid var(--sm-border);
+  border-radius: var(--sm-radius-lg);
+  backdrop-filter: blur(16px);
+  box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+  min-width: 280px;
+}
+.nav-orb-tool-link {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  padding: 12px 8px;
+  border-radius: var(--sm-radius-sm);
+  text-decoration: none;
+  transition: all 0.2s;
+  cursor: pointer;
+}
+.nav-orb-tool-link:hover {
+  background: rgba(255,255,255,0.04);
+}
+.nav-orb-tool-icon {
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--sm-gradient-subtle);
+  border: 1px solid var(--sm-border);
+  transition: border-color 0.2s;
+}
+.nav-orb-tool-link:hover .nav-orb-tool-icon {
+  border-color: rgba(188,0,0,0.3);
+}
+.nav-orb-tool-label {
+  font-family: 'Space Grotesk', sans-serif;
+  font-weight: 400;
+  font-size: 12px;
+  color: var(--sm-text-muted);
+  text-align: center;
+  white-space: nowrap;
+}
+@media (max-width: 768px) {
+  .team-orb-nav {
+    top: auto;
+    bottom: 16px;
+    right: 16px;
+  }
+  .nav-orb-grid {
+    min-width: 260px;
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+/* === Tool Grid (post-hero) === */
+.tool-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 20px;
+}
+@media (max-width: 640px) {
+  .tool-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* === Hero Particle Float (for HeroParticles) === */
+@keyframes hero-particle-float {
+  0%, 100% { transform: translateY(0) translateX(0); }
+  25% { transform: translateY(-20px) translateX(8px); }
+  50% { transform: translateY(-10px) translateX(-6px); }
+  75% { transform: translateY(-25px) translateX(4px); }
+}
+
+/* === SM Logo hover glow in hero === */
+.hero-sm-logo:hover {
+  opacity: 1 !important;
+}
+
+/* === Shared Team Feature Card === */
+.team-feature-card {
+  position: relative;
+  background: var(--sm-card);
+  border: 1px solid var(--sm-border);
+  border-radius: 14px;
+  padding: 16px 20px;
+  overflow: hidden;
+  transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 16px;
+}
+.team-feature-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  width: 3px;
+  background: var(--sm-gradient);
+  opacity: 0.7;
+  transition: opacity 0.4s;
+}
+.team-feature-card:hover {
+  transform: translateX(4px);
+  border-color: rgba(188,0,0,0.2);
+  background: var(--sm-card-hover);
+}
+.team-feature-card:hover::before {
+  opacity: 1;
+}
+.team-feature-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 18px;
+  border-radius: 100px;
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 13px;
+  font-weight: 600;
+  text-decoration: none;
+  transition: all 0.2s;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+/* === Hero Search Bar (scaffold) === */
+.hero-search-bar input:focus {
+  border-color: rgba(188,0,0,0.3) !important;
+}
+
+/* === Article Card responsive (shared) === */
+@media (min-width: 768px) {
+  .article-card-hero-row {
+    flex-direction: row !important;
+  }
+  .article-card-hero-img {
+    width: 50% !important;
+  }
+}
+
+/* === Quick Stats Chip hover === */
+.quick-stats-chip:hover {
+  border-color: rgba(188,0,0,0.2) !important;
+}
+
+/* === Light Mode Overrides for Team Hub Upgrades === */
+[data-theme="light"] .nav-orb-grid,
+:root[data-theme="light"] .nav-orb-grid {
+  background: rgba(255,255,255,0.95);
+  border-color: rgba(0,0,0,0.1);
+  box-shadow: 0 8px 32px rgba(0,0,0,0.08);
+}
+[data-theme="light"] .nav-orb-tool-link:hover {
+  background: rgba(0,0,0,0.04);
+}
+[data-theme="light"] .nav-orb-tool-label {
+  color: #555;
+}
+[data-theme="light"] .nav-orb-tool-icon {
+  background: rgba(188,0,0,0.05);
+  border-color: rgba(0,0,0,0.1);
+}
+[data-theme="light"] .team-feature-card {
+  background: rgba(255,255,255,0.8);
+  border-color: rgba(0,0,0,0.1);
+}
+[data-theme="light"] .team-feature-card:hover {
+  background: rgba(255,255,255,0.95);
+  border-color: rgba(188,0,0,0.25);
+}
+[data-theme="light"] .hero-search-bar input {
+  background: rgba(0,0,0,0.03) !important;
+  border-color: rgba(0,0,0,0.1) !important;
+  color: #333 !important;
+}
+[data-theme="light"] .quick-stats-chip {
+  background: rgba(0,0,0,0.02) !important;
+  border-color: rgba(0,0,0,0.08) !important;
+}
+[data-theme="light"] .quick-stats-chip:hover {
+  border-color: rgba(188,0,0,0.2) !important;
+}

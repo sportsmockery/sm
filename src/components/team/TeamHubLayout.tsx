@@ -4,15 +4,23 @@ import { useState, useEffect, useRef } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
+import { motion, useReducedMotion } from 'framer-motion'
 import { useTeamRecord } from '@/contexts/TeamRecordContext'
+import { useTheme } from '@/contexts/ThemeContext'
+import CountUpValue from './CountUp'
+import HeroParticles from './HeroParticles'
+import HeroSearchBar from './HeroSearchBar'
 
 /**
  * Team Hub Layout Component
  *
  * 2030 Premium Design System: Team Hubs
  * - Team Hero with team-hero-{slug} accent background + sm-grid-overlay
+ * - Framer Motion hero entrance + shimmer logo + count-up record
+ * - Particle background + red gradient overlay
+ * - SM logo top-left, inline search bar
  * - Glass-card stat pills, Space Grotesk headings
- * - Sticky subnav with team-pill quick-nav
+ * - Sticky subnav
  * - Slot for main content
  */
 
@@ -123,6 +131,16 @@ export default function TeamHubLayout({
   const navRef = useRef<HTMLDivElement>(null)
   const headerRef = useRef<HTMLDivElement>(null)
   const { setRecord: setContextRecord } = useTeamRecord()
+  const prefersReducedMotion = useReducedMotion()
+
+  let theme = 'dark'
+  try {
+    // eslint-disable-next-line react-hooks/rules-of-hooks
+    const themeCtx = useTheme()
+    theme = themeCtx.theme
+  } catch {
+    // ThemeContext may not be available in all render paths
+  }
 
   const tabs = team.league === 'NFL' ? NFL_TABS : TEAM_TABS
   const basePath = `/${team.slug}`
@@ -178,6 +196,38 @@ export default function TeamHubLayout({
 
   const heroClass = TEAM_HERO_CLASS[team.slug] || ''
 
+  // Count-up record display
+  const renderCountUpRecord = () => {
+    if (!record) return '--'
+
+    const wins = <CountUpValue value={record.wins} duration={1000} />
+    const losses = <CountUpValue value={record.losses} duration={1000} delay={300} />
+
+    if (team.league === 'NFL' && record.ties && record.ties > 0) {
+      const ties = <CountUpValue value={record.ties} duration={1000} delay={600} />
+      return <>{wins}-{losses}-{ties}</>
+    }
+    if (team.league === 'NHL' && record.otLosses && record.otLosses > 0) {
+      const ot = <CountUpValue value={record.otLosses} duration={1000} delay={600} />
+      return <>{wins}-{losses}-{ot}</>
+    }
+    return <>{wins}-{losses}</>
+  }
+
+  // Motion variants for hero entrance
+  const heroContainerVariants = {
+    hidden: { opacity: 0 },
+    visible: {
+      opacity: 1,
+      transition: { staggerChildren: 0.1, delayChildren: 0.1 },
+    },
+  }
+
+  const heroItemVariants = {
+    hidden: { opacity: 0, y: 20 },
+    visible: { opacity: 1, y: 0, transition: { duration: 0.5, ease: [0.25, 0.46, 0.45, 0.94] as [number, number, number, number] } },
+  }
+
   return (
     <div style={{ minHeight: '100vh', background: 'var(--sm-dark)' }}>
       {/* ===== TEAM HERO SECTION ===== */}
@@ -191,15 +241,70 @@ export default function TeamHubLayout({
           paddingBottom: '48px',
         }}
       >
+        {/* Particle dots background */}
+        <HeroParticles />
+
+        {/* Red gradient overlay */}
+        <div
+          style={{
+            position: 'absolute',
+            inset: 0,
+            background: 'radial-gradient(ellipse at 50% 100%, rgba(188,0,0,0.08) 0%, transparent 60%)',
+            pointerEvents: 'none',
+            zIndex: 0,
+          }}
+          aria-hidden="true"
+        />
+
         {/* Grid overlay */}
         <div className="sm-grid-overlay" />
 
+        {/* SM Logo - top left */}
+        <div
+          style={{
+            position: 'absolute',
+            top: '16px',
+            left: '24px',
+            zIndex: 2,
+            opacity: 0.7,
+            transition: 'opacity 0.3s',
+          }}
+          className="hero-sm-logo"
+        >
+          <Image
+            src={theme === 'light' ? '/downloads/sm-logo-light.png' : '/downloads/sm-logo-dark.png'}
+            alt="Sports Mockery"
+            width={120}
+            height={30}
+            style={{ height: '24px', width: 'auto', objectFit: 'contain' }}
+            unoptimized
+          />
+        </div>
+
         {/* Content */}
-        <div style={{ position: 'relative', zIndex: 1, maxWidth: '1320px', margin: '0 auto', padding: '0 24px' }}>
+        <motion.div
+          style={{ position: 'relative', zIndex: 1, maxWidth: '1320px', margin: '0 auto', padding: '0 24px' }}
+          variants={prefersReducedMotion ? undefined : heroContainerVariants}
+          initial={prefersReducedMotion ? undefined : 'hidden'}
+          animate={prefersReducedMotion ? undefined : 'visible'}
+        >
           {/* Team header row */}
-          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '24px', marginBottom: '32px' }}>
-            {/* Logo */}
-            <div
+          <motion.div
+            style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '24px', marginBottom: '32px' }}
+            variants={prefersReducedMotion ? undefined : heroItemVariants}
+          >
+            {/* Logo with shimmer pulse */}
+            <motion.div
+              animate={
+                prefersReducedMotion
+                  ? {}
+                  : { scale: [0.97, 1.03, 0.97] }
+              }
+              transition={
+                prefersReducedMotion
+                  ? undefined
+                  : { duration: 3, repeat: Infinity, ease: 'easeInOut' }
+              }
               style={{
                 width: '96px',
                 height: '96px',
@@ -221,7 +326,7 @@ export default function TeamHubLayout({
                 style={{ width: '100%', height: '100%', objectFit: 'contain' }}
                 unoptimized
               />
-            </div>
+            </motion.div>
 
             {/* Name + tagline */}
             <div style={{ textAlign: 'center' }}>
@@ -242,10 +347,10 @@ export default function TeamHubLayout({
                 {TEAM_TAGLINES[team.slug] || team.league}
               </p>
             </div>
-          </div>
+          </motion.div>
 
-          {/* Stats bar - glass pills */}
-          <div
+          {/* Stats bar - glass pills with count-up */}
+          <motion.div
             style={{
               display: 'flex',
               flexWrap: 'wrap',
@@ -253,14 +358,15 @@ export default function TeamHubLayout({
               gap: '12px',
               marginBottom: '28px',
             }}
+            variants={prefersReducedMotion ? undefined : heroItemVariants}
           >
-            {/* Record */}
+            {/* Record with count-up */}
             <div
               className="glass-card glass-card-sm glass-card-static"
               style={{ textAlign: 'center', minWidth: '120px', padding: '16px 20px' }}
             >
               <div style={{ fontSize: '24px', fontWeight: 700, color: 'var(--sm-text)', fontFamily: "'Space Grotesk', sans-serif" }}>
-                {formatRecord() || '--'}
+                {renderCountUpRecord()}
               </div>
               <div style={{ fontSize: '11px', textTransform: 'uppercase', letterSpacing: '1px', color: 'var(--sm-text-dim)', fontWeight: 600 }}>
                 Record
@@ -316,27 +422,13 @@ export default function TeamHubLayout({
                 </div>
               </div>
             )}
-          </div>
+          </motion.div>
 
-          {/* Quick-nav pills */}
-          <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center', gap: '8px' }}>
-            {[
-              { label: 'Schedule', href: `/${team.slug}/schedule` },
-              { label: 'Roster', href: `/${team.slug}/roster` },
-              { label: 'Stats', href: `/${team.slug}/stats` },
-              { label: 'Scores', href: `/${team.slug}/scores` },
-              { label: 'Players', href: `/${team.slug}/players` },
-            ].map((link) => (
-              <Link
-                key={link.label}
-                href={link.href}
-                className="team-pill"
-              >
-                {link.label}
-              </Link>
-            ))}
-          </div>
-        </div>
+          {/* Inline search bar scaffold */}
+          <motion.div variants={prefersReducedMotion ? undefined : heroItemVariants}>
+            <HeroSearchBar teamName={team.name} />
+          </motion.div>
+        </motion.div>
       </div>
 
       {/* ===== STICKY SUBNAV ===== */}
@@ -400,7 +492,7 @@ export default function TeamHubLayout({
         style={{
           maxWidth: '1320px',
           margin: '0 auto',
-          padding: '32px 24px 48px',
+          padding: '48px 24px 48px',
           background: 'var(--sm-dark)',
         }}
       >

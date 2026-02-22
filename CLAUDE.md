@@ -1,6 +1,6 @@
 # SportsMockery - Claude Project Knowledge Base
 
-> **Last Updated:** February 17, 2026 (Mock Draft eligibility rules added)
+> **Last Updated:** February 22, 2026 (DataLab Frontend Data Guide integration)
 > **Purpose:** This file contains everything Claude needs to know to work on this project.
 
 ---
@@ -104,9 +104,12 @@ When the user says "Team Pages", they mean the team hub pages at `/chicago-{team
 Team Pages → Data Layer (src/lib/{team}Data.ts) → Datalab Supabase
 ```
 
-### Datalab Reference Document
+### Datalab Reference Documents
 
-The **authoritative** Datalab integration guide is at:
+The **authoritative** frontend data guide is at:
+`/Users/christopherburhans/Documents/projects/sm-data-lab/docs/TestSM_Frontend_Data_Guide.md`
+
+Legacy integration guide (for background only):
 `/Users/christopherburhans/Documents/projects/sm-data-lab/docs/SportsMockery_Integration_Guide.md`
 
 SM's reference doc is at: `/docs/Team_Pages_Query.md`
@@ -126,7 +129,23 @@ SM's reference doc is at: `/docs/Team_Pages_Query.md`
 
 **NBA AND NHL USE ENDING YEAR!** Query Bulls and Blackhawks with `season = 2026` for the 2025-26 season.
 
+**Cap tables always use `season = 2026`** regardless of sport.
+
 **CONFIRMED:** There is NO `season_start_year` column in any tables - use `season` only.
+
+```typescript
+function getCurrentSeason(sport: 'nfl' | 'nba' | 'nhl' | 'mlb'): number {
+  const now = new Date()
+  const month = now.getMonth() + 1
+  const year = now.getFullYear()
+  switch (sport) {
+    case 'nfl': return month >= 9 ? year : year - 1    // 2025
+    case 'nba': return month >= 10 ? year + 1 : year   // 2026
+    case 'nhl': return month >= 10 ? year + 1 : year   // 2026
+    case 'mlb': return month >= 4 ? year : year - 1    // 2025
+  }
+}
+```
 
 ---
 
@@ -139,6 +158,44 @@ SM's reference doc is at: `/docs/Team_Pages_Query.md`
 | Blackhawks | `is_active` | |
 | Cubs | `is_active` | Also check `data_status != 'needs_roster_review'` |
 | White Sox | `is_active` | Also check `data_status != 'needs_roster_review'` |
+
+---
+
+### CRITICAL: Roster Source of Truth — Contracts Tables
+
+**NEVER use `{team}_players` alone for roster counts.** The `{team}_contracts` table is the source of truth for how many players to display, because it only contains players with active contracts.
+
+| Team | Max Roster Size | Contracts Table | Contract Count |
+|------|----------------|-----------------|----------------|
+| Bears (NFL) | **53** | `bears_contracts` | 52 |
+| Bulls (NBA) | **18** | `bulls_contracts` | 15 |
+| Blackhawks (NHL) | **23** | `blackhawks_contracts` | 23 |
+| Cubs (MLB) | **40** | `cubs_contracts` | 40 |
+| White Sox (MLB) | **40** | `whitesox_contracts` | 40 |
+
+**Recommended Roster Query:** Use contracts as driver, join players for bio data and headshots:
+
+```typescript
+// Bears roster (max 53 players, driven by contracts)
+const { data: contracts } = await supabase
+  .from('bears_contracts')
+  .select('player_id, player_name, position, age, cap_hit, base_salary, dead_cap')
+  .eq('season', 2026)
+  .order('cap_hit', { ascending: false })
+
+const { data: players } = await supabase
+  .from('bears_players')
+  .select('espn_id, headshot_url, jersey_number, height_inches, weight_lbs, college')
+  .eq('is_active', true)
+
+const headshots = new Map(players?.map(p => [String(p.espn_id), p]) || [])
+const roster = contracts?.map(c => ({ ...c, ...(headshots.get(c.player_id) || {}) })) || []
+```
+
+**Bulls uses `espn_player_id`** (not `espn_id`):
+```typescript
+const headshots = new Map(players?.map(p => [String(p.espn_player_id), p]) || [])
+```
 
 ---
 
@@ -282,7 +339,7 @@ const { data } = await supabase
 
 **DO NOT USE:** `fg_pct`, `three_pct`, `ft_pct`, `team_avg`, `team_era`, `team_ops`, `pp_pct`, `pk_pct` — these column names DO NOT EXIST.
 
-**Bears roster of 81 (CONFIRMED BY DATALAB):** 53 active + 16 practice squad + ~12 IR/other. Display all - there's no column to filter further.
+**Bears roster: Use `bears_contracts` (max 53).** The `bears_players` table has 81+ entries (active + practice squad + IR). Always use contracts as the roster source of truth — see "Roster Source of Truth" section above.
 
 ---
 
@@ -312,7 +369,7 @@ const { data } = await supabase
 
 1. **Check the API response**: Browser DevTools → Network → find the API call
 2. **Check column names**: Compare with list above
-3. **Check join columns**: `player_id` must match `{team}_players.id` (internal ID)
+3. **Check join columns**: stats `player_id` = ESPN ID (join via `{team}_players.espn_id`, Bulls: `espn_player_id`)
 4. **Check season value**: Use correct year per sport (NHL = ending year!)
 5. **Test in Datalab**: Run SQL directly in Supabase dashboard
 
@@ -325,7 +382,7 @@ During live games, Datalab updates every 10 seconds. SM must poll at the same ra
 | Table | Purpose |
 |-------|---------|
 | `live_games_registry` | Active games across all sports |
-| `{team}_games_live` | Live scores, quarter/period, time |
+| `{team}_live` | Live scores, quarter/period, time (**NOT** `{team}_games_live`) |
 | `{team}_player_stats_live` | Live player stats |
 
 ```javascript
@@ -335,7 +392,9 @@ const STANDARD_POLL_INTERVAL = 60_000 // No live games
 
 ---
 
-### Tables Reference
+### Tables Reference (58 Total)
+
+**Core Data (25 tables):**
 
 | Team | Games | Players | Player Stats | Seasons | Team Stats |
 |------|-------|---------|--------------|---------|------------|
@@ -345,7 +404,101 @@ const STANDARD_POLL_INTERVAL = 60_000 // No live games
 | Cubs | `cubs_games_master` | `cubs_players` | `cubs_player_game_stats` | `cubs_seasons` | `cubs_team_season_stats` |
 | White Sox | `whitesox_games_master` | `whitesox_players` | `whitesox_player_game_stats` | `whitesox_seasons` | `whitesox_team_season_stats` |
 
-**Note:** All `*_team_season_stats` tables now exist and are populated (Jan 26, 2026).
+**Player Season Aggregates (2 tables):**
+- `bears_player_season_stats` — pre-computed (materialized view)
+- `bulls_player_season_stats` — pre-computed
+- Blackhawks/Cubs/White Sox: aggregate manually from `*_player_game_stats`
+
+**Live Games (11 tables):**
+- `live_games_registry`
+- `{team}_live` (x5) — live game data
+- `{team}_player_stats_live` (x5) — live player stats
+
+**Salary Cap (20 tables):**
+- `{team}_salary_cap` (x5) — team cap summary
+- `{team}_contracts` (x5) — per-player contracts (**roster source of truth**)
+- `{team}_dead_money` (x5) — off-roster dead cap
+- `{team}_draft_pool` (x5) — draft pick cap charges
+
+---
+
+### CRITICAL: Opponent Player Stats Pattern
+
+All 5 teams store opponent player stats in the SAME stats table with `is_opponent = true`. **No join needed for opponent players** — name, position, and headshot are stored inline:
+
+```typescript
+// Split box score stats into Chicago vs opponent
+const chicagoStats = stats?.filter(s => !s.is_opponent) || []
+const opponentStats = stats?.filter(s => s.is_opponent) || []
+
+// Opponent players have inline columns (no join needed):
+// - opponent_player_name
+// - opponent_player_position
+// - opponent_player_headshot_url
+
+const enrichedOpponent = opponentStats.map(s => ({
+  ...s,
+  name: s.opponent_player_name,
+  position: s.opponent_player_position,
+  headshot_url: s.opponent_player_headshot_url,
+}))
+```
+
+---
+
+### CRITICAL: Player Season Aggregates
+
+| Team | Table | Type |
+|------|-------|------|
+| Bears | `bears_player_season_stats` | Pre-computed (materialized view) |
+| Bulls | `bulls_player_season_stats` | Pre-computed |
+| Blackhawks | None — aggregate from `blackhawks_player_game_stats` | Manual |
+| Cubs | None — aggregate from `cubs_player_game_stats` | Manual |
+| White Sox | None — aggregate from `whitesox_player_game_stats` | Manual |
+
+For manual aggregation, group by `player_id` and sum stats from `*_player_game_stats` where `is_opponent = false`.
+
+---
+
+### Salary Cap Tracker (20 Tables)
+
+**All cap tables use `season = 2026` regardless of sport.**
+
+| Table Pattern | Purpose |
+|---------------|---------|
+| `{team}_salary_cap` | Team-level cap summary (adjusted_cap, total_committed, cap_space, dead_money) |
+| `{team}_contracts` | Per-player contracts (**roster source of truth**) |
+| `{team}_dead_money` | Off-roster dead cap charges |
+| `{team}_draft_pool` | Projected draft pick cap charges |
+
+**Cap Ceilings:**
+
+| Sport | Cap/Threshold | Label |
+|-------|--------------|-------|
+| NFL | $303,450,000 | Salary Cap |
+| NBA | $154,647,000 | Salary Cap |
+| NHL | $95,500,000 | Salary Cap |
+| MLB | $241,000,000 | **CBT Threshold** (NOT "Salary Cap") |
+
+**Display Rules by Sport:**
+
+| Column | NFL | NBA | NHL | MLB |
+|--------|-----|-----|-----|-----|
+| `dead_cap` | Show | **Hide** (null) | **Hide** (null) | **Hide** (null) |
+| `age` | Show | Show | **Hide** (null) | **Hide** (null) |
+| Cap label | "Salary Cap" | "Salary Cap" | "Salary Cap" | "CBT Threshold" |
+| Cap hit label | "Cap Hit" | "Cap Hit" | "Cap Hit" | "Luxury Tax Value" |
+
+**Headshot Joins for Cap Pages:**
+```typescript
+const { data: players } = await supabase
+  .from('bears_players')
+  .select('espn_id, headshot_url')
+  .eq('is_active', true)
+
+const headshots = new Map(players?.map(p => [String(p.espn_id), p.headshot_url]) || [])
+const enriched = contracts?.map(c => ({ ...c, headshot_url: headshots.get(c.player_id) || null }))
+```
 
 ---
 
@@ -407,6 +560,8 @@ When encountering data issues, communicate with Data Lab using this format:
 | Bears record | `bears_season_record` | ~~bears_seasons~~ |
 | Blackhawks OTL | Column is `otl` | ~~ot_losses~~ |
 | Bulls active roster | `is_current_bulls` | ~~is_active~~ |
+| Live game data | `{team}_live` | ~~{team}_games_live~~ |
+| Roster source | `{team}_contracts` | ~~{team}_players with is_active~~ |
 | All games filters | Include `score > 0` filter | Raw count |
 
 ### Season Values (MEMORIZE THESE)
@@ -440,11 +595,11 @@ const filtered = data.filter((g: any) => {
 ### Automatic Verification Steps
 
 1. **Check records match official sources** (ESPN, league sites)
-2. **Check roster counts are reasonable:**
-   - NFL: 53-81 (roster + practice squad)
-   - NBA: 15-18
-   - NHL: 20-23
-   - MLB: 32-40 (NOT 200+!)
+2. **Check roster counts match contracts table:**
+   - NFL: max 53 (use `bears_contracts`, NOT `bears_players` which has 81+)
+   - NBA: 15-18 (use `bulls_contracts`)
+   - NHL: 20-23 (use `blackhawks_contracts`)
+   - MLB: 26-40 (use `cubs_contracts`/`whitesox_contracts`)
 3. **Check schedule game counts match sport** (see table above)
 4. **Check all pages load without errors**
 5. **Check stats are populated (not "—" or 0.0)**
@@ -485,18 +640,7 @@ const { data } = await datalabAdmin
   .single()
 ```
 
-**Season calculation in team-config.ts:**
-```typescript
-function getCurrentSeason(league: string): number {
-  const now = new Date()
-  const year = now.getFullYear()
-  const month = now.getMonth() + 1
-
-  if (league === 'NFL') return month < 9 ? year - 1 : year
-  if (league === 'NBA' || league === 'NHL') return month < 10 ? year : year + 1  // ENDING year!
-  return month < 4 ? year - 1 : year  // MLB
-}
-```
+**Season calculation:** See `getCurrentSeason()` function in the Season Conventions section above.
 
 ---
 
@@ -554,12 +698,13 @@ const { data } = await supabase
 
 | Team | File | Notes |
 |------|------|-------|
-| Bears | `src/lib/bearsData.ts` | Uses `is_active`, ESPN ID for stats (dual column names) |
-| Bulls | `src/lib/bullsData.ts` | Uses `is_current_bulls`, playerId for stats |
-| Blackhawks | `src/lib/blackhawksData.ts` | Uses `is_active`, espn_id for stats |
-| Cubs | `src/lib/cubsData.ts` | Uses espn_id join for stats |
-| White Sox | `src/lib/whitesoxData.ts` | Uses espn_id join for stats |
+| Bears | `src/lib/bearsData.ts` | Roster from `bears_contracts`, ESPN ID for stats (dual column names) |
+| Bulls | `src/lib/bullsData.ts` | Roster from `bulls_contracts`, `espn_player_id` for stats |
+| Blackhawks | `src/lib/blackhawksData.ts` | Roster from `blackhawks_contracts`, espn_id for stats |
+| Cubs | `src/lib/cubsData.ts` | Roster from `cubs_contracts`, espn_id for stats |
+| White Sox | `src/lib/whitesoxData.ts` | Roster from `whitesox_contracts`, espn_id for stats |
 | Shared | `src/lib/team-config.ts` | `fetchTeamRecord()`, `getCurrentSeason()` |
+| Cap Pages | `src/app/chicago-{team}/cap-tracker/page.tsx` | Uses `{team}_contracts` + `{team}_salary_cap` |
 
 ---
 
@@ -632,15 +777,15 @@ The cron job validates that ESPN IDs from the players table can be found in the 
 "ESPN ID mapping issue: only X/Y active players have matching stats"
 ```
 
-### Expected Roster Ranges
+### Expected Roster Ranges (from contracts tables)
 
-| Team | Min | Max | Notes |
-|------|-----|-----|-------|
-| Bears | 53 | 90 | Roster + practice squad |
-| Bulls | 15 | 20 | NBA roster |
-| Blackhawks | 20 | 25 | NHL roster |
-| Cubs | 26 | 45 | 40-man roster |
-| White Sox | 26 | 45 | 40-man roster |
+| Team | Min | Max | Source Table | Notes |
+|------|-----|-----|-------------|-------|
+| Bears | 48 | 53 | `bears_contracts` | Max 53 active roster |
+| Bulls | 13 | 18 | `bulls_contracts` | NBA roster |
+| Blackhawks | 20 | 23 | `blackhawks_contracts` | NHL roster |
+| Cubs | 26 | 40 | `cubs_contracts` | 40-man roster |
+| White Sox | 26 | 40 | `whitesox_contracts` | 40-man roster |
 
 ### Key Files
 
