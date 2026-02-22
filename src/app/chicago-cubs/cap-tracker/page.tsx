@@ -182,7 +182,6 @@ export default async function CubsCapTrackerPage() {
               subtitle={isOverThreshold ? 'OVER THRESHOLD' : 'UNDER THRESHOLD'}
               color={isOverThreshold ? 'var(--sm-error, #ef4444)' : 'var(--sm-success, #22c55e)'}
             />
-            <CapCard label="Dead Money" value={formatMoney(cap!.dead_money)} color="var(--sm-text-muted)" />
           </div>
         ) : (
           <div
@@ -196,7 +195,6 @@ export default async function CubsCapTrackerPage() {
             <CapCard label="Total Payroll" value="--" />
             <CapCard label="Luxury Tax Threshold" value="--" />
             <CapCard label="Payroll Space" value="--" />
-            <CapCard label="Dead Money" value="--" />
           </div>
         )}
 

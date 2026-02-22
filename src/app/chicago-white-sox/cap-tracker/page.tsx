@@ -184,7 +184,6 @@ export default async function WhiteSoxPayrollTrackerPage() {
               subtitle={cap!.cap_space && cap!.cap_space < 0 ? 'OVER THRESHOLD' : 'UNDER THRESHOLD'}
               color={cap!.cap_space && cap!.cap_space < 0 ? 'var(--sm-error, #ef4444)' : 'var(--sm-success, #22c55e)'}
             />
-            <CapCard label="Dead Money" value={formatMoney(cap!.dead_money)} color="var(--sm-text-muted)" />
             <CapCard label="Luxury Tax Threshold" value={formatMoney(cap!.total_cap)} />
           </div>
         ) : (
@@ -198,7 +197,6 @@ export default async function WhiteSoxPayrollTrackerPage() {
           >
             <CapCard label="Total Payroll" value="--" />
             <CapCard label="Payroll Space" value="--" />
-            <CapCard label="Dead Money" value="--" />
             <CapCard label="Committed" value="--" />
           </div>
         )}

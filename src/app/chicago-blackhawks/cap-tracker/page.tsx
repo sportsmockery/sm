@@ -179,7 +179,6 @@ export default async function BlackhawksCapTrackerPage() {
               subtitle={isOverCap ? 'OVER CAP' : 'AVAILABLE'}
               color={isOverCap ? 'var(--sm-error, #ef4444)' : 'var(--sm-success, #22c55e)'}
             />
-            <CapCard label="Dead Money" value={formatMoney(cap!.dead_money)} color="var(--sm-text-muted)" />
             <CapCard label="Committed" value={formatMoney(cap!.total_committed)} />
           </div>
         ) : (
@@ -193,7 +192,6 @@ export default async function BlackhawksCapTrackerPage() {
           >
             <CapCard label="Salary Cap" value="--" />
             <CapCard label="Cap Space" value="--" />
-            <CapCard label="Dead Money" value="--" />
             <CapCard label="Committed" value="--" />
           </div>
         )}
