@@ -6,7 +6,6 @@ import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { motion, useReducedMotion } from 'framer-motion'
 import { useTeamRecord } from '@/contexts/TeamRecordContext'
-import { useTheme } from '@/contexts/ThemeContext'
 import CountUpValue from './CountUp'
 import HeroParticles from './HeroParticles'
 import HeroSearchBar from './HeroSearchBar'
@@ -17,8 +16,8 @@ import HeroSearchBar from './HeroSearchBar'
  * 2030 Premium Design System: Team Hubs
  * - Team Hero with team-hero-{slug} accent background + sm-grid-overlay
  * - Framer Motion hero entrance + shimmer logo + count-up record
- * - Particle background + red gradient overlay
- * - SM logo top-left, inline search bar
+ * - Floating orbs background + red gradient overlay
+ * - Inline search bar
  * - Glass-card stat pills, Space Grotesk headings
  * - Sticky subnav
  * - Slot for main content
@@ -133,15 +132,6 @@ export default function TeamHubLayout({
   const { setRecord: setContextRecord } = useTeamRecord()
   const prefersReducedMotion = useReducedMotion()
 
-  let theme = 'dark'
-  try {
-    // eslint-disable-next-line react-hooks/rules-of-hooks
-    const themeCtx = useTheme()
-    theme = themeCtx.theme
-  } catch {
-    // ThemeContext may not be available in all render paths
-  }
-
   const tabs = team.league === 'NFL' ? NFL_TABS : TEAM_TABS
   const basePath = `/${team.slug}`
 
@@ -241,8 +231,8 @@ export default function TeamHubLayout({
           paddingBottom: '48px',
         }}
       >
-        {/* Particle dots background */}
-        <HeroParticles />
+        {/* Floating orbs background */}
+        <HeroParticles accentColor={team.primaryColor} />
 
         {/* Red gradient overlay */}
         <div
@@ -258,28 +248,6 @@ export default function TeamHubLayout({
 
         {/* Grid overlay */}
         <div className="sm-grid-overlay" />
-
-        {/* SM Logo - top left */}
-        <div
-          style={{
-            position: 'absolute',
-            top: '16px',
-            left: '24px',
-            zIndex: 2,
-            opacity: 0.7,
-            transition: 'opacity 0.3s',
-          }}
-          className="hero-sm-logo"
-        >
-          <Image
-            src={theme === 'light' ? '/downloads/sm-logo-light.png' : '/downloads/sm-logo-dark.png'}
-            alt="Sports Mockery"
-            width={120}
-            height={30}
-            style={{ height: '24px', width: 'auto', objectFit: 'contain' }}
-            unoptimized
-          />
-        </div>
 
         {/* Content */}
         <motion.div

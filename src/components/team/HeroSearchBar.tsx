@@ -6,7 +6,7 @@ export default function HeroSearchBar({ teamName }: { teamName: string }) {
       style={{
         display: 'flex',
         justifyContent: 'center',
-        marginTop: '20px',
+        marginTop: '12px',
       }}
     >
       <div
@@ -14,19 +14,19 @@ export default function HeroSearchBar({ teamName }: { teamName: string }) {
         style={{
           position: 'relative',
           width: '100%',
-          maxWidth: '480px',
+          maxWidth: '320px',
         }}
       >
         <svg
-          width="18"
-          height="18"
+          width="14"
+          height="14"
           fill="none"
-          stroke="var(--sm-text-muted)"
+          stroke="var(--sm-text-dim)"
           strokeWidth={2}
           viewBox="0 0 24 24"
           style={{
             position: 'absolute',
-            left: '14px',
+            left: '12px',
             top: '50%',
             transform: 'translateY(-50%)',
             pointerEvents: 'none',
@@ -40,21 +40,20 @@ export default function HeroSearchBar({ teamName }: { teamName: string }) {
         </svg>
         <input
           type="text"
-          placeholder={`Search ${teamName} tools & content...`}
+          placeholder={`Search ${teamName}...`}
           readOnly
           style={{
             width: '100%',
-            padding: '12px 16px 12px 42px',
+            padding: '8px 14px 8px 34px',
             borderRadius: 'var(--sm-radius-pill)',
-            background: 'rgba(255,255,255,0.05)',
-            border: '1px solid var(--sm-border)',
-            color: 'var(--sm-text-muted)',
+            background: 'rgba(255,255,255,0.03)',
+            border: '1px solid rgba(255,255,255,0.08)',
+            color: 'var(--sm-text-dim)',
             fontFamily: "'Space Grotesk', sans-serif",
-            fontSize: '14px',
+            fontSize: '12px',
             fontWeight: 400,
             outline: 'none',
             cursor: 'default',
-            backdropFilter: 'blur(8px)',
             transition: 'border-color 0.2s',
           }}
         />
