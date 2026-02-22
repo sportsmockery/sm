@@ -77,7 +77,7 @@ export default async function CubsGameCenterPage() {
           {/* Next Game */}
           {nextGame ? (
             <div
-              className="glass-card glass-card-static"
+              className="glass-card glass-card-static live-score-card"
               style={{
                 padding: '24px',
                 background: 'linear-gradient(135deg, rgba(14,51,134,0.4), rgba(204,52,51,0.1))',
@@ -92,8 +92,12 @@ export default async function CubsGameCenterPage() {
                   letterSpacing: '1px',
                   color: 'var(--sm-red-light)',
                   marginBottom: '12px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '8px',
                 }}
               >
+                <span className="live-indicator" />
                 Next Game
               </div>
               <div

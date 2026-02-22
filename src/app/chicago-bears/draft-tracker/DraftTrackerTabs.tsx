@@ -63,22 +63,12 @@ export default function DraftTrackerTabs({ hubItems, displayPosts }: DraftTracke
   return (
     <>
       {/* Tab Bar */}
-      <div style={{ display: 'flex', gap: '6px', marginBottom: '24px', flexWrap: 'wrap' }}>
+      <div className="draft-tab-group" style={{ display: 'flex', gap: '6px', marginBottom: '24px', flexWrap: 'wrap' }}>
         {TABS.map(tab => (
           <button
             key={tab.key}
             onClick={() => handleTabChange(tab.key)}
-            style={{
-              padding: '8px 18px',
-              borderRadius: '100px',
-              fontSize: '13px',
-              fontWeight: 600,
-              border: 'none',
-              cursor: 'pointer',
-              transition: 'all 0.15s ease',
-              backgroundColor: activeTab === tab.key ? '#C83200' : 'transparent',
-              color: activeTab === tab.key ? '#fff' : 'var(--sm-text-muted)',
-            }}
+            className={`draft-tab${activeTab === tab.key ? ' active' : ''}`}
           >
             {tab.label}
           </button>

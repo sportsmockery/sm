@@ -53,7 +53,7 @@ const config: Config = {
       },
       
       fontFamily: {
-        sans: ['Inter', 'system-ui', '-apple-system', 'sans-serif'],
+        sans: ['"Space Grotesk"', 'system-ui', '-apple-system', 'sans-serif'],
       },
       
       animation: {

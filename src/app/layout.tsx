@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono, Inter, JetBrains_Mono, Bebas_Neue, Exo_2 } from "next/font/google";
+import { Geist, Geist_Mono, Inter, JetBrains_Mono, Bebas_Neue, Exo_2, Space_Grotesk } from "next/font/google";
 import { Montserrat } from "next/font/google";
 import "./globals.css";
 import "@/styles/homepage.css";
@@ -17,6 +17,8 @@ import TeamChatPanel from "@/components/chat/TeamChatPanel";
 import MotionProvider from "@/components/motion/MotionProvider";
 import NavigationProgress from "@/components/layout/NavigationProgress";
 import Breadcrumb from "@/components/layout/Breadcrumb";
+import NavigationOrb from "@/components/layout/NavigationOrb";
+import ParticleBg from "@/components/layout/ParticleBg";
 
 // Floating buttons disabled - users access AI and Fan Chat via header buttons
 // import BearsAIButton from "@/components/bears/BearsAIButton";
@@ -61,6 +63,12 @@ const exo2 = Exo_2({
   variable: "--font-exo2",
   subsets: ["latin"],
   weight: ["400", "500", "600", "700", "800"],
+});
+
+const spaceGrotesk = Space_Grotesk({
+  variable: "--font-space-grotesk",
+  subsets: ["latin"],
+  weight: ["300", "400", "500", "600", "700"],
 });
 
 export const metadata: Metadata = {
@@ -160,7 +168,7 @@ export default function RootLayout({
         />
       </head>
       <body
-        className={`${geistSans.variable} ${geistMono.variable} ${montserrat.variable} ${inter.variable} ${jetbrainsMono.variable} ${bebasNeue.variable} ${exo2.variable} font-sans antialiased`}
+        className={`${geistSans.variable} ${geistMono.variable} ${montserrat.variable} ${inter.variable} ${jetbrainsMono.variable} ${bebasNeue.variable} ${exo2.variable} ${spaceGrotesk.variable} font-sans antialiased`}
         style={{ backgroundColor: 'var(--sm-dark)', color: 'var(--sm-text)' }}
       >
         <ThemeProvider>
@@ -182,6 +190,8 @@ export default function RootLayout({
                 </div>
                 <Footer />
               </div>
+              <NavigationOrb />
+              <ParticleBg />
               <ScrollToTop />
               <CookieBanner />
               <TeamChatPanel teamSlug="bears" teamName="Bears" />

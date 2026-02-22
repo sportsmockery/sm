@@ -99,20 +99,8 @@ export default function DepthChartClient({
               <button
                 key={f}
                 onClick={() => setSideFilter(f)}
-                style={{
-                  padding: '6px 14px',
-                  borderRadius: '100px',
-                  fontSize: '12px',
-                  fontWeight: 600,
-                  fontFamily: "'Space Grotesk', sans-serif",
-                  cursor: 'pointer',
-                  border: '1px solid',
-                  transition: 'all 0.2s',
-                  textTransform: 'capitalize',
-                  backgroundColor: sideFilter === f ? '#CE1141' : 'transparent',
-                  color: sideFilter === f ? '#ffffff' : 'var(--sm-text-muted)',
-                  borderColor: sideFilter === f ? '#CE1141' : 'var(--sm-border)',
-                }}
+                className={`draft-tab${sideFilter === f ? ' active' : ''}`}
+                style={{ textTransform: 'capitalize' }}
               >
                 {f === 'all' ? 'All' : f.charAt(0).toUpperCase() + f.slice(1)}
               </button>

@@ -4,7 +4,7 @@ import Image from 'next/image'
 import { TeamHubLayout } from '@/components/team'
 import { CHICAGO_TEAMS, fetchTeamRecord, fetchNextGame } from '@/lib/team-config'
 import { supabaseAdmin } from '@/lib/supabase-server'
-import { HubUpdatesFeed } from '@/components/hub'
+import { HubUpdatesFeed, RumorTicker } from '@/components/hub'
 
 export const metadata: Metadata = {
   title: 'Chicago Bulls Trade Rumors (Live) | Sports Mockery',
@@ -175,6 +175,9 @@ export default async function BullsTradeRumorsPage() {
           ))}
         </div>
 
+        {/* Rumor Ticker */}
+        <RumorTicker teamSlug="chicago-bulls" />
+
         {/* Hub Updates Feed */}
         <HubUpdatesFeed hubSlug="trade-rumors" title="Live Updates" emptyState="No trade updates yet. Check back soon." />
 
@@ -231,9 +234,12 @@ export default async function BullsTradeRumorsPage() {
                       </div>
                     )}
                     <div style={{ flex: 1, minWidth: 0 }}>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '6px' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '6px', flexWrap: 'wrap' }}>
                         <span className="sm-tag" style={{ fontSize: '10px', padding: '3px 8px' }}>
                           {post.category}
+                        </span>
+                        <span className={`rumor-badge ${index === 0 ? 'rumor-badge-hot' : index < 3 ? 'rumor-badge-rumored' : 'rumor-badge-cold'}`}>
+                          {index === 0 ? 'HOT' : index < 3 ? 'RUMORED' : 'COLD'}
                         </span>
                       </div>
                       <h3

@@ -112,16 +112,16 @@ export default function Header() {
           <Image
             src="/downloads/sm-logo-dark.png"
             alt="Sports Mockery"
-            width={160}
-            height={40}
+            width={200}
+            height={50}
             className="nav-logo-img nav-logo-light"
             priority
           />
           <Image
             src="/downloads/sm-logo-light.png"
             alt="Sports Mockery"
-            width={160}
-            height={40}
+            width={200}
+            height={50}
             className="nav-logo-img nav-logo-dark"
             priority
           />
@@ -372,7 +372,7 @@ export default function Header() {
                   fontSize: '14px',
                   fontWeight: 500,
                   textDecoration: 'none',
-                  fontFamily: "'Inter', sans-serif",
+                  fontFamily: "'Space Grotesk', sans-serif",
                 }}
               >
                 Log in
@@ -551,7 +551,7 @@ export default function Header() {
                   color: '#ef4444',
                   fontSize: '16px',
                   fontWeight: 500,
-                  fontFamily: "'Inter', sans-serif",
+                  fontFamily: "'Space Grotesk', sans-serif",
                   padding: '12px 0',
                   textAlign: 'left',
                   borderBottom: '1px solid var(--sm-border)',

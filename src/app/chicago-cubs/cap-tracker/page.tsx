@@ -203,16 +203,7 @@ export default async function CubsCapTrackerPage() {
                 {usedPct.toFixed(1)}%
               </span>
             </div>
-            <div
-              style={{
-                width: '100%',
-                height: '12px',
-                borderRadius: '6px',
-                backgroundColor: 'var(--sm-surface)',
-                overflow: 'hidden',
-                position: 'relative',
-              }}
-            >
+            <div className="cap-bar-container">
               {/* Dead money segment */}
               <div
                 style={{
@@ -222,19 +213,18 @@ export default async function CubsCapTrackerPage() {
                   height: '100%',
                   width: `${Math.min(deadPct, 100)}%`,
                   backgroundColor: 'rgba(239, 68, 68, 0.3)',
-                  borderRadius: '6px 0 0 6px',
+                  borderRadius: '7px 0 0 7px',
                 }}
               />
               {/* Total committed */}
               <div
+                className="cap-bar-used"
                 style={{
                   position: 'absolute',
                   left: 0,
                   top: 0,
-                  height: '100%',
                   width: `${Math.min(usedPct, 100)}%`,
-                  backgroundColor: isOverThreshold ? 'var(--sm-error, #ef4444)' : '#0E3386',
-                  borderRadius: '6px',
+                  ...(isOverThreshold ? { background: 'var(--sm-error, #ef4444)' } : {}),
                   opacity: 0.85,
                 }}
               />

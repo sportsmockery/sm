@@ -77,7 +77,7 @@ export default async function WhiteSoxGameCenterPage() {
           {/* Next Game */}
           {nextGame ? (
             <div
-              className="glass-card glass-card-static"
+              className="glass-card glass-card-static live-score-card"
               style={{
                 padding: '24px',
                 background: 'linear-gradient(135deg, rgba(39,37,31,0.4), rgba(196,206,212,0.1))',
@@ -92,8 +92,12 @@ export default async function WhiteSoxGameCenterPage() {
                   letterSpacing: '1px',
                   color: 'var(--sm-red-light)',
                   marginBottom: '12px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '8px',
                 }}
               >
+                <span className="live-indicator" />
                 Next Game
               </div>
               <div

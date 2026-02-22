@@ -77,7 +77,7 @@ export default async function BlackhawksGameCenterPage() {
           {/* Next Game */}
           {nextGame ? (
             <div
-              className="glass-card glass-card-static"
+              className="glass-card glass-card-static live-score-card"
               style={{
                 padding: '24px',
                 background: 'linear-gradient(135deg, rgba(207,10,44,0.15), rgba(0,0,0,0.3))',
@@ -92,8 +92,12 @@ export default async function BlackhawksGameCenterPage() {
                   letterSpacing: '1px',
                   color: 'var(--sm-red-light)',
                   marginBottom: '12px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '8px',
                 }}
               >
+                <span className="live-indicator" />
                 Next Game
               </div>
               <div

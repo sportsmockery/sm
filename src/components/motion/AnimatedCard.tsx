@@ -61,10 +61,10 @@ const AnimatedCard = forwardRef<HTMLDivElement, AnimatedCardProps>(
       children,
       index = 0,
       delay = 0,
-      hoverLift = false,
-      hoverScale = false,
-      hoverScaleAmount = 1.02,
-      hoverGlow = false,
+      hoverLift = true,
+      hoverScale = true,
+      hoverScaleAmount = 1.05,
+      hoverGlow = true,
       disableAnimation = false,
       as = 'div',
       className = '',
@@ -87,8 +87,17 @@ const AnimatedCard = forwardRef<HTMLDivElement, AnimatedCardProps>(
       hoverEffects.scale = hoverScaleAmount
     }
 
+    if (hoverGlow) {
+      hoverEffects.boxShadow = '0 0 10px rgba(188,0,0,0.3)'
+    }
+
+    hoverEffects.opacity = 0.95
+
     // Glow is handled via CSS class since it's a box-shadow
     const glowClass = hoverGlow ? 'hover-glow-bears' : ''
+
+    // Tap effect
+    const tapEffects = { scale: 0.95 }
 
     const MotionComponent = motion[as as keyof typeof motion] as typeof motion.div
 
@@ -113,7 +122,11 @@ const AnimatedCard = forwardRef<HTMLDivElement, AnimatedCardProps>(
         initial="hidden"
         animate="visible"
         custom={{ index, delay }}
-        whileHover={Object.keys(hoverEffects).length > 0 ? hoverEffects : undefined}
+        whileHover={Object.keys(hoverEffects).length > 0 ? {
+          ...hoverEffects,
+          transition: { duration: 0.2, ease: 'easeInOut' },
+        } : undefined}
+        whileTap={tapEffects}
         transition={Object.keys(hoverEffects).length > 0 ? transitionProps : undefined}
         className={`${className} ${glowClass}`.trim()}
         style={style}

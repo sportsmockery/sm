@@ -88,7 +88,7 @@ export default async function BearsGameCenterPage() {
           {/* Next Game */}
           {nextGame ? (
             <div
-              className="glass-card glass-card-static"
+              className="glass-card glass-card-static live-score-card"
               style={{
                 padding: '24px',
                 background: 'linear-gradient(135deg, rgba(11,22,42,0.4), rgba(200,56,3,0.1))',
@@ -103,8 +103,12 @@ export default async function BearsGameCenterPage() {
                   letterSpacing: '1px',
                   color: 'var(--sm-red-light)',
                   marginBottom: '12px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '8px',
                 }}
               >
+                <span className="live-indicator" />
                 Next Game
               </div>
               <div
