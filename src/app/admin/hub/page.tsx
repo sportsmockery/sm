@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import type { HubItem, HubSlug, HubItemFormData } from '@/types/hub'
 import { HUB_PAGES, TEAM_OPTIONS } from '@/types/hub'
 
@@ -454,6 +454,98 @@ const actionBtnStyle: React.CSSProperties = {
   border: '1px solid var(--border-default)', cursor: 'pointer',
 }
 
+const TEAM_SPORT: Record<string, string> = {
+  'chicago-bears': 'nfl', 'chicago-bulls': 'nba', 'chicago-blackhawks': 'nhl',
+  'chicago-cubs': 'mlb', 'chicago-white-sox': 'mlb',
+}
+const SPORT_ROUNDS: Record<string, number> = { nfl: 7, nba: 2, nhl: 7, mlb: 20 }
+
+interface HubDraftPick { year: number; round: number; pickPos: string; condition: string }
+
+function formatPick(pk: HubDraftPick) {
+  let s = `${pk.year} R${pk.round}`
+  if (pk.pickPos) s += ` ${pk.pickPos.charAt(0).toUpperCase() + pk.pickPos.slice(1)}`
+  if (pk.condition) s += ` (${pk.condition})`
+  return s
+}
+
+const compactSelect: React.CSSProperties = {
+  padding: '5px 8px', borderRadius: 6, fontSize: 12,
+  background: 'var(--bg-primary)', color: 'var(--text-primary)',
+  border: '1px solid var(--border-default)',
+}
+
+function DraftPickInlineSelector({ sport, picks, onAdd, onRemove, label }: {
+  sport: string
+  picks: HubDraftPick[]
+  onAdd: (pk: HubDraftPick) => void
+  onRemove: (i: number) => void
+  label: string
+}) {
+  const [year, setYear] = useState(2026)
+  const [round, setRound] = useState(1)
+  const [pickPos, setPickPos] = useState('')
+  const [condition, setCondition] = useState('')
+
+  const maxRound = SPORT_ROUNDS[sport] || 7
+  const rounds = Array.from({ length: maxRound }, (_, i) => i + 1)
+
+  return (
+    <div>
+      <label style={labelStyle}>{label}</label>
+      <div style={{ display: 'flex', gap: 6, alignItems: 'center', flexWrap: 'wrap' }}>
+        <select value={year} onChange={e => setYear(+e.target.value)} style={compactSelect}>
+          {[2026, 2027, 2028, 2029, 2030].map(y => <option key={y} value={y}>{y}</option>)}
+        </select>
+        <select value={round} onChange={e => setRound(+e.target.value)} style={compactSelect}>
+          {rounds.map(r => <option key={r} value={r}>Round {r}</option>)}
+        </select>
+        <select value={pickPos} onChange={e => setPickPos(e.target.value)} style={compactSelect}>
+          <option value="">Pick range</option>
+          <option value="early">Early (1-10)</option>
+          <option value="mid">Mid (11-21)</option>
+          <option value="late">Late (22+)</option>
+        </select>
+        <input
+          type="text" value={condition} onChange={e => setCondition(e.target.value)}
+          placeholder="Condition" style={{ ...compactSelect, width: 80 }}
+        />
+        <button
+          onClick={() => {
+            onAdd({ year, round, pickPos, condition: condition.trim() })
+            setCondition('')
+            setPickPos('')
+          }}
+          style={{
+            padding: '5px 10px', borderRadius: 6, border: 'none',
+            backgroundColor: '#bc0000', color: '#fff', fontSize: 12, fontWeight: 600, cursor: 'pointer',
+          }}
+        >
+          Add
+        </button>
+      </div>
+      {picks.length > 0 && (
+        <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', marginTop: 6 }}>
+          {picks.map((pk, i) => (
+            <span key={i} style={{
+              display: 'inline-flex', alignItems: 'center', gap: 4,
+              padding: '3px 8px', borderRadius: 6, fontSize: 11, fontWeight: 600,
+              background: 'var(--bg-hover)', color: 'var(--text-primary)',
+              border: '1px solid var(--border-default)',
+            }}>
+              {formatPick(pk)}
+              <button onClick={() => onRemove(i)} style={{
+                background: 'none', border: 'none', cursor: 'pointer', color: '#ef4444',
+                fontWeight: 700, padding: '0 2px', fontSize: 11,
+              }}>&times;</button>
+            </span>
+          ))}
+        </div>
+      )}
+    </div>
+  )
+}
+
 function HubMetaFields({ hubSlug, meta, updateMeta, formData, selectedTeam }: {
   hubSlug: HubSlug
   meta: Record<string, unknown>
@@ -466,11 +558,81 @@ function HubMetaFields({ hubSlug, meta, updateMeta, formData, selectedTeam }: {
   const [capMessage, setCapMessage] = useState('')
   const [capConfidence, setCapConfidence] = useState<{ level: string; sources: string[] } | null>(null)
 
+  // Player typeahead state
+  const [playerSearch, setPlayerSearch] = useState('')
+  const [rosterPlayers, setRosterPlayers] = useState<{ name: string; position: string }[]>([])
+  const [rosterLoading, setRosterLoading] = useState(false)
+  const [showDropdown, setShowDropdown] = useState(false)
+  const dropdownTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
+
+  const sport = TEAM_SPORT[selectedTeam || ''] || 'nfl'
+  const otherTeamValue = (meta.otherTeam as string) || ''
+
+  // Parse structured data from meta
+  const selectedPlayers: { name: string; position: string }[] = (() => {
+    try { const s = meta.selectedPlayers as string; return s ? JSON.parse(s) : [] } catch { return [] }
+  })()
+  const incomingPicks: HubDraftPick[] = (() => {
+    try { const s = meta.incomingPicks as string; return s ? JSON.parse(s) : [] } catch { return [] }
+  })()
+  const outgoingPicks: HubDraftPick[] = (() => {
+    try { const s = meta.outgoingPicks as string; return s ? JSON.parse(s) : [] } catch { return [] }
+  })()
+
+  // Fetch opposing team roster when otherTeam changes
+  useEffect(() => {
+    if (hubSlug !== 'trade-rumors') return
+    if (!otherTeamValue || otherTeamValue.length < 2) { setRosterPlayers([]); return }
+    const timer = setTimeout(async () => {
+      try {
+        setRosterLoading(true)
+        const teamRes = await fetch(`/api/gm/teams?search=${encodeURIComponent(otherTeamValue)}&sport=${sport}`)
+        const teamData = await teamRes.json()
+        if (teamData.teams?.length > 0) {
+          const team = teamData.teams[0]
+          const rosterRes = await fetch(`/api/gm/roster?team_key=${team.team_key}&sport=${sport}`)
+          const rosterData = await rosterRes.json()
+          setRosterPlayers((rosterData.players || []).map((p: any) => ({ name: p.full_name, position: p.position })))
+        } else { setRosterPlayers([]) }
+      } catch { setRosterPlayers([]) }
+      finally { setRosterLoading(false) }
+    }, 600)
+    return () => clearTimeout(timer)
+  }, [otherTeamValue, sport, hubSlug])
+
+  function addPlayer(player: { name: string; position: string }) {
+    const updated = [...selectedPlayers, player]
+    updateMeta('selectedPlayers', JSON.stringify(updated))
+    updateMeta('playerName', updated.map(p => p.name).join(', '))
+    if (updated.length === 1) updateMeta('position', player.position)
+    setPlayerSearch('')
+    setShowDropdown(false)
+  }
+
+  function removePlayer(index: number) {
+    const updated = selectedPlayers.filter((_, i) => i !== index)
+    updateMeta('selectedPlayers', JSON.stringify(updated))
+    updateMeta('playerName', updated.map(p => p.name).join(', '))
+    if (updated.length > 0) updateMeta('position', updated[0].position)
+  }
+
+  function syncOutgoingPicks(picks: HubDraftPick[]) {
+    updateMeta('outgoingPicks', JSON.stringify(picks))
+    updateMeta('estimatedCost', picks.map(formatPick).join(', '))
+  }
+
+  const filteredRoster = playerSearch.length > 0
+    ? rosterPlayers.filter(p =>
+        p.name.toLowerCase().includes(playerSearch.toLowerCase()) &&
+        !selectedPlayers.some(sp => sp.name === p.name)
+      ).slice(0, 10)
+    : []
+
   async function handleAskScout() {
     const playerName = m('playerName')
     const otherTeam = m('otherTeam')
     if (!playerName || !otherTeam) {
-      setCapMessage('Please fill in Player Name and Other Team first.')
+      setCapMessage('Please fill in Opposing Player(s) and Other Team first.')
       return
     }
 
@@ -516,26 +678,99 @@ function HubMetaFields({ hubSlug, meta, updateMeta, formData, selectedTeam }: {
   if (hubSlug === 'trade-rumors') {
     return (
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 12 }}>
+        {/* Row 1: Other Team first (needed before player search), then Position */}
         <div>
-          <label style={labelStyle}>Player Name</label>
-          <input type="text" value={m('playerName')} onChange={e => updateMeta('playerName', e.target.value)} placeholder="E.g., Khalil Mack" style={inputStyle} />
+          <label style={labelStyle}>Other Team</label>
+          <input type="text" value={m('otherTeam')} onChange={e => updateMeta('otherTeam', e.target.value)} placeholder="E.g., Atlanta Hawks" style={inputStyle} />
         </div>
         <div>
           <label style={labelStyle}>Position</label>
-          <select value={m('position')} onChange={e => updateMeta('position', e.target.value)} style={inputStyle}>
-            <option value="">Select...</option>
-            {['QB','RB','WR','TE','OL','DL','EDGE','LB','CB','S','K','P'].map(p => <option key={p} value={p}>{p}</option>)}
-          </select>
+          <input type="text" value={m('position')} readOnly placeholder="Auto-filled" style={{ ...inputStyle, opacity: 0.7 }} />
         </div>
-        <div>
-          <label style={labelStyle}>Other Team</label>
-          <input type="text" value={m('otherTeam')} onChange={e => updateMeta('otherTeam', e.target.value)} placeholder="E.g., Las Vegas Raiders" style={inputStyle} />
+        <div style={{ display: 'flex', alignItems: 'flex-end' }}>
+          {rosterLoading && <span style={{ fontSize: 11, color: 'var(--text-muted)', paddingBottom: 10 }}>Loading roster...</span>}
+          {!rosterLoading && rosterPlayers.length > 0 && <span style={{ fontSize: 11, color: '#22c55e', paddingBottom: 10 }}>{rosterPlayers.length} players loaded</span>}
         </div>
-        <div>
-          <label style={labelStyle}>Estimated Cost</label>
-          <input type="text" value={m('estimatedCost')} onChange={e => updateMeta('estimatedCost', e.target.value)} placeholder="E.g., 2nd round pick" style={inputStyle} />
+
+        {/* Row 2: Player typeahead (full width) */}
+        <div style={{ gridColumn: 'span 3', position: 'relative' }}>
+          <label style={labelStyle}>Opposing Player(s) Name(s)</label>
+          {selectedPlayers.length > 0 && (
+            <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', marginBottom: 6 }}>
+              {selectedPlayers.map((p, i) => (
+                <span key={i} style={{
+                  display: 'inline-flex', alignItems: 'center', gap: 4,
+                  padding: '3px 8px', borderRadius: 6, fontSize: 12, fontWeight: 600,
+                  background: 'var(--bg-hover)', color: 'var(--text-primary)',
+                  border: '1px solid var(--border-default)',
+                }}>
+                  {p.name} <span style={{ color: 'var(--text-muted)', fontWeight: 400 }}>({p.position})</span>
+                  <button onClick={() => removePlayer(i)} style={{
+                    background: 'none', border: 'none', cursor: 'pointer', color: '#ef4444',
+                    fontWeight: 700, padding: '0 2px', fontSize: 12,
+                  }}>&times;</button>
+                </span>
+              ))}
+            </div>
+          )}
+          <input
+            type="text"
+            value={playerSearch}
+            onChange={e => { setPlayerSearch(e.target.value); setShowDropdown(true) }}
+            onFocus={() => { if (playerSearch) setShowDropdown(true) }}
+            onBlur={() => { dropdownTimer.current = setTimeout(() => setShowDropdown(false), 200) }}
+            placeholder={rosterPlayers.length > 0 ? 'Type to search roster...' : 'Enter Other Team first to load roster'}
+            disabled={rosterPlayers.length === 0}
+            style={inputStyle}
+          />
+          {showDropdown && filteredRoster.length > 0 && (
+            <div style={{
+              position: 'absolute', top: '100%', left: 0, right: 0, zIndex: 50,
+              maxHeight: 200, overflowY: 'auto', borderRadius: 8,
+              background: 'var(--bg-card)', border: '1px solid var(--border-default)',
+              boxShadow: '0 4px 12px rgba(0,0,0,0.3)',
+            }}>
+              {filteredRoster.map((p, i) => (
+                <button key={i}
+                  onMouseDown={e => { e.preventDefault(); if (dropdownTimer.current) clearTimeout(dropdownTimer.current) }}
+                  onClick={() => addPlayer(p)}
+                  style={{
+                    display: 'block', width: '100%', textAlign: 'left', padding: '8px 12px',
+                    background: 'none', border: 'none', borderBottom: '1px solid var(--border-default)',
+                    color: 'var(--text-primary)', fontSize: 13, cursor: 'pointer',
+                  }}
+                >
+                  <strong>{p.name}</strong> <span style={{ color: 'var(--text-muted)', fontSize: 11 }}>{p.position}</span>
+                </button>
+              ))}
+            </div>
+          )}
         </div>
-        <div style={{ gridColumn: 'span 2' }}>
+
+        {/* Row 3: Opposing team draft picks */}
+        <div style={{ gridColumn: 'span 3' }}>
+          <DraftPickInlineSelector
+            sport={sport}
+            picks={incomingPicks}
+            onAdd={pk => { updateMeta('incomingPicks', JSON.stringify([...incomingPicks, pk])) }}
+            onRemove={i => { updateMeta('incomingPicks', JSON.stringify(incomingPicks.filter((_, j) => j !== i))) }}
+            label="Opposing Draft Picks (incoming to Chicago)"
+          />
+        </div>
+
+        {/* Row 4: Chicago's outgoing draft picks (Estimated Cost) */}
+        <div style={{ gridColumn: 'span 3' }}>
+          <DraftPickInlineSelector
+            sport={sport}
+            picks={outgoingPicks}
+            onAdd={pk => { const updated = [...outgoingPicks, pk]; syncOutgoingPicks(updated) }}
+            onRemove={i => { const updated = outgoingPicks.filter((_, j) => j !== i); syncOutgoingPicks(updated) }}
+            label="Chicago Sends (Draft Picks)"
+          />
+        </div>
+
+        {/* Row 5: Cap Impact + Scout */}
+        <div style={{ gridColumn: 'span 3' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
             <span style={{ fontSize: 12, fontWeight: 600, color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Cap Impact</span>
             <button
@@ -558,7 +793,7 @@ function HubMetaFields({ hubSlug, meta, updateMeta, formData, selectedTeam }: {
           <textarea
             value={m('capImpact')}
             onChange={e => updateMeta('capImpact', e.target.value)}
-            placeholder="E.g., $12M/year — or click Ask Scout to auto-fill"
+            placeholder="Click Ask Scout to auto-fill cap analysis"
             rows={3}
             style={{ ...inputStyle, resize: 'vertical' }}
           />
