@@ -471,10 +471,8 @@ export default function VisionTheaterClient({ data }: { data: VisionTheaterData 
                 backgroundClip: 'text',
               }}
             >
-              Vision
+              Vision Theater
             </span>
-            <br />
-            Theater
           </h1>
 
           <p
