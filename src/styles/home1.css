@@ -1,0 +1,213 @@
+/* ═══════════════════════════════════════════════════════════════════
+   home1.css — Spatial Data Interface
+   Scoped under .h1-root — strict palette: #bc0000, #000, #fff
+   ═══════════════════════════════════════════════════════════════════ */
+
+.h1-root {
+  /* Core palette */
+  --h1-red: #bc0000;
+  --h1-black: #000000;
+  --h1-white: #ffffff;
+
+  /* Functional */
+  --h1-glow: rgba(188, 0, 0, 0.4);
+  --h1-glow-soft: rgba(188, 0, 0, 0.15);
+  --h1-glass: rgba(10, 10, 10, 0.7);
+  --h1-glass-border: rgba(255, 255, 255, 0.06);
+  --h1-text: #ffffff;
+  --h1-text-muted: #888888;
+  --h1-bg: #000000;
+  --h1-surface: rgba(15, 15, 15, 0.9);
+
+  /* Spacing */
+  --h1-nav-height: 64px;
+  --h1-radius-sm: 8px;
+  --h1-radius-md: 14px;
+  --h1-radius-lg: 20px;
+  --h1-radius-pill: 100px;
+
+  /* Transitions */
+  --h1-ease: cubic-bezier(0.16, 1, 0.3, 1);
+  --h1-transition-fast: 0.15s ease;
+  --h1-transition-med: 0.3s ease;
+  --h1-transition-slow: 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+
+  min-height: 100vh;
+  background: var(--h1-black);
+  color: var(--h1-text);
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  overflow-x: hidden;
+}
+
+/* ─── Light mode ─────────────────────────────────────────────────── */
+[data-theme="light"] .h1-root {
+  --h1-glow: rgba(188, 0, 0, 0.2);
+  --h1-glow-soft: rgba(188, 0, 0, 0.08);
+  --h1-glass: rgba(245, 245, 245, 0.8);
+  --h1-glass-border: rgba(0, 0, 0, 0.08);
+  --h1-text: #111111;
+  --h1-text-muted: #666666;
+  --h1-bg: #ffffff;
+  --h1-surface: rgba(250, 250, 250, 0.95);
+
+  background: var(--h1-bg);
+  color: var(--h1-text);
+}
+
+/* ─── Glass effect ───────────────────────────────────────────────── */
+.h1-glass {
+  background: var(--h1-glass);
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  border: 1px solid var(--h1-glass-border);
+}
+
+/* ─── Shard clip-paths ───────────────────────────────────────────── */
+.h1-shard {
+  position: relative;
+  transition: transform 0.4s var(--h1-ease), box-shadow 0.4s var(--h1-ease);
+}
+
+.h1-shard:nth-child(5n+1) {
+  clip-path: polygon(0 4%, 100% 0, 98% 96%, 2% 100%);
+}
+.h1-shard:nth-child(5n+2) {
+  clip-path: polygon(2% 0, 100% 3%, 97% 100%, 0 97%);
+}
+.h1-shard:nth-child(5n+3) {
+  clip-path: polygon(0 0, 96% 2%, 100% 98%, 3% 100%);
+}
+.h1-shard:nth-child(5n+4) {
+  clip-path: polygon(3% 0, 100% 0, 100% 100%, 0 96%);
+}
+.h1-shard:nth-child(5n+5) {
+  clip-path: polygon(0 2%, 98% 0, 100% 97%, 1% 100%);
+}
+
+.h1-shard:hover {
+  transform: scale(1.02);
+  z-index: 10;
+}
+
+/* ─── Boot-up animation states ───────────────────────────────────── */
+.h1-boot-initial {
+  filter: blur(10px) brightness(0);
+  opacity: 0;
+}
+
+.h1-boot-verifying {
+  filter: blur(4px) brightness(1.2);
+  opacity: 0.5;
+  animation: h1-verify-pulse 1.2s ease-in-out infinite;
+}
+
+.h1-boot-resolved {
+  filter: blur(0) brightness(1);
+  opacity: 1;
+  transition: filter 0.6s var(--h1-ease), opacity 0.6s var(--h1-ease);
+}
+
+/* ─── Key stat highlight ─────────────────────────────────────────── */
+.h1-stat-highlight {
+  color: var(--h1-red);
+  font-weight: 700;
+  background: none;
+}
+
+/* ─── Scan line ──────────────────────────────────────────────────── */
+.h1-scan-line {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, var(--h1-red), transparent);
+  animation: h1-scan 4s linear infinite;
+  opacity: 0.6;
+}
+
+/* ─── AI HUD dock ────────────────────────────────────────────────── */
+.h1-dock-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  border: none;
+  cursor: pointer;
+  transition: transform var(--h1-transition-fast), box-shadow var(--h1-transition-fast);
+}
+
+.h1-dock-btn:hover {
+  transform: scale(1.1);
+}
+
+.h1-dock-btn:active {
+  transform: scale(0.95);
+}
+
+/* ─── System diagnostic ──────────────────────────────────────────── */
+.h1-diagnostic {
+  border: 1px solid var(--h1-red);
+  border-radius: var(--h1-radius-md);
+  padding: 24px;
+  position: relative;
+  overflow: hidden;
+  font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace;
+}
+
+.h1-diagnostic-pulse {
+  animation: h1-pulse-glow 2s ease-in-out infinite;
+}
+
+/* ─── Keyframes ──────────────────────────────────────────────────── */
+@keyframes h1-pulse-glow {
+  0%, 100% {
+    box-shadow: 0 0 8px rgba(188, 0, 0, 0.2);
+    border-color: rgba(188, 0, 0, 0.4);
+  }
+  50% {
+    box-shadow: 0 0 24px rgba(188, 0, 0, 0.5);
+    border-color: rgba(188, 0, 0, 0.8);
+  }
+}
+
+@keyframes h1-scan {
+  0% { transform: translateY(0); opacity: 0; }
+  10% { opacity: 0.6; }
+  90% { opacity: 0.6; }
+  100% { transform: translateY(100vh); opacity: 0; }
+}
+
+@keyframes h1-verify-pulse {
+  0%, 100% { opacity: 0.3; filter: blur(4px) brightness(1); }
+  50% { opacity: 0.6; filter: blur(2px) brightness(1.3); }
+}
+
+@keyframes h1-float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-8px); }
+}
+
+@keyframes h1-ecg-glow {
+  0%, 100% { filter: drop-shadow(0 0 4px rgba(188,0,0,0.3)); }
+  50% { filter: drop-shadow(0 0 12px rgba(188,0,0,0.6)); }
+}
+
+/* ─── Reduced motion ─────────────────────────────────────────────── */
+@media (prefers-reduced-motion: reduce) {
+  .h1-shard,
+  .h1-scan-line,
+  .h1-diagnostic-pulse {
+    animation: none !important;
+    transition: none !important;
+  }
+}
+
+/* ─── Responsive ─────────────────────────────────────────────────── */
+@media (max-width: 768px) {
+  .h1-root {
+    --h1-nav-height: 56px;
+  }
+}

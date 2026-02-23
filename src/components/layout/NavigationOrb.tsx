@@ -68,6 +68,7 @@ export default function NavigationOrb() {
 
   // Hide on team pages where OrbNav already provides navigation
   const isTeamPage = TEAM_PREFIXES.some((prefix) => pathname?.startsWith(prefix))
+  const isHomePage = pathname?.startsWith('/home')
 
   // Close on route change
   useEffect(() => {
@@ -94,7 +95,7 @@ export default function NavigationOrb() {
     return () => document.removeEventListener('keydown', handler)
   }, [])
 
-  if (isTeamPage) return null
+  if (isTeamPage || isHomePage) return null
 
   return (
     <div ref={orbRef}>
