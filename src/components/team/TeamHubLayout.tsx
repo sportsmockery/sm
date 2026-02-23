@@ -412,7 +412,7 @@ export default function TeamHubLayout({
       >
         <div style={{ maxWidth: '1320px', margin: '0 auto', padding: '0 24px' }}>
           {/* Desktop tabs */}
-          <nav style={{ display: 'flex', alignItems: 'center', gap: '4px', overflowX: 'auto', padding: '4px 0' }}>
+          <nav style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '4px', overflowX: 'auto', padding: '4px 0' }}>
             {tabs.map((tab: typeof tabs[number]) => {
               const isActive = tab.id === currentTab
               const href = tab.external
