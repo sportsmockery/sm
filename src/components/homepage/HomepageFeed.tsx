@@ -500,7 +500,7 @@ export function HomepageFeed({
             <span className="pulse-dot" /> Where Chicago Fans Come First
           </div>
 
-          <h1 className="hero-headline animate-entrance entrance-delay-2" style={{ whiteSpace: 'nowrap' }}>
+          <h1 className="hero-headline animate-entrance entrance-delay-2">
             Sports Mockery <span className="gradient-text">2.0</span>
           </h1>
 
