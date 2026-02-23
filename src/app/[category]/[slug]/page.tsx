@@ -26,6 +26,7 @@ import { getArticleAudioInfo } from '@/lib/audioPlayer'
 import { ArticleAudioPlayer } from '@/components/article/ArticleAudioPlayer'
 import ArticleContentWithEmbeds from '@/components/article/ArticleContentWithEmbeds'
 import { TeamChatWidget } from '@/components/chat'
+import SocialShareBar from '@/components/SocialShareBar'
 import ARTourButton from '@/components/ar/ARTourButton'
 
 interface ArticlePageProps {
@@ -335,6 +336,9 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
             <div style={{ marginTop: 32, borderRadius: 16, overflow: 'hidden', position: 'relative', aspectRatio: '16/9' }}>
               <Image src={post.featured_image} alt={post.title} fill style={{ objectFit: 'cover' }} priority />
             </div>
+          )}
+          {post.featured_image && (
+            <SocialShareBar url={articleUrl} title={post.title} />
           )}
         </div>
       </header>
