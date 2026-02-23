@@ -356,7 +356,7 @@ html {
 }
 
 html, body, button, input, textarea, select {
-  font-family: 'Space Grotesk', -apple-system, BlinkMacSystemFont, sans-serif;
+  font-family: var(--font-bebas-neue), 'Bebas Neue', Impact, sans-serif;
 }
 
 body {
@@ -3600,6 +3600,17 @@ a.glass-card-sm:active,
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
   }
+}
+
+/* === Scout Floating Button Animations === */
+@keyframes scoutPanelReveal {
+  0% { opacity: 0; transform: translateY(10px) scale(0.95); }
+  100% { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+@keyframes scoutSpin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
 }
 
 /* ========== 2030 DESIGN UPGRADES — SITE-WIDE ========== */

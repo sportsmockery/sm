@@ -26,18 +26,37 @@
   padding: 0 24px;
 }
 
-/* Main headline: Bebas Neue (matches /home hero exactly) */
+/* Main headline: Bebas Neue — chrome gradient + bevel */
 .hero-headline {
   font-family: var(--font-bebas-neue), 'Bebas Neue', Impact, sans-serif;
   font-size: clamp(4rem, 9vw, 7.5rem);
   font-weight: 400;
   line-height: 0.95;
-  letter-spacing: 0.01em;
+  letter-spacing: 0.04em;
   text-transform: uppercase;
-  color: #fff;
   margin: 24px 0 0;
   text-align: center;
-  /* Start invisible — combined reveal + glow animations (matches /home) */
+  /* Chrome / brushed-metal gradient */
+  background: linear-gradient(
+    180deg,
+    #ffffff 0%,
+    #e0e0e0 18%,
+    #ffffff 40%,
+    #b0b0b0 60%,
+    #d8d8d8 78%,
+    #ffffff 100%
+  );
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  /* Bevel: light ridge on top, dark shadow below, subtle red ambient */
+  filter:
+    drop-shadow(0 1px 0 rgba(255, 255, 255, 0.5))
+    drop-shadow(0 -1px 0 rgba(0, 0, 0, 0.25))
+    drop-shadow(0 3px 6px rgba(0, 0, 0, 0.6))
+    drop-shadow(0 0 40px rgba(188, 0, 0, 0.25))
+    drop-shadow(0 0 80px rgba(188, 0, 0, 0.12));
+  /* Start invisible — combined reveal + glow animations */
   opacity: 0;
   transform: translateY(40px);
   animation:
@@ -45,17 +64,15 @@
     hero-glowBurst 1.8s ease 0.8s forwards;
 }
 
-/* Gradient accent text (e.g. "2.0") */
+/* Gradient accent text (e.g. "2.0") — red with glow */
 .hero-headline .gradient-text {
-  background: linear-gradient(135deg, #bc0000, #ff4444);
+  background: linear-gradient(135deg, #ff1a1a, #bc0000 45%, #ff4444 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
-  text-shadow: none;
-  filter: drop-shadow(0 0 10px rgba(255, 255, 255, 0.25))
-         drop-shadow(0 0 30px rgba(255, 255, 255, 0.12))
-         drop-shadow(0 0 20px rgba(188, 0, 0, 0.3))
-         drop-shadow(0 0 60px rgba(188, 0, 0, 0.15));
+  filter: drop-shadow(0 0 10px rgba(255, 68, 68, 0.4))
+         drop-shadow(0 0 30px rgba(188, 0, 0, 0.35))
+         drop-shadow(0 0 60px rgba(188, 0, 0, 0.2));
 }
 
 /* Reveal animation: opacity + transform + blur (matches /home hm-heroReveal) */
@@ -64,45 +81,60 @@
   100% { opacity: 1; transform: translateY(0) scale(1); filter: blur(0); }
 }
 
-/* Glow burst animation (matches /home hm-glowBurst) */
+/* Glow burst animation — uses filter (compatible with background-clip: text) */
 @keyframes hero-glowBurst {
   0% {
-    text-shadow:
-      0 0 10px rgba(188, 0, 0, 0),
-      0 0 40px rgba(188, 0, 0, 0),
-      0 0 80px rgba(188, 0, 0, 0);
+    filter:
+      drop-shadow(0 1px 0 rgba(255,255,255,0.5))
+      drop-shadow(0 -1px 0 rgba(0,0,0,0.25))
+      drop-shadow(0 3px 6px rgba(0,0,0,0.6))
+      drop-shadow(0 0 20px rgba(188,0,0,0))
+      drop-shadow(0 0 40px rgba(188,0,0,0));
   }
   40% {
-    text-shadow:
-      0 0 20px rgba(188, 0, 0, 0.8),
-      0 0 60px rgba(188, 0, 0, 0.5),
-      0 0 120px rgba(188, 0, 0, 0.4),
-      0 0 200px rgba(188, 0, 0, 0.2);
+    filter:
+      drop-shadow(0 1px 0 rgba(255,255,255,0.5))
+      drop-shadow(0 -1px 0 rgba(0,0,0,0.25))
+      drop-shadow(0 3px 6px rgba(0,0,0,0.6))
+      drop-shadow(0 0 40px rgba(188,0,0,0.45))
+      drop-shadow(0 0 100px rgba(188,0,0,0.25));
   }
   100% {
-    text-shadow:
-      0 0 10px rgba(188, 0, 0, 0.6),
-      0 0 40px rgba(188, 0, 0, 0.4),
-      0 0 80px rgba(188, 0, 0, 0.3),
-      0 0 140px rgba(188, 0, 0, 0.2),
-      0 0 200px rgba(188, 0, 0, 0.1);
+    filter:
+      drop-shadow(0 1px 0 rgba(255,255,255,0.5))
+      drop-shadow(0 -1px 0 rgba(0,0,0,0.25))
+      drop-shadow(0 3px 6px rgba(0,0,0,0.6))
+      drop-shadow(0 0 40px rgba(188,0,0,0.25))
+      drop-shadow(0 0 80px rgba(188,0,0,0.12));
   }
 }
 
-/* Light mode: dark text, subtle glow, reveal only (no burst) */
+/* Light mode: dark chrome gradient + lighter bevel */
 [data-theme="light"] .hero-headline,
 .light .hero-headline {
-  color: #111118;
-  text-shadow:
-    0 0 10px rgba(188, 0, 0, 0.15),
-    0 0 40px rgba(188, 0, 0, 0.08);
+  background: linear-gradient(
+    180deg,
+    #2a2a2a 0%,
+    #111111 18%,
+    #3a3a3a 40%,
+    #111111 60%,
+    #2a2a2a 78%,
+    #1a1a1a 100%
+  );
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  filter:
+    drop-shadow(0 1px 0 rgba(255,255,255,0.3))
+    drop-shadow(0 2px 4px rgba(0,0,0,0.2))
+    drop-shadow(0 0 30px rgba(188,0,0,0.1));
   animation: hero-reveal 0.9s cubic-bezier(0.16, 1, 0.3, 1) 0.3s forwards;
 }
 
 [data-theme="light"] .hero-headline .gradient-text,
 .light .hero-headline .gradient-text {
-  filter: drop-shadow(0 0 10px rgba(188, 0, 0, 0.2))
-         drop-shadow(0 0 30px rgba(188, 0, 0, 0.1));
+  filter: drop-shadow(0 0 10px rgba(188, 0, 0, 0.25))
+         drop-shadow(0 0 30px rgba(188, 0, 0, 0.12));
 }
 
 /* Reduced motion */
@@ -1307,13 +1339,24 @@
   50% { opacity: 0.6; }
 }
 
-/* D) Dual glow orbs */
+/* D) Dual glow orbs — interactive */
 .glow-orb {
   position: absolute;
   border-radius: 50%;
   pointer-events: none;
   filter: blur(80px);
   will-change: transform;
+  transition: filter 0.3s ease, transform 0.3s ease;
+}
+
+.glow-orb:hover {
+  filter: blur(60px) brightness(1.5);
+  transform: scale(1.1);
+}
+
+@keyframes orbCardReveal {
+  0% { opacity: 0; transform: translateY(12px) scale(0.95); }
+  100% { opacity: 1; transform: translateY(0) scale(1); }
 }
 
 .glow-red-1 {
