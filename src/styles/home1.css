@@ -1,5 +1,5 @@
 /* ═══════════════════════════════════════════════════════════════════
-   home1.css — Spatial Data Interface
+   home1.css — Chicago Sports Command Center
    Scoped under .h1-root — strict palette: #bc0000, #000, #fff
    ═══════════════════════════════════════════════════════════════════ */
 
@@ -65,28 +65,29 @@
 /* ─── Shard clip-paths ───────────────────────────────────────────── */
 .h1-shard {
   position: relative;
-  transition: transform 0.4s var(--h1-ease), box-shadow 0.4s var(--h1-ease);
+  transition: transform 0.4s var(--h1-ease), box-shadow 0.4s var(--h1-ease), border-color 0.3s ease;
 }
 
 .h1-shard:nth-child(5n+1) {
-  clip-path: polygon(0 4%, 100% 0, 98% 96%, 2% 100%);
+  clip-path: polygon(0 2%, 100% 0, 99% 98%, 1% 100%);
 }
 .h1-shard:nth-child(5n+2) {
-  clip-path: polygon(2% 0, 100% 3%, 97% 100%, 0 97%);
+  clip-path: polygon(1% 0, 100% 1%, 98% 100%, 0 99%);
 }
 .h1-shard:nth-child(5n+3) {
-  clip-path: polygon(0 0, 96% 2%, 100% 98%, 3% 100%);
+  clip-path: polygon(0 0, 97% 1%, 100% 99%, 2% 100%);
 }
 .h1-shard:nth-child(5n+4) {
-  clip-path: polygon(3% 0, 100% 0, 100% 100%, 0 96%);
+  clip-path: polygon(2% 0, 100% 0, 100% 100%, 0 98%);
 }
 .h1-shard:nth-child(5n+5) {
-  clip-path: polygon(0 2%, 98% 0, 100% 97%, 1% 100%);
+  clip-path: polygon(0 1%, 99% 0, 100% 98%, 1% 100%);
 }
 
 .h1-shard:hover {
   transform: scale(1.02);
   z-index: 10;
+  box-shadow: 0 0 20px rgba(188, 0, 0, 0.15);
 }
 
 /* ─── Boot-up animation states ───────────────────────────────────── */
@@ -137,6 +138,7 @@
   border: none;
   cursor: pointer;
   transition: transform var(--h1-transition-fast), box-shadow var(--h1-transition-fast);
+  outline: none;
 }
 
 .h1-dock-btn:hover {
@@ -147,10 +149,15 @@
   transform: scale(0.95);
 }
 
+.h1-dock-btn:focus-visible {
+  outline: 2px solid var(--h1-red);
+  outline-offset: 2px;
+}
+
 /* ─── System diagnostic ──────────────────────────────────────────── */
 .h1-diagnostic {
   border: 1px solid var(--h1-red);
-  border-radius: var(--h1-radius-md);
+  border-radius: 0;
   padding: 24px;
   position: relative;
   overflow: hidden;
@@ -159,6 +166,20 @@
 
 .h1-diagnostic-pulse {
   animation: h1-pulse-glow 2s ease-in-out infinite;
+}
+
+/* ─── Remove default focus rings ─────────────────────────────────── */
+.h1-root a:focus-visible,
+.h1-root button:focus-visible,
+.h1-root input:focus-visible {
+  outline: 2px solid var(--h1-red);
+  outline-offset: 2px;
+}
+
+.h1-root a:focus:not(:focus-visible),
+.h1-root button:focus:not(:focus-visible),
+.h1-root input:focus:not(:focus-visible) {
+  outline: none;
 }
 
 /* ─── Keyframes ──────────────────────────────────────────────────── */
@@ -187,7 +208,7 @@
 
 @keyframes h1-float {
   0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(-8px); }
+  50% { transform: translateY(-6px); }
 }
 
 @keyframes h1-ecg-glow {

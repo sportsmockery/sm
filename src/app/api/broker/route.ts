@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { brokerHeadlines, brokerPulse, brokerBriefing } from '@/lib/dataBroker'
+import { brokerHeadlines, brokerPulse, brokerBriefing, brokerTeasers } from '@/lib/dataBroker'
 
 export const dynamic = 'force-dynamic'
 
@@ -10,8 +10,7 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ error: 'Missing ?type= parameter' }, { status: 400 })
   }
 
-  const controller = new AbortController()
-  const timeout = setTimeout(() => controller.abort(), 3000)
+  const timeout = setTimeout(() => {}, 3000)
 
   try {
     switch (type) {
@@ -32,6 +31,11 @@ export async function GET(req: NextRequest) {
         clearTimeout(timeout)
         return NextResponse.json(result)
       }
+      case 'teasers': {
+        const result = await brokerTeasers()
+        clearTimeout(timeout)
+        return NextResponse.json(result)
+      }
       default:
         clearTimeout(timeout)
         return NextResponse.json({ error: `Unknown type: ${type}` }, { status: 400 })
@@ -40,12 +44,8 @@ export async function GET(req: NextRequest) {
     clearTimeout(timeout)
     console.error('[Broker API]', error)
     return NextResponse.json(
-      {
-        data: null,
-        source: 'unavailable',
-        fetchedAt: new Date().toISOString(),
-      },
-      { status: 200 } // Graceful degradation — always 200 with envelope
+      { data: null, source: 'unavailable', fetchedAt: new Date().toISOString() },
+      { status: 200 }
     )
   }
 }

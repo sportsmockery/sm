@@ -9,9 +9,8 @@ import type { EnrichedHeadline } from '@/lib/dataBroker'
 
 type BootState = 'initial' | 'verifying' | 'resolved'
 
-// Deterministic shard widths based on index
-const SHARD_WIDTHS = [380, 300, 420, 280, 360, 340, 400, 310, 370, 290, 350, 320]
-const SHARD_ROTATIONS = [-0.5, 0.3, -0.2, 0.4, -0.3, 0.1, -0.4, 0.2, -0.1, 0.3, -0.3, 0.2]
+// Shard visual parameters — now full-width within column
+const SHARD_ROTATIONS = [-0.3, 0.2, -0.15, 0.25, -0.2, 0.1, -0.25, 0.15, -0.1, 0.2, -0.2, 0.15]
 const FLOAT_DURATIONS = [7, 8.5, 6, 9, 7.5, 8, 6.5, 9.5, 7, 8, 6.5, 9]
 
 // Highlight key stats in title text
@@ -100,48 +99,38 @@ export default function InformationShards() {
   }, [])
 
   return (
-    <section
+    <div
       style={{
-        maxWidth: 1400,
-        margin: '0 auto',
-        padding: '80px 24px 120px',
         display: 'flex',
-        flexWrap: 'wrap',
-        gap: 20,
-        justifyContent: 'center',
+        flexDirection: 'column',
+        gap: 16,
         position: 'relative',
         transition: 'filter 0.5s ease',
         filter: dataOverlay ? 'brightness(0.5)' : 'brightness(1)',
       }}
     >
-      {/* Section label */}
-      <div
-        style={{
-          width: '100%',
-          marginBottom: 16,
-          fontSize: 10,
-          letterSpacing: '0.2em',
-          textTransform: 'uppercase',
-          color: isDark ? '#333' : '#ccc',
-          fontFamily: "'SF Mono', 'Fira Code', monospace",
-        }}
-      >
-        Information Shards
-        {bootState !== 'resolved' && (
-          <span style={{ marginLeft: 8, color: '#bc0000' }}>
-            {bootState === 'initial' ? 'INITIALIZING...' : 'VERIFYING...'}
-          </span>
-        )}
-      </div>
+      {/* Boot status */}
+      {bootState !== 'resolved' && (
+        <div
+          style={{
+            fontSize: 9,
+            letterSpacing: '0.15em',
+            textTransform: 'uppercase',
+            color: '#bc0000',
+            fontFamily: "'SF Mono', 'Fira Code', monospace",
+          }}
+        >
+          {bootState === 'initial' ? 'INITIALIZING...' : 'VERIFYING DATA...'}
+        </div>
+      )}
 
       {headlines.length === 0 && bootState === 'resolved' && (
         <div
           style={{
-            width: '100%',
             textAlign: 'center',
-            padding: '60px 0',
+            padding: '40px 0',
             color: isDark ? '#444' : '#bbb',
-            fontSize: 14,
+            fontSize: 13,
           }}
         >
           No data available
@@ -149,7 +138,6 @@ export default function InformationShards() {
       )}
 
       {headlines.map((headline, i) => {
-        const shardWidth = SHARD_WIDTHS[i % SHARD_WIDTHS.length]
         const rotation = SHARD_ROTATIONS[i % SHARD_ROTATIONS.length]
         const floatDur = FLOAT_DURATIONS[i % FLOAT_DURATIONS.length]
         const slug = getCategorySlug(headline)
@@ -175,8 +163,7 @@ export default function InformationShards() {
               ease: [0.16, 1, 0.3, 1],
             }}
             style={{
-              width: shardWidth,
-              maxWidth: '100%',
+              width: '100%',
               padding: 20,
               borderRadius: 'var(--h1-radius-md)',
               transform: `rotate(${rotation}deg)`,
@@ -307,6 +294,6 @@ export default function InformationShards() {
           </motion.div>
         )
       })}
-    </section>
+    </div>
   )
 }

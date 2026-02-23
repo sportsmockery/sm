@@ -41,38 +41,47 @@ export interface BriefingItem {
   trend: 'up' | 'down' | 'neutral'
 }
 
+export interface GMTeaser {
+  chicagoTeam: string
+  tradePartner: string
+  grade: number
+  status: string
+  summary: string
+  createdAt: string
+}
+
+export interface SentimentData {
+  score: number          // 0-100
+  activityLevel: string  // 'low' | 'moderate' | 'high' | 'surge'
+  messageCount: number
+  topKeyword: string | null
+}
+
+export interface TeasersData {
+  gm: GMTeaser | null
+  sentiment: SentimentData | null
+}
+
 // ─── Stat extraction from headlines ─────────────────────────────
 const STAT_PATTERNS = [
-  // Score patterns: "Bears 24, Lions 17" or "beat Lions 24-17"
   { regex: /(\d+)-(\d+)\s*(win|loss|victory|defeat)/i, type: 'score' },
-  // Numeric stats: "rushed for 142 yards", "hit 3 home runs"
   { regex: /(\d+(?:\.\d+)?)\s*(yards?|points?|goals?|assists?|rebounds?|home runs?|strikeouts?|touchdowns?|TDs?|RBIs?|saves?|hits?|sacks?)/i, type: 'stat' },
-  // Contract/money: "$24.5 million", "$140M"
   { regex: /\$(\d+(?:\.\d+)?)\s*(million|M|billion|B)/i, type: 'money' },
-  // Record: "11-6", "23-22-8"
   { regex: /\b(\d{1,3}-\d{1,3}(?:-\d{1,3})?)\b/, type: 'record' },
-  // Draft pick: "1st overall", "pick #4"
   { regex: /(1st|2nd|3rd|\d+th)\s*(overall|pick|round)/i, type: 'draft' },
-  // Percentage: "shooting 48.5%"
   { regex: /(\d+(?:\.\d+)?)\s*%/i, type: 'percentage' },
 ]
 
 function extractStats(title: string, excerpt: string | null): { label: string; value: string; type: string }[] {
   const text = `${title} ${excerpt || ''}`
   const stats: { label: string; value: string; type: string }[] = []
-
   for (const pattern of STAT_PATTERNS) {
     const match = text.match(pattern.regex)
     if (match) {
-      stats.push({
-        label: pattern.type,
-        value: match[0],
-        type: pattern.type,
-      })
+      stats.push({ label: pattern.type, value: match[0], type: pattern.type })
     }
   }
-
-  return stats.slice(0, 3) // max 3 stats per headline
+  return stats.slice(0, 3)
 }
 
 // ─── Team key detection ─────────────────────────────────────────
@@ -85,7 +94,6 @@ const TEAM_KEYWORDS: Record<string, string[]> = {
 }
 
 function detectTeamKey(title: string, categorySlug: string | null): string | null {
-  // First check category slug
   if (categorySlug) {
     const slug = categorySlug.toLowerCase()
     if (slug.includes('bears')) return 'bears'
@@ -94,18 +102,15 @@ function detectTeamKey(title: string, categorySlug: string | null): string | nul
     if (slug.includes('cubs')) return 'cubs'
     if (slug.includes('white-sox') || slug.includes('whitesox')) return 'white-sox'
   }
-
-  // Then check title keywords
   const lower = title.toLowerCase()
   for (const [team, keywords] of Object.entries(TEAM_KEYWORDS)) {
     if (keywords.some((kw) => lower.includes(kw))) return team
   }
-
   return null
 }
 
 // ─── Freshness check ────────────────────────────────────────────
-const STALE_THRESHOLD_MS = 15 * 60 * 1000 // 15 minutes
+const STALE_THRESHOLD_MS = 15 * 60 * 1000
 
 function isFresh(fetchedAt: string | null): boolean {
   if (!fetchedAt) return false
@@ -118,9 +123,7 @@ function isFresh(fetchedAt: string | null): boolean {
 
 export async function brokerHeadlines(limit = 12): Promise<BrokerEnvelope<EnrichedHeadline[]>> {
   const now = new Date().toISOString()
-
   try {
-    // 1. Check DataLab cache
     const { data: cached } = await datalabAdmin
       .from('headlines_metadata')
       .select('*')
@@ -128,14 +131,9 @@ export async function brokerHeadlines(limit = 12): Promise<BrokerEnvelope<Enrich
       .limit(limit)
 
     if (cached && cached.length > 0 && isFresh(cached[0].fetched_at)) {
-      return {
-        data: cached.map(mapHeadline),
-        source: 'cache',
-        fetchedAt: now,
-      }
+      return { data: cached.map(mapHeadline), source: 'cache', fetchedAt: now }
     }
 
-    // 2. Fetch fresh posts from SM Supabase
     const { data: posts } = await supabaseAdmin
       .from('sm_posts')
       .select('id, title, excerpt, slug, featured_image, published_at, status, category_id')
@@ -144,14 +142,12 @@ export async function brokerHeadlines(limit = 12): Promise<BrokerEnvelope<Enrich
       .limit(limit)
 
     if (!posts || posts.length === 0) {
-      // Return cached data even if stale
       if (cached && cached.length > 0) {
         return { data: cached.map(mapHeadline), source: 'cache', fetchedAt: now }
       }
       return { data: null, source: 'unavailable', fetchedAt: now }
     }
 
-    // 3. Get category slugs
     const categoryIds = [...new Set(posts.map((p) => p.category_id).filter(Boolean))]
     const { data: categories } = await supabaseAdmin
       .from('sm_categories')
@@ -160,12 +156,10 @@ export async function brokerHeadlines(limit = 12): Promise<BrokerEnvelope<Enrich
 
     const categoryMap = new Map(categories?.map((c) => [c.id, c.slug]) || [])
 
-    // 4. Enrich and UPSERT
     const enriched: EnrichedHeadline[] = posts.map((post) => {
       const categorySlug = categoryMap.get(post.category_id) || null
       const teamKey = detectTeamKey(post.title, categorySlug)
       const keyStats = extractStats(post.title, post.excerpt)
-
       return {
         postId: String(post.id),
         title: post.title,
@@ -173,7 +167,7 @@ export async function brokerHeadlines(limit = 12): Promise<BrokerEnvelope<Enrich
         category: categorySlug,
         teamKey,
         keyStats,
-        reliabilityScore: 100, // CMS content = fully reliable
+        reliabilityScore: 100,
         engagementVelocity: 0,
         featuredImage: post.featured_image,
         publishedAt: post.published_at,
@@ -181,7 +175,6 @@ export async function brokerHeadlines(limit = 12): Promise<BrokerEnvelope<Enrich
       }
     })
 
-    // 5. UPSERT to DataLab (non-blocking)
     const upsertRows = enriched.map((h) => ({
       post_id: h.postId,
       title: h.title,
@@ -198,7 +191,6 @@ export async function brokerHeadlines(limit = 12): Promise<BrokerEnvelope<Enrich
       updated_at: now,
     }))
 
-    // Non-blocking upsert
     ;(async () => {
       try {
         await datalabAdmin.from('headlines_metadata').upsert(upsertRows, { onConflict: 'post_id' })
@@ -236,9 +228,7 @@ function mapHeadline(row: Record<string, unknown>): EnrichedHeadline {
 
 export async function brokerPulse(metricKey = 'global'): Promise<BrokerEnvelope<PulseData>> {
   const now = new Date().toISOString()
-
   try {
-    // 1. Check DataLab cache
     const { data: cached } = await datalabAdmin
       .from('engagement_pulse')
       .select('*')
@@ -260,7 +250,6 @@ export async function brokerPulse(metricKey = 'global'): Promise<BrokerEnvelope<
       }
     }
 
-    // 2. Compute from SM posts (views delta proxy)
     const oneHourAgo = new Date(Date.now() - 60 * 60 * 1000).toISOString()
     const { data: recentPosts } = await supabaseAdmin
       .from('sm_posts')
@@ -271,7 +260,6 @@ export async function brokerPulse(metricKey = 'global'): Promise<BrokerEnvelope<
       .limit(5)
 
     const totalRecentViews = recentPosts?.reduce((sum, p) => sum + (p.views || 0), 0) || 0
-    // Normalize to 0-100 scale (100 views/hr = score of 80)
     const engagementScore = Math.min(100, Math.round((totalRecentViews / 100) * 80) || cached?.engagement_score || 50)
 
     const pulseData: PulseData = {
@@ -283,8 +271,6 @@ export async function brokerPulse(metricKey = 'global'): Promise<BrokerEnvelope<
       computedAt: now,
     }
 
-    // 3. UPSERT to DataLab
-    // Non-blocking upsert
     ;(async () => {
       try {
         await datalabAdmin.from('engagement_pulse').upsert(
@@ -317,9 +303,7 @@ export async function brokerPulse(metricKey = 'global'): Promise<BrokerEnvelope<
 
 export async function brokerBriefing(): Promise<BrokerEnvelope<BriefingItem[]>> {
   const now = new Date().toISOString()
-
   try {
-    // Get latest headlines per team
     const { data: headlines } = await datalabAdmin
       .from('headlines_metadata')
       .select('title, team_key, key_stats, engagement_velocity')
@@ -330,7 +314,6 @@ export async function brokerBriefing(): Promise<BrokerEnvelope<BriefingItem[]>> 
       return { data: null, source: 'unavailable', fetchedAt: now }
     }
 
-    // Group by team, take top headline per team
     const teamMap = new Map<string, BriefingItem>()
     for (const h of headlines) {
       const team = h.team_key || 'general'
@@ -345,13 +328,115 @@ export async function brokerBriefing(): Promise<BrokerEnvelope<BriefingItem[]>> 
       }
     }
 
-    return {
-      data: Array.from(teamMap.values()),
-      source: 'broker',
-      fetchedAt: now,
-    }
+    return { data: Array.from(teamMap.values()), source: 'broker', fetchedAt: now }
   } catch (error) {
     console.error('[Broker] Briefing error:', error)
     return { data: null, source: 'unavailable', fetchedAt: new Date().toISOString() }
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// Feature Teasers broker (GM trade + Fan Chat sentiment)
+// ═══════════════════════════════════════════════════════════════════
+
+const POSITIVE_WORDS = ['win', 'won', 'lets go', 'goat', 'fire', 'amazing', 'clutch', 'beast', 'hype', 'love', 'great', 'lfg', 'dub', 'w ', 'elite', 'dominant', 'huge', 'yes', 'nice', 'sick']
+const NEGATIVE_WORDS = ['loss', 'lost', 'trash', 'terrible', 'awful', 'worst', 'tank', 'fire him', 'disappointing', 'choke', 'embarrassing', 'pathetic', 'bust', 'l ', 'suck', 'bad', 'hate', 'ugh', 'smh']
+
+export async function brokerTeasers(): Promise<BrokerEnvelope<TeasersData>> {
+  const now = new Date().toISOString()
+
+  // Fetch GM teaser + fan chat sentiment in parallel
+  const [gmResult, sentimentResult] = await Promise.allSettled([
+    fetchGMTeaser(),
+    fetchSentiment(),
+  ])
+
+  const gm = gmResult.status === 'fulfilled' ? gmResult.value : null
+  const sentiment = sentimentResult.status === 'fulfilled' ? sentimentResult.value : null
+
+  return {
+    data: { gm, sentiment },
+    source: gm || sentiment ? 'broker' : 'unavailable',
+    fetchedAt: now,
+  }
+}
+
+async function fetchGMTeaser(): Promise<GMTeaser | null> {
+  try {
+    const { data } = await datalabAdmin
+      .from('gm_trades')
+      .select('chicago_team, trade_partner, grade, status, trade_summary, created_at')
+      .order('created_at', { ascending: false })
+      .limit(1)
+      .single()
+
+    if (!data) return null
+
+    return {
+      chicagoTeam: data.chicago_team,
+      tradePartner: data.trade_partner,
+      grade: data.grade,
+      status: data.status,
+      summary: data.trade_summary || `${data.chicago_team} ↔ ${data.trade_partner}`,
+      createdAt: data.created_at,
+    }
+  } catch {
+    return null
+  }
+}
+
+async function fetchSentiment(): Promise<SentimentData | null> {
+  try {
+    const twoHoursAgo = new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString()
+    const { data: messages } = await supabaseAdmin
+      .from('chat_messages')
+      .select('content')
+      .gte('created_at', twoHoursAgo)
+      .eq('is_deleted', false)
+      .order('created_at', { ascending: false })
+      .limit(100)
+
+    if (!messages || messages.length === 0) {
+      return { score: 50, activityLevel: 'low', messageCount: 0, topKeyword: null }
+    }
+
+    // Light keyword-based sentiment analysis
+    let positiveCount = 0
+    let negativeCount = 0
+    const keywordCounts = new Map<string, number>()
+
+    for (const msg of messages) {
+      const content = (msg.content || '').toLowerCase()
+      for (const word of POSITIVE_WORDS) {
+        if (content.includes(word)) { positiveCount++; break }
+      }
+      for (const word of NEGATIVE_WORDS) {
+        if (content.includes(word)) { negativeCount++; break }
+      }
+      // Count team mentions for top keyword
+      for (const team of ['bears', 'bulls', 'blackhawks', 'cubs', 'white sox']) {
+        if (content.includes(team)) {
+          keywordCounts.set(team, (keywordCounts.get(team) || 0) + 1)
+        }
+      }
+    }
+
+    const total = positiveCount + negativeCount
+    const score = total > 0
+      ? Math.round((positiveCount / total) * 100)
+      : 50
+
+    const count = messages.length
+    const activityLevel = count > 80 ? 'surge' : count > 40 ? 'high' : count > 15 ? 'moderate' : 'low'
+
+    let topKeyword: string | null = null
+    let maxCount = 0
+    for (const [kw, cnt] of keywordCounts) {
+      if (cnt > maxCount) { topKeyword = kw; maxCount = cnt }
+    }
+
+    return { score, activityLevel, messageCount: count, topKeyword }
+  } catch {
+    return null
   }
 }

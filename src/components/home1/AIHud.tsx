@@ -15,10 +15,17 @@ interface BriefingItem {
   trend: 'up' | 'down' | 'neutral'
 }
 
+const DOCK_BUTTONS = [
+  { id: 'scout' as const, label: 'ACTIVATE SCOUT', tooltipWidth: 130 },
+  { id: 'gm' as const, label: 'RUN GM AUDIT', tooltipWidth: 115 },
+  { id: 'nextgen' as const, label: 'DATA VISION', tooltipWidth: 100 },
+]
+
 export default function AIHud() {
   const { theme } = useTheme()
   const isDark = theme === 'dark'
   const [activePanel, setActivePanel] = useState<Panel>(null)
+  const [hoveredBtn, setHoveredBtn] = useState<string | null>(null)
   const [scoutQuery, setScoutQuery] = useState('')
   const [scoutMessages, setScoutMessages] = useState<{ role: string; content: string }[]>([])
   const [scoutLoading, setScoutLoading] = useState(false)
@@ -29,7 +36,6 @@ export default function AIHud() {
   const inputRef = useRef<HTMLInputElement>(null)
   const sessionIdRef = useRef<string | null>(null)
 
-  // Toggle panel
   const toggle = (panel: Panel) => {
     if (activePanel === panel) {
       setActivePanel(null)
@@ -50,18 +56,14 @@ export default function AIHud() {
     }
   }
 
-  // Fetch GM briefing
   const fetchBriefing = async () => {
     setBriefingLoading(true)
     setBriefingError(false)
     try {
       const res = await fetch('/api/broker?type=briefing')
       const envelope = await res.json()
-      if (envelope.data) {
-        setBriefing(envelope.data)
-      } else {
-        setBriefingError(true)
-      }
+      if (envelope.data) setBriefing(envelope.data)
+      else setBriefingError(true)
     } catch {
       setBriefingError(true)
     } finally {
@@ -69,15 +71,12 @@ export default function AIHud() {
     }
   }
 
-  // Scout AI submit
   const submitScout = async () => {
     if (!scoutQuery.trim() || scoutLoading) return
-
     const query = scoutQuery.trim()
     setScoutQuery('')
     setScoutMessages((prev) => [...prev, { role: 'user', content: query }])
     setScoutLoading(true)
-
     try {
       const res = await fetch('/api/ask-ai', {
         method: 'POST',
@@ -100,14 +99,10 @@ export default function AIHud() {
     }
   }
 
-  // Focus input when scout panel opens
   useEffect(() => {
-    if (activePanel === 'scout' && inputRef.current) {
-      inputRef.current.focus()
-    }
+    if (activePanel === 'scout' && inputRef.current) inputRef.current.focus()
   }, [activePanel])
 
-  // Clean up overlay on unmount
   useEffect(() => {
     return () => {
       window.dispatchEvent(new CustomEvent('h1-data-overlay', { detail: { active: false } }))
@@ -116,9 +111,25 @@ export default function AIHud() {
 
   const trendArrow = (trend: string) =>
     trend === 'up' ? '\u2191' : trend === 'down' ? '\u2193' : '\u2022'
-
   const trendColor = (trend: string) =>
     trend === 'up' ? '#00d084' : trend === 'down' ? '#bc0000' : isDark ? '#555' : '#999'
+
+  const panelStyle = {
+    position: 'fixed' as const,
+    bottom: 90,
+    left: '50%',
+    transform: 'translateX(-50%)',
+    maxWidth: 'calc(100vw - 32px)',
+    borderRadius: 0,
+    overflow: 'hidden' as const,
+    zIndex: 91,
+    background: isDark ? 'rgba(10,10,10,0.95)' : 'rgba(250,250,250,0.97)',
+    border: `1px solid ${isDark ? 'rgba(188,0,0,0.2)' : 'rgba(188,0,0,0.1)'}`,
+    backdropFilter: 'blur(20px)',
+    boxShadow: isDark
+      ? '0 8px 40px rgba(0,0,0,0.6), 0 0 20px rgba(188,0,0,0.1)'
+      : '0 8px 40px rgba(0,0,0,0.15)',
+  }
 
   return (
     <>
@@ -130,28 +141,8 @@ export default function AIHud() {
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: 20 }}
             transition={{ duration: 0.25 }}
-            style={{
-              position: 'fixed',
-              bottom: 90,
-              left: '50%',
-              transform: 'translateX(-50%)',
-              width: 420,
-              maxWidth: 'calc(100vw - 32px)',
-              maxHeight: 400,
-              borderRadius: 16,
-              overflow: 'hidden',
-              zIndex: 91,
-              background: isDark ? 'rgba(10,10,10,0.95)' : 'rgba(250,250,250,0.97)',
-              border: `1px solid ${isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.08)'}`,
-              backdropFilter: 'blur(20px)',
-              boxShadow: isDark
-                ? '0 8px 40px rgba(0,0,0,0.6), 0 0 20px rgba(188,0,0,0.1)'
-                : '0 8px 40px rgba(0,0,0,0.15)',
-              display: 'flex',
-              flexDirection: 'column',
-            }}
+            style={{ ...panelStyle, width: 420, maxHeight: 400, display: 'flex', flexDirection: 'column' }}
           >
-            {/* Header */}
             <div
               style={{
                 padding: '12px 16px',
@@ -165,7 +156,6 @@ export default function AIHud() {
               <span style={{ fontSize: 13, fontWeight: 600, color: isDark ? '#fff' : '#111' }}>Scout AI</span>
             </div>
 
-            {/* Messages */}
             <div style={{ flex: 1, overflowY: 'auto', padding: '12px 16px', minHeight: 150 }}>
               {scoutMessages.length === 0 && (
                 <div style={{ fontSize: 12, color: isDark ? '#555' : '#999', textAlign: 'center', marginTop: 40 }}>
@@ -173,13 +163,7 @@ export default function AIHud() {
                 </div>
               )}
               {scoutMessages.map((msg, i) => (
-                <div
-                  key={i}
-                  style={{
-                    marginBottom: 10,
-                    textAlign: msg.role === 'user' ? 'right' : 'left',
-                  }}
-                >
+                <div key={i} style={{ marginBottom: 10, textAlign: msg.role === 'user' ? 'right' : 'left' }}>
                   <span
                     style={{
                       display: 'inline-block',
@@ -188,12 +172,7 @@ export default function AIHud() {
                       fontSize: 13,
                       lineHeight: 1.4,
                       maxWidth: '85%',
-                      backgroundColor:
-                        msg.role === 'user'
-                          ? '#bc0000'
-                          : isDark
-                            ? 'rgba(255,255,255,0.06)'
-                            : 'rgba(0,0,0,0.05)',
+                      backgroundColor: msg.role === 'user' ? '#bc0000' : isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.05)',
                       color: msg.role === 'user' ? '#fff' : isDark ? '#ddd' : '#333',
                     }}
                   >
@@ -206,7 +185,6 @@ export default function AIHud() {
               )}
             </div>
 
-            {/* Input */}
             <div
               style={{
                 padding: '10px 12px',
@@ -225,8 +203,8 @@ export default function AIHud() {
                   flex: 1,
                   padding: '8px 12px',
                   fontSize: 13,
-                  borderRadius: 8,
-                  border: `1px solid ${isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)'}`,
+                  borderRadius: 0,
+                  border: `1px solid ${isDark ? 'rgba(188,0,0,0.2)' : 'rgba(188,0,0,0.1)'}`,
                   background: isDark ? 'rgba(255,255,255,0.04)' : 'rgba(0,0,0,0.02)',
                   color: isDark ? '#fff' : '#111',
                   outline: 'none',
@@ -238,9 +216,9 @@ export default function AIHud() {
                 disabled={scoutLoading}
                 style={{
                   padding: '8px 14px',
-                  fontSize: 12,
-                  fontWeight: 600,
-                  borderRadius: 8,
+                  fontSize: 11,
+                  fontWeight: 700,
+                  letterSpacing: '0.05em',
                   border: 'none',
                   backgroundColor: '#bc0000',
                   color: '#ffffff',
@@ -249,7 +227,7 @@ export default function AIHud() {
                   fontFamily: 'inherit',
                 }}
               >
-                Send
+                SEND
               </button>
             </div>
           </motion.div>
@@ -261,26 +239,8 @@ export default function AIHud() {
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: 20 }}
             transition={{ duration: 0.25 }}
-            style={{
-              position: 'fixed',
-              bottom: 90,
-              left: '50%',
-              transform: 'translateX(-50%)',
-              width: 380,
-              maxWidth: 'calc(100vw - 32px)',
-              borderRadius: 16,
-              overflow: 'hidden',
-              zIndex: 91,
-              background: isDark ? 'rgba(10,10,10,0.95)' : 'rgba(250,250,250,0.97)',
-              border: `1px solid ${isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.08)'}`,
-              backdropFilter: 'blur(20px)',
-              boxShadow: isDark
-                ? '0 8px 40px rgba(0,0,0,0.6), 0 0 20px rgba(188,0,0,0.1)'
-                : '0 8px 40px rgba(0,0,0,0.15)',
-              padding: 20,
-            }}
+            style={{ ...panelStyle, width: 380, padding: 20 }}
           >
-            {/* Header */}
             <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 16 }}>
               <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="#bc0000" strokeWidth="1.5">
                 <rect x="2" y="7" width="20" height="14" rx="2" />
@@ -312,45 +272,21 @@ export default function AIHud() {
                     key={i}
                     style={{
                       padding: '10px 12px',
-                      borderRadius: 8,
                       background: isDark ? 'rgba(255,255,255,0.03)' : 'rgba(0,0,0,0.02)',
                       border: `1px solid ${isDark ? 'rgba(255,255,255,0.04)' : 'rgba(0,0,0,0.04)'}`,
                     }}
                   >
                     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 4 }}>
-                      <span
-                        style={{
-                          fontSize: 10,
-                          fontWeight: 600,
-                          textTransform: 'uppercase',
-                          letterSpacing: '0.1em',
-                          color: '#bc0000',
-                        }}
-                      >
+                      <span style={{ fontSize: 10, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.1em', color: '#bc0000' }}>
                         {item.team.replace('-', ' ')}
                       </span>
                       <span style={{ fontSize: 12, color: trendColor(item.trend) }}>{trendArrow(item.trend)}</span>
                     </div>
-                    <div
-                      style={{
-                        fontSize: 13,
-                        fontWeight: 500,
-                        color: isDark ? '#ddd' : '#222',
-                        lineHeight: 1.35,
-                        marginBottom: item.stat ? 4 : 0,
-                      }}
-                    >
+                    <div style={{ fontSize: 13, fontWeight: 500, color: isDark ? '#ddd' : '#222', lineHeight: 1.35, marginBottom: item.stat ? 4 : 0 }}>
                       {item.headline.length > 70 ? item.headline.slice(0, 67) + '...' : item.headline}
                     </div>
                     {item.stat && (
-                      <span
-                        style={{
-                          fontSize: 11,
-                          fontFamily: "'SF Mono', monospace",
-                          color: '#bc0000',
-                          fontWeight: 600,
-                        }}
-                      >
+                      <span style={{ fontSize: 11, fontFamily: "'SF Mono', monospace", color: '#bc0000', fontWeight: 600 }}>
                         {item.stat}
                       </span>
                     )}
@@ -373,66 +309,104 @@ export default function AIHud() {
           display: 'flex',
           alignItems: 'center',
           gap: 12,
-          padding: '8px 16px',
-          borderRadius: 'var(--h1-radius-pill)',
-          background: isDark ? 'rgba(10,10,10,0.85)' : 'rgba(255,255,255,0.92)',
+          padding: '8px 20px',
+          background: isDark ? 'rgba(10,10,10,0.9)' : 'rgba(255,255,255,0.95)',
           backdropFilter: 'blur(20px) saturate(180%)',
           WebkitBackdropFilter: 'blur(20px) saturate(180%)',
-          border: `1px solid ${isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.08)'}`,
+          border: `1px solid ${isDark ? 'rgba(188,0,0,0.15)' : 'rgba(188,0,0,0.08)'}`,
           boxShadow: isDark
-            ? '0 4px 24px rgba(0,0,0,0.4), 0 0 12px rgba(188,0,0,0.15)'
+            ? '0 4px 24px rgba(0,0,0,0.4), 0 0 16px rgba(188,0,0,0.12)'
             : '0 4px 24px rgba(0,0,0,0.1)',
         }}
       >
-        {/* Scout button */}
-        <button
-          className="h1-dock-btn"
-          onClick={() => toggle('scout')}
-          title="Scout AI"
-          style={{
-            backgroundColor: activePanel === 'scout' ? '#bc0000' : isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.04)',
-            color: activePanel === 'scout' ? '#fff' : isDark ? '#fff' : '#111',
-          }}
-        >
-          <Image
-            src="/downloads/scout-v2.png"
-            alt="Scout AI"
-            width={22}
-            height={22}
-            style={{ borderRadius: '50%', opacity: activePanel === 'scout' ? 1 : 0.7 }}
-          />
-        </button>
+        {DOCK_BUTTONS.map((btn) => {
+          const isActive = activePanel === btn.id
+          const isHovered = hoveredBtn === btn.id
 
-        {/* GM Audit button */}
-        <button
-          className="h1-dock-btn"
-          onClick={() => toggle('gm')}
-          title="GM Audit"
-          style={{
-            backgroundColor: activePanel === 'gm' ? '#bc0000' : isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.04)',
-            color: activePanel === 'gm' ? '#fff' : isDark ? '#fff' : '#111',
-          }}
-        >
-          <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="1.5">
-            <rect x="2" y="7" width="20" height="14" rx="2" />
-            <path d="M16 7V5a4 4 0 0 0-8 0v2" />
-          </svg>
-        </button>
+          return (
+            <div
+              key={btn.id}
+              style={{ position: 'relative' }}
+              onMouseEnter={() => setHoveredBtn(btn.id)}
+              onMouseLeave={() => setHoveredBtn(null)}
+            >
+              {/* Tooltip */}
+              <AnimatePresence>
+                {isHovered && !isActive && (
+                  <motion.div
+                    initial={{ opacity: 0, y: 4 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: 4 }}
+                    transition={{ duration: 0.15 }}
+                    style={{
+                      position: 'absolute',
+                      bottom: '100%',
+                      left: '50%',
+                      transform: 'translateX(-50%)',
+                      marginBottom: 8,
+                      padding: '4px 10px',
+                      backgroundColor: '#bc0000',
+                      color: '#ffffff',
+                      fontSize: 9,
+                      fontWeight: 700,
+                      letterSpacing: '0.1em',
+                      textTransform: 'uppercase',
+                      whiteSpace: 'nowrap',
+                      pointerEvents: 'none',
+                      fontFamily: "'SF Mono', monospace",
+                    }}
+                  >
+                    {btn.label}
+                    {/* Arrow */}
+                    <div
+                      style={{
+                        position: 'absolute',
+                        bottom: -4,
+                        left: '50%',
+                        transform: 'translateX(-50%)',
+                        width: 0,
+                        height: 0,
+                        borderLeft: '4px solid transparent',
+                        borderRight: '4px solid transparent',
+                        borderTop: '4px solid #bc0000',
+                      }}
+                    />
+                  </motion.div>
+                )}
+              </AnimatePresence>
 
-        {/* Next-Gen button */}
-        <button
-          className="h1-dock-btn"
-          onClick={() => toggle('nextgen')}
-          title="Next-Gen Data"
-          style={{
-            backgroundColor: activePanel === 'nextgen' ? '#bc0000' : isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.04)',
-            color: activePanel === 'nextgen' ? '#fff' : isDark ? '#fff' : '#111',
-          }}
-        >
-          <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="1.5">
-            <path d="M18 20V10M12 20V4M6 20v-6" />
-          </svg>
-        </button>
+              <button
+                className="h1-dock-btn"
+                onClick={() => toggle(btn.id)}
+                style={{
+                  backgroundColor: isActive ? '#bc0000' : isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.04)',
+                  color: isActive ? '#fff' : isDark ? '#fff' : '#111',
+                }}
+              >
+                {btn.id === 'scout' && (
+                  <Image
+                    src="/downloads/scout-v2.png"
+                    alt="Scout AI"
+                    width={22}
+                    height={22}
+                    style={{ borderRadius: '50%', opacity: isActive ? 1 : 0.7 }}
+                  />
+                )}
+                {btn.id === 'gm' && (
+                  <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="1.5">
+                    <rect x="2" y="7" width="20" height="14" rx="2" />
+                    <path d="M16 7V5a4 4 0 0 0-8 0v2" />
+                  </svg>
+                )}
+                {btn.id === 'nextgen' && (
+                  <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="1.5">
+                    <path d="M18 20V10M12 20V4M6 20v-6" />
+                  </svg>
+                )}
+              </button>
+            </div>
+          )
+        })}
       </div>
     </>
   )
