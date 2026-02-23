@@ -63,7 +63,7 @@ export function ScoutSearchBox() {
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
-          placeholder="What does Scout need to find for you today?"
+          placeholder="Scout AI is a high-IQ Chicago sports engine, ask me anything..."
           style={{
             flex: 1,
             fontSize: 15,
