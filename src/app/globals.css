@@ -3613,6 +3613,18 @@ a.glass-card-sm:active,
   100% { transform: rotate(360deg); }
 }
 
+@keyframes scoutProgressSweep {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(100%); }
+}
+
+@keyframes scoutHeadThink {
+  0%, 100% { transform: rotate(0deg) translateY(0); }
+  25% { transform: rotate(-8deg) translateY(-1px); }
+  50% { transform: rotate(6deg) translateY(1px); }
+  75% { transform: rotate(-4deg) translateY(-1px); }
+}
+
 /* ========== 2030 DESIGN UPGRADES — SITE-WIDE ========== */
 
 /* === Navigation Orb === */

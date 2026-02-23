@@ -40,6 +40,7 @@ export function ScoutSearchBox() {
       {/* Search bar */}
       <div
         style={{
+          position: 'relative',
           display: 'flex',
           alignItems: 'center',
           gap: 12,
@@ -49,15 +50,53 @@ export function ScoutSearchBox() {
           border: `1px solid ${isDark ? 'rgba(188,0,0,0.3)' : 'rgba(188,0,0,0.15)'}`,
           borderRadius: 16,
           boxShadow: isDark ? '0 0 30px rgba(188,0,0,0.1)' : '0 4px 20px rgba(0,0,0,0.08)',
+          overflow: 'hidden',
         }}
       >
-        <Image
-          src="/downloads/scout-v2.png"
-          alt="Scout"
-          width={24}
-          height={24}
-          style={{ borderRadius: '50%', flexShrink: 0, filter: 'drop-shadow(0 0 6px rgba(188,0,0,0.5)) drop-shadow(0 0 14px rgba(188,0,0,0.25))' }}
-        />
+        {/* Progress bar overlay when loading */}
+        {loading && (
+          <div
+            style={{
+              position: 'absolute',
+              top: 0,
+              left: 0,
+              right: 0,
+              bottom: 0,
+              borderRadius: 16,
+              overflow: 'hidden',
+              pointerEvents: 'none',
+              zIndex: 1,
+            }}
+          >
+            <div
+              style={{
+                position: 'absolute',
+                top: 0,
+                left: 0,
+                height: '100%',
+                width: '100%',
+                background: 'linear-gradient(90deg, transparent 0%, rgba(188,0,0,0.15) 40%, rgba(188,0,0,0.25) 60%, transparent 100%)',
+                animation: 'scoutProgressSweep 1.5s ease-in-out infinite',
+              }}
+            />
+          </div>
+        )}
+
+        {/* Scout icon with head wobble when loading */}
+        <div style={{ flexShrink: 0, position: 'relative', zIndex: 2 }}>
+          <Image
+            src="/downloads/scout-v2.png"
+            alt="Scout"
+            width={24}
+            height={24}
+            style={{
+              borderRadius: '50%',
+              filter: 'drop-shadow(0 0 6px rgba(188,0,0,0.5)) drop-shadow(0 0 14px rgba(188,0,0,0.25))',
+              animation: loading ? 'scoutHeadThink 0.6s ease-in-out infinite' : 'none',
+            }}
+          />
+        </div>
+
         <input
           ref={inputRef}
           value={query}
@@ -74,6 +113,8 @@ export function ScoutSearchBox() {
             outline: 'none',
             fontFamily: 'inherit',
             letterSpacing: '-0.01em',
+            position: 'relative',
+            zIndex: 2,
           }}
         />
         <button
@@ -96,6 +137,8 @@ export function ScoutSearchBox() {
             flexShrink: 0,
             transition: 'all 0.25s cubic-bezier(0.16, 1, 0.3, 1)',
             boxShadow: '0 0 0 0 rgba(188,0,0,0)',
+            position: 'relative',
+            zIndex: 2,
           }}
           onMouseEnter={(e) => {
             if (!loading) {
