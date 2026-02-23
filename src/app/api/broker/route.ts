@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { brokerHeadlines, brokerPulse, brokerBriefing, brokerTeasers } from '@/lib/dataBroker'
+import { fetchBears1Data } from '@/lib/bears1Data'
 
 export const dynamic = 'force-dynamic'
 
@@ -35,6 +36,11 @@ export async function GET(req: NextRequest) {
         const result = await brokerTeasers()
         clearTimeout(timeout)
         return NextResponse.json(result)
+      }
+      case 'bears1': {
+        const result = await fetchBears1Data()
+        clearTimeout(timeout)
+        return NextResponse.json({ data: result, source: 'broker', fetchedAt: new Date().toISOString() })
       }
       default:
         clearTimeout(timeout)

@@ -98,7 +98,7 @@ export default function Header() {
   }, [drawerOpen])
 
   // Don't render header on standalone landing pages
-  if (pathname?.startsWith('/home')) {
+  if (pathname?.startsWith('/home') || pathname === '/chicago-bears1') {
     return null
   }
 
