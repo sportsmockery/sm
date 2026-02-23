@@ -40,6 +40,16 @@ const FORMAT_NAMES: Record<string, string> = {
   podcast: 'Podcasts',
 };
 
+function getTeamLabel(value: number): string {
+  if (value === 0) return 'HIDDEN';
+  if (value <= 10) return `${value}% — Rare`;
+  if (value <= 25) return `${value}% — Less`;
+  if (value <= 40) return `${value}%`;
+  if (value <= 60) return `${value}%`;
+  if (value <= 80) return `${value}% — More`;
+  return `${value}% — Priority`;
+}
+
 export function FeedPersonalization({
   userId,
   initialTeamScores,
@@ -153,8 +163,13 @@ export function FeedPersonalization({
                   }
                   className="pref-slider"
                 />
-                <span className="pref-value" style={value === 0 ? { color: '#bc0000', fontWeight: 700 } : undefined}>
-                  {value === 0 ? 'HIDDEN' : `${value}%`}
+                <span className="pref-value" style={
+                  value === 0 ? { color: '#bc0000', fontWeight: 700 } :
+                  value < 25 ? { color: '#bc0000', fontWeight: 600 } :
+                  value > 75 ? { color: '#0a8f0a', fontWeight: 600 } :
+                  undefined
+                }>
+                  {getTeamLabel(value)}
                 </span>
               </div>
             ))}

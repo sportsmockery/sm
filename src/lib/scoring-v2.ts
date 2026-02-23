@@ -38,9 +38,9 @@ export const DEFAULT_ENGAGEMENT_PROFILE: UserEngagementProfile = {
     'white-sox': 30
   },
   format_prefs: {
-    'article': 0.33,
-    'video': 0.33,
-    'analysis': 0.34
+    'article': 50,
+    'video': 50,
+    'analysis': 50
   },
   author_reads: {},
   topic_views_today: {}
@@ -70,22 +70,29 @@ function calculateRecencyDecay(hoursOld: number): number {
 
 /**
  * Multi-team weighted affinity score
- * Returns 0-20 based on user's engagement with team
+ * Centered on 50 (default). Range: -30 to +30.
+ * Slider 100 = +30, Slider 50 = 0, Slider 1 = -29.4
+ * (Slider 0 is handled by filterBlockedTeams — hard removal)
  */
 function calculateTeamAffinity(post: Post, user: UserEngagementProfile | null): number {
   if (!user || !post.team_slug) return 0;
-  const teamEngagement = user.team_scores[post.team_slug] || 0;
-  return Math.round(teamEngagement * 0.2);
+  const teamEngagement = user.team_scores[post.team_slug];
+  if (teamEngagement === undefined) return 0;
+  // Center on 50: below 50 = penalty, above 50 = boost
+  return Math.round((teamEngagement - 50) * 0.6);
 }
 
 /**
  * Content format preference boost
- * Returns -10 to +20 based on user's format preferences
+ * Centered on 50 (default). Range: -15 to +15.
+ * Slider 100 = +15, Slider 50 = 0, Slider 0 = -15
  */
 function calculateContentTypeBoost(post: Post, user: UserEngagementProfile | null): number {
   if (!user) return 0;
-  const formatPref = user.format_prefs[post.content_type] || 0.33;
-  return Math.round((formatPref - 0.33) * 30);
+  const formatPref = user.format_prefs[post.content_type];
+  if (formatPref === undefined) return 0;
+  // Center on 50: below 50 = penalty, above 50 = boost
+  return Math.round((formatPref - 50) * 0.3);
 }
 
 /**
