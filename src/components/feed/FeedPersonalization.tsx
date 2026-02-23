@@ -83,7 +83,8 @@ export function FeedPersonalization({
         console.error('Failed to save preferences:', error);
       } else {
         setSaved(true);
-        setTimeout(() => setSaved(false), 2000);
+        // Reload to apply hard filters server-side
+        setTimeout(() => window.location.reload(), 800);
       }
     } catch (err) {
       console.error('Save error:', err);
@@ -134,10 +135,10 @@ export function FeedPersonalization({
           <div className="pref-section">
             <h4>Team Priority</h4>
             <p className="pref-desc">
-              Drag sliders to see more or less of each team
+              Set how much of each team you want to see. <strong>0% = completely hidden</strong> from your feed.
             </p>
             {Object.entries(teamScores).map(([team, value]) => (
-              <div className="pref-slider-row" key={team}>
+              <div className="pref-slider-row" key={team} style={value === 0 ? { opacity: 0.5 } : undefined}>
                 <label>{TEAM_NAMES[team] || team}</label>
                 <input
                   type="range"
@@ -152,7 +153,9 @@ export function FeedPersonalization({
                   }
                   className="pref-slider"
                 />
-                <span className="pref-value">{value}%</span>
+                <span className="pref-value" style={value === 0 ? { color: '#bc0000', fontWeight: 700 } : undefined}>
+                  {value === 0 ? 'HIDDEN' : `${value}%`}
+                </span>
               </div>
             ))}
           </div>

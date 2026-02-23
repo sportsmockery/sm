@@ -154,10 +154,45 @@ export function calculateAnonymousScore(post: Post): number {
 }
 
 /**
+ * Hard-filter posts by team preferences.
+ * If a user has explicitly set a team to 0%, those posts are removed entirely.
+ * Posts with no team_slug (general content) are always kept.
+ */
+export function filterBlockedTeams<T extends { team_slug?: string | null }>(
+  posts: T[],
+  user: UserEngagementProfile | null
+): T[] {
+  if (!user) return posts;
+
+  // Build set of blocked teams (score === 0)
+  const blocked = new Set<string>();
+  for (const [team, score] of Object.entries(user.team_scores)) {
+    if (score === 0) {
+      blocked.add(team);
+      // Handle whitesox/white-sox mismatch
+      if (team === 'white-sox') blocked.add('whitesox');
+      if (team === 'whitesox') blocked.add('white-sox');
+    }
+  }
+
+  if (blocked.size === 0) return posts;
+
+  return posts.filter(post => {
+    const slug = post.team_slug;
+    // Keep posts with no team (general content)
+    if (!slug) return true;
+    return !blocked.has(slug);
+  });
+}
+
+/**
  * Sort posts by score
  */
 export function sortPostsByScore(posts: Post[], context: ScoringContext): Post[] {
-  const scoredPosts = posts.map(post => ({
+  // Hard-filter: remove posts from teams the user set to 0%
+  const filtered = filterBlockedTeams(posts, context.user);
+
+  const scoredPosts = filtered.map(post => ({
     post,
     score: context.isLoggedIn
       ? calculatePostScore(post, context)

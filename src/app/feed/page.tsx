@@ -4,7 +4,7 @@ import { cookies } from 'next/headers'
 import { createServerClient } from '@supabase/ssr'
 import { HomepageFeed } from '@/components/homepage/HomepageFeed'
 import { FeedPersonalization } from '@/components/feed/FeedPersonalization'
-import { sortPostsByScore, type ScoringContext } from '@/lib/scoring-v2'
+import { sortPostsByScore, filterBlockedTeams, type ScoringContext } from '@/lib/scoring-v2'
 import { getHomepageDataWithFallbacks } from '@/lib/homepage-fallbacks'
 import { supabaseAdmin } from '@/lib/supabase-server'
 
@@ -175,11 +175,15 @@ async function getFeedData() {
 
   const rankedPosts = sortPostsByScore(interleaved as any, scoringContext)
 
-  // 7) Fallbacks
+  // 7) Hard-filter blocked teams from editor picks and trending too
+  const filteredEditorPicks = filterBlockedTeams(editorPicks || [], userProfile)
+  const filteredTrending = filterBlockedTeams(trendingPosts || [], userProfile)
+
+  // 8) Fallbacks
   const finalData = getHomepageDataWithFallbacks(
-    editorPicks || [],
+    filteredEditorPicks,
     rankedPosts,
-    trendingPosts || []
+    filteredTrending
   )
 
   // 8) Determine preferred team for UI highlighting
