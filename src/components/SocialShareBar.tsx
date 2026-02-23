@@ -49,7 +49,7 @@ export default function SocialShareBar({ url, title }: SocialShareBarProps) {
       key: 'x' as const,
       label: 'Share on X',
       href: `https://twitter.com/intent/tweet?url=${encodedUrl}&text=${encodedTitle}`,
-      brandColor: 'var(--sm-text)',
+      brandColor: '#000000',
       icon: (
         <svg width="18" height="18" fill="currentColor" viewBox="0 0 24 24">
           <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
@@ -116,7 +116,7 @@ export default function SocialShareBar({ url, title }: SocialShareBarProps) {
             borderRadius: '50%',
             backgroundColor: 'rgba(255,255,255,0.12)',
             color: 'rgba(255,255,255,0.85)',
-            border: 'none',
+            border: '2px solid #bc0000',
             outline: 'none',
             cursor: 'pointer',
             transition: 'transform 0.2s ease, color 0.2s ease, background-color 0.2s ease',
