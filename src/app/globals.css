@@ -356,7 +356,7 @@ html {
 }
 
 html, body, button, input, textarea, select {
-  font-family: var(--font-bebas-neue), 'Bebas Neue', Impact, sans-serif;
+  font-family: 'Space Grotesk', -apple-system, BlinkMacSystemFont, sans-serif;
 }
 
 body {

@@ -47,7 +47,7 @@ export function ScoutSearchBox() {
           background: isDark ? 'rgba(10,10,10,0.8)' : 'rgba(245,245,245,0.9)',
           backdropFilter: 'blur(20px)',
           border: `1px solid ${isDark ? 'rgba(188,0,0,0.3)' : 'rgba(188,0,0,0.15)'}`,
-          borderRadius: 0,
+          borderRadius: 16,
           boxShadow: isDark ? '0 0 30px rgba(188,0,0,0.1)' : '0 4px 20px rgba(0,0,0,0.08)',
         }}
       >
@@ -56,7 +56,7 @@ export function ScoutSearchBox() {
           alt="Scout"
           width={24}
           height={24}
-          style={{ borderRadius: '50%', flexShrink: 0 }}
+          style={{ borderRadius: '50%', flexShrink: 0, filter: 'drop-shadow(0 0 6px rgba(188,0,0,0.5)) drop-shadow(0 0 14px rgba(188,0,0,0.25))' }}
         />
         <input
           ref={inputRef}
@@ -79,8 +79,9 @@ export function ScoutSearchBox() {
         <button
           onClick={handleSearch}
           disabled={loading}
+          className="scout-search-btn"
           style={{
-            padding: '8px 20px',
+            padding: '9px 22px',
             fontSize: 11,
             fontWeight: 700,
             letterSpacing: '0.1em',
@@ -88,13 +89,34 @@ export function ScoutSearchBox() {
             backgroundColor: '#bc0000',
             color: '#ffffff',
             border: 'none',
+            borderRadius: 20,
             cursor: loading ? 'not-allowed' : 'pointer',
             opacity: loading ? 0.5 : 1,
             fontFamily: 'inherit',
             flexShrink: 0,
+            transition: 'all 0.25s cubic-bezier(0.16, 1, 0.3, 1)',
+            boxShadow: '0 0 0 0 rgba(188,0,0,0)',
+          }}
+          onMouseEnter={(e) => {
+            if (!loading) {
+              e.currentTarget.style.backgroundColor = '#e00000'
+              e.currentTarget.style.transform = 'scale(1.06)'
+              e.currentTarget.style.boxShadow = '0 0 16px rgba(188,0,0,0.4)'
+            }
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.backgroundColor = '#bc0000'
+            e.currentTarget.style.transform = 'scale(1)'
+            e.currentTarget.style.boxShadow = '0 0 0 0 rgba(188,0,0,0)'
+          }}
+          onMouseDown={(e) => {
+            if (!loading) e.currentTarget.style.transform = 'scale(0.95)'
+          }}
+          onMouseUp={(e) => {
+            if (!loading) e.currentTarget.style.transform = 'scale(1.06)'
           }}
         >
-          {loading ? '...' : 'SEARCH'}
+          {loading ? '...' : 'ASK SCOUT'}
         </button>
       </div>
 
@@ -106,6 +128,7 @@ export function ScoutSearchBox() {
             padding: 20,
             background: isDark ? 'rgba(10,10,10,0.6)' : 'rgba(245,245,245,0.8)',
             border: `1px solid ${isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.06)'}`,
+            borderRadius: 16,
             fontSize: 14,
             lineHeight: 1.6,
             color: isDark ? '#ddd' : '#333',
