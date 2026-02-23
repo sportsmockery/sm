@@ -1,7 +1,7 @@
 import { Metadata } from 'next'
 import { TeamHubLayout } from '@/components/team'
 import { CHICAGO_TEAMS, fetchTeamRecord, fetchNextGame } from '@/lib/team-config'
-import { getBullsRosterGrouped, type BullsPlayer, type PositionGroup, POSITION_GROUP_NAMES } from '@/lib/bullsData'
+import { getDepthChart } from '@/lib/depthChartData'
 import DepthChartClient from './DepthChartClient'
 import { HubUpdatesFeed } from '@/components/hub'
 
@@ -22,46 +22,43 @@ export const metadata: Metadata = {
 
 export const revalidate = 3600
 
-const POSITION_ORDER: PositionGroup[] = ['guards', 'forwards', 'centers']
-
 export default async function BullsDepthChartPage() {
   const team = CHICAGO_TEAMS.bulls
 
-  const [record, nextGame, roster] = await Promise.all([
+  const [record, nextGame, depthChart] = await Promise.all([
     fetchTeamRecord('bulls'),
     fetchNextGame('bulls'),
-    getBullsRosterGrouped(),
+    getDepthChart('bulls'),
   ])
 
-  // Build serializable data for client component
-  const positionGroups = POSITION_ORDER.map((group) => ({
-    key: group,
-    name: POSITION_GROUP_NAMES[group],
-    players: (roster[group] || []).map((p) => ({
-      playerId: p.playerId,
-      slug: p.slug,
-      fullName: p.fullName,
-      position: p.position,
-      jerseyNumber: p.jerseyNumber,
-      headshotUrl: p.headshotUrl,
-      height: p.height,
-      weight: p.weight,
-      age: p.age,
-      experience: p.experience,
-      college: p.college,
+  const positionGroups = depthChart.map((group) => ({
+    key: group.key,
+    name: group.name,
+    positions: group.positions.map((pos) => ({
+      position: pos.position,
+      players: pos.players.map((p) => ({
+        playerId: p.espnId || String(p.id),
+        slug: p.slug,
+        fullName: p.playerName,
+        position: p.position,
+        jerseyNumber: p.jerseyNumber,
+        headshotUrl: p.headshotUrl,
+        height: p.height,
+        weight: p.weight,
+        age: p.age,
+        experience: p.experience,
+        college: p.college,
+        depthOrder: p.depthOrder,
+        isStarter: p.isStarter,
+        injuryStatus: p.injuryStatus,
+        injuryDetail: p.injuryDetail,
+      })),
     })),
-  })).filter((g) => g.players.length > 0)
+  }))
 
-  const allPlayers = positionGroups.reduce((acc, g) => acc + g.players.length, 0)
-  const guardsCount = positionGroups
-    .filter((g) => g.key === 'guards')
-    .reduce((acc, g) => acc + g.players.length, 0)
-  const forwardsCount = positionGroups
-    .filter((g) => g.key === 'forwards')
-    .reduce((acc, g) => acc + g.players.length, 0)
-  const centersCount = positionGroups
-    .filter((g) => g.key === 'centers')
-    .reduce((acc, g) => acc + g.players.length, 0)
+  const allPlayers = positionGroups.reduce((acc, g) => acc + g.positions.reduce((a, p) => a + p.players.length, 0), 0)
+  const starterCount = positionGroups.reduce((acc, g) => acc + g.positions.reduce((a, p) => a + p.players.filter((pl) => pl.isStarter).length, 0), 0)
+  const injuredCount = positionGroups.reduce((acc, g) => acc + g.positions.reduce((a, p) => a + p.players.filter((pl) => pl.injuryStatus).length, 0), 0)
 
   return (
     <TeamHubLayout team={team} record={record} nextGame={nextGame} activeTab="depth-chart">
@@ -71,9 +68,11 @@ export default async function BullsDepthChartPage() {
       <DepthChartClient
         positionGroups={positionGroups}
         totalPlayers={allPlayers}
-        guardsCount={guardsCount}
-        forwardsCount={forwardsCount}
-        centersCount={centersCount}
+        starterCount={starterCount}
+        injuredCount={injuredCount}
+        teamSlug="chicago-bulls"
+        teamColor="#CE1141"
+        starterBgAlpha="rgba(206,17,65,0.03)"
       />
     </TeamHubLayout>
   )

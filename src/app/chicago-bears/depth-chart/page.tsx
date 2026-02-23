@@ -1,7 +1,8 @@
 import { Metadata } from 'next'
 import { TeamHubLayout } from '@/components/team'
 import { CHICAGO_TEAMS, fetchNextGame } from '@/lib/team-config'
-import { getBearsSeparatedRecord, getBearsRosterGrouped, type BearsPlayer, type PositionGroup } from '@/lib/bearsData'
+import { getBearsSeparatedRecord } from '@/lib/bearsData'
+import { getDepthChart } from '@/lib/depthChartData'
 import DepthChartClient from './DepthChartClient'
 import { HubUpdatesFeed } from '@/components/hub'
 
@@ -22,28 +23,13 @@ export const metadata: Metadata = {
 
 export const revalidate = 3600
 
-const POSITION_ORDER: PositionGroup[] = ['QB', 'RB', 'WR', 'TE', 'OL', 'DL', 'LB', 'CB', 'S', 'ST']
-
-const POSITION_GROUP_NAMES: Record<PositionGroup, string> = {
-  QB: 'Quarterbacks',
-  RB: 'Running Backs',
-  WR: 'Wide Receivers',
-  TE: 'Tight Ends',
-  OL: 'Offensive Line',
-  DL: 'Defensive Line',
-  LB: 'Linebackers',
-  CB: 'Cornerbacks',
-  S: 'Safeties',
-  ST: 'Special Teams',
-}
-
 export default async function BearsDepthChartPage() {
   const team = CHICAGO_TEAMS.bears
 
-  const [separatedRecord, nextGame, roster] = await Promise.all([
+  const [separatedRecord, nextGame, depthChart] = await Promise.all([
     getBearsSeparatedRecord(2025),
     fetchNextGame('bears'),
-    getBearsRosterGrouped(),
+    getDepthChart('bears'),
   ])
 
   const record = {
@@ -57,33 +43,35 @@ export default async function BearsDepthChartPage() {
     divisionRank: separatedRecord.divisionRank || undefined,
   }
 
-  // Build serializable data for client component
-  const positionGroups = POSITION_ORDER.map((group) => ({
-    key: group,
-    name: POSITION_GROUP_NAMES[group],
-    players: (roster[group] || []).map((p) => ({
-      playerId: p.playerId,
-      slug: p.slug,
-      fullName: p.fullName,
-      position: p.position,
-      jerseyNumber: p.jerseyNumber,
-      headshotUrl: p.headshotUrl,
-      height: p.height,
-      weight: p.weight,
-      age: p.age,
-      experience: p.experience,
-      college: p.college,
-      primaryRole: p.primaryRole,
+  // Build serializable position groups from depth chart
+  const positionGroups = depthChart.map((group) => ({
+    key: group.key,
+    name: group.name,
+    positions: group.positions.map((pos) => ({
+      position: pos.position,
+      players: pos.players.map((p) => ({
+        playerId: p.espnId || String(p.id),
+        slug: p.slug,
+        fullName: p.playerName,
+        position: p.position,
+        jerseyNumber: p.jerseyNumber,
+        headshotUrl: p.headshotUrl,
+        height: p.height,
+        weight: p.weight,
+        age: p.age,
+        experience: p.experience,
+        college: p.college,
+        depthOrder: p.depthOrder,
+        isStarter: p.isStarter,
+        injuryStatus: p.injuryStatus,
+        injuryDetail: p.injuryDetail,
+      })),
     })),
-  })).filter((g) => g.players.length > 0)
+  }))
 
-  const allPlayers = positionGroups.reduce((acc, g) => acc + g.players.length, 0)
-  const offenseCount = positionGroups
-    .filter((g) => ['QB', 'RB', 'WR', 'TE', 'OL'].includes(g.key))
-    .reduce((acc, g) => acc + g.players.length, 0)
-  const defenseCount = positionGroups
-    .filter((g) => ['DL', 'LB', 'CB', 'S'].includes(g.key))
-    .reduce((acc, g) => acc + g.players.length, 0)
+  const allPlayers = positionGroups.reduce((acc, g) => acc + g.positions.reduce((a, p) => a + p.players.length, 0), 0)
+  const starterCount = positionGroups.reduce((acc, g) => acc + g.positions.reduce((a, p) => a + p.players.filter((pl) => pl.isStarter).length, 0), 0)
+  const injuredCount = positionGroups.reduce((acc, g) => acc + g.positions.reduce((a, p) => a + p.players.filter((pl) => pl.injuryStatus).length, 0), 0)
 
   return (
     <TeamHubLayout team={team} record={record} nextGame={nextGame} activeTab="depth-chart">
@@ -93,8 +81,11 @@ export default async function BearsDepthChartPage() {
       <DepthChartClient
         positionGroups={positionGroups}
         totalPlayers={allPlayers}
-        offenseCount={offenseCount}
-        defenseCount={defenseCount}
+        starterCount={starterCount}
+        injuredCount={injuredCount}
+        teamSlug="chicago-bears"
+        teamColor="#C83200"
+        starterBgAlpha="rgba(200,50,0,0.03)"
       />
     </TeamHubLayout>
   )
