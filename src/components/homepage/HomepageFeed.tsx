@@ -1,7 +1,7 @@
 // src/components/homepage/HomepageFeed.tsx
 'use client';
 
-import { useState, useEffect, useRef, useCallback } from 'react';
+import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 
@@ -10,7 +10,7 @@ import { EditorPicksHero } from './EditorPicksHero';
 import { TeamFilterTabs } from './TeamFilterTabs';
 import { ForYouFeed } from './ForYouFeed';
 import { HomepageSidebar } from './HomepageSidebar';
-import { InlineSearch } from '@/components/search/InlineSearch';
+import { ScoutSearchBox } from './ScoutSearchBox';
 
 const TEAM_LABELS: Record<string, string> = {
   bears: 'Bears',
@@ -64,6 +64,154 @@ function ScrollProgress() {
   }, []);
 
   return <div ref={ref} className="scroll-progress" />;
+}
+
+/* ── Interactive Glow Orbs ── */
+function GlowOrbs({ posts }: { posts: any[] }) {
+  const [activeOrb, setActiveOrb] = useState<number | null>(null);
+  const [postIndex, setPostIndex] = useState(0);
+  const cardRef = useRef<HTMLDivElement>(null);
+
+  // Sort posts: highest engagement_score first, then by published_at (latest first)
+  const sortedPosts = useMemo(() => {
+    if (!posts.length) return [];
+    const hasScore = posts.filter((p: any) => p.engagement_score != null && p.engagement_score > 0);
+    const noScore = posts.filter((p: any) => !p.engagement_score || p.engagement_score <= 0);
+    // Sort scored posts by score desc, then remaining by published_at desc
+    hasScore.sort((a: any, b: any) => (b.engagement_score || 0) - (a.engagement_score || 0));
+    noScore.sort((a: any, b: any) => new Date(b.published_at).getTime() - new Date(a.published_at).getTime());
+    return [...hasScore, ...noScore];
+  }, [posts]);
+
+  // Close on click outside
+  useEffect(() => {
+    if (activeOrb === null) return;
+    const handleClick = (e: MouseEvent) => {
+      if (cardRef.current && !cardRef.current.contains(e.target as Node)) {
+        setActiveOrb(null);
+      }
+    };
+    document.addEventListener('mousedown', handleClick);
+    return () => document.removeEventListener('mousedown', handleClick);
+  }, [activeOrb]);
+
+  const handleOrbClick = (orbIndex: number) => {
+    if (activeOrb === orbIndex) {
+      // Same orb clicked again — show next post
+      setPostIndex((prev) => (prev + 1) % Math.max(1, sortedPosts.length));
+    } else {
+      // Different orb — if first ever click use index 0, otherwise advance
+      if (activeOrb !== null) {
+        setPostIndex((prev) => (prev + 1) % Math.max(1, sortedPosts.length));
+      }
+      setActiveOrb(orbIndex);
+    }
+  };
+
+  const post = sortedPosts[postIndex];
+  const postUrl = post
+    ? post.category_slug
+      ? `/${post.category_slug}/${post.slug}`
+      : `/${post.slug}`
+    : '#';
+
+  return (
+    <>
+      <div
+        className="glow-orb glow-red-1"
+        onClick={() => handleOrbClick(0)}
+        style={{ pointerEvents: 'auto', cursor: 'pointer' }}
+      />
+      <div
+        className="glow-orb glow-red-2"
+        onClick={() => handleOrbClick(1)}
+        style={{ pointerEvents: 'auto', cursor: 'pointer' }}
+      />
+
+      {activeOrb !== null && post && (
+        <div
+          ref={cardRef}
+          style={{
+            position: 'absolute',
+            top: activeOrb === 0 ? '40px' : 'auto',
+            bottom: activeOrb === 1 ? '40px' : 'auto',
+            right: activeOrb === 0 ? '20px' : 'auto',
+            left: activeOrb === 1 ? '20px' : 'auto',
+            zIndex: 20,
+            maxWidth: 320,
+            width: '90%',
+            animation: 'orbCardReveal 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards',
+          }}
+        >
+          <Link href={postUrl} style={{ textDecoration: 'none', color: 'inherit' }}>
+            <div
+              style={{
+                background: 'rgba(10,10,10,0.92)',
+                backdropFilter: 'blur(20px)',
+                border: '1px solid rgba(188,0,0,0.25)',
+                borderRadius: 8,
+                overflow: 'hidden',
+                boxShadow: '0 8px 32px rgba(0,0,0,0.5), 0 0 40px rgba(188,0,0,0.1)',
+              }}
+            >
+              {post.featured_image && (
+                <div style={{ position: 'relative', width: '100%', height: 140, overflow: 'hidden' }}>
+                  <Image
+                    src={post.featured_image}
+                    alt={post.title}
+                    fill
+                    style={{ objectFit: 'cover' }}
+                    sizes="320px"
+                  />
+                  <div style={{
+                    position: 'absolute',
+                    bottom: 0,
+                    left: 0,
+                    right: 0,
+                    height: 40,
+                    background: 'linear-gradient(transparent, rgba(10,10,10,0.92))',
+                  }} />
+                </div>
+              )}
+              <div style={{ padding: '12px 16px 14px' }}>
+                <div style={{
+                  fontSize: 9,
+                  fontWeight: 700,
+                  letterSpacing: '0.1em',
+                  textTransform: 'uppercase' as const,
+                  color: '#bc0000',
+                  marginBottom: 6,
+                }}>
+                  Suggested for you
+                </div>
+                <div style={{
+                  fontSize: 14,
+                  fontWeight: 600,
+                  lineHeight: 1.35,
+                  color: '#fff',
+                  display: '-webkit-box',
+                  WebkitLineClamp: 2,
+                  WebkitBoxOrient: 'vertical' as const,
+                  overflow: 'hidden',
+                }}>
+                  {post.title}
+                </div>
+                {post.category?.name && (
+                  <div style={{
+                    fontSize: 11,
+                    color: 'rgba(255,255,255,0.4)',
+                    marginTop: 6,
+                  }}>
+                    {post.category.name}
+                  </div>
+                )}
+              </div>
+            </div>
+          </Link>
+        </div>
+      )}
+    </>
+  );
 }
 
 /* ── Hero Particle Canvas ── */
@@ -344,8 +492,7 @@ export function HomepageFeed({
         {/* Ambient layers */}
         <div className="hero-bg-mesh" />
         <div className="sm-grid-overlay" />
-        <div className="glow-orb glow-red-1" />
-        <div className="glow-orb glow-red-2" />
+        <GlowOrbs posts={safePosts} />
         <HeroParticles />
 
         <div className="sm-container hero-content">
@@ -373,7 +520,7 @@ export function HomepageFeed({
           </div>
 
           <div className="animate-entrance entrance-delay-5">
-            <InlineSearch />
+            <ScoutSearchBox />
           </div>
         </div>
       </section>
