@@ -3,7 +3,7 @@ import { Metadata } from 'next'
 import Link from 'next/link'
 import { supabaseAdmin } from '@/lib/supabase-server'
 import { format } from 'date-fns'
-import { calculateReadTime } from '@/lib/content-utils'
+import { calculateReadTime, sanitizeWordPressContent } from '@/lib/content-utils'
 
 interface ArticlePageProps {
   params: Promise<{ slug: string }>
@@ -135,7 +135,7 @@ export default async function HomeArticlePage({ params }: ArticlePageProps) {
         {/* Content */}
         <div
           className="hm-article-content"
-          dangerouslySetInnerHTML={{ __html: post.content || '' }}
+          dangerouslySetInnerHTML={{ __html: sanitizeWordPressContent(post.content || '') }}
         />
 
         {/* Author Bio */}
