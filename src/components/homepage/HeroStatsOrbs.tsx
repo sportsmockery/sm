@@ -169,28 +169,7 @@ function FloatingDots() {
   )
 }
 
-function OrbitalStatOrb({ stat, index }: { stat: HeroStat; index: number }) {
-  const teamColor = stat.team ? TEAM_COLORS[stat.team] : undefined
-  const displayValue = useCountUp(stat.value, 1000, index * 200)
-
-  return (
-    <div
-      className="hero-stat-orb hero-stat-orb-orbital"
-      style={{
-        ...(teamColor ? { '--orb-accent': teamColor } as React.CSSProperties : {}),
-      }}
-    >
-      <span className="hero-stat-orb-value" style={{ fontSize: 11 }}>
-        {displayValue}
-      </span>
-      <span className="hero-stat-orb-label" style={{ fontSize: 7 }}>
-        {stat.label}
-      </span>
-    </div>
-  )
-}
-
-export function HeroStatsOrbs({ isLoggedIn = false }: { isLoggedIn?: boolean }) {
+export function HeroStatsOrbs() {
   const [stats, setStats] = useState<HeroStat[]>(FALLBACK_STATS)
   const [cycleSet, setCycleSet] = useState(0)
   const allStats = useRef<HeroStat[]>(FALLBACK_STATS)
@@ -239,27 +218,12 @@ export function HeroStatsOrbs({ isLoggedIn = false }: { isLoggedIn?: boolean }) 
     return displayStats.slice(0, 14)
   }, [displayStats, isMobile])
 
-  // For logged-in orbital mode, pick first 4 medium/large stats
-  const orbitalStats = useMemo(() => {
-    return allStats.current
-      .filter(s => s.size === 'large' || s.size === 'medium')
-      .slice(0, 4)
-  }, [cycleSet]) // eslint-disable-line react-hooks/exhaustive-deps
-
   return (
     <div className="hero-stats-orbs" aria-hidden="true">
       <FloatingDots />
-      {isLoggedIn ? (
-        <div className="hero-orbs-orbital-ring">
-          {orbitalStats.map((stat, i) => (
-            <OrbitalStatOrb key={`orbital-${stat.label}-${i}`} stat={stat} index={i} />
-          ))}
-        </div>
-      ) : (
-        visibleStats.map((stat, i) => (
-          <StatOrb key={`${stat.label}-${stat.value}-${i}`} stat={stat} index={i} />
-        ))
-      )}
+      {visibleStats.map((stat, i) => (
+        <StatOrb key={`${stat.label}-${stat.value}-${i}`} stat={stat} index={i} />
+      ))}
     </div>
   )
 }
