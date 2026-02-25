@@ -109,11 +109,7 @@ export default function HeroCard({
               <span>·</span>
               <a
                 href="#comments-section"
-                style={{ color: 'var(--sm-text-dim)', textDecoration: 'none', transition: 'color 0.2s' }}
-                onClick={(e) => {
-                  e.preventDefault()
-                  document.getElementById('comments-section')?.scrollIntoView({ behavior: 'smooth' })
-                }}
+                style={{ color: 'var(--sm-text-dim)', textDecoration: 'none', transition: 'color 0.2s', scrollBehavior: 'smooth' }}
               >
                 <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4 }}>
                   <svg width="14" height="14" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
