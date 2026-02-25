@@ -4128,3 +4128,225 @@ html .storyline-card {
     align-self: flex-end;
   }
 }
+
+/* ═══════════════════════════════════════════════
+   SECTION 2: Storyline-First Main Feed
+   ═══════════════════════════════════════════════ */
+
+.storyline-feed {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+/* --- Storyline Block --- */
+.storyline-block {
+  padding: 32px 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  opacity: 0;
+  transform: translateY(20px);
+  transition: opacity 0.5s cubic-bezier(0.16, 1, 0.3, 1),
+              transform 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.storyline-block--visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.storyline-block:last-child {
+  border-bottom: none;
+}
+
+/* Header */
+.storyline-block-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 20px;
+  padding: 0 4px;
+}
+
+.storyline-block-title-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.storyline-block-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: #bc0000;
+  flex-shrink: 0;
+}
+
+/* Team-specific dot colors */
+.storyline-dot--bears      { background: #c83200; }
+.storyline-dot--bulls      { background: #ce1141; }
+.storyline-dot--blackhawks { background: #cf0a2c; }
+.storyline-dot--cubs       { background: #0e3386; }
+.storyline-dot--white-sox  { background: #27251f; box-shadow: 0 0 0 1px rgba(255,255,255,0.15); }
+
+.storyline-block-title {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 18px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  color: #fff;
+  margin: 0;
+}
+
+.storyline-block-count {
+  font-size: 12px;
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.35);
+  padding: 2px 10px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 20px;
+}
+
+.storyline-block-viewall {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 12px;
+  font-weight: 600;
+  color: #bc0000;
+  text-decoration: none;
+  letter-spacing: 0.02em;
+  padding: 6px 14px;
+  border: 1px solid rgba(188, 0, 0, 0.2);
+  border-radius: 8px;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.storyline-block-viewall:hover {
+  background: rgba(188, 0, 0, 0.1);
+  border-color: rgba(188, 0, 0, 0.4);
+}
+
+/* Horizontal card row */
+.storyline-block-row-wrapper {
+  position: relative;
+}
+
+.storyline-block-row {
+  display: flex;
+  gap: 20px;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  scroll-behavior: smooth;
+  padding: 4px 2px 12px;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.storyline-block-row::-webkit-scrollbar {
+  display: none;
+}
+
+/* Card slot sizing */
+.storyline-card-slot {
+  flex: 0 0 280px;
+  scroll-snap-align: start;
+  min-width: 0;
+}
+
+/* First card in each block gets extra width */
+.storyline-card-slot:first-child {
+  flex: 0 0 340px;
+}
+
+/* Override card styles within storyline blocks */
+.storyline-card-slot .glass-card.feed-card {
+  height: 100%;
+}
+
+/* Scroll buttons */
+.storyline-scroll-btn {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 5;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(0, 0, 0, 0.7);
+  backdrop-filter: blur(12px);
+  color: rgba(255, 255, 255, 0.8);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+  opacity: 0;
+}
+
+.storyline-block-row-wrapper:hover .storyline-scroll-btn {
+  opacity: 1;
+}
+
+.storyline-scroll-btn:hover {
+  background: rgba(188, 0, 0, 0.3);
+  border-color: rgba(188, 0, 0, 0.4);
+  color: #fff;
+}
+
+.storyline-scroll-btn--left {
+  left: -12px;
+}
+
+.storyline-scroll-btn--right {
+  right: -12px;
+}
+
+/* Misc block (non-Chicago) */
+.storyline-block--misc .storyline-block-dot {
+  background: rgba(255, 255, 255, 0.3);
+}
+
+/* --- Mobile Responsive --- */
+@media (max-width: 768px) {
+  .storyline-block {
+    padding: 24px 0;
+  }
+
+  .storyline-block-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+    margin-bottom: 14px;
+  }
+
+  .storyline-block-title {
+    font-size: 15px;
+  }
+
+  .storyline-card-slot {
+    flex: 0 0 240px;
+  }
+
+  .storyline-card-slot:first-child {
+    flex: 0 0 280px;
+  }
+
+  .storyline-scroll-btn {
+    display: none;
+  }
+
+  .storyline-block-row {
+    gap: 14px;
+    padding: 2px 0 8px;
+  }
+}
+
+@media (max-width: 480px) {
+  .storyline-card-slot {
+    flex: 0 0 220px;
+  }
+
+  .storyline-card-slot:first-child {
+    flex: 0 0 260px;
+  }
+}
