@@ -68,6 +68,40 @@ function ScrollProgress() {
   return <div ref={ref} className="scroll-progress" />;
 }
 
+/* ── Scout First-Visit Tip (single instance) ── */
+function ScoutFirstTip() {
+  const [visible, setVisible] = useState(false);
+
+  useEffect(() => {
+    try {
+      if (!localStorage.getItem('sm-scout-hint-seen')) {
+        setVisible(true);
+      }
+    } catch {}
+  }, []);
+
+  const dismiss = useCallback(() => {
+    setVisible(false);
+    try { localStorage.setItem('sm-scout-hint-seen', '1'); } catch {}
+  }, []);
+
+  if (!visible) return null;
+
+  return (
+    <div className="scout-first-tip" onClick={dismiss}>
+      <Image src="/downloads/scout-v2.png" alt="" width={20} height={20} unoptimized style={{ borderRadius: '50%', flexShrink: 0 }} />
+      <span>Press &amp; hold any card for a quick Scout AI recap</span>
+      <button
+        onClick={(e) => { e.stopPropagation(); dismiss(); }}
+        style={{ background: 'none', border: 'none', color: 'rgba(255,255,255,0.5)', cursor: 'pointer', padding: 0, fontSize: 16, lineHeight: 1, flexShrink: 0 }}
+        aria-label="Dismiss tip"
+      >
+        &times;
+      </button>
+    </div>
+  );
+}
+
 /* ── Interactive Glow Orbs ── */
 function GlowOrbs({ posts }: { posts: any[] }) {
   const [activeOrb, setActiveOrb] = useState<number | null>(null);
@@ -807,6 +841,9 @@ export function HomepageFeed({
 
       {/* Back to Top */}
       <BackToTop />
+
+      {/* Scout first-visit tip — single instance for whole page */}
+      <ScoutFirstTip />
     </div>
   );
 }
