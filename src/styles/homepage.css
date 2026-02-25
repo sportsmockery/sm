@@ -489,7 +489,7 @@
   font-weight: 400;
   color: var(--sm-text-muted);
   max-width: 550px;
-  margin: 20px auto 0;
+  margin: 20px auto 32px;
   text-align: center;
   line-height: 1.6;
 }
@@ -499,7 +499,7 @@
   display: flex;
   justify-content: center;
   gap: 28px;
-  margin-top: 40px;
+  margin-top: 0;
   flex-wrap: wrap;
 }
 
@@ -1667,6 +1667,19 @@
   .hero-subtitle {
     font-size: 1rem;
     max-width: 90%;
+    margin-bottom: 24px !important;
+  }
+
+  .your-chicago-bar {
+    margin-bottom: 24px !important;
+  }
+
+  .scout-since-cta {
+    margin-bottom: 24px !important;
+  }
+
+  .catchup-timeline {
+    margin-bottom: 24px !important;
   }
 
   .team-logo-row {
@@ -4053,8 +4066,8 @@ html .storyline-card {
   justify-content: space-between;
   width: 100%;
   max-width: 740px;
-  height: 48px;
-  margin: 20px auto 0;
+  height: 48px !important;
+  margin: 0 auto 24px !important;
   padding: 0 24px;
   background: rgba(0, 0, 0, 0.3);
   backdrop-filter: blur(12px);
@@ -4213,7 +4226,8 @@ html .storyline-card {
   .your-chicago-bar {
     max-width: 100%;
     padding: 0 16px;
-    height: 44px;
+    height: 44px !important;
+    margin-bottom: 24px !important;
   }
 
   .your-chicago-title {
@@ -4251,10 +4265,13 @@ html .storyline-card {
   display: flex;
   align-items: center;
   justify-content: center;
-  margin: 10px auto 0;
-  padding: 6px 0;
+  height: 44px !important;
+  min-height: 44px;
+  margin: 0 auto 32px !important;
+  padding: 12px 24px !important;
+  gap: 8px;
   font-family: 'Space Grotesk', var(--font-space-grotesk), sans-serif;
-  font-size: 14px;
+  font-size: 16px;
   font-weight: 500;
   color: rgba(255, 255, 255, 0.65);
   background: none;
@@ -4428,13 +4445,14 @@ html .storyline-card {
 
   .scout-since-cta {
     font-size: 13px;
+    margin-bottom: 24px !important;
   }
 }
 
 .catchup-timeline {
   width: 100%;
   max-width: 740px;
-  margin: 24px auto 8px;
+  margin: 0 auto 24px !important;
   padding: 16px 20px 12px;
   background: rgba(0, 0, 0, 0.55);
   backdrop-filter: blur(24px);
@@ -4638,7 +4656,7 @@ html .storyline-card {
 /* Mobile */
 @media (max-width: 768px) {
   .catchup-timeline {
-    margin: 16px auto 4px;
+    margin: 0 auto 24px !important;
     padding: 12px 14px 8px;
     border-radius: 12px;
   }
