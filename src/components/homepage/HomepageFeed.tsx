@@ -15,6 +15,7 @@ import { ScoutSearchBox } from './ScoutSearchBox';
 import { CatchUpTimeline } from './CatchUpTimeline';
 import { ScoutSinceLastVisit } from './ScoutSinceLastVisit';
 import { HeroStatsOrbs } from './HeroStatsOrbs';
+import { FeedPersonalization } from '@/components/feed/FeedPersonalization';
 import { sortPostsByScore, DEFAULT_ENGAGEMENT_PROFILE } from '@/lib/scoring-v2';
 import type { UserEngagementProfile } from '@/lib/scoring-v2';
 
@@ -496,6 +497,7 @@ export function HomepageFeed({
   // Visit streak state for "Your Chicago" bar
   const [visitStreak, setVisitStreak] = useState<number>(0);
   const [displayName, setDisplayName] = useState<string>('Fan');
+  const [feedPanelOpen, setFeedPanelOpen] = useState(false);
 
   // Engagement profile for feed personalization
   const [engagementProfile, setEngagementProfile] = useState<UserEngagementProfile | null>(null);
@@ -827,15 +829,30 @@ export function HomepageFeed({
             Breaking news, real-time scores, and AI-powered analysis — all five Chicago teams, one platform.
           </p>
 
-          {/* Your Chicago Bar (logged-in only) — links to feed personalization */}
+          {/* Your Chicago Bar (logged-in only) — toggles feed customization panel */}
           {actuallyLoggedIn && visitStreak > 0 && (
-            <Link href="/feed" className="your-chicago-bar animate-entrance entrance-delay-3b">
-              <span className="your-chicago-left">
-                <span className="your-chicago-title">Your Chicago</span>
-                <span className="your-chicago-name">, {formatDisplayName(displayName)}</span>
-              </span>
-              <span className="your-chicago-streak">Day {visitStreak}</span>
-            </Link>
+            <>
+              <button
+                type="button"
+                className="your-chicago-bar animate-entrance entrance-delay-3b"
+                onClick={() => setFeedPanelOpen(prev => !prev)}
+              >
+                <span className="your-chicago-left">
+                  <span className="your-chicago-title">Your Chicago</span>
+                  <span className="your-chicago-name">, {formatDisplayName(displayName)}</span>
+                </span>
+                <span className="your-chicago-streak">Day {visitStreak}</span>
+              </button>
+              {feedPanelOpen && user?.id && (
+                <div className="your-chicago-panel animate-entrance" style={{ width: '100%', maxWidth: 740, margin: '8px auto 0' }}>
+                  <FeedPersonalization
+                    userId={user.id}
+                    defaultOpen
+                    hideToggle
+                  />
+                </div>
+              )}
+            </>
           )}
 
           {/* Scout "since last visit" CTA (logged-in only) */}

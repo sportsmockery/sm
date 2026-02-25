@@ -45,20 +45,23 @@ const FONT_SIZE: Record<string, number> = { large: 18, medium: 13, small: 10 }
 const LABEL_SIZE: Record<string, number> = { large: 9, medium: 7, small: 6 }
 
 const FALLBACK_STATS: HeroStat[] = [
-  { label: 'CHI Wins', value: '207', size: 'large' },
-  { label: 'Views', value: '30K', size: 'large' },
-  { label: 'Cap', value: '$12M', size: 'large' },
-  { label: 'Bears', value: '11-6', team: 'bears', size: 'medium' },
+  // Large (3)
+  { label: 'Bears Cap', value: '$69M', team: 'bears', size: 'large' },
+  { label: 'CHI Wins', value: '87', size: 'large' },
+  { label: 'Bears', value: '11-6', team: 'bears', size: 'large' },
+  // Medium (6)
   { label: 'Bulls', value: '23-22', team: 'bulls', size: 'medium' },
-  { label: 'Hawks', value: '21-22', team: 'blackhawks', size: 'medium' },
-  { label: 'Cubs', value: '92-70', team: 'cubs', size: 'medium' },
-  { label: 'Sox', value: '60-102', team: 'whitesox', size: 'medium' },
-  { label: 'Articles', value: '42', size: 'medium' },
+  { label: 'Hawks', value: '21-22-7', team: 'blackhawks', size: 'medium' },
+  { label: 'Cubs ST', value: '4-2', team: 'cubs', size: 'medium' },
+  { label: 'Sox ST', value: '2-4', team: 'whitesox', size: 'medium' },
+  { label: 'Bedard', value: '$950K', team: 'blackhawks', size: 'medium' },
+  { label: 'Posts/wk', value: '47', size: 'medium' },
+  // Small (5)
   { label: 'Teams', value: '5', size: 'small' },
-  { label: 'Posts', value: '500+', size: 'small' },
-  { label: 'Sports', value: '4', size: 'small' },
-  { label: 'City', value: 'CHI', size: 'small' },
-  { label: 'Live', value: '24/7', size: 'small' },
+  { label: 'Live', value: '0', size: 'small' },
+  { label: 'PVs', value: '30M', size: 'small' },
+  { label: 'Avg Comments', value: '89', size: 'small' },
+  { label: 'Next Game', value: '14h', size: 'small' },
 ]
 
 // Simple count-up for numeric values

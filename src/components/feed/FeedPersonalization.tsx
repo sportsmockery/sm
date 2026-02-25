@@ -8,6 +8,8 @@ interface FeedPersonalizationProps {
   userId: string;
   initialTeamScores?: Record<string, number>;
   initialFormatPrefs?: Record<string, number>;
+  defaultOpen?: boolean;
+  hideToggle?: boolean;
 }
 
 const DEFAULT_TEAM_SCORES: Record<string, number> = {
@@ -54,8 +56,10 @@ export function FeedPersonalization({
   userId,
   initialTeamScores,
   initialFormatPrefs,
+  defaultOpen = false,
+  hideToggle = false,
 }: FeedPersonalizationProps) {
-  const [isOpen, setIsOpen] = useState(false);
+  const [isOpen, setIsOpen] = useState(defaultOpen);
   const [teamScores, setTeamScores] = useState<Record<string, number>>(
     initialTeamScores || DEFAULT_TEAM_SCORES
   );
@@ -105,40 +109,42 @@ export function FeedPersonalization({
 
   return (
     <div className="personalization-panel">
-      <button
-        className="personalization-toggle"
-        onClick={() => setIsOpen(!isOpen)}
-      >
-        <svg
-          width="16"
-          height="16"
-          viewBox="0 0 16 16"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="2"
+      {!hideToggle && (
+        <button
+          className="personalization-toggle"
+          onClick={() => setIsOpen(!isOpen)}
         >
-          <path
-            d="M6 2v2M6 12v2M10 2v4M10 10v4M2 6h2M12 6h2M2 10h6M10 10h4"
-            strokeLinecap="round"
-          />
-        </svg>
-        <span>Customize Your Feed</span>
-        <svg
-          className={`personalization-chevron ${isOpen ? 'open' : ''}`}
-          width="12"
-          height="12"
-          viewBox="0 0 12 12"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="2"
-        >
-          <path
-            d="M3 5l3 3 3-3"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          />
-        </svg>
-      </button>
+          <svg
+            width="16"
+            height="16"
+            viewBox="0 0 16 16"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+          >
+            <path
+              d="M6 2v2M6 12v2M10 2v4M10 10v4M2 6h2M12 6h2M2 10h6M10 10h4"
+              strokeLinecap="round"
+            />
+          </svg>
+          <span>Customize Your Feed</span>
+          <svg
+            className={`personalization-chevron ${isOpen ? 'open' : ''}`}
+            width="12"
+            height="12"
+            viewBox="0 0 12 12"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+          >
+            <path
+              d="M3 5l3 3 3-3"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
+          </svg>
+        </button>
+      )}
 
       {isOpen && (
         <div className="personalization-body">
