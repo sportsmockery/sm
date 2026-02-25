@@ -335,16 +335,14 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
       <div style={{ backgroundColor: 'var(--sm-dark)' }}>
         <div style={{ maxWidth: 1400, margin: '0 auto', padding: '48px 24px', display: 'flex', justifyContent: 'center', gap: 0 }}>
           {/* Left Sidebar - TOC (Desktop only) */}
-          {readingTime >= 5 && (
-            <aside className="hidden xl:block" style={{ width: 220, flexShrink: 0 }}>
-              <div style={{ position: 'sticky', top: 96, paddingRight: 24 }}>
-                <ArticleTableOfContents
-                  contentHtml={post.content || ''}
-                  variant="glass"
-                />
-              </div>
-            </aside>
-          )}
+          <aside className="hidden xl:block" style={{ width: 220, flexShrink: 0 }}>
+            <div style={{ position: 'sticky', top: 96, paddingRight: 24 }}>
+              <ArticleTableOfContents
+                contentHtml={post.content || ''}
+                variant="glass"
+              />
+            </div>
+          </aside>
 
           {/* Main article column */}
           <div style={{ width: '100%', maxWidth: 720, borderColor: 'var(--sm-border)' }}>
@@ -357,14 +355,17 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
               />
             )}
 
+            {/* Scout Recap - below audio, above article body */}
+            <div style={{ marginBottom: 24 }}>
+              <ScoutRecapCard slug={slug} title={post.title} excerpt={post.excerpt} />
+            </div>
+
             <article className="article-body-2030">
               {/* Mobile TOC - shown at top on smaller screens */}
-              {readingTime >= 5 && (
-                <ArticleTableOfContents
-                  contentHtml={post.content || ''}
-                  className="xl:hidden"
-                />
-              )}
+              <ArticleTableOfContents
+                contentHtml={post.content || ''}
+                className="xl:hidden"
+              />
 
               {/* Auto-linked content with duplicate featured image stripped */}
               <ArticleContentWithEmbeds
@@ -438,18 +439,10 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
                 />
               )}
 
-              {/* Scout Recap */}
-              <ScoutRecapCard slug={slug} title={post.title} excerpt={post.excerpt} />
-
               <ARTourButton team={categoryData?.slug || category} />
             </div>
           </aside>
         </div>
-      </div>
-
-      {/* Mobile Scout Recap (below article body, above prev/next) */}
-      <div className="xl:hidden" style={{ maxWidth: 720, margin: '0 auto', padding: '0 24px 24px' }}>
-        <ScoutRecapCard slug={slug} title={post.title} excerpt={post.excerpt} />
       </div>
 
       {/* Next/Previous Article Navigation */}
