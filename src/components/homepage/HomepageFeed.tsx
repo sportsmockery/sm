@@ -13,6 +13,8 @@ import { StorylineFeed } from './StorylineFeed';
 import { CommandPanel } from './CommandPanel';
 import { ScoutSearchBox } from './ScoutSearchBox';
 import { CatchUpTimeline } from './CatchUpTimeline';
+import { ScoutSinceLastVisit } from './ScoutSinceLastVisit';
+import { HeroStatsOrbs } from './HeroStatsOrbs';
 import { sortPostsByScore, DEFAULT_ENGAGEMENT_PROFILE } from '@/lib/scoring-v2';
 import type { UserEngagementProfile } from '@/lib/scoring-v2';
 
@@ -795,6 +797,9 @@ export function HomepageFeed({
         {/* Section 8: Ambient stat visuals */}
         <AmbientStats posts={safePosts} />
 
+        {/* Hero Stats Orbs — live Chicago stats behind hero text */}
+        <HeroStatsOrbs />
+
         {/* Hero content (no glass card box) */}
         <div className="sm-container hero-content" style={{ transition: 'transform 0.15s ease-out' }}>
           <div className="sm-tag animate-entrance entrance-delay-1">
@@ -818,6 +823,13 @@ export function HomepageFeed({
               </span>
               <span className="your-chicago-streak">Day {visitStreak}</span>
             </Link>
+          )}
+
+          {/* Scout "since last visit" CTA (logged-in only) */}
+          {actuallyLoggedIn && (
+            <div className="animate-entrance entrance-delay-3b">
+              <ScoutSinceLastVisit />
+            </div>
           )}
 
           {/* 90-Second Catch-Up Timeline */}
