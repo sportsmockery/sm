@@ -31,11 +31,11 @@ export interface ScoringContext {
 export const DEFAULT_ENGAGEMENT_PROFILE: UserEngagementProfile = {
   user_id: null,
   team_scores: {
-    'bears': 50,
-    'bulls': 30,
-    'blackhawks': 30,
-    'cubs': 30,
-    'white-sox': 30
+    'bears': 40,
+    'cubs': 25,
+    'bulls': 15,
+    'white-sox': 10,
+    'blackhawks': 10
   },
   format_prefs: {
     'article': 50,

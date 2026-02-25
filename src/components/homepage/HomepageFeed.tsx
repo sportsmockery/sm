@@ -13,6 +13,8 @@ import { StorylineFeed } from './StorylineFeed';
 import { CommandPanel } from './CommandPanel';
 import { ScoutSearchBox } from './ScoutSearchBox';
 import { CatchUpTimeline } from './CatchUpTimeline';
+import { sortPostsByScore, DEFAULT_ENGAGEMENT_PROFILE } from '@/lib/scoring-v2';
+import type { UserEngagementProfile } from '@/lib/scoring-v2';
 
 const TEAM_LABELS: Record<string, string> = {
   bears: 'Bears',
@@ -487,6 +489,11 @@ export function HomepageFeed({
   const [visitStreak, setVisitStreak] = useState<number>(0);
   const [displayName, setDisplayName] = useState<string>('Fan');
 
+  // Engagement profile for feed personalization
+  const [engagementProfile, setEngagementProfile] = useState<UserEngagementProfile | null>(null);
+  const [hasSufficientData, setHasSufficientData] = useState(false);
+  const [profileLoaded, setProfileLoaded] = useState(false);
+
   // Listen for "My Chicago" mode toggle from Header
   useEffect(() => {
     try {
@@ -541,6 +548,32 @@ export function HomepageFeed({
         }
       })
       .catch(() => {});
+  }, [actuallyLoggedIn]);
+
+  // Fetch engagement profile for logged-in users (feed personalization)
+  useEffect(() => {
+    if (!actuallyLoggedIn) {
+      setProfileLoaded(true);
+      return;
+    }
+
+    // Ensure profile exists, then fetch it
+    fetch('/api/engagement/create-profile', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({}),
+    }).catch(() => {});
+
+    fetch('/api/engagement/profile')
+      .then(r => r.ok ? r.json() : null)
+      .then(data => {
+        if (data?.profile) {
+          setEngagementProfile(data.profile);
+          setHasSufficientData(data.hasSufficientData || false);
+        }
+      })
+      .catch(() => {})
+      .finally(() => setProfileLoaded(true));
   }, [actuallyLoggedIn]);
 
   // Feature 1: Team preference memory (localStorage)
@@ -644,18 +677,58 @@ export function HomepageFeed({
   const safeEditorPicks = Array.isArray(editorPicks) ? editorPicks : [];
   const safeTrendingPosts = Array.isArray(trendingPosts) ? trendingPosts : [];
 
-  // Reorder posts when "My Teams" mode is active
+  // Reorder posts: "My Teams" mode, or scoring for logged-in "all" mode
   const reorderedPosts = useMemo(() => {
-    if (chicagoMode !== 'my-teams' || !userFavoriteTeams.length) return safePosts;
-    const favSet = new Set(userFavoriteTeams.flatMap((t: string) => {
-      // Handle both slug formats
-      if (t === 'white-sox' || t === 'whitesox') return ['white-sox', 'whitesox'];
-      return [t];
-    }));
-    const favPosts = safePosts.filter((p: any) => favSet.has(p.team_slug?.toLowerCase()));
-    const otherPosts = safePosts.filter((p: any) => !favSet.has(p.team_slug?.toLowerCase()));
-    return [...favPosts, ...otherPosts];
-  }, [safePosts, chicagoMode, userFavoriteTeams]);
+    // "My Teams" mode: favorite teams first
+    if (chicagoMode === 'my-teams' && userFavoriteTeams.length) {
+      const favSet = new Set(userFavoriteTeams.flatMap((t: string) => {
+        if (t === 'white-sox' || t === 'whitesox') return ['white-sox', 'whitesox'];
+        return [t];
+      }));
+      const favPosts = safePosts.filter((p: any) => favSet.has(p.team_slug?.toLowerCase()));
+      const otherPosts = safePosts.filter((p: any) => !favSet.has(p.team_slug?.toLowerCase()));
+      return [...favPosts, ...otherPosts];
+    }
+
+    // Guest or profile not loaded yet: pure recency (unchanged)
+    if (!actuallyLoggedIn || !profileLoaded) return safePosts;
+
+    // Logged-in "all" mode: apply scoring
+    const profile: UserEngagementProfile = hasSufficientData && engagementProfile
+      ? {
+          user_id: engagementProfile.user_id,
+          team_scores: engagementProfile.team_scores || DEFAULT_ENGAGEMENT_PROFILE.team_scores,
+          format_prefs: engagementProfile.format_prefs || DEFAULT_ENGAGEMENT_PROFILE.format_prefs,
+          author_reads: engagementProfile.author_reads || {},
+          topic_views_today: engagementProfile.topic_views_today || {},
+        }
+      : DEFAULT_ENGAGEMENT_PROFILE;
+
+    return sortPostsByScore(safePosts as any, {
+      user: profile,
+      viewedPostIds: new Set(),
+      isLoggedIn: true,
+    }) as any[];
+  }, [safePosts, chicagoMode, userFavoriteTeams, actuallyLoggedIn, profileLoaded, hasSufficientData, engagementProfile]);
+
+  // Derive favorite teams: explicit favorites > top 2 from engagement profile
+  const derivedFavoriteTeams = useMemo(() => {
+    if (userFavoriteTeams.length) return userFavoriteTeams;
+    if (!engagementProfile?.team_scores) return [];
+    const sorted = Object.entries(engagementProfile.team_scores)
+      .sort(([, a], [, b]) => (b as number) - (a as number));
+    return sorted.slice(0, 2).map(([team]) => team);
+  }, [userFavoriteTeams, engagementProfile]);
+
+  // Derive team preference for StorylineFeed: top team if score > 30
+  const derivedTeamPreference = useMemo(() => {
+    if (userTeamPreference) return userTeamPreference;
+    if (!engagementProfile?.team_scores) return null;
+    const sorted = Object.entries(engagementProfile.team_scores)
+      .sort(([, a], [, b]) => (b as number) - (a as number));
+    if (sorted.length && (sorted[0][1] as number) > 30) return sorted[0][0];
+    return null;
+  }, [userTeamPreference, engagementProfile]);
 
   const filteredPosts = filterPosts(reorderedPosts, activeFilter);
 
@@ -743,7 +816,7 @@ export function HomepageFeed({
 
           {/* 90-Second Catch-Up Timeline */}
           <div className="animate-entrance entrance-delay-3b">
-            <CatchUpTimeline posts={safePosts} favoriteTeams={actuallyLoggedIn ? userFavoriteTeams : undefined} />
+            <CatchUpTimeline posts={safePosts} favoriteTeams={actuallyLoggedIn ? derivedFavoriteTeams : undefined} />
           </div>
 
           <div className="team-logo-row animate-entrance entrance-delay-4">
@@ -868,7 +941,7 @@ export function HomepageFeed({
                 showTrendingInline={isMobile}
                 trendingPosts={safeTrendingPosts}
                 activeTeam={activeFilter}
-                userTeamPreference={userTeamPreference}
+                userTeamPreference={derivedTeamPreference}
               />
             </main>
 

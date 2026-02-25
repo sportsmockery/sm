@@ -1,9 +1,35 @@
 'use client'
 
-import { useState, useRef } from 'react'
+import { useState, useRef, useEffect, useCallback } from 'react'
 import Image from 'next/image'
 import { useRouter } from 'next/navigation'
 import { useTheme } from '@/contexts/ThemeContext'
+import { useAuth } from '@/contexts/AuthContext'
+
+// Fire-and-forget Scout event tracking
+function trackScoutEvent(event: 'open' | 'summary_viewed' | 'close', extra?: { duration_ms?: number; query?: string }) {
+  try {
+    let anonId = localStorage.getItem('sm-anon-id')
+    if (!anonId) {
+      anonId = crypto.randomUUID()
+      localStorage.setItem('sm-anon-id', anonId)
+    }
+    const sessionId = localStorage.getItem('sm_session_id') || null
+
+    fetch('/api/track-scout', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        anon_id: anonId,
+        session_id: sessionId,
+        user_id: (window as any).__sm_user_id || null,
+        event,
+        path: window.location.pathname,
+        ...extra,
+      }),
+    }).catch(() => {}) // fire-and-forget
+  } catch {} // ignore localStorage errors
+}
 
 export function ScoutSearchBox() {
   const { theme } = useTheme()
@@ -13,6 +39,43 @@ export function ScoutSearchBox() {
   const [query, setQuery] = useState('')
   const [loading, setLoading] = useState(false)
   const [result, setResult] = useState<string | null>(null)
+
+  const { user } = useAuth()
+  const hasTrackedOpen = useRef(false)
+  const openTime = useRef<number | null>(null)
+
+  // Stash user_id on window for the tracking helper
+  useEffect(() => {
+    if (user?.id) (window as any).__sm_user_id = user.id
+  }, [user?.id])
+
+  // Track "close" on unmount with duration
+  const handleClose = useCallback(() => {
+    if (openTime.current) {
+      trackScoutEvent('close', { duration_ms: Date.now() - openTime.current })
+      openTime.current = null
+    }
+  }, [])
+
+  useEffect(() => {
+    return () => { handleClose() }
+  }, [handleClose])
+
+  const handleFocus = () => {
+    if (!hasTrackedOpen.current) {
+      hasTrackedOpen.current = true
+      openTime.current = Date.now()
+      trackScoutEvent('open')
+    }
+  }
+
+  const handleBlur = () => {
+    // Only fire close if there's no result showing (user left without querying)
+    if (!result && openTime.current) {
+      trackScoutEvent('close', { duration_ms: Date.now() - openTime.current })
+      openTime.current = null
+    }
+  }
 
   const handleSearch = async () => {
     if (!query.trim() || loading) return
@@ -28,6 +91,8 @@ export function ScoutSearchBox() {
       })
       const data = await res.json()
       setResult(data.response || 'No results found.')
+      // Track successful summary view
+      trackScoutEvent('summary_viewed', { query: query.trim() })
     } catch {
       setResult('Connection error. Try again.')
     } finally {
@@ -102,6 +167,8 @@ export function ScoutSearchBox() {
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
+          onFocus={handleFocus}
+          onBlur={handleBlur}
           placeholder="Scout AI is a high-IQ Chicago sports engine, ask me anything..."
           style={{
             flex: 1,
