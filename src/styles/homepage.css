@@ -4244,6 +4244,183 @@ html .storyline-card {
 }
 
 /* ═══════════════════════════════════════════════
+   Logged-In Hero: Personalized Title + CTA + Orbital Orbs
+   ═══════════════════════════════════════════════ */
+
+.hero-title {
+  font-family: 'Space Grotesk', sans-serif;
+  font-weight: 700;
+  font-size: clamp(3rem, 8vw, 6rem);
+  color: var(--sm-text);
+  text-shadow: 0 0 20px rgba(188, 0, 0, 0.5);
+  text-align: center;
+  margin: 24px 0 0;
+  letter-spacing: -0.02em;
+  transition: all 0.3s ease;
+  line-height: 1.1;
+  cursor: pointer;
+}
+
+[data-theme="light"] .hero-title {
+  text-shadow: 0 0 20px rgba(188, 0, 0, 0.3);
+}
+
+.hero-user-name {
+  color: var(--sm-red-light);
+  font-weight: 700;
+}
+
+.hero-streak-badge {
+  color: var(--sm-red);
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.hero-cta {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  position: relative;
+  margin-top: 24px;
+}
+
+.glass-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 220px;
+  height: 64px;
+  border-radius: 50px;
+  border: 2px solid rgba(188, 0, 0, 0.5);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  font-family: 'Space Grotesk', sans-serif;
+  font-weight: 700;
+  font-size: 20px;
+  text-decoration: none;
+  cursor: pointer;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  position: relative;
+  background: rgba(255, 255, 255, 0.15);
+  color: #fff;
+}
+
+[data-theme="light"] .glass-btn {
+  background: rgba(255, 255, 255, 0.1);
+  color: #1a1a1a;
+}
+
+.glass-btn:hover {
+  transform: scale(1.05);
+  box-shadow: 0 10px 30px rgba(188, 0, 0, 0.5);
+}
+
+.upgrade-badge {
+  position: absolute;
+  top: -8px;
+  right: -30px;
+  font-family: 'Space Grotesk', sans-serif;
+  font-weight: 700;
+  font-size: 14px;
+  color: var(--sm-red);
+  opacity: 0.8;
+  transform: rotate(5deg);
+  animation: badgeFloat 3s ease-in-out infinite;
+  pointer-events: none;
+}
+
+@keyframes badgeFloat {
+  0%, 100% { transform: rotate(5deg) translateY(0); }
+  50% { transform: rotate(5deg) translateY(-10px); }
+}
+
+/* Orbital ring container — centered on hero */
+.hero-orbs-orbital-ring {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0;
+  height: 0;
+  z-index: 1;
+  pointer-events: none;
+}
+
+/* Orbital orb — overrides base stat orb for circular path */
+.hero-stat-orb-orbital {
+  position: absolute;
+  width: 48px;
+  height: 48px;
+  animation: heroOrbit 12s linear infinite;
+}
+
+.hero-stat-orb-orbital:nth-child(1) { animation-delay: 0s; }
+.hero-stat-orb-orbital:nth-child(2) { animation-delay: -3s; }
+.hero-stat-orb-orbital:nth-child(3) { animation-delay: -6s; }
+.hero-stat-orb-orbital:nth-child(4) { animation-delay: -9s; }
+
+@keyframes heroOrbit {
+  from {
+    transform: rotate(0deg) translateX(120px) rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg) translateX(120px) rotate(-360deg);
+  }
+}
+
+/* Mobile: smaller orbit radius */
+@media (max-width: 768px) {
+  .hero-title {
+    font-size: clamp(2rem, 7vw, 3rem);
+    padding: 0 12px;
+  }
+
+  .glass-btn {
+    width: 100%;
+    max-width: 320px;
+    height: 56px;
+    font-size: 18px;
+  }
+
+  .upgrade-badge {
+    position: static;
+    display: block;
+    text-align: center;
+    transform: none;
+    margin-top: 8px;
+    animation: badgeFloat 3s ease-in-out infinite;
+  }
+
+  @keyframes heroOrbit {
+    from {
+      transform: rotate(0deg) translateX(80px) rotate(0deg);
+    }
+    to {
+      transform: rotate(360deg) translateX(80px) rotate(-360deg);
+    }
+  }
+}
+
+/* Reduced motion: no animations */
+@media (prefers-reduced-motion: reduce) {
+  .hero-stat-orb-orbital {
+    animation: none;
+  }
+
+  .hero-stat-orb-orbital:nth-child(1) { transform: translateX(120px) translateY(0); }
+  .hero-stat-orb-orbital:nth-child(2) { transform: translateX(0) translateY(120px); }
+  .hero-stat-orb-orbital:nth-child(3) { transform: translateX(-120px) translateY(0); }
+  .hero-stat-orb-orbital:nth-child(4) { transform: translateX(0) translateY(-120px); }
+
+  .upgrade-badge {
+    animation: none;
+  }
+
+  .glass-btn:hover {
+    transform: none;
+  }
+}
+
+/* ═══════════════════════════════════════════════
    Scout "Since Last Visit" CTA + Overlay
    ═══════════════════════════════════════════════ */
 

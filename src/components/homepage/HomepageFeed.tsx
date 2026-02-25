@@ -813,7 +813,7 @@ export function HomepageFeed({
         <AmbientStats posts={safePosts} />
 
         {/* Hero Stats Orbs — live Chicago stats behind hero text */}
-        <HeroStatsOrbs />
+        <HeroStatsOrbs isLoggedIn={actuallyLoggedIn} />
 
         {/* Hero content (no glass card box) */}
         <div className="sm-container hero-content" style={{ transition: 'transform 0.15s ease-out' }}>
@@ -821,28 +821,21 @@ export function HomepageFeed({
             <span className="pulse-dot" /> Where Chicago Fans Come First
           </div>
 
-          <h1 className="hero-headline animate-entrance entrance-delay-2">
-            Sports Mockery <span className="gradient-text">2.0</span>
-          </h1>
-
-          <p className="hero-subtitle animate-entrance entrance-delay-3">
-            Breaking news, real-time scores, and AI-powered analysis — all five Chicago teams, one platform.
-          </p>
-
-          {/* Your Chicago Bar (logged-in only) — toggles feed customization panel */}
-          {actuallyLoggedIn && visitStreak > 0 && (
+          {actuallyLoggedIn ? (
             <>
-              <button
-                type="button"
-                className="your-chicago-bar animate-entrance entrance-delay-3b"
+              {/* Logged-in personalized hero */}
+              <h1
+                className="hero-title animate-entrance entrance-delay-2"
                 onClick={() => setFeedPanelOpen(prev => !prev)}
+                title="Customize your feed"
               >
-                <span className="your-chicago-left">
-                  <span className="your-chicago-title">Your Chicago</span>
-                  <span className="your-chicago-name">, {formatDisplayName(displayName)}</span>
+                Your Chicago, <span className="hero-user-name">{formatDisplayName(displayName)}</span>
+                {' — '}
+                <span className="hero-streak-badge">
+                  {visitStreak > 0 ? `${visitStreak} Day${visitStreak !== 1 ? 's' : ''} Streak 🔥` : 'Join the Streak 🔥'}
                 </span>
-                <span className="your-chicago-streak">Day {visitStreak}</span>
-              </button>
+              </h1>
+
               {feedPanelOpen && user?.id && (
                 <div className="your-chicago-panel animate-entrance" style={{ width: '100%', maxWidth: 740, margin: '8px auto 0' }}>
                   <FeedPersonalization
@@ -852,6 +845,27 @@ export function HomepageFeed({
                   />
                 </div>
               )}
+
+              <div className="hero-cta animate-entrance entrance-delay-3">
+                <Link
+                  href="/subscribe"
+                  className="glass-btn"
+                >
+                  Subscribe Free
+                  <span className="upgrade-badge">2.0 Upgraded</span>
+                </Link>
+              </div>
+            </>
+          ) : (
+            <>
+              {/* Non-logged-in hero — unchanged */}
+              <h1 className="hero-headline animate-entrance entrance-delay-2">
+                Sports Mockery <span className="gradient-text">2.0</span>
+              </h1>
+
+              <p className="hero-subtitle animate-entrance entrance-delay-3">
+                Breaking news, real-time scores, and AI-powered analysis — all five Chicago teams, one platform.
+              </p>
             </>
           )}
 
