@@ -22,9 +22,12 @@ interface Post {
   views: number | null;
 }
 
+type CardSize = 'xl' | 'm' | 'compact';
+
 interface PostCardProps {
   post: Post;
   priority?: boolean;
+  cardSize?: CardSize;
 }
 
 const TEAM_DISPLAY_NAMES: Record<string, string> = {
@@ -82,7 +85,7 @@ function formatViews(views: number): string {
   return views.toString();
 }
 
-export function PostCard({ post, priority = false }: PostCardProps) {
+export function PostCard({ post, priority = false, cardSize = 'compact' }: PostCardProps) {
   const recencyLabel = formatRecency(post.published_at);
   const teamName = post.team_slug
     ? TEAM_DISPLAY_NAMES[post.team_slug] || post.team_slug.replace('-', ' ')
@@ -95,8 +98,10 @@ export function PostCard({ post, priority = false }: PostCardProps) {
 
   const contentBadge = getContentTypeBadge(post.content_type);
 
+  const sizeClass = cardSize === 'xl' ? 'card-xl' : cardSize === 'm' ? 'card-m' : 'card-compact';
+
   return (
-    <article className="glass-card feed-card">
+    <article className={`glass-card feed-card ${sizeClass}`}>
       <Link href={postUrl} onClick={() => markAsRead(post.slug)}>
         <div className="card-image">
           {post.featured_image ? (

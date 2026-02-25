@@ -2,9 +2,12 @@
 'use client';
 
 import { useState, useCallback, useRef, useEffect } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { PostCard } from './PostCard';
 import { TrendingInlineDrawer } from './TrendingInlineDrawer';
 import { FeedSkeleton } from './FeedSkeleton';
+
+const cardSpring = { type: 'spring' as const, stiffness: 300, damping: 30 };
 
 interface Post {
   id: string;
@@ -33,6 +36,20 @@ interface ForYouFeedProps {
 }
 
 const POSTS_PER_PAGE = 15;
+
+// Classify card size based on post properties
+function getCardSize(post: Post, index: number): 'xl' | 'm' | 'compact' {
+  // First post or posts with featured image + high views → XL (image-dominant)
+  if (index === 0 || (post.featured_image && post.is_trending && (post.views ?? 0) > 500)) {
+    return 'xl';
+  }
+  // Analysis, video, or evergreen content → M (medium with tags)
+  if (post.content_type === 'analysis' || post.content_type === 'video' || post.is_evergreen) {
+    return 'm';
+  }
+  // Everything else → compact (text-focus)
+  return 'compact';
+}
 
 const TEAM_NAMES: Record<string, string> = {
   bears: 'Bears',
@@ -164,16 +181,28 @@ export function ForYouFeed({
 
   return (
     <div className="feed-grid" ref={feedGridRef}>
-      {visiblePosts.map((post, index) => (
-        <div key={post.id} data-feed-card data-slug={post.slug}>
-          <PostCard post={post} priority={index < 3} />
+      <AnimatePresence mode="popLayout">
+        {visiblePosts.map((post, index) => (
+          <motion.div
+            key={post.id}
+            layoutId={`feed-card-${post.id}`}
+            layout="position"
+            transition={cardSpring}
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.95 }}
+            data-feed-card
+            data-slug={post.slug}
+          >
+            <PostCard post={post} priority={index < 3} cardSize={getCardSize(post, index)} />
 
-          {/* Insert trending drawer after index 5 on mobile */}
-          {showTrendingInline && isMobile && index === 5 && (
-            <TrendingInlineDrawer posts={trendingPosts} />
-          )}
-        </div>
-      ))}
+            {/* Insert trending drawer after index 5 on mobile */}
+            {showTrendingInline && isMobile && index === 5 && (
+              <TrendingInlineDrawer posts={trendingPosts} />
+            )}
+          </motion.div>
+        ))}
+      </AnimatePresence>
 
       {/* Infinite scroll trigger */}
       <div ref={loadMoreRef}>

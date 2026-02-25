@@ -307,6 +307,84 @@ function HeroParticles() {
   return <canvas ref={canvasRef} className="hero-particles" />;
 }
 
+/* ── Ambient Stat Visuals ── */
+function AmbientStats({ posts }: { posts: any[] }) {
+  const stats = useMemo(() => {
+    const totalArticles = posts.length;
+    const trendingCount = posts.filter((p: any) => p.is_trending).length;
+    const totalViews = posts.reduce((sum: number, p: any) => sum + (p.views || 0), 0);
+    const teamCount = new Set(posts.map((p: any) => p.team_slug).filter(Boolean)).size;
+    return [
+      { label: 'Articles', value: totalArticles },
+      { label: 'Trending', value: trendingCount },
+      { label: 'Views', value: totalViews >= 1000 ? `${(totalViews / 1000).toFixed(0)}K` : totalViews },
+      { label: 'Teams', value: teamCount },
+    ];
+  }, [posts]);
+
+  return (
+    <div className="ambient-stats" aria-hidden="true">
+      {stats.map((stat, i) => (
+        <div key={stat.label} className={`ambient-stat ambient-stat-${i}`}>
+          <span className="ambient-stat-value">{stat.value}</span>
+          <span className="ambient-stat-label">{stat.label}</span>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+/* ── Parallax Hero Field ── */
+function useParallaxHero(heroRef: React.RefObject<HTMLElement | null>) {
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+
+    const hero = heroRef.current;
+    if (!hero) return;
+
+    const layers = hero.querySelectorAll<HTMLElement>('.parallax-layer');
+    const heroContent = hero.querySelector<HTMLElement>('.hero-content');
+
+    // Scroll-based parallax
+    const onScroll = () => {
+      const scrollY = window.scrollY;
+      const heroHeight = hero.offsetHeight;
+      if (scrollY > heroHeight * 1.5) return; // skip if past hero
+
+      layers.forEach((layer) => {
+        const speed = parseFloat(layer.dataset.speed || '0.3');
+        layer.style.transform = `translateY(${scrollY * speed}px) translateZ(0)`;
+      });
+    };
+
+    // Cursor move effect: slight scale + tilt on hero content
+    const onMouseMove = (e: MouseEvent) => {
+      if (!heroContent) return;
+      const rect = hero.getBoundingClientRect();
+      const x = (e.clientX - rect.left) / rect.width - 0.5; // -0.5 to 0.5
+      const y = (e.clientY - rect.top) / rect.height - 0.5;
+      heroContent.style.transform = `scale(${1 + Math.abs(x * y) * 0.02}) translateZ(0)`;
+    };
+
+    const onMouseLeave = () => {
+      if (heroContent) {
+        heroContent.style.transform = 'scale(1) translateZ(0)';
+      }
+    };
+
+    window.addEventListener('scroll', onScroll, { passive: true });
+    hero.addEventListener('mousemove', onMouseMove, { passive: true });
+    hero.addEventListener('mouseleave', onMouseLeave);
+
+    return () => {
+      window.removeEventListener('scroll', onScroll);
+      hero.removeEventListener('mousemove', onMouseMove);
+      hero.removeEventListener('mouseleave', onMouseLeave);
+    };
+  }, [heroRef]);
+}
+
 interface HomepageFeedProps {
   initialPosts: any[];
   editorPicks: any[];
@@ -361,9 +439,41 @@ export function HomepageFeed({
 }: HomepageFeedProps) {
   const [activeFilter, setActiveFilter] = useState<string>('all');
   const [isMobile, setIsMobile] = useState<boolean>(false);
+  const [chicagoMode, setChicagoMode] = useState<'all' | 'my-teams'>('all');
+  const [userFavoriteTeams, setUserFavoriteTeams] = useState<string[]>([]);
+  const heroSectionRef = useRef<HTMLElement>(null);
+  useParallaxHero(heroSectionRef);
 
   const { isAuthenticated } = useAuth();
   const actuallyLoggedIn = isAuthenticated || isLoggedIn;
+
+  // Listen for "My Chicago" mode toggle from Header
+  useEffect(() => {
+    try {
+      const saved = localStorage.getItem('sm-chicago-mode');
+      if (saved === 'my-teams') setChicagoMode('my-teams');
+    } catch {}
+
+    const handler = (e: Event) => {
+      const mode = (e as CustomEvent).detail;
+      setChicagoMode(mode);
+    };
+    window.addEventListener('sm-chicago-mode-change', handler);
+    return () => window.removeEventListener('sm-chicago-mode-change', handler);
+  }, []);
+
+  // Load user favorite teams for "My Teams" mode
+  useEffect(() => {
+    if (!actuallyLoggedIn) return;
+    fetch('/api/user/preferences')
+      .then(r => r.ok ? r.json() : null)
+      .then(data => {
+        if (data?.favorite_teams?.length) {
+          setUserFavoriteTeams(data.favorite_teams);
+        }
+      })
+      .catch(() => {});
+  }, [actuallyLoggedIn]);
 
   // Feature 1: Team preference memory (localStorage)
   const handleFilterChange = useCallback((filter: string) => {
@@ -440,7 +550,7 @@ export function HomepageFeed({
       { threshold: 0.08, rootMargin: '0px 0px -40px 0px' }
     );
 
-    document.querySelectorAll('.scroll-reveal, .scroll-reveal-right, .scroll-reveal-scale').forEach((el) => {
+    document.querySelectorAll('.scroll-reveal, .scroll-reveal-right, .scroll-reveal-scale, .section-transition').forEach((el) => {
       observer.observe(el);
     });
 
@@ -466,7 +576,20 @@ export function HomepageFeed({
   const safeEditorPicks = Array.isArray(editorPicks) ? editorPicks : [];
   const safeTrendingPosts = Array.isArray(trendingPosts) ? trendingPosts : [];
 
-  const filteredPosts = filterPosts(safePosts, activeFilter);
+  // Reorder posts when "My Teams" mode is active
+  const reorderedPosts = useMemo(() => {
+    if (chicagoMode !== 'my-teams' || !userFavoriteTeams.length) return safePosts;
+    const favSet = new Set(userFavoriteTeams.flatMap((t: string) => {
+      // Handle both slug formats
+      if (t === 'white-sox' || t === 'whitesox') return ['white-sox', 'whitesox'];
+      return [t];
+    }));
+    const favPosts = safePosts.filter((p: any) => favSet.has(p.team_slug?.toLowerCase()));
+    const otherPosts = safePosts.filter((p: any) => !favSet.has(p.team_slug?.toLowerCase()));
+    return [...favPosts, ...otherPosts];
+  }, [safePosts, chicagoMode, userFavoriteTeams]);
+
+  const filteredPosts = filterPosts(reorderedPosts, activeFilter);
 
   // Filter editor picks by active filter too — fall back to top 3 from filtered posts
   const filteredEditorPicks =
@@ -487,36 +610,69 @@ export function HomepageFeed({
       {/* ===== Scroll Progress Bar ===== */}
       <ScrollProgress />
 
-      {/* ===== SECTION 1: Hero ===== */}
-      <section className="sm-hero-bg homepage-hero" aria-label="Hero">
-        {/* Ambient layers */}
+      {/* ===== SECTION 1: Immersive 3D/Parallax Hero "Field" ===== */}
+      <section className="sm-hero-bg homepage-hero parallax-hero" aria-label="Hero" ref={heroSectionRef}>
+        {/* Parallax Layer 1: Field lines (slowest) */}
+        <div className="parallax-layer hero-field-lines" data-speed="0.15" aria-hidden="true">
+          <svg width="100%" height="100%" viewBox="0 0 1200 600" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
+            {/* Center circle */}
+            <circle cx="600" cy="300" r="80" fill="none" stroke="rgba(255,255,255,0.07)" strokeWidth="1" />
+            {/* Midfield line */}
+            <line x1="600" y1="0" x2="600" y2="600" stroke="rgba(255,255,255,0.05)" strokeWidth="1" />
+            {/* Yard lines */}
+            <line x1="200" y1="0" x2="200" y2="600" stroke="rgba(255,255,255,0.04)" strokeWidth="0.5" />
+            <line x1="400" y1="0" x2="400" y2="600" stroke="rgba(255,255,255,0.04)" strokeWidth="0.5" />
+            <line x1="800" y1="0" x2="800" y2="600" stroke="rgba(255,255,255,0.04)" strokeWidth="0.5" />
+            <line x1="1000" y1="0" x2="1000" y2="600" stroke="rgba(255,255,255,0.04)" strokeWidth="0.5" />
+            {/* Sidelines */}
+            <line x1="0" y1="60" x2="1200" y2="60" stroke="rgba(255,255,255,0.06)" strokeWidth="1" />
+            <line x1="0" y1="540" x2="1200" y2="540" stroke="rgba(255,255,255,0.06)" strokeWidth="1" />
+            {/* End zone lines */}
+            <rect x="0" y="0" width="100" height="600" fill="rgba(188,0,0,0.03)" />
+            <rect x="1100" y="0" width="100" height="600" fill="rgba(188,0,0,0.03)" />
+          </svg>
+        </div>
+
+        {/* Parallax Layer 2: Chicago skyline silhouette (medium speed) */}
+        <div className="parallax-layer hero-skyline" data-speed="0.25" aria-hidden="true" />
+
+        {/* Parallax Layer 3: Stadium lights (fastest, closest) */}
+        <div className="parallax-layer hero-stadium-lights" data-speed="0.4" aria-hidden="true" />
+
+        {/* Existing ambient layers */}
         <div className="hero-bg-mesh" />
         <div className="sm-grid-overlay" />
         <GlowOrbs posts={safePosts} />
         <HeroParticles />
 
-        <div className="sm-container hero-content">
-          <div className="sm-tag animate-entrance entrance-delay-1">
-            <span className="pulse-dot" /> Where Chicago Fans Come First
-          </div>
+        {/* Section 8: Ambient stat visuals */}
+        <AmbientStats posts={safePosts} />
 
-          <h1 className="hero-headline animate-entrance entrance-delay-2">
-            Sports Mockery <span className="gradient-text">2.0</span>
-          </h1>
+        {/* Hero content on glass card */}
+        <div className="sm-container hero-content" style={{ transition: 'transform 0.15s ease-out' }}>
+          <div className="hero-glass-card">
+            <div className="sm-tag animate-entrance entrance-delay-1">
+              <span className="pulse-dot" /> Where Chicago Fans Come First
+            </div>
 
-          <p className="hero-subtitle animate-entrance entrance-delay-3">
-            Breaking news, real-time scores, and AI-powered analysis — all five Chicago teams, one platform.
-          </p>
+            <h1 className="hero-headline animate-entrance entrance-delay-2">
+              Sports Mockery <span className="gradient-text">2.0</span>
+            </h1>
 
-          <div className="team-logo-row animate-entrance entrance-delay-4">
-            {TEAM_LOGOS.map((logo) => (
-              <div key={logo.slug} className="team-logo-item">
-                <Link href={`/${logo.slug}`} className="team-logo-link">
-                  <Image src={logo.src} alt={logo.alt} width={32} height={32} />
-                </Link>
-                <span className="team-logo-label">{logo.label}</span>
-              </div>
-            ))}
+            <p className="hero-subtitle animate-entrance entrance-delay-3">
+              Breaking news, real-time scores, and AI-powered analysis — all five Chicago teams, one platform.
+            </p>
+
+            <div className="team-logo-row animate-entrance entrance-delay-4">
+              {TEAM_LOGOS.map((logo) => (
+                <div key={logo.slug} className="team-logo-item">
+                  <Link href={`/${logo.slug}`} className="team-logo-link">
+                    <Image src={logo.src} alt={logo.alt} width={32} height={32} />
+                  </Link>
+                  <span className="team-logo-label">{logo.label}</span>
+                </div>
+              ))}
+            </div>
           </div>
 
           <div className="animate-entrance entrance-delay-5">
@@ -524,6 +680,16 @@ export function HomepageFeed({
           </div>
         </div>
       </section>
+
+      {/* ===== SECTION 6: App Dock Ribbon ===== */}
+      <nav className="app-dock-ribbon section-transition" aria-label="Tools">
+        <div className="sm-container app-dock-inner">
+          <Link href="/scout-ai" className="app-dock-link">Scout AI</Link>
+          <Link href="/gm" className="app-dock-link">GM Trade Sim</Link>
+          <Link href="/mock-draft" className="app-dock-link">Mock Draft</Link>
+          <Link href="/fan-chat" className="app-dock-link">Fan Chat</Link>
+        </div>
+      </nav>
 
       {/* ===== Personalize Banner (logged-in only) ===== */}
       {actuallyLoggedIn && (
@@ -539,42 +705,47 @@ export function HomepageFeed({
       )}
 
       {/* ===== SECTION 2: Featured Content (full width, no sidebar) ===== */}
-      <section className="featured-section" aria-label="Featured stories">
+      <section className="featured-section section-transition" aria-label="Featured stories">
         <div className="sm-container">
           <EditorPicksHero picks={filteredEditorPicks} />
         </div>
       </section>
 
-      {/* ===== SECTION 3: What Chicago is Talking About ===== */}
+      {/* ===== SECTION 7: Horizontal Storylines Rail ===== */}
       {safeTrendingPosts.length > 0 && (
-        <section className="homepage-section talking-about-section">
+        <section className="storylines-rail-section section-transition" aria-label="Storylines">
           <div className="sm-container">
-            <h3 className="talking-section-header">What Chicago is Talking About</h3>
-            <div className="talking-about-list">
-              {safeTrendingPosts.slice(0, 5).map((post: any, i: number) => {
-                const postUrl = post.category_slug
-                  ? `/${post.category_slug}/${post.slug}`
-                  : `/${post.slug}`;
-                return (
-                  <Link key={post.id} href={postUrl} className="talking-item">
-                    <span className="talking-rank">{i + 1}</span>
-                    <div className="talking-content">
-                      <span className="talking-team-pill">
-                        {post.team_slug ? TEAM_LABELS[post.team_slug] || post.team_slug : 'Sports'}
-                      </span>
-                      <span className="talking-title">{post.title}</span>
+            <h3 className="storylines-rail-header">Storylines</h3>
+          </div>
+          <div className="storylines-rail">
+            {safeTrendingPosts.slice(0, 8).map((post: any) => {
+              const postUrl = post.category_slug
+                ? `/${post.category_slug}/${post.slug}`
+                : `/${post.slug}`;
+              const teamName = post.team_slug
+                ? TEAM_LABELS[post.team_slug] || post.team_slug
+                : 'Sports';
+              return (
+                <Link key={post.id} href={postUrl} className="storyline-card">
+                  {post.featured_image ? (
+                    <div className="storyline-card-image">
+                      <Image
+                        src={post.featured_image}
+                        alt=""
+                        fill
+                        sizes="260px"
+                      />
                     </div>
-                    {post.views > 0 && (
-                      <span className="talking-views">
-                        {post.views >= 1000
-                          ? `${(post.views / 1000).toFixed(1)}K`
-                          : post.views} views
-                      </span>
-                    )}
-                  </Link>
-                );
-              })}
-            </div>
+                  ) : (
+                    <div className="storyline-card-image storyline-card-placeholder" />
+                  )}
+                  <div className="storyline-card-body">
+                    <span className="storyline-card-team">{teamName}</span>
+                    <span className="storyline-card-title">{post.title}</span>
+                  </div>
+                </Link>
+              );
+            })}
           </div>
         </section>
       )}
@@ -591,7 +762,7 @@ export function HomepageFeed({
       </div>
 
       {/* ===== SECTION 5: Feed + Sidebar (two-column starts here) ===== */}
-      <section id="feed" className="feed-section">
+      <section id="feed" className="feed-section section-transition">
         <div className="sm-container">
           {/* Team preference banner */}
           {isTeamFilter && TEAM_LABELS[activeFilter] && (

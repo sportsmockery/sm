@@ -294,6 +294,82 @@
   --glass-blur: 12px;
 }
 
+/* ===== TIME-OF-DAY REACTIVE THEME LAYER ===== */
+/* These CSS vars are set by ThemeContext.tsx based on hour of day.
+   They layer on top of light/dark theme and transition smoothly. */
+
+:root {
+  /* Default time vars (day) — overwritten by JS */
+  --sm-time-card: rgba(19, 19, 29, 0.75);
+  --sm-time-glass-glow: rgba(255, 255, 255, 0.04);
+  --sm-time-hero-haze: linear-gradient(180deg, rgba(255,255,255,0.03) 0%, transparent 60%);
+}
+
+/* Smooth transitions when time-of-day changes */
+body,
+.homepage-hero,
+.hero-glass-card,
+.glass-card,
+.sm-hero-bg {
+  transition:
+    background-color 0.5s ease,
+    border-color 0.5s ease,
+    box-shadow 0.5s ease;
+}
+
+/* Apply time-of-day hero haze overlay */
+.sm-hero-bg::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: var(--sm-time-hero-haze);
+  pointer-events: none;
+  z-index: 0;
+  transition: background 0.5s ease;
+}
+
+/* Night mode: subtle red glow on glass cards */
+[data-time="night"] .hero-glass-card {
+  background: var(--sm-time-card);
+  box-shadow: 0 0 40px var(--sm-time-glass-glow);
+}
+
+[data-time="night"] .glass-card {
+  box-shadow: 0 0 20px var(--sm-time-glass-glow);
+}
+
+/* Dawn mode: deeper cool tone on glass cards */
+[data-time="dawn"] .hero-glass-card {
+  background: var(--sm-time-card);
+  box-shadow: 0 0 30px var(--sm-time-glass-glow);
+}
+
+[data-time="dawn"] .glass-card {
+  box-shadow: 0 0 15px var(--sm-time-glass-glow);
+}
+
+/* Day mode: standard (no extra glow) */
+[data-time="day"] .hero-glass-card {
+  background: var(--sm-time-card);
+}
+
+/* Light theme override: time vars have less effect */
+[data-theme="light"][data-time="night"] .hero-glass-card,
+.light[data-time="night"] .hero-glass-card {
+  background: rgba(255, 255, 255, 0.8);
+  box-shadow: 0 0 20px rgba(188, 0, 0, 0.04);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  body,
+  .homepage-hero,
+  .hero-glass-card,
+  .glass-card,
+  .sm-hero-bg {
+    transition: none;
+  }
+}
+
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
@@ -3130,6 +3206,161 @@ p {
 }
 
 .nav-right { display: flex; align-items: center; gap: 16px; }
+
+/* ===== Briefing Strip (above the fold) ===== */
+.briefing-strip {
+  position: relative;
+  z-index: 80;
+  height: 42px;
+  display: flex;
+  align-items: center;
+  background: rgba(0, 0, 0, 0.90);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border-bottom: 1px solid rgba(188, 0, 0, 0.15);
+  overflow: hidden;
+}
+
+[data-theme="light"] .briefing-strip,
+.light .briefing-strip {
+  background: rgba(240, 240, 240, 0.95);
+  border-bottom-color: rgba(0, 0, 0, 0.06);
+}
+
+.briefing-strip-inner {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  width: 100%;
+  max-width: var(--sm-max-width, 1200px);
+  margin: 0 auto;
+  padding: 0 24px;
+  overflow-x: auto;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.briefing-strip-inner::-webkit-scrollbar { display: none; }
+
+.briefing-chip:hover {
+  background: rgba(188, 0, 0, 0.15) !important;
+  border-color: rgba(188, 0, 0, 0.5) !important;
+  box-shadow: 0 0 12px rgba(188, 0, 0, 0.2);
+}
+
+[data-theme="light"] .briefing-chip,
+.light .briefing-chip {
+  color: #000000 !important;
+  border-color: rgba(188, 0, 0, 0.2) !important;
+}
+
+[data-theme="light"] .briefing-chip:hover,
+.light .briefing-chip:hover {
+  background: rgba(188, 0, 0, 0.08) !important;
+}
+
+@media (max-width: 640px) {
+  .briefing-strip-inner { justify-content: flex-start; gap: 8px; }
+  .briefing-chip { font-size: 12px !important; max-width: 240px !important; }
+}
+
+/* ========== SECTION 6: App Dock Ribbon ========== */
+.app-dock-ribbon {
+  position: relative;
+  z-index: 40;
+  background: rgba(0, 0, 0, 0.85);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-bottom: 1px solid rgba(188, 0, 0, 0.15);
+  padding: 0;
+}
+
+.app-dock-inner {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 32px;
+  height: 44px;
+  overflow-x: auto;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.app-dock-inner::-webkit-scrollbar { display: none; }
+
+.app-dock-link {
+  font-family: 'Space Grotesk', var(--font-space-grotesk), sans-serif;
+  font-weight: 600;
+  font-size: 14px;
+  color: rgba(255, 255, 255, 0.7);
+  text-decoration: none;
+  white-space: nowrap;
+  padding: 8px 4px;
+  position: relative;
+  transition: color 0.2s ease;
+}
+
+.app-dock-link::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: #bc0000;
+  transform: scaleX(0);
+  transition: transform 0.25s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.app-dock-link:hover {
+  color: #ffffff;
+}
+
+.app-dock-link:hover::after {
+  transform: scaleX(1);
+}
+
+/* Light mode */
+[data-theme="light"] .app-dock-ribbon,
+.light .app-dock-ribbon {
+  background: rgba(255, 255, 255, 0.92);
+  border-bottom-color: rgba(0, 0, 0, 0.08);
+}
+
+[data-theme="light"] .app-dock-link,
+.light .app-dock-link {
+  color: rgba(0, 0, 0, 0.6);
+}
+
+[data-theme="light"] .app-dock-link:hover,
+.light .app-dock-link:hover {
+  color: #bc0000;
+}
+
+/* Mobile: scroll horizontally, left-aligned */
+@media (max-width: 640px) {
+  .app-dock-inner {
+    justify-content: flex-start;
+    gap: 24px;
+    padding: 0 4px;
+  }
+  .app-dock-link {
+    font-size: 13px;
+  }
+}
+
+/* "My Chicago" mode toggle in header */
+.my-chicago-toggle {
+  transition: box-shadow 0.2s;
+}
+.my-chicago-toggle:hover {
+  box-shadow: 0 0 12px rgba(188, 0, 0, 0.2);
+}
+/* Hide on small screens where space is tight */
+@media (max-width: 640px) {
+  .my-chicago-toggle { display: none !important; }
+}
 
 .nav-hamburger {
   display: none;

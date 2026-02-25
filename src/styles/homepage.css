@@ -7,25 +7,223 @@
   min-height: 100vh;
 }
 
-/* ========== SECTION 1: Hero (~400px, content-hub style) ========== */
+/* ========== SECTION 1: Immersive 3D/Parallax Hero "Field" ========== */
 .homepage-hero {
   position: relative;
-  min-height: 400px;
+  min-height: 480px;
   display: flex;
   align-items: center;
   justify-content: center;
   overflow: clip;
   overflow-clip-margin: 40px;
   padding: 60px 0 40px;
+  perspective: 1000px;
 }
 
 .homepage-hero .hero-content {
   position: relative;
-  z-index: 1;
+  z-index: 5;
   text-align: center;
   max-width: 900px;
   padding: 0 24px;
   overflow: visible;
+  will-change: transform;
+}
+
+/* --- Parallax base layer --- */
+.parallax-layer {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  will-change: transform;
+}
+
+/* --- Layer 1: Field lines (SVG) --- */
+.hero-field-lines {
+  z-index: 0;
+  opacity: 0.6;
+}
+
+.hero-field-lines svg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+[data-theme="light"] .hero-field-lines,
+.light .hero-field-lines {
+  opacity: 0.3;
+}
+
+/* --- Layer 2: Chicago skyline silhouette --- */
+.hero-skyline {
+  z-index: 1;
+  bottom: 0;
+  top: auto;
+  height: 180px;
+  background:
+    /* Willis Tower */
+    linear-gradient(to top, rgba(0,0,0,0.3) 0%, transparent 100%) no-repeat 15% bottom / 28px 140px,
+    /* Hancock */
+    linear-gradient(to top, rgba(0,0,0,0.25) 0%, transparent 100%) no-repeat 25% bottom / 22px 120px,
+    /* Trump Tower */
+    linear-gradient(to top, rgba(0,0,0,0.22) 0%, transparent 100%) no-repeat 38% bottom / 18px 130px,
+    /* Aon Center */
+    linear-gradient(to top, rgba(0,0,0,0.2) 0%, transparent 100%) no-repeat 50% bottom / 24px 110px,
+    /* Marina City (two corncobs) */
+    linear-gradient(to top, rgba(0,0,0,0.18) 0%, transparent 100%) no-repeat 60% bottom / 14px 90px,
+    linear-gradient(to top, rgba(0,0,0,0.18) 0%, transparent 100%) no-repeat 62% bottom / 14px 85px,
+    /* Prudential */
+    linear-gradient(to top, rgba(0,0,0,0.16) 0%, transparent 100%) no-repeat 72% bottom / 20px 75px,
+    /* CNA Center */
+    linear-gradient(to top, rgba(0,0,0,0.14) 0%, transparent 100%) no-repeat 82% bottom / 26px 65px,
+    /* Smaller buildings fill */
+    linear-gradient(to top, rgba(0,0,0,0.12) 0%, transparent 100%) no-repeat 10% bottom / 16px 50px,
+    linear-gradient(to top, rgba(0,0,0,0.12) 0%, transparent 100%) no-repeat 45% bottom / 12px 55px,
+    linear-gradient(to top, rgba(0,0,0,0.1) 0%, transparent 100%) no-repeat 55% bottom / 10px 45px,
+    linear-gradient(to top, rgba(0,0,0,0.1) 0%, transparent 100%) no-repeat 90% bottom / 18px 40px;
+  mask-image: linear-gradient(to top, black 0%, transparent 100%);
+  -webkit-mask-image: linear-gradient(to top, black 0%, transparent 100%);
+}
+
+[data-theme="light"] .hero-skyline,
+.light .hero-skyline {
+  opacity: 0.15;
+}
+
+/* --- Layer 3: Stadium lights (radial gradients) --- */
+.hero-stadium-lights {
+  z-index: 2;
+  background:
+    radial-gradient(circle 60px at 10% 15%, rgba(255,255,255,0.04), transparent 70%),
+    radial-gradient(circle 80px at 90% 10%, rgba(255,255,255,0.03), transparent 70%),
+    radial-gradient(circle 50px at 20% 85%, rgba(255,255,255,0.03), transparent 70%),
+    radial-gradient(circle 70px at 80% 80%, rgba(255,255,255,0.04), transparent 70%),
+    radial-gradient(circle 40px at 50% 5%, rgba(255,255,255,0.05), transparent 70%),
+    radial-gradient(circle 45px at 35% 30%, rgba(255,255,255,0.02), transparent 70%),
+    radial-gradient(circle 55px at 70% 45%, rgba(255,255,255,0.02), transparent 70%);
+  animation: lightsFlicker 6s ease-in-out infinite;
+}
+
+@keyframes lightsFlicker {
+  0%, 100% { opacity: 0.7; }
+  30% { opacity: 0.9; }
+  50% { opacity: 0.6; }
+  70% { opacity: 1; }
+}
+
+[data-theme="light"] .hero-stadium-lights,
+.light .hero-stadium-lights {
+  background:
+    radial-gradient(circle 60px at 10% 15%, rgba(188,0,0,0.03), transparent 70%),
+    radial-gradient(circle 80px at 90% 10%, rgba(188,0,0,0.02), transparent 70%),
+    radial-gradient(circle 50px at 20% 85%, rgba(188,0,0,0.02), transparent 70%),
+    radial-gradient(circle 70px at 80% 80%, rgba(188,0,0,0.03), transparent 70%),
+    radial-gradient(circle 40px at 50% 5%, rgba(188,0,0,0.04), transparent 70%);
+}
+
+/* --- Glass card for hero content --- */
+.hero-glass-card {
+  background: rgba(19, 19, 29, 0.8);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 20px;
+  padding: 40px 48px 36px;
+  position: relative;
+}
+
+[data-theme="light"] .hero-glass-card,
+.light .hero-glass-card {
+  background: rgba(255, 255, 255, 0.75);
+  border-color: rgba(0, 0, 0, 0.08);
+}
+
+/* Mobile adjustments for parallax hero */
+@media (max-width: 768px) {
+  .hero-skyline { height: 100px; }
+  .hero-stadium-lights { animation: none; opacity: 0.5; }
+  .hero-glass-card { padding: 28px 20px 24px; }
+  .parallax-layer { transform: none !important; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .parallax-layer { transform: none !important; }
+  .hero-stadium-lights { animation: none; }
+}
+
+/* ========== SECTION 8: Ambient Stat Visuals ========== */
+.ambient-stats {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 3;
+  overflow: hidden;
+}
+
+.ambient-stat {
+  position: absolute;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  opacity: 0;
+  animation: ambientFloat 8s ease-in-out infinite;
+}
+
+.ambient-stat-value {
+  font-family: 'Space Grotesk', var(--font-space-grotesk), sans-serif;
+  font-size: 22px;
+  font-weight: 700;
+  color: rgba(188, 0, 0, 0.12);
+  line-height: 1;
+}
+
+.ambient-stat-label {
+  font-family: 'Space Grotesk', var(--font-space-grotesk), sans-serif;
+  font-size: 9px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: rgba(255, 255, 255, 0.06);
+}
+
+/* Position each stat in a different corner */
+.ambient-stat-0 { top: 15%; left: 8%; animation-delay: 0s; }
+.ambient-stat-1 { top: 20%; right: 10%; animation-delay: 2s; }
+.ambient-stat-2 { bottom: 25%; left: 12%; animation-delay: 4s; }
+.ambient-stat-3 { bottom: 18%; right: 8%; animation-delay: 6s; }
+
+@keyframes ambientFloat {
+  0%, 100% {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  20%, 80% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Light mode: adjust opacity */
+[data-theme="light"] .ambient-stat-value,
+.light .ambient-stat-value {
+  color: rgba(188, 0, 0, 0.08);
+}
+
+[data-theme="light"] .ambient-stat-label,
+.light .ambient-stat-label {
+  color: rgba(0, 0, 0, 0.05);
+}
+
+/* Hide on small screens — too cluttered */
+@media (max-width: 768px) {
+  .ambient-stats { display: none; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ambient-stat { animation: none; opacity: 0.5; }
 }
 
 /* Main headline: Bebas Neue — chrome gradient + bevel */
@@ -881,6 +1079,112 @@
   flex-shrink: 0;
 }
 
+/* ========== SECTION 5: Card Size Hierarchy ========== */
+
+/* XL — image-dominant hero card */
+.feed-card.card-xl {
+  grid-column: 1 / -1;
+}
+
+.feed-card.card-xl .card-image {
+  aspect-ratio: 21 / 9;
+  min-height: 320px;
+}
+
+.feed-card.card-xl .card-body h3 {
+  font-size: 26px;
+  -webkit-line-clamp: 3;
+}
+
+.feed-card.card-xl .card-body .card-excerpt {
+  -webkit-line-clamp: 3;
+  font-size: 16px;
+}
+
+/* M — medium card with tags */
+.feed-card.card-m .card-image {
+  aspect-ratio: 16 / 9;
+  min-height: 220px;
+}
+
+.feed-card.card-m .card-body h3 {
+  font-size: 20px;
+}
+
+/* Compact — text-focused card */
+.feed-card.card-compact .card-image {
+  aspect-ratio: 16 / 9;
+  min-height: 160px;
+}
+
+.feed-card.card-compact .card-body h3 {
+  font-size: 17px;
+  -webkit-line-clamp: 2;
+}
+
+.feed-card.card-compact .card-body .card-excerpt {
+  -webkit-line-clamp: 1;
+  font-size: 14px;
+}
+
+/* Elevation + hover for all card sizes */
+.feed-card.card-xl,
+.feed-card.card-m,
+.feed-card.card-compact {
+  transition: transform 0.3s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.feed-card.card-xl:hover {
+  transform: scale(1.02) translateY(-4px);
+  box-shadow: 0 20px 40px rgba(188, 0, 0, 0.2);
+}
+
+.feed-card.card-m:hover {
+  transform: scale(1.02) translateY(-4px);
+  box-shadow: 0 16px 32px rgba(188, 0, 0, 0.15);
+}
+
+.feed-card.card-compact:hover {
+  transform: scale(1.02) translateY(-4px);
+  box-shadow: 0 12px 24px rgba(188, 0, 0, 0.1);
+}
+
+/* Light mode hover shadows */
+[data-theme="light"] .feed-card.card-xl:hover,
+.light .feed-card.card-xl:hover {
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.12);
+}
+
+[data-theme="light"] .feed-card.card-m:hover,
+.light .feed-card.card-m:hover {
+  box-shadow: 0 16px 32px rgba(0, 0, 0, 0.1);
+}
+
+[data-theme="light"] .feed-card.card-compact:hover,
+.light .feed-card.card-compact:hover {
+  box-shadow: 0 12px 24px rgba(0, 0, 0, 0.08);
+}
+
+/* Mobile adjustments */
+@media (max-width: 768px) {
+  .feed-card.card-xl .card-image {
+    min-height: 200px;
+    aspect-ratio: 16 / 9;
+  }
+
+  .feed-card.card-xl .card-body h3 {
+    font-size: 22px;
+  }
+
+  .feed-card.card-m .card-image {
+    min-height: 160px;
+  }
+
+  .feed-card.card-compact .card-image {
+    min-height: 120px;
+  }
+}
+
 /* ========== Trending Sidebar (Desktop) ========== */
 .trending-sidebar {
   position: sticky;
@@ -1535,6 +1839,95 @@
   transform: scale(1);
 }
 
+/* ========== SECTION 9: Motion-Driven Section Transitions ========== */
+.section-transition {
+  opacity: 0;
+  transform: translateY(40px) scale(0.98);
+  transition: opacity 0.7s cubic-bezier(0.16, 1, 0.3, 1),
+              transform 0.7s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.section-transition.revealed {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+}
+
+/* Staggered children within transitioned sections */
+.section-transition.revealed .sm-container {
+  animation: sectionContentFade 0.5s cubic-bezier(0.16, 1, 0.3, 1) 0.15s both;
+}
+
+@keyframes sectionContentFade {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Storylines rail cards stagger in */
+.section-transition.revealed .storyline-card {
+  animation: storyCardSlide 0.5s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.section-transition.revealed .storyline-card:nth-child(1) { animation-delay: 0.1s; }
+.section-transition.revealed .storyline-card:nth-child(2) { animation-delay: 0.15s; }
+.section-transition.revealed .storyline-card:nth-child(3) { animation-delay: 0.2s; }
+.section-transition.revealed .storyline-card:nth-child(4) { animation-delay: 0.25s; }
+.section-transition.revealed .storyline-card:nth-child(5) { animation-delay: 0.3s; }
+.section-transition.revealed .storyline-card:nth-child(6) { animation-delay: 0.35s; }
+.section-transition.revealed .storyline-card:nth-child(7) { animation-delay: 0.4s; }
+.section-transition.revealed .storyline-card:nth-child(8) { animation-delay: 0.45s; }
+
+@keyframes storyCardSlide {
+  from {
+    opacity: 0;
+    transform: translateX(24px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0) scale(1);
+  }
+}
+
+/* App dock links stagger */
+.section-transition.revealed .app-dock-link {
+  animation: dockLinkFade 0.4s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.section-transition.revealed .app-dock-link:nth-child(1) { animation-delay: 0.05s; }
+.section-transition.revealed .app-dock-link:nth-child(2) { animation-delay: 0.1s; }
+.section-transition.revealed .app-dock-link:nth-child(3) { animation-delay: 0.15s; }
+.section-transition.revealed .app-dock-link:nth-child(4) { animation-delay: 0.2s; }
+
+@keyframes dockLinkFade {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Reduced motion: instant, no animation */
+@media (prefers-reduced-motion: reduce) {
+  .section-transition {
+    opacity: 1;
+    transform: none;
+    transition: none;
+  }
+  .section-transition .storyline-card,
+  .section-transition .app-dock-link,
+  .section-transition .sm-container {
+    animation: none !important;
+  }
+}
+
 /* Team filter bar slide-down */
 .team-filter-bar {
   opacity: 0;
@@ -1696,12 +2089,12 @@ html {
 
 /* ========== Enhanced feed card hover effects ========== */
 .feed-card {
-  transition: transform 0.25s ease, box-shadow 0.25s ease;
+  transition: transform 0.3s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.3s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 .feed-card:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+  transform: scale(1.02) translateY(-4px);
+  box-shadow: 0 12px 24px rgba(188, 0, 0, 0.12);
 }
 
 .feed-card .card-image img {
@@ -2847,13 +3240,16 @@ html {
 }
 
 /* ========== "What Chicago is Talking About" Section ========== */
-.talking-about-section {
-  padding: 24px 0;
+/* ========== SECTION 7: Horizontal Storylines Rail ========== */
+.storylines-rail-section {
+  padding: 28px 0 24px;
   border-bottom: 1px solid var(--sm-border);
   margin-bottom: 24px;
+  overflow: hidden;
 }
-.talking-section-header {
-  font-family: 'Space Grotesk', sans-serif;
+
+.storylines-rail-header {
+  font-family: 'Space Grotesk', var(--font-space-grotesk), sans-serif;
   font-size: 18px;
   font-weight: 700;
   color: var(--sm-text);
@@ -2862,83 +3258,123 @@ html {
   align-items: center;
   gap: 8px;
 }
-.talking-section-header::before {
+
+.storylines-rail-header::before {
   content: '';
   width: 8px;
   height: 8px;
   border-radius: 50%;
-  background: var(--sm-red);
+  background: #bc0000;
   animation: pulse-glow 2s infinite;
 }
-.talking-about-list {
+
+.storylines-rail {
+  display: flex;
+  gap: 16px;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  scroll-behavior: smooth;
+  padding: 0 max(24px, calc((100vw - 1200px) / 2));
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  -webkit-overflow-scrolling: touch;
+}
+
+.storylines-rail::-webkit-scrollbar { display: none; }
+
+.storyline-card {
+  flex: 0 0 260px;
+  scroll-snap-align: start;
+  text-decoration: none;
+  color: inherit;
+  border-radius: 12px;
+  overflow: hidden;
+  background: rgba(19, 19, 29, 0.75);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  transition: transform 0.3s cubic-bezier(0.22, 1, 0.36, 1),
+              box-shadow 0.3s cubic-bezier(0.22, 1, 0.36, 1),
+              border-color 0.3s ease;
+}
+
+.storyline-card:hover {
+  transform: translateY(-4px) scale(1.02);
+  box-shadow: 0 12px 28px rgba(188, 0, 0, 0.15);
+  border-color: rgba(188, 0, 0, 0.25);
+}
+
+.storyline-card-image {
+  position: relative;
+  width: 100%;
+  height: 140px;
+  overflow: hidden;
+}
+
+.storyline-card-image img {
+  object-fit: cover;
+  transition: transform 0.4s ease;
+}
+
+.storyline-card:hover .storyline-card-image img {
+  transform: scale(1.06);
+}
+
+.storyline-card-placeholder {
+  background: var(--sm-surface, rgba(30, 30, 40, 0.8));
+}
+
+.storyline-card-body {
+  padding: 12px 14px 14px;
   display: flex;
   flex-direction: column;
-  gap: 0;
+  gap: 4px;
 }
-.talking-item {
-  display: flex;
-  align-items: center;
-  gap: 16px;
-  padding: 12px 0;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.03);
-  text-decoration: none;
-  color: var(--sm-text);
-  transition: background 0.2s;
-}
-.talking-item:last-child { border-bottom: none; }
-.talking-item:hover { background: rgba(255, 255, 255, 0.02); }
 
-.talking-rank {
-  width: 28px;
-  height: 28px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 8px;
-  background: var(--sm-gradient-subtle);
-  font-family: 'Space Grotesk', sans-serif;
-  font-size: 13px;
-  font-weight: 700;
-  color: var(--sm-red-light);
-  flex-shrink: 0;
-}
-.talking-content {
-  flex: 1;
-  min-width: 0;
-}
-.talking-team-pill {
-  display: inline-block;
+.storyline-card-team {
+  font-family: 'Space Grotesk', var(--font-space-grotesk), sans-serif;
   font-size: 10px;
   font-weight: 600;
   text-transform: uppercase;
-  color: var(--sm-text-dim);
-  letter-spacing: 0.3px;
-  margin-bottom: 2px;
-}
-.talking-title {
-  display: block;
-  font-size: 14px;
-  font-weight: 500;
-  line-height: 1.3;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-.talking-views {
-  font-size: 12px;
-  color: var(--sm-text-dim);
-  white-space: nowrap;
-  flex-shrink: 0;
+  letter-spacing: 0.5px;
+  color: #bc0000;
 }
 
-/* Light mode overrides for talking section */
-[data-theme="light"] .talking-item,
-.light .talking-item {
-  border-bottom-color: rgba(0, 0, 0, 0.05);
+.storyline-card-title {
+  font-family: 'Space Grotesk', var(--font-space-grotesk), sans-serif;
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 1.35;
+  color: var(--sm-text);
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
 }
-[data-theme="light"] .talking-item:hover,
-.light .talking-item:hover {
-  background: rgba(0, 0, 0, 0.02);
+
+/* Light mode */
+[data-theme="light"] .storyline-card,
+.light .storyline-card {
+  background: rgba(255, 255, 255, 0.9);
+  border-color: rgba(0, 0, 0, 0.08);
+}
+
+[data-theme="light"] .storyline-card:hover,
+.light .storyline-card:hover {
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.1);
+  border-color: rgba(188, 0, 0, 0.2);
+}
+
+/* Mobile: narrower cards */
+@media (max-width: 640px) {
+  .storyline-card {
+    flex: 0 0 220px;
+  }
+  .storyline-card-image {
+    height: 110px;
+  }
+  .storylines-rail {
+    padding: 0 16px;
+    gap: 12px;
+  }
 }
 
 /* ========== Load More Button (spec) ========== */
