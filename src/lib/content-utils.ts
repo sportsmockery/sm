@@ -29,10 +29,10 @@ export function sanitizeWordPressContent(content: string): string {
   result = result.replace(/<!--\s*\/?wp:\w[^>]*-->/g, '')
 
   // 3. Strip unprocessed WordPress [caption] shortcodes, keeping inner content
-  result = result.replace(/\[caption[^\]]*\](.*?)\[\/caption\]/gs, '$1')
+  result = result.replace(/\[caption[^\]]*\]([\s\S]*?)\[\/caption\]/g, '$1')
 
   // 4. Strip [embed] shortcodes, keeping the URL inside
-  result = result.replace(/\[embed\](.*?)\[\/embed\]/gs, '$1')
+  result = result.replace(/\[embed\]([\s\S]*?)\[\/embed\]/g, '$1')
 
   // 5. Strip [gallery] shortcodes (no useful fallback)
   result = result.replace(/\[gallery[^\]]*\]/g, '')

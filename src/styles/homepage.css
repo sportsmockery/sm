@@ -332,6 +332,36 @@
   }
 }
 
+/* 100 floating background dots */
+.hero-floating-dot {
+  border-radius: 50%;
+  background: rgba(188, 0, 0, 0.15);
+  pointer-events: none;
+  z-index: 0;
+  opacity: 0;
+  animation: heroDotFloat ease-in-out infinite;
+}
+
+@keyframes heroDotFloat {
+  0%   { opacity: 0; transform: translate(0, 0); }
+  15%  { opacity: 0.5; }
+  50%  { opacity: 0.3; transform: translate(8px, -12px); }
+  85%  { opacity: 0.5; }
+  100% { opacity: 0; transform: translate(-4px, 8px); }
+}
+
+[data-theme="light"] .hero-floating-dot,
+.light .hero-floating-dot {
+  background: rgba(188, 0, 0, 0.10);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hero-floating-dot {
+    animation: none;
+    opacity: 0.2;
+  }
+}
+
 /* Main headline: Bebas Neue — chrome gradient + bevel */
 .hero-headline {
   font-family: var(--font-bebas-neue), 'Bebas Neue', Impact, sans-serif;

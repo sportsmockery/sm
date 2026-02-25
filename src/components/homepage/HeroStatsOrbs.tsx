@@ -138,6 +138,37 @@ function StatOrb({ stat, index }: { stat: HeroStat; index: number }) {
   )
 }
 
+// 100 purely decorative floating dots — no data, just ambiance
+const DOTS = Array.from({ length: 100 }, (_, i) => ({
+  top: `${(i * 7.3 + i * i * 0.13) % 100}%`,
+  left: `${(i * 11.7 + i * i * 0.09) % 100}%`,
+  size: 2 + (i % 5),               // 2–6px
+  delay: (i * 0.15) % 12,          // stagger over 12s
+  duration: 6 + (i % 8),           // 6–13s drift cycle
+}))
+
+function FloatingDots() {
+  return (
+    <>
+      {DOTS.map((d, i) => (
+        <div
+          key={`dot-${i}`}
+          className="hero-floating-dot"
+          style={{
+            position: 'absolute',
+            top: d.top,
+            left: d.left,
+            width: d.size,
+            height: d.size,
+            animationDuration: `${d.duration}s`,
+            animationDelay: `${d.delay}s`,
+          }}
+        />
+      ))}
+    </>
+  )
+}
+
 export function HeroStatsOrbs() {
   const [stats, setStats] = useState<HeroStat[]>(FALLBACK_STATS)
   const [cycleSet, setCycleSet] = useState(0)
@@ -189,6 +220,7 @@ export function HeroStatsOrbs() {
 
   return (
     <div className="hero-stats-orbs" aria-hidden="true">
+      <FloatingDots />
       {visibleStats.map((stat, i) => (
         <StatOrb key={`${stat.label}-${stat.value}-${i}`} stat={stat} index={i} />
       ))}
