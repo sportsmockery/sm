@@ -10,7 +10,7 @@ import { EditorPicksHero } from './EditorPicksHero';
 import { TeamFilterTabs } from './TeamFilterTabs';
 import { ForYouFeed } from './ForYouFeed';
 import { StorylineFeed } from './StorylineFeed';
-import { HomepageSidebar } from './HomepageSidebar';
+import { CommandPanel } from './CommandPanel';
 import { ScoutSearchBox } from './ScoutSearchBox';
 import { CatchUpTimeline } from './CatchUpTimeline';
 
@@ -796,7 +796,11 @@ export function HomepageFeed({
             </main>
 
             {/* Sidebar (desktop) */}
-            <HomepageSidebar trendingPosts={safeTrendingPosts} />
+            <CommandPanel
+              posts={filteredPosts}
+              trendingPosts={safeTrendingPosts}
+              isLoggedIn={actuallyLoggedIn}
+            />
           </div>
         </div>
       </section>
