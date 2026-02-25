@@ -18,7 +18,7 @@ import CommentSection from '@/components/article/CommentSection'
 import { ArticleTableOfContents, MoreFromTeam } from '@/components/article'
 import ScoutRecapCard from '@/components/article/ScoutRecapCard'
 import { categorySlugToTeam } from '@/lib/types'
-import { stripDuplicateFeaturedImage, calculateReadTime, getContextLabel } from '@/lib/content-utils'
+import { stripDuplicateFeaturedImage, calculateReadTime, getContextLabel, sanitizeWordPressContent } from '@/lib/content-utils'
 import { buildAutoLinkContextForPost, applyAutoLinksToHtml } from '@/lib/autolink'
 import { getArticleAudioInfo } from '@/lib/audioPlayer'
 import { ArticleAudioPlayer } from '@/components/article/ArticleAudioPlayer'
@@ -198,14 +198,20 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
   // Get context label (Rumor, Film Room, Opinion) per spec
   const contextLabel = getContextLabel(categoryData?.name, tags)
 
+  // Sanitize WordPress content: strip inline scripts, block comments, shortcodes.
+  // This MUST run before auto-linking or any other content processing.
+  // WordPress tweet embeds include <script> tags that execute during SSR and
+  // corrupt the DOM, breaking React hydration and client-side navigation.
+  const cleanContent = sanitizeWordPressContent(post.content || '')
+
   // Build auto-link context and apply auto-linking to content
-  let autoLinkedContent = post.content || ''
+  let autoLinkedContent = cleanContent
   try {
     const autoLinkCtx = await buildAutoLinkContextForPost(
       post.id,
       categoryData?.slug || category
     )
-    autoLinkedContent = applyAutoLinksToHtml(post.content || '', autoLinkCtx)
+    autoLinkedContent = applyAutoLinksToHtml(cleanContent, autoLinkCtx)
   } catch (err) {
     console.error('Error applying auto-links:', err)
     // Continue with original content if auto-linking fails
@@ -337,7 +343,7 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
           <aside className="hidden xl:block" style={{ width: 200, flexShrink: 0 }}>
             <div style={{ position: 'sticky', top: 96, paddingRight: 16 }}>
               <ArticleTableOfContents
-                contentHtml={post.content || ''}
+                contentHtml={cleanContent}
                 variant="glass"
               />
             </div>
@@ -357,7 +363,7 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
             <article className="article-body-2030">
               {/* Mobile TOC - shown at top on smaller screens */}
               <ArticleTableOfContents
-                contentHtml={post.content || ''}
+                contentHtml={cleanContent}
                 className="xl:hidden"
               />
 

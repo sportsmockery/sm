@@ -129,11 +129,15 @@ export default function ArticleContentWithEmbeds({
     if (twitterBlockquotes.length === 0) return
 
     // Load Twitter widget script and process embeds
-    loadTwitterScript().then(() => {
-      if (window.twttr?.widgets && contentRef.current) {
-        window.twttr.widgets.load(contentRef.current)
-      }
-    })
+    loadTwitterScript()
+      .then(() => {
+        if (window.twttr?.widgets && contentRef.current) {
+          window.twttr.widgets.load(contentRef.current)
+        }
+      })
+      .catch(() => {
+        // Silently fail — tweet embeds will show as blockquote fallbacks
+      })
   }, [processedContent])
 
   // If there's an inline slot, split content and inject it after paragraph 3
