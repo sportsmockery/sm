@@ -1,6 +1,5 @@
 import { notFound } from 'next/navigation'
 import { Metadata } from 'next'
-import Link from 'next/link'
 import Image from 'next/image'
 import { supabaseAdmin } from '@/lib/supabase-server'
 import { format } from 'date-fns'
@@ -10,23 +9,25 @@ import RelatedArticles from '@/components/article/RelatedArticles'
 import NextPrevArticle from '@/components/article/NextPrevArticle'
 import ArticleTags from '@/components/article/ArticleTags'
 import ArticleViewTracker from '@/components/ArticleViewTracker'
-import { ViewCounterCompact } from '@/components/ViewCounter'
 import ReadingProgressBar from '@/components/article/ReadingProgressBar'
 import ArticleActions from '@/components/article/ArticleActions'
 import ArticleSchema from '@/components/article/ArticleSchema'
 import CommentSection from '@/components/article/CommentSection'
-import UpdatedDate from '@/components/article/UpdatedDate'
-import TableOfContents from '@/components/article/TableOfContents'
-import MockeryCommentary from '@/components/article/MockeryCommentary'
 import { ArticleTableOfContents, MoreFromTeam } from '@/components/article'
-import { categorySlugToTeam, PostSummary } from '@/lib/types'
+import HeroCard from '@/components/article/HeroCard'
+import ArticleBodyCard from '@/components/article/ArticleBodyCard'
+import ScoutRecapCard from '@/components/article/ScoutRecapCard'
+import RailCard from '@/components/article/RailCard'
+import NextUpStrip from '@/components/article/NextUpStrip'
+import SlimCTA from '@/components/article/SlimCTA'
+import ArticleShareBar from '@/components/article/ArticleShareBar'
+import { categorySlugToTeam } from '@/lib/types'
 import { stripDuplicateFeaturedImage, calculateReadTime, getContextLabel } from '@/lib/content-utils'
 import { buildAutoLinkContextForPost, applyAutoLinksToHtml } from '@/lib/autolink'
 import { getArticleAudioInfo } from '@/lib/audioPlayer'
 import { ArticleAudioPlayer } from '@/components/article/ArticleAudioPlayer'
 import ArticleContentWithEmbeds from '@/components/article/ArticleContentWithEmbeds'
 import { TeamChatWidget } from '@/components/chat'
-import SocialShareBar from '@/components/SocialShareBar'
 import ARTourButton from '@/components/ar/ARTourButton'
 
 interface ArticlePageProps {
@@ -241,25 +242,12 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
 
   const categoryMap = new Map(allCategories?.map(c => [c.id, c]) || [])
 
-  // Generate a witty SM commentary
-  const smCommentaries = [
-    "Another day, another hot take served piping hot from the Windy City. You're welcome.",
-    "If you're not reading SportsMockery, are you even a real Chicago sports fan?",
-    "We're not saying we called this, but... okay fine, we definitely called this.",
-    "The truth hurts, but someone's gotta tell it. That's why we're here.",
-    "Chicago sports: where hope goes to get interesting stories written about it.",
-  ]
-  const randomCommentary = smCommentaries[Math.floor(Math.random() * smCommentaries.length)]
+  const formattedDate = format(new Date(post.published_at), 'MMMM d, yyyy')
 
   return (
     <>
-      {/* Track page view */}
       <ArticleViewTracker postId={post.id} />
-
-      {/* Reading Progress Bar */}
       <ReadingProgressBar />
-
-      {/* JSON-LD Structured Data */}
       <ArticleSchema
         article={{
           title: post.title,
@@ -282,178 +270,149 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
         url={articleUrl}
       />
 
-      {/* 2030 Hero Header */}
-      <header className="sm-hero-bg" style={{ padding: '120px 0 60px', minHeight: 250 }}>
-        <div className="sm-grid-overlay" />
-        <div style={{ position: 'relative', zIndex: 1, maxWidth: 760, margin: '0 auto', padding: '0 24px' }}>
-          {/* Breadcrumb */}
-          <nav style={{ marginBottom: 16 }}>
-            <ol style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 13, color: 'var(--sm-text-dim)', listStyle: 'none', padding: 0, margin: 0 }}>
-              <li><Link href="/" style={{ color: 'inherit', transition: 'color 0.2s' }}>Home</Link></li>
-              <li>/</li>
-              <li><Link href={`/${categoryData?.slug || category}`} style={{ color: 'inherit' }}>{categoryData?.name || category}</Link></li>
-            </ol>
-          </nav>
+      {/* Top spacer for fixed nav */}
+      <div style={{ paddingTop: 'calc(var(--sm-nav-height, 72px) + 24px)' }} />
 
-          {/* Category + Context tags */}
-          <div style={{ display: 'flex', gap: 8, marginBottom: 16, flexWrap: 'wrap' }}>
-            <Link href={`/${categoryData?.slug || category}`} className="sm-tag">{categoryData?.name || category}</Link>
-            {contextLabel && <span className="sm-tag">{contextLabel.label}</span>}
-          </div>
+      {/* 3-column grid */}
+      <div className="article-page-grid">
+        {/* Left column: Scout + TOC (desktop only via CSS) */}
+        <aside className="article-col-left">
+          <ScoutRecapCard slug={slug} title={post.title} excerpt={post.excerpt} />
+          <ArticleTableOfContents contentHtml={post.content || ''} variant="glass" />
+        </aside>
 
-          {/* Title */}
-          <h1 style={{ fontFamily: "'Space Grotesk', sans-serif", fontSize: 'clamp(2rem, 4vw, 3rem)', fontWeight: 700, letterSpacing: '-1px', lineHeight: 1.15, color: 'var(--sm-text)', marginBottom: 24 }}>
-            {post.title}
-          </h1>
-
-          {/* Author row */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap' }}>
-            {author && (
-              <Link href={`/author/${author.slug || author.id}`} style={{ display: 'flex', alignItems: 'center', gap: 10, textDecoration: 'none' }}>
-                {author.avatar_url ? (
-                  <div style={{ width: 32, height: 32, borderRadius: '50%', overflow: 'hidden', position: 'relative' }}>
-                    <Image src={author.avatar_url} alt={author.display_name} fill style={{ objectFit: 'cover' }} />
-                  </div>
-                ) : (
-                  <div style={{ width: 32, height: 32, borderRadius: '50%', background: 'var(--sm-gradient-subtle)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 14, fontWeight: 600, color: 'var(--sm-text)' }}>
-                    {author.display_name.charAt(0)}
-                  </div>
-                )}
-                <span style={{ fontSize: 14, fontWeight: 600, color: 'var(--sm-text)' }}>{author.display_name}</span>
-              </Link>
-            )}
-            <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 14, color: 'var(--sm-text-muted)', flexWrap: 'wrap' }}>
-              <time dateTime={post.published_at}>{format(new Date(post.published_at), 'MMMM d, yyyy')}</time>
-              <span style={{ color: 'var(--sm-text-dim)' }}>·</span>
-              <span>{readingTime} min read</span>
-              <span style={{ color: 'var(--sm-text-dim)' }}>·</span>
-              <ViewCounterCompact views={post.views || 0} />
-            </div>
-          </div>
+        {/* Center column */}
+        <main className="article-col-center">
+          <HeroCard
+            breadcrumb={[
+              { label: 'Home', href: '/' },
+              { label: categoryData?.name || category, href: `/${categoryData?.slug || category}` },
+            ]}
+            categoryName={categoryData?.name || category}
+            categorySlug={categoryData?.slug || category}
+            contextLabel={contextLabel}
+            title={post.title}
+            author={author}
+            publishedAt={post.published_at}
+            readingTime={readingTime}
+            views={post.views || 0}
+            formattedDate={formattedDate}
+          />
 
           {/* Featured image */}
           {post.featured_image && (
-            <div style={{ marginTop: 32, borderRadius: 16, overflow: 'hidden', position: 'relative', aspectRatio: '16/9' }}>
+            <div style={{ marginTop: 24, borderRadius: 16, overflow: 'hidden', position: 'relative', aspectRatio: '16/9' }}>
               <Image src={post.featured_image} alt={post.title} fill style={{ objectFit: 'cover' }} priority />
             </div>
           )}
-          {post.featured_image && (
-            <SocialShareBar url={articleUrl} title={post.title} />
-          )}
-        </div>
-      </header>
 
-      {/* 2030 Article Body Area */}
-      <div style={{ backgroundColor: 'var(--sm-dark)' }}>
-        <div style={{ maxWidth: 1400, margin: '0 auto', padding: '48px 24px', display: 'flex', justifyContent: 'center', gap: 0 }}>
-          {/* Left Sidebar - TOC (Desktop only) */}
-          {readingTime >= 5 && (
-            <aside className="hidden xl:block" style={{ width: 220, flexShrink: 0 }}>
-              <div style={{ position: 'sticky', top: 96, paddingRight: 24 }}>
-                <ArticleTableOfContents
-                  contentHtml={post.content || ''}
-                />
-              </div>
-            </aside>
-          )}
+          <ArticleShareBar url={articleUrl} title={post.title} />
 
-          {/* Main article column */}
-          <div style={{ width: '100%', maxWidth: 720, borderColor: 'var(--sm-border)' }}>
-            {/* Article Audio Player */}
-            {audioInfo && (
+          {audioInfo && (
+            <div style={{ marginTop: 16 }}>
               <ArticleAudioPlayer
                 initialArticle={audioInfo.article}
                 initialAudioUrl={audioInfo.audioUrl}
                 articleContent={post.content || ''}
               />
-            )}
+            </div>
+          )}
+
+          <ArticleBodyCard>
+            {/* Mobile/tablet: inline Scout + TOC */}
+            <div className="xl:hidden" style={{ marginBottom: 24 }}>
+              <ScoutRecapCard slug={slug} title={post.title} excerpt={post.excerpt} />
+              <div style={{ marginTop: 16 }}>
+                <ArticleTableOfContents contentHtml={post.content || ''} className="xl:hidden" />
+              </div>
+            </div>
 
             <article className="article-body-2030">
-              {/* Mobile TOC - shown at top on smaller screens */}
-              {readingTime >= 5 && (
-                <ArticleTableOfContents
-                  contentHtml={post.content || ''}
-                  className="xl:hidden"
-                />
-              )}
-
-              {/* Auto-linked content with duplicate featured image stripped */}
               <ArticleContentWithEmbeds
                 content={stripDuplicateFeaturedImage(autoLinkedContent, post.featured_image)}
               />
+            </article>
 
-              {/* Share buttons */}
-              <div style={{ margin: '32px 0', display: 'flex', alignItems: 'center', gap: 12, borderTop: '1px solid var(--sm-border)', borderBottom: '1px solid var(--sm-border)', padding: '24px 0' }}>
-                <ShareButtons url={articleUrl} title={post.title} />
+            {/* Share buttons */}
+            <div style={{ margin: '32px 0 0', display: 'flex', alignItems: 'center', gap: 12, borderTop: '1px solid var(--sm-border)', padding: '24px 0 0' }}>
+              <ShareButtons url={articleUrl} title={post.title} />
+            </div>
+
+            {/* Tags */}
+            {tags.length > 0 && (
+              <div style={{ marginTop: 24 }}>
+                <ArticleTags tags={tags} />
               </div>
+            )}
 
-              {/* Tags */}
-              {tags.length > 0 && (
-                <div style={{ marginTop: 40, borderTop: '1px solid var(--sm-border)', paddingTop: 24 }}>
-                  <ArticleTags tags={tags} />
-                </div>
-              )}
+            {/* Author Card */}
+            {author && (
+              <div style={{ marginTop: 32, borderTop: '1px solid var(--sm-border)', paddingTop: 32 }}>
+                <AuthorCard
+                  author={{
+                    id: author.id,
+                    name: author.display_name,
+                    slug: author.slug || String(author.id),
+                    avatar_url: author.avatar_url,
+                    bio: author.bio,
+                    twitter_url: author.twitter,
+                    email: author.email,
+                  }}
+                />
+              </div>
+            )}
 
-              {/* Author Card */}
-              {author && (
-                <div style={{ marginTop: 40, borderTop: '1px solid var(--sm-border)', paddingTop: 40 }}>
-                  <AuthorCard
-                    author={{
-                      id: author.id,
-                      name: author.display_name,
-                      slug: author.slug || String(author.id),
-                      avatar_url: author.avatar_url,
-                      bio: author.bio,
-                      twitter_url: author.twitter,
-                      email: author.email,
-                    }}
-                  />
-                </div>
-              )}
-
-              {/* Comments */}
+            {/* Comments */}
+            <div id="comments-section">
               <CommentSection
                 articleId={post.id}
                 articleUrl={articleUrl}
                 articleTitle={post.title}
               />
-            </article>
-          </div>
-
-          {/* Right Sidebar (Desktop only) */}
-          <aside className="hidden xl:block" style={{ width: 280, flexShrink: 0 }}>
-            <div style={{ position: 'sticky', top: 96, paddingLeft: 24 }}>
-              {relatedPosts.length > 0 && categoryData && (
-                <MoreFromTeam
-                  posts={relatedPosts.map(p => ({
-                    id: p.id,
-                    slug: p.slug,
-                    title: p.title,
-                    excerpt: p.excerpt,
-                    featuredImage: p.featured_image,
-                    publishedAt: p.published_at,
-                    views: 0,
-                    author: {
-                      id: author?.id || 0,
-                      displayName: author?.display_name || 'Staff',
-                      avatarUrl: author?.avatar_url || null,
-                    },
-                    team: categorySlugToTeam(categoryData.slug),
-                    categorySlug: categoryData.slug,
-                    categoryName: categoryData.name,
-                  }))}
-                  team={categorySlugToTeam(categoryData.slug)}
-                  currentPostId={post.id}
-                />
-              )}
-
-              <ARTourButton team={categoryData?.slug || category} />
             </div>
-          </aside>
-        </div>
+          </ArticleBodyCard>
+
+          <NextUpStrip
+            articles={relatedPosts.map(p => ({ id: p.id, title: p.title, slug: p.slug }))}
+            categorySlug={categoryData?.slug}
+          />
+          <SlimCTA />
+        </main>
+
+        {/* Right column (desktop/tablet via CSS) */}
+        <aside className="article-col-right">
+          {relatedPosts.length > 0 && categoryData && (
+            <RailCard>
+              <MoreFromTeam
+                posts={relatedPosts.map(p => ({
+                  id: p.id,
+                  slug: p.slug,
+                  title: p.title,
+                  excerpt: p.excerpt,
+                  featuredImage: p.featured_image,
+                  publishedAt: p.published_at,
+                  views: 0,
+                  author: {
+                    id: author?.id || 0,
+                    displayName: author?.display_name || 'Staff',
+                    avatarUrl: author?.avatar_url || null,
+                  },
+                  team: categorySlugToTeam(categoryData.slug),
+                  categorySlug: categoryData.slug,
+                  categoryName: categoryData.name,
+                }))}
+                team={categorySlugToTeam(categoryData.slug)}
+                currentPostId={post.id}
+              />
+            </RailCard>
+          )}
+          <RailCard>
+            <ARTourButton team={categoryData?.slug || category} />
+          </RailCard>
+        </aside>
       </div>
 
-      {/* Next/Previous Article Navigation */}
+      {/* Full-width below grid */}
       <NextPrevArticle
         prevArticle={prevPost ? {
           title: prevPost.title,
@@ -475,7 +434,6 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
         } : undefined}
       />
 
-      {/* Related Articles Section */}
       {relatedPosts.length > 0 && categoryData && (
         <section style={{ borderTop: '1px solid var(--sm-border)', padding: '48px 0', backgroundColor: 'var(--sm-surface)' }}>
           <div className="sm-container">
@@ -503,14 +461,12 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
         </section>
       )}
 
-      {/* Mobile Floating Action Bar */}
       <ArticleActions
         articleId={post.id}
         articleUrl={articleUrl}
         articleTitle={post.title}
       />
 
-      {/* Team Chat Widget */}
       <TeamChatWidget categorySlug={category} />
     </>
   )

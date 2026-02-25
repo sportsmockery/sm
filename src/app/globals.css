@@ -2,6 +2,7 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Space+Grotesk:wght@300;400;500;600;700&display=swap');
 
 @import "tailwindcss";
+@import "../styles/article-grid.css";
 
 /* ========== CSS VARIABLES (from Design Spec) ========== */
 /*
@@ -3667,6 +3668,7 @@ main, .page-content, [role="main"] {
 .article-body-2030 {
   max-width: 720px;
   margin: 0 auto;
+  font-family: var(--sm-font-body, 'Inter', sans-serif);
 }
 .article-body-2030 p {
   font-size: 17px;
@@ -3675,6 +3677,7 @@ main, .page-content, [role="main"] {
   margin-bottom: 24px;
 }
 .article-body-2030 h2 {
+  font-family: var(--sm-font-heading, 'Space Grotesk', sans-serif);
   font-size: 28px;
   font-weight: 700;
   color: var(--sm-text);
@@ -3682,6 +3685,7 @@ main, .page-content, [role="main"] {
   margin-bottom: 16px;
 }
 .article-body-2030 h3 {
+  font-family: var(--sm-font-heading, 'Space Grotesk', sans-serif);
   font-size: 22px;
   font-weight: 600;
   color: var(--sm-text);
@@ -3689,12 +3693,14 @@ main, .page-content, [role="main"] {
   margin-bottom: 12px;
 }
 .article-body-2030 blockquote {
-  border-left: 3px solid var(--sm-red);
-  padding: 20px 24px;
+  border-left: 4px solid var(--sm-red);
+  padding: 28px 32px;
   background: var(--sm-card);
-  border-radius: var(--sm-radius-md);
-  margin: 24px 0;
+  border-radius: 0 16px 16px 0;
+  margin: 40px 0;
   font-style: italic;
+  font-size: 19px;
+  line-height: 1.6;
   color: var(--sm-text-dim);
 }
 .article-body-2030 ul,
@@ -3702,18 +3708,33 @@ main, .page-content, [role="main"] {
   color: var(--sm-text-muted);
   padding-left: 24px;
   line-height: 1.8;
+  margin-bottom: 24px;
 }
 .article-body-2030 a {
   color: var(--sm-red-light);
   text-decoration: underline;
 }
 .article-body-2030 img {
-  border-radius: 12px;
+  border-radius: 16px;
   width: 100%;
   margin: 24px 0;
+  float: none !important;
+}
+.article-body-2030 iframe,
+.article-body-2030 .embed-container {
+  width: 100%;
+  border-radius: 16px;
+  margin: 24px 0;
+}
+.article-body-2030 figcaption {
+  font-size: 13px;
+  color: var(--sm-text-dim);
+  text-align: left;
+  margin-top: 8px;
 }
 @media (max-width: 768px) {
   .article-body-2030 p { font-size: 16px; }
+  .article-body-2030 blockquote { padding: 20px 24px; font-size: 17px; margin: 28px 0; }
 }
 
 /* ========== FINAL POLISH: Upgrade 1 — Haptic Micro-Interactions ========== */

@@ -1,0 +1,95 @@
+/* ===== ARTICLE PAGE 3-COLUMN GRID ===== */
+
+.article-page-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.4fr) minmax(0, 3fr) minmax(0, 1.3fr);
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 24px 24px 0;
+  gap: 24px;
+}
+
+/* Left column — sticky TOC + Scout */
+.article-col-left {
+  position: sticky;
+  top: calc(var(--sm-nav-height, 72px) + 24px);
+  height: fit-content;
+  max-height: calc(100vh - var(--sm-nav-height, 72px) - 48px);
+  overflow-y: auto;
+  scrollbar-width: thin;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+/* Center column */
+.article-col-center {
+  min-width: 0;
+}
+
+/* Right column — sticky rail */
+.article-col-right {
+  position: sticky;
+  top: calc(var(--sm-nav-height, 72px) + 24px);
+  height: fit-content;
+  max-height: calc(100vh - var(--sm-nav-height, 72px) - 48px);
+  overflow-y: auto;
+  scrollbar-width: thin;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+/* ===== Glass card shared style ===== */
+.article-glass-card {
+  background: var(--sm-card);
+  border: 1px solid var(--sm-border);
+  border-radius: 16px;
+  padding: 24px;
+}
+
+.article-glass-card-sm {
+  background: var(--sm-card);
+  border: 1px solid var(--sm-border);
+  border-radius: 16px;
+  padding: 16px 20px;
+}
+
+/* ===== Responsive: Tablet (2-col) ===== */
+@media (max-width: 1279px) {
+  .article-page-grid {
+    grid-template-columns: minmax(0, 3fr) minmax(0, 1.3fr);
+  }
+  .article-col-left {
+    display: none;
+  }
+}
+
+/* ===== Responsive: Mobile (1-col) ===== */
+@media (max-width: 1023px) {
+  .article-page-grid {
+    grid-template-columns: 1fr;
+    padding: 16px 16px 0;
+  }
+  .article-col-right {
+    display: none;
+  }
+}
+
+/* ===== NextUp strip scroll ===== */
+.next-up-strip {
+  display: flex;
+  gap: 12px;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  padding: 4px 0;
+}
+.next-up-strip::-webkit-scrollbar {
+  display: none;
+}
+.next-up-strip > * {
+  scroll-snap-align: start;
+  flex-shrink: 0;
+}

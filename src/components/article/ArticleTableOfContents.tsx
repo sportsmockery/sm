@@ -11,6 +11,7 @@ interface TOCItem {
 interface ArticleTableOfContentsProps {
   contentHtml: string
   className?: string
+  variant?: 'default' | 'glass'
 }
 
 /**
@@ -22,6 +23,7 @@ interface ArticleTableOfContentsProps {
 export default function ArticleTableOfContents({
   contentHtml,
   className = '',
+  variant = 'default',
 }: ArticleTableOfContentsProps) {
   const [items, setItems] = useState<TOCItem[]>([])
   const [activeId, setActiveId] = useState<string>('')
@@ -94,13 +96,12 @@ export default function ArticleTableOfContents({
     }
   }
 
-  // Detect if we're in sidebar mode (left side, no border/bg)
-  const isSidebarMode = className.includes('bg-transparent')
+  const isSidebarMode = variant === 'glass'
 
   if (isSidebarMode) {
-    // Athletic-style left sidebar TOC - minimal, elegant
+    // Athletic-style left sidebar TOC in glass card wrapper
     return (
-      <nav className={className} aria-label="Table of contents">
+      <nav className={`article-glass-card-sm ${className}`} aria-label="Table of contents">
         <div className="mb-4">
           <span
             className="text-[11px] font-semibold tracking-[0.1em] uppercase"
