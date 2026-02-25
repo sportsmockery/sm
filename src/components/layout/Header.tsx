@@ -169,7 +169,7 @@ export default function Header() {
           {/* "My Chicago" mode toggle */}
           <button
             onClick={toggleMyChicagoMode}
-            aria-label={myChicagoMode === 'all' ? 'Switch to My Teams' : 'Switch to All Chicago'}
+            aria-label={myChicagoMode === 'all' ? 'Switch to My Teams' : 'Switch to Chicago'}
             className="my-chicago-toggle"
             style={{
               display: 'flex',
@@ -213,7 +213,7 @@ export default function Header() {
                 letterSpacing: '0.02em',
               }}
             >
-              All Chicago
+              Chicago
             </span>
             <span
               style={{
