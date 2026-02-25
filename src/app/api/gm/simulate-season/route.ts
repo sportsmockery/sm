@@ -75,13 +75,12 @@ export async function POST(request: NextRequest) {
       })),
     }
 
-    // Use X-Source + X-User-Id auth (same pattern as /api/gm/simulate, /api/gm/fit, etc.)
+    // Auth via X-API-Key (validated against DataLab's GM_API_KEY)
     const res = await fetch(`${DATALAB_URL}/api/gm/simulate-season`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'X-Source': 'sportsmockery.com',
-        'X-User-Id': user.id,
+        'X-API-Key': process.env.GM_API_KEY || '',
       },
       body: JSON.stringify(payload),
     })
