@@ -3533,3 +3533,249 @@ html {
   border-color: rgba(188, 0, 0, 0.15);
   color: var(--sm-text);
 }
+
+/* ========== 2030 Glassmorphism: Stat Orbs ========== */
+.stat-orb {
+  position: absolute;
+  z-index: 5;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.15);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(188, 0, 0, 0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 11px;
+  font-weight: 500;
+  color: #ffffff;
+  text-align: center;
+  line-height: 1;
+  pointer-events: none;
+  animation: pulse-glow 2s ease-in-out infinite;
+  transition: transform 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.stat-orb--views {
+  top: 12px;
+  right: 12px;
+}
+
+.stat-orb--read {
+  bottom: 12px;
+  left: 12px;
+  width: auto;
+  min-width: 36px;
+  height: 36px;
+  padding: 0 8px;
+  border-radius: 18px;
+  font-size: 10px;
+  white-space: nowrap;
+}
+
+/* Hover: orbs scale up */
+.feed-card:hover .stat-orb {
+  transform: scale(1.2);
+}
+
+@keyframes pulse-glow {
+  0%, 100% { box-shadow: 0 0 8px rgba(188, 0, 0, 0.3); }
+  50% { box-shadow: 0 0 16px rgba(188, 0, 0, 0.6); }
+}
+
+/* ========== 2030 Glassmorphism: Neon Team Label ========== */
+.neon-team {
+  position: absolute;
+  bottom: 12px;
+  right: 12px;
+  z-index: 5;
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 1.5px;
+  color: #ffffff;
+  text-shadow: 0 0 8px #bc0000, 0 0 16px #bc0000;
+  padding: 4px 10px;
+  border-radius: 4px;
+  background: rgba(0, 0, 0, 0.5);
+  transition: text-shadow 0.3s ease;
+  animation: neon-breathe 3s ease-in-out infinite;
+}
+
+/* Hover: glow intensifies */
+.feed-card:hover .neon-team {
+  text-shadow: 0 0 10px #bc0000, 0 0 20px #bc0000, 0 0 40px #bc0000;
+}
+
+@keyframes neon-breathe {
+  0%, 100% { text-shadow: 0 0 8px #bc0000, 0 0 16px #bc0000; }
+  50% { text-shadow: 0 0 12px #bc0000, 0 0 24px #bc0000, 0 0 36px rgba(188, 0, 0, 0.4); }
+}
+
+/* Mobile: orbs reposition (stack vertically on left) */
+@media (max-width: 768px) {
+  .stat-orb--views {
+    top: 10px;
+    right: 10px;
+  }
+  .stat-orb--read {
+    bottom: 10px;
+    left: 10px;
+  }
+  .neon-team {
+    bottom: 10px;
+    right: 10px;
+    font-size: 10px;
+  }
+}
+
+/* ========== 2030 Glassmorphism: Gradient Masks + Polygon Crops (XL/M only) ========== */
+
+/* Red gradient overlay on stadium-cropped images */
+.card-image--stadium {
+  position: relative;
+}
+
+.card-image--stadium::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, rgba(188, 0, 0, 0.6) 0%, transparent 50%);
+  border-radius: inherit;
+  z-index: 2;
+  pointer-events: none;
+  transition: opacity 0.3s ease;
+}
+
+/* Radial gradient mask — dual cutout effect */
+.card-image--stadium img {
+  -webkit-mask-image:
+    radial-gradient(circle at 30% 30%, transparent 5%, black 15%),
+    radial-gradient(circle at 70% 70%, transparent 5%, black 15%);
+  mask-image:
+    radial-gradient(circle at 30% 30%, transparent 5%, black 15%),
+    radial-gradient(circle at 70% 70%, transparent 5%, black 15%);
+  -webkit-mask-composite: source-in;
+  mask-composite: intersect;
+  transition: transform 0.4s cubic-bezier(0.22, 1, 0.36, 1),
+              -webkit-mask-position 0.4s ease,
+              mask-position 0.4s ease;
+}
+
+/* Hover: image scales, mask shifts */
+.feed-card:hover .card-image--stadium img {
+  transform: scale(1.05);
+  -webkit-mask-position: 10px 10px, -10px -10px;
+  mask-position: 10px 10px, -10px -10px;
+}
+
+/* Hover: red overlay fades slightly for reveal effect */
+.feed-card:hover .card-image--stadium::before {
+  opacity: 0.7;
+}
+
+/* Mobile: disable polygon crop, keep gradient overlay */
+@media (max-width: 768px) {
+  .card-image--stadium img {
+    clip-path: none !important;
+    -webkit-mask-image: none;
+    mask-image: none;
+  }
+}
+
+/* ========== 2030 Glassmorphism: Holographic Tags ========== */
+.holo-tag {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  z-index: 6;
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  color: #ffffff;
+  padding: 5px 10px;
+  border-radius: 4px;
+  background: linear-gradient(
+    45deg,
+    rgba(255, 255, 255, 0.1),
+    rgba(188, 0, 0, 0.2),
+    rgba(255, 255, 255, 0.08)
+  );
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  transform: perspective(400px) rotateX(20deg);
+  transform-origin: bottom center;
+  transition: transform 0.4s cubic-bezier(0.22, 1, 0.36, 1),
+              background 0.3s ease,
+              box-shadow 0.3s ease;
+  pointer-events: none;
+}
+
+/* Hover: tag flips back to flat with Y-axis tilt */
+.feed-card:hover .holo-tag {
+  transform: perspective(400px) rotateX(0deg) rotateY(10deg);
+  background: linear-gradient(
+    45deg,
+    rgba(188, 0, 0, 0.25),
+    rgba(255, 255, 255, 0.15),
+    rgba(188, 0, 0, 0.2)
+  );
+  box-shadow: 0 4px 16px rgba(188, 0, 0, 0.3);
+}
+
+/* ========== 2030 Glassmorphism: Collage Thumbs (video/analysis) ========== */
+.collage-thumbs {
+  display: grid;
+  grid-template: 1fr 1fr / 1fr 1fr;
+  gap: 2px;
+  width: 100%;
+  height: 100%;
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  overflow: hidden;
+}
+
+.collage-thumbs img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.4s cubic-bezier(0.22, 1, 0.36, 1),
+              filter 0.4s ease;
+  filter: brightness(0.85);
+}
+
+/* Each quadrant shows a different crop of the same image */
+.collage-thumbs img:nth-child(2) {
+  filter: brightness(0.75);
+}
+.collage-thumbs img:nth-child(3) {
+  filter: brightness(0.9) saturate(1.2);
+}
+.collage-thumbs img:nth-child(4) {
+  filter: brightness(0.7) saturate(0.8);
+}
+
+/* Hover: individual tiles scale */
+.feed-card:hover .collage-thumbs img {
+  filter: brightness(1);
+}
+.feed-card:hover .collage-thumbs img:nth-child(1) { transform: scale(1.06); }
+.feed-card:hover .collage-thumbs img:nth-child(2) { transform: scale(1.04); }
+.feed-card:hover .collage-thumbs img:nth-child(3) { transform: scale(1.05); }
+.feed-card:hover .collage-thumbs img:nth-child(4) { transform: scale(1.03); }
+
+/* Mobile: holo-tag smaller */
+@media (max-width: 768px) {
+  .holo-tag {
+    font-size: 9px;
+    padding: 4px 8px;
+    transform: perspective(400px) rotateX(10deg);
+  }
+}

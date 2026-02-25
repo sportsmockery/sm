@@ -97,8 +97,10 @@ export function PostCard({ post, priority = false, cardSize = 'compact' }: PostC
     : `/${post.slug}`;
 
   const contentBadge = getContentTypeBadge(post.content_type);
+  const isCollageType = post.content_type === 'video' || post.content_type === 'analysis';
 
   const sizeClass = cardSize === 'xl' ? 'card-xl' : cardSize === 'm' ? 'card-m' : 'card-compact';
+  const isLargeCard = cardSize === 'xl' || cardSize === 'm';
 
   // Build context panel summary (truncated excerpt)
   const panelExcerpt = post.excerpt
@@ -107,23 +109,56 @@ export function PostCard({ post, priority = false, cardSize = 'compact' }: PostC
       : post.excerpt
     : null;
 
+  // Stat orbs data
+  const views = post.views || 0;
+  const viewsLabel = views > 999999
+    ? `${(views / 1000000).toFixed(1)}M`
+    : views > 999
+      ? `${(views / 1000).toFixed(1)}k`
+      : String(views);
+  const wordCount = post.excerpt ? post.excerpt.split(/\s+/).length : 0;
+  const minRead = Math.max(1, Math.floor(wordCount / 160));
+
   return (
     <article className={`glass-card feed-card ${sizeClass}`}>
       <Link href={postUrl} onClick={() => markAsRead(post.slug)}>
-        <div className="card-image">
-          {post.featured_image ? (
+        <div className={`card-image${isLargeCard ? ' card-image--stadium' : ''}`}>
+          {isCollageType && post.featured_image ? (
+            <div className="collage-thumbs">
+              {(['center', 'top left', 'bottom right', 'top right'] as const).map((pos, i) => (
+                <img
+                  key={i}
+                  src={post.featured_image!}
+                  alt=""
+                  style={{ objectPosition: pos }}
+                />
+              ))}
+            </div>
+          ) : post.featured_image ? (
             <Image
               src={post.featured_image}
               alt=""
               fill
               sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw"
               priority={priority}
+              style={isLargeCard ? { clipPath: 'polygon(0 0, 95% 0, 100% 12%, 100% 88%, 95% 100%, 0 100%)' } : undefined}
             />
           ) : (
             <div className="card-placeholder" />
           )}
+
+          {/* Holographic category tag — top-left corner */}
+          {post.category_slug && (
+            <span className="holo-tag">{post.category_slug.replace('chicago-', '').replace(/-/g, ' ')}</span>
+          )}
+
+          {/* Stat orbs */}
+          <div className="stat-orb stat-orb--views">{viewsLabel}</div>
+          <div className="stat-orb stat-orb--read">{minRead} min</div>
+
+          {/* Neon team label replaces old pill */}
           {teamName && (
-            <span className="sm-tag card-team-pill">{teamName}</span>
+            <span className="neon-team">{teamName.toUpperCase()}</span>
           )}
           {post.is_trending && (
             <span
