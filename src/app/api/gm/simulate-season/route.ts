@@ -1,17 +1,50 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getGMAuthUser } from '@/lib/gm-auth'
 import { datalabAdmin } from '@/lib/supabase-datalab'
+import { createServerClient } from '@supabase/ssr'
+import { cookies } from 'next/headers'
 
 export const dynamic = 'force-dynamic'
 export const maxDuration = 30 // V3 deep mode can take up to 15s
 
 const DATALAB_BASE = 'https://datalab.sportsmockery.com'
 const V3_ENDPOINT = `${DATALAB_BASE}/api/gm/simulate-season`
-const V1_ENDPOINT = `${DATALAB_BASE}/api/gm/sim/season`
+
+/**
+ * Get the user's actual Supabase access token to forward to DataLab.
+ * DataLab V3 requires a real user token, not the anon key.
+ */
+async function getUserAccessToken(request: NextRequest): Promise<string | null> {
+  // Check for Bearer token (mobile app)
+  const authHeader = request.headers.get('authorization')
+  if (authHeader?.startsWith('Bearer ')) {
+    return authHeader.slice(7)
+  }
+
+  // Get token from cookie-based session (web)
+  try {
+    const cookieStore = await cookies()
+    const supabase = createServerClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+      {
+        cookies: {
+          getAll() { return cookieStore.getAll() },
+          setAll(cookiesToSet) {
+            try { cookiesToSet.forEach(({ name, value, options }) => { cookieStore.set(name, value, options) }) } catch {}
+          },
+        },
+      }
+    )
+    const { data: { session } } = await supabase.auth.getSession()
+    return session?.access_token || null
+  } catch {
+    return null
+  }
+}
 
 /**
  * Fetch accepted trades for this session with full player/pick data.
- * This ensures the simulation has the complete roster picture.
  */
 async function fetchSessionTrades(sessionId: string) {
   try {
@@ -31,9 +64,8 @@ async function fetchSessionTrades(sessionId: string) {
 /**
  * POST /api/gm/simulate-season
  * Proxies to DataLab V3 season simulation API.
- * Includes full trade data (players, picks, prospects) so simulation
- * accounts for the new assets on each team after trades.
- * Falls back to V1 endpoint, then local engine if both fail.
+ * Includes full trade data so simulation accounts for roster changes.
+ * Falls back to local engine if DataLab is unreachable.
  */
 export async function POST(request: NextRequest) {
   try {
@@ -64,7 +96,7 @@ export async function POST(request: NextRequest) {
       teamKey,
       seasonYear: seasonYear || 2026,
       simulationDepth: simulationDepth || 'standard',
-      // Include full trade data so simulation has the complete roster picture
+      // Include full trade data so DataLab has the complete roster picture
       trades: trades.map((t: any) => ({
         tradeId: t.id,
         chicagoTeam: t.chicago_team,
@@ -80,57 +112,56 @@ export async function POST(request: NextRequest) {
       })),
     }
 
-    const authKey = process.env.DATALAB_SUPABASE_ANON_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+    // Get the user's real Supabase access token for DataLab auth
+    const userToken = await getUserAccessToken(request)
+    const serviceKey = process.env.DATALAB_SUPABASE_SERVICE_ROLE_KEY
+    const anonKey = process.env.DATALAB_SUPABASE_ANON_KEY
 
-    // Try V3 endpoint first
-    try {
-      const v3Response = await fetch(V3_ENDPOINT, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${authKey}`,
-        },
-        body: JSON.stringify(payload),
-      })
+    // Try V3 endpoint with multiple auth strategies
+    const authStrategies = [
+      // 1. User's actual access token (preferred by V3)
+      ...(userToken ? [{ 'Authorization': `Bearer ${userToken}` }] : []),
+      // 2. Service role key
+      ...(serviceKey ? [{ 'Authorization': `Bearer ${serviceKey}` }] : []),
+      // 3. X-API-Key with service role
+      ...(serviceKey ? [{ 'X-API-Key': serviceKey }] : []),
+      // 4. Anon key
+      ...(anonKey ? [{ 'Authorization': `Bearer ${anonKey}` }] : []),
+    ]
 
-      if (v3Response.ok) {
-        const data = await v3Response.json()
-        return NextResponse.json(data)
+    for (const authHeaders of authStrategies) {
+      try {
+        const v3Response = await fetch(V3_ENDPOINT, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            ...authHeaders,
+          },
+          body: JSON.stringify(payload),
+        })
+
+        if (v3Response.ok) {
+          const data = await v3Response.json()
+          // Validate the response has real data (not empty 0-0)
+          if (data.success) {
+            return NextResponse.json(data)
+          }
+        }
+
+        // If 401, try next auth strategy
+        if (v3Response.status === 401) continue
+
+        // Non-401 error, log and break
+        console.error('[Simulate Season V3] Error:', v3Response.status)
+        break
+      } catch (err) {
+        console.error('[Simulate Season V3] Request failed:', err)
+        break
       }
-
-      console.error('[Simulate Season V3] Non-OK response:', v3Response.status)
-    } catch (v3Error) {
-      console.error('[Simulate Season V3] Request failed:', v3Error)
     }
 
-    // Fallback to V1 endpoint
-    try {
-      const v1Response = await fetch(V1_ENDPOINT, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${authKey}`,
-        },
-        body: JSON.stringify({
-          sessionId,
-          sport,
-          teamKey,
-          seasonYear: seasonYear || 2026,
-          trades: payload.trades,
-        }),
-      })
-
-      if (v1Response.ok) {
-        const data = await v1Response.json()
-        return NextResponse.json({ ...data, simulation_version: data.simulation_version || 'v1' })
-      }
-
-      console.error('[Simulate Season V1 fallback] Non-OK response:', v1Response.status)
-    } catch (v1Error) {
-      console.error('[Simulate Season V1 fallback] Request failed:', v1Error)
-    }
-
-    // Both endpoints failed — fall back to local simulation engine
+    // DataLab V3 failed — fall back to local simulation engine
+    console.log('[Simulate Season] Falling back to local engine')
     const { simulateSeason } = await import('@/lib/sim/season-engine')
     const localResult = await simulateSeason({
       sessionId,
