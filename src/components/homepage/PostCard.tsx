@@ -1,9 +1,12 @@
 // src/components/homepage/PostCard.tsx
 'use client';
 
+import { useRef, useCallback, useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { differenceInHours, differenceInDays, format } from 'date-fns';
+import { useScoutConcierge } from '@/hooks/useScoutConcierge';
+import { ScoutConciergeOverlay } from './ScoutConciergeOverlay';
 
 interface Post {
   id: string;
@@ -91,6 +94,33 @@ export function PostCard({ post, priority = false, cardSize = 'compact' }: PostC
     ? TEAM_DISPLAY_NAMES[post.team_slug] || post.team_slug.replace('-', ' ')
     : null;
 
+  // --- Scout Concierge long-press ---
+  const LONG_PRESS_MS = 600;
+  const pressTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const [pressProgress, setPressProgress] = useState(0);
+  const pressActiveRef = useRef(false);
+  const scout = useScoutConcierge(post);
+
+  const startPress = useCallback(() => {
+    pressActiveRef.current = true;
+    setPressProgress(1); // triggers CSS animation
+    pressTimerRef.current = setTimeout(() => {
+      if (pressActiveRef.current) {
+        scout.trigger();
+        setPressProgress(0);
+      }
+    }, LONG_PRESS_MS);
+  }, [scout]);
+
+  const cancelPress = useCallback(() => {
+    pressActiveRef.current = false;
+    setPressProgress(0);
+    if (pressTimerRef.current) {
+      clearTimeout(pressTimerRef.current);
+      pressTimerRef.current = null;
+    }
+  }, []);
+
   // Build URL with category prefix: /chicago-bears/article-slug
   const postUrl = post.category_slug
     ? `/${post.category_slug}/${post.slug}`
@@ -120,8 +150,48 @@ export function PostCard({ post, priority = false, cardSize = 'compact' }: PostC
   const minRead = Math.max(1, Math.floor(wordCount / 160));
 
   return (
-    <article className={`glass-card feed-card ${sizeClass}`} style={{ padding: '16px', borderRadius: '20px', boxShadow: '0 12px 32px rgba(0,0,0,0.3)' }}>
-      <Link href={postUrl} onClick={() => markAsRead(post.slug)}>
+    <article
+      className={`glass-card feed-card ${sizeClass}${scout.isOpen ? ' scout-active' : ''}`}
+      style={{ padding: '16px', borderRadius: '20px', boxShadow: '0 12px 32px rgba(0,0,0,0.3)', position: 'relative' }}
+      onMouseDown={startPress}
+      onMouseUp={cancelPress}
+      onMouseLeave={cancelPress}
+      onTouchStart={startPress}
+      onTouchEnd={cancelPress}
+      onTouchCancel={cancelPress}
+      onContextMenu={(e) => { if (pressActiveRef.current) e.preventDefault(); }}
+    >
+      {/* Long-press progress ring */}
+      {pressProgress > 0 && (
+        <div className="scout-progress-ring">
+          <svg viewBox="0 0 36 36" width="36" height="36">
+            <circle cx="18" cy="18" r="16" fill="none" stroke="rgba(188,0,0,0.2)" strokeWidth="3" />
+            <circle
+              cx="18" cy="18" r="16"
+              fill="none"
+              stroke="#bc0000"
+              strokeWidth="3"
+              strokeLinecap="round"
+              strokeDasharray="100.53"
+              strokeDashoffset="100.53"
+              className="scout-progress-ring-circle"
+              style={{ animationDuration: `${LONG_PRESS_MS}ms` }}
+            />
+          </svg>
+        </div>
+      )}
+
+      {/* Scout Concierge Overlay */}
+      {scout.isOpen && (
+        <ScoutConciergeOverlay
+          isLoading={scout.isLoading}
+          error={scout.error}
+          data={scout.data}
+          onClose={scout.close}
+        />
+      )}
+
+      <Link href={postUrl} onClick={(e) => { if (scout.isOpen) { e.preventDefault(); return; } markAsRead(post.slug); }}>
         <div className={`card-image${isLargeCard ? ' card-image--stadium' : ''}`}>
           {isCollageType && post.featured_image ? (
             <div className="collage-thumbs">

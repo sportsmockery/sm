@@ -4350,3 +4350,263 @@ html .storyline-card {
     flex: 0 0 260px;
   }
 }
+
+/* ==========================================
+   SECTION 3 — Scout "Press & Hold" Concierge
+   ========================================== */
+
+/* Progress ring — appears during long-press */
+.scout-progress-ring {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  z-index: 20;
+  pointer-events: none;
+  filter: drop-shadow(0 0 6px rgba(188, 0, 0, 0.5));
+}
+
+@keyframes scout-ring-fill {
+  from { stroke-dashoffset: 100.53; }
+  to   { stroke-dashoffset: 0; }
+}
+
+.scout-progress-ring-circle {
+  animation: scout-ring-fill linear forwards;
+  transform: rotate(-90deg);
+  transform-origin: center;
+}
+
+/* Card gets subtle glow when scout overlay is active */
+.feed-card.scout-active {
+  box-shadow: 0 0 24px rgba(188, 0, 0, 0.3), 0 12px 32px rgba(0, 0, 0, 0.3) !important;
+}
+
+/* Concierge overlay — sits on top of card */
+.scout-concierge-overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 15;
+  background: rgba(12, 12, 18, 0.92);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-radius: 20px;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  overflow-y: auto;
+  border: 1px solid rgba(188, 0, 0, 0.25);
+  animation: scout-overlay-in 0.25s ease-out;
+}
+
+@keyframes scout-overlay-in {
+  from {
+    opacity: 0;
+    transform: scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* Close button */
+.scout-concierge-close {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.1);
+  border: none;
+  border-radius: 50%;
+  color: rgba(255, 255, 255, 0.7);
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+  z-index: 16;
+}
+
+.scout-concierge-close:hover {
+  background: rgba(188, 0, 0, 0.4);
+  color: #fff;
+}
+
+/* Header */
+.scout-concierge-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.scout-concierge-title {
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  color: #bc0000;
+  text-transform: uppercase;
+}
+
+/* Loading skeleton */
+.scout-concierge-loading {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding-top: 4px;
+}
+
+.scout-concierge-skeleton {
+  height: 14px;
+  background: linear-gradient(90deg, rgba(255,255,255,0.06) 25%, rgba(255,255,255,0.12) 50%, rgba(255,255,255,0.06) 75%);
+  background-size: 200% 100%;
+  border-radius: 6px;
+  animation: scout-shimmer 1.4s ease-in-out infinite;
+}
+
+.scout-concierge-skeleton--short { width: 60%; }
+.scout-concierge-skeleton--mid   { width: 80%; }
+
+@keyframes scout-shimmer {
+  0%   { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+/* Error */
+.scout-concierge-error {
+  font-size: 13px;
+  color: rgba(255, 255, 255, 0.6);
+  font-style: italic;
+  margin: 0;
+}
+
+/* Body */
+.scout-concierge-body {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.scout-concierge-tldr {
+  font-size: 13px;
+  line-height: 1.45;
+  color: rgba(255, 255, 255, 0.95);
+  margin: 0;
+  border-left: 3px solid #bc0000;
+  padding-left: 10px;
+}
+
+.scout-concierge-tldr strong {
+  color: #bc0000;
+  font-weight: 700;
+}
+
+.scout-concierge-summary {
+  font-size: 12.5px;
+  line-height: 1.55;
+  color: rgba(255, 255, 255, 0.75);
+  margin: 0;
+}
+
+/* Next Watch section */
+.scout-concierge-next {
+  margin-top: 4px;
+}
+
+.scout-concierge-next-label {
+  display: block;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: rgba(255, 255, 255, 0.5);
+  margin-bottom: 6px;
+}
+
+.scout-concierge-next ul {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.scout-concierge-next li {
+  font-size: 12px;
+  line-height: 1.4;
+  color: rgba(255, 255, 255, 0.7);
+  padding-left: 14px;
+  position: relative;
+}
+
+.scout-concierge-next li::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 6px;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #bc0000;
+}
+
+/* --- Light theme adjustments --- */
+[data-theme="light"] .scout-concierge-overlay {
+  background: rgba(255, 255, 255, 0.92);
+  border-color: rgba(188, 0, 0, 0.15);
+}
+
+[data-theme="light"] .scout-concierge-close {
+  background: rgba(0, 0, 0, 0.06);
+  color: rgba(0, 0, 0, 0.5);
+}
+
+[data-theme="light"] .scout-concierge-close:hover {
+  background: rgba(188, 0, 0, 0.15);
+  color: #bc0000;
+}
+
+[data-theme="light"] .scout-concierge-tldr {
+  color: rgba(0, 0, 0, 0.9);
+}
+
+[data-theme="light"] .scout-concierge-summary {
+  color: rgba(0, 0, 0, 0.65);
+}
+
+[data-theme="light"] .scout-concierge-error {
+  color: rgba(0, 0, 0, 0.5);
+}
+
+[data-theme="light"] .scout-concierge-next-label {
+  color: rgba(0, 0, 0, 0.45);
+}
+
+[data-theme="light"] .scout-concierge-next li {
+  color: rgba(0, 0, 0, 0.6);
+}
+
+/* --- Mobile: bottom-sheet style --- */
+@media (max-width: 768px) {
+  .scout-concierge-overlay {
+    position: fixed;
+    inset: auto 0 0 0;
+    border-radius: 20px 20px 0 0;
+    max-height: 60vh;
+    padding: 24px 20px 32px;
+    animation: scout-sheet-up 0.3s ease-out;
+  }
+
+  @keyframes scout-sheet-up {
+    from {
+      opacity: 0;
+      transform: translateY(100%);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+}
