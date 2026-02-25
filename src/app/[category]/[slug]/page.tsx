@@ -333,7 +333,7 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
 
       {/* 2030 Article Body Area */}
       <div style={{ backgroundColor: 'var(--sm-dark)' }}>
-        <div style={{ maxWidth: 1400, margin: '0 auto', padding: '48px 24px', display: 'flex', justifyContent: 'center', gap: 0 }}>
+        <div style={{ maxWidth: 1400, margin: '0 auto', padding: '16px 24px 48px', display: 'flex', justifyContent: 'center', gap: 0 }}>
           {/* Left Sidebar - TOC (Desktop only) */}
           <aside className="hidden xl:block" style={{ width: 220, flexShrink: 0 }}>
             <div style={{ position: 'sticky', top: 96, paddingRight: 24 }}>
