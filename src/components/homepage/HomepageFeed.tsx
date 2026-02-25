@@ -468,6 +468,12 @@ function filterPosts(posts: any[], activeFilter: string): any[] {
   );
 }
 
+function formatDisplayName(name: string): string {
+  if (!name) return '';
+  const lower = name.toLowerCase();
+  return lower.charAt(0).toUpperCase() + lower.slice(1);
+}
+
 export function HomepageFeed({
   initialPosts = [],
   editorPicks = [],
@@ -803,15 +809,15 @@ export function HomepageFeed({
             Breaking news, real-time scores, and AI-powered analysis — all five Chicago teams, one platform.
           </p>
 
-          {/* Your Chicago Bar (logged-in only) */}
+          {/* Your Chicago Bar (logged-in only) — links to feed personalization */}
           {actuallyLoggedIn && visitStreak > 0 && (
-            <div className="your-chicago-bar animate-entrance entrance-delay-3b">
+            <Link href="/feed" className="your-chicago-bar animate-entrance entrance-delay-3b">
               <span className="your-chicago-left">
                 <span className="your-chicago-title">Your Chicago</span>
-                <span className="your-chicago-name">, {displayName}</span>
+                <span className="your-chicago-name">, {formatDisplayName(displayName)}</span>
               </span>
               <span className="your-chicago-streak">Day {visitStreak}</span>
-            </div>
+            </Link>
           )}
 
           {/* 90-Second Catch-Up Timeline */}

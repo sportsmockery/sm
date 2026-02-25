@@ -190,15 +190,12 @@ export default function LiveStrip() {
   const hasLive = liveGames.length > 0;
   const hasUpcoming = upcomingGames.length > 0;
 
-  // Determine mode
-  const mode: 'live' | 'upcoming' | 'desk' = hasLive
-    ? 'live'
-    : hasUpcoming
-      ? 'upcoming'
-      : 'desk';
-
-  // Don't flash on initial load
+  // Don't flash on initial load; hide entirely when no live/upcoming games (Chicago Desk removed)
   if (!loaded) return null;
+  if (!hasLive && !hasUpcoming) return null;
+
+  // Determine mode
+  const mode: 'live' | 'upcoming' = hasLive ? 'live' : 'upcoming';
 
   return (
     <div className="live-strip" data-mode={mode}>
@@ -263,64 +260,10 @@ export default function LiveStrip() {
           </Link>
         ))}
 
-        {/* DESK fallback mode */}
-        {mode === 'desk' && (
-          <>
-            <span className="live-strip-desk-label">Chicago Desk</span>
-
-            {/* Team-picker pills */}
-            {TEAM_PILLS.map((pill) => (
-              <button
-                key={pill.path}
-                ref={(el) => { btnRefs.current[pill.path] = el; }}
-                className="live-strip-chip live-strip-chip--desk"
-                onClick={() => handleTeamPillClick(pill.path)}
-                aria-expanded={pickerOpen === pill.path}
-                aria-haspopup="true"
-              >
-                {pill.label}
-                <svg
-                  width="10" height="10" viewBox="0 0 24 24" fill="none"
-                  stroke="currentColor" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round"
-                  style={{ marginLeft: 2, opacity: 0.5, transition: 'transform 0.2s', transform: pickerOpen === pill.path ? 'rotate(180deg)' : 'none' }}
-                >
-                  <path d="M6 9l6 6 6-6" />
-                </svg>
-              </button>
-            ))}
-
-            {/* Direct pills */}
-            {DIRECT_PILLS.map((link) => (
-              <Link key={link.href} href={link.href} className="live-strip-chip live-strip-chip--desk">
-                {link.label}
-              </Link>
-            ))}
-          </>
-        )}
+        {/* Chicago Desk fallback removed — strip only shows for live/upcoming games */}
       </div>
 
-      {/* Team picker dropdown — rendered outside .live-strip-inner to escape overflow clip */}
-      {pickerOpen && pickerPos && (
-        <div
-          ref={pickerRef}
-          className="desk-team-picker"
-          style={{ position: 'fixed', top: pickerPos.top, left: pickerPos.left, transform: 'translateX(-50%)' }}
-        >
-          <span className="desk-team-picker-title">Choose your team</span>
-          <div className="desk-team-picker-grid">
-            {TEAMS.map((team, idx) => (
-              <button
-                key={team.key}
-                className={`desk-team-picker-btn${focusedIdx === idx ? ' desk-team-picker-btn--focused' : ''}`}
-                onClick={() => handleTeamSelect(team.slug, pickerOpen)}
-              >
-                <Image src={team.logo} alt={team.name} width={20} height={20} style={{ borderRadius: 4 }} />
-                <span>{team.name}</span>
-              </button>
-            ))}
-          </div>
-        </div>
-      )}
+      {/* Team picker dropdown removed with Chicago Desk */}
     </div>
   );
 }
