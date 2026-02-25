@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
+import Image from 'next/image'
 import Modal from '@/components/ui/Modal'
 
 interface Briefing {
@@ -68,6 +69,31 @@ export default function BriefingStrip() {
         title={activeBriefing?.title || ''}
         size="sm"
       >
+        <div style={{
+          display: 'flex',
+          alignItems: 'center',
+          gap: '8px',
+          marginBottom: '14px',
+        }}>
+          <Image
+            src="/downloads/scout-v2.png"
+            alt="Scout AI"
+            width={24}
+            height={24}
+            unoptimized
+            style={{ borderRadius: '50%' }}
+          />
+          <span style={{
+            fontFamily: "'Space Grotesk', sans-serif",
+            fontSize: '12px',
+            fontWeight: 700,
+            letterSpacing: '0.04em',
+            textTransform: 'uppercase' as const,
+            color: '#bc0000',
+          }}>
+            Scout Recap
+          </span>
+        </div>
         <p style={{
           fontFamily: "'Space Grotesk', sans-serif",
           fontSize: '15px',
