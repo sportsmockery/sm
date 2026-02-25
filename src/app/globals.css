@@ -3356,6 +3356,84 @@ p {
   border-color: rgba(255, 68, 68, 0.4);
 }
 
+/* Desk pill as button (team-picker trigger) */
+button.live-strip-chip--desk {
+  cursor: pointer;
+  background: none;
+}
+
+/* Team picker dropdown */
+.desk-team-picker {
+  position: absolute;
+  top: calc(100% + 8px);
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 200;
+  background: var(--sm-card, #13131d);
+  border: 1px solid var(--sm-border, rgba(255,255,255,0.06));
+  border-radius: 16px;
+  padding: 16px 20px;
+  min-width: 200px;
+  box-shadow: 0 12px 40px rgba(0,0,0,0.5);
+  animation: desk-picker-in 0.15s ease-out;
+}
+
+[data-theme="light"] .desk-team-picker {
+  background: #fff;
+  border-color: rgba(0,0,0,0.08);
+  box-shadow: 0 8px 32px rgba(0,0,0,0.12);
+}
+
+@keyframes desk-picker-in {
+  from { opacity: 0; transform: translateX(-50%) translateY(-4px) scale(0.97); }
+  to { opacity: 1; transform: translateX(-50%) translateY(0) scale(1); }
+}
+
+.desk-team-picker-title {
+  display: block;
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--sm-text-muted, #8a8a9a);
+  margin-bottom: 10px;
+}
+
+.desk-team-picker-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.desk-team-picker-btn {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 12px;
+  border-radius: 10px;
+  border: none;
+  background: none;
+  color: var(--sm-text, #fff);
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.12s;
+  width: 100%;
+  text-align: left;
+}
+
+.desk-team-picker-btn:hover,
+.desk-team-picker-btn--focused {
+  background: rgba(188, 0, 0, 0.1);
+}
+
+[data-theme="light"] .desk-team-picker-btn:hover,
+[data-theme="light"] .desk-team-picker-btn--focused {
+  background: rgba(188, 0, 0, 0.06);
+}
+
 @media (max-width: 640px) {
   .live-strip-inner {
     gap: 4px;
@@ -3364,6 +3442,15 @@ p {
   .live-strip-chip {
     font-size: 11px;
     padding: 2px 10px;
+  }
+  .desk-team-picker {
+    left: 0;
+    transform: none;
+    min-width: 180px;
+  }
+  @keyframes desk-picker-in {
+    from { opacity: 0; transform: translateY(-4px) scale(0.97); }
+    to { opacity: 1; transform: translateY(0) scale(1); }
   }
 }
 
