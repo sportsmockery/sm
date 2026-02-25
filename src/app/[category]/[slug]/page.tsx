@@ -334,8 +334,8 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
       <div style={{ backgroundColor: 'var(--sm-dark)' }}>
         <div style={{ maxWidth: 1400, margin: '0 auto', padding: '16px 24px 48px', display: 'flex', justifyContent: 'center', gap: 0 }}>
           {/* Left Sidebar - TOC (Desktop only) */}
-          <aside className="hidden xl:block" style={{ width: 220, flexShrink: 0 }}>
-            <div style={{ position: 'sticky', top: 96, paddingRight: 24 }}>
+          <aside className="hidden xl:block" style={{ width: 200, flexShrink: 0 }}>
+            <div style={{ position: 'sticky', top: 96, paddingRight: 16 }}>
               <ArticleTableOfContents
                 contentHtml={post.content || ''}
                 variant="glass"
@@ -412,7 +412,7 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
           </div>
 
           {/* Right Sidebar — Command Panel (Desktop only) */}
-          <aside className="hidden xl:block" style={{ width: 340, flexShrink: 0, paddingLeft: 24 }}>
+          <aside className="hidden xl:block" style={{ width: 300, flexShrink: 0, paddingLeft: 16 }}>
             <CommandPanel
               posts={relatedPosts.map(p => ({
                 id: String(p.id),
