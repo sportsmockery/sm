@@ -1,6 +1,19 @@
 'use client'
 
-import { useEffect } from 'react'
+import { useEffect, useRef } from 'react'
+
+function isChunkLoadError(error: Error): boolean {
+  const msg = error.message || ''
+  const name = error.name || ''
+  return (
+    name === 'ChunkLoadError' ||
+    msg.includes('Loading chunk') ||
+    msg.includes('Failed to fetch dynamically imported module') ||
+    msg.includes('error loading dynamically imported module') ||
+    msg.includes('Importing a module script failed') ||
+    msg.includes('Failed to load')
+  )
+}
 
 interface ErrorProps {
   error: Error & { digest?: string }
@@ -8,8 +21,17 @@ interface ErrorProps {
 }
 
 export default function Error({ error, reset }: ErrorProps) {
+  const reloadAttempted = useRef(false)
+
   useEffect(() => {
     console.error('Application error:', error)
+
+    // Auto-recover from stale chunk errors after deployment
+    if (isChunkLoadError(error) && !reloadAttempted.current) {
+      reloadAttempted.current = true
+      window.location.reload()
+      return
+    }
   }, [error])
 
   return (

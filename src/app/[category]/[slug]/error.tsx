@@ -14,8 +14,7 @@ function isChunkLoadError(error: Error): boolean {
     msg.includes('Importing a module script failed') ||
     msg.includes('Failed to load') ||
     // Next.js specific chunk errors
-    msg.includes('Cannot find module') ||
-    msg.includes('is not a function') && error.digest != null
+    msg.includes('Cannot find module')
   )
 }
 
