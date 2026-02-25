@@ -2,7 +2,11 @@
 import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useTheme } from '@/contexts/ThemeContext'
-import type { SimulationResult, TeamStanding, PlayoffMatchup, SimulatedGame, SeasonSegment, PlayerSimImpact } from '@/types/gm'
+import type {
+  SimulationResult, TeamStanding, PlayoffMatchup, SimulatedGame, SeasonSegment,
+  PlayerSimImpact, V3TradeAnalysis, V3KeyPlayerImpact, V3PlayerArchetype,
+  V3_ARCHETYPE_COLORS,
+} from '@/types/gm'
 
 interface SimulationResultsProps {
   result: SimulationResult
@@ -13,7 +17,7 @@ interface SimulationResultsProps {
   onClose: () => void
 }
 
-type Tab = 'overview' | 'games' | 'standings' | 'playoffs' | 'summary'
+type Tab = 'overview' | 'analysis' | 'games' | 'standings' | 'playoffs' | 'summary'
 
 function formatGameDate(dateStr: string): string {
   if (!dateStr) return ''
@@ -23,6 +27,15 @@ function formatGameDate(dateStr: string): string {
   } catch {
     return dateStr
   }
+}
+
+const ARCHETYPE_COLORS: Record<string, string> = {
+  'Franchise Changer': '#FFD700',
+  'Role Player Upgrade': '#3b82f6',
+  'Culture Setter': '#8b5cf6',
+  'Boom-or-Bust': '#f97316',
+  'Declining Star': '#6b7280',
+  'System Player': '#14b8a6',
 }
 
 export function SimulationResults({
@@ -45,7 +58,14 @@ export function SimulationResults({
 
   const { baseline, modified, gmScore, scoreBreakdown, standings, playoffs, championship, seasonSummary,
     games, segments, playerImpacts, baselinePowerRating, modifiedPowerRating, previousSeasonRecord } = result
-  const winImprovement = modified.wins - baseline.wins
+
+  // V3 fields
+  const isV3AI = result.simulation_version === 'v3-ai'
+  const hasTradeImpactDetail = result.tradeImpactDetail != null
+  const projectedRecord = result.projectedRecord || { wins: modified.wins, losses: modified.losses }
+  const recordChange = result.recordChange ?? (modified.wins - baseline.wins)
+  const playoffProb = result.playoffProbability
+  const winImprovement = recordChange
   const isImprovement = winImprovement > 0
 
   const getGradeLetter = (score: number): string => {
@@ -63,8 +83,12 @@ export function SimulationResults({
     return 'F'
   }
 
+  // Show Analysis tab only if V3 AI data is available
+  const hasAIAnalysis = isV3AI && (result.seasonNarrative || result.tradeAnalysis || result.rosterAssessment)
+
   const tabs: { id: Tab; label: string; icon: string }[] = [
     { id: 'overview', label: 'Overview', icon: '📊' },
+    ...(hasAIAnalysis ? [{ id: 'analysis' as Tab, label: 'AI Analysis', icon: '🧠' }] : []),
     ...(games && games.length > 0 ? [{ id: 'games' as Tab, label: 'Games', icon: '🎮' }] : []),
     { id: 'standings', label: 'Standings', icon: '🏆' },
     { id: 'playoffs', label: 'Playoffs', icon: '🎯' },
@@ -131,6 +155,14 @@ export function SimulationResults({
             </h2>
             <p style={{ margin: 0, marginTop: 2, fontSize: 12, color: subText }}>
               {teamName} • {tradeCount} trade{tradeCount !== 1 ? 's' : ''} executed
+              {result.simulation_version && (
+                <span style={{ marginLeft: 8, padding: '1px 6px', borderRadius: 4, backgroundColor: isV3AI ? '#22c55e20' : `${borderColor}`, color: isV3AI ? '#22c55e' : subText, fontSize: 10, fontWeight: 600 }}>
+                  {result.simulation_version}
+                </span>
+              )}
+              {result._cached && (
+                <span style={{ marginLeft: 4, fontSize: 10, color: subText }}>(cached)</span>
+              )}
             </p>
           </div>
           <button
@@ -200,7 +232,7 @@ export function SimulationResults({
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -10 }}
               >
-                {/* Before/After Comparison */}
+                {/* Record Comparison */}
                 <div
                   style={{
                     display: 'grid',
@@ -214,13 +246,13 @@ export function SimulationResults({
                 >
                   <div style={{ textAlign: 'center' }}>
                     <div style={{ fontSize: 11, textTransform: 'uppercase', color: subText, marginBottom: 8, fontWeight: 600 }}>
-                      Before Trades
+                      Without Trades
                     </div>
                     <div style={{ fontSize: 32, fontWeight: 800, color: textColor, lineHeight: 1 }}>
                       {baseline.wins}-{baseline.losses}
                     </div>
                     <div style={{ fontSize: 12, color: subText, marginTop: 6 }}>
-                      {baseline.madePlayoffs ? '✅ Playoffs' : '❌ Missed Playoffs'}
+                      {baseline.madePlayoffs ? `✅ Playoffs (#${baseline.playoffSeed})` : '❌ Missed Playoffs'}
                     </div>
                   </div>
 
@@ -230,10 +262,10 @@ export function SimulationResults({
 
                   <div style={{ textAlign: 'center', background: `${teamColor}15`, padding: 16, borderRadius: 10, margin: '-16px -4px -16px 0' }}>
                     <div style={{ fontSize: 11, textTransform: 'uppercase', color: teamColor, marginBottom: 8, fontWeight: 600 }}>
-                      After Trades
+                      With Your Trades
                     </div>
                     <div style={{ fontSize: 32, fontWeight: 800, color: textColor, lineHeight: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}>
-                      {modified.wins}-{modified.losses}
+                      {projectedRecord.wins}-{projectedRecord.losses}
                       {winImprovement !== 0 && (
                         <span style={{ fontSize: 13, fontWeight: 600, padding: '4px 8px', borderRadius: 6, backgroundColor: isImprovement ? '#22c55e' : '#ef4444', color: '#fff' }}>
                           {winImprovement > 0 ? '+' : ''}{winImprovement}W
@@ -241,12 +273,128 @@ export function SimulationResults({
                       )}
                     </div>
                     <div style={{ fontSize: 12, color: subText, marginTop: 6 }}>
-                      {modified.madePlayoffs ? `✅ #${modified.playoffSeed} Seed` : '❌ Missed Playoffs'}
+                      {result.projectedSeed ? `✅ #${result.projectedSeed} Seed` : modified.madePlayoffs ? `✅ #${modified.playoffSeed} Seed` : '❌ Missed Playoffs'}
                     </div>
                   </div>
                 </div>
 
-                {/* Power Rating Comparison */}
+                {/* Playoff Probability Gauge (V3) */}
+                {playoffProb != null && (
+                  <div style={{
+                    padding: 16, background: surfaceBg, borderRadius: 12, marginBottom: 20, textAlign: 'center',
+                  }}>
+                    <div style={{ fontSize: 11, textTransform: 'uppercase', color: subText, marginBottom: 8, fontWeight: 600 }}>
+                      Playoff Probability
+                    </div>
+                    <div style={{ position: 'relative', height: 12, borderRadius: 6, backgroundColor: isDark ? '#1f2937' : '#e5e7eb', overflow: 'hidden', marginBottom: 8 }}>
+                      <motion.div
+                        initial={{ width: 0 }}
+                        animate={{ width: `${playoffProb}%` }}
+                        transition={{ duration: 1, ease: 'easeOut' }}
+                        style={{
+                          height: '100%', borderRadius: 6,
+                          background: playoffProb >= 70 ? '#22c55e' : playoffProb >= 40 ? '#eab308' : '#ef4444',
+                        }}
+                      />
+                    </div>
+                    <div style={{ fontSize: 24, fontWeight: 800, color: playoffProb >= 70 ? '#22c55e' : playoffProb >= 40 ? '#eab308' : '#ef4444' }}>
+                      {playoffProb}%
+                    </div>
+                  </div>
+                )}
+
+                {/* Monte Carlo Confidence Interval (V3) */}
+                {result.monteCarloResults && (
+                  <div style={{
+                    padding: 16, background: surfaceBg, borderRadius: 12, marginBottom: 20,
+                  }}>
+                    <div style={{ fontSize: 12, textTransform: 'uppercase', color: subText, marginBottom: 10, fontWeight: 600 }}>
+                      Monte Carlo Projection ({result.monteCarloResults.iterations} simulations)
+                    </div>
+                    <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: 16 }}>
+                      <div style={{ textAlign: 'center' }}>
+                        <div style={{ fontSize: 10, color: subText }}>Floor (p10)</div>
+                        <div style={{ fontSize: 18, fontWeight: 700, color: '#ef4444' }}>{result.monteCarloResults.confidenceInterval.low}W</div>
+                      </div>
+                      <div style={{ textAlign: 'center' }}>
+                        <div style={{ fontSize: 10, color: teamColor, fontWeight: 600 }}>Median</div>
+                        <div style={{ fontSize: 24, fontWeight: 800, color: teamColor }}>{result.monteCarloResults.winDistribution.median}W</div>
+                      </div>
+                      <div style={{ textAlign: 'center' }}>
+                        <div style={{ fontSize: 10, color: subText }}>Ceiling (p90)</div>
+                        <div style={{ fontSize: 18, fontWeight: 700, color: '#22c55e' }}>{result.monteCarloResults.confidenceInterval.high}W</div>
+                      </div>
+                    </div>
+                    {result.monteCarloResults.divisionWinProbability > 0 && (
+                      <div style={{ textAlign: 'center', marginTop: 8, fontSize: 12, color: subText }}>
+                        Division win: {result.monteCarloResults.divisionWinProbability.toFixed(1)}%
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                {/* Trade Value Analysis (V3 WVS) */}
+                {hasTradeImpactDetail && result.tradeImpactDetail && (
+                  <div style={{
+                    padding: 16, background: surfaceBg, borderRadius: 12, marginBottom: 20,
+                    border: `1px solid ${borderColor}`,
+                  }}>
+                    <div style={{ fontSize: 12, textTransform: 'uppercase', color: subText, marginBottom: 12, fontWeight: 600 }}>
+                      Trade Value Analysis (WVS)
+                    </div>
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 12, marginBottom: 12 }}>
+                      <div style={{ textAlign: 'center' }}>
+                        <div style={{ fontSize: 10, color: '#ef4444', fontWeight: 600 }}>Sent</div>
+                        <div style={{ fontSize: 20, fontWeight: 700, color: '#ef4444' }}>{result.tradeImpactDetail.wvsBreakdown.sent.toFixed(1)}</div>
+                      </div>
+                      <div style={{ textAlign: 'center' }}>
+                        <div style={{ fontSize: 10, color: subText }}>WVS Delta</div>
+                        <div style={{
+                          fontSize: 20, fontWeight: 700,
+                          color: result.tradeImpactDetail.wvsBreakdown.delta > 0 ? '#22c55e' : result.tradeImpactDetail.wvsBreakdown.delta < 0 ? '#ef4444' : subText,
+                        }}>
+                          {result.tradeImpactDetail.wvsBreakdown.delta > 0 ? '+' : ''}{result.tradeImpactDetail.wvsBreakdown.delta.toFixed(1)}
+                        </div>
+                      </div>
+                      <div style={{ textAlign: 'center' }}>
+                        <div style={{ fontSize: 10, color: '#22c55e', fontWeight: 600 }}>Received</div>
+                        <div style={{ fontSize: 20, fontWeight: 700, color: '#22c55e' }}>{result.tradeImpactDetail.wvsBreakdown.received.toFixed(1)}</div>
+                      </div>
+                    </div>
+
+                    {result.tradeImpactDetail.talentDensityWarning && (
+                      <div style={{
+                        backgroundColor: isDark ? 'rgba(234,179,8,0.1)' : 'rgba(234,179,8,0.08)',
+                        color: '#eab308',
+                        fontSize: 12, padding: '8px 12px', borderRadius: 8, marginBottom: 8,
+                      }}>
+                        {result.tradeImpactDetail.talentDensityWarning}
+                      </div>
+                    )}
+
+                    {result.tradeImpactDetail.chicagoMarketBias > 0 && (
+                      <div style={{ fontSize: 12, color: '#3b82f6', marginBottom: 4 }}>
+                        Chicago Market Bonus: +{result.tradeImpactDetail.chicagoMarketBias} wins
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                {/* Chemistry Penalty (V3) */}
+                {result.chemistryPenalty && result.chemistryPenalty.earlySeasonWinReduction > 0 && (
+                  <div style={{
+                    padding: 12, background: isDark ? 'rgba(234,179,8,0.08)' : 'rgba(234,179,8,0.06)',
+                    borderRadius: 8, marginBottom: 20, border: '1px solid rgba(234,179,8,0.2)',
+                    display: 'flex', alignItems: 'center', gap: 10, fontSize: 12,
+                  }}>
+                    <span style={{ fontSize: 16 }}>⚠️</span>
+                    <span style={{ color: '#eab308' }}>
+                      Chemistry penalty: -{result.chemistryPenalty.earlySeasonWinReduction.toFixed(2)} wins during {result.chemistryPenalty.integrationGames}-game integration period (full integration by Week {result.chemistryPenalty.fullIntegrationWeek})
+                    </span>
+                  </div>
+                )}
+
+                {/* Power Rating Comparison (legacy) */}
                 {baselinePowerRating != null && modifiedPowerRating != null && (
                   <div style={{
                     display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 16,
@@ -271,8 +419,39 @@ export function SimulationResults({
                   </div>
                 )}
 
-                {/* Player Impacts */}
-                {playerImpacts && playerImpacts.length > 0 && (
+                {/* Player Impacts (V3 or legacy) */}
+                {result.keyPlayerImpacts && result.keyPlayerImpacts.length > 0 ? (
+                  <div style={{
+                    padding: 16, background: surfaceBg, borderRadius: 12, marginBottom: 20,
+                  }}>
+                    <div style={{ fontSize: 12, textTransform: 'uppercase', color: subText, marginBottom: 10, fontWeight: 600 }}>
+                      Key Player Impacts
+                    </div>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                      {result.keyPlayerImpacts.map((pi, idx) => (
+                        <div key={idx} style={{
+                          padding: '10px 12px', borderRadius: 8,
+                          backgroundColor: pi.direction === 'added' ? (isDark ? '#22c55e08' : '#22c55e06') : (isDark ? '#ef444408' : '#ef444406'),
+                          borderLeft: `3px solid ${pi.direction === 'added' ? '#22c55e' : '#ef4444'}`,
+                        }}>
+                          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 4 }}>
+                            <span style={{ fontSize: 14, fontWeight: 600, color: textColor }}>{pi.playerName}</span>
+                            <span style={{
+                              fontSize: 10, fontWeight: 600, padding: '2px 8px', borderRadius: 4,
+                              backgroundColor: `${ARCHETYPE_COLORS[pi.archetype] || '#6b7280'}20`,
+                              color: ARCHETYPE_COLORS[pi.archetype] || '#6b7280',
+                            }}>
+                              {pi.archetype}
+                            </span>
+                          </div>
+                          <div style={{ fontSize: 12, color: subText, lineHeight: 1.4 }}>
+                            {pi.impact}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                ) : playerImpacts && playerImpacts.length > 0 ? (
                   <div style={{
                     padding: 16, background: surfaceBg, borderRadius: 12, marginBottom: 20,
                   }}>
@@ -301,7 +480,7 @@ export function SimulationResults({
                       ))}
                     </div>
                   </div>
-                )}
+                ) : null}
 
                 {/* Championship Banner */}
                 {playoffs?.userTeamResult?.wonChampionship && championship && (
@@ -340,20 +519,29 @@ export function SimulationResults({
                     </span>
                   </div>
 
-                  <div style={{ background: 'rgba(255, 255, 255, 0.1)', borderRadius: 8, padding: 12, marginTop: 16, textAlign: 'left' }}>
-                    {[
-                      { label: `Trade quality (${tradeCount} trade${tradeCount !== 1 ? 's' : ''})`, value: scoreBreakdown.tradeQualityScore, max: 30 },
-                      { label: `Win improvement (${winImprovement > 0 ? '+' : ''}${scoreBreakdown.winImprovement} wins)`, value: scoreBreakdown.winImprovementScore, max: 30 },
-                      { label: 'Playoff achievement', value: scoreBreakdown.playoffBonusScore, max: 20 },
-                      { label: 'Championship bonus', value: scoreBreakdown.championshipBonus || 0, max: 15 },
-                    ].map((item, idx) => (
-                      <div key={idx} style={{ display: 'flex', justifyContent: 'space-between', padding: '6px 0', fontSize: 12, borderBottom: idx < 3 ? '1px solid rgba(255, 255, 255, 0.1)' : 'none' }}>
-                        <span>{item.label}</span>
-                        <span style={{ fontWeight: 600 }}>{item.value.toFixed(1)} / {item.max} pts</span>
-                      </div>
-                    ))}
-                  </div>
+                  {scoreBreakdown && (
+                    <div style={{ background: 'rgba(255, 255, 255, 0.1)', borderRadius: 8, padding: 12, marginTop: 16, textAlign: 'left' }}>
+                      {[
+                        { label: `Trade quality (${tradeCount} trade${tradeCount !== 1 ? 's' : ''})`, value: scoreBreakdown.tradeQualityScore, max: 30 },
+                        { label: `Win improvement (${winImprovement > 0 ? '+' : ''}${scoreBreakdown.winImprovement} wins)`, value: scoreBreakdown.winImprovementScore, max: 30 },
+                        { label: 'Playoff achievement', value: scoreBreakdown.playoffBonusScore, max: 20 },
+                        { label: 'Championship bonus', value: scoreBreakdown.championshipBonus || 0, max: 15 },
+                      ].map((item, idx) => (
+                        <div key={idx} style={{ display: 'flex', justifyContent: 'space-between', padding: '6px 0', fontSize: 12, borderBottom: idx < 3 ? '1px solid rgba(255, 255, 255, 0.1)' : 'none' }}>
+                          <span>{item.label}</span>
+                          <span style={{ fontWeight: 600 }}>{item.value.toFixed(1)} / {item.max} pts</span>
+                        </div>
+                      ))}
+                    </div>
+                  )}
                 </div>
+
+                {/* Performance metadata */}
+                {result.performance && (
+                  <div style={{ fontSize: 10, color: subText, textAlign: 'center', marginBottom: 16 }}>
+                    Simulated in {(result.performance.totalMs / 1000).toFixed(1)}s • {result.performance.simulationDepth} depth
+                  </div>
+                )}
 
                 {/* Actions */}
                 <div style={{ display: 'flex', gap: 12 }}>
@@ -364,6 +552,175 @@ export function SimulationResults({
                     Continue Trading
                   </button>
                 </div>
+              </motion.div>
+            )}
+
+            {/* AI ANALYSIS TAB (V3) */}
+            {activeTab === 'analysis' && hasAIAnalysis && (
+              <motion.div
+                key="analysis"
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -10 }}
+              >
+                {/* Season Narrative Headline */}
+                {result.seasonNarrative && (
+                  <div style={{
+                    padding: 20, borderRadius: 12, backgroundColor: surfaceBg, marginBottom: 20, textAlign: 'center',
+                  }}>
+                    <h3 style={{ fontSize: 20, fontWeight: 800, color: textColor, marginBottom: 12, lineHeight: 1.3 }}>
+                      {result.seasonNarrative.headline}
+                    </h3>
+                    <p style={{ fontSize: 14, color: subText, lineHeight: 1.7, textAlign: 'left', whiteSpace: 'pre-line' }}>
+                      {result.seasonNarrative.analysis}
+                    </p>
+                  </div>
+                )}
+
+                {/* Trade Impact Cards */}
+                {result.tradeAnalysis && result.tradeAnalysis.length > 0 && (
+                  <div style={{ marginBottom: 20 }}>
+                    <div style={{ fontSize: 12, textTransform: 'uppercase', color: subText, marginBottom: 10, fontWeight: 600 }}>
+                      Per-Trade Analysis
+                    </div>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+                      {result.tradeAnalysis.map((trade) => (
+                        <div key={trade.tradeId} style={{
+                          padding: 16, borderRadius: 12, backgroundColor: surfaceBg, border: `1px solid ${borderColor}`,
+                        }}>
+                          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
+                            <span style={{
+                              padding: '3px 10px', borderRadius: 6, fontSize: 11, fontWeight: 700,
+                              backgroundColor: trade.netImpact === 'positive' ? '#22c55e20' : trade.netImpact === 'negative' ? '#ef444420' : (isDark ? '#374151' : '#e5e7eb'),
+                              color: trade.netImpact === 'positive' ? '#22c55e' : trade.netImpact === 'negative' ? '#ef4444' : subText,
+                            }}>
+                              {trade.netImpact.toUpperCase()}
+                            </span>
+                            <span style={{ fontSize: 13, fontWeight: 600, color: trade.winsAdded > 0 ? '#22c55e' : '#ef4444' }}>
+                              {trade.winsAdded > 0 ? '+' : ''}{trade.winsAdded.toFixed(1)} wins
+                            </span>
+                          </div>
+                          <div style={{ display: 'flex', gap: 6, marginBottom: 8, flexWrap: 'wrap' }}>
+                            <span style={{
+                              fontSize: 10, fontWeight: 600, padding: '2px 8px', borderRadius: 4,
+                              backgroundColor: `${ARCHETYPE_COLORS[trade.playerArchetype] || '#6b7280'}20`,
+                              color: ARCHETYPE_COLORS[trade.playerArchetype] || '#6b7280',
+                            }}>
+                              {trade.playerArchetype}
+                            </span>
+                            <span style={{ fontSize: 10, color: subText, padding: '2px 6px' }}>
+                              Scheme Fit: {trade.schemeFit}/100
+                            </span>
+                            <span style={{ fontSize: 10, color: subText, padding: '2px 6px' }}>
+                              Need: {trade.positionalNeed}/100
+                            </span>
+                          </div>
+                          <p style={{ fontSize: 13, color: textColor, margin: 0, lineHeight: 1.5 }}>{trade.reasoning}</p>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* Roster Assessment */}
+                {result.rosterAssessment && (
+                  <div style={{
+                    padding: 16, borderRadius: 12, backgroundColor: surfaceBg, border: `1px solid ${borderColor}`, marginBottom: 20,
+                  }}>
+                    <div style={{ display: 'flex', gap: 8, marginBottom: 12, alignItems: 'center' }}>
+                      <span style={{
+                        padding: '4px 12px', borderRadius: 20, fontSize: 12, fontWeight: 700,
+                        backgroundColor: result.rosterAssessment.overallChange === 'improved' ? '#22c55e20' : result.rosterAssessment.overallChange === 'declined' ? '#ef444420' : '#eab30820',
+                        color: result.rosterAssessment.overallChange === 'improved' ? '#22c55e' : result.rosterAssessment.overallChange === 'declined' ? '#ef4444' : '#eab308',
+                      }}>
+                        Roster {result.rosterAssessment.overallChange}
+                      </span>
+                      <span style={{ fontSize: 12, color: subText }}>
+                        Depth: {result.rosterAssessment.depthScore}/100
+                      </span>
+                    </div>
+                    <p style={{ fontSize: 13, color: textColor, margin: 0, marginBottom: 12 }}>
+                      {result.rosterAssessment.identityShift}
+                    </p>
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+                      <div>
+                        <div style={{ fontSize: 10, textTransform: 'uppercase', color: '#22c55e', marginBottom: 6, fontWeight: 600 }}>Strengths Gained</div>
+                        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 4 }}>
+                          {result.rosterAssessment.strengthsGained.map((s, i) => (
+                            <span key={i} style={{ backgroundColor: '#22c55e15', color: '#22c55e', fontSize: 11, padding: '3px 8px', borderRadius: 6 }}>{s}</span>
+                          ))}
+                        </div>
+                      </div>
+                      <div>
+                        <div style={{ fontSize: 10, textTransform: 'uppercase', color: '#ef4444', marginBottom: 6, fontWeight: 600 }}>Weaknesses Created</div>
+                        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 4 }}>
+                          {result.rosterAssessment.weaknessesCreated.map((w, i) => (
+                            <span key={i} style={{ backgroundColor: '#ef444415', color: '#ef4444', fontSize: 11, padding: '3px 8px', borderRadius: 6 }}>{w}</span>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* Swing Games */}
+                {result.seasonNarrative?.swingGames && result.seasonNarrative.swingGames.length > 0 && (
+                  <div style={{
+                    padding: 16, borderRadius: 12, backgroundColor: surfaceBg, border: `1px solid ${borderColor}`, marginBottom: 20,
+                  }}>
+                    <div style={{ fontSize: 12, textTransform: 'uppercase', color: subText, marginBottom: 10, fontWeight: 600 }}>
+                      Swing Games — Most Affected by Trades
+                    </div>
+                    {result.seasonNarrative.swingGames.map((game, i) => (
+                      <div key={i} style={{
+                        display: 'flex', alignItems: 'center', gap: 12, padding: '8px 0',
+                        borderBottom: i < result.seasonNarrative!.swingGames.length - 1 ? `1px solid ${borderColor}` : 'none',
+                      }}>
+                        <span style={{ fontSize: 11, color: subText, width: 40, flexShrink: 0 }}>Wk {game.week}</span>
+                        <span style={{ fontSize: 13, fontWeight: 600, color: textColor, width: 40, flexShrink: 0 }}>{game.opponent}</span>
+                        <span style={{ fontSize: 12, color: subText, flex: 1 }}>{game.why}</span>
+                      </div>
+                    ))}
+                  </div>
+                )}
+
+                {/* Key Matchups */}
+                {result.seasonNarrative?.keyMatchups && result.seasonNarrative.keyMatchups.length > 0 && (
+                  <div style={{
+                    padding: 16, borderRadius: 12, backgroundColor: surfaceBg, border: `1px solid ${borderColor}`, marginBottom: 20,
+                  }}>
+                    <div style={{ fontSize: 12, textTransform: 'uppercase', color: subText, marginBottom: 10, fontWeight: 600 }}>
+                      Key Matchup Impacts
+                    </div>
+                    {result.seasonNarrative.keyMatchups.map((matchup, i) => (
+                      <div key={i} style={{
+                        display: 'flex', alignItems: 'center', gap: 12, padding: '8px 0',
+                        borderBottom: i < result.seasonNarrative!.keyMatchups.length - 1 ? `1px solid ${borderColor}` : 'none',
+                      }}>
+                        <span style={{ fontSize: 13, fontWeight: 700, color: teamColor, width: 40, flexShrink: 0 }}>
+                          {matchup.opponent}
+                        </span>
+                        <span style={{ fontSize: 12, color: textColor }}>{matchup.impact}</span>
+                      </div>
+                    ))}
+                  </div>
+                )}
+
+                {/* Playoff Outlook */}
+                {result.seasonNarrative?.playoffOutlook && (
+                  <div style={{
+                    padding: 16, borderRadius: 12,
+                    border: `2px solid ${teamColor}`,
+                    backgroundColor: `${teamColor}08`,
+                  }}>
+                    <div style={{ fontSize: 12, textTransform: 'uppercase', color: teamColor, marginBottom: 8, fontWeight: 600 }}>
+                      Playoff Outlook
+                    </div>
+                    <p style={{ fontSize: 14, color: textColor, margin: 0, lineHeight: 1.6 }}>
+                      {result.seasonNarrative.playoffOutlook}
+                    </p>
+                  </div>
+                )}
               </motion.div>
             )}
 
@@ -685,7 +1042,7 @@ export function SimulationResults({
             )}
 
             {/* SUMMARY TAB */}
-            {activeTab === 'summary' && seasonSummary && (
+            {activeTab === 'summary' && (
               <motion.div
                 key="summary"
                 initial={{ opacity: 0, y: 10 }}
@@ -723,103 +1080,112 @@ export function SimulationResults({
                   </div>
                 )}
 
-                {/* Headline */}
-                <div style={{
-                  padding: 20,
-                  borderRadius: 12,
-                  backgroundColor: surfaceBg,
-                  marginBottom: 20,
-                  textAlign: 'center',
-                }}>
-                  <h3 style={{ fontSize: 20, fontWeight: 800, color: textColor, marginBottom: 12, lineHeight: 1.3 }}>
-                    {seasonSummary.headline}
-                  </h3>
-                  <p style={{ fontSize: 14, color: subText, lineHeight: 1.6 }}>
-                    {seasonSummary.narrative}
-                  </p>
-                </div>
-
-                {/* Trade Impact */}
-                <div style={{
-                  padding: 16,
-                  borderRadius: 12,
-                  border: `2px solid ${teamColor}`,
-                  backgroundColor: `${teamColor}10`,
-                  marginBottom: 20,
-                }}>
-                  <div style={{ fontSize: 12, textTransform: 'uppercase', letterSpacing: '0.05em', color: teamColor, marginBottom: 8, fontWeight: 600 }}>
-                    Trade Impact
-                  </div>
-                  <p style={{ fontSize: 14, color: textColor, margin: 0 }}>
-                    {seasonSummary.tradeImpactSummary}
-                  </p>
-                </div>
-
-                {/* Key Moments */}
-                <div style={{ marginBottom: 20 }}>
-                  <h4 style={{ fontSize: 14, fontWeight: 700, color: textColor, marginBottom: 12 }}>
-                    Key Moments
-                  </h4>
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-                    {seasonSummary.keyMoments.map((moment: string, idx: number) => (
-                      <div
-                        key={idx}
-                        style={{
-                          display: 'flex',
-                          alignItems: 'center',
-                          gap: 12,
-                          padding: '10px 14px',
-                          borderRadius: 8,
-                          backgroundColor: surfaceBg,
-                        }}
-                      >
-                        <div style={{
-                          width: 24,
-                          height: 24,
-                          borderRadius: '50%',
-                          backgroundColor: teamColor,
-                          color: '#fff',
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'center',
-                          fontSize: 12,
-                          fontWeight: 700,
-                          flexShrink: 0,
-                        }}>
-                          {idx + 1}
-                        </div>
-                        <span style={{ fontSize: 13, color: textColor }}>{moment}</span>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-
-                {/* Affected Teams */}
-                {seasonSummary.affectedTeams.length > 0 && (
-                  <div>
-                    <h4 style={{ fontSize: 14, fontWeight: 700, color: textColor, marginBottom: 12 }}>
-                      Trade Partner Outcomes
-                    </h4>
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-                      {seasonSummary.affectedTeams.map((team: { teamName: string; impact: string }, idx: number) => (
-                        <div
-                          key={idx}
-                          style={{
-                            padding: '12px 14px',
-                            borderRadius: 8,
-                            backgroundColor: '#ef444410',
-                            border: '1px solid #ef444430',
-                          }}
-                        >
-                          <div style={{ fontSize: 13, fontWeight: 600, color: '#ef4444', marginBottom: 4 }}>
-                            {team.teamName}
-                          </div>
-                          <div style={{ fontSize: 12, color: subText }}>
-                            {team.impact}
-                          </div>
-                        </div>
-                      ))}
+                {/* Use V3 narrative if available, otherwise legacy seasonSummary */}
+                {result.seasonNarrative ? (
+                  <>
+                    <div style={{
+                      padding: 20, borderRadius: 12, backgroundColor: surfaceBg, marginBottom: 20, textAlign: 'center',
+                    }}>
+                      <h3 style={{ fontSize: 20, fontWeight: 800, color: textColor, marginBottom: 12, lineHeight: 1.3 }}>
+                        {result.seasonNarrative.headline}
+                      </h3>
+                      <p style={{ fontSize: 14, color: subText, lineHeight: 1.6, textAlign: 'left', whiteSpace: 'pre-line' }}>
+                        {result.seasonNarrative.analysis}
+                      </p>
                     </div>
+                    {result.seasonNarrative.playoffOutlook && (
+                      <div style={{
+                        padding: 16, borderRadius: 12, border: `2px solid ${teamColor}`, backgroundColor: `${teamColor}10`, marginBottom: 20,
+                      }}>
+                        <div style={{ fontSize: 12, textTransform: 'uppercase', letterSpacing: '0.05em', color: teamColor, marginBottom: 8, fontWeight: 600 }}>
+                          Playoff Outlook
+                        </div>
+                        <p style={{ fontSize: 14, color: textColor, margin: 0, lineHeight: 1.6 }}>
+                          {result.seasonNarrative.playoffOutlook}
+                        </p>
+                      </div>
+                    )}
+                  </>
+                ) : seasonSummary ? (
+                  <>
+                    {/* Headline */}
+                    <div style={{
+                      padding: 20, borderRadius: 12, backgroundColor: surfaceBg, marginBottom: 20, textAlign: 'center',
+                    }}>
+                      <h3 style={{ fontSize: 20, fontWeight: 800, color: textColor, marginBottom: 12, lineHeight: 1.3 }}>
+                        {seasonSummary.headline}
+                      </h3>
+                      <p style={{ fontSize: 14, color: subText, lineHeight: 1.6 }}>
+                        {seasonSummary.narrative}
+                      </p>
+                    </div>
+
+                    {/* Trade Impact */}
+                    <div style={{
+                      padding: 16, borderRadius: 12, border: `2px solid ${teamColor}`, backgroundColor: `${teamColor}10`, marginBottom: 20,
+                    }}>
+                      <div style={{ fontSize: 12, textTransform: 'uppercase', letterSpacing: '0.05em', color: teamColor, marginBottom: 8, fontWeight: 600 }}>
+                        Trade Impact
+                      </div>
+                      <p style={{ fontSize: 14, color: textColor, margin: 0 }}>
+                        {seasonSummary.tradeImpactSummary}
+                      </p>
+                    </div>
+
+                    {/* Key Moments */}
+                    <div style={{ marginBottom: 20 }}>
+                      <h4 style={{ fontSize: 14, fontWeight: 700, color: textColor, marginBottom: 12 }}>
+                        Key Moments
+                      </h4>
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                        {seasonSummary.keyMoments.map((moment: string, idx: number) => (
+                          <div
+                            key={idx}
+                            style={{
+                              display: 'flex', alignItems: 'center', gap: 12, padding: '10px 14px', borderRadius: 8, backgroundColor: surfaceBg,
+                            }}
+                          >
+                            <div style={{
+                              width: 24, height: 24, borderRadius: '50%', backgroundColor: teamColor, color: '#fff',
+                              display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 12, fontWeight: 700, flexShrink: 0,
+                            }}>
+                              {idx + 1}
+                            </div>
+                            <span style={{ fontSize: 13, color: textColor }}>{moment}</span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* Affected Teams */}
+                    {seasonSummary.affectedTeams.length > 0 && (
+                      <div>
+                        <h4 style={{ fontSize: 14, fontWeight: 700, color: textColor, marginBottom: 12 }}>
+                          Trade Partner Outcomes
+                        </h4>
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                          {seasonSummary.affectedTeams.map((team: { teamName: string; impact: string }, idx: number) => (
+                            <div
+                              key={idx}
+                              style={{
+                                padding: '12px 14px', borderRadius: 8, backgroundColor: '#ef444410', border: '1px solid #ef444430',
+                              }}
+                            >
+                              <div style={{ fontSize: 13, fontWeight: 600, color: '#ef4444', marginBottom: 4 }}>
+                                {team.teamName}
+                              </div>
+                              <div style={{ fontSize: 12, color: subText }}>
+                                {team.impact}
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                  </>
+                ) : (
+                  <div style={{ textAlign: 'center', padding: 40, color: subText }}>
+                    No summary available for this simulation.
                   </div>
                 )}
               </motion.div>

@@ -20,7 +20,7 @@ import { SimulationResults } from '@/components/gm/SimulationResults'
 import { DestinationPicker } from '@/components/gm/DestinationPicker'
 import type { PlayerData } from '@/components/gm/PlayerCard'
 import type { ValidationState } from '@/components/gm/ValidationIndicator'
-import type { TradeMode, MLBProspect, SimulationResult, TradeFlow } from '@/types/gm'
+import type { TradeMode, MLBProspect, SimulationResult, TradeFlow, SimulationPhase } from '@/types/gm'
 
 const DEFAULT_PREFERENCES: GMPreferences = {
   risk_tolerance: 'moderate',
@@ -185,6 +185,7 @@ export default function GMPage() {
 
   // Season Simulation
   const [isSimulating, setIsSimulating] = useState(false)
+  const [simPhase, setSimPhase] = useState<SimulationPhase>('idle')
   const [simulationResult, setSimulationResult] = useState<SimulationResult | null>(null)
   const [showSimulationResults, setShowSimulationResults] = useState(false)
   const [simulationError, setSimulationError] = useState<string | null>(null)
@@ -1174,15 +1175,22 @@ export default function GMPage() {
     fetchSessions()
   }
 
-  // Season Simulation
+  // Season Simulation — calls DataLab V3 API (single source of truth)
   async function handleSimulateSeason() {
     if (!activeSession || !selectedTeam) return
 
     setIsSimulating(true)
     setSimulationError(null)
+    setSimPhase('calculating')
+
+    // Progress phases for UX during 5-8s AI analysis
+    const phaseTimers = [
+      setTimeout(() => setSimPhase('analyzing'), 1500),
+      setTimeout(() => setSimPhase('generating'), 4000),
+    ]
 
     try {
-      const response = await fetch('/api/gm/sim/season', {
+      const response = await fetch('/api/gm/simulate-season', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -1190,6 +1198,7 @@ export default function GMPage() {
           sport: sport,
           teamKey: selectedTeam,
           seasonYear: 2026,
+          simulationDepth: 'standard',
         }),
       })
 
@@ -1202,13 +1211,16 @@ export default function GMPage() {
       if (data.success) {
         setSimulationResult(data)
         setShowSimulationResults(true)
+        setSimPhase('complete')
       } else {
         throw new Error('Simulation returned unsuccessful')
       }
     } catch (error: any) {
       console.error('Simulation error:', error)
       setSimulationError(error.message || 'Simulation failed')
+      setSimPhase('idle')
     } finally {
+      phaseTimers.forEach(clearTimeout)
       setIsSimulating(false)
     }
   }
@@ -1216,6 +1228,7 @@ export default function GMPage() {
   function handleSimulateAgain() {
     setShowSimulationResults(false)
     setSimulationResult(null)
+    setSimPhase('idle')
     handleSimulateSeason()
   }
 
@@ -1601,6 +1614,7 @@ export default function GMPage() {
                     sport={sport}
                     onSimulate={handleSimulateSeason}
                     isSimulating={isSimulating}
+                    simPhase={simPhase}
                     teamColor={teamColor}
                   />
                 )}
@@ -1868,6 +1882,7 @@ export default function GMPage() {
                     sport={sport}
                     onSimulate={handleSimulateSeason}
                     isSimulating={isSimulating}
+                    simPhase={simPhase}
                     teamColor={teamColor}
                   />
                 )}

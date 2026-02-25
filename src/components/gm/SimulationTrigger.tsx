@@ -1,13 +1,23 @@
 'use client'
 import { motion } from 'framer-motion'
 import { useTheme } from '@/contexts/ThemeContext'
+import type { SimulationPhase } from '@/types/gm'
 
 interface SimulationTriggerProps {
   tradeCount: number
   sport: string
   onSimulate: () => Promise<void>
   isSimulating: boolean
+  simPhase?: SimulationPhase
   teamColor: string
+}
+
+const PHASE_MESSAGES: Record<SimulationPhase, string> = {
+  idle: '',
+  calculating: 'Running 500 Monte Carlo simulations...',
+  analyzing: 'GM is analyzing your trades...',
+  generating: 'Generating season projection...',
+  complete: 'Complete!',
 }
 
 export function SimulationTrigger({
@@ -15,6 +25,7 @@ export function SimulationTrigger({
   sport,
   onSimulate,
   isSimulating,
+  simPhase = 'idle',
   teamColor,
 }: SimulationTriggerProps) {
   const { theme } = useTheme()
@@ -29,6 +40,8 @@ export function SimulationTrigger({
 
   // Game counts by sport
   const gameCount = sport === 'nfl' ? '17' : sport === 'mlb' ? '162' : sport === 'nba' ? '82' : sport === 'nhl' ? '82' : '82'
+
+  const phaseMessage = isSimulating ? PHASE_MESSAGES[simPhase] || 'Simulating Season...' : ''
 
   return (
     <div
@@ -69,8 +82,8 @@ export function SimulationTrigger({
           marginBottom: 16,
         }}
       >
-        See how your trades impact the season. We&apos;ll simulate all {gameCount} games
-        and show your improved record and GM Score.
+        See how your trades impact the season. AI-powered analysis simulates all {gameCount} games
+        with Monte Carlo projections and detailed trade breakdowns.
       </p>
 
       <motion.button
@@ -92,27 +105,34 @@ export function SimulationTrigger({
           alignItems: 'center',
           justifyContent: 'center',
           gap: 10,
+          flexDirection: 'column',
         }}
       >
         {isSimulating ? (
           <>
-            <motion.div
-              animate={{ rotate: 360 }}
-              transition={{ repeat: Infinity, duration: 0.8, ease: 'linear' }}
-              style={{
-                width: 18,
-                height: 18,
-                border: '2px solid rgba(255,255,255,0.3)',
-                borderTopColor: 'white',
-                borderRadius: '50%',
-              }}
-            />
-            Simulating Season...
+            <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+              <motion.div
+                animate={{ rotate: 360 }}
+                transition={{ repeat: Infinity, duration: 0.8, ease: 'linear' }}
+                style={{
+                  width: 18,
+                  height: 18,
+                  border: `2px solid ${isDark ? 'rgba(255,255,255,0.2)' : 'rgba(0,0,0,0.15)'}`,
+                  borderTopColor: isDark ? 'rgba(255,255,255,0.6)' : 'rgba(0,0,0,0.5)',
+                  borderRadius: '50%',
+                }}
+              />
+              <span>Simulating Season...</span>
+            </div>
+            {phaseMessage && (
+              <span style={{ fontSize: 11, opacity: 0.7, fontWeight: 500 }}>
+                {phaseMessage}
+              </span>
+            )}
           </>
         ) : (
           <>
-            <span>🏆</span>
-            Simulate 2026 Season
+            <span>🏆 Simulate 2026 Season</span>
           </>
         )}
       </motion.button>

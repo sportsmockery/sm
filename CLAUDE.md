@@ -1100,6 +1100,90 @@ All logged-in users can access `/gm`. No admin check — auth uses `@supabase/ss
 
 ---
 
+## Season Simulation V3 (CRITICAL)
+
+**The DataLab GM API is the SINGLE SOURCE OF TRUTH for season simulation and trade grading.** Do NOT calculate win projections locally, run Monte Carlo simulations client-side, compute GM scores on the frontend, or estimate playoff probabilities without the API.
+
+### Endpoint
+
+`POST https://datalab.sportsmockery.com/api/gm/simulate-season`
+
+Frontend proxy: `/api/gm/simulate-season` (proxies to DataLab with auth)
+
+### Request
+
+```typescript
+{
+  sessionId: string,       // Required: GM session UUID
+  sport: string,           // Required: nfl/nba/nhl/mlb
+  teamKey: string,         // Required: bears/bulls/blackhawks/cubs/whitesox
+  seasonYear: 2026,        // Optional: defaults to current year
+  simulationDepth: 'standard', // 'quick' (1-2s) | 'standard' (5-8s) | 'deep' (10-15s)
+}
+```
+
+### Fallback Chain
+
+1. DataLab V3 endpoint (`/api/gm/simulate-season`)
+2. DataLab V1 endpoint (`/api/gm/sim/season`)
+3. Local simulation engine (`@/lib/sim/season-engine`) — last resort
+
+### Version Detection
+
+| `simulation_version` | AI Analysis | Trade Impact Detail | Source |
+|---------------------|-------------|--------------------|----|
+| `v3-ai` | Yes (Claude Sonnet 4) | Yes | DataLab V3 |
+| `v3-quick` | No | Yes | DataLab V3 (quick mode) |
+| `v3-algorithmic-fallback` | No (AI failed) | Yes | DataLab V3 fallback |
+| `v1` | No | No | V1 fallback or local engine |
+
+### V3 Response Fields (additive to existing)
+
+| Field | Type | Available In | Description |
+|-------|------|--------------|-------------|
+| `projectedRecord` | `{wins, losses}` | All | AI-determined projected record |
+| `recordChange` | number | All | Wins improvement vs baseline |
+| `playoffProbability` | 0-100 | All | Playoff probability |
+| `projectedSeed` | number\|null | All | Playoff seed |
+| `tradeImpactDetail` | object | All V3 modes | WVS breakdown, talent density, market bias |
+| `tradeAnalysis` | array | v3-ai only | Per-trade AI analysis with archetypes |
+| `rosterAssessment` | object | v3-ai only | Strengths/weaknesses/identity shift |
+| `seasonNarrative` | object | v3-ai only | Headline, analysis, swing games, matchups |
+| `keyPlayerImpacts` | array | v3-ai only | Player impact with stat projections |
+| `monteCarloResults` | object | All V3 | 500+ iteration Monte Carlo results |
+| `chemistryPenalty` | object | All V3 | Integration period win reduction |
+
+### Player Archetypes (UI badge colors)
+
+| Archetype | Color |
+|-----------|-------|
+| Franchise Changer | Gold (#FFD700) |
+| Role Player Upgrade | Blue (#3b82f6) |
+| Culture Setter | Purple (#8b5cf6) |
+| Boom-or-Bust | Orange (#f97316) |
+| Declining Star | Gray (#6b7280) |
+| System Player | Teal (#14b8a6) |
+
+### Key Files
+
+| File | Purpose |
+|------|---------|
+| `src/app/api/gm/simulate-season/route.ts` | V3 proxy to DataLab (with V1 + local fallback) |
+| `src/app/api/gm/sim/season/route.ts` | Legacy V1 local simulation (kept as fallback) |
+| `src/components/gm/SimulationResults.tsx` | V3-aware results modal (6 tabs: Overview, AI Analysis, Games, Standings, Playoffs, Summary) |
+| `src/components/gm/SimulationTrigger.tsx` | Simulate button with progress phases |
+| `src/types/gm.ts` | V3 type definitions (V3TradeAnalysis, V3RosterAssessment, etc.) |
+| `src/lib/sim/` | Local simulation engine (legacy, fallback only) |
+
+### Caching & Rate Limits
+
+- Responses cached 30 minutes on DataLab (keyed on session+trades+sport+team+depth)
+- `_cached: true` flag indicates cached response
+- Rate limit: 5 simulations per minute per user (HTTP 429 if exceeded)
+- Cached responses don't count against rate limit
+
+---
+
 ## Mock Draft (CRITICAL - DO NOT OVERRIDE)
 
 **ALL mock draft data and logic comes from DataLab. NEVER override, assume, or modify eligibility on the frontend.**

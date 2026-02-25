@@ -385,6 +385,49 @@ export interface SimulationResult {
   baselinePowerRating?: number
   modifiedPowerRating?: number
   previousSeasonRecord?: { wins: number; losses: number; otLosses?: number; playoffRound?: number }
+
+  // ═══ V3 Fields (Feb 2026) — from DataLab GM API ═══
+  simulation_version?: 'v3-ai' | 'v3-quick' | 'v3-algorithmic-fallback' | 'v2-ai' | 'v2-quick' | 'v2-algorithmic-fallback' | 'v1'
+
+  // AI-determined projections
+  projectedRecord?: { wins: number; losses: number }
+  recordChange?: number
+  playoffProbability?: number
+  projectedSeed?: number | null
+
+  // Per-trade AI analysis
+  tradeAnalysis?: V3TradeAnalysis[]
+
+  // AI roster assessment
+  rosterAssessment?: V3RosterAssessment
+
+  // AI season narrative
+  seasonNarrative?: V3SeasonNarrative
+
+  // Key player impacts with stat projections
+  keyPlayerImpacts?: V3KeyPlayerImpact[]
+
+  // Monte Carlo supplementary data
+  monteCarloResults?: V3MonteCarloResults
+  pythagoreanBaseline?: { expectedWins: number; modifiedWins: number }
+  chemistryPenalty?: V3ChemistryPenalty
+
+  // V3 trade impact detail (always present in V3)
+  tradeImpactDetail?: V3TradeImpactDetail
+
+  // Backward-compatible division/league standings from V3
+  divisionStandings?: any[]
+
+  // Metadata
+  performance?: {
+    phase1Ms: number
+    phase2Ms: number
+    totalMs: number
+    simulationDepth: string
+    aiModel: string
+  }
+  durationMs?: number
+  _cached?: boolean
 }
 
 export interface SimulationRequest {
@@ -392,7 +435,101 @@ export interface SimulationRequest {
   sport: string
   teamKey: string
   seasonYear: number
+  simulationDepth?: 'quick' | 'standard' | 'deep'
 }
+
+// =====================
+// V3 Season Simulation Types (Feb 2026) — from DataLab GM API
+// =====================
+
+export interface V3TradeAnalysis {
+  tradeId: string
+  netImpact: 'positive' | 'negative' | 'neutral'
+  winsAdded: number
+  schemeFit: number        // 0-100
+  positionalNeed: number   // 0-100
+  playerArchetype: V3PlayerArchetype
+  reasoning: string
+}
+
+export type V3PlayerArchetype =
+  | 'Franchise Changer'
+  | 'Role Player Upgrade'
+  | 'Culture Setter'
+  | 'Boom-or-Bust'
+  | 'Declining Star'
+  | 'System Player'
+
+export interface V3RosterAssessment {
+  strengthsGained: string[]
+  weaknessesCreated: string[]
+  overallChange: 'improved' | 'declined' | 'lateral'
+  identityShift: string
+  depthScore: number  // 0-100
+}
+
+export interface V3SeasonNarrative {
+  headline: string
+  analysis: string
+  keyMatchups: { opponent: string; impact: string }[]
+  playoffOutlook: string
+  swingGames: { week: number; opponent: string; why: string }[]
+}
+
+export interface V3KeyPlayerImpact {
+  playerName: string
+  direction: 'added' | 'removed'
+  impact: string
+  archetype: V3PlayerArchetype
+}
+
+export interface V3MonteCarloResults {
+  iterations: number
+  winDistribution: {
+    mean: number
+    median: number
+    stdDev: number
+  }
+  playoffProbability: number
+  divisionWinProbability: number
+  confidenceInterval: {
+    low: number   // p10
+    high: number  // p90
+    confidence: number
+  }
+}
+
+export interface V3ChemistryPenalty {
+  integrationGames: number
+  earlySeasonWinReduction: number
+  fullIntegrationWeek: number
+}
+
+export interface V3TradeImpactDetail {
+  talentDensityFactor: number        // 0-1
+  talentDensityWarning: string | null
+  chicagoMarketBias: number          // 0-0.5 wins bonus
+  winProbDelta: number               // 0-1
+  wvsBreakdown: V3WVSBreakdown
+}
+
+export interface V3WVSBreakdown {
+  sent: number
+  received: number
+  delta: number  // positive = good trade
+}
+
+// Archetype badge colors for UI
+export const V3_ARCHETYPE_COLORS: Record<V3PlayerArchetype, string> = {
+  'Franchise Changer': '#FFD700',  // Gold
+  'Role Player Upgrade': '#3b82f6', // Blue
+  'Culture Setter': '#8b5cf6',      // Purple
+  'Boom-or-Bust': '#f97316',        // Orange
+  'Declining Star': '#6b7280',       // Gray
+  'System Player': '#14b8a6',        // Teal
+}
+
+export type SimulationPhase = 'idle' | 'calculating' | 'analyzing' | 'generating' | 'complete'
 
 // =====================
 // Video Game Simulation Types (Feb 2026)
