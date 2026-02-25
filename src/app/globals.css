@@ -217,29 +217,29 @@
 /* ===== LIGHT MODE OVERRIDE ===== */
 [data-theme="light"],
 .light {
-  --sm-dark: #ffffff;
-  --sm-surface: #f0f0f0;
-  --sm-card: #e0e0e0;
-  --sm-card-hover: #d0d0d0;
-  --sm-border: rgba(0, 0, 0, 0.1);
-  --sm-text: #000000;
-  --sm-text-muted: #666666;
-  --sm-text-dim: #888899;
+  --sm-dark: #fafafa;
+  --sm-surface: #f5f5f7;
+  --sm-card: #ffffff;
+  --sm-card-hover: #f8f8fa;
+  --sm-border: rgba(0, 0, 0, 0.08);
+  --sm-text: #1a1a2e;
+  --sm-text-muted: #555566;
+  --sm-text-dim: #8888a0;
   --sm-red-glow: rgba(188, 0, 0, 0.3);
   --sm-nav-bg: rgba(255, 255, 255, 0.8);
   --sm-nav-bg-scrolled: rgba(255, 255, 255, 0.95);
 
   /* Legacy compat for light mode */
-  --bg-page: #ffffff;
-  --bg-surface: #f0f0f0;
+  --bg-page: #fafafa;
+  --bg-surface: #f5f5f7;
   --bg-header: #ffffff;
   --bg-footer: #222222;
-  --bg-elevated: #f0f0f0;
-  --text-primary: #000000;
-  --text-muted: #666666;
+  --bg-elevated: #ffffff;
+  --text-primary: #1a1a2e;
+  --text-muted: #555566;
   --text-inverse: #ffffff;
-  --border-color: rgba(0,0,0,0.1);
-  --border-subtle: rgba(0,0,0,0.05);
+  --border-color: rgba(0,0,0,0.08);
+  --border-subtle: rgba(0,0,0,0.04);
   --link-color: #bc0000;
   --link-hover: #8a0000;
   --color-primary: #bc0000;
@@ -247,52 +247,52 @@
   --color-primary-light: #ff3333;
   --bears-orange: #dc4405;
   --bears-orange-light: #ff6b35;
-  --color-text-primary: #000000;
-  --color-text-secondary: #666666;
-  --color-text-muted: #888899;
-  --color-background: #ffffff;
-  --color-background-alt: #f0f0f0;
-  --color-border: rgba(0,0,0,0.1);
-  --background: #ffffff;
-  --foreground: #000000;
-  --bg-primary: #ffffff;
-  --bg-secondary: #f0f0f0;
-  --bg-tertiary: #e0e0e0;
+  --color-text-primary: #1a1a2e;
+  --color-text-secondary: #555566;
+  --color-text-muted: #8888a0;
+  --color-background: #fafafa;
+  --color-background-alt: #f5f5f7;
+  --color-border: rgba(0,0,0,0.08);
+  --background: #fafafa;
+  --foreground: #1a1a2e;
+  --bg-primary: #fafafa;
+  --bg-secondary: #f5f5f7;
+  --bg-tertiary: #ffffff;
   --sm-red: #bc0000;
   --sm-red-hover: #8a0000;
-  --border-primary: rgba(0,0,0,0.1);
-  --border-secondary: rgba(0,0,0,0.05);
-  --card-bg: #e0e0e0;
-  --card-border: rgba(0,0,0,0.1);
-  --card-hover-bg: #d0d0d0;
-  --bg-card: #e0e0e0;
-  --border-default: rgba(0,0,0,0.1);
+  --border-primary: rgba(0,0,0,0.08);
+  --border-secondary: rgba(0,0,0,0.04);
+  --card-bg: #ffffff;
+  --card-border: rgba(0,0,0,0.08);
+  --card-hover-bg: #f8f8fa;
+  --bg-card: #ffffff;
+  --border-default: rgba(0,0,0,0.08);
   --accent-red: #bc0000;
   --accent-red-glow: rgba(188, 0, 0, 0.3);
   --success: #10b981;
   --warning: #f59e0b;
-  --bg-hover: #d0d0d0;
-  --text-secondary: #666666;
+  --bg-hover: #f0f0f5;
+  --text-secondary: #555566;
   --footer-text-muted: #999999;
   --footer-bottom-bg: #111111;
-  --input-bg: #f0f0f0;
+  --input-bg: #f5f5f7;
   --input-border: rgba(0,0,0,0.1);
-  --input-text: #000000;
-  --input-placeholder: #888899;
+  --input-text: #1a1a2e;
+  --input-placeholder: #8888a0;
 
-  /* Shadows (light mode) */
-  --shadow-xs: 0 1px 2px rgba(0,0,0,0.04);
-  --shadow-sm: 0 2px 4px rgba(0,0,0,0.06);
-  --shadow-md: 0 4px 12px rgba(0,0,0,0.08);
-  --shadow-lg: 0 8px 24px rgba(0,0,0,0.12);
-  --shadow-xl: 0 16px 48px rgba(0,0,0,0.16);
-  --shadow-primary: 0 0 30px rgba(188, 0, 0, 0.15);
-  --shadow-bears: 0 0 30px rgba(220, 68, 5, 0.2);
+  /* Shadows (light mode) — white cards need shadow for depth */
+  --shadow-xs: 0 1px 3px rgba(0,0,0,0.04);
+  --shadow-sm: 0 2px 6px rgba(0,0,0,0.05);
+  --shadow-md: 0 4px 16px rgba(0,0,0,0.07);
+  --shadow-lg: 0 8px 28px rgba(0,0,0,0.1);
+  --shadow-xl: 0 16px 48px rgba(0,0,0,0.14);
+  --shadow-primary: 0 0 30px rgba(188, 0, 0, 0.12);
+  --shadow-bears: 0 0 30px rgba(220, 68, 5, 0.15);
 
   /* Glass morphism (light) */
-  --glass-bg: rgba(255, 255, 255, 0.8);
-  --glass-border: rgba(255, 255, 255, 0.2);
-  --glass-blur: 12px;
+  --glass-bg: rgba(255, 255, 255, 0.9);
+  --glass-border: rgba(0, 0, 0, 0.06);
+  --glass-blur: 16px;
 }
 
 /* ===== TIME-OF-DAY REACTIVE THEME LAYER ===== */
@@ -3217,6 +3217,7 @@ p {
   border-bottom: 1px solid rgba(188, 0, 0, 0.25);
   display: flex;
   align-items: center;
+  overflow: visible;
 }
 
 [data-theme="light"] .live-strip {
@@ -3364,10 +3365,6 @@ button.live-strip-chip--desk {
 
 /* Team picker dropdown */
 .desk-team-picker {
-  position: absolute;
-  top: calc(100% + 8px);
-  left: 50%;
-  transform: translateX(-50%);
   z-index: 200;
   background: var(--sm-card, #13131d);
   border: 1px solid var(--sm-border, rgba(255,255,255,0.06));
@@ -3385,8 +3382,8 @@ button.live-strip-chip--desk {
 }
 
 @keyframes desk-picker-in {
-  from { opacity: 0; transform: translateX(-50%) translateY(-4px) scale(0.97); }
-  to { opacity: 1; transform: translateX(-50%) translateY(0) scale(1); }
+  from { opacity: 0; transform: translateY(-4px) scale(0.97); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
 }
 
 .desk-team-picker-title {
@@ -3444,13 +3441,7 @@ button.live-strip-chip--desk {
     padding: 2px 10px;
   }
   .desk-team-picker {
-    left: 0;
-    transform: none;
     min-width: 180px;
-  }
-  @keyframes desk-picker-in {
-    from { opacity: 0; transform: translateY(-4px) scale(0.97); }
-    to { opacity: 1; transform: translateY(0) scale(1); }
   }
 }
 
@@ -3973,21 +3964,22 @@ a.glass-card-sm:active,
 .light .glass-card {
   background: #ffffff;
   border-color: rgba(0,0,0,0.06);
-  box-shadow: 0 1px 3px rgba(0,0,0,0.04), 0 4px 12px rgba(0,0,0,0.02);
+  box-shadow: 0 1px 3px rgba(0,0,0,0.06), 0 4px 16px rgba(0,0,0,0.04);
 }
 [data-theme="light"] .glass-card:hover,
 .light .glass-card:hover {
-  box-shadow: 0 4px 16px rgba(0,0,0,0.08), 0 1px 3px rgba(0,0,0,0.04);
+  background: #ffffff;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.1), 0 1px 4px rgba(0,0,0,0.06);
 }
 [data-theme="light"] .glass-card-sm,
 .light .glass-card-sm {
   background: #ffffff;
   border-color: rgba(0,0,0,0.06);
-  box-shadow: 0 1px 2px rgba(0,0,0,0.03);
+  box-shadow: 0 1px 3px rgba(0,0,0,0.05), 0 2px 8px rgba(0,0,0,0.03);
 }
 [data-theme="light"] .glass-card-sm:hover,
 .light .glass-card-sm:hover {
-  box-shadow: 0 4px 12px rgba(0,0,0,0.06);
+  box-shadow: 0 4px 16px rgba(0,0,0,0.08), 0 1px 3px rgba(0,0,0,0.05);
 }
 
 /* ========== FINAL POLISH: Upgrade 10 — Scroll-Linked Navbar ========== */
@@ -4496,17 +4488,20 @@ a.glass-card-sm:active,
 /* === Light mode glass card overrides (updated for new palette) === */
 [data-theme="light"] .glass-card,
 .light .glass-card {
-  background: #e0e0e0;
-  border-color: rgba(0,0,0,0.1);
+  background: #ffffff;
+  border-color: rgba(0,0,0,0.06);
+  box-shadow: 0 1px 3px rgba(0,0,0,0.06), 0 4px 16px rgba(0,0,0,0.04);
 }
 [data-theme="light"] .glass-card:hover,
 .light .glass-card:hover {
-  background: #d0d0d0;
+  background: #ffffff;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.1), 0 1px 4px rgba(0,0,0,0.06);
 }
 [data-theme="light"] .glass-card-sm,
 .light .glass-card-sm {
-  background: #e0e0e0;
-  border-color: rgba(0,0,0,0.1);
+  background: #ffffff;
+  border-color: rgba(0,0,0,0.06);
+  box-shadow: 0 1px 3px rgba(0,0,0,0.05), 0 2px 8px rgba(0,0,0,0.03);
 }
 
 /* === Logo hover glow === */

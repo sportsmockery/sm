@@ -48,6 +48,8 @@ export function CatchUpTimeline({ posts }: CatchUpTimelineProps) {
   const [activeIndex, setActiveIndex] = useState<number | null>(null);
   const chipListRef = useRef<HTMLDivElement>(null);
   const chipRefs = useRef<(HTMLButtonElement | null)[]>([]);
+  const blurTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const panelHoveredRef = useRef(false);
 
   // Derive catch-up items: last 24h, sorted by importance then recency, top 8
   const catchUpItems = useMemo(() => {
@@ -77,8 +79,11 @@ export function CatchUpTimeline({ posts }: CatchUpTimelineProps) {
   }, []);
 
   const handleChipBlur = useCallback(() => {
-    // Small delay so clicking "Jump to story" doesn't immediately close
-    setTimeout(() => setActiveIndex(null), 200);
+    // Delay close so user can move mouse to the panel below
+    if (blurTimerRef.current) clearTimeout(blurTimerRef.current);
+    blurTimerRef.current = setTimeout(() => {
+      if (!panelHoveredRef.current) setActiveIndex(null);
+    }, 400);
   }, []);
 
   // Keyboard navigation
@@ -189,6 +194,14 @@ export function CatchUpTimeline({ posts }: CatchUpTimelineProps) {
           role="tabpanel"
           aria-labelledby={`catchup-tab-${activeIndex}`}
           className="catchup-panel"
+          onMouseEnter={() => {
+            panelHoveredRef.current = true;
+            if (blurTimerRef.current) { clearTimeout(blurTimerRef.current); blurTimerRef.current = null; }
+          }}
+          onMouseLeave={() => {
+            panelHoveredRef.current = false;
+            blurTimerRef.current = setTimeout(() => setActiveIndex(null), 300);
+          }}
         >
           <p className="catchup-panel-excerpt">
             {activeItem.excerpt

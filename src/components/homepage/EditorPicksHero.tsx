@@ -1,6 +1,7 @@
 // src/components/homepage/EditorPicksHero.tsx
 'use client';
 
+import { useState, useRef, useCallback, useEffect } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 
@@ -35,98 +36,217 @@ function formatTeamName(slug: string | null): string {
     .join(' ');
 }
 
+const HOLD_DELAY = 500;
+const CACHE_TTL = 60 * 60 * 1000;
+
+/* ─── Scout Recap Overlay ─── */
+function ScoutRecapOverlay({ title, excerpt, slug, onClose }: { title: string; excerpt: string | null; slug: string; onClose: () => void }) {
+  const [recap, setRecap] = useState<string | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const cacheKey = `scout-recap-${slug}`;
+    try {
+      const cached = localStorage.getItem(cacheKey);
+      if (cached) {
+        const { text, ts } = JSON.parse(cached);
+        if (Date.now() - ts < CACHE_TTL) { setRecap(text); setLoading(false); return; }
+      }
+    } catch { /* ignore */ }
+
+    const controller = new AbortController();
+    (async () => {
+      try {
+        const res = await fetch('/api/ask-ai', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            query: `Give a 1-2 sentence TL;DR recap of this article: "${title}". ${excerpt ? `Context: ${excerpt}` : ''}. Be concise and direct.`,
+          }),
+          signal: controller.signal,
+        });
+        if (!res.ok) { setLoading(false); return; }
+        const data = await res.json();
+        const text = data.response || data.answer || '';
+        if (text) {
+          setRecap(text);
+          try { localStorage.setItem(cacheKey, JSON.stringify({ text, ts: Date.now() })); } catch { /* ignore */ }
+        }
+      } catch (err) {
+        if ((err as Error).name !== 'AbortError') { /* ignore */ }
+      } finally { setLoading(false); }
+    })();
+    return () => controller.abort();
+  }, [slug, title, excerpt]);
+
+  return (
+    <div
+      style={{ position: 'absolute', inset: 0, zIndex: 20, display: 'flex', flexDirection: 'column', justifyContent: 'flex-end', borderRadius: 16, overflow: 'hidden', animation: 'scoutOverlayIn 0.2s ease-out' }}
+      onClick={(e) => { e.preventDefault(); e.stopPropagation(); }}
+    >
+      <div style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.7)', backdropFilter: 'blur(4px)', WebkitBackdropFilter: 'blur(4px)' }} />
+      <div style={{ position: 'relative', padding: '16px 20px', display: 'flex', flexDirection: 'column', gap: 10 }}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+            <Image src="/downloads/scout-v2.png" alt="Scout AI" width={20} height={20} style={{ borderRadius: '50%' }} />
+            <span style={{ fontSize: 11, fontWeight: 700, color: '#fff', textTransform: 'uppercase', letterSpacing: '0.06em' }}>Scout Recap</span>
+          </div>
+          <button
+            onClick={(e) => { e.preventDefault(); e.stopPropagation(); onClose(); }}
+            style={{ background: 'rgba(255,255,255,0.15)', border: 'none', borderRadius: '50%', width: 26, height: 26, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', color: '#fff' }}
+            aria-label="Close recap"
+          >
+            <svg width="12" height="12" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+        </div>
+        {loading ? (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 5 }}>
+            <div style={{ height: 10, borderRadius: 5, background: 'rgba(255,255,255,0.15)', width: '100%' }} />
+            <div style={{ height: 10, borderRadius: 5, background: 'rgba(255,255,255,0.15)', width: '65%' }} />
+          </div>
+        ) : recap ? (
+          <p style={{ fontSize: 13, lineHeight: 1.5, color: 'rgba(255,255,255,0.9)', margin: 0 }}>{recap}</p>
+        ) : (
+          <p style={{ fontSize: 12, color: 'rgba(255,255,255,0.6)', margin: 0 }}>Recap unavailable.</p>
+        )}
+        <Link
+          href="/scout-ai"
+          onClick={(e) => e.stopPropagation()}
+          style={{ display: 'inline-flex', alignItems: 'center', gap: 5, fontSize: 11, fontWeight: 600, color: '#bc0000', textDecoration: 'none' }}
+        >
+          Ask Scout more
+          <svg width="10" height="10" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" />
+          </svg>
+        </Link>
+      </div>
+      <style>{`@keyframes scoutOverlayIn { from { opacity:0; transform:translateY(8px); } to { opacity:1; transform:translateY(0); } }`}</style>
+    </div>
+  );
+}
+
+/* ─── Holdable Main Card (slot 1) ─── */
+function HoldableMainCard({ pick }: { pick: EditorPick }) {
+  const [showRecap, setShowRecap] = useState(false);
+  const holdTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const didHold = useRef(false);
+
+  const startHold = useCallback(() => {
+    didHold.current = false;
+    holdTimer.current = setTimeout(() => { didHold.current = true; setShowRecap(true); }, HOLD_DELAY);
+  }, []);
+  const cancelHold = useCallback(() => { if (holdTimer.current) { clearTimeout(holdTimer.current); holdTimer.current = null; } }, []);
+  useEffect(() => () => { if (holdTimer.current) clearTimeout(holdTimer.current); }, []);
+
+  const href = pick.category_slug ? `/${pick.category_slug}/${pick.slug}` : `/${pick.slug}`;
+
+  return (
+    <Link
+      href={href}
+      className="glass-card featured-main-link"
+      style={{ padding: 0, position: 'relative' }}
+      onMouseDown={startHold} onMouseUp={cancelHold} onMouseLeave={cancelHold}
+      onTouchStart={startHold} onTouchEnd={cancelHold} onTouchCancel={cancelHold}
+      onClick={(e) => { if (didHold.current) { e.preventDefault(); didHold.current = false; } }}
+    >
+      <div className="featured-image">
+        {pick.featured_image ? (
+          <Image src={pick.featured_image} alt={pick.title} fill sizes="(max-width: 768px) 100vw, 60vw" priority />
+        ) : (
+          <div className="featured-image-empty" />
+        )}
+        {pick.team_slug && (
+          <span className="sm-tag featured-pill" style={{ display: 'inline-flex' }}>{formatTeamName(pick.team_slug)}</span>
+        )}
+      </div>
+      <h3>{pick.title}</h3>
+      {pick.excerpt && <p className="featured-excerpt">{pick.excerpt}</p>}
+      <div className="featured-meta">
+        {pick.team_slug && <span>{formatTeamName(pick.team_slug)}</span>}
+        <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4, fontSize: 11, color: 'var(--sm-text-dim)', marginLeft: 'auto' }}>
+          <Image src="/downloads/scout-v2.png" alt="" width={14} height={14} style={{ borderRadius: '50%', opacity: 0.6 }} />
+          Hold for recap
+        </span>
+      </div>
+      {showRecap && <ScoutRecapOverlay title={pick.title} excerpt={pick.excerpt} slug={pick.slug} onClose={() => setShowRecap(false)} />}
+    </Link>
+  );
+}
+
+/* ─── Holdable Side Card (slots 2-3) ─── */
+function HoldableSideCard({ pick }: { pick: EditorPick }) {
+  const [showRecap, setShowRecap] = useState(false);
+  const holdTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const didHold = useRef(false);
+
+  const startHold = useCallback(() => {
+    didHold.current = false;
+    holdTimer.current = setTimeout(() => { didHold.current = true; setShowRecap(true); }, HOLD_DELAY);
+  }, []);
+  const cancelHold = useCallback(() => { if (holdTimer.current) { clearTimeout(holdTimer.current); holdTimer.current = null; } }, []);
+  useEffect(() => () => { if (holdTimer.current) clearTimeout(holdTimer.current); }, []);
+
+  const href = pick.category_slug ? `/${pick.category_slug}/${pick.slug}` : `/${pick.slug}`;
+
+  return (
+    <Link
+      href={href}
+      className="glass-card-sm featured-side-card"
+      style={{ padding: '16px', borderRadius: '16px', border: '1px solid rgba(255, 255, 255, 0.06)', position: 'relative', overflow: 'hidden' }}
+      onMouseDown={startHold} onMouseUp={cancelHold} onMouseLeave={cancelHold}
+      onTouchStart={startHold} onTouchEnd={cancelHold} onTouchCancel={cancelHold}
+      onClick={(e) => { if (didHold.current) { e.preventDefault(); didHold.current = false; } }}
+    >
+      <div className="side-image">
+        {pick.featured_image ? (
+          <Image src={pick.featured_image} alt={pick.title} fill sizes="120px" />
+        ) : (
+          <div className="side-image-empty" />
+        )}
+      </div>
+      <div className="side-content">
+        {pick.team_slug && (
+          <span className="sm-tag" style={{ display: 'inline-flex' }}>{formatTeamName(pick.team_slug)}</span>
+        )}
+        <h4>{pick.title}</h4>
+        <span className="side-meta" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+          <span>{pick.team_slug ? formatTeamName(pick.team_slug) : ''}</span>
+          <span style={{ display: 'inline-flex', alignItems: 'center', gap: 3, fontSize: 10, color: 'var(--sm-text-dim)' }}>
+            <Image src="/downloads/scout-v2.png" alt="" width={12} height={12} style={{ borderRadius: '50%', opacity: 0.5 }} />
+            Hold for recap
+          </span>
+        </span>
+      </div>
+      {showRecap && <ScoutRecapOverlay title={pick.title} excerpt={pick.excerpt} slug={pick.slug} onClose={() => setShowRecap(false)} />}
+    </Link>
+  );
+}
+
+/* ─── Main Component ─── */
 export function EditorPicksHero({ picks = [] }: EditorPicksHeroProps) {
   const safePicks = Array.isArray(picks) ? picks : [];
-
-  if (safePicks.length === 0) {
-    return null;
-  }
+  if (safePicks.length === 0) return null;
 
   const sorted = [...safePicks].sort((a, b) => a.pinned_slot - b.pinned_slot);
-
-  // Slot 1: Large featured card (left column)
   const mainPick = sorted[0];
-
-  // Slots 2-3: Stacked side cards (right column)
   const sidePicks = sorted.slice(1, 3);
-
-  // Slots 4-6: More featured headline links
   const morePicks = sorted.slice(3, 6);
 
   return (
     <section className="sm-featured-shell" aria-label="Featured Content" style={{ padding: '40px 0' }}>
       <div className="featured-grid" style={{ gap: '48px', padding: '0 24px' }}>
-        {/* Left column: Large featured card */}
         <div className="featured-main">
-          <Link href={mainPick.category_slug ? `/${mainPick.category_slug}/${mainPick.slug}` : `/${mainPick.slug}`} className="glass-card featured-main-link" style={{ padding: 0 }}>
-            <div className="featured-image">
-              {mainPick.featured_image ? (
-                <Image
-                  src={mainPick.featured_image}
-                  alt={mainPick.title}
-                  fill
-                  sizes="(max-width: 768px) 100vw, 60vw"
-                  priority
-                />
-              ) : (
-                <div className="featured-image-empty" />
-              )}
-              {mainPick.team_slug && (
-                <span className="sm-tag featured-pill" style={{ display: 'inline-flex' }}>
-                  {formatTeamName(mainPick.team_slug)}
-                </span>
-              )}
-            </div>
-            <h3>{mainPick.title}</h3>
-            {mainPick.excerpt && (
-              <p className="featured-excerpt">{mainPick.excerpt}</p>
-            )}
-            <div className="featured-meta">
-              {mainPick.team_slug && (
-                <span>{formatTeamName(mainPick.team_slug)}</span>
-              )}
-            </div>
-          </Link>
+          <HoldableMainCard pick={mainPick} />
         </div>
-
-        {/* Right column: Stacked side cards */}
         <div className="featured-side" style={{ gap: '32px' }}>
           {sidePicks.map((pick) => (
-            <Link
-              key={pick.id}
-              href={pick.category_slug ? `/${pick.category_slug}/${pick.slug}` : `/${pick.slug}`}
-              className="glass-card-sm featured-side-card"
-              style={{ padding: '16px', borderRadius: '16px', border: '1px solid rgba(255, 255, 255, 0.06)' }}
-            >
-              <div className="side-image">
-                {pick.featured_image ? (
-                  <Image
-                    src={pick.featured_image}
-                    alt={pick.title}
-                    fill
-                    sizes="120px"
-                  />
-                ) : (
-                  <div className="side-image-empty" />
-                )}
-              </div>
-              <div className="side-content">
-                {pick.team_slug && (
-                  <span className="sm-tag" style={{ display: 'inline-flex' }}>
-                    {formatTeamName(pick.team_slug)}
-                  </span>
-                )}
-                <h4>{pick.title}</h4>
-                <span className="side-meta">
-                  {pick.team_slug ? formatTeamName(pick.team_slug) : ''}
-                </span>
-              </div>
-            </Link>
+            <HoldableSideCard key={pick.id} pick={pick} />
           ))}
         </div>
       </div>
 
-      {/* More Featured (slots 4-6) */}
       {morePicks.length > 0 && (
         <div className="featured-more">
           <h4 className="featured-more-title">More Featured</h4>

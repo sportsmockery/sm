@@ -86,9 +86,11 @@ export default function LiveStrip() {
   const router = useRouter();
   const [games, setGames] = useState<LiveGame[]>([]);
   const [loaded, setLoaded] = useState(false);
-  const [pickerOpen, setPickerOpen] = useState<string | null>(null); // path of open picker
+  const [pickerOpen, setPickerOpen] = useState<string | null>(null);
   const pickerRef = useRef<HTMLDivElement>(null);
   const [focusedIdx, setFocusedIdx] = useState(-1);
+  const [pickerPos, setPickerPos] = useState<{ top: number; left: number } | null>(null);
+  const btnRefs = useRef<Record<string, HTMLButtonElement | null>>({});
 
   const fetchGames = useCallback(async () => {
     try {
@@ -116,12 +118,14 @@ export default function LiveStrip() {
     function handleClick(e: MouseEvent) {
       if (pickerRef.current && !pickerRef.current.contains(e.target as Node)) {
         setPickerOpen(null);
+        setPickerPos(null);
         setFocusedIdx(-1);
       }
     }
     function handleKey(e: KeyboardEvent) {
       if (e.key === 'Escape') {
         setPickerOpen(null);
+        setPickerPos(null);
         setFocusedIdx(-1);
       }
       if (e.key === 'ArrowDown') {
@@ -152,7 +156,18 @@ export default function LiveStrip() {
     if (favSlug) {
       router.push(`/${favSlug}/${path}`);
     } else {
-      setPickerOpen(pickerOpen === path ? null : path);
+      if (pickerOpen === path) {
+        setPickerOpen(null);
+        setPickerPos(null);
+      } else {
+        // Position the dropdown below the button
+        const btn = btnRefs.current[path];
+        if (btn) {
+          const rect = btn.getBoundingClientRect();
+          setPickerPos({ top: rect.bottom + 8, left: rect.left + rect.width / 2 });
+        }
+        setPickerOpen(path);
+      }
       setFocusedIdx(-1);
     }
   }
@@ -164,6 +179,7 @@ export default function LiveStrip() {
       // Ignore storage errors
     }
     setPickerOpen(null);
+    setPickerPos(null);
     setFocusedIdx(-1);
     router.push(`/${teamSlug}/${path}`);
   }
@@ -254,42 +270,23 @@ export default function LiveStrip() {
 
             {/* Team-picker pills */}
             {TEAM_PILLS.map((pill) => (
-              <div key={pill.path} style={{ position: 'relative' }} ref={pickerOpen === pill.path ? pickerRef : undefined}>
-                <button
-                  className="live-strip-chip live-strip-chip--desk"
-                  onClick={() => handleTeamPillClick(pill.path)}
-                  aria-expanded={pickerOpen === pill.path}
-                  aria-haspopup="true"
+              <button
+                key={pill.path}
+                ref={(el) => { btnRefs.current[pill.path] = el; }}
+                className="live-strip-chip live-strip-chip--desk"
+                onClick={() => handleTeamPillClick(pill.path)}
+                aria-expanded={pickerOpen === pill.path}
+                aria-haspopup="true"
+              >
+                {pill.label}
+                <svg
+                  width="10" height="10" viewBox="0 0 24 24" fill="none"
+                  stroke="currentColor" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round"
+                  style={{ marginLeft: 2, opacity: 0.5, transition: 'transform 0.2s', transform: pickerOpen === pill.path ? 'rotate(180deg)' : 'none' }}
                 >
-                  {pill.label}
-                  <svg
-                    width="10" height="10" viewBox="0 0 24 24" fill="none"
-                    stroke="currentColor" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round"
-                    style={{ marginLeft: 2, opacity: 0.5 }}
-                  >
-                    <path d="M6 9l6 6 6-6" />
-                  </svg>
-                </button>
-
-                {/* Team picker dropdown */}
-                {pickerOpen === pill.path && (
-                  <div className="desk-team-picker">
-                    <span className="desk-team-picker-title">Choose your team</span>
-                    <div className="desk-team-picker-grid">
-                      {TEAMS.map((team, idx) => (
-                        <button
-                          key={team.key}
-                          className={`desk-team-picker-btn${focusedIdx === idx ? ' desk-team-picker-btn--focused' : ''}`}
-                          onClick={() => handleTeamSelect(team.slug, pill.path)}
-                        >
-                          <Image src={team.logo} alt={team.name} width={20} height={20} style={{ borderRadius: 4 }} />
-                          <span>{team.name}</span>
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-                )}
-              </div>
+                  <path d="M6 9l6 6 6-6" />
+                </svg>
+              </button>
             ))}
 
             {/* Direct pills */}
@@ -301,6 +298,29 @@ export default function LiveStrip() {
           </>
         )}
       </div>
+
+      {/* Team picker dropdown — rendered outside .live-strip-inner to escape overflow clip */}
+      {pickerOpen && pickerPos && (
+        <div
+          ref={pickerRef}
+          className="desk-team-picker"
+          style={{ position: 'fixed', top: pickerPos.top, left: pickerPos.left, transform: 'translateX(-50%)' }}
+        >
+          <span className="desk-team-picker-title">Choose your team</span>
+          <div className="desk-team-picker-grid">
+            {TEAMS.map((team, idx) => (
+              <button
+                key={team.key}
+                className={`desk-team-picker-btn${focusedIdx === idx ? ' desk-team-picker-btn--focused' : ''}`}
+                onClick={() => handleTeamSelect(team.slug, pickerOpen)}
+              >
+                <Image src={team.logo} alt={team.name} width={20} height={20} style={{ borderRadius: 4 }} />
+                <span>{team.name}</span>
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
     </div>
   );
 }

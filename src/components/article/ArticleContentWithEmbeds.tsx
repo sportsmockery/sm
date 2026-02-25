@@ -8,6 +8,8 @@ import { processIconShortcodes } from '@/lib/shortcodes'
 interface ArticleContentWithEmbedsProps {
   content: string
   className?: string
+  /** React node to inject after the 3rd paragraph */
+  inlineSlot?: React.ReactNode
 }
 
 // Script loading state
@@ -89,9 +91,28 @@ function processBareTweetUrls(html: string): string {
   })
 }
 
+/**
+ * Split HTML after the Nth closing </p> tag.
+ * Returns [before, after]. If fewer than N paragraphs, after is empty.
+ */
+function splitAfterParagraph(html: string, n: number): [string, string] {
+  let count = 0
+  const regex = /<\/p>/gi
+  let match: RegExpExecArray | null
+  while ((match = regex.exec(html)) !== null) {
+    count++
+    if (count === n) {
+      const splitIndex = match.index + match[0].length
+      return [html.slice(0, splitIndex), html.slice(splitIndex)]
+    }
+  }
+  return [html, '']
+}
+
 export default function ArticleContentWithEmbeds({
   content,
   className = '',
+  inlineSlot,
 }: ArticleContentWithEmbedsProps) {
   const contentRef = useRef<HTMLDivElement>(null)
 
@@ -114,6 +135,19 @@ export default function ArticleContentWithEmbeds({
       }
     })
   }, [processedContent])
+
+  // If there's an inline slot, split content and inject it after paragraph 3
+  if (inlineSlot) {
+    const [before, after] = splitAfterParagraph(processedContent, 3)
+    return (
+      <div ref={contentRef} className={`article-body ${className}`}>
+        <div dangerouslySetInnerHTML={{ __html: before }} />
+        {after ? inlineSlot : null}
+        {after && <div dangerouslySetInnerHTML={{ __html: after }} />}
+        {!after && inlineSlot}
+      </div>
+    )
+  }
 
   return (
     <div
