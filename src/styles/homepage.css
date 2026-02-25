@@ -4002,10 +4002,13 @@ html .storyline-card {
 
 /* ═══════════════════════════════════════════════
    "Your Chicago" Personalization Bar (logged-in only)
+   Force-visible: override any hiding from animation/layout
    ═══════════════════════════════════════════════ */
 
 .your-chicago-bar {
-  display: flex;
+  display: flex !important;
+  opacity: 1 !important;
+  visibility: visible !important;
   align-items: center;
   justify-content: space-between;
   width: 100%;
@@ -4021,12 +4024,12 @@ html .storyline-card {
   border-radius: 16px;
   box-shadow: 0 4px 12px rgba(188, 0, 0, 0.4);
   position: relative;
-  z-index: 2;
+  z-index: 10;
   box-sizing: border-box;
   cursor: pointer;
   text-decoration: none;
   color: inherit;
-  animation: yourChicagoLiftIn 0.4s ease-out;
+  animation: yourChicagoLiftIn 0.4s ease-out forwards;
   transition: transform 0.18s ease-out, box-shadow 0.18s ease-out;
 }
 
@@ -4100,7 +4103,39 @@ html .storyline-card {
   transform: scaleX(1);
 }
 
-/* Light mode */
+/* Dark mode — explicit */
+[data-theme="dark"] .your-chicago-bar,
+.dark .your-chicago-bar {
+  background: rgba(0, 0, 0, 0.45) !important;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(188, 0, 0, 0.25);
+  border-bottom: 2px solid #bc0000;
+  box-shadow: 0 4px 12px rgba(188, 0, 0, 0.4);
+}
+
+[data-theme="dark"] .your-chicago-bar:hover,
+.dark .your-chicago-bar:hover {
+  box-shadow: 0 6px 18px rgba(188, 0, 0, 0.55);
+}
+
+[data-theme="dark"] .your-chicago-title,
+.dark .your-chicago-title {
+  color: #fff !important;
+  text-shadow: 0 0 12px rgba(188, 0, 0, 0.5);
+}
+
+[data-theme="dark"] .your-chicago-name,
+.dark .your-chicago-name {
+  color: rgba(255, 255, 255, 0.85) !important;
+}
+
+[data-theme="dark"] .your-chicago-streak,
+.dark .your-chicago-streak {
+  color: #bc0000 !important;
+}
+
+/* Light mode — explicit */
 [data-theme="light"] .your-chicago-bar,
 .light .your-chicago-bar {
   background: rgba(255, 255, 255, 0.9) !important;
@@ -4173,7 +4208,9 @@ html .storyline-card {
    ═══════════════════════════════════════════════ */
 
 .scout-since-cta {
-  display: block;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   margin: 10px auto 0;
   padding: 6px 0;
   font-family: 'Space Grotesk', var(--font-space-grotesk), sans-serif;

@@ -143,7 +143,8 @@ export function ScoutSinceLastVisit() {
         onClick={handleOpen}
         type="button"
       >
-        Scout my Chicago since I was last here
+        <Image src="/downloads/scout-v2.png" alt="" width={20} height={20} unoptimized style={{ marginRight: 8, flexShrink: 0 }} />
+        What&apos;d I miss?
       </button>
 
       {/* Overlay */}

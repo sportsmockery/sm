@@ -533,13 +533,16 @@ export function HomepageFeed({
   // Fetch visit streak for "Your Chicago" bar (logged-in only)
   useEffect(() => {
     if (!actuallyLoggedIn) return;
+    console.log('YourChicagoBar rendering:', user?.email || user?.id || 'logged-in user');
     // Check session cache first
     try {
       const cached = sessionStorage.getItem('sm-visit-streak');
       if (cached) {
         const parsed = JSON.parse(cached);
-        if (parsed.streak) setVisitStreak(parsed.streak);
+        const cachedStreak = parsed.streak || 1;
+        setVisitStreak(cachedStreak);
         if (parsed.name) setDisplayName(parsed.name);
+        console.log('YourChicagoBar cached streak:', cachedStreak, 'name:', parsed.name);
         return; // Use cached value for this session
       }
     } catch {}
@@ -547,15 +550,25 @@ export function HomepageFeed({
       .then(r => r.ok ? r.json() : null)
       .then(data => {
         if (data) {
-          setVisitStreak(data.streak || 1);
+          const streak = data.streak || 1;
           const firstName = data.name?.split(' ')[0] || 'Fan';
+          setVisitStreak(streak);
           setDisplayName(firstName);
+          console.log('YourChicagoBar API streak:', streak, 'name:', firstName);
           try {
-            sessionStorage.setItem('sm-visit-streak', JSON.stringify({ streak: data.streak, name: firstName }));
+            sessionStorage.setItem('sm-visit-streak', JSON.stringify({ streak, name: firstName }));
           } catch {}
+        } else {
+          // API returned non-OK — still show bar with streak 1
+          console.warn('YourChicagoBar: visit-streak API returned non-OK, defaulting to streak 1');
+          setVisitStreak(1);
         }
       })
-      .catch(() => {});
+      .catch((err) => {
+        console.error('YourChicagoBar: visit-streak fetch failed:', err);
+        // Show bar anyway with fallback streak
+        setVisitStreak(1);
+      });
   }, [actuallyLoggedIn]);
 
   // Fetch engagement profile for logged-in users (feed personalization)
