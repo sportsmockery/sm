@@ -9,6 +9,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { EditorPicksHero } from './EditorPicksHero';
 import { TeamFilterTabs } from './TeamFilterTabs';
 import { ForYouFeed } from './ForYouFeed';
+import { StorylineFeed } from './StorylineFeed';
 import { HomepageSidebar } from './HomepageSidebar';
 import { ScoutSearchBox } from './ScoutSearchBox';
 import { CatchUpTimeline } from './CatchUpTimeline';
@@ -793,13 +794,14 @@ export function HomepageFeed({
                 <span className="sm-tag">Latest</span>
                 <h2>Latest Stories</h2>
               </div>
-              <ForYouFeed
+              <StorylineFeed
                 posts={filteredPosts}
                 isLoggedIn={isLoggedIn}
                 isMobile={isMobile}
                 showTrendingInline={isMobile}
                 trendingPosts={safeTrendingPosts}
                 activeTeam={activeFilter}
+                userTeamPreference={userTeamPreference}
               />
             </main>
 
