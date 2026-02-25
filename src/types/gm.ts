@@ -366,7 +366,7 @@ export interface SimulationResult {
     conference2: TeamStanding[] // NFC/Western/etc.
     conference1Name: string
     conference2Name: string
-  }
+  } | Array<{ team: string; wins: number; losses: number; winPct: number; rank: number; ties?: number }>
   playoffs?: {
     bracket: PlayoffMatchup[]
     userTeamResult?: {

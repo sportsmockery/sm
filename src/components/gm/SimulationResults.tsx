@@ -825,70 +825,123 @@ export function SimulationResults({
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -10 }}
               >
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
-                  {[
-                    { name: standings.conference1Name, teams: standings.conference1 },
-                    { name: standings.conference2Name, teams: standings.conference2 },
-                  ].map(conf => (
-                    <div key={conf.name} style={{ backgroundColor: surfaceBg, borderRadius: 12, padding: 16 }}>
-                      <h3 style={{ fontSize: 14, fontWeight: 700, color: textColor, marginBottom: 12, textAlign: 'center' }}>
-                        {conf.name}
-                      </h3>
-                      <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
-                        {/* Header */}
-                        <div style={{ display: 'grid', gridTemplateColumns: '24px 1fr 48px 48px', gap: 8, padding: '4px 8px', fontSize: 10, fontWeight: 600, color: subText, textTransform: 'uppercase' }}>
-                          <span>#</span>
-                          <span>Team</span>
-                          <span style={{ textAlign: 'center' }}>W-L</span>
-                          <span style={{ textAlign: 'center' }}>GB</span>
-                        </div>
-                        {conf.teams.slice(0, 12).map((team: TeamStanding, idx: number) => (
+                {/* Handle both structured (conference split) and flat array (DataLab V3) formats */}
+                {Array.isArray(standings) ? (
+                  /* Flat array from DataLab V3 — render single standings table */
+                  <div style={{ backgroundColor: surfaceBg, borderRadius: 12, padding: 16 }}>
+                    <h3 style={{ fontSize: 14, fontWeight: 700, color: textColor, marginBottom: 12, textAlign: 'center' }}>
+                      League Standings
+                    </h3>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+                      <div style={{ display: 'grid', gridTemplateColumns: '28px 1fr 56px 56px', gap: 8, padding: '4px 8px', fontSize: 10, fontWeight: 600, color: subText, textTransform: 'uppercase' }}>
+                        <span>#</span>
+                        <span>Team</span>
+                        <span style={{ textAlign: 'center' }}>W-L</span>
+                        <span style={{ textAlign: 'center' }}>Win%</span>
+                      </div>
+                      {(standings as Array<{ team: string; wins: number; losses: number; winPct: number; rank: number }>).map((entry, idx) => {
+                        const userKey = teamName.toLowerCase().replace('chicago ', '')
+                        const isUser = entry.team?.toLowerCase() === userKey || entry.team?.toLowerCase().includes(userKey)
+                        const teamLabel = entry.team?.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase()) || `Team ${idx + 1}`
+                        return (
                           <div
-                            key={team.teamKey}
+                            key={entry.team || idx}
                             style={{
                               display: 'grid',
-                              gridTemplateColumns: '24px 1fr 48px 48px',
+                              gridTemplateColumns: '28px 1fr 56px 56px',
                               gap: 8,
                               padding: '8px',
                               borderRadius: 6,
-                              backgroundColor: team.isUserTeam ? `${teamColor}20` : team.isTradePartner ? '#ef444420' : idx < 7 ? (isDark ? '#1f2937' : '#fff') : 'transparent',
-                              border: team.isUserTeam ? `2px solid ${teamColor}` : team.isTradePartner ? '2px solid #ef4444' : 'none',
+                              backgroundColor: isUser ? `${teamColor}20` : idx < 7 ? (isDark ? '#1f2937' : '#fff') : 'transparent',
+                              border: isUser ? `2px solid ${teamColor}` : 'none',
                             }}
                           >
-                            <span style={{ fontSize: 12, fontWeight: 600, color: team.playoffSeed ? '#22c55e' : subText }}>
-                              {team.conferenceRank}
+                            <span style={{ fontSize: 12, fontWeight: 600, color: idx < 7 ? '#22c55e' : subText }}>
+                              {entry.rank || idx + 1}
                             </span>
-                            <div style={{ display: 'flex', alignItems: 'center', gap: 6, overflow: 'hidden' }}>
-                              <img
-                                src={team.logoUrl}
-                                alt=""
-                                style={{ width: 20, height: 20, objectFit: 'contain', flexShrink: 0 }}
-                                onError={(e) => { (e.target as HTMLImageElement).style.display = 'none' }}
-                              />
-                              <span style={{ fontSize: 12, fontWeight: team.isUserTeam ? 700 : 500, color: team.isUserTeam ? teamColor : textColor, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                                {team.abbreviation}
-                              </span>
-                              {team.tradeImpact !== undefined && team.tradeImpact !== 0 && (
-                                <span style={{ fontSize: 10, padding: '1px 4px', borderRadius: 4, backgroundColor: team.tradeImpact > 0 ? '#22c55e20' : '#ef444420', color: team.tradeImpact > 0 ? '#22c55e' : '#ef4444' }}>
-                                  {team.tradeImpact > 0 ? '+' : ''}{team.tradeImpact}
-                                </span>
-                              )}
-                            </div>
+                            <span style={{ fontSize: 12, fontWeight: isUser ? 700 : 500, color: isUser ? teamColor : textColor, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                              {teamLabel}
+                            </span>
                             <span style={{ fontSize: 12, fontWeight: 500, color: textColor, textAlign: 'center' }}>
-                              {team.wins}-{team.losses}
+                              {entry.wins}-{entry.losses}
                             </span>
                             <span style={{ fontSize: 12, color: subText, textAlign: 'center' }}>
-                              {team.gamesBack === 0 ? '-' : team.gamesBack.toFixed(1)}
+                              {(entry.winPct * 100).toFixed(0)}%
                             </span>
                           </div>
-                        ))}
-                      </div>
-                      <div style={{ marginTop: 8, fontSize: 10, color: subText, textAlign: 'center' }}>
-                        ✅ = Playoff spot • Your team highlighted
-                      </div>
+                        )
+                      })}
                     </div>
-                  ))}
-                </div>
+                    <div style={{ marginTop: 8, fontSize: 10, color: subText, textAlign: 'center' }}>
+                      Top 7 = Playoff spot • Your team highlighted
+                    </div>
+                  </div>
+                ) : (
+                  /* Structured conference format */
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
+                    {[
+                      { name: standings.conference1Name, teams: standings.conference1 },
+                      { name: standings.conference2Name, teams: standings.conference2 },
+                    ].map(conf => (
+                      <div key={conf.name} style={{ backgroundColor: surfaceBg, borderRadius: 12, padding: 16 }}>
+                        <h3 style={{ fontSize: 14, fontWeight: 700, color: textColor, marginBottom: 12, textAlign: 'center' }}>
+                          {conf.name}
+                        </h3>
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+                          <div style={{ display: 'grid', gridTemplateColumns: '24px 1fr 48px 48px', gap: 8, padding: '4px 8px', fontSize: 10, fontWeight: 600, color: subText, textTransform: 'uppercase' }}>
+                            <span>#</span>
+                            <span>Team</span>
+                            <span style={{ textAlign: 'center' }}>W-L</span>
+                            <span style={{ textAlign: 'center' }}>GB</span>
+                          </div>
+                          {conf.teams?.slice(0, 12).map((team: TeamStanding, idx: number) => (
+                            <div
+                              key={team.teamKey}
+                              style={{
+                                display: 'grid',
+                                gridTemplateColumns: '24px 1fr 48px 48px',
+                                gap: 8,
+                                padding: '8px',
+                                borderRadius: 6,
+                                backgroundColor: team.isUserTeam ? `${teamColor}20` : team.isTradePartner ? '#ef444420' : idx < 7 ? (isDark ? '#1f2937' : '#fff') : 'transparent',
+                                border: team.isUserTeam ? `2px solid ${teamColor}` : team.isTradePartner ? '2px solid #ef4444' : 'none',
+                              }}
+                            >
+                              <span style={{ fontSize: 12, fontWeight: 600, color: team.playoffSeed ? '#22c55e' : subText }}>
+                                {team.conferenceRank}
+                              </span>
+                              <div style={{ display: 'flex', alignItems: 'center', gap: 6, overflow: 'hidden' }}>
+                                <img
+                                  src={team.logoUrl}
+                                  alt=""
+                                  style={{ width: 20, height: 20, objectFit: 'contain', flexShrink: 0 }}
+                                  onError={(e) => { (e.target as HTMLImageElement).style.display = 'none' }}
+                                />
+                                <span style={{ fontSize: 12, fontWeight: team.isUserTeam ? 700 : 500, color: team.isUserTeam ? teamColor : textColor, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                                  {team.abbreviation}
+                                </span>
+                                {team.tradeImpact !== undefined && team.tradeImpact !== 0 && (
+                                  <span style={{ fontSize: 10, padding: '1px 4px', borderRadius: 4, backgroundColor: team.tradeImpact > 0 ? '#22c55e20' : '#ef444420', color: team.tradeImpact > 0 ? '#22c55e' : '#ef4444' }}>
+                                    {team.tradeImpact > 0 ? '+' : ''}{team.tradeImpact}
+                                  </span>
+                                )}
+                              </div>
+                              <span style={{ fontSize: 12, fontWeight: 500, color: textColor, textAlign: 'center' }}>
+                                {team.wins}-{team.losses}
+                              </span>
+                              <span style={{ fontSize: 12, color: subText, textAlign: 'center' }}>
+                                {team.gamesBack === 0 ? '-' : team.gamesBack?.toFixed(1)}
+                              </span>
+                            </div>
+                          ))}
+                        </div>
+                        <div style={{ marginTop: 8, fontSize: 10, color: subText, textAlign: 'center' }}>
+                          ✅ = Playoff spot • Your team highlighted
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
               </motion.div>
             )}
 
