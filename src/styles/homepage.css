@@ -989,7 +989,22 @@
 .feed-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-  gap: 12px;
+  gap: 16px;
+  padding: 24px 0;
+}
+
+.card-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(360px, 1fr));
+  gap: 20px 24px;
+  padding: 0 20px;
+}
+
+@media (max-width: 768px) {
+  .card-grid {
+    gap: 16px 16px;
+    padding: 0 16px;
+  }
 }
 
 /* ========== Feed Card ========== */
@@ -1080,6 +1095,14 @@
 }
 
 /* ========== SECTION 5: Card Size Hierarchy ========== */
+
+/* Card breathing room — horizontal centering + air */
+.feed-card.card-xl,
+.feed-card.card-m,
+.feed-card.card-compact {
+  margin: 0 auto 8px auto;
+  max-width: calc(100% - 16px);
+}
 
 /* XL — image-dominant hero card */
 .feed-card.card-xl {
@@ -3405,7 +3428,7 @@ html {
 
 .storylines-rail {
   display: flex;
-  gap: 16px;
+  gap: 20px;
   overflow-x: auto;
   scroll-snap-type: x mandatory;
   scroll-behavior: smooth;
