@@ -252,7 +252,7 @@ export function SimulationResults({
                       {baseline.wins}-{baseline.losses}
                     </div>
                     <div style={{ fontSize: 12, color: subText, marginTop: 6 }}>
-                      {baseline.madePlayoffs ? `✅ Playoffs (#${baseline.playoffSeed})` : '❌ Missed Playoffs'}
+                      {baseline.madePlayoffs ? `✅ Playoffs${baseline.playoffSeed ? ` (#${baseline.playoffSeed})` : ''}` : '❌ Missed Playoffs'}
                     </div>
                   </div>
 
@@ -273,7 +273,7 @@ export function SimulationResults({
                       )}
                     </div>
                     <div style={{ fontSize: 12, color: subText, marginTop: 6 }}>
-                      {result.projectedSeed ? `✅ #${result.projectedSeed} Seed` : modified.madePlayoffs ? `✅ #${modified.playoffSeed} Seed` : '❌ Missed Playoffs'}
+                      {result.projectedSeed ? `✅ #${result.projectedSeed} Seed` : modified.madePlayoffs ? `✅${modified.playoffSeed ? ` #${modified.playoffSeed}` : ''} Seed` : '❌ Missed Playoffs'}
                     </div>
                   </div>
                 </div>

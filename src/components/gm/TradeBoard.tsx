@@ -131,6 +131,24 @@ export function TradeBoard({
 
   const displayLabel = chicagoLabel || chicagoTeam
 
+  // Ensure team color labels are readable on dark backgrounds
+  // Bears #0B162A, White Sox #27251F, Raiders black — all invisible on dark panels
+  const ensureReadable = (hex: string): string => {
+    if (!isDark) return hex
+    const c = hex.replace('#', '')
+    if (c.length < 6) return hex
+    const r = parseInt(c.slice(0, 2), 16)
+    const g = parseInt(c.slice(2, 4), 16)
+    const b = parseInt(c.slice(4, 6), 16)
+    const lum = (0.299 * r + 0.587 * g + 0.114 * b) / 255
+    if (lum < 0.35) {
+      return `rgb(${Math.min(255, r * 2 + 80)}, ${Math.min(255, g * 2 + 80)}, ${Math.min(255, b * 2 + 80)})`
+    }
+    return hex
+  }
+  const readableChicagoColor = ensureReadable(chicagoColor)
+  const readableOpponentColor = ensureReadable(opponentColor)
+
   // Share state
   const [showShareOptions, setShowShareOptions] = useState(false)
   const [copied, setCopied] = useState(false)
@@ -217,7 +235,7 @@ export function TradeBoard({
           <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12 }}>
             <img src={chicagoLogo} alt={displayLabel} style={{ width: 28, height: 28, objectFit: 'contain' }}
               onError={(e) => { (e.target as HTMLImageElement).style.display = 'none' }} />
-            <span style={{ fontWeight: 700, fontSize: '14px', color: chicagoColor }}>
+            <span style={{ fontWeight: 700, fontSize: '14px', color: readableChicagoColor }}>
               {displayLabel} Send
             </span>
           </div>
@@ -298,7 +316,7 @@ export function TradeBoard({
               <img src={opponentLogo} alt={opponentName} style={{ width: 28, height: 28, objectFit: 'contain' }}
                 onError={(e) => { (e.target as HTMLImageElement).style.display = 'none' }} />
             )}
-            <span style={{ fontWeight: 700, fontSize: '14px', color: opponentColor }}>
+            <span style={{ fontWeight: 700, fontSize: '14px', color: readableOpponentColor }}>
               {opponentName || 'Select Opponent'} Send
             </span>
           </div>
