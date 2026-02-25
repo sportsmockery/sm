@@ -23,9 +23,7 @@ import { buildAutoLinkContextForPost, applyAutoLinksToHtml } from '@/lib/autolin
 import { getArticleAudioInfo } from '@/lib/audioPlayer'
 import { ArticleAudioPlayer } from '@/components/article/ArticleAudioPlayer'
 import ArticleContentWithEmbeds from '@/components/article/ArticleContentWithEmbeds'
-import { TeamChatWidget } from '@/components/chat'
 import SocialShareBar from '@/components/SocialShareBar'
-import ARTourButton from '@/components/ar/ARTourButton'
 import { CommandPanel } from '@/components/homepage/CommandPanel'
 
 interface ArticlePageProps {
@@ -495,8 +493,7 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
         articleTitle={post.title}
       />
 
-      {/* Team Chat Widget */}
-      <TeamChatWidget categorySlug={category} />
+      {/* Team Chat Widget removed — root layout provides ChatProvider + TeamChatPanel globally */}
     </>
   )
 }

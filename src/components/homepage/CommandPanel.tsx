@@ -118,7 +118,7 @@ export function CommandPanel({ posts, trendingPosts, isLoggedIn }: CommandPanelP
     <aside className="command-panel" aria-label="Command Panel">
       {/* Section 1: Today's Keys */}
       <div className="cmd-card">
-        <h4 className="cmd-card-title">Today&apos;s Keys</h4>
+        <h4 className="cmd-card-title">Team Hubs</h4>
         <div className="cmd-keys-list">
           {TODAY_KEYS.map((item) => (
             <Link key={item.href} href={item.href} className="cmd-key-link">
@@ -131,7 +131,7 @@ export function CommandPanel({ posts, trendingPosts, isLoggedIn }: CommandPanelP
 
       {/* Section 2: Tools */}
       <div className="cmd-card">
-        <h4 className="cmd-card-title">Tools</h4>
+        <h4 className="cmd-card-title">SM 2.0 Fan Tools</h4>
         <div className="cmd-tools-grid">
           {TOOLS.map((tool) => (
             <Link key={tool.href} href={tool.href} className="cmd-tool-chip">

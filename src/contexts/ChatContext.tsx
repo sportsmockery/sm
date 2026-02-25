@@ -143,7 +143,7 @@ interface ChatProviderProps {
 }
 
 export function ChatProvider({ children, teamSlug }: ChatProviderProps) {
-  const supabase = createSupabaseClient()
+  const [supabase] = useState(() => createSupabaseClient())
   const channelRef = useRef<RealtimeChannel | null>(null)
 
   // Connection state
