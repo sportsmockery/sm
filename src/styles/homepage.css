@@ -4132,6 +4132,79 @@ html .storyline-card {
   }
 }
 
+/* Light mode */
+[data-theme="light"] .catchup-timeline,
+.light .catchup-timeline {
+  background: #ffffff;
+  border-color: rgba(188, 0, 0, 0.15);
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
+}
+
+[data-theme="light"] .catchup-label,
+.light .catchup-label {
+  color: #1a1a2e;
+}
+
+[data-theme="light"] .catchup-team-count,
+.light .catchup-team-count {
+  color: rgba(0, 0, 0, 0.4);
+}
+
+[data-theme="light"] .catchup-chip,
+.light .catchup-chip {
+  background: rgba(0, 0, 0, 0.03);
+  border-color: rgba(0, 0, 0, 0.08);
+  color: #1a1a2e;
+}
+
+[data-theme="light"] .catchup-chip:hover,
+.light .catchup-chip:hover,
+[data-theme="light"] .catchup-chip:focus-visible,
+.light .catchup-chip:focus-visible {
+  background: rgba(188, 0, 0, 0.06);
+  border-color: rgba(188, 0, 0, 0.25);
+  box-shadow: 0 0 12px rgba(188, 0, 0, 0.08);
+}
+
+[data-theme="light"] .catchup-chip--active,
+.light .catchup-chip--active {
+  background: rgba(188, 0, 0, 0.08);
+  border-color: rgba(188, 0, 0, 0.3);
+  box-shadow: 0 0 16px rgba(188, 0, 0, 0.1);
+}
+
+[data-theme="light"] .catchup-chip-headline,
+.light .catchup-chip-headline {
+  color: #1a1a2e;
+}
+
+[data-theme="light"] .catchup-chip-time,
+.light .catchup-chip-time {
+  color: rgba(0, 0, 0, 0.4);
+}
+
+[data-theme="light"] .catchup-panel,
+.light .catchup-panel {
+  background: rgba(188, 0, 0, 0.04);
+  border-color: rgba(188, 0, 0, 0.1);
+}
+
+[data-theme="light"] .catchup-panel-excerpt,
+.light .catchup-panel-excerpt {
+  color: rgba(0, 0, 0, 0.7);
+}
+
+[data-theme="light"] .catchup-view-all,
+.light .catchup-view-all {
+  background: rgba(188, 0, 0, 0.06);
+  border-color: rgba(188, 0, 0, 0.2);
+}
+
+[data-theme="light"] .catchup-view-all:hover,
+.light .catchup-view-all:hover {
+  background: rgba(188, 0, 0, 0.12);
+}
+
 /* ═══════════════════════════════════════════════
    SECTION 2: Storyline-First Main Feed
    ═══════════════════════════════════════════════ */
