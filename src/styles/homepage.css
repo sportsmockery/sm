@@ -3802,3 +3802,39 @@ html {
     transform: perspective(400px) rotateX(10deg);
   }
 }
+
+/* ========== FORCE: Card Spacing Overrides (must stay at END of file) ========== */
+.post-card,
+[class*="card-"] {
+  margin: 0 auto 12px auto !important;
+  max-width: calc(100% - 24px) !important;
+}
+
+.feed-container,
+.posts-grid {
+  display: grid !important;
+  grid-template-columns: repeat(auto-fit, minmax(380px, 1fr)) !important;
+  gap: 24px 28px !important;
+  padding: 24px 0 !important;
+}
+
+@media (max-width: 768px) {
+  .posts-grid {
+    grid-template-columns: 1fr !important;
+    gap: 20px !important;
+    padding: 20px 12px !important;
+  }
+}
+
+.storylines-rail {
+  gap: 24px !important;
+  padding: 0 28px !important;
+}
+
+/* Card internal padding + rounded corners */
+.feed-card.card-xl,
+.feed-card.card-m,
+.feed-card.card-compact {
+  padding: 20px !important;
+  border-radius: 20px !important;
+}
