@@ -355,11 +355,6 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
               />
             )}
 
-            {/* Scout Recap - below audio, above article body */}
-            <div style={{ marginBottom: 24 }}>
-              <ScoutRecapCard slug={slug} title={post.title} excerpt={post.excerpt} />
-            </div>
-
             <article className="article-body-2030">
               {/* Mobile TOC - shown at top on smaller screens */}
               <ArticleTableOfContents
@@ -370,6 +365,11 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
               {/* Auto-linked content with duplicate featured image stripped */}
               <ArticleContentWithEmbeds
                 content={stripDuplicateFeaturedImage(autoLinkedContent, post.featured_image)}
+                inlineSlot={
+                  <div style={{ margin: '24px 0' }}>
+                    <ScoutRecapCard slug={slug} title={post.title} excerpt={post.excerpt} />
+                  </div>
+                }
               />
 
               {/* Share buttons */}
