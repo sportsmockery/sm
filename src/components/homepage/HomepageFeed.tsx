@@ -11,6 +11,7 @@ import { TeamFilterTabs } from './TeamFilterTabs';
 import { ForYouFeed } from './ForYouFeed';
 import { HomepageSidebar } from './HomepageSidebar';
 import { ScoutSearchBox } from './ScoutSearchBox';
+import { CatchUpTimeline } from './CatchUpTimeline';
 
 const TEAM_LABELS: Record<string, string> = {
   bears: 'Bears',
@@ -661,6 +662,11 @@ export function HomepageFeed({
           <p className="hero-subtitle animate-entrance entrance-delay-3">
             Breaking news, real-time scores, and AI-powered analysis — all five Chicago teams, one platform.
           </p>
+
+          {/* 90-Second Catch-Up Timeline */}
+          <div className="animate-entrance entrance-delay-3b">
+            <CatchUpTimeline posts={safePosts} />
+          </div>
 
           <div className="team-logo-row animate-entrance entrance-delay-4">
             {TEAM_LOGOS.map((logo) => (
