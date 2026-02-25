@@ -264,7 +264,7 @@ export function StorylineFeed({
 
           {/* Mobile trending drawer after 2nd block */}
           {showTrendingInline && isMobile && gi === 1 && (
-            <TrendingInlineDrawer posts={trendingPosts} />
+            <TrendingInlineDrawer posts={trendingPosts as any} />
           )}
         </div>
       ))}
