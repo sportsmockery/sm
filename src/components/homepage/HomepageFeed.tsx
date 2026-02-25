@@ -715,7 +715,7 @@ export function HomepageFeed({
           <div className="sm-container">
             <h3 className="storylines-rail-header">Storylines</h3>
           </div>
-          <div className="storylines-rail">
+          <div className="storylines-rail" style={{ gap: '24px', paddingInline: '28px' }}>
             {safeTrendingPosts.slice(0, 8).map((post: any) => {
               const postUrl = post.category_slug
                 ? `/${post.category_slug}/${post.slug}`
@@ -724,7 +724,7 @@ export function HomepageFeed({
                 ? TEAM_LABELS[post.team_slug] || post.team_slug
                 : 'Sports';
               return (
-                <Link key={post.id} href={postUrl} className="storyline-card">
+                <Link key={post.id} href={postUrl} className="storyline-card" style={{ borderRadius: '16px' }}>
                   {post.featured_image ? (
                     <div className="storyline-card-image">
                       <Image
@@ -769,7 +769,7 @@ export function HomepageFeed({
               <button onClick={clearTeamPreference} className="team-pref-clear">Show All</button>
             </div>
           )}
-          <div className="content-grid">
+          <div className="content-grid" style={{ gap: '48px', padding: '0 24px' }}>
             {/* Main feed */}
             <main className="feed-column" aria-label="Latest articles">
               <div className="section-header scroll-reveal">

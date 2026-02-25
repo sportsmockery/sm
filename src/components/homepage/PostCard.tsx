@@ -120,7 +120,7 @@ export function PostCard({ post, priority = false, cardSize = 'compact' }: PostC
   const minRead = Math.max(1, Math.floor(wordCount / 160));
 
   return (
-    <article className={`glass-card feed-card ${sizeClass}`}>
+    <article className={`glass-card feed-card ${sizeClass}`} style={{ padding: '16px', borderRadius: '20px', boxShadow: '0 12px 32px rgba(0,0,0,0.3)' }}>
       <Link href={postUrl} onClick={() => markAsRead(post.slug)}>
         <div className={`card-image${isLargeCard ? ' card-image--stadium' : ''}`}>
           {isCollageType && post.featured_image ? (

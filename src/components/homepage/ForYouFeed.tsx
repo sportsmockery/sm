@@ -180,7 +180,7 @@ export function ForYouFeed({
   }
 
   return (
-    <div className="feed-grid" ref={feedGridRef}>
+    <div className="feed-grid" ref={feedGridRef} style={{ gap: '32px', padding: '32px 0' }}>
       <AnimatePresence mode="popLayout">
         {visiblePosts.map((post, index) => (
           <motion.div

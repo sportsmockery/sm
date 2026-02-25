@@ -54,11 +54,11 @@ export function EditorPicksHero({ picks = [] }: EditorPicksHeroProps) {
   const morePicks = sorted.slice(3, 6);
 
   return (
-    <section className="sm-featured-shell" aria-label="Featured Content">
-      <div className="featured-grid">
+    <section className="sm-featured-shell" aria-label="Featured Content" style={{ padding: '40px 0' }}>
+      <div className="featured-grid" style={{ gap: '48px', padding: '0 24px' }}>
         {/* Left column: Large featured card */}
         <div className="featured-main">
-          <Link href={mainPick.category_slug ? `/${mainPick.category_slug}/${mainPick.slug}` : `/${mainPick.slug}`} className="glass-card featured-main-link">
+          <Link href={mainPick.category_slug ? `/${mainPick.category_slug}/${mainPick.slug}` : `/${mainPick.slug}`} className="glass-card featured-main-link" style={{ padding: 0 }}>
             <div className="featured-image">
               {mainPick.featured_image ? (
                 <Image
@@ -90,12 +90,13 @@ export function EditorPicksHero({ picks = [] }: EditorPicksHeroProps) {
         </div>
 
         {/* Right column: Stacked side cards */}
-        <div className="featured-side">
+        <div className="featured-side" style={{ gap: '32px' }}>
           {sidePicks.map((pick) => (
             <Link
               key={pick.id}
               href={pick.category_slug ? `/${pick.category_slug}/${pick.slug}` : `/${pick.slug}`}
               className="glass-card-sm featured-side-card"
+              style={{ padding: '16px', borderRadius: '16px', border: '1px solid rgba(255, 255, 255, 0.06)' }}
             >
               <div className="side-image">
                 {pick.featured_image ? (
