@@ -3862,7 +3862,6 @@ html .feed-card .card-image {
 /* --- Storylines Rail --- */
 html .storylines-rail {
   gap: 24px !important;
-  padding-inline: 28px !important;
 }
 
 html .storyline-card {

@@ -712,7 +712,7 @@ export function HomepageFeed({
           <div className="sm-container">
             <h3 className="storylines-rail-header">Storylines</h3>
           </div>
-          <div className="storylines-rail" style={{ gap: '24px', paddingInline: '28px' }}>
+          <div className="storylines-rail">
             {safeTrendingPosts.slice(0, 8).map((post: any) => {
               const postUrl = post.category_slug
                 ? `/${post.category_slug}/${post.slug}`
