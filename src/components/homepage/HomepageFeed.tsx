@@ -674,10 +674,6 @@ export function HomepageFeed({
               ))}
             </div>
           </div>
-
-          <div className="animate-entrance entrance-delay-5">
-            <ScoutSearchBox />
-          </div>
         </div>
       </section>
 
