@@ -119,6 +119,17 @@ function calculateMLBPIR(player: TradePlayer): number {
 }
 
 export function calculatePlayerPIR(player: TradePlayer, sport: string): number {
+  // If this is a prospect with no real stats, use prospect_grade/trade_value for PIR
+  if (player.is_prospect) {
+    return calculateProspectPIR(player, sport)
+  }
+
+  // Check if player has any meaningful stats — if not, fall back to prospect-style rating
+  const hasStats = Object.values(player.stats).some(v => v != null && v !== '' && v !== 0)
+  if (!hasStats && player.trade_value) {
+    return calculateProspectPIR(player, sport)
+  }
+
   switch (sport) {
     case 'nfl': return calculateNFLPIR(player)
     case 'nba': return calculateNBAPIR(player)
@@ -126,6 +137,29 @@ export function calculatePlayerPIR(player: TradePlayer, sport: string): number {
     case 'mlb': return calculateMLBPIR(player)
     default: return 1.0
   }
+}
+
+/**
+ * Calculate PIR for prospects based on prospect_grade and trade_value.
+ * Prospects have no regular-season stats but carry future value.
+ * Scale: prospect_grade 80+ → PIR ~6-8, grade 50 → PIR ~2-3, grade 30 → PIR ~1
+ */
+function calculateProspectPIR(player: TradePlayer, sport: string): number {
+  const grade = player.prospect_grade || player.trade_value || 30
+  // Normalize grade (0-100) to PIR (0-10 scale)
+  // Top prospects (80+) → PIR 6-8, mid (50) → PIR 3, low (30) → PIR 1
+  const basePIR = Math.max(0.5, (grade / 100) * 10)
+
+  // Org rank bonus: top-5 prospects in an org get extra value
+  const rankBonus = player.org_rank ? Math.max(0, (6 - Math.min(player.org_rank, 6)) * 0.3) : 0
+
+  // Young age bonus for prospects (they're all young, but younger = more years of control)
+  const ageFactor = player.age && player.age < 22 ? 1.1 : 1.0
+
+  // Sport-specific ceiling adjustments
+  const sportMult = sport === 'mlb' ? 0.85 : sport === 'nhl' ? 0.9 : 1.0 // MLB prospects have lower immediate impact
+
+  return Math.min(10, (basePIR + rankBonus) * ageFactor * sportMult)
 }
 
 function getPickValue(pick: TradePick): number {

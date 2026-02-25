@@ -18,11 +18,23 @@ export interface TradePlayer {
   position: string
   age: number
   stats: Record<string, number | string | null>
+  // Prospect data (used for PIR when stats are empty)
+  is_prospect?: boolean
+  prospect_grade?: number    // 0-100 prospect rating
+  trade_value?: number       // 0-100 trade value
+  org_rank?: number          // Organization ranking
+  // Contract data
+  cap_hit?: number
+  contract_years?: number
+  espn_id?: string
 }
 
 export interface TradePick {
   round: number
   year: number
+  condition?: string
+  pick_number?: number
+  original_team?: string
 }
 
 export interface TradeData {
@@ -162,6 +174,15 @@ function parsePlayersJSON(json: any): TradePlayer[] {
     position: p.position || 'Unknown',
     age: p.age || 27,
     stats: p.stats || {},
+    // Preserve prospect data so PIR can factor in prospect value
+    is_prospect: !!p.is_prospect,
+    prospect_grade: p.prospect_grade ?? undefined,
+    trade_value: p.trade_value ?? undefined,
+    org_rank: p.org_rank ?? undefined,
+    // Preserve contract data
+    cap_hit: p.cap_hit ?? undefined,
+    contract_years: p.contract_years ?? undefined,
+    espn_id: p.espn_id ?? undefined,
   }))
 }
 
@@ -171,6 +192,9 @@ function parsePicksJSON(json: any): TradePick[] {
   return arr.map((p: any) => ({
     round: p.round || 1,
     year: p.year || 2026,
+    condition: p.condition,
+    pick_number: p.pick_number ?? p.pickNumber,
+    original_team: p.original_team ?? p.originalTeam,
   }))
 }
 

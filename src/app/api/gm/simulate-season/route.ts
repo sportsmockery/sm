@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getGMAuthUser } from '@/lib/gm-auth'
+import { datalabAdmin } from '@/lib/supabase-datalab'
 
 export const dynamic = 'force-dynamic'
 export const maxDuration = 30 // V3 deep mode can take up to 15s
@@ -9,9 +10,30 @@ const V3_ENDPOINT = `${DATALAB_BASE}/api/gm/simulate-season`
 const V1_ENDPOINT = `${DATALAB_BASE}/api/gm/sim/season`
 
 /**
+ * Fetch accepted trades for this session with full player/pick data.
+ * This ensures the simulation has the complete roster picture.
+ */
+async function fetchSessionTrades(sessionId: string) {
+  try {
+    const { data: trades } = await datalabAdmin
+      .from('gm_trades')
+      .select('id, players_sent, players_received, draft_picks_sent, draft_picks_received, trade_partner, partner_team_key, chicago_team, sport, grade, is_three_team, partner_2')
+      .eq('session_id', sessionId)
+      .eq('status', 'accepted')
+
+    return trades || []
+  } catch (err) {
+    console.error('[Simulate Season] Failed to fetch trades:', err)
+    return []
+  }
+}
+
+/**
  * POST /api/gm/simulate-season
  * Proxies to DataLab V3 season simulation API.
- * Falls back to V1 endpoint if V3 is completely unreachable.
+ * Includes full trade data (players, picks, prospects) so simulation
+ * accounts for the new assets on each team after trades.
+ * Falls back to V1 endpoint, then local engine if both fail.
  */
 export async function POST(request: NextRequest) {
   try {
@@ -33,12 +55,29 @@ export async function POST(request: NextRequest) {
       )
     }
 
+    // Fetch full trade data to include in simulation request
+    const trades = await fetchSessionTrades(sessionId)
+
     const payload = {
       sessionId,
       sport,
       teamKey,
       seasonYear: seasonYear || 2026,
       simulationDepth: simulationDepth || 'standard',
+      // Include full trade data so simulation has the complete roster picture
+      trades: trades.map((t: any) => ({
+        tradeId: t.id,
+        chicagoTeam: t.chicago_team,
+        tradePartner: t.trade_partner,
+        partnerTeamKey: t.partner_team_key,
+        grade: t.grade,
+        isThreeTeam: !!t.is_three_team,
+        partner2: t.partner_2 || null,
+        playersSent: t.players_sent || [],
+        playersReceived: t.players_received || [],
+        draftPicksSent: t.draft_picks_sent || [],
+        draftPicksReceived: t.draft_picks_received || [],
+      })),
     }
 
     const authKey = process.env.DATALAB_SUPABASE_ANON_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
@@ -77,12 +116,12 @@ export async function POST(request: NextRequest) {
           sport,
           teamKey,
           seasonYear: seasonYear || 2026,
+          trades: payload.trades,
         }),
       })
 
       if (v1Response.ok) {
         const data = await v1Response.json()
-        // Tag as v1 fallback
         return NextResponse.json({ ...data, simulation_version: data.simulation_version || 'v1' })
       }
 
