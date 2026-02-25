@@ -100,6 +100,13 @@ export function PostCard({ post, priority = false, cardSize = 'compact' }: PostC
 
   const sizeClass = cardSize === 'xl' ? 'card-xl' : cardSize === 'm' ? 'card-m' : 'card-compact';
 
+  // Build context panel summary (truncated excerpt)
+  const panelExcerpt = post.excerpt
+    ? post.excerpt.length > 120
+      ? post.excerpt.slice(0, 120).trimEnd() + '...'
+      : post.excerpt
+    : null;
+
   return (
     <article className={`glass-card feed-card ${sizeClass}`}>
       <Link href={postUrl} onClick={() => markAsRead(post.slug)}>
@@ -166,6 +173,21 @@ export function PostCard({ post, priority = false, cardSize = 'compact' }: PostC
           </div>
         </div>
       </Link>
+
+      {/* Section 10: Floating Context Panel */}
+      <div className="context-panel" aria-hidden="true">
+        <div className="context-panel-header">
+          {teamName && <span className="context-panel-team">{teamName}</span>}
+          {contentBadge && <span className="context-panel-type">{contentBadge}</span>}
+          {post.is_trending && <span className="context-panel-trending">Trending</span>}
+        </div>
+        {panelExcerpt && <p className="context-panel-excerpt">{panelExcerpt}</p>}
+        <div className="context-panel-footer">
+          <span>{post.author_name || 'SM Staff'}</span>
+          <span>{recencyLabel}</span>
+        </div>
+        <span className="context-panel-cta">Read article &rarr;</span>
+      </div>
     </article>
   );
 }

@@ -2534,6 +2534,141 @@ html {
   text-overflow: ellipsis;
 }
 
+/* ========== SECTION 10: Floating Context Panel ========== */
+.context-panel {
+  position: absolute;
+  bottom: calc(100% + 8px);
+  left: 50%;
+  transform: translateX(-50%) translateY(8px) scale(0.96);
+  width: 280px;
+  max-width: 90vw;
+  background: rgba(10, 10, 16, 0.95);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(188, 0, 0, 0.2);
+  border-radius: 12px;
+  padding: 14px 16px;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.25s cubic-bezier(0.16, 1, 0.3, 1),
+              transform 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  z-index: 50;
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(188, 0, 0, 0.08);
+}
+
+/* Show on card hover (desktop only) */
+@media (min-width: 769px) {
+  .feed-card:hover .context-panel,
+  .feed-card:focus-within .context-panel {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0) scale(1);
+    pointer-events: auto;
+  }
+}
+
+/* Hide on mobile — no hover context */
+@media (max-width: 768px) {
+  .context-panel { display: none; }
+}
+
+.context-panel-header {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 8px;
+  flex-wrap: wrap;
+}
+
+.context-panel-team {
+  font-family: 'Space Grotesk', var(--font-space-grotesk), sans-serif;
+  font-size: 11px;
+  font-weight: 600;
+  color: #ffffff;
+  background: rgba(188, 0, 0, 0.7);
+  padding: 2px 8px;
+  border-radius: 4px;
+}
+
+.context-panel-type {
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: rgba(255, 255, 255, 0.5);
+  background: rgba(255, 255, 255, 0.06);
+  padding: 2px 6px;
+  border-radius: 3px;
+}
+
+.context-panel-trending {
+  font-size: 10px;
+  font-weight: 700;
+  color: #ff6b35;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.context-panel-excerpt {
+  font-size: 13px;
+  line-height: 1.5;
+  color: rgba(255, 255, 255, 0.7);
+  margin: 0 0 10px;
+}
+
+.context-panel-footer {
+  display: flex;
+  justify-content: space-between;
+  font-size: 11px;
+  color: rgba(255, 255, 255, 0.35);
+  margin-bottom: 8px;
+}
+
+.context-panel-cta {
+  display: block;
+  font-family: 'Space Grotesk', var(--font-space-grotesk), sans-serif;
+  font-size: 12px;
+  font-weight: 600;
+  color: #bc0000;
+  padding-top: 8px;
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+/* Light mode */
+[data-theme="light"] .context-panel,
+.light .context-panel {
+  background: rgba(255, 255, 255, 0.96);
+  border-color: rgba(0, 0, 0, 0.1);
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.15), 0 0 0 1px rgba(0, 0, 0, 0.04);
+}
+
+[data-theme="light"] .context-panel-excerpt,
+.light .context-panel-excerpt {
+  color: rgba(0, 0, 0, 0.6);
+}
+
+[data-theme="light"] .context-panel-footer,
+.light .context-panel-footer {
+  color: rgba(0, 0, 0, 0.4);
+}
+
+[data-theme="light"] .context-panel-type,
+.light .context-panel-type {
+  color: rgba(0, 0, 0, 0.5);
+  background: rgba(0, 0, 0, 0.05);
+}
+
+[data-theme="light"] .context-panel-cta,
+.light .context-panel-cta {
+  border-top-color: rgba(0, 0, 0, 0.06);
+}
+
+/* Reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  .context-panel {
+    transition: none;
+  }
+}
+
 /* ========== SM+ CTA Widget ========== */
 .sm-plus-cta {
   position: relative;
