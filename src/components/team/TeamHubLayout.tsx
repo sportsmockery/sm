@@ -404,7 +404,7 @@ export default function TeamHubLayout({
         ref={navRef}
         className={isSticky ? 'sticky' : ''}
         style={{
-          ...(isSticky ? { top: '140px', zIndex: 40, boxShadow: '0 4px 12px rgba(0,0,0,0.3)' } : {}),
+          ...(isSticky ? { top: 'var(--sm-nav-height, 72px)', zIndex: 40, boxShadow: '0 4px 12px rgba(0,0,0,0.3)' } : {}),
           background: 'var(--sm-surface)',
           borderBottom: '1px solid var(--sm-border)',
           transition: 'box-shadow 0.2s ease',

@@ -3798,6 +3798,11 @@ main, .page-content, [role="main"] {
   margin: 24px 0;
   float: none !important;
 }
+.article-body-2030 .article-glass-card-sm img {
+  width: auto;
+  margin: 0;
+  border-radius: 50%;
+}
 .article-body-2030 iframe,
 .article-body-2030 .embed-container {
   width: 100%;

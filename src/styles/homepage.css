@@ -1031,6 +1031,10 @@
   background: var(--sm-surface);
 }
 
+.feed-card .card-body {
+  padding: 4px 4px 0;
+}
+
 .feed-card .card-body h3 {
   font-family: 'Space Grotesk', sans-serif;
   font-size: 20px;
@@ -4691,23 +4695,23 @@ html .storyline-card {
    SECTION 3b — Scout Affordance on Cards
    ========================================== */
 
-/* Hint badge: top-right of card, visible on hover */
+/* Hint badge: bottom-right of card body, visible on hover */
 .scout-hint-badge {
   position: absolute;
-  top: 10px;
+  bottom: 10px;
   right: 10px;
   z-index: 12;
   display: flex;
   align-items: center;
-  gap: 6px;
-  padding: 4px 10px 4px 6px;
+  gap: 5px;
+  padding: 3px 8px 3px 5px;
   background: rgba(12, 12, 18, 0.75);
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
-  border: 1px solid rgba(188, 0, 0, 0.3);
-  border-radius: 20px;
+  border: 1px solid rgba(188, 0, 0, 0.25);
+  border-radius: 16px;
   opacity: 0;
-  transform: translateY(-4px);
+  transform: translateY(4px);
   transition: opacity 0.2s, transform 0.2s;
   pointer-events: none;
 }
