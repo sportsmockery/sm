@@ -3,19 +3,24 @@
 import { useState, useEffect } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
+import { useAuth } from '@/contexts/AuthContext'
 
 interface ScoutRecapCardProps {
+  postId: number
   slug: string
   title: string
+  content?: string | null
   excerpt?: string | null
+  team?: string | null
 }
 
 const CACHE_TTL = 60 * 60 * 1000 // 1 hour
 
-export default function ScoutRecapCard({ slug, title, excerpt }: ScoutRecapCardProps) {
+export default function ScoutRecapCard({ postId, slug, title, content, excerpt, team }: ScoutRecapCardProps) {
   const [recap, setRecap] = useState<string | null>(null)
   const [loading, setLoading] = useState(true)
   const [failed, setFailed] = useState(false)
+  const { user } = useAuth()
 
   useEffect(() => {
     const cacheKey = `scout-recap-${slug}`
@@ -39,12 +44,21 @@ export default function ScoutRecapCard({ slug, title, excerpt }: ScoutRecapCardP
 
     async function fetchRecap() {
       try {
-        const res = await fetch('/api/ask-ai', {
+        const payload: Record<string, unknown> = {
+          postId,
+          postTitle: title,
+          content: content || undefined,
+          excerpt: excerpt || undefined,
+          team: team || undefined,
+        }
+        if (user?.name) {
+          payload.username = user.name
+        }
+
+        const res = await fetch('/api/scout/summary', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            query: `Give a 1-2 sentence TL;DR recap of this article: "${title}". ${excerpt ? `Context: ${excerpt}` : ''}. Be concise and direct.`,
-          }),
+          body: JSON.stringify(payload),
           signal: controller.signal,
         })
 
@@ -55,7 +69,7 @@ export default function ScoutRecapCard({ slug, title, excerpt }: ScoutRecapCardP
         }
 
         const data = await res.json()
-        const text = data.response || data.answer || ''
+        const text = data.summary || data.response || data.answer || ''
 
         if (text) {
           setRecap(text)
@@ -78,7 +92,7 @@ export default function ScoutRecapCard({ slug, title, excerpt }: ScoutRecapCardP
 
     fetchRecap()
     return () => controller.abort()
-  }, [slug, title, excerpt])
+  }, [slug, title, content, excerpt, team, postId, user?.name])
 
   // Don't render if failed
   if (failed && !recap) return null

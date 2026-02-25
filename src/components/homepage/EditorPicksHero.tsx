@@ -4,6 +4,7 @@
 import { useState, useRef, useCallback, useEffect } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
+import { useAuth } from '@/contexts/AuthContext';
 
 interface EditorPick {
   id: string;
@@ -40,9 +41,10 @@ const HOLD_DELAY = 500;
 const CACHE_TTL = 60 * 60 * 1000;
 
 /* ─── Scout Recap Overlay ─── */
-function ScoutRecapOverlay({ title, excerpt, slug, onClose }: { title: string; excerpt: string | null; slug: string; onClose: () => void }) {
+function ScoutRecapOverlay({ postId, title, excerpt, slug, team, onClose }: { postId: string; title: string; excerpt: string | null; slug: string; team?: string | null; onClose: () => void }) {
   const [recap, setRecap] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
+  const { user } = useAuth();
 
   useEffect(() => {
     const cacheKey = `scout-recap-${slug}`;
@@ -57,17 +59,24 @@ function ScoutRecapOverlay({ title, excerpt, slug, onClose }: { title: string; e
     const controller = new AbortController();
     (async () => {
       try {
-        const res = await fetch('/api/ask-ai', {
+        const teamKey = team ? team.replace('chicago-', '').replace('-', '') : undefined;
+        const payload: Record<string, unknown> = {
+          postId,
+          postTitle: title,
+          excerpt: excerpt || '',
+          team: teamKey,
+        };
+        if (user?.name) payload.username = user.name;
+
+        const res = await fetch('/api/scout/summary', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            query: `Give a 1-2 sentence TL;DR recap of this article: "${title}". ${excerpt ? `Context: ${excerpt}` : ''}. Be concise and direct.`,
-          }),
+          body: JSON.stringify(payload),
           signal: controller.signal,
         });
         if (!res.ok) { setLoading(false); return; }
         const data = await res.json();
-        const text = data.response || data.answer || '';
+        const text = data.summary || data.response || data.answer || '';
         if (text) {
           setRecap(text);
           try { localStorage.setItem(cacheKey, JSON.stringify({ text, ts: Date.now() })); } catch { /* ignore */ }
@@ -77,7 +86,7 @@ function ScoutRecapOverlay({ title, excerpt, slug, onClose }: { title: string; e
       } finally { setLoading(false); }
     })();
     return () => controller.abort();
-  }, [slug, title, excerpt]);
+  }, [slug, title, excerpt, team, postId, user?.name]);
 
   return (
     <div
@@ -170,7 +179,7 @@ function HoldableMainCard({ pick }: { pick: EditorPick }) {
           Hold for recap
         </span>
       </div>
-      {showRecap && <ScoutRecapOverlay title={pick.title} excerpt={pick.excerpt} slug={pick.slug} onClose={() => setShowRecap(false)} />}
+      {showRecap && <ScoutRecapOverlay postId={pick.id} title={pick.title} excerpt={pick.excerpt} slug={pick.slug} team={pick.category_slug || pick.team_slug} onClose={() => setShowRecap(false)} />}
     </Link>
   );
 }
@@ -219,7 +228,7 @@ function HoldableSideCard({ pick }: { pick: EditorPick }) {
           </span>
         </span>
       </div>
-      {showRecap && <ScoutRecapOverlay title={pick.title} excerpt={pick.excerpt} slug={pick.slug} onClose={() => setShowRecap(false)} />}
+      {showRecap && <ScoutRecapOverlay postId={pick.id} title={pick.title} excerpt={pick.excerpt} slug={pick.slug} team={pick.category_slug || pick.team_slug} onClose={() => setShowRecap(false)} />}
     </Link>
   );
 }

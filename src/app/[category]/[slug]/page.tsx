@@ -366,7 +366,14 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
                 content={stripDuplicateFeaturedImage(autoLinkedContent, post.featured_image)}
                 inlineSlot={
                   <div style={{ margin: '24px 0' }}>
-                    <ScoutRecapCard slug={slug} title={post.title} excerpt={post.excerpt} />
+                    <ScoutRecapCard
+                      postId={post.id}
+                      slug={slug}
+                      title={post.title}
+                      content={post.content}
+                      excerpt={post.excerpt}
+                      team={categorySlugToTeam(categoryData?.slug)?.replace('-', '') || undefined}
+                    />
                   </div>
                 }
               />

@@ -2,6 +2,7 @@
 'use client';
 
 import { useState, useCallback, useRef } from 'react';
+import { useAuth } from '@/contexts/AuthContext';
 
 interface ScoutPost {
   id: string;
@@ -47,6 +48,7 @@ export function useScoutConcierge(post: ScoutPost): UseScoutConciergeReturn {
   const [error, setError] = useState<string | null>(null);
   const [data, setData] = useState<ScoutData | null>(null);
   const abortRef = useRef<AbortController | null>(null);
+  const { user } = useAuth();
 
   const trigger = useCallback(async () => {
     // If already open with data for this post, just reopen
@@ -64,15 +66,20 @@ export function useScoutConcierge(post: ScoutPost): UseScoutConciergeReturn {
     try {
       const teamSlug = deriveTeamSlug(post);
 
-      const res = await fetch('https://datalab.sportsmockery.com/api/scout/summary', {
+      const payload: Record<string, unknown> = {
+        postId: post.id,
+        postTitle: post.title,
+        excerpt: post.excerpt || '',
+        team: teamSlug,
+      };
+      if (user?.name) {
+        payload.username = user.name;
+      }
+
+      const res = await fetch('/api/scout/summary', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          postId: post.id,
-          postTitle: post.title,
-          excerpt: post.excerpt || '',
-          team: teamSlug,
-        }),
+        body: JSON.stringify(payload),
         signal: controller.signal,
       });
 
@@ -93,7 +100,7 @@ export function useScoutConcierge(post: ScoutPost): UseScoutConciergeReturn {
     } finally {
       setIsLoading(false);
     }
-  }, [post, data, isOpen]);
+  }, [post, data, isOpen, user?.name]);
 
   const close = useCallback(() => {
     setIsOpen(false);
