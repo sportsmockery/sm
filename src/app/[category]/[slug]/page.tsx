@@ -26,6 +26,7 @@ import ArticleContentWithEmbeds from '@/components/article/ArticleContentWithEmb
 import { TeamChatWidget } from '@/components/chat'
 import SocialShareBar from '@/components/SocialShareBar'
 import ARTourButton from '@/components/ar/ARTourButton'
+import { CommandPanel } from '@/components/homepage/CommandPanel'
 
 interface ArticlePageProps {
   params: Promise<{
@@ -412,35 +413,27 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
             </article>
           </div>
 
-          {/* Right Sidebar (Desktop only) */}
-          <aside className="hidden xl:block" style={{ width: 300, flexShrink: 0 }}>
-            <div style={{ position: 'sticky', top: 96, paddingLeft: 24, display: 'flex', flexDirection: 'column', gap: 16 }}>
-              {relatedPosts.length > 0 && categoryData && (
-                <MoreFromTeam
-                  posts={relatedPosts.map(p => ({
-                    id: p.id,
-                    slug: p.slug,
-                    title: p.title,
-                    excerpt: p.excerpt,
-                    featuredImage: p.featured_image,
-                    publishedAt: p.published_at,
-                    views: 0,
-                    author: {
-                      id: author?.id || 0,
-                      displayName: author?.display_name || 'Staff',
-                      avatarUrl: author?.avatar_url || null,
-                    },
-                    team: categorySlugToTeam(categoryData.slug),
-                    categorySlug: categoryData.slug,
-                    categoryName: categoryData.name,
-                  }))}
-                  team={categorySlugToTeam(categoryData.slug)}
-                  currentPostId={post.id}
-                />
-              )}
-
-              <ARTourButton team={categoryData?.slug || category} />
-            </div>
+          {/* Right Sidebar — Command Panel (Desktop only) */}
+          <aside className="hidden xl:block" style={{ width: 340, flexShrink: 0, paddingLeft: 24 }}>
+            <CommandPanel
+              posts={relatedPosts.map(p => ({
+                id: String(p.id),
+                title: p.title,
+                slug: p.slug,
+                team_slug: categoryData?.slug?.replace('chicago-', '') || null,
+                category_slug: categoryData?.slug || null,
+                published_at: p.published_at,
+              }))}
+              trendingPosts={relatedPosts.map(p => ({
+                id: String(p.id),
+                title: p.title,
+                slug: p.slug,
+                team_slug: categoryData?.slug?.replace('chicago-', '') || null,
+                category_slug: categoryData?.slug || null,
+                published_at: p.published_at,
+              }))}
+              isLoggedIn={false}
+            />
           </aside>
         </div>
       </div>
