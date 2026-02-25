@@ -723,6 +723,7 @@ export function HomepageFeed({
               const teamName = post.team_slug
                 ? TEAM_LABELS[post.team_slug] || post.team_slug
                 : 'Sports';
+              const isScoutPost = (post.title || '').toLowerCase().includes('scout');
               return (
                 <Link key={post.id} href={postUrl} className="storyline-card" style={{ borderRadius: '16px' }}>
                   {post.featured_image ? (
@@ -732,6 +733,16 @@ export function HomepageFeed({
                         alt=""
                         fill
                         sizes="260px"
+                      />
+                    </div>
+                  ) : isScoutPost ? (
+                    <div className="storyline-card-image" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'linear-gradient(135deg, rgba(188,0,0,0.15), rgba(10,10,10,0.9))' }}>
+                      <Image
+                        src="/downloads/scout-v2.png"
+                        alt="Scout AI"
+                        width={64}
+                        height={64}
+                        style={{ borderRadius: '50%', filter: 'drop-shadow(0 0 12px rgba(188,0,0,0.6))' }}
                       />
                     </div>
                   ) : (
