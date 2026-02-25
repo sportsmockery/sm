@@ -40,28 +40,28 @@ const ORB_POSITIONS: { top: string; left: string }[] = [
   { top: '5%', left: '60%' },
 ]
 
-const SIZE_PX: Record<string, number> = { large: 80, medium: 50, small: 30 }
-const FONT_SIZE: Record<string, number> = { large: 18, medium: 13, small: 10 }
-const LABEL_SIZE: Record<string, number> = { large: 9, medium: 7, small: 6 }
+const SIZE_PX: Record<string, number> = { large: 90, medium: 60, small: 34 }
+const FONT_SIZE: Record<string, number> = { large: 16, medium: 11, small: 9 }
+const LABEL_SIZE: Record<string, number> = { large: 8, medium: 7, small: 6 }
 
 const FALLBACK_STATS: HeroStat[] = [
-  // Large (3)
-  { label: 'Bears Cap', value: '$69M', team: 'bears', size: 'large' },
-  { label: 'CHI Wins', value: '87', size: 'large' },
-  { label: 'Bears', value: '11-6', team: 'bears', size: 'large' },
-  // Medium (6)
-  { label: 'Bulls', value: '23-22', team: 'bulls', size: 'medium' },
-  { label: 'Hawks', value: '21-22-7', team: 'blackhawks', size: 'medium' },
-  { label: 'Cubs ST', value: '4-2', team: 'cubs', size: 'medium' },
-  { label: 'Sox ST', value: '2-4', team: 'whitesox', size: 'medium' },
-  { label: 'Bedard', value: '$950K', team: 'blackhawks', size: 'medium' },
-  { label: 'Posts/wk', value: '47', size: 'medium' },
-  // Small (5)
+  // Large (3): Live records + recent score
+  { label: 'Bulls', value: '24-35', team: 'bulls', size: 'large' },
+  { label: 'Hawks', value: '22-26-9', team: 'blackhawks', size: 'large' },
+  { label: 'L vs CHA', value: '99-131', team: 'bulls', size: 'large' },
+  // Medium (6): Scores, draft, players, posts
+  { label: 'L vs SJ', value: '6-3', team: 'blackhawks', size: 'medium' },
+  { label: 'L vs NY', value: '99-105', team: 'bulls', size: 'medium' },
+  { label: 'Bears Pick', value: '#10', team: 'bears', size: 'medium' },
+  { label: 'Cubs Top', value: 'Hoerner', team: 'cubs', size: 'medium' },
+  { label: 'Sox Top', value: 'Teel', team: 'whitesox', size: 'medium' },
+  { label: 'This Week', value: '6 posts', size: 'medium' },
+  // Small (5): Site stats
+  { label: 'Total Posts', value: '31K', size: 'small' },
+  { label: 'Wk Views', value: '6.8K', size: 'small' },
+  { label: 'Live Now', value: '0', size: 'small' },
   { label: 'Teams', value: '5', size: 'small' },
-  { label: 'Live', value: '0', size: 'small' },
-  { label: 'PVs', value: '30M', size: 'small' },
-  { label: 'Avg Comments', value: '89', size: 'small' },
-  { label: 'Next Game', value: '14h', size: 'small' },
+  { label: 'Sports', value: '4', size: 'small' },
 ]
 
 // Simple count-up for numeric values
