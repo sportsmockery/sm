@@ -648,31 +648,33 @@ export function HomepageFeed({
         {/* Section 8: Ambient stat visuals */}
         <AmbientStats posts={safePosts} />
 
-        {/* Hero content on glass card */}
+        {/* Hero content (no glass card box) */}
         <div className="sm-container hero-content" style={{ transition: 'transform 0.15s ease-out' }}>
-          <div className="hero-glass-card">
-            <div className="sm-tag animate-entrance entrance-delay-1">
-              <span className="pulse-dot" /> Where Chicago Fans Come First
-            </div>
+          <div className="sm-tag animate-entrance entrance-delay-1">
+            <span className="pulse-dot" /> Where Chicago Fans Come First
+          </div>
 
-            <h1 className="hero-headline animate-entrance entrance-delay-2">
-              Sports Mockery <span className="gradient-text">2.0</span>
-            </h1>
+          <h1 className="hero-headline animate-entrance entrance-delay-2">
+            Sports Mockery <span className="gradient-text">2.0</span>
+          </h1>
 
-            <p className="hero-subtitle animate-entrance entrance-delay-3">
-              Breaking news, real-time scores, and AI-powered analysis — all five Chicago teams, one platform.
-            </p>
+          <p className="hero-subtitle animate-entrance entrance-delay-3">
+            Breaking news, real-time scores, and AI-powered analysis — all five Chicago teams, one platform.
+          </p>
 
-            <div className="team-logo-row animate-entrance entrance-delay-4">
-              {TEAM_LOGOS.map((logo) => (
-                <div key={logo.slug} className="team-logo-item">
-                  <Link href={`/${logo.slug}`} className="team-logo-link">
-                    <Image src={logo.src} alt={logo.alt} width={32} height={32} />
-                  </Link>
-                  <span className="team-logo-label">{logo.label}</span>
-                </div>
-              ))}
-            </div>
+          <div className="team-logo-row animate-entrance entrance-delay-4">
+            {TEAM_LOGOS.map((logo) => (
+              <div key={logo.slug} className="team-logo-item">
+                <Link href={`/${logo.slug}`} className="team-logo-link">
+                  <Image src={logo.src} alt={logo.alt} width={32} height={32} />
+                </Link>
+                <span className="team-logo-label">{logo.label}</span>
+              </div>
+            ))}
+          </div>
+
+          <div className="animate-entrance entrance-delay-5">
+            <ScoutSearchBox />
           </div>
         </div>
       </section>

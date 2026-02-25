@@ -123,14 +123,14 @@
     radial-gradient(circle 40px at 50% 5%, rgba(188,0,0,0.04), transparent 70%);
 }
 
-/* --- Glass card for hero content --- */
+/* --- Glass card for hero content (disabled — kept for reference) --- */
 .hero-glass-card {
-  background: rgba(19, 19, 29, 0.8);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  border: 1px solid rgba(255, 255, 255, 0.06);
-  border-radius: 20px;
-  padding: 20px 48px 18px;
+  background: none;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  border: none;
+  border-radius: 0;
+  padding: 0;
   position: relative;
 }
 
