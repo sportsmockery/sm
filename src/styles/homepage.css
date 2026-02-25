@@ -3904,6 +3904,138 @@ html .storyline-card {
   animation-delay: 0.5s;
 }
 
+/* ═══════════════════════════════════════════════
+   "Your Chicago" Personalization Bar (logged-in only)
+   ═══════════════════════════════════════════════ */
+
+.your-chicago-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  max-width: 740px;
+  height: 48px;
+  margin: 20px auto 0;
+  padding: 0 24px;
+  background: rgba(0, 0, 0, 0.3);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(188, 0, 0, 0.2);
+  border-radius: 16px;
+  box-shadow: inset 0 0 20px rgba(188, 0, 0, 0.08), 0 2px 8px rgba(0, 0, 0, 0.2);
+  position: relative;
+  z-index: 2;
+  box-sizing: border-box;
+}
+
+.your-chicago-left {
+  display: flex;
+  align-items: baseline;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  min-width: 0;
+}
+
+.your-chicago-title {
+  font-family: 'Space Grotesk', var(--font-space-grotesk), sans-serif;
+  font-weight: 600;
+  font-size: 20px;
+  color: #fff;
+  text-shadow: 0 0 12px rgba(188, 0, 0, 0.5);
+  line-height: 1;
+}
+
+.your-chicago-name {
+  font-family: 'Space Grotesk', var(--font-space-grotesk), sans-serif;
+  font-weight: 400;
+  font-size: 16px;
+  color: rgba(255, 255, 255, 0.85);
+  line-height: 1;
+}
+
+.your-chicago-streak {
+  font-family: 'Space Grotesk', var(--font-space-grotesk), sans-serif;
+  font-weight: 700;
+  font-size: 18px;
+  color: #bc0000;
+  line-height: 1;
+  flex-shrink: 0;
+  position: relative;
+  cursor: default;
+}
+
+.your-chicago-streak::after {
+  content: '';
+  position: absolute;
+  bottom: -2px;
+  left: 0;
+  width: 100%;
+  height: 1px;
+  background: #bc0000;
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 0.25s ease;
+}
+
+.your-chicago-streak:hover::after {
+  transform: scaleX(1);
+}
+
+/* Light mode */
+[data-theme="light"] .your-chicago-bar,
+.light .your-chicago-bar {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: rgba(188, 0, 0, 0.15);
+  box-shadow: inset 0 0 20px rgba(188, 0, 0, 0.06), 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+[data-theme="light"] .your-chicago-title,
+.light .your-chicago-title {
+  color: #fff;
+  text-shadow: 0 0 12px rgba(188, 0, 0, 0.4);
+}
+
+[data-theme="light"] .your-chicago-name,
+.light .your-chicago-name {
+  color: rgba(255, 255, 255, 0.8);
+}
+
+/* Mobile: single line centered if tight, but prefer row layout */
+@media (max-width: 767px) {
+  .your-chicago-bar {
+    max-width: 100%;
+    padding: 0 16px;
+    height: 44px;
+  }
+
+  .your-chicago-title {
+    font-size: 17px;
+  }
+
+  .your-chicago-name {
+    font-size: 14px;
+  }
+
+  .your-chicago-streak {
+    font-size: 16px;
+  }
+}
+
+@media (max-width: 400px) {
+  .your-chicago-bar {
+    flex-wrap: wrap;
+    justify-content: center;
+    height: auto;
+    padding: 8px 16px;
+    gap: 4px;
+  }
+
+  .your-chicago-streak {
+    font-size: 15px;
+  }
+}
+
 .catchup-timeline {
   width: 100%;
   max-width: 740px;

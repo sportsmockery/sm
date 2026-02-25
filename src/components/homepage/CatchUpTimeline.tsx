@@ -18,6 +18,7 @@ interface CatchUpPost {
 
 interface CatchUpTimelineProps {
   posts: CatchUpPost[];
+  favoriteTeams?: string[];
 }
 
 const TEAM_DISPLAY: Record<string, string> = {
@@ -44,7 +45,7 @@ function trimHeadline(title: string, max = 60): string {
   return title.slice(0, max).trimEnd() + '\u2026';
 }
 
-export function CatchUpTimeline({ posts }: CatchUpTimelineProps) {
+export function CatchUpTimeline({ posts, favoriteTeams }: CatchUpTimelineProps) {
   const [activeIndex, setActiveIndex] = useState<number | null>(null);
   const chipListRef = useRef<HTMLDivElement>(null);
   const chipRefs = useRef<(HTMLButtonElement | null)[]>([]);
@@ -69,8 +70,21 @@ export function CatchUpTimeline({ posts }: CatchUpTimelineProps) {
       return new Date(b.published_at).getTime() - new Date(a.published_at).getTime();
     });
 
-    return recent.slice(0, 8);
-  }, [posts]);
+    let items = recent.slice(0, 8);
+
+    // Reorder by favorite teams if provided
+    if (favoriteTeams?.length) {
+      const favSet = new Set(favoriteTeams.flatMap((t: string) => {
+        if (t === 'white-sox' || t === 'whitesox') return ['white-sox', 'whitesox'];
+        return [t];
+      }));
+      const favItems = items.filter(p => favSet.has(p.team_slug || ''));
+      const otherItems = items.filter(p => !favSet.has(p.team_slug || ''));
+      items = [...favItems, ...otherItems];
+    }
+
+    return items;
+  }, [posts, favoriteTeams]);
 
   const activeItem = activeIndex !== null ? catchUpItems[activeIndex] : null;
 

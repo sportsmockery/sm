@@ -480,8 +480,12 @@ export function HomepageFeed({
   const heroSectionRef = useRef<HTMLElement>(null);
   useParallaxHero(heroSectionRef);
 
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, user } = useAuth();
   const actuallyLoggedIn = isAuthenticated || isLoggedIn;
+
+  // Visit streak state for "Your Chicago" bar
+  const [visitStreak, setVisitStreak] = useState<number>(0);
+  const [displayName, setDisplayName] = useState<string>('Fan');
 
   // Listen for "My Chicago" mode toggle from Header
   useEffect(() => {
@@ -506,6 +510,34 @@ export function HomepageFeed({
       .then(data => {
         if (data?.favorite_teams?.length) {
           setUserFavoriteTeams(data.favorite_teams);
+        }
+      })
+      .catch(() => {});
+  }, [actuallyLoggedIn]);
+
+  // Fetch visit streak for "Your Chicago" bar (logged-in only)
+  useEffect(() => {
+    if (!actuallyLoggedIn) return;
+    // Check session cache first
+    try {
+      const cached = sessionStorage.getItem('sm-visit-streak');
+      if (cached) {
+        const parsed = JSON.parse(cached);
+        if (parsed.streak) setVisitStreak(parsed.streak);
+        if (parsed.name) setDisplayName(parsed.name);
+        return; // Use cached value for this session
+      }
+    } catch {}
+    fetch('/api/user/visit-streak', { method: 'POST' })
+      .then(r => r.ok ? r.json() : null)
+      .then(data => {
+        if (data) {
+          setVisitStreak(data.streak || 1);
+          const firstName = data.name?.split(' ')[0] || 'Fan';
+          setDisplayName(firstName);
+          try {
+            sessionStorage.setItem('sm-visit-streak', JSON.stringify({ streak: data.streak, name: firstName }));
+          } catch {}
         }
       })
       .catch(() => {});
@@ -698,9 +730,20 @@ export function HomepageFeed({
             Breaking news, real-time scores, and AI-powered analysis — all five Chicago teams, one platform.
           </p>
 
+          {/* Your Chicago Bar (logged-in only) */}
+          {actuallyLoggedIn && visitStreak > 0 && (
+            <div className="your-chicago-bar animate-entrance entrance-delay-3b">
+              <span className="your-chicago-left">
+                <span className="your-chicago-title">Your Chicago</span>
+                <span className="your-chicago-name">, {displayName}</span>
+              </span>
+              <span className="your-chicago-streak">Day {visitStreak}</span>
+            </div>
+          )}
+
           {/* 90-Second Catch-Up Timeline */}
           <div className="animate-entrance entrance-delay-3b">
-            <CatchUpTimeline posts={safePosts} />
+            <CatchUpTimeline posts={safePosts} favoriteTeams={actuallyLoggedIn ? userFavoriteTeams : undefined} />
           </div>
 
           <div className="team-logo-row animate-entrance entrance-delay-4">
