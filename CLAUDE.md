@@ -1,6 +1,6 @@
 # SportsMockery - Claude Project Knowledge Base
 
-> **Last Updated:** February 22, 2026 (DataLab Frontend Data Guide integration)
+> **Last Updated:** February 25, 2026
 > **Purpose:** This file contains everything Claude needs to know to work on this project.
 
 ---
@@ -8,583 +8,139 @@
 ## Project Overview
 
 **Product:** SportsMockery - Chicago sports news and fan engagement platform
-**URL:** https://test.sportsmockery.com (test), https://sportsmockery.com (production)
+**URLs:** https://test.sportsmockery.com (test/prod), https://sportsmockery.com (WordPress/SEO)
 **Owner:** Chris
-
-### Tech Stack
-- **Framework:** Next.js 16+ (App Router)
-- **Database:** Supabase (PostgreSQL)
-- **Hosting:** Vercel
-- **Auth:** Supabase Auth
-- **Styling:** Tailwind CSS
+**Tech Stack:** Next.js 16+ (App Router), Supabase (PostgreSQL), Vercel, Supabase Auth, Tailwind CSS
+**Teams:** Bears (NFL), Bulls (NBA), Blackhawks (NHL), Cubs (MLB), White Sox (MLB)
 
 ### MCP Servers
 
-| Server | Package | Auth | Purpose |
-|--------|---------|------|---------|
-| **SEMRush** | `github:mrkooblu/semrush-mcp` | API Key via `SEMRUSH_API_KEY` env var | SEO keyword research, domain analytics, backlink analysis |
-
-**Configuration** (in `~/.claude.json` under this project's `mcpServers`):
-```json
-{
-  "semrush": {
-    "type": "stdio",
-    "command": "npx",
-    "args": ["-y", "github:mrkooblu/semrush-mcp"],
-    "env": {
-      "SEMRUSH_API_KEY": "34ea83b1d84e233f4d827d721c7108df"
-    }
-  }
-}
-```
-
-**Note:** Each SEMRush API call consumes 10-100 API units depending on the tool used.
-
-**Default Domain Rule:** When using the SEMRush MCP connector, always analyze **sportsmockery.com** (the live WordPress site) by default, unless explicitly told to use test.sportsmockery.com. All SEO data, Site Audit, keyword tracking, and content analysis should target the live domain **sportsmockery.com**.
+**SEMRush** (`github:mrkooblu/semrush-mcp`) — SEO keyword research, domain analytics. 10-100 API units per call.
+**Default Domain:** Always analyze **sportsmockery.com** (live WordPress site) unless told otherwise.
 
 ---
 
 ## Styling Rules (IMPORTANT)
 
-### DO NOT Modify the Theme Toggle
-The theme toggle in `src/components/layout/Header.tsx` uses the `<ThemeToggle />` component from `src/components/ThemeToggle.tsx`. This is the Chicago star sliding pill toggle. **Do not replace, revert, or modify this toggle.** It is finalized.
-
-### Always Use Inline Styles for Button Colors
-Tailwind classes for colors/borders on buttons often get overridden by other CSS. **Always use inline `style={{}}` for:**
-- `backgroundColor`
-- `color`
-- `border`
-- `outline`
-- SVG `stroke` color
-
-**Example - Correct:**
-```jsx
-<Link
-  href="/fan-chat"
-  className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded"
-  style={{
-    backgroundColor: theme === 'dark' ? '#ffffff' : '#bc0000',
-    color: theme === 'dark' ? '#bc0000' : '#ffffff',
-    border: 'none',
-    outline: 'none',
-  }}
->
-  <svg stroke={theme === 'dark' ? '#bc0000' : '#ffffff'} ...>
-```
-
-**Example - Wrong (will get overridden):**
-```jsx
-<Link
-  className={`... ${theme === 'dark' ? 'bg-white text-[#bc0000]' : 'bg-[#bc0000] text-white'}`}
->
-```
-
-### Brand Colors
-- **Primary Red:** `#bc0000`
-- Use this for CTA buttons, accents, and highlights
-
-### Teams Covered
-- Chicago Bears (NFL)
-- Chicago Bulls (NBA)
-- Chicago Blackhawks (NHL)
-- Chicago Cubs (MLB)
-- Chicago White Sox (MLB)
+- **DO NOT** modify the ThemeToggle in `src/components/ThemeToggle.tsx` or Header.tsx — it's finalized.
+- **Always use inline `style={{}}` for button colors** (backgroundColor, color, border, outline, SVG stroke). Tailwind color classes get overridden.
+- **Brand Primary Red:** `#bc0000`
 
 ---
 
-## Team Pages (CRITICAL REFERENCE)
+## Team Pages — Data Reference
 
-When the user says "Team Pages", they mean the team hub pages at `/chicago-{team}/` with sub-pages for players, roster, schedule, scores, and stats for all 5 Chicago teams (Bears, Bulls, Blackhawks, Cubs, White Sox).
+"Team Pages" = hub pages at `/chicago-{team}/` with sub-pages: players, roster, schedule, scores, stats, cap-tracker.
 
-**NEVER mark team pages as complete without verifying ALL data is displaying correctly.**
+**Data Flow:** Team Pages → `src/lib/{team}Data.ts` → Datalab Supabase
+**Authoritative data guide:** `/Users/christopherburhans/Documents/projects/sm-data-lab/docs/TestSM_Frontend_Data_Guide.md`
+**SM reference:** `/docs/Team_Pages_Query.md`
 
-### Data Flow Architecture
+### Season Year Storage (CRITICAL — differs by sport!)
 
-```
-Team Pages → Data Layer (src/lib/{team}Data.ts) → Datalab Supabase
-```
+| Sport | Convention | Current Value | `getCurrentSeason()` Logic |
+|-------|-----------|---------------|---------------------------|
+| NFL | Starting year | `2025` | `month >= 9 ? year : year - 1` |
+| NBA | **ENDING year** | `2026` | `month >= 10 ? year + 1 : year` |
+| NHL | **ENDING year** | `2026` | `month >= 10 ? year + 1 : year` |
+| MLB | Calendar year | `2025` | `month >= 4 ? year : year - 1` |
 
-### Datalab Reference Documents
+**Cap tables always use `season = 2026` regardless of sport.** No `season_start_year` column exists.
 
-The **authoritative** frontend data guide is at:
-`/Users/christopherburhans/Documents/projects/sm-data-lab/docs/TestSM_Frontend_Data_Guide.md`
+### Active Roster Column Names
 
-Legacy integration guide (for background only):
-`/Users/christopherburhans/Documents/projects/sm-data-lab/docs/SportsMockery_Integration_Guide.md`
-
-SM's reference doc is at: `/docs/Team_Pages_Query.md`
-
----
-
-### CRITICAL: Season Year Storage (Differs by Sport!)
-
-**CONFIRMED BY DATALAB (Jan 25, 2026)**
-
-| Sport | Stored As | Jan 2026 Season Value | Example |
-|-------|-----------|----------------------|---------|
-| **NFL** | Starting year | `2025` | 2025-26 season = 2025 |
-| **NBA** | **ENDING year** | `2026` | 2025-26 season = **2026** |
-| **NHL** | **ENDING year** | `2026` | 2025-26 season = **2026** |
-| **MLB** | Calendar year | `2025` (offseason) | 2025 season = 2025 |
-
-**NBA AND NHL USE ENDING YEAR!** Query Bulls and Blackhawks with `season = 2026` for the 2025-26 season.
-
-**Cap tables always use `season = 2026`** regardless of sport.
-
-**CONFIRMED:** There is NO `season_start_year` column in any tables - use `season` only.
-
-```typescript
-function getCurrentSeason(sport: 'nfl' | 'nba' | 'nhl' | 'mlb'): number {
-  const now = new Date()
-  const month = now.getMonth() + 1
-  const year = now.getFullYear()
-  switch (sport) {
-    case 'nfl': return month >= 9 ? year : year - 1    // 2025
-    case 'nba': return month >= 10 ? year + 1 : year   // 2026
-    case 'nhl': return month >= 10 ? year + 1 : year   // 2026
-    case 'mlb': return month >= 4 ? year : year - 1    // 2025
-  }
-}
-```
-
----
-
-### CRITICAL: Active Roster Column Names
-
-| Team | Column Name | Note |
-|------|-------------|------|
+| Team | Column | Notes |
+|------|--------|-------|
 | Bears | `is_active` | |
-| Bulls | **`is_current_bulls`** | Different from others! |
+| Bulls | **`is_current_bulls`** | Different! |
 | Blackhawks | `is_active` | |
 | Cubs | `is_active` | Also check `data_status != 'needs_roster_review'` |
 | White Sox | `is_active` | Also check `data_status != 'needs_roster_review'` |
 
----
+### Roster Source of Truth — Contracts Tables
 
-### CRITICAL: Roster Source of Truth — Contracts Tables
+**NEVER use `{team}_players` alone for roster.** Use `{team}_contracts` (contains only active contracts).
 
-**NEVER use `{team}_players` alone for roster counts.** The `{team}_contracts` table is the source of truth for how many players to display, because it only contains players with active contracts.
+| Team | Max Roster | Contracts Count | Note |
+|------|-----------|----------------|------|
+| Bears (NFL) | 53 | ~52 | `bears_players` has 81+ (includes PS/IR) |
+| Bulls (NBA) | 18 | ~15 | |
+| Blackhawks (NHL) | 23 | ~23 | |
+| Cubs (MLB) | 40 | ~40 | |
+| White Sox (MLB) | 40 | ~40 | |
 
-| Team | Max Roster Size | Contracts Table | Contract Count |
-|------|----------------|-----------------|----------------|
-| Bears (NFL) | **53** | `bears_contracts` | 52 |
-| Bulls (NBA) | **18** | `bulls_contracts` | 15 |
-| Blackhawks (NHL) | **23** | `blackhawks_contracts` | 23 |
-| Cubs (MLB) | **40** | `cubs_contracts` | 40 |
-| White Sox (MLB) | **40** | `whitesox_contracts` | 40 |
-
-**Recommended Roster Query:** Use contracts as driver, join players for bio data and headshots:
-
+**Roster query pattern:** Use contracts as driver, join players for headshots:
 ```typescript
-// Bears roster (max 53 players, driven by contracts)
-const { data: contracts } = await supabase
-  .from('bears_contracts')
-  .select('player_id, player_name, position, age, cap_hit, base_salary, dead_cap')
-  .eq('season', 2026)
-  .order('cap_hit', { ascending: false })
-
-const { data: players } = await supabase
-  .from('bears_players')
-  .select('espn_id, headshot_url, jersey_number, height_inches, weight_lbs, college')
-  .eq('is_active', true)
-
 const headshots = new Map(players?.map(p => [String(p.espn_id), p]) || [])
-const roster = contracts?.map(c => ({ ...c, ...(headshots.get(c.player_id) || {}) })) || []
+// Bulls uses espn_player_id instead of espn_id
+const roster = contracts?.map(c => ({ ...c, ...(headshots.get(c.player_id) || {}) }))
 ```
 
-**Bulls uses `espn_player_id`** (not `espn_id`):
-```typescript
-const headshots = new Map(players?.map(p => [String(p.espn_player_id), p]) || [])
+### Stats Join Patterns — ALL TEAMS USE ESPN ID
+
+| Team | Player Table Column | Stats `player_id` = |
+|------|-------------------|---------------------|
+| Bears | `espn_id` | ESPN ID |
+| Bulls | `espn_player_id` | ESPN ID |
+| Blackhawks | `espn_id` | ESPN ID |
+| Cubs | `espn_id` | ESPN ID |
+| White Sox | `espn_id` | ESPN ID |
+
+All teams: `stats.eq('player_id', player.playerId)` where `playerId` is the ESPN ID string.
+
+### Player Stats Column Names
+
+**NFL (Bears)** — DUAL COLUMN NAMES, use nullish coalescing:
+```
+Short: passing_cmp/att/yds/td/int, rushing_car/yds/td, receiving_rec/tgts/yds/td
+Long:  passing_completions/attempts/yards/touchdowns/interceptions, rushing_carries/yards/touchdowns, receiving_receptions/targets/yards/touchdowns
+Also: def_tackles_total, def_sacks, def_int, fum_fum
+Usage: stat.passing_yards ?? stat.passing_yds
+Foreign key: player_id → ESPN ID | Game key: bears_game_id (NOT game_id)
 ```
 
----
+**NBA (Bulls):** `points, total_rebounds, offensive/defensive_rebounds, assists, steals, blocks, turnovers, personal_fouls, field_goals_made/attempted, three_pointers_made/attempted, free_throws_made/attempted, minutes_played, plus_minus`
 
-### CRITICAL: Stats Join Patterns — ALL TEAMS NOW USE ESPN ID (Feb 9, 2026)
+**NHL (Blackhawks):** `goals, assists, points, plus_minus, shots_on_goal, hits, blocked_shots, saves, goals_against` (goalie)
+- **OT Loss:** Use ONLY `is_overtime = true` (covers both OT and shootout losses)
 
-**All teams now use ESPN ID for stats joins.** Data Lab updated Bears to be consistent:
+**MLB (Cubs/White Sox):** Batting: `at_bats, hits, runs, rbi, home_runs, walks, strikeouts` | Pitching: `innings_pitched, hits_allowed, runs_allowed, earned_runs, walks_allowed, strikeouts_pitched`
 
-| Team | Join Pattern | Code Usage |
-|------|--------------|------------|
-| **Bears** | `bp.espn_id = bpgs.player_id` | Use `player.playerId` (string) |
-| **Bulls** | `bp.espn_player_id = bpgs.player_id` | Use `player.playerId` (string) |
-| **Blackhawks** | `bp.espn_id = bpgs.player_id` | Use `player.playerId` (string) |
-| **Cubs** | `cp.espn_id = cpgs.player_id` | Use `player.playerId` (string) |
-| **White Sox** | `wp.espn_id = wpgs.player_id` | Use `player.playerId` (string) |
+### Team Season Stats Column Names (EXACT — no aliases exist)
 
-```typescript
-// ALL TEAMS (including Bears) - use ESPN ID (playerId)
-const stats = await query.from('bears_player_game_stats').eq('player_id', player.playerId)
-const stats = await query.from('bulls_player_game_stats').eq('player_id', player.playerId)
-```
+| Column | Team(s) | DO NOT USE |
+|--------|---------|------------|
+| `field_goal_pct` | Bulls | ~~fg_pct~~ |
+| `three_point_pct` | Bulls | ~~three_pct~~ |
+| `free_throw_pct` | Bulls | ~~ft_pct~~ |
+| `batting_average` | Cubs, White Sox | ~~team_avg~~ |
+| `era` | Cubs, White Sox | ~~team_era~~ |
+| `ops` | Cubs, White Sox | ~~team_ops~~ |
+| `power_play_pct` | Blackhawks | ~~pp_pct~~ |
+| `penalty_kill_pct` | Blackhawks | ~~pk_pct~~ |
 
-**Player Interface Structure:**
-```typescript
-interface Player {
-  playerId: string    // ESPN ID (use for ALL teams including Bears)
-  internalId: number  // Database ID (legacy, no longer used for stats joins)
-  // ... other fields
-}
-```
+### Records — ALWAYS Use Seasons Tables
 
----
+**NEVER calculate from `*_games_master`** (future games have `{team}_win = false` with 0-0 scores).
 
-### CRITICAL: Player Stats Column Names by Sport
+| Team | Record Table | Season | Verified Record |
+|------|-------------|--------|----------------|
+| Bears | `bears_season_record` | 2025 | 11-6 |
+| Bulls | `bulls_seasons` | 2026 | 23-22 |
+| Blackhawks | `blackhawks_seasons` | 2026 | 21-22-8 |
+| Cubs | `cubs_seasons` | 2025 | 92-70 |
+| White Sox | `whitesox_seasons` | 2025 | 60-102 |
 
-#### NFL (Bears)
+### Regular Season Game Counts
 
-**DUAL COLUMN NAMES:** Bears stats exist in two formats. Use COALESCE/nullish coalescing:
-- Short (older data): `passing_yds`, `passing_td`, `rushing_yds`, etc.
-- Long (recent data): `passing_yards`, `passing_touchdowns`, `rushing_yards`, etc.
-- In JS: `stat.passing_yards ?? stat.passing_yds`
-
-```
-Short names: passing_cmp, passing_att, passing_yds, passing_td, passing_int
-Long names: passing_completions, passing_attempts, passing_yards, passing_touchdowns, passing_interceptions
-Short: rushing_car, rushing_yds, rushing_td
-Long: rushing_carries, rushing_yards, rushing_touchdowns
-Short: receiving_rec, receiving_tgts, receiving_yds, receiving_td
-Long: receiving_receptions, receiving_targets, receiving_yards, receiving_touchdowns
-receiving_rec, receiving_tgts, receiving_yds, receiving_td
-def_tackles_total, def_sacks, def_int
-fum_fum
-```
-**Foreign key:** `player_id` → ESPN ID (NOT `bears_players.id`)
-**Game key:** `bears_game_id` (NOT `game_id`)
-
-#### NBA (Bulls)
-```
-points, total_rebounds, offensive_rebounds, defensive_rebounds
-assists, steals, blocks, turnovers, personal_fouls
-field_goals_made, field_goals_attempted
-three_pointers_made, three_pointers_attempted
-free_throws_made, free_throws_attempted
-minutes_played, plus_minus
-```
-
-#### NHL (Blackhawks)
-```
-goals, assists, points, plus_minus
-shots_on_goal, hits, blocked_shots
-saves, goals_against (goalie)
-```
-**OT Loss Logic (CONFIRMED BY DATALAB):** Use ONLY `is_overtime = true` (covers both OT and shootout losses):
-```sql
--- OT Losses (includes shootout) - returns the 8 OTL in 21-22-8 record
-WHERE blackhawks_win = false AND is_overtime = true
-```
-
-#### MLB (Cubs/White Sox)
-```
--- Batting
-at_bats, hits, runs, rbi, home_runs, walks, strikeouts
-
--- Pitching
-innings_pitched, hits_allowed, runs_allowed, earned_runs
-walks_allowed, strikeouts_pitched
-```
-
----
-
-### CRITICAL: Record Query Best Practice
-
-**ALWAYS use `{team}_seasons` table for authoritative win/loss records.**
-
-Calculating records from `{team}_games_master` can be inaccurate because:
-- Future games may have `{team}_win = false` with 0-0 scores
-- Filtering by `score > 0` may still have edge cases
-
-```typescript
-// WRONG - calculating from games_master
-const { data } = await supabase
-  .from('bulls_games_master')
-  .select('bulls_win')
-  .eq('season', 2026)
-const losses = data.filter(g => g.bulls_win === false).length // Includes future games!
-
-// CORRECT - use seasons table (recommended by Datalab)
-const { data } = await supabase
-  .from('bulls_seasons')
-  .select('wins, losses')
-  .eq('season', 2026)
-  .single()
-// Returns: { wins: 23, losses: 22 }
-```
-
----
-
-### Verified Records (Jan 26, 2026) ✅ ALL COMPLETE
-
-| Team | Table | Season | Record | Team Stats Table |
-|------|-------|--------|--------|------------------|
-| Bears | `bears_season_record` | 2025 | 11-6 | `bears_team_season_stats` ✅ |
-| Bulls | `bulls_seasons` | 2026 | 23-22 | `bulls_team_season_stats` ✅ |
-| Blackhawks | `blackhawks_seasons` | 2026 | 21-22-8 | `blackhawks_team_season_stats` ✅ |
-| Cubs | `cubs_seasons` | 2025 | 92-70 | `cubs_team_season_stats` ✅ |
-| White Sox | `whitesox_seasons` | 2025 | 60-102 | `whitesox_team_season_stats` ✅ |
-
-**All team_season_stats tables now exist and are populated.**
-
-### CRITICAL: Team Season Stats Column Names (Confirmed Jan 27, 2026)
-
-| Your Code Reference | Actual DB Column | Team(s) |
-|---------------------|-----------------|---------|
-| `field_goal_pct` | `field_goal_pct` | Bulls |
-| `three_point_pct` | `three_point_pct` | Bulls |
-| `free_throw_pct` | `free_throw_pct` | Bulls |
-| `batting_average` | `batting_average` | Cubs, White Sox |
-| `era` | `era` | Cubs, White Sox |
-| `ops` | `ops` | Cubs, White Sox |
-| `power_play_pct` | `power_play_pct` | Blackhawks |
-| `penalty_kill_pct` | `penalty_kill_pct` | Blackhawks |
-
-**DO NOT USE:** `fg_pct`, `three_pct`, `ft_pct`, `team_avg`, `team_era`, `team_ops`, `pp_pct`, `pk_pct` — these column names DO NOT EXIST.
-
-**Bears roster: Use `bears_contracts` (max 53).** The `bears_players` table has 81+ entries (active + practice squad + IR). Always use contracts as the roster source of truth — see "Roster Source of Truth" section above.
-
----
-
-### Verification Checklist Before Marking Complete
-
-#### Scores Page (`/chicago-{team}/scores`)
-- [ ] Game selector shows all completed games
-- [ ] Stats tables have data (not "No stats available")
-- [ ] Player names and photos display
-
-#### Players Page (`/chicago-{team}/players`)
-- [ ] Player selector works
-- [ ] Player profile displays bio info
-- [ ] Season stats display (not "No stats recorded")
-
-#### Stats Page (`/chicago-{team}/stats`)
-- [ ] Team record matches official (check against espn.com)
-- [ ] Leaderboards have players with stats
-
-#### Schedule Page (`/chicago-{team}/schedule`)
-- [ ] Games display (not "0 games")
-- [ ] Completed games show scores
-
----
-
-### How to Debug Missing Stats
-
-1. **Check the API response**: Browser DevTools → Network → find the API call
-2. **Check column names**: Compare with list above
-3. **Check join columns**: stats `player_id` = ESPN ID (join via `{team}_players.espn_id`, Bulls: `espn_player_id`)
-4. **Check season value**: Use correct year per sport (NHL = ending year!)
-5. **Test in Datalab**: Run SQL directly in Supabase dashboard
-
----
-
-### Live Games (10-Second Polling)
-
-During live games, Datalab updates every 10 seconds. SM must poll at the same rate.
-
-| Table | Purpose |
-|-------|---------|
-| `live_games_registry` | Active games across all sports |
-| `{team}_live` | Live scores, quarter/period, time (**NOT** `{team}_games_live`) |
-| `{team}_player_stats_live` | Live player stats |
-
-```javascript
-const LIVE_POLL_INTERVAL = 10_000    // During live games
-const STANDARD_POLL_INTERVAL = 60_000 // No live games
-```
-
----
-
-### Tables Reference (58 Total)
-
-**Core Data (25 tables):**
-
-| Team | Games | Players | Player Stats | Seasons | Team Stats |
-|------|-------|---------|--------------|---------|------------|
-| Bears | `bears_games_master` | `bears_players` | `bears_player_game_stats` | `bears_season_record` | `bears_team_season_stats` |
-| Bulls | `bulls_games_master` | `bulls_players` | `bulls_player_game_stats` | `bulls_seasons` | `bulls_team_season_stats` |
-| Blackhawks | `blackhawks_games_master` | `blackhawks_players` | `blackhawks_player_game_stats` | `blackhawks_seasons` | `blackhawks_team_season_stats` |
-| Cubs | `cubs_games_master` | `cubs_players` | `cubs_player_game_stats` | `cubs_seasons` | `cubs_team_season_stats` |
-| White Sox | `whitesox_games_master` | `whitesox_players` | `whitesox_player_game_stats` | `whitesox_seasons` | `whitesox_team_season_stats` |
-
-**Player Season Aggregates (2 tables):**
-- `bears_player_season_stats` — pre-computed (materialized view)
-- `bulls_player_season_stats` — pre-computed
-- Blackhawks/Cubs/White Sox: aggregate manually from `*_player_game_stats`
-
-**Live Games (11 tables):**
-- `live_games_registry`
-- `{team}_live` (x5) — live game data
-- `{team}_player_stats_live` (x5) — live player stats
-
-**Salary Cap (20 tables):**
-- `{team}_salary_cap` (x5) — team cap summary
-- `{team}_contracts` (x5) — per-player contracts (**roster source of truth**)
-- `{team}_dead_money` (x5) — off-roster dead cap
-- `{team}_draft_pool` (x5) — draft pick cap charges
-
----
-
-### CRITICAL: Opponent Player Stats Pattern
-
-All 5 teams store opponent player stats in the SAME stats table with `is_opponent = true`. **No join needed for opponent players** — name, position, and headshot are stored inline:
-
-```typescript
-// Split box score stats into Chicago vs opponent
-const chicagoStats = stats?.filter(s => !s.is_opponent) || []
-const opponentStats = stats?.filter(s => s.is_opponent) || []
-
-// Opponent players have inline columns (no join needed):
-// - opponent_player_name
-// - opponent_player_position
-// - opponent_player_headshot_url
-
-const enrichedOpponent = opponentStats.map(s => ({
-  ...s,
-  name: s.opponent_player_name,
-  position: s.opponent_player_position,
-  headshot_url: s.opponent_player_headshot_url,
-}))
-```
-
----
-
-### CRITICAL: Player Season Aggregates
-
-| Team | Table | Type |
-|------|-------|------|
-| Bears | `bears_player_season_stats` | Pre-computed (materialized view) |
-| Bulls | `bulls_player_season_stats` | Pre-computed |
-| Blackhawks | None — aggregate from `blackhawks_player_game_stats` | Manual |
-| Cubs | None — aggregate from `cubs_player_game_stats` | Manual |
-| White Sox | None — aggregate from `whitesox_player_game_stats` | Manual |
-
-For manual aggregation, group by `player_id` and sum stats from `*_player_game_stats` where `is_opponent = false`.
-
----
-
-### Salary Cap Tracker (20 Tables)
-
-**All cap tables use `season = 2026` regardless of sport.**
-
-| Table Pattern | Purpose |
-|---------------|---------|
-| `{team}_salary_cap` | Team-level cap summary (adjusted_cap, total_committed, cap_space, dead_money) |
-| `{team}_contracts` | Per-player contracts (**roster source of truth**) |
-| `{team}_dead_money` | Off-roster dead cap charges |
-| `{team}_draft_pool` | Projected draft pick cap charges |
-
-**Cap Ceilings:**
-
-| Sport | Cap/Threshold | Label |
-|-------|--------------|-------|
-| NFL | $303,450,000 | Salary Cap |
-| NBA | $154,647,000 | Salary Cap |
-| NHL | $95,500,000 | Salary Cap |
-| MLB | $241,000,000 | **CBT Threshold** (NOT "Salary Cap") |
-
-**Display Rules by Sport:**
-
-| Column | NFL | NBA | NHL | MLB |
-|--------|-----|-----|-----|-----|
-| `dead_cap` | Show | **Hide** (null) | **Hide** (null) | **Hide** (null) |
-| `age` | Show | Show | **Hide** (null) | **Hide** (null) |
-| Cap label | "Salary Cap" | "Salary Cap" | "Salary Cap" | "CBT Threshold" |
-| Cap hit label | "Cap Hit" | "Cap Hit" | "Cap Hit" | "Luxury Tax Value" |
-
-**Headshot Joins for Cap Pages:**
-```typescript
-const { data: players } = await supabase
-  .from('bears_players')
-  .select('espn_id, headshot_url')
-  .eq('is_active', true)
-
-const headshots = new Map(players?.map(p => [String(p.espn_id), p.headshot_url]) || [])
-const enriched = contracts?.map(c => ({ ...c, headshot_url: headshots.get(c.player_id) || null }))
-```
-
----
-
-## Team Pages Audit Protocol (RUN EVERY SESSION)
-
-**CRITICAL:** At the start of every session involving team pages, run a quick health check.
-
-### Audit Documents
-
-| Document | Location | Purpose |
-|----------|----------|---------|
-| **Frontend Audit** | `/docs/TeamPages_Audit.md` | Comprehensive frontend checklist |
-| **Data Lab Audit** | `/docs/TeamPages_Audit_Datalab.md` | Database verification guide |
-
-### Quick Health Check (Run First)
-
-Before making any team page changes, verify data is displaying:
-
-```bash
-# Check all team pages return 200
-for team in "chicago-bears" "chicago-bulls" "chicago-blackhawks" "chicago-cubs" "chicago-white-sox"; do
-  for page in "schedule" "scores" "stats" "roster" "players"; do
-    curl -s -o /dev/null -w "${team}/${page}: %{http_code}\n" "https://test.sportsmockery.com/${team}/${page}"
-  done
-done
-```
-
-### Inter-Claude Communication Protocol
-
-When encountering data issues, communicate with Data Lab using this format:
-
-```markdown
-## Data Lab Request
-
-**From:** Claude Code (SM Frontend)
-**Date:** [Current Date]
-**Priority:** [Critical/High/Medium/Low]
-
-### Issue Summary
-[1-2 sentence description]
-
-### Affected Tables
-- Table: `[table_name]`
-- Expected: [what data should return]
-- Actual: [what data is returning]
-
-### Verification
-- Checked official source: [ESPN/MLB/NHL/NBA/NFL.com URL]
-- Correct value: [value]
-
-### Requested Action
-[Specific fix needed]
-```
-
-### Correct Table Names (MEMORIZE THESE)
-
-| Data | Correct Table | WRONG Table |
-|------|---------------|-------------|
-| Bears record | `bears_season_record` | ~~bears_seasons~~ |
-| Blackhawks OTL | Column is `otl` | ~~ot_losses~~ |
-| Bulls active roster | `is_current_bulls` | ~~is_active~~ |
-| Live game data | `{team}_live` | ~~{team}_games_live~~ |
-| Roster source | `{team}_contracts` | ~~{team}_players with is_active~~ |
-| All games filters | Include `score > 0` filter | Raw count |
-
-### Season Values (MEMORIZE THESE)
-
-| League | Current Season | Convention |
-|--------|---------------|------------|
-| NFL | `2025` | Starting year |
-| NBA | `2026` | ENDING year |
-| NHL | `2026` | ENDING year |
-| MLB | `2025` | Calendar year |
-
-### Regular Season Game Counts (MEMORIZE THESE)
-
-**CRITICAL: Schedule pages must NEVER show more than the correct number of regular season games. Filter out preseason, All-Star, and exhibition games.**
-
-| League | Regular Season Games | Notes |
-|--------|---------------------|-------|
+| League | Games | Notes |
+|--------|-------|-------|
 | NFL | **17** | 18 weeks with 1 bye |
-| NBA | **82** | NOT 83, NOT 84 — exactly 82 |
-| NHL | **82** | Same as NBA |
-| MLB | **162** | April through September |
+| NBA | **82** | Exactly 82 |
+| NHL | **82** | Exactly 82 |
+| MLB | **162** | April–September |
 
-**How to enforce:** Always filter by `game_type` to exclude preseason/All-Star/exhibition games. Use JS-side filtering (not `.eq()`) since `game_type` values are inconsistent across teams:
+Filter preseason/All-Star with JS-side filtering (values inconsistent across teams):
 ```typescript
 const filtered = data.filter((g: any) => {
   const gt = (g.game_type || '').toUpperCase()
@@ -592,603 +148,180 @@ const filtered = data.filter((g: any) => {
 })
 ```
 
-### Automatic Verification Steps
+### Opponent Player Stats
 
-1. **Check records match official sources** (ESPN, league sites)
-2. **Check roster counts match contracts table:**
-   - NFL: max 53 (use `bears_contracts`, NOT `bears_players` which has 81+)
-   - NBA: 15-18 (use `bulls_contracts`)
-   - NHL: 20-23 (use `blackhawks_contracts`)
-   - MLB: 26-40 (use `cubs_contracts`/`whitesox_contracts`)
-3. **Check schedule game counts match sport** (see table above)
-4. **Check all pages load without errors**
-5. **Check stats are populated (not "—" or 0.0)**
+All teams: same stats table with `is_opponent = true`. Opponent data is inline (no join needed): `opponent_player_name`, `opponent_player_position`, `opponent_player_headshot_url`.
 
-### If Issues Found
+### Player Season Aggregates
 
-1. First check if it's a frontend query issue (wrong table/column/season)
-2. If frontend is correct, send Data Lab Request
-3. Wait for Data Lab Response before making further changes
-4. After Data Lab fixes, redeploy: `npm run build-deploy`
+| Team | Source | Type |
+|------|--------|------|
+| Bears | `bears_player_season_stats` | Pre-computed (materialized view) |
+| Bulls | `bulls_player_season_stats` | Pre-computed |
+| Blackhawks/Cubs/White Sox | Aggregate from `*_player_game_stats` | Manual (group by `player_id`, sum, `is_opponent = false`) |
 
----
+### Correct Table Names (CRITICAL)
 
-## Team Pages Troubleshooting Guide (CRITICAL)
+| Data | Correct | WRONG |
+|------|---------|-------|
+| Bears record | `bears_season_record` | ~~bears_seasons~~ |
+| Blackhawks OTL | Column `otl` | ~~ot_losses~~ |
+| Bulls active filter | `is_current_bulls` | ~~is_active~~ |
+| Live game data | `{team}_live` | ~~{team}_games_live~~ |
+| Roster source | `{team}_contracts` | ~~{team}_players~~ |
 
-**Run this test script to verify all pages are working:**
+### Tables Reference (58 Total)
 
-```bash
-node scripts/test-all-team-pages.mjs
+**Core (25):** `{team}_games_master`, `{team}_players`, `{team}_player_game_stats`, `{team}_seasons` (Bears: `bears_season_record`), `{team}_team_season_stats`
+
+**Live (11):** `live_games_registry`, `{team}_live` (x5), `{team}_player_stats_live` (x5)
+
+**Salary Cap (20):** `{team}_salary_cap`, `{team}_contracts`, `{team}_dead_money`, `{team}_draft_pool` (x5 each)
+
+**Aggregates (2):** `bears_player_season_stats`, `bulls_player_season_stats`
+
+### Salary Cap Tracker
+
+All cap tables use `season = 2026`.
+
+| Sport | Cap Ceiling | Cap Label | Cap Hit Label | Show `dead_cap` | Show `age` |
+|-------|------------|-----------|---------------|-----------------|------------|
+| NFL | $303,450,000 | Salary Cap | Cap Hit | Yes | Yes |
+| NBA | $154,647,000 | Salary Cap | Cap Hit | No | Yes |
+| NHL | $95,500,000 | Salary Cap | Cap Hit | No | No |
+| MLB | $241,000,000 | **CBT Threshold** | Luxury Tax Value | No | No |
+
+### Live Games (10-Second Polling)
+
+| Table | Purpose |
+|-------|---------|
+| `live_games_registry` | Active games across all sports |
+| `{team}_live` | Live scores, quarter/period, time |
+| `{team}_player_stats_live` | Live player stats |
+
+```javascript
+const LIVE_POLL_INTERVAL = 10_000    // During live games
+const STANDARD_POLL_INTERVAL = 60_000 // No live games
 ```
-
-This tests all 30 team pages (5 teams × 6 pages each) and shows a summary table.
-
-### Common Issues & Fixes
-
-#### Issue 1: Wrong Record Displayed
-**Symptom:** Bulls shows 39-43 instead of 23-22
-
-**Cause:** Calculating from `games_master` instead of `*_seasons` table, or wrong season value
-
-**Fix:** Always use `*_seasons` table for records:
-```typescript
-// In src/lib/{team}Data.ts - use seasons table
-const { data } = await datalabAdmin
-  .from('bulls_seasons')  // NOT games_master
-  .select('wins, losses')
-  .eq('season', getCurrentSeason())  // Make sure season is correct!
-  .single()
-```
-
-**Season calculation:** See `getCurrentSeason()` function in the Season Conventions section above.
-
----
-
-#### Issue 2: 0 Players Displayed
-**Symptom:** Cubs or White Sox roster shows 0 players
-
-**Cause:** Stats table uses `espn_id` as `player_id`, but query joins on `id`
-
-**Fix:** Use `espn_id` for join:
-```typescript
-// WRONG
-const { data } = await supabase.from('cubs_players').select('*').in('id', playerIds)
-
-// CORRECT - use espn_id column
-const { data } = await supabase.from('cubs_players').select('*').in('espn_id', espnIds)
-```
-
----
-
-#### Issue 3: No Stats for Players
-**Symptom:** Player profile shows "No stats recorded"
-
-**Cause:** Different teams use different ID columns for stats joins
-
-**Fix:** All teams now use ESPN ID for stats joins:
-| Team | Stats Join | Code |
-|------|------------|------|
-| Bears | `bp.espn_id = stats.player_id` | Use `player.playerId` |
-| Bulls | `bp.espn_player_id = stats.player_id` | Use `player.playerId` |
-| Others | `bp.espn_id = stats.player_id` | Use `player.playerId` |
-
----
-
-#### Issue 4: Schedule Shows 0 Games
-**Symptom:** Schedule page empty for Cubs/White Sox
-
-**Cause:** Wrong season year or filtering out all games
-
-**Fix:** Check season and remove restrictive filters:
-```typescript
-// Ensure correct season
-const season = month < 4 ? year - 1 : year  // MLB calendar year
-
-// Don't filter by game_type if column doesn't exist
-const { data } = await supabase
-  .from('cubs_games_master')
-  .select('*')
-  .eq('season', season)
-  .order('game_date')
-```
-
----
 
 ### Key Data Layer Files
 
-| Team | File | Notes |
-|------|------|-------|
-| Bears | `src/lib/bearsData.ts` | Roster from `bears_contracts`, ESPN ID for stats (dual column names) |
-| Bulls | `src/lib/bullsData.ts` | Roster from `bulls_contracts`, `espn_player_id` for stats |
-| Blackhawks | `src/lib/blackhawksData.ts` | Roster from `blackhawks_contracts`, espn_id for stats |
-| Cubs | `src/lib/cubsData.ts` | Roster from `cubs_contracts`, espn_id for stats |
-| White Sox | `src/lib/whitesoxData.ts` | Roster from `whitesox_contracts`, espn_id for stats |
-| Shared | `src/lib/team-config.ts` | `fetchTeamRecord()`, `getCurrentSeason()` |
-| Cap Pages | `src/app/chicago-{team}/cap-tracker/page.tsx` | Uses `{team}_contracts` + `{team}_salary_cap` |
+| File | Purpose |
+|------|---------|
+| `src/lib/bearsData.ts` | Bears data (dual column names) |
+| `src/lib/bullsData.ts` | Bulls data (`espn_player_id`) |
+| `src/lib/blackhawksData.ts` | Blackhawks data |
+| `src/lib/cubsData.ts` | Cubs data |
+| `src/lib/whitesoxData.ts` | White Sox data |
+| `src/lib/team-config.ts` | `fetchTeamRecord()`, `getCurrentSeason()` |
 
----
+### Audit & Troubleshooting
 
-### Cron Jobs for Team Data
+**Test all pages:** `node scripts/test-all-team-pages.mjs`
+**Audit docs:** `/docs/TeamPages_Audit.md` (frontend), `/docs/TeamPages_Audit_Datalab.md` (database)
+
+**Common issues:**
+1. **Wrong record** → Using `games_master` instead of `*_seasons` table, or wrong season value
+2. **0 players** → Joining on `id` instead of `espn_id`
+3. **No stats** → Wrong ID column for stats join (all teams use ESPN ID now)
+4. **0 games on schedule** → Wrong season year or over-filtering
+
+**Verification steps:** Check records match ESPN, roster counts match contracts, schedule game counts match sport, pages load without errors, stats are populated.
+
+**If data issue is in DataLab (not frontend query):** File request in `/docs/` using DataLab Request format. Wait for response before making changes.
+
+### Cron Jobs
 
 | Endpoint | Schedule | Purpose |
 |----------|----------|---------|
-| `/api/cron/sync-teams` | Every hour (:00) | Revalidates all team pages, verifies data |
-| `/api/cron/team-pages-health` | Every hour (:15) | Full health check with ESPN ID mapping verification |
+| `/api/cron/sync-teams` | Hourly (:00) | Revalidate team pages |
+| `/api/cron/team-pages-health` | Hourly (:15) | Health check + ESPN ID mapping |
 
 ---
 
-### DataLab Request Template (for missing data)
+## Scout AI
 
-When you need DataLab to create/fix tables:
+**Scout AI** = AI sports assistant. Aliases: "Scout", "Scout AI", "the AI model", "query AI".
+**Icon:** `/downloads/scout-v2.png` (use Image component)
 
-```markdown
-## DataLab Request: [Table Name]
+| Component | Location |
+|-----------|----------|
+| Backend | `https://datalab.sportsmockery.com/api/query` |
+| Frontend | `/src/app/ask-ai/page.tsx` |
+| API Proxy | `/src/app/api/ask-ai/route.ts` |
 
-**Priority:** HIGH
-**Date:** [Today]
+**Flow:** User question → POST `/api/ask-ai` with `{ query, sessionId }` → DataLab (Perplexity sonar-pro) → Response with `response, sessionId, sessionContext, chartData, bonusInsight`
 
-### Current State
-- Table `{team}_team_season_stats` is MISSING / has wrong data
+**Sessions:** `sessionId` for context continuity; `sessionContext` `{ player, team, season, sport }` for pronoun resolution.
 
-### What's Needed
-```sql
-CREATE TABLE {team}_team_season_stats (
-  id SERIAL PRIMARY KEY,
-  season INTEGER NOT NULL,
-  games_played INTEGER,
-  wins INTEGER,
-  losses INTEGER,
-  -- sport-specific columns...
-);
-```
+**Query History (30-day):** Logged-in users → `scout_query_history` table; Guests → localStorage (max 100). Cleanup cron: `/api/cron/cleanup-scout-history` (daily 3am UTC).
 
-### Data Source
-- ESPN: https://www.espn.com/{league}/team/stats/_/name/{abbrev}/season/{year}
-
-### Requested Action
-1. Create table with schema above
-2. Populate with current season data
-3. Set up auto-updates (if possible)
-```
+**Known issues:** See `/AskAI_Wrong.md` — citation markers in responses, player name typo handling, DB error leaks.
 
 ---
 
-## Team Pages Health Check Cron Job
+## Frontend Error Logging
 
-**Endpoint:** `/api/cron/team-pages-health`
-**Schedule:** Every hour at minute 15 (`15 * * * *`)
-**Admin Dashboard:** `/admin/team-pages-sync`
+**Utility:** `src/lib/scoutErrorLogger.ts` — logs to `scout_errors` table in Supabase.
+**Types:** `timeout`, `cors`, `parse`, `network`, `api`, `unknown`
+**Integration guide:** `/docs/Scout_Log/INTEGRATION_INSTRUCTIONS_TESTSM.md`
 
-### What It Checks
-
-1. **HTTP Status**: All team page URLs return 200
-2. **Record Table**: Season record exists for current season
-3. **Games Count**: Games exist for current season
-4. **Roster Count**: Active players within expected range
-5. **Stats Count**: Player stats exist for current season
-6. **ESPN ID Mapping**: Verifies player-to-stats join works correctly
-
-### ESPN ID Mapping Check
-
-The cron job validates that ESPN IDs from the players table can be found in the stats table:
-
-```typescript
-// If < 50% of active players have matching stats, it reports an error:
-"ESPN ID mapping issue: only X/Y active players have matching stats"
-```
-
-### Expected Roster Ranges (from contracts tables)
-
-| Team | Min | Max | Source Table | Notes |
-|------|-----|-----|-------------|-------|
-| Bears | 48 | 53 | `bears_contracts` | Max 53 active roster |
-| Bulls | 13 | 18 | `bulls_contracts` | NBA roster |
-| Blackhawks | 20 | 23 | `blackhawks_contracts` | NHL roster |
-| Cubs | 26 | 40 | `cubs_contracts` | 40-man roster |
-| White Sox | 26 | 40 | `whitesox_contracts` | 40-man roster |
-
-### Key Files
-
-| File | Purpose |
-|------|---------|
-| `/src/app/api/cron/team-pages-health/route.ts` | Cron endpoint |
-| `/src/app/admin/team-pages-sync/page.tsx` | Admin dashboard |
-| `/vercel.json` | Cron schedule configuration |
-
-### Adding to vercel.json
-
-```json
-{
-  "crons": [
-    {
-      "path": "/api/cron/team-pages-health",
-      "schedule": "15 * * * *"
-    }
-  ]
-}
-```
-
----
-
-## Scout AI - Chicago Sports AI Assistant
-
-**Scout AI** is the AI-powered sports assistant for Chicago sports questions. When the user mentions "Scout", "Scout AI", "the AI model", or "query AI", they are referring to this system.
-
-**Branding:** Always display as "Scout AI" with the Scout icon at `/downloads/scout-v2.png`.
-
-### Where Scout AI Lives
-| Location | Description |
-|----------|-------------|
-| Backend | https://datalab.sportsmockery.com/api/query |
-| Frontend | /scout-ai page on test.sportsmockery.com |
-| API Route | /src/app/api/ask-ai/route.ts (proxies to Data Lab) |
-| Icon | `/downloads/scout-v2.png` (use Image component) |
-
-### How Scout Works
-1. User submits question on /scout-ai page
-2. Frontend sends POST to /api/ask-ai with `{ query, sessionId }`
-3. API route proxies to Data Lab: https://datalab.sportsmockery.com/api/query
-4. Data Lab uses Perplexity sonar-pro model to generate response
-5. Response includes: `response`, `sessionId`, `sessionContext`, `chartData`, `bonusInsight`
-
-### Session Management
-Scout maintains conversation context for follow-ups:
-- **sessionId**: Passed between requests to maintain context
-- **sessionContext**: `{ player, team, season, sport }` for pronoun resolution
-- Pronouns like "he", "his", "that player" resolve to last mentioned entity
-
-### Query History (30-Day Retention)
-
-User queries are stored for 30 days:
-- **Logged-in users**: Stored in `scout_query_history` Supabase table
-- **Guests**: Stored in localStorage (max 100 queries)
-
-**Automatic Cleanup:**
-- Daily cron job at 3am UTC: `/api/cron/cleanup-scout-history`
-- Deletes entries older than 30 days
-- Alerts if table exceeds 100,000 rows
-
-**Key Files:**
-| File | Purpose |
-|------|---------|
-| `src/lib/scoutQueryHistory.ts` | History storage utility |
-| `src/app/api/cron/cleanup-scout-history/route.ts` | Daily cleanup cron |
-| `supabase/migrations/20260125_scout_query_history.sql` | Table schema |
-
-### Key Files
-| File | Purpose |
-|------|---------|
-| `/src/app/api/ask-ai/route.ts` | Proxies requests to Data Lab API |
-| `/src/app/ask-ai/page.tsx` | Scout AI chat interface |
-| `/downloads/scout-v2.png` | Scout AI icon (use with Image component) |
-| `/AskAI_Wrong.md` | QA test failure log |
-
-### Known Issues (from QA testing)
-See `/AskAI_Wrong.md` for documented failures:
-1. Citation markers [1][2][3] appearing in responses
-2. Player name typo handling needs improvement
-3. Database errors sometimes leak to user responses
-
----
-
-## Frontend Error Logging System (CRITICAL)
-
-**USE THIS FOR ALL FRONTEND ERRORS** - Scout AI, API calls, data fetching, etc.
-
-A shared `scout_errors` table exists in Supabase for logging frontend errors. This enables debugging between frontend and Data Lab teams.
-
-### Error Logging Utility
-
-**Location:** `src/lib/scoutErrorLogger.ts`
-
-```typescript
-import { createClient } from '@supabase/supabase-js'
-
-export type FrontendErrorType = 'timeout' | 'cors' | 'parse' | 'network' | 'api' | 'unknown'
-
-interface LogErrorParams {
-  errorType: FrontendErrorType
-  errorMessage: string
-  userQuery?: string
-  sessionId?: string
-  responseTimeMs?: number
-  requestPayload?: Record<string, unknown>
-  responsePayload?: Record<string, unknown>
-  metadata?: Record<string, unknown>
-}
-
-export async function logFrontendError(params: LogErrorParams): Promise<void> {
-  try {
-    const supabase = createClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-    )
-
-    await supabase.from('scout_errors').insert({
-      source: 'frontend',
-      error_type: params.errorType,
-      error_message: params.errorMessage,
-      user_query: params.userQuery,
-      session_id: params.sessionId,
-      response_time_ms: params.responseTimeMs,
-      request_payload: params.requestPayload,
-      response_payload: params.responsePayload,
-      user_agent: typeof navigator !== 'undefined' ? navigator.userAgent : null,
-      metadata: params.metadata,
-    })
-  } catch (e) {
-    console.error('[Error Logger] Failed:', e)
-  }
-}
-
-export function getErrorType(error: unknown): FrontendErrorType {
-  if (error instanceof Error) {
-    const msg = error.message.toLowerCase()
-    if (msg.includes('timeout') || msg.includes('aborted')) return 'timeout'
-    if (msg.includes('cors')) return 'cors'
-    if (msg.includes('json') || msg.includes('parse')) return 'parse'
-    if (msg.includes('network') || msg.includes('fetch')) return 'network'
-  }
-  return 'unknown'
-}
-```
-
-### Error Types (Use Consistently)
-
-| Type | When to Use |
-|------|-------------|
-| `timeout` | Request exceeded time limit |
-| `cors` | CORS policy blocked request |
-| `parse` | Failed to parse JSON response |
-| `network` | Network connection failed |
-| `api` | API returned error response (4xx/5xx) |
-| `unknown` | Any other error |
-
-### Usage Pattern
-
-**Wrap ALL API calls with error logging:**
-
-```typescript
-import { logFrontendError, getErrorType } from '@/lib/scoutErrorLogger'
-
-async function fetchData(query: string) {
-  const startTime = Date.now()
-
-  try {
-    const response = await fetch('/api/endpoint', {
-      method: 'POST',
-      body: JSON.stringify({ query }),
-    })
-
-    if (!response.ok) {
-      await logFrontendError({
-        errorType: 'api',
-        errorMessage: `HTTP ${response.status}`,
-        userQuery: query,
-        responseTimeMs: Date.now() - startTime,
-      })
-      throw new Error(`API error: ${response.status}`)
-    }
-
-    return await response.json()
-
-  } catch (error) {
-    await logFrontendError({
-      errorType: getErrorType(error),
-      errorMessage: error instanceof Error ? error.message : String(error),
-      userQuery: query,
-      responseTimeMs: Date.now() - startTime,
-    })
-    throw error
-  }
-}
-```
-
-### Viewing Errors
-
-```sql
--- Recent frontend errors
-SELECT created_at, error_type, error_message, user_query, response_time_ms
-FROM scout_errors
-WHERE source = 'frontend'
-ORDER BY created_at DESC
-LIMIT 20;
-
--- Error counts by type (last 24h)
-SELECT error_type, COUNT(*) as count
-FROM scout_errors
-WHERE source = 'frontend' AND created_at > NOW() - INTERVAL '24 hours'
-GROUP BY error_type;
-
--- Slow requests (over 10s)
-SELECT * FROM scout_errors
-WHERE response_time_ms > 10000
-ORDER BY created_at DESC;
-```
-
-### Table Schema
-
-```sql
-CREATE TABLE scout_errors (
-  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
-  created_at TIMESTAMPTZ DEFAULT now(),
-  source TEXT NOT NULL,           -- 'frontend' or 'backend'
-  error_type TEXT NOT NULL,       -- timeout, cors, parse, network, api, unknown
-  error_message TEXT,
-  user_query TEXT,
-  session_id TEXT,
-  response_time_ms INTEGER,
-  request_payload JSONB,
-  response_payload JSONB,
-  user_agent TEXT,
-  metadata JSONB
-);
-```
-
-### Key Files
-
-| File | Purpose |
-|------|---------|
-| `src/lib/scoutErrorLogger.ts` | Error logging utility |
-| `/docs/Scout_Log/` | Debug session logs |
-| `/docs/Scout_Log/INTEGRATION_INSTRUCTIONS_TESTSM.md` | Full integration guide |
-
-### When to Log Errors
-
-**ALWAYS log errors for:**
-- Scout AI queries
-- Team pages data fetching
-- Any API route failures
-- External service calls (Data Lab, etc.)
-
-**DON'T log:**
-- User validation errors (empty form fields, etc.)
-- Expected "no results" responses
-- Client-side navigation errors
+**Log errors for:** Scout AI queries, team pages data fetching, API route failures, external service calls.
+**Don't log:** User validation errors, expected "no results", client-side navigation errors.
 
 ---
 
 ## GM Trade Simulator
 
-**When the user says "GM"**, they mean the AI trade grading model (Claude Sonnet 4, `claude-sonnet-4-20250514`) that evaluates proposed trades. The AI runs via the Anthropic SDK in the `/api/gm/grade` route. Its system prompt makes it act as a brutally honest sports GM who grades trades 0-100.
+**"GM"** = AI trade grading model (Claude Sonnet 4 via Anthropic SDK). **"Trade Simulator"** = full `/gm` page UI.
 
-**When the user says "Trade Simulator"**, they mean the full trade simulator UI and functionality on the `/gm` page — team selection, roster browsing, opponent picking, trade building, draft pick selection, grading, trade history, leaderboard, and sessions.
-
-### Where It Lives
-
-| Location | Description |
-|----------|-------------|
-| Page | `/gm` on test.sportsmockery.com |
+| Component | Location |
+|-----------|----------|
+| Page | `/gm` (src/app/gm/page.tsx) |
 | Components | `src/components/gm/` (12 files) |
-| API Routes | `src/app/api/gm/` (7 routes: roster, teams, sessions, grade, trades, leaderboard, share/[code]) |
-| Database | Same Supabase as sm-data-lab (`siwoqfzzcxmngnseyzpv`) — accessed via `datalabAdmin` from `@/lib/supabase-datalab` |
-| AI Model | Claude Sonnet 4 via `@anthropic-ai/sdk` (direct, not proxied through datalab) |
+| API Routes | `src/app/api/gm/` (roster, teams, sessions, grade, trades, leaderboard, share/[code]) |
+| Database | DataLab Supabase via `datalabAdmin` from `@/lib/supabase-datalab` |
+| AI Model | Claude Sonnet 4 (`claude-sonnet-4-20250514`) via `@anthropic-ai/sdk` |
 
-### Access
+**Auth:** All logged-in users. Main SM Supabase for identity, DataLab Supabase for GM data.
 
-All logged-in users can access `/gm`. No admin check — auth uses `@supabase/ssr` cookie-based client against the main sm Supabase for identity, then queries the datalab Supabase for GM data.
+**DB Tables:** `gm_trades`, `gm_trade_items`, `gm_leaderboard`, `gm_sessions`, `gm_league_teams` (124 teams), `gm_audit_logs`, `gm_errors`
 
-### Database Tables (in datalab Supabase)
-
-| Table | Purpose |
-|-------|---------|
-| `gm_trades` | All trades with grades, breakdowns, shared codes |
-| `gm_trade_items` | Structured assets per trade |
-| `gm_leaderboard` | Per-user aggregate scores |
-| `gm_sessions` | Trade scenario sessions |
-| `gm_league_teams` | 124 NFL/NBA/NHL/MLB teams with logos |
-| `gm_audit_logs` | AI request/response logging |
-| `gm_errors` | Error log |
-
-### Key Files
-
-| File | Purpose |
-|------|---------|
-| `src/app/gm/page.tsx` | Main trade simulator page |
-| `src/app/api/gm/grade/route.ts` | AI grading route (Anthropic SDK) |
-| `src/app/api/gm/roster/route.ts` | Player roster + season stats |
-| `src/components/gm/PlayerCard.tsx` | Player card component + `PlayerData` interface |
-| `src/components/gm/GradeReveal.tsx` | Animated grade reveal overlay |
-| `src/components/gm/TradeBoard.tsx` | Two-panel trade visualization |
-
-### Grading Logic
-
-- Grade 70+ = **accepted**, 0-69 = **rejected**
-- Grade 70-90 = flagged **dangerous** (risky upside)
-- Untouchable players: Caleb Williams (Bears), Connor Bedard (Blackhawks) → grade 0 if traded
-- Rate limit: 10 trades per minute per user
+**Grading:** 70+ = accepted, 0-69 = rejected, 70-90 = flagged dangerous. Untouchable: Caleb Williams, Connor Bedard → grade 0. Rate limit: 10/min/user.
 
 ---
 
 ## Season Simulation V3 (CRITICAL)
 
-**The DataLab GM API is the SINGLE SOURCE OF TRUTH for season simulation and trade grading.** Do NOT calculate win projections locally, run Monte Carlo simulations client-side, compute GM scores on the frontend, or estimate playoff probabilities without the API.
+**DataLab GM API is the SINGLE SOURCE OF TRUTH.** Do NOT calculate projections, run simulations, or estimate probabilities locally.
 
-### Endpoint
+**Endpoint:** `POST /api/gm/simulate-season` → proxies to `datalab.sportsmockery.com/api/gm/simulate-season`
 
-`POST https://datalab.sportsmockery.com/api/gm/simulate-season`
+**Request:** `{ sessionId, sport, teamKey, seasonYear?, simulationDepth: 'quick'|'standard'|'deep' }`
 
-Frontend proxy: `/api/gm/simulate-season` (proxies to DataLab with auth)
+**Fallback chain:** DataLab V3 → DataLab V1 (`/api/gm/sim/season`) → Local engine (`@/lib/sim/season-engine`)
 
-### Request
+**Version detection:**
+| `simulation_version` | AI Analysis | Trade Impact | Source |
+|---------------------|-------------|--------------|--------|
+| `v3-ai` | Yes | Yes | DataLab V3 |
+| `v3-quick` | No | Yes | DataLab V3 quick |
+| `v3-algorithmic-fallback` | No | Yes | DataLab V3 fallback |
+| `v1` | No | No | V1/local |
 
-```typescript
-{
-  sessionId: string,       // Required: GM session UUID
-  sport: string,           // Required: nfl/nba/nhl/mlb
-  teamKey: string,         // Required: bears/bulls/blackhawks/cubs/whitesox
-  seasonYear: 2026,        // Optional: defaults to current year
-  simulationDepth: 'standard', // 'quick' (1-2s) | 'standard' (5-8s) | 'deep' (10-15s)
-}
-```
+**V3 fields:** `projectedRecord`, `recordChange`, `playoffProbability`, `projectedSeed`, `tradeImpactDetail`, `tradeAnalysis` (v3-ai), `rosterAssessment` (v3-ai), `seasonNarrative` (v3-ai), `keyPlayerImpacts` (v3-ai), `monteCarloResults`, `chemistryPenalty`
 
-### Fallback Chain
+**Player archetypes:** Franchise Changer (#FFD700), Role Player Upgrade (#3b82f6), Culture Setter (#8b5cf6), Boom-or-Bust (#f97316), Declining Star (#6b7280), System Player (#14b8a6)
 
-1. DataLab V3 endpoint (`/api/gm/simulate-season`)
-2. DataLab V1 endpoint (`/api/gm/sim/season`)
-3. Local simulation engine (`@/lib/sim/season-engine`) — last resort
+**Caching:** 30min on DataLab, `_cached: true` flag. Rate limit: 5/min/user (429 if exceeded).
 
-### Version Detection
-
-| `simulation_version` | AI Analysis | Trade Impact Detail | Source |
-|---------------------|-------------|--------------------|----|
-| `v3-ai` | Yes (Claude Sonnet 4) | Yes | DataLab V3 |
-| `v3-quick` | No | Yes | DataLab V3 (quick mode) |
-| `v3-algorithmic-fallback` | No (AI failed) | Yes | DataLab V3 fallback |
-| `v1` | No | No | V1 fallback or local engine |
-
-### V3 Response Fields (additive to existing)
-
-| Field | Type | Available In | Description |
-|-------|------|--------------|-------------|
-| `projectedRecord` | `{wins, losses}` | All | AI-determined projected record |
-| `recordChange` | number | All | Wins improvement vs baseline |
-| `playoffProbability` | 0-100 | All | Playoff probability |
-| `projectedSeed` | number\|null | All | Playoff seed |
-| `tradeImpactDetail` | object | All V3 modes | WVS breakdown, talent density, market bias |
-| `tradeAnalysis` | array | v3-ai only | Per-trade AI analysis with archetypes |
-| `rosterAssessment` | object | v3-ai only | Strengths/weaknesses/identity shift |
-| `seasonNarrative` | object | v3-ai only | Headline, analysis, swing games, matchups |
-| `keyPlayerImpacts` | array | v3-ai only | Player impact with stat projections |
-| `monteCarloResults` | object | All V3 | 500+ iteration Monte Carlo results |
-| `chemistryPenalty` | object | All V3 | Integration period win reduction |
-
-### Player Archetypes (UI badge colors)
-
-| Archetype | Color |
-|-----------|-------|
-| Franchise Changer | Gold (#FFD700) |
-| Role Player Upgrade | Blue (#3b82f6) |
-| Culture Setter | Purple (#8b5cf6) |
-| Boom-or-Bust | Orange (#f97316) |
-| Declining Star | Gray (#6b7280) |
-| System Player | Teal (#14b8a6) |
-
-### Key Files
-
-| File | Purpose |
-|------|---------|
-| `src/app/api/gm/simulate-season/route.ts` | V3 proxy to DataLab (with V1 + local fallback) |
-| `src/app/api/gm/sim/season/route.ts` | Legacy V1 local simulation (kept as fallback) |
-| `src/components/gm/SimulationResults.tsx` | V3-aware results modal (6 tabs: Overview, AI Analysis, Games, Standings, Playoffs, Summary) |
-| `src/components/gm/SimulationTrigger.tsx` | Simulate button with progress phases |
-| `src/types/gm.ts` | V3 type definitions (V3TradeAnalysis, V3RosterAssessment, etc.) |
-| `src/lib/sim/` | Local simulation engine (legacy, fallback only) |
-
-### Caching & Rate Limits
-
-- Responses cached 30 minutes on DataLab (keyed on session+trades+sport+team+depth)
-- `_cached: true` flag indicates cached response
-- Rate limit: 5 simulations per minute per user (HTTP 429 if exceeded)
-- Cached responses don't count against rate limit
+**Key files:** `src/app/api/gm/simulate-season/route.ts`, `src/components/gm/SimulationResults.tsx` (6 tabs), `src/components/gm/SimulationTrigger.tsx`, `src/types/gm.ts`
 
 ---
 
 ## Mock Draft (CRITICAL - DO NOT OVERRIDE)
 
-**ALL mock draft data and logic comes from DataLab. NEVER override, assume, or modify eligibility on the frontend.**
-
-### The Rule (MANDATORY)
+**ALL mock draft data comes from DataLab. NEVER override eligibility on frontend.**
 
 ```
 DO NOT pass include_in_season=true to DataLab
@@ -1198,208 +331,68 @@ DO NOT assume which teams should be eligible
 JUST call the API and display what it returns
 ```
 
-### Eligible Teams API
+**Eligible Teams:** `GET https://datalab.sportsmockery.com/api/gm/draft/teams`
 
-**Endpoint:** `GET https://datalab.sportsmockery.com/api/gm/draft/teams`
+**Current eligibility (Feb 2026):** Bears, Cubs, White Sox = YES (offseason). Bulls, Blackhawks = NO (in-season).
 
-| Param | Type | Default | Description |
-|-------|------|---------|-------------|
-| year | number | 2026 | Draft year |
-| include_in_season | "true" | omit | Include in-season teams (for display only - DO NOT USE) |
+**Frontend logic:**
+1. Fetch eligible teams → 0 teams: show "No mock drafts available" → 1 team: go direct → 2+: show picker
+2. Start draft: `POST /api/gm/draft/start` with `{ sport, draft_year: 2026, chicago_team: team.team_name }`
 
-**Standard Call (ALWAYS USE THIS):**
-```typescript
-const res = await fetch('https://datalab.sportsmockery.com/api/gm/draft/teams');
-const data = await res.json();
-// data.teams = only teams that are eligible RIGHT NOW
-```
+**team_key → chicago_team:** bears→"Chicago Bears", cubs→"Chicago Cubs", whitesox→"Chicago White Sox", bulls→"Chicago Bulls", blackhawks→"Chicago Blackhawks" (or just use `team_name` from API response)
 
-### How Eligibility Works (API handles this - you don't implement it)
+**gm_mock_draft_picks:** `prospect_id` NOT NULL (empty slots = `'pending'`). Partial unique index allows unlimited pending per mock. `UNIQUE (mock_id, overall_pick)` enforces one pick per slot.
 
-A team is eligible when ALL THREE conditions are true:
-1. **Season is over** — `season_status = "offseason"`
-2. **Mock draft window is open** — `mock_draft_window_status = "open"`
-3. **Draft hasn't happened yet** — window hasn't closed
+**Key files:** `src/app/mock-draft/page.tsx`, `src/app/api/gm/draft/eligibility/route.ts`, `mobile/app/mock-draft/index.tsx`
 
-A daily cron updates eligibility automatically based on real-world calendar dates.
-
-### Current Eligibility (Feb 2026)
-
-| Team | Season Status | Window | Eligible | Why |
-|------|---------------|--------|----------|-----|
-| Bears | offseason | open | **YES** | NFL season ended Jan 4, window opened Jan 5 |
-| Cubs | offseason | open | **YES** | MLB 2025 ended, window opened Nov 2 |
-| White Sox | offseason | open | **YES** | MLB 2025 ended, window opened Nov 2 |
-| Bulls | in_season | closed | NO | NBA season ends Apr 12, window opens Apr 13 |
-| Blackhawks | in_season | closed | NO | NHL season ends Apr 16, window opens Apr 17 |
-
-### Frontend Logic (FOLLOW THIS EXACTLY)
-
-```typescript
-// 1. Fetch eligible teams on page load
-const { teams } = await fetch('https://datalab.sportsmockery.com/api/gm/draft/teams').then(r => r.json());
-
-// 2. If teams.length === 0, show "No mock drafts available right now"
-// 3. If teams.length === 1, go straight to that team's draft
-// 4. If teams.length > 1, show team picker using the returned data:
-//    - team_key (pass to /api/gm/draft/start as chicago_team)
-//    - team_name, logo_url, primary_color for display
-//    - league for grouping/labels
-
-// 5. Start draft with selected team:
-const startRes = await fetch('/api/gm/draft/start', {
-  method: 'POST',
-  headers: { 'Content-Type': 'application/json' },
-  body: JSON.stringify({
-    sport: selectedTeam.sport,           // "nfl", "mlb", etc.
-    draft_year: 2026,
-    chicago_team: selectedTeam.team_name, // "Chicago Bears", "Chicago Cubs", etc.
-  }),
-});
-```
-
-### team_key to chicago_team Mapping
-
-| team_key | chicago_team value |
-|----------|-------------------|
-| bears | Chicago Bears |
-| cubs | Chicago Cubs |
-| whitesox | Chicago White Sox |
-| bulls | Chicago Bulls |
-| blackhawks | Chicago Blackhawks |
-
-**Note:** Just use the `team_name` field from the teams response directly.
-
-### Key Files
-
-| File | Purpose |
-|------|---------|
-| `src/app/mock-draft/page.tsx` | Web mock draft page |
-| `src/app/api/gm/draft/eligibility/route.ts` | Mobile eligibility API (proxies to DataLab) |
-| `mobile/app/mock-draft/index.tsx` | Mobile mock draft page |
-
-### Mock Draft Picks Table (`gm_mock_draft_picks`)
-
-**Constraint fix deployed Feb 17, 2026:**
-- The `create_mock_draft_picks` RPC sets `prospect_id = 'pending'` for empty pick slots (column is NOT NULL)
-- Old constraint `UNIQUE (mock_id, prospect_id)` caused failures — all 224 pending slots collided
-- **New constraint:** Partial unique index `UNIQUE (mock_id, prospect_id) WHERE prospect_id != 'pending'`
-  - Allows unlimited `'pending'` slots per mock draft
-  - Still prevents the same real prospect from being drafted twice in one mock
-- `UNIQUE (mock_id, overall_pick)` still enforces one pick per slot
-- **No frontend changes needed** — RPC and field names unchanged
-
-### If You're Tempted to Override
-
-**STOP.** Ask the user first. If DataLab is returning wrong data, the fix belongs in DataLab, not in frontend overrides.
+**If tempted to override: STOP.** Ask user first. Fix belongs in DataLab.
 
 ---
 
-## PostIQ - Admin Content Assistant
+## PostIQ — Admin Content Assistant
 
-**PostIQ** is the AI-powered content assistant for admin post creation. When the user mentions "PostIQ", "admin AI", or "content assistant", they are referring to this system.
+**PostIQ** = AI content assistant for admin post creation. Separate from Scout.
 
-**Note:** PostIQ is separate from Scout. Scout answers user sports questions; PostIQ helps admins write posts.
-
-### Where PostIQ Lives
-| Location | Description |
-|----------|-------------|
-| API Route | `/src/app/api/admin/ai/route.ts` |
+| Component | Location |
+|-----------|----------|
+| API | `/src/app/api/admin/ai/route.ts` |
 | Frontend | `/src/components/admin/PostEditor/AIAssistant.tsx` |
-| UI Location | AI Assistant panel in `/admin/posts/new` |
+| Docs | `/docs/PostIQ_Guide.md` |
 
-### How PostIQ Works
-- Uses Claude Sonnet 4 (`claude-sonnet-4-20250514`) via `@anthropic-ai/sdk`
-- Direct API calls to Anthropic (no Data Lab involved)
-- Returns JSON responses parsed by the frontend
+Uses Claude Sonnet 4 via `@anthropic-ai/sdk` (direct, no DataLab).
 
-### Features
-| Feature | Description |
-|---------|-------------|
-| **Headlines** | Generates 5 alternative headlines for articles |
-| **SEO** | Analyzes content, returns optimized title, meta description, keywords, and Mockery Score (1-100) |
-| **Ideas** | Generates 5 article ideas based on category/team |
-| **Grammar** | Checks grammar, spelling, and punctuation; shows issues with corrections |
-| **Excerpt** | Auto-generates 2-3 sentence article summary |
-| **Auto-Chart** | Analyzes article, creates chart from data, inserts into content (checkbox in sidebar) |
-
-### API Usage
+**Actions:** `headlines`, `seo`, `ideas`, `grammar`, `excerpt`, `generate_chart`
 ```typescript
-POST /api/admin/ai
-{ action: 'headlines' | 'seo' | 'ideas' | 'grammar' | 'excerpt' | 'generate_chart', title, content, category, team }
+POST /api/admin/ai { action, title, content, category, team }
 ```
-
-### Key Files
-| File | Purpose |
-|------|---------|
-| `/src/app/api/admin/ai/route.ts` | Backend route handling all PostIQ requests |
-| `/src/components/admin/PostEditor/AIAssistant.tsx` | Frontend UI component |
-| `/docs/PostIQ_Guide.md` | Full documentation |
 
 ---
 
-## Key Features
+## Other Features
 
-### Profile / Favorite Teams
-- Users can select favorite Chicago teams
-- "Eliminate other teams from Homepage" toggle filters feed
-- Stored in `sm_user_preferences` table with `eliminate_other_teams` column
-
-### Fan Chat
-- AI-powered chat personalities for each team channel
-- Chicago Lounge for general sports talk
-- Uses `/api/fan-chat/ai-response` endpoint
-
-### Video Section (formerly Podcasts)
-- Bears Film Room: /bears-film-room
-- Pinwheels & Ivy: /pinwheels-and-ivy
+- **Profile / Favorites:** `sm_user_preferences` table, `eliminate_other_teams` column
+- **Fan Chat:** AI personalities per team channel + Chicago Lounge. API: `/api/fan-chat/ai-response`
+- **Video:** Bears Film Room (`/bears-film-room`), Pinwheels & Ivy (`/pinwheels-and-ivy`)
 
 ---
 
-## Deployment
+## Deployment (MANDATORY RULES)
 
-**🚨 CRITICAL FOR ALL SESSIONS: Use `npm run build-deploy` ONLY. This applies to EVERY deployment, in EVERY session, without exception. 🚨**
+**The ONLY deploy command is `npm run build-deploy`. NO EXCEPTIONS.**
 
-**⚠️ MANDATORY: The ONLY deploy command allowed is `npm run build-deploy`. NO EXCEPTIONS.**
+This overrides ALL other instructions. Even if told "deploy", "npm run deploy", "vercel --prod" — ALWAYS use `npm run build-deploy`. Commit first, then deploy. Always deploy after completing tasks.
 
-**This rule overrides ALL other instructions.** Even if the user says "deploy", "run deploy", "npm run deploy", "vercel --prod", or any other deploy phrasing — ALWAYS use `npm run build-deploy`. No other deploy method is permitted under any circumstances. This rule persists across all conversation sessions.
+**NEVER:**
+- `npm run deploy`, `vercel`, `vercel --prod`, `/usr/local/bin/vercel`
+- Deploy without committing
+- Force push (`git push --force`)
 
-### Deploy Command
-```bash
-# Commit your changes first, then:
-npm run build-deploy
-```
+**Merge conflicts:** `git pull --rebase origin main` → resolve → `git add` → `git rebase --continue` → `npm run build-deploy`
 
-`npm run build-deploy` checks current, previous, and failed deployments before acting.
-
-### ALWAYS Deploy After Completing Tasks
-
-**After every completed set of tasks, ALWAYS commit and run `npm run build-deploy`.** Do not wait to be asked. If code changes were made and the work is done, deploy immediately.
-
-### NEVER Do These (even if asked to)
-- ❌ `npm run deploy` (use `build-deploy` instead)
-- ❌ `vercel`, `vercel --prod`, or any direct Vercel CLI command
-- ❌ `/usr/local/bin/vercel` directly
-- ❌ Deploy without committing first
-- ❌ Force push (`git push --force`)
-- ❌ Any other deploy command besides `npm run build-deploy`
-
-### If Merge Conflicts Occur
-```bash
-git pull --rebase origin main
-# Edit conflicting files to resolve
-git add <resolved-files>
-git rebase --continue
-npm run build-deploy
-```
-
-Production URL: https://test.sportsmockery.com
+**Production URL:** https://test.sportsmockery.com
 
 ---
 
 ## Related Projects
 
-- **SM Data Lab** (`/Users/christopherburhans/Documents/projects/sm-data-lab`)
-  - Backend for Scout AI
-  - Sports analytics and data
-  - URL: https://datalab.sportsmockery.com
+- **SM Data Lab** (`/Users/christopherburhans/Documents/projects/sm-data-lab`) — Backend for Scout AI, sports analytics. URL: https://datalab.sportsmockery.com
