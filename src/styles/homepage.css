@@ -993,19 +993,6 @@
   padding: 24px 0;
 }
 
-.card-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(360px, 1fr));
-  gap: 20px 24px;
-  padding: 0 20px;
-}
-
-@media (max-width: 768px) {
-  .card-grid {
-    gap: 16px 16px;
-    padding: 0 16px;
-  }
-}
 
 /* ========== Feed Card ========== */
 .feed-card {
@@ -1095,14 +1082,6 @@
 }
 
 /* ========== SECTION 5: Card Size Hierarchy ========== */
-
-/* Card breathing room — horizontal centering + air */
-.feed-card.card-xl,
-.feed-card.card-m,
-.feed-card.card-compact {
-  margin: 0 auto 8px auto;
-  max-width: calc(100% - 16px);
-}
 
 /* XL — image-dominant hero card */
 .feed-card.card-xl {
@@ -3803,48 +3782,72 @@ html {
   }
 }
 
-/* ========== SPACING FIX: Targets REAL class names (featured-grid, feed-grid, feed-card, etc.) ========== */
+/* ========== SPACING FIX: Aggressive overrides on REAL class names ========== */
 
-/* Featured grid (EditorPicksHero): hero left + side cards right */
+/* --- Featured Section (EditorPicksHero) --- */
+html .sm-featured-shell {
+  padding: 40px 0 !important;
+}
+
 html .featured-grid {
-  gap: 32px !important;
-  padding: 24px !important;
+  gap: 48px !important;
+  padding: 0 24px !important;
+}
+
+/* Kill glass-card 32px padding on the hero link */
+html .featured-main-link.glass-card,
+html .glass-card.featured-main-link {
+  padding: 0 !important;
 }
 
 html .featured-main .featured-image {
   border-radius: 20px !important;
-  margin-bottom: 24px !important;
+  margin-bottom: 28px !important;
+}
+
+html .featured-main h3 {
+  margin-bottom: 16px !important;
 }
 
 html .featured-side {
-  gap: 24px !important;
+  gap: 32px !important;
 }
 
-html .featured-side-card {
+/* Kill glass-card-sm padding on side cards, add our own */
+html .featured-side-card.glass-card-sm,
+html .glass-card-sm.featured-side-card {
+  padding: 16px !important;
   gap: 20px !important;
-  padding: 12px !important;
   border-radius: 16px !important;
-  background: rgba(255, 255, 255, 0.03) !important;
+  border: 1px solid rgba(255, 255, 255, 0.06) !important;
 }
 
 html .featured-side-card .side-image {
   border-radius: 12px !important;
 }
 
-/* Feed grid (ForYouFeed): article card grid */
-html .feed-grid {
-  gap: 28px !important;
-  padding: 24px 0 !important;
+/* More Featured section */
+html .featured-more {
+  margin-top: 32px !important;
+  padding-top: 24px !important;
 }
 
-/* Feed cards: spacing + shadow + radius */
-html .feed-card.card-xl,
-html .feed-card.card-m,
-html .feed-card.card-compact {
-  margin-bottom: 8px !important;
+/* --- Feed Section (ForYouFeed / PostCard grid) --- */
+html .content-grid {
+  gap: 48px !important;
+  padding: 0 24px !important;
+}
+
+html .feed-grid {
+  gap: 32px !important;
+  padding: 32px 0 !important;
+}
+
+/* Feed cards */
+html .glass-card.feed-card {
   padding: 16px !important;
   border-radius: 20px !important;
-  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.35) !important;
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.3) !important;
 }
 
 html .feed-card .card-image {
@@ -3852,12 +3855,7 @@ html .feed-card .card-image {
   margin-bottom: 20px !important;
 }
 
-/* Content grid (feed + sidebar wrapper) */
-html .content-grid {
-  gap: 40px !important;
-}
-
-/* Storylines rail */
+/* --- Storylines Rail --- */
 html .storylines-rail {
   gap: 24px !important;
   padding-inline: 28px !important;
@@ -3867,29 +3865,26 @@ html .storyline-card {
   border-radius: 16px !important;
 }
 
-/* Featured shell vertical padding */
-html .sm-featured-shell {
-  padding: 32px 0 !important;
-}
-
-/* Mobile */
+/* --- Mobile --- */
 @media (max-width: 768px) {
   html .featured-grid {
+    gap: 28px !important;
+    padding: 0 16px !important;
+  }
+  html .featured-side {
     gap: 24px !important;
-    padding: 16px !important;
   }
   html .feed-grid {
-    gap: 20px !important;
-    padding: 16px 0 !important;
+    gap: 24px !important;
+    padding: 20px 0 !important;
   }
-  html .feed-card.card-xl,
-  html .feed-card.card-m,
-  html .feed-card.card-compact {
+  html .glass-card.feed-card {
     padding: 12px !important;
     border-radius: 16px !important;
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3) !important;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25) !important;
   }
   html .content-grid {
     gap: 24px !important;
+    padding: 0 12px !important;
   }
 }
