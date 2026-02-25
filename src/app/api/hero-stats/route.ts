@@ -44,7 +44,7 @@ export async function GET() {
     ])
 
     const labels: Record<string, string> = {
-      bears: 'Bears', bulls: 'Bulls', blackhawks: 'Hawks', cubs: 'Cubs', whitesox: 'Sox',
+      bears: 'Bears', bulls: 'Bulls', blackhawks: 'Hawks', cubs: 'Cubs', whitesox: 'White Sox',
     }
 
     // --- LARGE ORBS: In-season team records (Bulls, Blackhawks) ---
@@ -53,7 +53,7 @@ export async function GET() {
       const idx = TEAMS.indexOf(key)
       const rec = records[idx]
       if (rec) {
-        stats.push({ label: labels[key], value: formatRecord(rec), team: key, size: 'large' })
+        stats.push({ label: `${labels[key]} Record`, value: formatRecord(rec), team: key, size: 'large' })
       }
     }
 
@@ -62,8 +62,9 @@ export async function GET() {
       const idx = TEAMS.indexOf(key)
       const game = lastGames[idx]
       if (game && stats.length < 3) {
+        const oppAbbrev = game.opponent.slice(0, 3).toUpperCase()
         stats.push({
-          label: `${game.result} vs ${game.opponent.slice(0, 3).toUpperCase()}`,
+          label: `${labels[key]} ${game.result} vs ${oppAbbrev}`,
           value: `${game.teamScore}-${game.opponentScore}`,
           team: key,
           size: 'large',
@@ -76,7 +77,7 @@ export async function GET() {
     // Last games for remaining teams (skip ones already used as large)
     const usedLargeGameKeys = new Set<string>()
     for (const s of stats) {
-      if (s.size === 'large' && (s.label.startsWith('W ') || s.label.startsWith('L '))) {
+      if (s.size === 'large' && s.label.includes(' vs ')) {
         usedLargeGameKeys.add(s.team || '')
       }
     }
@@ -85,8 +86,9 @@ export async function GET() {
       const idx = TEAMS.indexOf(key)
       const game = lastGames[idx]
       if (game && !usedLargeGameKeys.has(key)) {
+        const oppAbbrev = game.opponent.slice(0, 3).toUpperCase()
         stats.push({
-          label: `${game.result} vs ${game.opponent.slice(0, 3).toUpperCase()}`,
+          label: `${labels[key]} ${game.result} vs ${oppAbbrev}`,
           value: `${game.teamScore}-${game.opponentScore}`,
           team: key,
           size: 'medium',
@@ -100,14 +102,14 @@ export async function GET() {
       const idx = TEAMS.indexOf(key)
       const rec = records[idx]
       if (rec) {
-        stats.push({ label: labels[key], value: formatRecord(rec), team: key, size: 'medium' })
+        stats.push({ label: `${labels[key]} Record`, value: formatRecord(rec), team: key, size: 'medium' })
       }
     }
 
     // Weekly posts count
     const wkPosts = weeklyPosts.count || 0
     if (wkPosts > 0) {
-      stats.push({ label: 'This Week', value: `${wkPosts}`, size: 'medium' })
+      stats.push({ label: 'Posts This Week', value: `${wkPosts}`, size: 'medium' })
     }
 
     // --- SMALL ORBS: Site stats ---
@@ -120,11 +122,8 @@ export async function GET() {
     const views = weeklyViews.data?.reduce((sum: number, p: any) => sum + (p.views || 0), 0) || 0
     if (views > 0) {
       const formatted = views >= 1_000_000 ? `${(views / 1_000_000).toFixed(1)}M` : views >= 1000 ? `${(views / 1000).toFixed(1)}K` : String(views)
-      stats.push({ label: 'Wk Views', value: formatted, size: 'small' })
+      stats.push({ label: 'Weekly Views', value: formatted, size: 'small' })
     }
-
-    stats.push({ label: 'Teams', value: '5', size: 'small' })
-    stats.push({ label: 'Sports', value: '4', size: 'small' })
 
     return NextResponse.json({ stats })
   } catch (error) {

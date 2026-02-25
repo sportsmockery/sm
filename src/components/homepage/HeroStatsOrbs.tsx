@@ -22,46 +22,38 @@ const TEAM_COLORS: Record<string, string> = {
 // Fixed positions scattered organically (percentages)
 const ORB_POSITIONS: { top: string; left: string }[] = [
   // Large (3)
-  { top: '8%', left: '5%' },
-  { top: '12%', left: '78%' },
-  { top: '65%', left: '88%' },
-  // Medium (6)
-  { top: '25%', left: '15%' },
-  { top: '45%', left: '3%' },
-  { top: '72%', left: '12%' },
-  { top: '30%', left: '90%' },
-  { top: '55%', left: '82%' },
-  { top: '80%', left: '72%' },
-  // Small (5)
-  { top: '15%', left: '40%' },
-  { top: '38%', left: '68%' },
-  { top: '60%', left: '30%' },
-  { top: '85%', left: '45%' },
-  { top: '5%', left: '60%' },
+  { top: '8%', left: '3%' },
+  { top: '10%', left: '76%' },
+  { top: '62%', left: '85%' },
+  // Medium (5)
+  { top: '28%', left: '12%' },
+  { top: '50%', left: '2%' },
+  { top: '75%', left: '10%' },
+  { top: '35%', left: '88%' },
+  { top: '78%', left: '70%' },
+  // Small (2)
+  { top: '18%', left: '42%' },
+  { top: '82%', left: '48%' },
 ]
 
-const SIZE_PX: Record<string, number> = { large: 90, medium: 60, small: 34 }
-const FONT_SIZE: Record<string, number> = { large: 16, medium: 11, small: 9 }
-const LABEL_SIZE: Record<string, number> = { large: 8, medium: 7, small: 6 }
+const SIZE_PX: Record<string, number> = { large: 110, medium: 80, small: 56 }
+const FONT_SIZE: Record<string, number> = { large: 18, medium: 14, small: 12 }
+const LABEL_SIZE: Record<string, number> = { large: 9, medium: 8, small: 7 }
 
 const FALLBACK_STATS: HeroStat[] = [
   // Large (3): In-season records + recent score
-  { label: 'Bulls', value: '24-35', team: 'bulls', size: 'large' },
-  { label: 'Hawks', value: '22-26-9', team: 'blackhawks', size: 'large' },
-  { label: 'L vs CHA', value: '99-131', team: 'bulls', size: 'large' },
-  // Medium (6): Recent scores + offseason records (all short values)
-  { label: 'W vs SJ', value: '6-3', team: 'blackhawks', size: 'medium' },
-  { label: 'L vs NY', value: '99-105', team: 'bulls', size: 'medium' },
-  { label: 'Bears', value: '11-6', team: 'bears', size: 'medium' },
-  { label: 'Cubs', value: '92-70', team: 'cubs', size: 'medium' },
-  { label: 'Sox', value: '60-102', team: 'whitesox', size: 'medium' },
-  { label: 'This Week', value: '6', size: 'medium' },
-  // Small (5): Site stats
+  { label: 'Bulls Record', value: '23-22', team: 'bulls', size: 'large' },
+  { label: 'Hawks Record', value: '21-22-8', team: 'blackhawks', size: 'large' },
+  { label: 'Bulls L vs CHA', value: '99-131', team: 'bulls', size: 'large' },
+  // Medium (6): Last games + offseason records
+  { label: 'Hawks W vs SJ', value: '6-3', team: 'blackhawks', size: 'medium' },
+  { label: 'Bears Record', value: '11-6', team: 'bears', size: 'medium' },
+  { label: 'Cubs Record', value: '92-70', team: 'cubs', size: 'medium' },
+  { label: 'White Sox Record', value: '60-102', team: 'whitesox', size: 'medium' },
+  { label: 'Posts This Week', value: '6', size: 'medium' },
+  // Small (3): Site stats
   { label: 'Total Posts', value: '31K', size: 'small' },
-  { label: 'Wk Views', value: '6.8K', size: 'small' },
-  { label: 'Live Now', value: '0', size: 'small' },
-  { label: 'Teams', value: '5', size: 'small' },
-  { label: 'Sports', value: '4', size: 'small' },
+  { label: 'Weekly Views', value: '6.8K', size: 'small' },
 ]
 
 // Simple count-up for numeric values
@@ -129,11 +121,9 @@ function StatOrb({ stat, index }: { stat: HeroStat; index: number }) {
       <span className="hero-stat-orb-value" style={{ fontSize }}>
         {displayValue}
       </span>
-      {stat.size !== 'small' && (
-        <span className="hero-stat-orb-label" style={{ fontSize: labelFontSize }}>
-          {stat.label}
-        </span>
-      )}
+      <span className="hero-stat-orb-label" style={{ fontSize: labelFontSize }}>
+        {stat.label}
+      </span>
     </div>
   )
 }
@@ -181,7 +171,7 @@ export function HeroStatsOrbs() {
       .then(data => {
         if (data?.stats?.length) {
           allStats.current = data.stats
-          setStats(data.stats.slice(0, 14))
+          setStats(data.stats.slice(0, 10))
         }
       })
       .catch(() => {})
@@ -195,27 +185,26 @@ export function HeroStatsOrbs() {
     return () => clearInterval(interval)
   }, [])
 
-  // Select which 14 stats to display for current cycle
+  // Select which 10 stats to display for current cycle
   const displayStats = useMemo(() => {
     const all = allStats.current
-    if (all.length <= 14) return all
-    const offset = (cycleSet * 3) % all.length
+    if (all.length <= 10) return all
+    const offset = (cycleSet * 2) % all.length
     const result: HeroStat[] = []
-    for (let i = 0; i < 14; i++) {
+    for (let i = 0; i < 10; i++) {
       result.push(all[(offset + i) % all.length])
     }
     return result
   }, [cycleSet])
 
-  // On mobile, show fewer orbs
+  // On mobile, show fewer orbs (large + medium only)
   const isMobile = typeof window !== 'undefined' && window.innerWidth < 768
 
   const visibleStats = useMemo(() => {
     if (isMobile) {
-      // Only large + medium on mobile (9 orbs), skip small
-      return displayStats.filter(s => s.size !== 'small').slice(0, 9)
+      return displayStats.filter(s => s.size !== 'small').slice(0, 6)
     }
-    return displayStats.slice(0, 14)
+    return displayStats.slice(0, 10)
   }, [displayStats, isMobile])
 
   return (
