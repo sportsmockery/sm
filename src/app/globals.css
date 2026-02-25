@@ -3207,6 +3207,165 @@ p {
 
 .nav-right { display: flex; align-items: center; gap: 16px; }
 
+/* ===== Live Strip (always visible under header) ===== */
+.live-strip {
+  position: relative;
+  z-index: 85;
+  height: 32px;
+  background: rgba(0, 0, 0, 0.92);
+  border-bottom: 1px solid rgba(188, 0, 0, 0.25);
+  display: flex;
+  align-items: center;
+}
+
+[data-theme="light"] .live-strip {
+  background: rgba(245, 245, 245, 0.95);
+  border-bottom-color: rgba(188, 0, 0, 0.12);
+}
+
+.live-strip-inner {
+  max-width: 1200px;
+  margin: 0 auto;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 0 16px;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.live-strip-inner::-webkit-scrollbar { display: none; }
+
+/* Chips */
+.live-strip-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 3px 12px;
+  border: 1px solid rgba(188, 0, 0, 0.3);
+  border-radius: 100px;
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 12px;
+  font-weight: 500;
+  color: #fff;
+  white-space: nowrap;
+  text-decoration: none;
+  transition: background 0.15s, border-color 0.15s;
+  flex-shrink: 0;
+}
+
+.live-strip-chip:hover {
+  background: rgba(188, 0, 0, 0.15);
+  border-color: rgba(188, 0, 0, 0.5);
+}
+
+[data-theme="light"] .live-strip-chip {
+  color: #1a1a1a;
+  border-color: rgba(188, 0, 0, 0.2);
+}
+
+[data-theme="light"] .live-strip-chip:hover {
+  background: rgba(188, 0, 0, 0.08);
+}
+
+/* Badge */
+.live-strip-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  color: #ff4444;
+  text-transform: uppercase;
+}
+
+.live-strip-badge--upcoming {
+  color: rgba(255, 255, 255, 0.5);
+}
+
+[data-theme="light"] .live-strip-badge--upcoming {
+  color: rgba(0, 0, 0, 0.45);
+}
+
+/* Pulse dot */
+.live-strip-pulse {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #ff4444;
+  animation: live-pulse 1.5s ease-in-out infinite;
+}
+
+@keyframes live-pulse {
+  0%, 100% { opacity: 1; box-shadow: 0 0 0 0 rgba(255, 68, 68, 0.5); }
+  50% { opacity: 0.7; box-shadow: 0 0 0 4px rgba(255, 68, 68, 0); }
+}
+
+/* Matchup text */
+.live-strip-matchup {
+  font-weight: 600;
+}
+
+/* Status (period/clock) */
+.live-strip-status {
+  font-size: 11px;
+  color: rgba(255, 255, 255, 0.5);
+}
+
+[data-theme="light"] .live-strip-status {
+  color: rgba(0, 0, 0, 0.4);
+}
+
+/* Desk fallback */
+.live-strip-desk-label {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: rgba(188, 0, 0, 0.7);
+  margin-right: 4px;
+  flex-shrink: 0;
+}
+
+.live-strip-chip--desk {
+  border-color: rgba(255, 255, 255, 0.12);
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 12px;
+}
+
+.live-strip-chip--desk:hover {
+  border-color: rgba(188, 0, 0, 0.4);
+  color: #fff;
+}
+
+[data-theme="light"] .live-strip-chip--desk {
+  border-color: rgba(0, 0, 0, 0.1);
+  color: rgba(0, 0, 0, 0.6);
+}
+
+[data-theme="light"] .live-strip-chip--desk:hover {
+  color: #bc0000;
+}
+
+/* Live chip gets brighter border */
+.live-strip-chip--live {
+  border-color: rgba(255, 68, 68, 0.4);
+}
+
+@media (max-width: 640px) {
+  .live-strip-inner {
+    gap: 4px;
+    padding: 0 10px;
+  }
+  .live-strip-chip {
+    font-size: 11px;
+    padding: 2px 10px;
+  }
+}
+
 /* ===== Briefing Strip (above the fold) ===== */
 .briefing-strip {
   position: relative;

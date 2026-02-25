@@ -20,6 +20,7 @@ import Breadcrumb from "@/components/layout/Breadcrumb";
 import NavigationOrb from "@/components/layout/NavigationOrb";
 import ParticleBg from "@/components/layout/ParticleBg";
 import BriefingStrip from "@/components/layout/BriefingStrip";
+import LiveStrip from "@/components/layout/LiveStrip";
 
 // Floating buttons disabled - users access AI and Fan Chat via header buttons
 // import BearsAIButton from "@/components/bears/BearsAIButton";
@@ -181,6 +182,7 @@ export default function RootLayout({
               <NavigationProgress />
               <div className="flex min-h-screen flex-col">
                 <Header />
+                <LiveStrip />
                 <BriefingStrip />
                 <div id="main-content" className="flex-1" tabIndex={-1}>
                   <div className="sm-container">
