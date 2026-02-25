@@ -1,7 +1,7 @@
 // src/components/homepage/PostCard.tsx
 'use client';
 
-import { useRef, useCallback, useState } from 'react';
+import { useRef, useCallback, useState, useEffect } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { differenceInHours, differenceInDays, format } from 'date-fns';
@@ -101,6 +101,21 @@ export function PostCard({ post, priority = false, cardSize = 'compact' }: PostC
   const pressActiveRef = useRef(false);
   const scout = useScoutConcierge(post);
 
+  // First-visit tooltip: show once, then persist dismissal
+  const [showScoutTip, setShowScoutTip] = useState(false);
+  useEffect(() => {
+    try {
+      if (!localStorage.getItem('sm-scout-hint-seen')) {
+        setShowScoutTip(true);
+      }
+    } catch {}
+  }, []);
+
+  const dismissScoutTip = useCallback(() => {
+    setShowScoutTip(false);
+    try { localStorage.setItem('sm-scout-hint-seen', '1'); } catch {}
+  }, []);
+
   const startPress = useCallback(() => {
     pressActiveRef.current = true;
     setPressProgress(1); // triggers CSS animation
@@ -108,9 +123,11 @@ export function PostCard({ post, priority = false, cardSize = 'compact' }: PostC
       if (pressActiveRef.current) {
         scout.trigger();
         setPressProgress(0);
+        // Dismiss first-visit tip once they've used it
+        if (showScoutTip) dismissScoutTip();
       }
     }, LONG_PRESS_MS);
-  }, [scout]);
+  }, [scout, showScoutTip, dismissScoutTip]);
 
   const cancelPress = useCallback(() => {
     pressActiveRef.current = false;
@@ -161,6 +178,29 @@ export function PostCard({ post, priority = false, cardSize = 'compact' }: PostC
       onTouchCancel={cancelPress}
       onContextMenu={(e) => { if (pressActiveRef.current) e.preventDefault(); }}
     >
+      {/* Scout hint badge — visible on hover, hidden during press/overlay */}
+      {!scout.isOpen && pressProgress === 0 && (
+        <div className="scout-hint-badge" aria-hidden="true">
+          <Image src="/downloads/scout-v2.png" alt="" width={16} height={16} unoptimized style={{ borderRadius: '50%' }} />
+          <span>Hold for Scout recap</span>
+        </div>
+      )}
+
+      {/* First-visit tooltip — anchored below hint badge */}
+      {showScoutTip && !scout.isOpen && (
+        <div className="scout-first-tip" onClick={dismissScoutTip}>
+          <Image src="/downloads/scout-v2.png" alt="" width={20} height={20} unoptimized style={{ borderRadius: '50%', flexShrink: 0 }} />
+          <span>Press &amp; hold any card for a quick Scout AI recap</span>
+          <button
+            onClick={(e) => { e.stopPropagation(); dismissScoutTip(); }}
+            style={{ background: 'none', border: 'none', color: 'rgba(255,255,255,0.5)', cursor: 'pointer', padding: 0, fontSize: 14, lineHeight: 1 }}
+            aria-label="Dismiss tip"
+          >
+            &times;
+          </button>
+        </div>
+      )}
+
       {/* Long-press progress ring */}
       {pressProgress > 0 && (
         <div className="scout-progress-ring">
