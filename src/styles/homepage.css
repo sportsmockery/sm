@@ -3838,3 +3838,46 @@ html {
   padding: 20px !important;
   border-radius: 20px !important;
 }
+
+/* ========== TERMINAL: Container Query Spacing (highest specificity — DO NOT place anything after this) ========== */
+html .post-card,
+html [class*="post-card"],
+html [class*="card-"] {
+  margin-inline: auto !important;
+  margin-bottom: 20px !important;
+  max-inline-size: 95% !important;
+  padding: 24px !important;
+  container-type: inline-size !important;
+}
+
+@container (min-width: 380px) {
+  html .posts-container,
+  html .feed-list {
+    display: grid !important;
+    grid-template-columns: repeat(auto-fit, minmax(380px, 1fr)) !important;
+    gap: 28px !important;
+    padding-block: 32px !important;
+    padding-inline: 24px !important;
+  }
+}
+
+@container (max-width: 768px) {
+  html .posts-container {
+    grid-template-columns: 1fr !important;
+    gap: 24px !important;
+    padding: 24px 16px !important;
+  }
+}
+
+html .storylines-rail {
+  gap: 28px !important;
+  padding-inline: 32px !important;
+}
+
+/* Card float shadow + max radius */
+html .feed-card.card-xl,
+html .feed-card.card-m,
+html .feed-card.card-compact {
+  border-radius: 24px !important;
+  box-shadow: 0 24px 48px rgba(0, 0, 0, 0.4) !important;
+}
