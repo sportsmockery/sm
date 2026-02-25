@@ -3,6 +3,7 @@ import Anthropic from '@anthropic-ai/sdk'
 import { getGMAuthUser } from '@/lib/gm-auth'
 import { datalabAdmin } from '@/lib/supabase-datalab'
 import { randomBytes } from 'crypto'
+import { computeTradeHash } from '@/lib/gm-trade-hash'
 
 export const dynamic = 'force-dynamic'
 
@@ -915,6 +916,197 @@ export async function POST(request: NextRequest) {
       cubs: 'Chicago Cubs', whitesox: 'Chicago White Sox',
     }
 
+    // ========== REPEAT TRADE CACHE CHECK ==========
+    // For logged-in users, check if they've submitted this exact trade before.
+    // If so, return the cached grade without calling AI, but skip leaderboard update.
+    const tradeHash = computeTradeHash({
+      chicago_team,
+      sport,
+      partner_team_key: partner_team_key || undefined,
+      players_sent: Array.isArray(players_sent) ? players_sent : [],
+      players_received: Array.isArray(players_received) ? players_received : [],
+      draft_picks_sent: Array.isArray(draft_picks_sent) ? draft_picks_sent : [],
+      draft_picks_received: Array.isArray(draft_picks_received) ? draft_picks_received : [],
+      trade_partner_1,
+      trade_partner_2,
+      three_team_players: Array.isArray(threeTeamPlayers) ? threeTeamPlayers : undefined,
+      three_team_picks: Array.isArray(threeTeamPicks) ? threeTeamPicks : undefined,
+    })
+
+    if (userId) {
+      const { data: cachedTrade } = await datalabAdmin
+        .from('gm_trades')
+        .select('*')
+        .eq('user_id', userId)
+        .eq('trade_hash', tradeHash)
+        .order('created_at', { ascending: false })
+        .limit(1)
+        .single()
+
+      if (cachedTrade) {
+        // Cache hit — reuse the grade without calling AI
+        const cachedGrade = cachedTrade.grade
+        const cachedReasoning = cachedTrade.grade_reasoning
+        const cachedStatus = cachedTrade.status
+        const cachedIsDangerous = cachedTrade.is_dangerous
+        const cachedBreakdown = {
+          talent_balance: cachedTrade.talent_balance,
+          contract_value: cachedTrade.contract_value,
+          team_fit: cachedTrade.team_fit,
+          future_assets: cachedTrade.future_assets,
+        }
+        const cachedImprovementScore = cachedTrade.improvement_score || 0
+        const cachedTradeSummary = cachedTrade.trade_summary || ''
+        const cachedCapAnalysis = cachedTrade.cap_analysis || ''
+        const cachedAiVersion = `cached_${cachedTrade.ai_version || 'unknown'}`
+        const newSharedCode = randomBytes(6).toString('hex')
+        const userEmail = user?.email || 'guest'
+
+        // Create new trade record (appears in history normally)
+        const { data: newTrade, error: newTradeError } = await datalabAdmin.from('gm_trades').insert({
+          user_id: userId,
+          user_email: userEmail,
+          chicago_team,
+          sport,
+          trade_partner: isThreeTeamTrade ? `${trade_partner_1} / ${trade_partner_2}` : trade_partner,
+          players_sent: isThreeTeamTrade
+            ? (Array.isArray(threeTeamPlayers) ? threeTeamPlayers.filter((p: any) => p.from_team === chicago_team) : [])
+            : (Array.isArray(players_sent) ? players_sent : []),
+          players_received: isThreeTeamTrade
+            ? (Array.isArray(threeTeamPlayers) ? threeTeamPlayers.filter((p: any) => p.to_team === chicago_team) : [])
+            : (Array.isArray(players_received) ? players_received : []),
+          grade: cachedGrade,
+          grade_reasoning: cachedReasoning,
+          status: cachedStatus,
+          is_dangerous: cachedIsDangerous,
+          session_id: session_id || null,
+          improvement_score: cachedImprovementScore,
+          trade_summary: cachedTradeSummary,
+          ai_version: cachedAiVersion,
+          shared_code: newSharedCode,
+          partner_team_key: isThreeTeamTrade ? trade_partner_1 : (partner_team_key || null),
+          partner_team_logo: cachedTrade.partner_team_logo,
+          chicago_team_logo: cachedTrade.chicago_team_logo,
+          draft_picks_sent: isThreeTeamTrade
+            ? (Array.isArray(threeTeamPicks) ? threeTeamPicks.filter((pk: any) => pk.from_team === chicago_team) : [])
+            : (Array.isArray(draft_picks_sent) ? draft_picks_sent : []),
+          draft_picks_received: isThreeTeamTrade
+            ? (Array.isArray(threeTeamPicks) ? threeTeamPicks.filter((pk: any) => pk.to_team === chicago_team) : [])
+            : (Array.isArray(draft_picks_received) ? draft_picks_received : []),
+          talent_balance: cachedBreakdown.talent_balance,
+          contract_value: cachedBreakdown.contract_value,
+          team_fit: cachedBreakdown.team_fit,
+          future_assets: cachedBreakdown.future_assets,
+          cap_analysis: cachedCapAnalysis,
+          trade_hash: tradeHash,
+          is_three_team: isThreeTeamTrade || false,
+          ...(isThreeTeamTrade ? {
+            trade_partner_2: trade_partner_2,
+            trade_partner_2_logo: cachedTrade.trade_partner_2_logo,
+            three_team_players: threeTeamPlayers,
+            three_team_picks: threeTeamPicks,
+          } : {}),
+        }).select().single()
+
+        if (newTradeError) {
+          console.error('Failed to insert cached trade:', newTradeError)
+        }
+
+        // Create trade items for the new cached trade
+        if (newTrade && !isThreeTeamTrade) {
+          const tradeItems: any[] = []
+          const safeSent = Array.isArray(players_sent) ? players_sent : []
+          const safeRecv = Array.isArray(players_received) ? players_received : []
+          const safePkSent = Array.isArray(draft_picks_sent) ? draft_picks_sent : []
+          const safePkRecv = Array.isArray(draft_picks_received) ? draft_picks_received : []
+
+          for (const p of safeSent) {
+            tradeItems.push({
+              trade_id: newTrade.id, side: 'sent', asset_type: 'player',
+              player_name: p.name, position: p.position,
+              jersey_number: p.jersey_number || null, headshot_url: p.headshot_url || null,
+              age: p.age || null, college: p.college || null,
+              weight_lbs: p.weight_lbs || null, years_exp: p.years_exp || null,
+              draft_info: p.draft_info || null, stat_line: p.stats || null,
+              team_key: chicago_team, is_chicago_player: true,
+              espn_player_id: p.espn_id || null,
+            })
+          }
+          for (const p of safeRecv) {
+            tradeItems.push({
+              trade_id: newTrade.id, side: 'received', asset_type: 'player',
+              player_name: p.name, position: p.position,
+              team_key: partner_team_key || trade_partner, is_chicago_player: false,
+            })
+          }
+          for (const pk of safePkSent) {
+            tradeItems.push({
+              trade_id: newTrade.id, side: 'sent', asset_type: 'pick',
+              pick_year: pk.year, pick_round: pk.round, pick_condition: pk.condition || null,
+              team_key: chicago_team, is_chicago_player: true,
+            })
+          }
+          for (const pk of safePkRecv) {
+            tradeItems.push({
+              trade_id: newTrade.id, side: 'received', asset_type: 'pick',
+              pick_year: pk.year, pick_round: pk.round, pick_condition: pk.condition || null,
+              team_key: partner_team_key || trade_partner, is_chicago_player: false,
+            })
+          }
+          if (tradeItems.length > 0) {
+            await datalabAdmin.from('gm_trade_items').insert(tradeItems)
+          }
+        }
+
+        // Log to audit (with cached flag)
+        try {
+          await datalabAdmin.from('gm_audit_logs').insert({
+            user_id: userId,
+            trade_id: newTrade?.id || null,
+            request_payload: body,
+            response_payload: { grade: cachedGrade, reasoning: cachedReasoning, cached: true, original_trade_id: cachedTrade.id },
+            model_name: 'cached',
+            response_time_ms: Date.now() - startTime,
+          })
+        } catch (auditErr) {
+          console.error('Cached audit log failed:', auditErr)
+        }
+
+        // Update session counters (count normally)
+        if (session_id) {
+          const { data: sess } = await datalabAdmin.from('gm_sessions').select('*').eq('id', session_id).single()
+          if (sess) {
+            await datalabAdmin.from('gm_sessions').update({
+              num_trades: (sess.num_trades || 0) + 1,
+              num_approved: (sess.num_approved || 0) + (cachedStatus === 'accepted' ? 1 : 0),
+              num_dangerous: (sess.num_dangerous || 0) + (cachedIsDangerous ? 1 : 0),
+              num_failed: (sess.num_failed || 0) + (cachedStatus === 'rejected' ? 1 : 0),
+              total_improvement: +(((sess.total_improvement || 0) + (cachedStatus === 'accepted' ? cachedImprovementScore : 0)).toFixed(2)),
+              updated_at: new Date().toISOString(),
+            }).eq('id', session_id)
+          }
+        }
+
+        // SKIP leaderboard update entirely — this is the key difference
+
+        // Return identical response shape
+        return NextResponse.json({
+          grade: cachedGrade,
+          reasoning: cachedReasoning,
+          status: cachedStatus,
+          is_dangerous: cachedIsDangerous,
+          trade_id: newTrade?.id || null,
+          shared_code: newSharedCode,
+          trade_summary: cachedTradeSummary,
+          improvement_score: cachedImprovementScore,
+          breakdown: cachedBreakdown,
+          cap_analysis: cachedCapAnalysis,
+          ...(isThreeTeamTrade ? { is_three_team: true } : {}),
+        })
+      }
+    }
+    // ========== END REPEAT TRADE CACHE CHECK ==========
+
     // Handle 3-team trades separately
     if (isThreeTeamTrade) {
       const safeThreeTeamPlayers = Array.isArray(threeTeamPlayers) ? threeTeamPlayers : []
@@ -1128,6 +1320,7 @@ export async function POST(request: NextRequest) {
         improvement_score: improvementScore,
         trade_summary: tradeSummary,
         ai_version: `gm_3team_${API_VERSION}_${MODEL_NAME}`,
+        trade_hash: tradeHash,
         shared_code: sharedCode,
         partner_team_key: trade_partner_1,
         partner_team_logo: partner1Logo,
@@ -1744,6 +1937,7 @@ Grade this trade from the perspective of the ${teamDisplayNames[chicago_team]}.`
       improvement_score: improvementScore,
       trade_summary: tradeSummary,
       ai_version: `gm_ai_authority_${API_VERSION}_${MODEL_NAME}`,
+      trade_hash: tradeHash,
       shared_code: sharedCode,
       partner_team_key: partner_team_key || null,
       partner_team_logo: partnerTeamLogo,
