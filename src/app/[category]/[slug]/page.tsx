@@ -271,7 +271,7 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
       />
 
       {/* 2030 Hero Header */}
-      <header className="sm-hero-bg" style={{ padding: '120px 0 60px', minHeight: 250 }}>
+      <header className="sm-hero-bg" style={{ padding: '40px 0 60px', minHeight: 250 }}>
         <div className="sm-grid-overlay" />
         <div style={{ position: 'relative', zIndex: 1, maxWidth: 760, margin: '0 auto', padding: '0 24px' }}>
           {/* Breadcrumb */}
