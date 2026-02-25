@@ -686,16 +686,6 @@ export function HomepageFeed({
         </div>
       </section>
 
-      {/* ===== SECTION 6: App Dock Ribbon ===== */}
-      <nav className="app-dock-ribbon section-transition" aria-label="Tools">
-        <div className="sm-container app-dock-inner">
-          <Link href="/scout-ai" className="app-dock-link">Scout AI</Link>
-          <Link href="/gm" className="app-dock-link">GM Trade Sim</Link>
-          <Link href="/mock-draft" className="app-dock-link">Mock Draft</Link>
-          <Link href="/fan-chat" className="app-dock-link">Fan Chat</Link>
-        </div>
-      </nav>
-
       {/* ===== Personalize Banner (logged-in only) ===== */}
       {actuallyLoggedIn && (
         <div className="sm-container">
