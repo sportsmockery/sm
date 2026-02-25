@@ -40,6 +40,10 @@
     {
       "path": "/api/cron/sync-depth-charts",
       "schedule": "55 * * * *"
+    },
+    {
+      "path": "/api/cron/audit-orbs",
+      "schedule": "0 12 * * *"
     }
   ],
   "headers": [

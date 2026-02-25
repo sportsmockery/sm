@@ -1,10 +1,11 @@
 // src/app/api/hero-stats/route.ts
-// Hero orb stats — uses the SAME team-config functions as team pages.
-// One source of truth: if team pages are correct, hero orbs are correct.
+// Hero orb stats — ALL data from the SAME team-config functions as team pages.
+// Season-aware: uses season-status.ts to detect phase per sport dynamically.
+// Zero hardcoded stats — everything fetched live.
 
 import { NextResponse } from 'next/server'
-import { supabaseAdmin } from '@/lib/db'
 import { fetchTeamRecord, fetchLastGame } from '@/lib/team-config'
+import { getSeasonPhase, isInSeason } from '@/lib/season-status'
 
 export const dynamic = 'force-dynamic'
 export const revalidate = 300 // 5 min cache
@@ -14,7 +15,16 @@ interface HeroStat {
   value: string
   team?: string
   size: 'large' | 'medium' | 'small'
+  phase?: string
 }
+
+const TEAM_CONFIG: { key: string; label: string; sport: string }[] = [
+  { key: 'bears', label: 'Bears', sport: 'nfl' },
+  { key: 'bulls', label: 'Bulls', sport: 'nba' },
+  { key: 'blackhawks', label: 'Hawks', sport: 'nhl' },
+  { key: 'cubs', label: 'Cubs', sport: 'mlb' },
+  { key: 'whitesox', label: 'White Sox', sport: 'mlb' },
+]
 
 function formatRecord(r: { wins: number; losses: number; otLosses?: number; ties?: number }): string {
   let s = `${r.wins}-${r.losses}`
@@ -23,116 +33,108 @@ function formatRecord(r: { wins: number; losses: number; otLosses?: number; ties
   return s
 }
 
-const TEAMS = ['bears', 'bulls', 'blackhawks', 'cubs', 'whitesox'] as const
+function phaseLabel(phase: string): string {
+  switch (phase) {
+    case 'regular': return ''
+    case 'postseason': return 'Playoffs'
+    case 'preseason': return 'Preseason'
+    case 'offseason': return 'Offseason'
+    default: return ''
+  }
+}
 
 export async function GET() {
   try {
     const stats: HeroStat[] = []
 
     // Fetch all 5 records + last games in parallel — same functions as team pages
-    const [records, lastGames, weeklyPosts, totalPosts, weeklyViews, liveGames] = await Promise.all([
-      Promise.all(TEAMS.map(t => fetchTeamRecord(t))),
-      Promise.all(TEAMS.map(t => fetchLastGame(t))),
-      supabaseAdmin.from('sm_posts').select('id', { count: 'exact', head: true })
-        .eq('status', 'published')
-        .gte('published_at', new Date(Date.now() - 7 * 86400000).toISOString()),
-      supabaseAdmin.from('sm_posts').select('id', { count: 'exact', head: true }).eq('status', 'published'),
-      supabaseAdmin.from('sm_posts').select('views').eq('status', 'published')
-        .gte('published_at', new Date(Date.now() - 7 * 86400000).toISOString()).limit(200),
-      supabaseAdmin.from('sm_posts').select('id', { count: 'exact', head: true })
-        .eq('status', 'published'), // placeholder for live_games if needed
+    const [records, lastGames] = await Promise.all([
+      Promise.all(TEAM_CONFIG.map(t => fetchTeamRecord(t.key))),
+      Promise.all(TEAM_CONFIG.map(t => fetchLastGame(t.key))),
     ])
 
-    const labels: Record<string, string> = {
-      bears: 'Bears', bulls: 'Bulls', blackhawks: 'Hawks', cubs: 'Cubs', whitesox: 'White Sox',
-    }
+    // Determine season phase per sport dynamically
+    const teamPhases = TEAM_CONFIG.map(t => ({
+      ...t,
+      phase: getSeasonPhase(t.sport),
+      inSeason: isInSeason(t.sport),
+    }))
 
-    // --- LARGE ORBS: In-season team records (Bulls, Blackhawks) ---
-    const inSeason = ['bulls', 'blackhawks'] as const
-    for (const key of inSeason) {
-      const idx = TEAMS.indexOf(key)
+    // Separate in-season from offseason/preseason teams
+    const inSeasonTeams = teamPhases.filter(t => t.inSeason)
+    const otherTeams = teamPhases.filter(t => !t.inSeason)
+
+    // --- LARGE ORBS: In-season team records ---
+    for (const team of inSeasonTeams) {
+      const idx = TEAM_CONFIG.findIndex(t => t.key === team.key)
       const rec = records[idx]
       if (rec) {
-        stats.push({ label: `${labels[key]} Record`, value: formatRecord(rec), team: key, size: 'large' })
-      }
-    }
-
-    // Last game for first in-season team as a large orb
-    for (const key of inSeason) {
-      const idx = TEAMS.indexOf(key)
-      const game = lastGames[idx]
-      if (game && stats.length < 3) {
-        const oppAbbrev = game.opponent.slice(0, 3).toUpperCase()
         stats.push({
-          label: `${labels[key]} ${game.result} vs ${oppAbbrev}`,
-          value: `${game.teamScore}-${game.opponentScore}`,
-          team: key,
+          label: `${team.label} Record`,
+          value: formatRecord(rec),
+          team: team.key,
           size: 'large',
+          phase: team.phase,
         })
       }
     }
 
-    // --- MEDIUM ORBS: Remaining last games + offseason records ---
-
-    // Last games for remaining teams (skip ones already used as large)
-    const usedLargeGameKeys = new Set<string>()
-    for (const s of stats) {
-      if (s.size === 'large' && s.label.includes(' vs ')) {
-        usedLargeGameKeys.add(s.team || '')
-      }
-    }
-
-    for (const key of inSeason) {
-      const idx = TEAMS.indexOf(key)
+    // --- LARGE/MEDIUM ORBS: In-season last games ---
+    for (const team of inSeasonTeams) {
+      const idx = TEAM_CONFIG.findIndex(t => t.key === team.key)
       const game = lastGames[idx]
-      if (game && !usedLargeGameKeys.has(key)) {
-        const oppAbbrev = game.opponent.slice(0, 3).toUpperCase()
+      if (game) {
+        const oppAbbrev = game.opponent.length > 3
+          ? game.opponent.slice(0, 3).toUpperCase()
+          : game.opponent.toUpperCase()
         stats.push({
-          label: `${labels[key]} ${game.result} vs ${oppAbbrev}`,
+          label: `${team.label} ${game.result} vs ${oppAbbrev}`,
           value: `${game.teamScore}-${game.opponentScore}`,
-          team: key,
-          size: 'medium',
+          team: team.key,
+          size: stats.length < 3 ? 'large' : 'medium',
+          phase: team.phase,
         })
       }
     }
 
-    // Offseason team records (Bears, Cubs, Sox)
-    const offSeason = ['bears', 'cubs', 'whitesox'] as const
-    for (const key of offSeason) {
-      const idx = TEAMS.indexOf(key)
+    // --- MEDIUM ORBS: Offseason/preseason team records ---
+    for (const team of otherTeams) {
+      const idx = TEAM_CONFIG.findIndex(t => t.key === team.key)
       const rec = records[idx]
       if (rec) {
-        stats.push({ label: `${labels[key]} Record`, value: formatRecord(rec), team: key, size: 'medium' })
+        const pLabel = phaseLabel(team.phase)
+        stats.push({
+          label: pLabel ? `${team.label} ${pLabel}` : `${team.label} Record`,
+          value: formatRecord(rec),
+          team: team.key,
+          size: 'medium',
+          phase: team.phase,
+        })
       }
     }
 
-    // Weekly posts count
-    const wkPosts = weeklyPosts.count || 0
-    if (wkPosts > 0) {
-      stats.push({ label: 'Posts This Week', value: `${wkPosts}`, size: 'medium' })
-    }
-
-    // --- SMALL ORBS: Site stats ---
-    const total = totalPosts.count || 0
-    if (total > 0) {
-      const formatted = total >= 1000 ? `${(total / 1000).toFixed(1)}K` : String(total)
-      stats.push({ label: 'Total Posts', value: formatted, size: 'small' })
-    }
-
-    const views = weeklyViews.data?.reduce((sum: number, p: any) => sum + (p.views || 0), 0) || 0
-    if (views > 0) {
-      const formatted = views >= 1_000_000 ? `${(views / 1_000_000).toFixed(1)}M` : views >= 1000 ? `${(views / 1000).toFixed(1)}K` : String(views)
-      stats.push({ label: 'Weekly Views', value: formatted, size: 'small' })
+    // --- MEDIUM ORBS: Offseason/preseason last games (if available) ---
+    for (const team of otherTeams) {
+      const idx = TEAM_CONFIG.findIndex(t => t.key === team.key)
+      const game = lastGames[idx]
+      if (game) {
+        const oppAbbrev = game.opponent.length > 3
+          ? game.opponent.slice(0, 3).toUpperCase()
+          : game.opponent.toUpperCase()
+        stats.push({
+          label: `${team.label} Last Game`,
+          value: `${game.result} ${game.teamScore}-${game.opponentScore}`,
+          team: team.key,
+          size: 'small',
+          phase: team.phase,
+        })
+      }
     }
 
     return NextResponse.json({ stats })
   } catch (error) {
     console.error('[hero-stats] Error:', error)
-    return NextResponse.json({
-      stats: [
-        { label: 'Teams', value: '5', size: 'small' },
-        { label: 'Sports', value: '4', size: 'small' },
-      ],
-    })
+    // Error fallback — still no hardcoded stats, just empty
+    return NextResponse.json({ stats: [] })
   }
 }

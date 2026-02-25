@@ -227,6 +227,7 @@
 }
 
 /* ========== Hero Stats Orbs ========== */
+/* ── Orb container: desktop = orbital ring, mobile = vertical stack ── */
 .hero-stats-orbs {
   position: absolute;
   inset: 0;
@@ -235,7 +236,17 @@
   overflow: hidden;
 }
 
+.hero-orbs-orbit-ring {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0;
+  height: 0;
+}
+
+/* ── Individual orb: vertical stack layout, NO truncation ── */
 .hero-stat-orb {
+  position: absolute;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -249,57 +260,76 @@
     inset 0 0 14px rgba(188, 0, 0, 0.15),
     0 0 24px rgba(188, 0, 0, 0.10),
     0 0 1px var(--orb-accent, transparent);
+  padding: 6px;
+  line-height: 1.2;
+  text-align: center;
+  overflow: visible;
+  white-space: normal;
   opacity: 0;
-  animation: heroOrbAppear 0.8s ease-out forwards, heroOrbPulse 5s ease-in-out infinite;
-  animation-delay: var(--delay, 0s);
-  transition: opacity 0.6s ease;
-  padding: 4px;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  animation:
+    heroOrbAppear 0.8s ease-out forwards,
+    heroOrbit var(--orbit-speed, 12s) linear infinite;
+  animation-delay: var(--delay, 0s), var(--orbit-delay, 0s);
 }
 
-.hero-stat-orb-value {
-  font-family: 'Space Grotesk', var(--font-space-grotesk), sans-serif;
-  font-weight: 700;
-  color: rgba(255, 255, 255, 0.65);
-  line-height: 1;
-  white-space: nowrap;
-  max-width: 85%;
-  overflow: hidden;
-  text-overflow: ellipsis;
+/* ── Comet trail glow ── */
+.hero-stat-orb::after {
+  content: '';
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(188, 0, 0, 0.4) 0%, transparent 70%);
+  filter: blur(8px);
+  z-index: -1;
+  animation: trailPulse 2s ease-in-out infinite;
 }
 
+@keyframes trailPulse {
+  0%, 100% { opacity: 0.3; transform: scale(1); }
+  50% { opacity: 0.7; transform: scale(1.3); }
+}
+
+/* ── Label (top): 12px weight 500 ── */
 .hero-stat-orb-label {
   font-family: 'Space Grotesk', var(--font-space-grotesk), sans-serif;
+  font-size: 12px;
   font-weight: 500;
-  color: rgba(255, 255, 255, 0.35);
+  color: rgba(255, 255, 255, 0.45);
   text-transform: uppercase;
-  letter-spacing: 0.06em;
-  max-width: 85%;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  letter-spacing: 0.04em;
+  line-height: 1.2;
+  text-align: center;
+  overflow: visible;
+  white-space: normal;
+  word-break: break-word;
+  order: -1;
+}
+
+/* ── Value (bottom): 18px weight 700 bold ── */
+.hero-stat-orb-value {
+  font-family: 'Space Grotesk', var(--font-space-grotesk), sans-serif;
+  font-size: 18px;
+  font-weight: 700;
+  color: rgba(255, 255, 255, 0.7);
+  line-height: 1.2;
+  text-align: center;
+  overflow: visible;
   white-space: nowrap;
-  line-height: 1;
-  margin-top: 2px;
+}
+
+/* ── Orbit animation ── */
+@keyframes heroOrbit {
+  0%   { transform: rotate(0deg) translateX(var(--orbit-radius, 140px)) rotate(0deg); }
+  100% { transform: rotate(360deg) translateX(var(--orbit-radius, 140px)) rotate(-360deg); }
 }
 
 @keyframes heroOrbAppear {
-  from {
-    opacity: 0;
-    transform: scale(0.6);
-  }
-  to {
-    opacity: 1;
-    transform: scale(1);
-  }
+  from { opacity: 0; transform: scale(0.6) translateX(var(--orbit-radius, 140px)); }
+  to   { opacity: 1; transform: scale(1) translateX(var(--orbit-radius, 140px)); }
 }
 
-@keyframes heroOrbPulse {
-  0%, 100% { transform: scale(1); }
-  50% { transform: scale(1.02); box-shadow: inset 0 0 18px rgba(188, 0, 0, 0.20), 0 0 28px rgba(188, 0, 0, 0.12); }
-}
-
-/* Light mode */
+/* ── Light mode ── */
 [data-theme="light"] .hero-stat-orb,
 .light .hero-stat-orb {
   background: rgba(188, 0, 0, 0.06);
@@ -309,30 +339,85 @@
     0 0 20px rgba(188, 0, 0, 0.05);
 }
 
+[data-theme="light"] .hero-stat-orb::after,
+.light .hero-stat-orb::after {
+  opacity: 0.5;
+}
+
 [data-theme="light"] .hero-stat-orb-value,
 .light .hero-stat-orb-value {
-  color: rgba(0, 0, 0, 0.15);
+  color: rgba(0, 0, 0, 0.18);
 }
 
 [data-theme="light"] .hero-stat-orb-label,
 .light .hero-stat-orb-label {
-  color: rgba(0, 0, 0, 0.08);
+  color: rgba(0, 0, 0, 0.12);
 }
 
-/* Mobile: scale down, fewer orbs */
+/* ── Mobile: vertical stack below hero, no orbit ── */
 @media (max-width: 768px) {
+  .hero-stats-orbs {
+    position: relative;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 12px;
+    padding: 16px 8px;
+    overflow: visible;
+  }
+
+  .hero-orbs-orbit-ring {
+    position: static;
+    display: contents;
+    width: auto;
+    height: auto;
+  }
+
   .hero-stat-orb {
-    transform: scale(0.8);
+    position: static;
+    animation: heroOrbAppear 0.6s ease-out forwards;
+    transform: none !important;
+  }
+
+  .hero-stat-orb.orb-large  { width: 80px; height: 80px; }
+  .hero-stat-orb.orb-medium { width: 56px; height: 56px; }
+  .hero-stat-orb.orb-small  { width: 44px; height: 44px; }
+
+  .hero-stat-orb-label { font-size: 8px; }
+  .hero-stat-orb-value { font-size: 12px; }
+
+  .hero-stat-orb.orb-small .hero-stat-orb-label { font-size: 7px; }
+  .hero-stat-orb.orb-small .hero-stat-orb-value { font-size: 10px; }
+
+  .hero-stat-orb::after {
+    filter: blur(4px);
+    opacity: 0.2;
+  }
+
+  @keyframes heroOrbAppear {
+    from { opacity: 0; transform: scale(0.6); }
+    to   { opacity: 1; transform: scale(1); }
   }
 }
 
+/* Touch: scale on tap (mobile) */
+@media (hover: none) and (pointer: coarse) {
+  .hero-stat-orb:active {
+    transform: scale(1.1);
+  }
+}
+
+/* ── Reduced motion: static positions, no animation ── */
 @media (prefers-reduced-motion: reduce) {
   .hero-stat-orb {
     animation: heroOrbAppear 0.1s ease-out forwards;
   }
+  .hero-stat-orb::after {
+    animation: none;
+  }
 }
 
-/* 100 floating background dots */
+/* ── 100 floating background dots ── */
 .hero-floating-dot {
   border-radius: 50%;
   background: rgba(188, 0, 0, 0.15);
@@ -364,7 +449,7 @@
 
 /* Main headline: Bebas Neue — chrome gradient + bevel */
 .hero-headline {
-  font-family: var(--font-bebas-neue), 'Bebas Neue', Impact, sans-serif;
+  font-family: var(--font-sans);
   font-size: clamp(4rem, 9vw, 7.5rem);
   font-weight: 400;
   line-height: 0.95;

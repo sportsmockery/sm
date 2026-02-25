@@ -1,10 +1,8 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { Montserrat } from 'next/font/google'
 import { motion, AnimatePresence } from 'framer-motion'
 
-const montserrat = Montserrat({ subsets: ['latin'], weight: ['700'] })
 
 interface OracleScore {
   id: string
@@ -106,7 +104,7 @@ export default function OracleScoresBar({ className = '' }: OracleScoresBarProps
         aria-expanded={!isCollapsed}
         aria-controls="oracle-scores-content"
       >
-        <span className={montserrat.className}>Oracle Scores</span>
+        <span style={{ fontFamily: "'Space Grotesk', sans-serif", fontWeight: 700 }}>Oracle Scores</span>
         <svg
           className={`w-4 h-4 transition-transform ${isCollapsed ? '' : 'rotate-180'}`}
           fill="none"
@@ -160,7 +158,7 @@ function ScoreItem({ score }: { score: OracleScore }) {
 
       {/* Teams and scores */}
       <div className="flex items-center gap-2">
-        <span className={`font-bold ${montserrat.className}`}>{score.team}</span>
+        <span className={`font-bold `}>{score.team}</span>
         {score.teamScore !== null && (
           <span className="font-mono">{score.teamScore}</span>
         )}
