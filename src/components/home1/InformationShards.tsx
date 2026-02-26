@@ -117,7 +117,7 @@ export default function InformationShards() {
             letterSpacing: '0.15em',
             textTransform: 'uppercase',
             color: '#bc0000',
-            fontFamily: "'SF Mono', 'Fira Code', monospace",
+            fontFamily: "'Space Grotesk', sans-serif",
           }}
         >
           {bootState === 'initial' ? 'INITIALIZING...' : 'VERIFYING DATA...'}
@@ -207,7 +207,7 @@ export default function InformationShards() {
                   style={{
                     fontSize: 9,
                     color: isDark ? '#555' : '#aaa',
-                    fontFamily: "'SF Mono', monospace",
+                    fontFamily: "'Space Grotesk', sans-serif",
                   }}
                 >
                   {headline.reliabilityScore}%
@@ -282,7 +282,7 @@ export default function InformationShards() {
                         borderRadius: 4,
                         backgroundColor: 'rgba(188,0,0,0.15)',
                         color: '#bc0000',
-                        fontFamily: "'SF Mono', monospace",
+                        fontFamily: "'Space Grotesk', sans-serif",
                       }}
                     >
                       {stat.value}

@@ -71,7 +71,7 @@ export default function PersonalizedFeed({
           <div>
             <h2
               className="text-[18px] font-bold text-[#222] dark:text-white uppercase pb-2 border-b-[3px] border-[#bc0000] inline-block"
-              style={{ fontFamily: "'Montserrat', sans-serif" }}
+              style={{ fontFamily: "'Space Grotesk', sans-serif" }}
             >
               For You
             </h2>
@@ -167,7 +167,7 @@ export default function PersonalizedFeed({
             <Link
               href={activeFilter === 'all' ? '/latest' : `/${activeFilter}`}
               className="inline-flex items-center gap-2 text-[#bc0000] font-semibold hover:underline"
-              style={{ fontFamily: "'Montserrat', sans-serif" }}
+              style={{ fontFamily: "'Space Grotesk', sans-serif" }}
             >
               View All {activeFilter === 'all' ? 'Articles' : TEAM_INFO[activeFilter].shortName + ' Articles'}
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -250,7 +250,7 @@ function PersonalizedPostCard({
           {/* Title */}
           <h3
             className="text-[15px] font-bold text-[#222] dark:text-white leading-tight line-clamp-2 group-hover:text-[#bc0000] transition-colors"
-            style={{ fontFamily: "'Montserrat', sans-serif" }}
+            style={{ fontFamily: "'Space Grotesk', sans-serif" }}
           >
             {post.title}
           </h3>

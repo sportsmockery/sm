@@ -1,10 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { Montserrat } from 'next/font/google'
 import { motion, AnimatePresence } from 'framer-motion'
-
-const montserrat = Montserrat({ subsets: ['latin'], weight: ['700'] })
 
 // Stadium configurations for each team
 const STADIUM_CONFIG: Record<string, {
@@ -112,7 +109,7 @@ export default function AROverlay({
       <ARModal onClose={onClose}>
         <div className="text-center">
           <div className="text-6xl mb-4">🔒</div>
-          <h2 className={`text-2xl text-white mb-4 ${montserrat.className}`}>
+          <h2 className="text-2xl text-white mb-4">
             Elite Access Required
           </h2>
           <p className="text-zinc-400 mb-6 font-serif">
@@ -121,7 +118,7 @@ export default function AROverlay({
           <div className="flex gap-4 justify-center">
             <button
               onClick={onUpgrade}
-              className={`px-6 py-3 bg-red-600 text-white font-bold hover:bg-red-700 transition-colors focus:outline-none focus:ring-2 focus:ring-red-600 ${montserrat.className}`}
+              className="px-6 py-3 bg-red-600 text-white font-bold hover:bg-red-700 transition-colors focus:outline-none focus:ring-2 focus:ring-red-600"
             >
               Upgrade to Elite
             </button>
@@ -169,7 +166,7 @@ function FallbackTour({
 
   return (
     <div className="max-w-2xl mx-auto">
-      <h2 className={`text-2xl text-white text-center mb-4 ${montserrat.className}`}>
+      <h2 className="text-2xl text-white text-center mb-4">
         {config.name} Tour
       </h2>
       <p className="text-red-500 text-center mb-6 font-bold">{displayText}</p>
@@ -224,7 +221,7 @@ function FallbackTour({
         </p>
         <button
           onClick={onClose}
-          className={`px-6 py-3 bg-red-600 text-white font-bold hover:bg-red-700 transition-colors ${montserrat.className}`}
+          className="px-6 py-3 bg-red-600 text-white font-bold hover:bg-red-700 transition-colors"
         >
           Close Tour
         </button>

@@ -112,7 +112,7 @@ export default function ScoutRecapCard({ postId, slug, title, content, excerpt, 
           fontSize: 13,
           fontWeight: 600,
           color: 'var(--sm-text)',
-          fontFamily: "'Montserrat', sans-serif",
+          fontFamily: "'Space Grotesk', sans-serif",
           textTransform: 'uppercase',
           letterSpacing: '0.05em',
         }}>

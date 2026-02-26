@@ -76,7 +76,7 @@ export default function Error({ error, reset }: ErrorProps) {
         {/* Dev error details */}
         {process.env.NODE_ENV === 'development' && error.message && (
           <div className="glass-card glass-card-static" style={{ textAlign: 'left', marginBottom: 32, padding: 20 }}>
-            <p style={{ fontFamily: 'monospace', fontSize: 13, color: 'var(--sm-text-muted)', wordBreak: 'break-all' }}>
+            <p style={{ fontFamily: "'Space Grotesk', sans-serif", fontSize: 13, color: 'var(--sm-text-muted)', wordBreak: 'break-all' }}>
               {error.message}
             </p>
             {error.digest && (

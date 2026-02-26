@@ -91,7 +91,7 @@ export default function PaywallGate({
 
           <h3
             className="text-xl font-bold mb-2"
-            style={{ fontFamily: "'Montserrat', sans-serif" }}
+            style={{ fontFamily: "'Space Grotesk', sans-serif" }}
           >
             Unlock {featureNames[feature]}
           </h3>

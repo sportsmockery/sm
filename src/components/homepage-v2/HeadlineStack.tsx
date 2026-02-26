@@ -1,10 +1,8 @@
 'use client'
 
 import Link from 'next/link'
-import { Montserrat } from 'next/font/google'
 import { motion } from 'framer-motion'
 
-const montserrat = Montserrat({ subsets: ['latin'], weight: ['700'] })
 
 interface Headline {
   id: string
@@ -52,7 +50,7 @@ export default function HeadlineStack({
       <header className="px-4 py-3 border-b border-red-600" style={{ backgroundColor: 'var(--sm-surface)' }}>
         <h2
           id="headline-stack-title"
-          className={`text-lg uppercase tracking-wide ${montserrat.className}`}
+          className={`text-lg uppercase tracking-wide `}
           style={{ color: 'var(--sm-text)' }}
         >
           {title}
@@ -78,7 +76,7 @@ export default function HeadlineStack({
                   index < 3
                     ? 'bg-red-600 text-white'
                     : ''
-                } ${montserrat.className}`}
+                } `}
                 style={index >= 3 ? { backgroundColor: 'var(--sm-surface)', color: 'var(--sm-text-muted)' } : undefined}
               >
                 {index + 1}

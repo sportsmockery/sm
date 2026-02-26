@@ -63,7 +63,7 @@ export default function SentimentMeter() {
           letterSpacing: '0.2em',
           textTransform: 'uppercase',
           color: '#bc0000',
-          fontFamily: "'SF Mono', 'Fira Code', monospace",
+          fontFamily: "'Space Grotesk', sans-serif",
           fontWeight: 600,
           marginBottom: 16,
           alignSelf: 'flex-start',
@@ -162,7 +162,7 @@ export default function SentimentMeter() {
               fontSize: 9,
               color: isDark ? 'rgba(255,255,255,0.2)' : 'rgba(0,0,0,0.25)',
               margin: '4px 0 0',
-              fontFamily: "'SF Mono', monospace",
+              fontFamily: "'Space Grotesk', sans-serif",
             }}
           >
             {messageCount} messages / 2hr
@@ -175,7 +175,7 @@ export default function SentimentMeter() {
               color: '#bc0000',
               margin: '4px 0 0',
               fontWeight: 600,
-              fontFamily: "'SF Mono', monospace",
+              fontFamily: "'Space Grotesk', sans-serif",
               textTransform: 'uppercase',
             }}
           >

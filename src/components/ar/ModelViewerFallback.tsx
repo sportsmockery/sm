@@ -1,9 +1,7 @@
 'use client'
 
 import { useEffect, useRef } from 'react'
-import { Montserrat } from 'next/font/google'
 
-const montserrat = Montserrat({ subsets: ['latin'], weight: ['700'] })
 
 // Stadium configurations
 const STADIUM_CONFIG: Record<string, {
@@ -97,7 +95,7 @@ export default function ModelViewerFallback({
     >
       {/* Header */}
       <div className="flex items-center justify-between px-4 py-3" style={{ borderBottom: '1px solid var(--sm-border)' }}>
-        <h3 className={`text-lg ${montserrat.className}`} style={{ color: 'var(--sm-text)' }}>
+        <h3 className={`text-lg `} style={{ color: 'var(--sm-text)' }}>
           {config.name} - 3D View
         </h3>
         {onClose && (
@@ -127,7 +125,7 @@ export default function ModelViewerFallback({
 
         {/* Mockery overlay */}
         <div className="absolute bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-black/80 to-transparent">
-          <p className={`text-red-500 text-center font-bold ${montserrat.className}`}>
+          <p className={`text-red-500 text-center font-bold `}>
             {config.mockeryText}
           </p>
         </div>

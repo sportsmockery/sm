@@ -22,7 +22,7 @@ export default function ArticleTags({ tags, className = '' }: ArticleTagsProps) 
     >
       <span
         style={{
-          fontFamily: "'Inter', sans-serif",
+          fontFamily: "'Space Grotesk', sans-serif",
           fontSize: '13px',
           fontWeight: 600,
           color: 'var(--sm-text-muted)',

@@ -60,7 +60,7 @@ export default function BearsNewsFeed({ headlines }: BearsNewsFeedProps) {
           letterSpacing: '0.2em',
           textTransform: 'uppercase',
           color: '#bc0000',
-          fontFamily: "'SF Mono', 'Fira Code', monospace",
+          fontFamily: "'Space Grotesk', sans-serif",
           fontWeight: 600,
           display: 'block',
           marginBottom: 12,
@@ -136,7 +136,7 @@ export default function BearsNewsFeed({ headlines }: BearsNewsFeedProps) {
                   style={{
                     fontSize: 10,
                     color: isDark ? '#555' : '#aaa',
-                    fontFamily: "'SF Mono', monospace",
+                    fontFamily: "'Space Grotesk', sans-serif",
                   }}
                 >
                   {timeAgo(headline.publishedAt)}
@@ -151,7 +151,7 @@ export default function BearsNewsFeed({ headlines }: BearsNewsFeedProps) {
                     borderRadius: 3,
                     background: isDark ? 'rgba(188,0,0,0.12)' : 'rgba(188,0,0,0.06)',
                     color: '#bc0000',
-                    fontFamily: "'SF Mono', monospace",
+                    fontFamily: "'Space Grotesk', sans-serif",
                   }}
                 >
                   {headline.keyStats[0].value}

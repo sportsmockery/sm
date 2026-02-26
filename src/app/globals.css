@@ -1,5 +1,5 @@
-/* ========== GOOGLE FONTS - must be first ========== */
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Space+Grotesk:wght@300;400;500;600;700&display=swap');
+/* ========== GOOGLE FONTS - Space Grotesk only ========== */
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&display=swap');
 
 @import "tailwindcss";
 @import "../styles/article-grid.css";
@@ -53,11 +53,14 @@
   --sm-nav-bg-scrolled: rgba(5, 5, 8, 0.92);
   --sm-max-width: 1200px;
 
-  /* === Typography === */
-  --sm-font-heading: 'Space Grotesk', sans-serif;
-  --sm-font-body: 'Space Grotesk', -apple-system, BlinkMacSystemFont, sans-serif;
-  --font-heading: 'Space Grotesk', sans-serif;
-  --font-body: 'Space Grotesk', -apple-system, BlinkMacSystemFont, sans-serif;
+  /* === Typography — Space Grotesk only === */
+  --sm-font-heading: 'Space Grotesk', var(--font-space-grotesk), system-ui, sans-serif;
+  --sm-font-body: 'Space Grotesk', var(--font-space-grotesk), system-ui, sans-serif;
+  --font-heading: 'Space Grotesk', var(--font-space-grotesk), system-ui, sans-serif;
+  --font-body: 'Space Grotesk', var(--font-space-grotesk), system-ui, sans-serif;
+  --font-sans: 'Space Grotesk', var(--font-space-grotesk), system-ui, sans-serif;
+  --font-mono: 'Space Grotesk', var(--font-space-grotesk), system-ui, sans-serif;
+  --font-display: 'Space Grotesk', var(--font-space-grotesk), system-ui, sans-serif;
 
   /* ===== LEGACY COMPAT — Core theme vars ===== */
   --bg-page: #050508;
@@ -430,10 +433,7 @@ html {
 
 *, *::before, *::after {
   box-sizing: border-box;
-}
-
-html, body, button, input, textarea, select {
-  font-family: 'Space Grotesk', -apple-system, BlinkMacSystemFont, sans-serif;
+  font-family: 'Space Grotesk', var(--font-space-grotesk), system-ui, sans-serif !important;
 }
 
 body {
@@ -451,19 +451,8 @@ body {
 
 a { color: inherit; text-decoration: none; }
 
-/* Font family utility classes */
-.font-montserrat,
-.font-space-grotesk {
-  font-family: 'Space Grotesk', sans-serif;
-}
-
-.font-inter {
-  font-family: 'Space Grotesk', -apple-system, BlinkMacSystemFont, sans-serif;
-}
-
-/* ========== TYPOGRAPHY - 2030 Heading Hierarchy ========== */
+/* ========== TYPOGRAPHY - Space Grotesk Type Scale ========== */
 h1, h2, h3, h4, h5, h6 {
-  font-family: 'Space Grotesk', sans-serif;
   color: var(--sm-text);
   font-weight: 700;
   line-height: var(--line-height-snug);
@@ -1085,7 +1074,7 @@ p {
   font-size: 60px;
   color: var(--color-primary);
   opacity: 0.2;
-  font-family: Georgia, serif;
+  font-family: var(--font-sans);
   line-height: 1;
 }
 
@@ -3588,16 +3577,21 @@ button.live-strip-chip--desk {
   }
 }
 
-/* "My Chicago" mode toggle in header */
-.my-chicago-toggle {
+/* Feed mode toggle in header (For You / Latest) */
+.feed-mode-toggle {
   transition: box-shadow 0.2s;
 }
-.my-chicago-toggle:hover {
+.feed-mode-toggle:hover {
   box-shadow: 0 0 12px rgba(188, 0, 0, 0.2);
+}
+[data-theme="light"] .feed-mode-toggle,
+.light .feed-mode-toggle {
+  background: rgba(0, 0, 0, 0.05) !important;
+  border-color: rgba(0, 0, 0, 0.1) !important;
 }
 /* Hide on small screens where space is tight */
 @media (max-width: 640px) {
-  .my-chicago-toggle { display: none !important; }
+  .feed-mode-toggle { display: none !important; }
 }
 
 .nav-hamburger {
@@ -3746,7 +3740,7 @@ main, .page-content, [role="main"] {
 .article-body-2030 {
   max-width: 720px;
   margin: 0 auto;
-  font-family: var(--sm-font-body, 'Inter', sans-serif);
+  font-family: var(--sm-font-body);
 }
 .article-body-2030 p {
   font-size: 17px;

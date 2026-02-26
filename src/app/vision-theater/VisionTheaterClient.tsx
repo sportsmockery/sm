@@ -370,7 +370,7 @@ export default function VisionTheaterClient({ data }: { data: VisionTheaterData 
       style={{
         background: 'var(--sm-dark, #050508)',
         color: 'var(--sm-text, #ffffff)',
-        fontFamily: 'Inter, -apple-system, sans-serif',
+        fontFamily: "'Space Grotesk', sans-serif",
         minHeight: '100vh',
       }}
     >
@@ -451,7 +451,7 @@ export default function VisionTheaterClient({ data }: { data: VisionTheaterData 
           {/* Title — Bebas Neue with red glow, matching SM 2.0 hero */}
           <h1
             style={{
-              fontFamily: 'var(--font-bebas-neue), "Bebas Neue", Impact, sans-serif',
+              fontFamily: "'Space Grotesk', sans-serif",
               fontSize: 'clamp(4rem, 9vw, 7.5rem)',
               fontWeight: 400,
               lineHeight: 0.95,
@@ -518,7 +518,7 @@ export default function VisionTheaterClient({ data }: { data: VisionTheaterData 
                   fontWeight: 600,
                   cursor: 'pointer',
                   transition: 'all 0.2s',
-                  fontFamily: 'Inter, sans-serif',
+                  fontFamily: "'Space Grotesk', sans-serif",
                 }}
               >
                 {f.label}
@@ -537,7 +537,7 @@ export default function VisionTheaterClient({ data }: { data: VisionTheaterData 
               borderRadius: '8px',
               padding: '8px 12px',
               fontSize: '13px',
-              fontFamily: 'Inter, sans-serif',
+              fontFamily: "'Space Grotesk', sans-serif",
               cursor: 'pointer',
             }}
           >
@@ -561,7 +561,7 @@ export default function VisionTheaterClient({ data }: { data: VisionTheaterData 
               borderRadius: '8px',
               padding: '8px 14px',
               fontSize: '13px',
-              fontFamily: 'Inter, sans-serif',
+              fontFamily: "'Space Grotesk', sans-serif",
               flex: '1 1 200px',
               minWidth: '150px',
               outline: 'none',
@@ -661,7 +661,7 @@ export default function VisionTheaterClient({ data }: { data: VisionTheaterData 
                       padding: '6px 14px',
                       fontSize: '13px',
                       cursor: 'pointer',
-                      fontFamily: 'Inter, sans-serif',
+                      fontFamily: "'Space Grotesk', sans-serif",
                     }}
                   >
                     Close Player
@@ -708,7 +708,7 @@ export default function VisionTheaterClient({ data }: { data: VisionTheaterData 
                         borderRadius: '8px',
                         padding: '10px 14px',
                         fontSize: '14px',
-                        fontFamily: 'Inter, sans-serif',
+                        fontFamily: "'Space Grotesk', sans-serif",
                         outline: 'none',
                       }}
                     />
@@ -725,7 +725,7 @@ export default function VisionTheaterClient({ data }: { data: VisionTheaterData 
                         fontWeight: 600,
                         cursor: commentPosting ? 'not-allowed' : 'pointer',
                         opacity: commentPosting || !commentInput.trim() ? 0.5 : 1,
-                        fontFamily: 'Inter, sans-serif',
+                        fontFamily: "'Space Grotesk', sans-serif",
                       }}
                     >
                       {commentPosting ? 'Posting...' : 'Post'}
@@ -1216,7 +1216,7 @@ export default function VisionTheaterClient({ data }: { data: VisionTheaterData 
                   color: '#55556a',
                   fontWeight: 400,
                   marginTop: '4px',
-                  fontFamily: 'Inter, sans-serif',
+                  fontFamily: "'Space Grotesk', sans-serif",
                 }}
               >
                 {ch.videos.length} videos
@@ -1270,7 +1270,7 @@ export default function VisionTheaterClient({ data }: { data: VisionTheaterData 
             fontSize: '16px',
             fontWeight: 600,
             cursor: 'pointer',
-            fontFamily: 'Inter, sans-serif',
+            fontFamily: "'Space Grotesk', sans-serif",
           }}
         >
           Coming Soon
@@ -1373,7 +1373,7 @@ export default function VisionTheaterClient({ data }: { data: VisionTheaterData 
                     borderRadius: '8px',
                     padding: '12px 14px',
                     fontSize: '14px',
-                    fontFamily: 'Inter, sans-serif',
+                    fontFamily: "'Space Grotesk', sans-serif",
                     outline: 'none',
                   }}
                 />
@@ -1390,7 +1390,7 @@ export default function VisionTheaterClient({ data }: { data: VisionTheaterData 
                     fontWeight: 600,
                     cursor: scoutLoading ? 'not-allowed' : 'pointer',
                     opacity: scoutLoading || !scoutQuery.trim() ? 0.5 : 1,
-                    fontFamily: 'Inter, sans-serif',
+                    fontFamily: "'Space Grotesk', sans-serif",
                   }}
                 >
                   {scoutLoading ? '...' : 'Ask'}
@@ -1434,7 +1434,7 @@ export default function VisionTheaterClient({ data }: { data: VisionTheaterData 
                     padding: '10px 16px',
                     fontSize: '13px',
                     cursor: 'pointer',
-                    fontFamily: 'Inter, sans-serif',
+                    fontFamily: "'Space Grotesk', sans-serif",
                   }}
                 >
                   Don&apos;t show again
@@ -1450,7 +1450,7 @@ export default function VisionTheaterClient({ data }: { data: VisionTheaterData 
                     fontSize: '13px',
                     fontWeight: 600,
                     cursor: 'pointer',
-                    fontFamily: 'Inter, sans-serif',
+                    fontFamily: "'Space Grotesk', sans-serif",
                   }}
                 >
                   Resume Video

@@ -141,7 +141,7 @@ export default function BearsAIChat({ isOpen, onClose }: BearsAIChatProps) {
               AI
             </div>
             <div>
-              <h3 className="text-white font-bold" style={{ fontFamily: "'Montserrat', sans-serif" }}>
+              <h3 className="text-white font-bold" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
                 Bears AI Assistant
               </h3>
               <p className="text-white/70 text-xs">Powered by AI</p>

@@ -486,7 +486,7 @@ export function HomepageFeed({
 }: HomepageFeedProps) {
   const [activeFilter, setActiveFilter] = useState<string>('all');
   const [isMobile, setIsMobile] = useState<boolean>(false);
-  const [chicagoMode, setChicagoMode] = useState<'all' | 'my-teams'>('all');
+  const [feedMode, setFeedMode] = useState<'for-you' | 'latest'>('for-you');
   const [userFavoriteTeams, setUserFavoriteTeams] = useState<string[]>([]);
   const heroSectionRef = useRef<HTMLElement>(null);
   useParallaxHero(heroSectionRef);
@@ -504,19 +504,19 @@ export function HomepageFeed({
   const [hasSufficientData, setHasSufficientData] = useState(false);
   const [profileLoaded, setProfileLoaded] = useState(false);
 
-  // Listen for "My Chicago" mode toggle from Header
+  // Listen for feed mode toggle from Header ("For You" / "Latest")
   useEffect(() => {
     try {
-      const saved = localStorage.getItem('sm-chicago-mode');
-      if (saved === 'my-teams') setChicagoMode('my-teams');
+      const saved = localStorage.getItem('sm-feed-mode');
+      if (saved === 'latest') setFeedMode('latest');
     } catch {}
 
     const handler = (e: Event) => {
       const mode = (e as CustomEvent).detail;
-      setChicagoMode(mode);
+      setFeedMode(mode);
     };
-    window.addEventListener('sm-chicago-mode-change', handler);
-    return () => window.removeEventListener('sm-chicago-mode-change', handler);
+    window.addEventListener('sm-feed-mode-change', handler);
+    return () => window.removeEventListener('sm-feed-mode-change', handler);
   }, []);
 
   // Load user favorite teams for "My Teams" mode
@@ -700,23 +700,19 @@ export function HomepageFeed({
   const safeEditorPicks = Array.isArray(editorPicks) ? editorPicks : [];
   const safeTrendingPosts = Array.isArray(trendingPosts) ? trendingPosts : [];
 
-  // Reorder posts: "My Teams" mode, or scoring for logged-in "all" mode
+  // Reorder posts: "For You" (scored) vs "Latest" (published_at DESC)
   const reorderedPosts = useMemo(() => {
-    // "My Teams" mode: favorite teams first
-    if (chicagoMode === 'my-teams' && userFavoriteTeams.length) {
-      const favSet = new Set(userFavoriteTeams.flatMap((t: string) => {
-        if (t === 'white-sox' || t === 'whitesox') return ['white-sox', 'whitesox'];
-        return [t];
-      }));
-      const favPosts = safePosts.filter((p: any) => favSet.has(p.team_slug?.toLowerCase()));
-      const otherPosts = safePosts.filter((p: any) => !favSet.has(p.team_slug?.toLowerCase()));
-      return [...favPosts, ...otherPosts];
+    // "Latest" mode: pure recency sort
+    if (feedMode === 'latest') {
+      return [...safePosts].sort((a: any, b: any) =>
+        new Date(b.published_at).getTime() - new Date(a.published_at).getTime()
+      );
     }
 
     // Guest or profile not loaded yet: pure recency (unchanged)
     if (!actuallyLoggedIn || !profileLoaded) return safePosts;
 
-    // Logged-in "all" mode: apply scoring
+    // "For You" mode (logged-in): apply engagement scoring
     const profile: UserEngagementProfile = hasSufficientData && engagementProfile
       ? {
           user_id: engagementProfile.user_id,
@@ -732,7 +728,7 @@ export function HomepageFeed({
       viewedPostIds: new Set(),
       isLoggedIn: true,
     }) as any[];
-  }, [safePosts, chicagoMode, userFavoriteTeams, actuallyLoggedIn, profileLoaded, hasSufficientData, engagementProfile]);
+  }, [safePosts, feedMode, actuallyLoggedIn, profileLoaded, hasSufficientData, engagementProfile]);
 
   // Derive favorite teams: explicit favorites > top 2 from engagement profile
   const derivedFavoriteTeams = useMemo(() => {

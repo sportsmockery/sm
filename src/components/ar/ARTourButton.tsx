@@ -141,7 +141,7 @@ export default function ARTourButton({ team, className = '' }: ARTourButtonProps
 
         {/* Content */}
         <div className="p-4">
-          <h3 className="text-lg font-bold mb-1" style={{ color: 'var(--sm-text)', fontFamily: "'Montserrat', sans-serif" }}>
+          <h3 className="text-lg font-bold mb-1" style={{ color: 'var(--sm-text)', fontFamily: "'Space Grotesk', sans-serif" }}>
             {deviceType === 'desktop' ? '3D Stadium Tour' : 'AR Stadium Tour'}
           </h3>
           <p className="text-sm mb-3" style={{ color: 'var(--sm-text-muted)' }}>
@@ -158,7 +158,7 @@ export default function ARTourButton({ team, className = '' }: ARTourButtonProps
             className="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-lg text-white font-bold transition-all hover:opacity-90 active:scale-[0.98]"
             style={{
               backgroundColor: config.teamColor,
-              fontFamily: "'Montserrat', sans-serif"
+              fontFamily: "'Space Grotesk', sans-serif"
             }}
           >
             {deviceType === 'desktop' ? (
@@ -191,7 +191,7 @@ export default function ARTourButton({ team, className = '' }: ARTourButtonProps
             {/* Header */}
             <div className="flex items-center justify-between p-4 border-b border-zinc-800">
               <div>
-                <h2 className="text-xl font-bold text-white" style={{ fontFamily: "'Montserrat', sans-serif" }}>
+                <h2 className="text-xl font-bold text-white" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
                   {config.name}
                 </h2>
                 <p className="text-sm text-zinc-400">{config.mockeryText}</p>

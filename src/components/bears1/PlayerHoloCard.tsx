@@ -106,7 +106,7 @@ export default function PlayerHoloCard({
                   fontSize: 14,
                   fontWeight: 900,
                   color: '#bc0000',
-                  fontFamily: "'SF Mono', monospace",
+                  fontFamily: "'Space Grotesk', sans-serif",
                 }}
               >
                 {jerseyNumber}
@@ -135,7 +135,7 @@ export default function PlayerHoloCard({
             fontSize: 10,
             fontWeight: 700,
             color: '#bc0000',
-            fontFamily: "'SF Mono', monospace",
+            fontFamily: "'Space Grotesk', sans-serif",
             letterSpacing: '0.05em',
           }}
         >
@@ -177,7 +177,7 @@ export default function PlayerHoloCard({
             fontSize: 11,
             fontWeight: 600,
             color: '#bc0000',
-            fontFamily: "'SF Mono', monospace",
+            fontFamily: "'Space Grotesk', sans-serif",
             textAlign: 'center',
             marginTop: 4,
           }}

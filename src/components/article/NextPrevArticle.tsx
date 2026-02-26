@@ -118,7 +118,7 @@ export default function NextPrevArticle({
               <div style={{ flex: 1, minWidth: 0 }}>
                 <p
                   style={{
-                    fontFamily: "'Inter', sans-serif",
+                    fontFamily: "'Space Grotesk', sans-serif",
                     fontSize: '11px',
                     fontWeight: 600,
                     textTransform: 'uppercase',
@@ -178,7 +178,7 @@ export default function NextPrevArticle({
               <div style={{ flex: 1, minWidth: 0 }}>
                 <p
                   style={{
-                    fontFamily: "'Inter', sans-serif",
+                    fontFamily: "'Space Grotesk', sans-serif",
                     fontSize: '11px',
                     fontWeight: 600,
                     textTransform: 'uppercase',

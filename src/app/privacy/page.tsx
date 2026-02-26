@@ -16,7 +16,7 @@ export default function PrivacyPage() {
   }
 
   const paragraphStyle: React.CSSProperties = {
-    fontFamily: "'Inter', sans-serif",
+    fontFamily: "'Space Grotesk', sans-serif",
     fontSize: '16px',
     lineHeight: 1.8,
     color: 'var(--sm-text-muted)',
@@ -24,7 +24,7 @@ export default function PrivacyPage() {
   }
 
   const listItemStyle: React.CSSProperties = {
-    fontFamily: "'Inter', sans-serif",
+    fontFamily: "'Space Grotesk', sans-serif",
     fontSize: '16px',
     lineHeight: 1.8,
     color: 'var(--sm-text-muted)',

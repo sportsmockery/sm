@@ -45,7 +45,7 @@
 
   background: var(--hm-dark);
   color: var(--hm-text);
-  font-family: var(--font-inter), 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  font-family: var(--font-sans);
   -webkit-font-smoothing: antialiased;
   min-height: 100vh;
 }
@@ -292,7 +292,7 @@
 }
 .hm-glass-card:hover::before { opacity: 1; }
 .hm-glass-card h3 {
-  font-family: var(--font-montserrat), 'Montserrat', sans-serif;
+  font-family: var(--font-sans);
   font-size: 20px; font-weight: 600; margin-bottom: 10px;
   letter-spacing: -0.3px; color: #fff;
 }
@@ -366,7 +366,7 @@
   animation: hm-pulse 2s infinite;
 }
 .hm-hero h1 {
-  font-family: var(--font-bebas-neue), 'Bebas Neue', Impact, sans-serif;
+  font-family: var(--font-sans);
   font-size: clamp(4rem, 9vw, 7.5rem);
   font-weight: 400;
   line-height: 0.95;
@@ -446,7 +446,7 @@
 /* ── FEATURES GRID ── */
 .hm-features-header { text-align: center; margin-bottom: 64px; }
 .hm-features-header h2 {
-  font-family: var(--font-montserrat), 'Montserrat', sans-serif;
+  font-family: var(--font-sans);
   font-size: clamp(2rem, 4vw, 3rem); font-weight: 700;
   letter-spacing: -1px; margin-top: 20px; margin-bottom: 16px; color: #fff;
 }
@@ -473,14 +473,14 @@
 .hm-mock-bar-long { width: 85%; }
 .hm-mock-bar-accent { background: var(--hm-gradient-subtle); width: 50%; }
 .hm-showcase-text h2 {
-  font-family: var(--font-montserrat), 'Montserrat', sans-serif;
+  font-family: var(--font-sans);
   font-size: clamp(1.8rem, 3.5vw, 2.5rem); font-weight: 700;
   letter-spacing: -1px; margin-top: 20px; margin-bottom: 16px; color: #fff;
 }
 .hm-showcase-text p { color: var(--hm-text-muted); font-size: 16px; line-height: 1.7; margin-bottom: 24px; }
 .hm-stats { display: flex; gap: 32px; margin-top: 32px; }
 .hm-stat-item h4 {
-  font-family: var(--font-montserrat), 'Montserrat', sans-serif;
+  font-family: var(--font-sans);
   font-size: 28px; font-weight: 700; letter-spacing: -1px; color: #fff;
 }
 .hm-stat-item span { font-size: 13px; color: var(--hm-text-dim); }
@@ -488,7 +488,7 @@
 /* ── CTA SECTION ── */
 .hm-cta-section { text-align: center; padding: 120px 0; background: var(--hm-dark); }
 .hm-cta-section h2 {
-  font-family: var(--font-montserrat), 'Montserrat', sans-serif;
+  font-family: var(--font-sans);
   font-size: clamp(2rem, 4vw, 3rem); font-weight: 700;
   letter-spacing: -1px; margin: 20px 0 16px; color: #fff;
 }
@@ -507,7 +507,7 @@
 }
 .hm-page-hero .hm-hero-content { max-width: 700px; margin: 0 auto; }
 .hm-page-hero h1 {
-  font-family: var(--font-montserrat), 'Montserrat', sans-serif;
+  font-family: var(--font-sans);
   font-size: clamp(2.5rem, 5vw, 4rem); font-weight: 800;
   letter-spacing: -1.5px; margin-bottom: 16px; color: #fff;
 }
@@ -750,7 +750,7 @@
   border-radius: 16px; padding: 24px; text-align: center;
 }
 .hm-stat-value {
-  font-family: var(--font-montserrat), 'Montserrat', sans-serif;
+  font-family: var(--font-sans);
   font-size: 32px; font-weight: 700; color: #fff;
   letter-spacing: -1px;
 }
@@ -824,7 +824,7 @@
 }
 .hm-price-name { font-size: 16px; font-weight: 600; color: #fff; margin-bottom: 4px; }
 .hm-price-amount {
-  font-family: var(--font-montserrat), 'Montserrat', sans-serif;
+  font-family: var(--font-sans);
   font-size: 48px; font-weight: 800; color: #fff;
   letter-spacing: -2px; margin: 16px 0 4px;
 }
@@ -874,7 +874,7 @@
   margin-bottom: 24px; font-size: 13px; color: var(--hm-text-muted);
 }
 .hm-article-title {
-  font-family: var(--font-montserrat), 'Montserrat', sans-serif;
+  font-family: var(--font-sans);
   font-size: clamp(2rem, 4vw, 3rem); font-weight: 800;
   letter-spacing: -1px; line-height: 1.1; margin-bottom: 24px;
   color: #fff;
@@ -888,7 +888,7 @@
   font-size: 16px; line-height: 1.8; color: var(--hm-text-muted);
 }
 .hm-article-content h2 {
-  font-family: var(--font-montserrat), 'Montserrat', sans-serif;
+  font-family: var(--font-sans);
   font-size: 24px; font-weight: 700; color: #fff;
   margin: 48px 0 16px; letter-spacing: -0.5px;
 }
@@ -1107,7 +1107,7 @@
   box-shadow: 0 8px 24px var(--hm-red-glow);
 }
 .hm-modal-title {
-  font-family: var(--font-montserrat), 'Montserrat', sans-serif;
+  font-family: var(--font-sans);
   font-size: 26px; font-weight: 700;
   text-align: center; margin-bottom: 16px;
   letter-spacing: -0.5px; line-height: 1.2; color: #fff;
@@ -1266,7 +1266,7 @@
 }
 .hm-feed-header-content { max-width: 700px; margin: 0 auto; }
 .hm-feed-header h1 {
-  font-family: var(--font-montserrat), 'Montserrat', sans-serif;
+  font-family: var(--font-sans);
   font-size: clamp(2.5rem, 5vw, 3.5rem);
   font-weight: 800;
   letter-spacing: -1.5px;
@@ -1282,7 +1282,7 @@
   margin-bottom: 32px;
 }
 .hm-section-header h2 {
-  font-family: var(--font-montserrat), 'Montserrat', sans-serif;
+  font-family: var(--font-sans);
   font-size: 24px; font-weight: 700; letter-spacing: -0.5px; color: var(--hm-text);
 }
 .hm-section-header span { font-size: 14px; color: var(--hm-text-dim); }
@@ -1849,7 +1849,7 @@
   border: 1px solid rgba(255,255,255,0.06);
   border-radius: 12px;
   overflow: hidden;
-  font-family: 'Inter', sans-serif;
+  font-family: var(--font-sans);
 }
 .preview-topbar {
   display: flex; align-items: center; gap: 8px;

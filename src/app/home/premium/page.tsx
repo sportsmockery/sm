@@ -179,7 +179,7 @@ export default function PremiumPage() {
         {/* Perks */}
         <div style={{ textAlign: 'center', marginBottom: 48 }}>
           <span className="hm-tag">What You Get</span>
-          <h2 style={{ fontFamily: 'var(--font-montserrat), Montserrat, sans-serif', fontSize: 'clamp(1.8rem, 3vw, 2.5rem)', fontWeight: 700, letterSpacing: -1, marginTop: 20, color: '#fff' }}>
+          <h2 style={{ fontFamily: "'Space Grotesk', sans-serif", fontSize: 'clamp(1.8rem, 3vw, 2.5rem)', fontWeight: 700, letterSpacing: -1, marginTop: 20, color: '#fff' }}>
             Premium Perks
           </h2>
         </div>
@@ -196,7 +196,7 @@ export default function PremiumPage() {
         {/* FAQ */}
         <div style={{ textAlign: 'center', marginBottom: 48 }}>
           <span className="hm-tag">FAQ</span>
-          <h2 style={{ fontFamily: 'var(--font-montserrat), Montserrat, sans-serif', fontSize: 'clamp(1.8rem, 3vw, 2.5rem)', fontWeight: 700, letterSpacing: -1, marginTop: 20, color: '#fff' }}>
+          <h2 style={{ fontFamily: "'Space Grotesk', sans-serif", fontSize: 'clamp(1.8rem, 3vw, 2.5rem)', fontWeight: 700, letterSpacing: -1, marginTop: 20, color: '#fff' }}>
             Common Questions
           </h2>
         </div>

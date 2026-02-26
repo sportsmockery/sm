@@ -248,7 +248,7 @@ export default function PollResultsPage() {
                   background: 'var(--sm-surface)',
                   borderRadius: 'var(--sm-radius-sm)',
                   fontSize: 14,
-                  fontFamily: 'monospace',
+                  fontFamily: "'Space Grotesk', sans-serif",
                   color: 'var(--sm-text)',
                   border: '1px solid var(--sm-border)',
                 }}>
@@ -274,7 +274,7 @@ export default function PollResultsPage() {
                   background: 'var(--sm-surface)',
                   borderRadius: 'var(--sm-radius-sm)',
                   fontSize: 14,
-                  fontFamily: 'monospace',
+                  fontFamily: "'Space Grotesk', sans-serif",
                   color: 'var(--sm-text)',
                   border: '1px solid var(--sm-border)',
                   overflow: 'hidden',

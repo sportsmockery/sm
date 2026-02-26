@@ -105,7 +105,7 @@ export default function ArticleTableOfContents({
         <div className="mb-4">
           <span
             className="text-[11px] font-semibold tracking-[0.1em] uppercase"
-            style={{ color: 'var(--sm-text-muted)', fontFamily: "'Montserrat', sans-serif" }}
+            style={{ color: 'var(--sm-text-muted)', fontFamily: "'Space Grotesk', sans-serif" }}
           >
             Contents
           </span>
@@ -183,7 +183,7 @@ export default function ArticleTableOfContents({
           </svg>
           <span
             className="text-[13px] font-semibold uppercase tracking-wide"
-            style={{ color: 'var(--sm-text)', fontFamily: "'Montserrat', sans-serif" }}
+            style={{ color: 'var(--sm-text)', fontFamily: "'Space Grotesk', sans-serif" }}
           >
             In This Article
           </span>

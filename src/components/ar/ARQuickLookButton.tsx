@@ -1,8 +1,6 @@
 'use client'
 
-import { Montserrat } from 'next/font/google'
 
-const montserrat = Montserrat({ subsets: ['latin'], weight: ['700'] })
 
 // Stadium configurations for each team
 const STADIUM_CONFIG: Record<string, {
@@ -70,7 +68,7 @@ export default function ARQuickLookButton({ team, className = '' }: ARQuickLookB
 
   return (
     <div className={`p-4 ${className}`} style={{ backgroundColor: 'var(--sm-surface)', border: '1px solid var(--sm-border)' }}>
-      <h3 className={`text-lg mb-2 ${montserrat.className}`} style={{ color: 'var(--sm-text)' }}>
+      <h3 className={`text-lg mb-2 `} style={{ color: 'var(--sm-text)' }}>
         AR Stadium Tour
       </h3>
 
@@ -88,7 +86,7 @@ export default function ARQuickLookButton({ team, className = '' }: ARQuickLookB
           text-white font-bold rounded
           transition-colors
           focus:outline-none focus:ring-2 focus:ring-red-600 focus:ring-offset-2 focus:ring-offset-zinc-900
-          ${montserrat.className}
+          
         `}
         aria-label={`View ${config.name} in augmented reality`}
       >

@@ -27,7 +27,6 @@
  */
 
 import { useState, useEffect, useRef } from 'react'
-import { Montserrat } from 'next/font/google'
 import { motion, AnimatePresence } from 'framer-motion'
 import {
   Chart as ChartJS,
@@ -56,7 +55,6 @@ ChartJS.register(
   Filler
 )
 
-const montserrat = Montserrat({ subsets: ['latin'], weight: ['700'] })
 
 // Highlight types
 type HighlightType = 'chart' | 'data' | 'meme' | 'commentary' | 'video_highlight'
@@ -195,7 +193,7 @@ export default function AIHighlights({ teamSlug, teamName, className = '' }: AIH
     return (
       <div className={`bg-[var(--sm-card)] border border-[var(--sm-border)] rounded-lg overflow-hidden ${className}`}>
         <div className="px-4 py-3 border-b border-red-600 bg-gradient-to-r from-red-600 to-red-700">
-          <h3 className={`text-white text-lg ${montserrat.className}`}>
+          <h3 className={`text-white text-lg `}>
             AI-Generated Mockery Highlights
           </h3>
         </div>
@@ -215,7 +213,7 @@ export default function AIHighlights({ teamSlug, teamName, className = '' }: AIH
     return (
       <div className={`bg-[var(--sm-card)] border border-[var(--sm-border)] rounded-lg overflow-hidden ${className}`}>
         <div className="px-4 py-3 border-b border-red-600">
-          <h3 className={`text-[var(--sm-text)] text-lg ${montserrat.className}`}>
+          <h3 className={`text-[var(--sm-text)] text-lg `}>
             AI Highlights
           </h3>
         </div>
@@ -235,7 +233,7 @@ export default function AIHighlights({ teamSlug, teamName, className = '' }: AIH
       <header className="px-4 py-3 border-b border-red-600 bg-gradient-to-r from-red-600 to-red-700">
         <h3
           id="ai-highlights-title"
-          className={`text-white text-lg flex items-center gap-2 ${montserrat.className}`}
+          className={`text-white text-lg flex items-center gap-2 `}
         >
           <span className="text-xl">🤖</span>
           AI-Generated Mockery Highlights
@@ -353,7 +351,7 @@ function HighlightItem({
               {formatTime(highlight.timestamp)}
             </time>
           </div>
-          <h4 className={`text-sm font-medium text-[var(--sm-text)] line-clamp-2 ${montserrat.className}`}>
+          <h4 className={`text-sm font-medium text-[var(--sm-text)] line-clamp-2 `}>
             {highlight.title}
           </h4>
         </div>
@@ -485,7 +483,7 @@ function ChartHighlight({
 function DataHighlight({ content }: { content: string }) {
   return (
     <div className="bg-[var(--sm-surface)] rounded-lg p-4">
-      <p className={`text-2xl font-bold text-[var(--sm-text)] ${montserrat.className}`}>
+      <p className={`text-2xl font-bold text-[var(--sm-text)] `}>
         {content}
       </p>
     </div>
@@ -553,7 +551,7 @@ function VideoHighlight({ data, title }: { data: VideoHighlightData; title: stri
         {/* Mockery overlay text */}
         {data.overlay_text && (
           <div className="absolute bottom-0 left-0 right-0 p-3 bg-gradient-to-t from-black/90 via-black/60 to-transparent pointer-events-none">
-            <p className={`text-white text-sm font-bold drop-shadow-lg ${montserrat.className}`}>
+            <p className={`text-white text-sm font-bold drop-shadow-lg `}>
               {data.overlay_text}
             </p>
           </div>

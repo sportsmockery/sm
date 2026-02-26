@@ -1,10 +1,8 @@
 'use client'
 
 import { useState } from 'react'
-import { Montserrat } from 'next/font/google'
 import { motion, AnimatePresence } from 'framer-motion'
 
-const montserrat = Montserrat({ subsets: ['latin'], weight: ['700'] })
 
 interface NewsletterCTAProps {
   title?: string
@@ -71,7 +69,7 @@ export default function NewsletterCTA({
         {/* Title */}
         <h2
           id="newsletter-title"
-          className={`text-2xl md:text-3xl text-white mb-3 ${montserrat.className}`}
+          className={`text-2xl md:text-3xl text-white mb-3 `}
         >
           {title}
         </h2>
@@ -98,7 +96,7 @@ export default function NewsletterCTA({
           <button
             type="submit"
             disabled={status === 'loading' || status === 'success'}
-            className={`px-6 py-3 bg-red-600 text-white font-bold uppercase tracking-wide hover:bg-red-700 transition-colors focus:outline-none focus:ring-2 focus:ring-red-600 focus:ring-offset-2 focus:ring-offset-zinc-900 disabled:opacity-50 disabled:cursor-not-allowed ${montserrat.className}`}
+            className={`px-6 py-3 bg-red-600 text-white font-bold uppercase tracking-wide hover:bg-red-700 transition-colors focus:outline-none focus:ring-2 focus:ring-red-600 focus:ring-offset-2 focus:ring-offset-zinc-900 disabled:opacity-50 disabled:cursor-not-allowed `}
           >
             {status === 'loading' ? (
               <span className="flex items-center gap-2">

@@ -164,7 +164,7 @@ export default function TeamDataHubContent({ teamKey }: TeamDataHubContentProps)
               </div>
               <h1
                 className="text-white text-2xl md:text-4xl font-black uppercase"
-                style={{ fontFamily: "'Montserrat', sans-serif" }}
+                style={{ fontFamily: "'Space Grotesk', sans-serif" }}
               >
                 {team.name} Data Hub
               </h1>
@@ -226,7 +226,7 @@ export default function TeamDataHubContent({ teamKey }: TeamDataHubContentProps)
               <div className="flex items-center justify-between mb-6">
                 <h2
                   className="text-[18px] font-bold text-[var(--sm-text)] uppercase pb-2 border-b-[3px]"
-                  style={{ borderColor: team.secondaryColor, fontFamily: "'Montserrat', sans-serif" }}
+                  style={{ borderColor: team.secondaryColor, fontFamily: "'Space Grotesk', sans-serif" }}
                 >
                   Latest {team.shortName} News
                 </h2>
@@ -304,7 +304,7 @@ export default function TeamDataHubContent({ teamKey }: TeamDataHubContentProps)
                             className={`font-bold text-[var(--sm-text)] leading-tight group-hover:opacity-80 transition-colors ${
                               index === 0 ? 'text-[18px] md:text-[22px] line-clamp-3' : 'text-[15px] line-clamp-2'
                             }`}
-                            style={{ fontFamily: "'Montserrat', sans-serif" }}
+                            style={{ fontFamily: "'Space Grotesk', sans-serif" }}
                           >
                             {post.title}
                           </h3>
@@ -349,7 +349,7 @@ export default function TeamDataHubContent({ teamKey }: TeamDataHubContentProps)
             <div className="bg-[var(--sm-card)] rounded-xl p-6 shadow-sm">
               <h3
                 className="text-[16px] font-bold text-[var(--sm-text)] uppercase mb-4 pb-2 border-b-2"
-                style={{ borderColor: team.secondaryColor, fontFamily: "'Montserrat', sans-serif" }}
+                style={{ borderColor: team.secondaryColor, fontFamily: "'Space Grotesk', sans-serif" }}
               >
                 Quick Links
               </h3>
@@ -392,7 +392,7 @@ export default function TeamDataHubContent({ teamKey }: TeamDataHubContentProps)
             <div className="bg-[var(--sm-card)] rounded-xl p-6 shadow-sm">
               <h3
                 className="text-[16px] font-bold text-[var(--sm-text)] uppercase mb-4 pb-2 border-b-2 border-[var(--sm-border)]"
-                style={{ fontFamily: "'Montserrat', sans-serif" }}
+                style={{ fontFamily: "'Space Grotesk', sans-serif" }}
               >
                 Other Teams
               </h3>

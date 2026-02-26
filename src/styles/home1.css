@@ -35,7 +35,7 @@
   min-height: 100vh;
   background: var(--h1-black);
   color: var(--h1-text);
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  font-family: var(--font-sans);
   overflow-x: hidden;
 }
 
@@ -161,7 +161,7 @@
   padding: 24px;
   position: relative;
   overflow: hidden;
-  font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace;
+  font-family: var(--font-sans);
 }
 
 .h1-diagnostic-pulse {

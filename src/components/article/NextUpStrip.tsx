@@ -25,7 +25,7 @@ export default function NextUpStrip({ articles, categorySlug }: NextUpStripProps
         letterSpacing: '0.1em',
         color: 'var(--sm-text-muted)',
         marginBottom: 10,
-        fontFamily: "'Montserrat', sans-serif",
+        fontFamily: "'Space Grotesk', sans-serif",
       }}>
         Next Up
       </div>

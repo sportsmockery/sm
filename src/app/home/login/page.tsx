@@ -75,7 +75,7 @@ export default async function HomeLoginPage({ searchParams }: LoginPageProps) {
 
             {/* Heading */}
             <h1 style={{
-              fontFamily: 'var(--font-montserrat), Montserrat, sans-serif',
+              fontFamily: "'Space Grotesk', sans-serif",
               fontSize: 38, fontWeight: 800, letterSpacing: -1.5,
               color: '#fff', marginBottom: 10, lineHeight: 1.1,
             }}>
@@ -121,7 +121,7 @@ export default async function HomeLoginPage({ searchParams }: LoginPageProps) {
             </p>
 
             <h2 className="hm-login-reveal hm-login-d3" style={{
-              fontFamily: 'var(--font-montserrat), Montserrat, sans-serif',
+              fontFamily: "'Space Grotesk', sans-serif",
               fontSize: 28, fontWeight: 700, color: '#fff',
               marginTop: 8, textAlign: 'center', letterSpacing: -0.5,
             }}>

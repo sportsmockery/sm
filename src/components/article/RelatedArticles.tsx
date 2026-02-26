@@ -151,7 +151,7 @@ export default function RelatedArticles({
               {article.excerpt && (
                 <p
                   style={{
-                    fontFamily: "'Inter', sans-serif",
+                    fontFamily: "'Space Grotesk', sans-serif",
                     fontSize: '14px',
                     lineHeight: 1.6,
                     color: 'var(--sm-text-muted)',
@@ -172,7 +172,7 @@ export default function RelatedArticles({
                   display: 'flex',
                   alignItems: 'center',
                   gap: '8px',
-                  fontFamily: "'Inter', sans-serif",
+                  fontFamily: "'Space Grotesk', sans-serif",
                   fontSize: '12px',
                   color: 'var(--sm-text-dim)',
                 }}

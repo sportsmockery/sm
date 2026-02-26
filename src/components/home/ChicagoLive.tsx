@@ -44,7 +44,7 @@ export default function ChicagoLive({ heroStory, upcomingGames }: ChicagoLivePro
             <span className="w-2 h-2 bg-red-500 rounded-full animate-pulse" />
             <h2
               className="text-lg md:text-xl font-bold"
-              style={{ fontFamily: "'Montserrat', sans-serif", color: 'var(--sm-text)' }}
+              style={{ fontFamily: "'Space Grotesk', sans-serif", color: 'var(--sm-text)' }}
             >
               Chicago Live
             </h2>
@@ -95,7 +95,7 @@ export default function ChicagoLive({ heroStory, upcomingGames }: ChicagoLivePro
                     {/* Title */}
                     <h3
                       className="text-xl md:text-2xl lg:text-3xl font-bold text-white mb-2 line-clamp-3 group-hover:text-[#ff6b35] transition-colors"
-                      style={{ fontFamily: "'Montserrat', sans-serif" }}
+                      style={{ fontFamily: "'Space Grotesk', sans-serif" }}
                     >
                       {heroStory.title}
                     </h3>
@@ -128,7 +128,7 @@ export default function ChicagoLive({ heroStory, upcomingGames }: ChicagoLivePro
               <h3
                 className="text-sm font-bold uppercase tracking-wider mb-4 pb-3"
                 style={{
-                  fontFamily: "'Montserrat', sans-serif",
+                  fontFamily: "'Space Grotesk', sans-serif",
                   color: 'var(--sm-text)',
                   borderBottom: '2px solid #bc0000'
                 }}

@@ -2,10 +2,8 @@
 
 import Link from 'next/link'
 import Image from 'next/image'
-import { Montserrat } from 'next/font/google'
 import { motion } from 'framer-motion'
 
-const montserrat = Montserrat({ subsets: ['latin'], weight: ['700'] })
 
 interface Article {
   id: string
@@ -55,7 +53,7 @@ export default function ArticleGrid({
         <header className="mb-6 pb-3 border-b-4 border-red-600">
           <h2
             id="article-grid-title"
-            className={`text-2xl uppercase tracking-wide ${montserrat.className}`}
+            className={`text-2xl uppercase tracking-wide `}
             style={{ color: 'var(--sm-text)' }}
           >
             {title}
@@ -121,7 +119,7 @@ function ArticleCard({
 
             {/* Title - 24pt */}
             <h3
-              className={`text-lg leading-snug group-hover:text-red-600 transition-colors line-clamp-2 ${montserrat.className}`}
+              className={`text-lg leading-snug group-hover:text-red-600 transition-colors line-clamp-2 `}
               style={{ color: 'var(--sm-text)' }}
             >
               {article.title}

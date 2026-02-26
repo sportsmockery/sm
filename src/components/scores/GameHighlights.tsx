@@ -1,9 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { Montserrat } from 'next/font/google'
 
-const montserrat = Montserrat({ subsets: ['latin'], weight: ['700'] })
 
 // Chicago sports content creators by sport
 const CHICAGO_CHANNELS_BY_SPORT: Record<string, ChannelInfo[]> = {
@@ -230,7 +228,7 @@ export default function GameHighlights({
     <div className={`rounded-2xl overflow-hidden ${className}`} style={{ backgroundColor: 'var(--sm-card)', border: '1px solid var(--sm-border)' }}>
       {/* Header */}
       <div className="px-4 py-3" style={{ backgroundColor: teamColor, borderBottom: '1px solid var(--sm-border)' }}>
-        <h3 className={`text-white text-lg flex items-center gap-2 ${montserrat.className}`}>
+        <h3 className={`text-white text-lg flex items-center gap-2 `}>
           <span>🎬</span> Chicago Sports Coverage
         </h3>
         <p className="text-white/60 text-xs mt-1">From local creators who live & breathe Chicago {sportLabel}</p>

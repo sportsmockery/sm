@@ -1,10 +1,8 @@
 'use client'
 
 import Link from 'next/link'
-import { Montserrat } from 'next/font/google'
 import { motion } from 'framer-motion'
 
-const montserrat = Montserrat({ subsets: ['latin'], weight: ['700'] })
 
 interface HeroArticle {
   id: string
@@ -79,7 +77,7 @@ export default function HeroSection({
         <h1 className="mb-3">
           <Link
             href={`/${article.category.slug}/${article.slug}`}
-            className={`text-4xl md:text-5xl hover:text-red-600 transition-colors focus:outline-none focus:underline focus:decoration-red-600 ${montserrat.className}`}
+            className={`text-4xl md:text-5xl hover:text-red-600 transition-colors focus:outline-none focus:underline focus:decoration-red-600 `}
             style={{ color: 'var(--sm-text)' }}
           >
             {article.title}

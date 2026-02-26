@@ -1,10 +1,8 @@
 'use client'
 
 import Link from 'next/link'
-import { Montserrat } from 'next/font/google'
 import { motion } from 'framer-motion'
 
-const montserrat = Montserrat({ subsets: ['latin'], weight: ['700'] })
 
 interface TrendingItem {
   id: string
@@ -51,7 +49,7 @@ export default function TrendingSidebar({
       <header className="px-4 py-3 border-b border-red-600" style={{ backgroundColor: 'var(--sm-surface)' }}>
         <h2
           id="trending-sidebar-title"
-          className={`text-lg uppercase tracking-wide flex items-center gap-2 ${montserrat.className}`}
+          className={`text-lg uppercase tracking-wide flex items-center gap-2 `}
           style={{ color: 'var(--sm-text)' }}
         >
           <span className="text-red-600">🔥</span>

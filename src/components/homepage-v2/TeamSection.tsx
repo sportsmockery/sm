@@ -1,10 +1,8 @@
 'use client'
 
 import Link from 'next/link'
-import { Montserrat } from 'next/font/google'
 import { motion } from 'framer-motion'
 
-const montserrat = Montserrat({ subsets: ['latin'], weight: ['700'] })
 
 type TeamName = 'bears' | 'bulls' | 'blackhawks' | 'cubs' | 'whitesox'
 
@@ -107,7 +105,7 @@ function TeamCard({ team, index }: { team: Team; index: number }) {
         <div className="flex items-center justify-between">
           <Link
             href={`/${team.slug}`}
-            className={`text-white text-lg uppercase tracking-wide hover:underline focus:outline-none focus:underline ${montserrat.className}`}
+            className={`text-white text-lg uppercase tracking-wide hover:underline focus:outline-none focus:underline `}
           >
             {team.name}
           </Link>

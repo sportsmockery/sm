@@ -103,7 +103,7 @@
 }
 
 .sm-section-header h2 {
-  font-family: 'Montserrat', sans-serif;
+  font-family: var(--font-sans);
   font-size: 1.5rem;
   font-weight: 800;
   color: var(--sm-text);
@@ -248,7 +248,7 @@
 .sm-hero-tag {
   display: inline-block;
   padding: 4px 10px;
-  font-family: 'Montserrat', sans-serif;
+  font-family: var(--font-sans);
   font-size: 0.625rem;
   font-weight: 700;
   text-transform: uppercase;
@@ -259,7 +259,7 @@
 }
 
 .sm-hero-title {
-  font-family: 'Montserrat', sans-serif;
+  font-family: var(--font-sans);
   font-weight: 800;
   color: white;
   line-height: 1.2;
@@ -391,7 +391,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  font-family: 'Montserrat', sans-serif;
+  font-family: var(--font-sans);
   font-size: 0.75rem;
   font-weight: 700;
   color: var(--sm-text-muted);
@@ -421,7 +421,7 @@
   flex-shrink: 0;
   display: inline-block;
   padding: 3px 8px;
-  font-family: 'Montserrat', sans-serif;
+  font-family: var(--font-sans);
   font-size: 0.625rem;
   font-weight: 700;
   text-transform: uppercase;
@@ -630,7 +630,7 @@
 .sm-featured-tag {
   display: inline-block;
   padding: 3px 8px;
-  font-family: 'Montserrat', sans-serif;
+  font-family: var(--font-sans);
   font-size: 0.625rem;
   font-weight: 700;
   text-transform: uppercase;
@@ -641,7 +641,7 @@
 }
 
 .sm-featured-title {
-  font-family: 'Montserrat', sans-serif;
+  font-family: var(--font-sans);
   font-weight: 700;
   color: white;
   line-height: 1.25;
@@ -802,7 +802,7 @@
 .sm-latest-tag {
   display: inline-block;
   padding: 2px 6px;
-  font-family: 'Montserrat', sans-serif;
+  font-family: var(--font-sans);
   font-size: 0.5625rem;
   font-weight: 700;
   text-transform: uppercase;
@@ -825,7 +825,7 @@
 }
 
 .sm-latest-title {
-  font-family: 'Montserrat', sans-serif;
+  font-family: var(--font-sans);
   font-size: 0.9375rem;
   font-weight: 600;
   color: var(--sm-text);
@@ -962,7 +962,7 @@
 .sm-seasonal-tag {
   display: inline-block;
   padding: 3px 8px;
-  font-family: 'Montserrat', sans-serif;
+  font-family: var(--font-sans);
   font-size: 0.625rem;
   font-weight: 700;
   text-transform: uppercase;
@@ -973,7 +973,7 @@
 }
 
 .sm-seasonal-main-title {
-  font-family: 'Montserrat', sans-serif;
+  font-family: var(--font-sans);
   font-size: 1rem;
   font-weight: 700;
   color: white;
@@ -1112,7 +1112,7 @@
 .sm-evergreen-tag {
   display: inline-block;
   padding: 3px 6px;
-  font-family: 'Montserrat', sans-serif;
+  font-family: var(--font-sans);
   font-size: 0.5625rem;
   font-weight: 700;
   text-transform: uppercase;
@@ -1123,7 +1123,7 @@
 }
 
 .sm-evergreen-title {
-  font-family: 'Montserrat', sans-serif;
+  font-family: var(--font-sans);
   font-size: 0.875rem;
   font-weight: 700;
   color: white;
@@ -1146,7 +1146,7 @@
   align-items: center;
   gap: 4px;
   padding: 3px 8px;
-  font-family: 'Montserrat', sans-serif;
+  font-family: var(--font-sans);
   font-size: 0.625rem;
   font-weight: 600;
   text-transform: uppercase;

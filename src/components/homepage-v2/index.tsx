@@ -1,7 +1,6 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { Montserrat } from 'next/font/google'
 import { motion, AnimatePresence } from 'framer-motion'
 
 // Import all homepage components
@@ -15,7 +14,6 @@ import TeamSection from './TeamSection'
 import NewsletterCTA from './NewsletterCTA'
 import AROverlay from './AROverlay'
 
-const montserrat = Montserrat({ subsets: ['latin'], weight: ['700'] })
 
 /**
  * Homepage V2 - SportsMockery Redesign
@@ -157,7 +155,7 @@ export default function HomepageV2() {
           <p className="mb-4" style={{ color: 'var(--sm-text-muted)' }}>{error}</p>
           <button
             onClick={() => window.location.reload()}
-            className={`px-6 py-3 bg-red-600 text-white font-bold hover:bg-red-700 ${montserrat.className}`}
+            className={`px-6 py-3 bg-red-600 text-white font-bold hover:bg-red-700 `}
           >
             Try Again
           </button>
@@ -223,7 +221,7 @@ export default function HomepageV2() {
 
             {/* AR Button in sidebar */}
             <div className="p-4 border border-red-600" style={{ backgroundColor: 'var(--sm-surface)' }}>
-              <h3 className={`text-white text-lg mb-3 ${montserrat.className}`}>
+              <h3 className={`text-white text-lg mb-3 `}>
                 AR Experience
               </h3>
               <p className="text-sm mb-4 font-serif" style={{ color: 'var(--sm-text-muted)' }}>
@@ -231,7 +229,7 @@ export default function HomepageV2() {
               </p>
               <button
                 onClick={handleARClick}
-                className={`w-full px-4 py-3 bg-red-600 text-white font-bold hover:bg-red-700 transition-colors focus:outline-none focus:ring-2 focus:ring-red-600 ${montserrat.className}`}
+                className={`w-full px-4 py-3 bg-red-600 text-white font-bold hover:bg-red-700 transition-colors focus:outline-none focus:ring-2 focus:ring-red-600 `}
               >
                 {isElite ? '🎮 View in AR' : '🔒 Unlock AR Mockery - Elite Only'}
               </button>

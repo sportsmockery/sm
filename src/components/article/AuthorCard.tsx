@@ -85,7 +85,7 @@ export default function AuthorCard({
         {author.title && (
           <p
             style={{
-              fontFamily: "'Inter', sans-serif",
+              fontFamily: "'Space Grotesk', sans-serif",
               fontSize: '13px',
               color: 'var(--sm-red)',
               marginTop: '4px',
@@ -100,7 +100,7 @@ export default function AuthorCard({
       {author.bio && (
         <p
           style={{
-            fontFamily: "'Inter', sans-serif",
+            fontFamily: "'Space Grotesk', sans-serif",
             fontSize: '14px',
             lineHeight: 1.6,
             color: 'var(--sm-text-muted)',

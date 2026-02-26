@@ -2,10 +2,8 @@
 
 import Link from 'next/link'
 import Image from 'next/image'
-import { Montserrat } from 'next/font/google'
 import { motion } from 'framer-motion'
 
-const montserrat = Montserrat({ subsets: ['latin'], weight: ['700'] })
 
 interface Game {
   id: string
@@ -53,7 +51,7 @@ export default function UpcomingGames({
       <header className="px-4 py-3 border-b border-red-600" style={{ backgroundColor: 'var(--sm-surface)' }}>
         <h2
           id="upcoming-games-title"
-          className={`text-lg uppercase tracking-wide ${montserrat.className}`}
+          className={`text-lg uppercase tracking-wide `}
           style={{ color: 'var(--sm-text)' }}
         >
           {title}
@@ -94,7 +92,7 @@ export default function UpcomingGames({
                           className="w-6 h-6 object-contain"
                         />
                       )}
-                      <span className={`font-bold ${montserrat.className}`} style={{ color: 'var(--sm-text)' }}>
+                      <span className={`font-bold `} style={{ color: 'var(--sm-text)' }}>
                         {game.team}
                       </span>
                     </div>

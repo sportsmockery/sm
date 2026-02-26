@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono, Inter, JetBrains_Mono, Bebas_Neue, Exo_2, Space_Grotesk } from "next/font/google";
-import { Montserrat } from "next/font/google";
+import { Space_Grotesk } from "next/font/google";
 import "./globals.css";
 import "@/styles/homepage.css";
 import { ThemeProvider } from "@/contexts/ThemeContext";
@@ -26,46 +25,6 @@ import LiveStrip from "@/components/layout/LiveStrip";
 // import BearsAIButton from "@/components/bears/BearsAIButton";
 // import FloatingChatButton from "@/components/chat/FloatingChatButton";
 // import FloatingARButton from "@/components/ar/FloatingARButton";
-
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
-});
-
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
-});
-
-const montserrat = Montserrat({
-  variable: "--font-montserrat",
-  subsets: ["latin"],
-  weight: ["400", "500", "600", "700", "800", "900"],
-});
-
-const inter = Inter({
-  variable: "--font-inter",
-  subsets: ["latin"],
-  weight: ["400", "500", "600", "700", "800", "900"],
-});
-
-const jetbrainsMono = JetBrains_Mono({
-  variable: "--font-jetbrains-mono",
-  subsets: ["latin"],
-  weight: ["400", "500", "600", "700"],
-});
-
-const bebasNeue = Bebas_Neue({
-  variable: "--font-bebas-neue",
-  subsets: ["latin"],
-  weight: "400",
-});
-
-const exo2 = Exo_2({
-  variable: "--font-exo2",
-  subsets: ["latin"],
-  weight: ["400", "500", "600", "700", "800"],
-});
 
 const spaceGrotesk = Space_Grotesk({
   variable: "--font-space-grotesk",
@@ -170,7 +129,7 @@ export default function RootLayout({
         />
       </head>
       <body
-        className={`${geistSans.variable} ${geistMono.variable} ${montserrat.variable} ${inter.variable} ${jetbrainsMono.variable} ${bebasNeue.variable} ${exo2.variable} ${spaceGrotesk.variable} font-sans antialiased`}
+        className={`${spaceGrotesk.variable} font-sans antialiased`}
         style={{ backgroundColor: 'var(--sm-dark)', color: 'var(--sm-text)' }}
       >
         <ThemeProvider>
