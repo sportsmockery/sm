@@ -1,5 +1,5 @@
-/* ========== GOOGLE FONTS - Space Grotesk only ========== */
-@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&display=swap');
+/* ========== GOOGLE FONTS - Space Grotesk + Bebas Neue (hero headline) ========== */
+@import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Space+Grotesk:wght@300;400;500;600;700&display=swap');
 
 @import "tailwindcss";
 @import "../styles/article-grid.css";

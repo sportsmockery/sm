@@ -447,14 +447,14 @@
   }
 }
 
-/* Main headline: Space Grotesk — chrome gradient + bevel */
+/* Main headline: Bebas Neue — chrome gradient + bevel */
 .hero-headline {
-  font-family: 'Space Grotesk', var(--font-space-grotesk), system-ui, sans-serif !important;
+  font-family: 'Bebas Neue', var(--font-bebas-neue), Impact, sans-serif !important;
   font-size: clamp(4rem, 9vw, 7.5rem);
-  font-weight: 700;
+  font-weight: 400;
   line-height: 0.95;
-  letter-spacing: -0.02em;
-  text-transform: none;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
   margin: 24px 0 0;
   text-align: center;
   /* Chrome / brushed-metal gradient */
