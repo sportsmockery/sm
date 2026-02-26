@@ -79,7 +79,7 @@ export default async function PollEmbedPage({ params }: EmbedPageProps) {
             --sm-radius-lg: 20px;
             --sm-radius-pill: 100px;
             --sm-font-heading: 'Space Grotesk', sans-serif;
-            --sm-font-body: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            --sm-font-body: 'Space Grotesk', system-ui, sans-serif;
           }
           body {
             font-family: var(--sm-font-body);
