@@ -50,7 +50,7 @@ export default function TeamHub({
             <div>
               <h1
                 className="text-white text-3xl md:text-5xl font-black uppercase"
-                style={{ fontFamily: "'Space Grotesk', sans-serif" }}
+                style={{ fontFamily: "Barlow, sans-serif" }}
               >
                 {teamInfo.name}
               </h1>
@@ -79,7 +79,7 @@ export default function TeamHub({
             <h2
               className="text-[18px] font-bold uppercase mb-6 pb-2 border-b-[3px]"
               style={{
-                fontFamily: "'Space Grotesk', sans-serif",
+                fontFamily: "Barlow, sans-serif",
                 borderColor: 'var(--sm-red)',
                 color: 'var(--sm-text)',
               }}
@@ -105,7 +105,7 @@ export default function TeamHub({
             <h2
               className="text-[18px] font-bold uppercase pb-2 border-b-[3px]"
               style={{
-                fontFamily: "'Space Grotesk', sans-serif",
+                fontFamily: "Barlow, sans-serif",
                 borderColor: 'var(--sm-red)',
                 color: 'var(--sm-text)',
               }}
@@ -137,7 +137,7 @@ export default function TeamHub({
                 className="inline-flex items-center gap-2 px-6 py-3 rounded-lg font-semibold text-white transition-transform hover:scale-105"
                 style={{
                   backgroundColor: 'var(--sm-red)',
-                  fontFamily: "'Space Grotesk', sans-serif",
+                  fontFamily: "Barlow, sans-serif",
                 }}
               >
                 Browse All {teamInfo.shortName} Articles
@@ -211,7 +211,7 @@ function FeaturedCard({
             className={`text-white font-bold leading-tight group-hover:underline decoration-1 underline-offset-2 ${
               isPrimary ? 'text-xl md:text-2xl line-clamp-3' : 'text-base line-clamp-2'
             }`}
-            style={{ fontFamily: "'Space Grotesk', sans-serif" }}
+            style={{ fontFamily: "Barlow, sans-serif" }}
           >
             {post.title}
           </h3>
@@ -268,7 +268,7 @@ function ArticleCard({
           </span>
           <h3
             className="text-[15px] font-bold leading-tight line-clamp-2 transition-colors"
-            style={{ color: 'var(--sm-text)', fontFamily: "'Space Grotesk', sans-serif" }}
+            style={{ color: 'var(--sm-text)', fontFamily: "Barlow, sans-serif" }}
           >
             {post.title}
           </h3>

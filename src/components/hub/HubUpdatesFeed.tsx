@@ -99,7 +99,7 @@ export default async function HubUpdatesFeed({
       {/* Section Header */}
       <h2
         style={{
-          fontFamily: "'Space Grotesk', sans-serif",
+          fontFamily: "Barlow, sans-serif",
           color: 'var(--sm-text)',
           fontSize: '22px',
           fontWeight: 700,
@@ -166,7 +166,7 @@ export default async function HubUpdatesFeed({
             {/* Headline */}
             <h3
               style={{
-                fontFamily: "'Space Grotesk', sans-serif",
+                fontFamily: "Barlow, sans-serif",
                 fontSize: '15px',
                 fontWeight: 600,
                 color: 'var(--sm-text)',

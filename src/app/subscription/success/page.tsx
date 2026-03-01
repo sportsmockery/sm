@@ -50,7 +50,7 @@ function SubscriptionSuccessContent() {
             }} />
             <h1 style={{
               fontSize: '24px', fontWeight: 700, color: 'var(--sm-text)',
-              fontFamily: "'Space Grotesk', var(--font-heading), sans-serif",
+              fontFamily: "Barlow, var(--font-heading), sans-serif",
             }}>
               Processing your subscription...
             </h1>
@@ -73,7 +73,7 @@ function SubscriptionSuccessContent() {
             <div>
               <h1 style={{
                 fontSize: '28px', fontWeight: 900, color: 'var(--sm-text)', marginBottom: '8px',
-                fontFamily: "'Space Grotesk', var(--font-heading), sans-serif",
+                fontFamily: "Barlow, var(--font-heading), sans-serif",
               }}>
                 Welcome to SM+!
               </h1>

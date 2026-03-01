@@ -100,7 +100,7 @@ export default function Home1Nav() {
                 textTransform: 'uppercase',
                 color: '#bc0000',
                 fontWeight: 600,
-                fontFamily: "'Space Grotesk', sans-serif",
+                fontFamily: "Barlow, sans-serif",
                 marginTop: 2,
               }}
             >

@@ -79,7 +79,7 @@ export function HeroStatsOrbs() {
             const end = b === bands - 1 ? len - 1 : (b + 1) * bandSize
             if (end - start < 2) continue
             const progress = (b + 1) / bands // 0.2 (oldest) → 1.0 (newest)
-            const alpha = progress * (isDark ? 0.30 : 0.18)
+            const alpha = progress * (isDark ? 0.15 : 0.08)
 
             ctx!.beginPath()
             ctx!.moveTo(orb.trail[start].x, orb.trail[start].y)
@@ -97,13 +97,13 @@ export function HeroStatsOrbs() {
         // Draw orb glow (larger faint circle)
         ctx!.beginPath()
         ctx!.arc(orb.x, orb.y, orb.radius * 3, 0, Math.PI * 2)
-        ctx!.fillStyle = isDark ? 'rgba(188, 0, 0, 0.18)' : 'rgba(188, 0, 0, 0.12)'
+        ctx!.fillStyle = isDark ? 'rgba(188, 0, 0, 0.08)' : 'rgba(188, 0, 0, 0.05)'
         ctx!.fill()
 
         // Draw orb core (bright)
         ctx!.beginPath()
         ctx!.arc(orb.x, orb.y, orb.radius, 0, Math.PI * 2)
-        ctx!.fillStyle = isDark ? 'rgba(188, 0, 0, 0.75)' : 'rgba(188, 0, 0, 0.55)'
+        ctx!.fillStyle = isDark ? 'rgba(188, 0, 0, 0.35)' : 'rgba(188, 0, 0, 0.25)'
         ctx!.fill()
 
         // Move orb

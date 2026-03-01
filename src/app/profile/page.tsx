@@ -209,7 +209,7 @@ export default function ProfilePage() {
                   <>
                     <h1 style={{
                       fontSize: '28px', fontWeight: 900, color: 'var(--sm-text)',
-                      fontFamily: "'Space Grotesk', var(--font-heading), sans-serif",
+                      fontFamily: "Barlow, var(--font-heading), sans-serif",
                     }}>
                       {displayName}
                     </h1>
@@ -255,7 +255,7 @@ export default function ProfilePage() {
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '24px' }}>
           <h2 style={{
             fontSize: '22px', fontWeight: 900, letterSpacing: '-0.5px', textTransform: 'uppercase', color: 'var(--sm-text)',
-            fontFamily: "'Space Grotesk', var(--font-heading), sans-serif",
+            fontFamily: "Barlow, var(--font-heading), sans-serif",
           }}>
             Achievements
           </h2>
@@ -281,7 +281,7 @@ export default function ProfilePage() {
             <h2 style={{
               fontSize: '20px', fontWeight: 900, letterSpacing: '-0.5px', textTransform: 'uppercase',
               color: 'var(--sm-text)', marginBottom: '16px',
-              fontFamily: "'Space Grotesk', var(--font-heading), sans-serif",
+              fontFamily: "Barlow, var(--font-heading), sans-serif",
             }}>
               Saved Articles
             </h2>
@@ -308,7 +308,7 @@ export default function ProfilePage() {
             <h2 style={{
               fontSize: '20px', fontWeight: 900, letterSpacing: '-0.5px', textTransform: 'uppercase',
               color: 'var(--sm-text)', marginBottom: '16px',
-              fontFamily: "'Space Grotesk', var(--font-heading), sans-serif",
+              fontFamily: "Barlow, var(--font-heading), sans-serif",
             }}>
               Reading History
             </h2>
@@ -341,7 +341,7 @@ export default function ProfilePage() {
           <h2 style={{
             fontSize: '22px', fontWeight: 900, letterSpacing: '-0.5px', textTransform: 'uppercase',
             color: 'var(--sm-text)', marginBottom: '24px',
-            fontFamily: "'Space Grotesk', var(--font-heading), sans-serif",
+            fontFamily: "Barlow, var(--font-heading), sans-serif",
           }}>
             Settings
           </h2>

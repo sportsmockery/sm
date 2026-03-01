@@ -44,7 +44,7 @@ export default function RumorRadar({ rumors }: RumorRadarProps) {
           letterSpacing: '0.2em',
           textTransform: 'uppercase',
           color: '#bc0000',
-          fontFamily: "'Space Grotesk', sans-serif",
+          fontFamily: "Barlow, sans-serif",
           fontWeight: 600,
           display: 'block',
           marginBottom: 12,
@@ -103,7 +103,7 @@ export default function RumorRadar({ rumors }: RumorRadarProps) {
                 textAnchor="middle"
                 fill={isDark ? 'rgba(188,0,0,0.25)' : 'rgba(188,0,0,0.15)'}
                 fontSize="6"
-                fontFamily="'Space Grotesk', sans-serif"
+                fontFamily="Barlow, sans-serif"
                 fontWeight="600"
               >
                 {label}
@@ -190,7 +190,7 @@ export default function RumorRadar({ rumors }: RumorRadarProps) {
                   fontWeight: 700,
                   color: '#bc0000',
                   letterSpacing: '0.1em',
-                  fontFamily: "'Space Grotesk', sans-serif",
+                  fontFamily: "Barlow, sans-serif",
                 }}
               >
                 {hoveredRumor.category}
@@ -204,7 +204,7 @@ export default function RumorRadar({ rumors }: RumorRadarProps) {
                   background: isDark ? 'rgba(188,0,0,0.15)' : 'rgba(188,0,0,0.08)',
                   color: '#bc0000',
                   letterSpacing: '0.05em',
-                  fontFamily: "'Space Grotesk', sans-serif",
+                  fontFamily: "Barlow, sans-serif",
                 }}
               >
                 {hoveredRumor.auditBadge}
@@ -251,7 +251,7 @@ export default function RumorRadar({ rumors }: RumorRadarProps) {
                   fontSize: 10,
                   fontWeight: 700,
                   color: '#bc0000',
-                  fontFamily: "'Space Grotesk', sans-serif",
+                  fontFamily: "Barlow, sans-serif",
                 }}
               >
                 {hoveredRumor.reliabilityScore}%
@@ -308,7 +308,7 @@ export default function RumorRadar({ rumors }: RumorRadarProps) {
                   fontSize: 9,
                   fontWeight: 600,
                   color: '#bc0000',
-                  fontFamily: "'Space Grotesk', sans-serif",
+                  fontFamily: "Barlow, sans-serif",
                   flexShrink: 0,
                 }}
               >

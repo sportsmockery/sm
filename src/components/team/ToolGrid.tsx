@@ -232,7 +232,7 @@ export default function ToolGrid({ teamSlug, accentColor, secondaryColor }: Tool
     <section style={{ marginBottom: '48px' }}>
       <h2
         style={{
-          fontFamily: "'Space Grotesk', sans-serif",
+          fontFamily: "Barlow, sans-serif",
           color: 'var(--sm-text)',
           fontSize: '22px',
           fontWeight: 700,
@@ -294,7 +294,7 @@ export default function ToolGrid({ teamSlug, accentColor, secondaryColor }: Tool
                   </div>
                   <h3
                     style={{
-                      fontFamily: "'Space Grotesk', sans-serif",
+                      fontFamily: "Barlow, sans-serif",
                       color: 'var(--sm-text)',
                       fontSize: '16px',
                       fontWeight: 700,

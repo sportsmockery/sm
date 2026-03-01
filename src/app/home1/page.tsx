@@ -58,7 +58,7 @@ export default function Home1Page() {
             letterSpacing: '0.2em',
             textTransform: 'uppercase',
             color: '#bc0000',
-            fontFamily: "'Space Grotesk', sans-serif",
+            fontFamily: "Barlow, sans-serif",
             fontWeight: 600,
             marginBottom: 20,
           }}

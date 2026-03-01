@@ -170,7 +170,7 @@ function PositionCard({
           borderLeft: `3px solid ${TEAM_COLOR}`,
         }}
       >
-        <h2 className="font-bold" style={{ color: 'var(--sm-text)', fontFamily: "'Space Grotesk', sans-serif" }}>
+        <h2 className="font-bold" style={{ color: 'var(--sm-text)', fontFamily: "Barlow, sans-serif" }}>
           {groupName}
         </h2>
         <span className="text-sm" style={{ color: 'var(--sm-text-muted)' }}>

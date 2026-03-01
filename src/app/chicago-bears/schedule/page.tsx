@@ -124,7 +124,7 @@ export default async function BearsSchedulePage() {
           <div className="flex flex-wrap gap-6 justify-center text-center">
             <div>
               <div style={{ fontSize: '11px', color: 'var(--sm-text-muted)', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '4px' }}>Regular Season</div>
-              <div style={{ fontSize: '22px', fontWeight: 800, color: 'var(--sm-text)', fontFamily: "'Space Grotesk', sans-serif" }}>
+              <div style={{ fontSize: '22px', fontWeight: 800, color: 'var(--sm-text)', fontFamily: "Barlow, sans-serif" }}>
                 {separatedRecord.regularSeason.wins}-{separatedRecord.regularSeason.losses}
                 {separatedRecord.regularSeason.ties > 0 && `-${separatedRecord.regularSeason.ties}`}
               </div>
@@ -135,7 +135,7 @@ export default async function BearsSchedulePage() {
             {(separatedRecord.postseason.wins > 0 || separatedRecord.postseason.losses > 0) && (
               <div>
                 <div style={{ fontSize: '11px', color: 'var(--sm-text-muted)', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '4px' }}>Postseason</div>
-                <div style={{ fontSize: '22px', fontWeight: 800, color: 'var(--sm-red)', fontFamily: "'Space Grotesk', sans-serif" }}>
+                <div style={{ fontSize: '22px', fontWeight: 800, color: 'var(--sm-red)', fontFamily: "Barlow, sans-serif" }}>
                   {separatedRecord.postseason.wins}-{separatedRecord.postseason.losses}
                 </div>
               </div>
@@ -155,7 +155,7 @@ export default async function BearsSchedulePage() {
                 justifyContent: 'space-between',
               }}
             >
-              <h2 style={{ fontWeight: 700, color: 'var(--sm-text)', fontFamily: "'Space Grotesk', sans-serif" }}>
+              <h2 style={{ fontWeight: 700, color: 'var(--sm-text)', fontFamily: "Barlow, sans-serif" }}>
                 Regular Season ({regularGames.length} Games)
               </h2>
             </div>
@@ -218,7 +218,7 @@ export default async function BearsSchedulePage() {
               }}
             >
               <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-                <h2 style={{ fontWeight: 700, color: 'var(--sm-red)', fontFamily: "'Space Grotesk', sans-serif", margin: 0 }}>
+                <h2 style={{ fontWeight: 700, color: 'var(--sm-red)', fontFamily: "Barlow, sans-serif", margin: 0 }}>
                   Postseason
                 </h2>
                 <span style={{
@@ -253,7 +253,7 @@ export default async function BearsSchedulePage() {
                 borderBottom: '1px solid var(--sm-border)',
               }}
             >
-              <h2 style={{ fontWeight: 700, color: 'var(--sm-text-muted)', fontFamily: "'Space Grotesk', sans-serif", fontSize: 16 }}>
+              <h2 style={{ fontWeight: 700, color: 'var(--sm-text-muted)', fontFamily: "Barlow, sans-serif", fontSize: 16 }}>
                 Preseason
               </h2>
             </div>

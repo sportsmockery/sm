@@ -104,7 +104,7 @@ export default function OracleScoresBar({ className = '' }: OracleScoresBarProps
         aria-expanded={!isCollapsed}
         aria-controls="oracle-scores-content"
       >
-        <span style={{ fontFamily: "'Space Grotesk', sans-serif", fontWeight: 700 }}>Oracle Scores</span>
+        <span style={{ fontFamily: "Barlow, sans-serif", fontWeight: 700 }}>Oracle Scores</span>
         <svg
           className={`w-4 h-4 transition-transform ${isCollapsed ? '' : 'rotate-180'}`}
           fill="none"

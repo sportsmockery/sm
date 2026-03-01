@@ -37,7 +37,7 @@ export default function ForgotPasswordPage() {
             marginTop: '24px',
             fontSize: '24px',
             fontWeight: 700,
-            fontFamily: "'Space Grotesk', var(--font-heading), sans-serif",
+            fontFamily: "Barlow, var(--font-heading), sans-serif",
             color: 'var(--sm-text)',
           }}>
             Reset your password

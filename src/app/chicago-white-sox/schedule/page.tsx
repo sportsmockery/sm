@@ -85,7 +85,7 @@ export default async function WhiteSoxSchedulePage() {
           <div className="flex flex-wrap gap-6 justify-center text-center">
             <div>
               <div style={{ fontSize: '11px', color: 'var(--sm-text-muted)', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '4px' }}>2025 Season</div>
-              <div style={{ fontSize: '22px', fontWeight: 800, color: 'var(--sm-text)', fontFamily: "'Space Grotesk', sans-serif" }}>
+              <div style={{ fontSize: '22px', fontWeight: 800, color: 'var(--sm-text)', fontFamily: "Barlow, sans-serif" }}>
                 {soxRecord.wins}-{soxRecord.losses}
               </div>
             </div>
@@ -103,7 +103,7 @@ export default async function WhiteSoxSchedulePage() {
               justifyContent: 'space-between',
             }}
           >
-            <h2 style={{ fontWeight: 700, color: 'var(--sm-text)', fontFamily: "'Space Grotesk', sans-serif" }}>
+            <h2 style={{ fontWeight: 700, color: 'var(--sm-text)', fontFamily: "Barlow, sans-serif" }}>
               White Sox 2025 Schedule
             </h2>
             <span style={{ fontSize: '14px', color: 'var(--sm-text-muted)' }}>

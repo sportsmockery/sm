@@ -40,7 +40,7 @@ export default function BearsRosterHighlights({
               fontWeight: 700,
               color: 'var(--sm-text)',
               textTransform: 'uppercase',
-              fontFamily: "'Space Grotesk', sans-serif",
+              fontFamily: "Barlow, sans-serif",
               margin: 0,
             }}
           >
@@ -115,7 +115,7 @@ function PlayerCard({
       <div className="flex-1 min-w-0">
         <h4
           className="text-[14px] font-bold text-[#222] dark:text-white group-hover:text-[#bc0000] transition-colors"
-          style={{ fontFamily: "'Space Grotesk', sans-serif" }}
+          style={{ fontFamily: "Barlow, sans-serif" }}
         >
           {player.name}
         </h4>
@@ -129,7 +129,7 @@ function PlayerCard({
         <div className="text-right">
           <div
             className="text-[18px] font-bold text-[#222] dark:text-white"
-            style={{ fontFamily: "'Space Grotesk', sans-serif" }}
+            style={{ fontFamily: "Barlow, sans-serif" }}
           >
             {primaryStat.value}
           </div>

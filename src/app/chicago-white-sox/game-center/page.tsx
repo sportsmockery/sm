@@ -50,7 +50,7 @@ export default async function WhiteSoxGameCenterPage() {
         <div style={{ marginBottom: '32px' }}>
           <h1
             style={{
-              fontFamily: "'Space Grotesk', sans-serif",
+              fontFamily: "Barlow, sans-serif",
               fontSize: '32px',
               fontWeight: 700,
               color: 'var(--sm-text)',
@@ -102,7 +102,7 @@ export default async function WhiteSoxGameCenterPage() {
               </div>
               <div
                 style={{
-                  fontFamily: "'Space Grotesk', sans-serif",
+                  fontFamily: "Barlow, sans-serif",
                   fontSize: '22px',
                   fontWeight: 700,
                   color: 'var(--sm-text)',
@@ -139,7 +139,7 @@ export default async function WhiteSoxGameCenterPage() {
               </div>
               <div
                 style={{
-                  fontFamily: "'Space Grotesk', sans-serif",
+                  fontFamily: "Barlow, sans-serif",
                   fontSize: '20px',
                   fontWeight: 700,
                   color: 'var(--sm-text-muted)',
@@ -190,7 +190,7 @@ export default async function WhiteSoxGameCenterPage() {
                   <div>
                     <div
                       style={{
-                        fontFamily: "'Space Grotesk', sans-serif",
+                        fontFamily: "Barlow, sans-serif",
                         fontSize: '20px',
                         fontWeight: 700,
                         color: 'var(--sm-text)',
@@ -230,7 +230,7 @@ export default async function WhiteSoxGameCenterPage() {
           <section style={{ marginBottom: '32px' }}>
             <h2
               style={{
-                fontFamily: "'Space Grotesk', sans-serif",
+                fontFamily: "Barlow, sans-serif",
                 color: 'var(--sm-text)',
                 fontSize: '22px',
                 fontWeight: 700,
@@ -268,7 +268,7 @@ export default async function WhiteSoxGameCenterPage() {
           <section style={{ marginBottom: '32px' }}>
             <h2
               style={{
-                fontFamily: "'Space Grotesk', sans-serif",
+                fontFamily: "Barlow, sans-serif",
                 color: 'var(--sm-text)',
                 fontSize: '22px',
                 fontWeight: 700,
@@ -310,7 +310,7 @@ export default async function WhiteSoxGameCenterPage() {
             <Image src="/downloads/scout-v2.png" alt="Scout AI" width={28} height={28} />
             <h3
               style={{
-                fontFamily: "'Space Grotesk', sans-serif",
+                fontFamily: "Barlow, sans-serif",
                 color: 'var(--sm-text)',
                 fontWeight: 700,
                 fontSize: '18px',
@@ -391,7 +391,7 @@ function GameRow({ game }: { game: WhiteSoxGame }) {
         <div style={{ flex: 1, minWidth: 0 }}>
           <div
             style={{
-              fontFamily: "'Space Grotesk', sans-serif",
+              fontFamily: "Barlow, sans-serif",
               fontSize: '14px',
               fontWeight: 600,
               color: 'var(--sm-text)',
@@ -422,7 +422,7 @@ function GameRow({ game }: { game: WhiteSoxGame }) {
             </span>
             <span
               style={{
-                fontFamily: "'Space Grotesk', sans-serif",
+                fontFamily: "Barlow, sans-serif",
                 fontSize: '15px',
                 fontWeight: 700,
                 color: 'var(--sm-text)',

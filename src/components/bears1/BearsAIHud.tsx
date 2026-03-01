@@ -148,7 +148,7 @@ export default function BearsAIHud({ activePlayer }: BearsAIHudProps) {
             >
               <Image src="/downloads/scout-v2.png" alt="Scout" width={20} height={20} style={{ borderRadius: '50%' }} />
               <span style={{ fontSize: 13, fontWeight: 600, color: isDark ? '#fff' : '#111' }}>Scout AI</span>
-              <span style={{ fontSize: 9, color: '#bc0000', fontFamily: "'Space Grotesk', sans-serif", fontWeight: 600 }}>
+              <span style={{ fontSize: 9, color: '#bc0000', fontFamily: "Barlow, sans-serif", fontWeight: 600 }}>
                 BEARS INTEL
               </span>
             </div>
@@ -287,7 +287,7 @@ export default function BearsAIHud({ activePlayer }: BearsAIHudProps) {
                       {item.headline.length > 70 ? item.headline.slice(0, 67) + '...' : item.headline}
                     </div>
                     {item.stat && (
-                      <span style={{ fontSize: 11, fontFamily: "'Space Grotesk', sans-serif", color: '#bc0000', fontWeight: 600 }}>
+                      <span style={{ fontSize: 11, fontFamily: "Barlow, sans-serif", color: '#bc0000', fontWeight: 600 }}>
                         {item.stat}
                       </span>
                     )}
@@ -353,7 +353,7 @@ export default function BearsAIHud({ activePlayer }: BearsAIHudProps) {
                       textTransform: 'uppercase',
                       whiteSpace: 'nowrap',
                       pointerEvents: 'none',
-                      fontFamily: "'Space Grotesk', sans-serif",
+                      fontFamily: "Barlow, sans-serif",
                     }}
                   >
                     {btn.label}

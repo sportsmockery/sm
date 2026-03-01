@@ -20,7 +20,7 @@ export default function FanChatWidget({ teamLabel, channel }: { teamLabel: strin
           </svg>
         </div>
         <div>
-          <h3 style={{ fontFamily: "'Space Grotesk', sans-serif", color: 'var(--sm-text)', fontWeight: 700, fontSize: '16px', margin: 0 }}>
+          <h3 style={{ fontFamily: "Barlow, sans-serif", color: 'var(--sm-text)', fontWeight: 700, fontSize: '16px', margin: 0 }}>
             {teamLabel} Fan Chat
           </h3>
           <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '12px', color: 'var(--sm-text-dim)' }}>

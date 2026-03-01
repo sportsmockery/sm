@@ -42,7 +42,7 @@ export default function MoreFromTeam({
         <div className="flex items-center justify-between">
           <h3
             className="text-[16px] font-bold uppercase"
-            style={{ fontFamily: "'Space Grotesk', sans-serif", color: 'var(--sm-text)' }}
+            style={{ fontFamily: "Barlow, sans-serif", color: 'var(--sm-text)' }}
           >
             More {teamInfo.shortName} News
           </h3>
@@ -99,7 +99,7 @@ function RelatedPostCard({
       <div className="flex-1 min-w-0">
         <h4
           className="text-[14px] font-semibold leading-tight line-clamp-2 transition-colors"
-          style={{ fontFamily: "'Space Grotesk', sans-serif", color: 'var(--sm-text)' }}
+          style={{ fontFamily: "Barlow, sans-serif", color: 'var(--sm-text)' }}
         >
           {post.title}
         </h4>

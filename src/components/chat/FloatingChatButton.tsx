@@ -39,7 +39,7 @@ export default function FloatingChatButton({ teamSlug, teamName }: FloatingChatB
           color: 'white',
           fontSize: '0.95rem',
           fontWeight: 600,
-          fontFamily: "'Space Grotesk', sans-serif",
+          fontFamily: "Barlow, sans-serif",
           boxShadow: '0 4px 20px rgba(200, 56, 3, 0.4)',
           transition: 'transform 0.2s, box-shadow 0.2s',
         }}
@@ -76,7 +76,7 @@ export default function FloatingChatButton({ teamSlug, teamName }: FloatingChatB
         color: 'white',
         fontSize: '0.95rem',
         fontWeight: 600,
-        fontFamily: "'Space Grotesk', sans-serif",
+        fontFamily: "Barlow, sans-serif",
         boxShadow: '0 4px 20px rgba(200, 56, 3, 0.4)',
         transform: isHovered ? 'scale(1.05)' : 'scale(1)',
         transition: 'transform 0.2s, box-shadow 0.2s',

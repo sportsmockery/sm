@@ -11,7 +11,7 @@ export default function FanControlCenter() {
         <div className="text-center mb-8">
           <h2
             className="text-2xl md:text-3xl font-bold mb-2"
-            style={{ fontFamily: "'Space Grotesk', sans-serif", color: 'var(--sm-text)' }}
+            style={{ fontFamily: "Barlow, sans-serif", color: 'var(--sm-text)' }}
           >
             Chicago Fan Control Center
           </h2>
@@ -48,7 +48,7 @@ export default function FanControlCenter() {
               {/* Content */}
               <h3
                 className="text-xl md:text-2xl font-bold text-white mb-3"
-                style={{ fontFamily: "'Space Grotesk', sans-serif" }}
+                style={{ fontFamily: "Barlow, sans-serif" }}
               >
                 Fan Chat
               </h3>
@@ -68,7 +68,7 @@ export default function FanControlCenter() {
               <Link
                 href="/chat"
                 className="inline-flex items-center gap-2 px-6 py-3 bg-[#C83803] text-white font-semibold rounded-xl hover:bg-[#a52d02] transition-colors"
-                style={{ fontFamily: "'Space Grotesk', sans-serif" }}
+                style={{ fontFamily: "Barlow, sans-serif" }}
               >
                 Open Fan Chat
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -105,7 +105,7 @@ export default function FanControlCenter() {
               {/* Content */}
               <h3
                 className="text-xl md:text-2xl font-bold text-white mb-3"
-                style={{ fontFamily: "'Space Grotesk', sans-serif" }}
+                style={{ fontFamily: "Barlow, sans-serif" }}
               >
                 Scout AI
               </h3>
@@ -129,7 +129,7 @@ export default function FanControlCenter() {
               <Link
                 href="/scout-ai"
                 className="inline-flex items-center gap-2 px-6 py-3 bg-white/10 text-white font-semibold rounded-xl hover:bg-white/20 transition-colors border border-white/20"
-                style={{ fontFamily: "'Space Grotesk', sans-serif" }}
+                style={{ fontFamily: "Barlow, sans-serif" }}
               >
                 Scout AI Now
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">

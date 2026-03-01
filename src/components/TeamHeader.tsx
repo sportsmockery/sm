@@ -95,7 +95,7 @@ export default function TeamHeader({ categorySlug, categoryName, postCount }: Te
         >
           <h1
             className={`font-montserrat text-4xl font-black tracking-tight sm:text-5xl md:text-6xl ${config.textColor}`}
-            style={{ fontFamily: "'Space Grotesk', sans-serif" }}
+            style={{ fontFamily: "Barlow, sans-serif" }}
           >
             {config.name}
           </h1>

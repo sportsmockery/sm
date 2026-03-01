@@ -37,7 +37,7 @@ export default function FeatureCard({
         <div style={{ flex: 1, minWidth: 0 }}>
           <h3
             style={{
-              fontFamily: "'Space Grotesk', sans-serif",
+              fontFamily: "Barlow, sans-serif",
               color: 'var(--sm-text)',
               fontSize: '15px',
               fontWeight: 700,

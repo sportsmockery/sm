@@ -38,7 +38,7 @@ export default function HomepageTimeline({
         {/* Section header */}
         <h2
           className="text-[18px] font-bold uppercase mb-6 pb-2 border-b-[3px] border-[#bc0000]"
-          style={{ color: 'var(--sm-text)', fontFamily: "'Space Grotesk', sans-serif" }}
+          style={{ color: 'var(--sm-text)', fontFamily: "Barlow, sans-serif" }}
         >
           Latest Updates
         </h2>
@@ -66,7 +66,7 @@ export default function HomepageTimeline({
             <button
               onClick={loadMore}
               className="inline-flex items-center gap-2 px-6 py-3 font-semibold text-sm hover:border-[#bc0000] hover:text-[#bc0000] transition-colors rounded-lg"
-              style={{ backgroundColor: 'var(--sm-card)', border: '1px solid var(--sm-border)', color: 'var(--sm-text)', fontFamily: "'Space Grotesk', sans-serif" }}
+              style={{ backgroundColor: 'var(--sm-card)', border: '1px solid var(--sm-border)', color: 'var(--sm-text)', fontFamily: "Barlow, sans-serif" }}
             >
               Load More
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -183,7 +183,7 @@ function TimelineItem({
             {/* Title */}
             <h3
               className="text-[15px] md:text-[16px] font-bold leading-tight line-clamp-2 group-hover:text-[#bc0000] transition-colors"
-              style={{ color: 'var(--sm-text)', fontFamily: "'Space Grotesk', sans-serif" }}
+              style={{ color: 'var(--sm-text)', fontFamily: "Barlow, sans-serif" }}
             >
               {post.title}
             </h3>

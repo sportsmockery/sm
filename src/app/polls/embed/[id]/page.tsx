@@ -78,8 +78,8 @@ export default async function PollEmbedPage({ params }: EmbedPageProps) {
             --sm-radius-md: 16px;
             --sm-radius-lg: 20px;
             --sm-radius-pill: 100px;
-            --sm-font-heading: 'Space Grotesk', sans-serif;
-            --sm-font-body: 'Space Grotesk', system-ui, sans-serif;
+            --sm-font-heading: Barlow, sans-serif;
+            --sm-font-body: Barlow, system-ui, sans-serif;
           }
           body {
             font-family: var(--sm-font-body);

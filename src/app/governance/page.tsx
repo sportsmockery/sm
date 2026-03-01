@@ -50,7 +50,7 @@ export default function GovernancePage() {
 
           <h1 style={{
             fontSize: 'clamp(2rem, 4vw, 3.5rem)', fontWeight: 900, color: 'var(--sm-text)', marginBottom: '16px',
-            fontFamily: "'Space Grotesk', var(--font-heading), sans-serif",
+            fontFamily: "Barlow, var(--font-heading), sans-serif",
           }}>
             Fan Senate
           </h1>
@@ -94,7 +94,7 @@ export default function GovernancePage() {
       <section style={{ position: 'relative', maxWidth: '1200px', margin: '0 auto', padding: '16px 16px 32px' }}>
         <h2 style={{
           fontSize: '22px', fontWeight: 900, letterSpacing: '-0.5px', textTransform: 'uppercase', color: 'var(--sm-text)',
-          fontFamily: "'Space Grotesk', var(--font-heading), sans-serif", marginBottom: '24px',
+          fontFamily: "Barlow, var(--font-heading), sans-serif", marginBottom: '24px',
         }}>
           Active Proposals
         </h2>
@@ -169,7 +169,7 @@ export default function GovernancePage() {
       <section style={{ position: 'relative', maxWidth: '1200px', margin: '0 auto', padding: '16px 16px 32px' }}>
         <h2 style={{
           fontSize: '22px', fontWeight: 900, letterSpacing: '-0.5px', textTransform: 'uppercase', color: 'var(--sm-text)',
-          fontFamily: "'Space Grotesk', var(--font-heading), sans-serif", marginBottom: '24px',
+          fontFamily: "Barlow, var(--font-heading), sans-serif", marginBottom: '24px',
         }}>
           Past Proposals
         </h2>
@@ -215,7 +215,7 @@ export default function GovernancePage() {
       <section style={{ position: 'relative', maxWidth: '1200px', margin: '0 auto', padding: '16px 16px 48px' }}>
         <h2 style={{
           fontSize: '22px', fontWeight: 900, letterSpacing: '-0.5px', textTransform: 'uppercase', color: 'var(--sm-text)',
-          fontFamily: "'Space Grotesk', var(--font-heading), sans-serif", marginBottom: '24px',
+          fontFamily: "Barlow, var(--font-heading), sans-serif", marginBottom: '24px',
         }}>
           How It Works
         </h2>

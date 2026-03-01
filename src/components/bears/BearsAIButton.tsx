@@ -34,7 +34,7 @@ export default function BearsAIButton() {
           height={20}
           className="w-5 h-5"
         />
-        <span className="hidden sm:inline" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
+        <span className="hidden sm:inline" style={{ fontFamily: "Barlow, sans-serif" }}>
           Scout AI
         </span>
 

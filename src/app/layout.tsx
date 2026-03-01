@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Space_Grotesk, Bebas_Neue } from "next/font/google";
+import { Barlow } from "next/font/google";
 import "./globals.css";
 import "@/styles/homepage.css";
 import { ThemeProvider } from "@/contexts/ThemeContext";
@@ -26,16 +26,10 @@ import LiveStrip from "@/components/layout/LiveStrip";
 // import FloatingChatButton from "@/components/chat/FloatingChatButton";
 // import FloatingARButton from "@/components/ar/FloatingARButton";
 
-const spaceGrotesk = Space_Grotesk({
-  variable: "--font-space-grotesk",
+const barlow = Barlow({
+  variable: "--font-barlow",
   subsets: ["latin"],
-  weight: ["300", "400", "500", "600", "700"],
-});
-
-const bebasNeue = Bebas_Neue({
-  variable: "--font-bebas-neue",
-  subsets: ["latin"],
-  weight: "400",
+  weight: ["400", "500", "600", "700", "800", "900"],
 });
 
 export const metadata: Metadata = {
@@ -135,7 +129,7 @@ export default function RootLayout({
         />
       </head>
       <body
-        className={`${spaceGrotesk.variable} ${bebasNeue.variable} font-sans antialiased`}
+        className={`${barlow.variable} font-sans antialiased`}
         style={{ backgroundColor: 'var(--sm-dark)', color: 'var(--sm-text)' }}
       >
         <ThemeProvider>

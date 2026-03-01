@@ -35,7 +35,7 @@ export default function TeamSpotlight({
         {/* Section header */}
         <h2
           className="text-[18px] font-bold uppercase mb-6 pb-2 border-b-[3px] border-[#bc0000]"
-          style={{ color: 'var(--sm-text)', fontFamily: "'Space Grotesk', sans-serif" }}
+          style={{ color: 'var(--sm-text)', fontFamily: "Barlow, sans-serif" }}
         >
           Team Spotlight
         </h2>
@@ -79,7 +79,7 @@ export default function TeamSpotlight({
                     <div className="text-left">
                       <h3
                         className="text-[16px] font-bold"
-                        style={{ color: 'var(--sm-text)', fontFamily: "'Space Grotesk', sans-serif" }}
+                        style={{ color: 'var(--sm-text)', fontFamily: "Barlow, sans-serif" }}
                       >
                         {teamInfo.name}
                         {isBears && (
@@ -207,7 +207,7 @@ function SpotlightPostCard({
         <div className="flex-1 min-w-0">
           <h4
             className="text-[13px] font-semibold leading-tight line-clamp-2 group-hover:text-[#bc0000] transition-colors"
-            style={{ color: 'var(--sm-text)', fontFamily: "'Space Grotesk', sans-serif" }}
+            style={{ color: 'var(--sm-text)', fontFamily: "Barlow, sans-serif" }}
           >
             {post.title}
           </h4>

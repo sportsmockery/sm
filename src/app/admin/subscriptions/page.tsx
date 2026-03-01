@@ -90,7 +90,7 @@ export default function AdminSubscriptionsPage() {
   return (
     <div className="p-6 max-w-7xl mx-auto">
       <div className="mb-8">
-        <h1 className="text-2xl font-bold mb-2" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
+        <h1 className="text-2xl font-bold mb-2" style={{ fontFamily: "Barlow, sans-serif" }}>
           Subscriptions
         </h1>
         <p className="text-zinc-500">Manage SM+ subscribers and view subscription analytics</p>

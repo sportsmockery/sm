@@ -77,7 +77,7 @@ export default function TeamHubOverview({
             <h2
               className="text-lg font-bold"
               style={{
-                fontFamily: "'Space Grotesk', sans-serif",
+                fontFamily: "Barlow, sans-serif",
                 color: 'var(--sm-text)',
               }}
             >
@@ -110,7 +110,7 @@ export default function TeamHubOverview({
             <h2
               className="text-lg font-bold mb-4"
               style={{
-                fontFamily: "'Space Grotesk', sans-serif",
+                fontFamily: "Barlow, sans-serif",
                 color: 'var(--sm-text)',
               }}
             >
@@ -137,7 +137,7 @@ export default function TeamHubOverview({
           <h3
             className="font-bold mb-4"
             style={{
-              fontFamily: "'Space Grotesk', sans-serif",
+              fontFamily: "Barlow, sans-serif",
               color: 'var(--sm-text)',
             }}
           >
@@ -230,7 +230,7 @@ function ArticleCard({
               <h3
                 className="font-bold mt-1 line-clamp-3 group-hover:underline"
                 style={{
-                  fontFamily: "'Space Grotesk', sans-serif",
+                  fontFamily: "Barlow, sans-serif",
                   color: 'var(--sm-text)',
                   fontSize: '18px',
                   lineHeight: '1.3',
@@ -286,7 +286,7 @@ function ArticleCard({
           <h3
             className="font-semibold line-clamp-2 group-hover:underline"
             style={{
-              fontFamily: "'Space Grotesk', sans-serif",
+              fontFamily: "Barlow, sans-serif",
               color: 'var(--sm-text)',
               fontSize: '14px',
               lineHeight: '1.4',
@@ -356,7 +356,7 @@ function SeasonSnapshotCard({
           <div>
             <h3
               className="font-bold text-white"
-              style={{ fontFamily: "'Space Grotesk', sans-serif" }}
+              style={{ fontFamily: "Barlow, sans-serif" }}
             >
               Season Snapshot
             </h3>
@@ -480,7 +480,7 @@ function AskAIWidget({ team }: { team: TeamInfo }) {
           <h3
             className="font-bold"
             style={{
-              fontFamily: "'Space Grotesk', sans-serif",
+              fontFamily: "Barlow, sans-serif",
               color: 'var(--sm-text)',
             }}
           >
@@ -559,7 +559,7 @@ function FanChatWidget({ team }: { team: TeamInfo }) {
           <h3
             className="font-bold"
             style={{
-              fontFamily: "'Space Grotesk', sans-serif",
+              fontFamily: "Barlow, sans-serif",
               color: 'var(--sm-text)',
             }}
           >
@@ -607,7 +607,7 @@ function ARExperienceWidget({ team }: { team: TeamInfo }) {
             </svg>
           </div>
           <div>
-            <h3 className="font-bold text-white" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
+            <h3 className="font-bold text-white" style={{ fontFamily: "Barlow, sans-serif" }}>
               AR Stadium Tour
             </h3>
             <p className="text-xs text-white/70">

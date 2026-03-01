@@ -135,7 +135,7 @@ export default async function WhiteSoxPayrollTrackerPage() {
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '8px' }}>
             <h1
               style={{
-                fontFamily: "'Space Grotesk', sans-serif",
+                fontFamily: "Barlow, sans-serif",
                 fontSize: '32px',
                 fontWeight: 700,
                 color: 'var(--sm-text)',
@@ -270,7 +270,7 @@ export default async function WhiteSoxPayrollTrackerPage() {
           <section style={{ marginBottom: '32px' }}>
             <h2
               style={{
-                fontFamily: "'Space Grotesk', sans-serif",
+                fontFamily: "Barlow, sans-serif",
                 color: 'var(--sm-text)',
                 fontSize: '22px',
                 fontWeight: 700,
@@ -308,7 +308,7 @@ export default async function WhiteSoxPayrollTrackerPage() {
                       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '4px' }}>
                         <span
                           style={{
-                            fontFamily: "'Space Grotesk', sans-serif",
+                            fontFamily: "Barlow, sans-serif",
                             fontSize: '14px',
                             fontWeight: 600,
                             color: 'var(--sm-text)',
@@ -326,7 +326,7 @@ export default async function WhiteSoxPayrollTrackerPage() {
                         </span>
                         <span
                           style={{
-                            fontFamily: "'Space Grotesk', sans-serif",
+                            fontFamily: "Barlow, sans-serif",
                             fontSize: '14px',
                             fontWeight: 700,
                             color: '#27251F',
@@ -369,7 +369,7 @@ export default async function WhiteSoxPayrollTrackerPage() {
           <section style={{ marginBottom: '32px' }}>
             <h2
               style={{
-                fontFamily: "'Space Grotesk', sans-serif",
+                fontFamily: "Barlow, sans-serif",
                 color: 'var(--sm-text)',
                 fontSize: '22px',
                 fontWeight: 700,
@@ -394,7 +394,7 @@ export default async function WhiteSoxPayrollTrackerPage() {
                     >
                       <div
                         style={{
-                          fontFamily: "'Space Grotesk', sans-serif",
+                          fontFamily: "Barlow, sans-serif",
                           fontSize: '22px',
                           fontWeight: 700,
                           color: 'var(--sm-text)',
@@ -420,7 +420,7 @@ export default async function WhiteSoxPayrollTrackerPage() {
           <section style={{ marginBottom: '32px' }}>
             <h2
               style={{
-                fontFamily: "'Space Grotesk', sans-serif",
+                fontFamily: "Barlow, sans-serif",
                 color: 'var(--sm-text)',
                 fontSize: '22px',
                 fontWeight: 700,
@@ -484,7 +484,7 @@ export default async function WhiteSoxPayrollTrackerPage() {
                     <PlayerAvatar playerId={row.player_id} name={row.player_name} size={28} headshotMap={headshotMap} />
                     <span
                       style={{
-                        fontFamily: "'Space Grotesk', sans-serif",
+                        fontFamily: "Barlow, sans-serif",
                         fontWeight: 600,
                         color: 'var(--sm-text)',
                         whiteSpace: 'nowrap',
@@ -498,7 +498,7 @@ export default async function WhiteSoxPayrollTrackerPage() {
                   {/* Position */}
                   <div style={{ color: 'var(--sm-text-muted)', fontSize: '12px' }}>{row.position}</div>
                   {/* Luxury Tax Value */}
-                  <div style={{ textAlign: 'right', fontWeight: 700, color: 'var(--sm-text)', fontFamily: "'Space Grotesk', sans-serif" }}>
+                  <div style={{ textAlign: 'right', fontWeight: 700, color: 'var(--sm-text)', fontFamily: "Barlow, sans-serif" }}>
                     {formatMoney(row.cap_hit)}
                   </div>
                   {/* Base Salary */}
@@ -524,7 +524,7 @@ export default async function WhiteSoxPayrollTrackerPage() {
           <section style={{ marginBottom: '32px' }}>
             <h2
               style={{
-                fontFamily: "'Space Grotesk', sans-serif",
+                fontFamily: "Barlow, sans-serif",
                 color: 'var(--sm-text)',
                 fontSize: '22px',
                 fontWeight: 700,
@@ -574,7 +574,7 @@ export default async function WhiteSoxPayrollTrackerPage() {
             <Image src="/downloads/scout-v2.png" alt="Scout AI" width={28} height={28} />
             <h3
               style={{
-                fontFamily: "'Space Grotesk', sans-serif",
+                fontFamily: "Barlow, sans-serif",
                 color: 'var(--sm-text)',
                 fontWeight: 700,
                 fontSize: '18px',
@@ -643,7 +643,7 @@ function CapCard({
     <div className="glass-card glass-card-sm glass-card-static" style={{ textAlign: 'center', padding: '20px' }}>
       <div
         style={{
-          fontFamily: "'Space Grotesk', sans-serif",
+          fontFamily: "Barlow, sans-serif",
           fontSize: '28px',
           fontWeight: 700,
           color: color || 'var(--sm-text)',

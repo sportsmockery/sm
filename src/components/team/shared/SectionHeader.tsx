@@ -5,7 +5,7 @@ export default function SectionHeader({ title, href }: { title: string; href?: s
     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '20px' }}>
       <h2
         style={{
-          fontFamily: "'Space Grotesk', sans-serif",
+          fontFamily: "Barlow, sans-serif",
           color: 'var(--sm-text)',
           fontSize: '22px',
           fontWeight: 700,

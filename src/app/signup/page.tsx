@@ -37,7 +37,7 @@ export default function SignupPage() {
             marginTop: '24px',
             fontSize: '26px',
             fontWeight: 700,
-            fontFamily: "'Space Grotesk', var(--font-heading), sans-serif",
+            fontFamily: "Barlow, var(--font-heading), sans-serif",
             color: 'var(--sm-text)',
           }}>
             Join the future

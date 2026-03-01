@@ -118,7 +118,7 @@ export default function NextPrevArticle({
               <div style={{ flex: 1, minWidth: 0 }}>
                 <p
                   style={{
-                    fontFamily: "'Space Grotesk', sans-serif",
+                    fontFamily: "Barlow, sans-serif",
                     fontSize: '11px',
                     fontWeight: 600,
                     textTransform: 'uppercase',
@@ -137,7 +137,7 @@ export default function NextPrevArticle({
                 </span>
                 <h4
                   style={{
-                    fontFamily: "'Space Grotesk', sans-serif",
+                    fontFamily: "Barlow, sans-serif",
                     fontSize: '15px',
                     fontWeight: 600,
                     color: 'var(--sm-text)',
@@ -178,7 +178,7 @@ export default function NextPrevArticle({
               <div style={{ flex: 1, minWidth: 0 }}>
                 <p
                   style={{
-                    fontFamily: "'Space Grotesk', sans-serif",
+                    fontFamily: "Barlow, sans-serif",
                     fontSize: '11px',
                     fontWeight: 600,
                     textTransform: 'uppercase',
@@ -197,7 +197,7 @@ export default function NextPrevArticle({
                 </span>
                 <h4
                   style={{
-                    fontFamily: "'Space Grotesk', sans-serif",
+                    fontFamily: "Barlow, sans-serif",
                     fontSize: '15px',
                     fontWeight: 600,
                     color: 'var(--sm-text)',

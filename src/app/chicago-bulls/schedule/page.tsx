@@ -88,21 +88,21 @@ export default async function BullsSchedulePage() {
           <div className="flex flex-wrap gap-6 justify-center text-center">
             <div>
               <div style={{ fontSize: '11px', color: 'var(--sm-text-muted)', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '4px' }}>2025-26 Season</div>
-              <div style={{ fontSize: '22px', fontWeight: 800, color: 'var(--sm-text)', fontFamily: "'Space Grotesk', sans-serif" }}>
+              <div style={{ fontSize: '22px', fontWeight: 800, color: 'var(--sm-text)', fontFamily: "Barlow, sans-serif" }}>
                 {bullsRecord.wins}-{bullsRecord.losses}
               </div>
             </div>
             {bullsRecord.streak && (
               <div>
                 <div style={{ fontSize: '11px', color: 'var(--sm-text-muted)', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '4px' }}>Streak</div>
-                <div style={{ fontSize: '22px', fontWeight: 800, color: bullsRecord.streak.startsWith('W') ? '#10b981' : '#ef4444', fontFamily: "'Space Grotesk', sans-serif" }}>
+                <div style={{ fontSize: '22px', fontWeight: 800, color: bullsRecord.streak.startsWith('W') ? '#10b981' : '#ef4444', fontFamily: "Barlow, sans-serif" }}>
                   {bullsRecord.streak}
                 </div>
               </div>
             )}
             <div>
               <div style={{ fontSize: '11px', color: 'var(--sm-text-muted)', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '4px' }}>Games Played</div>
-              <div style={{ fontSize: '22px', fontWeight: 800, color: 'var(--sm-text)', fontFamily: "'Space Grotesk', sans-serif" }}>
+              <div style={{ fontSize: '22px', fontWeight: 800, color: 'var(--sm-text)', fontFamily: "Barlow, sans-serif" }}>
                 {completedGames.length}
               </div>
             </div>
@@ -121,7 +121,7 @@ export default async function BullsSchedulePage() {
                 justifyContent: 'space-between',
               }}
             >
-              <h2 style={{ fontWeight: 700, color: 'var(--sm-text)', fontFamily: "'Space Grotesk', sans-serif" }}>
+              <h2 style={{ fontWeight: 700, color: 'var(--sm-text)', fontFamily: "Barlow, sans-serif" }}>
                 Chicago Bulls 2025-26 Schedule
               </h2>
               <span style={{ fontSize: '14px', color: 'var(--sm-text-muted)' }}>

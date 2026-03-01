@@ -58,7 +58,7 @@ export default function AuthorCard({
                 justifyContent: 'center',
                 background: 'linear-gradient(135deg, var(--sm-red), var(--sm-red-light))',
                 color: '#ffffff',
-                fontFamily: "'Space Grotesk', sans-serif",
+                fontFamily: "Barlow, sans-serif",
                 fontSize: '20px',
                 fontWeight: 700,
               }}
@@ -73,7 +73,7 @@ export default function AuthorCard({
       <div style={{ textAlign: 'center', marginBottom: '12px' }}>
         <h3
           style={{
-            fontFamily: "'Space Grotesk', sans-serif",
+            fontFamily: "Barlow, sans-serif",
             fontSize: '18px',
             fontWeight: 700,
             color: 'var(--sm-text)',
@@ -85,7 +85,7 @@ export default function AuthorCard({
         {author.title && (
           <p
             style={{
-              fontFamily: "'Space Grotesk', sans-serif",
+              fontFamily: "Barlow, sans-serif",
               fontSize: '13px',
               color: 'var(--sm-red)',
               marginTop: '4px',
@@ -100,7 +100,7 @@ export default function AuthorCard({
       {author.bio && (
         <p
           style={{
-            fontFamily: "'Space Grotesk', sans-serif",
+            fontFamily: "Barlow, sans-serif",
             fontSize: '14px',
             lineHeight: 1.6,
             color: 'var(--sm-text-muted)',

@@ -10,13 +10,13 @@ export default function PrivacyPage() {
     fontSize: '24px',
     fontWeight: 700,
     color: 'var(--sm-text)',
-    fontFamily: "'Space Grotesk', var(--font-heading), sans-serif",
+    fontFamily: "Barlow, var(--font-heading), sans-serif",
     marginTop: '40px',
     marginBottom: '16px',
   }
 
   const paragraphStyle: React.CSSProperties = {
-    fontFamily: "'Space Grotesk', sans-serif",
+    fontFamily: "Barlow, sans-serif",
     fontSize: '16px',
     lineHeight: 1.8,
     color: 'var(--sm-text-muted)',
@@ -24,7 +24,7 @@ export default function PrivacyPage() {
   }
 
   const listItemStyle: React.CSSProperties = {
-    fontFamily: "'Space Grotesk', sans-serif",
+    fontFamily: "Barlow, sans-serif",
     fontSize: '16px',
     lineHeight: 1.8,
     color: 'var(--sm-text-muted)',
@@ -42,7 +42,7 @@ export default function PrivacyPage() {
           fontWeight: 900,
           letterSpacing: '-1px',
           color: 'var(--sm-text)',
-          fontFamily: "'Space Grotesk', var(--font-heading), sans-serif",
+          fontFamily: "Barlow, var(--font-heading), sans-serif",
           margin: '0 0 12px',
         }}>
           Privacy Policy

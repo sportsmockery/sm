@@ -207,7 +207,7 @@ export default function Header() {
                   textAlign: 'center',
                   fontSize: '10px',
                   fontWeight: 700,
-                  fontFamily: "'Space Grotesk', sans-serif",
+                  fontFamily: "Barlow, sans-serif",
                   color: feedMode === 'for-you' ? '#ffffff' : 'var(--sm-text-muted)',
                   position: 'relative',
                   zIndex: 1,
@@ -223,7 +223,7 @@ export default function Header() {
                   textAlign: 'center',
                   fontSize: '10px',
                   fontWeight: 700,
-                  fontFamily: "'Space Grotesk', sans-serif",
+                  fontFamily: "Barlow, sans-serif",
                   color: feedMode === 'latest' ? '#ffffff' : 'var(--sm-text-muted)',
                   position: 'relative',
                   zIndex: 1,
@@ -460,7 +460,7 @@ export default function Header() {
                   fontSize: '14px',
                   fontWeight: 500,
                   textDecoration: 'none',
-                  fontFamily: "'Space Grotesk', sans-serif",
+                  fontFamily: "Barlow, sans-serif",
                 }}
               >
                 Log in
@@ -639,7 +639,7 @@ export default function Header() {
                   color: '#ef4444',
                   fontSize: '16px',
                   fontWeight: 500,
-                  fontFamily: "'Space Grotesk', sans-serif",
+                  fontFamily: "Barlow, sans-serif",
                   padding: '12px 0',
                   textAlign: 'left',
                   borderBottom: '1px solid var(--sm-border)',

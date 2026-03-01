@@ -98,7 +98,7 @@ export default function FeatureGrid() {
           letterSpacing: '0.2em',
           textTransform: 'uppercase',
           color: '#bc0000',
-          fontFamily: "'Space Grotesk', sans-serif",
+          fontFamily: "Barlow, sans-serif",
           marginBottom: 20,
           fontWeight: 600,
         }}
@@ -181,7 +181,7 @@ export default function FeatureGrid() {
                   <div
                     style={{
                       fontSize: 10,
-                      fontFamily: "'Space Grotesk', sans-serif",
+                      fontFamily: "Barlow, sans-serif",
                       color: '#bc0000',
                       fontWeight: 600,
                       padding: '4px 8px',

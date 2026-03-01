@@ -18,7 +18,7 @@ import HeroSearchBar from './HeroSearchBar'
  * - Framer Motion hero entrance + shimmer logo + count-up record
  * - Floating orbs background + red gradient overlay
  * - Inline search bar
- * - Glass-card stat pills, Space Grotesk headings
+ * - Glass-card stat pills, Barlow headings
  * - Sticky subnav
  * - Slot for main content
  */
@@ -300,7 +300,7 @@ export default function TeamHubLayout({
             <div style={{ textAlign: 'center' }}>
               <h1
                 style={{
-                  fontFamily: "'Space Grotesk', sans-serif",
+                  fontFamily: "Barlow, sans-serif",
                   fontSize: '48px',
                   fontWeight: 700,
                   color: 'var(--sm-text)',
@@ -333,7 +333,7 @@ export default function TeamHubLayout({
               className="glass-card glass-card-sm glass-card-static"
               style={{ textAlign: 'center', minWidth: '120px', padding: '16px 20px' }}
             >
-              <div style={{ fontSize: '24px', fontWeight: 700, color: 'var(--sm-text)', fontFamily: "'Space Grotesk', sans-serif" }}>
+              <div style={{ fontSize: '24px', fontWeight: 700, color: 'var(--sm-text)', fontFamily: "Barlow, sans-serif" }}>
                 {renderCountUpRecord()}
               </div>
               <div style={{ fontSize: '11px', textTransform: 'uppercase', letterSpacing: '1px', color: 'var(--sm-text-dim)', fontWeight: 600 }}>
@@ -347,7 +347,7 @@ export default function TeamHubLayout({
                 className="glass-card glass-card-sm glass-card-static"
                 style={{ textAlign: 'center', minWidth: '120px', padding: '16px 20px' }}
               >
-                <div style={{ fontSize: '24px', fontWeight: 700, color: 'var(--sm-text)', fontFamily: "'Space Grotesk', sans-serif" }}>
+                <div style={{ fontSize: '24px', fontWeight: 700, color: 'var(--sm-text)', fontFamily: "Barlow, sans-serif" }}>
                   {record.divisionRank}
                 </div>
                 <div style={{ fontSize: '11px', textTransform: 'uppercase', letterSpacing: '1px', color: 'var(--sm-text-dim)', fontWeight: 600 }}>
@@ -365,7 +365,7 @@ export default function TeamHubLayout({
                 <div style={{
                   fontSize: '24px',
                   fontWeight: 700,
-                  fontFamily: "'Space Grotesk', sans-serif",
+                  fontFamily: "Barlow, sans-serif",
                   color: lastGame.result === 'W' ? 'var(--sm-success)' : lastGame.result === 'L' ? 'var(--sm-error)' : 'var(--sm-text)',
                 }}>
                   {lastGame.result} {lastGame.teamScore}-{lastGame.opponentScore}
@@ -382,7 +382,7 @@ export default function TeamHubLayout({
                 className="glass-card glass-card-sm glass-card-static"
                 style={{ textAlign: 'center', minWidth: '120px', padding: '16px 20px' }}
               >
-                <div style={{ fontSize: '16px', fontWeight: 600, color: 'var(--sm-text)', fontFamily: "'Space Grotesk', sans-serif" }}>
+                <div style={{ fontSize: '16px', fontWeight: 600, color: 'var(--sm-text)', fontFamily: "Barlow, sans-serif" }}>
                   {nextGame.isHome ? 'vs' : '@'} {nextGame.opponent}
                 </div>
                 <div style={{ fontSize: '11px', textTransform: 'uppercase', letterSpacing: '1px', color: 'var(--sm-text-dim)', fontWeight: 600 }}>

@@ -92,7 +92,7 @@ export default function PricingPageClient() {
         <div style={{ textAlign: 'center', marginBottom: '48px' }}>
           <h1 style={{
             fontSize: 'clamp(2rem, 4vw, 3rem)', fontWeight: 900, color: 'var(--sm-text)', marginBottom: '16px',
-            fontFamily: "'Space Grotesk', var(--font-heading), sans-serif",
+            fontFamily: "Barlow, var(--font-heading), sans-serif",
           }}>
             Upgrade to SM+
           </h1>
@@ -143,13 +143,13 @@ export default function PricingPageClient() {
                 <div style={{ marginBottom: '24px' }}>
                   <h3 style={{
                     fontSize: '20px', fontWeight: 700, marginBottom: '4px',
-                    fontFamily: "'Space Grotesk', var(--font-heading), sans-serif",
+                    fontFamily: "Barlow, var(--font-heading), sans-serif",
                     color: isPopular ? '#fff' : 'var(--sm-text)',
                   }}>
                     {plan.name}
                   </h3>
                   <div style={{ display: 'flex', alignItems: 'baseline', gap: '4px' }}>
-                    <span style={{ fontSize: '36px', fontWeight: 900, fontFamily: "'Space Grotesk', var(--font-heading), sans-serif" }}>
+                    <span style={{ fontSize: '36px', fontWeight: 900, fontFamily: "Barlow, var(--font-heading), sans-serif" }}>
                       {plan.price}
                     </span>
                     <span style={{ color: isPopular ? 'rgba(255,255,255,0.7)' : 'var(--sm-text-muted)' }}>

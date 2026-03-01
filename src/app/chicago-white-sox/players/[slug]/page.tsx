@@ -112,7 +112,7 @@ export default async function WhiteSoxPlayerPage({ params }: PlayerPageProps) {
                 </span>
               </div>
 
-              <h1 className="text-4xl md:text-5xl font-bold mb-2" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
+              <h1 className="text-4xl md:text-5xl font-bold mb-2" style={{ fontFamily: "Barlow, sans-serif" }}>
                 {profile.player.fullName}
               </h1>
 
@@ -219,7 +219,7 @@ export default async function WhiteSoxPlayerPage({ params }: PlayerPageProps) {
             {/* Season Stats */}
             {profile.currentSeason && (
               <section className="glass-card glass-card-static">
-                <h2 className="text-xl font-bold mb-6" style={{ fontFamily: "'Space Grotesk', sans-serif", color: 'var(--sm-text)' }}>
+                <h2 className="text-xl font-bold mb-6" style={{ fontFamily: "Barlow, sans-serif", color: 'var(--sm-text)' }}>
                   2025 Season Stats
                 </h2>
                 {isPitcher ? (
@@ -252,7 +252,7 @@ export default async function WhiteSoxPlayerPage({ params }: PlayerPageProps) {
             {profile.gameLog.length > 0 && (
               <section className="glass-card glass-card-static" style={{ overflow: 'hidden', padding: 0 }}>
                 <div className="p-6" style={{ borderBottom: '1px solid var(--sm-border)' }}>
-                  <h2 className="text-xl font-bold" style={{ fontFamily: "'Space Grotesk', sans-serif", color: 'var(--sm-text)' }}>
+                  <h2 className="text-xl font-bold" style={{ fontFamily: "Barlow, sans-serif", color: 'var(--sm-text)' }}>
                     Recent Games
                   </h2>
                 </div>
@@ -294,7 +294,7 @@ export default async function WhiteSoxPlayerPage({ params }: PlayerPageProps) {
           {/* Sidebar */}
           <div className="space-y-6">
             <section className="glass-card glass-card-static">
-              <h3 className="text-lg font-bold mb-4" style={{ fontFamily: "'Space Grotesk', sans-serif", color: 'var(--sm-text)' }}>
+              <h3 className="text-lg font-bold mb-4" style={{ fontFamily: "Barlow, sans-serif", color: 'var(--sm-text)' }}>
                 Quick Links
               </h3>
               <div className="space-y-2">

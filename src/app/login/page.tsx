@@ -88,7 +88,7 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
               marginTop: '32px',
               fontSize: '28px',
               fontWeight: 700,
-              fontFamily: "'Space Grotesk', var(--font-heading), sans-serif",
+              fontFamily: "Barlow, var(--font-heading), sans-serif",
               color: 'var(--sm-text)',
             }}>
               Welcome back
@@ -135,7 +135,7 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
 
           <h3 style={{
             fontSize: '24px', fontWeight: 700, color: '#fff', marginTop: '8px', textAlign: 'center',
-            fontFamily: "'Space Grotesk', var(--font-heading), sans-serif",
+            fontFamily: "Barlow, var(--font-heading), sans-serif",
           }}>
             Sports Mockery 2.0 Stands Alone
           </h3>

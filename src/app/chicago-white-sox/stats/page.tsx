@@ -42,7 +42,7 @@ export default async function WhiteSoxStatsPage() {
               fontWeight: 700,
               color: 'var(--sm-text)',
               marginBottom: 24,
-              fontFamily: "'Space Grotesk', sans-serif",
+              fontFamily: "Barlow, sans-serif",
             }}
           >
             Team Overview
@@ -72,7 +72,7 @@ export default async function WhiteSoxStatsPage() {
               fontWeight: 700,
               color: 'var(--sm-text)',
               marginBottom: 24,
-              fontFamily: "'Space Grotesk', sans-serif",
+              fontFamily: "Barlow, sans-serif",
             }}
           >
             Batting Leaders
@@ -113,7 +113,7 @@ export default async function WhiteSoxStatsPage() {
               fontWeight: 700,
               color: 'var(--sm-text)',
               marginBottom: 24,
-              fontFamily: "'Space Grotesk', sans-serif",
+              fontFamily: "Barlow, sans-serif",
             }}
           >
             Pitching Leaders
@@ -187,7 +187,7 @@ function StatCard({
           fontSize: 28,
           fontWeight: 800,
           color: positive ? 'var(--sm-success)' : negative ? 'var(--sm-error)' : 'var(--sm-text)',
-          fontFamily: "'Space Grotesk', sans-serif",
+          fontFamily: "Barlow, sans-serif",
         }}
       >
         {value}
@@ -237,7 +237,7 @@ function LeaderboardCard({
           style={{
             fontWeight: 700,
             color: 'var(--sm-text)',
-            fontFamily: "'Space Grotesk', sans-serif",
+            fontFamily: "Barlow, sans-serif",
             margin: 0,
           }}
         >

@@ -52,7 +52,7 @@ export default function FloatingARButton() {
           color: 'white',
           fontSize: '0.95rem',
           fontWeight: 600,
-          fontFamily: "'Space Grotesk', sans-serif",
+          fontFamily: "Barlow, sans-serif",
           boxShadow: '0 4px 20px rgba(139, 92, 246, 0.4)',
           transition: 'transform 0.2s, box-shadow 0.2s',
         }}
@@ -87,7 +87,7 @@ export default function FloatingARButton() {
           color: 'white',
           fontSize: '0.95rem',
           fontWeight: 600,
-          fontFamily: "'Space Grotesk', sans-serif",
+          fontFamily: "Barlow, sans-serif",
           boxShadow: '0 4px 20px rgba(139, 92, 246, 0.4)',
           transition: 'transform 0.2s, box-shadow 0.2s',
         }}

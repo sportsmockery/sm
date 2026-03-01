@@ -51,7 +51,7 @@ export default function BearsTrendingTopics({
               fontWeight: 700,
               color: 'var(--sm-text)',
               textTransform: 'uppercase',
-              fontFamily: "'Space Grotesk', sans-serif",
+              fontFamily: "Barlow, sans-serif",
               margin: 0,
             }}
           >
@@ -121,7 +121,7 @@ function TrendItem({
         <div className="flex items-center gap-2">
           <h4
             className="text-[14px] font-semibold group-hover:text-[#bc0000] transition-colors truncate"
-            style={{ fontFamily: "'Space Grotesk', sans-serif", color: 'var(--sm-text)' }}
+            style={{ fontFamily: "Barlow, sans-serif", color: 'var(--sm-text)' }}
           >
             {trend.title}
           </h4>

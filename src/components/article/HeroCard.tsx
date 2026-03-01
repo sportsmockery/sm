@@ -57,7 +57,7 @@ export default function HeroCard({
 
       {/* Headline */}
       <h1 style={{
-        fontFamily: "'Space Grotesk', sans-serif",
+        fontFamily: "Barlow, sans-serif",
         fontSize: 'clamp(2rem, 4vw, 3rem)',
         fontWeight: 700,
         letterSpacing: '-1px',

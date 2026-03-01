@@ -18,7 +18,7 @@ export default function AboutPage() {
           fontWeight: 900,
           letterSpacing: '-1.5px',
           color: 'var(--sm-text)',
-          fontFamily: "'Space Grotesk', var(--font-heading), sans-serif",
+          fontFamily: "Barlow, var(--font-heading), sans-serif",
           margin: '0 0 16px',
         }}>
           About Sports Mockery
@@ -35,7 +35,7 @@ export default function AboutPage() {
         <div className="glass-card glass-card-static" style={{ padding: '32px', marginBottom: '24px' }}>
           <h2 style={{
             fontSize: '28px', fontWeight: 800, letterSpacing: '-0.5px', color: 'var(--sm-text)',
-            fontFamily: "'Space Grotesk', var(--font-heading), sans-serif", marginBottom: '16px',
+            fontFamily: "Barlow, var(--font-heading), sans-serif", marginBottom: '16px',
           }}>
             Who We Are
           </h2>
@@ -51,7 +51,7 @@ export default function AboutPage() {
         <div className="glass-card glass-card-static" style={{ padding: '32px', marginBottom: '24px' }}>
           <h2 style={{
             fontSize: '28px', fontWeight: 800, letterSpacing: '-0.5px', color: 'var(--sm-text)',
-            fontFamily: "'Space Grotesk', var(--font-heading), sans-serif", marginBottom: '16px',
+            fontFamily: "Barlow, var(--font-heading), sans-serif", marginBottom: '16px',
           }}>
             Our Mission
           </h2>
@@ -66,7 +66,7 @@ export default function AboutPage() {
         {/* Our Values - Grid */}
         <h2 style={{
           fontSize: '28px', fontWeight: 800, letterSpacing: '-0.5px', color: 'var(--sm-text)',
-          fontFamily: "'Space Grotesk', var(--font-heading), sans-serif", marginBottom: '20px',
+          fontFamily: "Barlow, var(--font-heading), sans-serif", marginBottom: '20px',
         }}>
           Our Values
         </h2>
@@ -80,7 +80,7 @@ export default function AboutPage() {
             <div key={value.title} className="glass-card" style={{ padding: '28px' }}>
               <h3 style={{
                 fontSize: '18px', fontWeight: 700, color: 'var(--sm-text)',
-                fontFamily: "'Space Grotesk', var(--font-heading), sans-serif", marginBottom: '12px',
+                fontFamily: "Barlow, var(--font-heading), sans-serif", marginBottom: '12px',
               }}>
                 {value.title}
               </h3>
@@ -95,7 +95,7 @@ export default function AboutPage() {
         <div className="glass-card glass-card-static" style={{ padding: '32px', marginBottom: '40px' }}>
           <h2 style={{
             fontSize: '28px', fontWeight: 800, letterSpacing: '-0.5px', color: 'var(--sm-text)',
-            fontFamily: "'Space Grotesk', var(--font-heading), sans-serif", marginBottom: '16px',
+            fontFamily: "Barlow, var(--font-heading), sans-serif", marginBottom: '16px',
           }}>
             Our Team
           </h2>
@@ -110,7 +110,7 @@ export default function AboutPage() {
         <div className="glass-card glass-card-static" style={{ padding: '40px', textAlign: 'center' }}>
           <h2 style={{
             fontSize: '26px', fontWeight: 800, letterSpacing: '-0.5px', color: 'var(--sm-text)',
-            fontFamily: "'Space Grotesk', var(--font-heading), sans-serif", marginBottom: '12px',
+            fontFamily: "Barlow, var(--font-heading), sans-serif", marginBottom: '12px',
           }}>
             Get In Touch
           </h2>

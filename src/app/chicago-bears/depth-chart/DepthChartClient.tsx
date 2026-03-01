@@ -112,7 +112,7 @@ export default function DepthChartClient({
       <div style={{ marginBottom: '24px' }}>
         <h1
           style={{
-            fontFamily: "'Space Grotesk', sans-serif",
+            fontFamily: "Barlow, sans-serif",
             fontSize: '32px',
             fontWeight: 700,
             color: 'var(--sm-text)',
@@ -204,7 +204,7 @@ export default function DepthChartClient({
             >
               <h2
                 style={{
-                  fontFamily: "'Space Grotesk', sans-serif",
+                  fontFamily: "Barlow, sans-serif",
                   fontSize: '16px',
                   fontWeight: 700,
                   color: 'var(--sm-text)',
@@ -341,7 +341,7 @@ export default function DepthChartClient({
                           <div style={{ flex: 1, minWidth: 0 }}>
                             <div
                               style={{
-                                fontFamily: "'Space Grotesk', sans-serif",
+                                fontFamily: "Barlow, sans-serif",
                                 fontSize: '14px',
                                 fontWeight: 600,
                                 color: 'var(--sm-text)',

@@ -86,7 +86,7 @@ export default function CommentSection({
             display: 'flex',
             alignItems: 'center',
             gap: '10px',
-            fontFamily: "'Space Grotesk', sans-serif",
+            fontFamily: "Barlow, sans-serif",
             fontSize: '20px',
             fontWeight: 700,
             color: 'var(--sm-text)',
@@ -111,7 +111,7 @@ export default function CommentSection({
         </h2>
         <p
           style={{
-            fontFamily: "'Space Grotesk', sans-serif",
+            fontFamily: "Barlow, sans-serif",
             fontSize: '14px',
             color: 'var(--sm-text-muted)',
             marginTop: '6px',
@@ -153,7 +153,7 @@ export default function CommentSection({
                 animation: 'spin 1s linear infinite',
               }}
             />
-            <p style={{ fontFamily: "'Space Grotesk', sans-serif", fontSize: '14px', color: 'var(--sm-text-muted)' }}>
+            <p style={{ fontFamily: "Barlow, sans-serif", fontSize: '14px', color: 'var(--sm-text-muted)' }}>
               Loading comments...
             </p>
           </div>
@@ -162,7 +162,7 @@ export default function CommentSection({
 
       {/* Disqus noscript fallback */}
       <noscript>
-        <p style={{ color: 'var(--sm-text-muted)', textAlign: 'center', marginTop: '16px', fontFamily: "'Space Grotesk', sans-serif", fontSize: '14px' }}>
+        <p style={{ color: 'var(--sm-text-muted)', textAlign: 'center', marginTop: '16px', fontFamily: "Barlow, sans-serif", fontSize: '14px' }}>
           Please enable JavaScript to view the{' '}
           <a href="https://disqus.com/?ref_noscript" style={{ color: 'var(--sm-red)' }}>
             comments powered by Disqus.

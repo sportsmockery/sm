@@ -286,7 +286,7 @@ export default function AIHud() {
                       {item.headline.length > 70 ? item.headline.slice(0, 67) + '...' : item.headline}
                     </div>
                     {item.stat && (
-                      <span style={{ fontSize: 11, fontFamily: "'Space Grotesk', sans-serif", color: '#bc0000', fontWeight: 600 }}>
+                      <span style={{ fontSize: 11, fontFamily: "Barlow, sans-serif", color: '#bc0000', fontWeight: 600 }}>
                         {item.stat}
                       </span>
                     )}
@@ -353,7 +353,7 @@ export default function AIHud() {
                       textTransform: 'uppercase',
                       whiteSpace: 'nowrap',
                       pointerEvents: 'none',
-                      fontFamily: "'Space Grotesk', sans-serif",
+                      fontFamily: "Barlow, sans-serif",
                     }}
                   >
                     {btn.label}

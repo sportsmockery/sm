@@ -59,7 +59,7 @@ export default function ArticleCard({
               </span>
               <h3
                 style={{
-                  fontFamily: "'Space Grotesk', sans-serif",
+                  fontFamily: "Barlow, sans-serif",
                   color: 'var(--sm-text)',
                   fontSize: '20px',
                   fontWeight: 700,
@@ -119,7 +119,7 @@ export default function ArticleCard({
         <div style={{ flex: 1, minWidth: 0 }}>
           <h3
             style={{
-              fontFamily: "'Space Grotesk', sans-serif",
+              fontFamily: "Barlow, sans-serif",
               color: 'var(--sm-text)',
               fontSize: '15px',
               fontWeight: 600,

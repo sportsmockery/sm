@@ -134,7 +134,7 @@ export default function HolographicRoster({ players, stats, onActiveChange }: Ho
             letterSpacing: '0.2em',
             textTransform: 'uppercase',
             color: '#bc0000',
-            fontFamily: "'Space Grotesk', sans-serif",
+            fontFamily: "Barlow, sans-serif",
             fontWeight: 600,
           }}
         >
@@ -173,7 +173,7 @@ export default function HolographicRoster({ players, stats, onActiveChange }: Ho
                 ? '#fff'
                 : isDark ? '#aaa' : '#666',
               transition: 'all 0.2s ease',
-              fontFamily: "'Space Grotesk', sans-serif",
+              fontFamily: "Barlow, sans-serif",
             }}
           >
             {tab}
@@ -287,7 +287,7 @@ export default function HolographicRoster({ players, stats, onActiveChange }: Ho
           padding: '0 24px',
           fontSize: 10,
           color: isDark ? '#444' : '#bbb',
-          fontFamily: "'Space Grotesk', sans-serif",
+          fontFamily: "Barlow, sans-serif",
         }}
       >
         {filtered.length} players {activeTab !== 'ALL' ? `(${activeTab})` : ''}

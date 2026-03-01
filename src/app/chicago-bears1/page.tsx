@@ -65,7 +65,7 @@ export default function Bears1Page() {
               letterSpacing: '0.2em',
               textTransform: 'uppercase',
               color: '#bc0000',
-              fontFamily: "'Space Grotesk', sans-serif",
+              fontFamily: "Barlow, sans-serif",
               fontWeight: 600,
             }}
           >
@@ -149,7 +149,7 @@ export default function Bears1Page() {
                   fontSize: 16,
                   fontWeight: 800,
                   color: '#bc0000',
-                  fontFamily: "'Space Grotesk', sans-serif",
+                  fontFamily: "Barlow, sans-serif",
                 }}
               >
                 {record.regularSeason.wins}-{record.regularSeason.losses}
@@ -160,7 +160,7 @@ export default function Bears1Page() {
                   style={{
                     fontSize: 10,
                     color: isDark ? '#888' : '#666',
-                    fontFamily: "'Space Grotesk', sans-serif",
+                    fontFamily: "Barlow, sans-serif",
                   }}
                 >
                   {record.divisionRank}
@@ -172,7 +172,7 @@ export default function Bears1Page() {
                 style={{
                   fontSize: 11,
                   color: isDark ? '#666' : '#999',
-                  fontFamily: "'Space Grotesk', sans-serif",
+                  fontFamily: "Barlow, sans-serif",
                 }}
               >
                 POST: {record.postseason.wins}-{record.postseason.losses}
@@ -186,7 +186,7 @@ export default function Bears1Page() {
               letterSpacing: '0.2em',
               textTransform: 'uppercase',
               color: isDark ? '#444' : '#bbb',
-              fontFamily: "'Space Grotesk', sans-serif",
+              fontFamily: "Barlow, sans-serif",
             }}
           >
             2025 SEASON \u2022 {data.players.length} ACTIVE PLAYERS

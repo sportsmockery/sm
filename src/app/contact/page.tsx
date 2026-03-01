@@ -17,7 +17,7 @@ export default function ContactPage() {
           fontWeight: 900,
           letterSpacing: '-1.5px',
           color: 'var(--sm-text)',
-          fontFamily: "'Space Grotesk', var(--font-heading), sans-serif",
+          fontFamily: "Barlow, var(--font-heading), sans-serif",
           margin: '0 0 16px',
         }}>
           Contact Us
@@ -80,7 +80,7 @@ export default function ContactPage() {
         <div style={{ marginTop: '48px', paddingTop: '32px', borderTop: '1px solid var(--sm-border)', textAlign: 'center' }}>
           <h2 style={{
             fontSize: '20px', fontWeight: 700, color: 'var(--sm-text)',
-            fontFamily: "'Space Grotesk', var(--font-heading), sans-serif", marginBottom: '16px',
+            fontFamily: "Barlow, var(--font-heading), sans-serif", marginBottom: '16px',
           }}>
             Other Ways to Reach Us
           </h2>

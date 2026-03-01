@@ -80,9 +80,9 @@
      ========================================= */
 
   /* Font Families */
-  --font-sans: 'Space Grotesk', var(--font-space-grotesk), system-ui, sans-serif;
-  --font-mono: 'Space Grotesk', var(--font-space-grotesk), system-ui, sans-serif;
-  --font-display: 'Space Grotesk', var(--font-space-grotesk), system-ui, sans-serif;
+  --font-sans: 'Barlow', var(--font-barlow), sans-serif;
+  --font-mono: 'Barlow', var(--font-barlow), sans-serif;
+  --font-display: 'Barlow', var(--font-barlow), sans-serif;
 
   /* Font Sizes */
   --text-xs: 0.75rem;     /* 12px */

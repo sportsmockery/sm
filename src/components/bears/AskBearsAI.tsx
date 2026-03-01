@@ -133,7 +133,7 @@ export default function AskBearsAI({ className = '' }: AskBearsAIProps) {
           <div>
             <h3
               className="text-white text-[16px] font-bold"
-              style={{ fontFamily: "'Space Grotesk', sans-serif" }}
+              style={{ fontFamily: "Barlow, sans-serif" }}
             >
               Ask About the Bears
             </h3>

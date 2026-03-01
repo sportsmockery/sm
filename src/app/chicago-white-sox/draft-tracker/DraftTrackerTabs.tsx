@@ -90,7 +90,7 @@ export default function DraftTrackerTabs({ hubItems, displayPosts }: DraftTracke
             <div>
               <h2
                 style={{
-                  fontFamily: "'Space Grotesk', sans-serif",
+                  fontFamily: "Barlow, sans-serif",
                   color: 'var(--sm-text)',
                   fontSize: '20px',
                   fontWeight: 700,
@@ -126,7 +126,7 @@ export default function DraftTrackerTabs({ hubItems, displayPosts }: DraftTracke
         <section style={{ marginBottom: '32px' }}>
           <h2
             style={{
-              fontFamily: "'Space Grotesk', sans-serif",
+              fontFamily: "Barlow, sans-serif",
               color: 'var(--sm-text)',
               fontSize: '22px',
               fontWeight: 700,
@@ -154,7 +154,7 @@ export default function DraftTrackerTabs({ hubItems, displayPosts }: DraftTracke
               >
                 <div
                   style={{
-                    fontFamily: "'Space Grotesk', sans-serif",
+                    fontFamily: "Barlow, sans-serif",
                     fontSize: '18px',
                     fontWeight: 700,
                     color: 'var(--sm-text)',
@@ -195,7 +195,7 @@ export default function DraftTrackerTabs({ hubItems, displayPosts }: DraftTracke
             <section style={{ marginBottom: '28px' }}>
               <h2
                 style={{
-                  fontFamily: "'Space Grotesk', sans-serif",
+                  fontFamily: "Barlow, sans-serif",
                   color: 'var(--sm-text)',
                   fontSize: '22px',
                   fontWeight: 700,
@@ -233,7 +233,7 @@ export default function DraftTrackerTabs({ hubItems, displayPosts }: DraftTracke
                         </>
                       )}
                     </div>
-                    <h3 style={{ fontFamily: "'Space Grotesk', sans-serif", fontSize: '15px', fontWeight: 600, color: 'var(--sm-text)', margin: '0 0 6px 0', lineHeight: 1.3 }}>
+                    <h3 style={{ fontFamily: "Barlow, sans-serif", fontSize: '15px', fontWeight: 600, color: 'var(--sm-text)', margin: '0 0 6px 0', lineHeight: 1.3 }}>
                       {item.headline}
                     </h3>
                     <p style={{ fontSize: '14px', color: 'var(--sm-text-muted)', margin: '0 0 8px 0', lineHeight: 1.5 }}>{item.summary}</p>
@@ -251,7 +251,7 @@ export default function DraftTrackerTabs({ hubItems, displayPosts }: DraftTracke
           <section>
             <h2
               style={{
-                fontFamily: "'Space Grotesk', sans-serif",
+                fontFamily: "Barlow, sans-serif",
                 color: 'var(--sm-text)',
                 fontSize: '22px',
                 fontWeight: 700,
@@ -275,7 +275,7 @@ export default function DraftTrackerTabs({ hubItems, displayPosts }: DraftTracke
                         </div>
                       )}
                       <div style={{ flex: 1, minWidth: 0 }}>
-                        <h3 style={{ fontFamily: "'Space Grotesk', sans-serif", color: 'var(--sm-text)', fontSize: '15px', fontWeight: 600, lineHeight: 1.4, margin: 0, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
+                        <h3 style={{ fontFamily: "Barlow, sans-serif", color: 'var(--sm-text)', fontSize: '15px', fontWeight: 600, lineHeight: 1.4, margin: 0, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
                           {post.title}
                         </h3>
                         <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginTop: '8px', fontSize: '12px', color: 'var(--sm-text-dim)' }}>
@@ -301,7 +301,7 @@ export default function DraftTrackerTabs({ hubItems, displayPosts }: DraftTracke
         >
           <h2
             style={{
-              fontFamily: "'Space Grotesk', sans-serif",
+              fontFamily: "Barlow, sans-serif",
               color: 'var(--sm-text)',
               fontSize: '20px',
               fontWeight: 700,

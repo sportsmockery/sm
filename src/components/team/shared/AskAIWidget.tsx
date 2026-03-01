@@ -19,7 +19,7 @@ export default function AskAIWidget({ teamSlug, teamLabel }: { teamSlug: string;
           <Image src="/downloads/scout-v2.png" alt="Scout AI" width={20} height={20} />
         </div>
         <div>
-          <h3 style={{ fontFamily: "'Space Grotesk', sans-serif", color: 'var(--sm-text)', fontWeight: 700, fontSize: '16px', margin: 0 }}>
+          <h3 style={{ fontFamily: "Barlow, sans-serif", color: 'var(--sm-text)', fontWeight: 700, fontSize: '16px', margin: 0 }}>
             Scout AI
           </h3>
           <p style={{ color: 'var(--sm-text-dim)', fontSize: '12px', margin: 0 }}>

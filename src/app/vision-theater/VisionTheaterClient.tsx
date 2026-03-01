@@ -370,7 +370,7 @@ export default function VisionTheaterClient({ data }: { data: VisionTheaterData 
       style={{
         background: 'var(--sm-dark, #050508)',
         color: 'var(--sm-text, #ffffff)',
-        fontFamily: "'Space Grotesk', sans-serif",
+        fontFamily: "Barlow, sans-serif",
         minHeight: '100vh',
       }}
     >
@@ -448,10 +448,10 @@ export default function VisionTheaterClient({ data }: { data: VisionTheaterData 
             Vision Theater
           </div>
 
-          {/* Title — Bebas Neue with red glow, matching SM 2.0 hero */}
+          {/* Title — Barlow with red glow, matching SM 2.0 hero */}
           <h1
             style={{
-              fontFamily: "'Space Grotesk', sans-serif",
+              fontFamily: "Barlow, sans-serif",
               fontSize: 'clamp(4rem, 9vw, 7.5rem)',
               fontWeight: 400,
               lineHeight: 0.95,
@@ -518,7 +518,7 @@ export default function VisionTheaterClient({ data }: { data: VisionTheaterData 
                   fontWeight: 600,
                   cursor: 'pointer',
                   transition: 'all 0.2s',
-                  fontFamily: "'Space Grotesk', sans-serif",
+                  fontFamily: "Barlow, sans-serif",
                 }}
               >
                 {f.label}
@@ -537,7 +537,7 @@ export default function VisionTheaterClient({ data }: { data: VisionTheaterData 
               borderRadius: '8px',
               padding: '8px 12px',
               fontSize: '13px',
-              fontFamily: "'Space Grotesk', sans-serif",
+              fontFamily: "Barlow, sans-serif",
               cursor: 'pointer',
             }}
           >
@@ -561,7 +561,7 @@ export default function VisionTheaterClient({ data }: { data: VisionTheaterData 
               borderRadius: '8px',
               padding: '8px 14px',
               fontSize: '13px',
-              fontFamily: "'Space Grotesk', sans-serif",
+              fontFamily: "Barlow, sans-serif",
               flex: '1 1 200px',
               minWidth: '150px',
               outline: 'none',
@@ -631,7 +631,7 @@ export default function VisionTheaterClient({ data }: { data: VisionTheaterData 
                   </span>
                   <h2
                     style={{
-                      fontFamily: '"Space Grotesk", sans-serif',
+                      fontFamily: 'Barlow, sans-serif',
                       fontSize: '24px',
                       fontWeight: 700,
                       color: '#ffffff',
@@ -661,7 +661,7 @@ export default function VisionTheaterClient({ data }: { data: VisionTheaterData 
                       padding: '6px 14px',
                       fontSize: '13px',
                       cursor: 'pointer',
-                      fontFamily: "'Space Grotesk', sans-serif",
+                      fontFamily: "Barlow, sans-serif",
                     }}
                   >
                     Close Player
@@ -684,7 +684,7 @@ export default function VisionTheaterClient({ data }: { data: VisionTheaterData 
                     fontWeight: 600,
                     color: '#ffffff',
                     margin: '0 0 16px',
-                    fontFamily: '"Space Grotesk", sans-serif',
+                    fontFamily: 'Barlow, sans-serif',
                   }}
                 >
                   Fan Comments
@@ -708,7 +708,7 @@ export default function VisionTheaterClient({ data }: { data: VisionTheaterData 
                         borderRadius: '8px',
                         padding: '10px 14px',
                         fontSize: '14px',
-                        fontFamily: "'Space Grotesk', sans-serif",
+                        fontFamily: "Barlow, sans-serif",
                         outline: 'none',
                       }}
                     />
@@ -725,7 +725,7 @@ export default function VisionTheaterClient({ data }: { data: VisionTheaterData 
                         fontWeight: 600,
                         cursor: commentPosting ? 'not-allowed' : 'pointer',
                         opacity: commentPosting || !commentInput.trim() ? 0.5 : 1,
-                        fontFamily: "'Space Grotesk', sans-serif",
+                        fontFamily: "Barlow, sans-serif",
                       }}
                     >
                       {commentPosting ? 'Posting...' : 'Post'}
@@ -821,7 +821,7 @@ export default function VisionTheaterClient({ data }: { data: VisionTheaterData 
         >
           <h2
             style={{
-              fontFamily: '"Space Grotesk", sans-serif',
+              fontFamily: 'Barlow, sans-serif',
               fontSize: '22px',
               fontWeight: 700,
               color: '#ffffff',
@@ -1014,7 +1014,7 @@ export default function VisionTheaterClient({ data }: { data: VisionTheaterData 
           >
             <h2
               style={{
-                fontFamily: '"Space Grotesk", sans-serif',
+                fontFamily: 'Barlow, sans-serif',
                 fontSize: '22px',
                 fontWeight: 700,
                 color: '#ffffff',
@@ -1202,7 +1202,7 @@ export default function VisionTheaterClient({ data }: { data: VisionTheaterData 
                 fontSize: '16px',
                 fontWeight: 600,
                 cursor: 'pointer',
-                fontFamily: '"Space Grotesk", sans-serif',
+                fontFamily: 'Barlow, sans-serif',
                 transition: 'all 0.2s',
                 minWidth: '200px',
                 textAlign: 'center',
@@ -1216,7 +1216,7 @@ export default function VisionTheaterClient({ data }: { data: VisionTheaterData 
                   color: '#55556a',
                   fontWeight: 400,
                   marginTop: '4px',
-                  fontFamily: "'Space Grotesk', sans-serif",
+                  fontFamily: "Barlow, sans-serif",
                 }}
               >
                 {ch.videos.length} videos
@@ -1270,7 +1270,7 @@ export default function VisionTheaterClient({ data }: { data: VisionTheaterData 
             fontSize: '16px',
             fontWeight: 600,
             cursor: 'pointer',
-            fontFamily: "'Space Grotesk', sans-serif",
+            fontFamily: "Barlow, sans-serif",
           }}
         >
           Coming Soon
@@ -1342,7 +1342,7 @@ export default function VisionTheaterClient({ data }: { data: VisionTheaterData 
                 <div>
                   <h3
                     style={{
-                      fontFamily: '"Space Grotesk", sans-serif',
+                      fontFamily: 'Barlow, sans-serif',
                       fontSize: '18px',
                       fontWeight: 700,
                       color: '#ffffff',
@@ -1373,7 +1373,7 @@ export default function VisionTheaterClient({ data }: { data: VisionTheaterData 
                     borderRadius: '8px',
                     padding: '12px 14px',
                     fontSize: '14px',
-                    fontFamily: "'Space Grotesk', sans-serif",
+                    fontFamily: "Barlow, sans-serif",
                     outline: 'none',
                   }}
                 />
@@ -1390,7 +1390,7 @@ export default function VisionTheaterClient({ data }: { data: VisionTheaterData 
                     fontWeight: 600,
                     cursor: scoutLoading ? 'not-allowed' : 'pointer',
                     opacity: scoutLoading || !scoutQuery.trim() ? 0.5 : 1,
-                    fontFamily: "'Space Grotesk', sans-serif",
+                    fontFamily: "Barlow, sans-serif",
                   }}
                 >
                   {scoutLoading ? '...' : 'Ask'}
@@ -1434,7 +1434,7 @@ export default function VisionTheaterClient({ data }: { data: VisionTheaterData 
                     padding: '10px 16px',
                     fontSize: '13px',
                     cursor: 'pointer',
-                    fontFamily: "'Space Grotesk', sans-serif",
+                    fontFamily: "Barlow, sans-serif",
                   }}
                 >
                   Don&apos;t show again
@@ -1450,7 +1450,7 @@ export default function VisionTheaterClient({ data }: { data: VisionTheaterData 
                     fontSize: '13px',
                     fontWeight: 600,
                     cursor: 'pointer',
-                    fontFamily: "'Space Grotesk', sans-serif",
+                    fontFamily: "Barlow, sans-serif",
                   }}
                 >
                   Resume Video

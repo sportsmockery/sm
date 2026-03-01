@@ -23,7 +23,7 @@ export default function RailCard({ title, icon, children }: RailCardProps) {
             fontSize: 13,
             fontWeight: 600,
             color: 'var(--sm-text)',
-            fontFamily: "'Space Grotesk', sans-serif",
+            fontFamily: "Barlow, sans-serif",
             textTransform: 'uppercase',
             letterSpacing: '0.05em',
           }}>

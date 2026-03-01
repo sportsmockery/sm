@@ -179,7 +179,7 @@ export default function NeuralPulse({ headlines = [], onSearchSubmit }: NeuralPu
           letterSpacing: '0.2em',
           textTransform: 'uppercase',
           color: isDark ? '#333' : '#ccc',
-          fontFamily: "'Space Grotesk', sans-serif",
+          fontFamily: "Barlow, sans-serif",
           marginBottom: shattered ? 16 : 0,
           alignSelf: shattered ? 'flex-start' : 'auto',
         }}
@@ -383,7 +383,7 @@ export default function NeuralPulse({ headlines = [], onSearchSubmit }: NeuralPu
             fontSize: 10,
             letterSpacing: '0.15em',
             textTransform: 'uppercase',
-            fontFamily: "'Space Grotesk', sans-serif",
+            fontFamily: "Barlow, sans-serif",
             display: 'flex',
             flexDirection: 'column',
             alignItems: 'center',

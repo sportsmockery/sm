@@ -26,7 +26,7 @@ export default function CategoryHeader({
           {/* Category name per spec: 36-42px, Montserrat 900, centered, white */}
           <h1
             className="mb-3 text-[36px] lg:text-[42px] font-black uppercase tracking-tight text-white"
-            style={{ fontFamily: "'Space Grotesk', sans-serif" }}
+            style={{ fontFamily: "Barlow, sans-serif" }}
           >
             {categoryName}
           </h1>
@@ -35,7 +35,7 @@ export default function CategoryHeader({
           {description && (
             <p
               className="mb-4 max-w-2xl text-[14px] lg:text-[16px] text-white/80"
-              style={{ fontFamily: "'Space Grotesk', sans-serif" }}
+              style={{ fontFamily: "Barlow, sans-serif" }}
             >
               {description}
             </p>

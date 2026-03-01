@@ -93,7 +93,7 @@ export default function HeroCarousel({
                 style={{
                   backgroundColor: isBears ? teamInfo.secondaryColor : '#bc0000',
                   color: 'white',
-                  fontFamily: "'Space Grotesk', sans-serif",
+                  fontFamily: "Barlow, sans-serif",
                 }}
               >
                 {isBears ? '🐻 BEARS' : currentStory.categoryName}
@@ -110,7 +110,7 @@ export default function HeroCarousel({
             >
               <h2
                 className="text-white text-2xl md:text-4xl lg:text-5xl font-bold leading-tight mb-3 group-hover:underline decoration-2 underline-offset-4"
-                style={{ fontFamily: "'Space Grotesk', sans-serif" }}
+                style={{ fontFamily: "Barlow, sans-serif" }}
               >
                 {currentStory.title}
               </h2>
@@ -214,7 +214,7 @@ export default function HeroCarousel({
                   <div className="absolute bottom-0 left-0 right-0 p-2">
                     <p
                       className="text-white text-xs font-semibold line-clamp-2 leading-tight"
-                      style={{ fontFamily: "'Space Grotesk', sans-serif" }}
+                      style={{ fontFamily: "Barlow, sans-serif" }}
                     >
                       {story.title}
                     </p>

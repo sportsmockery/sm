@@ -19,7 +19,7 @@ export default function NotFound() {
         <div className="gradient-text" style={{
           fontSize: 'clamp(120px, 20vw, 200px)',
           fontWeight: 900,
-          fontFamily: "'Space Grotesk', sans-serif",
+          fontFamily: "Barlow, sans-serif",
           lineHeight: 1,
           marginBottom: 24,
         }}>
@@ -30,7 +30,7 @@ export default function NotFound() {
         <h1 style={{
           fontSize: 24,
           fontWeight: 700,
-          fontFamily: "'Space Grotesk', sans-serif",
+          fontFamily: "Barlow, sans-serif",
           color: 'var(--sm-text)',
           marginBottom: 12,
         }}>

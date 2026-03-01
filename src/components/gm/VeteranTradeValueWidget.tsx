@@ -294,7 +294,7 @@ function CalculationRow({
         color: isMultiplier
           ? (isDark ? '#fbbf24' : '#b45309')
           : (isDark ? '#e2e8f0' : '#334155'),
-        fontFamily: "'Space Grotesk', sans-serif",
+        fontFamily: "Barlow, sans-serif",
       }}>
         {value}
       </span>

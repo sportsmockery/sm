@@ -113,7 +113,7 @@ export default function NotificationsPage() {
           <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
             <h1 style={{
               fontSize: '28px', fontWeight: 700, color: 'var(--sm-text)', margin: 0,
-              fontFamily: "'Space Grotesk', var(--font-heading), sans-serif",
+              fontFamily: "Barlow, var(--font-heading), sans-serif",
             }}>
               Notifications
             </h1>

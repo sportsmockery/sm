@@ -122,7 +122,7 @@ export default async function PlayerProfilePage({ params }: PlayerPageProps) {
                 </span>
               </div>
 
-              <h1 className="text-2xl sm:text-4xl md:text-5xl font-bold mb-2" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
+              <h1 className="text-2xl sm:text-4xl md:text-5xl font-bold mb-2" style={{ fontFamily: "Barlow, sans-serif" }}>
                 {player.fullName}
               </h1>
 
@@ -188,7 +188,7 @@ export default async function PlayerProfilePage({ params }: PlayerPageProps) {
             {/* Season Overview */}
             {currentSeason && (
               <section className="glass-card glass-card-static">
-                <h2 className="text-lg sm:text-xl font-bold mb-4 sm:mb-6" style={{ fontFamily: "'Space Grotesk', sans-serif", color: 'var(--sm-text)' }}>
+                <h2 className="text-lg sm:text-xl font-bold mb-4 sm:mb-6" style={{ fontFamily: "Barlow, sans-serif", color: 'var(--sm-text)' }}>
                   2025 Season Overview
                 </h2>
                 <SeasonOverviewCards player={player} stats={currentSeason} />
@@ -198,7 +198,7 @@ export default async function PlayerProfilePage({ params }: PlayerPageProps) {
             {/* Strength Profile */}
             {currentSeason && (
               <section className="glass-card glass-card-static">
-                <h2 className="text-lg sm:text-xl font-bold mb-4 sm:mb-6" style={{ fontFamily: "'Space Grotesk', sans-serif", color: 'var(--sm-text)' }}>
+                <h2 className="text-lg sm:text-xl font-bold mb-4 sm:mb-6" style={{ fontFamily: "Barlow, sans-serif", color: 'var(--sm-text)' }}>
                   Strength Profile
                 </h2>
                 <StrengthProfileBars player={player} stats={currentSeason} />
@@ -208,7 +208,7 @@ export default async function PlayerProfilePage({ params }: PlayerPageProps) {
             {/* Postseason Stats (if applicable) */}
             {postseasonStats && postseasonStats.gamesPlayed > 0 && (
               <section className="glass-card glass-card-static" style={{ borderLeft: '3px solid var(--sm-red)' }}>
-                <h2 className="text-lg sm:text-xl font-bold mb-4 sm:mb-6" style={{ fontFamily: "'Space Grotesk', sans-serif", color: 'var(--sm-red)' }}>
+                <h2 className="text-lg sm:text-xl font-bold mb-4 sm:mb-6" style={{ fontFamily: "Barlow, sans-serif", color: 'var(--sm-red)' }}>
                   2025 Postseason Stats
                 </h2>
                 <div className="text-sm mb-4" style={{ color: 'var(--sm-text-muted)' }}>
@@ -222,7 +222,7 @@ export default async function PlayerProfilePage({ params }: PlayerPageProps) {
             {gameLog.length > 0 && (
               <section className="glass-card glass-card-static" style={{ overflow: 'hidden', padding: 0 }}>
                 <div className="p-4 sm:p-6" style={{ borderBottom: '1px solid var(--sm-border)' }}>
-                  <h2 className="text-lg sm:text-xl font-bold" style={{ fontFamily: "'Space Grotesk', sans-serif", color: 'var(--sm-text)' }}>
+                  <h2 className="text-lg sm:text-xl font-bold" style={{ fontFamily: "Barlow, sans-serif", color: 'var(--sm-text)' }}>
                     Game Log 2025
                   </h2>
                 </div>
@@ -236,7 +236,7 @@ export default async function PlayerProfilePage({ params }: PlayerPageProps) {
             {/* Similar Bears */}
             {similarPlayers.length > 0 && (
               <section className="glass-card glass-card-static">
-                <h3 className="text-base sm:text-lg font-bold mb-3 sm:mb-4" style={{ fontFamily: "'Space Grotesk', sans-serif", color: 'var(--sm-text)' }}>
+                <h3 className="text-base sm:text-lg font-bold mb-3 sm:mb-4" style={{ fontFamily: "Barlow, sans-serif", color: 'var(--sm-text)' }}>
                   Similar Bears
                 </h3>
                 <div className="space-y-2 sm:space-y-3">
@@ -283,7 +283,7 @@ export default async function PlayerProfilePage({ params }: PlayerPageProps) {
 
             {/* Quick Links */}
             <section className="glass-card glass-card-static">
-              <h3 className="text-base sm:text-lg font-bold mb-3 sm:mb-4" style={{ fontFamily: "'Space Grotesk', sans-serif", color: 'var(--sm-text)' }}>
+              <h3 className="text-base sm:text-lg font-bold mb-3 sm:mb-4" style={{ fontFamily: "Barlow, sans-serif", color: 'var(--sm-text)' }}>
                 Quick Links
               </h3>
               <div className="space-y-1 sm:space-y-2">

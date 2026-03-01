@@ -80,7 +80,7 @@ export default async function BearsScoresPage() {
           <div style={{ display: 'flex', flexWrap: 'wrap', gap: '24px', justifyContent: 'center', textAlign: 'center' }}>
             <div>
               <div style={{ fontSize: '11px', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '4px', color: 'var(--sm-text-muted)' }}>Regular Season</div>
-              <div style={{ fontSize: '22px', fontWeight: 700, color: 'var(--sm-text)', fontFamily: "'Space Grotesk', sans-serif" }}>
+              <div style={{ fontSize: '22px', fontWeight: 700, color: 'var(--sm-text)', fontFamily: "Barlow, sans-serif" }}>
                 {separatedRecord.regularSeason.wins}-{separatedRecord.regularSeason.losses}
                 {separatedRecord.regularSeason.ties > 0 && `-${separatedRecord.regularSeason.ties}`}
               </div>
@@ -89,7 +89,7 @@ export default async function BearsScoresPage() {
             {postseasonGames.length > 0 && (
               <div>
                 <div style={{ fontSize: '11px', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '4px', color: 'var(--sm-text-muted)' }}>Postseason</div>
-                <div style={{ fontSize: '22px', fontWeight: 700, color: 'var(--sm-red)', fontFamily: "'Space Grotesk', sans-serif" }}>
+                <div style={{ fontSize: '22px', fontWeight: 700, color: 'var(--sm-red)', fontFamily: "Barlow, sans-serif" }}>
                   {separatedRecord.postseason.wins}-{separatedRecord.postseason.losses}
                 </div>
                 <div style={{ fontSize: '12px', color: 'var(--sm-text-muted)' }}>{postseasonGames.length} games</div>

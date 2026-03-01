@@ -66,7 +66,7 @@ function ArticleCard({ article }: { article: GridArticle }) {
           {/* Category - subtle red text */}
           <span
             className="text-[10px] font-bold uppercase tracking-[0.08em] mb-1 block"
-            style={{ fontFamily: "'Space Grotesk', sans-serif", color: '#bc0000' }}
+            style={{ fontFamily: "Barlow, sans-serif", color: '#bc0000' }}
           >
             {article.category.name}
           </span>
@@ -74,7 +74,7 @@ function ArticleCard({ article }: { article: GridArticle }) {
           <h3
             className="text-[17px] font-bold leading-[1.3] line-clamp-3 transition-colors"
             style={{
-              fontFamily: "'Space Grotesk', sans-serif",
+              fontFamily: "Barlow, sans-serif",
               color: 'var(--sm-text)',
             }}
             dangerouslySetInnerHTML={{ __html: processIconShortcodes(article.title) }}

@@ -72,7 +72,7 @@ export default function CategoryFilters({
           <div className="flex items-baseline gap-3">
             <h1
               className="text-xl font-bold text-[var(--sm-text)]"
-              style={{ fontFamily: "'Space Grotesk', sans-serif" }}
+              style={{ fontFamily: "Barlow, sans-serif" }}
             >
               {categoryName}
             </h1>

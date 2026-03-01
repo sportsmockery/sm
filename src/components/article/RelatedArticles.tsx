@@ -42,7 +42,7 @@ export default function RelatedArticles({
           display: 'flex',
           alignItems: 'center',
           gap: '10px',
-          fontFamily: "'Space Grotesk', sans-serif",
+          fontFamily: "Barlow, sans-serif",
           fontSize: '24px',
           fontWeight: 700,
           color: 'var(--sm-text)',
@@ -128,7 +128,7 @@ export default function RelatedArticles({
                 <Link
                   href={`/${article.category.slug}/${article.slug}`}
                   style={{
-                    fontFamily: "'Space Grotesk', sans-serif",
+                    fontFamily: "Barlow, sans-serif",
                     fontSize: '18px',
                     fontWeight: 700,
                     lineHeight: 1.3,
@@ -151,7 +151,7 @@ export default function RelatedArticles({
               {article.excerpt && (
                 <p
                   style={{
-                    fontFamily: "'Space Grotesk', sans-serif",
+                    fontFamily: "Barlow, sans-serif",
                     fontSize: '14px',
                     lineHeight: 1.6,
                     color: 'var(--sm-text-muted)',
@@ -172,7 +172,7 @@ export default function RelatedArticles({
                   display: 'flex',
                   alignItems: 'center',
                   gap: '8px',
-                  fontFamily: "'Space Grotesk', sans-serif",
+                  fontFamily: "Barlow, sans-serif",
                   fontSize: '12px',
                   color: 'var(--sm-text-dim)',
                 }}

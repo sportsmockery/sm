@@ -59,7 +59,7 @@ export default function QuickStats({ teamSlug, teamLabel, league, stats }: Quick
     <div className="glass-card glass-card-static">
       <h3
         style={{
-          fontFamily: "'Space Grotesk', sans-serif",
+          fontFamily: "Barlow, sans-serif",
           color: 'var(--sm-text)',
           fontWeight: 700,
           fontSize: '16px',
@@ -92,7 +92,7 @@ export default function QuickStats({ teamSlug, teamLabel, league, stats }: Quick
           >
             <span
               style={{
-                fontFamily: "'Space Grotesk', sans-serif",
+                fontFamily: "Barlow, sans-serif",
                 fontSize: '13px',
                 fontWeight: 500,
                 color: 'var(--sm-text)',
@@ -102,7 +102,7 @@ export default function QuickStats({ teamSlug, teamLabel, league, stats }: Quick
             </span>
             <span
               style={{
-                fontFamily: "'Space Grotesk', sans-serif",
+                fontFamily: "Barlow, sans-serif",
                 fontSize: '13px',
                 fontWeight: 700,
                 color: 'var(--sm-text-muted)',

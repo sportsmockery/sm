@@ -7,9 +7,9 @@
 
 /* THEME VARIABLES */
 :root {
-  --font-sans: 'Space Grotesk', var(--font-space-grotesk), system-ui, sans-serif;
-  --font-heading: 'Space Grotesk', var(--font-space-grotesk), system-ui, sans-serif;
-  --font-display: 'Space Grotesk', var(--font-space-grotesk), system-ui, sans-serif;
+  --font-sans: 'Barlow', var(--font-barlow), sans-serif;
+  --font-heading: 'Barlow', var(--font-barlow), sans-serif;
+  --font-display: 'Barlow', var(--font-barlow), sans-serif;
 
   /* Primary brand color */
   --color-accent: #bc0000;

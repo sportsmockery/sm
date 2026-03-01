@@ -42,7 +42,7 @@ export default function Footer() {
         <div className="footer-grid">
           {/* Brand column (2fr) */}
           <div className="footer-col">
-            <div style={{ fontFamily: "'Space Grotesk', sans-serif", fontSize: '22px', fontWeight: 700, marginBottom: '12px' }}>
+            <div style={{ fontFamily: "Barlow, sans-serif", fontSize: '22px', fontWeight: 700, marginBottom: '12px' }}>
               <span>Sports </span>
               <span style={{ color: '#bc0000' }}>Mockery</span>
             </div>

@@ -472,7 +472,7 @@ export default function AR3HelmetPage() {
         backdropFilter: 'blur(10px)',
         color: '#0f0',
         fontSize: 'var(--text-xs, 12px)',
-        fontFamily: "'Space Grotesk', sans-serif",
+        fontFamily: "Barlow, sans-serif",
         borderRadius: 'var(--sm-radius-sm, 10px)',
         border: '1px solid var(--sm-border, rgba(255,255,255,0.06))',
         zIndex: 20,

@@ -122,7 +122,7 @@ export default function ArticleActions({
   }
 
   const labelStyle: React.CSSProperties = {
-    fontFamily: "'Space Grotesk', sans-serif",
+    fontFamily: "Barlow, sans-serif",
     fontSize: '10px',
     lineHeight: 1,
   }

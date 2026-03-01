@@ -611,7 +611,7 @@ export default function FanChatPage() {
                           background: 'rgba(255, 255, 255, 0.04)',
                           border: '1px solid rgba(255, 255, 255, 0.08)',
                           color: 'var(--sm-text-muted)',
-                          fontFamily: "'Space Grotesk', sans-serif",
+                          fontFamily: "Barlow, sans-serif",
                           fontSize: 12,
                           cursor: 'pointer',
                           transition: 'all 0.15s',

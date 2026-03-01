@@ -74,7 +74,7 @@ export default async function WhiteSoxPlayersPage() {
         {/* Header */}
         <div className="mb-6 flex items-center justify-between">
           <div>
-            <h1 className="text-2xl font-bold" style={{ fontFamily: "'Space Grotesk', sans-serif", color: 'var(--sm-text)' }}>
+            <h1 className="text-2xl font-bold" style={{ fontFamily: "Barlow, sans-serif", color: 'var(--sm-text)' }}>
               Players
             </h1>
             <p className="text-sm" style={{ color: 'var(--sm-text-muted)' }}>{players.length} players on roster</p>

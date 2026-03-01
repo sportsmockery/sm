@@ -41,7 +41,7 @@ export default function HeroSearchBar({ teamName }: { teamName: string }) {
         <span
           style={{
             color: 'var(--sm-text-dim)',
-            fontFamily: "'Space Grotesk', sans-serif",
+            fontFamily: "Barlow, sans-serif",
             fontSize: '12px',
             fontWeight: 400,
             whiteSpace: 'nowrap',
