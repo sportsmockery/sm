@@ -55,7 +55,7 @@ export function CatchUpTimeline({ posts, favoriteTeams }: CatchUpTimelineProps) 
   // Derive catch-up items: last 24h, sorted by importance then recency, top 8
   const catchUpItems = useMemo(() => {
     const now = Date.now();
-    const cutoff = now - 24 * 60 * 60 * 1000;
+    const cutoff = now - 72 * 60 * 60 * 1000;
 
     const recent = posts.filter((p) => {
       const pubTime = new Date(p.published_at).getTime();
