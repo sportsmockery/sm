@@ -940,56 +940,6 @@ export function HomepageFeed({
         </div>
       </section>
 
-      {/* ===== SECTION 7: Horizontal Storylines Rail ===== */}
-      {safeTrendingPosts.length > 0 && (
-        <section className="storylines-rail-section section-transition" aria-label="Storylines">
-          <div className="sm-container">
-            <h3 className="storylines-rail-header">Storylines</h3>
-          </div>
-          <div className="storylines-rail">
-            {safeTrendingPosts.slice(0, 8).map((post: any) => {
-              const postUrl = post.category_slug
-                ? `/${post.category_slug}/${post.slug}`
-                : `/${post.slug}`;
-              const teamName = post.team_slug
-                ? TEAM_LABELS[post.team_slug] || post.team_slug
-                : 'Sports';
-              const isScoutPost = (post.title || '').toLowerCase().includes('scout');
-              return (
-                <Link key={post.id} href={postUrl} className="storyline-card" style={{ borderRadius: '16px' }}>
-                  {post.featured_image ? (
-                    <div className="storyline-card-image">
-                      <Image
-                        src={post.featured_image}
-                        alt=""
-                        fill
-                        sizes="260px"
-                      />
-                    </div>
-                  ) : isScoutPost ? (
-                    <div className="storyline-card-image" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'linear-gradient(135deg, rgba(188,0,0,0.15), rgba(10,10,10,0.9))' }}>
-                      <Image
-                        src="/downloads/scout-v2.png"
-                        alt="Scout AI"
-                        width={64}
-                        height={64}
-                        style={{ borderRadius: '50%', filter: 'drop-shadow(0 0 12px rgba(188,0,0,0.6))' }}
-                      />
-                    </div>
-                  ) : (
-                    <div className="storyline-card-image storyline-card-placeholder" />
-                  )}
-                  <div className="storyline-card-body">
-                    <span className="storyline-card-team">{teamName}</span>
-                    <span className="storyline-card-title">{post.title}</span>
-                  </div>
-                </Link>
-              );
-            })}
-          </div>
-        </section>
-      )}
-
       {/* ===== SECTION 4: Sticky Filter Bar ===== */}
       <div className="team-filter-bar-sticky">
         <div className="sm-container">
