@@ -226,7 +226,7 @@
   --sm-card-hover: #f8f8fa;
   --sm-border: rgba(0, 0, 0, 0.08);
   --sm-text: #1a1a2e;
-  --sm-text-muted: #555566;
+  --sm-text-muted: #4A4A55;
   --sm-text-dim: #8888a0;
   --sm-red-glow: rgba(188, 0, 0, 0.3);
   --sm-nav-bg: rgba(255, 255, 255, 0.8);
@@ -899,6 +899,36 @@ p {
 .dark .skeleton {
   background: linear-gradient(90deg, #1c1c1f 25%, #27272a 50%, #1c1c1f 75%);
   background-size: 200% 100%;
+}
+
+/* ========== TABULAR NUMERICS ========== */
+.sm-table td, .sm-table th, [class*="stat"], [class*="score"], [class*="record"], .tabular-nums {
+  font-variant-numeric: tabular-nums;
+}
+
+/* ========== DATA FLASH ========== */
+@keyframes data-flash { 0% { background-color: rgba(188,0,0,0.25); } 100% { background-color: transparent; } }
+.data-flash { animation: data-flash 0.8s ease-out; border-radius: 4px; }
+
+/* ========== SKELETON SHIMMER ========== */
+.skeleton-shimmer {
+  background: linear-gradient(90deg, var(--sm-surface) 0%, var(--sm-card-hover) 40%, var(--sm-surface) 80%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s ease-in-out infinite;
+}
+
+/* ========== TACTILE PRESS SCALE ========== */
+.press-scale { transition: transform 0.1s ease; }
+.press-scale:active { transform: scale(0.97); }
+
+/* ========== SCOUT THINKING BORDER ========== */
+@keyframes gradient-pulse-border {
+  0%, 100% { border-color: rgba(188,0,0,0.3); box-shadow: 0 0 12px rgba(188,0,0,0.1); }
+  50% { border-color: rgba(255,68,68,0.5); box-shadow: 0 0 20px rgba(188,0,0,0.25); }
+}
+.scout-thinking-border {
+  border: 2px solid rgba(188,0,0,0.3);
+  animation: gradient-pulse-border 2s ease-in-out infinite;
 }
 
 /* ========== ANIMATION UTILITIES ========== */
@@ -2861,6 +2891,7 @@ p {
   position: relative;
   overflow: hidden;
   backdrop-filter: blur(10px);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.04), inset 0 -1px 0 rgba(0,0,0,0.2);
 }
 .glass-card::before {
   content: '';
@@ -4489,12 +4520,14 @@ a.glass-card-sm:active,
 .light .glass-card {
   background: #ffffff;
   border-color: rgba(0,0,0,0.06);
-  box-shadow: 0 1px 3px rgba(0,0,0,0.06), 0 4px 16px rgba(0,0,0,0.04);
+  box-shadow: 0 1px 3px rgba(0,0,0,0.06), 0 4px 12px rgba(0,0,0,0.03),
+              inset 0 1px 0 rgba(255,255,255,0.8), inset 0 -1px 0 rgba(0,0,0,0.04);
 }
 [data-theme="light"] .glass-card:hover,
 .light .glass-card:hover {
   background: #ffffff;
-  box-shadow: 0 4px 20px rgba(0,0,0,0.1), 0 1px 4px rgba(0,0,0,0.06);
+  box-shadow: 0 4px 20px rgba(0,0,0,0.1), 0 1px 4px rgba(0,0,0,0.06),
+              inset 0 1px 0 rgba(255,255,255,0.8), inset 0 -1px 0 rgba(0,0,0,0.04);
 }
 [data-theme="light"] .glass-card-sm,
 .light .glass-card-sm {
@@ -4760,4 +4793,30 @@ a.glass-card-sm:active,
 }
 [data-theme="light"] .quick-stats-chip:hover {
   border-color: rgba(188,0,0,0.2) !important;
+}
+
+/* ========== MOBILE BOTTOM NAV ========== */
+.mobile-bottom-nav { display: none; }
+@media (max-width: 768px) {
+  .mobile-bottom-nav { display: flex; }
+  body { padding-bottom: calc(56px + env(safe-area-inset-bottom, 0px)); }
+}
+
+/* ========== SWIPE GALLERY ========== */
+@media (max-width: 768px) {
+  .swipe-gallery { display: flex; overflow-x: auto; scroll-snap-type: x mandatory; gap: 12px; scrollbar-width: none; }
+  .swipe-gallery::-webkit-scrollbar { display: none; }
+  .swipe-gallery > * { scroll-snap-align: start; flex-shrink: 0; }
+}
+
+/* ========== ARTICLE FOCUS MODE ========== */
+.article-sidebar-focus { transition: opacity 0.5s ease; }
+.article-sidebar-focus.faded { opacity: 0.15; }
+
+/* ========== CINEMATIC ARTICLE HERO ========== */
+.article-hero-cinematic { position: relative; }
+.article-hero-cinematic::after {
+  content: ''; position: absolute; bottom: 0; left: 0; right: 0; height: 50%;
+  background: linear-gradient(to top, var(--sm-dark), transparent);
+  pointer-events: none; border-radius: 0 0 16px 16px;
 }

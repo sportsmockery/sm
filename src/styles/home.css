@@ -884,6 +884,18 @@
   aspect-ratio: 16/9; object-fit: cover;
   border: 1px solid var(--hm-border);
 }
+.hm-article-image-wrap {
+  position: relative;
+  margin-bottom: 40px;
+}
+.hm-article-image-wrap .hm-article-image {
+  margin-bottom: 0;
+}
+.hm-article-image-wrap::after {
+  content: ''; position: absolute; bottom: 0; left: 0; right: 0; height: 50%;
+  background: linear-gradient(to top, var(--hm-bg, #0a0a0a), transparent);
+  pointer-events: none; border-radius: 0 0 20px 20px;
+}
 .hm-article-content {
   font-size: 16px; line-height: 1.8; color: var(--hm-text-muted);
 }

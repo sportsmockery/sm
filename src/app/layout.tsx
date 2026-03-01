@@ -20,6 +20,7 @@ import NavigationOrb from "@/components/layout/NavigationOrb";
 import ParticleBg from "@/components/layout/ParticleBg";
 import BriefingStrip from "@/components/layout/BriefingStrip";
 import LiveStrip from "@/components/layout/LiveStrip";
+import MobileBottomNav from "@/components/layout/MobileBottomNav";
 
 // Floating buttons disabled - users access AI and Fan Chat via header buttons
 // import BearsAIButton from "@/components/bears/BearsAIButton";
@@ -154,6 +155,7 @@ export default function RootLayout({
                 <Footer />
               </div>
               <NavigationOrb />
+              <MobileBottomNav />
               <ParticleBg />
               <ScrollToTop />
               <CookieBanner />

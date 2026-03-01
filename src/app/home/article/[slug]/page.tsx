@@ -125,11 +125,13 @@ export default async function HomeArticlePage({ params }: ArticlePageProps) {
 
         {/* Featured Image */}
         {post.featured_image && (
-          <img
-            src={post.featured_image}
-            alt={post.title}
-            className="hm-article-image"
-          />
+          <div className="hm-article-image-wrap">
+            <img
+              src={post.featured_image}
+              alt={post.title}
+              className="hm-article-image"
+            />
+          </div>
         )}
 
         {/* Content */}

@@ -8,6 +8,7 @@ interface AnimatedCardProps {
   hoverScale?: number
   hoverRotate?: number
   glowColor?: string
+  maxTilt?: number
 }
 
 export default function AnimatedCard({
@@ -16,6 +17,7 @@ export default function AnimatedCard({
   hoverScale = 1.02,
   hoverRotate = 0,
   glowColor,
+  maxTilt = 2.5,
 }: AnimatedCardProps) {
   const cardRef = useRef<HTMLDivElement>(null)
   const [transform, setTransform] = useState('')
@@ -30,8 +32,8 @@ export default function AnimatedCard({
     const centerX = rect.width / 2
     const centerY = rect.height / 2
 
-    const rotateX = ((y - centerY) / centerY) * -5
-    const rotateY = ((x - centerX) / centerX) * 5
+    const rotateX = ((y - centerY) / centerY) * -maxTilt
+    const rotateY = ((x - centerX) / centerX) * maxTilt
 
     setTransform(
       `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale(${hoverScale})`

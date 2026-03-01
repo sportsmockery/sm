@@ -545,7 +545,7 @@ export default function AskAIPage() {
                 <div ref={messagesContainerRef} style={{ flex: 1, overflowY: 'auto', padding: 24 }}>
                   {messages.length === 0 ? (
                     <div style={{ height: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', textAlign: 'center' }}>
-                      <div className={isAnimating ? 'animate-thinking' : ''} style={{ width: 96, height: 96, marginBottom: 24 }}>
+                      <div className={`${isAnimating ? 'animate-thinking scout-thinking-border' : ''}`} style={{ width: 96, height: 96, marginBottom: 24, borderRadius: '50%' }}>
                         <Image src="/downloads/scout-v2.png" alt="Scout AI" width={96} height={96} style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
                       </div>
                       <h3 style={{ fontFamily: 'var(--sm-font-heading)', fontSize: '1.25rem', fontWeight: 700, color: 'var(--sm-text)', marginBottom: 8 }}>
@@ -648,7 +648,7 @@ export default function AskAIPage() {
                       ))}
                       {isLoading && (
                         <div style={{ display: 'flex', justifyContent: 'flex-start' }}>
-                          <div className="glass-card glass-card-sm glass-card-static" style={{
+                          <div className="glass-card glass-card-sm glass-card-static scout-thinking-border" style={{
                             display: 'flex', alignItems: 'center', gap: 10, borderRadius: 'var(--sm-radius-md)', padding: '12px 16px',
                           }}>
                             <span style={{ fontSize: 13, color: 'var(--sm-text-muted)' }}>Scout is thinking</span>
@@ -669,7 +669,7 @@ export default function AskAIPage() {
                 <div className="glass-card-sm" style={{ borderTop: '1px solid var(--sm-border)', borderRadius: 0, padding: '16px 24px' }}>
                   <form onSubmit={handleSubmit} style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
                     {/* Scout Icon - Always visible, animates on question */}
-                    <div className={isAnimating ? 'animate-thinking' : ''} style={{ width: 48, height: 48, flexShrink: 0 }}>
+                    <div className={`${isAnimating ? 'animate-thinking scout-thinking-border' : ''}`} style={{ width: 48, height: 48, flexShrink: 0, borderRadius: '50%' }}>
                       <Image src="/downloads/scout-v2.png" alt="Scout AI" width={48} height={48} style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
                     </div>
                     <input

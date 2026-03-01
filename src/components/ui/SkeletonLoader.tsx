@@ -15,8 +15,8 @@ export default function SkeletonLoader({
   className = '',
   lines = 1,
 }: SkeletonLoaderProps) {
-  const baseClasses = 'animate-pulse'
-  const baseStyle: React.CSSProperties = { backgroundColor: 'var(--sm-surface)' }
+  const baseClasses = 'skeleton-shimmer'
+  const baseStyle: React.CSSProperties = {}
 
   if (variant === 'circular') {
     return (

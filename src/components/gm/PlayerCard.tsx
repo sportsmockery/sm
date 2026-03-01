@@ -97,6 +97,7 @@ export function PlayerCard({ player, selected = false, compact = false, teamColo
   return (
     <motion.div
       layoutId={`player-${player.player_id}`}
+      className="press-scale"
       whileHover={{ scale: 1.02 }}
       animate={selected ? { scale: 1.03 } : { scale: 1 }}
       onClick={onClick}

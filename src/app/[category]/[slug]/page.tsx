@@ -25,6 +25,7 @@ import { ArticleAudioPlayer } from '@/components/article/ArticleAudioPlayer'
 import ArticleContentWithEmbeds from '@/components/article/ArticleContentWithEmbeds'
 import SocialShareBar from '@/components/SocialShareBar'
 import { CommandPanel } from '@/components/homepage/CommandPanel'
+import ArticleFocusMode from '@/components/article/ArticleFocusMode'
 
 interface ArticlePageProps {
   params: Promise<{
@@ -326,7 +327,7 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
 
           {/* Featured image */}
           {post.featured_image && (
-            <div style={{ marginTop: 32, borderRadius: 16, overflow: 'hidden', position: 'relative', aspectRatio: '16/9' }}>
+            <div className="article-hero-cinematic" style={{ marginTop: 32, borderRadius: 16, overflow: 'hidden', position: 'relative', aspectRatio: '16/9' }}>
               <Image src={post.featured_image} alt={post.title} fill style={{ objectFit: 'cover' }} priority />
             </div>
           )}
@@ -425,7 +426,7 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
           </div>
 
           {/* Right Sidebar — Command Panel (Desktop only) */}
-          <aside className="hidden xl:block" style={{ width: 300, flexShrink: 0, paddingLeft: 16 }}>
+          <ArticleFocusMode className="hidden xl:block" style={{ width: 300, flexShrink: 0, paddingLeft: 16 }}>
             <CommandPanel
               posts={relatedPosts.map(p => ({
                 id: String(p.id),
@@ -445,7 +446,7 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
               }))}
               isLoggedIn={false}
             />
-          </aside>
+          </ArticleFocusMode>
         </div>
       </div>
 
