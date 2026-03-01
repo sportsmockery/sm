@@ -1,99 +1,151 @@
 // src/components/homepage/HeroStatsOrbs.tsx
-// 500 purely decorative random dots — no text, no stats, no orbital ring.
-// Three categories: normal (red), trail (comet glow), themed (white/black).
-// New random layout on every page load via useMemo([]).
+// 100 canvas-based orbs that slowly bounce around the hero background.
+// Each orb has a bright red glow and a fading trail line behind it.
 'use client'
 
-import { useMemo, useState, useEffect } from 'react'
+import { useEffect, useRef } from 'react'
 
-interface Dot {
-  top: string
-  left: string
-  size: number
-  delay: number
-  duration: number
-  kind: 'normal' | 'trail' | 'themed'
+interface Orb {
+  x: number
+  y: number
+  dx: number
+  dy: number
+  radius: number
+  trail: { x: number; y: number }[]
 }
 
-function generateDots(count: number): Dot[] {
-  const trailCount = Math.round(count * 0.10)   // 10% trail
-  const themedCount = Math.round(count * 0.10)   // 10% themed
-  const normalCount = count - trailCount - themedCount
-
-  const dots: Dot[] = []
-
-  for (let i = 0; i < normalCount; i++) {
-    dots.push({
-      top: `${Math.random() * 100}%`,
-      left: `${Math.random() * 100}%`,
-      size: 2 + Math.random() * 4,          // 2-6px
-      delay: Math.random() * 12,
-      duration: 6 + Math.random() * 8,       // 6-14s
-      kind: 'normal',
-    })
-  }
-
-  for (let i = 0; i < trailCount; i++) {
-    dots.push({
-      top: `${Math.random() * 100}%`,
-      left: `${Math.random() * 100}%`,
-      size: 4 + Math.random() * 10,          // 4-14px
-      delay: Math.random() * 12,
-      duration: 6 + Math.random() * 8,
-      kind: 'trail',
-    })
-  }
-
-  for (let i = 0; i < themedCount; i++) {
-    dots.push({
-      top: `${Math.random() * 100}%`,
-      left: `${Math.random() * 100}%`,
-      size: 2 + Math.random() * 6,           // 2-8px
-      delay: Math.random() * 12,
-      duration: 6 + Math.random() * 8,
-      kind: 'themed',
-    })
-  }
-
-  return dots
-}
+const ORB_COUNT = 100
+const MOBILE_ORB_COUNT = 50
+const TRAIL_LENGTH = 150 // positions stored per orb
 
 export function HeroStatsOrbs() {
-  const [isMobile, setIsMobile] = useState(false)
+  const canvasRef = useRef<HTMLCanvasElement>(null)
 
   useEffect(() => {
-    setIsMobile(window.innerWidth < 768)
-  }, [])
+    if (typeof window === 'undefined') return
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return
 
-  // New random layout each mount (page load) — empty deps = runs once
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  const dots = useMemo(() => generateDots(isMobile ? 200 : 500), [isMobile])
+    const canvas = canvasRef.current
+    if (!canvas) return
+    const ctx = canvas.getContext('2d')
+    if (!ctx) return
+
+    let animId: number
+    let orbs: Orb[] = []
+    const isMobile = window.innerWidth < 768
+    const count = isMobile ? MOBILE_ORB_COUNT : ORB_COUNT
+
+    function resize() {
+      const parent = canvas!.parentElement
+      if (!parent) return
+      canvas!.width = parent.offsetWidth
+      canvas!.height = parent.offsetHeight
+    }
+
+    function createOrbs() {
+      orbs = []
+      for (let i = 0; i < count; i++) {
+        const speed = 0.3 + Math.random() * 0.7 // 0.3–1.0 px/frame (slow)
+        const angle = Math.random() * Math.PI * 2
+        orbs.push({
+          x: Math.random() * canvas!.width,
+          y: Math.random() * canvas!.height,
+          dx: Math.cos(angle) * speed,
+          dy: Math.sin(angle) * speed,
+          radius: 2 + Math.random() * 3, // 2–5px
+          trail: [],
+        })
+      }
+    }
+
+    function draw() {
+      ctx!.clearRect(0, 0, canvas!.width, canvas!.height)
+      const isDark = document.documentElement.getAttribute('data-theme') !== 'light'
+
+      for (let o = 0; o < orbs.length; o++) {
+        const orb = orbs[o]
+
+        // Store trail position
+        orb.trail.push({ x: orb.x, y: orb.y })
+        if (orb.trail.length > TRAIL_LENGTH) orb.trail.shift()
+
+        // Draw trail — split into 5 bands with fading opacity (oldest = transparent, newest = visible)
+        const len = orb.trail.length
+        if (len > 4) {
+          const bands = 5
+          const bandSize = Math.floor(len / bands)
+          for (let b = 0; b < bands; b++) {
+            const start = b * bandSize
+            const end = b === bands - 1 ? len - 1 : (b + 1) * bandSize
+            if (end - start < 2) continue
+            const progress = (b + 1) / bands // 0.2 (oldest) → 1.0 (newest)
+            const alpha = progress * (isDark ? 0.30 : 0.18)
+
+            ctx!.beginPath()
+            ctx!.moveTo(orb.trail[start].x, orb.trail[start].y)
+            for (let i = start + 1; i <= end; i++) {
+              ctx!.lineTo(orb.trail[i].x, orb.trail[i].y)
+            }
+            ctx!.strokeStyle = `rgba(188, 0, 0, ${alpha})`
+            ctx!.lineWidth = Math.max(1, orb.radius * 0.5)
+            ctx!.lineCap = 'round'
+            ctx!.lineJoin = 'round'
+            ctx!.stroke()
+          }
+        }
+
+        // Draw orb glow (larger faint circle)
+        ctx!.beginPath()
+        ctx!.arc(orb.x, orb.y, orb.radius * 3, 0, Math.PI * 2)
+        ctx!.fillStyle = isDark ? 'rgba(188, 0, 0, 0.18)' : 'rgba(188, 0, 0, 0.12)'
+        ctx!.fill()
+
+        // Draw orb core (bright)
+        ctx!.beginPath()
+        ctx!.arc(orb.x, orb.y, orb.radius, 0, Math.PI * 2)
+        ctx!.fillStyle = isDark ? 'rgba(188, 0, 0, 0.75)' : 'rgba(188, 0, 0, 0.55)'
+        ctx!.fill()
+
+        // Move orb
+        orb.x += orb.dx
+        orb.y += orb.dy
+
+        // Bounce off edges
+        if (orb.x - orb.radius < 0) { orb.x = orb.radius; orb.dx = Math.abs(orb.dx) }
+        if (orb.x + orb.radius > canvas!.width) { orb.x = canvas!.width - orb.radius; orb.dx = -Math.abs(orb.dx) }
+        if (orb.y - orb.radius < 0) { orb.y = orb.radius; orb.dy = Math.abs(orb.dy) }
+        if (orb.y + orb.radius > canvas!.height) { orb.y = canvas!.height - orb.radius; orb.dy = -Math.abs(orb.dy) }
+      }
+
+      animId = requestAnimationFrame(draw)
+    }
+
+    resize()
+    createOrbs()
+    draw()
+
+    const handleResize = () => { resize(); createOrbs() }
+    window.addEventListener('resize', handleResize)
+
+    const handleVisibility = () => {
+      if (document.hidden) cancelAnimationFrame(animId)
+      else draw()
+    }
+    document.addEventListener('visibilitychange', handleVisibility)
+
+    return () => {
+      cancelAnimationFrame(animId)
+      window.removeEventListener('resize', handleResize)
+      document.removeEventListener('visibilitychange', handleVisibility)
+    }
+  }, [])
 
   return (
     <div className="hero-stats-orbs" aria-hidden="true">
-      {dots.map((d, i) => {
-        const className = d.kind === 'trail'
-          ? 'hero-floating-dot hero-dot-trail'
-          : d.kind === 'themed'
-            ? 'hero-floating-dot hero-dot-themed'
-            : 'hero-floating-dot'
-
-        return (
-          <div
-            key={i}
-            className={className}
-            style={{
-              position: 'absolute',
-              top: d.top,
-              left: d.left,
-              width: d.size,
-              height: d.size,
-              animationDuration: `${d.duration}s`,
-              animationDelay: `${d.delay}s`,
-            }}
-          />
-        )
-      })}
+      <canvas
+        ref={canvasRef}
+        style={{ position: 'absolute', inset: 0, width: '100%', height: '100%' }}
+      />
     </div>
   )
 }
