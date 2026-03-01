@@ -44,6 +44,10 @@
     {
       "path": "/api/cron/audit-orbs",
       "schedule": "0 12 * * *"
+    },
+    {
+      "path": "/api/cron/sync-wordpress",
+      "schedule": "0 4 * * *"
     }
   ],
   "headers": [
