@@ -348,25 +348,65 @@ function HeroParticles() {
   return <canvas ref={canvasRef} className="hero-particles" />;
 }
 
-/* ── Ambient Stat Visuals ── */
+/* ── Ambient Stat Visuals (floating text — random positions each load) ── */
 function AmbientStats({ posts }: { posts: any[] }) {
-  const stats = useMemo(() => {
+  const [heroStats, setHeroStats] = useState<{ label: string; value: string | number }[]>([]);
+
+  // Fetch hero-stats API data (team records, last games)
+  useEffect(() => {
+    fetch('/api/hero-stats')
+      .then(r => r.ok ? r.json() : null)
+      .then(data => {
+        if (data?.stats?.length) {
+          setHeroStats(data.stats.map((s: any) => ({ label: s.label, value: s.value })));
+        }
+      })
+      .catch(() => {});
+  }, []);
+
+  // Merge post-derived stats + hero-stats, shuffle, assign random positions
+  const items = useMemo(() => {
+    // Post-derived stats
     const totalArticles = posts.length;
     const trendingCount = posts.filter((p: any) => p.is_trending).length;
     const totalViews = posts.reduce((sum: number, p: any) => sum + (p.views || 0), 0);
     const teamCount = new Set(posts.map((p: any) => p.team_slug).filter(Boolean)).size;
-    return [
+    const postStats: { label: string; value: string | number }[] = [
       { label: 'Articles', value: totalArticles },
       { label: 'Trending', value: trendingCount },
       { label: 'Views', value: totalViews >= 1000 ? `${(totalViews / 1000).toFixed(0)}K` : totalViews },
       { label: 'Teams', value: teamCount },
     ];
-  }, [posts]);
+
+    const merged = [...postStats, ...heroStats];
+
+    // Fisher-Yates shuffle
+    for (let i = merged.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [merged[i], merged[j]] = [merged[j], merged[i]];
+    }
+
+    // Assign random positions and animation delays
+    return merged.map(stat => ({
+      ...stat,
+      top: `${10 + Math.random() * 75}%`,   // 10-85%
+      left: `${5 + Math.random() * 85}%`,    // 5-90%
+      delay: Math.random() * 10,
+    }));
+  }, [posts, heroStats]);
 
   return (
     <div className="ambient-stats" aria-hidden="true">
-      {stats.map((stat, i) => (
-        <div key={stat.label} className={`ambient-stat ambient-stat-${i}`}>
+      {items.map((stat, i) => (
+        <div
+          key={`${stat.label}-${i}`}
+          className="ambient-stat"
+          style={{
+            top: stat.top,
+            left: stat.left,
+            animationDelay: `${stat.delay}s`,
+          }}
+        >
           <span className="ambient-stat-value">{stat.value}</span>
           <span className="ambient-stat-label">{stat.label}</span>
         </div>

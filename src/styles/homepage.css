@@ -176,7 +176,7 @@
   font-family: 'Space Grotesk', var(--font-space-grotesk), sans-serif;
   font-size: 22px;
   font-weight: 700;
-  color: rgba(188, 0, 0, 0.12);
+  color: rgba(188, 0, 0, 0.18);
   line-height: 1;
 }
 
@@ -186,14 +186,10 @@
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 1px;
-  color: rgba(255, 255, 255, 0.06);
+  color: rgba(255, 255, 255, 0.10);
 }
 
-/* Position each stat in a different corner */
-.ambient-stat-0 { top: 15%; left: 8%; animation-delay: 0s; }
-.ambient-stat-1 { top: 20%; right: 10%; animation-delay: 2s; }
-.ambient-stat-2 { bottom: 25%; left: 12%; animation-delay: 4s; }
-.ambient-stat-3 { bottom: 18%; right: 8%; animation-delay: 6s; }
+/* Positions now set via inline styles (random each load) */
 
 @keyframes ambientFloat {
   0%, 100% {
@@ -209,12 +205,12 @@
 /* Light mode: adjust opacity */
 [data-theme="light"] .ambient-stat-value,
 .light .ambient-stat-value {
-  color: rgba(188, 0, 0, 0.08);
+  color: rgba(188, 0, 0, 0.12);
 }
 
 [data-theme="light"] .ambient-stat-label,
 .light .ambient-stat-label {
-  color: rgba(0, 0, 0, 0.05);
+  color: rgba(0, 0, 0, 0.08);
 }
 
 /* Hide on small screens — too cluttered */
@@ -236,191 +232,25 @@
   overflow: hidden;
 }
 
-.hero-orbs-orbit-ring {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  width: 0;
-  height: 0;
-}
-
-/* ── Individual orb: vertical stack layout, NO truncation ── */
-.hero-stat-orb {
-  position: absolute;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  border-radius: 50%;
-  background: rgba(188, 0, 0, 0.12);
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
-  border: 1px solid rgba(188, 0, 0, 0.18);
-  box-shadow:
-    inset 0 0 14px rgba(188, 0, 0, 0.15),
-    0 0 24px rgba(188, 0, 0, 0.10),
-    0 0 1px var(--orb-accent, transparent);
-  padding: 6px;
-  line-height: 1.2;
-  text-align: center;
-  overflow: visible;
-  white-space: normal;
-  opacity: 0;
-  animation:
-    heroOrbAppear 0.8s ease-out forwards,
-    heroOrbit var(--orbit-speed, 12s) linear infinite;
-  animation-delay: var(--delay, 0s), var(--orbit-delay, 0s);
-}
-
-/* ── Comet trail glow ── */
-.hero-stat-orb::after {
-  content: '';
-  position: absolute;
-  width: 100%;
-  height: 100%;
-  border-radius: 50%;
-  background: radial-gradient(circle, rgba(188, 0, 0, 0.4) 0%, transparent 70%);
-  filter: blur(8px);
-  z-index: -1;
-  animation: trailPulse 2s ease-in-out infinite;
-}
-
+/* ── Trail pulse for comet-trail dots ── */
 @keyframes trailPulse {
   0%, 100% { opacity: 0.3; transform: scale(1); }
   50% { opacity: 0.7; transform: scale(1.3); }
 }
 
-/* ── Label (top): 12px weight 500 ── */
-.hero-stat-orb-label {
-  font-family: 'Space Grotesk', var(--font-space-grotesk), sans-serif;
-  font-size: 12px;
-  font-weight: 500;
-  color: rgba(255, 255, 255, 0.45);
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
-  line-height: 1.2;
-  text-align: center;
-  overflow: visible;
-  white-space: normal;
-  word-break: break-word;
-  order: -1;
+/* ── Themed dot float (combined translate + scale to avoid transform conflicts) ── */
+@keyframes themedDotFloat {
+  0%   { opacity: 0; transform: translate(0, 0) scale(1); }
+  15%  { opacity: 0.35; }
+  50%  { opacity: 0.25; transform: translate(8px, -12px) scale(1.15); }
+  85%  { opacity: 0.35; }
+  100% { opacity: 0; transform: translate(-4px, 8px) scale(1); }
 }
 
-/* ── Value (bottom): 18px weight 700 bold ── */
-.hero-stat-orb-value {
-  font-family: 'Space Grotesk', var(--font-space-grotesk), sans-serif;
-  font-size: 18px;
-  font-weight: 700;
-  color: rgba(255, 255, 255, 0.7);
-  line-height: 1.2;
-  text-align: center;
-  overflow: visible;
-  white-space: nowrap;
-}
-
-/* ── Orbit animation ── */
-@keyframes heroOrbit {
-  0%   { transform: rotate(0deg) translateX(var(--orbit-radius, 140px)) rotate(0deg); }
-  100% { transform: rotate(360deg) translateX(var(--orbit-radius, 140px)) rotate(-360deg); }
-}
-
-@keyframes heroOrbAppear {
-  from { opacity: 0; transform: scale(0.6) translateX(var(--orbit-radius, 140px)); }
-  to   { opacity: 1; transform: scale(1) translateX(var(--orbit-radius, 140px)); }
-}
-
-/* ── Light mode ── */
-[data-theme="light"] .hero-stat-orb,
-.light .hero-stat-orb {
-  background: rgba(188, 0, 0, 0.06);
-  border-color: rgba(188, 0, 0, 0.10);
-  box-shadow:
-    inset 0 0 12px rgba(188, 0, 0, 0.08),
-    0 0 20px rgba(188, 0, 0, 0.05);
-}
-
-[data-theme="light"] .hero-stat-orb::after,
-.light .hero-stat-orb::after {
-  opacity: 0.5;
-}
-
-[data-theme="light"] .hero-stat-orb-value,
-.light .hero-stat-orb-value {
-  color: rgba(0, 0, 0, 0.18);
-}
-
-[data-theme="light"] .hero-stat-orb-label,
-.light .hero-stat-orb-label {
-  color: rgba(0, 0, 0, 0.12);
-}
-
-/* ── Mobile: vertical stack below hero, no orbit ── */
-@media (max-width: 768px) {
-  .hero-stats-orbs {
-    position: relative;
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
-    gap: 12px;
-    padding: 16px 8px;
-    overflow: visible;
-  }
-
-  .hero-orbs-orbit-ring {
-    position: static;
-    display: contents;
-    width: auto;
-    height: auto;
-  }
-
-  .hero-stat-orb {
-    position: static;
-    animation: heroOrbAppear 0.6s ease-out forwards;
-    transform: none !important;
-  }
-
-  .hero-stat-orb.orb-large  { width: 80px; height: 80px; }
-  .hero-stat-orb.orb-medium { width: 56px; height: 56px; }
-  .hero-stat-orb.orb-small  { width: 44px; height: 44px; }
-
-  .hero-stat-orb-label { font-size: 8px; }
-  .hero-stat-orb-value { font-size: 12px; }
-
-  .hero-stat-orb.orb-small .hero-stat-orb-label { font-size: 7px; }
-  .hero-stat-orb.orb-small .hero-stat-orb-value { font-size: 10px; }
-
-  .hero-stat-orb::after {
-    filter: blur(4px);
-    opacity: 0.2;
-  }
-
-  @keyframes heroOrbAppear {
-    from { opacity: 0; transform: scale(0.6); }
-    to   { opacity: 1; transform: scale(1); }
-  }
-}
-
-/* Touch: scale on tap (mobile) */
-@media (hover: none) and (pointer: coarse) {
-  .hero-stat-orb:active {
-    transform: scale(1.1);
-  }
-}
-
-/* ── Reduced motion: static positions, no animation ── */
-@media (prefers-reduced-motion: reduce) {
-  .hero-stat-orb {
-    animation: heroOrbAppear 0.1s ease-out forwards;
-  }
-  .hero-stat-orb::after {
-    animation: none;
-  }
-}
-
-/* ── 100 floating background dots ── */
+/* ── 500 floating background dots ── */
 .hero-floating-dot {
   border-radius: 50%;
-  background: rgba(188, 0, 0, 0.15);
+  background: rgba(188, 0, 0, 0.10);
   pointer-events: none;
   z-index: 0;
   opacity: 0;
@@ -429,21 +259,62 @@
 
 @keyframes heroDotFloat {
   0%   { opacity: 0; transform: translate(0, 0); }
-  15%  { opacity: 0.5; }
-  50%  { opacity: 0.3; transform: translate(8px, -12px); }
-  85%  { opacity: 0.5; }
+  15%  { opacity: 0.35; }
+  50%  { opacity: 0.2; transform: translate(8px, -12px); }
+  85%  { opacity: 0.35; }
   100% { opacity: 0; transform: translate(-4px, 8px); }
 }
 
 [data-theme="light"] .hero-floating-dot,
 .light .hero-floating-dot {
-  background: rgba(188, 0, 0, 0.10);
+  background: rgba(188, 0, 0, 0.07);
+}
+
+/* ── Trail dots: slightly brighter red with comet glow ── */
+.hero-dot-trail {
+  background: rgba(188, 0, 0, 0.18);
+}
+
+.hero-dot-trail::after {
+  content: '';
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(188, 0, 0, 0.4) 0%, transparent 70%);
+  filter: blur(6px);
+  z-index: -1;
+  animation: trailPulse 2s ease-in-out infinite;
+}
+
+[data-theme="light"] .hero-dot-trail,
+.light .hero-dot-trail {
+  background: rgba(188, 0, 0, 0.12);
+}
+
+[data-theme="light"] .hero-dot-trail::after,
+.light .hero-dot-trail::after {
+  opacity: 0.4;
+}
+
+/* ── Themed dots: white (dark mode) / black (light mode) ── */
+.hero-dot-themed {
+  background: rgba(255, 255, 255, 0.25);
+  animation-name: themedDotFloat;
+}
+
+[data-theme="light"] .hero-dot-themed,
+.light .hero-dot-themed {
+  background: rgba(0, 0, 0, 0.20);
 }
 
 @media (prefers-reduced-motion: reduce) {
   .hero-floating-dot {
     animation: none;
-    opacity: 0.2;
+    opacity: 0.15;
+  }
+  .hero-dot-trail::after {
+    animation: none;
   }
 }
 
