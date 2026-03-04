@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server'
 
 const WP_API = 'https://www.sportsmockery.com/wp-json/wp/v2'
 const WP_EXPORT = 'https://www.sportsmockery.com/wp-json/sm-export/v1'
+const WP_SMED = 'https://www.sportsmockery.com/wp-json/smed/v1'
 const MAX_PAGES = 10
 const PER_PAGE = 100
 
@@ -76,8 +77,12 @@ async function wpFetchAllPosts(after: Date, before: Date): Promise<{ posts: any[
 
 // ── Editorial data ───────────────────────────────────────────────────────────
 async function fetchEditorial(startDate: Date, prevStart: Date, now: Date, days: number) {
-  // Parallel fetch: period posts, prev count, total count, authors, categories, monthly trends
-  const [periodResult, prevCountRes, totalCountRes, authorsRaw, categoriesRes, monthCounts] = await Promise.all([
+  const startStr = startDate.toISOString().split('T')[0]
+  const prevStr = prevStart.toISOString().split('T')[0]
+  const nowStr = now.toISOString().split('T')[0]
+
+  // Parallel fetch: period posts, prev count, total count, authors, categories, monthly trends, SMED views
+  const [periodResult, prevCountRes, totalCountRes, authorsRaw, categoriesRes, monthCounts, smedOverview, smedPrevOverview, smedAuthorViews, smedTopPosts] = await Promise.all([
     wpFetchAllPosts(startDate, now),
     wpApiFetch(`/posts?per_page=1&status=publish&after=${prevStart.toISOString()}&before=${startDate.toISOString()}`),
     wpApiFetch(`/posts?per_page=1&status=publish`),
@@ -93,6 +98,11 @@ async function fetchEditorial(startDate: Date, prevStart: Date, now: Date, days:
           .catch(() => ({ month: `${ms.getFullYear()}-${String(ms.getMonth() + 1).padStart(2, '0')}`, count: 0 }))
       })
     ),
+    // SMED plugin views endpoints (will 404 gracefully until plugin is updated)
+    fetch(`${WP_SMED}/views/overview?start=${startStr}&end=${nowStr}`, { next: { revalidate: 900 } }).then(r => r.ok ? r.json() : null).catch(() => null),
+    fetch(`${WP_SMED}/views/overview?start=${prevStr}&end=${startStr}`, { next: { revalidate: 900 } }).then(r => r.ok ? r.json() : null).catch(() => null),
+    fetch(`${WP_SMED}/views/authors?months=12`, { next: { revalidate: 900 } }).then(r => r.ok ? r.json() : []).catch(() => []),
+    fetch(`${WP_SMED}/views/posts?start=${startStr}&end=${nowStr}&limit=50`, { next: { revalidate: 900 } }).then(r => r.ok ? r.json() : []).catch(() => []),
   ])
 
   const period = periodResult.posts
@@ -121,18 +131,42 @@ async function fetchEditorial(startDate: Date, prevStart: Date, now: Date, days:
     wMap.set(aid, e)
   }
 
-  const writers = Array.from(wMap.entries()).map(([id, s]) => ({
-    id,
-    name: getAuthorName(id),
-    avatar: getAuthorAvatar(id),
-    role: (aMap.get(id) as any)?.role || '',
-    posts: s.posts,
-    views: 0,
-    avgViews: 0,
-    topCategories: Array.from(s.categories).slice(0, 3),
-    avgReadTime: 0,
-    avgScore: 0,
-  })).sort((a, b) => b.posts - a.posts)
+  // ── Merge SMED author views into writer stats ──
+  // smedAuthorViews is [{display_name, author_id, month, total_posts, total_views}, ...]
+  // Aggregate views per author for the selected period months
+  const smedAuthorViewsMap = new Map<number, number>()
+  const periodMonthSet = new Set<string>()
+  for (const p of period) {
+    const m = (p.date_gmt || p.date)?.substring(0, 7); if (m) periodMonthSet.add(m)
+  }
+  for (const row of (smedAuthorViews || [])) {
+    const aid = parseInt(row.author_id)
+    if (periodMonthSet.has(row.month)) {
+      smedAuthorViewsMap.set(aid, (smedAuthorViewsMap.get(aid) || 0) + parseInt(row.total_views || '0'))
+    }
+  }
+
+  // Build post-level views map from smedTopPosts
+  const postViewsMap = new Map<number, number>()
+  for (const row of (smedTopPosts || [])) {
+    postViewsMap.set(parseInt(row.post_id), parseInt(row.views || '0'))
+  }
+
+  const writers = Array.from(wMap.entries()).map(([id, s]) => {
+    const views = smedAuthorViewsMap.get(id) || 0
+    return {
+      id,
+      name: getAuthorName(id),
+      avatar: getAuthorAvatar(id),
+      role: (aMap.get(id) as any)?.role || '',
+      posts: s.posts,
+      views,
+      avgViews: s.posts > 0 ? Math.round(views / s.posts) : 0,
+      topCategories: Array.from(s.categories).slice(0, 3),
+      avgReadTime: 0,
+      avgScore: 0,
+    }
+  }).sort((a, b) => b.views - a.views || b.posts - a.posts)
 
   // ── Daily publishing trend ──
   const dMap = new Map<string, number>()
@@ -192,7 +226,7 @@ async function fetchEditorial(startDate: Date, prevStart: Date, now: Date, days:
     data: periodMonths.map(m => ({ month: m, count: authorMonthly.get(id)?.get(m) || 0 })),
   }))
 
-  // ── Enrich posts ──
+  // ── Enrich posts with views ──
   const enrichPost = (p: any) => ({
     id: p.id,
     title: typeof p.title === 'object' ? p.title.rendered : p.title,
@@ -200,47 +234,70 @@ async function fetchEditorial(startDate: Date, prevStart: Date, now: Date, days:
     published_at: p.date_gmt || p.date,
     author_name: getAuthorName(p.author),
     category_name: getCatName(p.categories?.[0]),
-    views: 0,
+    views: postViewsMap.get(p.id) || 0,
     featured_image: null,
   })
 
+  // Sort top content by views from SMED data
+  const topContent = [...(smedTopPosts || [])].slice(0, 15).map((sp: any) => ({
+    id: parseInt(sp.post_id),
+    title: sp.title || '',
+    slug: sp.slug || '',
+    published_at: sp.published_at || '',
+    author_name: sp.author_name || '',
+    category_name: '',
+    views: parseInt(sp.views || '0'),
+    featured_image: null,
+  }))
+  // Fall back to period posts if SMED data unavailable
   const recentPosts = period.slice(0, 25).map(enrichPost)
-  const topContent = period.slice(0, 15).map(enrichPost)
+
+  const periodViews = smedOverview?.total_views ? parseInt(smedOverview.total_views) : 0
+  const prevPeriodViews = smedPrevOverview?.total_views ? parseInt(smedPrevOverview.total_views) : 0
+  const allTimeViews = smedOverview?.all_time_views ? parseInt(smedOverview.all_time_views) : 0
+  const avgViews = period.length > 0 && periodViews > 0 ? Math.round(periodViews / period.length) : 0
 
   const velocity = days > 0 ? (period.length / (days / 7)).toFixed(1) : '0'
   const activeWriterRoles = ['author', 'editor', 'administrator']
   const totalAuthors = authors.filter((a: any) => activeWriterRoles.includes(a.role)).length
 
+  // ── Views distribution buckets ──
+  const vBuckets = { '0': 0, '1-100': 0, '101-500': 0, '501-1K': 0, '1K-10K': 0, '10K+': 0 }
+  for (const sp of (smedTopPosts || [])) {
+    const v = parseInt(sp.views || '0')
+    if (v === 0) vBuckets['0']++
+    else if (v <= 100) vBuckets['1-100']++
+    else if (v <= 500) vBuckets['101-500']++
+    else if (v <= 1000) vBuckets['501-1K']++
+    else if (v <= 10000) vBuckets['1K-10K']++
+    else vBuckets['10K+']++
+  }
+  const viewsDistribution = Object.entries(vBuckets).map(([range, count]) => ({ range, count }))
+
   return {
     overview: {
       totalPosts,
-      allTimeViews: 0,
+      allTimeViews,
       periodPosts: period.length,
       prevPeriodPosts: prevPeriodPosts,
-      periodViews: 0,
-      prevPeriodViews: 0,
+      periodViews,
+      prevPeriodViews,
       totalAuthors,
       totalCategories: categories.length,
-      avgReadTime: 0,
-      avgViews: 0,
+      avgViews,
       velocity,
-      avgScore: 0,
     },
     writers,
     writerTrends,
     writerMonths: periodMonths,
     categories: categoryBreakdown,
-    contentTypes: [],
-    topicBreakdown: [],
+    viewsDistribution,
     recentPosts,
     topContent,
     publishingTrend,
     monthlyTrend,
     dayOfWeek,
     hourDistribution,
-    readTimeDistribution: [],
-    viewsDistribution: [],
-    scoreDistribution: [],
   }
 }
 
