@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import { usePathname } from 'next/navigation'
 import Link from 'next/link'
 import Image from 'next/image'
 import Modal from '@/components/ui/Modal'
@@ -14,6 +15,7 @@ interface Briefing {
 }
 
 export default function BriefingStrip() {
+  const pathname = usePathname()
   const [briefings, setBriefings] = useState<Briefing[]>([])
   const [activeBriefing, setActiveBriefing] = useState<Briefing | null>(null)
 
@@ -28,6 +30,7 @@ export default function BriefingStrip() {
       .catch(() => {})
   }, [])
 
+  if (pathname?.startsWith('/admin')) return null
   if (!briefings.length) return null
 
   return (

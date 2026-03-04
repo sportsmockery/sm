@@ -256,8 +256,8 @@ function OverviewPanel({d}:{d:Data}) {
 
     {/* Row 3: Top writers bar + Content types + Views distribution */}
     <div className="grid lg:grid-cols-3 gap-4">
-      <Card title="Top Writers"><div style={{height:220}}>
-        <Bar data={{labels:d.writers.slice(0,8).map(w=>w.name.split(' ')[0]),datasets:[{data:d.writers.slice(0,8).map(w=>w.views),backgroundColor:P.slice(0,8).map(c=>c+'cc'),borderColor:P.slice(0,8),borderWidth:1,borderRadius:4}]}} options={{...bOpts(true,true)}} />
+      <Card title="Top Writers (Posts)"><div style={{height:220}}>
+        <Bar data={{labels:d.writers.slice(0,8).map(w=>w.name.split(' ')[0]),datasets:[{data:d.writers.slice(0,8).map(w=>w.posts),backgroundColor:P.slice(0,8).map(c=>c+'cc'),borderColor:P.slice(0,8),borderWidth:1,borderRadius:4}]}} options={{...bOpts(true,true)}} />
       </div></Card>
       <Card title="Content Types"><div style={{height:220}}>
         <Doughnut data={{labels:d.contentTypes.map(c=>c.type),datasets:[{data:d.contentTypes.map(c=>c.count),backgroundColor:P.slice(0,d.contentTypes.length),borderColor:'#fff',borderWidth:2}]}} options={dOpts('bottom')} />
@@ -297,9 +297,9 @@ function OverviewPanel({d}:{d:Data}) {
 // WRITERS PANEL
 // ═══════════════════════════════════════════════════════════════════════════════
 function WritersPanel({d}:{d:Data}) {
-  const [sort, setSort] = useState<'views'|'posts'|'avgViews'>('views')
+  const [sort, setSort] = useState<'posts'|'views'|'avgViews'>('posts')
   const sorted = [...d.writers].sort((a,b)=>b[sort]-a[sort])
-  const maxViews = Math.max(...d.writers.map(w=>w.views),1)
+  const maxPosts = Math.max(...d.writers.map(w=>w.posts),1)
 
   return <div className="space-y-4">
     {/* Writer scorecards */}
@@ -321,8 +321,8 @@ function WritersPanel({d}:{d:Data}) {
             <div><p className="text-[10px] text-slate-400">Views</p><p className="text-sm font-extrabold" style={{color:P[0]}}>{fN(w.views)}</p></div>
             <div><p className="text-[10px] text-slate-400">Avg</p><p className="text-sm font-extrabold" style={{color:P[1]}}>{fN(w.avgViews)}</p></div>
           </div>
-          {/* Views bar */}
-          <div className="h-1.5 bg-slate-100 rounded-full overflow-hidden"><div className="h-full rounded-full" style={{width:`${(w.views/maxViews)*100}%`,backgroundColor:P[i%P.length]}}/></div>
+          {/* Posts bar */}
+          <div className="h-1.5 bg-slate-100 rounded-full overflow-hidden"><div className="h-full rounded-full" style={{width:`${(w.posts/maxPosts)*100}%`,backgroundColor:P[i%P.length]}}/></div>
           {w.topCategories.length > 0 && <div className="flex gap-1 mt-2 flex-wrap">{w.topCategories.map(c=><Badge key={c} text={c} color={P[(i+1)%P.length]}/>)}</div>}
         </div>
       ))}

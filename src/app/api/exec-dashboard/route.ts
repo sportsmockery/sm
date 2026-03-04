@@ -1,5 +1,9 @@
 import { NextResponse } from 'next/server'
-import { supabaseAdmin } from '@/lib/supabase-server'
+
+const WP_API = 'https://www.sportsmockery.com/wp-json/wp/v2'
+const WP_EXPORT = 'https://www.sportsmockery.com/wp-json/sm-export/v1'
+const MAX_PAGES = 10
+const PER_PAGE = 100
 
 // ── Social configs ────────────────────────────────────────────────────────────
 const YT = [
@@ -26,7 +30,7 @@ export async function GET(request: Request) {
 
   try {
     const [editorial, social] = await Promise.all([
-      fetchEditorial(startDate.toISOString(), prevStart.toISOString(), now.toISOString(), days),
+      fetchEditorial(startDate, prevStart, now, days),
       fetchSocial(),
     ])
     return NextResponse.json({ ...editorial, social, range, days, timestamp: Date.now() })
@@ -36,87 +40,114 @@ export async function GET(request: Request) {
   }
 }
 
-async function fetchEditorial(sinceStr: string, prevStr: string, nowStr: string, days: number) {
-  const [
-    totalRes, allViewsRes, periodRes, prevRes, authorsRes, catsRes,
-    recentRes, topRes, trendRes, authorPostsRes,
-    allPostsRes, // for deeper analytics
-  ] = await Promise.all([
-    supabaseAdmin.from('sm_posts').select('*', { count: 'exact', head: true }),
-    supabaseAdmin.from('sm_posts').select('views'),
-    supabaseAdmin.from('sm_posts').select('id, views, published_at, category_id, author_id, read_time_estimate, content_type, primary_topic, importance_score').gte('published_at', sinceStr).lte('published_at', nowStr),
-    supabaseAdmin.from('sm_posts').select('id, views').gte('published_at', prevStr).lt('published_at', sinceStr),
-    supabaseAdmin.from('sm_authors').select('*'),
-    supabaseAdmin.from('sm_categories').select('*').order('post_count', { ascending: false }).limit(30),
-    supabaseAdmin.from('sm_posts').select('id, title, slug, views, published_at, author_id, category_id, featured_image, content_type, primary_topic, read_time_estimate, importance_score').order('published_at', { ascending: false }).limit(25),
-    supabaseAdmin.from('sm_posts').select('id, title, slug, views, published_at, author_id, category_id').gte('published_at', sinceStr).order('views', { ascending: false }).limit(15),
-    supabaseAdmin.from('sm_posts').select('published_at, views').gte('published_at', sinceStr).order('published_at', { ascending: true }),
-    supabaseAdmin.from('sm_posts').select('author_id, views, category_id, read_time_estimate, importance_score, content_type').gte('published_at', sinceStr),
-    supabaseAdmin.from('sm_posts').select('published_at, views, author_id, category_id, content_type, read_time_estimate, importance_score').gte('published_at', new Date(Date.now() - 365 * 86400000).toISOString()).order('published_at', { ascending: true }),
+// ── WordPress REST API helpers ───────────────────────────────────────────────
+async function wpApiFetch(path: string): Promise<{ data: any; total: number }> {
+  const res = await fetch(`${WP_API}${path}`, { next: { revalidate: 900 } })
+  if (!res.ok) {
+    if (res.status === 400) return { data: [], total: 0 }
+    throw new Error(`WP API ${res.status}: ${res.statusText}`)
+  }
+  const data = await res.json()
+  const total = parseInt(res.headers.get('X-WP-Total') || '0')
+  return { data, total }
+}
+
+async function wpFetchAllPosts(after: Date, before: Date): Promise<{ posts: any[]; total: number }> {
+  const posts: any[] = []
+  let total = 0
+  for (let page = 1; page <= MAX_PAGES; page++) {
+    try {
+      const { data, total: t } = await wpApiFetch(
+        `/posts?per_page=${PER_PAGE}&page=${page}&orderby=date&order=desc&status=publish` +
+        `&after=${after.toISOString()}&before=${before.toISOString()}` +
+        `&_fields=id,date,date_gmt,slug,title,author,categories`
+      )
+      if (page === 1) total = t
+      if (!Array.isArray(data) || data.length === 0) break
+      posts.push(...data)
+      if (data.length < PER_PAGE) break
+    } catch (e) {
+      console.error(`[Exec] WP posts page ${page}:`, e)
+      break
+    }
+  }
+  return { posts, total }
+}
+
+// ── Editorial data ───────────────────────────────────────────────────────────
+async function fetchEditorial(startDate: Date, prevStart: Date, now: Date, days: number) {
+  // Parallel fetch: period posts, prev count, total count, authors, categories, monthly trends
+  const [periodResult, prevCountRes, totalCountRes, authorsRaw, categoriesRes, monthCounts] = await Promise.all([
+    wpFetchAllPosts(startDate, now),
+    wpApiFetch(`/posts?per_page=1&status=publish&after=${prevStart.toISOString()}&before=${startDate.toISOString()}`),
+    wpApiFetch(`/posts?per_page=1&status=publish`),
+    fetch(`${WP_EXPORT}/authors`, { next: { revalidate: 3600 } }).then(r => r.ok ? r.json() : []).catch(() => []),
+    wpApiFetch(`/categories?per_page=100&orderby=count&order=desc&_fields=id,name,slug,count`),
+    // Monthly post counts for last 12 months (parallel lightweight queries)
+    Promise.all(
+      Array.from({ length: 12 }, (_, i) => {
+        const ms = new Date(now.getFullYear(), now.getMonth() - 11 + i, 1)
+        const me = new Date(now.getFullYear(), now.getMonth() - 10 + i, 1)
+        return wpApiFetch(`/posts?per_page=1&status=publish&after=${ms.toISOString()}&before=${me.toISOString()}`)
+          .then(({ total }) => ({ month: `${ms.getFullYear()}-${String(ms.getMonth() + 1).padStart(2, '0')}`, count: total }))
+          .catch(() => ({ month: `${ms.getFullYear()}-${String(ms.getMonth() + 1).padStart(2, '0')}`, count: 0 }))
+      })
+    ),
   ])
 
-  const totalPosts = totalRes.count || 0
-  const allViews = (allViewsRes.data || []).reduce((s: number, p: any) => s + (p.views || 0), 0)
-  const period = periodRes.data || []
-  const prev = prevRes.data || []
-  const authors = authorsRes.data || []
-  const cats = catsRes.data || []
-  const recent = recentRes.data || []
-  const top = topRes.data || []
-  const daily = trendRes.data || []
-  const aPosts = authorPostsRes.data || []
-  const yearPosts = allPostsRes.data || []
+  const period = periodResult.posts
+  const totalPosts = totalCountRes.total
+  const prevPeriodPosts = prevCountRes.total
+  const authors: any[] = authorsRaw || []
+  const categories: any[] = categoriesRes.data || []
 
-  const periodViews = period.reduce((s: number, p: any) => s + (p.views || 0), 0)
-  const prevViews = prev.reduce((s: number, p: any) => s + (p.views || 0), 0)
+  // Build lookup maps
   const aMap = new Map(authors.map((a: any) => [a.id, a]))
-  const cMap = new Map(cats.map((c: any) => [c.id, c]))
+  const cMap = new Map(categories.map((c: any) => [c.id, c]))
+
+  const getAuthorName = (id: number) => (aMap.get(id) as any)?.display_name || (aMap.get(id) as any)?.name || `Author ${id}`
+  const getAuthorAvatar = (id: number) => (aMap.get(id) as any)?.avatar_url || null
+  const getCatName = (id: number) => (cMap.get(id) as any)?.name || 'Uncategorized'
 
   // ── Writer stats ──
-  const wMap = new Map<number, { posts: number; views: number; categories: Set<string>; readTimes: number[]; scores: number[] }>()
-  for (const p of aPosts) {
-    const a = (p as any).author_id; if (!a) continue
-    const e = wMap.get(a) || { posts: 0, views: 0, categories: new Set<string>(), readTimes: [], scores: [] }
-    e.posts++; e.views += (p as any).views || 0
-    const catName = (cMap.get((p as any).category_id) as any)?.name
-    if (catName) e.categories.add(catName)
-    if ((p as any).read_time_estimate) e.readTimes.push((p as any).read_time_estimate)
-    if ((p as any).importance_score) e.scores.push((p as any).importance_score)
-    wMap.set(a, e)
-  }
-
-  const writers = Array.from(wMap.entries()).map(([id, s]) => {
-    const a = aMap.get(id) as any
-    return {
-      id, name: a?.display_name || 'Unknown', avatar: a?.avatar_url || null, email: a?.email || '', role: a?.role || '',
-      posts: s.posts, views: s.views, avgViews: s.posts > 0 ? Math.round(s.views / s.posts) : 0,
-      topCategories: Array.from(s.categories).slice(0, 3),
-      avgReadTime: s.readTimes.length > 0 ? Math.round(s.readTimes.reduce((a, b) => a + b, 0) / s.readTimes.length) : 0,
-      avgScore: s.scores.length > 0 ? Math.round(s.scores.reduce((a, b) => a + b, 0) / s.scores.length) : 0,
-    }
-  }).sort((a, b) => b.views - a.views)
-
-  // ── Daily trend ──
-  const dMap = new Map<string, { count: number; views: number }>()
-  for (const p of daily) {
-    const day = (p as any).published_at?.split('T')[0] || ''; if (!day) continue
-    const e = dMap.get(day) || { count: 0, views: 0 }; e.count++; e.views += (p as any).views || 0; dMap.set(day, e)
-  }
-  const publishingTrend = Array.from(dMap.entries()).map(([date, s]) => ({ date, ...s })).sort((a, b) => a.date.localeCompare(b.date))
-
-  // ── Monthly trend (last 12 months) ──
-  const mMap = new Map<string, { count: number; views: number }>()
-  for (const p of yearPosts) {
-    const d = (p as any).published_at; if (!d) continue
-    const key = d.substring(0, 7) // YYYY-MM
-    const e = mMap.get(key) || { count: 0, views: 0 }; e.count++; e.views += (p as any).views || 0; mMap.set(key, e)
-  }
-  const monthlyTrend = Array.from(mMap.entries()).map(([month, s]) => ({ month, ...s })).sort((a, b) => a.month.localeCompare(b.month))
-
-  // ── Day of week distribution ──
-  const dow = [0, 0, 0, 0, 0, 0, 0] // Sun-Sat
+  const wMap = new Map<number, { posts: number; categories: Set<string> }>()
   for (const p of period) {
-    const d = (p as any).published_at; if (!d) continue
+    const aid = p.author; if (!aid) continue
+    const e = wMap.get(aid) || { posts: 0, categories: new Set<string>() }
+    e.posts++
+    for (const catId of (p.categories || [])) {
+      e.categories.add(getCatName(catId))
+    }
+    wMap.set(aid, e)
+  }
+
+  const writers = Array.from(wMap.entries()).map(([id, s]) => ({
+    id,
+    name: getAuthorName(id),
+    avatar: getAuthorAvatar(id),
+    role: (aMap.get(id) as any)?.role || '',
+    posts: s.posts,
+    views: 0,
+    avgViews: 0,
+    topCategories: Array.from(s.categories).slice(0, 3),
+    avgReadTime: 0,
+    avgScore: 0,
+  })).sort((a, b) => b.posts - a.posts)
+
+  // ── Daily publishing trend ──
+  const dMap = new Map<string, number>()
+  for (const p of period) {
+    const day = (p.date_gmt || p.date)?.split('T')[0]; if (!day) continue
+    dMap.set(day, (dMap.get(day) || 0) + 1)
+  }
+  const publishingTrend = Array.from(dMap.entries())
+    .map(([date, count]) => ({ date, count, views: 0 }))
+    .sort((a, b) => a.date.localeCompare(b.date))
+
+  // ── Day of week ──
+  const dow = [0, 0, 0, 0, 0, 0, 0]
+  for (const p of period) {
+    const d = p.date_gmt || p.date; if (!d) continue
     dow[new Date(d).getDay()]++
   }
   const dayOfWeek = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map((name, i) => ({ name, count: dow[i] }))
@@ -124,110 +155,92 @@ async function fetchEditorial(sinceStr: string, prevStr: string, nowStr: string,
   // ── Hour distribution ──
   const hours = new Array(24).fill(0)
   for (const p of period) {
-    const d = (p as any).published_at; if (!d) continue
+    const d = p.date_gmt || p.date; if (!d) continue
     hours[new Date(d).getHours()]++
   }
   const hourDistribution = hours.map((count, hour) => ({ hour, count }))
 
   // ── Category breakdown ──
-  const catStats = new Map<number, { count: number; views: number }>()
+  const catStats = new Map<number, number>()
   for (const p of period) {
-    const c = (p as any).category_id; if (!c) continue
-    const e = catStats.get(c) || { count: 0, views: 0 }; e.count++; e.views += (p as any).views || 0; catStats.set(c, e)
+    for (const catId of (p.categories || [])) {
+      catStats.set(catId, (catStats.get(catId) || 0) + 1)
+    }
   }
   const categoryBreakdown = Array.from(catStats.entries())
-    .map(([id, s]) => ({ name: (cMap.get(id) as any)?.name || 'Uncategorized', ...s, avgViews: s.count > 0 ? Math.round(s.views / s.count) : 0 }))
-    .sort((a, b) => b.count - a.count).slice(0, 12)
+    .map(([id, count]) => ({ name: getCatName(id), count, views: 0, avgViews: 0 }))
+    .sort((a, b) => b.count - a.count)
+    .slice(0, 12)
 
-  // ── Content type distribution ──
-  const ctMap = new Map<string, number>()
-  for (const p of period) { const t = (p as any).content_type || 'article'; ctMap.set(t, (ctMap.get(t) || 0) + 1) }
-  const contentTypes = Array.from(ctMap.entries()).map(([type, count]) => ({ type, count })).sort((a, b) => b.count - a.count)
+  // ── Monthly trend ──
+  const monthlyTrend = monthCounts.map(m => ({ ...m, views: 0 }))
 
-  // ── Read time distribution ──
-  const rtBuckets = { '< 2 min': 0, '2-4 min': 0, '5-7 min': 0, '8-10 min': 0, '10+ min': 0 }
-  for (const p of period) {
-    const rt = (p as any).read_time_estimate || 4
-    if (rt < 2) rtBuckets['< 2 min']++
-    else if (rt <= 4) rtBuckets['2-4 min']++
-    else if (rt <= 7) rtBuckets['5-7 min']++
-    else if (rt <= 10) rtBuckets['8-10 min']++
-    else rtBuckets['10+ min']++
-  }
-  const readTimeDistribution = Object.entries(rtBuckets).map(([range, count]) => ({ range, count }))
-
-  // ── Views distribution buckets ──
-  const vBuckets = { '0': 0, '1-10': 0, '11-50': 0, '51-100': 0, '100+': 0 }
-  for (const p of period) {
-    const v = (p as any).views || 0
-    if (v === 0) vBuckets['0']++
-    else if (v <= 10) vBuckets['1-10']++
-    else if (v <= 50) vBuckets['11-50']++
-    else if (v <= 100) vBuckets['51-100']++
-    else vBuckets['100+']++
-  }
-  const viewsDistribution = Object.entries(vBuckets).map(([range, count]) => ({ range, count }))
-
-  // ── Importance score distribution ──
-  const scoreBuckets = { 'Low (0-25)': 0, 'Medium (26-50)': 0, 'High (51-75)': 0, 'Very High (76-100)': 0, 'Unscored': 0 }
-  for (const p of period) {
-    const s = (p as any).importance_score
-    if (s == null) scoreBuckets['Unscored']++
-    else if (s <= 25) scoreBuckets['Low (0-25)']++
-    else if (s <= 50) scoreBuckets['Medium (26-50)']++
-    else if (s <= 75) scoreBuckets['High (51-75)']++
-    else scoreBuckets['Very High (76-100)']++
-  }
-  const scoreDistribution = Object.entries(scoreBuckets).map(([range, count]) => ({ range, count }))
-
-  // ── Topic distribution ──
-  const topicMap = new Map<string, number>()
-  for (const p of period) { const t = (p as any).primary_topic; if (t) topicMap.set(t, (topicMap.get(t) || 0) + 1) }
-  const topicBreakdown = Array.from(topicMap.entries()).map(([topic, count]) => ({ topic, count })).sort((a, b) => b.count - a.count).slice(0, 15)
-
-  // ── Author monthly trend (top 5 writers) ──
-  const top5 = writers.slice(0, 5).map(w => w.id)
+  // ── Writer trends (from period data only) ──
+  const top5Ids = writers.slice(0, 5).map(w => w.id)
   const authorMonthly = new Map<number, Map<string, number>>()
-  for (const p of yearPosts) {
-    const aid = (p as any).author_id; if (!aid || !top5.includes(aid)) continue
-    const m = (p as any).published_at?.substring(0, 7); if (!m) continue
+  for (const p of period) {
+    const aid = p.author; if (!aid || !top5Ids.includes(aid)) continue
+    const m = (p.date_gmt || p.date)?.substring(0, 7); if (!m) continue
     if (!authorMonthly.has(aid)) authorMonthly.set(aid, new Map())
-    const aMap2 = authorMonthly.get(aid)!
-    aMap2.set(m, (aMap2.get(m) || 0) + 1)
+    const am = authorMonthly.get(aid)!
+    am.set(m, (am.get(m) || 0) + 1)
   }
-  const months = Array.from(new Set(yearPosts.map((p: any) => p.published_at?.substring(0, 7)).filter(Boolean))).sort()
-  const writerTrends = top5.map(id => {
-    const aData = authorMonthly.get(id) || new Map()
-    return {
-      id, name: (aMap.get(id) as any)?.display_name || 'Unknown',
-      data: months.map(m => ({ month: m, count: aData.get(m) || 0 })),
-    }
-  })
+  const periodMonths = Array.from(new Set(period.map((p: any) => (p.date_gmt || p.date)?.substring(0, 7)).filter(Boolean))).sort()
+  const writerTrends = top5Ids.map(id => ({
+    id,
+    name: getAuthorName(id),
+    data: periodMonths.map(m => ({ month: m, count: authorMonthly.get(id)?.get(m) || 0 })),
+  }))
 
+  // ── Enrich posts ──
   const enrichPost = (p: any) => ({
-    ...p,
-    author_name: (aMap.get(p.author_id) as any)?.display_name || 'Unknown',
-    category_name: (cMap.get(p.category_id) as any)?.name || 'Uncategorized',
+    id: p.id,
+    title: typeof p.title === 'object' ? p.title.rendered : p.title,
+    slug: p.slug,
+    published_at: p.date_gmt || p.date,
+    author_name: getAuthorName(p.author),
+    category_name: getCatName(p.categories?.[0]),
+    views: 0,
+    featured_image: null,
   })
 
-  const avgViews = period.length > 0 ? Math.round(periodViews / period.length) : 0
+  const recentPosts = period.slice(0, 25).map(enrichPost)
+  const topContent = period.slice(0, 15).map(enrichPost)
+
   const velocity = days > 0 ? (period.length / (days / 7)).toFixed(1) : '0'
+  const activeWriterRoles = ['author', 'editor', 'administrator']
+  const totalAuthors = authors.filter((a: any) => activeWriterRoles.includes(a.role)).length
 
   return {
     overview: {
-      totalPosts, allTimeViews: allViews,
-      periodPosts: period.length, prevPeriodPosts: prev.length,
-      periodViews, prevPeriodViews: prevViews,
-      totalAuthors: authors.length, totalCategories: cats.length,
-      avgReadTime: Math.round(period.reduce((s: number, p: any) => s + (p.read_time_estimate || 4), 0) / (period.length || 1)),
-      avgViews, velocity,
-      avgScore: Math.round(period.reduce((s: number, p: any) => s + (p.importance_score || 0), 0) / (period.filter((p: any) => p.importance_score).length || 1)),
+      totalPosts,
+      allTimeViews: 0,
+      periodPosts: period.length,
+      prevPeriodPosts: prevPeriodPosts,
+      periodViews: 0,
+      prevPeriodViews: 0,
+      totalAuthors,
+      totalCategories: categories.length,
+      avgReadTime: 0,
+      avgViews: 0,
+      velocity,
+      avgScore: 0,
     },
-    writers, writerTrends, writerMonths: months,
-    categories: categoryBreakdown, contentTypes, topicBreakdown,
-    recentPosts: recent.map(enrichPost), topContent: top.map(enrichPost),
-    publishingTrend, monthlyTrend, dayOfWeek, hourDistribution,
-    readTimeDistribution, viewsDistribution, scoreDistribution,
+    writers,
+    writerTrends,
+    writerMonths: periodMonths,
+    categories: categoryBreakdown,
+    contentTypes: [],
+    topicBreakdown: [],
+    recentPosts,
+    topContent,
+    publishingTrend,
+    monthlyTrend,
+    dayOfWeek,
+    hourDistribution,
+    readTimeDistribution: [],
+    viewsDistribution: [],
+    scoreDistribution: [],
   }
 }
 
@@ -274,7 +287,7 @@ async function fetchFacebook() {
     const r = await fetch(`https://graph.facebook.com/v24.0/${pid}?fields=name,fan_count,followers_count,picture&access_token=${token}`, { next: { revalidate: 3600 } })
     if (!r.ok) return []; const d = await r.json()
     return [
-      { id: pid, label: 'SportsMockery', name: d.name || 'SportsMockery', followers: d.followers_count || 0, likes: d.fan_count || 0, picture: d.picture?.data?.url || '' },
+      { id: pid, label: 'SportsMockery', name: d.name || 'SportsMockery', followers: d.followers_count || 0, likes: d.fan_count || 0, picture: d.picture?.data?.url || '', needsToken: false },
       { id: 'TruBearsFan', label: 'Tru Bears Fan', name: 'Tru Bears Fan', followers: 0, likes: 0, picture: '', needsToken: true },
       { id: 'ChiBearsRumors', label: 'Chi Bears Rumors', name: 'Chi Bears Rumors', followers: 0, likes: 0, picture: '', needsToken: true },
     ]

@@ -4,7 +4,7 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { useRouter } from 'next/navigation';
+import { useRouter, usePathname } from 'next/navigation';
 
 const POLL_INTERVAL = 15_000; // 15s when live games exist
 
@@ -84,6 +84,7 @@ function getOpponentScore(game: LiveGame): number {
 
 export default function LiveStrip() {
   const router = useRouter();
+  const pathname = usePathname();
   const [games, setGames] = useState<LiveGame[]>([]);
   const [loaded, setLoaded] = useState(false);
   const [pickerOpen, setPickerOpen] = useState<string | null>(null);
@@ -192,6 +193,7 @@ export default function LiveStrip() {
 
   // Don't flash on initial load; hide entirely when no live/upcoming games (Chicago Desk removed)
   if (!loaded) return null;
+  if (pathname?.startsWith('/admin')) return null;
   if (!hasLive && !hasUpcoming) return null;
 
   // Determine mode
