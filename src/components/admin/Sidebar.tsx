@@ -159,7 +159,7 @@ const navSections: NavSection[] = [
       { name: 'All Posts', href: '/admin/posts', icon: 'posts' },
       { name: 'Hub', href: '/admin/hub', icon: 'hub' },
       { name: 'Categories', href: '/admin/categories', icon: 'categories' },
-      { name: 'Authors', href: '/admin/authors', icon: 'authors' },
+      { name: 'Writers', href: '/admin/writers', icon: 'authors' },
       { name: 'Media Library', href: '/admin/media', icon: 'media' },
     ],
   },

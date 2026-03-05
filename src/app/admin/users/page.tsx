@@ -2,6 +2,8 @@
 
 import { useState, useEffect } from 'react'
 import { createClient } from '@/lib/supabase'
+import Image from 'next/image'
+import Link from 'next/link'
 import UsersTable from '@/components/admin/UsersTable'
 import InviteUser from '@/components/admin/InviteUser'
 import { Role } from '@/lib/roles'
@@ -278,6 +280,9 @@ export default function UsersPage() {
         />
       )}
 
+      {/* WordPress Writers Section */}
+      <WordPressWritersSection />
+
       {/* Password Reset Modal */}
       {passwordModal.isOpen && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
@@ -344,6 +349,118 @@ export default function UsersPage() {
               </button>
             </div>
           </div>
+        </div>
+      )}
+    </div>
+  )
+}
+
+interface WPWriter {
+  id: string
+  display_name: string
+  email: string
+  avatar_url?: string
+  role?: string
+  bio?: string
+}
+
+function WordPressWritersSection() {
+  const [writers, setWriters] = useState<WPWriter[]>([])
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    async function fetchWriters() {
+      try {
+        const supabase = createClient()
+        const { data } = await supabase
+          .from('sm_authors')
+          .select('id, display_name, email, avatar_url, role, bio')
+          .order('display_name')
+        setWriters(data || [])
+      } catch (error) {
+        console.error('Error fetching WP writers:', error)
+      } finally {
+        setLoading(false)
+      }
+    }
+    fetchWriters()
+  }, [])
+
+  const roleColors: Record<string, string> = {
+    editor: 'bg-blue-500/20 text-blue-400 border border-blue-500/30',
+    author: 'bg-green-500/20 text-green-400 border border-green-500/30',
+    admin: 'bg-red-500/20 text-red-400 border border-red-500/30',
+  }
+
+  return (
+    <div className="mt-10">
+      <div className="flex items-center justify-between mb-4">
+        <div>
+          <h2 className="text-xl font-bold" style={{ color: 'var(--text-primary)' }}>WordPress Writers</h2>
+          <p className="text-sm" style={{ color: 'var(--text-muted)' }}>
+            {writers.length} writers imported from WordPress
+          </p>
+        </div>
+        <Link
+          href="/admin/writers"
+          className="text-sm font-medium hover:underline"
+          style={{ color: 'var(--accent-red)' }}
+        >
+          Manage Writers →
+        </Link>
+      </div>
+
+      {loading ? (
+        <div className="flex items-center justify-center h-32">
+          <div className="animate-spin rounded-full h-6 w-6 border-t-2 border-b-2" style={{ borderColor: 'var(--accent-red)' }}></div>
+        </div>
+      ) : writers.length === 0 ? (
+        <div className="text-center py-8 rounded-lg" style={{ backgroundColor: 'var(--bg-card)', border: '1px solid var(--border-default)' }}>
+          <p style={{ color: 'var(--text-muted)' }}>No WordPress writers found</p>
+        </div>
+      ) : (
+        <div className="rounded-lg overflow-hidden" style={{ backgroundColor: 'var(--bg-card)', border: '1px solid var(--border-default)' }}>
+          <table className="w-full">
+            <thead>
+              <tr style={{ borderBottom: '1px solid var(--border-default)' }}>
+                <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider" style={{ color: 'var(--text-muted)' }}>Writer</th>
+                <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider" style={{ color: 'var(--text-muted)' }}>Email</th>
+                <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider" style={{ color: 'var(--text-muted)' }}>Role</th>
+                <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider" style={{ color: 'var(--text-muted)' }}>Source</th>
+              </tr>
+            </thead>
+            <tbody>
+              {writers.map((writer) => (
+                <tr key={writer.id} className="hover:opacity-90 transition-opacity" style={{ borderBottom: '1px solid var(--border-default)' }}>
+                  <td className="px-6 py-4">
+                    <div className="flex items-center gap-3">
+                      {writer.avatar_url ? (
+                        <Image src={writer.avatar_url} alt={writer.display_name} width={32} height={32} className="rounded-full" />
+                      ) : (
+                        <div className="w-8 h-8 rounded-full flex items-center justify-center text-white text-sm font-medium" style={{ backgroundColor: 'var(--accent-red)' }}>
+                          {writer.display_name.charAt(0).toUpperCase()}
+                        </div>
+                      )}
+                      <span className="font-medium" style={{ color: 'var(--text-primary)' }}>{writer.display_name}</span>
+                    </div>
+                  </td>
+                  <td className="px-6 py-4">
+                    <span style={{ color: 'var(--text-muted)' }}>{writer.email}</span>
+                  </td>
+                  <td className="px-6 py-4">
+                    <span className={`px-2 py-1 rounded-full text-xs font-medium ${roleColors[writer.role || ''] || 'bg-zinc-500/20 text-zinc-400 border border-zinc-500/30'}`}>
+                      {writer.role || 'author'}
+                    </span>
+                  </td>
+                  <td className="px-6 py-4">
+                    <span className="px-2 py-1 rounded-full text-xs font-medium bg-orange-500/20 text-orange-400 border border-orange-500/30">
+                      WordPress
+                    </span>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
         </div>
       )}
     </div>
