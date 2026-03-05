@@ -29,6 +29,11 @@ interface Data {
   dayOfWeek: Array<{ name: string; count: number }>
   hourDistribution: Array<{ hour: number; count: number }>
   social: { youtube: any[]; x: any[]; facebook: any[] }
+  seo: {
+    overview: { rank: number; organicKeywords: number; organicTraffic: number; organicCost: number; adwordsKeywords: number; adwordsTraffic: number } | null
+    keywords: Array<{ keyword: string; position: number; previousPosition: number; searchVolume: number; cpc: number; url: string; trafficPct: number; competition: number }>
+    competitors: Array<{ domain: string; relevance: number; commonKeywords: number; organicKeywords: number; organicTraffic: number }>
+  } | null
   range: string; days: number; timestamp: number
 }
 
@@ -523,54 +528,99 @@ function ContentPanel({d}:{d:Data}) {
 // SEO PANEL
 // ═══════════════════════════════════════════════════════════════════════════════
 function SEOPanel({d}:{d:Data}) {
+  const seo = d.seo
+  const ov = seo?.overview
+
   return <div className="space-y-4">
-    <div className="grid lg:grid-cols-3 gap-4">
-      <Card title="Domain Overview">
-        <div className="flex items-center gap-3 mb-4">
-          <div className="w-12 h-12 rounded-xl bg-blue-50 flex items-center justify-center" style={{color:'#2563eb'}}>{I.globe}</div>
-          <div><p className="text-lg font-extrabold text-slate-800">sportsmockery.com</p><p className="text-xs text-slate-400">Primary domain</p></div>
-        </div>
-        <StatRow label="Total Posts" value={fN(d.overview.totalPosts)} color="#2563eb"/>
-        <StatRow label="All-Time Views" value={fN(d.overview.allTimeViews)} color="#7c3aed"/>
-        <StatRow label="Active Writers" value={String(d.overview.totalAuthors)} color="#059669"/>
-        <StatRow label="Categories" value={String(d.overview.totalCategories)} color="#d97706"/>
-        <StatRow label="Avg Views/Post" value={fN(d.overview.avgViews)} color="#0891b2"/>
-      </Card>
-      <Card title="Content Health">
-        <div className="space-y-3">
-          <div><p className="text-[10px] text-slate-400 mb-1">Publishing Velocity</p><div className="flex items-center gap-2"><div className="flex-1 h-3 bg-slate-100 rounded-full overflow-hidden"><div className="h-full rounded-full bg-blue-500" style={{width:`${Math.min(100,parseFloat(d.overview.velocity)/10*100)}%`}}/></div><span className="text-xs font-bold text-slate-700">{d.overview.velocity}/wk</span></div></div>
-          <div><p className="text-[10px] text-slate-400 mb-1">Avg Views Per Article</p><div className="flex items-center gap-2"><div className="flex-1 h-3 bg-slate-100 rounded-full overflow-hidden"><div className="h-full rounded-full bg-purple-500" style={{width:`${Math.min(100,d.overview.avgViews/1000*100)}%`}}/></div><span className="text-xs font-bold text-slate-700">{fN(d.overview.avgViews)}</span></div></div>
-          <div><p className="text-[10px] text-slate-400 mb-1">Period Views</p><div className="flex items-center gap-2"><div className="flex-1 h-3 bg-slate-100 rounded-full overflow-hidden"><div className="h-full rounded-full bg-amber-500" style={{width:`${Math.min(100,d.overview.periodViews/100000*100)}%`}}/></div><span className="text-xs font-bold text-slate-700">{fN(d.overview.periodViews)}</span></div></div>
-          <div><p className="text-[10px] text-slate-400 mb-1">Active Writers Ratio</p><div className="flex items-center gap-2"><div className="flex-1 h-3 bg-slate-100 rounded-full overflow-hidden"><div className="h-full rounded-full bg-emerald-500" style={{width:`${(d.writers.length/d.overview.totalAuthors)*100}%`}}/></div><span className="text-xs font-bold text-slate-700">{d.writers.length}/{d.overview.totalAuthors}</span></div></div>
-        </div>
-      </Card>
-      <Card title="Social Reach">
-        <div className="space-y-3">
-          {d.social.youtube.map((ch,i)=><div key={ch.handle} className="flex items-center gap-2">
-            <span className="w-5 text-center" style={{color:'#dc2626'}}>{I.yt}</span>
-            <span className="text-xs text-slate-500 flex-1 truncate">{ch.label}</span>
-            <span className="text-xs font-bold tabular-nums text-slate-700">{fN(ch.subscribers)}</span>
-          </div>)}
-          {d.social.x.map((a,i)=><div key={a.username} className="flex items-center gap-2">
-            <span className="w-5 text-center">{I.x}</span>
-            <span className="text-xs text-slate-500 flex-1 truncate">{a.label}</span>
-            <span className="text-xs font-bold tabular-nums text-slate-700">{fN(a.followers)}</span>
-          </div>)}
-          {d.social.facebook.filter(p=>!p.needsToken).map(p=><div key={p.id} className="flex items-center gap-2">
-            <span className="w-5 text-center" style={{color:'#1877f2'}}>{I.fb}</span>
-            <span className="text-xs text-slate-500 flex-1 truncate">{p.label}</span>
-            <span className="text-xs font-bold tabular-nums text-slate-700">{fN(p.followers)}</span>
-          </div>)}
-        </div>
-      </Card>
+    {/* Row 1: Domain KPIs */}
+    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
+      <MiniKPI label="SEMRush Rank" value={ov ? fN(ov.rank) : '—'} color="#2563eb" icon={I.globe} />
+      <MiniKPI label="Organic Keywords" value={ov ? fN(ov.organicKeywords) : '—'} color="#059669" icon={I.bar} />
+      <MiniKPI label="Organic Traffic" value={ov ? fN(ov.organicTraffic) : '—'} sub="monthly est." color="#7c3aed" icon={I.eye} />
+      <MiniKPI label="Traffic Value" value={ov ? `$${fN(ov.organicCost)}` : '—'} sub="monthly est." color="#d97706" icon={I.star} />
+      <MiniKPI label="Total Posts" value={fN(d.overview.totalPosts)} color="#4f46e5" icon={I.doc} />
+      <MiniKPI label="Active Writers" value={String(d.overview.totalAuthors)} sub={`${d.writers.length} active`} color="#0891b2" icon={I.ppl} />
     </div>
 
-    <Card>
-      <div className="text-center py-8">
-        <div className="w-16 h-16 rounded-2xl bg-slate-100 flex items-center justify-center mx-auto mb-3" style={{color:'#94a3b8'}}>{I.globe}</div>
-        <p className="text-sm font-bold text-slate-600">SEMRush Integration Available</p>
-        <p className="text-xs text-slate-400 mt-1 max-w-md mx-auto">Organic keywords, domain authority, backlinks, competitor analysis, and SERP tracking are available via the SEMRush MCP integration. Run a domain analysis from the admin console to populate this section.</p>
+    <div className="grid lg:grid-cols-12 gap-4">
+      {/* Top Organic Keywords */}
+      <Card title="Top Organic Keywords" className="lg:col-span-8">
+        {seo?.keywords && seo.keywords.length > 0 ? <div className="overflow-x-auto"><table className="w-full">
+          <thead><tr className="border-b border-slate-100">{['Keyword','Pos','Prev','Volume','Traffic %','URL'].map(h=><th key={h} className="text-left px-2 py-1.5 text-[10px] font-bold uppercase tracking-wider text-slate-400">{h}</th>)}</tr></thead>
+          <tbody>{seo.keywords.map((kw,i)=>{
+            const diff = kw.previousPosition - kw.position
+            return <tr key={i} className="border-b border-slate-50 hover:bg-slate-50/50">
+              <td className="px-2 py-2 text-xs font-medium text-slate-700 max-w-[220px] truncate">{kw.keyword}</td>
+              <td className="px-2 py-2"><span className="text-xs font-extrabold tabular-nums" style={{color:kw.position<=3?'#059669':kw.position<=10?'#2563eb':'#64748b'}}>{kw.position}</span></td>
+              <td className="px-2 py-2"><span className="text-[11px] tabular-nums" style={{color:diff>0?'#059669':diff<0?'#dc2626':'#94a3b8'}}>{diff>0?`+${diff}`:diff<0?String(diff):'—'}</span></td>
+              <td className="px-2 py-2 text-xs font-semibold text-slate-700 tabular-nums">{fN(kw.searchVolume)}</td>
+              <td className="px-2 py-2 text-xs tabular-nums text-slate-500">{kw.trafficPct.toFixed(2)}%</td>
+              <td className="px-2 py-2 text-[10px] text-slate-400 max-w-[180px] truncate">{kw.url.replace('https://www.sportsmockery.com','')}</td>
+            </tr>
+          })}</tbody>
+        </table></div> : <p className="text-center py-6 text-xs text-slate-400">No keyword data available</p>}
+      </Card>
+
+      {/* Content Health sidebar */}
+      <div className="lg:col-span-4 space-y-4">
+        <Card title="Content Health">
+          <div className="space-y-3">
+            <div><p className="text-[10px] text-slate-400 mb-1">Publishing Velocity</p><div className="flex items-center gap-2"><div className="flex-1 h-3 bg-slate-100 rounded-full overflow-hidden"><div className="h-full rounded-full bg-blue-500" style={{width:`${Math.min(100,parseFloat(d.overview.velocity)/10*100)}%`}}/></div><span className="text-xs font-bold text-slate-700">{d.overview.velocity}/wk</span></div></div>
+            <div><p className="text-[10px] text-slate-400 mb-1">Avg Views Per Article</p><div className="flex items-center gap-2"><div className="flex-1 h-3 bg-slate-100 rounded-full overflow-hidden"><div className="h-full rounded-full bg-purple-500" style={{width:`${Math.min(100,d.overview.avgViews/1000*100)}%`}}/></div><span className="text-xs font-bold text-slate-700">{fN(d.overview.avgViews)}</span></div></div>
+            <div><p className="text-[10px] text-slate-400 mb-1">Period Views</p><div className="flex items-center gap-2"><div className="flex-1 h-3 bg-slate-100 rounded-full overflow-hidden"><div className="h-full rounded-full bg-amber-500" style={{width:`${Math.min(100,d.overview.periodViews/100000*100)}%`}}/></div><span className="text-xs font-bold text-slate-700">{fN(d.overview.periodViews)}</span></div></div>
+            <div><p className="text-[10px] text-slate-400 mb-1">Active Writers Ratio</p><div className="flex items-center gap-2"><div className="flex-1 h-3 bg-slate-100 rounded-full overflow-hidden"><div className="h-full rounded-full bg-emerald-500" style={{width:`${(d.writers.length/Math.max(d.overview.totalAuthors,1))*100}%`}}/></div><span className="text-xs font-bold text-slate-700">{d.writers.length}/{d.overview.totalAuthors}</span></div></div>
+          </div>
+        </Card>
+        <Card title="Social Reach">
+          <div className="space-y-3">
+            {d.social.youtube.map(ch=><div key={ch.handle} className="flex items-center gap-2">
+              <span className="w-5 text-center" style={{color:'#dc2626'}}>{I.yt}</span>
+              <span className="text-xs text-slate-500 flex-1 truncate">{ch.label}</span>
+              <span className="text-xs font-bold tabular-nums text-slate-700">{fN(ch.subscribers)}</span>
+            </div>)}
+            {d.social.x.map(a=><div key={a.username} className="flex items-center gap-2">
+              <span className="w-5 text-center">{I.x}</span>
+              <span className="text-xs text-slate-500 flex-1 truncate">{a.label}</span>
+              <span className="text-xs font-bold tabular-nums text-slate-700">{fN(a.followers)}</span>
+            </div>)}
+            {d.social.facebook.filter(p=>!p.needsToken).map(p=><div key={p.id} className="flex items-center gap-2">
+              <span className="w-5 text-center" style={{color:'#1877f2'}}>{I.fb}</span>
+              <span className="text-xs text-slate-500 flex-1 truncate">{p.label}</span>
+              <span className="text-xs font-bold tabular-nums text-slate-700">{fN(p.followers)}</span>
+            </div>)}
+          </div>
+        </Card>
       </div>
-    </Card>
+    </div>
+
+    {/* Row 3: Competitors + Keyword charts */}
+    <div className="grid lg:grid-cols-2 gap-4">
+      <Card title="Organic Competitors">
+        {seo?.competitors && seo.competitors.length > 0 ? <div className="overflow-x-auto"><table className="w-full">
+          <thead><tr className="border-b border-slate-100">{['Domain','Relevance','Common KW','Organic KW','Traffic'].map(h=><th key={h} className="text-left px-2 py-1.5 text-[10px] font-bold uppercase tracking-wider text-slate-400">{h}</th>)}</tr></thead>
+          <tbody>{seo.competitors.map((c,i)=><tr key={c.domain} className="border-b border-slate-50 hover:bg-slate-50/50">
+            <td className="px-2 py-2 text-xs font-medium text-slate-700">{c.domain}</td>
+            <td className="px-2 py-2"><div className="flex items-center gap-1.5"><div className="w-12 h-1.5 bg-slate-100 rounded-full overflow-hidden"><div className="h-full rounded-full" style={{width:`${c.relevance*100}%`,backgroundColor:P[i%P.length]}}/></div><span className="text-[10px] text-slate-500 tabular-nums">{(c.relevance*100).toFixed(0)}%</span></div></td>
+            <td className="px-2 py-2 text-xs tabular-nums text-slate-600">{fN(c.commonKeywords)}</td>
+            <td className="px-2 py-2 text-xs tabular-nums text-slate-600">{fN(c.organicKeywords)}</td>
+            <td className="px-2 py-2 text-xs font-bold tabular-nums" style={{color:'#2563eb'}}>{fN(c.organicTraffic)}</td>
+          </tr>)}</tbody>
+        </table></div> : <p className="text-center py-6 text-xs text-slate-400">No competitor data available</p>}
+      </Card>
+
+      {seo?.competitors && seo.competitors.length > 0 && <Card title="Competitor Traffic Comparison"><div style={{height:260}}>
+        <Bar data={{labels:['sportsmockery.com',...seo.competitors.slice(0,6).map(c=>c.domain.replace('.com',''))],datasets:[{data:[ov?.organicTraffic||0,...seo.competitors.slice(0,6).map(c=>c.organicTraffic)],backgroundColor:['#2563ebcc',...P.slice(1,7).map(c=>c+'99')],borderRadius:4}]}} options={bOpts(false,true)} />
+      </div></Card>}
+    </div>
+
+    {/* Keyword position distribution */}
+    {seo?.keywords && seo.keywords.length > 0 && <div className="grid lg:grid-cols-2 gap-4">
+      <Card title="Keyword Position Distribution"><div style={{height:220}}>
+        <Bar data={{labels:seo.keywords.slice(0,10).map(k=>k.keyword.length>25?k.keyword.substring(0,25)+'…':k.keyword),datasets:[{data:seo.keywords.slice(0,10).map(k=>k.searchVolume),backgroundColor:seo.keywords.slice(0,10).map((_,i)=>P[i%P.length]+'cc'),borderRadius:4}]}} options={bOpts(false,true)} />
+      </div></Card>
+      <Card title="Top Keywords by Search Volume"><div style={{height:220}}>
+        <Doughnut data={{labels:seo.keywords.slice(0,8).map(k=>k.keyword),datasets:[{data:seo.keywords.slice(0,8).map(k=>k.searchVolume),backgroundColor:P.slice(0,8),borderColor:'#fff',borderWidth:2}]}} options={dOpts('right')} />
+      </div></Card>
+    </div>}
   </div>
 }

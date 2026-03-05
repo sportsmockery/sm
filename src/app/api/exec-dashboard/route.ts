@@ -3,6 +3,7 @@ import { NextResponse } from 'next/server'
 const WP_API = 'https://www.sportsmockery.com/wp-json/wp/v2'
 const WP_EXPORT = 'https://www.sportsmockery.com/wp-json/sm-export/v1'
 const WP_SMED = 'https://www.sportsmockery.com/wp-json/smed/v1'
+const SEMRUSH_API = 'https://api.semrush.com'
 const MAX_PAGES = 10
 const PER_PAGE = 100
 
@@ -31,11 +32,12 @@ export async function GET(request: Request) {
   const prevStart = new Date(startDate.getTime() - days * 86400000)
 
   try {
-    const [editorial, social] = await Promise.all([
+    const [editorial, social, seo] = await Promise.all([
       fetchEditorial(startDate, prevStart, now, days),
       fetchSocial(),
+      fetchSEO(),
     ])
-    return NextResponse.json({ ...editorial, social, range, days, timestamp: Date.now() })
+    return NextResponse.json({ ...editorial, social, seo, range, days, timestamp: Date.now() })
   } catch (error) {
     console.error('Exec dashboard error:', error)
     return NextResponse.json({ error: 'Failed to fetch' }, { status: 500 })
@@ -164,19 +166,20 @@ async function fetchEditorial(startDate: Date, prevStart: Date, now: Date, days:
       views,
       avgViews: s.posts > 0 ? Math.round(views / s.posts) : 0,
       topCategories: Array.from(s.categories).slice(0, 3),
-      avgReadTime: 0,
-      avgScore: 0,
     }
   }).sort((a, b) => b.views - a.views || b.posts - a.posts)
 
   // ── Daily publishing trend ──
-  const dMap = new Map<string, number>()
+  const dMap = new Map<string, { count: number; views: number }>()
   for (const p of period) {
     const day = (p.date_gmt || p.date)?.split('T')[0]; if (!day) continue
-    dMap.set(day, (dMap.get(day) || 0) + 1)
+    const e = dMap.get(day) || { count: 0, views: 0 }
+    e.count++
+    e.views += postViewsMap.get(p.id) || 0
+    dMap.set(day, e)
   }
   const publishingTrend = Array.from(dMap.entries())
-    .map(([date, count]) => ({ date, count, views: 0 }))
+    .map(([date, { count, views }]) => ({ date, count, views }))
     .sort((a, b) => a.date.localeCompare(b.date))
 
   // ── Day of week ──
@@ -196,19 +199,29 @@ async function fetchEditorial(startDate: Date, prevStart: Date, now: Date, days:
   const hourDistribution = hours.map((count, hour) => ({ hour, count }))
 
   // ── Category breakdown ──
-  const catStats = new Map<number, number>()
+  const catStats = new Map<number, { count: number; views: number }>()
   for (const p of period) {
+    const pViews = postViewsMap.get(p.id) || 0
     for (const catId of (p.categories || [])) {
-      catStats.set(catId, (catStats.get(catId) || 0) + 1)
+      const e = catStats.get(catId) || { count: 0, views: 0 }
+      e.count++
+      e.views += pViews
+      catStats.set(catId, e)
     }
   }
   const categoryBreakdown = Array.from(catStats.entries())
-    .map(([id, count]) => ({ name: getCatName(id), count, views: 0, avgViews: 0 }))
+    .map(([id, { count, views }]) => ({ name: getCatName(id), count, views, avgViews: count > 0 ? Math.round(views / count) : 0 }))
     .sort((a, b) => b.count - a.count)
     .slice(0, 12)
 
   // ── Monthly trend ──
-  const monthlyTrend = monthCounts.map(m => ({ ...m, views: 0 }))
+  // Aggregate monthly views from SMED author data
+  const monthlyViewsMap = new Map<string, number>()
+  for (const row of (smedAuthorViews || [])) {
+    const m = row.month
+    if (m) monthlyViewsMap.set(m, (monthlyViewsMap.get(m) || 0) + parseInt(row.total_views || '0'))
+  }
+  const monthlyTrend = monthCounts.map(m => ({ ...m, views: monthlyViewsMap.get(m.month) || 0 }))
 
   // ── Writer trends (from period data only) ──
   const top5Ids = writers.slice(0, 5).map(w => w.id)
@@ -346,8 +359,79 @@ async function fetchFacebook() {
     if (!r.ok) return []; const d = await r.json()
     return [
       { id: pid, label: 'SportsMockery', name: d.name || 'SportsMockery', followers: d.followers_count || 0, likes: d.fan_count || 0, picture: d.picture?.data?.url || '', needsToken: false },
-      { id: 'TruBearsFan', label: 'Tru Bears Fan', name: 'Tru Bears Fan', followers: 0, likes: 0, picture: '', needsToken: true },
-      { id: 'ChiBearsRumors', label: 'Chi Bears Rumors', name: 'Chi Bears Rumors', followers: 0, likes: 0, picture: '', needsToken: true },
     ]
   } catch { return [] }
+}
+
+// ── SEMRush SEO data ─────────────────────────────────────────────────────────
+function parseSemrushCSV(csv: string): any[] {
+  const lines = csv.trim().split('\r\n')
+  if (lines.length < 2) return []
+  const headers = lines[0].split(';')
+  return lines.slice(1).map(line => {
+    const vals = line.split(';')
+    const obj: any = {}
+    headers.forEach((h, i) => obj[h] = vals[i] || '')
+    return obj
+  })
+}
+
+async function fetchSEO() {
+  const key = process.env.SEMRUSH_API_KEY; if (!key) return null
+  const domain = 'sportsmockery.com'
+  try {
+    const [overviewRes, keywordsRes, competitorsRes] = await Promise.allSettled([
+      fetch(`${SEMRUSH_API}/?type=domain_rank&key=${key}&export_columns=Db,Dn,Rk,Or,Ot,Oc,Ad,At,Ac&domain=${domain}&database=us`, { next: { revalidate: 3600 } }),
+      fetch(`${SEMRUSH_API}/?type=domain_organic&key=${key}&export_columns=Ph,Po,Pp,Pd,Nq,Cp,Ur,Tr,Tc,Co,Nr&domain=${domain}&database=us&display_limit=20&display_sort=tr_desc`, { next: { revalidate: 3600 } }),
+      fetch(`${SEMRUSH_API}/?type=domain_organic_organic&key=${key}&export_columns=Dn,Cr,Np,Or,Ot,Oc,Ad&domain=${domain}&database=us&display_limit=10`, { next: { revalidate: 3600 } }),
+    ])
+
+    let overview = null
+    if (overviewRes.status === 'fulfilled' && overviewRes.value.ok) {
+      const rows = parseSemrushCSV(await overviewRes.value.text())
+      if (rows.length > 0) {
+        const r = rows[0]
+        overview = {
+          rank: parseInt(r['Rk'] || '0'),
+          organicKeywords: parseInt(r['Or'] || '0'),
+          organicTraffic: parseInt(r['Ot'] || '0'),
+          organicCost: parseInt(r['Oc'] || '0'),
+          adwordsKeywords: parseInt(r['Ad'] || '0'),
+          adwordsTraffic: parseInt(r['At'] || '0'),
+        }
+      }
+    }
+
+    let keywords: any[] = []
+    if (keywordsRes.status === 'fulfilled' && keywordsRes.value.ok) {
+      const rows = parseSemrushCSV(await keywordsRes.value.text())
+      keywords = rows.map(r => ({
+        keyword: r['Ph'] || '',
+        position: parseInt(r['Po'] || '0'),
+        previousPosition: parseInt(r['Pp'] || '0'),
+        searchVolume: parseInt(r['Nq'] || '0'),
+        cpc: parseFloat(r['Cp'] || '0'),
+        url: r['Ur'] || '',
+        trafficPct: parseFloat(r['Tr'] || '0'),
+        competition: parseFloat(r['Co'] || '0'),
+      }))
+    }
+
+    let competitors: any[] = []
+    if (competitorsRes.status === 'fulfilled' && competitorsRes.value.ok) {
+      const rows = parseSemrushCSV(await competitorsRes.value.text())
+      competitors = rows.map(r => ({
+        domain: r['Dn'] || '',
+        relevance: parseFloat(r['Cr'] || '0'),
+        commonKeywords: parseInt(r['Np'] || '0'),
+        organicKeywords: parseInt(r['Or'] || '0'),
+        organicTraffic: parseInt(r['Ot'] || '0'),
+      }))
+    }
+
+    return { overview, keywords, competitors }
+  } catch (e) {
+    console.error('[Exec] SEMRush error:', e)
+    return null
+  }
 }
