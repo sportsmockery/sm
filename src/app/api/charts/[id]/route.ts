@@ -1,46 +1,57 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { supabaseAdmin } from '@/lib/supabase-server'
+import { supabaseAdmin } from '@/lib/db'
+
+interface DbChartRow {
+  id: string
+  options: string | null
+  created_at: string
+  updated_at: string
+}
 
 /**
  * GET /api/charts/[id]
- * Fetch a single chart by ID
+ * Get a single chart by ID.
  */
 export async function GET(
-  request: NextRequest,
+  _request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const { id } = await params
 
-    const { data: chart, error } = await supabaseAdmin
+    const { data, error } = await supabaseAdmin
       .from('sm_charts')
       .select('*')
       .eq('id', id)
-      .single()
+      .maybeSingle()
 
-    if (error || !chart) {
+    if (error) {
+      console.error('Error fetching chart:', error)
       return NextResponse.json(
-        { error: 'Chart not found' },
-        { status: 404 }
+        { error: 'Failed to fetch chart' },
+        { status: 500 }
       )
     }
 
-    // Transform database record to ChartConfig format
-    const config = {
-      id: chart.id,
-      postId: chart.post_id,
-      type: chart.chart_type,
-      title: chart.title,
-      size: chart.config?.size || 'medium',
-      colors: chart.config?.colors || { scheme: 'team', team: 'bears' },
-      data: chart.data || [],
-      dataSource: chart.config?.source?.type || 'manual',
-      dataLabQuery: chart.config?.source?.query,
-      createdAt: chart.created_at,
-      updatedAt: chart.updated_at,
+    if (!data) {
+      return NextResponse.json({ error: 'Chart not found' }, { status: 404 })
     }
 
-    return NextResponse.json(config)
+    const row = data as DbChartRow
+
+    let parsedOptions: unknown
+    try {
+      parsedOptions = row.options ? JSON.parse(row.options) : null
+    } catch {
+      parsedOptions = null
+    }
+
+    return NextResponse.json({
+      id: row.id,
+      options: parsedOptions,
+      created_at: row.created_at,
+      updated_at: row.updated_at,
+    })
   } catch (error) {
     console.error('Error fetching chart:', error)
     return NextResponse.json(
@@ -52,7 +63,7 @@ export async function GET(
 
 /**
  * PUT /api/charts/[id]
- * Update a chart
+ * Update a chart's options.
  */
 export async function PUT(
   request: NextRequest,
@@ -60,24 +71,29 @@ export async function PUT(
 ) {
   try {
     const { id } = await params
-    const body = await request.json()
+    const options = await request.json()
 
-    const { data: chart, error } = await supabaseAdmin
+    if (!options || typeof options !== 'object') {
+      return NextResponse.json({ error: 'Invalid chart options' }, { status: 400 })
+    }
+
+    const normalized = {
+      animation: true,
+      ...options,
+      responsive: options.responsive ?? true,
+    }
+
+    const serialized = JSON.stringify(normalized)
+
+    const { data, error } = await supabaseAdmin
       .from('sm_charts')
       .update({
-        chart_type: body.type,
-        title: body.title,
-        config: {
-          size: body.size,
-          colors: body.colors,
-          source: body.dataLabQuery ? { type: 'datalab', query: body.dataLabQuery } : { type: 'manual' },
-        },
-        data: body.data,
+        options: serialized,
         updated_at: new Date().toISOString(),
       })
       .eq('id', id)
-      .select()
-      .single()
+      .select('id')
+      .maybeSingle()
 
     if (error) {
       console.error('Error updating chart:', error)
@@ -87,7 +103,11 @@ export async function PUT(
       )
     }
 
-    return NextResponse.json(chart)
+    if (!data) {
+      return NextResponse.json({ error: 'Chart not found' }, { status: 404 })
+    }
+
+    return NextResponse.json({ success: true })
   } catch (error) {
     console.error('Error updating chart:', error)
     return NextResponse.json(
@@ -99,19 +119,21 @@ export async function PUT(
 
 /**
  * DELETE /api/charts/[id]
- * Delete a chart
+ * Delete a chart.
  */
 export async function DELETE(
-  request: NextRequest,
+  _request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const { id } = await params
 
-    const { error } = await supabaseAdmin
+    const { data, error } = await supabaseAdmin
       .from('sm_charts')
       .delete()
       .eq('id', id)
+      .select('id')
+      .maybeSingle()
 
     if (error) {
       console.error('Error deleting chart:', error)
@@ -119,6 +141,10 @@ export async function DELETE(
         { error: 'Failed to delete chart' },
         { status: 500 }
       )
+    }
+
+    if (!data) {
+      return NextResponse.json({ error: 'Chart not found' }, { status: 404 })
     }
 
     return NextResponse.json({ success: true })
