@@ -365,7 +365,7 @@ async function fetchFacebook() {
 
 // ── SEMRush SEO data ─────────────────────────────────────────────────────────
 function parseSemrushCSV(csv: string): any[] {
-  const lines = csv.trim().split('\r\n')
+  const lines = csv.trim().split(/\r?\n/).filter(l => l.trim())
   if (lines.length < 2) return []
   const headers = lines[0].split(';')
   return lines.slice(1).map(line => {
@@ -392,12 +392,12 @@ async function fetchSEO() {
       if (rows.length > 0) {
         const r = rows[0]
         overview = {
-          rank: parseInt(r['Rk'] || '0'),
-          organicKeywords: parseInt(r['Or'] || '0'),
-          organicTraffic: parseInt(r['Ot'] || '0'),
-          organicCost: parseInt(r['Oc'] || '0'),
-          adwordsKeywords: parseInt(r['Ad'] || '0'),
-          adwordsTraffic: parseInt(r['At'] || '0'),
+          rank: parseInt(r['Rank'] || '0'),
+          organicKeywords: parseInt(r['Organic Keywords'] || '0'),
+          organicTraffic: parseInt(r['Organic Traffic'] || '0'),
+          organicCost: parseInt(r['Organic Cost'] || '0'),
+          adwordsKeywords: parseInt(r['Adwords Keywords'] || '0'),
+          adwordsTraffic: parseInt(r['Adwords Traffic'] || '0'),
         }
       }
     }
@@ -406,14 +406,14 @@ async function fetchSEO() {
     if (keywordsRes.status === 'fulfilled' && keywordsRes.value.ok) {
       const rows = parseSemrushCSV(await keywordsRes.value.text())
       keywords = rows.map(r => ({
-        keyword: r['Ph'] || '',
-        position: parseInt(r['Po'] || '0'),
-        previousPosition: parseInt(r['Pp'] || '0'),
-        searchVolume: parseInt(r['Nq'] || '0'),
-        cpc: parseFloat(r['Cp'] || '0'),
-        url: r['Ur'] || '',
-        trafficPct: parseFloat(r['Tr'] || '0'),
-        competition: parseFloat(r['Co'] || '0'),
+        keyword: r['Keyword'] || '',
+        position: parseInt(r['Position'] || '0'),
+        previousPosition: parseInt(r['Previous Position'] || '0'),
+        searchVolume: parseInt(r['Search Volume'] || '0'),
+        cpc: parseFloat(r['CPC'] || '0'),
+        url: r['Url'] || '',
+        trafficPct: parseFloat(r['Traffic (%)'] || '0'),
+        competition: parseFloat(r['Competition'] || '0'),
       }))
     }
 
@@ -421,11 +421,11 @@ async function fetchSEO() {
     if (competitorsRes.status === 'fulfilled' && competitorsRes.value.ok) {
       const rows = parseSemrushCSV(await competitorsRes.value.text())
       competitors = rows.map(r => ({
-        domain: r['Dn'] || '',
-        relevance: parseFloat(r['Cr'] || '0'),
-        commonKeywords: parseInt(r['Np'] || '0'),
-        organicKeywords: parseInt(r['Or'] || '0'),
-        organicTraffic: parseInt(r['Ot'] || '0'),
+        domain: r['Domain'] || '',
+        relevance: parseFloat(r['Competitor Relevance'] || '0'),
+        commonKeywords: parseInt(r['Common Keywords'] || '0'),
+        organicKeywords: parseInt(r['Organic Keywords'] || '0'),
+        organicTraffic: parseInt(r['Organic Traffic'] || '0'),
       }))
     }
 
