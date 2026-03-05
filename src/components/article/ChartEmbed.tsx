@@ -99,6 +99,8 @@ export default function ChartEmbed({ id, mode, className = '' }: ChartEmbedProps
         <ReactECharts
           option={themeOptions}
           style={{ height: '400px', width: '100%' }}
+          opts={{ renderer: 'svg' }}
+          notMerge
         />
       </div>
 

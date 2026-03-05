@@ -1,16 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { supabaseAdmin } from '@/lib/db'
-
-interface DbChartRow {
-  id: string
-  options: string | null
-  created_at: string
-  updated_at: string
-}
+import { applyTheme, ThemeMode } from '@/lib/echarts-themes'
 
 /**
  * GET /api/charts/[id]
- * Get a single chart by ID.
  */
 export async function GET(
   _request: NextRequest,
@@ -21,49 +14,35 @@ export async function GET(
 
     const { data, error } = await supabaseAdmin
       .from('sm_charts')
-      .select('*')
+      .select('id, title, options, is_template, created_at, updated_at')
       .eq('id', id)
       .maybeSingle()
 
     if (error) {
       console.error('Error fetching chart:', error)
-      return NextResponse.json(
-        { error: 'Failed to fetch chart' },
-        { status: 500 }
-      )
+      return NextResponse.json({ error: 'Failed to fetch chart' }, { status: 500 })
     }
 
     if (!data) {
       return NextResponse.json({ error: 'Chart not found' }, { status: 404 })
     }
 
-    const row = data as DbChartRow
-
-    let parsedOptions: unknown
-    try {
-      parsedOptions = row.options ? JSON.parse(row.options) : null
-    } catch {
-      parsedOptions = null
-    }
-
     return NextResponse.json({
-      id: row.id,
-      options: parsedOptions,
-      created_at: row.created_at,
-      updated_at: row.updated_at,
+      id: data.id,
+      title: data.title,
+      options: data.options,
+      is_template: data.is_template,
+      created_at: data.created_at,
+      updated_at: data.updated_at,
     })
   } catch (error) {
     console.error('Error fetching chart:', error)
-    return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
-    )
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }
 }
 
 /**
  * PUT /api/charts/[id]
- * Update a chart's options.
  */
 export async function PUT(
   request: NextRequest,
@@ -71,36 +50,35 @@ export async function PUT(
 ) {
   try {
     const { id } = await params
-    const options = await request.json()
+    const body = await request.json()
+    const { title, mode, is_template } = body
+    const rawOptions = body.options || body
 
-    if (!options || typeof options !== 'object') {
+    if (!rawOptions || typeof rawOptions !== 'object') {
       return NextResponse.json({ error: 'Invalid chart options' }, { status: 400 })
     }
 
+    const themed = applyTheme(rawOptions, (mode as ThemeMode) || 'dark')
     const normalized = {
       animation: true,
-      ...options,
-      responsive: options.responsive ?? true,
+      animationDuration: 1000,
+      ...themed,
     }
 
-    const serialized = JSON.stringify(normalized)
+    const updates: Record<string, unknown> = { options: normalized }
+    if (title !== undefined) updates.title = title
+    if (is_template !== undefined) updates.is_template = is_template
 
     const { data, error } = await supabaseAdmin
       .from('sm_charts')
-      .update({
-        options: serialized,
-        updated_at: new Date().toISOString(),
-      })
+      .update(updates)
       .eq('id', id)
       .select('id')
       .maybeSingle()
 
     if (error) {
       console.error('Error updating chart:', error)
-      return NextResponse.json(
-        { error: 'Failed to update chart' },
-        { status: 500 }
-      )
+      return NextResponse.json({ error: 'Failed to update chart' }, { status: 500 })
     }
 
     if (!data) {
@@ -110,16 +88,12 @@ export async function PUT(
     return NextResponse.json({ success: true })
   } catch (error) {
     console.error('Error updating chart:', error)
-    return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
-    )
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }
 }
 
 /**
  * DELETE /api/charts/[id]
- * Delete a chart.
  */
 export async function DELETE(
   _request: NextRequest,
@@ -137,10 +111,7 @@ export async function DELETE(
 
     if (error) {
       console.error('Error deleting chart:', error)
-      return NextResponse.json(
-        { error: 'Failed to delete chart' },
-        { status: 500 }
-      )
+      return NextResponse.json({ error: 'Failed to delete chart' }, { status: 500 })
     }
 
     if (!data) {
@@ -150,9 +121,6 @@ export async function DELETE(
     return NextResponse.json({ success: true })
   } catch (error) {
     console.error('Error deleting chart:', error)
-    return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
-    )
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }
 }

@@ -3,9 +3,9 @@ export { default as ChartTypeSelector } from './ChartTypeSelector'
 export { default as ChartColorPicker, teamColors } from './ChartColorPicker'
 export { default as DataEntryForm } from './DataEntryForm'
 export { default as DataLabPicker } from './DataLabPicker'
-export { default as ChartPreview } from './ChartPreview'
+export { default as ChartPreview, buildEChartsOptions } from './ChartPreview'
 
-// Chart components
+// Legacy D3 chart components (kept for backward compatibility)
 export { default as BarChart } from './charts/BarChart'
 export { default as LineChart } from './charts/LineChart'
 export { default as PieChart } from './charts/PieChart'

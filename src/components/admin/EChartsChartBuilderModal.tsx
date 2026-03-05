@@ -107,10 +107,10 @@ export default function ChartBuilderModal({ onSave, onClose }: ChartBuilderModal
       series: [
         {
           type: baseType,
-          areaStyle: chartType === 'area' ? {} : undefined,
+          ...(chartType === 'area' ? { areaStyle: {} } : {}),
           data: values,
           itemStyle: { color: BRAND_COLORS[colorIndex] },
-        },
+        } as any,
       ],
     }
     setOptions(next)
@@ -170,10 +170,10 @@ export default function ChartBuilderModal({ onSave, onClose }: ChartBuilderModal
           series: [
             {
               type: baseType,
-              areaStyle: chartType === 'area' ? {} : undefined,
+              ...(chartType === 'area' ? { areaStyle: {} } : {}),
               data: values,
               itemStyle: { color: BRAND_COLORS[colorIndex] },
-            },
+            } as any,
           ],
         })
       }
@@ -189,7 +189,7 @@ export default function ChartBuilderModal({ onSave, onClose }: ChartBuilderModal
     const baseType = nextType === 'area' ? 'line' : nextType
     setOptions((prev) => ({
       ...prev,
-      series: (prev.series || []).map((s: any) => ({
+      series: (Array.isArray(prev.series) ? prev.series : []).map((s: any) => ({
         ...s,
         type: baseType,
         areaStyle: nextType === 'area' ? {} : undefined,
@@ -202,7 +202,7 @@ export default function ChartBuilderModal({ onSave, onClose }: ChartBuilderModal
     setColorIndex(idx)
     setOptions((prev) => ({
       ...prev,
-      series: (prev.series || []).map((s: any, i: number) => ({
+      series: (Array.isArray(prev.series) ? prev.series : []).map((s: any, i: number) => ({
         ...s,
         itemStyle: {
           ...(s.itemStyle || {}),
