@@ -18,6 +18,7 @@ const XA = [
   { username: 'bfr_pod', label: 'Bears Film Room Pod' },
   { username: 'PinwheelsIvyPod', label: 'Pinwheels & Ivy Pod' },
   { username: 'SSBehavior', label: 'SS Behavior' },
+  { username: 'dabearsblog', label: 'DaBearsBlog' },
 ]
 
 export async function GET(request: Request) {
