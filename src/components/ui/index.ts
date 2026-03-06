@@ -1,10 +1,23 @@
-// Core UI Components
-export { default as Button, IconButton, ButtonGroup } from './Button'
-export type { ButtonProps, IconButtonProps, ButtonGroupProps } from './Button'
+// Core UI Components (shadcn/ui)
+export { Button, buttonVariants } from './Button'
+export type { ButtonProps } from './Button'
 
-export { default as Input } from './Input'
-export type { InputProps } from './Input'
+export { Input } from './Input'
 
+export { Card, CardHeader, CardFooter, CardTitle, CardDescription, CardContent } from './Card'
+
+export {
+  Table,
+  TableHeader,
+  TableBody,
+  TableFooter,
+  TableHead,
+  TableRow,
+  TableCell,
+  TableCaption,
+} from './Table'
+
+// Legacy UI Components
 export { default as TextArea } from './TextArea'
 export type { TextAreaProps } from './TextArea'
 
@@ -14,17 +27,11 @@ export type { SelectProps, SelectOption } from './Select'
 export { default as Checkbox } from './Checkbox'
 export type { CheckboxProps } from './Checkbox'
 
-export { default as Card, CardHeader, CardBody, CardFooter, StatCard } from './Card'
-export type { CardProps, CardHeaderProps, StatCardProps } from './Card'
-
 export { default as Modal, ConfirmModal } from './Modal'
 export type { ModalProps, ConfirmModalProps } from './Modal'
 
 export { default as Dropdown, DropdownItem, DropdownDivider, DropdownLabel } from './Dropdown'
 export type { DropdownProps, DropdownItemProps, DropdownLabelProps } from './Dropdown'
-
-export { default as Table } from './Table'
-export type { TableProps, Column } from './Table'
 
 export { TabGroup, TabList, Tab, TabPanels, TabPanel } from './Tabs'
 export type { TabGroupProps, TabListProps, TabProps, TabPanelsProps, TabPanelProps } from './Tabs'
