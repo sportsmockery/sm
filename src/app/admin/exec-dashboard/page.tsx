@@ -1480,17 +1480,18 @@ Revenue: [
             </Section>
 
             {/* 5. Bulk Actions Row */}
-            <div className="flex items-center gap-3 px-1">
-              <span className="text-sm font-semibold" style={{ color: 'var(--sm-text)' }}>Bulk Actions:</span>
-              <button className="px-3 py-1.5 text-sm font-bold rounded border transition-colors" style={{ borderColor: 'var(--sm-border)', color: 'var(--sm-text-muted)', background: 'var(--sm-surface)' }}>
-                Approve Selected
-              </button>
-              <button className="px-3 py-1.5 text-sm font-bold rounded border transition-colors" style={{ borderColor: 'var(--sm-border)', color: 'var(--sm-text-muted)', background: 'var(--sm-surface)' }}>
-                Export CSV
-              </button>
-              <button className="px-3 py-1.5 text-sm font-bold rounded transition-colors" style={{ background: '#2563eb', color: '#fff' }}>
-                Process Payouts
-              </button>
+            <div className="rounded-lg border px-4 py-3 flex items-center justify-between" style={{ background: 'var(--sm-card)', borderColor: 'var(--sm-border)' }}>
+              <div className="flex items-center gap-3">
+                <button className="px-4 py-2 text-sm font-bold rounded transition-colors" style={{ backgroundColor: '#2563eb', color: '#fff' }}>
+                  Approve All Pending
+                </button>
+                <button className="px-4 py-2 text-sm font-bold rounded border transition-colors" style={{ borderColor: '#cbd5e1', backgroundColor: '#f8fafc', color: '#475569' }}>
+                  Export CSV
+                </button>
+              </div>
+              <p className="text-xs" style={{ color: 'var(--sm-text-dim)' }}>
+                Approvals recorded as <span className="font-semibold" style={{ color: 'var(--sm-text-muted)' }}>Admin User</span> at {new Date().toLocaleString('en-US', { month: 'short', day: 'numeric', year: 'numeric', hour: 'numeric', minute: '2-digit' })}
+              </p>
             </div>
 
             {/* 6. Payment History Card */}
