@@ -1177,18 +1177,100 @@ Revenue: [
             {/* 3. Writer Payment Table */}
             <Section title="Writer Payments">
               {(() => {
+                // PayBreakdownPopover component - shows detailed calculation breakdown on hover
+                const PayBreakdownPopover = ({ writer, month = 'March 2026' }: { 
+                  writer: { name: string; posts: number; views: number; perPost: number; per1k: number; calcPay: number; bonusType?: 'threshold' | 'bonus' | 'standard' }
+                  month?: string 
+                }) => {
+                  const [open, setOpen] = React.useState(false)
+                  const basePay = writer.posts * writer.perPost
+                  const viewsPay = (writer.views / 1000) * writer.per1k
+                  const avgViews = writer.views / writer.posts
+                  const hasBonus = writer.bonusType === 'bonus' && avgViews > 10000
+                  const bonusMultiplier = hasBonus ? 1.25 : 1
+                  const isThreshold = writer.bonusType === 'threshold' && writer.views >= 100000
+
+                  return (
+                    <div className="relative inline-block">
+                      <button
+                        onMouseEnter={() => setOpen(true)}
+                        onMouseLeave={() => setOpen(false)}
+                        onClick={() => setOpen(!open)}
+                        className="text-sm font-bold tabular-nums cursor-pointer underline decoration-dotted underline-offset-2"
+                        style={{ color: '#059669' }}
+                      >
+                        ${writer.calcPay.toFixed(2)}
+                      </button>
+                      {open && (
+                        <div 
+                          className="absolute z-50 bottom-full left-1/2 -translate-x-1/2 mb-2 w-72 rounded-lg border shadow-xl"
+                          style={{ background: 'var(--sm-card)', borderColor: 'var(--sm-border)' }}
+                        >
+                          {/* Header */}
+                          <div className="px-3 py-2 border-b" style={{ borderColor: 'var(--sm-border)' }}>
+                            <p className="text-sm font-bold" style={{ color: 'var(--sm-text)' }}>{writer.name}</p>
+                            <p className="text-xs" style={{ color: 'var(--sm-text-dim)' }}>{month}</p>
+                          </div>
+                          {/* Breakdown */}
+                          <div className="px-3 py-2 space-y-1.5">
+                            <div className="flex justify-between text-xs">
+                              <span style={{ color: 'var(--sm-text-muted)' }}>Posts</span>
+                              <span className="font-bold tabular-nums" style={{ color: 'var(--sm-text)' }}>{writer.posts}</span>
+                            </div>
+                            <div className="flex justify-between text-xs">
+                              <span style={{ color: 'var(--sm-text-muted)' }}>Views</span>
+                              <span className="font-bold tabular-nums" style={{ color: 'var(--sm-text)' }}>{writer.views.toLocaleString()}</span>
+                            </div>
+                            <div className="pt-1 border-t" style={{ borderColor: 'var(--sm-border)' }}>
+                              <p className="text-xs font-bold uppercase tracking-wide mb-1" style={{ color: 'var(--sm-text-dim)' }}>Formula</p>
+                              <div className="text-xs font-mono p-1.5 rounded space-y-0.5" style={{ background: 'var(--sm-surface)', color: 'var(--sm-text-muted)' }}>
+                                <p>Posts: {writer.posts} × ${writer.perPost.toFixed(2)} = ${basePay.toFixed(2)}</p>
+                                <p>Views: {(writer.views / 1000).toFixed(1)}K × ${writer.per1k.toFixed(2)} = ${viewsPay.toFixed(2)}</p>
+                                {isThreshold && (
+                                  <p style={{ color: C.amber }}>+ Threshold Bonus (100K+ views): +$50.00</p>
+                                )}
+                                {hasBonus && (
+                                  <p style={{ color: C.purple }}>× 1.25 Bonus (avg {'>'}10K/post)</p>
+                                )}
+                              </div>
+                            </div>
+                          </div>
+                          {/* Total */}
+                          <div className="px-3 py-2 border-t flex justify-between items-center" style={{ borderColor: 'var(--sm-border)', background: 'rgba(5,150,105,0.06)' }}>
+                            <span className="text-xs font-bold uppercase tracking-wide" style={{ color: 'var(--sm-text-dim)' }}>Total Pay</span>
+                            <span className="text-base font-extrabold tabular-nums" style={{ color: '#059669' }}>${writer.calcPay.toFixed(2)}</span>
+                          </div>
+                          {/* Arrow */}
+                          <div className="absolute left-1/2 -translate-x-1/2 top-full w-0 h-0" style={{ borderLeft: '6px solid transparent', borderRight: '6px solid transparent', borderTop: '6px solid var(--sm-border)' }} />
+                        </div>
+                      )}
+                    </div>
+                  )
+                }
+
+                // Writer data with bonus types for examples
                 const writers = [
-                  { name: 'Aldo Soto', posts: 28, views: 186420, perPost: 5.00, per1k: 8.00, status: 'Pending' as const },
-                  { name: 'Erik Lambert', posts: 22, views: 142850, perPost: 5.00, per1k: 8.00, status: 'Approved' as const },
-                  { name: 'Ryan Dauterive', posts: 19, views: 98760, perPost: 5.00, per1k: 8.00, status: 'Pending' as const },
-                  { name: 'Colin Longworth', posts: 15, views: 76230, perPost: 5.00, per1k: 8.00, status: 'Paid' as const },
-                  { name: 'Missy Carroll', posts: 12, views: 54890, perPost: 5.00, per1k: 8.00, status: 'Approved' as const },
-                  { name: 'Craig Rowland', posts: 8, views: 32150, perPost: 5.00, per1k: 8.00, status: 'Pending' as const },
-                ].map(w => ({
-                  ...w,
-                  formula: `(${w.posts} × $${w.perPost.toFixed(2)}) + (${(w.views / 1000).toFixed(1)}K × $${w.per1k.toFixed(2)})`,
-                  calcPay: (w.posts * w.perPost) + (w.views / 1000 * w.per1k),
-                })).sort((a, b) => b.calcPay - a.calcPay)
+                  { name: 'Aldo Soto', posts: 28, views: 186420, perPost: 5.00, per1k: 8.00, status: 'Pending' as const, bonusType: 'standard' as const },
+                  { name: 'Erik Lambert', posts: 22, views: 142850, perPost: 5.00, per1k: 8.00, status: 'Approved' as const, bonusType: 'standard' as const },
+                  { name: 'Ryan Dauterive', posts: 19, views: 98760, perPost: 5.00, per1k: 8.00, status: 'Pending' as const, bonusType: 'threshold' as const },
+                  { name: 'Colin Longworth', posts: 15, views: 76230, perPost: 5.00, per1k: 8.00, status: 'Paid' as const, bonusType: 'standard' as const },
+                  { name: 'Missy Carroll', posts: 12, views: 54890, perPost: 5.00, per1k: 8.00, status: 'Approved' as const, bonusType: 'standard' as const },
+                  { name: 'Craig Rowland', posts: 8, views: 32150, perPost: 5.00, per1k: 8.00, status: 'Pending' as const, bonusType: 'bonus' as const },
+                ].map(w => {
+                  const basePay = w.posts * w.perPost
+                  const viewsPay = (w.views / 1000) * w.per1k
+                  const avgViews = w.views / w.posts
+                  let calcPay = basePay + viewsPay
+                  // Threshold bonus: +$50 if views >= 100K (Ryan Dauterive doesn't quite hit it but shows the logic)
+                  if (w.bonusType === 'threshold' && w.views >= 100000) calcPay += 50
+                  // Bonus multiplier: 1.25x if avg views > 10K per post (Craig Rowland has ~4K avg so doesn't trigger)
+                  if (w.bonusType === 'bonus' && avgViews > 10000) calcPay *= 1.25
+                  return {
+                    ...w,
+                    formula: `(${w.posts} × $${w.perPost.toFixed(2)}) + (${(w.views / 1000).toFixed(1)}K × $${w.per1k.toFixed(2)})`,
+                    calcPay,
+                  }
+                }).sort((a, b) => b.calcPay - a.calcPay)
 
                 const cols = [
                   { key: 'name', label: 'Writer', sortable: false },
@@ -1238,7 +1320,9 @@ Revenue: [
                             <td className="px-3 py-3 text-sm tabular-nums" style={{ color: 'var(--sm-text-muted)' }}>${w.perPost.toFixed(2)}</td>
                             <td className="px-3 py-3 text-sm tabular-nums" style={{ color: 'var(--sm-text-muted)' }}>${w.per1k.toFixed(2)}</td>
                             <td className="px-3 py-3 text-xs font-mono" style={{ color: 'var(--sm-text-dim)' }}>{w.formula}</td>
-                            <td className="px-3 py-3 text-sm font-bold tabular-nums" style={{ color: '#059669' }}>${w.calcPay.toFixed(2)}</td>
+                            <td className="px-3 py-3">
+                              <PayBreakdownPopover writer={w} />
+                            </td>
                             {/* Status badge */}
                             <td className="px-3 py-3">
                               <span className="text-xs font-bold px-2 py-0.5 rounded-full" style={{
