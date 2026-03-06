@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server'
+import { supabaseAdmin } from '@/lib/supabase-server'
 
 const WP_API = 'https://www.sportsmockery.com/wp-json/wp/v2'
 const WP_EXPORT = 'https://www.sportsmockery.com/wp-json/sm-export/v1'
@@ -32,12 +33,13 @@ export async function GET(request: Request) {
   const prevStart = new Date(startDate.getTime() - days * 86400000)
 
   try {
-    const [editorial, social, seo] = await Promise.all([
+    const [editorial, social, seo, paymentSync] = await Promise.all([
       fetchEditorial(startDate, prevStart, now, days),
       fetchSocial(),
       fetchSEO(),
+      fetchPaymentSyncStatus(),
     ])
-    return NextResponse.json({ ...editorial, social, seo, range, days, timestamp: Date.now() })
+    return NextResponse.json({ ...editorial, social, seo, paymentSync, range, days, timestamp: Date.now() })
   } catch (error) {
     console.error('Exec dashboard error:', error)
     return NextResponse.json({ error: 'Failed to fetch' }, { status: 500 })
@@ -433,5 +435,66 @@ async function fetchSEO() {
   } catch (e) {
     console.error('[Exec] SEMRush error:', e)
     return null
+  }
+}
+
+// ── Payment sync status + data ───────────────────────────────────────────────
+async function fetchPaymentSyncStatus() {
+  try {
+    // Fetch latest sync status
+    const { data: syncData } = await supabaseAdmin
+      .from('writer_payment_syncs')
+      .select('*')
+      .order('created_at', { ascending: false })
+      .limit(1)
+      .single()
+
+    // Fetch current period payments
+    const now = new Date()
+    const periodStart = new Date(now.getFullYear(), now.getMonth(), 1).toISOString().split('T')[0]
+    const periodEnd = new Date(now.getFullYear(), now.getMonth() + 1, 1).toISOString().split('T')[0]
+
+    const { data: payments } = await supabaseAdmin
+      .from('writer_payments')
+      .select('*')
+      .eq('period_start', periodStart)
+      .eq('period_end', periodEnd)
+      .order('calculated_pay', { ascending: false })
+
+    // Fetch payment formulas
+    const { data: formulas } = await supabaseAdmin
+      .from('writer_payment_formulas')
+      .select('*')
+      .eq('is_active', true)
+
+    // Fetch payment history (last 12 months)
+    const { data: history } = await supabaseAdmin
+      .from('writer_payments')
+      .select('*')
+      .lt('period_start', periodStart)
+      .order('period_start', { ascending: false })
+      .limit(200)
+
+    return {
+      sync: syncData ? {
+        status: syncData.status,
+        lastSync: syncData.created_at,
+        errorMessage: syncData.error_message,
+        writersSynced: syncData.writers_synced,
+        totalViewsSynced: syncData.total_views_synced,
+      } : { status: 'unknown', lastSync: null },
+      payments: payments || [],
+      formulas: (formulas || []).map((f: any) => ({
+        id: f.id,
+        name: f.writer_name,
+        desc: f.formula_description,
+        formula: f.formula_code,
+        effectiveDate: f.effective_date,
+        writerId: f.writer_id,
+      })),
+      history: history || [],
+    }
+  } catch {
+    return { sync: { status: 'unknown', lastSync: null }, payments: [], formulas: [], history: [] }
   }
 }
