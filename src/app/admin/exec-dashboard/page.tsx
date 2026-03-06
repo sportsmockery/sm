@@ -671,6 +671,13 @@ export default function ExecDashboard() {
   // Drawer
   const [drawerType, setDrawerType] = useState<'writer' | 'post' | null>(null)
   const [drawerData, setDrawerData] = useState<any>(null)
+  // Payments tab state
+  const [payBreakdownOpen, setPayBreakdownOpen] = useState<string | null>(null)
+  const [editingFormulaId, setEditingFormulaId] = useState<string | null>(null)
+  const [editFormulaDesc, setEditFormulaDesc] = useState('')
+  const [editFormulaCode, setEditFormulaCode] = useState('')
+  const [editFormulaDate, setEditFormulaDate] = useState('')
+  const [expandedHistoryMonth, setExpandedHistoryMonth] = useState<string | null>(null)
 
   const load = useCallback(async (silent = false) => {
     if (!silent) setLoading(true); else setRefreshing(true)
@@ -1177,77 +1184,6 @@ Revenue: [
             {/* 3. Writer Payment Table */}
             <Section title="Writer Payments">
               {(() => {
-                // PayBreakdownPopover component - shows detailed calculation breakdown on hover
-                const PayBreakdownPopover = ({ writer, month = 'March 2026' }: { 
-                  writer: { name: string; posts: number; views: number; perPost: number; per1k: number; calcPay: number; bonusType?: 'threshold' | 'bonus' | 'standard' }
-                  month?: string 
-                }) => {
-                  const [open, setOpen] = React.useState(false)
-                  const basePay = writer.posts * writer.perPost
-                  const viewsPay = (writer.views / 1000) * writer.per1k
-                  const avgViews = writer.views / writer.posts
-                  const hasBonus = writer.bonusType === 'bonus' && avgViews > 10000
-                  const bonusMultiplier = hasBonus ? 1.25 : 1
-                  const isThreshold = writer.bonusType === 'threshold' && writer.views >= 100000
-
-                  return (
-                    <div className="relative inline-block">
-                      <button
-                        onMouseEnter={() => setOpen(true)}
-                        onMouseLeave={() => setOpen(false)}
-                        onClick={() => setOpen(!open)}
-                        className="text-sm font-bold tabular-nums cursor-pointer underline decoration-dotted underline-offset-2"
-                        style={{ color: '#059669' }}
-                      >
-                        ${writer.calcPay.toFixed(2)}
-                      </button>
-                      {open && (
-                        <div 
-                          className="absolute z-50 bottom-full left-1/2 -translate-x-1/2 mb-2 w-72 rounded-lg border shadow-xl"
-                          style={{ background: 'var(--sm-card)', borderColor: 'var(--sm-border)' }}
-                        >
-                          {/* Header */}
-                          <div className="px-3 py-2 border-b" style={{ borderColor: 'var(--sm-border)' }}>
-                            <p className="text-sm font-bold" style={{ color: 'var(--sm-text)' }}>{writer.name}</p>
-                            <p className="text-xs" style={{ color: 'var(--sm-text-dim)' }}>{month}</p>
-                          </div>
-                          {/* Breakdown */}
-                          <div className="px-3 py-2 space-y-1.5">
-                            <div className="flex justify-between text-xs">
-                              <span style={{ color: 'var(--sm-text-muted)' }}>Posts</span>
-                              <span className="font-bold tabular-nums" style={{ color: 'var(--sm-text)' }}>{writer.posts}</span>
-                            </div>
-                            <div className="flex justify-between text-xs">
-                              <span style={{ color: 'var(--sm-text-muted)' }}>Views</span>
-                              <span className="font-bold tabular-nums" style={{ color: 'var(--sm-text)' }}>{writer.views.toLocaleString()}</span>
-                            </div>
-                            <div className="pt-1 border-t" style={{ borderColor: 'var(--sm-border)' }}>
-                              <p className="text-xs font-bold uppercase tracking-wide mb-1" style={{ color: 'var(--sm-text-dim)' }}>Formula</p>
-                              <div className="text-xs font-mono p-1.5 rounded space-y-0.5" style={{ background: 'var(--sm-surface)', color: 'var(--sm-text-muted)' }}>
-                                <p>Posts: {writer.posts} × ${writer.perPost.toFixed(2)} = ${basePay.toFixed(2)}</p>
-                                <p>Views: {(writer.views / 1000).toFixed(1)}K × ${writer.per1k.toFixed(2)} = ${viewsPay.toFixed(2)}</p>
-                                {isThreshold && (
-                                  <p style={{ color: C.amber }}>+ Threshold Bonus (100K+ views): +$50.00</p>
-                                )}
-                                {hasBonus && (
-                                  <p style={{ color: C.purple }}>× 1.25 Bonus (avg {'>'}10K/post)</p>
-                                )}
-                              </div>
-                            </div>
-                          </div>
-                          {/* Total */}
-                          <div className="px-3 py-2 border-t flex justify-between items-center" style={{ borderColor: 'var(--sm-border)', background: 'rgba(5,150,105,0.06)' }}>
-                            <span className="text-xs font-bold uppercase tracking-wide" style={{ color: 'var(--sm-text-dim)' }}>Total Pay</span>
-                            <span className="text-base font-extrabold tabular-nums" style={{ color: '#059669' }}>${writer.calcPay.toFixed(2)}</span>
-                          </div>
-                          {/* Arrow */}
-                          <div className="absolute left-1/2 -translate-x-1/2 top-full w-0 h-0" style={{ borderLeft: '6px solid transparent', borderRight: '6px solid transparent', borderTop: '6px solid var(--sm-border)' }} />
-                        </div>
-                      )}
-                    </div>
-                  )
-                }
-
                 // Writer data with bonus types for examples
                 const writers = [
                   { name: 'Aldo Soto', posts: 28, views: 186420, perPost: 5.00, per1k: 8.00, status: 'Pending' as const, bonusType: 'standard' as const },
@@ -1321,7 +1257,49 @@ Revenue: [
                             <td className="px-3 py-3 text-sm tabular-nums" style={{ color: 'var(--sm-text-muted)' }}>${w.per1k.toFixed(2)}</td>
                             <td className="px-3 py-3 text-xs font-mono" style={{ color: 'var(--sm-text-dim)' }}>{w.formula}</td>
                             <td className="px-3 py-3">
-                              <PayBreakdownPopover writer={w} />
+                              <div className="relative inline-block">
+                                <button
+                                  onMouseEnter={() => setPayBreakdownOpen(w.name)}
+                                  onMouseLeave={() => setPayBreakdownOpen(null)}
+                                  onClick={() => setPayBreakdownOpen(payBreakdownOpen === w.name ? null : w.name)}
+                                  className="text-sm font-bold tabular-nums cursor-pointer underline decoration-dotted underline-offset-2"
+                                  style={{ color: '#059669' }}
+                                >
+                                  ${w.calcPay.toFixed(2)}
+                                </button>
+                                {payBreakdownOpen === w.name && (
+                                  <div 
+                                    className="absolute z-50 bottom-full left-1/2 -translate-x-1/2 mb-2 w-72 rounded-lg border shadow-xl"
+                                    style={{ background: 'var(--sm-card)', borderColor: 'var(--sm-border)' }}
+                                  >
+                                    <div className="px-3 py-2 border-b" style={{ borderColor: 'var(--sm-border)' }}>
+                                      <p className="text-sm font-bold" style={{ color: 'var(--sm-text)' }}>{w.name}</p>
+                                      <p className="text-xs" style={{ color: 'var(--sm-text-dim)' }}>March 2026</p>
+                                    </div>
+                                    <div className="px-3 py-2 space-y-1.5">
+                                      <div className="flex justify-between text-xs">
+                                        <span style={{ color: 'var(--sm-text-muted)' }}>Posts</span>
+                                        <span className="font-bold tabular-nums" style={{ color: 'var(--sm-text)' }}>{w.posts}</span>
+                                      </div>
+                                      <div className="flex justify-between text-xs">
+                                        <span style={{ color: 'var(--sm-text-muted)' }}>Views</span>
+                                        <span className="font-bold tabular-nums" style={{ color: 'var(--sm-text)' }}>{w.views.toLocaleString()}</span>
+                                      </div>
+                                      <div className="pt-1 border-t" style={{ borderColor: 'var(--sm-border)' }}>
+                                        <p className="text-xs font-bold uppercase tracking-wide mb-1" style={{ color: 'var(--sm-text-dim)' }}>Formula</p>
+                                        <div className="text-xs font-mono p-1.5 rounded space-y-0.5" style={{ background: 'var(--sm-surface)', color: 'var(--sm-text-muted)' }}>
+                                          <p>Posts: {w.posts} × ${w.perPost.toFixed(2)} = ${(w.posts * w.perPost).toFixed(2)}</p>
+                                          <p>Views: {(w.views / 1000).toFixed(1)}K × ${w.per1k.toFixed(2)} = ${((w.views / 1000) * w.per1k).toFixed(2)}</p>
+                                        </div>
+                                      </div>
+                                    </div>
+                                    <div className="px-3 py-2 border-t flex justify-between items-center" style={{ borderColor: 'var(--sm-border)', background: 'rgba(5,150,105,0.06)' }}>
+                                      <span className="text-xs font-bold uppercase tracking-wide" style={{ color: 'var(--sm-text-dim)' }}>Total Pay</span>
+                                      <span className="text-base font-extrabold tabular-nums" style={{ color: '#059669' }}>${w.calcPay.toFixed(2)}</span>
+                                    </div>
+                                  </div>
+                                )}
+                              </div>
                             </td>
                             {/* Status badge */}
                             <td className="px-3 py-3">
@@ -1365,11 +1343,6 @@ Revenue: [
             {/* 4. Writer Formulas Panel */}
             <Section title="Writer Payment Formulas">
               {(() => {
-                const [editingId, setEditingId] = React.useState<string | null>(null)
-                const [editDesc, setEditDesc] = React.useState('')
-                const [editFormula, setEditFormula] = React.useState('')
-                const [editDate, setEditDate] = React.useState('')
-
                 const formulas = [
                   { id: 'aldo', name: 'Aldo Soto', desc: '$3 per 1K views + $5 per post', formula: '(views / 1000) * 3 + (posts * 5)', effectiveDate: 'Jan 1, 2024' },
                   { id: 'erik', name: 'Erik Lambert', desc: '$4 per 1K views', formula: '(views / 1000) * 4', effectiveDate: 'Mar 1, 2024' },
@@ -1379,24 +1352,24 @@ Revenue: [
                 ]
 
                 const startEdit = (f: typeof formulas[0]) => {
-                  setEditingId(f.id)
-                  setEditDesc(f.desc)
-                  setEditFormula(f.formula)
-                  setEditDate(f.effectiveDate)
+                  setEditingFormulaId(f.id)
+                  setEditFormulaDesc(f.desc)
+                  setEditFormulaCode(f.formula)
+                  setEditFormulaDate(f.effectiveDate)
                 }
 
                 const cancelEdit = () => {
-                  setEditingId(null)
-                  setEditDesc('')
-                  setEditFormula('')
-                  setEditDate('')
+                  setEditingFormulaId(null)
+                  setEditFormulaDesc('')
+                  setEditFormulaCode('')
+                  setEditFormulaDate('')
                 }
 
                 return (
                   <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
                     {formulas.map(f => (
                       <div key={f.id} className="rounded-lg border p-3 relative" style={{ background: 'var(--sm-card)', borderColor: 'var(--sm-border)' }}>
-                        {editingId === f.id ? (
+                        {editingFormulaId === f.id ? (
                           /* Edit state */
                           <div className="space-y-2">
                             <p className="text-sm font-bold" style={{ color: 'var(--sm-text)' }}>{f.name}</p>
@@ -1404,8 +1377,8 @@ Revenue: [
                               <label className="text-[10px] font-bold uppercase tracking-wide block mb-0.5" style={{ color: 'var(--sm-text-dim)' }}>Description</label>
                               <input
                                 type="text"
-                                value={editDesc}
-                                onChange={e => setEditDesc(e.target.value)}
+                                value={editFormulaDesc}
+                                onChange={e => setEditFormulaDesc(e.target.value)}
                                 className="w-full text-xs px-2 py-1.5 rounded border outline-none"
                                 style={{ background: 'var(--sm-surface)', borderColor: 'var(--sm-border)', color: 'var(--sm-text)' }}
                               />
@@ -1414,8 +1387,8 @@ Revenue: [
                               <label className="text-[10px] font-bold uppercase tracking-wide block mb-0.5" style={{ color: 'var(--sm-text-dim)' }}>Formula</label>
                               <input
                                 type="text"
-                                value={editFormula}
-                                onChange={e => setEditFormula(e.target.value)}
+                                value={editFormulaCode}
+                                onChange={e => setEditFormulaCode(e.target.value)}
                                 className="w-full text-[10px] font-mono px-2 py-1.5 rounded border outline-none"
                                 style={{ background: 'var(--sm-surface)', borderColor: 'var(--sm-border)', color: 'var(--sm-text-muted)' }}
                               />
@@ -1424,8 +1397,8 @@ Revenue: [
                               <label className="text-[10px] font-bold uppercase tracking-wide block mb-0.5" style={{ color: 'var(--sm-text-dim)' }}>Effective Date</label>
                               <input
                                 type="text"
-                                value={editDate}
-                                onChange={e => setEditDate(e.target.value)}
+                                value={editFormulaDate}
+                                onChange={e => setEditFormulaDate(e.target.value)}
                                 className="w-full text-xs px-2 py-1.5 rounded border outline-none"
                                 style={{ background: 'var(--sm-surface)', borderColor: 'var(--sm-border)', color: 'var(--sm-text)' }}
                               />
@@ -1497,8 +1470,6 @@ Revenue: [
             {/* 6. Payment History Card */}
             <Section title="Payment History">
               {(() => {
-                const [expandedMonth, setExpandedMonth] = React.useState<string | null>(null)
-
                 // Generate 12 months of mock history data
                 const months = [
                   { month: 'Feb 2026', total: 14280, writers: [
@@ -1545,9 +1516,9 @@ Revenue: [
                                   height: `${heightPct}%`,
                                   minHeight: 4,
                                   backgroundColor: '#059669',
-                                  opacity: expandedMonth === m.month ? 1 : 0.7,
+                                  opacity: expandedHistoryMonth === m.month ? 1 : 0.7,
                                 }}
-                                onClick={() => setExpandedMonth(expandedMonth === m.month ? null : m.month)}
+                                onClick={() => setExpandedHistoryMonth(expandedHistoryMonth === m.month ? null : m.month)}
                                 title={`${m.month}: $${m.total.toLocaleString()}`}
                               />
                               <span className="text-[8px] font-bold" style={{ color: 'var(--sm-text-dim)' }}>
@@ -1565,15 +1536,15 @@ Revenue: [
                         <div key={m.month} className="rounded-lg border overflow-hidden" style={{ background: 'var(--sm-card)', borderColor: 'var(--sm-border)' }}>
                           {/* Accordion Header */}
                           <button
-                            onClick={() => setExpandedMonth(expandedMonth === m.month ? null : m.month)}
+                            onClick={() => setExpandedHistoryMonth(expandedHistoryMonth === m.month ? null : m.month)}
                             className="w-full px-4 py-3 flex items-center justify-between transition-colors"
-                            style={{ background: expandedMonth === m.month ? 'var(--sm-surface)' : 'transparent' }}
+                            style={{ background: expandedHistoryMonth === m.month ? 'var(--sm-surface)' : 'transparent' }}
                           >
                             <div className="flex items-center gap-3">
                               <svg
                                 width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"
                                 className="transition-transform"
-                                style={{ color: 'var(--sm-text-dim)', transform: expandedMonth === m.month ? 'rotate(90deg)' : 'rotate(0deg)' }}
+                                style={{ color: 'var(--sm-text-dim)', transform: expandedHistoryMonth === m.month ? 'rotate(90deg)' : 'rotate(0deg)' }}
                               >
                                 <path d="M9 18l6-6-6-6" />
                               </svg>
@@ -1588,7 +1559,7 @@ Revenue: [
                           </button>
 
                           {/* Accordion Content */}
-                          {expandedMonth === m.month && (
+                          {expandedHistoryMonth === m.month && (
                             <div className="border-t px-4 py-3" style={{ borderColor: 'var(--sm-border)' }}>
                               {m.writers.length > 0 ? (
                                 <div className="overflow-x-auto">
