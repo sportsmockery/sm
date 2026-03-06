@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useCallback, useRef } from 'react';
+import React, { useState, useCallback, useRef, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -20,14 +20,42 @@ const TEAM_TILES = [
   { team: 'Cubs', text: 'Playoff odds: 37%.', cssVar: '--cubs-primary' },
 ] as const;
 
+const FALLBACK_HEADLINES = [
+  'Bears OTA updates: Caleb Williams impressing coaches with deep ball accuracy',
+  'Bulls front office eyeing draft lottery odds as trade deadline dust settles',
+  'Blackhawks prospect pipeline ranked top-5 in NHL by multiple scouts',
+  'Cubs rotation depth being tested as spring injuries mount',
+  'White Sox rebuild tracker: farm system rising in organizational rankings',
+];
+
 export default function EdgePage() {
   const router = useRouter();
   const [prompt, setPrompt] = useState('');
   const [panels, setPanels] = useState<EdgePanel[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [headlines, setHeadlines] = useState<string[]>(FALLBACK_HEADLINES);
   const promptRef = useRef(prompt);
   promptRef.current = prompt;
+
+  useEffect(() => {
+    fetch('/api/edge/scout', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ prompt: 'Give me the 5 biggest Chicago sports headlines right now. Return ONLY a numbered list, one headline per line, no commentary.' }),
+    })
+      .then((r) => r.json())
+      .then((data) => {
+        if (data.answer) {
+          const lines = data.answer
+            .split('\n')
+            .map((l: string) => l.replace(/^\d+[.)]\s*/, '').trim())
+            .filter((l: string) => l.length > 10);
+          if (lines.length >= 3) setHeadlines(lines.slice(0, 7));
+        }
+      })
+      .catch(() => {});
+  }, []);
 
   const tagline = getEdgeTagline();
 
@@ -184,29 +212,80 @@ export default function EdgePage() {
           )}
         </AnimatePresence>
 
-        {/* Modes */}
-        <section className="max-w-4xl mx-auto px-4 pt-10 pb-4 flex flex-col items-center gap-6">
-          <div className="w-full grid grid-cols-1 md:grid-cols-3 gap-3">
-            <EdgeModeButton
-              title="Catch Up"
-              subtitle="EDGE recap in 90 seconds"
-              onClick={() => handleModeClick('catch-up')}
-              disabled={isSubmitting}
-            />
-            <EdgeModeButton
-              title="Feel It"
-              subtitle="Vents, hype, copium"
-              onClick={() => handleModeClick('feel-it')}
-              disabled={isSubmitting}
-            />
-            <EdgeModeButton
-              title="Control It"
-              subtitle="Trades, drafts, cap"
-              onClick={() => handleModeClick('control-it')}
-              disabled={isSubmitting}
-            />
+        {/* Hero zone: modes + stadium frame */}
+        <section className="relative overflow-hidden">
+          {/* Stadium arch backdrop */}
+          <div className="absolute inset-0 pointer-events-none" aria-hidden="true">
+            <svg
+              viewBox="0 0 1200 300"
+              className="absolute top-0 left-1/2 -translate-x-1/2 w-[140%] max-w-[1800px] h-auto opacity-[0.06]"
+              preserveAspectRatio="xMidYMin meet"
+            >
+              <path
+                d="M0,300 Q600,-80 1200,300"
+                fill="none"
+                stroke="rgba(188,0,0,1)"
+                strokeWidth="2"
+              />
+              <path
+                d="M100,300 Q600,-40 1100,300"
+                fill="none"
+                stroke="rgba(255,255,255,1)"
+                strokeWidth="0.8"
+              />
+            </svg>
+            {/* Skyline silhouette behind modes */}
+            <svg
+              viewBox="0 0 1200 120"
+              className="absolute bottom-0 left-1/2 -translate-x-1/2 w-full opacity-[0.04]"
+              preserveAspectRatio="xMidYMax meet"
+            >
+              <polygon
+                points="0,120 0,90 80,90 80,40 120,40 120,70 180,70 180,20 240,20 240,60 320,60 320,30 380,30 380,50 420,50 420,15 480,15 480,55 540,55 540,25 600,25 600,45 660,45 660,10 720,10 720,50 780,50 780,35 840,35 840,65 900,65 900,40 960,40 960,80 1040,80 1040,50 1100,50 1100,90 1200,90 1200,120"
+                fill="rgba(255,255,255,1)"
+              />
+            </svg>
+          </div>
+
+          {/* Top vignette */}
+          <div
+            className="absolute inset-x-0 top-0 h-24 pointer-events-none"
+            style={{ background: 'radial-gradient(ellipse at top, rgba(0,0,0,0.5) 0%, transparent 70%)' }}
+            aria-hidden="true"
+          />
+          {/* Bottom vignette */}
+          <div
+            className="absolute inset-x-0 bottom-0 h-20 pointer-events-none"
+            style={{ background: 'linear-gradient(to bottom, transparent, rgba(0,0,0,0.4))' }}
+            aria-hidden="true"
+          />
+
+          <div className="relative z-10 max-w-4xl mx-auto px-4 pt-10 pb-4 flex flex-col items-center gap-6">
+            <div className="w-full grid grid-cols-1 md:grid-cols-3 gap-3">
+              <EdgeModeButton
+                title="Catch Up"
+                subtitle="EDGE recap in 90 seconds"
+                onClick={() => handleModeClick('catch-up')}
+                disabled={isSubmitting}
+              />
+              <EdgeModeButton
+                title="Feel It"
+                subtitle="Vents, hype, copium"
+                onClick={() => handleModeClick('feel-it')}
+                disabled={isSubmitting}
+              />
+              <EdgeModeButton
+                title="Control It"
+                subtitle="Trades, drafts, cap"
+                onClick={() => handleModeClick('control-it')}
+                disabled={isSubmitting}
+              />
+            </div>
           </div>
         </section>
+
+        {/* Headline ticker */}
+        <EdgeHeadlineTicker headlines={headlines} />
 
         {/* Prompt lane */}
         <section className="max-w-3xl mx-auto px-4 pb-8 flex flex-col items-center gap-3">
@@ -481,6 +560,41 @@ function EdgeSessionPanel({ panel }: { panel: EdgePanel }) {
         {panel.answer}
       </div>
     </article>
+  );
+}
+
+function EdgeHeadlineTicker({ headlines }: { headlines: string[] }) {
+  // Double the items for seamless loop
+  const doubled = [...headlines, ...headlines];
+  return (
+    <div
+      className="w-full overflow-hidden border-y border-[var(--sm-border)]"
+      style={{ background: 'rgba(5,5,8,0.85)' }}
+      aria-label="Top Chicago sports headlines"
+    >
+      <div className="relative flex items-center h-10">
+        <div
+          className="flex-shrink-0 z-10 px-3 py-1 text-[10px] uppercase tracking-[0.2em] font-semibold border-r border-[var(--sm-border)] h-full flex items-center"
+          style={{ background: 'rgba(188,0,0,0.15)', color: '#ff6666' }}
+        >
+          Now
+        </div>
+        <div className="flex-1 overflow-hidden">
+          <motion.div
+            className="flex gap-8 whitespace-nowrap px-4"
+            animate={{ x: ['0%', '-50%'] }}
+            transition={{ duration: headlines.length * 6, repeat: Infinity, ease: 'linear' }}
+          >
+            {doubled.map((h, i) => (
+              <span key={i} className="text-xs inline-flex items-center gap-3" style={{ color: '#b0b0c4' }}>
+                <span className="inline-block h-1 w-1 rounded-full bg-[var(--sm-red)] flex-shrink-0" />
+                {h}
+              </span>
+            ))}
+          </motion.div>
+        </div>
+      </div>
+    </div>
   );
 }
 
