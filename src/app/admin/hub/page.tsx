@@ -37,6 +37,7 @@ export default function AdminHubPage() {
   const [showForm, setShowForm] = useState(false)
   const [editingId, setEditingId] = useState<string | null>(null)
   const [form, setForm] = useState<HubItemFormData>({ ...EMPTY_FORM })
+  const [showHowItWorks, setShowHowItWorks] = useState(false)
 
   useEffect(() => {
     fetchItems()
@@ -163,10 +164,129 @@ export default function AdminHubPage() {
   return (
     <div style={{ maxWidth: 1100, margin: '0 auto' }}>
       {/* Header */}
-      <div style={{ marginBottom: 24 }}>
-        <h1 style={{ fontSize: 24, fontWeight: 700, color: 'var(--text-primary)', fontFamily: 'var(--font-heading, Barlow, sans-serif)' }}>Hub</h1>
-        <p style={{ fontSize: 14, color: 'var(--text-muted)', marginTop: 4 }}>Create hub updates for team pages.</p>
+      <div style={{ marginBottom: 24, display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between' }}>
+        <div>
+          <h1 style={{ fontSize: 24, fontWeight: 700, color: 'var(--text-primary)', fontFamily: 'var(--font-heading, Barlow, sans-serif)' }}>Hub</h1>
+          <p style={{ fontSize: 14, color: 'var(--text-muted)', marginTop: 4 }}>Create hub updates for team pages.</p>
+        </div>
+        <button
+          onClick={() => setShowHowItWorks(true)}
+          style={{
+            display: 'inline-flex', alignItems: 'center', gap: 6,
+            padding: '6px 14px', borderRadius: 8, fontSize: 13, fontWeight: 500,
+            background: 'rgba(188, 0, 0, 0.08)', color: '#bc0000',
+            border: '1px solid rgba(188, 0, 0, 0.2)', cursor: 'pointer',
+          }}
+        >
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <circle cx="12" cy="12" r="10" />
+            <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3" />
+            <line x1="12" y1="17" x2="12.01" y2="17" />
+          </svg>
+          How GM Audit Works
+        </button>
       </div>
+
+      {/* How It Works Modal */}
+      {showHowItWorks && (
+        <div
+          onClick={() => setShowHowItWorks(false)}
+          style={{
+            position: 'fixed', inset: 0, zIndex: 1000,
+            backgroundColor: 'rgba(0, 0, 0, 0.7)',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            padding: 24,
+          }}
+        >
+          <div
+            onClick={e => e.stopPropagation()}
+            style={{
+              background: 'var(--bg-card, #1a1a2e)', border: '1px solid var(--border-default, #333)',
+              borderRadius: 16, padding: 32, maxWidth: 640, width: '100%',
+              maxHeight: '80vh', overflowY: 'auto',
+              boxShadow: '0 20px 60px rgba(0,0,0,0.5)',
+            }}
+          >
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
+              <h2 style={{ fontSize: 20, fontWeight: 700, color: 'var(--text-primary, #fff)', fontFamily: 'var(--font-heading, Barlow, sans-serif)' }}>
+                GM Audit — Automated Hub Intelligence
+              </h2>
+              <button
+                onClick={() => setShowHowItWorks(false)}
+                style={{ background: 'none', border: 'none', color: 'var(--text-muted, #888)', fontSize: 20, cursor: 'pointer', padding: '4px 8px' }}
+              >
+                &times;
+              </button>
+            </div>
+
+            <div style={{ fontSize: 14, lineHeight: 1.7, color: 'var(--text-secondary, #ccc)' }}>
+              <p style={{ marginBottom: 16 }}>
+                <strong style={{ color: '#bc0000' }}>GM Audit</strong> is an AI-powered research engine that automatically scans reputable Chicago sports media
+                to find verified news for each hub page. It runs every 2 hours on the Data Lab server.
+              </p>
+
+              <div style={{ background: 'rgba(188, 0, 0, 0.06)', border: '1px solid rgba(188, 0, 0, 0.15)', borderRadius: 10, padding: 16, marginBottom: 16 }}>
+                <h3 style={{ fontSize: 14, fontWeight: 700, color: 'var(--text-primary, #fff)', marginBottom: 10 }}>5-Phase Pipeline</h3>
+                <div style={{ display: 'grid', gap: 8 }}>
+                  {[
+                    { phase: '1. Research', desc: 'Perplexity AI searches the web for the latest news across all 5 hub categories (trade rumors, draft, cap, depth chart, game center).' },
+                    { phase: '2. Verification', desc: 'Every claim must be confirmed by 3+ sources from our approved media list (80+ outlets including ESPN, Chicago Tribune, Sun-Times, The Athletic, CHGO, beat reporters).' },
+                    { phase: '3. Deduplication', desc: 'Checks existing hub items within 72 hours to prevent duplicate posts. Matches by player name, headline overlap, and entity similarity.' },
+                    { phase: '4. Enrichment', desc: 'For trade rumors, Scout AI auto-generates cap impact analysis. Depth chart items are cross-referenced against our database.' },
+                    { phase: '5. Publishing', desc: 'Verified items are inserted as drafts for admin review. Items show author "gm-audit" to distinguish from manual entries.' },
+                  ].map(({ phase, desc }) => (
+                    <div key={phase} style={{ display: 'flex', gap: 10 }}>
+                      <span style={{ fontWeight: 700, color: '#bc0000', whiteSpace: 'nowrap', fontSize: 13 }}>{phase}</span>
+                      <span style={{ fontSize: 13 }}>{desc}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginBottom: 16 }}>
+                <div style={{ background: 'var(--bg-primary, #111)', borderRadius: 8, padding: 12 }}>
+                  <h4 style={{ fontSize: 12, fontWeight: 700, color: 'var(--text-primary, #fff)', marginBottom: 6, textTransform: 'uppercase', letterSpacing: '0.05em' }}>Source Verification</h4>
+                  <ul style={{ listStyle: 'none', padding: 0, margin: 0, fontSize: 12 }}>
+                    <li style={{ marginBottom: 4 }}>3+ verified sources required</li>
+                    <li style={{ marginBottom: 4 }}>80+ approved media outlets</li>
+                    <li style={{ marginBottom: 4 }}>Reporter names mapped to orgs</li>
+                    <li>Domain + name + reporter matching</li>
+                  </ul>
+                </div>
+                <div style={{ background: 'var(--bg-primary, #111)', borderRadius: 8, padding: 12 }}>
+                  <h4 style={{ fontSize: 12, fontWeight: 700, color: 'var(--text-primary, #fff)', marginBottom: 6, textTransform: 'uppercase', letterSpacing: '0.05em' }}>Safety Controls</h4>
+                  <ul style={{ listStyle: 'none', padding: 0, margin: 0, fontSize: 12 }}>
+                    <li style={{ marginBottom: 4 }}>All items publish as drafts first</li>
+                    <li style={{ marginBottom: 4 }}>72-hour dedup window</li>
+                    <li style={{ marginBottom: 4 }}>Full audit trail in database</li>
+                    <li>Admin review before going live</li>
+                  </ul>
+                </div>
+              </div>
+
+              <div style={{ background: 'var(--bg-primary, #111)', borderRadius: 8, padding: 12, marginBottom: 16 }}>
+                <h4 style={{ fontSize: 12, fontWeight: 700, color: 'var(--text-primary, #fff)', marginBottom: 6, textTransform: 'uppercase', letterSpacing: '0.05em' }}>Hub Categories Scanned</h4>
+                <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
+                  {['Trade Rumors', 'Draft Tracker', 'Cap Tracker', 'Depth Chart', 'Game Center'].map(cat => (
+                    <span key={cat} style={{
+                      padding: '3px 10px', borderRadius: 12, fontSize: 11, fontWeight: 600,
+                      background: 'rgba(188, 0, 0, 0.1)', color: '#bc0000',
+                      border: '1px solid rgba(188, 0, 0, 0.2)',
+                    }}>
+                      {cat}
+                    </span>
+                  ))}
+                </div>
+              </div>
+
+              <p style={{ fontSize: 12, color: 'var(--text-muted, #666)', fontStyle: 'italic' }}>
+                Currently active for Chicago Bears (Phase 1). Expanding to all 5 teams in future phases.
+                Runs every 2 hours via Data Lab cron job.
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Controls Row 1: Team + Hub Page */}
       <div style={{ display: 'flex', gap: 12, marginBottom: 16, flexWrap: 'wrap' }}>
