@@ -445,7 +445,7 @@ async function fetchPaymentSyncStatus() {
     const { data: syncData } = await supabaseAdmin
       .from('writer_payment_syncs')
       .select('*')
-      .order('created_at', { ascending: false })
+      .order('synced_at', { ascending: false })
       .limit(1)
       .single()
 
@@ -478,7 +478,7 @@ async function fetchPaymentSyncStatus() {
     return {
       sync: syncData ? {
         status: syncData.status,
-        lastSync: syncData.created_at,
+        lastSync: syncData.synced_at,
         errorMessage: syncData.error_message,
         writersSynced: syncData.writers_synced,
         totalViewsSynced: syncData.total_views_synced,
@@ -489,7 +489,7 @@ async function fetchPaymentSyncStatus() {
         name: f.writer_name,
         desc: f.formula_description,
         formula: f.formula_code,
-        effectiveDate: f.effective_date,
+        effectiveDate: f.effective_from,
         writerId: f.writer_id,
       })),
       history: history || [],
