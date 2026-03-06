@@ -1129,21 +1129,35 @@ Revenue: [
 
           {/* ═══════ PAYMENTS TAB ═══════ */}
           {tab === 'Payments' && <>
-            {/* 1. Top Alert Area */}
-            <div className="rounded-lg border px-4 py-3 flex items-center gap-3" style={{ background: 'rgba(37,99,235,0.06)', borderColor: 'rgba(37,99,235,0.2)' }}>
-              <div className="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0" style={{ background: 'rgba(37,99,235,0.12)' }}>
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#2563eb" strokeWidth="2">
-                  <circle cx="12" cy="12" r="10" /><path d="M12 8v4m0 4h.01" />
-                </svg>
-              </div>
-              <div className="flex-1">
-                <p className="text-sm font-semibold" style={{ color: '#2563eb' }}>Payment Alerts</p>
-                <p className="text-sm" style={{ color: 'var(--sm-text-muted)' }}>3 writers pending approval, 1 formula adjustment required</p>
-              </div>
-              <button className="px-3 py-1.5 text-sm font-bold rounded transition-colors" style={{ background: '#2563eb', color: '#fff' }}>
-                Review Now
-              </button>
-            </div>
+            {/* Payment Sync Failure Alert Banner */}
+            {/* TODO: Replace `syncFailed` with actual sync status from API */}
+            {(() => {
+              const syncFailed = true // Set to false when sync succeeds
+              if (!syncFailed) {
+                // Success state: render nothing (or optional success indicator)
+                return null
+              }
+              return (
+                <div className="rounded-xl border p-4 flex items-start gap-4" style={{ background: 'rgba(188,0,0,0.04)', borderColor: 'rgba(188,0,0,0.25)' }}>
+                  {/* Pulsing red dot indicator */}
+                  <div className="relative flex-shrink-0 mt-1">
+                    <span className="absolute inline-flex h-4 w-4 rounded-full opacity-75 animate-ping" style={{ backgroundColor: '#bc0000' }} />
+                    <span className="relative inline-flex h-4 w-4 rounded-full" style={{ backgroundColor: '#bc0000' }} />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-base font-extrabold uppercase tracking-wide" style={{ color: '#bc0000' }}>
+                      ⚠️ PAYMENT SYNC FAILED — DO NOT ISSUE PAYMENTS
+                    </p>
+                    <p className="text-sm mt-1" style={{ color: '#bc0000' }}>
+                      Last sync attempt: March 1, 2026 6:00 AM UTC — Error: API timeout after 30 seconds
+                    </p>
+                    <p className="text-sm mt-2" style={{ color: 'var(--sm-text-muted)' }}>
+                      The monthly view data has not been verified. Contact engineering before approving any payments.
+                    </p>
+                  </div>
+                </div>
+              )
+            })()}
 
             {/* 2. KPI Cards Row */}
             <div className="grid grid-cols-1 sm:grid-cols-4 gap-4">
