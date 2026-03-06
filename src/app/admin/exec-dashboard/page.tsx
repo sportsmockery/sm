@@ -652,7 +652,7 @@ function ContentScoreModule({ topContent, overview, onPostClick }: { topContent:
 
 // ═══════════════════════════════════════════════════════════════════════════════
 // MAIN DASHBOARD
-// ═════════════════════════════════════════════════════════════════��══���═══���══════
+// ═════════════════════════════════════════════════════════════════���══���═══���══════
 export default function ExecDashboard() {
   const [data, setData] = useState<Data | null>(null)
   const [loading, setLoading] = useState(true)
@@ -1496,36 +1496,139 @@ Revenue: [
 
             {/* 6. Payment History Card */}
             <Section title="Payment History">
-              <table className="w-full">
-                <thead>
-                  <tr className="border-b" style={{ borderColor: 'var(--sm-border)' }}>
-                    {['Date', 'Period', 'Writers Paid', 'Total Amount', 'Status'].map(h => (
-                      <th key={h} className="px-3 py-2.5 text-sm font-semibold uppercase tracking-wide text-left" style={{ color: 'var(--sm-text-dim)' }}>{h}</th>
-                    ))}
-                  </tr>
-                </thead>
-                <tbody>
-                  {[
-                    { date: 'Mar 1, 2024', period: 'February 2024', writers: 22, amount: '$14,280', status: 'Completed' },
-                    { date: 'Feb 1, 2024', period: 'January 2024', writers: 20, amount: '$12,950', status: 'Completed' },
-                    { date: 'Jan 1, 2024', period: 'December 2023', writers: 19, amount: '$11,420', status: 'Completed' },
-                  ].map(p => (
-                    <tr key={p.date} className="border-b transition-colors" style={{ borderColor: 'var(--sm-border)' }}
-                      onMouseEnter={e => (e.currentTarget.style.background = 'var(--sm-card-hover)')}
-                      onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}>
-                      <td className="px-3 py-3 text-sm" style={{ color: 'var(--sm-text)' }}>{p.date}</td>
-                      <td className="px-3 py-3 text-sm" style={{ color: 'var(--sm-text-muted)' }}>{p.period}</td>
-                      <td className="px-3 py-3 text-sm tabular-nums" style={{ color: 'var(--sm-text)' }}>{p.writers}</td>
-                      <td className="px-3 py-3 text-sm font-bold tabular-nums" style={{ color: C.green }}>{p.amount}</td>
-                      <td className="px-3 py-3">
-                        <span className="text-xs font-bold px-2 py-0.5 rounded-full" style={{ background: 'rgba(16,185,129,0.12)', color: C.green }}>
-                          {p.status}
-                        </span>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
+              {(() => {
+                const [expandedMonth, setExpandedMonth] = React.useState<string | null>(null)
+
+                // Generate 12 months of mock history data
+                const months = [
+                  { month: 'Feb 2026', total: 14280, writers: [
+                    { name: 'Aldo Soto', posts: 26, views: 178420, formula: '(26 × $5) + (178.4K × $8)', calcPay: 1557.36, status: 'Paid' },
+                    { name: 'Erik Lambert', posts: 20, views: 132850, formula: '(20 × $5) + (132.9K × $8)', calcPay: 1163.20, status: 'Paid' },
+                    { name: 'Ryan Dauterive', posts: 18, views: 94760, formula: '(18 × $5) + (94.8K × $8)', calcPay: 848.08, status: 'Paid' },
+                    { name: 'Colin Longworth', posts: 14, views: 72230, formula: '(14 × $5) + (72.2K × $8)', calcPay: 647.84, status: 'Paid' },
+                  ]},
+                  { month: 'Jan 2026', total: 12950, writers: [
+                    { name: 'Aldo Soto', posts: 24, views: 165200, formula: '(24 × $5) + (165.2K × $8)', calcPay: 1441.60, status: 'Paid' },
+                    { name: 'Erik Lambert', posts: 19, views: 121400, formula: '(19 × $5) + (121.4K × $8)', calcPay: 1066.20, status: 'Paid' },
+                    { name: 'Ryan Dauterive', posts: 16, views: 88500, formula: '(16 × $5) + (88.5K × $8)', calcPay: 788.00, status: 'Paid' },
+                  ]},
+                  { month: 'Dec 2025', total: 11420, writers: [
+                    { name: 'Aldo Soto', posts: 22, views: 152000, formula: '(22 × $5) + (152K × $8)', calcPay: 1326.00, status: 'Paid' },
+                    { name: 'Erik Lambert', posts: 17, views: 108600, formula: '(17 × $5) + (108.6K × $8)', calcPay: 953.80, status: 'Paid' },
+                  ]},
+                  { month: 'Nov 2025', total: 10850, writers: [] },
+                  { month: 'Oct 2025', total: 11200, writers: [] },
+                  { month: 'Sep 2025', total: 9800, writers: [] },
+                  { month: 'Aug 2025', total: 10100, writers: [] },
+                  { month: 'Jul 2025', total: 9650, writers: [] },
+                  { month: 'Jun 2025', total: 8900, writers: [] },
+                  { month: 'May 2025', total: 9200, writers: [] },
+                  { month: 'Apr 2025', total: 8450, writers: [] },
+                  { month: 'Mar 2025', total: 8100, writers: [] },
+                ]
+
+                const maxTotal = Math.max(...months.map(m => m.total))
+
+                return (
+                  <div className="space-y-4">
+                    {/* Bar Chart */}
+                    <div className="rounded-lg border p-4" style={{ background: 'var(--sm-surface)', borderColor: 'var(--sm-border)' }}>
+                      <p className="text-xs font-bold uppercase tracking-wide mb-3" style={{ color: 'var(--sm-text-dim)' }}>Monthly Payout (Last 12 Months)</p>
+                      <div className="flex items-end gap-1.5 h-32">
+                        {months.slice().reverse().map((m, i) => {
+                          const heightPct = (m.total / maxTotal) * 100
+                          return (
+                            <div key={m.month} className="flex-1 flex flex-col items-center gap-1">
+                              <div
+                                className="w-full rounded-t transition-all cursor-pointer"
+                                style={{
+                                  height: `${heightPct}%`,
+                                  minHeight: 4,
+                                  backgroundColor: '#059669',
+                                  opacity: expandedMonth === m.month ? 1 : 0.7,
+                                }}
+                                onClick={() => setExpandedMonth(expandedMonth === m.month ? null : m.month)}
+                                title={`${m.month}: $${m.total.toLocaleString()}`}
+                              />
+                              <span className="text-[8px] font-bold" style={{ color: 'var(--sm-text-dim)' }}>
+                                {m.month.split(' ')[0].slice(0, 3)}
+                              </span>
+                            </div>
+                          )
+                        })}
+                      </div>
+                    </div>
+
+                    {/* Accordion List */}
+                    <div className="space-y-1">
+                      {months.map(m => (
+                        <div key={m.month} className="rounded-lg border overflow-hidden" style={{ background: 'var(--sm-card)', borderColor: 'var(--sm-border)' }}>
+                          {/* Accordion Header */}
+                          <button
+                            onClick={() => setExpandedMonth(expandedMonth === m.month ? null : m.month)}
+                            className="w-full px-4 py-3 flex items-center justify-between transition-colors"
+                            style={{ background: expandedMonth === m.month ? 'var(--sm-surface)' : 'transparent' }}
+                          >
+                            <div className="flex items-center gap-3">
+                              <svg
+                                width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"
+                                className="transition-transform"
+                                style={{ color: 'var(--sm-text-dim)', transform: expandedMonth === m.month ? 'rotate(90deg)' : 'rotate(0deg)' }}
+                              >
+                                <path d="M9 18l6-6-6-6" />
+                              </svg>
+                              <span className="text-sm font-semibold" style={{ color: 'var(--sm-text)' }}>{m.month}</span>
+                            </div>
+                            <div className="flex items-center gap-4">
+                              <span className="text-sm font-bold tabular-nums" style={{ color: '#059669' }}>${m.total.toLocaleString()}</span>
+                              <span className="text-xs font-bold px-2 py-0.5 rounded-full" style={{ background: 'rgba(16,185,129,0.12)', color: '#059669' }}>
+                                Completed
+                              </span>
+                            </div>
+                          </button>
+
+                          {/* Accordion Content */}
+                          {expandedMonth === m.month && (
+                            <div className="border-t px-4 py-3" style={{ borderColor: 'var(--sm-border)' }}>
+                              {m.writers.length > 0 ? (
+                                <div className="overflow-x-auto">
+                                  <table className="w-full min-w-[600px]">
+                                    <thead>
+                                      <tr className="border-b" style={{ borderColor: 'var(--sm-border)' }}>
+                                        {['Writer', 'Posts', 'Views', 'Formula', 'Calculated Pay', 'Status'].map(h => (
+                                          <th key={h} className="px-2 py-2 text-xs font-semibold uppercase tracking-wide text-left" style={{ color: 'var(--sm-text-dim)' }}>{h}</th>
+                                        ))}
+                                      </tr>
+                                    </thead>
+                                    <tbody>
+                                      {m.writers.map(w => (
+                                        <tr key={w.name} className="border-b last:border-b-0" style={{ borderColor: 'var(--sm-border)' }}>
+                                          <td className="px-2 py-2 text-sm font-medium" style={{ color: 'var(--sm-text)' }}>{w.name}</td>
+                                          <td className="px-2 py-2 text-sm tabular-nums" style={{ color: 'var(--sm-text-muted)' }}>{w.posts}</td>
+                                          <td className="px-2 py-2 text-sm tabular-nums" style={{ color: 'var(--sm-text-muted)' }}>{w.views.toLocaleString()}</td>
+                                          <td className="px-2 py-2 text-[10px] font-mono" style={{ color: 'var(--sm-text-dim)' }}>{w.formula}</td>
+                                          <td className="px-2 py-2 text-sm font-bold tabular-nums" style={{ color: '#059669' }}>${w.calcPay.toFixed(2)}</td>
+                                          <td className="px-2 py-2">
+                                            <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-full" style={{ background: 'rgba(16,185,129,0.12)', color: '#059669' }}>
+                                              {w.status}
+                                            </span>
+                                          </td>
+                                        </tr>
+                                      ))}
+                                    </tbody>
+                                  </table>
+                                </div>
+                              ) : (
+                                <p className="text-sm py-2" style={{ color: 'var(--sm-text-dim)' }}>Detailed breakdown not available for this period.</p>
+                              )}
+                            </div>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )
+              })()}
             </Section>
           </>}
         </div>
