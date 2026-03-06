@@ -1176,39 +1176,106 @@ Revenue: [
 
             {/* 3. Writer Payment Table */}
             <Section title="Writer Payments">
-              <table className="w-full">
-                <thead>
-                  <tr className="border-b" style={{ borderColor: 'var(--sm-border)' }}>
-                    {['Writer', 'Posts', 'Views', 'Earned', 'Status'].map(h => (
-                      <th key={h} className="px-3 py-2.5 text-sm font-semibold uppercase tracking-wide text-left" style={{ color: 'var(--sm-text-dim)' }}>{h}</th>
-                    ))}
-                  </tr>
-                </thead>
-                <tbody>
-                  {[
-                    { name: 'Andrew Ingram', posts: 24, views: '142K', earned: '$1,136', status: 'Pending' },
-                    { name: 'Marcus Reyes', posts: 18, views: '98K', earned: '$784', status: 'Approved' },
-                    { name: 'Sarah Chen', posts: 15, views: '76K', earned: '$608', status: 'Pending' },
-                    { name: 'Jake Morrison', posts: 12, views: '54K', earned: '$432', status: 'Paid' },
-                    { name: 'Emily Taylor', posts: 9, views: '41K', earned: '$328', status: 'Pending' },
-                  ].map(w => (
-                    <tr key={w.name} className="border-b transition-colors" style={{ borderColor: 'var(--sm-border)' }}
-                      onMouseEnter={e => (e.currentTarget.style.background = 'var(--sm-card-hover)')}
-                      onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}>
-                      <td className="px-3 py-3 text-sm font-medium" style={{ color: 'var(--sm-text)' }}>{w.name}</td>
-                      <td className="px-3 py-3 text-sm tabular-nums" style={{ color: 'var(--sm-text-muted)' }}>{w.posts}</td>
-                      <td className="px-3 py-3 text-sm font-bold tabular-nums" style={{ color: C.blue }}>{w.views}</td>
-                      <td className="px-3 py-3 text-sm font-bold tabular-nums" style={{ color: C.green }}>{w.earned}</td>
-                      <td className="px-3 py-3">
-                        <span className="text-xs font-bold px-2 py-0.5 rounded-full" style={{
-                          background: w.status === 'Paid' ? 'rgba(16,185,129,0.12)' : w.status === 'Approved' ? 'rgba(59,130,246,0.12)' : 'rgba(245,158,11,0.12)',
-                          color: w.status === 'Paid' ? C.green : w.status === 'Approved' ? C.blue : C.amber,
-                        }}>{w.status}</span>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
+              {(() => {
+                const writers = [
+                  { name: 'Aldo Soto', posts: 28, views: 186420, perPost: 5.00, per1k: 8.00, status: 'Pending' as const },
+                  { name: 'Erik Lambert', posts: 22, views: 142850, perPost: 5.00, per1k: 8.00, status: 'Approved' as const },
+                  { name: 'Ryan Dauterive', posts: 19, views: 98760, perPost: 5.00, per1k: 8.00, status: 'Pending' as const },
+                  { name: 'Colin Longworth', posts: 15, views: 76230, perPost: 5.00, per1k: 8.00, status: 'Paid' as const },
+                  { name: 'Missy Carroll', posts: 12, views: 54890, perPost: 5.00, per1k: 8.00, status: 'Approved' as const },
+                  { name: 'Craig Rowland', posts: 8, views: 32150, perPost: 5.00, per1k: 8.00, status: 'Pending' as const },
+                ].map(w => ({
+                  ...w,
+                  formula: `(${w.posts} × $${w.perPost.toFixed(2)}) + (${(w.views / 1000).toFixed(1)}K × $${w.per1k.toFixed(2)})`,
+                  calcPay: (w.posts * w.perPost) + (w.views / 1000 * w.per1k),
+                })).sort((a, b) => b.calcPay - a.calcPay)
+
+                const cols = [
+                  { key: 'name', label: 'Writer', sortable: false },
+                  { key: 'posts', label: 'Posts', sortable: true },
+                  { key: 'views', label: 'Views', sortable: true },
+                  { key: 'perPost', label: '$/Post', sortable: true },
+                  { key: 'per1k', label: '$/1K Views', sortable: true },
+                  { key: 'formula', label: 'Formula', sortable: false },
+                  { key: 'calcPay', label: 'Calculated Pay', sortable: true },
+                  { key: 'status', label: 'Status', sortable: false },
+                  { key: 'actions', label: 'Actions', sortable: false },
+                ]
+
+                return (
+                  <div className="overflow-x-auto">
+                    <table className="w-full min-w-[900px]">
+                      <thead>
+                        <tr className="border-b" style={{ borderColor: 'var(--sm-border)' }}>
+                          {cols.map(c => (
+                            <th key={c.key} className="px-3 py-2.5 text-sm font-semibold uppercase tracking-wide text-left whitespace-nowrap" style={{ color: 'var(--sm-text-dim)' }}>
+                              {c.label}
+                              {c.sortable && (
+                                <svg className="inline-block ml-1 opacity-50" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                  <path d="M12 5v14M5 12l7 7 7-7" />
+                                </svg>
+                              )}
+                            </th>
+                          ))}
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {writers.map(w => (
+                          <tr key={w.name} className="border-b transition-colors" style={{ borderColor: 'var(--sm-border)' }}
+                            onMouseEnter={e => (e.currentTarget.style.background = 'var(--sm-card-hover)')}
+                            onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}>
+                            {/* Writer with avatar */}
+                            <td className="px-3 py-3">
+                              <div className="flex items-center gap-2">
+                                <div className="w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold" style={{ background: 'var(--sm-surface)', color: 'var(--sm-text-muted)' }}>
+                                  {w.name.split(' ').map(n => n[0]).join('')}
+                                </div>
+                                <span className="text-sm font-medium" style={{ color: 'var(--sm-text)' }}>{w.name}</span>
+                              </div>
+                            </td>
+                            <td className="px-3 py-3 text-sm tabular-nums" style={{ color: 'var(--sm-text-muted)' }}>{w.posts}</td>
+                            <td className="px-3 py-3 text-sm font-bold tabular-nums" style={{ color: C.blue }}>{w.views.toLocaleString()}</td>
+                            <td className="px-3 py-3 text-sm tabular-nums" style={{ color: 'var(--sm-text-muted)' }}>${w.perPost.toFixed(2)}</td>
+                            <td className="px-3 py-3 text-sm tabular-nums" style={{ color: 'var(--sm-text-muted)' }}>${w.per1k.toFixed(2)}</td>
+                            <td className="px-3 py-3 text-xs font-mono" style={{ color: 'var(--sm-text-dim)' }}>{w.formula}</td>
+                            <td className="px-3 py-3 text-sm font-bold tabular-nums" style={{ color: '#059669' }}>${w.calcPay.toFixed(2)}</td>
+                            {/* Status badge */}
+                            <td className="px-3 py-3">
+                              <span className="text-xs font-bold px-2 py-0.5 rounded-full" style={{
+                                background: w.status === 'Paid' ? 'rgba(16,185,129,0.12)' : w.status === 'Approved' ? 'rgba(59,130,246,0.12)' : 'rgba(245,158,11,0.12)',
+                                color: w.status === 'Paid' ? C.green : w.status === 'Approved' ? C.blue : C.amber,
+                              }}>{w.status}</span>
+                            </td>
+                            {/* Actions */}
+                            <td className="px-3 py-3">
+                              {w.status === 'Pending' && (
+                                <button className="text-xs font-bold px-2.5 py-1 rounded transition-colors" style={{ background: 'var(--sm-red)', color: '#fff' }}>
+                                  Approve
+                                </button>
+                              )}
+                              {w.status === 'Approved' && (
+                                <div className="flex items-center gap-1.5">
+                                  <button className="text-xs font-bold px-2.5 py-1 rounded transition-colors" style={{ background: '#059669', color: '#fff' }}>
+                                    Mark Paid
+                                  </button>
+                                  <button className="text-xs font-bold px-2.5 py-1 rounded border transition-colors" style={{ borderColor: 'var(--sm-border)', color: 'var(--sm-text-muted)', background: 'var(--sm-surface)' }}>
+                                    Revert
+                                  </button>
+                                </div>
+                              )}
+                              {w.status === 'Paid' && (
+                                <span className="text-xs font-bold px-2.5 py-1 rounded" style={{ background: 'var(--sm-surface)', color: 'var(--sm-text-dim)' }}>
+                                  Completed
+                                </span>
+                              )}
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                )
+              })()}
             </Section>
 
             {/* 4. Writer Formulas Panel */}
