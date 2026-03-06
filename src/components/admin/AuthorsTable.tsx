@@ -94,7 +94,7 @@ export default function AuthorsTable({ authors, onDelete }: AuthorsTableProps) {
                         </div>
                       )}
                       <Link
-                        href={`/admin/authors/${author.id}`}
+                        href={`/admin/writers/${author.id}`}
                         className="text-white hover:text-blue-400 font-medium"
                       >
                         {author.name}
@@ -115,7 +115,7 @@ export default function AuthorsTable({ authors, onDelete }: AuthorsTableProps) {
                   <td className="px-6 py-4 text-right">
                     <div className="flex items-center justify-end gap-2">
                       <Link
-                        href={`/admin/authors/${author.id}`}
+                        href={`/admin/writers/${author.id}`}
                         className="p-2 text-gray-400 hover:text-white hover:bg-gray-700 rounded transition-colors"
                         title="Edit"
                       >

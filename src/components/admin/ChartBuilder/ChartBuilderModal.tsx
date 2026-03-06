@@ -243,17 +243,17 @@ export default function ChartBuilderModal({
             <div>
               <label className="block text-xs font-medium text-zinc-500 uppercase tracking-wider mb-2">Chart Type</label>
               <div className="flex flex-wrap gap-2">
-                {(['bar', 'line', 'pie'] as ChartType[]).map((type) => (
+                {(['bar', 'line', 'pie', 'radar', 'scatter', 'heatmap'] as ChartType[]).map((type) => (
                   <button
                     key={type}
                     onClick={() => updateConfig({ type })}
-                    className={`px-4 py-2 rounded-lg text-sm font-medium capitalize transition-all ${
+                    className={`px-3 py-2 rounded-lg text-xs font-medium capitalize transition-all ${
                       config.type === type
                         ? 'bg-[#8B0000] text-white'
                         : 'bg-zinc-800 text-zinc-400 hover:bg-zinc-700 hover:text-white'
                     }`}
                   >
-                    {type === 'bar' && '📊'} {type === 'line' && '📈'} {type === 'pie' && '🥧'} {type}
+                    {type}
                   </button>
                 ))}
               </div>
