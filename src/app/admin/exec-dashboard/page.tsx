@@ -42,7 +42,7 @@ interface Data {
 // ═══════════════════════════════════════════════════════════════════════════════
 // CONSTANTS & UTILS
 // ═══════════════════════════════════════════════════════════════════════════════
-const TABS = ['Overview', 'Writers', 'Social', 'SEO', 'Content', 'Revenue'] as const
+const TABS = ['Overview', 'Writers', 'Social', 'SEO', 'Content', 'Revenue', 'Payments'] as const
 const RANGES = [
   { key: 'today', label: 'Today' },
   { key: 'yesterday', label: 'Yesterday' },
@@ -652,7 +652,7 @@ function ContentScoreModule({ topContent, overview, onPostClick }: { topContent:
 
 // ═══════════════════════════════════════════════════════════════════════════════
 // MAIN DASHBOARD
-// ═══════════════════════════════════════════════════════════════════════════════
+// ════════════════════════════════════════════════════════════════════════���══════
 export default function ExecDashboard() {
   const [data, setData] = useState<Data | null>(null)
   const [loading, setLoading] = useState(true)
@@ -734,10 +734,13 @@ export default function ExecDashboard() {
       Content: [
         { q: 'Publishing velocity?', a: `${d.velocity} posts/week across ${d.totalCategories} categories. ${d.periodPosts} published this period.`, color: C.blue },
       ],
-      Revenue: [
-        { q: 'Revenue trend?', a: `Est. $${fN(Math.round(d.periodViews * 0.008))} ad revenue this period at $${((d.periodViews > 0 ? Math.round(d.periodViews * 0.008) / d.periodViews * 1000 : 0)).toFixed(2)} RPM.`, color: C.green },
-      ],
-    }
+Revenue: [
+  { q: 'Revenue trend?', a: `Est. $${fN(Math.round(d.periodViews * 0.008))} ad revenue this period at $${((d.periodViews > 0 ? Math.round(d.periodViews * 0.008) / d.periodViews * 1000 : 0)).toFixed(2)} RPM.`, color: C.green },
+  ],
+  Payments: [
+  { q: 'Payment status?', a: `${d.totalAuthors} writers pending payout review for this period.`, color: C.blue },
+  ],
+  }
   }, [data])
 
   return (
@@ -920,7 +923,7 @@ export default function ExecDashboard() {
             </Section>
           </>}
 
-          {/* ═══════ WRITERS TAB ═══════ */}
+          {/* ═══════ WRITERS TAB ══��════ */}
           {tab === 'Writers' && <>
             <Section title="Writer Leaderboard" badge={<span className="text-xs tabular-nums" style={{ color: 'var(--sm-text-dim)' }}>{data.writers.length} writers</span>}>
               <SortableTable
@@ -1123,6 +1126,146 @@ export default function ExecDashboard() {
               </Section>
             </>
           })()}
+
+          {/* ═══════ PAYMENTS TAB ═══════ */}
+          {tab === 'Payments' && <>
+            {/* 1. Top Alert Area */}
+            <div className="rounded-lg border px-4 py-3 flex items-center gap-3" style={{ background: 'rgba(37,99,235,0.06)', borderColor: 'rgba(37,99,235,0.2)' }}>
+              <div className="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0" style={{ background: 'rgba(37,99,235,0.12)' }}>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#2563eb" strokeWidth="2">
+                  <circle cx="12" cy="12" r="10" /><path d="M12 8v4m0 4h.01" />
+                </svg>
+              </div>
+              <div className="flex-1">
+                <p className="text-sm font-semibold" style={{ color: '#2563eb' }}>Payment Alerts</p>
+                <p className="text-sm" style={{ color: 'var(--sm-text-muted)' }}>3 writers pending approval, 1 formula adjustment required</p>
+              </div>
+              <button className="px-3 py-1.5 text-sm font-bold rounded transition-colors" style={{ background: '#2563eb', color: '#fff' }}>
+                Review Now
+              </button>
+            </div>
+
+            {/* 2. KPI Cards Row */}
+            <div className="grid grid-cols-1 sm:grid-cols-4 gap-4">
+              {[
+                { l: 'Total Payable', v: '$12,450', c: C.green, s: 'this period' },
+                { l: 'Writers Owed', v: '18', c: C.blue, s: 'pending payout' },
+                { l: 'Avg Payout', v: '$692', c: C.purple, s: 'per writer' },
+                { l: 'Last Paid', v: 'Mar 1', c: C.amber, s: '2024' },
+              ].map(m => (
+                <div key={m.l} className="rounded-lg border px-4 py-3" style={{ background: 'var(--sm-card)', borderColor: 'var(--sm-border)' }}>
+                  <p className="text-xs font-bold uppercase tracking-wide" style={{ color: 'var(--sm-text-dim)' }}>{m.l}</p>
+                  <p className="text-2xl font-extrabold tabular-nums mt-1" style={{ color: m.c }}>{m.v}</p>
+                  <p className="text-sm mt-0.5" style={{ color: 'var(--sm-text-muted)' }}>{m.s}</p>
+                </div>
+              ))}
+            </div>
+
+            {/* 3. Writer Payment Table */}
+            <Section title="Writer Payments">
+              <table className="w-full">
+                <thead>
+                  <tr className="border-b" style={{ borderColor: 'var(--sm-border)' }}>
+                    {['Writer', 'Posts', 'Views', 'Earned', 'Status'].map(h => (
+                      <th key={h} className="px-3 py-2.5 text-sm font-semibold uppercase tracking-wide text-left" style={{ color: 'var(--sm-text-dim)' }}>{h}</th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody>
+                  {[
+                    { name: 'Andrew Ingram', posts: 24, views: '142K', earned: '$1,136', status: 'Pending' },
+                    { name: 'Marcus Reyes', posts: 18, views: '98K', earned: '$784', status: 'Approved' },
+                    { name: 'Sarah Chen', posts: 15, views: '76K', earned: '$608', status: 'Pending' },
+                    { name: 'Jake Morrison', posts: 12, views: '54K', earned: '$432', status: 'Paid' },
+                    { name: 'Emily Taylor', posts: 9, views: '41K', earned: '$328', status: 'Pending' },
+                  ].map(w => (
+                    <tr key={w.name} className="border-b transition-colors" style={{ borderColor: 'var(--sm-border)' }}
+                      onMouseEnter={e => (e.currentTarget.style.background = 'var(--sm-card-hover)')}
+                      onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}>
+                      <td className="px-3 py-3 text-sm font-medium" style={{ color: 'var(--sm-text)' }}>{w.name}</td>
+                      <td className="px-3 py-3 text-sm tabular-nums" style={{ color: 'var(--sm-text-muted)' }}>{w.posts}</td>
+                      <td className="px-3 py-3 text-sm font-bold tabular-nums" style={{ color: C.blue }}>{w.views}</td>
+                      <td className="px-3 py-3 text-sm font-bold tabular-nums" style={{ color: C.green }}>{w.earned}</td>
+                      <td className="px-3 py-3">
+                        <span className="text-xs font-bold px-2 py-0.5 rounded-full" style={{
+                          background: w.status === 'Paid' ? 'rgba(16,185,129,0.12)' : w.status === 'Approved' ? 'rgba(59,130,246,0.12)' : 'rgba(245,158,11,0.12)',
+                          color: w.status === 'Paid' ? C.green : w.status === 'Approved' ? C.blue : C.amber,
+                        }}>{w.status}</span>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </Section>
+
+            {/* 4. Writer Formulas Panel */}
+            <Section title="Payment Formulas">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="rounded-lg border p-4" style={{ background: 'var(--sm-surface)', borderColor: 'var(--sm-border)' }}>
+                  <p className="text-sm font-bold mb-2" style={{ color: 'var(--sm-text)' }}>Base Rate Formula</p>
+                  <p className="text-xs font-mono p-2 rounded" style={{ background: 'var(--sm-card)', color: 'var(--sm-text-muted)' }}>
+                    payout = (views × $0.008) + (posts × $5)
+                  </p>
+                  <p className="text-xs mt-2" style={{ color: 'var(--sm-text-dim)' }}>Applied to: Staff Writers</p>
+                </div>
+                <div className="rounded-lg border p-4" style={{ background: 'var(--sm-surface)', borderColor: 'var(--sm-border)' }}>
+                  <p className="text-sm font-bold mb-2" style={{ color: 'var(--sm-text)' }}>Bonus Multiplier</p>
+                  <p className="text-xs font-mono p-2 rounded" style={{ background: 'var(--sm-card)', color: 'var(--sm-text-muted)' }}>
+                    bonus = base × 1.25 if avg_views {'>'} 10K
+                  </p>
+                  <p className="text-xs mt-2" style={{ color: 'var(--sm-text-dim)' }}>Applied to: Top Performers</p>
+                </div>
+              </div>
+            </Section>
+
+            {/* 5. Bulk Actions Row */}
+            <div className="flex items-center gap-3 px-1">
+              <span className="text-sm font-semibold" style={{ color: 'var(--sm-text)' }}>Bulk Actions:</span>
+              <button className="px-3 py-1.5 text-sm font-bold rounded border transition-colors" style={{ borderColor: 'var(--sm-border)', color: 'var(--sm-text-muted)', background: 'var(--sm-surface)' }}>
+                Approve Selected
+              </button>
+              <button className="px-3 py-1.5 text-sm font-bold rounded border transition-colors" style={{ borderColor: 'var(--sm-border)', color: 'var(--sm-text-muted)', background: 'var(--sm-surface)' }}>
+                Export CSV
+              </button>
+              <button className="px-3 py-1.5 text-sm font-bold rounded transition-colors" style={{ background: '#2563eb', color: '#fff' }}>
+                Process Payouts
+              </button>
+            </div>
+
+            {/* 6. Payment History Card */}
+            <Section title="Payment History">
+              <table className="w-full">
+                <thead>
+                  <tr className="border-b" style={{ borderColor: 'var(--sm-border)' }}>
+                    {['Date', 'Period', 'Writers Paid', 'Total Amount', 'Status'].map(h => (
+                      <th key={h} className="px-3 py-2.5 text-sm font-semibold uppercase tracking-wide text-left" style={{ color: 'var(--sm-text-dim)' }}>{h}</th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody>
+                  {[
+                    { date: 'Mar 1, 2024', period: 'February 2024', writers: 22, amount: '$14,280', status: 'Completed' },
+                    { date: 'Feb 1, 2024', period: 'January 2024', writers: 20, amount: '$12,950', status: 'Completed' },
+                    { date: 'Jan 1, 2024', period: 'December 2023', writers: 19, amount: '$11,420', status: 'Completed' },
+                  ].map(p => (
+                    <tr key={p.date} className="border-b transition-colors" style={{ borderColor: 'var(--sm-border)' }}
+                      onMouseEnter={e => (e.currentTarget.style.background = 'var(--sm-card-hover)')}
+                      onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}>
+                      <td className="px-3 py-3 text-sm" style={{ color: 'var(--sm-text)' }}>{p.date}</td>
+                      <td className="px-3 py-3 text-sm" style={{ color: 'var(--sm-text-muted)' }}>{p.period}</td>
+                      <td className="px-3 py-3 text-sm tabular-nums" style={{ color: 'var(--sm-text)' }}>{p.writers}</td>
+                      <td className="px-3 py-3 text-sm font-bold tabular-nums" style={{ color: C.green }}>{p.amount}</td>
+                      <td className="px-3 py-3">
+                        <span className="text-xs font-bold px-2 py-0.5 rounded-full" style={{ background: 'rgba(16,185,129,0.12)', color: C.green }}>
+                          {p.status}
+                        </span>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </Section>
+          </>}
         </div>
       )}
 
