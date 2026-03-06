@@ -45,10 +45,13 @@ interface Data {
 const TABS = ['Overview', 'Writers', 'Social', 'SEO', 'Content', 'Revenue'] as const
 const RANGES = [
   { key: 'today', label: 'Today' },
-  { key: '7d', label: '7D' },
-  { key: '28d', label: '30D' },
-  { key: '90d', label: '90D' },
-  { key: '1y', label: 'YTD' },
+  { key: 'yesterday', label: 'Yesterday' },
+  { key: 'this-week', label: 'This Week' },
+  { key: 'this-month', label: 'This Month' },
+  { key: 'last-month', label: 'Last Month' },
+  { key: 'ytd', label: 'YTD' },
+  { key: 'last-year', label: 'Last Year' },
+  { key: 'custom', label: 'Custom' },
 ]
 const TEAMS = ['All Teams', 'Bears', 'Cubs', 'Bulls', 'Blackhawks', 'White Sox', 'Fire', 'Sky']
 const SOURCES = ['All Sources', 'Organic', 'Discover', 'Social', 'Direct']
@@ -654,7 +657,9 @@ export default function ExecDashboard() {
   const [data, setData] = useState<Data | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(false)
-  const [range, setRange] = useState('28d')
+  const [range, setRange] = useState('this-month')
+  const [customStart, setCustomStart] = useState('')
+  const [customEnd, setCustomEnd] = useState('')
   const [tab, setTab] = useState<typeof TABS[number]>('Overview')
   const [refreshing, setRefreshing] = useState(false)
   // Filters
@@ -766,16 +771,35 @@ export default function ExecDashboard() {
               className="w-full pl-9 pr-3 py-2 rounded-lg border text-sm outline-none"
               style={{ background: 'var(--sm-surface)', borderColor: 'var(--sm-border)', color: 'var(--sm-text)' }} />
           </div>
-          {/* Date range */}
-          <div className="inline-flex rounded-lg overflow-hidden border" style={{ borderColor: 'var(--sm-border)' }}>
-            {RANGES.map(r => (
-              <button key={r.key} onClick={() => setRange(r.key)}
-                className="px-3 py-2 text-sm font-bold transition-all"
-                style={{ background: range === r.key ? 'var(--sm-red)' : 'transparent', color: range === r.key ? '#fff' : 'var(--sm-text-dim)' }}>
-                {r.label}
-              </button>
-            ))}
-          </div>
+{/* Date range presets */}
+  <div className="flex items-center gap-1">
+  {RANGES.map(r => (
+  <button key={r.key} onClick={() => setRange(r.key)}
+  className="px-2.5 py-1.5 text-[11px] font-bold rounded transition-all"
+  style={{ 
+    backgroundColor: range === r.key ? '#2563eb' : 'transparent', 
+    color: range === r.key ? '#fff' : '#94a3b8' 
+  }}>
+  {r.label}
+  </button>
+  ))}
+  </div>
+  {/* Custom date range inputs */}
+  {range === 'custom' && (
+  <div className="flex items-center gap-2 ml-1">
+  <input type="date" value={customStart} onChange={e => setCustomStart(e.target.value)}
+  className="px-2 py-1.5 text-[11px] font-bold rounded border outline-none"
+  style={{ backgroundColor: '#fff', borderColor: '#e2e8f0', color: '#334155' }} />
+  <span className="text-[11px]" style={{ color: '#94a3b8' }}>to</span>
+  <input type="date" value={customEnd} onChange={e => setCustomEnd(e.target.value)}
+  className="px-2 py-1.5 text-[11px] font-bold rounded border outline-none"
+  style={{ backgroundColor: '#fff', borderColor: '#e2e8f0', color: '#334155' }} />
+  <button className="px-3 py-1.5 text-[11px] font-bold rounded transition-all"
+  style={{ backgroundColor: '#2563eb', color: '#fff' }}>
+  Apply
+  </button>
+  </div>
+  )}
           {/* Team filter */}
           <select value={team} onChange={e => setTeam(e.target.value)}
             className="px-3 py-2 rounded-lg border text-sm font-semibold outline-none"
