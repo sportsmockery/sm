@@ -652,7 +652,7 @@ function ContentScoreModule({ topContent, overview, onPostClick }: { topContent:
 
 // ═══════════════════════════════════════════════════════════════════════════════
 // MAIN DASHBOARD
-// ════════════════════════════════════════════════════════════════════════���══════
+// ════════════════════════════════════════════════════════════════════���═══���══════
 export default function ExecDashboard() {
   const [data, setData] = useState<Data | null>(null)
   const [loading, setLoading] = useState(true)
@@ -1148,15 +1148,14 @@ Revenue: [
             {/* 2. KPI Cards Row */}
             <div className="grid grid-cols-1 sm:grid-cols-4 gap-4">
               {[
-                { l: 'Total Payable', v: '$12,450', c: C.green, s: 'this period' },
-                { l: 'Writers Owed', v: '18', c: C.blue, s: 'pending payout' },
-                { l: 'Avg Payout', v: '$692', c: C.purple, s: 'per writer' },
-                { l: 'Last Paid', v: 'Mar 1', c: C.amber, s: '2024' },
+                { l: 'Total Payout', v: '$12,345.67', c: '#059669' },
+                { l: 'Writers Paid', v: '18', c: 'var(--sm-text)' },
+                { l: 'Total Views', v: '929,682', c: 'var(--sm-text)' },
+                { l: 'Total Posts', v: '156', c: 'var(--sm-text)' },
               ].map(m => (
                 <div key={m.l} className="rounded-lg border px-4 py-3" style={{ background: 'var(--sm-card)', borderColor: 'var(--sm-border)' }}>
                   <p className="text-xs font-bold uppercase tracking-wide" style={{ color: 'var(--sm-text-dim)' }}>{m.l}</p>
                   <p className="text-2xl font-extrabold tabular-nums mt-1" style={{ color: m.c }}>{m.v}</p>
-                  <p className="text-sm mt-0.5" style={{ color: 'var(--sm-text-muted)' }}>{m.s}</p>
                 </div>
               ))}
             </div>
