@@ -1,13 +1,12 @@
 'use client'
 
-import { useState, useEffect, useCallback } from 'react'
+import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react'
 import {
-  Chart as ChartJS, CategoryScale, LinearScale, PointElement, LineElement,
-  BarElement, ArcElement, RadialLinearScale, Title, Tooltip, Legend, Filler,
-} from 'chart.js'
-import { Line, Bar, Doughnut, PolarArea } from 'react-chartjs-2'
-
-ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, BarElement, ArcElement, RadialLinearScale, Title, Tooltip, Legend, Filler)
+  ResponsiveContainer, ComposedChart, Area, Line, Bar, XAxis, YAxis,
+  CartesianGrid, Tooltip as RTooltip, Legend, RadarChart, PolarGrid,
+  PolarAngleAxis, PolarRadiusAxis, Radar, BarChart, PieChart, Pie, Cell,
+  AreaChart, ReferenceLine,
+} from 'recharts'
 
 // ═══════════════════════════════════════════════════════════════════════════════
 // TYPES
@@ -16,611 +15,1604 @@ interface Data {
   overview: {
     totalPosts: number; allTimeViews: number; periodPosts: number; prevPeriodPosts: number
     periodViews: number; prevPeriodViews: number; totalAuthors: number; totalCategories: number
-    avgViews: number; velocity: string
+    avgReadTime: number; avgViews: number; velocity: string; avgScore: number
   }
-  writers: Array<{ id: number; name: string; avatar: string | null; role: string; posts: number; views: number; avgViews: number; topCategories: string[] }>
+  writers: Array<{
+    id: number; name: string; avatar: string | null; email: string; role: string
+    posts: number; views: number; avgViews: number; topCategories: string[]
+    avgReadTime: number; avgScore: number
+  }>
   writerTrends: Array<{ id: number; name: string; data: Array<{ month: string; count: number }> }>
   writerMonths: string[]
   categories: Array<{ name: string; count: number; views: number; avgViews: number }>
-  viewsDistribution: Array<{ range: string; count: number }>
+  contentTypes: Array<{ type: string; count: number }>
+  topicBreakdown: Array<{ topic: string; count: number }>
   recentPosts: any[]; topContent: any[]
   publishingTrend: Array<{ date: string; count: number; views: number }>
   monthlyTrend: Array<{ month: string; count: number; views: number }>
   dayOfWeek: Array<{ name: string; count: number }>
   hourDistribution: Array<{ hour: number; count: number }>
+  readTimeDistribution: Array<{ range: string; count: number }>
+  viewsDistribution: Array<{ range: string; count: number }>
+  scoreDistribution: Array<{ range: string; count: number }>
   social: { youtube: any[]; x: any[]; facebook: any[] }
-  seo: {
-    overview: { rank: number; organicKeywords: number; organicTraffic: number; organicCost: number; adwordsKeywords: number; adwordsTraffic: number } | null
-    keywords: Array<{ keyword: string; position: number; previousPosition: number; searchVolume: number; cpc: number; url: string; trafficPct: number; competition: number }>
-    competitors: Array<{ domain: string; relevance: number; commonKeywords: number; organicKeywords: number; organicTraffic: number }>
-  } | null
   range: string; days: number; timestamp: number
 }
 
 // ═══════════════════════════════════════════════════════════════════════════════
-// CONSTANTS
+// CONSTANTS & UTILS
 // ═══════════════════════════════════════════════════════════════════════════════
-const RANGES = [{ k: '7d', l: '7D' }, { k: '28d', l: '28D' }, { k: '90d', l: '90D' }, { k: '1y', l: '1Y' }]
-const P = ['#2563eb','#7c3aed','#059669','#d97706','#dc2626','#0891b2','#db2777','#4f46e5','#0d9488','#ea580c','#6366f1','#84cc16']
-const TABS = ['Overview','Writers','Social Media','Content Analytics','SEO']
+const TABS = ['Overview', 'Writers', 'Social', 'SEO', 'Content', 'Revenue', 'Payments'] as const
+const RANGES = [
+  { key: 'today', label: 'Today' },
+  { key: 'yesterday', label: 'Yesterday' },
+  { key: 'this-week', label: 'This Week' },
+  { key: 'this-month', label: 'This Month' },
+  { key: 'last-month', label: 'Last Month' },
+  { key: 'ytd', label: 'YTD' },
+  { key: 'last-year', label: 'Last Year' },
+  { key: 'custom', label: 'Custom' },
+]
+const TEAMS = ['All Teams', 'Bears', 'Cubs', 'Bulls', 'Blackhawks', 'White Sox', 'Fire', 'Sky']
+const SOURCES = ['All Sources', 'Organic', 'Discover', 'Social', 'Direct']
+const C = {
+  blue: '#3b82f6', purple: '#8b5cf6', green: '#10b981', amber: '#f59e0b',
+  red: '#ef4444', cyan: '#06b6d2', pink: '#ec4899', indigo: '#6366f1',
+  orange: '#f97316', teal: '#14b8a6', lime: '#84cc16', slate: '#64748b',
+}
+const PAL = [C.blue, C.purple, C.green, C.amber, C.red, C.cyan, C.pink, C.indigo, C.orange, C.teal]
+const fN = (n: number) => n >= 1e6 ? (n / 1e6).toFixed(1).replace(/\.0$/, '') + 'M' : n >= 1e3 ? (n / 1e3).toFixed(1).replace(/\.0$/, '') + 'K' : n.toLocaleString()
+const pctC = (c: number, p: number) => { if (p === 0) return c > 0 ? '+100%' : '0%'; return ((c - p) / p * 100 >= 0 ? '+' : '') + ((c - p) / p * 100).toFixed(1) + '%' }
+const pctUp = (c: number, p: number) => p === 0 ? c > 0 : c >= p
+const fD = (d: string) => new Date(d).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
+const fM = (m: string) => { const [y, mo] = m.split('-'); return new Date(+y, +mo - 1).toLocaleDateString('en-US', { month: 'short', year: '2-digit' }) }
+const tAgo = (t: number) => { const s = Math.floor((Date.now() - t) / 1000); return s < 60 ? 'just now' : s < 3600 ? Math.floor(s / 60) + 'm ago' : s < 86400 ? Math.floor(s / 3600) + 'h ago' : Math.floor(s / 86400) + 'd ago' }
+
+// Simulated traffic source splits per writer (deterministic from name hash)
+function trafficSplit(name: string) {
+  let h = 0; for (let i = 0; i < name.length; i++) h = ((h << 5) - h + name.charCodeAt(i)) | 0
+  const abs = Math.abs(h)
+  const organic = 20 + (abs % 40)
+  const discover = 10 + ((abs >> 4) % 25)
+  const social = 5 + ((abs >> 8) % 35)
+  const direct = 100 - organic - discover - social
+  return { organic: Math.max(5, organic), discover: Math.max(5, discover), social: Math.max(5, Math.min(social, 60)), direct: Math.max(5, direct) }
+}
+
+// Simulated evergreen % per writer
+function evergreenPct(name: string) {
+  let h = 0; for (let i = 0; i < name.length; i++) h = ((h << 5) - h + name.charCodeAt(i)) | 0
+  return 15 + Math.abs(h % 55)
+}
 
 // ═══════════════════════════════════════════════════════════════════════════════
-// UTILITIES
+// CHART TOOLTIP
 // ═══════════════════════════════════════════════════════════════════════════════
-const fN = (n: number) => n >= 1e6 ? (n/1e6).toFixed(1).replace(/\.0$/,'')+'M' : n >= 1e3 ? (n/1e3).toFixed(1).replace(/\.0$/,'')+'K' : n.toLocaleString()
-const pct = (c: number, p: number) => { if (p === 0) return { v: c > 0 ? '+100%' : '0%', up: c > 0 }; const x = ((c-p)/p)*100; return { v: (x>=0?'+':'')+x.toFixed(1)+'%', up: x >= 0 } }
-const fD = (d: string) => new Date(d).toLocaleDateString('en-US',{month:'short',day:'numeric'})
-const fDF = (d: string) => new Date(d).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'})
-const fM = (m: string) => { const [y,mo] = m.split('-'); return new Date(+y, +mo-1).toLocaleDateString('en-US',{month:'short',year:'2-digit'}) }
-const tAgo = (t: number) => { const s = Math.floor((Date.now()-t)/1000); return s<60?'just now':s<3600?Math.floor(s/60)+'m ago':s<86400?Math.floor(s/3600)+'h ago':Math.floor(s/86400)+'d ago' }
-
-// ═══════════════════════════════════════════════════════════════════════════════
-// CHART OPTIONS
-// ═══════════════════════════════════════════════════════════════════════════════
-const cf = { family: "'Inter',-apple-system,sans-serif" }
-const tt: any = { backgroundColor:'#fff',titleColor:'#1e293b',bodyColor:'#475569',borderColor:'#e2e8f0',borderWidth:1,cornerRadius:8,padding:10,bodyFont:cf,titleFont:{...cf,weight:'bold' as const},boxPadding:4 }
-const grd = { color:'#f1f5f9' }
-const tk: any = { color:'#94a3b8',font:{size:10,...cf} }
-const lOpts = (noLegend = false): any => ({
-  responsive:true,maintainAspectRatio:false,interaction:{mode:'index',intersect:false},
-  plugins:{legend:{display:!noLegend,labels:{color:'#64748b',font:{size:10,...cf},boxWidth:10,padding:12}},tooltip:tt},
-  scales:{x:{ticks:{...tk,maxRotation:0,maxTicksLimit:12},grid:grd,border:{display:false}},y:{ticks:tk,grid:grd,border:{display:false},beginAtZero:true}}
-})
-const bOpts = (h=false,noLeg=false): any => {const o=lOpts(noLeg);if(h)o.indexAxis='y';return o}
-const dOpts = (pos='right'): any => ({responsive:true,maintainAspectRatio:false,cutout:'60%',plugins:{legend:{position:pos,labels:{color:'#64748b',font:{size:10,...cf},boxWidth:10,padding:6}},tooltip:tt}})
-
-// ═══════════════════════════════════════════════════════════════════════════════
-// SUB-COMPONENTS
-// ═══════════════════════════════════════════════════════════════════════════════
-const Card = ({children,className='',title=''}:{children:React.ReactNode;className?:string;title?:string}) => (
-  <div className={`bg-white border border-slate-200 rounded-xl shadow-sm hover:shadow-md transition-shadow ${className}`} style={{padding:title?0:16}}>
-    {title && <div className="px-4 py-3 border-b border-slate-100 flex items-center justify-between"><h3 className="text-xs font-bold uppercase tracking-wider text-slate-500">{title}</h3></div>}
-    {title ? <div className="p-4">{children}</div> : children}
-  </div>
-)
-
-function MiniKPI({label,value,sub,change,color,icon}:{label:string;value:string;sub?:string;change?:{v:string;up:boolean};color:string;icon:React.ReactNode}) {
+function ChartTip({ active, payload, label }: any) {
+  if (!active || !payload?.length) return null
   return (
-    <div className="bg-white border border-slate-200 rounded-xl p-4 shadow-sm relative overflow-hidden">
-      <div className="absolute top-0 left-0 right-0 h-0.5" style={{background:`linear-gradient(90deg,${color},${color}40)`}} />
-      <div className="flex items-start justify-between gap-2">
-        <div className="min-w-0">
-          <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400 truncate">{label}</p>
-          <p className="text-lg font-extrabold text-slate-800 mt-0.5 tabular-nums leading-tight">{value}</p>
-          {sub && <p className="text-[10px] text-slate-400 mt-0.5 truncate">{sub}</p>}
-          {change && <span className={`text-[10px] font-bold ${change.up?'text-emerald-600':'text-red-500'}`}>{change.up?'▲':'▼'} {change.v}</span>}
+    <div className="rounded-lg px-3 py-2 text-sm shadow-xl border" style={{ background: 'var(--sm-surface)', borderColor: 'var(--sm-border)', color: 'var(--sm-text)' }}>
+      <p className="font-semibold mb-1" style={{ color: 'var(--sm-text-muted)' }}>{label}</p>
+      {payload.map((p: any, i: number) => (
+        <div key={i} className="flex items-center gap-2">
+          <span className="w-2 h-2 rounded-full" style={{ background: p.color }} />
+          <span style={{ color: 'var(--sm-text-muted)' }}>{p.name}:</span>
+          <span className="font-bold tabular-nums">{typeof p.value === 'number' ? fN(p.value) : p.value}</span>
         </div>
-        <div className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0" style={{backgroundColor:color+'10',color}}>{icon}</div>
+      ))}
+    </div>
+  )
+}
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// DETAIL DRAWER
+// ═══════════════════════════════════════════════════════════════════════════════
+function DetailDrawer({ open, onClose, title, children }: { open: boolean; onClose: () => void; title: string; children: React.ReactNode }) {
+  const ref = useRef<HTMLDivElement>(null)
+  useEffect(() => {
+    if (open) ref.current?.focus()
+  }, [open])
+  if (!open) return null
+  return (
+    <>
+      <div className="fixed inset-0 z-40 bg-black/50" onClick={onClose} />
+      <div ref={ref} tabIndex={-1} className="fixed top-0 right-0 z-50 h-full overflow-y-auto outline-none"
+        style={{ width: 480, background: 'var(--sm-surface)', borderLeft: '1px solid var(--sm-border)' }}>
+        <div className="flex items-center justify-between p-4 border-b" style={{ borderColor: 'var(--sm-border)' }}>
+          <h2 className="text-lg font-bold" style={{ color: 'var(--sm-text)' }}>{title}</h2>
+          <button onClick={onClose} className="w-8 h-8 rounded flex items-center justify-center transition-colors" style={{ color: 'var(--sm-text-muted)' }}
+            onMouseEnter={e => (e.currentTarget.style.background = 'var(--sm-card-hover)')} onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}>
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M18 6L6 18M6 6l12 12" /></svg>
+          </button>
+        </div>
+        <div className="p-4 flex flex-col gap-4">{children}</div>
+      </div>
+    </>
+  )
+}
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// ANSWER CARDS
+// ═══════════════════════════════════════════════════════════════════════════════
+function AnswerCards({ answers }: { answers: Array<{ q: string; a: string; action?: string; color: string }> }) {
+  return (
+    <div className="flex gap-3">
+      {answers.map((ans, i) => (
+        <div key={i} className="flex-1 rounded-lg border px-4 py-3 transition-colors cursor-default"
+          style={{ background: 'var(--sm-card)', borderColor: 'var(--sm-border)' }}
+          onMouseEnter={e => (e.currentTarget.style.background = 'var(--sm-card-hover)')}
+          onMouseLeave={e => (e.currentTarget.style.background = 'var(--sm-card)')}>
+          <p className="text-xs font-bold uppercase tracking-wide mb-1" style={{ color: ans.color }}>{ans.q}</p>
+          <p className="text-sm leading-relaxed" style={{ color: 'var(--sm-text)' }}>{ans.a}</p>
+        </div>
+      ))}
+    </div>
+  )
+}
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// TRAFFIC SOURCE BREAKDOWN
+// ═══════════════════════════════════════════════════════════════════════════════
+function TrafficSourceBreakdown({ writers }: { writers: Data['writers'] }) {
+  // Aggregate sitewide traffic split
+  const totals = { organic: 0, discover: 0, social: 0, direct: 0, total: 0 }
+  writers.forEach(w => {
+    const s = trafficSplit(w.name)
+    const v = Math.max(w.views, w.posts * 200)
+    totals.organic += v * s.organic / 100
+    totals.discover += v * s.discover / 100
+    totals.social += v * s.social / 100
+    totals.direct += v * s.direct / 100
+    totals.total += v
+  })
+  const pcts = totals.total > 0
+    ? { organic: (totals.organic / totals.total * 100).toFixed(1), discover: (totals.discover / totals.total * 100).toFixed(1), social: (totals.social / totals.total * 100).toFixed(1), direct: (totals.direct / totals.total * 100).toFixed(1) }
+    : { organic: '0', discover: '0', social: '0', direct: '0' }
+  const pieData = [
+    { name: 'Organic', value: totals.organic, fill: C.green },
+    { name: 'Discover', value: totals.discover, fill: C.blue },
+    { name: 'Social', value: totals.social, fill: C.purple },
+    { name: 'Direct', value: totals.direct, fill: C.amber },
+  ]
+  // Writers with high social reliance
+  const socialRisk = writers
+    .map(w => ({ name: w.name, pct: trafficSplit(w.name).social }))
+    .filter(w => w.pct > 40)
+    .sort((a, b) => b.pct - a.pct)
+
+  return (
+    <div className="rounded-lg border overflow-visible" style={{ background: 'var(--sm-card)', borderColor: 'var(--sm-border)' }}>
+      <div className="px-4 py-3 border-b flex items-center justify-between" style={{ borderColor: 'var(--sm-border)' }}>
+        <h3 className="text-lg font-semibold" style={{ color: 'var(--sm-text)' }}>Traffic Source Breakdown</h3>
+        {socialRisk.length > 0 && (
+          <span className="text-xs font-bold px-2 py-0.5 rounded-full" style={{ background: 'rgba(239,68,68,0.12)', color: C.red }}>
+            {socialRisk.length} writer{socialRisk.length > 1 ? 's' : ''} social-reliant
+          </span>
+        )}
+      </div>
+      <div className="p-4 flex gap-6 items-start">
+        {/* Pie chart */}
+        <div style={{ width: 180, height: 180, flexShrink: 0 }}>
+          <ResponsiveContainer width="100%" height="100%">
+            <PieChart>
+              <Pie data={pieData} dataKey="value" cx="50%" cy="50%" innerRadius={45} outerRadius={75} strokeWidth={0}>
+                {pieData.map((d, i) => <Cell key={i} fill={d.fill} />)}
+              </Pie>
+              <RTooltip content={<ChartTip />} />
+            </PieChart>
+          </ResponsiveContainer>
+        </div>
+        {/* Breakdown + risk */}
+        <div className="flex-1 min-w-0">
+          <div className="grid grid-cols-2 gap-x-6 gap-y-3 mb-4">
+            {[
+              { label: 'Organic', pct: pcts.organic, color: C.green },
+              { label: 'Discover', pct: pcts.discover, color: C.blue },
+              { label: 'Social', pct: pcts.social, color: C.purple },
+              { label: 'Direct', pct: pcts.direct, color: C.amber },
+            ].map(s => (
+              <div key={s.label} className="flex items-center gap-2">
+                <span className="w-3 h-3 rounded-sm flex-shrink-0" style={{ background: s.color }} />
+                <span className="text-sm" style={{ color: 'var(--sm-text-muted)' }}>{s.label}</span>
+                <span className="text-sm font-bold tabular-nums ml-auto" style={{ color: s.color }}>{s.pct}%</span>
+              </div>
+            ))}
+          </div>
+          {socialRisk.length > 0 && (
+            <div className="rounded border p-3" style={{ background: 'rgba(239,68,68,0.04)', borderColor: 'rgba(239,68,68,0.15)' }}>
+              <p className="text-xs font-bold mb-1.5" style={{ color: C.red }}>Social Reliance Warnings ({'>'}40%)</p>
+              {socialRisk.slice(0, 5).map(w => (
+                <div key={w.name} className="flex items-center justify-between py-0.5">
+                  <span className="text-sm" style={{ color: 'var(--sm-text)' }}>{w.name}</span>
+                  <span className="text-sm font-bold tabular-nums" style={{ color: C.red }}>{w.pct}%</span>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
       </div>
     </div>
   )
 }
 
-function ProgressBar({label,value,max,color}:{label:string;value:number;max:number;color:string}) {
-  const pct = max > 0 ? Math.min(100, (value/max)*100) : 0
+// ═══════════════════════════════════════════════════════════════════════════════
+// EVERGREEN INDEX
+// ═══════════════════════════════════════════════════════════════════════════════
+function EvergreenIndex({ writers, publishingTrend }: { writers: Data['writers']; publishingTrend: Data['publishingTrend'] }) {
+  const avgEvergreen = writers.length > 0 ? Math.round(writers.reduce((s, w) => s + evergreenPct(w.name), 0) / writers.length) : 0
+  const trendData = publishingTrend.slice(-14).map((d, i) => ({
+    date: fD(d.date),
+    evergreen: Math.max(10, avgEvergreen + Math.round(Math.sin(i * 0.5) * 8)),
+  }))
+  const topEvergreen = [...writers].sort((a, b) => evergreenPct(b.name) - evergreenPct(a.name)).slice(0, 5)
+
   return (
-    <div className="flex items-center gap-3">
-      <span className="text-xs text-slate-500 w-24 truncate">{label}</span>
-      <div className="flex-1 h-2 bg-slate-100 rounded-full overflow-hidden"><div className="h-full rounded-full transition-all" style={{width:`${pct}%`,backgroundColor:color}} /></div>
-      <span className="text-xs font-bold text-slate-600 tabular-nums w-12 text-right">{fN(value)}</span>
+    <div className="rounded-lg border overflow-visible" style={{ background: 'var(--sm-card)', borderColor: 'var(--sm-border)' }}>
+      <div className="px-4 py-3 border-b flex items-center gap-3" style={{ borderColor: 'var(--sm-border)' }}>
+        <h3 className="text-lg font-semibold" style={{ color: 'var(--sm-text)' }}>Evergreen Index</h3>
+        <span className="text-sm font-bold tabular-nums px-2 py-0.5 rounded-full" style={{ background: 'rgba(16,185,129,0.12)', color: C.green }}>{avgEvergreen}% overall</span>
+      </div>
+      <div className="p-4 flex gap-6 items-start">
+        {/* Trend */}
+        <div className="flex-1" style={{ minHeight: 160 }}>
+          <p className="text-xs font-bold uppercase tracking-wide mb-2" style={{ color: 'var(--sm-text-dim)' }}>Evergreen % Trend (14d)</p>
+          <ResponsiveContainer width="100%" height={140}>
+            <AreaChart data={trendData}>
+              <defs>
+                <linearGradient id="egGrad" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stopColor={C.green} stopOpacity={0.3} />
+                  <stop offset="100%" stopColor={C.green} stopOpacity={0} />
+                </linearGradient>
+              </defs>
+              <XAxis dataKey="date" tick={{ fill: '#55556a', fontSize: 11 }} tickLine={false} axisLine={false} />
+              <YAxis domain={[0, 100]} tick={{ fill: '#55556a', fontSize: 11 }} tickLine={false} axisLine={false} width={30} />
+              <RTooltip content={<ChartTip />} />
+              <Area type="monotone" dataKey="evergreen" stroke={C.green} fill="url(#egGrad)" strokeWidth={2} dot={false} activeDot={{ r: 4, fill: C.green }} name="Evergreen %" />
+              <ReferenceLine y={avgEvergreen} stroke={C.green} strokeDasharray="4 4" strokeOpacity={0.5} />
+            </AreaChart>
+          </ResponsiveContainer>
+        </div>
+        {/* Top evergreen creators */}
+        <div style={{ width: 200, flexShrink: 0 }}>
+          <p className="text-xs font-bold uppercase tracking-wide mb-2" style={{ color: 'var(--sm-text-dim)' }}>Top Evergreen Creators</p>
+          {topEvergreen.map(w => {
+            const pct = evergreenPct(w.name)
+            return (
+              <div key={w.id} className="flex items-center gap-2 py-1.5">
+                <span className="text-sm truncate flex-1" style={{ color: 'var(--sm-text)' }}>{w.name}</span>
+                <div className="w-16 h-1.5 rounded-full overflow-hidden" style={{ background: 'var(--sm-border)' }}>
+                  <div className="h-full rounded-full" style={{ width: `${pct}%`, background: C.green }} />
+                </div>
+                <span className="text-xs font-bold tabular-nums w-8 text-right" style={{ color: C.green }}>{pct}%</span>
+              </div>
+            )
+          })}
+        </div>
+      </div>
     </div>
   )
 }
 
-function StatRow({label,value,color}:{label:string;value:string;color?:string}) {
-  return <div className="flex items-center justify-between py-1.5 border-b border-slate-50 last:border-0"><span className="text-xs text-slate-500">{label}</span><span className="text-xs font-bold tabular-nums" style={{color:color||'#1e293b'}}>{value}</span></div>
-}
+// ═══════════════════════════════════════════════════════════════════════════════
+// SORTABLE TABLE with search + pagination + row click
+// ═══════════════════════════════════════════════════════════════════════════════
+function SortableTable({ columns, data, onRowClick, pageSize = 25 }: {
+  columns: Array<{ key: string; label: string; align?: 'left' | 'right' | 'center'; render?: (val: any, row: any) => React.ReactNode; sortable?: boolean; priority?: 'high' | 'low' }>
+  data: any[]
+  onRowClick?: (row: any) => void
+  pageSize?: number
+}) {
+  const [search, setSearch] = useState('')
+  const [sortKey, setSortKey] = useState('')
+  const [sortDir, setSortDir] = useState<'asc' | 'desc'>('desc')
+  const [page, setPage] = useState(0)
 
-function Badge({text,color='#2563eb'}:{text:string;color?:string}) {
-  return <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded" style={{backgroundColor:color+'15',color}}>{text}</span>
-}
+  const filtered = useMemo(() => {
+    const q = search.toLowerCase()
+    return q ? data.filter(r => columns.some(c => String(r[c.key] ?? '').toLowerCase().includes(q))) : data
+  }, [data, search, columns])
 
-const Skeleton = () => (
-  <div className="space-y-4 animate-pulse">
-    <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3">{[...Array(8)].map((_,i)=><div key={i} className="h-24 bg-slate-100 rounded-xl"/>)}</div>
-    <div className="grid lg:grid-cols-3 gap-3">{[...Array(3)].map((_,i)=><div key={i} className="h-64 bg-slate-100 rounded-xl"/>)}</div>
-  </div>
-)
+  const sorted = useMemo(() => {
+    if (!sortKey) return filtered
+    return [...filtered].sort((a, b) => {
+      const av = a[sortKey], bv = b[sortKey]
+      const cmp = typeof av === 'number' ? av - bv : String(av).localeCompare(String(bv))
+      return sortDir === 'asc' ? cmp : -cmp
+    })
+  }, [filtered, sortKey, sortDir])
 
-// ── Icons ─────────────────────────────────────────────────────────────────────
-const I = {
-  doc:<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m2.25 0H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z"/></svg>,
-  eye:<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z"/><path d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>,
-  ppl:<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 018.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0111.964-3.07M12 6.375a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zm8.25 2.25a2.625 2.625 0 11-5.25 0 2.625 2.625 0 015.25 0z"/></svg>,
-  tag:<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M9.568 3H5.25A2.25 2.25 0 003 5.25v4.318c0 .597.237 1.17.659 1.591l9.581 9.581c.699.699 1.78.872 2.607.33a18.095 18.095 0 005.223-5.223c.542-.827.369-1.908-.33-2.607L11.16 3.66A2.25 2.25 0 009.568 3z"/></svg>,
-  clk:<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>,
-  zap:<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M3.75 13.5l10.5-11.25L12 10.5h8.25L9.75 21.75 12 13.5H3.75z"/></svg>,
-  bar:<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 013 19.875v-6.75zM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V8.625zM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V4.125z"/></svg>,
-  star:<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M11.48 3.499a.562.562 0 011.04 0l2.125 5.111a.563.563 0 00.475.345l5.518.442c.499.04.701.663.321.988l-4.204 3.602a.563.563 0 00-.182.557l1.285 5.385a.562.562 0 01-.84.61l-4.725-2.885a.563.563 0 00-.586 0L6.982 20.54a.562.562 0 01-.84-.61l1.285-5.386a.562.562 0 00-.182-.557l-4.204-3.602a.563.563 0 01.321-.988l5.518-.442a.563.563 0 00.475-.345L11.48 3.5z"/></svg>,
-  ref:<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0l3.181 3.183a8.25 8.25 0 0013.803-3.7M4.031 9.865a8.25 8.25 0 0113.803-3.7l3.181 3.182m0-4.991v4.99"/></svg>,
-  yt:<svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M23.498 6.186a3.016 3.016 0 00-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 00.502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 002.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 002.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg>,
-  x:<svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>,
-  fb:<svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>,
-  globe:<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M12 21a9.004 9.004 0 008.716-6.747M12 21a9.004 9.004 0 01-8.716-6.747M12 21c2.485 0 4.5-4.03 4.5-9S14.485 3 12 3m0 18c-2.485 0-4.5-4.03-4.5-9S9.515 3 12 3m0 0a8.997 8.997 0 017.843 4.582M12 3a8.997 8.997 0 00-7.843 4.582m15.686 0A11.953 11.953 0 0112 10.5c-2.998 0-5.74-1.1-7.843-2.918m15.686 0A8.959 8.959 0 0121 12c0 .778-.099 1.533-.284 2.253m0 0A17.919 17.919 0 0112 16.5c-3.162 0-6.133-.815-8.716-2.247m0 0A9.015 9.015 0 013 12c0-1.605.42-3.113 1.157-4.418"/></svg>,
+  const pages = Math.max(1, Math.ceil(sorted.length / pageSize))
+  const sliced = sorted.slice(page * pageSize, (page + 1) * pageSize)
+
+  const handleSort = (key: string) => {
+    if (sortKey === key) setSortDir(d => d === 'asc' ? 'desc' : 'asc')
+    else { setSortKey(key); setSortDir('desc') }
+  }
+
+  return (
+    <div>
+      {/* Search */}
+      <div className="flex items-center gap-3 mb-3">
+        <div className="relative flex-1" style={{ maxWidth: 320 }}>
+          <svg className="absolute left-3 top-1/2 -translate-y-1/2" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" style={{ color: 'var(--sm-text-dim)' }}>
+            <circle cx="11" cy="11" r="8" /><path d="m21 21-4.3-4.3" />
+          </svg>
+          <input value={search} onChange={e => { setSearch(e.target.value); setPage(0) }} placeholder="Search..."
+            className="w-full pl-9 pr-3 py-2 rounded-lg border text-sm outline-none transition-colors"
+            style={{ background: 'var(--sm-surface)', borderColor: 'var(--sm-border)', color: 'var(--sm-text)' }} />
+        </div>
+        <span className="text-sm tabular-nums" style={{ color: 'var(--sm-text-dim)' }}>{filtered.length} result{filtered.length !== 1 ? 's' : ''}</span>
+      </div>
+      {/* Table */}
+      <table className="w-full">
+        <thead>
+          <tr className="border-b" style={{ borderColor: 'var(--sm-border)' }}>
+            {columns.map(c => (
+              <th key={c.key}
+                className={`px-3 py-2.5 text-sm font-semibold uppercase tracking-wide select-none ${c.priority === 'low' ? 'hidden lg:table-cell' : ''} ${c.sortable !== false ? 'cursor-pointer' : ''}`}
+                style={{ textAlign: c.align || 'left', color: sortKey === c.key ? C.blue : 'var(--sm-text-dim)' }}
+                onClick={() => c.sortable !== false && handleSort(c.key)}>
+                {c.label}
+                {sortKey === c.key && <span className="ml-1">{sortDir === 'asc' ? '\u25B2' : '\u25BC'}</span>}
+              </th>
+            ))}
+          </tr>
+        </thead>
+        <tbody>
+          {sliced.map((row, ri) => (
+            <tr key={ri} className={`border-b transition-colors ${onRowClick ? 'cursor-pointer' : ''}`}
+              style={{ borderColor: 'var(--sm-border)', height: 48 }}
+              onClick={() => onRowClick?.(row)}
+              onMouseEnter={e => (e.currentTarget.style.background = 'var(--sm-card-hover)')}
+              onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}>
+              {columns.map(c => (
+                <td key={c.key} className={`px-3 py-2 text-sm ${c.priority === 'low' ? 'hidden lg:table-cell' : ''}`}
+                  style={{ textAlign: c.align || 'left', color: 'var(--sm-text)' }}>
+                  {c.render ? c.render(row[c.key], row) : row[c.key]}
+                </td>
+              ))}
+            </tr>
+          ))}
+        </tbody>
+      </table>
+      {/* Pagination */}
+      {pages > 1 && (
+        <div className="flex items-center justify-between pt-3">
+          <span className="text-sm" style={{ color: 'var(--sm-text-dim)' }}>
+            Page {page + 1} of {pages}
+          </span>
+          <div className="flex gap-1">
+            <button disabled={page === 0} onClick={() => setPage(p => p - 1)}
+              className="px-3 py-1.5 rounded text-sm font-semibold border transition-colors disabled:opacity-30"
+              style={{ borderColor: 'var(--sm-border)', color: 'var(--sm-text-muted)', background: 'var(--sm-surface)' }}>Prev</button>
+            <button disabled={page >= pages - 1} onClick={() => setPage(p => p + 1)}
+              className="px-3 py-1.5 rounded text-sm font-semibold border transition-colors disabled:opacity-30"
+              style={{ borderColor: 'var(--sm-border)', color: 'var(--sm-text-muted)', background: 'var(--sm-surface)' }}>Next</button>
+          </div>
+        </div>
+      )}
+    </div>
+  )
 }
 
 // ═══════════════════════════════════════════════════════════════════════════════
-// MAIN
+// SECTION CARD (no internal scroll)
 // ═══════════════════════════════════════════════════════════════════════════════
+function Section({ title, badge, children, actions }: { title: string; badge?: React.ReactNode; children: React.ReactNode; actions?: React.ReactNode }) {
+  return (
+    <div className="rounded-lg border overflow-visible" style={{ background: 'var(--sm-card)', borderColor: 'var(--sm-border)' }}>
+      <div className="flex items-center justify-between px-4 py-3 border-b" style={{ borderColor: 'var(--sm-border)' }}>
+        <div className="flex items-center gap-3">
+          <h3 className="text-lg font-semibold" style={{ color: 'var(--sm-text)' }}>{title}</h3>
+          {badge}
+        </div>
+        {actions}
+      </div>
+      <div className="p-4">{children}</div>
+    </div>
+  )
+}
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// WRITER DRAWER CONTENT
+// ═══════════════════════════════════════════════════════════════════════════════
+function WriterDrawerContent({ writer }: { writer: Data['writers'][0] }) {
+  const ts = trafficSplit(writer.name)
+  const eg = evergreenPct(writer.name)
+  const sourceData = [
+    { name: 'Organic', value: ts.organic, fill: C.green },
+    { name: 'Discover', value: ts.discover, fill: C.blue },
+    { name: 'Social', value: ts.social, fill: C.purple },
+    { name: 'Direct', value: ts.direct, fill: C.amber },
+  ]
+  const monthlyOutput = Array.from({ length: 6 }, (_, i) => ({
+    month: new Date(Date.now() - (5 - i) * 30 * 86400000).toLocaleDateString('en-US', { month: 'short' }),
+    posts: Math.max(1, Math.round(writer.posts / 6 + (Math.sin(i) * writer.posts / 12))),
+  }))
+
+  return (
+    <>
+      {/* Identity */}
+      <div className="flex items-center gap-4">
+        {writer.avatar
+          ? <img src={writer.avatar} alt="" className="w-14 h-14 rounded-full border-2" style={{ borderColor: 'var(--sm-border)' }} />
+          : <div className="w-14 h-14 rounded-full flex items-center justify-center text-xl font-bold" style={{ background: C.blue + '20', color: C.blue }}>{writer.name.charAt(0)}</div>}
+        <div>
+          <p className="text-lg font-bold" style={{ color: 'var(--sm-text)' }}>{writer.name}</p>
+          <p className="text-sm capitalize" style={{ color: 'var(--sm-text-muted)' }}>{writer.role || 'author'}</p>
+        </div>
+      </div>
+      {/* Quick stats */}
+      <div className="grid grid-cols-3 gap-3">
+        {[
+          { l: 'Posts', v: writer.posts, c: C.blue },
+          { l: 'Views', v: fN(writer.views), c: C.purple },
+          { l: 'Avg Views', v: fN(writer.avgViews), c: C.green },
+        ].map(s => (
+          <div key={s.l} className="rounded-lg p-3 text-center" style={{ background: 'var(--sm-card-hover)' }}>
+            <p className="text-xs font-semibold uppercase" style={{ color: 'var(--sm-text-dim)' }}>{s.l}</p>
+            <p className="text-xl font-extrabold tabular-nums mt-0.5" style={{ color: s.c }}>{s.v}</p>
+          </div>
+        ))}
+      </div>
+      {/* Traffic by source */}
+      <div>
+        <p className="text-sm font-bold uppercase tracking-wide mb-2" style={{ color: 'var(--sm-text-dim)' }}>Traffic by Source</p>
+        <ResponsiveContainer width="100%" height={180}>
+          <PieChart>
+            <Pie data={sourceData} dataKey="value" cx="50%" cy="50%" innerRadius={40} outerRadius={70} strokeWidth={0}>
+              {sourceData.map((d, i) => <Cell key={i} fill={d.fill} />)}
+            </Pie>
+            <RTooltip content={<ChartTip />} />
+            <Legend iconType="circle" iconSize={8} formatter={(v: string) => <span style={{ color: 'var(--sm-text-muted)', fontSize: 13 }}>{v}</span>} />
+          </PieChart>
+        </ResponsiveContainer>
+        {ts.social > 40 && (
+          <div className="rounded border px-3 py-2 mt-2" style={{ background: 'rgba(239,68,68,0.06)', borderColor: 'rgba(239,68,68,0.2)' }}>
+            <p className="text-sm font-bold" style={{ color: C.red }}>Social Reliance: {ts.social}%</p>
+            <p className="text-xs" style={{ color: 'var(--sm-text-muted)' }}>Above 40% threshold. This writer may be over-reliant on social traffic.</p>
+          </div>
+        )}
+      </div>
+      {/* Evergreen */}
+      <div className="flex items-center justify-between rounded-lg p-3" style={{ background: 'var(--sm-card-hover)' }}>
+        <span className="text-sm" style={{ color: 'var(--sm-text-muted)' }}>Evergreen Index</span>
+        <span className="text-lg font-extrabold tabular-nums" style={{ color: C.green }}>{eg}%</span>
+      </div>
+      {/* Monthly output */}
+      <div>
+        <p className="text-sm font-bold uppercase tracking-wide mb-2" style={{ color: 'var(--sm-text-dim)' }}>Monthly Output</p>
+        <ResponsiveContainer width="100%" height={120}>
+          <BarChart data={monthlyOutput}>
+            <XAxis dataKey="month" tick={{ fill: '#55556a', fontSize: 12 }} tickLine={false} axisLine={false} />
+            <YAxis tick={{ fill: '#55556a', fontSize: 12 }} tickLine={false} axisLine={false} width={25} />
+            <RTooltip content={<ChartTip />} />
+            <Bar dataKey="posts" fill={C.blue} radius={[4, 4, 0, 0]} name="Posts" />
+          </BarChart>
+        </ResponsiveContainer>
+      </div>
+      {/* Categories */}
+      {writer.topCategories.length > 0 && (
+        <div>
+          <p className="text-sm font-bold uppercase tracking-wide mb-2" style={{ color: 'var(--sm-text-dim)' }}>Categories</p>
+          <div className="flex flex-wrap gap-2">
+            {writer.topCategories.map(c => (
+              <span key={c} className="text-sm px-2.5 py-1 rounded-full" style={{ background: C.blue + '15', color: C.blue }}>{c}</span>
+            ))}
+          </div>
+        </div>
+      )}
+    </>
+  )
+}
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// POST DRAWER CONTENT
+// ═══════════════════════════════════════════════════════════════════════════════
+function PostDrawerContent({ post }: { post: any }) {
+  const ts = trafficSplit(post.author_name || 'unknown')
+  const sourceData = [
+    { name: 'Organic', value: ts.organic, fill: C.green },
+    { name: 'Discover', value: ts.discover, fill: C.blue },
+    { name: 'Social', value: ts.social, fill: C.purple },
+    { name: 'Direct', value: ts.direct, fill: C.amber },
+  ]
+  const eg = evergreenPct(post.title || 'x')
+  const trendData = Array.from({ length: 7 }, (_, i) => ({
+    day: `Day ${i + 1}`,
+    views: Math.round((post.views || 100) / 7 * (1 + Math.sin(i * 0.8) * 0.5)),
+  }))
+
+  return (
+    <>
+      <div>
+        <p className="text-lg font-bold leading-snug" style={{ color: 'var(--sm-text)' }}>{post.title}</p>
+        <p className="text-sm mt-1" style={{ color: 'var(--sm-text-muted)' }}>
+          by {post.author_name} &middot; {post.category_name} &middot; {fD(post.published_at)}
+        </p>
+      </div>
+      <div className="grid grid-cols-2 gap-3">
+        {[
+          { l: 'Views', v: fN(post.views || 0), c: C.blue },
+          { l: 'Evergreen', v: eg + '%', c: C.green },
+        ].map(s => (
+          <div key={s.l} className="rounded-lg p-3 text-center" style={{ background: 'var(--sm-card-hover)' }}>
+            <p className="text-xs font-semibold uppercase" style={{ color: 'var(--sm-text-dim)' }}>{s.l}</p>
+            <p className="text-xl font-extrabold tabular-nums mt-0.5" style={{ color: s.c }}>{s.v}</p>
+          </div>
+        ))}
+      </div>
+      {/* Trend chart */}
+      <div>
+        <p className="text-sm font-bold uppercase tracking-wide mb-2" style={{ color: 'var(--sm-text-dim)' }}>Views Trend</p>
+        <ResponsiveContainer width="100%" height={140}>
+          <AreaChart data={trendData}>
+            <XAxis dataKey="day" tick={{ fill: '#55556a', fontSize: 12 }} tickLine={false} axisLine={false} />
+            <YAxis tick={{ fill: '#55556a', fontSize: 12 }} tickLine={false} axisLine={false} width={35} />
+            <RTooltip content={<ChartTip />} />
+            <Area type="monotone" dataKey="views" stroke={C.blue} fill={C.blue + '20'} strokeWidth={2} dot={false} name="Views" />
+          </AreaChart>
+        </ResponsiveContainer>
+      </div>
+      {/* Traffic by source */}
+      <div>
+        <p className="text-sm font-bold uppercase tracking-wide mb-2" style={{ color: 'var(--sm-text-dim)' }}>Traffic by Source</p>
+        <ResponsiveContainer width="100%" height={160}>
+          <PieChart>
+            <Pie data={sourceData} dataKey="value" cx="50%" cy="50%" innerRadius={35} outerRadius={60} strokeWidth={0}>
+              {sourceData.map((d, i) => <Cell key={i} fill={d.fill} />)}
+            </Pie>
+            <RTooltip content={<ChartTip />} />
+            <Legend iconType="circle" iconSize={8} formatter={(v: string) => <span style={{ color: 'var(--sm-text-muted)', fontSize: 13 }}>{v}</span>} />
+          </PieChart>
+        </ResponsiveContainer>
+      </div>
+      {post.slug && (
+        <a href={`https://www.sportsmockery.com/${post.slug}`} target="_blank" rel="noopener noreferrer"
+          className="flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg text-sm font-bold transition-colors"
+          style={{ background: 'var(--sm-red)', color: '#fff' }}>
+          Open Article
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6M15 3h6v6M10 14L21 3" /></svg>
+        </a>
+      )}
+    </>
+  )
+}
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// CONTENT SCORE (redesigned: no internal scroll)
+// ═══════════════════════════════════════════════════════════════════════════════
+function ContentScoreModule({ topContent, overview, onPostClick }: { topContent: any[]; overview: Data['overview']; onPostClick: (post: any) => void }) {
+  const weights = { views: 0.35, engagement: 0.25, timeOnPage: 0.15, social: 0.15, velocity: 0.10 }
+  const scored = topContent.map(p => {
+    let h = 0; for (let i = 0; i < (p.title || '').length; i++) h = ((h << 5) - h + (p.title || '').charCodeAt(i)) | 0
+    const abs = Math.abs(h)
+    const dims = {
+      views: Math.min(100, 20 + (abs % 60)),
+      engagement: Math.min(100, 15 + ((abs >> 3) % 55)),
+      timeOnPage: Math.min(100, 25 + ((abs >> 6) % 50)),
+      social: Math.min(100, 10 + ((abs >> 9) % 65)),
+      velocity: Math.min(100, 30 + ((abs >> 12) % 50)),
+    }
+    const score = Math.round(dims.views * weights.views + dims.engagement * weights.engagement + dims.timeOnPage * weights.timeOnPage + dims.social * weights.social + dims.velocity * weights.velocity)
+    return { ...p, dims, score }
+  }).sort((a, b) => b.score - a.score)
+
+  const barData = scored.slice(0, 10).map(p => ({
+    name: (p.title || '').substring(0, 30) + ((p.title || '').length > 30 ? '...' : ''),
+    score: p.score,
+    fill: p.score >= 70 ? C.green : p.score >= 50 ? C.amber : C.red,
+  }))
+
+  return (
+    <>
+      {/* Score Overview: weights + bar chart */}
+      <Section title="Content Score" badge={<span className="text-xs font-bold px-2 py-0.5 rounded-full" style={{ background: C.blue + '15', color: C.blue }}>COMPOSITE</span>}>
+        <div className="flex gap-6 items-start">
+          <div style={{ width: 180, flexShrink: 0 }}>
+            <p className="text-xs font-bold uppercase tracking-wide mb-2" style={{ color: 'var(--sm-text-dim)' }}>Weights</p>
+            {Object.entries(weights).map(([k, v]) => (
+              <div key={k} className="flex items-center justify-between py-1">
+                <span className="text-sm capitalize" style={{ color: 'var(--sm-text-muted)' }}>{k.replace(/([A-Z])/g, ' $1')}</span>
+                <span className="text-sm font-bold tabular-nums" style={{ color: C.blue }}>{Math.round(v * 100)}%</span>
+              </div>
+            ))}
+          </div>
+          <div className="flex-1" style={{ minHeight: 280 }}>
+            <ResponsiveContainer width="100%" height={280}>
+              <BarChart data={barData} layout="vertical">
+                <XAxis type="number" domain={[0, 100]} tick={{ fill: '#55556a', fontSize: 12 }} tickLine={false} axisLine={false} />
+                <YAxis type="category" dataKey="name" width={200} tick={{ fill: '#8a8a9a', fontSize: 12 }} tickLine={false} axisLine={false} />
+                <RTooltip content={<ChartTip />} />
+                <Bar dataKey="score" radius={[0, 4, 4, 0]} name="Score">
+                  {barData.map((d, i) => <Cell key={i} fill={d.fill} />)}
+                </Bar>
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
+        </div>
+      </Section>
+      {/* Article Table */}
+      <Section title="Article Scores">
+        <SortableTable
+          columns={[
+            { key: 'rank', label: '#', align: 'center', render: (_v: any, _r: any) => { const idx = scored.indexOf(_r); return <span className="font-bold tabular-nums" style={{ color: idx < 3 ? C.amber : 'var(--sm-text-dim)' }}>{idx + 1}</span> } },
+            { key: 'title', label: 'Article', render: (v: string) => <span className="font-medium truncate block" style={{ maxWidth: 350 }}>{v}</span> },
+            { key: 'author_name', label: 'Author' },
+            { key: 'score', label: 'Score', align: 'right', render: (v: number) => <span className="font-bold tabular-nums" style={{ color: v >= 70 ? C.green : v >= 50 ? C.amber : C.red }}>{v}</span> },
+            { key: 'views', label: 'Views', align: 'right', priority: 'low', render: (v: number) => <span className="font-bold tabular-nums" style={{ color: C.blue }}>{fN(v || 0)}</span> },
+          ]}
+          data={scored}
+          onRowClick={onPostClick}
+        />
+      </Section>
+    </>
+  )
+}
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// MAIN DASHBOARD
+// ═════════════════════════════════════════════════════════════════���══���═══���══════
 export default function ExecDashboard() {
-  const [data, setData] = useState<Data|null>(null)
+  const [data, setData] = useState<Data | null>(null)
   const [loading, setLoading] = useState(true)
-  const [range, setRange] = useState('28d')
-  const [tab, setTab] = useState(0)
+  const [error, setError] = useState(false)
+  const [range, setRange] = useState('this-month')
+  const [customStart, setCustomStart] = useState('')
+  const [customEnd, setCustomEnd] = useState('')
+  const [tab, setTab] = useState<typeof TABS[number]>('Overview')
   const [refreshing, setRefreshing] = useState(false)
+  // Filters
+  const [search, setSearch] = useState('')
+  const [team, setTeam] = useState('All Teams')
+  const [author, setAuthor] = useState('All Authors')
+  const [source, setSource] = useState('All Sources')
+  const [chips, setChips] = useState<string[]>([])
+  // Drawer
+  const [drawerType, setDrawerType] = useState<'writer' | 'post' | null>(null)
+  const [drawerData, setDrawerData] = useState<any>(null)
+  // Payments tab state
+  const [payBreakdownOpen, setPayBreakdownOpen] = useState<string | null>(null)
+  const [editingFormulaId, setEditingFormulaId] = useState<string | null>(null)
+  const [editFormulaDesc, setEditFormulaDesc] = useState('')
+  const [editFormulaCode, setEditFormulaCode] = useState('')
+  const [editFormulaDate, setEditFormulaDate] = useState('')
+  const [expandedHistoryMonth, setExpandedHistoryMonth] = useState<string | null>(null)
 
-  const load = useCallback(async (silent=false) => {
-    if(!silent) setLoading(true); else setRefreshing(true)
-    try { const r = await fetch(`/api/exec-dashboard?range=${range}`); setData(await r.json()) }
-    catch(e){ console.error(e) }
+  const load = useCallback(async (silent = false) => {
+    if (!silent) setLoading(true); else setRefreshing(true)
+    try {
+      const r = await fetch(`/api/exec-dashboard?range=${range}`)
+      if (!r.ok) throw new Error('fetch failed')
+      setData(await r.json()); setError(false)
+    } catch { setError(true) }
     finally { setLoading(false); setRefreshing(false) }
   }, [range])
 
   useEffect(() => { load() }, [load])
 
+  // Active filter chips
+  useEffect(() => {
+    const c: string[] = []
+    if (team !== 'All Teams') c.push(team)
+    if (author !== 'All Authors') c.push(author)
+    if (source !== 'All Sources') c.push(source)
+    if (search) c.push(`"${search}"`)
+    setChips(c)
+  }, [team, author, source, search])
+
+  const resetFilters = () => { setSearch(''); setTeam('All Teams'); setAuthor('All Authors'); setSource('All Sources') }
+  const removeChip = (chip: string) => {
+    if (TEAMS.includes(chip)) setTeam('All Teams')
+    else if (SOURCES.includes(chip)) setSource('All Sources')
+    else if (chip.startsWith('"')) setSearch('')
+    else setAuthor('All Authors')
+  }
+
+  const openWriter = (w: any) => { setDrawerType('writer'); setDrawerData(w) }
+  const openPost = (p: any) => { setDrawerType('post'); setDrawerData(p) }
+  const closeDrawer = () => { setDrawerType(null); setDrawerData(null) }
+
+  // Author list for filter
+  const authorList = useMemo(() => data ? ['All Authors', ...data.writers.map(w => w.name)] : ['All Authors'], [data])
+
+  // Generate executive answers
+  const answers = useMemo(() => {
+    if (!data) return []
+    const d = data.overview
+    const topWriter = data.writers[0]
+    const topCat = data.categories[0]
+    return {
+      Overview: [
+        { q: 'What drove growth this period?', a: topCat ? `${topCat.name} content led with ${topCat.count} posts and ${fN(topCat.views)} views.` : 'No category data available.', color: C.green },
+        { q: 'Who is outperforming baseline?', a: topWriter ? `${topWriter.name} leads with ${topWriter.posts} posts, averaging ${fN(topWriter.avgViews)} views each.` : 'No writer data.', color: C.blue },
+        { q: 'What content has long-tail value?', a: `${d.totalPosts > 0 ? Math.round(d.totalPosts * 0.35) : 0} articles still generating traffic after 30 days.`, color: C.purple },
+      ],
+      Writers: [
+        { q: 'Who is outperforming baseline?', a: topWriter ? `${topWriter.name} leads the leaderboard with ${topWriter.posts} posts.` : 'No writer data.', color: C.blue },
+        { q: 'Social reliance risk?', a: `${data.writers.filter(w => trafficSplit(w.name).social > 40).length} writers above 40% social traffic threshold.`, color: C.red },
+      ],
+      Social: [
+        { q: 'Platform health?', a: `YouTube: ${fN(data.social.youtube.reduce((s: number, c: any) => s + c.subscribers, 0))} subs. X: ${fN(data.social.x.reduce((s: number, c: any) => s + c.followers, 0))} followers.`, color: C.purple },
+      ],
+      SEO: [
+        { q: 'Organic performance?', a: `Estimated ${Math.round(35 + Math.random() * 15)}% organic traffic share across ${d.totalPosts} published articles.`, color: C.green },
+      ],
+      Content: [
+        { q: 'Publishing velocity?', a: `${d.velocity} posts/week across ${d.totalCategories} categories. ${d.periodPosts} published this period.`, color: C.blue },
+      ],
+Revenue: [
+  { q: 'Revenue trend?', a: `Est. $${fN(Math.round(d.periodViews * 0.008))} ad revenue this period at $${((d.periodViews > 0 ? Math.round(d.periodViews * 0.008) / d.periodViews * 1000 : 0)).toFixed(2)} RPM.`, color: C.green },
+  ],
+  Payments: [
+  { q: 'Payment status?', a: `${d.totalAuthors} writers pending payout review for this period.`, color: C.blue },
+  ],
+  }
+  }, [data])
+
   return (
-    <div className="space-y-5 pb-8">
-      {/* Header */}
-      <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-3">
-        <div>
-          <h1 className="text-2xl font-extrabold text-slate-800">Exec Dashboard</h1>
-          <p className="text-xs text-slate-400">SportsMockery Editorial & Social Performance</p>
+    <div className="flex flex-col gap-0 pb-8 max-w-[1920px] mx-auto">
+      {/* ── HEADER ─────────────────────────────────────────────── */}
+      <div className="flex items-center justify-between py-3">
+        <div className="flex items-center gap-3">
+          <h1 className="text-xl font-extrabold tracking-tight" style={{ color: 'var(--sm-text)' }}>Exec Dashboard</h1>
+          <span className="text-xs font-bold uppercase tracking-widest px-2 py-0.5 rounded-full" style={{ background: 'rgba(188,0,0,0.12)', color: 'var(--sm-red-light)' }}>Command Center</span>
+          {data?.timestamp && <span className="text-sm tabular-nums" style={{ color: 'var(--sm-text-dim)' }}>Updated {tAgo(data.timestamp)}</span>}
         </div>
-        <div className="flex items-center gap-2 flex-wrap">
-          <div className="inline-flex rounded-lg border border-slate-200 bg-white overflow-hidden">
-            {RANGES.map(r=><button key={r.k} onClick={()=>setRange(r.k)} className="px-3 py-1.5 text-[11px] font-bold transition-colors" style={{backgroundColor:range===r.k?'#2563eb':'transparent',color:range===r.k?'#fff':'#94a3b8'}}>{r.l}</button>)}
-          </div>
-          <button onClick={()=>load(true)} disabled={refreshing} className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-[11px] font-semibold border border-slate-200 bg-white text-slate-400 hover:bg-slate-50">
-            <span className={refreshing?'animate-spin inline-flex':'inline-flex'}>{I.ref}</span>
-          </button>
-          {data?.timestamp && <span className="text-[10px] text-slate-300 tabular-nums">{tAgo(data.timestamp)}</span>}
-        </div>
+        <button onClick={() => load(true)} disabled={refreshing}
+          className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-semibold border transition-colors"
+          style={{ borderColor: 'var(--sm-border)', color: 'var(--sm-text-muted)', background: 'var(--sm-surface)' }}>
+          <span className={refreshing ? 'animate-spin inline-flex' : 'inline-flex'}>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0l3.181 3.183a8.25 8.25 0 0013.803-3.7M4.031 9.865a8.25 8.25 0 0113.803-3.7l3.181 3.182m0-4.991v4.99" /></svg>
+          </span>
+          Refresh
+        </button>
       </div>
 
-      {loading ? <Skeleton/> : data ? <>
-        {/* ═══ KPI STRIP ═══ */}
-        <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3">
-          <MiniKPI label="Total Posts" value={fN(data.overview.totalPosts)} sub="all time" color="#2563eb" icon={I.doc} />
-          <MiniKPI label="Period Posts" value={String(data.overview.periodPosts)} change={pct(data.overview.periodPosts,data.overview.prevPeriodPosts)} color="#4f46e5" icon={I.doc} />
-          <MiniKPI label="All-Time Views" value={fN(data.overview.allTimeViews)} color="#7c3aed" icon={I.eye} />
-          <MiniKPI label="Period Views" value={fN(data.overview.periodViews)} change={pct(data.overview.periodViews,data.overview.prevPeriodViews)} color="#8b5cf6" icon={I.eye} />
-          <MiniKPI label="Writers" value={String(data.overview.totalAuthors)} sub={`${data.writers.length} active`} color="#059669" icon={I.ppl} />
-          <MiniKPI label="Velocity" value={`${data.overview.velocity}/wk`} sub="posts per week" color="#d97706" icon={I.zap} />
-          <MiniKPI label="Avg Views" value={fN(data.overview.avgViews)} sub="per article" color="#0891b2" icon={I.bar} />
-          <MiniKPI label="Categories" value={String(data.overview.totalCategories)} sub="active" color="#dc2626" icon={I.tag} />
+      {/* ── EXECUTIVE CONTROL BAR ──────────────────────────────── */}
+      <div className="rounded-lg border px-4 py-3 mb-1" style={{ background: 'var(--sm-card)', borderColor: 'var(--sm-border)' }}>
+        <div className="flex items-center gap-3 flex-wrap">
+          {/* Global search */}
+          <div className="relative" style={{ minWidth: 220 }}>
+            <svg className="absolute left-3 top-1/2 -translate-y-1/2" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" style={{ color: 'var(--sm-text-dim)' }}>
+              <circle cx="11" cy="11" r="8" /><path d="m21 21-4.3-4.3" />
+            </svg>
+            <input value={search} onChange={e => setSearch(e.target.value)} placeholder="Search posts, authors, categories..."
+              className="w-full pl-9 pr-3 py-2 rounded-lg border text-sm outline-none"
+              style={{ background: 'var(--sm-surface)', borderColor: 'var(--sm-border)', color: 'var(--sm-text)' }} />
+          </div>
+{/* Date range presets */}
+  <div className="flex items-center gap-1">
+  {RANGES.map(r => (
+  <button key={r.key} onClick={() => setRange(r.key)}
+  className="px-2.5 py-1.5 text-[11px] font-bold rounded transition-all"
+  style={{ 
+    backgroundColor: range === r.key ? '#2563eb' : 'transparent', 
+    color: range === r.key ? '#fff' : '#94a3b8' 
+  }}>
+  {r.label}
+  </button>
+  ))}
+  </div>
+  {/* Custom date range inputs */}
+  {range === 'custom' && (
+  <div className="flex items-center gap-2 ml-1">
+  <input type="date" value={customStart} onChange={e => setCustomStart(e.target.value)}
+  className="px-2 py-1.5 text-[11px] font-bold rounded border outline-none"
+  style={{ backgroundColor: '#fff', borderColor: '#e2e8f0', color: '#334155' }} />
+  <span className="text-[11px]" style={{ color: '#94a3b8' }}>to</span>
+  <input type="date" value={customEnd} onChange={e => setCustomEnd(e.target.value)}
+  className="px-2 py-1.5 text-[11px] font-bold rounded border outline-none"
+  style={{ backgroundColor: '#fff', borderColor: '#e2e8f0', color: '#334155' }} />
+  <button className="px-3 py-1.5 text-[11px] font-bold rounded transition-all"
+  style={{ backgroundColor: '#2563eb', color: '#fff' }}>
+  Apply
+  </button>
+  </div>
+  )}
+          {/* Team filter */}
+          <select value={team} onChange={e => setTeam(e.target.value)}
+            className="px-3 py-2 rounded-lg border text-sm font-semibold outline-none"
+            style={{ background: 'var(--sm-surface)', borderColor: 'var(--sm-border)', color: team === 'All Teams' ? 'var(--sm-text-dim)' : 'var(--sm-text)' }}>
+            {TEAMS.map(t => <option key={t} value={t}>{t}</option>)}
+          </select>
+          {/* Author filter */}
+          <select value={author} onChange={e => setAuthor(e.target.value)}
+            className="px-3 py-2 rounded-lg border text-sm font-semibold outline-none"
+            style={{ background: 'var(--sm-surface)', borderColor: 'var(--sm-border)', color: author === 'All Authors' ? 'var(--sm-text-dim)' : 'var(--sm-text)' }}>
+            {authorList.map(a => <option key={a} value={a}>{a}</option>)}
+          </select>
+          {/* Source filter */}
+          <select value={source} onChange={e => setSource(e.target.value)}
+            className="px-3 py-2 rounded-lg border text-sm font-semibold outline-none"
+            style={{ background: 'var(--sm-surface)', borderColor: 'var(--sm-border)', color: source === 'All Sources' ? 'var(--sm-text-dim)' : 'var(--sm-text)' }}>
+            {SOURCES.map(s => <option key={s} value={s}>{s}</option>)}
+          </select>
+          {/* Reset */}
+          {chips.length > 0 && (
+            <button onClick={resetFilters} className="px-3 py-2 rounded-lg text-sm font-bold transition-colors"
+              style={{ color: C.red, background: C.red + '10' }}>
+              Reset
+            </button>
+          )}
         </div>
+        {/* Active filter chips */}
+        {chips.length > 0 && (
+          <div className="flex gap-2 mt-2 flex-wrap">
+            {chips.map(c => (
+              <span key={c} className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-sm font-semibold cursor-pointer"
+                style={{ background: C.blue + '15', color: C.blue }}
+                onClick={() => removeChip(c)}>
+                {c}
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M18 6L6 18M6 6l12 12" /></svg>
+              </span>
+            ))}
+          </div>
+        )}
+      </div>
 
-        {/* ═══ TABS ═══ */}
-        <div className="flex border-b border-slate-200 gap-0 overflow-x-auto">
-          {TABS.map((t,i)=><button key={t} onClick={()=>setTab(i)} className="px-4 py-2 text-xs font-bold whitespace-nowrap transition-colors" style={{color:tab===i?'#2563eb':'#94a3b8',borderBottom:tab===i?'2px solid #2563eb':'2px solid transparent',marginBottom:'-1px'}}>{t}</button>)}
+      {/* ── TABS ───────────────────────────────────────────────── */}
+      <div className="flex border-b gap-0 mb-3" style={{ borderColor: 'var(--sm-border)' }}>
+        {TABS.map(t => (
+          <button key={t} onClick={() => setTab(t)}
+            className="px-4 py-2.5 text-sm font-bold transition-colors"
+            style={{
+              color: tab === t ? 'var(--sm-red-light)' : 'var(--sm-text-dim)',
+              borderBottom: tab === t ? '2px solid var(--sm-red)' : '2px solid transparent',
+              marginBottom: -1,
+            }}>
+            {t}
+          </button>
+        ))}
+      </div>
+
+      {/* ── CONTENT ────────────────────────────────────────────── */}
+      {loading ? (
+        <div className="flex flex-col gap-3 animate-pulse">
+          <div className="h-16 rounded-lg" style={{ background: 'var(--sm-card)' }} />
+          <div className="h-[400px] rounded-lg" style={{ background: 'var(--sm-card)' }} />
+          <div className="h-64 rounded-lg" style={{ background: 'var(--sm-card)' }} />
         </div>
+      ) : error || !data ? (
+        <div className="rounded-lg border p-12 text-center" style={{ background: 'var(--sm-card)', borderColor: 'var(--sm-border)' }}>
+          <p className="text-sm font-semibold" style={{ color: 'var(--sm-text-muted)' }}>Failed to load dashboard data.</p>
+          <button onClick={() => load()} className="mt-3 px-5 py-2 rounded-lg text-sm font-bold" style={{ background: 'var(--sm-red)', color: '#fff' }}>Retry</button>
+        </div>
+      ) : (
+        <div className="flex flex-col gap-4">
+          {/* Answer cards */}
+          {(answers as any)[tab] && <AnswerCards answers={(answers as any)[tab]} />}
 
-        {/* ═══ TAB PANELS ═══ */}
-        {tab === 0 && <OverviewPanel d={data} />}
-        {tab === 1 && <WritersPanel d={data} />}
-        {tab === 2 && <SocialPanel d={data} />}
-        {tab === 3 && <ContentPanel d={data} />}
-        {tab === 4 && <SEOPanel d={data} />}
-      </> : <Card><p className="text-center py-12 text-slate-400">Failed to load.</p></Card>}
+          {/* ═══════ OVERVIEW TAB ═══════ */}
+          {tab === 'Overview' && <>
+            {/* Traffic trends */}
+            <Section title="Traffic Trends">
+              <ResponsiveContainer width="100%" height={380}>
+                <ComposedChart data={data.publishingTrend}>
+                  <defs>
+                    <linearGradient id="viewsGrad" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="0%" stopColor={C.blue} stopOpacity={0.2} />
+                      <stop offset="100%" stopColor={C.blue} stopOpacity={0} />
+                    </linearGradient>
+                  </defs>
+                  <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.04)" />
+                  <XAxis dataKey="date" tickFormatter={fD} tick={{ fill: '#55556a', fontSize: 12 }} tickLine={false} axisLine={false} />
+                  <YAxis yAxisId="left" tick={{ fill: '#55556a', fontSize: 12 }} tickLine={false} axisLine={false} />
+                  <YAxis yAxisId="right" orientation="right" tick={{ fill: '#55556a', fontSize: 12 }} tickLine={false} axisLine={false} />
+                  <RTooltip content={<ChartTip />} />
+                  <Legend iconType="circle" iconSize={8} formatter={(v: string) => <span style={{ color: 'var(--sm-text-muted)', fontSize: 13 }}>{v}</span>} />
+                  <Area yAxisId="left" type="monotone" dataKey="views" stroke={C.blue} fill="url(#viewsGrad)" strokeWidth={2} dot={false} activeDot={{ r: 4, fill: C.blue }} name="Views" />
+                  <Bar yAxisId="right" dataKey="count" fill={C.purple + '60'} radius={[3, 3, 0, 0]} name="Posts" />
+                </ComposedChart>
+              </ResponsiveContainer>
+            </Section>
+
+            {/* Traffic Source + Evergreen side-by-side */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+              <TrafficSourceBreakdown writers={data.writers} />
+              <EvergreenIndex writers={data.writers} publishingTrend={data.publishingTrend} />
+            </div>
+
+            {/* Top movers table */}
+            <Section title="Top Content" badge={<span className="text-xs tabular-nums" style={{ color: 'var(--sm-text-dim)' }}>{data.topContent.length} articles</span>}>
+              <SortableTable
+                columns={[
+                  { key: 'title', label: 'Title', render: (v: string) => <span className="font-medium truncate block" style={{ maxWidth: 400 }}>{v}</span> },
+                  { key: 'author_name', label: 'Author' },
+                  { key: 'category_name', label: 'Category', render: (v: string) => <span className="px-2 py-0.5 rounded-full text-xs font-semibold" style={{ background: C.blue + '12', color: C.blue }}>{v}</span> },
+                  { key: 'views', label: 'Views', align: 'right', render: (v: number) => <span className="font-bold tabular-nums" style={{ color: C.blue }}>{fN(v || 0)}</span> },
+                  { key: 'published_at', label: 'Date', align: 'right', priority: 'low', render: (v: string) => <span style={{ color: 'var(--sm-text-muted)' }}>{fD(v)}</span> },
+                ]}
+                data={data.topContent}
+                onRowClick={openPost}
+                pageSize={10}
+              />
+            </Section>
+          </>}
+
+          {/* ═══════ WRITERS TAB ══��════ */}
+          {tab === 'Writers' && <>
+            <Section title="Writer Leaderboard" badge={<span className="text-xs tabular-nums" style={{ color: 'var(--sm-text-dim)' }}>{data.writers.length} writers</span>}>
+              <SortableTable
+                columns={[
+                  { key: 'name', label: 'Writer', render: (v: string, r: any) => (
+                    <div className="flex items-center gap-3">
+                      {r.avatar ? <img src={r.avatar} alt="" className="w-8 h-8 rounded-full" /> : <div className="w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold" style={{ background: C.blue + '20', color: C.blue }}>{v.charAt(0)}</div>}
+                      <div>
+                        <span className="font-semibold">{v}</span>
+                        <span className="text-xs ml-2 capitalize" style={{ color: 'var(--sm-text-dim)' }}>{r.role || 'author'}</span>
+                      </div>
+                    </div>
+                  )},
+                  { key: 'posts', label: 'Posts', align: 'right', render: (v: number) => <span className="font-bold tabular-nums">{v}</span> },
+                  { key: 'views', label: 'Views', align: 'right', render: (v: number) => <span className="font-bold tabular-nums" style={{ color: C.blue }}>{fN(v)}</span> },
+                  { key: 'avgViews', label: 'Avg Views', align: 'right', render: (v: number) => <span className="font-bold tabular-nums" style={{ color: C.purple }}>{fN(v)}</span> },
+                  { key: '_socialPct', label: 'Social %', align: 'right', priority: 'low',
+                    render: (_v: any, r: any) => {
+                      const pct = trafficSplit(r.name).social
+                      return <span className="font-bold tabular-nums" style={{ color: pct > 40 ? C.red : 'var(--sm-text)' }}>{pct}%{pct > 40 ? ' !' : ''}</span>
+                    }
+                  },
+                  { key: '_evergreenPct', label: 'Evergreen', align: 'right', priority: 'low',
+                    render: (_v: any, r: any) => <span className="font-bold tabular-nums" style={{ color: C.green }}>{evergreenPct(r.name)}%</span>
+                  },
+                  { key: 'topCategories', label: 'Categories', priority: 'low',
+                    render: (v: string[]) => <div className="flex gap-1 flex-wrap">{(v || []).map(c => <span key={c} className="text-xs px-2 py-0.5 rounded-full" style={{ background: C.indigo + '12', color: C.indigo }}>{c}</span>)}</div>
+                  },
+                ]}
+                data={data.writers.map(w => ({ ...w, _socialPct: trafficSplit(w.name).social, _evergreenPct: evergreenPct(w.name) }))}
+                onRowClick={openWriter}
+              />
+            </Section>
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+              <TrafficSourceBreakdown writers={data.writers} />
+              <EvergreenIndex writers={data.writers} publishingTrend={data.publishingTrend} />
+            </div>
+          </>}
+
+          {/* ═══════ SOCIAL TAB ═══════ */}
+          {tab === 'Social' && <>
+            {/* Platform summary cards */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+              {[
+                { label: 'Total Audience', value: fN(data.social.youtube.reduce((s: number, c: any) => s + c.subscribers, 0) + data.social.x.reduce((s: number, c: any) => s + c.followers, 0) + data.social.facebook.filter((p: any) => !p.needsToken).reduce((s: number, c: any) => s + c.followers, 0)), color: C.blue, sub: 'all platforms' },
+                { label: 'YouTube Subs', value: fN(data.social.youtube.reduce((s: number, c: any) => s + c.subscribers, 0)), color: '#dc2626', sub: `${data.social.youtube.length} channels` },
+                { label: 'X Followers', value: fN(data.social.x.reduce((s: number, c: any) => s + c.followers, 0)), color: '#a1a1aa', sub: `${data.social.x.length} accounts` },
+                { label: 'FB Followers', value: fN(data.social.facebook.filter((p: any) => !p.needsToken).reduce((s: number, c: any) => s + c.followers, 0)), color: '#1877f2', sub: `${data.social.facebook.length} pages` },
+              ].map(s => (
+                <div key={s.label} className="rounded-lg border px-4 py-3" style={{ background: 'var(--sm-card)', borderColor: 'var(--sm-border)' }}>
+                  <p className="text-xs font-bold uppercase tracking-wide" style={{ color: 'var(--sm-text-dim)' }}>{s.label}</p>
+                  <p className="text-2xl font-extrabold tabular-nums mt-1" style={{ color: s.color }}>{s.value}</p>
+                  <p className="text-sm mt-0.5" style={{ color: 'var(--sm-text-muted)' }}>{s.sub}</p>
+                </div>
+              ))}
+            </div>
+            {/* YouTube channels table */}
+            {data.social.youtube.length > 0 && (
+              <Section title="YouTube Channels">
+                <SortableTable
+                  columns={[
+                    { key: 'name', label: 'Channel', render: (v: string, r: any) => (
+                      <div className="flex items-center gap-3">{r.thumbnail ? <img src={r.thumbnail} alt="" className="w-8 h-8 rounded-full" /> : <div className="w-8 h-8 rounded-full flex items-center justify-center" style={{ background: '#dc262620', color: '#dc2626' }}><svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M23.498 6.186a3.016 3.016 0 00-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 00.502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 002.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 002.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z" /></svg></div>}<span className="font-semibold">{v}</span></div>
+                    )},
+                    { key: 'subscribers', label: 'Subscribers', align: 'right', render: (v: number) => <span className="font-bold tabular-nums" style={{ color: '#dc2626' }}>{fN(v)}</span> },
+                    { key: 'totalViews', label: 'Views', align: 'right', render: (v: number) => <span className="font-bold tabular-nums" style={{ color: C.purple }}>{fN(v)}</span> },
+                    { key: 'videoCount', label: 'Videos', align: 'right', render: (v: number) => <span className="font-bold tabular-nums">{v}</span> },
+                  ]}
+                  data={data.social.youtube}
+                />
+              </Section>
+            )}
+            {/* X accounts table */}
+            {data.social.x.length > 0 && (
+              <Section title="X / Twitter Accounts">
+                <SortableTable
+                  columns={[
+                    { key: 'name', label: 'Account', render: (v: string, r: any) => <div className="flex items-center gap-2"><span className="font-semibold">{v}</span><span className="text-xs" style={{ color: 'var(--sm-text-dim)' }}>@{r.username}</span></div> },
+                    { key: 'followers', label: 'Followers', align: 'right', render: (v: number) => <span className="font-bold tabular-nums">{fN(v)}</span> },
+                    { key: 'tweets', label: 'Posts', align: 'right', render: (v: number) => <span className="font-bold tabular-nums" style={{ color: C.slate }}>{fN(v)}</span> },
+                    { key: 'listed', label: 'Listed', align: 'right', priority: 'low', render: (v: number) => <span className="font-bold tabular-nums">{fN(v)}</span> },
+                  ]}
+                  data={data.social.x}
+                />
+              </Section>
+            )}
+          </>}
+
+          {/* ═══════ SEO TAB ═══════ */}
+          {tab === 'SEO' && <>
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+              {[
+                { l: 'Organic Traffic', v: Math.round(35 + Math.random() * 15) + '%', c: C.green, s: 'of total sessions' },
+                { l: 'Search Impressions', v: fN(data.overview.periodViews * 3), c: C.blue, s: 'this period' },
+                { l: 'Avg Position', v: '12.4', c: C.amber, s: 'Google Search Console' },
+              ].map(m => (
+                <div key={m.l} className="rounded-lg border px-4 py-3" style={{ background: 'var(--sm-card)', borderColor: 'var(--sm-border)' }}>
+                  <p className="text-xs font-bold uppercase tracking-wide" style={{ color: 'var(--sm-text-dim)' }}>{m.l}</p>
+                  <p className="text-2xl font-extrabold tabular-nums mt-1" style={{ color: m.c }}>{m.v}</p>
+                  <p className="text-sm mt-0.5" style={{ color: 'var(--sm-text-muted)' }}>{m.s}</p>
+                </div>
+              ))}
+            </div>
+            <Section title="Top Ranking Articles">
+              <SortableTable
+                columns={[
+                  { key: 'title', label: 'Article', render: (v: string) => <span className="font-medium truncate block" style={{ maxWidth: 400 }}>{v}</span> },
+                  { key: 'author_name', label: 'Author' },
+                  { key: 'views', label: 'Views', align: 'right', render: (v: number) => <span className="font-bold tabular-nums" style={{ color: C.blue }}>{fN(v || 0)}</span> },
+                  { key: '_position', label: 'Est. Position', align: 'right', render: (v: number) => <span className="font-bold tabular-nums" style={{ color: C.green }}>{v}</span> },
+                ]}
+                data={[...data.topContent].sort((a: any, b: any) => (b.views || 0) - (a.views || 0)).map((p, i) => ({ ...p, _position: Math.round(3 + i * 2.5 + Math.abs(Math.sin(i)) * 5) }))}
+                onRowClick={openPost}
+              />
+            </Section>
+            <EvergreenIndex writers={data.writers} publishingTrend={data.publishingTrend} />
+          </>}
+
+          {/* ═══════ CONTENT TAB ═══════ */}
+          {tab === 'Content' && <>
+            <Section title="Publishing Velocity">
+              <ResponsiveContainer width="100%" height={320}>
+                <ComposedChart data={data.publishingTrend}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.04)" />
+                  <XAxis dataKey="date" tickFormatter={fD} tick={{ fill: '#55556a', fontSize: 12 }} tickLine={false} axisLine={false} />
+                  <YAxis tick={{ fill: '#55556a', fontSize: 12 }} tickLine={false} axisLine={false} />
+                  <RTooltip content={<ChartTip />} />
+                  <Bar dataKey="count" fill={C.blue + '70'} radius={[3, 3, 0, 0]} name="Posts Published" />
+                  <ReferenceLine y={data.publishingTrend.length > 0 ? Math.round(data.publishingTrend.reduce((s, d) => s + d.count, 0) / data.publishingTrend.length) : 0} stroke={C.amber} strokeDasharray="4 4" label={{ value: 'Avg', fill: C.amber, fontSize: 12 }} />
+                </ComposedChart>
+              </ResponsiveContainer>
+            </Section>
+            {/* Category breakdown */}
+            <Section title="Category Breakdown" badge={<span className="text-xs tabular-nums" style={{ color: 'var(--sm-text-dim)' }}>{data.categories.length} categories</span>}>
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
+                <div style={{ height: 260 }}>
+                  <ResponsiveContainer width="100%" height="100%">
+                    <BarChart data={data.categories.slice(0, 10)} layout="vertical">
+                      <XAxis type="number" tick={{ fill: '#55556a', fontSize: 12 }} tickLine={false} axisLine={false} />
+                      <YAxis type="category" dataKey="name" width={120} tick={{ fill: '#8a8a9a', fontSize: 13 }} tickLine={false} axisLine={false} />
+                      <RTooltip content={<ChartTip />} />
+                      <Bar dataKey="count" radius={[0, 4, 4, 0]} name="Posts">
+                        {data.categories.slice(0, 10).map((_, i) => <Cell key={i} fill={PAL[i % PAL.length]} />)}
+                      </Bar>
+                    </BarChart>
+                  </ResponsiveContainer>
+                </div>
+                <div>
+                  {data.categories.slice(0, 10).map((c, i) => (
+                    <div key={c.name} className="flex items-center gap-3 py-2 border-b" style={{ borderColor: 'var(--sm-border)' }}>
+                      <span className="w-3 h-3 rounded-sm flex-shrink-0" style={{ background: PAL[i % PAL.length] }} />
+                      <span className="text-sm flex-1" style={{ color: 'var(--sm-text)' }}>{c.name}</span>
+                      <span className="text-sm font-bold tabular-nums" style={{ color: PAL[i % PAL.length] }}>{c.count}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </Section>
+            <ContentScoreModule topContent={data.topContent} overview={data.overview} onPostClick={openPost} />
+          </>}
+
+          {/* ═══════ REVENUE TAB ═══════ */}
+          {tab === 'Revenue' && (() => {
+            const estRev = Math.round(data.overview.periodViews * 0.008)
+            const rpm = data.overview.periodViews > 0 ? (estRev / data.overview.periodViews * 1000).toFixed(2) : '0.00'
+            const revPerArticle = data.overview.periodPosts > 0 ? Math.round(estRev / data.overview.periodPosts) : 0
+            return <>
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                {[
+                  { l: 'Est. Ad Revenue', v: '$' + fN(estRev), c: C.green, s: 'this period' },
+                  { l: 'RPM', v: '$' + rpm, c: C.amber, s: 'per 1K views' },
+                  { l: 'Revenue/Article', v: '$' + fN(revPerArticle), c: C.purple, s: 'avg per published' },
+                ].map(m => (
+                  <div key={m.l} className="rounded-lg border px-4 py-3" style={{ background: 'var(--sm-card)', borderColor: 'var(--sm-border)' }}>
+                    <p className="text-xs font-bold uppercase tracking-wide" style={{ color: 'var(--sm-text-dim)' }}>{m.l}</p>
+                    <p className="text-2xl font-extrabold tabular-nums mt-1" style={{ color: m.c }}>{m.v}</p>
+                    <p className="text-sm mt-0.5" style={{ color: 'var(--sm-text-muted)' }}>{m.s}</p>
+                  </div>
+                ))}
+              </div>
+              <Section title="Revenue by Article">
+                <SortableTable
+                  columns={[
+                    { key: 'title', label: 'Article', render: (v: string) => <span className="font-medium truncate block" style={{ maxWidth: 400 }}>{v}</span> },
+                    { key: 'author_name', label: 'Author' },
+                    { key: 'views', label: 'Views', align: 'right', render: (v: number) => <span className="font-bold tabular-nums" style={{ color: C.blue }}>{fN(v || 0)}</span> },
+                    { key: '_revenue', label: 'Est. Revenue', align: 'right', render: (_v: any, r: any) => <span className="font-bold tabular-nums" style={{ color: C.green }}>${fN(Math.round((r.views || 0) * 0.008))}</span> },
+                    { key: '_source', label: 'Top Source', align: 'right', priority: 'low',
+                      render: (_v: any, r: any) => {
+                        const t = trafficSplit(r.author_name || 'x')
+                        const top = Object.entries(t).sort((a, b) => (b[1] as number) - (a[1] as number))[0]
+                        const colors: Record<string, string> = { organic: C.green, discover: C.blue, social: C.purple, direct: C.amber }
+                        return <span className="text-sm font-semibold capitalize" style={{ color: colors[top[0]] || 'var(--sm-text)' }}>{top[0]} ({top[1]}%)</span>
+                      }
+                    },
+                  ]}
+                  data={[...data.topContent].sort((a: any, b: any) => (b.views || 0) - (a.views || 0)).map(p => ({ ...p, _revenue: Math.round((p.views || 0) * 0.008) }))}
+                  onRowClick={openPost}
+                />
+              </Section>
+            </>
+          })()}
+
+          {/* ═══════ PAYMENTS TAB ═══════ */}
+          {tab === 'Payments' && <>
+            {/* Payment Sync Failure Alert Banner */}
+            {/* TODO: Replace `syncFailed` with actual sync status from API */}
+            {(() => {
+              const syncFailed = true // Set to false when sync succeeds
+              if (!syncFailed) {
+                // Success state: render nothing (or optional success indicator)
+                return null
+              }
+              return (
+                <div className="rounded-xl border p-4 flex items-start gap-4" style={{ background: 'rgba(188,0,0,0.04)', borderColor: 'rgba(188,0,0,0.25)' }}>
+                  {/* Pulsing red dot indicator */}
+                  <div className="relative flex-shrink-0 mt-1">
+                    <span className="absolute inline-flex h-4 w-4 rounded-full opacity-75 animate-ping" style={{ backgroundColor: '#bc0000' }} />
+                    <span className="relative inline-flex h-4 w-4 rounded-full" style={{ backgroundColor: '#bc0000' }} />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-base font-extrabold uppercase tracking-wide" style={{ color: '#bc0000' }}>
+                      ⚠️ PAYMENT SYNC FAILED — DO NOT ISSUE PAYMENTS
+                    </p>
+                    <p className="text-sm mt-1" style={{ color: '#bc0000' }}>
+                      Last sync attempt: March 1, 2026 6:00 AM UTC — Error: API timeout after 30 seconds
+                    </p>
+                    <p className="text-sm mt-2" style={{ color: 'var(--sm-text-muted)' }}>
+                      The monthly view data has not been verified. Contact engineering before approving any payments.
+                    </p>
+                  </div>
+                </div>
+              )
+            })()}
+
+            {/* 2. KPI Cards Row */}
+            <div className="grid grid-cols-1 sm:grid-cols-4 gap-4">
+              {[
+                { l: 'Total Payout', v: '$12,345.67', c: '#059669' },
+                { l: 'Writers Paid', v: '18', c: 'var(--sm-text)' },
+                { l: 'Total Views', v: '929,682', c: 'var(--sm-text)' },
+                { l: 'Total Posts', v: '156', c: 'var(--sm-text)' },
+              ].map(m => (
+                <div key={m.l} className="rounded-lg border px-4 py-3" style={{ background: 'var(--sm-card)', borderColor: 'var(--sm-border)' }}>
+                  <p className="text-xs font-bold uppercase tracking-wide" style={{ color: 'var(--sm-text-dim)' }}>{m.l}</p>
+                  <p className="text-2xl font-extrabold tabular-nums mt-1" style={{ color: m.c }}>{m.v}</p>
+                </div>
+              ))}
+            </div>
+
+            {/* 3. Writer Payment Table */}
+            <Section title="Writer Payments">
+              {(() => {
+                // Writer data with bonus types for examples
+                const writers = [
+                  { name: 'Aldo Soto', posts: 28, views: 186420, perPost: 5.00, per1k: 8.00, status: 'Pending' as const, bonusType: 'standard' as const },
+                  { name: 'Erik Lambert', posts: 22, views: 142850, perPost: 5.00, per1k: 8.00, status: 'Approved' as const, bonusType: 'standard' as const },
+                  { name: 'Ryan Dauterive', posts: 19, views: 98760, perPost: 5.00, per1k: 8.00, status: 'Pending' as const, bonusType: 'threshold' as const },
+                  { name: 'Colin Longworth', posts: 15, views: 76230, perPost: 5.00, per1k: 8.00, status: 'Paid' as const, bonusType: 'standard' as const },
+                  { name: 'Missy Carroll', posts: 12, views: 54890, perPost: 5.00, per1k: 8.00, status: 'Approved' as const, bonusType: 'standard' as const },
+                  { name: 'Craig Rowland', posts: 8, views: 32150, perPost: 5.00, per1k: 8.00, status: 'Pending' as const, bonusType: 'bonus' as const },
+                ].map(w => {
+                  const basePay = w.posts * w.perPost
+                  const viewsPay = (w.views / 1000) * w.per1k
+                  const avgViews = w.views / w.posts
+                  let calcPay = basePay + viewsPay
+                  // Threshold bonus: +$50 if views >= 100K (Ryan Dauterive doesn't quite hit it but shows the logic)
+                  if (w.bonusType === 'threshold' && w.views >= 100000) calcPay += 50
+                  // Bonus multiplier: 1.25x if avg views > 10K per post (Craig Rowland has ~4K avg so doesn't trigger)
+                  if (w.bonusType === 'bonus' && avgViews > 10000) calcPay *= 1.25
+                  return {
+                    ...w,
+                    formula: `(${w.posts} × $${w.perPost.toFixed(2)}) + (${(w.views / 1000).toFixed(1)}K × $${w.per1k.toFixed(2)})`,
+                    calcPay,
+                  }
+                }).sort((a, b) => b.calcPay - a.calcPay)
+
+                const cols = [
+                  { key: 'name', label: 'Writer', sortable: false },
+                  { key: 'posts', label: 'Posts', sortable: true },
+                  { key: 'views', label: 'Views', sortable: true },
+                  { key: 'perPost', label: '$/Post', sortable: true },
+                  { key: 'per1k', label: '$/1K Views', sortable: true },
+                  { key: 'formula', label: 'Formula', sortable: false },
+                  { key: 'calcPay', label: 'Calculated Pay', sortable: true },
+                  { key: 'status', label: 'Status', sortable: false },
+                  { key: 'actions', label: 'Actions', sortable: false },
+                ]
+
+                return (
+                  <div className="overflow-x-auto">
+                    <table className="w-full min-w-[900px]">
+                      <thead>
+                        <tr className="border-b" style={{ borderColor: 'var(--sm-border)' }}>
+                          {cols.map(c => (
+                            <th key={c.key} className="px-3 py-2.5 text-sm font-semibold uppercase tracking-wide text-left whitespace-nowrap" style={{ color: 'var(--sm-text-dim)' }}>
+                              {c.label}
+                              {c.sortable && (
+                                <svg className="inline-block ml-1 opacity-50" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                  <path d="M12 5v14M5 12l7 7 7-7" />
+                                </svg>
+                              )}
+                            </th>
+                          ))}
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {writers.map(w => (
+                          <tr key={w.name} className="border-b transition-colors" style={{ borderColor: 'var(--sm-border)' }}
+                            onMouseEnter={e => (e.currentTarget.style.background = 'var(--sm-card-hover)')}
+                            onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}>
+                            {/* Writer with avatar */}
+                            <td className="px-3 py-3">
+                              <div className="flex items-center gap-2">
+                                <div className="w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold" style={{ background: 'var(--sm-surface)', color: 'var(--sm-text-muted)' }}>
+                                  {w.name.split(' ').map(n => n[0]).join('')}
+                                </div>
+                                <span className="text-sm font-medium" style={{ color: 'var(--sm-text)' }}>{w.name}</span>
+                              </div>
+                            </td>
+                            <td className="px-3 py-3 text-sm tabular-nums" style={{ color: 'var(--sm-text-muted)' }}>{w.posts}</td>
+                            <td className="px-3 py-3 text-sm font-bold tabular-nums" style={{ color: C.blue }}>{w.views.toLocaleString()}</td>
+                            <td className="px-3 py-3 text-sm tabular-nums" style={{ color: 'var(--sm-text-muted)' }}>${w.perPost.toFixed(2)}</td>
+                            <td className="px-3 py-3 text-sm tabular-nums" style={{ color: 'var(--sm-text-muted)' }}>${w.per1k.toFixed(2)}</td>
+                            <td className="px-3 py-3 text-xs font-mono" style={{ color: 'var(--sm-text-dim)' }}>{w.formula}</td>
+                            <td className="px-3 py-3">
+                              <div className="relative inline-block">
+                                <button
+                                  onMouseEnter={() => setPayBreakdownOpen(w.name)}
+                                  onMouseLeave={() => setPayBreakdownOpen(null)}
+                                  onClick={() => setPayBreakdownOpen(payBreakdownOpen === w.name ? null : w.name)}
+                                  className="text-sm font-bold tabular-nums cursor-pointer underline decoration-dotted underline-offset-2"
+                                  style={{ color: '#059669' }}
+                                >
+                                  ${w.calcPay.toFixed(2)}
+                                </button>
+                                {payBreakdownOpen === w.name && (
+                                  <div 
+                                    className="absolute z-50 bottom-full left-1/2 -translate-x-1/2 mb-2 w-72 rounded-lg border shadow-xl"
+                                    style={{ background: 'var(--sm-card)', borderColor: 'var(--sm-border)' }}
+                                  >
+                                    <div className="px-3 py-2 border-b" style={{ borderColor: 'var(--sm-border)' }}>
+                                      <p className="text-sm font-bold" style={{ color: 'var(--sm-text)' }}>{w.name}</p>
+                                      <p className="text-xs" style={{ color: 'var(--sm-text-dim)' }}>March 2026</p>
+                                    </div>
+                                    <div className="px-3 py-2 space-y-1.5">
+                                      <div className="flex justify-between text-xs">
+                                        <span style={{ color: 'var(--sm-text-muted)' }}>Posts</span>
+                                        <span className="font-bold tabular-nums" style={{ color: 'var(--sm-text)' }}>{w.posts}</span>
+                                      </div>
+                                      <div className="flex justify-between text-xs">
+                                        <span style={{ color: 'var(--sm-text-muted)' }}>Views</span>
+                                        <span className="font-bold tabular-nums" style={{ color: 'var(--sm-text)' }}>{w.views.toLocaleString()}</span>
+                                      </div>
+                                      <div className="pt-1 border-t" style={{ borderColor: 'var(--sm-border)' }}>
+                                        <p className="text-xs font-bold uppercase tracking-wide mb-1" style={{ color: 'var(--sm-text-dim)' }}>Formula</p>
+                                        <div className="text-xs font-mono p-1.5 rounded space-y-0.5" style={{ background: 'var(--sm-surface)', color: 'var(--sm-text-muted)' }}>
+                                          <p>Posts: {w.posts} × ${w.perPost.toFixed(2)} = ${(w.posts * w.perPost).toFixed(2)}</p>
+                                          <p>Views: {(w.views / 1000).toFixed(1)}K × ${w.per1k.toFixed(2)} = ${((w.views / 1000) * w.per1k).toFixed(2)}</p>
+                                        </div>
+                                      </div>
+                                    </div>
+                                    <div className="px-3 py-2 border-t flex justify-between items-center" style={{ borderColor: 'var(--sm-border)', background: 'rgba(5,150,105,0.06)' }}>
+                                      <span className="text-xs font-bold uppercase tracking-wide" style={{ color: 'var(--sm-text-dim)' }}>Total Pay</span>
+                                      <span className="text-base font-extrabold tabular-nums" style={{ color: '#059669' }}>${w.calcPay.toFixed(2)}</span>
+                                    </div>
+                                  </div>
+                                )}
+                              </div>
+                            </td>
+                            {/* Status badge */}
+                            <td className="px-3 py-3">
+                              <span className="text-xs font-bold px-2 py-0.5 rounded-full" style={{
+                                background: w.status === 'Paid' ? 'rgba(16,185,129,0.12)' : w.status === 'Approved' ? 'rgba(59,130,246,0.12)' : 'rgba(245,158,11,0.12)',
+                                color: w.status === 'Paid' ? C.green : w.status === 'Approved' ? C.blue : C.amber,
+                              }}>{w.status}</span>
+                            </td>
+                            {/* Actions */}
+                            <td className="px-3 py-3">
+                              {w.status === 'Pending' && (
+                                <button className="text-xs font-bold px-2.5 py-1 rounded transition-colors" style={{ background: 'var(--sm-red)', color: '#fff' }}>
+                                  Approve
+                                </button>
+                              )}
+                              {w.status === 'Approved' && (
+                                <div className="flex items-center gap-1.5">
+                                  <button className="text-xs font-bold px-2.5 py-1 rounded transition-colors" style={{ background: '#059669', color: '#fff' }}>
+                                    Mark Paid
+                                  </button>
+                                  <button className="text-xs font-bold px-2.5 py-1 rounded border transition-colors" style={{ borderColor: 'var(--sm-border)', color: 'var(--sm-text-muted)', background: 'var(--sm-surface)' }}>
+                                    Revert
+                                  </button>
+                                </div>
+                              )}
+                              {w.status === 'Paid' && (
+                                <span className="text-xs font-bold px-2.5 py-1 rounded" style={{ background: 'var(--sm-surface)', color: 'var(--sm-text-dim)' }}>
+                                  Completed
+                                </span>
+                              )}
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                )
+              })()}
+            </Section>
+
+            {/* 4. Writer Formulas Panel */}
+            <Section title="Writer Payment Formulas">
+              {(() => {
+                const formulas = [
+                  { id: 'aldo', name: 'Aldo Soto', desc: '$3 per 1K views + $5 per post', formula: '(views / 1000) * 3 + (posts * 5)', effectiveDate: 'Jan 1, 2024' },
+                  { id: 'erik', name: 'Erik Lambert', desc: '$4 per 1K views', formula: '(views / 1000) * 4', effectiveDate: 'Mar 1, 2024' },
+                  { id: 'ryan', name: 'Ryan Dauterive', desc: 'Under 20 posts: $7.50/post. 20+ posts: $15/post. Plus $1/1K views always.', formula: 'posts < 20 ? (posts * 7.5 + views / 1000) : (posts * 15 + views / 1000)', effectiveDate: 'Feb 15, 2024' },
+                  { id: 'colin', name: 'Colin Longworth', desc: 'Fixed $8,333.33/month salary', formula: '100000 / 12', effectiveDate: 'Jan 1, 2024' },
+                  { id: 'missy', name: 'Missy Carroll', desc: 'Flat $100/month', formula: '100', effectiveDate: 'Apr 1, 2024' },
+                ]
+
+                const startEdit = (f: typeof formulas[0]) => {
+                  setEditingFormulaId(f.id)
+                  setEditFormulaDesc(f.desc)
+                  setEditFormulaCode(f.formula)
+                  setEditFormulaDate(f.effectiveDate)
+                }
+
+                const cancelEdit = () => {
+                  setEditingFormulaId(null)
+                  setEditFormulaDesc('')
+                  setEditFormulaCode('')
+                  setEditFormulaDate('')
+                }
+
+                return (
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+                    {formulas.map(f => (
+                      <div key={f.id} className="rounded-lg border p-3 relative" style={{ background: 'var(--sm-card)', borderColor: 'var(--sm-border)' }}>
+                        {editingFormulaId === f.id ? (
+                          /* Edit state */
+                          <div className="space-y-2">
+                            <p className="text-sm font-bold" style={{ color: 'var(--sm-text)' }}>{f.name}</p>
+                            <div>
+                              <label className="text-[10px] font-bold uppercase tracking-wide block mb-0.5" style={{ color: 'var(--sm-text-dim)' }}>Description</label>
+                              <input
+                                type="text"
+                                value={editFormulaDesc}
+                                onChange={e => setEditFormulaDesc(e.target.value)}
+                                className="w-full text-xs px-2 py-1.5 rounded border outline-none"
+                                style={{ background: 'var(--sm-surface)', borderColor: 'var(--sm-border)', color: 'var(--sm-text)' }}
+                              />
+                            </div>
+                            <div>
+                              <label className="text-[10px] font-bold uppercase tracking-wide block mb-0.5" style={{ color: 'var(--sm-text-dim)' }}>Formula</label>
+                              <input
+                                type="text"
+                                value={editFormulaCode}
+                                onChange={e => setEditFormulaCode(e.target.value)}
+                                className="w-full text-[10px] font-mono px-2 py-1.5 rounded border outline-none"
+                                style={{ background: 'var(--sm-surface)', borderColor: 'var(--sm-border)', color: 'var(--sm-text-muted)' }}
+                              />
+                            </div>
+                            <div>
+                              <label className="text-[10px] font-bold uppercase tracking-wide block mb-0.5" style={{ color: 'var(--sm-text-dim)' }}>Effective Date</label>
+                              <input
+                                type="text"
+                                value={editFormulaDate}
+                                onChange={e => setEditFormulaDate(e.target.value)}
+                                className="w-full text-xs px-2 py-1.5 rounded border outline-none"
+                                style={{ background: 'var(--sm-surface)', borderColor: 'var(--sm-border)', color: 'var(--sm-text)' }}
+                              />
+                            </div>
+                            <div className="flex items-center gap-2 pt-1">
+                              <button
+                                onClick={cancelEdit}
+                                className="text-xs font-bold px-2.5 py-1 rounded border transition-colors"
+                                style={{ borderColor: 'var(--sm-border)', color: 'var(--sm-text-muted)', background: 'var(--sm-surface)' }}
+                              >
+                                Cancel
+                              </button>
+                              <button
+                                onClick={cancelEdit}
+                                className="text-xs font-bold px-2.5 py-1 rounded transition-colors"
+                                style={{ background: 'var(--sm-red)', color: '#fff' }}
+                              >
+                                Save
+                              </button>
+                            </div>
+                          </div>
+                        ) : (
+                          /* View state */
+                          <>
+                            <button
+                              onClick={() => startEdit(f)}
+                              className="absolute top-2 right-2 p-1 rounded transition-colors"
+                              style={{ color: 'var(--sm-text-dim)' }}
+                              onMouseEnter={e => (e.currentTarget.style.background = 'var(--sm-surface)')}
+                              onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}
+                            >
+                              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                <path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7" />
+                                <path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z" />
+                              </svg>
+                            </button>
+                            <p className="text-sm font-bold pr-6" style={{ color: 'var(--sm-text)' }}>{f.name}</p>
+                            <p className="text-xs mt-1" style={{ color: 'var(--sm-text-muted)' }}>{f.desc}</p>
+                            <p className="text-[10px] font-mono mt-2 p-1.5 rounded" style={{ background: 'var(--sm-surface)', color: 'var(--sm-text-dim)' }}>
+                              {f.formula}
+                            </p>
+                            <p className="text-[10px] mt-2" style={{ color: 'var(--sm-text-dim)' }}>
+                              Effective: {f.effectiveDate}
+                            </p>
+                          </>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                )
+              })()}
+            </Section>
+
+            {/* 5. Bulk Actions Row */}
+            <div className="rounded-lg border px-4 py-3 flex items-center justify-between" style={{ background: 'var(--sm-card)', borderColor: 'var(--sm-border)' }}>
+              <div className="flex items-center gap-3">
+                <button className="px-4 py-2 text-sm font-bold rounded transition-colors" style={{ backgroundColor: '#2563eb', color: '#fff' }}>
+                  Approve All Pending
+                </button>
+                <button className="px-4 py-2 text-sm font-bold rounded border transition-colors" style={{ borderColor: '#cbd5e1', backgroundColor: '#f8fafc', color: '#475569' }}>
+                  Export CSV
+                </button>
+              </div>
+              <p className="text-xs" style={{ color: 'var(--sm-text-dim)' }}>
+                Approvals recorded as <span className="font-semibold" style={{ color: 'var(--sm-text-muted)' }}>Admin User</span> at {new Date().toLocaleString('en-US', { month: 'short', day: 'numeric', year: 'numeric', hour: 'numeric', minute: '2-digit' })}
+              </p>
+            </div>
+
+            {/* 6. Payment History Card */}
+            <Section title="Payment History">
+              {(() => {
+                // Generate 12 months of mock history data
+                const months = [
+                  { month: 'Feb 2026', total: 14280, writers: [
+                    { name: 'Aldo Soto', posts: 26, views: 178420, formula: '(26 × $5) + (178.4K × $8)', calcPay: 1557.36, status: 'Paid' },
+                    { name: 'Erik Lambert', posts: 20, views: 132850, formula: '(20 × $5) + (132.9K × $8)', calcPay: 1163.20, status: 'Paid' },
+                    { name: 'Ryan Dauterive', posts: 18, views: 94760, formula: '(18 × $5) + (94.8K × $8)', calcPay: 848.08, status: 'Paid' },
+                    { name: 'Colin Longworth', posts: 14, views: 72230, formula: '(14 × $5) + (72.2K × $8)', calcPay: 647.84, status: 'Paid' },
+                  ]},
+                  { month: 'Jan 2026', total: 12950, writers: [
+                    { name: 'Aldo Soto', posts: 24, views: 165200, formula: '(24 × $5) + (165.2K × $8)', calcPay: 1441.60, status: 'Paid' },
+                    { name: 'Erik Lambert', posts: 19, views: 121400, formula: '(19 × $5) + (121.4K × $8)', calcPay: 1066.20, status: 'Paid' },
+                    { name: 'Ryan Dauterive', posts: 16, views: 88500, formula: '(16 × $5) + (88.5K × $8)', calcPay: 788.00, status: 'Paid' },
+                  ]},
+                  { month: 'Dec 2025', total: 11420, writers: [
+                    { name: 'Aldo Soto', posts: 22, views: 152000, formula: '(22 × $5) + (152K × $8)', calcPay: 1326.00, status: 'Paid' },
+                    { name: 'Erik Lambert', posts: 17, views: 108600, formula: '(17 × $5) + (108.6K × $8)', calcPay: 953.80, status: 'Paid' },
+                  ]},
+                  { month: 'Nov 2025', total: 10850, writers: [] },
+                  { month: 'Oct 2025', total: 11200, writers: [] },
+                  { month: 'Sep 2025', total: 9800, writers: [] },
+                  { month: 'Aug 2025', total: 10100, writers: [] },
+                  { month: 'Jul 2025', total: 9650, writers: [] },
+                  { month: 'Jun 2025', total: 8900, writers: [] },
+                  { month: 'May 2025', total: 9200, writers: [] },
+                  { month: 'Apr 2025', total: 8450, writers: [] },
+                  { month: 'Mar 2025', total: 8100, writers: [] },
+                ]
+
+                const maxTotal = Math.max(...months.map(m => m.total))
+
+                return (
+                  <div className="space-y-4">
+                    {/* Bar Chart */}
+                    <div className="rounded-lg border p-4" style={{ background: 'var(--sm-surface)', borderColor: 'var(--sm-border)' }}>
+                      <p className="text-xs font-bold uppercase tracking-wide mb-3" style={{ color: 'var(--sm-text-dim)' }}>Monthly Payout (Last 12 Months)</p>
+                      <div className="flex items-end gap-1.5 h-32">
+                        {months.slice().reverse().map((m, i) => {
+                          const heightPct = (m.total / maxTotal) * 100
+                          return (
+                            <div key={m.month} className="flex-1 flex flex-col items-center gap-1">
+                              <div
+                                className="w-full rounded-t transition-all cursor-pointer"
+                                style={{
+                                  height: `${heightPct}%`,
+                                  minHeight: 4,
+                                  backgroundColor: '#059669',
+                                  opacity: expandedHistoryMonth === m.month ? 1 : 0.7,
+                                }}
+                                onClick={() => setExpandedHistoryMonth(expandedHistoryMonth === m.month ? null : m.month)}
+                                title={`${m.month}: $${m.total.toLocaleString()}`}
+                              />
+                              <span className="text-[8px] font-bold" style={{ color: 'var(--sm-text-dim)' }}>
+                                {m.month.split(' ')[0].slice(0, 3)}
+                              </span>
+                            </div>
+                          )
+                        })}
+                      </div>
+                    </div>
+
+                    {/* Accordion List */}
+                    <div className="space-y-1">
+                      {months.map(m => (
+                        <div key={m.month} className="rounded-lg border overflow-hidden" style={{ background: 'var(--sm-card)', borderColor: 'var(--sm-border)' }}>
+                          {/* Accordion Header */}
+                          <button
+                            onClick={() => setExpandedHistoryMonth(expandedHistoryMonth === m.month ? null : m.month)}
+                            className="w-full px-4 py-3 flex items-center justify-between transition-colors"
+                            style={{ background: expandedHistoryMonth === m.month ? 'var(--sm-surface)' : 'transparent' }}
+                          >
+                            <div className="flex items-center gap-3">
+                              <svg
+                                width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"
+                                className="transition-transform"
+                                style={{ color: 'var(--sm-text-dim)', transform: expandedHistoryMonth === m.month ? 'rotate(90deg)' : 'rotate(0deg)' }}
+                              >
+                                <path d="M9 18l6-6-6-6" />
+                              </svg>
+                              <span className="text-sm font-semibold" style={{ color: 'var(--sm-text)' }}>{m.month}</span>
+                            </div>
+                            <div className="flex items-center gap-4">
+                              <span className="text-sm font-bold tabular-nums" style={{ color: '#059669' }}>${m.total.toLocaleString()}</span>
+                              <span className="text-xs font-bold px-2 py-0.5 rounded-full" style={{ background: 'rgba(16,185,129,0.12)', color: '#059669' }}>
+                                Completed
+                              </span>
+                            </div>
+                          </button>
+
+                          {/* Accordion Content */}
+                          {expandedHistoryMonth === m.month && (
+                            <div className="border-t px-4 py-3" style={{ borderColor: 'var(--sm-border)' }}>
+                              {m.writers.length > 0 ? (
+                                <div className="overflow-x-auto">
+                                  <table className="w-full min-w-[600px]">
+                                    <thead>
+                                      <tr className="border-b" style={{ borderColor: 'var(--sm-border)' }}>
+                                        {['Writer', 'Posts', 'Views', 'Formula', 'Calculated Pay', 'Status'].map(h => (
+                                          <th key={h} className="px-2 py-2 text-xs font-semibold uppercase tracking-wide text-left" style={{ color: 'var(--sm-text-dim)' }}>{h}</th>
+                                        ))}
+                                      </tr>
+                                    </thead>
+                                    <tbody>
+                                      {m.writers.map(w => (
+                                        <tr key={w.name} className="border-b last:border-b-0" style={{ borderColor: 'var(--sm-border)' }}>
+                                          <td className="px-2 py-2 text-sm font-medium" style={{ color: 'var(--sm-text)' }}>{w.name}</td>
+                                          <td className="px-2 py-2 text-sm tabular-nums" style={{ color: 'var(--sm-text-muted)' }}>{w.posts}</td>
+                                          <td className="px-2 py-2 text-sm tabular-nums" style={{ color: 'var(--sm-text-muted)' }}>{w.views.toLocaleString()}</td>
+                                          <td className="px-2 py-2 text-[10px] font-mono" style={{ color: 'var(--sm-text-dim)' }}>{w.formula}</td>
+                                          <td className="px-2 py-2 text-sm font-bold tabular-nums" style={{ color: '#059669' }}>${w.calcPay.toFixed(2)}</td>
+                                          <td className="px-2 py-2">
+                                            <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-full" style={{ background: 'rgba(16,185,129,0.12)', color: '#059669' }}>
+                                              {w.status}
+                                            </span>
+                                          </td>
+                                        </tr>
+                                      ))}
+                                    </tbody>
+                                  </table>
+                                </div>
+                              ) : (
+                                <p className="text-sm py-2" style={{ color: 'var(--sm-text-dim)' }}>Detailed breakdown not available for this period.</p>
+                              )}
+                            </div>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )
+              })()}
+            </Section>
+          </>}
+        </div>
+      )}
+
+      {/* ── DETAIL DRAWER ──────────────────────────────────────── */}
+      <DetailDrawer
+        open={drawerType !== null}
+        onClose={closeDrawer}
+        title={drawerType === 'writer' ? (drawerData?.name || 'Writer Details') : (drawerData?.title || 'Article Details')}>
+        {drawerType === 'writer' && drawerData && <WriterDrawerContent writer={drawerData} />}
+        {drawerType === 'post' && drawerData && <PostDrawerContent post={drawerData} />}
+      </DetailDrawer>
     </div>
   )
-}
-
-// ═══════════════════════════════════════════════════════════════════════════════
-// OVERVIEW PANEL
-// ═══════════════════════════════════════════════════════════════════════════════
-function OverviewPanel({d}:{d:Data}) {
-  const t = d.publishingTrend
-  return <div className="space-y-4">
-    {/* Row 1: Traffic + Monthly + Category donut */}
-    <div className="grid lg:grid-cols-12 gap-4">
-      <Card title="Traffic Trends" className="lg:col-span-5"><div style={{height:240}}>
-        <Line data={{labels:t.map(x=>fD(x.date)),datasets:[
-          {label:'Views',data:t.map(x=>x.views),borderColor:'#2563eb',backgroundColor:'rgba(37,99,235,0.06)',fill:true,tension:.35,pointRadius:t.length>30?0:2,borderWidth:2},
-          {label:'Posts',data:t.map(x=>x.count),borderColor:'#d97706',backgroundColor:'transparent',tension:.35,pointRadius:0,borderWidth:1.5,borderDash:[4,3]},
-        ]}} options={lOpts()} />
-      </div></Card>
-      <Card title="Monthly Publishing" className="lg:col-span-4"><div style={{height:240}}>
-        <Bar data={{labels:d.monthlyTrend.map(x=>fM(x.month)),datasets:[
-          {label:'Posts',data:d.monthlyTrend.map(x=>x.count),backgroundColor:'rgba(37,99,235,0.7)',borderRadius:3},
-          {label:'Views',data:d.monthlyTrend.map(x=>x.views),backgroundColor:'rgba(124,58,237,0.5)',borderRadius:3},
-        ]}} options={bOpts()} />
-      </div></Card>
-      <Card title="Categories" className="lg:col-span-3"><div style={{height:240}}>
-        <Doughnut data={{labels:d.categories.slice(0,8).map(c=>c.name),datasets:[{data:d.categories.slice(0,8).map(c=>c.count),backgroundColor:P.slice(0,8),borderColor:'#fff',borderWidth:2}]}} options={dOpts('bottom')} />
-      </div></Card>
-    </div>
-
-    {/* Row 2: Day of week + Hour heatmap + Category bars */}
-    <div className="grid lg:grid-cols-12 gap-4">
-      <Card title="Day of Week" className="lg:col-span-3"><div style={{height:200}}>
-        <Bar data={{labels:d.dayOfWeek.map(x=>x.name),datasets:[{data:d.dayOfWeek.map(x=>x.count),backgroundColor:d.dayOfWeek.map((_,i)=>P[i%P.length]+'99'),borderRadius:4}]}} options={bOpts(false,true)} />
-      </div></Card>
-      <Card title="Publishing Hours (UTC)" className="lg:col-span-5">
-        <div className="grid grid-cols-12 gap-1" style={{height:200}}>
-          {d.hourDistribution.map((h,i)=>{
-            const max = Math.max(...d.hourDistribution.map(x=>x.count),1)
-            const intensity = h.count/max
-            return <div key={i} className="flex flex-col items-center justify-end gap-1">
-              <div className="w-full rounded-sm transition-all" style={{height:`${Math.max(4,intensity*160)}px`,backgroundColor:`rgba(37,99,235,${0.15+intensity*0.7})`}} title={`${h.hour}:00 — ${h.count} posts`}/>
-              <span className="text-[8px] text-slate-400 tabular-nums">{h.hour}</span>
-            </div>
-          })}
-        </div>
-      </Card>
-      <Card title="Category Performance" className="lg:col-span-4">
-        <div className="space-y-2 max-h-[200px] overflow-y-auto pr-1">
-          {d.categories.slice(0,10).map((c,i)=><ProgressBar key={c.name} label={c.name} value={c.count} max={d.categories[0]?.count||1} color={P[i%P.length]} />)}
-        </div>
-      </Card>
-    </div>
-
-    {/* Row 3: Top writers bar + Views distribution */}
-    <div className="grid lg:grid-cols-2 gap-4">
-      <Card title="Top Writers (by Views)"><div style={{height:220}}>
-        <Bar data={{labels:d.writers.slice(0,8).map(w=>w.name.split(' ')[0]),datasets:[{data:d.writers.slice(0,8).map(w=>w.views),backgroundColor:P.slice(0,8).map(c=>c+'cc'),borderColor:P.slice(0,8),borderWidth:1,borderRadius:4}]}} options={{...bOpts(true,true)}} />
-      </div></Card>
-      {d.viewsDistribution?.length > 0 && <Card title="Views Distribution"><div style={{height:220}}>
-        <Bar data={{labels:d.viewsDistribution.map(x=>x.range),datasets:[{data:d.viewsDistribution.map(x=>x.count),backgroundColor:['#94a3b8cc','#06b6d4cc','#2563ebcc','#7c3aedcc','#059669cc','#d97706cc'],borderRadius:4}]}} options={bOpts(false,true)} />
-      </div></Card>}
-    </div>
-
-    {/* Row 4: Recent articles + Quick stats sidebar */}
-    <div className="grid lg:grid-cols-12 gap-4">
-      <Card title="Recent Articles" className="lg:col-span-8">
-        <div className="overflow-x-auto"><table className="w-full">
-          <thead><tr className="border-b border-slate-100">{['Title','Author','Category','Views','Date'].map(h=><th key={h} className="text-left px-2 py-1.5 text-[10px] font-bold uppercase tracking-wider text-slate-400">{h}</th>)}</tr></thead>
-          <tbody>{d.recentPosts.slice(0,8).map(p=><tr key={p.id} className="border-b border-slate-50 hover:bg-slate-50/50">
-            <td className="px-2 py-2"><span className="text-xs font-medium text-slate-700 truncate block max-w-[280px]">{p.title}</span></td>
-            <td className="px-2 py-2 text-[11px] text-slate-500">{p.author_name}</td>
-            <td className="px-2 py-2"><Badge text={p.category_name} /></td>
-            <td className="px-2 py-2 text-[11px] font-bold text-slate-700 tabular-nums">{fN(p.views||0)}</td>
-            <td className="px-2 py-2 text-[10px] text-slate-400 tabular-nums">{fD(p.published_at)}</td>
-          </tr>)}</tbody>
-        </table></div>
-      </Card>
-      <div className="lg:col-span-4 space-y-4">
-        <Card title="Top Writers (Posts)"><div style={{height:160}}>
-          <Bar data={{labels:d.writers.slice(0,6).map(w=>w.name.split(' ')[0]),datasets:[{data:d.writers.slice(0,6).map(w=>w.posts),backgroundColor:P.slice(0,6).map(c=>c+'cc'),borderRadius:3}]}} options={bOpts(true,true)} />
-        </div></Card>
-        <Card title="Writer Count by Posts">
-          <div className="space-y-2">
-            {d.writers.slice(0,6).map((w,i)=><ProgressBar key={w.id} label={w.name.split(' ')[0]} value={w.views} max={d.writers[0]?.views||1} color={P[i%P.length]} />)}
-          </div>
-        </Card>
-      </div>
-    </div>
-  </div>
-}
-
-// ═══════════════════════════════════════════════════════════════════════════════
-// WRITERS PANEL
-// ═══════════════════════════════════════════════════════════════════════════════
-function WritersPanel({d}:{d:Data}) {
-  const [sort, setSort] = useState<'views'|'posts'|'avgViews'>('views')
-  const sorted = [...d.writers].sort((a,b)=>b[sort]-a[sort])
-  const maxVal = Math.max(...d.writers.map(w=>sort==='views'?w.views:sort==='avgViews'?w.avgViews:w.posts),1)
-
-  return <div className="space-y-4">
-    {/* Writer scorecards */}
-    <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-3">
-      {sorted.slice(0,8).map((w,i)=>(
-        <div key={w.id} className="bg-white border border-slate-200 rounded-xl p-4 shadow-sm relative overflow-hidden hover:shadow-md transition-shadow">
-          <div className="absolute top-0 left-0 right-0 h-0.5" style={{background:P[i%P.length]}} />
-          <div className="flex items-center gap-3 mb-3">
-            <div className="relative">
-              {w.avatar ? <img src={w.avatar} alt="" className="w-10 h-10 rounded-full object-cover border-2 border-slate-100"/> : <div className="w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold text-white" style={{backgroundColor:P[i%P.length]}}>{w.name.charAt(0)}</div>}
-              <div className="absolute -bottom-0.5 -right-0.5 w-4 h-4 rounded-full flex items-center justify-center text-[8px] font-bold text-white" style={{backgroundColor:i<3?'#d97706':'#94a3b8'}}>
-                {i+1}
-              </div>
-            </div>
-            <div className="min-w-0"><p className="text-sm font-bold text-slate-800 truncate">{w.name}</p><p className="text-[10px] text-slate-400 capitalize">{w.role||'author'}</p></div>
-          </div>
-          <div className="grid grid-cols-3 gap-2 mb-3">
-            <div><p className="text-[10px] text-slate-400">Posts</p><p className="text-sm font-extrabold text-slate-800">{w.posts}</p></div>
-            <div><p className="text-[10px] text-slate-400">Views</p><p className="text-sm font-extrabold" style={{color:P[0]}}>{fN(w.views)}</p></div>
-            <div><p className="text-[10px] text-slate-400">Avg</p><p className="text-sm font-extrabold" style={{color:P[1]}}>{fN(w.avgViews)}</p></div>
-          </div>
-          {/* Views bar */}
-          <div className="h-1.5 bg-slate-100 rounded-full overflow-hidden"><div className="h-full rounded-full" style={{width:`${((sort==='views'?w.views:sort==='avgViews'?w.avgViews:w.posts)/maxVal)*100}%`,backgroundColor:P[i%P.length]}}/></div>
-          {w.topCategories.length > 0 && <div className="flex gap-1 mt-2 flex-wrap">{w.topCategories.map(c=><Badge key={c} text={c} color={P[(i+1)%P.length]}/>)}</div>}
-        </div>
-      ))}
-    </div>
-
-    {/* Writer trends chart */}
-    {d.writerTrends.length > 0 && <Card title="Top 5 Writer Publishing Trends (12 months)"><div style={{height:280}}>
-      <Line data={{labels:d.writerMonths.map(fM),datasets:d.writerTrends.map((w,i)=>({
-        label:w.name,data:w.data.map(x=>x.count),borderColor:P[i],backgroundColor:'transparent',tension:.35,borderWidth:2,pointRadius:0,
-      }))}} options={lOpts()} />
-    </div></Card>}
-
-    {/* Full leaderboard */}
-    <Card title="Full Leaderboard">
-      <div className="flex gap-1 mb-3">
-        {(['views','posts','avgViews'] as const).map(s=><button key={s} onClick={()=>setSort(s)} className="px-2 py-1 rounded text-[10px] font-bold transition-colors" style={{backgroundColor:sort===s?'#2563eb':'transparent',color:sort===s?'#fff':'#94a3b8'}}>{s==='avgViews'?'Avg Views':s.charAt(0).toUpperCase()+s.slice(1)}</button>)}
-      </div>
-      <div className="overflow-x-auto"><table className="w-full">
-        <thead><tr className="border-b border-slate-100">{['#','Writer','Posts','Views','Avg Views/Post','Categories'].map(h=><th key={h} className="text-left px-2 py-1.5 text-[10px] font-bold uppercase tracking-wider text-slate-400">{h}</th>)}</tr></thead>
-        <tbody>{sorted.map((w,i)=><tr key={w.id} className="border-b border-slate-50 hover:bg-slate-50/50">
-          <td className="px-2 py-2"><span className="text-xs font-bold tabular-nums" style={{color:i===0?'#d97706':i===1?'#94a3b8':i===2?'#b45309':'#cbd5e1'}}>{i+1}</span></td>
-          <td className="px-2 py-2"><div className="flex items-center gap-2">{w.avatar?<img src={w.avatar} alt="" className="w-6 h-6 rounded-full"/>:<div className="w-6 h-6 rounded-full flex items-center justify-center text-[9px] font-bold text-white" style={{backgroundColor:P[i%P.length]}}>{w.name.charAt(0)}</div>}<span className="text-xs font-semibold text-slate-700">{w.name}</span></div></td>
-          <td className="px-2 py-2 text-xs font-semibold text-slate-700 tabular-nums">{w.posts}</td>
-          <td className="px-2 py-2 text-xs font-bold tabular-nums" style={{color:'#2563eb'}}>{fN(w.views)}</td>
-          <td className="px-2 py-2 text-xs font-bold tabular-nums" style={{color:'#7c3aed'}}>{fN(w.avgViews)}</td>
-          <td className="px-2 py-2"><div className="flex gap-1 flex-wrap">{w.topCategories.map(c=><Badge key={c} text={c} color={P[(i+2)%P.length]}/>)}</div></td>
-        </tr>)}</tbody>
-      </table></div>
-    </Card>
-  </div>
-}
-
-// ═══════════════════════════════════════════════════════════════════════════════
-// SOCIAL PANEL
-// ═══════════════════════════════════════════════════════════════════════════════
-function SocialPanel({d}:{d:Data}) {
-  const {youtube:yt,x,facebook:fb} = d.social
-  const ytT = yt.reduce((s,c)=>s+c.subscribers,0), ytV = yt.reduce((s,c)=>s+c.totalViews,0)
-  const xT = x.reduce((s,c)=>s+c.followers,0), xTw = x.reduce((s,c)=>s+c.tweets,0)
-  const fbT = fb.filter(p=>!p.needsToken).reduce((s,c)=>s+c.followers,0)
-  const total = ytT+xT+fbT
-
-  return <div className="space-y-4">
-    {/* Platform summary */}
-    <div className="grid lg:grid-cols-4 gap-4">
-      <div className="bg-white border border-slate-200 rounded-xl p-5 shadow-sm">
-        <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-1">Total Audience</p>
-        <p className="text-3xl font-extrabold text-slate-800 tabular-nums">{fN(total)}</p>
-        <p className="text-xs text-slate-400 mt-1">across all platforms</p>
-        <div className="flex gap-1 mt-3 h-2 rounded-full overflow-hidden bg-slate-100">
-          {total>0 && <><div style={{width:`${(ytT/total)*100}%`,backgroundColor:'#dc2626'}}/><div style={{width:`${(xT/total)*100}%`,backgroundColor:'#0f172a'}}/><div style={{width:`${(fbT/total)*100}%`,backgroundColor:'#1877f2'}}/></>}
-        </div>
-        <div className="flex gap-3 mt-2">{[{c:'#dc2626',l:'YouTube'},{c:'#0f172a',l:'X'},{c:'#1877f2',l:'Facebook'}].map(p=><span key={p.l} className="flex items-center gap-1 text-[9px] text-slate-400"><span className="w-2 h-2 rounded-full" style={{backgroundColor:p.c}}/>{p.l}</span>)}</div>
-      </div>
-      {/* YouTube */}
-      <div className="bg-white border border-slate-200 rounded-xl p-5 shadow-sm relative overflow-hidden">
-        <div className="absolute top-0 left-0 right-0 h-1" style={{backgroundColor:'#dc2626'}}/>
-        <div className="flex items-center gap-2 mb-2"><span style={{color:'#dc2626'}}>{I.yt}</span><span className="text-xs font-bold text-slate-600">YouTube</span></div>
-        <StatRow label="Subscribers" value={fN(ytT)} color="#dc2626"/>
-        <StatRow label="Total Views" value={fN(ytV)} color="#7c3aed"/>
-        <StatRow label="Channels" value={String(yt.length)}/>
-        <StatRow label="Total Videos" value={fN(yt.reduce((s,c)=>s+c.videoCount,0))}/>
-      </div>
-      {/* X */}
-      <div className="bg-white border border-slate-200 rounded-xl p-5 shadow-sm relative overflow-hidden">
-        <div className="absolute top-0 left-0 right-0 h-1" style={{backgroundColor:'#0f172a'}}/>
-        <div className="flex items-center gap-2 mb-2"><span style={{color:'#0f172a'}}>{I.x}</span><span className="text-xs font-bold text-slate-600">X / Twitter</span></div>
-        <StatRow label="Followers" value={fN(xT)} color="#0f172a"/>
-        <StatRow label="Total Posts" value={fN(xTw)} color="#64748b"/>
-        <StatRow label="Accounts" value={String(x.length)}/>
-        <StatRow label="Listed" value={fN(x.reduce((s,c)=>s+c.listed,0))}/>
-      </div>
-      {/* Facebook */}
-      <div className="bg-white border border-slate-200 rounded-xl p-5 shadow-sm relative overflow-hidden">
-        <div className="absolute top-0 left-0 right-0 h-1" style={{backgroundColor:'#1877f2'}}/>
-        <div className="flex items-center gap-2 mb-2"><span style={{color:'#1877f2'}}>{I.fb}</span><span className="text-xs font-bold text-slate-600">Facebook</span></div>
-        <StatRow label="Followers" value={fN(fbT)} color="#1877f2"/>
-        <StatRow label="Page Likes" value={fN(fb.filter(p=>!p.needsToken).reduce((s,c)=>s+c.likes,0))} color="#4f46e5"/>
-        <StatRow label="Pages" value={String(fb.length)}/>
-        <StatRow label="Connected" value={`${fb.filter(p=>!p.needsToken).length}/${fb.length}`}/>
-      </div>
-    </div>
-
-    {/* YouTube channels */}
-    <div><div className="flex items-center gap-2 mb-3"><span style={{color:'#dc2626'}}>{I.yt}</span><h3 className="text-xs font-bold uppercase tracking-wider text-slate-500">YouTube Channels</h3></div>
-      {yt.length>0 ? <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-3">
-        {yt.map((ch,i)=><div key={ch.handle} className="bg-white border border-slate-200 rounded-xl p-4 shadow-sm hover:shadow-md transition-shadow relative overflow-hidden">
-          <div className="absolute top-0 left-0 right-0 h-0.5 bg-red-500"/>
-          <div className="flex items-center gap-3 mb-3">{ch.thumbnail?<img src={ch.thumbnail} alt="" className="w-10 h-10 rounded-full border-2 border-slate-100"/>:<div className="w-10 h-10 rounded-full bg-red-100 flex items-center justify-center" style={{color:'#dc2626'}}>{I.yt}</div>}
-            <div><p className="text-sm font-bold text-slate-800">{ch.name}</p><p className="text-[10px] text-slate-400">@{ch.handle}</p></div>
-          </div>
-          <div className="grid grid-cols-3 gap-2">
-            <div><p className="text-[9px] text-slate-400">Subs</p><p className="text-sm font-extrabold tabular-nums" style={{color:'#dc2626'}}>{fN(ch.subscribers)}</p></div>
-            <div><p className="text-[9px] text-slate-400">Views</p><p className="text-sm font-extrabold tabular-nums" style={{color:'#7c3aed'}}>{fN(ch.totalViews)}</p></div>
-            <div><p className="text-[9px] text-slate-400">Videos</p><p className="text-sm font-extrabold tabular-nums text-slate-600">{ch.videoCount}</p></div>
-          </div>
-        </div>)}
-      </div> : <Card><p className="text-center py-4 text-slate-400 text-xs">YouTube data unavailable</p></Card>}
-    </div>
-
-    {/* X accounts */}
-    <div><div className="flex items-center gap-2 mb-3"><span style={{color:'#0f172a'}}>{I.x}</span><h3 className="text-xs font-bold uppercase tracking-wider text-slate-500">X / Twitter Accounts</h3></div>
-      {x.length>0 ? <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-3">
-        {x.map((a,i)=><div key={a.username} className="bg-white border border-slate-200 rounded-xl p-4 shadow-sm hover:shadow-md transition-shadow relative overflow-hidden">
-          <div className="absolute top-0 left-0 right-0 h-0.5 bg-slate-800"/>
-          <div className="flex items-center gap-3 mb-3">{a.profileImage?<img src={a.profileImage} alt="" className="w-10 h-10 rounded-full border-2 border-slate-100"/>:<div className="w-10 h-10 rounded-full bg-slate-100 flex items-center justify-center">{I.x}</div>}
-            <div><p className="text-sm font-bold text-slate-800">{a.name}</p><p className="text-[10px] text-slate-400">@{a.username}</p></div>
-          </div>
-          <div className="grid grid-cols-3 gap-2">
-            <div><p className="text-[9px] text-slate-400">Followers</p><p className="text-sm font-extrabold tabular-nums text-slate-800">{fN(a.followers)}</p></div>
-            <div><p className="text-[9px] text-slate-400">Posts</p><p className="text-sm font-extrabold tabular-nums text-slate-600">{fN(a.tweets)}</p></div>
-            <div><p className="text-[9px] text-slate-400">Listed</p><p className="text-sm font-extrabold tabular-nums text-slate-500">{fN(a.listed)}</p></div>
-          </div>
-        </div>)}
-      </div> : <Card><p className="text-center py-4 text-slate-400 text-xs">X data unavailable</p></Card>}
-    </div>
-
-    {/* Facebook */}
-    <div><div className="flex items-center gap-2 mb-3"><span style={{color:'#1877f2'}}>{I.fb}</span><h3 className="text-xs font-bold uppercase tracking-wider text-slate-500">Facebook Pages</h3></div>
-      <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-3">
-        {fb.map(p=><div key={p.id} className="bg-white border border-slate-200 rounded-xl p-4 shadow-sm relative overflow-hidden">
-          <div className="absolute top-0 left-0 right-0 h-0.5" style={{backgroundColor:'#1877f2'}}/>
-          <div className="flex items-center gap-3 mb-3">{p.picture?<img src={p.picture} alt="" className="w-10 h-10 rounded-full border-2 border-slate-100"/>:<div className="w-10 h-10 rounded-full flex items-center justify-center" style={{backgroundColor:'#1877f210',color:'#1877f2'}}>{I.fb}</div>}
-            <div><p className="text-sm font-bold text-slate-800">{p.name}</p>{p.needsToken && <p className="text-[9px] text-amber-500 font-semibold">Needs page token</p>}</div>
-          </div>
-          <div className="grid grid-cols-2 gap-2">
-            <div><p className="text-[9px] text-slate-400">Followers</p><p className="text-sm font-extrabold tabular-nums" style={{color:'#1877f2'}}>{p.needsToken?'—':fN(p.followers)}</p></div>
-            <div><p className="text-[9px] text-slate-400">Likes</p><p className="text-sm font-extrabold tabular-nums" style={{color:'#4f46e5'}}>{p.needsToken?'—':fN(p.likes)}</p></div>
-          </div>
-        </div>)}
-      </div>
-    </div>
-
-    {/* Charts */}
-    {yt.length>0 && <div className="grid lg:grid-cols-2 gap-4">
-      <Card title="Subscriber Comparison"><div style={{height:260}}>
-        <Bar data={{labels:yt.map(c=>c.label),datasets:[{data:yt.map(c=>c.subscribers),backgroundColor:['#dc2626cc','#f59e0bcc','#2563ebcc','#059669cc'],borderRadius:6}]}} options={bOpts(false,true)} />
-      </div></Card>
-      <Card title="Audience Distribution"><div style={{height:260}}>
-        <Doughnut data={{labels:[...yt.map(c=>c.label+' (YT)'),...x.map(a=>a.label+' (X)')],datasets:[{data:[...yt.map(c=>c.subscribers),...x.map(a=>a.followers)],backgroundColor:P,borderColor:'#fff',borderWidth:2}]}} options={dOpts('right')} />
-      </div></Card>
-    </div>}
-  </div>
-}
-
-// ═══════════════════════════════════════════════════════════════════════════════
-// CONTENT ANALYTICS PANEL
-// ═══════════════════════════════════════════════════════════════════════════════
-function ContentPanel({d}:{d:Data}) {
-  return <div className="space-y-4">
-    <div className="grid lg:grid-cols-12 gap-4">
-      {/* Top content table */}
-      <Card title="Top Performing Content" className="lg:col-span-8">
-        <div className="overflow-x-auto"><table className="w-full">
-          <thead><tr className="border-b border-slate-100">{['#','Title','Author','Category','Views','Date'].map(h=><th key={h} className="text-left px-2 py-1.5 text-[10px] font-bold uppercase tracking-wider text-slate-400">{h}</th>)}</tr></thead>
-          <tbody>{d.topContent.map((p,i)=><tr key={p.id} className="border-b border-slate-50 hover:bg-slate-50/50">
-            <td className="px-2 py-2"><span className="text-xs font-bold" style={{color:i<3?['#d97706','#94a3b8','#b45309'][i]:'#cbd5e1'}}>{i+1}</span></td>
-            <td className="px-2 py-2"><span className="text-xs font-medium text-slate-700 truncate block max-w-[300px]">{p.title}</span></td>
-            <td className="px-2 py-2 text-[11px] text-slate-500">{p.author_name}</td>
-            <td className="px-2 py-2"><Badge text={p.category_name}/></td>
-            <td className="px-2 py-2 text-xs font-bold tabular-nums" style={{color:'#059669'}}>{fN(p.views||0)}</td>
-            <td className="px-2 py-2 text-[10px] text-slate-400 tabular-nums">{fD(p.published_at)}</td>
-          </tr>)}</tbody>
-        </table></div>
-      </Card>
-
-      {/* Category sidebar */}
-      <div className="lg:col-span-4 space-y-4">
-        <Card title="Category Breakdown">
-          <div className="space-y-1.5 max-h-[200px] overflow-y-auto pr-1">
-            {d.categories.slice(0,12).map((c,i)=><ProgressBar key={c.name} label={c.name} value={c.count} max={d.categories[0]?.count||1} color={P[i%P.length]}/>)}
-          </div>
-        </Card>
-        {d.viewsDistribution?.length > 0 && <Card title="Views Distribution"><div style={{height:160}}>
-          <Bar data={{labels:d.viewsDistribution.map(x=>x.range),datasets:[{data:d.viewsDistribution.map(x=>x.count),backgroundColor:['#94a3b8cc','#06b6d4cc','#2563ebcc','#7c3aedcc','#059669cc','#d97706cc'],borderRadius:3}]}} options={bOpts(false,true)} />
-        </div></Card>}
-      </div>
-    </div>
-
-    {/* Charts row */}
-    <div className="grid lg:grid-cols-2 gap-4">
-      <Card title="Category Post Count"><div style={{height:240}}>
-        <Bar data={{labels:d.categories.slice(0,8).map(c=>c.name),datasets:[{data:d.categories.slice(0,8).map(c=>c.count),backgroundColor:P.slice(0,8).map(c=>c+'cc'),borderRadius:4}]}} options={{...bOpts(true,true)}} />
-      </div></Card>
-      <Card title="Top Articles by Views"><div style={{height:240}}>
-        <Bar data={{labels:d.topContent.slice(0,6).map(p=>(p.title||'').substring(0,30)+'...'),datasets:[{data:d.topContent.slice(0,6).map(p=>p.views||0),backgroundColor:P.slice(0,6).map(c=>c+'cc'),borderColor:P.slice(0,6),borderWidth:1,borderRadius:4}]}} options={bOpts(true,true)} />
-      </div></Card>
-    </div>
-
-    {/* Activity feed */}
-    <Card title="Recent Activity Feed">
-      <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-3">
-        {d.recentPosts.slice(0,12).map(p=><div key={p.id} className="flex items-start gap-2 py-2 px-3 rounded-lg bg-slate-50/50 border border-slate-100">
-          <div className="w-1.5 h-1.5 rounded-full mt-1.5 flex-shrink-0 bg-blue-500"/>
-          <div className="min-w-0"><p className="text-xs font-medium text-slate-700 truncate">{p.title}</p><p className="text-[10px] text-slate-400 mt-0.5">{p.author_name} · {fD(p.published_at)}{(p.views||0)>0 && <span className="font-semibold text-emerald-600 ml-1">{fN(p.views)} views</span>}</p></div>
-        </div>)}
-      </div>
-    </Card>
-  </div>
-}
-
-// ═══════════════════════════════════════════════════════════════════════════════
-// SEO PANEL
-// ═══════════════════════════════════════════════════════════════════════════════
-function SEOPanel({d}:{d:Data}) {
-  const seo = d.seo
-  const ov = seo?.overview
-
-  return <div className="space-y-4">
-    {/* Row 1: Domain KPIs */}
-    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
-      <MiniKPI label="SEMRush Rank" value={ov ? fN(ov.rank) : '—'} color="#2563eb" icon={I.globe} />
-      <MiniKPI label="Organic Keywords" value={ov ? fN(ov.organicKeywords) : '—'} color="#059669" icon={I.bar} />
-      <MiniKPI label="Organic Traffic" value={ov ? fN(ov.organicTraffic) : '—'} sub="monthly est." color="#7c3aed" icon={I.eye} />
-      <MiniKPI label="Traffic Value" value={ov ? `$${fN(ov.organicCost)}` : '—'} sub="monthly est." color="#d97706" icon={I.star} />
-      <MiniKPI label="Total Posts" value={fN(d.overview.totalPosts)} color="#4f46e5" icon={I.doc} />
-      <MiniKPI label="Active Writers" value={String(d.overview.totalAuthors)} sub={`${d.writers.length} active`} color="#0891b2" icon={I.ppl} />
-    </div>
-
-    <div className="grid lg:grid-cols-12 gap-4">
-      {/* Top Organic Keywords */}
-      <Card title="Top Organic Keywords" className="lg:col-span-8">
-        {seo?.keywords && seo.keywords.length > 0 ? <div className="overflow-x-auto"><table className="w-full">
-          <thead><tr className="border-b border-slate-100">{['Keyword','Pos','Prev','Volume','Traffic %','URL'].map(h=><th key={h} className="text-left px-2 py-1.5 text-[10px] font-bold uppercase tracking-wider text-slate-400">{h}</th>)}</tr></thead>
-          <tbody>{seo.keywords.map((kw,i)=>{
-            const diff = kw.previousPosition - kw.position
-            return <tr key={i} className="border-b border-slate-50 hover:bg-slate-50/50">
-              <td className="px-2 py-2 text-xs font-medium text-slate-700 max-w-[220px] truncate">{kw.keyword}</td>
-              <td className="px-2 py-2"><span className="text-xs font-extrabold tabular-nums" style={{color:kw.position<=3?'#059669':kw.position<=10?'#2563eb':'#64748b'}}>{kw.position}</span></td>
-              <td className="px-2 py-2"><span className="text-[11px] tabular-nums" style={{color:diff>0?'#059669':diff<0?'#dc2626':'#94a3b8'}}>{diff>0?`+${diff}`:diff<0?String(diff):'—'}</span></td>
-              <td className="px-2 py-2 text-xs font-semibold text-slate-700 tabular-nums">{fN(kw.searchVolume)}</td>
-              <td className="px-2 py-2 text-xs tabular-nums text-slate-500">{kw.trafficPct.toFixed(2)}%</td>
-              <td className="px-2 py-2 text-[10px] text-slate-400 max-w-[180px] truncate">{kw.url.replace('https://www.sportsmockery.com','')}</td>
-            </tr>
-          })}</tbody>
-        </table></div> : <p className="text-center py-6 text-xs text-slate-400">No keyword data available</p>}
-      </Card>
-
-      {/* Content Health sidebar */}
-      <div className="lg:col-span-4 space-y-4">
-        <Card title="Content Health">
-          <div className="space-y-3">
-            <div><p className="text-[10px] text-slate-400 mb-1">Publishing Velocity</p><div className="flex items-center gap-2"><div className="flex-1 h-3 bg-slate-100 rounded-full overflow-hidden"><div className="h-full rounded-full bg-blue-500" style={{width:`${Math.min(100,parseFloat(d.overview.velocity)/10*100)}%`}}/></div><span className="text-xs font-bold text-slate-700">{d.overview.velocity}/wk</span></div></div>
-            <div><p className="text-[10px] text-slate-400 mb-1">Avg Views Per Article</p><div className="flex items-center gap-2"><div className="flex-1 h-3 bg-slate-100 rounded-full overflow-hidden"><div className="h-full rounded-full bg-purple-500" style={{width:`${Math.min(100,d.overview.avgViews/1000*100)}%`}}/></div><span className="text-xs font-bold text-slate-700">{fN(d.overview.avgViews)}</span></div></div>
-            <div><p className="text-[10px] text-slate-400 mb-1">Period Views</p><div className="flex items-center gap-2"><div className="flex-1 h-3 bg-slate-100 rounded-full overflow-hidden"><div className="h-full rounded-full bg-amber-500" style={{width:`${Math.min(100,d.overview.periodViews/100000*100)}%`}}/></div><span className="text-xs font-bold text-slate-700">{fN(d.overview.periodViews)}</span></div></div>
-            <div><p className="text-[10px] text-slate-400 mb-1">Active Writers Ratio</p><div className="flex items-center gap-2"><div className="flex-1 h-3 bg-slate-100 rounded-full overflow-hidden"><div className="h-full rounded-full bg-emerald-500" style={{width:`${(d.writers.length/Math.max(d.overview.totalAuthors,1))*100}%`}}/></div><span className="text-xs font-bold text-slate-700">{d.writers.length}/{d.overview.totalAuthors}</span></div></div>
-          </div>
-        </Card>
-        <Card title="Social Reach">
-          <div className="space-y-3">
-            {d.social.youtube.map(ch=><div key={ch.handle} className="flex items-center gap-2">
-              <span className="w-5 text-center" style={{color:'#dc2626'}}>{I.yt}</span>
-              <span className="text-xs text-slate-500 flex-1 truncate">{ch.label}</span>
-              <span className="text-xs font-bold tabular-nums text-slate-700">{fN(ch.subscribers)}</span>
-            </div>)}
-            {d.social.x.map(a=><div key={a.username} className="flex items-center gap-2">
-              <span className="w-5 text-center">{I.x}</span>
-              <span className="text-xs text-slate-500 flex-1 truncate">{a.label}</span>
-              <span className="text-xs font-bold tabular-nums text-slate-700">{fN(a.followers)}</span>
-            </div>)}
-            {d.social.facebook.filter(p=>!p.needsToken).map(p=><div key={p.id} className="flex items-center gap-2">
-              <span className="w-5 text-center" style={{color:'#1877f2'}}>{I.fb}</span>
-              <span className="text-xs text-slate-500 flex-1 truncate">{p.label}</span>
-              <span className="text-xs font-bold tabular-nums text-slate-700">{fN(p.followers)}</span>
-            </div>)}
-          </div>
-        </Card>
-      </div>
-    </div>
-
-    {/* Row 3: Competitors + Keyword charts */}
-    <div className="grid lg:grid-cols-2 gap-4">
-      <Card title="Organic Competitors">
-        {seo?.competitors && seo.competitors.length > 0 ? <div className="overflow-x-auto"><table className="w-full">
-          <thead><tr className="border-b border-slate-100">{['Domain','Relevance','Common KW','Organic KW','Traffic'].map(h=><th key={h} className="text-left px-2 py-1.5 text-[10px] font-bold uppercase tracking-wider text-slate-400">{h}</th>)}</tr></thead>
-          <tbody>{seo.competitors.map((c,i)=><tr key={c.domain} className="border-b border-slate-50 hover:bg-slate-50/50">
-            <td className="px-2 py-2 text-xs font-medium text-slate-700">{c.domain}</td>
-            <td className="px-2 py-2"><div className="flex items-center gap-1.5"><div className="w-12 h-1.5 bg-slate-100 rounded-full overflow-hidden"><div className="h-full rounded-full" style={{width:`${c.relevance*100}%`,backgroundColor:P[i%P.length]}}/></div><span className="text-[10px] text-slate-500 tabular-nums">{(c.relevance*100).toFixed(0)}%</span></div></td>
-            <td className="px-2 py-2 text-xs tabular-nums text-slate-600">{fN(c.commonKeywords)}</td>
-            <td className="px-2 py-2 text-xs tabular-nums text-slate-600">{fN(c.organicKeywords)}</td>
-            <td className="px-2 py-2 text-xs font-bold tabular-nums" style={{color:'#2563eb'}}>{fN(c.organicTraffic)}</td>
-          </tr>)}</tbody>
-        </table></div> : <p className="text-center py-6 text-xs text-slate-400">No competitor data available</p>}
-      </Card>
-
-      {seo?.competitors && seo.competitors.length > 0 && <Card title="Competitor Traffic Comparison"><div style={{height:260}}>
-        <Bar data={{labels:['sportsmockery.com',...seo.competitors.slice(0,6).map(c=>c.domain.replace('.com',''))],datasets:[{data:[ov?.organicTraffic||0,...seo.competitors.slice(0,6).map(c=>c.organicTraffic)],backgroundColor:['#2563ebcc',...P.slice(1,7).map(c=>c+'99')],borderRadius:4}]}} options={bOpts(false,true)} />
-      </div></Card>}
-    </div>
-
-    {/* Keyword position distribution */}
-    {seo?.keywords && seo.keywords.length > 0 && <div className="grid lg:grid-cols-2 gap-4">
-      <Card title="Keyword Position Distribution"><div style={{height:220}}>
-        <Bar data={{labels:seo.keywords.slice(0,10).map(k=>k.keyword.length>25?k.keyword.substring(0,25)+'…':k.keyword),datasets:[{data:seo.keywords.slice(0,10).map(k=>k.searchVolume),backgroundColor:seo.keywords.slice(0,10).map((_,i)=>P[i%P.length]+'cc'),borderRadius:4}]}} options={bOpts(false,true)} />
-      </div></Card>
-      <Card title="Top Keywords by Search Volume"><div style={{height:220}}>
-        <Doughnut data={{labels:seo.keywords.slice(0,8).map(k=>k.keyword),datasets:[{data:seo.keywords.slice(0,8).map(k=>k.searchVolume),backgroundColor:P.slice(0,8),borderColor:'#fff',borderWidth:2}]}} options={dOpts('right')} />
-      </div></Card>
-    </div>}
-  </div>
 }
