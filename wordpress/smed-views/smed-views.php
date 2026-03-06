@@ -83,6 +83,18 @@ add_action( 'rest_api_init', 'smed_views_register_routes' );
 function smed_views_register_routes() {
 	$ns = 'smed/v1';
 
+	// GET /smed/v1/writer-payments?start=YYYY-MM-DD&end=YYYY-MM-DD
+	// Returns post_views_count per writer (the ONLY source for payment calculations)
+	register_rest_route( $ns, '/writer-payments', array(
+		'methods'             => 'GET',
+		'callback'            => 'smed_writer_payments',
+		'permission_callback' => '__return_true',
+		'args'                => array(
+			'start' => array( 'required' => true, 'sanitize_callback' => 'sanitize_text_field' ),
+			'end'   => array( 'required' => true, 'sanitize_callback' => 'sanitize_text_field' ),
+		),
+	) );
+
 	// GET /smed/v1/views/overview?start=YYYY-MM-DD&end=YYYY-MM-DD
 	register_rest_route( $ns, '/views/overview', array(
 		'methods'             => 'GET',
@@ -241,4 +253,53 @@ function smed_views_posts( WP_REST_Request $request ) {
 	}
 
 	return rest_ensure_response( $result );
+}
+
+/* ── /writer-payments ───────────────────────────────────────────────────────── */
+/* Mirrors the manual SQL query used for monthly writer payment calculations.   */
+/* Source: post_views_count in wp_postmeta — the hero view count on live site.  */
+
+function smed_writer_payments( WP_REST_Request $request ) {
+	global $wpdb;
+	$start = $request->get_param( 'start' );
+	$end   = $request->get_param( 'end' );
+
+	$rows = $wpdb->get_results( $wpdb->prepare(
+		"SELECT
+			u.ID                                    AS author_id,
+			u.display_name,
+			COUNT(p.ID)                             AS total_posts,
+			COALESCE(SUM(CAST(pm.meta_value AS UNSIGNED)), 0) AS total_views
+		FROM {$wpdb->users} u
+		INNER JOIN {$wpdb->posts} p ON u.ID = p.post_author
+		LEFT JOIN {$wpdb->postmeta} pm ON p.ID = pm.post_id AND pm.meta_key = 'post_views_count'
+		WHERE p.post_date >= %s
+		  AND p.post_date < %s
+		  AND p.post_type   = 'post'
+		  AND p.post_status = 'publish'
+		GROUP BY u.ID, u.display_name
+		ORDER BY total_views DESC",
+		$start,
+		$end
+	) );
+
+	if ( $wpdb->last_error ) {
+		return new WP_Error( 'db_error', $wpdb->last_error, array( 'status' => 500 ) );
+	}
+
+	$result = array();
+	foreach ( $rows as $row ) {
+		$result[] = array(
+			'author_id'    => (string) $row->author_id,
+			'display_name' => $row->display_name,
+			'total_posts'  => (int) $row->total_posts,
+			'total_views'  => (int) $row->total_views,
+		);
+	}
+
+	return rest_ensure_response( array(
+		'start'   => $start,
+		'end'     => $end,
+		'writers' => $result,
+	) );
 }

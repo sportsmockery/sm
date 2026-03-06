@@ -48,6 +48,10 @@
     {
       "path": "/api/cron/sync-wordpress",
       "schedule": "0 4 * * *"
+    },
+    {
+      "path": "/api/cron/sync-writer-views",
+      "schedule": "0 5 * * *"
     }
   ],
   "headers": [
