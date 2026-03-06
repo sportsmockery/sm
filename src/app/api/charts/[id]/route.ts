@@ -1,58 +1,48 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { supabaseAdmin } from '@/lib/supabase-server'
+import { supabaseAdmin } from '@/lib/db'
+import { applyTheme, ThemeMode } from '@/lib/echarts-themes'
 
 /**
  * GET /api/charts/[id]
- * Fetch a single chart by ID
  */
 export async function GET(
-  request: NextRequest,
+  _request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const { id } = await params
 
-    const { data: chart, error } = await supabaseAdmin
+    const { data, error } = await supabaseAdmin
       .from('sm_charts')
-      .select('*')
+      .select('id, title, options, is_template, created_at, updated_at')
       .eq('id', id)
-      .single()
+      .maybeSingle()
 
-    if (error || !chart) {
-      return NextResponse.json(
-        { error: 'Chart not found' },
-        { status: 404 }
-      )
+    if (error) {
+      console.error('Error fetching chart:', error)
+      return NextResponse.json({ error: 'Failed to fetch chart' }, { status: 500 })
     }
 
-    // Transform database record to ChartConfig format
-    const config = {
-      id: chart.id,
-      postId: chart.post_id,
-      type: chart.chart_type,
-      title: chart.title,
-      size: chart.config?.size || 'medium',
-      colors: chart.config?.colors || { scheme: 'team', team: 'bears' },
-      data: chart.data || [],
-      dataSource: chart.config?.source?.type || 'manual',
-      dataLabQuery: chart.config?.source?.query,
-      createdAt: chart.created_at,
-      updatedAt: chart.updated_at,
+    if (!data) {
+      return NextResponse.json({ error: 'Chart not found' }, { status: 404 })
     }
 
-    return NextResponse.json(config)
+    return NextResponse.json({
+      id: data.id,
+      title: data.title,
+      options: data.options,
+      is_template: data.is_template,
+      created_at: data.created_at,
+      updated_at: data.updated_at,
+    })
   } catch (error) {
     console.error('Error fetching chart:', error)
-    return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
-    )
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }
 }
 
 /**
  * PUT /api/charts/[id]
- * Update a chart
  */
 export async function PUT(
   request: NextRequest,
@@ -61,72 +51,76 @@ export async function PUT(
   try {
     const { id } = await params
     const body = await request.json()
+    const { title, mode, is_template } = body
+    const rawOptions = body.options || body
 
-    const { data: chart, error } = await supabaseAdmin
+    if (!rawOptions || typeof rawOptions !== 'object') {
+      return NextResponse.json({ error: 'Invalid chart options' }, { status: 400 })
+    }
+
+    const themed = applyTheme(rawOptions, (mode as ThemeMode) || 'dark')
+    const normalized = {
+      animation: true,
+      animationDuration: 1000,
+      ...themed,
+    }
+
+    const updates: Record<string, unknown> = { options: normalized }
+    if (title !== undefined) updates.title = title
+    if (is_template !== undefined) updates.is_template = is_template
+
+    const { data, error } = await supabaseAdmin
       .from('sm_charts')
-      .update({
-        chart_type: body.type,
-        title: body.title,
-        config: {
-          size: body.size,
-          colors: body.colors,
-          source: body.dataLabQuery ? { type: 'datalab', query: body.dataLabQuery } : { type: 'manual' },
-        },
-        data: body.data,
-        updated_at: new Date().toISOString(),
-      })
+      .update(updates)
       .eq('id', id)
-      .select()
-      .single()
+      .select('id')
+      .maybeSingle()
 
     if (error) {
       console.error('Error updating chart:', error)
-      return NextResponse.json(
-        { error: 'Failed to update chart' },
-        { status: 500 }
-      )
+      return NextResponse.json({ error: 'Failed to update chart' }, { status: 500 })
     }
 
-    return NextResponse.json(chart)
+    if (!data) {
+      return NextResponse.json({ error: 'Chart not found' }, { status: 404 })
+    }
+
+    return NextResponse.json({ success: true })
   } catch (error) {
     console.error('Error updating chart:', error)
-    return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
-    )
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }
 }
 
 /**
  * DELETE /api/charts/[id]
- * Delete a chart
  */
 export async function DELETE(
-  request: NextRequest,
+  _request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const { id } = await params
 
-    const { error } = await supabaseAdmin
+    const { data, error } = await supabaseAdmin
       .from('sm_charts')
       .delete()
       .eq('id', id)
+      .select('id')
+      .maybeSingle()
 
     if (error) {
       console.error('Error deleting chart:', error)
-      return NextResponse.json(
-        { error: 'Failed to delete chart' },
-        { status: 500 }
-      )
+      return NextResponse.json({ error: 'Failed to delete chart' }, { status: 500 })
+    }
+
+    if (!data) {
+      return NextResponse.json({ error: 'Chart not found' }, { status: 404 })
     }
 
     return NextResponse.json({ success: true })
   } catch (error) {
     console.error('Error deleting chart:', error)
-    return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
-    )
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }
 }

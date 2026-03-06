@@ -2,6 +2,8 @@ import { NextResponse } from 'next/server'
 
 const WP_API = 'https://www.sportsmockery.com/wp-json/wp/v2'
 const WP_EXPORT = 'https://www.sportsmockery.com/wp-json/sm-export/v1'
+const WP_SMED = 'https://www.sportsmockery.com/wp-json/smed/v1'
+const SEMRUSH_API = 'https://api.semrush.com'
 const MAX_PAGES = 10
 const PER_PAGE = 100
 
@@ -17,6 +19,7 @@ const XA = [
   { username: 'bfr_pod', label: 'Bears Film Room Pod' },
   { username: 'PinwheelsIvyPod', label: 'Pinwheels & Ivy Pod' },
   { username: 'SSBehavior', label: 'SS Behavior' },
+  { username: 'dabearsblog', label: 'DaBearsBlog' },
 ]
 
 export async function GET(request: Request) {
@@ -29,11 +32,12 @@ export async function GET(request: Request) {
   const prevStart = new Date(startDate.getTime() - days * 86400000)
 
   try {
-    const [editorial, social] = await Promise.all([
+    const [editorial, social, seo] = await Promise.all([
       fetchEditorial(startDate, prevStart, now, days),
       fetchSocial(),
+      fetchSEO(),
     ])
-    return NextResponse.json({ ...editorial, social, range, days, timestamp: Date.now() })
+    return NextResponse.json({ ...editorial, social, seo, range, days, timestamp: Date.now() })
   } catch (error) {
     console.error('Exec dashboard error:', error)
     return NextResponse.json({ error: 'Failed to fetch' }, { status: 500 })
@@ -76,8 +80,12 @@ async function wpFetchAllPosts(after: Date, before: Date): Promise<{ posts: any[
 
 // ── Editorial data ───────────────────────────────────────────────────────────
 async function fetchEditorial(startDate: Date, prevStart: Date, now: Date, days: number) {
-  // Parallel fetch: period posts, prev count, total count, authors, categories, monthly trends
-  const [periodResult, prevCountRes, totalCountRes, authorsRaw, categoriesRes, monthCounts] = await Promise.all([
+  const startStr = startDate.toISOString().split('T')[0]
+  const prevStr = prevStart.toISOString().split('T')[0]
+  const nowStr = now.toISOString().split('T')[0]
+
+  // Parallel fetch: period posts, prev count, total count, authors, categories, monthly trends, SMED views
+  const [periodResult, prevCountRes, totalCountRes, authorsRaw, categoriesRes, monthCounts, smedOverview, smedPrevOverview, smedAuthorViews, smedTopPosts] = await Promise.all([
     wpFetchAllPosts(startDate, now),
     wpApiFetch(`/posts?per_page=1&status=publish&after=${prevStart.toISOString()}&before=${startDate.toISOString()}`),
     wpApiFetch(`/posts?per_page=1&status=publish`),
@@ -93,6 +101,11 @@ async function fetchEditorial(startDate: Date, prevStart: Date, now: Date, days:
           .catch(() => ({ month: `${ms.getFullYear()}-${String(ms.getMonth() + 1).padStart(2, '0')}`, count: 0 }))
       })
     ),
+    // SMED plugin views endpoints (will 404 gracefully until plugin is updated)
+    fetch(`${WP_SMED}/views/overview?start=${startStr}&end=${nowStr}`, { next: { revalidate: 900 } }).then(r => r.ok ? r.json() : null).catch(() => null),
+    fetch(`${WP_SMED}/views/overview?start=${prevStr}&end=${startStr}`, { next: { revalidate: 900 } }).then(r => r.ok ? r.json() : null).catch(() => null),
+    fetch(`${WP_SMED}/views/authors?months=12`, { next: { revalidate: 900 } }).then(r => r.ok ? r.json() : []).catch(() => []),
+    fetch(`${WP_SMED}/views/posts?start=${startStr}&end=${nowStr}&limit=50`, { next: { revalidate: 900 } }).then(r => r.ok ? r.json() : []).catch(() => []),
   ])
 
   const period = periodResult.posts
@@ -121,27 +134,52 @@ async function fetchEditorial(startDate: Date, prevStart: Date, now: Date, days:
     wMap.set(aid, e)
   }
 
-  const writers = Array.from(wMap.entries()).map(([id, s]) => ({
-    id,
-    name: getAuthorName(id),
-    avatar: getAuthorAvatar(id),
-    role: (aMap.get(id) as any)?.role || '',
-    posts: s.posts,
-    views: 0,
-    avgViews: 0,
-    topCategories: Array.from(s.categories).slice(0, 3),
-    avgReadTime: 0,
-    avgScore: 0,
-  })).sort((a, b) => b.posts - a.posts)
+  // ── Merge SMED author views into writer stats ──
+  // smedAuthorViews is [{display_name, author_id, month, total_posts, total_views}, ...]
+  // Aggregate views per author for the selected period months
+  const smedAuthorViewsMap = new Map<number, number>()
+  const periodMonthSet = new Set<string>()
+  for (const p of period) {
+    const m = (p.date_gmt || p.date)?.substring(0, 7); if (m) periodMonthSet.add(m)
+  }
+  for (const row of (smedAuthorViews || [])) {
+    const aid = parseInt(row.author_id)
+    if (periodMonthSet.has(row.month)) {
+      smedAuthorViewsMap.set(aid, (smedAuthorViewsMap.get(aid) || 0) + parseInt(row.total_views || '0'))
+    }
+  }
+
+  // Build post-level views map from smedTopPosts
+  const postViewsMap = new Map<number, number>()
+  for (const row of (smedTopPosts || [])) {
+    postViewsMap.set(parseInt(row.post_id), parseInt(row.views || '0'))
+  }
+
+  const writers = Array.from(wMap.entries()).map(([id, s]) => {
+    const views = smedAuthorViewsMap.get(id) || 0
+    return {
+      id,
+      name: getAuthorName(id),
+      avatar: getAuthorAvatar(id),
+      role: (aMap.get(id) as any)?.role || '',
+      posts: s.posts,
+      views,
+      avgViews: s.posts > 0 ? Math.round(views / s.posts) : 0,
+      topCategories: Array.from(s.categories).slice(0, 3),
+    }
+  }).sort((a, b) => b.views - a.views || b.posts - a.posts)
 
   // ── Daily publishing trend ──
-  const dMap = new Map<string, number>()
+  const dMap = new Map<string, { count: number; views: number }>()
   for (const p of period) {
     const day = (p.date_gmt || p.date)?.split('T')[0]; if (!day) continue
-    dMap.set(day, (dMap.get(day) || 0) + 1)
+    const e = dMap.get(day) || { count: 0, views: 0 }
+    e.count++
+    e.views += postViewsMap.get(p.id) || 0
+    dMap.set(day, e)
   }
   const publishingTrend = Array.from(dMap.entries())
-    .map(([date, count]) => ({ date, count, views: 0 }))
+    .map(([date, { count, views }]) => ({ date, count, views }))
     .sort((a, b) => a.date.localeCompare(b.date))
 
   // ── Day of week ──
@@ -161,19 +199,29 @@ async function fetchEditorial(startDate: Date, prevStart: Date, now: Date, days:
   const hourDistribution = hours.map((count, hour) => ({ hour, count }))
 
   // ── Category breakdown ──
-  const catStats = new Map<number, number>()
+  const catStats = new Map<number, { count: number; views: number }>()
   for (const p of period) {
+    const pViews = postViewsMap.get(p.id) || 0
     for (const catId of (p.categories || [])) {
-      catStats.set(catId, (catStats.get(catId) || 0) + 1)
+      const e = catStats.get(catId) || { count: 0, views: 0 }
+      e.count++
+      e.views += pViews
+      catStats.set(catId, e)
     }
   }
   const categoryBreakdown = Array.from(catStats.entries())
-    .map(([id, count]) => ({ name: getCatName(id), count, views: 0, avgViews: 0 }))
+    .map(([id, { count, views }]) => ({ name: getCatName(id), count, views, avgViews: count > 0 ? Math.round(views / count) : 0 }))
     .sort((a, b) => b.count - a.count)
     .slice(0, 12)
 
   // ── Monthly trend ──
-  const monthlyTrend = monthCounts.map(m => ({ ...m, views: 0 }))
+  // Aggregate monthly views from SMED author data
+  const monthlyViewsMap = new Map<string, number>()
+  for (const row of (smedAuthorViews || [])) {
+    const m = row.month
+    if (m) monthlyViewsMap.set(m, (monthlyViewsMap.get(m) || 0) + parseInt(row.total_views || '0'))
+  }
+  const monthlyTrend = monthCounts.map(m => ({ ...m, views: monthlyViewsMap.get(m.month) || 0 }))
 
   // ── Writer trends (from period data only) ──
   const top5Ids = writers.slice(0, 5).map(w => w.id)
@@ -192,7 +240,7 @@ async function fetchEditorial(startDate: Date, prevStart: Date, now: Date, days:
     data: periodMonths.map(m => ({ month: m, count: authorMonthly.get(id)?.get(m) || 0 })),
   }))
 
-  // ── Enrich posts ──
+  // ── Enrich posts with views ──
   const enrichPost = (p: any) => ({
     id: p.id,
     title: typeof p.title === 'object' ? p.title.rendered : p.title,
@@ -200,47 +248,70 @@ async function fetchEditorial(startDate: Date, prevStart: Date, now: Date, days:
     published_at: p.date_gmt || p.date,
     author_name: getAuthorName(p.author),
     category_name: getCatName(p.categories?.[0]),
-    views: 0,
+    views: postViewsMap.get(p.id) || 0,
     featured_image: null,
   })
 
+  // Sort top content by views from SMED data
+  const topContent = [...(smedTopPosts || [])].slice(0, 15).map((sp: any) => ({
+    id: parseInt(sp.post_id),
+    title: sp.title || '',
+    slug: sp.slug || '',
+    published_at: sp.published_at || '',
+    author_name: sp.author_name || '',
+    category_name: '',
+    views: parseInt(sp.views || '0'),
+    featured_image: null,
+  }))
+  // Fall back to period posts if SMED data unavailable
   const recentPosts = period.slice(0, 25).map(enrichPost)
-  const topContent = period.slice(0, 15).map(enrichPost)
+
+  const periodViews = smedOverview?.total_views ? parseInt(smedOverview.total_views) : 0
+  const prevPeriodViews = smedPrevOverview?.total_views ? parseInt(smedPrevOverview.total_views) : 0
+  const allTimeViews = smedOverview?.all_time_views ? parseInt(smedOverview.all_time_views) : 0
+  const avgViews = period.length > 0 && periodViews > 0 ? Math.round(periodViews / period.length) : 0
 
   const velocity = days > 0 ? (period.length / (days / 7)).toFixed(1) : '0'
   const activeWriterRoles = ['author', 'editor', 'administrator']
   const totalAuthors = authors.filter((a: any) => activeWriterRoles.includes(a.role)).length
 
+  // ── Views distribution buckets ──
+  const vBuckets = { '0': 0, '1-100': 0, '101-500': 0, '501-1K': 0, '1K-10K': 0, '10K+': 0 }
+  for (const sp of (smedTopPosts || [])) {
+    const v = parseInt(sp.views || '0')
+    if (v === 0) vBuckets['0']++
+    else if (v <= 100) vBuckets['1-100']++
+    else if (v <= 500) vBuckets['101-500']++
+    else if (v <= 1000) vBuckets['501-1K']++
+    else if (v <= 10000) vBuckets['1K-10K']++
+    else vBuckets['10K+']++
+  }
+  const viewsDistribution = Object.entries(vBuckets).map(([range, count]) => ({ range, count }))
+
   return {
     overview: {
       totalPosts,
-      allTimeViews: 0,
+      allTimeViews,
       periodPosts: period.length,
       prevPeriodPosts: prevPeriodPosts,
-      periodViews: 0,
-      prevPeriodViews: 0,
+      periodViews,
+      prevPeriodViews,
       totalAuthors,
       totalCategories: categories.length,
-      avgReadTime: 0,
-      avgViews: 0,
+      avgViews,
       velocity,
-      avgScore: 0,
     },
     writers,
     writerTrends,
     writerMonths: periodMonths,
     categories: categoryBreakdown,
-    contentTypes: [],
-    topicBreakdown: [],
+    viewsDistribution,
     recentPosts,
     topContent,
     publishingTrend,
     monthlyTrend,
     dayOfWeek,
     hourDistribution,
-    readTimeDistribution: [],
-    viewsDistribution: [],
-    scoreDistribution: [],
   }
 }
 
@@ -288,8 +359,79 @@ async function fetchFacebook() {
     if (!r.ok) return []; const d = await r.json()
     return [
       { id: pid, label: 'SportsMockery', name: d.name || 'SportsMockery', followers: d.followers_count || 0, likes: d.fan_count || 0, picture: d.picture?.data?.url || '', needsToken: false },
-      { id: 'TruBearsFan', label: 'Tru Bears Fan', name: 'Tru Bears Fan', followers: 0, likes: 0, picture: '', needsToken: true },
-      { id: 'ChiBearsRumors', label: 'Chi Bears Rumors', name: 'Chi Bears Rumors', followers: 0, likes: 0, picture: '', needsToken: true },
     ]
   } catch { return [] }
+}
+
+// ── SEMRush SEO data ─────────────────────────────────────────────────────────
+function parseSemrushCSV(csv: string): any[] {
+  const lines = csv.trim().split(/\r?\n/).filter(l => l.trim())
+  if (lines.length < 2) return []
+  const headers = lines[0].split(';')
+  return lines.slice(1).map(line => {
+    const vals = line.split(';')
+    const obj: any = {}
+    headers.forEach((h, i) => obj[h] = vals[i] || '')
+    return obj
+  })
+}
+
+async function fetchSEO() {
+  const key = process.env.SEMRUSH_API_KEY; if (!key) return null
+  const domain = 'sportsmockery.com'
+  try {
+    const [overviewRes, keywordsRes, competitorsRes] = await Promise.allSettled([
+      fetch(`${SEMRUSH_API}/?type=domain_rank&key=${key}&export_columns=Db,Dn,Rk,Or,Ot,Oc,Ad,At,Ac&domain=${domain}&database=us`, { next: { revalidate: 3600 } }),
+      fetch(`${SEMRUSH_API}/?type=domain_organic&key=${key}&export_columns=Ph,Po,Pp,Pd,Nq,Cp,Ur,Tr,Tc,Co,Nr&domain=${domain}&database=us&display_limit=20&display_sort=tr_desc`, { next: { revalidate: 3600 } }),
+      fetch(`${SEMRUSH_API}/?type=domain_organic_organic&key=${key}&export_columns=Dn,Cr,Np,Or,Ot,Oc,Ad&domain=${domain}&database=us&display_limit=10`, { next: { revalidate: 3600 } }),
+    ])
+
+    let overview = null
+    if (overviewRes.status === 'fulfilled' && overviewRes.value.ok) {
+      const rows = parseSemrushCSV(await overviewRes.value.text())
+      if (rows.length > 0) {
+        const r = rows[0]
+        overview = {
+          rank: parseInt(r['Rank'] || '0'),
+          organicKeywords: parseInt(r['Organic Keywords'] || '0'),
+          organicTraffic: parseInt(r['Organic Traffic'] || '0'),
+          organicCost: parseInt(r['Organic Cost'] || '0'),
+          adwordsKeywords: parseInt(r['Adwords Keywords'] || '0'),
+          adwordsTraffic: parseInt(r['Adwords Traffic'] || '0'),
+        }
+      }
+    }
+
+    let keywords: any[] = []
+    if (keywordsRes.status === 'fulfilled' && keywordsRes.value.ok) {
+      const rows = parseSemrushCSV(await keywordsRes.value.text())
+      keywords = rows.map(r => ({
+        keyword: r['Keyword'] || '',
+        position: parseInt(r['Position'] || '0'),
+        previousPosition: parseInt(r['Previous Position'] || '0'),
+        searchVolume: parseInt(r['Search Volume'] || '0'),
+        cpc: parseFloat(r['CPC'] || '0'),
+        url: r['Url'] || '',
+        trafficPct: parseFloat(r['Traffic (%)'] || '0'),
+        competition: parseFloat(r['Competition'] || '0'),
+      }))
+    }
+
+    let competitors: any[] = []
+    if (competitorsRes.status === 'fulfilled' && competitorsRes.value.ok) {
+      const rows = parseSemrushCSV(await competitorsRes.value.text())
+      competitors = rows.map(r => ({
+        domain: r['Domain'] || '',
+        relevance: parseFloat(r['Competitor Relevance'] || '0'),
+        commonKeywords: parseInt(r['Common Keywords'] || '0'),
+        organicKeywords: parseInt(r['Organic Keywords'] || '0'),
+        organicTraffic: parseInt(r['Organic Traffic'] || '0'),
+      }))
+    }
+
+    return { overview, keywords, competitors }
+  } catch (e) {
+    console.error('[Exec] SEMRush error:', e)
+    return null
+  }
 }

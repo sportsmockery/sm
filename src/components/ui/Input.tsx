@@ -1,91 +1,22 @@
-'use client'
+import * as React from "react"
 
-import { forwardRef, InputHTMLAttributes, ReactNode } from 'react'
+import { cn } from "@/lib/utils"
 
-export interface InputProps extends InputHTMLAttributes<HTMLInputElement> {
-  label?: string
-  error?: string
-  helper?: string
-  icon?: ReactNode
-  iconPosition?: 'left' | 'right'
-  required?: boolean
-}
-
-const Input = forwardRef<HTMLInputElement, InputProps>(
-  (
-    {
-      label,
-      error,
-      helper,
-      icon,
-      iconPosition = 'left',
-      required,
-      className = '',
-      id,
-      ...props
-    },
-    ref
-  ) => {
-    const inputId = id || label?.toLowerCase().replace(/\s+/g, '-')
-
-    const baseClasses =
-      'w-full h-[42px] px-4 bg-[var(--sm-surface)] border border-[var(--border-default)] rounded-lg text-[var(--sm-text)] text-sm font-sans transition-all duration-200 placeholder:text-[var(--sm-text-muted)] hover:border-[var(--border-strong)] focus:outline-none focus:border-[var(--accent-red)] focus:ring-2 focus:ring-[var(--accent-red-glow)] disabled:opacity-50 disabled:cursor-not-allowed'
-
-    const errorClasses = error
-      ? 'border-[var(--error)] focus:border-[var(--error)] focus:ring-red-500/20'
-      : ''
-
-    const iconPadding = icon
-      ? iconPosition === 'left'
-        ? 'pl-10'
-        : 'pr-10'
-      : ''
-
+const Input = React.forwardRef<HTMLInputElement, React.ComponentProps<"input">>(
+  ({ className, type, ...props }, ref) => {
     return (
-      <div className={className}>
-        {label && (
-          <label
-            htmlFor={inputId}
-            className="block text-sm font-medium text-[var(--sm-text-dim)] mb-2"
-          >
-            {label}
-            {required && <span className="text-[var(--error)] ml-1">*</span>}
-          </label>
+      <input
+        type={type}
+        className={cn(
+          "flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-base shadow-sm transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50 md:text-sm",
+          className
         )}
-
-        <div className="relative">
-          {icon && iconPosition === 'left' && (
-            <div className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--sm-text-muted)]">
-              {icon}
-            </div>
-          )}
-
-          <input
-            ref={ref}
-            id={inputId}
-            className={`${baseClasses} ${errorClasses} ${iconPadding}`}
-            {...props}
-          />
-
-          {icon && iconPosition === 'right' && (
-            <div className="absolute right-3 top-1/2 -translate-y-1/2 text-[var(--sm-text-muted)]">
-              {icon}
-            </div>
-          )}
-        </div>
-
-        {(error || helper) && (
-          <p
-            className={`text-xs mt-1 ${error ? 'text-[var(--error)]' : 'text-[var(--sm-text-muted)]'}`}
-          >
-            {error || helper}
-          </p>
-        )}
-      </div>
+        ref={ref}
+        {...props}
+      />
     )
   }
 )
+Input.displayName = "Input"
 
-Input.displayName = 'Input'
-
-export default Input
+export { Input }

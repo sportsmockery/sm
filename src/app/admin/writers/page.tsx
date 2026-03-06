@@ -2,15 +2,16 @@ import type { Metadata } from 'next'
 import { supabaseAdmin } from '@/lib/supabase-server'
 import Link from 'next/link'
 import Image from 'next/image'
+import SyncWritersButton from './SyncWritersButton'
 
 export const metadata: Metadata = {
-  title: 'Sports Mockery | Authors',
+  title: 'Sports Mockery | Writers',
 }
 
-export default async function AdminAuthorsPage() {
+export default async function AdminWritersPage() {
   const { data: authors } = await supabaseAdmin
     .from('sm_authors')
-    .select('id, display_name, email, bio, avatar_url, social_twitter, social_linkedin')
+    .select('id, display_name, email, bio, avatar_url, role, social_twitter, social_linkedin')
     .order('display_name')
 
   // Get post counts for each author
@@ -29,23 +30,30 @@ export default async function AdminAuthorsPage() {
   const sortedAuthors = [...authorsWithCounts].sort((a, b) => b.postCount - a.postCount)
   const totalPosts = authorsWithCounts.reduce((acc, a) => acc + a.postCount, 0)
 
+  const roleColors: Record<string, string> = {
+    editor: 'bg-blue-500/20 text-blue-400 border border-blue-500/30',
+    author: 'bg-green-500/20 text-green-400 border border-green-500/30',
+    admin: 'bg-red-500/20 text-red-400 border border-red-500/30',
+  }
+
   return (
     <div className="space-y-6">
       {/* Header */}
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-[var(--text-primary)]">Authors</h1>
+          <h1 className="text-2xl font-bold text-[var(--text-primary)]">Writers</h1>
           <p className="mt-1 text-[var(--text-muted)]">
-            {authors?.length || 0} authors · {totalPosts} total posts
+            {authors?.length || 0} writers · {totalPosts} total posts
           </p>
         </div>
+        <SyncWritersButton />
       </div>
 
       {/* Stats Overview */}
       <div className="grid gap-4 sm:grid-cols-3">
         <div className="rounded-xl border border-[var(--border-default)] bg-[var(--bg-card)] p-5">
           <p className="text-3xl font-bold text-[var(--text-primary)]">{authors?.length || 0}</p>
-          <p className="text-sm text-[var(--text-muted)]">Total Authors</p>
+          <p className="text-sm text-[var(--text-muted)]">Total Writers</p>
         </div>
         <div className="rounded-xl border border-[var(--border-default)] bg-[var(--bg-card)] p-5">
           <p className="text-3xl font-bold text-[var(--text-primary)]">{totalPosts}</p>
@@ -55,11 +63,11 @@ export default async function AdminAuthorsPage() {
           <p className="text-3xl font-bold text-[var(--text-primary)]">
             {authors?.length ? Math.round(totalPosts / authors.length) : 0}
           </p>
-          <p className="text-sm text-[var(--text-muted)]">Avg Posts/Author</p>
+          <p className="text-sm text-[var(--text-muted)]">Avg Posts/Writer</p>
         </div>
       </div>
 
-      {/* Authors Grid */}
+      {/* Writers Grid */}
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
         {sortedAuthors.length > 0 ? (
           sortedAuthors.map((author, index) => (
@@ -97,9 +105,16 @@ export default async function AdminAuthorsPage() {
                   )}
 
                   <div className="min-w-0 flex-1">
-                    <h3 className="font-semibold text-[var(--text-primary)]">
-                      {author.display_name}
-                    </h3>
+                    <div className="flex items-center gap-2">
+                      <h3 className="font-semibold text-[var(--text-primary)]">
+                        {author.display_name}
+                      </h3>
+                      {author.role && (
+                        <span className={`px-2 py-0.5 rounded-full text-[10px] font-medium ${roleColors[author.role] || 'bg-zinc-500/20 text-zinc-400 border border-zinc-500/30'}`}>
+                          {author.role}
+                        </span>
+                      )}
+                    </div>
                     {author.email && (
                       <p className="truncate text-sm text-[var(--text-muted)]">
                         {author.email}
@@ -171,7 +186,8 @@ export default async function AdminAuthorsPage() {
             <svg className="mb-4 h-12 w-12 text-[var(--text-muted)]" fill="none" viewBox="0 0 24 24" strokeWidth={1} stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" d="M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 018.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0111.964-3.07M12 6.375a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zm8.25 2.25a2.625 2.625 0 11-5.25 0 2.625 2.625 0 015.25 0z" />
             </svg>
-            <p className="text-[var(--text-muted)]">No authors found</p>
+            <p className="text-[var(--text-muted)]">No writers found</p>
+            <p className="mt-2 text-sm text-[var(--text-muted)]">Use &quot;Sync from WordPress&quot; to import writers</p>
           </div>
         )}
       </div>

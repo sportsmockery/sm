@@ -133,11 +133,11 @@ export default function CommandPalette() {
       action: () => router.push('/admin/categories'),
     },
     {
-      id: 'nav-authors',
-      title: 'Go to Authors',
+      id: 'nav-writers',
+      title: 'Go to Writers',
       icon: icons.authors,
       category: 'navigation',
-      action: () => router.push('/admin/authors'),
+      action: () => router.push('/admin/writers'),
     },
     {
       id: 'nav-media',
