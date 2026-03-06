@@ -652,7 +652,7 @@ function ContentScoreModule({ topContent, overview, onPostClick }: { topContent:
 
 // ═══════════════════════════════════════════════════════════════════════════════
 // MAIN DASHBOARD
-// ════════════════════════════════════════════════════════════════════���═══���══════
+// ═════════════════════════════════════════════════════════════════��══���═══���══════
 export default function ExecDashboard() {
   const [data, setData] = useState<Data | null>(null)
   const [loading, setLoading] = useState(true)
@@ -1363,23 +1363,120 @@ Revenue: [
             </Section>
 
             {/* 4. Writer Formulas Panel */}
-            <Section title="Payment Formulas">
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div className="rounded-lg border p-4" style={{ background: 'var(--sm-surface)', borderColor: 'var(--sm-border)' }}>
-                  <p className="text-sm font-bold mb-2" style={{ color: 'var(--sm-text)' }}>Base Rate Formula</p>
-                  <p className="text-xs font-mono p-2 rounded" style={{ background: 'var(--sm-card)', color: 'var(--sm-text-muted)' }}>
-                    payout = (views × $0.008) + (posts × $5)
-                  </p>
-                  <p className="text-xs mt-2" style={{ color: 'var(--sm-text-dim)' }}>Applied to: Staff Writers</p>
-                </div>
-                <div className="rounded-lg border p-4" style={{ background: 'var(--sm-surface)', borderColor: 'var(--sm-border)' }}>
-                  <p className="text-sm font-bold mb-2" style={{ color: 'var(--sm-text)' }}>Bonus Multiplier</p>
-                  <p className="text-xs font-mono p-2 rounded" style={{ background: 'var(--sm-card)', color: 'var(--sm-text-muted)' }}>
-                    bonus = base × 1.25 if avg_views {'>'} 10K
-                  </p>
-                  <p className="text-xs mt-2" style={{ color: 'var(--sm-text-dim)' }}>Applied to: Top Performers</p>
-                </div>
-              </div>
+            <Section title="Writer Payment Formulas">
+              {(() => {
+                const [editingId, setEditingId] = React.useState<string | null>(null)
+                const [editDesc, setEditDesc] = React.useState('')
+                const [editFormula, setEditFormula] = React.useState('')
+                const [editDate, setEditDate] = React.useState('')
+
+                const formulas = [
+                  { id: 'aldo', name: 'Aldo Soto', desc: '$3 per 1K views + $5 per post', formula: '(views / 1000) * 3 + (posts * 5)', effectiveDate: 'Jan 1, 2024' },
+                  { id: 'erik', name: 'Erik Lambert', desc: '$4 per 1K views', formula: '(views / 1000) * 4', effectiveDate: 'Mar 1, 2024' },
+                  { id: 'ryan', name: 'Ryan Dauterive', desc: 'Under 20 posts: $7.50/post. 20+ posts: $15/post. Plus $1/1K views always.', formula: 'posts < 20 ? (posts * 7.5 + views / 1000) : (posts * 15 + views / 1000)', effectiveDate: 'Feb 15, 2024' },
+                  { id: 'colin', name: 'Colin Longworth', desc: 'Fixed $8,333.33/month salary', formula: '100000 / 12', effectiveDate: 'Jan 1, 2024' },
+                  { id: 'missy', name: 'Missy Carroll', desc: 'Flat $100/month', formula: '100', effectiveDate: 'Apr 1, 2024' },
+                ]
+
+                const startEdit = (f: typeof formulas[0]) => {
+                  setEditingId(f.id)
+                  setEditDesc(f.desc)
+                  setEditFormula(f.formula)
+                  setEditDate(f.effectiveDate)
+                }
+
+                const cancelEdit = () => {
+                  setEditingId(null)
+                  setEditDesc('')
+                  setEditFormula('')
+                  setEditDate('')
+                }
+
+                return (
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+                    {formulas.map(f => (
+                      <div key={f.id} className="rounded-lg border p-3 relative" style={{ background: 'var(--sm-card)', borderColor: 'var(--sm-border)' }}>
+                        {editingId === f.id ? (
+                          /* Edit state */
+                          <div className="space-y-2">
+                            <p className="text-sm font-bold" style={{ color: 'var(--sm-text)' }}>{f.name}</p>
+                            <div>
+                              <label className="text-[10px] font-bold uppercase tracking-wide block mb-0.5" style={{ color: 'var(--sm-text-dim)' }}>Description</label>
+                              <input
+                                type="text"
+                                value={editDesc}
+                                onChange={e => setEditDesc(e.target.value)}
+                                className="w-full text-xs px-2 py-1.5 rounded border outline-none"
+                                style={{ background: 'var(--sm-surface)', borderColor: 'var(--sm-border)', color: 'var(--sm-text)' }}
+                              />
+                            </div>
+                            <div>
+                              <label className="text-[10px] font-bold uppercase tracking-wide block mb-0.5" style={{ color: 'var(--sm-text-dim)' }}>Formula</label>
+                              <input
+                                type="text"
+                                value={editFormula}
+                                onChange={e => setEditFormula(e.target.value)}
+                                className="w-full text-[10px] font-mono px-2 py-1.5 rounded border outline-none"
+                                style={{ background: 'var(--sm-surface)', borderColor: 'var(--sm-border)', color: 'var(--sm-text-muted)' }}
+                              />
+                            </div>
+                            <div>
+                              <label className="text-[10px] font-bold uppercase tracking-wide block mb-0.5" style={{ color: 'var(--sm-text-dim)' }}>Effective Date</label>
+                              <input
+                                type="text"
+                                value={editDate}
+                                onChange={e => setEditDate(e.target.value)}
+                                className="w-full text-xs px-2 py-1.5 rounded border outline-none"
+                                style={{ background: 'var(--sm-surface)', borderColor: 'var(--sm-border)', color: 'var(--sm-text)' }}
+                              />
+                            </div>
+                            <div className="flex items-center gap-2 pt-1">
+                              <button
+                                onClick={cancelEdit}
+                                className="text-xs font-bold px-2.5 py-1 rounded border transition-colors"
+                                style={{ borderColor: 'var(--sm-border)', color: 'var(--sm-text-muted)', background: 'var(--sm-surface)' }}
+                              >
+                                Cancel
+                              </button>
+                              <button
+                                onClick={cancelEdit}
+                                className="text-xs font-bold px-2.5 py-1 rounded transition-colors"
+                                style={{ background: 'var(--sm-red)', color: '#fff' }}
+                              >
+                                Save
+                              </button>
+                            </div>
+                          </div>
+                        ) : (
+                          /* View state */
+                          <>
+                            <button
+                              onClick={() => startEdit(f)}
+                              className="absolute top-2 right-2 p-1 rounded transition-colors"
+                              style={{ color: 'var(--sm-text-dim)' }}
+                              onMouseEnter={e => (e.currentTarget.style.background = 'var(--sm-surface)')}
+                              onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}
+                            >
+                              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                <path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7" />
+                                <path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z" />
+                              </svg>
+                            </button>
+                            <p className="text-sm font-bold pr-6" style={{ color: 'var(--sm-text)' }}>{f.name}</p>
+                            <p className="text-xs mt-1" style={{ color: 'var(--sm-text-muted)' }}>{f.desc}</p>
+                            <p className="text-[10px] font-mono mt-2 p-1.5 rounded" style={{ background: 'var(--sm-surface)', color: 'var(--sm-text-dim)' }}>
+                              {f.formula}
+                            </p>
+                            <p className="text-[10px] mt-2" style={{ color: 'var(--sm-text-dim)' }}>
+                              Effective: {f.effectiveDate}
+                            </p>
+                          </>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                )
+              })()}
             </Section>
 
             {/* 5. Bulk Actions Row */}
