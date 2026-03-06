@@ -78,21 +78,20 @@ export interface PostIQAnalyzeResponse {
  * POST /api/postiq/generate-chart
  *
  * Dedicated route for PostIQ chart generation.
- * Forwards to DataLab's /api/postiq/analyze endpoint.
+ * Forwards to DataLab's /api/postiq/generate-chart endpoint (ECharts options)
+ * with fallback to /api/postiq/analyze (legacy data points).
  *
  * Flow:
  * 1. Writer types article at test.sportsmockery.com
  * 2. Front-end debounces and sends to this route
- * 3. This route forwards to datalab.sportsmockery.com/api/postiq/analyze
- * 4. DataLab analyzes content and returns:
- *    - Success: charts array with team colors, axes, confidence
- *    - Rejection: reason, suggestion, potentialImprovements
- * 5. Front-end D3 components render animated charts
+ * 3. This route forwards to datalab.sportsmockery.com/api/postiq/generate-chart
+ * 4. DataLab analyzes content and returns ECharts options objects
+ * 5. Front-end renders with echarts-for-react
  */
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json()
-    const { content, title, category, team = 'bears', timestamp } = body
+    const { content, title, category, team = 'bears', timestamp, mode } = body
 
     // Validate required fields
     if (!content || content.length < 100) {
@@ -136,8 +135,41 @@ export async function POST(request: NextRequest) {
       // Continue without user ID
     }
 
-    // Forward to DataLab PostIQ /api/postiq/analyze
-    // New request format: { content: { title, body }, sport }
+    // Try new DataLab ECharts endpoint first
+    try {
+      const echartsResponse = await fetch(`${DATALAB_API}/api/postiq/generate-chart`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          ...(process.env.POSTIQ_INTERNAL_KEY && {
+            'X-PostIQ-Internal-Key': process.env.POSTIQ_INTERNAL_KEY,
+            'Authorization': `Bearer ${process.env.POSTIQ_INTERNAL_KEY}`,
+          }),
+        },
+        body: JSON.stringify({
+          content: { title: title || '', body: content },
+          team,
+          mode: mode || 'dark',
+        }),
+      })
+
+      if (echartsResponse.ok) {
+        const echartsData = await echartsResponse.json()
+        if (echartsData.charts && echartsData.charts.length > 0) {
+          return NextResponse.json({
+            success: true,
+            shouldCreateChart: true,
+            format: 'echarts',
+            charts: echartsData.charts,
+            config: { teamTheme: team },
+          })
+        }
+      }
+    } catch (error) {
+      console.error('[PostIQ Chart] ECharts endpoint failed, falling back to analyze:', error)
+    }
+
+    // Fallback to legacy /api/postiq/analyze endpoint
     const datalabResponse = await fetch(`${DATALAB_API}/api/postiq/analyze`, {
       method: 'POST',
       headers: {
@@ -153,7 +185,6 @@ export async function POST(request: NextRequest) {
           body: content,
         },
         sport: team,
-        // Legacy fields for backwards compatibility
         category,
         timestamp: timestamp || new Date().toISOString(),
         user_id: userId,
@@ -174,7 +205,7 @@ export async function POST(request: NextRequest) {
     }
 
     const data = await datalabResponse.json()
-    return NextResponse.json(normalizeResponse(data, team))
+    return NextResponse.json({ ...normalizeResponse(data, team), format: 'legacy' })
 
   } catch (error) {
     console.error('[PostIQ Chart] Error:', error)
