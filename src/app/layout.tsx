@@ -154,7 +154,7 @@ export default function RootLayout({
                 </div>
                 <Footer />
               </div>
-              <NavigationOrb />
+              {/* NavigationOrb removed — nav moved to left sidebar */}
               <MobileBottomNav />
               <ParticleBg />
               <ScrollToTop />

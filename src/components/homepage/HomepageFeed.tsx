@@ -801,10 +801,11 @@ export function HomepageFeed({
       {/* ===== Sidebar (fixed right, floating) ===== */}
       <div className="homepage-right-sidebar" style={{
         position: 'fixed',
-        top: '24px',
+        top: '50%',
+        transform: 'translateY(-50%)',
         right: '80px',
         width: '300px',
-        maxHeight: 'calc(100vh - 48px)',
+        maxHeight: 'calc(100vh - 80px)',
         overflowY: 'auto',
         overflowX: 'hidden',
         zIndex: 10,
