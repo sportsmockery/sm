@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useCallback, useEffect } from 'react';
+import React, { useState, useCallback, useEffect, useRef } from 'react';
 import type { RiverCard } from '@/lib/river-types';
 import { useRiverFeed } from '@/hooks/useRiverFeed';
 import RiverLayout from '@/components/SportsRiver/RiverLayout';
@@ -30,6 +30,7 @@ export default function RiverPageClient({
 
   const [showPicker, setShowPicker] = useState(false);
   const [isReturning, setIsReturning] = useState(false);
+  const previousVisitRef = useRef<number | null>(null);
 
   useEffect(() => {
     if (typeof window === 'undefined') return;
@@ -41,9 +42,15 @@ export default function RiverPageClient({
       setShowPicker(true);
     }
 
-    if (prefs !== null && localStorage.getItem('sm_last_visit') !== null) {
+    // Read previous visit timestamp before overwriting
+    const lastVisit = localStorage.getItem('sm_last_visit');
+    if (lastVisit !== null) {
+      previousVisitRef.current = Number(lastVisit);
       setIsReturning(true);
     }
+
+    // Write current visit timestamp for next session
+    localStorage.setItem('sm_last_visit', String(Date.now()));
   }, []);
 
   const handlePickerComplete = useCallback(
@@ -62,6 +69,11 @@ export default function RiverPageClient({
     setShowPicker(false);
   }, []);
 
+  // Build the "since last visit" card element to inject at position #3
+  const sinceLastVisitElement = isReturning && riverCards.length > 0 ? (
+    <SinceLastVisitCard riverCards={riverCards} lastVisitTimestamp={previousVisitRef.current} />
+  ) : null;
+
   return (
     <RiverLayout
       feedMode={feedMode}
@@ -69,18 +81,12 @@ export default function RiverPageClient({
       onFeedModeChange={setFeedMode}
       onTeamFilterChange={setTeamFilter}
     >
-      {/* Since Last Visit card for returning users — injected before feed */}
-      {isReturning && riverCards.length > 0 && (
-        <div className="mb-4">
-          <SinceLastVisitCard riverCards={riverCards} />
-        </div>
-      )}
-
       <RiverFeed
         riverCards={riverCards}
         loadMore={loadMore}
         isLoading={isLoading}
         hasMore={hasMore}
+        insertAtIndex2={sinceLastVisitElement}
       />
 
       {/* Team picker overlay for first-time anonymous visitors */}

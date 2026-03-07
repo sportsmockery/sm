@@ -185,7 +185,7 @@ export async function PATCH(request: NextRequest) {
     }
 
     const body = await request.json()
-    const { addTeam, removeTeam, notificationPrefs } = body
+    const { addTeam, removeTeam, notificationPrefs, feedMode, teamFilter } = body
 
     // Get current preferences
     const { data: current } = await supabaseAdmin
@@ -213,6 +213,14 @@ export async function PATCH(request: NextRequest) {
     // Handle notificationPrefs merge
     if (notificationPrefs) {
       currentNotifs = { ...currentNotifs, ...notificationPrefs }
+    }
+
+    // Handle feedMode and teamFilter (stored in notification_prefs JSON)
+    if (feedMode) {
+      currentNotifs = { ...currentNotifs, feedMode }
+    }
+    if (teamFilter) {
+      currentNotifs = { ...currentNotifs, teamFilter }
     }
 
     // Ensure Bears is first

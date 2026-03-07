@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useCallback, useEffect } from 'react';
+import { useAuth } from '@/contexts/AuthContext';
 
 const TEAMS = [
   { key: 'all', label: 'All' },
@@ -19,6 +20,8 @@ interface TeamFilterPillsProps {
 }
 
 export default function TeamFilterPills({ currentTeam, onTeamChange }: TeamFilterPillsProps) {
+  const { isAuthenticated } = useAuth();
+
   // Restore persisted filter on mount
   useEffect(() => {
     if (typeof window === 'undefined') return;
@@ -32,12 +35,19 @@ export default function TeamFilterPills({ currentTeam, onTeamChange }: TeamFilte
 
   const handleChange = useCallback(
     (team: string) => {
-      if (typeof window !== 'undefined') {
+      onTeamChange(team);
+
+      if (isAuthenticated) {
+        fetch('/api/user/preferences', {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ teamFilter: team }),
+        }).catch(() => {});
+      } else if (typeof window !== 'undefined') {
         localStorage.setItem(LS_TEAM_FILTER, team);
       }
-      onTeamChange(team);
     },
-    [onTeamChange]
+    [onTeamChange, isAuthenticated]
   );
 
   const pillStyle = (isActive: boolean): React.CSSProperties => ({

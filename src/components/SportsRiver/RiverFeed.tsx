@@ -33,6 +33,7 @@ interface RiverFeedProps {
   loadMore: () => void;
   isLoading: boolean;
   hasMore: boolean;
+  insertAtIndex2?: React.ReactNode;
 }
 
 const PlaceholderCard = React.memo(function PlaceholderCard({
@@ -144,6 +145,7 @@ export default function RiverFeed({
   loadMore,
   isLoading,
   hasMore,
+  insertAtIndex2,
 }: RiverFeedProps) {
   const feedRef = useRef<HTMLDivElement>(null);
   const animatedCountRef = useRef(0);
@@ -212,9 +214,16 @@ export default function RiverFeed({
 
       <div ref={feedRef} className="feed-container space-y-4">
         {riverCards.map((card, index) => (
-          <div key={card.card_id} className="feed-card" style={{ opacity: 0 }}>
-            {renderCardContent(index, card)}
-          </div>
+          <React.Fragment key={card.card_id}>
+            {index === 2 && insertAtIndex2 && (
+              <div className="feed-card" style={{ opacity: 0 }}>
+                {insertAtIndex2}
+              </div>
+            )}
+            <div className="feed-card" style={{ opacity: 0 }}>
+              {renderCardContent(index, card)}
+            </div>
+          </React.Fragment>
         ))}
       </div>
 

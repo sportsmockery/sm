@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 const TEAMS = [
@@ -24,6 +24,7 @@ export default function TeamPicker({ onComplete, onDismiss }: TeamPickerProps) {
   const [visible, setVisible] = useState(false);
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [allTeams, setAllTeams] = useState(false);
+  const pickerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (typeof window === 'undefined') return;
@@ -67,28 +68,36 @@ export default function TeamPicker({ onComplete, onDismiss }: TeamPickerProps) {
     setTimeout(() => onDismiss(), 300);
   }, [onDismiss]);
 
+  // Dismiss on outside click (non-blocking — no backdrop overlay)
+  useEffect(() => {
+    if (!visible) return;
+    const handleClickOutside = (e: MouseEvent) => {
+      if (pickerRef.current && !pickerRef.current.contains(e.target as Node)) {
+        handleDismiss();
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, [visible, handleDismiss]);
+
+  // Dismiss on user scroll
+  useEffect(() => {
+    if (!visible) return;
+    const handleScroll = () => {
+      handleDismiss();
+    };
+    window.addEventListener('scroll', handleScroll, { once: true, passive: true });
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, [visible, handleDismiss]);
+
   const hasSelection = allTeams || selected.size > 0;
 
   return (
     <AnimatePresence>
       {visible && (
         <>
-          {/* Backdrop — click to dismiss, does NOT block scroll */}
           <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.2 }}
-            onClick={handleDismiss}
-            aria-hidden="true"
-            style={{
-              position: 'fixed',
-              inset: 0,
-              zIndex: 1099,
-              pointerEvents: 'auto',
-            }}
-          />
-          <motion.div
+            ref={pickerRef}
             initial={{ y: '100%' }}
             animate={{ y: 0 }}
             exit={{ y: '100%' }}

@@ -1,13 +1,11 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useMemo } from 'react';
 import type { RiverCard } from '@/lib/river-types';
-
-const LS_LAST_VISIT = 'sm_last_visit';
-const LS_TEAM_PREFS = 'sm_team_prefs';
 
 interface SinceLastVisitCardProps {
   riverCards: RiverCard[];
+  lastVisitTimestamp: number | null;
 }
 
 function timeAgo(timestamp: string): string {
@@ -21,30 +19,13 @@ function timeAgo(timestamp: string): string {
   return `${days}d ago`;
 }
 
-export default function SinceLastVisitCard({ riverCards }: SinceLastVisitCardProps) {
-  const [missedItems, setMissedItems] = useState<RiverCard[]>([]);
-
-  useEffect(() => {
-    if (typeof window === 'undefined') return;
-    const prefs = localStorage.getItem(LS_TEAM_PREFS);
-    const lastVisit = localStorage.getItem(LS_LAST_VISIT);
-
-    if (!prefs || !lastVisit) {
-      // Update last visit for next time
-      localStorage.setItem(LS_LAST_VISIT, String(Date.now()));
-      return;
-    }
-
-    const lastVisitTime = Number(lastVisit);
-    const missed = riverCards.filter(
-      card => card.timestamp && new Date(card.timestamp).getTime() > lastVisitTime
+export default function SinceLastVisitCard({ riverCards, lastVisitTimestamp }: SinceLastVisitCardProps) {
+  const missedItems = useMemo(() => {
+    if (!lastVisitTimestamp) return [];
+    return riverCards.filter(
+      card => card.timestamp && new Date(card.timestamp).getTime() > lastVisitTimestamp
     ).slice(0, 3);
-
-    setMissedItems(missed);
-
-    // Update last visit timestamp
-    localStorage.setItem(LS_LAST_VISIT, String(Date.now()));
-  }, [riverCards]);
+  }, [riverCards, lastVisitTimestamp]);
 
   if (missedItems.length === 0) return null;
 

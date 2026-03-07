@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useCallback, useEffect } from 'react';
+import { useAuth } from '@/contexts/AuthContext';
 
 const FEED_MODES = [
   { key: 'for_you', label: 'For You', icon: '⚡' },
@@ -21,6 +22,8 @@ interface FeedModeSelectorProps {
 }
 
 export default function FeedModeSelector({ currentMode, onModeChange }: FeedModeSelectorProps) {
+  const { isAuthenticated } = useAuth();
+
   // Restore persisted mode on mount
   useEffect(() => {
     if (typeof window === 'undefined') return;
@@ -34,12 +37,19 @@ export default function FeedModeSelector({ currentMode, onModeChange }: FeedMode
 
   const handleChange = useCallback(
     (mode: string) => {
-      if (typeof window !== 'undefined') {
+      onModeChange(mode);
+
+      if (isAuthenticated) {
+        fetch('/api/user/preferences', {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ feedMode: mode }),
+        }).catch(() => {});
+      } else if (typeof window !== 'undefined') {
         localStorage.setItem(LS_FEED_MODE, mode);
       }
-      onModeChange(mode);
     },
-    [onModeChange]
+    [onModeChange, isAuthenticated]
   );
 
   return (
