@@ -67,7 +67,7 @@ interface RiverLayoutProps {
 }
 
 /* ------------------------------------------------------------------ */
-/*  Scout box (greeting, briefing with 4h cache, "What'd I Miss?" button) */
+/*  Scout box: icon aligned to middle of greeting + briefing; briefing inline (no box) */
 /* ------------------------------------------------------------------ */
 function ScoutBox() {
   const [refreshBriefing, setRefreshBriefing] = useState<(() => void) | null>(null);
@@ -92,8 +92,37 @@ function ScoutBox() {
           What&apos;d I Miss?
         </button>
       </div>
-      <ScoutGreeting />
-      <ScoutBriefingText setRefreshFn={setRefreshBriefing} />
+
+      <div className="flex items-center gap-4">
+        <div className="shrink-0 scout-head-container">
+          <Image
+            src="/downloads/scout-v2.png"
+            alt="Scout AI"
+            width={96}
+            height={96}
+            unoptimized
+            className="scout-head-img"
+            style={{ borderRadius: '50%', objectFit: 'cover', width: 96, height: 96 }}
+          />
+        </div>
+        <div className="flex-1 min-w-0">
+          <ScoutGreeting showIcon={false} />
+          <ScoutBriefingText setRefreshFn={setRefreshBriefing} inline />
+        </div>
+      </div>
+
+      <style>{`
+        .scout-head-container { animation: scoutBobble 1.2s ease-out; }
+        .scout-head-img { filter: none; }
+        @keyframes scoutBobble {
+          0% { transform: scale(0.6) rotate(-8deg); opacity: 0; }
+          40% { transform: scale(1.08) rotate(3deg); opacity: 1; }
+          60% { transform: scale(0.97) rotate(-1deg); }
+          80% { transform: scale(1.02) rotate(0.5deg); }
+          100% { transform: scale(1) rotate(0deg); }
+        }
+      `}</style>
+
       <ScoutRadar />
       <ScoutBriefingGrid />
     </div>
@@ -401,9 +430,9 @@ export default function RiverLayout({
       {/* Chicago skyline / stadiums background — dark mode only, light animation */}
       <div className="river-page-bg" aria-hidden="true" />
       <div
-        className="mx-auto flex w-full"
+        className="mx-auto flex w-full gap-8"
         style={{
-          maxWidth: 1440,
+          maxWidth: 1680,
           paddingLeft: 0,
           paddingRight: 0,
         }}
@@ -411,10 +440,11 @@ export default function RiverLayout({
         {/* Left rail — 280px glass cards */}
         <RightRail />
 
-        {/* Main content — minmax(0, 1fr) */}
+        {/* Main content — wider middle, min width so cards don't get cut off */}
         <main
           className="flex-1 min-w-0 py-6 px-6 lg:px-8"
           style={{
+            minWidth: 720,
             borderLeft: '1px solid var(--sm-border)',
           }}
         >

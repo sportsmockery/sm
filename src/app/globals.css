@@ -344,7 +344,9 @@
   --glass-blur: 16px;
 }
 
-/* ===== LEFT RAIL — Glass cards (River / EDGE) ===== */
+/* ────────────────────────────────────────────────
+   LEFT RAIL CONTAINER (fixed/sticky 280px panel)
+──────────────────────────────────────────────── */
 .left-rail {
   position: sticky;
   top: 0;
@@ -362,6 +364,9 @@
   gap: 32px;
 }
 
+/* ────────────────────────────────────────────────
+   INDIVIDUAL GLASS CARD
+──────────────────────────────────────────────── */
 .glass-card {
   background: rgba(27, 36, 48, 0.45);
   backdrop-filter: blur(10px);
@@ -375,6 +380,7 @@
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
 }
 
+/* Hover effect: lift, cyan glow pulse, subtle scale */
 .glass-card:hover {
   transform: translateY(-6px) scale(1.02);
   box-shadow:
@@ -384,6 +390,7 @@
   border-color: rgba(0, 212, 255, 0.35);
 }
 
+/* Cyan top accent border (2px, fades in on hover) */
 .glass-card::before {
   content: '';
   position: absolute;
@@ -400,6 +407,7 @@
   opacity: 1;
 }
 
+/* Inner cyan glow pulse on hover (very subtle) */
 .glass-card::after {
   content: '';
   position: absolute;
@@ -415,6 +423,9 @@
   opacity: 1;
 }
 
+/* ────────────────────────────────────────────────
+   TYPOGRAPHY INSIDE CARDS
+──────────────────────────────────────────────── */
 .glass-card .title {
   color: #FAFAFB;
   font-size: 16px;
@@ -441,6 +452,9 @@
   font-weight: 500;
 }
 
+/* ────────────────────────────────────────────────
+   SECTION HEADERS
+──────────────────────────────────────────────── */
 .rail-section-header {
   color: #FAFAFB;
   font-size: 14px;
@@ -451,6 +465,9 @@
   opacity: 0.9;
 }
 
+/* ────────────────────────────────────────────────
+   LINK / BUTTON STYLING INSIDE CARDS
+──────────────────────────────────────────────── */
 .glass-card a,
 .glass-card button {
   display: flex;
@@ -470,6 +487,7 @@
   transform: translateX(4px);
 }
 
+/* EDGE+ link (gold + cyan hover) */
 .glass-card .edge-plus {
   color: #D6B05E;
   font-weight: 600;
@@ -479,6 +497,8 @@
   color: #00D4FF;
 }
 
+/* Theme toggle (cyan accent); wrapper used in River left rail */
+.theme-toggle,
 .left-rail .theme-toggle-wrapper {
   display: flex;
   align-items: center;
@@ -491,6 +511,7 @@
   transition: all 0.3s ease;
 }
 
+.theme-toggle:hover,
 .left-rail .theme-toggle-wrapper:hover {
   background: rgba(0, 212, 255, 0.22);
   transform: scale(1.15);
@@ -519,6 +540,71 @@ html[data-theme="light"] .glass-card a,
 html[data-theme="light"] .glass-card button { color: #5c6470; }
 html[data-theme="light"] .glass-card a:hover,
 html[data-theme="light"] .glass-card button:hover { color: #00D4FF; }
+
+/* ────────────────────────────────────────────────
+   FEED CARD BASE (main column, ~1000px wide content)
+──────────────────────────────────────────────── */
+.feed-card {
+  position: relative;
+  overflow: hidden;
+  border-radius: 12px;
+  background: rgba(20, 22, 28, 0.75);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  transition:
+    opacity 0.8s ease-out,
+    transform 0.8s ease-out,
+    box-shadow 0.6s ease,
+    border 0.6s ease;
+  opacity: 0.78;
+  transform: translateY(28px);
+  will-change: opacity, transform, box-shadow, border;
+}
+
+.feed-card.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.feed-card::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(0, 212, 255, 0.09) 35%,
+    rgba(0, 212, 255, 0.32) 50%,
+    rgba(0, 212, 255, 0.09) 65%,
+    transparent 100%
+  );
+  background-size: 280% 100%;
+  background-position: 100% 0;
+  transition: background-position 1.5s ease-out;
+}
+
+.feed-card:hover::before {
+  background-position: -180% 0;
+}
+
+.feed-card.visible::before {
+  animation: cyan-scan 7s linear infinite;
+}
+
+@keyframes cyan-scan {
+  0%   { background-position: 100% 0; }
+  100% { background-position: -180% 0; }
+}
+
+.feed-card.visible {
+  border-image: linear-gradient(to right, transparent, #00D4FF60, transparent) 1;
+  box-shadow:
+    0 0 0 1.5px rgba(0, 212, 255, 0.18),
+    inset 0 0 16px rgba(0, 212, 255, 0.07);
+}
 
 /* ===== RIVER PAGE — Chicago background (dark mode only) ===== */
 .river-page-bg {
