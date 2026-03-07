@@ -13,10 +13,7 @@ const FAN_TOOLS: FanTool[] = [
     label: 'Scout AI',
     href: '/ask-ai',
     icon: (
-      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-        <circle cx="12" cy="12" r="10" />
-        <path d="m16 10-4 4-4-4" />
-      </svg>
+      <img src="/downloads/scout-v2.png" alt="Scout AI" width={16} height={16} style={{ borderRadius: '50%' }} />
     ),
   },
   {
@@ -24,7 +21,7 @@ const FAN_TOOLS: FanTool[] = [
     href: '/gm',
     icon: (
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-        <path d="M16 3h5v5M8 3H3v5M21 3l-7 7M3 3l7 7M16 21h5v-5M8 21H3v-5M21 21l-7-7M3 21l7-7" />
+        <path d="M16 3h5v5M4 20L21 3M21 16v5h-5M14 14l7 7M3 8V3h5M10 10L3 3" />
       </svg>
     ),
   },
@@ -33,8 +30,8 @@ const FAN_TOOLS: FanTool[] = [
     href: '/mock-draft',
     icon: (
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8Z" />
-        <path d="M14 2v6h6M16 13H8M16 17H8M10 9H8" />
+        <rect x="3" y="3" width="18" height="18" rx="2" />
+        <path d="M3 9h18M9 21V9" />
       </svg>
     ),
   },
