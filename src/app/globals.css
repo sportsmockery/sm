@@ -4924,7 +4924,7 @@ a.glass-card-sm:active,
 /* Push main content right to clear the 48px collapsed sidebar */
 @media (min-width: 769px) {
   .edge-main-wrapper {
-    margin-left: 48px;
+    margin-left: 75px;
     transition: margin-left 0.25s cubic-bezier(0.16, 1, 0.3, 1);
   }
   /* Hide old top header on desktop — replaced by left sidebar */

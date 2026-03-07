@@ -124,9 +124,11 @@ export default function LeftSidebar() {
           top: 0,
           left: 0,
           bottom: 0,
-          width: expanded ? 240 : 48,
-          background: '#121821',
-          borderRight: '1px solid #2B3442',
+          width: expanded ? 240 : 75,
+          background: 'rgba(12, 12, 18, 0.7)',
+          backdropFilter: 'blur(12px)',
+          WebkitBackdropFilter: 'blur(12px)',
+          borderRight: '1px solid rgba(255, 255, 255, 0.06)',
           zIndex: 1000,
           display: 'flex',
           flexDirection: 'column',
@@ -148,7 +150,7 @@ export default function LeftSidebar() {
             padding: expanded ? '0 12px' : '0',
             textDecoration: 'none',
             flexShrink: 0,
-            borderBottom: '1px solid #2B3442',
+            borderBottom: '1px solid rgba(255, 255, 255, 0.06)',
             gap: 8,
           }}
         >
@@ -234,7 +236,7 @@ export default function LeftSidebar() {
           })}
 
           {/* Divider */}
-          <div style={{ height: 1, background: '#2B3442', margin: '8px 10px' }} />
+          <div style={{ height: 1, background: 'rgba(255, 255, 255, 0.06)', margin: '8px 10px' }} />
 
           {/* SM+ CTA */}
           <Link
@@ -265,7 +267,7 @@ export default function LeftSidebar() {
           </Link>
 
           {/* Divider */}
-          <div style={{ height: 1, background: '#2B3442', margin: '8px 10px' }} />
+          <div style={{ height: 1, background: 'rgba(255, 255, 255, 0.06)', margin: '8px 10px' }} />
 
           {/* Teams section */}
           {expanded && (
@@ -337,7 +339,7 @@ export default function LeftSidebar() {
             padding: expanded ? '0 14px' : '0',
             background: 'none',
             border: 'none',
-            borderTop: '1px solid #2B3442',
+            borderTop: '1px solid rgba(255, 255, 255, 0.06)',
             cursor: 'pointer',
             color: '#556677',
             transition: 'color 0.2s',
@@ -361,7 +363,7 @@ export default function LeftSidebar() {
         </button>
 
         {/* Bottom profile */}
-        <div style={{ flexShrink: 0, borderTop: '1px solid #2B3442', position: 'relative' }} ref={profileRef}>
+        <div style={{ flexShrink: 0, borderTop: '1px solid rgba(255, 255, 255, 0.06)', position: 'relative' }} ref={profileRef}>
           {isAuthenticated && user ? (
             <button
               onClick={() => setProfileOpen(!profileOpen)}
@@ -444,8 +446,8 @@ export default function LeftSidebar() {
               marginBottom: 8,
               width: 200,
               borderRadius: 10,
-              backgroundColor: '#1A2332',
-              border: '1px solid #2B3442',
+              backgroundColor: 'rgba(12, 12, 18, 0.95)',
+              border: '1px solid rgba(255, 255, 255, 0.06)',
               boxShadow: '0 8px 32px rgba(0,0,0,0.4)',
               overflow: 'hidden',
               zIndex: 1001,
@@ -467,7 +469,7 @@ export default function LeftSidebar() {
                 <Link href="/my-gm-score" onClick={() => setProfileOpen(false)} style={popupLinkStyle}>
                   My GM Score
                 </Link>
-                <div style={{ height: 1, background: '#2B3442', margin: '4px 0' }} />
+                <div style={{ height: 1, background: 'rgba(255, 255, 255, 0.06)', margin: '4px 0' }} />
                 <button
                   onClick={() => { setProfileOpen(false); signOut() }}
                   style={{
