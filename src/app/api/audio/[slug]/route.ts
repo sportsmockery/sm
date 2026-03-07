@@ -8,6 +8,7 @@ export const maxDuration = 60;
 
 // ElevenLabs voice IDs - custom voices
 const VOICE_IDS: Record<string, string> = {
+  scout: "sGxbzIhibLi4V1pzLvNW",    // Scout - 15yo Chicago sports fan, passionate and energetic
   will: "bIHbv24MWmeRgasZH58o",     // Will - young, energetic American male
   brian: "nPczCjzI2devNBz1zQrb",    // Brian - mature, authoritative American male
   laura: "FGY2WhTYpPnrIDTdsKH5",    // Laura - warm, friendly American female
