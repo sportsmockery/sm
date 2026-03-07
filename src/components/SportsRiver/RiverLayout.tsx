@@ -510,6 +510,18 @@ export default function RiverLayout({
     <div className="min-h-screen relative" style={{ backgroundColor: 'var(--sm-dark)' }}>
       {/* Chicago skyline / stadiums background — dark mode only, light animation */}
       <div className="river-page-bg" aria-hidden="true" />
+      {/* Pulse lines — fast-moving colored dashes across background */}
+      <div className="river-pulse-lines" aria-hidden="true">
+        <div className="pulse-line pulse-r1" />
+        <div className="pulse-line pulse-r2" />
+        <div className="pulse-line pulse-r3" />
+        <div className="pulse-line pulse-r4" />
+        <div className="pulse-line pulse-r5" />
+        <div className="pulse-line pulse-c1" />
+        <div className="pulse-line pulse-c2" />
+        <div className="pulse-line pulse-c3" />
+        <div className="pulse-line pulse-g1" />
+      </div>
       <div
         className="mx-auto flex w-full gap-8"
         style={{
