@@ -180,20 +180,31 @@ export default function HomePage() {
             <h2>Everything. One ecosystem.</h2>
             <p>The tools, intelligence, and community that redefine what a sports platform can be.</p>
           </div>
-          <div className="hm-features-grid">
-            {FEATURES.map((feature, i) => (
-              <Link
-                key={feature.title}
-                href={feature.href}
-                className="hm-glass-card hm-animate"
-                style={{ transitionDelay: `${i * 0.07}s` }}
-              >
-                <div className="hm-feature-icon">{feature.icon}</div>
-                <h3>{feature.title}</h3>
-                <p>{feature.description}</p>
-                <span className="hm-card-tag">{feature.tag} &rarr;</span>
-              </Link>
-            ))}
+          <div style={{ position: 'relative' }}>
+            <div className="hm-dash-field" aria-hidden="true">
+              <div className="hm-streak hm-streak--r1" />
+              <div className="hm-streak hm-streak--r2" />
+              <div className="hm-streak hm-streak--r3" />
+              <div className="hm-streak hm-streak--r4" />
+              <div className="hm-streak hm-streak--c1" />
+              <div className="hm-streak hm-streak--c2" />
+              <div className="hm-streak hm-streak--g1" />
+            </div>
+            <div className="hm-features-grid">
+              {FEATURES.map((feature, i) => (
+                <Link
+                  key={feature.title}
+                  href={feature.href}
+                  className="hm-glass-card hm-animate"
+                  style={{ transitionDelay: `${i * 0.07}s` }}
+                >
+                  <div className="hm-feature-icon">{feature.icon}</div>
+                  <h3>{feature.title}</h3>
+                  <p>{feature.description}</p>
+                  <span className="hm-card-tag">{feature.tag} &rarr;</span>
+                </Link>
+              ))}
+            </div>
           </div>
         </div>
       </section>
