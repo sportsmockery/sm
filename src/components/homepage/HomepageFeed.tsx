@@ -802,7 +802,7 @@ export function HomepageFeed({
       <div className="homepage-right-sidebar" style={{
         position: 'fixed',
         top: '24px',
-        right: '24px',
+        right: '80px',
         width: '300px',
         maxHeight: 'calc(100vh - 48px)',
         overflowY: 'auto',
