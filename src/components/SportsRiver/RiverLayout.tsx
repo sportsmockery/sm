@@ -6,6 +6,7 @@ import Image from 'next/image';
 import { useAuth } from '@/contexts/AuthContext';
 import { ThemeToggle } from '@/components/ThemeToggle';
 import ScoutGreeting from './ScoutGreeting';
+import ScoutRadar from './ScoutRadar';
 import ScoutBriefingGrid from './ScoutBriefingGrid';
 import FanToolsCard from './FanToolsCard';
 import RightRailCard from './RightRailCard';
@@ -94,22 +95,22 @@ function RightRail() {
 
   return (
     <aside
-      className="hidden lg:flex flex-col gap-4 shrink-0 sticky top-0 overflow-y-auto"
+      className="hidden lg:flex flex-col gap-4 shrink-0 sticky top-0 overflow-y-auto border-r border-[var(--sm-border)] pl-4 pr-3 pt-6"
       style={{
-        width: 280,
+        width: 240,
+        minWidth: 240,
         maxHeight: '100vh',
         paddingBottom: 16,
+        backgroundColor: 'var(--sm-surface)',
       }}
     >
       {/* EDGE Logo */}
       <div
         className="rounded-xl overflow-hidden"
         style={{
-          background: 'rgba(12, 12, 18, 0.85)',
-          backdropFilter: 'blur(20px)',
-          WebkitBackdropFilter: 'blur(20px)',
-          border: '1px solid rgba(255, 255, 255, 0.06)',
-          boxShadow: '0 4px 20px rgba(0,0,0,0.3)',
+          background: 'var(--sm-card)',
+          border: '1px solid var(--sm-border)',
+          boxShadow: 'var(--shadow-sm)',
         }}
       >
         <Link
@@ -170,11 +171,9 @@ function RightRail() {
       <div
         className="rounded-xl overflow-hidden"
         style={{
-          background: 'rgba(12, 12, 18, 0.85)',
-          backdropFilter: 'blur(20px)',
-          WebkitBackdropFilter: 'blur(20px)',
-          border: '1px solid rgba(255, 255, 255, 0.06)',
-          boxShadow: '0 4px 20px rgba(0,0,0,0.3)',
+          background: 'var(--sm-card)',
+          border: '1px solid var(--sm-border)',
+          boxShadow: 'var(--shadow-sm)',
         }}
       >
         {/* EDGE+ */}
@@ -344,6 +343,39 @@ const popupLinkStyle: React.CSSProperties = {
 };
 
 /* ------------------------------------------------------------------ */
+/*  Right Utility Rail (320px)                                         */
+/* ------------------------------------------------------------------ */
+function RightUtilityRail() {
+  return (
+    <aside
+      className="hidden xl:flex flex-col gap-4 shrink-0 sticky top-0 overflow-y-auto border-l border-[var(--sm-border)] pl-4 pr-4 pt-4"
+      style={{
+        width: 320,
+        minWidth: 320,
+        maxHeight: '100vh',
+        paddingBottom: 16,
+        backgroundColor: 'var(--sm-surface)',
+      }}
+    >
+      <RightRailCard title="Live Now" accentColor="#BC0000">
+        <p className="text-[14px] leading-relaxed" style={{ color: 'var(--sm-text-secondary)' }}>
+          Game times and scores when available. Check team pages for full schedules.
+        </p>
+      </RightRailCard>
+      <RightRailCard title="Quick Links" accentColor="#BC0000">
+        <div className="flex flex-col gap-2">
+          <Link href="/chicago-bears" className="text-[14px] font-medium hover:underline" style={{ color: 'var(--sm-text)' }}>Bears</Link>
+          <Link href="/chicago-bulls" className="text-[14px] font-medium hover:underline" style={{ color: 'var(--sm-text)' }}>Bulls</Link>
+          <Link href="/chicago-blackhawks" className="text-[14px] font-medium hover:underline" style={{ color: 'var(--sm-text)' }}>Blackhawks</Link>
+          <Link href="/chicago-cubs" className="text-[14px] font-medium hover:underline" style={{ color: 'var(--sm-text)' }}>Cubs</Link>
+          <Link href="/chicago-white-sox" className="text-[14px] font-medium hover:underline" style={{ color: 'var(--sm-text)' }}>White Sox</Link>
+        </div>
+      </RightRailCard>
+    </aside>
+  );
+}
+
+/* ------------------------------------------------------------------ */
 /*  Main Layout                                                        */
 /* ------------------------------------------------------------------ */
 export default function RiverLayout({
@@ -352,27 +384,35 @@ export default function RiverLayout({
   return (
     <div className="min-h-screen" style={{ backgroundColor: 'var(--sm-dark)' }}>
       <div
-        className="mx-auto flex gap-6"
-        style={{ maxWidth: 1320, paddingLeft: 0, paddingRight: 24 }}
+        className="mx-auto flex w-full"
+        style={{
+          maxWidth: 1440,
+          paddingLeft: 0,
+          paddingRight: 0,
+        }}
       >
-        {/* Left Rail — desktop only */}
+        {/* Left rail — 240px */}
         <RightRail />
 
-        {/* Main content column — wide */}
-        <main className="flex-1 min-w-0 py-4" style={{ maxWidth: 1000 }}>
-          {/* Hero zone: Scout Briefing — unified glass container */}
+        {/* Main content — minmax(0, 1fr) */}
+        <main
+          className="flex-1 min-w-0 py-6 px-6 lg:px-8"
+          style={{
+            borderLeft: '1px solid var(--sm-border)',
+          }}
+        >
+          {/* Scout area: greeting, radar, briefing cards */}
           <div
             className="mb-6 rounded-xl overflow-hidden"
             style={{
-              background: 'rgba(12, 12, 18, 0.7)',
-              backdropFilter: 'blur(20px)',
-              WebkitBackdropFilter: 'blur(20px)',
-              border: '1px solid rgba(255, 255, 255, 0.06)',
-              boxShadow: '0 4px 24px rgba(0,0,0,0.25)',
+              background: 'var(--sm-card)',
+              border: '1px solid var(--sm-border)',
+              boxShadow: 'var(--shadow-sm)',
               padding: 'var(--card-padding, 20px)',
             }}
           >
             <ScoutGreeting />
+            <ScoutRadar />
             <ScoutBriefingGrid />
           </div>
 
@@ -392,6 +432,9 @@ export default function RiverLayout({
 
           {children}
         </main>
+
+        {/* Right utility rail — 320px */}
+        <RightUtilityRail />
       </div>
 
       {/* Mobile: fan tools below feed */}

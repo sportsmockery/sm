@@ -68,7 +68,7 @@ export default function ScoutGreeting() {
         <div className="flex items-center gap-2 mb-0.5">
           <span
             className="text-xs font-bold uppercase tracking-[0.12em]"
-            style={{ color: '#00D4FF', fontSize: 'var(--font-size-xs)' }}
+            style={{ color: 'var(--sm-red)', fontSize: 'var(--font-size-xs)' }}
           >
             Scout Briefing
           </span>
@@ -93,7 +93,7 @@ export default function ScoutGreeting() {
           {!animDone && (
             <span
               className="inline-block w-[2px] h-[1em] ml-0.5 align-text-bottom animate-pulse"
-              style={{ backgroundColor: '#BC0000' }}
+              style={{ backgroundColor: 'var(--sm-red)' }}
             />
           )}
         </p>
@@ -104,7 +104,7 @@ export default function ScoutGreeting() {
           animation: scoutBobble 1.2s ease-out;
         }
         .scout-head-img {
-          filter: drop-shadow(0 0 6px rgba(0, 212, 255, 0.2));
+          filter: none;
         }
         @keyframes scoutBobble {
           0% { transform: scale(0.6) rotate(-8deg); opacity: 0; }
