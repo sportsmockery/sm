@@ -107,12 +107,12 @@ export default function ScoutBriefingCard({
       {/* 2px top accent — team color micro-accent */}
       <div style={{ height: 2, width: '100%', backgroundColor: teamAccent || 'rgba(255,255,255,0.06)' }} />
 
-      <div style={{ padding: 12, display: 'flex', flexDirection: 'column', gap: 6, height: 'calc(100% - 2px)' }}>
+      <div style={{ padding: 'var(--card-padding-sm, 18px)', display: 'flex', flexDirection: 'column', gap: 6, height: 'calc(100% - 2px)' }}>
         {/* Header: chip + timestamp */}
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
             <span style={{ color: '#666' }}>{TYPE_ICONS[type]}</span>
-            <span style={{ fontSize: 10, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em', color: '#8a8a9a' }}>
+            <span style={{ fontSize: 'var(--font-size-xs)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em', color: 'var(--sm-text-meta)' }}>
               {TYPE_LABELS[type]}
             </span>
             {isLive && (
@@ -123,19 +123,19 @@ export default function ScoutBriefingCard({
             )}
           </div>
           {timestamp && (
-            <span style={{ fontSize: 9, color: '#55556a' }}>{timestamp}</span>
+            <span style={{ fontSize: 'var(--font-size-xs)', color: 'var(--sm-text-meta)' }}>{timestamp}</span>
           )}
         </div>
 
-        {/* Title — white */}
-        <h4 style={{ fontSize: 13, fontWeight: 700, lineHeight: 1.3, color: '#ffffff', margin: 0, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
+        {/* Title — card title size */}
+        <h4 style={{ fontSize: 'var(--font-size-card-title)', fontWeight: 600, lineHeight: 1.35, color: 'var(--sm-text)', margin: 0, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
           {title}
         </h4>
 
-        {/* Value — light gray */}
+        {/* Value — secondary */}
         <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
           {trendDirection && <TrendArrow direction={trendDirection} />}
-          <span style={{ fontSize: 11, lineHeight: 1.4, color: '#b0b0c0' }}>{value}</span>
+          <span style={{ fontSize: 'var(--font-size-sm)', lineHeight: 1.4, color: 'var(--sm-text-secondary)' }}>{value}</span>
         </div>
 
         {/* Rumor meter bar */}
@@ -144,7 +144,7 @@ export default function ScoutBriefingCard({
             <div style={{ width: '100%', height: 4, borderRadius: 2, backgroundColor: 'rgba(255,255,255,0.06)', overflow: 'hidden' }}>
               <div style={{ height: '100%', borderRadius: 2, width: `${confidence}%`, backgroundColor: teamAccent || '#bc0000', opacity: 0.8, transition: 'width 0.5s' }} />
             </div>
-            <span style={{ fontSize: 9, color: '#55556a', marginTop: 2, display: 'block' }}>{confidence}% confidence</span>
+            <span style={{ fontSize: 'var(--font-size-xs)', color: 'var(--sm-text-meta)', marginTop: 2, display: 'block' }}>{confidence}% confidence</span>
           </div>
         )}
 
@@ -164,7 +164,7 @@ export default function ScoutBriefingCard({
 
         {/* Detail — muted gray */}
         {detail && (
-          <p style={{ fontSize: 10, lineHeight: 1.3, color: '#55556a', margin: 0, marginTop: 'auto', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+          <p style={{ fontSize: 'var(--font-size-xs)', lineHeight: 1.4, color: 'var(--sm-text-meta)', margin: 0, marginTop: 'auto', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
             {detail}
           </p>
         )}

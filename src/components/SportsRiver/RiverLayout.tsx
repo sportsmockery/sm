@@ -94,10 +94,10 @@ function RightRail() {
 
   return (
     <aside
-      className="hidden lg:flex flex-col gap-4 shrink-0 sticky top-[80px] overflow-y-auto"
+      className="hidden lg:flex flex-col gap-4 shrink-0 sticky top-0 overflow-y-auto"
       style={{
         width: 280,
-        maxHeight: 'calc(100vh - 96px)',
+        maxHeight: '100vh',
         paddingBottom: 16,
       }}
     >
@@ -118,17 +118,17 @@ function RightRail() {
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            height: 48,
+            height: 56,
             textDecoration: 'none',
           }}
         >
           <Image
             src="/downloads/edge-logo.png"
-            alt="EDGE"
-            width={100}
-            height={28}
+            alt="SM EDGE"
+            width={160}
+            height={40}
             unoptimized
-            style={{ objectFit: 'contain', height: 22, width: 'auto' }}
+            style={{ objectFit: 'contain', height: 36, width: 'auto' }}
           />
         </Link>
       </div>
@@ -149,7 +149,7 @@ function RightRail() {
                 borderRadius: 8,
                 textDecoration: 'none',
                 color: 'var(--sm-text)',
-                fontSize: 13,
+                fontSize: 15,
                 fontWeight: 500,
                 transition: 'background 0.15s',
               }}
@@ -353,7 +353,7 @@ export default function RiverLayout({
     <div className="min-h-screen" style={{ backgroundColor: 'var(--sm-dark)' }}>
       <div
         className="mx-auto flex gap-6"
-        style={{ maxWidth: 1320, padding: '0 24px' }}
+        style={{ maxWidth: 1320, paddingLeft: 0, paddingRight: 24 }}
       >
         {/* Left Rail — desktop only */}
         <RightRail />
@@ -369,7 +369,7 @@ export default function RiverLayout({
               WebkitBackdropFilter: 'blur(20px)',
               border: '1px solid rgba(255, 255, 255, 0.06)',
               boxShadow: '0 4px 24px rgba(0,0,0,0.25)',
-              padding: '16px 20px 14px',
+              padding: 'var(--card-padding, 20px)',
             }}
           >
             <ScoutGreeting />
@@ -379,8 +379,8 @@ export default function RiverLayout({
           {/* Divider */}
           <div className="flex items-center gap-2 mb-5">
             <h3
-              className="text-xs font-semibold uppercase tracking-wider whitespace-nowrap"
-              style={{ color: 'var(--sm-text-dim)' }}
+              className="text-sm font-semibold uppercase tracking-wider whitespace-nowrap"
+              style={{ color: 'var(--sm-text-meta)', fontSize: 'var(--font-size-sm)' }}
             >
               Your Feed
             </h3>
@@ -401,8 +401,8 @@ export default function RiverLayout({
       >
         <div className="flex items-center gap-2 mt-4 mb-2">
           <h3
-            className="text-xs font-semibold uppercase tracking-wider whitespace-nowrap"
-            style={{ color: 'var(--sm-text-dim)' }}
+            className="text-sm font-semibold uppercase tracking-wider whitespace-nowrap"
+            style={{ color: 'var(--sm-text-meta)', fontSize: 'var(--font-size-sm)' }}
           >
             Fan Tools
           </h3>

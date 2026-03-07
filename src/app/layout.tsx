@@ -7,7 +7,7 @@ import { AuthProvider } from "@/contexts/AuthContext";
 import { ChatProvider } from "@/contexts/ChatContext";
 import { SubscriptionProvider } from "@/contexts/SubscriptionContext";
 import { TeamRecordProvider } from "@/contexts/TeamRecordContext";
-import Header from "@/components/layout/Header";
+// Header removed — top bar disabled
 // LeftSidebar removed — floating sidebar now lives in RiverLayout
 import SkipToContent from "@/components/layout/SkipToContent";
 import ScrollToTop from "@/components/layout/ScrollToTop";
@@ -143,7 +143,6 @@ export default function RootLayout({
               <SkipToContent />
               <NavigationProgress />
               <div className="flex min-h-screen flex-col">
-                <Header />
                 <LiveStrip />
                 <div id="main-content" className="flex-1" tabIndex={-1}>
                   <div className="sm-container">

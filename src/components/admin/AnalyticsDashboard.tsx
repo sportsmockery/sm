@@ -93,10 +93,10 @@ export default function AnalyticsDashboard() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-black text-zinc-900 dark:text-zinc-100 font-[var(--font-montserrat)]">
+          <h1 className="sm-analytics-title text-[var(--font-size-analytics)] font-semibold text-zinc-900 dark:text-zinc-100">
             Analytics Dashboard
           </h1>
-          <p className="text-sm text-zinc-500 mt-1">
+          <p className="text-base text-[var(--sm-text-secondary)] dark:text-[var(--sm-text-meta)] mt-1">
             Track your site performance and engagement
           </p>
         </div>

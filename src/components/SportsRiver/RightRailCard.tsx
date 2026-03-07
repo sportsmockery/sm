@@ -29,10 +29,10 @@ export default function RightRailCard({
       {accentColor && (
         <div style={{ height: 2, width: '100%', backgroundColor: accentColor }} />
       )}
-      <div style={{ padding: 16 }}>
-        <h3 style={{
-          fontSize: 10,
-          fontWeight: 700,
+      <div style={{ padding: 'var(--card-padding, 20px)' }}>
+        <h3 className="sm-card-title" style={{
+          fontSize: 'var(--font-size-card-title, 17px)',
+          fontWeight: 600,
           textTransform: 'uppercase',
           letterSpacing: '0.08em',
           color: '#BC0000',

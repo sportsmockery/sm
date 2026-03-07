@@ -42,7 +42,7 @@ export default function SinceLastVisitCard({ riverCards, lastVisitTimestamp }: S
       }}
     >
       <div style={{ height: 2, background: '#00D4FF' }} />
-      <div style={{ padding: 16 }}>
+      <div style={{ padding: 'var(--card-padding, 20px)' }}>
         <span
           style={{
             display: 'inline-block',

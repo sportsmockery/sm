@@ -67,27 +67,27 @@ export default function ScoutGreeting() {
       <div className="flex-1 min-w-0">
         <div className="flex items-center gap-2 mb-0.5">
           <span
-            className="text-[10px] font-bold uppercase tracking-[0.12em]"
-            style={{ color: '#00D4FF' }}
+            className="text-xs font-bold uppercase tracking-[0.12em]"
+            style={{ color: '#00D4FF', fontSize: 'var(--font-size-xs)' }}
           >
             Scout Briefing
           </span>
           <span
-            className="text-[10px]"
-            style={{ color: 'var(--sm-text-dim)', opacity: 0.5 }}
+            className="text-xs"
+            style={{ color: 'var(--sm-text-meta)', opacity: 0.5 }}
           >
             ·
           </span>
           <span
-            className="text-[10px]"
-            style={{ color: 'var(--sm-text-dim)' }}
+            className="text-xs"
+            style={{ color: 'var(--sm-text-meta)', fontSize: 'var(--font-size-xs)' }}
           >
             Updated {timeStr}
           </span>
         </div>
         <p
-          className="text-sm font-medium leading-snug"
-          style={{ color: 'var(--sm-text)' }}
+          className="sm-greeting-text"
+          style={{ color: 'var(--sm-text)', fontSize: 'var(--font-size-greeting, 18px)', fontWeight: 500 }}
         >
           {displayText}
           {!animDone && (

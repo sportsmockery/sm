@@ -146,8 +146,8 @@ export default function LeftSidebar() {
             display: 'flex',
             alignItems: 'center',
             justifyContent: expanded ? 'flex-start' : 'center',
-            height: 56,
-            padding: expanded ? '0 12px' : '0',
+            height: 72,
+            padding: expanded ? '0 14px' : '0',
             textDecoration: 'none',
             flexShrink: 0,
             borderBottom: '1px solid rgba(255, 255, 255, 0.06)',
@@ -157,11 +157,11 @@ export default function LeftSidebar() {
           {expanded ? (
             <Image
               src="/downloads/edge-logo.png"
-              alt="EDGE"
-              width={120}
-              height={32}
+              alt="SM EDGE"
+              width={180}
+              height={48}
               unoptimized
-              style={{ objectFit: 'contain', height: 28, width: 'auto' }}
+              style={{ objectFit: 'contain', height: 44, width: 'auto' }}
             />
           ) : (
             <span

@@ -3,7 +3,6 @@
 import React, { useState, useCallback, useRef, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
-import { EdgeLogo } from '@/components/edge/EdgeLogo';
 
 type EdgePanel =
   | { type: 'catch-up'; data: { items: { id: string; summary: string }[] } }
@@ -57,8 +56,6 @@ export default function EdgePage() {
       })
       .catch(() => {});
   }, []);
-
-  const tagline = getEdgeTagline();
 
   const scrollToSession = useCallback(() => {
     setTimeout(() => {
@@ -136,60 +133,6 @@ export default function EdgePage() {
           'radial-gradient(circle at top, rgba(188,0,0,0.18), transparent 55%), radial-gradient(circle at bottom, rgba(14,51,134,0.22), transparent 60%), var(--sm-dark)',
       }}
     >
-      {/* EDGE Identity Band */}
-      <header
-        className="h-[var(--sm-nav-height)] sticky top-0 z-30 border-b border-[var(--sm-border)] backdrop-blur-xl"
-        style={{ background: 'var(--sm-nav-bg)' }}
-      >
-        <div className="max-w-6xl mx-auto h-full flex items-center justify-between px-4">
-          <div className="flex items-center gap-2">
-            <span className="text-xs uppercase tracking-[0.18em]" style={{ color: '#9090a8' }}>
-              Sports Mockery
-            </span>
-            <EdgeLogo variant="full" height={28} className="flex-shrink-0" />
-          </div>
-
-          <div className="hidden md:block text-sm" style={{ color: '#9090a8' }}>
-            {tagline}
-          </div>
-
-          <nav className="flex items-center gap-2 text-xs font-medium">
-            <button
-              className="px-3 py-1.5 rounded-[var(--sm-radius-pill)] border border-[var(--sm-border)] bg-[var(--sm-card)] hover:bg-[var(--sm-card-hover)] transition focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[var(--sm-red)]"
-              style={{ color: '#a0a0b8' }}
-              onClick={() => router.push('/chicago-bears')}
-            >
-              Teams
-            </button>
-            <button
-              className="px-3 py-1.5 rounded-[var(--sm-radius-pill)] border border-[var(--sm-border)] bg-[var(--sm-card)] hover:bg-[var(--sm-card-hover)] transition focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[var(--sm-red)]"
-              style={{ color: '#a0a0b8' }}
-              onClick={() => router.push('/gm')}
-            >
-              Tools
-            </button>
-            <button
-              className="px-3 py-1.5 rounded-[var(--sm-radius-pill)] text-xs font-semibold text-white focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[var(--sm-red)]"
-              style={{
-                background: 'var(--sm-gradient)',
-                boxShadow: 'var(--shadow-primary)',
-                border: '1px solid rgba(0,0,0,0.4)',
-              }}
-              onClick={() => router.push('/pricing')}
-            >
-              SM+
-            </button>
-            <button
-              className="px-3 py-1.5 rounded-[var(--sm-radius-pill)] border border-[var(--sm-border)] transition focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[var(--sm-red)]"
-              style={{ color: '#a0a0b8' }}
-              onClick={() => router.push('/login')}
-            >
-              Log in
-            </button>
-          </nav>
-        </div>
-      </header>
-
       <main className="flex-1">
         {/* Error toast */}
         <AnimatePresence>
@@ -627,15 +570,6 @@ function EdgeSkyline() {
 }
 
 // ---- Helpers ----
-
-function getEdgeTagline() {
-  const hour = typeof window === 'undefined' ? 12 : new Date().getHours();
-  if (hour < 11)
-    return 'Chicago Sports, On Command — Morning EDGE: What did you miss?';
-  if (hour < 17)
-    return 'Chicago Sports, On Command — Daytime EDGE: What matters now?';
-  return 'Chicago Sports, On Command — Gameday EDGE: How are we winning?';
-}
 
 async function callScout(prompt: string): Promise<string> {
   const res = await fetch('/api/edge/scout', {
