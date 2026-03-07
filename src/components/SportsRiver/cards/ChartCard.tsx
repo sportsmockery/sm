@@ -1,6 +1,6 @@
 'use client';
 
-import React from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
 import { LineChart, Line, XAxis, YAxis, ResponsiveContainer, Tooltip } from 'recharts';
 import type { RiverCard } from '@/lib/river-types';
@@ -21,7 +21,56 @@ const PLACEHOLDER_DATA = [
   { name: 'Jun', value: 89 },
 ];
 
+/** Pulsing Graphite skeleton for chart area — no canvas until in view */
+function ChartSkeleton() {
+  return (
+    <div
+      className="w-full h-40 mb-3 rounded-lg overflow-hidden flex items-end gap-[6%] px-[5%] pb-3 pt-4 chart-skeleton"
+      style={{ background: '#1a1d24' }}
+      aria-hidden
+    >
+      {[72, 45, 88, 52, 65, 90, 58].map((h, i) => (
+        <div
+          key={i}
+          className="flex-1 rounded-t min-h-[8px]"
+          style={{
+            height: `${Math.max(12, h)}%`,
+            background: 'linear-gradient(180deg, #3d434d 0%, #2a2e36 100%)',
+            animation: 'chartSkeletonPulse 1.8s ease-in-out infinite',
+            animationDelay: `${i * 0.08}s`,
+          }}
+        />
+      ))}
+      <style>{`
+        @keyframes chartSkeletonPulse {
+          0%, 100% { opacity: 0.6; }
+          50% { opacity: 1; }
+        }
+      `}</style>
+    </div>
+  );
+}
+
 export const ChartCard = React.memo(function ChartCard({ card }: ChartCardProps) {
+  const chartRef = useRef<HTMLDivElement>(null);
+  const [isInView, setIsInView] = useState(false);
+
+  useEffect(() => {
+    const el = chartRef.current;
+    if (!el) return;
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setIsInView(true);
+        }
+      },
+      { rootMargin: '200px', threshold: 0 }
+    );
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, []);
+
   const c = card.content as Record<string, unknown>;
   const title = (c.title as string | undefined) ?? 'Analytics';
   const description = c.description as string | undefined;
@@ -46,18 +95,24 @@ export const ChartCard = React.memo(function ChartCard({ card }: ChartCardProps)
         </p>
       )}
 
-      {/* Chart */}
-      <div className="w-full h-40 mb-3" style={{ background: '#0B0F14', borderRadius: 8, padding: '8px 0' }}>
-        <ResponsiveContainer width="100%" height="100%">
-          <LineChart data={chartData}>
-            <XAxis dataKey="name" tick={{ fill: '#E6E8EC', fontSize: 10 }} axisLine={false} tickLine={false} />
-            <YAxis hide />
-            <Tooltip
-              contentStyle={{ background: '#1B2430', border: '1px solid #2B3442', borderRadius: 8, fontSize: 12, color: '#FAFAFB' }}
-            />
-            <Line type="monotone" dataKey="value" stroke="#00D4FF" strokeWidth={2} dot={{ fill: '#00D4FF', r: 3 }} />
-          </LineChart>
-        </ResponsiveContainer>
+      {/* Chart container: skeleton until within 200px of viewport */}
+      <div ref={chartRef} className="w-full mb-3" style={{ minHeight: 160 }}>
+        {!isInView ? (
+          <ChartSkeleton />
+        ) : (
+          <div className="w-full h-40" style={{ background: '#0B0F14', borderRadius: 8, padding: '8px 0' }}>
+            <ResponsiveContainer width="100%" height="100%">
+              <LineChart data={chartData}>
+                <XAxis dataKey="name" tick={{ fill: '#E6E8EC', fontSize: 10 }} axisLine={false} tickLine={false} />
+                <YAxis hide />
+                <Tooltip
+                  contentStyle={{ background: '#1B2430', border: '1px solid #2B3442', borderRadius: 8, fontSize: 12, color: '#FAFAFB' }}
+                />
+                <Line type="monotone" dataKey="value" stroke="#00D4FF" strokeWidth={2} dot={{ fill: '#00D4FF', r: 3 }} />
+              </LineChart>
+            </ResponsiveContainer>
+          </div>
+        )}
       </div>
 
       {/* CTA */}

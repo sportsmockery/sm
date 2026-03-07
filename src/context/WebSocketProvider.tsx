@@ -114,55 +114,84 @@ export function WebSocketProvider({ children }: { children: React.ReactNode }) {
   const cardChannelsRef = useRef<Map<string, RealtimeChannel>>(new Map());
   const injectionListenersRef = useRef<Set<(card: RiverCard) => void>>(new Set());
   const prevStateRef = useRef<ConnectionState>('offline');
+  const backoffMsRef = useRef(1000);
+  const reconnectTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  // Main channel: listen for INSERTs on sm_hub_updates and sm_box_scores
+  const INITIAL_BACKOFF_MS = 1000;
+  const MAX_BACKOFF_MS = 8000;
+
+  // Main channel: listen for INSERTs; reconnect with exponential backoff on drop
   useEffect(() => {
-    const channel = supabase
-      .channel('chicago_breaking')
-      .on(
-        'postgres_changes',
-        { event: 'INSERT', schema: 'public', table: 'sm_hub_updates' },
-        (payload: RealtimePostgresChangesPayload<Record<string, unknown>>) => {
-          if (payload.new && typeof payload.new === 'object') {
-            const card = hubInsertToRiverCard(payload.new as Record<string, unknown>);
-            injectionListenersRef.current.forEach((cb) => cb(card));
+    function subscribe() {
+      const channel = supabase
+        .channel('chicago_breaking')
+        .on(
+          'postgres_changes',
+          { event: 'INSERT', schema: 'public', table: 'sm_hub_updates' },
+          (payload: RealtimePostgresChangesPayload<Record<string, unknown>>) => {
+            if (payload.new && typeof payload.new === 'object') {
+              const card = hubInsertToRiverCard(payload.new as Record<string, unknown>);
+              injectionListenersRef.current.forEach((cb) => cb(card));
+            }
           }
-        }
-      )
-      .on(
-        'postgres_changes',
-        { event: 'INSERT', schema: 'public', table: 'sm_box_scores' },
-        (payload: RealtimePostgresChangesPayload<Record<string, unknown>>) => {
-          if (payload.new && typeof payload.new === 'object') {
-            const card = boxScoreInsertToRiverCard(payload.new as Record<string, unknown>);
-            injectionListenersRef.current.forEach((cb) => cb(card));
+        )
+        .on(
+          'postgres_changes',
+          { event: 'INSERT', schema: 'public', table: 'sm_box_scores' },
+          (payload: RealtimePostgresChangesPayload<Record<string, unknown>>) => {
+            if (payload.new && typeof payload.new === 'object') {
+              const card = boxScoreInsertToRiverCard(payload.new as Record<string, unknown>);
+              injectionListenersRef.current.forEach((cb) => cb(card));
+            }
           }
-        }
-      )
-      .subscribe((status) => {
-        let next: ConnectionState;
-        if (status === 'SUBSCRIBED') {
-          next = 'connected';
-        } else if (status === 'CHANNEL_ERROR' || status === 'TIMED_OUT') {
-          next = 'reconnecting';
-        } else {
-          next = 'offline';
-        }
+        )
+        .subscribe((status) => {
+          if (status === 'SUBSCRIBED') {
+            backoffMsRef.current = INITIAL_BACKOFF_MS;
+            if (
+              prevStateRef.current === 'reconnecting' ||
+              prevStateRef.current === 'offline'
+            ) {
+              setReconnectedAt(Date.now());
+            }
+            prevStateRef.current = 'connected';
+            setConnectionState('connected');
+            return;
+          }
 
-        if (
-          next === 'connected' &&
-          (prevStateRef.current === 'reconnecting' || prevStateRef.current === 'offline')
-        ) {
-          setReconnectedAt(Date.now());
-        }
-        prevStateRef.current = next;
-        setConnectionState(next);
-      });
+          if (status === 'CHANNEL_ERROR' || status === 'TIMED_OUT' || status === 'CLOSED') {
+            prevStateRef.current = 'reconnecting';
+            setConnectionState('reconnecting');
+            supabase.removeChannel(channel);
+            mainChannelRef.current = null;
 
-    mainChannelRef.current = channel;
+            const delay = backoffMsRef.current;
+            backoffMsRef.current = Math.min(backoffMsRef.current * 2, MAX_BACKOFF_MS);
+
+            reconnectTimeoutRef.current = setTimeout(() => {
+              reconnectTimeoutRef.current = null;
+              subscribe();
+            }, delay);
+          } else {
+            prevStateRef.current = 'offline';
+            setConnectionState('offline');
+          }
+        });
+
+      mainChannelRef.current = channel;
+    }
+
+    subscribe();
 
     return () => {
-      supabase.removeChannel(channel);
+      if (reconnectTimeoutRef.current) {
+        clearTimeout(reconnectTimeoutRef.current);
+        reconnectTimeoutRef.current = null;
+      }
+      if (mainChannelRef.current) {
+        supabase.removeChannel(mainChannelRef.current);
+        mainChannelRef.current = null;
+      }
     };
   }, []);
 

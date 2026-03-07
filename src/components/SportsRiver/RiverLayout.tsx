@@ -4,6 +4,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { useAuth } from '@/contexts/AuthContext';
+import { useWebSocket } from '@/context/WebSocketProvider';
 import { ThemeToggle } from '@/components/ThemeToggle';
 import ScoutGreeting from './ScoutGreeting';
 import ScoutBriefingText from './ScoutBriefingText';
@@ -66,6 +67,76 @@ interface RiverLayoutProps {
 }
 
 /* ------------------------------------------------------------------ */
+/*  Scout box (greeting, briefing with 4h cache, "What'd I Miss?" button) */
+/* ------------------------------------------------------------------ */
+function ScoutBox() {
+  const [refreshBriefing, setRefreshBriefing] = useState<(() => void) | null>(null);
+
+  return (
+    <div
+      className="mb-6 rounded-xl overflow-hidden relative"
+      style={{
+        background: 'var(--sm-card)',
+        border: '1px solid var(--sm-border)',
+        boxShadow: 'var(--shadow-sm)',
+        padding: 'var(--card-padding, 20px)',
+      }}
+    >
+      <div className="absolute top-4 right-4 z-10">
+        <button
+          type="button"
+          onClick={() => refreshBriefing?.()}
+          className="text-sm font-medium"
+          style={{ color: 'var(--sm-text-meta)' }}
+        >
+          What&apos;d I Miss?
+        </button>
+      </div>
+      <ScoutGreeting />
+      <ScoutBriefingText setRefreshFn={setRefreshBriefing} />
+      <ScoutRadar />
+      <ScoutBriefingGrid />
+    </div>
+  );
+}
+
+/* ------------------------------------------------------------------ */
+/*  Feed section header + offline indicator                            */
+/* ------------------------------------------------------------------ */
+function FeedSectionHeader() {
+  const { connectionState } = useWebSocket();
+  const isOffline = connectionState !== 'connected';
+
+  return (
+    <div className="flex items-center gap-2 mb-5">
+      {isOffline && (
+        <span
+          title="Showing offline cached data"
+          style={{
+            width: 8,
+            height: 8,
+            borderRadius: '50%',
+            backgroundColor: '#BC0000',
+            flexShrink: 0,
+          }}
+          aria-hidden
+        />
+      )}
+      <h3
+        className="text-sm font-semibold uppercase tracking-wider whitespace-nowrap"
+        style={{ color: 'var(--sm-text-meta)', fontSize: 'var(--font-size-sm)' }}
+      >
+        Your Feed
+      </h3>
+      <div
+        className="flex-1 h-px"
+        style={{ backgroundColor: 'var(--sm-border)' }}
+      />
+    </div>
+  );
+}
+
+/* ------------------------------------------------------------------ */
 /*  Right Rail                                                         */
 /* ------------------------------------------------------------------ */
 function RightRail() {
@@ -95,17 +166,8 @@ function RightRail() {
   }, [profileOpen]);
 
   return (
-    <aside
-      className="hidden lg:flex flex-col gap-4 shrink-0 sticky top-0 overflow-y-auto border-r border-[var(--sm-border)] pl-4 pr-3 pt-6"
-      style={{
-        width: 240,
-        minWidth: 240,
-        maxHeight: '100vh',
-        paddingBottom: 16,
-        backgroundColor: 'var(--sm-surface)',
-      }}
-    >
-      {/* EDGE Logo — 3x size */}
+    <aside className="left-rail hidden lg:flex shrink-0">
+      {/* EDGE Logo */}
       <div
         className="rounded-xl overflow-hidden"
         style={{
@@ -135,62 +197,26 @@ function RightRail() {
         </Link>
       </div>
 
-      {/* Team Hubs */}
-      <RightRailCard title="Team Hubs" accentColor="#BC0000">
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+      {/* Team Hubs — glass card */}
+      <RightRailCard title="Team Hubs" glass>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 0 }}>
           {TEAM_HUBS.map((hub) => (
-            <Link
-              key={hub.key}
-              href={hub.href}
-              className="rail-hub-link"
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: 10,
-                padding: '7px 8px',
-                borderRadius: 8,
-                textDecoration: 'none',
-                color: 'var(--sm-text)',
-                fontSize: 15,
-                fontWeight: 500,
-                transition: 'background 0.15s',
-              }}
-            >
-              <span style={{ color: 'var(--sm-text-muted)', flexShrink: 0 }}>{hub.icon}</span>
+            <Link key={hub.key} href={hub.href} style={{ textDecoration: 'none', display: 'flex', alignItems: 'center', gap: 8 }}>
+              <span style={{ flexShrink: 0 }}>{hub.icon}</span>
               <span>{hub.label}</span>
             </Link>
           ))}
         </div>
       </RightRailCard>
 
-      {/* Fan Tools */}
-      <RightRailCard title="SM 2.0 Fan Tools" accentColor="#BC0000">
+      {/* Fan Tools — glass card */}
+      <RightRailCard title="SM 2.0 Fan Tools" glass>
         <FanToolsCard />
       </RightRailCard>
 
-      {/* Bottom: EDGE+, Theme, Login */}
-      <div
-        className="rounded-xl overflow-hidden"
-        style={{
-          background: 'var(--sm-card)',
-          border: '1px solid var(--sm-border)',
-          boxShadow: 'var(--shadow-sm)',
-        }}
-      >
-        {/* EDGE+ */}
-        <Link
-          href="/pricing"
-          className="rail-hub-link"
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            padding: '12px 16px',
-            textDecoration: 'none',
-            transition: 'background 0.15s',
-            borderBottom: '1px solid rgba(255, 255, 255, 0.06)',
-          }}
-        >
+      {/* Bottom: EDGE+, Theme, Login — glass card */}
+      <div className="glass-card">
+        <Link href="/pricing" className="edge-plus" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '12px 16px', textDecoration: 'none' }}>
           <Image
             src="/downloads/edge-plus.png"
             alt="EDGE+"
@@ -201,22 +227,15 @@ function RightRail() {
           />
         </Link>
 
-        {/* Theme toggle */}
-        <div
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'space-between',
-            padding: '10px 16px',
-            borderBottom: '1px solid rgba(255, 255, 255, 0.06)',
-          }}
-        >
-          <span style={{ fontSize: 12, color: 'var(--sm-text-muted)', fontWeight: 500 }}>Theme</span>
-          <ThemeToggle />
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '10px 16px', borderTop: '1px solid rgba(255, 255, 255, 0.06)' }}>
+          <span className="meta" style={{ margin: 0 }}>Theme</span>
+          <div className="theme-toggle-wrapper">
+            <ThemeToggle />
+          </div>
         </div>
 
         {/* Profile / Login */}
-        <div style={{ position: 'relative' }} ref={profileRef}>
+        <div style={{ position: 'relative', borderTop: '1px solid rgba(255, 255, 255, 0.06)' }} ref={profileRef}>
           {isAuthenticated && user ? (
             <button
               onClick={() => setProfileOpen(!profileOpen)}
@@ -325,12 +344,6 @@ function RightRail() {
           )}
         </div>
       </div>
-
-      <style>{`
-        .rail-hub-link:hover {
-          background: rgba(255, 255, 255, 0.05) !important;
-        }
-      `}</style>
     </aside>
   );
 }
@@ -395,7 +408,7 @@ export default function RiverLayout({
           paddingRight: 0,
         }}
       >
-        {/* Left rail — 240px */}
+        {/* Left rail — 280px glass cards */}
         <RightRail />
 
         {/* Main content — minmax(0, 1fr) */}
@@ -406,34 +419,10 @@ export default function RiverLayout({
           }}
         >
           {/* Scout area: greeting, 24h briefing text, radar, then cards */}
-          <div
-            className="mb-6 rounded-xl overflow-hidden"
-            style={{
-              background: 'var(--sm-card)',
-              border: '1px solid var(--sm-border)',
-              boxShadow: 'var(--shadow-sm)',
-              padding: 'var(--card-padding, 20px)',
-            }}
-          >
-            <ScoutGreeting />
-            <ScoutBriefingText />
-            <ScoutRadar />
-            <ScoutBriefingGrid />
-          </div>
+          <ScoutBox />
 
-          {/* Divider */}
-          <div className="flex items-center gap-2 mb-5">
-            <h3
-              className="text-sm font-semibold uppercase tracking-wider whitespace-nowrap"
-              style={{ color: 'var(--sm-text-meta)', fontSize: 'var(--font-size-sm)' }}
-            >
-              Your Feed
-            </h3>
-            <div
-              className="flex-1 h-px"
-              style={{ backgroundColor: 'var(--sm-border)' }}
-            />
-          </div>
+          {/* Divider + offline indicator */}
+          <FeedSectionHeader />
 
           {children}
         </main>
