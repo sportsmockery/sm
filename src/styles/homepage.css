@@ -1710,7 +1710,7 @@
   left: -100px;
   width: 280px;
   height: 280px;
-  background: radial-gradient(circle, rgba(0,212,255,0.1), transparent 70%);
+  background: radial-gradient(circle, rgba(255,68,68,0.08), transparent 70%);
   animation: orbFloat2 18s ease-in-out infinite;
 }
 

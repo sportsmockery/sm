@@ -12,6 +12,7 @@ interface Orb {
   dy: number
   radius: number
   trail: { x: number; y: number }[]
+  cyan: boolean
 }
 
 const ORB_COUNT = 100
@@ -54,6 +55,7 @@ export function HeroStatsOrbs() {
           dy: Math.sin(angle) * speed,
           radius: 2 + Math.random() * 3, // 2–5px
           trail: [],
+          cyan: i % 3 === 0, // 1/3 of orbs are cyan
         })
       }
     }
@@ -86,7 +88,7 @@ export function HeroStatsOrbs() {
             for (let i = start + 1; i <= end; i++) {
               ctx!.lineTo(orb.trail[i].x, orb.trail[i].y)
             }
-            ctx!.strokeStyle = `rgba(188, 0, 0, ${alpha})`
+            ctx!.strokeStyle = orb.cyan ? `rgba(0, 212, 255, ${alpha})` : `rgba(188, 0, 0, ${alpha})`
             ctx!.lineWidth = Math.max(1, orb.radius * 0.5)
             ctx!.lineCap = 'round'
             ctx!.lineJoin = 'round'
@@ -97,13 +99,17 @@ export function HeroStatsOrbs() {
         // Draw orb glow (larger faint circle)
         ctx!.beginPath()
         ctx!.arc(orb.x, orb.y, orb.radius * 3, 0, Math.PI * 2)
-        ctx!.fillStyle = isDark ? 'rgba(188, 0, 0, 0.08)' : 'rgba(188, 0, 0, 0.05)'
+        ctx!.fillStyle = orb.cyan
+          ? (isDark ? 'rgba(0, 212, 255, 0.08)' : 'rgba(0, 212, 255, 0.05)')
+          : (isDark ? 'rgba(188, 0, 0, 0.08)' : 'rgba(188, 0, 0, 0.05)')
         ctx!.fill()
 
         // Draw orb core (bright)
         ctx!.beginPath()
         ctx!.arc(orb.x, orb.y, orb.radius, 0, Math.PI * 2)
-        ctx!.fillStyle = isDark ? 'rgba(188, 0, 0, 0.35)' : 'rgba(188, 0, 0, 0.25)'
+        ctx!.fillStyle = orb.cyan
+          ? (isDark ? 'rgba(0, 212, 255, 0.35)' : 'rgba(0, 212, 255, 0.25)')
+          : (isDark ? 'rgba(188, 0, 0, 0.35)' : 'rgba(188, 0, 0, 0.25)')
         ctx!.fill()
 
         // Move orb

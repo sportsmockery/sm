@@ -792,78 +792,29 @@ export function HomepageFeed({
             <CatchUpTimeline posts={safePosts} favoriteTeams={actuallyLoggedIn ? derivedFavoriteTeams : undefined} />
           </div>
 
-          <div className="team-logo-row animate-entrance entrance-delay-4">
-            {TEAM_LOGOS.map((logo) => (
-              <div key={logo.slug} className="team-logo-item">
-                <Link href={`/${logo.slug}`} className="team-logo-link">
-                  <Image src={logo.src} alt={logo.alt} width={32} height={32} />
-                </Link>
-                <span className="team-logo-label">{logo.label}</span>
-              </div>
-            ))}
-          </div>
-
-          <div className="animate-entrance entrance-delay-5">
+          <div className="animate-entrance entrance-delay-4">
             <ScoutSearchBox />
           </div>
         </div>
       </section>
 
-      {/* ===== SECTION 2: Featured Content (full width, no sidebar) ===== */}
-      <section className="featured-section section-transition" aria-label="Featured stories">
-        <div className="sm-container">
-          <EditorPicksHero picks={filteredEditorPicks} />
-        </div>
-      </section>
-
-      {/* ===== SECTION 4: Sticky Filter Bar ===== */}
-      <div className="team-filter-bar-sticky">
-        <div className="sm-container">
-          <TeamFilterTabs
-            activeFilter={activeFilter}
-            onFilterChange={handleFilterChange}
-            userPreferredTeam={userTeamPreference}
-          />
-        </div>
+      {/* ===== Sidebar (fixed right) ===== */}
+      <div style={{
+        position: 'fixed',
+        top: '80px',
+        right: 0,
+        width: '320px',
+        maxHeight: 'calc(100vh - 100px)',
+        overflowY: 'auto',
+        zIndex: 10,
+        padding: '16px 16px 16px 0',
+      }}>
+        <CommandPanel
+          posts={filteredPosts}
+          trendingPosts={safeTrendingPosts}
+          isLoggedIn={actuallyLoggedIn}
+        />
       </div>
-
-      {/* ===== SECTION 5: Feed + Sidebar (two-column starts here) ===== */}
-      <section id="feed" className="feed-section section-transition">
-        <div className="sm-container">
-          {/* Team preference banner */}
-          {isTeamFilter && TEAM_LABELS[activeFilter] && (
-            <div className="team-pref-banner">
-              Showing <strong>{TEAM_LABELS[activeFilter]}</strong> news first
-              <button onClick={clearTeamPreference} className="team-pref-clear">Show All</button>
-            </div>
-          )}
-          <div className="content-grid" style={{ gap: '48px', padding: '0 24px' }}>
-            {/* Main feed */}
-            <main className="feed-column" aria-label="Latest articles">
-              <div className="section-header scroll-reveal">
-                <span className="sm-tag">Latest</span>
-                <h2>Latest Stories</h2>
-              </div>
-              <StorylineFeed
-                posts={filteredPosts}
-                isLoggedIn={isLoggedIn}
-                isMobile={isMobile}
-                showTrendingInline={isMobile}
-                trendingPosts={safeTrendingPosts}
-                activeTeam={activeFilter}
-                userTeamPreference={derivedTeamPreference}
-              />
-            </main>
-
-            {/* Sidebar (desktop) */}
-            <CommandPanel
-              posts={filteredPosts}
-              trendingPosts={safeTrendingPosts}
-              isLoggedIn={actuallyLoggedIn}
-            />
-          </div>
-        </div>
-      </section>
 
       {/* Back to Top */}
       <BackToTop />
