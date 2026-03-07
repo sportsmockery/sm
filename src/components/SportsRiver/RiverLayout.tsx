@@ -3,14 +3,12 @@
 import React, { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { usePathname } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
 import { ThemeToggle } from '@/components/ThemeToggle';
 import ScoutGreeting from './ScoutGreeting';
 import ScoutBriefingGrid from './ScoutBriefingGrid';
 import FanToolsCard from './FanToolsCard';
-import FeedModeSelector from './FeedModeSelector';
-import TeamFilterPills from './TeamFilterPills';
+import RightRailCard from './RightRailCard';
 import type { Role } from '@/lib/roles';
 
 const TEAM_HUBS = [
@@ -66,20 +64,9 @@ interface RiverLayoutProps {
 }
 
 /* ------------------------------------------------------------------ */
-/*  Floating Left Sidebar                                              */
+/*  Right Rail                                                         */
 /* ------------------------------------------------------------------ */
-function FloatingLeftSidebar({
-  feedMode,
-  teamFilter,
-  onFeedModeChange,
-  onTeamFilterChange,
-}: {
-  feedMode: string;
-  teamFilter: string;
-  onFeedModeChange: (mode: string) => void;
-  onTeamFilterChange: (team: string) => void;
-}) {
-  const pathname = usePathname();
+function RightRail() {
   const { user, isAuthenticated, signOut } = useAuth();
   const [userRole, setUserRole] = useState<Role | null>(null);
   const [profileOpen, setProfileOpen] = useState(false);
@@ -105,170 +92,106 @@ function FloatingLeftSidebar({
     return () => document.removeEventListener('mousedown', handler);
   }, [profileOpen]);
 
-  useEffect(() => {
-    const handler = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') setProfileOpen(false);
-    };
-    document.addEventListener('keydown', handler);
-    return () => document.removeEventListener('keydown', handler);
-  }, []);
-
-  if (pathname?.startsWith('/home') || pathname === '/chicago-bears1' || pathname?.startsWith('/admin')) return null;
-
   return (
     <aside
-      className="floating-left-sidebar hidden md:flex flex-col"
+      className="hidden lg:flex flex-col gap-4 shrink-0 sticky top-[80px] overflow-y-auto"
       style={{
-        position: 'fixed',
-        top: 80,
-        left: 16,
-        bottom: 16,
-        width: 220,
-        borderRadius: 16,
-        background: 'rgba(12, 12, 18, 0.85)',
-        backdropFilter: 'blur(20px)',
-        WebkitBackdropFilter: 'blur(20px)',
-        border: '1px solid rgba(255, 255, 255, 0.06)',
-        boxShadow: '0 8px 32px rgba(0,0,0,0.4)',
-        zIndex: 900,
-        overflow: 'hidden',
-        fontFamily: 'Barlow, sans-serif',
+        width: 280,
+        maxHeight: 'calc(100vh - 96px)',
+        paddingBottom: 16,
       }}
     >
       {/* EDGE Logo */}
-      <Link
-        href="/"
+      <div
+        className="rounded-xl overflow-hidden"
         style={{
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          height: 52,
-          textDecoration: 'none',
-          flexShrink: 0,
-          borderBottom: '1px solid rgba(255, 255, 255, 0.06)',
+          background: 'rgba(12, 12, 18, 0.85)',
+          backdropFilter: 'blur(20px)',
+          WebkitBackdropFilter: 'blur(20px)',
+          border: '1px solid rgba(255, 255, 255, 0.06)',
+          boxShadow: '0 4px 20px rgba(0,0,0,0.3)',
         }}
       >
-        <Image
-          src="/downloads/edge-logo.png"
-          alt="EDGE"
-          width={100}
-          height={28}
-          unoptimized
-          style={{ objectFit: 'contain', height: 24, width: 'auto' }}
-        />
-      </Link>
-
-      {/* Scrollable content */}
-      <div style={{ flex: 1, overflowY: 'auto', overflowX: 'hidden', padding: '12px 0' }}>
-        {/* Feed Modes */}
-        <div style={{ padding: '0 14px' }}>
-          <div style={{
-            fontSize: 10,
-            fontWeight: 700,
-            textTransform: 'uppercase',
-            letterSpacing: '0.08em',
-            color: '#BC0000',
-            marginBottom: 8,
-          }}>
-            Feed
-          </div>
-          <FeedModeSelector currentMode={feedMode} onModeChange={onFeedModeChange} />
-        </div>
-
-        {/* Divider */}
-        <div style={{ height: 1, background: 'rgba(255, 255, 255, 0.06)', margin: '12px 14px' }} />
-
-        {/* Team Filters */}
-        <div style={{ padding: '0 14px' }}>
-          <div style={{
-            fontSize: 10,
-            fontWeight: 700,
-            textTransform: 'uppercase',
-            letterSpacing: '0.08em',
-            color: '#BC0000',
-            marginBottom: 8,
-          }}>
-            Teams
-          </div>
-          <TeamFilterPills currentTeam={teamFilter} onTeamChange={onTeamFilterChange} />
-        </div>
-
-        {/* Divider */}
-        <div style={{ height: 1, background: 'rgba(255, 255, 255, 0.06)', margin: '12px 14px' }} />
-
-        {/* Team Hubs */}
-        <div style={{ padding: '0 14px' }}>
-          <div style={{
-            fontSize: 10,
-            fontWeight: 700,
-            textTransform: 'uppercase',
-            letterSpacing: '0.08em',
-            color: '#BC0000',
-            marginBottom: 8,
-          }}>
-            Team Hubs
-          </div>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-            {TEAM_HUBS.map((hub) => (
-              <Link
-                key={hub.key}
-                href={hub.href}
-                className="sidebar-hub-link"
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: 10,
-                  padding: '7px 8px',
-                  borderRadius: 8,
-                  textDecoration: 'none',
-                  color: '#CCDDEE',
-                  fontSize: 13,
-                  fontWeight: 500,
-                  transition: 'background 0.15s, color 0.15s',
-                }}
-              >
-                <span style={{ color: '#8899AA', flexShrink: 0 }}>{hub.icon}</span>
-                <span>{hub.label}</span>
-              </Link>
-            ))}
-          </div>
-        </div>
-
-        {/* Divider */}
-        <div style={{ height: 1, background: 'rgba(255, 255, 255, 0.06)', margin: '12px 14px' }} />
-
-        {/* Fan Tools */}
-        <div style={{ padding: '0 14px' }}>
-          <div style={{
-            fontSize: 10,
-            fontWeight: 700,
-            textTransform: 'uppercase',
-            letterSpacing: '0.08em',
-            color: '#BC0000',
-            marginBottom: 8,
-          }}>
-            Fan Tools
-          </div>
-          <FanToolsCard />
-        </div>
+        <Link
+          href="/"
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            height: 48,
+            textDecoration: 'none',
+          }}
+        >
+          <Image
+            src="/downloads/edge-logo.png"
+            alt="EDGE"
+            width={100}
+            height={28}
+            unoptimized
+            style={{ objectFit: 'contain', height: 22, width: 'auto' }}
+          />
+        </Link>
       </div>
 
-      {/* Bottom section: EDGE+, Theme Toggle, Profile */}
-      <div style={{ flexShrink: 0, borderTop: '1px solid rgba(255, 255, 255, 0.06)' }}>
-        {/* EDGE+ / SM+ Premium */}
+      {/* Team Hubs */}
+      <RightRailCard title="Team Hubs" accentColor="#BC0000">
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+          {TEAM_HUBS.map((hub) => (
+            <Link
+              key={hub.key}
+              href={hub.href}
+              className="rail-hub-link"
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: 10,
+                padding: '7px 8px',
+                borderRadius: 8,
+                textDecoration: 'none',
+                color: 'var(--sm-text)',
+                fontSize: 13,
+                fontWeight: 500,
+                transition: 'background 0.15s',
+              }}
+            >
+              <span style={{ color: 'var(--sm-text-muted)', flexShrink: 0 }}>{hub.icon}</span>
+              <span>{hub.label}</span>
+            </Link>
+          ))}
+        </div>
+      </RightRailCard>
+
+      {/* Fan Tools */}
+      <RightRailCard title="SM 2.0 Fan Tools" accentColor="#BC0000">
+        <FanToolsCard />
+      </RightRailCard>
+
+      {/* Bottom: EDGE+, Theme, Login */}
+      <div
+        className="rounded-xl overflow-hidden"
+        style={{
+          background: 'rgba(12, 12, 18, 0.85)',
+          backdropFilter: 'blur(20px)',
+          WebkitBackdropFilter: 'blur(20px)',
+          border: '1px solid rgba(255, 255, 255, 0.06)',
+          boxShadow: '0 4px 20px rgba(0,0,0,0.3)',
+        }}
+      >
+        {/* EDGE+ */}
         <Link
           href="/pricing"
-          className="sidebar-hub-link"
+          className="rail-hub-link"
           style={{
             display: 'flex',
             alignItems: 'center',
             gap: 10,
-            padding: '10px 14px',
+            padding: '12px 16px',
             textDecoration: 'none',
             color: '#FFD700',
             fontSize: 13,
             fontWeight: 600,
             transition: 'background 0.15s',
+            borderBottom: '1px solid rgba(255, 255, 255, 0.06)',
           }}
         >
           <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -277,22 +200,19 @@ function FloatingLeftSidebar({
           <span>EDGE+</span>
         </Link>
 
-        {/* Divider */}
-        <div style={{ height: 1, background: 'rgba(255, 255, 255, 0.06)', margin: '0 14px' }} />
-
-        {/* Theme Toggle */}
-        <div style={{
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          padding: '10px 14px',
-        }}>
-          <span style={{ fontSize: 12, color: '#8899AA', fontWeight: 500 }}>Theme</span>
+        {/* Theme toggle */}
+        <div
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            padding: '10px 16px',
+            borderBottom: '1px solid rgba(255, 255, 255, 0.06)',
+          }}
+        >
+          <span style={{ fontSize: 12, color: 'var(--sm-text-muted)', fontWeight: 500 }}>Theme</span>
           <ThemeToggle />
         </div>
-
-        {/* Divider */}
-        <div style={{ height: 1, background: 'rgba(255, 255, 255, 0.06)', margin: '0 14px' }} />
 
         {/* Profile / Login */}
         <div style={{ position: 'relative' }} ref={profileRef}>
@@ -304,11 +224,10 @@ function FloatingLeftSidebar({
                 alignItems: 'center',
                 gap: 10,
                 width: '100%',
-                padding: '10px 14px',
+                padding: '10px 16px',
                 background: 'none',
                 border: 'none',
                 cursor: 'pointer',
-                transition: 'background 0.2s',
               }}
             >
               <div style={{
@@ -334,9 +253,6 @@ function FloatingLeftSidebar({
                 <div style={{ fontSize: 12, fontWeight: 600, color: '#FAFAFB', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                   {user.name || user.email?.split('@')[0]}
                 </div>
-                <div style={{ fontSize: 10, color: '#556677', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                  {user.email}
-                </div>
               </div>
             </button>
           ) : (
@@ -344,9 +260,9 @@ function FloatingLeftSidebar({
               display: 'flex',
               alignItems: 'center',
               gap: 8,
-              padding: '10px 14px',
+              padding: '10px 16px',
             }}>
-              <Link href="/login" style={{ fontSize: 12, color: '#8899AA', textDecoration: 'none', fontWeight: 500 }}>Log in</Link>
+              <Link href="/login" style={{ fontSize: 12, color: 'var(--sm-text-muted)', textDecoration: 'none', fontWeight: 500 }}>Log in</Link>
               <span style={{ color: '#556677', fontSize: 10 }}>|</span>
               <Link href="/signup" style={{
                 fontSize: 11, fontWeight: 700, color: '#121821',
@@ -361,7 +277,7 @@ function FloatingLeftSidebar({
             <div style={{
               position: 'absolute',
               bottom: '100%',
-              left: 8,
+              right: 0,
               marginBottom: 8,
               width: 200,
               borderRadius: 10,
@@ -410,13 +326,8 @@ function FloatingLeftSidebar({
       </div>
 
       <style>{`
-        .sidebar-hub-link:hover {
+        .rail-hub-link:hover {
           background: rgba(255, 255, 255, 0.05) !important;
-          color: #FAFAFB !important;
-        }
-        .floating-left-sidebar::-webkit-scrollbar { width: 0; }
-        @media (max-width: 768px) {
-          .floating-left-sidebar { display: none !important; }
         }
       `}</style>
     </aside>
@@ -437,36 +348,22 @@ const popupLinkStyle: React.CSSProperties = {
 /* ------------------------------------------------------------------ */
 export default function RiverLayout({
   children,
-  feedMode,
-  teamFilter,
-  onFeedModeChange,
-  onTeamFilterChange,
 }: RiverLayoutProps) {
   return (
     <div className="min-h-screen" style={{ backgroundColor: 'var(--sm-dark)' }}>
-      {/* Floating Left Sidebar — desktop only */}
-      <FloatingLeftSidebar
-        feedMode={feedMode}
-        teamFilter={teamFilter}
-        onFeedModeChange={onFeedModeChange}
-        onTeamFilterChange={onTeamFilterChange}
-      />
-
-      {/* Mobile: horizontal scrollable filter strips */}
-      <div className="md:hidden px-4 pt-3 pb-1">
-        <TeamFilterPills currentTeam={teamFilter} onTeamChange={onTeamFilterChange} />
-      </div>
-
-      {/* Center content — offset for floating sidebar on desktop */}
-      <div className="flex justify-center md:pl-[252px]">
-        <main className="w-full max-w-[720px] px-4 py-4">
-          {/* Hero zone: greeting + Scout briefing */}
+      <div
+        className="mx-auto flex gap-6"
+        style={{ maxWidth: 1320, padding: '0 24px' }}
+      >
+        {/* Main content column — wide */}
+        <main className="flex-1 min-w-0 py-4" style={{ maxWidth: 1000 }}>
+          {/* Hero zone: Scout greeting + briefing cards */}
           <div className="mb-6">
             <ScoutGreeting />
             <ScoutBriefingGrid />
           </div>
 
-          {/* Divider between briefing and feed */}
+          {/* Divider */}
           <div className="flex items-center gap-2 mb-5">
             <h3
               className="text-xs font-semibold uppercase tracking-wider whitespace-nowrap"
@@ -482,11 +379,14 @@ export default function RiverLayout({
 
           {children}
         </main>
+
+        {/* Right Rail — desktop only */}
+        <RightRail />
       </div>
 
       {/* Mobile: fan tools below feed */}
       <div
-        className="md:hidden px-4 pb-8 space-y-4"
+        className="lg:hidden px-4 pb-8 space-y-4"
         style={{ backgroundColor: 'var(--sm-dark)' }}
       >
         <div className="flex items-center gap-2 mt-4 mb-2">
@@ -496,10 +396,7 @@ export default function RiverLayout({
           >
             Fan Tools
           </h3>
-          <div
-            className="flex-1 h-px"
-            style={{ backgroundColor: 'var(--sm-border)' }}
-          />
+          <div className="flex-1 h-px" style={{ backgroundColor: 'var(--sm-border)' }} />
         </div>
         <FanToolsCard />
       </div>

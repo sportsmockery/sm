@@ -22,6 +22,7 @@ import LiveStrip from "@/components/layout/LiveStrip";
 import MobileBottomNav from "@/components/layout/MobileBottomNav";
 import { WebSocketProvider } from "@/context/WebSocketProvider";
 import { AudioPlayerProvider } from "@/context/AudioPlayerContext";
+import AudioMiniPlayer from "@/components/SportsRiver/AudioMiniPlayer";
 
 // Floating buttons disabled - users access AI and Fan Chat via header buttons
 // import BearsAIButton from "@/components/bears/BearsAIButton";
@@ -152,6 +153,7 @@ export default function RootLayout({
                     <WebSocketProvider>
                       <AudioPlayerProvider>
                         {children}
+                        <AudioMiniPlayer />
                       </AudioPlayerProvider>
                     </WebSocketProvider>
                   </MotionProvider>

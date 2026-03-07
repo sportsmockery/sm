@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import type { RiverCard } from '@/lib/river-types';
 import { BaseGlassCard } from '../BaseGlassCard';
 import { useAudioPlayer } from '@/context/AudioPlayerContext';
@@ -21,6 +21,7 @@ export const ListenNowCard = React.memo(function ListenNowCard({ card }: ListenN
 
   const audioPlayer = useAudioPlayer();
   const [selectedVoice, setSelectedVoice] = useState<string>('Voice A');
+  const cardRef = useRef<HTMLDivElement>(null);
 
   const handlePlay = useCallback(() => {
     audioPlayer.play({ title: headline, url: ctaUrl }, selectedVoice);
@@ -33,7 +34,22 @@ export const ListenNowCard = React.memo(function ListenNowCard({ card }: ListenN
   const isCurrentlyPlaying =
     audioPlayer.isPlaying && audioPlayer.currentArticle?.title === headline;
 
+  // Track visibility — when this card scrolls out of view while playing, show mini-player
+  useEffect(() => {
+    const el = cardRef.current;
+    if (!el) return;
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        audioPlayer.setCardOutOfView(!entry.isIntersecting);
+      },
+      { threshold: 0.1 }
+    );
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, [audioPlayer]);
+
   return (
+    <div ref={cardRef}>
     <BaseGlassCard trackingToken={card.tracking_token} accentColor={card.ui_directives.accent}>
       {/* Header */}
       <div className="flex items-center justify-between mb-3">
@@ -98,7 +114,15 @@ export const ListenNowCard = React.memo(function ListenNowCard({ card }: ListenN
       {/* Progress bar when playing */}
       {isCurrentlyPlaying && (
         <div className="mt-3 h-1 bg-[#2B3442] rounded-full overflow-hidden">
-          <div className="h-1 bg-[#BC0000] rounded-full animate-pulse" style={{ width: '30%' }} />
+          <div
+            className="h-1 bg-[#BC0000] rounded-full"
+            style={{
+              width: audioPlayer.duration > 0
+                ? `${(audioPlayer.currentTime / audioPlayer.duration) * 100}%`
+                : '0%',
+              transition: 'width 0.3s linear',
+            }}
+          />
         </div>
       )}
 
@@ -112,5 +136,6 @@ export const ListenNowCard = React.memo(function ListenNowCard({ card }: ListenN
         </button>
       </div>
     </BaseGlassCard>
+    </div>
   );
 });

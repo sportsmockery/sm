@@ -5,7 +5,7 @@ import React from 'react';
 interface RightRailCardProps {
   title: string;
   children: React.ReactNode;
-  accentColor?: string; // micro-accent for top border only
+  accentColor?: string;
   className?: string;
 }
 
@@ -19,23 +19,25 @@ export default function RightRailCard({
     <div
       className={`rounded-xl overflow-hidden ${className ?? ''}`}
       style={{
-        background: 'var(--sm-card)',
-        border: '1px solid var(--sm-border)',
-        boxShadow: '0 2px 8px rgba(0,0,0,0.12)',
+        background: 'rgba(12, 12, 18, 0.85)',
+        backdropFilter: 'blur(20px)',
+        WebkitBackdropFilter: 'blur(20px)',
+        border: '1px solid rgba(255, 255, 255, 0.06)',
+        boxShadow: '0 4px 20px rgba(0,0,0,0.3)',
       }}
     >
-      {/* 2px top accent bar */}
       {accentColor && (
-        <div
-          className="h-[2px] w-full"
-          style={{ backgroundColor: accentColor }}
-        />
+        <div style={{ height: 2, width: '100%', backgroundColor: accentColor }} />
       )}
-      <div className="p-4">
-        <h3
-          className="text-xs font-bold uppercase tracking-wider mb-3"
-          style={{ color: 'var(--sm-text-muted)' }}
-        >
+      <div style={{ padding: 16 }}>
+        <h3 style={{
+          fontSize: 10,
+          fontWeight: 700,
+          textTransform: 'uppercase',
+          letterSpacing: '0.08em',
+          color: '#BC0000',
+          marginBottom: 12,
+        }}>
           {title}
         </h3>
         {children}

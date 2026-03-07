@@ -17,7 +17,6 @@ interface BriefingItem {
   isLive?: boolean;
 }
 
-// Team accent colors — only used as micro-accents
 const TEAM_ACCENTS: Record<string, string> = {
   bears: '#C83803',
   bulls: '#CE1141',
@@ -26,7 +25,6 @@ const TEAM_ACCENTS: Record<string, string> = {
   'white-sox': '#6B7280',
 };
 
-// Static placeholder briefing items — will be replaced with real data
 function getPlaceholderBriefings(): BriefingItem[] {
   return [
     {
@@ -63,15 +61,6 @@ function getPlaceholderBriefings(): BriefingItem[] {
       isLive: false,
       href: '/chicago-blackhawks',
     },
-    {
-      type: 'player_trend',
-      title: 'Caleb Williams — Stock Rising',
-      value: 'Pro Bowl snub fueling offseason motivation',
-      teamAccent: TEAM_ACCENTS.bears,
-      trendDirection: 'up',
-      timestamp: '30m ago',
-      href: '/chicago-bears/players',
-    },
   ];
 }
 
@@ -81,26 +70,40 @@ export default function ScoutBriefingGrid() {
 
   useEffect(() => {
     setMounted(true);
-    // Load placeholder data — replace with API call later
     setBriefings(getPlaceholderBriefings());
   }, []);
 
   if (!mounted || briefings.length === 0) {
     return (
-      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3 mt-5">
-        {[1, 2, 3, 4, 5].map((i) => (
-          <div
-            key={i}
-            className="rounded-xl h-[140px] animate-pulse"
-            style={{ backgroundColor: 'var(--sm-card)' }}
-          />
-        ))}
+      <div className="mt-4">
+        <div className="flex items-center gap-2 mb-3">
+          <h3
+            className="text-xs font-semibold uppercase tracking-wider"
+            style={{ color: 'var(--sm-text-muted)' }}
+          >
+            Scout Briefing
+          </h3>
+          <div className="flex-1 h-px" style={{ backgroundColor: 'var(--sm-border)' }} />
+        </div>
+        <div className="flex gap-4 overflow-x-auto pb-2 scrollbar-hide">
+          {[1, 2, 3, 4].map((i) => (
+            <div
+              key={i}
+              className="rounded-xl animate-pulse shrink-0"
+              style={{
+                backgroundColor: 'var(--sm-card)',
+                width: 210,
+                height: 132,
+              }}
+            />
+          ))}
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="mt-5">
+    <div className="mt-4">
       <div className="flex items-center gap-2 mb-3">
         <h3
           className="text-xs font-semibold uppercase tracking-wider"
@@ -108,23 +111,19 @@ export default function ScoutBriefingGrid() {
         >
           Scout Briefing
         </h3>
-        <div
-          className="flex-1 h-px"
-          style={{ backgroundColor: 'var(--sm-border)' }}
-        />
+        <div className="flex-1 h-px" style={{ backgroundColor: 'var(--sm-border)' }} />
       </div>
 
-      {/* Desktop: row of 5. Tablet: 3-col. Mobile: horizontal scroll */}
-      <div className="hidden md:grid md:grid-cols-3 lg:grid-cols-5 gap-3">
+      {/* 4 cards in a row — fixed size, horizontal scroll on smaller screens */}
+      <div
+        className="flex gap-4 overflow-x-auto pb-2 scrollbar-hide"
+      >
         {briefings.map((item, i) => (
-          <ScoutBriefingCard key={i} {...item} />
-        ))}
-      </div>
-
-      {/* Mobile: horizontal scroll */}
-      <div className="md:hidden flex gap-3 overflow-x-auto pb-2 scrollbar-hide -mx-1 px-1">
-        {briefings.map((item, i) => (
-          <div key={i} className="min-w-[200px] max-w-[240px] flex-shrink-0">
+          <div
+            key={i}
+            className="shrink-0"
+            style={{ width: 210, minHeight: 120, maxHeight: 140 }}
+          >
             <ScoutBriefingCard {...item} />
           </div>
         ))}
