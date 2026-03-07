@@ -19,11 +19,9 @@ export default function RightRailCard({
     <div
       className={`rounded-xl overflow-hidden ${className ?? ''}`}
       style={{
-        background: 'rgba(12, 12, 18, 0.85)',
-        backdropFilter: 'blur(20px)',
-        WebkitBackdropFilter: 'blur(20px)',
-        border: '1px solid rgba(255, 255, 255, 0.06)',
-        boxShadow: '0 4px 20px rgba(0,0,0,0.3)',
+        background: 'var(--sm-card)',
+        border: '1px solid var(--sm-border)',
+        boxShadow: 'var(--shadow-sm)',
       }}
     >
       {accentColor && (

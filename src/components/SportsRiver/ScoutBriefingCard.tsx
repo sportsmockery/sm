@@ -65,17 +65,17 @@ const TYPE_ICONS: Record<BriefingCardType, React.ReactNode> = {
 function TrendArrow({ direction }: { direction: 'up' | 'down' | 'neutral' }) {
   if (direction === 'up')
     return (
-      <span className="inline-flex items-center text-emerald-400 text-xs font-semibold">
+      <span className="inline-flex items-center text-xs font-semibold" style={{ color: 'var(--sm-success)' }}>
         <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><polyline points="18 15 12 9 6 15" /></svg>
       </span>
     );
   if (direction === 'down')
     return (
-      <span className="inline-flex items-center text-red-400 text-xs font-semibold">
+      <span className="inline-flex items-center text-xs font-semibold" style={{ color: 'var(--sm-error)' }}>
         <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><polyline points="6 9 12 15 18 9" /></svg>
       </span>
     );
-  return <span style={{ color: '#555' }}>—</span>;
+  return <span style={{ color: 'var(--sm-text-meta)' }}>—</span>;
 }
 
 export default function ScoutBriefingCard({
@@ -92,10 +92,8 @@ export default function ScoutBriefingCard({
   isLive,
 }: ScoutBriefingCardProps) {
   const cardStyle: React.CSSProperties = {
-    background: 'rgba(20, 22, 28, 0.75)',
-    backdropFilter: 'blur(8px)',
-    WebkitBackdropFilter: 'blur(8px)',
-    border: '1px solid rgba(255, 255, 255, 0.08)',
+    background: 'var(--sm-surface)',
+    border: '1px solid var(--sm-border)',
     borderRadius: 12,
     overflow: 'hidden',
     height: '100%',
@@ -107,64 +105,64 @@ export default function ScoutBriefingCard({
       {/* 2px top accent — team color micro-accent */}
       <div style={{ height: 2, width: '100%', backgroundColor: teamAccent || 'rgba(255,255,255,0.06)' }} />
 
-      <div style={{ padding: 'var(--card-padding-sm, 18px)', display: 'flex', flexDirection: 'column', gap: 6, height: 'calc(100% - 2px)' }}>
-        {/* Header: chip + timestamp */}
+      <div style={{ padding: 'var(--card-padding-sm, 18px)', display: 'flex', flexDirection: 'column', gap: 8, height: 'calc(100% - 2px)' }}>
+        {/* Header: chip + timestamp (meta 13px) */}
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
-            <span style={{ color: '#666' }}>{TYPE_ICONS[type]}</span>
-            <span style={{ fontSize: 'var(--font-size-xs)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em', color: 'var(--sm-text-meta)' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+            <span style={{ color: 'var(--sm-text-meta)' }}>{TYPE_ICONS[type]}</span>
+            <span style={{ fontSize: 13, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em', color: 'var(--sm-text-meta)' }}>
               {TYPE_LABELS[type]}
             </span>
             {isLive && (
-              <span className="relative flex h-1.5 w-1.5 ml-1">
-                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75" />
-                <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-red-500" />
+              <span className="relative flex h-1.5 w-1.5 ml-1" style={{ color: 'var(--sm-error)' }}>
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full opacity-75" style={{ backgroundColor: 'var(--sm-error)' }} />
+                <span className="relative inline-flex rounded-full h-1.5 w-1.5" style={{ backgroundColor: 'var(--sm-error)' }} />
               </span>
             )}
           </div>
           {timestamp && (
-            <span style={{ fontSize: 'var(--font-size-xs)', color: 'var(--sm-text-meta)' }}>{timestamp}</span>
+            <span style={{ fontSize: 13, color: 'var(--sm-text-meta)' }}>{timestamp}</span>
           )}
         </div>
 
-        {/* Title — card title size */}
-        <h4 style={{ fontSize: 'var(--font-size-card-title)', fontWeight: 600, lineHeight: 1.35, color: 'var(--sm-text)', margin: 0, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
+        {/* Title — 16px semibold */}
+        <h4 style={{ fontSize: 16, fontWeight: 600, lineHeight: 1.4, color: 'var(--sm-text)', margin: 0, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
           {title}
         </h4>
 
-        {/* Value — secondary */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+        {/* Value — body 14px */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
           {trendDirection && <TrendArrow direction={trendDirection} />}
-          <span style={{ fontSize: 'var(--font-size-sm)', lineHeight: 1.4, color: 'var(--sm-text-secondary)' }}>{value}</span>
+          <span style={{ fontSize: 14, lineHeight: 1.45, color: 'var(--sm-text-secondary)' }}>{value}</span>
         </div>
 
-        {/* Rumor meter bar */}
+        {/* Rumor meter bar — team color as progress fill only */}
         {type === 'rumor_meter' && confidence !== undefined && (
           <div style={{ marginTop: 'auto' }}>
-            <div style={{ width: '100%', height: 4, borderRadius: 2, backgroundColor: 'rgba(255,255,255,0.06)', overflow: 'hidden' }}>
-              <div style={{ height: '100%', borderRadius: 2, width: `${confidence}%`, backgroundColor: teamAccent || '#bc0000', opacity: 0.8, transition: 'width 0.5s' }} />
+            <div style={{ width: '100%', height: 4, borderRadius: 2, backgroundColor: 'var(--sm-border)', overflow: 'hidden' }}>
+              <div style={{ height: '100%', borderRadius: 2, width: `${confidence}%`, backgroundColor: teamAccent || 'var(--sm-red)', opacity: 0.9, transition: 'width 0.5s' }} />
             </div>
-            <span style={{ fontSize: 'var(--font-size-xs)', color: 'var(--sm-text-meta)', marginTop: 2, display: 'block' }}>{confidence}% confidence</span>
+            <span style={{ fontSize: 13, color: 'var(--sm-text-meta)', marginTop: 4, display: 'block' }}>{confidence}% confidence</span>
           </div>
         )}
 
         {/* Fan pulse sentiment */}
         {type === 'fan_pulse' && sentiment && (
           <div style={{ marginTop: 'auto' }}>
-            <div style={{ width: '100%', height: 4, borderRadius: 2, backgroundColor: 'rgba(255,255,255,0.06)', overflow: 'hidden', display: 'flex' }}>
-              <div style={{ height: '100%', width: `${sentiment.positive}%`, backgroundColor: '#10b981', opacity: 0.8 }} />
-              <div style={{ height: '100%', width: `${sentiment.negative}%`, backgroundColor: '#ef4444', opacity: 0.8 }} />
+            <div style={{ width: '100%', height: 4, borderRadius: 2, backgroundColor: 'var(--sm-border)', overflow: 'hidden', display: 'flex' }}>
+              <div style={{ height: '100%', width: `${sentiment.positive}%`, backgroundColor: 'var(--sm-success)', opacity: 0.9 }} />
+              <div style={{ height: '100%', width: `${sentiment.negative}%`, backgroundColor: 'var(--sm-error)', opacity: 0.9 }} />
             </div>
-            <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 2 }}>
-              <span style={{ fontSize: 9, color: 'rgba(16, 185, 129, 0.7)' }}>{sentiment.positive}%</span>
-              <span style={{ fontSize: 9, color: 'rgba(239, 68, 68, 0.7)' }}>{sentiment.negative}%</span>
+            <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 4 }}>
+              <span style={{ fontSize: 13, color: 'var(--sm-text-meta)' }}>{sentiment.positive}%</span>
+              <span style={{ fontSize: 13, color: 'var(--sm-text-meta)' }}>{sentiment.negative}%</span>
             </div>
           </div>
         )}
 
-        {/* Detail — muted gray */}
+        {/* Detail — meta 13px */}
         {detail && (
-          <p style={{ fontSize: 'var(--font-size-xs)', lineHeight: 1.4, color: 'var(--sm-text-meta)', margin: 0, marginTop: 'auto', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+          <p style={{ fontSize: 13, lineHeight: 1.45, color: 'var(--sm-text-meta)', margin: 0, marginTop: 'auto', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
             {detail}
           </p>
         )}
