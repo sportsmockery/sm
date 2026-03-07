@@ -5,6 +5,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { useAuth } from '@/contexts/AuthContext';
 import { useWebSocket } from '@/context/WebSocketProvider';
+import { useAudioPlayer } from '@/context/AudioPlayerContext';
 import { ThemeToggle } from '@/components/ThemeToggle';
 import ScoutGreeting from './ScoutGreeting';
 import ScoutBriefingText from './ScoutBriefingText';
@@ -69,8 +70,26 @@ interface RiverLayoutProps {
 /* ------------------------------------------------------------------ */
 /*  Scout box: icon aligned to middle of greeting + briefing; briefing inline (no box) */
 /* ------------------------------------------------------------------ */
+const SCOUT_BRIEFING_AUDIO_URL = '/api/audio/scout-briefing?voice=scout';
+
 function ScoutBox() {
   const [refreshBriefing, setRefreshBriefing] = useState<(() => void) | null>(null);
+  const audioPlayer = useAudioPlayer();
+
+  const isScoutPlaying =
+    audioPlayer.currentArticle?.slug === 'scout-briefing' && audioPlayer.isPlaying;
+
+  const handleScoutPlayPause = () => {
+    if (isScoutPlaying) {
+      audioPlayer.pause();
+    } else {
+      audioPlayer.play({
+        title: 'Scout Report',
+        slug: 'scout-briefing',
+        url: SCOUT_BRIEFING_AUDIO_URL,
+      });
+    }
+  };
 
   return (
     <div
@@ -82,20 +101,52 @@ function ScoutBox() {
         padding: 'var(--card-padding, 20px)',
       }}
     >
-      <div className="flex items-center gap-4">
-        <div className="shrink-0 scout-head-container">
-          <Image
-            src="/downloads/scout-v2.png"
-            alt="Scout AI"
-            width={96}
-            height={96}
-            unoptimized
-            className="scout-head-img"
-            style={{ borderRadius: '50%', objectFit: 'cover', width: 96, height: 96 }}
-          />
+      <div className="absolute top-5 right-6 z-10 flex items-center gap-2">
+        <button
+          type="button"
+          onClick={handleScoutPlayPause}
+          className={`rounded-lg transition-all duration-200 hover:opacity-90 flex items-center justify-center scout-play-btn ${isScoutPlaying ? 'scout-playing' : ''}`}
+          style={{
+            color: 'var(--sm-text-meta)',
+            padding: '12px 14px',
+            background: 'rgba(27, 36, 48, 0.6)',
+            backdropFilter: 'blur(10px)',
+            WebkitBackdropFilter: 'blur(10px)',
+            border: '1px solid rgba(255, 255, 255, 0.1)',
+            boxShadow: '0 2px 8px rgba(0, 0, 0, 0.2)',
+          }}
+          aria-label={isScoutPlaying ? 'Pause Scout report' : 'Play Scout report'}
+        >
+          {isScoutPlaying ? (
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden>
+              <path d="M6 4h4v16H6V4zm8 0h4v16h-4V4z" />
+            </svg>
+          ) : (
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden>
+              <path d="M8 5v14l11-7L8 5z" />
+            </svg>
+          )}
+        </button>
+      </div>
+
+      <div className="flex flex-col gap-0">
+        <div className="flex items-center gap-8">
+          <div className={`shrink-0 scout-head-container ${isScoutPlaying ? 'scout-head-speaking' : ''}`} style={{ paddingLeft: 12, paddingRight: 12 }}>
+            <Image
+              src="/downloads/scout-v2.png"
+              alt="Scout AI"
+              width={96}
+              height={96}
+              unoptimized
+              className="scout-head-img"
+              style={{ borderRadius: '50%', objectFit: 'cover', width: 96, height: 96 }}
+            />
+          </div>
+          <div className="flex-1 min-w-0 flex items-center">
+            <ScoutGreeting showIcon={false} />
+          </div>
         </div>
-        <div className="flex-1 min-w-0">
-          <ScoutGreeting showIcon={false} />
+        <div className="min-w-0 mt-1">
           <ScoutBriefingText setRefreshFn={setRefreshBriefing} inline />
         </div>
       </div>
@@ -128,6 +179,28 @@ function ScoutBox() {
           60% { transform: scale(0.97) rotate(-1deg); }
           80% { transform: scale(1.02) rotate(0.5deg); }
           100% { transform: scale(1) rotate(0deg); }
+        }
+        .scout-head-speaking .scout-head-img {
+          animation: scoutSpeakPulse 1.4s ease-in-out infinite;
+        }
+        @keyframes scoutSpeakPulse {
+          0%, 100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(0, 212, 255, 0.35); }
+          50% { transform: scale(1.03); box-shadow: 0 0 20px 4px rgba(0, 212, 255, 0.25); }
+        }
+        .scout-play-btn.scout-playing { position: relative; }
+        .scout-play-btn.scout-playing::after {
+          content: '';
+          position: absolute;
+          inset: -3px;
+          border-radius: 10px;
+          background: transparent;
+          box-shadow: 0 0 0 0 rgba(0, 212, 255, 0.4);
+          animation: scoutBtnRing 1.5s ease-in-out infinite;
+          pointer-events: none;
+        }
+        @keyframes scoutBtnRing {
+          0%, 100% { box-shadow: 0 0 0 0 rgba(0, 212, 255, 0.35); opacity: 1; }
+          50% { box-shadow: 0 0 16px 4px rgba(0, 212, 255, 0.5); opacity: 0.9; }
         }
       `}</style>
 
