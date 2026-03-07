@@ -9,27 +9,9 @@ import { ThemeToggle } from '@/components/ThemeToggle';
 import ScoutGreeting from './ScoutGreeting';
 import ScoutBriefingGrid from './ScoutBriefingGrid';
 import FanToolsCard from './FanToolsCard';
+import FeedModeSelector from './FeedModeSelector';
+import TeamFilterPills from './TeamFilterPills';
 import type { Role } from '@/lib/roles';
-
-const FEED_MODES = [
-  { key: 'for_you', label: 'For You' },
-  { key: 'live', label: 'Live' },
-  { key: 'trending', label: 'Trending' },
-  { key: 'scout', label: 'Scout' },
-  { key: 'community', label: 'Community' },
-  { key: 'watch', label: 'Watch' },
-  { key: 'listen', label: 'Listen' },
-  { key: 'data', label: 'Data' },
-];
-
-const TEAM_FILTERS = [
-  { key: 'all', label: 'All' },
-  { key: 'bears', label: 'Bears' },
-  { key: 'cubs', label: 'Cubs' },
-  { key: 'bulls', label: 'Bulls' },
-  { key: 'blackhawks', label: 'Blackhawks' },
-  { key: 'white-sox', label: 'White Sox' },
-];
 
 const TEAM_HUBS = [
   {
@@ -86,7 +68,17 @@ interface RiverLayoutProps {
 /* ------------------------------------------------------------------ */
 /*  Floating Left Sidebar                                              */
 /* ------------------------------------------------------------------ */
-function FloatingLeftSidebar() {
+function FloatingLeftSidebar({
+  feedMode,
+  teamFilter,
+  onFeedModeChange,
+  onTeamFilterChange,
+}: {
+  feedMode: string;
+  teamFilter: string;
+  onFeedModeChange: (mode: string) => void;
+  onTeamFilterChange: (team: string) => void;
+}) {
   const pathname = usePathname();
   const { user, isAuthenticated, signOut } = useAuth();
   const [userRole, setUserRole] = useState<Role | null>(null);
@@ -168,6 +160,42 @@ function FloatingLeftSidebar() {
 
       {/* Scrollable content */}
       <div style={{ flex: 1, overflowY: 'auto', overflowX: 'hidden', padding: '12px 0' }}>
+        {/* Feed Modes */}
+        <div style={{ padding: '0 14px' }}>
+          <div style={{
+            fontSize: 10,
+            fontWeight: 700,
+            textTransform: 'uppercase',
+            letterSpacing: '0.08em',
+            color: '#BC0000',
+            marginBottom: 8,
+          }}>
+            Feed
+          </div>
+          <FeedModeSelector currentMode={feedMode} onModeChange={onFeedModeChange} />
+        </div>
+
+        {/* Divider */}
+        <div style={{ height: 1, background: 'rgba(255, 255, 255, 0.06)', margin: '12px 14px' }} />
+
+        {/* Team Filters */}
+        <div style={{ padding: '0 14px' }}>
+          <div style={{
+            fontSize: 10,
+            fontWeight: 700,
+            textTransform: 'uppercase',
+            letterSpacing: '0.08em',
+            color: '#BC0000',
+            marginBottom: 8,
+          }}>
+            Teams
+          </div>
+          <TeamFilterPills currentTeam={teamFilter} onTeamChange={onTeamFilterChange} />
+        </div>
+
+        {/* Divider */}
+        <div style={{ height: 1, background: 'rgba(255, 255, 255, 0.06)', margin: '12px 14px' }} />
+
         {/* Team Hubs */}
         <div style={{ padding: '0 14px' }}>
           <div style={{
@@ -417,42 +445,16 @@ export default function RiverLayout({
   return (
     <div className="min-h-screen" style={{ backgroundColor: 'var(--sm-dark)' }}>
       {/* Floating Left Sidebar — desktop only */}
-      <FloatingLeftSidebar />
+      <FloatingLeftSidebar
+        feedMode={feedMode}
+        teamFilter={teamFilter}
+        onFeedModeChange={onFeedModeChange}
+        onTeamFilterChange={onTeamFilterChange}
+      />
 
-      {/* Mobile: horizontal scrollable filter strip */}
-      <div className="md:hidden">
-        <div className="flex gap-2 overflow-x-auto px-4 py-3 scrollbar-hide">
-          {FEED_MODES.map((m) => (
-            <button
-              key={m.key}
-              onClick={() => onFeedModeChange(m.key)}
-              className="whitespace-nowrap rounded-full px-4 py-1.5 text-xs font-semibold transition-colors"
-              style={
-                feedMode === m.key
-                  ? { backgroundColor: '#BC0000', color: '#fff' }
-                  : { backgroundColor: 'var(--sm-card)', color: 'var(--sm-text)', border: '1px solid var(--sm-border)' }
-              }
-            >
-              {m.label}
-            </button>
-          ))}
-        </div>
-        <div className="flex gap-2 overflow-x-auto px-4 pb-3 scrollbar-hide">
-          {TEAM_FILTERS.map((t) => (
-            <button
-              key={t.key}
-              onClick={() => onTeamFilterChange(t.key)}
-              className="whitespace-nowrap rounded-full px-3 py-1 text-xs font-medium transition-colors"
-              style={
-                teamFilter === t.key
-                  ? { backgroundColor: 'rgba(0,212,255,0.12)', color: '#00D4FF', border: '1px solid rgba(0,212,255,0.3)' }
-                  : { backgroundColor: 'var(--sm-surface)', color: 'var(--sm-text)', border: '1px solid var(--sm-border)' }
-              }
-            >
-              {t.label}
-            </button>
-          ))}
-        </div>
+      {/* Mobile: horizontal scrollable filter strips */}
+      <div className="md:hidden px-4 pt-3 pb-1">
+        <TeamFilterPills currentTeam={teamFilter} onTeamChange={onTeamFilterChange} />
       </div>
 
       {/* Center content — offset for floating sidebar on desktop */}
