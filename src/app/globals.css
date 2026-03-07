@@ -4921,3 +4921,70 @@ a.glass-card-sm:active,
 .homepage-right-sidebar::-webkit-scrollbar { display: none; }
 
 /* ========== EDGE Left Sidebar Layout (removed — floating sidebar in RiverLayout) ========== */
+
+/* ========== River Feed Card — Scroll Reveal + Cyan Scan Line ========== */
+.feed-container .feed-card {
+  position: relative;
+  overflow: hidden;
+  opacity: 0;
+  transform: translateY(20px);
+  transition: opacity 0.7s ease, transform 0.7s ease, border-color 0.6s ease, box-shadow 0.6s ease;
+  will-change: opacity, transform, box-shadow;
+}
+
+.feed-container .feed-card.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* Cyan scan line */
+.feed-container .feed-card::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(0, 212, 255, 0.12) 40%,
+    rgba(0, 212, 255, 0.28) 50%,
+    rgba(0, 212, 255, 0.12) 60%,
+    transparent 100%
+  );
+  background-size: 300% 100%;
+  background-position: 100% 0;
+  transition: background-position 1.8s ease-out;
+}
+
+.feed-container .feed-card:hover::before {
+  background-position: -200% 0;
+}
+
+.feed-container .feed-card.visible::before {
+  animation: river-scan 7s linear infinite;
+}
+
+@keyframes river-scan {
+  0%   { background-position: 100% 0; }
+  100% { background-position: -200% 0; }
+}
+
+/* Cyan edge highlight + inner glow when visible */
+.feed-container .feed-card.visible {
+  border-image: linear-gradient(to right, transparent, #00D4FF66, transparent) 1;
+  box-shadow:
+    0 0 0 1.5px rgba(0, 212, 255, 0.22),
+    inset 0 0 14px rgba(0, 212, 255, 0.09);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .feed-container .feed-card {
+    opacity: 1;
+    transform: none;
+    transition: none;
+  }
+  .feed-container .feed-card.visible::before {
+    animation: none;
+  }
+}

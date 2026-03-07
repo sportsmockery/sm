@@ -143,7 +143,7 @@ export default function TeamPicker({ onComplete, onDismiss }: TeamPickerProps) {
                 marginBottom: 20,
               }}
             >
-              We&apos;ll personalize your River instantly.
+              We&apos;ll personalize your Dash instantly.
             </p>
 
             <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginBottom: 20 }}>
@@ -201,7 +201,7 @@ export default function TeamPicker({ onComplete, onDismiss }: TeamPickerProps) {
               <button
                 onClick={handleSubmit}
                 disabled={!hasSelection}
-                aria-label="Start my River feed"
+                aria-label="Enter Dash"
                 style={{
                   backgroundColor: hasSelection ? '#BC0000' : '#555',
                   color: '#FAFAFB',
@@ -217,7 +217,7 @@ export default function TeamPicker({ onComplete, onDismiss }: TeamPickerProps) {
                 onFocus={e => { e.currentTarget.style.boxShadow = '0 0 0 2px #BC0000'; }}
                 onBlur={e => { e.currentTarget.style.boxShadow = 'none'; }}
               >
-                Start My River →
+                Enter Dash →
               </button>
               <button
                 onClick={handleDismiss}

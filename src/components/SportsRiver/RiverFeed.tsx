@@ -1,10 +1,9 @@
 'use client';
 
-import React, { useEffect, useMemo, useRef } from 'react';
+import React, { useMemo } from 'react';
 import { useInView } from 'react-intersection-observer';
-import { gsap } from 'gsap';
-import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import type { RiverCard } from '@/lib/river-types';
+import { useCardReveal } from '@/hooks/useCardReveal';
 import { BaseGlassCard } from './BaseGlassCard';
 import RiverGhostPill from './RiverGhostPill';
 import RiverOfflineBanner from './RiverOfflineBanner';
@@ -25,8 +24,6 @@ import { CommentSpotlightCard } from './cards/CommentSpotlightCard';
 import { ListenNowCard } from './cards/ListenNowCard';
 import { JoinNewsletterCard } from './cards/JoinNewsletterCard';
 import { DownloadAppCard } from './cards/DownloadAppCard';
-
-gsap.registerPlugin(ScrollTrigger);
 
 interface RiverFeedProps {
   riverCards: RiverCard[];
@@ -153,9 +150,6 @@ export default function RiverFeed({
   hasMore,
   insertAtIndex2,
 }: RiverFeedProps) {
-  const feedRef = useRef<HTMLDivElement>(null);
-  const animatedCountRef = useRef(0);
-
   // Collect playable articles from listen_now cards for queue population
   const playableArticles = useMemo(() => {
     return riverCards
@@ -185,38 +179,8 @@ export default function RiverFeed({
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
-  // GSAP scroll-triggered card reveals
-  useEffect(() => {
-    if (!feedRef.current || riverCards.length === 0) return;
-
-    const cards = feedRef.current.querySelectorAll('.feed-card');
-    const newCards = Array.from(cards).slice(animatedCountRef.current);
-
-    if (newCards.length === 0) return;
-
-    gsap.fromTo(
-      newCards,
-      { y: 60, opacity: 0 },
-      {
-        y: 0,
-        opacity: 1,
-        duration: 0.8,
-        stagger: 0.15,
-        ease: 'power3.out',
-        scrollTrigger: {
-          trigger: feedRef.current,
-          start: 'top 85%',
-          toggleActions: 'play none none none',
-        },
-      }
-    );
-
-    animatedCountRef.current = cards.length;
-
-    return () => {
-      ScrollTrigger.getAll().forEach((t) => t.kill());
-    };
-  }, [riverCards.length]);
+  // CSS-driven scroll reveal (IntersectionObserver adds .visible)
+  useCardReveal(riverCards.length);
 
   if (isLoading && riverCards.length === 0) {
     return (
