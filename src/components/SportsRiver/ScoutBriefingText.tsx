@@ -107,18 +107,18 @@ export default function ScoutBriefingText({ setRefreshFn, inline = false }: Scou
       <ReactMarkdown
         components={{
           h2: ({ children }) => (
-            <h3 className="text-base font-semibold mt-4 mb-1 first:mt-0" style={{ color: 'var(--sm-text)' }}>
+            <h3 className="text-base font-semibold mt-2 mb-0.5 first:mt-0" style={{ color: 'var(--sm-text)' }}>
               {children}
             </h3>
           ),
           h3: ({ children }) => (
-            <h4 className="text-[15px] font-semibold mt-3 mb-1" style={{ color: 'var(--sm-text)' }}>
+            <h4 className="text-[15px] font-semibold mt-1.5 mb-0.5" style={{ color: 'var(--sm-text)' }}>
               {children}
             </h4>
           ),
-          p: ({ children }) => <p className="m-0 mb-2 last:mb-0">{children}</p>,
-          ul: ({ children }) => <ul className="list-disc pl-5 my-2 space-y-0.5">{children}</ul>,
-          ol: ({ children }) => <ol className="list-decimal pl-5 my-2 space-y-0.5">{children}</ol>,
+          p: ({ children }) => <p className="m-0 mb-1 last:mb-0">{children}</p>,
+          ul: ({ children }) => <ul className="list-disc pl-5 my-1 space-y-0.5">{children}</ul>,
+          ol: ({ children }) => <ol className="list-decimal pl-5 my-1 space-y-0.5">{children}</ol>,
           li: ({ children }) => <li className="m-0">{children}</li>,
         }}
       >
