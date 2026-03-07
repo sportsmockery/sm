@@ -292,17 +292,17 @@ function RightRail() {
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            height: 120,
+            height: 240,
             textDecoration: 'none',
           }}
         >
           <Image
             src="/downloads/edge-logo.png"
             alt="SM EDGE"
-            width={480}
-            height={120}
+            width={960}
+            height={240}
             unoptimized
-            style={{ objectFit: 'contain', height: 108, width: 'auto' }}
+            style={{ objectFit: 'contain', height: 216, width: 'auto' }}
           />
         </Link>
       </div>
@@ -330,10 +330,10 @@ function RightRail() {
           <Image
             src="/downloads/edge-plus.png"
             alt="EDGE+"
-            width={140}
-            height={36}
+            width={280}
+            height={72}
             unoptimized
-            style={{ objectFit: 'contain', height: 36, width: 'auto' }}
+            style={{ objectFit: 'contain', height: 72, width: 'auto' }}
           />
         </Link>
 
