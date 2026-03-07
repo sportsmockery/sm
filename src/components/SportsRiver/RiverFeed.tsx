@@ -6,6 +6,23 @@ import type { RiverCard } from '@/lib/river-types';
 import { BaseGlassCard } from './BaseGlassCard';
 import RiverGhostPill from './RiverGhostPill';
 import RiverOfflineBanner from './RiverOfflineBanner';
+import { ScoutArticleCard } from './cards/ScoutArticleCard';
+import { HubUpdateCard } from './cards/HubUpdateCard';
+import { TradeProposalCard } from './cards/TradeProposalCard';
+import { VisionTheaterCard } from './cards/VisionTheaterCard';
+import { TrendingArticleCard } from './cards/TrendingArticleCard';
+import { BoxScoreCard } from './cards/BoxScoreCard';
+import { TrendingPlayerCard } from './cards/TrendingPlayerCard';
+import { FanChatCard } from './cards/FanChatCard';
+import { MockDraftCard } from './cards/MockDraftCard';
+import { SmPlusCard } from './cards/SmPlusCard';
+import { InfographicCard } from './cards/InfographicCard';
+import { ChartCard } from './cards/ChartCard';
+import { PollCard } from './cards/PollCard';
+import { CommentSpotlightCard } from './cards/CommentSpotlightCard';
+import { ListenNowCard } from './cards/ListenNowCard';
+import { JoinNewsletterCard } from './cards/JoinNewsletterCard';
+import { DownloadAppCard } from './cards/DownloadAppCard';
 
 interface RiverFeedProps {
   riverCards: RiverCard[];
@@ -77,59 +94,58 @@ function SkeletonCard() {
 function renderCard(index: number, card: RiverCard) {
   const isBreathing = index % 8 === 7;
 
-  // Card-type switch scaffold: T5 components plug into each case
   let cardElement: React.ReactNode;
   switch (card.card_type) {
     case 'scout_summary':
-      cardElement = <PlaceholderCard card={card} isBreathing={isBreathing} />;
+      cardElement = <ScoutArticleCard card={card} />;
       break;
     case 'hub_update':
-      cardElement = <PlaceholderCard card={card} isBreathing={isBreathing} />;
+      cardElement = <HubUpdateCard card={card} />;
       break;
     case 'trade_proposal':
-      cardElement = <PlaceholderCard card={card} isBreathing={isBreathing} />;
+      cardElement = <TradeProposalCard card={card} />;
       break;
     case 'vision_theater':
-      cardElement = <PlaceholderCard card={card} isBreathing={isBreathing} />;
+      cardElement = <VisionTheaterCard card={card} />;
       break;
     case 'trending_article':
-      cardElement = <PlaceholderCard card={card} isBreathing={isBreathing} />;
+      cardElement = <TrendingArticleCard card={card} />;
       break;
     case 'box_score':
-      cardElement = <PlaceholderCard card={card} isBreathing={isBreathing} />;
+      cardElement = <BoxScoreCard card={card} />;
       break;
     case 'trending_player':
-      cardElement = <PlaceholderCard card={card} isBreathing={isBreathing} />;
+      cardElement = <TrendingPlayerCard card={card} />;
       break;
     case 'fan_chat':
-      cardElement = <PlaceholderCard card={card} isBreathing={isBreathing} />;
+      cardElement = <FanChatCard card={card} />;
       break;
     case 'mock_draft':
-      cardElement = <PlaceholderCard card={card} isBreathing={isBreathing} />;
+      cardElement = <MockDraftCard card={card} />;
       break;
     case 'sm_plus':
-      cardElement = <PlaceholderCard card={card} isBreathing={isBreathing} />;
+      cardElement = <SmPlusCard card={card} />;
       break;
     case 'infographic':
-      cardElement = <PlaceholderCard card={card} isBreathing={isBreathing} />;
+      cardElement = <InfographicCard card={card} />;
       break;
     case 'chart':
-      cardElement = <PlaceholderCard card={card} isBreathing={isBreathing} />;
+      cardElement = <ChartCard card={card} />;
       break;
     case 'poll':
-      cardElement = <PlaceholderCard card={card} isBreathing={isBreathing} />;
+      cardElement = <PollCard card={card} />;
       break;
     case 'comment_spotlight':
-      cardElement = <PlaceholderCard card={card} isBreathing={isBreathing} />;
+      cardElement = <CommentSpotlightCard card={card} />;
       break;
     case 'listen_now':
-      cardElement = <PlaceholderCard card={card} isBreathing={isBreathing} />;
+      cardElement = <ListenNowCard card={card} />;
       break;
     case 'join_newsletter':
-      cardElement = <PlaceholderCard card={card} isBreathing={isBreathing} />;
+      cardElement = <JoinNewsletterCard card={card} />;
       break;
     case 'download_app':
-      cardElement = <PlaceholderCard card={card} isBreathing={isBreathing} />;
+      cardElement = <DownloadAppCard card={card} />;
       break;
     default: {
       const _exhaustive: never = card.card_type;

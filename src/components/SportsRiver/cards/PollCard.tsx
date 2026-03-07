@@ -1,0 +1,127 @@
+'use client';
+
+import React, { useCallback, useState } from 'react';
+import type { RiverCard } from '@/lib/river-types';
+import { BaseGlassCard } from '../BaseGlassCard';
+import { CARD_TYPE_LABELS, formatTimestamp } from './utils';
+
+interface PollCardProps {
+  card: RiverCard;
+}
+
+interface PollOption {
+  id: string;
+  label: string;
+  votes: number;
+}
+
+export const PollCard = React.memo(function PollCard({ card }: PollCardProps) {
+  const c = card.content as Record<string, unknown>;
+  const question = (c.question as string | undefined) ?? 'What do you think?';
+  const pollId = c.poll_id as string | undefined;
+  const rawOptions = c.options as PollOption[] | undefined;
+
+  const defaultOptions: PollOption[] = [
+    { id: 'yes', label: 'Yes', votes: 0 },
+    { id: 'no', label: 'No', votes: 0 },
+  ];
+
+  const [options, setOptions] = useState<PollOption[]>(rawOptions ?? defaultOptions);
+  const [votedId, setVotedId] = useState<string | null>(null);
+
+  const totalVotes = options.reduce((sum, o) => sum + o.votes, 0);
+
+  const handleVote = useCallback(
+    (optionId: string) => {
+      if (votedId) return;
+      setVotedId(optionId);
+      setOptions((prev) =>
+        prev.map((o) => (o.id === optionId ? { ...o, votes: o.votes + 1 } : o))
+      );
+      // Fire-and-forget vote
+      if (pollId) {
+        fetch(`/api/polls/${pollId}/vote`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ option_id: optionId }),
+        }).catch(() => {});
+      }
+    },
+    [votedId, pollId]
+  );
+
+  const getPercent = (votes: number) => {
+    if (totalVotes === 0) return 0;
+    return Math.round((votes / totalVotes) * 100);
+  };
+
+  return (
+    <BaseGlassCard trackingToken={card.tracking_token} accentColor={card.ui_directives.accent}>
+      {/* Header */}
+      <div className="flex items-center justify-between mb-3">
+        <span className="text-xs font-bold uppercase tracking-widest" style={{ color: '#BC0000' }}>
+          {CARD_TYPE_LABELS[card.card_type]}
+        </span>
+        <span className="text-xs text-[#E6E8EC]/60">{formatTimestamp(card.timestamp)}</span>
+      </div>
+
+      {/* Question */}
+      <h3 className="text-lg font-bold text-[#FAFAFB] mb-4">{question}</h3>
+
+      {/* Options */}
+      <div className="space-y-2">
+        {options.map((option) => {
+          const pct = getPercent(option.votes);
+          const isVoted = votedId === option.id;
+
+          return (
+            <button
+              key={option.id}
+              onClick={() => handleVote(option.id)}
+              disabled={!!votedId}
+              className={`relative w-full text-left rounded-lg overflow-hidden min-h-[44px] transition-all duration-300 ${
+                votedId
+                  ? 'cursor-default'
+                  : 'cursor-pointer hover:border-[#BC0000]'
+              } border border-[#2B3442] bg-[#121821]`}
+              aria-label={`Vote for ${option.label}`}
+            >
+              {/* Progress bar background */}
+              {votedId && (
+                <div
+                  className="absolute inset-y-0 left-0 bg-[#BC0000]/20 transition-all duration-500 ease-out"
+                  style={{ width: `${pct}%` }}
+                />
+              )}
+              <div className="relative flex items-center justify-between px-4 py-3">
+                <span className={`text-sm font-bold ${isVoted ? 'text-[#BC0000]' : 'text-[#FAFAFB]'}`} style={{ fontFamily: 'Inter, sans-serif' }}>
+                  {option.label}
+                </span>
+                {votedId && (
+                  <span className="text-xs font-bold text-[#E6E8EC]/60">{pct}%</span>
+                )}
+              </div>
+            </button>
+          );
+        })}
+      </div>
+
+      {/* Post-vote message */}
+      {votedId && (
+        <p className="text-xs text-[#E6E8EC]/40 mt-2" style={{ fontFamily: 'Inter, sans-serif' }}>
+          See how fans voted
+        </p>
+      )}
+
+      {/* Footer */}
+      <div className="flex items-center gap-4 mt-4 pt-3 border-t border-[#2B3442]">
+        <button className="flex items-center gap-1 text-xs text-[#E6E8EC]/60 hover:text-[#BC0000] transition-colors min-h-[44px]" aria-label="Like this card">
+          &#9829; Like
+        </button>
+        <button className="flex items-center gap-1 text-xs text-[#E6E8EC]/60 hover:text-[#00D4FF] transition-colors min-h-[44px]" aria-label="Share this card">
+          &#8599; Share
+        </button>
+      </div>
+    </BaseGlassCard>
+  );
+});
