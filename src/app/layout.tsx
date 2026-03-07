@@ -8,7 +8,7 @@ import { ChatProvider } from "@/contexts/ChatContext";
 import { SubscriptionProvider } from "@/contexts/SubscriptionContext";
 import { TeamRecordProvider } from "@/contexts/TeamRecordContext";
 import Header from "@/components/layout/Header";
-import LeftSidebar from "@/components/layout/LeftSidebar";
+// LeftSidebar removed — floating sidebar now lives in RiverLayout
 import SkipToContent from "@/components/layout/SkipToContent";
 import ScrollToTop from "@/components/layout/ScrollToTop";
 import CookieBanner from "@/components/layout/CookieBanner";
@@ -140,8 +140,7 @@ export default function RootLayout({
               <ChatProvider teamSlug="bears">
               <SkipToContent />
               <NavigationProgress />
-              <LeftSidebar />
-              <div className="flex min-h-screen flex-col edge-main-wrapper">
+              <div className="flex min-h-screen flex-col">
                 <Header />
                 <LiveStrip />
                 <div id="main-content" className="flex-1" tabIndex={-1}>
