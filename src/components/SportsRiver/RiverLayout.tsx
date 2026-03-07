@@ -1,6 +1,10 @@
 'use client';
 
-import React, { useState } from 'react';
+import React from 'react';
+import ScoutGreeting from './ScoutGreeting';
+import ScoutBriefingGrid from './ScoutBriefingGrid';
+import RightRailCard from './RightRailCard';
+import FanToolsCard from './FanToolsCard';
 
 const FEED_MODES = [
   { key: 'for_you', label: 'For You' },
@@ -22,6 +26,14 @@ const TEAM_FILTERS = [
   { key: 'white-sox', label: 'White Sox' },
 ];
 
+const TEAM_HUBS = [
+  { key: 'bears', label: 'Bears', href: '/chicago-bears', accent: '#C83803' },
+  { key: 'bulls', label: 'Bulls', href: '/chicago-bulls', accent: '#CE1141' },
+  { key: 'cubs', label: 'Cubs', href: '/chicago-cubs', accent: '#0E3386' },
+  { key: 'blackhawks', label: 'Blackhawks', href: '/chicago-blackhawks', accent: '#CF0A2C' },
+  { key: 'white-sox', label: 'White Sox', href: '/chicago-white-sox', accent: '#6B7280' },
+];
+
 interface RiverLayoutProps {
   children: React.ReactNode;
   feedMode: string;
@@ -38,36 +50,36 @@ export default function RiverLayout({
   onTeamFilterChange,
 }: RiverLayoutProps) {
   return (
-    <div className="min-h-screen bg-[#0B0F14]">
+    <div className="min-h-screen" style={{ backgroundColor: 'var(--sm-dark)' }}>
       {/* Mobile: horizontal scrollable filter strip */}
       <div className="md:hidden">
-        {/* Feed mode pills */}
         <div className="flex gap-2 overflow-x-auto px-4 py-3 scrollbar-hide">
           {FEED_MODES.map((m) => (
             <button
               key={m.key}
               onClick={() => onFeedModeChange(m.key)}
-              className={`whitespace-nowrap rounded-full px-4 py-1.5 text-xs font-semibold transition-colors ${
+              className="whitespace-nowrap rounded-full px-4 py-1.5 text-xs font-semibold transition-colors"
+              style={
                 feedMode === m.key
-                  ? 'bg-[#BC0000] text-white'
-                  : 'bg-[#1B2430] text-[#E6E8EC] hover:bg-[#2B3442]'
-              }`}
+                  ? { backgroundColor: '#BC0000', color: '#fff' }
+                  : { backgroundColor: 'var(--sm-card)', color: 'var(--sm-text)', border: '1px solid var(--sm-border)' }
+              }
             >
               {m.label}
             </button>
           ))}
         </div>
-        {/* Team filter pills */}
         <div className="flex gap-2 overflow-x-auto px-4 pb-3 scrollbar-hide">
           {TEAM_FILTERS.map((t) => (
             <button
               key={t.key}
               onClick={() => onTeamFilterChange(t.key)}
-              className={`whitespace-nowrap rounded-full px-3 py-1 text-xs font-medium transition-colors ${
+              className="whitespace-nowrap rounded-full px-3 py-1 text-xs font-medium transition-colors"
+              style={
                 teamFilter === t.key
-                  ? 'bg-[#00D4FF]/20 text-[#00D4FF] border border-[#00D4FF]/40'
-                  : 'bg-[#121821]/80 text-[#E6E8EC] border border-[#2B3442] hover:bg-[#2B3442]'
-              }`}
+                  ? { backgroundColor: 'rgba(0,212,255,0.12)', color: '#00D4FF', border: '1px solid rgba(0,212,255,0.3)' }
+                  : { backgroundColor: 'var(--sm-surface)', color: 'var(--sm-text)', border: '1px solid var(--sm-border)' }
+              }
             >
               {t.label}
             </button>
@@ -76,23 +88,33 @@ export default function RiverLayout({
       </div>
 
       <div className="flex justify-center">
-        {/* Left Rail — desktop only */}
-        <aside className="hidden md:block w-[280px] shrink-0 sticky top-0 h-screen overflow-y-auto p-4 bg-[#121821]/80 border-r border-[#2B3442]">
+        {/* ---- Left Rail — desktop only ---- */}
+        <aside
+          className="hidden md:block w-[260px] shrink-0 sticky top-0 h-screen overflow-y-auto p-4"
+          style={{
+            backgroundColor: 'var(--sm-surface)',
+            borderRight: '1px solid var(--sm-border)',
+          }}
+        >
           {/* Feed Mode buttons */}
           <div className="mb-6">
-            <h3 className="text-xs font-semibold uppercase tracking-wider text-[#94a3b8] mb-3">
+            <h3
+              className="text-[11px] font-semibold uppercase tracking-wider mb-3"
+              style={{ color: 'var(--sm-text-dim)' }}
+            >
               Feed
             </h3>
-            <div className="flex flex-col gap-1">
+            <div className="flex flex-col gap-0.5">
               {FEED_MODES.map((m) => (
                 <button
                   key={m.key}
                   onClick={() => onFeedModeChange(m.key)}
-                  className={`text-left px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
+                  className="text-left px-3 py-2 rounded-lg text-sm font-medium transition-colors"
+                  style={
                     feedMode === m.key
-                      ? 'bg-[#BC0000]/20 text-[#FAFAFB]'
-                      : 'text-[#E6E8EC] hover:bg-[#1B2430]'
-                  }`}
+                      ? { backgroundColor: 'rgba(188,0,0,0.12)', color: 'var(--sm-text)' }
+                      : { color: 'var(--sm-text-muted)' }
+                  }
                 >
                   {m.label}
                 </button>
@@ -102,7 +124,10 @@ export default function RiverLayout({
 
           {/* Team filter pills */}
           <div className="mb-6">
-            <h3 className="text-xs font-semibold uppercase tracking-wider text-[#94a3b8] mb-3">
+            <h3
+              className="text-[11px] font-semibold uppercase tracking-wider mb-3"
+              style={{ color: 'var(--sm-text-dim)' }}
+            >
               Teams
             </h3>
             <div className="flex flex-wrap gap-2">
@@ -110,11 +135,12 @@ export default function RiverLayout({
                 <button
                   key={t.key}
                   onClick={() => onTeamFilterChange(t.key)}
-                  className={`rounded-full px-3 py-1 text-xs font-medium transition-colors ${
+                  className="rounded-full px-3 py-1 text-xs font-medium transition-colors"
+                  style={
                     teamFilter === t.key
-                      ? 'bg-[#00D4FF]/20 text-[#00D4FF] border border-[#00D4FF]/40'
-                      : 'bg-[#1B2430] text-[#E6E8EC] border border-[#2B3442] hover:bg-[#2B3442]'
-                  }`}
+                      ? { backgroundColor: 'rgba(0,212,255,0.12)', color: '#00D4FF', border: '1px solid rgba(0,212,255,0.3)' }
+                      : { backgroundColor: 'var(--sm-card)', color: 'var(--sm-text-muted)', border: '1px solid var(--sm-border)' }
+                  }
                 >
                   {t.label}
                 </button>
@@ -122,113 +148,276 @@ export default function RiverLayout({
             </div>
           </div>
 
-          {/* Trending Now placeholder */}
+          {/* Trending Now */}
           <div className="mb-6">
-            <h3 className="text-xs font-semibold uppercase tracking-wider text-[#94a3b8] mb-3">
+            <h3
+              className="text-[11px] font-semibold uppercase tracking-wider mb-3"
+              style={{ color: 'var(--sm-text-dim)' }}
+            >
               Trending Now
             </h3>
             <div className="space-y-2">
               {[1, 2, 3].map((i) => (
                 <div
                   key={i}
-                  className="h-8 rounded bg-[#1B2430] animate-pulse"
+                  className="h-8 rounded animate-pulse"
+                  style={{ backgroundColor: 'var(--sm-card)' }}
                 />
               ))}
             </div>
           </div>
 
-          {/* Live Fan-Chat peek placeholder */}
+          {/* Live Chat peek */}
           <div>
-            <h3 className="text-xs font-semibold uppercase tracking-wider text-[#94a3b8] mb-3">
+            <h3
+              className="text-[11px] font-semibold uppercase tracking-wider mb-3"
+              style={{ color: 'var(--sm-text-dim)' }}
+            >
               Live Chat
             </h3>
-            <div className="rounded-lg border border-[#2B3442] bg-[#1B2430] p-3">
-              <p className="text-xs text-[#94a3b8] italic">
+            <div
+              className="rounded-lg p-3"
+              style={{
+                backgroundColor: 'var(--sm-card)',
+                border: '1px solid var(--sm-border)',
+              }}
+            >
+              <p
+                className="text-xs italic"
+                style={{ color: 'var(--sm-text-dim)' }}
+              >
                 Join the conversation
               </p>
             </div>
           </div>
         </aside>
 
-        {/* Center Feed */}
-        <main className="w-full max-w-[680px] px-4 py-4">{children}</main>
+        {/* ---- Center Feed ---- */}
+        <main className="w-full max-w-[680px] px-4 py-4">
+          {/* Hero zone: greeting + Scout briefing */}
+          <div className="mb-6">
+            <ScoutGreeting />
+            <ScoutBriefingGrid />
+          </div>
 
-        {/* Right Rail — desktop only */}
-        <aside className="hidden lg:block w-[320px] shrink-0 sticky top-0 h-screen overflow-y-auto p-4 bg-[#121821]/80 border-l border-[#2B3442]">
-          {/* SM+ upsell */}
-          <div className="rounded-xl border border-[#D6B05E]/30 bg-[#1B2430] p-4 mb-6">
-            <h3 className="text-sm font-bold text-[#D6B05E] mb-1">
-              Unlock Scout Pro
+          {/* Divider between briefing and feed */}
+          <div className="flex items-center gap-2 mb-5">
+            <h3
+              className="text-xs font-semibold uppercase tracking-wider whitespace-nowrap"
+              style={{ color: 'var(--sm-text-dim)' }}
+            >
+              Your Feed
             </h3>
-            <p className="text-xs text-[#E6E8EC] mb-3">
-              Get exclusive analysis, ad-free experience, and priority Scout AI access.
+            <div
+              className="flex-1 h-px"
+              style={{ backgroundColor: 'var(--sm-border)' }}
+            />
+          </div>
+
+          {children}
+        </main>
+
+        {/* ---- Right Rail — desktop only ---- */}
+        <aside
+          className="hidden lg:flex flex-col gap-4 w-[300px] shrink-0 sticky top-0 h-screen overflow-y-auto p-4"
+          style={{
+            backgroundColor: 'var(--sm-surface)',
+            borderLeft: '1px solid var(--sm-border)',
+          }}
+        >
+          {/* SM+ Upsell */}
+          <RightRailCard title="SM+ Premium" accentColor="#D6B05E">
+            <p
+              className="text-xs mb-3 leading-relaxed"
+              style={{ color: 'var(--sm-text-muted)' }}
+            >
+              Exclusive analysis, ad-free, and priority Scout AI access.
             </p>
-            <button
-              className="w-full rounded-lg py-2 text-xs font-semibold text-[#0B0F14]"
-              style={{ backgroundColor: '#D6B05E' }}
+            <a
+              href="/sm-plus"
+              className="block w-full rounded-lg py-2 text-xs font-semibold text-center transition-opacity hover:opacity-90"
+              style={{ backgroundColor: '#D6B05E', color: '#0B0F14' }}
             >
               Upgrade to SM+
-            </button>
-          </div>
+            </a>
+          </RightRailCard>
 
-          {/* Daily Scout placeholder */}
-          <div className="rounded-xl border border-[#2B3442] bg-[#1B2430] p-4 mb-6">
-            <h3 className="text-sm font-bold text-[#FAFAFB] mb-1">
-              Your Daily Scout
-            </h3>
-            <p className="text-xs text-[#94a3b8] italic">
-              Personalized summary loading...
-            </p>
-          </div>
+          {/* Team Hubs */}
+          <RightRailCard title="Team Hubs">
+            <div className="flex flex-col gap-1">
+              {TEAM_HUBS.map((team) => (
+                <a
+                  key={team.key}
+                  href={team.href}
+                  className="group flex items-center gap-2.5 rounded-lg px-2.5 py-2 transition-colors duration-150"
+                  style={{ color: 'var(--sm-text)' }}
+                >
+                  {/* Team accent dot */}
+                  <span
+                    className="w-2 h-2 rounded-full shrink-0"
+                    style={{ backgroundColor: team.accent }}
+                  />
+                  <span className="text-sm font-medium">{team.label}</span>
+                  <svg
+                    className="ml-auto opacity-0 group-hover:opacity-60 transition-opacity"
+                    width="12"
+                    height="12"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  >
+                    <polyline points="9 18 15 12 9 6" />
+                  </svg>
+                </a>
+              ))}
+            </div>
+          </RightRailCard>
 
-          {/* Newsletter signup */}
-          <div className="rounded-xl border border-[#2B3442] bg-[#1B2430] p-4 mb-6">
-            <h3 className="text-sm font-bold text-[#FAFAFB] mb-2">
-              Join Newsletter
-            </h3>
+          {/* Fan Tools */}
+          <RightRailCard title="Fan Tools">
+            <FanToolsCard />
+          </RightRailCard>
+
+          {/* Chicago Snapshot */}
+          <RightRailCard title="Chicago Snapshot">
+            <div className="space-y-2">
+              {[
+                { team: 'Bears', record: '11-6', accent: '#C83803' },
+                { team: 'Bulls', record: '23-22', accent: '#CE1141' },
+                { team: 'Hawks', record: '21-22-8', accent: '#CF0A2C' },
+                { team: 'Cubs', record: '92-70', accent: '#0E3386' },
+                { team: 'Sox', record: '60-102', accent: '#6B7280' },
+              ].map((t) => (
+                <div
+                  key={t.team}
+                  className="flex items-center justify-between py-1"
+                >
+                  <div className="flex items-center gap-2">
+                    <span
+                      className="w-1.5 h-1.5 rounded-full"
+                      style={{ backgroundColor: t.accent }}
+                    />
+                    <span
+                      className="text-xs font-medium"
+                      style={{ color: 'var(--sm-text)' }}
+                    >
+                      {t.team}
+                    </span>
+                  </div>
+                  <span
+                    className="text-xs font-semibold tabular-nums"
+                    style={{ color: 'var(--sm-text-muted)' }}
+                  >
+                    {t.record}
+                  </span>
+                </div>
+              ))}
+            </div>
+          </RightRailCard>
+
+          {/* Newsletter */}
+          <RightRailCard title="Newsletter" accentColor="#BC0000">
             <div className="flex gap-2">
               <input
                 type="email"
                 placeholder="you@email.com"
-                className="flex-1 rounded-lg bg-[#0B0F14] border border-[#2B3442] px-3 py-1.5 text-xs text-[#FAFAFB] placeholder-[#94a3b8] outline-none focus:border-[#00D4FF]"
+                className="flex-1 rounded-lg px-3 py-1.5 text-xs outline-none transition-colors"
+                style={{
+                  backgroundColor: 'var(--sm-surface)',
+                  border: '1px solid var(--sm-border)',
+                  color: 'var(--sm-text)',
+                }}
               />
               <button
-                className="rounded-lg px-3 py-1.5 text-xs font-semibold text-white"
+                className="rounded-lg px-3 py-1.5 text-xs font-semibold text-white transition-opacity hover:opacity-90"
                 style={{ backgroundColor: '#BC0000' }}
               >
                 Go
               </button>
             </div>
-          </div>
+          </RightRailCard>
 
-          {/* Download app */}
-          <div className="rounded-xl border border-[#2B3442] bg-[#1B2430] p-4 mb-6">
-            <h3 className="text-sm font-bold text-[#FAFAFB] mb-2">
-              Download App
-            </h3>
-            <button
-              className="w-full rounded-lg py-2 text-xs font-semibold text-white"
-              style={{ backgroundColor: '#BC0000' }}
-            >
-              Get the SM App
-            </button>
-          </div>
-
-          {/* Live scores placeholder */}
-          <div className="rounded-xl border border-[#2B3442] bg-[#1B2430] p-4">
-            <h3 className="text-sm font-bold text-[#FAFAFB] mb-2">
-              Live Scores
-            </h3>
+          {/* Live Scores */}
+          <RightRailCard title="Live Scores">
             <div className="space-y-2">
               {[1, 2].map((i) => (
                 <div
                   key={i}
-                  className="h-10 rounded bg-[#0B0F14] animate-pulse"
+                  className="h-10 rounded animate-pulse"
+                  style={{ backgroundColor: 'var(--sm-surface)' }}
                 />
               ))}
+              <p
+                className="text-[10px] text-center pt-1"
+                style={{ color: 'var(--sm-text-dim)' }}
+              >
+                No live games right now
+              </p>
             </div>
-          </div>
+          </RightRailCard>
+
+          {/* Download App */}
+          <RightRailCard title="Get the App">
+            <a
+              href="#"
+              className="block w-full rounded-lg py-2 text-xs font-semibold text-center text-white transition-opacity hover:opacity-90"
+              style={{ backgroundColor: '#BC0000' }}
+            >
+              Download SM App
+            </a>
+          </RightRailCard>
         </aside>
+      </div>
+
+      {/* Mobile: stacked right rail content below feed */}
+      <div
+        className="lg:hidden px-4 pb-8 space-y-4"
+        style={{ backgroundColor: 'var(--sm-dark)' }}
+      >
+        <div
+          className="flex items-center gap-2 mt-4 mb-2"
+        >
+          <h3
+            className="text-xs font-semibold uppercase tracking-wider whitespace-nowrap"
+            style={{ color: 'var(--sm-text-dim)' }}
+          >
+            More
+          </h3>
+          <div
+            className="flex-1 h-px"
+            style={{ backgroundColor: 'var(--sm-border)' }}
+          />
+        </div>
+
+        <RightRailCard title="Team Hubs">
+          <div className="flex flex-wrap gap-2">
+            {TEAM_HUBS.map((team) => (
+              <a
+                key={team.key}
+                href={team.href}
+                className="flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-medium"
+                style={{
+                  backgroundColor: 'var(--sm-card)',
+                  border: '1px solid var(--sm-border)',
+                  color: 'var(--sm-text)',
+                }}
+              >
+                <span
+                  className="w-1.5 h-1.5 rounded-full"
+                  style={{ backgroundColor: team.accent }}
+                />
+                {team.label}
+              </a>
+            ))}
+          </div>
+        </RightRailCard>
+
+        <RightRailCard title="Fan Tools">
+          <FanToolsCard />
+        </RightRailCard>
       </div>
     </div>
   );
