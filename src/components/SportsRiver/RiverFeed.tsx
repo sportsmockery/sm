@@ -1,7 +1,9 @@
 'use client';
 
-import React, { useCallback, useRef } from 'react';
-import { Virtuoso, VirtuosoHandle } from 'react-virtuoso';
+import React, { useEffect, useRef } from 'react';
+import { useInView } from 'react-intersection-observer';
+import { gsap } from 'gsap';
+import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import type { RiverCard } from '@/lib/river-types';
 import { BaseGlassCard } from './BaseGlassCard';
 import RiverGhostPill from './RiverGhostPill';
@@ -24,6 +26,8 @@ import { ListenNowCard } from './cards/ListenNowCard';
 import { JoinNewsletterCard } from './cards/JoinNewsletterCard';
 import { DownloadAppCard } from './cards/DownloadAppCard';
 
+gsap.registerPlugin(ScrollTrigger);
+
 interface RiverFeedProps {
   riverCards: RiverCard[];
   loadMore: () => void;
@@ -31,7 +35,6 @@ interface RiverFeedProps {
   hasMore: boolean;
 }
 
-// Placeholder card for types not yet built (T5)
 const PlaceholderCard = React.memo(function PlaceholderCard({
   card,
   isBreathing,
@@ -91,70 +94,49 @@ function SkeletonCard() {
   );
 }
 
-function renderCard(index: number, card: RiverCard) {
+function renderCardContent(index: number, card: RiverCard) {
   const isBreathing = index % 8 === 7;
 
-  let cardElement: React.ReactNode;
   switch (card.card_type) {
     case 'scout_summary':
-      cardElement = <ScoutArticleCard card={card} />;
-      break;
+      return <ScoutArticleCard card={card} />;
     case 'hub_update':
-      cardElement = <HubUpdateCard card={card} />;
-      break;
+      return <HubUpdateCard card={card} />;
     case 'trade_proposal':
-      cardElement = <TradeProposalCard card={card} />;
-      break;
+      return <TradeProposalCard card={card} />;
     case 'vision_theater':
-      cardElement = <VisionTheaterCard card={card} />;
-      break;
+      return <VisionTheaterCard card={card} />;
     case 'trending_article':
-      cardElement = <TrendingArticleCard card={card} />;
-      break;
+      return <TrendingArticleCard card={card} />;
     case 'box_score':
-      cardElement = <BoxScoreCard card={card} />;
-      break;
+      return <BoxScoreCard card={card} />;
     case 'trending_player':
-      cardElement = <TrendingPlayerCard card={card} />;
-      break;
+      return <TrendingPlayerCard card={card} />;
     case 'fan_chat':
-      cardElement = <FanChatCard card={card} />;
-      break;
+      return <FanChatCard card={card} />;
     case 'mock_draft':
-      cardElement = <MockDraftCard card={card} />;
-      break;
+      return <MockDraftCard card={card} />;
     case 'sm_plus':
-      cardElement = <SmPlusCard card={card} />;
-      break;
+      return <SmPlusCard card={card} />;
     case 'infographic':
-      cardElement = <InfographicCard card={card} />;
-      break;
+      return <InfographicCard card={card} />;
     case 'chart':
-      cardElement = <ChartCard card={card} />;
-      break;
+      return <ChartCard card={card} />;
     case 'poll':
-      cardElement = <PollCard card={card} />;
-      break;
+      return <PollCard card={card} />;
     case 'comment_spotlight':
-      cardElement = <CommentSpotlightCard card={card} />;
-      break;
+      return <CommentSpotlightCard card={card} />;
     case 'listen_now':
-      cardElement = <ListenNowCard card={card} />;
-      break;
+      return <ListenNowCard card={card} />;
     case 'join_newsletter':
-      cardElement = <JoinNewsletterCard card={card} />;
-      break;
+      return <JoinNewsletterCard card={card} />;
     case 'download_app':
-      cardElement = <DownloadAppCard card={card} />;
-      break;
+      return <DownloadAppCard card={card} />;
     default: {
       const _exhaustive: never = card.card_type;
-      cardElement = <PlaceholderCard card={card} isBreathing={isBreathing} />;
-      break;
+      return <PlaceholderCard card={card} isBreathing={isBreathing} />;
     }
   }
-
-  return <div className="mb-4">{cardElement}</div>;
 }
 
 export default function RiverFeed({
@@ -163,11 +145,55 @@ export default function RiverFeed({
   isLoading,
   hasMore,
 }: RiverFeedProps) {
-  const virtuosoRef = useRef<VirtuosoHandle>(null);
+  const feedRef = useRef<HTMLDivElement>(null);
+  const animatedCountRef = useRef(0);
 
-  const handleScrollToTop = useCallback(() => {
-    virtuosoRef.current?.scrollToIndex({ index: 0, behavior: 'smooth' });
-  }, []);
+  const { ref: sentinelRef } = useInView({
+    threshold: 0,
+    rootMargin: '400px',
+    onChange(inView) {
+      if (inView && hasMore && !isLoading) {
+        loadMore();
+      }
+    },
+  });
+
+  const handleScrollToTop = () => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  // GSAP scroll-triggered card reveals
+  useEffect(() => {
+    if (!feedRef.current || riverCards.length === 0) return;
+
+    const cards = feedRef.current.querySelectorAll('.feed-card');
+    const newCards = Array.from(cards).slice(animatedCountRef.current);
+
+    if (newCards.length === 0) return;
+
+    gsap.fromTo(
+      newCards,
+      { y: 60, opacity: 0 },
+      {
+        y: 0,
+        opacity: 1,
+        duration: 0.8,
+        stagger: 0.15,
+        ease: 'power3.out',
+        scrollTrigger: {
+          trigger: feedRef.current,
+          start: 'top 85%',
+          toggleActions: 'play none none none',
+        },
+      }
+    );
+
+    animatedCountRef.current = cards.length;
+
+    return () => {
+      ScrollTrigger.getAll().forEach((t) => t.kill());
+    };
+  }, [riverCards.length]);
 
   if (isLoading && riverCards.length === 0) {
     return (
@@ -184,27 +210,30 @@ export default function RiverFeed({
       <RiverOfflineBanner />
       <RiverGhostPill onScrollToTop={handleScrollToTop} />
 
-      <Virtuoso
-        ref={virtuosoRef}
-        data={riverCards}
-        itemContent={renderCard}
-        useWindowScroll
-        endReached={loadMore}
-        overscan={5}
-        increaseViewportBy={200}
-        components={{
-          Footer: () =>
-            isLoading && riverCards.length > 0 ? (
-              <div className="flex justify-center py-6">
-                <div className="h-6 w-6 rounded-full border-2 border-[#00D4FF] border-t-transparent animate-spin" />
-              </div>
-            ) : !hasMore && riverCards.length > 0 ? (
-              <div className="text-center py-6 text-sm text-[#94a3b8]">
-                You&apos;re all caught up
-              </div>
-            ) : null,
-        }}
-      />
+      <div ref={feedRef} className="feed-container space-y-4">
+        {riverCards.map((card, index) => (
+          <div key={card.card_id} className="feed-card" style={{ opacity: 0 }}>
+            {renderCardContent(index, card)}
+          </div>
+        ))}
+      </div>
+
+      {/* Infinite scroll sentinel */}
+      {hasMore && (
+        <div ref={sentinelRef} className="h-1" />
+      )}
+
+      {isLoading && riverCards.length > 0 && (
+        <div className="flex justify-center py-6">
+          <div className="h-6 w-6 rounded-full border-2 border-[#00D4FF] border-t-transparent animate-spin" />
+        </div>
+      )}
+
+      {!hasMore && riverCards.length > 0 && (
+        <div className="text-center py-6 text-sm text-[#94a3b8]">
+          You&apos;re all caught up
+        </div>
+      )}
     </div>
   );
 }
