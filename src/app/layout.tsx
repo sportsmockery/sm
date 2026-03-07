@@ -9,7 +9,6 @@ import { SubscriptionProvider } from "@/contexts/SubscriptionContext";
 import { TeamRecordProvider } from "@/contexts/TeamRecordContext";
 import Header from "@/components/layout/Header";
 import LeftSidebar from "@/components/layout/LeftSidebar";
-import Footer from "@/components/layout/Footer";
 import SkipToContent from "@/components/layout/SkipToContent";
 import ScrollToTop from "@/components/layout/ScrollToTop";
 import CookieBanner from "@/components/layout/CookieBanner";
@@ -21,6 +20,7 @@ import NavigationOrb from "@/components/layout/NavigationOrb";
 import ParticleBg from "@/components/layout/ParticleBg";
 import LiveStrip from "@/components/layout/LiveStrip";
 import MobileBottomNav from "@/components/layout/MobileBottomNav";
+import { WebSocketProvider } from "@/context/WebSocketProvider";
 
 // Floating buttons disabled - users access AI and Fan Chat via header buttons
 // import BearsAIButton from "@/components/bears/BearsAIButton";
@@ -149,10 +149,11 @@ export default function RootLayout({
                     <Breadcrumb />
                   </div>
                   <MotionProvider>
-                    {children}
+                    <WebSocketProvider>
+                      {children}
+                    </WebSocketProvider>
                   </MotionProvider>
                 </div>
-                <Footer />
               </div>
               {/* NavigationOrb removed — nav moved to left sidebar */}
               <MobileBottomNav />
