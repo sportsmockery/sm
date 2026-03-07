@@ -2,6 +2,7 @@
 
 import { useState, useRef, useEffect, useCallback } from 'react'
 import Image from 'next/image'
+import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useTheme } from '@/contexts/ThemeContext'
 import { useAuth } from '@/contexts/AuthContext'
@@ -31,6 +32,14 @@ function trackScoutEvent(event: 'open' | 'summary_viewed' | 'close', extra?: { d
   } catch {} // ignore localStorage errors
 }
 
+const TEAM_LABELS: Record<string, string> = {
+  bears: 'Bears', bulls: 'Bulls', blackhawks: 'Blackhawks', cubs: 'Cubs',
+  whitesox: 'White Sox', 'white-sox': 'White Sox',
+}
+const TEAM_ORDER = ['bears', 'cubs', 'bulls', 'blackhawks', 'whitesox']
+
+interface Bullet { team: string; text: string; articleUrl?: string | null }
+
 export function ScoutSearchBox() {
   const { theme } = useTheme()
   const isDark = theme === 'dark'
@@ -40,9 +49,18 @@ export function ScoutSearchBox() {
   const [loading, setLoading] = useState(false)
   const [result, setResult] = useState<string | null>(null)
 
-  const { user } = useAuth()
+  const { user, isAuthenticated } = useAuth()
   const hasTrackedOpen = useRef(false)
   const openTime = useRef<number | null>(null)
+
+  // "What'd I Miss?" state
+  const [missOpen, setMissOpen] = useState(false)
+  const [missLoading, setMissLoading] = useState(false)
+  const [missError, setMissError] = useState<string | null>(null)
+  const [missBullets, setMissBullets] = useState<Bullet[]>([])
+  const missFetchedRef = useRef(false)
+  const missOverlayRef = useRef<HTMLDivElement>(null)
+  const missOpenTime = useRef<number | null>(null)
 
   // Stash user_id on window for the tracking helper
   useEffect(() => {
@@ -99,6 +117,64 @@ export function ScoutSearchBox() {
       setLoading(false)
     }
   }
+
+  // "What'd I Miss?" handlers
+  const handleMissOpen = useCallback(async () => {
+    setMissOpen(true)
+    missOpenTime.current = Date.now()
+    trackScoutEvent('open')
+    if (missFetchedRef.current) return
+    setMissLoading(true)
+    setMissError(null)
+    try {
+      const res = await fetch('/api/scout/since-last-visit', { method: 'POST' })
+      if (!res.ok) throw new Error(`HTTP ${res.status}`)
+      const data = await res.json()
+      if (data.bullets?.length) {
+        setMissBullets(data.bullets)
+        trackScoutEvent('summary_viewed')
+      } else {
+        setMissBullets([])
+        setMissError(data.message || 'No updates since your last visit.')
+      }
+      missFetchedRef.current = true
+    } catch {
+      setMissError("Scout couldn't load your catch-up. Try again in a bit.")
+    } finally {
+      setMissLoading(false)
+    }
+  }, [])
+
+  const handleMissClose = useCallback(() => {
+    setMissOpen(false)
+    if (missOpenTime.current) {
+      trackScoutEvent('close', { duration_ms: Date.now() - missOpenTime.current })
+      missOpenTime.current = null
+    }
+  }, [])
+
+  useEffect(() => {
+    if (!missOpen) return
+    const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') handleMissClose() }
+    document.addEventListener('keydown', onKey)
+    return () => document.removeEventListener('keydown', onKey)
+  }, [missOpen, handleMissClose])
+
+  useEffect(() => {
+    if (!missOpen) return
+    const onClick = (e: MouseEvent) => {
+      if (missOverlayRef.current && !missOverlayRef.current.contains(e.target as Node)) handleMissClose()
+    }
+    const timeout = setTimeout(() => document.addEventListener('mousedown', onClick), 100)
+    return () => { clearTimeout(timeout); document.removeEventListener('mousedown', onClick) }
+  }, [missOpen, handleMissClose])
+
+  const groupedBullets = TEAM_ORDER
+    .map(team => ({ team, label: TEAM_LABELS[team] || team, items: missBullets.filter(b => b.team === team || b.team === team.replace('whitesox', 'white-sox')) }))
+    .filter(g => g.items.length > 0)
+  const knownTeams = new Set(TEAM_ORDER.flatMap(t => [t, t.replace('whitesox', 'white-sox')]))
+  const otherBullets = missBullets.filter(b => !knownTeams.has(b.team))
+  if (otherBullets.length) groupedBullets.push({ team: 'sports', label: 'Chicago Sports', items: otherBullets })
 
   return (
     <div style={{ width: '100%', maxWidth: 700, margin: '0 auto' }}>
@@ -228,6 +304,40 @@ export function ScoutSearchBox() {
         >
           {loading ? '...' : 'ASK SCOUT'}
         </button>
+        {isAuthenticated && (
+          <button
+            onClick={handleMissOpen}
+            type="button"
+            style={{
+              padding: '9px 18px',
+              fontSize: 11,
+              fontWeight: 700,
+              letterSpacing: '0.1em',
+              textTransform: 'uppercase' as const,
+              backgroundColor: '#ffffff',
+              color: '#bc0000',
+              border: 'none',
+              borderRadius: 20,
+              cursor: 'pointer',
+              fontFamily: 'inherit',
+              flexShrink: 0,
+              transition: 'all 0.25s cubic-bezier(0.16, 1, 0.3, 1)',
+              position: 'relative',
+              zIndex: 2,
+              whiteSpace: 'nowrap',
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.transform = 'scale(1.06)'
+              e.currentTarget.style.boxShadow = '0 0 16px rgba(188,0,0,0.2)'
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.transform = 'scale(1)'
+              e.currentTarget.style.boxShadow = 'none'
+            }}
+          >
+            WHAT&apos;D I MISS?
+          </button>
+        )}
       </div>
 
       {/* Search result */}
@@ -263,6 +373,57 @@ export function ScoutSearchBox() {
             >
               Continue in Scout AI &rarr;
             </button>
+          </div>
+        </div>
+      )}
+
+      {/* "What'd I Miss?" overlay */}
+      {missOpen && (
+        <div className="scout-since-backdrop">
+          <div className="scout-concierge-overlay scout-since-overlay" ref={missOverlayRef}>
+            <button className="scout-concierge-close" onClick={handleMissClose} aria-label="Close">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
+                <path d="M18 6 6 18M6 6l12 12" />
+              </svg>
+            </button>
+            <div className="scout-concierge-header">
+              <Image src="/downloads/scout-v2.png" alt="Scout AI" width={28} height={28} unoptimized />
+              <span className="scout-concierge-title">Since you were last here</span>
+            </div>
+            {missLoading && (
+              <div className="scout-concierge-loading">
+                <div className="scout-concierge-skeleton" />
+                <div className="scout-concierge-skeleton scout-concierge-skeleton--short" />
+                <div className="scout-concierge-skeleton scout-concierge-skeleton--mid" />
+                <div className="scout-concierge-skeleton" />
+                <div className="scout-concierge-skeleton scout-concierge-skeleton--short" />
+              </div>
+            )}
+            {missError && !missLoading && (
+              <p className="scout-concierge-error">{missError}</p>
+            )}
+            {!missLoading && !missError && groupedBullets.length > 0 && (
+              <div className="scout-since-body">
+                {groupedBullets.map(group => (
+                  <div key={group.team} className="scout-since-team-group">
+                    <span className="scout-since-team-label">{group.label}</span>
+                    <ul className="scout-since-bullets">
+                      {group.items.map((bullet, i) => (
+                        <li key={i} className="scout-since-bullet">
+                          {bullet.articleUrl ? (
+                            <Link href={bullet.articleUrl} className="scout-since-bullet-link" onClick={handleMissClose}>
+                              {bullet.text}
+                            </Link>
+                          ) : (
+                            <span>{bullet.text}</span>
+                          )}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
         </div>
       )}

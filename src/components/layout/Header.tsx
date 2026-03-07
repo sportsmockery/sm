@@ -37,24 +37,7 @@ export default function Header() {
   const [drawerOpen, setDrawerOpen] = useState(false)
   const [userMenuOpen, setUserMenuOpen] = useState(false)
   const [userRole, setUserRole] = useState<Role | null>(null)
-  const [feedMode, setFeedMode] = useState<'for-you' | 'latest'>('for-you')
   const userMenuRef = useRef<HTMLDivElement>(null)
-
-  // Load feed mode from localStorage on mount
-  useEffect(() => {
-    try {
-      const saved = localStorage.getItem('sm-feed-mode')
-      if (saved === 'latest') setFeedMode('latest')
-    } catch {}
-  }, [])
-
-  // Toggle feed mode and broadcast to homepage
-  const toggleFeedMode = () => {
-    const next = feedMode === 'for-you' ? 'latest' : 'for-you'
-    setFeedMode(next)
-    try { localStorage.setItem('sm-feed-mode', next) } catch {}
-    window.dispatchEvent(new CustomEvent('sm-feed-mode-change', { detail: next }))
-  }
 
   // Fetch user role when authenticated
   useEffect(() => {
@@ -164,78 +147,8 @@ export default function Header() {
           ))}
         </div>
 
-        {/* RIGHT: Mode toggle + Theme toggle + Auth + Search + Hamburger */}
+        {/* RIGHT: Theme toggle + Auth + Search + Hamburger */}
         <div className="nav-right">
-          {/* Feed mode toggle — logged-in only */}
-          {isAuthenticated && (
-            <button
-              onClick={toggleFeedMode}
-              aria-label={feedMode === 'for-you' ? 'Switch to Latest' : 'Switch to For You'}
-              className="feed-mode-toggle"
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: '0',
-                background: 'rgba(255,255,255,0.06)',
-                backdropFilter: 'blur(12px)',
-                WebkitBackdropFilter: 'blur(12px)',
-                border: '1px solid rgba(255,255,255,0.1)',
-                borderRadius: '100px',
-                padding: '2px',
-                cursor: 'pointer',
-                position: 'relative',
-                height: '28px',
-                width: '130px',
-                flexShrink: 0,
-              }}
-            >
-              <span
-                style={{
-                  position: 'absolute',
-                  top: '2px',
-                  left: feedMode === 'for-you' ? '2px' : 'calc(50% + 1px)',
-                  width: 'calc(50% - 3px)',
-                  height: 'calc(100% - 4px)',
-                  borderRadius: '100px',
-                  backgroundColor: '#bc0000',
-                  transition: 'left 0.25s cubic-bezier(0.34, 1.56, 0.64, 1)',
-                }}
-              />
-              <span
-                style={{
-                  flex: 1,
-                  textAlign: 'center',
-                  fontSize: '10px',
-                  fontWeight: 700,
-                  fontFamily: "Barlow, sans-serif",
-                  color: feedMode === 'for-you' ? '#ffffff' : 'var(--sm-text-muted)',
-                  position: 'relative',
-                  zIndex: 1,
-                  transition: 'color 0.2s',
-                  letterSpacing: '0.02em',
-                }}
-              >
-                For You
-              </span>
-              <span
-                style={{
-                  flex: 1,
-                  textAlign: 'center',
-                  fontSize: '10px',
-                  fontWeight: 700,
-                  fontFamily: "Barlow, sans-serif",
-                  color: feedMode === 'latest' ? '#ffffff' : 'var(--sm-text-muted)',
-                  position: 'relative',
-                  zIndex: 1,
-                  transition: 'color 0.2s',
-                  letterSpacing: '0.02em',
-                }}
-              >
-                Latest
-              </span>
-            </button>
-          )}
-
           {/* Search icon */}
           <Link
             href="/search"
@@ -517,21 +430,6 @@ export default function Header() {
           </button>
 
           {/* Nav links in drawer */}
-          {isAuthenticated && (
-            <Link
-              href="/feed"
-              onClick={closeDrawer}
-              className="nav-feed-link"
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: '8px',
-              }}
-            >
-              <span style={{ flexShrink: 0, fontSize: '14px', lineHeight: 1 }}>&#10038;</span>
-              For You
-            </Link>
-          )}
           {navLinks.map((link) => (
             <Link key={link.href} href={link.href} onClick={closeDrawer}>
               {link.name}
