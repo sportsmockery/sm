@@ -197,15 +197,15 @@ export default function RiverFeed({
       <RiverOfflineBanner />
       <RiverGhostPill onScrollToTop={handleScrollToTop} />
 
-      <div ref={feedRef} className="feed-container space-y-4">
+      <div className="feed-container space-y-4">
         {riverCards.map((card, index) => (
           <React.Fragment key={card.card_id}>
             {index === 2 && insertAtIndex2 && (
-              <div className="feed-card" style={{ opacity: 0 }}>
+              <div className="feed-card">
                 {insertAtIndex2}
               </div>
             )}
-            <div className="feed-card" style={{ opacity: 0 }}>
+            <div className="feed-card">
               {renderCardContent(index, card, playableArticles)}
             </div>
           </React.Fragment>
