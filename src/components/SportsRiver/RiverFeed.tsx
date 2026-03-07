@@ -55,17 +55,17 @@ const PlaceholderCard = React.memo(function PlaceholderCard({
       isBreathing={isBreathing}
     >
       <div className="flex flex-col gap-2">
-        <span className="text-xs font-semibold uppercase tracking-wider text-[#00D4FF]">
+        <span className="text-xs font-semibold uppercase tracking-wider" style={{ color: 'var(--sm-text-meta)' }}>
           {label}
         </span>
         {heading && (
-          <h3 className="text-lg font-bold text-[#FAFAFB]">{heading}</h3>
+          <h3 className="text-lg font-bold" style={{ color: 'var(--sm-text)' }}>{heading}</h3>
         )}
         {body && (
-          <p className="text-sm text-[#E6E8EC] line-clamp-2">{body}</p>
+          <p className="text-sm line-clamp-2" style={{ color: 'var(--sm-text-secondary)' }}>{body}</p>
         )}
         {!heading && !body && (
-          <p className="text-sm text-[#94a3b8] italic">Coming soon</p>
+          <p className="text-sm italic" style={{ color: 'var(--sm-text-meta)' }}>Coming soon</p>
         )}
       </div>
     </BaseGlassCard>
@@ -75,18 +75,19 @@ const PlaceholderCard = React.memo(function PlaceholderCard({
 function SkeletonCard() {
   return (
     <div
-      className="rounded-2xl border border-[#2B3442] overflow-hidden"
+      className="rounded-2xl border overflow-hidden river-card"
       style={{
-        background: 'rgba(27, 36, 48, 0.72)',
-        backdropFilter: 'blur(20px)',
+        background: 'var(--sm-card)',
+        borderColor: 'var(--sm-border)',
+        boxShadow: 'var(--shadow-sm)',
       }}
     >
-      <div className="h-[2px] w-full bg-[#2B3442]" />
+      <div className="h-[2px] w-full" style={{ background: 'var(--sm-border)' }} />
       <div className="p-4 space-y-3">
-        <div className="h-3 w-16 rounded bg-[#2B3442] animate-pulse" />
-        <div className="h-5 w-3/4 rounded bg-[#2B3442] animate-pulse" />
-        <div className="h-4 w-full rounded bg-[#2B3442] animate-pulse" />
-        <div className="h-4 w-2/3 rounded bg-[#2B3442] animate-pulse" />
+        <div className="h-3 w-16 rounded animate-pulse" style={{ background: 'var(--sm-border)' }} />
+        <div className="h-5 w-3/4 rounded animate-pulse" style={{ background: 'var(--sm-border)' }} />
+        <div className="h-4 w-full rounded animate-pulse" style={{ background: 'var(--sm-border)' }} />
+        <div className="h-4 w-2/3 rounded animate-pulse" style={{ background: 'var(--sm-border)' }} />
       </div>
     </div>
   );

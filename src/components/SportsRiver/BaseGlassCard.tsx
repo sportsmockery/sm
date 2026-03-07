@@ -74,12 +74,11 @@ function BaseGlassCardInner({
   return (
     <motion.div
       ref={cardRef}
-      className={`relative overflow-hidden rounded-2xl border border-[#2B3442] ${isBreathing && !prefersReduced ? 'river-breathing' : ''} ${className ?? ''}`}
+      className={`relative overflow-hidden rounded-2xl border river-card ${isBreathing && !prefersReduced ? 'river-breathing' : ''} ${className ?? ''}`}
       style={{
-        background: 'rgba(27, 36, 48, 0.72)',
-        backdropFilter: 'blur(20px)',
-        WebkitBackdropFilter: 'blur(20px)',
-        boxShadow: '0 20px 40px rgba(0,0,0,0.4)',
+        background: 'var(--sm-card)',
+        borderColor: 'var(--sm-border)',
+        boxShadow: 'var(--shadow-sm)',
       }}
       initial={prefersReduced ? undefined : { opacity: 0, scale: 0.92, y: 30 }}
       whileInView={prefersReduced ? undefined : { opacity: 1, scale: 1, y: 0 }}
@@ -88,7 +87,7 @@ function BaseGlassCardInner({
       whileHover={
         prefersReduced
           ? undefined
-          : { y: -8, boxShadow: '0 28px 48px rgba(0,0,0,0.5)' }
+          : { y: -8, boxShadow: 'var(--shadow-md)' }
       }
     >
       {/* Top accent bar */}
@@ -96,8 +95,11 @@ function BaseGlassCardInner({
         className="absolute top-0 left-0 w-full h-[2px]"
         style={{ backgroundColor: accentColor }}
       />
-      {/* Inner edge highlight */}
-      <div className="absolute top-[2px] left-0 w-full h-[1px] bg-[#FAFAFB]/20" />
+      {/* Inner edge highlight — subtle in both themes */}
+      <div
+        className="absolute top-[2px] left-0 w-full h-[1px] river-card-edge"
+        aria-hidden
+      />
 
       <div className="p-4">{children}</div>
 

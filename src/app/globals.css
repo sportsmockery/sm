@@ -24,11 +24,11 @@
   --sm-red-glow: rgba(188, 0, 0, 0.3);
 
   /* === Surfaces === */
-  --sm-dark: #050508;
-  --sm-surface: #0c0c12;
-  --sm-card: #13131d;
-  --sm-card-hover: #1a1a28;
-  --sm-border: rgba(255, 255, 255, 0.06);
+  --sm-dark: #0e0e16;
+  --sm-surface: #14141f;
+  --sm-card: #1a1a28;
+  --sm-card-hover: #222234;
+  --sm-border: rgba(255, 255, 255, 0.08);
 
   /* === Text === */
   --sm-text: #ffffff;
@@ -343,6 +343,56 @@
   --glass-border: rgba(0, 0, 0, 0.06);
   --glass-blur: 16px;
 }
+
+/* ===== RIVER PAGE — Chicago background (dark mode only) ===== */
+.river-page-bg {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  overflow: hidden;
+}
+html[data-theme="light"] .river-page-bg {
+  display: none;
+}
+.river-page-bg::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(165deg, rgba(188, 0, 0, 0.08) 0%, transparent 45%),
+    linear-gradient(15deg, transparent 55%, rgba(0, 212, 255, 0.06) 100%),
+    linear-gradient(180deg, var(--sm-dark) 0%, transparent 30%, transparent 72%, var(--sm-dark) 100%),
+    url('https://images.unsplash.com/photo-1547483238-f400e65ccd56?w=1920') center/cover;
+  background-blend-mode: overlay, overlay, normal, normal;
+  filter: brightness(0.4) contrast(1.05);
+  opacity: 0.9;
+  animation: river-bg-drift 50s ease-in-out infinite;
+}
+.river-page-bg::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: var(--sm-dark);
+  opacity: 0.4;
+  pointer-events: none;
+}
+@keyframes river-bg-drift {
+  0%, 100% { transform: scale(1) translate(0, 0); }
+  50% { transform: scale(1.02) translate(-0.3%, -0.2%); }
+}
+
+/* River card inner edge and action buttons */
+.river-card-edge {
+  background: rgba(255, 255, 255, 0.06);
+}
+html[data-theme="light"] .river-card-edge {
+  background: rgba(0, 0, 0, 0.05);
+}
+.river-card .like-btn:hover { color: #bc0000 !important; }
+.river-card .like-btn:hover svg { color: #bc0000 !important; }
+.river-card .share-btn:hover { color: #00D4FF !important; }
+.river-card .share-btn:hover svg { color: #00D4FF !important; }
 
 /* ===== TIME-OF-DAY REACTIVE THEME LAYER ===== */
 /* These CSS vars are set by ThemeContext.tsx based on hour of day.

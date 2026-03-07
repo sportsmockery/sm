@@ -6,6 +6,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import type { RiverCard } from '@/lib/river-types';
 import { BaseGlassCard } from '../BaseGlassCard';
+import { CardActionButtons } from '../CardActionButtons';
 import { CARD_TYPE_LABELS, formatTimestamp } from './utils';
 
 interface ScoutArticleCardProps {
@@ -147,15 +148,7 @@ export const ScoutArticleCard = React.memo(function ScoutArticleCard({ card }: S
           )}
         </AnimatePresence>
 
-        {/* Footer */}
-        <div className="flex items-center gap-4 mt-4 pt-3 border-t border-[#2B3442]">
-          <button className="flex items-center gap-1 text-xs text-[#E6E8EC]/60 hover:text-[#BC0000] transition-colors min-h-[44px]" aria-label="Like this card">
-            &#9829; Like
-          </button>
-          <button className="flex items-center gap-1 text-xs text-[#E6E8EC]/60 hover:text-[#00D4FF] transition-colors min-h-[44px]" aria-label="Share this card">
-            &#8599; Share
-          </button>
-        </div>
+        <CardActionButtons />
       </div>
     </BaseGlassCard>
   );

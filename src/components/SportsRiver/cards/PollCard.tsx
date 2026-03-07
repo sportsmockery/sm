@@ -3,6 +3,7 @@
 import React, { useCallback, useRef, useState } from 'react';
 import type { RiverCard } from '@/lib/river-types';
 import { BaseGlassCard } from '../BaseGlassCard';
+import { CardActionButtons } from '../CardActionButtons';
 import { CARD_TYPE_LABELS, formatTimestamp } from './utils';
 
 interface PollCardProps {
@@ -92,14 +93,14 @@ export const PollCard = React.memo(function PollCard({ card }: PollCardProps) {
     <BaseGlassCard trackingToken={card.tracking_token} accentColor={card.ui_directives.accent}>
       {/* Header */}
       <div className="flex items-center justify-between mb-3">
-        <span className="text-xs font-bold uppercase tracking-widest" style={{ color: '#BC0000' }}>
+        <span className="font-bold uppercase tracking-widest" style={{ color: '#BC0000', fontSize: 16 }}>
           {CARD_TYPE_LABELS[card.card_type]}
         </span>
-        <span className="text-xs text-[#E6E8EC]/60">{formatTimestamp(card.timestamp)}</span>
+        <span className="text-[#E6E8EC]/60" style={{ fontSize: 16 }}>{formatTimestamp(card.timestamp)}</span>
       </div>
 
       {/* Question */}
-      <h3 className="text-lg font-bold text-[#FAFAFB] mb-4">{question}</h3>
+      <h3 className="font-bold text-[#FAFAFB] mb-4" style={{ fontSize: 22 }}>{question}</h3>
 
       {/* Options */}
       <div className="space-y-2">
@@ -127,11 +128,11 @@ export const PollCard = React.memo(function PollCard({ card }: PollCardProps) {
                 />
               )}
               <div className="relative flex items-center justify-between px-4 py-3">
-                <span className={`text-sm font-bold ${isVoted ? 'text-[#BC0000]' : 'text-[#FAFAFB]'}`} style={{ fontFamily: 'Inter, sans-serif' }}>
+                <span className={`font-bold ${isVoted ? 'text-[#BC0000]' : 'text-[#FAFAFB]'}`} style={{ fontFamily: 'Inter, sans-serif', fontSize: 18 }}>
                   {option.label}
                 </span>
                 {votedId && (
-                  <span className="text-xs font-bold text-[#E6E8EC]/60">{pct}%</span>
+                  <span className="font-bold text-[#E6E8EC]/60" style={{ fontSize: 16 }}>{pct}%</span>
                 )}
               </div>
             </button>
@@ -141,27 +142,20 @@ export const PollCard = React.memo(function PollCard({ card }: PollCardProps) {
 
       {/* Post-vote message */}
       {votedId && (
-        <p className="text-xs text-[#E6E8EC]/40 mt-2" style={{ fontFamily: 'Inter, sans-serif' }}>
+        <p className="text-[#E6E8EC]/40 mt-2" style={{ fontFamily: 'Inter, sans-serif', fontSize: 16 }}>
           See how fans voted
         </p>
       )}
 
       {/* Vote error */}
       {voteError && (
-        <p className="text-xs text-[#BC0000] mt-2" style={{ fontFamily: 'Inter, sans-serif' }}>
+        <p className="text-[#BC0000] mt-2" style={{ fontFamily: 'Inter, sans-serif', fontSize: 16 }}>
           {voteError}
         </p>
       )}
 
       {/* Footer */}
-      <div className="flex items-center gap-4 mt-4 pt-3 border-t border-[#2B3442]">
-        <button className="flex items-center gap-1 text-xs text-[#E6E8EC]/60 hover:text-[#BC0000] transition-colors min-h-[44px]" aria-label="Like this card">
-          &#9829; Like
-        </button>
-        <button className="flex items-center gap-1 text-xs text-[#E6E8EC]/60 hover:text-[#00D4FF] transition-colors min-h-[44px]" aria-label="Share this card">
-          &#8599; Share
-        </button>
-      </div>
+      <CardActionButtons />
     </BaseGlassCard>
   );
 });
