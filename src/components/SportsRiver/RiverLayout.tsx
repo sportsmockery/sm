@@ -82,17 +82,6 @@ function ScoutBox() {
         padding: 'var(--card-padding, 20px)',
       }}
     >
-      <div className="absolute top-4 right-4 z-10">
-        <button
-          type="button"
-          onClick={() => refreshBriefing?.()}
-          className="text-sm font-medium"
-          style={{ color: 'var(--sm-text-meta)' }}
-        >
-          What&apos;d I Miss?
-        </button>
-      </div>
-
       <div className="flex items-center gap-4">
         <div className="shrink-0 scout-head-container">
           <Image
@@ -109,6 +98,25 @@ function ScoutBox() {
           <ScoutGreeting showIcon={false} />
           <ScoutBriefingText setRefreshFn={setRefreshBriefing} inline />
         </div>
+      </div>
+
+      <div className="flex justify-end mt-4 mb-0 pb-1">
+        <button
+          type="button"
+          onClick={() => refreshBriefing?.()}
+          className="text-sm font-medium rounded-lg transition-all duration-200 hover:opacity-90"
+          style={{
+            color: 'var(--sm-text-meta)',
+            padding: '10px 16px',
+            background: 'rgba(27, 36, 48, 0.6)',
+            backdropFilter: 'blur(10px)',
+            WebkitBackdropFilter: 'blur(10px)',
+            border: '1px solid rgba(255, 255, 255, 0.1)',
+            boxShadow: '0 2px 8px rgba(0, 0, 0, 0.2)',
+          }}
+        >
+          What&apos;d I Miss?
+        </button>
       </div>
 
       <style>{`
