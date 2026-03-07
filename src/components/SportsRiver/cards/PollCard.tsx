@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useRef, useState } from 'react';
 import type { RiverCard } from '@/lib/river-types';
 import { BaseGlassCard } from '../BaseGlassCard';
 import { CARD_TYPE_LABELS, formatTimestamp } from './utils';
@@ -13,6 +13,17 @@ interface PollOption {
   id: string;
   label: string;
   votes: number;
+}
+
+function getOrCreateAnonymousId(): string {
+  const key = 'sm_anonymous_id';
+  if (typeof window === 'undefined') return crypto.randomUUID();
+  let id = localStorage.getItem(key);
+  if (!id) {
+    id = crypto.randomUUID();
+    localStorage.setItem(key, id);
+  }
+  return id;
 }
 
 export const PollCard = React.memo(function PollCard({ card }: PollCardProps) {
@@ -28,26 +39,48 @@ export const PollCard = React.memo(function PollCard({ card }: PollCardProps) {
 
   const [options, setOptions] = useState<PollOption[]>(rawOptions ?? defaultOptions);
   const [votedId, setVotedId] = useState<string | null>(null);
+  const [voteError, setVoteError] = useState<string | null>(null);
+  const prevOptionsRef = useRef<PollOption[]>(rawOptions ?? defaultOptions);
 
   const totalVotes = options.reduce((sum, o) => sum + o.votes, 0);
 
   const handleVote = useCallback(
-    (optionId: string) => {
+    async (optionId: string) => {
       if (votedId) return;
+      setVoteError(null);
+
+      // Save previous state for rollback
+      prevOptionsRef.current = options;
+
+      // Optimistic update
       setVotedId(optionId);
       setOptions((prev) =>
         prev.map((o) => (o.id === optionId ? { ...o, votes: o.votes + 1 } : o))
       );
-      // Fire-and-forget vote
+
       if (pollId) {
-        fetch(`/api/polls/${pollId}/vote`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ option_id: optionId }),
-        }).catch(() => {});
+        try {
+          const res = await fetch(`/api/polls/${pollId}/vote`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              option_ids: [optionId],
+              anonymous_id: getOrCreateAnonymousId(),
+            }),
+          });
+          if (!res.ok) {
+            const data = await res.json().catch(() => ({}));
+            throw new Error(data.error || 'Vote failed');
+          }
+        } catch (err) {
+          // Revert optimistic state
+          setVotedId(null);
+          setOptions(prevOptionsRef.current);
+          setVoteError(err instanceof Error ? err.message : 'Vote failed. Try again.');
+        }
       }
     },
-    [votedId, pollId]
+    [votedId, pollId, options]
   );
 
   const getPercent = (votes: number) => {
@@ -110,6 +143,13 @@ export const PollCard = React.memo(function PollCard({ card }: PollCardProps) {
       {votedId && (
         <p className="text-xs text-[#E6E8EC]/40 mt-2" style={{ fontFamily: 'Inter, sans-serif' }}>
           See how fans voted
+        </p>
+      )}
+
+      {/* Vote error */}
+      {voteError && (
+        <p className="text-xs text-[#BC0000] mt-2" style={{ fontFamily: 'Inter, sans-serif' }}>
+          {voteError}
         </p>
       )}
 

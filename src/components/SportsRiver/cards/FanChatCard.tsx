@@ -12,13 +12,16 @@ interface FanChatCardProps {
 }
 
 export const FanChatCard = React.memo(function FanChatCard({ card }: FanChatCardProps) {
+  const content = card.content as Record<string, unknown>;
+  const roomId = content.room_id as string | undefined;
+
+  // Subscribe to chat_presence keyed by room_id for live user count updates
   const { liveData, isUpdating } = useGhostUpdate(
-    card.card_id,
-    card.content as Record<string, unknown>,
-    'chat_messages'
+    roomId ?? card.card_id,
+    content,
+    'chat_presence'
   );
 
-  const roomId = liveData.room_id as string | undefined;
   const message = liveData.message as string | undefined;
   const userCount = (liveData.user_count as number | undefined) ?? 0;
   const roomTitle = (liveData.room_title as string | undefined) ?? 'Fan Chat';

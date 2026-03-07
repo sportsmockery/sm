@@ -22,6 +22,7 @@ export type RealtimePayload = RealtimePostgresChangesPayload<Record<string, unkn
 const TABLE_FILTER_KEY: Record<string, string> = {
   sm_box_scores: 'card_id',
   sm_hub_updates: 'id',
+  chat_presence: 'room_id',
 };
 
 function getFilterKey(table: string): string {

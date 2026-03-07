@@ -21,6 +21,7 @@ import ParticleBg from "@/components/layout/ParticleBg";
 import LiveStrip from "@/components/layout/LiveStrip";
 import MobileBottomNav from "@/components/layout/MobileBottomNav";
 import { WebSocketProvider } from "@/context/WebSocketProvider";
+import { AudioPlayerProvider } from "@/context/AudioPlayerContext";
 
 // Floating buttons disabled - users access AI and Fan Chat via header buttons
 // import BearsAIButton from "@/components/bears/BearsAIButton";
@@ -149,7 +150,9 @@ export default function RootLayout({
                   </div>
                   <MotionProvider>
                     <WebSocketProvider>
-                      {children}
+                      <AudioPlayerProvider>
+                        {children}
+                      </AudioPlayerProvider>
                     </WebSocketProvider>
                   </MotionProvider>
                 </div>

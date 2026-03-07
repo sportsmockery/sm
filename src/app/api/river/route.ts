@@ -694,18 +694,58 @@ export async function GET(req: NextRequest) {
     }
 
     // Fan chat → fan_chat cards
+    // Collect unique room IDs and fetch live user counts from chat_presence
+    const chatRoomIds = [...new Set(chatMessages.map((m: any) => m.room_id).filter(Boolean))];
+    const roomUserCounts = new Map<string, number>();
+    if (chatRoomIds.length > 0) {
+      try {
+        const { data: presenceData } = await supabaseAdmin
+          .from('chat_presence')
+          .select('room_id')
+          .in('room_id', chatRoomIds)
+          .eq('is_online', true);
+        if (presenceData) {
+          for (const p of presenceData) {
+            roomUserCounts.set(p.room_id, (roomUserCounts.get(p.room_id) || 0) + 1);
+          }
+        }
+      } catch {
+        // chat_presence may not exist yet — graceful fallback
+      }
+    }
+
+    // Fetch room titles
+    const roomTitles = new Map<string, string>();
+    if (chatRoomIds.length > 0) {
+      try {
+        const { data: rooms } = await supabaseAdmin
+          .from('chat_rooms')
+          .select('id, team_name')
+          .in('id', chatRoomIds);
+        if (rooms) {
+          for (const r of rooms) {
+            roomTitles.set(r.id, r.team_name);
+          }
+        }
+      } catch {
+        // graceful fallback
+      }
+    }
+
     for (const msg of chatMessages) {
       const score = scoreGenericCandidate('fan_chat', msg.created_at, null, scoringCtx);
       allCandidates.push({
         card_type: 'fan_chat',
         score,
         card: makeCard(
-          `chat_${msg.id}`,
+          `chat_${msg.room_id ?? msg.id}`,
           'fan_chat',
           msg.created_at,
           {
             message: msg.content,
             room_id: msg.room_id,
+            user_count: roomUserCounts.get(msg.room_id) ?? 0,
+            room_title: roomTitles.get(msg.room_id) ?? 'Fan Chat',
           },
           sessionId,
           userSegment,

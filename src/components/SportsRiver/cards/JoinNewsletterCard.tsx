@@ -23,11 +23,14 @@ export const JoinNewsletterCard = React.memo(function JoinNewsletterCard({ card 
       if (!email || status === 'loading') return;
       setStatus('loading');
       try {
-        await fetch('/api/newsletter/subscribe', {
+        const res = await fetch('/api/newsletter/subscribe', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ email }),
         });
+        if (!res.ok) {
+          throw new Error('Subscription failed');
+        }
         setStatus('success');
       } catch {
         setStatus('error');
