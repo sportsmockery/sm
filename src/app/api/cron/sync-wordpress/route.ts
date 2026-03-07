@@ -5,7 +5,7 @@ export const maxDuration = 60
 export const dynamic = 'force-dynamic'
 
 const WP_BASE_URL = 'https://www.sportsmockery.com/wp-json/sm-export/v1'
-const MAX_PAGES = 3
+const MAX_PAGES = 5
 const PER_PAGE = 100
 
 interface WPCategory {
@@ -87,16 +87,24 @@ export async function GET(request: NextRequest) {
   const startTime = Date.now()
 
   try {
-    // 1. Load existing wp_ids from sm_posts
-    const { data: existingRows, error: existingError } = await supabaseAdmin
-      .from('sm_posts')
-      .select('wp_id')
+    // 1. Load existing wp_ids from sm_posts (paginate to avoid 1000-row default limit)
+    const existingWpIds = new Set<number>()
+    let from = 0
+    const PAGE_SIZE = 5000
+    while (true) {
+      const { data: batch, error: batchError } = await supabaseAdmin
+        .from('sm_posts')
+        .select('wp_id')
+        .range(from, from + PAGE_SIZE - 1)
 
-    if (existingError) {
-      throw new Error(`Failed to load existing posts: ${existingError.message}`)
+      if (batchError) {
+        throw new Error(`Failed to load existing posts: ${batchError.message}`)
+      }
+      if (!batch || batch.length === 0) break
+      batch.forEach(r => existingWpIds.add(r.wp_id))
+      if (batch.length < PAGE_SIZE) break
+      from += PAGE_SIZE
     }
-
-    const existingWpIds = new Set(existingRows?.map(r => r.wp_id) || [])
     console.log(`[WP Sync] ${existingWpIds.size} existing posts in Supabase`)
 
     // 2. Fetch recent posts from WP (newest first, fetching from the last pages)

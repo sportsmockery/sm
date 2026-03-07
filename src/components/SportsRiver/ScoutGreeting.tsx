@@ -46,19 +46,21 @@ export default function ScoutGreeting() {
   const timeStr = now.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true });
 
   return (
-    <div className="flex items-start gap-3 mb-1">
-      {/* Scout icon — compact product-style */}
+    <div className="flex items-start gap-4 mb-1">
+      {/* Scout icon — 3x size */}
       <div className="shrink-0 scout-head-container" style={{ marginTop: 2 }}>
         <Image
           src="/downloads/scout-v2.png"
           alt="Scout AI"
-          width={32}
-          height={32}
+          width={96}
+          height={96}
           unoptimized
           className="scout-head-img"
           style={{
             borderRadius: '50%',
             objectFit: 'cover',
+            width: 96,
+            height: 96,
           }}
         />
       </div>

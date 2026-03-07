@@ -75,39 +75,41 @@ export default function ScoutBriefingGrid() {
 
   if (!mounted || briefings.length === 0) {
     return (
-      <div className="mt-2">
-        <div className="flex gap-4 overflow-x-auto pb-1 scrollbar-hide">
-          {[1, 2, 3, 4].map((i) => (
-            <div
-              key={i}
-              className="rounded-xl animate-pulse shrink-0"
-              style={{
-                backgroundColor: 'rgba(255, 255, 255, 0.04)',
-                width: 210,
-                height: 132,
-              }}
-            />
-          ))}
+      <div className="mt-5">
+        <div className="flex justify-center overflow-x-auto pb-1 scrollbar-hide">
+          <div className="flex gap-4 shrink-0">
+            {[1, 2, 3, 4].map((i) => (
+              <div
+                key={i}
+                className="rounded-xl animate-pulse shrink-0"
+                style={{
+                  backgroundColor: 'rgba(255, 255, 255, 0.04)',
+                  width: 210,
+                  height: 132,
+                }}
+              />
+            ))}
+          </div>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="mt-2">
-      {/* 4 cards in a row — fixed size, horizontal scroll on smaller screens */}
-      <div
-        className="flex gap-4 overflow-x-auto pb-1 scrollbar-hide"
-      >
-        {briefings.map((item, i) => (
-          <div
-            key={i}
-            className="shrink-0"
-            style={{ width: 210, minHeight: 120, maxHeight: 140 }}
-          >
-            <ScoutBriefingCard {...item} />
-          </div>
-        ))}
+    <div className="mt-5">
+      {/* Cards centered in box; horizontal scroll on small screens */}
+      <div className="flex justify-center overflow-x-auto pb-1 scrollbar-hide">
+        <div className="flex gap-4 shrink-0">
+          {briefings.map((item, i) => (
+            <div
+              key={i}
+              className="shrink-0"
+              style={{ width: 210, minHeight: 120, maxHeight: 140 }}
+            >
+              <ScoutBriefingCard {...item} />
+            </div>
+          ))}
+        </div>
       </div>
     </div>
   );

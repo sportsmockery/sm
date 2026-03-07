@@ -842,7 +842,7 @@
 
 /* ========== Poll Widget ========== */
 .poll-question {
-  font-size: 15px;
+  font-size: 19px;
   font-weight: 600;
   color: var(--sm-text);
   margin-bottom: 16px;
@@ -862,7 +862,7 @@
 }
 
 .poll-label {
-  font-size: 13px;
+  font-size: 17px;
   font-weight: 500;
   color: var(--sm-text-muted);
 }
@@ -882,7 +882,7 @@
 }
 
 .poll-percent {
-  font-size: 12px;
+  font-size: 16px;
   font-weight: 600;
   color: var(--sm-red-light);
   text-align: right;
@@ -891,7 +891,7 @@
 .poll-cta {
   display: inline-block;
   margin-top: 16px;
-  font-size: 13px;
+  font-size: 17px;
   font-weight: 600;
   color: var(--sm-red-light);
   text-decoration: none;
