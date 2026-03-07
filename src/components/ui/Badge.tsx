@@ -1,44 +1,36 @@
-import React, { ReactNode } from 'react'
+import * as React from "react"
+import { cva, type VariantProps } from "class-variance-authority"
 
-interface BadgeProps {
-  children: ReactNode
-  variant?: 'default' | 'primary' | 'secondary' | 'success' | 'warning' | 'danger' | 'outline'
-  size?: 'sm' | 'md' | 'lg'
-  className?: string
-}
+import { cn } from "@/lib/utils"
 
-const variantStyles: Record<string, React.CSSProperties> = {
-  default: { backgroundColor: 'var(--sm-surface)', color: 'var(--sm-text-muted)' },
-  primary: { backgroundColor: '#8B0000', color: '#ffffff' },
-  secondary: { backgroundColor: 'var(--sm-surface)', color: '#ffffff' },
-  success: { backgroundColor: '#10b981', color: '#ffffff' },
-  warning: { backgroundColor: '#f59e0b', color: '#ffffff' },
-  danger: { backgroundColor: '#ef4444', color: '#ffffff' },
-  outline: { border: '1px solid var(--sm-border)', color: 'var(--sm-text-muted)' },
-}
+const badgeVariants = cva(
+  "inline-flex items-center rounded-md border px-2.5 py-0.5 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2",
+  {
+    variants: {
+      variant: {
+        default:
+          "border-transparent bg-primary text-primary-foreground shadow hover:bg-primary/80",
+        secondary:
+          "border-transparent bg-secondary text-secondary-foreground hover:bg-secondary/80",
+        destructive:
+          "border-transparent bg-destructive text-destructive-foreground shadow hover:bg-destructive/80",
+        outline: "text-foreground",
+      },
+    },
+    defaultVariants: {
+      variant: "default",
+    },
+  }
+)
 
-const sizeClasses = {
-  sm: 'px-2 py-0.5 text-xs',
-  md: 'px-2.5 py-1 text-sm',
-  lg: 'px-3 py-1.5 text-base',
-}
+export interface BadgeProps
+  extends React.HTMLAttributes<HTMLDivElement>,
+    VariantProps<typeof badgeVariants> {}
 
-export default function Badge({
-  children,
-  variant = 'default',
-  size = 'md',
-  className = '',
-}: BadgeProps) {
+function Badge({ className, variant, ...props }: BadgeProps) {
   return (
-    <span
-      className={`
-        inline-flex items-center rounded-full font-medium
-        ${sizeClasses[size]}
-        ${className}
-      `}
-      style={variantStyles[variant]}
-    >
-      {children}
-    </span>
+    <div className={cn(badgeVariants({ variant }), className)} {...props} />
   )
 }
+
+export { Badge, badgeVariants }

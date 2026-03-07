@@ -1,6 +1,7 @@
 'use client'
 
 import Image from 'next/image'
+import Link from 'next/link'
 import { Role, ROLE_COLORS, ALL_ROLES, ROLE_DEFINITIONS } from '@/lib/roles'
 
 interface User {
@@ -84,7 +85,7 @@ export default function UsersTable({
                     </div>
                   )}
                   <div>
-                    <p className="text-white font-medium">{user.name || 'Unnamed'}</p>
+                    <Link href={`/admin/users/${user.id}`} className="text-white font-medium hover:underline">{user.name || 'Unnamed'}</Link>
                     <p className="text-sm text-gray-500">Joined {formatDate(user.created_at)}</p>
                   </div>
                 </div>

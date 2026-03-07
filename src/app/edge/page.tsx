@@ -3,6 +3,7 @@
 import React, { useState, useCallback, useRef, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
+import { EdgeLogo } from '@/components/edge/EdgeLogo';
 
 type EdgePanel =
   | { type: 'catch-up'; data: { items: { id: string; summary: string }[] } }
@@ -141,14 +142,11 @@ export default function EdgePage() {
         style={{ background: 'var(--sm-nav-bg)' }}
       >
         <div className="max-w-6xl mx-auto h-full flex items-center justify-between px-4">
-          <div className="flex items-baseline gap-2">
+          <div className="flex items-center gap-2">
             <span className="text-xs uppercase tracking-[0.18em]" style={{ color: '#9090a8' }}>
               Sports Mockery
             </span>
-            <span className="relative text-xl font-semibold tracking-[0.18em]">
-              EDGE
-              <span className="pointer-events-none absolute -bottom-1 left-0 h-[2px] w-8 bg-[var(--sm-red)] rotate-[-6deg]" />
-            </span>
+            <EdgeLogo variant="full" height={28} className="flex-shrink-0" />
           </div>
 
           <div className="hidden md:block text-sm" style={{ color: '#9090a8' }}>
