@@ -798,16 +798,18 @@ export function HomepageFeed({
         </div>
       </section>
 
-      {/* ===== Sidebar (fixed right) ===== */}
-      <div style={{
+      {/* ===== Sidebar (fixed right, floating) ===== */}
+      <div className="homepage-right-sidebar" style={{
         position: 'fixed',
-        top: '80px',
-        right: 0,
-        width: '320px',
-        maxHeight: 'calc(100vh - 100px)',
+        top: '24px',
+        right: '24px',
+        width: '300px',
+        maxHeight: 'calc(100vh - 48px)',
         overflowY: 'auto',
+        overflowX: 'hidden',
         zIndex: 10,
-        padding: '16px 16px 16px 0',
+        scrollbarWidth: 'none',
+        msOverflowStyle: 'none',
       }}>
         <CommandPanel
           posts={filteredPosts}
