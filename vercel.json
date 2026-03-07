@@ -1,5 +1,14 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
+  "builds": [
+    {
+      "src": "package.json",
+      "use": "@vercel/next",
+      "config": {
+        "installCommand": "npm ci --prefer-offline"
+      }
+    }
+  ],
   "crons": [
     {
       "path": "/api/cron/sync-teams",

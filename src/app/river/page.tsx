@@ -7,11 +7,11 @@ import { scorePostCandidate, scoreGenericCandidate, scoreRiverCandidates, type S
 import { isProTier } from '@/lib/stripe';
 import { TEAM_CATEGORY_SLUGS } from '@/lib/db';
 import type { UserEngagementProfile } from '@/lib/scoring-v2';
-import type { CardType, RiverCard, RiverFeedResponse, UserSegment } from '@/lib/river-types';
-import RiverPageClient from '@/app/river/RiverPageClient';
+import type { CardType, RiverCard, UserSegment } from '@/lib/river-types';
+import RiverPageClient from './RiverPageClient';
 
 export const metadata: Metadata = {
-  title: { absolute: 'Sports Mockery | Where Chicago Fans Come First' },
+  title: 'The River | Sports Mockery',
   description:
     'Your personalized Chicago sports feed. Live scores, breaking news, Scout AI analysis, and fan community — all in one stream.',
 };
@@ -177,7 +177,7 @@ function makeCard(
 }
 
 // ---------------------------------------------------------------------------
-// Fetch initial 12 River cards server-side
+// Fetch initial 12 River cards server-side (direct DB, no loopback HTTP)
 // ---------------------------------------------------------------------------
 
 async function getInitialRiverCards(): Promise<{ cards: RiverCard[]; cursor: string }> {
@@ -200,7 +200,6 @@ async function getInitialRiverCards(): Promise<{ cards: RiverCard[]; cursor: str
       teamFilter: null,
     };
 
-    // Parallel data fetching
     const [postsResult, hubResult, boxResult, tradesResult] = await Promise.all([
       supabaseAdmin
         .from('sm_posts')
@@ -237,7 +236,6 @@ async function getInitialRiverCards(): Promise<{ cards: RiverCard[]; cursor: str
 
     const allCandidates: ScoredCard[] = [];
 
-    // Posts
     for (const post of posts) {
       const engVel = post.engagement_velocity ?? 0;
       const cardType: CardType = engVel > 10 ? 'trending_article' : 'scout_summary';
@@ -245,129 +243,65 @@ async function getInitialRiverCards(): Promise<{ cards: RiverCard[]; cursor: str
       const postTeamSlug = categorySlugToTeamSlug(catSlug);
 
       const score = scorePostCandidate(
-        {
-          id: post.id,
-          published_at: post.published_at,
-          team_slug: postTeamSlug,
-          view_count: post.views ?? 0,
-          engagement_velocity: engVel,
-          importance_score: null,
-        },
+        { id: post.id, published_at: post.published_at, team_slug: postTeamSlug, view_count: post.views ?? 0, engagement_velocity: engVel, importance_score: null },
         scoringCtx
       );
 
       allCandidates.push({
         card_type: cardType,
         score,
-        card: makeCard(
-          `post_${post.id}`,
-          cardType,
-          post.published_at,
-          {
-            title: post.title,
-            slug: post.slug,
-            featured_image: post.featured_image,
-            excerpt: post.excerpt,
-            scout_summary: post.scout_summary,
-            engagement_velocity: engVel,
-            view_count: post.views,
-            team_slug: postTeamSlug,
-          },
-          sessionId,
-          userSegment,
-          postTeamSlug
-        ),
+        card: makeCard(`post_${post.id}`, cardType, post.published_at, {
+          title: post.title, slug: post.slug, featured_image: post.featured_image,
+          excerpt: post.excerpt, scout_summary: post.scout_summary,
+          engagement_velocity: engVel, view_count: post.views, team_slug: postTeamSlug,
+        }, sessionId, userSegment, postTeamSlug),
       });
     }
 
-    // Hub updates
     for (const hu of hubUpdates) {
       const score = scoreGenericCandidate('hub_update', hu.published_at, hu.team_slug, scoringCtx, hu.is_live ? 10 : 0);
       allCandidates.push({
         card_type: 'hub_update',
         score,
-        card: makeCard(
-          `hub_${hu.id}`,
-          'hub_update',
-          hu.published_at,
-          {
-            team_slug: hu.team_slug,
-            category: hu.category,
-            author_name: hu.author_name,
-            author_avatar_url: hu.author_avatar_url,
-            content: hu.content,
-            confidence_pct: hu.confidence_pct,
-            is_live: hu.is_live,
-            reply_count: hu.reply_count,
-            like_count: hu.like_count,
-          },
-          sessionId,
-          userSegment,
-          hu.team_slug
-        ),
+        card: makeCard(`hub_${hu.id}`, 'hub_update', hu.published_at, {
+          team_slug: hu.team_slug, category: hu.category, author_name: hu.author_name,
+          author_avatar_url: hu.author_avatar_url, content: hu.content,
+          confidence_pct: hu.confidence_pct, is_live: hu.is_live,
+          reply_count: hu.reply_count, like_count: hu.like_count,
+        }, sessionId, userSegment, hu.team_slug),
       });
     }
 
-    // Box scores
     for (const bs of boxScores) {
       const liveBoost = bs.game_status === 'live' ? 30 : 0;
       const score = scoreGenericCandidate('box_score', bs.updated_at, bs.team_slug, scoringCtx, liveBoost);
       allCandidates.push({
         card_type: 'box_score',
         score,
-        card: makeCard(
-          bs.card_id ?? `box_${bs.id}`,
-          'box_score',
-          bs.updated_at,
-          {
-            team_slug: bs.team_slug,
-            home_team_abbr: bs.home_team_abbr,
-            away_team_abbr: bs.away_team_abbr,
-            home_team_logo_url: bs.home_team_logo_url,
-            away_team_logo_url: bs.away_team_logo_url,
-            home_score: bs.home_score,
-            away_score: bs.away_score,
-            game_status: bs.game_status,
-            quarter_scores: bs.quarter_scores,
-            top_performers: bs.top_performers,
-            game_narrative: bs.game_narrative,
-            game_date: bs.game_date,
-            target_url: bs.target_url,
-          },
-          sessionId,
-          userSegment,
-          bs.team_slug
-        ),
+        card: makeCard(bs.card_id ?? `box_${bs.id}`, 'box_score', bs.updated_at, {
+          team_slug: bs.team_slug, home_team_abbr: bs.home_team_abbr, away_team_abbr: bs.away_team_abbr,
+          home_team_logo_url: bs.home_team_logo_url, away_team_logo_url: bs.away_team_logo_url,
+          home_score: bs.home_score, away_score: bs.away_score, game_status: bs.game_status,
+          quarter_scores: bs.quarter_scores, top_performers: bs.top_performers,
+          game_narrative: bs.game_narrative, game_date: bs.game_date, target_url: bs.target_url,
+        }, sessionId, userSegment, bs.team_slug),
       });
     }
 
-    // Trade proposals
     for (const tp of tradeProposals) {
       const score = scoreGenericCandidate('trade_proposal', tp.approved_at ?? tp.created_at, tp.team_a_slug, scoringCtx);
       allCandidates.push({
         card_type: 'trade_proposal',
         score,
-        card: makeCard(
-          `trade_${tp.id}`,
-          'trade_proposal',
-          tp.approved_at ?? tp.created_at,
-          {
-            submitted_by_username: tp.submitted_by_username,
-            team_a_slug: tp.team_a_slug,
-            team_b_slug: tp.team_b_slug,
-            team_a_receives: tp.team_a_receives,
-            team_b_receives: tp.team_b_receives,
-            trade_score: tp.trade_score,
-            ai_reasoning: tp.ai_reasoning,
-          },
-          sessionId,
-          userSegment,
-          tp.team_a_slug
-        ),
+        card: makeCard(`trade_${tp.id}`, 'trade_proposal', tp.approved_at ?? tp.created_at, {
+          submitted_by_username: tp.submitted_by_username, team_a_slug: tp.team_a_slug,
+          team_b_slug: tp.team_b_slug, team_a_receives: tp.team_a_receives,
+          team_b_receives: tp.team_b_receives, trade_score: tp.trade_score,
+          ai_reasoning: tp.ai_reasoning,
+        }, sessionId, userSegment, tp.team_a_slug),
       });
     }
 
-    // Score and sort
     scoreRiverCandidates(allCandidates, scoringCtx);
     allCandidates.sort((a, b) => {
       if (b.score !== a.score) return b.score - a.score;
@@ -376,7 +310,6 @@ async function getInitialRiverCards(): Promise<{ cards: RiverCard[]; cursor: str
 
     const riverCards = allCandidates.slice(0, limit).map(c => c.card);
 
-    // Build cursor from last card
     const lastScored = allCandidates[limit - 1];
     const cursorData = lastScored
       ? { last_score: lastScored.score, last_id: lastScored.card.card_id }
@@ -385,12 +318,12 @@ async function getInitialRiverCards(): Promise<{ cards: RiverCard[]; cursor: str
 
     return { cards: riverCards, cursor };
   } catch (e) {
-    console.error('[HomePage] Failed to fetch initial River cards:', e);
+    console.error('[RiverPage] Failed to fetch initial cards:', e);
     return { cards: [], cursor: '' };
   }
 }
 
-export default async function HomePage() {
+export default async function RiverPage() {
   const { cards, cursor } = await getInitialRiverCards();
   return <RiverPageClient initialCards={cards} initialCursor={cursor} />;
 }
