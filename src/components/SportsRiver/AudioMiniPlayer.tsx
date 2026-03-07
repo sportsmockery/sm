@@ -21,6 +21,7 @@ export default function AudioMiniPlayer() {
   };
 
   return (
+    <>
     <AnimatePresence>
       {visible && (
         <motion.div
@@ -30,12 +31,13 @@ export default function AudioMiniPlayer() {
           animate={{ y: 0, opacity: 1 }}
           exit={{ y: 80, opacity: 0 }}
           transition={{ type: 'spring', stiffness: 300, damping: 30 }}
+          className="audio-mini-player-wrapper"
           style={{
             position: 'fixed',
             bottom: 0,
             left: 0,
             right: 0,
-            zIndex: 50,
+            zIndex: 1100,
             display: 'flex',
             justifyContent: 'center',
           }}
@@ -231,5 +233,18 @@ export default function AudioMiniPlayer() {
         </motion.div>
       )}
     </AnimatePresence>
+    {visible && (
+      <style>{`
+        @media (max-width: 768px) {
+          .audio-mini-player-wrapper {
+            bottom: calc(56px + env(safe-area-inset-bottom, 0px)) !important;
+          }
+          .feed-container {
+            padding-bottom: 128px !important;
+          }
+        }
+      `}</style>
+    )}
+    </>
   );
 }

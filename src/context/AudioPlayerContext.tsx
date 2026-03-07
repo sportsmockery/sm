@@ -27,6 +27,7 @@ interface AudioPlayerContextValue extends AudioState {
   setCardOutOfView: (outOfView: boolean) => void;
   playNext: () => void;
   addToQueue: (article: AudioArticle) => void;
+  setQueue: (articles: AudioArticle[]) => void;
   updateProgress: (currentTime: number, duration: number) => void;
 }
 
@@ -50,6 +51,7 @@ const AudioPlayerCtx = createContext<AudioPlayerContextValue>({
   setCardOutOfView: () => {},
   playNext: () => {},
   addToQueue: () => {},
+  setQueue: () => {},
   updateProgress: () => {},
 });
 
@@ -155,14 +157,74 @@ export function AudioPlayerProvider({ children }: { children: React.ReactNode })
 
   const setVoice = useCallback((voice: AudioState['voice']) => {
     const audio = audioRef.current;
-    if (audio && audio.src) {
-      // Crossfade: save position, change voice (src would change in real impl), seek back
-      const currentPos = audio.currentTime;
-      // In a real implementation, the URL would change based on voice
-      // For now, just update the state
-      audio.currentTime = currentPos;
-    }
-    setState(prev => ({ ...prev, voice }));
+    setState(prev => {
+      if (!audio || !prev.currentArticle) {
+        return { ...prev, voice };
+      }
+
+      // Map UI voice names to API voice params
+      const voiceMap: Record<string, string> = {
+        'Voice A': 'will',
+        'Voice B': 'brian',
+        'Team Voice': 'laura',
+      };
+      const voiceParam = voiceMap[voice] || 'will';
+
+      // Build new audio URL with voice query param
+      const slug = prev.currentArticle.slug || prev.currentArticle.url;
+      const newSrc = `/api/audio/${encodeURIComponent(slug)}?voice=${voiceParam}`;
+
+      const wasPlaying = prev.isPlaying;
+      const savedTime = audio.currentTime;
+      const FADE_DURATION = 100; // ms per fade direction, ~200ms total
+
+      // Fade out volume
+      const originalVolume = audio.volume;
+      const fadeOut = () => {
+        return new Promise<void>(resolve => {
+          const steps = 5;
+          const stepTime = FADE_DURATION / steps;
+          let step = 0;
+          const interval = setInterval(() => {
+            step++;
+            audio.volume = Math.max(0, originalVolume * (1 - step / steps));
+            if (step >= steps) {
+              clearInterval(interval);
+              resolve();
+            }
+          }, stepTime);
+        });
+      };
+
+      const fadeIn = () => {
+        const steps = 5;
+        const stepTime = FADE_DURATION / steps;
+        let step = 0;
+        const interval = setInterval(() => {
+          step++;
+          audio.volume = Math.min(originalVolume, originalVolume * (step / steps));
+          if (step >= steps) {
+            clearInterval(interval);
+          }
+        }, stepTime);
+      };
+
+      fadeOut().then(() => {
+        audio.src = newSrc;
+        const onLoaded = () => {
+          audio.removeEventListener('loadedmetadata', onLoaded);
+          audio.currentTime = savedTime;
+          if (wasPlaying) {
+            audio.play().catch(() => {});
+          }
+          fadeIn();
+        };
+        audio.addEventListener('loadedmetadata', onLoaded);
+        audio.load();
+      });
+
+      return { ...prev, voice };
+    });
   }, []);
 
   const setCardOutOfView = useCallback((outOfView: boolean) => {
@@ -191,6 +253,10 @@ export function AudioPlayerProvider({ children }: { children: React.ReactNode })
     setState(prev => ({ ...prev, queue: [...prev.queue, article] }));
   }, []);
 
+  const setQueue = useCallback((articles: AudioArticle[]) => {
+    setState(prev => ({ ...prev, queue: articles }));
+  }, []);
+
   const updateProgress = useCallback((currentTime: number, duration: number) => {
     setState(prev => ({ ...prev, currentTime, duration }));
   }, []);
@@ -199,7 +265,7 @@ export function AudioPlayerProvider({ children }: { children: React.ReactNode })
     <AudioPlayerCtx.Provider value={{
       ...state,
       play, pause, resume, stop, setVoice,
-      setCardOutOfView, playNext, addToQueue, updateProgress,
+      setCardOutOfView, playNext, addToQueue, setQueue, updateProgress,
     }}>
       {children}
     </AudioPlayerCtx.Provider>

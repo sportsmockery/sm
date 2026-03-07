@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useMemo, useRef } from 'react';
 import { useInView } from 'react-intersection-observer';
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
@@ -95,7 +95,13 @@ function SkeletonCard() {
   );
 }
 
-function renderCardContent(index: number, card: RiverCard) {
+interface PlayableArticle {
+  title: string;
+  slug: string;
+  url: string;
+}
+
+function renderCardContent(index: number, card: RiverCard, siblingArticles?: PlayableArticle[]) {
   const isBreathing = index % 8 === 7;
 
   switch (card.card_type) {
@@ -128,7 +134,7 @@ function renderCardContent(index: number, card: RiverCard) {
     case 'comment_spotlight':
       return <CommentSpotlightCard card={card} />;
     case 'listen_now':
-      return <ListenNowCard card={card} />;
+      return <ListenNowCard card={card} siblingArticles={siblingArticles} />;
     case 'join_newsletter':
       return <JoinNewsletterCard card={card} />;
     case 'download_app':
@@ -149,6 +155,21 @@ export default function RiverFeed({
 }: RiverFeedProps) {
   const feedRef = useRef<HTMLDivElement>(null);
   const animatedCountRef = useRef(0);
+
+  // Collect playable articles from listen_now cards for queue population
+  const playableArticles = useMemo(() => {
+    return riverCards
+      .filter(c => c.card_type === 'listen_now')
+      .map(c => {
+        const content = c.content as Record<string, unknown>;
+        const slug = (content.slug as string | undefined) ?? c.card_id;
+        return {
+          title: (content.headline as string | undefined) ?? 'Listen to this article',
+          slug,
+          url: (content.cta_url as string | undefined) ?? '#',
+        };
+      });
+  }, [riverCards]);
 
   const { ref: sentinelRef } = useInView({
     threshold: 0,
@@ -221,7 +242,7 @@ export default function RiverFeed({
               </div>
             )}
             <div className="feed-card" style={{ opacity: 0 }}>
-              {renderCardContent(index, card)}
+              {renderCardContent(index, card, playableArticles)}
             </div>
           </React.Fragment>
         ))}

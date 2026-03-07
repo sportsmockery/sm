@@ -6,13 +6,20 @@ import { BaseGlassCard } from '../BaseGlassCard';
 import { useAudioPlayer } from '@/context/AudioPlayerContext';
 import { CARD_TYPE_LABELS, formatTimestamp } from './utils';
 
+interface PlayableArticle {
+  title: string;
+  slug: string;
+  url: string;
+}
+
 interface ListenNowCardProps {
   card: RiverCard;
+  siblingArticles?: PlayableArticle[];
 }
 
 const VOICES = ['Voice A', 'Voice B', 'Team Voice'] as const;
 
-export const ListenNowCard = React.memo(function ListenNowCard({ card }: ListenNowCardProps) {
+export const ListenNowCard = React.memo(function ListenNowCard({ card, siblingArticles }: ListenNowCardProps) {
   const c = card.content as Record<string, unknown>;
   const headline = (c.headline as string | undefined) ?? 'Listen to this article';
   const description = c.description as string | undefined;
@@ -23,21 +30,30 @@ export const ListenNowCard = React.memo(function ListenNowCard({ card }: ListenN
   const [selectedVoice, setSelectedVoice] = useState<string>('Voice A');
   const cardRef = useRef<HTMLDivElement>(null);
 
+  // Use slug (or card_id) as stable identity for matching active article
+  const cardSlug = (c.slug as string | undefined) ?? card.card_id;
+
   const handlePlay = useCallback(() => {
-    audioPlayer.play({ title: headline, url: ctaUrl }, selectedVoice);
-  }, [audioPlayer, headline, ctaUrl, selectedVoice]);
+    audioPlayer.play({ title: headline, slug: cardSlug, url: ctaUrl }, selectedVoice);
+    // Enqueue sibling playable articles that come after this one
+    if (siblingArticles) {
+      const myIndex = siblingArticles.findIndex(a => a.slug === cardSlug);
+      const upcoming = myIndex >= 0 ? siblingArticles.slice(myIndex + 1) : siblingArticles.filter(a => a.slug !== cardSlug);
+      audioPlayer.setQueue(upcoming);
+    }
+  }, [audioPlayer, headline, cardSlug, ctaUrl, selectedVoice, siblingArticles]);
 
   const handlePause = useCallback(() => {
     audioPlayer.pause();
   }, [audioPlayer]);
 
-  const isCurrentlyPlaying =
-    audioPlayer.isPlaying && audioPlayer.currentArticle?.title === headline;
+  const isActiveArticle = audioPlayer.currentArticle?.slug === cardSlug;
+  const isCurrentlyPlaying = audioPlayer.isPlaying && isActiveArticle;
 
-  // Track visibility — when this card scrolls out of view while playing, show mini-player
+  // Track visibility — only the card matching the currently playing article controls cardOutOfView
   useEffect(() => {
     const el = cardRef.current;
-    if (!el) return;
+    if (!el || !isActiveArticle) return;
     const observer = new IntersectionObserver(
       ([entry]) => {
         audioPlayer.setCardOutOfView(!entry.isIntersecting);
@@ -46,7 +62,15 @@ export const ListenNowCard = React.memo(function ListenNowCard({ card }: ListenN
     );
     observer.observe(el);
     return () => observer.disconnect();
-  }, [audioPlayer]);
+  }, [audioPlayer, isActiveArticle]);
+
+  // Reset cardOutOfView when playback switches away from this card
+  useEffect(() => {
+    if (!isActiveArticle) return;
+    return () => {
+      audioPlayer.setCardOutOfView(false);
+    };
+  }, [isActiveArticle, audioPlayer]);
 
   return (
     <div ref={cardRef}>
