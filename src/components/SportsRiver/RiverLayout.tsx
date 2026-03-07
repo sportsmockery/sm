@@ -277,7 +277,7 @@ function RightRail() {
             <div style={{
               position: 'absolute',
               bottom: '100%',
-              right: 0,
+              left: 0,
               marginBottom: 8,
               width: 200,
               borderRadius: 10,
@@ -355,10 +355,23 @@ export default function RiverLayout({
         className="mx-auto flex gap-6"
         style={{ maxWidth: 1320, padding: '0 24px' }}
       >
+        {/* Left Rail — desktop only */}
+        <RightRail />
+
         {/* Main content column — wide */}
         <main className="flex-1 min-w-0 py-4" style={{ maxWidth: 1000 }}>
-          {/* Hero zone: Scout greeting + briefing cards */}
-          <div className="mb-6">
+          {/* Hero zone: Scout Briefing — unified glass container */}
+          <div
+            className="mb-6 rounded-xl overflow-hidden"
+            style={{
+              background: 'rgba(12, 12, 18, 0.7)',
+              backdropFilter: 'blur(20px)',
+              WebkitBackdropFilter: 'blur(20px)',
+              border: '1px solid rgba(255, 255, 255, 0.06)',
+              boxShadow: '0 4px 24px rgba(0,0,0,0.25)',
+              padding: '16px 20px 14px',
+            }}
+          >
             <ScoutGreeting />
             <ScoutBriefingGrid />
           </div>
@@ -379,9 +392,6 @@ export default function RiverLayout({
 
           {children}
         </main>
-
-        {/* Right Rail — desktop only */}
-        <RightRail />
       </div>
 
       {/* Mobile: fan tools below feed */}

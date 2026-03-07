@@ -75,23 +75,14 @@ export default function ScoutBriefingGrid() {
 
   if (!mounted || briefings.length === 0) {
     return (
-      <div className="mt-4">
-        <div className="flex items-center gap-2 mb-3">
-          <h3
-            className="text-xs font-semibold uppercase tracking-wider"
-            style={{ color: 'var(--sm-text-muted)' }}
-          >
-            Scout Briefing
-          </h3>
-          <div className="flex-1 h-px" style={{ backgroundColor: 'var(--sm-border)' }} />
-        </div>
-        <div className="flex gap-4 overflow-x-auto pb-2 scrollbar-hide">
+      <div className="mt-2">
+        <div className="flex gap-4 overflow-x-auto pb-1 scrollbar-hide">
           {[1, 2, 3, 4].map((i) => (
             <div
               key={i}
               className="rounded-xl animate-pulse shrink-0"
               style={{
-                backgroundColor: 'var(--sm-card)',
+                backgroundColor: 'rgba(255, 255, 255, 0.04)',
                 width: 210,
                 height: 132,
               }}
@@ -103,20 +94,10 @@ export default function ScoutBriefingGrid() {
   }
 
   return (
-    <div className="mt-4">
-      <div className="flex items-center gap-2 mb-3">
-        <h3
-          className="text-xs font-semibold uppercase tracking-wider"
-          style={{ color: 'var(--sm-text-muted)' }}
-        >
-          Scout Briefing
-        </h3>
-        <div className="flex-1 h-px" style={{ backgroundColor: 'var(--sm-border)' }} />
-      </div>
-
+    <div className="mt-2">
       {/* 4 cards in a row — fixed size, horizontal scroll on smaller screens */}
       <div
-        className="flex gap-4 overflow-x-auto pb-2 scrollbar-hide"
+        className="flex gap-4 overflow-x-auto pb-1 scrollbar-hide"
       >
         {briefings.map((item, i) => (
           <div
