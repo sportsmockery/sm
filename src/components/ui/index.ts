@@ -43,7 +43,7 @@ export { ToastProvider, useToast } from './Toast'
 export type { Toast, ToastType } from './Toast'
 
 // Existing UI Components
-export { default as Badge } from './Badge'
+export { Badge } from './Badge'
 export { default as AnimatedCard } from './AnimatedCard'
 export { default as GlassCard } from './GlassCard'
 export { default as GlowCard } from './GlowCard'

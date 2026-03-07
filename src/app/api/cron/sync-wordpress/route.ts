@@ -99,18 +99,26 @@ export async function GET(request: NextRequest) {
     const existingWpIds = new Set(existingRows?.map(r => r.wp_id) || [])
     console.log(`[WP Sync] ${existingWpIds.size} existing posts in Supabase`)
 
-    // 2. Fetch recent posts from WP (up to MAX_PAGES pages, newest first)
+    // 2. Fetch recent posts from WP (newest first, fetching from the last pages)
+    //    The custom endpoint sorts oldest-first and ignores order params,
+    //    so we read total_pages first, then fetch backwards from the end.
     const allWpPosts: WPPost[] = []
 
-    for (let page = 1; page <= MAX_PAGES; page++) {
+    const probe = await fetchWithRetry<WPPostsResponse>(
+      `${WP_BASE_URL}/posts?page=1&per_page=${PER_PAGE}`
+    )
+    const totalPages = probe.total_pages
+
+    for (let i = 0; i < MAX_PAGES; i++) {
+      const page = totalPages - i
+      if (page < 1) break
+
       const response = await fetchWithRetry<WPPostsResponse>(
         `${WP_BASE_URL}/posts?page=${page}&per_page=${PER_PAGE}`
       )
 
-      allWpPosts.push(...response.posts)
-
-      // Stop if we've reached the last page
-      if (page >= response.total_pages) break
+      // Reverse so newest posts come first
+      allWpPosts.push(...response.posts.reverse())
     }
 
     console.log(`[WP Sync] Fetched ${allWpPosts.length} recent posts from WordPress`)

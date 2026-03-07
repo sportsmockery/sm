@@ -8,14 +8,11 @@ import Image from 'next/image';
 import { useAuth } from '@/contexts/AuthContext';
 import { EditorPicksHero } from './EditorPicksHero';
 import { TeamFilterTabs } from './TeamFilterTabs';
-import { ForYouFeed } from './ForYouFeed';
 import { StorylineFeed } from './StorylineFeed';
 import { CommandPanel } from './CommandPanel';
 import { ScoutSearchBox } from './ScoutSearchBox';
 import { CatchUpTimeline } from './CatchUpTimeline';
-import { ScoutSinceLastVisit } from './ScoutSinceLastVisit';
 import { HeroStatsOrbs } from './HeroStatsOrbs';
-import { FeedPersonalization } from '@/components/feed/FeedPersonalization';
 import { sortPostsByScore, DEFAULT_ENGAGEMENT_PROFILE } from '@/lib/scoring-v2';
 import type { UserEngagementProfile } from '@/lib/scoring-v2';
 
@@ -511,12 +508,6 @@ function filterPosts(posts: any[], activeFilter: string): any[] {
   );
 }
 
-function formatDisplayName(name: string): string {
-  if (!name) return '';
-  const lower = name.toLowerCase();
-  return lower.charAt(0).toUpperCase() + lower.slice(1);
-}
-
 export function HomepageFeed({
   initialPosts = [],
   editorPicks = [],
@@ -526,7 +517,6 @@ export function HomepageFeed({
 }: HomepageFeedProps) {
   const [activeFilter, setActiveFilter] = useState<string>('all');
   const [isMobile, setIsMobile] = useState<boolean>(false);
-  const [feedMode, setFeedMode] = useState<'for-you' | 'latest'>('for-you');
   const [userFavoriteTeams, setUserFavoriteTeams] = useState<string[]>([]);
   const heroSectionRef = useRef<HTMLElement>(null);
   useParallaxHero(heroSectionRef);
@@ -534,30 +524,10 @@ export function HomepageFeed({
   const { isAuthenticated, user } = useAuth();
   const actuallyLoggedIn = isAuthenticated || isLoggedIn;
 
-  // Visit streak state for "Your Chicago" bar
-  const [visitStreak, setVisitStreak] = useState<number>(0);
-  const [displayName, setDisplayName] = useState<string>('Fan');
-  const [feedPanelOpen, setFeedPanelOpen] = useState(false);
-
   // Engagement profile for feed personalization
   const [engagementProfile, setEngagementProfile] = useState<UserEngagementProfile | null>(null);
   const [hasSufficientData, setHasSufficientData] = useState(false);
   const [profileLoaded, setProfileLoaded] = useState(false);
-
-  // Listen for feed mode toggle from Header ("For You" / "Latest")
-  useEffect(() => {
-    try {
-      const saved = localStorage.getItem('sm-feed-mode');
-      if (saved === 'latest') setFeedMode('latest');
-    } catch {}
-
-    const handler = (e: Event) => {
-      const mode = (e as CustomEvent).detail;
-      setFeedMode(mode);
-    };
-    window.addEventListener('sm-feed-mode-change', handler);
-    return () => window.removeEventListener('sm-feed-mode-change', handler);
-  }, []);
 
   // Load user favorite teams for "My Teams" mode
   useEffect(() => {
@@ -570,47 +540,6 @@ export function HomepageFeed({
         }
       })
       .catch(() => {});
-  }, [actuallyLoggedIn]);
-
-  // Fetch visit streak for "Your Chicago" bar (logged-in only)
-  useEffect(() => {
-    if (!actuallyLoggedIn) return;
-    console.log('YourChicagoBar rendering:', user?.email || user?.id || 'logged-in user');
-    // Check session cache first
-    try {
-      const cached = sessionStorage.getItem('sm-visit-streak');
-      if (cached) {
-        const parsed = JSON.parse(cached);
-        const cachedStreak = parsed.streak || 1;
-        setVisitStreak(cachedStreak);
-        if (parsed.name) setDisplayName(parsed.name);
-        console.log('YourChicagoBar cached streak:', cachedStreak, 'name:', parsed.name);
-        return; // Use cached value for this session
-      }
-    } catch {}
-    fetch('/api/user/visit-streak', { method: 'POST' })
-      .then(r => r.ok ? r.json() : null)
-      .then(data => {
-        if (data) {
-          const streak = data.streak || 1;
-          const firstName = data.name?.split(' ')[0] || 'Fan';
-          setVisitStreak(streak);
-          setDisplayName(firstName);
-          console.log('YourChicagoBar API streak:', streak, 'name:', firstName);
-          try {
-            sessionStorage.setItem('sm-visit-streak', JSON.stringify({ streak, name: firstName }));
-          } catch {}
-        } else {
-          // API returned non-OK — still show bar with streak 1
-          console.warn('YourChicagoBar: visit-streak API returned non-OK, defaulting to streak 1');
-          setVisitStreak(1);
-        }
-      })
-      .catch((err) => {
-        console.error('YourChicagoBar: visit-streak fetch failed:', err);
-        // Show bar anyway with fallback streak
-        setVisitStreak(1);
-      });
   }, [actuallyLoggedIn]);
 
   // Fetch engagement profile for logged-in users (feed personalization)
@@ -740,19 +669,12 @@ export function HomepageFeed({
   const safeEditorPicks = Array.isArray(editorPicks) ? editorPicks : [];
   const safeTrendingPosts = Array.isArray(trendingPosts) ? trendingPosts : [];
 
-  // Reorder posts: "For You" (scored) vs "Latest" (published_at DESC)
+  // Reorder posts: engagement scoring for logged-in, recency for guests
   const reorderedPosts = useMemo(() => {
-    // "Latest" mode: pure recency sort
-    if (feedMode === 'latest') {
-      return [...safePosts].sort((a: any, b: any) =>
-        new Date(b.published_at).getTime() - new Date(a.published_at).getTime()
-      );
-    }
-
     // Guest or profile not loaded yet: pure recency (unchanged)
     if (!actuallyLoggedIn || !profileLoaded) return safePosts;
 
-    // "For You" mode (logged-in): apply engagement scoring
+    // Logged-in: apply engagement scoring
     const profile: UserEngagementProfile = hasSufficientData && engagementProfile
       ? {
           user_id: engagementProfile.user_id,
@@ -768,7 +690,7 @@ export function HomepageFeed({
       viewedPostIds: new Set(),
       isLoggedIn: true,
     }) as any[];
-  }, [safePosts, feedMode, actuallyLoggedIn, profileLoaded, hasSufficientData, engagementProfile]);
+  }, [safePosts, actuallyLoggedIn, profileLoaded, hasSufficientData, engagementProfile]);
 
   // Derive favorite teams: explicit favorites > top 2 from engagement profile
   const derivedFavoriteTeams = useMemo(() => {
@@ -865,129 +787,37 @@ export function HomepageFeed({
             Breaking news, real-time scores, and AI-powered analysis — all five Chicago teams, one platform.
           </p>
 
-          {/* Your Chicago Bar (logged-in only) — toggles feed customization panel */}
-          {actuallyLoggedIn && visitStreak > 0 && (
-            <>
-              <button
-                type="button"
-                className="your-chicago-bar animate-entrance entrance-delay-3b"
-                onClick={() => setFeedPanelOpen(prev => !prev)}
-              >
-                <span className="your-chicago-left">
-                  <span className="your-chicago-title">Your Chicago</span>
-                  <span className="your-chicago-name">, {formatDisplayName(displayName)}</span>
-                </span>
-                <span className="your-chicago-streak">Day {visitStreak}</span>
-              </button>
-              {feedPanelOpen && user?.id && (
-                <div className="your-chicago-panel animate-entrance" style={{ width: '100%', maxWidth: 740, margin: '8px auto 0' }}>
-                  <FeedPersonalization
-                    userId={user.id}
-                    defaultOpen
-                    hideToggle
-                  />
-                </div>
-              )}
-            </>
-          )}
-
-          {/* Scout "since last visit" CTA (logged-in only) */}
-          {actuallyLoggedIn && (
-            <div className="animate-entrance entrance-delay-3b">
-              <ScoutSinceLastVisit />
-            </div>
-          )}
-
           {/* 90-Second Catch-Up Timeline */}
           <div className="animate-entrance entrance-delay-3b">
             <CatchUpTimeline posts={safePosts} favoriteTeams={actuallyLoggedIn ? derivedFavoriteTeams : undefined} />
           </div>
 
-          <div className="team-logo-row animate-entrance entrance-delay-4">
-            {TEAM_LOGOS.map((logo) => (
-              <div key={logo.slug} className="team-logo-item">
-                <Link href={`/${logo.slug}`} className="team-logo-link">
-                  <Image src={logo.src} alt={logo.alt} width={32} height={32} />
-                </Link>
-                <span className="team-logo-label">{logo.label}</span>
-              </div>
-            ))}
-          </div>
-
-          <div className="animate-entrance entrance-delay-5">
+          <div className="animate-entrance entrance-delay-4">
             <ScoutSearchBox />
           </div>
         </div>
       </section>
 
-      {/* ===== Personalize Banner (logged-in only) ===== */}
-      {actuallyLoggedIn && (
-        <div className="sm-container">
-          <Link href="/feed" className="personalize-banner">
-            <span className="personalize-text">
-              <span style={{ flexShrink: 0, fontSize: '16px', lineHeight: 1 }}>&#10038;</span>
-              Personalize your feed
-            </span>
-            <span className="personalize-arrow">&rarr;</span>
-          </Link>
-        </div>
-      )}
-
-      {/* ===== SECTION 2: Featured Content (full width, no sidebar) ===== */}
-      <section className="featured-section section-transition" aria-label="Featured stories">
-        <div className="sm-container">
-          <EditorPicksHero picks={filteredEditorPicks} />
-        </div>
-      </section>
-
-      {/* ===== SECTION 4: Sticky Filter Bar ===== */}
-      <div className="team-filter-bar-sticky">
-        <div className="sm-container">
-          <TeamFilterTabs
-            activeFilter={activeFilter}
-            onFilterChange={handleFilterChange}
-            userPreferredTeam={userTeamPreference}
-          />
-        </div>
+      {/* ===== Sidebar (fixed right, floating) ===== */}
+      <div className="homepage-right-sidebar" style={{
+        position: 'fixed',
+        top: '50%',
+        transform: 'translateY(-50%)',
+        right: '80px',
+        width: '300px',
+        maxHeight: 'calc(100vh - 80px)',
+        overflowY: 'auto',
+        overflowX: 'hidden',
+        zIndex: 10,
+        scrollbarWidth: 'none',
+        msOverflowStyle: 'none',
+      }}>
+        <CommandPanel
+          posts={filteredPosts}
+          trendingPosts={safeTrendingPosts}
+          isLoggedIn={actuallyLoggedIn}
+        />
       </div>
-
-      {/* ===== SECTION 5: Feed + Sidebar (two-column starts here) ===== */}
-      <section id="feed" className="feed-section section-transition">
-        <div className="sm-container">
-          {/* Team preference banner */}
-          {isTeamFilter && TEAM_LABELS[activeFilter] && (
-            <div className="team-pref-banner">
-              Showing <strong>{TEAM_LABELS[activeFilter]}</strong> news first
-              <button onClick={clearTeamPreference} className="team-pref-clear">Show All</button>
-            </div>
-          )}
-          <div className="content-grid" style={{ gap: '48px', padding: '0 24px' }}>
-            {/* Main feed */}
-            <main className="feed-column" aria-label="Latest articles">
-              <div className="section-header scroll-reveal">
-                <span className="sm-tag">Latest</span>
-                <h2>Latest Stories</h2>
-              </div>
-              <StorylineFeed
-                posts={filteredPosts}
-                isLoggedIn={isLoggedIn}
-                isMobile={isMobile}
-                showTrendingInline={isMobile}
-                trendingPosts={safeTrendingPosts}
-                activeTeam={activeFilter}
-                userTeamPreference={derivedTeamPreference}
-              />
-            </main>
-
-            {/* Sidebar (desktop) */}
-            <CommandPanel
-              posts={filteredPosts}
-              trendingPosts={safeTrendingPosts}
-              isLoggedIn={actuallyLoggedIn}
-            />
-          </div>
-        </div>
-      </section>
 
       {/* Back to Top */}
       <BackToTop />

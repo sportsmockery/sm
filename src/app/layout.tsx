@@ -7,8 +7,8 @@ import { AuthProvider } from "@/contexts/AuthContext";
 import { ChatProvider } from "@/contexts/ChatContext";
 import { SubscriptionProvider } from "@/contexts/SubscriptionContext";
 import { TeamRecordProvider } from "@/contexts/TeamRecordContext";
-import Header from "@/components/layout/Header";
-import Footer from "@/components/layout/Footer";
+// Header removed — top bar disabled
+// LeftSidebar removed — floating sidebar now lives in RiverLayout
 import SkipToContent from "@/components/layout/SkipToContent";
 import ScrollToTop from "@/components/layout/ScrollToTop";
 import CookieBanner from "@/components/layout/CookieBanner";
@@ -18,9 +18,11 @@ import NavigationProgress from "@/components/layout/NavigationProgress";
 import Breadcrumb from "@/components/layout/Breadcrumb";
 import NavigationOrb from "@/components/layout/NavigationOrb";
 import ParticleBg from "@/components/layout/ParticleBg";
-import BriefingStrip from "@/components/layout/BriefingStrip";
 import LiveStrip from "@/components/layout/LiveStrip";
 import MobileBottomNav from "@/components/layout/MobileBottomNav";
+import { WebSocketProvider } from "@/context/WebSocketProvider";
+import { AudioPlayerProvider } from "@/context/AudioPlayerContext";
+import AudioMiniPlayer from "@/components/SportsRiver/AudioMiniPlayer";
 
 // Floating buttons disabled - users access AI and Fan Chat via header buttons
 // import BearsAIButton from "@/components/bears/BearsAIButton";
@@ -141,20 +143,22 @@ export default function RootLayout({
               <SkipToContent />
               <NavigationProgress />
               <div className="flex min-h-screen flex-col">
-                <Header />
                 <LiveStrip />
-                <BriefingStrip />
                 <div id="main-content" className="flex-1" tabIndex={-1}>
                   <div className="sm-container">
                     <Breadcrumb />
                   </div>
                   <MotionProvider>
-                    {children}
+                    <WebSocketProvider>
+                      <AudioPlayerProvider>
+                        {children}
+                        <AudioMiniPlayer />
+                      </AudioPlayerProvider>
+                    </WebSocketProvider>
                   </MotionProvider>
                 </div>
-                <Footer />
               </div>
-              <NavigationOrb />
+              {/* NavigationOrb removed — nav moved to left sidebar */}
               <MobileBottomNav />
               <ParticleBg />
               <ScrollToTop />

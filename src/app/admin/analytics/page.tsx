@@ -40,8 +40,8 @@ export default function AnalyticsPage() {
       {/* Header */}
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-[var(--text-primary)]">Analytics</h1>
-          <p className="mt-1 text-[var(--text-muted)]">
+          <h1 className="sm-analytics-title text-[var(--font-size-analytics)] font-semibold text-[var(--text-primary)]">Analytics</h1>
+          <p className="mt-1 text-base text-[var(--text-muted)]">
             Track your site performance and user engagement
           </p>
         </div>
