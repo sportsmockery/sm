@@ -67,33 +67,53 @@ export async function GET(
   }
 
   try {
-    // Fetch article content from database
-    const { data: post, error } = await supabaseAdmin
-      .from("sm_posts")
-      .select("title, content, published_at")
-      .eq("slug", slug)
-      .eq("status", "published")
-      .single();
+    let plainText: string;
 
-    if (error || !post) {
-      return NextResponse.json(
-        { error: "Article not found" },
-        { status: 404 }
-      );
+    if (slug === 'scout-briefing') {
+      // Special case: fetch live Scout briefing from edge/scout API
+      const briefingPrompt = `Summarize the biggest Chicago sports news from the last 24 hours for a fan. Keep it conversational like a 15-year-old Chicago sports fan would talk. Cover Bears, Bulls, Blackhawks, Cubs, and White Sox if there is news. Keep it under 2000 characters. No markdown formatting.`;
+      const baseUrl = req.nextUrl.origin;
+      const briefingRes = await fetch(`${baseUrl}/api/edge/scout`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ prompt: briefingPrompt }),
+      });
+      const briefingData = await briefingRes.json();
+      const briefingText = briefingData?.answer?.trim();
+      if (!briefingText || briefingText.length < 50) {
+        return NextResponse.json(
+          { error: "Scout briefing not available" },
+          { status: 503 }
+        );
+      }
+      plainText = `Here's your Scout Report. ${briefingText}`;
+    } else {
+      // Standard article: fetch from database
+      const { data: post, error } = await supabaseAdmin
+        .from("sm_posts")
+        .select("title, content, published_at")
+        .eq("slug", slug)
+        .eq("status", "published")
+        .single();
+
+      if (error || !post) {
+        return NextResponse.json(
+          { error: "Article not found" },
+          { status: 404 }
+        );
+      }
+
+      const publishDate = post.published_at
+        ? new Date(post.published_at).toLocaleDateString('en-US', {
+            month: 'long',
+            day: 'numeric',
+            year: 'numeric',
+          })
+        : 'recently';
+
+      const introduction = `Article Headline: ${post.title}. Written ${publishDate}.`;
+      plainText = `${introduction} ${stripHtmlForTTS(post.content || '')}`;
     }
-
-    // Format the publish date
-    const publishDate = post.published_at
-      ? new Date(post.published_at).toLocaleDateString('en-US', {
-          month: 'long',
-          day: 'numeric',
-          year: 'numeric',
-        })
-      : 'recently';
-
-    // Prepare text for TTS: introduction + title + date + content
-    const introduction = `Article Headline: ${post.title}. Written ${publishDate}.`;
-    const plainText = `${introduction} ${stripHtmlForTTS(post.content || '')}`;
 
     // Limit text length (ElevenLabs has limits)
     const maxChars = 5000; // Adjust based on your plan
