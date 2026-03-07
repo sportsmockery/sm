@@ -79,6 +79,7 @@ function BaseGlassCardInner({
         background: 'var(--sm-card)',
         borderColor: 'var(--sm-border)',
         boxShadow: 'var(--shadow-sm)',
+        willChange: prefersReduced ? undefined : 'transform, opacity',
       }}
       initial={prefersReduced ? undefined : { opacity: 0, scale: 0.92, y: 30 }}
       whileInView={prefersReduced ? undefined : { opacity: 1, scale: 1, y: 0 }}

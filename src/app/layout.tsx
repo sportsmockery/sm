@@ -21,6 +21,7 @@ import ParticleBg from "@/components/layout/ParticleBg";
 import LiveStrip from "@/components/layout/LiveStrip";
 import MobileBottomNav from "@/components/layout/MobileBottomNav";
 import { WebSocketProvider } from "@/context/WebSocketProvider";
+import { MediaControllerProvider } from "@/context/MediaControllerContext";
 import { AudioPlayerProvider } from "@/context/AudioPlayerContext";
 import AudioMiniPlayer from "@/components/SportsRiver/AudioMiniPlayer";
 
@@ -150,10 +151,12 @@ export default function RootLayout({
                   </div>
                   <MotionProvider>
                     <WebSocketProvider>
-                      <AudioPlayerProvider>
-                        {children}
-                        <AudioMiniPlayer />
-                      </AudioPlayerProvider>
+                      <MediaControllerProvider>
+                        <AudioPlayerProvider>
+                          {children}
+                          <AudioMiniPlayer />
+                        </AudioPlayerProvider>
+                      </MediaControllerProvider>
                     </WebSocketProvider>
                   </MotionProvider>
                 </div>
