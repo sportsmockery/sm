@@ -1,0 +1,51 @@
+[
+  {
+    "id": "0:1",
+    "name": "00 Platform Flow",
+    "frames": [
+      {
+        "id": "3:7",
+        "name": "Sports Mockery EDGE – User Flow",
+        "type": "FRAME",
+        "childCount": 6,
+        "width": 1920,
+        "height": 1200
+      }
+    ]
+  },
+  {
+    "id": "1:2",
+    "name": "01 Homepage",
+    "frames": []
+  },
+  {
+    "id": "1:3",
+    "name": "02 Article Templates",
+    "frames": []
+  },
+  {
+    "id": "3:2",
+    "name": "03 Tools",
+    "frames": []
+  },
+  {
+    "id": "3:3",
+    "name": "04 Scout AI",
+    "frames": []
+  },
+  {
+    "id": "3:4",
+    "name": "05 Sidebar + Cards",
+    "frames": []
+  },
+  {
+    "id": "3:5",
+    "name": "06 Mobile",
+    "frames": []
+  },
+  {
+    "id": "3:6",
+    "name": "07 Components",
+    "frames": []
+  }
+]
