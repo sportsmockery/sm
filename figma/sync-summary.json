@@ -1,0 +1,60 @@
+{
+  "fileName": "SM EDGE",
+  "lastModified": "2026-03-08T15:04:44Z",
+  "syncedAt": "2026-03-08T19:43:24.950Z",
+  "pages": 8,
+  "totalFrames": 1,
+  "components": 0,
+  "styles": {
+    "fill": 0,
+    "text": 0,
+    "effect": 0,
+    "grid": 0
+  },
+  "exportableNodes": 0,
+  "pageDetails": [
+    {
+      "name": "00 Platform Flow",
+      "frameCount": 1,
+      "frameNames": [
+        "Sports Mockery EDGE – User Flow"
+      ]
+    },
+    {
+      "name": "01 Homepage",
+      "frameCount": 0,
+      "frameNames": []
+    },
+    {
+      "name": "02 Article Templates",
+      "frameCount": 0,
+      "frameNames": []
+    },
+    {
+      "name": "03 Tools",
+      "frameCount": 0,
+      "frameNames": []
+    },
+    {
+      "name": "04 Scout AI",
+      "frameCount": 0,
+      "frameNames": []
+    },
+    {
+      "name": "05 Sidebar + Cards",
+      "frameCount": 0,
+      "frameNames": []
+    },
+    {
+      "name": "06 Mobile",
+      "frameCount": 0,
+      "frameNames": []
+    },
+    {
+      "name": "07 Components",
+      "frameCount": 0,
+      "frameNames": []
+    }
+  ],
+  "componentNames": []
+}

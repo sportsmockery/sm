@@ -644,6 +644,51 @@ html[data-theme="light"] .river-page-bg {
   50% { transform: scale(1.02) translate(-0.3%, -0.2%); }
 }
 
+/* ── Pulse Lines — fast dashes shooting across the page background ── */
+.river-pulse-lines {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  overflow: hidden;
+}
+html[data-theme="light"] .river-pulse-lines { display: none; }
+
+.pulse-line {
+  position: absolute;
+  height: 1.5px;
+  border-radius: 2px;
+  opacity: 0;
+  will-change: transform, opacity;
+}
+
+/* Red — most frequent (5 lines) */
+.pulse-r1 { width: 180px; top: 8%; left: -200px; background: linear-gradient(90deg, transparent, #BC0000 20%, #BC0000 80%, transparent); animation: pulse-dash 4.0s cubic-bezier(0.25, 0, 0.2, 1) infinite 0s; }
+.pulse-r2 { width: 120px; top: 22%; left: -140px; background: linear-gradient(90deg, transparent, #BC0000 20%, #BC0000 80%, transparent); animation: pulse-dash 3.2s cubic-bezier(0.25, 0, 0.2, 1) infinite 1.8s; }
+.pulse-r3 { width: 200px; top: 48%; left: -220px; background: linear-gradient(90deg, transparent, #BC0000 20%, #BC0000 80%, transparent); animation: pulse-dash 4.5s cubic-bezier(0.25, 0, 0.2, 1) infinite 3.5s; }
+.pulse-r4 { width: 100px; top: 65%; left: -120px; background: linear-gradient(90deg, transparent, #BC0000 20%, #BC0000 80%, transparent); animation: pulse-dash 3.0s cubic-bezier(0.25, 0, 0.2, 1) infinite 5.8s; }
+.pulse-r5 { width: 150px; top: 88%; left: -170px; background: linear-gradient(90deg, transparent, #BC0000 20%, #BC0000 80%, transparent); animation: pulse-dash 3.8s cubic-bezier(0.25, 0, 0.2, 1) infinite 8.0s; }
+
+/* Cyan — moderate (3 lines) */
+.pulse-c1 { width: 160px; top: 15%; left: -180px; background: linear-gradient(90deg, transparent, #00D4FF 20%, #00D4FF 80%, transparent); animation: pulse-dash 3.5s cubic-bezier(0.25, 0, 0.2, 1) infinite 2.5s; }
+.pulse-c2 { width: 130px; top: 55%; left: -150px; background: linear-gradient(90deg, transparent, #00D4FF 20%, #00D4FF 80%, transparent); animation: pulse-dash 4.2s cubic-bezier(0.25, 0, 0.2, 1) infinite 6.5s; }
+.pulse-c3 { width: 110px; top: 78%; left: -130px; background: linear-gradient(90deg, transparent, #00D4FF 20%, #00D4FF 80%, transparent); animation: pulse-dash 3.6s cubic-bezier(0.25, 0, 0.2, 1) infinite 10.0s; }
+
+/* Gold — rare (1 line) */
+.pulse-g1 { width: 140px; top: 38%; left: -160px; background: linear-gradient(90deg, transparent, #D6B05E 20%, #D6B05E 80%, transparent); animation: pulse-dash 5.0s cubic-bezier(0.25, 0, 0.2, 1) infinite 12.0s; }
+
+@keyframes pulse-dash {
+  0%   { transform: translateX(0); opacity: 0; }
+  3%   { opacity: 0.45; }
+  50%  { opacity: 0.3; }
+  97%  { opacity: 0.45; }
+  100% { transform: translateX(calc(100vw + 300px)); opacity: 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pulse-line { animation: none !important; }
+}
+
 /* River card inner edge and action buttons */
 .river-card-edge {
   background: rgba(255, 255, 255, 0.06);
