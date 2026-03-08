@@ -162,22 +162,22 @@ Make predictions and earn points for correct outcomes. Types: record, playoffs, 
 
 ## GM Score Integration
 
-**Action-Based Rewards (per tab)**
+**Current Contract (production)**
 
-| Tab | Actions | Max/Session |
-|-----|---------|-------------|
-| Roster | Reorder +5, Mark starter +2, Save +3, Share +5 | 20 |
-| Cap Space | Simulate +5, Save +3, Share +5 | 15 |
-| Trade | Build +5, Submit +10, Voted on +5, Graded +5 | 30 |
-| Draft | Build +5, Run sim +10, Save +3, Share +5 | 25 |
-| Predictions | Make +3, Correct +20, Share +5 | 30 |
-| Articles | Vote +5, Comment +5, Share +3, Bookmark +2 | 20 |
+GM Score in War Room uses the same contract as My GM Score and the trade simulator:
 
-**Caps:** Daily 500 points | Weekly 3,000 points
+| Source | Definition |
+|--------|------------|
+| **Trade score** | Average grade (0–100) of accepted trades; from `gm_leaderboard.avg_grade` |
+| **Mock draft score** | Best mock draft score (0–100); from `gm_mock_drafts.mock_score` |
+| **Combined GM Score** | `(trade_score × 0.60) + (mock_score × 0.40)` when both exist; otherwise the available score |
+| **Leaderboard rank** | Based on `gm_leaderboard.avg_grade` and `trades_count` |
 
-**Streak Bonuses:** 3-day +10/day | 7-day +20/day | 14-day +50/day | 30-day +100/day | 100-day +250/day. Streak resets if no engagement for 24 hours.
+War Room displays the user's combined GM Score, links to My GM Score (`/my-gm-score`), and shows leaderboard rank from the same source. No separate War Room–only score.
 
-**Achievements:** Four tiers (10, 25, 50, 100 pts). Examples: First Trade, Trade Master, Leaderboard #1, 100-Day Streak.
+**Proposed gamification (future)**
+
+Action-based engagement rewards, caps, streaks, and achievements would extend the system and require backend implementation. When implemented, they should either augment the displayed score or use a distinct label (e.g., "War Room Points") to avoid collision with the existing GM Score contract.
 
 ---
 
