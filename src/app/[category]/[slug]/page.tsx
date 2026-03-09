@@ -26,6 +26,8 @@ import ArticleContentWithEmbeds from '@/components/article/ArticleContentWithEmb
 import SocialShareBar from '@/components/SocialShareBar'
 import { CommandPanel } from '@/components/homepage/CommandPanel'
 import ArticleFocusMode from '@/components/article/ArticleFocusMode'
+import { ArticleBlockContent } from '@/components/articles/ArticleBlockContent'
+import { isBlockContent, parseDocument } from '@/components/admin/BlockEditor/serializer'
 
 interface ArticlePageProps {
   params: Promise<{
@@ -199,11 +201,15 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
   // Get context label (Rumor, Film Room, Opinion) per spec
   const contextLabel = getContextLabel(categoryData?.name, tags)
 
+  // Check if this is block-based content
+  const postContent = post.content || ''
+  const blockDocument = isBlockContent(postContent) ? parseDocument(postContent) : null
+
   // Sanitize WordPress content: strip inline scripts, block comments, shortcodes.
   // This MUST run before auto-linking or any other content processing.
   // WordPress tweet embeds include <script> tags that execute during SSR and
   // corrupt the DOM, breaking React hydration and client-side navigation.
-  const cleanContent = sanitizeWordPressContent(post.content || '')
+  const cleanContent = blockDocument ? '' : sanitizeWordPressContent(postContent)
 
   // Build auto-link context and apply auto-linking to content
   let autoLinkedContent = cleanContent
@@ -362,28 +368,35 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
             )}
 
             <article className="article-body-2030">
-              {/* Mobile TOC - shown at top on smaller screens */}
-              <ArticleTableOfContents
-                contentHtml={cleanContent}
-                className="xl:hidden"
-              />
+              {blockDocument ? (
+                /* Block-based article content */
+                <ArticleBlockContent document={blockDocument} />
+              ) : (
+                <>
+                  {/* Mobile TOC - shown at top on smaller screens */}
+                  <ArticleTableOfContents
+                    contentHtml={cleanContent}
+                    className="xl:hidden"
+                  />
 
-              {/* Auto-linked content with duplicate featured image stripped */}
-              <ArticleContentWithEmbeds
-                content={stripDuplicateFeaturedImage(autoLinkedContent, post.featured_image)}
-                inlineSlot={
-                  <div style={{ margin: '24px 0' }}>
-                    <ScoutRecapCard
-                      postId={post.id}
-                      slug={slug}
-                      title={post.title}
-                      content={post.content}
-                      excerpt={post.excerpt}
-                      team={categorySlugToTeam(categoryData?.slug)?.replace('-', '') || undefined}
-                    />
-                  </div>
-                }
-              />
+                  {/* Auto-linked content with duplicate featured image stripped */}
+                  <ArticleContentWithEmbeds
+                    content={stripDuplicateFeaturedImage(autoLinkedContent, post.featured_image)}
+                    inlineSlot={
+                      <div style={{ margin: '24px 0' }}>
+                        <ScoutRecapCard
+                          postId={post.id}
+                          slug={slug}
+                          title={post.title}
+                          content={post.content}
+                          excerpt={post.excerpt}
+                          team={categorySlugToTeam(categoryData?.slug)?.replace('-', '') || undefined}
+                        />
+                      </div>
+                    }
+                  />
+                </>
+              )}
 
               {/* Share buttons */}
               <div style={{ margin: '32px 0', display: 'flex', alignItems: 'center', gap: 12, borderTop: '1px solid var(--sm-border)', borderBottom: '1px solid var(--sm-border)', padding: '24px 0' }}>

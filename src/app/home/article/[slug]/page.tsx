@@ -4,6 +4,8 @@ import Link from 'next/link'
 import { supabaseAdmin } from '@/lib/supabase-server'
 import { format } from 'date-fns'
 import { calculateReadTime, sanitizeWordPressContent } from '@/lib/content-utils'
+import { ArticleBlockContent } from '@/components/articles/ArticleBlockContent'
+import { isBlockContent, parseDocument } from '@/components/admin/BlockEditor/serializer'
 
 interface ArticlePageProps {
   params: Promise<{ slug: string }>
@@ -135,10 +137,14 @@ export default async function HomeArticlePage({ params }: ArticlePageProps) {
         )}
 
         {/* Content */}
-        <div
-          className="hm-article-content"
-          dangerouslySetInnerHTML={{ __html: sanitizeWordPressContent(post.content || '') }}
-        />
+        {isBlockContent(post.content || '') ? (
+          <ArticleBlockContent document={parseDocument(post.content || '')!} />
+        ) : (
+          <div
+            className="hm-article-content"
+            dangerouslySetInnerHTML={{ __html: sanitizeWordPressContent(post.content || '') }}
+          />
+        )}
 
         {/* Author Bio */}
         {author && (

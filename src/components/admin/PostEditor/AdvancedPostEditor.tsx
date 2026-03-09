@@ -8,6 +8,9 @@ import RichTextEditor, { RichTextEditorRef } from './RichTextEditor'
 import { CategorySelect, AuthorSelect } from './SearchableSelect'
 import { ChartBuilderModal, ChartConfig, AISuggestion, ChartType } from '@/components/admin/ChartBuilder'
 import { PostIQChartGenerator } from '@/components/postiq'
+import { BlockEditor } from '@/components/admin/BlockEditor'
+import type { ArticleDocument } from '@/components/admin/BlockEditor'
+import { isBlockContent, parseDocument, serializeDocument } from '@/components/admin/BlockEditor/serializer'
 
 interface Category {
   id: string
@@ -102,6 +105,14 @@ export default function AdvancedPostEditor({
 
   // Preview mode
   const [showPreview, setShowPreview] = useState(false)
+
+  // Editor mode: 'richtext' (TipTap) or 'blocks' (Block Editor)
+  const [editorMode, setEditorMode] = useState<'richtext' | 'blocks'>(
+    post?.content && isBlockContent(post.content) ? 'blocks' : 'richtext'
+  )
+  const [blockDoc, setBlockDoc] = useState<ArticleDocument | null>(
+    post?.content && isBlockContent(post.content) ? parseDocument(post.content) : null
+  )
 
   // Push notification states
   const [sendPushNotification, setSendPushNotification] = useState(false)
@@ -672,7 +683,9 @@ export default function AdvancedPostEditor({
     setError('')
 
     // Track the content that may be modified by auto-insert features
-    let contentToSave = formData.content
+    let contentToSave = editorMode === 'blocks' && blockDoc
+      ? serializeDocument(blockDoc)
+      : formData.content
 
     try {
       // Auto-insert chart if enabled and publishing
@@ -1151,30 +1164,66 @@ export default function AdvancedPostEditor({
               </div>
             )}
 
-            {/* Content Editor - extends to fill space */}
-            <div
-              className={`mb-6 overflow-hidden rounded-lg border bg-white dark:bg-gray-900 ${
-                highlightMode
-                  ? 'border-purple-500 ring-2 ring-purple-500/20'
-                  : 'border-[var(--border-default)]'
-              }`}
-              onMouseUp={handleContentSelection}
-            >
-              {highlightMode && (
-                <div className="bg-purple-500/10 border-b border-purple-500/30 px-4 py-2 text-sm text-purple-600 dark:text-purple-400 flex items-center gap-2">
-                  <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                  </svg>
-                  Select the text containing data you want to chart
-                </div>
-              )}
-              <RichTextEditor
-                ref={contentEditorRef}
-                content={formData.content}
-                onChange={(content) => updateField('content', content)}
-                placeholder="Start writing your article..."
-              />
+            {/* Editor Mode Toggle */}
+            <div className="mb-3 flex items-center gap-2">
+              <button
+                type="button"
+                onClick={() => setEditorMode('richtext')}
+                className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${
+                  editorMode === 'richtext'
+                    ? 'bg-purple-500/15 text-purple-500 border border-purple-500/30'
+                    : 'text-[var(--text-muted)] hover:text-[var(--text-primary)] border border-transparent'
+                }`}
+              >
+                Rich Text
+              </button>
+              <button
+                type="button"
+                onClick={() => setEditorMode('blocks')}
+                className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${
+                  editorMode === 'blocks'
+                    ? 'bg-[#00D4FF]/15 text-[#00D4FF] border border-[#00D4FF]/30'
+                    : 'text-[var(--text-muted)] hover:text-[var(--text-primary)] border border-transparent'
+                }`}
+              >
+                Block Editor
+              </button>
             </div>
+
+            {/* Content Editor - extends to fill space */}
+            {editorMode === 'richtext' ? (
+              <div
+                className={`mb-6 overflow-hidden rounded-lg border bg-white dark:bg-gray-900 ${
+                  highlightMode
+                    ? 'border-purple-500 ring-2 ring-purple-500/20'
+                    : 'border-[var(--border-default)]'
+                }`}
+                onMouseUp={handleContentSelection}
+              >
+                {highlightMode && (
+                  <div className="bg-purple-500/10 border-b border-purple-500/30 px-4 py-2 text-sm text-purple-600 dark:text-purple-400 flex items-center gap-2">
+                    <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    Select the text containing data you want to chart
+                  </div>
+                )}
+                <RichTextEditor
+                  ref={contentEditorRef}
+                  content={formData.content}
+                  onChange={(content) => updateField('content', content)}
+                  placeholder="Start writing your article..."
+                />
+              </div>
+            ) : (
+              <div className="mb-6">
+                <BlockEditor
+                  initialBlocks={blockDoc?.blocks}
+                  initialTemplate={blockDoc?.template}
+                  onChange={(doc) => setBlockDoc(doc)}
+                />
+              </div>
+            )}
 
             {/* SEO Section - Below Content */}
             <div className="rounded-lg border border-[var(--border-default)] bg-[var(--bg-card)]">
