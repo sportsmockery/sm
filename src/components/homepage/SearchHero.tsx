@@ -64,7 +64,7 @@ export default function SearchHero({ firstName }: SearchHeroProps) {
 
               {/* Headline */}
               <h1
-                className="text-[clamp(32px,4vw,44px)] font-bold leading-[1.15] tracking-tight mt-4"
+                className="text-[clamp(32px,4vw,44px)] font-bold leading-[1.15] tracking-tight mt-4 whitespace-nowrap"
                 style={{ color: 'var(--hp-foreground)' }}
               >
                 What can I help you with?
