@@ -49,7 +49,7 @@ export default function SearchHero({ firstName }: SearchHeroProps) {
 
         {/* Large headline - centered */}
         <h1
-          className="text-left mb-12"
+          className="text-left mb-16"
           style={{
             fontSize: 'clamp(32px, 4.5vw, 42px)',
             fontWeight: 700,
@@ -58,11 +58,11 @@ export default function SearchHero({ firstName }: SearchHeroProps) {
             letterSpacing: '-0.02em',
           }}
         >
-          What can we get done?
+          What&apos;s up Chicago fans?
         </h1>
 
         {/* Search / Ask box - centered with red border and glow */}
-        <form onSubmit={handleSubmit} className="w-full max-w-[480px]">
+        <form onSubmit={handleSubmit} className="w-full max-w-[480px] mx-auto">
           <div
             style={{
               boxShadow: "0 0 12px rgba(188, 0, 0, 0.25), 0 0 24px rgba(188, 0, 0, 0.12)",
