@@ -32,26 +32,26 @@ export default function SearchHero({ firstName }: SearchHeroProps) {
         />
       </div>
 
-      <div className="flex flex-col items-center">
+      <div className="flex flex-col items-start w-full max-w-[480px]">
         {/* Scout head + Greeting side by side */}
         <div className="flex items-center gap-3 mb-4">
           <Image
             src="/downloads/scout-v2.png"
             alt="Scout"
-            width={48}
-            height={48}
-            className="h-12 w-12 object-contain"
+            width={56}
+            height={56}
+            className="h-14 w-14 object-contain"
           />
-          <span style={{ fontSize: 22, fontWeight: 500, color: 'var(--hp-foreground)', opacity: 0.7 }}>
+          <span style={{ fontSize: 26, fontWeight: 500, color: 'var(--hp-foreground)', opacity: 0.7 }}>
             Hi {firstName || "there"},
           </span>
         </div>
 
         {/* Large headline - centered */}
         <h1
-          className="text-center mb-8"
+          className="text-left mb-12"
           style={{
-            fontSize: 'clamp(28px, 4vw, 36px)',
+            fontSize: 'clamp(32px, 4.5vw, 42px)',
             fontWeight: 700,
             color: 'var(--hp-foreground)',
             lineHeight: 1.2,
@@ -62,7 +62,7 @@ export default function SearchHero({ firstName }: SearchHeroProps) {
         </h1>
 
         {/* Search / Ask box - centered with red border and glow */}
-        <form onSubmit={handleSubmit} className="w-full max-w-[420px]">
+        <form onSubmit={handleSubmit} className="w-full max-w-[480px]">
           <div
             style={{
               boxShadow: "0 0 12px rgba(188, 0, 0, 0.25), 0 0 24px rgba(188, 0, 0, 0.12)",
