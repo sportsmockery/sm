@@ -33,16 +33,16 @@ export default function SearchHero({ firstName }: SearchHeroProps) {
       </div>
 
       <div className="flex flex-col items-center">
-        {/* Scout head + Greeting inline, centered */}
-        <div className="flex items-center gap-2 mb-3">
+        {/* Scout head + Greeting side by side */}
+        <div className="flex items-center gap-3 mb-4">
           <Image
             src="/downloads/scout-v2.png"
             alt="Scout"
-            width={40}
-            height={40}
-            className="h-10 w-10 object-contain"
+            width={48}
+            height={48}
+            className="h-12 w-12 object-contain"
           />
-          <span style={{ fontSize: 20, fontWeight: 400, color: 'var(--hp-foreground)', opacity: 0.7 }}>
+          <span style={{ fontSize: 22, fontWeight: 500, color: 'var(--hp-foreground)', opacity: 0.7 }}>
             Hi {firstName || "there"},
           </span>
         </div>
