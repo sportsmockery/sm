@@ -40,7 +40,7 @@ export default function SearchHero({ firstName }: SearchHeroProps) {
         {/* Hero content aligned to feed column */}
         <div className="w-full max-w-[600px] flex flex-col items-start px-4">
           {/* Scout icon + Greeting */}
-          <div style={{ display: 'flex', alignItems: 'flex-end', gap: 12, marginBottom: 16 }}>
+          <div style={{ display: 'flex', alignItems: 'flex-start', gap: 12, marginBottom: 16 }}>
             <Image
               src="/downloads/scout-v2.png"
               alt="Scout"
@@ -48,9 +48,14 @@ export default function SearchHero({ firstName }: SearchHeroProps) {
               height={64}
               style={{ height: 64, width: 64, objectFit: 'contain' }}
             />
-            <span style={{ fontSize: 22, fontWeight: 500, color: 'var(--hp-foreground)', opacity: 0.65, paddingBottom: 6, lineHeight: 1 }}>
-              Hi {firstName || "there"},
-            </span>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 4, paddingTop: 8 }}>
+              <span style={{ fontSize: 22, fontWeight: 500, color: 'var(--hp-foreground)', opacity: 0.65, lineHeight: 1.2 }}>
+                Hi {firstName || "there"},
+              </span>
+              <span style={{ fontSize: 15, fontWeight: 400, color: 'var(--hp-foreground)', opacity: 0.5, lineHeight: 1.4 }}>
+                Welcome to SM✶EDGE, our new AI-powered platform.
+              </span>
+            </div>
           </div>
 
           {/* Headline */}
@@ -65,7 +70,7 @@ export default function SearchHero({ firstName }: SearchHeroProps) {
               marginBottom: 48,
             }}
           >
-            What&apos;s up Chicago fans?
+            What can I help you with?
           </h1>
 
           {/* Search input */}
