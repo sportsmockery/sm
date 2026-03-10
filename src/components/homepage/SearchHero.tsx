@@ -40,28 +40,29 @@ export default function SearchHero({ firstName }: SearchHeroProps) {
         {/* Hero content aligned to feed column */}
         <div className="w-full max-w-[600px] flex flex-col items-start px-4">
           {/* Scout icon + Greeting */}
-          <div className="flex items-end gap-3 mb-4">
+          <div style={{ display: 'flex', alignItems: 'flex-end', gap: 12, marginBottom: 16 }}>
             <Image
               src="/downloads/scout-v2.png"
               alt="Scout"
               width={64}
               height={64}
-              className="h-16 w-16 object-contain"
+              style={{ height: 64, width: 64, objectFit: 'contain' }}
             />
-            <span style={{ fontSize: 22, fontWeight: 500, color: 'var(--hp-foreground)', opacity: 0.65, paddingBottom: 4 }}>
+            <span style={{ fontSize: 22, fontWeight: 500, color: 'var(--hp-foreground)', opacity: 0.65, paddingBottom: 6, lineHeight: 1 }}>
               Hi {firstName || "there"},
             </span>
           </div>
 
           {/* Headline */}
           <h1
-            className="text-left mb-10"
             style={{
               fontSize: 'clamp(30px, 4vw, 40px)',
               fontWeight: 700,
               color: 'var(--hp-foreground)',
               lineHeight: 1.2,
               letterSpacing: '-0.02em',
+              textAlign: 'left',
+              marginBottom: 48,
             }}
           >
             What&apos;s up Chicago fans?
