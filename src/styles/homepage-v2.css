@@ -31,6 +31,56 @@
   --hp-accent-foreground: #f0f0f0;
 }
 
+/* Force light mode on homepage — overrides .dark class from ThemeContext */
+.homepage-v2-light,
+.dark .homepage-v2-light {
+  --hp-background: #ffffff;
+  --hp-foreground: #0a0a0a;
+  --hp-card: #ffffff;
+  --hp-card-foreground: #0a0a0a;
+  --hp-muted: #f2f2f2;
+  --hp-muted-foreground: #737373;
+  --hp-border: #e5e5e5;
+  --hp-accent: #f2f2f2;
+  --hp-accent-foreground: #0a0a0a;
+}
+
+.homepage-v2-light .hp-glass,
+.dark .homepage-v2-light .hp-glass {
+  background: rgba(255, 255, 255, 0.7);
+}
+
+.homepage-v2-light .hp-bottom-nav,
+.dark .homepage-v2-light .hp-bottom-nav {
+  background: rgba(255, 255, 255, 0.9);
+}
+
+.homepage-v2-light .hp-feed-card,
+.dark .homepage-v2-light .hp-feed-card {
+  background: var(--hp-card);
+  border-color: rgba(0, 0, 0, 0.06);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.03), 0 2px 4px rgba(0, 0, 0, 0.02);
+}
+
+.homepage-v2-light .hp-feed-card:hover,
+.dark .homepage-v2-light .hp-feed-card:hover {
+  border-color: rgba(0, 0, 0, 0.1);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.04), 0 4px 8px rgba(0, 0, 0, 0.03);
+}
+
+.homepage-v2-light .hp-sidebar-card,
+.dark .homepage-v2-light .hp-sidebar-card {
+  background: var(--hp-card);
+  border-color: rgba(0, 0, 0, 0.06);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.03);
+}
+
+.homepage-v2-light .hp-sidebar-card:hover,
+.dark .homepage-v2-light .hp-sidebar-card:hover {
+  border-color: rgba(0, 0, 0, 0.1);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.04);
+}
+
 /* Micro-interactions */
 @keyframes hp-like-bounce {
   0%, 100% { transform: scale(1); }

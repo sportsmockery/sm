@@ -24,11 +24,11 @@ export default function SearchHero({ firstName }: SearchHeroProps) {
       {/* EDGE Logo - top left */}
       <div className="absolute top-6 left-8">
         <Image
-          src="/downloads/edge-logo.png"
+          src="/edge_logo.png"
           alt="EDGE"
-          width={56}
-          height={56}
-          className="h-14 w-auto object-contain"
+          width={140}
+          height={40}
+          className="h-10 w-auto object-contain"
         />
       </div>
 

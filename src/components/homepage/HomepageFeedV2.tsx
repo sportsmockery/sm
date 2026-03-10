@@ -31,7 +31,7 @@ export default function HomepageFeedV2({ firstName }: HomepageFeedV2Props) {
 
   return (
     <div
-      className="homepage-v2 min-h-screen transition-colors duration-300 pb-16 md:pb-0"
+      className="homepage-v2 homepage-v2-light min-h-screen transition-colors duration-300 pb-16 md:pb-0"
       style={{ background: 'var(--hp-background)', color: 'var(--hp-foreground)' }}
     >
       {/* Full-screen Search Hero - above the fold */}
