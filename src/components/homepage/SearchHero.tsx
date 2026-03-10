@@ -40,22 +40,22 @@ export default function SearchHero({ firstName }: SearchHeroProps) {
         {/* Hero content aligned to feed column */}
         <div className="w-full max-w-[600px] flex flex-col items-start px-4">
           {/* Scout icon + Greeting */}
-          <div className="flex items-center gap-3 mb-3">
+          <div className="flex items-end gap-3 mb-4">
             <Image
               src="/downloads/scout-v2.png"
               alt="Scout"
-              width={48}
-              height={48}
-              className="h-12 w-12 object-contain"
+              width={64}
+              height={64}
+              className="h-16 w-16 object-contain"
             />
-            <span style={{ fontSize: 22, fontWeight: 500, color: 'var(--hp-foreground)', opacity: 0.65 }}>
+            <span style={{ fontSize: 22, fontWeight: 500, color: 'var(--hp-foreground)', opacity: 0.65, paddingBottom: 4 }}>
               Hi {firstName || "there"},
             </span>
           </div>
 
           {/* Headline */}
           <h1
-            className="text-left mb-8"
+            className="text-left mb-10"
             style={{
               fontSize: 'clamp(30px, 4vw, 40px)',
               fontWeight: 700,
@@ -68,7 +68,7 @@ export default function SearchHero({ firstName }: SearchHeroProps) {
           </h1>
 
           {/* Search input */}
-          <form onSubmit={handleSubmit} className="w-full max-w-[480px]">
+          <form onSubmit={handleSubmit} className="w-full max-w-[540px]">
             <div
               style={{
                 boxShadow: "0 0 12px rgba(188, 0, 0, 0.25), 0 0 24px rgba(188, 0, 0, 0.12)",
