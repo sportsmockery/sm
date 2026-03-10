@@ -36,20 +36,20 @@ export default function HomeSidebar({ selectedTeam, onSelectTeam }: HomeSidebarP
               fontWeight: selectedTeam === "all" ? 600 : 400,
             }}
           >
-            {/* Chicago Star Icon */}
+            {/* Chicago Six-Pointed Star */}
             <div className="flex h-6 w-6 items-center justify-center">
-              <img
-                src="/edge_logo.png"
-                alt="For You"
-                style={{
-                  height: 24,
-                  width: 24,
-                  objectFit: 'contain',
-                  transition: 'all 0.2s',
-                  filter: selectedTeam === "all" ? 'none' : 'grayscale(1)',
-                  opacity: selectedTeam === "all" ? 1 : 0.6,
-                }}
-              />
+              <svg width="24" height="24" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <polygon
+                  points="50,5 62,35 95,35 68,55 80,90 50,68 20,90 32,55 5,35 38,35"
+                  fill={selectedTeam === "all" ? "#bc0000" : "#888"}
+                  style={{ transition: 'fill 0.2s', opacity: selectedTeam === "all" ? 1 : 0.6 }}
+                />
+                <polygon
+                  points="50,95 62,65 95,65 68,45 80,10 50,32 20,10 32,45 5,65 38,65"
+                  fill={selectedTeam === "all" ? "#bc0000" : "#888"}
+                  style={{ transition: 'fill 0.2s', opacity: selectedTeam === "all" ? 1 : 0.6 }}
+                />
+              </svg>
             </div>
             <span style={{ color: 'var(--hp-foreground)' }}>For You</span>
           </button>
