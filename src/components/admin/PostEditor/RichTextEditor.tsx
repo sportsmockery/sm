@@ -7,7 +7,7 @@ import Image from '@tiptap/extension-image'
 import Youtube from '@tiptap/extension-youtube'
 import Placeholder from '@tiptap/extension-placeholder'
 import CharacterCount from '@tiptap/extension-character-count'
-import { useCallback, useEffect, useState, forwardRef, useImperativeHandle } from 'react'
+import { useCallback, useEffect, useState, forwardRef, useImperativeHandle, useRef } from 'react'
 import ChartBuilderModal, { ChartConfig } from '@/components/admin/ChartBuilder/ChartBuilderModal'
 import PollBuilder, { PollConfig } from '@/components/admin/PollBuilder/PollBuilder'
 
@@ -34,6 +34,15 @@ const RichTextEditor = forwardRef<RichTextEditorRef, RichTextEditorProps>(functi
   const [embedUrl, setEmbedUrl] = useState('')
   const [showChartBuilder, setShowChartBuilder] = useState(false)
   const [showPollBuilder, setShowPollBuilder] = useState(false)
+
+  // Auto-embed URL detection patterns
+  const isYoutubeUrl = (url: string) => /^https?:\/\/(www\.)?(youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/|youtube\.com\/shorts\/)/.test(url)
+  const isTwitterUrl = (url: string) => /^https?:\/\/(www\.)?(twitter\.com|x\.com)\/\w+\/status\/\d+/.test(url)
+  const isFacebookVideoUrl = (url: string) => /^https?:\/\/(www\.)?facebook\.com\/.*\/videos\//.test(url)
+  const isInstagramUrl = (url: string) => /^https?:\/\/(www\.)?instagram\.com\/(p|reel)\//.test(url)
+  const isTikTokUrl = (url: string) => /^https?:\/\/(www\.)?(tiktok\.com\/@[^/]+\/video\/|vm\.tiktok\.com\/)/.test(url)
+
+  const autoEmbedUrlRef = useRef<((url: string) => boolean) | null>(null)
 
   const editor = useEditor({
     immediatelyRender: false,
@@ -75,8 +84,57 @@ const RichTextEditor = forwardRef<RichTextEditorRef, RichTextEditorProps>(functi
       attributes: {
         class: 'prose prose-zinc dark:prose-invert max-w-none min-h-[400px] focus:outline-none px-4 py-3',
       },
+      handlePaste: (view, event) => {
+        const text = event.clipboardData?.getData('text/plain')?.trim()
+        if (!text) return false
+
+        // Check if pasted text is a single URL
+        try {
+          new URL(text)
+        } catch {
+          return false // Not a URL, let default paste handle it
+        }
+
+        const ed = view.state.doc ? autoEmbedUrlRef.current?.(text) : false
+        return ed || false
+      },
     },
   })
+
+  // Set up auto-embed handler after editor is created
+  useEffect(() => {
+    if (!editor) return
+    autoEmbedUrlRef.current = (url: string) => {
+      if (isYoutubeUrl(url)) {
+        editor.commands.setYoutubeVideo({ src: url })
+        return true
+      }
+      if (isTwitterUrl(url)) {
+        const tweetId = url.match(/status\/(\d+)/)?.[1]
+        if (tweetId) {
+          const embedHtml = `<div class="twitter-embed my-4 p-4 border border-zinc-200 dark:border-zinc-700 rounded-lg bg-zinc-50 dark:bg-zinc-800">
+            <blockquote class="twitter-tweet" data-theme="dark">
+              <a href="${url}">Loading tweet...</a>
+            </blockquote>
+            <script async src="https://platform.twitter.com/widgets.js"></script>
+          </div>`
+          editor.chain().focus().insertContent(embedHtml).run()
+          return true
+        }
+      }
+      if (isFacebookVideoUrl(url) || isInstagramUrl(url) || isTikTokUrl(url)) {
+        const platform = isFacebookVideoUrl(url) ? 'Facebook' : isInstagramUrl(url) ? 'Instagram' : 'TikTok'
+        const embedHtml = `<div class="social-embed my-4 p-4 border border-zinc-200 dark:border-zinc-700 rounded-lg bg-zinc-50 dark:bg-zinc-800">
+          <p class="text-sm text-zinc-500 mb-2">${platform} Embed</p>
+          <a href="${url}" class="text-[#00D4FF] underline text-sm" target="_blank" rel="noopener noreferrer">${url}</a>
+          <iframe src="${url}" class="w-full mt-2 rounded" style="min-height:400px;border:none;" allowfullscreen loading="lazy"></iframe>
+        </div>`
+        editor.chain().focus().insertContent(embedHtml).run()
+        return true
+      }
+      return false
+    }
+  }, [editor])
 
   // Expose focus method to parent
   useImperativeHandle(ref, () => ({

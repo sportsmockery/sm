@@ -84,136 +84,139 @@ function TagInfoPopover({ onClose }: { onClose: () => void }) {
 
   return (
     <div
-      ref={popoverRef}
-      className="absolute z-[60] mt-1 rounded-xl shadow-xl overflow-hidden"
-      style={{
-        width: 380, maxHeight: 480,
-        backgroundColor: '#ffffff',
-        border: '1px solid rgba(0,0,0,0.1)',
-        top: '100%', left: 0,
-      }}
+      className="fixed inset-0 z-[70] flex items-center justify-center bg-black/50 backdrop-blur-sm"
+      onClick={onClose}
     >
-      {/* Header */}
-      <div style={{
-        padding: '12px 16px', borderBottom: '1px solid rgba(0,0,0,0.06)',
-        display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-      }}>
-        <span style={{ fontSize: 13, fontWeight: 700, color: '#0B0F14' }}>Tag Guide</span>
-        <button
-          type="button"
-          onClick={onClose}
-          style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#9ca3af', padding: 2 }}
-        >
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
-            <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
-          </svg>
-        </button>
-      </div>
-
-      {/* Content - scrollable */}
-      <div style={{ padding: '12px 16px 16px', overflowY: 'auto', maxHeight: 420 }}>
-        {/* What Tags Do */}
-        <div style={{ ...sectionTitle, marginTop: 0 }}>What Tags Do</div>
-        <p style={bodyText}>
-          Tags help readers discover your story across SM Edge. They act like labels for the main ideas in your article, connecting it with related content, player pages, trending topics, and discussions.
-        </p>
-        <div style={{ marginTop: 8, marginBottom: 4 }}>
-          <p style={{ ...bodyText, fontWeight: 500, color: '#0B0F14', marginBottom: 4 }}>Tags power:</p>
-          <ul style={{ ...bodyText, paddingLeft: 16, margin: 0 }}>
-            <li><strong>Search results</strong> — find stories by player, trade, injury</li>
-            <li><strong>Trending topics</strong> — what Chicago fans are discussing</li>
-            <li><strong>Related stories</strong> — connecting coverage of the same topics</li>
-            <li><strong>Feed discovery</strong> — surfacing stories in the SM Edge feed</li>
-          </ul>
-        </div>
-
-        {/* How Many */}
-        <div style={sectionTitle}>How Many Tags to Use</div>
-        <p style={bodyText}>
-          Use <strong>3–6 tags</strong> per article. Focus on the most important people, topics, or themes. Adding too many tags makes discovery less accurate.
-        </p>
-
-        {/* Tag Format */}
-        <div style={sectionTitle}>Tag Format</div>
-        <p style={{ ...bodyText, marginBottom: 6 }}>
-          Tags should be lowercase, short, clear, and hyphen-separated.
-        </p>
-        <div style={{ marginBottom: 4 }}>
-          <span style={{ fontSize: 10, fontWeight: 600, color: '#0B0F14', marginRight: 6 }}>Good:</span>
-          <span style={codeTag}>caleb-williams</span>
-          <span style={codeTag}>trade</span>
-          <span style={codeTag}>analysis</span>
-          <span style={codeTag}>draft</span>
-        </div>
-        <div>
-          <span style={{ fontSize: 10, fontWeight: 600, color: '#0B0F14', marginRight: 6 }}>Avoid:</span>
-          <span style={badCode}>Caleb Williams discussion</span>
-          <span style={badCode}>bears trade rumors today</span>
-        </div>
-
-        {/* Types of Tags */}
-        <div style={sectionTitle}>Types of Tags</div>
-        <p style={{ ...bodyText, marginBottom: 8 }}>
-          Some tags have extra importance across the platform. Look for the star indicator in autocomplete.
-        </p>
-
-        <div style={{
-          background: '#f8f9fa', borderRadius: 8, padding: 12,
-          border: '1px solid rgba(0,0,0,0.06)', marginBottom: 8,
+      <div
+        ref={popoverRef}
+        className="mx-4 w-full rounded-xl shadow-2xl overflow-hidden flex flex-col"
+        style={{
+          maxWidth: 640, maxHeight: '90vh',
+          backgroundColor: '#ffffff',
+        }}
+        onClick={(e) => e.stopPropagation()}
+      >
+        {/* Header */}
+        <div className="shrink-0" style={{
+          padding: '14px 20px', borderBottom: '1px solid rgba(0,0,0,0.08)',
+          display: 'flex', alignItems: 'center', justifyContent: 'space-between',
         }}>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-            <div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 3 }}>
-                {starBadge('Player')}
-              </div>
-              <p style={{ ...bodyText, fontSize: 11 }}>
-                Connect articles to player profiles and trending discussions.
-                <br /><span style={codeTag}>caleb-williams</span><span style={codeTag}>connor-bedard</span><span style={codeTag}>cody-bellinger</span>
-              </p>
-            </div>
-            <div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 3 }}>
-                {starBadge('Topic')}
-              </div>
-              <p style={{ ...bodyText, fontSize: 11 }}>
-                Major storylines that appear in trending topics and discovery feeds.
-                <br /><span style={codeTag}>trade</span><span style={codeTag}>rumor</span><span style={codeTag}>draft</span><span style={codeTag}>injury</span><span style={codeTag}>free-agency</span>
-              </p>
-            </div>
-            <div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 3 }}>
-                {starBadge('Content')}
-              </div>
-              <p style={{ ...bodyText, fontSize: 11 }}>
-                Coverage type — helps surface analytical or interactive content.
-                <br /><span style={codeTag}>analytics</span><span style={codeTag}>debate</span><span style={codeTag}>prediction</span><span style={codeTag}>scout-report</span>
-              </p>
-            </div>
-          </div>
+          <span style={{ fontSize: 14, fontWeight: 700, color: '#0B0F14' }}>Tag Guide</span>
+          <button
+            type="button"
+            onClick={onClose}
+            className="flex h-7 w-7 items-center justify-center rounded-lg transition-colors"
+            style={{ background: 'transparent', border: 'none', cursor: 'pointer', color: '#9ca3af' }}
+            onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = 'rgba(0,0,0,0.05)' }}
+            onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = 'transparent' }}
+          >
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
         </div>
 
-        {/* Best Practices */}
-        <div style={sectionTitle}>Best Practices</div>
-        <ul style={{ ...bodyText, paddingLeft: 16, margin: 0 }}>
-          <li>Use 3–6 tags per article</li>
-          <li>Focus on the main players or topics</li>
-          <li>Prefer existing tags when possible</li>
-          <li>Avoid long or overly specific phrases</li>
-          <li>Avoid creating duplicate variations of the same tag</li>
-        </ul>
-
-        {/* Example */}
-        <div style={{
-          marginTop: 12, background: 'rgba(0,212,255,0.04)',
-          border: '1px solid rgba(0,212,255,0.1)', borderRadius: 8, padding: 12,
-        }}>
-          <p style={{ fontSize: 11, fontWeight: 600, color: '#0B0F14', marginBottom: 4 }}>
-            Example: &quot;Bears Expected to Expand Caleb Williams Passing Concepts&quot;
+        {/* Content — two-column layout */}
+        <div style={{ padding: '16px 24px 24px' }}>
+          {/* Intro */}
+          <p style={bodyText}>
+            Tags help readers discover your story across SM Edge. They connect your article with related content, player pages, trending topics, and discussions.
           </p>
-          <div style={{ display: 'flex', gap: 4, flexWrap: 'wrap' }}>
-            <span style={codeTag}>caleb-williams</span>
-            <span style={codeTag}>offense</span>
-            <span style={codeTag}>analysis</span>
+
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 24, marginTop: 16 }}>
+            {/* Left column */}
+            <div>
+              <div style={sectionTitle}>How Many Tags</div>
+              <p style={bodyText}>
+                Use <strong>3–6 tags</strong> per article. Focus on the most important people, topics, or themes.
+              </p>
+
+              <div style={{ ...sectionTitle, marginTop: 14 }}>Tag Format</div>
+              <p style={{ ...bodyText, marginBottom: 6 }}>Lowercase, short, hyphen-separated.</p>
+              <div style={{ marginBottom: 4 }}>
+                <span style={{ fontSize: 10, fontWeight: 600, color: '#0B0F14', marginRight: 6 }}>Good:</span>
+                <span style={codeTag}>caleb-williams</span>
+                <span style={codeTag}>trade</span>
+                <span style={codeTag}>analysis</span>
+              </div>
+              <div>
+                <span style={{ fontSize: 10, fontWeight: 600, color: '#0B0F14', marginRight: 6 }}>Avoid:</span>
+                <span style={badCode}>Caleb Williams discussion</span>
+              </div>
+
+              <div style={{ ...sectionTitle, marginTop: 14 }}>Best Practices</div>
+              <ul style={{ ...bodyText, paddingLeft: 16, margin: 0 }}>
+                <li>Focus on main players or topics</li>
+                <li>Prefer existing tags when possible</li>
+                <li>Avoid long or overly specific phrases</li>
+                <li>Avoid duplicate variations</li>
+              </ul>
+
+              {/* Example */}
+              <div style={{
+                marginTop: 12, background: 'rgba(0,212,255,0.04)',
+                border: '1px solid rgba(0,212,255,0.1)', borderRadius: 8, padding: 10,
+              }}>
+                <p style={{ fontSize: 11, fontWeight: 600, color: '#0B0F14', marginBottom: 4 }}>
+                  Example: &quot;Bears Expected to Expand Caleb Williams Passing Concepts&quot;
+                </p>
+                <div style={{ display: 'flex', gap: 4, flexWrap: 'wrap' }}>
+                  <span style={codeTag}>caleb-williams</span>
+                  <span style={codeTag}>offense</span>
+                  <span style={codeTag}>analysis</span>
+                </div>
+              </div>
+            </div>
+
+            {/* Right column */}
+            <div>
+              <div style={{ ...sectionTitle, marginTop: 0 }}>Tags Power</div>
+              <ul style={{ ...bodyText, paddingLeft: 16, margin: '0 0 8px' }}>
+                <li><strong>Search results</strong> — find stories by player, trade, injury</li>
+                <li><strong>Trending topics</strong> — what Chicago fans are discussing</li>
+                <li><strong>Related stories</strong> — connecting coverage of the same topics</li>
+                <li><strong>Feed discovery</strong> — surfacing stories in the SM Edge feed</li>
+              </ul>
+
+              <div style={sectionTitle}>High-Impact Tag Types</div>
+              <p style={{ ...bodyText, fontSize: 11, marginBottom: 8 }}>
+                Look for the star indicator in autocomplete suggestions.
+              </p>
+              <div style={{
+                background: '#f8f9fa', borderRadius: 8, padding: 12,
+                border: '1px solid rgba(0,0,0,0.06)',
+              }}>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+                  <div>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 3 }}>
+                      {starBadge('Player')}
+                    </div>
+                    <p style={{ ...bodyText, fontSize: 11 }}>
+                      Connect to player profiles and discussions.
+                      <br /><span style={codeTag}>caleb-williams</span><span style={codeTag}>connor-bedard</span>
+                    </p>
+                  </div>
+                  <div>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 3 }}>
+                      {starBadge('Topic')}
+                    </div>
+                    <p style={{ ...bodyText, fontSize: 11 }}>
+                      Major storylines in trending topics and discovery.
+                      <br /><span style={codeTag}>trade</span><span style={codeTag}>rumor</span><span style={codeTag}>draft</span><span style={codeTag}>injury</span>
+                    </p>
+                  </div>
+                  <div>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 3 }}>
+                      {starBadge('Content')}
+                    </div>
+                    <p style={{ ...bodyText, fontSize: 11 }}>
+                      Coverage type for analytical or interactive content.
+                      <br /><span style={codeTag}>analytics</span><span style={codeTag}>debate</span><span style={codeTag}>prediction</span>
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </div>
