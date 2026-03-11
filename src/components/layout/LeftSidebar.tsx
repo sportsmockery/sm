@@ -133,7 +133,7 @@ export default function LeftSidebar() {
           flexDirection: 'column',
           transition: 'width 0.25s cubic-bezier(0.16, 1, 0.3, 1)',
           overflow: 'hidden',
-          fontFamily: 'Barlow, sans-serif',
+         
         }}
         onMouseEnter={() => setExpanded(true)}
         onMouseLeave={() => { setExpanded(false); setProfileOpen(false) }}
@@ -521,5 +521,5 @@ const popupLinkStyle: React.CSSProperties = {
   color: '#CCDDEE',
   fontSize: 13,
   textDecoration: 'none',
-  fontFamily: 'Barlow, sans-serif',
+ 
 }

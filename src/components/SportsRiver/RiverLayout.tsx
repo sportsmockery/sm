@@ -464,7 +464,7 @@ const popupLinkStyle: React.CSSProperties = {
   color: '#CCDDEE',
   fontSize: 13,
   textDecoration: 'none',
-  fontFamily: 'Barlow, sans-serif',
+ 
 };
 
 /* ------------------------------------------------------------------ */

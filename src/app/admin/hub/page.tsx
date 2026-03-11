@@ -166,7 +166,7 @@ export default function AdminHubPage() {
       {/* Header */}
       <div style={{ marginBottom: 24, display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between' }}>
         <div>
-          <h1 style={{ fontSize: 24, fontWeight: 700, color: 'var(--text-primary)', fontFamily: 'var(--font-heading, Barlow, sans-serif)' }}>Hub</h1>
+          <h1 style={{ fontSize: 24, fontWeight: 700, color: 'var(--text-primary)', fontFamily: 'var(--font-heading)' }}>Hub</h1>
           <p style={{ fontSize: 14, color: 'var(--text-muted)', marginTop: 4 }}>Create hub updates for team pages.</p>
         </div>
         <button
@@ -208,7 +208,7 @@ export default function AdminHubPage() {
             }}
           >
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
-              <h2 style={{ fontSize: 20, fontWeight: 700, color: 'var(--text-primary, #fff)', fontFamily: 'var(--font-heading, Barlow, sans-serif)' }}>
+              <h2 style={{ fontSize: 20, fontWeight: 700, color: 'var(--text-primary, #fff)', fontFamily: 'var(--font-heading)' }}>
                 GM Audit — Automated Hub Intelligence
               </h2>
               <button

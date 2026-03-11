@@ -103,7 +103,7 @@ export default function MobileBottomNav() {
               style={{
                 fontSize: 10,
                 fontWeight: active ? 600 : 400,
-                fontFamily: 'Barlow, sans-serif',
+               
                 lineHeight: 1,
               }}
             >

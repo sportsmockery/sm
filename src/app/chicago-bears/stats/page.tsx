@@ -61,7 +61,7 @@ export default async function BearsStatsPage() {
               fontWeight: 700,
               color: 'var(--sm-text)',
               marginBottom: 24,
-              fontFamily: "Barlow, sans-serif",
+             
             }}
           >
             Team Overview — Regular Season
@@ -102,7 +102,7 @@ export default async function BearsStatsPage() {
               fontWeight: 700,
               color: 'var(--sm-text)',
               marginBottom: 24,
-              fontFamily: "Barlow, sans-serif",
+             
             }}
           >
             Player Leaderboards
@@ -194,7 +194,7 @@ export default async function BearsStatsPage() {
                     fontSize: 20,
                     fontWeight: 700,
                     color: 'var(--sm-red)',
-                    fontFamily: "Barlow, sans-serif",
+                   
                     display: 'flex',
                     alignItems: 'center',
                     gap: 10,
@@ -273,7 +273,7 @@ export default async function BearsStatsPage() {
                     fontWeight: 700,
                     color: 'var(--sm-text)',
                     marginBottom: 24,
-                    fontFamily: "Barlow, sans-serif",
+                   
                   }}
                 >
                   Postseason Player Leaderboards
@@ -383,7 +383,7 @@ function TeamStatCard({
           fontSize: 28,
           fontWeight: 800,
           color: positive ? 'var(--sm-success)' : negative ? 'var(--sm-error)' : 'var(--sm-text)',
-          fontFamily: "Barlow, sans-serif",
+         
         }}
       >
         {value}
@@ -436,7 +436,7 @@ function LeaderboardCard({
           style={{
             fontWeight: 700,
             color: 'var(--sm-text)',
-            fontFamily: "Barlow, sans-serif",
+           
             margin: 0,
           }}
         >

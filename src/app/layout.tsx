@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Barlow, Space_Grotesk } from "next/font/google";
+import { Space_Grotesk } from "next/font/google";
 import "./globals.css";
 import "@/styles/homepage.css";
 import "@/styles/homepage-v2.css";
@@ -30,12 +30,6 @@ import AudioMiniPlayer from "@/components/SportsRiver/AudioMiniPlayer";
 // import BearsAIButton from "@/components/bears/BearsAIButton";
 // import FloatingChatButton from "@/components/chat/FloatingChatButton";
 // import FloatingARButton from "@/components/ar/FloatingARButton";
-
-const barlow = Barlow({
-  variable: "--font-barlow",
-  subsets: ["latin"],
-  weight: ["400", "500", "600", "700", "800", "900"],
-});
 
 const spaceGrotesk = Space_Grotesk({
   variable: "--font-space-grotesk",
@@ -140,7 +134,7 @@ export default function RootLayout({
         />
       </head>
       <body
-        className={`${barlow.variable} ${spaceGrotesk.variable} font-sans antialiased`}
+        className={`${spaceGrotesk.variable} font-sans antialiased`}
         style={{ backgroundColor: 'var(--sm-dark)', color: 'var(--sm-text)' }}
       >
         <ThemeProvider>

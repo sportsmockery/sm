@@ -79,7 +79,7 @@ export default function FeedModeSelector({ currentMode, onModeChange }: FeedMode
               textAlign: 'left',
               transition: 'all 0.15s',
               outline: 'none',
-              fontFamily: 'Barlow, sans-serif',
+             
             }}
             onMouseEnter={e => {
               if (!isActive) e.currentTarget.style.color = '#FAFAFB';

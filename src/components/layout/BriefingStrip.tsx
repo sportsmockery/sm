@@ -48,7 +48,7 @@ export default function BriefingStrip() {
                 borderRadius: '100px',
                 padding: '4px 14px',
                 cursor: 'pointer',
-                fontFamily: "Barlow, sans-serif",
+               
                 fontSize: '13px',
                 fontWeight: 400,
                 color: '#ffffff',
@@ -87,7 +87,7 @@ export default function BriefingStrip() {
             style={{ borderRadius: '50%' }}
           />
           <span style={{
-            fontFamily: "Barlow, sans-serif",
+           
             fontSize: '12px',
             fontWeight: 700,
             letterSpacing: '0.04em',
@@ -98,7 +98,7 @@ export default function BriefingStrip() {
           </span>
         </div>
         <p style={{
-          fontFamily: "Barlow, sans-serif",
+         
           fontSize: '15px',
           lineHeight: 1.6,
           color: 'var(--sm-text-muted)',
@@ -116,7 +116,7 @@ export default function BriefingStrip() {
             onClick={() => setActiveBriefing(null)}
             style={{
               display: 'inline-block',
-              fontFamily: "Barlow, sans-serif",
+             
               fontSize: '14px',
               fontWeight: 600,
               color: '#bc0000',

@@ -97,7 +97,7 @@ export default function Bears1Nav() {
                 textTransform: 'uppercase',
                 color: '#bc0000',
                 fontWeight: 600,
-                fontFamily: "Barlow, sans-serif",
+               
                 marginTop: 2,
               }}
             >

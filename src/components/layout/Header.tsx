@@ -373,7 +373,7 @@ export default function Header() {
                   fontSize: '14px',
                   fontWeight: 500,
                   textDecoration: 'none',
-                  fontFamily: "Barlow, sans-serif",
+                 
                 }}
               >
                 Log in
@@ -537,7 +537,7 @@ export default function Header() {
                   color: '#ef4444',
                   fontSize: '16px',
                   fontWeight: 500,
-                  fontFamily: "Barlow, sans-serif",
+                 
                   padding: '12px 0',
                   textAlign: 'left',
                   borderBottom: '1px solid var(--sm-border)',

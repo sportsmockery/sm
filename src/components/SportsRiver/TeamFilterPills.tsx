@@ -62,7 +62,7 @@ export default function TeamFilterPills({ currentTeam, onTeamChange }: TeamFilte
     backgroundColor: isActive ? 'rgba(188, 0, 0, 0.1)' : '#1B2430',
     color: isActive ? '#BC0000' : 'rgba(230, 232, 236, 0.7)',
     outline: 'none',
-    fontFamily: 'Barlow, sans-serif',
+   
   });
 
   return (

@@ -83,7 +83,7 @@ export function EdgeLogo({
           <text
             x={0}
             y={72}
-            fontFamily="Barlow, system-ui, sans-serif"
+            fontFamily="var(--font-space-grotesk), Space Grotesk, sans-serif"
             fontWeight="800"
             fontSize="52"
             fill="url(#edge-sm-silver)"
@@ -117,7 +117,7 @@ export function EdgeLogo({
         <text
           x={isWordmark ? 0 : 248}
           y={72}
-          fontFamily="Barlow, system-ui, sans-serif"
+          fontFamily="var(--font-space-grotesk), Space Grotesk, sans-serif"
           fontWeight="800"
           fontSize="48"
           fontStyle="italic"

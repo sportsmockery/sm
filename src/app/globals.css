@@ -1,7 +1,6 @@
-/* ========== GOOGLE FONTS - Barlow (site-wide) ========== */
+/* ========== FONT: Space Grotesk only (EDGE Branding Final) ========== */
 
 @plugin "tailwindcss-animate";
-@import url('https://fonts.googleapis.com/css2?family=Barlow:ital,wght@0,400;0,500;0,600;0,700;0,800;0,900;1,400;1,500;1,600;1,700&display=swap');
 
 @import "tailwindcss";
 @import "../styles/article-grid.css";
@@ -59,14 +58,14 @@
   --sm-nav-bg-scrolled: rgba(5, 5, 8, 0.92);
   --sm-max-width: 1200px;
 
-  /* === Typography — Barlow only === */
-  --sm-font-heading: 'Barlow', var(--font-barlow), sans-serif;
-  --sm-font-body: 'Barlow', var(--font-barlow), sans-serif;
-  --font-heading: 'Barlow', var(--font-barlow), sans-serif;
-  --font-body: 'Barlow', var(--font-barlow), sans-serif;
-  --font-sans: 'Barlow', var(--font-barlow), sans-serif;
-  --font-mono: 'Barlow', var(--font-barlow), sans-serif;
-  --font-display: 'Barlow', var(--font-barlow), sans-serif;
+  /* === Typography — Space Grotesk ONLY (EDGE Branding Final) === */
+  --sm-font-heading: var(--font-space-grotesk), 'Space Grotesk', system-ui, sans-serif;
+  --sm-font-body: var(--font-space-grotesk), 'Space Grotesk', system-ui, sans-serif;
+  --font-heading: var(--font-space-grotesk), 'Space Grotesk', system-ui, sans-serif;
+  --font-body: var(--font-space-grotesk), 'Space Grotesk', system-ui, sans-serif;
+  --font-sans: var(--font-space-grotesk), 'Space Grotesk', system-ui, sans-serif;
+  --font-mono: var(--font-space-grotesk), 'Space Grotesk', monospace;
+  --font-display: var(--font-space-grotesk), 'Space Grotesk', system-ui, sans-serif;
 
   /* ===== LEGACY COMPAT — Core theme vars ===== */
   --bg-page: #050508;
@@ -865,7 +864,7 @@ html {
 
 *, *::before, *::after {
   box-sizing: border-box;
-  font-family: 'Barlow', var(--font-barlow), sans-serif !important;
+  font-family: inherit !important;
 }
 
 body {
@@ -883,7 +882,7 @@ body {
 
 a { color: inherit; text-decoration: none; }
 
-/* ========== TYPOGRAPHY - Barlow Type Scale ========== */
+/* ========== TYPOGRAPHY - Space Grotesk Type Scale ========== */
 h1, h2, h3, h4, h5, h6 {
   color: var(--sm-text);
   font-weight: 700;
@@ -1190,7 +1189,7 @@ main {
   color: #fff;
   padding: 14px 32px;
   border-radius: var(--sm-radius-pill);
-  font-family: Barlow, sans-serif;
+  font-family: inherit;
   font-weight: 600;
   font-size: 15px;
   text-decoration: none;
@@ -1215,7 +1214,7 @@ main {
   color: var(--sm-text);
   padding: 14px 32px;
   border-radius: var(--sm-radius-pill);
-  font-family: Barlow, sans-serif;
+  font-family: inherit;
   font-weight: 600;
   font-size: 15px;
   text-decoration: none;
@@ -3400,7 +3399,7 @@ main {
   gap: 6px;
   padding: 6px 14px;
   border-radius: var(--sm-radius-pill);
-  font-family: Barlow, sans-serif;
+  font-family: inherit;
   font-size: 12px;
   font-weight: 600;
   letter-spacing: 0.5px;
@@ -3424,7 +3423,7 @@ main {
   gap: 6px;
   padding: 8px 16px;
   border-radius: var(--sm-radius-pill);
-  font-family: Barlow, sans-serif;
+  font-family: inherit;
   font-size: 13px;
   font-weight: 600;
   background: rgba(255,255,255,0.04);
@@ -3472,7 +3471,7 @@ main {
   border: 1px solid var(--sm-border);
   border-radius: var(--sm-radius-md);
   color: var(--sm-text);
-  font-family: Barlow, sans-serif;
+  font-family: inherit;
   font-size: 15px;
   outline: none;
   transition: border-color 0.2s;
@@ -3663,7 +3662,7 @@ main {
 }
 .nav-links a {
   color: var(--sm-text-muted);
-  font-family: Barlow, sans-serif;
+  font-family: inherit;
   font-size: 14px;
   font-weight: 500;
   text-decoration: none;
@@ -3726,7 +3725,7 @@ main {
   padding: 3px 12px;
   border: 1px solid rgba(188, 0, 0, 0.3);
   border-radius: 100px;
-  font-family: Barlow, sans-serif;
+  font-family: inherit;
   font-size: 12px;
   font-weight: 500;
   color: #fff;
@@ -3801,7 +3800,7 @@ main {
 
 /* Desk fallback */
 .live-strip-desk-label {
-  font-family: Barlow, sans-serif;
+  font-family: inherit;
   font-size: 10px;
   font-weight: 700;
   letter-spacing: 0.08em;
@@ -3867,7 +3866,7 @@ button.live-strip-chip--desk {
 
 .desk-team-picker-title {
   display: block;
-  font-family: Barlow, sans-serif;
+  font-family: inherit;
   font-size: 11px;
   font-weight: 700;
   letter-spacing: 0.06em;
@@ -3891,7 +3890,7 @@ button.live-strip-chip--desk {
   border: none;
   background: none;
   color: var(--sm-text, #fff);
-  font-family: Barlow, sans-serif;
+  font-family: inherit;
   font-size: 13px;
   font-weight: 500;
   cursor: pointer;
@@ -4007,7 +4006,7 @@ button.live-strip-chip--desk {
 .app-dock-inner::-webkit-scrollbar { display: none; }
 
 .app-dock-link {
-  font-family: 'Barlow', var(--font-barlow), sans-serif;
+  font-family: inherit;
   font-weight: 600;
   font-size: 14px;
   color: rgba(255, 255, 255, 0.7);
@@ -4129,7 +4128,7 @@ button.live-strip-chip--desk {
 .mobile-drawer.open .drawer-panel { transform: translateX(0); }
 .drawer-panel a {
   color: var(--sm-text);
-  font-family: Barlow, sans-serif;
+  font-family: inherit;
   font-size: 16px;
   font-weight: 500;
   padding: 12px 0;
@@ -4160,7 +4159,7 @@ button.live-strip-chip--desk {
   max-width: 280px;
 }
 .footer-col h4 {
-  font-family: Barlow, sans-serif;
+  font-family: inherit;
   font-size: 12px;
   font-weight: 700;
   text-transform: uppercase;
@@ -4239,7 +4238,7 @@ main, .page-content, [role="main"] {
   margin-bottom: 24px;
 }
 .article-body-2030 h2 {
-  font-family: var(--sm-font-heading, Barlow, sans-serif);
+  font-family: var(--sm-font-heading);
   font-size: 28px;
   font-weight: 700;
   color: var(--sm-text);
@@ -4247,7 +4246,7 @@ main, .page-content, [role="main"] {
   margin-bottom: 16px;
 }
 .article-body-2030 h3 {
-  font-family: var(--sm-font-heading, Barlow, sans-serif);
+  font-family: var(--sm-font-heading);
   font-size: 22px;
   font-weight: 600;
   color: var(--sm-text);
@@ -4505,7 +4504,7 @@ a.glass-card-sm:active,
   align-items: center;
   gap: 8px;
   padding: 12px 0;
-  font-family: Barlow, sans-serif;
+  font-family: inherit;
   font-size: 12px;
 }
 .bc-link {
@@ -4656,7 +4655,7 @@ a.glass-card-sm:active,
   border: 1px solid var(--sm-border);
   border-radius: var(--sm-radius-pill);
   color: var(--sm-text);
-  font-family: Barlow, sans-serif;
+  font-family: inherit;
   font-size: 13px;
   font-weight: 600;
   text-decoration: none;
@@ -4727,7 +4726,7 @@ a.glass-card-sm:active,
   display: flex;
   align-items: center;
   gap: 8px;
-  font-family: Barlow, sans-serif;
+  font-family: inherit;
   font-size: 14px;
   font-weight: 600;
   color: var(--sm-red-light);
@@ -4746,7 +4745,7 @@ a.glass-card-sm:active,
   gap: 4px;
   padding: 3px 10px;
   border-radius: var(--sm-radius-pill);
-  font-family: Barlow, sans-serif;
+  font-family: inherit;
   font-size: 10px;
   font-weight: 700;
   text-transform: uppercase;
@@ -4783,7 +4782,7 @@ a.glass-card-sm:active,
   flex: 1;
   padding: 10px 16px;
   border-radius: var(--sm-radius-sm);
-  font-family: Barlow, sans-serif;
+  font-family: inherit;
   font-size: 14px;
   font-weight: 600;
   text-align: center;
@@ -4812,7 +4811,7 @@ a.glass-card-sm:active,
   background: var(--sm-card);
   border: 1px solid var(--sm-border);
   border-radius: var(--sm-radius-pill);
-  font-family: Barlow, sans-serif;
+  font-family: inherit;
   font-size: 13px;
   font-weight: 600;
   color: var(--sm-text);
@@ -4867,7 +4866,7 @@ a.glass-card-sm:active,
   background: transparent;
   border: 1px solid rgba(188,0,0,0.3);
   color: var(--sm-red-light);
-  font-family: Barlow, sans-serif;
+  font-family: inherit;
   font-size: 11px;
   font-weight: 600;
   cursor: pointer;
@@ -4892,7 +4891,7 @@ a.glass-card-sm:active,
   border-radius: var(--sm-radius-pill);
   background: rgba(188,0,0,0.15);
   border: 1px solid rgba(188,0,0,0.3);
-  font-family: Barlow, sans-serif;
+  font-family: inherit;
   font-size: 12px;
   font-weight: 700;
   color: #ff4444;
@@ -4913,7 +4912,7 @@ a.glass-card-sm:active,
   align-items: center;
   justify-content: center;
   gap: 24px;
-  font-family: Barlow, sans-serif;
+  font-family: inherit;
 }
 .live-score-card .team-score {
   font-size: 32px;
@@ -4947,7 +4946,7 @@ a.glass-card-sm:active,
   color: var(--sm-text-dim);
   width: 48px;
   flex-shrink: 0;
-  font-family: Barlow, sans-serif;
+  font-family: inherit;
 }
 .play-timeline-content {
   font-size: 14px;
@@ -5024,7 +5023,7 @@ a.glass-card-sm:active,
   color: #fff;
   padding: 10px 24px;
   border-radius: var(--sm-radius-pill);
-  font-family: Barlow, sans-serif;
+  font-family: inherit;
   font-weight: 600;
   font-size: 14px;
   border: none;
@@ -5096,7 +5095,7 @@ a.glass-card-sm:active,
   border-color: rgba(188,0,0,0.3);
 }
 .nav-orb-tool-label {
-  font-family: Barlow, sans-serif;
+  font-family: inherit;
   font-weight: 400;
   font-size: 12px;
   color: var(--sm-text-muted);
@@ -5187,7 +5186,7 @@ a.glass-card-sm:active,
   gap: 6px;
   padding: 8px 18px;
   border-radius: 100px;
-  font-family: Barlow, sans-serif;
+  font-family: inherit;
   font-size: 13px;
   font-weight: 600;
   text-decoration: none;
