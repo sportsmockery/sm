@@ -3,7 +3,7 @@
 import { useState, useRef, useEffect } from "react"
 import Image from "next/image"
 import Link from "next/link"
-import { MoreHorizontal, ArrowRightLeft, ClipboardPen, MessageSquare, BarChart3, Video, User } from "lucide-react"
+import { MoreHorizontal, ArrowRightLeft, ClipboardPen, MessageSquare, BarChart3, Video, User, Volume2 } from "lucide-react"
 import { useAuth } from "@/contexts/AuthContext"
 import FeedTeamSidebar from "@/components/homepage/FeedTeamSidebar"
 
@@ -46,6 +46,13 @@ const edgeTools = [
     description: "Stream all the latest SM videos.",
     icon: Video,
     href: "/bears-film-room",
+  },
+  {
+    id: "audio",
+    title: "Hands-Free Audio",
+    description: "Have articles continuously read to you.",
+    icon: Volume2,
+    href: "/audio",
   },
 ]
 

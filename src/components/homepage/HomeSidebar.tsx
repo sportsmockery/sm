@@ -1,7 +1,7 @@
 "use client"
 
 import { useState } from "react"
-import { Search, ArrowRightLeft, ClipboardPen, MessageSquare, BarChart3, Video } from "lucide-react"
+import { Search, ArrowRightLeft, ClipboardPen, MessageSquare, BarChart3, Video, Volume2 } from "lucide-react"
 import { homepageTeams } from "@/lib/homepage-team-data"
 
 interface HomeSidebarProps {
@@ -112,6 +112,7 @@ export default function HomeSidebar({ selectedTeam, onSelectTeam }: HomeSidebarP
               { icon: MessageSquare, label: 'Fan Chat', href: '/fan-chat' },
               { icon: BarChart3, label: 'Team Analytics', href: `/${selectedTeam === 'whitesox' ? 'chicago-white-sox' : `chicago-${selectedTeam}`}` },
               { icon: Video, label: 'Vision Theater', href: '/bears-film-room' },
+              { icon: Volume2, label: 'Hands-Free Audio', href: '/audio' },
             ].map((item) => (
               <a
                 key={item.label}
