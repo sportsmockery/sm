@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { supabaseAdmin } from '@/lib/supabase-server'
+import { requireAdmin } from '@/lib/admin-auth'
 
 /**
  * GET /api/admin/posts
@@ -7,10 +8,16 @@ import { supabaseAdmin } from '@/lib/supabase-server'
  */
 export async function GET(request: NextRequest) {
   try {
+    // Verify admin authentication
+    const auth = await requireAdmin(request)
+    if (auth.error) {
+      return NextResponse.json({ error: auth.error }, { status: auth.status })
+    }
+
     const { searchParams } = new URL(request.url)
     const status = searchParams.get('status')
-    const limit = parseInt(searchParams.get('limit') || '50')
-    const offset = parseInt(searchParams.get('offset') || '0')
+    const limit = Math.min(parseInt(searchParams.get('limit') || '50'), 100)
+    const offset = Math.max(parseInt(searchParams.get('offset') || '0'), 0)
 
     let query = supabaseAdmin
       .from('sm_posts')
@@ -57,6 +64,12 @@ export async function GET(request: NextRequest) {
  */
 export async function POST(request: NextRequest) {
   try {
+    // Verify admin authentication
+    const auth = await requireAdmin(request)
+    if (auth.error) {
+      return NextResponse.json({ error: auth.error }, { status: auth.status })
+    }
+
     const body = await request.json()
 
     // Validate required fields
@@ -117,7 +130,7 @@ export async function POST(request: NextRequest) {
     if (error) {
       console.error('Error creating post:', error)
       return NextResponse.json(
-        { error: 'Failed to create post', details: error.message, code: error.code },
+        { error: 'Failed to create post' },
         { status: 500 }
       )
     }

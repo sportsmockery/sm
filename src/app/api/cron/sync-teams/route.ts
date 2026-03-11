@@ -66,11 +66,11 @@ interface TeamDataVerification {
  * 4. Revalidates all team page paths
  */
 export async function GET(request: NextRequest) {
-  // Verify this is a Vercel cron request (optional)
+  // Verify cron authorization (required)
   const authHeader = request.headers.get('authorization')
   const cronSecret = process.env.CRON_SECRET
 
-  if (cronSecret && authHeader !== `Bearer ${cronSecret}`) {
+  if (!cronSecret || authHeader !== `Bearer ${cronSecret}`) {
     console.log('[Sync Teams Cron] Unauthorized request')
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }

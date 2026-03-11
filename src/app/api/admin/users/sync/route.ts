@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
+import { requireAdmin } from '@/lib/admin-auth'
 
 // Create admin client with service role key
 function getSupabaseAdmin() {
@@ -10,6 +11,12 @@ function getSupabaseAdmin() {
 
 export async function POST(request: NextRequest) {
   try {
+    // Verify admin authentication
+    const auth = await requireAdmin(request)
+    if (auth.error) {
+      return NextResponse.json({ error: auth.error }, { status: auth.status })
+    }
+
     const supabase = getSupabaseAdmin()
 
     // Get all users from Supabase Auth
@@ -17,7 +24,7 @@ export async function POST(request: NextRequest) {
 
     if (authError) {
       console.error('Error listing auth users:', authError)
-      return NextResponse.json({ error: authError.message }, { status: 400 })
+      return NextResponse.json({ error: 'Failed to list auth users' }, { status: 400 })
     }
 
     const authUsers = authData.users
@@ -29,7 +36,7 @@ export async function POST(request: NextRequest) {
 
     if (existingError) {
       console.error('Error fetching existing users:', existingError)
-      return NextResponse.json({ error: existingError.message }, { status: 400 })
+      return NextResponse.json({ error: 'Failed to fetch existing users' }, { status: 400 })
     }
 
     const existingEmails = new Set(existingUsers?.map(u => u.email.toLowerCase()) || [])
@@ -66,7 +73,7 @@ export async function POST(request: NextRequest) {
 
     if (insertError) {
       console.error('Error inserting users:', insertError)
-      return NextResponse.json({ error: insertError.message }, { status: 400 })
+      return NextResponse.json({ error: 'Failed to sync users' }, { status: 400 })
     }
 
     return NextResponse.json({
@@ -85,8 +92,14 @@ export async function POST(request: NextRequest) {
 }
 
 // GET to check sync status
-export async function GET() {
+export async function GET(request: NextRequest) {
   try {
+    // Verify admin authentication
+    const auth = await requireAdmin(request)
+    if (auth.error) {
+      return NextResponse.json({ error: auth.error }, { status: auth.status })
+    }
+
     const supabase = getSupabaseAdmin()
 
     const [authResult, dbResult] = await Promise.all([

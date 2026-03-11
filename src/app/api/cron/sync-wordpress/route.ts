@@ -75,11 +75,11 @@ async function fetchWithRetry<T>(url: string, retries = 3): Promise<T> {
  * Schedule: "0 4 * * *"
  */
 export async function GET(request: NextRequest) {
-  // Verify cron authorization
+  // Verify cron authorization (required)
   const authHeader = request.headers.get('authorization')
   const cronSecret = process.env.CRON_SECRET
 
-  if (cronSecret && authHeader !== `Bearer ${cronSecret}`) {
+  if (!cronSecret || authHeader !== `Bearer ${cronSecret}`) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
 

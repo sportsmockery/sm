@@ -2,18 +2,18 @@ import { NextRequest, NextResponse } from 'next/server'
 import { supabaseAdmin } from '@/lib/db'
 import { TeamSlug, UserPreferences } from '@/lib/types'
 import { getDefaultPreferences } from '@/lib/users'
+import { getAuthUser } from '@/lib/admin-auth'
 
 /**
  * GET /api/user/preferences
- * Get user preferences (requires user ID in header or cookie)
+ * Get user preferences (requires authenticated session)
  */
 export async function GET(request: NextRequest) {
   try {
-    // Get user ID from header or cookie
-    const userId = request.headers.get('x-user-id') ||
-                   request.cookies.get('user_id')?.value
+    // Authenticate via Supabase session (cookie or Bearer token)
+    const user = await getAuthUser(request)
 
-    if (!userId) {
+    if (!user) {
       // Return default preferences for anonymous users
       const defaults = getDefaultPreferences()
       return NextResponse.json({
@@ -27,6 +27,8 @@ export async function GET(request: NextRequest) {
         },
       })
     }
+
+    const userId = user.id
 
     // Fetch user preferences from database
     const { data, error } = await supabaseAdmin
@@ -87,17 +89,17 @@ export async function GET(request: NextRequest) {
  */
 export async function POST(request: NextRequest) {
   try {
-    // Get user ID from header or cookie
-    const userId = request.headers.get('x-user-id') ||
-                   request.cookies.get('user_id')?.value
+    // Authenticate via Supabase session
+    const user = await getAuthUser(request)
 
-    if (!userId) {
+    if (!user) {
       return NextResponse.json(
-        { error: 'User ID required' },
+        { error: 'Authentication required' },
         { status: 401 }
       )
     }
 
+    const userId = user.id
     const body = await request.json()
     const { favoriteTeams, notificationPrefs } = body
 
@@ -174,16 +176,17 @@ export async function POST(request: NextRequest) {
  */
 export async function PATCH(request: NextRequest) {
   try {
-    const userId = request.headers.get('x-user-id') ||
-                   request.cookies.get('user_id')?.value
+    // Authenticate via Supabase session
+    const user = await getAuthUser(request)
 
-    if (!userId) {
+    if (!user) {
       return NextResponse.json(
-        { error: 'User ID required' },
+        { error: 'Authentication required' },
         { status: 401 }
       )
     }
 
+    const userId = user.id
     const body = await request.json()
     const { addTeam, removeTeam, notificationPrefs, feedMode, teamFilter } = body
 

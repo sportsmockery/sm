@@ -22,8 +22,8 @@ export async function GET(request: NextRequest) {
   const authHeader = request.headers.get('authorization')
   const cronSecret = process.env.CRON_SECRET
 
-  // If CRON_SECRET is set, verify the request
-  if (cronSecret && authHeader !== `Bearer ${cronSecret}`) {
+  // Verify cron authorization (required)
+  if (!cronSecret || authHeader !== `Bearer ${cronSecret}`) {
     console.log('[Cron] Unauthorized request to bears-sync')
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }

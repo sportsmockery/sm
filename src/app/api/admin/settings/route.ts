@@ -66,6 +66,20 @@ export async function PUT(request: NextRequest) {
 
     const body = await request.json()
 
+    // Whitelist allowed settings fields to prevent mass assignment
+    const allowedFields = [
+      'site_name', 'site_description', 'logo_url', 'favicon_url',
+      'meta_title_template', 'meta_description', 'google_analytics_id',
+      'sitemap_enabled', 'robots_txt', 'twitter_handle', 'facebook_page',
+      'instagram_handle', 'youtube_channel', 'default_share_image'
+    ]
+    const sanitizedBody: Record<string, unknown> = {}
+    for (const field of allowedFields) {
+      if (body[field] !== undefined) {
+        sanitizedBody[field] = body[field]
+      }
+    }
+
     // Check if settings exist
     const { data: existing } = await supabase
       .from('sm_settings')
@@ -78,7 +92,7 @@ export async function PUT(request: NextRequest) {
       const { data, error } = await supabase
         .from('sm_settings')
         .update({
-          ...body,
+          ...sanitizedBody,
           updated_at: new Date().toISOString(),
           updated_by: user.id
         })
@@ -93,7 +107,7 @@ export async function PUT(request: NextRequest) {
       const { data, error } = await supabase
         .from('sm_settings')
         .insert({
-          ...body,
+          ...sanitizedBody,
           created_by: user.id
         })
         .select()

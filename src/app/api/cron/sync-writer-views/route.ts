@@ -6,19 +6,34 @@ export const dynamic = 'force-dynamic'
 
 const WP_SMED = 'https://www.sportsmockery.com/wp-json/smed/v1'
 
-// Payment formulas — evaluated with { posts, views } in scope
+// Payment formulas — safely evaluated with { posts, views } in scope
 // These match the formulas stored in writer_payment_formulas table
+// Only allows simple arithmetic expressions with posts/views variables
 function calculatePay(formulaCode: string, posts: number, views: number): number {
   try {
-    const fn = new Function('posts', 'views', `return ${formulaCode}`)
+    // Sanitize: only allow digits, arithmetic operators, parentheses, whitespace, decimal points,
+    // and the variable names 'posts' and 'views'
+    const sanitized = formulaCode.replace(/\b(posts|views)\b/g, '__VAR__')
+    if (!/^[\d\s+\-*/()._%VAR_]+$/.test(sanitized)) {
+      console.error('[Writer Views] Rejected unsafe formula:', formulaCode)
+      return 0
+    }
+    const fn = new Function('posts', 'views', `"use strict"; return ${formulaCode}`)
     const result = fn(posts, views)
+    if (typeof result !== 'number' || !isFinite(result)) return 0
     return Math.round(result * 100) / 100
   } catch {
     return 0
   }
 }
 
-export async function GET() {
+export async function GET(request: Request) {
+  // Verify cron authorization (required)
+  const authHeader = request.headers.get('authorization')
+  if (!process.env.CRON_SECRET || authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  }
+
   // Determine the period: sync data for today's current month-to-date
   // On the 1st of the month, also backfills the previous month if missing
   const now = new Date()

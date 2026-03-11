@@ -87,7 +87,15 @@ export async function POST(
     if (user_id) {
       existingVoteQuery = existingVoteQuery.eq('user_id', user_id)
     } else if (anonymous_id) {
-      existingVoteQuery = existingVoteQuery.or(`anonymous_id.eq.${anonymous_id},ip_hash.eq.${ipHash}`)
+      // Sanitize anonymous_id to prevent filter injection via special characters
+      const safeAnonId = String(anonymous_id).replace(/[^a-zA-Z0-9\-_]/g, '')
+      if (!safeAnonId) {
+        return NextResponse.json(
+          { error: 'Invalid anonymous ID' },
+          { status: 400 }
+        )
+      }
+      existingVoteQuery = existingVoteQuery.or(`anonymous_id.eq.${safeAnonId},ip_hash.eq.${ipHash}`)
     }
 
     const { data: existingVote } = await existingVoteQuery.maybeSingle()
@@ -242,7 +250,15 @@ export async function GET(
     if (userId) {
       query = query.eq('user_id', userId)
     } else {
-      query = query.or(`anonymous_id.eq.${anonymousId},ip_hash.eq.${ipHash}`)
+      // Sanitize anonymousId to prevent filter injection
+      const safeAnonId = String(anonymousId).replace(/[^a-zA-Z0-9\-_]/g, '')
+      if (!safeAnonId) {
+        return NextResponse.json(
+          { error: 'Invalid anonymous ID' },
+          { status: 400 }
+        )
+      }
+      query = query.or(`anonymous_id.eq.${safeAnonId},ip_hash.eq.${ipHash}`)
     }
 
     const { data: votes } = await query

@@ -24,14 +24,11 @@ export const dynamic = 'force-dynamic'
  * For development/testing, this can be called manually or via external trigger.
  */
 export async function GET(request: NextRequest) {
-  // Verify this is a Vercel cron request or has proper auth
+  // Verify cron authorization (required)
   const authHeader = request.headers.get('authorization')
   const cronSecret = process.env.CRON_SECRET
 
-  // Allow requests from localhost/internal or with valid auth
-  const isInternal = request.headers.get('x-internal-request') === 'true'
-
-  if (cronSecret && !isInternal && authHeader !== `Bearer ${cronSecret}`) {
+  if (!cronSecret || authHeader !== `Bearer ${cronSecret}`) {
     console.log('[Live Games Cron] Unauthorized request')
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }

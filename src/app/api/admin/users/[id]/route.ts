@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
+import { requireAdmin } from '@/lib/admin-auth'
 
 function getSupabaseAdmin() {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL!
@@ -12,6 +13,12 @@ export async function GET(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    // Verify admin authentication
+    const auth = await requireAdmin(request)
+    if (auth.error) {
+      return NextResponse.json({ error: auth.error }, { status: auth.status })
+    }
+
     const { id } = await params
     const supabase = getSupabaseAdmin()
 
@@ -44,6 +51,12 @@ export async function PATCH(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    // Verify admin authentication
+    const auth = await requireAdmin(request)
+    if (auth.error) {
+      return NextResponse.json({ error: auth.error }, { status: auth.status })
+    }
+
     const { id } = await params
     const body = await request.json()
     const supabase = getSupabaseAdmin()
@@ -69,7 +82,7 @@ export async function PATCH(
 
     if (error) {
       console.error('PATCH user error:', error)
-      return NextResponse.json({ error: error.message }, { status: 400 })
+      return NextResponse.json({ error: 'Failed to update user' }, { status: 400 })
     }
 
     return NextResponse.json({ user: data })
@@ -84,6 +97,12 @@ export async function DELETE(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    // Verify admin authentication
+    const auth = await requireAdmin(request)
+    if (auth.error) {
+      return NextResponse.json({ error: auth.error }, { status: auth.status })
+    }
+
     const { id } = await params
     const supabase = getSupabaseAdmin()
 
@@ -95,7 +114,7 @@ export async function DELETE(
 
     if (dbError) {
       console.error('DELETE user db error:', dbError)
-      return NextResponse.json({ error: dbError.message }, { status: 400 })
+      return NextResponse.json({ error: 'Failed to delete user' }, { status: 400 })
     }
 
     // Try to delete from Supabase Auth too
