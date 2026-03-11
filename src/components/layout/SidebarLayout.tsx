@@ -11,8 +11,9 @@ import AppSidebar from './AppSidebar'
 export default function SidebarLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname()
 
-  // Pages that should NOT have the sidebar (full-width hero layouts)
+  // Pages that should NOT have the sidebar
   const isFullWidth = pathname === '/' || pathname === '/feed'
+    || pathname.startsWith('/admin') || pathname.startsWith('/studio')
 
   if (isFullWidth) {
     return <>{children}</>
