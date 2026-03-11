@@ -9,7 +9,8 @@ import { ChatProvider } from "@/contexts/ChatContext";
 import { SubscriptionProvider } from "@/contexts/SubscriptionContext";
 import { TeamRecordProvider } from "@/contexts/TeamRecordContext";
 // Header removed — top bar disabled
-// LeftSidebar removed — floating sidebar now lives in RiverLayout
+// LeftSidebar removed — replaced by AppSidebar via SidebarLayout
+import SidebarLayout from "@/components/layout/SidebarLayout";
 import SkipToContent from "@/components/layout/SkipToContent";
 import ScrollToTop from "@/components/layout/ScrollToTop";
 import CookieBanner from "@/components/layout/CookieBanner";
@@ -107,7 +108,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className="scroll-smooth dark" suppressHydrationWarning>
+    <html lang="en" className="scroll-smooth light" suppressHydrationWarning>
       <head>
         <link rel="dns-prefetch" href="https://izwhcuccuwvlqqhpprbb.supabase.co" />
         <link rel="preconnect" href="https://izwhcuccuwvlqqhpprbb.supabase.co" />
@@ -122,10 +123,10 @@ export default function RootLayout({
               (function() {
                 try {
                   var theme = localStorage.getItem('sm-theme');
-                  if (theme === 'light') {
-                    document.documentElement.classList.remove('dark');
-                    document.documentElement.classList.add('light');
-                    document.documentElement.setAttribute('data-theme', 'light');
+                  if (theme === 'dark') {
+                    document.documentElement.classList.remove('light');
+                    document.documentElement.classList.add('dark');
+                    document.documentElement.setAttribute('data-theme', 'dark');
                   }
                 } catch (e) {}
               })();
@@ -154,7 +155,9 @@ export default function RootLayout({
                     <WebSocketProvider>
                       <MediaControllerProvider>
                         <AudioPlayerProvider>
-                          {children}
+                          <SidebarLayout>
+                            {children}
+                          </SidebarLayout>
                           <AudioMiniPlayer />
                         </AudioPlayerProvider>
                       </MediaControllerProvider>

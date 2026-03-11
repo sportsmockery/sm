@@ -34,7 +34,7 @@ const edgeTools = [
   },
   {
     id: "data-cosmos",
-    title: "Data Cosmos",
+    title: "Team Analytics",
     description: "Stats, rosters, scores, and more.",
     icon: BarChart3,
     href: "/chicago-bears",

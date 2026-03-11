@@ -28,7 +28,7 @@ export default function MotionProvider({ children }: MotionProviderProps) {
   useCursorGlow()
 
   return (
-    <LazyMotion features={domAnimation} strict>
+    <LazyMotion features={domAnimation}>
       <AnimatePresence
         mode="wait"
         initial={false}

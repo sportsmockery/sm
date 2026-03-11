@@ -42,7 +42,7 @@ const TIME_CSS_VARS: Record<TimeOfDay, Record<string, string>> = {
 const ThemeContext = createContext<ThemeContextType | undefined>(undefined)
 
 export function ThemeProvider({ children }: { children: ReactNode }) {
-  const [theme, setThemeState] = useState<Theme>('dark')
+  const [theme, setThemeState] = useState<Theme>('light')
   const [timeOfDay, setTimeOfDay] = useState<TimeOfDay>('day')
   const [mounted, setMounted] = useState(false)
 
@@ -51,10 +51,10 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
     setMounted(true)
 
     const stored = localStorage.getItem('sm-theme') as Theme | null
-    if (stored === 'light') {
-      setThemeState('light')
+    if (stored === 'dark') {
+      setThemeState('dark')
     }
-    // Default is dark (no action needed)
+    // Default is light (no action needed)
   }, [])
 
   // Apply theme to document
