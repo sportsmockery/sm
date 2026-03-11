@@ -117,16 +117,16 @@ export function EdgeHero({
       style={{ background: "var(--hp-background)", color: "var(--hp-foreground)" }}
       aria-labelledby="edge-hero-heading"
     >
-      {/* ── EDGE logo — top-left, visually light ── */}
+      {/* ── Blitz logo — top-left, visually light ── */}
       <div className="mx-auto w-full max-w-7xl px-4 pt-5 sm:px-6 lg:px-8 lg:pt-6">
         <div className="flex items-center justify-start">
           {logo ?? (
             <Image
-              src="/edge_logo.png"
-              alt="EDGE"
-              width={120}
-              height={34}
-              className="h-8 w-auto object-contain opacity-80"
+              src="/blitz_logo.svg"
+              alt="SM Blitz"
+              width={240}
+              height={88}
+              className="w-[240px] h-[88px] object-contain opacity-80"
               priority
             />
           )}
