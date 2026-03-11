@@ -40,10 +40,10 @@
   --sm-gradient: linear-gradient(135deg, #bc0000, #ff4444);
   --sm-gradient-subtle: linear-gradient(135deg, rgba(188,0,0,0.15), rgba(255,68,68,0.05));
 
-  /* === Status (mapped to brand palette) === */
-  --sm-success: #00D4FF;
-  --sm-warning: #D6B05E;
-  --sm-error: #BC0000;
+  /* === Status === */
+  --sm-success: #00d084;
+  --sm-warning: #ffa500;
+  --sm-error: #ff4444;
 
   /* === Edge Cyan (Intelligence) === */
   --edge-cyan: #00D4FF;
@@ -86,15 +86,15 @@
   --text-inverse: #FAFAFB;
   --border-color: rgba(255,255,255,0.08);
   --border-subtle: rgba(255,255,255,0.04);
-  --link-color: #BC0000;
-  --link-hover: #a00000;
-  --badge-bg: #BC0000;
+  --link-color: #ff4444;
+  --link-hover: #ff6666;
+  --badge-bg: #bc0000;
   --badge-text: #FAFAFB;
-  --color-primary: #BC0000;
-  --color-primary-dark: #8a0000;
-  --color-primary-light: #BC0000;
-  --bears-orange: #C83200;
-  --bears-orange-light: #C83200;
+  --color-primary: #ff4444;
+  --color-primary-dark: #cc0000;
+  --color-primary-light: #ff6666;
+  --bears-orange: #ff6b35;
+  --bears-orange-light: #ff8c5a;
   --color-text-primary: #FAFAFB;
   --color-text-secondary: #A9B4C2;
   --color-text-muted: #8F9BAD;
@@ -106,7 +106,7 @@
   --bg-primary: #050508;
   --bg-secondary: #0c0c12;
   --bg-tertiary: #13131d;
-  --sm-red-hover: #a00000;
+  --sm-red-hover: #ff6666;
   --border-primary: rgba(255,255,255,0.08);
   --border-secondary: rgba(255,255,255,0.04);
   --card-bg: #13131d;
@@ -114,10 +114,10 @@
   --card-hover-bg: #1a1a28;
   --bg-card: #13131d;
   --border-default: rgba(255,255,255,0.06);
-  --accent-red: #BC0000;
+  --accent-red: #ff4444;
   --accent-red-glow: rgba(188, 0, 0, 0.3);
-  --success: #00D4FF;
-  --warning: #D6B05E;
+  --success: #00d084;
+  --warning: #ffa500;
   --bg-hover: #1a1a28;
   --text-secondary: #A9B4C2;
   --footer-text-muted: #8F9BAD;
@@ -300,9 +300,9 @@
   --link-hover: #8a0000;
   --color-primary: #bc0000;
   --color-primary-dark: #8a0000;
-  --color-primary-light: #BC0000;
-  --bears-orange: #C83200;
-  --bears-orange-light: #C83200;
+  --color-primary-light: #ff3333;
+  --bears-orange: #dc4405;
+  --bears-orange-light: #ff6b35;
   --color-text-primary: #1a1a2e;
   --color-text-secondary: #555566;
   --color-text-muted: #8888a0;
@@ -325,8 +325,8 @@
   --border-default: rgba(0,0,0,0.08);
   --accent-red: #bc0000;
   --accent-red-glow: rgba(188, 0, 0, 0.3);
-  --success: #00D4FF;
-  --warning: #D6B05E;
+  --success: #10b981;
+  --warning: #f59e0b;
   --bg-hover: #f0f0f5;
   --text-secondary: #555566;
   --footer-text-muted: #999999;
@@ -872,7 +872,7 @@ html {
 
 *, *::before, *::after {
   box-sizing: border-box;
-  font-family: 'Barlow', var(--font-barlow), sans-serif !important;
+  font-family: inherit;
 }
 
 body {
@@ -1197,7 +1197,7 @@ main {
   color: #fff;
   padding: 14px 32px;
   border-radius: var(--sm-radius-pill);
-  font-family: Barlow, sans-serif;
+  font-family: inherit;
   font-weight: 600;
   font-size: 15px;
   text-decoration: none;
@@ -1222,7 +1222,7 @@ main {
   color: var(--sm-text);
   padding: 14px 32px;
   border-radius: var(--sm-radius-pill);
-  font-family: Barlow, sans-serif;
+  font-family: inherit;
   font-weight: 600;
   font-size: 15px;
   text-decoration: none;
@@ -3407,7 +3407,7 @@ main {
   gap: 6px;
   padding: 6px 14px;
   border-radius: var(--sm-radius-pill);
-  font-family: Barlow, sans-serif;
+  font-family: inherit;
   font-size: 12px;
   font-weight: 600;
   letter-spacing: 0.5px;
@@ -3431,7 +3431,7 @@ main {
   gap: 6px;
   padding: 8px 16px;
   border-radius: var(--sm-radius-pill);
-  font-family: Barlow, sans-serif;
+  font-family: inherit;
   font-size: 13px;
   font-weight: 600;
   background: rgba(255,255,255,0.04);
@@ -3479,7 +3479,7 @@ main {
   border: 1px solid var(--sm-border);
   border-radius: var(--sm-radius-md);
   color: var(--sm-text);
-  font-family: Barlow, sans-serif;
+  font-family: inherit;
   font-size: 15px;
   outline: none;
   transition: border-color 0.2s;
@@ -3670,7 +3670,7 @@ main {
 }
 .nav-links a {
   color: var(--sm-text-muted);
-  font-family: Barlow, sans-serif;
+  font-family: inherit;
   font-size: 14px;
   font-weight: 500;
   text-decoration: none;
@@ -3733,7 +3733,7 @@ main {
   padding: 3px 12px;
   border: 1px solid rgba(188, 0, 0, 0.3);
   border-radius: 100px;
-  font-family: Barlow, sans-serif;
+  font-family: inherit;
   font-size: 12px;
   font-weight: 500;
   color: #fff;
@@ -3808,7 +3808,7 @@ main {
 
 /* Desk fallback */
 .live-strip-desk-label {
-  font-family: Barlow, sans-serif;
+  font-family: inherit;
   font-size: 10px;
   font-weight: 700;
   letter-spacing: 0.08em;
@@ -3874,7 +3874,7 @@ button.live-strip-chip--desk {
 
 .desk-team-picker-title {
   display: block;
-  font-family: Barlow, sans-serif;
+  font-family: inherit;
   font-size: 11px;
   font-weight: 700;
   letter-spacing: 0.06em;
@@ -3898,7 +3898,7 @@ button.live-strip-chip--desk {
   border: none;
   background: none;
   color: var(--sm-text, #fff);
-  font-family: Barlow, sans-serif;
+  font-family: inherit;
   font-size: 13px;
   font-weight: 500;
   cursor: pointer;
@@ -4014,7 +4014,7 @@ button.live-strip-chip--desk {
 .app-dock-inner::-webkit-scrollbar { display: none; }
 
 .app-dock-link {
-  font-family: 'Barlow', var(--font-barlow), sans-serif;
+  font-family: inherit;
   font-weight: 600;
   font-size: 14px;
   color: rgba(255, 255, 255, 0.7);
@@ -4136,7 +4136,7 @@ button.live-strip-chip--desk {
 .mobile-drawer.open .drawer-panel { transform: translateX(0); }
 .drawer-panel a {
   color: var(--sm-text);
-  font-family: Barlow, sans-serif;
+  font-family: inherit;
   font-size: 16px;
   font-weight: 500;
   padding: 12px 0;
@@ -4167,7 +4167,7 @@ button.live-strip-chip--desk {
   max-width: 280px;
 }
 .footer-col h4 {
-  font-family: Barlow, sans-serif;
+  font-family: inherit;
   font-size: 12px;
   font-weight: 700;
   text-transform: uppercase;
@@ -4246,7 +4246,7 @@ main, .page-content, [role="main"] {
   margin-bottom: 24px;
 }
 .article-body-2030 h2 {
-  font-family: var(--sm-font-heading, Barlow, sans-serif);
+  font-family: inherit;
   font-size: 28px;
   font-weight: 700;
   color: var(--sm-text);
@@ -4254,7 +4254,7 @@ main, .page-content, [role="main"] {
   margin-bottom: 16px;
 }
 .article-body-2030 h3 {
-  font-family: var(--sm-font-heading, Barlow, sans-serif);
+  font-family: inherit;
   font-size: 22px;
   font-weight: 600;
   color: var(--sm-text);
@@ -4512,7 +4512,7 @@ a.glass-card-sm:active,
   align-items: center;
   gap: 8px;
   padding: 12px 0;
-  font-family: Barlow, sans-serif;
+  font-family: inherit;
   font-size: 12px;
 }
 .bc-link {
@@ -4663,7 +4663,7 @@ a.glass-card-sm:active,
   border: 1px solid var(--sm-border);
   border-radius: var(--sm-radius-pill);
   color: var(--sm-text);
-  font-family: Barlow, sans-serif;
+  font-family: inherit;
   font-size: 13px;
   font-weight: 600;
   text-decoration: none;
@@ -4734,7 +4734,7 @@ a.glass-card-sm:active,
   display: flex;
   align-items: center;
   gap: 8px;
-  font-family: Barlow, sans-serif;
+  font-family: inherit;
   font-size: 14px;
   font-weight: 600;
   color: var(--sm-red-light);
@@ -4753,7 +4753,7 @@ a.glass-card-sm:active,
   gap: 4px;
   padding: 3px 10px;
   border-radius: var(--sm-radius-pill);
-  font-family: Barlow, sans-serif;
+  font-family: inherit;
   font-size: 10px;
   font-weight: 700;
   text-transform: uppercase;
@@ -4790,7 +4790,7 @@ a.glass-card-sm:active,
   flex: 1;
   padding: 10px 16px;
   border-radius: var(--sm-radius-sm);
-  font-family: Barlow, sans-serif;
+  font-family: inherit;
   font-size: 14px;
   font-weight: 600;
   text-align: center;
@@ -4819,7 +4819,7 @@ a.glass-card-sm:active,
   background: var(--sm-card);
   border: 1px solid var(--sm-border);
   border-radius: var(--sm-radius-pill);
-  font-family: Barlow, sans-serif;
+  font-family: inherit;
   font-size: 13px;
   font-weight: 600;
   color: var(--sm-text);
@@ -4874,7 +4874,7 @@ a.glass-card-sm:active,
   background: transparent;
   border: 1px solid rgba(188,0,0,0.3);
   color: var(--sm-red-light);
-  font-family: Barlow, sans-serif;
+  font-family: inherit;
   font-size: 11px;
   font-weight: 600;
   cursor: pointer;
@@ -4899,7 +4899,7 @@ a.glass-card-sm:active,
   border-radius: var(--sm-radius-pill);
   background: rgba(188,0,0,0.15);
   border: 1px solid rgba(188,0,0,0.3);
-  font-family: Barlow, sans-serif;
+  font-family: inherit;
   font-size: 12px;
   font-weight: 700;
   color: #ff4444;
@@ -4920,7 +4920,7 @@ a.glass-card-sm:active,
   align-items: center;
   justify-content: center;
   gap: 24px;
-  font-family: Barlow, sans-serif;
+  font-family: inherit;
 }
 .live-score-card .team-score {
   font-size: 32px;
@@ -4954,7 +4954,7 @@ a.glass-card-sm:active,
   color: var(--sm-text-dim);
   width: 48px;
   flex-shrink: 0;
-  font-family: Barlow, sans-serif;
+  font-family: inherit;
 }
 .play-timeline-content {
   font-size: 14px;
@@ -5031,7 +5031,7 @@ a.glass-card-sm:active,
   color: #fff;
   padding: 10px 24px;
   border-radius: var(--sm-radius-pill);
-  font-family: Barlow, sans-serif;
+  font-family: inherit;
   font-weight: 600;
   font-size: 14px;
   border: none;
@@ -5103,7 +5103,7 @@ a.glass-card-sm:active,
   border-color: rgba(188,0,0,0.3);
 }
 .nav-orb-tool-label {
-  font-family: Barlow, sans-serif;
+  font-family: inherit;
   font-weight: 400;
   font-size: 12px;
   color: var(--sm-text-muted);
@@ -5194,7 +5194,7 @@ a.glass-card-sm:active,
   gap: 6px;
   padding: 8px 18px;
   border-radius: 100px;
-  font-family: Barlow, sans-serif;
+  font-family: inherit;
   font-size: 13px;
   font-weight: 600;
   text-decoration: none;

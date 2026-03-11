@@ -46,15 +46,15 @@
   --edge-gold-muted: rgba(214, 176, 94, 0.15);
   --edge-gold-glow: rgba(214, 176, 94, 0.3);
 
-  /* Status Colors (mapped to brand palette) */
-  --success: #00D4FF;
-  --success-muted: rgba(0, 212, 255, 0.15);
-  --warning: #D6B05E;
-  --warning-muted: rgba(214, 176, 94, 0.15);
-  --error: #BC0000;
-  --error-muted: rgba(188, 0, 0, 0.15);
-  --info: #00D4FF;
-  --info-muted: rgba(0, 212, 255, 0.15);
+  /* Status Colors */
+  --success: #10b981;
+  --success-muted: #065f46;
+  --warning: #f59e0b;
+  --warning-muted: #78350f;
+  --error: #ef4444;
+  --error-muted: #7f1d1d;
+  --info: #3b82f6;
+  --info-muted: #1e3a8a;
 
   /* =========================================
      TEAM COLORS
