@@ -47,7 +47,7 @@ export interface VideoBlock extends BlockBase {
 
 export interface ScoutInsightBlock extends BlockBase {
   type: 'scout-insight';
-  data: { insight: string; confidence: 'low' | 'medium' | 'high' };
+  data: { insight: string; confidence: 'low' | 'medium' | 'high'; autoGenerate?: boolean };
 }
 
 export interface GMInteractionBlock extends BlockBase {
@@ -213,7 +213,7 @@ export function createBlock(type: BlockType): ContentBlock {
     'heading': () => ({ id, type: 'heading', data: { text: '', level: 2 } }),
     'image': () => ({ id, type: 'image', data: { src: '', alt: '' } }),
     'video': () => ({ id, type: 'video', data: { url: '' } }),
-    'scout-insight': () => ({ id, type: 'scout-insight', data: { insight: '', confidence: 'high' } }),
+    'scout-insight': () => ({ id, type: 'scout-insight', data: { insight: '', confidence: 'high', autoGenerate: true } }),
     'gm-interaction': () => ({ id, type: 'gm-interaction', data: { question: '', options: ['YES', 'NO'], reward: 3 } }),
     'trade-scenario': () => ({
       id, type: 'trade-scenario',

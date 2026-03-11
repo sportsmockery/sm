@@ -10,7 +10,7 @@ import { ChartBuilderModal, ChartConfig, AISuggestion, ChartType } from '@/compo
 import { PostIQChartGenerator } from '@/components/postiq'
 import { BlockEditor } from '@/components/admin/BlockEditor'
 import type { ArticleDocument } from '@/components/admin/BlockEditor'
-import { isBlockContent, parseDocument, serializeDocument } from '@/components/admin/BlockEditor/serializer'
+import { isBlockContent, parseDocument, serializeDocument, blocksToHtml } from '@/components/admin/BlockEditor/serializer'
 
 interface Category {
   id: string
@@ -748,6 +748,48 @@ export default function AdvancedPostEditor({
           }
         } catch (pollErr) {
           console.error('Auto-add poll error:', pollErr)
+        }
+      }
+
+      // Auto-generate Scout Insights for block editor articles on publish
+      if (editorMode === 'blocks' && blockDoc && formData.status === 'published') {
+        const scoutBlocks = blockDoc.blocks.filter(
+          (b) => b.type === 'scout-insight' && b.data.autoGenerate !== false && !b.data.insight
+        )
+        if (scoutBlocks.length > 0) {
+          setAutoInsertingContent('Scout Insight')
+          // Extract article text for Scout to analyze
+          const articleText = blocksToHtml(blockDoc.blocks.filter(b => b.type !== 'scout-insight'))
+            .replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim()
+          try {
+            const scoutResponse = await fetch('/api/ask-ai', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                query: `You are Scout AI for SportsMockery. Read this article and provide a brief, sharp analytical insight (2-3 sentences max) as if you're a seasoned sports analyst giving your take. Be opinionated and specific. Article title: "${formData.title}". Article content: ${articleText.slice(0, 3000)}`,
+              }),
+            })
+            if (scoutResponse.ok) {
+              const scoutData = await scoutResponse.json()
+              if (scoutData.response) {
+                // Clean the response of any citation markers
+                const cleanInsight = scoutData.response.replace(/\[\d+\]/g, '').trim()
+                // Fill in all auto-generate scout insight blocks
+                const updatedBlocks = blockDoc.blocks.map((b) => {
+                  if (b.type === 'scout-insight' && b.data.autoGenerate !== false && !b.data.insight) {
+                    return { ...b, data: { ...b.data, insight: cleanInsight } }
+                  }
+                  return b
+                })
+                const updatedDoc = { ...blockDoc, blocks: updatedBlocks }
+                setBlockDoc(updatedDoc)
+                contentToSave = serializeDocument(updatedDoc)
+                console.log('Auto-generated Scout Insight')
+              }
+            }
+          } catch (scoutErr) {
+            console.error('Scout Insight auto-generation error:', scoutErr)
+          }
         }
       }
 

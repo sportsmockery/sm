@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useCallback } from 'react';
-import { Eye, PenLine, Undo2, Redo2 } from 'lucide-react';
+import { Eye, PenLine, Undo2, Redo2, LayoutTemplate } from 'lucide-react';
 import type { ContentBlock, BlockType, ArticleDocument } from './types';
 import { createBlock } from './types';
 import { BlockInserter } from './BlockInserter';
@@ -127,6 +127,22 @@ export function BlockEditor({ initialBlocks, initialTemplate, onChange }: BlockE
         </div>
 
         <div className="flex items-center gap-2">
+          <button
+            type="button"
+            onClick={() => {
+              if (window.confirm('Switch template? Your current blocks will be replaced.')) {
+                pushHistory(blocks);
+                setBlocks([]);
+                setTemplate('');
+                onChange?.({ version: 1, template: '', blocks: [] });
+              }
+            }}
+            className="flex items-center gap-1 px-2 py-1.5 rounded-lg text-[11px] font-medium transition-colors hover:bg-white/5"
+            style={{ color: '#A0A8B0' }}
+            title="Change template"
+          >
+            <LayoutTemplate size={12} /> Template
+          </button>
           <span className="text-[11px] text-slate-500">{blocks.length} blocks</span>
           <button
             type="button"

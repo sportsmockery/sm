@@ -203,11 +203,35 @@ export function VideoPanel({ block, onChange, onDelete, onMoveUp, onMoveDown }: 
 
 export function ScoutInsightPanel({ block, onChange, onDelete, onMoveUp, onMoveDown }: BlockPanelProps) {
   if (block.type !== 'scout-insight') return null;
+  const isAutoGenerate = block.data.autoGenerate !== false;
   return (
     <BlockShell label="Scout Insight" accent="#00D4FF" onDelete={onDelete} onMoveUp={onMoveUp} onMoveDown={onMoveDown}>
-      <Field label="Insight Text">
-        <TextArea value={block.data.insight} onChange={(insight) => onChange({ ...block, data: { ...block.data, insight } })} placeholder="Scout AI analysis..." rows={3} />
-      </Field>
+      <label className="flex items-start gap-2 cursor-pointer mb-3">
+        <input
+          type="checkbox"
+          checked={isAutoGenerate}
+          onChange={(e) => onChange({ ...block, data: { ...block.data, autoGenerate: e.target.checked, insight: e.target.checked ? '' : block.data.insight } })}
+          className="h-4 w-4 mt-0.5 rounded"
+          style={{ accentColor: '#00D4FF' }}
+        />
+        <div>
+          <span className="text-sm font-medium text-white">Auto-generate on publish</span>
+          <p className="text-[11px] text-slate-500">
+            Scout AI will read your article and add its own analysis when published
+          </p>
+        </div>
+      </label>
+      {!isAutoGenerate && (
+        <Field label="Manual Insight Text">
+          <TextArea value={block.data.insight} onChange={(insight) => onChange({ ...block, data: { ...block.data, insight } })} placeholder="Scout AI analysis..." rows={3} />
+        </Field>
+      )}
+      {isAutoGenerate && block.data.insight && (
+        <div className="rounded-lg p-3 mb-3" style={{ backgroundColor: 'rgba(0,212,255,0.04)', border: '1px solid rgba(0,212,255,0.1)' }}>
+          <span className="text-[10px] font-bold uppercase tracking-widest mb-1 block" style={{ color: '#00D4FF' }}>Generated Insight</span>
+          <p className="text-[13px] text-slate-400 italic">&ldquo;{block.data.insight}&rdquo;</p>
+        </div>
+      )}
       <Field label="Confidence">
         <Select value={block.data.confidence} onChange={(confidence) => onChange({ ...block, data: { ...block.data, confidence: confidence as 'low' | 'medium' | 'high' } })} options={[{ value: 'high', label: 'High' }, { value: 'medium', label: 'Medium' }, { value: 'low', label: 'Low' }]} />
       </Field>

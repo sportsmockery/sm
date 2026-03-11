@@ -3,6 +3,7 @@ import { supabaseAdmin } from '@/lib/supabase-server'
 import { createServerClient } from '@supabase/ssr'
 import { cookies } from 'next/headers'
 import StudioPostEditor from './StudioPostEditor'
+import { AdvancedPostEditor } from '@/components/admin/PostEditor'
 
 export const metadata: Metadata = {
   title: 'Sports Mockery | New Post',
@@ -63,7 +64,7 @@ export default async function StudioNewPostPage() {
   }
 
   return (
-    <StudioPostEditor
+    <AdvancedPostEditor
       categories={categories}
       authors={authors}
       currentUserId={currentUserAuthor?.id}
