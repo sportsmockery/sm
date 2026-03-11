@@ -40,7 +40,7 @@ export default function AuthorCard({
             </div>
           </Link>
         ) : (
-          <div className="flex h-24 w-24 items-center justify-center rounded-full bg-gradient-to-br from-[#8B0000] to-[#FF0000] text-3xl font-bold text-white">
+          <div className="flex h-24 w-24 items-center justify-center rounded-full bg-gradient-to-br from-[#8B0000] to-[#BC0000] text-3xl font-bold text-white">
             {name.charAt(0).toUpperCase()}
           </div>
         )}
@@ -52,7 +52,7 @@ export default function AuthorCard({
           </p>
           <Link
             href={`/author/${id}`}
-            className="text-xl font-bold text-white transition-colors hover:text-[#FF0000]"
+            className="text-xl font-bold text-white transition-colors hover:text-[#BC0000]"
           >
             {name}
           </Link>
@@ -93,7 +93,7 @@ export default function AuthorCard({
             )}
             <Link
               href={`/author/${id}`}
-              className="inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-[#8B0000] to-[#FF0000] px-4 py-2 text-sm font-semibold text-white transition-all hover:from-[#a00000] hover:to-[#FF3333]"
+              className="inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-[#8B0000] to-[#BC0000] px-4 py-2 text-sm font-semibold text-white transition-all hover:from-[#a00000] hover:to-[#FF3333]"
             >
               View all articles
               <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">

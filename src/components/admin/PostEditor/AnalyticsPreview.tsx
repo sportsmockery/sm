@@ -47,9 +47,9 @@ export default function AnalyticsPreview({
   }, [content, title])
 
   const getScoreColor = (score: number) => {
-    if (score >= 80) return 'text-green-500'
+    if (score >= 80) return 'text-[#00D4FF]'
     if (score >= 60) return 'text-yellow-500'
-    return 'text-red-500'
+    return 'text-[#BC0000]'
   }
 
   const getScoreGradient = (score: number) => {
@@ -117,7 +117,7 @@ export default function AnalyticsPreview({
             {/* Title length */}
             <div className="flex items-center justify-between text-sm">
               <span className="text-zinc-600 dark:text-zinc-400">Title length</span>
-              <span className={analytics.titleOptimal ? 'text-green-500' : 'text-yellow-500'}>
+              <span className={analytics.titleOptimal ? 'text-[#00D4FF]' : 'text-yellow-500'}>
                 {analytics.titleLength}/60 chars
               </span>
             </div>
@@ -126,7 +126,7 @@ export default function AnalyticsPreview({
             <div className="flex items-center justify-between text-sm">
               <span className="text-zinc-600 dark:text-zinc-400">Images</span>
               {analytics.hasImages ? (
-                <svg className="h-5 w-5 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <svg className="h-5 w-5 text-[#00D4FF]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                 </svg>
               ) : (
@@ -138,7 +138,7 @@ export default function AnalyticsPreview({
             <div className="flex items-center justify-between text-sm">
               <span className="text-zinc-600 dark:text-zinc-400">Internal links</span>
               {analytics.hasLinks ? (
-                <svg className="h-5 w-5 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <svg className="h-5 w-5 text-[#00D4FF]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                 </svg>
               ) : (
@@ -150,7 +150,7 @@ export default function AnalyticsPreview({
             <div className="flex items-center justify-between text-sm">
               <span className="text-zinc-600 dark:text-zinc-400">Headings</span>
               {analytics.hasHeadings ? (
-                <svg className="h-5 w-5 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <svg className="h-5 w-5 text-[#00D4FF]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                 </svg>
               ) : (
@@ -164,11 +164,11 @@ export default function AnalyticsPreview({
                 Word count {analytics.wordCount >= 300 ? '' : '(min 300)'}
               </span>
               {analytics.wordCount >= 300 ? (
-                <svg className="h-5 w-5 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <svg className="h-5 w-5 text-[#00D4FF]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                 </svg>
               ) : (
-                <span className={`text-xs ${analytics.wordCount >= 150 ? 'text-yellow-500' : 'text-red-500'}`}>
+                <span className={`text-xs ${analytics.wordCount >= 150 ? 'text-yellow-500' : 'text-[#BC0000]'}`}>
                   {300 - analytics.wordCount} more needed
                 </span>
               )}

@@ -116,7 +116,7 @@ function TimelineItem({
         }`}
         style={{
           backgroundColor: 'var(--sm-card)',
-          borderColor: !isBreaking && !isBears ? 'var(--sm-border)' : (isBreaking ? '#ef4444' : teamInfo.secondaryColor),
+          borderColor: !isBreaking && !isBears ? 'var(--sm-border)' : (isBreaking ? '#BC0000' : teamInfo.secondaryColor),
         }}
       />
 

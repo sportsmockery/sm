@@ -205,7 +205,7 @@ export default function SharePage() {
                 ))}
                 {trade.draft_picks_sent?.map((pk: any, i: number) => (
                   <div key={`dp-${i}`} style={{ padding: '8px 0', borderBottom: '1px solid var(--sm-border)' }}>
-                    <div style={{ fontWeight: 600, fontSize: 14, color: '#8b5cf6' }}>
+                    <div style={{ fontWeight: 600, fontSize: 14, color: '#D6B05E' }}>
                       {pk.year} Round {pk.round} Pick
                     </div>
                   </div>
@@ -225,7 +225,7 @@ export default function SharePage() {
                 ))}
                 {trade.draft_picks_received?.map((pk: any, i: number) => (
                   <div key={`dp-${i}`} style={{ padding: '8px 0', borderBottom: '1px solid var(--sm-border)' }}>
-                    <div style={{ fontWeight: 600, fontSize: 14, color: '#8b5cf6' }}>
+                    <div style={{ fontWeight: 600, fontSize: 14, color: '#D6B05E' }}>
                       {pk.year} Round {pk.round} Pick
                     </div>
                   </div>

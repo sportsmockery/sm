@@ -20,7 +20,7 @@ const CHICAGO_TEAMS = [
     slug: 'bulls',
     logo: 'https://a.espncdn.com/i/teamlogos/nba/500/chi.png',
     primaryColor: '#CE1141',
-    secondaryColor: '#000000',
+    secondaryColor: '#0B0F14',
     league: 'NBA',
   },
   {
@@ -44,7 +44,7 @@ const CHICAGO_TEAMS = [
     slug: 'blackhawks',
     logo: 'https://a.espncdn.com/i/teamlogos/nhl/500/chi.png',
     primaryColor: '#CF0A2C',
-    secondaryColor: '#000000',
+    secondaryColor: '#0B0F14',
     league: 'NHL',
   },
 ]
@@ -548,7 +548,7 @@ export default function FanZonePage() {
                 <button
                   type="submit"
                   className="w-full py-4 rounded-xl font-bold text-lg hover:bg-white/90 transition-colors"
-                  style={{ backgroundColor: '#ffffff', color: '#0B162A' }}
+                  style={{ backgroundColor: '#FAFAFB', color: '#0B162A' }}
                 >
                   Join Now
                 </button>

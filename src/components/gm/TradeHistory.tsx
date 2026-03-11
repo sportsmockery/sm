@@ -74,7 +74,7 @@ export function TradeHistory({ trades, page, totalPages, onPageChange }: TradeHi
         <AnimatePresence>
           {trades.map(t => {
             const isExpanded = expandedId === t.id
-            const gradeColor = t.grade >= 70 ? '#22c55e' : t.grade >= 50 ? '#eab308' : '#ef4444'
+            const gradeColor = t.grade >= 70 ? '#00D4FF' : t.grade >= 50 ? '#eab308' : '#BC0000'
 
             return (
               <motion.div
@@ -128,8 +128,8 @@ export function TradeHistory({ trades, page, totalPages, onPageChange }: TradeHi
                     </span>
                     <span style={{
                       fontSize: '10px', fontWeight: 700, padding: '2px 8px', borderRadius: 6,
-                      backgroundColor: t.status === 'accepted' ? '#22c55e15' : '#ef444415',
-                      color: t.status === 'accepted' ? '#22c55e' : '#ef4444',
+                      backgroundColor: t.status === 'accepted' ? '#00D4FF15' : '#BC000015',
+                      color: t.status === 'accepted' ? '#00D4FF' : '#BC0000',
                       textTransform: 'uppercase',
                     }}>
                       {t.status}
@@ -187,7 +187,7 @@ export function TradeHistory({ trades, page, totalPages, onPageChange }: TradeHi
                               navigator.clipboard.writeText(`${window.location.origin}/gm/share/${t.shared_code}`)
                             }}
                             style={{
-                              fontSize: '12px', color: '#3b82f6', background: 'none',
+                              fontSize: '12px', color: '#00D4FF', background: 'none',
                               border: 'none', cursor: 'pointer', fontWeight: 600, padding: 0,
                             }}
                           >

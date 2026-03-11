@@ -45,7 +45,7 @@ export default function LatestNews({
     <section className={className}>
       {/* Section header */}
       <div className="mb-6 flex items-center gap-3">
-        <div className="h-8 w-1 rounded-full bg-gradient-to-b from-[#FF0000] to-[#8B0000]" />
+        <div className="h-8 w-1 rounded-full bg-gradient-to-b from-[#BC0000] to-[#8B0000]" />
         <h2 className="font-heading text-2xl font-bold" style={{ color: 'var(--sm-text)' }}>
           {title}
         </h2>

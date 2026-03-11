@@ -13,6 +13,22 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
+        // EDGE Branding Final — Foundation
+        'sm-black': '#0B0F14',
+        'sm-white': '#FAFAFB',
+
+        // EDGE Intelligence (Cyan)
+        'edge-cyan': {
+          DEFAULT: '#00D4FF',
+          glow: 'rgba(0, 212, 255, 0.2)',
+        },
+
+        // EDGE Premium (Gold)
+        'edge-gold': {
+          DEFAULT: '#D6B05E',
+          glow: 'rgba(214, 176, 94, 0.2)',
+        },
+
         // SM Brand Colors
         'sm-red': {
           DEFAULT: '#bc0000',
@@ -53,7 +69,15 @@ const config: Config = {
       },
       
       fontFamily: {
-        sans: ['var(--font-space-grotesk)', 'system-ui', '-apple-system', 'sans-serif'],
+        sans: ['var(--font-space-grotesk)', 'Space Grotesk', 'system-ui', '-apple-system', 'sans-serif'],
+      },
+
+      borderRadius: {
+        'card': '14px',
+      },
+
+      fontSize: {
+        'xs': ['0.8125rem', { lineHeight: '1.25rem' }],
       },
       
       animation: {

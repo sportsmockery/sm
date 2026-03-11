@@ -348,7 +348,7 @@ export default function AskAIPage() {
           <div className="glass-card" style={{ textAlign: 'center' }}>
             <div style={{
               width: 80, height: 80, borderRadius: 'var(--sm-radius-lg)',
-              background: 'linear-gradient(135deg, #f59e0b, #f97316)', display: 'flex', alignItems: 'center', justifyContent: 'center',
+              background: 'linear-gradient(135deg, #f59e0b, #BC0000)', display: 'flex', alignItems: 'center', justifyContent: 'center',
               margin: '0 auto 24px',
             }}>
               <svg width="40" height="40" fill="none" stroke="white" viewBox="0 0 24 24">
@@ -363,7 +363,7 @@ export default function AskAIPage() {
             </p>
             <button onClick={() => openCheckout('sm_plus_monthly')} className="btn btn-lg" style={{
               display: 'inline-flex', gap: 8,
-              background: 'linear-gradient(135deg, #f59e0b, #f97316)', color: '#fff',
+              background: 'linear-gradient(135deg, #f59e0b, #BC0000)', color: '#fff',
               border: 'none', borderRadius: 'var(--sm-radius-md)', cursor: 'pointer',
             }}>
               <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -595,7 +595,7 @@ export default function AskAIPage() {
                               borderRadius: 'var(--sm-radius-md)',
                               padding: '12px 16px',
                               ...(message.role === 'user'
-                                ? { background: 'var(--sm-gradient)', color: '#ffffff' }
+                                ? { background: 'var(--sm-gradient)', color: '#FAFAFB' }
                                 : {}),
                             }}
                           >

@@ -55,7 +55,7 @@ export default function ResetPasswordPage() {
             width: 64, height: 64, borderRadius: '50%', margin: '0 auto 16px',
             background: 'rgba(16,185,129,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center',
           }}>
-            <svg style={{ width: 32, height: 32, color: '#10b981' }} fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
+            <svg style={{ width: 32, height: 32, color: '#00D4FF' }} fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
             </svg>
           </div>

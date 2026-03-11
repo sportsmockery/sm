@@ -32,7 +32,7 @@ export default function ArticleCard({
 }: ArticleCardProps) {
   const teamColor = getTeamColor(category.slug)
   const badgeColor = teamColor?.primary || '#8B0000'
-  const accentColor = teamColor?.primary || '#FF0000'
+  const accentColor = teamColor?.primary || '#BC0000'
   const prefersReducedMotion = useReducedMotion()
 
   return (

@@ -166,7 +166,7 @@ export default function StoryBranch({
       <div className="rounded-2xl border border-[#8B0000]/30 bg-gradient-to-br from-zinc-900 to-[#8B0000]/10 p-6">
         {/* Header */}
         <div className="mb-4 flex items-center gap-3">
-          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-[#8B0000] to-[#FF0000] shadow-lg shadow-[#8B0000]/20">
+          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-[#8B0000] to-[#BC0000] shadow-lg shadow-[#8B0000]/20">
             <svg className="h-5 w-5 text-white" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 6A2.25 2.25 0 016 3.75h2.25A2.25 2.25 0 0110.5 6v2.25a2.25 2.25 0 01-2.25 2.25H6a2.25 2.25 0 01-2.25-2.25V6zM3.75 15.75A2.25 2.25 0 016 13.5h2.25a2.25 2.25 0 012.25 2.25V18a2.25 2.25 0 01-2.25 2.25H6A2.25 2.25 0 013.75 18v-2.25zM13.5 6a2.25 2.25 0 012.25-2.25H18A2.25 2.25 0 0120.25 6v2.25A2.25 2.25 0 0118 10.5h-2.25a2.25 2.25 0 01-2.25-2.25V6zM13.5 15.75a2.25 2.25 0 012.25-2.25H18a2.25 2.25 0 012.25 2.25V18A2.25 2.25 0 0118 20.25h-2.25A2.25 2.25 0 0113.5 18v-2.25z" />
             </svg>
@@ -183,7 +183,7 @@ export default function StoryBranch({
         {/* Start button */}
         <button
           onClick={() => setIsStarted(true)}
-          className="w-full rounded-xl bg-gradient-to-r from-[#8B0000] to-[#FF0000] py-3 font-bold text-white transition-all hover:from-[#a00000] hover:to-[#FF3333]"
+          className="w-full rounded-xl bg-gradient-to-r from-[#8B0000] to-[#BC0000] py-3 font-bold text-white transition-all hover:from-[#a00000] hover:to-[#FF3333]"
         >
           Begin Your Story
         </button>
@@ -223,7 +223,7 @@ export default function StoryBranch({
 
         <button
           onClick={handleRestart}
-          className="text-xs font-semibold text-[#FF6666] transition-colors hover:text-[#FF0000]"
+          className="text-xs font-semibold text-[#FF6666] transition-colors hover:text-[#BC0000]"
         >
           Restart
         </button>
@@ -255,7 +255,7 @@ export default function StoryBranch({
           </div>
           <button
             onClick={handleRestart}
-            className="w-full rounded-xl bg-gradient-to-r from-[#8B0000] to-[#FF0000] py-3 font-bold text-white transition-all hover:from-[#a00000] hover:to-[#FF3333]"
+            className="w-full rounded-xl bg-gradient-to-r from-[#8B0000] to-[#BC0000] py-3 font-bold text-white transition-all hover:from-[#a00000] hover:to-[#FF3333]"
           >
             Try a Different Path
           </button>

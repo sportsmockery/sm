@@ -24,8 +24,8 @@ export default function NewPostButton() {
       href="/admin/posts/new"
       className="inline-flex items-center rounded-lg px-4 py-2.5 text-sm font-medium"
       style={{
-        backgroundColor: isDark ? '#ffffff' : '#bc0000',
-        color: isDark ? '#bc0000' : '#ffffff',
+        backgroundColor: isDark ? '#FAFAFB' : '#bc0000',
+        color: isDark ? '#bc0000' : '#FAFAFB',
         border: 'none',
         outline: 'none',
       }}

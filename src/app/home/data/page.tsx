@@ -252,7 +252,7 @@ export default function DataPage() {
                   <span className="hm-game-vs">vs</span>
                   <img src={g.logo} alt={g.vs} width={28} height={28} />
                 </div>
-                <div style={{ fontSize: 16, fontWeight: 700, color: g.score.startsWith('W') ? '#22c55e' : '#ff4444' }}>
+                <div style={{ fontSize: 16, fontWeight: 700, color: g.score.startsWith('W') ? '#00D4FF' : '#ff4444' }}>
                   {g.score}
                 </div>
                 <div style={{ fontSize: 12, color: '#55556a', marginTop: 4 }}>{g.date}</div>

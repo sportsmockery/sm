@@ -180,7 +180,7 @@ export default function ChartsPage() {
       {/* Error State */}
       {error && !loading && (
         <div className="rounded-xl border border-red-500/20 bg-red-500/10 p-6 text-center">
-          <p className="text-red-400">{error}</p>
+          <p className="text-[#BC0000]">{error}</p>
           <button
             onClick={fetchCharts}
             className="mt-4 inline-flex items-center gap-2 rounded-lg bg-[var(--accent-red)] px-4 py-2 text-sm font-medium text-white hover:bg-[var(--accent-red-hover)] transition-colors"

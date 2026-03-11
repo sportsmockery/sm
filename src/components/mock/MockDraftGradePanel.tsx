@@ -45,12 +45,12 @@ export default function MockDraftGradePanel({ grade, teamColor, teamName, draftY
 
   // Get grade color based on grade value
   const getGradeColor = (gradeValue: number) => {
-    if (gradeValue >= 90) return '#10b981' // Green - A
-    if (gradeValue >= 80) return '#22c55e' // Light green - B+
+    if (gradeValue >= 90) return '#00D4FF' // Green - A
+    if (gradeValue >= 80) return '#00D4FF' // Light green - B+
     if (gradeValue >= 70) return '#84cc16' // Yellow-green - B
     if (gradeValue >= 60) return '#f59e0b' // Orange - C
-    if (gradeValue >= 50) return '#f97316' // Dark orange - D
-    return '#ef4444' // Red - F
+    if (gradeValue >= 50) return '#BC0000' // Dark orange - D
+    return '#BC0000' // Red - F
   }
 
   const gradeColor = getGradeColor(grade.overall_grade)
@@ -76,7 +76,7 @@ export default function MockDraftGradePanel({ grade, teamColor, teamName, draftY
     try {
       const dataUrl = await toPng(gradeCardRef.current, {
         quality: 0.95,
-        backgroundColor: isDark ? '#1f2937' : '#ffffff',
+        backgroundColor: isDark ? '#1f2937' : '#FAFAFB',
         pixelRatio: 2,
       })
       setGeneratedImageUrl(dataUrl)
@@ -225,7 +225,7 @@ export default function MockDraftGradePanel({ grade, teamColor, teamName, draftY
           {/* Strengths */}
           {grade.strengths && grade.strengths.length > 0 && (
             <div>
-              <h4 style={{ fontWeight: 600, fontSize: '13px', color: '#10b981', marginBottom: 8, display: 'flex', alignItems: 'center', gap: 6 }}>
+              <h4 style={{ fontWeight: 600, fontSize: '13px', color: '#00D4FF', marginBottom: 8, display: 'flex', alignItems: 'center', gap: 6 }}>
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
                   <polyline points="20 6 9 17 4 12" />
                 </svg>
@@ -242,7 +242,7 @@ export default function MockDraftGradePanel({ grade, teamColor, teamName, draftY
           {/* Weaknesses */}
           {grade.weaknesses && grade.weaknesses.length > 0 && (
             <div>
-              <h4 style={{ fontWeight: 600, fontSize: '13px', color: '#ef4444', marginBottom: 8, display: 'flex', alignItems: 'center', gap: 6 }}>
+              <h4 style={{ fontWeight: 600, fontSize: '13px', color: '#BC0000', marginBottom: 8, display: 'flex', alignItems: 'center', gap: 6 }}>
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
                   <circle cx="12" cy="12" r="10" />
                   <line x1="12" y1="8" x2="12" y2="12" />
@@ -289,9 +289,9 @@ export default function MockDraftGradePanel({ grade, teamColor, teamName, draftY
               style={{
                 padding: '10px 20px',
                 borderRadius: 8,
-                border: `2px solid ${copied ? '#22c55e' : borderColor}`,
-                backgroundColor: copied ? '#22c55e10' : 'transparent',
-                color: copied ? '#22c55e' : isDark ? '#fff' : '#1a1a1a',
+                border: `2px solid ${copied ? '#00D4FF' : borderColor}`,
+                backgroundColor: copied ? '#00D4FF10' : 'transparent',
+                color: copied ? '#00D4FF' : isDark ? '#fff' : '#1a1a1a',
                 fontWeight: 600,
                 fontSize: 13,
                 cursor: 'pointer',
@@ -302,7 +302,7 @@ export default function MockDraftGradePanel({ grade, teamColor, teamName, draftY
             >
               {copied ? (
                 <>
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#22c55e" strokeWidth="2.5">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#00D4FF" strokeWidth="2.5">
                     <path d="M20 6L9 17l-5-5" strokeLinecap="round" strokeLinejoin="round" />
                   </svg>
                   Copied!
@@ -399,7 +399,7 @@ export default function MockDraftGradePanel({ grade, teamColor, teamName, draftY
                     padding: '10px 16px',
                     borderRadius: 8,
                     border: 'none',
-                    backgroundColor: '#22c55e',
+                    backgroundColor: '#00D4FF',
                     color: '#fff',
                     fontWeight: 600,
                     fontSize: 13,

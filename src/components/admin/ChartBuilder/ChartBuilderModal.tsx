@@ -152,7 +152,7 @@ export default function ChartBuilderModal({
             {onHighlightData && (
               <button
                 onClick={handleHighlightData}
-                className="w-full rounded-lg bg-purple-600 px-4 py-3 text-sm font-medium text-white hover:bg-purple-700 transition-colors flex items-center justify-center gap-2"
+                className="w-full rounded-lg bg-[#D6B05E] px-4 py-3 text-sm font-medium text-white hover:bg-[#D6B05E] transition-colors flex items-center justify-center gap-2"
               >
                 <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
@@ -209,8 +209,8 @@ export default function ChartBuilderModal({
 
         {/* AI Reasoning Banner */}
         {aiSuggestion?.reasoning && (
-          <div className="border-b border-zinc-800 bg-purple-500/10 px-6 py-3">
-            <p className="text-sm text-purple-300">
+          <div className="border-b border-zinc-800 bg-[#D6B05E]/10 px-6 py-3">
+            <p className="text-sm text-[#D6B05E]">
               <span className="font-semibold">PostIQ:</span> {aiSuggestion.reasoning}
             </p>
           </div>
@@ -343,7 +343,7 @@ export default function ChartBuilderModal({
                 <p className="text-xs text-zinc-500 mb-2">Not the right data?</p>
                 <button
                   onClick={handleHighlightData}
-                  className="w-full flex items-center justify-center gap-2 px-3 py-2.5 rounded-lg border border-purple-500/50 text-sm text-purple-400 hover:bg-purple-500/10 transition-colors"
+                  className="w-full flex items-center justify-center gap-2 px-3 py-2.5 rounded-lg border border-[#D6B05E]/50 text-sm text-[#D6B05E] hover:bg-[#D6B05E]/10 transition-colors"
                 >
                   <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
@@ -387,7 +387,7 @@ export default function ChartBuilderModal({
           <button
             onClick={handleInsert}
             disabled={!hasValidData || !config.title.trim()}
-            className="rounded-lg bg-gradient-to-r from-[#FF0000] to-[#8B0000] px-6 py-2 text-sm font-medium text-white hover:from-[#FF0000] hover:to-[#a00000] transition-all shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
+            className="rounded-lg bg-gradient-to-r from-[#BC0000] to-[#8B0000] px-6 py-2 text-sm font-medium text-white hover:from-[#BC0000] hover:to-[#a00000] transition-all shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
           >
             Insert Chart
           </button>

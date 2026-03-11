@@ -46,7 +46,7 @@ const RichTextEditor = forwardRef<RichTextEditorRef, RichTextEditorProps>(functi
       Link.configure({
         openOnClick: false,
         HTMLAttributes: {
-          class: 'text-blue-600 underline hover:text-blue-800',
+          class: 'text-[#00D4FF] underline hover:text-[#00D4FF]',
         },
       }),
       Image.configure({
@@ -212,7 +212,7 @@ const RichTextEditor = forwardRef<RichTextEditorRef, RichTextEditorProps>(functi
   )
 
   return (
-    <div className="rounded-lg border border-zinc-200 dark:border-zinc-700 overflow-hidden" style={{ backgroundColor: 'var(--bg-page, #ffffff)' }}>
+    <div className="rounded-lg border border-zinc-200 dark:border-zinc-700 overflow-hidden" style={{ backgroundColor: 'var(--bg-page, #FAFAFB)' }}>
       {/* Toolbar */}
       <div
         className="flex flex-wrap items-center gap-1 border-b border-zinc-200 dark:border-zinc-700 p-2"
@@ -322,7 +322,7 @@ const RichTextEditor = forwardRef<RichTextEditorRef, RichTextEditorProps>(functi
               <button
                 type="button"
                 onClick={addLink}
-                className="px-2 py-1 text-xs bg-blue-600 text-white rounded hover:bg-blue-700"
+                className="px-2 py-1 text-xs bg-[#00D4FF] text-white rounded hover:bg-[#00D4FF]"
               >
                 Add
               </button>
@@ -409,10 +409,10 @@ const RichTextEditor = forwardRef<RichTextEditorRef, RichTextEditorProps>(functi
       </div>
 
       {/* Editor Content - explicit white background for light mode */}
-      <div style={{ backgroundColor: 'var(--bg-page, #ffffff)' }}>
+      <div style={{ backgroundColor: 'var(--bg-page, #FAFAFB)' }}>
         <EditorContent
           editor={editor}
-          style={{ backgroundColor: 'var(--bg-page, #ffffff)', color: 'var(--text-primary, #222222)' }}
+          style={{ backgroundColor: 'var(--bg-page, #FAFAFB)', color: 'var(--text-primary, #222222)' }}
         />
       </div>
 
@@ -463,7 +463,7 @@ const RichTextEditor = forwardRef<RichTextEditorRef, RichTextEditorProps>(functi
                   else if (showEmbedModal === 'twitter') addTwitterEmbed()
                   else if (showEmbedModal === 'image') addImage()
                 }}
-                className="px-4 py-2 text-sm bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+                className="px-4 py-2 text-sm bg-[#00D4FF] text-white rounded-lg hover:bg-[#00D4FF]"
               >
                 Insert
               </button>

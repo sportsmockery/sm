@@ -23,16 +23,16 @@ export default function AnalyticsPage() {
   }
 
   const trafficSources = [
-    { name: 'Direct', value: 35, color: 'bg-blue-500' },
-    { name: 'Search', value: 28, color: 'bg-emerald-500' },
-    { name: 'Social', value: 22, color: 'bg-purple-500' },
+    { name: 'Direct', value: 35, color: 'bg-[#00D4FF]' },
+    { name: 'Search', value: 28, color: 'bg-[#00D4FF]' },
+    { name: 'Social', value: 22, color: 'bg-[#D6B05E]' },
     { name: 'Referral', value: 15, color: 'bg-amber-500' },
   ]
 
   const deviceBreakdown = [
     { name: 'Mobile', value: 58, color: 'bg-[var(--accent-red)]' },
-    { name: 'Desktop', value: 35, color: 'bg-blue-500' },
-    { name: 'Tablet', value: 7, color: 'bg-emerald-500' },
+    { name: 'Desktop', value: 35, color: 'bg-[#00D4FF]' },
+    { name: 'Tablet', value: 7, color: 'bg-[#00D4FF]' },
   ]
 
   return (
@@ -260,7 +260,7 @@ function StatCard({
         </div>
         <span
           className={`inline-flex items-center gap-1 text-xs font-medium ${
-            isPositive ? 'text-emerald-500' : 'text-red-500'
+            isPositive ? 'text-[#00D4FF]' : 'text-[#BC0000]'
           }`}
         >
           {isPositive ? (

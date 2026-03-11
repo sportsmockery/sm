@@ -96,7 +96,7 @@ export default function StudioMediaPage() {
         </div>
         <label
           className="inline-flex items-center rounded-lg px-4 py-2.5 text-sm font-medium cursor-pointer"
-          style={{ backgroundColor: '#bc0000', color: '#ffffff' }}
+          style={{ backgroundColor: '#bc0000', color: '#FAFAFB' }}
         >
           {uploading ? 'Uploading...' : 'Upload Files'}
           <input
@@ -134,7 +134,7 @@ export default function StudioMediaPage() {
           <p className="text-[var(--text-muted)] text-center mb-4">No media files yet</p>
           <label
             className="inline-flex items-center rounded-lg px-4 py-2 text-sm font-medium cursor-pointer"
-            style={{ backgroundColor: '#bc0000', color: '#ffffff' }}
+            style={{ backgroundColor: '#bc0000', color: '#FAFAFB' }}
           >
             Upload your first file
             <input

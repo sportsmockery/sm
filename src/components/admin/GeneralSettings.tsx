@@ -118,7 +118,7 @@ export default function GeneralSettings({ settings, onSave, saving }: GeneralSet
         <button
           type="submit"
           disabled={saving}
-          className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 transition-colors"
+          className="px-6 py-2 bg-[#00D4FF] text-white rounded-lg hover:bg-[#00D4FF] disabled:opacity-50 transition-colors"
         >
           {saving ? 'Saving...' : 'Save Changes'}
         </button>

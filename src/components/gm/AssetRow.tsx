@@ -72,8 +72,8 @@ export function AssetRow({
   const accentColor = type === 'PLAYER'
     ? teamColor
     : type === 'DRAFT_PICK'
-      ? '#8b5cf6'
-      : '#22c55e'
+      ? '#D6B05E'
+      : '#00D4FF'
 
   // Build display content based on type
   let primaryText = ''
@@ -228,7 +228,7 @@ export function AssetRow({
               background: 'none',
               border: 'none',
               cursor: 'pointer',
-              color: '#ef4444',
+              color: '#BC0000',
               fontSize: compact ? 14 : 16,
               fontWeight: 700,
               padding: compact ? 2 : 4,

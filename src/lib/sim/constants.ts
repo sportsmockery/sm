@@ -102,7 +102,7 @@ const nbaTeams: [string, string, string][] = [
   ['CHI_NBA', 'Chicago Bulls', '#CE1141'], ['CLE', 'Cleveland Cavaliers', '#6F263D'],
   ['DET_NBA', 'Detroit Pistons', '#C8102E'], ['IND_NBA', 'Indiana Pacers', '#002D62'],
   ['MIL', 'Milwaukee Bucks', '#00471B'], ['BOS', 'Boston Celtics', '#007A33'],
-  ['BKN', 'Brooklyn Nets', '#000000'], ['NYK', 'New York Knicks', '#006BB6'],
+  ['BKN', 'Brooklyn Nets', '#0B0F14'], ['NYK', 'New York Knicks', '#006BB6'],
   ['PHI', 'Philadelphia 76ers', '#006BB6'], ['TOR', 'Toronto Raptors', '#CE1141'],
   ['ATL_NBA', 'Atlanta Hawks', '#E03A3E'], ['CHA', 'Charlotte Hornets', '#1D1160'],
   ['MIA', 'Miami Heat', '#98002E'], ['ORL', 'Orlando Magic', '#0077C0'],

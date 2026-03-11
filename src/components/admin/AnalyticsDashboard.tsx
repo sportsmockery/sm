@@ -74,8 +74,8 @@ export default function AnalyticsDashboard() {
 
   if (error) {
     return (
-      <div className="rounded-xl bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 p-6 text-center">
-        <p className="text-red-600 dark:text-red-400">{error}</p>
+      <div className="rounded-xl bg-red-50 dark:bg-[#BC0000]/20 border border-red-200 dark:border-red-800 p-6 text-center">
+        <p className="text-[#BC0000] dark:text-[#BC0000]">{error}</p>
         <button
           onClick={() => window.location.reload()}
           className="mt-4 px-4 py-2 rounded-lg bg-red-600 text-white text-sm font-medium hover:bg-red-700 transition-colors"
@@ -251,10 +251,10 @@ function StatCard({
   color: 'red' | 'blue' | 'green' | 'purple'
 }) {
   const colorClasses = {
-    red: 'bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400',
-    blue: 'bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400',
-    green: 'bg-green-50 dark:bg-green-900/20 text-green-600 dark:text-green-400',
-    purple: 'bg-purple-50 dark:bg-purple-900/20 text-purple-600 dark:text-purple-400',
+    red: 'bg-red-50 dark:bg-[#BC0000]/20 text-[#BC0000] dark:text-[#BC0000]',
+    blue: 'bg-[#00D4FF]/10 dark:bg-[#00D4FF]/20 text-[#00D4FF] dark:text-[#00D4FF]',
+    green: 'bg-[#00D4FF]/10 dark:bg-[#00D4FF]/20 text-[#00D4FF] dark:text-[#00D4FF]',
+    purple: 'bg-[#D6B05E]/10 dark:bg-[#D6B05E]/20 text-[#D6B05E] dark:text-[#D6B05E]',
   }
 
   return (

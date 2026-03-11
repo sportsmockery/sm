@@ -193,8 +193,8 @@ export interface AssetRowConfig {
 // Accent colors for each asset type
 export const ASSET_ACCENT_COLORS = {
   PLAYER: null,           // Uses team color
-  DRAFT_PICK: '#8b5cf6',  // Purple
-  PROSPECT: '#22c55e',    // Green
+  DRAFT_PICK: '#D6B05E',  // Purple
+  PROSPECT: '#00D4FF',    // Green
 } as const
 
 // Format a draft pick for display
@@ -240,10 +240,10 @@ export function getProspectTierColor(tier: string | undefined): string {
   if (t.includes('below') || t.includes('organizational')) return '#808080' // Gray
   if (t.includes('fringe') || t.includes('longshot')) return '#404040' // Dark gray
   // MLB letter grades
-  if (t.startsWith('a')) return '#22c55e'  // Green for A grades
-  if (t.startsWith('b')) return '#3b82f6'  // Blue for B grades
+  if (t.startsWith('a')) return '#00D4FF'  // Green for A grades
+  if (t.startsWith('b')) return '#00D4FF'  // Blue for B grades
   if (t.startsWith('c')) return '#f59e0b'  // Orange for C grades
-  if (t.startsWith('d')) return '#ef4444'  // Red for D grades
+  if (t.startsWith('d')) return '#BC0000'  // Red for D grades
   return '#808080'
 }
 
@@ -522,9 +522,9 @@ export interface V3WVSBreakdown {
 // Archetype badge colors for UI
 export const V3_ARCHETYPE_COLORS: Record<V3PlayerArchetype, string> = {
   'Franchise Changer': '#FFD700',  // Gold
-  'Role Player Upgrade': '#3b82f6', // Blue
-  'Culture Setter': '#8b5cf6',      // Purple
-  'Boom-or-Bust': '#f97316',        // Orange
+  'Role Player Upgrade': '#00D4FF', // Blue
+  'Culture Setter': '#D6B05E',      // Purple
+  'Boom-or-Bust': '#BC0000',        // Orange
   'Declining Star': '#6b7280',       // Gray
   'System Player': '#14b8a6',        // Teal
 }

@@ -179,9 +179,9 @@ function StatusCard({
   color?: 'success' | 'warning' | 'info'
 }) {
   const colorClasses = {
-    success: 'text-emerald-500',
+    success: 'text-[#00D4FF]',
     warning: 'text-amber-500',
-    info: 'text-blue-500',
+    info: 'text-[#00D4FF]',
   }
 
   return (

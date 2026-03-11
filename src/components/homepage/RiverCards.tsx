@@ -57,25 +57,25 @@ function EngagementRow({ stats }: { stats: { comments: number; retweets: number;
 
   return (
     <div className="mt-5 flex max-w-md justify-between" style={{ color: 'var(--hp-muted-foreground)' }}>
-      <button className="group flex items-center gap-1 transition-colors hover:text-blue-500 hp-tap-target" aria-label="Discuss">
-        <div className="rounded-full p-2 group-hover:bg-blue-500/10 transition-colors">
+      <button className="group flex items-center gap-1 transition-colors hover:text-[#00D4FF] hp-tap-target" aria-label="Discuss">
+        <div className="rounded-full p-2 group-hover:bg-[#00D4FF]/10 transition-colors">
           <MessageCircle className="h-4 w-4" />
         </div>
         <span style={{ fontSize: 13 }}>{stats.comments}</span>
       </button>
       <button
         onClick={() => setShared(!shared)}
-        className={`group flex items-center gap-1 transition-colors hp-tap-target ${shared ? 'text-green-500' : 'hover:text-green-500'}`}
+        className={`group flex items-center gap-1 transition-colors hp-tap-target ${shared ? 'text-[#00D4FF]' : 'hover:text-[#00D4FF]'}`}
         aria-label="Share"
       >
-        <div className={`rounded-full p-2 transition-colors ${shared ? 'bg-green-500/10' : 'group-hover:bg-green-500/10'}`}>
+        <div className={`rounded-full p-2 transition-colors ${shared ? 'bg-[#00D4FF]/10' : 'group-hover:bg-[#00D4FF]/10'}`}>
           <Repeat2 className="h-4 w-4" />
         </div>
         <span style={{ fontSize: 13 }}>{stats.retweets}</span>
       </button>
       <button
         onClick={() => setLiked(!liked)}
-        className={`group flex items-center gap-1 transition-colors hp-tap-target ${liked ? 'text-pink-500' : 'hover:text-pink-500'}`}
+        className={`group flex items-center gap-1 transition-colors hp-tap-target ${liked ? 'text-[#BC0000]' : 'hover:text-[#BC0000]'}`}
         aria-label="React"
       >
         <div className={`rounded-full p-2 transition-colors ${liked ? 'bg-pink-500/10' : 'group-hover:bg-pink-500/10'}`}>
@@ -83,8 +83,8 @@ function EngagementRow({ stats }: { stats: { comments: number; retweets: number;
         </div>
         <span style={{ fontSize: 13 }}>{liked ? stats.likes + 1 : stats.likes}</span>
       </button>
-      <button className="group flex items-center gap-1 transition-colors hover:text-orange-500 hp-tap-target" aria-label="Views">
-        <div className="rounded-full p-2 group-hover:bg-orange-500/10 transition-colors">
+      <button className="group flex items-center gap-1 transition-colors hover:text-[#BC0000] hp-tap-target" aria-label="Views">
+        <div className="rounded-full p-2 group-hover:bg-[#BC0000]/10 transition-colors">
           <Activity className="h-4 w-4" />
         </div>
         <span style={{ fontSize: 13 }}>{stats.views}</span>
@@ -92,12 +92,12 @@ function EngagementRow({ stats }: { stats: { comments: number; retweets: number;
       <div className="flex">
         <button
           onClick={() => setSaved(!saved)}
-          className={`rounded-full p-2 transition-colors hp-tap-target ${saved ? 'text-blue-500 bg-blue-500/10' : 'hover:bg-blue-500/10 hover:text-blue-500'}`}
+          className={`rounded-full p-2 transition-colors hp-tap-target ${saved ? 'text-[#00D4FF] bg-[#00D4FF]/10' : 'hover:bg-[#00D4FF]/10 hover:text-[#00D4FF]'}`}
           aria-label="Save"
         >
           <Bookmark className={`h-4 w-4 ${saved ? 'fill-current' : ''}`} />
         </button>
-        <button className="rounded-full p-2 transition-colors hover:bg-blue-500/10 hover:text-blue-500 hp-tap-target" aria-label="Share">
+        <button className="rounded-full p-2 transition-colors hover:bg-[#00D4FF]/10 hover:text-[#00D4FF] hp-tap-target" aria-label="Share">
           <Share className="h-4 w-4" />
         </button>
       </div>
@@ -165,7 +165,7 @@ export function EditorialCard({
       {gmQuestion && (
         <div className="mt-5 rounded-2xl p-4" style={{ border: '1px solid var(--hp-border)', background: 'var(--hp-muted)', opacity: 0.9 }}>
           <div className="flex items-center gap-2">
-            <Activity className="h-4 w-4 text-orange-500" />
+            <Activity className="h-4 w-4 text-[#BC0000]" />
             <span style={{ fontSize: 12, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em', color: 'var(--hp-muted-foreground)' }}>GM Pulse</span>
           </div>
           <p className="mt-2" style={{ fontSize: 15, fontWeight: 500, color: 'var(--hp-foreground)' }}>{gmQuestion}</p>
@@ -175,7 +175,7 @@ export function EditorialCard({
               disabled={vote !== null}
               className="relative flex-1 overflow-hidden rounded-xl px-4 py-2.5 text-sm font-semibold transition-all"
               style={{
-                border: `2px solid ${vote === "yes" ? '#22c55e' : vote === "no" ? 'var(--hp-border)' : '#22c55e'}`,
+                border: `2px solid ${vote === "yes" ? '#00D4FF' : vote === "no" ? 'var(--hp-border)' : '#00D4FF'}`,
                 background: vote === "yes" ? 'rgba(34,197,94,0.1)' : vote === "no" ? 'var(--hp-muted)' : 'transparent',
                 color: vote === "no" ? 'var(--hp-muted-foreground)' : '#16a34a',
               }}
@@ -190,9 +190,9 @@ export function EditorialCard({
               disabled={vote !== null}
               className="relative flex-1 overflow-hidden rounded-xl px-4 py-2.5 text-sm font-semibold transition-all"
               style={{
-                border: `2px solid ${vote === "no" ? '#ef4444' : vote === "yes" ? 'var(--hp-border)' : '#ef4444'}`,
+                border: `2px solid ${vote === "no" ? '#BC0000' : vote === "yes" ? 'var(--hp-border)' : '#BC0000'}`,
                 background: vote === "no" ? 'rgba(239,68,68,0.1)' : vote === "yes" ? 'var(--hp-muted)' : 'transparent',
-                color: vote === "yes" ? 'var(--hp-muted-foreground)' : '#dc2626',
+                color: vote === "yes" ? 'var(--hp-muted-foreground)' : '#BC0000',
               }}
             >
               {vote && <span className="absolute inset-y-0 left-0 transition-all duration-500" style={{ width: `${noPercentage}%`, background: 'rgba(239,68,68,0.2)' }} />}
@@ -254,7 +254,7 @@ export function PollCard({ question, context, options, totalVotes, status, team,
               className="relative w-full overflow-hidden rounded-xl px-4 py-3.5 text-left transition-all hp-tap-target"
               style={{
                 fontSize: 15, fontWeight: 500,
-                border: `2px solid ${isSelected ? '#3b82f6' : 'var(--hp-border)'}`,
+                border: `2px solid ${isSelected ? '#00D4FF' : 'var(--hp-border)'}`,
                 background: isSelected ? 'rgba(59,130,246,0.1)' : isVoted ? 'var(--hp-muted)' : 'transparent',
               }}
             >
@@ -265,8 +265,8 @@ export function PollCard({ question, context, options, totalVotes, status, team,
                 />
               )}
               <span className="relative z-10 flex items-center justify-between">
-                <span style={{ color: isSelected ? '#2563eb' : 'var(--hp-foreground)' }}>{option}</span>
-                {isVoted && <span style={{ fontSize: 12, fontWeight: 600, color: isSelected ? '#2563eb' : 'var(--hp-muted-foreground)' }}>{percentage}%</span>}
+                <span style={{ color: isSelected ? '#00D4FF' : 'var(--hp-foreground)' }}>{option}</span>
+                {isVoted && <span style={{ fontSize: 12, fontWeight: 600, color: isSelected ? '#00D4FF' : 'var(--hp-muted-foreground)' }}>{percentage}%</span>}
               </span>
             </button>
           )
@@ -379,7 +379,7 @@ export function HubUpdateCard({ updateText, takeaway, status, team, teamColor, t
       <p style={{ fontSize: 18, lineHeight: 1.25, fontWeight: 700, color: 'var(--hp-foreground)' }}>{updateText}</p>
       <p className="mt-2.5" style={{ fontSize: 15, lineHeight: 1.65, color: 'var(--hp-foreground)', opacity: 0.7 }}>{takeaway}</p>
 
-      <button className="mt-4 flex items-center gap-1 transition-colors hp-tap-target" style={{ fontSize: 14, fontWeight: 600, color: '#2563eb' }}>
+      <button className="mt-4 flex items-center gap-1 transition-colors hp-tap-target" style={{ fontSize: 14, fontWeight: 600, color: '#00D4FF' }}>
         <span>View full update</span>
         <ChevronRight className="h-4 w-4" />
       </button>
@@ -441,9 +441,9 @@ export function BoxScoreCard({ homeTeam, awayTeam, status, period, keyPerformer,
       </div>
 
       <div className="mt-4 flex gap-4">
-        <button className="hp-tap-target" style={{ fontSize: 14, fontWeight: 500, color: '#2563eb' }}>Recap</button>
-        <button className="hp-tap-target" style={{ fontSize: 14, fontWeight: 500, color: '#2563eb' }}>Full box score</button>
-        <button className="hp-tap-target" style={{ fontSize: 14, fontWeight: 500, color: '#2563eb' }}>Reactions</button>
+        <button className="hp-tap-target" style={{ fontSize: 14, fontWeight: 500, color: '#00D4FF' }}>Recap</button>
+        <button className="hp-tap-target" style={{ fontSize: 14, fontWeight: 500, color: '#00D4FF' }}>Full box score</button>
+        <button className="hp-tap-target" style={{ fontSize: 14, fontWeight: 500, color: '#00D4FF' }}>Reactions</button>
       </div>
     </article>
   )
@@ -486,7 +486,7 @@ export function TradeProposalCard({ proposer, teamGets, otherTeamGets, fairnessS
             <ul className="space-y-1.5">
               {teamGets.items.map((item, i) => (
                 <li key={i} className="flex items-center gap-2" style={{ fontSize: 15, fontWeight: 500, color: 'var(--hp-foreground)' }}>
-                  <span className="h-1.5 w-1.5 rounded-full" style={{ background: '#22c55e' }} />
+                  <span className="h-1.5 w-1.5 rounded-full" style={{ background: '#00D4FF' }} />
                   {item}
                 </li>
               ))}
@@ -503,7 +503,7 @@ export function TradeProposalCard({ proposer, teamGets, otherTeamGets, fairnessS
             <ul className="space-y-1.5">
               {otherTeamGets.items.map((item, i) => (
                 <li key={i} className="flex items-center gap-2" style={{ fontSize: 15, fontWeight: 500, color: 'var(--hp-foreground)' }}>
-                  <span className="h-1.5 w-1.5 rounded-full" style={{ background: '#ef4444' }} />
+                  <span className="h-1.5 w-1.5 rounded-full" style={{ background: '#BC0000' }} />
                   {item}
                 </li>
               ))}
@@ -517,7 +517,7 @@ export function TradeProposalCard({ proposer, teamGets, otherTeamGets, fairnessS
               <span style={{ fontSize: 12, color: 'var(--hp-muted-foreground)' }}>Fairness</span>
               <div className="flex items-center gap-2 mt-1">
                 <div className="h-2 w-24 rounded-full overflow-hidden" style={{ background: 'var(--hp-muted)' }}>
-                  <div className="h-full rounded-full" style={{ width: `${fairnessScore}%`, background: 'linear-gradient(to right, #ef4444, #eab308, #22c55e)' }} />
+                  <div className="h-full rounded-full" style={{ width: `${fairnessScore}%`, background: 'linear-gradient(to right, #BC0000, #eab308, #00D4FF)' }} />
                 </div>
                 <span style={{ fontSize: 12, fontWeight: 600, color: 'var(--hp-foreground)' }}>{fairnessScore}%</span>
               </div>
@@ -536,9 +536,9 @@ export function TradeProposalCard({ proposer, teamGets, otherTeamGets, fairnessS
               className="flex items-center gap-1 rounded-xl px-3 py-1.5 transition-all hp-tap-target"
               style={{
                 fontSize: 12, fontWeight: 600,
-                background: userVote === "approve" ? '#22c55e' : 'var(--hp-card)',
+                background: userVote === "approve" ? '#00D4FF' : 'var(--hp-card)',
                 color: userVote === "approve" ? '#fff' : 'var(--hp-foreground)',
-                border: `1px solid ${userVote === "approve" ? '#22c55e' : 'var(--hp-border)'}`,
+                border: `1px solid ${userVote === "approve" ? '#00D4FF' : 'var(--hp-border)'}`,
               }}
             >
               <Check className="h-3.5 w-3.5" /> Approve
@@ -548,9 +548,9 @@ export function TradeProposalCard({ proposer, teamGets, otherTeamGets, fairnessS
               className="flex items-center gap-1 rounded-xl px-3 py-1.5 transition-all hp-tap-target"
               style={{
                 fontSize: 12, fontWeight: 600,
-                background: userVote === "reject" ? '#ef4444' : 'var(--hp-card)',
+                background: userVote === "reject" ? '#BC0000' : 'var(--hp-card)',
                 color: userVote === "reject" ? '#fff' : 'var(--hp-foreground)',
-                border: `1px solid ${userVote === "reject" ? '#ef4444' : 'var(--hp-border)'}`,
+                border: `1px solid ${userVote === "reject" ? '#BC0000' : 'var(--hp-border)'}`,
               }}
             >
               <X className="h-3.5 w-3.5" /> Reject
@@ -703,17 +703,17 @@ export function DebateCard({ prompt, sideA, sideB, participantCount, team, teamC
           onClick={() => setSelectedSide("b")}
           className="relative overflow-hidden rounded-2xl p-4 text-center transition-all hp-tap-target"
           style={{
-            border: `2px solid ${selectedSide === "b" ? '#3b82f6' : selectedSide === "a" ? 'var(--hp-border)' : 'var(--hp-border)'}`,
+            border: `2px solid ${selectedSide === "b" ? '#00D4FF' : selectedSide === "a" ? 'var(--hp-border)' : 'var(--hp-border)'}`,
             background: selectedSide === "b" ? 'rgba(59,130,246,0.1)' : selectedSide === "a" ? 'var(--hp-muted)' : 'transparent',
           }}
         >
           {selectedSide && (
             <div className="absolute inset-x-0 bottom-0 h-1" style={{ background: 'var(--hp-muted)' }}>
-              <div className="h-full transition-all duration-500" style={{ width: `${percentB}%`, background: '#3b82f6' }} />
+              <div className="h-full transition-all duration-500" style={{ width: `${percentB}%`, background: '#00D4FF' }} />
             </div>
           )}
-          <p className="font-semibold" style={{ color: selectedSide === "b" ? '#2563eb' : 'var(--hp-foreground)' }}>{sideB}</p>
-          {selectedSide && <p className="mt-2 text-2xl font-bold" style={{ color: '#2563eb' }}>{percentB}%</p>}
+          <p className="font-semibold" style={{ color: selectedSide === "b" ? '#00D4FF' : 'var(--hp-foreground)' }}>{sideB}</p>
+          {selectedSide && <p className="mt-2 text-2xl font-bold" style={{ color: '#00D4FF' }}>{percentB}%</p>}
         </button>
       </div>
 
@@ -722,7 +722,7 @@ export function DebateCard({ prompt, sideA, sideB, participantCount, team, teamC
           <Users className="h-4 w-4" />
           <span>{participantCount.toLocaleString()} participating</span>
         </div>
-        <button className="font-medium hp-tap-target" style={{ color: '#2563eb' }}>Join discussion</button>
+        <button className="font-medium hp-tap-target" style={{ color: '#00D4FF' }}>Join discussion</button>
       </div>
     </article>
   )

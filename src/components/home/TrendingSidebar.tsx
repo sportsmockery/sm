@@ -80,7 +80,7 @@ export default function TrendingSidebar({ articles, compact = false, className =
                   flex h-7 w-7 shrink-0 items-center justify-center rounded-lg
                   text-sm font-bold
                   ${index < 3
-                    ? 'bg-gradient-to-br from-[#FF0000] to-[#8B0000] text-white'
+                    ? 'bg-gradient-to-br from-[#BC0000] to-[#8B0000] text-white'
                     : ''
                   }
                 `}

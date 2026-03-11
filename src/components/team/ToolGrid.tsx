@@ -147,7 +147,7 @@ function SimulatorPreview({ accentColor }: { accentColor: string }) {
           fontSize: '11px',
           fontWeight: 600,
           backgroundColor: accentColor,
-          color: '#ffffff',
+          color: '#FAFAFB',
         }}
       >
         Build a Trade

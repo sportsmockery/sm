@@ -285,7 +285,7 @@ export default function AILoggingPage() {
                             </div>
                             <div className="flex items-center gap-2">
                               {log.is_validated ? (
-                                <span className="flex items-center gap-1 px-2 py-1 rounded-full bg-green-500/10 text-green-500 text-xs">
+                                <span className="flex items-center gap-1 px-2 py-1 rounded-full bg-[#00D4FF]/10 text-[#00D4FF] text-xs">
                                   <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                                   </svg>
@@ -300,7 +300,7 @@ export default function AILoggingPage() {
                                 </span>
                               )}
                               {log.data_imported && (
-                                <span className="flex items-center gap-1 px-2 py-1 rounded-full bg-blue-500/10 text-blue-500 text-xs">
+                                <span className="flex items-center gap-1 px-2 py-1 rounded-full bg-[#00D4FF]/10 text-[#00D4FF] text-xs">
                                   <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
                                   </svg>
@@ -368,7 +368,7 @@ export default function AILoggingPage() {
                                       <div
                                         className={`h-full rounded-full ${
                                           log.validation_match_score >= 0.8
-                                            ? 'bg-green-500'
+                                            ? 'bg-[#00D4FF]'
                                             : log.validation_match_score >= 0.5
                                             ? 'bg-yellow-500'
                                             : 'bg-red-500'
@@ -469,7 +469,7 @@ export default function AILoggingPage() {
                                 <div
                                   className={`h-full rounded-full ${
                                     data.confidence_score >= 0.8
-                                      ? 'bg-green-500'
+                                      ? 'bg-[#00D4FF]'
                                       : data.confidence_score >= 0.5
                                       ? 'bg-yellow-500'
                                       : 'bg-red-500'
@@ -505,14 +505,14 @@ export default function AILoggingPage() {
                 </div>
                 <div className="rounded-xl border border-[var(--border-default)] bg-[var(--bg-card)] p-6">
                   <p className="text-sm text-[var(--text-muted)]">Validated</p>
-                  <p className="text-3xl font-bold text-green-500 mt-1">{stats.validatedQueries}</p>
+                  <p className="text-3xl font-bold text-[#00D4FF] mt-1">{stats.validatedQueries}</p>
                   <p className="text-xs text-[var(--text-muted)] mt-1">
                     {stats.totalQueries > 0 ? ((stats.validatedQueries / stats.totalQueries) * 100).toFixed(1) : 0}%
                   </p>
                 </div>
                 <div className="rounded-xl border border-[var(--border-default)] bg-[var(--bg-card)] p-6">
                   <p className="text-sm text-[var(--text-muted)]">Imported</p>
-                  <p className="text-3xl font-bold text-blue-500 mt-1">{stats.importedQueries}</p>
+                  <p className="text-3xl font-bold text-[#00D4FF] mt-1">{stats.importedQueries}</p>
                   <p className="text-xs text-[var(--text-muted)] mt-1">
                     {stats.totalQueries > 0 ? ((stats.importedQueries / stats.totalQueries) * 100).toFixed(1) : 0}%
                   </p>
@@ -544,12 +544,12 @@ export default function AILoggingPage() {
                             <div className="flex items-center gap-2 mb-1">
                               <div className="flex-1 h-4 bg-[var(--bg-tertiary)] rounded-full overflow-hidden flex">
                                 <div
-                                  className="h-full bg-green-500"
+                                  className="h-full bg-[#00D4FF]"
                                   style={{ width: `${(teamStats.validated / Math.max(teamStats.total, 1)) * 100}%` }}
                                   title="Validated"
                                 />
                                 <div
-                                  className="h-full bg-blue-500"
+                                  className="h-full bg-[#00D4FF]"
                                   style={{ width: `${((teamStats.imported) / Math.max(teamStats.total, 1)) * 100}%` }}
                                   title="Imported"
                                 />
@@ -560,11 +560,11 @@ export default function AILoggingPage() {
                             </div>
                             <div className="flex gap-4 text-xs text-[var(--text-muted)]">
                               <span className="flex items-center gap-1">
-                                <span className="w-2 h-2 rounded-full bg-green-500" />
+                                <span className="w-2 h-2 rounded-full bg-[#00D4FF]" />
                                 {teamStats.validated} validated
                               </span>
                               <span className="flex items-center gap-1">
-                                <span className="w-2 h-2 rounded-full bg-blue-500" />
+                                <span className="w-2 h-2 rounded-full bg-[#00D4FF]" />
                                 {teamStats.imported} imported
                               </span>
                             </div>

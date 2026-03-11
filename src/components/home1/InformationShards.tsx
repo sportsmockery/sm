@@ -244,7 +244,7 @@ export default function InformationShards() {
                   lineHeight: 1.35,
                   margin: 0,
                   marginBottom: headline.excerpt ? 8 : 0,
-                  color: isDark ? '#ffffff' : '#111111',
+                  color: isDark ? '#FAFAFB' : '#111111',
                   letterSpacing: '-0.01em',
                 }}
               >

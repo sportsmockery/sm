@@ -267,7 +267,7 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
                       padding: '20px 12px',
                       borderRadius: 'var(--sm-radius-md)',
                       background: `linear-gradient(135deg, ${team.color}, ${team.color}88)`,
-                      color: '#ffffff',
+                      color: '#FAFAFB',
                       textDecoration: 'none',
                       transition: 'transform 0.2s, box-shadow 0.2s',
                       fontFamily: 'var(--sm-font-heading)',

@@ -123,7 +123,7 @@ export default function PricingPageClient() {
                 {plan.badge && (
                   <div style={{
                     position: 'absolute', top: -12, left: '50%', transform: 'translateX(-50%)',
-                    background: '#22c55e', color: '#fff', fontSize: '12px', fontWeight: 700,
+                    background: '#00D4FF', color: '#fff', fontSize: '12px', fontWeight: 700,
                     padding: '4px 12px', borderRadius: '9999px', whiteSpace: 'nowrap',
                   }}>
                     {plan.badge}
@@ -165,7 +165,7 @@ export default function PricingPageClient() {
                   {plan.features.map((feature, idx) => (
                     <li key={idx} style={{ display: 'flex', alignItems: 'flex-start', gap: '8px' }}>
                       {feature.included ? (
-                        <svg style={{ width: 20, height: 20, flexShrink: 0, color: isPopular ? '#fff' : '#22c55e' }} fill="currentColor" viewBox="0 0 20 20">
+                        <svg style={{ width: 20, height: 20, flexShrink: 0, color: isPopular ? '#fff' : '#00D4FF' }} fill="currentColor" viewBox="0 0 20 20">
                           <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
                         </svg>
                       ) : (

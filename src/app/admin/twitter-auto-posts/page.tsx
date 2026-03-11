@@ -178,10 +178,10 @@ export default function TwitterAutoPostsPage() {
   const getTeamBgColor = (team: string) => {
     const colors: Record<string, string> = {
       Bears: '#F97316',
-      Bulls: '#dc2626',
+      Bulls: '#BC0000',
       Blackhawks: '#991b1b',
-      Cubs: '#2563eb',
-      'White Sox': '#000000'
+      Cubs: '#00D4FF',
+      'White Sox': '#0B0F14'
     };
     return colors[team] || '#6b7280';
   };
@@ -189,8 +189,8 @@ export default function TwitterAutoPostsPage() {
   const getStatusColor = (status: string) => {
     const colors: Record<string, { bg: string; text: string }> = {
       draft: { bg: '#eab308', text: '#000' },
-      scheduled: { bg: '#3b82f6', text: '#fff' },
-      posted: { bg: '#22c55e', text: '#fff' }
+      scheduled: { bg: '#00D4FF', text: '#fff' },
+      posted: { bg: '#00D4FF', text: '#fff' }
     };
     return colors[status] || { bg: '#6b7280', text: '#fff' };
   };
@@ -214,12 +214,12 @@ export default function TwitterAutoPostsPage() {
 
   // Theme-aware colors
   const bgPage = isDark ? '#030712' : '#f9fafb';
-  const bgCard = isDark ? '#111827' : '#ffffff';
+  const bgCard = isDark ? '#111827' : '#FAFAFB';
   const bgCardAlt = isDark ? '#1f2937' : '#f3f4f6';
   const borderColor = isDark ? '#374151' : '#e5e7eb';
-  const textPrimary = isDark ? '#ffffff' : '#111827';
+  const textPrimary = isDark ? '#FAFAFB' : '#111827';
   const textSecondary = isDark ? '#9ca3af' : '#6b7280';
-  const inputBg = isDark ? '#1f2937' : '#ffffff';
+  const inputBg = isDark ? '#1f2937' : '#FAFAFB';
   const inputBorder = isDark ? '#374151' : '#d1d5db';
 
   if (loading) {
@@ -288,7 +288,7 @@ export default function TwitterAutoPostsPage() {
                       }}>
                         {p.team}
                       </span>
-                      <span style={{ fontSize: 28, fontWeight: 800, color: '#22c55e' }}>
+                      <span style={{ fontSize: 28, fontWeight: 800, color: '#00D4FF' }}>
                         {p.score?.toFixed(1)}
                       </span>
                       <span style={{ fontSize: 12, color: textSecondary }}>/ 10</span>
@@ -323,7 +323,7 @@ export default function TwitterAutoPostsPage() {
                             padding: '4px 8px',
                             borderRadius: 6,
                             backgroundColor: isDark ? '#374151' : '#e5e7eb',
-                            color: val >= 8 ? '#22c55e' : val >= 5 ? '#eab308' : '#ef4444',
+                            color: val >= 8 ? '#00D4FF' : val >= 5 ? '#eab308' : '#BC0000',
                             fontWeight: 600,
                           }}>
                             {criteriaLabels[key] || key}: {val}
@@ -382,7 +382,7 @@ export default function TwitterAutoPostsPage() {
                             onClick={() => saveCaption(p.id)}
                             style={{
                               padding: '6px 16px',
-                              backgroundColor: '#22c55e',
+                              backgroundColor: '#00D4FF',
                               color: '#fff',
                               borderRadius: 6,
                               border: 'none',
@@ -413,7 +413,7 @@ export default function TwitterAutoPostsPage() {
                     ) : (
                       <div>
                         <p style={{ color: textPrimary, marginBottom: 8, lineHeight: 1.5, fontSize: 15 }}>{p.caption}</p>
-                        <p style={{ color: '#3b82f6', fontSize: 13 }}>{p.hashtags}</p>
+                        <p style={{ color: '#00D4FF', fontSize: 13 }}>{p.hashtags}</p>
                         <button
                           onClick={() => startEditing(p)}
                           style={{
@@ -505,7 +505,7 @@ export default function TwitterAutoPostsPage() {
                         </div>
                       </div>
                       <p style={{ fontSize: 13, color: textPrimary, lineHeight: 1.4 }}>
-                        {p.caption} <span style={{ color: '#3b82f6' }}>{p.hashtags}</span>
+                        {p.caption} <span style={{ color: '#00D4FF' }}>{p.hashtags}</span>
                       </p>
                     </div>
                   </div>
@@ -559,7 +559,7 @@ export default function TwitterAutoPostsPage() {
                       style={{
                         width: '100%',
                         padding: '10px 16px',
-                        backgroundColor: posting === p.id || p.status === 'posted' ? '#6b7280' : '#3b82f6',
+                        backgroundColor: posting === p.id || p.status === 'posted' ? '#6b7280' : '#00D4FF',
                         color: '#fff',
                         borderRadius: 8,
                         border: 'none',
@@ -572,12 +572,12 @@ export default function TwitterAutoPostsPage() {
                     </button>
 
                     {p.tweet_id && (
-                      <p style={{ fontSize: 12, color: '#22c55e' }}>
+                      <p style={{ fontSize: 12, color: '#00D4FF' }}>
                         <a
                           href={`https://twitter.com/sportsmockery/status/${p.tweet_id}`}
                           target="_blank"
                           rel="noopener noreferrer"
-                          style={{ color: '#22c55e', textDecoration: 'underline' }}
+                          style={{ color: '#00D4FF', textDecoration: 'underline' }}
                         >
                           View Tweet →
                         </a>
@@ -595,7 +595,7 @@ export default function TwitterAutoPostsPage() {
                     <p>Format: <strong>{p.suggested_format}</strong></p>
                     <p>Created: {new Date(p.created_at).toLocaleString()}</p>
                     {p.scheduled_for && (
-                      <p style={{ color: '#3b82f6' }}>Scheduled: {new Date(p.scheduled_for).toLocaleString()}</p>
+                      <p style={{ color: '#00D4FF' }}>Scheduled: {new Date(p.scheduled_for).toLocaleString()}</p>
                     )}
                   </div>
                 </div>
@@ -627,7 +627,7 @@ export default function TwitterAutoPostsPage() {
         border: `1px solid ${borderColor}`,
         padding: 24,
       }}>
-        <h2 style={{ fontSize: 20, fontWeight: 700, marginBottom: 16, color: '#ef4444' }}>
+        <h2 style={{ fontSize: 20, fontWeight: 700, marginBottom: 16, color: '#BC0000' }}>
           Cron Error Log
         </h2>
         {errors.length === 0 ? (
@@ -649,7 +649,7 @@ export default function TwitterAutoPostsPage() {
                       {new Date(e.timestamp).toLocaleString()}
                     </td>
                     <td style={{ padding: '12px', color: '#eab308' }}>{e.source}</td>
-                    <td style={{ padding: '12px', color: '#ef4444' }}>{e.error}</td>
+                    <td style={{ padding: '12px', color: '#BC0000' }}>{e.error}</td>
                   </tr>
                 ))}
               </tbody>

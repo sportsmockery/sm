@@ -24,12 +24,12 @@ export default function UploadProgress({
             <div className="animate-spin rounded-full h-4 w-4 border-2 border-blue-500 border-t-transparent" />
           )}
           {status === 'complete' && (
-            <svg className="w-4 h-4 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg className="w-4 h-4 text-[#00D4FF]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
             </svg>
           )}
           {status === 'error' && (
-            <svg className="w-4 h-4 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg className="w-4 h-4 text-[#BC0000]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
             </svg>
           )}
@@ -59,10 +59,10 @@ export default function UploadProgress({
             </>
           )}
           {status === 'complete' && (
-            <span className="text-sm text-green-500">Complete</span>
+            <span className="text-sm text-[#00D4FF]">Complete</span>
           )}
           {status === 'error' && (
-            <span className="text-sm text-red-500">Failed</span>
+            <span className="text-sm text-[#BC0000]">Failed</span>
           )}
         </div>
       </div>
@@ -74,8 +74,8 @@ export default function UploadProgress({
             status === 'error'
               ? 'bg-red-500'
               : status === 'complete'
-              ? 'bg-green-500'
-              : 'bg-blue-500'
+              ? 'bg-[#00D4FF]'
+              : 'bg-[#00D4FF]'
           }`}
           style={{ width: `${progress}%` }}
         />
@@ -83,7 +83,7 @@ export default function UploadProgress({
 
       {/* Error message */}
       {status === 'error' && error && (
-        <p className="text-xs text-red-400 mt-1">{error}</p>
+        <p className="text-xs text-[#BC0000] mt-1">{error}</p>
       )}
     </div>
   )

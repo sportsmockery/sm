@@ -128,9 +128,9 @@
   --whitesox-primary: #27251F;
   --whitesox-secondary: #C4CED4;
   --bulls-primary: #CE1141;
-  --bulls-secondary: #000000;
+  --bulls-secondary: #0B0F14;
   --blackhawks-primary: #CF0A2C;
-  --blackhawks-secondary: #000000;
+  --blackhawks-secondary: #0B0F14;
 
   /* Type scale (readability-focused) */
   --font-size-xs: 0.8125rem;
@@ -317,7 +317,7 @@
   --border-default: rgba(0,0,0,0.08);
   --accent-red: #bc0000;
   --accent-red-glow: rgba(188, 0, 0, 0.3);
-  --success: #10b981;
+  --success: #00D4FF;
   --warning: #f59e0b;
   --bg-hover: #f0f0f5;
   --text-secondary: #555566;

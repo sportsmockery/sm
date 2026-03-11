@@ -164,7 +164,7 @@ export function OpponentRosterPanel({
     return result
   }, [roster, search, posFilter, sport])
 
-  const inputBg = isDark ? '#374151' : '#ffffff'
+  const inputBg = isDark ? '#374151' : '#FAFAFB'
   const inputBorder = isDark ? '#4b5563' : '#d1d5db'
   const subText = 'var(--sm-text-muted)'
 
@@ -248,7 +248,7 @@ export function OpponentRosterPanel({
               cursor: 'pointer',
               fontSize: 13,
               fontWeight: 600,
-              backgroundColor: viewMode === 'prospects' ? '#22c55e' : ('var(--sm-surface)'),
+              backgroundColor: viewMode === 'prospects' ? '#00D4FF' : ('var(--sm-surface)'),
               color: viewMode === 'prospects' ? '#fff' : subText,
               transition: 'all 0.15s',
             }}
@@ -372,12 +372,12 @@ export function OpponentRosterPanel({
             </span>
           )}
           {(selectedProspectIds?.size || 0) > 0 && (
-            <span style={{ fontSize: '12px', fontWeight: 600, color: '#22c55e' }}>
+            <span style={{ fontSize: '12px', fontWeight: 600, color: '#00D4FF' }}>
               {selectedProspectIds!.size} prospect{selectedProspectIds!.size > 1 ? 's' : ''}
             </span>
           )}
           {draftPicks.length > 0 && (
-            <span style={{ fontSize: '12px', fontWeight: 600, color: '#8b5cf6' }}>
+            <span style={{ fontSize: '12px', fontWeight: 600, color: '#D6B05E' }}>
               {draftPicks.length} pick{draftPicks.length > 1 ? 's' : ''}
             </span>
           )}
@@ -475,7 +475,7 @@ export function OpponentRosterPanel({
                     </span>
                     <button
                       onClick={() => onRemoveDraftPick(i)}
-                      style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#ef4444', fontWeight: 700, fontSize: '16px' }}
+                      style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#BC0000', fontWeight: 700, fontSize: '16px' }}
                     >
                       ×
                     </button>

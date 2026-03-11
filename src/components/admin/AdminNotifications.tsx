@@ -84,8 +84,8 @@ function getNotificationIcon(type: AdminNotification['type']) {
   switch (type) {
     case 'success':
       return (
-        <div className="flex h-9 w-9 items-center justify-center rounded-full bg-emerald-500/10">
-          <svg className="h-5 w-5 text-emerald-500" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
+        <div className="flex h-9 w-9 items-center justify-center rounded-full bg-[#00D4FF]/10">
+          <svg className="h-5 w-5 text-[#00D4FF]" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
           </svg>
         </div>
@@ -93,7 +93,7 @@ function getNotificationIcon(type: AdminNotification['type']) {
     case 'error':
       return (
         <div className="flex h-9 w-9 items-center justify-center rounded-full bg-red-500/10">
-          <svg className="h-5 w-5 text-red-500" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
+          <svg className="h-5 w-5 text-[#BC0000]" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z" />
           </svg>
         </div>
@@ -108,16 +108,16 @@ function getNotificationIcon(type: AdminNotification['type']) {
       )
     case 'info':
       return (
-        <div className="flex h-9 w-9 items-center justify-center rounded-full bg-blue-500/10">
-          <svg className="h-5 w-5 text-blue-500" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
+        <div className="flex h-9 w-9 items-center justify-center rounded-full bg-[#00D4FF]/10">
+          <svg className="h-5 w-5 text-[#00D4FF]" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" d="M11.25 11.25l.041-.02a.75.75 0 011.063.852l-.708 2.836a.75.75 0 001.063.853l.041-.021M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9-3.75h.008v.008H12V8.25z" />
           </svg>
         </div>
       )
     case 'post':
       return (
-        <div className="flex h-9 w-9 items-center justify-center rounded-full bg-violet-500/10">
-          <svg className="h-5 w-5 text-violet-500" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
+        <div className="flex h-9 w-9 items-center justify-center rounded-full bg-[#D6B05E]/10">
+          <svg className="h-5 w-5 text-[#D6B05E]" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" />
           </svg>
         </div>
@@ -133,7 +133,7 @@ function getNotificationIcon(type: AdminNotification['type']) {
     case 'user':
       return (
         <div className="flex h-9 w-9 items-center justify-center rounded-full bg-pink-500/10">
-          <svg className="h-5 w-5 text-pink-500" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
+          <svg className="h-5 w-5 text-[#BC0000]" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" d="M19 7.5v3m0 0v3m0-3h3m-3 0h-3m-2.25-4.125a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zM4 19.235v-.11a6.375 6.375 0 0112.75 0v.109A12.318 12.318 0 0110.374 21c-2.331 0-4.512-.645-6.374-1.766z" />
           </svg>
         </div>

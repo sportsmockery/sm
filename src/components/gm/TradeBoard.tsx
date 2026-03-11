@@ -354,7 +354,7 @@ export function TradeBoard({
                           {salaryRetentions?.[p.player_id] || 0}%
                         </span>
                         {(salaryRetentions?.[p.player_id] || 0) > 0 && (
-                          <span style={{ color: '#22c55e' }}>
+                          <span style={{ color: '#00D4FF' }}>
                             (${((p.cap_hit * (salaryRetentions?.[p.player_id] || 0)) / 100 / 1_000_000).toFixed(1)}M retained)
                           </span>
                         )}
@@ -384,7 +384,7 @@ export function TradeBoard({
                         onClick={() => onRemoveReceived(i)}
                         style={{
                           background: 'none', border: 'none', cursor: 'pointer',
-                          color: '#ef4444', fontSize: '16px', fontWeight: 700,
+                          color: '#BC0000', fontSize: '16px', fontWeight: 700,
                         }}
                       >
                         &times;
@@ -447,7 +447,7 @@ export function TradeBoard({
                   color: textColor, fontSize: 12,
                 }}
               />
-              {(cashSent || 0) > 100000 && <span style={{ color: '#ef4444', fontSize: 10 }}>Max $100K</span>}
+              {(cashSent || 0) > 100000 && <span style={{ color: '#BC0000', fontSize: 10 }}>Max $100K</span>}
             </div>
             <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
               <span style={{ color: subText }}>Cash Received:</span>
@@ -499,7 +499,7 @@ export function TradeBoard({
               <div style={{
                 fontSize: 64,
                 fontWeight: 900,
-                color: gradeResult.grade >= 70 ? '#22c55e' : gradeResult.grade >= 50 ? '#eab308' : '#ef4444',
+                color: gradeResult.grade >= 70 ? '#00D4FF' : gradeResult.grade >= 50 ? '#eab308' : '#BC0000',
                 lineHeight: 1,
               }}>
                 {gradeResult.grade}
@@ -511,8 +511,8 @@ export function TradeBoard({
                   fontWeight: 800,
                   fontSize: 12,
                   letterSpacing: '1px',
-                  backgroundColor: gradeResult.status === 'accepted' ? '#22c55e20' : '#ef444420',
-                  color: gradeResult.status === 'accepted' ? '#22c55e' : '#ef4444',
+                  backgroundColor: gradeResult.status === 'accepted' ? '#00D4FF20' : '#BC000020',
+                  color: gradeResult.status === 'accepted' ? '#00D4FF' : '#BC0000',
                 }}>
                   {gradeResult.status === 'accepted' ? 'ACCEPTED' : 'REJECTED'}
                 </span>
@@ -561,7 +561,7 @@ export function TradeBoard({
                 fontWeight: 700,
                 textAlign: 'center',
                 marginBottom: 16,
-                color: gradeResult.improvement_score > 0 ? '#22c55e' : gradeResult.improvement_score < 0 ? '#ef4444' : subText,
+                color: gradeResult.improvement_score > 0 ? '#00D4FF' : gradeResult.improvement_score < 0 ? '#BC0000' : subText,
               }}>
                 Team Improvement: {gradeResult.improvement_score > 0 ? '+' : ''}{gradeResult.improvement_score}
               </div>
@@ -577,10 +577,10 @@ export function TradeBoard({
                 borderRadius: 12,
               }}>
                 <div style={{ display: 'flex', alignItems: 'flex-start', gap: 12 }}>
-                  <div style={{ fontSize: 20, color: '#ef4444' }}>⚠️</div>
+                  <div style={{ fontSize: 20, color: '#BC0000' }}>⚠️</div>
                   <div style={{ flex: 1 }}>
                     <h4 style={{
-                      color: '#ef4444',
+                      color: '#BC0000',
                       fontWeight: 600,
                       fontSize: 12,
                       textTransform: 'uppercase',
@@ -634,7 +634,7 @@ export function TradeBoard({
                         height: '100%',
                         width: `${item.value * 100}%`,
                         borderRadius: 3,
-                        backgroundColor: gradeResult.grade >= 70 ? '#22c55e' : gradeResult.grade >= 50 ? '#eab308' : '#ef4444',
+                        backgroundColor: gradeResult.grade >= 70 ? '#00D4FF' : gradeResult.grade >= 50 ? '#eab308' : '#BC0000',
                       }} />
                     </div>
                   </div>
@@ -1002,9 +1002,9 @@ export function TradeBoard({
                       flex: 1,
                       padding: '10px 12px',
                       borderRadius: 8,
-                      border: `2px solid ${copied ? '#22c55e' : borderColor}`,
-                      backgroundColor: copied ? '#22c55e10' : 'transparent',
-                      color: copied ? '#22c55e' : textColor,
+                      border: `2px solid ${copied ? '#00D4FF' : borderColor}`,
+                      backgroundColor: copied ? '#00D4FF10' : 'transparent',
+                      color: copied ? '#00D4FF' : textColor,
                       fontWeight: 600,
                       fontSize: 13,
                       cursor: 'pointer',
@@ -1018,7 +1018,7 @@ export function TradeBoard({
                   >
                     {copied ? (
                       <>
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#22c55e" strokeWidth="2.5">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#00D4FF" strokeWidth="2.5">
                           <path d="M20 6L9 17l-5-5" strokeLinecap="round" strokeLinejoin="round" />
                         </svg>
                         Copied!
@@ -1124,7 +1124,7 @@ export function TradeBoard({
                           padding: '10px 16px',
                           borderRadius: 8,
                           border: 'none',
-                          backgroundColor: '#22c55e',
+                          backgroundColor: '#00D4FF',
                           color: '#fff',
                           fontWeight: 600,
                           fontSize: 13,
@@ -1155,7 +1155,7 @@ export function TradeBoard({
                       style={{
                         width: 48, height: 48,
                         borderRadius: 12,
-                        backgroundColor: '#000000',
+                        backgroundColor: '#0B0F14',
                         display: 'flex',
                         alignItems: 'center',
                         justifyContent: 'center',

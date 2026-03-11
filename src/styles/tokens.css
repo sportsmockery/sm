@@ -26,25 +26,33 @@
   --border-default: #27272a;
   --border-subtle: #1f1f23;
   --border-strong: #3f3f46;
-  --border-focus: #FF0000;
+  --border-focus: #BC0000;
 
-  /* Brand Accent */
-  --accent-red: #FF0000;
-  --accent-red-hover: #CC0000;
-  --accent-red-active: #990000;
-  --accent-red-muted: #661111;
-  --accent-red-glow: rgba(255, 0, 0, 0.2);
-  --accent-red-glow-strong: rgba(255, 0, 0, 0.4);
+  /* Brand Accent — EDGE Branding Final: #BC0000 */
+  --accent-red: #BC0000;
+  --accent-red-hover: #a00000;
+  --accent-red-active: #8a0000;
+  --accent-red-muted: #4c0000;
+  --accent-red-glow: rgba(188, 0, 0, 0.2);
+  --accent-red-glow-strong: rgba(188, 0, 0, 0.4);
 
-  /* Status Colors */
-  --success: #10b981;
-  --success-muted: #065f46;
-  --warning: #f59e0b;
-  --warning-muted: #78350f;
-  --error: #ef4444;
-  --error-muted: #7f1d1d;
-  --info: #3b82f6;
-  --info-muted: #1e3a8a;
+  /* Edge Intelligence */
+  --edge-cyan: #00D4FF;
+  --edge-cyan-glow: rgba(0, 212, 255, 0.2);
+
+  /* Edge Premium */
+  --edge-gold: #D6B05E;
+  --edge-gold-glow: rgba(214, 176, 94, 0.2);
+
+  /* Status Colors — mapped to brand palette */
+  --success: #00D4FF;
+  --success-muted: rgba(0, 212, 255, 0.15);
+  --warning: #D6B05E;
+  --warning-muted: rgba(214, 176, 94, 0.15);
+  --error: #BC0000;
+  --error-muted: rgba(188, 0, 0, 0.15);
+  --info: #00D4FF;
+  --info-muted: rgba(0, 212, 255, 0.15);
 
   /* =========================================
      TEAM COLORS
@@ -57,8 +65,8 @@
 
   /* Bulls */
   --bulls-primary: #CE1141;
-  --bulls-secondary: #000000;
-  --bulls-gradient: linear-gradient(135deg, #CE1141 0%, #000000 100%);
+  --bulls-secondary: #0B0F14;
+  --bulls-gradient: linear-gradient(135deg, #CE1141 0%, #0B0F14 100%);
 
   /* Cubs */
   --cubs-primary: #0E3386;
@@ -72,8 +80,8 @@
 
   /* Blackhawks */
   --blackhawks-primary: #CF0A2C;
-  --blackhawks-secondary: #000000;
-  --blackhawks-gradient: linear-gradient(135deg, #CF0A2C 0%, #000000 100%);
+  --blackhawks-secondary: #0B0F14;
+  --blackhawks-gradient: linear-gradient(135deg, #CF0A2C 0%, #0B0F14 100%);
 
   /* =========================================
      TYPOGRAPHY
@@ -244,7 +252,7 @@
 
   /* Cards */
   --card-padding: var(--space-5);
-  --card-radius: var(--radius-xl);
+  --card-radius: 0.875rem; /* 14px — EDGE Branding Final */
 
   /* Buttons */
   --btn-height-sm: 32px;
@@ -291,7 +299,7 @@
   --border-subtle: #f3f4f6;
   --border-strong: #d1d5db;
 
-  --accent-red: #8B0000;
+  --accent-red: #BC0000;
   --accent-red-hover: #a00000;
   --accent-red-glow: rgba(139, 0, 0, 0.15);
 
@@ -320,7 +328,7 @@
     --border-subtle: #f3f4f6;
     --border-strong: #d1d5db;
 
-    --accent-red: #8B0000;
+    --accent-red: #BC0000;
     --accent-red-hover: #a00000;
     --accent-red-glow: rgba(139, 0, 0, 0.15);
 

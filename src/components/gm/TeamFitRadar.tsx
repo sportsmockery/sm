@@ -155,7 +155,7 @@ export function TeamFitBars({ breakdown, teamColor = '#bc0000' }: Omit<TeamFitRa
     <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
       {LABELS.map(({ key, label }) => {
         const value = breakdown[key]
-        const barColor = value >= 70 ? '#22c55e' : value >= 50 ? '#eab308' : '#ef4444'
+        const barColor = value >= 70 ? '#00D4FF' : value >= 50 ? '#eab308' : '#BC0000'
 
         return (
           <div key={key}>

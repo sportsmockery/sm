@@ -37,7 +37,7 @@ export default function SEOFields({
           className="w-full rounded-lg border border-zinc-200 bg-white px-3 py-2 text-sm text-zinc-900 focus:border-[#8B0000] focus:outline-none focus:ring-1 focus:ring-[#8B0000] dark:border-zinc-700 dark:bg-zinc-800 dark:text-white"
         />
         <div className="mt-1 flex items-center justify-between text-xs">
-          <span className={titleOptimal ? 'text-green-600' : 'text-zinc-500'}>
+          <span className={titleOptimal ? 'text-[#00D4FF]' : 'text-zinc-500'}>
             Recommended: 50-60 characters
           </span>
           <span className={`${titleLength > 60 ? 'text-amber-500' : 'text-zinc-500'}`}>
@@ -59,7 +59,7 @@ export default function SEOFields({
           className="w-full rounded-lg border border-zinc-200 bg-white px-3 py-2 text-sm text-zinc-900 focus:border-[#8B0000] focus:outline-none focus:ring-1 focus:ring-[#8B0000] dark:border-zinc-700 dark:bg-zinc-800 dark:text-white"
         />
         <div className="mt-1 flex items-center justify-between text-xs">
-          <span className={descriptionOptimal ? 'text-green-600' : 'text-zinc-500'}>
+          <span className={descriptionOptimal ? 'text-[#00D4FF]' : 'text-zinc-500'}>
             Recommended: 150-160 characters
           </span>
           <span className={`${descriptionLength > 160 ? 'text-amber-500' : 'text-zinc-500'}`}>
@@ -108,10 +108,10 @@ export default function SEOFields({
       <div className="rounded-lg border border-zinc-200 bg-zinc-50 p-3 dark:border-zinc-700 dark:bg-zinc-800">
         <p className="mb-2 text-xs font-medium uppercase text-zinc-500">Search Preview</p>
         <div className="space-y-1">
-          <p className="text-sm font-medium text-blue-600 dark:text-blue-400">
+          <p className="text-sm font-medium text-[#00D4FF] dark:text-[#00D4FF]">
             {seoTitle || 'Page Title'}
           </p>
-          <p className="text-xs text-green-700 dark:text-green-500">
+          <p className="text-xs text-[#00D4FF] dark:text-[#00D4FF]">
             sportsmockery.com/article/slug
           </p>
           <p className="text-xs text-zinc-600 dark:text-zinc-400">

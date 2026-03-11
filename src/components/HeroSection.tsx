@@ -65,13 +65,13 @@ export default function HeroSection({ featuredArticle, secondaryArticles = [] }:
 
       {/* Red accent glow */}
       <div className="absolute top-0 left-1/4 w-96 h-96 bg-[#8B0000] rounded-full blur-3xl opacity-20" />
-      <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-[#FF0000] rounded-full blur-3xl opacity-10" />
+      <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-[#BC0000] rounded-full blur-3xl opacity-10" />
 
       {/* Chicago Skyline */}
       <div className="absolute bottom-0 left-0 right-0 h-48 pointer-events-none">
         <ChicagoSkyline
           className="absolute bottom-0 w-full h-full"
-          color="#ffffff"
+          color="#FAFAFB"
           opacity={0.05}
         />
       </div>
@@ -158,7 +158,7 @@ export default function HeroSection({ featuredArticle, secondaryArticles = [] }:
 
                 {/* Read more indicator */}
                 <div
-                  className={`mt-6 flex items-center gap-2 text-[#FF0000] font-semibold text-sm transform transition-all duration-500 ${
+                  className={`mt-6 flex items-center gap-2 text-[#BC0000] font-semibold text-sm transform transition-all duration-500 ${
                     isVisible ? 'translate-y-0 opacity-100' : 'translate-y-4 opacity-0'
                   }`}
                   style={{ transitionDelay: '500ms' }}
@@ -209,7 +209,7 @@ export default function HeroSection({ featuredArticle, secondaryArticles = [] }:
 
                 {/* Content */}
                 <div className="flex-1 flex flex-col justify-center min-w-0">
-                  <span className="text-xs font-bold uppercase tracking-wider text-[#FF0000] mb-1">
+                  <span className="text-xs font-bold uppercase tracking-wider text-[#BC0000] mb-1">
                     {article.category.name}
                   </span>
                   <h3 className="text-sm font-bold text-white leading-snug line-clamp-2 group-hover:text-zinc-200 transition-colors font-[var(--font-montserrat)]">
@@ -224,7 +224,7 @@ export default function HeroSection({ featuredArticle, secondaryArticles = [] }:
 
                 {/* Arrow indicator */}
                 <div className="shrink-0 self-center opacity-0 group-hover:opacity-100 transition-opacity">
-                  <svg className="w-5 h-5 text-[#FF0000]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <svg className="w-5 h-5 text-[#BC0000]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                   </svg>
                 </div>
@@ -264,10 +264,10 @@ export default function HeroSection({ featuredArticle, secondaryArticles = [] }:
         >
           {[
             { name: 'Bears', slug: 'chicago-bears', gradient: 'from-[#0B162A] to-[#C83200]' },
-            { name: 'Bulls', slug: 'chicago-bulls', gradient: 'from-[#CE1141] to-[#000000]' },
+            { name: 'Bulls', slug: 'chicago-bulls', gradient: 'from-[#CE1141] to-[#0B0F14]' },
             { name: 'Cubs', slug: 'chicago-cubs', gradient: 'from-[#0E3386] to-[#CC3433]' },
             { name: 'White Sox', slug: 'chicago-white-sox', gradient: 'from-[#27251F] to-[#4a4a4a]' },
-            { name: 'Blackhawks', slug: 'chicago-blackhawks', gradient: 'from-[#CF0A2C] to-[#000000]' },
+            { name: 'Blackhawks', slug: 'chicago-blackhawks', gradient: 'from-[#CF0A2C] to-[#0B0F14]' },
           ].map((team) => (
             <Link
               key={team.slug}

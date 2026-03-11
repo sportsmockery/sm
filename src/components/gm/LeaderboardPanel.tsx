@@ -94,7 +94,7 @@ export function LeaderboardPanel({ entries, currentUserEmail }: LeaderboardPanel
                   {entry.total_improvement != null && entry.total_improvement !== 0 && (
                     <div style={{
                       fontSize: '10px', fontWeight: 600,
-                      color: entry.total_improvement > 0 ? '#22c55e' : '#ef4444',
+                      color: entry.total_improvement > 0 ? '#00D4FF' : '#BC0000',
                     }}>
                       {entry.total_improvement > 0 ? '+' : ''}{Number(entry.total_improvement).toFixed(1)} imp
                     </div>

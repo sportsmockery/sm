@@ -37,16 +37,16 @@ interface Summary {
 const TIER_LABELS: Record<string, { label: string; color: string }> = {
   free: { label: 'Free', color: '#6b7280' },
   sm_plus_monthly: { label: 'SM+ Monthly', color: '#f59e0b' },
-  sm_plus_annual: { label: 'SM+ Annual', color: '#10b981' },
+  sm_plus_annual: { label: 'SM+ Annual', color: '#00D4FF' },
 }
 
 const STATUS_LABELS: Record<string, { label: string; color: string }> = {
-  active: { label: 'Active', color: '#10b981' },
+  active: { label: 'Active', color: '#00D4FF' },
   inactive: { label: 'Inactive', color: '#6b7280' },
-  canceled: { label: 'Canceled', color: '#ef4444' },
+  canceled: { label: 'Canceled', color: '#BC0000' },
   past_due: { label: 'Past Due', color: '#f59e0b' },
-  trialing: { label: 'Trial', color: '#3b82f6' },
-  unpaid: { label: 'Unpaid', color: '#ef4444' },
+  trialing: { label: 'Trial', color: '#00D4FF' },
+  unpaid: { label: 'Unpaid', color: '#BC0000' },
 }
 
 export default function AdminSubscriptionsPage() {
@@ -105,7 +105,7 @@ export default function AdminSubscriptionsPage() {
           </div>
           <div className="bg-white dark:bg-zinc-800 rounded-lg p-4 border border-zinc-200 dark:border-zinc-700">
             <p className="text-sm text-zinc-500">Active SM+</p>
-            <p className="text-2xl font-bold text-green-500">{summary.active}</p>
+            <p className="text-2xl font-bold text-[#00D4FF]">{summary.active}</p>
           </div>
           <div className="bg-white dark:bg-zinc-800 rounded-lg p-4 border border-zinc-200 dark:border-zinc-700">
             <p className="text-sm text-zinc-500">Monthly</p>
@@ -113,11 +113,11 @@ export default function AdminSubscriptionsPage() {
           </div>
           <div className="bg-white dark:bg-zinc-800 rounded-lg p-4 border border-zinc-200 dark:border-zinc-700">
             <p className="text-sm text-zinc-500">Annual</p>
-            <p className="text-2xl font-bold text-emerald-500">{summary.annual}</p>
+            <p className="text-2xl font-bold text-[#00D4FF]">{summary.annual}</p>
           </div>
           <div className="bg-white dark:bg-zinc-800 rounded-lg p-4 border border-zinc-200 dark:border-zinc-700">
             <p className="text-sm text-zinc-500">Canceled</p>
-            <p className="text-2xl font-bold text-red-500">{summary.canceled}</p>
+            <p className="text-2xl font-bold text-[#BC0000]">{summary.canceled}</p>
           </div>
           <div className="bg-white dark:bg-zinc-800 rounded-lg p-4 border border-zinc-200 dark:border-zinc-700">
             <p className="text-sm text-zinc-500">Past Due</p>
@@ -153,7 +153,7 @@ export default function AdminSubscriptionsPage() {
 
         <button
           onClick={fetchSubscriptions}
-          className="px-4 py-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition-colors"
+          className="px-4 py-2 bg-[#BC0000] text-white rounded-lg hover:bg-[#BC0000] transition-colors"
         >
           Refresh
         </button>
@@ -250,7 +250,7 @@ export default function AdminSubscriptionsPage() {
                         {sub.stripe_customer_id && (
                           <button
                             onClick={() => openStripeCustomer(sub.stripe_customer_id)}
-                            className="text-sm text-blue-500 hover:text-blue-600"
+                            className="text-sm text-[#00D4FF] hover:text-[#00D4FF]"
                           >
                             View in Stripe
                           </button>

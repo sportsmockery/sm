@@ -13,9 +13,9 @@ interface TeamChatPanelProps {
 const TEAM_COLORS: Record<string, { primary: string; accent: string }> = {
   bears: { primary: '#0B162A', accent: '#C83803' },
   cubs: { primary: '#0E3386', accent: '#CC3433' },
-  bulls: { primary: '#CE1141', accent: '#000000' },
+  bulls: { primary: '#CE1141', accent: '#0B0F14' },
   'white-sox': { primary: '#27251F', accent: '#C4CED4' },
-  blackhawks: { primary: '#CF0A2C', accent: '#000000' },
+  blackhawks: { primary: '#CF0A2C', accent: '#0B0F14' },
   fire: { primary: '#7B1113', accent: '#A0D3E8' },
   sky: { primary: '#5091CD', accent: '#FFC72C' },
 }
@@ -233,7 +233,7 @@ export default function TeamChatPanel({ teamName, teamSlug }: TeamChatPanelProps
         .chat-panel__online-dot {
           width: 8px;
           height: 8px;
-          background: #22c55e;
+          background: #00D4FF;
           border-radius: 50%;
         }
 
@@ -280,7 +280,7 @@ export default function TeamChatPanel({ teamName, teamSlug }: TeamChatPanelProps
 
         .chat-panel__tab--active {
           color: var(--text-main, #fff);
-          border-bottom-color: var(--accent, #3b82f6);
+          border-bottom-color: var(--accent, #00D4FF);
         }
 
         .chat-panel__content {
@@ -315,7 +315,7 @@ export default function TeamChatPanel({ teamName, teamSlug }: TeamChatPanelProps
           width: 24px;
           height: 24px;
           border: 2px solid var(--border-subtle, #333);
-          border-top-color: var(--accent, #3b82f6);
+          border-top-color: var(--accent, #00D4FF);
           border-radius: 50%;
           animation: spin 0.8s linear infinite;
         }

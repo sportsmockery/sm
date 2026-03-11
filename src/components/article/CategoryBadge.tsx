@@ -11,19 +11,19 @@ interface CategoryBadgeProps {
 // Team color mapping based on category slug
 function getTeamColors(slug: string): { bg: string; color: string } {
   const teamColors: Record<string, { bg: string; color: string }> = {
-    'chicago-bears': { bg: '#C83200', color: '#ffffff' },
-    bears: { bg: '#C83200', color: '#ffffff' },
-    'chicago-bulls': { bg: '#CE1141', color: '#ffffff' },
-    bulls: { bg: '#CE1141', color: '#ffffff' },
-    'chicago-cubs': { bg: '#0E3386', color: '#ffffff' },
-    cubs: { bg: '#0E3386', color: '#ffffff' },
-    'chicago-white-sox': { bg: '#27251F', color: '#ffffff' },
-    'white-sox': { bg: '#27251F', color: '#ffffff' },
-    'chicago-blackhawks': { bg: '#CF0A2C', color: '#ffffff' },
-    blackhawks: { bg: '#CF0A2C', color: '#ffffff' },
+    'chicago-bears': { bg: '#C83200', color: '#FAFAFB' },
+    bears: { bg: '#C83200', color: '#FAFAFB' },
+    'chicago-bulls': { bg: '#CE1141', color: '#FAFAFB' },
+    bulls: { bg: '#CE1141', color: '#FAFAFB' },
+    'chicago-cubs': { bg: '#0E3386', color: '#FAFAFB' },
+    cubs: { bg: '#0E3386', color: '#FAFAFB' },
+    'chicago-white-sox': { bg: '#27251F', color: '#FAFAFB' },
+    'white-sox': { bg: '#27251F', color: '#FAFAFB' },
+    'chicago-blackhawks': { bg: '#CF0A2C', color: '#FAFAFB' },
+    blackhawks: { bg: '#CF0A2C', color: '#FAFAFB' },
   }
 
-  return teamColors[slug.toLowerCase()] || { bg: '#8B0000', color: '#ffffff' }
+  return teamColors[slug.toLowerCase()] || { bg: '#8B0000', color: '#FAFAFB' }
 }
 
 const sizeClasses = {

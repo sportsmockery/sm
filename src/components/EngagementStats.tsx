@@ -80,7 +80,7 @@ export function ReadingProgressBar() {
   return (
     <div className="fixed top-0 left-0 right-0 z-50 h-1" style={{ backgroundColor: 'var(--sm-surface)' }}>
       <div
-        className="h-full bg-gradient-to-r from-[#FF0000] to-[#8B0000] transition-all duration-150"
+        className="h-full bg-gradient-to-r from-[#BC0000] to-[#8B0000] transition-all duration-150"
         style={{ width: `${progress}%` }}
       />
     </div>

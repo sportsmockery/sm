@@ -491,7 +491,7 @@ CREATE INDEX idx_ad_placements_active ON sm_ad_placements(is_active);`}
                     <button
                       onClick={() => handleToggleActive(ad)}
                       className="h-4 w-4 rounded-full"
-                      style={{ backgroundColor: ad.is_active ? '#22c55e' : 'var(--text-muted)' }}
+                      style={{ backgroundColor: ad.is_active ? '#00D4FF' : 'var(--text-muted)' }}
                       title={ad.is_active ? 'Active - Click to disable' : 'Disabled - Click to enable'}
                     />
                     <div>
@@ -519,7 +519,7 @@ CREATE INDEX idx_ad_placements_active ON sm_ad_placements(is_active);`}
                     </button>
                     <button
                       onClick={() => handleDelete(ad.id)}
-                      className="rounded px-3 py-1 text-sm text-red-400 hover:bg-red-900/20 hover:text-red-300"
+                      className="rounded px-3 py-1 text-sm text-[#BC0000] hover:bg-[#BC0000]/20 hover:text-[#BC0000]"
                     >
                       Delete
                     </button>

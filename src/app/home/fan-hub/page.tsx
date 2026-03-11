@@ -62,7 +62,7 @@ export default function FanHubPage() {
                   <div className="hm-room-online">{room.online} online</div>
                 </div>
                 {room.active && (
-                  <div style={{ width: 6, height: 6, borderRadius: '50%', background: '#22c55e' }} />
+                  <div style={{ width: 6, height: 6, borderRadius: '50%', background: '#00D4FF' }} />
                 )}
               </div>
             ))}

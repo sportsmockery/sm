@@ -34,7 +34,7 @@ export default function SyncWritersButton() {
   return (
     <div className="flex items-center gap-3">
       {message && (
-        <p className={`text-sm ${message.includes('Error') || message.includes('Failed') ? 'text-red-400' : 'text-green-400'}`}>
+        <p className={`text-sm ${message.includes('Error') || message.includes('Failed') ? 'text-[#BC0000]' : 'text-[#00D4FF]'}`}>
           {message}
         </p>
       )}

@@ -114,12 +114,12 @@
 
 /* Premium gradient button */
 .hp-btn-premium {
-  background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%);
+  background: linear-gradient(135deg, #00D4FF 0%, #D6B05E 100%);
   transition: all 0.2s ease;
 }
 
 .hp-btn-premium:hover {
-  background: linear-gradient(135deg, #2563eb 0%, #7c3aed 100%);
+  background: linear-gradient(135deg, #00D4FF 0%, #D6B05E 100%);
   transform: translateY(-1px);
 }
 

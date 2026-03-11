@@ -26,7 +26,7 @@
   --sm-section-alt-bg: var(--bg-secondary);
 
   /* Headlines box */
-  --sm-headlines-bg: #ffffff;
+  --sm-headlines-bg: #FAFAFB;
   --sm-headlines-border: #e5e7eb;
   --sm-headline-hover-bg: #f9fafb;
 }
@@ -392,7 +392,7 @@
   align-items: center;
   justify-content: center;
   font-family: var(--font-sans);
-  font-size: 0.75rem;
+  font-size: 0.8125rem;
   font-weight: 700;
   color: var(--sm-text-muted);
   background: var(--bg-secondary);
@@ -812,7 +812,7 @@
 }
 
 .sm-latest-time {
-  font-size: 0.75rem;
+  font-size: 0.8125rem;
   color: var(--sm-text-muted);
 }
 

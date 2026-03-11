@@ -3,8 +3,8 @@
 
 const TEAM_GRADIENTS: Record<string, string> = {
   bears: 'linear-gradient(135deg, #0B162A, #C83803)',
-  bulls: 'linear-gradient(135deg, #CE1141, #000000)',
-  blackhawks: 'linear-gradient(135deg, #CF0A2C, #000000)',
+  bulls: 'linear-gradient(135deg, #CE1141, #0B0F14)',
+  blackhawks: 'linear-gradient(135deg, #CF0A2C, #0B0F14)',
   cubs: 'linear-gradient(135deg, #0E3386, #CC3433)',
   'white-sox': 'linear-gradient(135deg, #27251F, #C4CED4)',
 };

@@ -26,7 +26,7 @@ export default function GradientHeader({
       style={
         teamColors
           ? { background: teamColors.gradient }
-          : { background: 'linear-gradient(135deg, #8B0000 0%, #000000 100%)' }
+          : { background: 'linear-gradient(135deg, #8B0000 0%, #0B0F14 100%)' }
       }
     >
       {/* Animated background pattern */}

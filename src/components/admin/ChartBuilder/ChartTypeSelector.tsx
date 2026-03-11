@@ -136,7 +136,7 @@ export default function ChartTypeSelector({ selected, onSelect }: ChartTypeSelec
                 : 'border-zinc-700 bg-zinc-800/50 text-zinc-400 hover:border-zinc-600 hover:text-zinc-300'
             }`}
           >
-            <div className={`${selected === chart.type ? 'text-[#FF0000]' : 'text-zinc-500'}`}>
+            <div className={`${selected === chart.type ? 'text-[#BC0000]' : 'text-zinc-500'}`}>
               {chart.icon}
             </div>
             <div>

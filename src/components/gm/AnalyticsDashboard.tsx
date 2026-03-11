@@ -102,8 +102,8 @@ export function AnalyticsDashboard() {
       const y = padding.top + chartH - barH
 
       const bucketStart = parseInt(d.bucket.split('-')[0])
-      let color = '#ef4444'
-      if (bucketStart >= 70) color = '#22c55e'
+      let color = '#BC0000'
+      if (bucketStart >= 70) color = '#00D4FF'
       else if (bucketStart >= 50) color = '#eab308'
 
       ctx.fillStyle = color + '80'
@@ -204,8 +204,8 @@ export function AnalyticsDashboard() {
       <div style={{
         padding: 40,
         textAlign: 'center',
-        color: '#ef4444',
-        backgroundColor: '#ef444420',
+        color: '#BC0000',
+        backgroundColor: '#BC000020',
         borderRadius: 12,
       }}>
         {error}
@@ -239,8 +239,8 @@ export function AnalyticsDashboard() {
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 12 }}>
         {[
           { label: 'Total Trades', value: data.total_trades, color: textColor },
-          { label: 'Accepted', value: data.accepted_trades, color: '#22c55e' },
-          { label: 'Rejected', value: data.rejected_trades, color: '#ef4444' },
+          { label: 'Accepted', value: data.accepted_trades, color: '#00D4FF' },
+          { label: 'Rejected', value: data.rejected_trades, color: '#BC0000' },
           { label: 'Dangerous', value: data.dangerous_trades, color: '#eab308' },
         ].map(stat => (
           <motion.div
@@ -288,7 +288,7 @@ export function AnalyticsDashboard() {
             <div style={{
               fontSize: '24px',
               fontWeight: 800,
-              color: stat.label === 'GM Score' ? '#bc0000' : (stat.value >= 70 ? '#22c55e' : stat.value >= 50 ? '#eab308' : '#ef4444'),
+              color: stat.label === 'GM Score' ? '#bc0000' : (stat.value >= 70 ? '#00D4FF' : stat.value >= 50 ? '#eab308' : '#BC0000'),
             }}>
               {stat.value}
             </div>
@@ -384,7 +384,7 @@ export function AnalyticsDashboard() {
                     <span style={{
                       fontSize: '12px',
                       fontWeight: 700,
-                      color: partner.avg_grade >= 70 ? '#22c55e' : partner.avg_grade >= 50 ? '#eab308' : '#ef4444',
+                      color: partner.avg_grade >= 70 ? '#00D4FF' : partner.avg_grade >= 50 ? '#eab308' : '#BC0000',
                     }}>
                       {partner.avg_grade}
                     </span>
@@ -436,8 +436,8 @@ export function AnalyticsDashboard() {
                       fontSize: '10px',
                       padding: '2px 6px',
                       borderRadius: 4,
-                      backgroundColor: '#22c55e20',
-                      color: '#22c55e',
+                      backgroundColor: '#00D4FF20',
+                      color: '#00D4FF',
                       fontWeight: 600,
                     }}>
                       {team.accepted_rate}% accepted
@@ -490,7 +490,7 @@ export function AnalyticsDashboard() {
                 <div style={{
                   fontSize: '11px',
                   fontWeight: 600,
-                  color: pos.net_value > 0 ? '#22c55e' : pos.net_value < 0 ? '#ef4444' : subText,
+                  color: pos.net_value > 0 ? '#00D4FF' : pos.net_value < 0 ? '#BC0000' : subText,
                 }}>
                   {pos.net_value > 0 ? '+' : ''}{pos.net_value} net
                 </div>

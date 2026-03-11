@@ -1099,7 +1099,7 @@ export default function AdvancedPostEditor({
               )}
               {autoSaveStatus === 'saved' && lastAutoSaved && (
                 <>
-                  <svg className="h-3 w-3" style={{ color: '#22c55e' }} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
+                  <svg className="h-3 w-3" style={{ color: '#00D4FF' }} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
                     <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
                   </svg>
                   Saved
@@ -1152,7 +1152,7 @@ export default function AdvancedPostEditor({
             className="inline-flex h-8 items-center gap-2 rounded-lg px-4 text-sm font-medium transition-colors disabled:opacity-50"
             style={{
               backgroundColor: '#bc0000',
-              color: '#ffffff',
+              color: '#FAFAFB',
             }}
           >
             {saving ? 'Saving...' : isEditing ? 'Update' : 'Publish'}
@@ -1220,7 +1220,7 @@ export default function AdvancedPostEditor({
                   disabled={aiLoading === 'grammar' || !formData.content}
                   className="w-full flex items-center gap-3 rounded-lg px-3 py-2 text-sm text-[var(--text-secondary)] hover:bg-[var(--bg-hover)] hover:text-[var(--text-primary)] disabled:opacity-50"
                 >
-                  <svg className="h-5 w-5 text-purple-500" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
+                  <svg className="h-5 w-5 text-[#D6B05E]" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                   </svg>
                   {aiLoading === 'grammar' ? 'Checking...' : 'Grammar Check'}
@@ -1231,7 +1231,7 @@ export default function AdvancedPostEditor({
                   disabled={aiLoading === 'headlines' || !formData.title || !formData.content}
                   className="w-full flex items-center gap-3 rounded-lg px-3 py-2 text-sm text-[var(--text-secondary)] hover:bg-[var(--bg-hover)] hover:text-[var(--text-primary)] disabled:opacity-50"
                 >
-                  <svg className="h-5 w-5 text-purple-500" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
+                  <svg className="h-5 w-5 text-[#D6B05E]" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25H12" />
                   </svg>
                   {aiLoading === 'headlines' ? 'Generating...' : 'Headlines'}
@@ -1250,7 +1250,7 @@ export default function AdvancedPostEditor({
                   disabled={formData.content.length < 200}
                   className="w-full flex items-center gap-3 rounded-lg px-3 py-2 text-sm text-[var(--text-secondary)] hover:bg-[var(--bg-hover)] hover:text-[var(--text-primary)] disabled:opacity-50"
                 >
-                  <svg className="h-5 w-5 text-purple-500" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
+                  <svg className="h-5 w-5 text-[#D6B05E]" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 013 19.875v-6.75zM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V8.625zM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V4.125z" />
                   </svg>
                   Add Chart
@@ -1266,7 +1266,7 @@ export default function AdvancedPostEditor({
           <div className={`mx-auto px-6 py-6 ${leftSidebarCollapsed ? 'max-w-5xl' : 'max-w-4xl'}`}>
             {/* Error - inline, dismisses automatically */}
             {error && (
-              <div className="mb-4 rounded-lg border border-red-500/30 bg-red-500/10 px-4 py-2 text-sm text-red-500">
+              <div className="mb-4 rounded-lg border border-red-500/30 bg-red-500/10 px-4 py-2 text-sm text-[#BC0000]">
                 {error}
               </div>
             )}
@@ -1315,9 +1315,9 @@ export default function AdvancedPostEditor({
 
             {/* Alternative Headlines */}
             {headlines.length > 0 && (
-              <div className="mb-6 rounded-lg border border-purple-500/30 bg-purple-500/5 p-4">
+              <div className="mb-6 rounded-lg border border-[#D6B05E]/30 bg-[#D6B05E]/5 p-4">
                 <div className="mb-3 flex items-center justify-between">
-                  <p className="text-xs font-semibold uppercase tracking-wide text-purple-500">Alternative Headlines</p>
+                  <p className="text-xs font-semibold uppercase tracking-wide text-[#D6B05E]">Alternative Headlines</p>
                   <button type="button" onClick={() => setHeadlines([])} className="text-[var(--text-muted)] hover:text-[var(--text-primary)]">
                     <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
                       <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
@@ -1330,7 +1330,7 @@ export default function AdvancedPostEditor({
                       key={i}
                       type="button"
                       onClick={() => { updateField('title', h); setHeadlines([]) }}
-                      className="w-full rounded-lg bg-white/50 dark:bg-gray-800/50 px-3 py-2 text-left text-sm text-[var(--text-secondary)] hover:bg-purple-500/10 hover:text-purple-500 transition-colors"
+                      className="w-full rounded-lg bg-white/50 dark:bg-gray-800/50 px-3 py-2 text-left text-sm text-[var(--text-secondary)] hover:bg-[#D6B05E]/10 hover:text-[#D6B05E] transition-colors"
                     >
                       {h}
                     </button>
@@ -1346,7 +1346,7 @@ export default function AdvancedPostEditor({
                 onClick={() => setEditorMode('richtext')}
                 className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${
                   editorMode === 'richtext'
-                    ? 'bg-purple-500/15 text-purple-500 border border-purple-500/30'
+                    ? 'bg-[#D6B05E]/15 text-[#D6B05E] border border-[#D6B05E]/30'
                     : 'text-[var(--text-muted)] hover:text-[var(--text-primary)] border border-transparent'
                 }`}
               >
@@ -1370,13 +1370,13 @@ export default function AdvancedPostEditor({
               <div
                 className={`mb-6 overflow-hidden rounded-lg border bg-white dark:bg-gray-900 ${
                   highlightMode
-                    ? 'border-purple-500 ring-2 ring-purple-500/20'
+                    ? 'border-[#D6B05E] ring-2 ring-[#D6B05E]/20'
                     : 'border-[var(--border-default)]'
                 }`}
                 onMouseUp={handleContentSelection}
               >
                 {highlightMode && (
-                  <div className="bg-purple-500/10 border-b border-purple-500/30 px-4 py-2 text-sm text-purple-600 dark:text-purple-400 flex items-center gap-2">
+                  <div className="bg-[#D6B05E]/10 border-b border-[#D6B05E]/30 px-4 py-2 text-sm text-[#D6B05E] dark:text-[#D6B05E] flex items-center gap-2">
                     <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                     </svg>
@@ -1410,13 +1410,13 @@ export default function AdvancedPostEditor({
                 <div className="flex items-center gap-2">
                   <span className="text-sm font-medium text-[var(--text-primary)]">SEO Settings</span>
                   {generatingSEO && (
-                    <svg className="h-4 w-4 animate-spin text-purple-500" fill="none" viewBox="0 0 24 24">
+                    <svg className="h-4 w-4 animate-spin text-[#D6B05E]" fill="none" viewBox="0 0 24 24">
                       <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
                       <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
                     </svg>
                   )}
                   {seoGenerated && !generatingSEO && (
-                    <span className="rounded bg-emerald-500/10 px-1.5 py-0.5 text-[10px] font-medium text-emerald-500">Auto-generated</span>
+                    <span className="rounded bg-[#00D4FF]/10 px-1.5 py-0.5 text-[10px] font-medium text-[#00D4FF]">Auto-generated</span>
                   )}
                 </div>
                 <div className="flex items-center gap-2">
@@ -1424,7 +1424,7 @@ export default function AdvancedPostEditor({
                     <button
                       type="button"
                       onClick={(e) => { e.stopPropagation(); regenerateSEO() }}
-                      className="text-xs text-purple-500 hover:text-purple-400"
+                      className="text-xs text-[#D6B05E] hover:text-[#D6B05E]"
                     >
                       ↻ Regenerate
                     </button>
@@ -1502,10 +1502,10 @@ export default function AdvancedPostEditor({
                   <div>
                     <label className="mb-1.5 block text-xs font-medium text-[var(--text-muted)]">Search Preview</label>
                     <div className="rounded-lg border border-[var(--border-default)] bg-white dark:bg-gray-900 p-3">
-                      <p className="truncate text-sm text-blue-600 hover:underline">
+                      <p className="truncate text-sm text-[#00D4FF] hover:underline">
                         {formData.seo_title || formData.title || 'Page Title'}
                       </p>
-                      <p className="truncate text-xs text-emerald-700 dark:text-emerald-500">
+                      <p className="truncate text-xs text-[#00D4FF] dark:text-[#00D4FF]">
                         sportsmockery.com/{formData.slug || 'article-slug'}
                       </p>
                       <p className="mt-1 line-clamp-2 text-xs text-gray-600 dark:text-gray-400">
@@ -1907,15 +1907,15 @@ export default function AdvancedPostEditor({
 
             {/* PostIQ Tools */}
             <div className="mt-6 pt-6 border-t border-[var(--border-default)]">
-              <p className="mb-3 text-xs font-semibold uppercase tracking-wide text-purple-500">PostIQ Tools</p>
+              <p className="mb-3 text-xs font-semibold uppercase tracking-wide text-[#D6B05E]">PostIQ Tools</p>
               <div className="grid grid-cols-2 gap-2">
                 <button
                   type="button"
                   onClick={() => runAI('headlines')}
                   disabled={aiLoading === 'headlines' || !formData.title || !formData.content}
-                  className="flex flex-col items-center justify-center gap-1 rounded-lg border border-[var(--border-default)] bg-[var(--bg-tertiary)] p-3 text-[var(--text-secondary)] hover:border-purple-500 hover:bg-purple-500/5 transition-colors disabled:opacity-50"
+                  className="flex flex-col items-center justify-center gap-1 rounded-lg border border-[var(--border-default)] bg-[var(--bg-tertiary)] p-3 text-[var(--text-secondary)] hover:border-[#D6B05E] hover:bg-[#D6B05E]/5 transition-colors disabled:opacity-50"
                 >
-                  <svg className="h-5 w-5 text-purple-500" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
+                  <svg className="h-5 w-5 text-[#D6B05E]" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25H12" />
                   </svg>
                   <span className="text-xs font-medium">{aiLoading === 'headlines' ? 'Loading...' : 'Headlines'}</span>
@@ -1924,9 +1924,9 @@ export default function AdvancedPostEditor({
                   type="button"
                   onClick={() => runAI('grammar')}
                   disabled={aiLoading === 'grammar' || !formData.content}
-                  className="flex flex-col items-center justify-center gap-1 rounded-lg border border-[var(--border-default)] bg-[var(--bg-tertiary)] p-3 text-[var(--text-secondary)] hover:border-purple-500 hover:bg-purple-500/5 transition-colors disabled:opacity-50"
+                  className="flex flex-col items-center justify-center gap-1 rounded-lg border border-[var(--border-default)] bg-[var(--bg-tertiary)] p-3 text-[var(--text-secondary)] hover:border-[#D6B05E] hover:bg-[#D6B05E]/5 transition-colors disabled:opacity-50"
                 >
-                  <svg className="h-5 w-5 text-purple-500" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
+                  <svg className="h-5 w-5 text-[#D6B05E]" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                   </svg>
                   <span className="text-xs font-medium">{aiLoading === 'grammar' ? 'Checking...' : 'Grammar'}</span>
@@ -1934,7 +1934,7 @@ export default function AdvancedPostEditor({
                 <button
                   type="button"
                   onClick={() => setShowTeamPicker(true)}
-                  className="flex flex-col items-center justify-center gap-1 rounded-lg border border-[var(--border-default)] bg-[var(--bg-tertiary)] p-3 text-[var(--text-secondary)] hover:border-purple-500 hover:bg-purple-500/5 transition-colors"
+                  className="flex flex-col items-center justify-center gap-1 rounded-lg border border-[var(--border-default)] bg-[var(--bg-tertiary)] p-3 text-[var(--text-secondary)] hover:border-[#D6B05E] hover:bg-[#D6B05E]/5 transition-colors"
                 >
                   <span className="text-lg">💡</span>
                   <span className="text-xs font-medium">Ideas</span>
@@ -1943,9 +1943,9 @@ export default function AdvancedPostEditor({
                   type="button"
                   onClick={() => openChartModal()}
                   disabled={formData.content.length < 200}
-                  className="flex flex-col items-center justify-center gap-1 rounded-lg border border-[var(--border-default)] bg-[var(--bg-tertiary)] p-3 text-[var(--text-secondary)] hover:border-purple-500 hover:bg-purple-500/5 transition-colors disabled:opacity-50"
+                  className="flex flex-col items-center justify-center gap-1 rounded-lg border border-[var(--border-default)] bg-[var(--bg-tertiary)] p-3 text-[var(--text-secondary)] hover:border-[#D6B05E] hover:bg-[#D6B05E]/5 transition-colors disabled:opacity-50"
                 >
-                  <svg className="h-5 w-5 text-purple-500" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
+                  <svg className="h-5 w-5 text-[#D6B05E]" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 013 19.875v-6.75zM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V8.625zM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V4.125z" />
                   </svg>
                   <span className="text-xs font-medium">Add Chart</span>
@@ -2006,7 +2006,7 @@ export default function AdvancedPostEditor({
             <div className="max-h-[60vh] space-y-3 overflow-y-auto p-6">
               {loadingIdeas ? (
                 <div className="py-8 text-center">
-                  <div className="mx-auto h-6 w-6 animate-spin rounded-full border-2 border-purple-500 border-t-transparent" />
+                  <div className="mx-auto h-6 w-6 animate-spin rounded-full border-2 border-[#D6B05E] border-t-transparent" />
                   <p className="mt-3 text-gray-500 dark:text-gray-400">Finding trending topics...</p>
                 </div>
               ) : ideas.length > 0 ? (
@@ -2017,8 +2017,8 @@ export default function AdvancedPostEditor({
                     onClick={() => setSelectedIdea(idea)}
                     className={`w-full rounded-lg border-2 p-4 text-left transition-all ${
                       selectedIdea === idea
-                        ? 'border-purple-500 bg-purple-50 dark:bg-purple-500/10'
-                        : 'border-gray-200 hover:border-purple-300 dark:border-gray-700'
+                        ? 'border-[#D6B05E] bg-[#D6B05E]/10 dark:bg-[#D6B05E]/10'
+                        : 'border-gray-200 hover:border-[#D6B05E] dark:border-gray-700'
                     }`}
                   >
                     <div className="flex items-start justify-between gap-3">
@@ -2033,13 +2033,13 @@ export default function AdvancedPostEditor({
                         </div>
                         <p className="mt-1.5 text-sm text-gray-600 dark:text-gray-300">{idea.angle}</p>
                         {idea.hook && (
-                          <p className="mt-1 text-xs italic text-purple-600 dark:text-purple-400">💡 {idea.hook}</p>
+                          <p className="mt-1 text-xs italic text-[#D6B05E] dark:text-[#D6B05E]">💡 {idea.hook}</p>
                         )}
                       </div>
                       {idea.viral_score !== undefined && (
                         <div className="flex flex-col items-center">
                           <div className={`flex h-10 w-10 items-center justify-center rounded-full text-sm font-bold text-white ${
-                            idea.viral_score >= 80 ? 'bg-green-500' :
+                            idea.viral_score >= 80 ? 'bg-[#00D4FF]' :
                             idea.viral_score >= 60 ? 'bg-yellow-500' : 'bg-gray-400'
                           }`}>
                             {idea.viral_score}
@@ -2050,12 +2050,12 @@ export default function AdvancedPostEditor({
                     </div>
                     <div className="mt-3 flex flex-wrap items-center gap-2">
                       <span className={`rounded-full px-2 py-0.5 text-xs font-medium ${
-                        idea.emotion === 'rage' ? 'bg-red-100 text-red-700 dark:bg-red-900/40 dark:text-red-300' :
-                        idea.emotion === 'hope' ? 'bg-green-100 text-green-700 dark:bg-green-900/40 dark:text-green-300' :
+                        idea.emotion === 'rage' ? 'bg-[#BC0000]/10 text-[#BC0000] dark:bg-[#BC0000]/40 dark:text-[#BC0000]' :
+                        idea.emotion === 'hope' ? 'bg-[#00D4FF]/10 text-[#00D4FF] dark:bg-[#00D4FF]/40 dark:text-[#00D4FF]' :
                         idea.emotion === 'LOL' ? 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/40 dark:text-yellow-300' :
-                        idea.emotion === 'panic' ? 'bg-orange-100 text-orange-700 dark:bg-orange-900/40 dark:text-orange-300' :
-                        idea.emotion === 'hype' ? 'bg-purple-100 text-purple-700 dark:bg-purple-900/40 dark:text-purple-300' :
-                        idea.emotion === 'nostalgia' ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-300' :
+                        idea.emotion === 'panic' ? 'bg-[#BC0000]/10 text-[#BC0000] dark:bg-[#BC0000]/40 dark:text-[#BC0000]' :
+                        idea.emotion === 'hype' ? 'bg-[#D6B05E]/10 text-[#D6B05E] dark:bg-[#D6B05E]/40 dark:text-[#D6B05E]' :
+                        idea.emotion === 'nostalgia' ? 'bg-[#00D4FF]/10 text-[#00D4FF] dark:bg-[#00D4FF]/40 dark:text-[#00D4FF]' :
                         'bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-300'
                       }`}>
                         {idea.emotion || 'analysis'}
@@ -2085,7 +2085,7 @@ export default function AdvancedPostEditor({
                   <button
                     type="button"
                     onClick={() => generateIdeas(currentIdeasTeam || undefined)}
-                    className="mt-3 text-sm font-medium text-purple-500 hover:text-purple-400"
+                    className="mt-3 text-sm font-medium text-[#D6B05E] hover:text-[#D6B05E]"
                   >
                     Try again
                   </button>
@@ -2097,7 +2097,7 @@ export default function AdvancedPostEditor({
                 type="button"
                 onClick={refreshIdeas}
                 disabled={loadingIdeas || !ideasCanRefresh}
-                className="flex items-center gap-1.5 text-sm font-medium text-purple-500 hover:text-purple-400 disabled:cursor-not-allowed disabled:opacity-50"
+                className="flex items-center gap-1.5 text-sm font-medium text-[#D6B05E] hover:text-[#D6B05E] disabled:cursor-not-allowed disabled:opacity-50"
               >
                 <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0l3.181 3.183a8.25 8.25 0 0013.803-3.7M4.031 9.865a8.25 8.25 0 0113.803-3.7l3.181 3.182m0-4.991v4.99" />
@@ -2115,7 +2115,7 @@ export default function AdvancedPostEditor({
                 type="button"
                 onClick={useSelectedIdea}
                 disabled={!selectedIdea}
-                className="rounded-lg bg-purple-600 px-4 py-2 text-sm font-medium text-white hover:bg-purple-700 disabled:cursor-not-allowed disabled:opacity-50"
+                className="rounded-lg bg-[#D6B05E] px-4 py-2 text-sm font-medium text-white hover:bg-[#D6B05E] disabled:cursor-not-allowed disabled:opacity-50"
               >
                 Use Selected
               </button>
@@ -2153,12 +2153,12 @@ export default function AdvancedPostEditor({
                     setShowTeamPicker(false)
                     generateIdeas(team.value || undefined)
                   }}
-                  className="w-full flex items-center gap-3 rounded-lg border-2 border-gray-200 px-4 py-3 text-left transition-all hover:border-purple-400 hover:bg-purple-50 dark:border-gray-700 dark:hover:border-purple-500 dark:hover:bg-purple-500/10"
+                  className="w-full flex items-center gap-3 rounded-lg border-2 border-gray-200 px-4 py-3 text-left transition-all hover:border-[#D6B05E] hover:bg-[#D6B05E]/10 dark:border-gray-700 dark:hover:border-[#D6B05E] dark:hover:bg-[#D6B05E]/10"
                 >
                   {team.logo ? (
                     <Image src={team.logo} alt={team.label} width={28} height={28} className="object-contain" />
                   ) : (
-                    <svg className="w-7 h-7 text-purple-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <svg className="w-7 h-7 text-[#D6B05E]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                     </svg>
                   )}
@@ -2172,7 +2172,7 @@ export default function AdvancedPostEditor({
 
       {/* Highlight Mode Floating Toolbar */}
       {highlightMode && (
-        <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-[70] flex items-center gap-3 rounded-full bg-purple-600 px-6 py-3 shadow-2xl">
+        <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-[70] flex items-center gap-3 rounded-full bg-[#D6B05E] px-6 py-3 shadow-2xl">
           <svg className="h-5 w-5 text-white animate-pulse" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
           </svg>
@@ -2182,7 +2182,7 @@ export default function AdvancedPostEditor({
           {highlightedText && (
             <button
               onClick={handleUseHighlightedData}
-              className="ml-2 rounded-full bg-white px-4 py-1.5 text-sm font-semibold text-purple-600 hover:bg-purple-50 transition-colors"
+              className="ml-2 rounded-full bg-white px-4 py-1.5 text-sm font-semibold text-[#D6B05E] hover:bg-[#D6B05E]/10 transition-colors"
             >
               Use This Data
             </button>
@@ -2240,7 +2240,7 @@ export default function AdvancedPostEditor({
             {/* Header */}
             <div className="flex items-center justify-between border-b border-gray-200 px-6 py-4 dark:border-zinc-700">
               <div className="flex items-center gap-3">
-                <svg className="h-5 w-5 text-purple-500" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
+                <svg className="h-5 w-5 text-[#D6B05E]" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.64 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.64 0-8.573-3.007-9.963-7.178z" />
                   <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
                 </svg>

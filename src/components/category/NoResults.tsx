@@ -49,7 +49,7 @@ export default function NoResults({
         <Link
           href="/"
           className="rounded-xl px-6 py-2.5 text-sm font-semibold transition-colors"
-          style={{ backgroundColor: 'var(--sm-accent)', color: '#ffffff' }}
+          style={{ backgroundColor: 'var(--sm-accent)', color: '#FAFAFB' }}
         >
           Go to Homepage
         </Link>

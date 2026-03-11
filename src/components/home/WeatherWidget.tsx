@@ -138,7 +138,7 @@ export default function WeatherWidget({ className = '' }: WeatherWidgetProps) {
 // Compact version for sidebar
 export function WeatherWidgetCompact({ className = '' }: WeatherWidgetProps) {
   return (
-    <div className={`flex items-center gap-2 rounded-lg bg-blue-500/10 px-3 py-2 ${className}`}>
+    <div className={`flex items-center gap-2 rounded-lg bg-[#00D4FF]/10 px-3 py-2 ${className}`}>
       <span className="text-lg">⛅</span>
       <div>
         <span className="text-sm font-semibold" style={{ color: 'var(--sm-text)' }}>28°F</span>

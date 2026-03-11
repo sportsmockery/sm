@@ -106,9 +106,9 @@ export default function ArticleChart({ chartId, config: propConfig, className = 
         gradient: [teamColors[colors.team].primary, teamColors[colors.team].secondary],
       }
     : {
-        primary: colors.customColors?.[0] || '#FF0000',
-        secondary: colors.customColors?.[0] || '#FF0000',
-        gradient: [colors.customColors?.[0] || '#FF0000', colors.customColors?.[0] || '#FF0000'],
+        primary: colors.customColors?.[0] || '#BC0000',
+        secondary: colors.customColors?.[0] || '#BC0000',
+        gradient: [colors.customColors?.[0] || '#BC0000', colors.customColors?.[0] || '#BC0000'],
       }
 
   const renderChart = () => {

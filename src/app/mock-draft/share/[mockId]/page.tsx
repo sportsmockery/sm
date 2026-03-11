@@ -91,12 +91,12 @@ export default function MockDraftSharePage() {
   const teamColor = team?.color || '#bc0000'
 
   const getGradeColor = (gradeValue: number) => {
-    if (gradeValue >= 90) return '#10b981'
-    if (gradeValue >= 80) return '#22c55e'
+    if (gradeValue >= 90) return '#00D4FF'
+    if (gradeValue >= 80) return '#00D4FF'
     if (gradeValue >= 70) return '#84cc16'
     if (gradeValue >= 60) return '#f59e0b'
-    if (gradeValue >= 50) return '#f97316'
-    return '#ef4444'
+    if (gradeValue >= 50) return '#BC0000'
+    return '#BC0000'
   }
 
   if (loading) {

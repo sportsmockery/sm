@@ -57,14 +57,13 @@ export default function ProfilePage() {
   const [isSavingAvatar, setIsSavingAvatar] = useState(false)
 
   const [settings, setSettings] = useState({
-    breakingNews: true, teamUpdates: true, weeklyDigest: false, predictionResults: true,
     darkMode: true, reducedMotion: false, compactMode: false,
     showProfile: true, showActivity: false, allowAnalytics: true,
     favoriteTeams: ['bears'] as TeamSlug[],
   })
 
   const [expandedSections, setExpandedSections] = useState<Record<string, boolean>>({
-    favorites: true, notifications: false, display: false, privacy: false, account: false,
+    favorites: true, account: false,
   })
 
   useEffect(() => {
@@ -172,7 +171,7 @@ export default function ProfilePage() {
               <input ref={fileInputRef} type="file" accept="image/*" onChange={handleAvatarChange} style={{ display: 'none' }} />
               <div style={{
                 position: 'absolute', bottom: -4, right: -4, width: 32, height: 32, borderRadius: '50%',
-                background: 'linear-gradient(135deg, #f59e0b, #f97316)', display: 'flex', alignItems: 'center', justifyContent: 'center',
+                background: 'linear-gradient(135deg, #f59e0b, #BC0000)', display: 'flex', alignItems: 'center', justifyContent: 'center',
                 fontSize: '12px', fontWeight: 700, color: '#fff', boxShadow: '0 2px 8px rgba(0,0,0,0.3)',
               }}>
                 {mockStats.streak}
@@ -193,12 +192,12 @@ export default function ProfilePage() {
                       autoFocus
                     />
                     <div style={{ display: 'flex', gap: '4px' }}>
-                      <button onClick={handleNameSave} disabled={isSavingName} style={{ padding: '6px', borderRadius: '8px', background: 'rgba(16,185,129,0.2)', color: '#10b981', border: 'none', cursor: 'pointer' }}>
+                      <button onClick={handleNameSave} disabled={isSavingName} style={{ padding: '6px', borderRadius: '8px', background: 'rgba(16,185,129,0.2)', color: '#00D4FF', border: 'none', cursor: 'pointer' }}>
                         <svg style={{ width: 20, height: 20 }} fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
                           <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" />
                         </svg>
                       </button>
-                      <button onClick={handleNameCancel} style={{ padding: '6px', borderRadius: '8px', background: 'rgba(239,68,68,0.2)', color: '#ef4444', border: 'none', cursor: 'pointer' }}>
+                      <button onClick={handleNameCancel} style={{ padding: '6px', borderRadius: '8px', background: 'rgba(239,68,68,0.2)', color: '#BC0000', border: 'none', cursor: 'pointer' }}>
                         <svg style={{ width: 20, height: 20 }} fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
                           <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
                         </svg>
@@ -351,33 +350,16 @@ export default function ProfilePage() {
               <FavoriteTeamsSelector initialTeams={settings.favoriteTeams} onChange={handleFavoriteTeamsChange} maxSelections={5} />
             </CollapsibleSection>
 
-            <CollapsibleSection title="Notifications" description="Choose what updates you receive" iconBgColor="#bc0000" isExpanded={expandedSections.notifications} onToggle={() => toggleSection('notifications')}>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-                <ToggleSetting label="Breaking News Alerts" description="Get notified about major breaking stories" enabled={settings.breakingNews} onChange={() => handleToggle('breakingNews')} />
-                <ToggleSetting label="Team Updates" description="Updates about your favorite team" enabled={settings.teamUpdates} onChange={() => handleToggle('teamUpdates')} />
-                <ToggleSetting label="Weekly Digest" description="Summary of the week's top stories" enabled={settings.weeklyDigest} onChange={() => handleToggle('weeklyDigest')} />
-                <ToggleSetting label="Prediction Results" description="When SM Prophecy predictions are resolved" enabled={settings.predictionResults} onChange={() => handleToggle('predictionResults')} />
-              </div>
-            </CollapsibleSection>
-
-            <CollapsibleSection title="Display" description="Customize your viewing experience" iconBgColor="#a855f7" isExpanded={expandedSections.display} onToggle={() => toggleSection('display')}>
+            <CollapsibleSection title="Account" description="Manage your account settings" iconBgColor="#71717a" isExpanded={expandedSections.account} onToggle={() => toggleSection('account')}>
               <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
                 <ToggleSetting label="Dark Mode" description="Use dark theme throughout the site" enabled={settings.darkMode} onChange={() => handleToggle('darkMode')} />
                 <ToggleSetting label="Reduced Motion" description="Minimize animations for accessibility" enabled={settings.reducedMotion} onChange={() => handleToggle('reducedMotion')} />
                 <ToggleSetting label="Compact Mode" description="Denser layout with smaller elements" enabled={settings.compactMode} onChange={() => handleToggle('compactMode')} />
-              </div>
-            </CollapsibleSection>
-
-            <CollapsibleSection title="Privacy" description="Control your data and visibility" iconBgColor="#10b981" isExpanded={expandedSections.privacy} onToggle={() => toggleSection('privacy')}>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                <div style={{ height: '1px', background: 'var(--sm-border)', margin: '4px 0' }} />
                 <ToggleSetting label="Public Profile" description="Allow others to see your profile" enabled={settings.showProfile} onChange={() => handleToggle('showProfile')} />
                 <ToggleSetting label="Activity Visibility" description="Show your reading activity on profile" enabled={settings.showActivity} onChange={() => handleToggle('showActivity')} />
                 <ToggleSetting label="Analytics" description="Help improve SM with anonymous usage data" enabled={settings.allowAnalytics} onChange={() => handleToggle('allowAnalytics')} />
-              </div>
-            </CollapsibleSection>
-
-            <CollapsibleSection title="Account" description="Manage your account settings" iconBgColor="#71717a" isExpanded={expandedSections.account} onToggle={() => toggleSection('account')}>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                <div style={{ height: '1px', background: 'var(--sm-border)', margin: '4px 0' }} />
                 <button className="glass-card glass-card-sm" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '16px', border: 'none', cursor: 'pointer', textAlign: 'left', width: '100%' }}>
                   <div>
                     <p style={{ fontWeight: 500, fontSize: '14px', color: 'var(--sm-text)' }}>Change Password</p>
@@ -387,27 +369,16 @@ export default function ProfilePage() {
                     <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
                   </svg>
                 </button>
-
-                <button className="glass-card glass-card-sm" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '16px', border: 'none', cursor: 'pointer', textAlign: 'left', width: '100%' }}>
-                  <div>
-                    <p style={{ fontWeight: 500, fontSize: '14px', color: 'var(--sm-text)' }}>Export Data</p>
-                    <p style={{ fontSize: '12px', color: 'var(--sm-text-muted)' }}>Download all your data</p>
-                  </div>
-                  <svg style={{ width: 20, height: 20, color: 'var(--sm-text-muted)', flexShrink: 0 }} fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
-                  </svg>
-                </button>
-
                 <button style={{
                   display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '16px',
                   borderRadius: 'var(--sm-radius-md)', border: 'none', cursor: 'pointer', textAlign: 'left', width: '100%',
                   background: 'rgba(239,68,68,0.1)',
                 }}>
                   <div>
-                    <p style={{ fontWeight: 500, fontSize: '14px', color: '#ef4444' }}>Delete Account</p>
+                    <p style={{ fontWeight: 500, fontSize: '14px', color: '#BC0000' }}>Delete Account</p>
                     <p style={{ fontSize: '12px', color: 'rgba(239,68,68,0.6)' }}>Permanently delete your account and data</p>
                   </div>
-                  <svg style={{ width: 20, height: 20, color: '#ef4444', flexShrink: 0 }} fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
+                  <svg style={{ width: 20, height: 20, color: '#BC0000', flexShrink: 0 }} fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
                   </svg>
                 </button>

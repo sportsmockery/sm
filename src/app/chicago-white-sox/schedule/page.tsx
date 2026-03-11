@@ -127,7 +127,7 @@ function GameRow({ game }: { game: WhiteSoxGame }) {
   const isInProgress = game.status === 'in_progress'
 
   const borderColor = isPast
-    ? game.result === 'W' ? '#10b981' : '#ef4444'
+    ? game.result === 'W' ? '#00D4FF' : '#BC0000'
     : 'var(--sm-red)'
 
   return (
@@ -193,7 +193,7 @@ function GameRow({ game }: { game: WhiteSoxGame }) {
                   fontSize: '11px',
                   fontWeight: 700,
                   backgroundColor: game.result === 'W' ? 'rgba(16, 185, 129, 0.1)' : 'rgba(239, 68, 68, 0.1)',
-                  color: game.result === 'W' ? '#10b981' : '#ef4444',
+                  color: game.result === 'W' ? '#00D4FF' : '#BC0000',
                 }}
               >
                 {game.result}

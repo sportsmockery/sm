@@ -40,7 +40,7 @@ export default function GovernancePage() {
         <div style={{ maxWidth: '1200px', margin: '0 auto', display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center' }}>
           <div style={{
             width: 80, height: 80, borderRadius: 'var(--sm-radius-lg)', marginBottom: '24px',
-            background: 'linear-gradient(135deg, #3b82f6, #6366f1)', display: 'flex', alignItems: 'center', justifyContent: 'center',
+            background: 'linear-gradient(135deg, #00D4FF, #6366f1)', display: 'flex', alignItems: 'center', justifyContent: 'center',
             boxShadow: '0 0 30px rgba(59,130,246,0.3)',
           }}>
             <svg style={{ width: 40, height: 40, color: '#fff' }} fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
@@ -66,7 +66,7 @@ export default function GovernancePage() {
               <div style={{ fontSize: '14px', color: 'var(--sm-text-muted)' }}>Active Proposals</div>
             </div>
             <div style={{ textAlign: 'center' }}>
-              <div style={{ fontSize: '30px', fontWeight: 900, color: '#3b82f6' }}>15.2K</div>
+              <div style={{ fontSize: '30px', fontWeight: 900, color: '#00D4FF' }}>15.2K</div>
               <div style={{ fontSize: '14px', color: 'var(--sm-text-muted)' }}>Total Votes Cast</div>
             </div>
             <div style={{ textAlign: 'center' }}>
@@ -113,7 +113,7 @@ export default function GovernancePage() {
                         {proposal.team}
                       </span>
                       <span style={{ display: 'flex', alignItems: 'center', gap: '4px', fontSize: '12px', color: 'var(--sm-text-muted)' }}>
-                        <span style={{ width: 6, height: 6, borderRadius: '50%', background: '#22c55e', animation: 'pulse 2s ease-in-out infinite' }} />
+                        <span style={{ width: 6, height: 6, borderRadius: '50%', background: '#00D4FF', animation: 'pulse 2s ease-in-out infinite' }} />
                         {proposal.endsIn} left
                       </span>
                     </div>
@@ -125,13 +125,13 @@ export default function GovernancePage() {
 
                 <div style={{ marginBottom: '16px' }}>
                   <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', fontSize: '14px', marginBottom: '8px' }}>
-                    <span style={{ fontWeight: 600, color: '#10b981' }}>Yes: {percentage}%</span>
-                    <span style={{ fontWeight: 600, color: '#ef4444' }}>No: {100 - percentage}%</span>
+                    <span style={{ fontWeight: 600, color: '#00D4FF' }}>Yes: {percentage}%</span>
+                    <span style={{ fontWeight: 600, color: '#BC0000' }}>No: {100 - percentage}%</span>
                   </div>
                   <div style={{ position: 'relative', height: 16, overflow: 'hidden', borderRadius: '9999px', background: 'var(--sm-surface)' }}>
                     <div style={{
                       position: 'absolute', inset: 0, right: `${100 - percentage}%`, borderRadius: '9999px',
-                      background: 'linear-gradient(90deg, #059669, #10b981)',
+                      background: 'linear-gradient(90deg, #00D4FF, #00D4FF)',
                     }} />
                   </div>
                   <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '12px', color: 'var(--sm-text-muted)', marginTop: '8px' }}>
@@ -151,10 +151,10 @@ export default function GovernancePage() {
                     </span>
                   </div>
                   <div style={{ display: 'flex', gap: '8px' }}>
-                    <button className="btn-sm" style={{ borderRadius: 'var(--sm-radius-md)', background: 'rgba(16,185,129,0.15)', color: '#10b981', border: 'none', fontWeight: 600, cursor: 'pointer', padding: '8px 16px', fontSize: '14px' }}>
+                    <button className="btn-sm" style={{ borderRadius: 'var(--sm-radius-md)', background: 'rgba(16,185,129,0.15)', color: '#00D4FF', border: 'none', fontWeight: 600, cursor: 'pointer', padding: '8px 16px', fontSize: '14px' }}>
                       Vote Yes
                     </button>
-                    <button className="btn-sm" style={{ borderRadius: 'var(--sm-radius-md)', background: 'rgba(239,68,68,0.15)', color: '#ef4444', border: 'none', fontWeight: 600, cursor: 'pointer', padding: '8px 16px', fontSize: '14px' }}>
+                    <button className="btn-sm" style={{ borderRadius: 'var(--sm-radius-md)', background: 'rgba(239,68,68,0.15)', color: '#BC0000', border: 'none', fontWeight: 600, cursor: 'pointer', padding: '8px 16px', fontSize: '14px' }}>
                       Vote No
                     </button>
                   </div>
@@ -189,7 +189,7 @@ export default function GovernancePage() {
                   <span style={{
                     fontSize: '12px', fontWeight: 600, padding: '2px 8px', borderRadius: '9999px',
                     background: passed ? 'rgba(16,185,129,0.15)' : 'rgba(239,68,68,0.15)',
-                    color: passed ? '#10b981' : '#ef4444',
+                    color: passed ? '#00D4FF' : '#BC0000',
                   }}>
                     {passed ? 'Passed' : 'Rejected'}
                   </span>
@@ -198,7 +198,7 @@ export default function GovernancePage() {
                 <div style={{ position: 'relative', height: 8, overflow: 'hidden', borderRadius: '9999px', background: 'var(--sm-surface)' }}>
                   <div style={{
                     position: 'absolute', inset: 0, right: `${100 - percentage}%`, borderRadius: '9999px',
-                    background: passed ? '#10b981' : '#ef4444',
+                    background: passed ? '#00D4FF' : '#BC0000',
                   }} />
                 </div>
                 <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '12px', color: 'var(--sm-text-muted)', marginTop: '8px' }}>

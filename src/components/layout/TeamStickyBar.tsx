@@ -279,11 +279,11 @@ export default function TeamStickyBar({ teamKey, className = '', isArticlePage }
   // Determine hover color class based on team
   const getHoverColorClass = (): string => {
     switch (teamKey) {
-      case 'bears': return 'hover:text-orange-300'
-      case 'bulls': return 'hover:text-red-300'
-      case 'cubs': return 'hover:text-blue-300'
+      case 'bears': return 'hover:text-[#BC0000]'
+      case 'bulls': return 'hover:text-[#BC0000]'
+      case 'cubs': return 'hover:text-[#00D4FF]'
       case 'whitesox': return 'hover:text-gray-300'
-      case 'blackhawks': return 'hover:text-red-300'
+      case 'blackhawks': return 'hover:text-[#BC0000]'
       default: return 'hover:text-white'
     }
   }
@@ -328,7 +328,7 @@ export default function TeamStickyBar({ teamKey, className = '', isArticlePage }
                     <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
                     <span className="relative inline-flex rounded-full h-full w-full bg-red-500"></span>
                   </span>
-                  <span className="text-red-400 hidden sm:inline">Live</span>
+                  <span className="text-[#BC0000] hidden sm:inline">Live</span>
                 </span>
                 <span className="text-white font-bold text-xs sm:text-sm truncate">
                   {config.abbrev} {data.liveGame.teamScore} - {data.liveGame.opponentScore} {data.liveGame.opponent}
@@ -377,7 +377,7 @@ export default function TeamStickyBar({ teamKey, className = '', isArticlePage }
                   className="hidden lg:flex items-center gap-2 hover:bg-white/10 px-2 py-1 rounded transition-colors"
                 >
                   <span className="text-white/50 text-xs">Last:</span>
-                  <span className={`text-xs font-bold ${data.lastGame.result === 'W' ? 'text-green-400' : 'text-red-400'}`}>
+                  <span className={`text-xs font-bold ${data.lastGame.result === 'W' ? 'text-[#00D4FF]' : 'text-[#BC0000]'}`}>
                     {data.lastGame.result}
                   </span>
                   <span className="text-white font-medium text-xs">

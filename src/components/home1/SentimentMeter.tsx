@@ -122,7 +122,7 @@ export default function SentimentMeter() {
               fontSize: 28,
               fontWeight: 900,
               fontStyle: 'italic',
-              color: isDark ? '#ffffff' : '#111111',
+              color: isDark ? '#FAFAFB' : '#111111',
               lineHeight: 1,
             }}
           >

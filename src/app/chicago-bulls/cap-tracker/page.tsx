@@ -179,7 +179,7 @@ export default async function BullsCapTrackerPage() {
               label="Cap Space"
               value={formatMoney(cap!.cap_space)}
               subtitle={isOverCap ? 'OVER CAP' : 'AVAILABLE'}
-              color={isOverCap ? 'var(--sm-error, #ef4444)' : 'var(--sm-success, #22c55e)'}
+              color={isOverCap ? 'var(--sm-error, #BC0000)' : 'var(--sm-success, #00D4FF)'}
             />
             <CapCard label="Committed" value={formatMoney(cap!.total_committed)} />
           </div>
@@ -208,7 +208,7 @@ export default async function BullsCapTrackerPage() {
               <span style={{ fontSize: '13px', fontWeight: 600, color: 'var(--sm-text)' }}>
                 Cap Usage
               </span>
-              <span style={{ fontSize: '13px', fontWeight: 700, color: isOverCap ? 'var(--sm-error, #ef4444)' : 'var(--sm-success, #22c55e)' }}>
+              <span style={{ fontSize: '13px', fontWeight: 700, color: isOverCap ? 'var(--sm-error, #BC0000)' : 'var(--sm-success, #00D4FF)' }}>
                 {usedPct.toFixed(1)}%
               </span>
             </div>
@@ -233,7 +233,7 @@ export default async function BullsCapTrackerPage() {
                   left: 0,
                   top: 0,
                   width: `${Math.min(usedPct, 100)}%`,
-                  ...(isOverCap ? { background: 'var(--sm-error, #ef4444)' } : {}),
+                  ...(isOverCap ? { background: 'var(--sm-error, #BC0000)' } : {}),
                   opacity: 0.85,
                 }}
               />

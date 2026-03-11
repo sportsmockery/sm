@@ -8,12 +8,12 @@ interface GradientTextProps {
 }
 
 const gradients = {
-  brand: 'from-[#FF0000] to-[#8B0000]',
+  brand: 'from-[#BC0000] to-[#8B0000]',
   bears: 'from-[#0B162A] to-[#C83200]',
-  bulls: 'from-[#CE1141] to-[#000000]',
+  bulls: 'from-[#CE1141] to-[#0B0F14]',
   cubs: 'from-[#0E3386] to-[#CC3433]',
   sox: 'from-[#27251F] to-[#C4CED4]',
-  hawks: 'from-[#CF0A2C] to-[#000000]',
+  hawks: 'from-[#CF0A2C] to-[#0B0F14]',
 }
 
 export default function GradientText({

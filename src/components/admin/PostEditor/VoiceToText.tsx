@@ -194,7 +194,7 @@ export default function VoiceToText({
         </svg>
         <span className="font-medium text-zinc-900 dark:text-zinc-100">Voice to Text</span>
         {isListening && (
-          <span className="flex items-center gap-1.5 rounded-full bg-red-100 px-2 py-0.5 text-xs font-medium text-red-600 dark:bg-red-900/40 dark:text-red-400">
+          <span className="flex items-center gap-1.5 rounded-full bg-[#BC0000]/10 px-2 py-0.5 text-xs font-medium text-[#BC0000] dark:bg-[#BC0000]/40 dark:text-[#BC0000]">
             <span className="h-2 w-2 animate-pulse rounded-full bg-red-500" />
             Recording
           </span>
@@ -247,7 +247,7 @@ export default function VoiceToText({
             <button
               type="button"
               onClick={insertTranscript}
-              className="flex-1 rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700"
+              className="flex-1 rounded-lg bg-[#00D4FF] px-4 py-2 text-sm font-medium text-white hover:bg-[#00D4FF]"
             >
               Insert Raw
             </button>

@@ -62,7 +62,7 @@ export default function CategoryFeatured({
             {/* Content */}
             <div className="absolute inset-0 flex flex-col justify-end p-6">
               {/* Featured badge */}
-              <span className="mb-3 inline-block w-fit rounded-full px-3 py-1 text-xs font-bold uppercase tracking-wider" style={{ backgroundColor: 'var(--sm-accent)', color: '#ffffff' }}>
+              <span className="mb-3 inline-block w-fit rounded-full px-3 py-1 text-xs font-bold uppercase tracking-wider" style={{ backgroundColor: 'var(--sm-accent)', color: '#FAFAFB' }}>
                 Featured
               </span>
 

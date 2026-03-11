@@ -16,7 +16,7 @@ export default async function PopularThisWeek({ limit = 5, className = '' }: Pop
   return (
     <div className={`rounded-2xl bg-[var(--sm-card)] border border-[var(--sm-border)] overflow-hidden ${className}`}>
       {/* Header */}
-      <div className="bg-gradient-to-r from-[#FF0000] to-[#8B0000] px-6 py-4">
+      <div className="bg-gradient-to-r from-[#BC0000] to-[#8B0000] px-6 py-4">
         <div className="flex items-center gap-3">
           <div className="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center">
             <svg className="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">

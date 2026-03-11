@@ -203,7 +203,7 @@ export default function ChatInput({ onSend }: ChatInputProps) {
           }
 
           .chat-input__auth-link {
-            color: var(--accent, #3b82f6);
+            color: var(--accent, #00D4FF);
             text-decoration: none;
             font-weight: 600;
           }
@@ -318,7 +318,7 @@ export default function ChatInput({ onSend }: ChatInputProps) {
         .chat-input__error {
           background: rgba(239, 68, 68, 0.1);
           border: 1px solid rgba(239, 68, 68, 0.3);
-          color: #ef4444;
+          color: #BC0000;
           padding: 8px 12px;
           border-radius: 8px;
           font-size: 0.8rem;
@@ -384,7 +384,7 @@ export default function ChatInput({ onSend }: ChatInputProps) {
         }
 
         .chat-input__field:focus {
-          border-color: var(--accent, #3b82f6);
+          border-color: var(--accent, #00D4FF);
         }
 
         .chat-input__field::placeholder {
@@ -400,7 +400,7 @@ export default function ChatInput({ onSend }: ChatInputProps) {
         }
 
         .chat-input__char-count--limit {
-          color: #ef4444;
+          color: #BC0000;
         }
 
         .chat-input__send {
@@ -409,7 +409,7 @@ export default function ChatInput({ onSend }: ChatInputProps) {
           display: flex;
           align-items: center;
           justify-content: center;
-          background: var(--accent, #3b82f6);
+          background: var(--accent, #00D4FF);
           border: none;
           border-radius: 50%;
           cursor: pointer;
@@ -418,7 +418,7 @@ export default function ChatInput({ onSend }: ChatInputProps) {
         }
 
         .chat-input__send:hover:not(:disabled) {
-          background: var(--accent-hover, #2563eb);
+          background: var(--accent-hover, #00D4FF);
           transform: scale(1.05);
         }
 

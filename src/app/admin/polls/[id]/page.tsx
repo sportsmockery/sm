@@ -94,11 +94,11 @@ export default function PollDetailsPage({ params }: { params: Promise<{ id: stri
   const getStatusBadge = (status: string) => {
     switch (status) {
       case 'active':
-        return 'bg-emerald-500/10 text-emerald-500 border-emerald-500/20'
+        return 'bg-[#00D4FF]/10 text-[#00D4FF] border-emerald-500/20'
       case 'closed':
         return 'bg-gray-500/10 text-gray-500 border-gray-500/20'
       case 'scheduled':
-        return 'bg-blue-500/10 text-blue-500 border-blue-500/20'
+        return 'bg-[#00D4FF]/10 text-[#00D4FF] border-blue-500/20'
       default:
         return 'bg-gray-500/10 text-gray-500 border-gray-500/20'
     }
@@ -143,7 +143,7 @@ export default function PollDetailsPage({ params }: { params: Promise<{ id: stri
           ) : (
             <button
               onClick={() => handleStatusChange('active')}
-              className="flex items-center gap-2 rounded-lg bg-emerald-500/10 px-4 py-2 text-sm font-medium text-emerald-500 hover:bg-emerald-500/20 transition-colors"
+              className="flex items-center gap-2 rounded-lg bg-[#00D4FF]/10 px-4 py-2 text-sm font-medium text-[#00D4FF] hover:bg-[#00D4FF]/20 transition-colors"
             >
               <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 10.5V6.75a4.5 4.5 0 119 0v3.75M3.75 21.75h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H3.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z" />
@@ -164,7 +164,7 @@ export default function PollDetailsPage({ params }: { params: Promise<{ id: stri
         <div className="border-b border-[var(--border-default)] bg-[var(--bg-tertiary)] px-6 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-purple-500/10">
+              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#D6B05E]/10">
                 <span className="text-xl">🗳️</span>
               </div>
               <div>
@@ -254,12 +254,12 @@ export default function PollDetailsPage({ params }: { params: Promise<{ id: stri
           Use this shortcode in your articles to embed this poll:
         </p>
         <div className="flex items-center gap-3 rounded-lg bg-[var(--bg-tertiary)] p-4">
-          <code className="flex-1 text-sm text-purple-500 font-mono">
+          <code className="flex-1 text-sm text-[#D6B05E] font-mono">
             [poll:{poll.id}]
           </code>
           <button
             onClick={copyShortcode}
-            className="rounded-lg bg-purple-500/10 px-3 py-1.5 text-sm font-medium text-purple-500 hover:bg-purple-500/20 transition-colors"
+            className="rounded-lg bg-[#D6B05E]/10 px-3 py-1.5 text-sm font-medium text-[#D6B05E] hover:bg-[#D6B05E]/20 transition-colors"
           >
             Copy
           </button>

@@ -295,7 +295,7 @@ function GameRow({
   const playoffRound = game.isPlayoff ? getPlayoffRoundName(game.week) : null
 
   const borderColor = isPast
-    ? game.result === 'W' ? '#10b981' : game.result === 'T' ? '#eab308' : '#ef4444'
+    ? game.result === 'W' ? '#00D4FF' : game.result === 'T' ? '#eab308' : '#BC0000'
     : 'var(--sm-red)'
 
   const rowBg = isPast
@@ -401,7 +401,7 @@ function GameRow({
                   fontSize: '11px',
                   fontWeight: 700,
                   backgroundColor: game.result === 'W' ? 'rgba(16, 185, 129, 0.1)' : game.result === 'T' ? 'rgba(234, 179, 8, 0.1)' : 'rgba(239, 68, 68, 0.1)',
-                  color: game.result === 'W' ? '#10b981' : game.result === 'T' ? '#eab308' : '#ef4444',
+                  color: game.result === 'W' ? '#00D4FF' : game.result === 'T' ? '#eab308' : '#BC0000',
                 }}
               >
                 {game.result}

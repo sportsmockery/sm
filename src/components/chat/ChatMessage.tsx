@@ -13,11 +13,11 @@ interface ChatMessageProps {
 }
 
 const BADGE_LABELS: Record<string, { label: string; color: string }> = {
-  staff: { label: 'STAFF', color: '#22c55e' },
-  moderator: { label: 'MOD', color: '#3b82f6' },
+  staff: { label: 'STAFF', color: '#00D4FF' },
+  moderator: { label: 'MOD', color: '#00D4FF' },
   ai: { label: 'AI', color: '#a855f7' },
   verified: { label: 'VERIFIED', color: '#f59e0b' },
-  og_fan: { label: 'OG', color: '#ef4444' },
+  og_fan: { label: 'OG', color: '#BC0000' },
   contributor: { label: 'CONTRIB', color: '#06b6d4' },
 }
 
@@ -359,7 +359,7 @@ export default function ChatMessage({ message, isOwn, showAvatar = true, isHighl
         }
 
         .chat-message__action--delete:hover {
-          color: #ef4444;
+          color: #BC0000;
         }
 
         .chat-message__reaction-picker {

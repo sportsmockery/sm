@@ -18,9 +18,9 @@ export const teams = {
   },
   bulls: {
     primary: '#CE1141', // Red
-    secondary: '#000000', // Black
+    secondary: '#0B0F14', // Black
     accent: '#CE1141',
-    gradient: 'linear-gradient(135deg, #CE1141 0%, #000000 100%)',
+    gradient: 'linear-gradient(135deg, #CE1141 0%, #0B0F14 100%)',
     gradientHover: 'linear-gradient(135deg, #e01548 0%, #1a1a1a 100%)',
   },
   cubs: {
@@ -39,9 +39,9 @@ export const teams = {
   },
   blackhawks: {
     primary: '#CF0A2C', // Red
-    secondary: '#000000', // Black
+    secondary: '#0B0F14', // Black
     accent: '#CF0A2C',
-    gradient: 'linear-gradient(135deg, #CF0A2C 0%, #000000 100%)',
+    gradient: 'linear-gradient(135deg, #CF0A2C 0%, #0B0F14 100%)',
     gradientHover: 'linear-gradient(135deg, #e80c31 0%, #1a1a1a 100%)',
   },
 } as const

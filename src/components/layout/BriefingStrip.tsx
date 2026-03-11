@@ -51,7 +51,7 @@ export default function BriefingStrip() {
                
                 fontSize: '13px',
                 fontWeight: 400,
-                color: '#ffffff',
+                color: '#FAFAFB',
                 whiteSpace: 'nowrap',
                 overflow: 'hidden',
                 textOverflow: 'ellipsis',

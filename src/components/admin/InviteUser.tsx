@@ -125,8 +125,8 @@ export default function InviteUser({ onSuccess, onCancel }: InviteUserProps) {
           onClick={() => setMode('create')}
           className="flex-1 px-4 py-2 rounded-lg text-sm font-medium transition-colors"
           style={{
-            backgroundColor: mode === 'create' ? '#2563eb' : 'var(--bg-secondary, #f5f5f5)',
-            color: mode === 'create' ? '#ffffff' : 'var(--text-muted, #666666)',
+            backgroundColor: mode === 'create' ? '#00D4FF' : 'var(--bg-secondary, #f5f5f5)',
+            color: mode === 'create' ? '#FAFAFB' : 'var(--text-muted, #666666)',
             border: mode === 'create' ? 'none' : '1px solid var(--border-color, #e0e0e0)',
           }}
         >
@@ -137,8 +137,8 @@ export default function InviteUser({ onSuccess, onCancel }: InviteUserProps) {
           onClick={() => setMode('invite')}
           className="flex-1 px-4 py-2 rounded-lg text-sm font-medium transition-colors"
           style={{
-            backgroundColor: mode === 'invite' ? '#2563eb' : 'var(--bg-secondary, #f5f5f5)',
-            color: mode === 'invite' ? '#ffffff' : 'var(--text-muted, #666666)',
+            backgroundColor: mode === 'invite' ? '#00D4FF' : 'var(--bg-secondary, #f5f5f5)',
+            color: mode === 'invite' ? '#FAFAFB' : 'var(--text-muted, #666666)',
             border: mode === 'invite' ? 'none' : '1px solid var(--border-color, #e0e0e0)',
           }}
         >
@@ -148,13 +148,13 @@ export default function InviteUser({ onSuccess, onCancel }: InviteUserProps) {
 
       <form onSubmit={mode === 'create' ? handleCreateUser : handleSendInvite} className="space-y-4">
         {error && (
-          <div className="p-3 bg-red-500/20 border border-red-500/30 rounded-lg text-red-600 dark:text-red-400 text-sm">
+          <div className="p-3 bg-red-500/20 border border-red-500/30 rounded-lg text-[#BC0000] dark:text-[#BC0000] text-sm">
             {error}
           </div>
         )}
 
         {success && (
-          <div className="p-3 bg-green-500/20 border border-green-500/30 rounded-lg text-green-600 dark:text-green-400 text-sm">
+          <div className="p-3 bg-[#00D4FF]/20 border border-green-500/30 rounded-lg text-[#00D4FF] dark:text-[#00D4FF] text-sm">
             {success}
           </div>
         )}
@@ -173,7 +173,7 @@ export default function InviteUser({ onSuccess, onCancel }: InviteUserProps) {
             required
             className="w-full px-4 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
             style={{
-              backgroundColor: 'var(--input-bg, #ffffff)',
+              backgroundColor: 'var(--input-bg, #FAFAFB)',
               border: '1px solid var(--input-border, #e0e0e0)',
               color: 'var(--input-text, #222222)',
             }}
@@ -194,7 +194,7 @@ export default function InviteUser({ onSuccess, onCancel }: InviteUserProps) {
             onChange={(e) => setName(e.target.value)}
             className="w-full px-4 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
             style={{
-              backgroundColor: 'var(--input-bg, #ffffff)',
+              backgroundColor: 'var(--input-bg, #FAFAFB)',
               border: '1px solid var(--input-border, #e0e0e0)',
               color: 'var(--input-text, #222222)',
             }}
@@ -218,7 +218,7 @@ export default function InviteUser({ onSuccess, onCancel }: InviteUserProps) {
               minLength={6}
               className="w-full px-4 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
               style={{
-                backgroundColor: 'var(--input-bg, #ffffff)',
+                backgroundColor: 'var(--input-bg, #FAFAFB)',
                 border: '1px solid var(--input-border, #e0e0e0)',
                 color: 'var(--input-text, #222222)',
               }}
@@ -239,7 +239,7 @@ export default function InviteUser({ onSuccess, onCancel }: InviteUserProps) {
             onChange={(e) => setRole(e.target.value as Role)}
             className="w-full px-4 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
             style={{
-              backgroundColor: 'var(--input-bg, #ffffff)',
+              backgroundColor: 'var(--input-bg, #FAFAFB)',
               border: '1px solid var(--input-border, #e0e0e0)',
               color: 'var(--input-text, #222222)',
             }}
@@ -264,7 +264,7 @@ export default function InviteUser({ onSuccess, onCancel }: InviteUserProps) {
           <button
             type="submit"
             disabled={sending || !email || (mode === 'create' && !password)}
-            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 transition-colors flex items-center gap-2"
+            className="px-4 py-2 bg-[#00D4FF] text-white rounded-lg hover:bg-[#00D4FF] disabled:opacity-50 transition-colors flex items-center gap-2"
           >
             {sending ? (
               <>

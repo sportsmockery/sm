@@ -35,7 +35,7 @@ const CategoryOption = ({ data, innerProps, isSelected, isFocused }: {
     {...innerProps}
     className={`flex items-center gap-3 px-3 py-2 cursor-pointer ${
       isSelected
-        ? 'bg-blue-600 text-white'
+        ? 'bg-[#00D4FF] text-white'
         : isFocused
         ? 'bg-zinc-100 dark:bg-zinc-800'
         : 'bg-white dark:bg-zinc-900'
@@ -70,7 +70,7 @@ const AuthorOption = ({ data, innerProps, isSelected, isFocused }: {
     {...innerProps}
     className={`flex items-center gap-3 px-3 py-2 cursor-pointer ${
       isSelected
-        ? 'bg-blue-600 text-white'
+        ? 'bg-[#00D4FF] text-white'
         : isFocused
         ? 'bg-zinc-100 dark:bg-zinc-800'
         : 'bg-white dark:bg-zinc-900'

@@ -21,9 +21,9 @@ interface AuthorsTableProps {
 }
 
 const roleColors = {
-  admin: 'bg-red-500/20 text-red-400 border-red-500/30',
-  editor: 'bg-blue-500/20 text-blue-400 border-blue-500/30',
-  author: 'bg-green-500/20 text-green-400 border-green-500/30'
+  admin: 'bg-red-500/20 text-[#BC0000] border-red-500/30',
+  editor: 'bg-[#00D4FF]/20 text-[#00D4FF] border-blue-500/30',
+  author: 'bg-[#00D4FF]/20 text-[#00D4FF] border-green-500/30'
 }
 
 export default function AuthorsTable({ authors, onDelete }: AuthorsTableProps) {
@@ -95,7 +95,7 @@ export default function AuthorsTable({ authors, onDelete }: AuthorsTableProps) {
                       )}
                       <Link
                         href={`/admin/writers/${author.id}`}
-                        className="text-white hover:text-blue-400 font-medium"
+                        className="text-white hover:text-[#00D4FF] font-medium"
                       >
                         {author.name}
                       </Link>
@@ -125,7 +125,7 @@ export default function AuthorsTable({ authors, onDelete }: AuthorsTableProps) {
                       </Link>
                       <button
                         onClick={() => setDeleteId(author.id)}
-                        className="p-2 text-gray-400 hover:text-red-400 hover:bg-gray-700 rounded transition-colors"
+                        className="p-2 text-gray-400 hover:text-[#BC0000] hover:bg-gray-700 rounded transition-colors"
                         title="Delete"
                       >
                         <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">

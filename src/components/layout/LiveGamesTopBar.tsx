@@ -207,7 +207,7 @@ export default function LiveGamesTopBar({ teamFilter, isHomepage = false }: Live
   }
 
   return (
-    <div className="bg-gradient-to-r from-red-900 via-red-800 to-red-900 border-b border-red-700">
+    <div className="bg-gradient-to-r from-red-900 via-red-800 to-red-900 border-b border-[#BC0000]">
       <div className="max-w-[1200px] mx-auto">
         {/* Scrollable container for multiple games */}
         <div className="flex items-center overflow-x-auto hide-scrollbar">
@@ -219,7 +219,7 @@ export default function LiveGamesTopBar({ teamFilter, isHomepage = false }: Live
               <Link
                 key={game.game_id}
                 href={getLivePageUrl(game)}
-                className="flex items-center gap-2 sm:gap-3 px-3 sm:px-4 py-2 hover:bg-white/10 transition-colors min-w-fit border-r border-red-700/50 last:border-r-0"
+                className="flex items-center gap-2 sm:gap-3 px-3 sm:px-4 py-2 hover:bg-white/10 transition-colors min-w-fit border-r border-[#BC0000]/50 last:border-r-0"
               >
                 {/* Live/Starting Badge */}
                 <div className="flex items-center gap-1.5 flex-shrink-0">
@@ -229,7 +229,7 @@ export default function LiveGamesTopBar({ teamFilter, isHomepage = false }: Live
                         <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
                         <span className="relative inline-flex rounded-full h-full w-full bg-red-500"></span>
                       </span>
-                      <span className="text-[10px] sm:text-xs font-bold uppercase tracking-wide text-red-300">
+                      <span className="text-[10px] sm:text-xs font-bold uppercase tracking-wide text-[#BC0000]">
                         LIVE
                       </span>
                     </>
@@ -272,11 +272,11 @@ export default function LiveGamesTopBar({ teamFilter, isHomepage = false }: Live
 
                 {/* Score */}
                 <div className="flex items-center gap-1 text-white font-bold text-sm sm:text-base flex-shrink-0">
-                  <span className={score.chicagoScore > score.opponentScore ? 'text-green-400' : ''}>
+                  <span className={score.chicagoScore > score.opponentScore ? 'text-[#00D4FF]' : ''}>
                     {score.chicagoAbbr} {score.chicagoScore}
                   </span>
                   <span className="text-white/50">–</span>
-                  <span className={score.opponentScore > score.chicagoScore ? 'text-red-300' : ''}>
+                  <span className={score.opponentScore > score.chicagoScore ? 'text-[#BC0000]' : ''}>
                     {score.opponentScore} {score.opponentAbbr}
                   </span>
                 </div>

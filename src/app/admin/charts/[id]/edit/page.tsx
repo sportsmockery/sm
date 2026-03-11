@@ -81,7 +81,7 @@ export default function EditChartPage({ params }: EditChartPageProps) {
           <h1 className="text-2xl font-bold text-[var(--text-primary)]">Edit Chart</h1>
         </div>
         <div className="rounded-xl border border-red-500/20 bg-red-500/10 p-6 text-center">
-          <p className="text-red-400">{error}</p>
+          <p className="text-[#BC0000]">{error}</p>
           <Link
             href="/admin/charts"
             className="mt-4 inline-flex items-center gap-2 rounded-lg bg-[var(--accent-red)] px-4 py-2 text-sm font-medium text-white hover:bg-[var(--accent-red-hover)] transition-colors"
@@ -370,7 +370,7 @@ function ChartBuilderModalWithInitial({
           </button>
           <button
             onClick={handleInsert}
-            className="rounded-lg bg-gradient-to-r from-[#FF0000] to-[#8B0000] px-6 py-2 text-sm font-medium text-white hover:from-[#FF0000] hover:to-[#a00000] transition-all shadow-lg"
+            className="rounded-lg bg-gradient-to-r from-[#BC0000] to-[#8B0000] px-6 py-2 text-sm font-medium text-white hover:from-[#BC0000] hover:to-[#a00000] transition-all shadow-lg"
           >
             {isEditing ? 'Save Changes' : 'Insert Chart'}
           </button>

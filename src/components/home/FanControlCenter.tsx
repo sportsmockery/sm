@@ -59,7 +59,7 @@ export default function FanControlCenter() {
               {/* Live Indicator */}
               <div className="flex items-center gap-2 mb-6">
                 <span className="flex items-center gap-2 px-3 py-1 bg-white/10 rounded-full text-white text-xs">
-                  <span className="w-2 h-2 bg-green-400 rounded-full animate-pulse" />
+                  <span className="w-2 h-2 bg-[#00D4FF] rounded-full animate-pulse" />
                   Live Now
                 </span>
               </div>

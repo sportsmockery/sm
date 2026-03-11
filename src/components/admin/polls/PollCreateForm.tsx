@@ -185,7 +185,7 @@ export default function PollCreateForm({ editMode = false, initialData }: PollCr
                 }}
                 className={`p-4 rounded-xl border-2 text-left transition-all ${
                   pollType === type.value
-                    ? 'border-purple-500 bg-purple-50 dark:bg-purple-900/20'
+                    ? 'border-[#D6B05E] bg-[#D6B05E]/10 dark:bg-[#D6B05E]/20'
                     : 'border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600'
                 }`}
               >
@@ -208,7 +208,7 @@ export default function PollCreateForm({ editMode = false, initialData }: PollCr
               value={title}
               onChange={(e) => setTitle(e.target.value)}
               placeholder="e.g., Bears QB Trade Poll"
-              className="w-full px-4 py-3 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+              className="w-full px-4 py-3 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl focus:ring-2 focus:ring-[#D6B05E] focus:border-transparent"
               required
             />
           </div>
@@ -222,7 +222,7 @@ export default function PollCreateForm({ editMode = false, initialData }: PollCr
               onChange={(e) => setQuestion(e.target.value)}
               placeholder="What's your take on the Bears trading for a new QB?"
               rows={2}
-              className="w-full px-4 py-3 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent resize-none"
+              className="w-full px-4 py-3 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl focus:ring-2 focus:ring-[#D6B05E] focus:border-transparent resize-none"
               required
             />
           </div>
@@ -285,7 +285,7 @@ export default function PollCreateForm({ editMode = false, initialData }: PollCr
                       onClick={() => selectEmoji(emoji)}
                       className={`text-3xl p-3 rounded-xl transition-all ${
                         isSelected
-                          ? 'bg-purple-100 dark:bg-purple-900/30 ring-2 ring-purple-500'
+                          ? 'bg-[#D6B05E]/10 dark:bg-[#D6B05E]/30 ring-2 ring-[#D6B05E]'
                           : 'bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700'
                       }`}
                     >
@@ -311,7 +311,7 @@ export default function PollCreateForm({ editMode = false, initialData }: PollCr
                         value={option.option_text}
                         onChange={(e) => updateOption(index, { option_text: e.target.value })}
                         placeholder={`Option ${index + 1}`}
-                        className="flex-1 px-4 py-3 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                        className="flex-1 px-4 py-3 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl focus:ring-2 focus:ring-[#D6B05E] focus:border-transparent"
                       />
                       <select
                         value={option.team_tag || ''}
@@ -329,7 +329,7 @@ export default function PollCreateForm({ editMode = false, initialData }: PollCr
                         <button
                           type="button"
                           onClick={() => removeOption(index)}
-                          className="p-2 text-gray-400 hover:text-red-500 rounded-lg hover:bg-red-50 dark:hover:bg-red-900/20"
+                          className="p-2 text-gray-400 hover:text-[#BC0000] rounded-lg hover:bg-red-50 dark:hover:bg-[#BC0000]/20"
                         >
                           <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
@@ -343,7 +343,7 @@ export default function PollCreateForm({ editMode = false, initialData }: PollCr
                 <button
                   type="button"
                   onClick={addOption}
-                  className="w-full py-3 border-2 border-dashed border-gray-200 dark:border-gray-700 rounded-xl text-sm text-gray-500 dark:text-gray-400 hover:border-purple-500 hover:text-purple-500 transition-colors"
+                  className="w-full py-3 border-2 border-dashed border-gray-200 dark:border-gray-700 rounded-xl text-sm text-gray-500 dark:text-gray-400 hover:border-[#D6B05E] hover:text-[#D6B05E] transition-colors"
                 >
                   + Add Option
                 </button>
@@ -422,7 +422,7 @@ export default function PollCreateForm({ editMode = false, initialData }: PollCr
                 type="checkbox"
                 checked={showResults}
                 onChange={(e) => setShowResults(e.target.checked)}
-                className="rounded border-gray-300 text-purple-600 focus:ring-purple-500"
+                className="rounded border-gray-300 text-[#D6B05E] focus:ring-[#D6B05E]"
               />
               <span className="text-sm text-gray-600 dark:text-gray-400">
                 Show results after voting
@@ -434,7 +434,7 @@ export default function PollCreateForm({ editMode = false, initialData }: PollCr
                 type="checkbox"
                 checked={showLiveResults}
                 onChange={(e) => setShowLiveResults(e.target.checked)}
-                className="rounded border-gray-300 text-purple-600 focus:ring-purple-500"
+                className="rounded border-gray-300 text-[#D6B05E] focus:ring-[#D6B05E]"
               />
               <span className="text-sm text-gray-600 dark:text-gray-400">
                 Show live results before voting
@@ -446,7 +446,7 @@ export default function PollCreateForm({ editMode = false, initialData }: PollCr
                 type="checkbox"
                 checked={isAnonymous}
                 onChange={(e) => setIsAnonymous(e.target.checked)}
-                className="rounded border-gray-300 text-purple-600 focus:ring-purple-500"
+                className="rounded border-gray-300 text-[#D6B05E] focus:ring-[#D6B05E]"
               />
               <span className="text-sm text-gray-600 dark:text-gray-400">
                 Anonymous voting (don't track user IDs)
@@ -483,7 +483,7 @@ export default function PollCreateForm({ editMode = false, initialData }: PollCr
 
         {/* Error */}
         {error && (
-          <div className="p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-xl text-red-600 dark:text-red-400 text-sm">
+          <div className="p-4 bg-red-50 dark:bg-[#BC0000]/20 border border-red-200 dark:border-red-800 rounded-xl text-[#BC0000] dark:text-[#BC0000] text-sm">
             {error}
           </div>
         )}
@@ -526,7 +526,7 @@ export default function PollCreateForm({ editMode = false, initialData }: PollCr
           <button
             type="button"
             onClick={() => setShowPreview(!showPreview)}
-            className="text-sm text-purple-600 dark:text-purple-400"
+            className="text-sm text-[#D6B05E] dark:text-[#D6B05E]"
           >
             {showPreview ? 'Hide Preview' : 'Show Preview'}
           </button>

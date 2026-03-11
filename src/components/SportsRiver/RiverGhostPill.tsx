@@ -95,7 +95,7 @@ export default function RiverGhostPill({ onScrollToTop }: RiverGhostPillProps) {
             border: '1px solid #BC0000',
             borderRadius: 9999,
             padding: '8px 20px',
-            color: '#ffffff',
+            color: '#FAFAFB',
             fontSize: 14,
             fontWeight: 600,
             cursor: 'pointer',

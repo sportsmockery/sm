@@ -56,7 +56,7 @@ export default function CategoriesTable({ categories, onDelete }: CategoriesTabl
               )}
               <Link
                 href={`/admin/categories/${category.id}`}
-                className="text-white hover:text-blue-400 font-medium"
+                className="text-white hover:text-[#00D4FF] font-medium"
               >
                 {category.name}
               </Link>
@@ -81,7 +81,7 @@ export default function CategoriesTable({ categories, onDelete }: CategoriesTabl
               </Link>
               <button
                 onClick={() => setDeleteId(category.id)}
-                className="p-2 text-gray-400 hover:text-red-400 hover:bg-gray-700 rounded transition-colors"
+                className="p-2 text-gray-400 hover:text-[#BC0000] hover:bg-gray-700 rounded transition-colors"
                 title="Delete"
               >
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">

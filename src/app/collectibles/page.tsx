@@ -21,7 +21,7 @@ const collections = [
     description: 'Relive the championship glory',
     items: 234,
     floorPrice: '0.8 ETH',
-    gradient: 'linear-gradient(135deg, #CE1141, #000000)',
+    gradient: 'linear-gradient(135deg, #CE1141, #0B0F14)',
   },
   {
     id: 'cubs-historic',
@@ -45,7 +45,7 @@ const collections = [
     description: 'Championship ice memories',
     items: 98,
     floorPrice: '0.45 ETH',
-    gradient: 'linear-gradient(135deg, #CF0A2C, #000000)',
+    gradient: 'linear-gradient(135deg, #CF0A2C, #0B0F14)',
   },
 ]
 

@@ -60,7 +60,7 @@ export default function CategoryForm({
     <form onSubmit={handleSubmit} className="space-y-6">
       <div>
         <label className="block text-sm font-medium text-gray-300 mb-1">
-          Name <span className="text-red-400">*</span>
+          Name <span className="text-[#BC0000]">*</span>
         </label>
         <input
           type="text"
@@ -74,7 +74,7 @@ export default function CategoryForm({
 
       <div>
         <label className="block text-sm font-medium text-gray-300 mb-1">
-          Slug <span className="text-red-400">*</span>
+          Slug <span className="text-[#BC0000]">*</span>
         </label>
         <div className="flex gap-2">
           <input
@@ -91,7 +91,7 @@ export default function CategoryForm({
           <button
             type="button"
             onClick={() => setAutoSlug(true)}
-            className="px-3 py-2 text-sm text-blue-400 hover:text-blue-300"
+            className="px-3 py-2 text-sm text-[#00D4FF] hover:text-[#00D4FF]"
           >
             Auto
           </button>
@@ -143,7 +143,7 @@ export default function CategoryForm({
         <button
           type="submit"
           disabled={saving || !name || !slug}
-          className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 transition-colors"
+          className="px-6 py-2 bg-[#00D4FF] text-white rounded-lg hover:bg-[#00D4FF] disabled:opacity-50 transition-colors"
         >
           {saving ? 'Saving...' : initialData?.id ? 'Update Category' : 'Create Category'}
         </button>

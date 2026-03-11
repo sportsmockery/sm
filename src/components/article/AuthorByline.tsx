@@ -61,7 +61,7 @@ export default function AuthorByline({
               className="object-cover"
             />
           ) : (
-            <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-[#8B0000] to-[#FF0000] text-xs font-bold text-white">
+            <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-[#8B0000] to-[#BC0000] text-xs font-bold text-white">
               {author.name.charAt(0).toUpperCase()}
             </div>
           )}

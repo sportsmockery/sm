@@ -160,7 +160,7 @@ export function HomepageSidebar({ trendingPosts }: HomepageSidebarProps) {
           className="sm-plus-btn"
           style={{
             backgroundColor: '#bc0000',
-            color: '#ffffff',
+            color: '#FAFAFB',
             border: 'none',
           }}
         >

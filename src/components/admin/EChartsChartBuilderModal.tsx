@@ -19,7 +19,7 @@ interface ChartBuilderModalProps {
   onClose: () => void
 }
 
-const BRAND_COLORS = ['#bc0000', '#111827', '#6b7280', '#f59e0b', '#22c55e', '#3b82f6', '#ec4899']
+const BRAND_COLORS = ['#bc0000', '#111827', '#6b7280', '#f59e0b', '#00D4FF', '#00D4FF', '#ec4899']
 
 const EMPTY_OPTIONS: EChartsOption = {
   title: { text: '' },
@@ -34,7 +34,7 @@ export default function ChartBuilderModal({ onSave, onClose }: ChartBuilderModal
   const [activeTab, setActiveTab] = useState<ChartBuilderTab>('data')
   const [options, setOptions] = useState<EChartsOption>({
     ...EMPTY_OPTIONS,
-    backgroundColor: theme === 'dark' ? '#050509' : '#ffffff',
+    backgroundColor: theme === 'dark' ? '#050509' : '#FAFAFB',
   })
   const chartRef: MutableRefObject<any> = useRef(null)
 
@@ -53,7 +53,7 @@ export default function ChartBuilderModal({ onSave, onClose }: ChartBuilderModal
   useEffect(() => {
     setOptions((prev) => ({
       ...prev,
-      backgroundColor: theme === 'dark' ? '#050509' : '#ffffff',
+      backgroundColor: theme === 'dark' ? '#050509' : '#FAFAFB',
     }))
   }, [theme])
 
@@ -218,7 +218,7 @@ export default function ChartBuilderModal({ onSave, onClose }: ChartBuilderModal
     if (tmpl) {
       setOptions({
         ...tmpl.options,
-        backgroundColor: theme === 'dark' ? '#050509' : '#ffffff',
+        backgroundColor: theme === 'dark' ? '#050509' : '#FAFAFB',
       })
       setActiveTab('visualize')
     }
@@ -360,7 +360,7 @@ export default function ChartBuilderModal({ onSave, onClose }: ChartBuilderModal
                 <button
                   onClick={applyStructuredData}
                   className="inline-flex items-center justify-center rounded-lg px-4 py-2 text-sm font-medium shadow-sm"
-                  style={{ backgroundColor: '#bc0000', color: '#ffffff' }}
+                  style={{ backgroundColor: '#bc0000', color: '#FAFAFB' }}
                 >
                   Apply Structured Data
                 </button>
@@ -402,7 +402,7 @@ export default function ChartBuilderModal({ onSave, onClose }: ChartBuilderModal
                 <button
                   onClick={applyRawData}
                   className="inline-flex items-center justify-center rounded-lg px-4 py-2 text-sm font-medium shadow-sm"
-                  style={{ backgroundColor: '#111827', color: '#ffffff' }}
+                  style={{ backgroundColor: '#111827', color: '#FAFAFB' }}
                 >
                   Apply Pasted Data
                 </button>
@@ -423,7 +423,7 @@ export default function ChartBuilderModal({ onSave, onClose }: ChartBuilderModal
                       className={`px-3 py-2 rounded-lg text-xs font-medium capitalize transition-all ${
                         chartType === type ? 'bg-zinc-100 text-black' : 'bg-zinc-800 text-zinc-300 hover:bg-zinc-700'
                       }`}
-                      style={chartType === type ? { backgroundColor: '#bc0000', color: '#ffffff' } : undefined}
+                      style={chartType === type ? { backgroundColor: '#bc0000', color: '#FAFAFB' } : undefined}
                     >
                       {type}
                     </button>
@@ -459,7 +459,7 @@ export default function ChartBuilderModal({ onSave, onClose }: ChartBuilderModal
                 <button
                   onClick={handlePreviewRefresh}
                   className="inline-flex items-center justify-center rounded-lg px-3 py-1.5 text-xs font-medium shadow-sm"
-                  style={{ backgroundColor: '#111827', color: '#ffffff' }}
+                  style={{ backgroundColor: '#111827', color: '#FAFAFB' }}
                 >
                   Refresh Preview
                 </button>
@@ -490,7 +490,7 @@ export default function ChartBuilderModal({ onSave, onClose }: ChartBuilderModal
             onClick={handleSave}
             disabled={isSaving || !hasSeries}
             className="rounded-lg px-6 py-2 text-sm font-medium shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
-            style={{ backgroundColor: '#bc0000', color: '#ffffff' }}
+            style={{ backgroundColor: '#bc0000', color: '#FAFAFB' }}
           >
             {isSaving ? 'Saving…' : 'Save & Insert'}
           </button>

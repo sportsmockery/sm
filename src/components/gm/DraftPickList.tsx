@@ -124,7 +124,7 @@ export function DraftPickList({
   const textColor = 'var(--sm-text)'
   const subText = 'var(--sm-text-muted)'
   const borderColor = 'var(--sm-border)'
-  const checkboxBg = isDark ? '#374151' : '#ffffff'
+  const checkboxBg = isDark ? '#374151' : '#FAFAFB'
 
   // Use tradeable picks from API if available, otherwise generate
   const years = [2026, 2027, 2028, 2029, 2030]
@@ -188,7 +188,7 @@ export function DraftPickList({
             height="16"
             viewBox="0 0 24 24"
             fill="none"
-            stroke="#8b5cf6"
+            stroke="#D6B05E"
             strokeWidth="2"
             strokeLinecap="round"
           >
@@ -243,7 +243,7 @@ export function DraftPickList({
               marginTop: 8,
               borderRadius: 8,
               border: `1px solid ${borderColor}`,
-              backgroundColor: isDark ? '#111827' : '#ffffff',
+              backgroundColor: isDark ? '#111827' : '#FAFAFB',
               maxHeight: 300,
               overflowY: 'auto',
             }}>

@@ -199,14 +199,14 @@ export default function BotAdminPage() {
             <button
               onClick={() => triggerMonitor()}
               disabled={isMonitoring}
-              className="px-4 py-2 bg-blue-600 hover:bg-blue-700 disabled:bg-blue-800 disabled:cursor-not-allowed text-white rounded-lg font-medium transition-colors"
+              className="px-4 py-2 bg-[#00D4FF] hover:bg-[#00D4FF] disabled:bg-[#00D4FF] disabled:cursor-not-allowed text-white rounded-lg font-medium transition-colors"
             >
               {isMonitoring ? 'Monitoring...' : 'Monitor All'}
             </button>
             <button
               onClick={() => postResponses()}
               disabled={isPosting}
-              className="px-4 py-2 bg-green-600 hover:bg-green-700 disabled:bg-green-800 disabled:cursor-not-allowed text-white rounded-lg font-medium transition-colors"
+              className="px-4 py-2 bg-[#00D4FF] hover:bg-[#00D4FF] disabled:bg-[#00D4FF] disabled:cursor-not-allowed text-white rounded-lg font-medium transition-colors"
             >
               {isPosting ? 'Posting...' : 'Post Pending'}
             </button>
@@ -215,11 +215,11 @@ export default function BotAdminPage() {
 
         {/* Error Alert */}
         {error && (
-          <div className="mb-6 p-4 bg-red-900/50 border border-red-700 rounded-xl text-red-200">
+          <div className="mb-6 p-4 bg-[#BC0000]/50 border border-[#BC0000] rounded-xl text-[#BC0000]">
             {error}
             <button
               onClick={() => setError(null)}
-              className="ml-4 text-red-400 hover:text-red-300"
+              className="ml-4 text-[#BC0000] hover:text-[#BC0000]"
             >
               Dismiss
             </button>
@@ -252,7 +252,7 @@ export default function BotAdminPage() {
                       onClick={() => toggleBot(status.team_slug, !status.enabled)}
                       className={`px-2 py-1 rounded text-xs font-medium transition-colors ${
                         status.enabled
-                          ? 'bg-green-600/20 text-green-400 hover:bg-green-600/30'
+                          ? 'bg-[#00D4FF]/20 text-[#00D4FF] hover:bg-[#00D4FF]/30'
                           : 'bg-zinc-700 text-zinc-400 hover:bg-zinc-600'
                       }`}
                     >
@@ -318,7 +318,7 @@ export default function BotAdminPage() {
                   <span
                     className={`px-2 py-0.5 rounded text-xs font-medium ${
                       log.log_level === 'error'
-                        ? 'bg-red-900/50 text-red-400'
+                        ? 'bg-[#BC0000]/50 text-[#BC0000]'
                         : log.log_level === 'warn'
                         ? 'bg-yellow-900/50 text-yellow-400'
                         : 'bg-zinc-700 text-zinc-400'

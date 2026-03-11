@@ -8,10 +8,10 @@ import { ThemeToggle } from '@/components/ThemeToggle'
 
 const navLinks = [
   { name: 'Bears', href: '/chicago-bears', color: '#C83200', bg: '#0B162A' },
-  { name: 'Bulls', href: '/chicago-bulls', color: '#CE1141', bg: '#000000' },
+  { name: 'Bulls', href: '/chicago-bulls', color: '#CE1141', bg: '#0B0F14' },
   { name: 'Cubs', href: '/chicago-cubs', color: '#0E3386', bg: '#CC3433' },
   { name: 'White Sox', href: '/chicago-white-sox', color: '#27251F', bg: '#C4CED4' },
-  { name: 'Blackhawks', href: '/chicago-blackhawks', color: '#CF0A2C', bg: '#000000' },
+  { name: 'Blackhawks', href: '/chicago-blackhawks', color: '#CF0A2C', bg: '#0B0F14' },
 ]
 
 const trendingHeadlines = [
@@ -69,7 +69,7 @@ export default function Header() {
       style={{ backgroundColor: isScrolled ? 'color-mix(in srgb, var(--sm-card) 80%, transparent)' : 'var(--sm-card)' }}
     >
       {/* Red accent bar */}
-      <div className="h-1 bg-gradient-to-r from-[#FF0000] via-[#8B0000] to-[#FF0000]" />
+      <div className="h-1 bg-gradient-to-r from-[#BC0000] via-[#8B0000] to-[#BC0000]" />
 
       {/* Trending ticker */}
       <div className="overflow-hidden" style={{ backgroundColor: 'var(--sm-surface)' }}>

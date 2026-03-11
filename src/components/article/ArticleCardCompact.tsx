@@ -33,7 +33,7 @@ export default function ArticleCardCompact({
     >
       {/* Number for rankings */}
       {showNumber && typeof index === 'number' && (
-        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-gradient-to-br from-[#8B0000] to-[#FF0000] text-lg font-black text-white">
+        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-gradient-to-br from-[#8B0000] to-[#BC0000] text-lg font-black text-white">
           {index + 1}
         </div>
       )}

@@ -106,7 +106,7 @@ export default function MediaModal({ isOpen, onClose, onSelect, allowMultiple = 
             onClick={() => setTab('library')}
             className={`px-6 py-3 font-medium transition-colors ${
               tab === 'library'
-                ? 'text-blue-500 border-b-2 border-blue-500'
+                ? 'text-[#00D4FF] border-b-2 border-blue-500'
                 : 'text-gray-400 hover:text-white'
             }`}
           >
@@ -116,7 +116,7 @@ export default function MediaModal({ isOpen, onClose, onSelect, allowMultiple = 
             onClick={() => setTab('upload')}
             className={`px-6 py-3 font-medium transition-colors ${
               tab === 'upload'
-                ? 'text-blue-500 border-b-2 border-blue-500'
+                ? 'text-[#00D4FF] border-b-2 border-blue-500'
                 : 'text-gray-400 hover:text-white'
             }`}
           >
@@ -149,7 +149,7 @@ export default function MediaModal({ isOpen, onClose, onSelect, allowMultiple = 
                   <p>No media found</p>
                   <button
                     onClick={() => setTab('upload')}
-                    className="mt-2 text-blue-500 hover:text-blue-400"
+                    className="mt-2 text-[#00D4FF] hover:text-[#00D4FF]"
                   >
                     Upload new media
                   </button>
@@ -182,7 +182,7 @@ export default function MediaModal({ isOpen, onClose, onSelect, allowMultiple = 
                           </div>
                         )}
                         {isSelected && (
-                          <div className="absolute top-2 right-2 w-6 h-6 bg-blue-500 rounded-full flex items-center justify-center">
+                          <div className="absolute top-2 right-2 w-6 h-6 bg-[#00D4FF] rounded-full flex items-center justify-center">
                             <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                             </svg>
@@ -215,7 +215,7 @@ export default function MediaModal({ isOpen, onClose, onSelect, allowMultiple = 
               </button>
               <button
                 onClick={handleInsert}
-                className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+                className="px-4 py-2 bg-[#00D4FF] text-white rounded-lg hover:bg-[#00D4FF]"
               >
                 Insert Selected
               </button>

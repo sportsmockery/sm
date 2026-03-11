@@ -180,7 +180,7 @@ export default async function CubsCapTrackerPage() {
               label="Payroll Space"
               value={formatMoney(cap!.cap_space)}
               subtitle={isOverThreshold ? 'OVER THRESHOLD' : 'UNDER THRESHOLD'}
-              color={isOverThreshold ? 'var(--sm-error, #ef4444)' : 'var(--sm-success, #22c55e)'}
+              color={isOverThreshold ? 'var(--sm-error, #BC0000)' : 'var(--sm-success, #00D4FF)'}
             />
           </div>
         ) : (
@@ -208,7 +208,7 @@ export default async function CubsCapTrackerPage() {
               <span style={{ fontSize: '13px', fontWeight: 600, color: 'var(--sm-text)' }}>
                 Luxury Tax Usage
               </span>
-              <span style={{ fontSize: '13px', fontWeight: 700, color: isOverThreshold ? 'var(--sm-error, #ef4444)' : 'var(--sm-success, #22c55e)' }}>
+              <span style={{ fontSize: '13px', fontWeight: 700, color: isOverThreshold ? 'var(--sm-error, #BC0000)' : 'var(--sm-success, #00D4FF)' }}>
                 {usedPct.toFixed(1)}%
               </span>
             </div>
@@ -233,7 +233,7 @@ export default async function CubsCapTrackerPage() {
                   left: 0,
                   top: 0,
                   width: `${Math.min(usedPct, 100)}%`,
-                  ...(isOverThreshold ? { background: 'var(--sm-error, #ef4444)' } : {}),
+                  ...(isOverThreshold ? { background: 'var(--sm-error, #BC0000)' } : {}),
                   opacity: 0.85,
                 }}
               />

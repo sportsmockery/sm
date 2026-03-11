@@ -48,7 +48,7 @@ export default function CollaborationNotes({
           </svg>
           <span className="font-medium text-zinc-900 dark:text-zinc-100">Collaboration Notes</span>
           {activeNotes.length > 0 && (
-            <span className="rounded-full bg-blue-100 px-2 py-0.5 text-xs font-medium text-blue-700 dark:bg-blue-900/40 dark:text-blue-400">
+            <span className="rounded-full bg-[#00D4FF]/10 px-2 py-0.5 text-xs font-medium text-[#00D4FF] dark:bg-[#00D4FF]/40 dark:text-[#00D4FF]">
               {activeNotes.length}
             </span>
           )}
@@ -67,8 +67,8 @@ export default function CollaborationNotes({
       <div className="p-4 space-y-4">
         {/* Add new note */}
         <form onSubmit={handleSubmit} className="flex gap-2">
-          <div className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full bg-blue-100 dark:bg-blue-900/40">
-            <span className="text-sm font-medium text-blue-700 dark:text-blue-400">
+          <div className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full bg-[#00D4FF]/10 dark:bg-[#00D4FF]/40">
+            <span className="text-sm font-medium text-[#00D4FF] dark:text-[#00D4FF]">
               {currentUser.charAt(0).toUpperCase()}
             </span>
           </div>
@@ -84,7 +84,7 @@ export default function CollaborationNotes({
               <div className="mt-2 flex justify-end">
                 <button
                   type="submit"
-                  className="rounded-lg bg-blue-600 px-4 py-1.5 text-sm font-medium text-white hover:bg-blue-700"
+                  className="rounded-lg bg-[#00D4FF] px-4 py-1.5 text-sm font-medium text-white hover:bg-[#00D4FF]"
                 >
                   Add Note
                 </button>
@@ -118,7 +118,7 @@ export default function CollaborationNotes({
                   <button
                     type="button"
                     onClick={() => onResolveNote(note.id)}
-                    className="text-xs text-green-600 hover:text-green-700 dark:text-green-400 dark:hover:text-green-300"
+                    className="text-xs text-[#00D4FF] hover:text-[#00D4FF] dark:text-[#00D4FF] dark:hover:text-[#00D4FF]"
                     title="Mark as resolved"
                   >
                     <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -144,7 +144,7 @@ export default function CollaborationNotes({
                 className="rounded-lg border border-zinc-200 bg-zinc-50 p-3 dark:border-zinc-700 dark:bg-zinc-800/50"
               >
                 <div className="flex items-center gap-2">
-                  <svg className="h-4 w-4 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <svg className="h-4 w-4 text-[#00D4FF]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                   </svg>
                   <span className="text-sm font-medium text-zinc-600 dark:text-zinc-400">

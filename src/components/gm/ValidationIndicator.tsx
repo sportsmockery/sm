@@ -48,9 +48,9 @@ export function ValidationIndicator({ validation, compact = false }: ValidationI
   if (displayValidation.status === 'idle' || displayValidation.status === 'validating') return null
 
   const statusConfig = {
-    valid: { color: '#22c55e', label: 'Ready to grade', bg: '#22c55e15' },
+    valid: { color: '#00D4FF', label: 'Ready to grade', bg: '#00D4FF15' },
     warning: { color: '#eab308', label: `${displayValidation.issues.length} warning${displayValidation.issues.length !== 1 ? 's' : ''}`, bg: '#eab30815' },
-    invalid: { color: '#ef4444', label: `${displayValidation.issues.filter(i => i.severity === 'error').length} issue${displayValidation.issues.filter(i => i.severity === 'error').length !== 1 ? 's' : ''}`, bg: '#ef444415' },
+    invalid: { color: '#BC0000', label: `${displayValidation.issues.filter(i => i.severity === 'error').length} issue${displayValidation.issues.filter(i => i.severity === 'error').length !== 1 ? 's' : ''}`, bg: '#BC000015' },
   }
 
   const config = statusConfig[displayValidation.status as keyof typeof statusConfig]
@@ -108,7 +108,7 @@ export function ValidationIndicator({ validation, compact = false }: ValidationI
                     alignItems: 'flex-start',
                     gap: 8,
                     fontSize: '12px',
-                    color: issue.severity === 'error' ? '#ef4444' : issue.severity === 'warning' ? '#eab308' : subText,
+                    color: issue.severity === 'error' ? '#BC0000' : issue.severity === 'warning' ? '#eab308' : subText,
                   }}
                 >
                   <span>

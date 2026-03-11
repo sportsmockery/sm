@@ -186,7 +186,7 @@ export function ThreeTeamTradeBoard({
           <div style={{
             fontSize: 10,
             fontWeight: 700,
-            color: '#ef4444',
+            color: '#BC0000',
             textTransform: 'uppercase',
             letterSpacing: '0.5px',
             marginBottom: 8,
@@ -194,7 +194,7 @@ export function ThreeTeamTradeBoard({
             alignItems: 'center',
             gap: 6,
           }}>
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#ef4444" strokeWidth="2">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#BC0000" strokeWidth="2">
               <path d="M5 12h14M12 5l7 7-7 7" strokeLinecap="round" strokeLinejoin="round" />
             </svg>
             SENDS OUT
@@ -270,7 +270,7 @@ export function ThreeTeamTradeBoard({
           <div style={{
             fontSize: 10,
             fontWeight: 700,
-            color: '#22c55e',
+            color: '#00D4FF',
             textTransform: 'uppercase',
             letterSpacing: '0.5px',
             marginBottom: 8,
@@ -278,7 +278,7 @@ export function ThreeTeamTradeBoard({
             alignItems: 'center',
             gap: 6,
           }}>
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#22c55e" strokeWidth="2">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#00D4FF" strokeWidth="2">
               <path d="M19 12H5M12 19l-7-7 7-7" strokeLinecap="round" strokeLinejoin="round" />
             </svg>
             RECEIVES
@@ -338,7 +338,7 @@ export function ThreeTeamTradeBoard({
                           padding: '6px 8px',
                           backgroundColor: isDark ? '#374151' : '#f3f4f6',
                           borderRadius: 6,
-                          borderLeft: '3px solid #8b5cf6',
+                          borderLeft: '3px solid #D6B05E',
                         }}
                       >
                         <span style={{ fontSize: 12, fontWeight: 600, color: textColor }}>
@@ -519,7 +519,7 @@ export function ThreeTeamTradeBoard({
               <div style={{
                 fontSize: 64,
                 fontWeight: 900,
-                color: gradeResult.grade >= 70 ? '#22c55e' : gradeResult.grade >= 50 ? '#eab308' : '#ef4444',
+                color: gradeResult.grade >= 70 ? '#00D4FF' : gradeResult.grade >= 50 ? '#eab308' : '#BC0000',
                 lineHeight: 1,
               }}>
                 {gradeResult.grade}
@@ -531,8 +531,8 @@ export function ThreeTeamTradeBoard({
                   fontWeight: 800,
                   fontSize: 12,
                   letterSpacing: '1px',
-                  backgroundColor: gradeResult.status === 'accepted' ? '#22c55e20' : '#ef444420',
-                  color: gradeResult.status === 'accepted' ? '#22c55e' : '#ef4444',
+                  backgroundColor: gradeResult.status === 'accepted' ? '#00D4FF20' : '#BC000020',
+                  color: gradeResult.status === 'accepted' ? '#00D4FF' : '#BC0000',
                 }}>
                   {gradeResult.status === 'accepted' ? 'ACCEPTED' : 'REJECTED'}
                 </span>
@@ -571,7 +571,7 @@ export function ThreeTeamTradeBoard({
                 fontWeight: 700,
                 textAlign: 'center',
                 marginBottom: 16,
-                color: gradeResult.improvement_score > 0 ? '#22c55e' : gradeResult.improvement_score < 0 ? '#ef4444' : subText,
+                color: gradeResult.improvement_score > 0 ? '#00D4FF' : gradeResult.improvement_score < 0 ? '#BC0000' : subText,
               }}>
                 Team Improvement: {gradeResult.improvement_score > 0 ? '+' : ''}{gradeResult.improvement_score}
               </div>
@@ -587,10 +587,10 @@ export function ThreeTeamTradeBoard({
                 borderRadius: 12,
               }}>
                 <div style={{ display: 'flex', alignItems: 'flex-start', gap: 12 }}>
-                  <div style={{ fontSize: 20, color: '#ef4444' }}>⚠️</div>
+                  <div style={{ fontSize: 20, color: '#BC0000' }}>⚠️</div>
                   <div style={{ flex: 1 }}>
                     <h4 style={{
-                      color: '#ef4444',
+                      color: '#BC0000',
                       fontWeight: 600,
                       fontSize: 12,
                       textTransform: 'uppercase',
@@ -615,10 +615,10 @@ export function ThreeTeamTradeBoard({
                       fontSize: 12,
                     }}>
                       <span style={{ color: subText }}>Current score:</span>
-                      <span style={{ color: '#ef4444', fontWeight: 700 }}>{gradeResult.grade}</span>
+                      <span style={{ color: '#BC0000', fontWeight: 700 }}>{gradeResult.grade}</span>
                       <span style={{ color: subText }}>|</span>
                       <span style={{ color: subText }}>Needed:</span>
-                      <span style={{ color: '#22c55e', fontWeight: 700 }}>70+</span>
+                      <span style={{ color: '#00D4FF', fontWeight: 700 }}>70+</span>
                     </div>
                   </div>
                 </div>
@@ -656,7 +656,7 @@ export function ThreeTeamTradeBoard({
                         height: '100%',
                         width: `${item.value * 100}%`,
                         borderRadius: 3,
-                        backgroundColor: gradeResult.grade >= 70 ? '#22c55e' : gradeResult.grade >= 50 ? '#eab308' : '#ef4444',
+                        backgroundColor: gradeResult.grade >= 70 ? '#00D4FF' : gradeResult.grade >= 50 ? '#eab308' : '#BC0000',
                       }} />
                     </div>
                   </div>
@@ -842,9 +842,9 @@ export function ThreeTeamTradeBoard({
                       flex: 1,
                       padding: '10px 12px',
                       borderRadius: 8,
-                      border: `2px solid ${copied ? '#22c55e' : borderColor}`,
-                      backgroundColor: copied ? '#22c55e10' : 'transparent',
-                      color: copied ? '#22c55e' : textColor,
+                      border: `2px solid ${copied ? '#00D4FF' : borderColor}`,
+                      backgroundColor: copied ? '#00D4FF10' : 'transparent',
+                      color: copied ? '#00D4FF' : textColor,
                       fontWeight: 600,
                       fontSize: 13,
                       cursor: 'pointer',
@@ -858,7 +858,7 @@ export function ThreeTeamTradeBoard({
                   >
                     {copied ? (
                       <>
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#22c55e" strokeWidth="2.5">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#00D4FF" strokeWidth="2.5">
                           <path d="M20 6L9 17l-5-5" strokeLinecap="round" strokeLinejoin="round" />
                         </svg>
                         Copied!

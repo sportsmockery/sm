@@ -28,7 +28,7 @@ export default function SignupForm() {
 
   const passwordStrength = getPasswordStrength(password)
   const strengthLabels = ['Very Weak', 'Weak', 'Fair', 'Good', 'Strong']
-  const strengthColors = ['#ef4444', '#f97316', '#eab308', '#84cc16', '#10b981']
+  const strengthColors = ['#BC0000', '#BC0000', '#eab308', '#84cc16', '#00D4FF']
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -70,7 +70,7 @@ export default function SignupForm() {
           width: 64, height: 64, borderRadius: '50%', margin: '0 auto 16px',
           background: 'rgba(16,185,129,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center',
         }}>
-          <svg style={{ width: 32, height: 32, color: '#10b981' }} fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
+          <svg style={{ width: 32, height: 32, color: '#00D4FF' }} fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
           </svg>
         </div>
@@ -198,7 +198,7 @@ export default function SignupForm() {
           placeholder="********"
         />
         {confirmPassword && password !== confirmPassword && (
-          <p style={{ marginTop: '4px', fontSize: '12px', color: '#ef4444' }}>Passwords do not match</p>
+          <p style={{ marginTop: '4px', fontSize: '12px', color: '#BC0000' }}>Passwords do not match</p>
         )}
       </div>
 

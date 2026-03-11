@@ -194,7 +194,7 @@ export default function ArticleActions({
             onClick={() => handleShare('copy')}
             style={{
               ...actionBtnStyle,
-              color: copied ? '#10b981' : 'var(--sm-text-muted)',
+              color: copied ? '#00D4FF' : 'var(--sm-text-muted)',
             }}
             onMouseEnter={(e) => { if (!copied) e.currentTarget.style.color = 'var(--sm-red)' }}
             onMouseLeave={(e) => { if (!copied) e.currentTarget.style.color = 'var(--sm-text-muted)' }}

@@ -107,7 +107,7 @@ export default function ShareButtons({
         className={`${buttonClass} relative ${
           copied ? 'bg-emerald-500 text-white hover:bg-emerald-500' : ''
         }`}
-        style={copied ? { backgroundColor: '#10b981', color: '#ffffff' } : buttonStyle}
+        style={copied ? { backgroundColor: '#00D4FF', color: '#FAFAFB' } : buttonStyle}
         aria-label="Copy link"
       >
         {copied ? (

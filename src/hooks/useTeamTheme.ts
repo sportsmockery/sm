@@ -9,7 +9,7 @@ const TEAM_THEMES: Record<string, { gradient: string; glow: string }> = {
     glow: 'rgba(200, 56, 3, 0.3)',
   },
   'chicago-bulls': {
-    gradient: 'linear-gradient(135deg, #CE1141, #000000)',
+    gradient: 'linear-gradient(135deg, #CE1141, #0B0F14)',
     glow: 'rgba(206, 17, 65, 0.3)',
   },
   'chicago-cubs': {
@@ -21,7 +21,7 @@ const TEAM_THEMES: Record<string, { gradient: string; glow: string }> = {
     glow: 'rgba(196, 206, 212, 0.2)',
   },
   'chicago-blackhawks': {
-    gradient: 'linear-gradient(135deg, #CF0A2C, #000000)',
+    gradient: 'linear-gradient(135deg, #CF0A2C, #0B0F14)',
     glow: 'rgba(207, 10, 44, 0.3)',
   },
 }

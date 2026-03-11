@@ -28,7 +28,7 @@ export default function MediaGrid({
             type="checkbox"
             checked={selectedItems.length === media.length && media.length > 0}
             onChange={onSelectAll}
-            className="rounded border-gray-600 bg-gray-700 text-blue-600 focus:ring-blue-500"
+            className="rounded border-gray-600 bg-gray-700 text-[#00D4FF] focus:ring-blue-500"
           />
           Select All
         </label>

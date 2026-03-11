@@ -69,7 +69,7 @@ export default async function PollEmbedPage({ params }: EmbedPageProps) {
             --sm-card: #13131d;
             --sm-card-hover: #1a1a28;
             --sm-border: rgba(255, 255, 255, 0.06);
-            --sm-text: #ffffff;
+            --sm-text: #FAFAFB;
             --sm-text-muted: #8a8a9a;
             --sm-text-dim: #55556a;
             --sm-gradient: linear-gradient(135deg, #bc0000, #ff4444);
@@ -89,8 +89,8 @@ export default async function PollEmbedPage({ params }: EmbedPageProps) {
           @media (prefers-color-scheme: light) {
             :root {
               --sm-dark: #f8f8fa;
-              --sm-surface: #ffffff;
-              --sm-card: #ffffff;
+              --sm-surface: #FAFAFB;
+              --sm-card: #FAFAFB;
               --sm-card-hover: #f0f0f5;
               --sm-border: rgba(0, 0, 0, 0.08);
               --sm-text: #111118;

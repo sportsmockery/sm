@@ -173,19 +173,19 @@ export const CRON_JOBS: CronJob[] = [
 // ============================================================================
 
 const CATEGORY_CONFIG: Record<PageCategory, { label: string; color: string }> = {
-  'homepage': { label: 'Homepage', color: '#3b82f6' },
-  'team-pages': { label: 'Team Pages', color: '#22c55e' },
-  'admin': { label: 'Admin', color: '#ef4444' },
+  'homepage': { label: 'Homepage', color: '#00D4FF' },
+  'team-pages': { label: 'Team Pages', color: '#00D4FF' },
+  'admin': { label: 'Admin', color: '#BC0000' },
   'studio': { label: 'Studio', color: '#a855f7' },
   'gm': { label: 'GM / Trade Sim', color: '#f59e0b' },
   'scout': { label: 'Scout AI', color: '#06b6d4' },
   'fan-engagement': { label: 'Fan Engagement', color: '#ec4899' },
-  'polls': { label: 'Polls', color: '#8b5cf6' },
-  'content': { label: 'Content / Shows', color: '#10b981' },
+  'polls': { label: 'Polls', color: '#D6B05E' },
+  'content': { label: 'Content / Shows', color: '#00D4FF' },
   'auth': { label: 'Auth', color: '#6366f1' },
   'user': { label: 'User', color: '#14b8a6' },
   'static': { label: 'Static', color: '#64748b' },
-  'experimental': { label: 'Experimental', color: '#f97316' },
+  'experimental': { label: 'Experimental', color: '#BC0000' },
   'misc': { label: 'Misc', color: '#78716c' },
 }
 

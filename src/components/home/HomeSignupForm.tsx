@@ -77,7 +77,7 @@ export default function HomeSignupForm() {
           display: 'flex', alignItems: 'center', justifyContent: 'center',
           margin: '0 auto 20px',
         }}>
-          <svg width="32" height="32" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="#22c55e">
+          <svg width="32" height="32" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="#00D4FF">
             <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
           </svg>
         </div>
@@ -204,7 +204,7 @@ export default function HomeSignupForm() {
           onBlur={(e) => e.target.style.borderColor = 'rgba(255,255,255,0.08)'}
         />
         {confirmPassword && password !== confirmPassword && (
-          <p style={{ marginTop: 6, fontSize: 12, color: '#ef4444' }}>Passwords do not match</p>
+          <p style={{ marginTop: 6, fontSize: 12, color: '#BC0000' }}>Passwords do not match</p>
         )}
       </div>
 

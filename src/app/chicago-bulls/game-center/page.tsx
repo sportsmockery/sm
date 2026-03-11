@@ -182,7 +182,7 @@ export default async function BullsGameCenterPage() {
                       fontSize: '14px',
                       backgroundColor:
                         lastGame.result === 'W' ? 'rgba(34,197,94,0.15)' : 'rgba(239,68,68,0.15)',
-                      color: lastGame.result === 'W' ? 'var(--sm-success, #22c55e)' : 'var(--sm-error, #ef4444)',
+                      color: lastGame.result === 'W' ? 'var(--sm-success, #00D4FF)' : 'var(--sm-error, #BC0000)',
                     }}
                   >
                     {lastGame.result}
@@ -415,7 +415,7 @@ function GameRow({ game }: { game: BullsGame }) {
                 borderRadius: '6px',
                 backgroundColor:
                   game.result === 'W' ? 'rgba(34,197,94,0.15)' : 'rgba(239,68,68,0.15)',
-                color: game.result === 'W' ? 'var(--sm-success, #22c55e)' : 'var(--sm-error, #ef4444)',
+                color: game.result === 'W' ? 'var(--sm-success, #00D4FF)' : 'var(--sm-error, #BC0000)',
               }}
             >
               {game.result}

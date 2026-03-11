@@ -12,14 +12,14 @@ export interface ColorConfig {
 
 const teamColors: Record<string, { primary: string; secondary: string; name: string }> = {
   bears: { primary: '#C83200', secondary: '#0B162A', name: 'Chicago Bears' },
-  bulls: { primary: '#CE1141', secondary: '#000000', name: 'Chicago Bulls' },
+  bulls: { primary: '#CE1141', secondary: '#0B0F14', name: 'Chicago Bulls' },
   cubs: { primary: '#0E3386', secondary: '#CC3433', name: 'Chicago Cubs' },
   whitesox: { primary: '#27251F', secondary: '#C4CED4', name: 'Chicago White Sox' },
-  blackhawks: { primary: '#CF0A2C', secondary: '#000000', name: 'Chicago Blackhawks' },
+  blackhawks: { primary: '#CF0A2C', secondary: '#0B0F14', name: 'Chicago Blackhawks' },
 }
 
 const presetColors = [
-  '#FF0000', '#8B0000', '#FF6B6B', '#4ECDC4', '#45B7D1',
+  '#BC0000', '#8B0000', '#FF6B6B', '#4ECDC4', '#45B7D1',
   '#96CEB4', '#FFEAA7', '#DDA0DD', '#98D8C8', '#F7DC6F',
 ]
 
@@ -29,7 +29,7 @@ interface ChartColorPickerProps {
 }
 
 export default function ChartColorPicker({ config, onChange }: ChartColorPickerProps) {
-  const [customColor, setCustomColor] = useState(config.customColors?.[0] || '#FF0000')
+  const [customColor, setCustomColor] = useState(config.customColors?.[0] || '#BC0000')
 
   const handleTeamSelect = (team: string) => {
     onChange({
@@ -118,7 +118,7 @@ export default function ChartColorPicker({ config, onChange }: ChartColorPickerP
               type="text"
               value={customColor}
               onChange={(e) => handleCustomColorChange(e.target.value)}
-              placeholder="#FF0000"
+              placeholder="#BC0000"
               className="flex-1 rounded-lg border border-zinc-700 bg-zinc-800 px-3 py-2 text-sm text-white placeholder:text-zinc-500 focus:border-[#8B0000] focus:outline-none"
             />
           </div>

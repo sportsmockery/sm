@@ -95,7 +95,7 @@ export default function ArticleShareBar({ url, title }: ArticleShareBarProps) {
         style={iconBtnStyle}
       >
         {copied ? (
-          <svg width="16" height="16" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="#22c55e">
+          <svg width="16" height="16" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="#00D4FF">
             <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" />
           </svg>
         ) : (

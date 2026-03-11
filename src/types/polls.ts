@@ -18,14 +18,14 @@ export type EmojiOption = typeof EMOJI_OPTIONS[number]
 
 // Team color palette
 export const TEAM_COLORS: Record<string, { primary: string; secondary: string; accent: string }> = {
-  bears: { primary: '#0B162A', secondary: '#C83200', accent: '#FFFFFF' },
-  bulls: { primary: '#CE1141', secondary: '#000000', accent: '#FFFFFF' },
-  cubs: { primary: '#0E3386', secondary: '#CC3433', accent: '#FFFFFF' },
-  whitesox: { primary: '#27251F', secondary: '#C4CED4', accent: '#FFFFFF' },
-  blackhawks: { primary: '#CF0A2C', secondary: '#000000', accent: '#FFD100' },
-  fire: { primary: '#AF2626', secondary: '#7CCDEF', accent: '#FFFFFF' },
-  sky: { primary: '#5091CD', secondary: '#FED141', accent: '#FFFFFF' },
-  default: { primary: '#1a1a2e', secondary: '#C83200', accent: '#FFFFFF' },
+  bears: { primary: '#0B162A', secondary: '#C83200', accent: '#FAFAFB' },
+  bulls: { primary: '#CE1141', secondary: '#0B0F14', accent: '#FAFAFB' },
+  cubs: { primary: '#0E3386', secondary: '#CC3433', accent: '#FAFAFB' },
+  whitesox: { primary: '#27251F', secondary: '#C4CED4', accent: '#FAFAFB' },
+  blackhawks: { primary: '#CF0A2C', secondary: '#0B0F14', accent: '#FFD100' },
+  fire: { primary: '#AF2626', secondary: '#7CCDEF', accent: '#FAFAFB' },
+  sky: { primary: '#5091CD', secondary: '#FED141', accent: '#FAFAFB' },
+  default: { primary: '#1a1a2e', secondary: '#C83200', accent: '#FAFAFB' },
 }
 
 // Poll option interface

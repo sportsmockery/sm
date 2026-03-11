@@ -17,7 +17,7 @@ export default function PostGameView({ game }: PostGameViewProps) {
       <div style={{ backgroundColor: 'var(--sm-card)', borderBottom: '1px solid var(--sm-border)' }}>
         <div className="max-w-[1200px] mx-auto px-4 py-2 text-center">
           <span className="inline-block px-3 py-1 rounded text-xs font-bold uppercase tracking-wider"
-            style={{ backgroundColor: '#bc0000', color: '#ffffff' }}>
+            style={{ backgroundColor: '#bc0000', color: '#FAFAFB' }}>
             Final
           </span>
         </div>

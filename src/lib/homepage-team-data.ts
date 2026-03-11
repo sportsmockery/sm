@@ -18,7 +18,7 @@ export const homepageTeams: HomepageTeam[] = [
     id: "bulls",
     name: "Bulls",
     color: "#CE1141",
-    secondaryColor: "#000000",
+    secondaryColor: "#0B0F14",
     logo: "https://a.espncdn.com/i/teamlogos/nba/500/chi.png",
   },
   {

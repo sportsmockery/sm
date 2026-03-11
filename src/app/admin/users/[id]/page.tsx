@@ -189,8 +189,8 @@ export default function UserDetailPage() {
       {message && (
         <div className={`p-3 rounded-lg mb-6 text-sm ${
           message.type === 'error'
-            ? 'bg-red-500/20 border border-red-500/30 text-red-400'
-            : 'bg-green-500/20 border border-green-500/30 text-green-400'
+            ? 'bg-red-500/20 border border-red-500/30 text-[#BC0000]'
+            : 'bg-[#00D4FF]/20 border border-green-500/30 text-[#00D4FF]'
         }`}>
           {message.text}
         </div>
@@ -322,8 +322,8 @@ export default function UserDetailPage() {
             {passwordMessage && (
               <div className={`p-2 rounded-lg mb-3 text-xs ${
                 passwordMessage.includes('Error') || passwordMessage.includes('Failed')
-                  ? 'bg-red-500/20 border border-red-500/30 text-red-400'
-                  : 'bg-green-500/20 border border-green-500/30 text-green-400'
+                  ? 'bg-red-500/20 border border-red-500/30 text-[#BC0000]'
+                  : 'bg-[#00D4FF]/20 border border-green-500/30 text-[#00D4FF]'
               }`}>
                 {passwordMessage}
               </div>
@@ -367,7 +367,7 @@ export default function UserDetailPage() {
                     <dt style={{ color: 'var(--text-muted)' }}>Favorite Teams</dt>
                     <dd className="flex flex-wrap gap-1.5 mt-1">
                       {preferences.favorite_teams.map((team: string) => (
-                        <span key={team} className="px-2 py-0.5 rounded-full text-xs font-medium bg-blue-500/20 text-blue-400 border border-blue-500/30">
+                        <span key={team} className="px-2 py-0.5 rounded-full text-xs font-medium bg-[#00D4FF]/20 text-[#00D4FF] border border-blue-500/30">
                           {TEAM_LABELS[team] || team}
                         </span>
                       ))}
@@ -387,15 +387,15 @@ export default function UserDetailPage() {
           )}
 
           {/* Danger Zone */}
-          <div className="rounded-lg p-5" style={{ backgroundColor: 'var(--bg-card)', border: '1px solid #ef4444' }}>
-            <h3 className="text-sm font-semibold uppercase tracking-wider mb-3 text-red-400">Danger Zone</h3>
+          <div className="rounded-lg p-5" style={{ backgroundColor: 'var(--bg-card)', border: '1px solid #BC0000' }}>
+            <h3 className="text-sm font-semibold uppercase tracking-wider mb-3 text-[#BC0000]">Danger Zone</h3>
             <p className="text-xs mb-3" style={{ color: 'var(--text-muted)' }}>
               Permanently delete this user and their auth account. This cannot be undone.
             </p>
             <button
               onClick={handleDelete}
               className="w-full px-3 py-2 text-white text-sm rounded-lg hover:opacity-90 transition-opacity"
-              style={{ backgroundColor: '#dc2626' }}
+              style={{ backgroundColor: '#BC0000' }}
             >
               Delete User
             </button>

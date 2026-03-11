@@ -62,7 +62,7 @@ function SubscriptionSuccessContent() {
           <div style={{ display: 'flex', flexDirection: 'column', gap: '24px', alignItems: 'center' }}>
             {/* Success Icon */}
             <div style={{
-              width: 80, height: 80, borderRadius: '50%', background: '#22c55e',
+              width: 80, height: 80, borderRadius: '50%', background: '#00D4FF',
               display: 'flex', alignItems: 'center', justifyContent: 'center',
             }}>
               <svg style={{ width: 40, height: 40, color: '#fff' }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -96,7 +96,7 @@ function SubscriptionSuccessContent() {
                   'Early Access to Features',
                 ].map((feature) => (
                   <li key={feature} style={{ display: 'flex', alignItems: 'center', gap: '12px', color: 'var(--sm-text)' }}>
-                    <svg style={{ width: 20, height: 20, color: '#22c55e', flexShrink: 0 }} fill="currentColor" viewBox="0 0 20 20">
+                    <svg style={{ width: 20, height: 20, color: '#00D4FF', flexShrink: 0 }} fill="currentColor" viewBox="0 0 20 20">
                       <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
                     </svg>
                     {feature}

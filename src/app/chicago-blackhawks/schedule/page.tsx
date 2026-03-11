@@ -96,7 +96,7 @@ export default async function BlackhawksSchedulePage() {
             {hawksRecord.streak && (
               <div>
                 <div style={{ fontSize: '11px', color: 'var(--sm-text-muted)', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '4px' }}>Streak</div>
-                <div style={{ fontSize: '22px', fontWeight: 800, color: hawksRecord.streak.startsWith('W') ? '#10b981' : '#ef4444' }}>
+                <div style={{ fontSize: '22px', fontWeight: 800, color: hawksRecord.streak.startsWith('W') ? '#00D4FF' : '#BC0000' }}>
                   {hawksRecord.streak}
                 </div>
               </div>
@@ -154,7 +154,7 @@ function GameRow({ game }: { game: BlackhawksGame }) {
   const isInProgress = game.status === 'in_progress'
 
   const borderColor = isPast
-    ? game.result === 'W' ? '#10b981' : game.result === 'OTL' ? '#eab308' : '#ef4444'
+    ? game.result === 'W' ? '#00D4FF' : game.result === 'OTL' ? '#eab308' : '#BC0000'
     : 'var(--sm-red)'
 
   return (
@@ -220,7 +220,7 @@ function GameRow({ game }: { game: BlackhawksGame }) {
                   fontSize: '11px',
                   fontWeight: 700,
                   backgroundColor: game.result === 'W' ? 'rgba(16, 185, 129, 0.1)' : game.result === 'OTL' ? 'rgba(234, 179, 8, 0.1)' : 'rgba(239, 68, 68, 0.1)',
-                  color: game.result === 'W' ? '#10b981' : game.result === 'OTL' ? '#eab308' : '#ef4444',
+                  color: game.result === 'W' ? '#00D4FF' : game.result === 'OTL' ? '#eab308' : '#BC0000',
                 }}
               >
                 {game.result}{game.overtime ? ' (OT)' : ''}{game.shootout ? ' (SO)' : ''}

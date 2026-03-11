@@ -62,9 +62,9 @@ const RANGES = [
 const TEAMS = ['All Teams', 'Bears', 'Cubs', 'Bulls', 'Blackhawks', 'White Sox', 'Fire', 'Sky']
 const SOURCES = ['All Sources', 'Organic', 'Discover', 'Social', 'Direct']
 const C = {
-  blue: '#3b82f6', purple: '#8b5cf6', green: '#10b981', amber: '#f59e0b',
-  red: '#ef4444', cyan: '#06b6d2', pink: '#ec4899', indigo: '#6366f1',
-  orange: '#f97316', teal: '#14b8a6', lime: '#84cc16', slate: '#64748b',
+  blue: '#00D4FF', purple: '#D6B05E', green: '#00D4FF', amber: '#f59e0b',
+  red: '#BC0000', cyan: '#06b6d2', pink: '#ec4899', indigo: '#6366f1',
+  orange: '#BC0000', teal: '#14b8a6', lime: '#84cc16', slate: '#64748b',
 }
 const PAL = [C.blue, C.purple, C.green, C.amber, C.red, C.cyan, C.pink, C.indigo, C.orange, C.teal]
 const fN = (n: number) => n >= 1e6 ? (n / 1e6).toFixed(1).replace(/\.0$/, '') + 'M' : n >= 1e3 ? (n / 1e3).toFixed(1).replace(/\.0$/, '') + 'K' : n.toLocaleString()
@@ -793,7 +793,7 @@ Revenue: [
   <button key={r.key} onClick={() => setRange(r.key)}
   className="px-2.5 py-1.5 text-[11px] font-bold rounded transition-all"
   style={{ 
-    backgroundColor: range === r.key ? '#2563eb' : 'transparent', 
+    backgroundColor: range === r.key ? '#00D4FF' : 'transparent', 
     color: range === r.key ? '#fff' : '#94a3b8' 
   }}>
   {r.label}
@@ -811,7 +811,7 @@ Revenue: [
   className="px-2 py-1.5 text-[11px] font-bold rounded border outline-none"
   style={{ backgroundColor: '#fff', borderColor: '#e2e8f0', color: '#334155' }} />
   <button className="px-3 py-1.5 text-[11px] font-bold rounded transition-all"
-  style={{ backgroundColor: '#2563eb', color: '#fff' }}>
+  style={{ backgroundColor: '#00D4FF', color: '#fff' }}>
   Apply
   </button>
   </div>
@@ -982,7 +982,7 @@ Revenue: [
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
               {[
                 { label: 'Total Audience', value: fN(data.social.youtube.reduce((s: number, c: any) => s + c.subscribers, 0) + data.social.x.reduce((s: number, c: any) => s + c.followers, 0) + data.social.facebook.filter((p: any) => !p.needsToken).reduce((s: number, c: any) => s + c.followers, 0)), color: C.blue, sub: 'all platforms' },
-                { label: 'YouTube Subs', value: fN(data.social.youtube.reduce((s: number, c: any) => s + c.subscribers, 0)), color: '#dc2626', sub: `${data.social.youtube.length} channels` },
+                { label: 'YouTube Subs', value: fN(data.social.youtube.reduce((s: number, c: any) => s + c.subscribers, 0)), color: '#BC0000', sub: `${data.social.youtube.length} channels` },
                 { label: 'X Followers', value: fN(data.social.x.reduce((s: number, c: any) => s + c.followers, 0)), color: '#a1a1aa', sub: `${data.social.x.length} accounts` },
                 { label: 'FB Followers', value: fN(data.social.facebook.filter((p: any) => !p.needsToken).reduce((s: number, c: any) => s + c.followers, 0)), color: '#1877f2', sub: `${data.social.facebook.length} pages` },
               ].map(s => (
@@ -999,9 +999,9 @@ Revenue: [
                 <SortableTable
                   columns={[
                     { key: 'name', label: 'Channel', render: (v: string, r: any) => (
-                      <div className="flex items-center gap-3">{r.thumbnail ? <img src={r.thumbnail} alt="" className="w-8 h-8 rounded-full" /> : <div className="w-8 h-8 rounded-full flex items-center justify-center" style={{ background: '#dc262620', color: '#dc2626' }}><svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M23.498 6.186a3.016 3.016 0 00-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 00.502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 002.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 002.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z" /></svg></div>}<span className="font-semibold">{v}</span></div>
+                      <div className="flex items-center gap-3">{r.thumbnail ? <img src={r.thumbnail} alt="" className="w-8 h-8 rounded-full" /> : <div className="w-8 h-8 rounded-full flex items-center justify-center" style={{ background: '#BC000020', color: '#BC0000' }}><svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M23.498 6.186a3.016 3.016 0 00-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 00.502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 002.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 002.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z" /></svg></div>}<span className="font-semibold">{v}</span></div>
                     )},
-                    { key: 'subscribers', label: 'Subscribers', align: 'right', render: (v: number) => <span className="font-bold tabular-nums" style={{ color: '#dc2626' }}>{fN(v)}</span> },
+                    { key: 'subscribers', label: 'Subscribers', align: 'right', render: (v: number) => <span className="font-bold tabular-nums" style={{ color: '#BC0000' }}>{fN(v)}</span> },
                     { key: 'totalViews', label: 'Views', align: 'right', render: (v: number) => <span className="font-bold tabular-nums" style={{ color: C.purple }}>{fN(v)}</span> },
                     { key: 'videoCount', label: 'Videos', align: 'right', render: (v: number) => <span className="font-bold tabular-nums">{v}</span> },
                   ]}
@@ -1185,7 +1185,7 @@ Revenue: [
               return (
                 <div className="grid grid-cols-1 sm:grid-cols-4 gap-4">
                   {[
-                    { l: 'Total Payout', v: '$' + totalPayout.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }), c: '#059669' },
+                    { l: 'Total Payout', v: '$' + totalPayout.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }), c: '#00D4FF' },
                     { l: 'Writers', v: String(payments.length), c: 'var(--sm-text)' },
                     { l: 'Total Views', v: fN(totalViews), c: 'var(--sm-text)' },
                     { l: 'Total Posts', v: String(totalPosts), c: 'var(--sm-text)' },
@@ -1255,7 +1255,7 @@ Revenue: [
                                     onMouseLeave={() => setPayBreakdownOpen(null)}
                                     onClick={() => setPayBreakdownOpen(payBreakdownOpen === w.writer_name ? null : w.writer_name)}
                                     className="text-sm font-bold tabular-nums cursor-pointer underline decoration-dotted underline-offset-2"
-                                    style={{ color: '#059669' }}
+                                    style={{ color: '#00D4FF' }}
                                   >
                                     ${(w.calculated_pay || 0).toFixed(2)}
                                   </button>
@@ -1288,7 +1288,7 @@ Revenue: [
                                       </div>
                                       <div className="px-3 py-2 border-t flex justify-between items-center" style={{ borderColor: 'var(--sm-border)', background: 'rgba(5,150,105,0.06)' }}>
                                         <span className="text-xs font-bold uppercase tracking-wide" style={{ color: 'var(--sm-text-dim)' }}>Total Pay</span>
-                                        <span className="text-base font-extrabold tabular-nums" style={{ color: '#059669' }}>${(w.calculated_pay || 0).toFixed(2)}</span>
+                                        <span className="text-base font-extrabold tabular-nums" style={{ color: '#00D4FF' }}>${(w.calculated_pay || 0).toFixed(2)}</span>
                                       </div>
                                     </div>
                                   )}
@@ -1308,7 +1308,7 @@ Revenue: [
                                 )}
                                 {status === 'Approved' && (
                                   <div className="flex items-center gap-1.5">
-                                    <button className="text-xs font-bold px-2.5 py-1 rounded transition-colors" style={{ background: '#059669', color: '#fff' }}>
+                                    <button className="text-xs font-bold px-2.5 py-1 rounded transition-colors" style={{ background: '#00D4FF', color: '#fff' }}>
                                       Mark Paid
                                     </button>
                                     <button className="text-xs font-bold px-2.5 py-1 rounded border transition-colors" style={{ borderColor: 'var(--sm-border)', color: 'var(--sm-text-muted)', background: 'var(--sm-surface)' }}>
@@ -1445,7 +1445,7 @@ Revenue: [
             {/* 5. Bulk Actions Row */}
             <div className="rounded-lg border px-4 py-3 flex items-center justify-between" style={{ background: 'var(--sm-card)', borderColor: 'var(--sm-border)' }}>
               <div className="flex items-center gap-3">
-                <button className="px-4 py-2 text-sm font-bold rounded transition-colors" style={{ backgroundColor: '#2563eb', color: '#fff' }}>
+                <button className="px-4 py-2 text-sm font-bold rounded transition-colors" style={{ backgroundColor: '#00D4FF', color: '#fff' }}>
                   Approve All Pending
                 </button>
                 <button className="px-4 py-2 text-sm font-bold rounded border transition-colors" style={{ borderColor: '#cbd5e1', backgroundColor: '#f8fafc', color: '#475569' }}>
@@ -1502,7 +1502,7 @@ Revenue: [
                                 style={{
                                   height: `${heightPct}%`,
                                   minHeight: 4,
-                                  backgroundColor: '#059669',
+                                  backgroundColor: '#00D4FF',
                                   opacity: expandedHistoryMonth === m.month ? 1 : 0.7,
                                 }}
                                 onClick={() => setExpandedHistoryMonth(expandedHistoryMonth === m.month ? null : m.month)}
@@ -1538,8 +1538,8 @@ Revenue: [
                               <span className="text-sm font-semibold" style={{ color: 'var(--sm-text)' }}>{m.month}</span>
                             </div>
                             <div className="flex items-center gap-4">
-                              <span className="text-sm font-bold tabular-nums" style={{ color: '#059669' }}>${m.total.toLocaleString()}</span>
-                              <span className="text-xs font-bold px-2 py-0.5 rounded-full" style={{ background: 'rgba(16,185,129,0.12)', color: '#059669' }}>
+                              <span className="text-sm font-bold tabular-nums" style={{ color: '#00D4FF' }}>${m.total.toLocaleString()}</span>
+                              <span className="text-xs font-bold px-2 py-0.5 rounded-full" style={{ background: 'rgba(16,185,129,0.12)', color: '#00D4FF' }}>
                                 Completed
                               </span>
                             </div>
@@ -1565,9 +1565,9 @@ Revenue: [
                                           <td className="px-2 py-2 text-sm tabular-nums" style={{ color: 'var(--sm-text-muted)' }}>{w.posts}</td>
                                           <td className="px-2 py-2 text-sm tabular-nums" style={{ color: 'var(--sm-text-muted)' }}>{w.views.toLocaleString()}</td>
                                           <td className="px-2 py-2 text-[10px] font-mono" style={{ color: 'var(--sm-text-dim)' }}>{w.formula}</td>
-                                          <td className="px-2 py-2 text-sm font-bold tabular-nums" style={{ color: '#059669' }}>${w.calcPay.toFixed(2)}</td>
+                                          <td className="px-2 py-2 text-sm font-bold tabular-nums" style={{ color: '#00D4FF' }}>${w.calcPay.toFixed(2)}</td>
                                           <td className="px-2 py-2">
-                                            <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-full" style={{ background: 'rgba(16,185,129,0.12)', color: '#059669' }}>
+                                            <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-full" style={{ background: 'rgba(16,185,129,0.12)', color: '#00D4FF' }}>
                                               {w.status}
                                             </span>
                                           </td>

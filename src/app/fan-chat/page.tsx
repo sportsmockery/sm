@@ -539,7 +539,7 @@ export default function FanChatPage() {
                               ? 'rounded-tr-sm'
                               : 'rounded-tl-sm'
                           }`}
-                          style={msg.isOwn ? { backgroundColor: '#bc0000', color: '#ffffff' } : { backgroundColor: 'var(--sm-surface)', color: 'var(--sm-text)' }}
+                          style={msg.isOwn ? { backgroundColor: '#bc0000', color: '#FAFAFB' } : { backgroundColor: 'var(--sm-surface)', color: 'var(--sm-text)' }}
                         >
                           {msg.content}
                         </div>

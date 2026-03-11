@@ -12,10 +12,10 @@ interface PollListProps {
 
 const STATUS_COLORS: Record<PollStatus, { bg: string; text: string; dot: string }> = {
   draft: { bg: 'bg-gray-100 dark:bg-gray-800', text: 'text-gray-600 dark:text-gray-400', dot: 'bg-gray-400' },
-  active: { bg: 'bg-green-100 dark:bg-green-900/30', text: 'text-green-600 dark:text-green-400', dot: 'bg-green-500' },
-  scheduled: { bg: 'bg-blue-100 dark:bg-blue-900/30', text: 'text-blue-600 dark:text-blue-400', dot: 'bg-blue-500' },
+  active: { bg: 'bg-[#00D4FF]/10 dark:bg-[#00D4FF]/30', text: 'text-[#00D4FF] dark:text-[#00D4FF]', dot: 'bg-[#00D4FF]' },
+  scheduled: { bg: 'bg-[#00D4FF]/10 dark:bg-[#00D4FF]/30', text: 'text-[#00D4FF] dark:text-[#00D4FF]', dot: 'bg-[#00D4FF]' },
   closed: { bg: 'bg-amber-100 dark:bg-amber-900/30', text: 'text-amber-600 dark:text-amber-400', dot: 'bg-amber-500' },
-  archived: { bg: 'bg-red-100 dark:bg-red-900/30', text: 'text-red-600 dark:text-red-400', dot: 'bg-red-500' },
+  archived: { bg: 'bg-[#BC0000]/10 dark:bg-[#BC0000]/30', text: 'text-[#BC0000] dark:text-[#BC0000]', dot: 'bg-red-500' },
 }
 
 const POLL_TYPE_ICONS: Record<PollType, string> = {
@@ -148,7 +148,7 @@ export default function PollList({ initialPolls = [] }: PollListProps) {
             placeholder="Search polls..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full pl-10 pr-4 py-2 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg text-sm focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+            className="w-full pl-10 pr-4 py-2 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg text-sm focus:ring-2 focus:ring-[#D6B05E] focus:border-transparent"
           />
         </div>
 
@@ -198,7 +198,7 @@ export default function PollList({ initialPolls = [] }: PollListProps) {
             type="checkbox"
             checked={showArchived}
             onChange={(e) => setShowArchived(e.target.checked)}
-            className="rounded border-gray-300 text-purple-600 focus:ring-purple-500"
+            className="rounded border-gray-300 text-[#D6B05E] focus:ring-[#D6B05E]"
           />
           Show archived
         </label>
@@ -207,10 +207,10 @@ export default function PollList({ initialPolls = [] }: PollListProps) {
       {/* Poll list */}
       {loading ? (
         <div className="flex items-center justify-center py-12">
-          <div className="h-8 w-8 animate-spin rounded-full border-2 border-purple-500 border-t-transparent" />
+          <div className="h-8 w-8 animate-spin rounded-full border-2 border-[#D6B05E] border-t-transparent" />
         </div>
       ) : error ? (
-        <div className="text-center py-12 text-red-500">{error}</div>
+        <div className="text-center py-12 text-[#BC0000]">{error}</div>
       ) : polls.length === 0 ? (
         <div className="text-center py-12">
           <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-gray-100 dark:bg-gray-800 mb-4">
@@ -225,7 +225,7 @@ export default function PollList({ initialPolls = [] }: PollListProps) {
           {!searchQuery && statusFilter === 'all' && typeFilter === 'all' && teamFilter === 'all' && (
             <Link
               href="/polls/new"
-              className="inline-flex items-center gap-2 px-4 py-2 bg-purple-600 text-white rounded-lg font-medium hover:bg-purple-700 transition-colors"
+              className="inline-flex items-center gap-2 px-4 py-2 bg-[#D6B05E] text-white rounded-lg font-medium hover:bg-[#D6B05E] transition-colors"
             >
               Create Poll
             </Link>
@@ -283,7 +283,7 @@ export default function PollList({ initialPolls = [] }: PollListProps) {
                             <div>
                               <Link
                                 href={`/polls/${poll.id}/edit`}
-                                className="font-medium text-gray-900 dark:text-white hover:text-purple-600 dark:hover:text-purple-400"
+                                className="font-medium text-gray-900 dark:text-white hover:text-[#D6B05E] dark:hover:text-[#D6B05E]"
                               >
                                 {poll.title || poll.question}
                               </Link>
@@ -377,14 +377,14 @@ export default function PollList({ initialPolls = [] }: PollListProps) {
                                   )}
                                   <button
                                     onClick={() => handleDelete(poll.id)}
-                                    className="w-full px-4 py-2 text-left text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20"
+                                    className="w-full px-4 py-2 text-left text-sm text-[#BC0000] dark:text-[#BC0000] hover:bg-red-50 dark:hover:bg-[#BC0000]/20"
                                   >
                                     Archive
                                   </button>
                                   {poll.status === 'archived' && (
                                     <button
                                       onClick={() => handleDelete(poll.id, true)}
-                                      className="w-full px-4 py-2 text-left text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20"
+                                      className="w-full px-4 py-2 text-left text-sm text-[#BC0000] dark:text-[#BC0000] hover:bg-red-50 dark:hover:bg-[#BC0000]/20"
                                     >
                                       Delete Permanently
                                     </button>

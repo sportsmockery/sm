@@ -369,7 +369,7 @@ export default function VisionTheaterClient({ data }: { data: VisionTheaterData 
     <div
       style={{
         background: 'var(--sm-dark, #050508)',
-        color: 'var(--sm-text, #ffffff)',
+        color: 'var(--sm-text, #FAFAFB)',
        
         minHeight: '100vh',
       }}
@@ -457,7 +457,7 @@ export default function VisionTheaterClient({ data }: { data: VisionTheaterData 
               lineHeight: 0.95,
               letterSpacing: '0.01em',
               textTransform: 'uppercase',
-              color: '#ffffff',
+              color: '#FAFAFB',
               margin: '0 0 24px',
               textShadow:
                 '0 0 8px rgba(188, 0, 0, 0.4), 0 0 20px rgba(188, 0, 0, 0.25), 0 0 40px rgba(188, 0, 0, 0.15)',
@@ -510,7 +510,7 @@ export default function VisionTheaterClient({ data }: { data: VisionTheaterData 
                 onClick={() => setChannelFilter(f.slug)}
                 style={{
                   backgroundColor: channelFilter === f.slug ? '#bc0000' : '#13131d',
-                  color: channelFilter === f.slug ? '#ffffff' : '#8a8a9a',
+                  color: channelFilter === f.slug ? '#FAFAFB' : '#8a8a9a',
                   border: '1px solid ' + (channelFilter === f.slug ? '#bc0000' : 'rgba(255,255,255,0.1)'),
                   borderRadius: '8px',
                   padding: '8px 16px',
@@ -532,7 +532,7 @@ export default function VisionTheaterClient({ data }: { data: VisionTheaterData 
             onChange={(e) => setKeywordFilter(e.target.value)}
             style={{
               backgroundColor: '#13131d',
-              color: '#ffffff',
+              color: '#FAFAFB',
               border: '1px solid rgba(255,255,255,0.1)',
               borderRadius: '8px',
               padding: '8px 12px',
@@ -556,7 +556,7 @@ export default function VisionTheaterClient({ data }: { data: VisionTheaterData 
             onChange={(e) => setSearchQuery(e.target.value)}
             style={{
               backgroundColor: '#13131d',
-              color: '#ffffff',
+              color: '#FAFAFB',
               border: '1px solid rgba(255,255,255,0.1)',
               borderRadius: '8px',
               padding: '8px 14px',
@@ -634,7 +634,7 @@ export default function VisionTheaterClient({ data }: { data: VisionTheaterData 
                      
                       fontSize: '24px',
                       fontWeight: 700,
-                      color: '#ffffff',
+                      color: '#FAFAFB',
                       margin: '4px 0 8px',
                     }}
                   >
@@ -682,7 +682,7 @@ export default function VisionTheaterClient({ data }: { data: VisionTheaterData 
                   style={{
                     fontSize: '16px',
                     fontWeight: 600,
-                    color: '#ffffff',
+                    color: '#FAFAFB',
                     margin: '0 0 16px',
                    
                   }}
@@ -703,7 +703,7 @@ export default function VisionTheaterClient({ data }: { data: VisionTheaterData 
                       style={{
                         flex: 1,
                         backgroundColor: '#13131d',
-                        color: '#ffffff',
+                        color: '#FAFAFB',
                         border: '1px solid rgba(255,255,255,0.1)',
                         borderRadius: '8px',
                         padding: '10px 14px',
@@ -717,7 +717,7 @@ export default function VisionTheaterClient({ data }: { data: VisionTheaterData 
                       disabled={commentPosting || !commentInput.trim()}
                       style={{
                         backgroundColor: '#bc0000',
-                        color: '#ffffff',
+                        color: '#FAFAFB',
                         border: 'none',
                         borderRadius: '8px',
                         padding: '10px 18px',
@@ -788,7 +788,7 @@ export default function VisionTheaterClient({ data }: { data: VisionTheaterData 
                         </div>
                         <div style={{ flex: 1, minWidth: 0 }}>
                           <div style={{ display: 'flex', gap: '8px', alignItems: 'baseline' }}>
-                            <span style={{ fontSize: '13px', fontWeight: 600, color: '#ffffff' }}>
+                            <span style={{ fontSize: '13px', fontWeight: 600, color: '#FAFAFB' }}>
                               {c.user_name}
                             </span>
                             <span style={{ fontSize: '11px', color: '#55556a' }}>
@@ -824,7 +824,7 @@ export default function VisionTheaterClient({ data }: { data: VisionTheaterData 
              
               fontSize: '22px',
               fontWeight: 700,
-              color: '#ffffff',
+              color: '#FAFAFB',
               margin: 0,
             }}
           >
@@ -924,7 +924,7 @@ export default function VisionTheaterClient({ data }: { data: VisionTheaterData 
                       top: '8px',
                       left: '8px',
                       background: 'rgba(0,0,0,0.7)',
-                      color: '#ffffff',
+                      color: '#FAFAFB',
                       fontSize: '11px',
                       fontWeight: 600,
                       padding: '3px 8px',
@@ -942,7 +942,7 @@ export default function VisionTheaterClient({ data }: { data: VisionTheaterData 
                     style={{
                       fontSize: '14px',
                       fontWeight: 700,
-                      color: '#ffffff',
+                      color: '#FAFAFB',
                       margin: '0 0 6px',
                       lineHeight: 1.4,
                       display: '-webkit-box',
@@ -1017,7 +1017,7 @@ export default function VisionTheaterClient({ data }: { data: VisionTheaterData 
                
                 fontSize: '22px',
                 fontWeight: 700,
-                color: '#ffffff',
+                color: '#FAFAFB',
                 margin: 0,
               }}
             >
@@ -1103,7 +1103,7 @@ export default function VisionTheaterClient({ data }: { data: VisionTheaterData 
                       bottom: '8px',
                       left: '8px',
                       background: 'rgba(188,0,0,0.85)',
-                      color: '#ffffff',
+                      color: '#FAFAFB',
                       fontSize: '10px',
                       fontWeight: 700,
                       padding: '2px 7px',
@@ -1121,7 +1121,7 @@ export default function VisionTheaterClient({ data }: { data: VisionTheaterData 
                       top: '6px',
                       left: '6px',
                       background: 'rgba(0,0,0,0.7)',
-                      color: '#ffffff',
+                      color: '#FAFAFB',
                       fontSize: '10px',
                       fontWeight: 600,
                       padding: '2px 6px',
@@ -1139,7 +1139,7 @@ export default function VisionTheaterClient({ data }: { data: VisionTheaterData 
                     style={{
                       fontSize: '12px',
                       fontWeight: 700,
-                      color: '#ffffff',
+                      color: '#FAFAFB',
                       margin: 0,
                       lineHeight: 1.3,
                       display: '-webkit-box',
@@ -1249,7 +1249,7 @@ export default function VisionTheaterClient({ data }: { data: VisionTheaterData 
         <p
           style={{
             fontSize: '18px',
-            color: '#ffffff',
+            color: '#FAFAFB',
             margin: '0 0 24px',
             maxWidth: '400px',
             marginLeft: 'auto',
@@ -1263,7 +1263,7 @@ export default function VisionTheaterClient({ data }: { data: VisionTheaterData 
         <button
           style={{
             backgroundColor: '#bc0000',
-            color: '#ffffff',
+            color: '#FAFAFB',
             border: 'none',
             borderRadius: '8px',
             padding: '14px 32px',
@@ -1345,7 +1345,7 @@ export default function VisionTheaterClient({ data }: { data: VisionTheaterData 
                      
                       fontSize: '18px',
                       fontWeight: 700,
-                      color: '#ffffff',
+                      color: '#FAFAFB',
                       margin: 0,
                     }}
                   >
@@ -1368,7 +1368,7 @@ export default function VisionTheaterClient({ data }: { data: VisionTheaterData 
                   style={{
                     flex: 1,
                     backgroundColor: '#0c0c12',
-                    color: '#ffffff',
+                    color: '#FAFAFB',
                     border: '1px solid rgba(255,255,255,0.1)',
                     borderRadius: '8px',
                     padding: '12px 14px',
@@ -1382,7 +1382,7 @@ export default function VisionTheaterClient({ data }: { data: VisionTheaterData 
                   disabled={scoutLoading || !scoutQuery.trim()}
                   style={{
                     backgroundColor: '#bc0000',
-                    color: '#ffffff',
+                    color: '#FAFAFB',
                     border: 'none',
                     borderRadius: '8px',
                     padding: '12px 18px',
@@ -1443,7 +1443,7 @@ export default function VisionTheaterClient({ data }: { data: VisionTheaterData 
                   onClick={handleResumeVideo}
                   style={{
                     backgroundColor: '#bc0000',
-                    color: '#ffffff',
+                    color: '#FAFAFB',
                     border: 'none',
                     borderRadius: '8px',
                     padding: '10px 20px',

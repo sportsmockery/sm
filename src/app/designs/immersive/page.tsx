@@ -26,8 +26,8 @@ const TEAMS = [
     record: '22-30',
     logo: 'https://a.espncdn.com/i/teamlogos/nba/500/chi.png',
     primaryColor: '#CE1141',
-    secondaryColor: '#000000',
-    gradient: 'from-[#CE1141] to-[#000000]',
+    secondaryColor: '#0B0F14',
+    gradient: 'from-[#CE1141] to-[#0B0F14]',
   },
   {
     id: 'cubs',
@@ -48,8 +48,8 @@ const TEAMS = [
     record: '23-38-6',
     logo: 'https://a.espncdn.com/i/teamlogos/nhl/500/chi.png',
     primaryColor: '#CF0A2C',
-    secondaryColor: '#000000',
-    gradient: 'from-[#CF0A2C] to-[#000000]',
+    secondaryColor: '#0B0F14',
+    gradient: 'from-[#CF0A2C] to-[#0B0F14]',
   },
   {
     id: 'whitesox',

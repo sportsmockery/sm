@@ -66,12 +66,12 @@ export function StatComparison({ playersSent, playersReceived, sport }: StatComp
       </div>
       <div style={{ display: 'grid', gridTemplateColumns: '1fr auto 1fr', gap: 8, alignItems: 'center', textAlign: 'center' }}>
         <div>
-          <div style={{ fontSize: '18px', fontWeight: 800, color: '#ef4444' }}>{sentStats.count}</div>
+          <div style={{ fontSize: '18px', fontWeight: 800, color: '#BC0000' }}>{sentStats.count}</div>
           <div style={{ fontSize: '10px', color: subText }}>Sending</div>
         </div>
         <div style={{ fontSize: '16px', color: subText }}>&#x2194;</div>
         <div>
-          <div style={{ fontSize: '18px', fontWeight: 800, color: '#22c55e' }}>{recvStats.count}</div>
+          <div style={{ fontSize: '18px', fontWeight: 800, color: '#00D4FF' }}>{recvStats.count}</div>
           <div style={{ fontSize: '10px', color: subText }}>Receiving</div>
         </div>
       </div>

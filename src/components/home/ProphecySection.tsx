@@ -29,15 +29,15 @@ export default function ProphecySection({
       {/* Section header */}
       <div className="mb-6 flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <div className="h-8 w-1 rounded-full bg-gradient-to-b from-[#FF0000] to-[#8B0000]" />
+          <div className="h-8 w-1 rounded-full bg-gradient-to-b from-[#BC0000] to-[#8B0000]" />
           <h2 className="font-heading text-2xl font-bold" style={{ color: 'var(--sm-text)' }}>
             AI Prophecies
           </h2>
         </div>
         <div className="flex items-center gap-2 rounded-full px-3 py-1 text-xs font-medium" style={{ backgroundColor: 'var(--sm-surface)', color: 'var(--sm-text-muted)' }}>
           <span className="relative flex h-2 w-2">
-            <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75" />
-            <span className="relative inline-flex h-2 w-2 rounded-full bg-emerald-500" />
+            <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-[#00D4FF] opacity-75" />
+            <span className="relative inline-flex h-2 w-2 rounded-full bg-[#00D4FF]" />
           </span>
           Powered by Claude AI
         </div>
@@ -68,7 +68,7 @@ export default function ProphecySection({
                 <div
                   className={`h-full rounded-full transition-all ${
                     prediction.confidence >= 70
-                      ? 'bg-gradient-to-r from-emerald-500 to-emerald-400'
+                      ? 'bg-gradient-to-r from-[#00D4FF] to-[#00D4FF]'
                       : prediction.confidence >= 50
                       ? 'bg-gradient-to-r from-amber-500 to-amber-400'
                       : 'bg-gradient-to-r from-red-500 to-red-400'

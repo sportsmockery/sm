@@ -22,7 +22,7 @@ const builtInTemplates = [
       tooltip: { trigger: 'axis' },
       xAxis: { type: 'category', data: ['G1', 'G2', 'G3', 'G4', 'G5'] },
       yAxis: { type: 'value' },
-      series: [{ type: 'line', data: [108, 115, 99, 122, 110], smooth: true, itemStyle: { color: '#3b82f6' } }],
+      series: [{ type: 'line', data: [108, 115, 99, 122, 110], smooth: true, itemStyle: { color: '#00D4FF' } }],
     },
     is_builtin: true,
   },

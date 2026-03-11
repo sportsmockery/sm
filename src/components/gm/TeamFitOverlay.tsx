@@ -98,9 +98,9 @@ export function TeamFitOverlay({
   if (!show || !player) return null
 
   const fitColor = fitData
-    ? fitData.overall_fit >= 70 ? '#22c55e'
+    ? fitData.overall_fit >= 70 ? '#00D4FF'
       : fitData.overall_fit >= 50 ? '#eab308'
-      : '#ef4444'
+      : '#BC0000'
     : '#6b7280'
 
   return (
@@ -182,9 +182,9 @@ export function TeamFitOverlay({
           ) : error ? (
             <div style={{
               padding: 20,
-              backgroundColor: '#ef444420',
+              backgroundColor: '#BC000020',
               borderRadius: 10,
-              color: '#ef4444',
+              color: '#BC0000',
               fontSize: '14px',
               textAlign: 'center',
             }}>
@@ -301,7 +301,7 @@ export function TeamFitOverlay({
                           <span style={{
                             fontSize: '12px',
                             fontWeight: 700,
-                            color: score >= 70 ? '#22c55e' : score >= 50 ? '#eab308' : '#ef4444',
+                            color: score >= 70 ? '#00D4FF' : score >= 50 ? '#eab308' : '#BC0000',
                           }}>
                             {score}/100
                           </span>
@@ -363,8 +363,8 @@ export function TeamFitOverlay({
                             fontSize: '10px',
                             padding: '2px 6px',
                             borderRadius: 4,
-                            backgroundColor: comp.outcome === 'success' ? '#22c55e20' : comp.outcome === 'failure' ? '#ef444420' : '#6b728020',
-                            color: comp.outcome === 'success' ? '#22c55e' : comp.outcome === 'failure' ? '#ef4444' : '#6b7280',
+                            backgroundColor: comp.outcome === 'success' ? '#00D4FF20' : comp.outcome === 'failure' ? '#BC000020' : '#6b728020',
+                            color: comp.outcome === 'success' ? '#00D4FF' : comp.outcome === 'failure' ? '#BC0000' : '#6b7280',
                             fontWeight: 600,
                           }}>
                             {comp.outcome}

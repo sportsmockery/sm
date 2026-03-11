@@ -126,7 +126,7 @@ export default function PredictionsPage() {
               alignItems: 'center',
               justifyContent: 'center',
               borderRadius: 'var(--sm-radius-lg)',
-              background: 'linear-gradient(135deg, #f59e0b, #ea580c)',
+              background: 'linear-gradient(135deg, #f59e0b, #BC0000)',
               boxShadow: '0 0 40px rgba(245, 158, 11, 0.3)',
             }}>
               <svg style={{ height: 40, width: 40, color: '#fff' }} fill="currentColor" viewBox="0 0 24 24">
@@ -144,7 +144,7 @@ export default function PredictionsPage() {
               lineHeight: 1.1,
             }}>
               SM{' '}
-              <span className="gradient-text" style={{ background: 'linear-gradient(135deg, #f59e0b, #ea580c)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>
+              <span className="gradient-text" style={{ background: 'linear-gradient(135deg, #f59e0b, #BC0000)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>
                 Prophecy
               </span>
             </h1>
@@ -177,7 +177,7 @@ export default function PredictionsPage() {
       {/* Active Predictions */}
       <section style={{ maxWidth: 'var(--sm-max-width)', margin: '0 auto', padding: '48px 16px' }}>
         <div style={{ marginBottom: 32, display: 'flex', alignItems: 'center', gap: 16 }}>
-          <div style={{ height: 32, width: 6, borderRadius: 'var(--sm-radius-pill)', background: 'linear-gradient(to bottom, #f59e0b, #ea580c)' }} />
+          <div style={{ height: 32, width: 6, borderRadius: 'var(--sm-radius-pill)', background: 'linear-gradient(to bottom, #f59e0b, #BC0000)' }} />
           <h2 style={{ fontSize: 24, fontWeight: 900, textTransform: 'uppercase', letterSpacing: '-0.02em', color: 'var(--sm-text)', fontFamily: 'var(--sm-font-heading)', margin: 0 }}>
             Active Predictions
           </h2>

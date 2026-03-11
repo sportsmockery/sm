@@ -19,7 +19,7 @@ const venues = [
     team: 'Bulls & Blackhawks',
     description: 'Explore the championship banners and legendary courts',
     status: 'coming-soon',
-    gradient: 'linear-gradient(135deg, #CE1141, #000000)',
+    gradient: 'linear-gradient(135deg, #CE1141, #0B0F14)',
   },
   {
     name: 'Wrigley Field',

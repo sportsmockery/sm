@@ -358,7 +358,7 @@ export function ChicagoDailyEmail({
 
 const styles: Record<string, React.CSSProperties> = {
   body: {
-    backgroundColor: '#ffffff',
+    backgroundColor: '#FAFAFB',
     fontFamily:
       "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif",
     margin: 0,
@@ -367,7 +367,7 @@ const styles: Record<string, React.CSSProperties> = {
   container: {
     maxWidth: '600px',
     margin: '0 auto',
-    backgroundColor: '#ffffff',
+    backgroundColor: '#FAFAFB',
   },
 
   // Header
@@ -387,7 +387,7 @@ const styles: Record<string, React.CSSProperties> = {
     textAlign: 'right' as const,
   },
   headerTitle: {
-    color: '#ffffff',
+    color: '#FAFAFB',
     fontSize: '14px',
     fontWeight: 600,
     margin: 0,
@@ -444,7 +444,7 @@ const styles: Record<string, React.CSSProperties> = {
   },
   heroCta: {
     backgroundColor: BRAND_RED,
-    color: '#ffffff',
+    color: '#FAFAFB',
     fontSize: '16px',
     fontWeight: 600,
     padding: '14px 28px',
@@ -529,7 +529,7 @@ const styles: Record<string, React.CSSProperties> = {
     padding: '16px 24px',
   },
   promoText: {
-    color: '#ffffff',
+    color: '#FAFAFB',
     fontSize: '14px',
     fontWeight: 500,
     margin: 0,
@@ -539,7 +539,7 @@ const styles: Record<string, React.CSSProperties> = {
     textAlign: 'right' as const,
   },
   promoButton: {
-    backgroundColor: '#ffffff',
+    backgroundColor: '#FAFAFB',
     color: DARK_BG,
     fontSize: '14px',
     fontWeight: 600,

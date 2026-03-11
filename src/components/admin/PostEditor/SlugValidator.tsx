@@ -116,7 +116,7 @@ export default function SlugValidator({
           <button
             type="button"
             onClick={regenerateFromTitle}
-            className="text-xs text-blue-600 hover:text-blue-700 dark:text-blue-400"
+            className="text-xs text-[#00D4FF] hover:text-[#00D4FF] dark:text-[#00D4FF]"
           >
             Auto-generate
           </button>
@@ -131,7 +131,7 @@ export default function SlugValidator({
           onChange={handleChange}
           className={`w-full rounded-lg border px-4 py-2 pr-10 text-zinc-900 focus:outline-none focus:ring-1 dark:bg-zinc-800 dark:text-zinc-100 ${
             result?.isAvailable === false
-              ? 'border-red-300 focus:border-red-500 focus:ring-red-500 dark:border-red-700'
+              ? 'border-red-300 focus:border-red-500 focus:ring-red-500 dark:border-[#BC0000]'
               : result?.isAvailable === true
               ? 'border-green-300 focus:border-green-500 focus:ring-green-500 dark:border-green-700'
               : 'border-zinc-300 focus:border-blue-500 focus:ring-blue-500 dark:border-zinc-700'
@@ -163,7 +163,7 @@ export default function SlugValidator({
             </svg>
           ) : result?.isAvailable === true ? (
             <svg
-              className="h-5 w-5 text-green-500"
+              className="h-5 w-5 text-[#00D4FF]"
               fill="none"
               viewBox="0 0 24 24"
               stroke="currentColor"
@@ -177,7 +177,7 @@ export default function SlugValidator({
             </svg>
           ) : result?.isAvailable === false ? (
             <svg
-              className="h-5 w-5 text-red-500"
+              className="h-5 w-5 text-[#BC0000]"
               fill="none"
               viewBox="0 0 24 24"
               stroke="currentColor"
@@ -202,13 +202,13 @@ export default function SlugValidator({
 
       {/* Conflict warning */}
       {result?.isAvailable === false && result.existingPost && (
-        <div className="rounded-lg bg-red-50 p-3 dark:bg-red-900/20">
-          <p className="text-sm text-red-600 dark:text-red-400">
+        <div className="rounded-lg bg-red-50 p-3 dark:bg-[#BC0000]/20">
+          <p className="text-sm text-[#BC0000] dark:text-[#BC0000]">
             This slug is already used by: &quot;{result.existingPost.title}&quot;
           </p>
           {result.suggestions.length > 0 && (
             <div className="mt-2">
-              <p className="text-xs text-red-500 dark:text-red-400">
+              <p className="text-xs text-[#BC0000] dark:text-[#BC0000]">
                 Try one of these instead:
               </p>
               <div className="mt-1 flex flex-wrap gap-2">
@@ -217,7 +217,7 @@ export default function SlugValidator({
                     key={suggestion}
                     type="button"
                     onClick={() => handleSuggestionClick(suggestion)}
-                    className="rounded-full bg-red-100 px-3 py-1 text-xs font-medium text-red-700 hover:bg-red-200 dark:bg-red-900/40 dark:text-red-300 dark:hover:bg-red-900/60"
+                    className="rounded-full bg-[#BC0000]/10 px-3 py-1 text-xs font-medium text-[#BC0000] hover:bg-[#BC0000]/20 dark:bg-[#BC0000]/40 dark:text-[#BC0000] dark:hover:bg-[#BC0000]/60"
                   >
                     {suggestion}
                   </button>
@@ -230,7 +230,7 @@ export default function SlugValidator({
 
       {/* Available confirmation */}
       {result?.isAvailable === true && (
-        <p className="text-xs text-green-600 dark:text-green-400">
+        <p className="text-xs text-[#00D4FF] dark:text-[#00D4FF]">
           This slug is available
         </p>
       )}

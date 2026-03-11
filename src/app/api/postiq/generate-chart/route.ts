@@ -7,10 +7,10 @@ const DATALAB_API = 'https://datalab.sportsmockery.com'
 // Team color palettes
 const TEAM_COLORS = {
   bears: { primary: '#0B162A', secondary: '#C83803' },
-  bulls: { primary: '#CE1141', secondary: '#000000' },
+  bulls: { primary: '#CE1141', secondary: '#0B0F14' },
   cubs: { primary: '#0E3386', secondary: '#CC3433' },
   whitesox: { primary: '#27251F', secondary: '#C4CED4' },
-  blackhawks: { primary: '#CF0A2C', secondary: '#000000' },
+  blackhawks: { primary: '#CF0A2C', secondary: '#0B0F14' },
 } as const
 
 export interface ChartDataPoint {

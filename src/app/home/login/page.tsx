@@ -160,16 +160,16 @@ export default async function HomeLoginPage({ searchParams }: LoginPageProps) {
                     {feature.sm === 'coming-soon' ? (
                       <span style={{ fontSize: 13, fontWeight: 600, color: '#8a8a9a' }}>Coming Soon</span>
                     ) : feature.sm ? (
-                      <span style={{ color: '#22c55e', fontSize: 20, fontWeight: 700 }}>&#10003;</span>
+                      <span style={{ color: '#00D4FF', fontSize: 20, fontWeight: 700 }}>&#10003;</span>
                     ) : (
-                      <span style={{ color: '#ef4444', fontSize: 20, fontWeight: 700 }}>&#10007;</span>
+                      <span style={{ color: '#BC0000', fontSize: 20, fontWeight: 700 }}>&#10007;</span>
                     )}
                   </div>
                   <div className="hm-login-table-cell hm-login-table-center">
                     {feature.espn ? (
-                      <span style={{ color: '#22c55e', fontSize: 20, fontWeight: 700 }}>&#10003;</span>
+                      <span style={{ color: '#00D4FF', fontSize: 20, fontWeight: 700 }}>&#10003;</span>
                     ) : (
-                      <span style={{ color: '#ef4444', fontSize: 20, fontWeight: 700 }}>&#10007;</span>
+                      <span style={{ color: '#BC0000', fontSize: 20, fontWeight: 700 }}>&#10007;</span>
                     )}
                   </div>
                 </div>

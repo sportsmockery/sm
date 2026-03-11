@@ -163,7 +163,7 @@ export default function SettingsPage() {
           </p>
         </div>
         {saved && (
-          <div className="flex items-center gap-2 rounded-lg bg-emerald-500/10 px-4 py-2 text-emerald-500">
+          <div className="flex items-center gap-2 rounded-lg bg-[#00D4FF]/10 px-4 py-2 text-[#00D4FF]">
             <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" />
             </svg>
@@ -431,7 +431,7 @@ function SEOTab({
               <p className="text-lg text-[#1a0dab]">
                 {settings.meta_title_template.replace('%title%', 'Example Page').replace('%site_name%', settings.site_name || 'Your Site')}
               </p>
-              <p className="text-sm text-emerald-700">
+              <p className="text-sm text-[#00D4FF]">
                 https://sportsmockery.com/example-page
               </p>
               <p className="text-sm text-[var(--text-secondary)]">
@@ -628,7 +628,7 @@ function SocialTab({
           {/* YouTube */}
           <div>
             <label className="mb-1.5 flex items-center gap-2 text-sm font-medium text-[var(--text-secondary)]">
-              <svg className="h-4 w-4 text-[#FF0000]" fill="currentColor" viewBox="0 0 24 24">
+              <svg className="h-4 w-4 text-[#BC0000]" fill="currentColor" viewBox="0 0 24 24">
                 <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/>
               </svg>
               YouTube
@@ -797,8 +797,8 @@ function AdvancedTab() {
       {/* Danger Zone */}
       <div className="overflow-hidden rounded-xl border border-red-500/30 bg-red-500/5">
         <div className="border-b border-red-500/30 bg-red-500/10 px-6 py-4">
-          <h2 className="font-semibold text-red-400">Danger Zone</h2>
-          <p className="mt-0.5 text-sm text-red-400/70">Irreversible actions that affect your entire site</p>
+          <h2 className="font-semibold text-[#BC0000]">Danger Zone</h2>
+          <p className="mt-0.5 text-sm text-[#BC0000]/70">Irreversible actions that affect your entire site</p>
         </div>
         <div className="space-y-4 p-6">
           <div className="flex items-center justify-between rounded-lg border border-red-500/20 bg-[var(--bg-tertiary)] p-4">
@@ -806,7 +806,7 @@ function AdvancedTab() {
               <p className="font-medium text-[var(--text-primary)]">Reset All Settings</p>
               <p className="text-sm text-[var(--text-muted)]">Restore all settings to their default values</p>
             </div>
-            <button className="rounded-lg border border-red-500/50 px-4 py-2 text-sm font-medium text-red-400 transition-colors hover:bg-red-500/10">
+            <button className="rounded-lg border border-red-500/50 px-4 py-2 text-sm font-medium text-[#BC0000] transition-colors hover:bg-red-500/10">
               Reset
             </button>
           </div>

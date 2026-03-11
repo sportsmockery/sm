@@ -228,7 +228,7 @@ export default function DataLabPicker({ onLoad, chartType }: DataLabPickerProps)
       <button
         onClick={handleLoad}
         disabled={loading || !query.statCategory || query.selectedStats.length === 0}
-        className="w-full rounded-lg bg-gradient-to-r from-[#FF0000] to-[#8B0000] px-4 py-2.5 text-sm font-medium text-white hover:from-[#FF0000] hover:to-[#a00000] disabled:opacity-50 disabled:cursor-not-allowed transition-all flex items-center justify-center gap-2"
+        className="w-full rounded-lg bg-gradient-to-r from-[#BC0000] to-[#8B0000] px-4 py-2.5 text-sm font-medium text-white hover:from-[#BC0000] hover:to-[#a00000] disabled:opacity-50 disabled:cursor-not-allowed transition-all flex items-center justify-center gap-2"
       >
         {loading ? (
           <>

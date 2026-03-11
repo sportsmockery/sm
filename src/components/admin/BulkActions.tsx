@@ -67,7 +67,7 @@ export default function BulkActions({
               }}
               className="flex w-full items-center gap-2 px-4 py-2 text-sm text-zinc-700 hover:bg-zinc-100 dark:text-zinc-200 dark:hover:bg-zinc-700"
             >
-              <span className="h-2 w-2 rounded-full bg-emerald-500" />
+              <span className="h-2 w-2 rounded-full bg-[#00D4FF]" />
               Published
             </button>
             <button

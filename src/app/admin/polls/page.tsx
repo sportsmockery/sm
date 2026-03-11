@@ -106,11 +106,11 @@ export default function PollsPage() {
   const getStatusBadge = (status: string) => {
     switch (status) {
       case 'active':
-        return 'bg-emerald-500/10 text-emerald-500 border-emerald-500/20'
+        return 'bg-[#00D4FF]/10 text-[#00D4FF] border-emerald-500/20'
       case 'closed':
         return 'bg-gray-500/10 text-gray-500 border-gray-500/20'
       case 'scheduled':
-        return 'bg-blue-500/10 text-blue-500 border-blue-500/20'
+        return 'bg-[#00D4FF]/10 text-[#00D4FF] border-blue-500/20'
       default:
         return 'bg-gray-500/10 text-gray-500 border-gray-500/20'
     }
@@ -184,7 +184,7 @@ export default function PollsPage() {
         </div>
       ) : polls.length === 0 ? (
         <div className="flex flex-col items-center justify-center py-16 px-6 rounded-xl border border-[var(--border-default)] bg-[var(--bg-card)]">
-          <div className="flex h-16 w-16 items-center justify-center rounded-full bg-purple-500/10 mb-4">
+          <div className="flex h-16 w-16 items-center justify-center rounded-full bg-[#D6B05E]/10 mb-4">
             <span className="text-3xl">🗳️</span>
           </div>
           <p className="text-[var(--text-muted)] text-center mb-4">
@@ -278,14 +278,14 @@ export default function PollsPage() {
                 ) : (
                   <button
                     onClick={() => handleStatusChange(poll.id, 'active')}
-                    className="rounded-lg px-3 py-2 text-sm font-medium text-emerald-500 hover:bg-emerald-500/10 transition-colors"
+                    className="rounded-lg px-3 py-2 text-sm font-medium text-[#00D4FF] hover:bg-[#00D4FF]/10 transition-colors"
                   >
                     Reopen
                   </button>
                 )}
                 <button
                   onClick={() => handleDelete(poll.id)}
-                  className="rounded-lg p-2 text-red-500 hover:bg-red-500/10 transition-colors"
+                  className="rounded-lg p-2 text-[#BC0000] hover:bg-red-500/10 transition-colors"
                 >
                   <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0" />

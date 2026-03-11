@@ -82,7 +82,7 @@ export default function ARQuickLookButton({ team, className = '' }: ARQuickLookB
         rel="ar"
         className={`
           block w-full text-center px-4 py-3
-          bg-[#FF0000] hover:bg-red-700
+          bg-[#BC0000] hover:bg-red-700
           text-white font-bold rounded
           transition-colors
           focus:outline-none focus:ring-2 focus:ring-red-600 focus:ring-offset-2 focus:ring-offset-zinc-900

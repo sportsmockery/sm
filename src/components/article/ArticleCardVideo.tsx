@@ -31,7 +31,7 @@ export default function ArticleCardVideo({
       style={{ backgroundColor: 'var(--sm-card)' }}
     >
       {/* Glow effect on hover */}
-      <div className="absolute -inset-1 rounded-2xl bg-gradient-to-r from-[#8B0000]/0 to-[#FF0000]/0 opacity-0 blur-xl transition-opacity duration-300 group-hover:from-[#8B0000]/20 group-hover:to-[#FF0000]/20 group-hover:opacity-100" />
+      <div className="absolute -inset-1 rounded-2xl bg-gradient-to-r from-[#8B0000]/0 to-[#BC0000]/0 opacity-0 blur-xl transition-opacity duration-300 group-hover:from-[#8B0000]/20 group-hover:to-[#BC0000]/20 group-hover:opacity-100" />
 
       <div className="relative">
         {/* Video Thumbnail */}

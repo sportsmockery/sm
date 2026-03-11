@@ -106,8 +106,8 @@ export function GradeProgressButton({
 
   const getProgressColor = () => {
     if (progress < 30) return '#eab308' // Yellow - validating
-    if (progress < 70) return '#3b82f6' // Blue - analyzing
-    return '#22c55e' // Green - grading/complete
+    if (progress < 70) return '#00D4FF' // Blue - analyzing
+    return '#00D4FF' // Green - grading/complete
   }
 
   return (

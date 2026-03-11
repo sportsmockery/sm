@@ -53,7 +53,7 @@ export default function ArticleError({
           className="px-6 py-2 font-medium rounded-lg transition-colors"
           style={{
             backgroundColor: '#bc0000',
-            color: '#ffffff',
+            color: '#FAFAFB',
           }}
         >
           Reload page

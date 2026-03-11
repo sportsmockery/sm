@@ -64,26 +64,26 @@ export default function Footer() {
       <div className="absolute bottom-0 left-0 right-0 h-32 pointer-events-none">
         <ChicagoSkyline
           className="absolute bottom-0 w-full h-full"
-          color="#ffffff"
+          color="#FAFAFB"
           opacity={0.03}
         />
       </div>
 
       {/* Gradient accent bar */}
-      <div className="h-1 bg-gradient-to-r from-[#FF0000] via-[#8B0000] to-[#FF0000]" />
+      <div className="h-1 bg-gradient-to-r from-[#BC0000] via-[#8B0000] to-[#BC0000]" />
 
       <div className="relative mx-auto max-w-6xl px-4 py-16">
         <div className="grid grid-cols-2 gap-8 md:grid-cols-5">
           {/* Logo & Description */}
           <div className="col-span-2 md:col-span-1">
             <Link href="/" className="group flex items-center gap-3">
-              <div className="relative flex items-center justify-center w-12 h-12 bg-gradient-to-br from-[#FF0000] to-[#8B0000] rounded-xl shadow-lg group-hover:shadow-xl transition-shadow">
+              <div className="relative flex items-center justify-center w-12 h-12 bg-gradient-to-br from-[#BC0000] to-[#8B0000] rounded-xl shadow-lg group-hover:shadow-xl transition-shadow">
                 <span className="text-white font-black text-xl tracking-tighter font-[var(--font-montserrat)]">SM</span>
                 <div className="absolute inset-0 rounded-xl bg-white opacity-0 group-hover:opacity-10 transition-opacity" />
               </div>
               <div className="flex flex-col">
                 <span className="text-lg font-black font-[var(--font-montserrat)] leading-none" style={{ color: 'var(--sm-text)' }}>SPORTS</span>
-                <span className="text-lg font-black text-[#FF0000] font-[var(--font-montserrat)] leading-none">MOCKERY</span>
+                <span className="text-lg font-black text-[#BC0000] font-[var(--font-montserrat)] leading-none">MOCKERY</span>
               </div>
             </Link>
             <p className="mt-6 text-sm text-[var(--sm-text-muted)] leading-relaxed">
@@ -201,7 +201,7 @@ export default function Footer() {
               />
               <button
                 type="submit"
-                className="w-full px-4 py-3 rounded-lg bg-gradient-to-r from-[#FF0000] to-[#8B0000] text-white font-bold text-sm hover:from-[#FF0000] hover:to-[#a00000] transition-all shadow-lg hover:shadow-xl hover:scale-[1.02]"
+                className="w-full px-4 py-3 rounded-lg bg-gradient-to-r from-[#BC0000] to-[#8B0000] text-white font-bold text-sm hover:from-[#BC0000] hover:to-[#a00000] transition-all shadow-lg hover:shadow-xl hover:scale-[1.02]"
               >
                 Subscribe
               </button>

@@ -275,7 +275,7 @@ export default function ScrollToTop() {
             width: 10,
             height: 10,
             borderRadius: '50%',
-            background: '#22c55e',
+            background: '#00D4FF',
             border: '2px solid var(--hp-background, #0B0F14)',
           }}
           className=""

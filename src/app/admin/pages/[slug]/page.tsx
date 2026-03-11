@@ -73,7 +73,7 @@ export default function AdminPageDetailPage({ params }: { params: Promise<{ slug
         {/* Metadata Badges */}
         <div className="flex flex-wrap gap-2 mt-4">
           {page.requiresAdmin && (
-            <Badge color="#ef4444" label="Admin Only" />
+            <Badge color="#BC0000" label="Admin Only" />
           )}
           {page.requiresAuth && !page.requiresAdmin && (
             <Badge color="#eab308" label="Auth Required" />
@@ -82,10 +82,10 @@ export default function AdminPageDetailPage({ params }: { params: Promise<{ slug
             <Badge color="#a855f7" label="Dynamic Route" />
           )}
           {page.sport && (
-            <Badge color="#3b82f6" label={page.sport} />
+            <Badge color="#00D4FF" label={page.sport} />
           )}
           {page.team && (
-            <Badge color="#22c55e" label={page.team} />
+            <Badge color="#00D4FF" label={page.team} />
           )}
         </div>
       </div>
@@ -105,8 +105,8 @@ export default function AdminPageDetailPage({ params }: { params: Promise<{ slug
                   className="text-[10px] px-1.5 py-0.5 rounded font-medium shrink-0"
                   style={{
                     backgroundColor:
-                      ds.type === 'supabase-table' ? '#3b82f620' :
-                      ds.type === 'api-route' ? '#22c55e20' :
+                      ds.type === 'supabase-table' ? '#00D4FF20' :
+                      ds.type === 'api-route' ? '#00D4FF20' :
                       '#f59e0b20',
                     color:
                       ds.type === 'supabase-table' ? '#60a5fa' :
@@ -146,7 +146,7 @@ export default function AdminPageDetailPage({ params }: { params: Promise<{ slug
               <div key={cron.id} className="px-4 py-3">
                 <div className="flex items-center gap-3 mb-1">
                   <span className="text-sm font-medium text-[var(--text-primary)]">{cron.name}</span>
-                  <span className="text-[10px] px-1.5 py-0.5 rounded bg-green-500/10 text-green-400 font-mono">
+                  <span className="text-[10px] px-1.5 py-0.5 rounded bg-[#00D4FF]/10 text-[#00D4FF] font-mono">
                     {cron.humanSchedule}
                   </span>
                   {cron.schedule && (

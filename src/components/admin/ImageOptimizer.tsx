@@ -127,8 +127,8 @@ export default function ImageOptimizer({
 
           {/* Optimized */}
           {optimizedInfo && (
-            <div className="bg-green-900/30 border border-green-800 rounded-lg p-4">
-              <label className="text-xs text-green-400 uppercase block mb-2">Optimized</label>
+            <div className="bg-[#00D4FF]/30 border border-[#00D4FF] rounded-lg p-4">
+              <label className="text-xs text-[#00D4FF] uppercase block mb-2">Optimized</label>
               <div className="grid grid-cols-2 gap-2 text-sm">
                 <div>
                   <span className="text-gray-400">Size:</span>
@@ -139,7 +139,7 @@ export default function ImageOptimizer({
                   <span className="text-white ml-2">{optimizedInfo.width} × {optimizedInfo.height}</span>
                 </div>
               </div>
-              <div className="mt-2 text-green-400 text-sm">
+              <div className="mt-2 text-[#00D4FF] text-sm">
                 Savings: {getSavings()}%
               </div>
             </div>
@@ -179,14 +179,14 @@ export default function ImageOptimizer({
           <button
             onClick={handleOptimize}
             disabled={processing}
-            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50"
+            className="px-4 py-2 bg-[#00D4FF] text-white rounded-lg hover:bg-[#00D4FF] disabled:opacity-50"
           >
             {processing ? 'Processing...' : 'Optimize'}
           </button>
         ) : (
           <button
             onClick={handleApply}
-            className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700"
+            className="px-4 py-2 bg-[#00D4FF] text-white rounded-lg hover:bg-[#00D4FF]"
           >
             Use Optimized
           </button>

@@ -162,10 +162,10 @@ export default function PollBuilder({ isOpen, onClose, onSave, initialConfig }: 
                 errors.question
                   ? 'border-red-500'
                   : 'border-gray-200 dark:border-gray-700'
-              } bg-gray-50 dark:bg-gray-800 px-4 py-3 text-gray-900 dark:text-white placeholder:text-gray-500 focus:border-purple-500 focus:outline-none focus:ring-1 focus:ring-purple-500`}
+              } bg-gray-50 dark:bg-gray-800 px-4 py-3 text-gray-900 dark:text-white placeholder:text-gray-500 focus:border-[#D6B05E] focus:outline-none focus:ring-1 focus:ring-[#D6B05E]`}
             />
             {errors.question && (
-              <p className="text-xs text-red-500">{errors.question}</p>
+              <p className="text-xs text-[#BC0000]">{errors.question}</p>
             )}
           </div>
 
@@ -198,7 +198,7 @@ export default function PollBuilder({ isOpen, onClose, onSave, initialConfig }: 
                   </div>
 
                   {/* Option number */}
-                  <span className="flex h-6 w-6 items-center justify-center rounded-full bg-purple-500/10 text-xs font-medium text-purple-500">
+                  <span className="flex h-6 w-6 items-center justify-center rounded-full bg-[#D6B05E]/10 text-xs font-medium text-[#D6B05E]">
                     {index + 1}
                   </span>
 
@@ -208,14 +208,14 @@ export default function PollBuilder({ isOpen, onClose, onSave, initialConfig }: 
                     value={option.text}
                     onChange={(e) => updateOption(option.id, { text: e.target.value })}
                     placeholder={`Option ${index + 1}`}
-                    className="flex-1 rounded-lg border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 px-4 py-2 text-sm text-gray-900 dark:text-white placeholder:text-gray-500 focus:border-purple-500 focus:outline-none"
+                    className="flex-1 rounded-lg border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 px-4 py-2 text-sm text-gray-900 dark:text-white placeholder:text-gray-500 focus:border-[#D6B05E] focus:outline-none"
                   />
 
                   {/* Color picker */}
                   <select
                     value={option.color || ''}
                     onChange={(e) => updateOption(option.id, { color: e.target.value || undefined })}
-                    className="rounded-lg border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 px-2 py-2 text-sm text-gray-900 dark:text-white focus:border-purple-500 focus:outline-none"
+                    className="rounded-lg border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 px-2 py-2 text-sm text-gray-900 dark:text-white focus:border-[#D6B05E] focus:outline-none"
                   >
                     {colorOptions.map((color) => (
                       <option key={color.value} value={color.value}>
@@ -228,7 +228,7 @@ export default function PollBuilder({ isOpen, onClose, onSave, initialConfig }: 
                   <button
                     onClick={() => removeOption(option.id)}
                     disabled={config.options.length <= 2}
-                    className="rounded-lg p-2 text-gray-400 hover:bg-red-500/10 hover:text-red-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                    className="rounded-lg p-2 text-gray-400 hover:bg-red-500/10 hover:text-[#BC0000] disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                   >
                     <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
@@ -239,14 +239,14 @@ export default function PollBuilder({ isOpen, onClose, onSave, initialConfig }: 
             </Reorder.Group>
 
             {errors.options && (
-              <p className="text-xs text-red-500">{errors.options}</p>
+              <p className="text-xs text-[#BC0000]">{errors.options}</p>
             )}
 
             {/* Add option button */}
             <button
               onClick={addOption}
               disabled={config.options.length >= 10}
-              className="w-full rounded-lg border-2 border-dashed border-gray-200 dark:border-gray-700 py-3 text-sm font-medium text-gray-500 hover:border-purple-500 hover:text-purple-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              className="w-full rounded-lg border-2 border-dashed border-gray-200 dark:border-gray-700 py-3 text-sm font-medium text-gray-500 hover:border-[#D6B05E] hover:text-[#D6B05E] disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
             >
               + Add Option
             </button>
@@ -267,7 +267,7 @@ export default function PollBuilder({ isOpen, onClose, onSave, initialConfig }: 
                   onClick={() => updateConfig({ pollType: 'single' })}
                   className={`rounded-lg px-3 py-1.5 text-xs font-medium transition-colors ${
                     config.pollType === 'single'
-                      ? 'bg-purple-500 text-white'
+                      ? 'bg-[#D6B05E] text-white'
                       : 'bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700'
                   }`}
                 >
@@ -277,7 +277,7 @@ export default function PollBuilder({ isOpen, onClose, onSave, initialConfig }: 
                   onClick={() => updateConfig({ pollType: 'multiple' })}
                   className={`rounded-lg px-3 py-1.5 text-xs font-medium transition-colors ${
                     config.pollType === 'multiple'
-                      ? 'bg-purple-500 text-white'
+                      ? 'bg-[#D6B05E] text-white'
                       : 'bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700'
                   }`}
                 >
@@ -295,7 +295,7 @@ export default function PollBuilder({ isOpen, onClose, onSave, initialConfig }: 
               <button
                 onClick={() => updateConfig({ showResults: !config.showResults })}
                 className={`relative h-6 w-11 rounded-full transition-colors ${
-                  config.showResults ? 'bg-purple-500' : 'bg-gray-300 dark:bg-gray-600'
+                  config.showResults ? 'bg-[#D6B05E]' : 'bg-gray-300 dark:bg-gray-600'
                 }`}
               >
                 <span
@@ -316,7 +316,7 @@ export default function PollBuilder({ isOpen, onClose, onSave, initialConfig }: 
                 type="datetime-local"
                 value={config.endsAt || ''}
                 onChange={(e) => updateConfig({ endsAt: e.target.value || null })}
-                className="rounded-lg border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 px-3 py-1.5 text-sm text-gray-900 dark:text-white focus:border-purple-500 focus:outline-none"
+                className="rounded-lg border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 px-3 py-1.5 text-sm text-gray-900 dark:text-white focus:border-[#D6B05E] focus:outline-none"
               />
             </div>
           </div>

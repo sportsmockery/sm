@@ -133,9 +133,9 @@ export function SimulationChart({ tradeId, originalGrade, show, onClose }: Simul
 
       // Bar color based on grade
       let color = '#6b7280'
-      if (d.grade_bucket >= 70) color = '#22c55e'
+      if (d.grade_bucket >= 70) color = '#00D4FF'
       else if (d.grade_bucket >= 50) color = '#eab308'
-      else color = '#ef4444'
+      else color = '#BC0000'
 
       ctx.fillStyle = color + '80'
       ctx.fillRect(x, y, barWidth, barHeight)
@@ -170,7 +170,7 @@ export function SimulationChart({ tradeId, originalGrade, show, onClose }: Simul
 
     // Mean marker
     const meanX = padding.left + (result.mean_grade / 100) * chartWidth
-    ctx.strokeStyle = '#3b82f6'
+    ctx.strokeStyle = '#00D4FF'
     ctx.lineWidth = 2
     ctx.beginPath()
     ctx.moveTo(meanX, padding.top)
@@ -293,8 +293,8 @@ export function SimulationChart({ tradeId, originalGrade, show, onClose }: Simul
         <div style={{
           padding: 12,
           borderRadius: 8,
-          backgroundColor: '#ef444420',
-          color: '#ef4444',
+          backgroundColor: '#BC000020',
+          color: '#BC0000',
           fontSize: '13px',
           marginBottom: 16,
         }}>
@@ -324,7 +324,7 @@ export function SimulationChart({ tradeId, originalGrade, show, onClose }: Simul
                 <span style={{ fontSize: '11px', color: subText }}>Original ({originalGrade})</span>
               </div>
               <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
-                <div style={{ width: 16, height: 2, backgroundColor: '#3b82f6' }} />
+                <div style={{ width: 16, height: 2, backgroundColor: '#00D4FF' }} />
                 <span style={{ fontSize: '11px', color: subText }}>Mean ({result.mean_grade})</span>
               </div>
             </div>
@@ -370,13 +370,13 @@ export function SimulationChart({ tradeId, originalGrade, show, onClose }: Simul
                 flex: 1,
                 padding: 12,
                 borderRadius: 8,
-                backgroundColor: '#ef444415',
-                border: '1px solid #ef444430',
+                backgroundColor: '#BC000015',
+                border: '1px solid #BC000030',
               }}>
-                <div style={{ fontSize: '20px', fontWeight: 800, color: '#ef4444' }}>
+                <div style={{ fontSize: '20px', fontWeight: 800, color: '#BC0000' }}>
                   {result.risk_analysis.downside_risk}%
                 </div>
-                <div style={{ fontSize: '11px', color: '#ef4444' }}>Downside Risk</div>
+                <div style={{ fontSize: '11px', color: '#BC0000' }}>Downside Risk</div>
                 <div style={{ fontSize: '10px', color: subText, marginTop: 2 }}>
                   Chance of grade below 50
                 </div>
@@ -385,13 +385,13 @@ export function SimulationChart({ tradeId, originalGrade, show, onClose }: Simul
                 flex: 1,
                 padding: 12,
                 borderRadius: 8,
-                backgroundColor: '#22c55e15',
-                border: '1px solid #22c55e30',
+                backgroundColor: '#00D4FF15',
+                border: '1px solid #00D4FF30',
               }}>
-                <div style={{ fontSize: '20px', fontWeight: 800, color: '#22c55e' }}>
+                <div style={{ fontSize: '20px', fontWeight: 800, color: '#00D4FF' }}>
                   {result.risk_analysis.upside_potential}%
                 </div>
-                <div style={{ fontSize: '11px', color: '#22c55e' }}>Upside Potential</div>
+                <div style={{ fontSize: '11px', color: '#00D4FF' }}>Upside Potential</div>
                 <div style={{ fontSize: '10px', color: subText, marginTop: 2 }}>
                   Chance of grade 80+
                 </div>
@@ -419,7 +419,7 @@ export function SimulationChart({ tradeId, originalGrade, show, onClose }: Simul
                   >
                     <span style={{
                       fontSize: '14px',
-                      color: factor.impact === 'positive' ? '#22c55e' : factor.impact === 'negative' ? '#ef4444' : '#6b7280',
+                      color: factor.impact === 'positive' ? '#00D4FF' : factor.impact === 'negative' ? '#BC0000' : '#6b7280',
                     }}>
                       {factor.impact === 'positive' ? '↑' : factor.impact === 'negative' ? '↓' : '→'}
                     </span>
@@ -441,7 +441,7 @@ export function SimulationChart({ tradeId, originalGrade, show, onClose }: Simul
                       <div style={{
                         width: `${factor.magnitude * 100}%`,
                         height: '100%',
-                        backgroundColor: factor.impact === 'positive' ? '#22c55e' : factor.impact === 'negative' ? '#ef4444' : '#6b7280',
+                        backgroundColor: factor.impact === 'positive' ? '#00D4FF' : factor.impact === 'negative' ? '#BC0000' : '#6b7280',
                       }} />
                     </div>
                   </div>

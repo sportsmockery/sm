@@ -94,11 +94,11 @@ export default function TeamPagesSyncPage() {
   const getStatusColor = (status: 'healthy' | 'warning' | 'error') => {
     switch (status) {
       case 'healthy':
-        return 'text-emerald-500 bg-emerald-500/10'
+        return 'text-[#00D4FF] bg-[#00D4FF]/10'
       case 'warning':
         return 'text-amber-500 bg-amber-500/10'
       case 'error':
-        return 'text-red-500 bg-red-500/10'
+        return 'text-[#BC0000] bg-red-500/10'
     }
   }
 
@@ -142,10 +142,10 @@ export default function TeamPagesSyncPage() {
   if (error && !data) {
     return (
       <div className="rounded-xl border border-red-500/20 bg-red-500/5 p-6 text-center">
-        <svg className="h-12 w-12 mx-auto text-red-500 mb-4" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
+        <svg className="h-12 w-12 mx-auto text-[#BC0000] mb-4" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
           <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z" />
         </svg>
-        <h3 className="text-lg font-semibold text-red-500 mb-2">Health Check Failed</h3>
+        <h3 className="text-lg font-semibold text-[#BC0000] mb-2">Health Check Failed</h3>
         <p className="text-[var(--text-muted)] mb-4">{error}</p>
         <button
           onClick={() => fetchHealthCheck(true)}
@@ -198,7 +198,7 @@ export default function TeamPagesSyncPage() {
       {data && (
         <div className={`rounded-xl border p-6 ${
           data.overallStatus === 'healthy'
-            ? 'border-emerald-500/20 bg-emerald-500/5'
+            ? 'border-emerald-500/20 bg-[#00D4FF]/5'
             : data.overallStatus === 'warning'
               ? 'border-amber-500/20 bg-amber-500/5'
               : 'border-red-500/20 bg-red-500/5'
@@ -227,7 +227,7 @@ export default function TeamPagesSyncPage() {
               <ul className="space-y-1">
                 {data.issues.map((issue, i) => (
                   <li key={i} className="text-sm text-[var(--text-muted)] flex items-start gap-2">
-                    <span className="text-red-500 mt-0.5">*</span>
+                    <span className="text-[#BC0000] mt-0.5">*</span>
                     {issue}
                   </li>
                 ))}
@@ -285,8 +285,8 @@ export default function TeamPagesSyncPage() {
                         key={check.page}
                         className={`text-center p-2 rounded-lg text-xs ${
                           check.ok
-                            ? 'bg-emerald-500/10 text-emerald-500'
-                            : 'bg-red-500/10 text-red-500'
+                            ? 'bg-[#00D4FF]/10 text-[#00D4FF]'
+                            : 'bg-red-500/10 text-[#BC0000]'
                         }`}
                       >
                         <div className="font-medium">
@@ -306,8 +306,8 @@ export default function TeamPagesSyncPage() {
                   <div className="grid grid-cols-3 gap-2 text-center">
                     <div className={`p-2 rounded-lg ${
                       result.dataChecks.recordTableExists
-                        ? 'bg-emerald-500/10 text-emerald-500'
-                        : 'bg-red-500/10 text-red-500'
+                        ? 'bg-[#00D4FF]/10 text-[#00D4FF]'
+                        : 'bg-red-500/10 text-[#BC0000]'
                     }`}>
                       <div className="text-xs opacity-70">Record</div>
                       <div className="font-medium">{result.dataChecks.recordTableExists ? 'OK' : 'ERR'}</div>
@@ -318,7 +318,7 @@ export default function TeamPagesSyncPage() {
                     </div>
                     <div className={`p-2 rounded-lg ${
                       result.dataChecks.rosterInRange
-                        ? 'bg-emerald-500/10 text-emerald-500'
+                        ? 'bg-[#00D4FF]/10 text-[#00D4FF]'
                         : 'bg-amber-500/10 text-amber-500'
                     }`}>
                       <div className="text-xs opacity-70">Roster</div>

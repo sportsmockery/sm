@@ -65,7 +65,7 @@ export default function FeatureCard({
           className="team-feature-btn"
           style={{
             backgroundColor: accentColor,
-            color: '#ffffff',
+            color: '#FAFAFB',
           }}
         >
           {buttonText}

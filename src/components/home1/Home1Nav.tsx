@@ -87,7 +87,7 @@ export default function Home1Nav() {
                 fontWeight: 900,
                 fontStyle: 'italic',
                 letterSpacing: '-0.03em',
-                color: isDark ? '#ffffff' : '#111111',
+                color: isDark ? '#FAFAFB' : '#111111',
                 lineHeight: 1,
               }}
             >

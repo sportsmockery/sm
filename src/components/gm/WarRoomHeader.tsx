@@ -98,9 +98,9 @@ export function WarRoomHeader({ gmScore, rank, sessionName, numApproved = 0, num
         {/* Session stats */}
         {(numApproved > 0 || numDangerous > 0 || numFailed > 0) && (
           <div style={{ display: 'flex', gap: 8 }}>
-            <StatChip value={numApproved} label="Approved" color="#22c55e" />
+            <StatChip value={numApproved} label="Approved" color="#00D4FF" />
             <StatChip value={numDangerous} label="Dangerous" color="#eab308" />
-            <StatChip value={numFailed} label="Failed" color="#ef4444" />
+            <StatChip value={numFailed} label="Failed" color="#BC0000" />
           </div>
         )}
 

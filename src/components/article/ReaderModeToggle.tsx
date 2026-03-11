@@ -39,7 +39,7 @@ export default function ReaderModeToggle({ className = '' }: ReaderModeTogglePro
       className={`flex items-center gap-2 px-3 py-1.5 text-sm rounded-md transition-colors hover:brightness-95 dark:hover:brightness-110 ${className}`}
       style={
         isReaderMode
-          ? { backgroundColor: '#bc0000', color: '#ffffff' }
+          ? { backgroundColor: '#bc0000', color: '#FAFAFB' }
           : { backgroundColor: 'var(--sm-surface)', color: 'var(--sm-text-muted)' }
       }
       aria-pressed={isReaderMode}

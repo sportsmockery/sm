@@ -105,9 +105,9 @@ export default function RecentPosts({ posts, className = '' }: RecentPostsProps)
 function StatusBadge({ status }: { status: string }) {
   const statusConfig = {
     published: {
-      bg: 'bg-emerald-500/10',
-      text: 'text-emerald-500',
-      dot: 'bg-emerald-500',
+      bg: 'bg-[#00D4FF]/10',
+      text: 'text-[#00D4FF]',
+      dot: 'bg-[#00D4FF]',
       label: 'Published',
     },
     draft: {
@@ -117,9 +117,9 @@ function StatusBadge({ status }: { status: string }) {
       label: 'Draft',
     },
     scheduled: {
-      bg: 'bg-blue-500/10',
-      text: 'text-blue-500',
-      dot: 'bg-blue-500',
+      bg: 'bg-[#00D4FF]/10',
+      text: 'text-[#00D4FF]',
+      dot: 'bg-[#00D4FF]',
       label: 'Scheduled',
     },
   }

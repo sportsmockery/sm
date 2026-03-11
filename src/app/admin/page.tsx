@@ -186,8 +186,8 @@ export default async function AdminDashboard() {
           href="/admin/posts?status=published"
           className="flex items-center gap-4 rounded-xl border border-[var(--border-default)] bg-[var(--bg-card)] p-5 transition-all hover:border-[var(--success)] hover:shadow-md"
         >
-          <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-emerald-500/10">
-            <svg className="h-6 w-6 text-emerald-500" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
+          <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-[#00D4FF]/10">
+            <svg className="h-6 w-6 text-[#00D4FF]" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
             </svg>
           </div>

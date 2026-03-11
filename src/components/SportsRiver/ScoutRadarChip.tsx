@@ -11,8 +11,8 @@ export interface ScoutRadarChipProps {
 }
 
 const statusDotColors: Record<string, string> = {
-  live: 'var(--sm-error, #ef4444)',
-  rising: 'var(--sm-success, #10b981)',
+  live: 'var(--sm-error, #BC0000)',
+  rising: 'var(--sm-success, #00D4FF)',
   neutral: 'var(--sm-text-meta)',
 };
 

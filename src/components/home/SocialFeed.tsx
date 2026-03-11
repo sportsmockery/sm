@@ -153,7 +153,7 @@ export default function SocialFeed({ posts = samplePosts, className = '' }: Soci
                 </div>
                 <div style={post.platform === 'twitter' ? { color: 'var(--sm-text)' } : undefined} className={`${
                   post.platform === 'twitter' ? '' :
-                  post.platform === 'instagram' ? 'text-pink-500' : 'text-blue-600'
+                  post.platform === 'instagram' ? 'text-[#BC0000]' : 'text-[#00D4FF]'
                 }`}>
                   <PlatformIcon platform={post.platform} />
                 </div>

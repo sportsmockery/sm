@@ -5,11 +5,11 @@ import * as d3 from 'd3'
 
 // Team color palettes
 const TEAM_COLORS = {
-  bears: { primary: '#0B162A', secondary: '#C83803', accent: '#FFFFFF' },
-  bulls: { primary: '#CE1141', secondary: '#000000', accent: '#FFFFFF' },
-  cubs: { primary: '#0E3386', secondary: '#CC3433', accent: '#FFFFFF' },
-  whitesox: { primary: '#27251F', secondary: '#C4CED4', accent: '#FFFFFF' },
-  blackhawks: { primary: '#CF0A2C', secondary: '#000000', accent: '#FFD100' },
+  bears: { primary: '#0B162A', secondary: '#C83803', accent: '#FAFAFB' },
+  bulls: { primary: '#CE1141', secondary: '#0B0F14', accent: '#FAFAFB' },
+  cubs: { primary: '#0E3386', secondary: '#CC3433', accent: '#FAFAFB' },
+  whitesox: { primary: '#27251F', secondary: '#C4CED4', accent: '#FAFAFB' },
+  blackhawks: { primary: '#CF0A2C', secondary: '#0B0F14', accent: '#FFD100' },
 } as const
 
 interface ChartDataPoint {

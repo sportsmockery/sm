@@ -167,7 +167,7 @@ export async function POST(request: NextRequest) {
 
 function generatePDFHTML(trades: any[]): string {
   const tradeCards = trades.map(t => {
-    const gradeColor = t.grade >= 75 ? '#22c55e' : t.grade >= 50 ? '#eab308' : '#ef4444'
+    const gradeColor = t.grade >= 75 ? '#00D4FF' : t.grade >= 50 ? '#eab308' : '#BC0000'
     return `
       <div style="border: 1px solid #e5e7eb; border-radius: 12px; padding: 20px; margin-bottom: 20px; page-break-inside: avoid;">
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
@@ -177,7 +177,7 @@ function generatePDFHTML(trades: any[]): string {
           </div>
           <div style="text-align: center;">
             <div style="font-size: 36px; font-weight: 900; color: ${gradeColor};">${t.grade}</div>
-            <div style="font-size: 11px; padding: 2px 12px; border-radius: 12px; background-color: ${t.status === 'accepted' ? '#22c55e20' : '#ef444420'}; color: ${t.status === 'accepted' ? '#22c55e' : '#ef4444'}; font-weight: 700; text-transform: uppercase;">
+            <div style="font-size: 11px; padding: 2px 12px; border-radius: 12px; background-color: ${t.status === 'accepted' ? '#00D4FF20' : '#BC000020'}; color: ${t.status === 'accepted' ? '#00D4FF' : '#BC0000'}; font-weight: 700; text-transform: uppercase;">
               ${t.status}
             </div>
           </div>

@@ -115,7 +115,7 @@ export default function SystemDiagnostic({ systems, onRetry }: SystemDiagnosticP
           }}
           onMouseEnter={(e) => {
             e.currentTarget.style.backgroundColor = '#bc0000'
-            e.currentTarget.style.color = '#ffffff'
+            e.currentTarget.style.color = '#FAFAFB'
           }}
           onMouseLeave={(e) => {
             e.currentTarget.style.backgroundColor = 'transparent'

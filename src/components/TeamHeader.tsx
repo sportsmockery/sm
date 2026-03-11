@@ -18,7 +18,7 @@ const teamConfigs: Record<string, TeamConfig> = {
   },
   'chicago-bulls': {
     name: 'Chicago Bulls',
-    gradient: 'from-[#CE1141] via-[#9A0F31] to-[#000000]',
+    gradient: 'from-[#CE1141] via-[#9A0F31] to-[#0B0F14]',
     pattern: 'bg-[radial-gradient(circle_at_30%_70%,rgba(206,17,65,0.2)_0%,transparent_50%)]',
     textColor: 'text-white',
   },
@@ -36,7 +36,7 @@ const teamConfigs: Record<string, TeamConfig> = {
   },
   'chicago-blackhawks': {
     name: 'Chicago Blackhawks',
-    gradient: 'from-[#CF0A2C] via-[#9A0721] to-[#000000]',
+    gradient: 'from-[#CF0A2C] via-[#9A0721] to-[#0B0F14]',
     pattern: 'bg-[radial-gradient(circle_at_20%_80%,rgba(207,10,44,0.2)_0%,transparent_50%)]',
     textColor: 'text-white',
   },

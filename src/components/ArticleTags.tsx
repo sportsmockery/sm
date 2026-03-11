@@ -20,7 +20,7 @@ export default function ArticleTags({ tags }: ArticleTagsProps) {
         <Link
           key={tag.id}
           href={`/tag/${tag.slug}`}
-          className="inline-flex items-center rounded-full bg-gradient-to-r from-[#8B0000]/10 to-[#FF0000]/10 px-3 py-1 text-xs font-semibold text-[#8B0000] transition-all hover:from-[#8B0000]/20 hover:to-[#FF0000]/20 dark:from-[#8B0000]/20 dark:to-[#FF0000]/20 dark:text-[#FF6666]"
+          className="inline-flex items-center rounded-full bg-gradient-to-r from-[#8B0000]/10 to-[#BC0000]/10 px-3 py-1 text-xs font-semibold text-[#8B0000] transition-all hover:from-[#8B0000]/20 hover:to-[#BC0000]/20 dark:from-[#8B0000]/20 dark:to-[#BC0000]/20 dark:text-[#FF6666]"
         >
           {tag.name}
         </Link>

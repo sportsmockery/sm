@@ -80,7 +80,7 @@ export default async function BullsHubPage() {
 
       <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '48px', maxWidth: '1320px', margin: '0 auto' }}>
         {/* Tool Grid */}
-        <ToolGrid teamSlug="chicago-bulls" accentColor="#CE1141" secondaryColor="#000000" />
+        <ToolGrid teamSlug="chicago-bulls" accentColor="#CE1141" secondaryColor="#0B0F14" />
 
         {/* Content Grid */}
         <style>{`@media (min-width: 1024px) { .hub-grid-bulls { grid-template-columns: 2fr 1fr !important; } }`}</style>

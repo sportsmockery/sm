@@ -10,7 +10,7 @@ interface GlowCardProps {
 }
 
 const glowColors = {
-  red: 'hover:shadow-[0_0_30px_rgba(255,0,0,0.3)] hover:border-[#FF0000]/50',
+  red: 'hover:shadow-[0_0_30px_rgba(255,0,0,0.3)] hover:border-[#BC0000]/50',
   blue: 'hover:shadow-[0_0_30px_rgba(14,51,134,0.3)] hover:border-[#0E3386]/50',
   orange: 'hover:shadow-[0_0_30px_rgba(200,50,0,0.3)] hover:border-[#C83200]/50',
   green: 'hover:shadow-[0_0_30px_rgba(16,185,129,0.3)] hover:border-emerald-500/50',

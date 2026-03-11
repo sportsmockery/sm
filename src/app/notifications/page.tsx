@@ -21,9 +21,9 @@ interface Notification {
 const TEAM_COLORS: Record<string, { primary: string; accent: string }> = {
   bears: { primary: '#0B162A', accent: '#C83803' },
   cubs: { primary: '#0E3386', accent: '#CC3433' },
-  bulls: { primary: '#CE1141', accent: '#000000' },
+  bulls: { primary: '#CE1141', accent: '#0B0F14' },
   'white-sox': { primary: '#27251F', accent: '#C4CED4' },
-  blackhawks: { primary: '#CF0A2C', accent: '#000000' },
+  blackhawks: { primary: '#CF0A2C', accent: '#0B0F14' },
   fire: { primary: '#7B1113', accent: '#A0D3E8' },
   sky: { primary: '#5091CD', accent: '#FFC72C' },
 }
@@ -95,9 +95,9 @@ export default function NotificationsPage() {
 
   const getBadgeStyle = (badge?: string) => {
     const styles: Record<string, { bg: string; color: string }> = {
-      staff: { bg: '#7c3aed', color: 'white' },
-      moderator: { bg: '#059669', color: 'white' },
-      verified: { bg: '#3b82f6', color: 'white' },
+      staff: { bg: '#D6B05E', color: 'white' },
+      moderator: { bg: '#00D4FF', color: 'white' },
+      verified: { bg: '#00D4FF', color: 'white' },
       og_fan: { bg: '#f59e0b', color: '#111' },
       contributor: { bg: '#ec4899', color: 'white' },
     }
@@ -118,7 +118,7 @@ export default function NotificationsPage() {
               Notifications
             </h1>
             {unreadCount > 0 && (
-              <span style={{ background: '#ef4444', color: '#fff', fontSize: '12px', fontWeight: 700, padding: '2px 8px', borderRadius: '12px' }}>
+              <span style={{ background: '#BC0000', color: '#fff', fontSize: '12px', fontWeight: 700, padding: '2px 8px', borderRadius: '12px' }}>
                 {unreadCount}
               </span>
             )}

@@ -152,7 +152,7 @@ export default function FeatureGrid() {
                     fontSize: 16,
                     fontWeight: 900,
                     fontStyle: 'italic',
-                    color: isDark ? '#ffffff' : '#111111',
+                    color: isDark ? '#FAFAFB' : '#111111',
                     margin: 0,
                     marginBottom: 6,
                     letterSpacing: '-0.02em',

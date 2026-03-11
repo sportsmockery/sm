@@ -81,7 +81,7 @@ export default function Pagination({ currentPage, totalPages, basePath }: Pagina
               href={getPageUrl(page)}
               className={`relative px-4 py-2 rounded-xl text-sm font-semibold transition-all duration-300 ${
                 page === currentPage
-                  ? 'bg-gradient-to-r from-[#FF0000] to-[#8B0000] text-white shadow-lg hover:shadow-xl scale-105'
+                  ? 'bg-gradient-to-r from-[#BC0000] to-[#8B0000] text-white shadow-lg hover:shadow-xl scale-105'
                   : 'text-[var(--sm-text-dim)] hover:text-[var(--sm-text)] hover:bg-[var(--sm-card-hover)]'
               }`}
               aria-current={page === currentPage ? 'page' : undefined}

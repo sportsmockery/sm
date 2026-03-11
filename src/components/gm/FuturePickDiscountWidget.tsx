@@ -68,7 +68,7 @@ export function FuturePickDiscountWidget({ picks, teamColor }: FuturePickDiscoun
           <div key={idx} style={{
             padding: 12,
             borderRadius: 8,
-            backgroundColor: isDark ? '#0f172a' : '#ffffff',
+            backgroundColor: isDark ? '#0f172a' : '#FAFAFB',
             border: `1px solid ${isDark ? '#1e293b' : '#e2e8f0'}`,
             marginBottom: idx < futurePicks.length - 1 ? 10 : 0,
           }}>
@@ -113,10 +113,10 @@ export function FuturePickDiscountWidget({ picks, teamColor }: FuturePickDiscoun
                 borderRadius: 4,
                 backgroundColor: isDark ? '#7f1d1d20' : '#fef2f2',
               }}>
-                <span style={{ fontSize: 12, color: isDark ? '#fca5a5' : '#dc2626' }}>
+                <span style={{ fontSize: 12, color: isDark ? '#fca5a5' : '#BC0000' }}>
                   Future discount:
                 </span>
-                <span style={{ fontSize: 13, fontWeight: 700, color: '#ef4444' }}>
+                <span style={{ fontSize: 13, fontWeight: 700, color: '#BC0000' }}>
                   -{discountPercent}%
                 </span>
               </div>
@@ -135,7 +135,7 @@ export function FuturePickDiscountWidget({ picks, teamColor }: FuturePickDiscoun
                 padding: '10px 12px',
                 borderRadius: 8,
                 backgroundColor: isDark ? '#1e3a5f' : '#dbeafe',
-                border: `2px solid ${isDark ? '#3b82f6' : '#60a5fa'}`,
+                border: `2px solid ${isDark ? '#00D4FF' : '#60a5fa'}`,
               }}>
                 <span style={{
                   fontSize: 12,
@@ -147,7 +147,7 @@ export function FuturePickDiscountWidget({ picks, teamColor }: FuturePickDiscoun
                 <span style={{
                   fontSize: 18,
                   fontWeight: 800,
-                  color: isDark ? '#60a5fa' : '#2563eb',
+                  color: isDark ? '#60a5fa' : '#00D4FF',
                 }}>
                   {pick.discountedValue.toLocaleString()} pts
                 </span>

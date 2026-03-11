@@ -21,10 +21,10 @@ interface AgingCurveWidgetProps {
 }
 
 const ASSESSMENT_STYLES: Record<string, { label: string; color: string; bg: string }> = {
-  developing: { label: 'DEVELOPING', color: '#22c55e', bg: '#22c55e20' },
-  in_prime: { label: 'IN PRIME', color: '#3b82f6', bg: '#3b82f620' },
+  developing: { label: 'DEVELOPING', color: '#00D4FF', bg: '#00D4FF20' },
+  in_prime: { label: 'IN PRIME', color: '#00D4FF', bg: '#00D4FF20' },
   declining: { label: 'DECLINING', color: '#f59e0b', bg: '#f59e0b20' },
-  past_prime: { label: 'PAST PRIME', color: '#ef4444', bg: '#ef444420' },
+  past_prime: { label: 'PAST PRIME', color: '#BC0000', bg: '#BC000020' },
 }
 
 // Generate curve points for SVG path
@@ -161,7 +161,7 @@ export function AgingCurveWidget({ data, teamColor }: AgingCurveWidgetProps) {
       <div style={{
         padding: 16,
         borderRadius: 8,
-        backgroundColor: isDark ? '#0f172a' : '#ffffff',
+        backgroundColor: isDark ? '#0f172a' : '#FAFAFB',
         border: `1px solid ${isDark ? '#1e293b' : '#e2e8f0'}`,
         marginBottom: 12,
       }}>
@@ -213,7 +213,7 @@ export function AgingCurveWidget({ data, teamColor }: AgingCurveWidgetProps) {
                 y={0}
                 width={xScale(data.peakAgeEnd) - xScale(data.peakAgeStart)}
                 height={chartHeight}
-                fill={isDark ? '#22c55e10' : '#22c55e15'}
+                fill={isDark ? '#00D4FF10' : '#00D4FF15'}
               />
 
               {/* Curve */}
@@ -269,7 +269,7 @@ export function AgingCurveWidget({ data, teamColor }: AgingCurveWidgetProps) {
       <div style={{
         padding: 12,
         borderRadius: 8,
-        backgroundColor: isDark ? '#0f172a' : '#ffffff',
+        backgroundColor: isDark ? '#0f172a' : '#FAFAFB',
         border: `2px solid ${assessmentStyle.color}`,
       }}>
         <div style={{

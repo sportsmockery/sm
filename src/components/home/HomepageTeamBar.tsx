@@ -208,10 +208,10 @@ function TeamSection({ team }: { team: TeamGameData }) {
         >
           <span className={`text-xs font-bold px-1.5 py-0.5 rounded ${
             team.lastGame.result === 'W'
-              ? 'bg-green-500/20 text-green-400'
+              ? 'bg-[#00D4FF]/20 text-[#00D4FF]'
               : team.lastGame.result === 'OTL'
                 ? 'bg-yellow-500/20 text-yellow-400'
-                : 'bg-red-500/20 text-red-400'
+                : 'bg-red-500/20 text-[#BC0000]'
           }`}>
             {team.lastGame.result}
           </span>

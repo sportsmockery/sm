@@ -16,11 +16,11 @@ interface StatsCardProps {
 
 const colorVariants = {
   default: 'bg-zinc-100 text-zinc-600 dark:bg-zinc-800 dark:text-zinc-400',
-  red: 'bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400',
-  green: 'bg-emerald-100 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400',
-  blue: 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400',
+  red: 'bg-[#BC0000]/10 text-[#BC0000] dark:bg-[#BC0000]/30 dark:text-[#BC0000]',
+  green: 'bg-[#00D4FF]/10 text-[#00D4FF] dark:bg-[#00D4FF]/30 dark:text-[#00D4FF]',
+  blue: 'bg-[#00D4FF]/10 text-[#00D4FF] dark:bg-[#00D4FF]/30 dark:text-[#00D4FF]',
   yellow: 'bg-yellow-100 text-yellow-600 dark:bg-yellow-900/30 dark:text-yellow-400',
-  purple: 'bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400',
+  purple: 'bg-[#D6B05E]/10 text-[#D6B05E] dark:bg-[#D6B05E]/30 dark:text-[#D6B05E]',
 }
 
 export default function StatsCard({
@@ -36,7 +36,7 @@ export default function StatsCard({
     <div
       className={`group rounded-xl p-6 transition-all hover:shadow-md ${className}`}
       style={{
-        backgroundColor: 'var(--bg-card, #ffffff)',
+        backgroundColor: 'var(--bg-card, #FAFAFB)',
         border: '1px solid var(--border-default, #e0e0e0)',
       }}
     >
@@ -48,9 +48,9 @@ export default function StatsCard({
           <div
             className={`flex items-center gap-1 rounded-full px-2 py-1 text-xs font-medium ${
               trend.direction === 'up'
-                ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400'
+                ? 'bg-[#00D4FF]/10 text-[#00D4FF] dark:bg-[#00D4FF]/30 dark:text-[#00D4FF]'
                 : trend.direction === 'down'
-                ? 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400'
+                ? 'bg-[#BC0000]/10 text-[#BC0000] dark:bg-[#BC0000]/30 dark:text-[#BC0000]'
                 : 'bg-zinc-100 text-zinc-600 dark:bg-zinc-800 dark:text-zinc-400'
             }`}
           >

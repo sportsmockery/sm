@@ -1411,9 +1411,9 @@ export default function GMPage() {
                   onClick={clearAllTrades}
                   style={{
                     padding: '6px 12px', borderRadius: 6,
-                    border: '1px solid #ef4444',
+                    border: '1px solid #BC0000',
                     backgroundColor: 'transparent',
-                    color: '#ef4444', fontSize: 11, fontWeight: 600, cursor: 'pointer',
+                    color: '#BC0000', fontSize: 11, fontWeight: 600, cursor: 'pointer',
                   }}
                 >
                   Clear All Trades
@@ -1603,7 +1603,7 @@ export default function GMPage() {
                     display: 'flex', alignItems: 'center', justifyContent: 'space-between',
                   }}>
                     <span>{gradeError}</span>
-                    <button onClick={() => setGradeError(null)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#dc2626', fontWeight: 700 }}>×</button>
+                    <button onClick={() => setGradeError(null)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#BC0000', fontWeight: 700 }}>×</button>
                   </div>
                 )}
 
@@ -1647,7 +1647,7 @@ export default function GMPage() {
                     <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                       <span style={{
                         fontSize: 10, fontWeight: 700, color: '#fff',
-                        backgroundColor: '#3b82f6', padding: '2px 6px', borderRadius: 4,
+                        backgroundColor: '#00D4FF', padding: '2px 6px', borderRadius: 4,
                       }}>
                         TEAM 2
                       </span>
@@ -1723,7 +1723,7 @@ export default function GMPage() {
                       <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                         <span style={{
                           fontSize: 10, fontWeight: 700, color: '#fff',
-                          backgroundColor: '#8b5cf6', padding: '2px 6px', borderRadius: 4,
+                          backgroundColor: '#D6B05E', padding: '2px 6px', borderRadius: 4,
                         }}>
                           TEAM 3
                         </span>

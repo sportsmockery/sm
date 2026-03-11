@@ -545,7 +545,7 @@ export default function AdminHubPage() {
                 <button onClick={() => handleEdit(item)} style={actionBtnStyle} title="Edit">
                   ✎
                 </button>
-                <button onClick={() => handleDelete(item.id)} style={{ ...actionBtnStyle, color: '#dc2626' }} title="Delete">
+                <button onClick={() => handleDelete(item.id)} style={{ ...actionBtnStyle, color: '#BC0000' }} title="Delete">
                   ✕
                 </button>
               </div>
@@ -655,7 +655,7 @@ function DraftPickInlineSelector({ sport, picks, onAdd, onRemove, label }: {
             }}>
               {formatPick(pk)}
               <button onClick={() => onRemove(i)} style={{
-                background: 'none', border: 'none', cursor: 'pointer', color: '#ef4444',
+                background: 'none', border: 'none', cursor: 'pointer', color: '#BC0000',
                 fontWeight: 700, padding: '0 2px', fontSize: 11,
               }}>&times;</button>
             </span>
@@ -809,7 +809,7 @@ function HubMetaFields({ hubSlug, meta, updateMeta, formData, selectedTeam }: {
         </div>
         <div style={{ display: 'flex', alignItems: 'flex-end' }}>
           {rosterLoading && <span style={{ fontSize: 11, color: 'var(--text-muted)', paddingBottom: 10 }}>Loading roster...</span>}
-          {!rosterLoading && rosterPlayers.length > 0 && <span style={{ fontSize: 11, color: '#22c55e', paddingBottom: 10 }}>{rosterPlayers.length} players loaded</span>}
+          {!rosterLoading && rosterPlayers.length > 0 && <span style={{ fontSize: 11, color: '#00D4FF', paddingBottom: 10 }}>{rosterPlayers.length} players loaded</span>}
         </div>
 
         {/* Row 2: Player typeahead (full width) */}
@@ -826,7 +826,7 @@ function HubMetaFields({ hubSlug, meta, updateMeta, formData, selectedTeam }: {
                 }}>
                   {p.name} <span style={{ color: 'var(--text-muted)', fontWeight: 400 }}>({p.position})</span>
                   <button onClick={() => removePlayer(i)} style={{
-                    background: 'none', border: 'none', cursor: 'pointer', color: '#ef4444',
+                    background: 'none', border: 'none', cursor: 'pointer', color: '#BC0000',
                     fontWeight: 700, padding: '0 2px', fontSize: 12,
                   }}>&times;</button>
                 </span>
@@ -920,7 +920,7 @@ function HubMetaFields({ hubSlug, meta, updateMeta, formData, selectedTeam }: {
           {capConfidence && (
             <div style={{
               fontSize: 11, marginTop: 4,
-              color: capConfidence.level === 'high' ? '#22c55e' : capConfidence.level === 'medium' ? '#f59e0b' : '#ef4444',
+              color: capConfidence.level === 'high' ? '#00D4FF' : capConfidence.level === 'medium' ? '#f59e0b' : '#BC0000',
             }}>
               {capConfidence.level} confidence &middot; {capConfidence.sources.length} sources
             </div>

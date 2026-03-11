@@ -111,7 +111,7 @@ export default function UsersTable({
                 </select>
                 {/* Show Fan Council badge if applicable */}
                 {user.isFanCouncilMember && user.role === 'fan' && (
-                  <span className="ml-2 px-2 py-0.5 text-xs rounded-full bg-purple-500/20 text-purple-400 border border-purple-500/30">
+                  <span className="ml-2 px-2 py-0.5 text-xs rounded-full bg-[#D6B05E]/20 text-[#D6B05E] border border-[#D6B05E]/30">
                     Council Eligible
                   </span>
                 )}
@@ -124,7 +124,7 @@ export default function UsersTable({
                   {onResetPassword && (
                     <button
                       onClick={() => onResetPassword(user.id, user.email)}
-                      className="text-blue-400 hover:text-blue-300 transition-colors"
+                      className="text-[#00D4FF] hover:text-[#00D4FF] transition-colors"
                       title="Reset password"
                     >
                       <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -134,7 +134,7 @@ export default function UsersTable({
                   )}
                   <button
                     onClick={() => onDelete(user.id)}
-                    className="text-red-400 hover:text-red-300 transition-colors"
+                    className="text-[#BC0000] hover:text-[#BC0000] transition-colors"
                     title="Delete user"
                   >
                     <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">

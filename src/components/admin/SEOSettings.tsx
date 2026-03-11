@@ -93,7 +93,7 @@ export default function SEOSettings({ settings, onSave, saving }: SEOSettingsPro
               type="checkbox"
               checked={formData.sitemap_enabled}
               onChange={(e) => handleChange('sitemap_enabled', e.target.checked)}
-              className="rounded border-gray-600 bg-gray-700 text-blue-600 focus:ring-blue-500"
+              className="rounded border-gray-600 bg-gray-700 text-[#00D4FF] focus:ring-blue-500"
             />
             <span className="text-gray-300">Enable XML Sitemap</span>
           </label>
@@ -118,7 +118,7 @@ Allow: /"
         <button
           type="submit"
           disabled={saving}
-          className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 transition-colors"
+          className="px-6 py-2 bg-[#00D4FF] text-white rounded-lg hover:bg-[#00D4FF] disabled:opacity-50 transition-colors"
         >
           {saving ? 'Saving...' : 'Save Changes'}
         </button>

@@ -209,8 +209,8 @@ export function ExportModal({ show, onClose, tradeIds, singleTrade = false }: Ex
               marginBottom: 16,
               padding: 12,
               borderRadius: 8,
-              backgroundColor: '#ef444420',
-              color: '#ef4444',
+              backgroundColor: '#BC000020',
+              color: '#BC0000',
               fontSize: '13px',
             }}>
               {error}
@@ -226,8 +226,8 @@ export function ExportModal({ show, onClose, tradeIds, singleTrade = false }: Ex
                 marginBottom: 16,
                 padding: 12,
                 borderRadius: 8,
-                backgroundColor: '#22c55e20',
-                color: '#22c55e',
+                backgroundColor: '#00D4FF20',
+                color: '#00D4FF',
                 fontSize: '13px',
                 textAlign: 'center',
                 fontWeight: 600,

@@ -182,7 +182,7 @@ export default function MediaUploader({ onUploadComplete, onClose }: MediaUpload
         {...getRootProps()}
         className={`border-2 border-dashed rounded-lg p-8 text-center cursor-pointer transition-colors ${
           isDragActive
-            ? 'border-blue-500 bg-blue-500/10'
+            ? 'border-blue-500 bg-[#00D4FF]/10'
             : 'border-gray-600 hover:border-gray-500'
         }`}
       >
@@ -191,7 +191,7 @@ export default function MediaUploader({ onUploadComplete, onClose }: MediaUpload
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
         </svg>
         {isDragActive ? (
-          <p className="text-blue-400">Drop files here...</p>
+          <p className="text-[#00D4FF]">Drop files here...</p>
         ) : (
           <>
             <p className="text-gray-300 mb-2">Drag & drop files here, or click to browse</p>
@@ -219,7 +219,7 @@ export default function MediaUploader({ onUploadComplete, onClose }: MediaUpload
         <div className="mt-4 flex justify-end">
           <button
             onClick={handleDone}
-            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+            className="px-4 py-2 bg-[#00D4FF] text-white rounded-lg hover:bg-[#00D4FF]"
           >
             Done
           </button>

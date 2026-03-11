@@ -123,12 +123,12 @@ export default function BoxScoreClient({ games, initialGameId }: { games: Game[]
                   <div className="text-xs" style={{ color: isSelected ? 'rgba(255,255,255,0.6)' : 'var(--sm-text-muted)' }}>
                     {new Date(game.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
                   </div>
-                  <div className="font-semibold" style={{ color: isSelected ? '#ffffff' : 'var(--sm-text)' }}>
+                  <div className="font-semibold" style={{ color: isSelected ? '#FAFAFB' : 'var(--sm-text)' }}>
                     {game.homeAway === 'home' ? 'vs' : '@'} {game.opponent}
                   </div>
                   <div className="flex items-center gap-2 mt-1">
                     <span className={`text-sm font-bold ${isWin ? 'text-green-500' : game.result === 'OTL' ? 'text-yellow-500' : 'text-red-500'}`}>{game.result}</span>
-                    <span className="text-sm font-semibold" style={{ color: isSelected ? '#ffffff' : 'var(--sm-text)' }}>
+                    <span className="text-sm font-semibold" style={{ color: isSelected ? '#FAFAFB' : 'var(--sm-text)' }}>
                       {game.hawksScore}-{game.oppScore}{game.isOT ? ' (OT)' : ''}
                     </span>
                   </div>
@@ -188,7 +188,7 @@ export default function BoxScoreClient({ games, initialGameId }: { games: Game[]
               className="flex-1 flex items-center justify-center gap-2 px-4 py-3 font-semibold transition-all hover:brightness-95 dark:hover:brightness-110"
               style={{
                 backgroundColor: activeTeam === 'blackhawks' ? '#CF0A2C' : 'var(--sm-card)',
-                color: activeTeam === 'blackhawks' ? '#ffffff' : 'var(--sm-text-muted)',
+                color: activeTeam === 'blackhawks' ? '#FAFAFB' : 'var(--sm-text-muted)',
               }}>
               <Image src={HAWKS_LOGO} alt="Blackhawks" width={24} height={24} className="w-6 h-6" unoptimized />
               Blackhawks
@@ -197,7 +197,7 @@ export default function BoxScoreClient({ games, initialGameId }: { games: Game[]
               className="flex-1 flex items-center justify-center gap-2 px-4 py-3 font-semibold transition-all hover:brightness-95 dark:hover:brightness-110"
               style={{
                 backgroundColor: activeTeam === 'opponent' ? '#CF0A2C' : 'var(--sm-card)',
-                color: activeTeam === 'opponent' ? '#ffffff' : 'var(--sm-text-muted)',
+                color: activeTeam === 'opponent' ? '#FAFAFB' : 'var(--sm-text-muted)',
               }}>
               <Image src={boxScore.opponent.logo} alt={boxScore.opponent.abbrev} width={24} height={24} className="w-6 h-6" unoptimized />
               {boxScore.opponent.fullName}
@@ -212,7 +212,7 @@ export default function BoxScoreClient({ games, initialGameId }: { games: Game[]
                   className="flex-1 px-6 py-4 text-sm font-semibold uppercase tracking-wider transition-all hover:brightness-95 dark:hover:brightness-110"
                   style={{
                     backgroundColor: activeTab === tab ? '#CF0A2C' : 'transparent',
-                    color: activeTab === tab ? '#ffffff' : 'var(--sm-text-muted)',
+                    color: activeTab === tab ? '#FAFAFB' : 'var(--sm-text-muted)',
                   }}>
                   {tab}
                 </button>

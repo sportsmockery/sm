@@ -22,7 +22,7 @@ export const CHICAGO_TEAMS: Record<string, Team> = {
     sport: 'nba',
     league: 'NBA',
     division: 'Central',
-    colors: { primary: '#CE1141', secondary: '#000000' },
+    colors: { primary: '#CE1141', secondary: '#0B0F14' },
     logo: '/logos/bulls.svg',
   },
   'chicago-cubs': {
@@ -58,7 +58,7 @@ export const CHICAGO_TEAMS: Record<string, Team> = {
     sport: 'nhl',
     league: 'NHL',
     division: 'Central',
-    colors: { primary: '#CF0A2C', secondary: '#000000' },
+    colors: { primary: '#CF0A2C', secondary: '#0B0F14' },
     logo: '/logos/blackhawks.svg',
   },
 };

@@ -473,7 +473,7 @@ export default function LeftSidebar() {
                   onClick={() => { setProfileOpen(false); signOut() }}
                   style={{
                     ...popupLinkStyle,
-                    color: '#ef4444',
+                    color: '#BC0000',
                     background: 'none',
                     border: 'none',
                     width: '100%',

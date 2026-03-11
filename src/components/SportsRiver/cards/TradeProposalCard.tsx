@@ -12,9 +12,9 @@ interface TradeProposalCardProps {
 }
 
 function scoreColor(score: number): string {
-  if (score > 70) return '#22c55e';
+  if (score > 70) return '#00D4FF';
   if (score >= 50) return '#eab308';
-  return '#ef4444';
+  return '#BC0000';
 }
 
 export const TradeProposalCard = React.memo(function TradeProposalCard({ card }: TradeProposalCardProps) {

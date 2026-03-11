@@ -36,9 +36,9 @@ export function DataFreshnessIndicator({
 
   // Determine status color
   const getStatusColor = () => {
-    if (freshness.is_stale) return '#ef4444' // Red for stale
+    if (freshness.is_stale) return '#BC0000' // Red for stale
     if (freshness.age_hours > 12) return '#eab308' // Yellow for aging
-    return '#22c55e' // Green for fresh
+    return '#00D4FF' // Green for fresh
   }
 
   const statusColor = getStatusColor()
@@ -78,7 +78,7 @@ export function DataFreshnessIndicator({
     <div
       style={{
         borderRadius: 10,
-        border: `1px solid ${freshness.is_stale ? '#ef444430' : borderColor}`,
+        border: `1px solid ${freshness.is_stale ? '#BC000030' : borderColor}`,
         backgroundColor: isDark ? '#1f2937' : '#fff',
         overflow: 'hidden',
       }}
@@ -137,14 +137,14 @@ export function DataFreshnessIndicator({
           style={{
             padding: '8px 12px',
             backgroundColor: isDark ? 'rgba(239, 68, 68, 0.15)' : 'rgba(239, 68, 68, 0.1)',
-            borderTop: `1px solid ${isDark ? '#ef444430' : '#fecaca'}`,
+            borderTop: `1px solid ${isDark ? '#BC000030' : '#fecaca'}`,
             display: 'flex',
             alignItems: 'center',
             gap: 8,
           }}
         >
           <span style={{ fontSize: 14 }}>⚠️</span>
-          <span style={{ fontSize: 11, color: '#ef4444', fontWeight: 500 }}>
+          <span style={{ fontSize: 11, color: '#BC0000', fontWeight: 500 }}>
             {freshness.warning}
           </span>
         </div>
@@ -210,7 +210,7 @@ function DataRow({
   const diffHours = (now.getTime() - date.getTime()) / (1000 * 60 * 60)
 
   const ageColor =
-    diffHours > 24 ? '#ef4444' : diffHours > 12 ? '#eab308' : '#22c55e'
+    diffHours > 24 ? '#BC0000' : diffHours > 12 ? '#eab308' : '#00D4FF'
 
   return (
     <div

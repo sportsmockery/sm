@@ -33,11 +33,11 @@ interface ScenarioTabsProps {
 }
 
 const SCENARIO_CONFIGS = [
-  { type: 'player_improvement' as const, label: 'Player Improves', emoji: '📈', color: '#22c55e' },
-  { type: 'player_decline' as const, label: 'Player Declines', emoji: '📉', color: '#ef4444' },
-  { type: 'injury_impact' as const, label: 'Injury Risk', emoji: '🏥', color: '#f97316' },
-  { type: 'add_pick' as const, label: 'Add Pick', emoji: '📄', color: '#3b82f6' },
-  { type: 'remove_player' as const, label: 'Remove Player', emoji: '❌', color: '#8b5cf6' },
+  { type: 'player_improvement' as const, label: 'Player Improves', emoji: '📈', color: '#00D4FF' },
+  { type: 'player_decline' as const, label: 'Player Declines', emoji: '📉', color: '#BC0000' },
+  { type: 'injury_impact' as const, label: 'Injury Risk', emoji: '🏥', color: '#BC0000' },
+  { type: 'add_pick' as const, label: 'Add Pick', emoji: '📄', color: '#00D4FF' },
+  { type: 'remove_player' as const, label: 'Remove Player', emoji: '❌', color: '#D6B05E' },
   { type: 'age_progression' as const, label: 'Time Forward', emoji: '⏳', color: '#6b7280' },
 ]
 
@@ -151,7 +151,7 @@ export function ScenarioTabs({ playersSent, playersReceived, onRunScenario, load
                 step="5"
                 value={params.improvement_pct || 15}
                 onChange={e => setParams(p => ({ ...p, improvement_pct: Number(e.target.value) }))}
-                style={{ width: '100%', accentColor: '#22c55e' }}
+                style={{ width: '100%', accentColor: '#00D4FF' }}
               />
               <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '10px', color: subText }}>
                 <span>+5%</span>
@@ -198,7 +198,7 @@ export function ScenarioTabs({ playersSent, playersReceived, onRunScenario, load
                 step="5"
                 value={Math.abs(params.improvement_pct || 15)}
                 onChange={e => setParams(p => ({ ...p, improvement_pct: -Number(e.target.value) }))}
-                style={{ width: '100%', accentColor: '#ef4444' }}
+                style={{ width: '100%', accentColor: '#BC0000' }}
               />
               <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '10px', color: subText }}>
                 <span>-5%</span>
@@ -247,9 +247,9 @@ export function ScenarioTabs({ playersSent, playersReceived, onRunScenario, load
                       flex: 1,
                       padding: '8px 12px',
                       borderRadius: 8,
-                      border: `2px solid ${params.injury_severity === severity ? '#f97316' : inputBorder}`,
-                      backgroundColor: params.injury_severity === severity ? '#f9731615' : 'transparent',
-                      color: params.injury_severity === severity ? '#f97316' : textColor,
+                      border: `2px solid ${params.injury_severity === severity ? '#BC0000' : inputBorder}`,
+                      backgroundColor: params.injury_severity === severity ? '#BC000015' : 'transparent',
+                      color: params.injury_severity === severity ? '#BC0000' : textColor,
                       fontSize: '11px',
                       fontWeight: 600,
                       cursor: 'pointer',
@@ -326,9 +326,9 @@ export function ScenarioTabs({ playersSent, playersReceived, onRunScenario, load
                       flex: 1,
                       padding: '8px 12px',
                       borderRadius: 8,
-                      border: `2px solid ${params.pick_side === side ? '#3b82f6' : inputBorder}`,
-                      backgroundColor: params.pick_side === side ? '#3b82f615' : 'transparent',
-                      color: params.pick_side === side ? '#3b82f6' : textColor,
+                      border: `2px solid ${params.pick_side === side ? '#00D4FF' : inputBorder}`,
+                      backgroundColor: params.pick_side === side ? '#00D4FF15' : 'transparent',
+                      color: params.pick_side === side ? '#00D4FF' : textColor,
                       fontSize: '12px',
                       fontWeight: 600,
                       cursor: 'pointer',

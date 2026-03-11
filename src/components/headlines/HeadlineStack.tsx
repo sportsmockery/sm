@@ -81,7 +81,7 @@ export default function HeadlineStack({
           </h2>
           <Link
             href="/news"
-            className="text-xs font-semibold text-[#8B0000] hover:text-[#FF0000] dark:text-[#FF6666] transition-colors"
+            className="text-xs font-semibold text-[#8B0000] hover:text-[#BC0000] dark:text-[#FF6666] transition-colors"
           >
             View All
           </Link>

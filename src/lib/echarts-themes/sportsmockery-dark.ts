@@ -1,12 +1,12 @@
 export const darkTheme = {
-  color: ['#bc0000', '#ffffff', '#999999', '#666666', '#444444'],
-  backgroundColor: '#000000',
+  color: ['#bc0000', '#FAFAFB', '#999999', '#666666', '#444444'],
+  backgroundColor: '#0B0F14',
   textStyle: {
-    color: '#ffffff',
+    color: '#FAFAFB',
   },
   title: {
     textStyle: {
-      color: '#ffffff',
+      color: '#FAFAFB',
       fontWeight: 'bold',
     },
     subtextStyle: {
@@ -22,7 +22,7 @@ export const darkTheme = {
     backgroundColor: 'rgba(30, 30, 30, 0.95)',
     borderColor: '#bc0000',
     textStyle: {
-      color: '#ffffff',
+      color: '#FAFAFB',
     },
   },
   categoryAxis: {

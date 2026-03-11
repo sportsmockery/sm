@@ -38,7 +38,7 @@ export default function PostForm({ initialData, onDataChange, onInsertImage }: P
       Link.configure({
         openOnClick: false,
         HTMLAttributes: {
-          class: 'text-[#8B0000] underline hover:text-red-700',
+          class: 'text-[#8B0000] underline hover:text-[#BC0000]',
         },
       }),
       Image.configure({

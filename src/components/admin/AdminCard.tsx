@@ -15,14 +15,14 @@ interface AdminCardProps {
 
 const colorClasses = {
   blue: {
-    bg: 'bg-blue-500',
-    light: 'bg-blue-100 dark:bg-blue-900/30',
-    text: 'text-blue-600 dark:text-blue-400',
+    bg: 'bg-[#00D4FF]',
+    light: 'bg-[#00D4FF]/10 dark:bg-[#00D4FF]/30',
+    text: 'text-[#00D4FF] dark:text-[#00D4FF]',
   },
   green: {
-    bg: 'bg-emerald-500',
-    light: 'bg-emerald-100 dark:bg-emerald-900/30',
-    text: 'text-emerald-600 dark:text-emerald-400',
+    bg: 'bg-[#00D4FF]',
+    light: 'bg-[#00D4FF]/10 dark:bg-[#00D4FF]/30',
+    text: 'text-[#00D4FF] dark:text-[#00D4FF]',
   },
   yellow: {
     bg: 'bg-yellow-500',
@@ -31,18 +31,18 @@ const colorClasses = {
   },
   red: {
     bg: 'bg-red-500',
-    light: 'bg-red-100 dark:bg-red-900/30',
-    text: 'text-red-600 dark:text-red-400',
+    light: 'bg-[#BC0000]/10 dark:bg-[#BC0000]/30',
+    text: 'text-[#BC0000] dark:text-[#BC0000]',
   },
   purple: {
-    bg: 'bg-purple-500',
-    light: 'bg-purple-100 dark:bg-purple-900/30',
-    text: 'text-purple-600 dark:text-purple-400',
+    bg: 'bg-[#D6B05E]',
+    light: 'bg-[#D6B05E]/10 dark:bg-[#D6B05E]/30',
+    text: 'text-[#D6B05E] dark:text-[#D6B05E]',
   },
   pink: {
     bg: 'bg-pink-500',
-    light: 'bg-pink-100 dark:bg-pink-900/30',
-    text: 'text-pink-600 dark:text-pink-400',
+    light: 'bg-[#BC0000]/10 dark:bg-[#BC0000]/30',
+    text: 'text-[#BC0000] dark:text-[#BC0000]',
   },
 }
 
@@ -68,7 +68,7 @@ export default function AdminCard({
             {typeof value === 'number' ? value.toLocaleString() : value}
           </p>
           {change && (
-            <p className={`mt-1 flex items-center gap-1 text-sm ${change.value >= 0 ? 'text-emerald-600' : 'text-red-600'}`}>
+            <p className={`mt-1 flex items-center gap-1 text-sm ${change.value >= 0 ? 'text-[#00D4FF]' : 'text-[#BC0000]'}`}>
               {change.value >= 0 ? (
                 <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 18L9 11.25l4.306 4.307a11.95 11.95 0 015.814-5.519l2.74-1.22m0 0l-5.94-2.28m5.94 2.28l-2.28 5.941" />

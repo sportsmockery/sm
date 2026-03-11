@@ -140,7 +140,7 @@ export default function PlayerProfileClient({ players }: Props) {
             className="flex items-center gap-1 px-4 py-2 text-sm font-semibold rounded-lg transition-colors"
             style={{
               backgroundColor: page === 0 ? 'var(--sm-surface)' : '#C83200',
-              color: page === 0 ? 'var(--sm-text-muted)' : '#ffffff',
+              color: page === 0 ? 'var(--sm-text-muted)' : '#FAFAFB',
               cursor: page === 0 ? 'not-allowed' : 'pointer',
               opacity: page === 0 ? 0.5 : 1,
             }}
@@ -161,7 +161,7 @@ export default function PlayerProfileClient({ players }: Props) {
             className="flex items-center gap-1 px-4 py-2 text-sm font-semibold rounded-lg transition-colors"
             style={{
               backgroundColor: page === totalPages - 1 ? 'var(--sm-surface)' : '#C83200',
-              color: page === totalPages - 1 ? 'var(--sm-text-muted)' : '#ffffff',
+              color: page === totalPages - 1 ? 'var(--sm-text-muted)' : '#FAFAFB',
               cursor: page === totalPages - 1 ? 'not-allowed' : 'pointer',
               opacity: page === totalPages - 1 ? 0.5 : 1,
             }}

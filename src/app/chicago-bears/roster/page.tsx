@@ -134,16 +134,16 @@ function getStatusBadge(status: string | null) {
   if (!status) return null
   const s = status.toLowerCase()
   if (s.includes('injured reserve') || s === 'ir') {
-    return { label: 'IR', bg: 'rgba(239, 68, 68, 0.1)', color: '#ef4444' }
+    return { label: 'IR', bg: 'rgba(239, 68, 68, 0.1)', color: '#BC0000' }
   }
   if (s.includes('practice squad') || s === 'ps') {
-    return { label: 'PS', bg: 'rgba(59, 130, 246, 0.1)', color: '#3b82f6' }
+    return { label: 'PS', bg: 'rgba(59, 130, 246, 0.1)', color: '#00D4FF' }
   }
   if (s.includes('pup') || s.includes('physically unable')) {
     return { label: 'PUP', bg: 'rgba(234, 179, 8, 0.1)', color: '#eab308' }
   }
   if (s.includes('suspend')) {
-    return { label: 'SUS', bg: 'rgba(239, 68, 68, 0.1)', color: '#ef4444' }
+    return { label: 'SUS', bg: 'rgba(239, 68, 68, 0.1)', color: '#BC0000' }
   }
   return null
 }

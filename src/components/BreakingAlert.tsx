@@ -52,8 +52,8 @@ export default function BreakingAlert({
 
   const priorityStyles = {
     normal: {
-      bg: 'from-[#8B0000] to-[#FF0000]',
-      border: 'border-[#FF0000]/50',
+      bg: 'from-[#8B0000] to-[#BC0000]',
+      border: 'border-[#BC0000]/50',
       icon: 'bg-white/20',
     },
     high: {

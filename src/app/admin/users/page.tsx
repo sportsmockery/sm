@@ -213,7 +213,7 @@ export default function UsersPage() {
         <div>
           <h1 className="text-2xl font-bold" style={{ color: 'var(--text-primary)' }}>Users</h1>
           {syncMessage && (
-            <p className={`text-sm mt-1 ${syncMessage.includes('Error') ? 'text-red-400' : 'text-green-400'}`}>
+            <p className={`text-sm mt-1 ${syncMessage.includes('Error') ? 'text-[#BC0000]' : 'text-[#00D4FF]'}`}>
               {syncMessage}
             </p>
           )}
@@ -297,8 +297,8 @@ export default function UsersPage() {
             {passwordMessage && (
               <div className={`p-3 rounded-lg mb-4 text-sm ${
                 passwordMessage.includes('Error') || passwordMessage.includes('Failed')
-                  ? 'bg-red-500/20 border border-red-500/30 text-red-400'
-                  : 'bg-green-500/20 border border-green-500/30 text-green-400'
+                  ? 'bg-red-500/20 border border-red-500/30 text-[#BC0000]'
+                  : 'bg-[#00D4FF]/20 border border-green-500/30 text-[#00D4FF]'
               }`}>
                 {passwordMessage}
               </div>
@@ -387,9 +387,9 @@ function WordPressWritersSection() {
   }, [])
 
   const roleColors: Record<string, string> = {
-    editor: 'bg-blue-500/20 text-blue-400 border border-blue-500/30',
-    author: 'bg-green-500/20 text-green-400 border border-green-500/30',
-    admin: 'bg-red-500/20 text-red-400 border border-red-500/30',
+    editor: 'bg-[#00D4FF]/20 text-[#00D4FF] border border-blue-500/30',
+    author: 'bg-[#00D4FF]/20 text-[#00D4FF] border border-green-500/30',
+    admin: 'bg-red-500/20 text-[#BC0000] border border-red-500/30',
   }
 
   return (
@@ -453,7 +453,7 @@ function WordPressWritersSection() {
                     </span>
                   </td>
                   <td className="px-6 py-4">
-                    <span className="px-2 py-1 rounded-full text-xs font-medium bg-orange-500/20 text-orange-400 border border-orange-500/30">
+                    <span className="px-2 py-1 rounded-full text-xs font-medium bg-[#BC0000]/20 text-[#BC0000] border border-orange-500/30">
                       WordPress
                     </span>
                   </td>

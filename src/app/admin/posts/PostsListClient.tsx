@@ -86,9 +86,9 @@ export default function PostsListClient({
 
   const getStatusBadge = (postStatus: string) => {
     const styles = {
-      published: 'bg-emerald-500/10 text-emerald-500 border-emerald-500/20',
+      published: 'bg-[#00D4FF]/10 text-[#00D4FF] border-emerald-500/20',
       draft: 'bg-amber-500/10 text-amber-500 border-amber-500/20',
-      scheduled: 'bg-blue-500/10 text-blue-500 border-blue-500/20',
+      scheduled: 'bg-[#00D4FF]/10 text-[#00D4FF] border-blue-500/20',
     }
     const icons = {
       published: (

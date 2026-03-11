@@ -8,9 +8,9 @@ import { motion, useScroll, useTransform, useSpring, useMotionValue, useInView }
 // Chicago teams
 const TEAMS = [
   { id: 'bears', name: 'Bears', fullName: 'Chicago Bears', league: 'NFL', record: '5-12', logo: 'https://a.espncdn.com/i/teamlogos/nfl/500/chi.png', primary: '#0B162A', secondary: '#C83803' },
-  { id: 'bulls', name: 'Bulls', fullName: 'Chicago Bulls', league: 'NBA', record: '22-30', logo: 'https://a.espncdn.com/i/teamlogos/nba/500/chi.png', primary: '#CE1141', secondary: '#000000' },
+  { id: 'bulls', name: 'Bulls', fullName: 'Chicago Bulls', league: 'NBA', record: '22-30', logo: 'https://a.espncdn.com/i/teamlogos/nba/500/chi.png', primary: '#CE1141', secondary: '#0B0F14' },
   { id: 'cubs', name: 'Cubs', fullName: 'Chicago Cubs', league: 'MLB', record: '83-79', logo: 'https://a.espncdn.com/i/teamlogos/mlb/500/chc.png', primary: '#0E3386', secondary: '#CC3433' },
-  { id: 'blackhawks', name: 'Blackhawks', fullName: 'Chicago Blackhawks', league: 'NHL', record: '23-38-6', logo: 'https://a.espncdn.com/i/teamlogos/nhl/500/chi.png', primary: '#CF0A2C', secondary: '#000000' },
+  { id: 'blackhawks', name: 'Blackhawks', fullName: 'Chicago Blackhawks', league: 'NHL', record: '23-38-6', logo: 'https://a.espncdn.com/i/teamlogos/nhl/500/chi.png', primary: '#CF0A2C', secondary: '#0B0F14' },
   { id: 'whitesox', name: 'White Sox', fullName: 'Chicago White Sox', league: 'MLB', record: '41-121', logo: 'https://a.espncdn.com/i/teamlogos/mlb/500/chw.png', primary: '#27251F', secondary: '#C4CED4' },
 ]
 

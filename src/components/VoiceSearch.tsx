@@ -110,7 +110,7 @@ export default function VoiceSearch({ onResult, className = '' }: VoiceSearchPro
                 {/* Microphone button */}
                 <div className={`relative flex h-20 w-20 items-center justify-center rounded-full ${
                   isListening
-                    ? 'bg-gradient-to-br from-[#8B0000] to-[#FF0000]'
+                    ? 'bg-gradient-to-br from-[#8B0000] to-[#BC0000]'
                     : 'bg-zinc-800'
                 } shadow-lg transition-all`}>
                   <svg
@@ -154,7 +154,7 @@ export default function VoiceSearch({ onResult, className = '' }: VoiceSearchPro
                 {[...Array(7)].map((_, i) => (
                   <div
                     key={i}
-                    className="h-8 w-1 rounded-full bg-gradient-to-t from-[#8B0000] to-[#FF0000]"
+                    className="h-8 w-1 rounded-full bg-gradient-to-t from-[#8B0000] to-[#BC0000]"
                     style={{
                       animation: 'soundWave 0.5s ease-in-out infinite',
                       animationDelay: `${i * 0.1}s`,

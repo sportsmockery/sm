@@ -111,12 +111,12 @@ export default function UserGMScoringPage() {
   }
 
   function getGradeColor(grade: number): string {
-    if (grade >= 90) return '#10b981'
-    if (grade >= 80) return '#22c55e'
+    if (grade >= 90) return '#00D4FF'
+    if (grade >= 80) return '#00D4FF'
     if (grade >= 70) return '#84cc16'
     if (grade >= 60) return '#f59e0b'
-    if (grade >= 50) return '#f97316'
-    return '#ef4444'
+    if (grade >= 50) return '#BC0000'
+    return '#BC0000'
   }
 
   function formatDate(dateStr: string | null): string {
@@ -180,9 +180,9 @@ export default function UserGMScoringPage() {
           padding: '12px 16px',
           borderRadius: 8,
           marginBottom: 16,
-          backgroundColor: '#ef444420',
-          border: '1px solid #ef444440',
-          color: '#ef4444',
+          backgroundColor: '#BC000020',
+          border: '1px solid #BC000040',
+          color: '#BC0000',
           fontSize: '13px',
           fontWeight: 600,
         }}>
@@ -320,9 +320,9 @@ export default function UserGMScoringPage() {
                       {user.total_trades}
                     </td>
                     <td style={{ padding: '12px 16px', textAlign: 'right' }}>
-                      <span style={{ color: '#10b981', fontWeight: 600 }}>{user.accepted_trades}</span>
+                      <span style={{ color: '#00D4FF', fontWeight: 600 }}>{user.accepted_trades}</span>
                       <span style={{ color: subText }}> / </span>
-                      <span style={{ color: '#ef4444' }}>{user.rejected_trades}</span>
+                      <span style={{ color: '#BC0000' }}>{user.rejected_trades}</span>
                     </td>
                     <td style={{ padding: '12px 16px', textAlign: 'center' }}>
                       <span
@@ -342,9 +342,9 @@ export default function UserGMScoringPage() {
                       </span>
                     </td>
                     <td style={{ padding: '12px 16px', textAlign: 'center' }}>
-                      <span style={{ color: '#10b981', fontWeight: 600 }}>{user.highest_grade}</span>
+                      <span style={{ color: '#00D4FF', fontWeight: 600 }}>{user.highest_grade}</span>
                       <span style={{ color: subText }}> / </span>
-                      <span style={{ color: '#ef4444', fontWeight: 600 }}>{user.lowest_grade}</span>
+                      <span style={{ color: '#BC0000', fontWeight: 600 }}>{user.lowest_grade}</span>
                     </td>
                     <td style={{ padding: '12px 16px', textAlign: 'right', color: subText, fontSize: '12px' }}>
                       {formatDate(user.last_trade_at)}

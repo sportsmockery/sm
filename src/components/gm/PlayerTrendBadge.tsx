@@ -12,11 +12,11 @@ interface PlayerTrendBadgeProps {
 }
 
 const TREND_CONFIG: Record<TrendDirection, { emoji: string; label: string; color: string; bgColor: string }> = {
-  hot: { emoji: '🔥', label: 'Hot', color: '#ef4444', bgColor: '#ef444420' },
-  rising: { emoji: '📈', label: 'Rising', color: '#22c55e', bgColor: '#22c55e20' },
+  hot: { emoji: '🔥', label: 'Hot', color: '#BC0000', bgColor: '#BC000020' },
+  rising: { emoji: '📈', label: 'Rising', color: '#00D4FF', bgColor: '#00D4FF20' },
   stable: { emoji: '➡️', label: 'Stable', color: '#6b7280', bgColor: '#6b728020' },
   declining: { emoji: '📉', label: 'Declining', color: '#eab308', bgColor: '#eab30820' },
-  cold: { emoji: '❄️', label: 'Cold', color: '#3b82f6', bgColor: '#3b82f620' },
+  cold: { emoji: '❄️', label: 'Cold', color: '#00D4FF', bgColor: '#00D4FF20' },
 }
 
 export function PlayerTrendBadge({ trend, performanceVsProjection, marketSentiment, compact = false }: PlayerTrendBadgeProps) {
@@ -68,7 +68,7 @@ export function PlayerTrendBadge({ trend, performanceVsProjection, marketSentime
       <span style={{ color: config.color }}>{config.label}</span>
       {performanceVsProjection !== null && performanceVsProjection !== undefined && (
         <span style={{
-          color: performanceVsProjection > 0 ? '#22c55e' : performanceVsProjection < 0 ? '#ef4444' : '#6b7280',
+          color: performanceVsProjection > 0 ? '#00D4FF' : performanceVsProjection < 0 ? '#BC0000' : '#6b7280',
           fontSize: '9px',
         }}>
           {performanceVsProjection > 0 ? '+' : ''}{performanceVsProjection}%
@@ -82,7 +82,7 @@ export function PlayerTrendBadge({ trend, performanceVsProjection, marketSentime
           fontWeight: 700,
           textTransform: 'uppercase',
           backgroundColor: isDark ? '#1f293780' : '#f3f4f680',
-          color: marketSentiment === 'buy' ? '#22c55e' : marketSentiment === 'sell' ? '#ef4444' : '#6b7280',
+          color: marketSentiment === 'buy' ? '#00D4FF' : marketSentiment === 'sell' ? '#BC0000' : '#6b7280',
         }}>
           {marketSentiment}
         </span>

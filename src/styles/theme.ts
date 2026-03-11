@@ -18,7 +18,7 @@ export const teamColors = {
   },
   'chicago-bulls': {
     primary: '#CE1141', // Red
-    secondary: '#000000', // Black
+    secondary: '#0B0F14', // Black
     name: 'Bulls',
   },
   'chicago-cubs': {
@@ -33,7 +33,7 @@ export const teamColors = {
   },
   'chicago-blackhawks': {
     primary: '#CF0A2C', // Red
-    secondary: '#000000', // Black
+    secondary: '#0B0F14', // Black
     name: 'Blackhawks',
   },
 } as const

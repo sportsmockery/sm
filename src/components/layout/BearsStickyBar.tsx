@@ -179,7 +179,7 @@ export default function BearsStickyBar({ className = '', isArticlePage }: BearsS
                 className="w-7 h-7 object-contain"
                 unoptimized
               />
-              <span className="hidden sm:inline text-white font-semibold text-sm group-hover:text-orange-300 transition-colors">
+              <span className="hidden sm:inline text-white font-semibold text-sm group-hover:text-[#BC0000] transition-colors">
                 Bears
               </span>
             </Link>
@@ -196,7 +196,7 @@ export default function BearsStickyBar({ className = '', isArticlePage }: BearsS
                     <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
                     <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-red-500"></span>
                   </span>
-                  <span className="text-red-400">Live</span>
+                  <span className="text-[#BC0000]">Live</span>
                 </span>
                 <span className="text-white font-bold text-sm">
                   CHI {bearsData.liveGame.bearsScore} - {bearsData.liveGame.opponentScore} {bearsData.liveGame.opponent}
@@ -245,7 +245,7 @@ export default function BearsStickyBar({ className = '', isArticlePage }: BearsS
                   className="hidden lg:flex items-center gap-2 hover:bg-white/10 px-2 py-1 rounded transition-colors"
                 >
                   <span className="text-white/50 text-xs">Last:</span>
-                  <span className={`text-xs font-bold ${bearsData.lastGame.result === 'W' ? 'text-green-400' : 'text-red-400'}`}>
+                  <span className={`text-xs font-bold ${bearsData.lastGame.result === 'W' ? 'text-[#00D4FF]' : 'text-[#BC0000]'}`}>
                     {bearsData.lastGame.result}
                   </span>
                   <span className="text-white font-medium text-xs">

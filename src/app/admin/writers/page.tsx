@@ -31,9 +31,9 @@ export default async function AdminWritersPage() {
   const totalPosts = authorsWithCounts.reduce((acc, a) => acc + a.postCount, 0)
 
   const roleColors: Record<string, string> = {
-    editor: 'bg-blue-500/20 text-blue-400 border border-blue-500/30',
-    author: 'bg-green-500/20 text-green-400 border border-green-500/30',
-    admin: 'bg-red-500/20 text-red-400 border border-red-500/30',
+    editor: 'bg-[#00D4FF]/20 text-[#00D4FF] border border-blue-500/30',
+    author: 'bg-[#00D4FF]/20 text-[#00D4FF] border border-green-500/30',
+    admin: 'bg-red-500/20 text-[#BC0000] border border-red-500/30',
   }
 
   return (

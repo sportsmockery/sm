@@ -13,39 +13,39 @@ interface ProspectCardProps {
 // Level colors for visual distinction (MLB + NHL)
 const LEVEL_COLORS: Record<string, string> = {
   // MLB
-  'AAA': '#22c55e',
-  'AA': '#3b82f6',
-  'A+': '#8b5cf6',
+  'AAA': '#00D4FF',
+  'AA': '#00D4FF',
+  'A+': '#D6B05E',
   'A': '#a855f7',
   'R': '#f59e0b',
   'Rk': '#f59e0b',
   // NHL
-  'AHL': '#22c55e',
-  'NHL': '#dc2626',
-  'OHL': '#3b82f6',
-  'WHL': '#3b82f6',
-  'QMJHL': '#3b82f6',
-  'USHL': '#8b5cf6',
-  'NCAA': '#8b5cf6',
+  'AHL': '#00D4FF',
+  'NHL': '#BC0000',
+  'OHL': '#00D4FF',
+  'WHL': '#00D4FF',
+  'QMJHL': '#00D4FF',
+  'USHL': '#D6B05E',
+  'NCAA': '#D6B05E',
   'USNTDP': '#a855f7',
-  'SHL': '#10b981',
-  'KHL': '#ef4444',
+  'SHL': '#00D4FF',
+  'KHL': '#BC0000',
   'Liiga': '#06b6d4',
   'NLA': '#06b6d4',
 }
 
 // Grade colors for prospect badges (MLB letter grades)
 const GRADE_COLORS: Record<string, string> = {
-  'A+': '#22c55e',
-  'A': '#22c55e',
-  'A-': '#22c55e',
-  'B+': '#3b82f6',
-  'B': '#3b82f6',
-  'B-': '#3b82f6',
+  'A+': '#00D4FF',
+  'A': '#00D4FF',
+  'A-': '#00D4FF',
+  'B+': '#00D4FF',
+  'B': '#00D4FF',
+  'B-': '#00D4FF',
   'C+': '#f59e0b',
   'C': '#f59e0b',
   'C-': '#f59e0b',
-  'D': '#ef4444',
+  'D': '#BC0000',
 }
 
 // Get tier color (handles both NHL and MLB tier names)
@@ -124,7 +124,7 @@ export function ProspectCard({ prospect, selected, teamColor, onClick }: Prospec
           width: 28,
           height: 28,
           borderRadius: '50%',
-          backgroundColor: isTop5 ? '#dc2626' : teamColor,
+          backgroundColor: isTop5 ? '#BC0000' : teamColor,
           color: '#fff',
           display: 'flex',
           alignItems: 'center',
@@ -239,7 +239,7 @@ export function ProspectCard({ prospect, selected, teamColor, onClick }: Prospec
               <span style={{
                 fontSize: 10,
                 fontWeight: 600,
-                color: '#22c55e',
+                color: '#00D4FF',
               }}>
                 ${surplusValue.toFixed(1)}M
               </span>
@@ -323,8 +323,8 @@ export function ProspectCard({ prospect, selected, teamColor, onClick }: Prospec
             fontWeight: 600,
             padding: '2px 8px',
             borderRadius: 4,
-            backgroundColor: tradeValue >= 80 ? '#dc262620' : `${teamColor}20`,
-            color: tradeValue >= 80 ? '#dc2626' : teamColor,
+            backgroundColor: tradeValue >= 80 ? '#BC000020' : `${teamColor}20`,
+            color: tradeValue >= 80 ? '#BC0000' : teamColor,
           }}>
             TV: {tradeValue}
           </span>

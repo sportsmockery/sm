@@ -44,11 +44,11 @@ const sampleSentiments: TeamSentiment[] = [
 ]
 
 const getSentimentColor = (sentiment: number) => {
-  if (sentiment >= 70) return { bg: 'from-emerald-500 to-emerald-400', text: 'text-emerald-500' }
+  if (sentiment >= 70) return { bg: 'from-[#00D4FF] to-[#00D4FF]', text: 'text-[#00D4FF]' }
   if (sentiment >= 40) return { bg: 'from-lime-500 to-lime-400', text: 'text-lime-500' }
   if (sentiment >= 10) return { bg: 'from-yellow-500 to-yellow-400', text: 'text-yellow-500' }
-  if (sentiment >= -20) return { bg: 'from-orange-500 to-orange-400', text: 'text-orange-500' }
-  return { bg: 'from-red-500 to-red-400', text: 'text-red-500' }
+  if (sentiment >= -20) return { bg: 'from-[#BC0000] to-[#BC0000]', text: 'text-[#BC0000]' }
+  return { bg: 'from-red-500 to-red-400', text: 'text-[#BC0000]' }
 }
 
 const getSentimentLabel = (sentiment: number) => {
@@ -143,18 +143,18 @@ export default function SentimentOrb({ sentiments = sampleSentiments, className 
           <div className="mb-3 flex items-center justify-center gap-1 text-sm">
             {currentSentiment.trend === 'up' && (
               <>
-                <svg className="h-4 w-4 text-emerald-500" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
+                <svg className="h-4 w-4 text-[#00D4FF]" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 18L9 11.25l4.306 4.307a11.95 11.95 0 015.814-5.519l2.74-1.22m0 0l-5.94-2.28m5.94 2.28l-2.28 5.941" />
                 </svg>
-                <span className="text-emerald-500">Trending Up</span>
+                <span className="text-[#00D4FF]">Trending Up</span>
               </>
             )}
             {currentSentiment.trend === 'down' && (
               <>
-                <svg className="h-4 w-4 text-red-500" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
+                <svg className="h-4 w-4 text-[#BC0000]" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 6L9 12.75l4.286-4.286a11.948 11.948 0 014.306 6.43l.776 2.898m0 0l3.182-5.511m-3.182 5.51l-5.511-3.181" />
                 </svg>
-                <span className="text-red-500">Trending Down</span>
+                <span className="text-[#BC0000]">Trending Down</span>
               </>
             )}
             {currentSentiment.trend === 'stable' && (

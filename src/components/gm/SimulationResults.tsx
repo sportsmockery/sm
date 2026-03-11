@@ -31,9 +31,9 @@ function formatGameDate(dateStr: string): string {
 
 const ARCHETYPE_COLORS: Record<string, string> = {
   'Franchise Changer': '#FFD700',
-  'Role Player Upgrade': '#3b82f6',
-  'Culture Setter': '#8b5cf6',
-  'Boom-or-Bust': '#f97316',
+  'Role Player Upgrade': '#00D4FF',
+  'Culture Setter': '#D6B05E',
+  'Boom-or-Bust': '#BC0000',
   'Declining Star': '#6b7280',
   'System Player': '#14b8a6',
 }
@@ -156,7 +156,7 @@ export function SimulationResults({
             <p style={{ margin: 0, marginTop: 2, fontSize: 12, color: subText }}>
               {teamName} • {tradeCount} trade{tradeCount !== 1 ? 's' : ''} executed
               {result.simulation_version && (
-                <span style={{ marginLeft: 8, padding: '1px 6px', borderRadius: 4, backgroundColor: isV3AI ? '#22c55e20' : `${borderColor}`, color: isV3AI ? '#22c55e' : subText, fontSize: 10, fontWeight: 600 }}>
+                <span style={{ marginLeft: 8, padding: '1px 6px', borderRadius: 4, backgroundColor: isV3AI ? '#00D4FF20' : `${borderColor}`, color: isV3AI ? '#00D4FF' : subText, fontSize: 10, fontWeight: 600 }}>
                   {result.simulation_version}
                 </span>
               )}
@@ -256,7 +256,7 @@ export function SimulationResults({
                     </div>
                   </div>
 
-                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 24, color: isImprovement ? '#22c55e' : winImprovement < 0 ? '#ef4444' : subText }}>
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 24, color: isImprovement ? '#00D4FF' : winImprovement < 0 ? '#BC0000' : subText }}>
                     →
                   </div>
 
@@ -267,7 +267,7 @@ export function SimulationResults({
                     <div style={{ fontSize: 32, fontWeight: 800, color: textColor, lineHeight: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}>
                       {projectedRecord.wins}-{projectedRecord.losses}
                       {winImprovement !== 0 && (
-                        <span style={{ fontSize: 13, fontWeight: 600, padding: '4px 8px', borderRadius: 6, backgroundColor: isImprovement ? '#22c55e' : '#ef4444', color: '#fff' }}>
+                        <span style={{ fontSize: 13, fontWeight: 600, padding: '4px 8px', borderRadius: 6, backgroundColor: isImprovement ? '#00D4FF' : '#BC0000', color: '#fff' }}>
                           {winImprovement > 0 ? '+' : ''}{winImprovement}W
                         </span>
                       )}
@@ -293,11 +293,11 @@ export function SimulationResults({
                         transition={{ duration: 1, ease: 'easeOut' }}
                         style={{
                           height: '100%', borderRadius: 6,
-                          background: playoffProb >= 70 ? '#22c55e' : playoffProb >= 40 ? '#eab308' : '#ef4444',
+                          background: playoffProb >= 70 ? '#00D4FF' : playoffProb >= 40 ? '#eab308' : '#BC0000',
                         }}
                       />
                     </div>
-                    <div style={{ fontSize: 24, fontWeight: 800, color: playoffProb >= 70 ? '#22c55e' : playoffProb >= 40 ? '#eab308' : '#ef4444' }}>
+                    <div style={{ fontSize: 24, fontWeight: 800, color: playoffProb >= 70 ? '#00D4FF' : playoffProb >= 40 ? '#eab308' : '#BC0000' }}>
                       {playoffProb}%
                     </div>
                   </div>
@@ -314,7 +314,7 @@ export function SimulationResults({
                     <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: 16 }}>
                       <div style={{ textAlign: 'center' }}>
                         <div style={{ fontSize: 10, color: subText }}>Floor (p10)</div>
-                        <div style={{ fontSize: 18, fontWeight: 700, color: '#ef4444' }}>{result.monteCarloResults.confidenceInterval.low}W</div>
+                        <div style={{ fontSize: 18, fontWeight: 700, color: '#BC0000' }}>{result.monteCarloResults.confidenceInterval.low}W</div>
                       </div>
                       <div style={{ textAlign: 'center' }}>
                         <div style={{ fontSize: 10, color: teamColor, fontWeight: 600 }}>Median</div>
@@ -322,7 +322,7 @@ export function SimulationResults({
                       </div>
                       <div style={{ textAlign: 'center' }}>
                         <div style={{ fontSize: 10, color: subText }}>Ceiling (p90)</div>
-                        <div style={{ fontSize: 18, fontWeight: 700, color: '#22c55e' }}>{result.monteCarloResults.confidenceInterval.high}W</div>
+                        <div style={{ fontSize: 18, fontWeight: 700, color: '#00D4FF' }}>{result.monteCarloResults.confidenceInterval.high}W</div>
                       </div>
                     </div>
                     {result.monteCarloResults.divisionWinProbability > 0 && (
@@ -344,21 +344,21 @@ export function SimulationResults({
                     </div>
                     <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 12, marginBottom: 12 }}>
                       <div style={{ textAlign: 'center' }}>
-                        <div style={{ fontSize: 10, color: '#ef4444', fontWeight: 600 }}>Sent</div>
-                        <div style={{ fontSize: 20, fontWeight: 700, color: '#ef4444' }}>{result.tradeImpactDetail.wvsBreakdown.sent.toFixed(1)}</div>
+                        <div style={{ fontSize: 10, color: '#BC0000', fontWeight: 600 }}>Sent</div>
+                        <div style={{ fontSize: 20, fontWeight: 700, color: '#BC0000' }}>{result.tradeImpactDetail.wvsBreakdown.sent.toFixed(1)}</div>
                       </div>
                       <div style={{ textAlign: 'center' }}>
                         <div style={{ fontSize: 10, color: subText }}>WVS Delta</div>
                         <div style={{
                           fontSize: 20, fontWeight: 700,
-                          color: result.tradeImpactDetail.wvsBreakdown.delta > 0 ? '#22c55e' : result.tradeImpactDetail.wvsBreakdown.delta < 0 ? '#ef4444' : subText,
+                          color: result.tradeImpactDetail.wvsBreakdown.delta > 0 ? '#00D4FF' : result.tradeImpactDetail.wvsBreakdown.delta < 0 ? '#BC0000' : subText,
                         }}>
                           {result.tradeImpactDetail.wvsBreakdown.delta > 0 ? '+' : ''}{result.tradeImpactDetail.wvsBreakdown.delta.toFixed(1)}
                         </div>
                       </div>
                       <div style={{ textAlign: 'center' }}>
-                        <div style={{ fontSize: 10, color: '#22c55e', fontWeight: 600 }}>Received</div>
-                        <div style={{ fontSize: 20, fontWeight: 700, color: '#22c55e' }}>{result.tradeImpactDetail.wvsBreakdown.received.toFixed(1)}</div>
+                        <div style={{ fontSize: 10, color: '#00D4FF', fontWeight: 600 }}>Received</div>
+                        <div style={{ fontSize: 20, fontWeight: 700, color: '#00D4FF' }}>{result.tradeImpactDetail.wvsBreakdown.received.toFixed(1)}</div>
                       </div>
                     </div>
 
@@ -373,7 +373,7 @@ export function SimulationResults({
                     )}
 
                     {result.tradeImpactDetail.chicagoMarketBias > 0 && (
-                      <div style={{ fontSize: 12, color: '#3b82f6', marginBottom: 4 }}>
+                      <div style={{ fontSize: 12, color: '#00D4FF', marginBottom: 4 }}>
                         Chicago Market Bonus: +{result.tradeImpactDetail.chicagoMarketBias} wins
                       </div>
                     )}
@@ -404,15 +404,15 @@ export function SimulationResults({
                       <div style={{ fontSize: 10, textTransform: 'uppercase', color: subText, marginBottom: 4 }}>Power Rating</div>
                       <div style={{ fontSize: 20, fontWeight: 700, color: subText }}>{baselinePowerRating}</div>
                     </div>
-                    <div style={{ fontSize: 20, color: modifiedPowerRating > baselinePowerRating ? '#22c55e' : modifiedPowerRating < baselinePowerRating ? '#ef4444' : subText }}>→</div>
+                    <div style={{ fontSize: 20, color: modifiedPowerRating > baselinePowerRating ? '#00D4FF' : modifiedPowerRating < baselinePowerRating ? '#BC0000' : subText }}>→</div>
                     <div style={{ textAlign: 'center' }}>
                       <div style={{ fontSize: 10, textTransform: 'uppercase', color: teamColor, marginBottom: 4 }}>Modified</div>
                       <div style={{ fontSize: 20, fontWeight: 700, color: teamColor }}>{modifiedPowerRating}</div>
                     </div>
                     <div style={{
                       fontSize: 13, fontWeight: 600, padding: '4px 10px', borderRadius: 6,
-                      backgroundColor: modifiedPowerRating > baselinePowerRating ? '#22c55e20' : modifiedPowerRating < baselinePowerRating ? '#ef444420' : `${borderColor}`,
-                      color: modifiedPowerRating > baselinePowerRating ? '#22c55e' : modifiedPowerRating < baselinePowerRating ? '#ef4444' : subText,
+                      backgroundColor: modifiedPowerRating > baselinePowerRating ? '#00D4FF20' : modifiedPowerRating < baselinePowerRating ? '#BC000020' : `${borderColor}`,
+                      color: modifiedPowerRating > baselinePowerRating ? '#00D4FF' : modifiedPowerRating < baselinePowerRating ? '#BC0000' : subText,
                     }}>
                       {modifiedPowerRating > baselinePowerRating ? '+' : ''}{(modifiedPowerRating - baselinePowerRating).toFixed(1)}
                     </div>
@@ -431,8 +431,8 @@ export function SimulationResults({
                       {result.keyPlayerImpacts.map((pi, idx) => (
                         <div key={idx} style={{
                           padding: '10px 12px', borderRadius: 8,
-                          backgroundColor: pi.direction === 'added' ? (isDark ? '#22c55e08' : '#22c55e06') : (isDark ? '#ef444408' : '#ef444406'),
-                          borderLeft: `3px solid ${pi.direction === 'added' ? '#22c55e' : '#ef4444'}`,
+                          backgroundColor: pi.direction === 'added' ? (isDark ? '#00D4FF08' : '#00D4FF06') : (isDark ? '#BC000008' : '#BC000006'),
+                          borderLeft: `3px solid ${pi.direction === 'added' ? '#00D4FF' : '#BC0000'}`,
                         }}>
                           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 4 }}>
                             <span style={{ fontSize: 14, fontWeight: 600, color: textColor }}>{pi.playerName}</span>
@@ -463,8 +463,8 @@ export function SimulationResults({
                         <div key={idx} style={{
                           display: 'flex', justifyContent: 'space-between', alignItems: 'center',
                           padding: '6px 10px', borderRadius: 6,
-                          backgroundColor: pi.direction === 'added' ? '#22c55e10' : '#ef444410',
-                          borderLeft: `3px solid ${pi.direction === 'added' ? '#22c55e' : '#ef4444'}`,
+                          backgroundColor: pi.direction === 'added' ? '#00D4FF10' : '#BC000010',
+                          borderLeft: `3px solid ${pi.direction === 'added' ? '#00D4FF' : '#BC0000'}`,
                         }}>
                           <div>
                             <span style={{ fontSize: 13, fontWeight: 600, color: textColor }}>{pi.playerName}</span>
@@ -472,7 +472,7 @@ export function SimulationResults({
                           </div>
                           <span style={{
                             fontSize: 13, fontWeight: 700,
-                            color: pi.powerRatingDelta > 0 ? '#22c55e' : '#ef4444',
+                            color: pi.powerRatingDelta > 0 ? '#00D4FF' : '#BC0000',
                           }}>
                             {pi.powerRatingDelta > 0 ? '+' : ''}{pi.powerRatingDelta}
                           </span>
@@ -591,12 +591,12 @@ export function SimulationResults({
                           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
                             <span style={{
                               padding: '3px 10px', borderRadius: 6, fontSize: 11, fontWeight: 700,
-                              backgroundColor: trade.netImpact === 'positive' ? '#22c55e20' : trade.netImpact === 'negative' ? '#ef444420' : (isDark ? '#374151' : '#e5e7eb'),
-                              color: trade.netImpact === 'positive' ? '#22c55e' : trade.netImpact === 'negative' ? '#ef4444' : subText,
+                              backgroundColor: trade.netImpact === 'positive' ? '#00D4FF20' : trade.netImpact === 'negative' ? '#BC000020' : (isDark ? '#374151' : '#e5e7eb'),
+                              color: trade.netImpact === 'positive' ? '#00D4FF' : trade.netImpact === 'negative' ? '#BC0000' : subText,
                             }}>
                               {trade.netImpact.toUpperCase()}
                             </span>
-                            <span style={{ fontSize: 13, fontWeight: 600, color: trade.winsAdded > 0 ? '#22c55e' : '#ef4444' }}>
+                            <span style={{ fontSize: 13, fontWeight: 600, color: trade.winsAdded > 0 ? '#00D4FF' : '#BC0000' }}>
                               {trade.winsAdded > 0 ? '+' : ''}{trade.winsAdded.toFixed(1)} wins
                             </span>
                           </div>
@@ -630,8 +630,8 @@ export function SimulationResults({
                     <div style={{ display: 'flex', gap: 8, marginBottom: 12, alignItems: 'center' }}>
                       <span style={{
                         padding: '4px 12px', borderRadius: 20, fontSize: 12, fontWeight: 700,
-                        backgroundColor: result.rosterAssessment.overallChange === 'improved' ? '#22c55e20' : result.rosterAssessment.overallChange === 'declined' ? '#ef444420' : '#eab30820',
-                        color: result.rosterAssessment.overallChange === 'improved' ? '#22c55e' : result.rosterAssessment.overallChange === 'declined' ? '#ef4444' : '#eab308',
+                        backgroundColor: result.rosterAssessment.overallChange === 'improved' ? '#00D4FF20' : result.rosterAssessment.overallChange === 'declined' ? '#BC000020' : '#eab30820',
+                        color: result.rosterAssessment.overallChange === 'improved' ? '#00D4FF' : result.rosterAssessment.overallChange === 'declined' ? '#BC0000' : '#eab308',
                       }}>
                         Roster {result.rosterAssessment.overallChange}
                       </span>
@@ -644,18 +644,18 @@ export function SimulationResults({
                     </p>
                     <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
                       <div>
-                        <div style={{ fontSize: 10, textTransform: 'uppercase', color: '#22c55e', marginBottom: 6, fontWeight: 600 }}>Strengths Gained</div>
+                        <div style={{ fontSize: 10, textTransform: 'uppercase', color: '#00D4FF', marginBottom: 6, fontWeight: 600 }}>Strengths Gained</div>
                         <div style={{ display: 'flex', flexWrap: 'wrap', gap: 4 }}>
                           {result.rosterAssessment.strengthsGained.map((s, i) => (
-                            <span key={i} style={{ backgroundColor: '#22c55e15', color: '#22c55e', fontSize: 11, padding: '3px 8px', borderRadius: 6 }}>{s}</span>
+                            <span key={i} style={{ backgroundColor: '#00D4FF15', color: '#00D4FF', fontSize: 11, padding: '3px 8px', borderRadius: 6 }}>{s}</span>
                           ))}
                         </div>
                       </div>
                       <div>
-                        <div style={{ fontSize: 10, textTransform: 'uppercase', color: '#ef4444', marginBottom: 6, fontWeight: 600 }}>Weaknesses Created</div>
+                        <div style={{ fontSize: 10, textTransform: 'uppercase', color: '#BC0000', marginBottom: 6, fontWeight: 600 }}>Weaknesses Created</div>
                         <div style={{ display: 'flex', flexWrap: 'wrap', gap: 4 }}>
                           {result.rosterAssessment.weaknessesCreated.map((w, i) => (
-                            <span key={i} style={{ backgroundColor: '#ef444415', color: '#ef4444', fontSize: 11, padding: '3px 8px', borderRadius: 6 }}>{w}</span>
+                            <span key={i} style={{ backgroundColor: '#BC000015', color: '#BC0000', fontSize: 11, padding: '3px 8px', borderRadius: 6 }}>{w}</span>
                           ))}
                         </div>
                       </div>
@@ -777,8 +777,8 @@ export function SimulationResults({
                               <div style={{
                                 display: 'grid', gridTemplateColumns: '32px 56px 1fr 40px 60px 56px',
                                 gap: 6, padding: '6px 8px', borderRadius: 6, alignItems: 'center',
-                                backgroundColor: g.result === 'W' ? '#22c55e08' : g.result === 'OTL' ? '#eab30808' : '#ef444408',
-                                borderLeft: `3px solid ${g.result === 'W' ? '#22c55e' : g.result === 'OTL' ? '#eab308' : '#ef4444'}`,
+                                backgroundColor: g.result === 'W' ? '#00D4FF08' : g.result === 'OTL' ? '#eab30808' : '#BC000008',
+                                borderLeft: `3px solid ${g.result === 'W' ? '#00D4FF' : g.result === 'OTL' ? '#eab308' : '#BC0000'}`,
                               }}>
                                 <span style={{ fontSize: 11, color: subText }}>{g.gameNumber}</span>
                                 <span style={{ fontSize: 11, color: subText }}>{formatGameDate(g.date)}</span>
@@ -793,7 +793,7 @@ export function SimulationResults({
                                 <div style={{ textAlign: 'center' }}>
                                   <span style={{
                                     fontSize: 12, fontWeight: 700,
-                                    color: g.result === 'W' ? '#22c55e' : g.result === 'OTL' ? '#eab308' : '#ef4444',
+                                    color: g.result === 'W' ? '#00D4FF' : g.result === 'OTL' ? '#eab308' : '#BC0000',
                                   }}>
                                     {g.result}{g.isOvertime ? '/OT' : ''} {g.teamScore}-{g.opponentScore}
                                   </span>
@@ -856,7 +856,7 @@ export function SimulationResults({
                               border: isUser ? `2px solid ${teamColor}` : 'none',
                             }}
                           >
-                            <span style={{ fontSize: 12, fontWeight: 600, color: idx < 7 ? '#22c55e' : subText }}>
+                            <span style={{ fontSize: 12, fontWeight: 600, color: idx < 7 ? '#00D4FF' : subText }}>
                               {entry.rank || idx + 1}
                             </span>
                             <span style={{ fontSize: 12, fontWeight: isUser ? 700 : 500, color: isUser ? teamColor : textColor, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
@@ -903,11 +903,11 @@ export function SimulationResults({
                                 gap: 8,
                                 padding: '8px',
                                 borderRadius: 6,
-                                backgroundColor: team.isUserTeam ? `${teamColor}20` : team.isTradePartner ? '#ef444420' : idx < 7 ? (isDark ? '#1f2937' : '#fff') : 'transparent',
-                                border: team.isUserTeam ? `2px solid ${teamColor}` : team.isTradePartner ? '2px solid #ef4444' : 'none',
+                                backgroundColor: team.isUserTeam ? `${teamColor}20` : team.isTradePartner ? '#BC000020' : idx < 7 ? (isDark ? '#1f2937' : '#fff') : 'transparent',
+                                border: team.isUserTeam ? `2px solid ${teamColor}` : team.isTradePartner ? '2px solid #BC0000' : 'none',
                               }}
                             >
-                              <span style={{ fontSize: 12, fontWeight: 600, color: team.playoffSeed ? '#22c55e' : subText }}>
+                              <span style={{ fontSize: 12, fontWeight: 600, color: team.playoffSeed ? '#00D4FF' : subText }}>
                                 {team.conferenceRank}
                               </span>
                               <div style={{ display: 'flex', alignItems: 'center', gap: 6, overflow: 'hidden' }}>
@@ -921,7 +921,7 @@ export function SimulationResults({
                                   {team.abbreviation}
                                 </span>
                                 {team.tradeImpact !== undefined && team.tradeImpact !== 0 && (
-                                  <span style={{ fontSize: 10, padding: '1px 4px', borderRadius: 4, backgroundColor: team.tradeImpact > 0 ? '#22c55e20' : '#ef444420', color: team.tradeImpact > 0 ? '#22c55e' : '#ef4444' }}>
+                                  <span style={{ fontSize: 10, padding: '1px 4px', borderRadius: 4, backgroundColor: team.tradeImpact > 0 ? '#00D4FF20' : '#BC000020', color: team.tradeImpact > 0 ? '#00D4FF' : '#BC0000' }}>
                                     {team.tradeImpact > 0 ? '+' : ''}{team.tradeImpact}
                                   </span>
                                 )}
@@ -1033,7 +1033,7 @@ export function SimulationResults({
                                         {match.homeTeam.abbreviation}
                                       </span>
                                     </div>
-                                    <span style={{ fontSize: 14, fontWeight: 700, color: match.winner === 'home' ? '#22c55e' : textColor }}>
+                                    <span style={{ fontSize: 14, fontWeight: 700, color: match.winner === 'home' ? '#00D4FF' : textColor }}>
                                       {match.seriesWins[0]}
                                     </span>
                                   </div>
@@ -1052,7 +1052,7 @@ export function SimulationResults({
                                         {match.awayTeam.abbreviation}
                                       </span>
                                     </div>
-                                    <span style={{ fontSize: 14, fontWeight: 700, color: match.winner === 'away' ? '#22c55e' : textColor }}>
+                                    <span style={{ fontSize: 14, fontWeight: 700, color: match.winner === 'away' ? '#00D4FF' : textColor }}>
                                       {match.seriesWins[1]}
                                     </span>
                                   </div>
@@ -1124,8 +1124,8 @@ export function SimulationResults({
                     {winImprovement !== 0 && (
                       <div style={{
                         fontSize: 14, fontWeight: 700, padding: '4px 10px', borderRadius: 6,
-                        backgroundColor: isImprovement ? '#22c55e20' : '#ef444420',
-                        color: isImprovement ? '#22c55e' : '#ef4444',
+                        backgroundColor: isImprovement ? '#00D4FF20' : '#BC000020',
+                        color: isImprovement ? '#00D4FF' : '#BC0000',
                       }}>
                         {winImprovement > 0 ? '+' : ''}{winImprovement}W
                       </div>
@@ -1221,10 +1221,10 @@ export function SimulationResults({
                             <div
                               key={idx}
                               style={{
-                                padding: '12px 14px', borderRadius: 8, backgroundColor: '#ef444410', border: '1px solid #ef444430',
+                                padding: '12px 14px', borderRadius: 8, backgroundColor: '#BC000010', border: '1px solid #BC000030',
                               }}
                             >
-                              <div style={{ fontSize: 13, fontWeight: 600, color: '#ef4444', marginBottom: 4 }}>
+                              <div style={{ fontSize: 13, fontWeight: 600, color: '#BC0000', marginBottom: 4 }}>
                                 {team.teamName}
                               </div>
                               <div style={{ fontSize: 12, color: subText }}>

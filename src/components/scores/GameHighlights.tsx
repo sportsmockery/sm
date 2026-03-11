@@ -62,7 +62,7 @@ const CHICAGO_CHANNELS_BY_SPORT: Record<string, ChannelInfo[]> = {
       channelId: 'UCHx2i3M5M5nqVsyh8YsXhug',
       description: 'Daily Bulls podcast & analysis',
       url: 'https://www.youtube.com/@LockedOnBulls',
-      color: '#000000',
+      color: '#0B0F14',
     },
   ],
   nhl: [
@@ -80,7 +80,7 @@ const CHICAGO_CHANNELS_BY_SPORT: Record<string, ChannelInfo[]> = {
       channelId: 'UCyf8VXvLQMxtQrxrxZZR_Qg',
       description: 'Blackhawks fan podcast & content',
       url: 'https://www.youtube.com/@committedindians',
-      color: '#000000',
+      color: '#0B0F14',
     },
     {
       id: 'blackhawks-talk',

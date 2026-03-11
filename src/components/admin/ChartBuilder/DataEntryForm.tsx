@@ -101,7 +101,7 @@ export default function DataEntryForm({ data, onChange, chartType }: DataEntryFo
             <button
               onClick={() => removeRow(index)}
               disabled={data.length <= 2}
-              className="rounded-lg p-2 text-zinc-500 hover:bg-zinc-800 hover:text-red-400 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+              className="rounded-lg p-2 text-zinc-500 hover:bg-zinc-800 hover:text-[#BC0000] disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
               title="Remove row"
             >
               <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">

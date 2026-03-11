@@ -130,7 +130,7 @@ export default function TrendsSidebar({ selectedTeam }: TrendsSidebarProps) {
           <p style={{ fontSize: 14, color: 'var(--hp-muted-foreground)', margin: 0 }}>AI-powered sports analysis</p>
         </div>
         <span className="flex items-center gap-1.5" style={{ fontSize: 10, color: '#16a34a', fontWeight: 500 }}>
-          <span className="w-1.5 h-1.5 rounded-full animate-pulse" style={{ background: '#22c55e' }} />
+          <span className="w-1.5 h-1.5 rounded-full animate-pulse" style={{ background: '#00D4FF' }} />
           Online
         </span>
       </button>

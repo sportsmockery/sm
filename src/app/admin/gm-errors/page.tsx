@@ -25,9 +25,9 @@ interface ErrorStats {
 }
 
 const SOURCE_COLORS: Record<string, string> = {
-  frontend: '#3b82f6',
-  backend: '#ef4444',
-  cron: '#8b5cf6',
+  frontend: '#00D4FF',
+  backend: '#BC0000',
+  cron: '#D6B05E',
   ai: '#eab308',
   audit: '#06b6d4',
 }
@@ -156,7 +156,7 @@ export default function GmErrorsPage() {
             borderBottom: activeTab === 'gm' ? '2px solid #bc0000' : 'none',
           }}
         >
-          Trade Simulator {errorCount > 0 && <span style={{ marginLeft: 6, backgroundColor: '#ef4444', color: '#fff', padding: '2px 6px', borderRadius: 10, fontSize: '11px' }}>{errorCount}</span>}
+          Trade Simulator {errorCount > 0 && <span style={{ marginLeft: 6, backgroundColor: '#BC0000', color: '#fff', padding: '2px 6px', borderRadius: 10, fontSize: '11px' }}>{errorCount}</span>}
         </button>
         <button
           onClick={() => setActiveTab('draft')}
@@ -168,22 +168,22 @@ export default function GmErrorsPage() {
             borderBottom: activeTab === 'draft' ? '2px solid #bc0000' : 'none',
           }}
         >
-          Mock Draft {draftErrorCount > 0 && <span style={{ marginLeft: 6, backgroundColor: '#ef4444', color: '#fff', padding: '2px 6px', borderRadius: 10, fontSize: '11px' }}>{draftErrorCount}</span>}
+          Mock Draft {draftErrorCount > 0 && <span style={{ marginLeft: 6, backgroundColor: '#BC0000', color: '#fff', padding: '2px 6px', borderRadius: 10, fontSize: '11px' }}>{draftErrorCount}</span>}
         </button>
       </div>
 
       {/* Summary cards */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: 12, marginBottom: 16 }}>
         <SummaryCard label="Total Logs" value={currentStats?.total || currentErrors.length} color="#6b7280" />
-        <SummaryCard label="Unresolved" value={currentStats?.unresolved || 0} color="#ef4444" />
-        <SummaryCard label="Auto-Resolved" value={currentStats?.resolved || 0} color="#22c55e" />
+        <SummaryCard label="Unresolved" value={currentStats?.unresolved || 0} color="#BC0000" />
+        <SummaryCard label="Auto-Resolved" value={currentStats?.resolved || 0} color="#00D4FF" />
         {activeTab === 'gm' && (
           <>
-            <SummaryCard label="Cron Runs" value={cronResults.length} color="#8b5cf6" />
+            <SummaryCard label="Cron Runs" value={cronResults.length} color="#D6B05E" />
             <SummaryCard
               label="Last Cron"
               value={cronResults.length > 0 ? new Date(cronResults[0].created_at).toLocaleTimeString() : '—'}
-              color="#22c55e"
+              color="#00D4FF"
               isText
             />
           </>
@@ -289,7 +289,7 @@ export default function GmErrorsPage() {
                   {isResolved && (
                     <span style={{
                       fontSize: '10px', fontWeight: 700, padding: '2px 8px', borderRadius: 6,
-                      backgroundColor: '#22c55e15', color: '#22c55e',
+                      backgroundColor: '#00D4FF15', color: '#00D4FF',
                       flexShrink: 0,
                     }}>
                       ✓ RESOLVED
@@ -306,8 +306,8 @@ export default function GmErrorsPage() {
                   {/* Type badge */}
                   <span style={{
                     fontSize: '10px', fontWeight: 600, padding: '2px 8px', borderRadius: 6,
-                    backgroundColor: isError ? '#ef444415' : '#22c55e15',
-                    color: isError ? '#ef4444' : '#22c55e',
+                    backgroundColor: isError ? '#BC000015' : '#00D4FF15',
+                    color: isError ? '#BC0000' : '#00D4FF',
                     flexShrink: 0,
                   }}>
                     {err.error_type}
@@ -316,7 +316,7 @@ export default function GmErrorsPage() {
                   {err.sport && (
                     <span style={{
                       fontSize: '10px', fontWeight: 600, padding: '2px 8px', borderRadius: 6,
-                      backgroundColor: '#3b82f615', color: '#3b82f6',
+                      backgroundColor: '#00D4FF15', color: '#00D4FF',
                       flexShrink: 0, textTransform: 'uppercase',
                     }}>
                       {err.sport}
@@ -346,7 +346,7 @@ export default function GmErrorsPage() {
                       <strong>Message:</strong> {err.error_message}
                     </div>
                     {err.resolved_at && (
-                      <div style={{ fontSize: '11px', color: '#22c55e', marginTop: 4 }}>
+                      <div style={{ fontSize: '11px', color: '#00D4FF', marginTop: 4 }}>
                         Resolved at: {new Date(err.resolved_at).toLocaleString()}
                       </div>
                     )}

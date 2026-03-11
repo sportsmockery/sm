@@ -200,17 +200,17 @@ export default function AdminPagesListPage() {
                       {/* Badges */}
                       <div className="flex items-center gap-2 shrink-0">
                         {page.dataSources.length > 0 && (
-                          <span className="text-[10px] px-1.5 py-0.5 rounded bg-blue-500/10 text-blue-400">
+                          <span className="text-[10px] px-1.5 py-0.5 rounded bg-[#00D4FF]/10 text-[#00D4FF]">
                             {page.dataSources.length} data
                           </span>
                         )}
                         {page.cronJobs.length > 0 && (
-                          <span className="text-[10px] px-1.5 py-0.5 rounded bg-green-500/10 text-green-400">
+                          <span className="text-[10px] px-1.5 py-0.5 rounded bg-[#00D4FF]/10 text-[#00D4FF]">
                             {page.cronJobs.length} cron
                           </span>
                         )}
                         {page.requiresAdmin && (
-                          <span className="text-[10px] px-1.5 py-0.5 rounded bg-red-500/10 text-red-400">
+                          <span className="text-[10px] px-1.5 py-0.5 rounded bg-red-500/10 text-[#BC0000]">
                             admin
                           </span>
                         )}
@@ -220,7 +220,7 @@ export default function AdminPagesListPage() {
                           </span>
                         )}
                         {page.isDynamic && (
-                          <span className="text-[10px] px-1.5 py-0.5 rounded bg-purple-500/10 text-purple-400">
+                          <span className="text-[10px] px-1.5 py-0.5 rounded bg-[#D6B05E]/10 text-[#D6B05E]">
                             dynamic
                           </span>
                         )}

@@ -88,7 +88,7 @@ export default function ChartEmbed({ id, mode, className = '' }: ChartEmbedProps
 
   const themeOptions = {
     ...baseOptions,
-    backgroundColor: mode === 'dark' ? '#000000' : '#ffffff',
+    backgroundColor: mode === 'dark' ? '#0B0F14' : '#FAFAFB',
   }
 
   const seoSchema = seo.schema ? JSON.stringify(seo.schema) : null

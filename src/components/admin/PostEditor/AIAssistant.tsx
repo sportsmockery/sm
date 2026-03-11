@@ -180,7 +180,7 @@ export default function AIAssistant({
     <div className="rounded-lg border border-zinc-200 bg-white dark:border-zinc-800 dark:bg-zinc-900">
       <div className="border-b border-zinc-200 dark:border-zinc-800">
         <div className="flex items-center gap-2 px-4 py-3">
-          <svg className="h-5 w-5 text-purple-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <svg className="h-5 w-5 text-[#D6B05E]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
           </svg>
           <span className="font-semibold text-zinc-900 dark:text-zinc-100">AI Assistant</span>
@@ -198,7 +198,7 @@ export default function AIAssistant({
               onClick={() => setActiveTab(tab.key as typeof activeTab)}
               className={`flex-1 px-4 py-2 text-sm font-medium transition-colors ${
                 activeTab === tab.key
-                  ? 'border-b-2 border-purple-500 text-purple-600 dark:text-purple-400'
+                  ? 'border-b-2 border-[#D6B05E] text-[#D6B05E] dark:text-[#D6B05E]'
                   : 'text-zinc-500 hover:text-zinc-700 dark:text-zinc-400 dark:hover:text-zinc-300'
               }`}
             >
@@ -210,7 +210,7 @@ export default function AIAssistant({
 
       <div className="p-4">
         {error && (
-          <div className="mb-4 rounded-lg bg-red-50 p-3 text-sm text-red-600 dark:bg-red-900/30 dark:text-red-400">
+          <div className="mb-4 rounded-lg bg-red-50 p-3 text-sm text-[#BC0000] dark:bg-[#BC0000]/30 dark:text-[#BC0000]">
             {error}
           </div>
         )}
@@ -223,7 +223,7 @@ export default function AIAssistant({
             <button
               onClick={generateHeadlines}
               disabled={loading || !title}
-              className="w-full rounded-lg bg-purple-600 px-4 py-2 text-sm font-medium text-white hover:bg-purple-700 disabled:opacity-50"
+              className="w-full rounded-lg bg-[#D6B05E] px-4 py-2 text-sm font-medium text-white hover:bg-[#D6B05E] disabled:opacity-50"
             >
               {loading ? 'Generating...' : 'Generate Headlines'}
             </button>
@@ -233,7 +233,7 @@ export default function AIAssistant({
                   <button
                     key={index}
                     onClick={() => onHeadlineSelect(headline)}
-                    className="w-full rounded-lg border border-zinc-200 p-3 text-left text-sm text-zinc-900 transition-colors hover:border-purple-300 hover:bg-purple-50 dark:border-zinc-700 dark:text-zinc-100 dark:hover:border-purple-700 dark:hover:bg-purple-900/20"
+                    className="w-full rounded-lg border border-zinc-200 p-3 text-left text-sm text-zinc-900 transition-colors hover:border-[#D6B05E] hover:bg-[#D6B05E]/10 dark:border-zinc-700 dark:text-zinc-100 dark:hover:border-[#D6B05E] dark:hover:bg-[#D6B05E]/20"
                   >
                     {headline}
                   </button>
@@ -252,14 +252,14 @@ export default function AIAssistant({
               <button
                 onClick={optimizeSEO}
                 disabled={loading || !content}
-                className="flex-1 rounded-lg bg-purple-600 px-4 py-2 text-sm font-medium text-white hover:bg-purple-700 disabled:opacity-50"
+                className="flex-1 rounded-lg bg-[#D6B05E] px-4 py-2 text-sm font-medium text-white hover:bg-[#D6B05E] disabled:opacity-50"
               >
                 {loading ? 'Analyzing...' : 'Analyze SEO'}
               </button>
               <button
                 onClick={generateExcerpt}
                 disabled={loading || !content}
-                className="rounded-lg border border-purple-300 px-4 py-2 text-sm font-medium text-purple-600 hover:bg-purple-50 disabled:opacity-50 dark:border-purple-700 dark:text-purple-400 dark:hover:bg-purple-900/20"
+                className="rounded-lg border border-[#D6B05E] px-4 py-2 text-sm font-medium text-[#D6B05E] hover:bg-[#D6B05E]/10 disabled:opacity-50 dark:border-purple-700 dark:text-[#D6B05E] dark:hover:bg-[#D6B05E]/20"
               >
                 Auto Excerpt
               </button>
@@ -299,7 +299,7 @@ export default function AIAssistant({
                       Keywords
                     </label>
                     <div className="mt-1 flex flex-wrap gap-1">
-                      <span className="rounded-full bg-purple-100 px-2 py-0.5 text-xs font-medium text-purple-700 dark:bg-purple-900/40 dark:text-purple-300">
+                      <span className="rounded-full bg-[#D6B05E]/10 px-2 py-0.5 text-xs font-medium text-[#D6B05E] dark:bg-[#D6B05E]/40 dark:text-[#D6B05E]">
                         {seoResult.focusKeyword}
                       </span>
                       {seoResult.secondaryKeywords.map((kw, i) => (
@@ -328,7 +328,7 @@ export default function AIAssistant({
 
                 <button
                   onClick={applySEO}
-                  className="w-full rounded-lg bg-green-600 px-4 py-2 text-sm font-medium text-white hover:bg-green-700"
+                  className="w-full rounded-lg bg-[#00D4FF] px-4 py-2 text-sm font-medium text-white hover:bg-[#00D4FF]"
                 >
                   Apply SEO Suggestions
                 </button>
@@ -345,7 +345,7 @@ export default function AIAssistant({
             <button
               onClick={generateIdeas}
               disabled={loading}
-              className="w-full rounded-lg bg-purple-600 px-4 py-2 text-sm font-medium text-white hover:bg-purple-700 disabled:opacity-50"
+              className="w-full rounded-lg bg-[#D6B05E] px-4 py-2 text-sm font-medium text-white hover:bg-[#D6B05E] disabled:opacity-50"
             >
               {loading ? 'Generating...' : 'Generate Ideas'}
             </button>
@@ -361,9 +361,9 @@ export default function AIAssistant({
                         {idea.headline}
                       </h4>
                       <span className={`rounded-full px-2 py-0.5 text-xs font-medium ${
-                        idea.type === 'satire' ? 'bg-pink-100 text-pink-700 dark:bg-pink-900/40 dark:text-pink-300' :
-                        idea.type === 'opinion' ? 'bg-orange-100 text-orange-700 dark:bg-orange-900/40 dark:text-orange-300' :
-                        idea.type === 'analysis' ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-300' :
+                        idea.type === 'satire' ? 'bg-[#BC0000]/10 text-[#BC0000] dark:bg-[#BC0000]/40 dark:text-[#BC0000]' :
+                        idea.type === 'opinion' ? 'bg-[#BC0000]/10 text-[#BC0000] dark:bg-[#BC0000]/40 dark:text-[#BC0000]' :
+                        idea.type === 'analysis' ? 'bg-[#00D4FF]/10 text-[#00D4FF] dark:bg-[#00D4FF]/40 dark:text-[#00D4FF]' :
                         'bg-zinc-100 text-zinc-700 dark:bg-zinc-800 dark:text-zinc-300'
                       }`}>
                         {idea.type}
@@ -372,7 +372,7 @@ export default function AIAssistant({
                     <p className="mt-1 text-sm text-zinc-600 dark:text-zinc-400">{idea.angle}</p>
                     <button
                       onClick={() => onHeadlineSelect(idea.headline)}
-                      className="mt-2 text-sm font-medium text-purple-600 hover:text-purple-700 dark:text-purple-400"
+                      className="mt-2 text-sm font-medium text-[#D6B05E] hover:text-[#D6B05E] dark:text-[#D6B05E]"
                     >
                       Use this headline →
                     </button>
@@ -391,16 +391,16 @@ export default function AIAssistant({
             <button
               onClick={checkGrammar}
               disabled={loading || !content}
-              className="w-full rounded-lg bg-purple-600 px-4 py-2 text-sm font-medium text-white hover:bg-purple-700 disabled:opacity-50"
+              className="w-full rounded-lg bg-[#D6B05E] px-4 py-2 text-sm font-medium text-white hover:bg-[#D6B05E] disabled:opacity-50"
             >
               {loading ? 'Checking...' : 'Check Grammar'}
             </button>
 
             {grammarResult && (
               <div className="space-y-4">
-                <div className={`rounded-lg p-4 ${grammarResult.issueCount === 0 ? 'bg-green-50 dark:bg-green-900/30' : 'bg-yellow-50 dark:bg-yellow-900/30'}`}>
+                <div className={`rounded-lg p-4 ${grammarResult.issueCount === 0 ? 'bg-[#00D4FF]/10 dark:bg-[#00D4FF]/30' : 'bg-yellow-50 dark:bg-yellow-900/30'}`}>
                   <div className="flex items-center justify-between">
-                    <span className={`font-semibold ${grammarResult.issueCount === 0 ? 'text-green-700 dark:text-green-300' : 'text-yellow-700 dark:text-yellow-300'}`}>
+                    <span className={`font-semibold ${grammarResult.issueCount === 0 ? 'text-[#00D4FF] dark:text-[#00D4FF]' : 'text-yellow-700 dark:text-yellow-300'}`}>
                       {grammarResult.issueCount === 0 ? 'No issues found!' : `${grammarResult.issueCount} issue${grammarResult.issueCount > 1 ? 's' : ''} found`}
                     </span>
                   </div>
@@ -414,9 +414,9 @@ export default function AIAssistant({
                     {grammarResult.issues.map((issue, i) => (
                       <div key={i} className="rounded border border-zinc-200 p-3 dark:border-zinc-700">
                         <div className="flex items-start gap-2">
-                          <span className="text-red-500 line-through text-sm">{issue.original}</span>
+                          <span className="text-[#BC0000] line-through text-sm">{issue.original}</span>
                           <span className="text-zinc-400">→</span>
-                          <span className="text-green-600 dark:text-green-400 text-sm">{issue.corrected}</span>
+                          <span className="text-[#00D4FF] dark:text-[#00D4FF] text-sm">{issue.corrected}</span>
                         </div>
                         <p className="mt-1 text-xs text-zinc-500 dark:text-zinc-400">{issue.explanation}</p>
                       </div>
@@ -427,7 +427,7 @@ export default function AIAssistant({
                 {grammarResult.issueCount > 0 && (
                   <button
                     onClick={applyGrammarFix}
-                    className="w-full rounded-lg bg-green-600 px-4 py-2 text-sm font-medium text-white hover:bg-green-700"
+                    className="w-full rounded-lg bg-[#00D4FF] px-4 py-2 text-sm font-medium text-white hover:bg-[#00D4FF]"
                   >
                     Apply All Corrections
                   </button>
@@ -445,7 +445,7 @@ export default function AIAssistant({
             <button
               onClick={generatePoll}
               disabled={loading || !content}
-              className="w-full rounded-lg bg-purple-600 px-4 py-2 text-sm font-medium text-white hover:bg-purple-700 disabled:opacity-50"
+              className="w-full rounded-lg bg-[#D6B05E] px-4 py-2 text-sm font-medium text-white hover:bg-[#D6B05E] disabled:opacity-50"
             >
               {loading ? 'Generating Poll...' : 'Generate Poll'}
             </button>
@@ -455,13 +455,13 @@ export default function AIAssistant({
                 {pollResult.success ? (
                   <>
                     {/* Poll Preview */}
-                    <div className="rounded-lg border border-purple-200 bg-purple-50 p-4 dark:border-purple-800 dark:bg-purple-900/30">
+                    <div className="rounded-lg border border-[#D6B05E]/30 bg-[#D6B05E]/10 p-4 dark:border-[#D6B05E] dark:bg-[#D6B05E]/30">
                       <div className="flex items-center justify-between mb-3">
-                        <span className="text-xs font-medium uppercase text-purple-600 dark:text-purple-400">
+                        <span className="text-xs font-medium uppercase text-[#D6B05E] dark:text-[#D6B05E]">
                           Poll Preview
                         </span>
                         {pollResult.confidence && (
-                          <span className="text-xs text-purple-500">
+                          <span className="text-xs text-[#D6B05E]">
                             {Math.round(pollResult.confidence * 100)}% confidence
                           </span>
                         )}
@@ -475,7 +475,7 @@ export default function AIAssistant({
                             key={i}
                             className="flex items-center gap-3 rounded-lg border border-zinc-200 bg-white p-3 dark:border-zinc-700 dark:bg-zinc-800"
                           >
-                            <div className="h-4 w-4 rounded-full border-2 border-purple-500" />
+                            <div className="h-4 w-4 rounded-full border-2 border-[#D6B05E]" />
                             <span className="text-sm text-zinc-700 dark:text-zinc-300">{option}</span>
                           </div>
                         ))}
@@ -491,7 +491,7 @@ export default function AIAssistant({
                     {onPollInsert && (
                       <button
                         onClick={applyPoll}
-                        className="w-full rounded-lg bg-green-600 px-4 py-2 text-sm font-medium text-white hover:bg-green-700"
+                        className="w-full rounded-lg bg-[#00D4FF] px-4 py-2 text-sm font-medium text-white hover:bg-[#00D4FF]"
                       >
                         Insert Poll into Article
                       </button>

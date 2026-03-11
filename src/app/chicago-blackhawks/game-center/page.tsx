@@ -182,7 +182,7 @@ export default async function BlackhawksGameCenterPage() {
                       fontSize: '14px',
                       backgroundColor:
                         lastGame.result === 'W' ? 'rgba(34,197,94,0.15)' : 'rgba(239,68,68,0.15)',
-                      color: lastGame.result === 'W' ? 'var(--sm-success, #22c55e)' : 'var(--sm-error, #ef4444)',
+                      color: lastGame.result === 'W' ? 'var(--sm-success, #00D4FF)' : 'var(--sm-error, #BC0000)',
                     }}
                   >
                     {lastGame.result}
@@ -421,9 +421,9 @@ function GameRow({ game }: { game: BlackhawksGame }) {
                   game.result === 'OTL' ? 'rgba(249,115,22,0.15)' :
                   'rgba(239,68,68,0.15)',
                 color:
-                  game.result === 'W' ? 'var(--sm-success, #22c55e)' :
-                  game.result === 'OTL' ? '#f97316' :
-                  'var(--sm-error, #ef4444)',
+                  game.result === 'W' ? 'var(--sm-success, #00D4FF)' :
+                  game.result === 'OTL' ? '#BC0000' :
+                  'var(--sm-error, #BC0000)',
               }}
             >
               {resultLabel}

@@ -62,7 +62,7 @@ export function DraftPickValueWidget({ picks, side, teamColor }: DraftPickValueW
         <div key={idx} style={{
           padding: 12,
           borderRadius: 8,
-          backgroundColor: isDark ? '#0f172a' : '#ffffff',
+          backgroundColor: isDark ? '#0f172a' : '#FAFAFB',
           border: `1px solid ${isDark ? '#1e293b' : '#e2e8f0'}`,
           marginBottom: idx < picks.length - 1 ? 10 : 0,
         }}>
@@ -113,7 +113,7 @@ export function DraftPickValueWidget({ picks, side, teamColor }: DraftPickValueW
             padding: 10,
             borderRadius: 8,
             backgroundColor: isDark ? '#1e3a5f' : '#dbeafe',
-            border: `2px solid ${isDark ? '#3b82f6' : '#60a5fa'}`,
+            border: `2px solid ${isDark ? '#00D4FF' : '#60a5fa'}`,
             display: 'flex',
             justifyContent: 'space-between',
             alignItems: 'center',
@@ -128,7 +128,7 @@ export function DraftPickValueWidget({ picks, side, teamColor }: DraftPickValueW
             <span style={{
               fontSize: 18,
               fontWeight: 800,
-              color: isDark ? '#60a5fa' : '#2563eb',
+              color: isDark ? '#60a5fa' : '#00D4FF',
             }}>
               {pick.gmSynthesized?.toLocaleString() || '—'} pts
             </span>

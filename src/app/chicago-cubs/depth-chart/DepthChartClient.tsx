@@ -52,11 +52,11 @@ function InjuryBadge({ status, detail }: { status: string; detail: string | null
   let color = '#000'
   let label = status
   if (status === 'O' || status === 'Out' || status === 'IR') {
-    bg = '#dc2626'
+    bg = '#BC0000'
     color = '#fff'
     label = status === 'IR' ? 'IR' : 'OUT'
   } else if (status === 'D2D' || status === 'DD') {
-    bg = '#f97316'
+    bg = '#BC0000'
     color = '#fff'
     label = 'DTD'
   } else if (status === 'Q' || status === 'Questionable') {
@@ -147,7 +147,7 @@ export default function DepthChartClient({
             {injuredCount > 0 && (
               <span>
                 <span style={{ color: 'var(--sm-text-muted)' }}>Injured: </span>
-                <span style={{ fontWeight: 600, color: '#dc2626' }}>{injuredCount}</span>
+                <span style={{ fontWeight: 600, color: '#BC0000' }}>{injuredCount}</span>
               </span>
             )}
           </div>
@@ -287,7 +287,7 @@ export default function DepthChartClient({
                               fontWeight: 700,
                               flexShrink: 0,
                               backgroundColor: player.isStarter ? teamColor : 'var(--sm-surface)',
-                              color: player.isStarter ? '#ffffff' : 'var(--sm-text-muted)',
+                              color: player.isStarter ? '#FAFAFB' : 'var(--sm-text-muted)',
                             }}
                           >
                             {player.jerseyNumber ?? '--'}

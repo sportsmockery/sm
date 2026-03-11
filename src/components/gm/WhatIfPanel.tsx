@@ -82,7 +82,7 @@ export function WhatIfPanel({
   if (!show) return null
 
   const gradeColor = (grade: number) =>
-    grade >= 70 ? '#22c55e' : grade >= 50 ? '#eab308' : '#ef4444'
+    grade >= 70 ? '#00D4FF' : grade >= 50 ? '#eab308' : '#BC0000'
 
   return (
     <motion.div
@@ -148,7 +148,7 @@ export function WhatIfPanel({
             padding: '10px 16px',
             borderRadius: 8,
             border: 'none',
-            backgroundColor: activeMode === 'simulate' ? '#3b82f6' : ('var(--sm-border)'),
+            backgroundColor: activeMode === 'simulate' ? '#00D4FF' : ('var(--sm-border)'),
             color: activeMode === 'simulate' ? '#fff' : subText,
             fontWeight: 700,
             fontSize: '13px',
@@ -186,8 +186,8 @@ export function WhatIfPanel({
           marginTop: 16,
           padding: 12,
           borderRadius: 8,
-          backgroundColor: '#ef444420',
-          color: '#ef4444',
+          backgroundColor: '#BC000020',
+          color: '#BC0000',
           fontSize: '13px',
         }}>
           {error}
@@ -227,8 +227,8 @@ export function WhatIfPanel({
               <div style={{
                 padding: '8px 16px',
                 borderRadius: 8,
-                backgroundColor: result.grade_delta >= 0 ? '#22c55e20' : '#ef444420',
-                color: result.grade_delta >= 0 ? '#22c55e' : '#ef4444',
+                backgroundColor: result.grade_delta >= 0 ? '#00D4FF20' : '#BC000020',
+                color: result.grade_delta >= 0 ? '#00D4FF' : '#BC0000',
                 fontSize: '18px',
                 fontWeight: 800,
               }}>
@@ -275,7 +275,7 @@ export function WhatIfPanel({
                     <div style={{
                       fontSize: '14px',
                       fontWeight: 700,
-                      color: item.value >= 0 ? '#22c55e' : '#ef4444',
+                      color: item.value >= 0 ? '#00D4FF' : '#BC0000',
                     }}>
                       {item.value >= 0 ? '+' : ''}{item.value.toFixed(1)}
                     </div>
@@ -312,7 +312,7 @@ export function WhatIfPanel({
                 <span style={{
                   fontSize: '12px',
                   fontWeight: 700,
-                  color: h.grade_delta >= 0 ? '#22c55e' : '#ef4444',
+                  color: h.grade_delta >= 0 ? '#00D4FF' : '#BC0000',
                 }}>
                   {h.grade_delta >= 0 ? '+' : ''}{h.grade_delta}
                 </span>

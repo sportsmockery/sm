@@ -84,7 +84,7 @@ export default function AuthorForm({ initialData, onSave, saving }: AuthorFormPr
             <button
               type="button"
               onClick={() => setAvatarUrl('')}
-              className="block px-4 py-2 text-red-400 text-sm hover:text-red-300"
+              className="block px-4 py-2 text-[#BC0000] text-sm hover:text-[#BC0000]"
             >
               Remove
             </button>
@@ -95,7 +95,7 @@ export default function AuthorForm({ initialData, onSave, saving }: AuthorFormPr
       {/* Name */}
       <div>
         <label className="block text-sm font-medium text-gray-300 mb-1">
-          Name <span className="text-red-400">*</span>
+          Name <span className="text-[#BC0000]">*</span>
         </label>
         <input
           type="text"
@@ -110,7 +110,7 @@ export default function AuthorForm({ initialData, onSave, saving }: AuthorFormPr
       {/* Email */}
       <div>
         <label className="block text-sm font-medium text-gray-300 mb-1">
-          Email <span className="text-red-400">*</span>
+          Email <span className="text-[#BC0000]">*</span>
         </label>
         <input
           type="email"
@@ -191,7 +191,7 @@ export default function AuthorForm({ initialData, onSave, saving }: AuthorFormPr
         <button
           type="submit"
           disabled={saving || !name || !email}
-          className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 transition-colors"
+          className="px-6 py-2 bg-[#00D4FF] text-white rounded-lg hover:bg-[#00D4FF] disabled:opacity-50 transition-colors"
         >
           {saving ? 'Saving...' : initialData?.id ? 'Update Author' : 'Create Author'}
         </button>

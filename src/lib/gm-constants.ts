@@ -39,13 +39,13 @@ export type TeamPhase = typeof TEAM_PHASES_2026[keyof typeof TEAM_PHASES_2026]
 
 // Grade interpretation for UI
 export const GRADE_INTERPRETATION = {
-  elite: { min: 90, max: 100, label: 'ELITE', message: 'Franchise-altering steal!', color: '#10b981' },
-  excellent: { min: 85, max: 89, label: 'EXCELLENT', message: 'Outstanding trade for Chicago', color: '#22c55e' },
-  accepted: { min: 70, max: 84, label: 'ACCEPTED', message: 'Trade approved - good value', color: '#22c55e' },
+  elite: { min: 90, max: 100, label: 'ELITE', message: 'Franchise-altering steal!', color: '#00D4FF' },
+  excellent: { min: 85, max: 89, label: 'EXCELLENT', message: 'Outstanding trade for Chicago', color: '#00D4FF' },
+  accepted: { min: 70, max: 84, label: 'ACCEPTED', message: 'Trade approved - good value', color: '#00D4FF' },
   close: { min: 65, max: 69, label: 'CLOSE', message: 'Almost there - minor adjustment needed', color: '#eab308' },
-  rejected: { min: 55, max: 64, label: 'REJECTED', message: 'Trade rejected - value concerns', color: '#f97316' },
-  bad: { min: 40, max: 54, label: 'BAD', message: 'Significant overpay', color: '#ef4444' },
-  terrible: { min: 20, max: 39, label: 'TERRIBLE', message: 'Do not make this trade', color: '#dc2626' },
+  rejected: { min: 55, max: 64, label: 'REJECTED', message: 'Trade rejected - value concerns', color: '#BC0000' },
+  bad: { min: 40, max: 54, label: 'BAD', message: 'Significant overpay', color: '#BC0000' },
+  terrible: { min: 20, max: 39, label: 'TERRIBLE', message: 'Do not make this trade', color: '#BC0000' },
   illegal: { min: 0, max: 19, label: 'ILLEGAL', message: 'Trading untouchable player or illegal trade', color: '#7f1d1d' },
 } as const
 
@@ -130,16 +130,16 @@ export const PROSPECT_TIER_COLORS = {
   fringe: '#404040',          // Dark gray - long shots
   longshot: '#404040',        // Dark gray
   // MLB grades (letter-based)
-  'A+': '#22c55e',
-  'A': '#22c55e',
-  'A-': '#22c55e',
-  'B+': '#3b82f6',
-  'B': '#3b82f6',
-  'B-': '#3b82f6',
+  'A+': '#00D4FF',
+  'A': '#00D4FF',
+  'A-': '#00D4FF',
+  'B+': '#00D4FF',
+  'B': '#00D4FF',
+  'B-': '#00D4FF',
   'C+': '#f59e0b',
   'C': '#f59e0b',
   'C-': '#f59e0b',
-  'D': '#ef4444',
+  'D': '#BC0000',
 } as const
 
 // Near-untouchable prospects by team (Feb 2026)

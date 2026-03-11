@@ -135,8 +135,8 @@ export function PlayerCard({ player, selected = false, compact = false, teamColo
           <span style={{
             fontSize: '9px', fontWeight: 700,
             padding: '2px 6px', borderRadius: '10px',
-            backgroundColor: player.status === 'IR' ? '#ef444430' : '#6b728030',
-            color: player.status === 'IR' ? '#ef4444' : '#6b7280',
+            backgroundColor: player.status === 'IR' ? '#BC000030' : '#6b728030',
+            color: player.status === 'IR' ? '#BC0000' : '#6b7280',
           }}>
             {player.status === 'Practice Squad' ? 'PS' : player.status}
           </span>
@@ -238,8 +238,8 @@ export function PlayerCard({ player, selected = false, compact = false, teamColo
                 fontWeight: 700,
                 padding: '1px 4px',
                 borderRadius: '4px',
-                backgroundColor: '#10b98120',
-                color: '#10b981',
+                backgroundColor: '#00D4FF20',
+                color: '#00D4FF',
               }}>
                 ROOKIE
               </span>

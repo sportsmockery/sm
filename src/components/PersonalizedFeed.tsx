@@ -116,7 +116,7 @@ export default function PersonalizedFeed({
       {/* Header */}
       <div className="mb-6 flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-[#8B0000] to-[#FF0000] shadow-lg shadow-[#8B0000]/20">
+          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-[#8B0000] to-[#BC0000] shadow-lg shadow-[#8B0000]/20">
             <svg className="h-5 w-5 text-white" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z" />
             </svg>
@@ -129,7 +129,7 @@ export default function PersonalizedFeed({
 
         <Link
           href="/profile"
-          className="text-xs font-semibold text-[#FF6666] transition-colors hover:text-[#FF0000]"
+          className="text-xs font-semibold text-[#FF6666] transition-colors hover:text-[#BC0000]"
         >
           Customize
         </Link>
@@ -208,7 +208,7 @@ export default function PersonalizedFeed({
               </span>
 
               {/* Title */}
-              <h4 className="line-clamp-2 font-semibold transition-colors group-hover:text-[#FF0000]" style={{ color: 'var(--sm-text)' }}>
+              <h4 className="line-clamp-2 font-semibold transition-colors group-hover:text-[#BC0000]" style={{ color: 'var(--sm-text)' }}>
                 {article.title}
               </h4>
 
@@ -223,7 +223,7 @@ export default function PersonalizedFeed({
             {/* Arrow */}
             <div className="flex shrink-0 items-center">
               <svg
-                className="h-5 w-5 transition-all group-hover:translate-x-1 group-hover:text-[#FF0000]"
+                className="h-5 w-5 transition-all group-hover:translate-x-1 group-hover:text-[#BC0000]"
                 style={{ color: 'var(--sm-text-muted)' }}
                 fill="none"
                 viewBox="0 0 24 24"

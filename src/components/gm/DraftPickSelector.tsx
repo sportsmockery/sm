@@ -157,7 +157,7 @@ export function DraftPickSelector({ sport, picks, onAdd, onRemove, label }: Draf
                 {pickLabel}
                 <button
                   onClick={() => onRemove(i)}
-                  style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#ef4444', fontWeight: 700, padding: '0 2px' }}
+                  style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#BC0000', fontWeight: 700, padding: '0 2px' }}
                 >
                   &#x2715;
                 </button>

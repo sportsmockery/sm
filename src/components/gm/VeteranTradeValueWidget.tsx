@@ -30,11 +30,11 @@ interface VeteranTradeValueWidgetProps {
 }
 
 const PERFORMANCE_LABELS: Record<string, { label: string; color: string }> = {
-  elite: { label: 'ELITE (Top 5)', color: '#22c55e' },
-  pro_bowl: { label: 'PRO BOWL (Top 10-15)', color: '#3b82f6' },
-  good: { label: 'GOOD (Top 20-25)', color: '#8b5cf6' },
+  elite: { label: 'ELITE (Top 5)', color: '#00D4FF' },
+  pro_bowl: { label: 'PRO BOWL (Top 10-15)', color: '#00D4FF' },
+  good: { label: 'GOOD (Top 20-25)', color: '#D6B05E' },
   average: { label: 'AVERAGE (Top 30-40)', color: '#f59e0b' },
-  below_avg: { label: 'BELOW AVERAGE', color: '#ef4444' },
+  below_avg: { label: 'BELOW AVERAGE', color: '#BC0000' },
 }
 
 export function VeteranTradeValueWidget({ veteran, teamColor }: VeteranTradeValueWidgetProps) {
@@ -77,7 +77,7 @@ export function VeteranTradeValueWidget({ veteran, teamColor }: VeteranTradeValu
       <div style={{
         padding: 12,
         borderRadius: 8,
-        backgroundColor: isDark ? '#0f172a' : '#ffffff',
+        backgroundColor: isDark ? '#0f172a' : '#FAFAFB',
         border: `1px solid ${isDark ? '#1e293b' : '#e2e8f0'}`,
         marginBottom: 12,
       }}>
@@ -111,7 +111,7 @@ export function VeteranTradeValueWidget({ veteran, teamColor }: VeteranTradeValu
       <div style={{
         padding: 12,
         borderRadius: 8,
-        backgroundColor: isDark ? '#0f172a' : '#ffffff',
+        backgroundColor: isDark ? '#0f172a' : '#FAFAFB',
         border: `1px solid ${isDark ? '#1e293b' : '#e2e8f0'}`,
       }}>
         <div style={{
@@ -193,7 +193,7 @@ export function VeteranTradeValueWidget({ veteran, teamColor }: VeteranTradeValu
             padding: '10px 12px',
             borderRadius: 8,
             backgroundColor: isDark ? '#1e3a5f' : '#dbeafe',
-            border: `2px solid ${isDark ? '#3b82f6' : '#60a5fa'}`,
+            border: `2px solid ${isDark ? '#00D4FF' : '#60a5fa'}`,
           }}>
             <span style={{
               fontSize: 13,
@@ -205,7 +205,7 @@ export function VeteranTradeValueWidget({ veteran, teamColor }: VeteranTradeValu
             <span style={{
               fontSize: 20,
               fontWeight: 800,
-              color: isDark ? '#60a5fa' : '#2563eb',
+              color: isDark ? '#60a5fa' : '#00D4FF',
             }}>
               {veteran.finalValue?.toLocaleString() || '—'} pts
             </span>

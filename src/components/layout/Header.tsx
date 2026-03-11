@@ -344,7 +344,7 @@ export default function Header() {
                         alignItems: 'center',
                         gap: '10px',
                         padding: '10px 16px',
-                        color: '#ef4444',
+                        color: '#BC0000',
                         fontSize: '14px',
                         width: '100%',
                         textAlign: 'left',
@@ -534,7 +534,7 @@ export default function Header() {
                   background: 'none',
                   border: 'none',
                   cursor: 'pointer',
-                  color: '#ef4444',
+                  color: '#BC0000',
                   fontSize: '16px',
                   fontWeight: 500,
                  

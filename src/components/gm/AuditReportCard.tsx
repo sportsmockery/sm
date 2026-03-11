@@ -9,25 +9,25 @@ interface AuditReportCardProps {
 }
 
 const gradeColors: Record<string, string> = {
-  A: '#22c55e',
-  B: '#3b82f6',
+  A: '#00D4FF',
+  B: '#00D4FF',
   C: '#eab308',
-  D: '#f97316',
-  F: '#ef4444',
+  D: '#BC0000',
+  F: '#BC0000',
 }
 
 const gradeBgColors: Record<string, string> = {
-  A: '#22c55e20',
-  B: '#3b82f620',
+  A: '#00D4FF20',
+  B: '#00D4FF20',
   C: '#eab30820',
-  D: '#f9731620',
-  F: '#ef444420',
+  D: '#BC000020',
+  F: '#BC000020',
 }
 
 const severityColors: Record<string, string> = {
   minor: '#eab308',
-  moderate: '#f97316',
-  major: '#ef4444',
+  moderate: '#BC0000',
+  major: '#BC0000',
 }
 
 export function AuditReportCard({ audit, gmGrade, isDark = true }: AuditReportCardProps) {
@@ -103,7 +103,7 @@ export function AuditReportCard({ audit, gmGrade, isDark = true }: AuditReportCa
           padding: 12,
           textAlign: 'center',
         }}>
-          <div style={{ fontSize: '24px', fontWeight: 800, color: '#22c55e' }}>
+          <div style={{ fontSize: '24px', fontWeight: 800, color: '#00D4FF' }}>
             {audit.validation_summary.fields_confirmed}
           </div>
           <div style={{ fontSize: '11px', color: subText }}>Confirmed</div>
@@ -186,9 +186,9 @@ export function AuditReportCard({ audit, gmGrade, isDark = true }: AuditReportCa
                   </span>
                 </div>
                 <div style={{ fontSize: '12px', color: subText }}>
-                  GM: <span style={{ color: '#ef4444' }}>{d.gm_value}</span>
+                  GM: <span style={{ color: '#BC0000' }}>{d.gm_value}</span>
                   {' → '}
-                  Actual: <span style={{ color: '#22c55e' }}>{d.actual_value}</span>
+                  Actual: <span style={{ color: '#00D4FF' }}>{d.actual_value}</span>
                 </div>
                 <div style={{ fontSize: '10px', color: isDark ? '#4b5563' : '#9ca3af', marginTop: 4 }}>
                   Sources: {d.sources_checked.join(', ')}

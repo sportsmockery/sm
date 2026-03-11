@@ -70,7 +70,7 @@ export default function FeedScoringPage() {
                 Older articles receive a penalty to keep fresh content at the top.
               </p>
               <div className="bg-[var(--bg-primary)] rounded p-3 font-mono text-sm">
-                <span className="text-red-400">-5 points</span> per day old (max <span className="text-red-400">-30 points</span>)
+                <span className="text-[#BC0000]">-5 points</span> per day old (max <span className="text-[#BC0000]">-30 points</span>)
               </div>
             </div>
 
@@ -81,7 +81,7 @@ export default function FeedScoringPage() {
                 Articles about a reader's favorite teams get boosted. Preferences are learned from reading history.
               </p>
               <div className="bg-[var(--bg-primary)] rounded p-3 font-mono text-sm">
-                <span className="text-green-400">+15 points</span> if matches user's top 3 teams
+                <span className="text-[#00D4FF]">+15 points</span> if matches user's top 3 teams
               </div>
             </div>
 
@@ -97,13 +97,13 @@ export default function FeedScoringPage() {
             </div>
 
             {/* Unseen */}
-            <div className="border-l-4 border-purple-500 pl-4">
+            <div className="border-l-4 border-[#D6B05E] pl-4">
               <h3 className="font-medium text-[var(--text-primary)] mb-2">Unseen Bonus</h3>
               <p className="text-sm text-[var(--text-secondary)] mb-2">
                 Articles the user hasn't viewed yet get a small boost to encourage discovery.
               </p>
               <div className="bg-[var(--bg-primary)] rounded p-3 font-mono text-sm">
-                <span className="text-purple-400">+5 points</span> if not in user's view history
+                <span className="text-[#D6B05E]">+5 points</span> if not in user's view history
               </div>
             </div>
           </div>
@@ -117,10 +117,10 @@ export default function FeedScoringPage() {
           <div className="bg-[var(--bg-primary)] rounded-lg p-4 border border-[var(--border-default)] font-mono text-sm">
             <p className="text-[var(--text-secondary)]">final_score = </p>
             <p className="pl-4 text-[var(--text-primary)]">importance_score</p>
-            <p className="pl-4 text-red-400">- recency_penalty (0 to 30)</p>
-            <p className="pl-4 text-green-400">+ team_boost (0 or 15)</p>
+            <p className="pl-4 text-[#BC0000]">- recency_penalty (0 to 30)</p>
+            <p className="pl-4 text-[#00D4FF]">+ team_boost (0 or 15)</p>
             <p className="pl-4 text-yellow-400">+ trending_boost (0 or 10)</p>
-            <p className="pl-4 text-purple-400">+ unseen_bonus (0 or 5)</p>
+            <p className="pl-4 text-[#D6B05E]">+ unseen_bonus (0 or 5)</p>
           </div>
           <p className="mt-4 text-sm text-[var(--text-muted)]">
             Articles are sorted by final_score descending. The highest-scoring article becomes the Featured article.

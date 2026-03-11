@@ -68,7 +68,7 @@ export default async function AdminPostDetailPage({ params }: PostDetailPageProp
           )}
           <Link
             href={`/admin/posts/${id}/edit`}
-            className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700"
+            className="rounded-lg bg-[#00D4FF] px-4 py-2 text-sm font-medium text-white hover:bg-[#00D4FF]"
           >
             Edit Post
           </Link>
@@ -113,7 +113,7 @@ export default async function AdminPostDetailPage({ params }: PostDetailPageProp
             <span
               className={`inline-flex rounded-full px-3 py-1 text-sm font-medium ${
                 post.status === 'published'
-                  ? 'bg-green-100 text-green-800 dark:bg-green-900/50 dark:text-green-300'
+                  ? 'bg-[#00D4FF]/10 text-[#00D4FF] dark:bg-[#00D4FF]/10 dark:text-[#00D4FF]'
                   : 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/50 dark:text-yellow-300'
               }`}
             >

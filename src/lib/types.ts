@@ -131,7 +131,7 @@ export const TEAM_INFO: Record<TeamSlug, TeamInfo> = {
     name: 'Chicago Bulls',
     shortName: 'Bulls',
     primaryColor: '#CE1141', // Red
-    secondaryColor: '#000000', // Black
+    secondaryColor: '#0B0F14', // Black
     logoUrl: '/images/teams/bulls-logo.png',
     city: 'Chicago',
     sport: 'basketball',
@@ -141,7 +141,7 @@ export const TEAM_INFO: Record<TeamSlug, TeamInfo> = {
     name: 'Chicago Blackhawks',
     shortName: 'Blackhawks',
     primaryColor: '#CF0A2C', // Red
-    secondaryColor: '#000000', // Black
+    secondaryColor: '#0B0F14', // Black
     logoUrl: '/images/teams/blackhawks-logo.png',
     city: 'Chicago',
     sport: 'hockey',

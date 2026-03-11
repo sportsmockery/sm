@@ -6,10 +6,10 @@
  *
  * Colors sourced from official team style guides:
  * - Bears: https://www.chicagobears.com (Navy #0B162A, Orange #C83200)
- * - Bulls: https://www.nba.com/bulls (Red #CE1141, Black #000000)
+ * - Bulls: https://www.nba.com/bulls (Red #CE1141, Black #0B0F14)
  * - Cubs: https://www.mlb.com/cubs (Blue #0E3386, Red #CC3433)
  * - White Sox: https://www.mlb.com/whitesox (Black #27251F, Silver #C4CED4)
- * - Blackhawks: https://www.nhl.com/blackhawks (Red #CF0A2C, Black #000000)
+ * - Blackhawks: https://www.nhl.com/blackhawks (Red #CF0A2C, Black #0B0F14)
  */
 
 import type { TeamInfo, NextGameInfo, TeamRecord } from '@/components/team/TeamHubLayout'
@@ -31,7 +31,7 @@ export const CHICAGO_TEAMS: Record<string, TeamInfo> = {
     slug: 'chicago-bulls',
     logo: 'https://a.espncdn.com/i/teamlogos/nba/500/chi.png',
     primaryColor: '#CE1141',
-    secondaryColor: '#000000',
+    secondaryColor: '#0B0F14',
     league: 'NBA',
   },
   cubs: {
@@ -58,7 +58,7 @@ export const CHICAGO_TEAMS: Record<string, TeamInfo> = {
     slug: 'chicago-blackhawks',
     logo: 'https://a.espncdn.com/i/teamlogos/nhl/500/chi.png',
     primaryColor: '#CF0A2C',
-    secondaryColor: '#000000',
+    secondaryColor: '#0B0F14',
     league: 'NHL',
   },
 }

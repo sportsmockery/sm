@@ -26,7 +26,7 @@ export default function RelatedArticles({
     <section className="mx-auto max-w-6xl px-4 py-12">
       {/* Section header */}
       <div className="mb-8 flex items-center gap-4">
-        <div className="h-8 w-1.5 rounded-full bg-gradient-to-b from-[#FF0000] to-[#8B0000]" />
+        <div className="h-8 w-1.5 rounded-full bg-gradient-to-b from-[#BC0000] to-[#8B0000]" />
         <h2 className="text-2xl font-black uppercase tracking-tight" style={{ color: 'var(--sm-text)' }}>
           More from {categoryName}
         </h2>

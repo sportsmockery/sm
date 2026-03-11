@@ -763,7 +763,7 @@ export default function StudioPostEditor({
             className="inline-flex h-8 items-center gap-2 rounded-lg px-4 text-sm font-medium transition-colors disabled:opacity-50"
             style={{
               backgroundColor: '#bc0000',
-              color: '#ffffff',
+              color: '#FAFAFB',
             }}
           >
             {saving ? 'Saving...' : isEditing ? 'Update' : 'Publish'}

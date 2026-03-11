@@ -68,14 +68,14 @@ export default function VideoHighlights({ videos = sampleVideos, className = '' 
       {/* Section header */}
       <div className="mb-6 flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <div className="h-8 w-1 rounded-full bg-gradient-to-b from-[#FF0000] to-[#8B0000]" />
+          <div className="h-8 w-1 rounded-full bg-gradient-to-b from-[#BC0000] to-[#8B0000]" />
           <h2 className="font-heading text-2xl font-bold" style={{ color: 'var(--sm-text)' }}>
             Video Highlights
           </h2>
         </div>
         <a
           href="/videos"
-          className="flex items-center gap-1 text-sm font-medium transition-colors hover:text-red-700"
+          className="flex items-center gap-1 text-sm font-medium transition-colors hover:text-[#BC0000]"
           style={{ color: '#8B0000' }}
         >
           View All

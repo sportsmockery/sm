@@ -30,8 +30,8 @@ export default function PostRow({ post, isSelected, onSelect, onDelete }: PostRo
     switch (status) {
       case 'published':
         return (
-          <span className="inline-flex items-center rounded-full bg-emerald-100 px-2.5 py-0.5 text-xs font-medium text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-400">
-            <span className="mr-1 h-1.5 w-1.5 rounded-full bg-emerald-500" />
+          <span className="inline-flex items-center rounded-full bg-[#00D4FF]/10 px-2.5 py-0.5 text-xs font-medium text-[#00D4FF] dark:bg-[#00D4FF]/30 dark:text-[#00D4FF]">
+            <span className="mr-1 h-1.5 w-1.5 rounded-full bg-[#00D4FF]" />
             Published
           </span>
         )
@@ -44,8 +44,8 @@ export default function PostRow({ post, isSelected, onSelect, onDelete }: PostRo
         )
       case 'scheduled':
         return (
-          <span className="inline-flex items-center rounded-full bg-blue-100 px-2.5 py-0.5 text-xs font-medium text-blue-800 dark:bg-blue-900/30 dark:text-blue-400">
-            <span className="mr-1 h-1.5 w-1.5 rounded-full bg-blue-500" />
+          <span className="inline-flex items-center rounded-full bg-[#00D4FF]/10 px-2.5 py-0.5 text-xs font-medium text-[#00D4FF] dark:bg-[#00D4FF]/30 dark:text-[#00D4FF]">
+            <span className="mr-1 h-1.5 w-1.5 rounded-full bg-[#00D4FF]" />
             Scheduled
           </span>
         )
@@ -155,7 +155,7 @@ export default function PostRow({ post, isSelected, onSelect, onDelete }: PostRo
           </Link>
           <button
             onClick={() => onDelete(post.id)}
-            className="rounded-lg p-2 text-zinc-500 hover:bg-red-50 hover:text-red-600 dark:hover:bg-red-900/20 dark:hover:text-red-400"
+            className="rounded-lg p-2 text-zinc-500 hover:bg-red-50 hover:text-[#BC0000] dark:hover:bg-[#BC0000]/20 dark:hover:text-[#BC0000]"
             title="Delete"
           >
             <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">

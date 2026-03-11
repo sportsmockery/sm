@@ -92,7 +92,7 @@ export default function HomepageFeedV2({ firstName }: HomepageFeedV2Props) {
             className="hp-bottom-nav-item"
             aria-label="Create"
           >
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl text-white shadow-lg hp-fab-compose" style={{ background: 'linear-gradient(135deg, #3b82f6, #8b5cf6)' }}>
+            <div className="flex h-10 w-10 items-center justify-center rounded-xl text-white shadow-lg hp-fab-compose" style={{ background: 'linear-gradient(135deg, #00D4FF, #D6B05E)' }}>
               <Plus className="h-5 w-5" />
             </div>
           </button>

@@ -1,12 +1,12 @@
 export const lightTheme = {
-  color: ['#bc0000', '#000000', '#666666', '#999999', '#cccccc'],
-  backgroundColor: '#ffffff',
+  color: ['#bc0000', '#0B0F14', '#666666', '#999999', '#cccccc'],
+  backgroundColor: '#FAFAFB',
   textStyle: {
-    color: '#000000',
+    color: '#0B0F14',
   },
   title: {
     textStyle: {
-      color: '#000000',
+      color: '#0B0F14',
       fontWeight: 'bold',
     },
     subtextStyle: {
@@ -22,7 +22,7 @@ export const lightTheme = {
     backgroundColor: 'rgba(0, 0, 0, 0.85)',
     borderColor: '#bc0000',
     textStyle: {
-      color: '#ffffff',
+      color: '#FAFAFB',
     },
   },
   categoryAxis: {

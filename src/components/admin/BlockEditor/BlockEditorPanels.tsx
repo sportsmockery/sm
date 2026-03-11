@@ -51,7 +51,7 @@ function BlockShell({
               <ChevronDown size={14} />
             </button>
           )}
-          <button type="button" onClick={onDelete} className="p-1 text-slate-500 hover:text-red-400 transition-colors" aria-label="Delete block">
+          <button type="button" onClick={onDelete} className="p-1 text-slate-500 hover:text-[#BC0000] transition-colors" aria-label="Delete block">
             <Trash2 size={14} />
           </button>
         </div>
@@ -298,7 +298,7 @@ export function TradeScenarioPanel({ block, onChange, onDelete, onMoveUp, onMove
                 <div key={idx} className="flex gap-2 mb-2">
                   <Select value={item.type} onChange={(v) => updateItem(side, idx, { type: v as 'player' | 'pick' })} options={[{ value: 'player', label: 'Player' }, { value: 'pick', label: 'Pick' }]} />
                   <TextInput value={item.label} onChange={(v) => updateItem(side, idx, { label: v })} placeholder="Name / pick" />
-                  <button type="button" onClick={() => removeItem(side, idx)} className="text-slate-500 hover:text-red-400 shrink-0"><Trash2 size={14} /></button>
+                  <button type="button" onClick={() => removeItem(side, idx)} className="text-slate-500 hover:text-[#BC0000] shrink-0"><Trash2 size={14} /></button>
                 </div>
               ))}
               <button type="button" onClick={() => addItem(side)} className="text-xs text-[#00D4FF] hover:underline">+ Add item</button>
@@ -347,7 +347,7 @@ export function PlayerComparisonPanel({ block, onChange, onDelete, onMoveUp, onM
           <TextInput value={stat.label} onChange={(v) => updateStat(idx, { label: v })} placeholder="Stat label" />
           <NumberInput value={stat.playerA} onChange={(v) => updateStat(idx, { playerA: v })} />
           <NumberInput value={stat.playerB} onChange={(v) => updateStat(idx, { playerB: v })} />
-          <button type="button" onClick={() => removeStat(idx)} className="text-slate-500 hover:text-red-400 shrink-0"><Trash2 size={14} /></button>
+          <button type="button" onClick={() => removeStat(idx)} className="text-slate-500 hover:text-[#BC0000] shrink-0"><Trash2 size={14} /></button>
         </div>
       ))}
       <button type="button" onClick={addStat} className="text-xs text-[#00D4FF] hover:underline">+ Add stat</button>
@@ -382,7 +382,7 @@ export function StatsChartPanel({ block, onChange, onDelete, onMoveUp, onMoveDow
         <div key={idx} className="flex gap-2 mb-2 items-center">
           <TextInput value={pt.label} onChange={(v) => updatePoint(idx, { label: v })} placeholder="Label" />
           <NumberInput value={pt.value} onChange={(v) => updatePoint(idx, { value: v })} />
-          <button type="button" onClick={() => removePoint(idx)} className="text-slate-500 hover:text-red-400 shrink-0"><Trash2 size={14} /></button>
+          <button type="button" onClick={() => removePoint(idx)} className="text-slate-500 hover:text-[#BC0000] shrink-0"><Trash2 size={14} /></button>
         </div>
       ))}
       <button type="button" onClick={addPoint} className="text-xs text-[#00D4FF] hover:underline">+ Add data point</button>
@@ -626,7 +626,7 @@ export function MockDraftPanel({ block, onChange, onDelete, onMoveUp, onMoveDown
           <TextInput value={pick.player} onChange={(v) => updatePick(idx, { player: v })} placeholder="Player" />
           <TextInput value={pick.position} onChange={(v) => updatePick(idx, { position: v })} placeholder="POS" />
           <TextInput value={pick.school} onChange={(v) => updatePick(idx, { school: v })} placeholder="School" />
-          <button type="button" onClick={() => removePick(idx)} className="text-slate-500 hover:text-red-400 shrink-0"><Trash2 size={14} /></button>
+          <button type="button" onClick={() => removePick(idx)} className="text-slate-500 hover:text-[#BC0000] shrink-0"><Trash2 size={14} /></button>
         </div>
       ))}
       <button type="button" onClick={addPick} className="text-xs text-[#00D4FF] hover:underline">+ Add pick</button>

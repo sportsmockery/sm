@@ -43,7 +43,7 @@ export default function ArticleTags({ tags, className = '' }: ArticleTagsProps) 
           onMouseEnter={(e) => {
             const el = e.currentTarget
             el.style.background = 'var(--sm-red)'
-            el.style.color = '#ffffff'
+            el.style.color = '#FAFAFB'
             el.style.borderColor = 'var(--sm-red)'
           }}
           onMouseLeave={(e) => {

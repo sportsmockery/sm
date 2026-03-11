@@ -238,7 +238,7 @@ export default function CopilotMonitoringPage() {
     return (
       <div className="p-8">
         <div className="rounded-xl p-6" style={{ backgroundColor: 'rgba(239, 68, 68, 0.1)', border: '1px solid rgba(239, 68, 68, 0.3)' }}>
-          <h2 className="font-semibold text-lg mb-2" style={{ color: '#ef4444' }}>Error</h2>
+          <h2 className="font-semibold text-lg mb-2" style={{ color: '#BC0000' }}>Error</h2>
           <p className="mb-4" style={{ color: '#f87171' }}>{error}</p>
           <button
             onClick={loadData}
@@ -294,7 +294,7 @@ export default function CopilotMonitoringPage() {
         </div>
         <div className="rounded-xl border border-[var(--border-default)] bg-[var(--bg-card)] p-6">
           <p className="text-sm text-[var(--text-muted)]">Total Errors</p>
-          <p className="text-3xl font-bold text-red-600">
+          <p className="text-3xl font-bold text-[#BC0000]">
             {totals.total_errors || 0}
           </p>
         </div>
@@ -309,7 +309,7 @@ export default function CopilotMonitoringPage() {
               <h3 className="text-lg font-semibold mb-1 capitalize flex items-center gap-2 text-[var(--text-primary)]">
                 <span
                   className={`w-2 h-2 rounded-full ${
-                    metric.error_rate > 5 ? 'bg-red-500' : 'bg-emerald-500'
+                    metric.error_rate > 5 ? 'bg-red-500' : 'bg-[#00D4FF]'
                   }`}
                 />
                 {metric.agent.replace('_', ' ')}
@@ -336,7 +336,7 @@ export default function CopilotMonitoringPage() {
                   <span className="text-[var(--text-muted)] text-sm">Error Rate</span>
                   <span
                     className={`font-semibold ${
-                      metric.error_rate > 5 ? 'text-red-600' : 'text-emerald-600'
+                      metric.error_rate > 5 ? 'text-[#BC0000]' : 'text-[#00D4FF]'
                     }`}
                   >
                     {metric.error_rate}%
@@ -382,7 +382,7 @@ export default function CopilotMonitoringPage() {
                     className="px-3 py-1 rounded-full text-xs font-medium"
                     style={{
                       backgroundColor: flag.enabled ? 'rgba(16, 185, 129, 0.1)' : 'var(--bg-tertiary)',
-                      color: flag.enabled ? '#10b981' : 'var(--text-muted)'
+                      color: flag.enabled ? '#00D4FF' : 'var(--text-muted)'
                     }}
                   >
                     {flag.enabled ? 'Enabled' : 'Disabled'}

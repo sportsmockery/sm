@@ -65,7 +65,7 @@ export default function StudioPostsClient({
         <Link
           href="/studio/posts/new"
           className="inline-flex items-center rounded-lg px-4 py-2 text-sm font-medium"
-          style={{ backgroundColor: '#bc0000', color: '#ffffff' }}
+          style={{ backgroundColor: '#bc0000', color: '#FAFAFB' }}
         >
           Create your first post
         </Link>

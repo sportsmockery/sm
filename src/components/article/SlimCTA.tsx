@@ -23,7 +23,7 @@ export default function SlimCTA() {
         href="/signup"
         style={{
           backgroundColor: '#bc0000',
-          color: '#ffffff',
+          color: '#FAFAFB',
           border: 'none',
           outline: 'none',
           padding: '8px 20px',

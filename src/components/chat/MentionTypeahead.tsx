@@ -136,7 +136,7 @@ export default function MentionTypeahead({
           width: 32px;
           height: 32px;
           border-radius: 50%;
-          background: var(--accent, #3b82f6);
+          background: var(--accent, #00D4FF);
           display: flex;
           align-items: center;
           justify-content: center;
@@ -173,7 +173,7 @@ export default function MentionTypeahead({
         }
 
         .mention-typeahead__name :global(.highlight) {
-          color: var(--accent, #3b82f6);
+          color: var(--accent, #00D4FF);
           font-weight: 700;
         }
 
@@ -187,17 +187,17 @@ export default function MentionTypeahead({
         }
 
         .mention-typeahead__badge--staff {
-          background: #7c3aed;
+          background: #D6B05E;
           color: white;
         }
 
         .mention-typeahead__badge--moderator {
-          background: #059669;
+          background: #00D4FF;
           color: white;
         }
 
         .mention-typeahead__badge--verified {
-          background: #3b82f6;
+          background: #00D4FF;
           color: white;
         }
 

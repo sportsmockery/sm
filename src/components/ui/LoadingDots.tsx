@@ -20,7 +20,7 @@ const gaps = {
 
 const colorStyles: Record<string, React.CSSProperties> = {
   primary: { backgroundColor: 'var(--accent-red)' },
-  white: { backgroundColor: '#ffffff' },
+  white: { backgroundColor: '#FAFAFB' },
   current: { backgroundColor: 'currentColor' },
   muted: { backgroundColor: 'var(--sm-text-muted)' },
 }

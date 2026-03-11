@@ -109,13 +109,13 @@ const TEAM_CONFIG: Record<string, {
   'chicago-bulls': {
     name: 'Bulls',
     primaryColor: '#CE1141',
-    accentColor: '#000000',
+    accentColor: '#0B0F14',
     mockeryTagline: 'Bulls Rebuild Watch',
   },
   'chicago-blackhawks': {
     name: 'Blackhawks',
     primaryColor: '#CF0A2C',
-    accentColor: '#000000',
+    accentColor: '#0B0F14',
     mockeryTagline: 'Hawks Hope Meter',
   },
   'chicago-cubs': {

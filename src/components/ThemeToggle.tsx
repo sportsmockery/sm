@@ -20,7 +20,7 @@ export function ThemeToggle() {
         className="inline-flex h-5 w-5 transform items-center justify-center rounded-full shadow-md transition-all duration-300 ease-in-out"
         style={{
           transform: isDark ? 'translateX(26px)' : 'translateX(4px)',
-          backgroundColor: isDark ? '#0a0a0b' : '#ffffff',
+          backgroundColor: isDark ? '#0a0a0b' : '#FAFAFB',
         }}
       >
         {/* Chicago star (✶) */}

@@ -11,8 +11,8 @@ interface PaginationProps {
 
 // Per design spec section 15.2:
 // - Style: Numbered buttons
-// - Current page: #bc0000 background, #ffffff text
-// - Other pages: #ffffff background, #222222 text, 1px #e0e0e0 border
+// - Current page: #bc0000 background, #FAFAFB text
+// - Other pages: #FAFAFB background, #222222 text, 1px #e0e0e0 border
 // - Hover: Light gray background (#f5f5f5)
 // - Button size: 36-40px square
 // - Spacing: 5px between
@@ -111,7 +111,7 @@ export default function Pagination({
             className="flex items-center justify-center w-[40px] h-[40px] text-[14px] font-medium transition-colors"
             style={
               currentPage === page
-                ? { backgroundColor: '#bc0000', color: '#ffffff', border: '1px solid #bc0000' }
+                ? { backgroundColor: '#bc0000', color: '#FAFAFB', border: '1px solid #bc0000' }
                 : { backgroundColor: 'var(--sm-card)', color: 'var(--sm-text)', border: '1px solid var(--sm-border)' }
             }
           >

@@ -77,7 +77,7 @@ export function OpponentTeamPicker({ open, onClose, onSelect, sport, chicagoTeam
   }, [teams, search, chicagoTeam, excludeTeam])
 
   const bgOverlay = 'rgba(0,0,0,0.6)'
-  const bgModal = isDark ? '#111827' : '#ffffff'
+  const bgModal = isDark ? '#111827' : '#FAFAFB'
   const borderColor = 'var(--sm-border)'
   const textColor = 'var(--sm-text)'
   const subText = 'var(--sm-text-muted)'
@@ -170,7 +170,7 @@ export function OpponentTeamPicker({ open, onClose, onSelect, sport, chicagoTeam
                               gap: 12,
                               padding: '10px 12px',
                               borderRadius: 10,
-                              border: `1px solid ${isRival ? '#ef444440' : 'transparent'}`,
+                              border: `1px solid ${isRival ? '#BC000040' : 'transparent'}`,
                               backgroundColor: 'transparent',
                               cursor: 'pointer',
                               width: '100%',
@@ -201,7 +201,7 @@ export function OpponentTeamPicker({ open, onClose, onSelect, sport, chicagoTeam
                             {isRival && (
                               <div style={{
                                 fontSize: '10px', fontWeight: 700,
-                                color: '#ef4444', backgroundColor: '#ef444415',
+                                color: '#BC0000', backgroundColor: '#BC000015',
                                 padding: '2px 8px', borderRadius: 6,
                               }} title="Division trade penalty applies">
                                 RIVAL

@@ -77,7 +77,7 @@ function formatMoney(value: number | null | undefined): string {
 }
 
 function ConfettiParticle({ delay }: { delay: number }) {
-  const colors = ['#bc0000', '#22c55e', '#eab308', '#3b82f6', '#a855f7']
+  const colors = ['#bc0000', '#00D4FF', '#eab308', '#00D4FF', '#a855f7']
   const color = colors[Math.floor(Math.random() * colors.length)]
   const x = Math.random() * 100
   const size = 4 + Math.random() * 6
@@ -281,7 +281,7 @@ export function GradeReveal({ result, show, onClose, onNewTrade, tradeDetails, s
               animate={{ opacity: 1 }}
               style={{
                 marginTop: 8, fontSize: '13px', fontWeight: 700,
-                color: result.improvement_score > 0 ? '#22c55e' : result.improvement_score < 0 ? '#ef4444' : subText,
+                color: result.improvement_score > 0 ? '#00D4FF' : result.improvement_score < 0 ? '#BC0000' : subText,
               }}
             >
               Team Improvement: {result.improvement_score > 0 ? '+' : ''}{result.improvement_score}
@@ -295,7 +295,7 @@ export function GradeReveal({ result, show, onClose, onNewTrade, tradeDetails, s
               animate={{ opacity: 1 }}
               style={{
                 marginTop: 6, fontSize: '12px', fontWeight: 600,
-                color: result.factors.motivation_score >= 7 ? '#22c55e' : result.factors.motivation_score >= 4 ? '#eab308' : '#ef4444',
+                color: result.factors.motivation_score >= 7 ? '#00D4FF' : result.factors.motivation_score >= 4 ? '#eab308' : '#BC0000',
               }}
             >
               Trade Realism: {result.factors.motivation_score.toFixed(1)}/10
@@ -604,7 +604,7 @@ export function GradeReveal({ result, show, onClose, onNewTrade, tradeDetails, s
               <button
                 onClick={() => setShowWhatIf(!showWhatIf)}
                 className="btn btn-secondary btn-md"
-                style={showWhatIf ? { borderColor: '#3b82f6', color: '#3b82f6', backgroundColor: 'rgba(59,130,246,0.1)' } : {}}
+                style={showWhatIf ? { borderColor: '#00D4FF', color: '#00D4FF', backgroundColor: 'rgba(59,130,246,0.1)' } : {}}
               >
                 {showWhatIf ? 'Hide What-If' : 'What If?'}
               </button>

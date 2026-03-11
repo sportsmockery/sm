@@ -32,7 +32,7 @@ export function DestinationPicker({
   const isDark = theme === 'dark'
 
   const bgOverlay = 'rgba(0,0,0,0.6)'
-  const bgModal = isDark ? '#111827' : '#ffffff'
+  const bgModal = isDark ? '#111827' : '#FAFAFB'
   const borderColor = 'var(--sm-border)'
   const textColor = 'var(--sm-text)'
   const subText = 'var(--sm-text-muted)'

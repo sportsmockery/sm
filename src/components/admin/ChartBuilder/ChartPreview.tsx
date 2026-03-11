@@ -19,7 +19,7 @@ function buildEChartsOptions(config: ChartConfig) {
 
   const secondaryColor =
     colors.scheme === 'team' && colors.team
-      ? teamColors[colors.team]?.secondary || '#000000'
+      ? teamColors[colors.team]?.secondary || '#0B0F14'
       : colors.customColors?.[1] || '#666666'
 
   const baseOptions: Record<string, unknown> = {

@@ -27,8 +27,8 @@ function SimilarTradeCard({ trade, isDark, index }: SimilarTradeCardProps) {
   const borderColor = 'var(--sm-border)'
 
   const outcomeColors = {
-    worked: { bg: 'rgba(34, 197, 94, 0.15)', text: '#22c55e', label: 'Worked' },
-    failed: { bg: 'rgba(239, 68, 68, 0.15)', text: '#ef4444', label: 'Failed' },
+    worked: { bg: 'rgba(34, 197, 94, 0.15)', text: '#00D4FF', label: 'Worked' },
+    failed: { bg: 'rgba(239, 68, 68, 0.15)', text: '#BC0000', label: 'Failed' },
     neutral: { bg: 'rgba(234, 179, 8, 0.15)', text: '#eab308', label: 'Mixed Results' },
   }
 
@@ -104,7 +104,7 @@ function SimilarTradeCard({ trade, isDark, index }: SimilarTradeCardProps) {
           borderRadius: 6,
           backgroundColor: isDark ? 'rgba(59, 130, 246, 0.1)' : 'rgba(59, 130, 246, 0.05)',
           fontSize: 11,
-          color: isDark ? '#93c5fd' : '#3b82f6',
+          color: isDark ? '#93c5fd' : '#00D4FF',
           lineHeight: 1.4,
         }}>
           <strong>Key difference:</strong> {trade.key_difference}
@@ -159,7 +159,7 @@ function LegacyHistoricalDisplay({ comparisons, isDark }: LegacyHistoricalDispla
           <div style={{ fontSize: 12, color: subText, marginTop: 2 }}>
             Haul: {comp.haul}
           </div>
-          <div style={{ fontSize: 12, color: '#22c55e', marginTop: 2 }}>
+          <div style={{ fontSize: 12, color: '#00D4FF', marginTop: 2 }}>
             {comp.outcome}
           </div>
         </div>
@@ -183,7 +183,7 @@ function EnhancedHistoricalContextPanel({ context, isDark, isRejected = false }:
   const subText = 'var(--sm-text-muted)'
   const borderColor = 'var(--sm-border)'
 
-  const successColor = context.success_rate >= 60 ? '#22c55e' : context.success_rate >= 40 ? '#eab308' : '#ef4444'
+  const successColor = context.success_rate >= 60 ? '#00D4FF' : context.success_rate >= 40 ? '#eab308' : '#BC0000'
 
   return (
     <div style={{
@@ -254,7 +254,7 @@ function EnhancedHistoricalContextPanel({ context, isDark, isRejected = false }:
           <div style={{
             fontSize: 11,
             fontWeight: 700,
-            color: '#ef4444',
+            color: '#BC0000',
             marginBottom: 6,
             textTransform: 'uppercase',
             display: 'flex',
@@ -282,7 +282,7 @@ function EnhancedHistoricalContextPanel({ context, isDark, isRejected = false }:
           <div style={{
             fontSize: 11,
             fontWeight: 700,
-            color: '#22c55e',
+            color: '#00D4FF',
             marginBottom: 6,
             textTransform: 'uppercase',
             display: 'flex',
@@ -343,11 +343,11 @@ function EnhancedSuggestedTradePanel({
   }
 
   const likelihoodColors: Record<string, { bg: string; text: string }> = {
-    'very likely': { bg: 'rgba(34, 197, 94, 0.15)', text: '#22c55e' },
-    'likely': { bg: 'rgba(34, 197, 94, 0.1)', text: '#22c55e' },
+    'very likely': { bg: 'rgba(34, 197, 94, 0.15)', text: '#00D4FF' },
+    'likely': { bg: 'rgba(34, 197, 94, 0.1)', text: '#00D4FF' },
     'possible': { bg: 'rgba(234, 179, 8, 0.15)', text: '#eab308' },
-    'unlikely': { bg: 'rgba(239, 68, 68, 0.1)', text: '#ef4444' },
-    'very unlikely': { bg: 'rgba(239, 68, 68, 0.15)', text: '#ef4444' },
+    'unlikely': { bg: 'rgba(239, 68, 68, 0.1)', text: '#BC0000' },
+    'very unlikely': { bg: 'rgba(239, 68, 68, 0.15)', text: '#BC0000' },
   }
 
   const likelihood = likelihoodColors[suggestion.likelihood?.toLowerCase()] || likelihoodColors['possible']
@@ -357,11 +357,11 @@ function EnhancedSuggestedTradePanel({
       padding: 16,
       borderRadius: 12,
       backgroundColor: isDark ? 'rgba(59, 130, 246, 0.1)' : 'rgba(59, 130, 246, 0.05)',
-      border: '1px solid #3b82f6',
+      border: '1px solid #00D4FF',
     }}>
       <h4 style={{
         fontWeight: 700,
-        color: '#3b82f6',
+        color: '#00D4FF',
         fontSize: 14,
         marginBottom: 12,
         display: 'flex',
@@ -430,7 +430,7 @@ function EnhancedSuggestedTradePanel({
             <span style={{ color: subText }}>Value Balance</span>
             <span style={{
               fontWeight: 600,
-              color: Math.abs(suggestion.value_balance.difference) < 10 ? '#22c55e' : '#eab308',
+              color: Math.abs(suggestion.value_balance.difference) < 10 ? '#00D4FF' : '#eab308',
             }}>
               {suggestion.value_balance.difference > 0 ? '+' : ''}{suggestion.value_balance.difference} pts
             </span>
@@ -438,18 +438,18 @@ function EnhancedSuggestedTradePanel({
           <div style={{ display: 'flex', gap: 4, height: 8, borderRadius: 4, overflow: 'hidden' }}>
             <div style={{
               flex: suggestion.value_balance.chicago_value,
-              backgroundColor: '#3b82f6',
+              backgroundColor: '#00D4FF',
               borderRadius: '4px 0 0 4px',
             }} />
             <div style={{
               flex: suggestion.value_balance.partner_value,
-              backgroundColor: '#22c55e',
+              backgroundColor: '#00D4FF',
               borderRadius: '0 4px 4px 0',
             }} />
           </div>
           <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 10, marginTop: 4 }}>
-            <span style={{ color: '#3b82f6' }}>{chicagoTeam}: {suggestion.value_balance.chicago_value}</span>
-            <span style={{ color: '#22c55e' }}>{opponentTeam}: {suggestion.value_balance.partner_value}</span>
+            <span style={{ color: '#00D4FF' }}>{chicagoTeam}: {suggestion.value_balance.chicago_value}</span>
+            <span style={{ color: '#00D4FF' }}>{opponentTeam}: {suggestion.value_balance.partner_value}</span>
           </div>
         </div>
       )}
@@ -478,7 +478,7 @@ function EnhancedSuggestedTradePanel({
         backgroundColor: isDark ? 'rgba(34, 197, 94, 0.1)' : 'rgba(34, 197, 94, 0.05)',
         border: '1px solid rgba(34, 197, 94, 0.3)',
       }}>
-        <div style={{ fontSize: 11, fontWeight: 700, color: '#22c55e', marginBottom: 6 }}>
+        <div style={{ fontSize: 11, fontWeight: 700, color: '#00D4FF', marginBottom: 6 }}>
           Why This Works
         </div>
         <div style={{ fontSize: 13, color: textColor, lineHeight: 1.5 }}>
@@ -515,7 +515,7 @@ function EnhancedSuggestedTradePanel({
           }}>
             <div>
               <span style={{ color: subText }}>Structure Success Rate: </span>
-              <span style={{ color: '#22c55e', fontWeight: 700 }}>
+              <span style={{ color: '#00D4FF', fontWeight: 700 }}>
                 {suggestion.historical_precedent.success_rate_for_structure}%
               </span>
             </div>
@@ -548,7 +548,7 @@ function EnhancedSuggestedTradePanel({
             borderRadius: 6,
           }}>
             <span style={{ color: subText }}>Est. improvement: </span>
-            <span style={{ color: '#22c55e', fontWeight: 700 }}>
+            <span style={{ color: '#00D4FF', fontWeight: 700 }}>
               +{suggestion.estimated_grade_improvement} pts
             </span>
           </span>
@@ -592,11 +592,11 @@ function LegacySuggestedTradePanel({ suggestion, isDark }: LegacySuggestedTradeP
       padding: 16,
       borderRadius: 12,
       backgroundColor: isDark ? 'rgba(59, 130, 246, 0.1)' : 'rgba(59, 130, 246, 0.05)',
-      border: '1px solid #3b82f6',
+      border: '1px solid #00D4FF',
     }}>
       <h4 style={{
         fontWeight: 700,
-        color: '#3b82f6',
+        color: '#00D4FF',
         fontSize: 14,
         marginBottom: 8,
         display: 'flex',
@@ -657,7 +657,7 @@ function LegacySuggestedTradePanel({ suggestion, isDark }: LegacySuggestedTradeP
         display: 'inline-block',
       }}>
         <span style={{ color: subText }}>Estimated improvement: </span>
-        <span style={{ color: '#22c55e', fontWeight: 700 }}>
+        <span style={{ color: '#00D4FF', fontWeight: 700 }}>
           +{suggestion.estimated_grade_improvement} points
         </span>
       </div>

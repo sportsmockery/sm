@@ -553,7 +553,7 @@ export default function MockDraftPage() {
             display: 'flex', alignItems: 'center', justifyContent: 'space-between',
           }}>
             <span>{error}</span>
-            <button onClick={() => setError(null)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#ef4444', fontWeight: 700 }}>
+            <button onClick={() => setError(null)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#BC0000', fontWeight: 700 }}>
               &#x2715;
             </button>
           </div>
@@ -586,7 +586,7 @@ export default function MockDraftPage() {
                     if (teamElig) {
                       if (isEligible) {
                         statusText = teamElig.reason || '✓ Ready to draft'
-                        statusColor = '#10b981'
+                        statusColor = '#00D4FF'
                       } else {
                         statusText = teamElig.reason || 'Not available'
                       }
@@ -696,7 +696,7 @@ export default function MockDraftPage() {
                         {draft.grade && (
                           <div style={{
                             padding: '4px 10px', borderRadius: 6,
-                            backgroundColor: draft.grade >= 80 ? '#10b981' : draft.grade >= 60 ? '#f59e0b' : '#ef4444',
+                            backgroundColor: draft.grade >= 80 ? '#00D4FF' : draft.grade >= 60 ? '#f59e0b' : '#BC0000',
                             color: '#fff', fontWeight: 700, fontSize: '12px',
                           }}>
                             {draft.letter_grade || draft.grade}
@@ -865,7 +865,7 @@ export default function MockDraftPage() {
                             {prospect.grade && (
                               <div style={{
                                 padding: '4px 10px', borderRadius: 6,
-                                backgroundColor: prospect.grade >= 80 ? '#10b981' : prospect.grade >= 60 ? '#f59e0b' : '#6b7280',
+                                backgroundColor: prospect.grade >= 80 ? '#00D4FF' : prospect.grade >= 60 ? '#f59e0b' : '#6b7280',
                                 color: '#fff', fontWeight: 700, fontSize: '12px',
                               }}>
                                 {prospect.grade}
@@ -1082,7 +1082,7 @@ export default function MockDraftPage() {
             <div style={{ textAlign: 'center', marginBottom: 20 }}>
               <div style={{
                 width: 80, height: 80, borderRadius: '50%', margin: '0 auto 12px',
-                backgroundColor: gradeResult.overall_grade >= 80 ? '#10b981' : gradeResult.overall_grade >= 60 ? '#f59e0b' : '#ef4444',
+                backgroundColor: gradeResult.overall_grade >= 80 ? '#00D4FF' : gradeResult.overall_grade >= 60 ? '#f59e0b' : '#BC0000',
                 color: '#fff', fontWeight: 800, fontSize: '28px',
                 display: 'flex', alignItems: 'center', justifyContent: 'center',
               }}>
@@ -1104,7 +1104,7 @@ export default function MockDraftPage() {
 
             {gradeResult.strengths.length > 0 && (
               <div style={{ marginBottom: 16 }}>
-                <div style={{ fontWeight: 600, fontSize: '14px', marginBottom: 8, color: '#10b981' }}>
+                <div style={{ fontWeight: 600, fontSize: '14px', marginBottom: 8, color: '#00D4FF' }}>
                   Strengths
                 </div>
                 <ul style={{ margin: 0, paddingLeft: 20 }}>
@@ -1117,7 +1117,7 @@ export default function MockDraftPage() {
 
             {gradeResult.weaknesses.length > 0 && (
               <div style={{ marginBottom: 20 }}>
-                <div style={{ fontWeight: 600, fontSize: '14px', marginBottom: 8, color: '#ef4444' }}>
+                <div style={{ fontWeight: 600, fontSize: '14px', marginBottom: 8, color: '#BC0000' }}>
                   Areas for Improvement
                 </div>
                 <ul style={{ margin: 0, paddingLeft: 20 }}>

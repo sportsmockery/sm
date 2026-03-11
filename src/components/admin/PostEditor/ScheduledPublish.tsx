@@ -96,7 +96,7 @@ export default function ScheduledPublish({
               onClick={() => handleStatusSelect(option.value as PublishStatus)}
               className={`flex-1 rounded-md px-3 py-2 text-sm font-medium transition-colors ${
                 (status === option.value || (status === 'scheduled' && option.value === 'scheduled'))
-                  ? 'bg-blue-600 text-white'
+                  ? 'bg-[#00D4FF] text-white'
                   : 'text-zinc-600 hover:bg-zinc-100 dark:text-zinc-400 dark:hover:bg-zinc-800'
               }`}
             >
@@ -109,8 +109,8 @@ export default function ScheduledPublish({
 
       {/* Published info */}
       {status === 'published' && publishedAt && (
-        <div className="mt-4 rounded-lg bg-green-50 p-3 dark:bg-green-900/20">
-          <p className="text-sm text-green-700 dark:text-green-400">
+        <div className="mt-4 rounded-lg bg-[#00D4FF]/10 p-3 dark:bg-[#00D4FF]/20">
+          <p className="text-sm text-[#00D4FF] dark:text-[#00D4FF]">
             Published on {format(parseISO(publishedAt), 'MMM d, yyyy \'at\' h:mm a')}
           </p>
         </div>
@@ -194,18 +194,18 @@ export default function ScheduledPublish({
           {scheduleDate && scheduleTime && (
             <div className={`rounded-lg p-3 ${
               isValidSchedule
-                ? 'bg-blue-50 dark:bg-blue-900/20'
-                : 'bg-red-50 dark:bg-red-900/20'
+                ? 'bg-[#00D4FF]/10 dark:bg-[#00D4FF]/20'
+                : 'bg-red-50 dark:bg-[#BC0000]/20'
             }`}>
               {isValidSchedule ? (
-                <p className="text-sm text-blue-700 dark:text-blue-400">
+                <p className="text-sm text-[#00D4FF] dark:text-[#00D4FF]">
                   Will publish on{' '}
                   <strong>
                     {format(parseISO(`${scheduleDate}T${scheduleTime}`), 'EEEE, MMM d, yyyy \'at\' h:mm a')}
                   </strong>
                 </p>
               ) : (
-                <p className="text-sm text-red-700 dark:text-red-400">
+                <p className="text-sm text-[#BC0000] dark:text-[#BC0000]">
                   Schedule time must be in the future
                 </p>
               )}

@@ -57,7 +57,7 @@ export default function AuthorCard({
                 alignItems: 'center',
                 justifyContent: 'center',
                 background: 'linear-gradient(135deg, var(--sm-red), var(--sm-red-light))',
-                color: '#ffffff',
+                color: '#FAFAFB',
                
                 fontSize: '20px',
                 fontWeight: 700,
@@ -146,7 +146,7 @@ export default function AuthorCard({
             aria-label={`Follow ${author.name} on Twitter`}
             onMouseEnter={(e) => {
               e.currentTarget.style.background = '#1DA1F2'
-              e.currentTarget.style.color = '#ffffff'
+              e.currentTarget.style.color = '#FAFAFB'
               e.currentTarget.style.borderColor = '#1DA1F2'
             }}
             onMouseLeave={(e) => {
@@ -178,7 +178,7 @@ export default function AuthorCard({
             aria-label={`Email ${author.name}`}
             onMouseEnter={(e) => {
               e.currentTarget.style.background = 'var(--sm-red)'
-              e.currentTarget.style.color = '#ffffff'
+              e.currentTarget.style.color = '#FAFAFB'
               e.currentTarget.style.borderColor = 'var(--sm-red)'
             }}
             onMouseLeave={(e) => {

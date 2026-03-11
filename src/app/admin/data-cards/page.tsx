@@ -45,52 +45,52 @@ type StatusFilter = 'all' | 'draft' | 'review' | 'approved' | 'published' | 'arc
 const STATUS_COLORS: Record<string, { bg: string; text: string }> = {
   draft: { bg: '#6b728015', text: '#6b7280' },
   review: { bg: '#f59e0b15', text: '#f59e0b' },
-  approved: { bg: '#3b82f615', text: '#3b82f6' },
-  published: { bg: '#22c55e15', text: '#22c55e' },
+  approved: { bg: '#00D4FF15', text: '#00D4FF' },
+  published: { bg: '#00D4FF15', text: '#00D4FF' },
   archived: { bg: '#9ca3af15', text: '#9ca3af' },
 }
 
 const CARD_TYPE_COLORS: Record<string, { bg: string; text: string }> = {
   // In-season types
-  player_spotlight: { bg: '#3b82f615', text: '#3b82f6' },
-  comparison: { bg: '#8b5cf615', text: '#8b5cf6' },
-  hot_take: { bg: '#ef444415', text: '#ef4444' },
+  player_spotlight: { bg: '#00D4FF15', text: '#00D4FF' },
+  comparison: { bg: '#D6B05E15', text: '#D6B05E' },
+  hot_take: { bg: '#BC000015', text: '#BC0000' },
   milestone: { bg: '#f59e0b15', text: '#f59e0b' },
-  game_recap: { bg: '#22c55e15', text: '#22c55e' },
+  game_recap: { bg: '#00D4FF15', text: '#00D4FF' },
   matchup: { bg: '#06b6d415', text: '#06b6d4' },
   trend: { bg: '#ec489915', text: '#ec4899' },
   // Offseason types
-  offseason_trade_rumor: { bg: '#f9731615', text: '#f97316' },
+  offseason_trade_rumor: { bg: '#BC000015', text: '#BC0000' },
   offseason_draft_prospect: { bg: '#a855f715', text: '#a855f7' },
   offseason_free_agent: { bg: '#14b8a615', text: '#14b8a6' },
-  offseason_roster_projection: { bg: '#3b82f615', text: '#3b82f6' },
+  offseason_roster_projection: { bg: '#00D4FF15', text: '#00D4FF' },
   offseason_historical: { bg: '#f59e0b15', text: '#f59e0b' },
 }
 
 const VIRAL_COLORS = [
-  { min: 0, max: 30, color: '#ef4444' },
+  { min: 0, max: 30, color: '#BC0000' },
   { min: 30, max: 60, color: '#f59e0b' },
-  { min: 60, max: 80, color: '#3b82f6' },
-  { min: 80, max: 100, color: '#22c55e' },
+  { min: 60, max: 80, color: '#00D4FF' },
+  { min: 80, max: 100, color: '#00D4FF' },
 ]
 
 function getViralColor(score: number): string {
   const match = VIRAL_COLORS.find(v => score >= v.min && score < v.max)
-  return match?.color || '#22c55e'
+  return match?.color || '#00D4FF'
 }
 
 const TIER_COLORS: Record<number, { bg: string; text: string }> = {
   1: { bg: '#fbbf2420', text: '#d97706' },
-  2: { bg: '#22c55e20', text: '#16a34a' },
-  3: { bg: '#3b82f620', text: '#2563eb' },
+  2: { bg: '#00D4FF20', text: '#16a34a' },
+  3: { bg: '#00D4FF20', text: '#00D4FF' },
   4: { bg: '#6b728020', text: '#6b7280' },
-  5: { bg: '#ef444420', text: '#ef4444' },
+  5: { bg: '#BC000020', text: '#BC0000' },
 }
 
 const CONFIDENCE_COLORS: Record<string, { bg: string; text: string }> = {
-  high: { bg: '#22c55e20', text: '#16a34a' },
+  high: { bg: '#00D4FF20', text: '#16a34a' },
   medium: { bg: '#f59e0b20', text: '#d97706' },
-  low: { bg: '#ef444420', text: '#ef4444' },
+  low: { bg: '#BC000020', text: '#BC0000' },
 }
 
 // --- Video Player Component ---
@@ -163,7 +163,7 @@ function VideoPlayer({ videoUrl }: { videoUrl: string }) {
 
   if (error) {
     return (
-      <div style={{ padding: 24, textAlign: 'center', color: '#ef4444', fontSize: '13px' }}>
+      <div style={{ padding: 24, textAlign: 'center', color: '#BC0000', fontSize: '13px' }}>
         {error}
       </div>
     )
@@ -402,7 +402,7 @@ export default function DataCardsPage() {
         return (
           <button
             onClick={(e) => { e.stopPropagation(); handleStatusUpdate(cardId, 'approved') }}
-            style={{ padding, borderRadius: 6, border: 'none', cursor: 'pointer', fontSize, fontWeight: 600, backgroundColor: '#3b82f6', color: '#fff' }}
+            style={{ padding, borderRadius: 6, border: 'none', cursor: 'pointer', fontSize, fontWeight: 600, backgroundColor: '#00D4FF', color: '#fff' }}
           >
             Approve
           </button>
@@ -411,7 +411,7 @@ export default function DataCardsPage() {
         return (
           <button
             onClick={(e) => { e.stopPropagation(); handleStatusUpdate(cardId, 'published') }}
-            style={{ padding, borderRadius: 6, border: 'none', cursor: 'pointer', fontSize, fontWeight: 600, backgroundColor: '#22c55e', color: '#fff' }}
+            style={{ padding, borderRadius: 6, border: 'none', cursor: 'pointer', fontSize, fontWeight: 600, backgroundColor: '#00D4FF', color: '#fff' }}
           >
             Publish
           </button>
@@ -563,7 +563,7 @@ export default function DataCardsPage() {
                             <span style={{
                               display: 'flex', alignItems: 'center', gap: 3,
                               padding: '2px 6px', borderRadius: 4,
-                              backgroundColor: '#3b82f615', color: '#3b82f6',
+                              backgroundColor: '#00D4FF15', color: '#00D4FF',
                               fontSize: '10px', fontWeight: 600,
                             }}>
                               <ImageIcon /> Image
@@ -638,7 +638,7 @@ export default function DataCardsPage() {
                             onClick={(e) => { e.stopPropagation(); handleDelete(card.id) }}
                             style={{
                               padding: '4px 10px', borderRadius: 6, border: 'none', cursor: 'pointer',
-                              fontSize: '11px', fontWeight: 600, backgroundColor: '#ef444415', color: '#ef4444',
+                              fontSize: '11px', fontWeight: 600, backgroundColor: '#BC000015', color: '#BC0000',
                             }}
                           >
                             Delete
@@ -695,7 +695,7 @@ export default function DataCardsPage() {
             >
               {generating && (
                 <span style={{
-                  width: 14, height: 14, border: '2px solid #ffffff50',
+                  width: 14, height: 14, border: '2px solid #FAFAFB50',
                   borderTopColor: '#fff', borderRadius: '50%',
                   display: 'inline-block', animation: 'spin 0.8s linear infinite',
                 }} />
@@ -708,7 +708,7 @@ export default function DataCardsPage() {
                 marginTop: 16, padding: '12px 14px', borderRadius: 8,
                 backgroundColor: generateResult.success ? '#f0fdf4' : '#fef2f2',
                 border: `1px solid ${generateResult.success ? '#bbf7d0' : '#fecaca'}`,
-                fontSize: '13px', color: generateResult.success ? '#15803d' : '#dc2626',
+                fontSize: '13px', color: generateResult.success ? '#15803d' : '#BC0000',
               }}>
                 {generateResult.message}
               </div>
@@ -983,7 +983,7 @@ export default function DataCardsPage() {
                 onClick={() => handleDelete(selectedCard.id)}
                 style={{
                   padding: '8px 16px', borderRadius: 8, border: 'none', cursor: 'pointer',
-                  fontSize: '13px', fontWeight: 600, backgroundColor: '#ef4444', color: '#fff',
+                  fontSize: '13px', fontWeight: 600, backgroundColor: '#BC0000', color: '#fff',
                 }}
               >
                 Delete

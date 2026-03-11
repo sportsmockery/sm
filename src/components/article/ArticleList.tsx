@@ -31,7 +31,7 @@ export default function ArticleList({
     <div className={className}>
       {title && (
         <div className="mb-4 flex items-center gap-3">
-          <div className="h-6 w-1 rounded-full bg-gradient-to-b from-[#8B0000] to-[#FF0000]" />
+          <div className="h-6 w-1 rounded-full bg-gradient-to-b from-[#8B0000] to-[#BC0000]" />
           <h3 className="font-heading text-lg font-bold" style={{ color: 'var(--sm-text)' }}>
             {title}
           </h3>

@@ -290,7 +290,7 @@ export default function NeuralPulse({ headlines = [], onSearchSubmit }: NeuralPu
                   letterSpacing: '0.1em',
                   textTransform: 'uppercase',
                   backgroundColor: '#bc0000',
-                  color: '#ffffff',
+                  color: '#FAFAFB',
                   border: 'none',
                   cursor: searchLoading ? 'not-allowed' : 'pointer',
                   opacity: searchLoading ? 0.5 : 1,

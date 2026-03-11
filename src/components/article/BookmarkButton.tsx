@@ -58,7 +58,7 @@ export default function BookmarkButton({
       className={`group flex items-center justify-center rounded-full transition-all hover:brightness-95 dark:hover:brightness-110 ${sizeClasses[size]} ${isAnimating ? 'scale-110' : ''} ${className}`}
       style={
         isBookmarked
-          ? { backgroundColor: '#8B0000', color: '#ffffff' }
+          ? { backgroundColor: '#8B0000', color: '#FAFAFB' }
           : { backgroundColor: 'var(--sm-surface)', color: 'var(--sm-text-muted)' }
       }
       aria-label={isBookmarked ? 'Remove bookmark' : 'Add bookmark'}

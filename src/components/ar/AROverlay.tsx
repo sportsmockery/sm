@@ -157,7 +157,7 @@ export default function AROverlay({
                 {/* Border effect */}
                 <mesh position={[0, 0, -0.001]}>
                   <Plane args={[1.45, 0.75]}>
-                    <meshBasicMaterial color="#000000" opacity={0.9} transparent />
+                    <meshBasicMaterial color="#0B0F14" opacity={0.9} transparent />
                   </Plane>
                 </mesh>
 
@@ -165,7 +165,7 @@ export default function AROverlay({
                 <Text
                   position={[0, 0.1, 0.01]}
                   fontSize={0.1}
-                  color="#FFFFFF"
+                  color="#FAFAFB"
                   anchorX="center"
                   anchorY="middle"
                   maxWidth={1.2}
@@ -176,7 +176,7 @@ export default function AROverlay({
                 <Text
                   position={[0, -0.1, 0.01]}
                   fontSize={0.08}
-                  color="#FFFFFF"
+                  color="#FAFAFB"
                   anchorX="center"
                   anchorY="middle"
                   maxWidth={1.2}

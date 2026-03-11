@@ -155,12 +155,12 @@ export default function MyGMScorePage() {
   }
 
   function getGradeColor(grade: number): string {
-    if (grade >= 90) return '#10b981'
-    if (grade >= 80) return '#22c55e'
+    if (grade >= 90) return '#00D4FF'
+    if (grade >= 80) return '#00D4FF'
     if (grade >= 70) return '#84cc16'
     if (grade >= 60) return '#f59e0b'
-    if (grade >= 50) return '#f97316'
-    return '#ef4444'
+    if (grade >= 50) return '#BC0000'
+    return '#BC0000'
   }
 
   if (authLoading || loading) {

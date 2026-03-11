@@ -104,7 +104,7 @@ export default function VisionShard() {
             </span>
             <h4
               style={{
-                color: '#ffffff',
+                color: '#FAFAFB',
                 fontSize: 16,
                 fontWeight: 900,
                 fontStyle: 'italic',
