@@ -36,7 +36,7 @@ export type EdgeHeroProps = {
   defaultQuery?: string
   /** Spinner / disabled state */
   isLoading?: boolean
-  /** Called on submit — if omitted, routes to /ask-ai */
+  /** Called on submit — if omitted, routes to /scout-ai */
   onSubmit?: (query: string) => void | Promise<void>
   /** Future: switch hero visual mode */
   mode?: HeroMode
@@ -48,7 +48,7 @@ export type EdgeHeroProps = {
 /*  Component                                                          */
 /* ------------------------------------------------------------------ */
 
-const ROTATING_PLACEHOLDERS = [
+const FALLBACK_PLACEHOLDERS = [
   "Why did the Bears lose Sunday?",
   "Is Caleb Williams improving?",
   "Should the Cubs trade Bellinger?",
@@ -76,8 +76,17 @@ export function EdgeHero({
   const [placeholderIdx, setPlaceholderIdx] = React.useState(0)
   const [isFading, setIsFading] = React.useState(false)
   const [inputFocused, setInputFocused] = React.useState(false)
+  const [prompts, setPrompts] = React.useState(FALLBACK_PLACEHOLDERS)
   const router = useRouter()
   const helperId = React.useId()
+
+  // Fetch daily Scout-generated prompts on mount
+  React.useEffect(() => {
+    fetch('/api/scout-prompts')
+      .then(r => r.json())
+      .then(d => { if (d.prompts?.length >= 5) setPrompts(d.prompts) })
+      .catch(() => {}) // keep fallback
+  }, [])
 
   // Rotate placeholders every 5s, pause when input is focused or user is typing
   React.useEffect(() => {
@@ -85,14 +94,14 @@ export function EdgeHero({
     const id = setInterval(() => {
       setIsFading(true)
       setTimeout(() => {
-        setPlaceholderIdx((i) => (i + 1) % ROTATING_PLACEHOLDERS.length)
+        setPlaceholderIdx((i) => (i + 1) % prompts.length)
         setIsFading(false)
       }, 200)
     }, ROTATION_INTERVAL)
     return () => clearInterval(id)
-  }, [placeholder, inputFocused, query])
+  }, [placeholder, inputFocused, query, prompts])
 
-  const activePlaceholder = placeholder ?? ROTATING_PLACEHOLDERS[placeholderIdx]
+  const activePlaceholder = placeholder ?? prompts[placeholderIdx]
 
   const greeting = userName ? `Hi ${userName},` : "Hi there,"
 
@@ -104,7 +113,7 @@ export function EdgeHero({
     if (onSubmit) {
       await onSubmit(trimmed)
     } else {
-      router.push(`/ask-ai?q=${encodeURIComponent(trimmed)}`)
+      router.push(`/scout-ai?q=${encodeURIComponent(trimmed)}`)
     }
   }
 
