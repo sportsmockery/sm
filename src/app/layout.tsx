@@ -148,9 +148,7 @@ export default function RootLayout({
               <div className="flex min-h-screen flex-col">
                 <LiveStrip />
                 <div id="main-content" className="flex-1" tabIndex={-1}>
-                  <div className="sm-container">
-                    <Breadcrumb />
-                  </div>
+                  {/* Breadcrumb removed — navigation handled by sidebar */}
                   <MotionProvider>
                     <WebSocketProvider>
                       <MediaControllerProvider>
@@ -168,7 +166,7 @@ export default function RootLayout({
               {/* NavigationOrb removed — nav moved to left sidebar */}
               <MobileBottomNav />
               {/* ParticleBg removed — replaced by Chicago star canvas in hero */}
-              <ScrollToTop />
+              {/* ScrollToTop (floating Scout orb) removed */}
               <CookieBanner />
               <TeamChatPanel teamSlug="bears" teamName="Bears" />
               {/* Floating buttons disabled - users access AI and Fan Chat via header buttons */}
