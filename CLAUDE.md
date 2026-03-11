@@ -75,6 +75,7 @@ SM Edge uses a **strict five-color palette**. No additional accent colors should
 - **DO NOT** size hero headlines below 48px or above 72px.
 - **DO NOT** use text smaller than 13px (accessibility).
 - Use `font-bold` for heroes, `font-medium` for article titles, default weight for body/UI/metadata.
+- **DO NOT** modify `font-family` declarations in `globals.css`, `tokens.css`, or `tailwind.config.ts` unless Chris explicitly asks for a font migration. These files control site-wide typography — changing them breaks the entire site. The branding rules here define the **target standard**; the actual CSS migration is a separate, owner-approved task.
 
 ### Motion & Animation
 
