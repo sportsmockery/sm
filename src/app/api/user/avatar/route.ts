@@ -1,8 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createServerClient } from '@supabase/ssr'
 import { cookies } from 'next/headers'
+import { supabaseAdmin } from '@/lib/db'
 
-// Create Supabase server client
+// Create Supabase server client (user-scoped, for auth verification)
 async function createSupabaseServer() {
   const cookieStore = await cookies()
   return createServerClient(
@@ -65,8 +66,8 @@ export async function POST(request: NextRequest) {
     const arrayBuffer = await file.arrayBuffer()
     const buffer = Buffer.from(arrayBuffer)
 
-    // Upload to Supabase Storage
-    const { data: uploadData, error: uploadError } = await supabase.storage
+    // Upload to Supabase Storage using admin client (bypasses RLS)
+    const { data: uploadData, error: uploadError } = await supabaseAdmin.storage
       .from('public')
       .upload(filePath, buffer, {
         contentType: file.type,
@@ -79,14 +80,15 @@ export async function POST(request: NextRequest) {
     }
 
     // Get public URL
-    const { data: { publicUrl } } = supabase.storage
+    const { data: { publicUrl } } = supabaseAdmin.storage
       .from('public')
       .getPublicUrl(filePath)
 
-    // Update user metadata with avatar URL
-    const { error: updateError } = await supabase.auth.updateUser({
-      data: { avatar_url: publicUrl }
-    })
+    // Update user metadata with avatar URL (use admin to ensure it succeeds)
+    const { error: updateError } = await supabaseAdmin.auth.admin.updateUserById(
+      user.id,
+      { user_metadata: { avatar_url: publicUrl } }
+    )
 
     if (updateError) {
       console.error('Avatar metadata update error:', updateError)
