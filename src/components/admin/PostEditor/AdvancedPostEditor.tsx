@@ -1634,11 +1634,10 @@ export default function AdvancedPostEditor({
 
               {/* Tags */}
               <TagInput selectedTags={selectedTags} onChange={setSelectedTags} />
-              <p className="mt-1.5 text-[11px] leading-relaxed text-[var(--text-muted)]">
-                Add 3–6 tags that describe the main players or topics in your story.
-                Use short, lowercase tags and select existing ones when possible.
-                <br />
-                <span className="text-[var(--text-secondary)]">Examples: caleb-williams trade analysis draft offense bullpen</span>
+              <p className="mt-1.5 text-[11px] leading-relaxed text-[var(--text-muted)] flex items-center gap-1">
+                Add 3–6 tags, click the
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#9ca3af" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" className="inline-block"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>
+                for more info.
               </p>
 
               {/* Featured Image */}
