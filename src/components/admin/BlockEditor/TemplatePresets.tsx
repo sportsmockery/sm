@@ -19,7 +19,7 @@ export const TEMPLATE_PRESETS: TemplatePreset[] = [
   {
     id: 'standard-news',
     label: 'Standard News',
-    description: 'Article with Scout insight & GM interaction',
+    description: 'Editorial article with Scout analysis and GM Pulse engagement',
     icon: Newspaper,
     blocks: () => [
       createBlock('paragraph'),
@@ -28,8 +28,6 @@ export const TEMPLATE_PRESETS: TemplatePreset[] = [
       createBlock('paragraph'),
       createBlock('scout-insight'),
       createBlock('paragraph'),
-      createBlock('image'),
-      createBlock('paragraph'),
       createBlock('update'),
       createBlock('paragraph'),
     ],
@@ -37,22 +35,22 @@ export const TEMPLATE_PRESETS: TemplatePreset[] = [
   {
     id: 'stats-comparison',
     label: 'Stats / Player Comparison',
-    description: 'Head-to-head comparison with charts',
+    description: 'Data-driven article with player matchups and chart analysis',
     icon: BarChart,
     blocks: () => [
+      createBlock('paragraph'),
       createBlock('player-comparison'),
       createBlock('paragraph'),
       createBlock('stats-chart'),
       createBlock('paragraph'),
       createBlock('stats-chart'),
-      createBlock('paragraph'),
       createBlock('gm-interaction'),
     ],
   },
   {
     id: 'rumor-trade',
     label: 'Rumor / Trade Simulator',
-    description: 'Trade scenario with rumor meter & mock draft',
+    description: 'Rumor confidence, trade scenarios, and mock draft picks',
     icon: Radio,
     blocks: () => [
       createBlock('rumor-meter'),
@@ -67,7 +65,7 @@ export const TEMPLATE_PRESETS: TemplatePreset[] = [
   {
     id: 'trending',
     label: 'Trending',
-    description: 'Hot topic with reactions & fan poll',
+    description: 'Trending topic with heat gauge, reactions, and fan polling',
     icon: Flame,
     blocks: () => [
       createBlock('heat-meter'),
@@ -80,8 +78,8 @@ export const TEMPLATE_PRESETS: TemplatePreset[] = [
   },
   {
     id: 'fan-debate',
-    label: 'Fan Chat / Debate',
-    description: 'PRO vs CON with fan takes',
+    label: 'Fan Debate',
+    description: 'PRO vs CON debate with Scout AI verdict',
     icon: MessageCircle,
     blocks: () => [
       createBlock('paragraph'),
@@ -105,8 +103,8 @@ export function TemplateSelector({ onSelect }: TemplateSelectorProps) {
         border: '1px solid rgba(255,255,255,0.08)',
       }}
     >
-      <h3 className="text-sm font-bold text-white mb-1">Start with a template</h3>
-      <p className="text-xs text-slate-500 mb-4">Choose a layout or start blank</p>
+      <h3 className="text-sm font-bold text-white mb-1">Choose an article template</h3>
+      <p className="text-xs text-slate-500 mb-4">Select a composition or start blank</p>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
         {TEMPLATE_PRESETS.map((preset) => {

@@ -167,9 +167,9 @@ export interface BlockCategory {
 
 export const BLOCK_CATEGORIES: BlockCategory[] = [
   {
-    label: 'Content',
+    label: 'Text',
     blocks: [
-      { type: 'paragraph', label: 'Paragraph', icon: 'Type', description: 'Plain text content' },
+      { type: 'paragraph', label: 'Paragraph', icon: 'Type', description: 'Article body text' },
       { type: 'heading', label: 'Heading', icon: 'Heading', description: 'Section heading (H2-H4)' },
       { type: 'image', label: 'Image', icon: 'Image', description: 'Image with caption' },
       { type: 'video', label: 'Video', icon: 'Play', description: 'Embedded video' },
@@ -177,36 +177,31 @@ export const BLOCK_CATEGORIES: BlockCategory[] = [
     ],
   },
   {
-    label: 'AI & Intelligence',
+    label: 'Intelligence',
     blocks: [
-      { type: 'scout-insight', label: 'Scout Insight', icon: 'Sparkles', description: 'Scout AI analysis quote' },
+      { type: 'scout-insight', label: 'Scout Insight', icon: 'Sparkles', description: 'Scout AI analysis block' },
       { type: 'gm-interaction', label: 'GM Pulse', icon: 'Vote', description: 'GM Score vote interaction' },
-      { type: 'poll', label: 'Fan Poll', icon: 'BarChart3', description: 'Yes/No fan poll with GM reward' },
+      { type: 'poll', label: 'Fan Poll', icon: 'BarChart3', description: 'Fan poll with GM reward' },
     ],
   },
   {
-    label: 'Stats & Data',
+    label: 'GM & Roster',
     blocks: [
-      { type: 'player-comparison', label: 'Player Comparison', icon: 'Users', description: 'Head-to-head stat bars' },
-      { type: 'stats-chart', label: 'Stats Chart', icon: 'BarChart', description: 'Bar or line chart' },
-    ],
-  },
-  {
-    label: 'Trades & Rumors',
-    blocks: [
-      { type: 'trade-scenario', label: 'Trade Scenario', icon: 'ArrowRightLeft', description: 'Team A/B trade card' },
-      { type: 'rumor-meter', label: 'Rumor Meter', icon: 'Thermometer', description: 'Rumor strength gauge' },
+      { type: 'player-comparison', label: 'Player Comparison', icon: 'Users', description: 'Head-to-head stat matchup' },
+      { type: 'stats-chart', label: 'Chart', icon: 'BarChart', description: 'Bar or line chart' },
+      { type: 'trade-scenario', label: 'Trade Scenario', icon: 'ArrowRightLeft', description: 'Team A / B trade card' },
+      { type: 'rumor-meter', label: 'Rumor Confidence', icon: 'Thermometer', description: 'Rumor confidence gauge' },
       { type: 'mock-draft', label: 'Mock Draft', icon: 'List', description: 'Draft pick cards' },
     ],
   },
   {
     label: 'Engagement',
     blocks: [
-      { type: 'debate', label: 'Debate Block', icon: 'Swords', description: 'PRO vs CON with voting' },
-      { type: 'hot-take', label: 'Hot Take', icon: 'Flame', description: 'Highlighted hot take' },
-      { type: 'reaction-stream', label: 'Reactions', icon: 'MessageCircle', description: 'Fan reaction cards' },
+      { type: 'debate', label: 'Debate', icon: 'Swords', description: 'PRO vs CON with voting' },
+      { type: 'hot-take', label: 'Hot Take', icon: 'Flame', description: 'Bold highlighted take' },
+      { type: 'reaction-stream', label: 'Reaction Stream', icon: 'MessageCircle', description: 'Fan reaction cards' },
       { type: 'heat-meter', label: 'Heat Meter', icon: 'Flame', description: 'Trending heat gauge' },
-      { type: 'update', label: 'Update Block', icon: 'Bell', description: 'Breaking update notice' },
+      { type: 'update', label: 'Breaking Update', icon: 'Bell', description: 'Breaking update notice' },
     ],
   },
 ];

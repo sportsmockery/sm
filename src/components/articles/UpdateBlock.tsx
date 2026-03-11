@@ -13,7 +13,7 @@ export function UpdateBlock({ timestamp, text }: UpdateBlockProps) {
       className="rounded-xl p-4 my-8 border-l-4"
       style={{
         backgroundColor: 'rgba(255,106,0,0.04)',
-        borderLeftColor: '#FF6A00',
+        borderLeftColor: '#BC0000',
         borderTop: '1px solid rgba(255,255,255,0.08)',
         borderRight: '1px solid rgba(255,255,255,0.08)',
         borderBottom: '1px solid rgba(255,255,255,0.08)',
@@ -22,7 +22,7 @@ export function UpdateBlock({ timestamp, text }: UpdateBlockProps) {
       <div className="flex items-center gap-2 mb-2">
         <span
           className="text-[10px] font-bold uppercase tracking-widest px-2 py-0.5 rounded"
-          style={{ backgroundColor: 'rgba(255,106,0,0.15)', color: '#FF6A00' }}
+          style={{ backgroundColor: 'rgba(255,106,0,0.15)', color: '#BC0000' }}
         >
           UPDATE
         </span>

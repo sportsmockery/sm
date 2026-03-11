@@ -174,13 +174,43 @@ export function BlockEditor({ initialBlocks, initialTemplate, onChange }: BlockE
         </div>
       ) : (
         <div
-          className="rounded-xl p-6 min-h-[400px]"
+          className="rounded-xl min-h-[400px] overflow-hidden"
           style={{
             backgroundColor: '#0B0F14',
             border: '1px solid rgba(255,255,255,0.08)',
           }}
         >
-          <BlockPreviewRenderer blocks={blocks} />
+          {/* Article preview chrome */}
+          <div
+            className="flex items-center justify-between px-4 py-3 border-b"
+            style={{ borderColor: 'rgba(255,255,255,0.06)', backgroundColor: 'rgba(255,255,255,0.02)' }}
+          >
+            <span className="text-[10px] font-bold uppercase tracking-widest text-slate-500">Article Preview</span>
+            <span className="text-[10px] text-slate-600">{blocks.length} blocks</span>
+          </div>
+          {/* ArticleHeader placeholder */}
+          <div className="px-6 pt-8 pb-4 sm:px-10 max-w-[720px] mx-auto">
+            <div className="flex items-center gap-2 mb-3">
+              <span
+                className="text-[10px] font-bold uppercase tracking-widest px-2 py-0.5 rounded"
+                style={{ backgroundColor: 'rgba(188,0,0,0.12)', color: '#BC0000' }}
+              >
+                Category
+              </span>
+            </div>
+            <h1 className="text-[28px] sm:text-[32px] font-bold tracking-tight mb-2" style={{ color: '#FAFAFB' }}>
+              Article Headline
+            </h1>
+            <div className="flex items-center gap-2 text-[13px] text-slate-500">
+              <span>By Author</span>
+              <span className="w-1 h-1 rounded-full bg-slate-600" />
+              <span>Draft</span>
+            </div>
+          </div>
+          {/* ArticleBody */}
+          <div className="px-6 pb-8 sm:px-10">
+            <BlockPreviewRenderer blocks={blocks} />
+          </div>
         </div>
       )}
     </div>

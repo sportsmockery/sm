@@ -87,37 +87,46 @@ export function BlockInserter({ onInsert }: BlockInserterProps) {
           </div>
 
           {/* Categories */}
-          {filteredCategories.map((cat) => (
-            <div key={cat.label}>
-              <div className="px-3 pt-3 pb-1">
-                <span className="text-[10px] font-bold uppercase tracking-widest text-slate-500">
-                  {cat.label}
-                </span>
-              </div>
-              {cat.blocks.map((block) => {
-                const Icon = ICON_MAP[block.icon] || Type;
-                return (
-                  <button
-                    key={block.type}
-                    type="button"
-                    onClick={() => { onInsert(block.type); setOpen(false); }}
-                    className="w-full flex items-center gap-3 px-3 py-2.5 text-left transition-colors hover:bg-white/5"
-                  >
-                    <div
-                      className="flex items-center justify-center w-8 h-8 rounded-lg shrink-0"
-                      style={{ backgroundColor: 'rgba(0,212,255,0.1)' }}
+          {filteredCategories.map((cat) => {
+            // Category accent: Intelligence/Text = cyan, GM & Roster = cyan, Engagement = red
+            const catAccent = cat.label === 'Engagement' ? '#BC0000' : '#00D4FF';
+            const catAccentBg = cat.label === 'Engagement' ? 'rgba(188,0,0,0.1)' : 'rgba(0,212,255,0.1)';
+            return (
+              <div key={cat.label}>
+                <div className="px-3 pt-3 pb-1">
+                  <span className="text-[10px] font-bold uppercase tracking-widest text-slate-500">
+                    {cat.label}
+                  </span>
+                </div>
+                {cat.blocks.map((block) => {
+                  const Icon = ICON_MAP[block.icon] || Type;
+                  // Override accent for specific rumor/heat blocks
+                  const isRedBlock = ['rumor-meter', 'heat-meter', 'hot-take', 'update'].includes(block.type);
+                  const accent = isRedBlock ? '#BC0000' : catAccent;
+                  const accentBg = isRedBlock ? 'rgba(188,0,0,0.1)' : catAccentBg;
+                  return (
+                    <button
+                      key={block.type}
+                      type="button"
+                      onClick={() => { onInsert(block.type); setOpen(false); }}
+                      className="w-full flex items-center gap-3 px-3 py-2.5 text-left transition-colors hover:bg-white/5"
                     >
-                      {React.createElement(Icon, { size: 14, color: '#00D4FF' })}
-                    </div>
-                    <div>
-                      <div className="text-sm font-medium text-white">{block.label}</div>
-                      <div className="text-[11px] text-slate-500">{block.description}</div>
-                    </div>
-                  </button>
-                );
-              })}
-            </div>
-          ))}
+                      <div
+                        className="flex items-center justify-center w-8 h-8 rounded-lg shrink-0"
+                        style={{ backgroundColor: accentBg }}
+                      >
+                        {React.createElement(Icon, { size: 14, color: accent })}
+                      </div>
+                      <div>
+                        <div className="text-sm font-medium text-white">{block.label}</div>
+                        <div className="text-[11px] text-slate-500">{block.description}</div>
+                      </div>
+                    </button>
+                  );
+                })}
+              </div>
+            );
+          })}
 
           {filteredCategories.length === 0 && (
             <div className="p-6 text-center text-sm text-slate-500">No blocks found</div>

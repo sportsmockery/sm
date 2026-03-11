@@ -10,8 +10,8 @@ interface ScoutInsightProps {
 
 export function ScoutInsight({ insight, confidence = 'high' }: ScoutInsightProps) {
   const confidenceColors = {
-    low: '#FF6A00',
-    medium: '#FFD700',
+    low: '#BC0000',
+    medium: '#D6B05E',
     high: '#00D4FF',
   };
 

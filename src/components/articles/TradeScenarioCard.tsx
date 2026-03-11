@@ -34,8 +34,8 @@ function TradeColumn({ team, receives }: { team: string; receives: TradeItem[] }
             <span
               className="text-[10px] font-bold uppercase px-1.5 py-0.5 rounded"
               style={{
-                backgroundColor: item.type === 'player' ? 'rgba(0,212,255,0.15)' : 'rgba(255,106,0,0.15)',
-                color: item.type === 'player' ? '#00D4FF' : '#FF6A00',
+                backgroundColor: item.type === 'player' ? 'rgba(0,212,255,0.15)' : 'rgba(214,176,94,0.15)',
+                color: item.type === 'player' ? '#00D4FF' : '#D6B05E',
               }}
             >
               {item.type}
@@ -58,8 +58,8 @@ export function TradeScenarioCard({ teamA, teamB, teamAReceives, teamBReceives }
       }}
     >
       <div className="flex items-center gap-2 mb-4">
-        <ArrowRightLeft size={16} style={{ color: '#FF6A00' }} />
-        <span className="text-xs font-bold uppercase tracking-widest" style={{ color: '#FF6A00' }}>
+        <ArrowRightLeft size={16} style={{ color: '#BC0000' }} />
+        <span className="text-xs font-bold uppercase tracking-widest" style={{ color: '#BC0000' }}>
           Trade Scenario
         </span>
       </div>

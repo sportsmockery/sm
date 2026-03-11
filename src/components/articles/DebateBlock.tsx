@@ -46,7 +46,7 @@ export function DebateBlock({ proArgument, conArgument, reward = 3 }: DebateBloc
             border: '2px solid rgba(255,106,0,0.3)',
           }}
         >
-          <span className="text-xs font-bold uppercase tracking-widest mb-3 block" style={{ color: '#FF6A00' }}>
+          <span className="text-xs font-bold uppercase tracking-widest mb-3 block" style={{ color: '#BC0000' }}>
             CON
           </span>
           <p className="text-sm text-slate-300 leading-relaxed">{conArgument}</p>
@@ -75,8 +75,8 @@ export function DebateBlock({ proArgument, conArgument, reward = 3 }: DebateBloc
           disabled={!!vote}
           className="flex-1 py-3 rounded-lg text-sm font-bold uppercase tracking-wide transition-all min-h-[44px]"
           style={{
-            backgroundColor: vote === 'con' ? '#FF6A00' : 'rgba(255,106,0,0.1)',
-            color: vote === 'con' ? '#0B0F14' : '#FF6A00',
+            backgroundColor: vote === 'con' ? '#BC0000' : 'rgba(255,106,0,0.1)',
+            color: vote === 'con' ? '#0B0F14' : '#BC0000',
             border: '1px solid rgba(255,106,0,0.3)',
             opacity: vote === 'pro' ? 0.4 : 1,
           }}

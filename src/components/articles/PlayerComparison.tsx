@@ -57,7 +57,7 @@ function StatBar({ label, valueA, valueB, isVisible }: {
               className="h-full rounded-full transition-all duration-700 ease-out"
               style={{
                 width: isVisible ? `${pctB}%` : '0%',
-                backgroundColor: '#FF6A00',
+                backgroundColor: '#BC0000',
               }}
             />
           </div>
@@ -99,7 +99,7 @@ export function PlayerComparison({ playerA, playerB, stats }: PlayerComparisonPr
               <Image src={player.headshot} alt={player.name} fill className="object-cover" />
             </div>
             <h4 className="text-sm font-bold text-white">{player.name}</h4>
-            <span className="text-xs" style={{ color: idx === 0 ? '#00D4FF' : '#FF6A00' }}>
+            <span className="text-xs" style={{ color: idx === 0 ? '#00D4FF' : '#BC0000' }}>
               {player.team}
             </span>
           </div>

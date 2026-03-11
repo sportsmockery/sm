@@ -260,7 +260,7 @@ export function TradeScenarioPanel({ block, onChange, onDelete, onMoveUp, onMove
   };
 
   return (
-    <BlockShell label="Trade Scenario" accent="#FF6A00" onDelete={onDelete} onMoveUp={onMoveUp} onMoveDown={onMoveDown}>
+    <BlockShell label="Trade Scenario" accent="#BC0000" onDelete={onDelete} onMoveUp={onMoveUp} onMoveDown={onMoveDown}>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {(['teamAReceives', 'teamBReceives'] as const).map((side, sideIdx) => {
           const teamKey = sideIdx === 0 ? 'teamA' : 'teamB';
@@ -348,7 +348,7 @@ export function StatsChartPanel({ block, onChange, onDelete, onMoveUp, onMoveDow
   };
 
   return (
-    <BlockShell label="Stats Chart" accent="#00D4FF" onDelete={onDelete} onMoveUp={onMoveUp} onMoveDown={onMoveDown}>
+    <BlockShell label="Chart" accent="#00D4FF" onDelete={onDelete} onMoveUp={onMoveUp} onMoveDown={onMoveDown}>
       <div className="flex gap-3 mb-3">
         <div className="flex-1"><Field label="Title"><TextInput value={d.title} onChange={(title) => onChange({ ...block, data: { ...d, title } })} /></Field></div>
         <div className="w-28"><Field label="Type"><Select value={d.chartType} onChange={(chartType) => onChange({ ...block, data: { ...d, chartType: chartType as 'bar' | 'line' } })} options={[{ value: 'bar', label: 'Bar' }, { value: 'line', label: 'Line' }]} /></Field></div>
@@ -369,11 +369,11 @@ export function StatsChartPanel({ block, onChange, onDelete, onMoveUp, onMoveDow
 export function DebatePanel({ block, onChange, onDelete, onMoveUp, onMoveDown }: BlockPanelProps) {
   if (block.type !== 'debate') return null;
   return (
-    <BlockShell label="Debate" accent="#FF6A00" onDelete={onDelete} onMoveUp={onMoveUp} onMoveDown={onMoveDown}>
-      <Field label="PRO Argument">
+    <BlockShell label="Debate" accent="#BC0000" onDelete={onDelete} onMoveUp={onMoveUp} onMoveDown={onMoveDown}>
+      <Field label="PRO Argument (The Case For)">
         <TextArea value={block.data.proArgument} onChange={(proArgument) => onChange({ ...block, data: { ...block.data, proArgument } })} placeholder="The case for..." rows={3} />
       </Field>
-      <Field label="CON Argument">
+      <Field label="CON Argument (The Case Against)">
         <TextArea value={block.data.conArgument} onChange={(conArgument) => onChange({ ...block, data: { ...block.data, conArgument } })} placeholder="The case against..." rows={3} />
       </Field>
       <Field label="GM Score Reward">
@@ -386,7 +386,7 @@ export function DebatePanel({ block, onChange, onDelete, onMoveUp, onMoveDown }:
 export function UpdatePanel({ block, onChange, onDelete, onMoveUp, onMoveDown }: BlockPanelProps) {
   if (block.type !== 'update') return null;
   return (
-    <BlockShell label="Update" accent="#FF6A00" onDelete={onDelete} onMoveUp={onMoveUp} onMoveDown={onMoveDown}>
+    <BlockShell label="Breaking Update" accent="#BC0000" onDelete={onDelete} onMoveUp={onMoveUp} onMoveDown={onMoveDown}>
       <Field label="Timestamp">
         <TextInput value={block.data.timestamp} onChange={(timestamp) => onChange({ ...block, data: { ...block.data, timestamp } })} placeholder="2:14 PM CT" />
       </Field>
@@ -416,7 +416,7 @@ export function PollPanel({ block, onChange, onDelete, onMoveUp, onMoveDown }: B
 export function HotTakePanel({ block, onChange, onDelete, onMoveUp, onMoveDown }: BlockPanelProps) {
   if (block.type !== 'hot-take') return null;
   return (
-    <BlockShell label="Hot Take" accent="#FF6A00" onDelete={onDelete} onMoveUp={onMoveUp} onMoveDown={onMoveDown}>
+    <BlockShell label="Hot Take" accent="#BC0000" onDelete={onDelete} onMoveUp={onMoveUp} onMoveDown={onMoveDown}>
       <Field label="Hot Take Text">
         <TextArea value={block.data.text} onChange={(text) => onChange({ ...block, data: { ...block.data, text } })} placeholder="Bold claim here..." rows={3} />
       </Field>
@@ -427,8 +427,8 @@ export function HotTakePanel({ block, onChange, onDelete, onMoveUp, onMoveDown }
 export function RumorMeterPanel({ block, onChange, onDelete, onMoveUp, onMoveDown }: BlockPanelProps) {
   if (block.type !== 'rumor-meter') return null;
   return (
-    <BlockShell label="Rumor Meter" accent="#FF6A00" onDelete={onDelete} onMoveUp={onMoveUp} onMoveDown={onMoveDown}>
-      <Field label="Strength">
+    <BlockShell label="Rumor Confidence" accent="#BC0000" onDelete={onDelete} onMoveUp={onMoveUp} onMoveDown={onMoveDown}>
+      <Field label="Confidence Level">
         <Select value={block.data.strength} onChange={(strength) => onChange({ ...block, data: { strength: strength as 'Low' | 'Medium' | 'Strong' | 'Heating Up' } })} options={[{ value: 'Low', label: 'Low' }, { value: 'Medium', label: 'Medium' }, { value: 'Strong', label: 'Strong' }, { value: 'Heating Up', label: 'Heating Up' }]} />
       </Field>
     </BlockShell>
@@ -438,7 +438,7 @@ export function RumorMeterPanel({ block, onChange, onDelete, onMoveUp, onMoveDow
 export function HeatMeterPanel({ block, onChange, onDelete, onMoveUp, onMoveDown }: BlockPanelProps) {
   if (block.type !== 'heat-meter') return null;
   return (
-    <BlockShell label="Heat Meter" accent="#FF6A00" onDelete={onDelete} onMoveUp={onMoveUp} onMoveDown={onMoveDown}>
+    <BlockShell label="Heat Meter" accent="#BC0000" onDelete={onDelete} onMoveUp={onMoveUp} onMoveDown={onMoveDown}>
       <Field label="Level">
         <Select value={block.data.level} onChange={(level) => onChange({ ...block, data: { level: level as 'Warm' | 'Hot' | 'Nuclear' } })} options={[{ value: 'Warm', label: 'Warm' }, { value: 'Hot', label: 'Hot' }, { value: 'Nuclear', label: 'Nuclear' }]} />
       </Field>
@@ -463,7 +463,7 @@ export function ReactionStreamPanel({ block, onChange, onDelete, onMoveUp, onMov
   };
 
   return (
-    <BlockShell label="Reactions" accent="#00FF00" onDelete={onDelete} onMoveUp={onMoveUp} onMoveDown={onMoveDown}>
+    <BlockShell label="Reaction Stream" accent="#00D4FF" onDelete={onDelete} onMoveUp={onMoveUp} onMoveDown={onMoveDown}>
       {d.reactions.map((r, idx) => (
         <div key={idx} className="mb-3 p-3 rounded-lg" style={{ backgroundColor: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.06)' }}>
           <div className="flex gap-2 mb-2">
