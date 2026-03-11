@@ -4,7 +4,7 @@ import { useState, useEffect } from "react"
 import HomeSidebar from "@/components/homepage/HomeSidebar"
 import MainFeed from "@/components/homepage/MainFeed"
 import TrendsSidebar from "@/components/homepage/TrendsSidebar"
-import SearchHero from "@/components/homepage/SearchHero"
+import { EdgeHero } from "@/components/home/edge-hero"
 import { Home, Compass, Plus, Film, User, X, FileText, Video, Camera, ImageIcon } from "lucide-react"
 
 interface HomepageFeedV2Props {
@@ -35,7 +35,17 @@ export default function HomepageFeedV2({ firstName }: HomepageFeedV2Props) {
       style={{ background: 'var(--hp-background)', color: 'var(--hp-foreground)' }}
     >
       {/* Full-screen Search Hero - above the fold */}
-      <SearchHero firstName={firstName || "Chris"} />
+      <EdgeHero
+        userName={firstName || "Chris"}
+        welcomeMessage="Welcome to SM✶EDGE, our AI-powered platform."
+        headline="What can I help you with?"
+        placeholder="Ask Scout anything..."
+        quickActions={[
+          { id: "1", label: "Bears rumors", value: "What are the latest Bears rumors today?" },
+          { id: "2", label: "Cubs outlook", value: "Give me the Cubs outlook for this week." },
+          { id: "3", label: "Bulls debate", value: "What are fans debating most about the Bulls right now?" },
+        ]}
+      />
 
       {/* Three-column layout - below the fold */}
       <div className="mx-auto flex max-w-[1300px]">

@@ -1,7 +1,10 @@
 "use client"
 
+import { useState, useRef, useEffect } from "react"
 import Image from "next/image"
-import { MoreHorizontal, ArrowRightLeft, Users, BarChart3, FileText, Play } from "lucide-react"
+import Link from "next/link"
+import { MoreHorizontal, ArrowRightLeft, ClipboardPen, MessageSquare, BarChart3, Video, User } from "lucide-react"
+import { useAuth } from "@/contexts/AuthContext"
 
 interface TrendsSidebarProps {
   selectedTeam: string
@@ -11,62 +14,107 @@ const edgeTools = [
   {
     id: "trade-sim",
     title: "Trade Simulator",
-    description: "Build and grade trades with AI logic.",
-    cta: "Open",
+    description: "Play GM and build trades now.",
     icon: ArrowRightLeft,
     href: "/gm",
   },
   {
     id: "mock-draft",
     title: "Mock Draft",
-    description: "Run mocks with instant grades.",
-    cta: "Start",
-    icon: FileText,
+    description: "Run mock drafts with instant grades.",
+    icon: ClipboardPen,
     href: "/mock-draft",
   },
   {
     id: "fan-hub",
     title: "Fan Chat",
-    description: "Live chat, conversation, and relentless banter.",
-    cta: "Join",
-    icon: Users,
+    description: "Live chat and conversation.",
+    icon: MessageSquare,
     href: "/fan-chat",
   },
   {
     id: "data-cosmos",
     title: "Data Cosmos",
-    description: "Stats, schedules, and leaderboards.",
-    cta: "Explore",
+    description: "Stats, rosters, scores, and more.",
     icon: BarChart3,
     href: "/chicago-bears",
   },
   {
     id: "shows",
-    title: "Original Shows",
-    description: "Exclusive series and breakdowns.",
-    cta: "Watch",
-    icon: Play,
+    title: "Vision Theater",
+    description: "Stream all the latest SM videos.",
+    icon: Video,
     href: "/bears-film-room",
   },
 ]
 
 export default function TrendsSidebar({ selectedTeam }: TrendsSidebarProps) {
+  const { user, isAuthenticated } = useAuth()
+  const [menuOpen, setMenuOpen] = useState(false)
+  const menuRef = useRef<HTMLDivElement>(null)
+
+  // Close menu on outside click
+  useEffect(() => {
+    if (!menuOpen) return
+    const handleClick = (e: MouseEvent) => {
+      if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
+        setMenuOpen(false)
+      }
+    }
+    document.addEventListener('mousedown', handleClick)
+    return () => document.removeEventListener('mousedown', handleClick)
+  }, [menuOpen])
+
+  const username = user?.email?.split('@')[0] || 'Guest'
+  const fullName = user?.name || ''
+
   return (
     <aside className="sticky top-0 pl-6 hidden h-screen w-[350px] flex-col gap-4 pt-4 pb-3 lg:flex overflow-y-auto">
       {/* User Profile */}
-      <button className="hp-sidebar-card flex items-center gap-3 p-4 hp-tap-target">
-        <div
-          className="h-11 w-11 rounded-xl overflow-hidden flex items-center justify-center flex-shrink-0"
-          style={{ background: '#bc0000' }}
-        >
-          <span className="text-white font-bold">SM</span>
+      <div className="hp-sidebar-card relative" ref={menuRef}>
+        <div className="flex items-center gap-3 p-4">
+          <div
+            className="h-11 w-11 rounded-xl overflow-hidden flex items-center justify-center flex-shrink-0"
+            style={{ background: user?.avatar ? 'transparent' : '#6b7280' }}
+          >
+            {user?.avatar ? (
+              <Image src={user.avatar} alt={username} width={44} height={44} className="h-full w-full object-cover" />
+            ) : (
+              <User className="h-6 w-6" style={{ color: '#9ca3af' }} />
+            )}
+          </div>
+          <div className="flex flex-1 flex-col text-left text-sm">
+            <span style={{ fontSize: 15, fontWeight: 700, color: 'var(--hp-foreground)' }}>{username}</span>
+            {fullName && (
+              <span style={{ fontSize: 11, color: 'var(--hp-muted-foreground)' }}>{fullName}</span>
+            )}
+          </div>
+          <button
+            onClick={() => setMenuOpen(!menuOpen)}
+            className="hp-tap-target"
+            style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 4 }}
+          >
+            <MoreHorizontal className="h-5 w-5" style={{ color: 'var(--hp-muted-foreground)' }} />
+          </button>
         </div>
-        <div className="flex flex-1 flex-col text-left text-sm">
-          <span style={{ fontSize: 15, fontWeight: 700, color: 'var(--hp-foreground)' }}>Sports Mockery</span>
-          <span style={{ fontSize: 11, color: 'var(--hp-muted-foreground)' }}>@SportsMockery</span>
-        </div>
-        <MoreHorizontal className="h-5 w-5" style={{ color: 'var(--hp-muted-foreground)' }} />
-      </button>
+        {menuOpen && (
+          <div
+            className="absolute right-4 top-14 z-50 rounded-lg py-1 shadow-lg"
+            style={{ background: 'var(--hp-card)', border: '1px solid var(--hp-border)', minWidth: 160 }}
+          >
+            <Link
+              href="/profile"
+              onClick={() => setMenuOpen(false)}
+              className="block px-4 py-2 text-sm transition-colors"
+              style={{ color: 'var(--hp-foreground)', textDecoration: 'none' }}
+              onMouseEnter={(e) => { e.currentTarget.style.background = 'var(--hp-muted)' }}
+              onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent' }}
+            >
+              View Profile
+            </Link>
+          </div>
+        )}
+      </div>
 
       {/* Ask Scout - Quick Access */}
       <button className="hp-sidebar-card w-full p-4 flex items-center gap-3 group transition-all">
@@ -79,7 +127,7 @@ export default function TrendsSidebar({ selectedTeam }: TrendsSidebarProps) {
         />
         <div className="flex-1 text-left" style={{ lineHeight: 1.2 }}>
           <p style={{ fontSize: 16, fontWeight: 600, color: 'var(--hp-foreground)', margin: 0 }}>Ask Scout</p>
-          <p style={{ fontSize: 13, color: 'var(--hp-muted-foreground)', margin: 0 }}>AI-powered sports analysis</p>
+          <p style={{ fontSize: 14, color: 'var(--hp-muted-foreground)', margin: 0 }}>AI-powered sports analysis</p>
         </div>
         <span className="flex items-center gap-1.5" style={{ fontSize: 10, color: '#16a34a', fontWeight: 500 }}>
           <span className="w-1.5 h-1.5 rounded-full animate-pulse" style={{ background: '#22c55e' }} />
@@ -98,14 +146,23 @@ export default function TrendsSidebar({ selectedTeam }: TrendsSidebarProps) {
             <a
               key={tool.id}
               href={tool.href}
-              className="group flex items-start gap-3 rounded-xl px-2.5 py-2.5 text-left transition-all hp-tap-target"
+              className="flex items-start gap-3 rounded-xl px-2.5 py-2.5 text-left transition-all hp-tap-target"
               style={{ textDecoration: 'none' }}
-              onMouseEnter={(e) => { e.currentTarget.style.background = 'var(--hp-muted)' }}
-              onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent' }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.background = 'var(--hp-muted)'
+                const icon = e.currentTarget.querySelector('[data-icon]') as HTMLElement
+                if (icon) icon.style.color = '#BC0000'
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.background = 'transparent'
+                const icon = e.currentTarget.querySelector('[data-icon]') as HTMLElement
+                if (icon) icon.style.color = 'var(--hp-muted-foreground)'
+              }}
             >
               <div
-                className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg transition-colors self-center"
-                style={{ background: 'var(--hp-muted)', color: 'var(--hp-muted-foreground)' }}
+                data-icon
+                className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg self-center"
+                style={{ background: 'var(--hp-muted)', color: 'var(--hp-muted-foreground)', transition: 'color 0.2s' }}
               >
                 <tool.icon className="h-5 w-5" />
               </div>
@@ -113,12 +170,6 @@ export default function TrendsSidebar({ selectedTeam }: TrendsSidebarProps) {
                 <p style={{ fontSize: 16, fontWeight: 600, color: 'var(--hp-foreground)', margin: 0 }}>{tool.title}</p>
                 <p className="line-clamp-2" style={{ fontSize: 14, color: 'var(--hp-muted-foreground)', margin: 0 }}>{tool.description}</p>
               </div>
-              <span
-                className="shrink-0 rounded-lg px-2.5 py-1 opacity-0 group-hover:opacity-100 transition-opacity"
-                style={{ fontSize: 10, fontWeight: 500, color: 'var(--hp-muted-foreground)', border: '1px solid var(--hp-border)' }}
-              >
-                {tool.cta}
-              </span>
             </a>
           ))}
         </div>

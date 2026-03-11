@@ -1,6 +1,6 @@
 # SportsMockery - Claude Project Knowledge Base
 
-> **Last Updated:** February 25, 2026
+> **Last Updated:** March 11, 2026
 > **Purpose:** This file contains everything Claude needs to know to work on this project.
 
 ---
@@ -91,6 +91,29 @@ Subtle motion makes the platform feel alive and intelligent. Use CSS animations/
 - Text colors must flip: `#0B0F14` text on light backgrounds, `#FAFAFB` text on dark backgrounds
 - Accent colors (Red, Cyan, Gold) stay the same in both modes — only backgrounds and text swap
 - Borders: use `rgba(0,0,0,0.08)` for light mode, `rgba(255,255,255,0.08)` for dark mode
+
+### Homepage Hero (SearchHero) — NON-NEGOTIABLE RULES
+
+The homepage hero (`src/components/homepage/SearchHero.tsx`) is the primary landing experience. These rules are mandatory.
+
+**Layout & Balance:**
+- Keep the hero vertically balanced — it must not feel too high or too low on the page
+- The logo should stay visually light and not dominate the hero
+- The greeting row must feel attached to the headline, not floating separately
+- The search input should be the clear action point — the thing the eye lands on
+
+**DO NOT:**
+- Add a giant card wrapping the whole hero
+- Add side panels, charts, tabs, stats, or dashboard widgets
+- Include the feed or mock feed cards in this component
+- Over-style the background (no giant gradients)
+- Add animated gimmicks
+
+**Architecture:**
+- The component must support future `mode` prop: `"default" | "breaking" | "team" | "analytics" | "debate"`
+- Only the `"default"` (Scout) mode is implemented now — keep it clean and minimal
+- The shell (layout, spacing, input) must be reusable across all future hero modes
+- Keep the design clean enough that swapping content per mode requires no structural changes
 
 ---
 
