@@ -77,6 +77,14 @@ export default function AdvancedPostEditor({
   const isEditing = !!post?.id
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState('')
+
+  // Autosave state
+  const [autoSaveStatus, setAutoSaveStatus] = useState<'idle' | 'saving' | 'saved' | 'error'>('idle')
+  const [autoSavedPostId, setAutoSavedPostId] = useState<string | null>(post?.id || null)
+  const [lastAutoSaved, setLastAutoSaved] = useState<Date | null>(null)
+  const autoSaveTimerRef = useRef<NodeJS.Timeout | null>(null)
+  const autoSaveInFlightRef = useRef(false)
+  const formDataRef = useRef(null as any)
   const [aiLoading, setAiLoading] = useState<string | null>(null)
   const [showTeamPicker, setShowTeamPicker] = useState(false)
   const [uploadingImage, setUploadingImage] = useState(false)
@@ -291,6 +299,104 @@ export default function AdvancedPostEditor({
   const updateField = useCallback((field: string, value: string | null) => {
     setFormData((prev) => ({ ...prev, [field]: value }))
   }, [])
+
+  // Keep formDataRef in sync for autosave
+  useEffect(() => {
+    formDataRef.current = formData
+  }, [formData])
+
+  // Autosave function — saves silently as draft without redirecting
+  const performAutoSave = useCallback(async () => {
+    const currentData = formDataRef.current
+    if (!currentData?.title?.trim()) return // Need at least a title
+    if (autoSaveInFlightRef.current) return // Already saving
+    if (saving) return // Manual save in progress
+
+    autoSaveInFlightRef.current = true
+    setAutoSaveStatus('saving')
+
+    try {
+      const contentToSave = editorMode === 'blocks' && blockDoc
+        ? serializeDocument(blockDoc)
+        : currentData.content
+
+      const postId = autoSavedPostId
+      const endpoint = postId ? `/api/posts/${postId}` : '/api/admin/posts'
+
+      const payload = {
+        ...currentData,
+        content: contentToSave,
+        status: postId ? currentData.status : 'draft', // New posts save as draft
+        category_id: currentData.category_id || null,
+        author_id: currentData.author_id || null,
+      }
+
+      const response = await fetch(endpoint, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      })
+
+      if (!response.ok) throw new Error('Autosave failed')
+
+      const data = await response.json()
+      const savedPost = data.post || data
+
+      // If this was the first save, capture the post ID for future updates
+      if (!postId && savedPost?.id) {
+        setAutoSavedPostId(savedPost.id)
+        // Update browser URL without navigating so refresh won't lose the post
+        window.history.replaceState(null, '', `/admin/posts/${savedPost.id}/edit`)
+      }
+
+      setAutoSaveStatus('saved')
+      setLastAutoSaved(new Date())
+    } catch {
+      setAutoSaveStatus('error')
+    } finally {
+      autoSaveInFlightRef.current = false
+    }
+  }, [autoSavedPostId, saving, editorMode, blockDoc])
+
+  // Schedule autosave 2 seconds after any form change
+  useEffect(() => {
+    // Don't autosave on initial mount
+    if (!formData.title?.trim() && !formData.content?.trim()) return
+
+    if (autoSaveTimerRef.current) {
+      clearTimeout(autoSaveTimerRef.current)
+    }
+
+    autoSaveTimerRef.current = setTimeout(() => {
+      performAutoSave()
+    }, 2000)
+
+    return () => {
+      if (autoSaveTimerRef.current) {
+        clearTimeout(autoSaveTimerRef.current)
+      }
+    }
+  }, [formData.title, formData.content, formData.excerpt, formData.category_id, formData.author_id, formData.featured_image, formData.seo_title, formData.seo_description, formData.seo_keywords, performAutoSave])
+
+  // Also autosave when block doc changes
+  useEffect(() => {
+    if (!blockDoc || editorMode !== 'blocks') return
+    if (!formData.title?.trim()) return
+
+    if (autoSaveTimerRef.current) {
+      clearTimeout(autoSaveTimerRef.current)
+    }
+
+    autoSaveTimerRef.current = setTimeout(() => {
+      performAutoSave()
+    }, 2000)
+
+    return () => {
+      if (autoSaveTimerRef.current) {
+        clearTimeout(autoSaveTimerRef.current)
+      }
+    }
+  }, [blockDoc, editorMode, performAutoSave])
 
   // AI Actions
   // Extract team key from category name
@@ -795,7 +901,9 @@ export default function AdvancedPostEditor({
 
       setAutoInsertingContent(null)
 
-      const endpoint = isEditing ? `/api/posts/${post?.id}` : '/api/admin/posts'
+      // Use autosaved post ID if we already created the post via autosave
+      const effectivePostId = isEditing ? post?.id : autoSavedPostId
+      const endpoint = effectivePostId ? `/api/posts/${effectivePostId}` : '/api/admin/posts'
 
       // Include social_caption in the payload if postToSocial is checked
       const payload = {
@@ -977,6 +1085,31 @@ export default function AdvancedPostEditor({
         {/* Right: Word count + Status + Save */}
         <div className="flex items-center gap-3">
           <span className="hidden sm:inline text-xs text-[var(--text-muted)]">{wordCount} words</span>
+
+          {/* Autosave indicator */}
+          {autoSaveStatus !== 'idle' && (
+            <span className="hidden sm:inline text-xs text-[var(--text-muted)] flex items-center gap-1">
+              {autoSaveStatus === 'saving' && (
+                <>
+                  <svg className="h-3 w-3 animate-spin" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
+                    <path d="M12 2v4m0 12v4m-7.07-3.93l2.83-2.83m8.48-8.48l2.83-2.83M2 12h4m12 0h4m-3.93 7.07l-2.83-2.83M7.76 7.76L4.93 4.93" />
+                  </svg>
+                  Saving...
+                </>
+              )}
+              {autoSaveStatus === 'saved' && lastAutoSaved && (
+                <>
+                  <svg className="h-3 w-3" style={{ color: '#22c55e' }} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                  </svg>
+                  Saved
+                </>
+              )}
+              {autoSaveStatus === 'error' && (
+                <span style={{ color: '#BC0000' }}>Autosave failed</span>
+              )}
+            </span>
+          )}
 
           <button
             type="button"
