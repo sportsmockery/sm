@@ -26,25 +26,35 @@
   --border-default: #27272a;
   --border-subtle: #1f1f23;
   --border-strong: #3f3f46;
-  --border-focus: #FF0000;
+  --border-focus: #BC0000;
 
   /* Brand Accent */
-  --accent-red: #FF0000;
-  --accent-red-hover: #CC0000;
-  --accent-red-active: #990000;
-  --accent-red-muted: #661111;
-  --accent-red-glow: rgba(255, 0, 0, 0.2);
-  --accent-red-glow-strong: rgba(255, 0, 0, 0.4);
+  --accent-red: #BC0000;
+  --accent-red-hover: #a00000;
+  --accent-red-active: #8a0000;
+  --accent-red-muted: #4c0000;
+  --accent-red-glow: rgba(188, 0, 0, 0.2);
+  --accent-red-glow-strong: rgba(188, 0, 0, 0.4);
 
-  /* Status Colors */
-  --success: #10b981;
-  --success-muted: #065f46;
-  --warning: #f59e0b;
-  --warning-muted: #78350f;
-  --error: #ef4444;
-  --error-muted: #7f1d1d;
-  --info: #3b82f6;
-  --info-muted: #1e3a8a;
+  /* Edge Cyan (Intelligence) */
+  --edge-cyan: #00D4FF;
+  --edge-cyan-muted: rgba(0, 212, 255, 0.15);
+  --edge-cyan-glow: rgba(0, 212, 255, 0.3);
+
+  /* Edge Gold (Premium) */
+  --edge-gold: #D6B05E;
+  --edge-gold-muted: rgba(214, 176, 94, 0.15);
+  --edge-gold-glow: rgba(214, 176, 94, 0.3);
+
+  /* Status Colors (mapped to brand palette) */
+  --success: #00D4FF;
+  --success-muted: rgba(0, 212, 255, 0.15);
+  --warning: #D6B05E;
+  --warning-muted: rgba(214, 176, 94, 0.15);
+  --error: #BC0000;
+  --error-muted: rgba(188, 0, 0, 0.15);
+  --info: #00D4FF;
+  --info-muted: rgba(0, 212, 255, 0.15);
 
   /* =========================================
      TEAM COLORS
@@ -79,13 +89,13 @@
      TYPOGRAPHY
      ========================================= */
 
-  /* Font Families */
-  --font-sans: 'Barlow', var(--font-barlow), sans-serif;
-  --font-mono: 'Barlow', var(--font-barlow), sans-serif;
-  --font-display: 'Barlow', var(--font-barlow), sans-serif;
+  /* Font Families — Space Grotesk only (EDGE Branding Final) */
+  --font-sans: var(--font-space-grotesk), 'Space Grotesk', system-ui, sans-serif;
+  --font-mono: var(--font-space-grotesk), 'Space Grotesk', monospace;
+  --font-display: var(--font-space-grotesk), 'Space Grotesk', system-ui, sans-serif;
 
   /* Font Sizes */
-  --text-xs: 0.75rem;     /* 12px */
+  --text-xs: 0.8125rem;   /* 13px — EDGE minimum */
   --text-sm: 0.875rem;    /* 14px */
   --text-base: 1rem;      /* 16px */
   --text-lg: 1.125rem;    /* 18px */
@@ -242,9 +252,9 @@
   --sidebar-width: 240px;
   --sidebar-collapsed-width: 64px;
 
-  /* Cards */
+  /* Cards — EDGE Branding: 14px radius, 20px padding */
   --card-padding: var(--space-5);
-  --card-radius: var(--radius-xl);
+  --card-radius: 0.875rem; /* 14px */
 
   /* Buttons */
   --btn-height-sm: 32px;
@@ -291,9 +301,9 @@
   --border-subtle: #f3f4f6;
   --border-strong: #d1d5db;
 
-  --accent-red: #8B0000;
+  --accent-red: #BC0000;
   --accent-red-hover: #a00000;
-  --accent-red-glow: rgba(139, 0, 0, 0.15);
+  --accent-red-glow: rgba(188, 0, 0, 0.15);
 
   --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
   --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1);
@@ -320,9 +330,9 @@
     --border-subtle: #f3f4f6;
     --border-strong: #d1d5db;
 
-    --accent-red: #8B0000;
+    --accent-red: #BC0000;
     --accent-red-hover: #a00000;
-    --accent-red-glow: rgba(139, 0, 0, 0.15);
+    --accent-red-glow: rgba(188, 0, 0, 0.15);
 
     --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
     --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1);

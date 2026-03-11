@@ -1,7 +1,6 @@
-/* ========== GOOGLE FONTS - Barlow (site-wide) ========== */
+/* ========== FONTS — Space Grotesk (EDGE Branding Final) ========== */
 
 @plugin "tailwindcss-animate";
-@import url('https://fonts.googleapis.com/css2?family=Barlow:ital,wght@0,400;0,500;0,600;0,700;0,800;0,900;1,400;1,500;1,600;1,700&display=swap');
 
 @import "tailwindcss";
 @import "../styles/article-grid.css";
@@ -41,10 +40,18 @@
   --sm-gradient: linear-gradient(135deg, #bc0000, #ff4444);
   --sm-gradient-subtle: linear-gradient(135deg, rgba(188,0,0,0.15), rgba(255,68,68,0.05));
 
-  /* === Status === */
-  --sm-success: #00d084;
-  --sm-warning: #ffa500;
-  --sm-error: #ff4444;
+  /* === Status (mapped to brand palette) === */
+  --sm-success: #00D4FF;
+  --sm-warning: #D6B05E;
+  --sm-error: #BC0000;
+
+  /* === Edge Cyan (Intelligence) === */
+  --edge-cyan: #00D4FF;
+  --edge-cyan-muted: rgba(0, 212, 255, 0.15);
+
+  /* === Edge Gold (Premium) === */
+  --edge-gold: #D6B05E;
+  --edge-gold-muted: rgba(214, 176, 94, 0.15);
 
   /* === Radius === */
   --sm-radius-sm: 10px;
@@ -59,14 +66,14 @@
   --sm-nav-bg-scrolled: rgba(5, 5, 8, 0.92);
   --sm-max-width: 1200px;
 
-  /* === Typography — Barlow only === */
-  --sm-font-heading: 'Barlow', var(--font-barlow), sans-serif;
-  --sm-font-body: 'Barlow', var(--font-barlow), sans-serif;
-  --font-heading: 'Barlow', var(--font-barlow), sans-serif;
-  --font-body: 'Barlow', var(--font-barlow), sans-serif;
-  --font-sans: 'Barlow', var(--font-barlow), sans-serif;
-  --font-mono: 'Barlow', var(--font-barlow), sans-serif;
-  --font-display: 'Barlow', var(--font-barlow), sans-serif;
+  /* === Typography — Space Grotesk only (EDGE Branding Final) === */
+  --sm-font-heading: var(--font-space-grotesk), 'Space Grotesk', system-ui, sans-serif;
+  --sm-font-body: var(--font-space-grotesk), 'Space Grotesk', system-ui, sans-serif;
+  --font-heading: var(--font-space-grotesk), 'Space Grotesk', system-ui, sans-serif;
+  --font-body: var(--font-space-grotesk), 'Space Grotesk', system-ui, sans-serif;
+  --font-sans: var(--font-space-grotesk), 'Space Grotesk', system-ui, sans-serif;
+  --font-mono: var(--font-space-grotesk), 'Space Grotesk', monospace;
+  --font-display: var(--font-space-grotesk), 'Space Grotesk', system-ui, sans-serif;
 
   /* ===== LEGACY COMPAT — Core theme vars ===== */
   --bg-page: #050508;
@@ -79,15 +86,15 @@
   --text-inverse: #FAFAFB;
   --border-color: rgba(255,255,255,0.08);
   --border-subtle: rgba(255,255,255,0.04);
-  --link-color: #ff4444;
-  --link-hover: #ff6666;
-  --badge-bg: #bc0000;
+  --link-color: #BC0000;
+  --link-hover: #a00000;
+  --badge-bg: #BC0000;
   --badge-text: #FAFAFB;
-  --color-primary: #ff4444;
-  --color-primary-dark: #cc0000;
-  --color-primary-light: #ff6666;
-  --bears-orange: #ff6b35;
-  --bears-orange-light: #ff8c5a;
+  --color-primary: #BC0000;
+  --color-primary-dark: #8a0000;
+  --color-primary-light: #BC0000;
+  --bears-orange: #C83200;
+  --bears-orange-light: #C83200;
   --color-text-primary: #FAFAFB;
   --color-text-secondary: #A9B4C2;
   --color-text-muted: #8F9BAD;
@@ -99,7 +106,7 @@
   --bg-primary: #050508;
   --bg-secondary: #0c0c12;
   --bg-tertiary: #13131d;
-  --sm-red-hover: #ff6666;
+  --sm-red-hover: #a00000;
   --border-primary: rgba(255,255,255,0.08);
   --border-secondary: rgba(255,255,255,0.04);
   --card-bg: #13131d;
@@ -107,10 +114,10 @@
   --card-hover-bg: #1a1a28;
   --bg-card: #13131d;
   --border-default: rgba(255,255,255,0.06);
-  --accent-red: #ff4444;
+  --accent-red: #BC0000;
   --accent-red-glow: rgba(188, 0, 0, 0.3);
-  --success: #00d084;
-  --warning: #ffa500;
+  --success: #00D4FF;
+  --warning: #D6B05E;
   --bg-hover: #1a1a28;
   --text-secondary: #A9B4C2;
   --footer-text-muted: #8F9BAD;
@@ -293,9 +300,9 @@
   --link-hover: #8a0000;
   --color-primary: #bc0000;
   --color-primary-dark: #8a0000;
-  --color-primary-light: #ff3333;
-  --bears-orange: #dc4405;
-  --bears-orange-light: #ff6b35;
+  --color-primary-light: #BC0000;
+  --bears-orange: #C83200;
+  --bears-orange-light: #C83200;
   --color-text-primary: #1a1a2e;
   --color-text-secondary: #555566;
   --color-text-muted: #8888a0;
@@ -318,8 +325,8 @@
   --border-default: rgba(0,0,0,0.08);
   --accent-red: #bc0000;
   --accent-red-glow: rgba(188, 0, 0, 0.3);
-  --success: #10b981;
-  --warning: #f59e0b;
+  --success: #00D4FF;
+  --warning: #D6B05E;
   --bg-hover: #f0f0f5;
   --text-secondary: #555566;
   --footer-text-muted: #999999;
@@ -372,7 +379,7 @@
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
   border: 1px solid rgba(255, 255, 255, 0.08);
-  border-radius: 12px;
+  border-radius: 14px;
   padding: 16px;
   position: relative;
   overflow: hidden;
