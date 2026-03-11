@@ -20,7 +20,7 @@ export type EdgeHeroProps = {
   /** User first name — falls back to generic greeting */
   userName?: string
   /** Sub-greeting beneath the user name */
-  welcomeMessage?: string
+  welcomeMessage?: React.ReactNode
   /** Large headline text */
   headline?: string
   /** Input placeholder */
@@ -49,7 +49,7 @@ export type EdgeHeroProps = {
 
 export function EdgeHero({
   userName,
-  welcomeMessage = "Welcome to SM\u2736EDGE, our AI-powered platform.",
+  welcomeMessage,
   headline = "What can I help you with?",
   placeholder = "Ask Scout anything about Chicago sports\u2026",
   quickActions = [],
@@ -140,7 +140,9 @@ export function EdgeHero({
                 className="text-sm leading-snug sm:text-[15px]"
                 style={{ color: "var(--hp-muted-foreground)" }}
               >
-                {welcomeMessage}
+                {welcomeMessage ?? (
+                  <>Welcome to SM&#x2736;Blitz, our <strong>NEW</strong> AI-powered platform.</>
+                )}
               </p>
             </div>
           </div>
@@ -217,7 +219,7 @@ export function EdgeHero({
                 className="mt-3 text-sm"
                 style={{ color: "var(--hp-muted-foreground)" }}
               >
-                Ask about rumors, players, depth charts, game outlooks, and more.
+                Scout — the AI analyst for Chicago sports. Ask about news, rumors, stats, or games.
               </p>
 
               {/* ── Quick actions ── */}

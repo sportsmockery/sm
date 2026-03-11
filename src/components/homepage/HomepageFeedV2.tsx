@@ -37,7 +37,7 @@ export default function HomepageFeedV2({ firstName }: HomepageFeedV2Props) {
       {/* Full-screen Search Hero - above the fold */}
       <EdgeHero
         userName={firstName || "Chris"}
-        welcomeMessage="Welcome to SM✶EDGE, our AI-powered platform."
+        welcomeMessage={<>Welcome to SM&#x2736;Blitz, our <strong>NEW</strong> AI-powered platform.</>}
         headline="What can I help you with?"
         placeholder="Ask Scout anything..."
         quickActions={[
