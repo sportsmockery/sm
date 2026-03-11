@@ -144,7 +144,7 @@ Stage 1: Full-Screen Hero (100vh) → user scrolls → Stage 2: Infinite Feed
 
 **Hero Layout Rules:**
 - Keep the hero vertically balanced — not too high or too low
-- EDGE logo stays top-left, visually light, does not dominate
+- Blitz logo (`/blitz_logo.svg`, 240x88) stays top-left, visually light, does not dominate
 - Scout identity pill must feel attached to the headline, not floating separately
 - Search input is the clear action point — the thing the eye lands on
 - **DO NOT:** add giant cards wrapping the hero, side panels, charts, tabs, stats, dashboard widgets, feed cards, giant gradients, or animated gimmicks
@@ -153,6 +153,18 @@ Stage 1: Full-Screen Hero (100vh) → user scrolls → Stage 2: Infinite Feed
 - Component supports `mode` prop: `"default" | "breaking" | "team" | "analytics" | "debate"`
 - Only `"default"` (Scout) mode is implemented now — keep it clean and minimal
 - The shell (layout, spacing, input) must be reusable across all future hero modes
+
+**Hero Background Animation (Chicago Stars):**
+- **Component:** `src/components/homepage/HeroStatsOrbs.tsx` — canvas-based Chicago six-pointed stars
+- **Rendered in:** `src/components/home/edge-hero.tsx` (inside the `<section>` as first child)
+- Stars are drawn as proper 6-pointed star polygons (alternating outer/inner radius), NOT circles
+- 62 stars on desktop, 37 on mobile — subtle, ambient motion
+- 2/3 red (`#BC0000`), 1/3 cyan (`#00D4FF`) with fading trail lines behind each star
+- Each star slowly rotates as it drifts
+- Respects `prefers-reduced-motion: reduce`
+- **Old `ParticleBg` dots removed from `layout.tsx`** — do NOT re-add `<ParticleBg />`
+- The old `HomepageFeed.tsx` (used only on `/feed`) has its own orbs — those are separate
+- To adjust: edit `HeroStatsOrbs.tsx` — speed, count, opacity, and star shape are all in that one file
 
 **Stage 2 — Feed:** Infinite scroll stream of feed cards generated from article blocks. Begins immediately after the hero.
 

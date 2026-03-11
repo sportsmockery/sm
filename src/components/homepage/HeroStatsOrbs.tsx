@@ -17,36 +17,26 @@ interface Star {
   rotationSpeed: number
 }
 
-const STAR_COUNT = 125
-const MOBILE_STAR_COUNT = 75
-const TRAIL_LENGTH = 180 // longer trails for faster movement
+const STAR_COUNT = 62
+const MOBILE_STAR_COUNT = 37
+const TRAIL_LENGTH = 150
 
-/** Draw a Chicago-style 6-pointed star (two overlapping triangles) */
+/** Draw a Chicago-style 6-pointed star with pointed tips */
 function drawChicagoStar(
   ctx: CanvasRenderingContext2D,
   cx: number,
   cy: number,
-  radius: number,
+  outerRadius: number,
   rotation: number,
 ) {
-  // Triangle 1 — pointing up
+  const innerRadius = outerRadius * 0.45
+  const points = 6
   ctx.beginPath()
-  for (let i = 0; i < 3; i++) {
-    const angle = rotation + (i * Math.PI * 2) / 3 - Math.PI / 2
-    const x = cx + Math.cos(angle) * radius
-    const y = cy + Math.sin(angle) * radius
-    if (i === 0) ctx.moveTo(x, y)
-    else ctx.lineTo(x, y)
-  }
-  ctx.closePath()
-  ctx.fill()
-
-  // Triangle 2 — pointing down (rotated 60°)
-  ctx.beginPath()
-  for (let i = 0; i < 3; i++) {
-    const angle = rotation + (i * Math.PI * 2) / 3 + Math.PI / 6
-    const x = cx + Math.cos(angle) * radius
-    const y = cy + Math.sin(angle) * radius
+  for (let i = 0; i < points * 2; i++) {
+    const r = i % 2 === 0 ? outerRadius : innerRadius
+    const angle = rotation + (i * Math.PI) / points - Math.PI / 2
+    const x = cx + Math.cos(angle) * r
+    const y = cy + Math.sin(angle) * r
     if (i === 0) ctx.moveTo(x, y)
     else ctx.lineTo(x, y)
   }
@@ -81,18 +71,18 @@ export function HeroStatsOrbs() {
     function createStars() {
       stars = []
       for (let i = 0; i < count; i++) {
-        const speed = 0.8 + Math.random() * 1.4 // 0.8–2.2 px/frame (much faster)
+        const speed = 0.2 + Math.random() * 0.5 // 0.2–0.7 px/frame (gentle drift)
         const angle = Math.random() * Math.PI * 2
         stars.push({
           x: Math.random() * canvas!.width,
           y: Math.random() * canvas!.height,
           dx: Math.cos(angle) * speed,
           dy: Math.sin(angle) * speed,
-          radius: 3 + Math.random() * 4, // 3–7px star size
+          radius: 3 + Math.random() * 4, // 3–7px
           trail: [],
-          cyan: i % 3 === 0, // 1/3 cyan, 2/3 red
+          cyan: i % 3 === 0,
           rotation: Math.random() * Math.PI * 2,
-          rotationSpeed: (Math.random() - 0.5) * 0.02,
+          rotationSpeed: (Math.random() - 0.5) * 0.008,
         })
       }
     }
@@ -108,7 +98,7 @@ export function HeroStatsOrbs() {
         star.trail.push({ x: star.x, y: star.y })
         if (star.trail.length > TRAIL_LENGTH) star.trail.shift()
 
-        // Draw trail — split into 5 bands with fading opacity
+        // Draw trail — 5 bands with fading opacity
         const len = star.trail.length
         if (len > 4) {
           const bands = 5
@@ -118,7 +108,7 @@ export function HeroStatsOrbs() {
             const end = b === bands - 1 ? len - 1 : (b + 1) * bandSize
             if (end - start < 2) continue
             const progress = (b + 1) / bands
-            const alpha = progress * (isDark ? 0.15 : 0.08)
+            const alpha = progress * (isDark ? 0.05 : 0.025)
 
             ctx!.beginPath()
             ctx!.moveTo(star.trail[start].x, star.trail[start].y)
@@ -133,16 +123,16 @@ export function HeroStatsOrbs() {
           }
         }
 
-        // Draw star glow (larger faint area)
+        // Draw star glow (very subtle)
         ctx!.fillStyle = star.cyan
-          ? (isDark ? 'rgba(0, 212, 255, 0.06)' : 'rgba(0, 212, 255, 0.04)')
-          : (isDark ? 'rgba(188, 0, 0, 0.06)' : 'rgba(188, 0, 0, 0.04)')
-        drawChicagoStar(ctx!, star.x, star.y, star.radius * 3, star.rotation)
+          ? (isDark ? 'rgba(0, 212, 255, 0.02)' : 'rgba(0, 212, 255, 0.012)')
+          : (isDark ? 'rgba(188, 0, 0, 0.02)' : 'rgba(188, 0, 0, 0.012)')
+        drawChicagoStar(ctx!, star.x, star.y, star.radius * 2, star.rotation)
 
-        // Draw star core (bright)
+        // Draw star core
         ctx!.fillStyle = star.cyan
-          ? (isDark ? 'rgba(0, 212, 255, 0.35)' : 'rgba(0, 212, 255, 0.25)')
-          : (isDark ? 'rgba(188, 0, 0, 0.35)' : 'rgba(188, 0, 0, 0.25)')
+          ? (isDark ? 'rgba(0, 212, 255, 0.12)' : 'rgba(0, 212, 255, 0.08)')
+          : (isDark ? 'rgba(188, 0, 0, 0.12)' : 'rgba(188, 0, 0, 0.08)')
         drawChicagoStar(ctx!, star.x, star.y, star.radius, star.rotation)
 
         // Move star

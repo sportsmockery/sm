@@ -164,7 +164,7 @@ export default function RootLayout({
               </div>
               {/* NavigationOrb removed — nav moved to left sidebar */}
               <MobileBottomNav />
-              <ParticleBg />
+              {/* ParticleBg removed — replaced by Chicago star canvas in hero */}
               <ScrollToTop />
               <CookieBanner />
               <TeamChatPanel teamSlug="bears" teamName="Bears" />

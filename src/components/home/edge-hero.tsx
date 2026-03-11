@@ -3,6 +3,7 @@
 import * as React from "react"
 import Image from "next/image"
 import { useRouter } from "next/navigation"
+import { HeroStatsOrbs } from "@/components/homepage/HeroStatsOrbs"
 
 /* ------------------------------------------------------------------ */
 /*  Types                                                              */
@@ -117,6 +118,9 @@ export function EdgeHero({
       style={{ background: "var(--hp-background)", color: "var(--hp-foreground)" }}
       aria-labelledby="edge-hero-heading"
     >
+      {/* ── Ambient Chicago stars background ── */}
+      <HeroStatsOrbs />
+
       {/* ── Blitz logo — top-left, visually light ── */}
       <div className="mx-auto w-full max-w-7xl px-4 pt-5 sm:px-6 lg:px-8 lg:pt-6">
         <div className="flex items-center justify-start">
