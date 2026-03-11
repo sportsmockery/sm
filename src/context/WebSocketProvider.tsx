@@ -160,10 +160,12 @@ export function WebSocketProvider({ children }: { children: React.ReactNode }) {
           }
 
           if (status === 'CHANNEL_ERROR' || status === 'TIMED_OUT' || status === 'CLOSED') {
+            // Guard against re-entry: removeChannel fires CLOSED which re-enters this callback
+            if (mainChannelRef.current !== channel) return;
+            mainChannelRef.current = null;
             prevStateRef.current = 'reconnecting';
             setConnectionState('reconnecting');
             supabase.removeChannel(channel);
-            mainChannelRef.current = null;
 
             const delay = backoffMsRef.current;
             backoffMsRef.current = Math.min(backoffMsRef.current * 2, MAX_BACKOFF_MS);

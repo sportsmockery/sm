@@ -13,7 +13,7 @@
   --hm-card: #13131d;
   --hm-card-hover: #1a1a28;
   --hm-border: rgba(255,255,255,0.06);
-  --hm-text: #ffffff;
+  --hm-text: #FAFAFB;
   --hm-text-muted: #8a8a9a;
   --hm-text-dim: #55556a;
   --hm-gradient: linear-gradient(135deg, #bc0000, #ff4444);
@@ -53,8 +53,8 @@
 /* ── LIGHT MODE ── */
 [data-theme="light"] .hm-root {
   --hm-dark: #f8f8fa;
-  --hm-surface: #ffffff;
-  --hm-card: #ffffff;
+  --hm-surface: #FAFAFB;
+  --hm-card: #FAFAFB;
   --hm-card-hover: #f0f0f5;
   --hm-border: rgba(0,0,0,0.08);
   --hm-text: #111118;
@@ -178,7 +178,7 @@
   box-shadow: 0 1px 3px rgba(0,0,0,0.04);
 }
 [data-theme="light"] .hm-radar-placeholder {
-  background: linear-gradient(135deg, #f0f0f5, #ffffff);
+  background: linear-gradient(135deg, #f0f0f5, #FAFAFB);
 }
 [data-theme="light"] .hm-team-tab {
   background: var(--hm-card);
@@ -195,7 +195,7 @@
   box-shadow: 0 1px 3px rgba(0,0,0,0.04);
 }
 [data-theme="light"] .hm-price-featured {
-  background: linear-gradient(180deg, rgba(188,0,0,0.03), #ffffff);
+  background: linear-gradient(180deg, rgba(188,0,0,0.03), #FAFAFB);
   border-color: rgba(188,0,0,0.2);
 }
 [data-theme="light"] .hm-faq-item {
@@ -1629,7 +1629,7 @@
 
 /* Light mode: Content Feed */
 [data-theme="light"] .hm-feed-header {
-  background: linear-gradient(180deg, #ffffff 0%, var(--hm-dark) 100%);
+  background: linear-gradient(180deg, #FAFAFB 0%, var(--hm-dark) 100%);
 }
 [data-theme="light"] .hm-editor-card,
 [data-theme="light"] .hm-more-featured,

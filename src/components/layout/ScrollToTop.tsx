@@ -223,38 +223,62 @@ export default function ScrollToTop() {
         onClick={handleOrbClick}
         aria-label="Ask Scout AI"
         style={{
-          width: 52,
-          height: 52,
+          position: 'relative',
+          width: 56,
+          height: 56,
           borderRadius: '50%',
-          background: 'rgba(10,10,10,0.9)',
-          border: '2px solid rgba(188,0,0,0.4)',
+          background: 'transparent',
+          border: '2px solid #bc0000',
           cursor: 'pointer',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
-          boxShadow: '0 4px 20px rgba(0,0,0,0.4), 0 0 20px rgba(188,0,0,0.15)',
+          boxShadow: 'none',
           transition: 'transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.3s ease',
           flexShrink: 0,
         }}
         onMouseEnter={(e) => {
           if (!animating) e.currentTarget.style.transform = 'scale(1.1)'
-          e.currentTarget.style.boxShadow = '0 4px 24px rgba(0,0,0,0.5), 0 0 30px rgba(188,0,0,0.3)'
         }}
         onMouseLeave={(e) => {
           if (!animating) e.currentTarget.style.transform = 'scale(1)'
-          e.currentTarget.style.boxShadow = '0 4px 20px rgba(0,0,0,0.4), 0 0 20px rgba(188,0,0,0.15)'
         }}
       >
         <Image
           src="/downloads/scout-v2.png"
           alt="Scout AI"
-          width={28}
-          height={28}
+          width={36}
+          height={36}
           style={{
             borderRadius: '50%',
             transition: 'transform 0.6s cubic-bezier(0.16, 1, 0.3, 1)',
             animation: animating ? 'scoutSpin 0.8s linear infinite' : 'none',
           }}
+        />
+        {/* Red ring ping */}
+        <span
+          style={{
+            position: 'absolute',
+            inset: -2,
+            borderRadius: '50%',
+            border: '2px solid #bc0000',
+            animation: 'scoutPing 45s ease-out infinite',
+            pointerEvents: 'none',
+          }}
+        />
+        {/* Online indicator */}
+        <span
+          style={{
+            position: 'absolute',
+            bottom: 2,
+            left: 2,
+            width: 10,
+            height: 10,
+            borderRadius: '50%',
+            background: '#22c55e',
+            border: '2px solid var(--hp-background, #0B0F14)',
+          }}
+          className=""
         />
       </button>
     </div>

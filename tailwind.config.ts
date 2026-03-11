@@ -53,15 +53,18 @@ const config: Config = {
       },
       
       fontFamily: {
-        sans: ['"Space Grotesk"', 'system-ui', '-apple-system', 'sans-serif'],
+        sans: ['var(--font-space-grotesk)', 'system-ui', '-apple-system', 'sans-serif'],
       },
       
       animation: {
         'fade-in': 'fadeIn 0.3s ease-out',
         'slide-up': 'slideUp 0.3s ease-out',
         'pulse-slow': 'pulse 3s ease-in-out infinite',
+        'pulse-star': 'pulseStar 2s ease-in-out infinite',
+        'telemetry': 'telemetry 4s linear infinite',
+        'orb-spin': 'orbSpin 6s linear infinite',
       },
-      
+
       keyframes: {
         fadeIn: {
           '0%': { opacity: '0' },
@@ -70,6 +73,18 @@ const config: Config = {
         slideUp: {
           '0%': { opacity: '0', transform: 'translateY(10px)' },
           '100%': { opacity: '1', transform: 'translateY(0)' },
+        },
+        pulseStar: {
+          '0%, 100%': { transform: 'scale(1)', opacity: '0.8' },
+          '50%': { transform: 'scale(1.15)', opacity: '1' },
+        },
+        telemetry: {
+          '0%': { opacity: '0.3', backgroundPosition: '-200% 0' },
+          '100%': { opacity: '0.6', backgroundPosition: '200% 0' },
+        },
+        orbSpin: {
+          '0%': { transform: 'rotate(0deg)' },
+          '100%': { transform: 'rotate(360deg)' },
         },
       },
     },

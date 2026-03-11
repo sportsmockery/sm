@@ -247,12 +247,12 @@
   /* Chrome / brushed-metal gradient */
   background: linear-gradient(
     180deg,
-    #ffffff 0%,
+    #FAFAFB 0%,
     #e0e0e0 18%,
-    #ffffff 40%,
+    #FAFAFB 40%,
     #b0b0b0 60%,
     #d8d8d8 78%,
-    #ffffff 100%
+    #FAFAFB 100%
   );
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
@@ -2614,7 +2614,7 @@ html {
   font-family: 'Barlow', var(--font-barlow), sans-serif;
   font-size: 11px;
   font-weight: 600;
-  color: #ffffff;
+  color: #FAFAFB;
   background: rgba(188, 0, 0, 0.7);
   padding: 2px 8px;
   border-radius: 4px;
@@ -3582,7 +3582,7 @@ html {
   font-family: Barlow, sans-serif;
   font-size: 11px;
   font-weight: 500;
-  color: #ffffff;
+  color: #FAFAFB;
   text-align: center;
   line-height: 1;
   pointer-events: none;
@@ -3627,7 +3627,7 @@ html {
   font-size: 11px;
   font-weight: 700;
   letter-spacing: 1.5px;
-  color: #ffffff;
+  color: #FAFAFB;
   text-shadow: 0 0 8px #bc0000, 0 0 16px #bc0000;
   padding: 4px 10px;
   border-radius: 4px;
@@ -3728,7 +3728,7 @@ html {
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.8px;
-  color: #ffffff;
+  color: #FAFAFB;
   padding: 5px 10px;
   border-radius: 4px;
   background: linear-gradient(
@@ -4556,7 +4556,7 @@ html .storyline-card {
 /* Light mode */
 [data-theme="light"] .catchup-timeline,
 .light .catchup-timeline {
-  background: #ffffff;
+  background: #FAFAFB;
   border-color: rgba(188, 0, 0, 0.15);
   box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
 }
@@ -5186,7 +5186,7 @@ html .storyline-card {
   font-family: 'Barlow', var(--font-barlow), sans-serif;
   font-size: 13px;
   font-weight: 600;
-  color: #ffffff;
+  color: #FAFAFB;
   line-height: 1.3;
 }
 

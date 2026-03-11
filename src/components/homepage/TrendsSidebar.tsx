@@ -17,9 +17,17 @@ const edgeTools = [
     href: "/gm",
   },
   {
+    id: "mock-draft",
+    title: "Mock Draft",
+    description: "Run mocks with instant grades.",
+    cta: "Start",
+    icon: FileText,
+    href: "/mock-draft",
+  },
+  {
     id: "fan-hub",
-    title: "Fan Hub",
-    description: "Live chat, polls, and conversations.",
+    title: "Fan Chat",
+    description: "Live chat, conversation, and relentless banter.",
     cta: "Join",
     icon: Users,
     href: "/fan-chat",
@@ -31,14 +39,6 @@ const edgeTools = [
     cta: "Explore",
     icon: BarChart3,
     href: "/chicago-bears",
-  },
-  {
-    id: "mock-draft",
-    title: "Mock Draft",
-    description: "Run mocks with instant grades.",
-    cta: "Start",
-    icon: FileText,
-    href: "/mock-draft",
   },
   {
     id: "shows",
@@ -73,13 +73,13 @@ export default function TrendsSidebar({ selectedTeam }: TrendsSidebarProps) {
         <Image
           src="/downloads/scout-v2.png"
           alt="Scout AI"
-          width={40}
-          height={40}
-          className="h-10 w-10 object-contain flex-shrink-0"
+          width={48}
+          height={48}
+          className="h-12 w-12 object-contain flex-shrink-0"
         />
-        <div className="flex-1 text-left">
-          <p style={{ fontSize: 14, fontWeight: 600, color: 'var(--hp-foreground)' }}>Ask Scout</p>
-          <p style={{ fontSize: 11, color: 'var(--hp-muted-foreground)' }}>AI-powered sports analysis</p>
+        <div className="flex-1 text-left" style={{ lineHeight: 1.2 }}>
+          <p style={{ fontSize: 16, fontWeight: 600, color: 'var(--hp-foreground)', margin: 0 }}>Ask Scout</p>
+          <p style={{ fontSize: 13, color: 'var(--hp-muted-foreground)', margin: 0 }}>AI-powered sports analysis</p>
         </div>
         <span className="flex items-center gap-1.5" style={{ fontSize: 10, color: '#16a34a', fontWeight: 500 }}>
           <span className="w-1.5 h-1.5 rounded-full animate-pulse" style={{ background: '#22c55e' }} />
@@ -90,7 +90,7 @@ export default function TrendsSidebar({ selectedTeam }: TrendsSidebarProps) {
       {/* SM Edge Tools */}
       <div className="hp-sidebar-card overflow-hidden">
         <div className="px-4 pt-4 pb-3">
-          <h2 style={{ fontSize: 14, fontWeight: 700, letterSpacing: '-0.01em', color: 'var(--hp-foreground)' }}>SM Edge Tools</h2>
+          <h2 style={{ fontSize: 16, fontWeight: 700, letterSpacing: '-0.01em', color: 'var(--hp-foreground)' }}>SM Edge Tools</h2>
         </div>
 
         <div className="px-3 pb-4 flex flex-col gap-1.5">
@@ -98,20 +98,20 @@ export default function TrendsSidebar({ selectedTeam }: TrendsSidebarProps) {
             <a
               key={tool.id}
               href={tool.href}
-              className="group flex items-center gap-3 rounded-xl px-2.5 py-2.5 text-left transition-all hp-tap-target"
+              className="group flex items-start gap-3 rounded-xl px-2.5 py-2.5 text-left transition-all hp-tap-target"
               style={{ textDecoration: 'none' }}
               onMouseEnter={(e) => { e.currentTarget.style.background = 'var(--hp-muted)' }}
               onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent' }}
             >
               <div
-                className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg transition-colors"
+                className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg transition-colors self-center"
                 style={{ background: 'var(--hp-muted)', color: 'var(--hp-muted-foreground)' }}
               >
-                <tool.icon className="h-4 w-4" />
+                <tool.icon className="h-5 w-5" />
               </div>
-              <div className="flex-1 min-w-0">
-                <p style={{ fontSize: 13, fontWeight: 600, color: 'var(--hp-foreground)', lineHeight: 1.3 }}>{tool.title}</p>
-                <p className="truncate" style={{ fontSize: 11, color: 'var(--hp-muted-foreground)', lineHeight: 1.3 }}>{tool.description}</p>
+              <div className="flex-1 min-w-0" style={{ lineHeight: 1.3 }}>
+                <p style={{ fontSize: 16, fontWeight: 600, color: 'var(--hp-foreground)', margin: 0 }}>{tool.title}</p>
+                <p className="line-clamp-2" style={{ fontSize: 14, color: 'var(--hp-muted-foreground)', margin: 0 }}>{tool.description}</p>
               </div>
               <span
                 className="shrink-0 rounded-lg px-2.5 py-1 opacity-0 group-hover:opacity-100 transition-opacity"

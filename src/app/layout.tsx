@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Barlow } from "next/font/google";
+import { Barlow, Space_Grotesk } from "next/font/google";
 import "./globals.css";
 import "@/styles/homepage.css";
 import "@/styles/homepage-v2.css";
@@ -35,6 +35,12 @@ const barlow = Barlow({
   variable: "--font-barlow",
   subsets: ["latin"],
   weight: ["400", "500", "600", "700", "800", "900"],
+});
+
+const spaceGrotesk = Space_Grotesk({
+  variable: "--font-space-grotesk",
+  subsets: ["latin"],
+  weight: ["400", "500", "700"],
 });
 
 export const metadata: Metadata = {
@@ -134,7 +140,7 @@ export default function RootLayout({
         />
       </head>
       <body
-        className={`${barlow.variable} font-sans antialiased`}
+        className={`${barlow.variable} ${spaceGrotesk.variable} font-sans antialiased`}
         style={{ backgroundColor: 'var(--sm-dark)', color: 'var(--sm-text)' }}
       >
         <ThemeProvider>

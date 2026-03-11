@@ -31,7 +31,7 @@
   --sm-border: rgba(255, 255, 255, 0.08);
 
   /* === Text === */
-  --sm-text: #ffffff;
+  --sm-text: #FAFAFB;
   --sm-text-secondary: #A9B4C2;
   --sm-text-meta: #8F9BAD;
   --sm-text-muted: #A9B4C2;
@@ -74,28 +74,28 @@
   --bg-header: #050508;
   --bg-footer: #050508;
   --bg-elevated: #13131d;
-  --text-primary: #ffffff;
+  --text-primary: #FAFAFB;
   --text-muted: #A9B4C2;
-  --text-inverse: #ffffff;
+  --text-inverse: #FAFAFB;
   --border-color: rgba(255,255,255,0.08);
   --border-subtle: rgba(255,255,255,0.04);
   --link-color: #ff4444;
   --link-hover: #ff6666;
   --badge-bg: #bc0000;
-  --badge-text: #ffffff;
+  --badge-text: #FAFAFB;
   --color-primary: #ff4444;
   --color-primary-dark: #cc0000;
   --color-primary-light: #ff6666;
   --bears-orange: #ff6b35;
   --bears-orange-light: #ff8c5a;
-  --color-text-primary: #ffffff;
+  --color-text-primary: #FAFAFB;
   --color-text-secondary: #A9B4C2;
   --color-text-muted: #8F9BAD;
   --color-background: #050508;
   --color-background-alt: #0c0c12;
   --color-border: rgba(255,255,255,0.08);
-  --color-black: #000000;
-  --color-white: #ffffff;
+  --color-black: #0B0F14;
+  --color-white: #FAFAFB;
   --bg-primary: #050508;
   --bg-secondary: #0c0c12;
   --bg-tertiary: #13131d;
@@ -117,7 +117,7 @@
   --footer-bottom-bg: #050508;
   --input-bg: #13131d;
   --input-border: rgba(255,255,255,0.1);
-  --input-text: #ffffff;
+  --input-text: #FAFAFB;
   --input-placeholder: #55556a;
 
   /* Team Colors */
@@ -266,7 +266,7 @@
 .light {
   --sm-dark: #fafafa;
   --sm-surface: #f5f5f7;
-  --sm-card: #ffffff;
+  --sm-card: #FAFAFB;
   --sm-card-hover: #f8f8fa;
   --sm-border: rgba(0, 0, 0, 0.08);
   --sm-text: #1a1a2e;
@@ -281,12 +281,12 @@
   /* Legacy compat for light mode */
   --bg-page: #fafafa;
   --bg-surface: #f5f5f7;
-  --bg-header: #ffffff;
+  --bg-header: #FAFAFB;
   --bg-footer: #222222;
-  --bg-elevated: #ffffff;
+  --bg-elevated: #FAFAFB;
   --text-primary: #1a1a2e;
   --text-muted: #555566;
-  --text-inverse: #ffffff;
+  --text-inverse: #FAFAFB;
   --border-color: rgba(0,0,0,0.08);
   --border-subtle: rgba(0,0,0,0.04);
   --link-color: #bc0000;
@@ -306,15 +306,15 @@
   --foreground: #1a1a2e;
   --bg-primary: #fafafa;
   --bg-secondary: #f5f5f7;
-  --bg-tertiary: #ffffff;
+  --bg-tertiary: #FAFAFB;
   --sm-red: #bc0000;
   --sm-red-hover: #8a0000;
   --border-primary: rgba(0,0,0,0.08);
   --border-secondary: rgba(0,0,0,0.04);
-  --card-bg: #ffffff;
+  --card-bg: #FAFAFB;
   --card-border: rgba(0,0,0,0.08);
   --card-hover-bg: #f8f8fa;
-  --bg-card: #ffffff;
+  --bg-card: #FAFAFB;
   --border-default: rgba(0,0,0,0.08);
   --accent-red: #bc0000;
   --accent-red-glow: rgba(188, 0, 0, 0.3);
@@ -1003,24 +1003,24 @@ main {
 /* ========== PROSEMIRROR/TIPTAP EDITOR STYLES ========== */
 /* Ensure editor content has proper background in light mode */
 .ProseMirror {
-  background-color: var(--bg-page, #ffffff) !important;
+  background-color: var(--bg-page, #FAFAFB) !important;
   color: var(--text-primary, #222222) !important;
 }
 
 .dark .ProseMirror,
 :root[data-theme="dark"] .ProseMirror {
-  background-color: var(--bg-page, #000000) !important;
-  color: var(--text-primary, #ffffff) !important;
+  background-color: var(--bg-page, #0B0F14) !important;
+  color: var(--text-primary, #FAFAFB) !important;
 }
 
 /* Prose typography inside editor */
 .ProseMirror.prose {
-  background-color: var(--bg-page, #ffffff) !important;
+  background-color: var(--bg-page, #FAFAFB) !important;
 }
 
 .dark .ProseMirror.prose,
 :root[data-theme="dark"] .ProseMirror.prose {
-  background-color: var(--bg-page, #000000) !important;
+  background-color: var(--bg-page, #0B0F14) !important;
 }
 
 /* ========== ARTICLE STYLES ========== */
@@ -1919,7 +1919,7 @@ main {
   right: 10px;
   bottom: 10px;
   background-color: rgba(0, 0, 0, 0.7);
-  color: #ffffff;
+  color: #FAFAFB;
   border-radius: 999px;
   padding: 6px 10px;
   font-size: 0.8rem;
@@ -1977,7 +1977,7 @@ main {
   padding: 10px 18px;
   border-radius: 999px;
   background-color: #e31e26;
-  color: #ffffff;
+  color: #FAFAFB;
   font-weight: 600;
   text-decoration: none;
 }
@@ -1989,16 +1989,16 @@ main {
   justify-content: center;
   padding: 10px 18px;
   border-radius: 999px;
-  background-color: #000000;
-  color: #ffffff;
+  background-color: #0B0F14;
+  color: #FAFAFB;
   font-weight: 600;
   text-decoration: none;
 }
 
 :root[data-theme="dark"] .sm-cta-button-bfr,
 .dark .sm-cta-button-bfr {
-  background-color: #ffffff;
-  color: #000000;
+  background-color: #FAFAFB;
+  color: #0B0F14;
 }
 
 /* Pinwheels & Ivy CTA Button */
@@ -2009,7 +2009,7 @@ main {
   padding: 10px 18px;
   border-radius: 999px;
   background-color: #e31e26;
-  color: #ffffff;
+  color: #FAFAFB;
   font-weight: 600;
   text-decoration: none;
 }
@@ -2021,7 +2021,7 @@ main {
 }
 
 .sm-pinwheels-ivy .sm-show-previous {
-  background-color: #ffffff;
+  background-color: #FAFAFB;
 }
 
 .sm-pinwheels-ivy .sm-section-title {
@@ -2041,7 +2041,7 @@ main {
 }
 
 .sm-pinwheels-ivy .sm-show-cta {
-  background-color: #ffffff;
+  background-color: #FAFAFB;
 }
 
 .sm-pinwheels-ivy .sm-cta-text {
@@ -2051,17 +2051,17 @@ main {
 /* Pinwheels & Ivy Dark Mode */
 :root[data-theme="dark"] .sm-pinwheels-ivy .sm-show-hero,
 .dark .sm-pinwheels-ivy .sm-show-hero {
-  background-color: #000000;
+  background-color: #0B0F14;
 }
 
 :root[data-theme="dark"] .sm-pinwheels-ivy .sm-show-previous,
 .dark .sm-pinwheels-ivy .sm-show-previous {
-  background-color: #000000;
+  background-color: #0B0F14;
 }
 
 :root[data-theme="dark"] .sm-pinwheels-ivy .sm-section-title,
 .dark .sm-pinwheels-ivy .sm-section-title {
-  color: #ffffff;
+  color: #FAFAFB;
 }
 
 :root[data-theme="dark"] .sm-pinwheels-ivy .sm-video-card,
@@ -2071,7 +2071,7 @@ main {
 
 :root[data-theme="dark"] .sm-pinwheels-ivy .sm-video-title,
 .dark .sm-pinwheels-ivy .sm-video-title {
-  color: #ffffff;
+  color: #FAFAFB;
 }
 
 :root[data-theme="dark"] .sm-pinwheels-ivy .sm-video-meta,
@@ -2081,23 +2081,23 @@ main {
 
 :root[data-theme="dark"] .sm-pinwheels-ivy .sm-show-cta,
 .dark .sm-pinwheels-ivy .sm-show-cta {
-  background-color: #000000;
+  background-color: #0B0F14;
 }
 
 :root[data-theme="dark"] .sm-pinwheels-ivy .sm-cta-text,
 .dark .sm-pinwheels-ivy .sm-cta-text {
-  color: #ffffff;
+  color: #FAFAFB;
 }
 
 /* ========== UNTOLD CHICAGO STORIES ========== */
 
 /* Light mode: black hero top, white bottom */
 .sm-untold-chicago .sm-show-hero {
-  background-color: #000000;
+  background-color: #0B0F14;
 }
 
 .sm-untold-chicago .sm-show-previous {
-  background-color: #ffffff;
+  background-color: #FAFAFB;
 }
 
 .sm-untold-chicago .sm-section-title {
@@ -2117,7 +2117,7 @@ main {
 }
 
 .sm-untold-chicago .sm-show-cta {
-  background-color: #ffffff;
+  background-color: #FAFAFB;
 }
 
 .sm-untold-chicago .sm-cta-text {
@@ -2142,17 +2142,17 @@ main {
 /* Untold Chicago Dark Mode: swap colors */
 :root[data-theme="dark"] .sm-untold-chicago .sm-show-hero,
 .dark .sm-untold-chicago .sm-show-hero {
-  background-color: #000000;
+  background-color: #0B0F14;
 }
 
 :root[data-theme="dark"] .sm-untold-chicago .sm-show-previous,
 .dark .sm-untold-chicago .sm-show-previous {
-  background-color: #000000;
+  background-color: #0B0F14;
 }
 
 :root[data-theme="dark"] .sm-untold-chicago .sm-section-title,
 .dark .sm-untold-chicago .sm-section-title {
-  color: #ffffff;
+  color: #FAFAFB;
 }
 
 :root[data-theme="dark"] .sm-untold-chicago .sm-video-card,
@@ -2162,7 +2162,7 @@ main {
 
 :root[data-theme="dark"] .sm-untold-chicago .sm-video-title,
 .dark .sm-untold-chicago .sm-video-title {
-  color: #ffffff;
+  color: #FAFAFB;
 }
 
 :root[data-theme="dark"] .sm-untold-chicago .sm-video-meta,
@@ -2172,12 +2172,12 @@ main {
 
 :root[data-theme="dark"] .sm-untold-chicago .sm-show-cta,
 .dark .sm-untold-chicago .sm-show-cta {
-  background-color: #000000;
+  background-color: #0B0F14;
 }
 
 :root[data-theme="dark"] .sm-untold-chicago .sm-cta-text,
 .dark .sm-untold-chicago .sm-cta-text {
-  color: #ffffff;
+  color: #FAFAFB;
 }
 
 /* ========== SOUTHSIDE BEHAVIOR TIKTOK PAGE ========== */
@@ -2302,7 +2302,7 @@ main {
   justify-content: center;
   background-color: rgba(0, 0, 0, 0.6);
   border-radius: 50%;
-  color: #ffffff;
+  color: #FAFAFB;
   font-size: 18px;
   opacity: 0;
   transition: opacity 0.2s ease;
@@ -2336,7 +2336,7 @@ main {
   padding: 10px 18px;
   border-radius: 999px;
   background-color: #27251F;
-  color: #ffffff;
+  color: #FAFAFB;
   font-weight: 600;
   text-decoration: none;
 }
@@ -3294,7 +3294,7 @@ main {
 /* ── DARK MODE SELECTION COLOR ── */
 .dark ::selection {
   background-color: rgba(188,0,0,0.3);
-  color: #ffffff;
+  color: #FAFAFB;
 }
 
 /* ── DARK MODE LINK HOVER ── */
@@ -3968,7 +3968,7 @@ button.live-strip-chip--desk {
 
 [data-theme="light"] .briefing-chip,
 .light .briefing-chip {
-  color: #000000 !important;
+  color: #0B0F14 !important;
   border-color: rgba(188, 0, 0, 0.2) !important;
 }
 
@@ -4031,7 +4031,7 @@ button.live-strip-chip--desk {
 }
 
 .app-dock-link:hover {
-  color: #ffffff;
+  color: #FAFAFB;
 }
 
 .app-dock-link:hover::after {
@@ -4451,18 +4451,18 @@ a.glass-card-sm:active,
 /* ========== FINAL POLISH: Upgrade 12 — Premium Light Mode ========== */
 [data-theme="light"] .glass-card,
 .light .glass-card {
-  background: #ffffff;
+  background: #FAFAFB;
   border-color: rgba(0,0,0,0.06);
   box-shadow: 0 1px 3px rgba(0,0,0,0.06), 0 4px 16px rgba(0,0,0,0.04);
 }
 [data-theme="light"] .glass-card:hover,
 .light .glass-card:hover {
-  background: #ffffff;
+  background: #FAFAFB;
   box-shadow: 0 4px 20px rgba(0,0,0,0.1), 0 1px 4px rgba(0,0,0,0.06);
 }
 [data-theme="light"] .glass-card-sm,
 .light .glass-card-sm {
-  background: #ffffff;
+  background: #FAFAFB;
   border-color: rgba(0,0,0,0.06);
   box-shadow: 0 1px 3px rgba(0,0,0,0.05), 0 2px 8px rgba(0,0,0,0.03);
 }
@@ -4977,20 +4977,20 @@ a.glass-card-sm:active,
 /* === Light mode glass card overrides (updated for new palette) === */
 [data-theme="light"] .glass-card,
 .light .glass-card {
-  background: #ffffff;
+  background: #FAFAFB;
   border-color: rgba(0,0,0,0.06);
   box-shadow: 0 1px 3px rgba(0,0,0,0.06), 0 4px 12px rgba(0,0,0,0.03),
               inset 0 1px 0 rgba(255,255,255,0.8), inset 0 -1px 0 rgba(0,0,0,0.04);
 }
 [data-theme="light"] .glass-card:hover,
 .light .glass-card:hover {
-  background: #ffffff;
+  background: #FAFAFB;
   box-shadow: 0 4px 20px rgba(0,0,0,0.1), 0 1px 4px rgba(0,0,0,0.06),
               inset 0 1px 0 rgba(255,255,255,0.8), inset 0 -1px 0 rgba(0,0,0,0.04);
 }
 [data-theme="light"] .glass-card-sm,
 .light .glass-card-sm {
-  background: #ffffff;
+  background: #FAFAFB;
   border-color: rgba(0,0,0,0.06);
   box-shadow: 0 1px 3px rgba(0,0,0,0.05), 0 2px 8px rgba(0,0,0,0.03);
 }
@@ -5383,5 +5383,68 @@ a.glass-card-sm:active,
   }
   .feed-container .feed-card.visible::before {
     animation: none;
+  }
+}
+
+/* ========== SCOUT PING ========== */
+
+@keyframes scoutPing {
+  0%, 90% { transform: scale(1); opacity: 0; }
+  93% { transform: scale(1); opacity: 1; }
+  100% { transform: scale(1.8); opacity: 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  @keyframes scoutPing { 0%, 100% { transform: none; opacity: 0; } }
+}
+
+/* ========== MOTION BRANDING ========== */
+
+/* Star pulse — breaking news / live indicators (red glow) */
+.motion-pulse-star {
+  animation: pulseStar 2s ease-in-out infinite;
+  filter: drop-shadow(0 0 6px rgba(188, 0, 0, 0.5));
+}
+
+/* Cyan telemetry — AI/Scout/data borders */
+.motion-telemetry {
+  position: relative;
+  overflow: hidden;
+}
+.motion-telemetry::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, transparent 0%, rgba(0, 212, 255, 0.12) 50%, transparent 100%);
+  background-size: 200% 100%;
+  animation: telemetry 4s linear infinite;
+  pointer-events: none;
+  border-radius: inherit;
+}
+
+/* Data orb rotation */
+.motion-orb-spin {
+  animation: orbSpin 6s linear infinite;
+}
+
+/* Hover micro-signal — cards & interactive elements */
+.motion-hover {
+  transition: transform 200ms ease-out, box-shadow 200ms ease-out;
+}
+.motion-hover:hover {
+  transform: scale(1.02);
+  box-shadow: 0 0 12px rgba(0, 212, 255, 0.15);
+}
+
+/* Accessibility: disable all motion branding */
+@media (prefers-reduced-motion: reduce) {
+  .motion-pulse-star,
+  .motion-telemetry::after,
+  .motion-orb-spin {
+    animation: none !important;
+  }
+  .motion-hover:hover {
+    transform: none !important;
+    box-shadow: none !important;
   }
 }

@@ -202,11 +202,11 @@ export default function RiverFeed({
         {riverCards.map((card, index) => (
           <React.Fragment key={card.card_id}>
             {index === 2 && insertAtIndex2 && (
-              <div className="feed-card">
+              <div className="feed-card motion-hover">
                 {insertAtIndex2}
               </div>
             )}
-            <div className="feed-card">
+            <div className="feed-card motion-hover">
               {renderCardContent(index, card, playableArticles)}
             </div>
           </React.Fragment>

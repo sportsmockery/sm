@@ -16,11 +16,11 @@
   --bg-elevated: #27272a;
 
   /* Text Colors */
-  --text-primary: #ffffff;
+  --text-primary: #FAFAFB;
   --text-secondary: #a1a1aa;
   --text-muted: #71717a;
   --text-disabled: #52525b;
-  --text-inverse: #000000;
+  --text-inverse: #0B0F14;
 
   /* Border Colors */
   --border-default: #27272a;
@@ -274,18 +274,18 @@
 
 [data-theme="light"],
 .light {
-  --bg-primary: #ffffff;
+  --bg-primary: #FAFAFB;
   --bg-secondary: #f9fafb;
   --bg-tertiary: #f3f4f6;
-  --bg-card: #ffffff;
+  --bg-card: #FAFAFB;
   --bg-hover: #f3f4f6;
-  --bg-elevated: #ffffff;
+  --bg-elevated: #FAFAFB;
 
   --text-primary: #111827;
   --text-secondary: #4b5563;
   --text-muted: #9ca3af;
   --text-disabled: #d1d5db;
-  --text-inverse: #ffffff;
+  --text-inverse: #FAFAFB;
 
   --border-default: #e5e7eb;
   --border-subtle: #f3f4f6;
@@ -303,18 +303,18 @@
 
 @media (prefers-color-scheme: light) {
   :root:not([data-theme="dark"]) {
-    --bg-primary: #ffffff;
+    --bg-primary: #FAFAFB;
     --bg-secondary: #f9fafb;
     --bg-tertiary: #f3f4f6;
-    --bg-card: #ffffff;
+    --bg-card: #FAFAFB;
     --bg-hover: #f3f4f6;
-    --bg-elevated: #ffffff;
+    --bg-elevated: #FAFAFB;
 
     --text-primary: #111827;
     --text-secondary: #4b5563;
     --text-muted: #9ca3af;
     --text-disabled: #d1d5db;
-    --text-inverse: #ffffff;
+    --text-inverse: #FAFAFB;
 
     --border-default: #e5e7eb;
     --border-subtle: #f3f4f6;

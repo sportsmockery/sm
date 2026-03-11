@@ -24,7 +24,58 @@
 
 - **DO NOT** modify the ThemeToggle in `src/components/ThemeToggle.tsx` or Header.tsx — it's finalized.
 - **Always use inline `style={{}}` for button colors** (backgroundColor, color, border, outline, SVG stroke). Tailwind color classes get overridden.
-- **Brand Primary Red:** `#bc0000`
+### Core Color Palette (ALWAYS FOLLOW)
+
+Only use these colors. Do not substitute other blacks, whites, reds, etc.
+
+| Name | Hex | Usage |
+|------|-----|-------|
+| **Black** | `#0B0F14` | Backgrounds, text (dark mode bg, light mode text) |
+| **White** | `#FAFAFB` | Backgrounds, text (light mode bg, dark mode text) |
+| **Red** | `#BC0000` | Brand — logos, CTAs, accents, links |
+| **Edge Cyan** | `#00D4FF` | Technology / intelligence — AI features, data, Scout |
+| **Gold** | `#D6B05E` | Premium layer — subscriptions, premium badges, VIP |
+
+**Rules:**
+- **Red = brand** (primary identity, buttons, alerts)
+- **Cyan = intelligence** (AI, tech, data-driven features)
+- **Gold = premium** (paid tiers, exclusive content)
+- **DO NOT** use `#000000` — use `#0B0F14` instead
+- **DO NOT** use `#FFFFFF` — use `#FAFAFB` instead
+
+### Typography — Space Grotesk (ALWAYS FOLLOW)
+
+**Space Grotesk** is the site-wide font (`--font-space-grotesk` via `next/font/google`, mapped to `font-sans` in Tailwind).
+
+| Context | Weight | Size | Example |
+|---------|--------|------|---------|
+| Hero headlines | **Bold (700)** | 64–72px (`text-[clamp(48px,5vw,72px)]`) | SearchHero h1 |
+| Article titles | **Medium (500)** | 20–24px | Card headlines, post titles |
+| UI labels | **Regular (400)** | 14px | Buttons, inputs, nav items |
+
+- **DO NOT** use other font families unless explicitly told to.
+- **DO NOT** size hero headlines below 48px or above 72px.
+- Use `font-bold` for heroes, `font-medium` for article titles, default weight for UI labels.
+
+### Motion Branding (ALWAYS FOLLOW)
+
+Subtle motion makes the platform feel alive and intelligent. Use CSS animations/Tailwind `animate-*` classes. Keep durations slow (2–6s) and easing smooth. **Never jarring or distracting.**
+
+| Effect | Where | Color | CSS Class / Keyframe |
+|--------|-------|-------|---------------------|
+| **Star pulse** | Breaking news badges, live indicators | `#BC0000` | `animate-pulse-star` — scale 1→1.15 + opacity glow, 2s ease |
+| **Cyan telemetry lines** | AI/Scout sections, data borders | `#00D4FF` | `animate-telemetry` — subtle opacity sweep left→right, 4s linear infinite |
+| **Data orb rotation** | Stats widgets, score orbs, data hubs | `#00D4FF` / `#D6B05E` | `animate-orb-spin` — rotate 360°, 6s linear infinite |
+| **Hover micro-signals** | Cards, buttons, interactive elements | Inherited | Scale 1.02 + subtle glow on hover, 200ms ease-out |
+
+**Rules:**
+- Motion should be **ambient** — users notice it subconsciously, not consciously
+- Use `prefers-reduced-motion: reduce` to disable all custom animations for accessibility
+- **Star pulse** = breaking/live content only (red glow)
+- **Telemetry** = AI/intelligence features only (cyan sweep)
+- **Orb spin** = data visualization contexts only
+- **Hover signals** = all interactive elements (cards, buttons, links)
+- Keep all animation durations ≥ 2s for ambient effects (hover excepted)
 
 ---
 

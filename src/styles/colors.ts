@@ -3,7 +3,7 @@ export const brand = {
   primary: '#bc0000', // SM Red per design spec
   primaryDark: '#8a0000', // Darker red for hover
   secondary: '#222222',
-  white: '#FFFFFF',
+  white: '#FAFAFB',
   accent: '#bc0000',
 }
 
@@ -68,7 +68,7 @@ export function getTeamColors(slug: string) {
 // UI Colors with Light/Dark variants
 export const ui = {
   background: {
-    light: '#FFFFFF',
+    light: '#FAFAFB',
     dark: '#0a0a0a',
     muted: '#f5f5f5',
     mutedDark: '#1a1a1a',
@@ -80,8 +80,8 @@ export const ui = {
     secondaryDark: '#a1a1aa',
     muted: '#9ca3af',
     mutedDark: '#71717a',
-    inverse: '#FFFFFF',
-    inverseDark: '#000000',
+    inverse: '#FAFAFB',
+    inverseDark: '#0B0F14',
   },
   border: {
     light: '#e5e7eb',
@@ -96,13 +96,13 @@ export const ui = {
     hoverDark: '#8a0000',
   },
   card: {
-    light: '#FFFFFF',
+    light: '#FAFAFB',
     dark: '#18181b',
-    elevated: '#FFFFFF',
+    elevated: '#FAFAFB',
     elevatedDark: '#27272a',
   },
   input: {
-    bg: '#FFFFFF',
+    bg: '#FAFAFB',
     bgDark: '#27272a',
     border: '#d1d5db',
     borderDark: '#3f3f46',
@@ -138,7 +138,7 @@ export const lightModeTokens = {
 // Gradient presets
 export const gradients = {
   brand: 'linear-gradient(135deg, #bc0000 0%, #8a0000 100%)',
-  dark: 'linear-gradient(135deg, #222222 0%, #000000 100%)',
+  dark: 'linear-gradient(135deg, #222222 0%, #0B0F14 100%)',
   overlay: 'linear-gradient(to top, rgba(0,0,0,0.8) 0%, rgba(0,0,0,0.4) 50%, transparent 100%)',
   hero: 'linear-gradient(to bottom, transparent 0%, rgba(0,0,0,0.7) 100%)',
   glass: 'linear-gradient(135deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0.05) 100%)',

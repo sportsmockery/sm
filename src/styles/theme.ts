@@ -3,7 +3,7 @@ export const brand = {
   primary: '#bc0000', // SM Red per design spec
   primaryDark: '#8a0000', // Darker red for hover
   secondary: '#222222', // Near black
-  white: '#ffffff',
+  white: '#FAFAFB',
   background: '#f5f5f5',
   text: '#222222',
   textMuted: '#666666',

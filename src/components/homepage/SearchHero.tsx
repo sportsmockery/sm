@@ -44,15 +44,15 @@ export default function SearchHero({ firstName }: SearchHeroProps) {
             <Image
               src="/downloads/scout-v2.png"
               alt="Scout"
-              width={60}
-              height={60}
-              className="w-[60px] h-[60px] object-contain flex-shrink-0"
+              width={80}
+              height={80}
+              className="w-[80px] h-[80px] object-contain flex-shrink-0"
             />
             <div className="flex flex-col">
-              <span className="text-[17px] font-medium leading-tight" style={{ color: 'var(--hp-foreground)', opacity: 0.7 }}>
+              <span className="text-[23px] font-medium leading-tight" style={{ color: 'var(--hp-foreground)', opacity: 0.7 }}>
                 Hi {firstName || "there"},
               </span>
-              <span className="text-[13px] font-normal leading-snug mt-[3px]" style={{ color: 'var(--hp-foreground)', opacity: 0.45 }}>
+              <span className="text-[17px] font-normal leading-snug mt-[3px]" style={{ color: 'var(--hp-foreground)', opacity: 0.6 }}>
                 Welcome to SM✶EDGE, our new AI-powered platform.
               </span>
             </div>
@@ -60,16 +60,16 @@ export default function SearchHero({ firstName }: SearchHeroProps) {
 
           {/* Headline */}
           <h1
-            className="text-[clamp(32px,4vw,44px)] font-bold leading-[1.15] tracking-tight mb-[25px] whitespace-nowrap"
+            className="text-[clamp(48px,5vw,72px)] font-bold leading-[1.15] tracking-tight mb-[25px] whitespace-nowrap"
             style={{ color: 'var(--hp-foreground)' }}
           >
             What can I help you with?
           </h1>
 
           {/* Search input */}
-          <form onSubmit={handleSubmit} className="w-full max-w-[540px]">
+          <form onSubmit={handleSubmit} className="mt-4 md:mt-6 w-full max-w-[540px]">
             <div
-              className="rounded-lg"
+              className="rounded-lg motion-telemetry"
               style={{
                 boxShadow: "0 0 10px rgba(188, 0, 0, 0.2), 0 0 20px rgba(188, 0, 0, 0.08)",
               }}

@@ -209,7 +209,7 @@ export default function LiveStrip() {
             href={`/live/${game.sport}/${game.game_id}`}
             className="live-strip-chip live-strip-chip--live"
           >
-            <span className="live-strip-badge">
+            <span className="live-strip-badge motion-pulse-star">
               <span className="live-strip-pulse" />
               LIVE
             </span>
