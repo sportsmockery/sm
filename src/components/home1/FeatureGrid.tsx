@@ -55,6 +55,19 @@ const SM_FEATURES = [
       </svg>
     ),
   },
+  {
+    id: 'audio',
+    name: 'HANDS-FREE AUDIO',
+    desc: 'Have articles continuously read to you',
+    route: '/audio',
+    icon: (
+      <svg width="28" height="28" fill="none" viewBox="0 0 24 24" stroke="#bc0000" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+        <polygon points="11,5 6,9 2,9 2,15 6,15 11,19" fill="#bc0000" stroke="none" />
+        <path d="M15.54 8.46a5 5 0 0 1 0 7.07" />
+        <path d="M19.07 4.93a10 10 0 0 1 0 14.14" />
+      </svg>
+    ),
+  },
 ]
 
 export default function FeatureGrid() {
@@ -110,7 +123,7 @@ export default function FeatureGrid() {
       <div
         style={{
           display: 'grid',
-          gridTemplateColumns: 'repeat(4, 1fr)',
+          gridTemplateColumns: 'repeat(5, 1fr)',
           gap: 16,
         }}
         className="h1-feature-grid"
