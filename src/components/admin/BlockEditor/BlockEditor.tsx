@@ -97,8 +97,8 @@ export function BlockEditor({ initialBlocks, initialTemplate, onChange }: BlockE
       <div
         className="flex items-center justify-between px-4 py-2 rounded-xl"
         style={{
-          backgroundColor: 'rgba(255,255,255,0.03)',
-          border: '1px solid rgba(255,255,255,0.08)',
+          backgroundColor: '#f8f9fa',
+          border: '1px solid rgba(0,0,0,0.1)',
         }}
       >
         <div className="flex items-center gap-2">
@@ -137,8 +137,8 @@ export function BlockEditor({ initialBlocks, initialTemplate, onChange }: BlockE
                 onChange?.({ version: 1, template: '', blocks: [] });
               }
             }}
-            className="flex items-center gap-1 px-2 py-1.5 rounded-lg text-[11px] font-medium transition-colors hover:bg-white/5"
-            style={{ color: '#A0A8B0' }}
+            className="flex items-center gap-1 px-2 py-1.5 rounded-lg text-[11px] font-medium transition-colors hover:bg-black/5"
+            style={{ color: '#6b7280' }}
             title="Change template"
           >
             <LayoutTemplate size={12} /> Template
@@ -192,14 +192,14 @@ export function BlockEditor({ initialBlocks, initialTemplate, onChange }: BlockE
         <div
           className="rounded-xl min-h-[400px] overflow-hidden"
           style={{
-            backgroundColor: '#0B0F14',
-            border: '1px solid rgba(255,255,255,0.08)',
+            backgroundColor: '#ffffff',
+            border: '1px solid rgba(0,0,0,0.1)',
           }}
         >
           {/* Article preview chrome */}
           <div
             className="flex items-center justify-between px-4 py-3 border-b"
-            style={{ borderColor: 'rgba(255,255,255,0.06)', backgroundColor: 'rgba(255,255,255,0.02)' }}
+            style={{ borderColor: 'rgba(0,0,0,0.08)', backgroundColor: '#f8f9fa' }}
           >
             <span className="text-[10px] font-bold uppercase tracking-widest text-slate-500">Article Preview</span>
             <span className="text-[10px] text-slate-600">{blocks.length} blocks</span>
@@ -214,7 +214,7 @@ export function BlockEditor({ initialBlocks, initialTemplate, onChange }: BlockE
                 Category
               </span>
             </div>
-            <h1 className="text-[28px] sm:text-[32px] font-bold tracking-tight mb-2" style={{ color: '#FAFAFB' }}>
+            <h1 className="text-[28px] sm:text-[32px] font-bold tracking-tight mb-2" style={{ color: '#0B0F14' }}>
               Article Headline
             </h1>
             <div className="flex items-center gap-2 text-[13px] text-slate-500">

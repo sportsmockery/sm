@@ -99,12 +99,12 @@ export function TemplateSelector({ onSelect }: TemplateSelectorProps) {
     <div
       className="rounded-xl p-6"
       style={{
-        backgroundColor: 'rgba(255,255,255,0.03)',
-        border: '1px solid rgba(255,255,255,0.08)',
+        backgroundColor: '#f8f9fa',
+        border: '1px solid rgba(0,0,0,0.1)',
       }}
     >
-      <h3 className="text-sm font-bold text-white mb-1">Choose an article template</h3>
-      <p className="text-xs text-slate-500 mb-4">Select a composition or start blank</p>
+      <h3 className="text-sm font-bold mb-1" style={{ color: '#0B0F14' }}>Choose an article template</h3>
+      <p className="text-xs mb-4" style={{ color: '#6b7280' }}>Select a composition or start blank</p>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
         {TEMPLATE_PRESETS.map((preset) => {
@@ -114,8 +114,13 @@ export function TemplateSelector({ onSelect }: TemplateSelectorProps) {
               key={preset.id}
               type="button"
               onClick={() => onSelect(preset.blocks(), preset.id)}
-              className="flex items-start gap-3 p-4 rounded-xl text-left transition-all hover:bg-white/5"
-              style={{ border: '1px solid rgba(255,255,255,0.08)' }}
+              className="flex items-start gap-3 p-4 rounded-xl text-left transition-all"
+              style={{
+                border: '1px solid rgba(0,0,0,0.1)',
+                backgroundColor: '#ffffff',
+              }}
+              onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = '#f0f4f8' }}
+              onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = '#ffffff' }}
             >
               <div
                 className="flex items-center justify-center w-10 h-10 rounded-lg shrink-0"
@@ -124,8 +129,8 @@ export function TemplateSelector({ onSelect }: TemplateSelectorProps) {
                 {React.createElement(Icon, { size: 18, color: '#00D4FF' })}
               </div>
               <div>
-                <div className="text-sm font-bold text-white">{preset.label}</div>
-                <div className="text-[11px] text-slate-500">{preset.description}</div>
+                <div className="text-sm font-bold" style={{ color: '#0B0F14' }}>{preset.label}</div>
+                <div className="text-[11px]" style={{ color: '#6b7280' }}>{preset.description}</div>
               </div>
             </button>
           );
@@ -135,18 +140,23 @@ export function TemplateSelector({ onSelect }: TemplateSelectorProps) {
         <button
           type="button"
           onClick={() => onSelect([createBlock('paragraph')], 'blank')}
-          className="flex items-start gap-3 p-4 rounded-xl text-left transition-all hover:bg-white/5"
-          style={{ border: '1px dashed rgba(255,255,255,0.15)' }}
+          className="flex items-start gap-3 p-4 rounded-xl text-left transition-all"
+          style={{
+            border: '1px dashed rgba(0,0,0,0.2)',
+            backgroundColor: '#ffffff',
+          }}
+          onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = '#f0f4f8' }}
+          onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = '#ffffff' }}
         >
           <div
             className="flex items-center justify-center w-10 h-10 rounded-lg shrink-0"
-            style={{ backgroundColor: 'rgba(255,255,255,0.05)' }}
+            style={{ backgroundColor: 'rgba(0,0,0,0.05)' }}
           >
-            <span className="text-slate-500 text-lg">+</span>
+            <span style={{ color: '#6b7280', fontSize: 18 }}>+</span>
           </div>
           <div>
-            <div className="text-sm font-bold text-white">Blank</div>
-            <div className="text-[11px] text-slate-500">Start from scratch</div>
+            <div className="text-sm font-bold" style={{ color: '#0B0F14' }}>Blank</div>
+            <div className="text-[11px]" style={{ color: '#6b7280' }}>Start from scratch</div>
           </div>
         </button>
       </div>

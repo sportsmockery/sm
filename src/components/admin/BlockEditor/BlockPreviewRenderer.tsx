@@ -163,8 +163,8 @@ function RenderBlock({ block }: { block: ContentBlock }) {
                 key={pick.pickNumber}
                 className="rounded-lg p-3 flex items-center gap-4"
                 style={{
-                  backgroundColor: i === 0 ? 'rgba(214,176,94,0.06)' : 'rgba(255,255,255,0.02)',
-                  border: i === 0 ? '1px solid rgba(214,176,94,0.15)' : '1px solid rgba(255,255,255,0.06)',
+                  backgroundColor: i === 0 ? 'rgba(214,176,94,0.06)' : 'rgba(0,0,0,0.03)',
+                  border: i === 0 ? '1px solid rgba(214,176,94,0.15)' : '1px solid rgba(0,0,0,0.06)',
                 }}
               >
                 <span
@@ -211,7 +211,7 @@ function RenderBlock({ block }: { block: ContentBlock }) {
               <div key={l} className="flex-1 flex flex-col items-center gap-1">
                 <div
                   className="w-full h-2.5 rounded-full transition-all"
-                  style={{ backgroundColor: i <= activeIdx ? BRAND.red : 'rgba(255,255,255,0.08)' }}
+                  style={{ backgroundColor: i <= activeIdx ? BRAND.red : 'rgba(0,0,0,0.08)' }}
                 />
                 <span
                   className="text-[10px] font-bold uppercase"
@@ -254,7 +254,7 @@ function RenderBlock({ block }: { block: ContentBlock }) {
               <div key={l} className="flex-1 flex flex-col items-center gap-1">
                 <div
                   className="w-full h-3 rounded-full transition-all"
-                  style={{ backgroundColor: i <= activeIdx ? BRAND.red : 'rgba(255,255,255,0.08)' }}
+                  style={{ backgroundColor: i <= activeIdx ? BRAND.red : 'rgba(0,0,0,0.08)' }}
                 />
                 <span
                   className="text-[10px] font-bold uppercase"
@@ -291,7 +291,7 @@ function RenderBlock({ block }: { block: ContentBlock }) {
           <PreviewSection>
             <div
               className="rounded-xl px-5 py-4 flex items-center gap-3"
-              style={{ backgroundColor: 'rgba(255,255,255,0.02)', border: '1px dashed rgba(255,255,255,0.08)' }}
+              style={{ backgroundColor: 'rgba(0,0,0,0.03)', border: '1px dashed rgba(0,0,0,0.08)' }}
             >
               <div className="w-2 h-2 rounded-full shrink-0" style={{ backgroundColor: '#64748b', opacity: 0.5 }} />
               <span className="text-[13px] text-slate-500">Reaction Stream — disabled</span>
@@ -334,7 +334,7 @@ function RenderBlock({ block }: { block: ContentBlock }) {
         <PreviewSection>
           <div
             className="rounded-xl px-5 py-4 flex items-center gap-3"
-            style={{ backgroundColor: 'rgba(255,255,255,0.02)', border: '1px dashed rgba(255,255,255,0.08)' }}
+            style={{ backgroundColor: 'rgba(0,0,0,0.03)', border: '1px dashed rgba(0,0,0,0.08)' }}
           >
             <div className="w-2 h-2 rounded-full shrink-0" style={{ backgroundColor: '#64748b', opacity: 0.5 }} />
             <div>
@@ -359,7 +359,7 @@ function RenderBlock({ block }: { block: ContentBlock }) {
 
     /* ─── Utility ─── */
     case 'divider':
-      return <hr className="my-8 border-0 h-px" style={{ backgroundColor: 'rgba(255,255,255,0.08)' }} />;
+      return <hr className="my-8 border-0 h-px" style={{ backgroundColor: 'rgba(0,0,0,0.08)' }} />;
 
     default:
       return null;

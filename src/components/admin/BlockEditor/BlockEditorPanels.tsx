@@ -24,14 +24,14 @@ function BlockShell({
     <div
       className="group rounded-xl relative"
       style={{
-        backgroundColor: 'rgba(255,255,255,0.03)',
-        border: '1px solid rgba(255,255,255,0.08)',
+        backgroundColor: '#f8f9fa',
+        border: '1px solid rgba(0,0,0,0.1)',
       }}
     >
       {/* Top bar */}
       <div
         className="flex items-center gap-2 px-3 py-2 rounded-t-xl border-b"
-        style={{ borderColor: 'rgba(255,255,255,0.06)', backgroundColor: 'rgba(255,255,255,0.02)' }}
+        style={{ borderColor: 'rgba(0,0,0,0.08)', backgroundColor: '#f3f4f6' }}
       >
         <GripVertical size={14} className="text-slate-600 cursor-grab" />
         <span
@@ -42,12 +42,12 @@ function BlockShell({
         </span>
         <div className="ml-auto flex items-center gap-1">
           {onMoveUp && (
-            <button type="button" onClick={onMoveUp} className="p-1 text-slate-500 hover:text-white transition-colors" aria-label="Move up">
+            <button type="button" onClick={onMoveUp} className="p-1 text-slate-500 hover:text-[#0B0F14] transition-colors" aria-label="Move up">
               <ChevronUp size={14} />
             </button>
           )}
           {onMoveDown && (
-            <button type="button" onClick={onMoveDown} className="p-1 text-slate-500 hover:text-white transition-colors" aria-label="Move down">
+            <button type="button" onClick={onMoveDown} className="p-1 text-slate-500 hover:text-[#0B0F14] transition-colors" aria-label="Move down">
               <ChevronDown size={14} />
             </button>
           )}
@@ -78,7 +78,7 @@ function TextInput({ value, onChange, placeholder }: { value: string; onChange: 
       value={value}
       onChange={(e) => onChange(e.target.value)}
       placeholder={placeholder}
-      className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-sm text-white placeholder-slate-600 outline-none focus:border-[#00D4FF]/50"
+      className="w-full bg-white border border-gray-300 rounded-lg px-3 py-2 text-sm text-[#0B0F14] placeholder-slate-600 outline-none focus:border-[#00D4FF]/50"
     />
   );
 }
@@ -90,7 +90,7 @@ function TextArea({ value, onChange, placeholder, rows = 3 }: { value: string; o
       onChange={(e) => onChange(e.target.value)}
       placeholder={placeholder}
       rows={rows}
-      className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-sm text-white placeholder-slate-600 outline-none focus:border-[#00D4FF]/50 resize-y"
+      className="w-full bg-white border border-gray-300 rounded-lg px-3 py-2 text-sm text-[#0B0F14] placeholder-slate-600 outline-none focus:border-[#00D4FF]/50 resize-y"
     />
   );
 }
@@ -100,7 +100,7 @@ function Select({ value, onChange, options }: { value: string; onChange: (v: str
     <select
       value={value}
       onChange={(e) => onChange(e.target.value)}
-      className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-sm text-white outline-none focus:border-[#00D4FF]/50"
+      className="w-full bg-white border border-gray-300 rounded-lg px-3 py-2 text-sm text-[#0B0F14] outline-none focus:border-[#00D4FF]/50"
     >
       {options.map((o) => <option key={o.value} value={o.value}>{o.label}</option>)}
     </select>
@@ -115,7 +115,7 @@ function NumberInput({ value, onChange, min, max }: { value: number; onChange: (
       onChange={(e) => onChange(Number(e.target.value))}
       min={min}
       max={max}
-      className="w-24 bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-sm text-white outline-none focus:border-[#00D4FF]/50"
+      className="w-24 bg-white border border-gray-300 rounded-lg px-3 py-2 text-sm text-[#0B0F14] outline-none focus:border-[#00D4FF]/50"
     />
   );
 }
@@ -215,7 +215,7 @@ export function ScoutInsightPanel({ block, onChange, onDelete, onMoveUp, onMoveD
           style={{ accentColor: '#00D4FF' }}
         />
         <div>
-          <span className="text-sm font-medium text-white">Auto-generate on publish</span>
+          <span className="text-sm font-medium text-[#0B0F14]">Auto-generate on publish</span>
           <p className="text-[11px] text-slate-500">
             Scout AI will read your article and add its own analysis when published
           </p>
@@ -486,8 +486,8 @@ export function ReactionStreamPanel({ block, onChange, onDelete, onMoveUp, onMov
       <div
         className="rounded-lg p-3 mb-4 flex items-center gap-3"
         style={{
-          backgroundColor: hasReactions ? 'rgba(0,212,255,0.04)' : 'rgba(255,255,255,0.02)',
-          border: hasReactions ? '1px solid rgba(0,212,255,0.12)' : '1px solid rgba(255,255,255,0.06)',
+          backgroundColor: hasReactions ? 'rgba(0,212,255,0.04)' : '#f3f4f6',
+          border: hasReactions ? '1px solid rgba(0,212,255,0.12)' : '1px solid rgba(0,0,0,0.08)',
         }}
       >
         <div
@@ -516,7 +516,7 @@ export function ReactionStreamPanel({ block, onChange, onDelete, onMoveUp, onMov
           style={{ accentColor: '#00D4FF' }}
         />
         <div>
-          <span className="text-sm font-medium text-white">Enable Reaction Stream</span>
+          <span className="text-sm font-medium text-[#0B0F14]">Enable Reaction Stream</span>
           <p className="text-[11px] text-slate-500">
             {d.enabled
               ? 'Reactions will display when available on the published article.'
@@ -560,7 +560,7 @@ export function ReactionStreamPanel({ block, onChange, onDelete, onMoveUp, onMov
           style={{ accentColor: '#00D4FF' }}
         />
         <div>
-          <span className="text-[13px] font-medium text-white">Auto-hide when empty</span>
+          <span className="text-[13px] font-medium text-[#0B0F14]">Auto-hide when empty</span>
           <p className="text-[11px] text-slate-500">
             Automatically hides this block on the published article if no reactions are available.
           </p>
@@ -576,7 +576,7 @@ export function ReactionStreamPanel({ block, onChange, onDelete, onMoveUp, onMov
               <div
                 key={i}
                 className="rounded-lg p-3 flex gap-3"
-                style={{ backgroundColor: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.06)' }}
+                style={{ backgroundColor: '#f8f9fa', border: '1px solid rgba(0,0,0,0.08)' }}
               >
                 <div
                   className="w-7 h-7 rounded-full shrink-0 flex items-center justify-center text-[11px] font-bold"
@@ -586,7 +586,7 @@ export function ReactionStreamPanel({ block, onChange, onDelete, onMoveUp, onMov
                 </div>
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2">
-                    <span className="text-[12px] font-bold text-white truncate">{r.username}</span>
+                    <span className="text-[12px] font-bold text-[#0B0F14] truncate">{r.username}</span>
                     <span className="text-[10px] text-slate-600 ml-auto shrink-0">{r.timestamp}</span>
                   </div>
                   <p className="text-[12px] text-slate-400 leading-snug mt-0.5">{r.comment}</p>
@@ -638,7 +638,7 @@ export function DividerPanel({ block, onDelete, onMoveUp, onMoveDown }: BlockPan
   if (block.type !== 'divider') return null;
   return (
     <BlockShell label="Divider" onDelete={onDelete} onMoveUp={onMoveUp} onMoveDown={onMoveDown}>
-      <div className="h-px w-full" style={{ backgroundColor: 'rgba(255,255,255,0.1)' }} />
+      <div className="h-px w-full" style={{ backgroundColor: 'rgba(0,0,0,0.1)' }} />
     </BlockShell>
   );
 }

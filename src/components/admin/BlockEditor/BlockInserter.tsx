@@ -57,9 +57,9 @@ export function BlockInserter({ onInsert }: BlockInserterProps) {
         onClick={() => { setOpen(!open); setSearch(''); }}
         className="flex items-center justify-center w-8 h-8 rounded-full transition-all"
         style={{
-          backgroundColor: open ? '#00D4FF' : 'rgba(255,255,255,0.06)',
-          color: open ? '#0B0F14' : '#A0A8B0',
-          border: '1px solid rgba(255,255,255,0.1)',
+          backgroundColor: open ? '#00D4FF' : 'rgba(0,0,0,0.05)',
+          color: open ? '#ffffff' : '#6b7280',
+          border: '1px solid rgba(0,0,0,0.1)',
         }}
         aria-label="Add block"
       >
@@ -70,37 +70,36 @@ export function BlockInserter({ onInsert }: BlockInserterProps) {
         <div
           className="absolute top-10 z-50 w-[320px] max-h-[420px] overflow-y-auto rounded-xl shadow-2xl"
           style={{
-            backgroundColor: '#1A1F28',
-            border: '1px solid rgba(255,255,255,0.1)',
+            backgroundColor: '#ffffff',
+            border: '1px solid rgba(0,0,0,0.12)',
           }}
         >
           {/* Search */}
-          <div className="p-3 border-b" style={{ borderColor: 'rgba(255,255,255,0.08)' }}>
+          <div className="p-3 border-b" style={{ borderColor: 'rgba(0,0,0,0.08)' }}>
             <input
               ref={inputRef}
               type="text"
               placeholder="Search blocks..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="w-full bg-transparent text-sm text-white placeholder-slate-500 outline-none"
+              className="w-full bg-transparent text-sm outline-none"
+              style={{ color: '#0B0F14' }}
             />
           </div>
 
           {/* Categories */}
           {filteredCategories.map((cat) => {
-            // Category accent: Intelligence/Text = cyan, GM & Roster = cyan, Engagement = red
             const catAccent = cat.label === 'Engagement' ? '#BC0000' : '#00D4FF';
             const catAccentBg = cat.label === 'Engagement' ? 'rgba(188,0,0,0.1)' : 'rgba(0,212,255,0.1)';
             return (
               <div key={cat.label}>
                 <div className="px-3 pt-3 pb-1">
-                  <span className="text-[10px] font-bold uppercase tracking-widest text-slate-500">
+                  <span className="text-[10px] font-bold uppercase tracking-widest" style={{ color: '#9ca3af' }}>
                     {cat.label}
                   </span>
                 </div>
                 {cat.blocks.map((block) => {
                   const Icon = ICON_MAP[block.icon] || Type;
-                  // Override accent for specific rumor/heat blocks
                   const isRedBlock = ['rumor-meter', 'heat-meter', 'hot-take', 'update'].includes(block.type);
                   const accent = isRedBlock ? '#BC0000' : catAccent;
                   const accentBg = isRedBlock ? 'rgba(188,0,0,0.1)' : catAccentBg;
@@ -109,7 +108,7 @@ export function BlockInserter({ onInsert }: BlockInserterProps) {
                       key={block.type}
                       type="button"
                       onClick={() => { onInsert(block.type); setOpen(false); }}
-                      className="w-full flex items-center gap-3 px-3 py-2.5 text-left transition-colors hover:bg-white/5"
+                      className="w-full flex items-center gap-3 px-3 py-2.5 text-left transition-colors hover:bg-black/5"
                     >
                       <div
                         className="flex items-center justify-center w-8 h-8 rounded-lg shrink-0"
@@ -118,8 +117,8 @@ export function BlockInserter({ onInsert }: BlockInserterProps) {
                         {React.createElement(Icon, { size: 14, color: accent })}
                       </div>
                       <div>
-                        <div className="text-sm font-medium text-white">{block.label}</div>
-                        <div className="text-[11px] text-slate-500">{block.description}</div>
+                        <div className="text-sm font-medium" style={{ color: '#0B0F14' }}>{block.label}</div>
+                        <div className="text-[11px]" style={{ color: '#6b7280' }}>{block.description}</div>
                       </div>
                     </button>
                   );
@@ -129,7 +128,7 @@ export function BlockInserter({ onInsert }: BlockInserterProps) {
           })}
 
           {filteredCategories.length === 0 && (
-            <div className="p-6 text-center text-sm text-slate-500">No blocks found</div>
+            <div className="p-6 text-center text-sm" style={{ color: '#6b7280' }}>No blocks found</div>
           )}
         </div>
       )}
