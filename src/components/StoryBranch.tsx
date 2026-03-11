@@ -183,7 +183,8 @@ export default function StoryBranch({
         {/* Start button */}
         <button
           onClick={() => setIsStarted(true)}
-          className="w-full rounded-xl bg-gradient-to-r from-[#8B0000] to-[#BC0000] py-3 font-bold text-white transition-all hover:from-[#a00000] hover:to-[#FF3333]"
+          className="w-full rounded-xl py-3 font-bold text-white transition-all"
+          style={{ backgroundColor: '#BC0000' }}
         >
           Begin Your Story
         </button>
@@ -255,7 +256,8 @@ export default function StoryBranch({
           </div>
           <button
             onClick={handleRestart}
-            className="w-full rounded-xl bg-gradient-to-r from-[#8B0000] to-[#BC0000] py-3 font-bold text-white transition-all hover:from-[#a00000] hover:to-[#FF3333]"
+            className="w-full rounded-xl py-3 font-bold text-white transition-all"
+          style={{ backgroundColor: '#BC0000' }}
           >
             Try a Different Path
           </button>

@@ -140,7 +140,7 @@ export default async function AuthorsPage({ searchParams }: AuthorsPageProps) {
         {/* Join CTA */}
         <div
           className="mt-16 rounded-2xl p-8 text-center"
-          style={{ background: 'linear-gradient(135deg, #bc0000, #ff4444)' }}
+          style={{ backgroundColor: '#BC0000' }}
         >
           <h3 className="mb-3 font-heading text-2xl font-bold text-white">
             Want to Write for SportsMockery?

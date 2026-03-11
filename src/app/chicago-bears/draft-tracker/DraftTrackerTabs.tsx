@@ -82,7 +82,7 @@ export default function DraftTrackerTabs({ hubItems, displayPosts }: DraftTracke
           style={{
             marginBottom: '32px',
             padding: '28px',
-            background: 'linear-gradient(135deg, rgba(11,22,42,0.4), rgba(200,56,3,0.1))',
+            background: 'rgba(188, 0, 0, 0.06)',
             borderColor: 'rgba(200,56,3,0.2)',
           }}
         >

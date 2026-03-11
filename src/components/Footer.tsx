@@ -201,7 +201,8 @@ export default function Footer() {
               />
               <button
                 type="submit"
-                className="w-full px-4 py-3 rounded-lg bg-gradient-to-r from-[#BC0000] to-[#8B0000] text-white font-bold text-sm hover:from-[#BC0000] hover:to-[#a00000] transition-all shadow-lg hover:shadow-xl hover:scale-[1.02]"
+                className="w-full px-4 py-3 rounded-lg text-white font-bold text-sm transition-all shadow-lg hover:shadow-xl hover:scale-[1.02]"
+                style={{ backgroundColor: '#BC0000' }}
               >
                 Subscribe
               </button>

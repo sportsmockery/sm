@@ -70,7 +70,7 @@ export default function HomeNav() {
         <Link
           href="/home/login"
           style={{
-            background: 'linear-gradient(135deg, #bc0000, #ff4444)',
+            backgroundColor: '#BC0000',
             color: '#fff',
             padding: '10px 24px',
             borderRadius: 100,
@@ -142,7 +142,7 @@ export default function HomeNav() {
             href="/home/login"
             onClick={() => setMenuOpen(false)}
             style={{
-              background: 'linear-gradient(135deg, #bc0000, #ff4444)',
+              backgroundColor: '#BC0000',
               color: '#fff',
               padding: '12px 24px',
               borderRadius: 100,

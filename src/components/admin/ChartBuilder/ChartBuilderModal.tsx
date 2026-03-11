@@ -387,7 +387,8 @@ export default function ChartBuilderModal({
           <button
             onClick={handleInsert}
             disabled={!hasValidData || !config.title.trim()}
-            className="rounded-lg bg-gradient-to-r from-[#BC0000] to-[#8B0000] px-6 py-2 text-sm font-medium text-white hover:from-[#BC0000] hover:to-[#a00000] transition-all shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
+            className="rounded-lg px-6 py-2 text-sm font-medium text-white transition-all shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
+            style={{ backgroundColor: '#BC0000' }}
           >
             Insert Chart
           </button>

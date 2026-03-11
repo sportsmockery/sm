@@ -72,8 +72,8 @@ export default async function PollEmbedPage({ params }: EmbedPageProps) {
             --sm-text: #FAFAFB;
             --sm-text-muted: #8a8a9a;
             --sm-text-dim: #55556a;
-            --sm-gradient: linear-gradient(135deg, #bc0000, #ff4444);
-            --sm-gradient-subtle: linear-gradient(135deg, rgba(188,0,0,0.15), rgba(255,68,68,0.05));
+            --sm-gradient: #BC0000;
+            --sm-gradient-subtle: rgba(188, 0, 0, 0.08);
             --sm-radius-sm: 10px;
             --sm-radius-md: 16px;
             --sm-radius-lg: 20px;

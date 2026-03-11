@@ -114,7 +114,7 @@ export default function PricingPageClient() {
                 style={{
                   position: 'relative', padding: '28px', borderRadius: 'var(--sm-radius-lg)',
                   ...(isPopular ? {
-                    background: 'linear-gradient(135deg, #bc0000, #ff4444)',
+                    backgroundColor: '#BC0000',
                     color: '#fff',
                     border: '2px solid rgba(255,255,255,0.2)',
                   } : {}),

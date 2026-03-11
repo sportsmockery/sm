@@ -1,5 +1,5 @@
 import { Metadata } from 'next'
-import { TeamHubLayout, OrbNav, ToolGrid, QuickStats } from '@/components/team'
+import { TeamHubLayout, ToolGrid, QuickStats } from '@/components/team'
 import { SectionHeader, ArticleCard, AskAIWidget, FanChatWidget } from '@/components/team/shared'
 import { CHICAGO_TEAMS, fetchTeamRecord, fetchNextGame, fetchLastGame } from '@/lib/team-config'
 import { supabaseAdmin } from '@/lib/supabase-server'
@@ -75,8 +75,7 @@ export default async function BlackhawksHubPage() {
       lastGame={lastGame}
       activeTab="overview"
     >
-      {/* Orb Navigation */}
-      <OrbNav teamSlug="chicago-blackhawks" accentColor="#CF0A2C" />
+      {/* OrbNav removed — navigation handled by sidebar */}
 
       <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '48px', maxWidth: '1320px', margin: '0 auto' }}>
         {/* Tool Grid */}

@@ -370,7 +370,8 @@ function ChartBuilderModalWithInitial({
           </button>
           <button
             onClick={handleInsert}
-            className="rounded-lg bg-gradient-to-r from-[#BC0000] to-[#8B0000] px-6 py-2 text-sm font-medium text-white hover:from-[#BC0000] hover:to-[#a00000] transition-all shadow-lg"
+            className="rounded-lg px-6 py-2 text-sm font-medium text-white transition-all shadow-lg"
+            style={{ backgroundColor: '#BC0000' }}
           >
             {isEditing ? 'Save Changes' : 'Insert Chart'}
           </button>

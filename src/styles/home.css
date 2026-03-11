@@ -16,8 +16,8 @@
   --hm-text: #FAFAFB;
   --hm-text-muted: #8a8a9a;
   --hm-text-dim: #55556a;
-  --hm-gradient: linear-gradient(135deg, #bc0000, #ff4444);
-  --hm-gradient-subtle: linear-gradient(135deg, rgba(188,0,0,0.15), rgba(255,68,68,0.05));
+  --hm-gradient: #BC0000;
+  --hm-gradient-subtle: rgba(188, 0, 0, 0.08);
 
   /* Functional */
   --hm-success: #00d084;

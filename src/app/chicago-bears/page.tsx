@@ -1,5 +1,5 @@
 import { Metadata } from 'next'
-import { TeamHubLayout, OrbNav, ToolGrid, QuickStats } from '@/components/team'
+import { TeamHubLayout, ToolGrid, QuickStats } from '@/components/team'
 import { SectionHeader, ArticleCard, AskAIWidget, FanChatWidget } from '@/components/team/shared'
 import {
   BearsSeasonCard,
@@ -74,8 +74,7 @@ export default async function BearsHubPage() {
       lastGame={lastGame}
       activeTab="overview"
     >
-      {/* OrbNav - fixed position tool launcher */}
-      <OrbNav teamSlug="chicago-bears" accentColor="#C83200" />
+      {/* OrbNav removed — navigation handled by sidebar */}
 
       <div
         style={{

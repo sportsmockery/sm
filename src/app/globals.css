@@ -36,9 +36,9 @@
   --sm-text-muted: #A9B4C2;
   --sm-text-dim: #8F9BAD;
 
-  /* === Gradients === */
-  --sm-gradient: linear-gradient(135deg, #bc0000, #ff4444);
-  --sm-gradient-subtle: linear-gradient(135deg, rgba(188,0,0,0.15), rgba(255,68,68,0.05));
+  /* === Gradients (flattened to solid colors) === */
+  --sm-gradient: #BC0000;
+  --sm-gradient-subtle: rgba(188, 0, 0, 0.08);
 
   /* === Status === */
   --sm-success: #00d084;
