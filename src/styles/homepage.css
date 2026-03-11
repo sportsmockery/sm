@@ -173,7 +173,6 @@
 }
 
 .ambient-stat-value {
-  font-family: var(--font-space-grotesk), 'Space Grotesk', system-ui, sans-serif;
   font-size: 22px;
   font-weight: 700;
   color: rgba(188, 0, 0, 0.18);
@@ -181,7 +180,6 @@
 }
 
 .ambient-stat-label {
-  font-family: var(--font-space-grotesk), 'Space Grotesk', system-ui, sans-serif;
   font-size: 9px;
   font-weight: 600;
   text-transform: uppercase;
@@ -236,7 +234,6 @@
 
 /* Main headline: Barlow — chrome gradient + bevel */
 .hero-headline {
-  font-family: var(--font-space-grotesk), 'Space Grotesk', system-ui, sans-serif !important;
   font-size: clamp(3rem, 7vw, 5.5rem);
   font-weight: 800;
   line-height: 1.0;
@@ -356,7 +353,6 @@
 
 /* Subtitle */
 .hero-subtitle {
-  font-family: var(--font-space-grotesk), 'Space Grotesk', system-ui, sans-serif;
   font-size: clamp(1rem, 1.8vw, 1.15rem);
   font-weight: 400;
   color: var(--sm-text-muted);
@@ -481,7 +477,6 @@
 .homepage-section .section-header h2,
 .featured-section .section-header h2,
 .feed-section .section-header h2 {
-  font-family: var(--font-space-grotesk), 'Space Grotesk', system-ui, sans-serif;
   font-size: 32px;
   font-weight: 700;
   margin-top: 12px;
@@ -523,7 +518,6 @@
 }
 
 .featured-main h3 {
-  font-family: var(--font-space-grotesk), 'Space Grotesk', system-ui, sans-serif;
   font-size: 24px;
   font-weight: 700;
   color: var(--sm-text);
@@ -585,7 +579,6 @@
 }
 
 .featured-side-card .side-content h4 {
-  font-family: var(--font-space-grotesk), 'Space Grotesk', system-ui, sans-serif;
   font-size: 16px;
   font-weight: 600;
   color: var(--sm-text);
@@ -684,7 +677,6 @@
 }
 
 .widget-title {
-  font-family: var(--font-space-grotesk), 'Space Grotesk', system-ui, sans-serif;
   font-size: 12px;
   font-weight: 700;
   text-transform: uppercase;
@@ -944,7 +936,6 @@
   gap: 4px;
   padding: 7px 16px;
   border-radius: 100px;
-  font-family: var(--font-space-grotesk), 'Space Grotesk', system-ui, sans-serif;
   font-size: 13px;
   font-weight: 600;
   background: rgba(255, 255, 255, 0.04);
@@ -1044,7 +1035,6 @@
 }
 
 .feed-card .card-body h3 {
-  font-family: var(--font-space-grotesk), 'Space Grotesk', system-ui, sans-serif;
   font-size: 20px;
   font-weight: 600;
   color: var(--sm-text);
@@ -1210,7 +1200,6 @@
 }
 
 .trending-section h3 {
-  font-family: var(--font-space-grotesk), 'Space Grotesk', system-ui, sans-serif;
   font-size: 18px;
   font-weight: 700;
   color: var(--sm-text);
@@ -1304,7 +1293,6 @@
   padding: 16px 20px;
   background: none;
   border: none;
-  font-family: var(--font-space-grotesk), 'Space Grotesk', system-ui, sans-serif;
   font-size: 16px;
   font-weight: 600;
   color: var(--sm-text);
@@ -1457,7 +1445,6 @@
 }
 
 .feed-empty-message {
-  font-family: var(--font-space-grotesk), 'Space Grotesk', system-ui, sans-serif;
   font-size: 20px;
   font-weight: 600;
   color: var(--sm-text);
@@ -2305,7 +2292,6 @@ html {
 }
 
 .hero-search-bar kbd {
-  font-family: var(--font-space-grotesk), 'Space Grotesk', system-ui, sans-serif;
   font-size: 11px;
   font-weight: 600;
   padding: 2px 6px;
@@ -2363,7 +2349,6 @@ html {
   background: rgba(255, 255, 255, 0.06);
   border: 1px solid rgba(255, 255, 255, 0.08);
   border-radius: 12px;
-  font-family: var(--font-space-grotesk), 'Space Grotesk', system-ui, sans-serif;
   font-size: 14px;
   color: var(--sm-text);
   transition: border-color 0.2s, box-shadow 0.2s;
@@ -2383,7 +2368,6 @@ html {
   border-radius: 6px;
   background: rgba(255, 255, 255, 0.04);
   border: 1px solid rgba(255, 255, 255, 0.08);
-  font-family: var(--font-space-grotesk), 'Space Grotesk', system-ui, sans-serif;
   font-size: 11px;
   color: var(--sm-text-dim);
   pointer-events: none;
@@ -2611,7 +2595,6 @@ html {
 }
 
 .context-panel-team {
-  font-family: var(--font-space-grotesk), 'Space Grotesk', system-ui, sans-serif;
   font-size: 11px;
   font-weight: 600;
   color: #FAFAFB;
@@ -2656,7 +2639,6 @@ html {
 
 .context-panel-cta {
   display: block;
-  font-family: var(--font-space-grotesk), 'Space Grotesk', system-ui, sans-serif;
   font-size: 12px;
   font-weight: 600;
   color: #bc0000;
@@ -2741,7 +2723,6 @@ html {
 }
 
 .sm-plus-cta h4 {
-  font-family: var(--font-space-grotesk), 'Space Grotesk', system-ui, sans-serif;
   font-size: 16px;
   font-weight: 700;
   color: var(--sm-text);
@@ -2911,7 +2892,6 @@ html {
 }
 
 .featured-more-title {
-  font-family: var(--font-space-grotesk), 'Space Grotesk', system-ui, sans-serif;
   font-size: 12px;
   font-weight: 700;
   text-transform: uppercase;
@@ -3139,7 +3119,6 @@ html {
   background: transparent;
   border: none;
   color: var(--sm-text);
-  font-family: var(--font-space-grotesk), 'Space Grotesk', system-ui, sans-serif;
   font-size: 14px;
   font-weight: 600;
   cursor: pointer;
@@ -3162,7 +3141,6 @@ html {
   gap: 24px;
 }
 .pref-section h4 {
-  font-family: var(--font-space-grotesk), 'Space Grotesk', system-ui, sans-serif;
   font-size: 14px;
   font-weight: 600;
   margin-bottom: 4px;
@@ -3215,7 +3193,6 @@ html {
   background: var(--sm-gradient);
   color: #fff;
   border: none;
-  font-family: var(--font-space-grotesk), 'Space Grotesk', system-ui, sans-serif;
   font-size: 13px;
   font-weight: 600;
   cursor: pointer;
@@ -3248,7 +3225,6 @@ html {
   padding: 32px 0 16px;
 }
 .feed-page-header .gradient-text {
-  font-family: var(--font-space-grotesk), 'Space Grotesk', system-ui, sans-serif;
   font-size: 28px;
   font-weight: 700;
   background: linear-gradient(135deg, #bc0000, #ff4444);
@@ -3307,7 +3283,6 @@ html {
   text-align: center;
 }
 .portal-label {
-  font-family: var(--font-space-grotesk), 'Space Grotesk', system-ui, sans-serif;
   font-size: 14px;
   font-weight: 600;
   color: var(--sm-text-muted);
@@ -3361,7 +3336,6 @@ html {
   pointer-events: none;
 }
 .orb-name {
-  font-family: var(--font-space-grotesk), 'Space Grotesk', system-ui, sans-serif;
   font-size: 8px;
   font-weight: 600;
   color: var(--sm-text-dim);
@@ -3415,7 +3389,6 @@ html {
 }
 
 .storylines-rail-header {
-  font-family: var(--font-space-grotesk), 'Space Grotesk', system-ui, sans-serif;
   font-size: 18px;
   font-weight: 700;
   color: var(--sm-text);
@@ -3496,7 +3469,6 @@ html {
 }
 
 .storyline-card-team {
-  font-family: var(--font-space-grotesk), 'Space Grotesk', system-ui, sans-serif;
   font-size: 10px;
   font-weight: 600;
   text-transform: uppercase;
@@ -3505,7 +3477,6 @@ html {
 }
 
 .storyline-card-title {
-  font-family: var(--font-space-grotesk), 'Space Grotesk', system-ui, sans-serif;
   font-size: 14px;
   font-weight: 600;
   line-height: 1.35;
@@ -3553,7 +3524,6 @@ html {
   border: 1px solid var(--sm-border);
   border-radius: 12px;
   color: var(--sm-text-muted);
-  font-family: var(--font-space-grotesk), 'Space Grotesk', system-ui, sans-serif;
   font-size: 14px;
   font-weight: 600;
   cursor: pointer;
@@ -3579,7 +3549,6 @@ html {
   display: flex;
   align-items: center;
   justify-content: center;
-  font-family: var(--font-space-grotesk), 'Space Grotesk', system-ui, sans-serif;
   font-size: 11px;
   font-weight: 500;
   color: #FAFAFB;
@@ -3623,7 +3592,6 @@ html {
   bottom: 12px;
   right: 12px;
   z-index: 5;
-  font-family: var(--font-space-grotesk), 'Space Grotesk', system-ui, sans-serif;
   font-size: 11px;
   font-weight: 700;
   letter-spacing: 1.5px;
@@ -3723,7 +3691,6 @@ html {
   top: 10px;
   left: 10px;
   z-index: 6;
-  font-family: var(--font-space-grotesk), 'Space Grotesk', system-ui, sans-serif;
   font-size: 10px;
   font-weight: 700;
   text-transform: uppercase;
@@ -3984,7 +3951,6 @@ html .storyline-card {
 }
 
 .your-chicago-title {
-  font-family: var(--font-space-grotesk), 'Space Grotesk', system-ui, sans-serif;
   font-weight: 700;
   font-size: 20px;
   color: #fff;
@@ -3993,7 +3959,6 @@ html .storyline-card {
 }
 
 .your-chicago-name {
-  font-family: var(--font-space-grotesk), 'Space Grotesk', system-ui, sans-serif;
   font-weight: 400;
   font-size: 16px;
   color: rgba(255, 255, 255, 0.85);
@@ -4001,7 +3966,6 @@ html .storyline-card {
 }
 
 .your-chicago-streak {
-  font-family: var(--font-space-grotesk), 'Space Grotesk', system-ui, sans-serif;
   font-weight: 700;
   font-size: 18px;
   color: #bc0000;
@@ -4142,7 +4106,6 @@ html .storyline-card {
   margin: 0 auto 32px !important;
   padding: 12px 24px !important;
   gap: 8px;
-  font-family: var(--font-space-grotesk), 'Space Grotesk', system-ui, sans-serif;
   font-size: 16px;
   font-weight: 500;
   color: rgba(255, 255, 255, 0.65);
@@ -4237,7 +4200,6 @@ html .storyline-card {
 }
 
 .scout-since-team-label {
-  font-family: var(--font-space-grotesk), 'Space Grotesk', system-ui, sans-serif;
   font-size: 11px;
   font-weight: 700;
   letter-spacing: 0.08em;
@@ -4359,7 +4321,6 @@ html .storyline-card {
 }
 
 .catchup-label {
-  font-family: var(--font-space-grotesk), 'Space Grotesk', system-ui, sans-serif;
   font-weight: 600;
   font-size: 14px;
   color: #fff;
@@ -4405,7 +4366,6 @@ html .storyline-card {
   transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
   text-align: left;
   color: #fff;
-  font-family: var(--font-space-grotesk), 'Space Grotesk', system-ui, sans-serif;
 }
 
 .catchup-chip:hover,
@@ -4459,7 +4419,6 @@ html .storyline-card {
   background: rgba(188, 0, 0, 0.12);
   border: 1px solid rgba(188, 0, 0, 0.3);
   border-radius: 12px;
-  font-family: var(--font-space-grotesk), 'Space Grotesk', system-ui, sans-serif;
   font-size: 11px;
   font-weight: 600;
   letter-spacing: 0.02em;
@@ -4494,7 +4453,6 @@ html .storyline-card {
 
 .catchup-panel-excerpt {
   flex: 1;
-  font-family: var(--font-space-grotesk), 'Space Grotesk', system-ui, sans-serif;
   font-size: 13px;
   line-height: 1.55;
   color: rgba(255, 255, 255, 0.8);
@@ -4507,7 +4465,6 @@ html .storyline-card {
 
 .catchup-panel-jump {
   flex-shrink: 0;
-  font-family: var(--font-space-grotesk), 'Space Grotesk', system-ui, sans-serif;
   font-size: 11px;
   font-weight: 700;
   letter-spacing: 0.04em;
@@ -4686,7 +4643,6 @@ html .storyline-card {
 .storyline-dot--white-sox  { background: #27251f; box-shadow: 0 0 0 1px rgba(255,255,255,0.15); }
 
 .storyline-block-title {
-  font-family: var(--font-space-grotesk), 'Space Grotesk', system-ui, sans-serif;
   font-size: 18px;
   font-weight: 700;
   letter-spacing: 0.06em;
@@ -4704,7 +4660,6 @@ html .storyline-card {
 }
 
 .storyline-block-viewall {
-  font-family: var(--font-space-grotesk), 'Space Grotesk', system-ui, sans-serif;
   font-size: 12px;
   font-weight: 600;
   color: #bc0000;
@@ -5134,7 +5089,6 @@ html .storyline-card {
 }
 
 .scout-hint-badge span {
-  font-family: var(--font-space-grotesk), 'Space Grotesk', system-ui, sans-serif;
   font-size: 10px;
   font-weight: 600;
   letter-spacing: 0.02em;
@@ -5183,7 +5137,6 @@ html .storyline-card {
 }
 
 .scout-first-tip span {
-  font-family: var(--font-space-grotesk), 'Space Grotesk', system-ui, sans-serif;
   font-size: 13px;
   font-weight: 600;
   color: #FAFAFB;
@@ -5277,7 +5230,6 @@ html .storyline-card {
 }
 
 .cmd-card-title {
-  font-family: var(--font-space-grotesk), 'Space Grotesk', system-ui, sans-serif;
   font-size: 11px;
   font-weight: 700;
   letter-spacing: 0.08em;
@@ -5302,7 +5254,6 @@ html .storyline-card {
   padding: 8px 10px;
   border-radius: 8px;
   text-decoration: none;
-  font-family: var(--font-space-grotesk), 'Space Grotesk', system-ui, sans-serif;
   font-size: 13px;
   font-weight: 500;
   color: var(--sm-text);
@@ -5340,7 +5291,6 @@ html .storyline-card {
   border: 1px solid rgba(255, 255, 255, 0.08);
   border-radius: 100px;
   text-decoration: none;
-  font-family: var(--font-space-grotesk), 'Space Grotesk', system-ui, sans-serif;
   font-size: 12px;
   font-weight: 500;
   color: var(--sm-text);
@@ -5385,7 +5335,6 @@ html .storyline-card {
 }
 
 .cmd-team-label {
-  font-family: var(--font-space-grotesk), 'Space Grotesk', system-ui, sans-serif;
   font-size: 13px;
   font-weight: 700;
   letter-spacing: 0.03em;
@@ -5393,7 +5342,6 @@ html .storyline-card {
 }
 
 .cmd-team-count {
-  font-family: var(--font-space-grotesk), 'Space Grotesk', system-ui, sans-serif;
   font-size: 11px;
   color: var(--sm-text-muted);
 }
@@ -5420,7 +5368,6 @@ html .storyline-card {
 }
 
 .cmd-trending-rank {
-  font-family: var(--font-space-grotesk), 'Space Grotesk', system-ui, sans-serif;
   font-size: 14px;
   font-weight: 800;
   color: rgba(188, 0, 0, 0.6);
@@ -5431,7 +5378,6 @@ html .storyline-card {
 }
 
 .cmd-trending-title {
-  font-family: var(--font-space-grotesk), 'Space Grotesk', system-ui, sans-serif;
   font-size: 13px;
   font-weight: 500;
   line-height: 1.4;

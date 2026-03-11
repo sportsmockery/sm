@@ -864,7 +864,6 @@ html {
 
 *, *::before, *::after {
   box-sizing: border-box;
-  font-family: var(--font-space-grotesk), 'Space Grotesk', system-ui, sans-serif !important;
 }
 
 body {
@@ -1189,7 +1188,6 @@ main {
   color: #fff;
   padding: 14px 32px;
   border-radius: var(--sm-radius-pill);
-  font-family: var(--font-space-grotesk), 'Space Grotesk', system-ui, sans-serif;
   font-weight: 600;
   font-size: 15px;
   text-decoration: none;
@@ -1214,7 +1212,6 @@ main {
   color: var(--sm-text);
   padding: 14px 32px;
   border-radius: var(--sm-radius-pill);
-  font-family: var(--font-space-grotesk), 'Space Grotesk', system-ui, sans-serif;
   font-weight: 600;
   font-size: 15px;
   text-decoration: none;
@@ -3399,7 +3396,6 @@ main {
   gap: 6px;
   padding: 6px 14px;
   border-radius: var(--sm-radius-pill);
-  font-family: var(--font-space-grotesk), 'Space Grotesk', system-ui, sans-serif;
   font-size: 12px;
   font-weight: 600;
   letter-spacing: 0.5px;
@@ -3423,7 +3419,6 @@ main {
   gap: 6px;
   padding: 8px 16px;
   border-radius: var(--sm-radius-pill);
-  font-family: var(--font-space-grotesk), 'Space Grotesk', system-ui, sans-serif;
   font-size: 13px;
   font-weight: 600;
   background: rgba(255,255,255,0.04);
@@ -3471,7 +3466,6 @@ main {
   border: 1px solid var(--sm-border);
   border-radius: var(--sm-radius-md);
   color: var(--sm-text);
-  font-family: var(--font-space-grotesk), 'Space Grotesk', system-ui, sans-serif;
   font-size: 15px;
   outline: none;
   transition: border-color 0.2s;
@@ -3662,7 +3656,6 @@ main {
 }
 .nav-links a {
   color: var(--sm-text-muted);
-  font-family: var(--font-space-grotesk), 'Space Grotesk', system-ui, sans-serif;
   font-size: 14px;
   font-weight: 500;
   text-decoration: none;
@@ -3725,7 +3718,6 @@ main {
   padding: 3px 12px;
   border: 1px solid rgba(188, 0, 0, 0.3);
   border-radius: 100px;
-  font-family: var(--font-space-grotesk), 'Space Grotesk', system-ui, sans-serif;
   font-size: 12px;
   font-weight: 500;
   color: #fff;
@@ -3800,7 +3792,6 @@ main {
 
 /* Desk fallback */
 .live-strip-desk-label {
-  font-family: var(--font-space-grotesk), 'Space Grotesk', system-ui, sans-serif;
   font-size: 10px;
   font-weight: 700;
   letter-spacing: 0.08em;
@@ -3866,7 +3857,6 @@ button.live-strip-chip--desk {
 
 .desk-team-picker-title {
   display: block;
-  font-family: var(--font-space-grotesk), 'Space Grotesk', system-ui, sans-serif;
   font-size: 11px;
   font-weight: 700;
   letter-spacing: 0.06em;
@@ -3890,7 +3880,6 @@ button.live-strip-chip--desk {
   border: none;
   background: none;
   color: var(--sm-text, #fff);
-  font-family: var(--font-space-grotesk), 'Space Grotesk', system-ui, sans-serif;
   font-size: 13px;
   font-weight: 500;
   cursor: pointer;
@@ -4006,7 +3995,6 @@ button.live-strip-chip--desk {
 .app-dock-inner::-webkit-scrollbar { display: none; }
 
 .app-dock-link {
-  font-family: var(--font-space-grotesk), 'Space Grotesk', system-ui, sans-serif;
   font-weight: 600;
   font-size: 14px;
   color: rgba(255, 255, 255, 0.7);
@@ -4128,7 +4116,6 @@ button.live-strip-chip--desk {
 .mobile-drawer.open .drawer-panel { transform: translateX(0); }
 .drawer-panel a {
   color: var(--sm-text);
-  font-family: var(--font-space-grotesk), 'Space Grotesk', system-ui, sans-serif;
   font-size: 16px;
   font-weight: 500;
   padding: 12px 0;
@@ -4159,7 +4146,6 @@ button.live-strip-chip--desk {
   max-width: 280px;
 }
 .footer-col h4 {
-  font-family: var(--font-space-grotesk), 'Space Grotesk', system-ui, sans-serif;
   font-size: 12px;
   font-weight: 700;
   text-transform: uppercase;
@@ -4504,7 +4490,6 @@ a.glass-card-sm:active,
   align-items: center;
   gap: 8px;
   padding: 12px 0;
-  font-family: var(--font-space-grotesk), 'Space Grotesk', system-ui, sans-serif;
   font-size: 12px;
 }
 .bc-link {
@@ -4655,7 +4640,6 @@ a.glass-card-sm:active,
   border: 1px solid var(--sm-border);
   border-radius: var(--sm-radius-pill);
   color: var(--sm-text);
-  font-family: var(--font-space-grotesk), 'Space Grotesk', system-ui, sans-serif;
   font-size: 13px;
   font-weight: 600;
   text-decoration: none;
@@ -4726,7 +4710,6 @@ a.glass-card-sm:active,
   display: flex;
   align-items: center;
   gap: 8px;
-  font-family: var(--font-space-grotesk), 'Space Grotesk', system-ui, sans-serif;
   font-size: 14px;
   font-weight: 600;
   color: var(--sm-red-light);
@@ -4745,7 +4728,6 @@ a.glass-card-sm:active,
   gap: 4px;
   padding: 3px 10px;
   border-radius: var(--sm-radius-pill);
-  font-family: var(--font-space-grotesk), 'Space Grotesk', system-ui, sans-serif;
   font-size: 10px;
   font-weight: 700;
   text-transform: uppercase;
@@ -4782,7 +4764,6 @@ a.glass-card-sm:active,
   flex: 1;
   padding: 10px 16px;
   border-radius: var(--sm-radius-sm);
-  font-family: var(--font-space-grotesk), 'Space Grotesk', system-ui, sans-serif;
   font-size: 14px;
   font-weight: 600;
   text-align: center;
@@ -4811,7 +4792,6 @@ a.glass-card-sm:active,
   background: var(--sm-card);
   border: 1px solid var(--sm-border);
   border-radius: var(--sm-radius-pill);
-  font-family: var(--font-space-grotesk), 'Space Grotesk', system-ui, sans-serif;
   font-size: 13px;
   font-weight: 600;
   color: var(--sm-text);
@@ -4866,7 +4846,6 @@ a.glass-card-sm:active,
   background: transparent;
   border: 1px solid rgba(188,0,0,0.3);
   color: var(--sm-red-light);
-  font-family: var(--font-space-grotesk), 'Space Grotesk', system-ui, sans-serif;
   font-size: 11px;
   font-weight: 600;
   cursor: pointer;
@@ -4891,7 +4870,6 @@ a.glass-card-sm:active,
   border-radius: var(--sm-radius-pill);
   background: rgba(188,0,0,0.15);
   border: 1px solid rgba(188,0,0,0.3);
-  font-family: var(--font-space-grotesk), 'Space Grotesk', system-ui, sans-serif;
   font-size: 12px;
   font-weight: 700;
   color: #ff4444;
@@ -4912,7 +4890,6 @@ a.glass-card-sm:active,
   align-items: center;
   justify-content: center;
   gap: 24px;
-  font-family: var(--font-space-grotesk), 'Space Grotesk', system-ui, sans-serif;
 }
 .live-score-card .team-score {
   font-size: 32px;
@@ -4946,7 +4923,6 @@ a.glass-card-sm:active,
   color: var(--sm-text-dim);
   width: 48px;
   flex-shrink: 0;
-  font-family: var(--font-space-grotesk), 'Space Grotesk', system-ui, sans-serif;
 }
 .play-timeline-content {
   font-size: 14px;
@@ -5023,7 +4999,6 @@ a.glass-card-sm:active,
   color: #fff;
   padding: 10px 24px;
   border-radius: var(--sm-radius-pill);
-  font-family: var(--font-space-grotesk), 'Space Grotesk', system-ui, sans-serif;
   font-weight: 600;
   font-size: 14px;
   border: none;
@@ -5095,7 +5070,6 @@ a.glass-card-sm:active,
   border-color: rgba(188,0,0,0.3);
 }
 .nav-orb-tool-label {
-  font-family: var(--font-space-grotesk), 'Space Grotesk', system-ui, sans-serif;
   font-weight: 400;
   font-size: 12px;
   color: var(--sm-text-muted);
@@ -5186,7 +5160,6 @@ a.glass-card-sm:active,
   gap: 6px;
   padding: 8px 18px;
   border-radius: 100px;
-  font-family: var(--font-space-grotesk), 'Space Grotesk', system-ui, sans-serif;
   font-size: 13px;
   font-weight: 600;
   text-decoration: none;
