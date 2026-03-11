@@ -249,7 +249,7 @@ export function EdgeHero({
                 className="mt-3 text-sm"
                 style={{ color: "var(--hp-muted-foreground)" }}
               >
-                Scout — the AI analyst for Chicago sports. Ask about news, rumors, stats, or games.
+                Introducing <span style={{ color: "#BC0000", fontWeight: 700 }}>Scout</span> — the AI analyst for Chicago sports. Ask about news, rumors, stats, etc.
               </p>
 
               {/* ── Quick actions ── */}

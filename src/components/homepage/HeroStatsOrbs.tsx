@@ -1,11 +1,11 @@
 // src/components/homepage/HeroStatsOrbs.tsx
-// 100 canvas-based orbs that slowly bounce around the hero background.
-// Each orb has a bright red glow and a fading trail line behind it.
+// Canvas-based Chicago six-pointed stars that drift across the hero background
+// with fading trail lines behind each star.
 'use client'
 
 import { useEffect, useRef } from 'react'
 
-interface Orb {
+interface Star {
   x: number
   y: number
   dx: number
@@ -13,11 +13,46 @@ interface Orb {
   radius: number
   trail: { x: number; y: number }[]
   cyan: boolean
+  rotation: number
+  rotationSpeed: number
 }
 
-const ORB_COUNT = 100
-const MOBILE_ORB_COUNT = 50
-const TRAIL_LENGTH = 150 // positions stored per orb
+const STAR_COUNT = 125
+const MOBILE_STAR_COUNT = 75
+const TRAIL_LENGTH = 180 // longer trails for faster movement
+
+/** Draw a Chicago-style 6-pointed star (two overlapping triangles) */
+function drawChicagoStar(
+  ctx: CanvasRenderingContext2D,
+  cx: number,
+  cy: number,
+  radius: number,
+  rotation: number,
+) {
+  // Triangle 1 — pointing up
+  ctx.beginPath()
+  for (let i = 0; i < 3; i++) {
+    const angle = rotation + (i * Math.PI * 2) / 3 - Math.PI / 2
+    const x = cx + Math.cos(angle) * radius
+    const y = cy + Math.sin(angle) * radius
+    if (i === 0) ctx.moveTo(x, y)
+    else ctx.lineTo(x, y)
+  }
+  ctx.closePath()
+  ctx.fill()
+
+  // Triangle 2 — pointing down (rotated 60°)
+  ctx.beginPath()
+  for (let i = 0; i < 3; i++) {
+    const angle = rotation + (i * Math.PI * 2) / 3 + Math.PI / 6
+    const x = cx + Math.cos(angle) * radius
+    const y = cy + Math.sin(angle) * radius
+    if (i === 0) ctx.moveTo(x, y)
+    else ctx.lineTo(x, y)
+  }
+  ctx.closePath()
+  ctx.fill()
+}
 
 export function HeroStatsOrbs() {
   const canvasRef = useRef<HTMLCanvasElement>(null)
@@ -32,9 +67,9 @@ export function HeroStatsOrbs() {
     if (!ctx) return
 
     let animId: number
-    let orbs: Orb[] = []
+    let stars: Star[] = []
     const isMobile = window.innerWidth < 768
-    const count = isMobile ? MOBILE_ORB_COUNT : ORB_COUNT
+    const count = isMobile ? MOBILE_STAR_COUNT : STAR_COUNT
 
     function resize() {
       const parent = canvas!.parentElement
@@ -43,19 +78,21 @@ export function HeroStatsOrbs() {
       canvas!.height = parent.offsetHeight
     }
 
-    function createOrbs() {
-      orbs = []
+    function createStars() {
+      stars = []
       for (let i = 0; i < count; i++) {
-        const speed = 0.3 + Math.random() * 0.7 // 0.3–1.0 px/frame (slow)
+        const speed = 0.8 + Math.random() * 1.4 // 0.8–2.2 px/frame (much faster)
         const angle = Math.random() * Math.PI * 2
-        orbs.push({
+        stars.push({
           x: Math.random() * canvas!.width,
           y: Math.random() * canvas!.height,
           dx: Math.cos(angle) * speed,
           dy: Math.sin(angle) * speed,
-          radius: 2 + Math.random() * 3, // 2–5px
+          radius: 3 + Math.random() * 4, // 3–7px star size
           trail: [],
-          cyan: i % 3 === 0, // 1/3 of orbs are cyan
+          cyan: i % 3 === 0, // 1/3 cyan, 2/3 red
+          rotation: Math.random() * Math.PI * 2,
+          rotationSpeed: (Math.random() - 0.5) * 0.02,
         })
       }
     }
@@ -64,15 +101,15 @@ export function HeroStatsOrbs() {
       ctx!.clearRect(0, 0, canvas!.width, canvas!.height)
       const isDark = document.documentElement.getAttribute('data-theme') !== 'light'
 
-      for (let o = 0; o < orbs.length; o++) {
-        const orb = orbs[o]
+      for (let s = 0; s < stars.length; s++) {
+        const star = stars[s]
 
         // Store trail position
-        orb.trail.push({ x: orb.x, y: orb.y })
-        if (orb.trail.length > TRAIL_LENGTH) orb.trail.shift()
+        star.trail.push({ x: star.x, y: star.y })
+        if (star.trail.length > TRAIL_LENGTH) star.trail.shift()
 
-        // Draw trail — split into 5 bands with fading opacity (oldest = transparent, newest = visible)
-        const len = orb.trail.length
+        // Draw trail — split into 5 bands with fading opacity
+        const len = star.trail.length
         if (len > 4) {
           const bands = 5
           const bandSize = Math.floor(len / bands)
@@ -80,57 +117,54 @@ export function HeroStatsOrbs() {
             const start = b * bandSize
             const end = b === bands - 1 ? len - 1 : (b + 1) * bandSize
             if (end - start < 2) continue
-            const progress = (b + 1) / bands // 0.2 (oldest) → 1.0 (newest)
+            const progress = (b + 1) / bands
             const alpha = progress * (isDark ? 0.15 : 0.08)
 
             ctx!.beginPath()
-            ctx!.moveTo(orb.trail[start].x, orb.trail[start].y)
+            ctx!.moveTo(star.trail[start].x, star.trail[start].y)
             for (let i = start + 1; i <= end; i++) {
-              ctx!.lineTo(orb.trail[i].x, orb.trail[i].y)
+              ctx!.lineTo(star.trail[i].x, star.trail[i].y)
             }
-            ctx!.strokeStyle = orb.cyan ? `rgba(0, 212, 255, ${alpha})` : `rgba(188, 0, 0, ${alpha})`
-            ctx!.lineWidth = Math.max(1, orb.radius * 0.5)
+            ctx!.strokeStyle = star.cyan ? `rgba(0, 212, 255, ${alpha})` : `rgba(188, 0, 0, ${alpha})`
+            ctx!.lineWidth = Math.max(1, star.radius * 0.4)
             ctx!.lineCap = 'round'
             ctx!.lineJoin = 'round'
             ctx!.stroke()
           }
         }
 
-        // Draw orb glow (larger faint circle)
-        ctx!.beginPath()
-        ctx!.arc(orb.x, orb.y, orb.radius * 3, 0, Math.PI * 2)
-        ctx!.fillStyle = orb.cyan
-          ? (isDark ? 'rgba(0, 212, 255, 0.08)' : 'rgba(0, 212, 255, 0.05)')
-          : (isDark ? 'rgba(188, 0, 0, 0.08)' : 'rgba(188, 0, 0, 0.05)')
-        ctx!.fill()
+        // Draw star glow (larger faint area)
+        ctx!.fillStyle = star.cyan
+          ? (isDark ? 'rgba(0, 212, 255, 0.06)' : 'rgba(0, 212, 255, 0.04)')
+          : (isDark ? 'rgba(188, 0, 0, 0.06)' : 'rgba(188, 0, 0, 0.04)')
+        drawChicagoStar(ctx!, star.x, star.y, star.radius * 3, star.rotation)
 
-        // Draw orb core (bright)
-        ctx!.beginPath()
-        ctx!.arc(orb.x, orb.y, orb.radius, 0, Math.PI * 2)
-        ctx!.fillStyle = orb.cyan
+        // Draw star core (bright)
+        ctx!.fillStyle = star.cyan
           ? (isDark ? 'rgba(0, 212, 255, 0.35)' : 'rgba(0, 212, 255, 0.25)')
           : (isDark ? 'rgba(188, 0, 0, 0.35)' : 'rgba(188, 0, 0, 0.25)')
-        ctx!.fill()
+        drawChicagoStar(ctx!, star.x, star.y, star.radius, star.rotation)
 
-        // Move orb
-        orb.x += orb.dx
-        orb.y += orb.dy
+        // Move star
+        star.x += star.dx
+        star.y += star.dy
+        star.rotation += star.rotationSpeed
 
         // Bounce off edges
-        if (orb.x - orb.radius < 0) { orb.x = orb.radius; orb.dx = Math.abs(orb.dx) }
-        if (orb.x + orb.radius > canvas!.width) { orb.x = canvas!.width - orb.radius; orb.dx = -Math.abs(orb.dx) }
-        if (orb.y - orb.radius < 0) { orb.y = orb.radius; orb.dy = Math.abs(orb.dy) }
-        if (orb.y + orb.radius > canvas!.height) { orb.y = canvas!.height - orb.radius; orb.dy = -Math.abs(orb.dy) }
+        if (star.x - star.radius < 0) { star.x = star.radius; star.dx = Math.abs(star.dx) }
+        if (star.x + star.radius > canvas!.width) { star.x = canvas!.width - star.radius; star.dx = -Math.abs(star.dx) }
+        if (star.y - star.radius < 0) { star.y = star.radius; star.dy = Math.abs(star.dy) }
+        if (star.y + star.radius > canvas!.height) { star.y = canvas!.height - star.radius; star.dy = -Math.abs(star.dy) }
       }
 
       animId = requestAnimationFrame(draw)
     }
 
     resize()
-    createOrbs()
+    createStars()
     draw()
 
-    const handleResize = () => { resize(); createOrbs() }
+    const handleResize = () => { resize(); createStars() }
     window.addEventListener('resize', handleResize)
 
     const handleVisibility = () => {
