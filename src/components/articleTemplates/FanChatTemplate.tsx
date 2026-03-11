@@ -45,7 +45,7 @@ export function FanChatTemplate({
   return (
     <>
       <ReadingProgressBar />
-      <article className="max-w-[720px] mx-auto px-4 py-8" style={{ backgroundColor: '#0B0F14' }}>
+      <article className="max-w-[720px] mx-auto px-4 py-8 bg-[#FAFAFB] dark:bg-[#0B0F14]">
         <ArticleHeader
           tags={tags}
           headline={headline}
@@ -56,7 +56,7 @@ export function FanChatTemplate({
         />
 
         {/* Intro */}
-        <p className="text-[18px] leading-7 text-white mb-5">{introParagraph}</p>
+        <p className="text-[18px] leading-7 text-[#0B0F14] dark:text-[#FAFAFB] mb-5">{introParagraph}</p>
 
         {/* Debate Block (includes PRO/CON cards + vote) */}
         <DebateBlock
@@ -67,7 +67,7 @@ export function FanChatTemplate({
 
         {/* Additional paragraphs */}
         {paragraphs.map((p, i) => (
-          <p key={i} className="text-[18px] leading-7 text-white mb-5">{p}</p>
+          <p key={i} className="text-[18px] leading-7 text-[#0B0F14] dark:text-[#FAFAFB] mb-5">{p}</p>
         ))}
 
         {/* Top Fan Takes */}
@@ -87,7 +87,7 @@ export function FanChatTemplate({
                   }}
                 >
                   <div className="flex items-center gap-2 mb-2">
-                    <span className="text-sm font-bold text-white">{take.username}</span>
+                    <span className="text-sm font-bold text-[#0B0F14] dark:text-[#FAFAFB]">{take.username}</span>
                     <span
                       className="text-[10px] font-bold uppercase px-2 py-0.5 rounded-full"
                       style={{

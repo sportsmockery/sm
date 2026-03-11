@@ -48,7 +48,7 @@ export function StandardNewsTemplate({
   return (
     <>
       <ReadingProgressBar />
-      <article className="max-w-[720px] mx-auto px-4 py-8" style={{ backgroundColor: '#0B0F14' }}>
+      <article className="max-w-[720px] mx-auto px-4 py-8 bg-[#FAFAFB] dark:bg-[#0B0F14]">
         <ArticleHeader
           tags={tags}
           headline={headline}
@@ -60,12 +60,12 @@ export function StandardNewsTemplate({
 
         {/* Paragraph 1 */}
         {paragraphs[0] && (
-          <p className="text-[18px] leading-7 text-white mb-5">{paragraphs[0]}</p>
+          <p className="text-[18px] leading-7 text-[#0B0F14] dark:text-[#FAFAFB] mb-5">{paragraphs[0]}</p>
         )}
 
         {/* Paragraph 2 */}
         {paragraphs[1] && (
-          <p className="text-[18px] leading-7 text-white mb-5">{paragraphs[1]}</p>
+          <p className="text-[18px] leading-7 text-[#0B0F14] dark:text-[#FAFAFB] mb-5">{paragraphs[1]}</p>
         )}
 
         {/* GM Interaction */}
@@ -77,7 +77,7 @@ export function StandardNewsTemplate({
 
         {/* Paragraph 3 */}
         {paragraphs[2] && (
-          <p className="text-[18px] leading-7 text-white mb-5">{paragraphs[2]}</p>
+          <p className="text-[18px] leading-7 text-[#0B0F14] dark:text-[#FAFAFB] mb-5">{paragraphs[2]}</p>
         )}
 
         {/* Scout Insight */}
@@ -85,7 +85,7 @@ export function StandardNewsTemplate({
 
         {/* Paragraph 4 */}
         {paragraphs[3] && (
-          <p className="text-[18px] leading-7 text-white mb-5">{paragraphs[3]}</p>
+          <p className="text-[18px] leading-7 text-[#0B0F14] dark:text-[#FAFAFB] mb-5">{paragraphs[3]}</p>
         )}
 
         {/* Image */}
@@ -103,7 +103,7 @@ export function StandardNewsTemplate({
 
         {/* Paragraph 5 */}
         {paragraphs[4] && (
-          <p className="text-[18px] leading-7 text-white mb-5">{paragraphs[4]}</p>
+          <p className="text-[18px] leading-7 text-[#0B0F14] dark:text-[#FAFAFB] mb-5">{paragraphs[4]}</p>
         )}
 
         {/* Update Block */}
@@ -111,12 +111,12 @@ export function StandardNewsTemplate({
 
         {/* Remaining paragraphs */}
         {paragraphs.slice(5).map((p, i) => (
-          <p key={i} className="text-[18px] leading-7 text-white mb-5">{p}</p>
+          <p key={i} className="text-[18px] leading-7 text-[#0B0F14] dark:text-[#FAFAFB] mb-5">{p}</p>
         ))}
 
         {/* Related Articles */}
         {relatedArticles.length > 0 && (
-          <div className="mt-12 pt-8" style={{ borderTop: '1px solid rgba(255,255,255,0.08)' }}>
+          <div className="mt-12 pt-8 border-t border-[#0B0F14]/8 dark:border-[#FAFAFB]/8">
             <h3 className="text-xs font-bold uppercase tracking-widest text-slate-400 mb-6">
               Related Articles
             </h3>
@@ -125,11 +125,7 @@ export function StandardNewsTemplate({
                 <Link
                   key={article.slug}
                   href={`/${article.slug}`}
-                  className="group rounded-xl overflow-hidden"
-                  style={{
-                    backgroundColor: 'rgba(255,255,255,0.04)',
-                    border: '1px solid rgba(255,255,255,0.08)',
-                  }}
+                  className="group rounded-xl overflow-hidden bg-[#0B0F14]/[0.03] dark:bg-[#FAFAFB]/[0.04] border border-[#0B0F14]/[0.08] dark:border-[#FAFAFB]/[0.08]"
                 >
                   {article.image && (
                     <div className="relative aspect-video">
@@ -142,7 +138,7 @@ export function StandardNewsTemplate({
                         {article.team}
                       </span>
                     )}
-                    <h4 className="text-sm font-bold text-white group-hover:text-[#00D4FF] transition-colors line-clamp-2">
+                    <h4 className="text-sm font-bold text-[#0B0F14] dark:text-[#FAFAFB] group-hover:text-[#00D4FF] transition-colors line-clamp-2">
                       {article.title}
                     </h4>
                   </div>

@@ -1,0 +1,1597 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SM Edge — Article Template Previews</title>
+<style>
+  /* ─── Reset & Base ─── */
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&display=swap');
+
+  :root {
+    --black: #0B0F14;
+    --white: #FAFAFB;
+    --red: #BC0000;
+    --cyan: #00D4FF;
+    --gold: #D6B05E;
+    --glass-bg: rgba(255,255,255,0.04);
+    --glass-border: rgba(255,255,255,0.08);
+    --slate-400: #94a3b8;
+    --slate-500: #64748b;
+    --slate-600: #475569;
+  }
+
+  body {
+    font-family: 'Space Grotesk', system-ui, -apple-system, sans-serif;
+    background-color: #060911;
+    color: var(--white);
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* ─── Page Layout ─── */
+  .page-header {
+    text-align: center;
+    padding: 60px 24px 40px;
+    border-bottom: 1px solid rgba(255,255,255,0.06);
+    margin-bottom: 48px;
+  }
+  .page-header h1 {
+    font-size: clamp(28px, 4vw, 42px);
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    margin-bottom: 8px;
+  }
+  .page-header p {
+    color: var(--slate-500);
+    font-size: 15px;
+    max-width: 520px;
+    margin: 0 auto;
+  }
+
+  .template-section {
+    max-width: 780px;
+    margin: 0 auto 80px;
+    padding: 0 24px;
+  }
+
+  /* ─── Template Header ─── */
+  .template-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 8px;
+  }
+  .template-number {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    background: rgba(0,212,255,0.1);
+    color: var(--cyan);
+    font-weight: 700;
+    font-size: 14px;
+    flex-shrink: 0;
+  }
+  .template-name {
+    font-size: 20px;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+  }
+  .template-desc {
+    color: var(--slate-500);
+    font-size: 13px;
+    margin-bottom: 24px;
+    padding-left: 44px;
+  }
+
+  /* ─── Article Preview Container ─── */
+  .article-preview {
+    background: var(--black);
+    border: 1px solid var(--glass-border);
+    border-radius: 16px;
+    padding: 32px 28px;
+    position: relative;
+    overflow: hidden;
+  }
+  .article-preview::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(0,212,255,0.2), transparent);
+  }
+
+  /* ─── Article Meta ─── */
+  .article-meta {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding-bottom: 16px;
+    margin-bottom: 24px;
+    border-bottom: 1px solid rgba(255,255,255,0.06);
+  }
+  .meta-dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    background: var(--cyan);
+  }
+  .meta-label {
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--cyan);
+  }
+  .meta-status {
+    font-size: 11px;
+    color: var(--slate-600);
+    margin-left: auto;
+  }
+
+  /* ─── Article Content ─── */
+  .article-body {
+    max-width: 720px;
+    margin: 0 auto;
+  }
+
+  /* ─── Block: Paragraph ─── */
+  .block-paragraph {
+    font-size: 17px;
+    line-height: 1.7;
+    color: var(--white);
+    margin-bottom: 24px;
+  }
+
+  /* ─── Block: Scout Insight ─── */
+  .block-insight {
+    margin-bottom: 24px;
+  }
+  .insight-card {
+    background: rgba(0,212,255,0.04);
+    border: 1px solid rgba(0,212,255,0.12);
+    border-radius: 12px;
+    padding: 20px;
+  }
+  .insight-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 12px;
+  }
+  .insight-icon {
+    width: 28px; height: 28px;
+    border-radius: 50%;
+    overflow: hidden;
+    flex-shrink: 0;
+  }
+  .insight-icon img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+  .insight-label {
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: var(--cyan);
+  }
+  .insight-confidence {
+    font-size: 10px;
+    font-weight: 700;
+    padding: 2px 8px;
+    border-radius: 4px;
+    margin-left: auto;
+  }
+  .confidence-high { background: rgba(0,212,255,0.12); color: var(--cyan); }
+  .confidence-medium { background: rgba(214,176,94,0.12); color: var(--gold); }
+  .confidence-low { background: rgba(188,0,0,0.12); color: var(--red); }
+  .insight-text {
+    font-size: 15px;
+    line-height: 1.65;
+    color: var(--white);
+    font-style: italic;
+    opacity: 0.9;
+  }
+
+  /* ─── Block: GM Pulse / Poll ─── */
+  .block-poll {
+    margin-bottom: 24px;
+  }
+  .poll-variant-label {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-bottom: 8px;
+  }
+  .poll-dot {
+    width: 6px; height: 6px;
+    border-radius: 50%;
+  }
+  .poll-tag {
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+  }
+  .poll-card {
+    background: var(--glass-bg);
+    border: 1px solid var(--glass-border);
+    border-radius: 12px;
+    padding: 20px;
+  }
+  .poll-question {
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--white);
+    margin-bottom: 14px;
+  }
+  .poll-options {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .poll-option {
+    padding: 10px 16px;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+    border: 1px solid rgba(0,212,255,0.15);
+    background: rgba(0,212,255,0.06);
+    color: var(--cyan);
+    text-align: left;
+  }
+  .poll-reward {
+    font-size: 11px;
+    color: var(--gold);
+    margin-top: 10px;
+    font-weight: 600;
+  }
+
+  /* ─── Block: Breaking Update ─── */
+  .block-update {
+    margin-bottom: 24px;
+  }
+  .update-card {
+    border-radius: 12px;
+    border-left: 4px solid var(--red);
+    background: rgba(188,0,0,0.03);
+    border-top: 1px solid rgba(255,255,255,0.06);
+    border-right: 1px solid rgba(255,255,255,0.06);
+    border-bottom: 1px solid rgba(255,255,255,0.06);
+    padding: 16px;
+  }
+  .update-badge {
+    display: inline-block;
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    padding: 2px 8px;
+    border-radius: 4px;
+    background: rgba(188,0,0,0.12);
+    color: var(--red);
+    margin-bottom: 8px;
+  }
+  .update-timestamp {
+    font-size: 13px;
+    color: var(--slate-400);
+    margin-bottom: 4px;
+  }
+  .update-text {
+    font-size: 14px;
+    line-height: 1.6;
+    color: var(--white);
+  }
+
+  /* ─── Block: Stats Chart ─── */
+  .block-chart {
+    margin-bottom: 24px;
+  }
+  .chart-card {
+    background: var(--glass-bg);
+    border: 1px solid var(--glass-border);
+    border-radius: 12px;
+    padding: 20px;
+  }
+  .chart-header {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-bottom: 16px;
+  }
+  .chart-title {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--white);
+  }
+  .chart-bars {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+  .chart-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .chart-label {
+    width: 90px;
+    font-size: 13px;
+    color: var(--slate-400);
+    text-align: right;
+    flex-shrink: 0;
+  }
+  .chart-bar-bg {
+    flex: 1;
+    height: 20px;
+    background: rgba(255,255,255,0.04);
+    border-radius: 6px;
+    overflow: hidden;
+    position: relative;
+  }
+  .chart-bar-fill {
+    height: 100%;
+    border-radius: 6px;
+    transition: width 0.8s ease-out;
+  }
+  .chart-value {
+    width: 48px;
+    font-size: 13px;
+    font-weight: 600;
+    text-align: right;
+    flex-shrink: 0;
+  }
+
+  /* ─── Block: Player Comparison ─── */
+  .block-comparison {
+    margin-bottom: 24px;
+  }
+  .comparison-wrapper {
+    background: var(--glass-bg);
+    border: 1px solid var(--glass-border);
+    border-radius: 12px;
+    overflow: hidden;
+  }
+  .comparison-header {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 10px 20px;
+    border-bottom: 1px solid rgba(255,255,255,0.06);
+  }
+  .comparison-body {
+    padding: 20px;
+  }
+  .comparison-players {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 20px;
+  }
+  .comparison-player {
+    text-align: center;
+    flex: 1;
+  }
+  .player-avatar {
+    width: 56px; height: 56px;
+    border-radius: 50%;
+    margin: 0 auto 8px;
+    overflow: hidden;
+    border: 2px solid rgba(255,255,255,0.1);
+  }
+  .player-avatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+  .player-name {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--white);
+  }
+  .player-position {
+    font-size: 11px;
+    color: var(--slate-500);
+  }
+  .comparison-vs {
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--red);
+    align-self: center;
+    padding: 0 12px;
+  }
+  .stat-comparison-rows {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+  .stat-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .stat-val {
+    width: 50px;
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--white);
+  }
+  .stat-val.left { text-align: right; }
+  .stat-val.right { text-align: left; }
+  .stat-bar-container {
+    flex: 1;
+    display: flex;
+    gap: 3px;
+    align-items: center;
+  }
+  .stat-bar-left {
+    flex: 1;
+    display: flex;
+    justify-content: flex-end;
+  }
+  .stat-bar-right {
+    flex: 1;
+  }
+  .stat-bar-inner {
+    height: 8px;
+    border-radius: 4px;
+    transition: width 0.7s ease-out;
+  }
+  .stat-name {
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--slate-500);
+    width: 60px;
+    text-align: center;
+    flex-shrink: 0;
+  }
+
+  /* ─── Block: Rumor Meter ─── */
+  .block-rumor-meter {
+    margin-bottom: 24px;
+  }
+  .rumor-meter-card {
+    background: rgba(188,0,0,0.04);
+    border: 1px solid rgba(188,0,0,0.15);
+    border-radius: 12px;
+    padding: 20px;
+  }
+  .meter-label-row {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-bottom: 14px;
+  }
+  .meter-bars {
+    display: flex;
+    gap: 4px;
+  }
+  .meter-segment {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+  }
+  .meter-bar {
+    width: 100%;
+    height: 10px;
+    border-radius: 999px;
+    transition: background-color 0.3s;
+  }
+  .meter-bar.active { background: var(--red); }
+  .meter-bar.inactive { background: rgba(255,255,255,0.08); }
+  .meter-text {
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+  }
+  .meter-text.active { color: var(--red); }
+  .meter-text.inactive { color: #A0A8B0; }
+
+  /* ─── Block: Heat Meter ─── */
+  .block-heat-meter {
+    margin-bottom: 24px;
+  }
+
+  /* ─── Block: Trade Scenario ─── */
+  .block-trade {
+    margin-bottom: 24px;
+  }
+  .trade-card {
+    background: var(--glass-bg);
+    border: 1px solid var(--glass-border);
+    border-radius: 12px;
+    overflow: hidden;
+  }
+  .trade-header {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 10px 20px;
+    border-bottom: 1px solid rgba(255,255,255,0.06);
+  }
+  .trade-body {
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    gap: 0;
+  }
+  .trade-side {
+    padding: 16px 20px;
+  }
+  .trade-team-name {
+    font-size: 12px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    margin-bottom: 10px;
+  }
+  .trade-receives-label {
+    font-size: 10px;
+    color: var(--slate-500);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    margin-bottom: 8px;
+  }
+  .trade-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 10px;
+    border-radius: 6px;
+    margin-bottom: 4px;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--white);
+  }
+  .trade-item.player-type {
+    background: rgba(0,212,255,0.06);
+    border: 1px solid rgba(0,212,255,0.12);
+  }
+  .trade-item.pick-type {
+    background: rgba(214,176,94,0.06);
+    border: 1px solid rgba(214,176,94,0.12);
+  }
+  .trade-item-icon {
+    font-size: 11px;
+  }
+  .trade-divider {
+    width: 1px;
+    background: rgba(255,255,255,0.06);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+  }
+  .trade-arrow {
+    background: var(--black);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 50%;
+    width: 28px; height: 28px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    color: var(--slate-400);
+  }
+
+  /* ─── Block: Mock Draft ─── */
+  .block-draft {
+    margin-bottom: 24px;
+  }
+  .draft-wrapper {
+    background: var(--glass-bg);
+    border: 1px solid var(--glass-border);
+    border-radius: 12px;
+    overflow: hidden;
+  }
+  .draft-header {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 10px 20px;
+    border-bottom: 1px solid rgba(255,255,255,0.06);
+  }
+  .draft-list {
+    padding: 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+  .draft-pick {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 12px;
+    border-radius: 10px;
+  }
+  .draft-pick.top-pick {
+    background: rgba(214,176,94,0.06);
+    border: 1px solid rgba(214,176,94,0.15);
+  }
+  .draft-pick.normal-pick {
+    background: rgba(255,255,255,0.02);
+    border: 1px solid rgba(255,255,255,0.06);
+  }
+  .pick-number {
+    font-size: 20px;
+    font-weight: 700;
+    width: 32px;
+    text-align: center;
+  }
+  .pick-info { flex: 1; }
+  .pick-team {
+    font-size: 13px;
+    color: var(--slate-400);
+    margin-bottom: 2px;
+  }
+  .pick-player {
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--white);
+  }
+  .pick-meta { text-align: right; }
+  .pick-position {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--cyan);
+  }
+  .pick-school {
+    font-size: 13px;
+    color: var(--slate-400);
+  }
+
+  /* ─── Block: Debate ─── */
+  .block-debate {
+    margin-bottom: 24px;
+  }
+  .debate-wrapper {
+    background: var(--glass-bg);
+    border: 1px solid var(--glass-border);
+    border-radius: 12px;
+    overflow: hidden;
+  }
+  .debate-header {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 10px 20px;
+    border-bottom: 1px solid rgba(255,255,255,0.06);
+  }
+  .debate-body {
+    padding: 20px;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+  }
+  .debate-side {
+    padding: 16px;
+    border-radius: 10px;
+  }
+  .debate-pro {
+    background: rgba(0,212,255,0.04);
+    border: 1px solid rgba(0,212,255,0.12);
+  }
+  .debate-con {
+    background: rgba(188,0,0,0.04);
+    border: 1px solid rgba(188,0,0,0.12);
+  }
+  .debate-side-label {
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    margin-bottom: 8px;
+  }
+  .debate-argument {
+    font-size: 14px;
+    line-height: 1.6;
+    color: var(--white);
+  }
+  .debate-vote-bar {
+    margin: 0 20px 20px;
+    display: flex;
+    border-radius: 6px;
+    overflow: hidden;
+    height: 8px;
+  }
+  .vote-pro {
+    background: var(--cyan);
+    transition: width 0.6s ease-out;
+  }
+  .vote-con {
+    background: var(--red);
+    transition: width 0.6s ease-out;
+  }
+  .vote-labels {
+    display: flex;
+    justify-content: space-between;
+    margin: 6px 20px 20px;
+    font-size: 12px;
+    font-weight: 600;
+  }
+
+  /* ─── Block: Hot Take ─── */
+  .block-hot-take {
+    margin-bottom: 24px;
+  }
+  .hot-take-card {
+    background: rgba(214,176,94,0.06);
+    border: 1px solid rgba(214,176,94,0.2);
+    border-radius: 12px;
+    padding: 20px;
+  }
+  .hot-take-label {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-bottom: 8px;
+  }
+  .hot-take-text {
+    font-size: 16px;
+    font-weight: 500;
+    line-height: 1.6;
+    color: var(--white);
+  }
+
+  /* ─── Block: Reaction Stream ─── */
+  .block-reactions {
+    margin-bottom: 24px;
+  }
+  .reactions-header {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-bottom: 12px;
+  }
+  .reaction-cards {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .reaction-card {
+    background: var(--glass-bg);
+    border: 1px solid var(--glass-border);
+    border-radius: 10px;
+    padding: 14px 16px;
+    display: flex;
+    gap: 12px;
+  }
+  .reaction-avatar {
+    width: 36px; height: 36px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    font-weight: 700;
+    flex-shrink: 0;
+  }
+  .reaction-content { flex: 1; }
+  .reaction-user {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--white);
+    margin-bottom: 2px;
+  }
+  .reaction-comment {
+    font-size: 13px;
+    color: var(--slate-400);
+    line-height: 1.5;
+  }
+  .reaction-time {
+    font-size: 11px;
+    color: var(--slate-600);
+    margin-top: 4px;
+  }
+
+  /* ─── Shared dot + label pattern ─── */
+  .block-label-dot {
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+  .block-label-text {
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+  }
+
+  /* ─── Template Divider ─── */
+  .template-divider {
+    max-width: 780px;
+    margin: 0 auto 48px;
+    padding: 0 24px;
+  }
+  .template-divider hr {
+    border: none;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent);
+  }
+
+  /* ─── Block Type Label (corner ribbon) ─── */
+  .block-type-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 9px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    padding: 2px 8px;
+    border-radius: 4px;
+    background: rgba(255,255,255,0.05);
+    color: var(--slate-500);
+    margin-bottom: 6px;
+  }
+
+  /* ─── Animations ─── */
+  @keyframes pulseGlow {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(0,212,255,0); }
+    50% { box-shadow: 0 0 12px 2px rgba(0,212,255,0.08); }
+  }
+  .article-preview { animation: pulseGlow 4s ease-in-out infinite; }
+
+  @media (max-width: 640px) {
+    .article-preview { padding: 24px 16px; }
+    .trade-body { grid-template-columns: 1fr; }
+    .trade-divider { width: 100%; height: 1px; flex-direction: row; }
+    .debate-body { grid-template-columns: 1fr; }
+    .comparison-players { flex-direction: column; gap: 16px; }
+    .comparison-vs { padding: 8px 0; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ════════════════════════════════════════════════════ -->
+<!-- PAGE HEADER                                         -->
+<!-- ════════════════════════════════════════════════════ -->
+<div class="page-header">
+  <h1>SM Edge — Article Templates</h1>
+  <p>Preview of all five article templates with sample content. Each template provides a starting block structure for different story types.</p>
+</div>
+
+<!-- ════════════════════════════════════════════════════ -->
+<!-- TEMPLATE 1: STANDARD NEWS                           -->
+<!-- ════════════════════════════════════════════════════ -->
+<div class="template-section">
+  <div class="template-header">
+    <div class="template-number">1</div>
+    <div class="template-name">Standard News</div>
+  </div>
+  <div class="template-desc">Fast breaking updates, injury news, game recaps, and team announcements.</div>
+
+  <div class="article-preview">
+    <div class="article-meta">
+      <div class="meta-dot"></div>
+      <span class="meta-label">SM Edge</span>
+      <span class="meta-status">Draft Preview</span>
+    </div>
+    <div class="article-body">
+
+      <!-- Paragraph -->
+      <div class="block-type-tag">Paragraph</div>
+      <div class="block-paragraph">
+        The Chicago Bears have officially restructured Montez Sweat's contract, freeing up $14.2 million in cap space ahead of free agency. The move signals that the front office is prepared to make aggressive moves this offseason to build around Caleb Williams entering his second year.
+      </div>
+
+      <!-- Paragraph -->
+      <div class="block-type-tag">Paragraph</div>
+      <div class="block-paragraph">
+        General manager Ryan Poles confirmed the restructure during a press conference at Halas Hall on Monday, noting that the team remains committed to Sweat as a cornerstone of the defensive line for the foreseeable future. The adjustment converts base salary into a signing bonus, spreading the cap hit across the remaining years of the deal.
+      </div>
+
+      <!-- GM Pulse -->
+      <div class="block-type-tag">GM Pulse</div>
+      <div class="block-poll">
+        <div class="poll-variant-label">
+          <div class="poll-dot" style="background: var(--cyan)"></div>
+          <span class="poll-tag" style="color: var(--cyan)">GM Pulse</span>
+        </div>
+        <div class="poll-card">
+          <div class="poll-question">How should the Bears use the $14.2M in freed cap space?</div>
+          <div class="poll-options">
+            <div class="poll-option">Sign a top free agent wide receiver</div>
+            <div class="poll-option">Upgrade the offensive line</div>
+            <div class="poll-option">Add secondary depth</div>
+            <div class="poll-option">Roll it over for mid-season flexibility</div>
+          </div>
+          <div class="poll-reward">+15 GM Score</div>
+        </div>
+      </div>
+
+      <!-- Paragraph -->
+      <div class="block-type-tag">Paragraph</div>
+      <div class="block-paragraph">
+        The Bears currently sit at approximately $38 million in effective cap space after the restructure — the most room they've had entering a free agency period since 2021. League sources indicate the team has already begun preliminary conversations with representatives for several top-tier targets.
+      </div>
+
+      <!-- Scout Insight -->
+      <div class="block-type-tag">Scout Insight</div>
+      <div class="block-insight">
+        <div class="insight-card">
+          <div class="insight-header">
+            <div class="insight-icon"><img src="../../public/Scout.png" alt="Scout AI"></div>
+            <span class="insight-label">Scout AI Insight</span>
+            <span class="insight-confidence confidence-high">HIGH</span>
+          </div>
+          <div class="insight-text">
+            This restructure follows the exact pattern Poles used with Jaylon Johnson last offseason. The Bears are clearly in "win now" mode — expect at least one marquee free agent signing within the first 48 hours of the legal tampering window. The cap math points to a WR1 or elite safety as the primary target.
+          </div>
+        </div>
+      </div>
+
+      <!-- Paragraph -->
+      <div class="block-type-tag">Paragraph</div>
+      <div class="block-paragraph">
+        The restructure does not change the length of Sweat's deal or his guaranteed money. His performance incentives remain intact, and he is expected to report for the start of the voluntary offseason program in April.
+      </div>
+
+      <!-- Breaking Update -->
+      <div class="block-type-tag">Breaking Update</div>
+      <div class="block-update">
+        <div class="update-card">
+          <div class="update-badge">Breaking</div>
+          <div class="update-timestamp">Updated 2:47 PM CT</div>
+          <div class="update-text">
+            NFL Network's Ian Rapoport confirms the Bears are also in discussions to restructure the deals of two additional defensive starters. More cap space could be on the way.
+          </div>
+        </div>
+      </div>
+
+      <!-- Paragraph -->
+      <div class="block-type-tag">Paragraph</div>
+      <div class="block-paragraph">
+        Free agency officially opens on March 12. The Bears hold the No. 9 overall pick in the 2026 NFL Draft, giving them additional trade leverage if they choose to package picks to move up for a premium prospect.
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<div class="template-divider"><hr></div>
+
+<!-- ════════════════════════════════════════════════════ -->
+<!-- TEMPLATE 2: STATS / PLAYER COMPARISON               -->
+<!-- ════════════════════════════════════════════════════ -->
+<div class="template-section">
+  <div class="template-header">
+    <div class="template-number">2</div>
+    <div class="template-name">Stats / Player Comparison</div>
+  </div>
+  <div class="template-desc">Data-driven analysis with charts, player matchups, and statistical breakdowns.</div>
+
+  <div class="article-preview">
+    <div class="article-meta">
+      <div class="meta-dot"></div>
+      <span class="meta-label">SM Edge</span>
+      <span class="meta-status">Draft Preview</span>
+    </div>
+    <div class="article-body">
+
+      <!-- Paragraph -->
+      <div class="block-type-tag">Paragraph</div>
+      <div class="block-paragraph">
+        With the Bulls sitting at 23-22 and fighting for playoff positioning, the backcourt rotation has become the most debated topic among fans. Coby White's scoring surge over the last ten games has coincided with the team's best stretch of play, but how does he compare to the other young guards the Bulls considered keeping?
+      </div>
+
+      <!-- Player Comparison -->
+      <div class="block-type-tag">Player Comparison</div>
+      <div class="block-comparison">
+        <div class="comparison-wrapper">
+          <div class="comparison-header">
+            <div class="block-label-dot" style="background: var(--cyan)"></div>
+            <span class="block-label-text" style="color: var(--cyan)">Player Comparison</span>
+          </div>
+          <div class="comparison-body">
+            <div class="comparison-players">
+              <div class="comparison-player">
+                <div class="player-avatar" style="border-color: rgba(0,212,255,0.3);"><img src="https://a.espncdn.com/i/headshots/nba/players/full/4395725.png" alt="Coby White"></div>
+                <div class="player-name">Coby White</div>
+                <div class="player-position">SG — Chicago Bulls</div>
+              </div>
+              <div class="comparison-vs">VS</div>
+              <div class="comparison-player">
+                <div class="player-avatar" style="border-color: rgba(188,0,0,0.3);"><img src="https://a.espncdn.com/i/headshots/nba/players/full/4433218.png" alt="Tyrese Haliburton"></div>
+                <div class="player-name">Tyrese Haliburton</div>
+                <div class="player-position">PG — Indiana Pacers</div>
+              </div>
+            </div>
+            <div class="stat-comparison-rows">
+              <div class="stat-row">
+                <span class="stat-val left" style="color: var(--cyan)">19.4</span>
+                <div class="stat-bar-container">
+                  <div class="stat-bar-left"><div class="stat-bar-inner" style="width:82%; background: var(--cyan)"></div></div>
+                  <span class="stat-name">PPG</span>
+                  <div class="stat-bar-right"><div class="stat-bar-inner" style="width:88%; background: var(--red)"></div></div>
+                </div>
+                <span class="stat-val right" style="color: var(--red)">20.8</span>
+              </div>
+              <div class="stat-row">
+                <span class="stat-val left" style="color: var(--cyan)">4.2</span>
+                <div class="stat-bar-container">
+                  <div class="stat-bar-left"><div class="stat-bar-inner" style="width:42%; background: var(--cyan)"></div></div>
+                  <span class="stat-name">APG</span>
+                  <div class="stat-bar-right"><div class="stat-bar-inner" style="width:98%; background: var(--red)"></div></div>
+                </div>
+                <span class="stat-val right" style="color: var(--red)">9.8</span>
+              </div>
+              <div class="stat-row">
+                <span class="stat-val left" style="color: var(--cyan)">45.3%</span>
+                <div class="stat-bar-container">
+                  <div class="stat-bar-left"><div class="stat-bar-inner" style="width:72%; background: var(--cyan)"></div></div>
+                  <span class="stat-name">FG%</span>
+                  <div class="stat-bar-right"><div class="stat-bar-inner" style="width:76%; background: var(--red)"></div></div>
+                </div>
+                <span class="stat-val right" style="color: var(--red)">47.1%</span>
+              </div>
+              <div class="stat-row">
+                <span class="stat-val left" style="color: var(--cyan)">38.6%</span>
+                <div class="stat-bar-container">
+                  <div class="stat-bar-left"><div class="stat-bar-inner" style="width:85%; background: var(--cyan)"></div></div>
+                  <span class="stat-name">3PT%</span>
+                  <div class="stat-bar-right"><div class="stat-bar-inner" style="width:72%; background: var(--red)"></div></div>
+                </div>
+                <span class="stat-val right" style="color: var(--red)">35.2%</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Paragraph -->
+      <div class="block-type-tag">Paragraph</div>
+      <div class="block-paragraph">
+        White's three-point shooting has been a revelation since the All-Star break. He's shooting 42.1% from deep in his last 12 games, the best stretch of his career, and it's opened up the Bulls' half-court offense in ways that weren't possible earlier in the season.
+      </div>
+
+      <!-- Stats Chart -->
+      <div class="block-type-tag">Stats Chart</div>
+      <div class="block-chart">
+        <div class="chart-card">
+          <div class="chart-header">
+            <div class="block-label-dot" style="background: var(--cyan)"></div>
+            <span class="chart-title">Coby White — Points Per Game (Last 8 Games)</span>
+          </div>
+          <div class="chart-bars">
+            <div class="chart-row">
+              <span class="chart-label">vs. MIL</span>
+              <div class="chart-bar-bg"><div class="chart-bar-fill" style="width:78%; background: var(--cyan)"></div></div>
+              <span class="chart-value" style="color: var(--cyan)">28</span>
+            </div>
+            <div class="chart-row">
+              <span class="chart-label">vs. CLE</span>
+              <div class="chart-bar-bg"><div class="chart-bar-fill" style="width:58%; background: var(--cyan)"></div></div>
+              <span class="chart-value" style="color: var(--cyan)">21</span>
+            </div>
+            <div class="chart-row">
+              <span class="chart-label">@ BOS</span>
+              <div class="chart-bar-bg"><div class="chart-bar-fill" style="width:44%; background: var(--cyan)"></div></div>
+              <span class="chart-value" style="color: var(--cyan)">16</span>
+            </div>
+            <div class="chart-row">
+              <span class="chart-label">vs. NYK</span>
+              <div class="chart-bar-bg"><div class="chart-bar-fill" style="width:89%; background: var(--cyan)"></div></div>
+              <span class="chart-value" style="color: var(--cyan)">32</span>
+            </div>
+            <div class="chart-row">
+              <span class="chart-label">@ IND</span>
+              <div class="chart-bar-bg"><div class="chart-bar-fill" style="width:67%; background: var(--cyan)"></div></div>
+              <span class="chart-value" style="color: var(--cyan)">24</span>
+            </div>
+            <div class="chart-row">
+              <span class="chart-label">vs. DET</span>
+              <div class="chart-bar-bg"><div class="chart-bar-fill" style="width:53%; background: var(--cyan)"></div></div>
+              <span class="chart-value" style="color: var(--cyan)">19</span>
+            </div>
+            <div class="chart-row">
+              <span class="chart-label">@ ATL</span>
+              <div class="chart-bar-bg"><div class="chart-bar-fill" style="width:72%; background: var(--cyan)"></div></div>
+              <span class="chart-value" style="color: var(--cyan)">26</span>
+            </div>
+            <div class="chart-row">
+              <span class="chart-label">vs. MIA</span>
+              <div class="chart-bar-bg"><div class="chart-bar-fill" style="width:61%; background: var(--cyan)"></div></div>
+              <span class="chart-value" style="color: var(--cyan)">22</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Paragraph -->
+      <div class="block-type-tag">Paragraph</div>
+      <div class="block-paragraph">
+        The numbers tell the story. White is averaging 23.5 points per game over this stretch while maintaining elite efficiency from beyond the arc. If he can sustain this level through April, the Bulls have a legitimate path to the play-in tournament and beyond.
+      </div>
+
+      <!-- Stats Chart 2 -->
+      <div class="block-type-tag">Stats Chart</div>
+      <div class="block-chart">
+        <div class="chart-card">
+          <div class="chart-header">
+            <div class="block-label-dot" style="background: var(--cyan)"></div>
+            <span class="chart-title">Bulls Team 3PT% — Monthly Trend</span>
+          </div>
+          <div class="chart-bars">
+            <div class="chart-row">
+              <span class="chart-label">October</span>
+              <div class="chart-bar-bg"><div class="chart-bar-fill" style="width:52%; background: rgba(0,212,255,0.5)"></div></div>
+              <span class="chart-value" style="color: var(--slate-400)">33.1%</span>
+            </div>
+            <div class="chart-row">
+              <span class="chart-label">November</span>
+              <div class="chart-bar-bg"><div class="chart-bar-fill" style="width:55%; background: rgba(0,212,255,0.6)"></div></div>
+              <span class="chart-value" style="color: var(--slate-400)">34.8%</span>
+            </div>
+            <div class="chart-row">
+              <span class="chart-label">December</span>
+              <div class="chart-bar-bg"><div class="chart-bar-fill" style="width:50%; background: rgba(0,212,255,0.5)"></div></div>
+              <span class="chart-value" style="color: var(--slate-400)">32.4%</span>
+            </div>
+            <div class="chart-row">
+              <span class="chart-label">January</span>
+              <div class="chart-bar-bg"><div class="chart-bar-fill" style="width:60%; background: rgba(0,212,255,0.7)"></div></div>
+              <span class="chart-value" style="color: var(--slate-400)">36.2%</span>
+            </div>
+            <div class="chart-row">
+              <span class="chart-label">February</span>
+              <div class="chart-bar-bg"><div class="chart-bar-fill" style="width:66%; background: rgba(0,212,255,0.85)"></div></div>
+              <span class="chart-value" style="color: var(--cyan)">38.7%</span>
+            </div>
+            <div class="chart-row">
+              <span class="chart-label">March</span>
+              <div class="chart-bar-bg"><div class="chart-bar-fill" style="width:70%; background: var(--cyan)"></div></div>
+              <span class="chart-value" style="color: var(--cyan)">39.4%</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- GM Pulse -->
+      <div class="block-type-tag">GM Pulse</div>
+      <div class="block-poll">
+        <div class="poll-variant-label">
+          <div class="poll-dot" style="background: var(--cyan)"></div>
+          <span class="poll-tag" style="color: var(--cyan)">GM Pulse</span>
+        </div>
+        <div class="poll-card">
+          <div class="poll-question">Should the Bulls extend Coby White this summer?</div>
+          <div class="poll-options">
+            <div class="poll-option">Yes — lock him up long term</div>
+            <div class="poll-option">No — let the market set his price</div>
+          </div>
+          <div class="poll-reward">+10 GM Score</div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<div class="template-divider"><hr></div>
+
+<!-- ════════════════════════════════════════════════════ -->
+<!-- TEMPLATE 3: RUMOR / TRADE SIMULATOR                 -->
+<!-- ════════════════════════════════════════════════════ -->
+<div class="template-section">
+  <div class="template-header">
+    <div class="template-number">3</div>
+    <div class="template-name">Rumor / Trade Simulator</div>
+  </div>
+  <div class="template-desc">Trade speculation, roster moves, front office strategy, and mock draft analysis.</div>
+
+  <div class="article-preview">
+    <div class="article-meta">
+      <div class="meta-dot"></div>
+      <span class="meta-label">SM Edge</span>
+      <span class="meta-status">Draft Preview</span>
+    </div>
+    <div class="article-body">
+
+      <!-- Rumor Meter -->
+      <div class="block-type-tag">Rumor Meter</div>
+      <div class="block-rumor-meter">
+        <div class="rumor-meter-card">
+          <div class="meter-label-row">
+            <div class="block-label-dot" style="background: var(--red)"></div>
+            <span class="block-label-text" style="color: var(--red)">Rumor Confidence</span>
+          </div>
+          <div class="meter-bars">
+            <div class="meter-segment">
+              <div class="meter-bar active"></div>
+              <span class="meter-text active">Low</span>
+            </div>
+            <div class="meter-segment">
+              <div class="meter-bar active"></div>
+              <span class="meter-text active">Medium</span>
+            </div>
+            <div class="meter-segment">
+              <div class="meter-bar active"></div>
+              <span class="meter-text active">Strong</span>
+            </div>
+            <div class="meter-segment">
+              <div class="meter-bar inactive"></div>
+              <span class="meter-text inactive">Heating Up</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Paragraph -->
+      <div class="block-type-tag">Paragraph</div>
+      <div class="block-paragraph">
+        Multiple league sources indicate that the Chicago Bears are exploring a trade package to move up from pick No. 9 in the 2026 NFL Draft. The target? Penn State edge rusher Abdul Carter, who is widely expected to be available somewhere in the 3-5 range. The Bears have reportedly reached out to at least two teams currently slotted in the top five.
+      </div>
+
+      <!-- Trade Scenario -->
+      <div class="block-type-tag">Trade Scenario</div>
+      <div class="block-trade">
+        <div class="trade-card">
+          <div class="trade-header">
+            <div class="block-label-dot" style="background: var(--red)"></div>
+            <span class="block-label-text" style="color: var(--red)">Trade Scenario</span>
+          </div>
+          <div class="trade-body">
+            <div class="trade-side">
+              <div class="trade-team-name" style="color: var(--cyan)">Chicago Bears</div>
+              <div class="trade-receives-label">Receives</div>
+              <div class="trade-item player-type">
+                <span class="trade-item-icon">&#9632;</span> Abdul Carter, EDGE
+              </div>
+              <div class="trade-item pick-type">
+                <span class="trade-item-icon">&#9670;</span> 2026 5th Round Pick
+              </div>
+            </div>
+            <div class="trade-divider">
+              <div class="trade-arrow">&#8596;</div>
+            </div>
+            <div class="trade-side">
+              <div class="trade-team-name" style="color: var(--red)">New York Giants</div>
+              <div class="trade-receives-label">Receives</div>
+              <div class="trade-item pick-type">
+                <span class="trade-item-icon">&#9670;</span> 2026 1st Round (#9)
+              </div>
+              <div class="trade-item pick-type">
+                <span class="trade-item-icon">&#9670;</span> 2026 3rd Round (#72)
+              </div>
+              <div class="trade-item pick-type">
+                <span class="trade-item-icon">&#9670;</span> 2027 2nd Round
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Paragraph -->
+      <div class="block-type-tag">Paragraph</div>
+      <div class="block-paragraph">
+        The cost to move up would be significant but not unprecedented. A similar move in 2023 saw the Houston Texans trade a first, third, and a future second to move from 12 to 3. The Bears front office views Carter as a generational talent who could anchor the defensive line alongside Montez Sweat for the next decade.
+      </div>
+
+      <!-- Mock Draft -->
+      <div class="block-type-tag">Mock Draft</div>
+      <div class="block-draft">
+        <div class="draft-wrapper">
+          <div class="draft-header">
+            <div class="block-label-dot" style="background: var(--gold)"></div>
+            <span class="block-label-text" style="color: var(--gold)">Mock Draft</span>
+          </div>
+          <div class="draft-list">
+            <div class="draft-pick top-pick">
+              <span class="pick-number" style="color: var(--gold)">1</span>
+              <div class="pick-info">
+                <div class="pick-team">Tennessee Titans</div>
+                <div class="pick-player">Cam Ward</div>
+              </div>
+              <div class="pick-meta">
+                <div class="pick-position">QB</div>
+                <div class="pick-school">Miami (FL)</div>
+              </div>
+            </div>
+            <div class="draft-pick normal-pick">
+              <span class="pick-number" style="color: #A0A8B0">2</span>
+              <div class="pick-info">
+                <div class="pick-team">Cleveland Browns</div>
+                <div class="pick-player">Shedeur Sanders</div>
+              </div>
+              <div class="pick-meta">
+                <div class="pick-position">QB</div>
+                <div class="pick-school">Colorado</div>
+              </div>
+            </div>
+            <div class="draft-pick normal-pick">
+              <span class="pick-number" style="color: #A0A8B0">3</span>
+              <div class="pick-info">
+                <div class="pick-team">New York Giants</div>
+                <div class="pick-player">Travis Hunter</div>
+              </div>
+              <div class="pick-meta">
+                <div class="pick-position">CB/WR</div>
+                <div class="pick-school">Colorado</div>
+              </div>
+            </div>
+            <div class="draft-pick normal-pick">
+              <span class="pick-number" style="color: #A0A8B0">4</span>
+              <div class="pick-info">
+                <div class="pick-team" style="color: var(--cyan)">Chicago Bears (via trade)</div>
+                <div class="pick-player" style="font-weight: 600">Abdul Carter</div>
+              </div>
+              <div class="pick-meta">
+                <div class="pick-position">EDGE</div>
+                <div class="pick-school">Penn State</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Paragraph -->
+      <div class="block-type-tag">Paragraph</div>
+      <div class="block-paragraph">
+        If the Bears pull the trigger on this trade, they would enter the 2026 season with one of the most fearsome edge rushing duos in the NFL. Carter posted 12 sacks and 19.5 tackles for loss in his final college season — numbers that project to an immediate impact at the professional level.
+      </div>
+
+      <!-- GM Pulse -->
+      <div class="block-type-tag">GM Pulse</div>
+      <div class="block-poll">
+        <div class="poll-variant-label">
+          <div class="poll-dot" style="background: var(--cyan)"></div>
+          <span class="poll-tag" style="color: var(--cyan)">GM Pulse</span>
+        </div>
+        <div class="poll-card">
+          <div class="poll-question">Would you make this trade to move up for Abdul Carter?</div>
+          <div class="poll-options">
+            <div class="poll-option">Yes — Carter is worth the price</div>
+            <div class="poll-option">No — keep the picks and build depth</div>
+            <div class="poll-option">Only if the cost is lower than projected</div>
+          </div>
+          <div class="poll-reward">+15 GM Score</div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<div class="template-divider"><hr></div>
+
+<!-- ════════════════════════════════════════════════════ -->
+<!-- TEMPLATE 4: TRENDING STORY                          -->
+<!-- ════════════════════════════════════════════════════ -->
+<div class="template-section">
+  <div class="template-header">
+    <div class="template-number">4</div>
+    <div class="template-name">Trending Story</div>
+  </div>
+  <div class="template-desc">High-attention social topics, viral moments, and fan reaction stories.</div>
+
+  <div class="article-preview">
+    <div class="article-meta">
+      <div class="meta-dot"></div>
+      <span class="meta-label">SM Edge</span>
+      <span class="meta-status">Draft Preview</span>
+    </div>
+    <div class="article-body">
+
+      <!-- Heat Meter -->
+      <div class="block-type-tag">Heat Meter</div>
+      <div class="block-heat-meter">
+        <div class="rumor-meter-card">
+          <div class="meter-label-row">
+            <div class="block-label-dot" style="background: var(--red)"></div>
+            <span class="block-label-text" style="color: var(--red)">Heat Meter</span>
+          </div>
+          <div class="meter-bars">
+            <div class="meter-segment">
+              <div class="meter-bar active" style="height: 12px"></div>
+              <span class="meter-text active">Warm</span>
+            </div>
+            <div class="meter-segment">
+              <div class="meter-bar active" style="height: 12px"></div>
+              <span class="meter-text active">Hot</span>
+            </div>
+            <div class="meter-segment">
+              <div class="meter-bar active" style="height: 12px"></div>
+              <span class="meter-text active">Nuclear</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Paragraph -->
+      <div class="block-type-tag">Paragraph</div>
+      <div class="block-paragraph">
+        Connor Bedard's between-the-legs goal against the Nashville Predators last night has officially broken the internet. The highlight has surpassed 8 million views across social platforms in under 12 hours, making it the most-viewed Blackhawks clip since Patrick Kane's 2015 Stanley Cup winner. Chicago is buzzing.
+      </div>
+
+      <!-- Reaction Stream -->
+      <div class="block-type-tag">Reaction Stream</div>
+      <div class="block-reactions">
+        <div class="reactions-header">
+          <div class="block-label-dot" style="background: var(--cyan)"></div>
+          <span class="block-label-text" style="color: var(--cyan)">Fan Reactions</span>
+        </div>
+        <div class="reaction-cards">
+          <div class="reaction-card">
+            <div class="reaction-avatar" style="background: rgba(0,212,255,0.12); color: var(--cyan)">MJ</div>
+            <div class="reaction-content">
+              <div class="reaction-user">@MadHouseOnMadison</div>
+              <div class="reaction-comment">I've watched this 47 times and I still can't figure out how the puck got past the goalie. Bedard is operating on a different frequency than the rest of the league.</div>
+              <div class="reaction-time">2 hours ago</div>
+            </div>
+          </div>
+          <div class="reaction-card">
+            <div class="reaction-avatar" style="background: rgba(188,0,0,0.12); color: var(--red)">KS</div>
+            <div class="reaction-content">
+              <div class="reaction-user">@KaneStanley2015</div>
+              <div class="reaction-comment">Been a Hawks fan for 30 years. That goal is top 5 all-time at the United Center. The building was shaking.</div>
+              <div class="reaction-time">3 hours ago</div>
+            </div>
+          </div>
+          <div class="reaction-card">
+            <div class="reaction-avatar" style="background: rgba(214,176,94,0.12); color: var(--gold)">TL</div>
+            <div class="reaction-content">
+              <div class="reaction-user">@TheLoop_Chi</div>
+              <div class="reaction-comment">Bedard just put the entire NHL on notice. This kid is 20 years old. We're going to be watching highlights like this for the next 15 years. Generational.</div>
+              <div class="reaction-time">4 hours ago</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Hot Take -->
+      <div class="block-type-tag">Hot Take</div>
+      <div class="block-hot-take">
+        <div class="hot-take-card">
+          <div class="hot-take-label">
+            <div class="block-label-dot" style="background: var(--gold)"></div>
+            <span class="block-label-text" style="color: var(--gold)">Top Take</span>
+          </div>
+          <div class="hot-take-text">
+            Connor Bedard will win the Hart Trophy within the next two seasons. His skill ceiling is the highest we've seen since McDavid entered the league, and last night was proof that he's approaching it faster than anyone expected.
+          </div>
+        </div>
+      </div>
+
+      <!-- Poll -->
+      <div class="block-type-tag">Fan Poll</div>
+      <div class="block-poll">
+        <div class="poll-variant-label">
+          <div class="poll-dot" style="background: var(--cyan)"></div>
+          <span class="poll-tag" style="color: var(--cyan)">Community Vote</span>
+        </div>
+        <div class="poll-card">
+          <div class="poll-question">Where does Bedard's goal rank among the best Blackhawks goals you've ever seen?</div>
+          <div class="poll-options">
+            <div class="poll-option">No. 1 — best I've ever seen live</div>
+            <div class="poll-option">Top 5 — up there with Kane's Cup winners</div>
+            <div class="poll-option">Top 10 — incredible but we've seen greatness before</div>
+            <div class="poll-option">Great goal, but let's not overreact</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Scout Insight -->
+      <div class="block-type-tag">Scout Insight</div>
+      <div class="block-insight">
+        <div class="insight-card">
+          <div class="insight-header">
+            <div class="insight-icon"><img src="../../public/Scout.png" alt="Scout AI"></div>
+            <span class="insight-label">Scout AI Insight</span>
+            <span class="insight-confidence confidence-high">HIGH</span>
+          </div>
+          <div class="insight-text">
+            Bedard's goal was not just aesthetically remarkable — it was analytically elite. The expected goals value on that shot attempt was 0.03. He converted a sub-3% chance into a highlight that will define this franchise's rebuild. His on-ice impacts are now consistently matching his highlight production: the Blackhawks are a +6.4 xGF% better with Bedard on the ice this month.
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<div class="template-divider"><hr></div>
+
+<!-- ════════════════════════════════════════════════════ -->
+<!-- TEMPLATE 5: FAN DEBATE                              -->
+<!-- ════════════════════════════════════════════════════ -->
+<div class="template-section">
+  <div class="template-header">
+    <div class="template-number">5</div>
+    <div class="template-name">Fan Debate</div>
+  </div>
+  <div class="template-desc">Questions designed to spark strong fan participation and discussion.</div>
+
+  <div class="article-preview">
+    <div class="article-meta">
+      <div class="meta-dot"></div>
+      <span class="meta-label">SM Edge</span>
+      <span class="meta-status">Draft Preview</span>
+    </div>
+    <div class="article-body">
+
+      <!-- Paragraph -->
+      <div class="block-type-tag">Paragraph</div>
+      <div class="block-paragraph">
+        The Cubs enter spring training with an outfield logjam and a farm system loaded with near-ready talent. With Ian Happ entering the final year of his contract, Pete Crow-Armstrong establishing himself as the everyday center fielder, and top prospect James Triantos knocking on the door, the question facing Jed Hoyer is unavoidable: do the Cubs trade Ian Happ now to maximize his value, or ride with the veteran for one more championship push?
+      </div>
+
+      <!-- Debate -->
+      <div class="block-type-tag">Debate</div>
+      <div class="block-debate">
+        <div class="debate-wrapper">
+          <div class="debate-header">
+            <div class="block-label-dot" style="background: var(--red)"></div>
+            <span class="block-label-text" style="color: var(--red)">Debate</span>
+          </div>
+          <div class="debate-body">
+            <div class="debate-side debate-pro">
+              <div class="debate-side-label" style="color: var(--cyan)">PRO — Trade Happ Now</div>
+              <div class="debate-argument">
+                Happ is 31 and will walk in free agency after 2026. His trade value will never be higher than it is right now. The Cubs have a surplus of outfield talent and could land a top-30 prospect or a controllable arm. Holding Happ through a season where the team might finish 85 wins is sentimentality over strategy.
+              </div>
+            </div>
+            <div class="debate-side debate-con">
+              <div class="debate-side-label" style="color: var(--red)">CON — Keep Happ for the Push</div>
+              <div class="debate-argument">
+                The Cubs won 92 games last year. This roster is good enough to compete, and Happ is a core reason why. His leadership, switch-hitting ability, and defensive versatility are irreplaceable in October. Trading him signals a soft rebuild when this team should be going all-in. You don't trade a fan favorite in a competitive window.
+              </div>
+            </div>
+          </div>
+          <div class="debate-vote-bar">
+            <div class="vote-pro" style="width: 57%"></div>
+            <div class="vote-con" style="width: 43%"></div>
+          </div>
+          <div class="vote-labels">
+            <span style="color: var(--cyan)">Trade — 57%</span>
+            <span style="color: var(--red)">Keep — 43%</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Paragraph -->
+      <div class="block-type-tag">Paragraph</div>
+      <div class="block-paragraph">
+        The debate cuts to the heart of what the Cubs are trying to be. Hoyer has consistently said this team is built to compete now, but the farm system tells a different story — one of a franchise preparing for the next wave. Happ sits right at the intersection of those two timelines, and the decision the Cubs make will define the next three years.
+      </div>
+
+      <!-- Scout Insight -->
+      <div class="block-type-tag">Scout Insight</div>
+      <div class="block-insight">
+        <div class="insight-card">
+          <div class="insight-header">
+            <div class="insight-icon"><img src="../../public/Scout.png" alt="Scout AI"></div>
+            <span class="insight-label">Scout AI Insight</span>
+            <span class="insight-confidence confidence-medium">MEDIUM</span>
+          </div>
+          <div class="insight-text">
+            Historical comps suggest the Cubs would get the best return by trading Happ before the July deadline rather than now. Spring training trades for rental-year players historically yield 15-20% less prospect capital than deadline deals, when contenders are desperate. However, an early trade gives the Cubs more time to integrate Triantos — and Happ's value drops if he starts slow. It's a genuine 50/50 decision with no clearly wrong answer.
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════════════════ -->
+<!-- FOOTER                                              -->
+<!-- ════════════════════════════════════════════════════ -->
+<div style="text-align: center; padding: 40px 24px 60px; border-top: 1px solid rgba(255,255,255,0.06); margin-top: 20px;">
+  <div style="font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.12em; color: var(--cyan); margin-bottom: 6px;">SM Edge</div>
+  <div style="font-size: 13px; color: var(--slate-600);">Article Template Preview — Internal Reference</div>
+</div>
+
+</body>
+</html>

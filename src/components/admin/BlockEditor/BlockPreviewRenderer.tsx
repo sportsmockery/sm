@@ -279,13 +279,74 @@ function RenderBlock({ block }: { block: ContentBlock }) {
       );
 
     /* ─── Engagement ─── */
-    case 'reaction-stream':
-      if (block.data.reactions.length === 0) return <EmptyState label="Reaction Stream — add fan reactions" accent={BRAND.cyan} />;
+    case 'reaction-stream': {
+      const rsEnabled = block.data.enabled;
+      const rsPreview = block.data.previewItems ?? [];
+      const rsAvailable = (block.data.availableCount ?? 0) > 0;
+      const rsMaxItems = block.data.maxItems ?? 5;
+
+      // Disabled state
+      if (!rsEnabled) {
+        return (
+          <PreviewSection>
+            <div
+              className="rounded-xl px-5 py-4 flex items-center gap-3"
+              style={{ backgroundColor: 'rgba(255,255,255,0.02)', border: '1px dashed rgba(255,255,255,0.08)' }}
+            >
+              <div className="w-2 h-2 rounded-full shrink-0" style={{ backgroundColor: '#64748b', opacity: 0.5 }} />
+              <span className="text-[13px] text-slate-500">Reaction Stream — disabled</span>
+            </div>
+          </PreviewSection>
+        );
+      }
+
+      // Enabled with preview data available
+      if (rsPreview.length > 0) {
+        return (
+          <PreviewSection>
+            <ReactionStream reactions={rsPreview.slice(0, rsMaxItems)} />
+          </PreviewSection>
+        );
+      }
+
+      // Enabled with known available reactions but no preview items loaded
+      if (rsAvailable) {
+        return (
+          <PreviewSection>
+            <div
+              className="rounded-xl px-5 py-4 flex items-center gap-3"
+              style={{ backgroundColor: 'rgba(0,212,255,0.03)', border: '1px solid rgba(0,212,255,0.1)' }}
+            >
+              <div className="w-2 h-2 rounded-full shrink-0" style={{ backgroundColor: BRAND.cyan }} />
+              <div>
+                <span className="text-[13px] font-medium" style={{ color: BRAND.cyan }}>Reaction Stream</span>
+                <span className="text-[12px] text-slate-500 block">
+                  {block.data.availableCount} reactions available — will render on publish.
+                </span>
+              </div>
+            </div>
+          </PreviewSection>
+        );
+      }
+
+      // Enabled but no reactions available yet
       return (
         <PreviewSection>
-          <ReactionStream reactions={block.data.reactions} />
+          <div
+            className="rounded-xl px-5 py-4 flex items-center gap-3"
+            style={{ backgroundColor: 'rgba(255,255,255,0.02)', border: '1px dashed rgba(255,255,255,0.08)' }}
+          >
+            <div className="w-2 h-2 rounded-full shrink-0" style={{ backgroundColor: '#64748b', opacity: 0.5 }} />
+            <div>
+              <span className="text-[13px] text-slate-400">Reaction Stream</span>
+              <span className="text-[12px] text-slate-500 block">
+                Will appear when fan reactions are available.
+              </span>
+            </div>
+          </div>
         </PreviewSection>
       );
+    }
 
     /* ─── Premium / Gold ─── */
     case 'hot-take':

@@ -94,10 +94,19 @@ export interface UpdateBlockType extends BlockBase {
   data: { timestamp: string; text: string };
 }
 
+export type ReactionSource = 'auto' | 'debate' | 'poll' | 'fan-chat' | 'team';
+
 export interface ReactionStreamBlock extends BlockBase {
   type: 'reaction-stream';
   data: {
-    reactions: { avatar: string; username: string; comment: string; timestamp: string }[];
+    enabled: boolean;
+    source: ReactionSource;
+    maxItems: number;
+    autoHideWhenEmpty: boolean;
+    /** Set at render-time — number of reactions currently available */
+    availableCount?: number;
+    /** Lightweight preview items for editor display (platform-generated, not manually authored) */
+    previewItems?: { avatar: string; username: string; comment: string; timestamp: string }[];
   };
 }
 
@@ -233,7 +242,7 @@ export function createBlock(type: BlockType): ContentBlock {
     }),
     'debate': () => ({ id, type: 'debate', data: { proArgument: '', conArgument: '', reward: 3 } }),
     'update': () => ({ id, type: 'update', data: { timestamp: '', text: '' } }),
-    'reaction-stream': () => ({ id, type: 'reaction-stream', data: { reactions: [] } }),
+    'reaction-stream': () => ({ id, type: 'reaction-stream', data: { enabled: false, source: 'auto' as const, maxItems: 5, autoHideWhenEmpty: true } }),
     'poll': () => ({ id, type: 'poll', data: { question: '', options: ['YES', 'NO'], reward: 2 } }),
     'hot-take': () => ({ id, type: 'hot-take', data: { text: '' } }),
     'rumor-meter': () => ({ id, type: 'rumor-meter', data: { strength: 'Medium' } }),

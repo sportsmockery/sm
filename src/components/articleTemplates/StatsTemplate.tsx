@@ -62,7 +62,7 @@ export function StatsTemplate({
   return (
     <>
       <ReadingProgressBar />
-      <article className="max-w-[720px] mx-auto px-4 py-8" style={{ backgroundColor: '#0B0F14' }}>
+      <article className="max-w-[720px] mx-auto px-4 py-8 bg-[#FAFAFB] dark:bg-[#0B0F14]">
         <ArticleHeader
           tags={tags}
           headline={headline}
@@ -81,7 +81,7 @@ export function StatsTemplate({
 
         {/* Paragraph 1 */}
         {paragraphs[0] && (
-          <p className="text-[18px] leading-7 text-white mb-5">{paragraphs[0]}</p>
+          <p className="text-[18px] leading-7 text-[#0B0F14] dark:text-[#FAFAFB] mb-5">{paragraphs[0]}</p>
         )}
 
         {/* Stats Chart */}
@@ -89,37 +89,29 @@ export function StatsTemplate({
 
         {/* Paragraph 2 */}
         {paragraphs[1] && (
-          <p className="text-[18px] leading-7 text-white mb-5">{paragraphs[1]}</p>
+          <p className="text-[18px] leading-7 text-[#0B0F14] dark:text-[#FAFAFB] mb-5">{paragraphs[1]}</p>
         )}
 
         {/* Comparison Table */}
         {comparisonTable && (
           <div
-            className="rounded-xl overflow-hidden my-8"
-            style={{
-              backgroundColor: 'rgba(255,255,255,0.04)',
-              border: '1px solid rgba(255,255,255,0.08)',
-            }}
+            className="rounded-xl overflow-hidden my-8 bg-[#0B0F14]/[0.03] dark:bg-[#FAFAFB]/[0.04] border border-[#0B0F14]/[0.08] dark:border-[#FAFAFB]/[0.08]"
           >
             {/* Table header */}
-            <div className="grid grid-cols-3 text-xs font-bold uppercase tracking-widest text-slate-400 p-4 border-b" style={{ borderColor: 'rgba(255,255,255,0.08)' }}>
+            <div className="grid grid-cols-3 text-xs font-bold uppercase tracking-widest text-slate-400 p-4 border-b border-[#0B0F14]/[0.08] dark:border-[#FAFAFB]/[0.08]">
               <span>Stat</span>
               <span className="text-center" style={{ color: '#00D4FF' }}>{playerA.name}</span>
-              <span className="text-center" style={{ color: '#FF6A00' }}>{playerB.name}</span>
+              <span className="text-center" style={{ color: '#BC0000' }}>{playerB.name}</span>
             </div>
             {/* Table rows — collapse to stacked on mobile */}
             {comparisonTable.map((row, i) => (
               <div
                 key={row.label}
-                className="grid grid-cols-1 md:grid-cols-3 p-4 border-b last:border-b-0"
-                style={{
-                  borderColor: 'rgba(255,255,255,0.08)',
-                  backgroundColor: i % 2 === 0 ? 'transparent' : 'rgba(255,255,255,0.02)',
-                }}
+                className={`grid grid-cols-1 md:grid-cols-3 p-4 border-b last:border-b-0 border-[#0B0F14]/[0.08] dark:border-[#FAFAFB]/[0.08] ${i % 2 !== 0 ? 'bg-[#0B0F14]/[0.02] dark:bg-[#FAFAFB]/[0.02]' : ''}`}
               >
                 <span className="text-sm text-slate-400 md:text-left font-medium mb-1 md:mb-0">{row.label}</span>
-                <span className="text-sm text-white text-center">{row.playerA}</span>
-                <span className="text-sm text-white text-center">{row.playerB}</span>
+                <span className="text-sm text-[#0B0F14] dark:text-[#FAFAFB] text-center">{row.playerA}</span>
+                <span className="text-sm text-[#0B0F14] dark:text-[#FAFAFB] text-center">{row.playerB}</span>
               </div>
             ))}
           </div>
@@ -127,7 +119,7 @@ export function StatsTemplate({
 
         {/* Paragraph 3 */}
         {paragraphs[2] && (
-          <p className="text-[18px] leading-7 text-white mb-5">{paragraphs[2]}</p>
+          <p className="text-[18px] leading-7 text-[#0B0F14] dark:text-[#FAFAFB] mb-5">{paragraphs[2]}</p>
         )}
 
         {/* Trend Line Chart */}
@@ -137,7 +129,7 @@ export function StatsTemplate({
 
         {/* Paragraph 4 */}
         {paragraphs[3] && (
-          <p className="text-[18px] leading-7 text-white mb-5">{paragraphs[3]}</p>
+          <p className="text-[18px] leading-7 text-[#0B0F14] dark:text-[#FAFAFB] mb-5">{paragraphs[3]}</p>
         )}
 
         {/* GM Interaction */}
@@ -149,7 +141,7 @@ export function StatsTemplate({
 
         {/* Remaining paragraphs */}
         {paragraphs.slice(4).map((p, i) => (
-          <p key={i} className="text-[18px] leading-7 text-white mb-5">{p}</p>
+          <p key={i} className="text-[18px] leading-7 text-[#0B0F14] dark:text-[#FAFAFB] mb-5">{p}</p>
         ))}
       </article>
     </>

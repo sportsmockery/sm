@@ -77,6 +77,21 @@ Subtle motion makes the platform feel alive and intelligent. Use CSS animations/
 - **Hover signals** = all interactive elements (cards, buttons, links)
 - Keep all animation durations ≥ 2s for ambient effects (hover excepted)
 
+### Theme Mode (MANDATORY)
+
+**Light mode is the default.** All components must support both light and dark mode.
+
+**Rules:**
+- **DO NOT** create any component without styling for both light and dark mode
+- **Light mode = default** — components must look correct with no theme class applied
+- Use Tailwind `dark:` variants for dark mode overrides (e.g., `bg-white dark:bg-[#0B0F14]`)
+- For inline styles, use CSS variables or conditional logic based on theme context — never hardcode only one mode
+- Test every new component visually in both modes before considering it complete
+- Glass-morphic containers (`rgba(255,255,255,0.04)`) are dark-mode patterns — provide a light-mode equivalent (e.g., `rgba(11,15,20,0.03)` or solid light backgrounds)
+- Text colors must flip: `#0B0F14` text on light backgrounds, `#FAFAFB` text on dark backgrounds
+- Accent colors (Red, Cyan, Gold) stay the same in both modes — only backgrounds and text swap
+- Borders: use `rgba(0,0,0,0.08)` for light mode, `rgba(255,255,255,0.08)` for dark mode
+
 ---
 
 ## Team Pages — Data Reference

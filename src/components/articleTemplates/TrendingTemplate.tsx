@@ -41,7 +41,7 @@ function HeatMeter({ level }: { level: HeatLevel }) {
   return (
     <div className="my-6">
       <div className="flex items-center gap-2 mb-3">
-        <Flame size={16} style={{ color: '#FF6A00' }} />
+        <Flame size={16} style={{ color: '#BC0000' }} />
         <span className="text-xs font-bold uppercase tracking-widest text-slate-400">Heat Meter</span>
       </div>
       <div className="flex gap-1">
@@ -50,12 +50,12 @@ function HeatMeter({ level }: { level: HeatLevel }) {
             <div
               className="w-full h-3 rounded-full transition-colors"
               style={{
-                backgroundColor: i <= activeIdx ? '#FF6A00' : 'rgba(255,255,255,0.1)',
+                backgroundColor: i <= activeIdx ? '#BC0000' : 'rgba(255,255,255,0.1)',
               }}
             />
             <span
               className="text-[10px] font-bold uppercase"
-              style={{ color: i <= activeIdx ? '#FF6A00' : '#A0A8B0' }}
+              style={{ color: i <= activeIdx ? '#BC0000' : '#A0A8B0' }}
             >
               {l}
             </span>
@@ -85,7 +85,7 @@ function FanPoll({ question, reward = 2 }: { question: string; reward?: number }
         border: '1px solid rgba(255,255,255,0.08)',
       }}
     >
-      <p className="text-white text-[16px] font-medium mb-4">{question}</p>
+      <p className="text-[#0B0F14] dark:text-[#FAFAFB] text-[16px] font-medium mb-4">{question}</p>
       <div className="flex items-center gap-3">
         {['YES', 'NO'].map((option) => (
           <button
@@ -140,7 +140,7 @@ export function TrendingTemplate({
   return (
     <>
       <ReadingProgressBar />
-      <article className="max-w-[720px] mx-auto px-4 py-8" style={{ backgroundColor: '#0B0F14' }}>
+      <article className="max-w-[720px] mx-auto px-4 py-8 bg-[#FAFAFB] dark:bg-[#0B0F14]">
         <ArticleHeader
           tags={[...tags]}
           headline={headline}
@@ -153,7 +153,7 @@ export function TrendingTemplate({
         {/* Trending label */}
         <div className="flex items-center gap-2 mb-2">
           <span className="text-lg">🔥</span>
-          <span className="text-sm font-bold uppercase tracking-widest" style={{ color: '#FF6A00' }}>
+          <span className="text-sm font-bold uppercase tracking-widest" style={{ color: '#BC0000' }}>
             Trending
           </span>
         </div>
@@ -163,7 +163,7 @@ export function TrendingTemplate({
 
         {/* Opening paragraph */}
         {paragraphs[0] && (
-          <p className="text-[18px] leading-7 text-white mb-5">{paragraphs[0]}</p>
+          <p className="text-[18px] leading-7 text-[#0B0F14] dark:text-[#FAFAFB] mb-5">{paragraphs[0]}</p>
         )}
 
         {/* Reaction Stream */}
@@ -187,20 +187,20 @@ export function TrendingTemplate({
           <div
             className="rounded-xl p-5 my-8"
             style={{
-              backgroundColor: 'rgba(255,106,0,0.06)',
-              border: '1px solid rgba(255,106,0,0.2)',
+              backgroundColor: 'rgba(214,176,94,0.06)',
+              border: '1px solid rgba(214,176,94,0.2)',
             }}
           >
-            <span className="text-xs font-bold uppercase tracking-widest mb-2 block" style={{ color: '#FF6A00' }}>
+            <span className="text-xs font-bold uppercase tracking-widest mb-2 block" style={{ color: '#D6B05E' }}>
               Hot Take
             </span>
-            <p className="text-[16px] text-white font-medium leading-relaxed">{hotTake}</p>
+            <p className="text-[16px] text-[#0B0F14] dark:text-[#FAFAFB] font-medium leading-relaxed">{hotTake}</p>
           </div>
         )}
 
         {/* Paragraph 2 */}
         {paragraphs[1] && (
-          <p className="text-[18px] leading-7 text-white mb-5">{paragraphs[1]}</p>
+          <p className="text-[18px] leading-7 text-[#0B0F14] dark:text-[#FAFAFB] mb-5">{paragraphs[1]}</p>
         )}
 
         {/* Fan Poll */}
@@ -211,7 +211,7 @@ export function TrendingTemplate({
 
         {/* Remaining paragraphs */}
         {paragraphs.slice(2).map((p, i) => (
-          <p key={i} className="text-[18px] leading-7 text-white mb-5">{p}</p>
+          <p key={i} className="text-[18px] leading-7 text-[#0B0F14] dark:text-[#FAFAFB] mb-5">{p}</p>
         ))}
       </article>
     </>

@@ -473,32 +473,129 @@ export function HeatMeterPanel({ block, onChange, onDelete, onMoveUp, onMoveDown
 export function ReactionStreamPanel({ block, onChange, onDelete, onMoveUp, onMoveDown }: BlockPanelProps) {
   if (block.type !== 'reaction-stream') return null;
   const d = block.data;
-
-  const addReaction = () => {
-    onChange({ ...block, data: { reactions: [...d.reactions, { avatar: '', username: '', comment: '', timestamp: '' }] } });
-  };
-  const removeReaction = (idx: number) => {
-    onChange({ ...block, data: { reactions: d.reactions.filter((_, i) => i !== idx) } });
-  };
-  const updateReaction = (idx: number, updates: Partial<{ avatar: string; username: string; comment: string; timestamp: string }>) => {
-    const reactions = [...d.reactions];
-    reactions[idx] = { ...reactions[idx], ...updates };
-    onChange({ ...block, data: { reactions } });
-  };
+  const hasReactions = (d.availableCount ?? 0) > 0;
+  const hasPreview = (d.previewItems ?? []).length > 0;
 
   return (
     <BlockShell label="Reaction Stream" accent="#00D4FF" onDelete={onDelete} onMoveUp={onMoveUp} onMoveDown={onMoveDown}>
-      {d.reactions.map((r, idx) => (
-        <div key={idx} className="mb-3 p-3 rounded-lg" style={{ backgroundColor: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.06)' }}>
-          <div className="flex gap-2 mb-2">
-            <TextInput value={r.username} onChange={(v) => updateReaction(idx, { username: v })} placeholder="Username" />
-            <TextInput value={r.timestamp} onChange={(v) => updateReaction(idx, { timestamp: v })} placeholder="2m ago" />
-            <button type="button" onClick={() => removeReaction(idx)} className="text-slate-500 hover:text-red-400 shrink-0"><Trash2 size={14} /></button>
-          </div>
-          <TextInput value={r.comment} onChange={(v) => updateReaction(idx, { comment: v })} placeholder="Comment text" />
+      <p className="text-[13px] text-slate-400 mb-4 leading-relaxed">
+        Displays recent fan reactions related to this post. Reactions are sourced automatically from platform activity.
+      </p>
+
+      {/* Status indicator */}
+      <div
+        className="rounded-lg p-3 mb-4 flex items-center gap-3"
+        style={{
+          backgroundColor: hasReactions ? 'rgba(0,212,255,0.04)' : 'rgba(255,255,255,0.02)',
+          border: hasReactions ? '1px solid rgba(0,212,255,0.12)' : '1px solid rgba(255,255,255,0.06)',
+        }}
+      >
+        <div
+          className="w-2 h-2 rounded-full shrink-0"
+          style={{ backgroundColor: hasReactions ? '#00D4FF' : '#64748b' }}
+        />
+        <div>
+          <span className="text-[12px] font-bold block" style={{ color: hasReactions ? '#00D4FF' : '#94a3b8' }}>
+            {hasReactions ? `Reactions available (${d.availableCount})` : 'No reactions available yet'}
+          </span>
+          <span className="text-[11px] text-slate-500">
+            {hasReactions
+              ? 'This block will show recent fan sentiment on publish.'
+              : 'This block will stay hidden unless reactions appear.'}
+          </span>
         </div>
-      ))}
-      <button type="button" onClick={addReaction} className="text-xs text-[#00D4FF] hover:underline">+ Add reaction</button>
+      </div>
+
+      {/* Enable / Disable toggle */}
+      <label className="flex items-start gap-2 cursor-pointer mb-4">
+        <input
+          type="checkbox"
+          checked={d.enabled}
+          onChange={(e) => onChange({ ...block, data: { ...d, enabled: e.target.checked } })}
+          className="h-4 w-4 mt-0.5 rounded"
+          style={{ accentColor: '#00D4FF' }}
+        />
+        <div>
+          <span className="text-sm font-medium text-white">Enable Reaction Stream</span>
+          <p className="text-[11px] text-slate-500">
+            {d.enabled
+              ? 'Reactions will display when available on the published article.'
+              : 'Block is disabled and will not appear on the published article.'}
+          </p>
+        </div>
+      </label>
+
+      {/* Source selector */}
+      <Field label="Source">
+        <Select
+          value={d.source}
+          onChange={(source) => onChange({ ...block, data: { ...d, source: source as 'auto' | 'debate' | 'poll' | 'fan-chat' | 'team' } })}
+          options={[
+            { value: 'auto', label: 'Auto — best available source' },
+            { value: 'debate', label: 'Debate votes & comments' },
+            { value: 'poll', label: 'Poll activity' },
+            { value: 'fan-chat', label: 'Fan Chat' },
+            { value: 'team', label: 'Team channel' },
+          ]}
+        />
+      </Field>
+
+      {/* Max items */}
+      <Field label="Max Reactions to Show">
+        <NumberInput
+          value={d.maxItems}
+          onChange={(maxItems) => onChange({ ...block, data: { ...d, maxItems } })}
+          min={1}
+          max={10}
+        />
+      </Field>
+
+      {/* Auto-hide toggle */}
+      <label className="flex items-start gap-2 cursor-pointer mb-2">
+        <input
+          type="checkbox"
+          checked={d.autoHideWhenEmpty}
+          onChange={(e) => onChange({ ...block, data: { ...d, autoHideWhenEmpty: e.target.checked } })}
+          className="h-4 w-4 mt-0.5 rounded"
+          style={{ accentColor: '#00D4FF' }}
+        />
+        <div>
+          <span className="text-[13px] font-medium text-white">Auto-hide when empty</span>
+          <p className="text-[11px] text-slate-500">
+            Automatically hides this block on the published article if no reactions are available.
+          </p>
+        </div>
+      </label>
+
+      {/* Preview items */}
+      {hasPreview && d.enabled && (
+        <div className="mt-4">
+          <span className="text-[10px] font-bold uppercase tracking-widest text-slate-500 mb-2 block">Preview</span>
+          <div className="space-y-2">
+            {(d.previewItems ?? []).slice(0, d.maxItems).map((r, i) => (
+              <div
+                key={i}
+                className="rounded-lg p-3 flex gap-3"
+                style={{ backgroundColor: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.06)' }}
+              >
+                <div
+                  className="w-7 h-7 rounded-full shrink-0 flex items-center justify-center text-[11px] font-bold"
+                  style={{ backgroundColor: 'rgba(0,212,255,0.1)', color: '#00D4FF' }}
+                >
+                  {r.username.charAt(0).toUpperCase()}
+                </div>
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-2">
+                    <span className="text-[12px] font-bold text-white truncate">{r.username}</span>
+                    <span className="text-[10px] text-slate-600 ml-auto shrink-0">{r.timestamp}</span>
+                  </div>
+                  <p className="text-[12px] text-slate-400 leading-snug mt-0.5">{r.comment}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
     </BlockShell>
   );
 }

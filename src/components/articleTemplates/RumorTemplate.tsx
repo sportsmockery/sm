@@ -64,12 +64,12 @@ function RumorMeter({ strength }: { strength: RumorStrength }) {
             <div
               className="w-full h-2 rounded-full transition-colors"
               style={{
-                backgroundColor: i <= activeIdx ? '#FF6A00' : 'rgba(255,255,255,0.1)',
+                backgroundColor: i <= activeIdx ? '#BC0000' : 'rgba(255,255,255,0.1)',
               }}
             />
             <span
               className="text-[10px] font-bold uppercase"
-              style={{ color: i <= activeIdx ? '#FF6A00' : '#A0A8B0' }}
+              style={{ color: i <= activeIdx ? '#BC0000' : '#A0A8B0' }}
             >
               {level}
             </span>
@@ -97,7 +97,7 @@ export function RumorTemplate({
   return (
     <>
       <ReadingProgressBar />
-      <article className="max-w-[720px] mx-auto px-4 py-8" style={{ backgroundColor: '#0B0F14' }}>
+      <article className="max-w-[720px] mx-auto px-4 py-8 bg-[#FAFAFB] dark:bg-[#0B0F14]">
         <ArticleHeader
           tags={tags}
           headline={headline}
@@ -119,12 +119,12 @@ export function RumorTemplate({
           }}
         >
           <span className="text-xs font-bold uppercase tracking-widest text-slate-400">Source:</span>
-          <span className="text-sm font-medium text-white">{source}</span>
+          <span className="text-sm font-medium text-[#0B0F14] dark:text-[#FAFAFB]">{source}</span>
         </div>
 
         {/* Paragraphs */}
-        {paragraphs[0] && <p className="text-[18px] leading-7 text-white mb-5">{paragraphs[0]}</p>}
-        {paragraphs[1] && <p className="text-[18px] leading-7 text-white mb-5">{paragraphs[1]}</p>}
+        {paragraphs[0] && <p className="text-[18px] leading-7 text-[#0B0F14] dark:text-[#FAFAFB] mb-5">{paragraphs[0]}</p>}
+        {paragraphs[1] && <p className="text-[18px] leading-7 text-[#0B0F14] dark:text-[#FAFAFB] mb-5">{paragraphs[1]}</p>}
 
         {/* Trade Scenario */}
         {tradeScenario && (
@@ -147,7 +147,7 @@ export function RumorTemplate({
           </button>
         </div>
 
-        {paragraphs[2] && <p className="text-[18px] leading-7 text-white mb-5">{paragraphs[2]}</p>}
+        {paragraphs[2] && <p className="text-[18px] leading-7 text-[#0B0F14] dark:text-[#FAFAFB] mb-5">{paragraphs[2]}</p>}
 
         {/* Mock Draft Picks */}
         {mockDraftPicks.length > 0 && (
@@ -169,7 +169,7 @@ export function RumorTemplate({
                 </span>
                 <div className="flex-1">
                   <div className="text-xs text-slate-400 mb-0.5">{pick.team}</div>
-                  <div className="text-sm font-bold text-white">{pick.player}</div>
+                  <div className="text-sm font-bold text-[#0B0F14] dark:text-[#FAFAFB]">{pick.player}</div>
                 </div>
                 <div className="text-right">
                   <div className="text-xs font-bold" style={{ color: '#00D4FF' }}>{pick.position}</div>
@@ -180,7 +180,7 @@ export function RumorTemplate({
           </div>
         )}
 
-        {paragraphs[3] && <p className="text-[18px] leading-7 text-white mb-5">{paragraphs[3]}</p>}
+        {paragraphs[3] && <p className="text-[18px] leading-7 text-[#0B0F14] dark:text-[#FAFAFB] mb-5">{paragraphs[3]}</p>}
 
         {/* GM Action Panel */}
         <div
@@ -190,7 +190,7 @@ export function RumorTemplate({
             border: '1px solid rgba(255,255,255,0.08)',
           }}
         >
-          <h3 className="text-sm font-bold text-white mb-4">Take Action</h3>
+          <h3 className="text-sm font-bold text-[#0B0F14] dark:text-[#FAFAFB] mb-4">Take Action</h3>
           <div className="flex flex-col sm:flex-row gap-3">
             <button
               type="button"
@@ -202,7 +202,7 @@ export function RumorTemplate({
             <button
               type="button"
               className="flex-1 py-3 rounded-lg text-sm font-bold uppercase tracking-wide min-h-[44px] transition-opacity hover:opacity-90"
-              style={{ backgroundColor: '#FF6A00', color: '#0B0F14' }}
+              style={{ backgroundColor: '#D6B05E', color: '#0B0F14' }}
             >
               Submit Mock Draft (+15 GM Score)
             </button>
@@ -226,7 +226,7 @@ export function RumorTemplate({
                   }}
                 >
                   <div className="flex items-center gap-2 mb-2">
-                    <span className="text-sm font-bold text-white">{trade.username}</span>
+                    <span className="text-sm font-bold text-[#0B0F14] dark:text-[#FAFAFB]">{trade.username}</span>
                     <span className="text-xs text-slate-400">{trade.teamA} ↔ {trade.teamB}</span>
                   </div>
                   <p className="text-sm text-slate-300">{trade.summary}</p>
@@ -238,7 +238,7 @@ export function RumorTemplate({
 
         {/* Remaining paragraphs */}
         {paragraphs.slice(4).map((p, i) => (
-          <p key={i} className="text-[18px] leading-7 text-white mb-5">{p}</p>
+          <p key={i} className="text-[18px] leading-7 text-[#0B0F14] dark:text-[#FAFAFB] mb-5">{p}</p>
         ))}
       </article>
     </>
