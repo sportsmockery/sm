@@ -13,7 +13,7 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
-        // SM Brand Colors (EDGE Branding Final)
+        // SM Brand Colors
         'sm-red': {
           DEFAULT: '#bc0000',
           50: '#fff1f1',
@@ -28,19 +28,6 @@ const config: Config = {
           900: '#8a0000',
           950: '#4c0000',
         },
-        // Edge Cyan (Intelligence)
-        'edge-cyan': {
-          DEFAULT: '#00D4FF',
-          muted: 'rgba(0, 212, 255, 0.15)',
-        },
-        // Edge Gold (Premium)
-        'edge-gold': {
-          DEFAULT: '#D6B05E',
-          muted: 'rgba(214, 176, 94, 0.15)',
-        },
-        // Foundation
-        'sm-black': '#0B0F14',
-        'sm-white': '#FAFAFB',
         
         // Chicago Team Colors
         'bears': {
@@ -66,15 +53,7 @@ const config: Config = {
       },
       
       fontFamily: {
-        sans: ['var(--font-space-grotesk)', 'Space Grotesk', 'system-ui', '-apple-system', 'sans-serif'],
-      },
-
-      borderRadius: {
-        'card': '14px',
-      },
-
-      fontSize: {
-        'xs': ['0.8125rem', { lineHeight: '1.25rem' }], /* 13px minimum per EDGE */
+        sans: ['var(--font-space-grotesk)', 'system-ui', '-apple-system', 'sans-serif'],
       },
       
       animation: {
