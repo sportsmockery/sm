@@ -46,36 +46,23 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
   const [timeOfDay, setTimeOfDay] = useState<TimeOfDay>('day')
   const [mounted, setMounted] = useState(false)
 
-  // On mount, check localStorage
+  // On mount, force light mode
   useEffect(() => {
     setMounted(true)
-
-    const stored = localStorage.getItem('sm-theme') as Theme | null
-    if (stored === 'dark') {
-      setThemeState('dark')
-    }
-    // Default is light (no action needed)
+    // Always light mode — clear any stored dark preference
+    localStorage.setItem('sm-theme', 'light')
   }, [])
 
-  // Apply theme to document
+  // Apply light theme to document (always)
   useEffect(() => {
     if (!mounted) return
 
     const root = document.documentElement
-
-    // Remove both classes first
-    root.classList.remove('light', 'dark')
-
-    if (theme === 'light') {
-      root.classList.add('light')
-      root.setAttribute('data-theme', 'light')
-      localStorage.setItem('sm-theme', 'light')
-    } else {
-      root.classList.add('dark')
-      root.removeAttribute('data-theme')
-      localStorage.setItem('sm-theme', 'dark')
-    }
-  }, [theme, mounted])
+    root.classList.remove('dark')
+    root.classList.add('light')
+    root.setAttribute('data-theme', 'light')
+    localStorage.setItem('sm-theme', 'light')
+  }, [mounted])
 
   // Time-of-day reactive CSS vars — checks every 10 minutes
   useEffect(() => {
@@ -104,13 +91,10 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
     return () => clearInterval(interval)
   }, [mounted])
 
-  const toggleTheme = () => {
-    setThemeState(prev => prev === 'light' ? 'dark' : 'light')
-  }
+  // Light mode is forced — toggle and setTheme are no-ops
+  const toggleTheme = () => {}
 
-  const setTheme = (newTheme: Theme) => {
-    setThemeState(newTheme)
-  }
+  const setTheme = (_newTheme: Theme) => {}
 
   return (
     <ThemeContext.Provider value={{ theme, resolvedTheme: theme, toggleTheme, setTheme, timeOfDay }}>

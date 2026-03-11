@@ -117,22 +117,7 @@ export default function RootLayout({
         <link rel="prefetch" href="/chicago-bears" />
         <link rel="prefetch" href="/scout-ai" />
         <link rel="prefetch" href="/gm" />
-        <script
-          dangerouslySetInnerHTML={{
-            __html: `
-              (function() {
-                try {
-                  var theme = localStorage.getItem('sm-theme');
-                  if (theme === 'dark') {
-                    document.documentElement.classList.remove('light');
-                    document.documentElement.classList.add('dark');
-                    document.documentElement.setAttribute('data-theme', 'dark');
-                  }
-                } catch (e) {}
-              })();
-            `,
-          }}
-        />
+        {/* Light mode forced — no theme-switching script needed */}
       </head>
       <body
         className={`${spaceGrotesk.variable} font-sans antialiased`}
