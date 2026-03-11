@@ -91,7 +91,7 @@ function TagInfoPopover({ onClose }: { onClose: () => void }) {
         ref={popoverRef}
         className="mx-4 w-full rounded-xl shadow-2xl overflow-hidden flex flex-col"
         style={{
-          maxWidth: 640, maxHeight: '90vh',
+          maxWidth: 780, maxHeight: '90vh',
           backgroundColor: '#ffffff',
         }}
         onClick={(e) => e.stopPropagation()}
@@ -118,6 +118,10 @@ function TagInfoPopover({ onClose }: { onClose: () => void }) {
 
         {/* Content — two-column layout */}
         <div style={{ padding: '16px 24px 24px' }}>
+          {/* Warning */}
+          <p style={{ fontSize: 13, fontWeight: 700, color: '#BC0000', marginBottom: 8 }}>
+            DO NOT CREATE NEW TAGS WITHOUT LOOKING FOR TAGS THAT ALREADY EXIST.
+          </p>
           {/* Intro */}
           <p style={bodyText}>
             Tags help readers discover your story across SM Edge. They connect your article with related content, player pages, trending topics, and discussions.
@@ -171,12 +175,12 @@ function TagInfoPopover({ onClose }: { onClose: () => void }) {
             {/* Right column */}
             <div>
               <div style={{ ...sectionTitle, marginTop: 0 }}>Tags Power</div>
-              <ul style={{ ...bodyText, paddingLeft: 16, margin: '0 0 8px' }}>
-                <li><strong>Search results</strong> — find stories by player, trade, injury</li>
-                <li><strong>Trending topics</strong> — what Chicago fans are discussing</li>
-                <li><strong>Related stories</strong> — connecting coverage of the same topics</li>
-                <li><strong>Feed discovery</strong> — surfacing stories in the SM Edge feed</li>
-              </ul>
+              <div style={{ ...bodyText, marginBottom: 8 }}>
+                <div><strong>Search results</strong> — find stories by player, trade, injury</div>
+                <div><strong>Trending topics</strong> — what Chicago fans are discussing</div>
+                <div><strong>Related stories</strong> — connecting coverage of the same topics</div>
+                <div><strong>Feed discovery</strong> — surfacing stories in the SM Edge feed</div>
+              </div>
 
               <div style={sectionTitle}>High-Impact Tag Types</div>
               <p style={{ ...bodyText, fontSize: 11, marginBottom: 8 }}>
