@@ -20,21 +20,36 @@
 
 ---
 
-## Styling Rules (IMPORTANT)
+## Platform Identity (IMPORTANT)
+
+SM Edge is a **sports intelligence platform**, not a traditional sports blog. It combines editorial storytelling, advanced analytics, fan debate, AI insights (Scout), and interactive participation.
+
+**The experience should feel like:** Twitter-style discovery + Bloomberg-style analytics + The Athletic-style editorial + Reddit-style participation — unified into one platform.
+
+**SM Edge must feel:** modern, intelligent, Chicago-rooted, premium, fast, editorial, analytical.
+
+**Avoid styles that resemble:** sportsbook UIs, ESPN clones, generic blog themes.
+
+**Editorial Principle:** Every feature must reinforce at least one of: Sports Intelligence, Fan Participation, Editorial Credibility. Before adding any feature ask: *"Does this help fans understand the game better or participate more?"* If not, it does not belong.
+
+---
+
+## Design System (ALWAYS FOLLOW)
 
 - **DO NOT** modify the ThemeToggle in `src/components/ThemeToggle.tsx` or Header.tsx — it's finalized.
 - **Always use inline `style={{}}` for button colors** (backgroundColor, color, border, outline, SVG stroke). Tailwind color classes get overridden.
-### Core Color Palette (ALWAYS FOLLOW)
 
-Only use these colors. Do not substitute other blacks, whites, reds, etc.
+### Core Color Palette
+
+SM Edge uses a **strict five-color palette**. No additional accent colors should be introduced.
 
 | Name | Hex | Usage |
 |------|-----|-------|
 | **Black** | `#0B0F14` | Backgrounds, text (dark mode bg, light mode text) |
 | **White** | `#FAFAFB` | Backgrounds, text (light mode bg, dark mode text) |
-| **Red** | `#BC0000` | Brand — logos, CTAs, accents, links |
-| **Edge Cyan** | `#00D4FF` | Technology / intelligence — AI features, data, Scout |
-| **Gold** | `#D6B05E` | Premium layer — subscriptions, premium badges, VIP |
+| **Red** | `#BC0000` | Brand — breaking news, rumors, debate tension, brand emphasis |
+| **Edge Cyan** | `#00D4FF` | Intelligence — analytics, charts, Scout AI, system interactions, insight modules |
+| **Gold** | `#D6B05E` | Premium — top fan takes, elite GM rank, premium insights, featured moments |
 
 **Rules:**
 - **Red = brand** (primary identity, buttons, alerts)
@@ -42,40 +57,55 @@ Only use these colors. Do not substitute other blacks, whites, reds, etc.
 - **Gold = premium** (paid tiers, exclusive content)
 - **DO NOT** use `#000000` — use `#0B0F14` instead
 - **DO NOT** use `#FFFFFF` — use `#FAFAFB` instead
+- **NEVER introduce:** orange, emerald, violet, purple, alternate blues. All UI must follow this palette.
 
 ### Typography — Space Grotesk (ALWAYS FOLLOW)
 
-**Space Grotesk** is the site-wide font (`--font-space-grotesk` via `next/font/google`, mapped to `font-sans` in Tailwind).
+**Space Grotesk** is the sole typeface (`--font-space-grotesk` via `next/font/google`, mapped to `font-sans` in Tailwind). **No additional fonts.**
 
-| Context | Weight | Size | Example |
-|---------|--------|------|---------|
-| Hero headlines | **Bold (700)** | 64–72px (`text-[clamp(48px,5vw,72px)]`) | SearchHero h1 |
-| Article titles | **Medium (500)** | 20–24px | Card headlines, post titles |
-| UI labels | **Regular (400)** | 14px | Buttons, inputs, nav items |
+| Context | Weight | Size | Usage |
+|---------|--------|------|-------|
+| Hero headlines | **Bold (700)** | 64–72px (`text-[clamp(48px,5vw,72px)]`) | Homepage hero, major story moments |
+| Article titles | **Medium (500)** | 20–24px | Article headlines, feed card titles |
+| Body text | **Regular (400)** | 18px | Article paragraphs, analysis text |
+| UI labels | **Regular (400)** | 14px | Buttons, card labels, block labels |
+| Metadata | **Regular (400)** | 13px | Timestamps, authors, read time |
 
 - **DO NOT** use other font families unless explicitly told to.
 - **DO NOT** size hero headlines below 48px or above 72px.
-- Use `font-bold` for heroes, `font-medium` for article titles, default weight for UI labels.
+- **DO NOT** use text smaller than 13px (accessibility).
+- Use `font-bold` for heroes, `font-medium` for article titles, default weight for body/UI/metadata.
 
-### Motion Branding (ALWAYS FOLLOW)
+### Motion & Animation
 
-Subtle motion makes the platform feel alive and intelligent. Use CSS animations/Tailwind `animate-*` classes. Keep durations slow (2–6s) and easing smooth. **Never jarring or distracting.**
+Two categories of motion exist:
+
+**Ambient motion** (background, decorative — slow, 2–6s):
 
 | Effect | Where | Color | CSS Class / Keyframe |
 |--------|-------|-------|---------------------|
 | **Star pulse** | Breaking news badges, live indicators | `#BC0000` | `animate-pulse-star` — scale 1→1.15 + opacity glow, 2s ease |
 | **Cyan telemetry lines** | AI/Scout sections, data borders | `#00D4FF` | `animate-telemetry` — subtle opacity sweep left→right, 4s linear infinite |
 | **Data orb rotation** | Stats widgets, score orbs, data hubs | `#00D4FF` / `#D6B05E` | `animate-orb-spin` — rotate 360°, 6s linear infinite |
-| **Hover micro-signals** | Cards, buttons, interactive elements | Inherited | Scale 1.02 + subtle glow on hover, 200ms ease-out |
+
+**Interactive motion** (user-triggered — fast, 200–300ms):
+
+| Effect | Where | Duration |
+|--------|-------|----------|
+| **Fade-in** | Content appearing | 200–300ms |
+| **Slide-up** | Cards entering viewport | 200–300ms |
+| **Vote fill** | Poll bar animations | 200–300ms |
+| **Chart draw** | Analytics visualizations | 200–300ms |
+| **Hover micro-signals** | Cards, buttons, interactive elements | 200ms ease-out, scale 1.02 + subtle glow |
 
 **Rules:**
-- Motion should be **ambient** — users notice it subconsciously, not consciously
+- Ambient motion should be **subconscious** — users notice it peripherally, not directly
+- Interactive motion should be **responsive** — fast and intentional
 - Use `prefers-reduced-motion: reduce` to disable all custom animations for accessibility
 - **Star pulse** = breaking/live content only (red glow)
 - **Telemetry** = AI/intelligence features only (cyan sweep)
 - **Orb spin** = data visualization contexts only
-- **Hover signals** = all interactive elements (cards, buttons, links)
-- Keep all animation durations ≥ 2s for ambient effects (hover excepted)
+- Avoid flashy or distracting animations
 
 ### Theme Mode (MANDATORY)
 
@@ -92,28 +122,152 @@ Subtle motion makes the platform feel alive and intelligent. Use CSS animations/
 - Accent colors (Red, Cyan, Gold) stay the same in both modes — only backgrounds and text swap
 - Borders: use `rgba(0,0,0,0.08)` for light mode, `rgba(255,255,255,0.08)` for dark mode
 
-### Homepage Hero (SearchHero) — NON-NEGOTIABLE RULES
+---
 
-The homepage hero (`src/components/homepage/SearchHero.tsx`) is the primary landing experience. These rules are mandatory.
+## Layout Standards (ALWAYS FOLLOW)
 
-**Layout & Balance:**
-- Keep the hero vertically balanced — it must not feel too high or too low on the page
-- The logo should stay visually light and not dominate the hero
-- The greeting row must feel attached to the headline, not floating separately
-- The search input should be the clear action point — the thing the eye lands on
+### Homepage — Full-Screen Hero + Infinite Feed
 
-**DO NOT:**
-- Add a giant card wrapping the whole hero
-- Add side panels, charts, tabs, stats, or dashboard widgets
-- Include the feed or mock feed cards in this component
-- Over-style the background (no giant gradients)
-- Add animated gimmicks
+The homepage is a **two-stage experience**:
 
-**Architecture:**
-- The component must support future `mode` prop: `"default" | "breaking" | "team" | "analytics" | "debate"`
-- Only the `"default"` (Scout) mode is implemented now — keep it clean and minimal
+```
+Stage 1: Full-Screen Hero (100vh) → user scrolls → Stage 2: Infinite Feed
+```
+
+**Stage 1 — Hero Entry (`src/components/home/edge-hero.tsx`):**
+- Hero **always fills 100% of viewport height** (`min-h-screen`) on initial load
+- Feed must NOT be visible until user scrolls
+- Hero does NOT collapse or transform into a header — it simply scrolls away
+- Hero content may include: Scout prompt, contextual message, quick discovery suggestions
+- Hero may dynamically change layout based on mode (Scout Briefing, Breaking Radar, Analytics, Debate Arena) but must always remain **full-screen on entry**
+
+**Hero Layout Rules:**
+- Keep the hero vertically balanced — not too high or too low
+- EDGE logo stays top-left, visually light, does not dominate
+- Scout identity pill must feel attached to the headline, not floating separately
+- Search input is the clear action point — the thing the eye lands on
+- **DO NOT:** add giant cards wrapping the hero, side panels, charts, tabs, stats, dashboard widgets, feed cards, giant gradients, or animated gimmicks
+
+**Hero Architecture:**
+- Component supports `mode` prop: `"default" | "breaking" | "team" | "analytics" | "debate"`
+- Only `"default"` (Scout) mode is implemented now — keep it clean and minimal
 - The shell (layout, spacing, input) must be reusable across all future hero modes
-- Keep the design clean enough that swapping content per mode requires no structural changes
+
+**Stage 2 — Feed:** Infinite scroll stream of feed cards generated from article blocks. Begins immediately after the hero.
+
+### Content Width
+
+| Context | Max Width |
+|---------|-----------|
+| Article body | 720px |
+| Homepage feed | 1300px (3-column) |
+| Hero content | max-w-2xl (centered) |
+
+### Spacing System
+
+| Context | Size |
+|---------|------|
+| Section spacing | 64px |
+| Paragraph spacing | 20px |
+| Card spacing | 24px |
+
+Maintain consistent vertical rhythm.
+
+### Card Design System
+
+Cards are the primary container for feed items, analytics, debates, rumors, and polls.
+
+| Property | Value |
+|----------|-------|
+| Border radius | 14px |
+| Border | `1px solid rgba(11,15,20,0.08)` |
+| Padding | 20px |
+
+Cards should feel: structured, minimal, editorial. **Avoid excessive shadows.**
+
+### Mobile Standards
+
+Mobile traffic is the majority.
+
+- Minimum tap target: **44px**
+- Cards must stack vertically
+- Avoid horizontal scrolling
+- Charts must resize responsively
+- Support keyboard navigation
+
+---
+
+## Content Architecture
+
+### Block-Driven Content System
+
+**Article blocks are the source of truth.** The platform follows a block-driven content system:
+
+```
+Writer → Block Editor → Article JSON → Article Renderer + Feed Extractor → Feed Cards → Homepage Feed
+```
+
+Articles are composed from reusable blocks: paragraph, subheading, image, scout insight, chart, player comparison, rumor confidence, trade scenario, debate, poll, reaction stream. Blocks appear in article order.
+
+### Article Templates
+
+| Template | Purpose | Dominant Color |
+|----------|---------|---------------|
+| Standard News | Fast editorial updates | — |
+| Stats / Player Comparison | Data-driven analysis | Cyan |
+| Rumor / Trade Simulator | Front office speculation | Red |
+| Trending Story | Fan momentum highlights | — |
+| Fan Debate | Participation & voting | — |
+
+### Block → Feed Card Mapping
+
+One article can generate **multiple feed moments**:
+
+| Block | Feed Card |
+|-------|-----------|
+| Paragraph | ArticleCard |
+| ChartBlock | AnalyticsCard |
+| DebateBlock | DebateCard |
+| RumorBlock | RumorCard |
+| PollBlock | PollCard |
+
+### Core Article Components
+
+| Component | Purpose | Accent |
+|-----------|---------|--------|
+| ArticleHeader | Category, headline, subheadline | Red (category) |
+| ArticleMeta | Author, role, publish time, read time | — |
+| ArticleBody | Width/spacing wrapper | — |
+| InsightBlock | Scout AI commentary | Cyan |
+| UpdateBlock | Breaking editorial update | Red |
+| ChartBlock | Analytics visualization | Cyan |
+| PlayerComparisonBlock | Side-by-side comparison | — |
+| DraftPickBlock | Mock draft visualization | Gold |
+| PollBlock | Fan voting (option A → cyan, B → red) | Cyan/Red |
+| DebateBlock | Pro → cyan, Con → red | Cyan/Red |
+| RumorConfidenceBlock | Rumor certainty display | Red |
+| ReactionStreamBlock | Fan reactions (platform-generated, not writer-authored) | — |
+| TopTakeBlock | Premium reactions | Gold |
+
+### Naming Conventions
+
+Components use PascalCase. Suffix meanings:
+- **Block** → article primitive
+- **Card** → feed component
+- **Panel** → editor configuration
+- **Renderer** → data → UI mapper
+
+---
+
+## Developer Rules (ALWAYS FOLLOW)
+
+1. Do not duplicate styling logic across components
+2. Shared primitives should power both article pages and feed cards
+3. Business logic belongs in `lib/`, not inside React components
+4. Block editor panels should not control article rendering styles
+5. The homepage must render the hero with `min-h-screen`
+6. Components must support keyboard navigation, high color contrast, alt text for images
+7. No text smaller than 13px
 
 ---
 

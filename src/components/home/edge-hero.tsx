@@ -85,13 +85,13 @@ export function EdgeHero({
 
   return (
     <section
-      className={`relative overflow-hidden ${className ?? ""}`}
+      className={`relative flex min-h-screen flex-col overflow-hidden ${className ?? ""}`}
       style={{ background: "var(--hp-background)", color: "var(--hp-foreground)" }}
       aria-labelledby="edge-hero-heading"
     >
-      <div className="mx-auto w-full max-w-7xl px-4 pb-10 pt-5 sm:px-6 sm:pb-14 lg:px-8 lg:pb-16 lg:pt-6">
-        {/* ── EDGE logo — top-left, visually light ── */}
-        <div className="mb-10 flex items-center justify-start">
+      {/* ── EDGE logo — top-left, visually light ── */}
+      <div className="mx-auto w-full max-w-7xl px-4 pt-5 sm:px-6 lg:px-8 lg:pt-6">
+        <div className="flex items-center justify-start">
           {logo ?? (
             <Image
               src="/edge_logo.png"
@@ -103,15 +103,18 @@ export function EdgeHero({
             />
           )}
         </div>
+      </div>
 
-        {/* ── Centered hero content ── */}
-        <div className="mx-auto flex min-h-[380px] max-w-2xl flex-col items-center justify-center text-center sm:min-h-[420px]">
+      {/* ── Centered hero content — fills remaining viewport ── */}
+      <div className="flex flex-1 items-center justify-center px-4 sm:px-6 lg:px-8">
+        <div className="mx-auto flex max-w-2xl flex-col items-center text-center">
           {/* ── Scout identity pill ── */}
           <div
-            className="mb-5 inline-flex items-center gap-3 rounded-full px-4 py-2"
+            className="mb-5 inline-flex gap-3 rounded-full px-4 py-3"
             style={{
               background: "var(--hp-muted)",
               border: "1px solid var(--hp-border)",
+              alignItems: "center",
             }}
           >
             <div className="shrink-0">
@@ -126,7 +129,7 @@ export function EdgeHero({
               )}
             </div>
 
-            <div className="min-w-0 text-left">
+            <div className="min-w-0 text-left" style={{ transform: 'translateY(9px)' }}>
               <div
                 className="text-base font-semibold leading-tight sm:text-lg"
                 style={{ color: "var(--hp-foreground)" }}
