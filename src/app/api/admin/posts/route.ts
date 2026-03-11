@@ -135,6 +135,15 @@ export async function POST(request: NextRequest) {
       )
     }
 
+    // Save tags if provided
+    if (body.tags && Array.isArray(body.tags) && body.tags.length > 0) {
+      const tagRows = body.tags.map((tagId: number) => ({
+        post_id: post.id,
+        tag_id: tagId,
+      }))
+      await supabaseAdmin.from('sm_post_tags').insert(tagRows)
+    }
+
     return NextResponse.json(post, { status: 201 })
   } catch (error) {
     console.error('Error creating post:', error)

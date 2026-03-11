@@ -28,18 +28,26 @@ interface Author {
   display_name: string
 }
 
+interface TagData {
+  id: number
+  name: string
+  slug: string
+}
+
 interface PostEditFormProps {
   post: Post
   categories: Category[]
   authors: Author[]
+  initialTags?: TagData[]
 }
 
-export default function PostEditForm({ post, categories, authors }: PostEditFormProps) {
+export default function PostEditForm({ post, categories, authors, initialTags }: PostEditFormProps) {
   return (
     <AdvancedPostEditor
       post={post}
       categories={categories}
       authors={authors}
+      initialTags={initialTags}
     />
   )
 }

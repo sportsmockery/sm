@@ -15,10 +15,14 @@ interface PostEditPageProps {
 export default async function AdminPostEditPage({ params }: PostEditPageProps) {
   const { id } = await params
 
-  const [postResult, categoriesResult, authorsResult] = await Promise.all([
+  const [postResult, categoriesResult, authorsResult, tagsResult] = await Promise.all([
     supabaseAdmin.from('sm_posts').select('*').eq('id', id).single(),
     supabaseAdmin.from('sm_categories').select('id, name').order('name'),
     supabaseAdmin.from('sm_authors').select('id, display_name').order('display_name'),
+    supabaseAdmin
+      .from('sm_post_tags')
+      .select('tag:sm_tags(id, name, slug)')
+      .eq('post_id', id),
   ])
 
   if (postResult.error || !postResult.data) {
@@ -28,6 +32,14 @@ export default async function AdminPostEditPage({ params }: PostEditPageProps) {
   const post = postResult.data
   const categories = categoriesResult.data || []
   const authors = authorsResult.data || []
+
+  // Extract tags from junction table result
+  const initialTags = (tagsResult.data || [])
+    .map((row: unknown) => {
+      const r = row as { tag?: { id: number; name: string; slug: string } | Array<{ id: number; name: string; slug: string }> }
+      return Array.isArray(r.tag) ? r.tag[0] : r.tag
+    })
+    .filter((t): t is { id: number; name: string; slug: string } => !!t)
 
   return (
     <div>
@@ -46,7 +58,7 @@ export default async function AdminPostEditPage({ params }: PostEditPageProps) {
         </div>
       </div>
 
-      <PostEditForm post={post} categories={categories} authors={authors} />
+      <PostEditForm post={post} categories={categories} authors={authors} initialTags={initialTags} />
     </div>
   )
 }

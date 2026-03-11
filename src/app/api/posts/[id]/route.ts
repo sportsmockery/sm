@@ -101,6 +101,20 @@ export async function POST(
       )
     }
 
+    // Update tags if provided
+    if (body.tags !== undefined && Array.isArray(body.tags)) {
+      // Remove existing tags
+      await supabaseAdmin.from('sm_post_tags').delete().eq('post_id', id)
+      // Insert new tags
+      if (body.tags.length > 0) {
+        const tagRows = body.tags.map((tagId: number) => ({
+          post_id: parseInt(id),
+          tag_id: tagId,
+        }))
+        await supabaseAdmin.from('sm_post_tags').insert(tagRows)
+      }
+    }
+
     return NextResponse.json({ success: true, post })
   } catch (error) {
     console.error('Error in POST /api/posts/[id]:', error)

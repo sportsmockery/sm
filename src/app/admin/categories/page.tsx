@@ -1,6 +1,7 @@
 import type { Metadata } from 'next'
 import { supabaseAdmin } from '@/lib/supabase-server'
 import Link from 'next/link'
+import CreateCategoryModal from '@/components/admin/CreateCategoryModal'
 
 export const metadata: Metadata = {
   title: 'Sports Mockery | Categories',
@@ -56,6 +57,7 @@ export default async function AdminCategoriesPage() {
             {categories?.length || 0} categories · {totalPosts} total posts
           </p>
         </div>
+        <CreateCategoryModal categories={categoriesWithCounts.map(c => ({ id: c.id, name: c.name, slug: c.slug, description: c.description, parent_id: undefined }))} />
       </div>
 
       {/* Stats Cards */}

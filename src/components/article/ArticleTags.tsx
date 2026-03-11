@@ -33,7 +33,7 @@ export default function ArticleTags({ tags, className = '' }: ArticleTagsProps) 
       {tags.map((tag) => (
         <Link
           key={tag}
-          href={`/search?tag=${encodeURIComponent(tag)}`}
+          href={`/tag/${encodeURIComponent(tag.toLowerCase().replace(/\s+/g, '-'))}`}
           className="sm-tag"
           style={{
             textDecoration: 'none',

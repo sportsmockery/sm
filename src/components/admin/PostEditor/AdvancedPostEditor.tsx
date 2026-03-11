@@ -6,6 +6,7 @@ import Image from 'next/image'
 import Link from 'next/link'
 import RichTextEditor, { RichTextEditorRef } from './RichTextEditor'
 import { CategorySelect, AuthorSelect } from './SearchableSelect'
+import TagInput from './TagInput'
 import { ChartBuilderModal, ChartConfig, AISuggestion, ChartType } from '@/components/admin/ChartBuilder'
 import { PostIQChartGenerator } from '@/components/postiq'
 import { BlockEditor } from '@/components/admin/BlockEditor'
@@ -60,11 +61,18 @@ interface ArticleIdea {
   source_headlines?: string[]
 }
 
+interface TagData {
+  id: number
+  name: string
+  slug: string
+}
+
 interface AdvancedPostEditorProps {
   post?: Post
   categories: Category[]
   authors: Author[]
   currentUserId?: string
+  initialTags?: TagData[]
 }
 
 export default function AdvancedPostEditor({
@@ -72,6 +80,7 @@ export default function AdvancedPostEditor({
   categories,
   authors,
   currentUserId,
+  initialTags = [],
 }: AdvancedPostEditorProps) {
   const router = useRouter()
   const isEditing = !!post?.id
@@ -155,6 +164,9 @@ export default function AdvancedPostEditor({
     seo_keywords: post?.seo_keywords || '',
     scheduled_at: post?.scheduled_at || null,
   })
+
+  // Tags state
+  const [selectedTags, setSelectedTags] = useState<TagData[]>(initialTags)
 
   // PostIQ Chart Modal State
   const [showChartModal, setShowChartModal] = useState(false)
@@ -329,6 +341,7 @@ export default function AdvancedPostEditor({
         status: postId ? currentData.status : 'draft', // New posts save as draft
         category_id: currentData.category_id || null,
         author_id: currentData.author_id || null,
+        tags: selectedTags.map(t => t.id),
       }
 
       const response = await fetch(endpoint, {
@@ -913,6 +926,7 @@ export default function AdvancedPostEditor({
         author_id: formData.author_id || null,
         social_caption: postToSocial ? socialCaption : (post?.social_caption || null),
         post_to_social: postToSocial && !socialAlreadyPosted && socialCaption.trim(),
+        tags: selectedTags.map(t => t.id),
       }
 
       const response = await fetch(endpoint, {
@@ -1848,6 +1862,9 @@ export default function AdvancedPostEditor({
                   placeholder="Select category..."
                 />
               </div>
+
+              {/* Tags */}
+              <TagInput selectedTags={selectedTags} onChange={setSelectedTags} />
 
               {/* Featured Image */}
               <div>

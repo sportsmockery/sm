@@ -182,17 +182,63 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
     ])
 
     author = authorResult.data
-    relatedPosts = relatedPostsResult.data || []
     categoryData = categoryResult.data
     prevPost = prevPostResult.data?.[0] || null
     nextPost = nextPostResult.data?.[0] || null
     tags = (tagsResult?.data?.map((t: unknown) => {
-      const tagData = t as { tag?: { name?: string } | Array<{ name?: string }> }
+      const tagData = t as { tag?: { name?: string; slug?: string } | Array<{ name?: string; slug?: string }> }
       if (Array.isArray(tagData.tag)) {
         return tagData.tag[0]?.name
       }
       return tagData.tag?.name
     }).filter((name): name is string => typeof name === 'string') || [])
+
+    // Enhanced related posts: prefer tag-matched articles, then same-category
+    const categoryRelated = relatedPostsResult.data || []
+    const tagIds = (tagsResult?.data || []).map((t: unknown) => {
+      const tagData = t as { tag?: { id?: number } | Array<{ id?: number }> }
+      return Array.isArray(tagData.tag) ? tagData.tag[0]?.id : tagData.tag?.id
+    }).filter((id): id is number => !!id)
+
+    if (tagIds.length > 0) {
+      try {
+        // Find posts sharing the same tags
+        const { data: taggedPostIds } = await supabaseAdmin
+          .from('sm_post_tags')
+          .select('post_id')
+          .in('tag_id', tagIds)
+          .neq('post_id', post.id)
+
+        const uniquePostIds = [...new Set((taggedPostIds || []).map(r => r.post_id))]
+
+        if (uniquePostIds.length > 0) {
+          const { data: tagRelated } = await supabaseAdmin
+            .from('sm_posts')
+            .select('id, title, slug, excerpt, featured_image, published_at')
+            .in('id', uniquePostIds.slice(0, 10))
+            .eq('status', 'published')
+            .order('published_at', { ascending: false })
+            .limit(4)
+
+          // Merge: tag-matched first, then category-matched (deduped)
+          const seenIds = new Set((tagRelated || []).map(p => p.id))
+          const merged = [...(tagRelated || [])]
+          for (const p of categoryRelated) {
+            if (!seenIds.has(p.id) && merged.length < 4) {
+              merged.push(p)
+              seenIds.add(p.id)
+            }
+          }
+          relatedPosts = merged
+        } else {
+          relatedPosts = categoryRelated
+        }
+      } catch {
+        relatedPosts = categoryRelated
+      }
+    } else {
+      relatedPosts = categoryRelated
+    }
   } catch (err) {
     console.error('Error fetching article supplementary data:', err)
     // Continue with defaults - page will still render with just the post content
