@@ -427,6 +427,40 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
                 </div>
               )}
 
+              {/* Next for Chicago Fans */}
+              {relatedPosts.length > 0 && categoryData && (
+                <div style={{ marginTop: 40, borderTop: '1px solid var(--sm-border)', paddingTop: 32 }}>
+                  <h3 style={{ fontSize: 18, fontWeight: 700, color: 'var(--sm-text)', marginBottom: 16 }}>
+                    Next for Chicago Fans
+                  </h3>
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                    {relatedPosts.slice(0, 3).map((rp) => (
+                      <Link
+                        key={rp.id}
+                        href={`/${categoryData.slug}/${rp.slug}`}
+                        className="group rounded-xl p-3 transition-colors"
+                        style={{ background: 'var(--sm-surface)', border: '1px solid var(--sm-border)', textDecoration: 'none' }}
+                      >
+                        {rp.featured_image && (
+                          <div className="mb-2 overflow-hidden rounded-lg" style={{ aspectRatio: '16/9' }}>
+                            <Image
+                              src={rp.featured_image}
+                              alt={rp.title}
+                              width={200}
+                              height={112}
+                              className="h-full w-full object-cover transition-transform duration-200 group-hover:scale-105"
+                            />
+                          </div>
+                        )}
+                        <p className="line-clamp-2" style={{ fontSize: 14, fontWeight: 600, lineHeight: 1.3, color: 'var(--sm-text)' }}>
+                          {rp.title}
+                        </p>
+                      </Link>
+                    ))}
+                  </div>
+                </div>
+              )}
+
               {/* Comments */}
               <div id="comments-section">
                 <CommentSection

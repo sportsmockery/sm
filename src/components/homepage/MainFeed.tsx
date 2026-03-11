@@ -13,6 +13,11 @@ import {
   TrendingArticleCard,
   DebateCard,
   VideoCard,
+  ScoutBriefingCard,
+  ScoutAnalysisCard,
+  FanReactionsCard,
+  ScoutPredictionCard,
+  GameModeCard,
 } from "@/components/homepage/RiverCards"
 
 interface MainFeedProps {
@@ -39,6 +44,10 @@ function RiverCard({ item }: { item: HomepageRiverItem }) {
           author_name={data.author_name as string}
           breakingIndicator={data.breakingIndicator as "BREAKING" | "RUMOR" | "ANALYSIS" | "REPORT" | "TRENDING"}
           gmQuestion={data.gmQuestion as string}
+          trendingContext={data.trendingContext as string | undefined}
+          rumorCredibility={data.rumorCredibility as "HIGH" | "MEDIUM" | "LOW" | undefined}
+          scoutStat={data.scoutStat as string | undefined}
+          authorPhoto={data.authorPhoto as string | undefined}
         />
       )
     case "poll":
@@ -179,6 +188,26 @@ export default function MainFeed({ activeTab, setActiveTab, selectedTeam }: Main
 
       {/* River Feed */}
       <div className="pb-24" key={selectedTeam}>
+        {/* Scout Briefing — always first in the feed */}
+        <ScoutBriefingCard />
+
+        {/* Game Mode card — shown on game days (placeholder) */}
+        <GameModeCard
+          homeTeam="Bears"
+          awayTeam="Packers"
+          kickoff="7:20 PM CT"
+          scoutNote="Watch the Bears secondary tonight — Green Bay has exploited zone coverage for 300+ yards in 3 of the last 4 meetings."
+        />
+
+        {/* Scout Prediction — once per day on game days (placeholder) */}
+        <ScoutPredictionCard
+          homeTeam="Cubs"
+          awayTeam="Brewers"
+          homeScore={5}
+          awayScore={3}
+          winProbability={63}
+        />
+
         {displayFeed.map((item, index) => (
           <div key={item.id}>
             {index === 5 && (
@@ -192,6 +221,11 @@ export default function MainFeed({ activeTab, setActiveTab, selectedTeam }: Main
               </div>
             )}
             <RiverCard item={item} />
+            {typeof item.data.scoutAnalysis === "string" && (
+              <ScoutAnalysisCard analysis={item.data.scoutAnalysis} />
+            )}
+            {/* Fan Reactions card every 8 items */}
+            {(index + 1) % 8 === 0 && <FanReactionsCard />}
           </div>
         ))}
       </div>

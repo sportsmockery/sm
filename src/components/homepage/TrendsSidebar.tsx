@@ -72,7 +72,7 @@ export default function TrendsSidebar({ selectedTeam }: TrendsSidebarProps) {
     <aside className="sticky top-0 pl-6 hidden h-screen w-[350px] flex-col gap-4 pt-4 pb-3 lg:flex overflow-y-auto">
       {/* User Profile */}
       <div className="hp-sidebar-card relative" ref={menuRef}>
-        <div className="flex items-center gap-3 p-4">
+        <div className="flex items-center gap-3 px-3 py-2.5">
           <div
             className="h-11 w-11 rounded-xl overflow-hidden flex items-center justify-center flex-shrink-0"
             style={{ background: user?.avatar ? 'transparent' : '#6b7280' }}
@@ -84,7 +84,7 @@ export default function TrendsSidebar({ selectedTeam }: TrendsSidebarProps) {
             )}
           </div>
           <div className="flex flex-1 flex-col text-left text-sm">
-            <span style={{ fontSize: 15, fontWeight: 700, color: 'var(--hp-foreground)' }}>{username}</span>
+            <span style={{ fontSize: 14, fontWeight: 700, color: 'var(--hp-foreground)' }}>{username}</span>
             {fullName && (
               <span style={{ fontSize: 11, color: 'var(--hp-muted-foreground)' }}>{fullName}</span>
             )}
@@ -117,7 +117,7 @@ export default function TrendsSidebar({ selectedTeam }: TrendsSidebarProps) {
       </div>
 
       {/* Ask Scout - Quick Access */}
-      <button className="hp-sidebar-card w-full p-4 flex items-center gap-3 group transition-all">
+      <button className="hp-sidebar-card w-full px-3 py-2.5 flex items-center gap-3 group transition-all">
         <Image
           src="/downloads/scout-v2.png"
           alt="Scout AI"
@@ -126,8 +126,8 @@ export default function TrendsSidebar({ selectedTeam }: TrendsSidebarProps) {
           className="h-12 w-12 object-contain flex-shrink-0"
         />
         <div className="flex-1 text-left" style={{ lineHeight: 1.2 }}>
-          <p style={{ fontSize: 16, fontWeight: 600, color: 'var(--hp-foreground)', margin: 0 }}>Ask Scout</p>
-          <p style={{ fontSize: 14, color: 'var(--hp-muted-foreground)', margin: 0 }}>AI-powered sports analysis</p>
+          <p style={{ fontSize: 14, fontWeight: 600, color: 'var(--hp-foreground)', margin: 0 }}>Ask Scout</p>
+          <p style={{ fontSize: 13, color: 'var(--hp-muted-foreground)', margin: 0 }}>AI-powered sports analysis</p>
         </div>
         <span className="flex items-center gap-1.5" style={{ fontSize: 10, color: '#16a34a', fontWeight: 500 }}>
           <span className="w-1.5 h-1.5 rounded-full animate-pulse" style={{ background: '#00D4FF' }} />
@@ -137,16 +137,16 @@ export default function TrendsSidebar({ selectedTeam }: TrendsSidebarProps) {
 
       {/* SM Edge Tools */}
       <div className="hp-sidebar-card overflow-hidden">
-        <div className="px-4 pt-4 pb-3">
-          <h2 style={{ fontSize: 16, fontWeight: 700, letterSpacing: '-0.01em', color: 'var(--hp-foreground)' }}>SM Edge Tools</h2>
+        <div className="px-3 pt-3 pb-2">
+          <h2 style={{ fontSize: 14, fontWeight: 700, letterSpacing: '-0.01em', color: 'var(--hp-foreground)' }}>SM Edge Tools</h2>
         </div>
 
-        <div className="px-3 pb-4 flex flex-col gap-1.5">
+        <div className="px-2.5 pb-3 flex flex-col gap-1">
           {edgeTools.map((tool) => (
             <a
               key={tool.id}
               href={tool.href}
-              className="flex items-start gap-3 rounded-xl px-2.5 py-2.5 text-left transition-all hp-tap-target"
+              className="flex items-start gap-2.5 rounded-xl px-2 py-2 text-left transition-all hp-tap-target"
               style={{ textDecoration: 'none' }}
               onMouseEnter={(e) => {
                 e.currentTarget.style.background = 'var(--hp-muted)'
@@ -161,14 +161,14 @@ export default function TrendsSidebar({ selectedTeam }: TrendsSidebarProps) {
             >
               <div
                 data-icon
-                className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg self-center"
+                className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg self-center"
                 style={{ background: 'var(--hp-muted)', color: 'var(--hp-muted-foreground)', transition: 'color 0.2s' }}
               >
                 <tool.icon className="h-5 w-5" />
               </div>
               <div className="flex-1 min-w-0" style={{ lineHeight: 1.3 }}>
-                <p style={{ fontSize: 16, fontWeight: 600, color: 'var(--hp-foreground)', margin: 0 }}>{tool.title}</p>
-                <p className="line-clamp-2" style={{ fontSize: 14, color: 'var(--hp-muted-foreground)', margin: 0 }}>{tool.description}</p>
+                <p style={{ fontSize: 14, fontWeight: 600, color: 'var(--hp-foreground)', margin: 0 }}>{tool.title}</p>
+                <p className="line-clamp-2" style={{ fontSize: 12, color: 'var(--hp-muted-foreground)', margin: 0 }}>{tool.description}</p>
               </div>
             </a>
           ))}

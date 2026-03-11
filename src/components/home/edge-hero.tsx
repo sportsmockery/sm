@@ -47,11 +47,21 @@ export type EdgeHeroProps = {
 /*  Component                                                          */
 /* ------------------------------------------------------------------ */
 
+const ROTATING_PLACEHOLDERS = [
+  "Why did the Bears lose Sunday?",
+  "Is Caleb Williams improving?",
+  "Should the Cubs trade Bellinger?",
+  "What\u2019s wrong with the Bulls defense?",
+  "Are the Blackhawks rebuilding correctly?",
+]
+
+const ROTATION_INTERVAL = 5000
+
 export function EdgeHero({
   userName,
   welcomeMessage,
   headline = "What can I help you with?",
-  placeholder = "Ask Scout anything about Chicago sports\u2026",
+  placeholder,
   quickActions = [],
   logo,
   scoutAvatar,
@@ -62,8 +72,26 @@ export function EdgeHero({
   className,
 }: EdgeHeroProps) {
   const [query, setQuery] = React.useState(defaultQuery)
+  const [placeholderIdx, setPlaceholderIdx] = React.useState(0)
+  const [isFading, setIsFading] = React.useState(false)
+  const [inputFocused, setInputFocused] = React.useState(false)
   const router = useRouter()
   const helperId = React.useId()
+
+  // Rotate placeholders every 5s, pause when input is focused or user is typing
+  React.useEffect(() => {
+    if (placeholder || inputFocused || query) return
+    const id = setInterval(() => {
+      setIsFading(true)
+      setTimeout(() => {
+        setPlaceholderIdx((i) => (i + 1) % ROTATING_PLACEHOLDERS.length)
+        setIsFading(false)
+      }, 200)
+    }, ROTATION_INTERVAL)
+    return () => clearInterval(id)
+  }, [placeholder, inputFocused, query])
+
+  const activePlaceholder = placeholder ?? ROTATING_PLACEHOLDERS[placeholderIdx]
 
   const greeting = userName ? `Hi ${userName},` : "Hi there,"
 
@@ -193,10 +221,12 @@ export function EdgeHero({
                   type="text"
                   value={query}
                   onChange={(e) => setQuery(e.target.value)}
-                  placeholder={placeholder}
+                  onFocus={() => setInputFocused(true)}
+                  onBlur={() => setInputFocused(false)}
+                  placeholder={activePlaceholder}
                   aria-describedby={helperId}
                   disabled={isLoading}
-                  className="h-14 w-full bg-transparent px-5 pr-20 text-base outline-none placeholder:opacity-50 sm:h-16 sm:text-[15px]"
+                  className={`h-14 w-full bg-transparent px-5 pr-20 text-base outline-none sm:h-16 sm:text-[15px] placeholder:transition-opacity placeholder:duration-200 ${isFading ? "placeholder:opacity-0" : "placeholder:opacity-50"}`}
                   style={{ color: "var(--hp-foreground)" }}
                 />
 

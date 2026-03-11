@@ -2,7 +2,7 @@
 
 import { useState } from "react"
 import {
-  MessageCircle, Repeat2, Heart, Activity, Bookmark, Share,
+  MessageCircle, Share, Activity,
   TrendingUp, Play, Clock, Check, X, ChevronRight, Bot,
   BarChart3, Users
 } from "lucide-react"
@@ -23,6 +23,37 @@ export interface BaseCardProps {
   team: string
   teamColor: string
   timestamp: string
+}
+
+// Scout Insight pill badge — displayed on AI-generated cards
+export function ScoutInsightBadge() {
+  return (
+    <span
+      className="inline-flex items-center rounded-full px-2 py-0.5"
+      style={{
+        fontSize: 10,
+        fontWeight: 600,
+        letterSpacing: "0.03em",
+        backgroundColor: "rgba(0, 0, 0, 0.06)",
+        color: "#3a3a3a",
+      }}
+    >
+      Scout Insight
+    </span>
+  )
+}
+
+// Trending context line — shown below headlines on high-traffic stories
+export function TrendingContextLine({ context }: { context: string }) {
+  return (
+    <p
+      className="mt-1.5 flex items-center gap-1"
+      style={{ fontSize: 13, color: "var(--hp-muted-foreground)" }}
+    >
+      <TrendingUp className="h-3.5 w-3.5 inline flex-shrink-0" style={{ color: "#BC0000" }} />
+      <span>Trending: {context}</span>
+    </p>
+  )
 }
 
 // Team tag component
@@ -49,53 +80,44 @@ function CardLabel({ label, isBreaking = false }: { label: string; isBreaking?: 
   )
 }
 
-// Shared engagement row
+// Shared engagement row — reactions + comment + share
 function EngagementRow({ stats }: { stats: { comments: number; retweets: number; likes: number; views: string } }) {
-  const [liked, setLiked] = useState(false)
-  const [shared, setShared] = useState(false)
-  const [saved, setSaved] = useState(false)
+  const [reactions, setReactions] = useState<Record<string, boolean>>({})
+  const [counts, setCounts] = useState({ smart: Math.floor(Math.random() * 80) + 10, hot: Math.floor(Math.random() * 60) + 5, bad: Math.floor(Math.random() * 30) + 2 })
+
+  const toggle = (key: "smart" | "hot" | "bad") => {
+    setReactions(prev => ({ ...prev, [key]: !prev[key] }))
+    setCounts(prev => ({ ...prev, [key]: prev[key] + (reactions[key] ? -1 : 1) }))
+  }
+
+  const reactionButtons = [
+    { key: "smart" as const, emoji: "\uD83D\uDC4D", label: "Smart Take", count: counts.smart },
+    { key: "hot" as const, emoji: "\uD83D\uDD25", label: "Hot", count: counts.hot },
+    { key: "bad" as const, emoji: "\uD83D\uDC4E", label: "Bad Take", count: counts.bad },
+  ]
 
   return (
-    <div className="mt-5 flex max-w-md justify-between" style={{ color: 'var(--hp-muted-foreground)' }}>
-      <button className="group flex items-center gap-1 transition-colors hover:text-[#00D4FF] hp-tap-target" aria-label="Discuss">
-        <div className="rounded-full p-2 group-hover:bg-[#00D4FF]/10 transition-colors">
-          <MessageCircle className="h-4 w-4" />
-        </div>
-        <span style={{ fontSize: 13 }}>{stats.comments}</span>
-      </button>
-      <button
-        onClick={() => setShared(!shared)}
-        className={`group flex items-center gap-1 transition-colors hp-tap-target ${shared ? 'text-[#00D4FF]' : 'hover:text-[#00D4FF]'}`}
-        aria-label="Share"
-      >
-        <div className={`rounded-full p-2 transition-colors ${shared ? 'bg-[#00D4FF]/10' : 'group-hover:bg-[#00D4FF]/10'}`}>
-          <Repeat2 className="h-4 w-4" />
-        </div>
-        <span style={{ fontSize: 13 }}>{stats.retweets}</span>
-      </button>
-      <button
-        onClick={() => setLiked(!liked)}
-        className={`group flex items-center gap-1 transition-colors hp-tap-target ${liked ? 'text-[#BC0000]' : 'hover:text-[#BC0000]'}`}
-        aria-label="React"
-      >
-        <div className={`rounded-full p-2 transition-colors ${liked ? 'bg-pink-500/10' : 'group-hover:bg-pink-500/10'}`}>
-          <Heart className={`h-4 w-4 ${liked ? 'fill-current' : ''}`} />
-        </div>
-        <span style={{ fontSize: 13 }}>{liked ? stats.likes + 1 : stats.likes}</span>
-      </button>
-      <button className="group flex items-center gap-1 transition-colors hover:text-[#BC0000] hp-tap-target" aria-label="Views">
-        <div className="rounded-full p-2 group-hover:bg-[#BC0000]/10 transition-colors">
-          <Activity className="h-4 w-4" />
-        </div>
-        <span style={{ fontSize: 13 }}>{stats.views}</span>
-      </button>
-      <div className="flex">
-        <button
-          onClick={() => setSaved(!saved)}
-          className={`rounded-full p-2 transition-colors hp-tap-target ${saved ? 'text-[#00D4FF] bg-[#00D4FF]/10' : 'hover:bg-[#00D4FF]/10 hover:text-[#00D4FF]'}`}
-          aria-label="Save"
-        >
-          <Bookmark className={`h-4 w-4 ${saved ? 'fill-current' : ''}`} />
+    <div className="mt-5 flex items-center justify-between" style={{ color: 'var(--hp-muted-foreground)' }}>
+      <div className="flex items-center gap-3">
+        {reactionButtons.map(({ key, emoji, label, count }) => (
+          <button
+            key={key}
+            onClick={() => toggle(key)}
+            className={`group flex items-center gap-1 rounded-full px-2.5 py-1.5 transition-all hp-tap-target ${reactions[key] ? 'bg-[rgba(0,0,0,0.06)] dark:bg-[rgba(255,255,255,0.08)]' : 'hover:bg-[rgba(0,0,0,0.04)] dark:hover:bg-[rgba(255,255,255,0.04)]'}`}
+            aria-label={label}
+          >
+            <span style={{ fontSize: 14 }}>{emoji}</span>
+            <span style={{ fontSize: 12, fontWeight: reactions[key] ? 600 : 400 }}>{count}</span>
+          </button>
+        ))}
+      </div>
+
+      <div className="flex items-center gap-1">
+        <button className="group flex items-center gap-1 transition-colors hover:text-[#00D4FF] hp-tap-target" aria-label="Comments">
+          <div className="rounded-full p-2 group-hover:bg-[#00D4FF]/10 transition-colors">
+            <MessageCircle className="h-4 w-4" />
+          </div>
+          <span style={{ fontSize: 12 }}>{stats.comments}</span>
         </button>
         <button className="rounded-full p-2 transition-colors hover:bg-[#00D4FF]/10 hover:text-[#00D4FF] hp-tap-target" aria-label="Share">
           <Share className="h-4 w-4" />
@@ -118,10 +140,14 @@ interface EditorialCardProps extends BaseCardProps {
   breakingIndicator?: "BREAKING" | "RUMOR" | "ANALYSIS" | "REPORT" | "TRENDING"
   stats: { comments: number; retweets: number; likes: number; views: string }
   gmQuestion?: string
+  trendingContext?: string
+  rumorCredibility?: "HIGH" | "MEDIUM" | "LOW"
+  scoutStat?: string
+  authorPhoto?: string
 }
 
 export function EditorialCard({
-  headline, summary, insight, team, teamColor, timestamp, stats, author_name, breakingIndicator, gmQuestion,
+  headline, summary, insight, team, teamColor, timestamp, stats, author_name, breakingIndicator, gmQuestion, trendingContext, rumorCredibility, scoutStat, authorPhoto,
 }: EditorialCardProps) {
   const [vote, setVote] = useState<"yes" | "no" | null>(null)
   const [yesVotes, setYesVotes] = useState(Math.floor(Math.random() * 500) + 200)
@@ -140,7 +166,7 @@ export function EditorialCard({
   const noPercentage = Math.round((noVotes / totalVotes) * 100)
 
   return (
-    <article className="hp-feed-card hp-card-enter">
+    <article className="hp-feed-card hp-card-enter group relative">
       <div className="flex items-center justify-between gap-3 mb-4">
         <div className="flex items-center gap-3">
           <CardLabel label={breakingIndicator || "NEWS"} isBreaking={breakingIndicator === "BREAKING"} />
@@ -150,6 +176,8 @@ export function EditorialCard({
       </div>
 
       <h2 style={{ fontSize: 21, fontWeight: 700, lineHeight: 1.25, letterSpacing: '-0.02em', color: 'var(--hp-foreground)' }}>{headline}</h2>
+      {rumorCredibility && breakingIndicator === "RUMOR" && <RumorCredibilityMeter level={rumorCredibility} />}
+      {trendingContext && <TrendingContextLine context={trendingContext} />}
       <p className="mt-3 line-clamp-3" style={{ fontSize: 15, lineHeight: 1.65, color: 'var(--hp-foreground)', opacity: 0.7 }}>{summary}</p>
 
       {insight && (
@@ -159,7 +187,31 @@ export function EditorialCard({
         </div>
       )}
 
-      <p className="mt-4" style={{ fontSize: 12, color: 'var(--hp-muted-foreground)' }}>By {author_name}</p>
+      <div className="mt-4 flex items-center gap-2">
+        {authorPhoto && (
+          <img src={authorPhoto} alt={author_name} className="h-5 w-5 rounded-full object-cover" crossOrigin="anonymous" />
+        )}
+        <p style={{ fontSize: 12, color: 'var(--hp-muted-foreground)' }}>By {author_name}</p>
+      </div>
+
+      {/* Scout Stat hover overlay */}
+      {scoutStat && (
+        <div
+          className="pointer-events-none absolute right-4 top-14 z-10 max-w-[220px] rounded-xl px-3 py-2.5 opacity-0 transition-opacity duration-200 group-hover:opacity-100"
+          style={{
+            background: "var(--hp-card)",
+            border: "1px solid var(--hp-border)",
+            boxShadow: "0 4px 12px rgba(0,0,0,0.1)",
+          }}
+        >
+          <span style={{ fontSize: 10, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.05em", color: "#00D4FF" }}>
+            Scout Stat
+          </span>
+          <p className="mt-1" style={{ fontSize: 12, lineHeight: 1.4, color: "var(--hp-foreground)", opacity: 0.8 }}>
+            {scoutStat}
+          </p>
+        </div>
+      )}
       <EngagementRow stats={stats} />
 
       {gmQuestion && (
@@ -580,6 +632,7 @@ export function ScoutSummaryCard({ summary, bullets, topic, team, teamColor, tim
       <div className="flex items-center justify-between gap-3 mb-4">
         <div className="flex items-center gap-3">
           <CardLabel label="SCOUT AI" />
+          <ScoutInsightBadge />
           <span style={{ fontSize: 11, color: 'var(--hp-muted-foreground)' }}>{timestamp}</span>
         </div>
         <TeamTag team={team} teamHex={teamHex} />
@@ -729,6 +782,116 @@ export function DebateCard({ prompt, sideA, sideB, participantCount, team, teamC
 }
 
 // ============================================
+// SCOUT BRIEFING CARD — prepended to homepage feed
+// ============================================
+
+const BRIEFING_BULLETS = [
+  "Bears offensive line concerns continue",
+  "Cubs trade talks heating up",
+  "Bulls win behind Coby White",
+  "Blackhawks youth movement showing promise",
+]
+
+export function ScoutBriefingCard() {
+  return (
+    <article className="hp-feed-card hp-card-enter" style={{ borderLeft: "3px solid #00D4FF" }}>
+      <div className="flex items-center gap-2.5 mb-4">
+        <img
+          src="/downloads/scout-v2.png"
+          alt="Scout"
+          className="h-6 w-6 rounded-full object-contain"
+        />
+        <span
+          style={{
+            fontSize: 14,
+            fontWeight: 700,
+            letterSpacing: "-0.01em",
+            color: "var(--hp-foreground)",
+          }}
+        >
+          Scout Briefing
+        </span>
+        <ScoutInsightBadge />
+      </div>
+
+      <ul className="space-y-2">
+        {BRIEFING_BULLETS.map((bullet, i) => (
+          <li
+            key={i}
+            className="flex items-start gap-2.5"
+            style={{ fontSize: 15, lineHeight: 1.5, color: "var(--hp-foreground)", opacity: 0.8 }}
+          >
+            <span
+              className="mt-2 h-1.5 w-1.5 rounded-full flex-shrink-0"
+              style={{ background: "#00D4FF" }}
+            />
+            {bullet}
+          </li>
+        ))}
+      </ul>
+
+      <button
+        className="mt-4 flex items-center gap-1.5 rounded-xl px-4 py-2.5 transition-colors hp-tap-target"
+        style={{
+          fontSize: 14,
+          fontWeight: 600,
+          background: "rgba(0, 212, 255, 0.1)",
+          color: "#0891b2",
+        }}
+      >
+        <Bot className="h-4 w-4" /> Ask Scout for details
+      </button>
+    </article>
+  )
+}
+
+// ============================================
+// SCOUT ANALYSIS CARD — appears after major articles
+// ============================================
+
+interface ScoutAnalysisCardProps {
+  analysis: string
+}
+
+export function ScoutAnalysisCard({ analysis }: ScoutAnalysisCardProps) {
+  return (
+    <article
+      className="hp-feed-card hp-card-enter"
+      style={{ borderLeft: "3px solid #00D4FF" }}
+    >
+      <div className="flex items-center gap-2.5 mb-3">
+        <img
+          src="/downloads/scout-v2.png"
+          alt="Scout"
+          className="h-5 w-5 rounded-full object-contain"
+        />
+        <span
+          style={{
+            fontSize: 12,
+            fontWeight: 700,
+            textTransform: "uppercase",
+            letterSpacing: "0.05em",
+            color: "#00D4FF",
+          }}
+        >
+          Scout Insight
+        </span>
+      </div>
+      <p
+        style={{
+          fontSize: 14,
+          lineHeight: 1.6,
+          color: "var(--hp-foreground)",
+          opacity: 0.8,
+        }}
+      >
+        {analysis}
+      </p>
+    </article>
+  )
+}
+
+// ============================================
 // CARD 10: VIDEO/MEDIA CARD
 // ============================================
 
@@ -780,6 +943,211 @@ export function VideoCard({ title, duration, source, teaser, thumbnailUrl, team,
       </div>
 
       <EngagementRow stats={stats} />
+    </article>
+  )
+}
+
+// ============================================
+// WHAT FANS ARE SAYING CARD
+// ============================================
+
+const FAN_REACTIONS = [
+  { quote: "Bears offensive line is the real problem.", user: "ChiBears_Fan42" },
+  { quote: "Caleb Williams is the franchise. Protect him.", user: "WindyCityQB" },
+  { quote: "Cubs pitching depth is underrated this year.", user: "NorthSideFaithful" },
+  { quote: "Coby White is a legit All-Star.", user: "BullsNation23" },
+  { quote: "Bedard is going to be generational.", user: "HawksTalk_" },
+  { quote: "White Sox rebuild might actually work.", user: "SouthSideHope" },
+]
+
+export function FanReactionsCard() {
+  const [picks] = useState(() => {
+    const shuffled = [...FAN_REACTIONS].sort(() => Math.random() - 0.5)
+    return shuffled.slice(0, 3)
+  })
+
+  return (
+    <article className="hp-feed-card hp-card-enter">
+      <div className="flex items-center gap-2.5 mb-4">
+        <Users className="h-4 w-4" style={{ color: "#D6B05E" }} />
+        <span style={{ fontSize: 14, fontWeight: 700, color: "var(--hp-foreground)" }}>
+          What Fans Are Saying
+        </span>
+      </div>
+
+      <div className="space-y-3">
+        {picks.map((r, i) => (
+          <div
+            key={i}
+            className="rounded-xl p-3"
+            style={{ background: "var(--hp-muted)", border: "1px solid var(--hp-border)" }}
+          >
+            <p style={{ fontSize: 14, lineHeight: 1.5, color: "var(--hp-foreground)", fontStyle: "italic" }}>
+              &ldquo;{r.quote}&rdquo;
+            </p>
+            <p className="mt-1" style={{ fontSize: 12, color: "var(--hp-muted-foreground)" }}>
+              &mdash; {r.user}
+            </p>
+          </div>
+        ))}
+      </div>
+    </article>
+  )
+}
+
+// ============================================
+// SCOUT PREDICTION CARD
+// ============================================
+
+interface ScoutPredictionCardProps {
+  homeTeam: string
+  awayTeam: string
+  homeScore: number
+  awayScore: number
+  winProbability: number
+}
+
+export function ScoutPredictionCard({ homeTeam, awayTeam, homeScore, awayScore, winProbability }: ScoutPredictionCardProps) {
+  const [userVote, setUserVote] = useState<"agree" | "disagree" | null>(null)
+  const [agreeCount, setAgreeCount] = useState(Math.floor(Math.random() * 300) + 50)
+  const [disagreeCount, setDisagreeCount] = useState(Math.floor(Math.random() * 200) + 30)
+
+  const handleVote = (v: "agree" | "disagree") => {
+    if (userVote) return
+    setUserVote(v)
+    if (v === "agree") setAgreeCount(c => c + 1)
+    else setDisagreeCount(c => c + 1)
+  }
+
+  const total = agreeCount + disagreeCount
+  const agreePercent = Math.round((agreeCount / total) * 100)
+
+  return (
+    <article className="hp-feed-card hp-card-enter" style={{ borderLeft: "3px solid #00D4FF" }}>
+      <div className="flex items-center gap-2.5 mb-4">
+        <img src="/downloads/scout-v2.png" alt="Scout" className="h-5 w-5 rounded-full object-contain" />
+        <span style={{ fontSize: 12, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.05em", color: "#00D4FF" }}>
+          Scout Prediction
+        </span>
+        <ScoutInsightBadge />
+      </div>
+
+      <div className="flex items-center justify-center gap-8 py-3">
+        <div className="text-center">
+          <p style={{ fontSize: 15, fontWeight: 700, color: "var(--hp-foreground)" }}>{homeTeam}</p>
+          <p style={{ fontSize: 28, fontWeight: 700, color: "var(--hp-foreground)" }}>{homeScore}</p>
+        </div>
+        <span style={{ fontSize: 13, fontWeight: 500, color: "var(--hp-muted-foreground)" }}>vs</span>
+        <div className="text-center">
+          <p style={{ fontSize: 15, fontWeight: 700, color: "var(--hp-foreground)" }}>{awayTeam}</p>
+          <p style={{ fontSize: 28, fontWeight: 700, color: "var(--hp-foreground)" }}>{awayScore}</p>
+        </div>
+      </div>
+
+      <div className="flex items-center justify-center gap-2 mt-1">
+        <span style={{ fontSize: 13, color: "var(--hp-muted-foreground)" }}>Win probability:</span>
+        <span style={{ fontSize: 14, fontWeight: 700, color: "#00D4FF" }}>{winProbability}%</span>
+      </div>
+
+      <div className="mt-4 flex gap-3">
+        <button
+          onClick={() => handleVote("agree")}
+          disabled={userVote !== null}
+          className="flex-1 rounded-xl px-3 py-2.5 text-sm font-semibold transition-all hp-tap-target"
+          style={{
+            border: `2px solid ${userVote === "agree" ? "#00D4FF" : "var(--hp-border)"}`,
+            background: userVote === "agree" ? "rgba(0,212,255,0.1)" : "transparent",
+            color: userVote === "disagree" ? "var(--hp-muted-foreground)" : "var(--hp-foreground)",
+          }}
+        >
+          {userVote ? `Agree (${agreePercent}%)` : "\uD83D\uDC4D Agree"}
+        </button>
+        <button
+          onClick={() => handleVote("disagree")}
+          disabled={userVote !== null}
+          className="flex-1 rounded-xl px-3 py-2.5 text-sm font-semibold transition-all hp-tap-target"
+          style={{
+            border: `2px solid ${userVote === "disagree" ? "#BC0000" : "var(--hp-border)"}`,
+            background: userVote === "disagree" ? "rgba(188,0,0,0.1)" : "transparent",
+            color: userVote === "agree" ? "var(--hp-muted-foreground)" : "var(--hp-foreground)",
+          }}
+        >
+          {userVote ? `Disagree (${100 - agreePercent}%)` : "\uD83D\uDC4E Disagree"}
+        </button>
+      </div>
+      {userVote && (
+        <p className="mt-2 text-center" style={{ fontSize: 12, color: "var(--hp-muted-foreground)" }}>
+          {total.toLocaleString()} votes
+        </p>
+      )}
+    </article>
+  )
+}
+
+// ============================================
+// RUMOR CREDIBILITY METER
+// ============================================
+
+type CredibilityLevel = "HIGH" | "MEDIUM" | "LOW"
+
+export function RumorCredibilityMeter({ level }: { level: CredibilityLevel }) {
+  const config = {
+    HIGH: { color: "#16a34a", width: "100%", label: "HIGH" },
+    MEDIUM: { color: "#D6B05E", width: "60%", label: "MEDIUM" },
+    LOW: { color: "#BC0000", width: "30%", label: "LOW" },
+  }
+  const { color, width, label } = config[level]
+
+  return (
+    <div className="mt-2 flex items-center gap-2.5">
+      <span style={{ fontSize: 10, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.05em", color: "var(--hp-muted-foreground)" }}>
+        Credibility
+      </span>
+      <div className="h-1.5 flex-1 rounded-full overflow-hidden" style={{ background: "var(--hp-muted)", maxWidth: 80 }}>
+        <div className="h-full rounded-full transition-all" style={{ width, background: color }} />
+      </div>
+      <span style={{ fontSize: 10, fontWeight: 700, color }}>{label}</span>
+    </div>
+  )
+}
+
+// ============================================
+// GAME MODE CARD
+// ============================================
+
+interface GameModeCardProps {
+  homeTeam: string
+  awayTeam: string
+  kickoff: string
+  scoutNote: string
+}
+
+export function GameModeCard({ homeTeam, awayTeam, kickoff, scoutNote }: GameModeCardProps) {
+  return (
+    <article className="hp-feed-card hp-card-enter" style={{ border: "2px solid rgba(188, 0, 0, 0.3)" }}>
+      <div className="flex items-center gap-2.5 mb-3">
+        <span className="w-2 h-2 rounded-full animate-pulse" style={{ background: "#BC0000" }} />
+        <span style={{ fontSize: 12, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.1em", color: "#BC0000" }}>
+          Game Mode
+        </span>
+      </div>
+
+      <h2 style={{ fontSize: 21, fontWeight: 700, color: "var(--hp-foreground)" }}>
+        {homeTeam} vs {awayTeam}
+      </h2>
+      <p className="mt-1" style={{ fontSize: 14, color: "var(--hp-muted-foreground)" }}>
+        Kickoff: {kickoff}
+      </p>
+
+      <div className="mt-4 flex items-start gap-2.5 rounded-xl p-3" style={{ background: "var(--hp-muted)", borderLeft: "3px solid #00D4FF" }}>
+        <img src="/downloads/scout-v2.png" alt="Scout" className="h-5 w-5 rounded-full object-contain mt-0.5" />
+        <div>
+          <span style={{ fontSize: 11, fontWeight: 700, color: "#00D4FF" }}>Scout says:</span>
+          <p className="mt-0.5" style={{ fontSize: 14, lineHeight: 1.5, color: "var(--hp-foreground)", opacity: 0.8 }}>
+            {scoutNote}
+          </p>
+        </div>
+      </div>
     </article>
   )
 }
