@@ -493,6 +493,50 @@ const STANDARD_POLL_INTERVAL = 60_000 // No live games
 | `/api/cron/sync-teams` | Hourly (:00) | Revalidate team pages |
 | `/api/cron/team-pages-health` | Hourly (:15) | Health check + ESPN ID mapping |
 
+### Sidebar & Leaderboard Data Flow (CRITICAL — Single Source of Truth)
+
+**All stats flow from ONE place:** `src/lib/{team}Data.ts` → `get{Team}Stats()` → `leaderboards` object.
+
+```
+DB (DataLab) → {team}Data.ts get{Team}Stats() → Team Pages (server components)
+                                               → team-sidebar-data.ts → Team Page Sidebars
+                                               → /api/team-sidebar → Homepage Feed Sidebar (client)
+```
+
+**Rules:**
+- Team pages pull from DB via `get{Team}Stats()` — this is the canonical source
+- Sidebars and homepage feed mirror the same data from the same functions
+- **NEVER create separate DB queries** for sidebar stats — always use the existing leaderboard functions
+- If stats are wrong, fix in ONE place: the `getLeaderboards()` function in `{team}Data.ts`
+- `team-sidebar-data.ts` calls `get{Team}Stats()` and extracts top leaders — it does NOT query the DB directly
+
+**Leaderboard query safety checklist:**
+1. **Always filter `is_opponent = false`** — all `*_player_game_stats` tables contain both team and opponent rows
+2. **Always filter by `playersMap.has()`** — only show active roster players
+3. **Bears: filter `game_type` in JS** — values are inconsistent (null, empty, 'regular', 'postseason')
+4. **MLB (Cubs/WhiteSox): include `walks` in select** — needed for OBP calculation
+5. **Verify fallback queries match primary queries** — same columns, same filters
+
+**Leaderboard categories by team:**
+
+| Team | Categories | Sort |
+|------|-----------|------|
+| Bears | Pass Yds, Rush Yds, Rec Yds, Tackles, Sacks | Total stats |
+| Bulls | PTS (total), PPG, RPG, SPG, BPG | PTS by total; others by per-game |
+| Cubs | AVG, HR, OBP, RBI, AB | AVG/OBP by rate (min 50 AB); others by total |
+| White Sox | AVG, HR, OBP, RBI, AB | Same as Cubs |
+| Blackhawks | Goals, Assists, Points, SV%, Goals (#2) | Skaters by total; goalies by SV% |
+
+**Key files:**
+
+| File | Purpose |
+|------|---------|
+| `src/lib/{team}Data.ts` | Source of truth — DB queries, aggregation, leaderboards |
+| `src/lib/team-sidebar-data.ts` | Extracts top leaders from leaderboards for sidebar display |
+| `src/app/api/team-sidebar/route.ts` | API route for homepage feed sidebar (client-side fetch) |
+| `src/components/homepage/FeedTeamSidebar.tsx` | Compact sidebar for homepage feed (client component) |
+| `src/components/team/shared/TeamRosterHighlights.tsx` | Full sidebar for team hub pages (server component) |
+
 ---
 
 ## Scout AI

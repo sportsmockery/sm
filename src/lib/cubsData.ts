@@ -142,6 +142,9 @@ export interface CubsTeamStats {
 export interface CubsLeaderboard {
   batting: LeaderboardEntry[]
   homeRuns: LeaderboardEntry[]
+  obp: LeaderboardEntry[]
+  rbiLeaders: LeaderboardEntry[]
+  atBats: LeaderboardEntry[]
   pitching: LeaderboardEntry[]
   saves: LeaderboardEntry[]
 }
@@ -730,7 +733,7 @@ function getDefaultTeamStats(season: number): CubsTeamStats {
 
 async function getLeaderboards(season: number): Promise<CubsLeaderboard> {
   if (!datalabAdmin) {
-    return { batting: [], homeRuns: [], pitching: [], saves: [] }
+    return { batting: [], homeRuns: [], obp: [], rbiLeaders: [], atBats: [], pitching: [], saves: [] }
   }
 
   const players = await getCubsPlayers()
@@ -746,6 +749,7 @@ async function getLeaderboards(season: number): Promise<CubsLeaderboard> {
       hits,
       home_runs,
       rbi,
+      walks,
       innings_pitched,
       earned_runs,
       strikeouts_pitched,
@@ -766,6 +770,7 @@ async function getLeaderboards(season: number): Promise<CubsLeaderboard> {
         hits,
         home_runs,
         rbi,
+        walks,
         innings_pitched,
         earned_runs,
         strikeouts_pitched,
@@ -779,7 +784,7 @@ async function getLeaderboards(season: number): Promise<CubsLeaderboard> {
   }
 
   if (!gameStats || gameStats.length === 0) {
-    return { batting: [], homeRuns: [], pitching: [], saves: [] }
+    return { batting: [], homeRuns: [], obp: [], rbiLeaders: [], atBats: [], pitching: [], saves: [] }
   }
 
   // Aggregate stats by player (keyed by ESPN ID which is a string)
@@ -794,6 +799,7 @@ async function getLeaderboards(season: number): Promise<CubsLeaderboard> {
         hits: 0,
         homeRuns: 0,
         rbi: 0,
+        walks: 0,
         inningsPitched: 0,
         earnedRuns: 0,
         strikeouts: 0,
@@ -808,6 +814,7 @@ async function getLeaderboards(season: number): Promise<CubsLeaderboard> {
     totals.hits += stat.hits || 0
     totals.homeRuns += stat.home_runs || 0
     totals.rbi += stat.rbi || 0
+    totals.walks += stat.walks || 0
     totals.inningsPitched += stat.innings_pitched || 0
     totals.earnedRuns += stat.earned_runs || 0
     totals.strikeouts += stat.strikeouts_pitched || 0
@@ -847,6 +854,52 @@ async function getLeaderboards(season: number): Promise<CubsLeaderboard> {
       tertiaryLabel: 'G',
     }))
 
+  const obp = aggregatedStats
+    .filter(s => s.atBats >= 50 && playersMap.has(String(s.player_id)))
+    .sort((a, b) => {
+      const obpA = (a.hits + a.walks) / (a.atBats + a.walks)
+      const obpB = (b.hits + b.walks) / (b.atBats + b.walks)
+      return obpB - obpA
+    })
+    .slice(0, 5)
+    .map(s => ({
+      player: playersMap.get(String(s.player_id))!,
+      primaryStat: Math.round(((s.hits + s.walks) / (s.atBats + s.walks)) * 1000) / 1000,
+      primaryLabel: 'OBP',
+      secondaryStat: s.walks,
+      secondaryLabel: 'BB',
+      tertiaryStat: s.hits,
+      tertiaryLabel: 'H',
+    }))
+
+  const rbiLeaders = aggregatedStats
+    .filter(s => s.rbi > 0 && playersMap.has(String(s.player_id)))
+    .sort((a, b) => b.rbi - a.rbi)
+    .slice(0, 5)
+    .map(s => ({
+      player: playersMap.get(String(s.player_id))!,
+      primaryStat: s.rbi,
+      primaryLabel: 'RBI',
+      secondaryStat: s.homeRuns,
+      secondaryLabel: 'HR',
+      tertiaryStat: s.games,
+      tertiaryLabel: 'G',
+    }))
+
+  const atBats = aggregatedStats
+    .filter(s => s.atBats > 0 && playersMap.has(String(s.player_id)))
+    .sort((a, b) => b.atBats - a.atBats)
+    .slice(0, 5)
+    .map(s => ({
+      player: playersMap.get(String(s.player_id))!,
+      primaryStat: s.atBats,
+      primaryLabel: 'AB',
+      secondaryStat: s.hits,
+      secondaryLabel: 'H',
+      tertiaryStat: s.games,
+      tertiaryLabel: 'G',
+    }))
+
   const pitching = aggregatedStats
     .filter(s => s.inningsPitched >= 20 && playersMap.has(String(s.player_id)))
     .sort((a, b) => {
@@ -882,7 +935,7 @@ async function getLeaderboards(season: number): Promise<CubsLeaderboard> {
       tertiaryLabel: null,
     }))
 
-  return { batting, homeRuns, pitching, saves }
+  return { batting, homeRuns, obp, rbiLeaders, atBats, pitching, saves }
 }
 
 /**

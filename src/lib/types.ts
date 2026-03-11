@@ -237,6 +237,50 @@ export interface BearsTrend {
 }
 
 /**
+ * Generic team sidebar types (reusable across all teams)
+ */
+export interface TeamSeasonOverview {
+  teamSlug: string
+  teamName: string
+  season: number
+  record: {
+    wins: number
+    losses: number
+    ties: number
+    otl?: number
+  }
+  standing: string
+  nextGame: {
+    opponent: string
+    date: string
+    time: string
+    isHome: boolean
+  } | null
+  lastGame: {
+    opponent: string
+    result: 'W' | 'L' | 'T' | 'OTL'
+    score: string
+  } | null
+}
+
+export interface TeamPlayer {
+  id: number
+  name: string
+  position: string
+  number: number
+  imageUrl?: string
+  stats?: Record<string, string | number>
+}
+
+export interface TeamTrend {
+  id: number
+  title: string
+  slug: string
+  postCount: number
+  isHot?: boolean
+}
+
+/**
  * User preferences for personalization
  */
 export interface UserPreferences {

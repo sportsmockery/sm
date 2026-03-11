@@ -727,6 +727,7 @@ async function getLeaderboards(season: number): Promise<BlackhawksLeaderboard> {
       shots_against
     `)
     .eq('season', season)
+    .eq('is_opponent', false)
 
   // Fallback to previous season if no stats
   if (!gameStats || gameStats.length === 0) {
@@ -742,6 +743,7 @@ async function getLeaderboards(season: number): Promise<BlackhawksLeaderboard> {
         shots_against
       `)
       .eq('season', season - 1)
+      .eq('is_opponent', false)
     gameStats = prevStats
   }
 

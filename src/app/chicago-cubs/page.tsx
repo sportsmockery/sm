@@ -1,7 +1,11 @@
 import { Metadata } from 'next'
 import { TeamHubLayout, ToolGrid, QuickStats } from '@/components/team'
 import { SectionHeader, ArticleCard, AskAIWidget, FanChatWidget } from '@/components/team/shared'
+import TeamSeasonCard from '@/components/team/shared/TeamSeasonCard'
+import TeamRosterHighlights from '@/components/team/shared/TeamRosterHighlights'
+import TeamTrendingTopics from '@/components/team/shared/TeamTrendingTopics'
 import { CHICAGO_TEAMS, fetchTeamRecord, fetchNextGame, fetchLastGame } from '@/lib/team-config'
+import { getTeamSeasonOverview, getTeamKeyPlayers, getTeamTrends } from '@/lib/team-sidebar-data'
 import { supabaseAdmin } from '@/lib/supabase-server'
 
 export const metadata: Metadata = {
@@ -60,11 +64,14 @@ export default async function CubsHubPage() {
   const team = CHICAGO_TEAMS.cubs
 
   // Fetch all data in parallel
-  const [record, nextGame, lastGame, posts] = await Promise.all([
+  const [record, nextGame, lastGame, posts, seasonOverview, keyPlayers, trends] = await Promise.all([
     fetchTeamRecord('cubs'),
     fetchNextGame('cubs'),
     fetchLastGame('cubs'),
     getCubsPosts(12),
+    getTeamSeasonOverview('cubs'),
+    getTeamKeyPlayers('cubs'),
+    getTeamTrends('cubs'),
   ])
 
   return (
@@ -86,6 +93,11 @@ export default async function CubsHubPage() {
         <div className="hub-grid-cubs" style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '32px' }}>
           {/* Left Column: Main Content */}
           <div style={{ display: 'flex', flexDirection: 'column', gap: '48px' }}>
+            {/* Season Snapshot - Mobile Only */}
+            <div className="lg:hidden">
+              <TeamSeasonCard season={seasonOverview} />
+            </div>
+
             <section>
               <SectionHeader title="Latest Cubs News" />
               {posts.length > 0 ? (
@@ -121,7 +133,21 @@ export default async function CubsHubPage() {
 
           {/* Right Column: Sidebar */}
           <div className="hidden lg:flex" style={{ flexDirection: 'column', gap: '24px' }}>
+            {/* Season Card - Desktop Only */}
+            <TeamSeasonCard season={seasonOverview} />
+
+            {/* Quick Stats */}
             <QuickStats teamSlug="chicago-cubs" teamLabel="Cubs" league="MLB" />
+
+            {/* Key Players */}
+            {keyPlayers && keyPlayers.length > 0 && (
+              <TeamRosterHighlights players={keyPlayers} teamSlug="chicago-cubs" />
+            )}
+
+            {/* Trending Topics */}
+            {trends && trends.length > 0 && (
+              <TeamTrendingTopics trends={trends} teamSlug="chicago-cubs" />
+            )}
           </div>
         </div>
       </div>

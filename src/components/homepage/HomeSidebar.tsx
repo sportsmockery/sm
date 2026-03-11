@@ -1,7 +1,7 @@
 "use client"
 
 import { useState } from "react"
-import { Search } from "lucide-react"
+import { Search, ArrowRightLeft, ClipboardPen, MessageSquare, BarChart3, Video } from "lucide-react"
 import { homepageTeams } from "@/lib/homepage-team-data"
 
 interface HomeSidebarProps {
@@ -99,6 +99,44 @@ export default function HomeSidebar({ selectedTeam, onSelectTeam }: HomeSidebarP
             )
           })}
         </nav>
+
+        {/* Blitz Features — shown when a team is selected */}
+        {selectedTeam && selectedTeam !== 'all' && (
+          <div style={{ marginTop: 8, borderTop: '1px solid var(--hp-border)', paddingTop: 8 }}>
+            <div style={{ padding: '4px 16px', fontSize: 11, fontWeight: 700, color: 'var(--hp-muted-foreground)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+              Blitz Features
+            </div>
+            {[
+              { icon: ArrowRightLeft, label: 'Trade Simulator', href: '/gm' },
+              { icon: ClipboardPen, label: 'Mock Draft', href: '/mock-draft' },
+              { icon: MessageSquare, label: 'Fan Chat', href: '/fan-chat' },
+              { icon: BarChart3, label: 'Team Analytics', href: `/${selectedTeam === 'whitesox' ? 'chicago-white-sox' : `chicago-${selectedTeam}`}` },
+              { icon: Video, label: 'Vision Theater', href: '/bears-film-room' },
+            ].map((item) => (
+              <a
+                key={item.label}
+                href={item.href}
+                className="hp-tap-target"
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 12,
+                  borderRadius: 12,
+                  padding: '8px 16px',
+                  fontSize: 14,
+                  color: 'var(--hp-foreground)',
+                  textDecoration: 'none',
+                  transition: 'background 0.15s',
+                }}
+                onMouseEnter={(e) => { e.currentTarget.style.background = 'var(--hp-muted)' }}
+                onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent' }}
+              >
+                <item.icon className="h-4 w-4" style={{ color: 'var(--hp-muted-foreground)' }} />
+                <span>{item.label}</span>
+              </a>
+            ))}
+          </div>
+        )}
       </div>
 
       {/* Search */}

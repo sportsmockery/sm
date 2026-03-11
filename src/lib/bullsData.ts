@@ -130,6 +130,8 @@ export interface BullsLeaderboard {
   rebounding: LeaderboardEntry[]
   assists: LeaderboardEntry[]
   defense: LeaderboardEntry[]
+  steals: LeaderboardEntry[]
+  blocks: LeaderboardEntry[]
 }
 
 export interface LeaderboardEntry {
@@ -722,7 +724,7 @@ function getDefaultTeamStats(season: number): BullsTeamStats {
 
 async function getLeaderboards(season: number): Promise<BullsLeaderboard> {
   if (!datalabAdmin) {
-    return { scoring: [], rebounding: [], assists: [], defense: [] }
+    return { scoring: [], rebounding: [], assists: [], defense: [], steals: [], blocks: [] }
   }
 
   const players = await getBullsPlayers()
@@ -742,6 +744,7 @@ async function getLeaderboards(season: number): Promise<BullsLeaderboard> {
       blocks
     `)
     .eq('season', season)
+    .eq('is_opponent', false)
 
   // Fallback to previous season if no stats
   if (!gameStats || gameStats.length === 0) {
@@ -756,11 +759,12 @@ async function getLeaderboards(season: number): Promise<BullsLeaderboard> {
         blocks
       `)
       .eq('season', season - 1)
+      .eq('is_opponent', false)
     gameStats = prevStats
   }
 
   if (!gameStats || gameStats.length === 0) {
-    return { scoring: [], rebounding: [], assists: [], defense: [] }
+    return { scoring: [], rebounding: [], assists: [], defense: [], steals: [], blocks: [] }
   }
 
   // Aggregate stats by player (keyed by ESPN ID which is a string)
@@ -846,7 +850,35 @@ async function getLeaderboards(season: number): Promise<BullsLeaderboard> {
       tertiaryLabel: 'GP',
     }))
 
-  return { scoring, rebounding, assists, defense }
+  const steals = aggregatedStats
+    .filter(s => s.steals > 0 && playersMap.has(String(s.player_id)))
+    .sort((a, b) => (b.steals / b.games) - (a.steals / a.games))
+    .slice(0, 5)
+    .map(s => ({
+      player: playersMap.get(String(s.player_id))!,
+      primaryStat: Math.round((s.steals / s.games) * 10) / 10,
+      primaryLabel: 'SPG',
+      secondaryStat: s.steals,
+      secondaryLabel: 'STL',
+      tertiaryStat: s.games,
+      tertiaryLabel: 'GP',
+    }))
+
+  const blocks = aggregatedStats
+    .filter(s => s.blocks > 0 && playersMap.has(String(s.player_id)))
+    .sort((a, b) => (b.blocks / b.games) - (a.blocks / a.games))
+    .slice(0, 5)
+    .map(s => ({
+      player: playersMap.get(String(s.player_id))!,
+      primaryStat: Math.round((s.blocks / s.games) * 10) / 10,
+      primaryLabel: 'BPG',
+      secondaryStat: s.blocks,
+      secondaryLabel: 'BLK',
+      tertiaryStat: s.games,
+      tertiaryLabel: 'GP',
+    }))
+
+  return { scoring, rebounding, assists, defense, steals, blocks }
 }
 
 /**

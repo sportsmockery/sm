@@ -984,6 +984,7 @@ async function getLeaderboards(season: number, gameType: GameType = 'regular'): 
     .from('bears_player_game_stats')
     .select('*')
     .eq('season', season)
+    .eq('is_opponent', false)
 
   // Filter by game type in JS for reliability
   let gameStats = (allGameStats || []).filter((g: any) => {
@@ -1000,6 +1001,7 @@ async function getLeaderboards(season: number, gameType: GameType = 'regular'): 
       .from('bears_player_game_stats')
       .select('*')
       .eq('season', season - 1)
+      .eq('is_opponent', false)
     gameStats = (prevStats || []).filter((g: any) => {
       const gt = (g.game_type || '').toLowerCase()
       return gt === 'regular' || gt === '' || !g.game_type
