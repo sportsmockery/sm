@@ -13,15 +13,226 @@ interface TagInputProps {
   onChange: (tags: Tag[]) => void
 }
 
+/* ─── Tag Type Classification ─── */
+const TOPIC_SLUGS = new Set([
+  'trade', 'rumor', 'draft', 'injury', 'analysis', 'free-agency', 'film-room',
+  'recap', 'preview', 'roster', 'contract', 'signing', 'release', 'suspension',
+  'playoff', 'offseason', 'breaking', 'schedule', 'standings', 'coaching',
+])
+const CONTENT_SLUGS = new Set([
+  'analytics', 'debate', 'prediction', 'scout-report', 'hot-take',
+  'breakdown', 'comparison', 'stat-deep-dive', 'opinion', 'poll',
+])
+
+function classifyTag(slug: string): 'player' | 'topic' | 'content' | 'tag' {
+  if (TOPIC_SLUGS.has(slug)) return 'topic'
+  if (CONTENT_SLUGS.has(slug)) return 'content'
+  // Player heuristic: two+ hyphenated parts, all alphabetic, e.g. "caleb-williams"
+  const parts = slug.split('-')
+  if (parts.length >= 2 && parts.every(p => /^[a-z]{2,}$/.test(p))) return 'player'
+  return 'tag'
+}
+
+function tagTypeLabel(type: 'player' | 'topic' | 'content' | 'tag'): string | null {
+  if (type === 'player') return 'Player'
+  if (type === 'topic') return 'Topic'
+  if (type === 'content') return 'Content'
+  return null
+}
+
+/* ─── Tag Info Popover ─── */
+function TagInfoPopover({ onClose }: { onClose: () => void }) {
+  const popoverRef = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    const handleClick = (e: MouseEvent) => {
+      if (popoverRef.current && !popoverRef.current.contains(e.target as Node)) {
+        onClose()
+      }
+    }
+    document.addEventListener('mousedown', handleClick)
+    return () => document.removeEventListener('mousedown', handleClick)
+  }, [onClose])
+
+  const sectionTitle: React.CSSProperties = {
+    fontSize: 13, fontWeight: 600, color: '#0B0F14', marginBottom: 4, marginTop: 16,
+  }
+  const bodyText: React.CSSProperties = {
+    fontSize: 12, lineHeight: 1.6, color: '#4b5563', marginBottom: 0,
+  }
+  const codeTag: React.CSSProperties = {
+    display: 'inline-block', fontSize: 11, fontFamily: 'monospace',
+    background: 'rgba(0,212,255,0.08)', color: '#00D4FF',
+    padding: '1px 6px', borderRadius: 4, marginRight: 4, marginBottom: 3,
+  }
+  const badCode: React.CSSProperties = {
+    ...codeTag, background: 'rgba(188,0,0,0.06)', color: '#BC0000',
+    textDecoration: 'line-through',
+  }
+  const starBadge = (label: string) => (
+    <span style={{
+      display: 'inline-flex', alignItems: 'center', gap: 3,
+      fontSize: 10, fontWeight: 600, color: '#D6B05E',
+      background: 'rgba(214,176,94,0.1)', padding: '1px 6px', borderRadius: 4,
+    }}>
+      <svg width="10" height="10" viewBox="0 0 24 24" fill="#D6B05E" stroke="none">
+        <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
+      </svg>
+      {label}
+    </span>
+  )
+
+  return (
+    <div
+      ref={popoverRef}
+      className="absolute z-[60] mt-1 rounded-xl shadow-xl overflow-hidden"
+      style={{
+        width: 380, maxHeight: 480,
+        backgroundColor: '#ffffff',
+        border: '1px solid rgba(0,0,0,0.1)',
+        top: '100%', left: 0,
+      }}
+    >
+      {/* Header */}
+      <div style={{
+        padding: '12px 16px', borderBottom: '1px solid rgba(0,0,0,0.06)',
+        display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+      }}>
+        <span style={{ fontSize: 13, fontWeight: 700, color: '#0B0F14' }}>Tag Guide</span>
+        <button
+          type="button"
+          onClick={onClose}
+          style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#9ca3af', padding: 2 }}
+        >
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
+      </div>
+
+      {/* Content - scrollable */}
+      <div style={{ padding: '12px 16px 16px', overflowY: 'auto', maxHeight: 420 }}>
+        {/* What Tags Do */}
+        <div style={{ ...sectionTitle, marginTop: 0 }}>What Tags Do</div>
+        <p style={bodyText}>
+          Tags help readers discover your story across SM Edge. They act like labels for the main ideas in your article, connecting it with related content, player pages, trending topics, and discussions.
+        </p>
+        <div style={{ marginTop: 8, marginBottom: 4 }}>
+          <p style={{ ...bodyText, fontWeight: 500, color: '#0B0F14', marginBottom: 4 }}>Tags power:</p>
+          <ul style={{ ...bodyText, paddingLeft: 16, margin: 0 }}>
+            <li><strong>Search results</strong> — find stories by player, trade, injury</li>
+            <li><strong>Trending topics</strong> — what Chicago fans are discussing</li>
+            <li><strong>Related stories</strong> — connecting coverage of the same topics</li>
+            <li><strong>Feed discovery</strong> — surfacing stories in the SM Edge feed</li>
+          </ul>
+        </div>
+
+        {/* How Many */}
+        <div style={sectionTitle}>How Many Tags to Use</div>
+        <p style={bodyText}>
+          Use <strong>3–6 tags</strong> per article. Focus on the most important people, topics, or themes. Adding too many tags makes discovery less accurate.
+        </p>
+
+        {/* Tag Format */}
+        <div style={sectionTitle}>Tag Format</div>
+        <p style={{ ...bodyText, marginBottom: 6 }}>
+          Tags should be lowercase, short, clear, and hyphen-separated.
+        </p>
+        <div style={{ marginBottom: 4 }}>
+          <span style={{ fontSize: 10, fontWeight: 600, color: '#0B0F14', marginRight: 6 }}>Good:</span>
+          <span style={codeTag}>caleb-williams</span>
+          <span style={codeTag}>trade</span>
+          <span style={codeTag}>analysis</span>
+          <span style={codeTag}>draft</span>
+        </div>
+        <div>
+          <span style={{ fontSize: 10, fontWeight: 600, color: '#0B0F14', marginRight: 6 }}>Avoid:</span>
+          <span style={badCode}>Caleb Williams discussion</span>
+          <span style={badCode}>bears trade rumors today</span>
+        </div>
+
+        {/* Types of Tags */}
+        <div style={sectionTitle}>Types of Tags</div>
+        <p style={{ ...bodyText, marginBottom: 8 }}>
+          Some tags have extra importance across the platform. Look for the star indicator in autocomplete.
+        </p>
+
+        <div style={{
+          background: '#f8f9fa', borderRadius: 8, padding: 12,
+          border: '1px solid rgba(0,0,0,0.06)', marginBottom: 8,
+        }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+            <div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 3 }}>
+                {starBadge('Player')}
+              </div>
+              <p style={{ ...bodyText, fontSize: 11 }}>
+                Connect articles to player profiles and trending discussions.
+                <br /><span style={codeTag}>caleb-williams</span><span style={codeTag}>connor-bedard</span><span style={codeTag}>cody-bellinger</span>
+              </p>
+            </div>
+            <div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 3 }}>
+                {starBadge('Topic')}
+              </div>
+              <p style={{ ...bodyText, fontSize: 11 }}>
+                Major storylines that appear in trending topics and discovery feeds.
+                <br /><span style={codeTag}>trade</span><span style={codeTag}>rumor</span><span style={codeTag}>draft</span><span style={codeTag}>injury</span><span style={codeTag}>free-agency</span>
+              </p>
+            </div>
+            <div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 3 }}>
+                {starBadge('Content')}
+              </div>
+              <p style={{ ...bodyText, fontSize: 11 }}>
+                Coverage type — helps surface analytical or interactive content.
+                <br /><span style={codeTag}>analytics</span><span style={codeTag}>debate</span><span style={codeTag}>prediction</span><span style={codeTag}>scout-report</span>
+              </p>
+            </div>
+          </div>
+        </div>
+
+        {/* Best Practices */}
+        <div style={sectionTitle}>Best Practices</div>
+        <ul style={{ ...bodyText, paddingLeft: 16, margin: 0 }}>
+          <li>Use 3–6 tags per article</li>
+          <li>Focus on the main players or topics</li>
+          <li>Prefer existing tags when possible</li>
+          <li>Avoid long or overly specific phrases</li>
+          <li>Avoid creating duplicate variations of the same tag</li>
+        </ul>
+
+        {/* Example */}
+        <div style={{
+          marginTop: 12, background: 'rgba(0,212,255,0.04)',
+          border: '1px solid rgba(0,212,255,0.1)', borderRadius: 8, padding: 12,
+        }}>
+          <p style={{ fontSize: 11, fontWeight: 600, color: '#0B0F14', marginBottom: 4 }}>
+            Example: &quot;Bears Expected to Expand Caleb Williams Passing Concepts&quot;
+          </p>
+          <div style={{ display: 'flex', gap: 4, flexWrap: 'wrap' }}>
+            <span style={codeTag}>caleb-williams</span>
+            <span style={codeTag}>offense</span>
+            <span style={codeTag}>analysis</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+/* ─── Main Component ─── */
 export default function TagInput({ selectedTags, onChange }: TagInputProps) {
   const [query, setQuery] = useState('')
   const [suggestions, setSuggestions] = useState<Tag[]>([])
   const [showDropdown, setShowDropdown] = useState(false)
   const [loading, setLoading] = useState(false)
   const [highlightIndex, setHighlightIndex] = useState(-1)
+  const [showInfo, setShowInfo] = useState(false)
   const inputRef = useRef<HTMLInputElement>(null)
   const dropdownRef = useRef<HTMLDivElement>(null)
   const debounceRef = useRef<NodeJS.Timeout | null>(null)
+  const infoButtonRef = useRef<HTMLButtonElement>(null)
 
   // Fetch suggestions from API
   const fetchSuggestions = useCallback(async (search: string) => {
@@ -139,34 +350,75 @@ export default function TagInput({ selectedTags, onChange }: TagInputProps) {
   const atMax = selectedTags.length >= maxRecommended
 
   return (
-    <div>
-      <label className="mb-1.5 block text-xs font-medium text-[var(--text-muted)]">
+    <div className="relative">
+      <label className="mb-1.5 flex items-center gap-1.5 text-xs font-medium text-[var(--text-muted)]">
         Tags
-        <span className="ml-1 text-[var(--text-muted)] font-normal">
+        <span className="font-normal">
           ({selectedTags.length}/{maxRecommended})
         </span>
+        <button
+          ref={infoButtonRef}
+          type="button"
+          onClick={() => setShowInfo(!showInfo)}
+          className="inline-flex items-center justify-center rounded-full transition-colors"
+          style={{
+            width: 16, height: 16, padding: 0, border: 'none', cursor: 'pointer',
+            background: showInfo ? 'rgba(0,212,255,0.12)' : 'transparent',
+            color: showInfo ? '#00D4FF' : 'var(--text-muted)',
+          }}
+          onMouseEnter={(e) => {
+            if (!showInfo) {
+              e.currentTarget.style.color = '#00D4FF'
+              e.currentTarget.style.background = 'rgba(0,212,255,0.08)'
+            }
+          }}
+          onMouseLeave={(e) => {
+            if (!showInfo) {
+              e.currentTarget.style.color = 'var(--text-muted)'
+              e.currentTarget.style.background = 'transparent'
+            }
+          }}
+          title="Tag guide"
+        >
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5}>
+            <circle cx="12" cy="12" r="10" />
+            <path d="M12 16v-4M12 8h.01" />
+          </svg>
+        </button>
       </label>
+
+      {/* Info Popover */}
+      {showInfo && <TagInfoPopover onClose={() => setShowInfo(false)} />}
 
       {/* Selected tags */}
       {selectedTags.length > 0 && (
         <div className="mb-2 flex flex-wrap gap-1.5">
-          {selectedTags.map(tag => (
-            <span
-              key={tag.id}
-              className="inline-flex items-center gap-1 rounded-full border border-[var(--border-default)] bg-[var(--bg-tertiary)] px-2.5 py-1 text-xs text-[var(--text-primary)]"
-            >
-              {tag.name}
-              <button
-                type="button"
-                onClick={() => removeTag(tag.id)}
-                className="ml-0.5 rounded-full p-0.5 text-[var(--text-muted)] hover:text-[var(--accent-red)] transition-colors"
+          {selectedTags.map(tag => {
+            const type = classifyTag(tag.slug)
+            const label = tagTypeLabel(type)
+            return (
+              <span
+                key={tag.id}
+                className="inline-flex items-center gap-1 rounded-full border border-[var(--border-default)] bg-[var(--bg-tertiary)] px-2.5 py-1 text-xs text-[var(--text-primary)]"
               >
-                <svg className="h-3 w-3" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
-                </svg>
-              </button>
-            </span>
-          ))}
+                {label && (
+                  <svg width="10" height="10" viewBox="0 0 24 24" fill="#D6B05E" stroke="none" style={{ marginRight: 1 }}>
+                    <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
+                  </svg>
+                )}
+                {tag.name}
+                <button
+                  type="button"
+                  onClick={() => removeTag(tag.id)}
+                  className="ml-0.5 rounded-full p-0.5 text-[var(--text-muted)] hover:text-[var(--accent-red)] transition-colors"
+                >
+                  <svg className="h-3 w-3" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              </span>
+            )
+          })}
         </div>
       )}
 
@@ -190,21 +442,42 @@ export default function TagInput({ selectedTags, onChange }: TagInputProps) {
             ref={dropdownRef}
             className="absolute z-50 mt-1 w-full overflow-hidden rounded-lg border border-[var(--border-default)] bg-[var(--bg-card)] shadow-lg"
           >
-            {suggestions.map((tag, i) => (
-              <button
-                key={tag.id}
-                type="button"
-                onClick={() => addTag(tag)}
-                className={`flex w-full items-center justify-between px-3 py-2 text-left text-sm transition-colors ${
-                  i === highlightIndex
-                    ? 'bg-[var(--bg-hover)] text-[var(--text-primary)]'
-                    : 'text-[var(--text-secondary)] hover:bg-[var(--bg-hover)]'
-                }`}
-              >
-                <span>{tag.name}</span>
-                <span className="text-xs text-[var(--text-muted)]">{tag.slug}</span>
-              </button>
-            ))}
+            {suggestions.map((tag, i) => {
+              const type = classifyTag(tag.slug)
+              const label = tagTypeLabel(type)
+              return (
+                <button
+                  key={tag.id}
+                  type="button"
+                  onClick={() => addTag(tag)}
+                  className={`flex w-full items-center justify-between px-3 py-2 text-left text-sm transition-colors ${
+                    i === highlightIndex
+                      ? 'bg-[var(--bg-hover)] text-[var(--text-primary)]'
+                      : 'text-[var(--text-secondary)] hover:bg-[var(--bg-hover)]'
+                  }`}
+                >
+                  <span className="flex items-center gap-1.5">
+                    {tag.name}
+                  </span>
+                  <span className="flex items-center gap-2">
+                    {label ? (
+                      <span style={{
+                        display: 'inline-flex', alignItems: 'center', gap: 3,
+                        fontSize: 10, fontWeight: 600, color: '#D6B05E',
+                        background: 'rgba(214,176,94,0.1)', padding: '1px 6px', borderRadius: 4,
+                      }}>
+                        <svg width="9" height="9" viewBox="0 0 24 24" fill="#D6B05E" stroke="none">
+                          <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
+                        </svg>
+                        {label}
+                      </span>
+                    ) : (
+                      <span className="text-xs text-[var(--text-muted)]">Tag</span>
+                    )}
+                  </span>
+                </button>
+              )
+            })}
             {query.trim() && !suggestions.find(s => s.name.toLowerCase() === query.trim().toLowerCase()) && (
               <button
                 type="button"

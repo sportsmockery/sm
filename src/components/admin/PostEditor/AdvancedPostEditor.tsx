@@ -91,6 +91,7 @@ export default function AdvancedPostEditor({
   const [autoSaveStatus, setAutoSaveStatus] = useState<'idle' | 'saving' | 'saved' | 'error'>('idle')
   const [autoSavedPostId, setAutoSavedPostId] = useState<string | null>(post?.id || null)
   const [lastAutoSaved, setLastAutoSaved] = useState<Date | null>(null)
+  const [, setAutoSaveTick] = useState(0) // Force re-render for "ago" text
   const autoSaveTimerRef = useRef<NodeJS.Timeout | null>(null)
   const autoSaveInFlightRef = useRef(false)
   const formDataRef = useRef(null as any)
@@ -110,6 +111,13 @@ export default function AdvancedPostEditor({
   // Sidebar states
   const [leftSidebarCollapsed, setLeftSidebarCollapsed] = useState(false)
   const [rightSidebarCollapsed, setRightSidebarCollapsed] = useState(false)
+
+  // Update "ago" text for auto-save display every 30s
+  useEffect(() => {
+    if (!lastAutoSaved) return
+    const interval = setInterval(() => setAutoSaveTick(t => t + 1), 30000)
+    return () => clearInterval(interval)
+  }, [lastAutoSaved])
 
   // Slug editing state
   const [slugEditable, setSlugEditable] = useState(false)
@@ -465,6 +473,8 @@ export default function AdvancedPostEditor({
           setHeadlines(data.headlines)
         } else if (action === 'ideas' && data.ideas) {
           setIdeas(data.ideas)
+        } else if (action === 'poll' && data.success && data.updatedContent) {
+          updateField('content', data.updatedContent)
         }
       }
     } catch (err) {
@@ -1098,7 +1108,20 @@ export default function AdvancedPostEditor({
 
         {/* Right: Word count + Status + Save */}
         <div className="flex items-center gap-3">
-          <span className="hidden sm:inline text-xs text-[var(--text-muted)]">{wordCount} words</span>
+          <div className="hidden sm:flex items-center gap-2">
+            <span className="inline-flex items-center gap-1 rounded-md bg-[var(--bg-tertiary)] px-2 py-1 text-xs text-[var(--text-muted)]">
+              <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m2.25 0H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" />
+              </svg>
+              {wordCount} words
+            </span>
+            <span className="inline-flex items-center gap-1 rounded-md bg-[var(--bg-tertiary)] px-2 py-1 text-xs text-[var(--text-muted)]">
+              <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+              {Math.ceil(wordCount / 200)} min read
+            </span>
+          </div>
 
           {/* Autosave indicator */}
           {autoSaveStatus !== 'idle' && (
@@ -1230,6 +1253,14 @@ export default function AdvancedPostEditor({
               <div className="space-y-1">
                 <button
                   type="button"
+                  onClick={() => setShowTeamPicker(true)}
+                  className="w-full flex items-center gap-3 rounded-lg px-3 py-2 text-sm text-[var(--text-secondary)] hover:bg-[var(--bg-hover)] hover:text-[var(--text-primary)]"
+                >
+                  <span className="text-lg">💡</span>
+                  Generate Ideas
+                </button>
+                <button
+                  type="button"
                   onClick={() => runAI('grammar')}
                   disabled={aiLoading === 'grammar' || !formData.content}
                   className="w-full flex items-center gap-3 rounded-lg px-3 py-2 text-sm text-[var(--text-secondary)] hover:bg-[var(--bg-hover)] hover:text-[var(--text-primary)] disabled:opacity-50"
@@ -1252,14 +1283,6 @@ export default function AdvancedPostEditor({
                 </button>
                 <button
                   type="button"
-                  onClick={() => setShowTeamPicker(true)}
-                  className="w-full flex items-center gap-3 rounded-lg px-3 py-2 text-sm text-[var(--text-secondary)] hover:bg-[var(--bg-hover)] hover:text-[var(--text-primary)]"
-                >
-                  <span className="text-lg">💡</span>
-                  Generate Ideas
-                </button>
-                <button
-                  type="button"
                   onClick={() => openChartModal()}
                   disabled={formData.content.length < 200}
                   className="w-full flex items-center gap-3 rounded-lg px-3 py-2 text-sm text-[var(--text-secondary)] hover:bg-[var(--bg-hover)] hover:text-[var(--text-primary)] disabled:opacity-50"
@@ -1268,6 +1291,17 @@ export default function AdvancedPostEditor({
                     <path strokeLinecap="round" strokeLinejoin="round" d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 013 19.875v-6.75zM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V8.625zM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V4.125z" />
                   </svg>
                   Add Chart
+                </button>
+                <button
+                  type="button"
+                  onClick={() => runAI('poll')}
+                  disabled={aiLoading === 'poll' || !formData.content}
+                  className="w-full flex items-center gap-3 rounded-lg px-3 py-2 text-sm text-[var(--text-secondary)] hover:bg-[var(--bg-hover)] hover:text-[var(--text-primary)] disabled:opacity-50"
+                >
+                  <svg className="h-5 w-5 text-[#D6B05E]" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-7.5 13.5h-3v-6h3v6zm4 0h-3v-9h3v9z" />
+                  </svg>
+                  {aiLoading === 'poll' ? 'Generating...' : 'Add Poll'}
                 </button>
               </div>
             </div>
@@ -1302,7 +1336,7 @@ export default function AdvancedPostEditor({
             />
 
             {/* Slug/URL */}
-            <div className="mb-6 flex items-center gap-2 text-sm text-[var(--text-muted)]">
+            <div className="mb-6 flex items-center text-sm text-[var(--text-muted)]">
               <span className="flex-shrink-0">sportsmockery.com/</span>
               {slugEditable ? (
                 <input
@@ -1321,12 +1355,11 @@ export default function AdvancedPostEditor({
               <button
                 type="button"
                 onClick={() => setSlugEditable(!slugEditable)}
-                className="flex-shrink-0 px-2 py-1 text-xs font-medium rounded border border-[var(--border-default)] text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:border-[var(--text-muted)] transition-colors"
+                className="flex-shrink-0 ml-2 px-2 py-1 text-xs font-medium rounded border border-[var(--border-default)] text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:border-[var(--text-muted)] transition-colors"
               >
                 {slugEditable ? 'Done' : 'Edit'}
               </button>
             </div>
-
             {/* Alternative Headlines */}
             {headlines.length > 0 && (
               <div className="mb-6 rounded-lg border border-[#D6B05E]/30 bg-[#D6B05E]/5 p-4">
@@ -1353,30 +1386,51 @@ export default function AdvancedPostEditor({
               </div>
             )}
 
-            {/* Editor Mode Toggle */}
-            <div className="mb-3 flex items-center gap-2">
-              <button
-                type="button"
-                onClick={() => setEditorMode('richtext')}
-                className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${
-                  editorMode === 'richtext'
-                    ? 'bg-[#D6B05E]/15 text-[#D6B05E] border border-[#D6B05E]/30'
-                    : 'text-[var(--text-muted)] hover:text-[var(--text-primary)] border border-transparent'
-                }`}
-              >
-                Rich Text
-              </button>
-              <button
-                type="button"
-                onClick={() => setEditorMode('blocks')}
-                className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${
-                  editorMode === 'blocks'
-                    ? 'bg-[#00D4FF]/15 text-[#00D4FF] border border-[#00D4FF]/30'
-                    : 'text-[var(--text-muted)] hover:text-[var(--text-primary)] border border-transparent'
-                }`}
-              >
-                Block Editor
-              </button>
+            {/* Editor Mode Toggle + Auto-save */}
+            <div className="mb-3 flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => setEditorMode('richtext')}
+                  className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${
+                    editorMode === 'richtext'
+                      ? 'bg-[#D6B05E]/15 text-[#D6B05E] border border-[#D6B05E]/30'
+                      : 'text-[var(--text-muted)] hover:text-[var(--text-primary)] border border-transparent'
+                  }`}
+                >
+                  Rich Text
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setEditorMode('blocks')}
+                  className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${
+                    editorMode === 'blocks'
+                      ? 'bg-[#00D4FF]/15 text-[#00D4FF] border border-[#00D4FF]/30'
+                      : 'text-[var(--text-muted)] hover:text-[var(--text-primary)] border border-transparent'
+                  }`}
+                >
+                  Block Editor
+                </button>
+              </div>
+              <span className="inline-flex items-center gap-1.5 rounded-md bg-[var(--bg-tertiary)] px-2.5 py-1 text-xs text-[var(--text-muted)]">
+                {lastAutoSaved ? (
+                  <>
+                    <svg className="h-3 w-3" style={{ color: '#00D4FF' }} fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                    </svg>
+                    <span>Saved {lastAutoSaved.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
+                    <span className="text-[var(--text-muted)]">·</span>
+                    <span>{Math.round((Date.now() - lastAutoSaved.getTime()) / 60000) < 1 ? 'just now' : `${Math.round((Date.now() - lastAutoSaved.getTime()) / 60000)}m ago`}</span>
+                  </>
+                ) : (
+                  <>
+                    <svg className="h-3 w-3" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    <span>Not yet saved</span>
+                  </>
+                )}
+              </span>
             </div>
 
             {/* Content Editor - extends to fill space */}
@@ -1533,38 +1587,17 @@ export default function AdvancedPostEditor({
           </div>
         </main>
 
-        {/* Right Sidebar - Settings Only */}
+        {/* Right Sidebar - Post Settings */}
         <aside
           className={`flex-shrink-0 border-l border-[var(--border-default)] bg-[var(--bg-secondary)] transition-all duration-300 overflow-hidden ${
             rightSidebarCollapsed ? 'w-0 lg:w-0' : 'w-72'
           } hidden lg:block`}
         >
           <div className="h-full overflow-y-auto p-4">
-            <h3 className="mb-4 text-xs font-semibold uppercase tracking-wide text-[var(--text-muted)]">Settings</h3>
+            <h3 className="mb-4 text-xs font-semibold uppercase tracking-wide text-[var(--text-muted)]">Post Settings</h3>
 
             <div className="space-y-4">
-              {/* Status */}
-              <div>
-                <label className="mb-1.5 block text-xs font-medium text-[var(--text-muted)]">Status</label>
-                <div className="grid grid-cols-3 gap-1">
-                  {['draft', 'published', 'scheduled'].map((s) => (
-                    <button
-                      key={s}
-                      type="button"
-                      onClick={() => updateField('status', s)}
-                      className={`rounded-lg border px-2 py-1.5 text-xs font-medium transition-all ${
-                        formData.status === s
-                          ? 'border-[var(--accent-red)] bg-[var(--accent-red-muted)] text-[var(--accent-red)]'
-                          : 'border-[var(--border-default)] text-[var(--text-secondary)] hover:border-[var(--text-muted)]'
-                      }`}
-                    >
-                      {s.charAt(0).toUpperCase() + s.slice(1)}
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              {/* Schedule */}
+              {/* Schedule (only shown when status is scheduled) */}
               {formData.status === 'scheduled' && (
                 <div>
                   <label className="mb-1.5 block text-xs font-medium text-[var(--text-muted)]">Schedule Date</label>
@@ -1576,6 +1609,92 @@ export default function AdvancedPostEditor({
                   />
                 </div>
               )}
+
+              {/* Author */}
+              <div>
+                <label className="mb-1.5 block text-xs font-medium text-[var(--text-muted)]">Author</label>
+                <AuthorSelect
+                  options={authorOptions}
+                  value={formData.author_id}
+                  onChange={(value) => updateField('author_id', value)}
+                  placeholder="Select author..."
+                />
+              </div>
+
+              {/* Category */}
+              <div>
+                <label className="mb-1.5 block text-xs font-medium text-[var(--text-muted)]">Category</label>
+                <CategorySelect
+                  options={categoryOptions}
+                  value={formData.category_id}
+                  onChange={(value) => updateField('category_id', value)}
+                  placeholder="Select category..."
+                />
+              </div>
+
+              {/* Tags */}
+              <TagInput selectedTags={selectedTags} onChange={setSelectedTags} />
+              <p className="mt-1.5 text-[11px] leading-relaxed text-[var(--text-muted)]">
+                Add 3–6 tags that describe the main players or topics in your story.
+                Use short, lowercase tags and select existing ones when possible.
+                <br />
+                <span className="text-[var(--text-secondary)]">Examples: caleb-williams trade analysis draft offense bullpen</span>
+              </p>
+
+              {/* Featured Image */}
+              <div>
+                <label className="mb-1.5 block text-xs font-medium text-[var(--text-muted)]">Featured Image</label>
+                {formData.featured_image ? (
+                  <div className="group relative aspect-video overflow-hidden rounded-lg bg-[var(--bg-tertiary)]">
+                    <Image
+                      src={formData.featured_image}
+                      alt="Featured"
+                      fill
+                      className="object-cover"
+                    />
+                    <div className="absolute inset-0 bg-black/50 opacity-0 transition-opacity group-hover:opacity-100">
+                      <div className="flex h-full items-center justify-center gap-2">
+                        <label className="cursor-pointer rounded bg-white px-2 py-1 text-xs font-medium text-zinc-900 hover:bg-zinc-100">
+                          Change
+                          <input type="file" accept="image/*" onChange={handleImageUpload} className="hidden" />
+                        </label>
+                        <button
+                          type="button"
+                          onClick={() => updateField('featured_image', '')}
+                          className="rounded bg-red-500 px-2 py-1 text-xs font-medium text-white hover:bg-red-600"
+                        >
+                          Remove
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="relative">
+                    <input
+                      type="file"
+                      id="featured-image-upload-top"
+                      accept="image/*"
+                      onChange={handleImageUpload}
+                      className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
+                    />
+                    <div className="flex cursor-pointer flex-col items-center justify-center rounded-lg border-2 border-dashed border-[var(--border-default)] bg-[var(--bg-tertiary)] py-4 hover:border-[var(--accent-red)] transition-colors">
+                      {uploadingImage ? (
+                        <svg className="h-5 w-5 animate-spin text-[var(--text-muted)]" fill="none" viewBox="0 0 24 24">
+                          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                        </svg>
+                      ) : (
+                        <>
+                          <svg className="h-5 w-5 text-[var(--text-muted)]" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909m-18 3.75h16.5a1.5 1.5 0 001.5-1.5V6a1.5 1.5 0 00-1.5-1.5H3.75A1.5 1.5 0 002.25 6v12a1.5 1.5 0 001.5 1.5zm10.5-11.25h.008v.008h-.008V8.25zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z" />
+                          </svg>
+                          <p className="mt-1 text-xs text-[var(--text-muted)]">Add image</p>
+                        </>
+                      )}
+                    </div>
+                  </div>
+                )}
+              </div>
 
               {/* Push Notification */}
               <div className="border-t border-[var(--border-default)] pt-4">
@@ -1792,201 +1911,9 @@ export default function AdvancedPostEditor({
                 )}
               </div>
 
-              {/* PostIQ Auto-Insert Features */}
-              <div className="border-t border-[var(--border-default)] pt-4">
-                <div className="flex items-center gap-2 mb-3">
-                  <svg className="w-4 h-4 text-[var(--accent-red)]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
-                  </svg>
-                  <span className="text-xs font-semibold uppercase tracking-wide text-[var(--text-muted)]">PostIQ Auto-Insert</span>
-                </div>
-
-                {/* Auto-Insert Chart */}
-                <label className="flex items-start gap-2 cursor-pointer mb-3">
-                  <input
-                    type="checkbox"
-                    checked={autoInsertChart}
-                    onChange={(e) => setAutoInsertChart(e.target.checked)}
-                    className="h-4 w-4 mt-0.5 rounded border-[var(--border-default)] text-[var(--accent-red)] focus:ring-[var(--accent-red)]"
-                  />
-                  <div>
-                    <span className="text-sm font-medium text-[var(--text-primary)]">Insert Chart</span>
-                    <p className="text-xs text-[var(--text-muted)]">
-                      PostIQ will analyze content and add a relevant chart when publishing
-                    </p>
-                  </div>
-                </label>
-
-                {/* Auto-Add Poll */}
-                <label className="flex items-start gap-2 cursor-pointer">
-                  <input
-                    type="checkbox"
-                    checked={autoAddPoll}
-                    onChange={(e) => setAutoAddPoll(e.target.checked)}
-                    className="h-4 w-4 mt-0.5 rounded border-[var(--border-default)] text-[var(--accent-red)] focus:ring-[var(--accent-red)]"
-                  />
-                  <div>
-                    <span className="text-sm font-medium text-[var(--text-primary)]">Add Poll</span>
-                    <p className="text-xs text-[var(--text-muted)]">
-                      PostIQ will create a fan engagement poll based on article content
-                    </p>
-                  </div>
-                </label>
-
-                {autoInsertingContent && (
-                  <div className="mt-3 flex items-center gap-2 text-xs text-[var(--accent-red)]">
-                    <div className="h-3 w-3 border-2 border-[var(--accent-red)] border-t-transparent rounded-full animate-spin" />
-                    <span>PostIQ is generating {autoInsertingContent}...</span>
-                  </div>
-                )}
-              </div>
-
-              {/* Author */}
-              <div>
-                <label className="mb-1.5 block text-xs font-medium text-[var(--text-muted)]">Author</label>
-                <AuthorSelect
-                  options={authorOptions}
-                  value={formData.author_id}
-                  onChange={(value) => updateField('author_id', value)}
-                  placeholder="Select author..."
-                />
-              </div>
-
-              {/* Category */}
-              <div>
-                <label className="mb-1.5 block text-xs font-medium text-[var(--text-muted)]">Category</label>
-                <CategorySelect
-                  options={categoryOptions}
-                  value={formData.category_id}
-                  onChange={(value) => updateField('category_id', value)}
-                  placeholder="Select category..."
-                />
-              </div>
-
-              {/* Tags */}
-              <TagInput selectedTags={selectedTags} onChange={setSelectedTags} />
-
-              {/* Featured Image */}
-              <div>
-                <label className="mb-1.5 block text-xs font-medium text-[var(--text-muted)]">Featured Image</label>
-                {formData.featured_image ? (
-                  <div className="group relative aspect-video overflow-hidden rounded-lg bg-[var(--bg-tertiary)]">
-                    <Image
-                      src={formData.featured_image}
-                      alt="Featured"
-                      fill
-                      className="object-cover"
-                    />
-                    <div className="absolute inset-0 bg-black/50 opacity-0 transition-opacity group-hover:opacity-100">
-                      <div className="flex h-full items-center justify-center gap-2">
-                        <label className="cursor-pointer rounded bg-white px-2 py-1 text-xs font-medium text-zinc-900 hover:bg-zinc-100">
-                          Change
-                          <input type="file" accept="image/*" onChange={handleImageUpload} className="hidden" />
-                        </label>
-                        <button
-                          type="button"
-                          onClick={() => updateField('featured_image', '')}
-                          className="rounded bg-red-500 px-2 py-1 text-xs font-medium text-white hover:bg-red-600"
-                        >
-                          Remove
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-                ) : (
-                  <div className="relative">
-                    <input
-                      type="file"
-                      id="featured-image-upload"
-                      accept="image/*"
-                      onChange={handleImageUpload}
-                      className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
-                    />
-                    <div className="flex cursor-pointer flex-col items-center justify-center rounded-lg border-2 border-dashed border-[var(--border-default)] bg-[var(--bg-tertiary)] py-4 hover:border-[var(--accent-red)] transition-colors">
-                      {uploadingImage ? (
-                        <svg className="h-5 w-5 animate-spin text-[var(--text-muted)]" fill="none" viewBox="0 0 24 24">
-                          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
-                        </svg>
-                      ) : (
-                        <>
-                          <svg className="h-5 w-5 text-[var(--text-muted)]" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
-                            <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909m-18 3.75h16.5a1.5 1.5 0 001.5-1.5V6a1.5 1.5 0 00-1.5-1.5H3.75A1.5 1.5 0 002.25 6v12a1.5 1.5 0 001.5 1.5zm10.5-11.25h.008v.008h-.008V8.25zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z" />
-                          </svg>
-                          <p className="mt-1 text-xs text-[var(--text-muted)]">Add image</p>
-                        </>
-                      )}
-                    </div>
-                  </div>
-                )}
-              </div>
             </div>
 
-            {/* PostIQ Tools */}
-            <div className="mt-6 pt-6 border-t border-[var(--border-default)]">
-              <p className="mb-3 text-xs font-semibold uppercase tracking-wide text-[#D6B05E]">PostIQ Tools</p>
-              <div className="grid grid-cols-2 gap-2">
-                <button
-                  type="button"
-                  onClick={() => runAI('headlines')}
-                  disabled={aiLoading === 'headlines' || !formData.title || !formData.content}
-                  className="flex flex-col items-center justify-center gap-1 rounded-lg border border-[var(--border-default)] bg-[var(--bg-tertiary)] p-3 text-[var(--text-secondary)] hover:border-[#D6B05E] hover:bg-[#D6B05E]/5 transition-colors disabled:opacity-50"
-                >
-                  <svg className="h-5 w-5 text-[#D6B05E]" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25H12" />
-                  </svg>
-                  <span className="text-xs font-medium">{aiLoading === 'headlines' ? 'Loading...' : 'Headlines'}</span>
-                </button>
-                <button
-                  type="button"
-                  onClick={() => runAI('grammar')}
-                  disabled={aiLoading === 'grammar' || !formData.content}
-                  className="flex flex-col items-center justify-center gap-1 rounded-lg border border-[var(--border-default)] bg-[var(--bg-tertiary)] p-3 text-[var(--text-secondary)] hover:border-[#D6B05E] hover:bg-[#D6B05E]/5 transition-colors disabled:opacity-50"
-                >
-                  <svg className="h-5 w-5 text-[#D6B05E]" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                  </svg>
-                  <span className="text-xs font-medium">{aiLoading === 'grammar' ? 'Checking...' : 'Grammar'}</span>
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setShowTeamPicker(true)}
-                  className="flex flex-col items-center justify-center gap-1 rounded-lg border border-[var(--border-default)] bg-[var(--bg-tertiary)] p-3 text-[var(--text-secondary)] hover:border-[#D6B05E] hover:bg-[#D6B05E]/5 transition-colors"
-                >
-                  <span className="text-lg">💡</span>
-                  <span className="text-xs font-medium">Ideas</span>
-                </button>
-                <button
-                  type="button"
-                  onClick={() => openChartModal()}
-                  disabled={formData.content.length < 200}
-                  className="flex flex-col items-center justify-center gap-1 rounded-lg border border-[var(--border-default)] bg-[var(--bg-tertiary)] p-3 text-[var(--text-secondary)] hover:border-[#D6B05E] hover:bg-[#D6B05E]/5 transition-colors disabled:opacity-50"
-                >
-                  <svg className="h-5 w-5 text-[#D6B05E]" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 013 19.875v-6.75zM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V8.625zM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V4.125z" />
-                  </svg>
-                  <span className="text-xs font-medium">Add Chart</span>
-                </button>
-              </div>
-            </div>
 
-            {/* Stats */}
-            <div className="mt-6 pt-6 border-t border-[var(--border-default)]">
-              <div className="grid grid-cols-3 gap-2">
-                <div className="rounded-lg bg-[var(--bg-tertiary)] p-2 text-center">
-                  <p className="text-lg font-bold text-[var(--text-primary)]">{wordCount}</p>
-                  <p className="text-[10px] text-[var(--text-muted)]">Words</p>
-                </div>
-                <div className="rounded-lg bg-[var(--bg-tertiary)] p-2 text-center">
-                  <p className="text-lg font-bold text-[var(--text-primary)]">{Math.ceil(wordCount / 200)}</p>
-                  <p className="text-[10px] text-[var(--text-muted)]">Min Read</p>
-                </div>
-                <div className="rounded-lg bg-[var(--bg-tertiary)] p-2 text-center">
-                  <p className="text-lg font-bold text-[var(--text-primary)]">{formData.content.split(/<\/p>/i).length - 1 || 0}</p>
-                  <p className="text-[10px] text-[var(--text-muted)]">Paragraphs</p>
-                </div>
-              </div>
-            </div>
 
             {/* Keyboard Shortcut */}
             <div className="mt-4 text-center">
