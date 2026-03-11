@@ -22,6 +22,7 @@ interface SearchableSelectProps {
   label?: string
   isLoading?: boolean
   isClearable?: boolean
+  compact?: boolean
 }
 
 // Custom option component for categories with team icons
@@ -195,6 +196,7 @@ export function AuthorSelect({
   label,
   isLoading,
   isClearable = true,
+  compact = false,
 }: SearchableSelectProps) {
   const selectedOption = options.find((opt) => opt.value === value) || null
 
@@ -221,30 +223,51 @@ export function AuthorSelect({
         }}
         classNames={{
           control: () =>
-            'rounded-lg border border-zinc-300 bg-white px-1 py-0.5 dark:border-zinc-700 dark:bg-zinc-800 hover:border-zinc-400 dark:hover:border-zinc-600',
+            compact
+              ? 'rounded-lg border border-[var(--border-default)] bg-[var(--bg-tertiary)] px-2 hover:border-zinc-400 dark:hover:border-zinc-600'
+              : 'rounded-lg border border-zinc-300 bg-white px-1 py-0.5 dark:border-zinc-700 dark:bg-zinc-800 hover:border-zinc-400 dark:hover:border-zinc-600',
           menu: () =>
             'mt-1 rounded-lg border border-zinc-200 bg-white shadow-lg dark:border-zinc-700 dark:bg-zinc-900',
           menuList: () => 'py-1',
-          input: () => 'text-zinc-900 dark:text-zinc-100',
-          placeholder: () => 'text-zinc-400 dark:text-zinc-500',
+          input: () => compact ? 'text-sm text-zinc-900 dark:text-zinc-100' : 'text-zinc-900 dark:text-zinc-100',
+          placeholder: () => compact ? 'text-sm text-zinc-400 dark:text-zinc-500' : 'text-zinc-400 dark:text-zinc-500',
           indicatorSeparator: () => 'hidden',
-          dropdownIndicator: () => 'text-zinc-400 dark:text-zinc-500',
-          clearIndicator: () => 'text-zinc-400 hover:text-zinc-600 dark:text-zinc-500 dark:hover:text-zinc-300',
+          dropdownIndicator: () => compact ? 'text-zinc-400 dark:text-zinc-500 !p-1' : 'text-zinc-400 dark:text-zinc-500',
+          clearIndicator: () => compact ? 'text-zinc-400 hover:text-zinc-600 dark:text-zinc-500 dark:hover:text-zinc-300 !p-1' : 'text-zinc-400 hover:text-zinc-600 dark:text-zinc-500 dark:hover:text-zinc-300',
         }}
         styles={{
+          container: (base) => ({
+            ...base,
+            ...(compact ? { height: '32px' } : {}),
+          }),
           control: (base) => ({
             ...base,
-            backgroundColor: 'transparent',
-            borderColor: 'transparent',
             boxShadow: 'none',
-            minHeight: '42px',
+            ...(compact
+              ? { minHeight: '32px', height: '32px', overflow: 'hidden', backgroundColor: 'var(--bg-tertiary)', borderColor: 'var(--border-default)', borderWidth: '1px' }
+              : { minHeight: '42px', backgroundColor: 'transparent', borderColor: 'transparent' }),
+          }),
+          valueContainer: (base) => ({
+            ...base,
+            ...(compact ? { padding: '0 4px', height: '32px', display: 'flex', alignItems: 'center', flexWrap: 'nowrap' as const } : {}),
+          }),
+          indicatorsContainer: (base) => ({
+            ...base,
+            ...(compact ? { height: '32px' } : {}),
+          }),
+          input: (base) => ({
+            ...base,
+            ...(compact ? { margin: 0, padding: 0 } : {}),
           }),
           menu: (base) => ({
             ...base,
             backgroundColor: 'transparent',
           }),
           option: () => ({}),
-          singleValue: () => ({}),
+          singleValue: (base) => ({
+            ...base,
+            ...(compact ? { position: 'static' as const, transform: 'none', margin: 0, maxWidth: 'calc(100% - 8px)' } : {}),
+          }),
         }}
       />
     </div>

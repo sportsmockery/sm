@@ -1161,6 +1161,20 @@ export default function AdvancedPostEditor({
             Preview
           </button>
 
+          <div className="flex items-center gap-1.5">
+            <span className="text-xs text-[var(--text-muted)] whitespace-nowrap">Author:</span>
+            <div className="w-48">
+              <AuthorSelect
+                options={authorOptions}
+                value={formData.author_id}
+                onChange={(value) => updateField('author_id', value)}
+                placeholder="Select..."
+                compact
+                isClearable={false}
+              />
+            </div>
+          </div>
+
           <select
             value={formData.status}
             onChange={(e) => updateField('status', e.target.value)}
@@ -1609,17 +1623,6 @@ export default function AdvancedPostEditor({
                   />
                 </div>
               )}
-
-              {/* Author */}
-              <div>
-                <label className="mb-1.5 block text-xs font-medium text-[var(--text-muted)]">Author</label>
-                <AuthorSelect
-                  options={authorOptions}
-                  value={formData.author_id}
-                  onChange={(value) => updateField('author_id', value)}
-                  placeholder="Select author..."
-                />
-              </div>
 
               {/* Category */}
               <div>
