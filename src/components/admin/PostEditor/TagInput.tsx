@@ -130,7 +130,7 @@ function TagInfoPopover({ onClose }: { onClose: () => void }) {
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 24, marginTop: 16 }}>
             {/* Left column */}
             <div>
-              <div style={sectionTitle}>How Many Tags</div>
+              <div style={{ ...sectionTitle, marginTop: 0 }}>How Many Tags</div>
               <p style={bodyText}>
                 Use <strong>3–6 tags</strong> per article. Focus on the most important people, topics, or themes.
               </p>
