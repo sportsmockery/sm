@@ -1,7 +1,7 @@
 import { Metadata } from 'next'
 import Image from 'next/image'
 import { TeamHubLayout } from '@/components/team'
-import { CHICAGO_TEAMS, fetchNextGame } from '@/lib/team-config'
+import { CHICAGO_TEAMS, fetchNextGame, getMLBRecordLabel } from '@/lib/team-config'
 import { getCubsSchedule, getCubsSeparatedRecord, type CubsGame } from '@/lib/cubsData'
 
 const CUBS_LOGO = 'https://a.espncdn.com/i/teamlogos/mlb/500/chc.png'
@@ -38,8 +38,10 @@ export default async function CubsSchedulePage() {
   )
 
   // Count games by type
+  const springTrainingGames = schedule.filter(g => g.gameType === 'spring-training')
   const regularGames = schedule.filter(g => g.gameType === 'regular')
   const postseasonGames = schedule.filter(g => g.gameType === 'postseason')
+  const hasSpringTraining = springTrainingGames.length > 0
   const hasPostseason = postseasonGames.length > 0
 
   // Find next scheduled game
@@ -94,7 +96,7 @@ export default async function CubsSchedulePage() {
         <div className="glass-card glass-card-sm glass-card-static" style={{ marginBottom: '24px' }}>
           <div className="flex flex-wrap gap-6 justify-center text-center">
             <div>
-              <div style={{ fontSize: '11px', color: 'var(--sm-text-muted)', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '4px' }}>Regular Season</div>
+              <div style={{ fontSize: '11px', color: 'var(--sm-text-muted)', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '4px' }}>{getMLBRecordLabel()}</div>
               <div style={{ fontSize: '22px', fontWeight: 800, color: 'var(--sm-text)' }}>
                 {separatedRecord.regularSeason.wins}-{separatedRecord.regularSeason.losses}
               </div>
@@ -128,7 +130,7 @@ export default async function CubsSchedulePage() {
               Chicago Cubs 2025 Schedule
             </h2>
             <span style={{ fontSize: '14px', color: 'var(--sm-text-muted)' }}>
-              {regularGames.length} regular{hasPostseason ? ` + ${postseasonGames.length} playoff` : ''} games
+              {hasSpringTraining ? `${springTrainingGames.length} ST + ` : ''}{regularGames.length} regular{hasPostseason ? ` + ${postseasonGames.length} playoff` : ''} games
             </span>
           </div>
           <div>
@@ -147,6 +149,7 @@ function GameRow({ game }: { game: CubsGame }) {
   const isPast = game.status === 'final'
   const isInProgress = game.status === 'in_progress'
   const isPostseason = game.gameType === 'postseason'
+  const isSpringTraining = game.gameType === 'spring-training'
 
   const borderColor = isPast
     ? game.result === 'W' ? '#00D4FF' : '#BC0000'
@@ -164,6 +167,22 @@ function GameRow({ game }: { game: CubsGame }) {
     >
       <div className="grid grid-cols-[auto_1fr_auto] sm:grid-cols-[100px_1fr_140px] gap-4 items-center">
         <div className="flex-shrink-0">
+          {isSpringTraining && (
+            <span
+              style={{
+                display: 'inline-block',
+                padding: '2px 8px',
+                backgroundColor: 'rgba(0, 212, 255, 0.1)',
+                color: '#00D4FF',
+                fontSize: '11px',
+                borderRadius: '100px',
+                fontWeight: 700,
+                marginBottom: '4px',
+              }}
+            >
+              Spring Training
+            </span>
+          )}
           {isPostseason && (
             <span
               style={{

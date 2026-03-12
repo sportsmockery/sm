@@ -9,7 +9,7 @@ export interface SeasonStatus {
   sport: string
   isInSeason: boolean
   isOffseason: boolean
-  seasonPhase: 'preseason' | 'regular' | 'postseason' | 'offseason'
+  seasonPhase: 'preseason' | 'spring-training' | 'regular' | 'postseason' | 'offseason'
   currentSeason: number
   draftAvailable: boolean
   nextPhaseDate?: string
@@ -58,8 +58,8 @@ const SEASON_WINDOWS = {
     draftMonth: 7, // July
   },
   mlb: {
-    preseason: { start: { month: 2, day: 20 }, end: { month: 3, day: 28 } },
-    regular: { start: { month: 3, day: 28 }, end: { month: 10, day: 1 } },
+    preseason: { start: { month: 2, day: 20 }, end: { month: 3, day: 26 } },
+    regular: { start: { month: 3, day: 26 }, end: { month: 10, day: 1 } },
     postseason: { start: { month: 10, day: 1 }, end: { month: 11, day: 5 } },
     offseason: { start: { month: 11, day: 5 }, end: { month: 2, day: 20 } },
     draftMonth: 7, // July
@@ -83,8 +83,8 @@ export function getCurrentSeason(sport: string): number {
       // NBA/NHL use ending year: 2025-26 season = 2026
       return month < 10 ? year : year + 1
     case 'mlb':
-      // MLB uses calendar year
-      return month < 4 ? year - 1 : year
+      // MLB uses calendar year — spring training starts in Feb
+      return month < 2 ? year - 1 : year
     default:
       return year
   }
@@ -109,8 +109,8 @@ export function isInOffseason(sport: string): boolean {
       // NHL offseason: Jun - Sep
       return month >= 6 && month <= 9
     case 'mlb':
-      // MLB offseason: Oct - Mar
-      return month >= 10 || month <= 3
+      // MLB offseason: Nov - Feb (spring training starts ~Feb 20)
+      return month >= 11 || month <= 1
     default:
       return false
   }
@@ -121,13 +121,13 @@ export function isInOffseason(sport: string): boolean {
  */
 export function isInSeason(sport: string): boolean {
   const phase = getSeasonPhase(sport)
-  return phase === 'regular' || phase === 'postseason'
+  return phase === 'regular' || phase === 'postseason' || phase === 'spring-training'
 }
 
 /**
  * Get current season phase for a sport
  */
-export function getSeasonPhase(sport: string): 'preseason' | 'regular' | 'postseason' | 'offseason' {
+export function getSeasonPhase(sport: string): 'preseason' | 'spring-training' | 'regular' | 'postseason' | 'offseason' {
   const now = new Date()
   const month = now.getMonth() + 1
   const day = now.getDate()
@@ -153,7 +153,8 @@ export function getSeasonPhase(sport: string): 'preseason' | 'regular' | 'postse
 
   if (isInRange(windows.regular)) return 'regular'
   if (isInRange(windows.postseason)) return 'postseason'
-  if (isInRange(windows.preseason)) return 'preseason'
+  // MLB preseason = spring training
+  if (isInRange(windows.preseason)) return sport.toLowerCase() === 'mlb' ? 'spring-training' : 'preseason'
   return 'offseason'
 }
 

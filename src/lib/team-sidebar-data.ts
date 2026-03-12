@@ -4,7 +4,7 @@
  */
 
 import { TeamSeasonOverview, TeamPlayer, TeamTrend, TEAM_INFO } from './types'
-import { fetchTeamRecord, fetchNextGame, fetchLastGame } from './team-config'
+import { fetchTeamRecord, fetchNextGame, fetchLastGame, getMLBSeasonPhase } from './team-config'
 
 type TeamKey = 'bears' | 'bulls' | 'cubs' | 'blackhawks' | 'whitesox'
 
@@ -41,7 +41,11 @@ export async function getTeamSeasonOverview(teamKey: TeamKey): Promise<TeamSeaso
     const ties = record?.ties ?? 0
     const otl = (record as any)?.otLosses ?? 0
 
-    const standing = `${wins}-${losses}${ties > 0 ? `-${ties}` : ''}${otl > 0 ? `-${otl}` : ''} in ${TEAM_LEAGUE[teamKey]}`
+    // Add season phase label for MLB teams during spring training
+    const isMLB = teamKey === 'cubs' || teamKey === 'whitesox'
+    const mlbPhase = isMLB ? getMLBSeasonPhase() : null
+    const phaseLabel = mlbPhase === 'spring-training' ? ' (Spring Training)' : ''
+    const standing = `${wins}-${losses}${ties > 0 ? `-${ties}` : ''}${otl > 0 ? `-${otl}` : ''} in ${TEAM_LEAGUE[teamKey]}${phaseLabel}`
 
     return {
       teamSlug: TEAM_SLUG_MAP[teamKey],

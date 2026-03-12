@@ -116,6 +116,7 @@ export interface WhiteSoxGame {
   stadium: string | null
   tv: string | null
   innings: number | null
+  gameType: 'regular' | 'postseason' | 'preseason' | 'spring-training'
 }
 
 export interface WhiteSoxTeamStats {
@@ -534,12 +535,8 @@ export async function getWhiteSoxSchedule(season?: number): Promise<WhiteSoxGame
 
   if (!datalabAdmin) return []
 
-  // MLB regular season starts late March (earliest is ~March 18 for international games)
-  // Filter out spring training games
-  const seasonStartDate = `${targetSeason}-03-18`
-
-  // Get regular season games (max 162)
-  const { data: regularData, error: regularError } = await datalabAdmin
+  // Get all games for the season (spring training + regular + postseason)
+  const { data, error: queryError } = await datalabAdmin
     .from('whitesox_games_master')
     .select(`
       id,
@@ -557,44 +554,13 @@ export async function getWhiteSoxSchedule(season?: number): Promise<WhiteSoxGame
       game_type
     `)
     .eq('season', targetSeason)
-    .eq('game_type', 'regular')
-    .gte('game_date', seasonStartDate)
-    .order('game_date', { ascending: true })
-    .limit(MLB_REGULAR_SEASON_GAMES)
+    .order('game_date', { ascending: false })
 
-  // Get postseason games (no limit)
-  const { data: postseasonData } = await datalabAdmin
-    .from('whitesox_games_master')
-    .select(`
-      id,
-      game_date,
-      game_time,
-      season,
-      opponent,
-      opponent_full_name,
-      is_whitesox_home,
-      venue,
-      whitesox_score,
-      opponent_score,
-      whitesox_win,
-      broadcast,
-      game_type
-    `)
-    .eq('season', targetSeason)
-    .eq('game_type', 'postseason')
-    .order('game_date', { ascending: true })
-
-  const data = [...(regularData || []), ...(postseasonData || [])]
-    .sort((a, b) => new Date(b.game_date).getTime() - new Date(a.game_date).getTime())
-
-  if (regularError) return []
+  if (queryError) return []
 
   // If no games in current season, fall back to previous season
   if (!data || data.length === 0) {
-    const prevSeasonStartDate = `${targetSeason - 1}-03-18`
-
-    // Get previous season regular games (max 162)
-    const { data: prevRegular, error: prevError } = await datalabAdmin
+    const { data: prevData, error: prevError } = await datalabAdmin
       .from('whitesox_games_master')
       .select(`
         id,
@@ -612,39 +578,11 @@ export async function getWhiteSoxSchedule(season?: number): Promise<WhiteSoxGame
         game_type
       `)
       .eq('season', targetSeason - 1)
-      .eq('game_type', 'regular')
-      .gte('game_date', prevSeasonStartDate)
-      .order('game_date', { ascending: true })
-      .limit(MLB_REGULAR_SEASON_GAMES)
-
-    // Get previous season postseason games
-    const { data: prevPostseason } = await datalabAdmin
-      .from('whitesox_games_master')
-      .select(`
-        id,
-        game_date,
-        game_time,
-        season,
-        opponent,
-        opponent_full_name,
-        is_whitesox_home,
-        venue,
-        whitesox_score,
-        opponent_score,
-        whitesox_win,
-        broadcast,
-        game_type
-      `)
-      .eq('season', targetSeason - 1)
-      .eq('game_type', 'postseason')
-      .order('game_date', { ascending: true })
+      .order('game_date', { ascending: false })
 
     if (prevError) return []
 
-    const prevData = [...(prevRegular || []), ...(prevPostseason || [])]
-      .sort((a, b) => new Date(b.game_date).getTime() - new Date(a.game_date).getTime())
-
-    return prevData.map((g: any) => transformGame(g))
+    return (prevData || []).map((g: any) => transformGame(g))
   }
 
   return data.map((g: any) => transformGame(g))
@@ -680,6 +618,9 @@ function transformGame(game: any): WhiteSoxGame {
     stadium: game.venue,
     tv: game.broadcast,
     innings: null,
+    gameType: game.game_type === 'spring_training' ? 'spring-training'
+      : game.game_type === 'postseason' ? 'postseason'
+      : 'regular',
   }
 }
 
@@ -1043,13 +984,12 @@ export async function getAvailableSeasons(): Promise<number[]> {
 }
 
 function getCurrentSeason(): number {
-  // MLB season year - use 2024 until 2025 season has games
+  // MLB season year — spring training starts in Feb
   const now = new Date()
   const year = now.getFullYear()
   const month = now.getMonth() + 1
-  // MLB season typically starts in late March/April
-  // If before April, use previous year
-  if (month < 4) {
+  // Before February = still previous year's season
+  if (month < 2) {
     return year - 1
   }
   return year

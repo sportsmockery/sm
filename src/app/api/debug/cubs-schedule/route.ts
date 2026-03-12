@@ -31,7 +31,7 @@ export async function GET() {
     const year = now.getFullYear()
     const month = now.getMonth() + 1
     // MLB season logic: if before April, use previous year
-    const targetSeason = month < 4 ? year - 1 : year
+    const targetSeason = month < 2 ? year - 1 : year
     results.computedSeason = { year, month, targetSeason }
 
     const seasonStartDate = `${targetSeason}-03-18`
@@ -61,7 +61,7 @@ export async function GET() {
     const now = new Date()
     const year = now.getFullYear()
     const month = now.getMonth() + 1
-    const targetSeason = month < 4 ? year - 1 : year
+    const targetSeason = month < 2 ? year - 1 : year
     const seasonStartDate = `${targetSeason}-03-18`
 
     const { data, error } = await datalabAdmin

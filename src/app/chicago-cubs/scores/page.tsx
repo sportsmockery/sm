@@ -1,7 +1,7 @@
 import { Metadata } from 'next'
 import Link from 'next/link'
 import { TeamHubLayout } from '@/components/team'
-import { CHICAGO_TEAMS, fetchNextGame } from '@/lib/team-config'
+import { CHICAGO_TEAMS, fetchNextGame, getMLBRecordLabel } from '@/lib/team-config'
 import { getCubsRecentScores, getCubsSeparatedRecord } from '@/lib/cubsData'
 import BoxScoreClient from './BoxScoreClient'
 
@@ -50,7 +50,7 @@ export default async function CubsScoresPage() {
         <div className="glass-card glass-card-sm glass-card-static"  >
           <div className="flex flex-wrap gap-6 justify-center text-center">
             <div>
-              <div className="text-xs uppercase tracking-wider mb-1" style={{ color: 'var(--sm-text-muted)' }}>Regular Season</div>
+              <div className="text-xs uppercase tracking-wider mb-1" style={{ color: 'var(--sm-text-muted)' }}>{getMLBRecordLabel()}</div>
               <div className="text-xl font-bold" style={{ color: 'var(--sm-text)' }}>
                 {separatedRecord.regularSeason.wins}-{separatedRecord.regularSeason.losses}
               </div>

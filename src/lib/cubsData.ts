@@ -116,7 +116,7 @@ export interface CubsGame {
   stadium: string | null
   tv: string | null
   innings: number | null
-  gameType: 'regular' | 'postseason' | 'preseason'
+  gameType: 'regular' | 'postseason' | 'preseason' | 'spring-training'
 }
 
 export interface CubsSeparatedRecord {
@@ -544,13 +544,8 @@ export async function getCubsSchedule(season?: number): Promise<CubsGame[]> {
 
   if (!datalabAdmin) return []
 
-  // MLB regular season starts late March (earliest is Tokyo series ~March 18)
-  // Filter out spring training games
-  const seasonStartDate = `${targetSeason}-03-18`
-
-  // Get all games for the season (regular + postseason)
-  // Date filter excludes spring training; no game_type filter so we catch
-  // postseason regardless of how it's labeled in the database
+  // Include spring training, regular season, and postseason games
+  // game_type from DataLab: 'spring_training', 'regular', 'postseason'
   const { data, error } = await datalabAdmin
     .from('cubs_games_master')
     .select(`
@@ -569,15 +564,12 @@ export async function getCubsSchedule(season?: number): Promise<CubsGame[]> {
       game_type
     `)
     .eq('season', targetSeason)
-    .gte('game_date', seasonStartDate)
     .order('game_date', { ascending: false })
 
   if (error) return []
 
   // If no games in current season, fall back to previous season
   if (!data || data.length === 0) {
-    const prevSeasonStartDate = `${targetSeason - 1}-03-18`
-
     const { data: prevData, error: prevError } = await datalabAdmin
       .from('cubs_games_master')
       .select(`
@@ -596,7 +588,6 @@ export async function getCubsSchedule(season?: number): Promise<CubsGame[]> {
         game_type
       `)
       .eq('season', targetSeason - 1)
-      .gte('game_date', prevSeasonStartDate)
       .order('game_date', { ascending: false })
 
     if (prevError) return []
@@ -637,7 +628,9 @@ function transformGame(game: any): CubsGame {
     stadium: game.venue,
     tv: game.broadcast,
     innings: null,
-    gameType: (!game.game_type || game.game_type === 'regular') ? 'regular' : 'postseason',
+    gameType: game.game_type === 'spring_training' ? 'spring-training'
+      : game.game_type === 'postseason' ? 'postseason'
+      : 'regular',
   }
 }
 
@@ -1048,17 +1041,17 @@ export async function getAvailableSeasons(): Promise<number[]> {
 }
 
 function getCurrentSeason(): number {
-  // MLB season year - use 2024 until 2025 season has games
+  // MLB season year — spring training starts in Feb
   const now = new Date()
   const year = now.getFullYear()
   const month = now.getMonth() + 1
-  // MLB season typically starts in late March/April
-  // If before April, use previous year
-  if (month < 4) {
+  // Before February = still previous year's season
+  if (month < 2) {
     return year - 1
   }
   return year
 }
+
 
 /**
  * Search players by name or number

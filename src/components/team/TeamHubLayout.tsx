@@ -59,6 +59,7 @@ export interface TeamRecord {
   otLosses?: number
   pct?: string
   divisionRank?: string
+  recordLabel?: string  // e.g. "Spring Training" — defaults to "Record"
   postseason?: {
     wins: number
     losses: number
@@ -337,7 +338,7 @@ export default function TeamHubLayout({
                 {renderCountUpRecord()}
               </div>
               <div style={{ fontSize: '11px', textTransform: 'uppercase', letterSpacing: '1px', color: 'var(--sm-text-dim)', fontWeight: 600 }}>
-                Record
+                {record?.recordLabel || 'Record'}
               </div>
             </div>
 

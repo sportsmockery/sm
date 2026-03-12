@@ -299,7 +299,7 @@ Components use PascalCase. Suffix meanings:
 | NFL | Starting year | `2025` | `month >= 9 ? year : year - 1` |
 | NBA | **ENDING year** | `2026` | `month >= 10 ? year + 1 : year` |
 | NHL | **ENDING year** | `2026` | `month >= 10 ? year + 1 : year` |
-| MLB | Calendar year | `2025` | `month >= 4 ? year : year - 1` |
+| MLB | Calendar year | `2026` | `month >= 2 ? year : year - 1` (spring training starts Feb) |
 
 **Cap tables always use `season = 2026` regardless of sport.** No `season_start_year` column exists.
 

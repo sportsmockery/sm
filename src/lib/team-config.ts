@@ -15,6 +15,34 @@
 import type { TeamInfo, NextGameInfo, TeamRecord } from '@/components/team/TeamHubLayout'
 import { datalabAdmin as datalabClient } from './supabase-datalab'
 
+/**
+ * Get current MLB season phase based on date boundaries
+ * Spring training: Feb 20 - Mar 25
+ * Regular season: Mar 26 - Sep 30
+ * Postseason: Oct 1 - Nov 5
+ * Offseason: Nov 6 - Feb 19
+ */
+export function getMLBSeasonPhase(date?: Date): 'spring-training' | 'regular' | 'postseason' | 'offseason' {
+  const d = date || new Date()
+  const month = d.getMonth() + 1
+  const day = d.getDate()
+
+  if ((month === 10) || (month === 11 && day <= 5)) return 'postseason'
+  if ((month === 3 && day >= 26) || (month >= 4 && month <= 9)) return 'regular'
+  if ((month === 2 && day >= 20) || (month === 3 && day <= 25)) return 'spring-training'
+  return 'offseason'
+}
+
+/** Get human-readable label for the current MLB season phase */
+export function getMLBRecordLabel(): string {
+  const phase = getMLBSeasonPhase()
+  switch (phase) {
+    case 'spring-training': return 'Spring Training'
+    case 'postseason': return 'Postseason'
+    default: return 'Record'
+  }
+}
+
 export const CHICAGO_TEAMS: Record<string, TeamInfo> = {
   bears: {
     name: 'Chicago Bears',
@@ -122,9 +150,9 @@ function getCurrentSeason(league: string): number {
     return month < 10 ? year : year + 1
   }
 
-  // MLB: Calendar year season (Apr-Oct)
-  // Before April = still showing previous year's completed season
-  return month < 4 ? year - 1 : year
+  // MLB: Calendar year season — spring training starts in Feb
+  // Before February = still showing previous year's completed season
+  return month < 2 ? year - 1 : year
 }
 
 // Map team keys to their _seasons table name and column mapping
@@ -195,11 +223,15 @@ export async function fetchTeamRecord(teamKey: string): Promise<TeamRecord | nul
       }
     }
 
+    // Add season phase label for MLB teams (Spring Training, Postseason, etc.)
+    const recordLabel = teamInfo.league === 'MLB' ? getMLBRecordLabel() : undefined
+
     return {
       wins,
       losses,
       ties: ties > 0 ? ties : undefined,
       otLosses: otLosses > 0 ? otLosses : undefined,
+      recordLabel,
       postseason: (postWins > 0 || postLosses > 0) ? { wins: postWins, losses: postLosses } : undefined,
     }
   } catch (error) {
