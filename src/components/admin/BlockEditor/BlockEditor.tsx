@@ -3,7 +3,7 @@
 import React, { useState, useCallback } from 'react';
 import { Eye, PenLine, Undo2, Redo2, LayoutTemplate } from 'lucide-react';
 import type { ContentBlock, BlockType, ArticleDocument } from './types';
-import { createBlock } from './types';
+import { createBlock, migrateBlock } from './types';
 import { BlockInserter } from './BlockInserter';
 import { BlockPanel } from './BlockEditorPanels';
 import { BlockPreviewRenderer } from './BlockPreviewRenderer';
@@ -16,7 +16,9 @@ interface BlockEditorProps {
 }
 
 export function BlockEditor({ initialBlocks, initialTemplate, onChange }: BlockEditorProps) {
-  const [blocks, setBlocks] = useState<ContentBlock[]>(initialBlocks || []);
+  const [blocks, setBlocks] = useState<ContentBlock[]>(() =>
+    (initialBlocks || []).filter(b => b.type !== 'reaction-stream').map(migrateBlock)
+  );
   const [template, setTemplate] = useState(initialTemplate || '');
   const [mode, setMode] = useState<'edit' | 'preview'>('edit');
   const [history, setHistory] = useState<ContentBlock[][]>([]);

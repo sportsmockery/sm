@@ -186,7 +186,7 @@ export function PreviewDebateBlock({ children }: { children: React.ReactNode }) 
 /* ─── Rumor / Breaking Primitives (red) ─── */
 
 /** RumorConfidenceBlock — red confidence meter with editorial severity emphasis */
-export function RumorConfidenceBlock({ children }: { children: React.ReactNode }) {
+export function RumorConfidenceBlock({ children, label = 'Rumor Confidence' }: { children: React.ReactNode; label?: string }) {
   return (
     <PreviewSection>
       <div
@@ -199,7 +199,7 @@ export function RumorConfidenceBlock({ children }: { children: React.ReactNode }
         <div className="flex items-center gap-2 mb-3">
           <div className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: BRAND.red }} />
           <span className="text-[10px] font-bold uppercase tracking-widest" style={{ color: BRAND.red }}>
-            Rumor Confidence
+            {label}
           </span>
         </div>
         {children}

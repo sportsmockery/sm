@@ -3,6 +3,7 @@
 import React, { useState } from 'react';
 import {
   Newspaper, BarChart, Radio, Flame, MessageCircle, Info, X,
+  Trophy, Play,
 } from 'lucide-react';
 import type { ContentBlock } from './types';
 import { createBlock } from './types';
@@ -28,7 +29,7 @@ export const TEMPLATE_PRESETS: TemplatePreset[] = [
     blocks: () => [
       createBlock('paragraph'),
       createBlock('paragraph'),
-      createBlock('gm-interaction'),
+      createBlock('interaction'),
       createBlock('paragraph'),
       createBlock('scout-insight'),
       createBlock('paragraph'),
@@ -37,7 +38,7 @@ export const TEMPLATE_PRESETS: TemplatePreset[] = [
     ],
     infoContent: {
       howToUse: 'Write a standard news article. Start with your lede, add body paragraphs, then use the GM Pulse block for fan engagement. Scout Insight auto-generates an AI take on publish. Use the Update block for breaking news additions.',
-      blockList: ['Paragraph x4', 'GM Interaction', 'Scout Insight (auto-generated)', 'Update Block'],
+      blockList: ['Paragraph x4', 'GM Pulse', 'Scout Insight (auto-generated)', 'Update Block'],
     },
   },
   {
@@ -52,11 +53,11 @@ export const TEMPLATE_PRESETS: TemplatePreset[] = [
       createBlock('stats-chart'),
       createBlock('paragraph'),
       createBlock('stats-chart'),
-      createBlock('gm-interaction'),
+      createBlock('interaction'),
     ],
     infoContent: {
       howToUse: 'Build a data-driven comparison article. Open with analysis context, then use Player Comparison blocks for side-by-side matchups. Add Stats Chart blocks with data points to visualize trends. End with a GM Pulse poll to engage readers.',
-      blockList: ['Paragraph x3', 'Player Comparison', 'Stats Chart x2', 'GM Interaction'],
+      blockList: ['Paragraph x3', 'Player Comparison', 'Stats Chart x2', 'GM Pulse'],
     },
   },
   {
@@ -65,35 +66,40 @@ export const TEMPLATE_PRESETS: TemplatePreset[] = [
     description: 'Rumor confidence, trade scenarios, and mock draft picks',
     icon: Radio,
     blocks: () => [
-      createBlock('rumor-meter'),
+      createBlock('sentiment-meter'),
       createBlock('paragraph'),
       createBlock('trade-scenario'),
       createBlock('paragraph'),
       createBlock('mock-draft'),
       createBlock('paragraph'),
-      createBlock('gm-interaction'),
+      createBlock('interaction'),
     ],
     infoContent: {
-      howToUse: 'Lead with a Rumor Meter to set the confidence level (1-100). Write analysis around the rumor, add a Trade Scenario block showing the potential deal, and optionally include a Mock Draft pick. The GM Pulse at the end lets fans vote on the trade.',
-      blockList: ['Rumor Meter', 'Paragraph x3', 'Trade Scenario', 'Mock Draft', 'GM Interaction'],
+      howToUse: 'Lead with a Sentiment Meter (rumor mode) to set confidence level. Write analysis around the rumor, add a Trade Scenario block showing the potential deal, and optionally include Mock Draft picks. The GM Pulse at the end lets fans vote on the trade.',
+      blockList: ['Sentiment Meter', 'Paragraph x3', 'Trade Scenario', 'Mock Draft', 'GM Pulse'],
     },
   },
   {
     id: 'trending',
     label: 'Trending',
-    description: 'Trending topic with heat gauge, reactions, and fan polling',
+    description: 'Trending topic with heat gauge, hot takes, and fan polling',
     icon: Flame,
-    blocks: () => [
-      createBlock('heat-meter'),
-      createBlock('paragraph'),
-      createBlock('reaction-stream'),
-      createBlock('hot-take'),
-      createBlock('poll'),
-      createBlock('scout-insight'),
-    ],
+    blocks: () => {
+      const meter = createBlock('sentiment-meter');
+      if (meter.type === 'sentiment-meter') meter.data.mode = 'heat';
+      const poll = createBlock('interaction');
+      if (poll.type === 'interaction') poll.data.variant = 'poll';
+      return [
+        meter,
+        createBlock('paragraph'),
+        createBlock('hot-take'),
+        poll,
+        createBlock('scout-insight'),
+      ];
+    },
     infoContent: {
-      howToUse: 'Use for trending topics that are generating buzz. Start with the Heat Meter to show momentum, write your take, then add a Reaction Stream for community pulse. The Hot Take block highlights a bold opinion, and the Poll drives participation. Scout AI wraps up with analysis.',
-      blockList: ['Heat Meter', 'Paragraph', 'Reaction Stream', 'Hot Take', 'Poll', 'Scout Insight'],
+      howToUse: 'Use for trending topics generating buzz. Start with the Heat Meter to show momentum, write your take, drop a bold Hot Take, add a Fan Poll for participation, and Scout AI wraps up with analysis.',
+      blockList: ['Sentiment Meter (heat)', 'Paragraph', 'Hot Take', 'Fan Poll', 'Scout Insight'],
     },
   },
   {
@@ -110,6 +116,51 @@ export const TEMPLATE_PRESETS: TemplatePreset[] = [
     infoContent: {
       howToUse: 'Frame a debate topic with an intro paragraph, then use the Debate block to present PRO (cyan) and CON (red) arguments. Add a closing paragraph for your editorial take, and Scout AI delivers the final verdict.',
       blockList: ['Paragraph x2', 'Debate (PRO vs CON)', 'Scout Insight (AI verdict)'],
+    },
+  },
+  {
+    id: 'game-recap',
+    label: 'Game Recap',
+    description: 'Post-game summary with stats, quotes, and fan engagement',
+    icon: Trophy,
+    blocks: () => {
+      const poll = createBlock('interaction');
+      if (poll.type === 'interaction') poll.data.variant = 'poll';
+      return [
+        createBlock('paragraph'),
+        createBlock('stats-chart'),
+        createBlock('paragraph'),
+        createBlock('quote'),
+        createBlock('paragraph'),
+        createBlock('scout-insight'),
+        poll,
+      ];
+    },
+    infoContent: {
+      howToUse: 'Open with the game summary and score context. Add a stats chart for key game metrics, write your analysis, include a player or coach quote, continue with takeaways, let Scout AI add perspective, and close with a fan poll.',
+      blockList: ['Paragraph x3', 'Stats Chart', 'Quote', 'Scout Insight', 'Fan Poll'],
+    },
+  },
+  {
+    id: 'film-room',
+    label: 'Film Room',
+    description: 'Video analysis with stats and player comparison',
+    icon: Play,
+    blocks: () => {
+      const poll = createBlock('interaction');
+      if (poll.type === 'interaction') poll.data.variant = 'poll';
+      return [
+        createBlock('video'),
+        createBlock('paragraph'),
+        createBlock('stats-chart'),
+        createBlock('player-comparison'),
+        createBlock('scout-insight'),
+        poll,
+      ];
+    },
+    infoContent: {
+      howToUse: 'Lead with the film clip or highlight video, break down what you see in the paragraph, support with a stats chart, compare players if relevant, let Scout AI add analytics context, and close with a fan poll.',
+      blockList: ['Video', 'Paragraph', 'Stats Chart', 'Player Comparison', 'Scout Insight', 'Fan Poll'],
     },
   },
 ];
@@ -681,12 +732,6 @@ function TrendingPreview() {
       <BlockTag label="Paragraph" />
       <Paragraph>Connor Bedard&apos;s between-the-legs goal against the Nashville Predators last night has officially broken the internet. The highlight has surpassed 8 million views across social platforms in under 12 hours, making it the most-viewed Blackhawks clip since Patrick Kane&apos;s 2015 Stanley Cup winner.</Paragraph>
 
-      <ReactionStreamBlock reactions={[
-        { initials: 'MJ', user: '@MadHouseOnMadison', comment: "I've watched this 47 times and I still can't figure out how the puck got past the goalie. Bedard is operating on a different frequency.", time: '2 hours ago', color: LM.cyan },
-        { initials: 'KS', user: '@KaneStanley2015', comment: "Been a Hawks fan for 30 years. That goal is top 5 all-time at the United Center. The building was shaking.", time: '3 hours ago', color: LM.red },
-        { initials: 'TL', user: '@TheLoop_Chi', comment: "Bedard just put the entire NHL on notice. This kid is 20 years old. Generational.", time: '4 hours ago', color: LM.gold },
-      ]} />
-
       <HotTakeBlock text="Connor Bedard will win the Hart Trophy within the next two seasons. His skill ceiling is the highest we've seen since McDavid entered the league, and last night was proof that he's approaching it faster than anyone expected." />
 
       <PollBlock
@@ -724,12 +769,126 @@ function FanDebatePreview() {
   );
 }
 
+function QuoteBlock({ text, speaker, team }: { text: string; speaker: string; team?: string }) {
+  return (
+    <div style={{ marginBottom: 20 }}>
+      <BlockTag label="Quote" />
+      <blockquote style={{
+        borderRadius: 12, borderLeft: `4px solid ${LM.cyan}`,
+        background: 'rgba(0,212,255,0.03)', padding: 16,
+        borderTop: `1px solid ${LM.border}`, borderRight: `1px solid ${LM.border}`, borderBottom: `1px solid ${LM.border}`,
+      }}>
+        <div style={{ fontSize: 14, lineHeight: 1.6, fontStyle: 'italic', color: LM.text, marginBottom: 8 }}>
+          &ldquo;{text}&rdquo;
+        </div>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+          <span style={{ fontSize: 13, fontWeight: 500, color: LM.cyan }}>— {speaker}</span>
+          {team && <span style={{ fontSize: 12, color: LM.slate500 }}>{team}</span>}
+        </div>
+      </blockquote>
+    </div>
+  );
+}
+
+function GameRecapPreview() {
+  return (
+    <>
+      <BlockTag label="Paragraph" />
+      <Paragraph>The Bears took care of business at Soldier Field on Sunday, defeating the Detroit Lions 27-17 in a game that was never really in doubt after the first quarter. Caleb Williams threw for 312 yards and 3 touchdowns, looking every bit the franchise quarterback Chicago has been waiting for.</Paragraph>
+
+      <ChartBlock
+        title="Caleb Williams — Key Game Stats"
+        rows={[
+          { label: 'Pass Yds', value: '312', pct: 85 },
+          { label: 'Comp %', value: '71.4%', pct: 71 },
+          { label: 'TD', value: '3', pct: 75 },
+          { label: 'QBR', value: '94.2', pct: 94 },
+          { label: 'Rush Yds', value: '28', pct: 28 },
+        ]}
+      />
+
+      <BlockTag label="Paragraph" />
+      <Paragraph>The defense held the Lions to just 247 total yards, with Montez Sweat recording 2.5 sacks and a forced fumble that shifted momentum in the second quarter.</Paragraph>
+
+      <QuoteBlock
+        text="We&apos;re building something special here. The guys came out with the right mentality and executed at a high level on both sides of the ball."
+        speaker="Caleb Williams"
+        team="Chicago Bears"
+      />
+
+      <BlockTag label="Paragraph" />
+      <Paragraph>With the win, Chicago improves to 11-6 on the season and clinches a playoff berth for the first time since 2020. The Bears control their own destiny for the NFC North crown heading into the final week of the regular season.</Paragraph>
+
+      <InsightBlock text="Williams' performance was methodical — he went 8-for-10 on third downs, converting in situations where the Bears averaged just 34% conversion earlier in the season. The offensive line allowed zero sacks for the second consecutive game. This is a team peaking at exactly the right time." />
+
+      <PollBlock
+        label="Community Vote"
+        question="How far can this Bears team go in the playoffs?"
+        options={['Super Bowl or bust', 'NFC Championship Game', 'One-and-done in the Wild Card', 'Depends on the matchup']}
+      />
+    </>
+  );
+}
+
+function FilmRoomPreview() {
+  return (
+    <>
+      <div style={{ marginBottom: 20 }}>
+        <BlockTag label="Video" />
+        <div style={{
+          background: LM.glassBg, border: `1px solid ${LM.glassBorder}`, borderRadius: 12,
+          aspectRatio: '16/9', display: 'flex', alignItems: 'center', justifyContent: 'center',
+        }}>
+          <div style={{ textAlign: 'center' }}>
+            <div style={{ fontSize: 28, color: LM.slate400, marginBottom: 6 }}>&#9654;</div>
+            <span style={{ fontSize: 12, color: LM.slate500 }}>Film clip — Bears vs Lions, Q2 7:42</span>
+          </div>
+        </div>
+      </div>
+
+      <BlockTag label="Paragraph" />
+      <Paragraph>On this play, watch how Caleb Williams reads the Cover-2 shell and immediately identifies the soft spot in the zone. The pre-snap motion from the slot receiver tells him the safety is cheating inside, leaving the deep out route wide open. This is NFL-level processing from a second-year quarterback.</Paragraph>
+
+      <ChartBlock
+        title="Williams vs Cover-2 (2025 Season)"
+        rows={[
+          { label: 'Comp %', value: '74.2%', pct: 74 },
+          { label: 'YPA', value: '9.1', pct: 82 },
+          { label: 'TD:INT', value: '12:2', pct: 86 },
+          { label: 'Passer Rating', value: '118.4', pct: 90 },
+        ]}
+      />
+
+      <ComparisonBlock
+        p1={{ name: 'Caleb Williams', pos: 'QB — Chicago Bears' }}
+        p2={{ name: 'Jalen Hurts', pos: 'QB — Philadelphia Eagles' }}
+        stats={[
+          { name: 'YPA', v1: '8.4', v2: '7.1', pct1: 88, pct2: 72 },
+          { name: 'TD%', v1: '6.2%', v2: '5.8%', pct1: 82, pct2: 75 },
+          { name: 'QBR', v1: '72.4', v2: '65.1', pct1: 85, pct2: 76 },
+          { name: 'EPA/Play', v1: '0.21', v2: '0.14', pct1: 90, pct2: 65 },
+        ]}
+      />
+
+      <InsightBlock text="Williams' ability to manipulate the safety with his eyes before delivery is the most advanced pre-snap skill we've tracked from any QB in this draft class. His time-to-throw against two-high shells (2.41 seconds) ranks in the 95th percentile among all NFL quarterbacks this season." />
+
+      <PollBlock
+        label="Community Vote"
+        question="Is Caleb Williams already a top-10 NFL quarterback?"
+        options={['Yes — the film doesn\'t lie', 'Not yet — but he\'s on pace', 'Too early to say']}
+      />
+    </>
+  );
+}
+
 const PREVIEW_MAP: Record<string, React.FC> = {
   'standard-news': StandardNewsPreview,
   'stats-comparison': StatsComparisonPreview,
   'rumor-trade': RumorTradePreview,
   'trending': TrendingPreview,
   'fan-debate': FanDebatePreview,
+  'game-recap': GameRecapPreview,
+  'film-room': FilmRoomPreview,
 };
 
 /* ─── Modal ─── */

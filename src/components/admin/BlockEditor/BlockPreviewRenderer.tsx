@@ -3,6 +3,7 @@
 import React from 'react';
 import Image from 'next/image';
 import type { ContentBlock } from './types';
+import { SENTIMENT_CONFIGS } from './types';
 
 /* ─── Shared article components ─── */
 import { ScoutInsight } from '@/components/articles/ScoutInsight';
@@ -11,8 +12,6 @@ import { TradeScenarioCard } from '@/components/articles/TradeScenarioCard';
 import { PlayerComparison } from '@/components/articles/PlayerComparison';
 import { StatsChart } from '@/components/articles/StatsChart';
 import { DebateBlock as DebateBlockComponent } from '@/components/articles/DebateBlock';
-import { UpdateBlock as UpdateBlockComponent } from '@/components/articles/UpdateBlock';
-import { ReactionStream } from '@/components/articles/ReactionStream';
 
 /* ─── Shared preview primitives (reusable in feed renderer) ─── */
 import {
@@ -41,7 +40,7 @@ interface BlockPreviewRendererProps {
 
 function RenderBlock({ block }: { block: ContentBlock }) {
   switch (block.type) {
-    /* ─── Text ─── */
+    /* ─── Content ─── */
     case 'paragraph':
       return (
         <PreviewSection>
@@ -93,7 +92,62 @@ function RenderBlock({ block }: { block: ContentBlock }) {
         </PreviewSection>
       );
 
-    /* ─── Intelligence (cyan) ─── */
+    case 'quote':
+      if (!block.data.text) return <EmptyState label="Quote — add quote text" />;
+      return (
+        <PreviewSection>
+          <blockquote
+            className="rounded-xl border-l-4 p-5 my-4"
+            style={{
+              borderLeftColor: BRAND.cyan,
+              backgroundColor: 'rgba(0,212,255,0.03)',
+            }}
+          >
+            <p className="text-[16px] leading-relaxed italic mb-3" style={{ color: BRAND.white }}>
+              &ldquo;{block.data.text}&rdquo;
+            </p>
+            <footer className="flex items-center gap-2">
+              <span className="text-[13px] font-medium" style={{ color: BRAND.cyan }}>
+                — {block.data.speaker}
+              </span>
+              {block.data.team && (
+                <span className="text-[12px] text-slate-500">{block.data.team}</span>
+              )}
+            </footer>
+          </blockquote>
+        </PreviewSection>
+      );
+
+    case 'social-embed':
+      if (!block.data.url) return <EmptyState label="Social Embed — add a URL" />;
+      return (
+        <PreviewSection>
+          <div
+            className="rounded-xl p-4 flex items-center gap-3"
+            style={{
+              backgroundColor: 'rgba(255,255,255,0.04)',
+              border: '1px solid rgba(255,255,255,0.08)',
+            }}
+          >
+            <div
+              className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0"
+              style={{ backgroundColor: 'rgba(0,212,255,0.1)' }}
+            >
+              <span className="text-[12px] font-bold uppercase" style={{ color: BRAND.cyan }}>
+                {block.data.platform === 'twitter' ? 'X' : block.data.platform === 'youtube' ? 'YT' : block.data.platform === 'tiktok' ? 'TT' : 'IG'}
+              </span>
+            </div>
+            <div className="flex-1 min-w-0">
+              <span className="text-[10px] font-bold uppercase tracking-widest block" style={{ color: BRAND.cyan }}>
+                {block.data.platform} embed
+              </span>
+              <span className="text-[12px] text-slate-500 truncate block">{block.data.url}</span>
+            </div>
+          </div>
+        </PreviewSection>
+      );
+
+    /* ─── Analysis (cyan) ─── */
     case 'scout-insight':
       if (block.data.autoGenerate !== false && !block.data.insight) {
         return (
@@ -117,24 +171,6 @@ function RenderBlock({ block }: { block: ContentBlock }) {
         </InsightBlock>
       );
 
-    /* ─── Polls & Engagement (cyan / gold for predictions) ─── */
-    case 'gm-interaction':
-      if (!block.data.question) return <EmptyState label="GM Pulse — add a question" accent={BRAND.cyan} />;
-      return (
-        <PollBlock variant="gm-decision">
-          <GMInteraction question={block.data.question} options={block.data.options} reward={block.data.reward} />
-        </PollBlock>
-      );
-
-    case 'poll':
-      if (!block.data.question) return <EmptyState label="Fan Poll — add a question" accent={BRAND.cyan} />;
-      return (
-        <PollBlock variant={block.data.options.length > 2 ? 'multi' : 'binary'}>
-          <GMInteraction question={block.data.question} options={block.data.options} reward={block.data.reward} />
-        </PollBlock>
-      );
-
-    /* ─── Charts & Analytics (cyan) ─── */
     case 'stats-chart':
       if (block.data.dataPoints.length === 0) return <EmptyState label="Chart — add data points" accent={BRAND.cyan} />;
       return (
@@ -143,7 +179,6 @@ function RenderBlock({ block }: { block: ContentBlock }) {
         </ChartBlock>
       );
 
-    /* ─── Player Comparison (cyan) ─── */
     case 'player-comparison':
       if (!block.data.playerA.name && !block.data.playerB.name) return <EmptyState label="Player Comparison — add players" accent={BRAND.cyan} />;
       return (
@@ -152,7 +187,6 @@ function RenderBlock({ block }: { block: ContentBlock }) {
         </PlayerComparisonBlock>
       );
 
-    /* ─── Draft Picks (gold / cyan) ─── */
     case 'mock-draft':
       if (block.data.picks.length === 0) return <EmptyState label="Mock Draft — add draft picks" accent={BRAND.gold} />;
       return (
@@ -187,7 +221,6 @@ function RenderBlock({ block }: { block: ContentBlock }) {
         </DraftPickBlock>
       );
 
-    /* ─── Trades & Rumors (red) ─── */
     case 'trade-scenario':
       if (!block.data.teamA && !block.data.teamB) return <EmptyState label="Trade Scenario — set up both teams" accent={BRAND.red} />;
       return (
@@ -199,6 +232,90 @@ function RenderBlock({ block }: { block: ContentBlock }) {
             teamBReceives={block.data.teamBReceives}
           />
         </RumorBlock>
+      );
+
+    /* ─── Sentiment Meter (unified rumor/heat/confidence/panic) ─── */
+    case 'sentiment-meter': {
+      const config = SENTIMENT_CONFIGS[block.data.mode];
+      const segments = config.segments;
+      const activeLevel = block.data.level;
+      return (
+        <RumorConfidenceBlock label={config.label}>
+          <div className="flex gap-1">
+            {segments.map((seg, i) => (
+              <div key={seg} className="flex-1 flex flex-col items-center gap-1">
+                <div
+                  className="w-full h-2.5 rounded-full transition-all"
+                  style={{ backgroundColor: i < activeLevel ? BRAND.red : 'rgba(0,0,0,0.08)' }}
+                />
+                <span
+                  className="text-[10px] font-bold uppercase"
+                  style={{ color: i < activeLevel ? BRAND.red : '#A0A8B0' }}
+                >
+                  {seg}
+                </span>
+              </div>
+            ))}
+          </div>
+        </RumorConfidenceBlock>
+      );
+    }
+
+    /* ─── Fan Interaction ─── */
+    case 'interaction':
+      if (!block.data.question) return <EmptyState label={`${block.data.variant === 'gm-pulse' ? 'GM Pulse' : 'Fan Poll'} — add a question`} accent={BRAND.cyan} />;
+      return (
+        <PollBlock variant={block.data.variant === 'gm-pulse' ? 'gm-decision' : 'binary'}>
+          <GMInteraction question={block.data.question} options={block.data.options} reward={block.data.reward} />
+        </PollBlock>
+      );
+
+    case 'debate':
+      if (!block.data.proArgument && !block.data.conArgument) return <EmptyState label="Debate — add PRO and CON arguments" accent={BRAND.red} />;
+      return (
+        <PreviewDebateBlock>
+          <DebateBlockComponent proArgument={block.data.proArgument} conArgument={block.data.conArgument} reward={block.data.reward} />
+        </PreviewDebateBlock>
+      );
+
+    case 'hot-take':
+      if (!block.data.text) return <EmptyState label="Hot Take — add your bold claim" accent={BRAND.gold} />;
+      return (
+        <TopTakeBlock>
+          <p className="text-[16px] font-medium leading-relaxed" style={{ color: BRAND.white }}>{block.data.text}</p>
+        </TopTakeBlock>
+      );
+
+    case 'update':
+      if (!block.data.text) return <EmptyState label="Breaking Update — add update text" accent={BRAND.red} />;
+      return (
+        <BreakingUpdateBlock>
+          {block.data.timestamp && (
+            <span className="text-[13px] text-slate-400 mb-1 block">{block.data.timestamp}</span>
+          )}
+          <p className="text-sm leading-relaxed" style={{ color: BRAND.white }}>{block.data.text}</p>
+        </BreakingUpdateBlock>
+      );
+
+    /* ─── Utility ─── */
+    case 'divider':
+      return <hr className="my-8 border-0 h-px" style={{ backgroundColor: 'rgba(0,0,0,0.08)' }} />;
+
+    /* ─── Legacy blocks (should be migrated, but render gracefully) ─── */
+    case 'gm-interaction':
+      if (!block.data.question) return <EmptyState label="GM Pulse — add a question" accent={BRAND.cyan} />;
+      return (
+        <PollBlock variant="gm-decision">
+          <GMInteraction question={block.data.question} options={block.data.options} reward={block.data.reward} />
+        </PollBlock>
+      );
+
+    case 'poll':
+      if (!block.data.question) return <EmptyState label="Fan Poll — add a question" accent={BRAND.cyan} />;
+      return (
+        <PollBlock variant="binary">
+          <GMInteraction question={block.data.question} options={block.data.options} reward={block.data.reward} />
+        </PollBlock>
       );
 
     case 'rumor-meter': {
@@ -226,29 +343,11 @@ function RenderBlock({ block }: { block: ContentBlock }) {
       );
     }
 
-    /* ─── Breaking Updates (red — editorial callout) ─── */
-    case 'update':
-      if (!block.data.text) return <EmptyState label="Breaking Update — add update text" accent={BRAND.red} />;
-      return (
-        <BreakingUpdateBlock>
-          {block.data.timestamp && (
-            <span className="text-[13px] text-slate-400 mb-1 block">{block.data.timestamp}</span>
-          )}
-          <p className="text-sm leading-relaxed" style={{ color: BRAND.white }}>{block.data.text}</p>
-        </BreakingUpdateBlock>
-      );
-
-    /* ─── Heat Meter (red) ─── */
     case 'heat-meter': {
       const levels = ['Warm', 'Hot', 'Nuclear'] as const;
       const activeIdx = levels.indexOf(block.data.level);
       return (
-        <RumorConfidenceBlock>
-          <div className="flex items-center gap-2 mb-3 -mt-1">
-            <span className="text-[10px] font-bold uppercase tracking-widest" style={{ color: BRAND.red }}>
-              Heat Meter
-            </span>
-          </div>
+        <RumorConfidenceBlock label="Heat Meter">
           <div className="flex gap-1">
             {levels.map((l, i) => (
               <div key={l} className="flex-1 flex flex-col items-center gap-1">
@@ -269,67 +368,7 @@ function RenderBlock({ block }: { block: ContentBlock }) {
       );
     }
 
-    /* ─── Debate (red) ─── */
-    case 'debate':
-      if (!block.data.proArgument && !block.data.conArgument) return <EmptyState label="Debate — add PRO and CON arguments" accent={BRAND.red} />;
-      return (
-        <PreviewDebateBlock>
-          <DebateBlockComponent proArgument={block.data.proArgument} conArgument={block.data.conArgument} reward={block.data.reward} />
-        </PreviewDebateBlock>
-      );
-
-    /* ─── Engagement ─── */
-    case 'reaction-stream': {
-      const rsEnabled = block.data.enabled;
-      const rsPreview = block.data.previewItems ?? [];
-      const rsAvailable = (block.data.availableCount ?? 0) > 0;
-      const rsMaxItems = block.data.maxItems ?? 5;
-
-      // Disabled state
-      if (!rsEnabled) {
-        return (
-          <PreviewSection>
-            <div
-              className="rounded-xl px-5 py-4 flex items-center gap-3"
-              style={{ backgroundColor: 'rgba(0,0,0,0.03)', border: '1px dashed rgba(0,0,0,0.08)' }}
-            >
-              <div className="w-2 h-2 rounded-full shrink-0" style={{ backgroundColor: '#64748b', opacity: 0.5 }} />
-              <span className="text-[13px] text-slate-500">Reaction Stream — disabled</span>
-            </div>
-          </PreviewSection>
-        );
-      }
-
-      // Enabled with preview data available
-      if (rsPreview.length > 0) {
-        return (
-          <PreviewSection>
-            <ReactionStream reactions={rsPreview.slice(0, rsMaxItems)} />
-          </PreviewSection>
-        );
-      }
-
-      // Enabled with known available reactions but no preview items loaded
-      if (rsAvailable) {
-        return (
-          <PreviewSection>
-            <div
-              className="rounded-xl px-5 py-4 flex items-center gap-3"
-              style={{ backgroundColor: 'rgba(0,212,255,0.03)', border: '1px solid rgba(0,212,255,0.1)' }}
-            >
-              <div className="w-2 h-2 rounded-full shrink-0" style={{ backgroundColor: BRAND.cyan }} />
-              <div>
-                <span className="text-[13px] font-medium" style={{ color: BRAND.cyan }}>Reaction Stream</span>
-                <span className="text-[12px] text-slate-500 block">
-                  {block.data.availableCount} reactions available — will render on publish.
-                </span>
-              </div>
-            </div>
-          </PreviewSection>
-        );
-      }
-
-      // Enabled but no reactions available yet
+    case 'reaction-stream':
       return (
         <PreviewSection>
           <div
@@ -337,29 +376,10 @@ function RenderBlock({ block }: { block: ContentBlock }) {
             style={{ backgroundColor: 'rgba(0,0,0,0.03)', border: '1px dashed rgba(0,0,0,0.08)' }}
           >
             <div className="w-2 h-2 rounded-full shrink-0" style={{ backgroundColor: '#64748b', opacity: 0.5 }} />
-            <div>
-              <span className="text-[13px] text-slate-400">Reaction Stream</span>
-              <span className="text-[12px] text-slate-500 block">
-                Will appear when fan reactions are available.
-              </span>
-            </div>
+            <span className="text-[13px] text-slate-500">Reaction Stream — platform managed</span>
           </div>
         </PreviewSection>
       );
-    }
-
-    /* ─── Premium / Gold ─── */
-    case 'hot-take':
-      if (!block.data.text) return <EmptyState label="Hot Take — add your bold claim" accent={BRAND.gold} />;
-      return (
-        <TopTakeBlock>
-          <p className="text-[16px] font-medium leading-relaxed" style={{ color: BRAND.white }}>{block.data.text}</p>
-        </TopTakeBlock>
-      );
-
-    /* ─── Utility ─── */
-    case 'divider':
-      return <hr className="my-8 border-0 h-px" style={{ backgroundColor: 'rgba(0,0,0,0.08)' }} />;
 
     default:
       return null;

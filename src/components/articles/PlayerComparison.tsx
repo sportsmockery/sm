@@ -13,6 +13,7 @@ interface StatComparison {
   label: string;
   playerA: number;
   playerB: number;
+  higherWins?: boolean;
   format?: string;
 }
 
@@ -22,22 +23,27 @@ interface PlayerComparisonProps {
   stats: StatComparison[];
 }
 
-function StatBar({ label, valueA, valueB, isVisible }: {
+function StatBar({ label, valueA, valueB, higherWins = true, isVisible }: {
   label: string;
   valueA: number;
   valueB: number;
+  higherWins?: boolean;
   isVisible: boolean;
 }) {
   const max = Math.max(valueA, valueB) * 1.15;
   const pctA = (valueA / max) * 100;
   const pctB = (valueB / max) * 100;
 
+  // Determine which player "wins" this stat
+  const aWins = higherWins ? valueA >= valueB : valueA <= valueB;
+  const bWins = !aWins;
+
   return (
     <div className="mb-4">
-      <div className="flex justify-between text-xs text-slate-400 mb-1.5">
-        <span>{valueA.toFixed(1)}</span>
+      <div className="flex justify-between text-xs mb-1.5">
+        <span style={{ color: aWins ? '#00D4FF' : '#64748b', fontWeight: aWins ? 600 : 400 }}>{valueA.toFixed(1)}</span>
         <span className="font-medium text-slate-300">{label}</span>
-        <span>{valueB.toFixed(1)}</span>
+        <span style={{ color: bWins ? '#BC0000' : '#64748b', fontWeight: bWins ? 600 : 400 }}>{valueB.toFixed(1)}</span>
       </div>
       <div className="flex gap-1">
         <div className="flex-1 flex justify-end">
@@ -46,7 +52,7 @@ function StatBar({ label, valueA, valueB, isVisible }: {
               className="h-full rounded-full transition-all duration-700 ease-out ml-auto"
               style={{
                 width: isVisible ? `${pctA}%` : '0%',
-                backgroundColor: '#00D4FF',
+                backgroundColor: aWins ? '#00D4FF' : 'rgba(0,212,255,0.3)',
               }}
             />
           </div>
@@ -57,7 +63,7 @@ function StatBar({ label, valueA, valueB, isVisible }: {
               className="h-full rounded-full transition-all duration-700 ease-out"
               style={{
                 width: isVisible ? `${pctB}%` : '0%',
-                backgroundColor: '#BC0000',
+                backgroundColor: bWins ? '#BC0000' : 'rgba(188,0,0,0.3)',
               }}
             />
           </div>
@@ -113,6 +119,7 @@ export function PlayerComparison({ playerA, playerB, stats }: PlayerComparisonPr
           label={stat.label}
           valueA={stat.playerA}
           valueB={stat.playerB}
+          higherWins={stat.higherWins}
           isVisible={isVisible}
         />
       ))}

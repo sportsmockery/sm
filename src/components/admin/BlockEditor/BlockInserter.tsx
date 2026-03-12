@@ -3,18 +3,18 @@
 import React, { useState, useRef, useEffect } from 'react';
 import {
   Plus, X, Type, Heading, ImageIcon, Play, Minus,
-  Sparkles, Vote, BarChart3, Users, BarChart,
-  ArrowRightLeft, Thermometer, List, Swords, Flame,
-  MessageCircle, Bell,
+  Sparkles, Vote, BarChart, Users, ArrowRightLeft,
+  Thermometer, List, Swords, Flame, Bell,
+  Quote, Share2,
 } from 'lucide-react';
 import { BLOCK_CATEGORIES, type BlockType } from './types';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const ICON_MAP: Record<string, any> = {
   Type, Heading, Image: ImageIcon, Play, Minus,
-  Sparkles, Vote, BarChart3, Users, BarChart,
-  ArrowRightLeft, Thermometer, List, Swords, Flame,
-  MessageCircle, Bell,
+  Sparkles, Vote, BarChart, Users, ArrowRightLeft,
+  Thermometer, List, Swords, Flame, Bell,
+  Quote, Share2,
 };
 
 interface BlockInserterProps {
@@ -89,8 +89,8 @@ export function BlockInserter({ onInsert }: BlockInserterProps) {
 
           {/* Categories */}
           {filteredCategories.map((cat) => {
-            const catAccent = cat.label === 'Engagement' ? '#BC0000' : '#00D4FF';
-            const catAccentBg = cat.label === 'Engagement' ? 'rgba(188,0,0,0.1)' : 'rgba(0,212,255,0.1)';
+            const catAccent = cat.label === 'Fan Interaction' ? '#BC0000' : '#00D4FF';
+            const catAccentBg = cat.label === 'Fan Interaction' ? 'rgba(188,0,0,0.1)' : 'rgba(0,212,255,0.1)';
             return (
               <div key={cat.label}>
                 <div className="px-3 pt-3 pb-1">
@@ -100,7 +100,7 @@ export function BlockInserter({ onInsert }: BlockInserterProps) {
                 </div>
                 {cat.blocks.map((block) => {
                   const Icon = ICON_MAP[block.icon] || Type;
-                  const isRedBlock = ['rumor-meter', 'heat-meter', 'hot-take', 'update'].includes(block.type);
+                  const isRedBlock = ['sentiment-meter', 'hot-take', 'update', 'debate'].includes(block.type);
                   const accent = isRedBlock ? '#BC0000' : catAccent;
                   const accentBg = isRedBlock ? 'rgba(188,0,0,0.1)' : catAccentBg;
                   return (

@@ -2,7 +2,8 @@
 
 import React from 'react';
 import { Trash2, GripVertical, ChevronUp, ChevronDown } from 'lucide-react';
-import type { ContentBlock } from './types';
+import type { ContentBlock, SentimentMode, InteractionVariant, SocialPlatform } from './types';
+import { SENTIMENT_CONFIGS } from './types';
 
 // Shared wrapper for each block's edit panel
 function BlockShell({
@@ -61,7 +62,7 @@ function BlockShell({
   );
 }
 
-// Input helper
+// Input helpers
 function Field({ label, children }: { label: string; children: React.ReactNode }) {
   return (
     <label className="block mb-3">
@@ -120,6 +121,28 @@ function NumberInput({ value, onChange, min, max }: { value: number; onChange: (
   );
 }
 
+function ToggleChips({ value, onChange, options }: { value: string; onChange: (v: string) => void; options: { value: string; label: string }[] }) {
+  return (
+    <div className="flex gap-2 flex-wrap">
+      {options.map((o) => (
+        <button
+          key={o.value}
+          type="button"
+          onClick={() => onChange(o.value)}
+          className="px-3 py-1.5 rounded-lg text-xs font-bold uppercase tracking-wide transition-all"
+          style={{
+            backgroundColor: value === o.value ? '#00D4FF' : 'rgba(0,0,0,0.05)',
+            color: value === o.value ? '#ffffff' : '#6b7280',
+            border: `1px solid ${value === o.value ? '#00D4FF' : 'rgba(0,0,0,0.1)'}`,
+          }}
+        >
+          {o.label}
+        </button>
+      ))}
+    </div>
+  );
+}
+
 // Block-specific edit panels
 
 interface BlockPanelProps<T extends ContentBlock = ContentBlock> {
@@ -129,6 +152,8 @@ interface BlockPanelProps<T extends ContentBlock = ContentBlock> {
   onMoveUp?: () => void;
   onMoveDown?: () => void;
 }
+
+// ─── Content Blocks ───
 
 export function ParagraphPanel({ block, onChange, onDelete, onMoveUp, onMoveDown }: BlockPanelProps) {
   if (block.type !== 'paragraph') return null;
@@ -201,6 +226,54 @@ export function VideoPanel({ block, onChange, onDelete, onMoveUp, onMoveDown }: 
   );
 }
 
+export function QuotePanel({ block, onChange, onDelete, onMoveUp, onMoveDown }: BlockPanelProps) {
+  if (block.type !== 'quote') return null;
+  return (
+    <BlockShell label="Quote" onDelete={onDelete} onMoveUp={onMoveUp} onMoveDown={onMoveDown}>
+      <Field label="Quote Text">
+        <TextArea value={block.data.text} onChange={(text) => onChange({ ...block, data: { ...block.data, text } })} placeholder="&quot;We&apos;re going to compete every night...&quot;" rows={3} />
+      </Field>
+      <div className="flex gap-3">
+        <div className="flex-1">
+          <Field label="Speaker">
+            <TextInput value={block.data.speaker} onChange={(speaker) => onChange({ ...block, data: { ...block.data, speaker } })} placeholder="Matt Eberflus" />
+          </Field>
+        </div>
+        <div className="flex-1">
+          <Field label="Team (optional)">
+            <TextInput value={block.data.team || ''} onChange={(team) => onChange({ ...block, data: { ...block.data, team } })} placeholder="Chicago Bears" />
+          </Field>
+        </div>
+      </div>
+    </BlockShell>
+  );
+}
+
+export function SocialEmbedPanel({ block, onChange, onDelete, onMoveUp, onMoveDown }: BlockPanelProps) {
+  if (block.type !== 'social-embed') return null;
+  return (
+    <BlockShell label="Social Embed" onDelete={onDelete} onMoveUp={onMoveUp} onMoveDown={onMoveDown}>
+      <Field label="URL">
+        <TextInput value={block.data.url} onChange={(url) => onChange({ ...block, data: { ...block.data, url } })} placeholder="https://twitter.com/..." />
+      </Field>
+      <Field label="Platform">
+        <ToggleChips
+          value={block.data.platform}
+          onChange={(platform) => onChange({ ...block, data: { ...block.data, platform: platform as SocialPlatform } })}
+          options={[
+            { value: 'twitter', label: 'Twitter / X' },
+            { value: 'youtube', label: 'YouTube' },
+            { value: 'tiktok', label: 'TikTok' },
+            { value: 'instagram', label: 'Instagram' },
+          ]}
+        />
+      </Field>
+    </BlockShell>
+  );
+}
+
+// ─── Analysis Blocks ───
+
 export function ScoutInsightPanel({ block, onChange, onDelete, onMoveUp, onMoveDown }: BlockPanelProps) {
   if (block.type !== 'scout-insight') return null;
   const isAutoGenerate = block.data.autoGenerate !== false;
@@ -239,30 +312,93 @@ export function ScoutInsightPanel({ block, onChange, onDelete, onMoveUp, onMoveD
   );
 }
 
-export function GMInteractionPanel({ block, onChange, onDelete, onMoveUp, onMoveDown }: BlockPanelProps) {
-  if (block.type !== 'gm-interaction') return null;
+export function StatsChartPanel({ block, onChange, onDelete, onMoveUp, onMoveDown }: BlockPanelProps) {
+  if (block.type !== 'stats-chart') return null;
+  const d = block.data;
+
+  const addPoint = () => {
+    onChange({ ...block, data: { ...d, dataPoints: [...d.dataPoints, { label: '', value: 0 }] } });
+  };
+  const removePoint = (idx: number) => {
+    onChange({ ...block, data: { ...d, dataPoints: d.dataPoints.filter((_, i) => i !== idx) } });
+  };
+  const updatePoint = (idx: number, updates: Partial<{ label: string; value: number }>) => {
+    const dataPoints = [...d.dataPoints];
+    dataPoints[idx] = { ...dataPoints[idx], ...updates };
+    onChange({ ...block, data: { ...d, dataPoints } });
+  };
+
   return (
-    <BlockShell label="GM Pulse" accent="#00D4FF" onDelete={onDelete} onMoveUp={onMoveUp} onMoveDown={onMoveDown}>
-      <Field label="Question">
-        <TextInput value={block.data.question} onChange={(question) => onChange({ ...block, data: { ...block.data, question } })} placeholder="Should the Bears..." />
-      </Field>
-      <div className="flex gap-3">
-        <div className="flex-1">
-          <Field label="Option 1">
-            <TextInput value={block.data.options[0] || ''} onChange={(v) => { const options = [...block.data.options]; options[0] = v; onChange({ ...block, data: { ...block.data, options } }); }} />
-          </Field>
-        </div>
-        <div className="flex-1">
-          <Field label="Option 2">
-            <TextInput value={block.data.options[1] || ''} onChange={(v) => { const options = [...block.data.options]; options[1] = v; onChange({ ...block, data: { ...block.data, options } }); }} />
-          </Field>
-        </div>
-        <div className="w-20">
-          <Field label="Reward">
-            <NumberInput value={block.data.reward} onChange={(reward) => onChange({ ...block, data: { ...block.data, reward } })} min={1} max={20} />
-          </Field>
-        </div>
+    <BlockShell label="Chart" accent="#00D4FF" onDelete={onDelete} onMoveUp={onMoveUp} onMoveDown={onMoveDown}>
+      <div className="flex gap-3 mb-3">
+        <div className="flex-1"><Field label="Title"><TextInput value={d.title} onChange={(title) => onChange({ ...block, data: { ...d, title } })} /></Field></div>
+        <div className="w-28"><Field label="Type"><Select value={d.chartType} onChange={(chartType) => onChange({ ...block, data: { ...d, chartType: chartType as 'bar' | 'line' } })} options={[{ value: 'bar', label: 'Bar' }, { value: 'line', label: 'Line' }]} /></Field></div>
       </div>
+      <span className="text-[10px] font-bold uppercase tracking-widest text-slate-500 mb-2 block">Data Points</span>
+      {d.dataPoints.map((pt, idx) => (
+        <div key={idx} className="flex gap-2 mb-2 items-center">
+          <TextInput value={pt.label} onChange={(v) => updatePoint(idx, { label: v })} placeholder="Label" />
+          <NumberInput value={pt.value} onChange={(v) => updatePoint(idx, { value: v })} />
+          <button type="button" onClick={() => removePoint(idx)} className="text-slate-500 hover:text-[#BC0000] shrink-0"><Trash2 size={14} /></button>
+        </div>
+      ))}
+      <button type="button" onClick={addPoint} className="text-xs text-[#00D4FF] hover:underline">+ Add data point</button>
+    </BlockShell>
+  );
+}
+
+export function PlayerComparisonPanel({ block, onChange, onDelete, onMoveUp, onMoveDown }: BlockPanelProps) {
+  if (block.type !== 'player-comparison') return null;
+  const d = block.data;
+
+  const updatePlayer = (side: 'playerA' | 'playerB', updates: Partial<{ name: string; team: string; headshot: string }>) => {
+    onChange({ ...block, data: { ...d, [side]: { ...d[side], ...updates } } });
+  };
+  const addStat = () => {
+    onChange({ ...block, data: { ...d, stats: [...d.stats, { label: '', playerA: 0, playerB: 0, higherWins: true }] } });
+  };
+  const removeStat = (idx: number) => {
+    onChange({ ...block, data: { ...d, stats: d.stats.filter((_, i) => i !== idx) } });
+  };
+  const updateStat = (idx: number, updates: Partial<{ label: string; playerA: number; playerB: number; higherWins: boolean }>) => {
+    const stats = [...d.stats];
+    stats[idx] = { ...stats[idx], ...updates };
+    onChange({ ...block, data: { ...d, stats } });
+  };
+
+  return (
+    <BlockShell label="Player Comparison" accent="#00D4FF" onDelete={onDelete} onMoveUp={onMoveUp} onMoveDown={onMoveDown}>
+      <div className="grid grid-cols-2 gap-4 mb-4">
+        {(['playerA', 'playerB'] as const).map((side, i) => (
+          <div key={side}>
+            <span className="text-[10px] font-bold uppercase tracking-widest text-slate-500 mb-2 block">Player {i === 0 ? 'A' : 'B'}</span>
+            <Field label="Name"><TextInput value={d[side].name} onChange={(v) => updatePlayer(side, { name: v })} /></Field>
+            <Field label="Team"><TextInput value={d[side].team} onChange={(v) => updatePlayer(side, { team: v })} /></Field>
+            <Field label="Headshot URL"><TextInput value={d[side].headshot} onChange={(v) => updatePlayer(side, { headshot: v })} /></Field>
+          </div>
+        ))}
+      </div>
+      <span className="text-[10px] font-bold uppercase tracking-widest text-slate-500 mb-2 block">Stats</span>
+      {d.stats.map((stat, idx) => (
+        <div key={idx} className="flex gap-2 mb-2 items-center">
+          <TextInput value={stat.label} onChange={(v) => updateStat(idx, { label: v })} placeholder="Stat label" />
+          <NumberInput value={stat.playerA} onChange={(v) => updateStat(idx, { playerA: v })} />
+          <NumberInput value={stat.playerB} onChange={(v) => updateStat(idx, { playerB: v })} />
+          <label className="flex items-center gap-1 shrink-0 cursor-pointer" title={stat.higherWins !== false ? 'Higher = better' : 'Lower = better'}>
+            <input
+              type="checkbox"
+              checked={stat.higherWins !== false}
+              onChange={(e) => updateStat(idx, { higherWins: e.target.checked })}
+              className="h-3.5 w-3.5 rounded"
+              style={{ accentColor: '#00D4FF' }}
+            />
+            <span className="text-[10px] text-slate-500">{stat.higherWins !== false ? 'Hi' : 'Lo'}</span>
+          </label>
+          <button type="button" onClick={() => removeStat(idx)} className="text-slate-500 hover:text-[#BC0000] shrink-0"><Trash2 size={14} /></button>
+        </div>
+      ))}
+      <p className="text-[10px] text-slate-400 mb-2">Toggle Hi/Lo: Hi = higher is better (yards, points). Lo = lower is better (INTs, sacks allowed).</p>
+      <button type="button" onClick={addStat} className="text-xs text-[#00D4FF] hover:underline">+ Add stat</button>
     </BlockShell>
   );
 }
@@ -310,296 +446,6 @@ export function TradeScenarioPanel({ block, onChange, onDelete, onMoveUp, onMove
   );
 }
 
-export function PlayerComparisonPanel({ block, onChange, onDelete, onMoveUp, onMoveDown }: BlockPanelProps) {
-  if (block.type !== 'player-comparison') return null;
-  const d = block.data;
-
-  const updatePlayer = (side: 'playerA' | 'playerB', updates: Partial<{ name: string; team: string; headshot: string }>) => {
-    onChange({ ...block, data: { ...d, [side]: { ...d[side], ...updates } } });
-  };
-  const addStat = () => {
-    onChange({ ...block, data: { ...d, stats: [...d.stats, { label: '', playerA: 0, playerB: 0 }] } });
-  };
-  const removeStat = (idx: number) => {
-    onChange({ ...block, data: { ...d, stats: d.stats.filter((_, i) => i !== idx) } });
-  };
-  const updateStat = (idx: number, updates: Partial<{ label: string; playerA: number; playerB: number }>) => {
-    const stats = [...d.stats];
-    stats[idx] = { ...stats[idx], ...updates };
-    onChange({ ...block, data: { ...d, stats } });
-  };
-
-  return (
-    <BlockShell label="Player Comparison" accent="#00D4FF" onDelete={onDelete} onMoveUp={onMoveUp} onMoveDown={onMoveDown}>
-      <div className="grid grid-cols-2 gap-4 mb-4">
-        {(['playerA', 'playerB'] as const).map((side, i) => (
-          <div key={side}>
-            <span className="text-[10px] font-bold uppercase tracking-widest text-slate-500 mb-2 block">Player {i === 0 ? 'A' : 'B'}</span>
-            <Field label="Name"><TextInput value={d[side].name} onChange={(v) => updatePlayer(side, { name: v })} /></Field>
-            <Field label="Team"><TextInput value={d[side].team} onChange={(v) => updatePlayer(side, { team: v })} /></Field>
-            <Field label="Headshot URL"><TextInput value={d[side].headshot} onChange={(v) => updatePlayer(side, { headshot: v })} /></Field>
-          </div>
-        ))}
-      </div>
-      <span className="text-[10px] font-bold uppercase tracking-widest text-slate-500 mb-2 block">Stats</span>
-      {d.stats.map((stat, idx) => (
-        <div key={idx} className="flex gap-2 mb-2 items-center">
-          <TextInput value={stat.label} onChange={(v) => updateStat(idx, { label: v })} placeholder="Stat label" />
-          <NumberInput value={stat.playerA} onChange={(v) => updateStat(idx, { playerA: v })} />
-          <NumberInput value={stat.playerB} onChange={(v) => updateStat(idx, { playerB: v })} />
-          <button type="button" onClick={() => removeStat(idx)} className="text-slate-500 hover:text-[#BC0000] shrink-0"><Trash2 size={14} /></button>
-        </div>
-      ))}
-      <button type="button" onClick={addStat} className="text-xs text-[#00D4FF] hover:underline">+ Add stat</button>
-    </BlockShell>
-  );
-}
-
-export function StatsChartPanel({ block, onChange, onDelete, onMoveUp, onMoveDown }: BlockPanelProps) {
-  if (block.type !== 'stats-chart') return null;
-  const d = block.data;
-
-  const addPoint = () => {
-    onChange({ ...block, data: { ...d, dataPoints: [...d.dataPoints, { label: '', value: 0 }] } });
-  };
-  const removePoint = (idx: number) => {
-    onChange({ ...block, data: { ...d, dataPoints: d.dataPoints.filter((_, i) => i !== idx) } });
-  };
-  const updatePoint = (idx: number, updates: Partial<{ label: string; value: number }>) => {
-    const dataPoints = [...d.dataPoints];
-    dataPoints[idx] = { ...dataPoints[idx], ...updates };
-    onChange({ ...block, data: { ...d, dataPoints } });
-  };
-
-  return (
-    <BlockShell label="Chart" accent="#00D4FF" onDelete={onDelete} onMoveUp={onMoveUp} onMoveDown={onMoveDown}>
-      <div className="flex gap-3 mb-3">
-        <div className="flex-1"><Field label="Title"><TextInput value={d.title} onChange={(title) => onChange({ ...block, data: { ...d, title } })} /></Field></div>
-        <div className="w-28"><Field label="Type"><Select value={d.chartType} onChange={(chartType) => onChange({ ...block, data: { ...d, chartType: chartType as 'bar' | 'line' } })} options={[{ value: 'bar', label: 'Bar' }, { value: 'line', label: 'Line' }]} /></Field></div>
-      </div>
-      <span className="text-[10px] font-bold uppercase tracking-widest text-slate-500 mb-2 block">Data Points</span>
-      {d.dataPoints.map((pt, idx) => (
-        <div key={idx} className="flex gap-2 mb-2 items-center">
-          <TextInput value={pt.label} onChange={(v) => updatePoint(idx, { label: v })} placeholder="Label" />
-          <NumberInput value={pt.value} onChange={(v) => updatePoint(idx, { value: v })} />
-          <button type="button" onClick={() => removePoint(idx)} className="text-slate-500 hover:text-[#BC0000] shrink-0"><Trash2 size={14} /></button>
-        </div>
-      ))}
-      <button type="button" onClick={addPoint} className="text-xs text-[#00D4FF] hover:underline">+ Add data point</button>
-    </BlockShell>
-  );
-}
-
-export function DebatePanel({ block, onChange, onDelete, onMoveUp, onMoveDown }: BlockPanelProps) {
-  if (block.type !== 'debate') return null;
-  return (
-    <BlockShell label="Debate" accent="#BC0000" onDelete={onDelete} onMoveUp={onMoveUp} onMoveDown={onMoveDown}>
-      <Field label="PRO Argument (The Case For)">
-        <TextArea value={block.data.proArgument} onChange={(proArgument) => onChange({ ...block, data: { ...block.data, proArgument } })} placeholder="The case for..." rows={3} />
-      </Field>
-      <Field label="CON Argument (The Case Against)">
-        <TextArea value={block.data.conArgument} onChange={(conArgument) => onChange({ ...block, data: { ...block.data, conArgument } })} placeholder="The case against..." rows={3} />
-      </Field>
-      <Field label="GM Score Reward">
-        <NumberInput value={block.data.reward} onChange={(reward) => onChange({ ...block, data: { ...block.data, reward } })} min={1} max={20} />
-      </Field>
-    </BlockShell>
-  );
-}
-
-export function UpdatePanel({ block, onChange, onDelete, onMoveUp, onMoveDown }: BlockPanelProps) {
-  if (block.type !== 'update') return null;
-  return (
-    <BlockShell label="Breaking Update" accent="#BC0000" onDelete={onDelete} onMoveUp={onMoveUp} onMoveDown={onMoveDown}>
-      <Field label="Timestamp">
-        <TextInput value={block.data.timestamp} onChange={(timestamp) => onChange({ ...block, data: { ...block.data, timestamp } })} placeholder="2:14 PM CT" />
-      </Field>
-      <Field label="Update Text">
-        <TextArea value={block.data.text} onChange={(text) => onChange({ ...block, data: { ...block.data, text } })} placeholder="Breaking update..." rows={2} />
-      </Field>
-    </BlockShell>
-  );
-}
-
-export function PollPanel({ block, onChange, onDelete, onMoveUp, onMoveDown }: BlockPanelProps) {
-  if (block.type !== 'poll') return null;
-  return (
-    <BlockShell label="Fan Poll" accent="#00D4FF" onDelete={onDelete} onMoveUp={onMoveUp} onMoveDown={onMoveDown}>
-      <Field label="Question">
-        <TextInput value={block.data.question} onChange={(question) => onChange({ ...block, data: { ...block.data, question } })} placeholder="Is this an overreaction?" />
-      </Field>
-      <div className="flex gap-3">
-        <div className="flex-1"><Field label="Option 1"><TextInput value={block.data.options[0] || ''} onChange={(v) => { const options = [...block.data.options]; options[0] = v; onChange({ ...block, data: { ...block.data, options } }); }} /></Field></div>
-        <div className="flex-1"><Field label="Option 2"><TextInput value={block.data.options[1] || ''} onChange={(v) => { const options = [...block.data.options]; options[1] = v; onChange({ ...block, data: { ...block.data, options } }); }} /></Field></div>
-        <div className="w-20"><Field label="Reward"><NumberInput value={block.data.reward} onChange={(reward) => onChange({ ...block, data: { ...block.data, reward } })} min={1} max={20} /></Field></div>
-      </div>
-    </BlockShell>
-  );
-}
-
-export function HotTakePanel({ block, onChange, onDelete, onMoveUp, onMoveDown }: BlockPanelProps) {
-  if (block.type !== 'hot-take') return null;
-  return (
-    <BlockShell label="Hot Take" accent="#BC0000" onDelete={onDelete} onMoveUp={onMoveUp} onMoveDown={onMoveDown}>
-      <Field label="Hot Take Text">
-        <TextArea value={block.data.text} onChange={(text) => onChange({ ...block, data: { ...block.data, text } })} placeholder="Bold claim here..." rows={3} />
-      </Field>
-    </BlockShell>
-  );
-}
-
-export function RumorMeterPanel({ block, onChange, onDelete, onMoveUp, onMoveDown }: BlockPanelProps) {
-  if (block.type !== 'rumor-meter') return null;
-  return (
-    <BlockShell label="Rumor Confidence" accent="#BC0000" onDelete={onDelete} onMoveUp={onMoveUp} onMoveDown={onMoveDown}>
-      <Field label="Confidence Level">
-        <Select value={block.data.strength} onChange={(strength) => onChange({ ...block, data: { strength: strength as 'Low' | 'Medium' | 'Strong' | 'Heating Up' } })} options={[{ value: 'Low', label: 'Low' }, { value: 'Medium', label: 'Medium' }, { value: 'Strong', label: 'Strong' }, { value: 'Heating Up', label: 'Heating Up' }]} />
-      </Field>
-    </BlockShell>
-  );
-}
-
-export function HeatMeterPanel({ block, onChange, onDelete, onMoveUp, onMoveDown }: BlockPanelProps) {
-  if (block.type !== 'heat-meter') return null;
-  return (
-    <BlockShell label="Heat Meter" accent="#BC0000" onDelete={onDelete} onMoveUp={onMoveUp} onMoveDown={onMoveDown}>
-      <Field label="Level">
-        <Select value={block.data.level} onChange={(level) => onChange({ ...block, data: { level: level as 'Warm' | 'Hot' | 'Nuclear' } })} options={[{ value: 'Warm', label: 'Warm' }, { value: 'Hot', label: 'Hot' }, { value: 'Nuclear', label: 'Nuclear' }]} />
-      </Field>
-    </BlockShell>
-  );
-}
-
-export function ReactionStreamPanel({ block, onChange, onDelete, onMoveUp, onMoveDown }: BlockPanelProps) {
-  if (block.type !== 'reaction-stream') return null;
-  const d = block.data;
-  const hasReactions = (d.availableCount ?? 0) > 0;
-  const hasPreview = (d.previewItems ?? []).length > 0;
-
-  return (
-    <BlockShell label="Reaction Stream" accent="#00D4FF" onDelete={onDelete} onMoveUp={onMoveUp} onMoveDown={onMoveDown}>
-      <p className="text-[13px] text-slate-400 mb-4 leading-relaxed">
-        Displays recent fan reactions related to this post. Reactions are sourced automatically from platform activity.
-      </p>
-
-      {/* Status indicator */}
-      <div
-        className="rounded-lg p-3 mb-4 flex items-center gap-3"
-        style={{
-          backgroundColor: hasReactions ? 'rgba(0,212,255,0.04)' : '#f3f4f6',
-          border: hasReactions ? '1px solid rgba(0,212,255,0.12)' : '1px solid rgba(0,0,0,0.08)',
-        }}
-      >
-        <div
-          className="w-2 h-2 rounded-full shrink-0"
-          style={{ backgroundColor: hasReactions ? '#00D4FF' : '#64748b' }}
-        />
-        <div>
-          <span className="text-[12px] font-bold block" style={{ color: hasReactions ? '#00D4FF' : '#94a3b8' }}>
-            {hasReactions ? `Reactions available (${d.availableCount})` : 'No reactions available yet'}
-          </span>
-          <span className="text-[11px] text-slate-500">
-            {hasReactions
-              ? 'This block will show recent fan sentiment on publish.'
-              : 'This block will stay hidden unless reactions appear.'}
-          </span>
-        </div>
-      </div>
-
-      {/* Enable / Disable toggle */}
-      <label className="flex items-start gap-2 cursor-pointer mb-4">
-        <input
-          type="checkbox"
-          checked={d.enabled}
-          onChange={(e) => onChange({ ...block, data: { ...d, enabled: e.target.checked } })}
-          className="h-4 w-4 mt-0.5 rounded"
-          style={{ accentColor: '#00D4FF' }}
-        />
-        <div>
-          <span className="text-sm font-medium text-[#0B0F14]">Enable Reaction Stream</span>
-          <p className="text-[11px] text-slate-500">
-            {d.enabled
-              ? 'Reactions will display when available on the published article.'
-              : 'Block is disabled and will not appear on the published article.'}
-          </p>
-        </div>
-      </label>
-
-      {/* Source selector */}
-      <Field label="Source">
-        <Select
-          value={d.source}
-          onChange={(source) => onChange({ ...block, data: { ...d, source: source as 'auto' | 'debate' | 'poll' | 'fan-chat' | 'team' } })}
-          options={[
-            { value: 'auto', label: 'Auto — best available source' },
-            { value: 'debate', label: 'Debate votes & comments' },
-            { value: 'poll', label: 'Poll activity' },
-            { value: 'fan-chat', label: 'Fan Chat' },
-            { value: 'team', label: 'Team channel' },
-          ]}
-        />
-      </Field>
-
-      {/* Max items */}
-      <Field label="Max Reactions to Show">
-        <NumberInput
-          value={d.maxItems}
-          onChange={(maxItems) => onChange({ ...block, data: { ...d, maxItems } })}
-          min={1}
-          max={10}
-        />
-      </Field>
-
-      {/* Auto-hide toggle */}
-      <label className="flex items-start gap-2 cursor-pointer mb-2">
-        <input
-          type="checkbox"
-          checked={d.autoHideWhenEmpty}
-          onChange={(e) => onChange({ ...block, data: { ...d, autoHideWhenEmpty: e.target.checked } })}
-          className="h-4 w-4 mt-0.5 rounded"
-          style={{ accentColor: '#00D4FF' }}
-        />
-        <div>
-          <span className="text-[13px] font-medium text-[#0B0F14]">Auto-hide when empty</span>
-          <p className="text-[11px] text-slate-500">
-            Automatically hides this block on the published article if no reactions are available.
-          </p>
-        </div>
-      </label>
-
-      {/* Preview items */}
-      {hasPreview && d.enabled && (
-        <div className="mt-4">
-          <span className="text-[10px] font-bold uppercase tracking-widest text-slate-500 mb-2 block">Preview</span>
-          <div className="space-y-2">
-            {(d.previewItems ?? []).slice(0, d.maxItems).map((r, i) => (
-              <div
-                key={i}
-                className="rounded-lg p-3 flex gap-3"
-                style={{ backgroundColor: '#f8f9fa', border: '1px solid rgba(0,0,0,0.08)' }}
-              >
-                <div
-                  className="w-7 h-7 rounded-full shrink-0 flex items-center justify-center text-[11px] font-bold"
-                  style={{ backgroundColor: 'rgba(0,212,255,0.1)', color: '#00D4FF' }}
-                >
-                  {r.username.charAt(0).toUpperCase()}
-                </div>
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2">
-                    <span className="text-[12px] font-bold text-[#0B0F14] truncate">{r.username}</span>
-                    <span className="text-[10px] text-slate-600 ml-auto shrink-0">{r.timestamp}</span>
-                  </div>
-                  <p className="text-[12px] text-slate-400 leading-snug mt-0.5">{r.comment}</p>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
-    </BlockShell>
-  );
-}
-
 export function MockDraftPanel({ block, onChange, onDelete, onMoveUp, onMoveDown }: BlockPanelProps) {
   if (block.type !== 'mock-draft') return null;
   const d = block.data;
@@ -634,6 +480,138 @@ export function MockDraftPanel({ block, onChange, onDelete, onMoveUp, onMoveDown
   );
 }
 
+export function SentimentMeterPanel({ block, onChange, onDelete, onMoveUp, onMoveDown }: BlockPanelProps) {
+  if (block.type !== 'sentiment-meter') return null;
+  const d = block.data;
+  const config = SENTIMENT_CONFIGS[d.mode];
+  const maxLevel = config.segments.length;
+
+  return (
+    <BlockShell label={config.label} accent="#BC0000" onDelete={onDelete} onMoveUp={onMoveUp} onMoveDown={onMoveDown}>
+      <Field label="Mode">
+        <ToggleChips
+          value={d.mode}
+          onChange={(mode) => onChange({ ...block, data: { ...d, mode: mode as SentimentMode, level: Math.min(d.level, SENTIMENT_CONFIGS[mode as SentimentMode].segments.length) } })}
+          options={[
+            { value: 'rumor', label: 'Rumor' },
+            { value: 'heat', label: 'Heat' },
+            { value: 'confidence', label: 'Confidence' },
+            { value: 'panic', label: 'Panic' },
+          ]}
+        />
+      </Field>
+      <Field label={`Level (1-${maxLevel})`}>
+        <div className="flex gap-1 mt-1">
+          {config.segments.map((seg, i) => (
+            <button
+              key={seg}
+              type="button"
+              onClick={() => onChange({ ...block, data: { ...d, level: i + 1 } })}
+              className="flex-1 flex flex-col items-center gap-1"
+            >
+              <div
+                className="w-full h-3 rounded-full transition-all"
+                style={{ backgroundColor: i < d.level ? '#BC0000' : 'rgba(0,0,0,0.08)' }}
+              />
+              <span
+                className="text-[9px] font-bold uppercase"
+                style={{ color: i < d.level ? '#BC0000' : '#A0A8B0' }}
+              >
+                {seg}
+              </span>
+            </button>
+          ))}
+        </div>
+      </Field>
+    </BlockShell>
+  );
+}
+
+// ─── Fan Interaction Blocks ───
+
+export function InteractionPanel({ block, onChange, onDelete, onMoveUp, onMoveDown }: BlockPanelProps) {
+  if (block.type !== 'interaction') return null;
+  const d = block.data;
+  const label = d.variant === 'gm-pulse' ? 'GM Pulse' : 'Fan Poll';
+
+  return (
+    <BlockShell label={label} accent="#00D4FF" onDelete={onDelete} onMoveUp={onMoveUp} onMoveDown={onMoveDown}>
+      <Field label="Variant">
+        <ToggleChips
+          value={d.variant}
+          onChange={(variant) => onChange({ ...block, data: { ...d, variant: variant as InteractionVariant } })}
+          options={[
+            { value: 'gm-pulse', label: 'GM Pulse' },
+            { value: 'poll', label: 'Fan Poll' },
+          ]}
+        />
+      </Field>
+      <Field label="Question">
+        <TextInput value={d.question} onChange={(question) => onChange({ ...block, data: { ...d, question } })} placeholder={d.variant === 'gm-pulse' ? 'Should the Bears...' : 'Is this an overreaction?'} />
+      </Field>
+      <div className="flex gap-3">
+        <div className="flex-1">
+          <Field label="Option 1">
+            <TextInput value={d.options[0] || ''} onChange={(v) => { const options = [...d.options]; options[0] = v; onChange({ ...block, data: { ...d, options } }); }} />
+          </Field>
+        </div>
+        <div className="flex-1">
+          <Field label="Option 2">
+            <TextInput value={d.options[1] || ''} onChange={(v) => { const options = [...d.options]; options[1] = v; onChange({ ...block, data: { ...d, options } }); }} />
+          </Field>
+        </div>
+        <div className="w-20">
+          <Field label="Reward">
+            <NumberInput value={d.reward} onChange={(reward) => onChange({ ...block, data: { ...d, reward } })} min={1} max={20} />
+          </Field>
+        </div>
+      </div>
+    </BlockShell>
+  );
+}
+
+export function DebatePanel({ block, onChange, onDelete, onMoveUp, onMoveDown }: BlockPanelProps) {
+  if (block.type !== 'debate') return null;
+  return (
+    <BlockShell label="Debate" accent="#BC0000" onDelete={onDelete} onMoveUp={onMoveUp} onMoveDown={onMoveDown}>
+      <Field label="PRO Argument (The Case For)">
+        <TextArea value={block.data.proArgument} onChange={(proArgument) => onChange({ ...block, data: { ...block.data, proArgument } })} placeholder="The case for..." rows={3} />
+      </Field>
+      <Field label="CON Argument (The Case Against)">
+        <TextArea value={block.data.conArgument} onChange={(conArgument) => onChange({ ...block, data: { ...block.data, conArgument } })} placeholder="The case against..." rows={3} />
+      </Field>
+      <Field label="GM Score Reward">
+        <NumberInput value={block.data.reward} onChange={(reward) => onChange({ ...block, data: { ...block.data, reward } })} min={1} max={20} />
+      </Field>
+    </BlockShell>
+  );
+}
+
+export function HotTakePanel({ block, onChange, onDelete, onMoveUp, onMoveDown }: BlockPanelProps) {
+  if (block.type !== 'hot-take') return null;
+  return (
+    <BlockShell label="Hot Take" accent="#BC0000" onDelete={onDelete} onMoveUp={onMoveUp} onMoveDown={onMoveDown}>
+      <Field label="Hot Take Text">
+        <TextArea value={block.data.text} onChange={(text) => onChange({ ...block, data: { ...block.data, text } })} placeholder="Bold claim here..." rows={3} />
+      </Field>
+    </BlockShell>
+  );
+}
+
+export function UpdatePanel({ block, onChange, onDelete, onMoveUp, onMoveDown }: BlockPanelProps) {
+  if (block.type !== 'update') return null;
+  return (
+    <BlockShell label="Breaking Update" accent="#BC0000" onDelete={onDelete} onMoveUp={onMoveUp} onMoveDown={onMoveDown}>
+      <Field label="Timestamp">
+        <TextInput value={block.data.timestamp} onChange={(timestamp) => onChange({ ...block, data: { ...block.data, timestamp } })} placeholder="e.g. 9:30 PM CT" />
+      </Field>
+      <Field label="Update Text">
+        <TextArea value={block.data.text} onChange={(text) => onChange({ ...block, data: { ...block.data, text } })} placeholder="Breaking update..." rows={2} />
+      </Field>
+    </BlockShell>
+  );
+}
+
 export function DividerPanel({ block, onDelete, onMoveUp, onMoveDown }: BlockPanelProps) {
   if (block.type !== 'divider') return null;
   return (
@@ -646,24 +624,26 @@ export function DividerPanel({ block, onDelete, onMoveUp, onMoveDown }: BlockPan
 // Panel router — maps block type to edit panel
 export function BlockPanel(props: BlockPanelProps) {
   const panels: Record<string, React.FC<BlockPanelProps>> = {
+    // Content
     'paragraph': ParagraphPanel,
     'heading': HeadingPanel,
     'image': ImagePanel,
     'video': VideoPanel,
-    'scout-insight': ScoutInsightPanel,
-    'gm-interaction': GMInteractionPanel,
-    'trade-scenario': TradeScenarioPanel,
-    'player-comparison': PlayerComparisonPanel,
-    'stats-chart': StatsChartPanel,
-    'debate': DebatePanel,
-    'update': UpdatePanel,
-    'reaction-stream': ReactionStreamPanel,
-    'poll': PollPanel,
-    'hot-take': HotTakePanel,
-    'rumor-meter': RumorMeterPanel,
-    'heat-meter': HeatMeterPanel,
-    'mock-draft': MockDraftPanel,
+    'quote': QuotePanel,
+    'social-embed': SocialEmbedPanel,
     'divider': DividerPanel,
+    // Analysis
+    'scout-insight': ScoutInsightPanel,
+    'stats-chart': StatsChartPanel,
+    'player-comparison': PlayerComparisonPanel,
+    'trade-scenario': TradeScenarioPanel,
+    'mock-draft': MockDraftPanel,
+    'sentiment-meter': SentimentMeterPanel,
+    // Fan Interaction
+    'interaction': InteractionPanel,
+    'debate': DebatePanel,
+    'hot-take': HotTakePanel,
+    'update': UpdatePanel,
   };
 
   const Panel = panels[props.block.type];
