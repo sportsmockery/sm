@@ -80,15 +80,15 @@ export async function GET(
     let playersMap: Record<string, { name: string; position: string; headshot_url: string | null }> = {}
 
     if (hawksPlayerIds.length > 0) {
-      // Stats use NHL API IDs, players table has nhl_id column
+      // Stats player_id = ESPN ID, match via espn_id column on players table
       const { data: playersData } = await datalabAdmin
         .from('blackhawks_players')
-        .select('nhl_id, name, position, headshot_url')
-        .in('nhl_id', hawksPlayerIds)
+        .select('espn_id, name, position, headshot_url')
+        .in('espn_id', hawksPlayerIds)
 
       if (playersData) {
         playersMap = Object.fromEntries(
-          playersData.map(p => [p.nhl_id, { name: p.name, position: p.position, headshot_url: p.headshot_url }])
+          playersData.map(p => [String(p.espn_id), { name: p.name, position: p.position, headshot_url: p.headshot_url }])
         )
       }
     }

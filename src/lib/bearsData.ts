@@ -535,6 +535,7 @@ function aggregateGameStats(data: any[], gameType: GameType): PlayerSeasonStats 
     acc.tackles = (acc.tackles || 0) + (game.defensive_total_tackles ?? game.def_tackles_total ?? 0)
     acc.sacks = (acc.sacks || 0) + (parseFloat(game.defensive_sacks ?? game.def_sacks) || 0)
     acc.passesDefended = (acc.passesDefended || 0) + (game.def_passes_defended || 0)
+    acc.interceptions = (acc.interceptions || 0) + (game.defensive_interceptions ?? game.def_int ?? game.interceptions ?? 0)
     acc.fumbles = (acc.fumbles || 0) + (game.fum_fum || 0)
     return acc
   }, {})
@@ -924,29 +925,6 @@ async function getTeamStatsFromDatalab(season: number, gameType: GameType = 'reg
     pointDifferential: pointsFor - pointsAgainst,
     offensiveRank: null,
     defensiveRank: null,
-  }
-}
-
-function transformTeamStats(data: any): BearsTeamStats {
-  // Use total_points from bears_team_season_stats if available
-  const pointsFor = data.total_points || data.points_for || 0
-  const ppg = data.points_per_game || 0
-
-  // Calculate record from season record table or estimate from games
-  // For now, use the season record view for accurate W-L
-  return {
-    season: data.season || 2025,
-    record: '12-6', // Use combined record from season_record view
-    wins: 12,
-    losses: 6,
-    ties: 0,
-    pointsFor: pointsFor,
-    pointsAgainst: 0, // Not in team_season_stats, calculate from games if needed
-    ppg: ppg,
-    papg: 0,
-    pointDifferential: 0,
-    offensiveRank: data.offensive_rank || null,
-    defensiveRank: data.defensive_rank || null,
   }
 }
 
