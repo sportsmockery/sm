@@ -1333,6 +1333,8 @@ export default function GMPage() {
         background: 'var(--sm-surface)',
         borderBottom: '1px solid var(--sm-border)',
         padding: '12px 24px',
+        position: 'relative',
+        zIndex: 38,
       }}>
         <div style={{ maxWidth: 1440, margin: '0 auto' }}>
           {/* Row 1: Team tabs */}
@@ -1346,9 +1348,9 @@ export default function GMPage() {
                   style={{
                     display: 'flex', alignItems: 'center', gap: 8,
                     padding: '8px 16px', borderRadius: 20,
-                    border: isActive ? 'none' : `1px solid ${borderColor}`,
-                    backgroundColor: isActive ? t.color : 'transparent',
-                    color: isActive ? '#fff' : subText,
+                    border: isActive ? `2px solid ${t.color}` : `1px solid ${isDark ? 'rgba(255,255,255,0.15)' : 'rgba(0,0,0,0.15)'}`,
+                    backgroundColor: isActive ? t.color : (isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.03)'),
+                    color: isActive ? '#fff' : textColor,
                     fontWeight: isActive ? 700 : 500,
                     fontSize: isActive ? 14 : 13,
                     cursor: 'pointer',
