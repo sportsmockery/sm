@@ -50,6 +50,7 @@ const publicPaths = [
   '/api/feed',   // Oracle feed API
   '/api/audio',  // Audio TTS API
   '/api/cron',   // Vercel cron jobs
+  '/gm',         // GM Trade Simulator (handles own auth)
 ]
 
 // Paths that should never trigger the first-time visitor redirect
