@@ -1250,7 +1250,7 @@ export default function GMPage() {
   return (
     <div className="sm-hero-bg" style={{ minHeight: '100vh', color: textColor }}>
       <div className="sm-grid-overlay" />
-      {/* BAND 1: Header + GM Score */}
+      {/* HEADER: Title + Team Tabs + GM Score (single sticky band) */}
       <div style={{
         background: 'var(--sm-surface)',
         borderBottom: '1px solid var(--sm-border)',
@@ -1260,85 +1260,72 @@ export default function GMPage() {
         zIndex: 40,
         backdropFilter: 'blur(12px)',
       }}>
-        <div style={{ maxWidth: 1440, margin: '0 auto', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 12 }}>
-          {/* Left: Title */}
-          <div>
-            <h1 style={{ fontSize: 24, fontWeight: 900, color: textColor, margin: 0, letterSpacing: '-0.5px' }}>WAR ROOM</h1>
-            <p style={{ fontSize: 13, color: subText, margin: '2px 0 0', fontWeight: 500 }}>
-              {selectedTeam ? `${teamLabel} Trade Session` : 'Select a team to start trading'}
-            </p>
-          </div>
+        <div style={{ maxWidth: 1440, margin: '0 auto' }}>
+          {/* Row 1: Title + Icons + GM Score */}
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 12 }}>
+            <div>
+              <h1 style={{ fontSize: 24, fontWeight: 900, color: textColor, margin: 0, letterSpacing: '-0.5px' }}>WAR ROOM</h1>
+              <p style={{ fontSize: 13, color: subText, margin: '2px 0 0', fontWeight: 500 }}>
+                {selectedTeam ? `${teamLabel} Trade Session` : 'Select a team to start trading'}
+              </p>
+            </div>
 
-          {/* Right: Icons + GM Score */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-            {/* Analytics */}
-            <button
-              onClick={() => router.push('/gm/analytics')}
-              title="Analytics"
-              style={{
-                padding: 8, borderRadius: 8,
-                border: `1px solid ${borderColor}`,
-                backgroundColor: 'transparent', cursor: 'pointer',
-                display: 'flex', alignItems: 'center', justifyContent: 'center',
-              }}
-            >
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke={subText} strokeWidth="2" strokeLinecap="round">
-                <path d="M18 20V10M12 20V4M6 20v-6" />
-              </svg>
-            </button>
-
-            {/* Preferences */}
-            <button
-              onClick={() => setShowPreferencesModal(true)}
-              title="Preferences"
-              style={{
-                padding: 8, borderRadius: 8,
-                border: `1px solid ${borderColor}`,
-                backgroundColor: 'transparent', cursor: 'pointer',
-                display: 'flex', alignItems: 'center', justifyContent: 'center',
-              }}
-            >
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke={subText} strokeWidth="2" strokeLinecap="round">
-                <circle cx="12" cy="12" r="3" />
-                <path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42" />
-              </svg>
-            </button>
-
-            {/* GM Score Card */}
-            <div
-              style={{
-                display: 'flex', alignItems: 'center', gap: 10,
-                padding: '8px 16px', borderRadius: 12,
-                backgroundColor: isDark ? '#374151' : '#f3f4f6',
-                border: `1px solid ${borderColor}`,
-              }}
-              title="Your GM Score updates when you grade trades"
-            >
-              <div style={{ width: 36, height: 36, borderRadius: '50%', backgroundColor: '#bc000015', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="#bc0000" stroke="none">
-                  <path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z" />
+            <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+              <button
+                onClick={() => router.push('/gm/analytics')}
+                title="Analytics"
+                style={{
+                  padding: 8, borderRadius: 8,
+                  border: `1px solid ${borderColor}`,
+                  backgroundColor: 'transparent', cursor: 'pointer',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                }}
+              >
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke={subText} strokeWidth="2" strokeLinecap="round">
+                  <path d="M18 20V10M12 20V4M6 20v-6" />
                 </svg>
-              </div>
-              <div>
-                <div style={{ fontSize: 22, fontWeight: 900, color: '#bc0000', lineHeight: 1 }}>{gmScore}</div>
-                <div style={{ fontSize: 10, fontWeight: 600, color: subText }}>GM Score</div>
+              </button>
+
+              <button
+                onClick={() => setShowPreferencesModal(true)}
+                title="Preferences"
+                style={{
+                  padding: 8, borderRadius: 8,
+                  border: `1px solid ${borderColor}`,
+                  backgroundColor: 'transparent', cursor: 'pointer',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                }}
+              >
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke={subText} strokeWidth="2" strokeLinecap="round">
+                  <circle cx="12" cy="12" r="3" />
+                  <path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42" />
+                </svg>
+              </button>
+
+              <div
+                style={{
+                  display: 'flex', alignItems: 'center', gap: 10,
+                  padding: '8px 16px', borderRadius: 12,
+                  backgroundColor: isDark ? '#374151' : '#f3f4f6',
+                  border: `1px solid ${borderColor}`,
+                }}
+                title="Your GM Score updates when you grade trades"
+              >
+                <div style={{ width: 36, height: 36, borderRadius: '50%', backgroundColor: '#bc000015', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="#bc0000" stroke="none">
+                    <path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z" />
+                  </svg>
+                </div>
+                <div>
+                  <div style={{ fontSize: 22, fontWeight: 900, color: '#bc0000', lineHeight: 1 }}>{gmScore}</div>
+                  <div style={{ fontSize: 10, fontWeight: 600, color: subText }}>GM Score</div>
+                </div>
               </div>
             </div>
           </div>
-        </div>
-      </div>
 
-      {/* BAND 2: Team Tabs */}
-      <div style={{
-        background: 'var(--sm-surface)',
-        borderBottom: '1px solid var(--sm-border)',
-        padding: '12px 24px',
-        position: 'relative',
-        zIndex: 38,
-      }}>
-        <div style={{ maxWidth: 1440, margin: '0 auto' }}>
-          {/* Row 1: Team tabs */}
-          <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', alignItems: 'center', justifyContent: 'center' }}>
+          {/* Row 2: Team selector tabs */}
+          <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', alignItems: 'center', justifyContent: 'center', marginTop: 12, paddingTop: 12, borderTop: `1px solid ${borderColor}` }}>
             {TEAMS.map(t => {
               const isActive = selectedTeam === t.key
               return (
@@ -1349,7 +1336,7 @@ export default function GMPage() {
                     display: 'flex', alignItems: 'center', gap: 8,
                     padding: '8px 16px', borderRadius: 20,
                     border: isActive ? `2px solid ${t.color}` : `1px solid ${isDark ? 'rgba(255,255,255,0.15)' : 'rgba(0,0,0,0.15)'}`,
-                    backgroundColor: isActive ? t.color : (isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.03)'),
+                    backgroundColor: isActive ? t.color : (isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.04)'),
                     color: isActive ? '#fff' : textColor,
                     fontWeight: isActive ? 700 : 500,
                     fontSize: isActive ? 14 : 13,
@@ -1364,16 +1351,14 @@ export default function GMPage() {
             })}
           </div>
 
-          {/* Row 2: Trade Mode + Session + Clear (only when team selected) */}
+          {/* Row 3: Trade Mode + Session + Clear (only when team selected) */}
           {selectedTeam && (
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', flexWrap: 'wrap', gap: 12, marginTop: 12 }}>
-              {/* Trade Mode Picker */}
               <TradeModePicker
                 mode={tradeMode}
                 onChange={(mode) => {
                   setTradeMode(mode)
                   if (mode === '2-team') {
-                    // Reset third team state when switching to 2-team
                     setThirdTeam(null)
                     setThirdTeamRoster([])
                     setSelectedThirdTeamIds(new Set())
@@ -1382,12 +1367,10 @@ export default function GMPage() {
                     setSelectedThirdTeamProspectIds(new Set())
                     setTradeFlows([])
                   }
-                  // Note: Migration to 3-team mode is handled by useEffect
                 }}
                 disabled={!selectedTeam}
               />
 
-              {/* Session info */}
               {activeSession && (
                 <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
                   <span style={{ fontSize: 12, color: subText }}>
@@ -1407,7 +1390,6 @@ export default function GMPage() {
                 </div>
               )}
 
-              {/* Clear trades */}
               {trades.length > 0 && (
                 <button
                   onClick={clearAllTrades}
@@ -1430,8 +1412,7 @@ export default function GMPage() {
       <div style={{
         background: 'var(--sm-surface)',
         borderBottom: '1px solid var(--sm-border)',
-        position: 'sticky',
-        top: 130,
+        position: 'relative',
         zIndex: 35,
       }}>
         <div style={{ maxWidth: 1440, margin: '0 auto', display: 'flex' }}>
