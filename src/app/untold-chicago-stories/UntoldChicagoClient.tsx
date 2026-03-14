@@ -13,7 +13,7 @@ type Props = {
 function SocialLinks() {
   return (
     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '20px', marginTop: '16px' }}>
-      <a href="https://www.youtube.com/@untoldchicagostories?sub_confirmation=1" target="_blank" rel="noopener noreferrer" style={{ color: '#fff', opacity: 0.8 }} title="Subscribe on YouTube">
+      <a href="https://www.youtube.com/@untoldchicago?sub_confirmation=1" target="_blank" rel="noopener noreferrer" style={{ color: '#fff', opacity: 0.8 }} title="Subscribe on YouTube">
         <svg style={{ width: 32, height: 32 }} viewBox="0 0 24 24" fill="currentColor"><path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg>
       </a>
       <a href="https://open.spotify.com/track/0LV2TlOspytIK9K2IJRilB" target="_blank" rel="noopener noreferrer" style={{ color: '#fff', opacity: 0.8 }} title="Listen on Spotify">
@@ -104,7 +104,7 @@ export function UntoldChicagoClient({ latestVideo, previousVideos }: Props) {
       <section className="sm-show-cta">
         <div className="sm-container sm-cta-inner">
           <p className="sm-cta-text">Want more Untold Chicago Stories?</p>
-          <a href="https://www.youtube.com/@untoldchicagostories/videos" target="_blank" rel="noopener noreferrer" className="btn-primary">
+          <a href="https://www.youtube.com/@untoldchicago/videos" target="_blank" rel="noopener noreferrer" className="btn-primary">
             View Full Video Archive
           </a>
         </div>

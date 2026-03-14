@@ -11,8 +11,7 @@ const PER_PAGE = 100
 // ── Social configs ────────────────────────────────────────────────────────────
 const YT = [
   { handle: 'sportsmockery', label: 'SportsMockery' },
-  { handle: 'bearsfilmroom', label: 'Bears Film Room' },
-  { handle: 'untoldchicagostories', label: 'Untold Chicago Stories' },
+  { handle: 'untoldchicago', label: 'Untold Chicago Stories' },
   { handle: 'PinwheelsandIvyPodcast', label: 'Pinwheels & Ivy' },
 ]
 const XA = [

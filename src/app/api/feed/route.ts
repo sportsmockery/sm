@@ -10,6 +10,7 @@ import {
 } from '@/lib/scoring-v2'
 import { getTeamFromCategory } from '@/lib/transform-post'
 import type { HomepageRiverItem } from '@/lib/homepage-river-data'
+import { getYouTubeFeedVideos, type YouTubeFeedVideo } from '@/lib/getYouTubeFeedVideos'
 
 // Column names match actual sm_posts table schema
 const POST_SELECT = 'id,title,slug,excerpt,featured_image,category_id,author_id,importance_score,published_at,views,template_version,content,author:sm_authors!author_id(display_name),category:sm_categories!category_id(slug,name)'
@@ -289,6 +290,42 @@ function formatViewCount(views: number): string {
   return String(views)
 }
 
+function mapYouTubeToRiverItem(video: YouTubeFeedVideo, index: number): HomepageRiverItem {
+  return {
+    id: `yt-${video.videoId}`,
+    type: 'video' as const,
+    team: video.team,
+    teamColor: video.teamColor,
+    timestamp: formatRelativeTime(video.publishedAt),
+    data: {
+      headline: video.title,
+      title: video.title,
+      summary: video.description?.slice(0, 200) || '',
+      teaser: video.description?.slice(0, 150) || '',
+      duration: video.duration,
+      source: video.channelName,
+      thumbnailUrl: video.thumbnailUrl,
+      videoId: video.videoId,
+      isShort: video.isShort,
+      stats: { comments: 0, retweets: 0, likes: 0, views: '0' },
+      slug: undefined,
+      categorySlug: undefined,
+    },
+  }
+}
+
+function interleaveVideos(articles: HomepageRiverItem[], videos: HomepageRiverItem[]): HomepageRiverItem[] {
+  if (videos.length === 0) return articles
+  const result = [...articles]
+  // Insert a video every 4 articles
+  let videoIdx = 0
+  for (let i = 3; i < result.length + videos.length && videoIdx < videos.length; i += 5) {
+    result.splice(i, 0, videos[videoIdx])
+    videoIdx++
+  }
+  return result
+}
+
 // GET endpoint for simple fetches (first-time visitors)
 export async function GET() {
   try {
@@ -342,10 +379,15 @@ export async function GET() {
         .slice(0, 4)
     }
 
-    // Build river items for the homepage feed
-    const riverItems: HomepageRiverItem[] = (posts || [])
+    // Fetch YouTube videos from SM channels
+    const ytVideos = await getYouTubeFeedVideos()
+    const ytRiverItems = ytVideos.map(mapYouTubeToRiverItem)
+
+    // Build river items for the homepage feed (articles + YouTube interleaved)
+    const articleRiverItems: HomepageRiverItem[] = (posts || [])
       .slice(0, 20)
       .map(mapPostToRiverItem)
+    const riverItems = interleaveVideos(articleRiverItems, ytRiverItems)
 
     // Build team-specific river items
     const teamRiverItems: Record<string, HomepageRiverItem[]> = {}
