@@ -809,8 +809,12 @@ async function getLeaderboards(season: number): Promise<WhiteSoxLeaderboard> {
 
   const aggregatedStats = Array.from(playerTotals.values())
 
+  // Dynamic AB threshold: use 50 for regular season, lower for spring training
+  const maxAB = Math.max(...aggregatedStats.map(s => s.atBats), 0)
+  const minAB = maxAB >= 50 ? 50 : Math.max(Math.floor(maxAB * 0.3), 5)
+
   const batting = aggregatedStats
-    .filter(s => s.atBats >= 50 && playersMap.has(String(s.player_id)))
+    .filter(s => s.atBats >= minAB && playersMap.has(String(s.player_id)))
     .sort((a, b) => (b.hits / b.atBats) - (a.hits / a.atBats))
     .slice(0, 5)
     .map(s => ({
@@ -838,7 +842,7 @@ async function getLeaderboards(season: number): Promise<WhiteSoxLeaderboard> {
     }))
 
   const obp = aggregatedStats
-    .filter(s => s.atBats >= 50 && playersMap.has(String(s.player_id)))
+    .filter(s => s.atBats >= minAB && playersMap.has(String(s.player_id)))
     .sort((a, b) => {
       const obpA = (a.hits + a.walks) / (a.atBats + a.walks)
       const obpB = (b.hits + b.walks) / (b.atBats + b.walks)

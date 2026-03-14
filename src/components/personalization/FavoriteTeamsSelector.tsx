@@ -238,11 +238,12 @@ export default function FavoriteTeamsSelector({
         <button
           onClick={savePreferences}
           disabled={isLoading}
-          className={`px-6 py-3 rounded-xl font-semibold text-white transition-all ${
+          className={`px-6 py-3 rounded-xl font-semibold transition-all ${
             isLoading
               ? 'bg-gray-400 cursor-not-allowed'
               : 'bg-[#bc0000] hover:bg-[#a00000] active:scale-[0.98]'
           }`}
+          style={{ color: '#FAFAFB' }}
         >
           {isLoading ? (
             <span className="flex items-center gap-2">
