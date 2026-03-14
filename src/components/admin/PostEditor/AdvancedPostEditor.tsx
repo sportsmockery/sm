@@ -144,6 +144,11 @@ export default function AdvancedPostEditor({
   const [pushTitle, setPushTitle] = useState('')
   const [pushMessage, setPushMessage] = useState('')
 
+  // Force hero featured state
+  const [forceHeroFeatured, setForceHeroFeatured] = useState(
+    (post as any)?.force_hero_featured || false
+  )
+
   // Social media posting states (transient - not persisted directly)
   const [postToSocial, setPostToSocial] = useState(false)
   const [socialCaption, setSocialCaption] = useState(post?.social_caption || '')
@@ -939,6 +944,7 @@ export default function AdvancedPostEditor({
         social_caption: postToSocial ? socialCaption : (post?.social_caption || null),
         post_to_social: postToSocial && !socialAlreadyPosted && socialCaption.trim(),
         tags: selectedTags.map(t => t.id),
+        force_hero_featured: forceHeroFeatured,
       }
 
       const response = await fetch(endpoint, {
@@ -1777,6 +1783,20 @@ export default function AdvancedPostEditor({
                     </div>
                   </div>
                 )}
+              </div>
+
+              {/* Force Hero Featured */}
+              <div className="border-t border-[var(--border-default)] pt-4">
+                <label className="flex items-center gap-2 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={forceHeroFeatured}
+                    onChange={(e) => setForceHeroFeatured(e.target.checked)}
+                    className="h-4 w-4 rounded border-[var(--border-default)] text-[var(--accent-red)] focus:ring-[var(--accent-red)]"
+                  />
+                  <span className="text-sm font-medium text-[var(--text-primary)]">Force Hero Featured</span>
+                </label>
+                <p className="mt-1 text-xs text-[var(--text-muted)] ml-6">Override trending threshold — this article will take over the homepage hero regardless of view count</p>
               </div>
 
               {/* Social Media Posting */}

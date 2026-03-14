@@ -251,19 +251,19 @@ export default function AppSidebar() {
         style={{
           display: 'flex',
           alignItems: 'center',
-          height: 88,
-          padding: '0 16px',
+          padding: '12px 14px 25px',
           textDecoration: 'none',
           flexShrink: 0,
         }}
         className="border-b border-[#0B0F14]/8 dark:border-[#FAFAFB]/8"
       >
         <Image
-          src="/blitz_logo.svg"
-          alt="SM Blitz"
-          width={240}
-          height={88}
-          style={{ objectFit: 'contain', height: 72, width: 'auto' }}
+          src="/downloads/edge-logo-sidebar.png"
+          alt="SM Edge"
+          width={600}
+          height={209}
+          unoptimized
+          style={{ objectFit: 'contain', height: 70, width: 'auto' }}
         />
       </Link>
 

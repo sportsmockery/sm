@@ -1,8 +1,10 @@
 'use client'
 
 import { useState } from 'react'
+import Image from 'next/image'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
+import { useAuth } from '@/contexts/AuthContext'
 
 // Icon components for cleaner code
 const icons = {
@@ -209,6 +211,7 @@ interface SidebarProps {
 export default function Sidebar({ collapsed = false, onCollapse }: SidebarProps) {
   const pathname = usePathname()
   const [isCollapsed, setIsCollapsed] = useState(collapsed)
+  const { user } = useAuth()
 
   const handleCollapse = () => {
     const newState = !isCollapsed
@@ -229,14 +232,28 @@ export default function Sidebar({ collapsed = false, onCollapse }: SidebarProps)
         isCollapsed ? 'w-16' : 'w-60'
       }`}
     >
-      {/* Sidebar Header */}
+      {/* Sidebar Header — User Profile */}
       <div className="flex h-14 items-center justify-between border-b border-[var(--border-default)] px-4">
-        <Link href="/admin" className="flex items-center gap-3">
-          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-[var(--accent-red)] text-white font-bold text-sm">
-            SM
-          </div>
+        <Link href="/admin" className="flex items-center gap-3 min-w-0">
+          {user?.avatar ? (
+            <Image
+              src={user.avatar}
+              alt={user.name || 'User'}
+              width={32}
+              height={32}
+              className="h-8 w-8 rounded-full object-cover flex-shrink-0"
+            />
+          ) : (
+            <div className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full" style={{ backgroundColor: '#BC0000' }}>
+              <span className="text-sm font-bold text-white">
+                {(user?.name || user?.email)?.charAt(0).toUpperCase() || 'U'}
+              </span>
+            </div>
+          )}
           {!isCollapsed && (
-            <span className="text-base font-bold text-[var(--text-primary)]">Admin</span>
+            <span className="text-sm font-semibold text-[var(--text-primary)] truncate">
+              {user?.name || user?.email?.split('@')[0] || 'Admin'}
+            </span>
           )}
         </Link>
         <button
@@ -325,6 +342,7 @@ export function MobileSidebar({
   onClose: () => void
 }) {
   const pathname = usePathname()
+  const { user } = useAuth()
 
   const isActive = (href: string) => {
     if (href === '/admin') {
@@ -347,11 +365,25 @@ export function MobileSidebar({
       <aside className="fixed left-0 top-[92px] z-[60] h-[calc(100vh-92px)] w-72 bg-[var(--bg-secondary)] shadow-2xl lg:hidden animate-in slide-in-from-left duration-300">
         {/* Header */}
         <div className="flex h-14 items-center justify-between border-b border-[var(--border-default)] px-4">
-          <Link href="/admin" className="flex items-center gap-3" onClick={onClose}>
-            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-[var(--accent-red)] text-white font-bold text-sm">
-              SM
-            </div>
-            <span className="text-base font-bold text-[var(--text-primary)]">Admin</span>
+          <Link href="/admin" className="flex items-center gap-3 min-w-0" onClick={onClose}>
+            {user?.avatar ? (
+              <Image
+                src={user.avatar}
+                alt={user.name || 'User'}
+                width={32}
+                height={32}
+                className="h-8 w-8 rounded-full object-cover flex-shrink-0"
+              />
+            ) : (
+              <div className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full" style={{ backgroundColor: '#BC0000' }}>
+                <span className="text-sm font-bold text-white">
+                  {(user?.name || user?.email)?.charAt(0).toUpperCase() || 'U'}
+                </span>
+              </div>
+            )}
+            <span className="text-sm font-semibold text-[var(--text-primary)] truncate">
+              {user?.name || user?.email?.split('@')[0] || 'Admin'}
+            </span>
           </Link>
           <button
             onClick={onClose}

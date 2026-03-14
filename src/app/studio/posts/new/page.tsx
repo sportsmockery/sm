@@ -27,11 +27,21 @@ export default async function StudioNewPostPage() {
 
   // Fetch categories and authors
   const [categoriesResult, authorsResult] = await Promise.all([
-    supabaseAdmin.from('sm_categories').select('id, name').order('name'),
+    supabaseAdmin.from('sm_categories').select('id, name, slug').in('slug', ['chicago-bears', 'chicago-blackhawks', 'chicago-bulls', 'chicago-cubs', 'chicago-white-sox']).order('name'),
     supabaseAdmin.from('sm_authors').select('id, display_name, email').order('display_name'),
   ])
 
-  const categories = categoriesResult.data || []
+  const DISPLAY_NAMES: Record<string, string> = {
+    'chicago-bears': 'Chicago Bears',
+    'chicago-blackhawks': 'Chicago Blackhawks',
+    'chicago-bulls': 'Chicago Bulls',
+    'chicago-cubs': 'Chicago Cubs',
+    'chicago-white-sox': 'Chicago White Sox',
+  }
+  const categories = (categoriesResult.data || []).map(c => ({
+    ...c,
+    name: DISPLAY_NAMES[c.slug] || c.name,
+  }))
   let authors = authorsResult.data || []
 
   // Find author matching current user's email (case-insensitive)

@@ -4,15 +4,28 @@ import { useState, useEffect } from "react"
 import HomeSidebar from "@/components/homepage/HomeSidebar"
 import MainFeed from "@/components/homepage/MainFeed"
 import TrendsSidebar from "@/components/homepage/TrendsSidebar"
-import { EdgeHero } from "@/components/home/edge-hero"
+import { HomepageHero } from "@/components/home/hero/homepage-hero"
+import type { FeaturedStory, GameContext, TeamContext, DebateContext } from "@/components/home/hero/types"
 import { Home, Compass, Plus, Film, User, X, FileText, Video, Camera, ImageIcon } from "lucide-react"
 import EdgeIntro from "@/components/home/EdgeIntro"
 
 interface HomepageFeedV2Props {
   firstName?: string
+  featuredStory?: FeaturedStory | null
+  gameContext?: GameContext | null
+  teamContext?: TeamContext | null
+  debateContext?: DebateContext | null
+  primaryTeam?: string
 }
 
-export default function HomepageFeedV2({ firstName }: HomepageFeedV2Props) {
+export default function HomepageFeedV2({
+  firstName,
+  featuredStory,
+  gameContext,
+  teamContext,
+  debateContext,
+  primaryTeam,
+}: HomepageFeedV2Props) {
   const [activeTab, setActiveTab] = useState<"for-you" | "team-pulse">("for-you")
   const [selectedTeam, setSelectedTeam] = useState<string>("all")
   const [activeNavItem, setActiveNavItem] = useState<string>("home")
@@ -57,11 +70,13 @@ export default function HomepageFeedV2({ firstName }: HomepageFeedV2Props) {
         transition: 'opacity 400ms ease-in',
       }}
     >
-      {/* Full-screen Search Hero - above the fold */}
-      <EdgeHero
-        userName={firstName || "Chris"}
-        welcomeMessage={<>Welcome to SM&#x2736;EDGE, our <strong>NEW</strong> AI-powered platform.</>}
-        headline="What can I help you with?"
+      {/* Full-screen Dynamic Hero - above the fold */}
+      <HomepageHero
+        user={{ name: firstName || "Chris", primaryTeam }}
+        featuredStory={featuredStory}
+        gameContext={gameContext}
+        teamContext={teamContext}
+        debateContext={debateContext}
         quickActions={[
           { id: "1", label: "Bears rumors", value: "What are the latest Bears rumors today?" },
           { id: "2", label: "Cubs outlook", value: "Give me the Cubs outlook for this week." },

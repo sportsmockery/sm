@@ -15,6 +15,7 @@ export interface Post {
   meta_description: string
   og_image: string
   views: number
+  force_hero_featured: boolean
   created_at: string
   updated_at: string
   category?: {
@@ -163,7 +164,8 @@ export async function createPost(data: Partial<Post>): Promise<Post> {
       meta_title: data.meta_title || '',
       meta_description: data.meta_description || '',
       og_image: data.og_image || '',
-      views: 0
+      views: 0,
+      force_hero_featured: data.force_hero_featured || false,
     })
     .select()
     .single()
@@ -192,6 +194,7 @@ export async function updatePost(id: string, data: Partial<Post>): Promise<Post>
   if (data.meta_title !== undefined) updateData.meta_title = data.meta_title
   if (data.meta_description !== undefined) updateData.meta_description = data.meta_description
   if (data.og_image !== undefined) updateData.og_image = data.og_image
+  if (data.force_hero_featured !== undefined) updateData.force_hero_featured = data.force_hero_featured
 
   const { data: post, error } = await supabase
     .from('sm_posts')

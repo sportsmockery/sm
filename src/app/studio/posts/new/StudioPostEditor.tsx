@@ -80,6 +80,11 @@ export default function StudioPostEditor({
   const [pushTitle, setPushTitle] = useState('')
   const [pushMessage, setPushMessage] = useState('')
 
+  // Force hero featured state
+  const [forceHeroFeatured, setForceHeroFeatured] = useState(
+    (post as any)?.force_hero_featured || false
+  )
+
   // Social media posting states
   const [postToSocial, setPostToSocial] = useState(false)
   const [socialCaption, setSocialCaption] = useState(post?.social_caption || '')
@@ -452,6 +457,7 @@ export default function StudioPostEditor({
           category_id: formData.category_id || null,
           author_id: formData.author_id || null,
           social_caption: socialCaption || null,
+          force_hero_featured: forceHeroFeatured,
         }),
       })
 
@@ -1140,6 +1146,20 @@ export default function StudioPostEditor({
                     </div>
                   </div>
                 )}
+              </div>
+
+              {/* Force Hero Featured */}
+              <div className="border-t border-[var(--border-default)] pt-4">
+                <label className="flex items-center gap-2 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={forceHeroFeatured}
+                    onChange={(e) => setForceHeroFeatured(e.target.checked)}
+                    className="h-4 w-4 rounded border-[var(--border-default)] text-[var(--accent-red)] focus:ring-[var(--accent-red)]"
+                  />
+                  <span className="text-sm font-medium text-[var(--text-primary)]">Force Hero Featured</span>
+                </label>
+                <p className="mt-1 text-xs text-[var(--text-muted)] ml-6">Override trending threshold — this article will take over the homepage hero regardless of view count</p>
               </div>
 
               {/* Social Media Posting */}

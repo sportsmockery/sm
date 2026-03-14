@@ -17,7 +17,7 @@ export default async function AdminPostEditPage({ params }: PostEditPageProps) {
 
   const [postResult, categoriesResult, authorsResult, tagsResult] = await Promise.all([
     supabaseAdmin.from('sm_posts').select('*').eq('id', id).single(),
-    supabaseAdmin.from('sm_categories').select('id, name').order('name'),
+    supabaseAdmin.from('sm_categories').select('id, name, slug').in('slug', ['chicago-bears', 'chicago-blackhawks', 'chicago-bulls', 'chicago-cubs', 'chicago-white-sox']).order('name'),
     supabaseAdmin.from('sm_authors').select('id, display_name').order('display_name'),
     supabaseAdmin
       .from('sm_post_tags')
@@ -30,7 +30,17 @@ export default async function AdminPostEditPage({ params }: PostEditPageProps) {
   }
 
   const post = postResult.data
-  const categories = categoriesResult.data || []
+  const DISPLAY_NAMES: Record<string, string> = {
+    'chicago-bears': 'Chicago Bears',
+    'chicago-blackhawks': 'Chicago Blackhawks',
+    'chicago-bulls': 'Chicago Bulls',
+    'chicago-cubs': 'Chicago Cubs',
+    'chicago-white-sox': 'Chicago White Sox',
+  }
+  const categories = (categoriesResult.data || []).map(c => ({
+    ...c,
+    name: DISPLAY_NAMES[c.slug] || c.name,
+  }))
   const authors = authorsResult.data || []
 
   // Extract tags from junction table result

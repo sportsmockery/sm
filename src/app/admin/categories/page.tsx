@@ -1,26 +1,44 @@
 import type { Metadata } from 'next'
 import { supabaseAdmin } from '@/lib/supabase-server'
 import Link from 'next/link'
-import CreateCategoryModal from '@/components/admin/CreateCategoryModal'
+
+export const dynamic = 'force-dynamic'
 
 export const metadata: Metadata = {
   title: 'Sports Mockery | Categories',
 }
 
-// Team colors for category badges
+// Only these 5 team categories are used — maps DB slug → clean display name
+const TEAM_CATEGORY_SLUGS = [
+  'chicago-bears',
+  'chicago-blackhawks',
+  'chicago-bulls',
+  'chicago-cubs',
+  'chicago-white-sox',
+]
+
+const DISPLAY_NAMES: Record<string, string> = {
+  'chicago-bears': 'Chicago Bears',
+  'chicago-blackhawks': 'Chicago Blackhawks',
+  'chicago-bulls': 'Chicago Bulls',
+  'chicago-cubs': 'Chicago Cubs',
+  'chicago-white-sox': 'Chicago White Sox',
+}
+
 const TEAM_COLORS: Record<string, { bg: string; text: string; border: string }> = {
-  bears: { bg: 'bg-[#0B162A]', text: 'text-[#C83803]', border: 'border-[#C83803]' },
-  bulls: { bg: 'bg-[#CE1141]', text: 'text-white', border: 'border-[#CE1141]' },
-  cubs: { bg: 'bg-[#0E3386]', text: 'text-[#CC3433]', border: 'border-[#CC3433]' },
-  whitesox: { bg: 'bg-[#27251F]', text: 'text-[#C4CED4]', border: 'border-[#C4CED4]' },
-  'white-sox': { bg: 'bg-[#27251F]', text: 'text-[#C4CED4]', border: 'border-[#C4CED4]' },
-  blackhawks: { bg: 'bg-[#CF0A2C]', text: 'text-[#FFD100]', border: 'border-[#FFD100]' },
+  'chicago-bears': { bg: 'bg-[#0B162A]', text: 'text-[#C83803]', border: 'border-[#C83803]' },
+  'chicago-bulls': { bg: 'bg-[#CE1141]', text: 'text-white', border: 'border-[#CE1141]' },
+  'chicago-cubs': { bg: 'bg-[#0E3386]', text: 'text-[#CC3433]', border: 'border-[#CC3433]' },
+  'chicago-white-sox': { bg: 'bg-[#27251F]', text: 'text-[#C4CED4]', border: 'border-[#C4CED4]' },
+  'chicago-blackhawks': { bg: 'bg-[#CF0A2C]', text: 'text-[#FFD100]', border: 'border-[#FFD100]' },
 }
 
 export default async function AdminCategoriesPage() {
+  // Only fetch the 5 team categories
   const { data: categories } = await supabaseAdmin
     .from('sm_categories')
     .select('id, name, slug, description')
+    .in('slug', TEAM_CATEGORY_SLUGS)
     .order('name')
 
   // Get post counts for each category
@@ -31,20 +49,13 @@ export default async function AdminCategoriesPage() {
         .select('*', { count: 'exact', head: true })
         .eq('category_id', category.id)
 
-      return { ...category, postCount: count || 0 }
+      // Use clean display name
+      const displayName = DISPLAY_NAMES[category.slug] || category.name
+      return { ...category, name: displayName, postCount: count || 0 }
     })
   )
 
-  // Sort: teams first, then alphabetically
-  const teamSlugs = ['bears', 'bulls', 'cubs', 'white-sox', 'whitesox', 'blackhawks']
-  const sortedCategories = [...categoriesWithCounts].sort((a, b) => {
-    const aIsTeam = teamSlugs.includes(a.slug.toLowerCase())
-    const bIsTeam = teamSlugs.includes(b.slug.toLowerCase())
-    if (aIsTeam && !bIsTeam) return -1
-    if (!aIsTeam && bIsTeam) return 1
-    return a.name.localeCompare(b.name)
-  })
-
+  const sortedCategories = [...categoriesWithCounts].sort((a, b) => a.name.localeCompare(b.name))
   const totalPosts = categoriesWithCounts.reduce((acc, cat) => acc + cat.postCount, 0)
 
   return (
@@ -54,16 +65,15 @@ export default async function AdminCategoriesPage() {
         <div>
           <h1 className="text-2xl font-bold text-[var(--text-primary)]">Categories</h1>
           <p className="mt-1 text-[var(--text-muted)]">
-            {categories?.length || 0} categories · {totalPosts} total posts
+            {sortedCategories.length} categories · {totalPosts} total posts
           </p>
         </div>
-        <CreateCategoryModal categories={categoriesWithCounts.map(c => ({ id: c.id, name: c.name, slug: c.slug, description: c.description, parent_id: undefined }))} />
       </div>
 
       {/* Stats Cards */}
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
-        {sortedCategories.filter(cat => teamSlugs.includes(cat.slug.toLowerCase())).map((category) => {
-          const colors = TEAM_COLORS[category.slug.toLowerCase()] || { bg: 'bg-[var(--bg-tertiary)]', text: 'text-[var(--text-primary)]', border: 'border-[var(--border-default)]' }
+        {sortedCategories.map((category) => {
+          const colors = TEAM_COLORS[category.slug] || { bg: 'bg-[var(--bg-tertiary)]', text: 'text-[var(--text-primary)]', border: 'border-[var(--border-default)]' }
           return (
             <Link
               key={category.id}
@@ -112,14 +122,13 @@ export default async function AdminCategoriesPage() {
           <tbody className="divide-y divide-[var(--border-subtle)]">
             {sortedCategories.length > 0 ? (
               sortedCategories.map((category) => {
-                const isTeam = teamSlugs.includes(category.slug.toLowerCase())
-                const colors = TEAM_COLORS[category.slug.toLowerCase()]
+                const colors = TEAM_COLORS[category.slug]
 
                 return (
                   <tr key={category.id} className="group hover:bg-[var(--bg-hover)] transition-colors">
                     <td className="px-6 py-4">
                       <div className="flex items-center gap-3">
-                        {isTeam && colors ? (
+                        {colors ? (
                           <div className={`flex h-8 w-8 items-center justify-center rounded-lg ${colors.bg}`}>
                             <span className={`text-xs font-bold ${colors.text}`}>
                               {category.name.substring(0, 2).toUpperCase()}

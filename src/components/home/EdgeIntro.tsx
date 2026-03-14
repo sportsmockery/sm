@@ -45,6 +45,8 @@ export default function EdgeIntro({ onComplete }: { onComplete: () => void }) {
       <div
         style={{
           position: 'relative',
+          width: 720,
+          height: 264,
           opacity: phase === 'fade-in' ? 0 : 1,
           transition: `opacity ${FADE_IN_MS}ms ease-in`,
           overflow: 'hidden',
@@ -55,16 +57,20 @@ export default function EdgeIntro({ onComplete }: { onComplete: () => void }) {
           alt="SM Edge"
           width={720}
           height={264}
+          style={{ width: 720, height: 264 }}
           className="object-contain"
           priority
         />
 
-        {/* Silver shimmer overlay */}
+        {/* Silver shimmer overlay — clipped to logo bounds only */}
         {(phase === 'shimmer' || phase === 'fade-out') && (
           <div
             style={{
               position: 'absolute',
-              inset: 0,
+              top: 0,
+              left: 0,
+              width: 720,
+              height: 264,
               pointerEvents: 'none',
               overflow: 'hidden',
             }}

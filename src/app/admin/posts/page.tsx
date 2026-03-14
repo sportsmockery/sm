@@ -57,10 +57,17 @@ export default async function AdminPostsPage({ searchParams }: PostsPageProps) {
     authorIds.length > 0
       ? supabaseAdmin.from('sm_authors').select('id, display_name, avatar_url').in('id', authorIds)
       : Promise.resolve({ data: [] }),
-    supabaseAdmin.from('sm_categories').select('id, name, slug').order('name'),
+    supabaseAdmin.from('sm_categories').select('id, name, slug').in('slug', ['chicago-bears', 'chicago-blackhawks', 'chicago-bulls', 'chicago-cubs', 'chicago-white-sox']).order('name'),
   ])
 
-  const categoryMap = new Map(categoriesResult.data?.map(c => [c.id, c]) || [])
+  const DISPLAY_NAMES: Record<string, string> = {
+    'chicago-bears': 'Chicago Bears',
+    'chicago-blackhawks': 'Chicago Blackhawks',
+    'chicago-bulls': 'Chicago Bulls',
+    'chicago-cubs': 'Chicago Cubs',
+    'chicago-white-sox': 'Chicago White Sox',
+  }
+  const categoryMap = new Map(categoriesResult.data?.map(c => [c.id, { ...c, name: DISPLAY_NAMES[c.slug] || c.name }]) || [])
   const authorMap = new Map(authorsResult.data?.map(a => [a.id, a]) || [])
 
   // Status counts
@@ -145,7 +152,7 @@ export default async function AdminPostsPage({ searchParams }: PostsPageProps) {
         </form>
 
         <CategoryFilter
-          categories={allCategories.data || []}
+          categories={(allCategories.data || []).map(c => ({ ...c, name: DISPLAY_NAMES[c.slug] || c.name }))}
           currentCategory={category}
         />
       </div>

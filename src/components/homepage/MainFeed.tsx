@@ -175,7 +175,7 @@ export default function MainFeed({ activeTab, setActiveTab, selectedTeam }: Main
   const displayFeed = feed.length < 5 ? [...feed, ...homepageRiverFeed.filter(item => !feed.includes(item)).slice(0, 10 - feed.length)] : feed
 
   return (
-    <main className="min-h-screen w-full max-w-[600px] pt-4" style={{ borderLeft: '1px solid rgba(0, 212, 255, 0.15)', borderRight: '1px solid rgba(0, 212, 255, 0.15)', boxShadow: 'inset 1px 0 8px -2px rgba(0, 212, 255, 0.08), inset -1px 0 8px -2px rgba(0, 212, 255, 0.08)' }}>
+    <main className="min-h-screen w-full max-w-[600px] pt-4" style={{ borderLeft: '1px solid var(--hp-border)', borderRight: '1px solid var(--hp-border)' }}>
       {/* Top Intelligence Card - Featured Story */}
       <TopIntelligenceCard
         headline="Bears Finalize Historic Trade Package for Elite Receiver"
