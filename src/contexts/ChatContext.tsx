@@ -326,11 +326,11 @@ export function ChatProvider({ children, teamSlug }: ChatProviderProps) {
         console.warn('Chat participants not available')
       }
 
-      // Load recent messages (without join to chat_users — FK may not exist)
+      // Load recent messages with user data
       try {
         const { data: recentMessages, error: msgError } = await supabase
           .from('chat_messages')
-          .select('*')
+          .select('*, user:chat_users(*)')
           .eq('room_id', room.id)
           .eq('moderation_status', 'approved')
           .eq('is_deleted', false)
@@ -362,10 +362,10 @@ export function ChatProvider({ children, teamSlug }: ChatProviderProps) {
             filter: `room_id=eq.${room.id}`,
           },
           async (payload) => {
-            // Fetch full message
+            // Fetch full message with user data
             const { data: newMsg } = await supabase
               .from('chat_messages')
-              .select('*')
+              .select('*, user:chat_users(*)')
               .eq('id', payload.new.id)
               .single()
 

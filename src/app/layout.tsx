@@ -122,6 +122,7 @@ export default function RootLayout({
       <body
         className={`${spaceGrotesk.variable} font-sans antialiased`}
         style={{ backgroundColor: 'var(--sm-dark)', color: 'var(--sm-text)' }}
+        suppressHydrationWarning
       >
         <ThemeProvider>
           <AuthProvider>

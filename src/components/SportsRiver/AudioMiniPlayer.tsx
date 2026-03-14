@@ -10,7 +10,8 @@ export default function AudioMiniPlayer() {
   const audio = useAudioPlayer();
   const [voiceOpen, setVoiceOpen] = useState(false);
 
-  const visible = (audio.isPlaying || audio.currentArticle) && audio.cardOutOfView;
+  // Show mini player whenever audio is active — persists across page navigation
+  const visible = !!(audio.isPlaying || audio.currentArticle);
   const progress = audio.duration > 0 ? (audio.currentTime / audio.duration) * 100 : 0;
 
   const formatTime = (s: number) => {
