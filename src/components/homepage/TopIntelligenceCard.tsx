@@ -2,6 +2,7 @@
 
 import { ChevronRight } from "lucide-react"
 import Image from "next/image"
+import Link from "next/link"
 
 interface TopIntelligenceCardProps {
   headline: string
@@ -10,9 +11,13 @@ interface TopIntelligenceCardProps {
   team: string
   teamColor: string
   timestamp: string
+  slug?: string
+  categorySlug?: string
 }
 
-export default function TopIntelligenceCard({ headline, summary, imageUrl, team, teamColor, timestamp }: TopIntelligenceCardProps) {
+export default function TopIntelligenceCard({ headline, summary, imageUrl, team, teamColor, timestamp, slug, categorySlug }: TopIntelligenceCardProps) {
+  const articleUrl = slug && categorySlug ? `/${categorySlug}/${slug}` : undefined
+
   return (
     <article
       className="mx-4 mb-5 overflow-hidden cursor-pointer group"
@@ -25,13 +30,12 @@ export default function TopIntelligenceCard({ headline, summary, imageUrl, team,
       }}
     >
       {/* Image */}
-      {imageUrl && (
+      {imageUrl && imageUrl.length > 0 && (
         <div className="relative overflow-hidden" style={{ aspectRatio: '16/9' }}>
           <img
             src={imageUrl}
             alt={headline}
             className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-            crossOrigin="anonymous"
           />
           <div
             className="absolute inset-0"
@@ -58,9 +62,17 @@ export default function TopIntelligenceCard({ headline, summary, imageUrl, team,
         </div>
 
         {/* Headline */}
-        <h2 style={{ fontSize: 24, fontWeight: 700, lineHeight: 1.2, letterSpacing: '-0.02em', color: 'var(--hp-foreground)' }}>
-          {headline}
-        </h2>
+        {articleUrl ? (
+          <Link href={articleUrl}>
+            <h2 style={{ fontSize: 24, fontWeight: 700, lineHeight: 1.2, letterSpacing: '-0.02em', color: 'var(--hp-foreground)' }}>
+              {headline}
+            </h2>
+          </Link>
+        ) : (
+          <h2 style={{ fontSize: 24, fontWeight: 700, lineHeight: 1.2, letterSpacing: '-0.02em', color: 'var(--hp-foreground)' }}>
+            {headline}
+          </h2>
+        )}
 
         {/* Summary */}
         <p className="mt-3 line-clamp-3" style={{ fontSize: 15, lineHeight: 1.65, color: 'var(--hp-foreground)', opacity: 0.7 }}>
@@ -69,13 +81,24 @@ export default function TopIntelligenceCard({ headline, summary, imageUrl, team,
 
         {/* Actions */}
         <div className="mt-4 flex items-center justify-between">
-          <button
-            className="flex items-center gap-1 transition-colors"
-            style={{ fontSize: 14, fontWeight: 600, color: '#BC0000' }}
-          >
-            <span>Read full story</span>
-            <ChevronRight className="h-4 w-4" />
-          </button>
+          {articleUrl ? (
+            <Link
+              href={articleUrl}
+              className="flex items-center gap-1 transition-colors"
+              style={{ fontSize: 14, fontWeight: 600, color: '#BC0000' }}
+            >
+              <span>Read full story</span>
+              <ChevronRight className="h-4 w-4" />
+            </Link>
+          ) : (
+            <span
+              className="flex items-center gap-1"
+              style={{ fontSize: 14, fontWeight: 600, color: '#BC0000' }}
+            >
+              <span>Read full story</span>
+              <ChevronRight className="h-4 w-4" />
+            </span>
+          )}
 
           {/* Ask Scout */}
           <button

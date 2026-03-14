@@ -1,6 +1,7 @@
 "use client"
 
-import { homepageRiverFeed, homepageTeamRiverFeeds, type HomepageRiverItem } from "@/lib/homepage-river-data"
+import { useState, useEffect } from "react"
+import { type HomepageRiverItem } from "@/lib/homepage-river-data"
 import TopIntelligenceCard from "@/components/homepage/TopIntelligenceCard"
 import {
   EditorialCard,
@@ -48,6 +49,8 @@ function RiverCard({ item }: { item: HomepageRiverItem }) {
           rumorCredibility={data.rumorCredibility as "HIGH" | "MEDIUM" | "LOW" | undefined}
           scoutStat={data.scoutStat as string | undefined}
           authorPhoto={data.authorPhoto as string | undefined}
+          slug={data.slug as string | undefined}
+          categorySlug={data.categorySlug as string | undefined}
         />
       )
     case "poll":
@@ -134,6 +137,8 @@ function RiverCard({ item }: { item: HomepageRiverItem }) {
           teamColor={teamColor}
           timestamp={timestamp}
           stats={data.stats as { comments: number; retweets: number; likes: number; views: string }}
+          slug={data.slug as string | undefined}
+          categorySlug={data.categorySlug as string | undefined}
         />
       )
     case "debate":
@@ -160,6 +165,8 @@ function RiverCard({ item }: { item: HomepageRiverItem }) {
           teamColor={teamColor}
           timestamp={timestamp}
           stats={data.stats as { comments: number; retweets: number; likes: number; views: string }}
+          slug={data.slug as string | undefined}
+          categorySlug={data.categorySlug as string | undefined}
         />
       )
     default:
@@ -167,48 +174,127 @@ function RiverCard({ item }: { item: HomepageRiverItem }) {
   }
 }
 
-export default function MainFeed({ activeTab, setActiveTab, selectedTeam }: MainFeedProps) {
-  // Get the appropriate River feed based on selection
-  const feed = selectedTeam === "all" ? homepageRiverFeed : (homepageTeamRiverFeeds[selectedTeam] || [])
+// ─── Loading skeleton for feed items ───
+function FeedSkeleton() {
+  return (
+    <div className="space-y-4 px-4 pt-4">
+      {[1, 2, 3].map(i => (
+        <div key={i} className="rounded-[14px] p-5 animate-pulse" style={{ border: '1px solid var(--hp-border)', background: 'var(--hp-card)' }}>
+          <div className="flex items-center gap-3 mb-3">
+            <div className="w-10 h-10 rounded-full" style={{ background: 'var(--hp-border)' }} />
+            <div className="flex-1 space-y-2">
+              <div className="h-3 w-24 rounded" style={{ background: 'var(--hp-border)' }} />
+              <div className="h-2 w-16 rounded" style={{ background: 'var(--hp-border)' }} />
+            </div>
+          </div>
+          <div className="space-y-2">
+            <div className="h-4 w-full rounded" style={{ background: 'var(--hp-border)' }} />
+            <div className="h-4 w-3/4 rounded" style={{ background: 'var(--hp-border)' }} />
+            <div className="h-3 w-full rounded mt-3" style={{ background: 'var(--hp-border)' }} />
+            <div className="h-3 w-5/6 rounded" style={{ background: 'var(--hp-border)' }} />
+          </div>
+        </div>
+      ))}
+    </div>
+  )
+}
 
-  // For team-specific views with limited content, supplement with all feed
-  const displayFeed = feed.length < 5 ? [...feed, ...homepageRiverFeed.filter(item => !feed.includes(item)).slice(0, 10 - feed.length)] : feed
+export default function MainFeed({ activeTab, setActiveTab, selectedTeam }: MainFeedProps) {
+  const [feed, setFeed] = useState<HomepageRiverItem[]>([])
+  const [teamFeeds, setTeamFeeds] = useState<Record<string, HomepageRiverItem[]>>({})
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState(false)
+
+  // Fetch live feed data from API
+  useEffect(() => {
+    let cancelled = false
+
+    async function fetchFeed() {
+      setLoading(true)
+      setError(false)
+
+      try {
+        const res = await fetch('/api/feed')
+        if (!res.ok) throw new Error(`Feed API returned ${res.status}`)
+
+        const data = await res.json()
+
+        if (cancelled) return
+
+        if (data.riverItems && data.riverItems.length > 0) {
+          setFeed(data.riverItems)
+          setTeamFeeds(data.teamRiverItems || {})
+        } else {
+          setError(true)
+        }
+      } catch (err) {
+        console.error('[MainFeed] Failed to fetch feed:', err)
+        if (!cancelled) setError(true)
+      } finally {
+        if (!cancelled) setLoading(false)
+      }
+    }
+
+    fetchFeed()
+    return () => { cancelled = true }
+  }, [])
+
+  // Select display feed based on team filter
+  const displayFeed = selectedTeam === "all"
+    ? feed
+    : (teamFeeds[selectedTeam] || [])
+
+  // If team filter yields too few items, supplement with all feed
+  const finalFeed = displayFeed.length < 3 && displayFeed.length > 0
+    ? [...displayFeed, ...feed.filter(item => !displayFeed.some(d => d.id === item.id)).slice(0, 10 - displayFeed.length)]
+    : displayFeed
+
+  // Get featured story from the first item
+  const featuredItem = feed[0]
+  const feedItems = selectedTeam === "all" ? finalFeed.slice(1) : finalFeed
 
   return (
     <main className="min-h-screen w-full max-w-[600px] pt-4" style={{ borderLeft: '1px solid var(--hp-border)', borderRight: '1px solid var(--hp-border)' }}>
-      {/* Top Intelligence Card - Featured Story */}
-      <TopIntelligenceCard
-        headline="Bears Finalize Historic Trade Package for Elite Receiver"
-        summary="In a blockbuster move that reshapes the NFC North, the Chicago Bears have acquired a top-tier wide receiver, sending multiple draft picks to secure their franchise quarterback's most dangerous weapon yet."
-        imageUrl="https://images.unsplash.com/photo-1566577739112-5180d4bf9390?w=800&auto=format&fit=crop&q=60"
-        team="Bears"
-        teamColor="#0B162A"
-        timestamp="2 hours ago"
-      />
+      {/* Top Intelligence Card - Featured Story (from live data) */}
+      {featuredItem ? (
+        <TopIntelligenceCard
+          headline={featuredItem.data.headline as string}
+          summary={featuredItem.data.summary as string}
+          imageUrl={(featuredItem.data.featuredImage as string) || ""}
+          team={featuredItem.team}
+          teamColor={featuredItem.teamColor}
+          timestamp={featuredItem.timestamp}
+          slug={featuredItem.data.slug as string | undefined}
+          categorySlug={featuredItem.data.categorySlug as string | undefined}
+        />
+      ) : !loading && (
+        <TopIntelligenceCard
+          headline="Welcome to SM Edge"
+          summary="Your Chicago sports intelligence feed is loading. Check back soon for the latest news, analysis, and fan engagement."
+          imageUrl=""
+          team="Chicago Sports"
+          teamColor="#0B0F14"
+          timestamp=""
+        />
+      )}
 
       {/* River Feed */}
       <div className="pb-24" key={selectedTeam}>
         {/* Scout Briefing — always first in the feed */}
         <ScoutBriefingCard />
 
-        {/* Game Mode card — shown on game days (placeholder) */}
-        <GameModeCard
-          homeTeam="Bears"
-          awayTeam="Packers"
-          kickoff="7:20 PM CT"
-          scoutNote="Watch the Bears secondary tonight — Green Bay has exploited zone coverage for 300+ yards in 3 of the last 4 meetings."
-        />
+        {/* Loading state */}
+        {loading && <FeedSkeleton />}
 
-        {/* Scout Prediction — once per day on game days (placeholder) */}
-        <ScoutPredictionCard
-          homeTeam="Cubs"
-          awayTeam="Brewers"
-          homeScore={5}
-          awayScore={3}
-          winProbability={63}
-        />
+        {/* Error state — no data available */}
+        {!loading && error && feedItems.length === 0 && (
+          <div className="px-4 py-12 text-center" style={{ color: 'var(--hp-muted-foreground)' }}>
+            <p style={{ fontSize: 15 }}>Unable to load feed. Please try again later.</p>
+          </div>
+        )}
 
-        {displayFeed.map((item, index) => (
+        {/* Live feed items */}
+        {!loading && feedItems.map((item, index) => (
           <div key={item.id}>
             {index === 5 && (
               <div className="hp-day-divider px-4">

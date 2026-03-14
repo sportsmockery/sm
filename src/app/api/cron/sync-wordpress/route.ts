@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { supabaseAdmin } from '@/lib/supabase-server'
+import { transformPosts, type PostToTransform } from '@/lib/transform-post'
 
 export const maxDuration = 60
 export const dynamic = 'force-dynamic'
@@ -275,12 +276,54 @@ export async function GET(request: NextRequest) {
       insertedCount = postsToInsert.length
     }
 
+    // 7. Auto-transform newly inserted posts into structured blocks
+    let transformedCount = 0
+    if (insertedCount > 0) {
+      console.log(`[WP Sync] Transforming ${insertedCount} new posts into structured blocks...`)
+
+      // Fetch the just-inserted posts (they have template_version = NULL)
+      const { data: untransformed } = await supabaseAdmin
+        .from('sm_posts')
+        .select('id, slug, title, content, excerpt, featured_image, category_id, published_at')
+        .is('template_version', null)
+        .eq('status', 'published')
+        .order('published_at', { ascending: false })
+        .limit(insertedCount)
+
+      if (untransformed && untransformed.length > 0) {
+        const { transformed, errors } = transformPosts(untransformed as PostToTransform[])
+
+        for (const post of transformed) {
+          const { error: updateError } = await supabaseAdmin
+            .from('sm_posts')
+            .update({
+              content: post.content,
+              excerpt: post.excerpt,
+              template_version: post.template_version,
+              updated_at: new Date().toISOString(),
+            })
+            .eq('id', post.id)
+
+          if (updateError) {
+            console.error(`[WP Sync] Transform failed for ${post.id}:`, updateError.message)
+          } else {
+            transformedCount++
+          }
+        }
+
+        if (errors.length > 0) {
+          console.warn(`[WP Sync] ${errors.length} transform errors:`, errors.map(e => e.error))
+        }
+      }
+    }
+
     const duration = Date.now() - startTime
-    console.log(`[WP Sync] Done in ${duration}ms — ${insertedCount} posts, ${newCategoriesCount} categories, ${newAuthorsCount} authors`)
+    console.log(`[WP Sync] Done in ${duration}ms — ${insertedCount} posts, ${transformedCount} transformed, ${newCategoriesCount} categories, ${newAuthorsCount} authors`)
 
     return NextResponse.json({
       success: true,
       newPosts: insertedCount,
+      transformed: transformedCount,
       newCategories: newCategoriesCount,
       newAuthors: newAuthorsCount,
       skipped: allWpPosts.length - newWpPosts.length,

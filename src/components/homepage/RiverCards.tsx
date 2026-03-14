@@ -2,6 +2,7 @@
 
 import { useState } from "react"
 import Image from "next/image"
+import Link from "next/link"
 import {
   MessageCircle, Share, Activity,
   TrendingUp, Play, Clock, Check, X, ChevronRight,
@@ -145,15 +146,18 @@ interface EditorialCardProps extends BaseCardProps {
   rumorCredibility?: "HIGH" | "MEDIUM" | "LOW"
   scoutStat?: string
   authorPhoto?: string
+  slug?: string
+  categorySlug?: string
 }
 
 export function EditorialCard({
-  headline, summary, insight, team, teamColor, timestamp, stats, author_name, breakingIndicator, gmQuestion, trendingContext, rumorCredibility, scoutStat, authorPhoto,
+  headline, summary, insight, team, teamColor, timestamp, stats, author_name, breakingIndicator, gmQuestion, trendingContext, rumorCredibility, scoutStat, authorPhoto, slug, categorySlug,
 }: EditorialCardProps) {
   const [vote, setVote] = useState<"yes" | "no" | null>(null)
   const [yesVotes, setYesVotes] = useState(Math.floor(Math.random() * 500) + 200)
   const [noVotes, setNoVotes] = useState(Math.floor(Math.random() * 300) + 100)
   const teamHex = teamColor
+  const articleUrl = slug && categorySlug ? `/${categorySlug}/${slug}` : undefined
 
   const handleVote = (choice: "yes" | "no") => {
     if (vote) return
@@ -176,7 +180,13 @@ export function EditorialCard({
         <TeamTag team={team} teamHex={teamHex} />
       </div>
 
-      <h2 style={{ fontSize: 21, fontWeight: 700, lineHeight: 1.25, letterSpacing: '-0.02em', color: 'var(--hp-foreground)' }}>{headline}</h2>
+      {articleUrl ? (
+        <Link href={articleUrl}>
+          <h2 className="hover:underline" style={{ fontSize: 21, fontWeight: 700, lineHeight: 1.25, letterSpacing: '-0.02em', color: 'var(--hp-foreground)' }}>{headline}</h2>
+        </Link>
+      ) : (
+        <h2 style={{ fontSize: 21, fontWeight: 700, lineHeight: 1.25, letterSpacing: '-0.02em', color: 'var(--hp-foreground)' }}>{headline}</h2>
+      )}
       {rumorCredibility && breakingIndicator === "RUMOR" && <RumorCredibilityMeter level={rumorCredibility} />}
       {trendingContext && <TrendingContextLine context={trendingContext} />}
       <p className="mt-3 line-clamp-3" style={{ fontSize: 15, lineHeight: 1.65, color: 'var(--hp-foreground)', opacity: 0.7 }}>{summary}</p>
@@ -190,7 +200,7 @@ export function EditorialCard({
 
       <div className="mt-4 flex items-center gap-2">
         {authorPhoto && (
-          <img src={authorPhoto} alt={author_name} className="h-5 w-5 rounded-full object-cover" crossOrigin="anonymous" />
+          <img src={authorPhoto} alt={author_name} className="h-5 w-5 rounded-full object-cover" />
         )}
         <span style={{ fontSize: 12, color: 'var(--hp-muted-foreground)' }}>By {author_name}</span>
       </div>
@@ -675,10 +685,13 @@ interface TrendingArticleCardProps extends BaseCardProps {
   summary: string
   trendMetric: string
   stats: { comments: number; retweets: number; likes: number; views: string }
+  slug?: string
+  categorySlug?: string
 }
 
-export function TrendingArticleCard({ headline, summary, trendMetric, team, teamColor, timestamp, stats }: TrendingArticleCardProps) {
+export function TrendingArticleCard({ headline, summary, trendMetric, team, teamColor, timestamp, stats, slug, categorySlug }: TrendingArticleCardProps) {
   const teamHex = teamColor
+  const articleUrl = slug && categorySlug ? `/${categorySlug}/${slug}` : undefined
 
   return (
     <article className="hp-feed-card hp-card-enter">
@@ -695,7 +708,13 @@ export function TrendingArticleCard({ headline, summary, trendMetric, team, team
         <span style={{ fontSize: 13, fontWeight: 600, color: '#BC0000' }}>{trendMetric}</span>
       </div>
 
-      <h2 style={{ fontSize: 21, fontWeight: 700, lineHeight: 1.25, letterSpacing: '-0.02em', color: 'var(--hp-foreground)' }}>{headline}</h2>
+      {articleUrl ? (
+        <Link href={articleUrl}>
+          <h2 className="hover:underline" style={{ fontSize: 21, fontWeight: 700, lineHeight: 1.25, letterSpacing: '-0.02em', color: 'var(--hp-foreground)' }}>{headline}</h2>
+        </Link>
+      ) : (
+        <h2 style={{ fontSize: 21, fontWeight: 700, lineHeight: 1.25, letterSpacing: '-0.02em', color: 'var(--hp-foreground)' }}>{headline}</h2>
+      )}
       <p className="mt-3 line-clamp-3" style={{ fontSize: 15, lineHeight: 1.65, color: 'var(--hp-foreground)', opacity: 0.7 }}>{summary}</p>
 
       <EngagementRow stats={stats} />
@@ -903,10 +922,13 @@ interface VideoCardProps extends BaseCardProps {
   teaser: string
   thumbnailUrl: string
   stats: { comments: number; retweets: number; likes: number; views: string }
+  slug?: string
+  categorySlug?: string
 }
 
-export function VideoCard({ title, duration, source, teaser, thumbnailUrl, team, teamColor, timestamp, stats }: VideoCardProps) {
+export function VideoCard({ title, duration, source, teaser, thumbnailUrl, team, teamColor, timestamp, stats, slug, categorySlug }: VideoCardProps) {
   const teamHex = teamColor
+  const articleUrl = slug && categorySlug ? `/${categorySlug}/${slug}` : undefined
 
   return (
     <article className="hp-feed-card hp-card-enter">
@@ -918,7 +940,13 @@ export function VideoCard({ title, duration, source, teaser, thumbnailUrl, team,
         <TeamTag team={team} teamHex={teamHex} />
       </div>
 
-      <h2 style={{ fontSize: 21, fontWeight: 700, lineHeight: 1.25, letterSpacing: '-0.02em', color: 'var(--hp-foreground)' }}>{title}</h2>
+      {articleUrl ? (
+        <Link href={articleUrl}>
+          <h2 className="hover:underline" style={{ fontSize: 21, fontWeight: 700, lineHeight: 1.25, letterSpacing: '-0.02em', color: 'var(--hp-foreground)' }}>{title}</h2>
+        </Link>
+      ) : (
+        <h2 style={{ fontSize: 21, fontWeight: 700, lineHeight: 1.25, letterSpacing: '-0.02em', color: 'var(--hp-foreground)' }}>{title}</h2>
+      )}
       <p className="mt-2.5 line-clamp-2" style={{ fontSize: 15, lineHeight: 1.65, color: 'var(--hp-foreground)', opacity: 0.7 }}>{teaser}</p>
 
       <div className="mt-4 relative rounded-2xl overflow-hidden group shadow-md" style={{ background: '#000', aspectRatio: '16/9' }}>
@@ -927,7 +955,6 @@ export function VideoCard({ title, duration, source, teaser, thumbnailUrl, team,
           alt={title}
           className="w-full h-full object-cover group-hover:scale-105 transition-all duration-300"
           style={{ opacity: 0.9 }}
-          crossOrigin="anonymous"
         />
         <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity" style={{ background: 'linear-gradient(to top, rgba(0,0,0,0.6), transparent, transparent)' }} />
         <div className="absolute inset-0 flex items-center justify-center">

@@ -8,9 +8,11 @@ import {
   type ScoringContext,
   type UserEngagementProfile
 } from '@/lib/scoring-v2'
+import { getTeamFromCategory } from '@/lib/transform-post'
+import type { HomepageRiverItem } from '@/lib/homepage-river-data'
 
 // Column names match actual sm_posts table schema
-const POST_SELECT = 'id,title,slug,excerpt,featured_image,category_id,author_id,importance_score,published_at,views,author:sm_authors!author_id(display_name),category:sm_categories!category_id(slug,name)'
+const POST_SELECT = 'id,title,slug,excerpt,featured_image,category_id,author_id,importance_score,published_at,views,template_version,content,author:sm_authors!author_id(display_name),category:sm_categories!category_id(slug,name)'
 
 export async function POST(request: NextRequest) {
   try {
@@ -151,12 +153,30 @@ export async function POST(request: NextRequest) {
         .slice(0, 4)
     }
 
+    // Build river items for homepage feed
+    const riverItems: HomepageRiverItem[] = scoredArticles
+      .slice(0, 20)
+      .map(mapPostToRiverItem)
+
+    const teamRiverItems: Record<string, HomepageRiverItem[]> = {}
+    for (const team of teams) {
+      teamRiverItems[team] = scoredArticles
+        .filter(a => {
+          const category = Array.isArray(a.category) ? a.category[0] : a.category
+          return category?.slug?.toLowerCase()?.includes(team)
+        })
+        .slice(0, 10)
+        .map(mapPostToRiverItem)
+    }
+
     return NextResponse.json({
       featured,
       topHeadlines,
       latestNews,
       teamSections,
       trending: trending?.slice(0, 5) || [],
+      riverItems,
+      teamRiverItems,
       meta: {
         total: scoredArticles.length,
         viewedCount: clientViewedIds.length,
@@ -171,6 +191,102 @@ export async function POST(request: NextRequest) {
       { status: 500 }
     )
   }
+}
+
+// ─── Map posts to HomepageRiverItem format ───
+
+function mapPostToRiverItem(post: any): HomepageRiverItem {
+  const teamInfo = getTeamFromCategory(post.category_id)
+
+  let summary = post.excerpt || ''
+  let insight = ''
+
+  // Try to extract richer data from structured content
+  if (post.template_version === 1 && post.content) {
+    try {
+      const doc = typeof post.content === 'string' ? JSON.parse(post.content) : post.content
+      const blocks = doc.blocks || []
+
+      if (!summary) {
+        const firstP = blocks.find((b: any) => b.type === 'paragraph' && b.data?.html)
+        if (firstP) {
+          const plain = firstP.data.html.replace(/<[^>]+>/g, '').trim()
+          summary = plain.length > 200 ? plain.slice(0, 200) + '...' : plain
+        }
+      }
+
+      // Extract first key takeaway as insight
+      const takeawayHeading = blocks.findIndex((b: any) =>
+        b.type === 'heading' && b.data?.text === 'Key Takeaways'
+      )
+      if (takeawayHeading >= 0) {
+        const listBlock = blocks[takeawayHeading + 1]
+        if (listBlock?.type === 'paragraph' && listBlock.data?.html?.includes('<li>')) {
+          const liMatch = listBlock.data.html.match(/<li>([\s\S]*?)<\/li>/)
+          if (liMatch) insight = liMatch[1].replace(/<[^>]+>/g, '').trim()
+        }
+      }
+    } catch { /* fall through */ }
+  }
+
+  // Fallback excerpt from raw content
+  if (!summary && post.content) {
+    const plain = String(post.content).replace(/<[^>]+>/g, '').replace(/<!--[^>]*-->/g, '').trim()
+    summary = plain.length > 200 ? plain.slice(0, 200) + '...' : plain
+  }
+
+  // Author display name
+  const authorName = Array.isArray(post.author)
+    ? post.author[0]?.display_name
+    : post.author?.display_name
+  const displayAuthor = authorName || 'Sports Mockery'
+
+  // Relative timestamp
+  const timestamp = formatRelativeTime(post.published_at)
+
+  return {
+    id: `post-${post.id}`,
+    type: 'editorial' as const,
+    team: teamInfo?.name || 'Chicago Sports',
+    teamColor: teamInfo?.color || '#0B0F14',
+    timestamp,
+    data: {
+      author: { name: displayAuthor, handle: 'SportsMockery', avatar: 'SM', verified: true },
+      headline: post.title,
+      summary,
+      insight: insight || '',
+      author_name: displayAuthor,
+      breakingIndicator: 'REPORT' as const,
+      stats: {
+        comments: 0,
+        retweets: 0,
+        likes: 0,
+        views: post.views ? formatViewCount(post.views) : '0',
+      },
+      slug: post.slug,
+      postId: post.id,
+      featuredImage: post.featured_image || '',
+      categorySlug: (Array.isArray(post.category) ? post.category[0]?.slug : post.category?.slug) || '',
+    },
+  }
+}
+
+function formatRelativeTime(publishedAt: string | null): string {
+  if (!publishedAt) return ''
+  const diffMs = Date.now() - new Date(publishedAt).getTime()
+  const mins = Math.floor(diffMs / 60000)
+  const hrs = Math.floor(diffMs / 3600000)
+  const days = Math.floor(diffMs / 86400000)
+  if (mins < 60) return `${Math.max(1, mins)}m`
+  if (hrs < 24) return `${hrs}h`
+  if (days < 7) return `${days}d`
+  return `${Math.floor(days / 7)}w`
+}
+
+function formatViewCount(views: number): string {
+  if (views >= 1000000) return `${(views / 1000000).toFixed(1)}M`
+  if (views >= 1000) return `${(views / 1000).toFixed(1)}K`
+  return String(views)
 }
 
 // GET endpoint for simple fetches (first-time visitors)
@@ -226,12 +342,31 @@ export async function GET() {
         .slice(0, 4)
     }
 
+    // Build river items for the homepage feed
+    const riverItems: HomepageRiverItem[] = (posts || [])
+      .slice(0, 20)
+      .map(mapPostToRiverItem)
+
+    // Build team-specific river items
+    const teamRiverItems: Record<string, HomepageRiverItem[]> = {}
+    for (const team of teams) {
+      const catMap: Record<string, number> = {
+        bears: 1, blackhawks: 2, bulls: 3, cubs: 4, whitesox: 6,
+      }
+      teamRiverItems[team] = (posts || [])
+        .filter(p => p.category_id === catMap[team])
+        .slice(0, 10)
+        .map(mapPostToRiverItem)
+    }
+
     return NextResponse.json({
       featured,
       topHeadlines,
       latestNews,
       teamSections,
       trending: posts?.slice(0, 5) || [],
+      riverItems,
+      teamRiverItems,
       meta: {
         total: posts?.length || 0,
         viewedCount: 0,
