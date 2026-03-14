@@ -3,6 +3,7 @@
 import { useState } from "react"
 import Image from "next/image"
 import Link from "next/link"
+import { useRouter } from "next/navigation"
 import {
   MessageCircle, Share, Activity,
   TrendingUp, Play, Clock, Check, X, ChevronRight,
@@ -83,13 +84,24 @@ function CardLabel({ label, isBreaking = false }: { label: string; isBreaking?: 
 }
 
 // Shared engagement row — reactions + comment + share
-function EngagementRow({ stats }: { stats: { comments: number; retweets: number; likes: number; views: string } }) {
+// Reactions use real data from props. When no DB-backed reaction data exists yet,
+// counts will be 0 — this is intentional (no fake numbers).
+function EngagementRow({ stats, articleUrl }: { stats: { comments: number; retweets: number; likes: number; views: string }; articleUrl?: string }) {
   const [reactions, setReactions] = useState<Record<string, boolean>>({})
-  const [counts, setCounts] = useState({ smart: Math.floor(Math.random() * 80) + 10, hot: Math.floor(Math.random() * 60) + 5, bad: Math.floor(Math.random() * 30) + 2 })
+  const [counts, setCounts] = useState({ smart: stats.likes, hot: stats.retweets, bad: stats.comments })
 
   const toggle = (key: "smart" | "hot" | "bad") => {
     setReactions(prev => ({ ...prev, [key]: !prev[key] }))
     setCounts(prev => ({ ...prev, [key]: prev[key] + (reactions[key] ? -1 : 1) }))
+  }
+
+  const handleShare = async () => {
+    const url = articleUrl ? `${window.location.origin}${articleUrl}` : window.location.href
+    if (navigator.share) {
+      try { await navigator.share({ url }) } catch { /* user cancelled */ }
+    } else {
+      await navigator.clipboard.writeText(url)
+    }
   }
 
   const reactionButtons = [
@@ -112,16 +124,31 @@ function EngagementRow({ stats }: { stats: { comments: number; retweets: number;
             <span style={{ fontSize: 12, fontWeight: reactions[key] ? 600 : 400 }}>{count}</span>
           </button>
         ))}
+        {stats.views && stats.views !== '0' && (
+          <span className="flex items-center gap-1" style={{ fontSize: 12 }}>
+            <Activity className="h-3.5 w-3.5" />
+            {stats.views}
+          </span>
+        )}
       </div>
 
       <div className="flex items-center gap-1">
-        <button className="group flex items-center gap-1 transition-colors hover:text-[#00D4FF] hp-tap-target" aria-label="Comments">
-          <div className="rounded-full p-2 group-hover:bg-[#00D4FF]/10 transition-colors">
-            <MessageCircle className="h-4 w-4" />
-          </div>
-          <span style={{ fontSize: 12 }}>{stats.comments}</span>
-        </button>
-        <button className="rounded-full p-2 transition-colors hover:bg-[#00D4FF]/10 hover:text-[#00D4FF] hp-tap-target" aria-label="Share">
+        {articleUrl ? (
+          <Link href={articleUrl} className="group flex items-center gap-1 transition-colors hover:text-[#00D4FF] hp-tap-target" aria-label="Comments">
+            <div className="rounded-full p-2 group-hover:bg-[#00D4FF]/10 transition-colors">
+              <MessageCircle className="h-4 w-4" />
+            </div>
+            <span style={{ fontSize: 12 }}>{stats.comments}</span>
+          </Link>
+        ) : (
+          <span className="group flex items-center gap-1 hp-tap-target" aria-label="Comments">
+            <div className="rounded-full p-2">
+              <MessageCircle className="h-4 w-4" />
+            </div>
+            <span style={{ fontSize: 12 }}>{stats.comments}</span>
+          </span>
+        )}
+        <button onClick={handleShare} className="rounded-full p-2 transition-colors hover:bg-[#00D4FF]/10 hover:text-[#00D4FF] hp-tap-target" aria-label="Share">
           <Share className="h-4 w-4" />
         </button>
       </div>
@@ -223,7 +250,7 @@ export function EditorialCard({
           </p>
         </div>
       )}
-      <EngagementRow stats={stats} />
+      <EngagementRow stats={stats} articleUrl={articleUrl} />
 
       {gmQuestion && (
         <div className="mt-5 rounded-2xl p-4" style={{ border: '1px solid var(--hp-border)', background: 'var(--hp-muted)', opacity: 0.9 }}>
@@ -361,6 +388,7 @@ interface ChartCardProps extends BaseCardProps {
 
 export function ChartCard({ headline, takeaway, chartData, statSource, team, teamColor, timestamp, stats }: ChartCardProps) {
   const teamHex = teamColor
+  const articleUrl = undefined
 
   return (
     <article className="hp-feed-card hp-card-enter">
@@ -410,7 +438,7 @@ export function ChartCard({ headline, takeaway, chartData, statSource, team, tea
       </div>
 
       <p className="mt-3" style={{ fontSize: 12, color: 'var(--hp-muted-foreground)' }}>Source: {statSource}</p>
-      <EngagementRow stats={stats} />
+      <EngagementRow stats={stats} articleUrl={articleUrl} />
     </article>
   )
 }
@@ -427,6 +455,9 @@ interface HubUpdateCardProps extends BaseCardProps {
 
 export function HubUpdateCard({ updateText, takeaway, status, team, teamColor, timestamp }: HubUpdateCardProps) {
   const teamHex = teamColor
+  const router = useRouter()
+  const teamSlug = team.toLowerCase().replace(/\s+/g, "-").replace("chicago-", "")
+  const teamHubUrl = `/chicago-${teamSlug}`
 
   return (
     <article className="hp-feed-card hp-card-enter">
@@ -442,7 +473,7 @@ export function HubUpdateCard({ updateText, takeaway, status, team, teamColor, t
       <p style={{ fontSize: 18, lineHeight: 1.25, fontWeight: 700, color: 'var(--hp-foreground)' }}>{updateText}</p>
       <p className="mt-2.5" style={{ fontSize: 15, lineHeight: 1.65, color: 'var(--hp-foreground)', opacity: 0.7 }}>{takeaway}</p>
 
-      <button className="mt-4 flex items-center gap-1 transition-colors hp-tap-target" style={{ fontSize: 14, fontWeight: 600, color: '#00D4FF' }}>
+      <button onClick={() => router.push(teamHubUrl)} className="mt-4 flex items-center gap-1 transition-colors hp-tap-target hover:opacity-80" style={{ fontSize: 14, fontWeight: 600, color: '#00D4FF' }}>
         <span>View full update</span>
         <ChevronRight className="h-4 w-4" />
       </button>
@@ -464,6 +495,9 @@ interface BoxScoreCardProps extends BaseCardProps {
 
 export function BoxScoreCard({ homeTeam, awayTeam, status, period, keyPerformer, team, teamColor, timestamp }: BoxScoreCardProps) {
   const teamHex = teamColor
+  const router = useRouter()
+  const teamSlug = team.toLowerCase().replace(/\s+/g, "-").replace("chicago-", "")
+  const teamHubUrl = `/chicago-${teamSlug}`
 
   return (
     <article className="hp-feed-card hp-card-enter">
@@ -504,9 +538,9 @@ export function BoxScoreCard({ homeTeam, awayTeam, status, period, keyPerformer,
       </div>
 
       <div className="mt-4 flex gap-4">
-        <button className="hp-tap-target" style={{ fontSize: 14, fontWeight: 500, color: '#00D4FF' }}>Recap</button>
-        <button className="hp-tap-target" style={{ fontSize: 14, fontWeight: 500, color: '#00D4FF' }}>Full box score</button>
-        <button className="hp-tap-target" style={{ fontSize: 14, fontWeight: 500, color: '#00D4FF' }}>Reactions</button>
+        <button onClick={() => router.push(teamHubUrl)} className="hp-tap-target hover:opacity-80 transition-opacity" style={{ fontSize: 14, fontWeight: 500, color: '#00D4FF' }}>Recap</button>
+        <button onClick={() => router.push(`${teamHubUrl}/schedule`)} className="hp-tap-target hover:opacity-80 transition-opacity" style={{ fontSize: 14, fontWeight: 500, color: '#00D4FF' }}>Full box score</button>
+        <button onClick={() => router.push(`/scout-ai?q=${encodeURIComponent(`${awayTeam.name} vs ${homeTeam.name} reactions`)}`)} className="hp-tap-target hover:opacity-80 transition-opacity" style={{ fontSize: 14, fontWeight: 500, color: '#00D4FF' }}>Reactions</button>
       </div>
     </article>
   )
@@ -637,6 +671,7 @@ interface ScoutSummaryCardProps extends BaseCardProps {
 
 export function ScoutSummaryCard({ summary, bullets, topic, team, teamColor, timestamp }: ScoutSummaryCardProps) {
   const teamHex = teamColor
+  const router = useRouter()
 
   return (
     <article className="hp-feed-card hp-card-enter">
@@ -665,10 +700,10 @@ export function ScoutSummaryCard({ summary, bullets, topic, team, teamColor, tim
       </div>
 
       <div className="mt-4 flex gap-4">
-        <button className="flex items-center gap-1.5 rounded-xl px-4 py-2.5 transition-colors hp-tap-target" style={{ fontSize: 14, fontWeight: 600, background: 'rgba(6,182,212,0.1)', color: '#0891b2' }}>
+        <button onClick={() => router.push(`/scout-ai?q=${encodeURIComponent(`${topic} ${team}`)}`)} className="flex items-center gap-1.5 rounded-xl px-4 py-2.5 transition-colors hp-tap-target hover:opacity-80" style={{ fontSize: 14, fontWeight: 600, background: 'rgba(6,182,212,0.1)', color: '#0891b2' }}>
           <Image src="/downloads/scout-v2.png" alt="Scout" width={16} height={16} className="h-4 w-4 rounded-full object-contain" /> Ask Scout
         </button>
-        <button className="hp-tap-target transition-colors" style={{ fontSize: 14, fontWeight: 500, color: 'var(--hp-muted-foreground)' }}>
+        <button onClick={() => router.push(`/scout-ai?q=${encodeURIComponent(`Full analysis: ${topic}`)}`)} className="hp-tap-target transition-colors hover:opacity-80" style={{ fontSize: 14, fontWeight: 500, color: 'var(--hp-muted-foreground)' }}>
           View full analysis
         </button>
       </div>
@@ -717,7 +752,7 @@ export function TrendingArticleCard({ headline, summary, trendMetric, team, team
       )}
       <p className="mt-3 line-clamp-3" style={{ fontSize: 15, lineHeight: 1.65, color: 'var(--hp-foreground)', opacity: 0.7 }}>{summary}</p>
 
-      <EngagementRow stats={stats} />
+      <EngagementRow stats={stats} articleUrl={articleUrl} />
     </article>
   )
 }
@@ -735,6 +770,7 @@ interface DebateCardProps extends BaseCardProps {
 
 export function DebateCard({ prompt, sideA, sideB, participantCount, team, teamColor, timestamp }: DebateCardProps) {
   const teamHex = teamColor
+  const router = useRouter()
   const [selectedSide, setSelectedSide] = useState<"a" | "b" | null>(null)
   const [votesA] = useState(Math.floor(Math.random() * 60) + 20)
   const [votesB] = useState(Math.floor(Math.random() * 60) + 20)
@@ -795,7 +831,7 @@ export function DebateCard({ prompt, sideA, sideB, participantCount, team, teamC
           <Users className="h-4 w-4" />
           <span>{participantCount.toLocaleString()} participating</span>
         </div>
-        <button className="font-medium hp-tap-target" style={{ color: '#00D4FF' }}>Join discussion</button>
+        <button onClick={() => router.push(`/scout-ai?q=${encodeURIComponent(prompt)}`)} className="font-medium hp-tap-target hover:opacity-80 transition-opacity" style={{ color: '#00D4FF' }}>Join discussion</button>
       </div>
     </article>
   )
@@ -813,6 +849,8 @@ const BRIEFING_BULLETS = [
 ]
 
 export function ScoutBriefingCard() {
+  const router = useRouter()
+
   return (
     <article className="hp-feed-card hp-card-enter" style={{ borderLeft: "3px solid #00D4FF" }}>
       <div className="flex items-center gap-2.5 mb-4">
@@ -851,7 +889,8 @@ export function ScoutBriefingCard() {
       </ul>
 
       <button
-        className="mt-4 flex items-center gap-1.5 rounded-xl px-4 py-2.5 transition-colors hp-tap-target"
+        onClick={() => router.push("/scout-ai")}
+        className="mt-4 flex items-center gap-1.5 rounded-xl px-4 py-2.5 transition-colors hp-tap-target hover:opacity-80"
         style={{
           fontSize: 14,
           fontWeight: 600,
@@ -974,7 +1013,7 @@ export function VideoCard({ title, duration, source, teaser, thumbnailUrl, team,
         </div>
       </a>
 
-      <EngagementRow stats={stats} />
+      <EngagementRow stats={stats} articleUrl={articleUrl} />
     </article>
   )
 }

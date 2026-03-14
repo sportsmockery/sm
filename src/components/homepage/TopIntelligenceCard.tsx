@@ -3,6 +3,7 @@
 import { ChevronRight } from "lucide-react"
 import Image from "next/image"
 import Link from "next/link"
+import { useRouter } from "next/navigation"
 
 interface TopIntelligenceCardProps {
   headline: string
@@ -16,6 +17,7 @@ interface TopIntelligenceCardProps {
 }
 
 export default function TopIntelligenceCard({ headline, summary, imageUrl, team, teamColor, timestamp, slug, categorySlug }: TopIntelligenceCardProps) {
+  const router = useRouter()
   const articleUrl = slug && categorySlug ? `/${categorySlug}/${slug}` : undefined
 
   return (
@@ -102,7 +104,8 @@ export default function TopIntelligenceCard({ headline, summary, imageUrl, team,
 
           {/* Ask Scout */}
           <button
-            className="flex items-center gap-2 px-3 py-1.5 rounded-full transition-colors"
+            onClick={() => router.push(`/scout-ai?q=${encodeURIComponent(`Tell me about: ${headline}`)}`)}
+            className="flex items-center gap-2 px-3 py-1.5 rounded-full transition-colors hover:opacity-80"
             style={{ background: 'var(--hp-muted)' }}
           >
             <Image
