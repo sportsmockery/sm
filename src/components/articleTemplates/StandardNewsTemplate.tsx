@@ -14,6 +14,7 @@ interface RelatedArticle {
   slug: string;
   image?: string;
   team?: string;
+  category_slug?: string;
 }
 
 interface StandardNewsTemplateProps {
@@ -124,7 +125,7 @@ export function StandardNewsTemplate({
               {relatedArticles.map((article) => (
                 <Link
                   key={article.slug}
-                  href={`/${article.slug}`}
+                  href={article.category_slug ? `/${article.category_slug}/${article.slug}` : `/${article.slug}`}
                   className="group rounded-xl overflow-hidden bg-[#0B0F14]/[0.03] dark:bg-[#FAFAFB]/[0.04] border border-[#0B0F14]/[0.08] dark:border-[#FAFAFB]/[0.08]"
                 >
                   {article.image && (

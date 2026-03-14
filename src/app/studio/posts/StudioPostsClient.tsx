@@ -143,7 +143,7 @@ export default function StudioPostsClient({
                       </svg>
                     </Link>
                     <a
-                      href={`/${post.slug}`}
+                      href={post.category_id && categoryMap[post.category_id]?.slug ? `/${categoryMap[post.category_id].slug}/${post.slug}` : `/${post.slug}`}
                       target="_blank"
                       rel="noopener noreferrer"
                       className="rounded-lg p-2 text-[var(--text-muted)] hover:bg-[var(--bg-tertiary)] hover:text-[var(--text-primary)] transition-colors"

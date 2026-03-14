@@ -8,6 +8,8 @@ interface ArticleAudioPlayerProps {
   initialArticle: ArticleMeta;
   initialAudioUrl: string;
   articleContent?: string;
+  /** Auto-start playback on mount (e.g. from feed "Listen" button) */
+  autoPlay?: boolean;
 }
 
 interface PlaylistState {
@@ -51,6 +53,7 @@ const VOICE_PROFILES: VoiceProfile[] = [
 export function ArticleAudioPlayer({
   initialArticle,
   initialAudioUrl,
+  autoPlay = false,
 }: ArticleAudioPlayerProps) {
   const [playlist, setPlaylist] = useState<PlaylistState>({
     currentArticle: initialArticle,
@@ -129,6 +132,18 @@ export function ArticleAudioPlayer({
   useEffect(() => {
     updateMediaSession(playlist.currentArticle);
   }, [playlist.currentArticle, updateMediaSession]);
+
+  // Auto-play on mount if requested (e.g. from feed "Listen" button)
+  useEffect(() => {
+    if (!autoPlay || !audioRef.current) return;
+    const audio = audioRef.current;
+    audio.src = getAudioUrl(initialArticle.slug, selectedVoice);
+    setIsLoading(true);
+    audio.play().catch(() => {
+      setIsLoading(false);
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []); // intentionally run once on mount
 
   const handleModeChange = (mode: NextArticleMode) => {
     setPlaylist((prev) => ({ ...prev, mode }));
@@ -296,7 +311,7 @@ export function ArticleAudioPlayer({
   };
 
   return (
-    <div className="p-4 rounded-lg mt-4" style={{ backgroundColor: 'var(--sm-surface)', border: '1px solid var(--sm-border)' }}>
+    <div className="px-4 py-2.5 rounded-lg mt-4" style={{ backgroundColor: 'var(--sm-surface)', border: '1px solid var(--sm-border)' }}>
       {/* Hidden audio element for iOS background playback compatibility */}
       <audio
         ref={audioRef}
@@ -312,19 +327,21 @@ export function ArticleAudioPlayer({
         onDurationChange={handleDurationChange}
         className="hidden"
       />
-      <div className="flex justify-between items-center gap-3 mb-3 text-sm">
-        <span className="font-medium flex items-center gap-2" style={{ color: 'var(--sm-text)' }}>
+      {/* Row 1: Label + title + duration */}
+      <div className="flex items-center gap-2 mb-2 text-sm">
+        <span className="font-medium flex items-center gap-2 shrink-0" style={{ color: 'var(--sm-text)' }}>
           <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z" />
           </svg>
           Listen to this article
         </span>
-        <span className="text-xs truncate max-w-[200px]" style={{ color: 'var(--sm-text-muted)' }}>
+        <span className="text-xs truncate flex-1" style={{ color: 'var(--sm-text-muted)' }}>
           {playlist.currentArticle.title}
         </span>
+        <span className="text-xs shrink-0" style={{ color: 'var(--sm-text-muted)' }}>{formatTime(duration)}</span>
       </div>
 
-      {/* Progress bar - clickable for seeking */}
+      {/* Row 2: Progress bar */}
       <div
         className="w-full rounded-full h-1.5 mb-2 cursor-pointer"
         style={{ backgroundColor: 'var(--sm-surface)' }}
@@ -336,13 +353,8 @@ export function ArticleAudioPlayer({
         />
       </div>
 
-      {/* Time display */}
-      <div className="flex justify-between text-xs mb-3" style={{ color: 'var(--sm-text-muted)' }}>
-        <span>{formatTime(currentTime)}</span>
-        <span>{formatTime(duration)}</span>
-      </div>
-
-      <div className="flex flex-wrap items-center justify-between gap-3 text-sm">
+      {/* Row 3: All controls */}
+      <div className="flex flex-wrap items-center justify-between gap-2 text-sm">
         <div className="flex gap-2 items-center">
           <button
             type="button"

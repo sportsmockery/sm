@@ -34,6 +34,9 @@ interface ArticlePageProps {
     category: string
     slug: string
   }>
+  searchParams: Promise<{
+    listen?: string
+  }>
 }
 
 // Reading time now uses centralized utility with 225 WPM standard
@@ -117,8 +120,10 @@ export async function generateMetadata({ params }: ArticlePageProps): Promise<Me
   }
 }
 
-export default async function ArticlePage({ params }: ArticlePageProps) {
+export default async function ArticlePage({ params, searchParams }: ArticlePageProps) {
   const { slug, category } = await params
+  const { listen } = await searchParams
+  const autoPlayAudio = listen === 'true'
   const post = await getPost(slug)
 
   if (!post) {
@@ -410,6 +415,7 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
                 initialArticle={audioInfo.article}
                 initialAudioUrl={audioInfo.audioUrl}
                 articleContent={post.content || ''}
+                autoPlay={autoPlayAudio}
               />
             )}
 
