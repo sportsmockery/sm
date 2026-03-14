@@ -24,8 +24,7 @@ import { getArticleAudioInfo } from '@/lib/audioPlayer'
 import { ArticleAudioPlayer } from '@/components/article/ArticleAudioPlayer'
 import ArticleContentWithEmbeds from '@/components/article/ArticleContentWithEmbeds'
 import SocialShareBar from '@/components/SocialShareBar'
-import { CommandPanel } from '@/components/homepage/CommandPanel'
-import ArticleFocusMode from '@/components/article/ArticleFocusMode'
+import ArticleSidebar from '@/components/article/ArticleSidebar'
 import { ArticleBlockContent } from '@/components/articles/ArticleBlockContent'
 import { isBlockContent, parseDocument } from '@/components/admin/BlockEditor/serializer'
 
@@ -524,28 +523,12 @@ export default async function ArticlePage({ params, searchParams }: ArticlePageP
             </article>
           </div>
 
-          {/* Right Sidebar — Command Panel (Desktop only) */}
-          <ArticleFocusMode className="hidden xl:block" style={{ width: 300, flexShrink: 0, paddingLeft: 16 }}>
-            <CommandPanel
-              posts={relatedPosts.map(p => ({
-                id: String(p.id),
-                title: p.title,
-                slug: p.slug,
-                team_slug: categoryData?.slug?.replace('chicago-', '') || null,
-                category_slug: categoryData?.slug || null,
-                published_at: p.published_at,
-              }))}
-              trendingPosts={relatedPosts.map(p => ({
-                id: String(p.id),
-                title: p.title,
-                slug: p.slug,
-                team_slug: categoryData?.slug?.replace('chicago-', '') || null,
-                category_slug: categoryData?.slug || null,
-                published_at: p.published_at,
-              }))}
-              isLoggedIn={false}
-            />
-          </ArticleFocusMode>
+          {/* Right Sidebar — SM EDGE Features (Desktop only) */}
+          <aside className="hidden xl:block" style={{ width: 300, flexShrink: 0, paddingLeft: 16 }}>
+            <div style={{ position: 'sticky', top: 96 }}>
+              <ArticleSidebar />
+            </div>
+          </aside>
         </div>
       </div>
 
