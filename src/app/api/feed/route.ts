@@ -11,6 +11,7 @@ import {
 import { getTeamFromCategory } from '@/lib/transform-post'
 import type { HomepageRiverItem } from '@/lib/homepage-river-data'
 import { getYouTubeFeedVideos, type YouTubeFeedVideo } from '@/lib/getYouTubeFeedVideos'
+import { composeAdaptiveRiver } from '@/lib/river-composer'
 
 // Column names match actual sm_posts table schema
 const POST_SELECT = 'id,title,slug,excerpt,featured_image,category_id,author_id,importance_score,published_at,views,template_version,content,author:sm_authors!author_id(display_name),category:sm_categories!category_id(slug,name)'
@@ -154,21 +155,10 @@ export async function POST(request: NextRequest) {
         .slice(0, 4)
     }
 
-    // Build river items for homepage feed
-    const riverItems: HomepageRiverItem[] = scoredArticles
-      .slice(0, 20)
-      .map(mapPostToRiverItem)
-
-    const teamRiverItems: Record<string, HomepageRiverItem[]> = {}
-    for (const team of teams) {
-      teamRiverItems[team] = scoredArticles
-        .filter(a => {
-          const category = Array.isArray(a.category) ? a.category[0] : a.category
-          return category?.slug?.toLowerCase()?.includes(team)
-        })
-        .slice(0, 10)
-        .map(mapPostToRiverItem)
-    }
+    // ── Adaptive River composition ──
+    const river = composeAdaptiveRiver(scoredArticles.slice(0, 60))
+    const riverItems = river.hero ? [river.hero, ...river.items] : river.items
+    const teamRiverItems = river.teamItems
 
     return NextResponse.json({
       featured,
@@ -384,27 +374,25 @@ export async function GET() {
         .slice(0, 4)
     }
 
-    // Fetch YouTube videos from SM channels
-    const ytVideos = await getYouTubeFeedVideos()
-    const ytRiverItems = ytVideos.map(mapYouTubeToRiverItem)
+    // ── Adaptive River composition ──
+    // Use the composer to extract candidates, score, and compose a diverse feed
+    const isDebug = process.env.NODE_ENV === 'development'
+    const river = composeAdaptiveRiver((posts || []).slice(0, 60), { debug: isDebug })
 
-    // Build river items for the homepage feed (articles + YouTube interleaved)
-    const articleRiverItems: HomepageRiverItem[] = (posts || [])
-      .slice(0, 20)
-      .map(mapPostToRiverItem)
-    const riverItems = interleaveVideos(articleRiverItems, ytRiverItems)
+    // Interleave YouTube videos into the river
+    let ytRiverItems: HomepageRiverItem[] = []
+    try {
+      const ytVideos = await getYouTubeFeedVideos()
+      ytRiverItems = ytVideos.map(mapYouTubeToRiverItem)
+    } catch { /* YouTube fetch failure should not break the feed */ }
 
-    // Build team-specific river items
-    const teamRiverItems: Record<string, HomepageRiverItem[]> = {}
-    for (const team of teams) {
-      const catMap: Record<string, number> = {
-        bears: 1, blackhawks: 2, bulls: 3, cubs: 4, whitesox: 6,
-      }
-      teamRiverItems[team] = (posts || [])
-        .filter(p => p.category_id === catMap[team])
-        .slice(0, 10)
-        .map(mapPostToRiverItem)
-    }
+    const riverItems = interleaveVideos(
+      river.hero ? [river.hero, ...river.items] : river.items,
+      ytRiverItems
+    )
+
+    // Team-specific river items from composer
+    const teamRiverItems = river.teamItems
 
     return NextResponse.json({
       featured,
@@ -418,7 +406,8 @@ export async function GET() {
         total: posts?.length || 0,
         viewedCount: 0,
         isAuthenticated: false,
-      }
+      },
+      ...(isDebug && river.debug ? { _riverDebug: river.debug } : {}),
     })
   } catch (error) {
     console.error('Feed API error:', error)

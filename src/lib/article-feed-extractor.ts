@@ -48,16 +48,23 @@ const ACCENT = {
 /* ─── Block → FeedCardKind mapping ─── */
 
 const BLOCK_FEED_MAP: Partial<Record<ContentBlock['type'], { kind: FeedCardKind; accent: string; label: string }>> = {
+  // Analytics / Intelligence
   'scout-insight':      { kind: 'analytics', accent: ACCENT.cyan, label: 'Scout Insight' },
   'stats-chart':        { kind: 'analytics', accent: ACCENT.cyan, label: 'Analytics' },
   'player-comparison':  { kind: 'analytics', accent: ACCENT.cyan, label: 'Player Comparison' },
-  'debate':             { kind: 'debate',    accent: ACCENT.red,  label: 'Edge Debate' },
-  'rumor-meter':        { kind: 'rumor',     accent: ACCENT.red,  label: 'Rumor Alert' },
-  'heat-meter':         { kind: 'rumor',     accent: ACCENT.red,  label: 'Trending' },
+  'mock-draft':         { kind: 'analytics', accent: ACCENT.gold, label: 'Mock Draft' },
+  // Rumor / Breaking
   'trade-scenario':     { kind: 'rumor',     accent: ACCENT.red,  label: 'Trade Scenario' },
   'update':             { kind: 'rumor',     accent: ACCENT.red,  label: 'Breaking' },
-  'mock-draft':         { kind: 'analytics', accent: ACCENT.gold, label: 'Mock Draft' },
+  'sentiment-meter':    { kind: 'rumor',     accent: ACCENT.red,  label: 'Rumor Alert' },
+  // Debate / Takes
+  'debate':             { kind: 'debate',    accent: ACCENT.red,  label: 'Edge Debate' },
   'hot-take':           { kind: 'debate',    accent: ACCENT.gold, label: 'Top Take' },
+  // Polls / Interaction
+  'interaction':        { kind: 'poll',      accent: ACCENT.cyan, label: 'Fan Vote' },
+  // Legacy types (still in some stored content)
+  'rumor-meter':        { kind: 'rumor',     accent: ACCENT.red,  label: 'Rumor Alert' },
+  'heat-meter':         { kind: 'rumor',     accent: ACCENT.red,  label: 'Trending' },
   'gm-interaction':     { kind: 'poll',      accent: ACCENT.cyan, label: 'GM Pulse' },
   'poll':               { kind: 'poll',      accent: ACCENT.cyan, label: 'Edge Debate' },
 };
@@ -87,10 +94,12 @@ function blockHasContent(block: ContentBlock): boolean {
     case 'scout-insight':      return !!block.data.insight;
     case 'gm-interaction':     return !!block.data.question;
     case 'poll':               return !!block.data.question;
+    case 'interaction':        return !!(block as any).data.question;
     case 'stats-chart':        return block.data.dataPoints.length > 0;
     case 'player-comparison':  return !!(block.data.playerA.name || block.data.playerB.name);
     case 'debate':             return !!(block.data.proArgument || block.data.conArgument);
-    case 'rumor-meter':        return true; // always has a strength value
+    case 'sentiment-meter':    return true;
+    case 'rumor-meter':        return true;
     case 'heat-meter':         return true;
     case 'trade-scenario':     return !!(block.data.teamA || block.data.teamB);
     case 'update':             return !!block.data.text;
