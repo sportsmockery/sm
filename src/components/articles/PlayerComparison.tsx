@@ -101,8 +101,16 @@ export function PlayerComparison({ playerA, playerB, stats }: PlayerComparisonPr
       <div className="grid grid-cols-2 gap-4 mb-6">
         {[playerA, playerB].map((player, idx) => (
           <div key={player.name} className="flex flex-col items-center text-center">
-            <div className="relative w-16 h-16 rounded-full overflow-hidden mb-2">
-              <Image src={player.headshot} alt={player.name} fill className="object-cover" />
+            <div className="relative w-16 h-16 rounded-full overflow-hidden mb-2" style={{ border: `2px solid ${idx === 0 ? '#00D4FF' : '#BC0000'}` }}>
+              {player.headshot ? (
+                <Image src={player.headshot} alt={player.name} fill className="object-cover" />
+              ) : (
+                <div className="w-full h-full flex items-center justify-center" style={{ backgroundColor: 'rgba(255,255,255,0.1)' }}>
+                  <span className="text-[18px] font-bold" style={{ color: idx === 0 ? '#00D4FF' : '#BC0000' }}>
+                    {player.name?.split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase() || '?'}
+                  </span>
+                </div>
+              )}
             </div>
             <h4 className="text-sm font-bold text-white">{player.name}</h4>
             <span className="text-xs" style={{ color: idx === 0 ? '#00D4FF' : '#BC0000' }}>

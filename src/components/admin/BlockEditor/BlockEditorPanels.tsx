@@ -372,9 +372,30 @@ export function PlayerComparisonPanel({ block, onChange, onDelete, onMoveUp, onM
         {(['playerA', 'playerB'] as const).map((side, i) => (
           <div key={side}>
             <span className="text-[10px] font-bold uppercase tracking-widest text-slate-500 mb-2 block">Player {i === 0 ? 'A' : 'B'}</span>
+            {/* Player photo preview */}
+            <div className="flex justify-center mb-3">
+              {d[side].headshot ? (
+                <div className="relative w-16 h-16 rounded-full overflow-hidden" style={{ border: `2px solid ${i === 0 ? '#00D4FF' : '#BC0000'}` }}>
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src={d[side].headshot}
+                    alt={d[side].name || `Player ${i === 0 ? 'A' : 'B'}`}
+                    className="w-full h-full object-cover"
+                    onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; (e.target as HTMLImageElement).parentElement!.style.backgroundColor = '#e2e8f0'; }}
+                  />
+                </div>
+              ) : (
+                <div
+                  className="w-16 h-16 rounded-full flex items-center justify-center"
+                  style={{ backgroundColor: '#e2e8f0', border: `2px dashed ${i === 0 ? '#00D4FF' : '#BC0000'}40` }}
+                >
+                  <span className="text-[10px] text-slate-400 text-center leading-tight">Add<br/>photo</span>
+                </div>
+              )}
+            </div>
             <Field label="Name"><TextInput value={d[side].name} onChange={(v) => updatePlayer(side, { name: v })} /></Field>
             <Field label="Team"><TextInput value={d[side].team} onChange={(v) => updatePlayer(side, { team: v })} /></Field>
-            <Field label="Headshot URL"><TextInput value={d[side].headshot} onChange={(v) => updatePlayer(side, { headshot: v })} /></Field>
+            <Field label="Headshot URL"><TextInput value={d[side].headshot} onChange={(v) => updatePlayer(side, { headshot: v })} placeholder="https://a.espncdn.com/..." /></Field>
           </div>
         ))}
       </div>
