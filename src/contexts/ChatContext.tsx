@@ -298,48 +298,53 @@ export function ChatProvider({ children, teamSlug }: ChatProviderProps) {
 
       setCurrentRoom(room)
 
-      // Load room participants (users who have chatted in this room)
-      const { data: participants } = await supabase
-        .from('chat_room_participants')
-        .select(`
-          user_id,
-          display_name,
-          last_message_at,
-          chat_users:user_id (
-            avatar_url,
-            badge
-          )
-        `)
-        .eq('room_id', room.id)
-        .order('last_message_at', { ascending: false })
-        .limit(100)
+      // Load room participants (table may not exist yet — non-critical)
+      try {
+        const { data: participants } = await supabase
+          .from('chat_room_participants')
+          .select(`
+            user_id,
+            display_name,
+            last_message_at
+          `)
+          .eq('room_id', room.id)
+          .order('last_message_at', { ascending: false })
+          .limit(100)
 
-      if (participants) {
-        const formattedParticipants: RoomParticipant[] = participants.map((p: any) => ({
-          user_id: p.user_id,
-          display_name: p.display_name || 'Anonymous',
-          avatar_url: p.chat_users?.avatar_url,
-          badge: p.chat_users?.badge,
-          last_message_at: p.last_message_at,
-        }))
-        setRoomParticipants(formattedParticipants)
+        if (participants) {
+          const formattedParticipants: RoomParticipant[] = participants.map((p: any) => ({
+            user_id: p.user_id,
+            display_name: p.display_name || 'Anonymous',
+            avatar_url: undefined,
+            badge: undefined,
+            last_message_at: p.last_message_at,
+          }))
+          setRoomParticipants(formattedParticipants)
+        }
+      } catch {
+        // chat_room_participants table may not exist — continue without participants
+        console.warn('Chat participants not available')
       }
 
-      // Load recent messages
-      const { data: recentMessages, error: msgError } = await supabase
-        .from('chat_messages')
-        .select(`
-          *,
-          user:chat_users(*)
-        `)
-        .eq('room_id', room.id)
-        .eq('moderation_status', 'approved')
-        .eq('is_deleted', false)
-        .order('created_at', { ascending: false })
-        .limit(50)
+      // Load recent messages (without join to chat_users — FK may not exist)
+      try {
+        const { data: recentMessages, error: msgError } = await supabase
+          .from('chat_messages')
+          .select('*')
+          .eq('room_id', room.id)
+          .eq('moderation_status', 'approved')
+          .eq('is_deleted', false)
+          .order('created_at', { ascending: false })
+          .limit(50)
 
-      if (msgError) throw msgError
-      setMessages((recentMessages || []).reverse())
+        if (msgError) {
+          console.warn('Failed to load chat messages:', msgError.message)
+        } else {
+          setMessages((recentMessages || []).reverse())
+        }
+      } catch {
+        console.warn('Chat messages not available')
+      }
 
       // Subscribe to realtime updates
       if (channelRef.current) {
@@ -357,10 +362,10 @@ export function ChatProvider({ children, teamSlug }: ChatProviderProps) {
             filter: `room_id=eq.${room.id}`,
           },
           async (payload) => {
-            // Fetch full message with user
+            // Fetch full message
             const { data: newMsg } = await supabase
               .from('chat_messages')
-              .select('*, user:chat_users(*)')
+              .select('*')
               .eq('id', payload.new.id)
               .single()
 
