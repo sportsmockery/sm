@@ -685,7 +685,7 @@ export default function AskAIPage() {
                       type="submit"
                       disabled={!input.trim() || isLoading}
                       className="btn btn-primary btn-md"
-                      style={{ whiteSpace: 'nowrap' }}
+                      style={{ whiteSpace: 'nowrap', color: '#FAFAFB' }}
                     >
                       Ask Scout
                     </button>
