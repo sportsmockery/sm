@@ -8,6 +8,7 @@
  */
 
 import type { ContentBlock, ArticleDocument } from '@/components/admin/BlockEditor/types'
+import { serializeDocument } from '@/components/admin/BlockEditor/serializer'
 
 // ─── Category → Team mapping ───
 
@@ -402,9 +403,10 @@ export function transformPosts(posts: PostToTransform[]): { transformed: Transfo
 
   for (const post of posts) {
     try {
-      // Skip posts that already have JSON block content
-      if (post.content.trim().startsWith('{') && post.content.includes('"version"')) {
-        errors.push({ id: post.id, error: 'Already transformed (JSON content detected)' })
+      // Skip posts that already have block content (either format)
+      if (post.content.trimStart().startsWith('<!-- SM_BLOCKS -->') ||
+          (post.content.trim().startsWith('{') && post.content.includes('"version"'))) {
+        errors.push({ id: post.id, error: 'Already transformed (block content detected)' })
         continue
       }
 
@@ -412,7 +414,7 @@ export function transformPosts(posts: PostToTransform[]): { transformed: Transfo
 
       transformed.push({
         id: post.id,
-        content: JSON.stringify(result.document),
+        content: serializeDocument(result.document),
         excerpt: post.excerpt || result.excerpt,
         template_version: 1,
         keyTakeaways: result.keyTakeaways,

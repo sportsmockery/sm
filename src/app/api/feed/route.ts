@@ -205,7 +205,12 @@ function mapPostToRiverItem(post: any): HomepageRiverItem {
   // Try to extract richer data from structured content
   if (post.template_version === 1 && post.content) {
     try {
-      const doc = typeof post.content === 'string' ? JSON.parse(post.content) : post.content
+      let contentStr = String(post.content)
+      // Strip SM_BLOCKS markers if present
+      if (contentStr.includes('<!-- SM_BLOCKS -->')) {
+        contentStr = contentStr.replace('<!-- SM_BLOCKS -->', '').replace('<!-- /SM_BLOCKS -->', '').trim()
+      }
+      const doc = JSON.parse(contentStr)
       const blocks = doc.blocks || []
 
       if (!summary) {

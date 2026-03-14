@@ -193,11 +193,11 @@ const supabase = createClient(url, key)
 async function main() {
   console.log('Fetching last 10 untransformed published posts...')
 
+  // Fetch both untransformed AND incorrectly-formatted transformed posts
   const { data: posts, error } = await supabase
     .from('sm_posts')
-    .select('id, slug, title, content, excerpt, featured_image, category_id, published_at')
+    .select('id, slug, title, content, excerpt, featured_image, category_id, published_at, template_version')
     .eq('status', 'published')
-    .is('template_version', null)
     .order('published_at', { ascending: false })
     .limit(10)
 
@@ -218,18 +218,38 @@ async function main() {
 
   for (const post of posts) {
     try {
-      // Skip if already JSON content
-      if (post.content.trim().startsWith('{') && post.content.includes('"version"')) {
-        console.log(`  SKIP: ${post.slug} (already transformed)`)
+      // Skip if already properly formatted with SM_BLOCKS markers
+      if (post.content.trimStart().startsWith('<!-- SM_BLOCKS -->')) {
+        console.log(`  SKIP: ${post.slug} (already properly formatted)`)
         continue
       }
 
-      const result = transformPostContent(post.content, post.title)
+      // If previously transformed as raw JSON, re-wrap it
+      let result
+      if (post.template_version === 1 && post.content.trim().startsWith('{') && post.content.includes('"version"')) {
+        // Already transformed but missing SM_BLOCKS wrapper — fix it
+        const serialized = `<!-- SM_BLOCKS -->${post.content.trim()}<!-- /SM_BLOCKS -->`
+        const { error: updateError } = await supabase
+          .from('sm_posts')
+          .update({ content: serialized, updated_at: new Date().toISOString() })
+          .eq('id', post.id)
+        if (updateError) {
+          console.error(`  FAIL (rewrap): ${post.slug} — ${updateError.message}`)
+          errorCount++
+        } else {
+          console.log(`  REWRAP: ${post.slug} (added SM_BLOCKS markers)`)
+          successCount++
+        }
+        continue
+      }
+
+      result = transformPostContent(post.content, post.title)
+      const serialized = `<!-- SM_BLOCKS -->${JSON.stringify(result.document)}<!-- /SM_BLOCKS -->`
 
       const { error: updateError } = await supabase
         .from('sm_posts')
         .update({
-          content: JSON.stringify(result.document),
+          content: serialized,
           excerpt: post.excerpt || result.excerpt,
           template_version: 1,
           updated_at: new Date().toISOString(),
