@@ -103,8 +103,8 @@ export default function HomeSidebar({ selectedTeam, onSelectTeam }: HomeSidebarP
         {/* Blitz Features — shown when a team is selected */}
         {selectedTeam && selectedTeam !== 'all' && (
           <div style={{ marginTop: 8, borderTop: '1px solid var(--hp-border)', paddingTop: 8 }}>
-            <div style={{ padding: '4px 16px', fontSize: 11, fontWeight: 700, color: 'var(--hp-muted-foreground)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-              Blitz Features
+            <div style={{ padding: '4px 16px', fontSize: 14, fontWeight: 700, letterSpacing: '-0.01em' }}>
+              <span style={{ color: '#00D4FF' }}>SM</span><span style={{ color: '#BC0000' }}>&#x2736;</span><span style={{ color: '#00D4FF' }}>EDGE Features</span>
             </div>
             {[
               { icon: ArrowRightLeft, label: 'Trade Simulator', href: '/gm' },
@@ -132,7 +132,9 @@ export default function HomeSidebar({ selectedTeam, onSelectTeam }: HomeSidebarP
                 onMouseEnter={(e) => { e.currentTarget.style.background = 'var(--hp-muted)' }}
                 onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent' }}
               >
-                <item.icon className="h-4 w-4" style={{ color: 'var(--hp-muted-foreground)' }} />
+                <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg" style={{ background: 'var(--hp-muted)', color: '#00D4FF', border: '1px solid #00D4FF' }}>
+                  <item.icon className="h-5 w-5" />
+                </div>
                 <span>{item.label}</span>
               </a>
             ))}

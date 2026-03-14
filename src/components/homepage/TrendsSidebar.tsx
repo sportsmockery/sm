@@ -157,7 +157,7 @@ export default function TrendsSidebar({ selectedTeam }: TrendsSidebarProps) {
       {(!selectedTeam || selectedTeam === 'all') && (
         <div className="hp-sidebar-card overflow-hidden">
           <div className="px-3 pt-3 pb-2">
-            <h2 style={{ fontSize: 14, fontWeight: 700, letterSpacing: '-0.01em', color: 'var(--hp-foreground)' }}>Blitz Features</h2>
+            <h2 style={{ fontSize: 14, fontWeight: 700, letterSpacing: '-0.01em' }}><span style={{ color: '#00D4FF' }}>SM</span><span style={{ color: '#BC0000' }}>&#x2736;</span><span style={{ color: '#00D4FF' }}>EDGE Features</span></h2>
           </div>
 
           <div className="px-2.5 pb-3 flex flex-col gap-1">
@@ -175,13 +175,13 @@ export default function TrendsSidebar({ selectedTeam }: TrendsSidebarProps) {
                 onMouseLeave={(e) => {
                   e.currentTarget.style.background = 'transparent'
                   const icon = e.currentTarget.querySelector('[data-icon]') as HTMLElement
-                  if (icon) icon.style.color = 'var(--hp-muted-foreground)'
+                  if (icon) icon.style.color = '#00D4FF'
                 }}
               >
                 <div
                   data-icon
                   className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg self-center"
-                  style={{ background: 'var(--hp-muted)', color: 'var(--hp-muted-foreground)', transition: 'color 0.2s' }}
+                  style={{ background: 'var(--hp-muted)', color: '#00D4FF', border: '1px solid #00D4FF', transition: 'color 0.2s' }}
                 >
                   <tool.icon className="h-5 w-5" />
                 </div>
