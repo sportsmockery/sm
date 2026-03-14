@@ -41,7 +41,7 @@ export default function ArticleShareBar({ url, title }: ArticleShareBarProps) {
     borderRadius: '50%',
     backgroundColor: 'var(--sm-surface)',
     color: 'var(--sm-text-muted)',
-    border: '1px solid var(--sm-border)',
+    border: 'none',
     cursor: 'pointer',
     transition: 'background-color 0.2s, color 0.2s',
     textDecoration: 'none',
@@ -49,13 +49,12 @@ export default function ArticleShareBar({ url, title }: ArticleShareBarProps) {
 
   return (
     <div
-      className="article-glass-card-sm"
       style={{
         marginTop: 16,
         display: 'flex',
         alignItems: 'center',
         gap: 10,
-        padding: '8px 16px',
+        padding: '8px 0',
       }}
     >
       <span style={{ fontSize: 12, fontWeight: 600, color: 'var(--sm-text-dim)', marginRight: 4 }}>

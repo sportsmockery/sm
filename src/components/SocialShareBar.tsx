@@ -95,11 +95,7 @@ export default function SocialShareBar({ url, title }: SocialShareBarProps) {
           gap: 12,
           padding: '10px 24px',
           borderRadius: 9999,
-          backgroundColor: 'rgba(30, 30, 30, 0.9)',
-          backdropFilter: 'blur(12px)',
-          WebkitBackdropFilter: 'blur(12px)',
-          boxShadow: '0 4px 20px rgba(0,0,0,0.3)',
-          border: '1px solid rgba(255,255,255,0.12)',
+          backgroundColor: 'transparent',
         }}
       >
         {platforms.map((platform) => {
@@ -114,9 +110,9 @@ export default function SocialShareBar({ url, title }: SocialShareBarProps) {
             width: 44,
             height: 44,
             borderRadius: '50%',
-            backgroundColor: 'rgba(255,255,255,0.12)',
-            color: 'rgba(255,255,255,0.85)',
-            border: '2px solid #bc0000',
+            backgroundColor: 'transparent',
+            color: '#0B0F14',
+            border: 'none',
             outline: 'none',
             cursor: 'pointer',
             transition: 'transform 0.2s ease, color 0.2s ease, background-color 0.2s ease',
@@ -176,7 +172,7 @@ export default function SocialShareBar({ url, title }: SocialShareBarProps) {
                 }}
                 onMouseLeave={(e) => {
                   e.currentTarget.style.transform = 'scale(1)'
-                  e.currentTarget.style.color = 'rgba(255,255,255,0.85)'
+                  e.currentTarget.style.color = '#0B0F14'
                 }}
               >
                 {platform.icon}
@@ -196,7 +192,7 @@ export default function SocialShareBar({ url, title }: SocialShareBarProps) {
               }}
               onMouseLeave={(e) => {
                 e.currentTarget.style.transform = 'scale(1)'
-                e.currentTarget.style.color = 'rgba(255,255,255,0.85)'
+                e.currentTarget.style.color = '#0B0F14'
               }}
             >
               {platform.icon}
