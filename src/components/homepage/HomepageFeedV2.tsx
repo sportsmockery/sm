@@ -16,6 +16,8 @@ interface HomepageFeedV2Props {
   teamContext?: TeamContext | null
   debateContext?: DebateContext | null
   primaryTeam?: string
+  /** Article ID shown in hero — feed will suppress it from top position */
+  heroArticleId?: number
 }
 
 export default function HomepageFeedV2({
@@ -25,6 +27,7 @@ export default function HomepageFeedV2({
   teamContext,
   debateContext,
   primaryTeam,
+  heroArticleId,
 }: HomepageFeedV2Props) {
   const [activeTab, setActiveTab] = useState<"for-you" | "team-pulse">("for-you")
   const [selectedTeam, setSelectedTeam] = useState<string>("all")
@@ -99,6 +102,7 @@ export default function HomepageFeedV2({
           activeTab={activeTab}
           setActiveTab={setActiveTab}
           selectedTeam={selectedTeam}
+          heroArticleId={heroArticleId}
         />
 
         {/* Right Sidebar */}

@@ -25,6 +25,8 @@ interface MainFeedProps {
   activeTab: "for-you" | "team-pulse"
   setActiveTab: (tab: "for-you" | "team-pulse") => void
   selectedTeam: string
+  /** Article ID currently shown in the hero — suppress from first feed position */
+  heroArticleId?: number
 }
 
 function RiverCard({ item }: { item: HomepageRiverItem }) {
@@ -201,7 +203,7 @@ function FeedSkeleton() {
   )
 }
 
-export default function MainFeed({ activeTab, setActiveTab, selectedTeam }: MainFeedProps) {
+export default function MainFeed({ activeTab, setActiveTab, selectedTeam, heroArticleId }: MainFeedProps) {
   const [feed, setFeed] = useState<HomepageRiverItem[]>([])
   const [teamFeeds, setTeamFeeds] = useState<Record<string, HomepageRiverItem[]>>({})
   const [loading, setLoading] = useState(true)
@@ -251,9 +253,20 @@ export default function MainFeed({ activeTab, setActiveTab, selectedTeam }: Main
     ? [...displayFeed, ...feed.filter(item => !displayFeed.some(d => d.id === item.id)).slice(0, 10 - displayFeed.length)]
     : displayFeed
 
+  // If a hero article is shown above, suppress it from the first feed position
+  // to avoid duplication. It can still appear later in the feed naturally.
+  const heroSuppressedFeed = heroArticleId
+    ? finalFeed.filter((item, idx) => {
+        // Only suppress from first 3 positions
+        if (idx >= 3) return true
+        const postId = item.data?.postId
+        return postId !== heroArticleId
+      })
+    : finalFeed
+
   // Get featured story from the first item
-  const featuredItem = feed[0]
-  const feedItems = selectedTeam === "all" ? finalFeed.slice(1) : finalFeed
+  const featuredItem = heroSuppressedFeed[0] || feed[0]
+  const feedItems = selectedTeam === "all" ? heroSuppressedFeed.slice(1) : heroSuppressedFeed
 
   return (
     <main className="min-h-screen w-full max-w-[600px] pt-4" style={{ borderLeft: '1px solid var(--hp-border)', borderRight: '1px solid var(--hp-border)' }}>

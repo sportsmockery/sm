@@ -8,6 +8,9 @@ import type { ReactNode } from "react"
 /* ------------------------------------------------------------------ */
 /*  Trending Article Featured Hero                                     */
 /*  Full-width featured-image takeover. Highest-priority hero mode.    */
+/*                                                                     */
+/*  Uses the article's featured image as the hero background with a    */
+/*  dark overlay for readability. Content sits left-of-center.         */
 /* ------------------------------------------------------------------ */
 
 interface TrendingFeaturedHeroProps {
@@ -19,6 +22,8 @@ export function TrendingFeaturedHero({ story, logo }: TrendingFeaturedHeroProps)
   return (
     <HeroShell
       logo={logo}
+      height="cinematic"
+      forceLight
       ariaLabel={`Featured: ${story.title}`}
       background={
         <>
@@ -32,7 +37,7 @@ export function TrendingFeaturedHero({ story, logo }: TrendingFeaturedHeroProps)
               priority
               sizes="100vw"
             />
-            {/* Dark overlay for readability */}
+            {/* Dark overlay — stronger left for text readability */}
             <div
               className="absolute inset-0"
               style={{
@@ -51,9 +56,9 @@ export function TrendingFeaturedHero({ story, logo }: TrendingFeaturedHeroProps)
         </>
       }
     >
-      <div className="mx-auto flex max-w-2xl flex-col items-start text-left md:items-start md:max-w-3xl">
-        {/* Eyebrow */}
-        <div className="mb-4 flex items-center gap-3">
+      <div className="mx-auto flex w-full max-w-3xl flex-col items-start text-left lg:max-w-4xl">
+        {/* Eyebrow row */}
+        <div className="mb-4 flex flex-wrap items-center gap-3">
           <span
             className="inline-flex items-center rounded-full px-3 py-1 text-xs font-medium uppercase tracking-wider"
             style={{
@@ -63,7 +68,7 @@ export function TrendingFeaturedHero({ story, logo }: TrendingFeaturedHeroProps)
             }}
           >
             <span
-              className="mr-1.5 inline-block h-1.5 w-1.5 rounded-full"
+              className="mr-1.5 inline-block h-1.5 w-1.5 rounded-full animate-pulse"
               style={{ backgroundColor: "#BC0000" }}
             />
             Trending Now
@@ -88,7 +93,7 @@ export function TrendingFeaturedHero({ story, logo }: TrendingFeaturedHeroProps)
           className="font-bold tracking-tight"
           style={{
             color: "#FAFAFB",
-            fontSize: "clamp(32px, 4.5vw, 56px)",
+            fontSize: "clamp(28px, 4.5vw, 56px)",
             lineHeight: 1.1,
           }}
         >
@@ -105,12 +110,24 @@ export function TrendingFeaturedHero({ story, logo }: TrendingFeaturedHeroProps)
           </p>
         )}
 
-        {/* Meta row */}
-        {story.publishedLabel && (
+        {/* Meta row — publishedLabel + optional view count */}
+        {(story.publishedLabel || story.views > 0) && (
           <div className="mt-4 flex items-center gap-3">
-            <span className="text-sm" style={{ color: "rgba(250, 250, 251, 0.5)" }}>
-              {story.publishedLabel}
-            </span>
+            {story.publishedLabel && (
+              <span className="text-sm" style={{ color: "rgba(250, 250, 251, 0.5)" }}>
+                {story.publishedLabel}
+              </span>
+            )}
+            {story.views > 0 && (
+              <>
+                {story.publishedLabel && (
+                  <span style={{ color: "rgba(250, 250, 251, 0.25)" }}>·</span>
+                )}
+                <span className="text-sm" style={{ color: "rgba(250, 250, 251, 0.5)" }}>
+                  {formatViews(story.views)} views
+                </span>
+              </>
+            )}
           </div>
         )}
 
@@ -121,4 +138,10 @@ export function TrendingFeaturedHero({ story, logo }: TrendingFeaturedHeroProps)
       </div>
     </HeroShell>
   )
+}
+
+function formatViews(views: number): string {
+  if (views >= 1000000) return `${(views / 1000000).toFixed(1)}M`
+  if (views >= 1000) return `${(views / 1000).toFixed(1)}K`
+  return String(views)
 }
