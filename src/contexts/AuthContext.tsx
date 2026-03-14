@@ -85,7 +85,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           console.error('Auth session check failed:', error.message)
           setUser(null)
         } else if (session?.user) {
-          setUser(mapSupabaseUser(session.user))
+          // getSession returns cached data — fetch fresh user to get updated metadata (e.g. avatar)
+          const { data: { user: freshUser } } = await supabase.auth.getUser()
+          setUser(mapSupabaseUser(freshUser ?? session.user))
         } else {
           setUser(null)
           // Clean up any stale session expiry
