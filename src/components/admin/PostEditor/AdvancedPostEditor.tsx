@@ -366,8 +366,10 @@ export default function AdvancedPostEditor({
       // If this was the first save, capture the post ID for future updates
       if (!postId && savedPost?.id) {
         setAutoSavedPostId(savedPost.id)
-        // Update browser URL without navigating so refresh won't lose the post
-        window.history.replaceState(null, '', `/admin/posts/${savedPost.id}/edit`)
+        // Note: Do NOT call window.history.replaceState here — in Next.js 16
+        // it triggers the App Router to re-render the new route, which remounts
+        // the editor and clears all form state. The autoSavedPostId state is
+        // sufficient for subsequent autosaves to hit the correct endpoint.
       }
 
       setAutoSaveStatus('saved')
