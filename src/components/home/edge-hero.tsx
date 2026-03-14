@@ -154,7 +154,7 @@ export function EdgeHero({
             className="mb-5 inline-flex gap-3 rounded-full px-4 py-3"
             style={{
               background: "var(--hp-muted)",
-              border: "1px solid var(--hp-border)",
+              border: "1px solid #00D4FF",
               alignItems: "center",
             }}
           >
@@ -182,7 +182,7 @@ export function EdgeHero({
                 style={{ color: "var(--hp-muted-foreground)" }}
               >
                 {welcomeMessage ?? (
-                  <>Welcome to SM&#x2736;EDGE, our <strong>NEW</strong> AI-powered platform.</>
+                  <>Welcome to <span style={{ color: '#00D4FF' }}>SM</span><span style={{ color: '#BC0000' }}>&#x2736;</span><span style={{ color: '#00D4FF' }}>EDGE</span>, our <strong>NEW</strong> AI-powered platform.</>
                 )}
               </p>
             </div>
@@ -278,14 +278,14 @@ export function EdgeHero({
                       className="inline-flex items-center rounded-full px-3.5 py-2 text-sm font-medium transition-colors"
                       style={{
                         background: "var(--hp-muted)",
-                        border: "1px solid var(--hp-border)",
+                        border: "1px solid #00D4FF",
                         color: "var(--hp-foreground)",
                       }}
                       onMouseEnter={(e) => {
-                        e.currentTarget.style.borderColor = "rgba(188, 0, 0, 0.3)"
+                        e.currentTarget.style.borderColor = "#00B8DB"
                       }}
                       onMouseLeave={(e) => {
-                        e.currentTarget.style.borderColor = "var(--hp-border)"
+                        e.currentTarget.style.borderColor = "#00D4FF"
                       }}
                     >
                       {action.label}
