@@ -8,12 +8,17 @@ import type { User as SupabaseUser, Session } from '@supabase/supabase-js'
 const SESSION_KEY = 'sm-session-expiry'
 const SESSION_DURATION = 24 * 60 * 60 * 1000 // 24 hours in milliseconds
 
-// Create Supabase client for browser
+// Browser client singleton — shared across AuthContext instances
+let _browserClient: ReturnType<typeof createBrowserClient> | null = null
+
 function createSupabaseClient() {
-  return createBrowserClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-  )
+  if (!_browserClient) {
+    _browserClient = createBrowserClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+    )
+  }
+  return _browserClient
 }
 
 // User type
@@ -105,7 +110,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     // Listen for auth state changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (event, session) => {
+      async (event: any, session: any) => {
         if (session?.user) {
           setUser(mapSupabaseUser(session.user))
         } else {

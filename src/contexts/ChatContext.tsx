@@ -4,11 +4,17 @@ import React, { createContext, useContext, useState, useEffect, useCallback, use
 import { createBrowserClient } from '@supabase/ssr'
 import { RealtimeChannel } from '@supabase/supabase-js'
 
+// Browser client singleton — shared across ChatContext instances
+let _chatBrowserClient: ReturnType<typeof createBrowserClient> | null = null
+
 function createSupabaseClient() {
-  return createBrowserClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-  )
+  if (!_chatBrowserClient) {
+    _chatBrowserClient = createBrowserClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+    )
+  }
+  return _chatBrowserClient
 }
 
 // Types
@@ -229,7 +235,7 @@ export function ChatProvider({ children, teamSlug }: ChatProviderProps) {
 
     checkAuth()
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event: any, session: any) => {
       setIsAuthenticated(!!session)
     })
 
@@ -361,7 +367,7 @@ export function ChatProvider({ children, teamSlug }: ChatProviderProps) {
             table: 'chat_messages',
             filter: `room_id=eq.${room.id}`,
           },
-          async (payload) => {
+          async (payload: any) => {
             // Fetch full message with user data
             const { data: newMsg } = await supabase
               .from('chat_messages')
@@ -382,7 +388,7 @@ export function ChatProvider({ children, teamSlug }: ChatProviderProps) {
             table: 'chat_messages',
             filter: `room_id=eq.${room.id}`,
           },
-          (payload) => {
+          (payload: any) => {
             setMessages(prev =>
               prev.map(msg => msg.id === payload.new.id ? { ...msg, ...payload.new } : msg)
             )
@@ -405,7 +411,7 @@ export function ChatProvider({ children, teamSlug }: ChatProviderProps) {
             if (data) {
               setMessages(prev =>
                 prev.map(msg => {
-                  const updated = data.find(d => d.id === msg.id)
+                  const updated = data.find((d: any) => d.id === msg.id)
                   return updated ? { ...msg, reaction_counts: updated.reaction_counts } : msg
                 })
               )

@@ -1,12 +1,17 @@
 import { createBrowserClient } from '@supabase/ssr'
 import type { User, Session } from '@supabase/supabase-js'
 
-// Create a browser client for auth operations
-function createClient() {
-  return createBrowserClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-  )
+// Browser auth client singleton — cached so we don't create multiple GoTrueClient instances
+let _authClient: ReturnType<typeof createBrowserClient> | null = null
+
+function getAuthClient() {
+  if (!_authClient) {
+    _authClient = createBrowserClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+    )
+  }
+  return _authClient
 }
 
 export interface AuthError {
@@ -24,7 +29,7 @@ export interface AuthResult {
  * Sign in with email and password
  */
 export async function signIn(email: string, password: string): Promise<AuthResult> {
-  const supabase = createClient()
+  const supabase = getAuthClient()
 
   const { data, error } = await supabase.auth.signInWithPassword({
     email,
@@ -54,7 +59,7 @@ export async function signUp(
   password: string,
   metadata?: { full_name?: string }
 ): Promise<AuthResult> {
-  const supabase = createClient()
+  const supabase = getAuthClient()
 
   const { data, error } = await supabase.auth.signUp({
     email,
@@ -84,7 +89,7 @@ export async function signUp(
  * Sign out the current user
  */
 export async function signOut(): Promise<{ error: AuthError | null }> {
-  const supabase = createClient()
+  const supabase = getAuthClient()
 
   const { error } = await supabase.auth.signOut()
 
@@ -99,7 +104,7 @@ export async function signOut(): Promise<{ error: AuthError | null }> {
  * Send password reset email
  */
 export async function resetPassword(email: string): Promise<{ error: AuthError | null }> {
-  const supabase = createClient()
+  const supabase = getAuthClient()
 
   const { error } = await supabase.auth.resetPasswordForEmail(email, {
     redirectTo: `${window.location.origin}/reset-password`,
@@ -116,7 +121,7 @@ export async function resetPassword(email: string): Promise<{ error: AuthError |
  * Update password (for reset password flow)
  */
 export async function updatePassword(newPassword: string): Promise<{ error: AuthError | null }> {
-  const supabase = createClient()
+  const supabase = getAuthClient()
 
   const { error } = await supabase.auth.updateUser({
     password: newPassword,
@@ -133,7 +138,7 @@ export async function updatePassword(newPassword: string): Promise<{ error: Auth
  * Get the current user
  */
 export async function getCurrentUser(): Promise<{ user: User | null; error: AuthError | null }> {
-  const supabase = createClient()
+  const supabase = getAuthClient()
 
   const { data: { user }, error } = await supabase.auth.getUser()
 
@@ -148,7 +153,7 @@ export async function getCurrentUser(): Promise<{ user: User | null; error: Auth
  * Get the current session
  */
 export async function getSession(): Promise<{ session: Session | null; error: AuthError | null }> {
-  const supabase = createClient()
+  const supabase = getAuthClient()
 
   const { data: { session }, error } = await supabase.auth.getSession()
 
@@ -163,9 +168,9 @@ export async function getSession(): Promise<{ session: Session | null; error: Au
  * Subscribe to auth state changes
  */
 export function onAuthStateChange(callback: (user: User | null) => void) {
-  const supabase = createClient()
+  const supabase = getAuthClient()
 
-  const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+  const { data: { subscription } } = supabase.auth.onAuthStateChange((_event: any, session: any) => {
     callback(session?.user ?? null)
   })
 

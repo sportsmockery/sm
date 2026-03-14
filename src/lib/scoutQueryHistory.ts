@@ -14,6 +14,9 @@ const STORAGE_KEY = 'scout_query_history'
 const MAX_DAYS = 30
 const MAX_LOCAL_QUERIES = 100 // Limit localStorage entries
 
+// Cached browser client singleton for query history
+let _historyClient: ReturnType<typeof createBrowserClient> | null = null
+
 export interface QueryHistoryEntry {
   id: string
   query: string
@@ -95,7 +98,10 @@ function getSupabaseClient() {
 
   if (!url || !key) return null
 
-  return createBrowserClient(url, key)
+  if (!_historyClient) {
+    _historyClient = createBrowserClient(url, key)
+  }
+  return _historyClient
 }
 
 /**
@@ -122,7 +128,7 @@ export async function getSupabaseHistory(userId: string): Promise<QueryHistoryEn
       return []
     }
 
-    return (data || []).map(row => ({
+    return (data || []).map((row: any) => ({
       id: row.id,
       query: row.query,
       response: row.response,
