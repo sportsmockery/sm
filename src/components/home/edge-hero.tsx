@@ -130,16 +130,16 @@ export function EdgeHero({
       {/* ── Ambient Chicago stars background ── */}
       <HeroStatsOrbs />
 
-      {/* ── Blitz logo — top-left, visually light ── */}
+      {/* ── Edge logo — top-left, visually light ── */}
       <div className="mx-auto w-full max-w-7xl px-4 pt-5 sm:px-6 lg:px-8 lg:pt-6">
-        <div className="flex items-center justify-start">
+        <div className="flex items-center justify-start" style={{ marginLeft: '-400px', marginTop: '-50px' }}>
           {logo ?? (
             <Image
-              src="/blitz_logo.svg"
-              alt="SM Blitz"
-              width={240}
-              height={88}
-              className="w-[240px] h-[88px] object-contain opacity-80"
+              src="/edge_logo.svg"
+              alt="SM Edge"
+              width={720}
+              height={264}
+              className="w-[720px] h-[264px] object-contain opacity-80"
               priority
             />
           )}
@@ -147,7 +147,7 @@ export function EdgeHero({
       </div>
 
       {/* ── Centered hero content — fills remaining viewport ── */}
-      <div className="flex flex-1 items-center justify-center px-4 sm:px-6 lg:px-8">
+      <div className="flex flex-1 items-center justify-center px-4 sm:px-6 lg:px-8" style={{ marginTop: '-280px' }}>
         <div className="mx-auto flex max-w-2xl flex-col items-center text-center">
           {/* ── Scout identity pill ── */}
           <div
@@ -182,21 +182,23 @@ export function EdgeHero({
                 style={{ color: "var(--hp-muted-foreground)" }}
               >
                 {welcomeMessage ?? (
-                  <>Welcome to SM&#x2736;Blitz, our <strong>NEW</strong> AI-powered platform.</>
+                  <>Welcome to SM&#x2736;EDGE, our <strong>NEW</strong> AI-powered platform.</>
                 )}
               </p>
             </div>
           </div>
 
           {/* ── Headline ── */}
-          <div className="w-full max-w-3xl">
+          <div className="w-full">
             <h1
               id="edge-hero-heading"
-              className="mx-auto max-w-3xl text-balance font-bold tracking-tight"
+              className="text-balance font-bold tracking-tight"
               style={{
                 color: "var(--hp-foreground)",
                 fontSize: "clamp(48px, 5vw, 72px)",
                 lineHeight: 1.1,
+                whiteSpace: "nowrap",
+                marginLeft: "-45px",
               }}
             >
               {headline}

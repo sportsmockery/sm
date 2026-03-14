@@ -720,8 +720,20 @@ async function getLeaderboards(season: number): Promise<WhiteSoxLeaderboard> {
   }
 
   const players = await getWhiteSoxPlayers()
-  // Use playerId (ESPN ID) as key since stats tables use ESPN IDs
-  const playersMap = new Map(players.map(p => [p.playerId, p]))
+
+  // Build MLB player_id → player map (stats table uses MLB IDs, not ESPN IDs)
+  const { data: rawPlayers } = await datalabAdmin
+    .from('whitesox_players')
+    .select('espn_id, player_id')
+    .eq('is_active', true)
+  const espnToPlayer = new Map(players.map(p => [p.playerId, p]))
+  const playersMap = new Map<string, typeof players[0]>()
+  for (const rp of rawPlayers || []) {
+    const player = espnToPlayer.get(String(rp.espn_id))
+    if (player && rp.player_id) {
+      playersMap.set(String(rp.player_id), player)
+    }
+  }
 
   // Get all game stats for season and aggregate by player
   let { data: gameStats } = await datalabAdmin

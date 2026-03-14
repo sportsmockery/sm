@@ -6,6 +6,7 @@ import MainFeed from "@/components/homepage/MainFeed"
 import TrendsSidebar from "@/components/homepage/TrendsSidebar"
 import { EdgeHero } from "@/components/home/edge-hero"
 import { Home, Compass, Plus, Film, User, X, FileText, Video, Camera, ImageIcon } from "lucide-react"
+import EdgeIntro from "@/components/home/EdgeIntro"
 
 interface HomepageFeedV2Props {
   firstName?: string
@@ -17,6 +18,8 @@ export default function HomepageFeedV2({ firstName }: HomepageFeedV2Props) {
   const [activeNavItem, setActiveNavItem] = useState<string>("home")
   const [isComposeOpen, setIsComposeOpen] = useState(false)
   const [composeTab, setComposeTab] = useState<"text" | "photo" | "reel" | "story">("text")
+  const [introComplete, setIntroComplete] = useState(false)
+  const [showIntro, setShowIntro] = useState(true)
 
   // Close on escape
   useEffect(() => {
@@ -29,15 +32,35 @@ export default function HomepageFeedV2({ firstName }: HomepageFeedV2Props) {
     return () => window.removeEventListener("keydown", handleEscape)
   }, [])
 
+  // Only show intro once per session
+  useEffect(() => {
+    if (sessionStorage.getItem('edge-intro-seen')) {
+      setShowIntro(false)
+      setIntroComplete(true)
+    }
+  }, [])
+
+  const handleIntroComplete = () => {
+    setIntroComplete(true)
+    sessionStorage.setItem('edge-intro-seen', '1')
+  }
+
   return (
+    <>
+    {showIntro && !introComplete && <EdgeIntro onComplete={handleIntroComplete} />}
     <div
       className="homepage-v2 homepage-v2-light min-h-screen transition-colors duration-300 pb-16 md:pb-0"
-      style={{ background: 'var(--hp-background)', color: 'var(--hp-foreground)' }}
+      style={{
+        background: 'var(--hp-background)',
+        color: 'var(--hp-foreground)',
+        opacity: introComplete ? 1 : 0,
+        transition: 'opacity 400ms ease-in',
+      }}
     >
       {/* Full-screen Search Hero - above the fold */}
       <EdgeHero
         userName={firstName || "Chris"}
-        welcomeMessage={<>Welcome to SM&#x2736;Blitz, our <strong>NEW</strong> AI-powered platform.</>}
+        welcomeMessage={<>Welcome to SM&#x2736;EDGE, our <strong>NEW</strong> AI-powered platform.</>}
         headline="What can I help you with?"
         quickActions={[
           { id: "1", label: "Bears rumors", value: "What are the latest Bears rumors today?" },
@@ -205,5 +228,6 @@ export default function HomepageFeedV2({ firstName }: HomepageFeedV2Props) {
         </div>
       )}
     </div>
+    </>
   )
 }
