@@ -167,6 +167,8 @@ function RiverCard({ item }: { item: HomepageRiverItem }) {
           stats={data.stats as { comments: number; retweets: number; likes: number; views: string }}
           slug={data.slug as string | undefined}
           categorySlug={data.categorySlug as string | undefined}
+          videoId={data.videoId as string | undefined}
+          isShort={data.isShort as boolean | undefined}
         />
       )
     default:

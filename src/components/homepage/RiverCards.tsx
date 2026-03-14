@@ -924,11 +924,15 @@ interface VideoCardProps extends BaseCardProps {
   stats: { comments: number; retweets: number; likes: number; views: string }
   slug?: string
   categorySlug?: string
+  videoId?: string
+  isShort?: boolean
 }
 
-export function VideoCard({ title, duration, source, teaser, thumbnailUrl, team, teamColor, timestamp, stats, slug, categorySlug }: VideoCardProps) {
+export function VideoCard({ title, duration, source, teaser, thumbnailUrl, team, teamColor, timestamp, stats, slug, categorySlug, videoId, isShort }: VideoCardProps) {
   const teamHex = teamColor
   const articleUrl = slug && categorySlug ? `/${categorySlug}/${slug}` : undefined
+  const youtubeUrl = videoId ? (isShort ? `https://www.youtube.com/shorts/${videoId}` : `https://www.youtube.com/watch?v=${videoId}`) : undefined
+  const linkUrl = articleUrl || youtubeUrl
 
   return (
     <article className="hp-feed-card hp-card-enter">
@@ -940,16 +944,16 @@ export function VideoCard({ title, duration, source, teaser, thumbnailUrl, team,
         <TeamTag team={team} teamHex={teamHex} />
       </div>
 
-      {articleUrl ? (
-        <Link href={articleUrl}>
+      {linkUrl ? (
+        <a href={linkUrl} target={youtubeUrl ? '_blank' : undefined} rel={youtubeUrl ? 'noopener noreferrer' : undefined}>
           <h2 className="hover:underline" style={{ fontSize: 21, fontWeight: 700, lineHeight: 1.25, letterSpacing: '-0.02em', color: 'var(--hp-foreground)' }}>{title}</h2>
-        </Link>
+        </a>
       ) : (
         <h2 style={{ fontSize: 21, fontWeight: 700, lineHeight: 1.25, letterSpacing: '-0.02em', color: 'var(--hp-foreground)' }}>{title}</h2>
       )}
       <p className="mt-2.5 line-clamp-2" style={{ fontSize: 15, lineHeight: 1.65, color: 'var(--hp-foreground)', opacity: 0.7 }}>{teaser}</p>
 
-      <div className="mt-4 relative rounded-2xl overflow-hidden group shadow-md" style={{ background: '#000', aspectRatio: '16/9' }}>
+      <a href={linkUrl || '#'} target={youtubeUrl ? '_blank' : undefined} rel={youtubeUrl ? 'noopener noreferrer' : undefined} className="mt-4 relative rounded-2xl overflow-hidden group shadow-md block" style={{ background: '#000', aspectRatio: isShort ? '9/16' : '16/9', maxHeight: isShort ? 400 : undefined }}>
         <img
           src={thumbnailUrl}
           alt={title}
@@ -968,7 +972,7 @@ export function VideoCard({ title, duration, source, teaser, thumbnailUrl, team,
         <div className="absolute top-3 left-3 rounded-lg px-2.5 py-1" style={{ background: 'rgba(0,0,0,0.6)', fontSize: 12, fontWeight: 500, color: '#fff' }}>
           {source}
         </div>
-      </div>
+      </a>
 
       <EngagementRow stats={stats} />
     </article>
