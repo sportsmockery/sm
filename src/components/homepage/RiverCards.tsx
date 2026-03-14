@@ -1,9 +1,10 @@
 "use client"
 
 import { useState } from "react"
+import Image from "next/image"
 import {
   MessageCircle, Share, Activity,
-  TrendingUp, Play, Clock, Check, X, ChevronRight, Bot,
+  TrendingUp, Play, Clock, Check, X, ChevronRight,
   BarChart3, Users
 } from "lucide-react"
 import {
@@ -191,7 +192,7 @@ export function EditorialCard({
         {authorPhoto && (
           <img src={authorPhoto} alt={author_name} className="h-5 w-5 rounded-full object-cover" crossOrigin="anonymous" />
         )}
-        <p style={{ fontSize: 12, color: 'var(--hp-muted-foreground)' }}>By {author_name}</p>
+        <span style={{ fontSize: 12, color: 'var(--hp-muted-foreground)' }}>By {author_name}</span>
       </div>
 
       {/* Scout Stat hover overlay */}
@@ -655,7 +656,7 @@ export function ScoutSummaryCard({ summary, bullets, topic, team, teamColor, tim
 
       <div className="mt-4 flex gap-4">
         <button className="flex items-center gap-1.5 rounded-xl px-4 py-2.5 transition-colors hp-tap-target" style={{ fontSize: 14, fontWeight: 600, background: 'rgba(6,182,212,0.1)', color: '#0891b2' }}>
-          <Bot className="h-4 w-4" /> Ask Scout
+          <Image src="/downloads/scout-v2.png" alt="Scout" width={16} height={16} className="h-4 w-4 rounded-full object-contain" /> Ask Scout
         </button>
         <button className="hp-tap-target transition-colors" style={{ fontSize: 14, fontWeight: 500, color: 'var(--hp-muted-foreground)' }}>
           View full analysis
@@ -839,7 +840,7 @@ export function ScoutBriefingCard() {
           color: "#0891b2",
         }}
       >
-        <Bot className="h-4 w-4" /> Ask Scout for details
+        <Image src="/downloads/scout-v2.png" alt="Scout" width={16} height={16} className="h-4 w-4 rounded-full object-contain" /> Ask Scout for details
       </button>
     </article>
   )

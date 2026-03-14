@@ -206,9 +206,9 @@ function CompactRoster({ players, slug, info }: { players: TeamPlayer[]; slug: s
           Full Roster →
         </Link>
       </div>
-      {players.map((player) => (
+      {players.map((player, idx) => (
         <Link
-          key={player.id}
+          key={`${player.id}-${idx}`}
           href={`/${slug}/players/${player.id}`}
           className="group flex items-center gap-2 px-3 py-1.5 transition-colors"
           style={{ borderBottom: '1px solid var(--hp-border)', textDecoration: 'none' }}

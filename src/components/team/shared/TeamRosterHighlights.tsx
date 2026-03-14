@@ -44,9 +44,9 @@ export default function TeamRosterHighlights({
 
       {/* Player list */}
       <div>
-        {players.slice(0, 5).map((player) => (
+        {players.slice(0, 5).map((player, idx) => (
           <Link
-            key={player.id}
+            key={`${player.id}-${idx}`}
             href={`/${teamSlug}/players/${player.id}`}
             className="group flex items-center gap-3 px-4 py-3 hover:bg-[var(--sm-card-hover)] transition-colors"
             style={{ borderBottom: '1px solid var(--sm-border)' }}
