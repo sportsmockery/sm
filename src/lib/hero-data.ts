@@ -138,7 +138,10 @@ async function fetchFeaturedStory(): Promise<{
   if (!supabaseAdmin) return null
 
   try {
-    // Get highest-viewed recent published article
+    // Max 48 hours old — never hero-takeover a stale article
+    const cutoff = new Date(Date.now() - 48 * 60 * 60 * 1000).toISOString()
+
+    // Get highest-viewed recent published article within 48h window
     const { data: posts } = await supabaseAdmin
       .from("sm_posts")
       .select(
@@ -146,6 +149,7 @@ async function fetchFeaturedStory(): Promise<{
       )
       .eq("status", "published")
       .not("featured_image", "is", null)
+      .gte("published_at", cutoff)
       .order("views", { ascending: false })
       .limit(5)
 
