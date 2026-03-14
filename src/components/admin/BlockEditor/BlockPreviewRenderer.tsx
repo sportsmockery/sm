@@ -42,22 +42,44 @@ function RenderBlock({ block }: { block: ContentBlock }) {
   switch (block.type) {
     /* ─── Content ─── */
     case 'paragraph':
+      if (!block.data.html) {
+        return (
+          <PreviewSection>
+            <p className="text-[18px] leading-[1.7]" style={{ color: BRAND.white }}>
+              <span className="text-slate-600 italic text-[16px]">Write your paragraph...</span>
+            </p>
+          </PreviewSection>
+        );
+      }
       return (
         <PreviewSection>
-          <p className="text-[18px] leading-[1.7]" style={{ color: BRAND.white }}>
-            {block.data.html || <span className="text-slate-600 italic text-[16px]">Write your paragraph...</span>}
-          </p>
+          <p
+            className="text-[18px] leading-[1.7]"
+            style={{ color: BRAND.white }}
+            dangerouslySetInnerHTML={{ __html: block.data.html }}
+          />
         </PreviewSection>
       );
 
     case 'heading': {
       const Tag = `h${block.data.level}` as 'h2' | 'h3' | 'h4';
       const sizes: Record<number, string> = { 2: 'text-[24px]', 3: 'text-[20px]', 4: 'text-[18px]' };
+      if (!block.data.text) {
+        return (
+          <div className="mb-4 mt-8">
+            <Tag className={`${sizes[block.data.level]} font-medium tracking-tight`} style={{ color: BRAND.white }}>
+              <span className="text-slate-600 italic font-normal">Section heading...</span>
+            </Tag>
+          </div>
+        );
+      }
       return (
         <div className="mb-4 mt-8">
-          <Tag className={`${sizes[block.data.level]} font-medium tracking-tight`} style={{ color: BRAND.white }}>
-            {block.data.text || <span className="text-slate-600 italic font-normal">Section heading...</span>}
-          </Tag>
+          <Tag
+            className={`${sizes[block.data.level]} font-medium tracking-tight`}
+            style={{ color: BRAND.white }}
+            dangerouslySetInnerHTML={{ __html: block.data.text }}
+          />
         </div>
       );
     }
@@ -293,7 +315,7 @@ function RenderBlock({ block }: { block: ContentBlock }) {
           {block.data.timestamp && (
             <span className="text-[13px] text-slate-400 mb-1 block">{block.data.timestamp}</span>
           )}
-          <p className="text-sm leading-relaxed" style={{ color: BRAND.white }}>{block.data.text}</p>
+          <p className="text-sm leading-relaxed" style={{ color: BRAND.white }} dangerouslySetInnerHTML={{ __html: block.data.text }} />
         </BreakingUpdateBlock>
       );
 

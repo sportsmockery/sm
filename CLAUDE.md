@@ -281,6 +281,8 @@ Components use PascalCase. Suffix meanings:
 5. The homepage must render the hero with `min-h-screen`
 6. Components must support keyboard navigation, high color contrast, alt text for images
 7. No text smaller than 13px
+8. **Supabase Browser Client — SINGLETON ONLY.** Never call `createBrowserClient()` or `createClient()` to make a new instance. Import the singleton from `src/lib/supabase.ts` (`import { supabase } from '@/lib/supabase'`) or use the `createClient()` re-export (which returns the same singleton). Creating multiple GoTrueClient instances causes auth race conditions, hydration errors, and "Multiple GoTrueClient instances detected" warnings. For server-side (API routes, server components), use `src/lib/supabase-server.ts` instead.
+9. **Block content HTML must use `dangerouslySetInnerHTML`.** Block data fields like `block.data.html` and `block.data.text` contain HTML strings (links, bold, italic, lists) from WordPress imports. Always render them with `dangerouslySetInnerHTML={{ __html: value }}`, never as React children (`{value}`). Rendering HTML strings as children causes raw tags to appear as text and breaks React hydration. See `BlockPreviewRenderer.tsx` for the correct pattern.
 
 ---
 
