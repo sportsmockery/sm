@@ -3547,6 +3547,26 @@ main {
   }
 }
 
+/* ===== FAN-CHAT: no gap above Chat Channels — pull content up to align with top ===== */
+.fan-chat-page {
+  margin-top: -32px; /* cancel space from LiveStrip so Chat Channels starts at top of content area */
+}
+.fan-chat-page .fan-chat-content {
+  margin-top: 0;
+  padding-top: 0;
+}
+.fan-chat-page .fan-chat-grid {
+  margin-top: 0;
+  padding-top: 0;
+}
+
+/* ===== FAN-CHAT WIDER RESPONSIVE GRID ===== */
+@media (min-width: 1024px) {
+  .fan-chat-grid {
+    grid-template-columns: minmax(260px, 280px) 1fr;
+  }
+}
+
 /* ===== MOBILE BOTTOM-NAV CLEARANCE ===== */
 @media (max-width: 768px) {
   .scout-ai-main { padding-bottom: 80px; min-height: 100dvh; }
