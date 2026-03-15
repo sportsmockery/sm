@@ -326,7 +326,7 @@ export default async function BullsGameCenterPage() {
           <Link
             href="/scout-ai?team=chicago-bulls&q=How%20did%20the%20Bulls%20do%20in%20their%20last%20game"
             className="btn btn-md btn-primary"
-            style={{ display: 'inline-block', textDecoration: 'none', borderRadius: 'var(--sm-radius-pill)' }}
+            style={{ display: 'inline-block', textDecoration: 'none', borderRadius: 'var(--sm-radius-pill)', backgroundColor: '#bc0000', color: '#fff' }}
           >
             Ask Scout
           </Link>

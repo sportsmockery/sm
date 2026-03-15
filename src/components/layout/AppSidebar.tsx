@@ -18,7 +18,7 @@ const EDGE_TOOLS: { id: string; title: string; href: string; icon: React.Compone
   { id: 'gm', title: 'Trade Simulator', href: '/gm', icon: ArrowRightLeft },
   { id: 'draft', title: 'Mock Draft', href: '/mock-draft', icon: ClipboardPen },
   { id: 'chat', title: 'Fan Chat', href: '/fan-chat', icon: MessageSquare },
-  { id: 'analytics', title: 'Team Analytics', href: '/chicago-bears', icon: BarChart3 },
+  { id: 'analytics', title: 'Team Stats', href: '/chicago-bears', icon: BarChart3 },
   { id: 'vision', title: 'Vision Theater', href: '/bears-film-room', icon: Video },
   { id: 'audio', title: 'Hands-Free Audio', href: '/audio', icon: Volume2 },
 ]
@@ -253,6 +253,27 @@ export default function AppSidebar() {
                   <tool.icon className="h-3 w-3" />
                 </div>
                 <span className="truncate" style={{ flex: 1, minWidth: 0 }}>{tool.title}</span>
+                {tool.id === 'chat' && (
+                  <span
+                    style={{
+                      flexShrink: 0,
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: 4,
+                      padding: '2px 6px',
+                      borderRadius: 'var(--sm-radius-pill)',
+                      fontSize: 9,
+                      fontWeight: 700,
+                      letterSpacing: '0.03em',
+                      color: '#22c55e',
+                      border: '1px solid rgba(34, 197, 94, 0.4)',
+                      background: 'rgba(34, 197, 94, 0.12)',
+                    }}
+                  >
+                    <span style={{ width: 4, height: 4, borderRadius: '50%', background: '#22c55e' }} />
+                    LIVE
+                  </span>
+                )}
               </Link>
             ))}
           </div>

@@ -585,7 +585,7 @@ export default async function BlackhawksCapTrackerPage() {
           <Link
             href="/scout-ai?team=chicago-blackhawks&q=How%20much%20cap%20space%20do%20the%20Blackhawks%20have"
             className="btn btn-md btn-primary"
-            style={{ display: 'inline-block', textDecoration: 'none', borderRadius: 'var(--sm-radius-pill)' }}
+            style={{ display: 'inline-block', textDecoration: 'none', borderRadius: 'var(--sm-radius-pill)', backgroundColor: '#bc0000', color: '#fff' }}
           >
             Ask Scout
           </Link>

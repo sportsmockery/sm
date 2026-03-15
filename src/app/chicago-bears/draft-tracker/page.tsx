@@ -1,14 +1,12 @@
 import { Metadata } from 'next'
 import Link from 'next/link'
 import Image from 'next/image'
-import { Suspense } from 'react'
 import { TeamHubLayout } from '@/components/team'
 import { CHICAGO_TEAMS, fetchNextGame } from '@/lib/team-config'
 import { getBearsSeparatedRecord } from '@/lib/bearsData'
 import { getBearsPosts } from '@/lib/bears'
-import { datalabAdmin } from '@/lib/supabase-datalab'
-import DraftTrackerTabs from './DraftTrackerTabs'
-import type { HubItem } from '@/types/hub'
+import HubUpdatesFeed from '@/components/hub/HubUpdatesFeed'
+import DraftNewsList from '@/components/hub/DraftNewsList'
 
 export const metadata: Metadata = {
   title: 'Chicago Bears Draft Tracker & Mock Drafts 2026 | Sports Mockery',
@@ -33,20 +31,10 @@ export const revalidate = 3600
 export default async function BearsDraftTrackerPage() {
   const team = CHICAGO_TEAMS.bears
 
-  const [separatedRecord, nextGame, posts, hubItemsResult] = await Promise.all([
+  const [separatedRecord, nextGame, posts] = await Promise.all([
     getBearsSeparatedRecord(2025),
     fetchNextGame('bears'),
     getBearsPosts(20),
-    datalabAdmin
-      .from('hub_items')
-      .select('*')
-      .eq('team_slug', 'chicago-bears')
-      .eq('hub_slug', 'draft-tracker')
-      .eq('status', 'published')
-      .order('featured', { ascending: false })
-      .order('timestamp', { ascending: false })
-      .limit(10)
-      .then(res => res.data || []) as Promise<HubItem[]>,
   ])
 
   const record = {
@@ -67,7 +55,6 @@ export default async function BearsDraftTrackerPage() {
     .slice(0, 8)
   const displayPosts = draftPosts.length > 0 ? draftPosts : posts.slice(0, 6)
 
-  // Serialize posts for client component
   const serializedPosts = displayPosts.map(p => ({
     id: p.id,
     title: p.title,
@@ -124,7 +111,7 @@ export default async function BearsDraftTrackerPage() {
         <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', marginBottom: '24px' }}>
           {[
             { label: 'Trade Rumors', href: '/chicago-bears/trade-rumors' },
-            { label: 'Cap Tracker', href: '/chicago-bears/cap-tracker' },
+            { label: 'Salary Cap', href: '/chicago-bears/cap-tracker' },
             { label: 'Depth Chart', href: '/chicago-bears/depth-chart' },
             { label: 'Full Roster', href: '/chicago-bears/roster' },
           ].map((link) => (
@@ -134,13 +121,16 @@ export default async function BearsDraftTrackerPage() {
           ))}
         </div>
 
-        {/* Tabs */}
-        <Suspense fallback={null}>
-          <DraftTrackerTabs
-            hubItems={hubItemsResult as HubItem[]}
-            displayPosts={serializedPosts}
-          />
-        </Suspense>
+        {/* Hub updates from /admin/hub (above) */}
+        <HubUpdatesFeed
+          hubSlug="draft-tracker"
+          teamSlug="chicago-bears"
+          title="Draft Intel"
+          emptyState="No draft updates yet."
+        />
+
+        {/* Latest draft news (below) */}
+        <DraftNewsList posts={serializedPosts} teamSlug="chicago-bears" />
 
         {/* Ask Scout CTA */}
         <div
@@ -167,7 +157,7 @@ export default async function BearsDraftTrackerPage() {
           <Link
             href="/scout-ai?team=chicago-bears&q=What%20should%20the%20Bears%20do%20in%20the%202026%20draft"
             className="btn btn-md btn-primary"
-            style={{ display: 'inline-block', textDecoration: 'none', borderRadius: 'var(--sm-radius-pill)' }}
+            style={{ display: 'inline-block', textDecoration: 'none', borderRadius: 'var(--sm-radius-pill)', backgroundColor: '#bc0000', color: '#fff' }}
           >
             Ask Scout
           </Link>

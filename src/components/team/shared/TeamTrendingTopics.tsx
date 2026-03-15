@@ -47,31 +47,29 @@ export default function TeamTrendingTopics({
           <Link
             key={trend.id}
             href={`/${teamSlug}`}
-            className="group flex items-center gap-3 px-4 py-3 hover:bg-[var(--sm-card-hover)] transition-colors"
-            style={{ borderBottom: '1px solid var(--sm-border)' }}
+            className="group flex items-start hover:bg-[var(--sm-card-hover)] transition-colors"
+            style={{ borderBottom: '1px solid var(--sm-border)', minHeight: 48, padding: '10px 16px', gap: 10 }}
           >
             <div
-              className={`w-6 h-6 flex-shrink-0 rounded-full flex items-center justify-center text-[11px] font-bold ${
-                index < 3 ? 'text-white' : 'bg-gray-100 dark:bg-gray-800 text-gray-500 dark:text-gray-400'
-              }`}
-              style={index < 3 ? { backgroundColor: info.secondaryColor } : undefined}
+              className="w-6 h-6 flex-shrink-0 rounded-full flex items-center justify-center text-[11px] font-bold text-white"
+              style={{ backgroundColor: info.secondaryColor, marginTop: 10 }}
             >
               {index + 1}
             </div>
-            <div className="flex-1 min-w-0">
-              <div className="flex items-center gap-1.5">
-                <h4 className="text-[13px] font-semibold group-hover:text-[#bc0000] transition-colors truncate" style={{ color: 'var(--sm-text)' }}>
+            <div className="flex-1 min-w-0 flex flex-col gap-2" style={{ marginLeft: 6, paddingTop: 2 }}>
+              <div className="flex items-center gap-1.5 min-h-[1.25rem]">
+                <h4 className="font-semibold group-hover:text-[#bc0000] transition-colors truncate" style={{ color: 'var(--sm-text)', fontSize: 12, lineHeight: 1.25 }}>
                   {trend.title}
                 </h4>
                 {trend.isHot && (
                   <span className="flex-shrink-0 px-1 py-0.5 bg-red-500/10 text-red-500 text-[9px] font-bold rounded uppercase">Hot</span>
                 )}
               </div>
-              <p className="text-[11px] mt-0.5" style={{ color: 'var(--sm-text-muted)' }}>
+              <p className="text-[11px] leading-tight" style={{ color: 'var(--sm-text-muted)' }}>
                 {trend.postCount} {trend.postCount === 1 ? 'article' : 'articles'}
               </p>
             </div>
-            <svg className="w-3 h-3 text-gray-300 group-hover:text-[#bc0000] transition-colors flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg className="w-3 h-3 flex-shrink-0 text-gray-300 group-hover:text-[#bc0000] transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24" style={{ marginTop: 10 }}>
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
             </svg>
           </Link>

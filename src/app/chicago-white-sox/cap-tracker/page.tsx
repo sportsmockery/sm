@@ -7,16 +7,16 @@ import { datalabAdmin } from '@/lib/supabase-datalab'
 import { HubUpdatesFeed } from '@/components/hub'
 
 export const metadata: Metadata = {
-  title: 'Chicago White Sox Payroll Tracker 2026 | Sports Mockery',
+  title: 'Chicago White Sox Luxury Tax 2026 | Sports Mockery',
   description:
     'Live payroll, contracts, spending breakdown.',
   openGraph: {
-    title: 'Chicago White Sox Payroll Tracker 2026',
+    title: 'Chicago White Sox Luxury Tax 2026',
     description: 'Live payroll, contracts, spending breakdown.',
     type: 'website',
   },
   twitter: {
-    title: 'Chicago White Sox Payroll Tracker 2026',
+    title: 'Chicago White Sox Luxury Tax 2026',
     description: 'Live payroll, contracts, spending breakdown.',
   },
 }
@@ -143,7 +143,7 @@ export default async function WhiteSoxPayrollTrackerPage() {
                 margin: '0 0 8px 0',
               }}
             >
-              White Sox Payroll Tracker
+              White Sox Luxury Tax
             </h1>
             {cap && (
               <div
@@ -590,7 +590,7 @@ export default async function WhiteSoxPayrollTrackerPage() {
           <Link
             href="/scout-ai?team=chicago-white-sox&q=How%20much%20payroll%20space%20do%20the%20White%20Sox%20have"
             className="btn btn-md btn-primary"
-            style={{ display: 'inline-block', textDecoration: 'none', borderRadius: 'var(--sm-radius-pill)' }}
+            style={{ display: 'inline-block', textDecoration: 'none', borderRadius: 'var(--sm-radius-pill)', backgroundColor: '#bc0000', color: '#fff' }}
           >
             Ask Scout
           </Link>

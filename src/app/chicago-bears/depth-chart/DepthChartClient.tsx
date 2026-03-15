@@ -169,7 +169,7 @@ export default function DepthChartClient({
         {[
           { label: 'Trade Rumors', href: '/chicago-bears/trade-rumors' },
           { label: 'Draft Tracker', href: '/chicago-bears/draft-tracker' },
-          { label: 'Cap Tracker', href: '/chicago-bears/cap-tracker' },
+          { label: 'Salary Cap', href: '/chicago-bears/cap-tracker' },
           { label: 'Full Roster', href: '/chicago-bears/roster' },
         ].map((link) => (
           <Link key={link.label} href={link.href} className="team-pill">

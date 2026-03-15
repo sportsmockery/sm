@@ -160,7 +160,7 @@ export default async function BullsTradeRumorsPage() {
           }}
         >
           {[
-            { label: 'Cap Tracker', href: '/chicago-bulls/cap-tracker' },
+            { label: 'Salary Cap', href: '/chicago-bulls/cap-tracker' },
             { label: 'Draft Tracker', href: '/chicago-bulls/draft-tracker' },
             { label: 'Depth Chart', href: '/chicago-bulls/depth-chart' },
             { label: 'Full Roster', href: '/chicago-bulls/roster' },
@@ -340,6 +340,8 @@ export default async function BullsTradeRumorsPage() {
               display: 'inline-block',
               textDecoration: 'none',
               borderRadius: 'var(--sm-radius-pill)',
+              backgroundColor: '#bc0000',
+              color: '#fff',
             }}
           >
             Ask Scout

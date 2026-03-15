@@ -102,7 +102,7 @@ export const TEAM_INFO: Record<TeamSlug, TeamInfo> = {
     shortName: 'Bears',
     primaryColor: '#0B162A', // Navy
     secondaryColor: '#C83803', // Orange
-    logoUrl: '/images/teams/bears-logo.png',
+    logoUrl: 'https://a.espncdn.com/i/teamlogos/nfl/500/chi.png',
     city: 'Chicago',
     sport: 'football',
   },
@@ -112,7 +112,7 @@ export const TEAM_INFO: Record<TeamSlug, TeamInfo> = {
     shortName: 'Cubs',
     primaryColor: '#0E3386', // Blue
     secondaryColor: '#CC3433', // Red
-    logoUrl: '/images/teams/cubs-logo.png',
+    logoUrl: 'https://a.espncdn.com/i/teamlogos/mlb/500/chc.png',
     city: 'Chicago',
     sport: 'baseball',
   },
@@ -122,7 +122,7 @@ export const TEAM_INFO: Record<TeamSlug, TeamInfo> = {
     shortName: 'White Sox',
     primaryColor: '#27251F', // Black
     secondaryColor: '#C4CED4', // Silver
-    logoUrl: '/images/teams/whitesox-logo.png',
+    logoUrl: 'https://a.espncdn.com/i/teamlogos/mlb/500/chw.png',
     city: 'Chicago',
     sport: 'baseball',
   },
@@ -132,7 +132,7 @@ export const TEAM_INFO: Record<TeamSlug, TeamInfo> = {
     shortName: 'Bulls',
     primaryColor: '#CE1141', // Red
     secondaryColor: '#0B0F14', // Black
-    logoUrl: '/images/teams/bulls-logo.png',
+    logoUrl: 'https://a.espncdn.com/i/teamlogos/nba/500/chi.png',
     city: 'Chicago',
     sport: 'basketball',
   },
@@ -142,7 +142,7 @@ export const TEAM_INFO: Record<TeamSlug, TeamInfo> = {
     shortName: 'Blackhawks',
     primaryColor: '#CF0A2C', // Red
     secondaryColor: '#0B0F14', // Black
-    logoUrl: '/images/teams/blackhawks-logo.png',
+    logoUrl: 'https://a.espncdn.com/i/teamlogos/nhl/500/chi.png',
     city: 'Chicago',
     sport: 'hockey',
   },

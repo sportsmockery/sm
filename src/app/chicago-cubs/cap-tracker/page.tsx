@@ -7,16 +7,16 @@ import { datalabAdmin } from '@/lib/supabase-datalab'
 import { HubUpdatesFeed } from '@/components/hub'
 
 export const metadata: Metadata = {
-  title: 'Chicago Cubs Payroll Tracker 2026 | Sports Mockery',
+  title: 'Chicago Cubs Luxury Tax 2026 | Sports Mockery',
   description:
     'Live Cubs payroll, contracts, luxury tax analysis.',
   openGraph: {
-    title: 'Chicago Cubs Payroll Tracker 2026',
+    title: 'Chicago Cubs Luxury Tax 2026',
     description: 'Live Cubs payroll, contracts, luxury tax analysis.',
     type: 'website',
   },
   twitter: {
-    title: 'Chicago Cubs Payroll Tracker 2026',
+    title: 'Chicago Cubs Luxury Tax 2026',
     description: 'Live Cubs payroll, contracts, luxury tax analysis.',
   },
 }
@@ -140,7 +140,7 @@ export default async function CubsCapTrackerPage() {
                 margin: '0 0 8px 0',
               }}
             >
-              Cubs Payroll Tracker
+              Cubs Luxury Tax
             </h1>
             {cap && (
               <div
@@ -587,7 +587,7 @@ export default async function CubsCapTrackerPage() {
           <Link
             href="/scout-ai?team=chicago-cubs&q=How%20much%20payroll%20space%20do%20the%20Cubs%20have"
             className="btn btn-md btn-primary"
-            style={{ display: 'inline-block', textDecoration: 'none', borderRadius: 'var(--sm-radius-pill)' }}
+            style={{ display: 'inline-block', textDecoration: 'none', borderRadius: 'var(--sm-radius-pill)', backgroundColor: '#bc0000', color: '#fff' }}
           >
             Ask Scout
           </Link>

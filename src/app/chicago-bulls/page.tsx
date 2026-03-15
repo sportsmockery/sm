@@ -1,6 +1,6 @@
 import { Metadata } from 'next'
 import { TeamHubLayout, ToolGrid, QuickStats } from '@/components/team'
-import { SectionHeader, ArticleCard, AskAIWidget, FanChatWidget } from '@/components/team/shared'
+import { SectionHeader, ArticleCard } from '@/components/team/shared'
 import TeamSeasonCard from '@/components/team/shared/TeamSeasonCard'
 import TeamRosterHighlights from '@/components/team/shared/TeamRosterHighlights'
 import TeamTrendingTopics from '@/components/team/shared/TeamTrendingTopics'
@@ -84,7 +84,7 @@ export default async function BullsHubPage() {
     >
       {/* OrbNav removed — navigation handled by sidebar */}
 
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '48px', maxWidth: '1320px', margin: '0 auto' }}>
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '24px', maxWidth: '1320px', margin: '0 auto' }}>
         {/* Tool Grid */}
         <ToolGrid teamSlug="chicago-bulls" accentColor="#CE1141" secondaryColor="#0B0F14" />
 
@@ -123,12 +123,6 @@ export default async function BullsHubPage() {
                 </div>
               </section>
             )}
-
-            {/* Scout AI & Fan Chat */}
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '16px' }}>
-              <AskAIWidget teamSlug="chicago-bulls" teamLabel="Bulls" />
-              <FanChatWidget teamLabel="Bulls" channel="bulls" />
-            </div>
           </div>
 
           {/* Right Column: Sidebar */}

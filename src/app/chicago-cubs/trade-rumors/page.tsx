@@ -154,7 +154,7 @@ export default async function CubsTradeRumorsPage() {
           }}
         >
           {[
-            { label: 'Payroll Tracker', href: '/chicago-cubs/cap-tracker' },
+            { label: 'Luxury Tax', href: '/chicago-cubs/cap-tracker' },
             { label: 'Draft Tracker', href: '/chicago-cubs/draft-tracker' },
             { label: 'Depth Chart', href: '/chicago-cubs/depth-chart' },
             { label: 'Full Roster', href: '/chicago-cubs/roster' },
@@ -334,6 +334,8 @@ export default async function CubsTradeRumorsPage() {
               display: 'inline-block',
               textDecoration: 'none',
               borderRadius: 'var(--sm-radius-pill)',
+              backgroundColor: '#bc0000',
+              color: '#fff',
             }}
           >
             Ask Scout

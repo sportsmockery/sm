@@ -27,14 +27,14 @@ export default function BearsTrendingTopics({
       {/* Header */}
       <div
         style={{
-          padding: '16px 20px',
+          padding: '12px 16px',
           borderBottom: '1px solid var(--sm-border)',
           borderLeft: `4px solid ${bearsInfo.secondaryColor}`,
         }}
       >
         <div className="flex items-center gap-2">
           <svg
-            className="w-5 h-5"
+            className="w-4 h-4"
             style={{ color: bearsInfo.secondaryColor }}
             fill="currentColor"
             viewBox="0 0 20 20"
@@ -47,11 +47,10 @@ export default function BearsTrendingTopics({
           </svg>
           <h3
             style={{
-              fontSize: 16,
+              fontSize: 14,
               fontWeight: 700,
               color: 'var(--sm-text)',
               textTransform: 'uppercase',
-             
               margin: 0,
             }}
           >
@@ -73,10 +72,10 @@ export default function BearsTrendingTopics({
       </div>
 
       {/* Footer */}
-      <div style={{ padding: '12px 20px', borderTop: '1px solid var(--sm-border)', backgroundColor: 'var(--sm-surface)' }}>
+      <div style={{ padding: '10px 16px', borderTop: '1px solid var(--sm-border)', backgroundColor: 'var(--sm-surface)' }}>
         <Link
           href="/chicago-bears"
-          className="text-sm hover:underline font-medium"
+          className="text-xs hover:underline font-medium"
           style={{ color: '#bc0000' }}
         >
           View All Topics →
@@ -101,47 +100,44 @@ function TrendItem({
   return (
     <Link
       href={`/chicago-bears`}
-      className="group flex items-center gap-4 px-6 py-4 hover:bg-[var(--sm-card-hover)] transition-colors"
-      style={{ borderBottom: '1px solid var(--sm-border)' }}
+      className="group flex items-start hover:bg-[var(--sm-card-hover)] transition-colors"
+      style={{ borderBottom: '1px solid var(--sm-border)', minHeight: 48, padding: '10px 16px', gap: 10 }}
     >
       {/* Rank */}
       <div
-        className={`w-7 h-7 flex-shrink-0 rounded-full flex items-center justify-center text-[12px] font-bold ${
-          rank <= 3
-            ? 'text-white'
-            : 'bg-gray-100 dark:bg-gray-800 text-gray-500 dark:text-gray-400'
-        }`}
-        style={rank <= 3 ? { backgroundColor: teamColor } : undefined}
+        className="w-6 h-6 flex-shrink-0 rounded-full flex items-center justify-center text-[11px] font-bold text-white"
+        style={{ backgroundColor: teamColor, marginTop: 10 }}
       >
         {rank}
       </div>
 
       {/* Topic info */}
-      <div className="flex-1 min-w-0">
-        <div className="flex items-center gap-2">
+      <div className="flex-1 min-w-0 flex flex-col gap-2" style={{ marginLeft: 6, paddingTop: 2 }}>
+        <div className="flex items-center gap-1.5 min-h-[1.25rem]">
           <h4
-            className="text-[14px] font-semibold group-hover:text-[#bc0000] transition-colors truncate"
-            style={{ color: 'var(--sm-text)' }}
+            className="font-semibold group-hover:text-[#bc0000] transition-colors truncate"
+            style={{ color: 'var(--sm-text)', fontSize: 12, lineHeight: 1.25 }}
           >
             {trend.title}
           </h4>
           {trend.isHot && (
-            <span className="flex-shrink-0 px-1.5 py-0.5 bg-red-500/10 text-red-500 text-[10px] font-bold rounded uppercase">
+            <span className="flex-shrink-0 px-1 py-0.5 bg-red-500/10 text-red-500 text-[9px] font-bold rounded uppercase">
               Hot
             </span>
           )}
         </div>
-        <p className="text-[12px] mt-0.5" style={{ color: 'var(--sm-text-muted)' }}>
+        <p className="text-[11px] leading-tight" style={{ color: 'var(--sm-text-muted)' }}>
           {trend.postCount} {trend.postCount === 1 ? 'article' : 'articles'}
         </p>
       </div>
 
       {/* Arrow */}
       <svg
-        className="w-4 h-4 text-gray-300 group-hover:text-[#bc0000] transition-colors flex-shrink-0"
+        className="w-3 h-3 flex-shrink-0 text-gray-300 group-hover:text-[#bc0000] transition-colors"
         fill="none"
         stroke="currentColor"
         viewBox="0 0 24 24"
+        style={{ marginTop: 10 }}
       >
         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
       </svg>
