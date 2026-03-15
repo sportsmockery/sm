@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { formatNumber } from '@/lib/analytics'
+import { formatNumber } from '@/lib/format'
 import { useScrollDepth, useReadingProgress } from '@/hooks/useScrollDepth'
 import { useTimeOnPage } from '@/hooks/usePageView'
 

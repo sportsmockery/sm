@@ -26,7 +26,7 @@ export default function SocialShareBar({ url, title }: SocialShareBarProps) {
       document.body.appendChild(textarea)
       textarea.select()
       document.execCommand('copy')
-      document.body.removeChild(textarea)
+      if (textarea.parentNode) textarea.parentNode.removeChild(textarea)
       setCopied(true)
       setTimeout(() => setCopied(false), 2000)
     }

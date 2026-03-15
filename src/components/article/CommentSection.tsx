@@ -121,25 +121,33 @@ export default function CommentSection({
         </p>
       </div>
 
-      {/* Disqus Thread Container */}
-      <div
-        id="disqus_thread"
-        style={{
-          minHeight: '200px',
-          borderRadius: 'var(--sm-radius-md)',
-          padding: '16px',
-          background: 'var(--sm-surface)',
-          border: '1px solid var(--sm-border)',
-        }}
-      >
+      {/* Disqus thread: empty container so Disqus owns the DOM. No React children here
+          to avoid hydration/removeChild conflicts when Disqus injects its iframe. */}
+      <div style={{ position: 'relative', minHeight: '200px' }}>
+        <div
+          id="disqus_thread"
+          style={{
+            minHeight: '200px',
+            borderRadius: 'var(--sm-radius-md)',
+            padding: '16px',
+            background: 'var(--sm-surface)',
+            border: '1px solid var(--sm-border)',
+          }}
+        />
         {!isLoaded && (
           <div
+            aria-hidden
             style={{
+              position: 'absolute',
+              inset: 0,
               display: 'flex',
               flexDirection: 'column',
               alignItems: 'center',
               justifyContent: 'center',
               padding: '48px 0',
+              background: 'var(--sm-surface)',
+              borderRadius: 'var(--sm-radius-md)',
+              pointerEvents: 'none',
             }}
           >
             <div
