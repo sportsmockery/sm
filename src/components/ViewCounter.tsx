@@ -69,12 +69,16 @@ export default function ViewCounter({
 export function ViewCounterCompact({
   views,
   className = '',
+  variant,
 }: {
   views: number
   className?: string
+  /** Use 'overlay' when rendered on a dark image so text is light */
+  variant?: 'default' | 'overlay'
 }) {
+  const colorStyle = variant === 'overlay' ? { color: 'rgba(255,255,255,0.9)' } : { color: 'var(--sm-text-muted)' }
   return (
-    <span className={`flex items-center gap-1 text-xs ${className}`} style={{ color: 'var(--sm-text-muted)' }}>
+    <span className={`flex items-center gap-1 text-xs ${className}`} style={colorStyle}>
       <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
         <path
           strokeLinecap="round"
