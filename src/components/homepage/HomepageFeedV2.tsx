@@ -7,7 +7,6 @@ import TrendsSidebar from "@/components/homepage/TrendsSidebar"
 import { HomepageHero } from "@/components/home/hero/homepage-hero"
 import type { FeaturedStory, GameContext, TeamContext, DebateContext } from "@/components/home/hero/types"
 import { Home, Compass, Plus, Film, User, X, FileText, Video, Camera, ImageIcon } from "lucide-react"
-import EdgeIntro from "@/components/home/EdgeIntro"
 
 interface HomepageFeedV2Props {
   firstName?: string
@@ -34,10 +33,8 @@ export default function HomepageFeedV2({
   const [activeNavItem, setActiveNavItem] = useState<string>("home")
   const [isComposeOpen, setIsComposeOpen] = useState(false)
   const [composeTab, setComposeTab] = useState<"text" | "photo" | "reel" | "story">("text")
-  // Start with intro hidden to prevent hydration mismatch.
-  // Server renders with these defaults; useEffect on client decides whether to show intro.
-  const [introComplete, setIntroComplete] = useState(true)
-  const [showIntro, setShowIntro] = useState(false)
+  const [introComplete] = useState(true)
+  const [showIntro] = useState(false)
 
   // Close on escape
   useEffect(() => {
@@ -50,22 +47,9 @@ export default function HomepageFeedV2({
     return () => window.removeEventListener("keydown", handleEscape)
   }, [])
 
-  // Show intro only if not seen this session (client-only check)
-  useEffect(() => {
-    if (!sessionStorage.getItem('edge-intro-seen')) {
-      setShowIntro(true)
-      setIntroComplete(false)
-    }
-  }, [])
-
-  const handleIntroComplete = () => {
-    setIntroComplete(true)
-    sessionStorage.setItem('edge-intro-seen', '1')
-  }
 
   return (
     <>
-    {showIntro && !introComplete && <EdgeIntro onComplete={handleIntroComplete} />}
     <div
       className="homepage-v2 homepage-v2-light min-h-screen transition-colors duration-300 pb-16 md:pb-0"
       style={{
