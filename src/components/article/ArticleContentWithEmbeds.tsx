@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { processIconShortcodes } from '@/lib/shortcodes'
 
 // Window.twttr type is declared in TwitterEmbed.tsx
@@ -109,12 +109,19 @@ function splitAfterParagraph(html: string, n: number): [string, string] {
   return [html, '']
 }
 
+/**
+ * Renders WordPress article HTML CLIENT-ONLY to prevent React hydration
+ * mismatches (removeChild errors). WordPress HTML contains structures
+ * that browsers normalize differently than the server renderer, causing
+ * DOM mismatches on hydration.
+ */
 export default function ArticleContentWithEmbeds({
   content,
   className = '',
   inlineSlot,
 }: ArticleContentWithEmbedsProps) {
   const contentRef = useRef<HTMLDivElement>(null)
+  const [mounted, setMounted] = useState(false)
 
   // Process content: Twitter URLs to embeds, and icon shortcodes to icons
   const processedContent = processIconShortcodes(
@@ -122,13 +129,15 @@ export default function ArticleContentWithEmbeds({
   )
 
   useEffect(() => {
-    // Check if there are any Twitter blockquotes in the content
-    if (!contentRef.current) return
+    setMounted(true)
+  }, [])
+
+  useEffect(() => {
+    if (!mounted || !contentRef.current) return
 
     const twitterBlockquotes = contentRef.current.querySelectorAll('.twitter-tweet')
     if (twitterBlockquotes.length === 0) return
 
-    // Load Twitter widget script and process embeds
     loadTwitterScript()
       .then(() => {
         if (window.twttr?.widgets && contentRef.current) {
@@ -138,9 +147,25 @@ export default function ArticleContentWithEmbeds({
       .catch(() => {
         // Silently fail — tweet embeds will show as blockquote fallbacks
       })
-  }, [processedContent])
+  }, [mounted, processedContent])
 
-  // If there's an inline slot, split content and inject it after paragraph 3
+  // Server render: skeleton placeholder (prevents hydration mismatch)
+  if (!mounted) {
+    return (
+      <div className={`article-body ${className}`} aria-busy="true">
+        <div className="space-y-4 animate-pulse">
+          {Array.from({ length: 6 }).map((_, i) => (
+            <div key={i}>
+              <div className="h-4 rounded" style={{ background: 'var(--hp-border, rgba(0,0,0,0.08))', width: i === 0 ? '90%' : i === 3 ? '70%' : '100%' }} />
+              {i < 5 && <div className="h-4 rounded mt-2" style={{ background: 'var(--hp-border, rgba(0,0,0,0.08))', width: i % 2 === 0 ? '95%' : '80%' }} />}
+            </div>
+          ))}
+        </div>
+      </div>
+    )
+  }
+
+  // Client render: actual content
   if (inlineSlot) {
     const [before, after] = splitAfterParagraph(processedContent, 3)
     return (
