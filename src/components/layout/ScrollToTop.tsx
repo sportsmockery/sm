@@ -97,7 +97,7 @@ export default function ScrollToTop() {
     }, 2000)
   }
 
-  if (pathname?.startsWith('/admin')) return null
+  if (pathname?.startsWith('/admin') || pathname === '/scout-ai') return null
   if (!visible) return null
 
   return (
