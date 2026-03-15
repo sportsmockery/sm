@@ -1213,7 +1213,7 @@ export async function getAvailableSeasons(): Promise<number[]> {
       .order('season', { ascending: false })
 
     if (data && data.length > 0) {
-      return [...new Set(data.map((d: any) => d.season))]
+      return [...new Set(data.map((d: any) => d.season))] as number[]
     }
   } catch {
     // Fallback
