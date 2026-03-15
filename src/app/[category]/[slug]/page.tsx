@@ -381,16 +381,17 @@ export default async function ArticlePage({ params, searchParams }: ArticlePageP
             </div>
           </div>
 
-          {/* Featured image */}
-          {post.featured_image && (
-            <div className="article-hero-cinematic" style={{ marginTop: 32, borderRadius: 16, overflow: 'hidden', position: 'relative', aspectRatio: '16/9' }}>
+        </div>
+
+        {/* Featured image — full width matching content + sidebars */}
+        {post.featured_image && (
+          <div style={{ maxWidth: 1400, margin: '0 auto', padding: '32px 24px 0' }}>
+            <div className="article-hero-cinematic" style={{ borderRadius: 16, overflow: 'hidden', position: 'relative', aspectRatio: '16/9' }}>
               <Image src={post.featured_image} alt={post.title} fill style={{ objectFit: 'cover' }} priority />
             </div>
-          )}
-          {post.featured_image && (
             <SocialShareBar url={articleUrl} title={post.title} />
-          )}
-        </div>
+          </div>
+        )}
       </header>
 
       {/* 2030 Article Body Area */}
