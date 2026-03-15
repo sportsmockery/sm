@@ -4,6 +4,7 @@
  */
 
 import { createClient } from '@supabase/supabase-js'
+import { getBrowserClient } from './supabase-browser'
 
 // Environment validation
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
@@ -18,25 +19,15 @@ if (!supabaseAnonKey) {
   throw new Error('Missing NEXT_PUBLIC_SUPABASE_ANON_KEY environment variable')
 }
 
-// Browser-side singleton — reused across all calls
-let _dbBrowserClient: ReturnType<typeof createClient> | null = null
-
 /**
- * Create a Supabase client for public/client-side use
- * Uses the anon key with RLS policies
- * Returns a singleton to avoid multiple GoTrueClient instances
+ * Browser-side Supabase client — delegates to shared singleton
  */
 export function createSupabaseClient() {
-  if (!_dbBrowserClient) {
-    _dbBrowserClient = createClient(supabaseUrl!, supabaseAnonKey!)
-  }
-  return _dbBrowserClient
+  return getBrowserClient()
 }
 
 /**
- * Create a Supabase admin client for server-side use
- * Uses the service role key to bypass RLS
- * Only use in server components and API routes
+ * Server-side admin client (service role key, bypasses RLS)
  */
 export function createSupabaseAdmin() {
   if (!supabaseServiceKey) {
@@ -46,8 +37,7 @@ export function createSupabaseAdmin() {
   return createClient(supabaseUrl!, supabaseServiceKey)
 }
 
-// Export singleton instances for convenience
-export const supabase = createSupabaseClient()
+export const supabase = getBrowserClient()
 export const supabaseAdmin = createSupabaseAdmin()
 
 /**

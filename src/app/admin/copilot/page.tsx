@@ -1,7 +1,7 @@
 'use client'
 
-import { useEffect, useState, useCallback, useMemo } from 'react'
-import { createBrowserClient } from '@supabase/ssr'
+import { useEffect, useState, useCallback } from 'react'
+import { getBrowserClient } from '@/lib/supabase-browser'
 
 interface AgentMetrics {
   agent: string
@@ -74,11 +74,7 @@ export default function CopilotMonitoringPage() {
   const [accessToken, setAccessToken] = useState<string | null>(null)
   const [updating, setUpdating] = useState<string | null>(null)
 
-  // Create Supabase client (memoized to avoid multiple GoTrueClient instances)
-  const supabase = useMemo(() => createBrowserClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-  ), [])
+  const supabase = getBrowserClient()
 
   // Get access token
   useEffect(() => {

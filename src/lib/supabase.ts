@@ -1,20 +1,14 @@
-import { createClient as createSupabaseClient } from '@supabase/supabase-js'
-
 /**
- * Browser-side Supabase singleton.
- * ALWAYS import this instead of creating new clients.
+ * General-purpose Supabase client.
  *
- * For server-side (API routes, server components), use supabase-server.ts instead.
+ * Browser code: delegates to the shared singleton in supabase-browser.ts
+ * Server code: should use supabase-server.ts instead
  */
-export const supabase = createSupabaseClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-)
+import { getBrowserClient } from './supabase-browser'
 
-/**
- * @deprecated Use the `supabase` singleton export instead.
- * Kept temporarily for compatibility — returns the same singleton.
- */
+export const supabase = getBrowserClient()
+
+/** @deprecated Use `supabase` or `getBrowserClient()` instead */
 export function createClient() {
-  return supabase
+  return getBrowserClient()
 }

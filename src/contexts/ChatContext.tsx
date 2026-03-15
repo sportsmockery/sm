@@ -1,20 +1,11 @@
 'use client'
 
 import React, { createContext, useContext, useState, useEffect, useCallback, useRef } from 'react'
-import { createBrowserClient } from '@supabase/ssr'
+import { getBrowserClient } from '@/lib/supabase-browser'
 import { RealtimeChannel } from '@supabase/supabase-js'
 
-// Browser client singleton — shared across ChatContext instances
-let _chatBrowserClient: ReturnType<typeof createBrowserClient> | null = null
-
 function createSupabaseClient() {
-  if (!_chatBrowserClient) {
-    _chatBrowserClient = createBrowserClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-    )
-  }
-  return _chatBrowserClient
+  return getBrowserClient()
 }
 
 // Types

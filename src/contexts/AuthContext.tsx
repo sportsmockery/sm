@@ -1,24 +1,15 @@
 'use client'
 
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react'
-import { createBrowserClient } from '@supabase/ssr'
+import { getBrowserClient } from '@/lib/supabase-browser'
 import type { User as SupabaseUser, Session } from '@supabase/supabase-js'
 
 // Session persistence constants
 const SESSION_KEY = 'sm-session-expiry'
 const SESSION_DURATION = 24 * 60 * 60 * 1000 // 24 hours in milliseconds
 
-// Browser client singleton — shared across AuthContext instances
-let _browserClient: ReturnType<typeof createBrowserClient> | null = null
-
 function createSupabaseClient() {
-  if (!_browserClient) {
-    _browserClient = createBrowserClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-    )
-  }
-  return _browserClient
+  return getBrowserClient()
 }
 
 // User type
