@@ -1,5 +1,6 @@
 import Link from 'next/link'
-import { getPopularThisWeek, formatNumber } from '@/lib/analytics'
+import { getPopularThisWeek } from '@/lib/analytics'
+import { formatNumber } from '@/lib/format'
 
 interface PopularThisWeekProps {
   limit?: number

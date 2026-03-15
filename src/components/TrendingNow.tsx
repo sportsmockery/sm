@@ -1,6 +1,7 @@
 import Link from 'next/link'
 import Image from 'next/image'
-import { getTrendingPosts, formatNumber } from '@/lib/analytics'
+import { getTrendingPosts } from '@/lib/analytics'
+import { formatNumber } from '@/lib/format'
 
 interface TrendingNowProps {
   limit?: number

@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { formatNumber } from '@/lib/analytics'
+import { formatNumber } from '@/lib/format'
 import ViewsChart from './ViewsChart'
 import TopPostsChart from './TopPostsChart'
 import CategoryBreakdown from './CategoryBreakdown'

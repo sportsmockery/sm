@@ -33,6 +33,7 @@ export default function ArticleSidebar({ categoryName, categorySlug }: ArticleSi
           width={48}
           height={48}
           className="h-12 w-12 object-contain flex-shrink-0"
+          style={{ width: 'auto', height: 'auto' }}
         />
         <div className="flex-1 text-left" style={{ lineHeight: 1.2 }}>
           <p style={{ fontSize: 14, fontWeight: 600, color: 'var(--sm-text)', margin: 0 }}>Ask Scout</p>

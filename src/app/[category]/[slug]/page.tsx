@@ -15,6 +15,7 @@ import ReadingProgressBar from '@/components/article/ReadingProgressBar'
 import ArticleActions from '@/components/article/ArticleActions'
 import ArticleSchema from '@/components/article/ArticleSchema'
 import CommentSection from '@/components/article/CommentSection'
+import { SegmentErrorBoundary } from '@/components/article/SegmentErrorBoundary'
 import { ArticleTableOfContents, MoreFromTeam } from '@/components/article'
 import ScoutRecapCard from '@/components/article/ScoutRecapCard'
 import { categorySlugToTeam } from '@/lib/types'
@@ -538,13 +539,15 @@ export default async function ArticlePage({ params, searchParams }: ArticlePageP
                 </div>
               )}
 
-              {/* Comments */}
+              {/* Comments — isolated so failures do not take down the article */}
               <div id="comments-section">
-                <CommentSection
-                  articleId={post.id}
-                  articleUrl={articleUrl}
-                  articleTitle={post.title}
-                />
+                <SegmentErrorBoundary>
+                  <CommentSection
+                    articleId={post.id}
+                    articleUrl={articleUrl}
+                    articleTitle={post.title}
+                  />
+                </SegmentErrorBoundary>
               </div>
             </article>
           </div>

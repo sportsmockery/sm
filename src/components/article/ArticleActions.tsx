@@ -92,7 +92,7 @@ export default function ArticleActions({
         document.body.appendChild(input)
         input.select()
         document.execCommand('copy')
-        document.body.removeChild(input)
+        if (input.parentNode) input.parentNode.removeChild(input)
         setCopied(true)
         setTimeout(() => setCopied(false), 2000)
       }
