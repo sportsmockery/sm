@@ -413,12 +413,12 @@ export default function AppSidebar() {
           color: #00D4FF !important;
         }
 
-        @media (min-width: 769px) {
+        @media (min-width: 1024px) {
           .app-sidebar-desktop { display: flex !important; }
           .app-sidebar-mobile { display: none !important; }
           .app-sidebar-hamburger { display: none !important; }
         }
-        @media (max-width: 768px) {
+        @media (max-width: 1023px) {
           .app-sidebar-desktop { display: none !important; }
           .app-sidebar-mobile { display: flex !important; }
           .app-sidebar-hamburger { display: flex !important; }

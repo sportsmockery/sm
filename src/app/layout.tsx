@@ -100,6 +100,9 @@ export const metadata: Metadata = {
     canonical: "https://sportsmockery.com",
   },
   category: "sports",
+  icons: {
+    icon: "/favicon.ico",
+  },
 };
 
 export default function RootLayout({
@@ -110,6 +113,7 @@ export default function RootLayout({
   return (
     <html lang="en" className="scroll-smooth light" suppressHydrationWarning>
       <head>
+        <link rel="icon" href="/favicon.ico" sizes="any" />
         <link rel="dns-prefetch" href="https://izwhcuccuwvlqqhpprbb.supabase.co" />
         <link rel="preconnect" href="https://izwhcuccuwvlqqhpprbb.supabase.co" />
         <link rel="dns-prefetch" href="https://a.espncdn.com" />
