@@ -133,7 +133,7 @@ export async function GET(request: NextRequest) {
     // Map to Story format
     const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://test.sportsmockery.com';
 
-    const stories: Story[] = posts.map((post) => ({
+    const stories: Story[] = posts.map((post: any) => ({
       id: post.id,
       title: post.title,
       url: `${baseUrl}/${post.slug}`,
