@@ -145,7 +145,7 @@ export function WebSocketProvider({ children }: { children: React.ReactNode }) {
             }
           }
         )
-        .subscribe((status) => {
+        .subscribe((status: any) => {
           if (status === 'SUBSCRIBED') {
             backoffMsRef.current = INITIAL_BACKOFF_MS;
             if (
