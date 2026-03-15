@@ -4,8 +4,8 @@ import { useState, useEffect, useRef } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
 import { usePathname } from 'next/navigation'
-import { useAuth } from '@/contexts/AuthContext'
 import { homepageTeams } from '@/lib/homepage-team-data'
+import { ArrowRightLeft, ClipboardPen, MessageSquare, BarChart3, Video, Volume2 } from 'lucide-react'
 
 interface NavItem {
   name: string
@@ -13,28 +13,13 @@ interface NavItem {
   icon: React.ReactNode
 }
 
-const PRIMARY_ITEMS: NavItem[] = [
-  {
-    name: 'For You',
-    href: '/feed',
-    icon: (
-      // eslint-disable-next-line @next/next/no-img-element
-      <img
-        src="/edge-dash.png"
-        alt="For You"
-        width={22}
-        height={22}
-        style={{ width: 22, height: 22, objectFit: 'contain' }}
-      />
-    ),
-  },
-  {
-    name: 'Scout',
-    href: '/scout-ai',
-    icon: (
-      <Image src="/downloads/scout-v2.png" alt="Scout" width={22} height={22} style={{ borderRadius: '50%', width: 22, height: 22 }} />
-    ),
-  },
+const EDGE_TOOLS: { id: string; title: string; href: string; icon: React.ComponentType<{ className?: string }> }[] = [
+  { id: 'gm', title: 'Trade Simulator', href: '/gm', icon: ArrowRightLeft },
+  { id: 'draft', title: 'Mock Draft', href: '/mock-draft', icon: ClipboardPen },
+  { id: 'chat', title: 'Fan Chat', href: '/fan-chat', icon: MessageSquare },
+  { id: 'analytics', title: 'Team Analytics', href: '/chicago-bears', icon: BarChart3 },
+  { id: 'vision', title: 'Vision Theater', href: '/bears-film-room', icon: Video },
+  { id: 'audio', title: 'Hands-Free Audio', href: '/audio', icon: Volume2 },
 ]
 
 const TEAM_ID_TO_ROUTE: Record<string, string> = {
@@ -60,80 +45,6 @@ const TEAM_ITEMS: NavItem[] = homepageTeams.map((team) => ({
     />
   ),
 }))
-
-const DISCOVER_ITEMS: NavItem[] = [
-  {
-    name: 'Trending',
-    href: '/trending',
-    icon: (
-      <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-        <polyline points="23 6 13.5 15.5 8.5 10.5 1 18" />
-        <polyline points="17 6 23 6 23 12" />
-      </svg>
-    ),
-  },
-  {
-    name: 'Debates',
-    href: '/debates',
-    icon: (
-      <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-        <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
-      </svg>
-    ),
-  },
-  {
-    name: 'Rumors',
-    href: '/rumors',
-    icon: (
-      <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-        <circle cx="12" cy="12" r="10" />
-        <line x1="12" y1="8" x2="12" y2="12" />
-        <line x1="12" y1="16" x2="12.01" y2="16" />
-      </svg>
-    ),
-  },
-  {
-    name: 'Analytics',
-    href: '/analytics',
-    icon: (
-      <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-        <path d="M18 20V10M12 20V4M6 20v-6" />
-      </svg>
-    ),
-  },
-]
-
-const USER_ITEMS: NavItem[] = [
-  {
-    name: 'Profile',
-    href: '/profile',
-    icon: (
-      <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-        <path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2" />
-        <circle cx="12" cy="7" r="4" />
-      </svg>
-    ),
-  },
-  {
-    name: 'Saved',
-    href: '/saved',
-    icon: (
-      <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-        <path d="M19 21l-7-5-7 5V5a2 2 0 012-2h10a2 2 0 012 2z" />
-      </svg>
-    ),
-  },
-  {
-    name: 'Settings',
-    href: '/settings',
-    icon: (
-      <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-        <circle cx="12" cy="12" r="3" />
-        <path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-2 2 2 2 0 01-2-2v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83 0 2 2 0 010-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 01-2-2 2 2 0 012-2h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 010-2.83 2 2 0 012.83 0l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 012-2 2 2 0 012 2v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 0 2 2 0 010 2.83l-.06.06A1.65 1.65 0 0019.32 9a1.65 1.65 0 001.51 1H21a2 2 0 012 2 2 2 0 01-2 2h-.09a1.65 1.65 0 00-1.51 1z" />
-      </svg>
-    ),
-  },
-]
 
 function NavSection({ label, items, isActive }: { label: string; items: NavItem[]; isActive: (href: string) => boolean }) {
   return (
@@ -208,7 +119,6 @@ function NavSection({ label, items, isActive }: { label: string; items: NavItem[
 
 export default function AppSidebar() {
   const pathname = usePathname()
-  const { isAuthenticated } = useAuth()
   const [mobileOpen, setMobileOpen] = useState(false)
   const sidebarRef = useRef<HTMLDivElement>(null)
 
@@ -267,14 +177,84 @@ export default function AppSidebar() {
         />
       </Link>
 
-      {/* Nav sections */}
-      <div style={{ flex: 1, overflowY: 'auto', overflowX: 'hidden', padding: '8px 0' }}>
-        <NavSection label="Primary" items={PRIMARY_ITEMS} isActive={isActive} />
+      {/* Ask Scout — compact, replaces Primary */}
+      <div style={{ padding: '12px 12px 8px', flexShrink: 0 }}>
+        <Link
+          href="/scout-ai"
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: 8,
+            padding: '8px 10px',
+            borderRadius: 12,
+            background: 'var(--sm-surface)',
+            border: '1px solid var(--sm-border)',
+            textDecoration: 'none',
+          }}
+        >
+          <Image
+            src="/downloads/scout-v2.png"
+            alt="Scout"
+            width={28}
+            height={28}
+            style={{ width: 28, height: 28, borderRadius: '50%', objectFit: 'contain', flexShrink: 0 }}
+          />
+          <div style={{ flex: 1, minWidth: 0 }}>
+            <p style={{ fontSize: 12, fontWeight: 600, color: 'var(--sm-text)', margin: 0, lineHeight: 1.2 }}>Ask Scout</p>
+            <p style={{ fontSize: 10, color: 'var(--sm-text-muted)', margin: 0, lineHeight: 1.2 }}>AI sports analysis</p>
+          </div>
+          <span style={{ width: 6, height: 6, borderRadius: '50%', background: '#16a34a', flexShrink: 0 }} title="Online" />
+        </Link>
+      </div>
+
+      {/* Nav sections + SM EDGE Features — no scroll, compact */}
+      <div style={{ flex: 1, overflowY: 'auto', overflowX: 'hidden', padding: '0 8px 8px', display: 'flex', flexDirection: 'column', gap: 0 }}>
         <NavSection label="Teams" items={TEAM_ITEMS} isActive={isActive} />
-        <NavSection label="Discover" items={DISCOVER_ITEMS} isActive={isActive} />
-        {isAuthenticated && (
-          <NavSection label="User" items={USER_ITEMS} isActive={isActive} />
-        )}
+        {/* SM EDGE Features — compact, fits without scroll */}
+        <div style={{ marginTop: 12, flexShrink: 0 }}>
+          <div style={{ fontSize: 11, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.08em', padding: '8px 16px 4px' }}>
+            <span style={{ color: '#00D4FF' }}>SM</span>
+            <span style={{ color: '#BC0000' }}> &#x2736; </span>
+            <span style={{ color: '#00D4FF' }}>EDGE Features</span>
+          </div>
+          <div style={{ background: 'var(--sm-surface)', border: '1px solid var(--sm-border)', borderRadius: 12, overflow: 'hidden' }}>
+            {EDGE_TOOLS.map((tool) => (
+              <Link
+                key={tool.id}
+                href={tool.href}
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 8,
+                  padding: '6px 10px',
+                  textDecoration: 'none',
+                  fontSize: 12,
+                  fontWeight: 500,
+                  color: 'var(--sm-text)',
+                  borderBottom: tool.id !== EDGE_TOOLS[EDGE_TOOLS.length - 1].id ? '1px solid var(--sm-border)' : 'none',
+                }}
+              >
+                <div
+                  style={{
+                    width: 24,
+                    height: 24,
+                    flexShrink: 0,
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    borderRadius: 6,
+                    background: 'var(--sm-card)',
+                    color: '#00D4FF',
+                    border: '1px solid #00D4FF',
+                  }}
+                >
+                  <tool.icon className="h-3 w-3" />
+                </div>
+                <span className="truncate" style={{ flex: 1, minWidth: 0 }}>{tool.title}</span>
+              </Link>
+            ))}
+          </div>
+        </div>
       </div>
     </>
   )

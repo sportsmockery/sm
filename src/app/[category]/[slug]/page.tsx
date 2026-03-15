@@ -16,6 +16,7 @@ import ArticleActions from '@/components/article/ArticleActions'
 import ArticleSchema from '@/components/article/ArticleSchema'
 import CommentSection from '@/components/article/CommentSection'
 import { SegmentErrorBoundary } from '@/components/article/SegmentErrorBoundary'
+import ArticleSidebar from '@/components/article/ArticleSidebar'
 import { ArticleTableOfContents, MoreFromTeam } from '@/components/article'
 import ScoutRecapCard from '@/components/article/ScoutRecapCard'
 import { categorySlugToTeam } from '@/lib/types'
@@ -25,7 +26,6 @@ import { getArticleAudioInfo } from '@/lib/audioPlayer'
 import { ArticleAudioPlayer } from '@/components/article/ArticleAudioPlayer'
 import ArticleContentWithEmbeds from '@/components/article/ArticleContentWithEmbeds'
 import SocialShareBar from '@/components/SocialShareBar'
-import ArticleSidebar from '@/components/article/ArticleSidebar'
 import { ArticleBlockContent } from '@/components/articles/ArticleBlockContent'
 import { isBlockContent, parseDocument } from '@/components/admin/BlockEditor/serializer'
 
@@ -344,41 +344,43 @@ export default async function ArticlePage({ params, searchParams }: ArticlePageP
 
           {/* Featured image with overlaid author + meta + share */}
           {post.featured_image && (
-            <div style={{ marginTop: 24 }}>
+            <div style={{ marginTop: 24, position: 'relative' }}>
               <div className="article-hero-cinematic" style={{ borderRadius: 16, overflow: 'hidden', position: 'relative', aspectRatio: '16/9' }}>
                 <Image src={post.featured_image} alt={post.title} fill style={{ objectFit: 'cover' }} priority />
                 {/* Gradient overlay for readability */}
                 <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, height: '50%', background: 'linear-gradient(to top, rgba(0,0,0,0.7), transparent)', borderRadius: '0 0 16px 16px' }} />
-              </div>
-
-              {/* Author centered over image bottom */}
-              {author && (
-                <div style={{ display: 'flex', justifyContent: 'center', marginTop: -120, position: 'relative', zIndex: 2, marginBottom: 8 }}>
-                  <Link href={`/author/${author.slug || author.id}`} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6, textDecoration: 'none' }}>
-                    {author.avatar_url ? (
-                      <div style={{ width: 44, height: 44, borderRadius: '50%', overflow: 'hidden', position: 'relative', border: '2px solid rgba(255,255,255,0.6)' }}>
-                        <Image src={author.avatar_url} alt={author.display_name} fill style={{ objectFit: 'cover' }} />
-                      </div>
-                    ) : (
-                      <div style={{ width: 44, height: 44, borderRadius: '50%', background: 'rgba(255,255,255,0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 16, fontWeight: 600, color: '#fff', border: '2px solid rgba(255,255,255,0.6)' }}>
-                        {author.display_name.charAt(0)}
-                      </div>
-                    )}
-                    <span style={{ fontSize: 14, fontWeight: 600, color: '#fff' }}>{author.display_name}</span>
-                  </Link>
+                {/* Author, date/read/views (top arrow), share (bottom arrow) overlaid on image */}
+                <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, zIndex: 2, display: 'flex', flexDirection: 'column', alignItems: 'center', paddingLeft: 24, paddingRight: 24, paddingBottom: 16 }}>
+                  {author && (
+                    <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 8 }}>
+                      <Link href={`/author/${author.slug || author.id}`} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6, textDecoration: 'none' }}>
+                        {author.avatar_url ? (
+                          <div style={{ width: 44, height: 44, borderRadius: '50%', overflow: 'hidden', position: 'relative', border: '2px solid rgba(255,255,255,0.6)' }}>
+                            <Image src={author.avatar_url} alt={author.display_name} fill style={{ objectFit: 'cover' }} />
+                          </div>
+                        ) : (
+                          <div style={{ width: 44, height: 44, borderRadius: '50%', background: 'rgba(255,255,255,0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 16, fontWeight: 600, color: '#fff', border: '2px solid rgba(255,255,255,0.6)' }}>
+                            {author.display_name.charAt(0)}
+                          </div>
+                        )}
+                        <span style={{ fontSize: 14, fontWeight: 600, color: '#fff' }}>{author.display_name}</span>
+                      </Link>
+                    </div>
+                  )}
+                  {/* Top arrow: date, read time, views */}
+                  <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: 8, fontSize: 13, color: 'rgba(255,255,255,0.9)', marginBottom: 20 }}>
+                    <time dateTime={post.published_at}>{format(new Date(post.published_at), 'MMMM d, yyyy')}</time>
+                    <span style={{ color: 'rgba(255,255,255,0.6)' }}>·</span>
+                    <span>{readingTime} min read</span>
+                    <span style={{ color: 'rgba(255,255,255,0.6)' }}>·</span>
+                    <ViewCounterCompact views={post.views || 0} variant="overlay" />
+                  </div>
+                  {/* Bottom arrow: social share icons — offset down so date row stays fixed */}
+                  <div style={{ display: 'flex', justifyContent: 'center', position: 'relative', top: 30 }}>
+                    <SocialShareBar url={articleUrl} title={post.title} />
+                  </div>
                 </div>
-              )}
-
-              {/* Date, read time, views centered */}
-              <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: 8, fontSize: 13, color: 'var(--sm-text-muted)', marginBottom: 4 }}>
-                <time dateTime={post.published_at}>{format(new Date(post.published_at), 'MMMM d, yyyy')}</time>
-                <span style={{ color: 'var(--sm-text-dim)' }}>·</span>
-                <span>{readingTime} min read</span>
-                <span style={{ color: 'var(--sm-text-dim)' }}>·</span>
-                <ViewCounterCompact views={post.views || 0} />
               </div>
-
-              <SocialShareBar url={articleUrl} title={post.title} />
             </div>
           )}
 
@@ -552,7 +554,7 @@ export default async function ArticlePage({ params, searchParams }: ArticlePageP
             </article>
           </div>
 
-          {/* Right Sidebar — SM EDGE Features (Desktop only) */}
+          {/* Right Sidebar — Ask Scout + SM EDGE Features (Desktop only) */}
           <aside className="hidden xl:block" style={{ width: 300, flexShrink: 0, paddingLeft: 16 }}>
             <div style={{ position: 'sticky', top: 96 }}>
               <ArticleSidebar categoryName={categoryData?.name} categorySlug={categoryData?.slug} />

@@ -49,9 +49,7 @@ export default function ArticleSidebar({ categoryName, categorySlug }: ArticleSi
       <div className="rounded-2xl overflow-hidden" style={{ background: 'var(--sm-surface)', border: '1px solid var(--sm-border)' }}>
         <div className="px-3 pt-3 pb-2">
           <h2 style={{ fontSize: 14, fontWeight: 700, letterSpacing: '-0.01em', margin: 0 }}>
-            <span style={{ color: '#00D4FF' }}>SM</span>
-            <span style={{ color: '#BC0000' }}>&#x2736;</span>
-            <span style={{ color: '#00D4FF' }}>EDGE Features</span>
+            <span style={{ color: '#00D4FF' }}>SM</span> <span style={{ color: '#BC0000' }}>&#x2736;</span> <span style={{ color: '#00D4FF' }}>EDGE Features</span>
           </h2>
         </div>
 

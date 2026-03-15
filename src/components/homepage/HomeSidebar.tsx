@@ -115,37 +115,39 @@ export default function HomeSidebar({ selectedTeam, onSelectTeam }: HomeSidebarP
           })}
         </nav>
 
-        {/* SM Edge Features — always visible */}
-        <div style={{ marginTop: 8, borderTop: '1px solid var(--hp-border)', paddingTop: 8 }}>
-          <div style={{ padding: '4px 16px', fontSize: 14, fontWeight: 700, letterSpacing: '-0.01em' }}>
-            <span style={{ color: '#00D4FF' }}>SM</span><span style={{ color: '#BC0000' }}>&#x2736;</span><span style={{ color: '#00D4FF' }}>EDGE Features</span>
+        {/* SM Edge Features — left sidebar only when a team is selected */}
+        {selectedTeam && selectedTeam !== 'all' && (
+          <div style={{ marginTop: 8, borderTop: '1px solid var(--hp-border)', paddingTop: 8 }}>
+            <div style={{ padding: '4px 16px', fontSize: 14, fontWeight: 700, letterSpacing: '-0.01em' }}>
+              <span style={{ color: '#00D4FF' }}>SM</span> <span style={{ color: '#BC0000' }}>&#x2736;</span> <span style={{ color: '#00D4FF' }}>EDGE Features</span>
+            </div>
+            {edgeTools.map((item) => (
+              <a
+                key={item.label}
+                href={getToolHref(item)}
+                className="hp-tap-target"
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 12,
+                  borderRadius: 12,
+                  padding: '8px 16px',
+                  fontSize: 14,
+                  color: 'var(--hp-foreground)',
+                  textDecoration: 'none',
+                  transition: 'background 0.15s',
+                }}
+                onMouseEnter={(e) => { e.currentTarget.style.background = 'var(--hp-muted)' }}
+                onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent' }}
+              >
+                <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg" style={{ background: 'var(--hp-muted)', color: '#00D4FF', border: '1px solid #00D4FF' }}>
+                  <item.icon className="h-5 w-5" />
+                </div>
+                <span>{item.label}</span>
+              </a>
+            ))}
           </div>
-          {edgeTools.map((item) => (
-            <a
-              key={item.label}
-              href={getToolHref(item)}
-              className="hp-tap-target"
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: 12,
-                borderRadius: 12,
-                padding: '8px 16px',
-                fontSize: 14,
-                color: 'var(--hp-foreground)',
-                textDecoration: 'none',
-                transition: 'background 0.15s',
-              }}
-              onMouseEnter={(e) => { e.currentTarget.style.background = 'var(--hp-muted)' }}
-              onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent' }}
-            >
-              <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg" style={{ background: 'var(--hp-muted)', color: '#00D4FF', border: '1px solid #00D4FF' }}>
-                <item.icon className="h-5 w-5" />
-              </div>
-              <span>{item.label}</span>
-            </a>
-          ))}
-        </div>
+        )}
       </div>
     </header>
   )
