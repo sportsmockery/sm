@@ -34,8 +34,10 @@ export default function HomepageFeedV2({
   const [activeNavItem, setActiveNavItem] = useState<string>("home")
   const [isComposeOpen, setIsComposeOpen] = useState(false)
   const [composeTab, setComposeTab] = useState<"text" | "photo" | "reel" | "story">("text")
-  const [introComplete, setIntroComplete] = useState(false)
-  const [showIntro, setShowIntro] = useState(true)
+  // Start with intro hidden to prevent hydration mismatch.
+  // Server renders with these defaults; useEffect on client decides whether to show intro.
+  const [introComplete, setIntroComplete] = useState(true)
+  const [showIntro, setShowIntro] = useState(false)
 
   // Close on escape
   useEffect(() => {
@@ -48,11 +50,11 @@ export default function HomepageFeedV2({
     return () => window.removeEventListener("keydown", handleEscape)
   }, [])
 
-  // Only show intro once per session
+  // Show intro only if not seen this session (client-only check)
   useEffect(() => {
-    if (sessionStorage.getItem('edge-intro-seen')) {
-      setShowIntro(false)
-      setIntroComplete(true)
+    if (!sessionStorage.getItem('edge-intro-seen')) {
+      setShowIntro(true)
+      setIntroComplete(false)
     }
   }, [])
 

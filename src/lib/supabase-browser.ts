@@ -1,20 +1,31 @@
 /**
  * THE browser-side Supabase client singleton.
  *
- * Every client-side file that needs Supabase MUST import from here.
- * Do NOT create your own createBrowserClient / createClient anywhere else.
- * Multiple GoTrueClient instances cause auth race conditions.
+ * Uses globalThis to guarantee exactly ONE instance even if this module
+ * gets bundled into multiple chunks by Next.js/webpack.
  */
 import { createBrowserClient } from '@supabase/ssr'
 
-let _instance: ReturnType<typeof createBrowserClient> | null = null
+const GLOBAL_KEY = '__sm_supabase_browser__' as const
+
+declare global {
+  // eslint-disable-next-line no-var
+  var [__sm_supabase_browser__]: ReturnType<typeof createBrowserClient> | undefined
+}
 
 export function getBrowserClient() {
-  if (!_instance) {
-    _instance = createBrowserClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-    )
+  if (typeof window !== 'undefined' && (globalThis as any)[GLOBAL_KEY]) {
+    return (globalThis as any)[GLOBAL_KEY]!
   }
-  return _instance
+
+  const client = createBrowserClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+  )
+
+  if (typeof window !== 'undefined') {
+    ;(globalThis as any)[GLOBAL_KEY] = client
+  }
+
+  return client
 }
