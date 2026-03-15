@@ -396,13 +396,13 @@ export default function AskAIPage() {
           animation: thinking 1.5s ease-in-out infinite;
         }
       `}</style>
-      <div className="sm-hero-bg" style={{ minHeight: '100vh' }}>
+      <div className="sm-hero-bg scout-ai-main" style={{ minHeight: '100vh' }}>
         <div className="sm-grid-overlay" />
         <div style={{ maxWidth: 'var(--sm-max-width)', margin: '0 auto', padding: '32px 16px', position: 'relative', zIndex: 1 }}>
 
           {/* Feature capability cards - 3 column grid */}
           {messages.length === 0 && (
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 16, marginBottom: 24 }}>
+            <div className="homepage-skeleton-grid" style={{ marginBottom: 24 }}>
               {capabilities.map((cap) => (
                 <div key={cap.title} className="glass-card glass-card-sm" style={{ textAlign: 'center' }}>
                   <div style={{

@@ -306,8 +306,8 @@ export default function BoxScoreClient({ games, initialGameId }: Props) {
 function PassingTable({ players }: { players: PlayerStats[] }) {
   if (players.length === 0) return <EmptyStats message="No passing stats available" />
   return (
-    <div className="overflow-x-auto">
-      <table className="w-full">
+    <div className="sm-table-wrapper">
+      <table className="sm-table">
         <thead>
           <tr className="text-left text-xs uppercase tracking-wider" style={{ color: 'var(--sm-text-muted)', borderBottom: '1px solid var(--sm-border)' }}>
             <th className="px-4 py-3">Player</th>
@@ -340,8 +340,8 @@ function PassingTable({ players }: { players: PlayerStats[] }) {
 function RushingTable({ players }: { players: PlayerStats[] }) {
   if (players.length === 0) return <EmptyStats message="No rushing stats available" />
   return (
-    <div className="overflow-x-auto">
-      <table className="w-full">
+    <div className="sm-table-wrapper">
+      <table className="sm-table">
         <thead>
           <tr className="text-left text-xs uppercase tracking-wider" style={{ color: 'var(--sm-text-muted)', borderBottom: '1px solid var(--sm-border)' }}>
             <th className="px-4 py-3">Player</th>
@@ -372,8 +372,8 @@ function RushingTable({ players }: { players: PlayerStats[] }) {
 function ReceivingTable({ players }: { players: PlayerStats[] }) {
   if (players.length === 0) return <EmptyStats message="No receiving stats available" />
   return (
-    <div className="overflow-x-auto">
-      <table className="w-full">
+    <div className="sm-table-wrapper">
+      <table className="sm-table">
         <thead>
           <tr className="text-left text-xs uppercase tracking-wider" style={{ color: 'var(--sm-text-muted)', borderBottom: '1px solid var(--sm-border)' }}>
             <th className="px-4 py-3">Player</th>
@@ -406,8 +406,8 @@ function ReceivingTable({ players }: { players: PlayerStats[] }) {
 function DefenseTable({ players }: { players: PlayerStats[] }) {
   if (players.length === 0) return <EmptyStats message="No defensive stats available" />
   return (
-    <div className="overflow-x-auto">
-      <table className="w-full">
+    <div className="sm-table-wrapper">
+      <table className="sm-table">
         <thead>
           <tr className="text-left text-xs uppercase tracking-wider" style={{ color: 'var(--sm-text-muted)', borderBottom: '1px solid var(--sm-border)' }}>
             <th className="px-4 py-3">Player</th>

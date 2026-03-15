@@ -41,7 +41,7 @@ export default function HomeLoading() {
           </div>
 
           {/* Cards grid */}
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 24 }}>
+          <div className="homepage-skeleton-grid">
             {Array.from({ length: 6 }).map((_, i) => (
               <div key={i} className="glass-card glass-card-static" style={{ padding: 0, overflow: 'hidden' }}>
                 {/* Image skeleton */}

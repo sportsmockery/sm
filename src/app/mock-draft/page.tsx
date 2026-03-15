@@ -518,7 +518,7 @@ export default function MockDraftPage() {
   const subText = 'var(--sm-text-muted)'
 
   return (
-    <div className="sm-hero-bg" style={{ minHeight: '100vh', color: 'var(--sm-text)' }}>
+    <div className="sm-hero-bg mock-draft-content" style={{ minHeight: '100vh', color: 'var(--sm-text)' }}>
       <div className="sm-grid-overlay" />
       <main style={{ maxWidth: 1400, margin: '0 auto', padding: '24px 16px', paddingTop: 80, position: 'relative', zIndex: 1 }}>
         {/* Header - stacks on mobile */}

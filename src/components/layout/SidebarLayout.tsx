@@ -34,9 +34,14 @@ export default function SidebarLayout({ children }: { children: React.ReactNode 
           flex: 1;
           min-width: 0;
         }
-        @media (min-width: 769px) {
+        @media (min-width: 1024px) {
           .app-sidebar-content {
             margin-left: 240px;
+          }
+        }
+        @media (max-width: 1023px) {
+          .app-sidebar-content {
+            padding-bottom: calc(56px + env(safe-area-inset-bottom, 0px));
           }
         }
       `}</style>

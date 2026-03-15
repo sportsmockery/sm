@@ -1,6 +1,7 @@
 import type { Metadata } from 'next'
 import { supabaseAdmin } from '@/lib/supabase-server'
 import Link from 'next/link'
+import AddCategoryForm from '@/components/admin/AddCategoryForm'
 
 export const dynamic = 'force-dynamic'
 
@@ -34,12 +35,25 @@ const TEAM_COLORS: Record<string, { bg: string; text: string; border: string }> 
 }
 
 export default async function AdminCategoriesPage() {
-  // Only fetch the 5 team categories
-  const { data: categories } = await supabaseAdmin
+  // Fetch all categories (team slugs get display names below)
+  const { data: categories, error: fetchError } = await supabaseAdmin
     .from('sm_categories')
-    .select('id, name, slug, description')
-    .in('slug', TEAM_CATEGORY_SLUGS)
+    .select('id, name, slug')
     .order('name')
+
+  if (fetchError) {
+    console.error('Admin categories fetch error:', fetchError)
+    return (
+      <div className="space-y-6">
+        <h1 className="text-2xl font-bold text-[var(--text-primary)]">Categories</h1>
+        <div className="rounded-xl border border-red-500/30 bg-red-500/10 p-6 text-[var(--text-primary)]">
+          <p className="font-medium">Failed to load categories</p>
+          <p className="mt-2 text-sm text-[var(--text-muted)]">{fetchError.message}</p>
+          <p className="mt-2 text-xs text-[var(--text-muted)]">Check Supabase: table <code className="rounded bg-black/20 px-1">sm_categories</code>, env <code className="rounded bg-black/20 px-1">SUPABASE_SERVICE_ROLE_KEY</code>.</p>
+        </div>
+      </div>
+    )
+  }
 
   // Get post counts for each category
   const categoriesWithCounts = await Promise.all(
@@ -69,6 +83,10 @@ export default async function AdminCategoriesPage() {
           </p>
         </div>
       </div>
+
+      {sortedCategories.length === 0 && (
+        <p className="text-[var(--text-muted)]">No categories in <code className="rounded bg-[var(--bg-tertiary)] px-1.5 py-0.5 text-sm">sm_categories</code>. Add one below.</p>
+      )}
 
       {/* Stats Cards */}
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
@@ -107,9 +125,6 @@ export default async function AdminCategoriesPage() {
               </th>
               <th className="hidden px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-[var(--text-muted)] md:table-cell">
                 Slug
-              </th>
-              <th className="hidden px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-[var(--text-muted)] lg:table-cell">
-                Description
               </th>
               <th className="px-6 py-3 text-center text-xs font-semibold uppercase tracking-wider text-[var(--text-muted)]">
                 Posts
@@ -152,9 +167,6 @@ export default async function AdminCategoriesPage() {
                         /{category.slug}
                       </code>
                     </td>
-                    <td className="hidden px-6 py-4 text-sm text-[var(--text-muted)] lg:table-cell">
-                      {category.description || <span className="italic">No description</span>}
-                    </td>
                     <td className="px-6 py-4 text-center">
                       <Link
                         href={`/admin/posts?category=${category.id}`}
@@ -191,17 +203,22 @@ export default async function AdminCategoriesPage() {
               })
             ) : (
               <tr>
-                <td colSpan={5} className="px-6 py-16 text-center">
+                <td colSpan={4} className="px-6 py-16 text-center">
                   <svg className="mx-auto h-12 w-12 text-[var(--text-muted)]" fill="none" viewBox="0 0 24 24" strokeWidth={1} stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" d="M9.568 3H5.25A2.25 2.25 0 003 5.25v4.318c0 .597.237 1.17.659 1.591l9.581 9.581c.699.699 1.78.872 2.607.33a18.095 18.095 0 005.223-5.223c.542-.827.369-1.908-.33-2.607L11.16 3.66A2.25 2.25 0 009.568 3z" />
                     <path strokeLinecap="round" strokeLinejoin="round" d="M6 6h.008v.008H6V6z" />
                   </svg>
-                  <p className="mt-4 text-[var(--text-muted)]">No categories found</p>
+                  <p className="mt-4 text-[var(--text-muted)]">No categories in the table yet. Add one using the form above.</p>
                 </td>
               </tr>
             )}
           </tbody>
         </table>
+      </div>
+
+      {/* Add category */}
+      <div className="max-w-md">
+        <AddCategoryForm />
       </div>
     </div>
   )
