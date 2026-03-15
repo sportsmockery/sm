@@ -18,12 +18,19 @@ if (!supabaseAnonKey) {
   throw new Error('Missing NEXT_PUBLIC_SUPABASE_ANON_KEY environment variable')
 }
 
+// Browser-side singleton — reused across all calls
+let _dbBrowserClient: ReturnType<typeof createClient> | null = null
+
 /**
  * Create a Supabase client for public/client-side use
  * Uses the anon key with RLS policies
+ * Returns a singleton to avoid multiple GoTrueClient instances
  */
 export function createSupabaseClient() {
-  return createClient(supabaseUrl!, supabaseAnonKey!)
+  if (!_dbBrowserClient) {
+    _dbBrowserClient = createClient(supabaseUrl!, supabaseAnonKey!)
+  }
+  return _dbBrowserClient
 }
 
 /**

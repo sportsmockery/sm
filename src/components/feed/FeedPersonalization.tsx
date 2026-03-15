@@ -2,7 +2,7 @@
 'use client';
 
 import { useState } from 'react';
-import { createClient } from '@supabase/supabase-js';
+import { supabase } from '@/lib/supabase';
 
 interface FeedPersonalizationProps {
   userId: string;
@@ -76,11 +76,6 @@ export function FeedPersonalization({
     setSaved(false);
 
     try {
-      const supabase = createClient(
-        process.env.NEXT_PUBLIC_SUPABASE_URL!,
-        process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-      );
-
       const { error } = await supabase
         .from('user_engagement_profile')
         .upsert(

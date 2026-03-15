@@ -53,10 +53,11 @@ function RenderBlock({ block }: { block: ContentBlock }) {
       }
       return (
         <PreviewSection>
-          <p
+          <div
             className="text-[18px] leading-[1.7]"
             style={{ color: BRAND.white }}
             dangerouslySetInnerHTML={{ __html: block.data.html }}
+            suppressHydrationWarning
           />
         </PreviewSection>
       );
@@ -79,6 +80,7 @@ function RenderBlock({ block }: { block: ContentBlock }) {
             className={`${sizes[block.data.level]} font-medium tracking-tight`}
             style={{ color: BRAND.white }}
             dangerouslySetInnerHTML={{ __html: block.data.text }}
+            suppressHydrationWarning
           />
         </div>
       );
@@ -315,7 +317,7 @@ function RenderBlock({ block }: { block: ContentBlock }) {
           {block.data.timestamp && (
             <span className="text-[13px] text-slate-400 mb-1 block">{block.data.timestamp}</span>
           )}
-          <p className="text-sm leading-relaxed" style={{ color: BRAND.white }} dangerouslySetInnerHTML={{ __html: block.data.text }} />
+          <div className="text-sm leading-relaxed" style={{ color: BRAND.white }} dangerouslySetInnerHTML={{ __html: block.data.text }} suppressHydrationWarning />
         </BreakingUpdateBlock>
       );
 

@@ -37,7 +37,26 @@ export function sanitizeWordPressContent(content: string): string {
   // 5. Strip [gallery] shortcodes (no useful fallback)
   result = result.replace(/\[gallery[^\]]*\]/g, '')
 
-  // 6. Collapse excessive whitespace left by removals (3+ newlines → 2)
+  // 6. Fix invalid HTML nesting — CRITICAL for React hydration.
+  //    WordPress often wraps block-level elements inside <p> tags, e.g.:
+  //      <p><blockquote>...</blockquote></p>
+  //      <p><div>...</div></p>
+  //      <p><figure>...</figure></p>
+  //    Browsers auto-correct this by splitting the <p>, producing a different
+  //    DOM than what the server rendered. React then fails with "removeChild"
+  //    errors during hydration. Fix by unwrapping block elements from <p> tags.
+  const blockEls = 'blockquote|div|figure|ul|ol|table|pre|section|article|aside|header|footer|h[1-6]|iframe'
+  result = result.replace(
+    new RegExp(`<p>\\s*(<(?:${blockEls})[\\s\\S]*?</(?:${blockEls})>)\\s*</p>`, 'gi'),
+    '$1'
+  )
+  // Also handle self-closing / void block elements in <p> (e.g. <p><hr></p>)
+  result = result.replace(/<p>\s*(<(?:hr|br)\s*\/?>)\s*<\/p>/gi, '$1')
+
+  // 7. Strip empty <p> tags that browsers normalize inconsistently
+  result = result.replace(/<p>\s*(?:&nbsp;)?\s*<\/p>/gi, '')
+
+  // 8. Collapse excessive whitespace left by removals (3+ newlines → 2)
   result = result.replace(/\n{3,}/g, '\n\n')
 
   return result

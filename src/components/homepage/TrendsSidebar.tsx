@@ -3,196 +3,37 @@
 import { useState, useRef, useEffect } from "react"
 import Image from "next/image"
 import Link from "next/link"
-import { MoreHorizontal, ArrowRightLeft, ClipboardPen, MessageSquare, BarChart3, Video, User, Volume2 } from "lucide-react"
-import { useAuth } from "@/contexts/AuthContext"
 import FeedTeamSidebar from "@/components/homepage/FeedTeamSidebar"
 
 interface TrendsSidebarProps {
   selectedTeam: string
 }
 
-const edgeTools = [
-  {
-    id: "trade-sim",
-    title: "Trade Simulator",
-    description: "Play GM and build trades now.",
-    icon: ArrowRightLeft,
-    href: "/gm",
-  },
-  {
-    id: "mock-draft",
-    title: "Mock Draft",
-    description: "Run mock drafts with instant grades.",
-    icon: ClipboardPen,
-    href: "/mock-draft",
-  },
-  {
-    id: "fan-hub",
-    title: "Fan Chat",
-    description: "Live chat and conversation.",
-    icon: MessageSquare,
-    href: "/fan-chat",
-  },
-  {
-    id: "data-cosmos",
-    title: "Team Analytics",
-    description: "Stats, rosters, scores, and more.",
-    icon: BarChart3,
-    href: "/chicago-bears",
-  },
-  {
-    id: "shows",
-    title: "Vision Theater",
-    description: "Stream all the latest SM videos.",
-    icon: Video,
-    href: "/bears-film-room",
-  },
-  {
-    id: "audio",
-    title: "Hands-Free Audio",
-    description: "Have articles continuously read to you.",
-    icon: Volume2,
-    href: "/audio",
-  },
-]
-
 export default function TrendsSidebar({ selectedTeam }: TrendsSidebarProps) {
-  const { user, isAuthenticated } = useAuth()
-  const [menuOpen, setMenuOpen] = useState(false)
-  const menuRef = useRef<HTMLDivElement>(null)
-
-  // Close menu on outside click
-  useEffect(() => {
-    if (!menuOpen) return
-    const handleClick = (e: MouseEvent) => {
-      if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
-        setMenuOpen(false)
-      }
-    }
-    document.addEventListener('mousedown', handleClick)
-    return () => document.removeEventListener('mousedown', handleClick)
-  }, [menuOpen])
-
-  const username = user?.email?.split('@')[0] || 'Guest'
-  const fullName = user?.name || ''
-
   return (
     <aside className="sticky top-0 pl-6 hidden h-screen w-[350px] flex-col gap-4 pt-4 pb-3 lg:flex overflow-y-auto">
-      {/* When no team selected: show Profile + Ask Scout */}
-      {(!selectedTeam || selectedTeam === 'all') && (
-        <>
-          {/* User Profile */}
-          <div className="hp-sidebar-card relative" ref={menuRef}>
-            <div className="flex items-center gap-3 px-3 py-2.5">
-              <div
-                className="h-11 w-11 rounded-xl overflow-hidden flex items-center justify-center flex-shrink-0"
-                style={{ background: user?.avatar ? 'transparent' : '#6b7280' }}
-              >
-                {user?.avatar ? (
-                  <Image src={user.avatar} alt={username} width={44} height={44} className="h-full w-full object-cover" />
-                ) : (
-                  <User className="h-6 w-6" style={{ color: '#9ca3af' }} />
-                )}
-              </div>
-              <div className="flex flex-1 flex-col text-left text-sm">
-                <span style={{ fontSize: 14, fontWeight: 700, color: 'var(--hp-foreground)' }}>{username}</span>
-                {fullName && (
-                  <span style={{ fontSize: 11, color: 'var(--hp-muted-foreground)' }}>{fullName}</span>
-                )}
-              </div>
-              <button
-                onClick={() => setMenuOpen(!menuOpen)}
-                className="hp-tap-target"
-                style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 4 }}
-              >
-                <MoreHorizontal className="h-5 w-5" style={{ color: 'var(--hp-muted-foreground)' }} />
-              </button>
-            </div>
-            {menuOpen && (
-              <div
-                className="absolute right-4 top-14 z-50 rounded-lg py-1 shadow-lg"
-                style={{ background: 'var(--hp-card)', border: '1px solid var(--hp-border)', minWidth: 160 }}
-              >
-                <Link
-                  href="/profile"
-                  onClick={() => setMenuOpen(false)}
-                  className="block px-4 py-2 text-sm transition-colors"
-                  style={{ color: 'var(--hp-foreground)', textDecoration: 'none' }}
-                  onMouseEnter={(e) => { e.currentTarget.style.background = 'var(--hp-muted)' }}
-                  onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent' }}
-                >
-                  View Profile
-                </Link>
-              </div>
-            )}
-          </div>
-
-          {/* Ask Scout - Quick Access */}
-          <button className="hp-sidebar-card w-full px-3 py-2.5 flex items-center gap-3 group transition-all">
-            <Image
-              src="/downloads/scout-v2.png"
-              alt="Scout AI"
-              width={48}
-              height={48}
-              className="h-12 w-12 object-contain flex-shrink-0"
-            />
-            <div className="flex-1 text-left" style={{ lineHeight: 1.2 }}>
-              <p style={{ fontSize: 14, fontWeight: 600, color: 'var(--hp-foreground)', margin: 0 }}>Ask Scout</p>
-              <p style={{ fontSize: 13, color: 'var(--hp-muted-foreground)', margin: 0 }}>AI-powered sports analysis</p>
-            </div>
-            <span className="flex items-center gap-1.5" style={{ fontSize: 10, color: '#16a34a', fontWeight: 500 }}>
-              <span className="w-1.5 h-1.5 rounded-full animate-pulse" style={{ background: '#16a34a' }} />
-              Online
-            </span>
-          </button>
-        </>
-      )}
+      {/* Ask Scout - Quick Access */}
+      <Link href="/scout-ai" className="hp-sidebar-card w-full px-3 py-2.5 flex items-center gap-3 group transition-all" style={{ textDecoration: 'none' }}>
+        <Image
+          src="/downloads/scout-v2.png"
+          alt="Scout AI"
+          width={48}
+          height={48}
+          className="h-12 w-12 object-contain flex-shrink-0"
+        />
+        <div className="flex-1 text-left" style={{ lineHeight: 1.2 }}>
+          <p style={{ fontSize: 14, fontWeight: 600, color: 'var(--hp-foreground)', margin: 0 }}>Ask Scout</p>
+          <p style={{ fontSize: 13, color: 'var(--hp-muted-foreground)', margin: 0 }}>AI-powered sports analysis</p>
+        </div>
+        <span className="flex items-center gap-1.5" style={{ fontSize: 10, color: '#16a34a', fontWeight: 500 }}>
+          <span className="w-1.5 h-1.5 rounded-full animate-pulse" style={{ background: '#16a34a' }} />
+          Online
+        </span>
+      </Link>
 
       {/* Team Sidebar - shown when a team is selected */}
       {selectedTeam && selectedTeam !== 'all' && (
         <FeedTeamSidebar selectedTeam={selectedTeam} />
-      )}
-
-      {/* Blitz Features — only shown when no team selected (moves to left sidebar otherwise) */}
-      {(!selectedTeam || selectedTeam === 'all') && (
-        <div className="hp-sidebar-card overflow-hidden">
-          <div className="px-3 pt-3 pb-2">
-            <h2 style={{ fontSize: 14, fontWeight: 700, letterSpacing: '-0.01em' }}><span style={{ color: '#00D4FF' }}>SM</span><span style={{ color: '#BC0000' }}>&#x2736;</span><span style={{ color: '#00D4FF' }}>EDGE Features</span></h2>
-          </div>
-
-          <div className="px-2.5 pb-3 flex flex-col gap-1">
-            {edgeTools.map((tool) => (
-              <a
-                key={tool.id}
-                href={tool.href}
-                className="flex items-start gap-2.5 rounded-xl px-2 py-2 text-left transition-all hp-tap-target"
-                style={{ textDecoration: 'none' }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.background = 'var(--hp-muted)'
-                  const icon = e.currentTarget.querySelector('[data-icon]') as HTMLElement
-                  if (icon) icon.style.color = '#BC0000'
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.background = 'transparent'
-                  const icon = e.currentTarget.querySelector('[data-icon]') as HTMLElement
-                  if (icon) icon.style.color = '#00D4FF'
-                }}
-              >
-                <div
-                  data-icon
-                  className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg self-center"
-                  style={{ background: 'var(--hp-muted)', color: '#00D4FF', border: '1px solid #00D4FF', transition: 'color 0.2s' }}
-                >
-                  <tool.icon className="h-5 w-5" />
-                </div>
-                <div className="flex-1 min-w-0" style={{ lineHeight: 1.3 }}>
-                  <p style={{ fontSize: 14, fontWeight: 600, color: 'var(--hp-foreground)', margin: 0 }}>{tool.title}</p>
-                  <p className="line-clamp-2" style={{ fontSize: 12, color: 'var(--hp-muted-foreground)', margin: 0 }}>{tool.description}</p>
-                </div>
-              </a>
-            ))}
-          </div>
-        </div>
       )}
 
       {/* Footer */}

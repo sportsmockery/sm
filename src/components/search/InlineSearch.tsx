@@ -3,7 +3,7 @@
 
 import { useState, useRef, useEffect } from 'react';
 import Link from 'next/link';
-import { createClient } from '@supabase/supabase-js';
+import { supabase as supabaseSingleton } from '@/lib/supabase';
 
 const FEATURES = [
   { name: 'Scout AI', description: 'Ask anything about Chicago sports', href: '/scout-ai', icon: 'AI' },
@@ -37,12 +37,7 @@ interface SearchResults {
   teams: typeof TEAMS;
 }
 
-const supabase = typeof window !== 'undefined'
-  ? createClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-    )
-  : null;
+const supabase = typeof window !== 'undefined' ? supabaseSingleton : null;
 
 export function InlineSearch() {
   const [query, setQuery] = useState('');

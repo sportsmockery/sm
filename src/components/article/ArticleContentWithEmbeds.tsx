@@ -144,10 +144,10 @@ export default function ArticleContentWithEmbeds({
   if (inlineSlot) {
     const [before, after] = splitAfterParagraph(processedContent, 3)
     return (
-      <div ref={contentRef} className={`article-body ${className}`}>
-        <div dangerouslySetInnerHTML={{ __html: before }} />
+      <div ref={contentRef} className={`article-body ${className}`} suppressHydrationWarning>
+        <div dangerouslySetInnerHTML={{ __html: before }} suppressHydrationWarning />
         {after ? inlineSlot : null}
-        {after && <div dangerouslySetInnerHTML={{ __html: after }} />}
+        {after && <div dangerouslySetInnerHTML={{ __html: after }} suppressHydrationWarning />}
         {!after && inlineSlot}
       </div>
     )
@@ -158,6 +158,7 @@ export default function ArticleContentWithEmbeds({
       ref={contentRef}
       className={`article-body ${className}`}
       dangerouslySetInnerHTML={{ __html: processedContent }}
+      suppressHydrationWarning
     />
   )
 }

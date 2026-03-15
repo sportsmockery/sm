@@ -418,7 +418,7 @@ export default async function ArticlePage({ params, searchParams }: ArticlePageP
               />
             )}
 
-            <article className="article-body-2030">
+            <article className="article-body-2030" suppressHydrationWarning>
               {blockDocument ? (
                 /* Block-based article content */
                 <ArticleBlockContent document={blockDocument} />

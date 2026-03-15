@@ -1,7 +1,7 @@
 "use client"
 
 import { useState } from "react"
-import { Search, ArrowRightLeft, ClipboardPen, MessageSquare, BarChart3, Video, Volume2 } from "lucide-react"
+import { ArrowRightLeft, ClipboardPen, MessageSquare, BarChart3, Video, Volume2 } from "lucide-react"
 import { homepageTeams } from "@/lib/homepage-team-data"
 
 interface HomeSidebarProps {
@@ -9,13 +9,30 @@ interface HomeSidebarProps {
   onSelectTeam: (teamId: string) => void
 }
 
+const edgeTools = [
+  { icon: ArrowRightLeft, label: 'Trade Simulator', href: '/gm' },
+  { icon: ClipboardPen, label: 'Mock Draft', href: '/mock-draft' },
+  { icon: MessageSquare, label: 'Fan Chat', href: '/fan-chat' },
+  { icon: BarChart3, label: 'Team Analytics', href: '/chicago-bears' },
+  { icon: Video, label: 'Vision Theater', href: '/bears-film-room' },
+  { icon: Volume2, label: 'Hands-Free Audio', href: '/audio' },
+]
+
 export default function HomeSidebar({ selectedTeam, onSelectTeam }: HomeSidebarProps) {
   const [hoveredTeam, setHoveredTeam] = useState<string | null>(null)
+
+  // Update Team Analytics link based on selected team
+  const getToolHref = (tool: typeof edgeTools[0]) => {
+    if (tool.label === 'Team Analytics' && selectedTeam && selectedTeam !== 'all') {
+      return `/${selectedTeam === 'whitesox' ? 'chicago-white-sox' : `chicago-${selectedTeam}`}`
+    }
+    return tool.href
+  }
 
   return (
     <header className="sticky top-0 flex h-screen w-[275px] flex-col justify-between px-2 py-3">
       <div className="flex flex-col gap-1 pt-4">
-        {/* Navigation */}
+        {/* Team Navigation */}
         <nav className="flex flex-col gap-1">
           {/* For You - All Teams */}
           <button
@@ -36,7 +53,6 @@ export default function HomeSidebar({ selectedTeam, onSelectTeam }: HomeSidebarP
               fontWeight: selectedTeam === "all" ? 600 : 400,
             }}
           >
-            {/* Chicago Six-Pointed Star */}
             <div className="flex h-6 w-6 items-center justify-center">
               <img
                 src="/edge-dash.png"
@@ -78,7 +94,6 @@ export default function HomeSidebar({ selectedTeam, onSelectTeam }: HomeSidebarP
                   opacity: isSelected ? 1 : hoveredTeam === team.id ? 0.9 : 1,
                 }}
               >
-                {/* Team Logo */}
                 <div className="flex h-6 w-6 items-center justify-center">
                   <img
                     src={team.logo}
@@ -100,69 +115,37 @@ export default function HomeSidebar({ selectedTeam, onSelectTeam }: HomeSidebarP
           })}
         </nav>
 
-        {/* Blitz Features — shown when a team is selected */}
-        {selectedTeam && selectedTeam !== 'all' && (
-          <div style={{ marginTop: 8, borderTop: '1px solid var(--hp-border)', paddingTop: 8 }}>
-            <div style={{ padding: '4px 16px', fontSize: 14, fontWeight: 700, letterSpacing: '-0.01em' }}>
-              <span style={{ color: '#00D4FF' }}>SM</span><span style={{ color: '#BC0000' }}>&#x2736;</span><span style={{ color: '#00D4FF' }}>EDGE Features</span>
-            </div>
-            {[
-              { icon: ArrowRightLeft, label: 'Trade Simulator', href: '/gm' },
-              { icon: ClipboardPen, label: 'Mock Draft', href: '/mock-draft' },
-              { icon: MessageSquare, label: 'Fan Chat', href: '/fan-chat' },
-              { icon: BarChart3, label: 'Team Analytics', href: `/${selectedTeam === 'whitesox' ? 'chicago-white-sox' : `chicago-${selectedTeam}`}` },
-              { icon: Video, label: 'Vision Theater', href: '/bears-film-room' },
-              { icon: Volume2, label: 'Hands-Free Audio', href: '/audio' },
-            ].map((item) => (
-              <a
-                key={item.label}
-                href={item.href}
-                className="hp-tap-target"
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: 12,
-                  borderRadius: 12,
-                  padding: '8px 16px',
-                  fontSize: 14,
-                  color: 'var(--hp-foreground)',
-                  textDecoration: 'none',
-                  transition: 'background 0.15s',
-                }}
-                onMouseEnter={(e) => { e.currentTarget.style.background = 'var(--hp-muted)' }}
-                onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent' }}
-              >
-                <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg" style={{ background: 'var(--hp-muted)', color: '#00D4FF', border: '1px solid #00D4FF' }}>
-                  <item.icon className="h-5 w-5" />
-                </div>
-                <span>{item.label}</span>
-              </a>
-            ))}
+        {/* SM Edge Features — always visible */}
+        <div style={{ marginTop: 8, borderTop: '1px solid var(--hp-border)', paddingTop: 8 }}>
+          <div style={{ padding: '4px 16px', fontSize: 14, fontWeight: 700, letterSpacing: '-0.01em' }}>
+            <span style={{ color: '#00D4FF' }}>SM</span><span style={{ color: '#BC0000' }}>&#x2736;</span><span style={{ color: '#00D4FF' }}>EDGE Features</span>
           </div>
-        )}
-      </div>
-
-      {/* Search */}
-      <div className="relative px-2">
-        <Search
-          className="absolute left-6 top-1/2 h-5 w-5 -translate-y-1/2"
-          style={{ color: 'var(--hp-muted-foreground)' }}
-        />
-        <input
-          type="text"
-          placeholder="Search"
-          style={{
-            width: '100%',
-            borderRadius: 16,
-            border: 0,
-            background: 'var(--hp-muted)',
-            padding: '14px 16px 14px 48px',
-            fontSize: 15,
-            color: 'var(--hp-foreground)',
-            outline: 'none',
-            transition: 'all 0.2s',
-          }}
-        />
+          {edgeTools.map((item) => (
+            <a
+              key={item.label}
+              href={getToolHref(item)}
+              className="hp-tap-target"
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: 12,
+                borderRadius: 12,
+                padding: '8px 16px',
+                fontSize: 14,
+                color: 'var(--hp-foreground)',
+                textDecoration: 'none',
+                transition: 'background 0.15s',
+              }}
+              onMouseEnter={(e) => { e.currentTarget.style.background = 'var(--hp-muted)' }}
+              onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent' }}
+            >
+              <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg" style={{ background: 'var(--hp-muted)', color: '#00D4FF', border: '1px solid #00D4FF' }}>
+                <item.icon className="h-5 w-5" />
+              </div>
+              <span>{item.label}</span>
+            </a>
+          ))}
+        </div>
       </div>
     </header>
   )

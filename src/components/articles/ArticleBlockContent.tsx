@@ -13,7 +13,7 @@ export function ArticleBlockContent({ document }: ArticleBlockContentProps) {
   return (
     <>
       <ReadingProgressBar />
-      <div className="article-block-content">
+      <div className="article-block-content" suppressHydrationWarning>
         <BlockPreviewRenderer blocks={document.blocks} />
       </div>
     </>
