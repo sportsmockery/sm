@@ -5,7 +5,6 @@ import Link from 'next/link'
 import Image from 'next/image'
 import { type TeamSeasonData } from '@/components/team/TeamSeasonCard'
 import TeamSeasonCard from '@/components/team/TeamSeasonCard'
-import ARTourButton from '@/components/ar/ARTourButton'
 
 type TeamKey = 'bears' | 'bulls' | 'cubs' | 'whitesox' | 'blackhawks'
 
@@ -384,9 +383,6 @@ export default function TeamDataHubContent({ teamKey }: TeamDataHubContentProps)
                 </Link>
               </nav>
             </div>
-
-            {/* AR Stadium Tour */}
-            <ARTourButton team={team.categorySlug} />
 
             {/* Other teams */}
             <div className="bg-[var(--sm-card)] rounded-xl p-6 shadow-sm">

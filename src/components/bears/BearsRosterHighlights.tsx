@@ -28,7 +28,7 @@ export default function BearsRosterHighlights({
       {/* Header */}
       <div
         style={{
-          padding: '16px 20px',
+          padding: '12px 16px',
           borderBottom: '1px solid var(--sm-border)',
           borderLeft: `4px solid ${bearsInfo.secondaryColor}`,
         }}
@@ -36,11 +36,10 @@ export default function BearsRosterHighlights({
         <div className="flex items-center justify-between">
           <h3
             style={{
-              fontSize: 16,
+              fontSize: 14,
               fontWeight: 700,
               color: 'var(--sm-text)',
               textTransform: 'uppercase',
-             
               margin: 0,
             }}
           >
@@ -48,7 +47,7 @@ export default function BearsRosterHighlights({
           </h3>
           <Link
             href="/chicago-bears/roster"
-            className="text-sm hover:underline"
+            className="text-xs hover:underline"
             style={{ color: '#bc0000' }}
           >
             Full Roster →
@@ -82,11 +81,11 @@ function PlayerCard({
   return (
     <Link
       href={`/chicago-bears/players/${player.id}`}
-      className="group flex items-center gap-4 p-4 hover:bg-[var(--sm-card-hover)] transition-colors"
+      className="group flex items-center gap-3 px-4 py-3 hover:bg-[var(--sm-card-hover)] transition-colors"
       style={{ borderBottom: '1px solid var(--sm-border)' }}
     >
       {/* Player image/number */}
-      <div className="relative w-14 h-14 flex-shrink-0">
+      <div className="relative w-10 h-10 flex-shrink-0">
         {player.imageUrl ? (
           <Image
             src={player.imageUrl}
@@ -96,7 +95,7 @@ function PlayerCard({
           />
         ) : (
           <div
-            className="w-full h-full rounded-full flex items-center justify-center text-white font-bold text-lg"
+            className="w-full h-full rounded-full flex items-center justify-center text-white font-bold text-sm"
             style={{ backgroundColor: teamColor }}
           >
             #{player.number}
@@ -104,7 +103,7 @@ function PlayerCard({
         )}
         {/* Position badge */}
         <div
-          className="absolute -bottom-1 -right-1 px-1.5 py-0.5 rounded text-[10px] font-bold text-white"
+          className="absolute -bottom-0.5 -right-0.5 px-1 py-0.5 rounded text-[9px] font-bold text-white"
           style={{ backgroundColor: teamColor }}
         >
           {player.position}
@@ -113,13 +112,10 @@ function PlayerCard({
 
       {/* Player info */}
       <div className="flex-1 min-w-0">
-        <h4
-          className="text-[14px] font-bold text-[#222] dark:text-white group-hover:text-[#bc0000] transition-colors"
-         
-        >
+        <h4 className="font-bold text-[#222] dark:text-white group-hover:text-[#bc0000] transition-colors truncate" style={{ fontSize: 12 }}>
           {player.name}
         </h4>
-        <p className="text-[12px] text-gray-500 dark:text-gray-400">
+        <p className="text-[11px] text-gray-500 dark:text-gray-400">
           #{player.number} • {player.position}
         </p>
       </div>
@@ -127,19 +123,16 @@ function PlayerCard({
       {/* Primary stat */}
       {primaryStat && (
         <div className="text-right">
-          <div
-            className="text-[18px] font-bold text-[#222] dark:text-white"
-           
-          >
+          <div className="font-bold text-[#222] dark:text-white" style={{ fontSize: 12 }}>
             {primaryStat.value}
           </div>
-          <div className="text-[10px] text-gray-400 uppercase">{primaryStat.label}</div>
+          <div className="text-[9px] text-gray-400 uppercase">{primaryStat.label}</div>
         </div>
       )}
 
       {/* Arrow */}
       <svg
-        className="w-4 h-4 text-gray-300 group-hover:text-[#bc0000] transition-colors"
+        className="w-3 h-3 text-gray-300 group-hover:text-[#bc0000] transition-colors flex-shrink-0"
         fill="none"
         stroke="currentColor"
         viewBox="0 0 24 24"

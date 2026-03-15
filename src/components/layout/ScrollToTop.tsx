@@ -106,7 +106,7 @@ export default function ScrollToTop() {
       style={{
         position: 'fixed',
         bottom: 24,
-        right: 24,
+        right: 99,
         zIndex: 1050,
         display: 'flex',
         flexDirection: 'column',
@@ -119,11 +119,11 @@ export default function ScrollToTop() {
         <div
           style={{
             width: 300,
-            background: 'rgba(10,10,10,0.94)',
+            background: '#FAFAFB',
             backdropFilter: 'blur(20px)',
-            border: '1px solid rgba(188,0,0,0.3)',
+            border: '1px solid rgba(11,15,20,0.12)',
             borderRadius: 12,
-            boxShadow: '0 8px 40px rgba(0,0,0,0.5), 0 0 30px rgba(188,0,0,0.1)',
+            boxShadow: '0 8px 40px rgba(0,0,0,0.15), 0 0 20px rgba(188,0,0,0.08)',
             overflow: 'hidden',
             animation: 'scoutPanelReveal 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards',
           }}
@@ -140,7 +140,7 @@ export default function ScrollToTop() {
             <div style={{
               fontSize: 13,
               lineHeight: 1.45,
-              color: 'rgba(255,255,255,0.85)',
+              color: '#0B0F14',
               fontWeight: 500,
             }}>
               {greeting}
@@ -153,7 +153,7 @@ export default function ScrollToTop() {
             alignItems: 'center',
             gap: 8,
             padding: '8px 12px 12px',
-            borderTop: '1px solid rgba(255,255,255,0.05)',
+            borderTop: '1px solid rgba(11,15,20,0.08)',
           }}>
             <input
               ref={inputRef}
@@ -166,9 +166,9 @@ export default function ScrollToTop() {
                 flex: 1,
                 fontSize: 13,
                 fontWeight: 500,
-                color: '#fff',
-                background: 'rgba(255,255,255,0.05)',
-                border: '1px solid rgba(255,255,255,0.08)',
+                color: '#0B0F14',
+                background: 'rgba(11,15,20,0.04)',
+                border: '1px solid rgba(11,15,20,0.12)',
                 borderRadius: 6,
                 padding: '8px 10px',
                 outline: 'none',
@@ -206,7 +206,7 @@ export default function ScrollToTop() {
               alignItems: 'center',
               gap: 8,
               fontSize: 12,
-              color: 'rgba(255,255,255,0.5)',
+              color: 'rgba(11,15,20,0.6)',
             }}>
               <span style={{
                 display: 'inline-block',

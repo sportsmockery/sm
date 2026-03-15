@@ -77,7 +77,7 @@ interface TeamHubLayoutProps {
 
 // Standard tabs for all team hubs
 const TEAM_TABS = [
-  { id: 'overview', label: 'Hub', path: '' },
+  { id: 'overview', label: 'EDGE', path: '' },
   { id: 'live', label: 'Live', path: '/live' },
   { id: 'schedule', label: 'Schedule', path: '/schedule' },
   { id: 'scores', label: 'Scores', path: '/scores' },
@@ -90,7 +90,7 @@ const TEAM_TABS = [
 
 // NFL tabs
 const NFL_TABS = [
-  { id: 'overview', label: 'Hub', path: '' },
+  { id: 'overview', label: 'EDGE', path: '' },
   { id: 'live', label: 'Live', path: '/live' },
   { id: 'schedule', label: 'Schedule', path: '/schedule' },
   { id: 'scores', label: 'Box Scores', path: '/scores' },
@@ -420,6 +420,7 @@ export default function TeamHubLayout({
                 ? `${tab.external}?channel=${team.slug.replace('chicago-', '')}`
                 : basePath + tab.path
 
+              const isEdgeTab = tab.id === 'overview'
               return (
                 <Link
                   key={tab.id}
@@ -429,7 +430,7 @@ export default function TeamHubLayout({
                     fontSize: '14px',
                     fontWeight: 600,
                     whiteSpace: 'nowrap',
-                    color: isActive ? 'var(--sm-text)' : 'var(--sm-text-muted)',
+                    color: isEdgeTab ? '#00D4FF' : (isActive ? 'var(--sm-text)' : 'var(--sm-text-muted)'),
                     textDecoration: 'none',
                     position: 'relative',
                     transition: 'color 0.2s',

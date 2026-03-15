@@ -136,7 +136,7 @@ export default async function BlackhawksTradeRumorsPage() {
           }}
         >
           {[
-            { label: 'Cap Tracker', href: '/chicago-blackhawks/cap-tracker' },
+            { label: 'Salary Cap', href: '/chicago-blackhawks/cap-tracker' },
             { label: 'Draft Tracker', href: '/chicago-blackhawks/draft-tracker' },
             { label: 'Depth Chart', href: '/chicago-blackhawks/depth-chart' },
             { label: 'Full Roster', href: '/chicago-blackhawks/roster' },
@@ -316,6 +316,8 @@ export default async function BlackhawksTradeRumorsPage() {
               display: 'inline-block',
               textDecoration: 'none',
               borderRadius: 'var(--sm-radius-pill)',
+              backgroundColor: '#bc0000',
+              color: '#fff',
             }}
           >
             Ask Scout

@@ -326,7 +326,7 @@ export default async function WhiteSoxGameCenterPage() {
           <Link
             href="/scout-ai?team=chicago-white-sox&q=How%20did%20the%20White%20Sox%20do%20in%20their%20last%20game"
             className="btn btn-md btn-primary"
-            style={{ display: 'inline-block', textDecoration: 'none', borderRadius: 'var(--sm-radius-pill)' }}
+            style={{ display: 'inline-block', textDecoration: 'none', borderRadius: 'var(--sm-radius-pill)', backgroundColor: '#bc0000', color: '#fff' }}
           >
             Ask Scout
           </Link>

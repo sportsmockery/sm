@@ -13,7 +13,7 @@ const edgeTools = [
   { icon: ArrowRightLeft, label: 'Trade Simulator', href: '/gm' },
   { icon: ClipboardPen, label: 'Mock Draft', href: '/mock-draft' },
   { icon: MessageSquare, label: 'Fan Chat', href: '/fan-chat' },
-  { icon: BarChart3, label: 'Team Analytics', href: '/chicago-bears' },
+  { icon: BarChart3, label: 'Team Stats', href: '/chicago-bears' },
   { icon: Video, label: 'Vision Theater', href: '/bears-film-room' },
   { icon: Volume2, label: 'Hands-Free Audio', href: '/audio' },
 ]
@@ -21,9 +21,9 @@ const edgeTools = [
 export default function HomeSidebar({ selectedTeam, onSelectTeam }: HomeSidebarProps) {
   const [hoveredTeam, setHoveredTeam] = useState<string | null>(null)
 
-  // Update Team Analytics link based on selected team
+  // Update Team Stats link based on selected team
   const getToolHref = (tool: typeof edgeTools[0]) => {
-    if (tool.label === 'Team Analytics' && selectedTeam && selectedTeam !== 'all') {
+    if (tool.label === 'Team Stats' && selectedTeam && selectedTeam !== 'all') {
       return `/${selectedTeam === 'whitesox' ? 'chicago-white-sox' : `chicago-${selectedTeam}`}`
     }
     return tool.href
@@ -143,7 +143,28 @@ export default function HomeSidebar({ selectedTeam, onSelectTeam }: HomeSidebarP
                 <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg" style={{ background: 'var(--hp-muted)', color: '#00D4FF', border: '1px solid #00D4FF' }}>
                   <item.icon className="h-5 w-5" />
                 </div>
-                <span>{item.label}</span>
+                <span style={{ flex: 1 }}>{item.label}</span>
+                {item.label === 'Fan Chat' && (
+                  <span
+                    style={{
+                      flexShrink: 0,
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: 5,
+                      padding: '3px 8px',
+                      borderRadius: 'var(--sm-radius-pill)',
+                      fontSize: 10,
+                      fontWeight: 700,
+                      letterSpacing: '0.05em',
+                      color: '#22c55e',
+                      border: '1px solid rgba(34, 197, 94, 0.4)',
+                      background: 'rgba(34, 197, 94, 0.12)',
+                    }}
+                  >
+                    <span style={{ width: 5, height: 5, borderRadius: '50%', background: '#22c55e' }} />
+                    LIVE
+                  </span>
+                )}
               </a>
             ))}
           </div>

@@ -56,6 +56,8 @@ export default function AskAIWidget({ teamSlug, teamLabel }: { teamSlug: string;
           textAlign: 'center',
           textDecoration: 'none',
           borderRadius: 'var(--sm-radius-pill)',
+          backgroundColor: '#bc0000',
+          color: '#fff',
         }}
       >
         Ask Scout

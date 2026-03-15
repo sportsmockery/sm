@@ -611,7 +611,7 @@ export default async function BearsCapTrackerPage() {
           <Link
             href="/scout-ai?team=chicago-bears&q=How%20much%20cap%20space%20do%20the%20Bears%20have"
             className="btn btn-md btn-primary"
-            style={{ display: 'inline-block', textDecoration: 'none', borderRadius: 'var(--sm-radius-pill)' }}
+            style={{ display: 'inline-block', textDecoration: 'none', borderRadius: 'var(--sm-radius-pill)', backgroundColor: '#bc0000', color: '#fff' }}
           >
             Ask Scout
           </Link>

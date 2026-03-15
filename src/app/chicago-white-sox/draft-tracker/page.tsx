@@ -1,13 +1,11 @@
 import { Metadata } from 'next'
 import Link from 'next/link'
 import Image from 'next/image'
-import { Suspense } from 'react'
 import { TeamHubLayout } from '@/components/team'
 import { CHICAGO_TEAMS, fetchTeamRecord, fetchNextGame } from '@/lib/team-config'
 import { supabaseAdmin } from '@/lib/supabase-server'
-import { datalabAdmin } from '@/lib/supabase-datalab'
-import DraftTrackerTabs from './DraftTrackerTabs'
-import type { HubItem } from '@/types/hub'
+import HubUpdatesFeed from '@/components/hub/HubUpdatesFeed'
+import DraftNewsList from '@/components/hub/DraftNewsList'
 
 export const metadata: Metadata = {
   title: 'Chicago White Sox Draft Tracker & Mock Drafts 2026 | Sports Mockery',
@@ -62,20 +60,10 @@ async function getWhiteSoxPosts(limit: number = 20) {
 export default async function WhiteSoxDraftTrackerPage() {
   const team = CHICAGO_TEAMS.whitesox
 
-  const [record, nextGame, posts, hubItemsResult] = await Promise.all([
+  const [record, nextGame, posts] = await Promise.all([
     fetchTeamRecord('whitesox'),
     fetchNextGame('whitesox'),
     getWhiteSoxPosts(20),
-    datalabAdmin
-      .from('hub_items')
-      .select('*')
-      .eq('team_slug', 'chicago-white-sox')
-      .eq('hub_slug', 'draft-tracker')
-      .eq('status', 'published')
-      .order('featured', { ascending: false })
-      .order('timestamp', { ascending: false })
-      .limit(10)
-      .then(res => res.data || []) as Promise<HubItem[]>,
   ])
 
   // Filter draft-related posts
@@ -142,7 +130,7 @@ export default async function WhiteSoxDraftTrackerPage() {
         <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', marginBottom: '24px' }}>
           {[
             { label: 'Trade Rumors', href: '/chicago-white-sox/trade-rumors' },
-            { label: 'Payroll Tracker', href: '/chicago-white-sox/cap-tracker' },
+            { label: 'Luxury Tax', href: '/chicago-white-sox/cap-tracker' },
             { label: 'Depth Chart', href: '/chicago-white-sox/depth-chart' },
             { label: 'Full Roster', href: '/chicago-white-sox/roster' },
           ].map((link) => (
@@ -152,13 +140,16 @@ export default async function WhiteSoxDraftTrackerPage() {
           ))}
         </div>
 
-        {/* Tabs */}
-        <Suspense fallback={null}>
-          <DraftTrackerTabs
-            hubItems={hubItemsResult as HubItem[]}
-            displayPosts={serializedPosts}
-          />
-        </Suspense>
+        {/* Hub updates from /admin/hub (above) */}
+        <HubUpdatesFeed
+          hubSlug="draft-tracker"
+          teamSlug="chicago-white-sox"
+          title="Draft Intel"
+          emptyState="No draft updates yet."
+        />
+
+        {/* Latest draft news (below) */}
+        <DraftNewsList posts={serializedPosts} teamSlug="chicago-white-sox" />
 
         {/* Ask Scout CTA */}
         <div
@@ -185,7 +176,7 @@ export default async function WhiteSoxDraftTrackerPage() {
           <Link
             href="/scout-ai?team=chicago-white-sox&q=What%20should%20the%20White%20Sox%20do%20in%20the%202026%20draft"
             className="btn btn-md btn-primary"
-            style={{ display: 'inline-block', textDecoration: 'none', borderRadius: 'var(--sm-radius-pill)' }}
+            style={{ display: 'inline-block', textDecoration: 'none', borderRadius: 'var(--sm-radius-pill)', backgroundColor: '#bc0000', color: '#fff' }}
           >
             Ask Scout
           </Link>

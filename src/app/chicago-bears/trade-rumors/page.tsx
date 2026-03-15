@@ -126,7 +126,7 @@ export default async function BearsTradeRumorsPage() {
           }}
         >
           {[
-            { label: 'Cap Tracker', href: '/chicago-bears/cap-tracker' },
+            { label: 'Salary Cap', href: '/chicago-bears/cap-tracker' },
             { label: 'Draft Tracker', href: '/chicago-bears/draft-tracker' },
             { label: 'Depth Chart', href: '/chicago-bears/depth-chart' },
             { label: 'Full Roster', href: '/chicago-bears/roster' },
@@ -306,6 +306,8 @@ export default async function BearsTradeRumorsPage() {
               display: 'inline-block',
               textDecoration: 'none',
               borderRadius: 'var(--sm-radius-pill)',
+              backgroundColor: '#bc0000',
+              color: '#fff',
             }}
           >
             Ask Scout

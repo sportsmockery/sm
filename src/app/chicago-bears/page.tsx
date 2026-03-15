@@ -1,12 +1,11 @@
 import { Metadata } from 'next'
 import { TeamHubLayout, ToolGrid, QuickStats } from '@/components/team'
-import { SectionHeader, ArticleCard, AskAIWidget, FanChatWidget } from '@/components/team/shared'
+import { SectionHeader, ArticleCard } from '@/components/team/shared'
 import {
   BearsSeasonCard,
   BearsRosterHighlights,
   BearsTrendingTopics,
 } from '@/components/bears'
-import ARTourButton from '@/components/ar/ARTourButton'
 import { CHICAGO_TEAMS, fetchTeamRecord, fetchNextGame, fetchLastGame } from '@/lib/team-config'
 import {
   getBearsSeasonOverview,
@@ -80,12 +79,12 @@ export default async function BearsHubPage() {
         style={{
           display: 'grid',
           gridTemplateColumns: '1fr',
-          gap: '48px',
+          gap: '24px',
           maxWidth: '1320px',
           margin: '0 auto',
         }}
       >
-        {/* Tool Grid */}
+        {/* Tool Grid - 4 cards in one row */}
         <ToolGrid teamSlug="chicago-bears" accentColor="#C83200" secondaryColor="#0B162A" />
 
         {/* Responsive 2-column at lg */}
@@ -127,10 +126,6 @@ export default async function BearsHubPage() {
                 </div>
               </section>
             )}
-
-            {/* Ask AI & Fan Chat - in main column */}
-            <AskAIWidget teamSlug="chicago-bears" teamLabel="Bears" />
-            <FanChatWidget teamLabel="Bears" channel="bears" />
           </div>
 
           {/* Right Column: Sidebar */}
@@ -147,9 +142,6 @@ export default async function BearsHubPage() {
             {keyPlayers && keyPlayers.length > 0 && (
               <BearsRosterHighlights players={keyPlayers} />
             )}
-
-            {/* AR Stadium Tour */}
-            <ARTourButton team="chicago-bears" />
 
             {/* Trending Topics */}
             {trends && trends.length > 0 && (

@@ -62,6 +62,7 @@ export default function TeamSeasonCard({
       className={`rounded-xl overflow-hidden ${className}`}
       style={{
         background: `linear-gradient(135deg, ${team.primaryColor} 0%, #1a2940 100%)`,
+        color: '#FAFAFB',
       }}
     >
       {/* Header */}
@@ -78,18 +79,16 @@ export default function TeamSeasonCard({
               />
             </div>
             <div>
-              <h3
-                className="text-white text-lg font-bold"
-               
-              >
+              <h3 className="text-lg font-bold" style={{ color: '#FAFAFB' }}>
                 {season.season} Season
               </h3>
-              <p className="text-white/60 text-sm">{standing}</p>
+              <p className="text-sm" style={{ color: 'rgba(255,255,255,0.7)' }}>{standing}</p>
             </div>
           </div>
           <Link
             href={`/${team.categorySlug}/schedule`}
-            className="text-sm text-white/70 hover:text-white transition-colors"
+            className="text-sm transition-colors hover:opacity-100"
+            style={{ color: 'rgba(255,255,255,0.85)' }}
           >
             Full Schedule
           </Link>
@@ -101,41 +100,26 @@ export default function TeamSeasonCard({
         <div className="flex items-center justify-center gap-8">
           {/* Wins */}
           <div className="text-center">
-            <div
-              className="text-5xl font-black text-white"
-             
-            >
-              {record.wins}
-            </div>
-            <div className="text-white/60 text-sm uppercase tracking-wide mt-1">Wins</div>
+            <div className="text-5xl font-black" style={{ color: '#FAFAFB' }}>{record.wins}</div>
+            <div className="text-sm uppercase tracking-wide mt-1" style={{ color: 'rgba(255,255,255,0.7)' }}>Wins</div>
           </div>
 
           {/* Divider */}
-          <div className="text-white/30 text-4xl font-light">-</div>
+          <div className="text-4xl font-light" style={{ color: 'rgba(255,255,255,0.4)' }}>-</div>
 
           {/* Losses */}
           <div className="text-center">
-            <div
-              className="text-5xl font-black text-white"
-             
-            >
-              {record.losses}
-            </div>
-            <div className="text-white/60 text-sm uppercase tracking-wide mt-1">Losses</div>
+            <div className="text-5xl font-black" style={{ color: '#FAFAFB' }}>{record.losses}</div>
+            <div className="text-sm uppercase tracking-wide mt-1" style={{ color: 'rgba(255,255,255,0.7)' }}>Losses</div>
           </div>
 
           {/* OT Losses or Ties (if applicable) */}
           {(record.otLosses !== undefined || (record.ties && record.ties > 0)) && (
             <>
-              <div className="text-white/30 text-4xl font-light">-</div>
+              <div className="text-4xl font-light" style={{ color: 'rgba(255,255,255,0.4)' }}>-</div>
               <div className="text-center">
-                <div
-                  className="text-5xl font-black text-white"
-                 
-                >
-                  {record.otLosses ?? record.ties}
-                </div>
-                <div className="text-white/60 text-sm uppercase tracking-wide mt-1">
+                <div className="text-5xl font-black" style={{ color: '#FAFAFB' }}>{record.otLosses ?? record.ties}</div>
+                <div className="text-sm uppercase tracking-wide mt-1" style={{ color: 'rgba(255,255,255,0.7)' }}>
                   {record.otLosses !== undefined ? 'OT' : 'Ties'}
                 </div>
               </div>
@@ -144,13 +128,8 @@ export default function TeamSeasonCard({
 
           {/* Win % */}
           <div className="text-center border-l border-white/10 pl-8">
-            <div
-              className="text-3xl font-bold text-white/80"
-             
-            >
-              {winPct}%
-            </div>
-            <div className="text-white/60 text-sm uppercase tracking-wide mt-1">Win %</div>
+            <div className="text-3xl font-bold" style={{ color: 'rgba(255,255,255,0.9)' }}>{winPct}%</div>
+            <div className="text-sm uppercase tracking-wide mt-1" style={{ color: 'rgba(255,255,255,0.7)' }}>Win %</div>
           </div>
         </div>
       </div>
@@ -159,7 +138,7 @@ export default function TeamSeasonCard({
       <div className="grid grid-cols-2 border-t border-white/10">
         {/* Next game */}
         <div className="px-6 py-4 border-r border-white/10">
-          <div className="text-white/50 text-xs uppercase tracking-wide mb-2">Next Game</div>
+          <div className="text-xs uppercase tracking-wide mb-2" style={{ color: 'rgba(255,255,255,0.6)' }}>Next Game</div>
           {nextGame ? (
             <div>
               <div className="flex items-center gap-2">
@@ -172,25 +151,22 @@ export default function TeamSeasonCard({
                     className="w-5 h-5"
                   />
                 )}
-                <span
-                  className="text-white font-bold"
-                 
-                >
+                <span className="font-bold" style={{ color: '#FAFAFB' }}>
                   {nextGame.isHome ? 'vs' : '@'} {nextGame.opponent}
                 </span>
               </div>
-              <div className="text-white/60 text-sm mt-1">
+              <div className="text-sm mt-1" style={{ color: 'rgba(255,255,255,0.8)' }}>
                 {nextGame.date} {nextGame.time && `• ${nextGame.time}`}
               </div>
             </div>
           ) : (
-            <div className="text-white/50">Offseason</div>
+            <div style={{ color: 'rgba(255,255,255,0.6)' }}>Offseason</div>
           )}
         </div>
 
         {/* Last game */}
         <div className="px-6 py-4">
-          <div className="text-white/50 text-xs uppercase tracking-wide mb-2">Last Game</div>
+          <div className="text-xs uppercase tracking-wide mb-2" style={{ color: 'rgba(255,255,255,0.6)' }}>Last Game</div>
           {lastGame && lastGame.result ? (
             <div>
               <div className="flex items-center gap-2">
@@ -205,17 +181,12 @@ export default function TeamSeasonCard({
                 >
                   {lastGame.result}
                 </span>
-                <span
-                  className="text-white font-bold"
-                 
-                >
-                  {lastGame.opponent}
-                </span>
+                <span className="font-bold" style={{ color: '#FAFAFB' }}>{lastGame.opponent}</span>
               </div>
-              <div className="text-white/60 text-sm mt-1">{lastGame.score}</div>
+              <div className="text-sm mt-1" style={{ color: 'rgba(255,255,255,0.8)' }}>{lastGame.score}</div>
             </div>
           ) : (
-            <div className="text-white/50">No recent games</div>
+            <div style={{ color: 'rgba(255,255,255,0.6)' }}>No recent games</div>
           )}
         </div>
       </div>
@@ -225,19 +196,22 @@ export default function TeamSeasonCard({
         <div className="flex items-center gap-4">
           <Link
             href={`/${team.categorySlug}/roster`}
-            className="text-sm text-white/70 hover:text-white transition-colors"
+            className="text-sm transition-colors hover:opacity-100"
+            style={{ color: 'rgba(255,255,255,0.85)' }}
           >
             Roster
           </Link>
           <Link
             href={`/${team.categorySlug}/stats`}
-            className="text-sm text-white/70 hover:text-white transition-colors"
+            className="text-sm transition-colors hover:opacity-100"
+            style={{ color: 'rgba(255,255,255,0.85)' }}
           >
             Stats
           </Link>
           <Link
             href={`/${team.categorySlug}/standings`}
-            className="text-sm text-white/70 hover:text-white transition-colors"
+            className="text-sm transition-colors hover:opacity-100"
+            style={{ color: 'rgba(255,255,255,0.85)' }}
           >
             Standings
           </Link>

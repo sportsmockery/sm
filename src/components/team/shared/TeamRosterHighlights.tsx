@@ -73,7 +73,7 @@ export default function TeamRosterHighlights({
 
             {/* Player info */}
             <div className="flex-1 min-w-0">
-              <h4 className="text-[13px] font-bold text-[#222] dark:text-white group-hover:text-[#bc0000] transition-colors truncate">
+              <h4 className="font-bold text-[#222] dark:text-white group-hover:text-[#bc0000] transition-colors truncate" style={{ fontSize: 12 }}>
                 {player.name}
               </h4>
               <p className="text-[11px] text-gray-500 dark:text-gray-400">
@@ -86,7 +86,7 @@ export default function TeamRosterHighlights({
               const [label, value] = Object.entries(player.stats!)[0]
               return (
                 <div className="text-right">
-                  <div className="text-[15px] font-bold text-[#222] dark:text-white">
+                  <div className="font-bold text-[#222] dark:text-white" style={{ fontSize: 12 }}>
                     {typeof value === 'number' ? value.toLocaleString() : value}
                   </div>
                   <div className="text-[9px] text-gray-400 uppercase">

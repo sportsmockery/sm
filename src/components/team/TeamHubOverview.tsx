@@ -51,7 +51,6 @@ interface TeamHubOverviewProps {
   nextGame?: NextGameInfo | null
   posts: TeamPost[]
   seasonStats?: SeasonStats
-  arEnabled?: boolean
 }
 
 export default function TeamHubOverview({
@@ -60,7 +59,6 @@ export default function TeamHubOverview({
   nextGame,
   posts,
   seasonStats,
-  arEnabled = true,
 }: TeamHubOverviewProps) {
   return (
     <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-8">
@@ -176,9 +174,6 @@ export default function TeamHubOverview({
 
         {/* Fan Chat Widget */}
         <FanChatWidget team={team} />
-
-        {/* AR Experience - if enabled */}
-        {arEnabled && <ARExperienceWidget team={team} />}
       </div>
     </div>
   )
@@ -506,7 +501,7 @@ function AskAIWidget({ team }: { team: TeamInfo }) {
       <Link
         href={`/scout-ai?team=${team.slug}`}
         className="block w-full text-center py-2.5 rounded-lg font-semibold text-sm transition-colors text-white"
-        style={{ backgroundColor: 'var(--sm-red)' }}
+        style={{ backgroundColor: '#bc0000' }}
       >
         Ask Scout
       </Link>
@@ -583,50 +578,6 @@ function FanChatWidget({ team }: { team: TeamInfo }) {
       >
         Join Chat
       </Link>
-    </div>
-  )
-}
-
-// AR Experience Widget
-function ARExperienceWidget({ team }: { team: TeamInfo }) {
-  return (
-    <div
-      className="glass-card glass-card-static"
-      style={{ overflow: 'hidden', padding: 0 }}
-    >
-      <div
-        className="p-5"
-        style={{
-          background: 'var(--sm-gradient-subtle)',
-        }}
-      >
-        <div className="flex items-center gap-3 mb-3">
-          <div className="w-10 h-10 rounded-full bg-white/20 flex items-center justify-center">
-            <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
-            </svg>
-          </div>
-          <div>
-            <h3 className="font-bold text-white">
-              AR Stadium Tour
-            </h3>
-            <p className="text-xs text-white/70">
-              Immersive experience
-            </p>
-          </div>
-        </div>
-
-        <p className="text-sm text-white/80 mb-4">
-          Explore the stadium in augmented reality.
-        </p>
-
-        <Link
-          href={`/ar-vr?team=${team.slug}`}
-          className="block w-full text-center py-2.5 rounded-lg font-semibold text-sm transition-colors bg-white/20 text-white hover:bg-white/30"
-        >
-          Launch AR Tour
-        </Link>
-      </div>
     </div>
   )
 }

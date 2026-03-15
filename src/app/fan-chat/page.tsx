@@ -81,6 +81,15 @@ const channels = [
   },
 ]
 
+const CHANNEL_FAN_LABEL: Record<string, string> = {
+  global: 'Chicago',
+  bears: 'Bears',
+  bulls: 'Bulls',
+  cubs: 'Cubs',
+  whitesox: 'White Sox',
+  blackhawks: 'Blackhawks',
+}
+
 // Get initial welcome messages for a channel
 function getWelcomeMessages(channelId: string): ChatMessage[] {
   const personality = AI_PERSONALITIES[channelId] || AI_PERSONALITIES.bears
@@ -218,9 +227,28 @@ export default function FanChatPage() {
   }, [activeChannel])
 
   // Track number of authenticated users online
-  // In demo mode, this is 1 (just the current user)
-  // In production with ChatContext/presence tracking, this would be the real count
   const [authenticatedUsersOnline, setAuthenticatedUsersOnline] = useState(1)
+
+  // Per-channel online counts for left sidebar ("X Bears Fans Online"). Start at 1 so text is always visible (AI + you).
+  const [onlineCounts, setOnlineCounts] = useState<Record<string, number>>(() => ({
+    global: 1, bears: 1, bulls: 1, cubs: 1, whitesox: 1, blackhawks: 1,
+  }))
+  useEffect(() => {
+    const fetchCounts = async () => {
+      try {
+        const res = await fetch('/api/fan-chat/online-counts')
+        if (res.ok) {
+          const data = await res.json()
+          setOnlineCounts(data)
+        }
+      } catch {
+        // Keep existing (at least 1 per channel)
+      }
+    }
+    fetchCounts()
+    const interval = setInterval(fetchCounts, 30_000)
+    return () => clearInterval(interval)
+  }, [])
 
   // Handle sending a message
   const handleSendMessage = useCallback(async () => {
@@ -360,29 +388,24 @@ export default function FanChatPage() {
                       )}
                     </div>
 
-                    {/* Info */}
+                    {/* Info - channel name + fans online */}
                     <div className="flex-1 text-left min-w-0">
-                      <div className="flex items-center gap-2">
-                        <span
-                          className="font-semibold text-sm truncate"
-                          style={{ color: activeChannel === channel.id ? 'var(--sm-red)' : 'var(--sm-text)' }}
-                        >
-                          {channel.name}
-                        </span>
-                        {channel.isLive && (
-                          <span className="sm-tag" style={{ background: 'rgba(34,197,94,0.15)', color: 'var(--sm-success)', borderColor: 'transparent', fontSize: 10, padding: '2px 6px' }}>
-                            <span style={{ width: 6, height: 6, borderRadius: '50%', backgroundColor: 'var(--sm-success)', display: 'inline-block', marginRight: 4, animation: 'pulse 2s infinite' }} />
-                            LIVE
-                          </span>
-                        )}
-                      </div>
-                      <p className="text-xs truncate" style={{ color: 'var(--sm-text-muted)' }}>
-                        {channel.aiPersonality} is here
+                      <span
+                        className="font-semibold text-sm truncate block"
+                        style={{ color: activeChannel === channel.id ? 'var(--sm-red)' : 'var(--sm-text)' }}
+                      >
+                        {channel.name}
+                      </span>
+                      <p className="text-xs truncate mt-0.5" style={{ color: 'var(--sm-text-muted)' }}>
+                        {Math.max(1, (onlineCounts[channel.id] ?? 1) + (activeChannel === channel.id ? 1 : 0))} {CHANNEL_FAN_LABEL[channel.id] ?? channel.id} Fans Online
                       </p>
                     </div>
 
-                    {/* Online indicator for AI */}
-                    <span className="w-2 h-2 bg-green-500 rounded-full flex-shrink-0" title={`${channel.aiPersonality} is online`} />
+                    {/* Green dot + LIVE for all channels */}
+                    <span className="flex items-center gap-1.5 flex-shrink-0" style={{ color: 'var(--sm-success)', fontSize: 11, fontWeight: 500 }}>
+                      <span className="w-2 h-2 bg-green-500 rounded-full" title="Live" />
+                      LIVE
+                    </span>
                   </button>
                 ))}
               </div>
@@ -438,27 +461,22 @@ export default function FanChatPage() {
                     </div>
                   )}
                   <div>
-                    <h2 className="font-bold text-white" style={{ fontFamily: 'var(--sm-font-heading)' }}>
+                    <h2
+                      className="font-bold"
+                      style={{
+                        fontFamily: 'var(--sm-font-heading)',
+                        color: currentChannel.id === 'bears' ? '#CC5500' : 'white',
+                      }}
+                    >
                       {currentChannel.name}
                     </h2>
-                    <p className="text-xs text-white/70">
-                      {currentChannel.aiPersonality} is online
-                    </p>
                   </div>
                 </div>
 
-                <div className="flex items-center gap-2">
-                  {currentChannel.isLive && (
-                    <span className="flex items-center gap-2 px-3 py-1 bg-white/20 rounded-full text-white text-sm">
-                      <span className="w-2 h-2 bg-green-400 rounded-full animate-pulse" />
-                      Live
-                    </span>
-                  )}
-                  <span className="flex items-center gap-1.5 text-white/70 text-sm">
-                    <span className="w-2 h-2 bg-green-500 rounded-full" />
-                    {personality?.username || currentChannel.aiPersonality} online
-                  </span>
-                </div>
+                <span className="flex items-center gap-2 px-3 py-1.5 rounded-full text-sm font-medium flex-shrink-0" style={{ background: 'rgba(34,197,94,0.2)', color: 'var(--sm-success)' }}>
+                  <span className="w-2 h-2 bg-green-500 rounded-full" />
+                  LIVE
+                </span>
               </div>
 
               {/* Messages Area - content at top, no icon */}
@@ -467,19 +485,10 @@ export default function FanChatPage() {
                 <div className="pb-4 mb-4" style={{ borderBottom: '1px solid var(--sm-border)' }}>
                   <h3
                     className="font-bold text-base"
-                    style={{ fontFamily: 'var(--sm-font-heading)', color: 'var(--sm-text)', marginBottom: 4 }}
+                    style={{ fontFamily: 'var(--sm-font-heading)', color: 'var(--sm-text)' }}
                   >
                     Welcome to {currentChannel.name}
                   </h3>
-                  <p className="text-sm" style={{ color: 'var(--sm-text-muted)' }}>
-                    Chat with {currentChannel.aiPersonality} and other fans. Be respectful and have fun!
-                    {personality && (
-                      <span className="inline-flex items-center gap-1.5 ml-2">
-                        <span className="w-1.5 h-1.5 bg-green-500 rounded-full animate-pulse" />
-                        {personality.username} is here
-                      </span>
-                    )}
-                  </p>
                 </div>
 
                 {/* Messages */}

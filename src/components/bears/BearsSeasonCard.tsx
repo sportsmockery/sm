@@ -1,6 +1,7 @@
 'use client'
 
 import Link from 'next/link'
+import Image from 'next/image'
 import { BearsSeasonOverview, TEAM_INFO } from '@/lib/types'
 
 interface BearsSeasonCardProps {
@@ -28,31 +29,33 @@ export default function BearsSeasonCard({
       className={`rounded-xl overflow-hidden ${className}`}
       style={{
         background: `linear-gradient(135deg, ${bearsInfo.primaryColor} 0%, #1a2940 100%)`,
+        color: '#FAFAFB',
       }}
     >
       {/* Header */}
       <div className="px-6 py-4 border-b border-white/10">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div
-              className="w-12 h-12 rounded-full flex items-center justify-center text-white font-black text-xl"
-              style={{ backgroundColor: bearsInfo.secondaryColor }}
-            >
-              B
+            <div className="relative w-10 h-10 rounded-full flex items-center justify-center overflow-hidden bg-white/10 shrink-0">
+              <Image
+                src={bearsInfo.logoUrl}
+                alt={bearsInfo.name}
+                width={40}
+                height={40}
+                className="object-contain w-full h-full"
+              />
             </div>
             <div>
-              <h3
-                className="text-white text-lg font-bold"
-               
-              >
+              <h3 className="text-lg font-bold" style={{ color: '#FAFAFB' }}>
                 {season.season} Season
               </h3>
-              <p className="text-white/60 text-sm">{standing}</p>
+              <p className="text-sm" style={{ color: 'rgba(255,255,255,0.7)' }}>{standing}</p>
             </div>
           </div>
           <Link
             href="/chicago-bears/schedule"
-            className="text-sm text-white/70 hover:text-white transition-colors"
+            className="text-sm transition-colors hover:opacity-100"
+            style={{ color: 'rgba(255,255,255,0.85)' }}
           >
             Full Schedule →
           </Link>
@@ -64,38 +67,23 @@ export default function BearsSeasonCard({
         <div className="flex items-center justify-center gap-8">
           {/* Wins */}
           <div className="text-center">
-            <div
-              className="text-5xl font-black text-white"
-             
-            >
-              {record.wins}
-            </div>
-            <div className="text-white/60 text-sm uppercase tracking-wide mt-1">Wins</div>
+            <div className="text-5xl font-black" style={{ color: '#FAFAFB' }}>{record.wins}</div>
+            <div className="text-sm uppercase tracking-wide mt-1" style={{ color: 'rgba(255,255,255,0.7)' }}>Wins</div>
           </div>
 
           {/* Divider */}
-          <div className="text-white/30 text-4xl font-light">-</div>
+          <div className="text-4xl font-light" style={{ color: 'rgba(255,255,255,0.4)' }}>-</div>
 
           {/* Losses */}
           <div className="text-center">
-            <div
-              className="text-5xl font-black text-white"
-             
-            >
-              {record.losses}
-            </div>
-            <div className="text-white/60 text-sm uppercase tracking-wide mt-1">Losses</div>
+            <div className="text-5xl font-black" style={{ color: '#FAFAFB' }}>{record.losses}</div>
+            <div className="text-sm uppercase tracking-wide mt-1" style={{ color: 'rgba(255,255,255,0.7)' }}>Losses</div>
           </div>
 
           {/* Win % */}
           <div className="text-center border-l border-white/10 pl-8">
-            <div
-              className="text-3xl font-bold text-white/80"
-             
-            >
-              {winPct}%
-            </div>
-            <div className="text-white/60 text-sm uppercase tracking-wide mt-1">Win %</div>
+            <div className="text-3xl font-bold" style={{ color: 'rgba(255,255,255,0.9)' }}>{winPct}%</div>
+            <div className="text-sm uppercase tracking-wide mt-1" style={{ color: 'rgba(255,255,255,0.7)' }}>Win %</div>
           </div>
         </div>
       </div>
@@ -104,18 +92,15 @@ export default function BearsSeasonCard({
       <div className="grid grid-cols-2 border-t border-white/10">
         {/* Next game */}
         <div className="px-6 py-4 border-r border-white/10">
-          <div className="text-white/50 text-xs uppercase tracking-wide mb-2">Next Game</div>
+          <div className="text-xs uppercase tracking-wide mb-2" style={{ color: 'rgba(255,255,255,0.6)' }}>Next Game</div>
           {nextGame ? (
             <div>
               <div className="flex items-center gap-2">
-                <span
-                  className="text-white font-bold"
-                 
-                >
+                <span className="font-bold" style={{ color: '#FAFAFB' }}>
                   {nextGame.isHome ? 'vs' : '@'} {nextGame.opponent}
                 </span>
               </div>
-              <div className="text-white/60 text-sm mt-1">
+              <div className="text-sm mt-1" style={{ color: 'rgba(255,255,255,0.8)' }}>
                 {new Date(nextGame.date).toLocaleDateString('en-US', {
                   weekday: 'short',
                   month: 'short',
@@ -126,13 +111,13 @@ export default function BearsSeasonCard({
               </div>
             </div>
           ) : (
-            <div className="text-white/50">Offseason</div>
+            <div style={{ color: 'rgba(255,255,255,0.6)' }}>Offseason</div>
           )}
         </div>
 
         {/* Last game */}
         <div className="px-6 py-4">
-          <div className="text-white/50 text-xs uppercase tracking-wide mb-2">Last Game</div>
+          <div className="text-xs uppercase tracking-wide mb-2" style={{ color: 'rgba(255,255,255,0.6)' }}>Last Game</div>
           {lastGame ? (
             <div>
               <div className="flex items-center gap-2">
@@ -147,17 +132,12 @@ export default function BearsSeasonCard({
                 >
                   {lastGame.result}
                 </span>
-                <span
-                  className="text-white font-bold"
-                 
-                >
-                  {lastGame.opponent}
-                </span>
+                <span className="font-bold" style={{ color: '#FAFAFB' }}>{lastGame.opponent}</span>
               </div>
-              <div className="text-white/60 text-sm mt-1">{lastGame.score}</div>
+              <div className="text-sm mt-1" style={{ color: 'rgba(255,255,255,0.8)' }}>{lastGame.score}</div>
             </div>
           ) : (
-            <div className="text-white/50">No recent games</div>
+            <div style={{ color: 'rgba(255,255,255,0.6)' }}>No recent games</div>
           )}
         </div>
       </div>
@@ -167,19 +147,22 @@ export default function BearsSeasonCard({
         <div className="flex items-center gap-4">
           <Link
             href="/chicago-bears/roster"
-            className="text-sm text-white/70 hover:text-white transition-colors"
+            className="text-sm transition-colors hover:opacity-100"
+            style={{ color: 'rgba(255,255,255,0.85)' }}
           >
             Roster
           </Link>
           <Link
             href="/chicago-bears/stats"
-            className="text-sm text-white/70 hover:text-white transition-colors"
+            className="text-sm transition-colors hover:opacity-100"
+            style={{ color: 'rgba(255,255,255,0.85)' }}
           >
             Stats
           </Link>
           <Link
             href="/chicago-bears/schedule"
-            className="text-sm text-white/70 hover:text-white transition-colors"
+            className="text-sm transition-colors hover:opacity-100"
+            style={{ color: 'rgba(255,255,255,0.85)' }}
           >
             Schedule
           </Link>

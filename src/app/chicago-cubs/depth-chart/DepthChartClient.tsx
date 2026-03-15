@@ -171,7 +171,7 @@ export default function DepthChartClient({
         {[
           { label: 'Trade Rumors', href: '/chicago-cubs/trade-rumors' },
           { label: 'Draft Tracker', href: '/chicago-cubs/draft-tracker' },
-          { label: 'Payroll Tracker', href: '/chicago-cubs/cap-tracker' },
+          { label: 'Luxury Tax', href: '/chicago-cubs/cap-tracker' },
           { label: 'Full Roster', href: '/chicago-cubs/roster' },
         ].map((link) => (
           <Link key={link.label} href={link.href} className="team-pill">

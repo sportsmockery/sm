@@ -149,7 +149,7 @@ export default async function WhiteSoxTradeRumorsPage() {
           }}
         >
           {[
-            { label: 'Payroll Tracker', href: '/chicago-white-sox/cap-tracker' },
+            { label: 'Luxury Tax', href: '/chicago-white-sox/cap-tracker' },
             { label: 'Draft Tracker', href: '/chicago-white-sox/draft-tracker' },
             { label: 'Depth Chart', href: '/chicago-white-sox/depth-chart' },
             { label: 'Full Roster', href: '/chicago-white-sox/roster' },
@@ -329,6 +329,8 @@ export default async function WhiteSoxTradeRumorsPage() {
               display: 'inline-block',
               textDecoration: 'none',
               borderRadius: 'var(--sm-radius-pill)',
+              backgroundColor: '#bc0000',
+              color: '#fff',
             }}
           >
             Ask Scout
