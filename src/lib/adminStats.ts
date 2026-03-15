@@ -90,7 +90,7 @@ export async function getTotalViews(): Promise<number> {
     return 0
   }
 
-  return data?.reduce((sum, post) => sum + (post.views || 0), 0) || 0
+  return data?.reduce((sum: number, post: any) => sum + (post.views || 0), 0) || 0
 }
 
 /**
