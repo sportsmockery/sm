@@ -4,8 +4,9 @@ import { useState, useEffect, useRef } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
 import { usePathname } from 'next/navigation'
+import { useAuth } from '@/contexts/AuthContext'
 import { homepageTeams } from '@/lib/homepage-team-data'
-import { ArrowRightLeft, ClipboardPen, MessageSquare, BarChart3, Video, Volume2 } from 'lucide-react'
+import { ArrowRightLeft, ClipboardPen, MessageSquare, BarChart3, Video, Volume2, MoreVertical } from 'lucide-react'
 
 interface NavItem {
   name: string
@@ -119,6 +120,7 @@ function NavSection({ label, items, isActive }: { label: string; items: NavItem[
 
 export default function AppSidebar() {
   const pathname = usePathname()
+  const { user, isAuthenticated } = useAuth()
   const [mobileOpen, setMobileOpen] = useState(false)
   const sidebarRef = useRef<HTMLDivElement>(null)
 
@@ -256,6 +258,77 @@ export default function AppSidebar() {
           </div>
         </div>
       </div>
+
+      {/* User profile — bottom of sidebar, under Hands-Free Audio */}
+      {isAuthenticated && user && (
+        <div
+          style={{
+            flexShrink: 0,
+            marginTop: 'auto',
+            padding: '12px 8px 16px',
+            borderTop: '1px solid var(--sm-border)',
+          }}
+        >
+          <Link
+            href="/profile"
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: 10,
+              padding: '8px 10px',
+              borderRadius: 12,
+              background: 'var(--sm-surface)',
+              border: '1px solid var(--sm-border)',
+              textDecoration: 'none',
+            }}
+          >
+            <div
+              style={{
+                width: 36,
+                height: 36,
+                borderRadius: '50%',
+                overflow: 'hidden',
+                flexShrink: 0,
+                background: 'var(--sm-card)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+              }}
+            >
+              {user.avatar ? (
+                <Image
+                  src={user.avatar}
+                  alt=""
+                  width={36}
+                  height={36}
+                  style={{ width: 36, height: 36, objectFit: 'cover' }}
+                />
+              ) : (
+                <span style={{ fontSize: 14, fontWeight: 600, color: 'var(--sm-text-muted)' }}>
+                  {(user.name || user.email || '?').charAt(0).toUpperCase()}
+                </span>
+              )}
+            </div>
+            <span
+              className="truncate"
+              style={{
+                flex: 1,
+                minWidth: 0,
+                fontSize: 13,
+                fontWeight: 500,
+                color: 'var(--sm-text)',
+              }}
+            >
+              {user.name || user.email?.split('@')[0] || 'Profile'}
+            </span>
+            <MoreVertical
+              size={18}
+              style={{ flexShrink: 0, color: 'var(--sm-text-muted)' }}
+              aria-hidden
+            />
+          </Link>
+        </div>
+      )}
     </>
   )
 

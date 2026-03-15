@@ -44,12 +44,6 @@ const suggestedPrompts = [
   "White Sox trade deadline moves",
 ]
 
-const capabilities = [
-  { icon: 'M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z', title: 'Stats & Analysis', desc: 'Compare players, advanced metrics, season stats' },
-  { icon: 'M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9a2 2 0 00-2-2h-2m-4-3H9M7 16h6M7 8h6v4H7V8z', title: 'News & Updates', desc: 'Latest moves, trades, injuries, and rumors' },
-  { icon: 'M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z', title: 'Schedules & History', desc: 'Game results, upcoming matchups, team history' },
-]
-
 export default function AskAIPage() {
   const [messages, setMessages] = useState<Message[]>([])
   const [input, setInput] = useState('')
@@ -398,32 +392,18 @@ export default function AskAIPage() {
       `}</style>
       <div className="sm-hero-bg scout-ai-main" style={{ minHeight: '100vh' }}>
         <div className="sm-grid-overlay" />
-        <div style={{ maxWidth: 'var(--sm-max-width)', margin: '0 auto', padding: '32px 16px', position: 'relative', zIndex: 1 }}>
+        <div style={{ maxWidth: 'min(1600px, 100vw - 32px)', margin: '0 auto', padding: '24px 16px', position: 'relative', zIndex: 1 }}>
 
-          {/* Feature capability cards - 3 column grid */}
-          {messages.length === 0 && (
-            <div className="homepage-skeleton-grid" style={{ marginBottom: 24 }}>
-              {capabilities.map((cap) => (
-                <div key={cap.title} className="glass-card glass-card-sm" style={{ textAlign: 'center' }}>
-                  <div style={{
-                    width: 40, height: 40, borderRadius: 'var(--sm-radius-sm)', background: 'var(--sm-gradient-subtle)',
-                    display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 12px',
-                  }}>
-                    <svg width="20" height="20" fill="none" stroke="var(--sm-red)" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d={cap.icon} />
-                    </svg>
-                  </div>
-                  <h3 style={{ fontFamily: 'var(--sm-font-heading)', fontSize: 14, fontWeight: 600, color: 'var(--sm-text)', marginBottom: 4 }}>{cap.title}</h3>
-                  <p style={{ fontSize: 12, color: 'var(--sm-text-muted)', lineHeight: 1.4 }}>{cap.desc}</p>
-                </div>
-              ))}
-            </div>
-          )}
-
-          <div style={{ display: 'grid', gridTemplateColumns: '280px 1fr', gap: 24 }}>
-            {/* Left Sidebar */}
+          <div style={{ display: 'grid', gridTemplateColumns: 'minmax(260px, 280px) 1fr', gap: 24, alignItems: 'start' }}>
+            {/* Left Sidebar - same height as main box, top-aligned */}
             <div>
-              <div className="glass-card glass-card-static" style={{ position: 'sticky', top: 96 }}>
+              <div className="glass-card glass-card-static" style={{
+                minHeight: 'calc(100vh - 120px)',
+                display: 'flex',
+                flexDirection: 'column',
+                position: 'sticky',
+                top: 96,
+              }}>
                 {/* Logo/Icon and Title */}
                 <div style={{ display: 'flex', alignItems: 'center', gap: 16, marginBottom: 16 }}>
                   <div style={{
@@ -465,8 +445,8 @@ export default function AskAIPage() {
                   </div>
                 </div>
 
-                {/* Query History Section */}
-                <div style={{ marginTop: 24, paddingTop: 24, borderTop: '1px solid var(--sm-border)' }}>
+                {/* Query History Section - pushed to bottom when card is tall */}
+                <div style={{ marginTop: 'auto', paddingTop: 24, borderTop: '1px solid var(--sm-border)' }}>
                   <button
                     onClick={() => setShowHistory(!showHistory)}
                     style={{
@@ -539,7 +519,7 @@ export default function AskAIPage() {
             <div>
               <div className="glass-card glass-card-static" style={{
                 padding: 0, overflow: 'hidden', display: 'flex', flexDirection: 'column',
-                minHeight: 'calc(100vh - 200px)', maxHeight: 'calc(100vh - 200px)',
+                minHeight: 'calc(100vh - 120px)', maxHeight: 'calc(100vh - 120px)',
               }}>
                 {/* Messages Area */}
                 <div ref={messagesContainerRef} style={{ flex: 1, overflowY: 'auto', padding: 24 }}>
