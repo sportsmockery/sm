@@ -148,7 +148,7 @@ export async function getRecentPosts(limit: number = 10): Promise<RecentPost[]> 
     return []
   }
 
-  return (data || []).map(post => ({
+  return (data || []).map((post: any) => ({
     ...post,
     category: Array.isArray(post.category) ? post.category[0] : post.category
   })) as unknown as RecentPost[]
