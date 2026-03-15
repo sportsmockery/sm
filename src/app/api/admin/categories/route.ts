@@ -13,7 +13,7 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json()
-    const { name, slug, description, parent_id } = body
+    const { name, slug, parent_id } = body
 
     if (!name || !slug) {
       return NextResponse.json({ error: 'Name and slug are required' }, { status: 400 })
@@ -24,7 +24,7 @@ export async function POST(request: NextRequest) {
       .from('sm_categories')
       .select('id')
       .eq('slug', slug)
-      .single()
+      .maybeSingle()
 
     if (existing) {
       return NextResponse.json({ error: 'A category with this slug already exists' }, { status: 400 })
@@ -35,7 +35,6 @@ export async function POST(request: NextRequest) {
       .insert({
         name,
         slug,
-        description: description || '',
         parent_id: parent_id || null
       })
       .select()

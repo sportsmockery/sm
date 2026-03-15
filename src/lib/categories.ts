@@ -16,7 +16,7 @@ export async function getCategories(): Promise<Category[]> {
 
   const { data, error } = await supabase
     .from('sm_categories')
-    .select('*')
+    .select('id, name, slug, parent_id, created_at, updated_at')
     .order('name', { ascending: true })
 
   if (error) throw error
@@ -30,7 +30,7 @@ export async function getCategoriesWithPostCount(): Promise<Category[]> {
   // Get categories
   const { data: categories, error: catError } = await supabase
     .from('sm_categories')
-    .select('*')
+    .select('id, name, slug, parent_id, created_at, updated_at')
     .order('name', { ascending: true })
 
   if (catError) throw catError
@@ -61,7 +61,7 @@ export async function getCategory(id: string): Promise<Category | null> {
 
   const { data, error } = await supabase
     .from('sm_categories')
-    .select('*')
+    .select('id, name, slug, parent_id, created_at, updated_at')
     .eq('id', id)
     .single()
 
@@ -78,7 +78,7 @@ export async function getCategoryBySlug(slug: string): Promise<Category | null> 
 
   const { data, error } = await supabase
     .from('sm_categories')
-    .select('*')
+    .select('id, name, slug, parent_id, created_at, updated_at')
     .eq('slug', slug)
     .single()
 
@@ -98,10 +98,9 @@ export async function createCategory(data: Partial<Category>): Promise<Category>
     .insert({
       name: data.name,
       slug: data.slug,
-      description: data.description || '',
       parent_id: data.parent_id || null
     })
-    .select()
+    .select('id, name, slug, parent_id, created_at, updated_at')
     .single()
 
   if (error) throw error
@@ -118,14 +117,13 @@ export async function updateCategory(id: string, data: Partial<Category>): Promi
 
   if (data.name !== undefined) updates.name = data.name
   if (data.slug !== undefined) updates.slug = data.slug
-  if (data.description !== undefined) updates.description = data.description
   if (data.parent_id !== undefined) updates.parent_id = data.parent_id || null
 
   const { data: category, error } = await supabase
     .from('sm_categories')
     .update(updates)
     .eq('id', id)
-    .select()
+    .select('id, name, slug, parent_id, created_at, updated_at')
     .single()
 
   if (error) throw error

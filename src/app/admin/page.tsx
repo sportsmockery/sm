@@ -16,7 +16,7 @@ import TopPostsChart from '@/components/admin/TopPostsChart'
 export default async function AdminDashboard() {
   const [postsResult, categoriesResult, authorsResult, recentPostsResult, viewsResult] = await Promise.all([
     supabaseAdmin.from('sm_posts').select('*', { count: 'exact', head: true }),
-    supabaseAdmin.from('sm_categories').select('*', { count: 'exact', head: true }),
+    supabaseAdmin.from('sm_categories').select('id', { count: 'exact', head: true }),
     supabaseAdmin.from('sm_authors').select('*', { count: 'exact', head: true }),
     supabaseAdmin
       .from('sm_posts')

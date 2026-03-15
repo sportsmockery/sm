@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef } from 'react'
 import Image from 'next/image'
-import { useRouter } from 'next/navigation'
+import { useRouter, usePathname } from 'next/navigation'
 
 const GREETINGS = [
   "Yo! What's good, Chicago? What can Scout dig up for you?",
@@ -14,6 +14,7 @@ const GREETINGS = [
 
 export default function ScrollToTop() {
   const router = useRouter()
+  const pathname = usePathname()
   const [visible, setVisible] = useState(false)
   const [expanded, setExpanded] = useState(false)
   const [query, setQuery] = useState('')
@@ -96,6 +97,7 @@ export default function ScrollToTop() {
     }, 2000)
   }
 
+  if (pathname?.startsWith('/admin')) return null
   if (!visible) return null
 
   return (
