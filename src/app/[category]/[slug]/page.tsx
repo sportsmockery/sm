@@ -348,31 +348,35 @@ export default async function ArticlePage({ params, searchParams }: ArticlePageP
                 <Image src={post.featured_image} alt={post.title} fill style={{ objectFit: 'cover' }} priority />
                 {/* Gradient overlay for readability */}
                 <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, height: '50%', background: 'linear-gradient(to top, rgba(0,0,0,0.7), transparent)', borderRadius: '0 0 16px 16px' }} />
-                {/* Author + meta overlay */}
-                <div style={{ position: 'absolute', bottom: 16, left: 20, right: 20, zIndex: 2 }}>
-                  {author && (
-                    <Link href={`/author/${author.slug || author.id}`} style={{ display: 'flex', alignItems: 'center', gap: 10, textDecoration: 'none', marginBottom: 8 }}>
-                      {author.avatar_url ? (
-                        <div style={{ width: 36, height: 36, borderRadius: '50%', overflow: 'hidden', position: 'relative', border: '2px solid rgba(255,255,255,0.5)' }}>
-                          <Image src={author.avatar_url} alt={author.display_name} fill style={{ objectFit: 'cover' }} />
-                        </div>
-                      ) : (
-                        <div style={{ width: 36, height: 36, borderRadius: '50%', background: 'rgba(255,255,255,0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 14, fontWeight: 600, color: '#fff', border: '2px solid rgba(255,255,255,0.5)' }}>
-                          {author.display_name.charAt(0)}
-                        </div>
-                      )}
-                      <span style={{ fontSize: 14, fontWeight: 600, color: '#fff' }}>{author.display_name}</span>
-                    </Link>
-                  )}
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 13, color: 'rgba(255,255,255,0.8)', flexWrap: 'wrap' }}>
-                    <time dateTime={post.published_at}>{format(new Date(post.published_at), 'MMMM d, yyyy')}</time>
-                    <span style={{ color: 'rgba(255,255,255,0.5)' }}>·</span>
-                    <span>{readingTime} min read</span>
-                    <span style={{ color: 'rgba(255,255,255,0.5)' }}>·</span>
-                    <ViewCounterCompact views={post.views || 0} />
-                  </div>
-                </div>
               </div>
+
+              {/* Author centered over image bottom */}
+              {author && (
+                <div style={{ display: 'flex', justifyContent: 'center', marginTop: -120, position: 'relative', zIndex: 2, marginBottom: 8 }}>
+                  <Link href={`/author/${author.slug || author.id}`} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6, textDecoration: 'none' }}>
+                    {author.avatar_url ? (
+                      <div style={{ width: 44, height: 44, borderRadius: '50%', overflow: 'hidden', position: 'relative', border: '2px solid rgba(255,255,255,0.6)' }}>
+                        <Image src={author.avatar_url} alt={author.display_name} fill style={{ objectFit: 'cover' }} />
+                      </div>
+                    ) : (
+                      <div style={{ width: 44, height: 44, borderRadius: '50%', background: 'rgba(255,255,255,0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 16, fontWeight: 600, color: '#fff', border: '2px solid rgba(255,255,255,0.6)' }}>
+                        {author.display_name.charAt(0)}
+                      </div>
+                    )}
+                    <span style={{ fontSize: 14, fontWeight: 600, color: '#fff' }}>{author.display_name}</span>
+                  </Link>
+                </div>
+              )}
+
+              {/* Date, read time, views centered */}
+              <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: 8, fontSize: 13, color: 'var(--sm-text-muted)', marginBottom: 4 }}>
+                <time dateTime={post.published_at}>{format(new Date(post.published_at), 'MMMM d, yyyy')}</time>
+                <span style={{ color: 'var(--sm-text-dim)' }}>·</span>
+                <span>{readingTime} min read</span>
+                <span style={{ color: 'var(--sm-text-dim)' }}>·</span>
+                <ViewCounterCompact views={post.views || 0} />
+              </div>
+
               <SocialShareBar url={articleUrl} title={post.title} />
             </div>
           )}
