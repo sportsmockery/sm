@@ -250,6 +250,8 @@ export default function ScrollToTop() {
           width={36}
           height={36}
           style={{
+            width: 36,
+            height: 36,
             borderRadius: '50%',
             transition: 'transform 0.6s cubic-bezier(0.16, 1, 0.3, 1)',
             animation: animating ? 'scoutSpin 0.8s linear infinite' : 'none',
