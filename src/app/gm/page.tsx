@@ -1248,7 +1248,7 @@ export default function GMPage() {
   const pageBg = 'var(--sm-dark)'
 
   return (
-    <div className="sm-hero-bg" style={{ minHeight: '100vh', color: textColor }}>
+    <div className="sm-hero-bg gm-page-content" style={{ minHeight: '100vh', color: textColor }}>
       <div className="sm-grid-overlay" />
       {/* HEADER: Title + Team Tabs + GM Score (single sticky band) */}
       <div style={{

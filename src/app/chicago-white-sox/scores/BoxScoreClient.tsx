@@ -218,8 +218,8 @@ export default function BoxScoreClient({ games, initialGameId }: { games: Game[]
 function BattingTable({ players }: { players: PlayerStats[] }) {
   if (players.length === 0) return <div className="py-12 text-center" style={{ color: 'var(--sm-text-muted)' }}>No batting stats available</div>
   return (
-    <div className="overflow-x-auto">
-      <table className="w-full">
+    <div className="sm-table-wrapper">
+      <table className="sm-table">
         <thead>
           <tr className="text-left text-xs uppercase tracking-wider" style={{ color: 'var(--sm-text-muted)', borderBottom: '1px solid var(--sm-border)' }}>
             <th className="px-3 py-3">Player</th>
@@ -262,8 +262,8 @@ function BattingTable({ players }: { players: PlayerStats[] }) {
 function PitchingTable({ players }: { players: PlayerStats[] }) {
   if (players.length === 0) return <div className="py-12 text-center" style={{ color: 'var(--sm-text-muted)' }}>No pitching stats available</div>
   return (
-    <div className="overflow-x-auto">
-      <table className="w-full">
+    <div className="sm-table-wrapper">
+      <table className="sm-table">
         <thead>
           <tr className="text-left text-xs uppercase tracking-wider" style={{ color: 'var(--sm-text-muted)', borderBottom: '1px solid var(--sm-border)' }}>
             <th className="px-3 py-3">Player</th>

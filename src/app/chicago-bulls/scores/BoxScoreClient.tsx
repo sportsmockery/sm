@@ -223,8 +223,8 @@ export default function BoxScoreClient({ games, initialGameId }: { games: Game[]
               {currentPlayers.length === 0 ? (
                 <div className="py-12 text-center" style={{ color: 'var(--sm-text-muted)' }}>No player stats available</div>
               ) : (
-                <div className="overflow-x-auto">
-                  <table className="w-full">
+                <div className="sm-table-wrapper">
+                  <table className="sm-table">
                     <thead>
                       <tr className="text-left text-xs uppercase tracking-wider" style={{ color: 'var(--sm-text-muted)', borderBottom: '1px solid var(--sm-border)' }}>
                         <th className="px-3 py-3">Player</th>
