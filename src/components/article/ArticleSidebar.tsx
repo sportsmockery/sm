@@ -13,7 +13,12 @@ const edgeTools = [
   { id: 'audio', title: 'Hands-Free Audio', description: 'Have articles continuously read to you.', href: '/audio', icon: Volume2 },
 ]
 
-export default function ArticleSidebar() {
+interface ArticleSidebarProps {
+  categoryName?: string
+  categorySlug?: string
+}
+
+export default function ArticleSidebar({ categoryName, categorySlug }: ArticleSidebarProps) {
   return (
     <div className="flex flex-col gap-3">
       {/* Ask Scout */}

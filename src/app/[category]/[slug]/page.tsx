@@ -333,65 +333,77 @@ export default async function ArticlePage({ params, searchParams }: ArticlePageP
       />
 
       {/* 2030 Hero Header */}
-      <header className="sm-hero-bg" style={{ padding: '40px 0 60px', minHeight: 250 }}>
+      <header className="sm-hero-bg" style={{ padding: '40px 0 32px', minHeight: 0 }}>
         <div className="sm-grid-overlay" />
-        <div style={{ position: 'relative', zIndex: 1, maxWidth: 760, margin: '0 auto', padding: '0 24px' }}>
-          {/* Breadcrumb */}
-          <nav style={{ marginBottom: 16 }}>
-            <ol style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 13, color: 'var(--sm-text-dim)', listStyle: 'none', padding: 0, margin: 0 }}>
-              <li><Link href="/" style={{ color: 'inherit', transition: 'color 0.2s' }}>Home</Link></li>
-              <li>/</li>
-              <li><Link href={`/${categoryData?.slug || category}`} style={{ color: 'inherit' }}>{categoryData?.name || category}</Link></li>
-            </ol>
-          </nav>
-
-          {/* Category + Context tags */}
-          <div style={{ display: 'flex', gap: 8, marginBottom: 16, flexWrap: 'wrap' }}>
-            <Link href={`/${categoryData?.slug || category}`} className="sm-tag">{categoryData?.name || category}</Link>
-            {contextLabel && <span className="sm-tag">{contextLabel.label}</span>}
-          </div>
-
+        <div style={{ position: 'relative', zIndex: 1, maxWidth: 1236, margin: '0 auto', padding: '0 24px' }}>
           {/* Title */}
-          <h1 style={{ fontSize: 'clamp(2rem, 4vw, 3rem)', fontWeight: 700, letterSpacing: '-1px', lineHeight: 1.15, color: 'var(--sm-text)', marginBottom: 24 }}>
+          <h1 style={{ fontSize: 'clamp(2rem, 4vw, 3rem)', fontWeight: 700, letterSpacing: '-1px', lineHeight: 1.15, color: 'var(--sm-text)', marginBottom: 16 }}>
             {post.title}
           </h1>
 
-          {/* Author row */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap' }}>
-            {author && (
-              <Link href={`/author/${author.slug || author.id}`} style={{ display: 'flex', alignItems: 'center', gap: 10, textDecoration: 'none' }}>
-                {author.avatar_url ? (
-                  <div style={{ width: 32, height: 32, borderRadius: '50%', overflow: 'hidden', position: 'relative' }}>
-                    <Image src={author.avatar_url} alt={author.display_name} fill style={{ objectFit: 'cover' }} />
+          {/* Featured image with overlaid author + meta + share */}
+          {post.featured_image && (
+            <div style={{ marginTop: 24 }}>
+              <div className="article-hero-cinematic" style={{ borderRadius: 16, overflow: 'hidden', position: 'relative', aspectRatio: '16/9' }}>
+                <Image src={post.featured_image} alt={post.title} fill style={{ objectFit: 'cover' }} priority />
+                {/* Gradient overlay for readability */}
+                <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, height: '50%', background: 'linear-gradient(to top, rgba(0,0,0,0.7), transparent)', borderRadius: '0 0 16px 16px' }} />
+                {/* Author + meta overlay */}
+                <div style={{ position: 'absolute', bottom: 16, left: 20, right: 20, zIndex: 2 }}>
+                  {author && (
+                    <Link href={`/author/${author.slug || author.id}`} style={{ display: 'flex', alignItems: 'center', gap: 10, textDecoration: 'none', marginBottom: 8 }}>
+                      {author.avatar_url ? (
+                        <div style={{ width: 36, height: 36, borderRadius: '50%', overflow: 'hidden', position: 'relative', border: '2px solid rgba(255,255,255,0.5)' }}>
+                          <Image src={author.avatar_url} alt={author.display_name} fill style={{ objectFit: 'cover' }} />
+                        </div>
+                      ) : (
+                        <div style={{ width: 36, height: 36, borderRadius: '50%', background: 'rgba(255,255,255,0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 14, fontWeight: 600, color: '#fff', border: '2px solid rgba(255,255,255,0.5)' }}>
+                          {author.display_name.charAt(0)}
+                        </div>
+                      )}
+                      <span style={{ fontSize: 14, fontWeight: 600, color: '#fff' }}>{author.display_name}</span>
+                    </Link>
+                  )}
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 13, color: 'rgba(255,255,255,0.8)', flexWrap: 'wrap' }}>
+                    <time dateTime={post.published_at}>{format(new Date(post.published_at), 'MMMM d, yyyy')}</time>
+                    <span style={{ color: 'rgba(255,255,255,0.5)' }}>·</span>
+                    <span>{readingTime} min read</span>
+                    <span style={{ color: 'rgba(255,255,255,0.5)' }}>·</span>
+                    <ViewCounterCompact views={post.views || 0} />
                   </div>
-                ) : (
-                  <div style={{ width: 32, height: 32, borderRadius: '50%', background: 'var(--sm-gradient-subtle)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 14, fontWeight: 600, color: 'var(--sm-text)' }}>
-                    {author.display_name.charAt(0)}
-                  </div>
-                )}
-                <span style={{ fontSize: 14, fontWeight: 600, color: 'var(--sm-text)' }}>{author.display_name}</span>
-              </Link>
-            )}
-            <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 14, color: 'var(--sm-text-muted)', flexWrap: 'wrap' }}>
-              <time dateTime={post.published_at}>{format(new Date(post.published_at), 'MMMM d, yyyy')}</time>
-              <span style={{ color: 'var(--sm-text-dim)' }}>·</span>
-              <span>{readingTime} min read</span>
-              <span style={{ color: 'var(--sm-text-dim)' }}>·</span>
-              <ViewCounterCompact views={post.views || 0} />
+                </div>
+              </div>
+              <SocialShareBar url={articleUrl} title={post.title} />
             </div>
-          </div>
+          )}
 
+          {/* Author row fallback when no featured image */}
+          {!post.featured_image && (
+            <div style={{ display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap', marginTop: 16 }}>
+              {author && (
+                <Link href={`/author/${author.slug || author.id}`} style={{ display: 'flex', alignItems: 'center', gap: 10, textDecoration: 'none' }}>
+                  {author.avatar_url ? (
+                    <div style={{ width: 32, height: 32, borderRadius: '50%', overflow: 'hidden', position: 'relative' }}>
+                      <Image src={author.avatar_url} alt={author.display_name} fill style={{ objectFit: 'cover' }} />
+                    </div>
+                  ) : (
+                    <div style={{ width: 32, height: 32, borderRadius: '50%', background: 'var(--sm-gradient-subtle)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 14, fontWeight: 600, color: 'var(--sm-text)' }}>
+                      {author.display_name.charAt(0)}
+                    </div>
+                  )}
+                  <span style={{ fontSize: 14, fontWeight: 600, color: 'var(--sm-text)' }}>{author.display_name}</span>
+                </Link>
+              )}
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 14, color: 'var(--sm-text-muted)', flexWrap: 'wrap' }}>
+                <time dateTime={post.published_at}>{format(new Date(post.published_at), 'MMMM d, yyyy')}</time>
+                <span style={{ color: 'var(--sm-text-dim)' }}>·</span>
+                <span>{readingTime} min read</span>
+                <span style={{ color: 'var(--sm-text-dim)' }}>·</span>
+                <ViewCounterCompact views={post.views || 0} />
+              </div>
+            </div>
+          )}
         </div>
-
-        {/* Featured image — full width matching content + sidebars */}
-        {post.featured_image && (
-          <div style={{ maxWidth: 1400, margin: '0 auto', padding: '32px 24px 0' }}>
-            <div className="article-hero-cinematic" style={{ borderRadius: 16, overflow: 'hidden', position: 'relative', aspectRatio: '16/9' }}>
-              <Image src={post.featured_image} alt={post.title} fill style={{ objectFit: 'cover' }} priority />
-            </div>
-            <SocialShareBar url={articleUrl} title={post.title} />
-          </div>
-        )}
       </header>
 
       {/* 2030 Article Body Area */}
@@ -409,6 +421,15 @@ export default async function ArticlePage({ params, searchParams }: ArticlePageP
 
           {/* Main article column */}
           <div style={{ width: '100%', maxWidth: 720, borderColor: 'var(--sm-border)' }}>
+            {/* Breadcrumb */}
+            <nav style={{ marginBottom: 12 }}>
+              <ol style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 13, color: 'var(--sm-text-dim)', listStyle: 'none', padding: 0, margin: 0 }}>
+                <li><Link href="/" style={{ color: 'inherit', transition: 'color 0.2s' }}>Home</Link></li>
+                <li>/</li>
+                <li><Link href={`/${categoryData?.slug || category}`} style={{ color: 'inherit' }}>{categoryData?.name || category}</Link></li>
+              </ol>
+            </nav>
+
             {/* Article Audio Player */}
             {audioInfo && (
               <ArticleAudioPlayer
@@ -527,7 +548,7 @@ export default async function ArticlePage({ params, searchParams }: ArticlePageP
           {/* Right Sidebar — SM EDGE Features (Desktop only) */}
           <aside className="hidden xl:block" style={{ width: 300, flexShrink: 0, paddingLeft: 16 }}>
             <div style={{ position: 'sticky', top: 96 }}>
-              <ArticleSidebar />
+              <ArticleSidebar categoryName={categoryData?.name} categorySlug={categoryData?.slug} />
             </div>
           </aside>
         </div>
