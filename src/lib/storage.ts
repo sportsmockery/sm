@@ -67,7 +67,7 @@ export async function listFiles(prefix?: string): Promise<string[]> {
 
   if (error) throw error
 
-  return data.map(file => file.name)
+  return data.map((file: any) => file.name)
 }
 
 export async function downloadFile(path: string): Promise<Blob> {

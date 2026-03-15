@@ -43,14 +43,14 @@ export async function getCategoriesWithPostCount(): Promise<Category[]> {
   if (countError) throw countError
 
   // Calculate counts
-  const countMap = (counts || []).reduce((acc, post) => {
+  const countMap = (counts || []).reduce((acc: Record<string, number>, post: any) => {
     if (post.category_id) {
       acc[post.category_id] = (acc[post.category_id] || 0) + 1
     }
     return acc
   }, {} as Record<string, number>)
 
-  return (categories || []).map(cat => ({
+  return (categories || []).map((cat: any) => ({
     ...cat,
     post_count: countMap[cat.id] || 0
   }))
