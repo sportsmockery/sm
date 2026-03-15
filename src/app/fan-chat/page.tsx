@@ -2,11 +2,9 @@
 
 import { useState, useEffect, useRef, useCallback } from 'react'
 import { useSearchParams } from 'next/navigation'
-import Link from 'next/link'
 import Image from 'next/image'
 import { useAIChatPersonality } from '@/hooks/useAIChatPersonality'
 import { AI_PERSONALITIES } from '@/lib/ai-personalities'
-import { TeamPortalHub } from '@/components/fan-chat/TeamPortalHub'
 
 // Message type
 interface ChatMessage {
@@ -284,29 +282,31 @@ export default function FanChatPage() {
   const showEchoDigest = messages.length > 0 && messages.length % 10 === 0 && messages.length > 5
 
   return (
-    <div className="sm-hero-bg" style={{ minHeight: '100vh' }}>
+    <div className="sm-hero-bg fan-chat-page" style={{ minHeight: '100vh', marginTop: 0, paddingTop: 0 }}>
       <div className="sm-grid-overlay" />
-      <div style={{ maxWidth: 'var(--sm-max-width)', margin: '0 auto', padding: '24px 16px', paddingTop: 96, position: 'relative', zIndex: 1 }}>
+      <div className="fan-chat-content" style={{ maxWidth: 'min(1600px, 100vw - 32px)', margin: '0 auto', padding: '0 16px 24px', position: 'relative', zIndex: 1, marginTop: 0, paddingTop: 0 }}>
 
-        {/* Portal Hub */}
-        <TeamPortalHub
-          activeTeam={activeChannel === 'global' ? 'bears' : activeChannel}
-          onSelectTeam={(slug) => {
-            setActiveChannel(slug)
-            setShowChannels(false)
-          }}
-        />
-
-        <div className="grid grid-cols-1 lg:grid-cols-4 gap-6" style={{ minHeight: 'calc(100vh - 200px)' }}>
+        <div
+          className="grid grid-cols-1 gap-x-6 gap-y-0 fan-chat-grid"
+          style={{ alignItems: 'start', alignContent: 'start', minHeight: 'calc(100vh - 48px)', marginTop: 0, paddingTop: 0 }}
+        >
           {/* Channel List - Sidebar */}
-          <div className={`lg:col-span-1 ${showChannels ? 'block' : 'hidden lg:block'}`}>
+          <div className={`${showChannels ? 'block' : 'hidden lg:block'}`} style={{ alignSelf: 'start', marginTop: 0, paddingTop: 0 }}>
             <div
-              className="glass-card glass-card-static overflow-hidden sticky top-24"
-              style={{ padding: 0 }}
+              className="glass-card glass-card-static overflow-hidden sticky"
+              style={{
+                top: 0,
+                padding: 0,
+                height: 'calc(100vh - 48px)',
+                minHeight: 'calc(100vh - 48px)',
+                display: 'flex',
+                flexDirection: 'column',
+                marginTop: 0,
+              }}
             >
               {/* Header */}
               <div
-                className="px-5 py-4"
+                className="px-5 py-4 flex-shrink-0"
                 style={{ borderBottom: '1px solid var(--sm-border)' }}
               >
                 <h2
@@ -321,7 +321,7 @@ export default function FanChatPage() {
               </div>
 
               {/* Channel List */}
-              <div className="p-2">
+              <div className="p-2 flex-1 overflow-y-auto min-h-0">
                 {channels.map((channel) => (
                   <button
                     key={channel.id}
@@ -387,8 +387,8 @@ export default function FanChatPage() {
                 ))}
               </div>
 
-              {/* AI Info */}
-              <div className="px-5 py-4" style={{ borderTop: '1px solid var(--sm-border)' }}>
+              {/* AI Info - pushed to bottom when card is tall */}
+              <div className="px-5 py-4 flex-shrink-0 mt-auto" style={{ borderTop: '1px solid var(--sm-border)' }}>
                 <p className="text-xs" style={{ color: 'var(--sm-text-muted)' }}>
                   Our superfans are always online and ready to chat about Chicago sports
                 </p>
@@ -397,12 +397,13 @@ export default function FanChatPage() {
           </div>
 
           {/* Main Chat Area */}
-          <div className="lg:col-span-3">
+          <div>
             <div
-              className="glass-card glass-card-static overflow-hidden flex flex-col h-full"
+              className="glass-card glass-card-static overflow-hidden flex flex-col"
               style={{
                 padding: 0,
-                minHeight: 'calc(100vh - 200px)',
+                minHeight: 'calc(100vh - 48px)',
+                maxHeight: 'calc(100vh - 48px)',
               }}
             >
               {/* Chat Header */}
@@ -460,43 +461,25 @@ export default function FanChatPage() {
                 </div>
               </div>
 
-              {/* Messages Area */}
+              {/* Messages Area - content at top, no icon */}
               <div ref={messagesContainerRef} className="flex-1 overflow-y-auto p-5">
-                {/* Welcome Message */}
-                <div className="text-center py-8 mb-6" style={{ borderBottom: '1px solid var(--sm-border)' }}>
-                  <div
-                    className="w-16 h-16 rounded-full mx-auto mb-4 flex items-center justify-center"
-                    style={{ backgroundColor: currentChannel.color }}
-                  >
-                    {currentChannel.logo ? (
-                      <Image
-                        src={currentChannel.logo}
-                        alt={currentChannel.name}
-                        width={40}
-                        height={40}
-                        unoptimized
-                      />
-                    ) : (
-                      <span className="text-3xl">{currentChannel.icon}</span>
-                    )}
-                  </div>
+                {/* Compact welcome at top */}
+                <div className="pb-4 mb-4" style={{ borderBottom: '1px solid var(--sm-border)' }}>
                   <h3
-                    className="font-bold text-lg mb-1"
-                    style={{ fontFamily: 'var(--sm-font-heading)', color: 'var(--sm-text)' }}
+                    className="font-bold text-base"
+                    style={{ fontFamily: 'var(--sm-font-heading)', color: 'var(--sm-text)', marginBottom: 4 }}
                   >
                     Welcome to {currentChannel.name}
                   </h3>
-                  <p className="text-sm mb-2" style={{ color: 'var(--sm-text-muted)' }}>
+                  <p className="text-sm" style={{ color: 'var(--sm-text-muted)' }}>
                     Chat with {currentChannel.aiPersonality} and other fans. Be respectful and have fun!
-                  </p>
-                  {personality && (
-                    <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-xs" style={{ backgroundColor: 'var(--sm-surface)' }}>
-                      <span className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
-                      <span style={{ color: 'var(--sm-text-muted)' }}>
-                        {personality.username} is here to talk {personality.teamFullName}
+                    {personality && (
+                      <span className="inline-flex items-center gap-1.5 ml-2">
+                        <span className="w-1.5 h-1.5 bg-green-500 rounded-full animate-pulse" />
+                        {personality.username} is here
                       </span>
-                    </div>
-                  )}
+                    )}
+                  </p>
                 </div>
 
                 {/* Messages */}
@@ -674,17 +657,10 @@ export default function FanChatPage() {
                     onClick={handleSendMessage}
                     disabled={!message.trim() || aiLoading}
                     className="btn btn-primary btn-md"
-                    style={{ borderRadius: 'var(--sm-radius-pill)', minHeight: 44, paddingLeft: 20, paddingRight: 20 }}
+                    style={{ borderRadius: 'var(--sm-radius-pill)', minHeight: 44, paddingLeft: 20, paddingRight: 20, color: '#FAFAFB' }}
                   >
                     Send
                   </button>
-                </div>
-
-                {/* Sign in prompt for non-logged-in users */}
-                <div className="mt-3 text-center">
-                  <p className="text-xs" style={{ color: 'var(--sm-text-muted)' }}>
-                    <Link href="/login" className="hover:underline" style={{ color: '#bc0000' }}>Sign in</Link> to save your chat history
-                  </p>
                 </div>
               </div>
             </div>
