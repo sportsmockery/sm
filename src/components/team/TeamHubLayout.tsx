@@ -1,14 +1,9 @@
 'use client'
 
 import { useState, useEffect, useRef } from 'react'
-import Image from 'next/image'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { motion, useReducedMotion } from 'framer-motion'
-import { useTeamRecord } from '@/contexts/TeamRecordContext'
-import CountUpValue from './CountUp'
-import HeroParticles from './HeroParticles'
-import HeroSearchBar from './HeroSearchBar'
+import TeamHeader from './TeamHeader'
 
 /**
  * Team Hub Layout Component
@@ -130,9 +125,6 @@ export default function TeamHubLayout({
   const [isSticky, setIsSticky] = useState(false)
   const navRef = useRef<HTMLDivElement>(null)
   const headerRef = useRef<HTMLDivElement>(null)
-  const { setRecord: setContextRecord } = useTeamRecord()
-  const prefersReducedMotion = useReducedMotion()
-
   const tabs = team.league === 'NFL' ? NFL_TABS : TEAM_TABS
   const basePath = `/${team.slug}`
 
@@ -158,246 +150,11 @@ export default function TeamHubLayout({
     return () => window.removeEventListener('scroll', handleScroll)
   }, [])
 
-  const formatRecord = () => {
-    if (!record) return null
-
-    let regularSeason = ''
-    if (team.league === 'NFL') {
-      const tie = record.ties && record.ties > 0 ? `-${record.ties}` : ''
-      regularSeason = `${record.wins}-${record.losses}${tie}`
-    } else if (team.league === 'NHL') {
-      const ot = record.otLosses && record.otLosses > 0 ? `-${record.otLosses}` : ''
-      regularSeason = `${record.wins}-${record.losses}${ot}`
-    } else {
-      regularSeason = `${record.wins}-${record.losses}`
-    }
-
-    if (record.postseason && (record.postseason.wins > 0 || record.postseason.losses > 0)) {
-      return `${regularSeason} • Playoffs: ${record.postseason.wins}-${record.postseason.losses}`
-    }
-
-    return regularSeason
-  }
-
-  useEffect(() => {
-    const formatted = formatRecord()
-    setContextRecord(formatted)
-    return () => setContextRecord(null)
-  }, [record, team.league, setContextRecord])
-
-  const heroClass = TEAM_HERO_CLASS[team.slug] || ''
-
-  // Count-up record display
-  const renderCountUpRecord = () => {
-    if (!record) return '--'
-
-    const wins = <CountUpValue value={record.wins} duration={1000} />
-    const losses = <CountUpValue value={record.losses} duration={1000} delay={300} />
-
-    if (team.league === 'NFL' && record.ties && record.ties > 0) {
-      const ties = <CountUpValue value={record.ties} duration={1000} delay={600} />
-      return <>{wins}-{losses}-{ties}</>
-    }
-    if (team.league === 'NHL' && record.otLosses && record.otLosses > 0) {
-      const ot = <CountUpValue value={record.otLosses} duration={1000} delay={600} />
-      return <>{wins}-{losses}-{ot}</>
-    }
-    return <>{wins}-{losses}</>
-  }
-
-  // Motion variants for hero entrance
-  const heroContainerVariants = {
-    hidden: { opacity: 0 },
-    visible: {
-      opacity: 1,
-      transition: { staggerChildren: 0.1, delayChildren: 0.1 },
-    },
-  }
-
-  const heroItemVariants = {
-    hidden: { opacity: 0, y: 20 },
-    visible: { opacity: 1, y: 0, transition: { duration: 0.5, ease: [0.25, 0.46, 0.45, 0.94] as [number, number, number, number] } },
-  }
-
   return (
     <div style={{ minHeight: '100vh', background: 'var(--sm-dark)' }}>
-      {/* ===== TEAM HERO SECTION ===== */}
-      <div
-        ref={headerRef}
-        className={heroClass}
-        style={{
-          position: 'relative',
-          overflow: 'hidden',
-          paddingTop: '48px',
-          paddingBottom: '48px',
-        }}
-      >
-        {/* Floating orbs background */}
-        <HeroParticles accentColor={team.primaryColor} />
-
-        {/* Red gradient overlay */}
-        <div
-          style={{
-            position: 'absolute',
-            inset: 0,
-            background: 'radial-gradient(ellipse at 50% 100%, rgba(188,0,0,0.08) 0%, transparent 60%)',
-            pointerEvents: 'none',
-            zIndex: 0,
-          }}
-          aria-hidden="true"
-        />
-
-        {/* Grid overlay */}
-        <div className="sm-grid-overlay" />
-
-        {/* Content */}
-        <motion.div
-          style={{ position: 'relative', zIndex: 1, maxWidth: '1320px', margin: '0 auto', padding: '0 24px' }}
-          variants={prefersReducedMotion ? undefined : heroContainerVariants}
-          initial={prefersReducedMotion ? undefined : 'hidden'}
-          animate={prefersReducedMotion ? undefined : 'visible'}
-        >
-          {/* Team header row */}
-          <motion.div
-            style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '24px', marginBottom: '32px' }}
-            variants={prefersReducedMotion ? undefined : heroItemVariants}
-          >
-            {/* Logo with shimmer pulse */}
-            <motion.div
-              animate={
-                prefersReducedMotion
-                  ? {}
-                  : { scale: [0.97, 1.03, 0.97] }
-              }
-              transition={
-                prefersReducedMotion
-                  ? undefined
-                  : { duration: 3, repeat: Infinity, ease: 'easeInOut' }
-              }
-              style={{
-                width: '96px',
-                height: '96px',
-                borderRadius: 'var(--sm-radius-lg)',
-                background: 'rgba(255,255,255,0.06)',
-                border: '1px solid rgba(255,255,255,0.1)',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                padding: '12px',
-                backdropFilter: 'blur(12px)',
-              }}
-            >
-              <Image
-                src={team.logo}
-                alt={team.name}
-                width={72}
-                height={72}
-                style={{ width: '100%', height: '100%', objectFit: 'contain' }}
-                unoptimized
-              />
-            </motion.div>
-
-            {/* Name + tagline */}
-            <div style={{ textAlign: 'center' }}>
-              <h1
-                style={{
-                 
-                  fontSize: '48px',
-                  fontWeight: 700,
-                  color: 'var(--sm-text)',
-                  letterSpacing: '-1.5px',
-                  lineHeight: 1.1,
-                  margin: '0 0 8px 0',
-                }}
-              >
-                {team.name}
-              </h1>
-              <p style={{ fontSize: '16px', color: 'var(--sm-text-muted)', fontWeight: 500, margin: 0 }}>
-                {TEAM_TAGLINES[team.slug] || team.league}
-              </p>
-            </div>
-          </motion.div>
-
-          {/* Stats bar - glass pills with count-up */}
-          <motion.div
-            style={{
-              display: 'flex',
-              flexWrap: 'wrap',
-              justifyContent: 'center',
-              gap: '12px',
-              marginBottom: '28px',
-            }}
-            variants={prefersReducedMotion ? undefined : heroItemVariants}
-          >
-            {/* Record with count-up */}
-            <div
-              className="glass-card glass-card-sm glass-card-static"
-              style={{ textAlign: 'center', minWidth: '120px', padding: '16px 20px' }}
-            >
-              <div style={{ fontSize: '24px', fontWeight: 700, color: 'var(--sm-text)' }}>
-                {renderCountUpRecord()}
-              </div>
-              <div style={{ fontSize: '11px', textTransform: 'uppercase', letterSpacing: '1px', color: 'var(--sm-text-dim)', fontWeight: 600 }}>
-                {record?.recordLabel || 'Record'}
-              </div>
-            </div>
-
-            {/* Division Rank */}
-            {record?.divisionRank && (
-              <div
-                className="glass-card glass-card-sm glass-card-static"
-                style={{ textAlign: 'center', minWidth: '120px', padding: '16px 20px' }}
-              >
-                <div style={{ fontSize: '24px', fontWeight: 700, color: 'var(--sm-text)' }}>
-                  {record.divisionRank}
-                </div>
-                <div style={{ fontSize: '11px', textTransform: 'uppercase', letterSpacing: '1px', color: 'var(--sm-text-dim)', fontWeight: 600 }}>
-                  Division
-                </div>
-              </div>
-            )}
-
-            {/* Last Game */}
-            {lastGame && (
-              <div
-                className="glass-card glass-card-sm glass-card-static"
-                style={{ textAlign: 'center', minWidth: '120px', padding: '16px 20px' }}
-              >
-                <div style={{
-                  fontSize: '24px',
-                  fontWeight: 700,
-                 
-                  color: lastGame.result === 'W' ? 'var(--sm-success)' : lastGame.result === 'L' ? 'var(--sm-error)' : 'var(--sm-text)',
-                }}>
-                  {lastGame.result} {lastGame.teamScore}-{lastGame.opponentScore}
-                </div>
-                <div style={{ fontSize: '11px', textTransform: 'uppercase', letterSpacing: '1px', color: 'var(--sm-text-dim)', fontWeight: 600 }}>
-                  {lastGame.isHome ? 'vs' : '@'} {lastGame.opponent}
-                </div>
-              </div>
-            )}
-
-            {/* Next Game */}
-            {nextGame && (
-              <div
-                className="glass-card glass-card-sm glass-card-static"
-                style={{ textAlign: 'center', minWidth: '120px', padding: '16px 20px' }}
-              >
-                <div style={{ fontSize: '16px', fontWeight: 600, color: 'var(--sm-text)' }}>
-                  {nextGame.isHome ? 'vs' : '@'} {nextGame.opponent}
-                </div>
-                <div style={{ fontSize: '11px', textTransform: 'uppercase', letterSpacing: '1px', color: 'var(--sm-text-dim)', fontWeight: 600 }}>
-                  {nextGame.date} {nextGame.time}
-                </div>
-              </div>
-            )}
-          </motion.div>
-
-          {/* Inline search bar scaffold */}
-          <motion.div variants={prefersReducedMotion ? undefined : heroItemVariants}>
-            <HeroSearchBar teamName={team.name} />
-          </motion.div>
-        </motion.div>
+      {/* ===== COMPACT TEAM HEADER ===== */}
+      <div ref={headerRef} style={{ maxWidth: '1320px', margin: '0 auto' }}>
+        <TeamHeader team={team} record={record || undefined} nextGame={nextGame || undefined} lastGame={lastGame || undefined} />
       </div>
 
       {/* ===== STICKY SUBNAV ===== */}
