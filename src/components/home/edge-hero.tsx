@@ -132,7 +132,7 @@ export function EdgeHero({
 
       {/* ── Edge logo — top-left, visually light ── */}
       <div className="mx-auto w-full max-w-7xl px-4 pt-5 sm:px-6 lg:px-8 lg:pt-6">
-        <div className="flex items-center justify-start" style={{ marginLeft: '-400px', marginTop: '-50px' }}>
+        <div className="flex items-center justify-start desktop-only-decoration" style={{ marginLeft: '-400px', marginTop: '-50px' }}>
           {logo ?? (
             <Image
               src="/edge_logo.svg"
@@ -147,7 +147,7 @@ export function EdgeHero({
       </div>
 
       {/* ── Centered hero content — fills remaining viewport ── */}
-      <div className="flex flex-1 items-center justify-center px-4 sm:px-6 lg:px-8" style={{ marginTop: '-280px' }}>
+      <div className="flex flex-1 items-center justify-center px-4 sm:px-6 lg:px-8 desktop-offset" style={{ marginTop: '-280px' }}>
         <div className="mx-auto flex max-w-2xl flex-col items-center text-center">
           {/* ── Scout identity pill ── */}
           <div
@@ -192,13 +192,11 @@ export function EdgeHero({
           <div className="w-full">
             <h1
               id="edge-hero-heading"
-              className="text-balance font-bold tracking-tight"
+              className="text-balance font-bold tracking-tight md:whitespace-nowrap md:-ml-[45px]"
               style={{
                 color: "var(--hp-foreground)",
                 fontSize: "clamp(48px, 5vw, 72px)",
                 lineHeight: 1.1,
-                whiteSpace: "nowrap",
-                marginLeft: "-45px",
               }}
             >
               {headline}

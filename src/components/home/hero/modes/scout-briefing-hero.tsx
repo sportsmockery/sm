@@ -141,13 +141,11 @@ export function ScoutBriefingHero({
         {/* Headline */}
         <div className="w-full">
           <h1
-            className="text-balance font-bold tracking-tight"
+            className="text-balance font-bold tracking-tight md:whitespace-nowrap md:-ml-[45px]"
             style={{
               color: "var(--hp-foreground)",
               fontSize: "clamp(48px, 5vw, 72px)",
               lineHeight: 1.1,
-              whiteSpace: "nowrap",
-              marginLeft: "-45px",
             }}
           >
             What can I help you with?
