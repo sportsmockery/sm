@@ -447,7 +447,6 @@ function RenderBlock({ block }: { block: ContentBlock }) {
 export function BlockPreviewRenderer({ blocks }: BlockPreviewRendererProps) {
   return (
     <article>
-      <ArticleMeta />
       <ArticleBody>
         {blocks.map((block) => (
           <RenderBlock key={block.id} block={block} />
