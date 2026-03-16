@@ -414,7 +414,7 @@ export default async function ArticlePage({ params, searchParams }: ArticlePageP
 
       {/* 2030 Article Body Area */}
       <div style={{ backgroundColor: '#FAFAFB' }}>
-        <div style={{ maxWidth: 1236, margin: '0 auto', padding: '16px 24px 48px', display: 'flex', gap: 0 }}>
+        <div style={{ maxWidth: 1236, margin: '0 auto', padding: '16px 24px 48px', display: 'flex', justifyContent: 'space-between', gap: 0 }}>
           {/* Main article column */}
           <div style={{ width: '100%', maxWidth: 720, borderColor: 'var(--sm-border)' }}>
             {/* Breadcrumb */}
