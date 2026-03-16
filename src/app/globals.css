@@ -3569,15 +3569,15 @@ main {
 
 /* ===== MOBILE HERO OVERFLOW FIXES ===== */
 @media (max-width: 768px) {
-  .desktop-only-decoration { display: none; }
+  .desktop-only-decoration { display: none !important; }
   .desktop-offset { margin-top: 0 !important; }
 }
 
 /* ===== MOBILE BOTTOM-NAV CLEARANCE ===== */
 @media (max-width: 1023px) {
-  .scout-ai-main { padding-bottom: 72px; height: calc(100vh - 72px); }
-  .gm-page-content { margin-left: 0; padding-bottom: 72px; }
-  .mock-draft-content { padding-bottom: 72px; }
+  .scout-ai-main { padding-bottom: calc(56px + env(safe-area-inset-bottom) + 16px); height: calc(100vh - 72px); }
+  .gm-page-content,
+  .mock-draft-content { margin-left: 0; padding-bottom: calc(56px + env(safe-area-inset-bottom) + 16px); }
 }
 
 /* ===== ANIMATIONS ===== */
