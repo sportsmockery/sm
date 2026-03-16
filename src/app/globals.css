@@ -3567,11 +3567,17 @@ main {
   }
 }
 
-/* ===== MOBILE BOTTOM-NAV CLEARANCE ===== */
+/* ===== MOBILE HERO OVERFLOW FIXES ===== */
 @media (max-width: 768px) {
-  .scout-ai-main { padding-bottom: 80px; min-height: 100dvh; }
-  .gm-page-content { padding-bottom: 80px; min-height: 100dvh; }
-  .mock-draft-content { padding-bottom: 80px; min-height: 100dvh; }
+  .desktop-only-decoration { display: none !important; }
+  .desktop-offset { margin-top: 0 !important; }
+}
+
+/* ===== MOBILE BOTTOM-NAV CLEARANCE ===== */
+@media (max-width: 1023px) {
+  .scout-ai-main { padding-bottom: calc(56px + env(safe-area-inset-bottom) + 16px); height: calc(100vh - 72px); }
+  .gm-page-content,
+  .mock-draft-content { margin-left: 0; padding-bottom: calc(56px + env(safe-area-inset-bottom) + 16px); }
 }
 
 /* ===== ANIMATIONS ===== */

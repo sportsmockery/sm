@@ -48,7 +48,7 @@ export function HeroShell({
 
       <div className="relative z-10 mx-auto w-full max-w-7xl px-4 pt-5 sm:px-6 lg:px-8 lg:pt-6">
         <div
-          className="flex items-center justify-start"
+          className="flex items-center justify-start desktop-only-decoration"
           style={{ marginLeft: "-400px", marginTop: "-50px" }}
         >
           {logo ?? (
@@ -66,7 +66,7 @@ export function HeroShell({
 
       <div
         className={`relative z-10 flex flex-1 items-center justify-center px-4 sm:px-6 lg:px-8 ${
-          height === "cinematic" ? "" : ""
+          height === "cinematic" ? "" : "desktop-offset"
         }`}
         style={{ marginTop: height === "cinematic" ? "-200px" : "-280px" }}
       >

@@ -45,8 +45,10 @@ export default function EdgeIntro({ onComplete }: { onComplete: () => void }) {
       <div
         style={{
           position: 'relative',
-          width: 720,
-          height: 264,
+          width: '100%',
+          maxWidth: 720,
+          height: 'auto',
+          aspectRatio: '720 / 264',
           opacity: phase === 'fade-in' ? 0 : 1,
           transition: `opacity ${FADE_IN_MS}ms ease-in`,
           overflow: 'hidden',
@@ -57,7 +59,7 @@ export default function EdgeIntro({ onComplete }: { onComplete: () => void }) {
           alt="SM Edge"
           width={720}
           height={264}
-          style={{ width: 720, height: 264 }}
+          style={{ width: '100%', maxWidth: 720, height: 'auto' }}
           className="object-contain"
           priority
         />
@@ -69,8 +71,8 @@ export default function EdgeIntro({ onComplete }: { onComplete: () => void }) {
               position: 'absolute',
               top: 0,
               left: 0,
-              width: 720,
-              height: 264,
+              width: '100%',
+              height: '100%',
               pointerEvents: 'none',
               overflow: 'hidden',
             }}
