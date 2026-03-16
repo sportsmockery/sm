@@ -1,5 +1,5 @@
 import { Metadata } from 'next'
-import { TeamHubLayout, ToolGrid, QuickStats } from '@/components/team'
+import { TeamHubLayout, QuickStats } from '@/components/team'
 import { SectionHeader, ArticleCard } from '@/components/team/shared'
 import TeamSeasonCard from '@/components/team/shared/TeamSeasonCard'
 import TeamRosterHighlights from '@/components/team/shared/TeamRosterHighlights'
@@ -85,9 +85,6 @@ export default async function CubsHubPage() {
       {/* OrbNav removed — navigation handled by sidebar */}
 
       <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '24px', maxWidth: '1320px', margin: '0 auto' }}>
-        {/* Tool Grid */}
-        <ToolGrid teamSlug="chicago-cubs" accentColor="#0E3386" secondaryColor="#CC3433" />
-
         {/* Content Grid */}
         <style>{`@media (min-width: 1024px) { .hub-grid-cubs { grid-template-columns: 2fr 1fr !important; } }`}</style>
         <div className="hub-grid-cubs" style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '32px' }}>

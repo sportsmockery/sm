@@ -104,10 +104,10 @@ export default function TeamHeader({ team, rightSlot }: TeamHeaderProps) {
       {/* Right: header tools / actions slot */}
       {rightSlot && (
         <div
-          className="hidden md:block"
+          className="hidden lg:block"
           style={{
-            minWidth: 280,
-            maxWidth: 420,
+            flex: '1 1 auto',
+            maxWidth: 640,
           }}
         >
           {rightSlot}

@@ -230,7 +230,7 @@ export default function TeamHubLayout({
         style={{
           maxWidth: '1320px',
           margin: '0 auto',
-          padding: '48px 24px 48px',
+          padding: '32px 24px 48px',
           background: 'var(--sm-dark)',
         }}
       >

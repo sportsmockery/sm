@@ -94,8 +94,7 @@ export default function ToolGrid({ teamSlug, accentColor, secondaryColor, compac
       <div
         className={compact ? undefined : 'tool-grid'}
         style={compact ? {
-          display: 'grid',
-          gridTemplateColumns: 'repeat(2, 1fr)',
+          display: 'flex',
           gap: '8px',
         } : undefined}
       >
