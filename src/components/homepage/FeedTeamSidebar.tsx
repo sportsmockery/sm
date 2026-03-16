@@ -186,8 +186,8 @@ function CompactSeasonCard({ season, info, espnLogo }: { season: TeamSeasonOverv
           <Link href={`/${season.teamSlug}/stats`} style={{ fontSize: 11, color: 'var(--hp-muted-foreground)' }} className="hover:underline">Stats</Link>
           <Link href={`/${season.teamSlug}/schedule`} style={{ fontSize: 11, color: 'var(--hp-muted-foreground)' }} className="hover:underline">Schedule</Link>
         </div>
-        <Link href={`/${season.teamSlug}`} style={{ fontSize: 11, fontWeight: 600, color: '#BC0000' }} className="hover:underline">
-          Hub →
+        <Link href={`/${season.teamSlug}/stats`} style={{ fontSize: 11, fontWeight: 600, color: '#BC0000' }} className="hover:underline">
+          Team Stats →
         </Link>
       </div>
     </div>
