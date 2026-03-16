@@ -1,6 +1,7 @@
 import { Metadata } from 'next'
 import { TeamHubLayout, QuickStats } from '@/components/team'
 import { SectionHeader, ArticleCard } from '@/components/team/shared'
+import RecentHubUpdates from '@/components/hub/RecentHubUpdates'
 import TeamSeasonCard from '@/components/team/shared/TeamSeasonCard'
 import TeamRosterHighlights from '@/components/team/shared/TeamRosterHighlights'
 import TeamTrendingTopics from '@/components/team/shared/TeamTrendingTopics'
@@ -94,6 +95,8 @@ export default async function WhiteSoxHubPage() {
             <div className="lg:hidden">
               <TeamSeasonCard season={seasonOverview} />
             </div>
+
+            <RecentHubUpdates teamSlug="chicago-white-sox" />
 
             <section>
               <SectionHeader title="Latest White Sox News" />

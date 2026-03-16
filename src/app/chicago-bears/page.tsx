@@ -1,6 +1,7 @@
 import { Metadata } from 'next'
 import { TeamHubLayout, QuickStats } from '@/components/team'
 import { SectionHeader, ArticleCard } from '@/components/team/shared'
+import RecentHubUpdates from '@/components/hub/RecentHubUpdates'
 import {
   BearsSeasonCard,
   BearsRosterHighlights,
@@ -97,6 +98,9 @@ export default async function BearsHubPage() {
             <div className="lg:hidden">
               <BearsSeasonCard season={seasonOverview} />
             </div>
+
+            {/* Recent Hub Intel */}
+            <RecentHubUpdates teamSlug="chicago-bears" />
 
             {/* Latest Headlines */}
             <section>
