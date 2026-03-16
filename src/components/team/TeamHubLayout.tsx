@@ -4,6 +4,7 @@ import { useState, useEffect, useRef } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import TeamHeader from './TeamHeader'
+import ToolGrid from './ToolGrid'
 
 /**
  * Team Hub Layout Component
@@ -154,7 +155,16 @@ export default function TeamHubLayout({
     <div style={{ minHeight: '100vh', background: 'var(--sm-dark)' }}>
       {/* ===== COMPACT TEAM HEADER ===== */}
       <div ref={headerRef} style={{ maxWidth: '1320px', margin: '0 auto' }}>
-        <TeamHeader team={team} record={record || undefined} nextGame={nextGame || undefined} lastGame={lastGame || undefined} />
+        <TeamHeader
+          team={team}
+          rightSlot={
+            <ToolGrid
+              teamSlug={team.slug}
+              accentColor={team.secondaryColor}
+              secondaryColor={team.primaryColor}
+            />
+          }
+        />
       </div>
 
       {/* ===== STICKY SUBNAV ===== */}

@@ -135,6 +135,7 @@ export default function ScrollToTop() {
               alt="Scout"
               width={22}
               height={22}
+              loading="eager"
               style={{ borderRadius: '50%', flexShrink: 0, marginTop: 1 }}
             />
             <div style={{
@@ -212,7 +213,14 @@ export default function ScrollToTop() {
                 display: 'inline-block',
                 animation: 'scoutSpin 0.8s linear infinite',
               }}>
-                <Image src="/downloads/scout-v2.png" alt="" width={16} height={16} style={{ borderRadius: '50%' }} />
+                <Image
+                  src="/downloads/scout-v2.png"
+                  alt=""
+                  width={16}
+                  height={16}
+                  loading="eager"
+                  style={{ borderRadius: '50%' }}
+                />
               </span>
               Scout is thinking...
             </div>
@@ -251,6 +259,7 @@ export default function ScrollToTop() {
           alt="Scout AI"
           width={36}
           height={36}
+          loading="eager"
           style={{
             width: 36,
             height: 36,
