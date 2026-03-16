@@ -144,6 +144,40 @@ function RenderBlock({ block }: { block: ContentBlock }) {
 
     case 'social-embed':
       if (!block.data.url) return <EmptyState label="Social Embed — add a URL" />;
+      if (block.data.platform === 'youtube') {
+        const ytMatch = block.data.url.match(/(?:watch\?v=|youtu\.be\/|embed\/)([a-zA-Z0-9_-]+)/)
+        const videoId = ytMatch?.[1]
+        if (videoId) {
+          return (
+            <PreviewSection>
+              <div className="relative w-full rounded-xl overflow-hidden" style={{ aspectRatio: '16/9' }}>
+                <iframe
+                  src={`https://www.youtube.com/embed/${videoId}`}
+                  className="absolute inset-0 w-full h-full"
+                  allowFullScreen
+                  title="YouTube video"
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                />
+              </div>
+            </PreviewSection>
+          )
+        }
+      }
+      if (block.data.platform === 'twitter') {
+        const tweetIdMatch = block.data.url.match(/status\/(\d+)/)
+        if (tweetIdMatch) {
+          return (
+            <PreviewSection>
+              <div className="rounded-xl overflow-hidden" style={{ maxWidth: 550, margin: '0 auto' }}>
+                <blockquote className="twitter-tweet" data-dnt="true">
+                  <a href={block.data.url}>{block.data.url}</a>
+                </blockquote>
+                <script async src="https://platform.twitter.com/widgets.js" />
+              </div>
+            </PreviewSection>
+          )
+        }
+      }
       return (
         <PreviewSection>
           <div

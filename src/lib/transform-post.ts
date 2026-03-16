@@ -304,6 +304,45 @@ export function transformPostContent(rawContent: string, title: string): Transfo
 
       case 'figure':
       case 'img': {
+        // Check for Twitter/X embed
+        const tweetUrlMatch = el.rawHtml.match(/twitter\.com\/\w+\/status\/(\d+)/)
+          || el.rawHtml.match(/x\.com\/\w+\/status\/(\d+)/)
+        if (tweetUrlMatch) {
+          // Extract the full tweet URL from the anchor tag
+          const tweetHrefMatch = el.rawHtml.match(/href="(https?:\/\/(?:twitter|x)\.com\/[^"]+)"/)
+          const tweetUrl = tweetHrefMatch ? tweetHrefMatch[1].replace(/\?.*$/, '') : `https://twitter.com/i/status/${tweetUrlMatch[1]}`
+          blocks.push({
+            id: blockId('embed', blockIndex++),
+            type: 'social-embed',
+            data: { url: tweetUrl, platform: 'twitter' },
+          } as ContentBlock)
+          break
+        }
+
+        // Check for YouTube embed
+        const ytIframeMatch = el.rawHtml.match(/youtube\.com\/embed\/([a-zA-Z0-9_-]+)/)
+          || el.rawHtml.match(/data-video_id="([a-zA-Z0-9_-]+)"/)
+        if (ytIframeMatch) {
+          const videoId = ytIframeMatch[1]
+          blocks.push({
+            id: blockId('embed', blockIndex++),
+            type: 'social-embed',
+            data: { url: `https://www.youtube.com/watch?v=${videoId}`, platform: 'youtube' },
+          } as ContentBlock)
+          break
+        }
+
+        // Check for Instagram embed
+        const igMatch = el.rawHtml.match(/instagram\.com\/(?:p|reel)\/([a-zA-Z0-9_-]+)/)
+        if (igMatch) {
+          blocks.push({
+            id: blockId('embed', blockIndex++),
+            type: 'social-embed',
+            data: { url: `https://www.instagram.com/p/${igMatch[1]}/`, platform: 'instagram' },
+          } as ContentBlock)
+          break
+        }
+
         // Extract image src from figure or img tag
         const srcMatch = el.rawHtml.match(/src="([^"]+)"/i)
         const altMatch = el.rawHtml.match(/alt="([^"]*)"?/i)
