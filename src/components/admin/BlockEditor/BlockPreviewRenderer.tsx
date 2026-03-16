@@ -45,7 +45,7 @@ function RenderBlock({ block }: { block: ContentBlock }) {
       if (!block.data.html) {
         return (
           <PreviewSection>
-            <p className="text-[18px] leading-[1.7]" style={{ color: BRAND.white }}>
+            <p className="text-[18px] leading-[1.7]" style={{ color: 'var(--sm-text, #0B0F14)' }}>
               <span className="text-slate-600 italic text-[16px]">Write your paragraph...</span>
             </p>
           </PreviewSection>
@@ -55,7 +55,7 @@ function RenderBlock({ block }: { block: ContentBlock }) {
         <PreviewSection>
           <div
             className="text-[18px] leading-[1.7]"
-            style={{ color: BRAND.white }}
+            style={{ color: 'var(--sm-text, #0B0F14)' }}
             dangerouslySetInnerHTML={{ __html: block.data.html }}
             suppressHydrationWarning
           />
@@ -68,7 +68,7 @@ function RenderBlock({ block }: { block: ContentBlock }) {
       if (!block.data.text) {
         return (
           <div className="mb-4 mt-8">
-            <Tag className={`${sizes[block.data.level]} font-medium tracking-tight`} style={{ color: BRAND.white }}>
+            <Tag className={`${sizes[block.data.level]} font-medium tracking-tight`} style={{ color: 'var(--sm-text, #0B0F14)' }}>
               <span className="text-slate-600 italic font-normal">Section heading...</span>
             </Tag>
           </div>
@@ -78,7 +78,7 @@ function RenderBlock({ block }: { block: ContentBlock }) {
         <div className="mb-4 mt-8">
           <Tag
             className={`${sizes[block.data.level]} font-medium tracking-tight`}
-            style={{ color: BRAND.white }}
+            style={{ color: 'var(--sm-text, #0B0F14)' }}
             dangerouslySetInnerHTML={{ __html: block.data.text }}
             suppressHydrationWarning
           />
@@ -127,7 +127,7 @@ function RenderBlock({ block }: { block: ContentBlock }) {
               backgroundColor: 'rgba(0,212,255,0.03)',
             }}
           >
-            <p className="text-[16px] leading-relaxed italic mb-3" style={{ color: BRAND.white }}>
+            <p className="text-[16px] leading-relaxed italic mb-3" style={{ color: 'var(--sm-text, #0B0F14)' }}>
               &ldquo;{block.data.text}&rdquo;
             </p>
             <footer className="flex items-center gap-2">
@@ -267,7 +267,7 @@ function RenderBlock({ block }: { block: ContentBlock }) {
                 </span>
                 <div className="flex-1">
                   <div className="text-[13px] text-slate-400 mb-0.5">{pick.team}</div>
-                  <div className="text-sm font-medium" style={{ color: BRAND.white }}>{pick.player}</div>
+                  <div className="text-sm font-medium" style={{ color: 'var(--sm-text, #0B0F14)' }}>{pick.player}</div>
                 </div>
                 <div className="text-right">
                   <div className="text-[13px] font-bold" style={{ color: BRAND.cyan }}>{pick.position}</div>
@@ -340,7 +340,7 @@ function RenderBlock({ block }: { block: ContentBlock }) {
       if (!block.data.text) return <EmptyState label="Hot Take — add your bold claim" accent={BRAND.gold} />;
       return (
         <TopTakeBlock>
-          <p className="text-[16px] font-medium leading-relaxed" style={{ color: BRAND.white }}>{block.data.text}</p>
+          <p className="text-[16px] font-medium leading-relaxed" style={{ color: 'var(--sm-text, #0B0F14)' }}>{block.data.text}</p>
         </TopTakeBlock>
       );
 
@@ -351,7 +351,7 @@ function RenderBlock({ block }: { block: ContentBlock }) {
           {block.data.timestamp && (
             <span className="text-[13px] text-slate-400 mb-1 block">{block.data.timestamp}</span>
           )}
-          <div className="text-sm leading-relaxed" style={{ color: BRAND.white }} dangerouslySetInnerHTML={{ __html: block.data.text }} suppressHydrationWarning />
+          <div className="text-sm leading-relaxed" style={{ color: 'var(--sm-text, #0B0F14)' }} dangerouslySetInnerHTML={{ __html: block.data.text }} suppressHydrationWarning />
         </BreakingUpdateBlock>
       );
 
