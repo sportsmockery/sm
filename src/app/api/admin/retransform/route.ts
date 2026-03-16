@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { supabaseAdmin } from '@/lib/supabase-server'
 import { transformPostContent } from '@/lib/transform-post'
 import { serializeDocument } from '@/components/admin/BlockEditor/serializer'
+import { revalidatePath } from 'next/cache'
 
 export const maxDuration = 300
 export const dynamic = 'force-dynamic'
@@ -36,7 +37,7 @@ export async function POST(request: NextRequest) {
     // Get posts that have SM_BLOCKS content (already transformed)
     let query = supabaseAdmin
       .from('sm_posts')
-      .select('id, slug, title, wp_id, excerpt, featured_image, category_id, published_at')
+      .select('id, slug, title, wp_id, excerpt, featured_image, category_id, published_at, category:sm_categories!category_id(slug)')
       .eq('status', 'published')
       .eq('template_version', 1)
       .not('wp_id', 'is', null)
@@ -99,6 +100,10 @@ export async function POST(request: NextRequest) {
           errors.push(`${post.slug}: DB update failed: ${updateError.message}`)
           failed++
         } else {
+          // Revalidate the article page cache
+          const cat = Array.isArray((post as any).category) ? (post as any).category[0] : (post as any).category
+          const catSlug = cat?.slug || 'news'
+          try { revalidatePath(`/${catSlug}/${post.slug}`) } catch {}
           processed++
         }
       } catch (err) {
