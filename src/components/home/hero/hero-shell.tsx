@@ -57,7 +57,7 @@ export function HeroShell({
               alt="SM Edge"
               width={720}
               height={264}
-              className="w-full max-w-[720px] h-auto object-contain opacity-80"
+              className="w-[720px] h-[264px] object-contain opacity-80"
               priority
             />
           )}
