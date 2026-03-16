@@ -2,17 +2,7 @@
 
 import Image from "next/image"
 import Link from "next/link"
-import { ArrowRightLeft, ClipboardPen, MessageSquare, BarChart3, Video, Volume2 } from "lucide-react"
 import FeedTeamSidebar from "@/components/homepage/FeedTeamSidebar"
-
-const EDGE_TOOLS = [
-  { icon: ArrowRightLeft, label: 'Trade Simulator', href: '/gm' },
-  { icon: ClipboardPen, label: 'Mock Draft', href: '/mock-draft' },
-  { icon: MessageSquare, label: 'Fan Chat', href: '/fan-chat' },
-  { icon: BarChart3, label: 'Team Stats', href: '/chicago-bears' },
-  { icon: Video, label: 'Vision Theater', href: '/bears-film-room' },
-  { icon: Volume2, label: 'Hands-Free Audio', href: '/audio' },
-]
 
 interface TrendsSidebarProps {
   selectedTeam: string
@@ -42,64 +32,8 @@ export default function TrendsSidebar({ selectedTeam }: TrendsSidebarProps) {
         </span>
       </Link>
 
-      {/* SM EDGE Features — right sidebar when For You is selected */}
-      {isForYou && (
-        <div className="hp-sidebar-card overflow-hidden" style={{ padding: 0 }}>
-          <div style={{ padding: '12px 16px 8px', fontSize: 14, fontWeight: 700, letterSpacing: '-0.01em' }}>
-            <span style={{ color: '#00D4FF' }}>SM</span> <span style={{ color: '#BC0000' }}>&#x2736;</span> <span style={{ color: '#00D4FF' }}>EDGE Features</span>
-          </div>
-          {EDGE_TOOLS.map((item) => (
-            <Link
-              key={item.label}
-              href={item.href}
-              className="hp-tap-target"
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: 12,
-                padding: '8px 16px',
-                fontSize: 14,
-                color: 'var(--hp-foreground)',
-                textDecoration: 'none',
-                transition: 'background 0.15s',
-              }}
-              onMouseEnter={(e) => { e.currentTarget.style.background = 'var(--hp-muted)' }}
-              onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent' }}
-            >
-              <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg" style={{ background: 'var(--hp-muted)', color: '#00D4FF', border: '1px solid #00D4FF' }}>
-                <item.icon className="h-5 w-5" />
-              </div>
-              <span style={{ flex: 1 }}>{item.label}</span>
-              {item.label === 'Fan Chat' && (
-                <span
-                  style={{
-                    flexShrink: 0,
-                    display: 'inline-flex',
-                    alignItems: 'center',
-                    gap: 5,
-                    padding: '3px 8px',
-                    borderRadius: 'var(--sm-radius-pill)',
-                    fontSize: 10,
-                    fontWeight: 700,
-                    letterSpacing: '0.05em',
-                    color: '#22c55e',
-                    border: '1px solid rgba(34, 197, 94, 0.4)',
-                    background: 'rgba(34, 197, 94, 0.12)',
-                  }}
-                >
-                  <span style={{ width: 5, height: 5, borderRadius: '50%', background: '#22c55e' }} />
-                  LIVE
-                </span>
-              )}
-            </Link>
-          ))}
-        </div>
-      )}
-
-      {/* Team Sidebar - shown when a team is selected */}
-      {!isForYou && selectedTeam && (
-        <FeedTeamSidebar selectedTeam={selectedTeam} />
-      )}
+      {/* Team Sidebar — always visible, defaults to Bears when on For You */}
+      <FeedTeamSidebar selectedTeam={isForYou ? 'bears' : selectedTeam} />
 
       {/* Footer */}
       <div className="px-4 mt-auto pb-4" style={{ fontSize: 13, color: 'var(--hp-muted-foreground)' }}>
