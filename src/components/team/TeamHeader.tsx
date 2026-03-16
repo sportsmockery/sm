@@ -106,10 +106,8 @@ export default function TeamHeader({ team, rightSlot }: TeamHeaderProps) {
         <div
           className="hidden md:block"
           style={{
-            minWidth: 320,
-            maxWidth: 520,
-            transform: 'scale(0.9)',
-            transformOrigin: 'top right',
+            minWidth: 280,
+            maxWidth: 420,
           }}
         >
           {rightSlot}

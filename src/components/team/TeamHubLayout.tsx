@@ -162,6 +162,7 @@ export default function TeamHubLayout({
               teamSlug={team.slug}
               accentColor={team.secondaryColor}
               secondaryColor={team.primaryColor}
+              compact
             />
           }
         />

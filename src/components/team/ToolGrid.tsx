@@ -7,6 +7,7 @@ interface ToolGridProps {
   teamSlug: string
   accentColor: string
   secondaryColor: string
+  compact?: boolean
 }
 
 interface ToolCard {
@@ -78,13 +79,26 @@ function getTools(teamSlug: string, accentColor: string): ToolCard[] {
   ]
 }
 
-export default function ToolGrid({ teamSlug, accentColor, secondaryColor }: ToolGridProps) {
+export default function ToolGrid({ teamSlug, accentColor, secondaryColor, compact }: ToolGridProps) {
   const prefersReducedMotion = useReducedMotion()
   const tools = getTools(teamSlug, accentColor)
 
+  const iconSize = compact ? '32px' : '44px'
+  const iconRadius = compact ? '8px' : '12px'
+  const cardPadding = compact ? '12px 14px' : '24px'
+  const fontSize = compact ? '13px' : '16px'
+  const gap = compact ? '8px' : '12px'
+
   return (
-    <section style={{ marginBottom: '16px' }} className="team-tool-grid-section">
-      <div className="tool-grid">
+    <section style={{ marginBottom: compact ? '0' : '16px' }} className="team-tool-grid-section">
+      <div
+        className={compact ? undefined : 'tool-grid'}
+        style={compact ? {
+          display: 'grid',
+          gridTemplateColumns: 'repeat(2, 1fr)',
+          gap: '8px',
+        } : undefined}
+      >
         {tools.map((tool, index) => (
           <motion.div
             key={tool.title}
@@ -110,7 +124,7 @@ export default function ToolGrid({ teamSlug, accentColor, secondaryColor }: Tool
                 className="glass-card"
                 style={{
                   height: '100%',
-                  padding: '24px',
+                  padding: cardPadding,
                   display: 'flex',
                   flexDirection: 'column',
                   position: 'relative',
@@ -121,12 +135,12 @@ export default function ToolGrid({ teamSlug, accentColor, secondaryColor }: Tool
                     {tool.topRightBadge}
                   </div>
                 )}
-                <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap }}>
                   <div
                     style={{
-                      width: '44px',
-                      height: '44px',
-                      borderRadius: '12px',
+                      width: iconSize,
+                      height: iconSize,
+                      borderRadius: iconRadius,
                       display: 'flex',
                       alignItems: 'center',
                       justifyContent: 'center',
@@ -140,18 +154,18 @@ export default function ToolGrid({ teamSlug, accentColor, secondaryColor }: Tool
                   </div>
                   <h3
                     style={{
-                     
                       color: 'var(--sm-text)',
-                      fontSize: '16px',
+                      fontSize,
                       fontWeight: 700,
                       letterSpacing: '-0.3px',
                       margin: 0,
+                      lineHeight: 1.2,
                     }}
                   >
                     {tool.title}
                   </h3>
                 </div>
-                <div style={{ flex: 1 }}>{tool.preview}</div>
+                {!compact && <div style={{ flex: 1 }}>{tool.preview}</div>}
               </div>
             </Link>
           </motion.div>
