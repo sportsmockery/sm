@@ -36,7 +36,7 @@ export async function GET(request: NextRequest) {
       const { data, error } = await datalabAdmin
         .from(table)
         .select('*')
-        .in('status', ['in_progress', 'pre', 'live', 'upcoming'])
+        .in('status', ['in_progress', 'pre', 'live', 'upcoming', 'final'])
         .order('updated_at', { ascending: false })
         .limit(3)
 
