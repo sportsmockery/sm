@@ -54,8 +54,8 @@ export async function GET(
   const { slug } = await params;
   const voiceParam = req.nextUrl.searchParams.get("voice") || "will";
 
-  // Validate voice parameter
-  const voiceId = VOICE_IDS[voiceParam] || VOICE_IDS.will;
+  // Validate voice parameter (overridden for some scout-specific slugs below)
+  let voiceId = VOICE_IDS[voiceParam] || VOICE_IDS.will;
 
   // Check for API key
   const apiKey = process.env.ELEVENLABS_API_KEY;
@@ -69,7 +69,44 @@ export async function GET(
   try {
     let plainText: string;
 
-    if (slug === 'scout-briefing') {
+    if (slug === 'scout-insight') {
+      // Scout Insight card — bullets passed via query (?b=...&b=...)
+      const bullets = req.nextUrl.searchParams.getAll('b').map(b => b.trim()).filter(Boolean);
+      if (bullets.length === 0) {
+        return NextResponse.json(
+          { error: "No insight bullets provided" },
+          { status: 400 }
+        );
+      }
+
+      // Force Scout voice for insight reads
+      voiceId = VOICE_IDS.scout;
+
+      const greetings = [
+        "What's up, this is your pal Scout with some insight.",
+        "Hey Chicago, Scout here — let's break down what you need to know.",
+        "Scout checking in — here's what's happening with your teams.",
+        "What's good, Chicago — Scout's got the latest for you.",
+        "Your favorite AI analyst here — let me catch you up real quick.",
+      ];
+
+      const closers = [
+        "That's the rundown — tap in if you want to dig deeper.",
+        "That's what I got for now. Ask me anything, I'm always here.",
+        "There you have it, Chicago. Let's talk if you want the full breakdown.",
+        "That's your snapshot — hit me up for the details behind the numbers.",
+        "And that's the intel. You know where to find me.",
+      ];
+
+      // Deterministic rotation based on first bullet so the same card is stable
+      const seedSource = bullets[0] || '';
+      const seed = seedSource.split('').reduce((acc, ch) => acc + ch.charCodeAt(0), 0);
+      const greeting = greetings[seed % greetings.length];
+      const closer = closers[seed % closers.length];
+
+      const insightsText = bullets.join('. ') + (bullets.length ? '.' : '');
+      plainText = `${greeting} ${insightsText} ${closer}`;
+    } else if (slug === 'scout-briefing') {
       // Special case: fetch live Scout briefing from edge/scout API
       const briefingPrompt = `Summarize the biggest Chicago sports news from the last 24 hours for a fan. Keep it conversational like a 15-year-old Chicago sports fan would talk. Cover Bears, Bulls, Blackhawks, Cubs, and White Sox if there is news. Keep it under 2000 characters. No markdown formatting.`;
       const baseUrl = req.nextUrl.origin;
@@ -86,6 +123,8 @@ export async function GET(
           { status: 503 }
         );
       }
+      // Force Scout voice for briefing
+      voiceId = VOICE_IDS.scout;
       plainText = `Here's your Scout Report. ${briefingText}`;
     } else {
       // Standard article: fetch from database

@@ -50,7 +50,8 @@ const ICON_MAP: Record<string, string> = {
   'icon-bell': '🔔',
   'icon-flag': '🚩',
   'icon-thumbs-up': '👍',
-  'icon-thumbs-down': '👎',
+  // Hide thumbs-down icon across the site (no render)
+  'icon-thumbs-down': '',
 }
 
 /**
