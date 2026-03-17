@@ -51,12 +51,20 @@ function NFLSituation({ play, game }: { play: Play & { down?: number; distance?:
   )
 }
 
-function MLBSituation({ play }: { play: Play }) {
-  // MLB situation from play context - diamond graphic
+function MLBSituation({ play }: { play: Play & { outs?: number } }) {
+  const label = play.period_label || ''
+  const isTop = /top|▲/i.test(label)
+  const isBot = /bot|bottom|▼/i.test(label)
+  const arrow = isTop ? '▲' : isBot ? '▼' : ''
+  const inningNum = label.replace(/[^\d]/g, '') || String(play.period || '')
+
   return (
     <div style={{ backgroundColor: 'var(--sm-card)', borderBottom: '1px solid var(--sm-border)' }}>
       <div className="max-w-[1200px] mx-auto px-4 py-2 flex items-center justify-center gap-4 text-sm">
-        <span style={{ color: 'var(--sm-text-muted)' }}>{play.period_label} {play.game_clock}</span>
+        <span style={{ color: 'var(--sm-text)' }}>{arrow} Inning {inningNum}</span>
+        {play.outs != null && (
+          <span style={{ color: 'var(--sm-text-muted)' }}>{play.outs} {play.outs === 1 ? 'Out' : 'Outs'}</span>
+        )}
       </div>
     </div>
   )

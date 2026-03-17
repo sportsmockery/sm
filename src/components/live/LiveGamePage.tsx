@@ -32,9 +32,8 @@ export default function LiveGamePage({ sport, gameId }: LiveGamePageProps) {
   // Loading state
   if (isLoading) {
     return (
-      <div className="sm-hero-bg" style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-        <div className="sm-grid-overlay" />
-        <div style={{ width: 32, height: 32, border: '3px solid var(--sm-red)', borderTopColor: 'transparent', borderRadius: '50%', animation: 'spin-2030 1s linear infinite' }} />
+      <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#FAFAFB' }}>
+        <div style={{ width: 32, height: 32, border: '3px solid #BC0000', borderTopColor: 'transparent', borderRadius: '50%', animation: 'spin-2030 1s linear infinite' }} />
       </div>
     )
   }
@@ -42,8 +41,7 @@ export default function LiveGamePage({ sport, gameId }: LiveGamePageProps) {
   // Error state
   if (error || !game) {
     return (
-      <div className="sm-hero-bg" style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-        <div className="sm-grid-overlay" />
+      <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#FAFAFB' }}>
         <div className="glass-card" style={{ textAlign: 'center', maxWidth: 400, position: 'relative', zIndex: 1 }}>
           <h1 style={{ fontFamily: 'var(--sm-font-heading)', fontSize: 24, fontWeight: 700, color: 'var(--sm-text)', marginBottom: 8 }}>
             {error || 'Game not found'}
@@ -78,11 +76,7 @@ export default function LiveGamePage({ sport, gameId }: LiveGamePageProps) {
   const tabLabels = { plays: 'Play-by-Play', boxscore: 'Box Score', stats: 'Team Stats' }
 
   return (
-    <div className="sm-hero-bg" style={{ minHeight: '100vh' }}>
-      <div className="sm-grid-overlay" />
-      {/* Game Switcher */}
-      <GameSwitcher currentGameId={gameId} />
-
+    <div style={{ minHeight: '100vh', background: '#FAFAFB' }}>
       {/* Score Header (always shown) */}
       <ScoreHeader game={game} />
 

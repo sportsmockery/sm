@@ -207,7 +207,7 @@ export default function LiveGamesTopBar({ teamFilter, isHomepage = false }: Live
   }
 
   return (
-    <div className="bg-gradient-to-r from-red-900 via-red-800 to-red-900 border-b border-[#BC0000]">
+    <div style={{ background: '#00D4FF', borderBottom: '1px solid rgba(0,180,220,0.6)' }}>
       <div className="max-w-[1200px] mx-auto">
         {/* Scrollable container for multiple games */}
         <div className="flex items-center overflow-x-auto hide-scrollbar">
@@ -219,17 +219,18 @@ export default function LiveGamesTopBar({ teamFilter, isHomepage = false }: Live
               <Link
                 key={game.game_id}
                 href={getLivePageUrl(game)}
-                className="flex items-center gap-2 sm:gap-3 px-3 sm:px-4 py-2 hover:bg-white/10 transition-colors min-w-fit border-r border-[#BC0000]/50 last:border-r-0"
+                className="flex items-center gap-2 sm:gap-3 px-3 sm:px-4 py-1.5 my-1 mx-1 transition-colors min-w-fit"
+                style={{ background: '#FAFAFB', borderRadius: 999, color: '#0B0F14' }}
               >
                 {/* Live/Starting Badge */}
                 <div className="flex items-center gap-1.5 flex-shrink-0">
                   {isGameLive(game) ? (
                     <>
                       <span className="relative flex h-2 w-2">
-                        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
-                        <span className="relative inline-flex rounded-full h-full w-full bg-red-500"></span>
+                        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
+                        <span className="relative inline-flex rounded-full h-full w-full bg-green-500"></span>
                       </span>
-                      <span className="text-[10px] sm:text-xs font-bold uppercase tracking-wide text-[#BC0000]">
+                      <span className="text-[10px] sm:text-xs font-bold uppercase tracking-wide" style={{ color: '#16a34a' }}>
                         LIVE
                       </span>
                     </>
@@ -239,7 +240,7 @@ export default function LiveGamesTopBar({ teamFilter, isHomepage = false }: Live
                         <span className="animate-pulse absolute inline-flex h-full w-full rounded-full bg-yellow-400 opacity-75"></span>
                         <span className="relative inline-flex rounded-full h-full w-full bg-yellow-500"></span>
                       </span>
-                      <span className="text-[10px] sm:text-xs font-bold uppercase tracking-wide text-yellow-300">
+                      <span className="text-[10px] sm:text-xs font-bold uppercase tracking-wide" style={{ color: '#ca8a04' }}>
                         SOON
                       </span>
                     </>
@@ -271,23 +272,23 @@ export default function LiveGamesTopBar({ teamFilter, isHomepage = false }: Live
                 </div>
 
                 {/* Score */}
-                <div className="flex items-center gap-1 text-white font-bold text-sm sm:text-base flex-shrink-0">
-                  <span className={score.chicagoScore > score.opponentScore ? 'text-[#00D4FF]' : ''}>
+                <div className="flex items-center gap-1 font-bold text-sm sm:text-base flex-shrink-0" style={{ color: '#0B0F14' }}>
+                  <span className={score.chicagoScore > score.opponentScore ? 'text-[#16a34a]' : ''}>
                     {score.chicagoAbbr} {score.chicagoScore}
                   </span>
-                  <span className="text-white/50">–</span>
+                  <span style={{ color: '#999' }}>–</span>
                   <span className={score.opponentScore > score.chicagoScore ? 'text-[#BC0000]' : ''}>
                     {score.opponentScore} {score.opponentAbbr}
                   </span>
                 </div>
 
                 {/* Period/Clock */}
-                <div className="text-white/60 text-xs sm:text-sm flex-shrink-0">
+                <div className="text-xs sm:text-sm flex-shrink-0" style={{ color: '#666' }}>
                   {getStatusText(game)}
                 </div>
 
                 {/* Arrow indicator */}
-                <svg className="w-3 h-3 text-white/40 flex-shrink-0 hidden sm:block" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg className="w-3 h-3 flex-shrink-0 hidden sm:block" style={{ color: '#999' }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                 </svg>
               </Link>

@@ -426,23 +426,7 @@ export default async function ArticlePage({ params, searchParams }: ArticlePageP
               </ol>
             </nav>
 
-            {/* Author */}
-            {author && (
-              <div style={{ marginBottom: 16 }}>
-                <Link href={`/author/${author.slug || author.id}`} style={{ display: 'flex', alignItems: 'center', gap: 10, textDecoration: 'none' }}>
-                  {author.avatar_url ? (
-                    <div style={{ width: 36, height: 36, borderRadius: '50%', overflow: 'hidden', position: 'relative', flexShrink: 0 }}>
-                      <Image src={author.avatar_url} alt={author.display_name} fill style={{ objectFit: 'cover' }} />
-                    </div>
-                  ) : (
-                    <div style={{ width: 36, height: 36, borderRadius: '50%', background: 'var(--sm-gradient-subtle, #eee)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 14, fontWeight: 600, color: 'var(--sm-text)', flexShrink: 0 }}>
-                      {author.display_name.charAt(0)}
-                    </div>
-                  )}
-                  <span style={{ fontSize: 15, fontWeight: 600, color: 'var(--sm-text)' }}>{author.display_name}</span>
-                </Link>
-              </div>
-            )}
+
 
             {/* Article Audio Player */}
             {audioInfo && (
