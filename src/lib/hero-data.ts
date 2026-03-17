@@ -6,6 +6,7 @@
 /* ------------------------------------------------------------------ */
 
 import { supabaseAdmin } from "@/lib/supabase-server"
+import { datalabAdmin } from "@/lib/supabase-datalab"
 import type {
   FeaturedStory,
   GameContext,
@@ -216,43 +217,84 @@ async function fetchUserPrimaryTeam(userId: string): Promise<string | null> {
 /* ── Live games ── */
 
 async function fetchLiveGames(): Promise<GameContext | null> {
-  if (!supabaseAdmin) return null
-
   try {
-    const { data: registry } = await supabaseAdmin
+    // live_games_registry is in DataLab, not main SM database
+    const { data: registry } = await datalabAdmin
       .from("live_games_registry")
       .select("*")
-      .in("status", ["live", "pre"])
+      .in("status", ["active"])
       .limit(5)
 
     if (!registry || registry.length === 0) return null
 
-    // Prefer live games over pre-game
-    const game = registry.find((g: any) => g.status === "live") || registry[0]
+    // Pick the first active game entry
+    const entry = registry[0]
+    const teamSlug = entry.team_id || "bears"
 
-    // Build matchup string from available data
-    const matchup = game.matchup || `${game.home_team || "Home"} vs ${game.away_team || "Away"}`
-    const kickoffLabel =
-      game.status === "live"
-        ? game.game_time || "LIVE NOW"
-        : game.start_time
-          ? new Date(game.start_time).toLocaleTimeString("en-US", {
-              hour: "numeric",
-              minute: "2-digit",
-            })
-          : "Today"
+    // Fetch game details from the team's live table
+    const liveTable = `${teamSlug}_live`
+    const { data: liveGames } = await datalabAdmin
+      .from(liveTable)
+      .select("*")
+      .eq("game_id", entry.game_id)
+      .limit(1)
 
-    // Determine team hub link
-    const teamSlug = game.team_key || "bears"
-    const href = TEAM_HUB_HREF[teamSlug] || "/chicago-bears"
+    const game = liveGames?.[0]
+
+    if (!game) {
+      // Fallback: use registry data only
+      const href = TEAM_HUB_HREF[teamSlug] || `/chicago-${teamSlug}`
+      return {
+        matchup: `${TEAM_DISPLAY[teamSlug] || teamSlug} — Game Day`,
+        kickoffLabel: "Today",
+        href,
+      }
+    }
+
+    // Build matchup from live table data
+    const homeName = game.home_team_name || "Home"
+    const awayName = game.away_team_name || "Away"
+    const matchup = `${awayName} at ${homeName}`
+
+    // Determine kickoff label based on game status
+    let kickoffLabel: string
+    const gameStatus = (game.status || "").toLowerCase()
+    if (gameStatus === "in_progress" || gameStatus === "in progress" || gameStatus === "live") {
+      const period = game.period_label || `Q${game.period || ""}`
+      const clock = game.clock || ""
+      kickoffLabel = clock ? `LIVE — ${period} ${clock}` : `LIVE — ${period}`
+    } else if (game.game_date) {
+      // Pre-game: show start time
+      const startTime = new Date(game.game_date)
+      kickoffLabel = `Today @ ${startTime.toLocaleTimeString("en-US", {
+        hour: "numeric",
+        minute: "2-digit",
+        timeZone: "America/Chicago",
+      })} CT`
+      // Add venue if available
+      if (game.venue_name) {
+        kickoffLabel += ` — ${game.venue_name}`
+      }
+    } else {
+      kickoffLabel = "Today"
+    }
+
+    const href = TEAM_HUB_HREF[teamSlug] || `/chicago-${teamSlug}`
+
+    // Build storyline from broadcast info if available
+    let storyline: string | undefined
+    if (game.broadcast_network) {
+      storyline = `Watch on ${game.broadcast_network}`
+    }
 
     return {
       matchup,
       kickoffLabel,
       href,
-      storyline: game.storyline || undefined,
+      storyline,
     }
-  } catch {
+  } catch (e) {
+    console.error("[hero-data] fetchLiveGames error:", e)
     return null
   }
 }
