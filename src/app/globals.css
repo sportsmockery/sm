@@ -3736,7 +3736,7 @@ main {
 .live-strip {
   position: relative;
   z-index: 85;
-  height: 32px;
+  min-height: 36px;
   background: rgba(0, 0, 0, 0.92);
   border-bottom: 1px solid rgba(34, 197, 94, 0.25);
   display: flex;
@@ -3746,8 +3746,8 @@ main {
 }
 
 [data-theme="light"] .live-strip {
-  background: rgba(245, 245, 245, 0.95);
-  border-bottom-color: rgba(34, 197, 94, 0.12);
+  background: #00D4FF;
+  border-bottom-color: rgba(0, 180, 220, 0.6);
 }
 
 .live-strip-inner {
@@ -3789,11 +3789,12 @@ main {
 
 [data-theme="light"] .live-strip-chip {
   color: #1a1a1a;
-  border-color: rgba(34, 197, 94, 0.2);
+  border-color: rgba(0, 0, 0, 0.1);
+  background: rgba(255, 255, 255, 0.85);
 }
 
 [data-theme="light"] .live-strip-chip:hover {
-  background: rgba(34, 197, 94, 0.08);
+  background: rgba(255, 255, 255, 1);
 }
 
 /* Badge */
