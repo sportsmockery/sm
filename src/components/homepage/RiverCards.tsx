@@ -1018,10 +1018,10 @@ interface VideoCardProps extends BaseCardProps {
 }
 
 export function VideoCard({ title, duration, source, teaser, thumbnailUrl, team, teamColor, timestamp, stats, slug, categorySlug, videoId, isShort }: VideoCardProps) {
+  const [playing, setPlaying] = useState(false)
   const teamHex = teamColor
   const articleUrl = slug && categorySlug ? `/${categorySlug}/${slug}` : undefined
-  const youtubeUrl = videoId ? (isShort ? `https://www.youtube.com/shorts/${videoId}` : `https://www.youtube.com/watch?v=${videoId}`) : undefined
-  const linkUrl = articleUrl || youtubeUrl
+  const embedUrl = videoId ? `https://www.youtube.com/embed/${videoId}?autoplay=1&rel=0` : undefined
 
   return (
     <article className="hp-feed-card hp-card-enter">
@@ -1033,35 +1033,63 @@ export function VideoCard({ title, duration, source, teaser, thumbnailUrl, team,
         <TeamTag team={team} teamHex={teamHex} />
       </div>
 
-      {linkUrl ? (
-        <a href={linkUrl} target={youtubeUrl ? '_blank' : undefined} rel={youtubeUrl ? 'noopener noreferrer' : undefined}>
+      {articleUrl ? (
+        <Link href={articleUrl}>
           <h2 className="hover:underline" style={{ fontSize: 21, fontWeight: 700, lineHeight: 1.25, letterSpacing: '-0.02em', color: 'var(--hp-foreground)' }}>{title}</h2>
-        </a>
+        </Link>
       ) : (
         <h2 style={{ fontSize: 21, fontWeight: 700, lineHeight: 1.25, letterSpacing: '-0.02em', color: 'var(--hp-foreground)' }}>{title}</h2>
       )}
       <p className="mt-2.5 line-clamp-2" style={{ fontSize: 15, lineHeight: 1.65, color: 'var(--hp-foreground)', opacity: 0.7 }}>{teaser}</p>
 
-      <a href={linkUrl || '#'} target={youtubeUrl ? '_blank' : undefined} rel={youtubeUrl ? 'noopener noreferrer' : undefined} className="mt-4 relative rounded-2xl overflow-hidden group shadow-md block" style={{ background: '#000', aspectRatio: isShort ? '9/16' : '16/9', maxHeight: isShort ? 400 : undefined }}>
-        <img
-          src={thumbnailUrl}
-          alt={title}
-          className="w-full h-full object-cover group-hover:scale-105 transition-all duration-300"
-          style={{ opacity: 0.9 }}
-        />
-        <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity" style={{ background: 'linear-gradient(to top, rgba(0,0,0,0.6), transparent, transparent)' }} />
-        <div className="absolute inset-0 flex items-center justify-center">
-          <div className="h-16 w-16 rounded-full flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform" style={{ background: 'rgba(255,255,255,0.95)' }}>
-            <Play className="h-7 w-7 ml-1" style={{ color: '#000' }} fill="#000" />
-          </div>
+      {/* Video container — centered, plays inline */}
+      <div className="mt-4 flex justify-center">
+        <div
+          className="relative rounded-2xl overflow-hidden shadow-md w-full"
+          style={{
+            background: '#000',
+            aspectRatio: isShort ? '9/16' : '16/9',
+            maxWidth: isShort ? 300 : undefined,
+            maxHeight: isShort ? 530 : undefined,
+          }}
+        >
+          {playing && embedUrl ? (
+            <iframe
+              src={embedUrl}
+              className="absolute inset-0 w-full h-full"
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+              allowFullScreen
+              title={title}
+            />
+          ) : (
+            <button
+              type="button"
+              className="w-full h-full absolute inset-0 group"
+              onClick={() => embedUrl ? setPlaying(true) : undefined}
+              aria-label={`Play ${title}`}
+            >
+              <img
+                src={thumbnailUrl}
+                alt={title}
+                className="w-full h-full object-cover group-hover:scale-105 transition-all duration-300"
+                style={{ opacity: 0.9 }}
+              />
+              <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity" style={{ background: 'linear-gradient(to top, rgba(0,0,0,0.6), transparent, transparent)' }} />
+              <div className="absolute inset-0 flex items-center justify-center">
+                <div className="h-16 w-16 rounded-full flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform" style={{ background: 'rgba(255,255,255,0.95)' }}>
+                  <Play className="h-7 w-7 ml-1" style={{ color: '#000' }} fill="#000" />
+                </div>
+              </div>
+              <div className="absolute bottom-3 right-3 rounded-lg px-2.5 py-1" style={{ background: 'rgba(0,0,0,0.8)', fontSize: 12, fontWeight: 500, color: '#fff' }}>
+                {duration}
+              </div>
+              <div className="absolute top-3 left-3 rounded-lg px-2.5 py-1" style={{ background: 'rgba(0,0,0,0.6)', fontSize: 12, fontWeight: 500, color: '#fff' }}>
+                {source}
+              </div>
+            </button>
+          )}
         </div>
-        <div className="absolute bottom-3 right-3 rounded-lg px-2.5 py-1" style={{ background: 'rgba(0,0,0,0.8)', fontSize: 12, fontWeight: 500, color: '#fff' }}>
-          {duration}
-        </div>
-        <div className="absolute top-3 left-3 rounded-lg px-2.5 py-1" style={{ background: 'rgba(0,0,0,0.6)', fontSize: 12, fontWeight: 500, color: '#fff' }}>
-          {source}
-        </div>
-      </a>
+      </div>
 
       <EngagementRow stats={stats} articleUrl={articleUrl} />
     </article>
