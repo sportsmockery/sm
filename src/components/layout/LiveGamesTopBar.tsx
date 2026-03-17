@@ -208,9 +208,9 @@ export default function LiveGamesTopBar({ teamFilter, isHomepage = false }: Live
 
   return (
     <div style={{ background: '#00D4FF', borderBottom: '1px solid rgba(0,180,220,0.6)' }}>
-      <div className="max-w-[1200px] mx-auto">
+      <div className="max-w-[1200px] mx-auto px-4">
         {/* Scrollable container for multiple games */}
-        <div className="flex items-center overflow-x-auto hide-scrollbar">
+        <div className="flex items-center justify-center overflow-x-auto hide-scrollbar py-1.5 gap-2">
           {liveGames.map((game) => {
             const score = getScoreDisplay(game)
             const teamConfig = TEAM_CONFIG[game.chicago_team]

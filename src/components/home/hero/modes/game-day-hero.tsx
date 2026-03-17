@@ -173,7 +173,7 @@ export function GameDayHero({ games: initialGames, logo }: GameDayHeroProps) {
 
         {/* CTA */}
         <div className="mt-8">
-          <HeroCta href={game.href}>Open Game Hub</HeroCta>
+          <HeroCta href={game.href}>Open Game Center</HeroCta>
         </div>
 
         {/* Dot indicators — only when multiple games */}
