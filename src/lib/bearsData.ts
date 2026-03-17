@@ -780,7 +780,7 @@ function transformGame(game: any, context?: any): BearsGame {
     season: game.season || 2025,
     week: game.week,
     date: game.game_date,
-    time: formatGameTime(game.game_time),
+    time: game.game_time_display || formatGameTime(game.game_time),
     dayOfWeek: gameDate.toLocaleDateString('en-US', { weekday: 'long' }),
     opponent: (game.opponent || '').trim(), // Trim whitespace from opponent
     opponentFullName: game.opponent_full_name ? game.opponent_full_name.trim() : null,

@@ -9,13 +9,13 @@ interface HomeSidebarProps {
   onSelectTeam: (teamId: string) => void
 }
 
-const edgeTools = [
+const edgeTools: { icon: React.ComponentType<{ className?: string }>; label: string; desc?: string; href: string; liveOnly?: boolean }[] = [
   { icon: Tv, label: 'Game Center', href: '/live', liveOnly: true },
-  { icon: ClipboardPen, label: 'War Room', href: '/gm' },
-  { icon: MessageSquare, label: 'Fan Chat', href: '/fan-chat' },
-  { icon: BarChart3, label: 'Team Stats', href: '/chicago-bears' },
-  { icon: Video, label: 'Vision Theater', href: '/bears-film-room' },
-  { icon: Volume2, label: 'Hands-Free Audio', href: '/audio' },
+  { icon: ClipboardPen, label: 'War Room', desc: 'Play GM — simulate trades, run mock drafts, and compete against other SM users.', href: '/gm' },
+  { icon: MessageSquare, label: 'Fan Chat', desc: 'Skip the comments and argue it out live.', href: '/fan-chat' },
+  { icon: BarChart3, label: 'Team Stats', desc: 'The numbers that explain the wins… and the excuses.', href: '/chicago-bears' },
+  { icon: Video, label: 'Vision Theater', desc: 'All videos, no digging. Just press play.', href: '/bears-film-room' },
+  { icon: Volume2, label: 'Hands-Free Audio', desc: 'Sit back, choose a voice, and press play.', href: '/audio' },
 ]
 
 export default function HomeSidebar({ selectedTeam, onSelectTeam }: HomeSidebarProps) {
@@ -158,7 +158,10 @@ export default function HomeSidebar({ selectedTeam, onSelectTeam }: HomeSidebarP
                 <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg" style={{ background: 'var(--hp-muted)', color: '#00D4FF', border: '1px solid #00D4FF' }}>
                   <item.icon className="h-5 w-5" />
                 </div>
-                <span style={{ flex: 1 }}>{item.label}</span>
+                <div style={{ flex: 1 }}>
+                  <span>{item.label}</span>
+                  {item.desc && <p style={{ fontSize: 11, color: 'var(--hp-muted-foreground)', margin: '2px 0 0', lineHeight: 1.3 }}>{item.desc}</p>}
+                </div>
                 {(item.label === 'Fan Chat' || item.label === 'Game Center') && (
                   <span
                     style={{
