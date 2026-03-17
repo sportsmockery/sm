@@ -57,14 +57,12 @@ async function fetchFromDatalabApi(gameId: string) {
 
     const data = await res.json()
 
-    const isChicagoHome = CHICAGO_TEAM_IDS.some(t => {
-      if (t === 'bears') return data.home_team_abbr === 'CHI' && data.sport === 'nfl'
-      if (t === 'bulls') return data.home_team_abbr === 'CHI' && data.sport === 'nba'
-      if (t === 'blackhawks') return data.home_team_abbr === 'CHI' && data.sport === 'nhl'
-      if (t === 'cubs') return data.home_team_abbr === 'CHC'
-      if (t === 'whitesox') return data.home_team_abbr === 'CHW'
-      return false
-    })
+    // DataLab nests game info under game_data
+    const gd = data.game_data || {}
+    const homeAbbr = gd.home_team || ''
+    const awayAbbr = gd.away_team || ''
+
+    const isChicagoHome = homeAbbr === 'CHI' || homeAbbr === 'CHC' || homeAbbr === 'CHW'
 
     // Map plays from DataLab format
     const rawPlays: any[] = data.plays || []
@@ -92,7 +90,9 @@ async function fetchFromDatalabApi(gameId: string) {
       strength: p.strength,                 // NHL (PP/SH/EV)
       at_bat_id: p.atBatId,                // MLB
       outs: p.outs,                         // MLB
-      pitch_count: p.pitchCount,            // MLB
+      pitch_count: typeof p.pitchCount === 'object'
+        ? p.pitchCount                      // MLB {balls, strikes} object
+        : p.pitchCount,
     }))
 
     // Map player_stats from DataLab format (sport-prefixed columns)
@@ -165,101 +165,73 @@ async function fetchFromDatalabApi(gameId: string) {
       mlb_era: p.mlb_era,
     }))
 
-    // Build linescore from raw_payload if available
-    let linescore: Record<string, { home: number; away: number }> | null = null
-    const rawPayload = data.raw_payload
-    if (rawPayload?.competitions?.[0]?.competitors) {
-      const competitors = rawPayload.competitions[0].competitors
-      const home = competitors.find((c: any) => c.homeAway === 'home')
-      const away = competitors.find((c: any) => c.homeAway === 'away')
-      if (home?.linescores && away?.linescores) {
-        linescore = {}
-        for (let i = 0; i < Math.max(home.linescores.length, away.linescores.length); i++) {
-          linescore[`${i + 1}`] = {
-            home: home.linescores[i]?.value ?? 0,
-            away: away.linescores[i]?.value ?? 0,
-          }
-        }
-      }
-    }
-
-    // Build team stats from raw_payload
-    let teamStats: { home: Record<string, number | string>; away: Record<string, number | string> } | null = null
-    if (rawPayload?.competitions?.[0]?.competitors) {
-      const competitors = rawPayload.competitions[0].competitors
-      const home = competitors.find((c: any) => c.homeAway === 'home')
-      const away = competitors.find((c: any) => c.homeAway === 'away')
-      if (home?.statistics && away?.statistics) {
-        const homeStats: Record<string, number | string> = {}
-        const awayStats: Record<string, number | string> = {}
-        for (const stat of home.statistics) homeStats[stat.name] = stat.displayValue
-        for (const stat of away.statistics) awayStats[stat.name] = stat.displayValue
-        teamStats = { home: homeStats, away: awayStats }
-      }
-    }
+    // Linescore and team_stats are not in the DataLab REST API response,
+    // so these remain null when using the API (Supabase fallback has raw_payload)
+    const linescore: Record<string, { home: number; away: number }> | null = null
+    const teamStats: { home: Record<string, number | string>; away: Record<string, number | string> } | null = null
 
     return {
       game_id: data.game_id,
       sport: data.sport,
-      season: data.season,
-      game_date: data.game_date,
-      game_start_time: data.game_date,
+      season: gd.season,
+      game_date: gd.game_date,
+      game_start_time: gd.game_date,
       status: data.status,
       home_team: {
-        team_id: data.home_team_id,
-        name: data.home_team_name,
-        abbr: data.home_team_abbr,
-        logo_url: data.home_logo_url,
-        score: data.home_score,
-        timeouts: data.home_timeouts,
+        team_id: homeAbbr,
+        name: gd.home_team_full || homeAbbr,
+        abbr: homeAbbr,
+        logo_url: gd.home_logo_url || '',
+        score: gd.home_score ?? 0,
+        timeouts: gd.home_timeouts ?? null,
         is_chicago: isChicagoHome,
       },
       away_team: {
-        team_id: data.away_team_id,
-        name: data.away_team_name,
-        abbr: data.away_team_abbr,
-        logo_url: data.away_logo_url,
-        score: data.away_score,
-        timeouts: data.away_timeouts,
+        team_id: awayAbbr,
+        name: gd.away_team_full || awayAbbr,
+        abbr: awayAbbr,
+        logo_url: gd.away_logo_url || '',
+        score: gd.away_score ?? 0,
+        timeouts: gd.away_timeouts ?? null,
         is_chicago: !isChicagoHome,
       },
-      period: data.period,
-      period_label: data.period_label,
-      clock: data.clock,
+      period: gd.period || null,
+      period_label: gd.period || null,
+      clock: gd.clock || null,
       venue: {
-        name: data.venue_name,
-        city: data.venue_city,
-        state: data.venue_state,
+        name: gd.venue || null,
+        city: gd.venue_city || null,
+        state: gd.venue_state || null,
       },
       weather: {
-        temperature: data.temperature,
-        condition: data.weather_condition,
-        wind_speed: data.wind_speed,
+        temperature: gd.temperature ?? null,
+        condition: gd.weather_condition ?? null,
+        wind_speed: gd.wind_speed ?? null,
       },
       broadcast: {
-        network: data.broadcast_network,
-        announcers: data.broadcast_announcers,
+        network: gd.broadcast_network ?? null,
+        announcers: gd.broadcast_announcers ?? null,
       },
       odds: {
-        win_probability_home: data.live_win_probability_home,
-        win_probability_away: data.live_win_probability_away,
-        spread_favorite_team_id: data.live_spread_favorite_team_id,
-        spread_points: data.live_spread_points,
-        moneyline_home: data.live_moneyline_home,
-        moneyline_away: data.live_moneyline_away,
-        over_under: data.live_over_under,
+        win_probability_home: gd.live_win_probability_home ?? null,
+        win_probability_away: gd.live_win_probability_away ?? null,
+        spread_favorite_team_id: gd.live_spread_favorite_team_id ?? null,
+        spread_points: gd.live_spread_points ?? null,
+        moneyline_home: gd.live_moneyline_home ?? null,
+        moneyline_away: gd.live_moneyline_away ?? null,
+        over_under: gd.live_over_under ?? null,
       },
       players,
       play_by_play: playByPlay,
       plays_count: data.plays_count || rawPlays.length,
       team_stats: teamStats,
       linescore,
-      last_event_id: data.last_event_id,
+      last_event_id: gd.last_event_id ?? null,
       poll_interval_ms: data.poll_interval_recommended_ms || 10000,
-      cache_age_seconds: data.updated_at
-        ? Math.floor((Date.now() - new Date(data.updated_at).getTime()) / 1000)
+      cache_age_seconds: gd.last_updated
+        ? Math.floor((Date.now() - new Date(gd.last_updated).getTime()) / 1000)
         : 0,
-      updated_at: data.updated_at,
+      updated_at: gd.last_updated,
       timestamp: new Date().toISOString(),
     }
   } catch (err) {

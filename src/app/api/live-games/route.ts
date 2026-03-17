@@ -60,10 +60,12 @@ async function fetchFromDatalabApi(team: string | null) {
     const rawGames: any[] = Array.isArray(data) ? data : (data.games || [])
 
     const games = rawGames.map((game: any) => {
-      const isChicagoHome = game.home_team_abbr === 'CHI' || game.home_team_abbr === 'CHC' || game.home_team_abbr === 'CHW'
+      // DataLab uses home_team/away_team (abbrs like "CHI", "CHC", "CHW")
+      const homeAbbr = game.home_team || game.home_team_abbr || ''
+      const awayAbbr = game.away_team || game.away_team_abbr || ''
+      const isChicagoHome = homeAbbr === 'CHI' || homeAbbr === 'CHC' || homeAbbr === 'CHW'
 
       // game_time_central is now formatted: "03/17/2026, 6:30 PM CT"
-      // Extract just the time portion for display
       const gameTimeDisplay = parseGameTimeCentral(game.game_time_central)
 
       return {
@@ -72,24 +74,24 @@ async function fetchFromDatalabApi(team: string | null) {
         status: game.status === 'pre' ? 'upcoming' : game.status,
         game_start_time: game.game_date,
         game_time_display: gameTimeDisplay,
-        home_team_id: game.chicago_team || '',
+        home_team_id: game.team_id || '',
         away_team_id: '',
-        home_team_name: game.home_team_name || '',
-        away_team_name: game.away_team_name || '',
-        home_team_abbr: game.home_team_abbr || '',
-        away_team_abbr: game.away_team_abbr || '',
+        home_team_name: game.home_team_full || game.home_team_name || homeAbbr,
+        away_team_name: game.away_team_full || game.away_team_name || awayAbbr,
+        home_team_abbr: homeAbbr,
+        away_team_abbr: awayAbbr,
         home_logo_url: game.home_logo_url || '',
         away_logo_url: game.away_logo_url || '',
         home_score: game.home_score || 0,
         away_score: game.away_score || 0,
         period: game.period || null,
-        period_label: game.period_label || null,
+        period_label: game.period_label || game.period || null,
         clock: game.clock || null,
-        venue_name: game.venue_name || null,
+        venue_name: game.venue || game.venue_name || null,
         broadcast_network: game.broadcast_network || null,
         plays_count: game.plays_count || 0,
-        updated_at: game.updated_at,
-        chicago_team: game.chicago_team || '',
+        updated_at: game.last_updated || game.updated_at,
+        chicago_team: game.team_id || '',
         is_chicago_home: isChicagoHome,
       }
     })
