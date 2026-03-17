@@ -217,7 +217,7 @@ export default function LiveStrip() {
               {getChicagoAbbr(game)} {getChicagoScore(game)} – {getOpponentScore(game)} {getOpponentAbbr(game)}
             </span>
             <span className="live-strip-status">
-              {game.period_label && game.clock
+              {game.period_label && game.clock && game.sport !== 'mlb'
                 ? `${game.period_label} ${game.clock}`
                 : game.period_label || 'In Progress'}
             </span>

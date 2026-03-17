@@ -162,8 +162,8 @@ export default function LiveGamesTopBar({ teamFilter, isHomepage = false }: Live
       return `${diffMins}m`
     }
 
-    // For live games, show period and clock
-    if (game.period_label && game.clock) {
+    // For live games, show period and clock (skip clock for MLB — always 0:00)
+    if (game.period_label && game.clock && game.sport !== 'mlb') {
       return `${game.period_label} ${game.clock}`
     }
     if (game.period_label) {

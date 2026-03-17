@@ -16,7 +16,7 @@ export default function GameSwitcher({ currentGameId }: GameSwitcherProps) {
 
   const getStatusLabel = (game: LiveGameSummary): string => {
     if (game.status === 'in_progress') {
-      if (game.period_label && game.clock) return `${game.period_label} ${game.clock}`
+      if (game.period_label && game.clock && game.sport !== 'mlb') return `${game.period_label} ${game.clock}`
       if (game.period_label) return game.period_label
       return 'LIVE'
     }

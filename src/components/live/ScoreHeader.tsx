@@ -16,7 +16,7 @@ export default function ScoreHeader({ game }: ScoreHeaderProps) {
 
   const getPeriodDisplay = () => {
     if (!isLive) return isFinal ? 'FINAL' : game.status.toUpperCase()
-    if (game.period_label && game.clock) return `${game.period_label} ${game.clock}`
+    if (game.period_label && game.clock && game.sport !== 'mlb') return `${game.period_label} ${game.clock}`
     if (game.period_label) return game.period_label
     return 'LIVE'
   }

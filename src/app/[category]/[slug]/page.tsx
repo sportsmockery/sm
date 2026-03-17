@@ -146,7 +146,7 @@ export default async function ArticlePage({ params, searchParams }: ArticlePageP
       post.author_id
         ? supabaseAdmin
             .from('sm_authors')
-            .select('id, display_name, bio, avatar_url, twitter, instagram, email, slug')
+            .select('id, display_name, bio, avatar_url, email')
             .eq('id', post.author_id)
             .single()
         : Promise.resolve({ data: null, error: null }),
@@ -366,7 +366,7 @@ export default async function ArticlePage({ params, searchParams }: ArticlePageP
                       </Link>
                     </div>
                   )}
-                  {/* Top arrow: date, read time, views */}
+                  {/* Date, read time, views */}
                   <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: 8, fontSize: 13, color: 'rgba(255,255,255,0.9)', marginBottom: 20 }}>
                     <time dateTime={post.published_at}>{format(new Date(post.published_at), 'MMMM d, yyyy')}</time>
                     <span style={{ color: 'rgba(255,255,255,0.6)' }}>·</span>
@@ -374,11 +374,11 @@ export default async function ArticlePage({ params, searchParams }: ArticlePageP
                     <span style={{ color: 'rgba(255,255,255,0.6)' }}>·</span>
                     <ViewCounterCompact views={post.views || 0} variant="overlay" />
                   </div>
-                  {/* Bottom arrow: social share icons — offset down so date row stays fixed */}
-                  <div style={{ display: 'flex', justifyContent: 'center', position: 'relative', top: 30 }}>
-                    <SocialShareBar url={articleUrl} title={post.title} />
-                  </div>
                 </div>
+              </div>
+              {/* Social share icons — outside overflow:hidden container */}
+              <div style={{ display: 'flex', justifyContent: 'center', marginTop: 12 }}>
+                <SocialShareBar url={articleUrl} title={post.title} />
               </div>
             </div>
           )}
@@ -422,9 +422,27 @@ export default async function ArticlePage({ params, searchParams }: ArticlePageP
               <ol style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 13, color: 'var(--sm-text-dim)', listStyle: 'none', padding: 0, margin: 0 }}>
                 <li><Link href="/" style={{ color: 'inherit', transition: 'color 0.2s' }}>Home</Link></li>
                 <li>/</li>
-                <li><Link href={`/${categoryData?.slug || category}`} style={{ color: 'inherit' }}>{categoryData?.name || category}</Link></li>
+                <li><Link href={`/${categoryData?.slug || category}`} style={{ color: 'inherit' }}>{(categoryData?.name || category).replace(/ News & Rumors$/i, '')}</Link></li>
               </ol>
             </nav>
+
+            {/* Author */}
+            {author && (
+              <div style={{ marginBottom: 16 }}>
+                <Link href={`/author/${author.slug || author.id}`} style={{ display: 'flex', alignItems: 'center', gap: 10, textDecoration: 'none' }}>
+                  {author.avatar_url ? (
+                    <div style={{ width: 36, height: 36, borderRadius: '50%', overflow: 'hidden', position: 'relative', flexShrink: 0 }}>
+                      <Image src={author.avatar_url} alt={author.display_name} fill style={{ objectFit: 'cover' }} />
+                    </div>
+                  ) : (
+                    <div style={{ width: 36, height: 36, borderRadius: '50%', background: 'var(--sm-gradient-subtle, #eee)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 14, fontWeight: 600, color: 'var(--sm-text)', flexShrink: 0 }}>
+                      {author.display_name.charAt(0)}
+                    </div>
+                  )}
+                  <span style={{ fontSize: 15, fontWeight: 600, color: 'var(--sm-text)' }}>{author.display_name}</span>
+                </Link>
+              </div>
+            )}
 
             {/* Article Audio Player */}
             {audioInfo && (

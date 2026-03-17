@@ -57,8 +57,8 @@ function StatusBadge({ status, clock, periodLabel, sport }: { status: string; cl
   if (status === 'in_progress' || status === 'live') {
     return (
       <div className="flex items-center gap-1.5">
-        <span className="w-2 h-2 rounded-full bg-red-500 animate-pulse" />
-        <span style={{ fontSize: 12, fontWeight: 700, color: '#BC0000' }}>
+        <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
+        <span style={{ fontSize: 12, fontWeight: 700, color: '#16a34a' }}>
           {periodLabel}{clock && sport !== 'mlb' ? ` ${clock}` : ''}
         </span>
       </div>
@@ -77,17 +77,17 @@ function GameCard({ game, prevScore }: { game: LiveGame; prevScore: { home: numb
   const homeScored = prevScore && game.home_score > prevScore.home
   const awayScored = prevScore && game.away_score > prevScore.away
   const isLive = game.status === 'in_progress' || game.status === 'live'
-  const teamLink = TEAM_HUB[game.chicago_team] || '/'
+  const gameLink = `/live/${game.sport}/${game.game_id}`
 
   return (
-    <Link href={teamLink} style={{ textDecoration: 'none', display: 'block' }}>
+    <Link href={gameLink} style={{ textDecoration: 'none', display: 'block' }}>
       <div
         className="glass-card"
         style={{
           padding: '16px 20px',
           transition: 'transform 0.15s ease, box-shadow 0.15s ease',
           cursor: 'pointer',
-          border: isLive ? '1px solid rgba(188,0,0,0.2)' : undefined,
+          border: isLive ? '1px solid rgba(22,163,106,0.2)' : undefined,
         }}
       >
         {/* Sport + status row */}
@@ -248,9 +248,9 @@ export default function GameCenterClient() {
         </div>
         <div className="flex items-center gap-2">
           {hasLive && (
-            <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full" style={{ background: 'rgba(188,0,0,0.08)' }}>
-              <span className="w-2 h-2 rounded-full bg-red-500 animate-pulse" />
-              <span style={{ fontSize: 12, fontWeight: 600, color: '#BC0000' }}>
+            <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full" style={{ background: 'rgba(22,163,106,0.08)' }}>
+              <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
+              <span style={{ fontSize: 12, fontWeight: 600, color: '#16a34a' }}>
                 {liveGames.length} Live
               </span>
             </div>
@@ -281,8 +281,8 @@ export default function GameCenterClient() {
       {/* Live Games */}
       {liveGames.length > 0 && (
         <section style={{ marginBottom: 32 }}>
-          <h2 style={{ fontSize: 18, fontWeight: 700, color: '#BC0000', marginBottom: 12, display: 'flex', alignItems: 'center', gap: 8 }}>
-            <span className="w-2.5 h-2.5 rounded-full bg-red-500 animate-pulse" />
+          <h2 style={{ fontSize: 18, fontWeight: 700, color: '#16a34a', marginBottom: 12, display: 'flex', alignItems: 'center', gap: 8 }}>
+            <span className="w-2.5 h-2.5 rounded-full bg-green-500 animate-pulse" />
             Live Now
           </h2>
           <div className="grid gap-4" style={{ gridTemplateColumns: 'repeat(auto-fill, minmax(340px, 1fr))' }}>
