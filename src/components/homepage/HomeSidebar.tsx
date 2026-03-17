@@ -1,7 +1,7 @@
 "use client"
 
-import { useState } from "react"
-import { ArrowRightLeft, ClipboardPen, MessageSquare, BarChart3, Video, Volume2 } from "lucide-react"
+import { useState, useEffect } from "react"
+import { ArrowRightLeft, ClipboardPen, MessageSquare, BarChart3, Video, Volume2, Tv } from "lucide-react"
 import { homepageTeams } from "@/lib/homepage-team-data"
 
 interface HomeSidebarProps {
@@ -10,6 +10,7 @@ interface HomeSidebarProps {
 }
 
 const edgeTools = [
+  { icon: Tv, label: 'Game Center', href: '/live', liveOnly: true },
   { icon: ArrowRightLeft, label: 'Trade Simulator', href: '/gm' },
   { icon: ClipboardPen, label: 'Mock Draft', href: '/mock-draft' },
   { icon: MessageSquare, label: 'Fan Chat', href: '/fan-chat' },
@@ -20,6 +21,20 @@ const edgeTools = [
 
 export default function HomeSidebar({ selectedTeam, onSelectTeam }: HomeSidebarProps) {
   const [hoveredTeam, setHoveredTeam] = useState<string | null>(null)
+  const [hasLiveGames, setHasLiveGames] = useState(false)
+
+  // Poll for live games to show/hide Game Center
+  useEffect(() => {
+    const check = () => {
+      fetch('/api/hero-games')
+        .then(r => r.json())
+        .then(d => setHasLiveGames(d.games?.length > 0))
+        .catch(() => {})
+    }
+    check()
+    const id = setInterval(check, 30_000)
+    return () => clearInterval(id)
+  }, [])
 
   // Update Team Stats link based on selected team
   const getToolHref = (tool: typeof edgeTools[0]) => {
@@ -121,7 +136,7 @@ export default function HomeSidebar({ selectedTeam, onSelectTeam }: HomeSidebarP
             <div style={{ padding: '4px 16px', fontSize: 14, fontWeight: 700, letterSpacing: '-0.01em' }}>
               <span style={{ color: '#00D4FF' }}>SM</span> <span style={{ color: '#BC0000' }}>&#x2736;</span> <span style={{ color: '#00D4FF' }}>EDGE Features</span>
             </div>
-            {edgeTools.map((item) => (
+            {edgeTools.filter(item => !item.liveOnly || hasLiveGames).map((item) => (
               <a
                 key={item.label}
                 href={getToolHref(item)}
@@ -136,6 +151,7 @@ export default function HomeSidebar({ selectedTeam, onSelectTeam }: HomeSidebarP
                   color: 'var(--hp-foreground)',
                   textDecoration: 'none',
                   transition: 'background 0.15s',
+                  ...(item.label === 'Game Center' ? { border: '1px solid #00D4FF', margin: '4px 0' } : {}),
                 }}
                 onMouseEnter={(e) => { e.currentTarget.style.background = 'var(--hp-muted)' }}
                 onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent' }}
@@ -144,7 +160,7 @@ export default function HomeSidebar({ selectedTeam, onSelectTeam }: HomeSidebarP
                   <item.icon className="h-5 w-5" />
                 </div>
                 <span style={{ flex: 1 }}>{item.label}</span>
-                {item.label === 'Fan Chat' && (
+                {(item.label === 'Fan Chat' || item.label === 'Game Center') && (
                   <span
                     style={{
                       flexShrink: 0,

@@ -6,7 +6,7 @@ import Image from 'next/image'
 import { usePathname } from 'next/navigation'
 import { useAuth } from '@/contexts/AuthContext'
 import { homepageTeams } from '@/lib/homepage-team-data'
-import { ArrowRightLeft, ClipboardPen, MessageSquare, BarChart3, Video, Volume2, MoreVertical } from 'lucide-react'
+import { ArrowRightLeft, ClipboardPen, MessageSquare, BarChart3, Video, Volume2, MoreVertical, Tv } from 'lucide-react'
 
 interface NavItem {
   name: string
@@ -14,7 +14,8 @@ interface NavItem {
   icon: React.ReactNode
 }
 
-const EDGE_TOOLS: { id: string; title: string; href: string; icon: React.ComponentType<{ className?: string }> }[] = [
+const EDGE_TOOLS: { id: string; title: string; href: string; icon: React.ComponentType<{ className?: string }>; liveOnly?: boolean }[] = [
+  { id: 'game-center', title: 'Game Center', href: '/live', icon: Tv, liveOnly: true },
   { id: 'gm', title: 'Trade Simulator', href: '/gm', icon: ArrowRightLeft },
   { id: 'draft', title: 'Mock Draft', href: '/mock-draft', icon: ClipboardPen },
   { id: 'chat', title: 'Fan Chat', href: '/fan-chat', icon: MessageSquare },
@@ -123,6 +124,20 @@ export default function AppSidebar() {
   const { user, isAuthenticated } = useAuth()
   const [mobileOpen, setMobileOpen] = useState(false)
   const sidebarRef = useRef<HTMLDivElement>(null)
+  const [hasLiveGames, setHasLiveGames] = useState(false)
+
+  // Poll for live games to show/hide Game Center
+  useEffect(() => {
+    const check = () => {
+      fetch('/api/hero-games')
+        .then(r => r.json())
+        .then(d => setHasLiveGames(d.games?.length > 0))
+        .catch(() => {})
+    }
+    check()
+    const id = setInterval(check, 30_000)
+    return () => clearInterval(id)
+  }, [])
 
   // Close mobile menu on route change
   useEffect(() => {
@@ -220,7 +235,7 @@ export default function AppSidebar() {
             <span style={{ color: '#00D4FF' }}>EDGE Features</span>
           </div>
           <div style={{ background: 'var(--sm-surface)', border: '1px solid var(--sm-border)', borderRadius: 12, overflow: 'hidden' }}>
-            {EDGE_TOOLS.map((tool) => (
+            {EDGE_TOOLS.filter(tool => !tool.liveOnly || hasLiveGames).map((tool, idx, arr) => (
               <Link
                 key={tool.id}
                 href={tool.href}
@@ -233,7 +248,8 @@ export default function AppSidebar() {
                   fontSize: 12,
                   fontWeight: 500,
                   color: 'var(--sm-text)',
-                  borderBottom: tool.id !== EDGE_TOOLS[EDGE_TOOLS.length - 1].id ? '1px solid var(--sm-border)' : 'none',
+                  borderBottom: idx !== arr.length - 1 ? '1px solid var(--sm-border)' : 'none',
+                  ...(tool.id === 'game-center' ? { border: '1px solid #00D4FF', borderRadius: 12, margin: 4, padding: '8px 10px' } : {}),
                 }}
               >
                 <div
@@ -253,7 +269,7 @@ export default function AppSidebar() {
                   <tool.icon className="h-3 w-3" />
                 </div>
                 <span className="truncate" style={{ flex: 1, minWidth: 0 }}>{tool.title}</span>
-                {tool.id === 'chat' && (
+                {(tool.id === 'chat' || tool.id === 'game-center') && (
                   <span
                     style={{
                       flexShrink: 0,
