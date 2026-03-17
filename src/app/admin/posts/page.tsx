@@ -26,7 +26,7 @@ export default async function AdminPostsPage({ searchParams }: PostsPageProps) {
 
   let query = supabaseAdmin
     .from('sm_posts')
-    .select('id, title, slug, status, published_at, created_at, category_id, author_id, featured_image, excerpt', { count: 'exact' })
+    .select('id, title, slug, status, published_at, created_at, category_id, author_id, featured_image, excerpt, is_story_universe', { count: 'exact' })
 
   if (status && status !== 'all') {
     query = query.eq('status', status)

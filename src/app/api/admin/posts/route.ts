@@ -116,6 +116,13 @@ export async function POST(request: NextRequest) {
     if (body.updated_at !== undefined) postData.updated_at = body.updated_at || now
     if (body.views !== undefined) postData.views = body.views
     if (body.importance_score !== undefined) postData.importance_score = body.importance_score
+    if (body.force_hero_featured !== undefined) postData.force_hero_featured = body.force_hero_featured
+    if (body.is_story_universe !== undefined) {
+      postData.is_story_universe = body.is_story_universe
+      postData.story_universe_related_ids = body.is_story_universe
+        ? (body.story_universe_related_ids || [])
+        : []
+    }
 
     // Set published_at if status is published
     if (body.status === 'published') {

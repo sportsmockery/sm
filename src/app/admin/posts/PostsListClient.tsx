@@ -15,6 +15,7 @@ interface Post {
   author_id: number | null
   featured_image: string | null
   excerpt: string | null
+  is_story_universe?: boolean
 }
 
 interface Category {
@@ -282,9 +283,24 @@ export default function PostsListClient({
                           )}
                         </div>
                         <div className="min-w-0">
-                          <Link href={`/admin/posts/${post.id}`} className="block font-medium text-[var(--text-primary)] hover:text-[var(--accent-red)] transition-colors line-clamp-1">
-                            {post.title}
-                          </Link>
+                          <div className="flex items-center gap-2">
+                            <Link href={`/admin/posts/${post.id}`} className="block font-medium text-[var(--text-primary)] hover:text-[var(--accent-red)] transition-colors line-clamp-1">
+                              {post.title}
+                            </Link>
+                            {post.is_story_universe && (
+                              <span
+                                className="inline-flex flex-shrink-0 items-center rounded-md px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wider"
+                                style={{
+                                  backgroundColor: 'rgba(188, 0, 0, 0.1)',
+                                  color: '#BC0000',
+                                  border: '1px solid rgba(188, 0, 0, 0.2)',
+                                }}
+                                title="Story Universe active — this post powers a homepage hero cluster"
+                              >
+                                Universe
+                              </span>
+                            )}
+                          </div>
                           <p className="mt-0.5 text-xs text-[var(--text-muted)] line-clamp-1">/{post.slug}</p>
                         </div>
                       </div>

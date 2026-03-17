@@ -12,6 +12,11 @@ import type {
   GameContext,
   TeamContext,
   DebateContext,
+  StoryUniverseContext,
+  StoryUniverseRelatedStory,
+  ScoutLiveContext,
+  LiveSignal,
+  LiveSignalType,
 } from "@/components/home/hero/types"
 import { TRENDING_VIEW_THRESHOLD } from "@/components/home/hero/types"
 import { getTeamFromCategory } from "@/lib/transform-post"
@@ -68,6 +73,8 @@ function categoryToTeamSlug(categorySlug: string | undefined): string | undefine
 
 export interface HeroData {
   featuredStory: FeaturedStory | null
+  storyUniverseContext: StoryUniverseContext | null
+  scoutLiveContext: ScoutLiveContext | null
   gameContexts: GameContext[]
   teamContext: TeamContext | null
   debateContext: DebateContext | null
@@ -81,6 +88,8 @@ export interface HeroData {
 export async function getHeroData(userId: string | null): Promise<HeroData> {
   const result: HeroData = {
     featuredStory: null,
+    storyUniverseContext: null,
+    scoutLiveContext: null,
     gameContexts: [],
     teamContext: null,
     debateContext: null,
@@ -91,10 +100,12 @@ export async function getHeroData(userId: string | null): Promise<HeroData> {
   if (!supabaseAdmin) return result
 
   // Run independent queries in parallel
-  const [featuredResult, prefsResult, liveGamesResult] = await Promise.allSettled([
+  const [featuredResult, prefsResult, liveGamesResult, storyUniverseResult, scoutLiveResult] = await Promise.allSettled([
     fetchFeaturedStory(),
     userId ? fetchUserPrimaryTeam(userId) : Promise.resolve(null),
     fetchLiveGames(),
+    fetchStoryUniverse(),
+    fetchScoutLive(),
   ])
 
   // 1. Featured/trending story
@@ -103,7 +114,17 @@ export async function getHeroData(userId: string | null): Promise<HeroData> {
     result.heroArticleId = featuredResult.value.articleId
   }
 
-  // 2. User primary team
+  // 2. Story Universe context
+  if (storyUniverseResult.status === "fulfilled" && storyUniverseResult.value) {
+    result.storyUniverseContext = storyUniverseResult.value
+  }
+
+  // 3. Scout Live context
+  if (scoutLiveResult.status === "fulfilled" && scoutLiveResult.value) {
+    result.scoutLiveContext = scoutLiveResult.value
+  }
+
+  // 4. User primary team
   if (prefsResult.status === "fulfilled" && prefsResult.value) {
     result.primaryTeam = prefsResult.value
   }
@@ -390,6 +411,197 @@ async function fetchTeamPulse(teamSlug: string): Promise<TeamContext | null> {
       href: TEAM_HUB_HREF[teamSlug] || TEAM_HUB_HREF[teamSlug.replace("-", "")] || `/chicago-${teamSlug}`,
     }
   } catch {
+    return null
+  }
+}
+
+/* ── Scout Live Feed ── */
+
+async function fetchScoutLive(): Promise<ScoutLiveContext | null> {
+  if (!supabaseAdmin) return null
+
+  try {
+    // Get recent published posts from the last 6 hours — signals from editorial activity
+    const cutoff = new Date(Date.now() - 6 * 60 * 60 * 1000).toISOString()
+
+    const { data: posts } = await supabaseAdmin
+      .from("sm_posts")
+      .select(
+        "id, title, slug, excerpt, published_at, views, category:sm_categories!category_id(slug, name)"
+      )
+      .eq("status", "published")
+      .gte("published_at", cutoff)
+      .order("published_at", { ascending: false })
+      .limit(12)
+
+    if (!posts || posts.length < 3) return null
+
+    // Convert recent posts into typed signals
+    const signals: LiveSignal[] = []
+
+    for (const post of posts) {
+      const category = Array.isArray(post.category) ? post.category[0] : post.category
+      const catSlug = category?.slug || "news"
+      const href = `/${catSlug}/${post.slug}`
+      const timestamp = formatPublishedLabel(post.published_at)
+      const title = post.title || ""
+      const titleLower = title.toLowerCase()
+
+      // Classify signal type from post title/content
+      let type: LiveSignalType = "news"
+      let label: string | undefined
+      let value: string | undefined
+
+      if (titleLower.includes("rumor") || titleLower.includes("linked to") || titleLower.includes("trade") || titleLower.includes("signing") || titleLower.includes("interest in")) {
+        type = "rumor"
+        label = "Rumor"
+      } else if (titleLower.includes("scout") || titleLower.includes("analysis") || titleLower.includes("breakdown") || titleLower.includes("film")) {
+        type = "scout"
+        label = "Scout"
+      } else if (titleLower.includes("update") || titleLower.includes("breaking") || titleLower.includes("report") || titleLower.includes("insider")) {
+        type = "update"
+        label = "Update"
+      } else if (titleLower.includes("stat") || titleLower.includes("rank") || titleLower.includes("rate") || titleLower.includes("average") || titleLower.includes("record")) {
+        type = "stat"
+        label = "Stat"
+      } else if (titleLower.includes("fan") || titleLower.includes("poll") || titleLower.includes("debate") || titleLower.includes("vote")) {
+        type = "sentiment"
+        label = "Fans"
+      }
+
+      // Add view count as value for popular posts
+      if (post.views >= 1000) {
+        value = `${(post.views / 1000).toFixed(1)}K views`
+      }
+
+      // Trim title for signal message (keep it scannable)
+      const message = title.length > 80 ? title.slice(0, 77) + "..." : title
+
+      signals.push({
+        id: String(post.id),
+        type,
+        label,
+        message,
+        timestamp,
+        value,
+        href,
+      })
+    }
+
+    if (signals.length < 3) return null
+
+    // Generate headline from the dominant signal type or most recent cluster
+    const teamCounts: Record<string, number> = {}
+    for (const post of posts) {
+      const cat = Array.isArray(post.category) ? post.category[0] : post.category
+      const team = categoryToTeamSlug(cat?.slug)
+      if (team) teamCounts[team] = (teamCounts[team] || 0) + 1
+    }
+
+    // Find the hottest team (most recent activity)
+    let dominantTeam = ""
+    let maxCount = 0
+    for (const [team, count] of Object.entries(teamCounts)) {
+      if (count > maxCount) {
+        maxCount = count
+        dominantTeam = team
+      }
+    }
+
+    const teamName = dominantTeam ? TEAM_DISPLAY[dominantTeam] : "Chicago sports"
+
+    // Count signal types for headline flavor
+    const rumorCount = signals.filter((s) => s.type === "rumor").length
+    const updateCount = signals.filter((s) => s.type === "update").length
+
+    let headline: string
+    if (rumorCount >= 2) {
+      headline = `${teamName} trade signals are heating up`
+    } else if (updateCount >= 2) {
+      headline = `Multiple ${teamName} updates breaking now`
+    } else {
+      headline = `${teamName} intelligence is active`
+    }
+
+    const summary = `${signals.length} signals in the last 6 hours across Chicago sports. Scout is monitoring.`
+
+    return { headline, summary, signals: signals.slice(0, 6) }
+  } catch (e) {
+    console.error("[hero-data] fetchScoutLive error:", e)
+    return null
+  }
+}
+
+/* ── Story Universe ── */
+
+async function fetchStoryUniverse(): Promise<StoryUniverseContext | null> {
+  if (!supabaseAdmin) return null
+
+  try {
+    // Find the most recent published post with is_story_universe = true
+    const { data: mainPosts } = await supabaseAdmin
+      .from("sm_posts")
+      .select(
+        "id, title, slug, excerpt, featured_image, views, published_at, is_story_universe, story_universe_related_ids, category:sm_categories!category_id(slug, name)"
+      )
+      .eq("status", "published")
+      .eq("is_story_universe", true)
+      .not("featured_image", "is", null)
+      .order("published_at", { ascending: false })
+      .limit(1)
+
+    if (!mainPosts || mainPosts.length === 0) return null
+
+    const main = mainPosts[0]
+    const relatedIds = main.story_universe_related_ids
+
+    if (!relatedIds || relatedIds.length !== 2) return null
+
+    // Fetch the 2 related stories
+    const { data: relatedPosts } = await supabaseAdmin
+      .from("sm_posts")
+      .select(
+        "id, title, slug, excerpt, featured_image, category:sm_categories!category_id(slug)"
+      )
+      .in("id", relatedIds)
+      .eq("status", "published")
+
+    if (!relatedPosts || relatedPosts.length !== 2) return null
+
+    const mainCategory = Array.isArray(main.category) ? main.category[0] : main.category
+    const mainCategorySlug = mainCategory?.slug || "news"
+    const teamSlug = categoryToTeamSlug(mainCategorySlug)
+    const teamName = teamSlug ? TEAM_DISPLAY[teamSlug] : undefined
+
+    const mainStory: FeaturedStory = {
+      id: String(main.id),
+      title: main.title,
+      dek: main.excerpt || undefined,
+      imageUrl: main.featured_image!,
+      href: `/${mainCategorySlug}/${main.slug}`,
+      views: main.views ?? 0,
+      team: teamName,
+      publishedLabel: formatPublishedLabel(main.published_at),
+    }
+
+    // Map related posts preserving the order from relatedIds
+    const relatedById = new Map(relatedPosts.map((p) => [String(p.id), p]))
+    const relatedStories = relatedIds.map((rid: string) => {
+      const p = relatedById.get(rid)!
+      const cat = Array.isArray(p.category) ? p.category[0] : p.category
+      const catSlug = cat?.slug || "news"
+      return {
+        id: String(p.id),
+        title: p.title,
+        dek: p.excerpt || undefined,
+        href: `/${catSlug}/${p.slug}`,
+        imageUrl: p.featured_image || undefined,
+      } satisfies StoryUniverseRelatedStory
+    }) as [StoryUniverseRelatedStory, StoryUniverseRelatedStory]
+
+    return { mainStory, relatedStories }
+  } catch (e) {
+    console.error("[hero-data] fetchStoryUniverse error:", e)
     return null
   }
 }

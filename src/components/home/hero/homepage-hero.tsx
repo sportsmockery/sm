@@ -3,6 +3,8 @@
 import { resolveHeroMode } from "./types"
 import type { HomepageHeroProps } from "./types"
 import { TrendingFeaturedHero } from "./modes/trending-featured-hero"
+import { StoryUniverseHero } from "./modes/story-universe-hero"
+import { ScoutLiveHero } from "./modes/scout-live-hero"
 import { GameDayHero } from "./modes/game-day-hero"
 import { TeamPulseHero } from "./modes/team-pulse-hero"
 import { DebateHero } from "./modes/debate-hero"
@@ -16,10 +18,12 @@ import { ScoutBriefingHero } from "./modes/scout-briefing-hero"
 /*                                                                     */
 /*  Priority:                                                          */
 /*    1. Trending Article Featured Hero                                */
-/*    2. Game Day Hero                                                 */
-/*    3. Personalized Team Pulse Hero                                  */
-/*    4. Fan Debate Hero                                               */
-/*    5. Scout Briefing Hero (default)                                 */
+/*    2. Story Universe                                                */
+/*    3. Scout Live Feed                                               */
+/*    4. Game Day Hero                                                 */
+/*    5. Personalized Team Pulse Hero                                  */
+/*    6. Fan Debate Hero                                               */
+/*    7. Scout Briefing Hero (default)                                 */
 /* ------------------------------------------------------------------ */
 
 export function HomepageHero(props: HomepageHeroProps) {
@@ -31,6 +35,24 @@ export function HomepageHero(props: HomepageHeroProps) {
         <TrendingFeaturedHero
           story={props.featuredStory!}
           logo={props.logo}
+        />
+      )
+
+    case "story-universe":
+      return (
+        <StoryUniverseHero
+          context={props.storyUniverseContext!}
+          logo={props.logo}
+        />
+      )
+
+    case "scout-live":
+      return (
+        <ScoutLiveHero
+          context={props.scoutLiveContext!}
+          logo={props.logo}
+          quickActions={props.quickActions}
+          onScoutSubmit={props.onScoutSubmit}
         />
       )
 

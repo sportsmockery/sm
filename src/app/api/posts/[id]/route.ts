@@ -62,6 +62,18 @@ export async function POST(
       updated_at: new Date().toISOString(),
     }
 
+    // Story Universe fields
+    if (body.force_hero_featured !== undefined) {
+      updateData.force_hero_featured = body.force_hero_featured
+    }
+    if (body.is_story_universe !== undefined) {
+      updateData.is_story_universe = body.is_story_universe
+      // Clear related IDs if unchecked
+      updateData.story_universe_related_ids = body.is_story_universe
+        ? (body.story_universe_related_ids || [])
+        : []
+    }
+
     // Only update social_caption if provided
     if (social_caption !== undefined) {
       updateData.social_caption = social_caption || null

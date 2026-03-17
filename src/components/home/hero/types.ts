@@ -8,6 +8,8 @@ import type { ReactNode } from "react"
 
 export type HeroModeName =
   | "trending"
+  | "story-universe"
+  | "scout-live"
   | "gameday"
   | "team-pulse"
   | "debate"
@@ -61,6 +63,45 @@ export interface TeamContext {
   href: string
 }
 
+/* ── Story Universe ── */
+
+export interface StoryUniverseRelatedStory {
+  id: string
+  title: string
+  dek?: string
+  href: string
+  imageUrl?: string
+  /** Optional type label — e.g. "Scout Insight", "Rumor Watch", "Key Stat" */
+  label?: string
+}
+
+export interface StoryUniverseContext {
+  mainStory: FeaturedStory
+  relatedStories: [StoryUniverseRelatedStory, StoryUniverseRelatedStory]
+}
+
+/* ── Scout Live Feed ── */
+
+export type LiveSignalType = "rumor" | "scout" | "update" | "stat" | "sentiment" | "news"
+
+export interface LiveSignal {
+  id: string
+  type: LiveSignalType
+  /** Optional type label override (e.g. "Rumor Watch") */
+  label?: string
+  message: string
+  timestamp: string
+  /** Optional value for stats/confidence (e.g. "68%", "Bottom 5") */
+  value?: string
+  href?: string
+}
+
+export interface ScoutLiveContext {
+  headline: string
+  summary: string
+  signals: LiveSignal[]
+}
+
 /* ── Fan Debate ── */
 
 export interface DebateContext {
@@ -89,6 +130,8 @@ export interface HeroUser {
 export interface HomepageHeroProps {
   user?: HeroUser
   featuredStory?: FeaturedStory | null
+  storyUniverseContext?: StoryUniverseContext | null
+  scoutLiveContext?: ScoutLiveContext | null
   gameContexts?: GameContext[]
   teamContext?: TeamContext | null
   debateContext?: DebateContext | null
@@ -120,11 +163,13 @@ export function isTrendingStory(story: FeaturedStory | null | undefined): boolea
  * Resolve which hero mode should render.
  *
  * Priority:
- *  1. Trending Article Featured Hero
- *  2. Game Day Hero
- *  3. Personalized Team Pulse Hero
- *  4. Fan Debate Hero
- *  5. Scout Briefing Hero (default)
+ *  1. Trending Article Featured Hero (views >= 2500)
+ *  2. Story Universe (editor-curated cluster)
+ *  3. Scout Live Feed (3+ recent signals)
+ *  4. Game Day Hero
+ *  5. Personalized Team Pulse Hero
+ *  6. Fan Debate Hero
+ *  7. Scout Briefing Hero (default)
  */
 export function resolveHeroMode(props: HomepageHeroProps): HeroModeName {
   if (
@@ -134,6 +179,26 @@ export function resolveHeroMode(props: HomepageHeroProps): HeroModeName {
     props.featuredStory.href
   ) {
     return "trending"
+  }
+
+  // 2. Story Universe — editor-curated story cluster
+  if (
+    props.storyUniverseContext &&
+    props.storyUniverseContext.mainStory &&
+    props.storyUniverseContext.mainStory.imageUrl &&
+    props.storyUniverseContext.mainStory.href &&
+    props.storyUniverseContext.relatedStories?.length === 2
+  ) {
+    return "story-universe"
+  }
+
+  // 3. Scout Live Feed — real-time intelligence signals
+  if (
+    props.scoutLiveContext &&
+    props.scoutLiveContext.headline &&
+    props.scoutLiveContext.signals?.length >= 3
+  ) {
+    return "scout-live"
   }
 
   if (props.gameContexts && props.gameContexts.length > 0 && props.gameContexts[0].matchup && props.gameContexts[0].href) {
