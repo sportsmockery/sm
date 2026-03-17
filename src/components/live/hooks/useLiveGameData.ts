@@ -3,6 +3,7 @@
 import { useEffect, useState, useCallback, useRef } from 'react'
 
 const POLL_INTERVAL = 10000
+const MAX_RETRIES = 3
 
 export interface PlayerStats {
   player_id: string
@@ -138,6 +139,7 @@ export function useLiveGameData(gameId: string | undefined) {
   const [error, setError] = useState<string | null>(null)
   const abortRef = useRef<AbortController | null>(null)
   const retriesRef = useRef(0)
+  const gameRef = useRef<GameData | null>(null)
 
   const fetchGame = useCallback(async () => {
     if (!gameId) return
@@ -153,8 +155,7 @@ export function useLiveGameData(gameId: string | undefined) {
 
       if (!res.ok) {
         retriesRef.current++
-        // Only show error if no existing game data and retried enough
-        if (retriesRef.current > 3 && !game) {
+        if (retriesRef.current > MAX_RETRIES && !gameRef.current) {
           setError(res.status === 404 ? 'Game not found' : `Failed to fetch: ${res.status}`)
           setIsLoading(false)
         }
@@ -162,24 +163,29 @@ export function useLiveGameData(gameId: string | undefined) {
       }
 
       const data: GameData = await res.json()
-      setGame(data)
+      // Only update state if data actually changed to prevent unnecessary re-renders
+      const prev = gameRef.current
+      if (!prev || JSON.stringify(data) !== JSON.stringify(prev)) {
+        gameRef.current = data
+        setGame(data)
+      }
       setError(null)
       setIsLoading(false)
       retriesRef.current = 0
     } catch (err) {
       if (err instanceof Error && err.name === 'AbortError') return
       retriesRef.current++
-      if (retriesRef.current > 3 && !game) {
+      if (retriesRef.current > MAX_RETRIES && !gameRef.current) {
         console.error('[useLiveGameData] Error:', err)
         setError(err instanceof Error ? err.message : 'Failed to load game')
         setIsLoading(false)
       }
-      // If we already have game data, silently ignore the error
     }
-  }, [gameId, game])
+  }, [gameId])
 
   useEffect(() => {
     retriesRef.current = 0
+    gameRef.current = null
     setIsLoading(true)
     setError(null)
     fetchGame()
