@@ -3,17 +3,17 @@
 import { useState, useEffect } from "react"
 import Image from "next/image"
 import Link from "next/link"
-import { ArrowRightLeft, ClipboardPen, MessageSquare, BarChart3, Video, Volume2, Tv } from "lucide-react"
+import { ArrowRightLeft, ClipboardPen, MessageSquare, BarChart3, Video, Volume2, Tv, MoreHorizontal, LogIn } from "lucide-react"
 import FeedTeamSidebar from "@/components/homepage/FeedTeamSidebar"
+import { useAuth } from "@/contexts/AuthContext"
 
-const EDGE_TOOLS: { icon: React.ComponentType<{ className?: string }>; label: string; href: string; liveOnly?: boolean }[] = [
+const EDGE_TOOLS: { icon: React.ComponentType<{ className?: string }>; label: string; desc?: string; href: string; liveOnly?: boolean }[] = [
   { icon: Tv, label: 'Game Center', href: '/live', liveOnly: true },
-  { icon: ArrowRightLeft, label: 'Trade Simulator', href: '/gm' },
-  { icon: ClipboardPen, label: 'Mock Draft', href: '/mock-draft' },
-  { icon: MessageSquare, label: 'Fan Chat', href: '/fan-chat' },
-  { icon: BarChart3, label: 'Team Stats', href: '/chicago-bears' },
-  { icon: Video, label: 'Vision Theater', href: '/bears-film-room' },
-  { icon: Volume2, label: 'Hands-Free Audio', href: '/audio' },
+  { icon: ClipboardPen, label: 'War Room', desc: 'Play GM — simulate trades, run mock drafts, and compete against other SM users.', href: '/gm' },
+  { icon: MessageSquare, label: 'Fan Chat', desc: 'Skip the comments and argue it out live.', href: '/fan-chat' },
+  { icon: BarChart3, label: 'Team Stats', desc: 'The numbers that explain the wins… and the excuses.', href: '/chicago-bears' },
+  { icon: Video, label: 'Vision Theater', desc: 'All videos, no digging. Just press play.', href: '/bears-film-room' },
+  { icon: Volume2, label: 'Hands-Free Audio', desc: 'Sit back, choose a voice, and press play.', href: '/audio' },
 ]
 
 interface TrendsSidebarProps {
@@ -21,8 +21,10 @@ interface TrendsSidebarProps {
 }
 
 export default function TrendsSidebar({ selectedTeam }: TrendsSidebarProps) {
+  const { user, isAuthenticated } = useAuth()
   const isForYou = !selectedTeam || selectedTeam === 'all'
   const [hasLiveGames, setHasLiveGames] = useState(false)
+  const [showProfileMenu, setShowProfileMenu] = useState(false)
 
   useEffect(() => {
     const check = () => {
@@ -38,6 +40,64 @@ export default function TrendsSidebar({ selectedTeam }: TrendsSidebarProps) {
 
   return (
     <aside className="sticky top-0 pl-6 hidden h-screen w-[350px] flex-col gap-4 pt-4 pb-3 lg:flex overflow-y-auto">
+      {/* Profile / Login */}
+      {isAuthenticated && user ? (
+        <div className="flex items-center gap-3 px-3 py-2 relative">
+          <Link href="/profile" className="flex items-center gap-3 flex-1 min-w-0" style={{ textDecoration: 'none' }}>
+            {user.avatar ? (
+              <Image src={user.avatar} alt={user.name || ''} width={36} height={36} className="rounded-full object-cover shrink-0" style={{ width: 36, height: 36 }} />
+            ) : (
+              <div className="shrink-0 flex items-center justify-center rounded-full" style={{ width: 36, height: 36, backgroundColor: 'var(--hp-muted)', color: 'var(--hp-foreground)', fontSize: 14, fontWeight: 600 }}>
+                {(user.name || user.email)?.[0]?.toUpperCase()}
+              </div>
+            )}
+            <div className="min-w-0">
+              <p className="truncate" style={{ fontSize: 14, fontWeight: 600, color: 'var(--hp-foreground)', margin: 0, lineHeight: 1.2 }}>{user.name || user.email?.split('@')[0]}</p>
+              <p className="truncate" style={{ fontSize: 12, color: 'var(--hp-muted-foreground)', margin: 0 }}>{user.email}</p>
+            </div>
+          </Link>
+          <button
+            onClick={() => setShowProfileMenu(!showProfileMenu)}
+            className="shrink-0 flex items-center justify-center rounded-full transition-colors hover:bg-[var(--hp-muted)]"
+            style={{ width: 32, height: 32 }}
+          >
+            <MoreHorizontal className="w-5 h-5" style={{ color: 'var(--hp-muted-foreground)' }} />
+          </button>
+          {showProfileMenu && (
+            <>
+              <div className="fixed inset-0 z-40" onClick={() => setShowProfileMenu(false)} />
+              <div className="absolute right-3 top-full z-50 w-44 rounded-xl shadow-xl overflow-hidden" style={{ backgroundColor: 'var(--hp-card)', border: '1px solid var(--hp-border)' }}>
+                <div className="p-1.5">
+                  <Link href="/profile" className="block px-3 py-2 rounded-lg text-[13px] font-medium transition-colors hover:bg-[var(--hp-muted)]" style={{ color: 'var(--hp-foreground)', textDecoration: 'none' }} onClick={() => setShowProfileMenu(false)}>
+                    Profile
+                  </Link>
+                  <Link href="/profile?tab=settings" className="block px-3 py-2 rounded-lg text-[13px] font-medium transition-colors hover:bg-[var(--hp-muted)]" style={{ color: 'var(--hp-foreground)', textDecoration: 'none' }} onClick={() => setShowProfileMenu(false)}>
+                    Settings
+                  </Link>
+                  <Link href="/profile?tab=favorites" className="block px-3 py-2 rounded-lg text-[13px] font-medium transition-colors hover:bg-[var(--hp-muted)]" style={{ color: 'var(--hp-foreground)', textDecoration: 'none' }} onClick={() => setShowProfileMenu(false)}>
+                    Favorites
+                  </Link>
+                </div>
+              </div>
+            </>
+          )}
+        </div>
+      ) : (
+        <Link
+          href="/login"
+          className="hp-sidebar-card flex items-center gap-3 px-3 py-2.5 group transition-all"
+          style={{ textDecoration: 'none' }}
+        >
+          <div className="flex items-center justify-center rounded-full shrink-0" style={{ width: 36, height: 36, backgroundColor: '#0B0F14' }}>
+            <LogIn className="w-4 h-4" style={{ color: '#FAFAFB' }} />
+          </div>
+          <div>
+            <p style={{ fontSize: 14, fontWeight: 600, color: 'var(--hp-foreground)', margin: 0 }}>Sign in</p>
+            <p style={{ fontSize: 12, color: 'var(--hp-muted-foreground)', margin: 0 }}>Save favorites & join discussions</p>
+          </div>
+        </Link>
+      )}
+
       {/* Ask Scout - Quick Access */}
       <Link href="/scout-ai" className="hp-sidebar-card w-full px-3 py-2.5 flex items-center gap-3 group transition-all" style={{ textDecoration: 'none' }}>
         <Image
@@ -85,7 +145,10 @@ export default function TrendsSidebar({ selectedTeam }: TrendsSidebarProps) {
               <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg" style={{ background: 'var(--hp-muted)', color: '#00D4FF', border: '1px solid #00D4FF' }}>
                 <item.icon className="h-5 w-5" />
               </div>
-              <span style={{ flex: 1 }}>{item.label}</span>
+              <div style={{ flex: 1 }}>
+                <span>{item.label}</span>
+                {item.desc && <p style={{ fontSize: 11, color: 'var(--hp-muted-foreground)', margin: '2px 0 0', lineHeight: 1.3 }}>{item.desc}</p>}
+              </div>
               {(item.label === 'Fan Chat' || item.label === 'Game Center') && (
                 <span
                   style={{

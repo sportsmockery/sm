@@ -41,8 +41,7 @@ const TEAM_PILLS: { label: string; path: string }[] = [
 
 // Pills that go directly to a fixed route
 const DIRECT_PILLS: { label: string; href: string }[] = [
-  { label: 'Mock Draft', href: '/mock-draft' },
-  { label: 'Trade Simulator', href: '/gm' },
+  { label: 'War Room', href: '/gm' },
   { label: 'Fan Chat', href: '/fan-chat' },
 ];
 
@@ -57,13 +56,11 @@ function getFavoriteTeamSlug(): string | null {
 }
 
 function formatGameTime(isoTime: string): string {
-  const d = new Date(isoTime);
-  const hours = d.getHours();
-  const mins = d.getMinutes();
-  const ampm = hours >= 12 ? 'PM' : 'AM';
-  const h = hours % 12 || 12;
-  const m = mins.toString().padStart(2, '0');
-  return `${h}:${m} ${ampm}`;
+  return new Date(isoTime).toLocaleTimeString('en-US', {
+    hour: 'numeric',
+    minute: '2-digit',
+    timeZone: 'America/Chicago',
+  }) + ' CT';
 }
 
 function getChicagoAbbr(game: LiveGame): string {
@@ -199,9 +196,14 @@ export default function LiveStrip() {
   // Determine mode
   const mode: 'live' | 'upcoming' = hasLive ? 'live' : 'upcoming';
 
+  // Pages with sidebar need offset so pills center over content area
+  const isFullWidth = pathname === '/' || pathname === '/feed'
+    || pathname?.startsWith('/admin') || pathname?.startsWith('/studio');
+  const hasSidebar = !isFullWidth;
+
   return (
     <div className="live-strip" data-mode={mode}>
-      <div className="live-strip-inner">
+      <div className={`live-strip-inner${hasSidebar ? ' live-strip-inner--with-sidebar' : ''}`}>
         {/* LIVE mode */}
         {mode === 'live' && liveGames.map((game) => (
           <Link

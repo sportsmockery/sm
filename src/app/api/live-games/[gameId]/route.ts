@@ -193,6 +193,7 @@ export async function GET(
       sport: gameRow.sport,
       season: gameRow.season,
       game_date: gameRow.game_date,
+      game_start_time: gameRow.game_date,
       status: gameRow.status,
       home_team: {
         team_id: gameRow.home_team_id,

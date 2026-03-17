@@ -3761,6 +3761,11 @@ main {
   padding: 0 16px;
   scrollbar-width: none;
 }
+@media (min-width: 1024px) {
+  .live-strip-inner--with-sidebar {
+    padding-left: 240px;
+  }
+}
 
 .live-strip-inner::-webkit-scrollbar { display: none; }
 

@@ -5,8 +5,7 @@ import { usePathname } from 'next/navigation'
 
 const platformLinks = [
   { name: 'Scout AI', href: '/scout-ai' },
-  { name: 'Trade Simulator', href: '/gm' },
-  { name: 'Mock Draft', href: '/mock-draft' },
+  { name: 'War Room', href: '/gm' },
   { name: 'Data Cosmos', href: '/datahub' },
   { name: 'Fan Hub', href: '/fan-zone' },
 ]

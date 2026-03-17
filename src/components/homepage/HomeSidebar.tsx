@@ -11,8 +11,7 @@ interface HomeSidebarProps {
 
 const edgeTools = [
   { icon: Tv, label: 'Game Center', href: '/live', liveOnly: true },
-  { icon: ArrowRightLeft, label: 'Trade Simulator', href: '/gm' },
-  { icon: ClipboardPen, label: 'Mock Draft', href: '/mock-draft' },
+  { icon: ClipboardPen, label: 'War Room', href: '/gm' },
   { icon: MessageSquare, label: 'Fan Chat', href: '/fan-chat' },
   { icon: BarChart3, label: 'Team Stats', href: '/chicago-bears' },
   { icon: Video, label: 'Vision Theater', href: '/bears-film-room' },

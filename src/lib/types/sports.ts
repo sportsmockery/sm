@@ -61,6 +61,14 @@ export interface Game {
   isHome: boolean;      // relative to the team being viewed
   result?: 'W' | 'L' | 'T';
   recapUrl?: string;
+  // MLB-specific
+  probablePitcherHome?: string | null;
+  probablePitcherAway?: string | null;
+  mlbGamePk?: number | null;
+  espnGameId?: string | null;
+  weatherTemp?: number | null;
+  weatherCondition?: string | null;
+  weatherWind?: string | null;
 }
 
 // Stats types

@@ -62,8 +62,7 @@ const TODAY_KEYS = [
 
 const TOOLS = [
   { label: 'Scout AI', href: '/scout-ai', icon: '/downloads/scout-v2.png', isImage: true },
-  { label: 'GM Trade Sim', href: '/gm', isImage: false },
-  { label: 'Mock Draft', href: '/mock-draft', isImage: false },
+  { label: 'War Room', href: '/gm', isImage: false },
   { label: 'Fan Chat', href: '/fan-chat', isImage: false },
 ];
 

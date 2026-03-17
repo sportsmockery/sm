@@ -117,6 +117,14 @@ export interface WhiteSoxGame {
   tv: string | null
   innings: number | null
   gameType: 'regular' | 'postseason' | 'preseason' | 'spring-training'
+  // New MLB columns
+  probablePitcherHome: string | null
+  probablePitcherAway: string | null
+  mlbGamePk: number | null
+  espnGameId: string | null
+  weatherTemp: number | null
+  weatherCondition: string | null
+  weatherWind: string | null
 }
 
 export interface WhiteSoxTeamStats {
@@ -551,7 +559,14 @@ export async function getWhiteSoxSchedule(season?: number): Promise<WhiteSoxGame
       opponent_score,
       whitesox_win,
       broadcast,
-      game_type
+      game_type,
+      probable_pitcher_home,
+      probable_pitcher_away,
+      mlb_game_pk,
+      espn_game_id,
+      weather_temp,
+      weather_condition,
+      weather_wind
     `)
     .eq('season', targetSeason)
     .order('game_date', { ascending: false })
@@ -621,6 +636,13 @@ function transformGame(game: any): WhiteSoxGame {
     gameType: game.game_type === 'spring_training' ? 'spring-training'
       : game.game_type === 'postseason' ? 'postseason'
       : 'regular',
+    probablePitcherHome: game.probable_pitcher_home || null,
+    probablePitcherAway: game.probable_pitcher_away || null,
+    mlbGamePk: game.mlb_game_pk || null,
+    espnGameId: game.espn_game_id || null,
+    weatherTemp: game.weather_temp || null,
+    weatherCondition: game.weather_condition || null,
+    weatherWind: game.weather_wind || null,
   }
 }
 

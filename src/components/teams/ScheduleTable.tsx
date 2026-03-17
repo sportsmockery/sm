@@ -94,9 +94,15 @@ export default function ScheduleTable({ games, team, showWeek = true }: Schedule
                   <p className="font-semibold" style={{ color: 'var(--sm-text)' }}>
                     {game.isHome ? 'vs' : '@'} {opponent.name}
                   </p>
-                  <p className="text-sm" style={{ color: 'var(--sm-text-muted)' }}>
-                    {game.venue}
-                  </p>
+                  {game.status === 'scheduled' && (game.probablePitcherHome || game.probablePitcherAway) ? (
+                    <p className="text-xs" style={{ color: 'var(--sm-text-muted)' }}>
+                      {game.probablePitcherAway || 'TBD'} vs {game.probablePitcherHome || 'TBD'}
+                    </p>
+                  ) : (
+                    <p className="text-sm" style={{ color: 'var(--sm-text-muted)' }}>
+                      {game.venue}
+                    </p>
+                  )}
                 </div>
                 <div className="text-right">
                   {score ? (
@@ -123,6 +129,7 @@ export default function ScheduleTable({ games, team, showWeek = true }: Schedule
             {showWeek && <th className="px-4 py-3">Wk</th>}
             <th className="px-4 py-3">Date</th>
             <th className="px-4 py-3">Opponent</th>
+            {!showWeek && <th className="px-4 py-3">Pitchers</th>}
             <th className="px-4 py-3">Result</th>
             <th className="px-4 py-3">Score</th>
             <th className="px-4 py-3">Venue</th>
@@ -176,6 +183,15 @@ export default function ScheduleTable({ games, team, showWeek = true }: Schedule
                     </div>
                   </div>
                 </td>
+                {!showWeek && (
+                  <td className="px-4 py-3 text-sm" style={{ color: 'var(--sm-text-muted)' }}>
+                    {(game.probablePitcherHome || game.probablePitcherAway) ? (
+                      <span>{game.probablePitcherAway || 'TBD'} vs {game.probablePitcherHome || 'TBD'}</span>
+                    ) : (
+                      <span style={{ color: 'var(--sm-text-dim)' }}>—</span>
+                    )}
+                  </td>
+                )}
                 <td className="px-4 py-3">
                   {game.result ? (
                     <span className={`rounded px-2 py-1 text-xs font-bold ${getResultColor(game.result)}`}>
