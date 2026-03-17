@@ -605,6 +605,7 @@ export async function getWhiteSoxSchedule(season?: number): Promise<WhiteSoxGame
 
 function formatGameTime(timeStr: string | null): string | null {
   if (!timeStr) return null
+  // DB stores times in CT — just format directly
   const [hours, minutes] = timeStr.split(':').map(Number)
   const hour12 = hours % 12 || 12
   const ampm = hours >= 12 ? 'PM' : 'AM'

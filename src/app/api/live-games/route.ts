@@ -75,6 +75,36 @@ export async function GET(request: NextRequest) {
       }
     }
 
+    // Enrich upcoming games with start times from games_master tables
+    const MASTER_TABLES: Record<string, string> = {
+      bears: 'bears_games_master',
+      bulls: 'bulls_games_master',
+      blackhawks: 'blackhawks_games_master',
+      cubs: 'cubs_games_master',
+      whitesox: 'whitesox_games_master',
+    }
+
+    for (const game of allGames) {
+      if (game.status === 'upcoming' && game.game_start_time && !game.game_start_time.includes('T')) {
+        // game_start_time is just a date — look up actual time from games_master
+        const masterTable = MASTER_TABLES[game.chicago_team]
+        if (masterTable && datalabAdmin) {
+          try {
+            const { data: masterRow } = await datalabAdmin
+              .from(masterTable)
+              .select('game_time')
+              .eq('game_date', game.game_start_time)
+              .limit(1)
+              .single()
+            if (masterRow?.game_time) {
+              // Combine date + time as CT ISO string
+              game.game_start_time = `${game.game_start_time}T${masterRow.game_time}-06:00`
+            }
+          } catch { /* skip enrichment on error */ }
+        }
+      }
+    }
+
     return NextResponse.json({
       games: allGames,
       count: allGames.length,
