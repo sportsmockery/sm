@@ -220,7 +220,7 @@ export default function LiveGamesTopBar({ teamFilter, isHomepage = false }: Live
                 key={game.game_id}
                 href={getLivePageUrl(game)}
                 className="flex items-center gap-2 sm:gap-3 px-3 sm:px-4 py-1.5 my-1 mx-1 transition-colors min-w-fit"
-                style={{ background: '#FAFAFB', borderRadius: 999, color: '#0B0F14' }}
+                style={{ background: 'rgba(255,255,255,0.15)', borderRadius: 999, color: '#0B0F14' }}
               >
                 {/* Live/Starting Badge */}
                 <div className="flex items-center gap-1.5 flex-shrink-0">
@@ -230,7 +230,7 @@ export default function LiveGamesTopBar({ teamFilter, isHomepage = false }: Live
                         <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
                         <span className="relative inline-flex rounded-full h-full w-full bg-green-500"></span>
                       </span>
-                      <span className="text-[10px] sm:text-xs font-bold uppercase tracking-wide" style={{ color: '#16a34a' }}>
+                      <span className="text-[10px] sm:text-xs font-bold uppercase tracking-wide" style={{ color: '#FAFAFB' }}>
                         LIVE
                       </span>
                     </>
