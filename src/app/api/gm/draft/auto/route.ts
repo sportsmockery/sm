@@ -85,7 +85,7 @@ export async function POST(request: NextRequest) {
         team_color: p.team_color,
         is_user_pick: p.is_user_pick,
         is_current: p.pick_number === currentPick,
-        selected_prospect: p.prospect_id ? {
+        selected_prospect: (p.prospect_id && p.prospect_id !== 'pending' && p.prospect_name) ? {
           id: p.prospect_id,
           name: p.prospect_name,
           position: p.position,
@@ -112,7 +112,7 @@ export async function POST(request: NextRequest) {
     // Check for BOTH prospect_id AND prospect_name to determine if actually picked
     // The get_mock_draft RPC may return default/placeholder values for prospect_id
     const pickedProspectIds = allPicks
-      .filter((p: any) => p.prospect_id && p.prospect_name && p.prospect_name !== 'null' && p.prospect_name !== '')
+      .filter((p: any) => p.prospect_id && p.prospect_id !== 'pending' && p.prospect_name && p.prospect_name !== 'null' && p.prospect_name !== '')
       .map((p: any) => String(p.prospect_id))
 
     log(`Already picked prospect IDs: ${pickedProspectIds.length} picks made`)
@@ -321,6 +321,8 @@ export async function POST(request: NextRequest) {
       const prospectName = localPick?.prospect_name || p.prospect_name
       const position = localPick?.position || p.position
 
+      const hasProspect = prospectId && prospectId !== 'pending' && prospectName
+
       return {
         pick_number: p.pick_number,
         round: p.round,
@@ -330,7 +332,7 @@ export async function POST(request: NextRequest) {
         team_color: p.team_color,
         is_user_pick: p.is_user_pick,
         is_current: p.pick_number === updatedDraft.current_pick,
-        selected_prospect: prospectId ? {
+        selected_prospect: hasProspect ? {
           id: prospectId,
           name: prospectName,
           position: position,

@@ -23,12 +23,13 @@ export default function AuthorPopular({ articles, className = '' }: AuthorPopula
 
   return (
     <section
-      className={`rounded-2xl border p-6 ${className}`}
-      style={{ borderColor: 'var(--sm-border)', backgroundColor: 'var(--sm-card)' }}
+      className={`rounded-2xl p-6 ${className}`}
+      style={{ border: '1px solid var(--border-default)', backgroundColor: 'var(--bg-card)' }}
     >
-      <h2 className="mb-4 flex items-center gap-2 font-heading text-lg font-bold" style={{ color: 'var(--sm-text)' }}>
+      <h2 className="mb-4 flex items-center gap-2 text-lg font-bold" style={{ color: 'var(--text-primary)' }}>
         <svg
-          className="h-5 w-5 text-[#8B0000] dark:text-[#FF6666]"
+          className="h-5 w-5"
+          style={{ color: '#BC0000' }}
           fill="none"
           viewBox="0 0 24 24"
           strokeWidth={2}
@@ -54,25 +55,25 @@ export default function AuthorPopular({ articles, className = '' }: AuthorPopula
               <span
                 className={`flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-xs font-bold ${
                   index === 0
-                    ? 'bg-amber-500 text-white'
+                    ? 'bg-[#D6B05E] text-white'
                     : index === 1
                     ? 'bg-zinc-400 text-white'
                     : index === 2
                     ? 'bg-amber-700 text-white'
                     : ''
                 }`}
-                style={index > 2 ? { backgroundColor: 'var(--sm-surface)', color: 'var(--sm-text)' } : undefined}
+                style={index > 2 ? { backgroundColor: 'var(--bg-tertiary)', color: 'var(--text-primary)' } : undefined}
               >
                 {index + 1}
               </span>
 
               <div className="min-w-0 flex-1">
-                <h4 className="line-clamp-2 text-sm font-semibold transition-colors group-hover:text-[#8B0000] dark:group-hover:text-[#FF6666]" style={{ color: 'var(--sm-text)' }}>
+                <h4 className="line-clamp-2 text-sm font-semibold transition-colors group-hover:text-[#BC0000]" style={{ color: 'var(--text-primary)' }}>
                   {article.title}
                 </h4>
-                <div className="mt-1 flex items-center gap-2 text-xs" style={{ color: 'var(--sm-text-muted)' }}>
+                <div className="mt-1 flex items-center gap-2 text-xs" style={{ color: 'var(--text-muted)' }}>
                   <span>{article.views.toLocaleString()} views</span>
-                  <span>•</span>
+                  <span>·</span>
                   <time dateTime={article.published_at}>
                     {format(new Date(article.published_at), 'MMM d, yyyy')}
                   </time>

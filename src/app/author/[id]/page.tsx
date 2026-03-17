@@ -152,11 +152,12 @@ export default async function AuthorPage({ params, searchParams }: AuthorPagePro
     .order('views', { ascending: false })
     .limit(5)
 
-  // Calculate total views
-  const totalViews = allPosts?.reduce(() => {
-    // In a real app, we'd aggregate views from the posts
-    return Math.floor(Math.random() * 50000) + 10000
-  }, 0) || 0
+  // Calculate total views from actual data
+  const { data: viewsData } = await supabaseAdmin
+    .from('sm_posts')
+    .select('views')
+    .eq('author_id', author.id)
+  const totalViews = viewsData?.reduce((sum, p) => sum + (p.views || 0), 0) || 0
 
   // Transform data for components
   const articles = posts?.map(post => {
@@ -203,7 +204,7 @@ export default async function AuthorPage({ params, searchParams }: AuthorPagePro
       title: post.title,
       slug: post.slug,
       published_at: post.published_at,
-      views: post.views || Math.floor(Math.random() * 5000) + 500,
+      views: post.views || 0,
       category: {
         name: cat?.name || 'Uncategorized',
         slug: cat?.slug || 'uncategorized',
@@ -220,7 +221,7 @@ export default async function AuthorPage({ params, searchParams }: AuthorPagePro
   }
 
   return (
-    <div style={{ minHeight: '100vh', background: 'var(--sm-dark)' }}>
+    <div style={{ minHeight: '100vh' }}>
       {/* Author Header */}
       <AuthorHeader
         author={authorData}
@@ -229,8 +230,8 @@ export default async function AuthorPage({ params, searchParams }: AuthorPagePro
       />
 
       {/* Stats Section */}
-      <div style={{ padding: '32px 0', borderBottom: '1px solid var(--sm-border)', background: 'var(--sm-card)' }}>
-        <div style={{ maxWidth: 'var(--container-xl)', margin: '0 auto', padding: '0 16px' }}>
+      <div style={{ padding: '32px 0', borderBottom: '1px solid var(--border-default)', backgroundColor: 'var(--bg-card)' }}>
+        <div style={{ maxWidth: '1300px', margin: '0 auto', padding: '0 16px' }}>
           <AuthorStats
             totalPosts={allPosts?.length || 0}
             totalViews={totalViews}
@@ -240,11 +241,11 @@ export default async function AuthorPage({ params, searchParams }: AuthorPagePro
       </div>
 
       {/* Main Content */}
-      <main style={{ maxWidth: 'var(--container-xl)', margin: '0 auto', padding: '48px 16px' }}>
+      <main style={{ maxWidth: '1300px', margin: '0 auto', padding: '48px 16px' }}>
         <div className="grid gap-8 lg:grid-cols-3">
           {/* Main Column - Articles */}
           <div className="lg:col-span-2">
-            <h2 style={{ marginBottom: '24px', fontSize: 'var(--text-2xl)', fontWeight: 700, fontFamily: 'var(--sm-font-heading)', color: 'var(--sm-text)' }}>
+            <h2 className="text-2xl font-bold mb-6" style={{ color: 'var(--text-primary)' }}>
               Articles {category && `in ${categories?.find(c => c.slug === category)?.name || category}`}
             </h2>
 
@@ -272,25 +273,6 @@ export default async function AuthorPage({ params, searchParams }: AuthorPagePro
               authorId={id}
             />
 
-            {/* Ad Placeholder */}
-            <div className="glass-card" style={{ padding: '32px', textAlign: 'center', borderStyle: 'dashed' }}>
-              <p style={{ fontSize: 'var(--text-sm)', color: 'var(--sm-text-muted)' }}>
-                Advertisement
-              </p>
-              <div style={{
-                marginTop: '8px',
-                display: 'flex',
-                height: '192px',
-                alignItems: 'center',
-                justifyContent: 'center',
-                borderRadius: 'var(--sm-radius-md)',
-                background: 'var(--sm-surface)',
-              }}>
-                <span style={{ color: 'var(--sm-text-dim)' }}>
-                  300x250
-                </span>
-              </div>
-            </div>
           </aside>
         </div>
       </main>

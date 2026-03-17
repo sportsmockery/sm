@@ -121,6 +121,16 @@ export default function UsersTable({
               </td>
               <td className="px-6 py-4 whitespace-nowrap text-right">
                 <div className="flex items-center justify-end gap-2">
+                  <Link
+                    href={`/admin/users/${user.id}`}
+                    className="transition-colors"
+                    style={{ color: 'var(--text-muted)' }}
+                    title="Edit user profile"
+                  >
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                    </svg>
+                  </Link>
                   {onResetPassword && (
                     <button
                       onClick={() => onResetPassword(user.id, user.email)}

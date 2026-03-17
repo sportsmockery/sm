@@ -61,7 +61,7 @@ export async function PATCH(
     const body = await request.json()
     const supabase = getSupabaseAdmin()
 
-    const allowedFields = ['name', 'role', 'is_fan_council_member', 'reputation_score']
+    const allowedFields = ['name', 'role', 'is_fan_council_member', 'reputation_score', 'bio', 'avatar_url']
     const updates: Record<string, unknown> = {}
     for (const field of allowedFields) {
       if (body[field] !== undefined) {
