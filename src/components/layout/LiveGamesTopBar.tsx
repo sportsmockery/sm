@@ -218,6 +218,18 @@ export default function LiveGamesTopBar({ teamFilter, isHomepage = false }: Live
     return chicagoTeam?.logo || '/logos/bears.svg'
   }
 
+  const getOpponentName = (game: LiveGameData): string => {
+    const name = game.is_chicago_home ? game.away_team_name : game.home_team_name
+    const abbr = game.is_chicago_home ? game.away_team_abbr : game.home_team_abbr
+
+    // MLB: expand short nickname-only team names to full city + nickname
+    if (game.sport === 'mlb') {
+      if (abbr === 'OAK' && name === 'Athletics') return 'Oakland Athletics'
+    }
+
+    return name
+  }
+
   // Build the live game page URL
   const getLivePageUrl = (game: LiveGameData): string => {
     return `/live/${game.sport}/${game.game_id}`
@@ -280,7 +292,7 @@ export default function LiveGamesTopBar({ teamFilter, isHomepage = false }: Live
                   <div className="relative w-4 h-4 sm:w-5 sm:h-5 opacity-80">
                     <Image
                       src={getOpponentLogo(game)}
-                      alt="Opponent"
+                      alt={getOpponentName(game)}
                       fill
                       className="object-contain"
                       unoptimized
@@ -288,15 +300,20 @@ export default function LiveGamesTopBar({ teamFilter, isHomepage = false }: Live
                   </div>
                 </div>
 
-                {/* Score */}
-                <div className="flex items-center gap-1 font-bold text-sm sm:text-base flex-shrink-0" style={{ color: '#0B0F14' }}>
-                  <span className={score.chicagoScore > score.opponentScore ? 'text-[#16a34a]' : ''}>
-                    {score.chicagoAbbr} {score.chicagoScore}
-                  </span>
-                  <span style={{ color: '#999' }}>–</span>
-                  <span className={score.opponentScore > score.chicagoScore ? 'text-[#BC0000]' : ''}>
-                    {score.opponentScore} {score.opponentAbbr}
-                  </span>
+                {/* Score + opponent name */}
+                <div className="flex flex-col items-start sm:items-center justify-center flex-shrink-0 leading-tight">
+                  <div className="flex items-center gap-1 font-bold text-sm sm:text-base" style={{ color: '#0B0F14' }}>
+                    <span className={score.chicagoScore > score.opponentScore ? 'text-[#16a34a]' : ''}>
+                      {score.chicagoAbbr} {score.chicagoScore}
+                    </span>
+                    <span style={{ color: '#999' }}>–</span>
+                    <span className={score.opponentScore > score.chicagoScore ? 'text-[#BC0000]' : ''}>
+                      {score.opponentScore} {score.opponentAbbr}
+                    </span>
+                  </div>
+                  <div className="text-[10px] sm:text-xs text-left sm:text-center whitespace-nowrap" style={{ color: '#333' }}>
+                    vs {getOpponentName(game)}
+                  </div>
                 </div>
 
                 {/* Period/Clock */}

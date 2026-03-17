@@ -24,14 +24,22 @@ export async function GET(
       return NextResponse.json({ error: 'Game ID is required' }, { status: 400 })
     }
 
-    // Try DataLab REST API first
+    // Prefer Supabase (shared DB) first
+    const supabaseResponse = await fetchFromSupabase(gameId)
+
+    // If Supabase found the game (anything but 404), return that
+    if (supabaseResponse.status !== 404) {
+      return supabaseResponse
+    }
+
+    // Fallback: DataLab REST API
     const datalabResult = await fetchFromDatalabApi(gameId)
     if (datalabResult) {
       return NextResponse.json(datalabResult)
     }
 
-    // Fallback: direct Supabase queries
-    return await fetchFromSupabase(gameId)
+    // If DataLab also fails, return the original Supabase 404
+    return supabaseResponse
   } catch (error) {
     console.error('[API /api/live-games/[gameId]] Error:', error)
     return NextResponse.json(

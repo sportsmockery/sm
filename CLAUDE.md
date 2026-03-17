@@ -462,6 +462,21 @@ const LIVE_POLL_INTERVAL = 10_000    // During live games
 const STANDARD_POLL_INTERVAL = 60_000 // No live games
 ```
 
+**Live API routing (test.sportsmockery.com):**
+
+- **Supabase-first, API-second:**  
+  - `/api/live-games` and `/api/live-games/[gameId]` **must always read from the shared DataLab Supabase first**, then fall back to DataLab’s HTTP API only if Supabase fails or has no data.
+  - This guarantees the frontend and DataLab stay in sync and keeps live data consistent across platforms.
+- **`/api/live-games`:**
+  - Uses `live_games_registry` + `{team}_live` tables to build the games list (names, logos, scores, status, period, clock, `game_time_display`).
+  - If Supabase returns games, that payload is used directly.
+  - If Supabase is unavailable or empty, it falls back to `DATALAB_API_URL /api/live` and normalizes the response to the same shape.
+- **`/api/live-games/[gameId]`:**
+  - Uses `live_games_registry` + `{team}_live` + `{team}_player_stats_live` to build full game data: home/away names, **full team names**, logos, scores, period/clock, plays, player stats, and derived linescore/team stats.
+  - If Supabase returns anything other than 404, that response is authoritative.
+  - If Supabase returns 404, it falls back to `DATALAB_API_URL /api/live/{gameId}` and normalizes to the same `GameData` shape used by `/live`.
+  - Frontend components (`LiveGamesTopBar`, `LiveGamePage`, `ScoreHeader`, etc.) should always treat Supabase as the primary source and never call DataLab HTTP APIs directly.
+
 ### Game Times — All Sports (CRITICAL)
 
 **Always use `game_time_display`** (varchar) for showing game times. Format: `"3:05 PM CT"`, `"7:00 PM CT"`, etc. Already populated on every game with a time. All times are Central Time (Chicago), always.
