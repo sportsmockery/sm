@@ -12,14 +12,11 @@ interface LeaderboardEntry {
   user_id: string
   rank: number
   score: number
+  display_name: string
   activities_count: number
   trades_count: number
   drafts_count: number
   sims_count: number
-  users?: {
-    username: string | null
-    email: string | null
-  }
 }
 
 interface LeaderboardData {
