@@ -3738,9 +3738,10 @@ main {
   z-index: 85;
   height: 32px;
   background: rgba(0, 0, 0, 0.92);
-  border-bottom: 1px solid rgba(188, 0, 0, 0.25);
+  border-bottom: 1px solid rgba(34, 197, 94, 0.25);
   display: flex;
   align-items: center;
+  justify-content: center;
   overflow: visible;
 }
 
