@@ -19,7 +19,7 @@ const EDGE_TOOLS: { id: string; title: string; href: string; icon: React.Compone
   { id: 'draft', title: 'War Room', href: '/gm', icon: ClipboardPen },
   { id: 'chat', title: 'Fan Chat', href: '/fan-chat', icon: MessageSquare },
   { id: 'analytics', title: 'Team Stats', href: '/chicago-bears', icon: BarChart3 },
-  { id: 'vision', title: 'Vision Theater', href: '/bears-film-room', icon: Video },
+  { id: 'vision', title: 'Vision Theater', href: '/vision-theater', icon: Video },
   { id: 'audio', title: 'Hands-Free Audio', href: '/audio', icon: Volume2 },
 ]
 

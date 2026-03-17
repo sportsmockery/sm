@@ -485,7 +485,7 @@ export default function VisionTheaterClient({ data }: { data: VisionTheaterData 
       <section
         style={{
           position: 'sticky',
-          top: 'var(--sm-nav-height, 72px)',
+          top: 0,
           zIndex: 10,
           background: 'var(--sm-dark, #050508)',
           borderBottom: '1px solid rgba(255,255,255,0.06)',
