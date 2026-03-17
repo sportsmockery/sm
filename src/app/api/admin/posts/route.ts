@@ -26,6 +26,7 @@ export async function GET(request: NextRequest) {
         category:sm_categories(id, name, slug),
         author:sm_authors(id, display_name)
       `, { count: 'exact' })
+      .order('published_at', { ascending: false, nullsFirst: false })
       .order('created_at', { ascending: false })
       .range(offset, offset + limit - 1)
 

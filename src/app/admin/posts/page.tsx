@@ -41,6 +41,7 @@ export default async function AdminPostsPage({ searchParams }: PostsPageProps) {
   }
 
   const { data: posts, count } = await query
+    .order('published_at', { ascending: false, nullsFirst: false })
     .order('created_at', { ascending: false })
     .range(offset, offset + POSTS_PER_PAGE - 1)
 
