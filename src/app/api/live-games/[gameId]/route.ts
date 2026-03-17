@@ -7,6 +7,29 @@ const DATALAB_API_URL = process.env.DATALAB_API_URL || 'https://datalab.sportsmo
 const TEAM_TABLES = ['bears', 'bulls', 'blackhawks', 'cubs', 'whitesox'] as const
 const CHICAGO_TEAM_IDS = ['bears', 'bulls', 'blackhawks', 'cubs', 'whitesox']
 
+const CENTRAL_TZ = 'America/Chicago'
+
+function toCentralTimeString(dateLike: string | Date | null | undefined): string | null {
+  if (!dateLike) return null
+  const date = typeof dateLike === 'string' ? new Date(dateLike) : dateLike
+  if (Number.isNaN(date.getTime())) return null
+
+  const datePart = date.toLocaleDateString('en-US', {
+    timeZone: CENTRAL_TZ,
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+  })
+  const timePart = date.toLocaleTimeString('en-US', {
+    timeZone: CENTRAL_TZ,
+    hour: 'numeric',
+    minute: '2-digit',
+    hour12: true,
+  })
+
+  return `${datePart}, ${timePart} CT`
+}
+
 /**
  * GET /api/live-games/[gameId]
  *

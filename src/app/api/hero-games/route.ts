@@ -25,6 +25,34 @@ const CHICAGO_ABBRS: Record<string, string> = {
   whitesox: "CHW",
 }
 
+const CHICAGO_NICKNAMES: Record<string, string> = {
+  bears: "Bears",
+  bulls: "Bulls",
+  blackhawks: "Blackhawks",
+  cubs: "Cubs",
+  whitesox: "White Sox",
+}
+
+function getTeamNickname(fullName: string | null | undefined, teamSlug: string | null): string {
+  if (teamSlug && CHICAGO_NICKNAMES[teamSlug]) {
+    return CHICAGO_NICKNAMES[teamSlug]
+  }
+  if (!fullName) return "Team"
+
+  const parts = fullName.trim().split(/\s+/)
+  if (parts.length === 1) return parts[0]
+
+  // Keep last two words when the last word is short (e.g. "Sox", "FC") to avoid over-truncating
+  const last = parts[parts.length - 1]
+  const secondLast = parts[parts.length - 2]
+  if (last.length <= 3) {
+    return `${secondLast} ${last}`
+  }
+
+  // Default: use final word as nickname ("Angels", "Packers", etc.)
+  return last
+}
+
 export async function GET() {
   try {
     const { data: registry } = await datalabAdmin
@@ -71,7 +99,17 @@ export async function GET() {
 
       const homeName = game.home_team_name || "Home"
       const awayName = game.away_team_name || "Away"
-      const matchup = `${awayName} at ${homeName}`
+      const chicagoAbbr = CHICAGO_ABBRS[teamSlug]
+      const isChicagoHome = (game.home_team_abbr || "").toUpperCase() === chicagoAbbr
+
+      const homeNickname = getTeamNickname(homeName, isChicagoHome ? teamSlug : null)
+      const awayNickname = getTeamNickname(awayName, !isChicagoHome ? teamSlug : null)
+
+      // For homepage Game Day hero, always show nicknames only (no city):
+      // e.g. "Athletics vs. White Sox" when Chicago is home.
+      const matchup = isChicagoHome
+        ? `${awayNickname} vs. ${homeNickname}`
+        : `${homeNickname} at ${awayNickname}`
 
       let kickoffLabel: string
       if (gameStatus === "in_progress" || gameStatus === "in progress" || gameStatus === "live") {
@@ -83,21 +121,29 @@ export async function GET() {
           const clock = game.clock || ""
           kickoffLabel = clock && clock !== "0:00" ? `LIVE — ${period} ${clock}` : `LIVE — ${period}`
         }
-      } else if (game.game_date) {
-        const startTime = new Date(game.game_date)
-        kickoffLabel = `Today @ ${startTime.toLocaleTimeString("en-US", {
-          hour: "numeric",
-          minute: "2-digit",
-          timeZone: "America/Chicago",
-        })} CT`
+      } else if (game.game_time_central || game.game_date) {
+        // Prefer DataLab's Central Time string (game_time_central) to avoid timezone drift.
+        const central = (game.game_time_central as string | null) || null
+        if (central) {
+          // Format: "MM/DD/YYYY, 6:30 PM CT" → we want "6:30 PM CT"
+          const commaIdx = central.indexOf(", ")
+          const timePart = commaIdx >= 0 ? central.slice(commaIdx + 2) : central
+          kickoffLabel = `Today @ ${timePart}`
+        } else {
+          // Fallback to local Central formatting from game_date if central string missing
+          const startTime = new Date(game.game_date)
+          kickoffLabel = `Today @ ${startTime.toLocaleTimeString("en-US", {
+            hour: "numeric",
+            minute: "2-digit",
+            timeZone: "America/Chicago",
+          })} CT`
+        }
         if (game.venue_name) kickoffLabel += ` — ${game.venue_name}`
       } else {
         kickoffLabel = "Today"
       }
 
       const href = TEAM_HUB_HREF[teamSlug] || `/chicago-${teamSlug}`
-      const chicagoAbbr = CHICAGO_ABBRS[teamSlug]
-      const isChicagoHome = (game.home_team_abbr || "").toUpperCase() === chicagoAbbr
       const teamLogoUrl = isChicagoHome ? game.home_logo_url : game.away_logo_url
 
       games.push({

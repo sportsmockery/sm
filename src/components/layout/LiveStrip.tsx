@@ -183,9 +183,17 @@ export default function LiveStrip() {
     router.push(`/${teamSlug}/${path}`);
   }
 
-  // Split into live vs upcoming
+  // Split into live vs upcoming, driven by live feed only
+  const now = Date.now();
   const liveGames = games.filter((g) => g.status === 'in_progress');
-  const upcomingGames = games.filter((g) => g.status === 'upcoming');
+  const upcomingGames = games.filter((g) => {
+    if (g.status !== 'upcoming' || !g.game_start_time) return false;
+    const startTime = new Date(g.game_start_time).getTime();
+    const ninetyMinutesFromNow = now + 90 * 60 * 1000;
+    // Only treat as "upcoming" for pills if starting within 90 minutes
+    // and not far in the past (guard small clock drift with 1-minute grace).
+    return startTime <= ninetyMinutesFromNow && startTime >= now - 60 * 1000;
+  });
   const hasLive = liveGames.length > 0;
   const hasUpcoming = upcomingGames.length > 0;
 
