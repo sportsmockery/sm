@@ -146,7 +146,7 @@ export default async function ArticlePage({ params, searchParams }: ArticlePageP
       post.author_id
         ? supabaseAdmin
             .from('sm_authors')
-            .select('id, display_name, bio, avatar_url, email, slug, twitter, instagram')
+            .select('id, display_name, bio, avatar_url, email')
             .eq('id', post.author_id)
             .single()
         : Promise.resolve({ data: null, error: null }),
@@ -322,7 +322,7 @@ export default async function ArticlePage({ params, searchParams }: ArticlePageP
           slug: slug,
           author: author ? {
             name: author.display_name,
-            slug: author.slug || String(author.id),
+            slug: String(author.id),
             avatar_url: author.avatar_url,
           } : { name: 'SportsMockery Staff', slug: 'staff' },
           category: {
@@ -352,7 +352,7 @@ export default async function ArticlePage({ params, searchParams }: ArticlePageP
                 <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, zIndex: 2, display: 'flex', flexDirection: 'column', alignItems: 'center', paddingLeft: 24, paddingRight: 24, paddingBottom: 16 }}>
                   {author && (
                     <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 8 }}>
-                      <Link href={`/author/${author.slug || author.id}`} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6, textDecoration: 'none' }}>
+                      <Link href={`/author/${author.id}`} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6, textDecoration: 'none' }}>
                         {author.avatar_url ? (
                           <div style={{ width: 44, height: 44, borderRadius: '50%', overflow: 'hidden', position: 'relative', border: '2px solid rgba(255,255,255,0.6)' }}>
                             <Image src={author.avatar_url} alt={author.display_name} fill style={{ objectFit: 'cover' }} />
@@ -387,7 +387,7 @@ export default async function ArticlePage({ params, searchParams }: ArticlePageP
           {!post.featured_image && (
             <div style={{ display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap', marginTop: 16 }}>
               {author && (
-                <Link href={`/author/${author.slug || author.id}`} style={{ display: 'flex', alignItems: 'center', gap: 10, textDecoration: 'none' }}>
+                <Link href={`/author/${author.id}`} style={{ display: 'flex', alignItems: 'center', gap: 10, textDecoration: 'none' }}>
                   {author.avatar_url ? (
                     <div style={{ width: 32, height: 32, borderRadius: '50%', overflow: 'hidden', position: 'relative' }}>
                       <Image src={author.avatar_url} alt={author.display_name} fill style={{ objectFit: 'cover' }} />
@@ -490,10 +490,10 @@ export default async function ArticlePage({ params, searchParams }: ArticlePageP
                     author={{
                       id: author.id,
                       name: author.display_name,
-                      slug: author.slug || String(author.id),
+                      slug: String(author.id),
                       avatar_url: author.avatar_url,
                       bio: author.bio,
-                      twitter_url: author.twitter,
+                      twitter_url: undefined,
                       email: author.email,
                     }}
                   />
@@ -596,7 +596,7 @@ export default async function ArticlePage({ params, searchParams }: ArticlePageP
                 },
                 author: author ? {
                   name: author.display_name,
-                  slug: author.slug || String(author.id),
+                  slug: String(author.id),
                   avatar_url: author.avatar_url ?? undefined,
                 } : { name: 'Staff', slug: 'staff' },
               }))}
