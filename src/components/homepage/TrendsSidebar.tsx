@@ -1,11 +1,13 @@
 "use client"
 
+import { useState, useEffect } from "react"
 import Image from "next/image"
 import Link from "next/link"
-import { ArrowRightLeft, ClipboardPen, MessageSquare, BarChart3, Video, Volume2 } from "lucide-react"
+import { ArrowRightLeft, ClipboardPen, MessageSquare, BarChart3, Video, Volume2, Tv } from "lucide-react"
 import FeedTeamSidebar from "@/components/homepage/FeedTeamSidebar"
 
-const EDGE_TOOLS = [
+const EDGE_TOOLS: { icon: React.ComponentType<{ className?: string }>; label: string; href: string; liveOnly?: boolean }[] = [
+  { icon: Tv, label: 'Game Center', href: '/live', liveOnly: true },
   { icon: ArrowRightLeft, label: 'Trade Simulator', href: '/gm' },
   { icon: ClipboardPen, label: 'Mock Draft', href: '/mock-draft' },
   { icon: MessageSquare, label: 'Fan Chat', href: '/fan-chat' },
@@ -20,6 +22,19 @@ interface TrendsSidebarProps {
 
 export default function TrendsSidebar({ selectedTeam }: TrendsSidebarProps) {
   const isForYou = !selectedTeam || selectedTeam === 'all'
+  const [hasLiveGames, setHasLiveGames] = useState(false)
+
+  useEffect(() => {
+    const check = () => {
+      fetch('/api/hero-games')
+        .then(r => r.json())
+        .then(d => setHasLiveGames(d.games?.length > 0))
+        .catch(() => {})
+    }
+    check()
+    const id = setInterval(check, 30_000)
+    return () => clearInterval(id)
+  }, [])
 
   return (
     <aside className="sticky top-0 pl-6 hidden h-screen w-[350px] flex-col gap-4 pt-4 pb-3 lg:flex overflow-y-auto">
@@ -48,7 +63,7 @@ export default function TrendsSidebar({ selectedTeam }: TrendsSidebarProps) {
           <div style={{ padding: '12px 16px 8px', fontSize: 14, fontWeight: 700, letterSpacing: '-0.01em' }}>
             <span style={{ color: '#00D4FF' }}>SM</span> <span style={{ color: '#BC0000' }}>&#x2736;</span> <span style={{ color: '#00D4FF' }}>EDGE Features</span>
           </div>
-          {EDGE_TOOLS.map((item) => (
+          {EDGE_TOOLS.filter(item => !item.liveOnly || hasLiveGames).map((item) => (
             <Link
               key={item.label}
               href={item.href}
@@ -62,6 +77,7 @@ export default function TrendsSidebar({ selectedTeam }: TrendsSidebarProps) {
                 color: 'var(--hp-foreground)',
                 textDecoration: 'none',
                 transition: 'background 0.15s',
+                ...(item.label === 'Game Center' ? { border: '1px solid #00D4FF', borderRadius: 12, margin: '4px 8px' } : {}),
               }}
               onMouseEnter={(e) => { e.currentTarget.style.background = 'var(--hp-muted)' }}
               onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent' }}
@@ -70,7 +86,7 @@ export default function TrendsSidebar({ selectedTeam }: TrendsSidebarProps) {
                 <item.icon className="h-5 w-5" />
               </div>
               <span style={{ flex: 1 }}>{item.label}</span>
-              {item.label === 'Fan Chat' && (
+              {(item.label === 'Fan Chat' || item.label === 'Game Center') && (
                 <span
                   style={{
                     flexShrink: 0,
