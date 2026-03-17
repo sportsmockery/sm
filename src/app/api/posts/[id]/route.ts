@@ -127,6 +127,22 @@ export async function POST(
       }
     }
 
+    // Auto-generate TOC via Scout when publishing (fire-and-forget)
+    if (status === 'published' && content) {
+      const baseUrl = process.env.NEXT_PUBLIC_APP_URL
+        || (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : 'http://localhost:3000')
+      fetch(`${baseUrl}/api/admin/ai`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'generate_toc',
+          title: title || post.title,
+          content,
+          postId: id,
+        }),
+      }).catch(err => console.error('[TOC] Auto-generate failed:', err))
+    }
+
     return NextResponse.json({ success: true, post })
   } catch (error) {
     console.error('Error in POST /api/posts/[id]:', error)

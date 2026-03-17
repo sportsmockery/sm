@@ -287,10 +287,11 @@ export function ArticleAudioPlayer({
       navigator.mediaSession.playbackState = 'paused';
     }
   };
+  const [showNextPrompt, setShowNextPrompt] = useState(false);
   const handleEnded = () => {
     setIsPlaying(false);
     setProgress(0);
-    loadNextArticle();
+    setShowNextPrompt(true);
   };
   const handleAudioError = () => {
     setError('Failed to load audio. Please try again.');
@@ -311,8 +312,7 @@ export function ArticleAudioPlayer({
   };
 
   return (
-    <div className="px-4 py-2.5 rounded-lg mt-4" style={{ backgroundColor: 'var(--sm-surface)', border: '1px solid var(--sm-border)' }}>
-      {/* Hidden audio element for iOS background playback compatibility */}
+    <div className="mt-1 relative">
       <audio
         ref={audioRef}
         preload="metadata"
@@ -327,190 +327,160 @@ export function ArticleAudioPlayer({
         onDurationChange={handleDurationChange}
         className="hidden"
       />
-      {/* Row 1: Label + title + duration */}
-      <div className="flex items-center gap-2 mb-2 text-sm">
-        <span className="font-medium flex items-center gap-2 shrink-0" style={{ color: 'var(--sm-text)' }}>
-          <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z" />
-          </svg>
-          Listen to this article
-        </span>
-        <span className="text-xs truncate flex-1" style={{ color: 'var(--sm-text-muted)' }}>
-          {playlist.currentArticle.title}
-        </span>
-        <span className="text-xs shrink-0" style={{ color: 'var(--sm-text-muted)' }}>{formatTime(duration)}</span>
-      </div>
 
-      {/* Row 2: Progress bar */}
+      {/* Single-row player bar */}
       <div
-        className="w-full rounded-full h-1.5 mb-2 cursor-pointer"
-        style={{ backgroundColor: 'var(--sm-surface)' }}
-        onClick={handleSeek}
+        className="flex items-center gap-3 rounded-full px-2 py-1.5"
+        style={{ backgroundColor: '#fff', border: '1px solid rgba(11,15,20,0.12)' }}
       >
-        <div
-          className="bg-[#bc0000] h-1.5 rounded-full transition-all duration-150"
-          style={{ width: `${progress}%` }}
-        />
-      </div>
-
-      {/* Row 3: All controls */}
-      <div className="flex flex-wrap items-center justify-between gap-2 text-sm">
-        <div className="flex gap-2 items-center">
-          <button
-            type="button"
-            onClick={handlePlayPause}
-            disabled={isLoading}
-            className="px-3 py-1.5 rounded disabled:opacity-50 transition-colors text-sm flex items-center gap-1.5"
-            style={{ backgroundColor: 'var(--sm-card)', color: 'var(--sm-text)', border: '1px solid var(--sm-border)' }}
-          >
-            {isLoading ? (
-              <>
-                <svg className="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
-                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"/>
-                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"/>
-                </svg>
-                Loading...
-              </>
-            ) : isPlaying ? (
-              <>
-                <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
-                  <path d="M6 4h4v16H6V4zm8 0h4v16h-4V4z"/>
-                </svg>
-                Pause
-              </>
-            ) : (
-              <>
-                <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
-                  <path d="M8 5v14l11-7z"/>
-                </svg>
-                Play
-              </>
-            )}
-          </button>
-          {(isPlaying || progress > 0) && (
-            <button
-              type="button"
-              onClick={handleStop}
-              className="px-3 py-1.5 rounded transition-colors text-sm flex items-center gap-1.5"
-              style={{ backgroundColor: 'var(--sm-card)', color: 'var(--sm-text)', border: '1px solid var(--sm-border)' }}
-            >
-              <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
-                <path d="M6 6h12v12H6z"/>
-              </svg>
-              Stop
-            </button>
-          )}
-          <button
-            type="button"
-            onClick={() => loadNextArticle()}
-            disabled={isLoadingNext}
-            className="px-3 py-1.5 rounded disabled:opacity-50 disabled:cursor-not-allowed transition-colors text-sm flex items-center gap-1.5"
-            style={{ backgroundColor: 'var(--sm-card)', color: 'var(--sm-text)', border: '1px solid var(--sm-border)' }}
-          >
-            <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
-              <path d="M6 18l8.5-6L6 6v12zM16 6v12h2V6h-2z"/>
+        {/* Play/Pause */}
+        <button
+          type="button"
+          onClick={handlePlayPause}
+          disabled={isLoading}
+          className="shrink-0 flex items-center justify-center rounded-full transition-transform hover:scale-105 disabled:opacity-50"
+          style={{ width: 38, height: 38, backgroundColor: '#d1d5db' }}
+        >
+          {isLoading ? (
+            <svg className="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
+              <circle className="opacity-25" cx="12" cy="12" r="10" stroke="#fff" strokeWidth="3"/>
+              <path className="opacity-75" fill="#fff" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"/>
             </svg>
-            {isLoadingNext ? "Loading..." : "Next"}
-          </button>
+          ) : isPlaying ? (
+            <svg className="w-4 h-4" fill="#fff" viewBox="0 0 24 24">
+              <path d="M6 4h4v16H6V4zm8 0h4v16h-4V4z"/>
+            </svg>
+          ) : (
+            <svg className="w-4 h-4 ml-0.5" fill="#fff" viewBox="0 0 24 24">
+              <path d="M8 5v14l11-7z"/>
+            </svg>
+          )}
+        </button>
+
+        {/* Current time */}
+        <span className="text-[12px] font-medium tabular-nums shrink-0" style={{ color: '#0B0F14', minWidth: 36 }}>{formatTime(currentTime)}</span>
+
+        {/* Progress bar */}
+        <div
+          className="flex-1 h-[5px] rounded-full cursor-pointer relative"
+          style={{ backgroundColor: 'rgba(11,15,20,0.08)' }}
+          onClick={handleSeek}
+        >
+          <div
+            className="h-[5px] rounded-full transition-all duration-100"
+            style={{ width: `${progress}%`, backgroundColor: '#BC0000' }}
+          />
         </div>
 
-        <div className="flex gap-2 items-center flex-wrap">
-          {/* Voice selector */}
-          <div className="relative">
-            <button
-              type="button"
-              onClick={() => setShowVoiceSelector(!showVoiceSelector)}
-              className="px-2.5 py-1 rounded-full text-xs transition-colors flex items-center gap-1"
-              style={{ backgroundColor: 'var(--sm-card)', color: 'var(--sm-text)', border: '1px solid var(--sm-border)' }}
-            >
-              <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-              </svg>
-              {currentVoiceProfile.name}
-              <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-              </svg>
-            </button>
-            {/* Voice selector - mobile: bottom sheet, desktop: dropdown */}
-            {showVoiceSelector && (
-              <>
-                {/* Mobile overlay backdrop */}
-                <div
-                  className="fixed inset-0 bg-black/50 z-40 md:hidden"
-                  onClick={() => setShowVoiceSelector(false)}
-                />
-                {/* Mobile: bottom sheet, Desktop: dropdown */}
-                <div className="fixed inset-x-0 bottom-0 z-50 md:absolute md:inset-auto md:right-0 md:bottom-auto md:mt-1 w-full md:w-52 md:rounded-lg shadow-lg max-h-[50vh] md:max-h-none overflow-y-auto" style={{ backgroundColor: 'var(--sm-card)', border: '1px solid var(--sm-border)' }}>
-                  <div className="p-3 md:p-2">
-                    <div className="flex justify-between items-center md:block mb-2 md:mb-1">
-                      <div className="text-sm md:text-xs font-medium px-2 py-1" style={{ color: 'var(--sm-text-muted)' }}>
-                        Select Voice
-                      </div>
-                      {/* Close button for mobile */}
+        {/* Duration */}
+        <span className="text-[12px] font-medium tabular-nums shrink-0" style={{ color: 'rgba(11,15,20,0.4)', minWidth: 36 }}>{formatTime(duration)}</span>
+
+        {/* Voice selector */}
+        <div className="relative shrink-0">
+          <button
+            type="button"
+            onClick={() => setShowVoiceSelector(!showVoiceSelector)}
+            className="flex items-center gap-1 rounded-full px-2.5 py-1 transition-colors hover:bg-[rgba(11,15,20,0.06)]"
+            style={{ color: '#0B0F14' }}
+          >
+            <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M19.114 5.636a9 9 0 010 12.728M16.463 8.288a5.25 5.25 0 010 7.424M6.75 8.25l4.72-4.72a.75.75 0 011.28.53v15.88a.75.75 0 01-1.28.53l-4.72-4.72H4.51c-.88 0-1.704-.507-1.938-1.354A9.01 9.01 0 012.25 12c0-.83.112-1.633.322-2.396C2.806 8.756 3.63 8.25 4.51 8.25H6.75z" />
+            </svg>
+            <span className="text-[11px] font-medium">{currentVoiceProfile.name}</span>
+            <svg className="w-2.5 h-2.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+            </svg>
+          </button>
+          {showVoiceSelector && (
+            <>
+              <div className="fixed inset-0 z-40" onClick={() => setShowVoiceSelector(false)} />
+              <div className="absolute right-0 bottom-full mb-2 z-50 w-44 rounded-xl shadow-xl overflow-hidden" style={{ backgroundColor: '#fff', border: '1px solid rgba(11,15,20,0.1)' }}>
+                <div className="p-1.5">
+                  <div className="text-[10px] font-semibold uppercase tracking-wider px-2.5 py-1.5" style={{ color: 'rgba(11,15,20,0.3)' }}>Voice</div>
+                  {VOICE_PROFILES.map((profile) => (
+                    <button
+                      key={profile.id}
+                      type="button"
+                      onClick={() => handleVoiceChange(profile.id)}
+                      className="w-full text-left px-2.5 py-2 rounded-lg text-[13px] transition-colors hover:bg-[rgba(11,15,20,0.04)]"
+                      style={selectedVoice === profile.id ? { backgroundColor: 'rgba(188,0,0,0.06)', color: '#BC0000' } : { color: '#0B0F14' }}
+                    >
+                      <span className="font-medium">{profile.name}</span>
+                      <span className="text-[11px] ml-1.5" style={{ color: 'rgba(11,15,20,0.35)' }}>{profile.description}</span>
+                    </button>
+                  ))}
+                  <div className="mt-1 pt-1" style={{ borderTop: '1px solid rgba(11,15,20,0.06)' }}>
+                    <div className="text-[10px] font-semibold uppercase tracking-wider px-2.5 py-1.5" style={{ color: 'rgba(11,15,20,0.3)' }}>Up next</div>
+                    {(['team', 'recent'] as const).map((mode) => (
                       <button
+                        key={mode}
                         type="button"
-                        onClick={() => setShowVoiceSelector(false)}
-                        className="md:hidden p-1 rounded-full"
+                        onClick={() => { handleModeChange(mode); setShowVoiceSelector(false); }}
+                        className="w-full text-left px-2.5 py-2 rounded-lg text-[13px] transition-colors hover:bg-[rgba(11,15,20,0.04)]"
+                        style={playlist.mode === mode ? { backgroundColor: 'rgba(188,0,0,0.06)', color: '#BC0000' } : { color: '#0B0F14' }}
                       >
-                        <svg className="w-5 h-5" style={{ color: 'var(--sm-text-muted)' }} fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                        </svg>
-                      </button>
-                    </div>
-                    {VOICE_PROFILES.map((profile) => (
-                      <button
-                        key={profile.id}
-                        type="button"
-                        onClick={() => handleVoiceChange(profile.id)}
-                        className="w-full text-left px-3 md:px-2 py-3 md:py-1.5 rounded text-sm md:text-xs transition-colors"
-                        style={
-                          selectedVoice === profile.id
-                            ? { backgroundColor: 'color-mix(in srgb, var(--sm-accent) 10%, transparent)', color: 'var(--sm-accent)' }
-                            : { color: 'var(--sm-text)' }
-                        }
-                      >
-                        <div className="font-medium">{profile.name}</div>
-                        <div style={{ color: 'var(--sm-text-muted)' }}>{profile.description}</div>
+                        <span className="font-medium">{mode === 'team' ? 'Same team' : 'Latest articles'}</span>
                       </button>
                     ))}
                   </div>
                 </div>
-              </>
-            )}
-          </div>
-
-          <span className="text-xs" style={{ color: 'var(--sm-text-muted)' }}>Next by:</span>
-          <button
-            type="button"
-            onClick={() => handleModeChange("team")}
-            className="px-2.5 py-1 rounded-full text-xs transition-colors"
-            style={
-              playlist.mode === "team"
-                ? { border: '1px solid #bc0000', backgroundColor: 'color-mix(in srgb, #bc0000 10%, transparent)', color: '#bc0000' }
-                : { border: '1px solid var(--sm-border)', backgroundColor: 'var(--sm-card)', color: 'var(--sm-text)' }
-            }
-          >
-            Team
-          </button>
-          <button
-            type="button"
-            onClick={() => handleModeChange("recent")}
-            className="px-2.5 py-1 rounded-full text-xs transition-colors"
-            style={
-              playlist.mode === "recent"
-                ? { border: '1px solid #bc0000', backgroundColor: 'color-mix(in srgb, #bc0000 10%, transparent)', color: '#bc0000' }
-                : { border: '1px solid var(--sm-border)', backgroundColor: 'var(--sm-card)', color: 'var(--sm-text)' }
-            }
-          >
-            Recent
-          </button>
+              </div>
+            </>
+          )}
         </div>
+
+        {/* Next */}
+        <button
+          type="button"
+          onClick={() => loadNextArticle()}
+          disabled={isLoadingNext}
+          className="shrink-0 flex items-center justify-center rounded-full transition-colors hover:bg-[rgba(11,15,20,0.06)] disabled:opacity-30"
+          style={{ width: 32, height: 32 }}
+          aria-label="Next article"
+        >
+          <svg className="w-4 h-4" fill="#0B0F14" viewBox="0 0 24 24">
+            <path d="M6 18l8.5-6L6 6v12zM16 6v12h2V6h-2z"/>
+          </svg>
+        </button>
       </div>
 
-      {error && (
-        <div className="mt-3 text-xs text-red-600 dark:text-red-400">
-          {error}
+      {/* End-of-track prompt popup */}
+      {showNextPrompt && (
+        <div className="absolute bottom-full mb-2 left-1/2 -translate-x-1/2 z-50 rounded-xl shadow-xl overflow-hidden" style={{ backgroundColor: '#fff', border: '1px solid rgba(11,15,20,0.1)', width: 220 }}>
+          <div className="p-3">
+            <div className="text-[12px] font-semibold mb-2.5" style={{ color: '#0B0F14' }}>What to listen to next?</div>
+            <div className="flex flex-col gap-1.5">
+              <button
+                type="button"
+                onClick={() => { setShowNextPrompt(false); handleModeChange('team'); loadNextArticle(); }}
+                className="w-full text-left px-3 py-2 rounded-lg text-[13px] font-medium transition-colors hover:bg-[rgba(11,15,20,0.04)]"
+                style={{ color: '#0B0F14' }}
+              >
+                More from this team
+              </button>
+              <button
+                type="button"
+                onClick={() => { setShowNextPrompt(false); handleModeChange('recent'); loadNextArticle(); }}
+                className="w-full text-left px-3 py-2 rounded-lg text-[13px] font-medium transition-colors hover:bg-[rgba(11,15,20,0.04)]"
+                style={{ color: '#0B0F14' }}
+              >
+                Latest articles
+              </button>
+              <button
+                type="button"
+                onClick={() => setShowNextPrompt(false)}
+                className="w-full text-left px-3 py-2 rounded-lg text-[12px] transition-colors hover:bg-[rgba(11,15,20,0.04)]"
+                style={{ color: 'rgba(11,15,20,0.4)' }}
+              >
+                Stop listening
+              </button>
+            </div>
+          </div>
         </div>
+      )}
+
+      {error && (
+        <div className="mt-1 text-center text-[11px]" style={{ color: '#BC0000' }}>{error}</div>
       )}
     </div>
   );

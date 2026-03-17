@@ -4306,11 +4306,22 @@ main, .page-content, [role="main"] {
   color: var(--sm-text-dim);
 }
 .article-body-2030 ul,
-.article-body-2030 ol {
+.article-body-2030 ol,
+.article-block-content ul,
+.article-block-content ol {
   color: var(--sm-text-muted);
   padding-left: 24px;
   line-height: 1.8;
   margin-bottom: 24px;
+  list-style-type: disc;
+}
+.article-body-2030 ol,
+.article-block-content ol {
+  list-style-type: decimal;
+}
+.article-body-2030 li,
+.article-block-content li {
+  margin-bottom: 8px;
 }
 .article-body-2030 a {
   color: var(--sm-red-light);

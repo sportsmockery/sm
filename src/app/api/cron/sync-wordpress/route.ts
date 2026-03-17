@@ -234,6 +234,24 @@ export async function GET(request: NextRequest) {
       }
     }
 
+    // 5b. Ensure every post will have an author — fallback for WP authors
+    //     not returned by the /authors endpoint (deleted/legacy accounts)
+    const { data: staffAuthor } = await supabaseAdmin
+      .from('sm_authors')
+      .select('id')
+      .ilike('display_name', '%Sports Mockery%')
+      .limit(1)
+      .single()
+    const fallbackAuthorId = staffAuthor?.id || null
+
+    const stillMissing = newWpPosts
+      .filter(p => !authorMap.has(p.author_id))
+      .map(p => p.author_id)
+    const uniqueStillMissing = [...new Set(stillMissing)]
+    if (uniqueStillMissing.length > 0) {
+      console.warn(`[WP Sync] ${uniqueStillMissing.length} author wp_ids not found in WP API: ${uniqueStillMissing.join(', ')}. Using fallback author.`)
+    }
+
     // 6. Insert new posts with resolved category_id and author_id
     const postsToInsert = newWpPosts.map(post => ({
       wp_id: post.id,
@@ -245,7 +263,7 @@ export async function GET(request: NextRequest) {
       category_wp_id: post.category_id,
       author_wp_id: post.author_id,
       category_id: catMap.get(post.category_id) || null,
-      author_id: authorMap.get(post.author_id) || null,
+      author_id: authorMap.get(post.author_id) || fallbackAuthorId,
       seo_title: post.seo_title || null,
       seo_description: post.seo_description || null,
       published_at: post.published_at,

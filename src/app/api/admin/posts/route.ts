@@ -111,6 +111,17 @@ export async function POST(request: NextRequest) {
       created_at: now,
     }
 
+    // Ensure published posts always have an author
+    if (postData.status === 'published' && !postData.author_id) {
+      const { data: staff } = await supabaseAdmin
+        .from('sm_authors')
+        .select('id')
+        .ilike('display_name', '%Sports Mockery%')
+        .limit(1)
+        .single()
+      if (staff) postData.author_id = staff.id
+    }
+
     // Only add optional columns if they have values (avoids schema cache errors)
     if (body.social_caption) postData.social_caption = body.social_caption
     if (body.updated_at !== undefined) postData.updated_at = body.updated_at || now

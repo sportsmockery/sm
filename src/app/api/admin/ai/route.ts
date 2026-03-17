@@ -178,7 +178,7 @@ function extractJSON(text: string): string {
 }
 
 interface AIRequest {
-  action: 'headlines' | 'seo' | 'ideas' | 'grammar' | 'excerpt' | 'generate_chart' | 'generate_seo' | 'analyze_chart' | 'generate_poll' | 'poll' | 'publish-assist'
+  action: 'headlines' | 'seo' | 'ideas' | 'grammar' | 'excerpt' | 'generate_chart' | 'generate_seo' | 'analyze_chart' | 'generate_poll' | 'poll' | 'publish-assist' | 'generate_toc'
   content?: string
   title?: string
   category?: string
@@ -312,6 +312,8 @@ export async function POST(request: NextRequest) {
       case 'poll':
       case 'generate_poll':
         return await generatePollForPost(title || '', content || '', category, team, postId)
+      case 'generate_toc':
+        return await generateTOC(title || '', content || '', postId)
       default:
         return NextResponse.json({ error: 'Invalid action' }, { status: 400 })
     }
@@ -1084,4 +1086,112 @@ function insertPollShortcodeAfterParagraph(
   // If paragraph not found, insert at the end of content
   const pollBlock = `\n<div class="poll-embed my-6">${shortcode}</div>`
   return htmlContent + pollBlock
+}
+
+/**
+ * Generate a Table of Contents for an article using Scout AI.
+ * Analyzes article content, generates clean section labels,
+ * injects heading IDs into the content, and saves the TOC to the post.
+ */
+async function generateTOC(title: string, content: string, postId?: string) {
+  const plainText = content.replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim()
+
+  const prompt = `You are Scout, the AI sports analyst for Sports Mockery. Analyze this article and generate a clean, reader-friendly Table of Contents.
+
+Article Title: "${title}"
+Article Content:
+${plainText.slice(0, 4000)}
+
+Your task:
+1. Identify the major sections/topics in this article (look for headings, topic shifts, and logical sections)
+2. Generate 4-8 concise TOC entries that help readers navigate the article
+3. Each entry should be a clear, descriptive label (not just copying heading text verbatim — make them scannable and useful)
+4. Assign a slug-style ID to each entry for anchor linking
+5. Assign a level: 2 for main sections, 3 for subsections
+
+Return a JSON object with:
+{
+  "toc": [
+    { "id": "section-slug", "text": "Clean Section Label", "level": 2 },
+    { "id": "sub-section-slug", "text": "Subsection Label", "level": 3 }
+  ]
+}
+
+RULES:
+- Keep labels concise (3-8 words each)
+- Use fan-friendly language, not academic
+- IDs must be lowercase, hyphen-separated, no special characters
+- Minimum 3 entries, maximum 8
+- If the article is too short for a meaningful TOC, return { "toc": [] }
+
+Return ONLY the JSON object, no explanation.`
+
+  try {
+    const message = await anthropic.messages.create({
+      model: 'claude-sonnet-4-20250514',
+      max_tokens: 800,
+      messages: [{ role: 'user', content: prompt }],
+    })
+
+    const responseText = message.content[0].type === 'text' ? message.content[0].text : ''
+    const jsonText = extractJSON(responseText)
+    const result = JSON.parse(jsonText)
+    const toc = Array.isArray(result.toc) ? result.toc : []
+
+    // If we have a postId and a valid TOC, inject heading IDs into content and save
+    if (postId && toc.length >= 3) {
+      // Inject IDs into headings in the HTML content
+      let updatedContent = content
+      for (const entry of toc) {
+        // Try to find a heading that roughly matches this TOC entry
+        // Match h2/h3 tags and add an id attribute
+        const headingRegex = new RegExp(
+          `(<h[23])([^>]*>)([^<]*?)(<\/h[23]>)`,
+          'gi'
+        )
+        let matched = false
+        updatedContent = updatedContent.replace(headingRegex, (full, open, attrs, text, close) => {
+          if (matched) return full
+          const cleanText = text.replace(/<[^>]*>/g, '').trim().toLowerCase()
+          const entryWords = entry.text.toLowerCase().split(/\s+/)
+          // Match if heading contains at least half the words from the TOC entry
+          const matchCount = entryWords.filter((w: string) => cleanText.includes(w)).length
+          if (matchCount >= Math.ceil(entryWords.length / 2)) {
+            matched = true
+            // Add id if not already present
+            if (!attrs.includes(' id=')) {
+              return `${open} id="${entry.id}"${attrs}${text}${close}`
+            }
+          }
+          return full
+        })
+      }
+
+      // Save TOC and updated content to the post
+      await supabaseAdmin
+        .from('sm_posts')
+        .update({ toc, content: updatedContent })
+        .eq('id', postId)
+
+      return NextResponse.json({
+        success: true,
+        toc,
+        updatedContent,
+        message: `Generated ${toc.length} TOC entries`,
+      })
+    }
+
+    return NextResponse.json({
+      success: true,
+      toc,
+      message: toc.length >= 3 ? `Generated ${toc.length} TOC entries` : 'Article too short for TOC',
+    })
+  } catch (e) {
+    console.error('TOC generation error:', e)
+    return NextResponse.json({
+      success: false,
+      toc: [],
+      error: 'Failed to generate TOC',
+    })
+  }
 }
