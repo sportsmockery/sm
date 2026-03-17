@@ -22,8 +22,8 @@ const features = [
         <path d="M16 3h5v5M4 20L21 3M21 16v5h-5M14 14l7 7M3 8V3h5M10 10L3 3" />
       </svg>
     ),
-    title: 'Trade Simulator / Mock Draft',
-    desc: 'Build complex trades and draft like a GM, your GM score is saved on our leaderboard',
+    title: 'War Room',
+    desc: 'Build trades, run mock drafts, and simulate seasons like a GM',
   },
   {
     icon: (

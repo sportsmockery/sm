@@ -255,7 +255,7 @@ pollLiveGames();
       "period": "3rd Quarter",
       "clock": "8:42",
       "game_date": "2026-02-02T19:00:00.000Z",
-      "game_time_central": "02/02/2026, 13:00:00",
+      "game_time_central": "02/02/2026, 1:00 PM CT",
       "venue": "United Center",
       "last_updated": "2026-02-02T14:29:55.000Z",
       "last_updated_central": "02/02/2026, 08:29:55"

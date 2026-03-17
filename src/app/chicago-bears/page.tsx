@@ -1,6 +1,7 @@
 import { Metadata } from 'next'
-import { TeamHubLayout, ToolGrid, QuickStats } from '@/components/team'
+import { TeamHubLayout, QuickStats } from '@/components/team'
 import { SectionHeader, ArticleCard } from '@/components/team/shared'
+import RecentHubUpdates from '@/components/hub/RecentHubUpdates'
 import {
   BearsSeasonCard,
   BearsRosterHighlights,
@@ -84,9 +85,6 @@ export default async function BearsHubPage() {
           margin: '0 auto',
         }}
       >
-        {/* Tool Grid - 4 cards in one row */}
-        <ToolGrid teamSlug="chicago-bears" accentColor="#C83200" secondaryColor="#0B162A" />
-
         {/* Responsive 2-column at lg */}
         <style>{`
           @media (min-width: 1024px) {
@@ -100,6 +98,9 @@ export default async function BearsHubPage() {
             <div className="lg:hidden">
               <BearsSeasonCard season={seasonOverview} />
             </div>
+
+            {/* Recent Hub Intel */}
+            <RecentHubUpdates teamSlug="chicago-bears" />
 
             {/* Latest Headlines */}
             <section>

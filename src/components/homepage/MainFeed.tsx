@@ -124,6 +124,8 @@ function RiverCard({ item }: { item: HomepageRiverItem }) {
           summary={data.summary as string}
           bullets={data.bullets as string[]}
           topic={data.topic as string}
+          slug={data.slug as string | undefined}
+          categorySlug={data.categorySlug as string | undefined}
           team={team}
           teamColor={teamColor}
           timestamp={timestamp}
@@ -310,7 +312,7 @@ export default function MainFeed({ activeTab, setActiveTab, selectedTeam, heroAr
 
         {/* Live feed items */}
         {!loading && feedItems.map((item, index) => (
-          <div key={item.id}>
+          <div key={`${item.id}-${index}`}>
             {index === 5 && (
               <div className="hp-day-divider px-4">
                 <span>Earlier Today</span>

@@ -3,6 +3,7 @@
 import { useEffect, useState, useCallback, useRef } from 'react'
 
 const POLL_INTERVAL = 10000
+const MAX_RETRIES = 3
 
 export interface PlayerStats {
   player_id: string
@@ -77,6 +78,23 @@ export interface Play {
   team_id: string | null
   score_home: number
   score_away: number
+  scoring_play?: boolean
+  score_value?: number
+  // NFL
+  down?: number
+  distance?: number
+  yard_line?: number
+  drive_id?: string
+  is_turnover?: boolean
+  // NHL
+  strength?: string // PP/SH/EV
+  // MLB
+  at_bat_id?: string
+  outs?: number
+  pitch_count?: number
+  // NBA
+  shooting_play?: boolean
+  points_attempted?: number
 }
 
 export interface TeamData {
@@ -137,11 +155,12 @@ export function useLiveGameData(gameId: string | undefined) {
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const abortRef = useRef<AbortController | null>(null)
+  const retriesRef = useRef(0)
+  const gameRef = useRef<GameData | null>(null)
 
   const fetchGame = useCallback(async () => {
     if (!gameId) return
 
-    abortRef.current?.abort()
     const controller = new AbortController()
     abortRef.current = controller
 
@@ -152,27 +171,82 @@ export function useLiveGameData(gameId: string | undefined) {
       })
 
       if (!res.ok) {
-        if (res.status === 404) {
-          setError('Game not found')
-        } else {
-          throw new Error(`Failed to fetch: ${res.status}`)
+        retriesRef.current++
+        if (retriesRef.current > MAX_RETRIES && !gameRef.current) {
+          setError(res.status === 404 ? 'Game not found' : `Failed to fetch: ${res.status}`)
+          setIsLoading(false)
         }
         return
       }
 
       const data: GameData = await res.json()
-      setGame(data)
+      const prev = gameRef.current
+
+      if (prev) {
+        // Merge play-by-play: keep all existing plays + add any new ones
+        // This prevents the list from disappearing when the API returns partial data
+        const existingPlays = prev.play_by_play || []
+        const newPlays = data.play_by_play || []
+
+        // Guard: if API returned zero plays but we already have plays, keep existing
+        if (newPlays.length === 0 && existingPlays.length > 0) {
+          data.play_by_play = existingPlays
+        } else {
+          const existingById = new Map(existingPlays.map(p => [p.play_id, p]))
+          const merged: Play[] = []
+          const seen = new Set<string>()
+
+          // First, include all new plays (updating existing ones in-place)
+          for (const play of newPlays) {
+            merged.push(play)
+            seen.add(play.play_id)
+          }
+
+          // Then, append any existing plays that weren't in the new response
+          // (keeps plays that the API may have dropped from a partial refresh)
+          for (const play of existingPlays) {
+            if (!seen.has(play.play_id)) {
+              merged.push(play)
+            }
+          }
+
+          data.play_by_play = merged
+        }
+
+        // Guard: if API returned zero players but we already have players, keep existing
+        if ((data.players || []).length === 0 && (prev.players || []).length > 0) {
+          data.players = prev.players
+        }
+      }
+
+      // Compare without volatile fields (cache_age, timestamp) to avoid unnecessary re-renders
+      const compareKey = (d: GameData) => {
+        const { cache_age_seconds, timestamp, updated_at, ...rest } = d as any
+        return JSON.stringify(rest)
+      }
+      if (!prev || compareKey(data) !== compareKey(prev)) {
+        gameRef.current = data
+        setGame(data)
+      }
       setError(null)
+      setIsLoading(false)
+      retriesRef.current = 0
     } catch (err) {
       if (err instanceof Error && err.name === 'AbortError') return
-      console.error('[useLiveGameData] Error:', err)
-      setError(err instanceof Error ? err.message : 'Failed to load game')
-    } finally {
-      setIsLoading(false)
+      retriesRef.current++
+      if (retriesRef.current > MAX_RETRIES && !gameRef.current) {
+        console.error('[useLiveGameData] Error:', err)
+        setError(err instanceof Error ? err.message : 'Failed to load game')
+        setIsLoading(false)
+      }
     }
   }, [gameId])
 
   useEffect(() => {
+    retriesRef.current = 0
+    gameRef.current = null
+    setIsLoading(true)
+    setError(null)
     fetchGame()
     const interval = setInterval(fetchGame, POLL_INTERVAL)
     return () => {

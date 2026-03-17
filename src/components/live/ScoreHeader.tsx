@@ -16,7 +16,16 @@ export default function ScoreHeader({ game }: ScoreHeaderProps) {
 
   const getPeriodDisplay = () => {
     if (!isLive) return isFinal ? 'FINAL' : game.status.toUpperCase()
-    if (game.period_label && game.clock) return `${game.period_label} ${game.clock}`
+    if (game.sport === 'mlb' && game.period_label) {
+      // Show ▲/▼ for top/bottom of inning
+      const label = game.period_label
+      const isTop = /top|▲/i.test(label)
+      const isBot = /bot|bottom|▼/i.test(label)
+      const inningNum = label.replace(/[^\d]/g, '') || String(game.period || '')
+      const arrow = isTop ? '▲' : isBot ? '▼' : ''
+      return `${arrow} ${inningNum}${inningNum === '1' ? 'st' : inningNum === '2' ? 'nd' : inningNum === '3' ? 'rd' : 'th'}`
+    }
+    if (game.period_label && game.clock && game.sport !== 'mlb') return `${game.period_label} ${game.clock}`
     if (game.period_label) return game.period_label
     return 'LIVE'
   }
@@ -36,16 +45,6 @@ export default function ScoreHeader({ game }: ScoreHeaderProps) {
       `}</style>
       <div className="sticky top-0 z-50 bg-gradient-to-r from-gray-900 via-gray-800 to-gray-900 text-white shadow-lg">
         <div className="max-w-[1200px] mx-auto px-4">
-          {/* Back link */}
-          <div className="py-2 border-b border-white/10">
-            <Link href="/" className="text-white/60 hover:text-white text-sm flex items-center gap-1">
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-              </svg>
-              Back to Home
-            </Link>
-          </div>
-
           {/* Score display */}
           <div className="py-4 flex items-center justify-between">
             {/* Away Team */}
@@ -75,12 +74,12 @@ export default function ScoreHeader({ game }: ScoreHeaderProps) {
                   {game.home_team.score}
                 </span>
               </div>
-              <div className={`text-sm mt-1 ${isLive ? 'text-red-400' : 'text-white/60'}`}>
+              <div className={`text-sm mt-1 ${isLive ? 'text-green-400' : 'text-white/60'}`}>
                 {isLive && (
                   <span className="inline-flex items-center gap-1 mr-1">
                     <span className="relative flex h-2 w-2">
-                      <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
-                      <span className="relative inline-flex rounded-full h-full w-full bg-red-500"></span>
+                      <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
+                      <span className="relative inline-flex rounded-full h-full w-full bg-green-500"></span>
                     </span>
                   </span>
                 )}

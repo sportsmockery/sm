@@ -26,7 +26,7 @@ export default async function AdminPostsPage({ searchParams }: PostsPageProps) {
 
   let query = supabaseAdmin
     .from('sm_posts')
-    .select('id, title, slug, status, published_at, created_at, category_id, author_id, featured_image, excerpt', { count: 'exact' })
+    .select('id, title, slug, status, published_at, created_at, category_id, author_id, featured_image, excerpt, is_story_universe', { count: 'exact' })
 
   if (status && status !== 'all') {
     query = query.eq('status', status)
@@ -41,6 +41,7 @@ export default async function AdminPostsPage({ searchParams }: PostsPageProps) {
   }
 
   const { data: posts, count } = await query
+    .order('published_at', { ascending: false, nullsFirst: false })
     .order('created_at', { ascending: false })
     .range(offset, offset + POSTS_PER_PAGE - 1)
 
@@ -162,6 +163,7 @@ export default async function AdminPostsPage({ searchParams }: PostsPageProps) {
         posts={posts || []}
         categoryMap={Object.fromEntries(categoryMap)}
         authorMap={Object.fromEntries(authorMap)}
+        allCategories={(allCategories.data || []).map(c => ({ ...c, name: DISPLAY_NAMES[c.slug] || c.name }))}
         currentPage={currentPage}
         totalPages={totalPages}
         status={status}

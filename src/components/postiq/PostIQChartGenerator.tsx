@@ -106,7 +106,7 @@ interface PostIQChartGeneratorProps {
   onAnalysisComplete?: (analysis: ChartAnalysis | null) => void
   onChartInsert?: (chartId: string, shortcode: string, updatedContent: string) => void
   showIndicator?: boolean
-  indicatorPosition?: 'bottom-right' | 'bottom-center' | 'top-right'
+  indicatorPosition?: 'bottom-left' | 'bottom-right' | 'bottom-center' | 'top-right'
 }
 
 // Minimum confidence threshold for displaying charts
@@ -122,7 +122,7 @@ export default function PostIQChartGenerator({
   onAnalysisComplete,
   onChartInsert,
   showIndicator = true,
-  indicatorPosition = 'bottom-right',
+  indicatorPosition = 'bottom-left',
 }: PostIQChartGeneratorProps) {
   const [analysis, setAnalysis] = useState<ChartSuggestion | null>(null)
   const [rejection, setRejection] = useState<RejectionResponse | null>(null)
@@ -414,6 +414,7 @@ export default function PostIQChartGenerator({
   }
 
   const positionClasses = {
+    'bottom-left': 'bottom-6 left-6',
     'bottom-right': 'bottom-6 right-6',
     'bottom-center': 'bottom-6 left-1/2 -translate-x-1/2',
     'top-right': 'top-6 right-6',
@@ -600,7 +601,7 @@ export default function PostIQChartGenerator({
       {/* Rejection/Warning Indicator - don't show for empty content (avoids confusion with other PostIQ features) */}
       {showIndicator && rejection && rejection.reason !== 'empty_content' && !isAnalyzing && !analysis && (
         <div className={`fixed ${positionClasses[indicatorPosition]} z-40 animate-in slide-in-from-bottom-4 duration-300`}>
-          <div className="flex flex-col rounded-xl bg-amber-500/10 dark:bg-amber-900/20 border border-amber-400/30 shadow-lg overflow-hidden max-w-sm">
+          <div className="flex flex-col rounded-xl bg-amber-50 dark:bg-amber-950 border border-amber-400/50 shadow-lg overflow-hidden max-w-sm">
             <div className="flex items-start gap-3 px-4 py-3">
               <svg className="w-5 h-5 text-amber-500 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
                 <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
@@ -627,7 +628,7 @@ export default function PostIQChartGenerator({
               <>
                 <button
                   onClick={() => setShowRejectionDetails(!showRejectionDetails)}
-                  className="flex items-center justify-between px-4 py-2 bg-amber-500/5 hover:bg-amber-500/10 transition-colors border-t border-amber-400/20"
+                  className="flex items-center justify-between px-4 py-2 bg-amber-100 dark:bg-amber-900 hover:bg-amber-200 dark:hover:bg-amber-800 transition-colors border-t border-amber-400/30"
                 >
                   <span className="text-xs font-medium text-amber-600 dark:text-amber-400">
                     How to improve
@@ -638,7 +639,7 @@ export default function PostIQChartGenerator({
                 </button>
 
                 {showRejectionDetails && (
-                  <div className="px-4 py-3 bg-amber-500/5 border-t border-amber-400/20">
+                  <div className="px-4 py-3 bg-amber-100 dark:bg-amber-900 border-t border-amber-400/30">
                     <ul className="space-y-1.5">
                       {rejection.potentialImprovements.map((improvement, idx) => (
                         <li key={idx} className="flex items-start gap-2 text-sm text-amber-600/80 dark:text-amber-300/70">

@@ -47,7 +47,7 @@ async function getPost(slug: string) {
   try {
     const { data: post, error } = await supabaseAdmin
       .from('sm_posts')
-      .select('id, title, content, excerpt, featured_image, published_at, updated_at, seo_title, seo_description, author_id, category_id, views')
+      .select('id, title, content, excerpt, featured_image, published_at, updated_at, seo_title, seo_description, author_id, category_id, views, toc')
       .eq('slug', slug)
       .eq('status', 'published')
       .single()
@@ -146,7 +146,7 @@ export default async function ArticlePage({ params, searchParams }: ArticlePageP
       post.author_id
         ? supabaseAdmin
             .from('sm_authors')
-            .select('id, display_name, bio, avatar_url, twitter, instagram, email, slug')
+            .select('id, display_name, bio, avatar_url, email')
             .eq('id', post.author_id)
             .single()
         : Promise.resolve({ data: null, error: null }),
@@ -322,7 +322,7 @@ export default async function ArticlePage({ params, searchParams }: ArticlePageP
           slug: slug,
           author: author ? {
             name: author.display_name,
-            slug: author.slug || String(author.id),
+            slug: String(author.id),
             avatar_url: author.avatar_url,
           } : { name: 'SportsMockery Staff', slug: 'staff' },
           category: {
@@ -334,118 +334,91 @@ export default async function ArticlePage({ params, searchParams }: ArticlePageP
       />
 
       {/* 2030 Hero Header */}
-      <header className="sm-hero-bg" style={{ padding: '40px 0 32px', minHeight: 0 }}>
-        <div className="sm-grid-overlay" />
+      <header style={{ padding: '40px 0 32px', minHeight: 0, position: 'relative', background: '#FAFAFB' }}>
         <div style={{ position: 'relative', zIndex: 1, maxWidth: 1236, margin: '0 auto', padding: '0 24px' }}>
-          {/* Title */}
-          <h1 style={{ fontSize: 'clamp(2rem, 4vw, 3rem)', fontWeight: 700, letterSpacing: '-1px', lineHeight: 1.15, color: 'var(--sm-text)', marginBottom: 16 }}>
-            {post.title}
-          </h1>
-
-          {/* Featured image with overlaid author + meta + share */}
-          {post.featured_image && (
-            <div style={{ marginTop: 24, position: 'relative' }}>
+          {/* Featured image with headline overlay */}
+          {post.featured_image ? (
+            <div style={{ position: 'relative' }}>
               <div className="article-hero-cinematic" style={{ borderRadius: 16, overflow: 'hidden', position: 'relative', aspectRatio: '16/9' }}>
                 <Image src={post.featured_image} alt={post.title} fill style={{ objectFit: 'cover' }} priority />
                 {/* Gradient overlay for readability */}
-                <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, height: '50%', background: 'linear-gradient(to top, rgba(0,0,0,0.7), transparent)', borderRadius: '0 0 16px 16px' }} />
-                {/* Author, date/read/views (top arrow), share (bottom arrow) overlaid on image */}
-                <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, zIndex: 2, display: 'flex', flexDirection: 'column', alignItems: 'center', paddingLeft: 24, paddingRight: 24, paddingBottom: 16 }}>
-                  {author && (
-                    <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 8 }}>
-                      <Link href={`/author/${author.slug || author.id}`} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6, textDecoration: 'none' }}>
-                        {author.avatar_url ? (
-                          <div style={{ width: 44, height: 44, borderRadius: '50%', overflow: 'hidden', position: 'relative', border: '2px solid rgba(255,255,255,0.6)' }}>
-                            <Image src={author.avatar_url} alt={author.display_name} fill style={{ objectFit: 'cover' }} />
-                          </div>
-                        ) : (
-                          <div style={{ width: 44, height: 44, borderRadius: '50%', background: 'rgba(255,255,255,0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 16, fontWeight: 600, color: '#fff', border: '2px solid rgba(255,255,255,0.6)' }}>
-                            {author.display_name.charAt(0)}
-                          </div>
-                        )}
-                        <span style={{ fontSize: 14, fontWeight: 600, color: '#fff' }}>{author.display_name}</span>
-                      </Link>
-                    </div>
-                  )}
-                  {/* Top arrow: date, read time, views */}
-                  <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: 8, fontSize: 13, color: 'rgba(255,255,255,0.9)', marginBottom: 20 }}>
-                    <time dateTime={post.published_at}>{format(new Date(post.published_at), 'MMMM d, yyyy')}</time>
-                    <span style={{ color: 'rgba(255,255,255,0.6)' }}>·</span>
-                    <span>{readingTime} min read</span>
-                    <span style={{ color: 'rgba(255,255,255,0.6)' }}>·</span>
-                    <ViewCounterCompact views={post.views || 0} variant="overlay" />
-                  </div>
-                  {/* Bottom arrow: social share icons — offset down so date row stays fixed */}
-                  <div style={{ display: 'flex', justifyContent: 'center', position: 'relative', top: 30 }}>
-                    <SocialShareBar url={articleUrl} title={post.title} />
-                  </div>
+                <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, height: '60%', background: 'linear-gradient(to top, rgba(0,0,0,0.8), transparent)', borderRadius: '0 0 16px 16px' }} />
+                {/* Title + share icons overlaid at bottom */}
+                <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, zIndex: 2, padding: '0 28px 20px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 16 }}>
+                  <h1 style={{ fontSize: 'clamp(1.75rem, 3.5vw, 2.75rem)', fontWeight: 700, letterSpacing: '-1px', lineHeight: 1.15, color: '#fff', margin: 0, textAlign: 'center', textShadow: '0 2px 8px rgba(0,0,0,0.7), 0 1px 3px rgba(0,0,0,0.9)' }}>
+                    {post.title}
+                  </h1>
+                  <SocialShareBar url={articleUrl} title={post.title} />
                 </div>
               </div>
             </div>
+          ) : (
+            <h1 style={{ fontSize: 'clamp(2rem, 4vw, 3rem)', fontWeight: 700, letterSpacing: '-1px', lineHeight: 1.15, color: 'var(--sm-text)', marginBottom: 16 }}>
+              {post.title}
+            </h1>
           )}
 
-          {/* Author row fallback when no featured image */}
-          {!post.featured_image && (
-            <div style={{ display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap', marginTop: 16 }}>
-              {author && (
-                <Link href={`/author/${author.slug || author.id}`} style={{ display: 'flex', alignItems: 'center', gap: 10, textDecoration: 'none' }}>
+          {/* Author · Date · Read time · Views — inline row, centered */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap', justifyContent: 'center', marginTop: -4 }}>
+            {author && (
+              <>
+                <Link href={`/author/${author.id}`} style={{ display: 'flex', alignItems: 'center', gap: 8, textDecoration: 'none', flexShrink: 0 }}>
                   {author.avatar_url ? (
-                    <div style={{ width: 32, height: 32, borderRadius: '50%', overflow: 'hidden', position: 'relative' }}>
+                    <div style={{ width: 28, height: 28, borderRadius: '50%', overflow: 'hidden', position: 'relative', flexShrink: 0 }}>
                       <Image src={author.avatar_url} alt={author.display_name} fill style={{ objectFit: 'cover' }} />
                     </div>
                   ) : (
-                    <div style={{ width: 32, height: 32, borderRadius: '50%', background: 'var(--sm-gradient-subtle)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 14, fontWeight: 600, color: 'var(--sm-text)' }}>
+                    <div style={{ width: 28, height: 28, borderRadius: '50%', background: 'var(--sm-gradient-subtle)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 12, fontWeight: 600, color: 'var(--sm-text)', flexShrink: 0 }}>
                       {author.display_name.charAt(0)}
                     </div>
                   )}
-                  <span style={{ fontSize: 14, fontWeight: 600, color: 'var(--sm-text)' }}>{author.display_name}</span>
+                  <span style={{ fontSize: 14, fontWeight: 600, color: 'var(--sm-text)', whiteSpace: 'nowrap' }}>{author.display_name}</span>
                 </Link>
-              )}
-              <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 14, color: 'var(--sm-text-muted)', flexWrap: 'wrap' }}>
-                <time dateTime={post.published_at}>{format(new Date(post.published_at), 'MMMM d, yyyy')}</time>
                 <span style={{ color: 'var(--sm-text-dim)' }}>·</span>
-                <span>{readingTime} min read</span>
-                <span style={{ color: 'var(--sm-text-dim)' }}>·</span>
-                <ViewCounterCompact views={post.views || 0} />
-              </div>
+              </>
+            )}
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 13, color: 'var(--sm-text-muted)' }}>
+              <time dateTime={post.published_at}>{format(new Date(post.published_at), 'MMMM d, yyyy')}</time>
+              <span style={{ color: 'var(--sm-text-dim)' }}>·</span>
+              <span>{readingTime} min read</span>
+              <span style={{ color: 'var(--sm-text-dim)' }}>·</span>
+              <ViewCounterCompact views={post.views || 0} />
             </div>
-          )}
+          </div>
+
         </div>
       </header>
 
+      {/* Article Audio Player */}
+      {audioInfo && (
+        <div style={{ backgroundColor: '#FAFAFB' }}>
+          <div style={{ maxWidth: 680, margin: '0 auto', padding: '0 24px' }}>
+            <ArticleAudioPlayer
+              initialArticle={audioInfo.article}
+              initialAudioUrl={audioInfo.audioUrl}
+              articleContent={post.content || ''}
+              autoPlay={autoPlayAudio}
+            />
+          </div>
+        </div>
+      )}
+
       {/* 2030 Article Body Area */}
-      <div style={{ backgroundColor: 'var(--sm-dark)' }}>
-        <div style={{ maxWidth: 1400, margin: '0 auto', padding: '16px 24px 48px', display: 'flex', justifyContent: 'center', gap: 0 }}>
-          {/* Left Sidebar - TOC (Desktop only) */}
-          <aside className="hidden xl:block" style={{ width: 200, flexShrink: 0 }}>
-            <div style={{ position: 'sticky', top: 96, paddingRight: 16 }}>
+      <div style={{ backgroundColor: '#FAFAFB' }}>
+        <div style={{ maxWidth: 1460, margin: '0 auto', padding: '16px 24px 48px', display: 'flex', gap: 24 }}>
+          {/* Left TOC Sidebar (Desktop only) */}
+          <aside className="hidden xl:block" style={{ width: 260, flexShrink: 0 }}>
+            <div style={{ position: 'sticky', top: 96 }}>
               <ArticleTableOfContents
                 contentHtml={cleanContent}
                 variant="glass"
+                storedToc={post.toc as Array<{ id: string; text: string; level: number }> | null}
               />
             </div>
           </aside>
 
           {/* Main article column */}
-          <div style={{ width: '100%', maxWidth: 720, borderColor: 'var(--sm-border)' }}>
-            {/* Breadcrumb */}
-            <nav style={{ marginBottom: 12 }}>
-              <ol style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 13, color: 'var(--sm-text-dim)', listStyle: 'none', padding: 0, margin: 0 }}>
-                <li><Link href="/" style={{ color: 'inherit', transition: 'color 0.2s' }}>Home</Link></li>
-                <li>/</li>
-                <li><Link href={`/${categoryData?.slug || category}`} style={{ color: 'inherit' }}>{categoryData?.name || category}</Link></li>
-              </ol>
-            </nav>
-
-            {/* Article Audio Player */}
-            {audioInfo && (
-              <ArticleAudioPlayer
-                initialArticle={audioInfo.article}
-                initialAudioUrl={audioInfo.audioUrl}
-                articleContent={post.content || ''}
-                autoPlay={autoPlayAudio}
-              />
-            )}
+          <div style={{ width: '100%', maxWidth: 775, borderColor: 'var(--sm-border)' }}>
 
             <article className="article-body-2030" suppressHydrationWarning>
               {blockDocument ? (
@@ -497,10 +470,10 @@ export default async function ArticlePage({ params, searchParams }: ArticlePageP
                     author={{
                       id: author.id,
                       name: author.display_name,
-                      slug: author.slug || String(author.id),
+                      slug: String(author.id),
                       avatar_url: author.avatar_url,
                       bio: author.bio,
-                      twitter_url: author.twitter,
+                      twitter_url: undefined,
                       email: author.email,
                     }}
                   />
@@ -555,7 +528,7 @@ export default async function ArticlePage({ params, searchParams }: ArticlePageP
           </div>
 
           {/* Right Sidebar — Ask Scout + SM EDGE Features (Desktop only) */}
-          <aside className="hidden xl:block" style={{ width: 300, flexShrink: 0, paddingLeft: 16 }}>
+          <aside className="hidden xl:block" style={{ width: 300, flexShrink: 0 }}>
             <div style={{ position: 'sticky', top: 96 }}>
               <ArticleSidebar categoryName={categoryData?.name} categorySlug={categoryData?.slug} />
             </div>
@@ -603,7 +576,7 @@ export default async function ArticlePage({ params, searchParams }: ArticlePageP
                 },
                 author: author ? {
                   name: author.display_name,
-                  slug: author.slug || String(author.id),
+                  slug: String(author.id),
                   avatar_url: author.avatar_url ?? undefined,
                 } : { name: 'Staff', slug: 'staff' },
               }))}

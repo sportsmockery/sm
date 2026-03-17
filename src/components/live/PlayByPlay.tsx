@@ -14,22 +14,21 @@ export default function PlayByPlay({ plays }: PlayByPlayProps) {
 
   const sorted = [...plays].sort((a, b) => b.sequence - a.sequence)
 
-  // Group by period for separators
+  // Group by period for separators — show header for each period change
   let lastPeriod: number | null = null
 
   return (
     <div className="space-y-2">
-      {sorted.map(play => {
-        const showSeparator = lastPeriod !== null && play.period !== lastPeriod
+      {sorted.map((play, idx) => {
+        const isNewPeriod = play.period !== lastPeriod
         lastPeriod = play.period
 
         return (
           <div key={play.play_id}>
-            {showSeparator && (
-              <div className="flex items-center gap-3 py-2">
-                <div className="flex-1 h-px" style={{ backgroundColor: 'var(--sm-border)' }} />
-                <span className="text-xs font-bold uppercase" style={{ color: 'var(--sm-text-muted)' }}>{play.period_label}</span>
-                <div className="flex-1 h-px" style={{ backgroundColor: 'var(--sm-border)' }} />
+            {isNewPeriod && (
+              <div className="flex items-center justify-between py-3 px-2 mt-2 rounded-lg" style={{ backgroundColor: 'var(--sm-surface)', border: '1px solid var(--sm-border)' }}>
+                <span className="text-sm font-bold" style={{ color: 'var(--sm-text)' }}>{play.period_label}</span>
+                <span className="text-sm font-medium" style={{ color: 'var(--sm-text-muted)' }}>{play.score_away} - {play.score_home}</span>
               </div>
             )}
             <PlayByPlayItem play={play} />

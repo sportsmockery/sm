@@ -16,6 +16,8 @@ export interface Post {
   og_image: string
   views: number
   force_hero_featured: boolean
+  is_story_universe: boolean
+  story_universe_related_ids: string[]
   created_at: string
   updated_at: string
   category?: {
@@ -166,6 +168,8 @@ export async function createPost(data: Partial<Post>): Promise<Post> {
       og_image: data.og_image || '',
       views: 0,
       force_hero_featured: data.force_hero_featured || false,
+      is_story_universe: data.is_story_universe || false,
+      story_universe_related_ids: data.story_universe_related_ids || [],
     })
     .select()
     .single()
@@ -195,6 +199,8 @@ export async function updatePost(id: string, data: Partial<Post>): Promise<Post>
   if (data.meta_description !== undefined) updateData.meta_description = data.meta_description
   if (data.og_image !== undefined) updateData.og_image = data.og_image
   if (data.force_hero_featured !== undefined) updateData.force_hero_featured = data.force_hero_featured
+  if (data.is_story_universe !== undefined) updateData.is_story_universe = data.is_story_universe
+  if (data.story_universe_related_ids !== undefined) updateData.story_universe_related_ids = data.story_universe_related_ids
 
   const { data: post, error } = await supabase
     .from('sm_posts')

@@ -1,6 +1,7 @@
 import { Metadata } from 'next'
-import { TeamHubLayout, ToolGrid, QuickStats } from '@/components/team'
+import { TeamHubLayout, QuickStats } from '@/components/team'
 import { SectionHeader, ArticleCard } from '@/components/team/shared'
+import RecentHubUpdates from '@/components/hub/RecentHubUpdates'
 import TeamSeasonCard from '@/components/team/shared/TeamSeasonCard'
 import TeamRosterHighlights from '@/components/team/shared/TeamRosterHighlights'
 import TeamTrendingTopics from '@/components/team/shared/TeamTrendingTopics'
@@ -85,9 +86,6 @@ export default async function BlackhawksHubPage() {
       {/* OrbNav removed — navigation handled by sidebar */}
 
       <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '24px', maxWidth: '1320px', margin: '0 auto' }}>
-        {/* Tool Grid */}
-        <ToolGrid teamSlug="chicago-blackhawks" accentColor="#CF0A2C" secondaryColor="#0B0F14" />
-
         {/* Content Grid */}
         <style>{`@media (min-width: 1024px) { .hub-grid-hawks { grid-template-columns: 2fr 1fr !important; } }`}</style>
         <div className="hub-grid-hawks" style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '32px' }}>
@@ -97,6 +95,8 @@ export default async function BlackhawksHubPage() {
             <div className="lg:hidden">
               <TeamSeasonCard season={seasonOverview} />
             </div>
+
+            <RecentHubUpdates teamSlug="chicago-blackhawks" />
 
             <section>
               <SectionHeader title="Latest Blackhawks News" />

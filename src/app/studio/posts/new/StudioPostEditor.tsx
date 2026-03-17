@@ -6,6 +6,7 @@ import Image from 'next/image'
 import Link from 'next/link'
 import RichTextEditor, { RichTextEditorRef } from '@/components/admin/PostEditor/RichTextEditor'
 import { CategorySelect, AuthorSelect } from '@/components/admin/PostEditor/SearchableSelect'
+import StoryUniversePanel from '@/components/admin/PostEditor/StoryUniversePanel'
 import { ChartBuilderModal, ChartConfig, AISuggestion, ChartType } from '@/components/admin/ChartBuilder'
 import { PostIQChartGenerator } from '@/components/postiq'
 
@@ -84,6 +85,15 @@ export default function StudioPostEditor({
   const [forceHeroFeatured, setForceHeroFeatured] = useState(
     (post as any)?.force_hero_featured || false
   )
+
+  // Story Universe state
+  const [isStoryUniverse, setIsStoryUniverse] = useState(
+    (post as any)?.is_story_universe || false
+  )
+  const [storyUniverseRelatedIds, setStoryUniverseRelatedIds] = useState<string[]>(
+    (post as any)?.story_universe_related_ids || []
+  )
+  const [storyUniverseError, setStoryUniverseError] = useState('')
 
   // Social media posting states
   const [postToSocial, setPostToSocial] = useState(false)
@@ -446,6 +456,14 @@ export default function StudioPostEditor({
 
       setAutoInsertingContent(null)
 
+      // Story Universe validation
+      if (isStoryUniverse && storyUniverseRelatedIds.length !== 2) {
+        setStoryUniverseError('You must select 2 related stories for Story Universe')
+        setSaving(false)
+        return
+      }
+      setStoryUniverseError('')
+
       const endpoint = isEditing ? `/api/posts/${post?.id}` : '/api/admin/posts'
 
       const response = await fetch(endpoint, {
@@ -458,6 +476,8 @@ export default function StudioPostEditor({
           author_id: formData.author_id || null,
           social_caption: socialCaption || null,
           force_hero_featured: forceHeroFeatured,
+          is_story_universe: isStoryUniverse,
+          story_universe_related_ids: isStoryUniverse ? storyUniverseRelatedIds : [],
         }),
       })
 
@@ -1162,6 +1182,19 @@ export default function StudioPostEditor({
                 <p className="mt-1 text-xs text-[var(--text-muted)] ml-6">Override trending threshold — this article will take over the homepage hero regardless of view count</p>
               </div>
 
+              {/* Story Universe */}
+              <StoryUniversePanel
+                postId={post?.id || null}
+                categoryId={formData.category_id || null}
+                title={formData.title}
+                tags={[]}
+                isStoryUniverse={isStoryUniverse}
+                onIsStoryUniverseChange={setIsStoryUniverse}
+                relatedIds={storyUniverseRelatedIds}
+                onRelatedIdsChange={setStoryUniverseRelatedIds}
+                validationError={storyUniverseError}
+              />
+
               {/* Social Media Posting */}
               <div className="border-t border-[var(--border-default)] pt-4">
                 <label className={`flex items-center gap-2 ${socialAlreadyPosted ? 'cursor-not-allowed opacity-60' : 'cursor-pointer'}`}>
@@ -1680,7 +1713,7 @@ export default function StudioPostEditor({
           debounceMs={1500}
           minContentLength={300}
           showIndicator={true}
-          indicatorPosition="bottom-right"
+          indicatorPosition="bottom-left"
           onChartInsert={(chartId, shortcode, updatedContent) => {
             setFormData(prev => ({ ...prev, content: updatedContent }))
           }}

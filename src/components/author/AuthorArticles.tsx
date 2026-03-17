@@ -47,10 +47,10 @@ export default function AuthorArticles({
             href={`/author/${authorId}`}
             className={`rounded-full px-4 py-2 text-sm font-medium transition-colors ${
               !selectedCategory
-                ? 'bg-[#8B0000] text-white dark:bg-[#FF6666]'
+                ? 'bg-[#BC0000] text-white'
                 : ''
             }`}
-            style={selectedCategory ? { backgroundColor: 'var(--sm-surface)', color: 'var(--sm-text)' } : undefined}
+            style={selectedCategory ? { backgroundColor: 'var(--bg-tertiary)', color: 'var(--text-primary)' } : undefined}
           >
             All ({categories.reduce((sum, c) => sum + c.count, 0)})
           </a>
@@ -60,10 +60,10 @@ export default function AuthorArticles({
               href={`/author/${authorId}?category=${cat.slug}`}
               className={`rounded-full px-4 py-2 text-sm font-medium transition-colors ${
                 selectedCategory === cat.slug
-                  ? 'bg-[#8B0000] text-white dark:bg-[#FF6666]'
+                  ? 'bg-[#BC0000] text-white'
                   : ''
               }`}
-              style={selectedCategory !== cat.slug ? { backgroundColor: 'var(--sm-surface)', color: 'var(--sm-text)' } : undefined}
+              style={selectedCategory !== cat.slug ? { backgroundColor: 'var(--bg-tertiary)', color: 'var(--text-primary)' } : undefined}
             >
               {cat.name} ({cat.count})
             </a>
@@ -102,8 +102,8 @@ export default function AuthorArticles({
           />
         </>
       ) : (
-        <div className="rounded-2xl border border-dashed p-12 text-center" style={{ borderColor: 'var(--sm-border)', backgroundColor: 'var(--sm-card)' }}>
-          <p style={{ color: 'var(--sm-text-muted)' }}>
+        <div className="rounded-2xl border border-dashed p-12 text-center" style={{ borderColor: 'var(--border-default)', backgroundColor: 'var(--bg-card)' }}>
+          <p style={{ color: 'var(--text-muted)' }}>
             No articles found in this category.
           </p>
         </div>

@@ -16,7 +16,7 @@ export default function GameSwitcher({ currentGameId }: GameSwitcherProps) {
 
   const getStatusLabel = (game: LiveGameSummary): string => {
     if (game.status === 'in_progress') {
-      if (game.period_label && game.clock) return `${game.period_label} ${game.clock}`
+      if (game.period_label && game.clock && game.sport !== 'mlb') return `${game.period_label} ${game.clock}`
       if (game.period_label) return game.period_label
       return 'LIVE'
     }
@@ -32,7 +32,7 @@ export default function GameSwitcher({ currentGameId }: GameSwitcherProps) {
   return (
     <>
       <div className="bg-gray-950 border-b border-white/10 overflow-x-auto hide-scrollbar-gs">
-        <div className="max-w-[1200px] mx-auto flex items-center gap-1 px-2 py-2">
+        <div className="max-w-[1200px] mx-auto flex items-center justify-center gap-1 px-2 py-2">
           {games.map(game => {
             const isCurrent = game.game_id === currentGameId
             const isUpcoming = game.status === 'upcoming'
@@ -48,7 +48,7 @@ export default function GameSwitcher({ currentGameId }: GameSwitcherProps) {
                     ? 'bg-white/5 text-white/40 hover:bg-white/10'
                     : 'bg-white/5 text-white/70 hover:bg-white/10'
                 }`}
-                style={isCurrent ? { borderBottom: '2px solid #bc0000' } : undefined}
+                style={isCurrent ? { borderBottom: '2px solid #22c55e' } : undefined}
               >
                 {/* Logos */}
                 <div className="flex items-center -space-x-1">
@@ -69,7 +69,7 @@ export default function GameSwitcher({ currentGameId }: GameSwitcherProps) {
                   }
                 </span>
                 {/* Status */}
-                <span className={`text-[10px] ${game.status === 'in_progress' ? 'text-red-400' : 'text-white/40'}`}>
+                <span className={`text-[10px] ${game.status === 'in_progress' ? 'text-green-400' : 'text-white/40'}`}>
                   {getStatusLabel(game)}
                 </span>
               </button>

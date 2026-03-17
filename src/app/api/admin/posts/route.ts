@@ -26,6 +26,7 @@ export async function GET(request: NextRequest) {
         category:sm_categories(id, name, slug),
         author:sm_authors(id, display_name)
       `, { count: 'exact' })
+      .order('published_at', { ascending: false, nullsFirst: false })
       .order('created_at', { ascending: false })
       .range(offset, offset + limit - 1)
 
@@ -110,11 +111,43 @@ export async function POST(request: NextRequest) {
       created_at: now,
     }
 
+    // Ensure published posts always have an author
+    if (postData.status === 'published' && !postData.author_id) {
+      const { data: staff } = await supabaseAdmin
+        .from('sm_authors')
+        .select('id')
+        .ilike('display_name', '%Sports Mockery%')
+        .limit(1)
+        .single()
+      if (staff) postData.author_id = staff.id
+    }
+
     // Only add optional columns if they have values (avoids schema cache errors)
     if (body.social_caption) postData.social_caption = body.social_caption
     if (body.updated_at !== undefined) postData.updated_at = body.updated_at || now
     if (body.views !== undefined) postData.views = body.views
     if (body.importance_score !== undefined) postData.importance_score = body.importance_score
+    if (body.force_hero_featured !== undefined) {
+      postData.force_hero_featured = body.force_hero_featured
+      // Track when hero override was activated (24h display cap)
+      if (body.force_hero_featured) {
+        postData.hero_override_at = new Date().toISOString()
+      } else {
+        postData.hero_override_at = null
+      }
+    }
+    if (body.is_story_universe !== undefined) {
+      postData.is_story_universe = body.is_story_universe
+      postData.story_universe_related_ids = body.is_story_universe
+        ? (body.story_universe_related_ids || [])
+        : []
+      // Track when hero override was activated (24h display cap)
+      if (body.is_story_universe) {
+        postData.hero_override_at = new Date().toISOString()
+      } else if (!body.force_hero_featured) {
+        postData.hero_override_at = null
+      }
+    }
 
     // Set published_at if status is published
     if (body.status === 'published') {

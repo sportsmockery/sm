@@ -27,9 +27,10 @@ export default function AuthorLatest({ articles, className = '' }: AuthorLatestP
 
   return (
     <section className={className}>
-      <h2 className="mb-6 flex items-center gap-2 font-heading text-xl font-bold" style={{ color: 'var(--sm-text)' }}>
+      <h2 className="mb-6 flex items-center gap-2 text-xl font-bold" style={{ color: 'var(--text-primary)' }}>
         <svg
-          className="h-5 w-5 text-[#8B0000] dark:text-[#FF6666]"
+          className="h-5 w-5"
+          style={{ color: '#BC0000' }}
           fill="none"
           viewBox="0 0 24 24"
           strokeWidth={2}
@@ -60,20 +61,20 @@ export default function AuthorLatest({ articles, className = '' }: AuthorLatestP
                   className="object-cover transition-transform duration-500 group-hover:scale-105"
                 />
               ) : (
-                <div className="h-full w-full" style={{ background: 'linear-gradient(to bottom right, var(--sm-surface), var(--sm-border))' }} />
+                <div className="h-full w-full" style={{ backgroundColor: 'var(--bg-tertiary)' }} />
               )}
             </div>
 
             <div className="absolute inset-0 bg-gradient-to-t from-black via-black/50 to-transparent" />
 
             <div className="absolute inset-0 flex flex-col justify-end p-6">
-              <span className="mb-2 inline-block w-fit rounded bg-[#8B0000] px-2 py-1 text-xs font-bold text-white">
+              <span className="mb-2 inline-block w-fit rounded px-2 py-1 text-xs font-bold text-white" style={{ backgroundColor: '#BC0000' }}>
                 {featured.category.name}
               </span>
-              <h3 className="mb-2 font-heading text-xl font-bold text-white transition-colors group-hover:text-[#FF6666] lg:text-2xl">
+              <h3 className="mb-2 text-xl font-bold text-white transition-colors group-hover:text-[#BC0000] lg:text-2xl">
                 {featured.title}
               </h3>
-              <time className="text-sm" style={{ color: 'var(--sm-text-dim)' }}>
+              <time className="text-sm text-zinc-400">
                 {format(new Date(featured.published_at), 'MMM d, yyyy')}
               </time>
             </div>
@@ -86,8 +87,8 @@ export default function AuthorLatest({ articles, className = '' }: AuthorLatestP
             <Link
               key={article.id}
               href={`/${article.category.slug}/${article.slug}`}
-              className="group flex gap-4 rounded-xl border p-4 transition-all hover:border-[#8B0000]/30 hover:shadow-lg dark:hover:border-[#FF6666]/30"
-              style={{ borderColor: 'var(--sm-border)', backgroundColor: 'var(--sm-card)' }}
+              className="group flex gap-4 rounded-xl p-4 transition-all"
+              style={{ border: '1px solid var(--border-default)', backgroundColor: 'var(--bg-card)' }}
             >
               {article.featured_image && (
                 <div className="relative h-24 w-24 shrink-0 overflow-hidden rounded-lg">
@@ -100,13 +101,13 @@ export default function AuthorLatest({ articles, className = '' }: AuthorLatestP
                 </div>
               )}
               <div className="flex flex-1 flex-col justify-center">
-                <span className="mb-1 text-xs font-medium text-[#8B0000] dark:text-[#FF6666]">
+                <span className="mb-1 text-xs font-medium" style={{ color: '#BC0000' }}>
                   {article.category.name}
                 </span>
-                <h4 className="line-clamp-2 font-semibold transition-colors group-hover:text-[#8B0000] dark:group-hover:text-[#FF6666]" style={{ color: 'var(--sm-text)' }}>
+                <h4 className="line-clamp-2 font-semibold transition-colors group-hover:text-[#BC0000]" style={{ color: 'var(--text-primary)' }}>
                   {article.title}
                 </h4>
-                <time className="mt-1 text-xs" style={{ color: 'var(--sm-text-muted)' }}>
+                <time className="mt-1 text-xs" style={{ color: 'var(--text-muted)' }}>
                   {format(new Date(article.published_at), 'MMM d, yyyy')}
                 </time>
               </div>

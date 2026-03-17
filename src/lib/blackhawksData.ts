@@ -594,7 +594,7 @@ function transformGame(game: any): BlackhawksGame {
     gameId: game.id?.toString() || game.game_id,
     season: getCurrentSeason(),
     date: game.game_date,
-    time: formatGameTime(game.game_time),
+    time: game.game_time_display || formatGameTime(game.game_time),
     dayOfWeek: gameDate.toLocaleDateString('en-US', { weekday: 'long' }),
     opponent: game.opponent,
     opponentFullName: game.opponent_full_name || null,

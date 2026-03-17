@@ -12,25 +12,34 @@ interface ArticleTableOfContentsProps {
   contentHtml: string
   className?: string
   variant?: 'default' | 'glass'
+  /** Scout-generated TOC stored in DB — used when available, falls back to HTML extraction */
+  storedToc?: Array<{ id: string; text: string; level: number }> | null
 }
 
 /**
  * In-article table of contents - Athletic-style
  * Left sidebar placement with minimal design
- * Extracts h2 and h3 headings from article content
+ * Uses Scout-generated TOC if available, otherwise extracts h2/h3 headings from HTML
  * Highlights current section based on scroll position
  */
 export default function ArticleTableOfContents({
   contentHtml,
   className = '',
   variant = 'default',
+  storedToc,
 }: ArticleTableOfContentsProps) {
   const [items, setItems] = useState<TOCItem[]>([])
   const [activeId, setActiveId] = useState<string>('')
   const [isExpanded, setIsExpanded] = useState(true)
 
-  // Extract headings from HTML content
+  // Use stored TOC if available, otherwise extract from HTML
   useEffect(() => {
+    if (storedToc && storedToc.length >= 3) {
+      setItems(storedToc)
+      setActiveId(storedToc[0].id)
+      return
+    }
+
     const parser = new DOMParser()
     const doc = parser.parseFromString(contentHtml, 'text/html')
     const headings = doc.querySelectorAll('h2, h3')
@@ -46,11 +55,10 @@ export default function ArticleTableOfContents({
 
     setItems(tocItems)
 
-    // Set initial active item
     if (tocItems.length > 0) {
       setActiveId(tocItems[0].id)
     }
-  }, [contentHtml])
+  }, [contentHtml, storedToc])
 
   // Track scroll position to update active heading
   useEffect(() => {
@@ -99,53 +107,60 @@ export default function ArticleTableOfContents({
   const isSidebarMode = variant === 'glass'
 
   if (isSidebarMode) {
-    // Athletic-style left sidebar TOC in glass card wrapper
     return (
-      <nav className={`article-glass-card-sm ${className}`} aria-label="Table of contents">
-        <div className="mb-4">
+      <nav className={className} aria-label="Table of contents">
+        {/* Header */}
+        <div className="flex items-center gap-2 mb-5">
+          <div
+            className="flex items-center justify-center rounded-md"
+            style={{ width: 24, height: 24, backgroundColor: 'rgba(188,0,0,0.08)' }}
+          >
+            <svg className="w-3.5 h-3.5" style={{ color: '#BC0000' }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h7" />
+            </svg>
+          </div>
           <span
-            className="text-[11px] font-semibold tracking-[0.1em] uppercase"
-            style={{ color: 'var(--sm-text-muted)' }}
+            className="text-[12px] font-bold tracking-[0.08em] uppercase"
+            style={{ color: 'var(--sm-text)' }}
           >
             Contents
           </span>
         </div>
-        <ul className="space-y-0">
-          {items.map((item, index) => (
-            <li key={item.id} className="relative">
-              <button
-                onClick={() => scrollToHeading(item.id)}
-                className={`group w-full text-left py-2 text-[13px] leading-snug transition-all duration-200 ${
-                  item.level === 3 ? 'pl-3' : ''
-                }`}
-                style={{
-                  color: activeId === item.id ? '#bc0000' : 'var(--sm-text-muted)',
-                  fontWeight: activeId === item.id ? 600 : 400,
-                }}
-              >
-                {/* Active indicator line */}
-                {activeId === item.id && (
+
+        {/* Items */}
+        <ul className="space-y-0.5">
+          {items.map((item) => {
+            const isActive = activeId === item.id
+            return (
+              <li key={item.id}>
+                <button
+                  onClick={() => scrollToHeading(item.id)}
+                  className="group w-full text-left py-1.5 text-[13px] leading-snug transition-all duration-200 flex items-start gap-2"
+                  style={{
+                    color: isActive ? '#BC0000' : 'var(--sm-text-muted)',
+                    fontWeight: isActive ? 600 : 400,
+                  }}
+                >
+                  {/* Active indicator */}
                   <span
-                    className="absolute left-0 top-1/2 -translate-y-1/2 w-[2px] h-4 rounded-full"
-                    style={{ backgroundColor: '#bc0000' }}
+                    className="shrink-0 mt-[5px] rounded-full transition-all duration-200"
+                    style={{
+                      width: 6,
+                      height: 6,
+                      backgroundColor: isActive ? '#BC0000' : 'rgba(11,15,20,0.12)',
+                    }}
                   />
-                )}
-                <span className="line-clamp-2 group-hover:text-[var(--sm-text)] transition-colors pl-3">
-                  {item.text}
-                </span>
-              </button>
-            </li>
-          ))}
+                  <span className="line-clamp-2 group-hover:text-[var(--sm-text)] transition-colors">
+                    {item.text}
+                  </span>
+                </button>
+              </li>
+            )
+          })}
         </ul>
-        {/* Progress indicator */}
-        <div className="mt-6 pt-4 border-t" style={{ borderColor: 'var(--sm-border)' }}>
-          <div className="flex items-center gap-2 text-[11px]" style={{ color: 'var(--sm-text-muted)' }}>
-            <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" />
-            </svg>
-            <span>{items.findIndex(i => i.id === activeId) + 1} of {items.length}</span>
-          </div>
-        </div>
+
+        {/* Subtle bottom line */}
+        <div className="mt-5 h-px" style={{ background: 'linear-gradient(to right, rgba(188,0,0,0.15), transparent)' }} />
       </nav>
     )
   }

@@ -12,8 +12,7 @@ const teams = [
 
 const platform = [
   { name: 'Scout AI', href: '/scout-ai' },
-  { name: 'Trade Simulator', href: '/gm' },
-  { name: 'Mock Draft', href: '/mock-draft' },
+  { name: 'War Room', href: '/gm' },
   { name: 'Fan Hub', href: '/fan-zone' },
   { name: 'Data Hub', href: '/datahub' },
 ]

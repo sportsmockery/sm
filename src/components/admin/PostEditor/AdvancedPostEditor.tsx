@@ -9,6 +9,7 @@ import { CategorySelect, AuthorSelect } from './SearchableSelect'
 import TagInput from './TagInput'
 import { ChartBuilderModal, ChartConfig, AISuggestion, ChartType } from '@/components/admin/ChartBuilder'
 import { PostIQChartGenerator } from '@/components/postiq'
+import StoryUniversePanel from './StoryUniversePanel'
 import { BlockEditor } from '@/components/admin/BlockEditor'
 import type { ArticleDocument } from '@/components/admin/BlockEditor'
 import { isBlockContent, parseDocument, serializeDocument, blocksToHtml } from '@/components/admin/BlockEditor/serializer'
@@ -148,6 +149,15 @@ export default function AdvancedPostEditor({
   const [forceHeroFeatured, setForceHeroFeatured] = useState(
     (post as any)?.force_hero_featured || false
   )
+
+  // Story Universe state
+  const [isStoryUniverse, setIsStoryUniverse] = useState(
+    (post as any)?.is_story_universe || false
+  )
+  const [storyUniverseRelatedIds, setStoryUniverseRelatedIds] = useState<string[]>(
+    (post as any)?.story_universe_related_ids || []
+  )
+  const [storyUniverseError, setStoryUniverseError] = useState('')
 
   // Social media posting states (transient - not persisted directly)
   const [postToSocial, setPostToSocial] = useState(false)
@@ -935,6 +945,14 @@ export default function AdvancedPostEditor({
       const effectivePostId = isEditing ? post?.id : autoSavedPostId
       const endpoint = effectivePostId ? `/api/posts/${effectivePostId}` : '/api/admin/posts'
 
+      // Story Universe validation
+      if (isStoryUniverse && storyUniverseRelatedIds.length !== 2) {
+        setStoryUniverseError('You must select 2 related stories for Story Universe')
+        setSaving(false)
+        return
+      }
+      setStoryUniverseError('')
+
       // Include social_caption in the payload if postToSocial is checked
       const payload = {
         ...formData,
@@ -945,6 +963,8 @@ export default function AdvancedPostEditor({
         post_to_social: postToSocial && !socialAlreadyPosted && socialCaption.trim(),
         tags: selectedTags.map(t => t.id),
         force_hero_featured: forceHeroFeatured,
+        is_story_universe: isStoryUniverse,
+        story_universe_related_ids: isStoryUniverse ? storyUniverseRelatedIds : [],
       }
 
       const response = await fetch(endpoint, {
@@ -1799,6 +1819,19 @@ export default function AdvancedPostEditor({
                 <p className="mt-1 text-xs text-[var(--text-muted)] ml-6">Override trending threshold — this article will take over the homepage hero regardless of view count</p>
               </div>
 
+              {/* Story Universe */}
+              <StoryUniversePanel
+                postId={autoSavedPostId || post?.id || null}
+                categoryId={formData.category_id || null}
+                title={formData.title}
+                tags={selectedTags.map(t => t.slug)}
+                isStoryUniverse={isStoryUniverse}
+                onIsStoryUniverseChange={setIsStoryUniverse}
+                relatedIds={storyUniverseRelatedIds}
+                onRelatedIdsChange={setStoryUniverseRelatedIds}
+                validationError={storyUniverseError}
+              />
+
               {/* Social Media Posting */}
               <div className="border-t border-[var(--border-default)] pt-4">
                 <label className={`flex items-center gap-2 ${socialAlreadyPosted ? 'cursor-not-allowed opacity-60' : 'cursor-pointer'}`}>
@@ -2194,7 +2227,7 @@ export default function AdvancedPostEditor({
           debounceMs={1500}
           minContentLength={300}
           showIndicator={true}
-          indicatorPosition="bottom-right"
+          indicatorPosition="bottom-left"
           onChartInsert={(chartId, shortcode, updatedContent) => {
             setFormData(prev => ({ ...prev, content: updatedContent }))
           }}

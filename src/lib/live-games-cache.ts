@@ -149,11 +149,24 @@ export interface LivePlay {
   player_ids: string[]
   score_home: number
   score_away: number
-  // Sport-specific
+  scoring_play?: boolean
+  score_value?: number
+  // NFL
   down?: number
   distance?: number
   yard_line?: number
+  drive_id?: string
+  is_turnover?: boolean
   possession?: string
+  // NHL
+  strength?: string // PP/SH/EV
+  // MLB
+  at_bat_id?: string
+  outs?: number
+  pitch_count?: number
+  // NBA
+  shooting_play?: boolean
+  points_attempted?: number
 }
 
 export interface LiveTeamStats {
@@ -307,7 +320,7 @@ const DATALAB_API_URL = process.env.DATALAB_API_URL || 'https://datalab.sportsmo
 // Fetch live games from Datalab
 export async function fetchLiveGamesFromDatalab(): Promise<LiveGame[]> {
   try {
-    const response = await fetch(`${DATALAB_API_URL}/live/games`, {
+    const response = await fetch(`${DATALAB_API_URL}/api/live`, {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',
@@ -340,7 +353,7 @@ export async function fetchLiveGamesFromDatalab(): Promise<LiveGame[]> {
 // Fetch single game with full details from Datalab
 export async function fetchLiveGameFromDatalab(gameId: string): Promise<LiveGame | null> {
   try {
-    const response = await fetch(`${DATALAB_API_URL}/live/games/${gameId}`, {
+    const response = await fetch(`${DATALAB_API_URL}/api/live/${gameId}`, {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',

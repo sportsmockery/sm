@@ -59,7 +59,9 @@ export default async function HomePage() {
     <HomepageFeedV2
       firstName={firstName ?? undefined}
       featuredStory={heroData.featuredStory}
-      gameContext={heroData.gameContext}
+      storyUniverseContext={heroData.storyUniverseContext}
+      scoutLiveContext={heroData.scoutLiveContext}
+      gameContexts={heroData.gameContexts}
       teamContext={heroData.teamContext}
       debateContext={heroData.debateContext}
       primaryTeam={heroData.primaryTeam ?? undefined}

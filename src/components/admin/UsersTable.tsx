@@ -45,30 +45,30 @@ export default function UsersTable({
   }
 
   return (
-    <div className="bg-gray-800 rounded-lg overflow-hidden">
+    <div className="rounded-lg overflow-hidden" style={{ backgroundColor: 'var(--bg-card)', border: '1px solid var(--border-default)' }}>
       <table className="w-full">
-        <thead className="bg-gray-900/50">
-          <tr>
-            <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
+        <thead>
+          <tr style={{ borderBottom: '1px solid var(--border-default)' }}>
+            <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider" style={{ color: 'var(--text-muted)' }}>
               User
             </th>
-            <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
+            <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider" style={{ color: 'var(--text-muted)' }}>
               Email
             </th>
-            <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
+            <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider" style={{ color: 'var(--text-muted)' }}>
               Role
             </th>
-            <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
+            <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider" style={{ color: 'var(--text-muted)' }}>
               Last Login
             </th>
-            <th className="px-6 py-3 text-right text-xs font-medium text-gray-400 uppercase tracking-wider">
+            <th className="px-6 py-3 text-right text-xs font-medium uppercase tracking-wider" style={{ color: 'var(--text-muted)' }}>
               Actions
             </th>
           </tr>
         </thead>
-        <tbody className="divide-y divide-gray-700">
+        <tbody>
           {users.map((user) => (
-            <tr key={user.id} className="hover:bg-gray-700/50 transition-colors">
+            <tr key={user.id} className="hover:opacity-90 transition-opacity" style={{ borderBottom: '1px solid var(--border-default)' }}>
               <td className="px-6 py-4 whitespace-nowrap">
                 <div className="flex items-center gap-3">
                   {user.avatar_url ? (
@@ -80,18 +80,18 @@ export default function UsersTable({
                       className="rounded-full"
                     />
                   ) : (
-                    <div className="w-10 h-10 rounded-full bg-gray-600 flex items-center justify-center text-white font-medium">
+                    <div className="w-10 h-10 rounded-full flex items-center justify-center text-white font-medium" style={{ backgroundColor: 'var(--accent-red)' }}>
                       {user.name?.charAt(0)?.toUpperCase() || user.email.charAt(0).toUpperCase()}
                     </div>
                   )}
                   <div>
-                    <Link href={`/admin/users/${user.id}`} className="text-white font-medium hover:underline">{user.name || 'Unnamed'}</Link>
-                    <p className="text-sm text-gray-500">Joined {formatDate(user.created_at)}</p>
+                    <Link href={`/admin/users/${user.id}`} className="font-medium hover:underline" style={{ color: 'var(--text-primary)' }}>{user.name || 'Unnamed'}</Link>
+                    <p className="text-sm" style={{ color: 'var(--text-muted)' }}>Joined {formatDate(user.created_at)}</p>
                   </div>
                 </div>
               </td>
               <td className="px-6 py-4 whitespace-nowrap">
-                <span className="text-gray-300">{user.email}</span>
+                <span style={{ color: 'var(--text-secondary)' }}>{user.email}</span>
               </td>
               <td className="px-6 py-4 whitespace-nowrap">
                 <select
@@ -103,7 +103,7 @@ export default function UsersTable({
                     <option
                       key={role.value}
                       value={role.value}
-                      className="bg-gray-800 text-white"
+                      style={{ backgroundColor: 'var(--bg-card)', color: 'var(--text-primary)' }}
                     >
                       {role.label}
                     </option>
@@ -117,10 +117,20 @@ export default function UsersTable({
                 )}
               </td>
               <td className="px-6 py-4 whitespace-nowrap">
-                <span className="text-gray-400 text-sm">{formatDate(user.last_sign_in_at)}</span>
+                <span className="text-sm" style={{ color: 'var(--text-muted)' }}>{formatDate(user.last_sign_in_at)}</span>
               </td>
               <td className="px-6 py-4 whitespace-nowrap text-right">
                 <div className="flex items-center justify-end gap-2">
+                  <Link
+                    href={`/admin/users/${user.id}`}
+                    className="transition-colors"
+                    style={{ color: 'var(--text-muted)' }}
+                    title="Edit user profile"
+                  >
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                    </svg>
+                  </Link>
                   {onResetPassword && (
                     <button
                       onClick={() => onResetPassword(user.id, user.email)}

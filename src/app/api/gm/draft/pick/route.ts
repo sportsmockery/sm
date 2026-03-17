@@ -49,6 +49,17 @@ export async function POST(request: NextRequest) {
     const prospectName = prospect_name || 'Unknown'
     const prospectPosition = position || 'Unknown'
 
+    // Check for duplicate pick — ensure this prospect hasn't already been selected
+    const allPicks = mockDraft.picks || []
+    const alreadyPicked = allPicks.some((p: any) =>
+      p.prospect_id && String(p.prospect_id) === String(prospect_id) &&
+      p.prospect_name && p.prospect_name !== 'null' && p.prospect_name !== '' &&
+      p.prospect_id !== 'pending'
+    )
+    if (alreadyPicked) {
+      return NextResponse.json({ error: 'This prospect has already been selected' }, { status: 400 })
+    }
+
     // Update the pick directly in the database (bypassing problematic RPC)
     const { error: updateError } = await datalabAdmin
       .from('gm_mock_draft_picks')
@@ -102,7 +113,7 @@ export async function POST(request: NextRequest) {
       team_color: p.team_color,
       is_user_pick: p.is_user_pick,
       is_current: p.pick_number === updatedDraft?.current_pick,
-      selected_prospect: p.prospect_id ? {
+      selected_prospect: (p.prospect_id && p.prospect_id !== 'pending' && p.prospect_name) ? {
         id: p.prospect_id,
         name: p.prospect_name,
         position: p.position,

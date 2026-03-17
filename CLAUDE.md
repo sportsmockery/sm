@@ -462,6 +462,26 @@ const LIVE_POLL_INTERVAL = 10_000    // During live games
 const STANDARD_POLL_INTERVAL = 60_000 // No live games
 ```
 
+### Game Times — All Sports (CRITICAL)
+
+**Always use `game_time_display`** (varchar) for showing game times. Format: `"3:05 PM CT"`, `"7:00 PM CT"`, etc. Already populated on every game with a time. All times are Central Time (Chicago), always.
+
+**What NOT to use:**
+- `game_time` — 24-hour format (`18:30:00`), for internal DB use only
+- `game_start_utc` — UTC timestamptz, only in schedule views, for sorting/filtering
+- **DO NOT** construct `new Date()` from `game_time` — that causes timezone offset bugs
+
+**Display:** Just render directly — no formatting needed:
+```tsx
+<span>{game.game_time_display}</span>  // "6:30 PM CT"
+```
+
+**Notes:**
+- `game_time_display` is `null` for games where time is TBD
+- MLB games also have `probable_pitcher_home` / `probable_pitcher_away` for preview cards
+- Schedule views (`{team}_schedule_all`, etc.) include `game_time_display` automatically
+- `{team}_live` tables store `game_date` in **UTC** — always enrich from `games_master` for display
+
 ### Key Data Layer Files
 
 | File | Purpose |

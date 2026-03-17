@@ -17,6 +17,7 @@ interface UserData {
   updated_at?: string
   is_fan_council_member?: boolean
   reputation_score?: number
+  bio?: string
 }
 
 interface UserPreferences {
@@ -44,8 +45,10 @@ export default function UserDetailPage() {
   // Editable fields
   const [name, setName] = useState('')
   const [role, setRole] = useState<Role>('fan')
+  const [bio, setBio] = useState('')
   const [isFanCouncil, setIsFanCouncil] = useState(false)
   const [reputationScore, setReputationScore] = useState(0)
+  const [avatarUploading, setAvatarUploading] = useState(false)
 
   // Password
   const [newPassword, setNewPassword] = useState('')
@@ -65,6 +68,7 @@ export default function UserDetailPage() {
       setPreferences(data.preferences)
       setName(data.user.name || '')
       setRole(data.user.role || 'fan')
+      setBio(data.user.bio || '')
       setIsFanCouncil(data.user.is_fan_council_member || false)
       setReputationScore(data.user.reputation_score || 0)
     } catch {
@@ -81,7 +85,7 @@ export default function UserDetailPage() {
       const res = await fetch(`/api/admin/users/${userId}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name, role, is_fan_council_member: isFanCouncil, reputation_score: reputationScore }),
+        body: JSON.stringify({ name, role, bio, is_fan_council_member: isFanCouncil, reputation_score: reputationScore }),
       })
       const data = await res.json()
       if (!res.ok) throw new Error(data.error || 'Failed to save')
@@ -137,6 +141,30 @@ export default function UserDetailPage() {
       setPasswordMessage('Failed to send reset email')
     } finally {
       setPasswordLoading(false)
+    }
+  }
+
+  const handleAvatarUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+
+    setAvatarUploading(true)
+    try {
+      const formData = new FormData()
+      formData.append('file', file)
+      formData.append('userId', userId)
+
+      const res = await fetch('/api/admin/users/avatar', { method: 'POST', body: formData })
+      const data = await res.json()
+      if (data.error) throw new Error(data.error)
+
+      setUser(prev => prev ? { ...prev, avatar_url: data.avatarUrl } : prev)
+      setMessage({ type: 'success', text: 'Avatar updated' })
+      setTimeout(() => setMessage(null), 3000)
+    } catch (err: any) {
+      setMessage({ type: 'error', text: err.message || 'Failed to upload avatar' })
+    } finally {
+      setAvatarUploading(false)
     }
   }
 
@@ -202,13 +230,26 @@ export default function UserDetailPage() {
           {/* Profile Header */}
           <div className="rounded-lg p-6" style={{ backgroundColor: 'var(--bg-card)', border: '1px solid var(--border-default)' }}>
             <div className="flex items-center gap-4 mb-6">
-              {user.avatar_url ? (
-                <Image src={user.avatar_url} alt={user.name} width={80} height={80} className="rounded-full" />
-              ) : (
-                <div className="w-20 h-20 rounded-full flex items-center justify-center text-2xl font-bold text-white" style={{ backgroundColor: 'var(--accent-red)' }}>
-                  {user.name?.charAt(0)?.toUpperCase() || user.email.charAt(0).toUpperCase()}
+              <label className="relative cursor-pointer group">
+                <input type="file" accept="image/*" onChange={handleAvatarUpload} className="hidden" />
+                {user.avatar_url ? (
+                  <Image src={user.avatar_url} alt={user.name} width={80} height={80} className="rounded-full object-cover w-20 h-20" />
+                ) : (
+                  <div className="w-20 h-20 rounded-full flex items-center justify-center text-2xl font-bold text-white" style={{ backgroundColor: 'var(--accent-red)' }}>
+                    {user.name?.charAt(0)?.toUpperCase() || user.email.charAt(0).toUpperCase()}
+                  </div>
+                )}
+                <div className="absolute inset-0 rounded-full bg-black/50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                  {avatarUploading ? (
+                    <div className="animate-spin rounded-full h-6 w-6 border-t-2 border-b-2 border-white" />
+                  ) : (
+                    <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
+                    </svg>
+                  )}
                 </div>
-              )}
+              </label>
               <div>
                 <h1 className="text-2xl font-bold" style={{ color: 'var(--text-primary)' }}>{user.name || 'Unnamed'}</h1>
                 <p style={{ color: 'var(--text-muted)' }}>{user.email}</p>
@@ -252,6 +293,18 @@ export default function UserDetailPage() {
                     </option>
                   ))}
                 </select>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium mb-1" style={{ color: 'var(--text-secondary)' }}>Bio</label>
+                <textarea
+                  value={bio}
+                  onChange={(e) => setBio(e.target.value)}
+                  rows={3}
+                  placeholder="Author bio..."
+                  className="w-full px-4 py-2 rounded-lg focus:outline-none resize-y"
+                  style={{ backgroundColor: 'var(--bg-tertiary)', border: '1px solid var(--border-default)', color: 'var(--text-primary)' }}
+                />
               </div>
 
               <div className="flex items-center gap-3">

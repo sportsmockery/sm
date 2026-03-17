@@ -20,9 +20,17 @@ export default function TopIntelligenceCard({ headline, summary, imageUrl, team,
   const router = useRouter()
   const articleUrl = slug && categorySlug ? `/${categorySlug}/${slug}` : undefined
 
+  const handleCardClick = (e: React.MouseEvent) => {
+    // Don't navigate if clicking on interactive elements (buttons, links)
+    const target = e.target as HTMLElement
+    if (target.closest('a') || target.closest('button')) return
+    if (articleUrl) router.push(articleUrl)
+  }
+
   return (
     <article
       className="mx-4 mb-5 overflow-hidden cursor-pointer group"
+      onClick={handleCardClick}
       style={{
         borderRadius: 16,
         border: '2px solid rgba(188, 0, 0, 0.2)',
@@ -33,7 +41,7 @@ export default function TopIntelligenceCard({ headline, summary, imageUrl, team,
     >
       {/* Image */}
       {imageUrl && imageUrl.length > 0 && (
-        <div className="relative overflow-hidden" style={{ aspectRatio: '16/9' }}>
+        <Link href={articleUrl || '#'} className="block relative overflow-hidden" style={{ aspectRatio: '16/9' }}>
           <img
             src={imageUrl}
             alt={headline}
@@ -43,7 +51,7 @@ export default function TopIntelligenceCard({ headline, summary, imageUrl, team,
             className="absolute inset-0"
             style={{ background: 'linear-gradient(to top, rgba(0,0,0,0.6), transparent, transparent)' }}
           />
-        </div>
+        </Link>
       )}
 
       <div className="p-5">

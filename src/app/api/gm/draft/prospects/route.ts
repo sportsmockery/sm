@@ -51,7 +51,7 @@ export async function GET(request: NextRequest) {
     // Order by big_board_rank
     query = query.order('big_board_rank', { ascending: true, nullsFirst: false })
 
-    const { data: prospects, error } = await query.limit(200)
+    const { data: prospects, error } = await query.limit(500)
 
     if (error) {
       console.error('Prospects fetch error:', error)

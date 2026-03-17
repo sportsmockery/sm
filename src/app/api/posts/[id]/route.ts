@@ -62,6 +62,30 @@ export async function POST(
       updated_at: new Date().toISOString(),
     }
 
+    // Story Universe / Force Hero fields
+    if (body.force_hero_featured !== undefined) {
+      updateData.force_hero_featured = body.force_hero_featured
+      // Track when hero override was activated (24h display cap)
+      if (body.force_hero_featured) {
+        updateData.hero_override_at = new Date().toISOString()
+      } else if (!body.is_story_universe) {
+        updateData.hero_override_at = null
+      }
+    }
+    if (body.is_story_universe !== undefined) {
+      updateData.is_story_universe = body.is_story_universe
+      // Clear related IDs if unchecked
+      updateData.story_universe_related_ids = body.is_story_universe
+        ? (body.story_universe_related_ids || [])
+        : []
+      // Track when hero override was activated (24h display cap)
+      if (body.is_story_universe) {
+        updateData.hero_override_at = new Date().toISOString()
+      } else if (!body.force_hero_featured) {
+        updateData.hero_override_at = null
+      }
+    }
+
     // Only update social_caption if provided
     if (social_caption !== undefined) {
       updateData.social_caption = social_caption || null
@@ -113,6 +137,22 @@ export async function POST(
         }))
         await supabaseAdmin.from('sm_post_tags').insert(tagRows)
       }
+    }
+
+    // Auto-generate TOC via Scout when publishing (fire-and-forget)
+    if (status === 'published' && content) {
+      const baseUrl = process.env.NEXT_PUBLIC_APP_URL
+        || (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : 'http://localhost:3000')
+      fetch(`${baseUrl}/api/admin/ai`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'generate_toc',
+          title: title || post.title,
+          content,
+          postId: id,
+        }),
+      }).catch(err => console.error('[TOC] Auto-generate failed:', err))
     }
 
     return NextResponse.json({ success: true, post })

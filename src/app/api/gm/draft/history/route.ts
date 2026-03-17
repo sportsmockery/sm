@@ -37,7 +37,7 @@ export async function GET(request: NextRequest) {
         .from('gm_mock_draft_picks')
         .select('mock_id')
         .in('mock_id', draftIds)
-        .not('prospect_id', 'is', null)
+        .neq('prospect_id', 'pending')
 
       if (pickCounts) {
         for (const pc of pickCounts) {
@@ -53,9 +53,10 @@ export async function GET(request: NextRequest) {
       sport: d.sport,
       draft_year: d.draft_year,
       status: d.status,
-      grade: d.overall_grade,
-      letter_grade: d.letter_grade,
+      grade: d.grade ?? d.mock_score,
+      letter_grade: d.mock_grade_letter,
       created_at: d.created_at,
+      completed_at: d.completed_at,
       picks_made: pickCountsMap[d.id] || 0,
     }))
 

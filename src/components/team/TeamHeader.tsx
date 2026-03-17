@@ -1,57 +1,15 @@
 'use client'
 
 import Image from 'next/image'
-import type { TeamInfo, NextGameInfo, LastGameInfo, TeamRecord } from './TeamHubLayout'
+import type { ReactNode } from 'react'
+import type { TeamInfo } from './TeamHubLayout'
 
 interface TeamHeaderProps {
   team: TeamInfo
-  record?: TeamRecord | null
-  nextGame?: NextGameInfo | null
-  lastGame?: LastGameInfo | null
+  rightSlot?: ReactNode
 }
 
-function formatRecord(team: TeamInfo, record?: TeamRecord | null) {
-  if (!record) return '--'
-
-  let base = ''
-
-  if (team.league === 'NFL') {
-    const tie = record.ties && record.ties > 0 ? `-${record.ties}` : ''
-    base = `${record.wins}-${record.losses}${tie}`
-  } else if (team.league === 'NHL') {
-    const ot = record.otLosses && record.otLosses > 0 ? `-${record.otLosses}` : ''
-    base = `${record.wins}-${record.losses}${ot}`
-  } else {
-    base = `${record.wins}-${record.losses}`
-  }
-
-  if (record.postseason && (record.postseason.wins > 0 || record.postseason.losses > 0)) {
-    return `${base} • ${record.postseason.wins}-${record.postseason.losses} in playoffs`
-  }
-
-  return base
-}
-
-function formatLastResult(lastGame?: LastGameInfo | null) {
-  if (!lastGame) return 'No recent game'
-  const prefix = lastGame.result || ''
-  const location = lastGame.isHome ? 'vs' : '@'
-  return `${prefix} ${lastGame.teamScore}-${lastGame.opponentScore} ${location} ${lastGame.opponent}`
-}
-
-function formatWinPct(record?: TeamRecord | null) {
-  if (!record) return '--'
-  if (record.pct) return `${record.pct}%`
-  const totalGames = record.wins + record.losses + (record.ties || 0)
-  if (!totalGames) return '--'
-  const pct = ((record.wins / totalGames) * 100).toFixed(1)
-  return `${pct}%`
-}
-
-export default function TeamHeader({ team, record, nextGame, lastGame }: TeamHeaderProps) {
-  const recordText = formatRecord(team, record)
-  const lastResultText = formatLastResult(lastGame)
-  const winPct = formatWinPct(record)
+export default function TeamHeader({ team, rightSlot }: TeamHeaderProps) {
 
   return (
     <header
@@ -119,7 +77,7 @@ export default function TeamHeader({ team, record, nextGame, lastGame }: TeamHea
                 background: '#F8F8FA',
               }}
             >
-              {record?.recordLabel || `${new Date().getFullYear()} Season`}
+              {`${new Date().getFullYear()} Season`}
             </span>
           </div>
           <p
@@ -143,131 +101,18 @@ export default function TeamHeader({ team, record, nextGame, lastGame }: TeamHea
           </p>
         </div>
       </div>
-
-      {/* Right: stat band */}
-      <div
-        style={{
-          display: 'flex',
-          alignItems: 'stretch',
-          justifyContent: 'flex-end',
-          gap: 10,
-          minWidth: 0,
-        }}
-      >
+      {/* Right: header tools / actions slot */}
+      {rightSlot && (
         <div
+          className="hidden lg:block"
           style={{
-            display: 'flex',
-            alignItems: 'stretch',
-            gap: 0,
-            borderRadius: 999,
-            overflow: 'hidden',
-            border: '1px solid rgba(11,15,20,0.08)',
-            background: '#FFFFFF',
-            boxShadow: '0 10px 24px rgba(0,0,0,0.03)',
+            flex: '1 1 auto',
+            maxWidth: 640,
           }}
         >
-          {/* Record */}
-          <div
-            style={{
-              padding: '8px 14px',
-              display: 'flex',
-              flexDirection: 'column',
-              justifyContent: 'center',
-              minWidth: 112,
-              borderRight: '1px solid rgba(11,15,20,0.06)',
-            }}
-          >
-            <span
-              style={{
-                fontSize: 11,
-                fontWeight: 600,
-                letterSpacing: '0.06em',
-                textTransform: 'uppercase',
-                color: 'rgba(11,15,20,0.6)',
-              }}
-            >
-              Record
-            </span>
-            <span
-              style={{
-                fontSize: 16,
-                fontWeight: 700,
-                color: '#0B0F14',
-              }}
-            >
-              {recordText}
-            </span>
-          </div>
-
-          {/* Last result */}
-          <div
-            style={{
-              padding: '8px 14px',
-              display: 'flex',
-              flexDirection: 'column',
-              justifyContent: 'center',
-              minWidth: 172,
-              borderRight: '1px solid rgba(11,15,20,0.06)',
-            }}
-          >
-            <span
-              style={{
-                fontSize: 11,
-                fontWeight: 600,
-                letterSpacing: '0.06em',
-                textTransform: 'uppercase',
-                color: 'rgba(11,15,20,0.6)',
-              }}
-            >
-              Last Game
-            </span>
-            <span
-              style={{
-                fontSize: 13,
-                fontWeight: 500,
-                color: 'rgba(11,15,20,0.8)',
-                whiteSpace: 'nowrap',
-                textOverflow: 'ellipsis',
-                overflow: 'hidden',
-              }}
-            >
-              {lastResultText}
-            </span>
-          </div>
-
-          {/* Win % / standing */}
-          <div
-            style={{
-              padding: '8px 14px',
-              display: 'flex',
-              flexDirection: 'column',
-              justifyContent: 'center',
-              minWidth: 120,
-            }}
-          >
-            <span
-              style={{
-                fontSize: 11,
-                fontWeight: 600,
-                letterSpacing: '0.06em',
-                textTransform: 'uppercase',
-                color: 'rgba(11,15,20,0.6)',
-              }}
-            >
-              {record?.divisionRank ? 'Division Rank' : 'Win %'}
-            </span>
-            <span
-              style={{
-                fontSize: 16,
-                fontWeight: 700,
-                color: '#0B0F14',
-              }}
-            >
-              {record?.divisionRank || winPct}
-            </span>
-          </div>
+          {rightSlot}
         </div>
-      </div>
+      )}
     </header>
   )
 }

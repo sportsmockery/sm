@@ -32,19 +32,9 @@ const PLATFORM_TOOLS = [
     ),
   },
   {
-    title: 'Trade Simulator',
-    desc: 'Build & grade trades',
+    title: 'War Room',
+    desc: 'Trades, drafts & simulations',
     href: '/gm',
-    icon: (
-      <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="#ff4444" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-        <path d="M16 3h5v5M4 20L21 3M21 16v5h-5M14 14l7 7M3 8V3h5M10 10L3 3" />
-      </svg>
-    ),
-  },
-  {
-    title: 'Mock Draft',
-    desc: 'Simulate your draft picks',
-    href: '/mock-draft',
     icon: (
       <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="#ff4444" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
         <rect x="3" y="3" width="18" height="18" rx="2" />

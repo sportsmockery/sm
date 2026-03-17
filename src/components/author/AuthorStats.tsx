@@ -51,16 +51,16 @@ function StatCard({
   const animatedValue = useAnimatedCounter(value)
 
   return (
-    <div className="flex flex-col items-center rounded-2xl border p-6" style={{ borderColor: 'var(--sm-border)', backgroundColor: 'var(--sm-card)' }}>
+    <div className="flex flex-col items-center rounded-2xl p-6" style={{ border: '1px solid var(--border-default)', backgroundColor: 'var(--bg-tertiary)' }}>
       <div
         className={`mb-3 flex h-12 w-12 items-center justify-center rounded-xl ${color}`}
       >
         {icon}
       </div>
-      <p className="text-3xl font-bold" style={{ color: 'var(--sm-text)' }}>
+      <p className="text-3xl font-bold" style={{ color: 'var(--text-primary)' }}>
         {animatedValue.toLocaleString()}
       </p>
-      <p className="text-sm" style={{ color: 'var(--sm-text-muted)' }}>{label}</p>
+      <p className="text-sm" style={{ color: 'var(--text-muted)' }}>{label}</p>
     </div>
   )
 }
@@ -76,7 +76,7 @@ export default function AuthorStats({
       <StatCard
         value={totalPosts}
         label="Total Articles"
-        color="bg-[#8B0000]/10 text-[#8B0000] dark:bg-[#FF6666]/10 dark:text-[#FF6666]"
+        color="bg-[#BC0000]/10 text-[#BC0000]"
         icon={
           <svg
             className="h-6 w-6"
@@ -96,7 +96,7 @@ export default function AuthorStats({
       <StatCard
         value={totalViews}
         label="Total Views"
-        color="bg-emerald-500/10 text-emerald-600 dark:text-emerald-400"
+        color="bg-[#00D4FF]/10 text-[#00D4FF]"
         icon={
           <svg
             className="h-6 w-6"
@@ -121,7 +121,7 @@ export default function AuthorStats({
       <StatCard
         value={categoriesCovered}
         label="Teams Covered"
-        color="bg-amber-500/10 text-amber-600 dark:text-amber-400"
+        color="bg-[#D6B05E]/10 text-[#D6B05E]"
         icon={
           <svg
             className="h-6 w-6"

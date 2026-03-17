@@ -45,7 +45,7 @@ function RenderBlock({ block }: { block: ContentBlock }) {
       if (!block.data.html) {
         return (
           <PreviewSection>
-            <p className="text-[18px] leading-[1.7]" style={{ color: BRAND.white }}>
+            <p className="text-[18px] leading-[1.7]" style={{ color: 'var(--sm-text, #0B0F14)' }}>
               <span className="text-slate-600 italic text-[16px]">Write your paragraph...</span>
             </p>
           </PreviewSection>
@@ -55,7 +55,7 @@ function RenderBlock({ block }: { block: ContentBlock }) {
         <PreviewSection>
           <div
             className="text-[18px] leading-[1.7]"
-            style={{ color: BRAND.white }}
+            style={{ color: 'var(--sm-text, #0B0F14)' }}
             dangerouslySetInnerHTML={{ __html: block.data.html }}
             suppressHydrationWarning
           />
@@ -68,7 +68,7 @@ function RenderBlock({ block }: { block: ContentBlock }) {
       if (!block.data.text) {
         return (
           <div className="mb-4 mt-8">
-            <Tag className={`${sizes[block.data.level]} font-medium tracking-tight`} style={{ color: BRAND.white }}>
+            <Tag className={`${sizes[block.data.level]} font-medium tracking-tight`} style={{ color: 'var(--sm-text, #0B0F14)' }}>
               <span className="text-slate-600 italic font-normal">Section heading...</span>
             </Tag>
           </div>
@@ -78,7 +78,7 @@ function RenderBlock({ block }: { block: ContentBlock }) {
         <div className="mb-4 mt-8">
           <Tag
             className={`${sizes[block.data.level]} font-medium tracking-tight`}
-            style={{ color: BRAND.white }}
+            style={{ color: 'var(--sm-text, #0B0F14)' }}
             dangerouslySetInnerHTML={{ __html: block.data.text }}
             suppressHydrationWarning
           />
@@ -127,7 +127,7 @@ function RenderBlock({ block }: { block: ContentBlock }) {
               backgroundColor: 'rgba(0,212,255,0.03)',
             }}
           >
-            <p className="text-[16px] leading-relaxed italic mb-3" style={{ color: BRAND.white }}>
+            <p className="text-[16px] leading-relaxed italic mb-3" style={{ color: 'var(--sm-text, #0B0F14)' }}>
               &ldquo;{block.data.text}&rdquo;
             </p>
             <footer className="flex items-center gap-2">
@@ -144,6 +144,40 @@ function RenderBlock({ block }: { block: ContentBlock }) {
 
     case 'social-embed':
       if (!block.data.url) return <EmptyState label="Social Embed — add a URL" />;
+      if (block.data.platform === 'youtube') {
+        const ytMatch = block.data.url.match(/(?:watch\?v=|youtu\.be\/|embed\/)([a-zA-Z0-9_-]+)/)
+        const videoId = ytMatch?.[1]
+        if (videoId) {
+          return (
+            <PreviewSection>
+              <div className="relative w-full rounded-xl overflow-hidden" style={{ aspectRatio: '16/9' }}>
+                <iframe
+                  src={`https://www.youtube.com/embed/${videoId}`}
+                  className="absolute inset-0 w-full h-full"
+                  allowFullScreen
+                  title="YouTube video"
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                />
+              </div>
+            </PreviewSection>
+          )
+        }
+      }
+      if (block.data.platform === 'twitter') {
+        const tweetIdMatch = block.data.url.match(/status\/(\d+)/)
+        if (tweetIdMatch) {
+          return (
+            <PreviewSection>
+              <div className="rounded-xl overflow-hidden" style={{ maxWidth: 550, margin: '0 auto' }}>
+                <blockquote className="twitter-tweet" data-dnt="true">
+                  <a href={block.data.url}>{block.data.url}</a>
+                </blockquote>
+                <script async src="https://platform.twitter.com/widgets.js" />
+              </div>
+            </PreviewSection>
+          )
+        }
+      }
       return (
         <PreviewSection>
           <div
@@ -233,7 +267,7 @@ function RenderBlock({ block }: { block: ContentBlock }) {
                 </span>
                 <div className="flex-1">
                   <div className="text-[13px] text-slate-400 mb-0.5">{pick.team}</div>
-                  <div className="text-sm font-medium" style={{ color: BRAND.white }}>{pick.player}</div>
+                  <div className="text-sm font-medium" style={{ color: 'var(--sm-text, #0B0F14)' }}>{pick.player}</div>
                 </div>
                 <div className="text-right">
                   <div className="text-[13px] font-bold" style={{ color: BRAND.cyan }}>{pick.position}</div>
@@ -306,7 +340,7 @@ function RenderBlock({ block }: { block: ContentBlock }) {
       if (!block.data.text) return <EmptyState label="Hot Take — add your bold claim" accent={BRAND.gold} />;
       return (
         <TopTakeBlock>
-          <p className="text-[16px] font-medium leading-relaxed" style={{ color: BRAND.white }}>{block.data.text}</p>
+          <p className="text-[16px] font-medium leading-relaxed" style={{ color: 'var(--sm-text, #0B0F14)' }}>{block.data.text}</p>
         </TopTakeBlock>
       );
 
@@ -317,7 +351,7 @@ function RenderBlock({ block }: { block: ContentBlock }) {
           {block.data.timestamp && (
             <span className="text-[13px] text-slate-400 mb-1 block">{block.data.timestamp}</span>
           )}
-          <div className="text-sm leading-relaxed" style={{ color: BRAND.white }} dangerouslySetInnerHTML={{ __html: block.data.text }} suppressHydrationWarning />
+          <div className="text-sm leading-relaxed" style={{ color: 'var(--sm-text, #0B0F14)' }} dangerouslySetInnerHTML={{ __html: block.data.text }} suppressHydrationWarning />
         </BreakingUpdateBlock>
       );
 
@@ -413,7 +447,6 @@ function RenderBlock({ block }: { block: ContentBlock }) {
 export function BlockPreviewRenderer({ blocks }: BlockPreviewRendererProps) {
   return (
     <article>
-      <ArticleMeta />
       <ArticleBody>
         {blocks.map((block) => (
           <RenderBlock key={block.id} block={block} />

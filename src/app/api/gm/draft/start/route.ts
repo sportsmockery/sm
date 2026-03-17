@@ -88,6 +88,11 @@ export async function POST(request: NextRequest) {
       year = fallbackYear
     }
 
+    // Limit MLB drafts to 7 rounds
+    if (teamInfo.sport === 'mlb') {
+      draftOrder = draftOrder.filter((p: any) => p.round <= 7)
+    }
+
     // 1. Create mock draft session using RPC
     // Bypass eligibility check since frontend already validates via /api/gm/draft/teams endpoint
     const { data: mockId, error: mockError } = await datalabAdmin.rpc('create_mock_draft', {

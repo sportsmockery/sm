@@ -90,13 +90,14 @@ export default function UsersPage() {
 
   const handleRoleChange = async (userId: string, role: Role) => {
     try {
-      const supabase = createClient()
-      const { error } = await supabase
-        .from('sm_users')
-        .update({ role })
-        .eq('id', userId)
+      const res = await fetch(`/api/admin/users/${userId}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ role })
+      })
 
-      if (error) throw error
+      const data = await res.json()
+      if (data.error) throw new Error(data.error)
 
       setUsers(prev => prev.map(u => u.id === userId ? { ...u, role } : u))
     } catch (error) {
@@ -109,13 +110,12 @@ export default function UsersPage() {
     if (!confirm('Are you sure you want to delete this user?')) return
 
     try {
-      const supabase = createClient()
-      const { error } = await supabase
-        .from('sm_users')
-        .delete()
-        .eq('id', userId)
+      const res = await fetch(`/api/admin/users/${userId}`, {
+        method: 'DELETE'
+      })
 
-      if (error) throw error
+      const data = await res.json()
+      if (data.error) throw new Error(data.error)
 
       setUsers(prev => prev.filter(u => u.id !== userId))
     } catch (error) {
@@ -367,6 +367,7 @@ interface WPWriter {
 function WordPressWritersSection() {
   const [writers, setWriters] = useState<WPWriter[]>([])
   const [loading, setLoading] = useState(true)
+  const [expanded, setExpanded] = useState(false)
 
   useEffect(() => {
     async function fetchWriters() {
@@ -375,6 +376,7 @@ function WordPressWritersSection() {
         const { data } = await supabase
           .from('sm_authors')
           .select('id, display_name, email, avatar_url, role, bio')
+          .not('id', 'in', '(1,11)')
           .order('display_name')
         setWriters(data || [])
       } catch (error) {
@@ -394,23 +396,34 @@ function WordPressWritersSection() {
 
   return (
     <div className="mt-10">
-      <div className="flex items-center justify-between mb-4">
-        <div>
+      <button
+        onClick={() => setExpanded(!expanded)}
+        className="w-full flex items-center justify-between mb-4 cursor-pointer"
+      >
+        <div className="flex items-center gap-2">
+          <svg
+            className="w-5 h-5 transition-transform"
+            style={{ color: 'var(--text-muted)', transform: expanded ? 'rotate(90deg)' : 'rotate(0deg)' }}
+            fill="none" stroke="currentColor" viewBox="0 0 24 24"
+          >
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+          </svg>
           <h2 className="text-xl font-bold" style={{ color: 'var(--text-primary)' }}>WordPress Writers</h2>
-          <p className="text-sm" style={{ color: 'var(--text-muted)' }}>
-            {writers.length} writers imported from WordPress
-          </p>
+          <span className="text-sm" style={{ color: 'var(--text-muted)' }}>
+            ({writers.length})
+          </span>
         </div>
         <Link
           href="/admin/writers"
           className="text-sm font-medium hover:underline"
           style={{ color: 'var(--accent-red)' }}
+          onClick={(e) => e.stopPropagation()}
         >
           Manage Writers →
         </Link>
-      </div>
+      </button>
 
-      {loading ? (
+      {!expanded ? null : loading ? (
         <div className="flex items-center justify-center h-32">
           <div className="animate-spin rounded-full h-6 w-6 border-t-2 border-b-2" style={{ borderColor: 'var(--accent-red)' }}></div>
         </div>
