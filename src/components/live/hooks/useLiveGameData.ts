@@ -163,9 +163,33 @@ export function useLiveGameData(gameId: string | undefined) {
       }
 
       const data: GameData = await res.json()
-      // Only update state if data actually changed to prevent unnecessary re-renders
       const prev = gameRef.current
-      if (!prev || JSON.stringify(data) !== JSON.stringify(prev)) {
+
+      if (prev) {
+        // Merge play-by-play: keep all existing plays + add any new ones
+        // This prevents the list from disappearing when the API returns partial data
+        const existingPlays = prev.play_by_play || []
+        const newPlays = data.play_by_play || []
+        const existingIds = new Set(existingPlays.map(p => p.play_id))
+        const merged = [...existingPlays]
+        for (const play of newPlays) {
+          if (!existingIds.has(play.play_id)) {
+            merged.push(play)
+          } else {
+            // Update existing play data (score changes, etc.)
+            const idx = merged.findIndex(p => p.play_id === play.play_id)
+            if (idx >= 0) merged[idx] = play
+          }
+        }
+        data.play_by_play = merged
+      }
+
+      // Compare without volatile fields (cache_age, timestamp) to avoid unnecessary re-renders
+      const compareKey = (d: GameData) => {
+        const { cache_age_seconds, timestamp, updated_at, ...rest } = d as any
+        return JSON.stringify(rest)
+      }
+      if (!prev || compareKey(data) !== compareKey(prev)) {
         gameRef.current = data
         setGame(data)
       }
