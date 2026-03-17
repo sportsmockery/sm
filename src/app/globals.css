@@ -3753,13 +3753,12 @@ main {
 .live-strip-inner {
   max-width: 1200px;
   margin: 0 auto;
-  width: 100%;
+  width: fit-content;
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 6px;
   padding: 0 16px;
-  overflow-x: auto;
   scrollbar-width: none;
 }
 
