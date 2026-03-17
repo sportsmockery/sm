@@ -97,14 +97,14 @@ export function GameDayHero({ games: initialGames, logo }: GameDayHeroProps) {
         <span
           className="mb-5 inline-flex items-center rounded-full px-4 py-1.5 text-xs font-medium uppercase tracking-wider"
           style={{
-            backgroundColor: "rgba(188, 0, 0, 0.08)",
-            color: "#BC0000",
-            border: "1px solid rgba(188, 0, 0, 0.15)",
+            backgroundColor: "rgba(34, 197, 94, 0.08)",
+            color: "#22C55E",
+            border: "1px solid rgba(34, 197, 94, 0.15)",
           }}
         >
           <span
             className="mr-2 inline-block h-2 w-2 rounded-full animate-pulse"
-            style={{ backgroundColor: "#BC0000" }}
+            style={{ backgroundColor: "#22C55E" }}
           />
           Game Day
         </span>
