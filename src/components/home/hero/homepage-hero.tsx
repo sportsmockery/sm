@@ -32,6 +32,7 @@ import { ScoutBriefingHero } from "./modes/scout-briefing-hero"
 /* ------------------------------------------------------------------ */
 
 const HERO_VIEWS_KEY = "sm_hero_takeover_views"
+const GAMEDAY_VIEWS_KEY = "sm_gameday_hero_views"
 
 interface HeroViewRecord {
   [articleId: string]: number // visit count per article
@@ -44,6 +45,30 @@ function getHeroViews(): HeroViewRecord {
   } catch {
     return {}
   }
+}
+
+function getGameDayViews(): HeroViewRecord {
+  try {
+    const raw = localStorage.getItem(GAMEDAY_VIEWS_KEY)
+    return raw ? JSON.parse(raw) : {}
+  } catch {
+    return {}
+  }
+}
+
+function recordGameDayView(gameId: string): void {
+  try {
+    const views = getGameDayViews()
+    views[gameId] = (views[gameId] || 0) + 1
+    localStorage.setItem(GAMEDAY_VIEWS_KEY, JSON.stringify(views))
+  } catch {
+    // localStorage unavailable
+  }
+}
+
+function hasExceededGameDayCap(gameId: string, cap: number): boolean {
+  const views = getGameDayViews()
+  return (views[gameId] || 0) >= cap
 }
 
 function recordHeroView(articleId: string): void {
@@ -115,7 +140,21 @@ export function HomepageHero(props: HomepageHeroProps) {
       return resolveHeroModeSkippingTakeovers(props)
     }
 
-    return baseMode
+    let resolved: HeroModeName = baseMode
+
+    // Game Day visit cap: logged-in users only, only while game is still upcoming
+    if (isLoggedIn && resolved === "gameday" && props.gameContexts && props.gameContexts[0]) {
+      const game = props.gameContexts[0]
+      const isLiveGame = game.kickoffLabel?.startsWith("LIVE")
+      const gameId = game.gameId
+
+      // Only cap pre-game hero takeovers; once live, keep Game Day in rotation
+      if (!isLiveGame && gameId && hasExceededGameDayCap(gameId, 1)) {
+        resolved = resolveHeroModeSkippingGameDay(props)
+      }
+    }
+
+    return resolved
   }, [props, isLoggedIn])
 
   // Record the view for takeover modes (logged-in users only)
@@ -125,8 +164,15 @@ export function HomepageHero(props: HomepageHeroProps) {
       recordHeroView(props.featuredStory.id)
     } else if (mode === "story-universe" && props.storyUniverseContext?.mainStory?.id) {
       recordHeroView(props.storyUniverseContext.mainStory.id)
+    } else if (mode === "gameday" && props.gameContexts && props.gameContexts[0]?.gameId) {
+      const game = props.gameContexts[0]
+      const isLiveGame = game.kickoffLabel?.startsWith("LIVE")
+      // Only record pre-game views for visit cap; live games stay in rotation
+      if (!isLiveGame) {
+        recordGameDayView(game.gameId!)
+      }
     }
-  }, [mode, isLoggedIn, props.featuredStory?.id, props.storyUniverseContext?.mainStory?.id])
+  }, [mode, isLoggedIn, props.featuredStory?.id, props.storyUniverseContext?.mainStory?.id, props.gameContexts])
 
   switch (mode) {
     case "trending":
@@ -233,3 +279,52 @@ function resolveHeroModeSkippingTakeovers(props: HomepageHeroProps): HeroModeNam
 
 export { resolveHeroMode } from "./types"
 export type { HomepageHeroProps, HeroModeName } from "./types"
+
+/**
+ * Resolve hero mode skipping Game Day (for when a logged-in user
+ * has already seen the pre-game takeover for the current matchup).
+ */
+function resolveHeroModeSkippingGameDay(props: HomepageHeroProps): HeroModeName {
+  // Preserve higher-priority modes if they qualify
+  if (
+    props.featuredStory &&
+    isTrendingStory(props.featuredStory) &&
+    props.featuredStory.imageUrl &&
+    props.featuredStory.href
+  ) {
+    return "trending"
+  }
+
+  if (
+    props.storyUniverseContext &&
+    props.storyUniverseContext.mainStory &&
+    props.storyUniverseContext.mainStory.imageUrl &&
+    props.storyUniverseContext.mainStory.href &&
+    props.storyUniverseContext.relatedStories?.length === 2
+  ) {
+    return "story-universe"
+  }
+
+  if (
+    props.scoutLiveContext &&
+    props.scoutLiveContext.headline &&
+    props.scoutLiveContext.signals?.length >= 3
+  ) {
+    return "scout-live"
+  }
+
+  // Skip Game Day here on purpose and fall through to Team Pulse / Debate / Scout
+  if (
+    props.user?.primaryTeam &&
+    props.teamContext?.teamName &&
+    props.teamContext?.href
+  ) {
+    return "team-pulse"
+  }
+
+  if (props.debateContext?.question && props.debateContext?.href) {
+    return "debate"
+  }
+
+  return "scout"
+}

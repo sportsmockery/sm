@@ -46,6 +46,29 @@ export async function GET(request: NextRequest) {
   }
 }
 
+const CENTRAL_TZ = 'America/Chicago'
+
+function toCentralTimeString(dateLike: string | Date | null | undefined): string | null {
+  if (!dateLike) return null
+  const date = typeof dateLike === 'string' ? new Date(dateLike) : dateLike
+  if (Number.isNaN(date.getTime())) return null
+
+  const datePart = date.toLocaleDateString('en-US', {
+    timeZone: CENTRAL_TZ,
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+  })
+  const timePart = date.toLocaleTimeString('en-US', {
+    timeZone: CENTRAL_TZ,
+    hour: 'numeric',
+    minute: '2-digit',
+    hour12: true,
+  })
+
+  return `${datePart}, ${timePart} CT`
+}
+
 /**
  * Primary source: DataLab REST API /api/live
  * Returns game_time_central already formatted as "MM/DD/YYYY, H:MM PM CT"
@@ -73,7 +96,7 @@ async function fetchFromDatalabApi(team: string | null) {
       const awayAbbr = game.away_team || game.away_team_abbr || ''
       const isChicagoHome = homeAbbr === 'CHI' || homeAbbr === 'CHC' || homeAbbr === 'CHW'
 
-      // game_time_central is now formatted: "03/17/2026, 6:30 PM CT"
+      // game_time_central is already formatted by DataLab: "03/17/2026, 6:30 PM CT"
       const gameTimeDisplay = parseGameTimeCentral(game.game_time_central)
 
       return {
@@ -152,7 +175,7 @@ async function fetchFromSupabase(team: string | null) {
 
     const { data, error } = await datalabAdmin
       .from(table)
-      .select('*')
+          .select('*')
       .in('status', ['in_progress', 'pre', 'live', 'upcoming', 'final'])
       .order('updated_at', { ascending: false })
       .limit(3)
@@ -164,8 +187,9 @@ async function fetchFromSupabase(team: string | null) {
 
     if (data && data.length > 0) {
       for (const game of data) {
-        // game_time_central is now formatted in the DB too
-        const gameTimeDisplay = parseGameTimeCentral(game.game_time_central)
+        // Normalize to Central Time string for UI (game_time_central)
+        const gameTimeCentral = toCentralTimeString(game.game_date)
+        const gameTimeDisplay = parseGameTimeCentral(gameTimeCentral)
 
         allGames.push({
           game_id: game.game_id,

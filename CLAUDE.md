@@ -477,6 +477,43 @@ const STANDARD_POLL_INTERVAL = 60_000 // No live games
   - If Supabase returns 404, it falls back to `DATALAB_API_URL /api/live/{gameId}` and normalizes to the same `GameData` shape used by `/live`.
   - Frontend components (`LiveGamesTopBar`, `LiveGamePage`, `ScoreHeader`, etc.) should always treat Supabase as the primary source and never call DataLab HTTP APIs directly.
 
+**Live game times — ALWAYS Central Time:**
+
+- **Source of truth:** For live contexts (pills, headers, live pages), always rely on **Central Time strings** derived from `game_date`, never raw UTC in the UI.
+- **Formatter used in live APIs:**
+  ```ts
+  const CENTRAL_TZ = 'America/Chicago'
+  function toCentralTimeString(dateLike: string | Date | null): string | null {
+    if (!dateLike) return null
+    const date = typeof dateLike === 'string' ? new Date(dateLike) : dateLike
+    if (Number.isNaN(date.getTime())) return null
+  
+    const datePart = date.toLocaleDateString('en-US', {
+      timeZone: CENTRAL_TZ,
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
+    })
+    const timePart = date.toLocaleTimeString('en-US', {
+      timeZone: CENTRAL_TZ,
+      hour: 'numeric',
+      minute: '2-digit',
+      hour12: true,
+    })
+  
+    return `${datePart}, ${timePart} CT`
+  }
+  ```
+- **`/api/live-games`:**
+  - Supabase path normalizes `liveData.game_date` to a Central Time string and then parses it to a display-only time (e.g. `"6:30 PM CT"`):
+    ```ts
+    const gameTimeCentral = toCentralTimeString(game.game_date)
+    const game_time_display = parseGameTimeCentral(gameTimeCentral) // e.g. "6:30 PM CT"
+    ```
+  - UI pills and top bars should use `game_time_display` for showing kickoff times.
+- **`/api/live-games/[gameId]`:**
+  - Exposes `game_start_time` as the ISO-like value used for polling/logic; callers that need a human-readable time should format via `toCentralTimeString` or reuse `game_time_display` from the list endpoint.
+
 ### Game Times — All Sports (CRITICAL)
 
 **Always use `game_time_display`** (varchar) for showing game times. Format: `"3:05 PM CT"`, `"7:00 PM CT"`, etc. Already populated on every game with a time. All times are Central Time (Chicago), always.
