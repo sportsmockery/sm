@@ -146,7 +146,7 @@ export default async function ArticlePage({ params, searchParams }: ArticlePageP
       post.author_id
         ? supabaseAdmin
             .from('sm_authors')
-            .select('id, display_name, bio, avatar_url, email')
+            .select('id, display_name, bio, avatar_url, email, slug, twitter, instagram')
             .eq('id', post.author_id)
             .single()
         : Promise.resolve({ data: null, error: null }),
