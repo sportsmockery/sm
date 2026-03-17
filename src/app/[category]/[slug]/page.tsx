@@ -428,12 +428,14 @@ export default async function ArticlePage({ params, searchParams }: ArticlePageP
 
             {/* Article Audio Player */}
             {audioInfo && (
-              <ArticleAudioPlayer
-                initialArticle={audioInfo.article}
-                initialAudioUrl={audioInfo.audioUrl}
-                articleContent={post.content || ''}
-                autoPlay={autoPlayAudio}
-              />
+              <div style={{ marginBottom: 20 }}>
+                <ArticleAudioPlayer
+                  initialArticle={audioInfo.article}
+                  initialAudioUrl={audioInfo.audioUrl}
+                  articleContent={post.content || ''}
+                  autoPlay={autoPlayAudio}
+                />
+              </div>
             )}
 
             <article className="article-body-2030" suppressHydrationWarning>
