@@ -2,6 +2,7 @@
 
 import Image from 'next/image'
 import Link from 'next/link'
+import { CHICAGO_TEAMS } from '@/lib/teams'
 import type { GameData } from './hooks/useLiveGameData'
 import { useScoreAnimation } from './hooks/useScoreAnimation'
 
@@ -13,6 +14,36 @@ export default function ScoreHeader({ game }: ScoreHeaderProps) {
   const isLive = game.status === 'in_progress'
   const isFinal = game.status === 'final'
   const { homeAnimating, awayAnimating } = useScoreAnimation(game.home_team.score, game.away_team.score)
+
+  const getChicagoSlugForAbbr = (sport: string, abbr: string): string | null => {
+    if (abbr === 'CHC') return 'chicago-cubs'
+    if (abbr === 'CWS') return 'chicago-white-sox'
+    if (abbr === 'CHI') {
+      if (sport === 'nfl') return 'chicago-bears'
+      if (sport === 'nba') return 'chicago-bulls'
+      if (sport === 'nhl') return 'chicago-blackhawks'
+    }
+    return null
+  }
+
+  const getTeamLogo = (team: GameData['home_team'], isHome: boolean): string => {
+    if (team.logo_url) return team.logo_url
+
+    const slug = getChicagoSlugForAbbr(game.sport, team.abbr)
+    if (slug) {
+      const chicagoTeam = CHICAGO_TEAMS[slug]
+      if (chicagoTeam?.logo) return chicagoTeam.logo
+    }
+
+    // Fallback: if this side is the Chicago team, use any matching Chicago logo
+    if (team.is_chicago) {
+      const fallback = Object.values(CHICAGO_TEAMS).find(t => t.abbreviation === team.abbr)
+      if (fallback?.logo) return fallback.logo
+    }
+
+    // Ultimate fallback – generic Chicago mark
+    return '/logos/bears.svg'
+  }
 
   const getPeriodDisplay = () => {
     if (!isLive) return isFinal ? 'FINAL' : game.status.toUpperCase()
@@ -50,7 +81,7 @@ export default function ScoreHeader({ game }: ScoreHeaderProps) {
             {/* Away Team */}
             <div className="flex items-center gap-2 sm:gap-3 flex-1">
               <Image
-                src={game.away_team.logo_url}
+                src={getTeamLogo(game.away_team, false)}
                 alt={game.away_team.name}
                 width={40}
                 height={40}
@@ -94,7 +125,7 @@ export default function ScoreHeader({ game }: ScoreHeaderProps) {
                 <div className="text-white/60 text-xs sm:text-sm">{game.home_team.abbr}</div>
               </div>
               <Image
-                src={game.home_team.logo_url}
+                src={getTeamLogo(game.home_team, true)}
                 alt={game.home_team.name}
                 width={40}
                 height={40}

@@ -4,6 +4,7 @@ import { useEffect, useState, useCallback } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
 import { usePathname } from 'next/navigation'
+import { CHICAGO_TEAMS } from '@/lib/teams'
 
 // Polling interval: 10 seconds
 const POLL_INTERVAL = 10000
@@ -193,12 +194,28 @@ export default function LiveGamesTopBar({ teamFilter, isHomepage = false }: Live
 
   // Get the Chicago team's logo
   const getChicagoLogo = (game: LiveGameData): string => {
-    return game.is_chicago_home ? game.home_logo_url : game.away_logo_url
+    const apiLogo = game.is_chicago_home ? game.home_logo_url : game.away_logo_url
+    if (apiLogo) return apiLogo
+
+    // Fallback to static Chicago team logo if API logo is missing
+    const teamConfig = TEAM_CONFIG[game.chicago_team]
+    const slug = teamConfig?.slug
+    const chicagoTeam = slug ? CHICAGO_TEAMS[slug] : undefined
+
+    return chicagoTeam?.logo || '/logos/bears.svg'
   }
 
   // Get the opponent's logo
   const getOpponentLogo = (game: LiveGameData): string => {
-    return game.is_chicago_home ? game.away_logo_url : game.home_logo_url
+    const apiLogo = game.is_chicago_home ? game.away_logo_url : game.home_logo_url
+    if (apiLogo) return apiLogo
+
+    // For opponents we usually don't have a static asset; fall back to Chicago logo
+    const teamConfig = TEAM_CONFIG[game.chicago_team]
+    const slug = teamConfig?.slug
+    const chicagoTeam = slug ? CHICAGO_TEAMS[slug] : undefined
+
+    return chicagoTeam?.logo || '/logos/bears.svg'
   }
 
   // Build the live game page URL
