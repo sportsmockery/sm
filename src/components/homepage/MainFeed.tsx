@@ -129,6 +129,7 @@ function RiverCard({ item }: { item: HomepageRiverItem }) {
           team={team}
           teamColor={teamColor}
           timestamp={timestamp}
+          stats={data.stats as { views: string } | undefined}
         />
       )
     case "trending_article":
