@@ -416,7 +416,7 @@ export default async function ArticlePage({ params, searchParams }: ArticlePageP
       <div style={{ backgroundColor: '#FAFAFB' }}>
         <div style={{ maxWidth: 1236, margin: '0 auto', padding: '16px 24px 48px', display: 'flex', justifyContent: 'space-between', gap: 0 }}>
           {/* Main article column */}
-          <div style={{ width: '100%', maxWidth: 720, borderColor: 'var(--sm-border)' }}>
+          <div style={{ width: '100%', maxWidth: 775, borderColor: 'var(--sm-border)' }}>
             {/* Breadcrumb */}
             <nav style={{ marginBottom: 12 }}>
               <ol style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 13, color: 'var(--sm-text-dim)', listStyle: 'none', padding: 0, margin: 0 }}>

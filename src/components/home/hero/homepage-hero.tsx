@@ -37,7 +37,7 @@ export function HomepageHero(props: HomepageHeroProps) {
     case "gameday":
       return (
         <GameDayHero
-          game={props.gameContext!}
+          games={props.gameContexts!}
           logo={props.logo}
         />
       )

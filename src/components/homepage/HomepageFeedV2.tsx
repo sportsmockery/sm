@@ -5,13 +5,13 @@ import HomeSidebar from "@/components/homepage/HomeSidebar"
 import MainFeed from "@/components/homepage/MainFeed"
 import TrendsSidebar from "@/components/homepage/TrendsSidebar"
 import { HomepageHero } from "@/components/home/hero/homepage-hero"
-import type { FeaturedStory, GameContext, TeamContext, DebateContext } from "@/components/home/hero/types"
+import type { FeaturedStory, TeamContext, DebateContext, GameContext } from "@/components/home/hero/types"
 import { Home, Compass, Plus, Film, User, X, FileText, Video, Camera, ImageIcon } from "lucide-react"
 
 interface HomepageFeedV2Props {
   firstName?: string
   featuredStory?: FeaturedStory | null
-  gameContext?: GameContext | null
+  gameContexts?: GameContext[]
   teamContext?: TeamContext | null
   debateContext?: DebateContext | null
   primaryTeam?: string
@@ -22,7 +22,7 @@ interface HomepageFeedV2Props {
 export default function HomepageFeedV2({
   firstName,
   featuredStory,
-  gameContext,
+  gameContexts,
   teamContext,
   debateContext,
   primaryTeam,
@@ -63,7 +63,7 @@ export default function HomepageFeedV2({
       <HomepageHero
         user={{ name: firstName || "Chris", primaryTeam }}
         featuredStory={featuredStory}
-        gameContext={gameContext}
+        gameContexts={gameContexts}
         teamContext={teamContext}
         debateContext={debateContext}
         quickActions={[

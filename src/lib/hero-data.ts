@@ -68,7 +68,7 @@ function categoryToTeamSlug(categorySlug: string | undefined): string | undefine
 
 export interface HeroData {
   featuredStory: FeaturedStory | null
-  gameContext: GameContext | null
+  gameContexts: GameContext[]
   teamContext: TeamContext | null
   debateContext: DebateContext | null
   primaryTeam: string | null
@@ -81,7 +81,7 @@ export interface HeroData {
 export async function getHeroData(userId: string | null): Promise<HeroData> {
   const result: HeroData = {
     featuredStory: null,
-    gameContext: null,
+    gameContexts: [],
     teamContext: null,
     debateContext: null,
     primaryTeam: null,
@@ -108,9 +108,9 @@ export async function getHeroData(userId: string | null): Promise<HeroData> {
     result.primaryTeam = prefsResult.value
   }
 
-  // 3. Live game context
+  // 3. Live game contexts (may be multiple games)
   if (liveGamesResult.status === "fulfilled" && liveGamesResult.value) {
-    result.gameContext = liveGamesResult.value
+    result.gameContexts = liveGamesResult.value
   }
 
   // 4. Team pulse context (if user has a primary team)
@@ -216,83 +216,135 @@ async function fetchUserPrimaryTeam(userId: string): Promise<string | null> {
 
 /* ── Live games ── */
 
-async function fetchLiveGames(): Promise<GameContext | null> {
+async function fetchLiveGames(): Promise<GameContext[] | null> {
   try {
-    // live_games_registry is in DataLab, not main SM database
+    // live_games_registry is in DataLab — filter to recent, error-free entries
     const { data: registry } = await datalabAdmin
       .from("live_games_registry")
       .select("*")
-      .in("status", ["active"])
-      .limit(5)
+      .eq("status", "active")
+      .eq("error_count", 0)
+      .order("created_at", { ascending: false })
+      .limit(10)
 
     if (!registry || registry.length === 0) return null
 
-    // Pick the first active game entry
-    const entry = registry[0]
-    const teamSlug = entry.team_id || "bears"
+    const games: GameContext[] = []
+    const seenGameIds = new Set<string>()
 
-    // Fetch game details from the team's live table
-    const liveTable = `${teamSlug}_live`
-    const { data: liveGames } = await datalabAdmin
-      .from(liveTable)
-      .select("*")
-      .eq("game_id", entry.game_id)
-      .limit(1)
+    // Check each registry entry against its live table
+    for (const entry of registry) {
+      // Skip duplicate game IDs (same game registered for multiple teams)
+      if (seenGameIds.has(entry.game_id)) continue
+      seenGameIds.add(entry.game_id)
 
-    const game = liveGames?.[0]
+      const teamSlug = entry.team_id || "bears"
+      const liveTable = `${teamSlug}_live`
 
-    if (!game) {
-      // Fallback: use registry data only
+      const { data: liveGames } = await datalabAdmin
+        .from(liveTable)
+        .select("*")
+        .eq("game_id", entry.game_id)
+        .limit(1)
+
+      const game = liveGames?.[0]
+      if (!game) continue
+
+      // Only show upcoming or in-progress games — skip final/post/completed
+      const gameStatus = (game.status || "").toLowerCase()
+      if (
+        gameStatus === "final" ||
+        gameStatus === "post" ||
+        gameStatus === "completed" ||
+        gameStatus === "postponed" ||
+        gameStatus === "canceled"
+      ) {
+        continue
+      }
+
+      // For upcoming games, only show if starting within 1 hour
+      if (gameStatus === "upcoming" || gameStatus === "pre" || gameStatus === "scheduled") {
+        if (game.game_date) {
+          const startTime = new Date(game.game_date).getTime()
+          const now = Date.now()
+          const msUntilStart = startTime - now
+          if (msUntilStart > 60 * 60 * 1000) continue // More than 1 hour away — skip
+        }
+      }
+
+      // Build matchup from live table data
+      const homeName = game.home_team_name || "Home"
+      const awayName = game.away_team_name || "Away"
+      const matchup = `${awayName} at ${homeName}`
+
+      // Determine kickoff label based on game status
+      let kickoffLabel: string
+      if (gameStatus === "in_progress" || gameStatus === "in progress" || gameStatus === "live") {
+        // Use ESPN's status detail for accurate period labels (e.g. "Bottom 2nd", "3:12 - 1st Quarter")
+        const statusDetail = game.raw_payload?.status?.type?.detail
+        if (statusDetail) {
+          kickoffLabel = `LIVE — ${statusDetail}`
+        } else {
+          const period = game.period_label || `Q${game.period || ""}`
+          const clock = game.clock || ""
+          kickoffLabel = clock && clock !== "0:00" ? `LIVE — ${period} ${clock}` : `LIVE — ${period}`
+        }
+      } else if (game.game_date) {
+        // Pre-game / upcoming: show start time
+        const startTime = new Date(game.game_date)
+        kickoffLabel = `Today @ ${startTime.toLocaleTimeString("en-US", {
+          hour: "numeric",
+          minute: "2-digit",
+          timeZone: "America/Chicago",
+        })} CT`
+        if (game.venue_name) {
+          kickoffLabel += ` — ${game.venue_name}`
+        }
+      } else {
+        kickoffLabel = "Today"
+      }
+
       const href = TEAM_HUB_HREF[teamSlug] || `/chicago-${teamSlug}`
-      return {
-        matchup: `${TEAM_DISPLAY[teamSlug] || teamSlug} — Game Day`,
-        kickoffLabel: "Today",
+
+      let storyline: string | undefined
+      if (game.broadcast_network) {
+        storyline = `Watch on ${game.broadcast_network}`
+      }
+
+      // Pick the Chicago team's logo based on which side is the Chicago team
+      const chicagoAbbrs: Record<string, string> = {
+        bears: "CHI", bulls: "CHI", blackhawks: "CHI", cubs: "CHC", whitesox: "CHW",
+      }
+      const chicagoAbbr = chicagoAbbrs[teamSlug]
+      const isChicagoHome = (game.home_team_abbr || "").toUpperCase() === chicagoAbbr
+      const teamLogoUrl = isChicagoHome
+        ? (game.home_logo_url || undefined)
+        : (game.away_logo_url || undefined)
+
+      games.push({
+        matchup,
+        kickoffLabel,
         href,
-      }
+        storyline,
+        teamLogoUrl,
+        sport: entry.sport || undefined,
+        homeScore: game.home_score ?? 0,
+        awayScore: game.away_score ?? 0,
+        homeAbbr: game.home_team_abbr || undefined,
+        awayAbbr: game.away_team_abbr || undefined,
+        gameId: entry.game_id,
+        teamSlug,
+      })
     }
 
-    // Build matchup from live table data
-    const homeName = game.home_team_name || "Home"
-    const awayName = game.away_team_name || "Away"
-    const matchup = `${awayName} at ${homeName}`
+    // Sort: live/in-progress games first, then upcoming
+    games.sort((a, b) => {
+      const aLive = a.kickoffLabel?.startsWith("LIVE") ? 0 : 1
+      const bLive = b.kickoffLabel?.startsWith("LIVE") ? 0 : 1
+      return aLive - bLive
+    })
 
-    // Determine kickoff label based on game status
-    let kickoffLabel: string
-    const gameStatus = (game.status || "").toLowerCase()
-    if (gameStatus === "in_progress" || gameStatus === "in progress" || gameStatus === "live") {
-      const period = game.period_label || `Q${game.period || ""}`
-      const clock = game.clock || ""
-      kickoffLabel = clock ? `LIVE — ${period} ${clock}` : `LIVE — ${period}`
-    } else if (game.game_date) {
-      // Pre-game: show start time
-      const startTime = new Date(game.game_date)
-      kickoffLabel = `Today @ ${startTime.toLocaleTimeString("en-US", {
-        hour: "numeric",
-        minute: "2-digit",
-        timeZone: "America/Chicago",
-      })} CT`
-      // Add venue if available
-      if (game.venue_name) {
-        kickoffLabel += ` — ${game.venue_name}`
-      }
-    } else {
-      kickoffLabel = "Today"
-    }
-
-    const href = TEAM_HUB_HREF[teamSlug] || `/chicago-${teamSlug}`
-
-    // Build storyline from broadcast info if available
-    let storyline: string | undefined
-    if (game.broadcast_network) {
-      storyline = `Watch on ${game.broadcast_network}`
-    }
-
-    return {
-      matchup,
-      kickoffLabel,
-      href,
-      storyline,
-    }
+    return games.length > 0 ? games : null
   } catch (e) {
     console.error("[hero-data] fetchLiveGames error:", e)
     return null

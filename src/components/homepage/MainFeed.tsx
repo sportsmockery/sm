@@ -312,7 +312,7 @@ export default function MainFeed({ activeTab, setActiveTab, selectedTeam, heroAr
 
         {/* Live feed items */}
         {!loading && feedItems.map((item, index) => (
-          <div key={item.id}>
+          <div key={`${item.id}-${index}`}>
             {index === 5 && (
               <div className="hp-day-divider px-4">
                 <span>Earlier Today</span>

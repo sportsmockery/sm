@@ -162,6 +162,7 @@ export default async function AdminPostsPage({ searchParams }: PostsPageProps) {
         posts={posts || []}
         categoryMap={Object.fromEntries(categoryMap)}
         authorMap={Object.fromEntries(authorMap)}
+        allCategories={(allCategories.data || []).map(c => ({ ...c, name: DISPLAY_NAMES[c.slug] || c.name }))}
         currentPage={currentPage}
         totalPages={totalPages}
         status={status}

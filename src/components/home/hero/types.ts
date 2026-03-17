@@ -35,6 +35,22 @@ export interface GameContext {
   kickoffLabel: string
   href: string
   storyline?: string
+  /** Chicago team logo URL (e.g. ESPN logo) */
+  teamLogoUrl?: string
+  /** Sport for formatting (nfl, nba, nhl, mlb) */
+  sport?: string
+  /** Home team score */
+  homeScore?: number
+  /** Away team score */
+  awayScore?: number
+  /** Home team abbreviation */
+  homeAbbr?: string
+  /** Away team abbreviation */
+  awayAbbr?: string
+  /** Registry game ID for polling */
+  gameId?: string
+  /** Team slug for polling */
+  teamSlug?: string
 }
 
 /* ── Team Pulse ── */
@@ -73,7 +89,7 @@ export interface HeroUser {
 export interface HomepageHeroProps {
   user?: HeroUser
   featuredStory?: FeaturedStory | null
-  gameContext?: GameContext | null
+  gameContexts?: GameContext[]
   teamContext?: TeamContext | null
   debateContext?: DebateContext | null
   quickActions?: QuickAction[]
@@ -120,7 +136,7 @@ export function resolveHeroMode(props: HomepageHeroProps): HeroModeName {
     return "trending"
   }
 
-  if (props.gameContext?.matchup && props.gameContext?.href) {
+  if (props.gameContexts && props.gameContexts.length > 0 && props.gameContexts[0].matchup && props.gameContexts[0].href) {
     return "gameday"
   }
 

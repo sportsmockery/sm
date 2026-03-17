@@ -30,13 +30,32 @@ const sampleStory: FeaturedStory = {
   forceHeroFeatured: true,
 }
 
-const sampleGame: GameContext = {
-  matchup: "Bears vs. Packers",
-  kickoffLabel: "Today @ 12:00 PM CT — Soldier Field",
-  href: "/chicago-bears/gameday",
-  storyline:
-    "A heated NFC North rivalry renewed. Chicago enters with a 3-game winning streak while Green Bay looks to rebound after last week's loss.",
-}
+const sampleGames: GameContext[] = [
+  {
+    matchup: "Memphis Grizzlies at Chicago Bulls",
+    kickoffLabel: "LIVE — 3:12 - 1st Quarter",
+    href: "/chicago-bulls",
+    storyline: "Watch on CHSN",
+    teamLogoUrl: "https://a.espncdn.com/i/teamlogos/nba/500/chi.png",
+    sport: "nba",
+    homeScore: 25,
+    awayScore: 22,
+    homeAbbr: "CHI",
+    awayAbbr: "MEM",
+  },
+  {
+    matchup: "Chicago White Sox at Texas Rangers",
+    kickoffLabel: "LIVE — Bottom 2nd",
+    href: "/chicago-white-sox",
+    storyline: "Watch on NBCSCH",
+    teamLogoUrl: "https://a.espncdn.com/i/teamlogos/mlb/500/chw.png",
+    sport: "mlb",
+    homeScore: 0,
+    awayScore: 0,
+    homeAbbr: "TEX",
+    awayAbbr: "CHW",
+  },
+]
 
 const sampleTeam: TeamContext = {
   teamName: "Chicago Bears",
@@ -169,9 +188,9 @@ export default function Home2Page() {
       {/* ── 3. Game Day ── */}
       <Divider
         title="3 — Game Day Hero"
-        description="Matchup-focused hero with kickoff time, storyline, and pulsing Game Day badge. Triggers when a Chicago team has a game today."
+        description="Matchup-focused hero with kickoff time, storyline, and pulsing Game Day badge. Rotates between multiple games with dot indicators (10s cycle). Triggers when a Chicago team has a game today."
       />
-      <GameDayHero game={sampleGame} />
+      <GameDayHero games={sampleGames} />
 
       {/* ── 4. Team Pulse ── */}
       <Divider
