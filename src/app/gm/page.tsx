@@ -1,6 +1,6 @@
 'use client'
 import { useEffect, useState, useCallback, useRef } from 'react'
-import { useRouter } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { useTheme } from '@/contexts/ThemeContext'
 import { useAuth } from '@/contexts/AuthContext'
 import { AnimatePresence, motion } from 'framer-motion'
@@ -72,6 +72,7 @@ export default function GMPage() {
   const { user, loading: authLoading, isAuthenticated } = useAuth()
   const [pageLoading, setPageLoading] = useState(true)
   const router = useRouter()
+  const searchParams = useSearchParams()
   const { theme } = useTheme()
 
   // Team & roster
@@ -174,8 +175,12 @@ export default function GMPage() {
   const [cashSent, setCashSent] = useState(0)
   const [cashReceived, setCashReceived] = useState(0)
 
-  // Mobile
-  const [activeTab, setActiveTab] = useState<'build' | 'history' | 'leaderboard'>('build')
+  // Tabs — check URL for ?tab= param
+  const tabParam = searchParams.get('tab')
+  const validTabs = ['build', 'mock-draft', 'history', 'leaderboard'] as const
+  type TabType = typeof validTabs[number] | 'welcome'
+  const initialTab: TabType = validTabs.includes(tabParam as any) ? (tabParam as TabType) : 'welcome'
+  const [activeTab, setActiveTab] = useState<TabType>(initialTab)
   const [leftPanelOpen, setLeftPanelOpen] = useState(false)
   const [rightPanelOpen, setRightPanelOpen] = useState(false)
 
@@ -1250,13 +1255,14 @@ export default function GMPage() {
   return (
     <div className="sm-hero-bg gm-page-content" style={{ minHeight: '100vh', color: textColor }}>
       <div className="sm-grid-overlay" />
-      {/* HEADER: Title + Team Tabs + GM Score (single sticky band) */}
+      {/* HEADER: Title + Team Tabs + GM Score (single sticky band) — hidden on welcome */}
       <div style={{
         background: 'var(--sm-surface)',
         borderBottom: '1px solid var(--sm-border)',
         padding: '12px 24px',
         position: 'sticky',
-        top: 64,
+        display: activeTab === 'welcome' ? 'none' : 'block',
+        top: 0,
         zIndex: 40,
         backdropFilter: 'blur(12px)',
       }}>
@@ -1272,6 +1278,77 @@ export default function GMPage() {
 
             <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
               <button
+                onClick={() => router.push('/mock-draft')}
+                title="Mock Draft"
+                style={{
+                  padding: '6px 12px', borderRadius: 8,
+                  border: `1px solid ${borderColor}`,
+                  backgroundColor: 'transparent', cursor: 'pointer',
+                  display: 'flex', alignItems: 'center', gap: 6,
+                  fontSize: 12, fontWeight: 600, color: subText,
+                }}
+              >
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+                  <path d="M16 4h2a2 2 0 012 2v14a2 2 0 01-2 2H6a2 2 0 01-2-2V6a2 2 0 012-2h2" />
+                  <rect x="8" y="2" width="8" height="4" rx="1" />
+                  <path d="M9 12l2 2 4-4" />
+                </svg>
+                Mock Draft
+              </button>
+              <button
+                onClick={() => router.push('/mock-draft')}
+                title="Draft History"
+                style={{
+                  padding: '6px 12px', borderRadius: 8,
+                  border: `1px solid ${borderColor}`,
+                  backgroundColor: 'transparent', cursor: 'pointer',
+                  display: 'flex', alignItems: 'center', gap: 6,
+                  fontSize: 12, fontWeight: 600, color: subText,
+                }}
+              >
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+                  <path d="M16 4h2a2 2 0 012 2v14a2 2 0 01-2 2H6a2 2 0 01-2-2V6a2 2 0 012-2h2" />
+                  <rect x="8" y="2" width="8" height="4" rx="1" />
+                </svg>
+                Draft History
+              </button>
+
+              <button
+                onClick={() => router.push('/leaderboards')}
+                title="Leaderboard"
+                style={{
+                  padding: '6px 12px', borderRadius: 8,
+                  border: `1px solid ${borderColor}`,
+                  backgroundColor: 'transparent', cursor: 'pointer',
+                  display: 'flex', alignItems: 'center', gap: 6,
+                  fontSize: 12, fontWeight: 600, color: subText,
+                }}
+              >
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+                  <path d="M12 15l-2 5l9-12h-5l2-5l-9 12h5z" />
+                </svg>
+                Leaderboard
+              </button>
+
+              <button
+                onClick={() => setActiveTab('history')}
+                title="Trade History"
+                style={{
+                  padding: '6px 12px', borderRadius: 8,
+                  border: `1px solid ${borderColor}`,
+                  backgroundColor: 'transparent', cursor: 'pointer',
+                  display: 'flex', alignItems: 'center', gap: 6,
+                  fontSize: 12, fontWeight: 600, color: subText,
+                }}
+              >
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+                  <path d="M12 8v4l3 3" />
+                  <circle cx="12" cy="12" r="10" />
+                </svg>
+                Trade History
+              </button>
+
+              <button
                 onClick={() => router.push('/gm/analytics')}
                 title="Analytics"
                 style={{
@@ -1286,21 +1363,6 @@ export default function GMPage() {
                 </svg>
               </button>
 
-              <button
-                onClick={() => setShowPreferencesModal(true)}
-                title="Preferences"
-                style={{
-                  padding: 8, borderRadius: 8,
-                  border: `1px solid ${borderColor}`,
-                  backgroundColor: 'transparent', cursor: 'pointer',
-                  display: 'flex', alignItems: 'center', justifyContent: 'center',
-                }}
-              >
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke={subText} strokeWidth="2" strokeLinecap="round">
-                  <circle cx="12" cy="12" r="3" />
-                  <path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42" />
-                </svg>
-              </button>
 
               <div
                 style={{
@@ -1408,21 +1470,22 @@ export default function GMPage() {
         </div>
       </div>
 
-      {/* MODE TABS: Build Trade / History / Leaderboard */}
+      {/* MODE TABS: Build Trade / History / Leaderboard — hidden on welcome */}
       <div style={{
         background: 'var(--sm-surface)',
         borderBottom: '1px solid var(--sm-border)',
         position: 'relative',
         zIndex: 35,
+        display: activeTab === 'welcome' ? 'none' : 'block',
       }}>
         <div style={{ maxWidth: 1440, margin: '0 auto', display: 'flex' }}>
-          {(['build', 'history', 'leaderboard'] as const).map(tab => {
+          {(['build', 'mock-draft', 'history', 'leaderboard'] as const).map(tab => {
             const isActive = activeTab === tab
-            const labels = { build: 'Build Trade', history: 'History', leaderboard: 'Leaderboard' }
+            const labels: Record<string, string> = { build: 'Trade Simulator', 'mock-draft': 'Mock Draft', history: 'Trade History', leaderboard: 'Leaderboard' }
             return (
               <button
                 key={tab}
-                onClick={() => setActiveTab(tab)}
+                onClick={() => tab === 'mock-draft' ? router.push('/mock-draft') : setActiveTab(tab)}
                 style={{
                   flex: 1, padding: '12px 16px',
                   border: 'none', borderBottom: isActive ? '3px solid var(--sm-red)' : '3px solid transparent',
@@ -1441,7 +1504,94 @@ export default function GMPage() {
 
       {/* MAIN CONTENT */}
       <main style={{ maxWidth: 1440, margin: '0 auto', padding: '24px', position: 'relative', zIndex: 1 }}>
-        {!selectedTeam ? (
+        {activeTab === 'welcome' ? (
+          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 32, padding: '60px 20px' }}>
+            <div style={{ textAlign: 'center' }}>
+              <h2 style={{ fontSize: 28, fontWeight: 900, color: textColor, marginBottom: 8, fontFamily: 'var(--sm-font-heading)' }}>
+                Welcome to the <span style={{ color: '#00D4FF' }}>EDGE</span> War Room
+              </h2>
+              <p style={{ fontSize: 16, color: subText, maxWidth: 500 }}>
+                What would you like to do?
+              </p>
+            </div>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: 20, width: '100%', maxWidth: 700 }}>
+              {/* Trade Simulator Card */}
+              <button
+                onClick={() => setActiveTab('build')}
+                className="glass-card glass-card-static"
+                style={{
+                  padding: 32, textAlign: 'center', cursor: 'pointer',
+                  border: '2px solid var(--sm-border)', transition: 'all 0.2s',
+                }}
+                onMouseEnter={e => { e.currentTarget.style.borderColor = '#BC0000'; e.currentTarget.style.transform = 'translateY(-2px)' }}
+                onMouseLeave={e => { e.currentTarget.style.borderColor = 'var(--sm-border)'; e.currentTarget.style.transform = 'none' }}
+              >
+                <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#BC0000" strokeWidth="1.5" strokeLinecap="round" style={{ margin: '0 auto 16px' }}>
+                  <path d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4" />
+                </svg>
+                <div style={{ fontSize: 20, fontWeight: 800, color: textColor, marginBottom: 6, fontFamily: 'var(--sm-font-heading)' }}>
+                  Trade Simulator
+                </div>
+                <p style={{ fontSize: 14, color: subText, margin: 0 }}>
+                  Build and grade trades between Chicago teams and the rest of the league
+                </p>
+              </button>
+
+              {/* Mock Draft Card */}
+              <button
+                onClick={() => router.push('/mock-draft')}
+                className="glass-card glass-card-static"
+                style={{
+                  padding: 32, textAlign: 'center', cursor: 'pointer',
+                  border: '2px solid var(--sm-border)', transition: 'all 0.2s',
+                }}
+                onMouseEnter={e => { e.currentTarget.style.borderColor = '#00D4FF'; e.currentTarget.style.transform = 'translateY(-2px)' }}
+                onMouseLeave={e => { e.currentTarget.style.borderColor = 'var(--sm-border)'; e.currentTarget.style.transform = 'none' }}
+              >
+                <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#00D4FF" strokeWidth="1.5" strokeLinecap="round" style={{ margin: '0 auto 16px' }}>
+                  <path d="M16 4h2a2 2 0 012 2v14a2 2 0 01-2 2H6a2 2 0 01-2-2V6a2 2 0 012-2h2" />
+                  <rect x="8" y="2" width="8" height="4" rx="1" />
+                  <path d="M9 12l2 2 4-4" />
+                </svg>
+                <div style={{ fontSize: 20, fontWeight: 800, color: textColor, marginBottom: 6, fontFamily: 'var(--sm-font-heading)' }}>
+                  Mock Draft
+                </div>
+                <p style={{ fontSize: 14, color: subText, margin: 0 }}>
+                  Simulate your team&apos;s draft and get AI grades on your picks
+                </p>
+              </button>
+            </div>
+          </div>
+        ) : activeTab === 'history' ? (
+          <TradeHistory
+            trades={trades}
+            page={tradesPage}
+            totalPages={tradesTotalPages}
+            onPageChange={setTradesPage}
+          />
+        ) : activeTab === 'leaderboard' ? (
+          <div className="glass-card glass-card-static">
+            <h2 style={{ fontSize: 18, fontWeight: 700, marginBottom: 16, fontFamily: 'var(--sm-font-heading)', color: textColor }}>Leaderboard</h2>
+            {leaderboard.length === 0 ? (
+              <p style={{ color: subText }}>No trades graded yet. Be the first!</p>
+            ) : (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                {leaderboard.map((entry: any, i: number) => (
+                  <div key={entry.user_id || i} className="glass-card-sm glass-card-static" style={{
+                    display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                    padding: '12px 16px',
+                  }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                      <span style={{ fontSize: 18, fontWeight: 900, color: i < 3 ? '#D6B05E' : subText, minWidth: 28 }}>#{i + 1}</span>
+                      <span style={{ fontWeight: 600, color: textColor }}>{entry.display_name || 'Anonymous'}</span>
+                    </div>
+                    <span style={{ fontSize: 18, fontWeight: 900, color: '#bc0000' }}>{entry.total_score || 0}</span>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        ) : !selectedTeam ? (
           <div className="glass-card glass-card-static" style={{ textAlign: 'center', padding: '80px 20px' }}>
             <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="var(--sm-text-dim)" strokeWidth="1" style={{ margin: '0 auto 20px' }}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4" />
@@ -1998,36 +2148,7 @@ export default function GMPage() {
               </div>
             </div>
           </>
-        ) : activeTab === 'history' ? (
-          <TradeHistory
-            trades={trades}
-            page={tradesPage}
-            totalPages={tradesTotalPages}
-            onPageChange={p => fetchTrades(p)}
-          />
-        ) : (
-          <div className="glass-card glass-card-static">
-            <h2 style={{ fontSize: 18, fontWeight: 700, marginBottom: 16, fontFamily: 'var(--sm-font-heading)', color: 'var(--sm-text)' }}>Leaderboard</h2>
-            {leaderboard.length === 0 ? (
-              <p style={{ color: subText }}>No trades graded yet. Be the first!</p>
-            ) : (
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-                {leaderboard.map((entry: any, i: number) => (
-                  <div key={entry.user_id || i} className="glass-card-sm glass-card-static" style={{
-                    display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-                    padding: '12px 16px',
-                  }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-                      <span style={{ fontSize: 16, fontWeight: 700, color: i < 3 ? 'var(--sm-red)' : subText }}>#{i + 1}</span>
-                      <span style={{ fontWeight: 600, color: 'var(--sm-text)' }}>{entry.display_name || 'Anonymous'}</span>
-                    </div>
-                    <span style={{ fontSize: 18, fontWeight: 800, color: 'var(--sm-red)' }}>{entry.total_score}</span>
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
-        )}
+        ) : null}
       </main>
 
       {/* Modals */}

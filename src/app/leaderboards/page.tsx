@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 
 import { useAuth } from '@/contexts/AuthContext'
 import Link from 'next/link'
+import Image from 'next/image'
 
 interface LeaderboardEntry {
   id: string
@@ -51,10 +52,11 @@ interface UserPosition {
 }
 
 const SPORT_CONFIG = [
-  { sport: 'NFL', emoji: '🏈', label: 'NFL', color: '#0B162A' },
-  { sport: 'NBA', emoji: '🏀', label: 'NBA', color: '#CE1141' },
-  { sport: 'MLB', emoji: '⚾', label: 'MLB', color: '#0E3386' },
-  { sport: 'NHL', emoji: '🏒', label: 'NHL', color: '#CF0A2C' },
+  { sport: 'ALL', logos: [], label: 'All', color: '#BC0000' },
+  { sport: 'NFL', logos: ['https://a.espncdn.com/i/teamlogos/nfl/500/chi.png'], label: 'Bears', color: '#0B162A' },
+  { sport: 'NBA', logos: ['https://a.espncdn.com/i/teamlogos/nba/500/chi.png'], label: 'Bulls', color: '#CE1141' },
+  { sport: 'MLB', logos: ['https://a.espncdn.com/i/teamlogos/mlb/500/chc.png', 'https://a.espncdn.com/i/teamlogos/mlb/500/chw.png'], label: 'Cubs / Sox', color: '#0E3386' },
+  { sport: 'NHL', logos: ['https://a.espncdn.com/i/teamlogos/nhl/500/chi.png'], label: 'Blackhawks', color: '#CF0A2C' },
 ]
 
 const MEDAL_COLORS: Record<number, { bg: string; text: string; border: string }> = {
@@ -66,11 +68,14 @@ const MEDAL_COLORS: Record<number, { bg: string; text: string; border: string }>
 export default function LeaderboardsPage() {
   const { user, loading: authLoading, isAuthenticated } = useAuth()
   const router = useRouter()
-  const [selectedSport, setSelectedSport] = useState('NFL')
+  const [selectedSport, setSelectedSport] = useState('ALL')
   const [leaderboard, setLeaderboard] = useState<LeaderboardData | null>(null)
   const [userPosition, setUserPosition] = useState<UserPosition | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const [selectedUserId, setSelectedUserId] = useState<string | null>(null)
+  const [userAnalytics, setUserAnalytics] = useState<any>(null)
+  const [analyticsLoading, setAnalyticsLoading] = useState(false)
 
   const fetchData = useCallback(async () => {
     setLoading(true)
@@ -78,7 +83,8 @@ export default function LeaderboardsPage() {
 
     try {
       // Fetch top 20 leaderboard
-      const leaderboardRes = await fetch(`/api/gm/leaderboard?sport=${selectedSport}&limit=20`)
+      const sportParam = selectedSport === 'ALL' ? '' : `sport=${selectedSport}&`
+      const leaderboardRes = await fetch(`/api/gm/leaderboard?${sportParam}limit=20`)
       if (!leaderboardRes.ok) {
         if (leaderboardRes.status === 401) {
           router.push('/login?next=/leaderboards')
@@ -90,7 +96,7 @@ export default function LeaderboardsPage() {
       setLeaderboard(leaderboardData)
 
       // Fetch user's personal position
-      const positionRes = await fetch(`/api/gm/user-position?sport=${selectedSport}`)
+      const positionRes = await fetch(`/api/gm/user-position?${selectedSport !== 'ALL' ? `sport=${selectedSport}` : ''}`)
       if (positionRes.ok) {
         const positionData = await positionRes.json()
         setUserPosition(positionData)
@@ -111,6 +117,17 @@ export default function LeaderboardsPage() {
     }
     fetchData()
   }, [authLoading, isAuthenticated, fetchData, router])
+
+  // Fetch analytics for selected user
+  useEffect(() => {
+    if (!selectedUserId) { setUserAnalytics(null); return }
+    setAnalyticsLoading(true)
+    fetch(`/api/gm/analytics?target_user_id=${selectedUserId}`)
+      .then(r => r.json())
+      .then(d => setUserAnalytics(d))
+      .catch(() => setUserAnalytics(null))
+      .finally(() => setAnalyticsLoading(false))
+  }, [selectedUserId])
 
   function getOrdinal(n: number): string {
     const s = ['th', 'st', 'nd', 'rd']
@@ -170,18 +187,32 @@ export default function LeaderboardsPage() {
             marginBottom: 24,
             flexWrap: 'wrap',
           }}>
-            {SPORT_CONFIG.map(({ sport, emoji, label }) => (
+            {SPORT_CONFIG.map(({ sport, logos, label }) => (
               <button
                 key={sport}
                 onClick={() => setSelectedSport(sport)}
-                className={selectedSport === sport ? 'btn-primary btn-sm' : 'btn-secondary btn-sm'}
                 style={{
                   display: 'flex',
                   alignItems: 'center',
-                  gap: 8,
+                  gap: 6,
+                  padding: '8px 16px',
+                  borderRadius: 999,
+                  border: selectedSport === sport ? '2px solid #BC0000' : '1px solid var(--sm-border)',
+                  backgroundColor: selectedSport === sport ? 'rgba(188, 0, 0, 0.1)' : 'var(--sm-card)',
+                  color: selectedSport === sport ? '#BC0000' : 'var(--sm-text)',
+                  fontWeight: selectedSport === sport ? 700 : 500,
+                  fontSize: 13,
+                  cursor: 'pointer',
+                  transition: 'all 0.15s',
                 }}
               >
-                <span style={{ fontSize: 18 }}>{emoji}</span>
+                {logos.length > 0 ? (
+                  <span style={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                    {logos.map((logo, i) => (
+                      <Image key={i} src={logo} alt="" width={20} height={20} style={{ objectFit: 'contain' }} unoptimized />
+                    ))}
+                  </span>
+                ) : null}
                 <span>{label}</span>
               </button>
             ))}
@@ -409,9 +440,7 @@ export default function LeaderboardsPage() {
                 <tr>
                   <th>Rank</th>
                   <th>Player</th>
-                  <th style={{ textAlign: 'right' }}>Score</th>
-                  <th style={{ textAlign: 'right' }}>Activities</th>
-                  <th>Breakdown</th>
+                  <th style={{ textAlign: 'right' }}>GM Score</th>
                 </tr>
               </thead>
               <tbody>
@@ -450,9 +479,19 @@ export default function LeaderboardsPage() {
                       {/* Username */}
                       <td>
                         <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                          <span style={{ fontWeight: 600 }}>
-                            {entry.users?.username || `User ${entry.user_id.slice(0, 6)}`}
-                          </span>
+                          <button
+                            onClick={() => setSelectedUserId(entry.user_id)}
+                            style={{
+                              fontWeight: 600, background: 'none', border: 'none',
+                              color: 'var(--sm-text)', cursor: 'pointer', padding: 0,
+                              textDecoration: 'underline', textDecorationColor: 'transparent',
+                              transition: 'text-decoration-color 0.15s',
+                            }}
+                            onMouseEnter={e => { e.currentTarget.style.textDecorationColor = '#00D4FF' }}
+                            onMouseLeave={e => { e.currentTarget.style.textDecorationColor = 'transparent' }}
+                          >
+                            {entry.display_name || `User ${entry.user_id?.slice(0, 6)}`}
+                          </button>
                           {isCurrentUser && (
                             <span className="sm-tag" style={{
                               padding: '2px 8px',
@@ -467,42 +506,16 @@ export default function LeaderboardsPage() {
                         </div>
                       </td>
 
-                      {/* Score */}
-                      <td className="stat-num" style={{ fontWeight: 700, fontSize: 16 }}>
-                        {entry.score}
-                      </td>
-
-                      {/* Activities */}
-                      <td className="stat-num">
-                        {entry.activities_count}
-                      </td>
-
-                      {/* Breakdown */}
-                      <td>
-                        <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
-                          {entry.trades_count > 0 && (
-                            <span className="sm-tag" style={{ padding: '4px 8px', fontSize: 11 }}>
-                              {entry.trades_count} trades
-                            </span>
-                          )}
-                          {entry.drafts_count > 0 && (
-                            <span className="sm-tag" style={{ padding: '4px 8px', fontSize: 11 }}>
-                              {entry.drafts_count} drafts
-                            </span>
-                          )}
-                          {entry.sims_count > 0 && (
-                            <span className="sm-tag" style={{ padding: '4px 8px', fontSize: 11 }}>
-                              {entry.sims_count} sims
-                            </span>
-                          )}
-                        </div>
+                      {/* GM Score */}
+                      <td className="stat-num" style={{ fontWeight: 800, fontSize: 18, color: '#BC0000' }}>
+                        {(entry.score || 0).toLocaleString()}
                       </td>
                     </tr>
                   )
                 })}
                 {top20.length === 0 && (
                   <tr>
-                    <td colSpan={5} style={{ padding: 40, textAlign: 'center', color: 'var(--sm-text-muted)' }}>
+                    <td colSpan={3} style={{ padding: 40, textAlign: 'center', color: 'var(--sm-text-muted)' }}>
                       No competitors yet. Be the first!
                     </td>
                   </tr>
@@ -525,18 +538,18 @@ export default function LeaderboardsPage() {
           </div>
         </div>
 
-        {/* Not Competing CTA */}
-        {!userPosition?.competing && (
+        {/* CTA for users not on the leaderboard — only show if not logged in */}
+        {!isAuthenticated && (
           <div className="glass-card glass-card-static" style={{ textAlign: 'center', marginTop: 24 }}>
             <div style={{ fontSize: 48, marginBottom: 12 }}>🎯</div>
             <h3 style={{ fontWeight: 700, fontSize: 20, marginBottom: 8, fontFamily: 'var(--sm-font-heading)' }}>
-              You're Not Competing Yet!
+              Join the Competition!
             </h3>
             <p style={{ fontSize: 14, color: 'var(--sm-text-muted)', marginBottom: 20 }}>
-              Complete a trade or mock draft for {selectedSport} to join the leaderboard.
+              Sign in and complete trades or mock drafts to appear on the leaderboard.
             </p>
             <div style={{ display: 'flex', gap: 12, justifyContent: 'center', flexWrap: 'wrap' }}>
-              <Link href="/gm" className="btn-primary btn-sm">
+              <Link href="/gm" style={{ padding: '8px 20px', borderRadius: 8, backgroundColor: '#BC0000', color: '#FAFAFB', fontSize: 14, fontWeight: 600, textDecoration: 'none', display: 'inline-block' }}>
                 Make a Trade
               </Link>
               <Link href="/mock-draft" className="btn-secondary btn-sm">
@@ -553,23 +566,23 @@ export default function LeaderboardsPage() {
           </h3>
           <div style={{
             display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
-            gap: 16,
+            gridTemplateColumns: 'repeat(2, 1fr)',
+            gap: 12,
           }}>
             {[
-              { step: '1', text: 'Complete trades, mock drafts, or season simulations' },
-              { step: '2', text: 'Each activity gives you a score (0-100)' },
-              { step: '3', text: 'Your average score = your leaderboard score' },
-              { step: '4', text: 'More activities = more chances to improve your average!' },
-            ].map(({ step, text }) => (
+              { step: '1', title: 'Build', text: 'Make trades or run mock drafts for any Chicago team' },
+              { step: '2', title: 'Grade', text: 'AI grades each move from 0–100 based on realism and value' },
+              { step: '3', title: 'Earn', text: 'Accepted trades (70+) add to your cumulative GM Score' },
+              { step: '4', title: 'Compete', text: 'Climb the leaderboard and prove you\'re the best GM in Chicago' },
+            ].map(({ step, title, text }) => (
               <div key={step} style={{
                 display: 'flex',
                 alignItems: 'flex-start',
                 gap: 12,
                 padding: 16,
                 background: 'var(--sm-surface)',
-                borderRadius: 'var(--sm-radius-sm)',
-                border: '1px solid var(--sm-border)',
+                borderRadius: 10,
+                border: '1px solid rgba(0, 212, 255, 0.2)',
               }}>
                 <span style={{
                   display: 'flex',
@@ -578,22 +591,113 @@ export default function LeaderboardsPage() {
                   width: 32,
                   height: 32,
                   borderRadius: '50%',
-                  background: 'var(--sm-gradient)',
-                  color: '#fff',
-                  fontWeight: 700,
+                  background: '#00D4FF',
+                  color: '#0B0F14',
+                  fontWeight: 800,
                   fontSize: 14,
                   flexShrink: 0,
                 }}>
                   {step}
                 </span>
-                <p style={{ margin: 0, fontSize: 14, color: 'var(--sm-text-muted)' }}>
-                  {text}
-                </p>
+                <div>
+                  <div style={{ fontWeight: 700, fontSize: 14, color: 'var(--sm-text)', marginBottom: 2 }}>{title}</div>
+                  <p style={{ margin: 0, fontSize: 13, color: 'var(--sm-text-muted)', lineHeight: 1.4 }}>{text}</p>
+                </div>
               </div>
             ))}
           </div>
         </div>
       </main>
+
+      {/* User Analytics Modal */}
+      {selectedUserId && (
+        <div
+          style={{
+            position: 'fixed', inset: 0, zIndex: 50,
+            backgroundColor: 'rgba(0,0,0,0.6)',
+            backdropFilter: 'blur(8px)',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            padding: 20,
+          }}
+          onClick={() => setSelectedUserId(null)}
+        >
+          <div
+            className="glass-card glass-card-static"
+            style={{ maxWidth: 500, width: '100%', maxHeight: '80vh', overflowY: 'auto' }}
+            onClick={e => e.stopPropagation()}
+          >
+            {analyticsLoading ? (
+              <div style={{ textAlign: 'center', padding: 40 }}>
+                <div style={{ width: 32, height: 32, border: '2px solid var(--sm-red)', borderTopColor: 'transparent', borderRadius: '50%', animation: 'spin-2030 1s linear infinite', margin: '0 auto 16px' }} />
+                <p style={{ color: 'var(--sm-text-muted)' }}>Loading stats...</p>
+              </div>
+            ) : userAnalytics ? (
+              <>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
+                  <h3 style={{ margin: 0, fontSize: 18, fontWeight: 700, fontFamily: 'var(--sm-font-heading)' }}>
+                    GM Profile
+                  </h3>
+                  <button onClick={() => setSelectedUserId(null)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--sm-text-muted)', fontSize: 20 }}>
+                    &#x2715;
+                  </button>
+                </div>
+
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 12, marginBottom: 20 }}>
+                  <div style={{ textAlign: 'center', padding: 12, background: 'var(--sm-surface)', borderRadius: 8, border: '1px solid var(--sm-border)' }}>
+                    <div style={{ fontSize: 24, fontWeight: 800, color: '#bc0000' }}>{userAnalytics.total_gm_score || 0}</div>
+                    <div style={{ fontSize: 11, color: 'var(--sm-text-muted)', fontWeight: 600 }}>GM Score</div>
+                  </div>
+                  <div style={{ textAlign: 'center', padding: 12, background: 'var(--sm-surface)', borderRadius: 8, border: '1px solid var(--sm-border)' }}>
+                    <div style={{ fontSize: 24, fontWeight: 800 }}>{userAnalytics.total_trades || 0}</div>
+                    <div style={{ fontSize: 11, color: 'var(--sm-text-muted)', fontWeight: 600 }}>Total Trades</div>
+                  </div>
+                  <div style={{ textAlign: 'center', padding: 12, background: 'var(--sm-surface)', borderRadius: 8, border: '1px solid var(--sm-border)' }}>
+                    <div style={{ fontSize: 24, fontWeight: 800 }}>{userAnalytics.average_grade || 0}</div>
+                    <div style={{ fontSize: 11, color: 'var(--sm-text-muted)', fontWeight: 600 }}>Avg Grade</div>
+                  </div>
+                </div>
+
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 12, marginBottom: 20 }}>
+                  <div style={{ padding: 12, background: 'var(--sm-surface)', borderRadius: 8, border: '1px solid var(--sm-border)' }}>
+                    <div style={{ fontSize: 11, color: 'var(--sm-text-muted)', fontWeight: 600, marginBottom: 4 }}>Accepted</div>
+                    <div style={{ fontSize: 18, fontWeight: 700, color: '#22c55e' }}>{userAnalytics.accepted_trades || 0}</div>
+                  </div>
+                  <div style={{ padding: 12, background: 'var(--sm-surface)', borderRadius: 8, border: '1px solid var(--sm-border)' }}>
+                    <div style={{ fontSize: 11, color: 'var(--sm-text-muted)', fontWeight: 600, marginBottom: 4 }}>Rejected</div>
+                    <div style={{ fontSize: 18, fontWeight: 700, color: '#bc0000' }}>{userAnalytics.rejected_trades || 0}</div>
+                  </div>
+                  <div style={{ padding: 12, background: 'var(--sm-surface)', borderRadius: 8, border: '1px solid var(--sm-border)' }}>
+                    <div style={{ fontSize: 11, color: 'var(--sm-text-muted)', fontWeight: 600, marginBottom: 4 }}>Best Grade</div>
+                    <div style={{ fontSize: 18, fontWeight: 700, color: '#00D4FF' }}>{userAnalytics.highest_grade || 0}</div>
+                  </div>
+                  <div style={{ padding: 12, background: 'var(--sm-surface)', borderRadius: 8, border: '1px solid var(--sm-border)' }}>
+                    <div style={{ fontSize: 11, color: 'var(--sm-text-muted)', fontWeight: 600, marginBottom: 4 }}>Worst Grade</div>
+                    <div style={{ fontSize: 18, fontWeight: 700 }}>{userAnalytics.lowest_grade || 0}</div>
+                  </div>
+                </div>
+
+                {/* Teams breakdown */}
+                {userAnalytics.chicago_teams?.length > 0 && (
+                  <div style={{ marginBottom: 16 }}>
+                    <div style={{ fontSize: 13, fontWeight: 600, marginBottom: 8 }}>Teams Traded</div>
+                    <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+                      {userAnalytics.chicago_teams.map((t: any) => (
+                        <span key={t.team} className="sm-tag" style={{ padding: '4px 10px', fontSize: 12 }}>
+                          {t.team}: {t.trade_count} trades ({t.avg_grade} avg)
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </>
+            ) : (
+              <div style={{ textAlign: 'center', padding: 40, color: 'var(--sm-text-muted)' }}>
+                No analytics available for this user.
+              </div>
+            )}
+          </div>
+        </div>
+      )}
     </div>
   )
 }

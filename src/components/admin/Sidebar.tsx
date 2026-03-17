@@ -187,6 +187,7 @@ const navSections: NavSection[] = [
       { name: 'Feed Scoring', href: '/admin/feed-scoring', icon: 'feedScoring' },
       { name: 'User GM Scoring', href: '/admin/user-gm-scoring', icon: 'gmScoring' },
       { name: 'Notifications', href: '/admin/notifications', icon: 'notifications' },
+      { name: 'Leaderboard', href: '/admin/leaderboard', icon: 'gmScoring' },
       { name: 'GM Errors', href: '/admin/gm-errors', icon: 'aiLogging' },
       { name: 'Data Cards', href: '/admin/data-cards', icon: 'dataCards' },
     ],

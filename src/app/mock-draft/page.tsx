@@ -123,6 +123,7 @@ export default function MockDraftPage() {
   const [showGradeModal, setShowGradeModal] = useState(false)
   const [eligibility, setEligibility] = useState<Record<string, TeamEligibility>>({})
   const [eligibilityLoading, setEligibilityLoading] = useState(true)
+  const [gmScore, setGmScore] = useState(0)
 
   // Computed
   const currentTeamConfig = CHICAGO_TEAMS.find(t => t.key === selectedTeam)
@@ -219,6 +220,8 @@ export default function MockDraftPage() {
     setPageLoading(false)
     fetchHistory()
     fetchEligibility()
+    // Fetch GM score (same source as /gm page)
+    fetch('/api/gm/analytics').then(r => r.json()).then(d => setGmScore(d.total_gm_score || 0)).catch(() => {})
   }, [authLoading, isAuthenticated, router, fetchHistory, fetchEligibility])
 
   // Fetch prospects when draft starts
@@ -520,7 +523,7 @@ export default function MockDraftPage() {
   return (
     <div className="sm-hero-bg mock-draft-content" style={{ minHeight: '100vh', color: 'var(--sm-text)' }}>
       <div className="sm-grid-overlay" />
-      <main style={{ maxWidth: 1400, margin: '0 auto', padding: '24px 16px', paddingTop: 80, position: 'relative', zIndex: 1 }}>
+      <main style={{ maxWidth: 1400, margin: '0 auto', padding: '24px 16px', position: 'relative', zIndex: 1 }}>
         {/* Header - stacks on mobile */}
         <div style={{ marginBottom: 20 }}>
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
@@ -532,15 +535,112 @@ export default function MockDraftPage() {
                 Take control of your team&apos;s draft picks
               </p>
             </div>
-            {activeDraft && (
+            <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
               <button
-                onClick={resetDraft}
-                className="btn btn-secondary btn-sm"
-                style={{ borderColor: teamColor, color: teamColor }}
+                onClick={() => router.push('/gm')}
+                style={{
+                  padding: '6px 12px', borderRadius: 8,
+                  border: '1px solid var(--sm-border)',
+                  backgroundColor: 'transparent', cursor: 'pointer',
+                  display: 'flex', alignItems: 'center', gap: 6,
+                  fontSize: 12, fontWeight: 600, color: 'var(--sm-text-muted)',
+                }}
               >
-                New Draft
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+                  <path d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4" />
+                </svg>
+                Trade Simulator
               </button>
-            )}
+              <button
+                onClick={() => router.push('/leaderboards')}
+                style={{
+                  padding: '6px 12px', borderRadius: 8,
+                  border: '1px solid var(--sm-border)',
+                  backgroundColor: 'transparent', cursor: 'pointer',
+                  display: 'flex', alignItems: 'center', gap: 6,
+                  fontSize: 12, fontWeight: 600, color: 'var(--sm-text-muted)',
+                }}
+              >
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+                  <path d="M12 15l-2 5l9-12h-5l2-5l-9 12h5z" />
+                </svg>
+                Leaderboard
+              </button>
+              <button
+                onClick={() => { resetDraft(); window.scrollTo(0, document.body.scrollHeight) }}
+                style={{
+                  padding: '6px 12px', borderRadius: 8,
+                  border: '1px solid var(--sm-border)',
+                  backgroundColor: 'transparent', cursor: 'pointer',
+                  display: 'flex', alignItems: 'center', gap: 6,
+                  fontSize: 12, fontWeight: 600, color: 'var(--sm-text-muted)',
+                }}
+              >
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+                  <path d="M16 4h2a2 2 0 012 2v14a2 2 0 01-2 2H6a2 2 0 01-2-2V6a2 2 0 012-2h2" />
+                  <rect x="8" y="2" width="8" height="4" rx="1" />
+                </svg>
+                Draft History
+              </button>
+              <button
+                onClick={() => router.push('/gm?tab=history')}
+                style={{
+                  padding: '6px 12px', borderRadius: 8,
+                  border: '1px solid var(--sm-border)',
+                  backgroundColor: 'transparent', cursor: 'pointer',
+                  display: 'flex', alignItems: 'center', gap: 6,
+                  fontSize: 12, fontWeight: 600, color: 'var(--sm-text-muted)',
+                }}
+              >
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+                  <path d="M12 8v4l3 3" />
+                  <circle cx="12" cy="12" r="10" />
+                </svg>
+                Trade History
+              </button>
+              <button
+                onClick={() => router.push('/gm/analytics')}
+                title="Analytics"
+                style={{
+                  padding: 8, borderRadius: 8,
+                  border: '1px solid var(--sm-border)',
+                  backgroundColor: 'transparent', cursor: 'pointer',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                }}
+              >
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--sm-text-muted)" strokeWidth="2" strokeLinecap="round">
+                  <path d="M18 20V10M12 20V4M6 20v-6" />
+                </svg>
+              </button>
+              <div
+                style={{
+                  display: 'flex', alignItems: 'center', gap: 10,
+                  padding: '8px 16px', borderRadius: 12,
+                  backgroundColor: isDark ? '#374151' : '#f3f4f6',
+                  border: '1px solid var(--sm-border)',
+                }}
+                title="Your GM Score"
+              >
+                <div style={{ width: 36, height: 36, borderRadius: '50%', backgroundColor: '#bc000015', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="#bc0000" stroke="none">
+                    <path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z" />
+                  </svg>
+                </div>
+                <div>
+                  <div style={{ fontSize: 22, fontWeight: 900, color: '#bc0000', lineHeight: 1 }}>{gmScore}</div>
+                  <div style={{ fontSize: 10, fontWeight: 600, color: 'var(--sm-text-muted)' }}>GM Score</div>
+                </div>
+              </div>
+              {activeDraft && (
+                <button
+                  onClick={resetDraft}
+                  className="btn btn-secondary btn-sm"
+                  style={{ borderColor: teamColor, color: teamColor }}
+                >
+                  New Draft
+                </button>
+              )}
+            </div>
           </div>
         </div>
 

@@ -52,13 +52,16 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'Authentication required' }, { status: 401 })
     }
 
+    // Support viewing another user's analytics via ?target_user_id=
+    const targetUserId = request.nextUrl.searchParams.get('target_user_id') || user.id
+
     // Try Data Lab first
     try {
-      const res = await fetch(`${DATALAB_URL}/api/gm/analytics?user_id=${user.id}`, {
+      const res = await fetch(`${DATALAB_URL}/api/gm/analytics?user_id=${targetUserId}`, {
         headers: {
           'Content-Type': 'application/json',
           'X-Source': 'sportsmockery.com',
-          'X-User-Id': user.id,
+          'X-User-Id': targetUserId,
         },
       })
 
@@ -74,7 +77,7 @@ export async function GET(request: NextRequest) {
     const { data: trades, error } = await datalabAdmin
       .from('gm_trades')
       .select('*')
-      .eq('user_id', user.id)
+      .eq('user_id', targetUserId)
       .order('created_at', { ascending: false })
 
     if (error) throw error
